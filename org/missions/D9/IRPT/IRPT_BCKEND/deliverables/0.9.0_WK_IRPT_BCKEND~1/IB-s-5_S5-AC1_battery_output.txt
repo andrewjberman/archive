@@ -1,0 +1,47 @@
+IB-s-5 BATTERY -- S5-AC1, six arms. AWS calls: get-role only (read-only). No write, no vendor call.
+repo C:\tmp\wk-irpt-1-1 | policy C:\tmp\wk-irpt-1-1\infra\aws\terraform\investor-reporting\core\firm_destination_policy.json
+
+(a) EACH FIRM LANDS ONLY IN ITS OWN LOCATIONS.
+    DENOMINATOR: 3 firm(s) in the applied policy
+    49financial  6 of 6 destination kind(s) land under firms/49financial/ only
+    cottonwood   6 of 6 destination kind(s) land under firms/cottonwood/ only
+    inflection   6 of 6 destination kind(s) land under firms/inflection/ only
+    3 of 3 firm(s) x every destination kind land only in their own locations
+
+(b) A WRITE INTO A SECOND FIRM'S LOCATION IS REFUSED -- THE DIFFERENCE CONTROL.
+    cross-firm request (49financial bound, asking for cottonwood) REFUSED: destination_for: requested firm 'cottonwood' does not match the bound firm '49financial' -- a write into a second firm's location is refused
+    same-firm request (49financial bound, 49financial requested) SUCCEEDED: firms/49financial/requests/X/revisions/0/
+
+(c) UNKNOWN, SPOOFED, CONTRADICTORY, OPAL-ORIGIN.
+    unknown domain                     -> Quarantined              (never-a-firm=True, expected-type=True) reason=sender domain 'example-firm.com' matches no enumerated firm and is not the Opal domain -- 
+    spoofed display-From               -> Quarantined              (never-a-firm=True, expected-type=True) reason=sender_evidence.display_from_used is True, not False -- the display From header is never t
+    contradictory evidence             -> Quarantined              (never-a-firm=True, expected-type=True) reason=sender_evidence.verified is VERIFIED but verification_method is 'UNKNOWN' -- a verified ve
+    Opal-origin, no target-firm rule   -> Unresolved               (never-a-firm=True, expected-type=True) reason=sender domain 'opalinvest.com' is Opal's own (opal_domain in the policy); no target-firm r
+    4 of 4 fixture(s) NEVER became a firm, each with the policy's own outcome type
+
+(d) THE BOUND FIRM IS IMMUTABLE.
+    bound.firm_id = <other>            -> RAISED GateRefusal: BoundRequest is immutable: once bound the firm is immutable (attempt to set 'firm_id')
+    bound.rebind(<other>)              -> RAISED KeyComponentRefused: a bound firm is never rebound ('49financial' -> 'cottonwood'); a request that resolves to a differen
+    del bound.firm_id                  -> RAISED GateRefusal: BoundRequest is immutable (attempt to delete 'firm_id')
+    3 of 3 mutation attempt(s) RAISED; firm_id after all attempts: 49financial (unchanged: True)
+
+(e) COMPLETENESS FAILS LOUD.
+    RUN 1 (HEAD -- real registry, real policy): rc=0 -- 3 passed in 0.05s
+    RUN 2 (scratch registry + planted 4th firm 'planted4th'): rc=1 -- 1 failed, 2 deselected in 0.27s
+      the failure output NAMES the missing firm 'planted4th': True
+
+(f) THE POLICY IS VERSIONED AND OWNED; THE IAM HALF IS APPLIED.
+    policy_version = '1'
+    owner          = '0.7.0_AE_CloudOps'
+    get-role irpt-core-firm-49financial   rc=0 trust-to-lambda=True
+    get-role irpt-core-firm-cottonwood    rc=0 trust-to-lambda=True
+    get-role irpt-core-firm-inflection    rc=0 trust-to-lambda=True
+    get-role irpt-core-quarantine         rc=0 trust-to-lambda=True
+    4 of 4 role(s) exist with a trust policy naming lambda.amazonaws.com
+    deploy_ledger.py check -> line(s) naming this slug: 0
+    git log -1 --format=%H -- org/critical_paths/.open_deploys/irpt-bckend-s5.json -> fd7382ef6849bc833bd204360ba277dbb4df3ca3
+    working-tree status of the sentinel: clean
+
+AWS calls made by this battery: 4, all read-only get-role
+arms: 6 of 6 evaluated; arms holding: 6 of 6; assertions failed: 0
+IBS5-POLICY-BOUND

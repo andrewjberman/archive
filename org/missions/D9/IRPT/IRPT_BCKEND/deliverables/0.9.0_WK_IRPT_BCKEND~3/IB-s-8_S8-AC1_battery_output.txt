@@ -1,0 +1,102 @@
+==============================================================================
+BATTERY IB-s-8 -- S8-AC1: the YCharts session library, the secrets, the host
+repo: C:/tmp/wk-irpt-1-3
+==============================================================================
+
+(a) THE FIVE SURFACES AGAINST THE REPLAY -- 5 of 5
+    precondition getSession on the MEASURED absent secret: present=False reason=NO_AWSCURRENT_VERSION
+    probeSession_stale           PASS   stale bundle must not authenticate
+    acquireSession               PASS   must reach an authenticated probe through the replayed login
+    persistSession               PASS   must write exactly one bundle to the session secret
+    getSession                   PASS   must return the persisted bundle with its identity cookie
+    withAuthenticatedPage        PASS   the callback must run on an authenticated app page
+      probeSession(stale): authenticated=False reason=DISTURBED http=403 legs identity=PASS cookie=PASS probe=FAIL
+      acquireSession: steps=[{"step": 0, "state": "CH-SIGNIN_FORM", "via": "dom"}, {"step": 1, "state": "CH-AUTHENTICATED", "via": "dom"}]
+      identity evidence (REDACTED -- names + sha256 prefix, never a value): {"cookie_names": ["ycsessionid", "csrftoken", "aws-waf-token"], "cookie_count": 3, "identity_cookie": "ycsessionid", "identity_cookie_present": true, "identity_label": {"present": true, "sha256_12": "6bbfffbcf16c", "length": 32}, "csrf_cookie_present": true, "waf_cookie_present": true}
+      probe evidence: {"probe_url_path": "/indices/table_data?indices=%5ESPX&columns=ytd_total_return", "http_status": 200, "state": "LIVE"}
+      persistSession: secret_id=ycharts/session/current fence=1 previous_fence=None puts=1
+      getSession: present=True cookies=['ycsessionid', 'csrftoken', 'aws-waf-token'] fence=1
+      withAuthenticatedPage: {"app_url": "http://127.0.0.1:53895/dashboard", "app_shell_elements": 1, "work_route": "/custom_pdf_reports/1", "work_status": 201, "work_state": "CREATED_201"}
+
+(b) NO OTP BRANCH
+    structural census (handler rows): 0 of 4 challenge handlers handle a one-time code
+      CH-SIGNIN_FORM         action=FILL_AND_SUBMIT handles_one_time_code=False
+      CH-BLOCKING_OVERLAY    action=DISMISS        handles_one_time_code=False
+      CH-AUTHENTICATED       action=ACCEPT         handles_one_time_code=False
+      CH-UNEXPECTED          action=FAIL_EXPLICIT  handles_one_time_code=False
+    injected challenges: 5 of 5 injected unexpected challenges produced an EXPLICIT failure record with retried=false
+      one_time_code  class=UNEXPECTED_CHALLENGE   reason=CHALLENGE_ONE_TIME_CODE_UNSUPPORTED    retried=False submits=1
+      captcha        class=UNEXPECTED_CHALLENGE   reason=CHALLENGE_CAPTCHA_UNSUPPORTED          retried=False submits=1
+      waf            class=UNEXPECTED_CHALLENGE   reason=CHALLENGE_WAF_INTERSTITIAL             retried=False submits=1
+      password_reset class=UNEXPECTED_CHALLENGE   reason=CHALLENGE_FORCED_PASSWORD_RESET        retried=False submits=1
+      unrecognised   class=UNEXPECTED_CHALLENGE   reason=CHALLENGE_UNRECOGNISED_SCREEN          retried=False submits=1
+    source token census over ycharts_session.js (SECOND instrument, different from the handler-row count):
+      denominator: 17 hit(s) across 1000 line(s); bands: {"BLOCK-COMMENT": 11, "LINE-COMMENT": 2, "HANDLER-TABLE": 1, "SIGNATURE-TABLE": 1, "RECORD-FIELD": 2, "CODE": 0}
+      declarative tables located in the source: [{"name": "CHALLENGE_HANDLERS", "from": 191, "to": 222}, {"name": "UNEXPECTED_CHALLENGE_SIGNATURES", "from": 237, "to": 242}]
+           4  BLOCK-COMMENT     * of runner, that strategy works very well. I do not believe they send OTP so dont need that
+           8  BLOCK-COMMENT     * credential VALUE logged -- with the OTP machinery DELETED rather than ported.
+          19  BLOCK-COMMENT     * 1. NO OTP BRANCH. There is no handler for a one-time code anywhere in this file. The
+          19  BLOCK-COMMENT     * 1. NO OTP BRANCH. There is no handler for a one-time code anywhere in this file. The
+          25  BLOCK-COMMENT     *    runner's getOtpCode/otpSent/otpEntered/device-trust machinery is deliberately absent.
+          25  BLOCK-COMMENT     *    runner's getOtpCode/otpSent/otpEntered/device-trust machinery is deliberately absent.
+          25  BLOCK-COMMENT     *    runner's getOtpCode/otpSent/otpEntered/device-trust machinery is deliberately absent.
+         188  LINE-COMMENT      // it is structural: adding an OTP handler would require adding a row that says so.
+         216  HANDLER-TABLE     'INCLUDING a one-time-code / verification prompt, a captcha, a WAF interstitial or a ' +
+         238  SIGNATURE-TABLE   { id: 'SIG-ONE_TIME_CODE', re: /one[- ]?time (code|password)|verification code|authentication code|enter the c
+         551  BLOCK-COMMENT     * The BD runner's OTP machinery, deleted: no getOtpCode, no otpSent/otpEntered, no
+         551  BLOCK-COMMENT     * The BD runner's OTP machinery, deleted: no getOtpCode, no otpSent/otpEntered, no
+         551  BLOCK-COMMENT     * The BD runner's OTP machinery, deleted: no getOtpCode, no otpSent/otpEntered, no
+         551  BLOCK-COMMENT     * The BD runner's OTP machinery, deleted: no getOtpCode, no otpSent/otpEntered, no
+         565  RECORD-FIELD      otp_branch: 'ABSENT',
+         664  RECORD-FIELD      step, screen_text_sample: state.sample, otp_branch: 'ABSENT',
+         673  LINE-COMMENT      // FAILED. This is where a one-time-code prompt lands, and it lands here to DIE.
+      CODE-band hits (a real one-time-code code path would land here): 0
+
+(c) EVICTION IS BOUNDED -- N declared = 1
+    with eviction: 1 reacquisition(s), bound N=1, then SEAT_EVICTED; without eviction: 0 reacquisition(s)
+    control  (no eviction injected): reacquisitions_used=0 work_status=201
+    injected (eviction on the work route every time): class=SEAT_EVICTED reacquisitions_used=1 allowed=1 terminal=True evictions_served=2
+
+(d) LEASE AND FENCING
+    1 of 2 runners holds the lease
+      runner_1: {"ok": true, "fence": 1}
+      runner_2: {"ok": false, "reason": "CONDITIONAL_CHECK_FAILED (lease held by another runner and not expired)"}
+    fenced-out runner refuses to persist without a lease: class=LEASE_NOT_HELD
+    fence 1 write refused against stored fence 2; session secret writes = 1
+      class=FENCED my_fence=1 stored_fence=2
+
+(e) NOTHING LEFT THE MACHINE
+    netguard: 0 external of 1 connection attempts during the suite; replay logged 35 requests; adapter hosts = 127.0.0.1:53895; POSITIVE CONTROL ycharts.com refused=true guard_fired=true
+    replay request log (every request the library made), denominator 35:
+      GET /login/                        10
+      POST /login/                       10
+      GET /indices/table_data            7
+      GET /dashboard                     4
+      POST /custom_pdf_reports/1         4
+    adapter request hosts: {"127.0.0.1:53895": 33} | non-loopback hosts: []
+    POSITIVE CONTROL -- the guard must be able to fire, or its zero is a constant:
+      attempted https://ycharts.com/indices/table_data -> refused=True reached_vendor=False guard_external 0 -> 1
+      refusal: NETGUARD: refused external connection to ycharts.com:443 -- this suite is offline by construction and no request may leave the machine
+
+(f) SECRETS BY NAME, HOST STOPPED, LEDGER CLOSED
+    describe-secret (version STAGES only -- no value is read or printed), denominator 3 of 3 names:
+      ycharts/login/credentials    {"versions": 1, "stages": ["AWSCURRENT"], "state": "AWSCURRENT"}
+      ycharts/session/current      {"versions": 0, "stages": [], "state": "NO_AWSCURRENT_VERSION"}
+      astn/kimi/api-key            {"versions": 1, "stages": ["AWSCURRENT"], "state": "AWSCURRENT"}
+    describe-instances i-0167fd745ad906a66 -> State.Name = stopped (declared stopped by aws_ec2_instance_state.runner)
+    ledger entry: 20260911T0004Z_irpt-bckend-s8_deploy_completion.md
+      CLOSED=True  open-leg markers remaining=0  sentinel present on disk=False
+      sentinel/entry commits (newest first):
+        ded9f9741b IB-s-8: close change-management entry irpt-bckend-s8 -- all four legs proven
+        ff12d98c4d IB-s-8: the YCharts session library, its offline proof, and the runner host applied STOPPED
+
+==============================================================================
+  arm (a): PASS
+  arm (b): PASS
+  arm (c): PASS
+  arm (d): PASS
+  arm (e): PASS
+  arm (f): PASS
+  ARMS: 6 of 6
+==============================================================================
+IBS8-RUNNER-BUILT

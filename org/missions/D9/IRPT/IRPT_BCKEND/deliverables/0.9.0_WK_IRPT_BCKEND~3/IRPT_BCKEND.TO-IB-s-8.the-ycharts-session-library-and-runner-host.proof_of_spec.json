@@ -1,0 +1,267 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-8",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-8.the-ycharts-session-library-and-runner-host.md",
+    "group": "B",
+    "vintage_commit": "7d7f33569a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7d7f33569a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-8.the-ycharts-session-library-and-runner-host.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js",
+      "kind": "script",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The library is pulled to the runner host by the irpt-ycharts-deploy SSM document, which is APPLIED but has not been SENT: the host is stopped and sending the deploy document to a stopped host does nothing. Committed, not deployed, and deliberately so -- deploying the code is a separate operator act from running it, and running it is a live vendor call.",
+      "artifact_covered_by": [
+        "S8-AC1",
+        "S8-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/run-ycharts-session.sh",
+      "kind": "script",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same SSM deploy path as the library; bash -n syntax-checked by .tools/commit-gate.sh at ff12d98c4d ('OK: bash -n syntax-checked').",
+      "artifact_covered_by": [
+        "S8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/package.json",
+      "kind": "config_data",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "npm install runs on the host at deploy time (irpt-ycharts-deploy step 'npm install --omit=dev'), never here: an npm install in this worktree is egress off Opal infrastructure.",
+      "artifact_covered_by": [
+        "S8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/README.md",
+      "kind": "doc",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Operator note; carries the 'What the offline proof cannot show' section that disarms rows W3-S1 and W3-S2 at the point a reader stands.",
+      "artifact_covered_by": [
+        "S8-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/investor-reporting-ycharts/tests/",
+      "kind": "test",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "netguard.js, replay_ycharts.js, replay_browser.js, fakes.js, run_offline_suite.js and fixtures/har_derived_routes.json. Excluded from the host deploy on purpose (the SSM document copies the runner, and the suite is a repo-side proof).",
+      "artifact_covered_by": [
+        "S8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/instance.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply: 'Apply complete! Resources: 9 added, 0 changed, 0 destroyed.' aws_instance.runner = i-0167fd745ad906a66; aws_ec2_instance_state.runner = stopped; describe-instances -> State.Name = stopped; post-apply plan -> 'No changes. Your infrastructure matches the configuration.'",
+      "artifact_covered_by": [
+        "S8-AC1",
+        "S8-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_iam_role.runner = arn:aws:iam::313476888478:role/irpt-ycharts-runner-role (get-role returned NoSuchEntity before the apply, so the role is new, not adopted). comp-iam service irpt-ycharts-runner: 7 statements, concrete resources; comp-iam gaps names no row for this role.",
+      "artifact_covered_by": [
+        "S8-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/ssm.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_ssm_document.deploy = irpt-ycharts-deploy and aws_ssm_document.run = irpt-ycharts-run, both created in the same apply. NEITHER IS SCHEDULED and neither has been sent.",
+      "artifact_covered_by": [
+        "S8-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/ycharts/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The IB-s-18 skeleton COMPLETED: five variables with measured defaults, the provider region bound to var.aws_region, and data.terraform_remote_state.core reading investor-reporting/core/tfstate for the jobs table name and the KMS key arn. terraform init succeeded against the declared backend and the root converges.",
+      "artifact_covered_by": [
+        "S8-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "ff12d98c4d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 IB-s-8 entries appended, entries_total 98 -> 109. Verified APPEND-ONLY against the prior blob: the first 98 entries compare EQUAL and the only _meta change is the denominators (entries_total, appended_by_cell.IB-s-8).",
+      "artifact_covered_by": [
+        "S8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T0004Z_irpt-bckend-s8_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "ded9f9741b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Opened before the apply (sentinel committed OPEN at ff12d98c4d), all four legs closed with their proofs, entry CLOSED, and the close committed at ded9f9741b BEFORE the reads that grade the act. deploy_ledger.py check lists no irpt-bckend-s8 row; the battery reads CLOSED=True, 0 open-leg markers, sentinel absent.",
+      "artifact_covered_by": [
+        "S8-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_8.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S8-AC1 battery. Committed in the same commit as this instance and the status flip.",
+      "artifact_covered_by": [
+        "S8-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S8-AC1",
+      "criterion_verbatim": "S8-AC1 -- PASSES BY OUTPUT -- the library against the captured flows, the secrets by name, the host stopped. (a) THE FIVE SURFACES WORK AGAINST THE REPLAY. probeSession on a stale bundle -> not authenticated; acquireSession through the replayed login flow -> authenticated (identity/cookie/probe evidence printed, values redacted); persistSession writes a bundle; getSession returns it; withAuthenticatedPage runs a callback on an app page. 5 of 5. (b) NO OTP BRANCH -- THE CENSUS. Enumerate the runner's challenge handlers (denominator printed): 0 handle a one-time code; an injected unexpected challenge produces an EXPLICIT failure record, not a retry loop. Printed. (c) EVICTION IS BOUNDED -- THE DIFFERENCE CONTROL. Inject an eviction mid-session: reacquisition happens at most N times (N declared) then stops with a failure; without the eviction, 0 reacquisitions. Both printed. (d) LEASE AND FENCING. Two concurrent runners: exactly one holds the lease; the fenced one refuses to persist. Printed. (e) NOTHING LEFT THE MACHINE. The replay server's request log shows every request; an outbound-network guard recorded 0 external connections. Printed. (f) SECRETS BY NAME, HOST STOPPED, LEDGER CLOSED. describe-secret on the three names prints their version stages (no values); describe-instances prints stopped for the host; the ledger CLOSED and the sentinel committed (hash).",
+      "method": "command",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_8.py",
+      "expect": "IBS8-RUNNER-BUILT",
+      "output_evidence": "rc 0. Final lines verbatim: '  arm (a): PASS' / '  arm (b): PASS' / '  arm (c): PASS' / '  arm (d): PASS' / '  arm (e): PASS' / '  arm (f): PASS' / '  ARMS: 6 of 6' / 'IBS8-RUNNER-BUILT'. Per arm, the deciding lines: (a) '(a) THE FIVE SURFACES AGAINST THE REPLAY -- 5 of 5' with the measured precondition 'getSession on the MEASURED absent secret: present=False reason=NO_AWSCURRENT_VERSION', probeSession(stale) 'authenticated=False reason=DISTURBED http=403 legs identity=PASS cookie=PASS probe=FAIL', acquireSession steps '[{\"step\":0,\"state\":\"CH-SIGNIN_FORM\",\"via\":\"dom\"},{\"step\":1,\"state\":\"CH-AUTHENTICATED\",\"via\":\"dom\"}]' with probe evidence '{\"probe_url_path\":\"/indices/table_data?indices=%5ESPX&columns=ytd_total_return\",\"http_status\":200,\"state\":\"LIVE\"}', persistSession 'secret_id=ycharts/session/current fence=1 previous_fence=None puts=1', getSession 'present=True cookies=[ycsessionid, csrftoken, aws-waf-token] fence=1', withAuthenticatedPage '{\"app_url\":\".../dashboard\",\"app_shell_elements\":1,\"work_route\":\"/custom_pdf_reports/1\",\"work_status\":201,\"work_state\":\"CREATED_201\"}'. (b) 'structural census (handler rows): 0 of 4 challenge handlers handle a one-time code' and 'injected challenges: 5 of 5 injected unexpected challenges produced an EXPLICIT failure record with retried=false', each of the five with 'submits=1' read from the replay's own request log; source token census 'denominator: 17 hit(s) across 1000 line(s); bands: {\"BLOCK-COMMENT\": 11, \"LINE-COMMENT\": 2, \"HANDLER-TABLE\": 1, \"SIGNATURE-TABLE\": 1, \"RECORD-FIELD\": 2, \"CODE\": 0}' and 'CODE-band hits (a real one-time-code code path would land here): 0'. (c) 'with eviction: 1 reacquisition(s), bound N=1, then SEAT_EVICTED; without eviction: 0 reacquisition(s)'; injected 'class=SEAT_EVICTED reacquisitions_used=1 allowed=1 terminal=True evictions_served=2'; control 'reacquisitions_used=0 work_status=201'. (d) '1 of 2 runners holds the lease', runner_2 '{\"ok\": false, \"reason\": \"CONDITIONAL_CHECK_FAILED (lease held by another runner and not expired)\"}', 'fenced-out runner refuses to persist without a lease: class=LEASE_NOT_HELD', and 'fence 1 write refused against stored fence 2; session secret writes = 1' with 'class=FENCED my_fence=1 stored_fence=2'. (e) 'netguard: 0 external of 1 connection attempts during the suite; replay logged 35 requests; adapter hosts = 127.0.0.1:<ephemeral>; POSITIVE CONTROL ycharts.com refused=true guard_fired=true', 'non-loopback hosts: []', replay route log 'GET /login/ 10 | POST /login/ 10 | GET /indices/table_data 7 | GET /dashboard 4 | POST /custom_pdf_reports/1 4', positive control 'attempted https://ycharts.com/indices/table_data -> refused=True reached_vendor=False guard_external 0 -> 1' with refusal 'NETGUARD: refused external connection to ycharts.com:443'. (f) 'ycharts/login/credentials {\"versions\": 1, \"stages\": [\"AWSCURRENT\"], \"state\": \"AWSCURRENT\"}', 'ycharts/session/current {\"versions\": 0, \"stages\": [], \"state\": \"NO_AWSCURRENT_VERSION\"}', 'astn/kimi/api-key {\"versions\": 1, \"stages\": [\"AWSCURRENT\"], \"state\": \"AWSCURRENT\"}', 'describe-instances i-0167fd745ad906a66 -> State.Name = stopped', 'CLOSED=True  open-leg markers remaining=0  sentinel present on disk=False', commits 'ded9f9741b' (close, removes the sentinel) and 'ff12d98c4d' (apply, commits the sentinel OPEN). Full verbatim output: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-8_S8-AC1_battery_output.txt",
+      "denominator": "arms 6 of 6; arm (a) surfaces 5 of 5; arm (b) handler rows 0 of 4 handle a one-time code and injected challenges 5 of 5 explicit failures and source tokens 0 CODE-band of 17 hits across 1000 lines; arm (c) reacquisitions 1 of bound N=1 with eviction and 0 of 1 without; arm (d) lease holders 1 of 2 concurrent runners and session-secret writes 1 of 2 attempted; arm (e) external connections 0 of 1 attempt observed, non-loopback hosts 0 of 1 host, replay requests 35; arm (f) secrets 3 of 3 names described",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC2",
+      "criterion_verbatim": "S8-AC2 -- THE ROOT IS CONVERGED after this cell's apply. Run after the apply and after the ledger closes.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/ycharts plan -no-color -input=false -lock=false",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\.",
+      "output_evidence": "rc 0. Verbatim: 'No changes. Your infrastructure matches the configuration.' preceded by the nine refresh lines (aws_iam_role.runner, aws_iam_role_policy.runner, aws_iam_role_policy_attachment.runner_ssm, aws_iam_instance_profile.runner, aws_security_group.runner, aws_instance.runner [id=i-0167fd745ad906a66], aws_ec2_instance_state.runner [id=i-0167fd745ad906a66], aws_ssm_document.deploy, aws_ssm_document.run) and by 'data.terraform_remote_state.core: Read complete'. Taken AFTER the apply and AFTER the ledger close was committed at ded9f9741b, in the order NEVER-2 requires. Full verbatim output: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-8_S8-AC2_plan_output.txt",
+      "denominator": "9 of 9 resources refreshed and converged; 0 to add, 0 to change, 0 to destroy. Pre-apply plan was '9 to add, 0 to change, 0 to destroy', so no pre-existing resource was touched by this cell.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S8-AC3",
+      "criterion_verbatim": "S8-AC3 -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: what the replay cannot show about the live site (WAF token minting, cookie rotation timing, an eviction by a person); the AWSCURRENT state you found on ycharts/session/current and what it implies for the first live run; and which part of the BDAPI runner you deliberately did NOT carry over and why. No verdict: the instance row carries the output under UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment -- recorded, not self-graded; the reads behind it are: aws secretsmanager describe-secret --secret-id ycharts/session/current --query VersionIdsToStages (-> null); comp-read of infra/aws/lambda/ycharts-market-data-pull/ycharts_client.py; comp-read of infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js; and the offline suite's own records",
+      "judgment": true,
+      "output_evidence": "(1) WHAT THE REPLAY CANNOT SHOW ABOUT THE LIVE SITE. Three named gaps plus a fourth the order did not name. (i) WAF TOKEN MINTING: aws-waf-token is minted by AWS WAF's browser challenge, executed as JavaScript in a real page. The replay Set-Cookies a random value; nothing about the challenge, its difficulty or its failure mode is exercised. If the live challenge fails or is served as an interstitial, the library classifies it CH-UNEXPECTED / SIG-WAF and fails explicitly -- which is the designed behaviour, and is also the untested path. (ii) COOKIE ROTATION TIMING: the whole reason the browser holds the session rather than a hand-rolled cookie header is that csrftoken and aws-waf-token rotate under the browser's feet. The replay rotates nothing across a session, so the library's reliance on the live context (probeSession via context.requestGet) is CORRECT BY DESIGN and UNMEASURED BY THIS PROOF. The first live run is the first test of whether a bundle persisted at time T is still assemblable at T+delta. (iii) AN EVICTION BY A PERSON: the injected eviction is a replay mode; a real one is Alyssa signing in. The 403 marker string 'concurrent sign in' is transcribed from ycharts_client.py's seat_evicted(), which is itself a reverse-engineered predicate -- if the vendor changes that wording, this library reports DISTURBED instead of EVICTED_HARD and reacquires zero times rather than N. That is a SINGLE STRING of shared dependency between this library and the market-data client, and it is the one place where both instruments would be wrong together. (iv) THE GAP THE ORDER DID NOT NAME, and it is the largest: THE SIGN-IN PAGE ITSELF IS UNMEASURED. All three supplied HARs are post-authentication; there is no login flow in any evidence available in this worktree (row IRPT_BCKEND-W3-S2). The form action, the field names and the submit control are a Django-shaped MODEL, and the selector list the library tries is exactly the set that model satisfies. Related but separate: no real browser ran at all (row IRPT_BCKEND-W3-S1), so arm (a)'s '5 of 5' is a statement about the library's mechanism, not about Chromium. (2) THE AWSCURRENT STATE OF ycharts/session/current AND WHAT IT IMPLIES. Measured 2026-09-10 via describe-secret: the secret EXISTS (arn ...:secret:ycharts/session/current-fxoD1K, LastChangedDate 1779374828) and VersionIdsToStages is NULL -- it has no AWSCURRENT version and no version of any kind. The brief's measurement re-grounds exactly. Four implications for the first live run. (a) getSession MUST treat absence as a VALUE: get-secret-value on a versionless secret raises ResourceNotFoundException, so a library that let that propagate would die before it ever reached a login. It returns {present:false, reason:'NO_AWSCURRENT_VERSION'} instead, and arm (a) proves that branch first. (b) The first live run necessarily takes the ACQUIRE path -- there is nothing to probe -- so the first live run is simultaneously the first exercise of the modelled login DOM, of the WAF challenge and of the lease. Those three unknowns land together, which is an argument for running it attended. (c) PutSecretValue on a secret with no versions CREATES version 1 and stages it AWSCURRENT; the role grants PutSecretValue on this ARN alone, so the mechanism is in place, but it has never been exercised against this secret and no version has ever existed. (d) The FENCE starts from nothing: persistSession compares against a stored fence of null and permits the first write unconditionally. That is correct for a first write and is the one lease state the difference control in arm (d) does not cover, because there is no prior holder to be fenced against. (3) WHAT OF THE BDAPI RUNNER WAS DELIBERATELY NOT CARRIED OVER, AND WHY. Five things, each a decision rather than an omission. (i) THE ENTIRE OTP APPARATUS -- getOtpCode and its adapter seam (graph/teams/relay), otpSent/otpEntered, the two-step delivery-screen handling, the 'Remember My Device' checkbox with its three fallback strategies, and the bd_DeviceRegistration device-trust inject/capture. Andrew's word is 'I do not believe they send OTP so dont need that part', and a code channel built on a belief about a vendor is worse than no channel: it would have to be tested against a challenge nobody has seen, and an untested credential-adjacent path is exactly where a quiet failure hides. It is replaced by an explicit refusal that NAMES the thing it will not do (CHALLENGE_ONE_TIME_CODE_UNSUPPORTED), so the day YCharts does send a code, the failure says so instead of timing out. (ii) THE OUTER MULTI-ATTEMPT LOGIN RETRY (BD_MAX_LOGIN_ATTEMPTS with exponential backoff, up to 3 fresh browser contexts). BD's retry exists to survive a consumed-OTP race, which is the machinery that is gone; what remains would be repeated password submission against a vendor whose seat a human also uses. acquireSession is ONE attempt: a re-presented sign-in form after submit is an explicit AuthError, not a second password. The bound that DOES survive is on REACQUISITION AFTER AN EVICTION, which is a different event with a different cause. (iii) THE RESIDENTIAL PROXY AND ignoreHTTPSErrors. BD needed BrightData, then dropped it; carrying either forward would mean TLS interception on a path where the only measured requirement is normal TLS. Native egress and normal certificate validation. (iv) THE S3 DEBUG-SCREENSHOT CHANNEL (BD_DEBUG_SHOTS, masked fields, per-step PNGs to a debug prefix). It exists so an agent could watch a login it could not otherwise see, and it carries a standing ROE hazard -- pixels of a post-fill form. The IAM policy here grants no PutObject at all, so the channel is structurally absent rather than merely unused. What replaces it is a redacted structured record: cookie NAMES, a sha256 prefix, HTTP statuses, step states. (v) THE VISION PATH AS A HARD DEPENDENCY. The Kimi seam is preserved (opts.vision, and astn/kimi/api-key is granted) because the style Andrew named is DOM-first-with-vision-fallback, but classifyScreen reaches it only after DOM and signature checks, and the offline suite injects NO vision port -- replay_browser.js's screenshot() THROWS rather than stubbing, so the vision path cannot pass this suite without being exercised. It is present and honestly unproven, rather than present and falsely green. (4) FOR THE CVO'S ATTENTION, since it decides whether this cell's evidence supports FWD-4: the two ARMED rows W3-S1 and W3-S2 are disarmed only in the sense that the limitation is written where a reader stands. Nothing in this order can close them; closing either requires a live YCharts sign-in, which is Andrew's per-use word via 1.0.0_SA_CTO at L10.",
+      "denominator": "3 questions asked by the criterion, 3 answered, plus 1 gap the criterion did not name (the unmeasured sign-in page) and 1 addressed to the CVO's FWD-4 read; 5 BDAPI components enumerated as deliberately not carried over; 4 implications stated for the first live run",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion. Graded by 3.0.0_SA_CVO at L9 and never self-graded: the output is recorded here without a verdict, per the task order's own instruction and spine v3 L9."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The central claim of arm (b) is that the challenge handler table contains zero handlers for a one-time code. Mutated exactly one field in a copy of the library -- CH-UNEXPECTED.handles_one_time_code, false -> true -- and re-read the census through the library's own challengeHandlerCensus(). A passing assertion never mutated has never been tested, and the risk here is precisely that a table asserting its own compliance always agrees with itself.",
+      "expected": "one_time_code_handlers moves 0 -> 1 and the arm (b) structural predicate (one_time_code_handlers === 0) becomes false",
+      "observed": "BASELINE structural census: denominator=4 one_time_code_handlers=0. MUTANT structural census: denominator=4 one_time_code_handlers=1. arm-b structural predicate one_time_code_handlers===0 -> false. SECOND, UNPLANNED MUTANT, recorded because it is stronger evidence than the deliberate one: the first build of the source token census banded a prose string inside the handler table as CODE, arm (b) read FAIL, ARMS read 5 of 6 and the battery WITHHELD IBS8-RUNNER-BUILT (rc 1). The banding was then made structural -- the two declarative table ranges are located by reading the source -- rather than the threshold being relaxed. The battery can therefore be observed failing on this exact arm. Arms (c) and (e) carry their own discriminators as well: arm (c) runs the same code path with and without the eviction (1 reacquisition vs 0), and arm (e) fires a POSITIVE CONTROL at https://ycharts.com and records the guard's external count moving 0 -> 1, because a guard that cannot go non-zero is a constant wearing a measurement's clothes.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two full runs of the battery on the same inputs, compared on the 23 DECIDING lines (the six arm verdicts, the ARMS line, the marker, and every line carrying a count, a denominator or a status). The deliberately non-stable values are named rather than left to be discovered: the replay binds an EPHEMERAL loopback port, the records carry ISO timestamps, and the redacted identity label is a sha256 prefix of a freshly minted fixture cookie.",
+      "observed": "23 deciding lines in each run. 22 byte-identical. The single difference is the ephemeral port inside the arm (e) line: '... adapter hosts = 127.0.0.1:53895 ...' vs '... adapter hosts = 127.0.0.1:60226 ...'. Every arm verdict, every denominator and every count is identical across the two runs, and both runs printed IBS8-RUNNER-BUILT at rc 0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live YCharts call -- sign-in, probe or report generation against ycharts.com",
+      "reason": "NO LIVE VENDOR CALL is authorized by this order or by the endpoint; availability is not authorization. The live arm is expressly qualified to 1.0.0_SA_CTO's L10 read on Andrew's explicit per-use word. Enforced here, not merely stated: netguard.js refuses every non-loopback destination and the refusal is demonstrated by a positive control."
+    },
+    {
+      "item": "Starting the runner host",
+      "reason": "The host is applied STOPPED and stays stopped by the task order's bound. Starting it and signing in is the qualified live arm. The instance role has NO ec2 control-plane grant, so the box cannot start itself either."
+    },
+    {
+      "item": "Running the library in a real browser (Chromium via Playwright)",
+      "reason": "Playwright is not installed in this worktree and installing it is an npm install against the public registry -- egress off Opal infrastructure, excluded from this seat's standing authority, and the one thing arm (e) exists to refuse. The library's code paths are exercised through a Playwright-SHAPED loopback adapter instead. Row IRPT_BCKEND-W3-S1."
+    },
+    {
+      "item": "Replaying a CAPTURED sign-in flow",
+      "reason": "No captured sign-in exists in anything available here: the private packet is absent from the worktree and all three HARs in the sanitized evidence are post-authentication sessions. The sign-in page is MODELLED and said to be. Row IRPT_BCKEND-W3-S2."
+    },
+    {
+      "item": "The Kimi-VL vision fallback path",
+      "reason": "Present as a seam (opts.vision; astn/kimi/api-key granted to the role) because the style Andrew named is DOM-first-with-vision-fallback, but the offline suite injects no vision port and replay_browser.js's screenshot() THROWS rather than stubbing. Honestly unproven rather than falsely green -- a stub would have let the path pass without ever running."
+    },
+    {
+      "item": "infra/aws/lambda/ci/lambda-source-map.json",
+      "reason": "In this order's <paths> grant and deliberately UNTOUCHED: cell IB-s-8 creates no Lambda, so there is no function to register. Registering a phantom entry would make a later CodeSha256 check compare against nothing."
+    },
+    {
+      "item": "Sending either SSM document (irpt-ycharts-deploy, irpt-ycharts-run)",
+      "reason": "Both are APPLIED and neither has been sent. The deploy document targets a stopped host; the run document IS a live vendor call. They are separate documents precisely so that 'update the code' and 'sign in to YCharts' cannot be the same operator act."
+    },
+    {
+      "item": "The generation job (cell IB-s-9)",
+      "reason": "IB-s-9 hangs off this cell and owns the generation job in the same Terraform root. This order builds the session library and the host only."
+    },
+    {
+      "item": "Any repair of the other OPEN or HELD-STALE change-management entries visible in this tree",
+      "reason": "Three entries belonging to other seats (opsec-s15-reconciler-function, d12-sms-tfn-registration-and-production-access, and two HELD-STALE holds) are OPEN or past-window in this worktree. Out of lane and out of this order's scope; left exactly as found rather than widened into."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W3-S1: The offline proof of the YCharts session library runs WITHOUT A REAL BROWSER -- Playwright is not installed in this worktree and installing it is egress off Opal infrastructure, so the library's own code paths are exercised through a Playwright-shaped loopback adapter (tests/replay_browser.js) rather than Chromium. ARMED because 'arm (a) 5 of 5' reads like 'the runner works in a browser'; disarmed same turn by naming the limit in the replay adapter's header, the README's 'What the offline proof cannot show' section and the S8-AC3 judgment record.",
+    "IRPT_BCKEND-W3-S2: There is NO CAPTURED LOGIN FLOW in any evidence available to this cell -- the private HAR packet is absent from the worktree (docs/research/investor_reporting_ycharts_20260910/ holds only the profiler) and all three HARs in the sanitized evidence are post-authentication sessions -- so the 'replayed login flow' in S8-AC1 arm (a) is MODELLED while the app surface is measured. ARMED because the first live run is also the first test of the sign-in selectors; disarmed same turn by writing the measured-versus-modelled split into the replay header and into the fixture the replay loads, and by making a selector miss an EXPLICIT failure rather than a hang."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-8_session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js --enumerate '(?i)one[- ]?time|otp|verification code|2fa|two[- ]factor'",
+      "result": "ENUMERATE-END: 17 hit(s) | 7 whole | 10 sub | UNBANDED=17 across 1000 lines. An INDEPENDENT third read that agrees with the battery's own source-census denominator of 17; comp-read's backend could not band this file (top-level-keys), which is why the battery bands them itself and prints the table ranges it located."
+    },
+    {
+      "tool": "comp-iam service (Phase 1, per the order's preflight)",
+      "invocation": "comp-iam service irpt-ycharts-runner",
+      "result": "SERVICE: irpt-ycharts-runner-role [iam-role], source infra/aws/terraform/investor-reporting/ycharts/iam.tf, 7 statements. Secrets Get/Describe and Put on named ARNs, dynamodb GetItem/UpdateItem on the irpt-jobs ARN, kms Decrypt/GenerateDataKey on the core key, s3 GetObject on the runner's own artifact prefix, s3 ListBucket conditioned to that prefix, plus AmazonSSMManagedInstanceCore. comp-iam NOTE: the TF role label 'runner' is reused by estate-report-runner-role and is now module-namespaced, so the inline policy links correctly rather than FALSE-MISSING."
+    },
+    {
+      "tool": "comp-iam gaps (Phase 2, per the order's preflight)",
+      "invocation": "comp-iam gaps",
+      "result": "Total: 12 missing | 291 deny-present | 1 coverage-unknown | 2 resource-mismatch across 31 service(s). NO row names irpt-ycharts-runner. Carried with the tool's own disclosed blind spot: 51 GRANTED-BROAD rows are EXCLUDED NOT CLEARED, and 266 calls in 26 role-UNMAPPED services are not resource-checked -- an honest hole, not a pass."
+    },
+    {
+      "tool": "comp-adversary compose",
+      "invocation": "comp-adversary compose infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js --out .scratch/adversary_ib_s_8.json",
+      "result": "declaration written (10302 bytes), read-vintage HEAD @ded9f9741b, artifact-vintage ff12d98c4d. Author profile: 1 repo path, 4 file:line cites, 0 commits. DECLARED EXCLUSION it reports: 'T11: decomposition neighborhood NOT RESOLVED (artifact carries no <decomp_ref> -- not a tree task order)'. That is the tool's honest scope statement about a .js source file, not a finding."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "deploy_ledger.py open --slug irpt-bckend-s8 (4 legs) ... close-leg L1..L4 ... close --slug irpt-bckend-s8",
+      "result": "OK: CLOSED deploy ledger 'irpt-bckend-s8' -- all 4 legs proven; sentinel removed. Opened BEFORE the apply with the sentinel committed OPEN at ff12d98c4d, closed and the close committed at ded9f9741b BEFORE the grading reads."
+    },
+    {
+      "tool": ".tools/safe-apply.sh with .tools/terraform.exe",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/ycharts apply -no-color -input=false -auto-approve",
+      "result": "Apply complete! Resources: 9 added, 0 changed, 0 destroyed. The worktree-provisioned .tools/terraform.exe (v1.9.8) was used by that path, never a PATH substitute, so remote state was not re-pinned. safe-apply's first identity gate reads org/mcp/sessions/<session>.serial, which is gitignored and absent in a fresh worktree; that one line was written naming this serial before the apply."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~3 <0.9.0_WK_IRPT_BCKEND~3@opal.agent>\" -F <msgfile> -- <explicit file paths>",
+      "result": "ff12d98c4d and ded9f9741b, both msg-verify MATCH. Note for anyone repeating this: safe-commit stages with 'git add -f', which OVERRIDES .gitignore for a DIRECTORY pathspec -- the first attempt passed the terraform root as a directory and the gate correctly BLOCKED on the 685.5MB provider binary inside .terraform/. Explicit file paths, not directories, for any tree that holds tool output."
+    }
+  ]
+}

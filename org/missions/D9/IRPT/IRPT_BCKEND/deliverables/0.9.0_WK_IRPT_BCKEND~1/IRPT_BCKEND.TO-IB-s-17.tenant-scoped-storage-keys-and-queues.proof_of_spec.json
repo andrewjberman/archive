@@ -1,0 +1,313 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-17",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_IRPT_BCKEND~1",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-17.tenant-scoped-storage-keys-and-queues.md",
+    "group": "OTHER",
+    "vintage_commit": "410f28f7db"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "410f28f7db89da51953eba34402394cdfee6ae23",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-17.tenant-scoped-storage-keys-and-queues.md"
+  },
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/tenant-scoped-storage-keys-and-queues.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "34290ce98f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED and READ BACK: safe-apply rc=0 'Apply complete! Resources: 17 added, 0 changed, 0 destroyed.', then the battery read the live plane with read-only AWS calls. The root's terraform/provider block plus the locals that READ the firm ids from data/firm_registry.json (enabled == true AND kind == 'client'). A variable with three literals would be the enumerated list CLAUDE.md section 5 says lapses silently; the apply's own output proves the read worked -- firm_ids = ['49financial', 'cottonwood', 'inflection'].",
+      "introduces": [
+        "firm_ids"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/kms.tf",
+      "kind": "terraform",
+      "commit_or_etag": "34290ce98f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED and READ BACK: safe-apply rc=0 'Apply complete! Resources: 17 added, 0 changed, 0 destroyed.', then the battery read the live plane with read-only AWS calls. One CMK + alias/investor-reporting. describe-key resolves the alias to arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111 and get-key-rotation-status BY KEY ID reads KeyRotationEnabled true, RotationPeriodInDays 365. The key policy is left at the provider default because comp-iam reads ZERO investor-reporting roles: there is no principal to grant to, and inventing one is a widening.",
+      "introduces": [
+        "aws_kms_alias"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/s3.tf",
+      "kind": "terraform",
+      "commit_or_etag": "34290ce98f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED and READ BACK: safe-apply rc=0 'Apply complete! Resources: 17 added, 0 changed, 0 destroyed.', then the battery read the live plane with read-only AWS calls. opal-data-ycharts, measured ABSENT (HeadBucket 404) before the act. Read back: SSEAlgorithm aws:kms with KMSMasterKeyID equal to the resolved alias key, public-access-block 4 of 4 true, versioning Enabled, and list-objects-v2 returning 0 objects -- the prefixes are DECLARED, never created as empty objects. layout.json is written by terraform (local_file) so a registry change becomes a plan diff.",
+      "introduces": [
+        "local_file"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/dynamodb.tf",
+      "kind": "terraform",
+      "commit_or_etag": "34290ce98f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED and READ BACK: safe-apply rc=0 'Apply complete! Resources: 17 added, 0 changed, 0 destroyed.', then the battery read the live plane with read-only AWS calls. Four tables read back with describe-table + describe-continuous-backups: 4 of 4 SSE ENABLED/KMS with OUR key arn, PITR ENABLED, PAY_PER_REQUEST. Only KEY attributes are declared because an attribute block for a non-key attribute is a Terraform error -- the lease and revision fields are the item writer's.",
+      "introduces": [
+        "aws_dynamodb_table"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/sqs.tf",
+      "kind": "terraform",
+      "commit_or_etag": "34290ce98f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED and READ BACK: safe-apply rc=0 'Apply complete! Resources: 17 added, 0 changed, 0 destroyed.', then the battery read the live plane with read-only AWS calls. Three queues + three DLQs read back with get-queue-attributes: KmsMasterKeyId set on 6 of 6, MaximumMessageSize 4096 on 6 of 6, and each work queue's RedrivePolicy naming its own DLQ. The 4096 ceiling is the mechanism that turns 'queues carry ids not attachments' into a transport refusal.",
+      "introduces": [
+        "max_message_size"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/outputs.tf",
+      "kind": "terraform",
+      "commit_or_etag": "34290ce98f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPLIED and READ BACK: safe-apply rc=0 'Apply complete! Resources: 17 added, 0 changed, 0 destroyed.', then the battery read the live plane with read-only AWS calls. The handles the eight sibling roots consume, names and ARNs only -- no policy document, no credential. The apply printed every one.",
+      "introduces": [
+        "evidence_bucket"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_keys/keys.py",
+      "kind": "script",
+      "commit_or_etag": "34290ce98f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The II.3 key grammar. 'Client names are never cache keys' is enforced by a POSITIVE GRAMMAR plus a REGISTRY-DERIVED NEGATIVE, neither of which is a list of names, so neither can lapse when a firm is renamed. TenantBinding is frozen at construction; s3_evidence_key refuses a lock-shaped key; queue_message admits only id-shaped values and mirrors the 4096-byte ceiling. commit-gate rc=0.",
+      "introduces": [
+        "KeyComponentRefused"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_keys/tests/test_keys.py",
+      "kind": "test",
+      "commit_or_etag": "34290ce98f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "45 tests, 45 passed, 0 failed. The four arms the criterion names plus a refuser for every claim in the B17 acceptance clause. THIS SUITE CAUGHT A REAL HOLE IN THE LIBRARY: the first parameter ladder ended in REVISION_RE and admitted 'Smith-Family'. The grammar was tightened, not the test.",
+      "introduces": [
+        "test_a_client_or_firm_name_component_raises"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/layout.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "WRITTEN BY THE APPLY (local_file), committed here so IB-s-5 can bind its FirmDestinationPolicy and per-firm IAM conditions to it. firms == the registry's 3 enabled client firms, the three prefix families rendered per firm, and a quarantine prefix that carries NO firm -- because a message reaches quarantine precisely when its firm could not be established.",
+      "introduces": [
+        "quarantine"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260910T2240Z_irpt-bckend-s17_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "f44cab8208",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The change-management entry: OPENED at e3e767cc28 before anything was applied, four legs each closed on its own proof (L1 the sources commit, L2 the Apply complete line, L3 the battery's read of the applied plane, L4 the 0-diff plan), CLOSED and committed at f44cab8208 BEFORE the reads that grade the act."
+    },
+    {
+      "path_or_key": "org/critical_paths/.open_deploys/irpt-bckend-s17.json",
+      "kind": "doc",
+      "commit_or_etag": "e3e767cc28",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The sentinel, COMMITTED WHILE OPEN at e3e767cc28 and removed by the close at f44cab8208. That is what a closed entry looks like, and `git log -1 -- <sentinel>` still resolves, which is what S17-AC1 arm (e) reads."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_17.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S17-AC1 battery, five arms, 27 read-only AWS calls. Every arm reads the APPLIED PLANE rather than terraform state or the apply log -- state is a description, and this criterion is about what is actually there. Arm (b) is the one file-reading arm and says so in its own output. commit-gate rc=0.",
+      "introduces": [
+        "IBS17-STORAGE-APPLIED"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IB-s-17_S17-AC1_battery_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The battery's full transcript as run, rc=0, so a verifier reads every denominator without re-running it against the live account."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IB-s-17_S17-AC2_plan_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The graded plan transcript: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/tenant-scoped-storage-keys-and-queues.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The criteria with rc, deciding lines and denominators; what was applied; the two mechanisms; the three rows; the bounds observed."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "24 entries APPENDED by this cell -- 74 to 98 -- covering the eight repo files, the registry it reads, and the 13 AWS resources it applied (bucket, state key, CMK, alias, 4 tables, 6 queues). Pure append: the diff is 451 insertions and 1 deletion, the deletion being the _meta.denominators closing brace. data/firm_registry.json appears a SECOND time rather than having the first entry's cell widened, because the manifest's own contract is append-only.",
+      "introduces": [
+        "APPLIED_BY_THIS_CELL",
+        "appended_by_cell"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THREE appended rows, W1-S3/S4/S5, all OBSERVATION and all INERT. Pure append: 70 insertions, 0 deletions.",
+      "introduces": [
+        "IRPT_BCKEND-W1-S3",
+        "IRPT_BCKEND-W1-S4",
+        "IRPT_BCKEND-W1-S5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-17.tenant-scoped-storage-keys-and-queues.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The <status> flip to complete. The staged-to-pending flip rode 34290ce98f, as the hand-off directed. The flip is LAST on purpose: the halt gate admits a worker only while a task order issued to it is NON-TERMINAL, so flipping earlier would have withdrawn this cell's own apply grant (row W1-S3)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S17-AC1",
+      "criterion_verbatim": "PASSES BY OUTPUT -- the applied plane read back, every count beside its denominator. (a) THE BUCKET IS THERE, ENCRYPTED, CLOSED. head-bucket 200; get-bucket-encryption names the alias/investor-reporting key (aws:kms); get-public-access-block all four true; get-bucket-versioning Enabled. Print each read. (b) THE LAYOUT IS DECLARED FROM THE REGISTRY. layout.json firm ids == data/firm_registry.json enabled client firms (print 3 of 3 and the ids); quarantine/ present; the three prefix families per firm present. (c) TABLES AND QUEUES, N OF N. describe-table on 4 of 4 tables: SSE with the key, PITR enabled, PAY_PER_REQUEST; get-queue-attributes on 3 of 3 queues + 3 of 3 DLQs: KmsMasterKeyId set, RedrivePolicy names the DLQ. Print names and the denominator. (d) THE KEY GRAMMAR REFUSES A CLIENT NAME -- THE DIFFERENCE CONTROL. tests/test_keys.py: a well-formed key carries every II.3 component (assert each); a key built with a client name component RAISES; two calls with the same inputs produce the same key (idempotent) and two different fingerprints produce different keys. Print passed/total. (e) THE LEDGER IS CLOSED AND ITS SENTINEL COMMITTED. python .tools/deploy_ledger.py check reads no OPEN entry for this slug; git log -1 --format=%H -- org/critical_paths/.open_deploys/irpt-bckend-s17.json prints a hash.",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_17.py",
+      "output_evidence": "rc=0. Final line: 'IBS17-STORAGE-APPLIED'; above it 'arms: 5 of 5 evaluated; arms holding: 5 of 5; assertions failed: 0'. Full transcript committed beside this instance as IB-s-17_S17-AC1_battery_output.txt. 27 AWS calls, ALL read-only (head-bucket, get-bucket-encryption, get-public-access-block, get-bucket-versioning, list-objects-v2, describe-key, get-key-rotation-status, describe-table, describe-continuous-backups, get-queue-url, get-queue-attributes) -- 0 writes of any kind.\n\n(a) THE BUCKET IS THERE, ENCRYPTED, CLOSED. 'head-bucket opal-data-ycharts -> rc=0 200 OK (no body)'. 'get-bucket-encryption -> SSEAlgorithm=aws:kms KMSMasterKeyID=arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963cea8111'. THE ALIAS IS RESOLVED, NOT STRING-MATCHED: describe-key on alias/investor-reporting returns that same arn, and the battery compares the two ARNs -- a bucket encrypted with a DIFFERENT key whose arn merely looked similar would fail here, where a substring test on the word 'investor-reporting' would not. 'get-public-access-block -> {\"BlockPublicAcls\": true, \"BlockPublicPolicy\": true, \"IgnorePublicAcls\": true, \"RestrictPublicBuckets\": true}' with '4 of 4 axis(es) true'. 'get-bucket-versioning -> Status=Enabled'.\n\n(b) THE LAYOUT IS DECLARED FROM THE REGISTRY. 'registry enabled client firms: [49financial, cottonwood, inflection]' and 'layout.json firms: [49financial, cottonwood, inflection]', '3 of 3 firm id(s) match the registry'. The registry carries FIVE firms; the two excluded are mockadv (kind=test) and demo (kind=demo), so 3 of 5 is the filter working and 3 of 3 is the match. 'quarantine prefix -> quarantine/' and it carries no firm id. 'prefix families declared: [generations, intake, requests]' with '3 of 3 firm(s) carry all three prefix families', each rendered under firms/<firm_id>/. '_keys/keys.py vs layout.json: AGREE' -- the runtime library and the declaration are two carriers of one fact and this is the comparison that keeps them from drifting. 'list-objects-v2 -> 0 object(s) in the bucket', which is the arm that shows the prefixes were DECLARED and not created as empty objects.\n\n(c) TABLES AND QUEUES, N OF N. '4 of 4 table(s) SSE-KMS with OUR key, PITR enabled, PAY_PER_REQUEST' -- irpt-requests (tenant:HASH,request_revision:RANGE), irpt-jobs (tenant,job), irpt-outbox (tenant,seq), irpt-checkpoints (source,cursor), each printed with key-is-ours=True, so the SSE claim is about OUR CMK and not merely about 'a KMS key'. '3 of 3 work queue(s) KMS-encrypted with a RedrivePolicy naming their DLQ' and '3 of 3 dead-letter queue(s) KMS-encrypted'; MaximumMessageSize 4096 on 6 of 6.\n\n(d) THE KEY GRAMMAR REFUSES A CLIENT NAME. 'python -m pytest infra/aws/lambda/investor-reporting/_keys/tests/test_keys.py -q' -> '45 passed in 0.16s', '45 of 45 test(s) passed, 0 failed'. The four named arms are ALSO exercised in the battery's own output so a reader need not open the test file: a well-formed key 'irpt/v1/49financial/holdings_snapshot/asf=aaaa...aaaa/src=src-1/sch=sch-1/cfg=cfg-1/p=as_of=2026-09-09' with '7 of 7 II.3 component(s) present in the key: tenant, account-set fingerprint, source revision, schema revision, config revision, operation, operation parameter'; '5 of 5 client/firm-name component(s) REFUSED at construction' (Smith Family, Smith-Family, smith family trust, cottonwood, blackdiamond); 'idempotent: same inputs give the same key -> True'; 'discriminating: a different account-set fingerprint gives a different key -> True'.\n\n(e) THE LEDGER IS CLOSED AND ITS SENTINEL COMMITTED. 'deploy_ledger.py check -> rc=1' with 'line(s) naming this slug: 0' -- rc=1 is the sweep's verdict about SIX OTHER entries that were already open before this cell started (advi-insure x2, d12-sms x2, freshguard, opsec-s15), NOT about irpt-bckend-s17, and the arm reads the slug lines rather than the exit code for exactly that reason. 'git log -1 --format=%H -- org/critical_paths/.open_deploys/irpt-bckend-s17.json' -> f44cab8208d24c7d83d83b7bd92f86d292577eba, and the sentinel's working-tree status is clean.",
+      "denominator": "5 of 5 arms evaluated, 5 of 5 holding, 0 failed assertions; 4 of 4 public-access axes true; 3 of 3 registry firms == 3 of 3 layout firms (from a registry of 5, two excluded as kind=test and kind=demo); 3 of 3 prefix families on 3 of 3 firms; 0 objects in the bucket; 4 of 4 tables SSE-KMS with OUR key arn, PITR, PAY_PER_REQUEST; 3 of 3 queues + 3 of 3 DLQs KMS with MaximumMessageSize 4096 and a RedrivePolicy naming each DLQ; 45 of 45 tests passed; 7 of 7 II.3 components in the key; 5 of 5 client/firm-name components refused; 27 of 27 AWS calls read-only; 4 of 4 red-first mutants fired",
+      "expect": "IBS17-STORAGE-APPLIED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S17-AC2",
+      "criterion_verbatim": "THE ROOT IS CONVERGED: a plan after the apply reads no changes. Run after the apply and after the ledger closes. A plan that still wants to change something means the applied plane and the record disagree; that is a FAIL, not a retry.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/core plan -no-color -input=false -lock=false",
+      "output_evidence": "rc=0. Deciding line, verbatim: 'No changes. Your infrastructure matches the configuration.' followed by 'Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.' Transcript committed as IB-s-17_S17-AC2_plan_output.txt. RUN IN THE ORDER THE CRITERION NAMES: after the apply (f44cab8208 closed the ledger at 22:5xZ) and after the close was committed. The refresh touched all 17 resources including local_file.layout (id=00f649e2cf6191157534...), so the declaration on disk is part of what converged and not merely a file beside it. RE-RUN A SECOND TIME after the four red-first mutants (one of which edited layout.json) and it read 'No changes' again -- which is how the mutant restore was verified by an instrument OTHER than the sha256 comparison that the mutant harness itself performs.",
+      "denominator": "17 of 17 resources refreshed and matching; 0 to add, 0 to change, 0 to destroy; the plan run 3 times across 3 states (pre-apply 17-to-add, post-apply No-changes, post-mutant-restore No-changes)",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S17-AC3",
+      "criterion_verbatim": "JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: whether the layout's prefix families are sufficient for every later cell's writes (name any a later cell will need that is not declared); whether firms/{firm_id}/ under ONE bucket with IAM conditions is the right shape here versus per-firm buckets, given both shapes are live in the estate; and what a reader of layout.json cannot learn from it. No verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "Evidence assembled for 3.0.0_SA_CVO from: the decomposition's cell rows for IB-s-5/6/7/9/10/11/13/14/16 read for their write targets; the two committed contract fixtures ExportReceipt.valid.json and AnalysisReport.valid.json compared against the applied layout; data/firm_registry.json's per-firm `bucket` field; row IRPT_BCKEND-S1 and decomposition finding 1; and the applied bucket's own attributes (no lifecycle configuration exists). NOT self-graded (spine v3 L9).",
+      "output_evidence": "RECORDED FOR L9, NO VERDICT.\n\n1. ARE THE DECLARED PREFIX FAMILIES SUFFICIENT FOR EVERY LATER CELL'S WRITES? NO -- AND THE GAP IS ALREADY VISIBLE IN THIS PROJECT'S OWN COMMITTED ARTIFACTS, WHICH IS WHY I CAN NAME IT RATHER THAN SUSPECT IT.\nDeclared: three families (intake, requests, generations) plus a firmless quarantine/, with the three generation artifacts -- vendor/report.pdf, sections/report.json, exports/{revision}/report.pdf -- nested UNDER firms/{firm_id}/generations/{id}/attempts/{a}/.\nTHE GAP: AN EXPORT THAT HAS NO GENERATION ATTEMPT HAS NO DECLARED HOME. B14 (IB-s-14) renders TWO export families. The ANALYSIS export descends from a YCharts generation attempt and is covered. The PERFORMANCE export is built from a PerformanceReport (B11) and a NarrativePacket (B13) and involves NO vendor generation at all -- there is no attempt id to nest it under, so the declared layout cannot express its location.\nThis is not a hypothesis. The two fixtures IB-s-18 committed at c4214773c9 and merged at 410f28f7db already disagree with each other: AnalysisReport.valid.json carries protected_pdf_ref.storage_key = 'firms/49financial/generations/REQ-0001/attempts/ATT-9/vendor/report.pdf', which matches the declared generations family EXACTLY; while ExportReceipt.valid.json carries storage_bucket 'opal-data-49f' and storage_key 'investor-reporting/exports/rev-3/report.pdf' -- A DIFFERENT BUCKET and a prefix this layout does not declare. A fixture is an illustration and not a destination decision, so neither is 'wrong'; what they show is that the destination question is UNSETTLED across this project's own artifacts and that IB-s-14 will have to settle it against a layout that currently answers only half of it.\nA SECOND, SMALLER GAP: NarrativePacket has no declared home. B13's decomposition row names no S3 destination, so it may well live in irpt-requests; but ExportBundle pins 'narrative packet ... sha256', which implies a retrievable immutable artifact, and if that artifact is an S3 object it has no family.\nA THIRD, DELIBERATE ONE: quarantine/ is FLAT. It carries no firm by design (a message reaches quarantine precisely when its firm could not be established), but it also carries no family, so a quarantined attachment and a quarantined message body share one prefix with no structure to tell them apart.\nWHAT I DID NOT DO, AND WHY: I did not add a fourth family speculatively. IB-s-5 binds its FirmDestinationPolicy and its per-firm IAM conditions to WHATEVER THIS FILE DECLARES, so inventing a prefix here would silently widen the policy surface of a cell that has not been cut yet. Naming it is the act that belongs to this cell.\n\n2. ONE BUCKET WITH IAM CONDITIONS, OR PER-FIRM BUCKETS? BOTH SHAPES ARE LIVE, AND THIS PROJECT NOW USES BOTH -- THAT IS THE FIRST THING THE CVO SHOULD KNOW.\ndata/firm_registry.json gives every firm its own bucket (opal-data-bd, opal-data-inf, opal-data-cot), so the per-firm shape is not hypothetical -- it is canonical for firm data. And row IRPT_BCKEND-S1 plus decomposition finding 1 already re-homed the directory and the holdings snapshot INTO the firm's own bucket. So after this cell: firm-derived DATA lives in per-firm buckets, and request EVIDENCE lives in one shared bucket with per-firm prefixes.\nTHE STRONGEST ARGUMENT FOR THE SHARED BUCKET IS STRUCTURAL, NOT CONVENIENCE: QUARANTINE HAS NO FIRM. A per-firm bucket layout has nowhere to put an item whose firm could not be established, and choosing a bucket for it WOULD BE CHOOSING A FIRM -- the exact cross-firm write the ingestion gate exists to refuse. A shared bucket with a firmless quarantine/ prefix expresses 'unknown firm' directly, and no arrangement of per-firm buckets can. Second: the per-firm buckets are shared with other pipelines, so putting vendor artifacts and client mail attachments there widens what those buckets' EXISTING readers can reach; this bucket has exactly one producer set and one consumer set.\nTHE ARGUMENT AGAINST, AT FULL STRENGTH: CLAUDE.md section 5 pairs per-firm buckets with a bucket-scoped Deny, which is coarser and far easier to audit than a prefix condition. Three buckets fail SEPARATELY; one prefix condition is a single edit away from being wrong for all three firms at once, and the blast radius of a mistake in a shared bucket is every firm. That is a real asymmetry and it is not answered by the quarantine argument.\nWHAT WOULD SETTLE IT, and it is not a matter of taste: whether IB-s-5's conditions can be shown to DENY cross-prefix access with a NEGATIVE test per firm (a principal scoped to 49financial refused on firms/inflection/). Until that test exists and passes, the shared bucket's separation is DESIRED and not EXERCISED. This cell created no policy at all, so today the separation is neither -- it is declared.\nAN ASYMMETRY I DID NOT RESOLVE: the shared bucket is here because the PRD's paths row named it; the firm-bucket decision for directory and holdings came from a surprise row OVERTURNING a different PRD row. Two destinations, decided by two different mechanisms, in one project.\n\n3. WHAT A READER OF layout.json CANNOT LEARN FROM IT. Eight things, and the first three matter most.\n(i) WHO MAY WRITE ANYWHERE IN IT. The file declares WHERE, never WHO. No IAM condition, no bucket policy and no key-policy grant exists yet, so a reader who takes the per-firm prefixes as a separation GUARANTEE would be reading a declaration as a control.\n(ii) RETENTION -- AND THERE IS NONE. This bucket has NO lifecycle rule, so vendor PDFs, client holdings attachments and every superseded version accumulate indefinitely. Nothing in the file hints at it, nobody declared it, and versioning (which this cell turned on for immutability) makes it strictly larger. I name it because it is a real standing property that no criterion in this order would have surfaced.\n(iii) WHETHER ENCRYPTION IS ENFORCED. The file NAMES alias/investor-reporting, but the SSE default lives on the bucket; from the declaration alone a reader cannot tell an enforced default from an aspiration.\n(iv) WHETHER ANY PREFIX HAS EVER BEEN WRITTEN. The declaration reads identically for a live prefix and one nothing has ever touched. Today, measured: 0 objects.\n(v) THAT THE BRACES ARE PLACEHOLDERS. _meta.not_declared says so in prose, but a MACHINE reading firm_prefixes gets a string containing '{id}' and nothing typed tells it that is a variable.\n(vi) ANY ORDERING OR LIFECYCLE between the families -- that an intake object precedes a request revision which precedes a generation attempt.\n(vii) WHAT HAPPENS WHEN A FIRM IS REMOVED FROM THE REGISTRY: the next apply silently drops its prefixes from the declaration while its OBJECTS remain. The file is not a census of what exists and does not say so.\n(viii) IT IS ONE LONG LINE. Terraform 1.9's jsonencode has no pretty-print, so a person needs `python -m json.tool` to read a file whose entire purpose is to be read. I chose terraform-managed generation over a hand-run generator because it makes registry drift a plan diff, and this is what that choice cost.",
+      "denominator": "3 declared prefix families + 1 quarantine prefix against 9 later cells' write needs, with 2 named gaps and 1 named flat-prefix limitation; 2 of 2 committed export-related fixtures disagreeing with each other on bucket AND prefix; 3 per-firm buckets live in the registry against 1 shared bucket applied here; 8 things a reader of layout.json cannot learn from it",
+      "expect": "JUDGMENT -- graded by 3.0.0_SA_CVO at L9; no worker verdict recorded",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: graded at L9 by 3.0.0_SA_CVO and explicitly NOT self-graded ('No verdict'). Two of the three heads are not settleable by any instrument in this worktree: whether the declared families SUFFICE depends on cells that do not exist yet (IB-s-13 and IB-s-14 are unwritten, so their write targets can be inferred from the decomposition and the contracts but not measured), and the one-bucket-versus-per-firm-buckets question is an architecture ruling whose substitute oracle -- a NEGATIVE per-firm access test against IB-s-5's conditions -- cannot run because those conditions do not exist. The record states both limits rather than converting them into claims."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing claim is that the resources are ACTUALLY THERE with the properties claimed, and that the key grammar refuses what it says it refuses. FIVE control layers. (1) THE BLAST-RADIUS CONTROL, before the act: the pre-apply plan read '17 to add, 0 to change, 0 to destroy', which discriminates creating new resources from modifying existing ones -- the sign-off question is what the act MAY touch, and 0-to-change is the answer read from the producer's own output rather than predicted from the input's shape. (2) THE ALIAS IS RESOLVED, NOT MATCHED: arm (a) compares the bucket's KMSMasterKeyID against the arn describe-key returns for alias/investor-reporting. A substring test on 'investor-reporting' would pass on a different key with a similar arn. (3) ARM (e) FIRED RED FOR REAL, UNSTAGED: the battery was run once BEFORE the ledger closed and returned rc=1 with the token WITHHELD, naming 'OPEN: irpt-bckend-s17 ... stranded=[L1,L2,L3,L4]'; it returned rc=0 with the token only after the close was committed. That is a red-then-green control that happened in the course of the work rather than being constructed afterwards. (4) FOUR RED-FIRST MUTANTS on the battery and on the layout, each restored byte-for-byte. (5) THE KEY-GRAMMAR SUITE CAUGHT A REAL DEFECT IN THE LIBRARY, which is the strongest evidence that it is not merely transcribing the implementation: the first parameter ladder ended in REVISION_RE and ADMITTED 'Smith-Family', because a dashed human name is a well-formed revision token. The grammar was tightened (the ladder now ends in an enum token) and the reason is a comment at the site. Had the test been written from the implementation it would have scored that blind spot as a pass.",
+      "expected": "Each mutant must produce rc=1, WITHHOLD the token, print at least one ERROR line tagged with its own arm, and be restored byte-for-byte with the battery green again afterwards.",
+      "observed": "4 of 4 FIRED-AS-EXPECTED. (a) the battery pointed at a bucket that is not there -> rc=1, 5 arm-a errors, 'head-bucket did not return 200: An error occurred (404)'. (c) a table name that does not exist -> rc=1, 'describe-table irpt-nonexistent failed: ResourceNotFoundException'. (c) a queue name that does not exist -> rc=1, 'get-queue-url irpt-not-a-queue failed: AWS.SimpleQueueService.NonExistentQueue'. (b) layout.json edited to drop a firm the registry lists -> rc=1, 'layout firms (49financial, cottonwood) != registry (49financial, cottonwood, inflection)'. All four restored (sha256 equal before and after, 4 of 4), battery green at rc=0 with the token before and after the exercise. THE LAYOUT RESTORE WAS ALSO VERIFIED BY A DIFFERENT INSTRUMENT: a terraform plan after the exercise read 'No changes' again, so the restore is confirmed by terraform's own refresh and not only by the harness's own hash.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Arms (a), (c) and part of (b) read the live AWS plane, so they are only as stable as the account. Arms (b) file half, (d) and (e) are pure local reads. The battery prints no timestamp and makes no write, so a re-run cannot change what it measures. Run to completion six times: once before the ledger closed, once as the graded run, and four times inside the mutant exercise.",
+      "observed": "Every green run produced identical counts: 4 of 4 public-access axes, 3 of 3 firms, 3 of 3 families per firm, 4 of 4 tables, 3 of 3 queues, 3 of 3 DLQs, 45 of 45 tests, 7 of 7 key components, 5 of 5 refusals, 27 AWS calls. The ONLY output that differed between the first run and the graded run is arm (e), which is the point of that arm: it read the entry OPEN before the close and absent after. The terraform plan was run three times (pre-apply: 17 to add; post-apply: No changes; post-mutant: No changes) and was stable in each state.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any IAM role, bucket policy, key-policy grant or per-firm condition.",
+      "reason": "IB-s-5 owns the FirmDestinationPolicy and the per-firm conditions on THIS SAME root, and comp-iam reads ZERO investor-reporting roles at the cut -- there is no principal to grant to. Granting one that does not exist would be a widening nobody asked for. The consequence is stated rather than hidden: the per-firm separation is DECLARED today, not enforced."
+    },
+    {
+      "item": "Any object written under firms/ or quarantine/.",
+      "reason": "The order's bound: this cell creates empty resources and a layout declaration; the first object under firms/ is written by a later cell through the gate. Arm (b) MEASURES the emptiness (list-objects-v2 -> 0 objects) rather than asserting it."
+    },
+    {
+      "item": "A fourth prefix family for a performance export, or a home for a NarrativePacket artifact.",
+      "reason": "S17-AC3 head 1 names both gaps with the evidence that shows them (the ExportReceipt fixture's bucket and prefix disagree with the AnalysisReport fixture's). IB-s-5 binds its policy to whatever this file declares, so inventing a prefix here would widen an uncut cell's policy surface. Named, not filled."
+    },
+    {
+      "item": "A lifecycle/retention rule on opal-data-ycharts.",
+      "reason": "Nothing in the PRD row, the decomposition or this order names one, and retention on client evidence is a policy decision rather than a build choice. Its ABSENCE is recorded in S17-AC3 head 3(ii) so it is a known standing property rather than an oversight discovered later."
+    },
+    {
+      "item": "Committing infra/aws/terraform/investor-reporting/core/.terraform.lock.hcl.",
+      "reason": "The root .gitignore:206 carries '**/.terraform.lock.hcl'. Force-adding it would contradict the rule in force and editing the rule is a neighbouring defect. Filed as IRPT_BCKEND-W1-S4 with the resolved provider versions recorded in the ledger entry so the vintage is not lost."
+    },
+    {
+      "item": "Any apply of the eight sibling roots.",
+      "reason": "'Apply this root and NO other.' The other eight remain the skeletons IB-s-18 wrote; only core/ was initialised, and only core/tfstate was written."
+    },
+    {
+      "item": "Any repair of IB-s-18's arm (d) now that core/ is initialised.",
+      "reason": "Filed as IRPT_BCKEND-W1-S5 with the measurement that matters: .terraform/ is gitignored and the backend is S3, so a re-grade from a fresh worktree still passes. Editing a merged, terminal cell's battery is not this order's."
+    },
+    {
+      "item": "A monitor, alarm, SNS topic or SES send on any of these resources.",
+      "reason": "The standing moratorium and the order's bound 2. A DLQ is a durable place a person reads, not a notification, and this cell built no notifier of any kind."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W1-S3: safe-apply's FIRST identity gate (the HALTGT checkpoint) refused the apply fail-closed with 'IDENTITY UNRESOLVED' until org/mcp/sessions/<CLAUDE_CODE_SESSION_ID>.serial named the acting serial -- OPAL_AGENT_SERIAL satisfies only the SECOND gate. The file is gitignored (.gitignore:423) and has no commit plane, so the lane grant cannot express it; I wrote the one line the gate itself prescribes and it then admitted the apply on its DESIGNED worker path, resolving the worker through a non-terminal task order and scanning its ISSUER's inbox (2.0.0_SA_COO~B). No override was used. Names the coupling that a worker's own complete flip WITHDRAWS its apply grant. OBSERVATION, INERT.",
+    "IRPT_BCKEND-W1-S4: '**/.terraform.lock.hcl' is ignored at .gitignore:206 while 35 sibling roots under infra/aws/terraform/ track one, so this root's provider pins (hashicorp/aws 5.100.0, hashicorp/local 2.9.1) live only in the worktree and in this cell's ledger entry. Not fixed: both coherent remedies are neighbouring defects. OBSERVATION, INERT.",
+    "IRPT_BCKEND-W1-S5: IB-s-18's S18-AC1 arm (d) asserts no root is initialised and recorded '0 of 9 roots initialised'; this cell legitimately initialised core/, so re-running that battery IN THIS WORKTREE now reads a FAIL that is not a defect. Measured mitigation rather than assumed: .terraform/ is gitignored and the backend is S3, and git status on the core dir shows only layout.json, so a re-grade from a FRESH worktree still passes. OBSERVATION, INERT."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "the S17-AC1 battery (this worker's)",
+      "invocation": "timeout 300 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_17.py",
+      "result": "rc=0 -- 'arms: 5 of 5 evaluated; arms holding: 5 of 5; assertions failed: 0' then 'IBS17-STORAGE-APPLIED'. 27 read-only AWS calls, 0 writes."
+    },
+    {
+      "tool": ".tools/safe-apply.sh (NEVER-9: the only permitted apply path)",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/core apply -auto-approve -no-color -input=false",
+      "result": "rc=0 -- 'Apply complete! Resources: 17 added, 0 changed, 0 destroyed.' Three gates ran and are quoted in the ledger: HALT-GATE resolved the worker and scanned issuer 2.0.0_SA_COO~B; comp-tagauthz PASSED (229 roles swept, 9 tag-conditioned statements, 0 candidate resources, no access-granting tag overwritten); tombstone-gate CLEAN on 17 creates vs 7 tombstones. FIRST ATTEMPT rc=3, refused on identity -- row W1-S3."
+    },
+    {
+      "tool": ".tools/terraform.exe v1.9.8 (the worktree-provisioned binary, never a PATH substitute)",
+      "invocation": "-chdir=infra/aws/terraform/investor-reporting/core init | plan (x3)",
+      "result": "init rc=0 (aws 5.100.0, local 2.9.1); pre-apply plan '17 to add, 0 to change, 0 to destroy'; post-apply and post-mutant plans both 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (NEVER-2)",
+      "invocation": "open --slug irpt-bckend-s17 (4 legs, window 4h); close-leg x4; close; check",
+      "result": "OPENED before the act and committed at e3e767cc28 with its sentinel; all four legs closed on their own proof; CLOSED and committed at f44cab8208 BEFORE the grading reads; `check` reads 0 lines naming this slug."
+    },
+    {
+      "tool": "pytest (the key grammar suite, by its own file path)",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/_keys/tests/test_keys.py -q --color=no",
+      "result": "rc=0, 45 passed, 0 failed. Run by path rather than by directory: a directory collection returns ZERO if any module raises SystemExit at import, which reads identically to a green suite."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (rule 14 -- py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh <keys.py> <test_keys.py>; then <battery_ib_s_17.py>",
+      "result": "rc=0 both times -- 'All checks passed!', 'OK: pre-commit gate clean for N of N file(s)'."
+    },
+    {
+      "tool": ".tools/aws shim (CLI v1.44), resolved through .tools/git_bash_resolver.py",
+      "invocation": "27 read-only calls inside the battery: head-bucket, get-bucket-{encryption,versioning}, get-public-access-block, list-objects-v2, describe-key, get-key-rotation-status, describe-table x4, describe-continuous-backups x4, get-queue-url x6, get-queue-attributes x6",
+      "result": "All read-only, 0 writes. TWO INSTRUMENT TRAPS NAMED AND HANDLED: a bare `bash` on this box is the WSL stub (it answers in UTF-16 'no installed distributions', which looks nothing like an AWS error), so the battery resolves Git Bash explicitly; and this CLI v1 refuses get-key-rotation-status on an ALIAS (InvalidArnException), so rotation was measured BY KEY ID -- KeyRotationEnabled true, 365 days."
+    },
+    {
+      "tool": "four red-first mutants (.scratch/mutants17.py)",
+      "invocation": "each mutant applied to the real deliverable, battery re-run, file restored from its original bytes, restore verified by sha256 AND by a terraform plan",
+      "result": "4 of 4 FIRED-AS-EXPECTED, 4 of 4 restored, battery green before and after, plan 'No changes' after the layout mutant was restored."
+    }
+  ]
+}
