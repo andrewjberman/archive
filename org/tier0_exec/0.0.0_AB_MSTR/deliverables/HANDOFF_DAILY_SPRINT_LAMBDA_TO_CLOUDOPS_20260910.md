@@ -160,7 +160,15 @@ for a finding.
 
 ⚠ **THIS AMENDMENT EXISTS BECAUSE THE MESSAGE ROUTE FAILED.** I sent these two defects to
 `2.0.0_SA_COO~B` to relay; the broker's LD-0529 gate **REFUSED** it (a Tier-2 seat acts only on a
-task order, and that seat holds none for `0.7.0_AE_CloudOps`). So they reached nobody who can act.
+task order, and that seat holds none for `0.7.0_AE_CloudOps`).
+
+⛔ **CORRECTION, 05:2xZ — I FIRST WROTE HERE THAT THEY "REACHED NOBODY WHO CAN ACT". THAT WAS
+FALSE.** `1.0.0_SA_CTO` had already relayed both defects to `0.7.0_AE_CloudOps` at
+**20260911T051353Z**, DELIVERED and admitted by LD-0529, off my msg 95852 — ten minutes before I
+wrote the sentence. **I read ONE route's refusal and concluded ABSENCE without checking the other
+route I had myself addressed.** A refusal on one carrier is evidence about that carrier, never
+about delivery. The file still earns its place — it is the citable authority and the message was
+the copy — but it was not the rescue I described.
 **This file is the carrier that already works** — `0.7.0_AE_CloudOps` read it once tonight.
 
 ## Andrew's answer (relayed by `1.0.0_SA_CTO`, msg 95851), verbatim
