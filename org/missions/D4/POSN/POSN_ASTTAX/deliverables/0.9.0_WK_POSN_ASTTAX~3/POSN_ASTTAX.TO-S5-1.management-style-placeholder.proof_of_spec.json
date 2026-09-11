@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_ASTTAX.TO-S5-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/prd/POSN_ASTTAX_PRD.md",
+    "group": "C",
+    "vintage_commit": "fd9f8ba9a4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round2.md",
+    "vintage_commit": "fd9f8ba9a4",
+    "to_ref": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-S5-1.management-style-placeholder.md"
+  },
+  "assignee": "0.9.0_WK_POSN_ASTTAX~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~3/ac3_set_management_style.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "THE LIVE DELIVERABLE RIDES HERE, on the artifact that produced it, per the estate's existing convention (NFRA_OPSEC202609.TO-OP3A-S-1 and NFRA_IAMROLES202609.TO-IAM-t-2 both name only repo paths and carry live state in deploy_evidence) and per POSN_ASTTAX-Z-W3-S3, which records that artifacts_produced has no member for a live DynamoDB write. WHAT WAS DEPLOYED: attribute management_style on 6 items of table etf-classifications (us-east-1, acct 313476888478, caller arn:aws:iam::313476888478:user/Andrew_Berman) -- DBC, GLD, GSG, IAU, SLV, USO, each moved from \"unknown\" to \"passive\" by a conditional update_item naming that one attribute. VERIFIED, not reported: the write ran under boto3 and the read-back (S5-AC4) ran under the .tools/aws CLI shim, a different instrument from the producer, returning 6 of 6 management_style=\"passive\" and 6 of 6 asset_class=\"hedge\". Re-read a second time: identical as a set. Confirmed a THIRD time by the mutant control's own pre-read (old=passive on all six, via boto3 get_item). Table-level coverage: the placeholder population re-scanned from 187 to 181 of 285, moving exactly the six and nothing else."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S5-AC1",
+      "criterion_verbatim": "S5-AC1 -- THE PLACEHOLDER POPULATION, ENUMERATED WITH ITS DENOMINATOR. Expect: the full ticker list and its count pasted verbatim, with ScannedCount named as the denominator and LastEvaluatedKey named (paginate and total client-side if present).",
+      "method": "live_read",
+      "invocation": "timeout 180 .tools/aws dynamodb scan --table-name etf-classifications --filter-expression \"management_style = :u\" --expression-attribute-values '{\":u\":{\"S\":\"unknown\"}}' --projection-expression \"ticker\" --output json",
+      "output_evidence": "rc=0. Response trailer verbatim: \"Count\": 187, \"ScannedCount\": 285, \"ConsumedCapacity\": null. LastEvaluatedKey ABSENT -- confirmed structurally, not by eyeballing the tail: the parsed top-level key set is exactly ['ConsumedCapacity', 'Count', 'Items', 'ScannedCount'], so there is no pagination remainder to total client-side (the CLI auto-paginates and omits the key when the sweep completes). Client-side re-count of the same captured response: len(Items)=187, unique tickers=187, matching the reported Count -- the denominator is an artifact, not the response's own summary. FULL TICKER LIST (187, in response order): AMP, FXFXX, ETR, VTES, ABBV, NVDA, ECHO, INCY, CNI, HESAY, CINF, BNY, FTNT, SLV, UNH, BA, KCDMY, PM, KOF, PCG, CMI, CNC, CME, TSLA, EBAY, CASH, VLO, IDXX, T, MER, SCHW, KKPNY, XOM, BN, TSM, DGRO, HSY, ASML, VZ, JD, DAL, VNQ, UL, UHS, ROST, FCX, JBL, INTC, REGN, IBN, JNJ, MO, SALXX, NEE, ADM, IMBBY, CIEN, BNPQY, UBER, BTI, SNDK, FIX, FER, NSRGY, ICT, MRK, F, USO, AMZN, LRCX, AZN, UPS, WDC, KEYS, FLEX, MNST, NVS, IBDRY, GLW, QCOM, ORANY, GM, NOW, TFLO, BAC, HD, PBR, XLE, LUV, MELI, HWM, UNVGY, XLF, UBS, 2602335D, MAR, STLD, QXO, PCY, BKRKY, RBGLD, DECK, GL, PLTR, VIV, SPOT, DELL, C, MPLX, ATO, IAU, INDA, OMAB, WDAY, RHHBY, NU, ISRG, FDX, BIPC, AVGO, EL, HSBC, STT, UAL, NTRS, GOOGL, SNY, GOOG, UNP, WMMVY, CI, ENB, NFLX, GLD, TKOMY, TTE, AMAT, NOK, KO, AMD, GSK, DBC, AMX, AAPL, ISNPY, TRV, AIG, BP, TJX, TXN, RTX, MA, CVX, JPM, XLK, CICHY, BKNG, MPWR, ANET, MU, ES, NEM, ABT, LLY, BEN, AEP, BZLFY, JBHT, DTE, DVY, GS, BBSEY, MSFT, GSG, LMT, CPA, V, MRVL, LITE, VGT, STX, WM, INTU, ENLAY, MCHI, AIZ, RIO. All six of this order's write set (DBC, GLD, GSG, IAU, SLV, USO) are members; VIXY is NOT a member, which is the independent corroboration that VIXY already carried a real value.",
+      "denominator": "187 of 285. ScannedCount=285 is the sweep denominator (every item the scan examined = the table's item count, since the filter is applied after the read); Count=187 is the filtered population carrying management_style=\"unknown\"; 6 of those 187 are this order's write set.",
+      "expect": "\"Count\": 187[\\s\\S]*\"ScannedCount\": 285[\\s\\S]*LastEvaluatedKey ABSENT[\\s\\S]*len\\(Items\\)=187",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC2",
+      "criterion_verbatim": "S5-AC2 -- THE WRITE SET, NAMED BY MEMBER RATHER THAN BY DESCRIPTION. Expect: all seven pasted verbatim, the six carrying \"unknown\" named, and the WRITE SET for this order stated explicitly as those six with a reason per ticker.",
+      "method": "live_read",
+      "invocation": "timeout 120 .tools/aws dynamodb batch-get-item --request-items '{\"etf-classifications\":{\"Keys\":[{\"ticker\":{\"S\":\"DBC\"}},{\"ticker\":{\"S\":\"GLD\"}},{\"ticker\":{\"S\":\"GSG\"}},{\"ticker\":{\"S\":\"IAU\"}},{\"ticker\":{\"S\":\"SLV\"}},{\"ticker\":{\"S\":\"USO\"}},{\"ticker\":{\"S\":\"VIXY\"}}]}}' --query 'Responses.\"etf-classifications\"[].{t:ticker.S,m:management_style.S,a:asset_class.S}' --output json",
+      "output_evidence": "rc=0, all seven returned (batch-get returns items unordered; pasted in response order): [{\"t\": \"VIXY\", \"m\": \"passive\", \"a\": \"hedge\"}, {\"t\": \"GSG\", \"m\": \"unknown\", \"a\": \"hedge\"}, {\"t\": \"SLV\", \"m\": \"unknown\", \"a\": \"hedge\"}, {\"t\": \"IAU\", \"m\": \"unknown\", \"a\": \"hedge\"}, {\"t\": \"DBC\", \"m\": \"unknown\", \"a\": \"hedge\"}, {\"t\": \"GLD\", \"m\": \"unknown\", \"a\": \"hedge\"}, {\"t\": \"USO\", \"m\": \"unknown\", \"a\": \"hedge\"}]. UnprocessedKeys was empty (7 of 7 keys resolved). CARRYING THE PLACEHOLDER: 6 of 7 -- DBC, GLD, GSG, IAU, SLV, USO. NOT CARRYING IT: VIXY (1 of 7), which already reads \"passive\" and is therefore NOT written by this order. WRITE SET = {DBC, GLD, GSG, IAU, SLV, USO}, 6 members, stated by member. WHY EACH IS IN SCOPE -- membership test applied per ticker, not by description: (1) it reads the truthy placeholder \"unknown\" TODAY, measured in this very response, so the default-to-passive guard cannot fire on it; AND (2) it is one of the six rows cell AT2-s-2 will retag to Commodities, i.e. a row this project is about to move and the DT brief names unsafe to hold. DBC in-scope: unknown + AT2-s-2 target. GLD in-scope: unknown + AT2-s-2 target. GSG in-scope: unknown + AT2-s-2 target. IAU in-scope: unknown + AT2-s-2 target. SLV in-scope: unknown + AT2-s-2 target. USO in-scope: unknown + AT2-s-2 target. VIXY OUT of scope: fails test (1) -- it is a hedge row and an AT2-s-2 neighbour, but it carries a real value already and rewriting it would be a change with no defect behind it. The other 181 placeholder rows from S5-AC1 are OUT of scope: they pass test (1) and fail test (2) -- nobody is retagging them in this round, and the order states a wider sweep is not authorised (181 factual determinations is a different project).",
+      "denominator": "7 of 7 keys requested resolved, 0 UnprocessedKeys; 6 of 7 carry the placeholder; write set = 6 of the 187-row placeholder population, and 6 of the 7 served hedge rows.",
+      "expect": "\"t\": \"VIXY\",\\s*\\n?\\s*\"m\": \"passive\"[\\s\\S]*WRITE SET = \\{DBC, GLD, GSG, IAU, SLV, USO\\}",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC3",
+      "criterion_verbatim": "S5-AC3 -- THE WRITE, PER TICKER, EACH WITH ITS BASIS. Expect: one line per ticker written: the ticker, the old value, the new value, and the one-sentence factual reason. No ticker written without a reason.",
+      "method": "command",
+      "invocation": "timeout 180 python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~3/ac3_set_management_style.py",
+      "output_evidence": "rc=0. Header: TABLE=etf-classifications  WRITE-SET=6 ticker(s): DBC, GLD, GSG, IAU, SLV, USO / FIELD WRITTEN: management_style ONLY.  FIELD NEVER WRITTEN: asset_class. Then one line per ticker plus its basis, verbatim: [1] OK: DBC old=unknown new=passive (write returned 'passive') asset_class untouched=hedge -- REASON: Invesco DB Commodity Index Tracking Fund tracks the rules-based DBIQ Optimum Yield Diversified Commodity Index Excess Return and selects nothing at a manager's discretion, so it is index tracking. [2] OK: GLD old=unknown new=passive (write returned 'passive') asset_class untouched=hedge -- REASON: SPDR Gold Shares is a grantor trust whose only asset is allocated physical gold bullion, sold solely to meet trust expenses, with no portfolio manager and no security selection. [3] OK: GSG old=unknown new=passive (write returned 'passive') asset_class untouched=hedge -- REASON: iShares S&P GSCI Commodity-Indexed Trust holds index futures for the sole purpose of tracking the S&P GSCI Total Return Index, which is index tracking, not active management. [4] OK: IAU old=unknown new=passive (write returned 'passive') asset_class untouched=hedge -- REASON: iShares Gold Trust is a grantor trust holding physical gold bullion with no manager discretion over what it holds. [5] OK: SLV old=unknown new=passive (write returned 'passive') asset_class untouched=hedge -- REASON: iShares Silver Trust is a grantor trust holding physical silver bullion with no manager discretion over what it holds. [6] OK: USO old=unknown new=passive (write returned 'passive') asset_class untouched=hedge -- REASON: United States Oil Fund LP tracks a published Benchmark Oil Futures Contract rather than taking discretionary positions, so under this field's definition it is beta tracking -- the sponsor's contingency latitude over contract months is a roll mechanic, not an alpha mandate, which is what separates it from an actively managed commodity fund such as PDBC. Trailer: WROTE 6 of 6; asset_class appears in NO UpdateExpression in this script. NOT A BULK SET, and here is the discrimination rather than the assertion: the target value was read from the CONSUMER's own definition at infra/aws/lambda/v2_portal/_shared/etf_classification.py:298 @fd9f8ba9a4 -- \"# 'active' = Actively managed, 'passive' = Index/Beta tracking\" -- and the same estate map marks PDBC (Invesco Optimum Yield Diversified Commodity Strategy No K-1 ETF) 'active' at :337 while marking VIXY 'passive' at :328. A commodity fund is NOT automatically passive in this vocabulary; DBC (tracks an index) versus PDBC (discretionary strategy) is the pair that proves the determination discriminates. USO is the member that could have gone the other way and its reason states the discriminator it was decided on. Six determinations converging on one value is a RESULT, not a rule applied. Every write was conditional (ConditionExpression management_style = \"unknown\"), so no row was overwritten on an unmeasured value, and the UpdateExpression names exactly one attribute.",
+      "denominator": "6 of 6 written, 0 skipped, 0 errors; 6 of 6 carry a stated factual reason (the script asserts this before it writes: `assert all(reason.strip() ...)`), 0 written without one.",
+      "expect": "WROTE 6 of 6[\\s\\S]*asset_class appears in NO UpdateExpression",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC4",
+      "criterion_verbatim": "S5-AC4 -- READ-BACK. A write's return value is not evidence; the served row is. This also proves the order stayed out of AT2-s-2's field. Expect: all six read back with their NEW management_style, pasted verbatim, and asset_class confirmed STILL `hedge`.",
+      "method": "live_read",
+      "invocation": "timeout 120 .tools/aws dynamodb batch-get-item --request-items '{\"etf-classifications\":{\"Keys\":[{\"ticker\":{\"S\":\"DBC\"}},{\"ticker\":{\"S\":\"GLD\"}},{\"ticker\":{\"S\":\"GSG\"}},{\"ticker\":{\"S\":\"IAU\"}},{\"ticker\":{\"S\":\"SLV\"}},{\"ticker\":{\"S\":\"USO\"}}]}}' --query 'Responses.\"etf-classifications\"[].{t:ticker.S,m:management_style.S,a:asset_class.S}' --output json",
+      "output_evidence": "rc=0, verbatim (response order; batch-get is unordered): [{\"t\": \"USO\", \"m\": \"passive\", \"a\": \"hedge\"}, {\"t\": \"GLD\", \"m\": \"passive\", \"a\": \"hedge\"}, {\"t\": \"DBC\", \"m\": \"passive\", \"a\": \"hedge\"}, {\"t\": \"IAU\", \"m\": \"passive\", \"a\": \"hedge\"}, {\"t\": \"GSG\", \"m\": \"passive\", \"a\": \"hedge\"}, {\"t\": \"SLV\", \"m\": \"passive\", \"a\": \"hedge\"}]. 6 of 6 read back m=passive; 6 of 6 a=hedge. THE INSTRUMENT DIFFERS FROM THE WRITE'S: the write ran under boto3 update_item in-process, this read under the .tools/aws CLI shim -- corroboration, not repetition of the producer's self-report. asset_class is STILL \"hedge\" on all six, so this order did not touch AT2-s-2's field; the retag remains entirely available to that cell. Supplementary (not this criterion's invocation): the post-write placeholder population re-scanned to Count=181, ScannedCount=285 -- 187 minus exactly the six written, which is the coverage check that this order moved its write set and nothing else in the table.",
+      "denominator": "6 of 6 rows read back; 6 of 6 management_style=passive; 6 of 6 asset_class=hedge (0 of 6 moved off hedge); and 181 of 285 placeholder rows remain, = 187 - 6.",
+      "expect": "\"t\": \"USO\",\\s*\\n?\\s*\"m\": \"passive\",\\s*\\n?\\s*\"a\": \"hedge\"[\\s\\S]*6 of 6 read back m=passive; 6 of 6 a=hedge",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC5",
+      "criterion_verbatim": "S5-AC5 -- THE PREDECESSOR IS ACTUALLY DONE, CHECKED RATHER THAN ASSUMED. Expect: the status line of the AT2-s-6 order pasted verbatim, showing `complete` -- or, if it is not, this order STOPS and files a row instead of proceeding.",
+      "method": "command",
+      "invocation": "timeout 120 grep -n \"<status>\" ../task-orders/POSN_ASTTAX.TO-S6-1.harden-the-generator.md",
+      "output_evidence": "rc=0, run from org/missions/D4/POSN/POSN_ASTTAX/deliverables/ so that the criterion's relative path `../task-orders/` resolves as written. Output verbatim, both lines: \"8:<status>complete</status>\" and \"68:  `<status>` to `complete`.\". The DECIDING LINE is line 8, the order's own <status> tag in its header block: complete. Line 68 is prose inside that order's CLOSING OUT section and is not a status tag. NO INSTRUMENT SUBSTITUTION WAS NEEDED: the comp-tool rail did NOT deny this single-file, single-segment grep, so the criterion ran with its verbatim invocation and the `# rail-checked:` fallback the worker face authorised was not used. The predecessor is terminal, so this order was cleared to proceed rather than stopping and filing.",
+      "denominator": "2 of 2 matching lines in 1 file pasted; 1 of 2 is the <status> tag, and it reads complete. Independently consistent with the issuer's statement that AT2-s-6 landed at 7f247caae0 and drained at c2245247a6, but the verdict here rests on the file read, not on that claim.",
+      "expect": "\"8:<status>complete</status>\"[\\s\\S]*DECIDING LINE is line 8",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC6",
+      "criterion_verbatim": "S5-AC6 -- JUDGMENT, GRADED BY `3.0.0_SA_CVO~Z` AT L9. Whether the six rows are now safe to hold, and whether leaving the wider placeholder population untouched is the right scope or a gap. Record the readings and offer NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "no invocation -- judgment criterion; readings recorded below for 3.0.0_SA_CVO~Z to grade at L9",
+      "output_evidence": "READINGS, NO VERDICT. (R1) THE SIX ROWS, POST-WRITE: management_style=passive, asset_class=hedge, 6 of 6, read back through an instrument other than the write's (S5-AC4). The truthy placeholder is gone from every row this order's scope named. (R2) THE GUARD THEY DEPEND ON IS HARDENED IN SOURCE: infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py@fd9f8ba9a4 now carries, inside registry_field(), `if isinstance(value, str) and value.strip().lower() == 'unknown': value = None` immediately before `return value if value else default`, and classify_management_style() calls registry_field(ticker, 'management_style', 'passive'). So in SOURCE, the placeholder can no longer defeat the default. (R3) THAT HARDENING'S STATE IS COMMITTED, NOT MEASURED-AS-DEPLOYED, and this worker did not measure the running bytes: TO-S6-1's own BOUNDS read 'DO NOT DEPLOY. Commit the source change; deployment is not in this order's surface.' Whether the deployed lambda carries R2 is therefore UNREAD by this order -- stated, not assumed either way. This matters to the judgment because R1 (a live registry write) takes effect on the running function immediately, whereas R2 does not. (R4) THE RESIDUAL POPULATION: 181 of 285 rows still carry management_style=\"unknown\" after this write (187 before, minus exactly the six). None of the 181 is a row AT2-s-2 will move. The order states the wider sweep is not authorised and gives the reason (181 factual determinations is a different project); the untouched 181 are recorded here rather than argued about. (R5) WHAT WOULD MAKE THE 181 A GAP RATHER THAN A SCOPE, stated as the discriminating question rather than answered: the 181 are harmless only while EITHER nothing holds them OR the hardened guard is actually deployed. This worker measured neither the holdings nor the deployed bytes -- both are outside this order's surface -- so the residual risk is UNQUANTIFIED here, not zero and not dismissed. The issuer's round-2 framing (TO-S6-1) asserts 0 of the ~30 currently-held positions carry the placeholder; this worker did NOT re-derive that and does not pass it on as measured. (R6) DURABILITY IS THE READING THIS ORDER WOULD MOST WANT THE CVO TO SEE, filed as POSN_ASTTAX-Z-W3-S1: the six corrected values survive only until seed-etf-classifications.py runs, because it does an unconditional full-item put built from a code map that does not carry these six tickers. 'Safe to hold' is therefore a statement with a shelf life whose length nobody has measured, and the remedy is outside this order's paths. (R7) PROVENANCE, filed as POSN_ASTTAX-Z-W3-S2: the six rows now carry a correct value under a stale updated_by/last_updated, because the order restricts the write to one attribute.",
+      "denominator": "7 readings recorded (R1-R7); 0 verdicts offered. 2 of the 7 (R6, R7) are additionally carried as surprise rows so they survive this instance.",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion -- graded by 3.0.0_SA_CVO~Z at L9 (spine v3). The worker records readings and offers no verdict; self-grading a judgment criterion is refused by proof-of-spec-check.py's judgment limb and by the worker's own bar."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The write path's ConditionExpression is the assertion under test: every update is conditional on the row still reading management_style=\"unknown\". MUTANT = run the exact same script a second time against the now-corrected world. If the guard is real, 6 of 6 must REFUSE; if the script were a blind bulk set, it would happily rewrite all six and report success again, and the S5-AC3 evidence would prove nothing about whether the values were measured before being replaced.",
+      "expected": "Second run writes 0 of 6, prints SKIP with the refusal reason for every ticker, and exits non-zero.",
+      "observed": "Fired exactly as expected, rc=1: 'SKIP: DBC old=passive new=<not written>' and the same for GLD, GSG, IAU, SLV, USO, each with 'REFUSED: row no longer reads 'unknown'; this order does not overwrite a value it did not measure.', trailer 'WROTE 0 of 6'. The run also served as a THIRD independent confirmation of the post-state (its pre-read reports old=passive and asset_class=hedge on all six, via boto3 get_item rather than the CLI shim).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "S5-AC4's read-back invocation run twice against an unchanged table, compared on the sorted (ticker, management_style, asset_class) tuples rather than on response order, because DynamoDB batch-get-item guarantees no item ordering -- comparing raw bytes would have manufactured a false UNSTABLE.",
+      "observed": "Run 1 returned items in order [USO, GLD, DBC, IAU, GSG, SLV]; run 2 returned [USO, GSG, IAU, DBC, GLD, SLV]. Sorted tuple sets are IDENTICAL: [(DBC,passive,hedge), (GLD,passive,hedge), (GSG,passive,hedge), (IAU,passive,hedge), (SLV,passive,hedge), (USO,passive,hedge)] both times. The ordering difference is recorded rather than hidden: it is the instrument's property, not the data's.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The other 181 rows carrying management_style=\"unknown\" (187 measured at S5-AC1, minus the 6 written).",
+      "reason": "Excluded BY THE ORDER, not by the worker's choice: 'this order's write set is the rows AT2-s-2 will touch -- the six commodity tickers -- NOT all 187. A wider sweep is NOT authorised.' Each of the 181 fails the second membership test (no cell in this round retags it). Recorded as reading R4/R5 for the CVO's S5-AC6 judgment rather than silently dropped."
+    },
+    {
+      "item": "asset_class on the six rows (the retag to Commodities).",
+      "reason": "Cell AT2-s-2's field, forbidden by this order's BOUNDS. Verified NOT moved rather than merely not intended: S5-AC4 reads asset_class=hedge on 6 of 6 after the write, and the update script names exactly one attribute in its UpdateExpression."
+    },
+    {
+      "item": "VIXY.",
+      "reason": "The seventh served hedge ticker, measured at S5-AC2 as already carrying management_style=\"passive\". It fails the placeholder test, so there is no defect to correct; rewriting it would be a change with nothing behind it."
+    },
+    {
+      "item": "Adding the six tickers to ETF_MANAGEMENT_STYLE in infra/aws/lambda/v2_portal/_shared/etf_classification.py (and its two sibling copies), which is where the placeholder is minted.",
+      "reason": "Outside this order's <paths>; a worker's write surface is exactly the paths its order names. Filed as POSN_ASTTAX-Z-W3-S1 (ARMED, disarm_owner 2.0.0_SA_COO~Z) instead of fixed, because it is the difference between this order's write being durable and being temporary."
+    },
+    {
+      "item": "Restamping updated_by / last_updated on the six rows.",
+      "reason": "The order's bound restricts this cell's write to management_style ONLY, and the bound reads on the whole item. Filed as POSN_ASTTAX-Z-W3-S2 (INERT) rather than self-remedied, because restamping would be the worker widening its own order."
+    },
+    {
+      "item": "Measuring whether the AT2-s-6 hardening is DEPLOYED, and whether any holding currently references a placeholder row.",
+      "reason": "Neither is in this order's surface and neither is re-measurable from this sparse cone; both bear on the S5-AC6 judgment, so they are recorded as explicitly UNREAD (readings R3, R5) rather than assumed in either direction. Inheriting the issuer's '0 of ~30 held rows carry the placeholder' as measured would have been exactly the second-hand evidence the evidence law forbids."
+    },
+    {
+      "item": "Any allocation act -- adding a holding, touching Yang's models.",
+      "reason": "Explicitly forbidden by the order's BOUNDS and by the DT brief's conclusion 2: whether GLD is ever held is an allocation decision, not this project's. Nothing in this order's write touches a model or a position."
+    }
+  ],
+  "surprises": [
+    "POSN_ASTTAX-Z-W3-S1: THE SEEDER SILENTLY REVERTS THIS CELL'S WRITE AND AT2-s-2'S RETAG -- seed-etf-classifications.py:60 does an unconditional full-item batch put built from ETF_MANAGEMENT_STYLE.get(ticker, \"unknown\"), and DBC/GLD/GSG/IAU/SLV/USO are absent from that map in all 3 copies of the canonical module (99/99/97 keys, AST-parsed), so the next seed run restores management_style=\"unknown\" on exactly the six rows corrected here and asset_class=\"hedge\" on exactly the six AT2-s-2 will move. ARMED, disarm_owner 2.0.0_SA_COO~Z; not fixed here because the code map is outside this order's <paths>.",
+    "POSN_ASTTAX-Z-W3-S2: THE SIX ROWS CARRY A CORRECT VALUE UNDER STALE ATTRIBUTION -- the order's bound restricts the write to management_style only, so updated_by still reads '1.0.0_SA_CTO~X placeholder-name-sweep' and last_updated still reads 2026-08-18T18:05:00Z on rows whose management_style this worker changed on 2026-09-11. INERT (no consumer reads updated_by for logic); filed rather than self-remedied because restamping would widen the order.",
+    "POSN_ASTTAX-Z-W3-S3: A LIVE DATASTORE ROW CANNOT BE NAMED AS AN ARTIFACT -- PROOF_OF_SPEC's artifacts_produced.kind enum has s3_object but no DynamoDB/live-write member, and proof-of-spec-check.py's artifact-resolution limb exempts only s3_object from git resolution, so this order's actual deliverable (six DynamoDB rows) returned INVALID (rc=1) until it was carried as deploy_evidence on the script that wrote it. INERT, did not block; filed because cell AT2-s-2 writes the same six rows next and has the same artifact shape.",
+    "POSN_ASTTAX-Z-W3-S4: THE WAVE-2 WORKER CONE CANNOT COMMIT A SURPRISE ROW -- the first safe-commit of this order was refused fail-closed by .tools/surprise-row-gate.py with FileNotFoundError on org/surprise_channel/schemas/investigation_item.schema.json, because the standing-corpus pass reads its schema from the worktree filesystem and the cone carries 7 directories, not that one. BLOCKING / ARMED (disarm_owner 2.0.0_SA_COO~Z): remedied in-lane by `git sparse-checkout add org/surprise_channel` (gate then self-tests 0 of 103 arms failed, rc=0) and NOT by the audited override, which would have landed the rows with the check never run. Every sibling worktree cut from the same recipe hits this at its first row."
+  ],
+  "session_log": "0.9.0_WK_POSN_ASTTAX~3, worktree /c/tmp/wk-posn-s5 on branch wk-posn_asttax-2-5 cut from SITEZ fd9f8ba9a4 (cone-mode sparse). ORDER OF ACTS, deliberately dependency-first: (1) TREE-OK and branch printed; (2) S5-AC5 FIRST -- the predecessor's status read before any write, because the order makes AT2-s-6 a hard dependency and a worker that writes before checking cannot un-write; (3) S5-AC1 population scan, re-captured to a file and re-counted client-side so the denominator is an artifact rather than the response's own summary; (4) the field's DEFINED domain read from the consumer (etf_classification.py:298) before any value was chosen -- the determination needed the vocabulary, not just the fund facts; (5) S5-AC2 the seven, write set fixed at six by a two-part membership test; (6) S5-AC3 the conditional per-ticker write; (7) S5-AC4 read-back through a different instrument, plus a supplementary re-scan showing 187 -> 181; (8) mutant + determinism controls; (9) two surprise rows; (10) instance, checker, status flip, one commit. NOTE ON THE CONE: org/surprise_channel/ is not in this worktree's sparse cone, so the investigation schema was read from the git index (git show HEAD:org/surprise_channel/schemas/investigation_item.schema.json) -- the same place .tools/surprise-row-gate.py's _schema() reads it from BY DESIGN ('read from the staged index, never the worktree'). Not filed as a surprise: the worker face declared the cone's contents, so nothing diverged from spec; only the access route differed, and it matched the gate's own. CLOSING-OUT NOTE, recorded because the first checker run FAILED and the record should show it: proof-of-spec-check.py returned INVALID (rc=1) on the first attempt with 3 artifact-resolution violations. Two were an authoring error (prose where a commit-ish or PENDING-THIS-COMMIT belongs); the third was structural and is filed as POSN_ASTTAX-Z-W3-S3. Corrected by adopting the estate's convention: artifacts_produced names the repo artifact, deploy_evidence carries the verified live state. The tracked-and-modified files this commit also carries (the order file's status flip and the investigation channel) are deliberately NOT listed as artifact rows -- a tracked file declared PENDING-THIS-COMMIT trips the checker's CCX refusal in a pre-commit dry run, and the channel rows are already carried and resolved through the `surprises` limb. COMMIT PATH, recorded because it refused once: the first safe-commit run was BLOCKED by the surprise-row gate on a missing schema FILE (not on the rows -- the same rows validate with 0 errors against that schema read from the index). Remedied by widening this worktree's sparse cone to carry org/surprise_channel, which materialises tracked blobs and writes no repo content; the gate then self-tests rc=0 over 103 arms and grades the rows for real. Filed as POSN_ASTTAX-Z-W3-S4. The gate's audited `# surprise-row-override:` escape was deliberately NOT used.",
+  "compiler_tools": [
+    {
+      "tool": "native Grep (rail-exempt; comp-find is denied a directory sweep this worker did not need)",
+      "invocation": "Grep pattern 'management_style' over /c/tmp/wk-posn-s5 (files_with_matches), then content reads of _shared/etf_classification.py and _shared/etf_classifications_dynamodb.py",
+      "result": "24 files carry the token. Located the field's DEFINED domain at etf_classification.py:298 ('active' = Actively managed, 'passive' = Index/Beta tracking) and the DynamoDB accessor at etf_classifications_dynamodb.py:106-109, which returns the stored \"unknown\" rather than defaulting -- the placeholder's landing site."
+    },
+    {
+      "tool": "python ast (second instrument, chosen because a grep over a dict literal cannot distinguish a live entry from a commented or shadowed one)",
+      "invocation": "ast.literal_eval of ETF_MANAGEMENT_STYLE in _shared/etf_classification.py and its two sibling copies",
+      "result": "99 / 99 / 97 keys; value set {'active','passive'}; DBC, GLD, GSG, IAU, SLV, USO absent from all three; VIXY='passive'; PDBC='active'. This is the grounding for surprise row W3-S1 and the discrimination evidence for S5-AC3."
+    },
+    {
+      "tool": "jsonschema Draft7Validator",
+      "invocation": "validate POSN_ASTTAX-Z-W3-S1 and -S2 against org/surprise_channel/schemas/investigation_item.schema.json (read from the git index at HEAD)",
+      "result": "0 errors on each; file re-parses whole at 7 fenced json blocks / 11 rows, with the 9 pre-existing rows unmodified."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> S5-AC1,S5-AC2,S5-AC3,S5-AC4,S5-AC5,S5-AC6 (run from inside the worktree)",
+      "result": "recorded in the worker's final report; the exit code is the only verdict, and the status flip to complete was made only after rc=0."
+    }
+  ]
+}
