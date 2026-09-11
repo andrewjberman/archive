@@ -1,0 +1,152 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-12",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "d1479bc5f0"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~1",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "430c5fcb4a",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-12.dev-green-typecheck.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-11/census.test.ts",
+      "kind": "test",
+      "commit_or_etag": "2750d80b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PORTAL repo, branch wk-irpt_fntend-2-1-fe-s-12, commit 2750d80b (LOCAL). Three repairs, all inside this file: (1) test.each([...])('row %s', (_name, row) => ...) replaced by a plain `for (const row of census.components)` loop registering one test(`row ${row.component}`, ...) per row -- same names, same assertions, and `row` now carries its declared ComponentRow type, which removes the two TS7006 implicit-any parameters without an annotation; (2) the same conversion for the PRD accounting loop, names `PRD reuse row #<n>`, removing two more TS7006s; (3) expect(row.path).not.toMatch(/\\(UNRESOLVED/) replaced by expect(UNRESOLVED_MARKER.test(row.path ?? '')).toBe(false), since `toMatch` is not on the shim's Matchers interface. UNRESOLVED_MARKER is module-level and carries NO `g` flag deliberately -- a global regex retains lastIndex between .test() calls and would have made the new per-row loop order-dependent. Six of the eight base TS errors are in this file and all six are gone.",
+      "artifact_covered_by": ["F12-AC1", "F12-AC2", "F12-AC3", "F12-AC4", "F12-AC5"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-11/colour-law.test.ts",
+      "kind": "test",
+      "commit_or_etag": "2750d80b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PORTAL repo, branch wk-irpt_fntend-2-1-fe-s-12, commit 2750d80b (LOCAL). One repair: walkTsx's `readdirSync(dir)` + `statSync(abs).isDirectory()` replaced by `readdirSync(dir, { withFileTypes: true })` and the entry's own isDirectory(). `statSync` is not declared by the folder's type-only node:fs shim (fe-s-1/node-builtins.d.ts), while the withFileTypes:true overload of readdirSync IS, and its entry type already carries isFile()/isDirectory(). Same partition of entries into directories and .tsx files -- SCANNED holds at 38 files, identical to the pre-repair baseline. The eighth and last base TS error (TS2305) is gone.",
+      "artifact_covered_by": ["F12-AC1", "F12-AC2", "F12-AC3", "F12-AC4", "F12-AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~1/dev-green-typecheck.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Session log for this order: the eight base errors reproduced verbatim in this worktree before any edit, the merged ambient-shim surface that explains each one, the four repairs, the mutant run and its restore, and the two-run determinism record for all five criteria.",
+      "artifact_covered_by": ["F12-AC1", "F12-AC2", "F12-AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F12-AC1",
+      "criterion_verbatim": "F12-AC1 -- the whole portal typechecks (record the run time).",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-2-1-fe-s-12/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0\nelapsed=26s\n\n(BASE, measured in this same worktree BEFORE any edit, as the negative control -- all eight errors reproduced verbatim, matching the issuer's list exactly:\n src/pages/InvestorReporting/__tests__/fe-s-11/census.test.ts(85,8): error TS2339: Property 'each' does not exist on type 'typeof test'.\n census.test.ts(87,6) TS7006 '_name'; census.test.ts(87,13) TS7006 'row'; census.test.ts(95,30) TS2339 'toMatch' on 'Matchers'; census.test.ts(140,8) TS2339 'each'; census.test.ts(140,97) TS7006 '_n'; census.test.ts(140,101) TS7006 'r'; colour-law.test.ts(39,37) TS2305 'node:fs' has no exported member 'statSync'.\n rc=2)",
+      "denominator": "8 of 8 base errors cleared; whole-program tsc -b --noEmit over the portal's entire src/ (not a scoped or per-file check). 2 of 2 post-repair runs rc=0 with zero output.",
+      "expect": "rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F12-AC2",
+      "criterion_verbatim": "F12-AC2 -- the census and colour-law tests still pass (record `COMPONENTS:` and `SCANNED:`).",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-2-1-fe-s-12/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-11",
+      "output_evidence": "census.test.ts:\nCENSUS DENOMINATOR: COMPONENTS: 65 (REUSED 27, NEW 38)\ncolour-law.test.ts:\nSCANNED: 38 files\n\n 86 pass\n 0 fail\n 359 expect() calls\nRan 86 tests across 2 files. [130.00ms]\nrc=0\n\n(BASE, same worktree before any edit: COMPONENTS: 65 (REUSED 27, NEW 38); SCANNED: 38 files; 86 pass, 0 fail, 359 expect() calls, 86 tests across 2 files, rc=0 -- IDENTICAL on test count, assertion count and BOTH printed lines.)",
+      "denominator": "86 of 86 tests across 2 of 2 files; 359 expect() calls, the same count as the base -- the test.each-to-for-loop conversion neither dropped nor added an assertion.",
+      "expect": "0 fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F12-AC3",
+      "criterion_verbatim": "F12-AC3 -- the whole Investor Reporting set is green (record the pass count; 322 at the base).",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-2-1-fe-s-12/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": " 322 pass\n 1 skip\n 0 fail\n 1496 expect() calls\nRan 323 tests across 48 files. [1.83s]\nrc=0",
+      "denominator": "322 pass of 323 tests (1 skip, pre-existing) across 48 of 48 files -- exactly the issuer's base figure (322 pass, 1 skip, 0 fail, 48 files), unmoved by the repair.",
+      "expect": "0 fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F12-AC4",
+      "criterion_verbatim": "F12-AC4 -- no file outside the two test files changed.",
+      "method": "diff",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-2-1-fe-s-12/portal && echo \"OUTSIDE-GRANT: $(git diff --name-only edab15b5 -- src | grep -vc '__tests__/fe-s-11/')\"",
+      "output_evidence": "OUTSIDE-GRANT: 0\n\n(Corroborated by a WIDER read with a different scope -- `git diff --name-only edab15b5` over the WHOLE portal repo, not just src/, which the criterion's own pathspec would not have caught:\n src/pages/InvestorReporting/__tests__/fe-s-11/census.test.ts\n src/pages/InvestorReporting/__tests__/fe-s-11/colour-law.test.ts\nand `git status --short` showing no untracked artifact left by tsc or bun.)",
+      "denominator": "2 of 2 changed files, both inside the granted directory; 0 outside. The corroborating read's denominator is the whole portal repo, not src/.",
+      "expect": "OUTSIDE-GRANT: 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F12-AC5",
+      "criterion_verbatim": "F12-AC5 -- the ambient shims and tsconfig are untouched.",
+      "method": "diff",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-2-1-fe-s-12/portal && echo \"SHIMS-EDITED: $(git diff --name-only edab15b5 -- src/pages/InvestorReporting/__tests__/fe-s-1 src/pages/InvestorReporting/__tests__/fe-s-3/ambient-shims.d.ts src/pages/InvestorReporting/__tests__/fe-s-7/ambient-shims.d.ts tsconfig.json | wc -l)",
+      "output_evidence": "SHIMS-EDITED: 0",
+      "denominator": "4 of 4 named shim/config paths checked (fe-s-1 directory, fe-s-3/ambient-shims.d.ts, fe-s-7/ambient-shims.d.ts, tsconfig.json); 0 edited. Implied by F12-AC4's whole-repo read as well: only the two test files differ from edab15b5.",
+      "expect": "SHIMS-EDITED: 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A for-loop that registers tests can silently register ZERO of them, and an inverted regex assertion still passes vacuously -- both failure modes would read as a clean 86 pass. So both repairs were mutated at once and re-run: (a) census.test.ts's converted assertion flipped to expect(UNRESOLVED_MARKER.test(row.path ?? '')).toBe(true), asserting every REUSED path DOES carry the UNRESOLVED marker; (b) colour-law.test.ts's walkTsx recursion replaced by `if (entry.isDirectory()) continue`, so the withFileTypes entry's own isDirectory() no longer drives the walk.",
+      "expected": "(a) exactly the 27 REUSED rows fail, each named individually -- proving the loop registers one live test per row and the converted regex assertion actually evaluates in the correct orientation; (b) SCANNED drops far below 38 -- proving the Dirent's isDirectory() is genuinely the thing driving recursion, i.e. a faithful statSync replacement rather than a vacuous one.",
+      "observed": "27 fail / 59 pass / 332 expect() calls, rc=1, with individually named failures (e.g. 'every census row is REUSED with an existing path, or NEW with a non-empty reason > row YAxis') -- 27 is exactly the REUSED count printed by the census line; and 'SCANNED: 1 files' against the baseline's 38. Both arms fired as predicted. Mutation reverted; `git status --porcelain -- src | wc -l` then read 0 against commit 2750d80b, so the restored files are byte-identical to the committed ones, and all three live criteria were re-run clean afterwards.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every live criterion run twice on the same unmodified inputs after the mutant was reverted: bun run typecheck twice, bun test fe-s-11 twice, bun test src/pages/InvestorReporting twice.",
+      "observed": "typecheck rc=0 both runs, zero output both runs. fe-s-11: 86 pass / 0 fail / 359 expect() calls both runs, with COMPONENTS: 65 (REUSED 27, NEW 38) and SCANNED: 38 files both runs. Full set: 322 pass / 1 skip / 0 fail / 1496 expect() calls / 48 files both runs. Only wall-clock timings differed (fe-s-11 126ms vs 130ms; full set 2.32s vs 1.83s), which no criterion grades.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Widening the ambient bun:test / node:fs shims to declare test.each, Matchers.toMatch and statSync",
+      "reason": "F12-AC5 grades the shims as UNTOUCHED and the cell states 'The shims are not edited'. The shims' own headers give the standing reason (declaring a wider surface changes what every file in the portal sees); the repair was therefore made to fit the declared surface rather than the surface widened to fit the repair."
+    },
+    {
+      "item": "Any // @ts-ignore, // @ts-expect-error, `any` cast, tsconfig change, tsc exclusion, or strictness reduction",
+      "reason": "All six are forbidden by the cell verbatim. Verified absent: a scan of both changed files for ts-ignore / ts-expect-error / ts-nocheck / 'as any' / ': any' / '<any>' returned no hits (rc=1), and F12-AC5 confirms tsconfig.json is unmodified."
+    },
+    {
+      "item": "Repairing the other, non-fe-s-11 test folders or any src/ component",
+      "reason": "Out of grant. The order's <paths> names only portal/src/pages/InvestorReporting/__tests__/fe-s-11/ and the round-2 investigation file, and the eight base errors were all inside fe-s-11 anyway -- F12-AC4 grades the absence of any other change and reads 0."
+    },
+    {
+      "item": "A dev server on port 5181 and any rendered-UI check",
+      "reason": "The order states 'you need no dev server for this order'; all five criteria are a typecheck, two test runs and two git diffs. No criterion names a render."
+    }
+  ],
+  "surprises": [
+    "IRPT_FNTEND-W1-S15: this order's <proof_of_spec> block specifies phase `BUILD`, but org/standards/PROOF_OF_SPEC.schema.json's phase enum has no `BUILD` member (it offers P1-SCRIPTS, P2-TIMING, P3-REPOINTS, P4-PUBLISHERS, P5-DECOMMISSION, BUILD-GENERAL, INVESTIGATION, NON-BUILD-OTHER); the instance was authored with the ordered value, refused by proof-of-spec-check.py, and carried as BUILD-GENERAL -- the nearest enum member and the only build-flavoured one. Recorded, not treated as a defect in the order."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~1/dev-green-typecheck.result.md",
+  "compiler_tools": [
+    {
+      "tool": "tsc -b --noEmit via `bun run typecheck`, bun 1.3.9 (cf6cdbbb)",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-2-1-fe-s-12/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0, no diagnostics, ~26s. Base in the same worktree before any edit: rc=2 with the eight errors the face lists, verbatim."
+    },
+    {
+      "tool": "bun test, bun 1.3.9 (cf6cdbbb)",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-2-1-fe-s-12/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "result": "322 pass, 1 skip, 0 fail, 1496 expect() calls, 48 files, rc=0 -- the issuer's base figure, unmoved."
+    },
+    {
+      "tool": "git diff --name-only against the portal base commit edab15b5",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-2-1-fe-s-12/portal && git diff --name-only edab15b5",
+      "result": "Exactly two paths, both under src/pages/InvestorReporting/__tests__/fe-s-11/. OUTSIDE-GRANT: 0, SHIMS-EDITED: 0."
+    },
+    {
+      "tool": "safe-commit.sh (portal repo, branch wk-irpt_fntend-2-1-fe-s-12)",
+      "invocation": "cd <WS>/portal && bash <WS>/.tools/safe-commit.sh --author \"0.9.0_WK_IRPT_FNTEND~1 <0.9.0_WK_IRPT_FNTEND~1@opal.agent>\" -F <msgfile> -- src/pages/InvestorReporting/__tests__/fe-s-11/",
+      "result": "rc=0, commit 2750d80b, 2 files changed, 44 insertions(+), 27 deletions(-); msg-verify MATCH len=2408. NOTE the gate's own disclosure, not cited as validation here: '[commit-gate] WARN: commit-gate checked 0 of 2 file(s) -- NOTHING WAS CHECKED' (it reads only .py/.sh/.tf/org/projects/*.json). The language-appropriate instruments are F12-AC1's tsc -b and F12-AC2/AC3's bun test, above."
+    }
+  ]
+}

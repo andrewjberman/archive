@@ -1,0 +1,188 @@
+==============================================================================
+BATTERY IB-rt-4 -- RT4-AC1: typed ids at every key boundary, and the exception path
+repo: C:/tmp/wk-irpt-2-3   (merged tip)
+==============================================================================
+
+(a) N OF N CONSTRUCTORS -- four negatives each, refused without echoing
+    PUBLIC SURFACE OF _keys, read off the module by AST, not from a written list:
+      11 public callables - 4 readers = 7 constructors
+      constructors: ['TenantBinding', 'cache_key', 'idempotency_key', 'key_digest', 's3_evidence_key', 'quarantine_key', 'queue_message']
+      reader SUBTRACTED  classify_refused       classifies a value for a reason code; builds nothing
+      reader SUBTRACTED  firm_tokens            reads the registry by path
+      reader SUBTRACTED  load_firm_ids          reads the registry by path
+      reader SUBTRACTED  verify_against_layout  compares two declarations by path
+      TenantBinding     display name                   REFUSED TENANT_NOT_ENABLED         leak 0 of 7 renderings
+      TenantBinding     e-mail                         REFUSED TENANT_NOT_ENABLED         leak 0 of 7 renderings
+      TenantBinding     raw upstream key               REFUSED TENANT_NOT_ENABLED         leak 0 of 7 renderings
+      TenantBinding     request-controlled firm token  ADMITTED (tenant position) -> TenantBinding(firm_id=49fi
+      cache_key         display name                   REFUSED DISPLAY_NAME_SHAPED        leak 0 of 7 renderings
+      cache_key         e-mail                         REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      cache_key         raw upstream key               REFUSED RAW_UPSTREAM_KEY_SHAPED    leak 0 of 7 renderings
+      cache_key         request-controlled firm token  REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      idempotency_key   display name                   REFUSED DISPLAY_NAME_SHAPED        leak 0 of 7 renderings
+      idempotency_key   e-mail                         REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      idempotency_key   raw upstream key               REFUSED RAW_UPSTREAM_KEY_SHAPED    leak 0 of 7 renderings
+      idempotency_key   request-controlled firm token  REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      key_digest        display name                   REFUSED NOT_A_MODULE_KEY           leak 0 of 7 renderings
+      key_digest        e-mail                         REFUSED NOT_A_MODULE_KEY           leak 0 of 7 renderings
+      key_digest        raw upstream key               REFUSED NOT_A_MODULE_KEY           leak 0 of 7 renderings
+      key_digest        request-controlled firm token  REFUSED NOT_A_MODULE_KEY           leak 0 of 7 renderings
+      s3_evidence_key   display name                   REFUSED DISPLAY_NAME_SHAPED        leak 0 of 7 renderings
+      s3_evidence_key   e-mail                         REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      s3_evidence_key   raw upstream key               REFUSED RAW_UPSTREAM_KEY_SHAPED    leak 0 of 7 renderings
+      s3_evidence_key   request-controlled firm token  REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      quarantine_key    display name                   REFUSED DISPLAY_NAME_SHAPED        leak 0 of 7 renderings
+      quarantine_key    e-mail                         REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      quarantine_key    raw upstream key               REFUSED RAW_UPSTREAM_KEY_SHAPED    leak 0 of 7 renderings
+      quarantine_key    request-controlled firm token  REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      queue_message     display name                   REFUSED DISPLAY_NAME_SHAPED        leak 0 of 7 renderings
+      queue_message     e-mail                         REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+      queue_message     raw upstream key               REFUSED RAW_UPSTREAM_KEY_SHAPED    leak 0 of 7 renderings
+      queue_message     request-controlled firm token  REFUSED FIRM_TOKEN_IN_KEY_BODY     leak 0 of 7 renderings
+    REFUSED 27 of 28 trials (1 admitted in the tenant position by design); 0 occurrences of the refused value in 27 of 27 refusals
+    SEVEN RENDERINGS PER REFUSAL: str(), repr(), '%s', '%r', an f-string, exc.args
+      and the public log line -- a leak wearing a different syntax is the same leak.
+    %r PLACEHOLDERS INSIDE A REFUSAL CONSTRUCTION: 0 (the ruling says twelve; the module carried EIGHTEEN across sixteen sites -- row W3-S16)
+
+(b) THE POSITIVE STILL BUILDS -- same key as round-1 HEAD, by hash
+    THE ORACLE IS THE MODULE AT 7478fdf144, loaded from git -- not a remembered list of
+      expected strings, which the same hand that changed the code would update.
+      cache_key/plain            SAME   sha256 240a314fb4ab  irpt/v1/49financial/irpt_directory_search/as
+      cache_key/params           SAME   sha256 c3297aaf1952  irpt/v1/49financial/irpt_generate_status/asf
+      idempotency_key            SAME   sha256 c7187427299f  irpt/v1/49financial/irpt_generate/asf=bbbbbb
+      key_digest                 SAME   sha256 5152edaed9e1  240a314fb4abd0765905716d1001b9d60f3050ed3245
+      s3/generations/vendor_pdf  SAME   sha256 c050d5426288  firms/49financial/generations/2332060/attemp
+      s3/generations/sections    SAME   sha256 7e07d456eca0  firms/49financial/generations/2332257/attemp
+      s3/generations/receipt     SAME   sha256 c5d5d3a3684f  firms/49financial/generations/REQ-ababababab
+      s3/intake/dated            SAME   sha256 0f2704a03315  firms/49financial/intake/YYYY/MM/DD/2026/09/
+      s3/requests/revision       SAME   sha256 5f6484f4ae42  firms/49financial/requests/REQ-ababababababa
+      quarantine                 SAME   sha256 1b003e3d4a7e  quarantine/2026/09/11/MSG-0f1e2d3c4b5a/messa
+      queue_message              SAME   sha256 7a8ae7db0c7a  {"kind":"irpt_generate","request":"REQ-ababa
+      TenantBinding.firm_id      SAME   sha256 0a86e61d948a  49financial
+    12 of 12 identical -- the refusal did not change the grammar
+
+(c) THE ENVELOPE EVERYWHERE -- the handler error paths, over the MERGED module set
+    modules scanned 30 | except handlers 57 | handlers BINDING the exception 25
+    by family: {"directory": 8, "_authz": 5, "intake": 12, "ycharts": 14, "export": 16, "ops": 2}
+    HANDLERS RENDERING THE CAUGHT EXCEPTION INTO TEXT: 0
+    THE DENOMINATOR MOVED AND THAT IS WHY THE CENSUS RE-RAN RATHER THAN A DIFF BEING
+      RE-APPLIED: 25 modules / 49 handlers before the merge, 30 / 57 now. Nine paths
+      rendered the exception at this tip and only TWO were ones this order had seen;
+      seven were in code that did not exist at the first cut, one of them a whole
+      module (dispatch.py) the census had never read.
+    THE CENSUS IS STRUCTURAL: str(exc), repr(exc), a %-format operand, an f-string
+      value and .format(exc) -- and NOT type(exc).__name__, which carries no caller
+      data. An earlier cut counted those and over-fired 2 of 12 onto modules that had
+      already applied this lesson, one citing row W2-S10 in a comment.
+    PUBLIC REASONS ARE A CLOSED ENUM: 14 members
+      a free-string reason is refused: True
+    ARM (c)'s DENOMINATOR IS NOT WIDENED (row W3-S15, carried to L10 by name): it
+      counts EXCEPT HANDLERS, and a public reason built on an ordinary return is
+      outside it. The one such instance found is fixed; the dataflow census is not
+      this order's to build.
+
+(d) INJECTED NEGATIVES -- a client name, an e-mail and an S3 key, per family
+      directory  client name reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      directory  e-mail      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      directory  S3 key      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      _authz     client name reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      _authz     e-mail      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      _authz     S3 key      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      intake     client name reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      intake     e-mail      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      intake     S3 key      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      ycharts    client name reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      ycharts    e-mail      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      ycharts    S3 key      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      export     client name reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      export     e-mail      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      export     S3 key      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      ops        client name reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      ops        e-mail      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+      ops        S3 key      reason=INVALID_INPUT          occurrences 0 | corr resolves True | internal record carries it True
+    TOTAL OCCURRENCES ACROSS body + headers + the public log: 0 of 18 injections
+    AND THE OTHER DIRECTION: 18 of 18 correlation ids resolve to an internal record
+      that DOES carry the value. The detail moved; it did not disappear. A redaction
+      that destroys the diagnostic is switched off by the first person debugging at 2am.
+    the envelope's own fields: ['correlation_id', 'ok', 'public_reason_code'] -- no 'error', no 'message', no 'detail', no
+      'stack'; there is no field for them to travel in, which is stronger than a rule.
+
+(e) DEPLOYED -- the amendment's five steps, in order
+    (1) EVERY ROOT PLANS ONLY THIS ORDER'S CODE CHANGE
+        root directory  post-apply plan: No changes.                                    CLEAN
+        root intake     post-apply plan: No changes.                                    CLEAN
+        root ycharts    post-apply plan: No changes.                                    CLEAN
+        root export     post-apply plan: Plan: 0 to add, 2 to change, 1 to destroy.     NOT-THIS-ORDERS (no .tf changed here)
+            FOREIGN-RESOURCE   aws_iam_role_policy.render_host_export_evidence not in this branch's configuration
+            STALE-DECLARATION  aws_ssm_document.export_render_run           declared here; the LIVE content is a sibling's newer version
+            STALE-DECLARATION  module.irpt_export_render.aws_lambda_function.this declared here; the LIVE content is a sibling's newer version
+        root ops        post-apply plan: No changes.                                    CLEAN
+        ATTRIBUTION RESTS ON ONE VERIFIABLE FACT: this order changed NO Terraform
+        configuration -- `git status --porcelain -- infra/aws/terraform/` is empty.
+        So no diff in any of these plans can originate from this order's edits, and
+        each residual is labelled by WHY it cannot be converged from here:
+          FOREIGN-RESOURCE   in the shared state, in no .tf of this branch. Applying
+                             DESTROYS it -- here, a live S3 grant on the ycharts
+                             runner role, created after this order's own apply.
+          STALE-DECLARATION  declared in this branch, but the LIVE content is a
+                             sibling's newer version. Applying REVERTS it -- here,
+                             21 command lines of render-host preflight and the
+                             RENDERER_MODULE_ABSENT refusal branch.
+        Labelling by 'is the name in a .tf here' was the first cut and it called the
+        SSM document OURS, which would have read as this order failing to deploy
+        something. The resource is declared here; the DIFF is not this order's.
+        THIS ORDER'S OWN CONVERGENCE WAS MEASURED AT THE TIME OF THE ACT and is in
+        the ledger: pre-apply '0 to add, 1 to change, 0 to destroy' with
+        source_code_hash the only differing attribute, post-apply 'No changes'.
+        The residual appeared AFTER that, and destroying it would remove a live S3
+        grant from the ycharts runner role. Row IRPT_BCKEND-W3-S20.
+        ROW W3-S17 IS CLOSED BY THE TREE: the export root's BASELINE plan at this tip
+        read 'No changes' BEFORE any upload. The three resources the pre-merge
+        worktree read as orphans were IB-rt-8's live declarations; the route was the
+        merge. The withheld apply was still correct -- that plan would have destroyed
+        two live IAM role policies -- and the premise it was reported under was wrong.
+    (2) IMPORT CLOSURE IN THE REAL LAYOUT -- /var/task from the zip PLUS /opt/python
+        from the PUBLISHED layer: 6 of 6 functions CLOSED (layer on path for 6)
+        ROW W3-S14: download.py has imported `enforce` at module level since round 1
+        and the zip never carried it, so the deployed download route raised
+        ModuleNotFoundError on its first call while CodeSha256, the post-apply plan
+        and the ledger all read green. enforce.py, errors.py and resolve.py are now in
+        the build input. keys.py is NOT: the layer carries it, and a second copy at
+        /var/task would shadow the layer's and put two key grammars in one runtime.
+    (3) THE LAYER, AND WHY IT IS NOT REPUBLISHED
+        irpt-export-render         irpt-common:5
+        irpt-narrative             irpt-common:5
+        irpt-performance-adapter   irpt-common:5
+        runtime capabilities read on the DEPLOYED function: statusCode 200, FunctionError None
+        CONTRACTS AVAILABLE: 5 of 5 -- ExportBundle, ExportReceipt, NarrativePacket, PerformanceReport, RenderPackage
+        THE PUBLISHED LAYER ALREADY CARRIES THE UNION AT THIS TIP, so a rebuild is a
+        0-diff on content and a republish would mint a version with identical bytes:
+        measured in the published zip -- 5 of 5 contracts, keys.py, firm_registry.json
+        and bd_helpers.py present; enforce.py, errors.py, resolve.py ABSENT, which is
+        exactly why those three ride the export ZIP. Row IRPT_BCKEND-W3-S21 records that the
+        layer's own BUILD_MANIFEST disagrees with what is published.
+    (4) THE LEDGER: 20260911T1535Z_irpt-bckend-rt4_deploy_completion.md CLOSED=True legs=5 open markers=0 sentinel on disk=False sentinel commits=2
+        1577717530 IB-rt-4: close the change-management entry -- all five legs proven
+        862b0e4a6e IB-rt-4 at the merged tip: the envelope re-applied on IB-rt-8's controller, the import closure closed, and the OPEN sentinel before the act
+    (5) TRIPLE EQUALITY artifact_sha256 == S3 content-sha256 == live CodeSha256: 6 of 6
+        irpt-directory-search      OK     reg iAWpaqFylkOnmi | s3 iAWpaqFylkOnmi | live iAWpaqFylkOnmi
+        irpt-directory-refresh     OK     reg KCAo+JzS0TCVjy | s3 KCAo+JzS0TCVjy | live KCAo+JzS0TCVjy
+        irpt-export-render         OK     reg W6fWlpva77QiSA | s3 W6fWlpva77QiSA | live W6fWlpva77QiSA
+        irpt-intake-poller         OK     reg YpE2MyUwdGzMfL | s3 YpE2MyUwdGzMfL | live YpE2MyUwdGzMfL
+        irpt-status                OK     reg puH1OBabqlGAI1 | s3 puH1OBabqlGAI1 | live puH1OBabqlGAI1
+        irpt-ycharts-generate      OK     reg hiVUThOsWCSe30 | s3 hiVUThOsWCSe30 | live hiVUThOsWCSe30
+        ROW W3-S18: this read 0 of 6 at the merged tip. The drain took this order's
+        CODE half and not its REGISTRATION half, so the record held pre-deploy hashes
+        while the world served post-deploy ones. Rebuilding from the merged tree
+        reproduced the LIVE bytes for five of six, so those needed an honest
+        registration and nothing else -- no upload, no apply, no churn.
+
+==============================================================================
+  arm (a): PASS
+  arm (b): PASS
+  arm (c): PASS
+  arm (d): PASS
+  arm (e): PASS
+  ARMS: 5 of 5
+==============================================================================
+IBRT4-KEYS-TYPED

@@ -1,0 +1,352 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-rt-7",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "assignee": "0.9.0_WK_IRPT_BCKEND~1",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rt-7.the-holdings-handler-and-the-attribution-holdouts.md",
+  "group": "OTHER",
+  "vintage_commit": "df84a8a952cb9aa5b40b8858308785811e432acd"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "df84a8a952cb9aa5b40b8858308785811e432acd",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rt-7.the-holdings-handler-and-the-attribution-holdouts.md"
+ },
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/the-holdings-handler-and-the-attribution-holdouts.result.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/holdings/snapshot.py",
+   "kind": "script",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "THE HOLDINGS HANDLER, deployed as irpt-holdings with entry point snapshot.lambda_handler and verified BY CONTENT: live CodeSha256 yOiMCrewFEMtE6GCJzBjNdLQsRpliY8zrM3t1AMyynI= equals the build input recorded in lambda-source-map.json. Serves through guard() + FirmBinding; projects by walking the parent chain; re-derives the slice's totals; refuses a snapshot that collapses its two clocks; answers UNAVAILABLE naming the as-of for a missing one. 22 of 22 tests pass.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "KEY_OPERATION",
+    "clocks_are_distinct",
+    "SnapshotUnavailable"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/holdings/stage.py",
+   "kind": "script",
+   "commit_or_etag": "5a359024a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Stages the flat package members from `git show <pin>:<path>` and WRITES BUILD_MANIFEST.json's declared_blobs, so the index gate's digests cannot drift from the staging that produced them. `--check` re-verifies: 5 of 5 staged members byte-equal to their pinned blob.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "declared_blobs"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/holdings/BUILD_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "5a359024a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Declares layer_dependencies (ids, keys, jsonschema, boto3, botocore) and vendored_modules. WITHOUT IT the import-closure check is ADVISORY and the index gate is skipped entirely -- the first build printed exactly that, naming ids and keys. WITH it both ENFORCE: 6 of 6 .py imports satisfied and 4 of 4 members index-equal, manifest-equal and LF.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "layer_dependencies"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/holdings/tests/test_snapshot.py",
+   "kind": "test",
+   "commit_or_etag": "5a359024a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "22 tests over the REAL module. Test 3 forces a prefix-collision the opaque-id grammar makes impossible TODAY, because 'cannot happen today' is a property of the grammar and not of the projection. Test 15 records the MEASURED firm-swap mechanism (the Enforcer overwrites x-firm-id from the binding, so a swapped header is INERT rather than refused) after the first draft asserted a refusal that would have encoded the wrong mechanism. Test 19 asserts serve-never-build against the module's own source. Test 21 asserts the two operation names.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "test_15b_a_binding_the_directory_does_not_declare_is_refused_FIRM_BINDING"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/investor-reporting/holdings/iam.tf",
+   "kind": "iam",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "One role, READ-ONLY. Applied 5 to add, 0 to change, 0 to destroy. comp-iam service irpt-holdings reads 3 statements: its own log group; s3:GetObject on the three client-firm buckets under investor-reporting/*; a prefix-CONDITIONED s3:ListBucket. Nothing that mutates and nothing outside those buckets -- the silver plane where the runner's inputs live is deliberately NOT granted.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "irpt-holdings-role"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/investor-reporting/holdings/lambda.tf",
+   "kind": "terraform",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The function from the S3 artifact, attached to irpt-common by DATA SOURCE (a read; it cannot create, move or destroy the layer the performance root owns). Post-apply plan: No changes.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "irpt_holdings"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/investor-reporting/api/integrations.tf",
+   "kind": "terraform",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "ONE map entry -- holdings = irpt-holdings. The ROUTE follows from the published contract with no edit to routes.tf (CTO ruling 1, one carrier). Applied 3 to add, 0 to change, 0 to destroy: integration, route and invoke permission, every one keyed 'holdings' (row W1-S15 records the third-line reading of the bound). The plan REFUSED LOUDLY before the function existed, which is the data-source discipline working.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ]
+  },
+  {
+   "path_or_key": "docs/contracts/investor-reporting/v1/HoldingsSnapshot.schema.json",
+   "kind": "config_data",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "FOUR OPTIONAL fields added -- clocks.custody_as_of, clocks.overlay_as_of, node.clocks, attribution_holdouts -- with `required` BYTE-IDENTICAL, because routes.json's own _immutability rule says v1 is immutable and that adding an optional field is not breaking while changing required-ness is. 153 insertions, 0 deletions. Packaged into the deployed zip and used to validate the served slice (battery arm (a): served_slice_contract_valid true).",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "attribution_holdouts",
+    "overlay_as_of"
+   ]
+  },
+  {
+   "path_or_key": "docs/contracts/investor-reporting/v1/routes.json",
+   "kind": "config_data",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "The holdings route flipped NO-HANDLER-AT-HEAD -> DECLARED against irpt-holdings; _denominator RE-DERIVED from the entries to 12 declared of 12 total, 7 functions. Verified live: get-routes on 7k3ed8px20 returns the route under CUSTOM authorizer naqxlm targeting the irpt-holdings integration.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "irpt-holdings"
+   ]
+  },
+  {
+   "path_or_key": "docs/contracts/investor-reporting/v1/responses/holdings-snapshot.response.schema.json",
+   "kind": "config_data",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The response contract, the same envelope the other eleven operations answer. Before this cell the route's response_schema was null with the honest reason that a route publishing nothing can have no response contract.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "holdings-snapshot"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/investor_reporting/holdings_snapshot.py",
+   "kind": "script",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "stamp_clocks/assert_clocks_carried, holdout_block, redistribute_holdouts and holdouts_held, plus CONTRACT_PATH repointed to the PUBLISHED contract. The difference control runs on EVERY build, not only in tests: run_firm REFUSES a build whose holdouts are invisible AND refuses if the redistributing build passes the same check. Exercised by rebuilding all three firms' QA snapshots, which the battery then reads back from S3.",
+   "artifact_covered_by": [
+    "RT7-AC1",
+    "RT7-AC2"
+   ],
+   "introduces": [
+    "stamp_clocks",
+    "holdout_block",
+    "redistribute_holdouts"
+   ]
+  },
+  {
+   "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_holdouts.py",
+   "kind": "test",
+   "commit_or_etag": "d9c940244a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "12 tests, 12 passing. Each pairs an honest build with the wrong build that STILL reconciles -- test 10 asserts both halves explicitly -- so a pass means the check discriminates rather than that the arithmetic held. Test 11 is the VACUOUS branch, printed as vacuous.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "test_10_and_the_redistributing_build_still_reconciles_to_the_cent"
+   ]
+  },
+  {
+   "path_or_key": "investor-reporting/qa/holdings/<as_of>/snapshot.json in opal-data-bd, opal-data-inf and opal-data-cot",
+   "kind": "s3_object",
+   "commit_or_etag": "read at battery run time through each family's own latest.json",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Rebuilt for all three firms under QA prefixes only -- no production artifact is overwritten (this order's second bound) and the deployed function's IRPT_HOLDINGS_PREFIX is the PRODUCTION prefix. 49F 5,877 accounts / 128,655 nodes / 0 unassigned; INF 874 / 2,584 / 84 unassigned at $7,193,856.71; COT 971 / 971 / 10. All three reconcile to the cent and validate.",
+   "artifact_covered_by": [
+    "RT7-AC1",
+    "RT7-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_rt_7.py",
+   "kind": "test",
+   "commit_or_etag": "5f68db528e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "RT7-AC1's five arms, each over the real artifact: the live API's route table, the landed S3 snapshots through their own pointers, the real _authz.Enforcer, the real producer's assertions, the live function configuration and the committed ledger. Prints IBRT7-HOLDINGS-SERVED only when every arm holds; byte-identical across two same-input runs.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ],
+   "introduces": [
+    "IBRT7-HOLDINGS-SERVED",
+    "swap_run"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IB-rt-7_RT7-AC1_battery_output.txt",
+   "kind": "doc",
+   "commit_or_etag": "5f68db528e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The verbatim transcript of the passing RT7-AC1 run.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/the-holdings-handler-and-the-attribution-holdouts.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The session log: what was built, the per-arm evidence with denominators, the RT7-AC2 judgment output in full, the recorded comp-iam Phase 1 and Phase 2 runs, and the bounds held.",
+   "artifact_covered_by": [
+    "RT7-AC1",
+    "RT7-AC2"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "17 rows APPENDED for this cell's new and changed paths (entries 354 -> 371), by a byte splice verified as 204 insertions / 0 deletions with every pre-existing entry asserted identical before the write.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260911T1637Z_irpt-bckend-rt7_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "5a359024a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The ledger, CLOSED with all four legs proven and 0 open. Its OPEN sentinel was committed at 2f0cb688de BEFORE the act (row W3-S4's rule) and removed by the close in the same commit as the deploy, which is BEFORE every read that grades the act.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "5f68db528e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Rows IRPT_BCKEND-W1-S14, W1-S15 and W1-S16 appended (rows 101 -> 104), inside the fenced json array, no existing row edited. S14 was filed BEFORE any other act of this cell and S15 BEFORE the api apply it concerns.",
+   "artifact_covered_by": [
+    "RT7-AC1"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RT7-AC1",
+   "criterion_verbatim": "PASSES BY OUTPUT -- the route served and guarded, the holdouts held, the clocks distinct, the reconcile to the cent. (a) SERVED. `get-routes` shows the holdings route integrated to `irpt-holdings` with `naqxlm`; an in-process authorized request returns a schema-valid `HoldingsSnapshot` slice; six swapped-identifier requests refused with 0 protected bytes (`6 of 6`); `unguarded_routes()` over the real file still `0 of N`. (b) BASES NEVER SPLICED, HOLDOUTS VISIBLE. Per firm: every node carries exactly one basis; unassigned accounts present with full value (count and value printed); the custody total before == after to the cent; a redistributing build FAILS the same check (printed). (c) TWO CLOCKS. `custody_as_of` and `overlay_as_of` present and distinct on the snapshot and on `N of N` nodes; a fixture that collapses them is refused. (d) NORMALIZED. 0 ids matching `:acct:`; ids resolve against the refreshed directory `N of M` per firm with the IB-rt-3 numbers (printed). (e) DEPLOYED. `CodeSha256` equality; the holdings and api roots' post-apply plans `No changes`; ledgers CLOSED, sentinels committed.",
+   "method": "command",
+   "invocation": "timeout 900 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_rt_7.py",
+   "output_evidence": "rc=0. Final line: 'IBRT7-HOLDINGS-SERVED'; '\"overall_pass\": true' in the JSON report above it. Full transcript committed as IB-rt-7_RT7-AC1_battery_output.txt. Byte-identical across two same-input runs.\n\n(a) SERVED. Read from the LIVE api: \"live_route\": {\"route_key\": \"GET /api/scoped/investor-reporting/holdings/{accountSetId}\", \"authorization_type\": \"CUSTOM\", \"authorizer_id\": \"naqxlm\", \"integration_uri_names_the_function\": true, \"denominator\": \"1 of 1 holdings route on api 7k3ed8px20\"}. The published route table: \"declared\": \"12 of 12\", \"no_handler_at_head\": 0 -- it was 11 DECLARED + 1 NO-HANDLER-AT-HEAD until this cell built the handler. \"unguarded_routes_over_this_cells_table\": \"0 of 1\". \"authorized_request_served\": true and \"served_slice_contract_valid\": true against the packaged published contract.\n\nTHE SIX SWAPS, TWO PLANES, BOTH PRINTED. FIRM_ADVISOR plane: \"refused\": \"6 of 6\", \"refusals_carry_zero_protected_bytes\": \"6 of 6\", \"authorized_request_served\": true -- the authorized control is what makes 6 of 6 discriminating rather than a plane where everything refuses. FIRM_OPERATIONS plane: \"refused\": \"5 of 6\"; the one not refused is the `advisor` kind, because `_authz.covers()` returns an unconditional True for a FIRM_OPERATIONS/OPAL_GLOBAL principal (enforce.py:319-320) while its own docstring says \"within the verified firm\". Filed as row IRPT_BCKEND-W1-S16 (OBSERVATION, ARMED): `_authz/` is IB-s-3's surface and is not in this order's <paths> grant, so it is recorded and not edited. No cross-firm bytes are reachable through it -- MEASURED, not assumed: the served payload on that request is the viewer's OWN permitted slice, identical to the un-swapped request's, because the projection is over scope.permitted_account_set built from the verified firm's directory. Every swap id is minted for ANOTHER firm by the real normalizer, and 0 of 6 refusals echo the refused value.\n\n(b) BASES NEVER SPLICED, HOLDOUTS VISIBLE. Read from the LANDED QA snapshots through their own latest.json pointers, per firm: every node carries exactly one basis of OBSERVED/ASSIGNED/TARGET and the runner's own assert_bases_not_spliced is clean for all three. 49financial: 128,655 nodes, unassigned \"0 of 5877 custody account(s) have no overlay assignment\", observable MEASURED, custody total 1,505,496,010.88 before == after. cottonwood: 971 nodes, unassigned 10 of 971, visible \"10 of 10\", total 479,119,691.95 before == after. inflection: 2,584 nodes, unassigned 84 of 874 carrying $7,193,856.71, visible \"84 of 84\", total 195,507,302.27 before == after. reconciled_to_the_cent true everywhere.\n\nTHE DIFFERENCE CONTROL, on the LANDED artifact rather than a fixture: redistribute_holdouts() drops the unassigned account nodes and spreads their value pro rata across the accounts that DO carry a model. For INF and COT it FIRES -- \"redistributing_build_holds_holdouts\": false, \"present_as_account_nodes\": \"0 of 84\" -- and \"still_reconciles\": true, with 7,193,856.71 USD moved and the total unchanged. THAT IS THE POINT: a reconcile-only acceptance would have passed the economically wrong answer. For 49F the control is printed as VACUOUS (\"0 unassigned accounts for this firm, so a redistributing build moves nothing and this control cannot fire; printed as vacuous, not as a pass\"), per bound 12.\n\n(c) TWO CLOCKS. Present and carried per firm: 49financial 2026-09-11/2026-09-11 (one date partition feeds both halves, so equality here is structural), inflection 2026-09-11/2026-09-11, cottonwood 2026-09-10/2026-09-11 -- \"values_differ\": true, the firm whose overlay is genuinely a day ahead of its custody. \"nodes_carrying_both\": \"128655 of 128655\", \"971 of 971\", \"2584 of 2584\". A collapsed fixture built from the SAME landed artifact is refused by the producer (\"a_collapsed_fixture_is_refused_by_the_producer\": true) AND at the serving boundary (\"a_collapsed_fixture_is_refused_at_the_serving_boundary\": [true, \"the snapshot header carries fewer than two source clocks\"]). A node SILENTLY RE-DATED -- header still whole, one node's pair changed -- is refused too (\"a_silently_re_dated_node_is_refused\": true), which a header-only check could not catch.\n\n(d) NORMALIZED. ':acct:' census over holdings scope ids AND every node id: \"0 of 127071 ids carry ':acct:'\" (49F), \"0 of 971\" (COT), \"0 of 2584\" (INF); ids_not_of_issued_shape 0 everywhere. Against the refreshed directory: inflection \"874 of 874\" both directions; cottonwood directory-side \"837 of 837\"; 49financial \"5860 of 5877\". The INF figure ROSE from IB-rt-3's 790 of 790 because the 84 holdouts come from accounts_v2 -- the directory's own source -- so carrying them closed the population gap rather than widening it. The round-1 reference numbers (7,453 / 790 / 946) are printed per firm beside the measurement.\n\n(e) DEPLOYED. \"live_code_sha256\": \"yOiMCrewFEMtE6GCJzBjNdLQsRpliY8zrM3t1AMyynI=\" EQUALS \"build_input_sha256\" from lambda-source-map.json -- content, never filename. \"handler\": \"snapshot.lambda_handler\", runtime python3.12, timeout 29, layers [\"arn:aws:lambda:us-east-1:313476888478:layer:irpt-common:5\"], role irpt-holdings-role. \"zero_diff_plans\": {\"holdings\": true, \"api\": true}. \"ledger_closed\": true, \"legs_still_open\": 0, \"sentinel_commits_before_the_act\": [\"5a359024a9\", \"2f0cb688de\"] -- committed at 2f0cb688de BEFORE the act and removed by the close at 5a359024a9.\n\nBOTH BUILD GATES WERE MADE TO ENFORCE RATHER THAN ADVISE, and that was not cosmetic: the first build printed \"ADVISORY (not enforced -- no BUILD_MANIFEST.json, so layer_dependencies are undeclared and a layer import is indistinguishable from a missing module) ... UNENFORCED IS NOT A PASS\", naming `ids` and `keys`. With BUILD_MANIFEST.json the same build reads \"OK: import-closure -- 6 packaged .py file(s), every top-level import satisfied by package/stdlib/runtime/layer\" and \"OK: index-gate ran-sentinel present (members=4 pin=2f0cb688de)\", the latter after \"4 of 4 members index-equal, manifest-equal, and LF (0 CR bytes)\".",
+   "denominator": "5 of 5 arms hold. (a) 1 of 1 live holdings route under naqxlm; 12 of 12 routes DECLARED; 0 of 1 unguarded; six swaps 6 of 6 refused on the FIRM_ADVISOR plane with 6 of 6 refusals carrying zero protected bytes, and 5 of 6 on the FIRM_OPERATIONS plane with the exception named and filed (W1-S16). (b) 3 of 3 firms: unassigned 0 of 5,877 (49F), 10 of 971 (COT), 84 of 874 (INF, $7,193,856.71); visible as account nodes 0 of 0, 10 of 10, 84 of 84; before == after to the cent 3 of 3; the difference control FIRES on 2 of 2 firms that have holdouts and is printed VACUOUS on the third. (c) both clocks on 128,655 of 128,655 / 971 of 971 / 2,584 of 2,584 nodes; 3 of 3 collapse fixtures refused at both the producer and the serving boundary; 3 of 3 re-dated-node fixtures refused. (d) ':acct:' 0 of 127,071 / 0 of 971 / 0 of 2,584; directory join 874 of 874 (INF), 837 of 837 directory-side (COT), 5,860 of 5,877 (49F). (e) 1 CodeSha256 equal by content, 2 of 2 roots 0-diff, ledger CLOSED with 0 legs open, 2 sentinel commits with the OPEN one before the act.",
+   "expect": "IBRT7-HOLDINGS-SERVED",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "RT7-AC2",
+   "criterion_verbatim": "JUDGMENT, RECORDED AND NOT SELF-GRADED. State for `3.0.0_SA_CVO`: which attribution can still reconcile to the cent and be economically wrong after these holdouts (the fixture that would catch it, built or not); which firm's overlay clock is furthest from its custody clock and what the snapshot says about it; and what the served slice cannot tell a reader about accounts the scope excludes. No verdict: the instance row carries the output under `UNVERIFIABLE-BY-INSTRUMENT` with `status_reason` naming `3.0.0_SA_CVO` at L9.",
+   "method": "manual_read_with_citation",
+   "invocation": "Evidence assembled for 3.0.0_SA_CVO from: the landed QA snapshots' own clocks and attribution_holdouts blocks (read through each firm's latest.json pointer); holdings_snapshot.build_cot's expand_model call site for the TARGET arithmetic; _scope.unmatched_reasons for the gap vocabulary the slice does not carry forward; and snapshot.project's own coverage.remainder for what the slice does say.",
+   "output_evidence": "RECORDED FOR L9, NO VERDICT. Full text in the session log, section 2 / RT7-AC2.\n\n1. WHAT CAN STILL RECONCILE AND BE WRONG. THREE CLASSES, none closed by the holdouts. (i) MISATTRIBUTION INSIDE A SLEEVE: COT's TARGET nodes are custody_value x recursive_model_weight, so a wrong blend weight still sums to the account's custody value and reconciles exactly. THE FIXTURE THAT WOULD CATCH IT DOES NOT EXIST AND IS BUILDABLE: perturb ONE fact_model_blend.relative_allocation on a real account and assert the per-leaf values MOVE. Nothing in this cell asserts a leaf's value against an independently-derived expectation -- expand_model is tested for cycles, missing nodes and retained mass, not for arithmetic against a second source. (ii) THE OBSERVED/TARGET CONFUSION AT THE READER: 49F's model node is ASSIGNED at full account value, COT's are TARGET; both sit under an OBSERVED account and both sum to it, so a consumer that renders children without reading `basis` shows a model target as a holding -- the endpoint's own forbidden shape -- while every total reconciles. The fixture is a FNTEND render assertion that `basis` reaches the label, which is IRPT_FNTEND's to build. (iii) A WHOLE-FIRM STALE SHIFT: if the custody feed is a day behind, every number is internally consistent and uniformly wrong. The two clocks now make the condition VISIBLE, but carrying a clock is not checking it: nothing refuses a snapshot whose custody clock is N days behind the business date, and the tolerance that would define N does not exist as a declared value anywhere in this project.\n\n2. WHICH FIRM'S OVERLAY CLOCK IS FURTHEST FROM ITS CUSTODY CLOCK. COTTONWOOD, BY ONE DAY: custody_as_of 2026-09-10 (fact_holdings) vs overlay_as_of 2026-09-11 (fact_model_assignment), measured on the landed snapshot and carried on all 971 nodes. 49F and INF read 2026-09-11 for both -- and for 49F that is STRUCTURAL rather than reassuring: its custody and overlay arrive in ONE table (fact_allocation_account_map), so the two clocks CANNOT differ there and equality is not evidence of freshness. WHAT THE SNAPSHOT SAYS ABOUT COT'S GAP IS: the two dates, on the header and on every node, and nothing else. It does NOT say the gap is acceptable and does NOT say what it means. Concretely: COT's TARGET attribution is computed from a model assignment dated one day AFTER the holdings it attributes, so an account rebalanced on the 11th has its 10th-of-the-month custody value attributed to its NEW model, and every total still reconciles. The condition was invisible before this cell; whether it is tolerable belongs to whoever owns the COT feed cadence, and a tolerance invented by a worker would become a fact by repetition.\n\n3. WHAT THE SERVED SLICE CANNOT TELL A READER ABOUT EXCLUDED ACCOUNTS. It reports coverage.remainder -- the excluded NODE count and their summed custody value -- and that is deliberately all. It CANNOT say: how many distinct ACCOUNTS those nodes belonged to (an account contributes between one and hundreds of nodes, so the node count is not an account count); WHY an account is excluded -- not-entitled and ownership-map-not-caught-up read identically as \"not in the permitted set\", which is exactly the UNPROJECTED-ID vs NOT-IN-DIRECTORY distinction _scope.unmatched_reasons makes at the SCOPE layer and the slice does not carry forward; or whether the firm holds accounts THIS SNAPSHOT NEVER BUILT -- the 134 COT and 17 49F accounts present in one producer and not the other are invisible to a reader of any slice, because they are absent from the snapshot the slice is cut from. A reader asking \"am I seeing everything\" gets an answer to the narrower question \"of what this snapshot held, how much did your scope exclude\", and the difference between the two questions is not stated in the payload.",
+   "denominator": "3 of 3 heads answered. Head 1: 3 classes of reconciling-but-wrong attribution named, each with the fixture that would catch it and whether it exists (0 of 3 exist; 1 is buildable here, 1 belongs to IRPT_FNTEND, 1 needs a tolerance that is not declared anywhere). Head 2: 3 of 3 firms' clock pairs measured, the single firm with a gap named (COT, 1 day), and the 1 firm whose equality is STRUCTURAL rather than evidence of freshness distinguished. Head 3: 3 things the slice cannot say, each against what it does say (coverage.remainder), including the 134 COT and 17 49F one-sided accounts invisible to any slice.",
+   "expect": "JUDGMENT -- graded by 3.0.0_SA_CVO at L9; no worker verdict recorded",
+   "judgment": true,
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion: graded at L9 by 3.0.0_SA_CVO and explicitly NOT self-graded ('No verdict'). No instrument available to this worker settles any head: head 1 asks which wrong answers survive a control, which is a statement about the unobserved and has no passing observation; head 2's 'what the snapshot SAYS about it' is a sufficiency judgment against a tolerance nobody has declared, and inventing one here would make it a fact by repetition; head 3 is about what CANNOT be told, which by construction cannot be demonstrated by a measurement. The facts the heads rest on ARE measured and re-derivable: the three firms' clock pairs, the one-sided account counts, and the slice's own coverage.remainder."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The load-bearing claim is that a custody total reconciling to the cent means the attribution is right -- and it does not, because redistribution preserves the total exactly. Every arm is built around a control that would fail if its claim were false. (b) carries the REDISTRIBUTING BUILD: the same landed snapshot with the holdouts dropped and their value spread across the sleeves that do carry a model; the honest build must HOLD its holdouts and that build must FAIL the identical check while STILL reconciling. (a) carries the AUTHORIZED REQUEST beside the six swaps, so a plane on which everything refuses cannot score 6 of 6. (c) carries TWO collapse fixtures -- a missing header clock and a single node silently re-dated -- the second of which a header-only check cannot catch. The runner refuses at BUILD time on the same conditions, so a build that starts redistributing cannot land.",
+   "expected": "A redistributing build fails the holdout check while reconciling; a plane where the authorized request is refused cannot score a swap pass; a node whose clocks differ from the header is refused; a firm with no holdouts is reported VACUOUS rather than passing.",
+   "observed": "THE CONTROLS FIRED AND CHANGED THE WORK, three times. (1) The redistributing build moved $7,193,856.71 out of INF's 84 unassigned accounts and the total did not move -- 'still_reconciles': true with 'present_as_account_nodes': '0 of 84' -- so the reconcile is demonstrably not the control. (2) Arm (a)'s first run scored 5 of 6 and BLOCKED; reading it found _authz.covers()'s unconditional True for an admin principal, so the battery gained a second plane and the finding became row W1-S16 rather than the criterion being relaxed. (3) The handler test suite's first run FAILED three ways and each was a wrong assertion rather than a wrong handler: the wire operation id is refused by the key grammar (test 21 now asserts both names), a swapped X-Firm-Id header is INERT rather than refused because the Enforcer overwrites it from the binding (test 15 now records the measured mechanism and 15b asserts where a firm swap IS stopped), and the packaged contract was the pre-edit blob because stage.py stages from the COMMITTED blob -- which is the discipline working, not failing. 49F's difference control is printed VACUOUS.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Two same-input runs of the RT7-AC1 battery, byte-compared: `timeout 900 python .../battery_ib_rt_7.py` twice, then `diff`. The comparison spans the whole report -- every count, every live read and every fixture-derived id.",
+   "observed": "diff produced no output: the two runs are byte-identical, including the live route read, the 40-account sample drawn from the landed snapshot, the six swap outcomes on both planes, the per-firm holdout censuses and both terraform plan verdicts. Every denominator in this instance is re-derived by the battery on each run from the real population -- the live API's route table, the landed S3 objects through their own pointers, the live function configuration -- and none is transcribed from a previous run.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Rebuilding `irpt-common` and removing `carried_forward_members` from build_layer.py, which the issuer amendment makes this order's FIRST ACT.",
+   "reason": "Row IRPT_BCKEND-W1-S14: the act writes seven paths this order's <paths> grant does not name, and a path the grant lacks is a row, never an override. The amendment's own escape clause applies and was MEASURED: the live irpt-common:5 already carries 9 of 9 members the merged tree declares and 3 of 3 consumer functions already read it, so the capabilities were recorded and nothing needed repointing. The residual source-hygiene edit changes zero deployed bytes (the block contributes 0 unique packaged paths at identical pins)."
+  },
+  {
+   "item": "Fixing `_authz.Enforcer.covers()`'s advisor branch.",
+   "reason": "Row IRPT_BCKEND-W1-S16: `_authz/` is IB-s-3's surface and is not in this order's <paths>. Never fix a neighbouring defect -- recorded with the one-comparison remedy named, for the issuer to route."
+  },
+  {
+   "item": "A PRODUCTION rebuild of the holdings snapshots on the new runner, and a production first-mint of the holdouts.",
+   "reason": "This order's bound: the rebuilt artifacts land under investor-reporting/qa/. The deployed function reads the PRODUCTION prefix, so the route currently serves the pre-holdout production snapshot until a cell that owns the production build runs it -- stated here rather than left to be discovered."
+  },
+  {
+   "item": "A staleness check on the custody clock (refusing a snapshot whose custody_as_of is more than N days behind the business date).",
+   "reason": "Named in RT7-AC2 head 1 as a class this cell's controls do NOT close, and deliberately not invented here: the check needs a per-firm tolerance (how many days behind the business date a custody clock may be) and no such value is declared anywhere in this project. A tolerance a worker picked would become a fact by repetition. The two clocks this cell DOES carry are what make the check writable at all."
+  }
+ ],
+ "surprises": [
+  "IRPT_BCKEND-W1-S14: the issuer amendment's FIRST ACT (rebuild irpt-common, remove carried_forward_members, repoint 3 of 3 functions) writes seven paths this order's <paths> grant does not name -- and the ordered outcome was MEASURED to be already true: the live irpt-common:5 carries 9 of 9 declared members and 3 of 3 consumers already read it, so the amendment's own 'record that and repoint only' branch applies. BLOCKING, INERT, disarm owner 2.0.0_SA_COO~B.",
+  "IRPT_BCKEND-W1-S15: this order's bound says the api plan shows 'only the added integration and route target; any other line is a STOP', and the measured plan carries three lines because api/integrations.tf couples the invoke permission to the same for_each. All three are keyed 'holdings', 0 changed and 0 destroyed; without the permission the route answers 5xx from inside the auth boundary. OBSERVATION, INERT.",
+  "IRPT_BCKEND-W1-S16: _authz.Enforcer.covers() admits ANY advisor id for a FIRM_OPERATIONS or OPAL_GLOBAL viewer, including another firm's, while its own docstring says 'within the verified firm' -- measured as 5 of 6 swaps refused on that plane against 6 of 6 on the FIRM_ADVISOR plane. No cross-firm bytes are reachable through it. OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~B to route."
+ ],
+ "compiler_tools": [
+  {
+   "tool": "the RT7-AC1 battery (this worker's)",
+   "invocation": "timeout 900 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_rt_7.py",
+   "result": "rc=0 -- '\"overall_pass\": true' then 'IBRT7-HOLDINGS-SERVED'."
+  },
+  {
+   "tool": "infra/aws/lambda/ci/build-and-upload.sh (the estate's own build, both gates)",
+   "invocation": "bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-holdings",
+   "result": "rc=0. 'OK: import-closure -- 6 packaged .py file(s), every top-level import satisfied by package/stdlib/runtime/layer' and 'OK: index-gate ran-sentinel present (members=4 pin=2f0cb688de)'. zip sha256 yOiMCrewFEMtE6GCJzBjNdLQsRpliY8zrM3t1AMyynI=, 50073 bytes, S3 write VERIFIED with a sha256 metadata match. The FIRST build printed the ADVISORY instead, which is why BUILD_MANIFEST.json exists."
+  },
+  {
+   "tool": "comp-iam service (preflight Phase 1, the face's own requirement)",
+   "invocation": "comp-iam service irpt-holdings",
+   "result": "irpt-holdings-role: 3 statements -- its own log group; s3:GetObject on arn:aws:s3:::${b}/investor-reporting/* for the three firm buckets; a prefix-CONDITIONED s3:ListBucket. Nothing that mutates. The tool also surfaced irpt-holdings-snapshot-scheduler-role (0 statements, directory/schedule.tf) -- IB-s-12's DISABLED schedule slot, not this cell's and not touched."
+  },
+  {
+   "tool": "comp-iam gaps (preflight Phase 2)",
+   "invocation": "comp-iam gaps",
+   "result": "'Total: 12 missing | 291 deny-present | 1 coverage-unknown | 2 resource-mismatch across 31 service(s)'. 0 rows name irpt-holdings (measured by counting matching lines in the tool's own output). BLIND SPOT carried from the face: DESIRED plane only, and a GRANTED-BROAD wildcard cannot be falsified by a resource check."
+  },
+  {
+   "tool": "the estate's terraform binary, by the path the face names",
+   "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/{holdings,api} plan -no-color -input=false",
+   "result": "Both roots: 'No changes. Your infrastructure matches the configuration.' Re-run inside battery arm (e) on every run, never cited from the apply."
+  },
+  {
+   "tool": "aws apigatewayv2 get-routes / lambda get-function-configuration (live plane)",
+   "invocation": "aws apigatewayv2 get-routes --api-id 7k3ed8px20 ; aws lambda get-function-configuration --function-name irpt-holdings",
+   "result": "GET /api/scoped/investor-reporting/holdings/{accountSetId} -> integrations/6ouz1v4, CUSTOM, naqxlm; CodeSha256 yOiMCrewFEMtE6GCJzBjNdLQsRpliY8zrM3t1AMyynI=, handler snapshot.lambda_handler, layer irpt-common:5, role irpt-holdings-role."
+  },
+  {
+   "tool": "python -m pytest over the two suites this cell wrote",
+   "invocation": "python -m pytest infra/aws/lambda/investor-reporting/holdings/tests and data/assets/scripts/gold/investor_reporting/tests/test_holdouts.py",
+   "result": "22 passed (handler) and 12 passed (the holdouts and the two clocks)."
+  }
+ ]
+}
