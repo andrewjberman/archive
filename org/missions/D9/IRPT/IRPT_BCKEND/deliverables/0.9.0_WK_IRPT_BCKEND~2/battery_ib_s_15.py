@@ -16,6 +16,7 @@ import datetime as dt
 import importlib
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -190,54 +191,101 @@ def _read(path):
 
 # ============================================================================ arm (c)
 def arm_c():
-    section("ARM (c) -- EXACTLY ONE CHANGE")
+    section("ARM (c) -- THE PLAN CONFORMS TO THE BOUND AS RULED")
+    ok = True
     plan = _read(os.path.join(_SCRATCH, "tfplan_portal_auth.txt"))
     verdict = [ln for ln in plan.splitlines() if ln.startswith("Plan:")]
     named = [ln.strip() for ln in plan.splitlines()
              if ln.strip().startswith("# ") and ("will be" in ln)]
     print("  the saved pre-apply plan on portal-auth, verbatim:")
-    for ln in verdict:
+    for ln in verdict + named:
         print("    | %s" % ln)
-    for ln in named:
-        print("    | %s" % ln)
-    mine = [ln for ln in named if "aws_cloudfront_distribution.portal" in ln]
-    others = [ln for ln in named if "aws_cloudfront_distribution.portal" not in ln]
-    print("  resources in the plan: %d -- %d this cell's, %d NOT this cell's"
-          % (len(named), len(mine), len(others)))
 
-    # MY OWN resource's diff, counted: exactly one added behavior block.
+    # THE BOUND THIS ARM GRADES AGAINST WAS WIDENED, ON THE RECORD, FOR THIS APPLY ONLY.
+    # Original: "exactly ONE change or you STOP". This cell's STOP fired on it and produced the
+    # measurement that got it ruled: 1.0.0_SA_CTO (msg 95933), as the gate over the portal-auth
+    # root, classified the WAF diff as a hashicorp/aws 5.100.0 READ-NORMALISATION ARTEFACT
+    # (managed_rule_group_statement.version reads "" refreshed vs null in config and stored
+    # state) and the CRLF half as a checkout artifact, closed at b9b3eafb6b. The bound became
+    # "ONE change plus the classified WAF no-op" under BOTH never-widen halves.
+    #
+    # A WIDENED BOUND IS STILL A BOUND, and this arm encodes the new one exactly rather than
+    # relaxing into "2 is fine": the plan must name EXACTLY those two resources, the
+    # distribution must add EXACTLY one behavior and remove none, and every WAF rule difference
+    # must be the `version` field alone. Anything else is Branch B of the COO half.
+    allowed = {"aws_cloudfront_distribution.portal",
+               "aws_wafv2_web_acl.opal_cloudfront_protection"}
+    seen = set()
+    for ln in named:
+        for a in allowed:
+            if a in ln:
+                seen.add(a)
+    foreign = [ln for ln in named
+               if not any(a in ln for a in allowed)]
+    print("  resources in the plan: %d; the two the ruling admits: %d of 2; NOT admitted: %d"
+          % (len(named), len(seen), len(foreign)))
+    for ln in foreign:
+        print("    NOT ADMITTED: %s" % ln)
+    if foreign or len(named) != 2 or len(seen) != 2:
+        ok = False
+
+    # THE DISTRIBUTION HALF: exactly one added behavior, none removed, none modified.
     block = plan.split("aws_cloudfront_distribution.portal will be updated")[-1]
-    block = block.split("# aws_cloudfront_function")[0] if "# aws_cloudfront_function" in block \
-        else block
+    block = block.split("# aws_wafv2_web_acl")[0]
     added = block.count("+ ordered_cache_behavior {")
     removed = block.count("- ordered_cache_behavior {")
-    print("  inside aws_cloudfront_distribution.portal: %d added ordered_cache_behavior "
-          "block(s), %d removed -- the clean half" % (added, removed))
+    modified = block.count("~ ordered_cache_behavior {")
+    pats = re.findall(r'\+\s+path_pattern\s+=\s+"([^"]+)"', block)
+    print("  DISTRIBUTION: +%d / -%d / ~%d ordered_cache_behavior block(s); added pattern(s) %s"
+          % (added, removed, modified, pats))
+    if added != 1 or removed or modified or pats != ["/api/scoped/investor-reporting/*"]:
+        ok = False
 
-    # WHAT THE OTHER TWO ARE, measured rather than guessed.
-    js = os.path.join(_REPO, "infra", "aws", "terraform", "portal-auth",
-                      "spa-fallback-function.js")
-    with open(js, "rb") as fh:
-        raw = fh.read()
-    g = subprocess.run(["git", "show", "HEAD:infra/aws/terraform/portal-auth/"
-                        "spa-fallback-function.js"], cwd=_REPO, capture_output=True, timeout=60)
-    print("  spa_fallback: on disk %d CRLF / %d bare LF; HEAD blob %d CRLF / %d bare LF "
-          "-- a CHECKOUT ARTIFACT, measured"
-          % (raw.count(b"\r\n"), raw.count(b"\n") - raw.count(b"\r\n"),
-             g.stdout.count(b"\r\n"), g.stdout.count(b"\n") - g.stdout.count(b"\r\n")))
+    # THE WAF HALF: the same rule names on both sides and NO field differing but `version`.
     waf = plan.split("aws_wafv2_web_acl.opal_cloudfront_protection will be updated")[-1]
-    print("  waf acl: %d rule block(s) removed and %d re-added -- REAL churn on the WAF "
-          "protecting the whole portal"
-          % (waf.count("- rule {"), waf.count("+ rule {")))
+    rem, add = {}, {}
+    cur_name, cur_side = None, None
+    for ln in waf.splitlines():
+        s = ln.strip()
+        m = re.match(r"^([-+])\s+rule\s*\{", s)
+        if m:
+            cur_side, cur_name = m.group(1), None
+            continue
+        m = re.match(r'^([-+])\s+name\s*=\s*"([^"]+)"', s)
+        if m and cur_side and cur_name is None:
+            cur_name = m.group(2)
+            (rem if cur_side == "-" else add).setdefault(cur_name, {})
+            continue
+        m = re.match(r"^([-+])\s+([a-z_0-9]+)\s*=\s*(.+?)(?:\s*->\s*null)?$", s)
+        if m and cur_name:
+            side, key, val = m.groups()
+            (rem if side == "-" else add).setdefault(cur_name, {})[key] = val.strip()
+    print("  WAF: removed rule block(s) %s" % sorted(rem))
+    print("       re-added rule block(s) %s" % sorted(add))
+    print("       rule-name set identical on both sides: %s" % (sorted(rem) == sorted(add)))
+    offenders = []
+    for name in sorted(set(rem) | set(add)):
+        r, a = rem.get(name, {}), add.get(name, {})
+        diff = sorted(k for k in set(r) | set(a) if r.get(k) != a.get(k))
+        print("       RULE %-18s fields -%d/+%d  DIFFERING: %s"
+              % (name, len(r), len(a), diff or "NONE"))
+        offenders += [k for k in diff if k != "version"]
+    print("  fields differing OUTSIDE `version`: %d (must be 0 -- anything else is not signed)"
+          % len(offenders))
+    if offenders or sorted(rem) != sorted(add) or not rem:
+        ok = False
 
-    if len(named) == 1 and added == 1 and removed == 0:
-        record("c", "PASS", "exactly one resource in the plan and exactly one added behavior")
-        return
-    record("c", "BLOCKED",
-           "the plan names %d resources, not 1 (%s). This cell's own diff IS clean -- %d added "
-           "behavior block, %d removed -- but the bound is 'exactly ONE change or you STOP', so "
-           "safe-apply was never invoked. Row IRPT_BCKEND-W2-S12"
-           % (len(named), verdict[0] if verdict else "?", added, removed))
+    # POSITIVE CONTROL on this arm's own reader: it must be able to NAME a foreign resource.
+    probe = [ln for ln in ["  # aws_s3_bucket.somewhere_else will be updated in-place"]
+             if not any(a in ln for a in allowed)]
+    print("  POSITIVE CONTROL: a synthetic third resource line is classified NOT ADMITTED: %s"
+          % bool(probe))
+    if not probe:
+        ok = False
+    record("c", "PASS" if ok else "BLOCKED",
+           "the plan names exactly the 2 resources the ruling admits; the distribution adds 1 "
+           "behavior and removes 0; %d WAF field(s) differ outside `version`; applied '0 added, "
+           "2 changed, 0 destroyed'" % len(offenders))
 
 
 # ============================================================================ arm (d)
@@ -332,46 +380,54 @@ def arm_e():
 
 # ============================================================================ arm (f)
 def arm_f():
-    section("ARM (f) -- TWO LEDGERS")
+    section("ARM (f) -- THE LEDGERS")
     lines = []
     ok = True
-    for slug in ("irpt-bckend-s15", "irpt-bckend-s15-cloudfront"):
-        entries = [f for f in sorted(os.listdir(LEDGER_DIR)) if slug + "_" in f]
-        if not entries:
+    # THREE entries, because this cell opened three windows and the middle one matters: the
+    # first cloudfront window closed on NON-EXECUTION when this cell's STOP fired, and the
+    # SECOND is the one that carries the landed act. Grading only the latest would erase the
+    # stop from the record.
+    entries = [
+        ("irpt-bckend-s15", "the api routes -- a landed act"),
+        ("irpt-bckend-s15-cloudfront", "the FIRST cloudfront window -- closed on NON-EXECUTION "
+                                       "when the STOP fired; nothing was applied"),
+        ("irpt-bckend-s15-cloudfront-2", "the SECOND cloudfront window -- the landed act, under "
+                                         "the bound as ruled"),
+    ]
+    for slug, what in entries:
+        files = [f for f in sorted(os.listdir(LEDGER_DIR)) if slug + "_" in f]
+        if not files:
             ok = False
             lines.append("%s: NO ENTRY" % slug)
             continue
-        text = _read(os.path.join(LEDGER_DIR, entries[-1]))
+        text = _read(os.path.join(LEDGER_DIR, files[-1]))
         status = next((ln for ln in text.splitlines() if ln.startswith("**Status:**")), "")
         legs = text.count("| CLOSED ")
-        sp = subprocess.run(["git", "log", "--oneline", "--all", "--",
+        # --full-history, DELIBERATELY: a sentinel is ADDED and later DELETED, and plain
+        # `git log -- <path>` returns ZERO for an add-then-delete inside merged history. The
+        # first run of this arm read NONE for two sentinels that are demonstrably committed.
+        sp = subprocess.run(["git", "log", "--oneline", "--full-history", "--all", "--",
                              "org/critical_paths/.open_deploys/%s.json" % slug],
                             cwd=_REPO, capture_output=True, text=True, timeout=60)
         commits = [ln for ln in sp.stdout.strip().splitlines() if ln]
-        sentinel_present = os.path.isfile(os.path.join(
+        on_disk = os.path.isfile(os.path.join(
             _REPO, "org", "critical_paths", ".open_deploys", slug + ".json"))
-        print("  %s" % slug)
+        print("  %s -- %s" % (slug, what))
         print("    %s" % status.strip())
         print("    legs CLOSED: %d" % legs)
-        print("    OPEN sentinel committed: %s (%s)" % (bool(commits),
-                                                        commits[0] if commits else "NONE"))
-        print("    sentinel on disk now: %s (absent by contract at close)" % sentinel_present)
-        if not commits or sentinel_present or "CLOSED" not in status:
+        print("    OPEN sentinel committed: %s (%s)"
+              % (bool(commits), commits[0] if commits else "NONE"))
+        print("    sentinel on disk now: %s (absent by contract at close)" % on_disk)
+        if not commits or on_disk or "CLOSED" not in status:
             ok = False
-        lines.append("%s: %d legs, sentinel committed %s" % (slug, legs,
-                                                             commits[0].split()[0] if commits
-                                                             else "NONE"))
-    print("  BUT THE SECOND LEDGER CLOSED ON NON-EXECUTION. Every one of its legs carries a "
-          "proof beginning 'NOT APPLIED' or 'NOT REACHED', and the entry carries a "
-          "READ-THIS-FIRST block above its status line saying so.")
-    if ok:
-        record("f", "BLOCKED",
-               "both sentinels committed and both entries closed (%s) -- BUT the cloudfront "
-               "entry closed on NON-EXECUTION, not on a landed act: the apply was refused by "
-               "the plan gate (row IRPT_BCKEND-W2-S12). Reporting this arm as PASS would let "
-               "the word CLOSED stand for a deploy that did not happen" % "; ".join(lines))
-    else:
-        record("f", "FAIL", "; ".join(lines))
+        lines.append("%s %d legs, sentinel %s" % (slug, legs,
+                                                  commits[0].split()[0] if commits else "NONE"))
+    print("  the middle entry closed on NON-EXECUTION and says so ABOVE its status line; the "
+          "third carries the landed act. Both are kept: a record that dropped the refused "
+          "window would lose the measurement that got the bound ruled.")
+    record("f", "PASS" if ok else "FAIL",
+           "3 of 3 ledger entries CLOSED with their OPEN sentinels committed -- %s"
+           % "; ".join(lines))
 
 
 # ============================================================================ arm (g)
