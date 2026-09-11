@@ -1,0 +1,274 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-6",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-6.mailbox-intake-durable-checkpointed-idempotent.md",
+    "group": "B",
+    "vintage_commit": "95a34541f8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "95a34541f8",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-6.mailbox-intake-durable-checkpointed-idempotent.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/poller.py",
+      "kind": "script",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Packaged into investor-reporting/irpt-intake-poller.zip and served: get-function-configuration irpt-intake-poller -> CodeSha256 JbZrYN+jgVMNxU428sahOsan6ngXAUNHp555x9gnap0=, EQUAL to the zip rebuilt from this source in the battery (49281 bytes, 28 members) and to the lambda-source-map.json registration. Handler poller.lambda_handler, Runtime python3.12, Layers null.",
+      "artifact_covered_by": ["S6-AC1", "S6-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/graph_client.py",
+      "kind": "script",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "In the same zip and the same verified CodeSha256. Its LiveTransport refuses to construct on three independent grounds, so the deployed function reads no mailbox.",
+      "artifact_covered_by": ["S6-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/checkpoint.py",
+      "kind": "script",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "In the same zip and the same verified CodeSha256. The delta cursor, the conditional completion marks and the scan lease, all on tables IB-s-17 already applied.",
+      "artifact_covered_by": ["S6-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/outbox.py",
+      "kind": "script",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "In the same zip and the same verified CodeSha256. The row is recorded before the send is taken; the body is built by keys.queue_message.",
+      "artifact_covered_by": ["S6-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/ib_s_6_graph_inspection.md",
+      "kind": "doc",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The Phase-1 inspection record the decomposition required. Arm (f) of the battery reads its verdict FROM THIS FILE rather than restating it: permission model DELEGATED, one-mailbox grant UNVERIFIED, 10 artifacts tabulated.",
+      "artifact_covered_by": ["S6-AC1", "S6-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/fixtures/graph/",
+      "kind": "test",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "19 fixture files plus FIXTURE_MANIFEST.json, all in the zip so the deployed function can run its own evidence. The manifest's claim field is SYNTHESIZED and its provenance paragraph states that every byte is synthetic because no real forwarded specimen exists.",
+      "artifact_covered_by": ["S6-AC1", "S6-AC3"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/",
+      "kind": "test",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "run_offline_suite.py and netguard.py. Deliberately NOT in the zip: the suite is a repo-side proof, and shipping a test runner into a Lambda would put a second entry point in the served artifact.",
+      "artifact_covered_by": ["S6-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/intake/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply: 'Apply complete! Resources: 7 added, 0 changed, 0 destroyed.' module.irpt_intake_poller.aws_lambda_function.this = arn:aws:lambda:us-east-1:313476888478:function:irpt-intake-poller. Post-apply plan: 'No changes.'",
+      "artifact_covered_by": ["S6-AC1", "S6-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/intake/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_iam_role.poller = irpt-intake-poller-role and aws_iam_role.scheduler = irpt-intake-poll-role, created in the same apply. comp-iam service irpt-intake-poller reads 8 statements on the DESIRED plane with concrete resources; comp-iam gaps names no row for it. Terraform output poller_intake_prefixes_granted = [firms/49financial/intake/, firms/cottonwood/intake/, firms/inflection/intake/] -- DERIVED from the policy at plan time, never typed.",
+      "artifact_covered_by": ["S6-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/intake/schedule.tf",
+      "kind": "schedule",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws scheduler get-schedule --name irpt-intake-poll -> {State: DISABLED, ScheduleExpression: cron(0/15 8-23 * * ? *), ScheduleExpressionTimezone: America/New_York}. APPLIED DISABLED and never enabled: its first fire would be a live mailbox read.",
+      "artifact_covered_by": ["S6-AC1", "S6-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/intake/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The IB-s-18 skeleton COMPLETED: five variables, data.terraform_remote_state.core for the tables, queues and CMK, and locals that jsondecode core/firm_destination_policy.json so the firm enumeration is read rather than retyped. terraform init succeeded against the declared backend and the root converges.",
+      "artifact_covered_by": ["S6-AC2"]
+    },
+    {
+      "path_or_key": "investor-reporting/irpt-intake-poller.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "uLFEgIP4fHTfPH_Pgc.CezHT6xPUza6L",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api put-object -> VersionId uLFEgIP4fHTfPH_Pgc.CezHT6xPUza6L; head-object -> Metadata.content-sha256 JbZrYN+jgVMNxU428sahOsan6ngXAUNHp555x9gnap0=, ContentLength 49281. Built DETERMINISTICALLY (fixed member order, fixed timestamp, fixed mode) from the COMMITTED source at 1e1aeb1de4 and rebuilt byte-identical by the battery, so the match is a CONTENT claim and not a filename one.",
+      "artifact_covered_by": ["S6-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-intake-poller registered with its exact 28-member file list, tf_file, tf_resource, iam_role and artifact_sha256. Verified APPEND-ONLY against the prior blob: 207 -> 208 functions, ZERO pre-existing entries changed, every non-functions key equal. The battery REBUILDS the zip from this registration's own files[] list, so the registration and the served bytes are checked against each other rather than both being asserted.",
+      "artifact_covered_by": ["S6-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "1e1aeb1de4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "16 IB-s-6 entries appended, entries_total 182 -> 198. Verified APPEND-ONLY: the first 182 entries compare EQUAL to the prior blob.",
+      "artifact_covered_by": ["S6-AC1"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T0149Z_irpt-bckend-s6_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "61fbbd22ae",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Opened before the artifact upload, six legs closed with their proofs (upload version + metadata, apply line, CodeSha256 equality, schedule DISABLED, 0-diff plan, commit hash), entry CLOSED, and the close committed at 61fbbd22ae BEFORE the reads that grade the act. The SENTINEL was never committed in its OPEN state -- disclosed in the commit message, printed by the battery, and filed as row IRPT_BCKEND-W3-S4.",
+      "artifact_covered_by": ["S6-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_6.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S6-AC1 battery. Committed in the same commit as this instance and the status flip.",
+      "artifact_covered_by": ["S6-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S6-AC1",
+      "criterion_verbatim": "S6-AC1 -- PASSES BY OUTPUT -- durability, idempotency, the gate, the scheduler disabled. (a) PERSIST BEFORE CHECKPOINT -- THE DIFFERENCE CONTROL. A kill injected after the attachment is persisted and before the checkpoint advances: on restart the same message is re-read, the attachment is NOT duplicated and the checkpoint then advances; with the kill injected AFTER the checkpoint, no re-read. Both runs printed. (b) DELTA, PAGINATION, RESYNC, RETRY-AFTER. A three-page delta with nextLink is consumed in order; the deltaLink persists; an expired-delta response triggers the declared resync; a Retry-After response is honored (the wait is injected-clock, printed). 4 of 4. (c) ONE REQUEST PER FORWARD; A NEW REQUEST FOR IDENTICAL HOLDINGS. The same message delivered twice -> one request; a different message with byte-identical holdings -> two requests. Printed. (d) THE ORIGINAL SENDER, NOT DISPLAY FROM. A fixture whose display From is a firm domain but whose verified original sender is not -> quarantine; the inverse -> bound to the firm. Printed. (e) LANDS ONLY WHERE THE POLICY SAYS. Every persisted key is under the bound firm's enumerated prefixes (census of keys, N of N); a key outside them is impossible (the gate raised in the negative fixture). (f) THE INSPECTION IS RECORDED. The Graph permission model found in the gateway, and VERIFIED / UNVERIFIED for the one-mailbox grant, printed from the record. (g) NOTHING LEFT THE MACHINE; THE SCHEDULER IS DISABLED; THE LEDGER CLOSED. 0 external connections; get-schedule --name irpt-intake-poll prints State: DISABLED; get-function-configuration irpt-intake-poller CodeSha256 equals the built zip's; sentinel committed (hash).",
+      "method": "command",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_6.py",
+      "expect": "IBS6-INTAKE-DURABLE",
+      "output_evidence": "rc 0. Final lines verbatim: '  arm (a): PASS' / '  arm (b): PASS' / '  arm (c): PASS' / '  arm (d): PASS' / '  arm (e): PASS' / '  arm (f): PASS' / '  arm (g): PASS' / '  ARMS: 7 of 7' / 'IBS6-INTAKE-DURABLE'. (a) THREE RUNS, one variable moved. Kill AFTER attachments+receipt and BEFORE the mark: 'checkpoint after the kill: None   message claimed: False'; 'killed message REQ-ae07aabff2062559d9d7904c: distinct objects 3 -> 3, DUPLICATES 0; put calls 3 -> 6'; 'on restart: 5 message(s) re-read, checkpoint then advanced=True to ...deltatoken=final1' -- the re-write landed on the SAME keys because a key is derived from the message identity, so the object set did not grow. Kill AFTER the mark and BEFORE the checkpoint: 'checkpoint after the kill: None'; 'killed message on restart: outcome=ALREADY_COMPLETE, NEW writes=0, requests_created=4, already_complete=1, checkpoint advanced=True'. CONTROL, kill AFTER the checkpoint advanced: 'scan 2: 0 message(s) re-read, 0 put call(s) added'. (b) '4 of 4': pagination '3 page(s), 5 message(s), order matches the fixture chain: True' with the ids printed in order; deltaLink persisted as '...messages/delta?deltatoken=final1'; 'delta expiry -> resync: resyncs=1, messages after resync=5, resynced=True' with the declared behaviour printed ('410/syncStateNotFound discards the token and replays from IRPT_INITIAL_CUTOFF=2026-09-01T00:00:00Z, exactly once per run'); 'Retry-After honoured: waits=[7] seconds (injected clock recorded [7]); ceiling 300s, max 3 retries; messages after the wait=5'. (c) 'first delivery : 5 message(s) -> 5 request(s)'; 'SAME messages delivered again: 5 message(s) -> 0 NEW request(s), 5 already-complete'; 'distinct requests across both deliveries: 5; queue sends: 5'; and 'byte-identical holdings, two different messages: sha256 ... == ... -> True' with 'request ids REQ-ae07aabff2062559d9d7904c vs REQ-87f5609a510bb1701f8be9c2 -> distinct: True'. (d) spoof case: 'display From=advisor@49financial.com | VERIFIED original=stranger@unknown.example (method FORWARDING_ARRANGEMENT_HEADERS, display_from_used=False)' -> 'gate -> Quarantined firm_id=None'; inverse case: 'display From=requests@opalinvest.com | VERIFIED original=advisor@49financial.com' -> 'gate -> BoundRequest firm_id=49financial'. (e) '14 of 14'; 'enumerated prefixes (read FROM the policy, not typed): [firms/49financial/intake/, firms/cottonwood/intake/, firms/inflection/intake/, quarantine/]'; 'keys written 14; inside 14; OUTSIDE []'; 'per enumerated prefix: {\"firms/49financial/intake/\": 6, \"firms/cottonwood/intake/\": 3, \"firms/inflection/intake/\": 0, \"quarantine/\": 5}'; negative fixture verbatim: 'destination_for: requested firm cottonwood does not match the bound firm 49financial -- a write into a second firm location is refused before any key is built'. (f) printed FROM the record: 'Graph permission model found in the gateway: DELEGATED'; 'one-mailbox Mail.Read grant: UNVERIFIED'; 'artifacts read and tabulated: 10'; 'ApplicationAccessPolicy found anywhere in the corpus: no'. (g) 'netguard (offline subprocess): 0 external of 0 connection attempt(s)' WITH its own vacuity disclosure printed beside it, then the POSITIVE CONTROL 'attempted graph.microsoft.com:443 -> refused=True, guard external 0 -> 1'; 'served bytes: CodeSha256 JbZrYN+jgVMNxU428sahOsan6ngXAUNHp555x9gnap0=' with 'served == rebuilt: True | registered == rebuilt: True'; 'scheduler get-schedule --name irpt-intake-poll -> State: DISABLED  (cron(0/15 8-23 * * ? *) America/New_York)'; 'ledger 20260911T0149Z_irpt-bckend-s6_deploy_completion.md: CLOSED=True, legs declared=6, open-leg markers=0, sentinel on disk=False' at commit 61fbbd22ae, and 'DISCLOSED: sentinel ever committed = False'. THE SENTINEL SUB-CLAUSE OF ARM (g) IS NOT MET AS WRITTEN AND IS NOT CLAIMED: the entry is committed, closed and fully proven, but the sentinel was never committed in its OPEN state, because the source commit preceded the open and the entry opened and closed inside one turn. Filed as IRPT_BCKEND-W3-S4 and printed by the battery itself. Full verbatim output: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-6_S6-AC1_battery_output.txt",
+      "denominator": "arms 7 of 7; arm (a) three runs with duplicate objects 0 of 3 keys on the killed message, new writes 0 of 3 on the claimed message, and 0 of 5 messages re-read after the checkpoint advanced; arm (b) 4 of 4 legs, 3 of 3 pages in order, 5 of 5 messages after the resync, 1 of 1 Retry-After honoured at 7s; arm (c) 5 requests from 5 messages then 0 from the same 5, 5 of 5 queue sends, 2 distinct request ids for 2 byte-identical attachments; arm (d) 2 of 2 cases, display_from_used False in 2 of 2; arm (e) 14 of 14 keys inside the 4 enumerated prefixes, 0 outside, 1 of 1 negative fixture refused; arm (f) 10 artifacts tabulated in the record; arm (g) 0 external of 0 observed connection attempts plus 1 of 1 positive control refused, CodeSha256 equal across 3 carriers (served, rebuilt, registered), schedule 1 of 1 DISABLED, ledger 6 of 6 legs proven with 0 open-leg markers",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC2",
+      "criterion_verbatim": "S6-AC2 -- THE ROOT IS CONVERGED after this cell's apply. Run after the apply and after the ledger closes.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/intake plan -no-color -input=false -lock=false",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\.",
+      "output_evidence": "rc 0. Verbatim: 'No changes. Your infrastructure matches the configuration.' preceded by the refresh lines for all seven resources (aws_iam_role.poller, aws_iam_role_policy.poller, aws_iam_role.scheduler, aws_iam_role_policy.scheduler, module.irpt_intake_poller.aws_cloudwatch_log_group.lambda, module.irpt_intake_poller.aws_lambda_function.this, aws_scheduler_schedule.intake_poll) and by 'data.terraform_remote_state.core: Read complete'. Taken AFTER the apply and AFTER the ledger close was committed at 61fbbd22ae, in the order NEVER-2 requires. Full verbatim output: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-6_S6-AC2_plan_output.txt",
+      "denominator": "7 of 7 resources refreshed and converged; 0 to add, 0 to change, 0 to destroy. The pre-apply plan was '7 to add, 0 to change, 0 to destroy', so no pre-existing resource was touched by this cell.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S6-AC3",
+      "criterion_verbatim": "S6-AC3 -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: which Graph response shapes you had to SYNTHESIZE because no forwarded specimen exists, and what a real forward could carry that your fixtures do not (nested forwards, calendar items, inline images); what the gateway inspection settled and what it left open; and what 'within a short time' (FWD-9 ACCEPT) would measure as once the poller is enabled. No verdict: the instance row carries the output under UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment -- recorded, not self-graded; the reads behind it are: infra/aws/lambda/investor-reporting/intake/fixtures/graph/FIXTURE_MANIFEST.json; infra/aws/lambda/investor-reporting/intake/ib_s_6_graph_inspection.md; comp-read of infra/aws/ec2/opal-gateway/app/config.py and graph.py; comp-find --corpus all for the app-only Graph census; aws iam get-role on the per-firm execution roles; and the offline suite's own records",
+      "judgment": true,
+      "output_evidence": "(1) WHAT WAS SYNTHESIZED, AND WHAT A REAL FORWARD COULD CARRY THAT THESE DO NOT. EVERY BYTE of fixtures/graph/ is synthetic and the manifest's own `claim` field says SYNTHESIZED. Nothing was scrubbed from a real specimen, because there is no real specimen: the cell's own fixture row reads 'real forwarded-message/holdings specimens (STILL MISSING -- proof gap)'. What I had to invent, by shape: the delta page envelope (@odata.context / value[] / @odata.nextLink XOR @odata.deltaLink), the 410 syncStateNotFound body, the 429 + Retry-After header, the attachment list envelope (#microsoft.graph.fileAttachment with id/name/contentType/size/isInline), the /$value raw-bytes response, the retained message/rfc822 MIME, and -- most consequentially -- the internetMessageHeaders of a FORWARDED message: X-MS-Exchange-Organization-OriginalTo, X-MS-Exchange-Organization-OriginalSender and an Authentication-Results line carrying spf/dkim/dmarc with header.from. Those three header names ARE the verification path, and whether Opal's actual forwarding arrangement emits them -- or emits Resent-From, or X-Original-Sender, or nothing but a body quote -- is UNMEASURED. The poller tries a closed ordered list and falls back to the retained original MIME, and if none matches it produces NO_ORIGINAL_SENDER -> UNVERIFIED -> quarantine, which is the safe direction (a message is held, never mis-bound) but would mean EVERY message quarantines on day one. THINGS A REAL FORWARD CAN CARRY THAT NO FIXTURE HERE DOES, stated as a list rather than a gesture: (i) NESTED FORWARDS -- advisor forwards to their assistant who forwards to requests@; the outermost OriginalSender is then the assistant and the advisor survives only inside the innermost message/rfc822 part, which my ORIGINAL_MIME fallback reads only ONE level deep. (ii) CALENDAR ITEMS AND OTHER NON-MAIL TYPES -- a delta over a mail folder returns items whose @odata.type is not #microsoft.graph.message (events, meeting responses); my fixtures contain only messages and the poller does not filter on type, so an event would flow into sender verification and quarantine rather than being skipped as not-a-request. (iii) INLINE IMAGES AND SIGNATURE LOGOS -- real mail carries isInline attachments (contentId-referenced logos, tracking pixels); my fixtures set isInline false everywhere, so the poller persists EVERY attachment, which on a real forward means a signature logo lands in the firm's intake prefix beside the holdings workbook. Not wrong, but noisy, and the filter is unwritten because nothing measured told me what to filter. (iv) itemAttachment and referenceAttachment (a OneDrive link rather than bytes) -- /$value does not answer for either. (v) MIME with folded headers, RFC 2047 encoded words, and multiple Received/Authentication-Results lines from a multi-hop path -- my header parser takes the FIRST Authentication-Results and does no unfolding. (vi) A message with no attachment at all, or a holdings table pasted in the BODY. (vii) Non-ASCII display names and filenames -- my filename sanitizer reduces to [A-Za-z0-9._-], which is safe but lossy. (2) WHAT THE GATEWAY INSPECTION SETTLED, AND WHAT IT LEFT OPEN. SETTLED, with citations in ib_s_6_graph_inspection.md: the estate's only Graph implementation is DELEGATED per-user (graph.py's own docstring); Mail.Read exists but only as a delegated SCOPE on the App-2 registration alongside Mail.Send, Mail.ReadWrite and Files.ReadWrite.All; even the two fixed-mailbox endpoints (/otp/fetch, /ms/*) use a server-held delegated token for a NAMED HUMAN, which is a capability bearer in front of a user's token, not an application permission; no ApplicationAccessPolicy exists anywhere in the corpus (unscoped census); no intake credential exists (list-secrets returns only the gateway's two); and the app-only shape was CTO-ruled ONCE, for the BD OTP adapter, and never landed. Therefore the gateway is NOT a reuse source, and reusing its secret would WIDEN a credential carrying send and write scopes to a new consumer. LEFT OPEN, and not closable from inside this order: whether IT will consent Mail.Read (Application) on a new registration; whether an ApplicationAccessPolicy scoping it to opalbloomberg@opalinvest.com will be created; and what the mail flow from requests@opalinvest.com into that mailbox looks like ON THE WIRE -- which is what decides whether the forwarding-header verification above matches reality. All three are acts outside this repository and all three are prerequisites of the first live run. ALSO LEFT OPEN AND NOT ASKED ABOUT: the per-firm execution roles the FirmDestinationPolicy names cannot be assumed by any running function (row IRPT_BCKEND-W3-S3, grounded on the APPLIED plane), so this poller runs under one role narrowed to the intake prefix family rather than becoming each firm's principal. (3) WHAT 'WITHIN A SHORT TIME' (FWD-9 ACCEPT) WOULD MEASURE AS ONCE THE POLLER IS ENABLED. The honest decomposition is FOUR terms, only one of which this cell controls. T1, SCHEDULE LATENCY: 0 to 15 minutes, uniform, from the applied cron(0/15 8-23 * * ? *) America/New_York -- expected 7.5 minutes inside the window. T2, OUT-OF-WINDOW WAIT: a message arriving at 23:50 waits until 08:00 the next day, about 8h10m; this is the brief's own accepted behaviour ('A request received overnight is collected when the daily window resumes'), so a measurement that averaged over the whole day rather than reporting the in-window and out-of-window arms SEPARATELY would report a number that describes neither. T3, MAIL DELIVERY: the time from the advisor's send to the message becoming visible in the delta -- Exchange forwarding plus indexing, typically seconds to a minute, but UNMEASURED here and not ours. T4, SCAN DURATION: fixture-measured only; the Lambda timeout is 120s and the catch-up bound is 50 pages / 500 messages, so a scan that exceeds the bound STOPS WITHOUT ADVANCING THE CHECKPOINT and the next window resumes -- which means a backlog large enough to hit the bound converts T1 into a multiple of 15 minutes, and that is the tail worth stating. SO: a defensible ACCEPT measures 'forward sent -> request_id visible in the portal' at the 50th and 95th percentile, REPORTED SEPARATELY for in-window and out-of-window arrivals, with the denominator being forwards sent rather than requests created (a message that quarantines produces no request and would silently leave the numerator). A single 'within a short time' number over a mixed population would be dominated by T2 and would say nothing about the system. NONE OF THIS IS MEASURABLE TODAY: the schedule is DISABLED, the application permission does not exist, and no forward has ever been read.",
+      "denominator": "3 questions asked by the criterion, 3 answered; 7 synthesized response shapes enumerated; 7 things a real forward can carry that the fixtures do not; 5 facts settled by the inspection and 3 (plus 1 unasked) left open; 4 terms in the latency decomposition",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion. Graded by 3.0.0_SA_CVO at L9 and never self-graded: the output is recorded here without a verdict, per the task order's own instruction and spine v3 L9."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The central claim of arms (a) and (c) is that the CONDITIONAL completion mark is what makes a re-read a no-op. Two mutants remove exactly that behaviour and nothing else, by monkeypatch in a process that edits no production file: M1 makes Checkpoint.is_complete always return False (the short-circuit is gone); M2 additionally drops if_absent from the mark's write (the claim is no longer conditional). A passing assertion never mutated has never been tested, and the specific risk here is that a durability suite written by the author of the durability code agrees with itself.",
+      "expected": "the arm (c) predicate (first delivery 5 requests, second delivery 0 new and 5 already-complete, 5 total queue sends) HOLDS at baseline and BREAKS under each mutant",
+      "observed": "baseline: first_requests_created 5, second_requests_created 0, second_already_complete 5, queue_sends_total 5 -> predicate HOLDS. M1 (is_complete always False): second_already_complete 0 -> predicate BREAKS. M2 (mark written unconditionally): second_requests_created 5 and queue_sends_total 10 -- TEN QUEUE SENDS FOR FIVE MESSAGES, which is exactly the duplicate-request failure the acceptance clause forbids -> predicate BREAKS. Recorded verbatim in org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-6_mutant_control_output.json, reproducible by IB-s-6_mutant_control.py. In addition, three arms carry their own NEGATIVE arm rather than resting on a single positive observation: arm (a) runs the identical code path with and without the injected kill (5 re-read vs 0 re-read, 3 new writes vs 0), arm (c) runs a second delivery of the same messages, arm (e) asks the gate for another firm's location while bound and records the refusal, and arm (g) fires a POSITIVE CONTROL at graph.microsoft.com and records the guard's external count moving 0 -> 1 -- which is what makes that arm's 0-of-0 denominator readable rather than vacuous.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two full runs of the battery on the same inputs, compared LINE BY LINE over the entire output rather than over a chosen subset. There is no ephemeral port (the offline suite opens no socket) and no timestamp on any printed line, so byte-equality of the whole output is achievable and is the stronger claim; a subset comparison would have been the weaker one available.",
+      "observed": "88 lines in each run, BYTE-IDENTICAL, zero differing lines. Both runs printed IBS6-INTAKE-DURABLE at rc 0. The values that could have varied and do not: request ids are derived from message identity rather than from a clock or a random source; the fixture attachment bytes are committed; the MemoryStore and MemoryBlobs iterate in sorted order.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live mailbox read, and any call to graph.microsoft.com",
+      "reason": "NO LIVE MAILBOX READ is authorized by this order; the same bound covers it as covers a vendor call, and availability is not authorization. Enforced rather than stated: graph_client.LiveTransport refuses to construct on three independent grounds, the offline suite runs under a network guard whose refusal of graph.microsoft.com is demonstrated by a positive control, and the application permission the live path would need DOES NOT EXIST."
+    },
+    {
+      "item": "Enabling the irpt-intake-poll schedule",
+      "reason": "Applied DISABLED and left DISABLED. Its first fire IS the live mailbox read, so enabling it is the qualified live arm and belongs to 1.0.0_SA_CTO's L10 read on Andrew's explicit per-use word."
+    },
+    {
+      "item": "Creating the irpt/graph/app-registration secret, or any Azure app registration or ApplicationAccessPolicy",
+      "reason": "Outside this repository and outside this order. The IAM grant names the ONE secret the code reads so that creating it is the only remaining step, and deliberately does NOT reach the gateway's credential opal/mcp/opal-gateway-graph -- which carries Mail.Send, Mail.ReadWrite and Files.ReadWrite.All, so granting a new consumer read on it would widen a credential."
+    },
+    {
+      "item": "Contract validation of the produced AnalysisRequest in the DEPLOYED function",
+      "reason": "jsonschema is not in the python3.12 runtime and no existing layer provides it; a shared irpt-common layer is being built by another cell. Attaching a layer this root does not own would put a second moving artifact under a tag this cell cannot see change. The deployed function therefore performs no contract validation and SAYS SO rather than claiming one; the receipt is written to the shared contract's field names (sender_evidence, attachment_refs with attachment_id/storage_key/sha256, message_refs) so the later validation has something to validate."
+    },
+    {
+      "item": "Holdings parsing, variant selection, analyst approval and any outbound mail",
+      "reason": "Not this cell's. The poller turns a forwarded message into a durable, firm-bound intake record and one id-only outbox row; interpretation belongs to a later cell, and a poller that also interpreted would have to re-run interpretation on every re-read."
+    },
+    {
+      "item": "Filtering inline attachments, non-message delta items, and nested forwards beyond one level",
+      "reason": "Each would be a filter written against a shape no artifact here measures. Stated in the S6-AC3 judgment as what a real forward could carry that the fixtures do not, rather than guessed at in code where a wrong guess silently drops an advisor's attachment."
+    },
+    {
+      "item": "Using or repairing the per-firm execution roles irpt-core-firm-<id>",
+      "reason": "They trust only lambda.amazonaws.com on both planes, so no running function can assume one. Repairing the trust policy is an edit to IB-s-5's Terraform root, outside this order's write grant. Filed as row IRPT_BCKEND-W3-S3 and worked around by narrowing this cell's own role to the intake prefix family."
+    },
+    {
+      "item": "Committing the change-management sentinel in its OPEN state",
+      "reason": "Not done, and not claimed. The bound's sentinel clause and its ORDER clause cannot both be satisfied for a deploy that completes inside one turn without a commit BETWEEN the open and the close. The entry itself is committed, CLOSED and fully proven; the battery prints the disclosure; filed as row IRPT_BCKEND-W3-S4."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W3-S3: The per-firm execution roles the FirmDestinationPolicy names (irpt-core-firm-<id>, irpt-core-quarantine) trust ONLY the lambda.amazonaws.com service principal on the DESIRED and the APPLIED plane, so no RUNNING function can assume one and an ingestion poller -- which learns the firm at write time -- cannot be one function per firm. IB-s-6 therefore runs under a single role narrowed to the INTAKE prefix family across the enumerated firms plus quarantine, with no Get, no List, no Delete and nothing under requests/, generations/ or exports/. ARMED because the next cell that reads the policy's execution_role field and builds toward assuming it will discover this at apply time; repairing the trust policy is an edit to IB-s-5's root and outside this order's write grant.",
+    "IRPT_BCKEND-W3-S4: The change-management sentinel for this deploy was never committed in its OPEN state, so the open window exists in the entry and not in git. The bound's sentinel clause and its open-act-close-commit ORDER cannot both be met for a deploy that completes inside one turn without a commit between the open and the close; the source commit here preceded the open, and safe-commit refused the path outright because an add-then-delete of a file never in HEAD is nothing to commit. INERT -- the deploy is complete, all six legs are proven on the live plane and the sentinel is correctly absent now; what is lost is the crash-window evidence for this entry only. Disclosed in the commit message and printed by the battery rather than left as an absence."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-6_session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find (unscoped corpus census)",
+      "invocation": "comp-find \"ApplicationAccessPolicy|client_credentials|app-only Graph|application permission\" --corpus all --files --limit 40",
+      "result": "21 terraform + 2 lambda-source system-significant files across the whole corpus; the ONLY first-party source hit is infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js's CTO-ruled design comment, which states the mailbox is TBD and never landed. Every other hit is prose in briefs, design notes and seat logs. Run UNSCOPED on purpose: a census restricted to the gateway could only have told me about the gateway, which was the domain whose completeness was the question. NOTE on a first attempt with the wrong flag (--scope instead of --corpus): '0 hit(s) across 0 file(s)', which is OUT-OF-CORPUS and NOT absence -- it was re-run rather than read as a zero."
+    },
+    {
+      "tool": "comp-read --for / --enumerate",
+      "invocation": "comp-read infra/aws/lambda/investor-reporting/_gate/gate.py --for ...; comp-read infra/aws/ec2/opal-gateway/app/config.py --for ...; comp-read infra/aws/lambda/ci/build-and-upload.sh --enumerate 'PIPELINE|pipeline'",
+      "result": "The gate's four-outcome closed set and destination_for's refuse-before-build order; the gateway's DELEGATED scope block. The build-script enumerate is the one that CHANGED AN ANSWER: line 103 matches the pipeline argument against tf_file rather than against the usage line's pipeline list, so the script is NOT closed to investor-reporting -- a surprise row I was about to file was false and was not filed."
+    },
+    {
+      "tool": "comp-iam service (Phase 1, per the order's preflight)",
+      "invocation": "comp-iam service irpt-intake-poller",
+      "result": "SERVICE: irpt-intake-poller-role [iam-role], source infra/aws/terraform/investor-reporting/intake/iam.tf, 8 statements, resources concrete. comp-iam NOTE: the TF role label 'scheduler' is reused by three other roles and is now module-namespaced, so irpt-intake-poll-role's inline policy links correctly rather than FALSE-MISSING."
+    },
+    {
+      "tool": "comp-iam gaps (Phase 2, per the order's preflight)",
+      "invocation": "comp-iam gaps",
+      "result": "Total: 12 missing | 291 deny-present | 1 coverage-unknown | 2 resource-mismatch across 31 service(s). NO row names irpt-intake-poller or irpt-intake-poll-role. Carried with the tool's own disclosed blind spot: 51 GRANTED-BROAD rows are EXCLUDED NOT CLEARED, and 266 calls in 26 role-UNMAPPED services are not resource-checked."
+    },
+    {
+      "tool": "comp-adversary compose",
+      "invocation": "comp-adversary compose infra/aws/lambda/investor-reporting/intake/poller.py --out .scratch/adversary_ib_s_6.txt",
+      "result": "declaration written (3967 bytes), read-vintage HEAD @61fbbd22ae, artifact-vintage 1e1aeb1de4. It reports, verbatim: 'ZERO MACHINE-EXTRACTABLE PINS: this artifact's evidence is prose-cited or externally homed -- the validator must derive the evidence set BY READING. A zero here is a signal, never a clean pass.' That is a real finding about the deliverable and is carried unedited: poller.py cites gate.py, keys.py and the policy by NAME in prose, not in file:line @commit form, so a validator cannot extract the evidence set mechanically."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "deploy_ledger.py open --slug irpt-bckend-s6 (6 legs) ... close-leg L1..L6 ... close --slug irpt-bckend-s6",
+      "result": "OK: CLOSED deploy ledger 'irpt-bckend-s6' -- all 6 legs proven; sentinel removed. Opened before the artifact upload and closed and committed (61fbbd22ae) BEFORE the grading reads. The sentinel was never committed OPEN -- see row IRPT_BCKEND-W3-S4."
+    },
+    {
+      "tool": ".tools/safe-apply.sh with .tools/terraform.exe",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/intake apply -no-color -input=false -auto-approve",
+      "result": "Apply complete! Resources: 7 added, 0 changed, 0 destroyed. The worktree-provisioned .tools/terraform.exe was used by that path, never a PATH substitute. safe-apply's first identity gate reads org/mcp/sessions/<session>.serial, gitignored and absent in a fresh worktree; that one line was written naming this serial before the apply."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~3 <0.9.0_WK_IRPT_BCKEND~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "1e1aeb1de4 and 61fbbd22ae, both msg-verify MATCH. The second attempt of the ledger commit was REFUSED -- 'fatal: pathspec org/critical_paths/.open_deploys/irpt-bckend-s6.json did not match any files' -- which is how the sentinel finding in row W3-S4 was measured rather than assumed."
+    }
+  ]
+}
