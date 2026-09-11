@@ -1,0 +1,274 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "62301f71e0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "f61edc41fc",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-4.directory-freshness-driven-on-a-controlled-clock.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/refresh.py",
+      "kind": "script",
+      "commit_or_etag": "24f6c0e88a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Shipped in the irpt-directory-refresh zip. SERVED BYTES verified by CONTENT on TWO DIFFERENT OBJECTS: get-function-configuration CodeSha256 = DUwUcJHdJYLEAk8UAlEFk489lNUzKEdefMzWSqMdhUM= equals the STORED artifact's own Metadata.content-sha256 (head-object, ContentLength=15820, VersionId=phWZ5KY.u_b.i2Pwsgl.Ow6xWaNNBNuE). Neither side is a producer self-report; a bogus-sha negative control reads False. aws lambda update-function-code was never used (NEVER-9): the code pointer is Terraform's.",
+      "artifact_covered_by": [
+        "S4-AC1",
+        "S4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/expiry.py",
+      "kind": "script",
+      "commit_or_etag": "b873f64de3",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Shipped in the same zip and pinned at b873f64de3, which corrects SCHEDULE_EXPRESSION from the UTC spelling to the ZONE-PINNED form the Terraform actually applies. The served CodeSha256 above is the sha of the CORRECTED zip -- the first upload (Vwc/0HnBgoJHafNScNIWMsCx2F6ehZV7wRvnMMbj7ok=, 15690 B) was superseded inside the same open change-management window rather than left disagreeing with the world.",
+      "artifact_covered_by": [
+        "S4-AC1",
+        "S4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_expiry.py",
+      "kind": "test",
+      "commit_or_etag": "24f6c0e88a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "23 tests, 23 pass, clock injected throughout -- no sleep and no real-calendar wait. Two of them earned their place before the apply: the contract-shape test caught source_dates.as_of being a TIMESTAMP rather than a business date (every envelope this cell emits was schema-invalid in the first draft), and the calendar test caught an unusable-but-importable calendar raising instead of reporting an unknown age. tests/ is not shipped in the zip (the build's parity check scans top-level *.py only).",
+      "artifact_covered_by": [
+        "S4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/directory/schedule.tf",
+      "kind": "terraform",
+      "commit_or_etag": "24f6c0e88a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "APPENDED to IB-s-12's file, whose own header sequences this cell after it. Applied via .tools/safe-apply.sh (NEVER-9) using the worktree-provisioned .tools/terraform.exe by that path. FIRST APPLY: 'Apply complete! Resources: 7 added, 0 changed, 0 destroyed.' The pre-apply plan said the same before the fact -- '7 to add, 0 to change, 0 to destroy' -- which is the measurement the hand-off made a STOP condition: IB-s-1's irpt-directory-search and IB-s-12's irpt-holdings-snapshot live in this root and NEITHER was touched. SECOND APPLY (the corrected zip): '0 added, 1 changed, 0 destroyed' -- the function code only. Post-apply plan: 'No changes.' (S4-AC2).",
+      "artifact_covered_by": [
+        "S4-AC2",
+        "S4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "b873f64de3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Registers irpt-directory-refresh (210 functions, was 209) with artifact_sha256 written by build-and-upload itself. Also adds a _parity_note to the SIBLING irpt-directory-search entry: the two functions share one source_dir because this cell's DELIVERABLE places refresh.py and expiry.py in the directory handler's folder, so a future REBUILD of the search function will fail the ADHC_DRIFTD.002 parity check naming those two modules. The sibling's files[] is deliberately NOT widened -- it describes the zip that is actually served -- and the note says the remedy is a decision, never a BAU_PARITY_SKIP.",
+      "artifact_covered_by": [
+        "S4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-directory-refresh.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "phWZ5KY.u_b.i2Pwsgl.Ow6xWaNNBNuE",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head-object rc=0 ContentLength=15820, Metadata.content-sha256=DUwUcJHdJYLEAk8UAlEFk489lNUzKEdefMzWSqMdhUM=. This is the BUILD-INPUT side of the served-bytes comparison in arm (g), and it is the artifact the SCHEDULE actually invokes -- the amendment's own question. The shared-home gold script is NOT what the schedule runs, and is 404 (arm (h)).",
+      "artifact_covered_by": [
+        "S4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T0340Z_irpt-bckend-s4_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "b873f64de3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 entry: opened BEFORE the act, its OPEN SENTINEL committed at 24f6c0e88a BEFORE the act (row IRPT_BCKEND-W3-S4's ordering, so that the bound's 'sentinel COMMITTED' and its open-act-close-commit order are BOTH met rather than one being impossible), closed at completion with 5 of 5 legs proven, and committed at b873f64de3 BEFORE the reads that grade the act. Arm (g) grades the sentinel BOTH ways: its commit is in git history AND it is absent on disk now, because deploy_ledger.py close removes it as the act of closing (row W2-S6).",
+      "artifact_covered_by": [
+        "S4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "24f6c0e88a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pinned at the commit that introduced this cell's first manifest edit; the +4 append described here rides THIS proof's own commit as a further modification of the same path (PENDING was refused by the checker's CCX guard precisely because the path already exists at HEAD -- a correct refusal, and the pin is corrected rather than the guard worked around). APPEND-ONLY: 242 -> 246 entries (+4; three of the seven rows this cell offered were already registered by earlier cells and were not duplicated), 48 insertions and 0 deletions -- no existing entry rewritten. Includes the READ row for the gold directory runner, which this cell traced and ran but did not write.",
+      "artifact_covered_by": [
+        "S4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/ib_s_4_controlled_clock.py",
+      "kind": "test",
+      "commit_or_etag": "24f6c0e88a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The controlled-clock harness the DELIVERABLE names. It drives all five arms in 0.659 s against the REAL trading frontier (NYSE/pandas_market_calendars, printed) with the CLOCK injected -- no sleep, no scheduler, no wait. Every date it uses is DERIVED from the calendar's own frontier rather than typed, so it behaves the same on a Monday, a Friday and the day after a holiday.",
+      "artifact_covered_by": [
+        "S4-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_4.py",
+      "kind": "test",
+      "commit_or_etag": "24f6c0e88a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S4-AC1 battery, arms (a)-(e), (f), (g), (h), (i) and (amend). Pinned at the commit that introduced it; the three instrument repairs described in the .result.md (the AST sleep census, the resolved Git Bash interpreter, the normalised id comparison) ride THIS proof's own commit. It GRADES and never ACTS -- except arm (h), which runs the guard's explicit mint ONCE for the record as the face instructs.",
+      "artifact_covered_by": [
+        "S4-AC1",
+        "S4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_4.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The battery's .result.md named by the DELIVERABLE clause: the verbatim arm output, a per-arm control table, the four instrument defects and the one world defect caught, the deploy ordering, and the full S4-AC3 judgment including what the cadence measurement CANNOT support. Rides this proof's own commit.",
+      "artifact_covered_by": [
+        "S4-AC1",
+        "S4-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/comp-adversary.IB-s-4.validation_context_declaration.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The comp-adversary v1 validation_context_declaration for this instance (11,256 B), landed so 3.0.0_SA_CVO receives what this author's evidence context WAS and what it was NOT. Rides this proof's own commit.",
+      "artifact_covered_by": [
+        "S4-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S4-AC1",
+      "criterion_verbatim": "S4-AC1 -- PASSES BY OUTPUT -- five arms, five different readings, on a controlled clock. (a) ADDED CLIENT appears within the declared window without anyone asking; (b) CHANGED ELIGIBILITY ceases to be offered within the window and stays VISIBLE marked terminated; (c) MISSED TRIGGER reads MISSED; (d) FAILED REFRESH reads FAILED; (e) OVER-AGE REQUEST hits the declared expiry/fallback -- print the five status values and assert they are pairwise distinct (5 of 5). (f) NO WAIT. (h) THE RUNNER'S FIRST-MINT LANDED -- THE ARTIFACT, NOT THE EXIT CODE. (g) THE SCHEDULE IS APPLIED AND ENABLED. (i) THE ID SPACE, TRACED. (amend) GUARDED, BOUND, AND SILENT ON THE REFUSED VALUE.",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_4.py",
+      "output_evidence": "rc=0. ARM (a) PASS: ADDED CLIENT -> REFRESH_COMPLETED_WITH_ADDITIONS (state READY); distinct 5 of 5 | ARM (b) PASS: CHANGED ELIGIBILITY -> REFRESH_COMPLETED_WITH_ELIGIBILITY_CHANGE (state READY) | ARM (c) PASS: MISSED TRIGGER -> REFRESH_TRIGGER_MISSED (state UNCERTAIN) | ARM (d) PASS: FAILED REFRESH -> REFRESH_FAILED (state FAILED) | ARM (e) PASS: OVER-AGE REQUEST -> DIRECTORY_OVER_AGE (state STALE) | PAIRWISE DISTINCT: 5 of 5 reason codes; 5 of 5 (state, code) pairs | ARM (f) PASS: harness 0.659 s < 60 s; 0 of 0 real sleep call site(s) longer than 1 s across 4 source file(s), AST-read | ARM (g) PASS: State ENABLED with the declared expression cron(0 9 ? * MON-FRI *) (America/New_York); CodeSha256 == the artifact's own content-sha256 (DUwUcJHdJYLEAk8UAlEFk489lNUzKEdefMzWSqMdhUM=); ledger CLOSED with 5 legs, committed b873f64de3, sentinel committed (b873f64de3) then removed by the close | ARM (h) BLOCKED-BY-W1-S8: safe-deploy.sh --mint-bundle investor_reporting rc=2 -> \"ERROR: no bundle named 'investor_reporting' declared (declared: ['accrual_bridge'])\"; head-object s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/directory_runner.py -> 404 Not Found; the BUILT file beside it size=41968 sha256=431e89285a609fbf3cd695f4cc88722d2f912c37b5e3e88149a9fcd3dff2f491 | ARM (i) PASS: 3 of 3 firms traced to file:line @ b873f64de3; holdings ids resolved against the refreshed directory: 49financial 5856 of 5873; inflection 0 of 790; cottonwood 0 of 946 | ARM (amend) PASS: 0 of 1 routes unguarded; a non-reconciling FirmBinding REFUSES with FIRM_BINDING while a reconciling one serves; 0 occurrence(s) of a refused client name across the whole envelope and audit trail | 9 of 10 arms PASS; 1 BLOCKED by a named row: ['h'] | IBS4-FRESHNESS-DRIVEN",
+      "denominator": "10 arms: 9 PASS + 1 BLOCKED-BY-W1-S8 (arm (h)), which the face's own rule admits -- 'the token is not withheld when every other arm holds' -- and the battery enforces narrowly (ONLY h may be blocked, every other arm must PASS, the arm count must be exactly 10). Within them: 5 of 5 reason codes and 5 of 5 (state, code) pairs pairwise distinct; harness 0.659 s against a 60 s ceiling with 0 of 0 real sleep call sites over 1 s across 4 source files (AST-read); 3 of 3 firms traced to a file:line at a named commit; holdings-vs-directory resolution 5856 of 5873 (49F), 0 of 790 (INF), 0 of 946 (COT); 0 of 1 routes unguarded with a 1-of-2 positive control; 0 occurrences of a refused client display name across the whole envelope and audit trail with a 1-hit positive control; 5 of 5 ledger legs CLOSED; 23 of 23 unit tests pass.",
+      "status": "PASS",
+      "expect": "IBS4-FRESHNESS-DRIVEN"
+    },
+    {
+      "criterion_id": "S4-AC2",
+      "criterion_verbatim": "S4-AC2 -- THE ROOT IS CONVERGED after this cell's apply. Run after the apply and after the ledger closes.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/directory plan -no-color -input=false -lock=false",
+      "output_evidence": "rc=0. 'No changes. Your infrastructure matches the configuration.' / 'Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.' Run AFTER both applies and AFTER the ledger closed at b873f64de3.",
+      "denominator": "11 of 11 resources in this root refreshed against live AWS with 0 drift -- IB-s-1's 4 (role, policy, function, log group), IB-s-12's 4 (scheduler role, its policy, the DISABLED holdings schedule, plus the core remote state read) and this cell's 7 additions, of which the counts overlap in the same root. The measurement that matters for the hand-off's STOP condition is the PRE-apply plan: '7 to add, 0 to change, 0 to destroy' -- nothing belonging to IB-s-1 or IB-s-12 appeared in it. Binary used by its provisioned path .tools/terraform.exe, never a PATH substitute.",
+      "status": "PASS",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\."
+    },
+    {
+      "criterion_id": "S4-AC3",
+      "criterion_verbatim": "S4-AC3 -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: how you measured the cadence you declared (which source completion manifests, over how many days), and what the harness's controlled clock cannot show about the real scheduler (time zones, DST, a missed fire nobody observes). No verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "Source-completion reads through directory_runner's own SourceSet classes, re-run by this cell: 49F gold/advi dimensions + manifest.json.asof; INF silver/api_dims/{accounts_v2,representatives,household_rep_mapping} snapshot dates with min() across the three (directory_runner.py:290-297); COT blackdiamond/cottonwood/silver/fact_allocations resolved partition (directory_runner.py:313-318). Live reads of the applied scheduler: aws scheduler get-schedule --name irpt-directory-refresh (State, ScheduleExpression, ScheduleExpressionTimezone, RetryPolicy, Target). Full text: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_4.result.md section 'S4-AC3'.",
+      "output_evidence": "HOW THE CADENCE WAS MEASURED, and the honest answer first: from ONE day's completion evidence across three firms plus the sources' own declared behaviour -- NOT from a multi-day census. What was read: 49financial completion 2026-09-09 while the calendar's expected last trading day was 2026-09-10 (T-1); inflection completion 2026-09-10, the min() across its three api_dims snapshots (T-0 that morning); cottonwood completion 2026-09-09 (T-1). The runner's own business-date walk (expected_last_trading_day -> prev_trading_day until the whole source set is complete) selected 2026-09-09 for 49F and COT and 2026-09-10 for INF. From that: a TRADING-DAY cadence is the right SHAPE (a calendar-day cadence fires twice a week into a closed market) and MAX_AGE_TRADING_DAYS = 2 -- one missed fire tolerated, two not -- because 1 behind IS the steady state. WHAT THAT MEASUREMENT CANNOT SUPPORT, stated rather than left for the reader to infer: (1) n = 1 DAY, 3 firms; a proper cadence claim wants a completion-date series over weeks, and a source that silently completes T-2 once a month would not appear in this evidence at all; (2) the 09:00 ET TIME is the BRIEF'S, not a measurement -- nothing here establishes that all three sources have completed by 09:00, only that they had completed by the time the runner was invoked, so if a source regularly completes at 10:00 ET every fire would produce a correct but needlessly day-old directory and the system would look healthy while being a day slow; (3) the ceiling of 2 is a DECLARATION on one day's shape, mitigated only by living in ONE place (expiry.py) behind a test. || WHAT THE CONTROLLED CLOCK CANNOT SHOW, by subtraction from what a real scheduled execution involves: TIME ZONES -- the schedule is applied cron(0 9 ? * MON-FRI *) with ScheduleExpressionTimezone America/New_York, read live in arm (g), but the harness never converts a zone, so a WRONG zone would pass every arm; DST -- the zone pin exists precisely so the fire does not walk an hour in March and November, and NO ARM EXERCISES A DST BOUNDARY because that boundary is a property of the SCHEDULER's interpretation, not of this cell's date arithmetic; A MISSED FIRE NOBODY OBSERVES -- the harness shows the DETECTION given a manifest gap, but not that the detection ever RUNS; if the scheduler itself stops firing, no manifest is written and nothing observes the absence, because THE DETECTOR IS INSIDE THE THING THAT FAILED. This cell builds no monitor (standing moratorium), so the honest statement is that a TOTAL SCHEDULER OUTAGE IS INVISIBLE TO THIS SYSTEM BY DESIGN and the first observer is a human or the over-age answer an advisor receives; RETRIES -- the applied target carries MaximumRetryAttempts 185 and MaximumEventAgeInSeconds 86400, and the manifest write is keyed by business date so a retry is idempotent, but that is REASONED, not exercised; CONCURRENCY -- two fires overlapping, or a fire overlapping a read; THE LAMBDA ACTUALLY RUNNING -- arm (g) proves the function exists and carries the built bytes, but NO ARM INVOKES IT and the first real execution is the first scheduled fire; IAM AT RUNTIME -- whether irpt-directory-refresh-role can actually GetObject the directory and PutObject the manifest is DESIRED-plane verified only. THE SHARPEST: the missed-fire detector lives inside the process whose absence it is meant to detect -- it catches a SKIPPED fire and is blind to a STOPPED schedule. || THREE THINGS FOR THE CVO TO CHALLENGE: (1) ENABLED is this project's first live schedule, justified because no vendor client is in the function's import closure; if the bound is read more broadly the one-line change is state = DISABLED; (2) the function does freshness ACCOUNTING and does not BUILD -- build_dispatch: NOT_WIRED is recorded honestly, but a reader skimming 'the refresh schedule is live' could conclude the directory now refreshes itself, and IT DOES NOT until row W1-S8 clears; (3) three id spellings are now in play (rows W2-S9, W1-S7, W2-S11) and each was found only where two cells JOIN.",
+      "denominator": "3 of 3 firms' source completion manifests read, over 1 DAY (the limit, stated); 7 aspects of a real scheduled execution enumerated by subtraction from the execution path, 7 of 7 outside what the controlled clock can show; 1 applied schedule read live for state, expression, timezone, retry policy and target; 3 items raised for the CVO to challenge.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=\"true\" at the cut). Graded at L9 by 3.0.0_SA_CVO and never self-graded: this row carries its OUTPUT and no verdict. The substitute oracle is 3.0.0_SA_CVO's L9 adjudication.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One control per arm, each able to make the arm's own instrument go the other way: (a)-(e) the five reason codes compared PAIRWISE and again as (state, code) pairs, plus a unit test proving a build that DROPS a client reads FAILED rather than an eligibility delta; (f) a synthetic MODULE containing time.sleep(5) and sleep(0.2) censused by the SAME AST reader; (g) the served CodeSha256 compared against a bogus sha; (h) a landed artifact would read rc=0 and PASS the arm, and the INTERPRETER is printed because a bare bash here is the WSL stub; (i) 49financial must resolve NON-ZERO or the comparison itself is broken; (amend) the same route census over a table carrying one unwrapped handler, and the same leak census over a synthetic leaky envelope.",
+      "expected": "(a)-(e) 5 of 5 distinct; (f) 2 call sites of which 1 over 1 s; (g) False; (h) a 404 and a verbatim refusal; (i) 49F non-zero; (amend) 1 of 2 unguarded and 1 leak hit.",
+      "observed": "(a)-(e) 'PAIRWISE DISTINCT: 5 of 5 reason codes; 5 of 5 (state, code) pairs'; (f) 'a synthetic module containing time.sleep(5) and sleep(0.2) is censused by the SAME reader -> 2 call site(s) [5.0, 0.2], of which 1 over 1 s'; (g) 'NEGATIVE CONTROL: served == a bogus sha? False'; (h) rc=2 with \"no bundle named 'investor_reporting' declared (declared: ['accrual_bridge'])\" and head-object 404; (i) '49financial ... RESOLVED 5856 of 5873'; (amend) 'the same census over a table carrying one unwrapped handler reads 1 of 2 unguarded' and 'a synthetic leaky envelope trips it at 1'. THREE OF THESE CONTROLS ACTUALLY FIRED, each on MY OWN INSTRUMENT and each before its output became evidence: arm (f)'s first version was a REGEX that matched the literal time.sleep(5) inside its own positive-control STRING and failed the arm in a cell with no sleep at all (replaced by the AST read -- a text scan reads the TEXT, an AST read reads the CODE); arm (h)'s first run invoked a BARE bash, which on this box is the WSL stub, and recorded 'Windows Subsystem for Linux has no installed distributions' where the guard's verdict belonged -- a fabricated citation of a refusal that had not happened, now resolved through .tools/git_bash_resolver.py with the interpreter PRINTED; and arm (i)'s first run read 0 of 3 firms, which its own positive control REFUSED because row W1-S7 records 49financial resolving 7,431 of 7,453 -- the cause was a third id spelling (namespaced vs bare), filed as row IRPT_BCKEND-W2-S11. A fourth defect was caught by the unit tests before the apply: source_dates.as_of is a TIMESTAMP in the contract, not a business date, so every envelope in the first draft was schema-invalid.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The S4-AC1 battery was run end-to-end TWICE after the last repair and the per-arm verdict lines, the arm count and the token line were diffed with the harness wall-clock normalised (it is a duration, not a result). The unit suite was re-run after every edit to either module.",
+      "observed": "diff of the two runs' summary blocks: no differences -- 'DETERMINISM: summaries IDENTICAL across 2 of 2 runs (wall-clock normalised)'; both rc=0, both printed IBS4-FRESHNESS-DRIVEN. The one deliberately non-deterministic input is the harness's anchor date, which is DERIVED from the calendar's expected last trading day rather than typed -- so the arms move with the frontier by design and the VERDICTS do not.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The runner's production first-mint to the shared code home",
+      "reason": "BLOCKED-BY-W1-S8 and recorded as arm (h) rather than worked around. The guard's explicit mint mechanism was run ONCE for the record and refused -- no bundle named 'investor_reporting' is declared (only 'accrual_bridge') -- and head-object on the served prefix is 404. Declaring a bundle is an edit to .tools/safe_deploy_core.py CODE_TREES, outside every worker's <paths> and outside this round; the issuer carries it to L10. Per the face, NO NEW ROW was filed for this finding."
+    },
+    {
+      "item": "Changing the INF or COT account-id join so the directory and the holdings population share an id space",
+      "reason": "The spec is FROZEN mid-round and the face says so explicitly: 'NO join is changed mid-round ... whether one id space is owed is the CTO's L10 read'. Arm (i) READS the raw-key selection and COUNTS the overlap; the FACT is the deliverable. The additional spelling difference found while measuring is filed as row IRPT_BCKEND-W2-S11, not fixed."
+    },
+    {
+      "item": "Running the gold directory runner INSIDE the refresh Lambda",
+      "reason": "Measured impossibility rather than a preference: the runner needs pandas (absent from the runtime) and its production code has no landed artifact (W1-S8). The build is an INJECTED build_fn; the deployed function records build_dispatch: NOT_WIRED naming that row. Inventing a compute surface to make the schedule look complete is the papering-over the standing bound names."
+    },
+    {
+      "item": "Any monitor, alarm, SNS topic, SES send or notification for a missed fire",
+      "reason": "Bound 2 and the standing moratorium. The cell ships a DETECTOR that reads the manifest gap on the next fire, and the S4-AC3 output states plainly what that cannot do: a TOTAL scheduler outage is invisible, because the detector lives inside the process whose absence it would have to detect."
+    },
+    {
+      "item": "Invoking the deployed irpt-directory-refresh function",
+      "reason": "No criterion asks for it, and a manual invoke would write a refresh manifest into a firm bucket outside a scheduled run -- an ad-hoc artifact that is never production evidence. Arm (g) grades that the function exists and carries the built bytes; the first real execution is the first scheduled fire, and the S4-AC3 output says so."
+    },
+    {
+      "item": "Editing infra/aws/terraform/investor-reporting/directory/lambda.tf or iam.tf (IB-s-1's files)",
+      "reason": "This cell's resources are appended to schedule.tf -- the file the DELIVERABLE names -- because a schedule and its target are ONE unit with ONE owner, and splitting them across a sibling cell's file would put two cells on one resource pair. IB-s-1's resources were not touched: 0 changed, 0 destroyed."
+    },
+    {
+      "item": "A DST-boundary arm",
+      "reason": "A controlled clock cannot exercise it: the boundary is a property of the SCHEDULER's interpretation of a zone-pinned expression, not of this cell's date arithmetic. The zone pin is applied and read live (ScheduleExpressionTimezone America/New_York); the gap is declared in the S4-AC3 output rather than papered over with an arm that would prove nothing."
+    },
+    {
+      "item": "Any live vendor call",
+      "reason": "Bound 1. The refresh function's import closure is the standard library plus boto3 -- no vendor client is reachable from it at all, which is the measured basis on which the schedule is ENABLED rather than DISABLED."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W2-S11: a THIRD id spelling, and it makes row W1-S7 look worse than it is. The holdings snapshot NAMESPACES its account ids (49f:acct:acc_...) while the directory carries the bare acc_... tail, so a consumer joining the two artifacts as written gets 0 of N for ALL THREE firms and would conclude the id space is broken estate-wide. After stripping the prefix, 49financial resolves 5,856 of 5,873 while inflection stays 0 of 790 and cottonwood 0 of 946 -- the W1-S7 shape. Two different problems wearing one symptom: a cosmetic PREFIX difference affecting every firm, and a real RAW-KEY difference affecting INF and COT. Found because arm (i) carried a positive control: 0 of 3 firms resolving non-zero is a broken instrument, not a finding. Residual stated: 17 of 5,873 49F ids do not resolve even after normalisation. ARMED, disarm_owner 2.0.0_SA_COO~B."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_4.result.md",
+  "compiler_tools": [
+    {
+      "tool": "battery_ib_s_4.py (the S4-AC1 acceptance battery, arms a-e, f, g, h, i, amend)",
+      "invocation": "timeout 300 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_4.py",
+      "result": "rc=0, 9 of 10 arms PASS + arm (h) BLOCKED-BY-W1-S8, IBS4-FRESHNESS-DRIVEN. Run twice after the last repair; summaries identical."
+    },
+    {
+      "tool": "ib_s_4_controlled_clock.py (the harness the DELIVERABLE names)",
+      "invocation": "timeout 120 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/ib_s_4_controlled_clock.py",
+      "result": "five arms, five distinct readings, 0.659-1.196 s wall clock against a 60 s ceiling, driven on the REAL NYSE frontier with the clock injected."
+    },
+    {
+      "tool": "pytest (Python 3.12.10)",
+      "invocation": "timeout 300 python -m pytest infra/aws/lambda/investor-reporting/directory/tests/test_refresh_expiry.py -q",
+      "result": "23 passed (23 of 23). Two of them caught pre-apply defects: the StatusEnvelope shape and the unusable-calendar path."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (the NEVER-2 change-management contract tool)",
+      "invocation": "open --slug irpt-bckend-s4 (5 legs) -> close-leg x5 -> close",
+      "result": "OPENED with the sentinel committed at 24f6c0e88a BEFORE the act; CLOSED with all 5 legs proven and committed at b873f64de3 BEFORE the grading reads; the sentinel removed by the close."
+    },
+    {
+      "tool": "infra/aws/lambda/ci/build-and-upload.sh",
+      "invocation": "bash infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-directory-refresh (twice)",
+      "result": "import-closure gate clean over 3 packaged .py files; upload write-VERIFIED both times. Second build sha DUwUcJHdJYLEAk8UAlEFk489lNUzKEdefMzWSqMdhUM= (15820 B) is the served one."
+    },
+    {
+      "tool": ".tools/safe-apply.sh with the worktree-provisioned .tools/terraform.exe",
+      "invocation": "safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/directory apply -no-color -input=false -auto-approve (twice)",
+      "result": "'7 added, 0 changed, 0 destroyed' then '0 added, 1 changed, 0 destroyed'; HALT-GATE passed with the session serial file written before the apply."
+    },
+    {
+      "tool": "comp-iam (Phase-1 DESIRED-plane grading named by this order's preflight)",
+      "invocation": "timeout 180 comp-iam roles | grep -i irpt",
+      "result": "irpt-directory-refresh-role (tf_resource irpt_directory_refresh) and irpt-directory-refresh-scheduler-role (tf_resource irpt_directory_refresh_scheduler) both resolve -- this cell's two new roles. BLIND SPOT carried from the preflight: DESIRED plane only; a GRANTED-BROAD wildcard cannot be falsified by a resource check, and runtime IAM is unexercised (stated in the S4-AC3 output)."
+    },
+    {
+      "tool": "comp-adversary (validator-context composer; the assignee's instrument at report time)",
+      "invocation": "timeout 300 comp-adversary compose org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/IRPT_BCKEND.TO-IB-s-4.directory-freshness-driven-on-a-controlled-clock.proof_of_spec.json --out <declaration>",
+      "result": "rc=0, declaration written (11,256 B) and landed beside this instance. Author profile: 16 repo paths, 2 file:line cites, 4 tool mentions, 0 commit pins PARSED. FLAGS READ RATHER THAN SKIMMED: source 2 cited-path vintage 16 attempted / 16 STABLE / 0 flagged -- every path this instance cites exists at the read vintage, and notably there is no GONE row for the sentinel because this instance cites the LEDGER ENTRY rather than the sentinel the close deletes. Source 3 (T11): owned cell IB-s-4, dependencies ONE HOP = 0 from BOTH carriers, 2 neighborhood members digested of 2, 0 UNPROVEN dependencies, 802 directory siblings DEMOTED. 5 complement sources run / 0 deferred / 5 declared-excluded. The tool's pin-parser warning applies as before: the hex runs in this instance are commits cited in prose plus base64 sha and VersionId excerpts printed as evidence, so a '0 attempted' on source 1 is a PARSER zero rather than an evidence zero."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/IRPT_BCKEND.TO-IB-s-4.directory-freshness-driven-on-a-controlled-clock.proof_of_spec.json S4-AC1,S4-AC2,S4-AC3",
+      "result": "rc=0 VALID before the complete flip, and re-run after it. Its FIRST run REFUSED this instance: two rows were pinned PENDING-THIS-COMMIT on paths already committed at HEAD (the CCX class). That refusal was CORRECT -- the paths are modified, not introduced, by this commit -- and the pins were corrected to the commits that carry them rather than the guard being worked around."
+    }
+  ]
+}
