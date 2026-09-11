@@ -1,0 +1,164 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-rb-10",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-10.check-face-salient-warning.md",
+  "group": "OTHER",
+  "vintage_commit": "3f2189f28bb2102eda0fa12fe277cc2246290702"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "192c198231",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-10.check-face-salient-warning.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~3",
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~3/check-face-salient-warning.result.md",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/checkface/render_print.py",
+   "kind": "script",
+   "commit_or_etag": "fb5c9421bc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "render_value() now places the marker icon FIRST for REFUSE and PROVISIONAL ('[BLOCKED] [REFUSED: ...]', '[WARN] <value> [PROVISIONAL]'); PASS stays bare. Fixes C-S12 (the trailing-icon layout AMGT-r-10 shipped, which the CVO FAILED).",
+   "artifact_covered_by": ["AC1", "AC2", "AC4"]
+  },
+  {
+   "path_or_key": "lib/research/checkface/salience_fixture.py",
+   "kind": "config_data",
+   "commit_or_etag": "fb5c9421bc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New module: same_number_checks(value=12345) returns PASS/PROVISIONAL/REFUSE check rows all carrying the IDENTICAL value -- the difference arm C-S12 named as missing (round-2's test compared 500 vs 12345).",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "lib/research/checkface/tests/test_checkface.py",
+   "kind": "test",
+   "commit_or_etag": "fb5c9421bc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New test_same_number_leads_with_marker_the_salience_arm: same value under all three verdicts, asserts PASS is bare and PROVISIONAL/REFUSE each lead with a non-digit marker. Existing test_refuse_renders_marked_value_in_place_of_the_value updated to assert rendered.startswith(f'[{icon}]') (derived from the check's own marker) instead of a startswith('[REFUSED:') literal, since the icon now leads. Two other pre-existing tests unmodified.",
+   "artifact_covered_by": ["AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~3/SPEC_SECTION_checkface.md",
+   "kind": "doc",
+   "commit_or_etag": "fb5c9421bc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Updated (this worker's own prior deliverable): s.0 records C-S12 and its fix; s.1's table shows the LEADING format per verdict and states the marker must lead in both the DATA and READING faces; s.2's REFUSE description changed from 'appended' to 'LEADING'; s.4 states the leading placement is what the .tsx carries forward and that a refused/provisional value stays reachable but never presented as trusted or read-first. Text only.",
+   "artifact_covered_by": ["AC5"]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~3/check-face-salient-warning.result.md",
+   "kind": "doc",
+   "commit_or_etag": "fb5c9421bc",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Session log: the defect re-read, the (a)/(b)/(c) deliverables, the mutant control actually run with its observed output, and the clean post-restore re-verification of AC1-AC4."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-10.check-face-salient-warning.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "status staged -> complete rides this same commit, per the bar's own instruction."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "a summary line beginning with a passed count and no \"failed\" -- AMGT-r-10's tests still pass PLUS a new SAME-NUMBER salience test: it renders one fixed value under PASS and under PROVISIONAL (and REFUSE) and asserts the PROVISIONAL/REFUSE render LEADS with a status marker while PASS is the bare value. A test comparing two different numbers, or asserting only a trailing tag, does not meet this",
+   "method": "test_suite",
+   "invocation": "python -m pytest lib/research/checkface/tests -q 2>&1 | tail -1",
+   "output_evidence": "5 passed in 0.07s",
+   "denominator": "5 of 5 tests in lib/research/checkface/tests/test_checkface.py (4 pre-existing, one updated for the new leading layout + 1 new same-number salience test)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "\"prov_leads_marker True\" AND \"pass_is_bare True\" AND \"same_value_differs True\" AND \"ascii True\" -- the PROVISIONAL render of the SAME value leads with a non-digit status marker, PASS renders the bare number, the two differ, and the render is ASCII. If the PROVISIONAL render still starts with the value's digit (a trailing-tag-only fix), prov_leads_marker is False and this is NOT met",
+   "method": "command",
+   "invocation": "python -c \"import importlib.util as u; s=u.spec_from_file_location('rp','lib/research/checkface/render_print.py'); m=u.module_from_spec(s); s.loader.exec_module(m); v='12345'; p=m.render_value({'verdict':'PASS','value':v,'figure_id':'f'}); q=m.render_value({'verdict':'PROVISIONAL','value':v,'figure_id':'f','marker':{'colour_token':'amber','icon':'WARN'}}); print('prov_leads_marker', (not q.strip()[0].isdigit()), '| pass_is_bare', p.strip()==v, '| same_value_differs', p!=q, '| ascii', q.isascii())\"",
+   "output_evidence": "prov_leads_marker True | pass_is_bare True | same_value_differs True | ascii True",
+   "denominator": "N/A -- boolean check over one PASS/PROVISIONAL render pair of the same value",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "exactly \"0\" -- NEGATIVE: no portal source; the salient marker is a print+data+spec artifact and C-DESIGN-SPEC-FIRST holds",
+   "method": "command",
+   "invocation": "git status --porcelain -- portal/ | grep -c -E '\\.(tsx|ts|css)$'",
+   "output_evidence": "0 (grep's own rc=1 on zero matches; the printed count is the graded value, per the criterion's own \"exactly 0\" bar -- no .tsx/.ts/.css touched under portal/ by this cell's work)",
+   "denominator": "N/A -- boolean/count check over portal/'s working-tree status",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "exactly \"ascii True\" -- NEGATIVE: render_print.py introduces no non-ASCII (no glyph/emoji); the leading salient marker is an ASCII status token",
+   "method": "command",
+   "invocation": "python -c \"print('ascii', open('lib/research/checkface/render_print.py', encoding='utf-8').read().isascii())\"",
+   "output_evidence": "ascii True",
+   "denominator": "N/A -- boolean check over the whole file's byte content",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "look at the rendered fixture -- does a PROVISIONAL/REFUSE figure read as visibly not-yet-checked AT A GLANCE (the warning reached before the number), rather than as a number that passed? Is the leading-marker choice one the design spec carries unchanged into the .tsx? This is the AC4 regrade C-S12 asks for.",
+   "method": "manual_read_with_citation",
+   "invocation": "READ the salience_fixture.py rendered output and SPEC_SECTION_checkface.md at commit fb5c9421bc",
+   "output_evidence": "Rendered via render_value(same_number_checks(12345)[verdict]): PASS -> '12345' | PROVISIONAL -> '[WARN] 12345 [PROVISIONAL]' | REFUSE -> '[BLOCKED] [REFUSED: unit never confirmed against a field map]'. Not self-graded per this cell's own instruction (G-14, judgment never self-graded).",
+   "denominator": "N/A -- judgment row, no mechanical denominator",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "judgment": true,
+   "status_reason": "judgment criterion, spine v3 L9 -- graded by 3.0.0_SA_CVO~Z, never self-graded (task order's own instruction: do not self-grade AC5)"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Reverted render_value()'s REFUSE and PROVISIONAL branches from the new LEADING-icon layout back to AMGT-r-10's old TRAILING-icon layout (scratch backup of the file, edited in place, restored after) and re-ran the suite.",
+   "expected": "test_same_number_leads_with_marker_the_salience_arm FAILS (the PROVISIONAL render starts with the value's digit again under the reverted trailing layout); test_refuse_renders_marked_value_in_place_of_the_value FAILS too (it now asserts the marker leads); the other 3 pre-existing tests, which do not inspect marker placement, keep passing.",
+   "observed": "ACTUALLY RUN: `python -m pytest lib/research/checkface/tests -q` -> `2 failed, 3 passed in 0.13s`. FAILED: test_refuse_renders_marked_value_in_place_of_the_value (AssertionError: assert False, rendered.startswith(f'[{icon}]') false under the reverted code) and test_same_number_leads_with_marker_the_salience_arm (AssertionError: assert not True -- '1'.isdigit() true, the reverted PROVISIONAL render started with the digit again). The other 3 tests PASSED. Matches the prediction exactly. Restored from the scratch backup; `git diff --stat` after restore showed the same 23 insertions/12 deletions as before the mutant (the intended fix, unchanged); re-ran: `5 passed`.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "`python -m pytest lib/research/checkface/tests -q` run twice back-to-back after the mutant restore.",
+   "observed": "`5 passed` both runs, identical summary line (0.04s / 0.07s -- timing varies, the pass/fail result and count are identical).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "regenerating the three REAL landed blocks' check_face_*.json / check_face_*.md (SAP_GY/BA_US/BABA_US Equity) with the new leading-marker render",
+   "reason": "those files live under 0.9.0_WK_AMGT_RESAPP~8's deliverables/ subfolder, outside this cell's write surface (this cell's WHAT TO PRODUCE names lib/research/checkface/ and this worker's OWN deliverables/0.9.0_WK_AMGT_RESAPP~3/, not another worker's folder). render_value() is shared code: any future re-render of those three blocks picks up the leading-marker layout automatically, with no further code change -- proven on the same-number fixture per AC1/AC2."
+  },
+  {
+   "item": "the .tsx page render",
+   "reason": "C-DESIGN-SPEC-FIRST / BLOCK C-DESIGN-SPEC-FIRST: 'no .tsx, no file under portal/.' AC3 refuses a .tsx; this cell delivers the print-path render, the same-number difference-arm fixture/test, and the spec section only."
+  },
+  {
+   "item": "a print-path marker glyph on PASS rows",
+   "reason": "deliberate design choice, unchanged from AMGT-r-10 -- PASS renders unmarked so a REFUSE/PROVISIONAL row's leading marker reads as a genuine departure rather than one flag among many. Named in SPEC_SECTION_checkface.md s.1."
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh lib/research/checkface/render_print.py lib/research/checkface/salience_fixture.py lib/research/checkface/tests/test_checkface.py",
+   "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+  },
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest lib/research/checkface/tests -q",
+   "result": "5 passed"
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~3 <0.9.0_WK_AMGT_RESAPP~3@opal.agent>\" -F .scratch/msg1.txt -- lib/research/checkface/render_print.py lib/research/checkface/salience_fixture.py lib/research/checkface/tests/test_checkface.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~3/SPEC_SECTION_checkface.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~3/check-face-salient-warning.result.md",
+   "result": "commit 1 (the work) landed at fb5c9421bc700aedf53788ddff25b045dfba1797; commit 2 (this instance + status flip) PENDING-THIS-COMMIT"
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~3/AMGT_RESAPP.TO-AMGT-rb-10.check-face-salient-warning.proof_of_spec.json AC1,AC2,AC3,AC4,AC5",
+   "result": "PENDING-THIS-COMMIT (the exit code is the verdict; run before the flip and recorded in the commit message)"
+  }
+ ]
+}
