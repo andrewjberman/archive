@@ -97,6 +97,18 @@ CODE_SUFFIXES = (".py", ".js", ".mjs", ".cjs", ".ts", ".sh", ".ps1")
 # that cannot read anything.
 SM_READ_API = re.compile(r"get_secret_value|GetSecretValueCommand|get-secret-value")
 
+# A FOURTH CLASS, and it exists because THIS FILE became TRACKED when its own
+# branch drained. A census over `git ls-files` then finds the battery itself: its
+# fake Secrets Manager client defines `get_secret_value` and its fixtures name the
+# secret, so the READER/MENTION discriminator -- correctly -- calls it a reader.
+# It is not an ESTATE reader; it reaches no AWS. The discriminator for this class
+# is STRUCTURAL, never a file name: a file under this project's own deliverables/
+# is a TEST HARNESS. Every member is PRINTED with its own count, so the exclusion
+# is visible on the output and the estate denominator stays honest -- a silent
+# skip here would be the self-wrapping the bounds forbid, inverted.
+# Row IRPT_BCKEND-W3-S29.
+HARNESS_PREFIX = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/"
+
 
 def arm_a1():
     print("(a1) CENSUS -- every reader of %s in the repository" % SECRET)
@@ -117,10 +129,15 @@ def arm_a1():
         code_hits.append(rel)
         text = blob.decode("utf-8", "replace")
         (readers if SM_READ_API.search(text) else mentions).append(rel)
+    harness = [r for r in readers if r.startswith(HARNESS_PREFIX)]
+    readers = [r for r in readers if not r.startswith(HARNESS_PREFIX)]
     print("      DENOMINATOR: %d file(s) scanned (git ls-files, tracked) | "
           "%d name the secret | %d are CODE | %d of those RESOLVE it "
-          "(a Secrets Manager read API) | %d only MENTION it"
-          % (len(files), len(hits), len(code_hits), len(readers), len(mentions)))
+          "(a Secrets Manager read API) | %d only MENTION it | "
+          "%d of the resolvers are this cell's OWN TEST HARNESS, listed below "
+          "and excluded from the estate denominator"
+          % (len(files), len(hits), len(code_hits), len(readers) + len(harness),
+             len(mentions), len(harness)))
 
     # MECE BY SUBTRACTION, not by recall: the population is the READERS the
     # census FOUND, minus what the table accounts for. A leftover voids it.
@@ -133,6 +150,10 @@ def arm_a1():
     for rel in sorted(mentions):
         print("      MENTION      %s" % rel)
         print("                   names the secret but calls no Secrets Manager read API")
+    for rel in sorted(harness):
+        print("      HARNESS      %s" % rel)
+        print("                   this cell's own battery under deliverables/: its FAKE "
+              "Secrets Manager client defines the read API and reaches no AWS")
     for rel in unaccounted:
         print("      UNACCOUNTED  %s -- the census found a reader the table does not hold"
               % rel)
@@ -144,6 +165,13 @@ def arm_a1():
     check("a1 readers migrated or retired: %d of %d" % (accounted, len(readers)),
           not unaccounted and not missing and accounted == n,
           "denominator is the census, not the table")
+    # CONTROL ON THE EXCLUSION ITSELF: the harness class must never swallow a
+    # declared estate reader. If it ever does, the exclusion is hiding the answer.
+    check("a1 the HARNESS exclusion removed 0 declared estate reader(s): %d of %d "
+          "excluded file(s) are under deliverables/"
+          % (len(harness), len(harness)),
+          not [r for r in harness if r in EXPECTED_READERS],
+          "an exclusion that can remove a real reader is a hole, not a class")
     return code_hits
 
 
@@ -467,16 +495,20 @@ def main():
             ("(b) FENCING", "two capture attempts on the fixture -- not built"),
             ("(c) ROTATION", "publish a new version, old refused -- not built"),
             ("(d) EVICTION", "401 mid-job, ONE refresh, resume at checkpoint -- not built"),
-            ("(e) ABSORBED", "ledger + state mv + apply -- FORBIDDEN this session "
-                             "(managed wind-down, 0.0.0_AB_MSTR 2026-09-11 17:30Z)"),
+            ("(e) ABSORBED", "ledger + state mv + apply -- BLOCKED, row IRPT_BCKEND-W3-S26: "
+                             "the ycharts root's plan carries an unapplied handler flip to "
+                             "entry.lambda_handler and entry.py is in no zip, so the apply "
+                             "this arm REQUIRES takes irpt-ycharts-generate down"),
             ("(f) NO EGRESS", "guard log across the whole battery -- not built")):
         print("  NOT RUN  %-14s %s" % (arm, why))
     print("-" * 78)
     print("ARM (a) checks failed: %d" % len(FAILURES))
     for f in FAILURES:
         print("  FAILED: %s" % f)
-    print("FINAL: ARM-A-ONLY, INCOMPLETE-UNDER-WINDDOWN -- RT9-AC1 is NOT met by this run "
-          "and its acceptance token is deliberately absent from this output.")
+    print("FINAL: ARM-A-ONLY, INCOMPLETE -- RT9-AC1 is NOT met by this run and its "
+          "acceptance token is deliberately absent from this output in EVERY form, "
+          "including negated: the expect is graded as a REGEX and a negated line would "
+          "match. Arm (e) is BLOCKED by row IRPT_BCKEND-W3-S26.")
     return 1 if FAILURES else 0
 
 
