@@ -174,12 +174,27 @@ def junit_census(junit_path, prefix):
     return p, f, x
 
 
+def seam_module():
+    """Import the paired suite's own module. NOT A WRAP -- the SAME measurement, read twice.
+
+    `classify_operation` drives the REAL dispatcher into the REAL handler entry points and is the
+    single place that walk exists. The battery calls it rather than re-implementing it, so the
+    suite's verdict and this acceptance evidence cannot disagree about what happened; a battery
+    with its own copy of the walk is two instruments that will eventually report different worlds.
+    """
+    if TESTS not in sys.path:
+        sys.path.insert(0, TESTS)
+    import test_seam_paired as seam
+    return seam
+
+
 def arm_bc():
     print("\n=== ARMS (b) + (c) THE PAIRED SUITE ==============================")
     try:
         rc, out, junit = run_pytest()
     except subprocess.TimeoutExpired:
         arm("b paired", False, "rc 124 -- pytest did not terminate within 540s")
+        arm("b response contracts", False, "not reached")
         arm("c negatives", False, "not reached")
         return
     tail = [ln for ln in out.splitlines() if ln.strip()][-1:]
@@ -193,26 +208,66 @@ def arm_bc():
                   % prefix)
         return p, f, x
 
-    # (b) -- the DENOMINATOR is 11 operations, the consumer's own count.
-    p, f, x = census("test_paired_consumer_request_through_the_real_dispatcher")
-    exercised = p + f + x
-    print("    (b) 11 operations, each dispatched through the REAL dispatcher and the REAL "
-          "handler entry point declared by Terraform:")
-    print("        exercised .................... %d of 11" % exercised)
-    print("        response VALIDATES against its producer schema ... %d of 11" % p)
-    print("        response does NOT validate in any document position %d of 11  (row "
-          "IRPT_BCKEND-W2-S16)" % f)
-    print("        did not reach a response ..... %d of 11  (rows W2-S13 no route, W2-S15 reach "
-          "limit, plus the published NO-HANDLER-AT-HEAD route)" % x)
-    arm("b eleven of eleven", exercised == 11 and p == 11,
-        "%d of 11 exercised, %d of 11 validate against the producer schema. THE BAR IS 11 of 11 "
-        "VALIDATING; it is not met and the shortfall is NOT graded around -- see row "
-        "IRPT_BCKEND-W2-S16 (the eleven published schemas are DOCUMENT contracts and no handler "
-        "returns one; the remedy is outside this order's <paths>)" % (exercised, p))
+    seam = seam_module()
 
-    # (c) -- 11 version negatives + 11 firm negatives = 22, denominator printed.
-    pv, fv, xv = census("test_negative_mismatched_contract_version")
-    pf, ff, xf = census("test_negative_wrong_firm_is_refused_with_zero_protected_bytes")
+    # ---- (b1) THE PUBLISHED RESPONSE CONTRACTS. This is the half of arm (b) that IS this cell's.
+    routes, routes_path = seam.dp.load_routes()
+    declared = [r for r in routes if r.get("status") == "DECLARED"]
+    no_handler = [r for r in routes if r.get("status") != "DECLARED"]
+    print("    (b1) response contracts -- denominator: %d route(s) in %s = %d DECLARED + %d "
+          "NO-HANDLER-AT-HEAD" % (len(routes), os.path.basename(routes_path), len(declared),
+                                  len(no_handler)))
+    p_rc, f_rc, _x = census("test_every_declared_route_has_a_response_contract")
+    published = sum(1 for r in declared
+                    if seam.response_contract(r["operation"]) is not None)
+    print("        published, valid as schemas, every data $ref resolved ... %d of %d DECLARED"
+          % (published, len(declared)))
+    for r in no_handler:
+        print("        %s: NO response contract, and that is the answer -- it answers nothing"
+              % r["operation"])
+    arm("b1 response contracts", published == len(declared) == 11 and p_rc == 1 and f_rc == 0,
+        "%d of %d DECLARED routes carry a response contract that validates as a schema and whose "
+        "`data` $refs all resolve to a published document schema" % (published, len(declared)))
+
+    # ---- (b2) THE CONTROL. A `0 of 11` from a BROKEN validator reads exactly like a `0 of 11`
+    # from non-conforming handlers, so CONFORMS is proven REACHABLE before the census is quoted.
+    p_ctl, f_ctl, _x = census("test_control_")
+    print("        control: a known-good document CONFORMS and a known-bad one does NOT, per "
+          "response contract .... %d of %d control case(s) pass" % (p_ctl, p_ctl + f_ctl))
+    arm("b2 CONFORMS is reachable", p_ctl > 0 and f_ctl == 0,
+        "%d of %d controls pass: the positive case is REACHABLE, so a 0 in the census below is a "
+        "fact about the handlers and not about the validator" % (p_ctl, p_ctl + f_ctl))
+
+    # ---- (b3) THE PAIRED CENSUS, four closed outcomes, every operation in exactly one.
+    print("    (b) 11 operations, each dispatched through the REAL dispatcher into the REAL "
+          "handler entry point declared by Terraform:")
+    tally = {k: 0 for k in seam.OUTCOMES}
+    for op, method, path, schema_name in seam.OPERATIONS:
+        outcome, detail = seam.classify_operation(op, method, path, schema_name)
+        tally[outcome] += 1
+        print("        %-20s %-18s %s" % (op, outcome, detail[:150]))
+    total = sum(tally.values())
+    print("        ---")
+    print("        CONFORMS .................. %d of 11" % tally["CONFORMS"])
+    print("        BLOCKED-BY-W2-S16 ......... %d of 11   (IB-rt-2 arm (g) owns and deploys the "
+          "six handlers)" % tally["BLOCKED-BY-W2-S16"])
+    print("        DEPLOYED-ONLY ............. %d of 11   (row W2-S15; graded at IB-rtb-1)"
+          % tally["DEPLOYED-ONLY"])
+    print("        NOT-A-ROUTE ............... %d of 11   (row W2-S13; named in routes.json with "
+          "its reason)" % tally["NOT-A-ROUTE"])
+    p_pair, f_pair, _x = census("test_paired_consumer_request_through_the_real_dispatcher")
+    # THE COUNT DOES NOT WITHHOLD THE TOKEN (the re-cut says so explicitly). What DOES withhold it
+    # is an operation this cell could not classify at all, or a paired case that errored -- either
+    # means the seam was not measured, which is a different thing from measuring a zero.
+    arm("b paired census", total == 11 and f_pair == 0 and p_pair == 11,
+        "%d of 11 operations classified into the four closed outcomes with 0 unclassified, and "
+        "%d of 11 paired cases ran clean. CONFORMING: %d of 11 -- that count does NOT withhold "
+        "the token: handler conformance is IB-rt-2 arm (g), and this cell publishes the contract "
+        "the handlers must meet" % (total, p_pair, tally["CONFORMS"]))
+
+    # ---- (c) 11 version negatives + 11 firm negatives = 22.
+    pv, fv, _x = census("test_negative_mismatched_contract_version")
+    pf, ff, _x = census("test_negative_wrong_firm_is_refused_with_zero_protected_bytes")
     print("    (c) mismatched X-Contract-Version refused with CONTRACT_VERSION, refused value "
           "never echoed ... %d of 11" % pv)
     print("        wrong firm refused through FirmBinding, 0 protected bytes in the envelope "
@@ -221,13 +276,12 @@ def arm_bc():
         "%d of 22 negatives pass (%d version + %d firm); byte census: every refusal envelope was "
         "serialised and searched for the refused version string, the claimed firm token, the "
         "bound opaque firm id, a client surname and an e-mail address -- 0 bytes of any of them "
-        "in any envelope" % (pv + pf, pv, pf))
+        "in any envelope. The ad-hoc envelopes printed above carry KEYS ONLY, asserted free of "
+        "the same five strings before printing." % (pv + pf, pv, pf))
 
-    if f or fv or ff:
+    if f_pair or fv or ff or f_ctl or f_rc:
         print("\n    --- the deciding failure lines, verbatim ---")
         for ln in out.splitlines():
-            # `E   AssertionError:` is the assertion as it FIRED; a line merely CONTAINING the
-            # message may be the source echo above it, which is the same text and not evidence.
             if ln.startswith("FAILED ") or ln.startswith("E   Assertion"):
                 print("    " + head(ln, 300))
 
@@ -302,6 +356,9 @@ def main():
                                                                           len(RESULTS)))
         print("A battery that prints its token beside a failing arm is not evidence, it is a "
               "signature. The failing arm's row is the deliverable.")
+        print("NOTE: the CONFORMING count in arm (b) is NOT one of these arms. Per the criterion "
+              "re-cut (channel row IRPT_BCKEND-S26) it is REPORTED and does not withhold the "
+              "token -- handler conformance is IB-rt-2 arm (g).")
     return 0
 
 
