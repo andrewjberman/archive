@@ -1,0 +1,55 @@
+{
+  "slug": "irpt-bckend-s4",
+  "title": "IRPT IB-s-4: irpt-directory-refresh Lambda + its two roles + the ENABLED irpt-directory-refresh schedule in the directory root",
+  "author": "0.9.0_WK_IRPT_BCKEND~2",
+  "status": "OPEN",
+  "opened_at": "2026-09-11T03:40:08.103743+00:00",
+  "window_hours": 4.0,
+  "entry_path": "org/critical_paths/change_management/20260911T0340Z_irpt-bckend-s4_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "git",
+      "target": "wk-irpt_bckend-1-2 source commit for refresh.py, expiry.py, schedule.tf and the source-map registration",
+      "proof_required": "commit hash on the worker branch (LOCAL, never pushed)",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "s3-prefix",
+      "target": "opal-313476888478-lambda-artifacts investor-reporting/irpt-directory-refresh.zip",
+      "proof_required": "head-object ContentLength + content-sha256 metadata == the sha build-and-upload computed over the built zip",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "activation",
+      "target": "terraform apply of infra/aws/terraform/investor-reporting/directory (state key investor-reporting/directory/tfstate) adding irpt-directory-refresh, its role, the scheduler role and the ENABLED schedule",
+      "proof_required": "safe-apply output showing ADDED only, with 0 changed and 0 destroyed so IB-s-1 and IB-s-12 resources are untouched",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "activation",
+      "target": "the irpt-directory-refresh EventBridge schedule, ENABLED",
+      "proof_required": "aws scheduler get-schedule State ENABLED + the declared expression and timezone",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "verify",
+      "target": "0-diff terraform plan on the directory root (criterion S4-AC2) and the served CodeSha256 against the artifact metadata",
+      "proof_required": "plan No changes + CodeSha256 == content-sha256",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260911T034008Z OPENED by 0.9.0_WK_IRPT_BCKEND~2 with 5 leg(s)"
+  ],
+  "last_red_at": null
+}
