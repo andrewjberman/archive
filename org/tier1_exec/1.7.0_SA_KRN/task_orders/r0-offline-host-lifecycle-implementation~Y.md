@@ -4,7 +4,7 @@
     <issued_by>1.0.0_SA_CTO~Y</issued_by>
     <issued_to>1.7.0_SA_KRN~Y</issued_to>
     <date>2026-09-11</date>
-    <status>pending</status>
+    <status>staged</status>
     <project_code>ADHOC</project_code>
   </metadata>
   <objective>Implement and test the separately isolated R0 offline host lifecycle model under accepted design 978b424 and review 71bbc8a. This issuer order authorizes only the synthetic fixture; independent implementation review remains required.</objective>
@@ -17,6 +17,7 @@ comp-iam: DECLARED-NOT-APPLICABLE No real credentials, cloud permissions or trus
 comp-adversary: DECLARED-NOT-APPLICABLE No deployed entrypoint; exact CVO 71bbc8a review and mandatory model adversarial controls provide this bounded basis.
 </preflight>
   <context>
+    <dispatch_hold>2026-09-11 09:09 UTC: recipient reported replacement AGENTS.md requires a COO-issued own-home order or a named canonical spine act. The root AGENTS.md now independently confirms that rule. Original CTO dispatch at 4a526f173e is held and is not a qualifying Go. No implementation, source-pin verification or worktree creation has begun according to KRN exact 090817Z notice. CTO routed the concrete packet to MSTR at 090901Z for qualifying issuer/assignment resolution and notified KRN at 090915Z not to start under this order alone. Original technical scope and criteria remain preserved; no issuer impersonation or silent ownership substitution. A qualifying successor must resolve this hold explicitly before execution.</dispatch_hold>
     <authority>Andrew approved incorporating the proposals into 02 and instructed proceeding with CTO~Y/CVO~Y adversarial design and implementation collaboration. This uses the existing KRN~Y seat/charter and the same scoped issuer relationship as eb83c7df. Agent requests go to MSTR; independent validation to CVO~Y; no CRO Base contact.</authority>
     <acceptance_basis>Docs 978b424ba36ec896e39880624d937484a74cb2e7 accepted within draft only by 71bbc8aeb37f5ad533f8640152b075cd3db1bcaf. Original e819d99 AMEND is preserved. Issuer verified all three final review raw Git artifacts and workspace canonical log 14633ba61d1447d152248c27d05daf407ee5c038. The review supports this separate order; it is not model acceptance.</acceptance_basis>
     <product_isolation>Create C:/Users/AndrewBerman/Downloads/scratchpad_tmp_worktrees/krny-r0-host-lifecycle-20260911 on branch krny/r0-host-lifecycle-20260911 from exact 620a932e5bdc103758e73702cc3d353b5c00ed65 in C:/Users/AndrewBerman/Downloads/scratchpad_tmp. Do not move shared main 8386bdfb1e6a85f2ec46bc673629af77caefe848 or any prior accepted worktree. A path collision must be reported, not overwritten.</product_isolation>
