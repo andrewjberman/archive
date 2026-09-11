@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rd-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-7.starred-watchlist-per-firm-pure-marker.md",
+    "group": "OTHER",
+    "vintage_commit": "f3501860e809d876cb14bc16032edee309f9166d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "d0efe81ca84b3856c917a3efefb59d56d3414591",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-7.starred-watchlist-per-firm-pure-marker.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/watchlist/store.py",
+      "kind": "script",
+      "commit_or_etag": "61770a9396a9a876133b515ae774113ce92fdeb0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A library module, not a deploy artifact -- no Terraform, no Lambda, no schedule. star()/unstar()/list_starred() persist against the ALREADY-LIVE opal-amgt-security-metrics table (AMGT-rd-2, verified live in that cell's own proof-of-spec instance) under a WATCHLIST#<firm_id> partition-key namespace this cell mints; no new AWS resource is created by this cell, so DEPLOYED-VERIFIED does not apply -- correctness is proven by the test suite (AC1/AC2) against an in-memory fake of that same table shape.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/watchlist/__init__.py",
+      "kind": "script",
+      "commit_or_etag": "61770a9396a9a876133b515ae774113ce92fdeb0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Re-exports star/unstar/list_starred from store.py; no independent logic.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "lib/research/watchlist/tests/test_watchlist.py",
+      "kind": "test",
+      "commit_or_etag": "61770a9396a9a876133b515ae774113ce92fdeb0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC1 (per-firm sharing + cross-firm tenancy boundary) and AC2 (non-wiring absence-of-effect) proof itself -- see acceptance rows below for the graded runs.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/AMGT-rd-7.pure-marker-design-record.md",
+      "kind": "doc",
+      "commit_or_etag": "61770a9396a9a876133b515ae774113ce92fdeb0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "States where the store lives (reuses AMGT-rd-2's table, no new Terraform), why the tenancy boundary is structural rather than a filter, how the per-user reversal is confined to one function, and what the non-wiring tests actually prove -- read for AC4.",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "041adfa2c0bd0ba103578515a0f873ccdde85ca0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows. AMGT_RESAPP-Z-W7-S6 (commit ab85391b24): AC3's own '| tail -12' invocation clips comp-find's DENOMINATOR line off the graded excerpt at this worktree's current hit count (12); recorded so AC3's grading below can cite the denominator honestly rather than either omitting it or fabricating it inside the truncated excerpt. AMGT_RESAPP-Z-W7-S7 (commit 041adfa2c0bd0ba103578515a0f873ccdde85ca0): the FIRST controls.mutant draft (a real socket call) was not intercepted by 2 of 5 tests and made a trivial, payload-free real connection attempt to example.com before being reverted and replaced with the network-free mutant graded below."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line with a passed count and no \"failed\" -- including a test that two DIFFERENT users at the SAME firm see the SAME starred set (per-firm sharing) and that a user at a DIFFERENT firm does NOT see it (the tenancy boundary). A suite proving only that a star persists is NOT met",
+      "method": "test_suite",
+      "invocation": "timeout 110 python -m pytest lib/research -q -k \"starred or watchlist\" 2>&1 | tail -3",
+      "output_evidence": ".....                                                                    [100%]\n5 passed, 50 deselected in 0.14s",
+      "denominator": "5 of 55 tests in lib/research selected by the keyword filter (all 5 belong to lib/research/watchlist/tests/test_watchlist.py, matched via the module filename 'test_watchlist' containing 'watchlist'); of those 5, 2 are the AC1-specific arms -- test_starred_watchlist_is_shared_across_firm_pms (per-firm sharing, two distinct calls representing two different PMs) and test_starred_watchlist_tenancy_boundary_across_firms (the cross-firm boundary, both RESULT and MECHANISM asserted) -- both PASS, 0 FAIL, confirmed via --collect-only (lib/research/watchlist/tests/test_watchlist.py::test_starred_watchlist_is_shared_across_firm_pms, ::test_starred_watchlist_tenancy_boundary_across_firms, plus 3 AC2 tests also swept in by this keyword)",
+      "status": "PASS",
+      "expect": "\\d+ passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a summary line with a passed count and no \"failed\" -- including the NON-WIRING test: starring a name fires NO refresh, enqueues NO harvester and issues NO vendor request. The assertion must be on the ABSENCE of the side effect (a spy/mock asserting not-called), not on the star having been stored. A suite without that arm is NOT met",
+      "method": "test_suite",
+      "invocation": "timeout 110 python -m pytest lib/research -q -k \"marker or no_side_effect or pure\" 2>&1 | tail -3",
+      "output_evidence": ".....                                                                    [100%]\n5 passed, 50 deselected in 0.14s",
+      "denominator": "5 of 55 tests in lib/research selected; 3 are this cell's non-wiring arms (test_star_is_a_pure_marker_no_network_call, test_unstar_is_a_pure_marker_no_network_call, test_star_has_no_side_effect_beyond_the_marker_row), 2 are pre-existing lib/research/checkface tests also matched by 'marker' (test_marker_distinct_per_verdict_the_reading_arm, test_same_number_leads_with_marker_the_salience_arm, unrelated to this cell, already passing before this cell existed). All 5 PASS, 0 FAIL. The 3 non-wiring tests assert on ABSENCE: a blocked raw socket (socket.socket.connect + socket.create_connection monkeypatched to raise _VendorCallDetected) for the duration of star()/unstar(), plus an exact-call-count assertion on the fake table (only the one expected put_item/delete_item call recorded, no second table ever requested) -- not merely that the star was stored. controls.mutant below reproduces this arm actually firing on a real violation.",
+      "status": "PASS",
+      "expect": "\\d+ passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a printed denominator, and NO hit inside the starring code path that calls a harvest, refresh, enqueue or trigger -- NEGATIVE: the marker path is inert. Hits elsewhere in lib/research (the harvesters and producers legitimately contain these words) are expected and fine; a hit reachable FROM the star handler is the C-STARRED-PER-FIRM violation and is NOT met. A denominator of 0 files scanned is OUT-OF-CORPUS and is NOT met either",
+      "method": "command",
+      "invocation": "timeout 110 comp-find \"harvest|refresh|enqueue|trigger\" lib/research --limit 20 2>&1 | tail -12",
+      "output_evidence": "    lib/research/freshness/build_view.py:199: last_refreshed = max(candidates) if candidates else NEVER\n    lib/research/freshness/build_view.py:205: \"last_refreshed\": last_refreshed,\n    lib/research/social/__init__.py:3: At this cut: no dataset has been triggered, no post-level record has been read. This\n    lib/research/social/measure.py:48: # until triggered) -- the cap is a guard against an unknown price, not a budget drawn\n    lib/research/social/measure.py:57: \"\"\"A trigger that would exceed COST_CAP_USD refuses BEFORE it is sent (worker\n    lib/research/social/measure.py:102: # THE STOP RULE (worker face s.(a)): one company, one dataset, ONE trigger per query\n    lib/research/social/measure.py:106: # attempted in this run is re-triggered (AC6: prevents a second spend on the same\n    lib/research/social/measure.py:111: \"after all three shapes are exhausted -- whichever is first; never re-trigger a \"\n    lib/research/social/measure.py:118: \"before the trigger and again after; the difference is this record's cost\",\n    lib/research/social/measure.py:190: \"trigger anything without --word-record.\",\n    lib/research/social/measure.py:207: # at this cut (AC4) -- the trigger itself is the NEXT order's, the one that adds\n    lib/research/social/measure.py:217: f\"client exists in this module yet (AC4) -- the trigger is the order that \" [DENOMINATOR NOT VISIBLE IN THIS EXCERPT -- the literal '| tail -12' clips comp-find's own header; see supplementary denominator citation below and surprise row AMGT_RESAPP-Z-W7-S6]",
+      "denominator": "SUPPLEMENTARY (same command, same worktree state, run without the trailing tail -12): 'DENOMINATOR: 12 hit(s) across 67 file(s) scanned in scope [corpus=all] | 49 EPHEMERAL-FLOOR, NOT searched'. 12 of 12 hits are in lib/research/freshness/build_view.py (2 hits, a pre-existing field name 'last_refreshed') and lib/research/social/__init__.py + measure.py (10 hits, a pre-existing vendor-spend guard's own 'trigger' vocabulary) -- 0 of 12 hits are inside lib/research/watchlist/ (this cell's module, commit 61770a9396a9a876133b515ae774113ce92fdeb0) or reachable from star()/unstar()/list_starred(), which import nothing from freshness/ or social/. Not OUT-OF-CORPUS (67 files scanned, not 0).",
+      "status": "PASS",
+      "expect": "harvest|refresh|enqueue|trigger"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "is the per-firm key a STRUCTURAL tenancy boundary (so another firm's starred set is unreachable, not merely unfiltered), and is the marker genuinely inert -- including transitively, where a star writes a row that some other job later treats as a work queue? The transitive path is the one a direct test can miss.",
+      "method": "manual_read_with_citation",
+      "invocation": "read lib/research/watchlist/store.py, lib/research/watchlist/tests/test_watchlist.py, and org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/AMGT-rd-7.pure-marker-design-record.md",
+      "output_evidence": "STRUCTURAL BOUNDARY: list_starred(firm_id) issues one DynamoDB Query keyed on _partition_key(firm_id) (WATCHLIST#<firm_id>) against the base table's hash key -- Query returns ONLY items whose partition key equals the given value; there is no scan and no code path that receives another firm's rows to filter after the fact (test_starred_watchlist_tenancy_boundary_across_firms asserts both the result and that each firm's own Query call carries only that firm's own key). INERTNESS, DIRECT: star()/unstar() make exactly one call each against the persistence seam; comp-find finds zero hits for harvest/refresh/enqueue/trigger inside lib/research/watchlist/ (AC3). INERTNESS, TRANSITIVE -- THE LIMIT OF WHAT THIS INSTANCE CAN CLAIM: no job anywhere in this repo currently reads the WATCHLIST# partition-key namespace (comp-find over lib/ and infra/ for 'WATCHLIST#' at this commit returns only this cell's own store.py, __init__.py, test and design-record hits -- a fact about the estate's CURRENT state, not a structural guarantee against a FUTURE job being wired to read it as a work queue). The socket-level test guard (block_all_sockets) would catch a DIRECT vendor call added inside star()/unstar(), and the exact-call-count assertions catch a silently-added SECOND row on the same seam (both reproduced firing in controls.mutant below) but neither can see a SEPARATE, later-written job that independently queries WATCHLIST# rows and acts on them -- that risk is named, not closed, by this cell's own design (marker table, no queue, no event source mapping, no stream consumer declared on opal-amgt-security-metrics by this cell or any other cell at this commit).",
+      "denominator": "N/A -- judgment criterion, no verdict computed by this instance",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order's own annotation: 'AC4 is judgment -- do NOT grade it. record UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z. PASS or FAIL on a judgment row is INVALID.' The grade lands in 3.0.0_SA_CVO~Z's L9 adjudication row.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+      "mutant": {
+        "description": "TWO mutants were tried, in order. (1) star() was temporarily edited to add a REAL socket call (socket.create_connection to example.com:80) after its put_item. Running the full suite showed only 3 of 5 tests failing -- the 2 AC1 tests (test_starred_watchlist_is_shared_across_firm_pms, test_starred_watchlist_tenancy_boundary_across_firms) do not use the block_all_sockets fixture, so the injected call was not intercepted by those two and a REAL outbound TCP connection attempt to example.com (an IANA-reserved documentation/testing domain, no payload sent beyond the handshake) was made from this worktree without being caught -- an unintended, if minor, live network act this instance discloses rather than hides. That mutant was reverted immediately (git diff --stat: no diff) and REPLACED with (2), a network-free mutant: star() edited to make a SECOND table.put_item call (a synthetic 'QUEUE#pending-collection' row) after the real marker write, on the SAME already-faked persistence seam -- zero real network risk, since it never leaves the fake table. This second mutant is the one graded below; both edits were reverted and lib/research/watchlist/store.py is confirmed byte-identical to commit 61770a9396a9a876133b515ae774113ce92fdeb0 (git diff --stat: no output) before this instance's formal AC1-AC3 runs were taken.",
+        "expected": "The absence-of-effect tests (test_star_is_a_pure_marker_no_network_call, test_star_has_no_side_effect_beyond_the_marker_row) FAIL on the second row appearing; the AC1 storage/retrieval tests (which only check each firm's own returned list, never the fake table's total call count) and test_unstar_is_a_pure_marker_no_network_call (unstar() was not mutated) are NOT expected to fail -- demonstrating exactly the task order's own warning that 'a suite proving only that a star persists is NOT met'.",
+        "observed": "2 failed, 3 passed. FAILED: test_star_is_a_pure_marker_no_network_call (AssertionError: fake_dynamodb.table.calls held 2 entries, not the expected 1 -- [('put_item','WATCHLIST#firm-alpha','AAPL'), ('put_item','QUEUE#pending-collection','WORK_ITEM')]); FAILED: test_star_has_no_side_effect_beyond_the_marker_row (AssertionError: assert 2 == (0 + 1)). PASSED: test_starred_watchlist_is_shared_across_firm_pms, test_starred_watchlist_tenancy_boundary_across_firms (the phantom 'QUEUE#pending-collection' row is invisible to a Query keyed on 'WATCHLIST#<firm_id>', so AC1's own tests are structurally blind to this exact violation), and test_unstar_is_a_pure_marker_no_network_call (unmutated). Reverted; suite back to 5 passed, 0 failed (git diff --stat: no output, byte-identical).",
+        "status": "FIRED-AS-EXPECTED"
+      },
+    "determinism": {
+      "method": "AC1's invocation (python -m pytest lib/research -q -k \"starred or watchlist\") run twice in immediate succession, same worktree state, no code change between runs.",
+      "observed": "Run 1: '5 passed, 50 deselected in 0.14s'. Run 2: '5 passed, 50 deselected in 0.14s'. Byte-identical summary both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A frontend/API surface for starring (a button, an endpoint)",
+      "reason": "Not named by this cell's WHAT TO PRODUCE (a/b/c are all persistence + semantics + proof); the Lead Panel surface (AMGT-rd-8) is a separate, later cell that will call this module."
+    },
+    {
+      "item": "Per-user starring",
+      "reason": "Explicitly reserved to Andrew's own future word (bound: 'reversible to per-user on his word'). Not built; _partition_key() is documented as the single point that reversal would touch."
+    },
+    {
+      "item": "New DynamoDB table, index, or any Terraform change",
+      "reason": "infra/aws/terraform/amgt-resapp/security-metrics-table.tf's own comment names this cell as an allowed occupant of the existing table ('may persist here or in a sibling keyspace; this schema does not preclude either'); this cell takes that option, and the task order's own preamble instructs NOT to touch the (currently invalid, duplicate-provider) terraform module for an unrelated reason. No apply was run by this cell; no change-management ledger entry was needed (NEVER-2 governs a confirmed DEPLOY, and none occurred)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W7-S6: AC3's own '| tail -12' invocation clips comp-find's DENOMINATOR line off the graded excerpt at this worktree's current hit count (12 pre-existing, unrelated hits in lib/research/freshness and lib/research/social); the substantive bar (no hit inside the starring code path) holds either way, and the AC3 acceptance row above cites the same command's un-truncated denominator line as supplementary evidence rather than omitting or fabricating it.",
+    "AMGT_RESAPP-Z-W7-S7: controls.mutant's first draft (a real socket call injected into star() to test AC2's absence-of-effect suite) was not intercepted by 2 of 5 tests and made a trivial, payload-free real connection attempt to example.com before being caught, reverted, and replaced with a network-free mutant (the one graded in controls.mutant below)."
+  ],
+  "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (the task order names only org/mcp/sessions/, lib/research/, infra/aws/terraform/amgt-resapp/, org/missions/D5/AMGT/AMGT_RESAPP/deliverables/, the surprise-channel investigation file, and the task-order file itself). The full session is this turn's transcript; every invocation and output is carried verbatim in the acceptance rows above and in the design-record deliverable.",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "timeout 60 python -m py_compile lib/research/watchlist/__init__.py lib/research/watchlist/store.py lib/research/watchlist/tests/test_watchlist.py",
+      "result": "OK: no output, rc 0 -- all three files byte-compile clean."
+    },
+    {
+      "tool": "ds-precommit-check.py",
+      "invocation": "timeout 60 python .tools/ds-precommit-check.py --verbose lib/research/watchlist/store.py lib/research/watchlist/__init__.py lib/research/watchlist/tests/test_watchlist.py",
+      "result": "store.py: 8 module names; __init__.py: 5 module names; test_watchlist.py: 14 module names -- rc 0, no undefined-name violations."
+    },
+    {
+      "tool": "ruff",
+      "invocation": "timeout 60 python -m ruff check --target-version py39 lib/research/watchlist/store.py lib/research/watchlist/__init__.py lib/research/watchlist/tests/test_watchlist.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "comp-read --enumerate (banned-word self-check, before commit)",
+      "invocation": "comp-read lib/research/watchlist/store.py --enumerate \"(?i)harvest|refresh|enqueue|trigger\"; comp-read lib/research/watchlist/tests/test_watchlist.py --enumerate \"(?i)harvest|refresh|enqueue|trigger\"; comp-read lib/research/watchlist/__init__.py --enumerate \"(?i)harvest|refresh|enqueue|trigger\"",
+      "result": "0 hit(s) in all three files (case-insensitive, broader than AC3's own case-sensitive sweep) -- confirms AC3 will find nothing inside this module before running the graded invocation."
+    },
+    {
+      "tool": "safe-commit.sh (code + design-record commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~7 <0.9.0_WK_AMGT_RESAPP~7@opal.agent>\" -F <msgfile> -- lib/research/watchlist/ org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/AMGT-rd-7.pure-marker-design-record.md",
+      "result": "commit 61770a9396a9a876133b515ae774113ce92fdeb0: risk-reflex REFLEX CLEAN (4 of 4 files, PRESENT_WITH_ZERO_RESULTS); commit-gate OK (3 of 4 files -- the .md deliverable falls outside the .py/.sh/.tf scanner by design); to-pipeline-gate OK; missions-tree-check 0 violations; surprise-row-gate OK (0 rows this commit); msg-verify MATCH."
+    },
+    {
+      "tool": "safe-commit.sh (surprise-row commit, S6)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~7 <0.9.0_WK_AMGT_RESAPP~7@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit ab85391b24: surprise-corpus baseline unchanged (4 known, 0 new, 0 resolved -- this project's channel is not in that legacy-failure baseline); surprise-row-gate OK (1 new row of 39 total, step-7/step-10 fields present); missions-tree-check 0 violations; msg-verify MATCH."
+    },
+    {
+      "tool": "safe-commit.sh (surprise-row commit, S7)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~7 <0.9.0_WK_AMGT_RESAPP~7@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 041adfa2c0bd0ba103578515a0f873ccdde85ca0: surprise-corpus baseline unchanged (4 known, 0 new, 0 resolved); surprise-row-gate OK (1 new row of 40 total, step-7/step-10 fields present); missions-tree-check 0 violations; msg-verify MATCH."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/AMGT_RESAPP.TO-AMGT-rd-7.starred-watchlist-per-firm-pure-marker.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "see final report -- run after this instance was written, before the status-flip commit"
+    }
+  ]
+}
