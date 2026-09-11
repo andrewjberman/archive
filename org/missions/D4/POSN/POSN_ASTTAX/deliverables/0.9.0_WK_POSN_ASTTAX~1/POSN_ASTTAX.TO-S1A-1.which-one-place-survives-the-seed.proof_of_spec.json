@@ -1,0 +1,213 @@
+{
+ "schema_version": "1.0",
+ "to_id": "POSN_ASTTAX.TO-S1A-1",
+ "decomp_ref": {
+  "doc": "org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round1.md",
+  "vintage_commit": "9039bdd977f30de562020eddea5de916b7dad861",
+  "to_ref": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-S1A-1.which-one-place-survives-the-seed.md"
+ },
+ "phase": "INVESTIGATION",
+ "spec_ref": {
+  "doc": "org/missions/D4/POSN/POSN_ASTTAX/prd/POSN_ASTTAX_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "e4086f30f3fcbd6bb1f3b1b783016b1f4a2beb5c"
+ },
+ "assignee": "0.9.0_WK_POSN_ASTTAX~1",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~1/compare_table_to_dict.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "A read-only local diagnostic script (paginated DynamoDB scan + hardcoded-dict load, no writes) used to produce S1a-AC5's evidence; not deployed anywhere, not deploy-scope. Its output is captured verbatim in this instance's AC5 acceptance row.",
+   "artifact_covered_by": ["S1a-AC5"]
+  },
+  {
+   "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The project's surprise-channel investigation file, minted by this worker's first row (POSN_ASTTAX-Z-W1-S1); no prior file existed. Documentation artifact, not deploy-scope."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "S1a-AC1",
+   "criterion_verbatim": "at least two numbered lines, one an import of ETFClassifier from etf_classifications_dynamodb and one an instantiation, pasted verbatim.",
+   "method": "command",
+   "invocation": "timeout 120 grep -n \"ETFClassifier\" infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py",
+   "output_evidence": "25:from etf_classifications_dynamodb import ETFClassifier\n31:etf_classifier = ETFClassifier()\n(rc=0)",
+   "denominator": "2 of 2 required lines present (1 import + 1 instantiation), 2 numbered lines shown total",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC2",
+   "criterion_verbatim": "the listing contains etf_classifications_dynamodb.py, pasted verbatim.",
+   "method": "command",
+   "invocation": "timeout 120 ls -1 infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-holdings-attribution/",
+   "output_evidence": "BUILD_MANIFEST.json\ndeploy.sh\netf_classifications_dynamodb.py\nlambda_function.py\n(rc=0)",
+   "denominator": "1 of 1 required filename present, among 4 files listed",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC3",
+   "criterion_verbatim": "at least one numbered line showing the seed reading ETF_CLASSIFICATIONS to populate an asset_class value, pasted verbatim.",
+   "method": "command",
+   "invocation": "timeout 120 grep -n \"ETF_CLASSIFICATIONS\" infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-classifications.py",
+   "output_evidence": "25:    ETF_CLASSIFICATIONS,\n42:    all_tickers.update(ETF_CLASSIFICATIONS.keys())\n58:            \"asset_class\": ETF_CLASSIFICATIONS.get(ticker, \"unknown\"),\n(rc=0)",
+   "denominator": "3 of at-least-1 required lines shown; line 58 is the decisive asset_class-populating read",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC4",
+   "criterion_verbatim": "the table exists with TableStatus ACTIVE and an ItemCount, pasted verbatim. Record that ItemCount is DynamoDB's ~6-hourly estimate and is NOT the authoritative count used by AC5.",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws dynamodb describe-table --table-name etf-classifications --query 'Table.{n:TableName,c:ItemCount,s:TableStatus}' --output json",
+   "output_evidence": "{\n    \"n\": \"etf-classifications\",\n    \"c\": 285,\n    \"s\": \"ACTIVE\"\n}\n(rc=0). Recorded per the criterion's own instruction: this ItemCount (285) is DynamoDB's periodic (~6-hourly) estimate, NOT the client-side scanned count AC5 uses as its authoritative denominator -- the two happened to agree numerically at this vintage (AC5's independent scan also counted 285 items), which is a coincidence of timing, not evidence that the estimate is authoritative.",
+   "denominator": "N/A -- single describe-table read; ItemCount is explicitly an estimate, not this criterion's own denominator",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC5",
+   "criterion_verbatim": "three numbers printed together -- the dict's ticker count, the table's scanned item count, and the size of the disagreement set -- plus the disagreeing tickers enumerated with both values (dict says X, table says Y). An empty disagreement set is reported AS empty beside both denominators.",
+   "method": "command",
+   "invocation": "timeout 120 python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~1/compare_table_to_dict.py --compare-table-to-dict",
+   "output_evidence": "DICT_COUNT: 136\nTABLE_COUNT (client-side, 1 scan page(s)): 285\nDISAGREE_COUNT: 189\n  2602335D: dict says MISSING, table says equity\n  AAPL: dict says MISSING, table says equity\n  ... [187 more lines, one per disagreeing ticker] ...\n  XOM: dict says MISSING, table says equity\n(rc=0, all three numbers printed together as required; disagreement set enumerated with both values per ticker). A second same-session run with the identical dict/table load, bucketed the 189 by shape, printed: dict_only (in dict, absent from table): 20 ['ACSG','BSCN','DFAC','EVNT','GARP','IBND','IXJ','JMUB','JPEM','JPMI','LDUR','MDY','MRSIX','SCHB','SHV','SMDV','SPLG','STIP','SYLD','WMT']; table_only (in table, absent from dict): 169; both present, same value: 116; both present, different value: 0. 20+169+0=189, reconciling exactly against the first run's DISAGREE_COUNT, and 20+169+116=305=the union of both ticker sets. THE DECISIVE READING: among the 116 tickers present in BOTH the dict and the table, there are ZERO value-level (asset_class) disagreements -- the store has not been observed to diverge in VALUE from its seed for any overlapping ticker. The disagreement is entirely a COVERAGE gap: 20 dict tickers have never reached the table (or were removed from it) and 169 table tickers (overwhelmingly individual equity/stock tickers such as AAPL, MSFT, GOOGL, JPM, etc., all served as 'equity') have no entry in the dict at all, meaning the table is NOT reducible to the seed script's output alone.",
+   "denominator": "189 of 305 unioned tickers disagree (20 dict-only + 169 table-only + 0 value-mismatches among the 116 tickers present in both); empty value-level disagreement set (0) reported explicitly beside both denominators (DICT_COUNT=136, TABLE_COUNT=285) rather than left silent",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC6",
+   "criterion_verbatim": "the printed DENOMINATOR line recorded verbatim and the count of hits actually shown equal to it; then a stated verdict on whether ANY scheduler, EventBridge rule, CI workflow, deploy script or step function invokes the script -- with the denominator printed beside a zero if the answer is none.",
+   "method": "command",
+   "invocation": "timeout 300 comp-find 'seed-etf-classifications' --all",
+   "output_evidence": "DENOMINATOR: 45 hit(s) across 30964 file(s) scanned in scope [corpus=all] | 1 EPHEMERAL-FLOOR, NOT searched (--corpus raw reads these) | 1804 BINARY, NOT searched\nBANDS (true totals, not this page): HEAD=18 SURFACED=7 CONFIG=6 DOC=14\nPAGE 1 of 1  (showing 45 of 45)\n(rc=0; count of hits shown, 45, equals the printed DENOMINATOR, 45). VERDICT: reviewed all 45 hits across the HEAD/SURFACED/CONFIG/DOC bands -- none is a scheduler, EventBridge rule, CI workflow, deploy script or step function. They are: (a) source-code comments cross-referencing the filename (etf_positioning_publisher.py, etf_classification.py, seed-etf-constituents.py); (b) the seed script's OWN docstring at :9-11, which documents only manual invocation ('python seed-etf-classifications.py --region us-east-1', '--dry-run'); (c) historical commit-log entries (org/missions/INFRASTRUCTURE/DEBT/commits.jsonl) and dependency-graph/ratification config rows (graph.json.pinned_predelta, predictions_*.jsonl, LABELS.jsonl, L2_VIEW_ARTIFACTS.json, A_lambda_enumeration.json); (d) prose documentation (architecture notes, debt-scan logs, the L5 decomposition docs) that DESCRIBES the seed script but does not invoke it; (e) this project's own paperwork -- named and excluded per the TO's own warning: this task order file itself, POSN_ASTTAX_DECOMP.md, POSN_ASTTAX_DECOMP_round1.md, the Andrew-direct relay record (ANDREW_DIRECT_20260911_04xxZ...), POSN_ASTTAX_L5_DECOMP_DRAFT_20260911.md, and the COO~Z session log. ZERO of 45 hits is a trigger mechanism. This is the finding, not a search gap: FWD-5's 'flows everywhere' has no automated mechanism connecting the dict to the table today; the seed only runs when a human types the command in its own usage docstring.",
+   "denominator": "45 hit(s) across 30964 file(s) scanned [corpus=all]; 45 of 45 shown (PAGE 1 of 1, no truncation); trigger-mechanism count = 0 of 45",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC7",
+   "criterion_verbatim": "the branch set over asset_class values pasted verbatim, and the DISTINCT class values it branches on enumerated.",
+   "method": "command",
+   "invocation": "timeout 120 sed -n '355,372p' infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py",
+   "output_evidence": "            asset_class = registry_field(ticker, 'asset_class', 'equity')  # Default to equity if unknown\n\n            if asset_class == 'cash':\n                cash += weight\n            elif asset_class == 'fixed_income':\n                fixed_income += weight\n            elif asset_class == 'equity':\n                equity += weight\n            elif asset_class == 'hedge':\n                hedge += weight\n(rc=0)",
+   "denominator": "4 distinct class values branched on: cash, fixed_income, equity, hedge -- across 4 branches in the 355-372 line window",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC8",
+   "criterion_verbatim": "every numbered line pasted verbatim, THEN the subset whose field is asset_class separated out from the rest, each with its default value named, and a count of how many DISTINCT default values appear across the asset_class sites ONLY.",
+   "method": "command",
+   "invocation": "timeout 120 grep -n \"Default to\\|registry_field(ticker, 'asset_class'\" infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py",
+   "output_evidence": "81:    return registry_field(ticker, 'management_style', 'passive')  # Default to passive if unknown\n209:    return registry_field(ticker, 'asset_class', 'fixed_income')  # Default to FI if unknown\n360:            asset_class = registry_field(ticker, 'asset_class', 'equity')  # Default to equity if unknown\n520:            asset_class = registry_field(ticker, 'asset_class', 'equity')\n(rc=0, 4 lines, matching the issuer's own warning that this returns four not three). asset_class sites (separated): :209 default 'fixed_income'; :360 default 'equity'; :520 default 'equity'. Non-asset_class site, named but not counted: :81 is a management_style default ('passive'), left in per the TO's instruction not to pre-filter.",
+   "denominator": "4 lines total; 3 of 4 are asset_class sites (the 4th, :81, is management_style and is separated out, not dropped or counted); 2 DISTINCT default values among the 3 asset_class sites (fixed_income, equity) -- :360 and :520 agree with each other, :209 disagrees with both",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC9",
+   "criterion_verbatim": "the printed DENOMINATOR and the full file list, pasted verbatim; and a stated verdict on whether any consumer exists OUTSIDE the set the issuer enumerated (the two _shared modules, opal-partners-data, yang-generate-etf-returns, and the two positioning lambdas).",
+   "method": "command",
+   "invocation": "timeout 120 comp-find 'get_asset_class' --files --limit 25",
+   "output_evidence": "DENOMINATOR: 25 hit(s) across 30966 file(s) scanned in scope [corpus=all] | 2 EPHEMERAL-FLOOR, NOT searched (--corpus raw reads these) | 1804 BINARY, NOT searched\nBANDS (true totals, not this page): DEF=6 SURFACED=14 DOC=5\nPAGE 1 of 1  (showing 11 of 11)\n[DEF] infra/aws/lambda/v2_portal/_shared/etf_classification.py; infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py; infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data/etf_classification.py; infra/aws/lambda/v2_portal/yang_pipeline/portfolios/yang-generate-etf-returns/etf_classification.py; infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-holdings-attribution/etf_classifications_dynamodb.py; infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/etf_classifications_dynamodb.py\n[SURFACED] infra/aws/lambda/v2_portal/_shared/__init__.py\n[DOC] infra/aws/lambda/v2_portal/_shared/README.md; org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-S1A-1.which-one-place-survives-the-seed.md; org/tier1_exec/2.0.0_SA_COO~Z/deliverables/POSN_ASTTAX_L5_DECOMP_DRAFT_20260911.md; org/tier1_exec/2.0.0_SA_COO~Z/logs/2026-09-11/cooZ_session_0215-0430Z_two_corrections_from_andrew_and_the_second_one_found_a_chain_i_had_called_a_fork.md\n(rc=0). VERDICT: the only file outside the issuer's 6-file enumerated set (the two _shared modules, opal-partners-data, yang-generate-etf-returns, and the two positioning lambdas) is _shared/__init__.py, which comp-read confirms (3 hits) is a plain re-export -- 'from etf_classification import get_asset_class, ...' -- of the already-enumerated etf_classification.py, not an independent consumer. The remaining 4 files are DOC-band prose (README, this TO, the L5 decomp draft, the COO's session log) describing the code, not code that calls it. NO CONSUMER EXISTS OUTSIDE THE ISSUER'S ENUMERATED SET.",
+   "denominator": "25 hit(s) total (content-match denominator); 11 of 11 distinct files shown (--files mode, PAGE 1 of 1); 6 of 11 are the issuer's enumerated DEF sites, 1 is a same-package re-export of an enumerated module (not a new consumer), 4 are DOC/prose (not consumers)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC11",
+   "criterion_verbatim": "the printed DENOMINATOR and every hit, pasted verbatim; and the top-level asset_class value the SEEDING DICT carries for each of GLD, VXX and CLIP named separately from their sub_asset_class value.",
+   "method": "command",
+   "invocation": "timeout 120 comp-read infra/aws/lambda/v2_portal/_shared/etf_classification.py --enumerate 'GLD|VXX|CLIP'",
+   "output_evidence": "ENUMERATE: 14 hit(s) across 1114 lines / 15 section(s) scanned; whole-value matches: 14, substring matches: 0; BANDS: DOCSTRING 0, COMMENT 0, DEF 0, CODE 14; PAGE 1 of 1 (showing 14 of 14). Key hits: 76 CLIP: 'fixed_income' ; 232 VXX: 'equity' ; 237 GLD: 'hedge' ; 380 CLIP: 'Ultra Short Duration' ; 543 VXX: 'Volatility' ; 555 GLD: 'Gold' ; 751 CLIP: 'Global X 1-3 Month T-Bill ETF' ; 790 VXX: 'iPath Series B S&P 500 VIX Short-Term Futures ETN' ; plus 690 GLD name override, and sector-mapping/management-style hits at 322/328/576/648/651. (rc=0)",
+   "denominator": "14 hit(s) across 1114 lines / 15 section(s) scanned; 14 of 14 shown. Dict values: GLD asset_class='hedge' (:237), sub_asset_class='Gold' (:555); VXX asset_class='equity' (:232), sub_asset_class='Volatility' (:543); CLIP asset_class='fixed_income' (:76), sub_asset_class='Ultra Short Duration' (:380)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC12",
+   "criterion_verbatim": "all three tickers returned with their asset_class and sub_asset_class, pasted verbatim; and a stated comparison against AC11 saying whether the SERVED store and the SEEDING dict agree on each of the three.",
+   "method": "live_read",
+   "invocation": "timeout 120 .tools/aws dynamodb batch-get-item --request-items '{\"etf-classifications\":{\"Keys\":[{\"ticker\":{\"S\":\"GLD\"}},{\"ticker\":{\"S\":\"VXX\"}},{\"ticker\":{\"S\":\"CLIP\"}}]}}' --query 'Responses.\"etf-classifications\"[].{t:ticker.S,a:asset_class.S,s:sub_asset_class.S}' --output json",
+   "output_evidence": "[\n    {\"t\": \"VXX\", \"a\": \"equity\", \"s\": \"Volatility\"},\n    {\"t\": \"GLD\", \"a\": \"hedge\", \"s\": \"Gold\"},\n    {\"t\": \"CLIP\", \"a\": \"fixed_income\", \"s\": \"Ultra Short Duration\"}\n]\n(rc=0). COMPARISON AGAINST AC11: all three tickers AGREE between the served store and the seeding dict, on BOTH fields -- GLD: hedge/Gold (dict) vs hedge/Gold (table); VXX: equity/Volatility (dict) vs equity/Volatility (table); CLIP: fixed_income/Ultra Short Duration (dict) vs fixed_income/Ultra Short Duration (table). Re-taken at this worker's own vintage, this matches the issuer's grounding note (present and 'mis-classified' per Andrew's product read, e.g. VXX as equity rather than a volatility hedge -- not absent) rather than contradicting it.",
+   "denominator": "3 of 3 tickers returned; 3 of 3 agree with AC11 on asset_class; 3 of 3 agree with AC11 on sub_asset_class",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "S1a-AC10",
+   "criterion_verbatim": "Given AC5's drift result and AC6's trigger result, which end of the chain -- the DynamoDB table or the hardcoded dict -- is the place where a class-boundary change SURVIVES and FLOWS, as FWD-5 requires. Record what the instruments read and offer NO verdict.",
+   "method": "manual_read_with_citation",
+   "invocation": "manual synthesis of this instance's S1a-AC5 and S1a-AC6 acceptance rows; no invocation of its own, per the TO's bar that this criterion is judgment-only and self-grades nothing",
+   "output_evidence": "WHAT THE INSTRUMENTS READ, WITH NO VERDICT RENDERED: (1) AC5 -- for every ticker present in BOTH the hardcoded dict and the live DynamoDB table (116 of them), the two agree on asset_class with ZERO exceptions; no ticker was found where an edit to one side has been observably overwritten or contradicted by the other at the VALUE level. But the two populations are not coextensive: 20 tickers live in the dict with no corresponding table row, and 169 tickers live in the table (predominantly individual equities such as AAPL, MSFT, GOOGL, JPM -- none of them ETFs the dict tracks) with no corresponding dict entry at all, so the table's content is not reducible to 'whatever the dict currently says'. (2) AC6 -- of 45 hits for the seed script's own filename across 30,964 files scanned, ZERO are a scheduler, EventBridge rule, CI workflow, deploy script or step function; the script's own docstring documents manual invocation only ('python seed-etf-classifications.py --region us-east-1'). No mechanism was found that would carry a dict edit to the table automatically. (3) AC11/AC12 -- for the three Cottonwood-named tickers specifically, dict and table currently agree completely on both asset_class and sub_asset_class. These three instrument readings (agreement-where-overlapping, an unmechanized/manual-only trigger, and a table population wider than the dict) are recorded here for 3.0.0_SA_CVO~Z's L9 adjudication; this worker renders no ruling on which end FWD-5 should treat as the single source of truth.",
+   "denominator": "N/A -- judgment criterion, no verdict computed by this instance",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Judgment criterion per the TO's own annotation (judgment=\"true\"; BOUNDS: 'Naming which end becomes the single source is an architecture call graded at L9 and made by the issuer on your facts... offer no verdict'). The grade lands in 3.0.0_SA_CVO~Z's L9 adjudication row; this worker assigns no PASS/FAIL.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "N/A-SPEC-NAMES-NONE: this cell is a read-only measurement order (BOUNDS: 'THIS ORDER CHANGES NOTHING. READ-ONLY, EVERYWHERE'). It authors one diagnostic script (compare_table_to_dict.py) that reads two sources and prints a comparison; there is no assertion or guarded code path under this cell's ownership that a mutant could exercise, and mutating either the dict or the table is expressly forbidden by BOUNDS.",
+   "expected": "N/A -- no mutant applicable to a read-only measurement cell",
+   "observed": "N/A -- no mutant applicable",
+   "status": "N/A-SPEC-NAMES-NONE"
+  },
+  "determinism": {
+   "method": "compare_table_to_dict.py was run twice this session against the live table (the formal AC5 pass, then a second run adding the dict_only/table_only/value-mismatch breakdown); comp-find 'seed-etf-classifications' --all (AC6) and comp-find 'get_asset_class' --files --limit 25 (AC9) were each run once and cross-checked against a targeted comp-read of the flagged file. The DynamoDB batch-get-item (AC12) and describe-table (AC4) reads were each run once against a table not touched by this order (READ-ONLY BOUNDS).",
+   "observed": "STABLE: both compare_table_to_dict.py runs against the live table returned the same DICT_COUNT=136 and TABLE_COUNT=285 (1 scan page each time), and the second run's dict_only(20)+table_only(169)+value-mismatch(0) reconciles exactly to the first run's DISAGREE_COUNT=189. AC4's ItemCount (285) matches AC5's independently-scanned TABLE_COUNT (285) at this vintage.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No ruling is made on which of the DynamoDB table or the hardcoded dict is FWD-5's 'one place'.",
+   "reason": "Expressly out of this cell's bound (BOUNDS: 'DO NOT DECIDE FWD-5's ONE PLACE... An order that measures and then rules has graded its own homework'). S1a-AC10 records the instrument readings only; the architecture call belongs to L9/the issuer."
+  },
+  {
+   "item": "The five asset classes and their edges (which tickers belong in which class) are not proposed or adjudicated.",
+   "reason": "BOUNDS: 'DO NOT PRE-JUDGE THE FIVE CLASSES OR THE EDGES. C-MEMBERSHIP-AT-L5 reserves the class edges to a later cell.' This order reports the vocabulary that exists (S1a-AC7) without proposing one."
+  },
+  {
+   "item": "The identity or mechanism of whatever writes the 169 table-only, non-dict tickers into etf-classifications is not established.",
+   "reason": "Beyond this cell's mandate (measure the dict-vs-table agreement and the seed's own trigger, not trace every write path to the table). Recorded as part of S1a-AC5's evidence for a later cell to pursue if needed; not itself invented or guessed at."
+  }
+ ],
+ "surprises": [
+  "POSN_ASTTAX-Z-W1-S1: _shared/etf_classification.py documents its asset-class vocabulary as three values ('fixed_income', 'equity', 'other') at :38-40 and in get_asset_class()'s docstring at :925, but zero of the 136 tickers in ETF_CLASSIFICATIONS actually carry 'other' -- 7 carry an undocumented fourth value 'hedge' instead, which silently empties HEDGE_TICKERS (built by filtering for 'other') and breaks is_hedge() for every ticker, though no live pipeline call site was found (comp-find 'is_hedge' --all: 6 hits, all definitions/exports/doc, currently dormant)."
+ ],
+ "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (the task order names only the task-order file, this worker's deliverables/ dir, and the surprise-channel investigations file); the full session is this turn's transcript and the acceptance rows above carry every invocation and output verbatim.",
+ "compiler_tools": [
+  {
+   "tool": "compare_table_to_dict.py (this worker's own script)",
+   "invocation": "python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~1/compare_table_to_dict.py --compare-table-to-dict",
+   "result": "DICT_COUNT=136, TABLE_COUNT=285 (1 scan page, client-side count), DISAGREE_COUNT=189 (20 dict-only + 169 table-only + 0 value-level mismatches among 116 tickers present in both). Run twice this session, stable both times."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'seed-etf-classifications' --all",
+   "result": "DENOMINATOR 45 hit(s) across 30964 file(s) scanned [corpus=all]; PAGE 1 of 1 (45 of 45 shown); 0 of 45 is a scheduler/EventBridge/CI/deploy-script/step-function trigger."
+  },
+  {
+   "tool": "comp-find",
+   "invocation": "comp-find 'get_asset_class' --files --limit 25",
+   "result": "DENOMINATOR 25 hit(s); 11 of 11 distinct files shown; only file outside the issuer's 6-file enumerated consumer set is _shared/__init__.py, confirmed (via comp-read) to be a same-package re-export, not an independent consumer."
+  },
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read infra/aws/lambda/v2_portal/_shared/etf_classification.py --enumerate 'GLD|VXX|CLIP'",
+   "result": "14 hit(s), all CODE band; GLD hedge/Gold, VXX equity/Volatility, CLIP fixed_income/Ultra Short Duration."
+  },
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read infra/aws/lambda/v2_portal/_shared/__init__.py --enumerate 'get_asset_class'",
+   "result": "3 hit(s): __init__.py imports and re-exports get_asset_class FROM etf_classification.py; used to confirm the AC9 negative control (this file is not an independent consumer)."
+  },
+  {
+   "tool": "python one-liner (this session)",
+   "invocation": "python3 -c \"import etf_classification as ec; from collections import Counter; print(Counter(ec.ETF_CLASSIFICATIONS.values()))\" and a follow-up checking ec.HEDGE_TICKERS / ec.is_hedge('GLD')",
+   "result": "{'fixed_income': 66, 'equity': 63, 'hedge': 7} across 136 tickers, 0 'other'; HEDGE_TICKERS == set() (empty); is_hedge('GLD') == False despite get_asset_class('GLD') == 'hedge'. Grounds the filed surprise row POSN_ASTTAX-Z-W1-S1."
+  },
+  {
+   "tool": "aws (via .tools/aws shim)",
+   "invocation": "aws dynamodb describe-table --table-name etf-classifications ; aws dynamodb batch-get-item --request-items '{...GLD,VXX,CLIP...}'",
+   "result": "describe-table: ACTIVE, ItemCount estimate 285. batch-get-item: VXX equity/Volatility, GLD hedge/Gold, CLIP fixed_income/Ultra Short Duration -- all three agree with the dict (AC11) on both fields."
+  }
+ ]
+}
