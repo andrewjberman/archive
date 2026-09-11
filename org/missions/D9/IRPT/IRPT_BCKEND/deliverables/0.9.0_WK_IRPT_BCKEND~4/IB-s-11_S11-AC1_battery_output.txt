@@ -1,0 +1,152 @@
+IB-s-11 BATTERY -- performance adapters + normalizer
+  package     : C:\tmp\wk-irpt-1-4\infra\aws\lambda\investor-reporting\performance
+  evidence    : docs\briefs\sources\INVESTOR_REPORTING_PERFORMANCE_EVIDENCE_20260910.json
+  transport   : recorded (no credential, no host, no socket)
+
+==============================================================================
+(a) THREE TENANTS, THREE ROUTES
+==============================================================================
+  F-49F  -> BLACK_DIAMOND  host=bd3.bdreporting.com          credential=blackdiamond/49f/session     plane=opal-data-assets/blackdiamond/49f/
+  F-COT  -> BLACK_DIAMOND  host=bd3.bdreporting.com          credential=blackdiamond/cot/session     plane=opal-data-cot/forwardfill_v2/
+  F-INF  -> ORION          host=api.cloud.orionadvisor.com   credential=orion/credentials            plane=opal-data-assets/orion/inflection/
+  pair F-49F|F-COT    same_host=True  same_credential=False same_data_plane=False SEPARATED=True
+  pair F-49F|F-INF    same_host=False same_credential=False same_data_plane=False SEPARATED=True
+  pair F-COT|F-INF    same_host=False same_credential=False same_data_plane=False SEPARATED=True
+  PASS:  (a) 49F and COT are DIFFERENT BD routes on the SAME host; INF is Orion  -- 3 of 3 firm pairs separated; an unknown firm is refused, not defaulted
+
+==============================================================================
+(b) THE CAPTURED EVIDENCE REPLAYS -- 9 of 9 accounted
+==============================================================================
+  REPORT   F-49F (bd_refreshed_period + bd_refreshed_series) validates=True  errors=0  series=63  accounts=0
+  REPORT   F-INF (orion_daily)                        validates=True  errors=0  series=92  accounts=2
+  REPORT   F-INF (orion_252, the captured scope)      validates=True  errors=0  series=1  accounts=0
+  bd_114               401 ABSENT-WITH-REASON (HTTP 401, 0-byte body)
+  bd_117               401 ABSENT-WITH-REASON (HTTP 401, 0-byte body)
+  orion_252            200 PARSED into the F-INF captured-scope PerformanceReport
+  orion_compact        200 NOT COMMITTED (5,290,686 bytes, cumulative=true); its 4,278-point/92-date counts read from the evidence
+  bd_session_refresh   200 NO BODY BY DESIGN (the probe never saves or digests a session-token response) -- accounted, not replayed
+  bd_refreshed_period  200 PARSED into the F-49F PerformanceReport
+  bd_refreshed_series  200 PARSED into the F-49F PerformanceReport
+  orion_daily          200 PARSED into the F-INF PerformanceReport
+  orion_value_check    200 PARSED as the vendor ending-value oracle for arm (e)
+  401 ARM  report=None  absences=2  first reason: vendor returned HTTP 401 with a 0-byte body (capture bd_114)
+  PASS:  (b) the capture replays; 401s are absent-with-reason, never a value  -- 9 of 9 receipts accounted; 3 of 3 reports validate against the contract
+
+==============================================================================
+(c) UNITS ARE MEANING -- THE DIFFERENCE CONTROL
+==============================================================================
+  ONE POINT (2026-06-10): vendor value -1.026959166347
+    read as PERCENT  -> -0.010269591663  (the truth; factor-1 = -0.010269591663)
+    read as DECIMAL  -> -1.026959166347  (100.0x off)
+    conversion recorded: {"source_path": "$.series[0]", "from_unit": "PERCENT", "to_unit": "DECIMAL_FRACTION", "multiplier": 0.01, "from_value": -1.0269591663466304, "to_value": -0.010269591663466304}
+  GROUP list:Client/Household:900000001                points=92
+    max |daily percent/100 - (factor-1)|  = 0.0
+    linked factors (product - 1)          = 0.018564905412121
+    vendor summary (calculated-performance)= 0.018564905412000
+    |linked - summary|                    = 1.2085818457130415e-13
+    UNIT-BLIND link (control, must fail)  = -0.999998816706432
+  GROUP list:opal-probe-accounts/Account:900000002     points=92
+    max |daily percent/100 - (factor-1)|  = 0.0
+    linked factors (product - 1)          = 0.018553586506894
+    vendor summary (calculated-performance)= 0.018553586507000
+    |linked - summary|                    = 1.064634491676486e-13
+    UNIT-BLIND link (control, must fail)  = -0.999998734573647
+  GROUP list:opal-probe-accounts/Account:900000003     points=92
+    max |daily percent/100 - (factor-1)|  = 0.0
+    linked factors (product - 1)          = 0.018576816423676
+    vendor summary (calculated-performance)= 0.018576816424000
+    |linked - summary|                    = 3.236334811251851e-13
+    UNIT-BLIND link (control, must fail)  = -0.999998900776580
+  DECLARED OUTPUT UNIT across both providers: ['DECIMAL_FRACTION']
+  PASS:  (c) two source units normalize to ONE declared unit; the unit-blind build fails  -- 3 of 3 groups tie to the vendor summary below 1e-12; the unit-blind link is -0.999999 against 0.018565
+
+==============================================================================
+(d) NO FABRICATED AGGREGATE
+==============================================================================
+  relationship = a household of 2 accounts, the EXACT selected set
+    account return                 = 0.018553586507
+    account return                 = 0.018576816424
+    SUM of account returns         = 0.037130402931  (delta +0.018565497519)
+    MEAN of account returns        = 0.018565201466  (delta +0.000000296054)
+    VENDOR household calculation   = 0.018564905412  <-- the report carries THIS
+    carried = vendor_calculation
+  a build that sums: BLOCKED: REFUSE_SUMMED_AGGREGATE -- a relationship return is a vendor calculation for the exact selected account set, never a sum or average of 2 account returns.
+  PASS:  (d) the vendor's relationship calculation is carried; a summing build fails  -- the MEAN is wrong by +2.961e-07 -- close enough to survive review, which is why it is refused rather than tolerated
+
+==============================================================================
+(e) HIERARCHY, IDENTITY, SHORTCUT
+==============================================================================
+  HIERARCHY  available=['levels', 'combinedLevels'] chosen='levels' not_summed=['combinedLevels']
+             both carry the SAME Account node -- summing them would double count
+  LEVELS     account TWR                 = 0.016410648
+             sum of its 11 Segment TWRs  = 0.148930573  (9.1x the account)
+             children carried as identities, never summed: 11
+             report account-level rows: 0 (Segment rows are NOT account rows)
+  IDENTITY   repeated calculation ids: {'Period': 6, 'opal-probe-qtd': 3, 'opal-probe-ytd': 3}
+             id='Period'  group_path=list:Client/Household:900000001                node_type=calculated-performance
+             id='Period'  group_path=list:Client/Household:900000001                node_type=calculated-performance-breakdown
+             id='Period'  group_path=list:opal-probe-accounts/Account:900000002     node_type=calculated-performance
+             id='Period'  group_path=list:opal-probe-accounts/Account:900000002     node_type=calculated-performance-breakdown
+             id='Period'  group_path=list:opal-probe-accounts/Account:900000003     node_type=calculated-performance
+             id='Period'  group_path=list:opal-probe-accounts/Account:900000003     node_type=calculated-performance-breakdown
+             distinct triples for id='Period': 6 of 6
+  SHORTCUT   candidate: startValue + valueChange -> ending market value -> rejected_mapping
+             list:Client/Household:900000001                2026-06-10  startValue+valueChange=  61516.07  vendor=  61516.07  diff=   0.00  match
+             list:Client/Household:900000001                2026-06-18  startValue+valueChange=  63558.94  vendor=  63348.26  diff= 210.68  MISMATCH
+             list:Client/Household:900000001                2026-09-09  startValue+valueChange=  63308.26  vendor=  63308.26  diff=   0.00  match
+             list:opal-probe-accounts/Account:900000002     2026-06-10  startValue+valueChange=  31542.15  vendor=  31542.15  diff=   0.00  match
+             list:opal-probe-accounts/Account:900000002     2026-06-18  startValue+valueChange=  32592.04  vendor=  32484.04  diff= 108.00  MISMATCH
+             list:opal-probe-accounts/Account:900000002     2026-09-09  startValue+valueChange=  32460.60  vendor=  32460.60  diff=   0.00  match
+             list:opal-probe-accounts/Account:900000003     2026-06-10  startValue+valueChange=  29973.92  vendor=  29973.92  diff=   0.00  match
+             list:opal-probe-accounts/Account:900000003     2026-06-18  startValue+valueChange=  30966.90  vendor=  30864.22  diff= 102.68  MISMATCH
+             list:opal-probe-accounts/Account:900000003     2026-09-09  startValue+valueChange=  30847.66  vendor=  30847.66  diff=   0.00  match
+             6 of 9 cells match; max |difference| = $210.68
+  PASS:  (e) one hierarchy, the identity triple, and the value shortcut refused  -- 3 of 9 shortcut cells disagree by up to $210.68; id 'Period' collides 6 ways and the triple separates all 6
+
+==============================================================================
+(f) ABSENT STAYS ABSENT
+==============================================================================
+  F-49F  UNSUPPORTED  money_weighted_return    the provider returned money-weighted returns alongside time-weighted ones; thi
+  F-INF  UNSUPPORTED  fee_basis                the Scope response carries per-day feeAmount but declares no gross/net basis f
+  F-INF  UNSUPPORTED  accrual_basis            startAccruedInt / accruedIntChange are present per day but the response declar
+  F-INF  UNSUPPORTED  annualization            the response carries no annualization flag; the period is 92 days and an annua
+  F-INF  UNSUPPORTED  money_weighted_return    the captured Scope calculation requested time-weighted breakdowns only ($type 
+  F-INF  UNSUPPORTED  benchmark                no benchmark node was requested in the captured Scope graph and none was retur
+  F-INF  PARTIAL      history_before_2026-06-10 the group declares inceptionDate 2023-03-03 but the captured calculation start
+  census: 7 absence rows across 2 providers; 5 of 5 required Orion facts carried as absences (missing: none)
+  UNSUPPORTED vs PARTIAL: {'UNSUPPORTED': 6, 'PARTIAL': 1}
+  the report's own basis fields say UNKNOWN rather than guessing: fee_basis=UNKNOWN accrual_basis=UNKNOWN annualization=UNKNOWN
+  PASS:  (f) every unsupported fact is absent WITH a reason; none is zero-filled  -- 7 absence rows, 5 of 5 required Orion facts present
+
+==============================================================================
+(g) NOTHING LEFT THE MACHINE; THE LEDGER CLOSED
+==============================================================================
+  socket guard active for every arm above
+  outbound attempts during arms (a)-(f) : 0
+  of which to a VENDOR host             : 0 (denominator: bd3.bdreporting.com,api.cloud.orionadvisor.com)
+  LiveTransport construction            : REFUSED -- BLOCKED: a live Black Diamond or Orion call needs Andrew's explicit per-use word. IRPT_PERF_VEND
+  POSITIVE CONTROL (deliberate connect)  : guard fired=True; vendor attempts moved 0 -> 1, so the zero above is MEASURED, not a dead guard
+  AWS CONTROL PLANE (named, not vendor): lambda get-function-configuration irpt-performance-adapter
+    CodeSha256        = Tl+NwcWAWl46YWeCrHShPpjoX5RgGUWm2UVQPLRJdFM=
+    built zip sha256  = Tl+NwcWAWl46YWeCrHShPpjoX5RgGUWm2UVQPLRJdFM=
+    equal             = True
+    State/Update/Runtime/Handler = Active / Successful / python3.12 / handler.lambda_handler
+  LEDGER    sentinel committed at        : b146774670586594e9c59dc71bc9218b1e040d5d IB-s-11: close the irpt-bckend-s11 deploy ledger -- four legs proven
+            sentinel on disk now         : False (removed by the close, as designed)
+            entry                        : 20260910T2304Z_irpt-bckend-s11_deploy_completion.md
+            entry reads CLOSED           : True
+  PASS:  (g) 0 vendor connections from the adapters; CodeSha256 == the built zip; ledger closed  -- 0 of 0 vendor connections during arms (a)-(f); the positive control moved the counter to 1, so the guard is live; CodeSha256 EQUALS the built zip
+
+==============================================================================
+VERDICT
+==============================================================================
+  PASS  (a) 49F and COT are DIFFERENT BD routes on the SAME host; INF is Orion
+  PASS  (b) the capture replays; 401s are absent-with-reason, never a value
+  PASS  (c) two source units normalize to ONE declared unit; the unit-blind build fails
+  PASS  (d) the vendor's relationship calculation is carried; a summing build fails
+  PASS  (e) one hierarchy, the identity triple, and the value shortcut refused
+  PASS  (f) every unsupported fact is absent WITH a reason; none is zero-filled
+  PASS  (g) 0 vendor connections from the adapters; CodeSha256 == the built zip; ledger closed
+
+  7 of 7 mechanical arms passed
+IBS11-PERFORMANCE-NORMALIZED
