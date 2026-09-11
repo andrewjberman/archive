@@ -42,23 +42,28 @@ this reason:
 
 ## Screens reviewed
 
-Six of the seven named screens were captured fresh this cell (`fe-s-11_*_390.png`,
-this folder); three of those six landed on the intended content, three landed
-on the portal's global error boundary instead of the named screen (see
-`design-conformity-census.result.md` and surprise row
-`IRPT_FNTEND-W1-S12` for why -- a genuine, reproducible crash this order's own
-named fixtures trigger, not a brand defect). Where a fresh capture is an error
-screen, this review ALSO cites the same screen's working capture from an
-EARLIER cell's own committed deliverable (read-only, for informational
-context; not edited, not this order's own evidence for its acceptance rows):
+**AMENDED.** The issuer's amendment repaired the one-firm infinite loop
+(`global/useFirmContext.ts`, row `IRPT_FNTEND-W1-S12`) and the print-route
+fixture gap (new `fixtures/smoke/fe-s-11-print.json`). Re-captured against
+the repaired code: the page, the Analysis tab, the export modal and the print
+route all now LAND on their real content. The Holdings tab alone still does
+not land -- not the repaired defect, but a DIFFERENT, previously-masked one
+in `fe-s-7-smartx.json`'s own performance-report fixture (row
+`IRPT_FNTEND-W1-S13`), outside this order's grant. Six of the seven named
+screens were captured fresh this cell (`fe-s-11_*_390.png`, this folder);
+five of those six now land on the intended content, one (Holdings) still
+lands on the portal's error boundary. Where a capture is an error screen,
+this review ALSO cites the same screen's working capture from an EARLIER
+cell's own committed deliverable (read-only, for informational context; not
+edited, not this order's own evidence for its acceptance rows):
 
 | screen | this cell's own PNG | working reference (earlier cell) |
 |---|---|---|
 | page / Reporting tab | `fe-s-11_page_390.png` (LANDED) | -- |
-| Analysis tab | `fe-s-11_analysis_390.png` (crashed) | `0.9.0_WK_IRPT_FNTEND~3/fe-s-6_analysis_ready_1440.png` |
-| Holdings tab | `fe-s-11_holdings_390.png` (crashed) | `0.9.0_WK_IRPT_FNTEND~4/fe-s-7_holdings_smartx_1440.png` |
-| Export modal | `fe-s-11_export_390.png` (crashed) | `0.9.0_WK_IRPT_FNTEND~1/fe-s-9_export_modal_1440.png` (already this worker's own deliverables folder, from the earlier FE-s-9 order) |
-| print, performance | `fe-s-11_print_390.png` (bundle-not-renderable message, not a crash) | `0.9.0_WK_IRPT_FNTEND~2/fe-s-4_print_performance_1440.png` |
+| Analysis tab | `fe-s-11_analysis_390.png` (LANDED, post-repair) | -- |
+| Holdings tab | `fe-s-11_holdings_390.png` (still crashed -- a DIFFERENT defect, row `IRPT_FNTEND-W1-S13`, outside this order's grant) | `0.9.0_WK_IRPT_FNTEND~4/fe-s-7_holdings_smartx_1440.png` |
+| Export modal | `fe-s-11_export_390.png` (LANDED, post-repair) | -- |
+| print, performance | `fe-s-11_print_390.png` (LANDED, post-repair: the actual performance document, `REFS RESOLVED: 1 of 1`) | -- |
 | print, analysis | not captured -- F11-AC8 names one print invocation (`?bundle=perf-narrative-fixture-1`, a PERFORMANCE bundle); no analysis-print fixture/route is named by this order's acceptance battery | `0.9.0_WK_IRPT_FNTEND~2/fe-s-4_print_analysis_1440.png` |
 
 ## Colours
@@ -76,15 +81,27 @@ context; not edited, not this order's own evidence for its acceptance rows):
   once, never in a multi-segment ramp -- consistent with DESIGN_BIBLE's B2
   ("purple is a single-accent color only... must never appear inside a
   multi-segment ramp").
-- **Export modal (`fe-s-9_export_modal_1440.png`, reference)**: the modal body
-  is a dark navy band (`Panel variant="chart"`) carrying WHITE text
-  throughout ("EXPORT OPTIONS", "Branding", checkbox labels) -- exactly
-  brand's contrast rule applied to a non-white/grey fill. The selected
-  branding pill ("Opal") is solid electric-purple with white text; the two
-  unavailable choices ("Advisor", "Co-branded") are outline-only, dark text,
-  correctly greyed/disabled-looking without inventing a new colour.
-- **Print templates (`fe-s-4_print_performance_1440.png`,
-  `fe-s-4_print_analysis_1440.png`, reference)**: white page sheet on the
+- **Analysis tab (`fe-s-11_analysis_390.png`, LANDED post-repair)**: the
+  variant/comparison card, the certified-sections card and the vendor-preview
+  card are all white cards on the silver canvas with navy/slate text; status
+  badges use semantic colour (green "SUPPORTED", amber "UNSUPPORTED", a
+  neutral "MODELED" tag) rather than brand purple, which is correct -- purple
+  stays the single accent (the "Opal Partner One" `FirmAttribution` chip, the
+  purple "Export" button) and is not spent on status semantics.
+- **Export modal (`fe-s-9_export_modal_1440.png`, reference, and this cell's
+  own `fe-s-11_export_390.png` at 390px)**: the modal body is a dark navy
+  band (`Panel variant="chart"`) carrying WHITE text throughout ("EXPORT
+  OPTIONS", "Branding", checkbox labels) -- exactly brand's contrast rule
+  applied to a non-white/grey fill. The selected branding pill ("Opal") is
+  solid electric-purple with white text; the two unavailable choices
+  ("Advisor", "Co-branded") are outline-only, dark text, correctly
+  greyed/disabled-looking without inventing a new colour. At 390px the
+  preview column scrolls horizontally rather than clipping (see Narrow-width
+  section below) -- same dark band, same colours, same logo.
+- **Print templates (this cell's own `fe-s-11_print_390.png`, LANDED
+  post-repair -- the actual performance document at 390px, three pages;
+  plus reference `fe-s-4_print_performance_1440.png` /
+  `fe-s-4_print_analysis_1440.png` at 1440px)**: white page sheet on the
   silver canvas (per `render/Page.tsx`'s `<section className="ir-page ...">`
   and `render/print.css`'s own header, "the canvas is the silver cool grey
   #C4CBDB and NOTHING light sits on it"); navy headings and body text; the
@@ -96,10 +113,13 @@ context; not edited, not this order's own evidence for its acceptance rows):
   `render/Page.tsx`'s own header names as a property of the code rather than
   a reviewer's memory.
 - **Colour-law scan (`colour-law.test.ts`, F11-AC3)**: mechanically confirms
-  the above for every `.tsx` file in the tree except ONE real exception --
-  `export/AppliedBranding.tsx` renders `text-white` with no dark ancestor and
-  no self-contained dark background in its own file. See
-  `design-conformity-census.result.md` and surprise row `IRPT_FNTEND-W1-S11`.
+  the above for every `.tsx` file in the tree. **AMENDED, now clean**: the
+  one real exception this scan found (`export/AppliedBranding.tsx`'s
+  `text-white/80`/`text-white` with no dark ancestor anywhere in its own
+  file, row `IRPT_FNTEND-W1-S11`) is repaired -- `text-slate-700` /
+  `text-slate-900`, per the issuer's amendment -- and `bun test
+  colour-law.test.ts` now reads `4 pass, 0 fail`, `SCANNED: 38 files`, zero
+  violations.
 
 ## Logo clear space
 
@@ -182,23 +202,31 @@ re-flow at narrow widths instead of clipping"); the tab strip's three labels
 truncate the row rather than wrapping vertically (browser default overflow,
 acceptable at this width, no content is lost -- `HOLDINGS` is simply
 off-screen-right, reachable by scroll); the period-preset row wraps into two
-lines; the export/preview PNGs (`fe-s-9_export_modal_390.png`, from FE-s-9's
-own deliverables, present in this same folder) show the modal's preview
-column scrolling horizontally rather than clipping, per `ExportModal.tsx`'s
-own `data-slot="preview-scroll"` comment ("a narrow viewport scrolls it
-horizontally rather than clipping it").
+lines; both `fe-s-11_export_390.png` (this cell, post-repair) and the earlier
+`fe-s-9_export_modal_390.png` (from FE-s-9's own deliverables, present in
+this same folder) show the modal's preview column scrolling horizontally
+rather than clipping, per `ExportModal.tsx`'s own `data-slot="preview-scroll"`
+comment ("a narrow viewport scrolls it horizontally rather than clipping
+it"). The Analysis tab's cards (`fe-s-11_analysis_390.png`) stack full-width
+rather than clipping; the print document (`fe-s-11_print_390.png`) renders
+its fixed-page-size sheet at 390px with the browser scrolling the sheet
+itself rather than reflowing it, matching a print template's own convention
+(a page has a real physical size; it does not respond).
 
 ## Summary
 
-Where this order's own captures succeeded (the page/Reporting tab) and where
-an earlier cell's own captures are available as reference (export modal, both
-print templates, Analysis/Holdings tabs pre-crash), the Investor Reporting
-surfaces consistently use the SAME reused header/tabs/panel/dropdown
-components, the SAME brand palette (electric-purple single accent, navy
-headings, cool-grey canvas, white cards/sheets), and the SAME logo treatment
-as the rest of the portal and the print package -- one brand across the
-dashboard and the exported document, as FWD-12 and FWD-8 require. The one
-disputable colour-law gap (`AppliedBranding.tsx`, never mounted anywhere) and
-the one reproducible crash on a one-firm catalogue (blocking three of this
-order's six fresh captures) are both recorded as surprise rows rather than
-silently smoothed over by substituting an old screenshot for a new claim.
+**AMENDED.** After the issuer's two repairs (`global/useFirmContext.ts`,
+`export/AppliedBranding.tsx`) and the new print fixture, five of this order's
+six fresh captures land on their real, intended content (page, Analysis tab,
+export modal, print route -- plus the always-working page) and the
+colour-law scan is clean (0 violations). Across every screen now reviewed
+first-hand, the Investor Reporting surfaces consistently use the SAME reused
+header/tabs/panel/dropdown components, the SAME brand palette
+(electric-purple single accent, navy headings, cool-grey canvas, white
+cards/sheets), and the SAME logo treatment as the rest of the portal and the
+print package -- one brand across the dashboard and the exported document,
+as FWD-12 and FWD-8 require. One screen (Holdings) still does not land, on a
+DIFFERENT, previously-masked defect in `fe-s-7-smartx.json`'s own fixture
+data (row `IRPT_FNTEND-W1-S13`) outside this order's grant -- recorded as a
+surprise row rather than silently smoothed over by substituting an old
+screenshot for a new claim, exactly as the two now-repaired defects were.
