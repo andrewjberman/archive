@@ -1,0 +1,162 @@
+==============================================================================
+BATTERY IB-s-9 -- S9-AC1: the seven steps, the job's durability, the read-back
+repo: C:/tmp/wk-irpt-1-3
+==============================================================================
+
+(a) SEVEN OF SEVEN -- each recipe step against the replay, 8 of 8
+    declared steps: ['identity', 'template', 'upload', 'create', 'validate', 'generate', 'download']
+      create       ok=True  status=201
+      download     ok=True  status=200
+      generate     ok=True  status=201
+      identity     ok=True  status=200
+      read_back    ok=True  status=200
+      template     ok=True  status=200
+      upload       ok=True  status=200
+      validate     ok=True  status=200
+    identity checks (all four required): {"authenticated": true, "email_match": true, "no_impersonation": true, "stable_user_id_match": true}
+    wrong-user-id CONTROL rejected: True
+    upload multipart field: 'holdings' | create multipart fields: ['portfolio', 'items']  (MEASURED, PRD v0.8 SUPP VI.5 @d67e9813b5)
+    empty `sections` array accepted as legitimate: True
+
+(b) SUBMITTING BEFORE THE SIDE EFFECT -- THE DIFFERENCE CONTROL
+    kill: kill injected AFTER submitting_before_create
+    state after the kill: SUBMITTING | intent claimed BEFORE the POST: True
+    CORRECT BUILD on restart: resumed=True resubmitted=False create POSTs=0 adopted_by=OWNED_BY_NAME portfolio=2332060
+    BROKEN BUILD (resubmits instead of reconciling): create POSTs=1 -> FAIL, as it must
+
+(c) NEVER THE NEWEST ROW
+    candidates: 2 | NEWEST row: id=2332999 created_at=2026-09-11T04:00:30Z name='Advisor B working copy'
+    adopted: 2332060 by OWNED_BY_NAME | newest adopted: False
+    the owned name is deterministic (derived BEFORE the submit): True
+
+(d) SETTINGS READ BACK -- 7 of 7
+      benchmark            -> benchmark_symbol         expected="^SPXTR"         actual="^SPXTR"         OK
+      level_as_of_type     -> level_as_of_type         expected="prior_close"    actual="prior_close"    OK
+      management_fee       -> management_fee           expected=0.003            actual=0.003            OK
+      rebalance_frequency  -> rebalance_frequency      expected="quarterly"      actual="quarterly"      OK
+      reinvest_dividends   -> reinvest_dividends       expected=false            actual=false            OK
+      start_of_series      -> start_of_series          expected="oldest"         actual="oldest"         OK
+      tax_status           -> tax_status               expected="non_qualified"  actual="non_qualified"  OK
+    DRIFT CONTROL (a replay that returns a drifted setting): 6 of 7 matched, drifted=['management_fee'], job outcome=SETTINGS_DRIFTED, job state=ATTENTION
+
+(e) BODIES PER S8
+    root keys: August 34 / July 33 | modal fields: August 34 / July 32
+    the ONLY August-extra root key: ['branding_client_group_id'] | modal: ['brandingClientGroupId', 'requestedSectionOrder']
+    secondarySecurity.securityId by variant: {"COMPARISON": "S:SPY", "MULTI": null, "OVERVIEW": null}
+    comparisonSecurities length by variant: {"COMPARISON": 0, "MULTI": 2, "OVERVIEW": 0}
+    asymmetric empties (type per field): {"custom_security_labels": "list", "custom_texts": "dict", "dollar_conversion_levels": "list", "reportState": "NoneType", "risk_profile": "NoneType", "saved_hypothetical_id": "NoneType", "sections": "list", "serialized_transition_analyses": "dict", "talking_points": "dict"}
+    duplicate cover fields agree: True across 7 pairs
+    cardinality refused when wrong: template 14141847 (MULTI) takes 2..5 comparison securities and 1 were supplied
+    templates read from templates.json (captured configuration, not constants): ['14141822', '14141824', '14141847']
+    global-preference PUT census: {"global_preference_writes": 0, "offending_routes": [], "requests_recorded": 7}
+
+(f) THE 201 IS WRAPPED -- the job id is OPAL'S
+    Opal attempt id: ATT-9fef11e014433c6027050eac
+    vendor-job-id census over the attempt row: {"by_shape": [], "by_token": [], "fields_walked": 41, "vendor_job_id_fields": []}
+    the vendor's measured 201 keys: ['report_url', 'zip_url']  (no job id exists to invent)
+    artifact key: firms/49financial/generations/2332060/attempts/0/vendor/report.pdf
+      under the bound firm's generations prefix: True
+    PDF: sha256=cef3b030a93763cb bytes=193 credential headers sent=[] header names sent=[]
+    separate unauthenticated client, headers per request: [[]]
+    SIGNED-PARAM CENSUS over every log line: {"log_lines": 18, "occurrences": 0, "params_found": [], "signed_params_looked_for": 4}
+    job states in order: ['CLAIMED', 'SUBMITTING', 'SUBMITTING', 'SUBMITTED', 'SUBMITTING', 'DOWNLOADING', 'READY']
+
+(g) SCHEMA-VALID -- the AnalysisReport attempt row
+    validated=True against AnalysisReport.schema.json; required: ['request_ref', 'vendor_artifact', 'effective_inputs', 'sections', 'disclosures', 'extraction_validation', 'release']
+
+(v0.8) THE MEASURED CONTRACTS AND THE DECISION TABLE, ON THE REPLAY
+    upload field 'holdings'; save fields ['portfolio', 'items'] -- PRD v0.8 SUPP VI.5 @d67e9813b5 -- MEASURED LIVE, not invented
+    full payload (34 keys) -> 201 | minimal payload -> 404, classified CONTRACT_FAILURE, never session expiry / INVALID_RESPONSE
+    fee 0 -> 422 invalid_management_fee | the captured 0.003 annual recipe succeeds
+    empty `sections` accepted: True
+    PDF client separate and unauthenticated: True; session-cookie headers on that request: 0
+    JOB BUDGET: 26.76s measured for the live Overview invocation, budget 900s (33.6x headroom)
+      a timeout NEVER licenses regeneration -- it marks the outcome UNCERTAIN and reconciles the owned object
+    DECISION TABLE -- 10 of 10 branches classified as declared:
+      ARTIFACT_FETCH_PENDING   status=201   -> ARTIFACT_FETCH_PENDING
+      BACKOFF_429              status=429   -> BACKOFF
+      BROWSER_CHALLENGE        status=405   -> BROWSER_CHALLENGE
+      DENIED                   status=403   -> DENIED
+      HEALTHY                  status=200   -> HEALTHY
+      INVALID_RESPONSE_HTML    status=200   -> INVALID_RESPONSE
+      RECONCILE_UNCERTAIN      status=None  -> RECONCILE
+      REFRESH_401              status=401   -> REFRESH
+      REFRESH_EVICTION         status=403   -> REFRESH
+      WAF_REFRESH_REQUIRED     status=202   -> WAF_REFRESH_REQUIRED
+    ONE refresh allowed: True | repeat eviction refused: True
+
+(v0.10) THREE RECIPES IN ONE HANDLER (issuer supplement, channel row IRPT_BCKEND-S14)
+    packet: docs/research/investor_reporting_ycharts_variants_20260911/ @72acd16e66 -- NOT in this branch's ancestry; read by object reference, row W3-S7
+    VARIANT FROM THE COMPARISON COUNT -- 3 of 3 correct:
+      0 comparison(s) -> OVERVIEW   template 14141822  OK
+      1 comparison(s) -> COMPARISON template 14141824  OK
+      2 comparison(s) -> MULTI      template 14141847  OK
+    6 comparisons refused: 6 comparison securities selects no recipe; the declared cardinalities are [(0, 0, 'OVERVIEW'), (1, 1
+    a declared variant that disagrees with the count refused: VARIANT_CARDINALITY_MISMATCH: the caller asked for 'MULTI' and 1 comparison(s) derives 'COMPARISON'
+    PRE-ACCESS CONTROLS -- each with the vendor-request count AT THE REFUSAL:
+      account_scope_mismatch           CLIENT_ACCOUNT_SCOPE_MISMATCH          vendor requests: 0
+      changed_inputs_same_request_id   CHANGED_INPUTS_SAME_REQUEST_ID         vendor requests: 0
+      outside_catalog                  COMPARISON_OUTSIDE_AUTHORIZED_CATALOG  vendor requests: 0
+      server_controlled_field          SERVER_CONTROLLED_FIELD                vendor requests: 0
+      total vendor requests during all refusals: 0
+    DUPLICATE RE-DELIVERY: first run READY with 7 vendor requests; the duplicate -> EXISTING_ARTIFACT_REUSED with 0 vendor requests
+      receipt key: firms/49financial/generations/REQ-abababababababababababab/attempts/0/receipt.json
+    WAF: the same 202 WITH the x-amzn-waf-action header -> WAF_REFRESH_REQUIRED; WITHOUT it -> INVALID_RESPONSE
+      measured case: 202 during calculation polling whose only signal was x-amzn-waf-action
+    COMPARISON CATALOG: 4 entries, 4 typed model_portfolio, 3 live-proven: ['P:1728413', 'P:1728415', 'P:1728315', 'P:1728420']
+    MEASURED VARIANT OUTPUTS (the CRO's live run, not this cell's):
+      14141822  23 pages  portrait  573677 bytes  sha256 abab2ffe8411a29b
+      14141824  31 pages  portrait  820984 bytes  sha256 f01cbd48a5771cb5
+      14141847  35 pages  landscape  854115 bytes  sha256 0a67ecf76732832e
+    UPLOAD RECONCILED (not merely parsed): True -- 2 rows sent, 2 echoed, unit 'Dollars'
+
+(amend) GUARDED, BOUND, AND SILENT ON THE REFUSED VALUE
+    this cell ships NO route handler -- the generation job is a QUEUE CONSUMER woken by irpt-generation, not a handler the edge reaches
+    unguarded_routes(job.ROUTES) -> 0 of 0 unguarded  OK: every route is guarded
+      THE CENSUS IS VACUOUS: True. IB-s-15's deliverable at infra/aws/terraform/investor-reporting/api/routes.json -- does not exist before that cell lands (channel row S13, from this worker's W3-S5)
+      CONTROL, an UNGUARDED handler wired to a route: 1 of 1 unguarded
+      CONTROL, the SAME handler wrapped by guard():   0 of 1 unguarded
+      public callables added by this cell: 17, route-reachable: 0
+    FIRM BINDING: a non-reconciling binding -> ok=False code=FIRM_BINDING; opaque id echoed: False
+      envelope: {"census": {"opaque_id_echoed": false, "reconciles": false}, "code": "FIRM_BINDING", "ok": false, "reason": "the supplied binding does not reconcile with this directory artifact's declared opaque firm id; refusing rather than returning an empty result, which a caller cannot tell apart from a revocation"}
+    _keys SILENCE: code=KEY_REFUSED, audit entries=1, envelope 809 bytes, OCCURRENCES OF THE REFUSED VALUE: 0
+      reason (parameter NAMES only): 1 of 2 key parameter(s) were refused by the key grammar: ['client']. A key component is admitted by SHAPE -- a client name, an e-mail address or a fir
+
+(h) NOTHING LEFT THE MACHINE; THE LEDGER CLOSED
+    netguard (offline subprocess): 0 external of 0 connection attempt(s)
+      attempts_observed is the denominator. It is 0 when the suite opens no socket at all -- which is the STRONGER statement, and is also why a 0-of-0 refusal count is vacuous on its own and the positive control below carries the arm.
+    POSITIVE CONTROL: attempted ycharts.com:443 -> refused=True, guard external 0 -> 1
+      NETGUARD: refused external connection to ycharts.com:443 -- the IB-s-9 suite is offline by construction and NO LIVE YCHARTS CALL is authorized
+    replay requests made by the chain: 7 over routes ['GET /custom_pdf_reports/generate/14141822', 'GET /dashboard/', 'GET /model_portfolios/2332060/status', 'POST /custom_pdf_reports/14141822', 'POST /custom_pdf_reports/validate_report_securities/14141822', 'POST /model_portfolios/fixed/', 'POST /model_portfolios/fixed/holdings_upload/client']
+    served bytes: CodeSha256 S9C9ibDNI8D77ZUefrAQSq2OgwO1206wySuzfolxUhI=
+      rebuilt zip S9C9ibDNI8D77ZUefrAQSq2OgwO1206wySuzfolxUhI= (81065 bytes, 25 members); registration S9C9ibDNI8D77ZUefrAQSq2OgwO1206wySuzfolxUhI=
+      served == rebuilt: True | registered == rebuilt: True
+      Layers: None | Timeout: 900s
+    the IB-s-8 host after this cell's apply: stopped (untouched)
+    ledger 20260911T0417Z_irpt-bckend-s9_deploy_completion.md: CLOSED=True, legs=5, open markers=0, sentinel on disk=False
+      THE SENTINEL'S OWN COMMITS (the W3-S4 rule applied):
+        a0e05b957d IB-s-9: close change-management entry irpt-bckend-s9 -- all five legs proven
+        9e40afcf4a IB-s-9: commit the OPEN change-management sentinel for irpt-bckend-s9, before the act
+      entry commits:
+        a0e05b957d IB-s-9: close change-management entry irpt-bckend-s9 -- all five legs proven
+        9e40afcf4a IB-s-9: commit the OPEN change-management sentinel for irpt-bckend-s9, before the act
+    THE VARIANTS PACKET IS NOT IN THIS BRANCH (row W3-S7): {"path": "docs/research/investor_reporting_ycharts_variants_20260911/", "present_in_worktree": false, "files_at_72acd16e66": 26, "commit_is_ancestor_of_head": false, "positive_control_known_ancestor": true}
+    FIXTURE MANIFEST RE-DERIVED FROM DISK (row W3-S9): 13 of 13 rows match, 13 file(s) on disk, 0 unlisted
+      declared {"decision_branches": 10, "files": 13} vs counted {"decision_branches": 10, "files": 13} -- disagreeing: none
+      the manifest is the MEASURED-vs-EXTENDED carrier, so it is recomputed here and never believed; it went stale at 88c97c1529 and arm (h) now fails if it does again
+
+==============================================================================
+  arm (a): PASS
+  arm (b): PASS
+  arm (c): PASS
+  arm (d): PASS
+  arm (e): PASS
+  arm (f): PASS
+  arm (g): PASS
+  arm (v08): PASS
+  arm (v010): PASS
+  arm (amend): PASS
+  arm (h): PASS
+  ARMS: 11 of 11
+==============================================================================
+IBS9-GENERATION-CHAIN
