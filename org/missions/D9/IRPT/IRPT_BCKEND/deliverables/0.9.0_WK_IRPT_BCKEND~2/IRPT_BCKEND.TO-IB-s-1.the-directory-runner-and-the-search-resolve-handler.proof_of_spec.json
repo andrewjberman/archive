@@ -1,0 +1,327 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "62301f71e0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "f61edc41fc",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-1.the-directory-runner-and-the-search-resolve-handler.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/directory_runner.py",
+      "kind": "script",
+      "commit_or_etag": "3654197107",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The runner's PRODUCTION schedule is cell IB-s-4's, not this cell's; this cell runs it AD HOC for QA (permitted) and its QA output is graded by arm (f). safe-deploy.sh was attempted ONCE under the ledger per the face's rule-13 clause: it did NOT refuse this serial -- it ACCEPTED it, found the shared-home S3 prefix carries 0 members, printed 'SKIP-NOT-MEMBER' and 'NOTHING WAS DEPLOYED', and exited rc=0 under an 'OK: safe-deploy gate PASS' headline. A third outcome the face does not contemplate; filed ARMED as row IRPT_BCKEND-W2-S5, disarm_owner 2.0.0_SA_COO~B. No first-mint was attempted -- this order does not authorize one.",
+      "artifact_covered_by": [
+        "S1-AC1",
+        "S1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/gold/investor_reporting/tests/test_directory_runner.py",
+      "kind": "test",
+      "commit_or_etag": "3654197107",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unit tests are never deployed. Re-run by THIS instance rather than taken from the previous instance's report: 'python -m pytest ... -q' -> '34 passed in 1.08s' across both test files (denominator 34 of 34).",
+      "artifact_covered_by": [
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/handler.py",
+      "kind": "script",
+      "commit_or_etag": "3654197107",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "SERVED BYTES verified by CONTENT, never by filename, on TWO DIFFERENT OBJECTS: 'aws lambda get-function-configuration --function-name irpt-directory-search' -> CodeSha256 = 7OOoRBhYUc9t8pjV48MJR7erKIifjFFdOJu3zdH4enk=, equal to the STORED artifact's OWN 'content-sha256' metadata read by s3api head-object on s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-directory-search.zip (ContentLength=5497). Neither side is the producer's self-report. NEGATIVE CONTROL in the same arm: served == a bogus sha -> False, so the comparison is not a constant.",
+      "artifact_covered_by": [
+        "S1-AC1",
+        "S1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/test_handler.py",
+      "kind": "test",
+      "commit_or_etag": "3654197107",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unit tests are never deployed. Included in the 34 of 34 pytest pass re-run by this instance.",
+      "artifact_covered_by": [
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/fixtures.py",
+      "kind": "test",
+      "commit_or_etag": "3654197107",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The acceptance FIXTURE directory and the ResolvedScope fixtures that arms (b) and (e) run over -- duplicate names, an account-only entry, multiple relationships, a terminated-but-entitled client, a partly permitted relationship, advisor A / advisor B / revoked / UNKNOWN-principal scopes. Never deployed; consumed in-process by the battery.",
+      "artifact_covered_by": [
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/directory/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "3654197107",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Applied via .tools/safe-apply.sh (NEVER-9) from the root whose state key is this cell's -> 'Apply complete! Resources: 4 added, 0 changed, 0 destroyed.' 0 changed and 0 destroyed = no existing resource was touched. Converged read AFTER the apply and AFTER the ledger closed, re-run by THIS instance: '.tools/terraform.exe -chdir=... plan -no-color -input=false -lock=false' rc=0 -> 'No changes. Your infrastructure matches the configuration.' The Lambda is deployed UNWIRED: no route, no schedule, no event source (IB-s-15 and IB-s-4 own those).",
+      "artifact_covered_by": [
+        "S1-AC2",
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/directory/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "3654197107",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "irpt-directory-role created by the same apply (role_arn arn:aws:iam::313476888478:role/irpt-directory-role) and refreshed with 0 drift by the post-apply plan (aws_iam_role.irpt_directory + aws_iam_role_policy.irpt_directory both 'Refreshing state...' then 'No changes.'). Phase-1 comp-iam grading, run by this instance: 'comp-iam roles' now resolves 'irpt-directory-role  tf_resource: irpt_directory' (192 roles parsed, was 191 at the cut's preflight -- the delta is this role). The grant is s3:GetObject on the firm buckets' investor-reporting/directory/* prefixes only -- no ListBucket, no write, no QA prefix -- and the firm list is DERIVED from data/firm_registry.json rather than enumerated in Terraform, so onboarding a firm cannot silently bypass the policy. DECLARED BLIND SPOT, carried from the preflight: comp-iam reads the DESIRED plane (the repo's Terraform); a GRANTED-BROAD wildcard cannot be falsified by a resource check.",
+      "artifact_covered_by": [
+        "S1-AC2",
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "3654197107",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "IB-s-18's path/owner manifest, extended APPEND-ONLY by this cell: 74 -> 106 entries (+32), no existing entry rewritten. A manifest is a repo record; it has no deployed plane.",
+      "artifact_covered_by": [
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "4d3d2d10dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Registers irpt-directory-search so the estate's build-input map can resolve the function to its source (Rule 22a: deployed bytes are diffed against the BUILD INPUT, never by filename). 206 functions, was 205; the delta is this function. A CI map is a repo record with no deployed plane.",
+      "artifact_covered_by": [
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260910T2304Z_irpt-bckend-s1_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "4d3d2d10dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The NEVER-2 change-management entry: opened BEFORE the act, closed at completion, and COMMITTED BEFORE the reads that grade the act. Re-read by THIS instance at HEAD rather than trusted: 'Status: CLOSED -- nothing stranded -- closed 20260910T231318Z', 'legs CLOSED: 5 of 5'. The SENTINEL org/critical_paths/.open_deploys/irpt-bckend-s1.json is ABSENT BY CONTRACT -- deploy_ledger.py close DELETES it as the act of closing, so a sentinel present at grading time could only mean the entry is still OPEN, which is the state the arm exists to rule out (row IRPT_BCKEND-W2-S6). Graded instead three ways: status CLOSED with 5 of 5 legs, the entry committed at 4d3d2d10dd, and 'deploy_ledger.py check' naming this slug on 0 of 7 finding lines (scan denominator 6 of 6 sentinels).",
+      "artifact_covered_by": [
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-bd/investor-reporting/qa/directory/latest.json",
+      "kind": "s3_object",
+      "commit_or_etag": "6f13651d866579d69290e02d2bb34992",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api head-object rc=0 ContentLength=275, re-read by THIS instance inside arm (f). Points at investor-reporting/qa/directory/2026-09-09/directory.json, 4509 entries, as_of 2026-09-09, source_completion_date 2026-09-09. The object was fetched back out of the bucket and censused by this instance (6,371,481 bytes). Destination is the FIRM's OWN bucket per firm-config.mjs FIRM_BUCKET_MAP, NOT opal-data-portal-v2 (decomposition s.9 finding 1, row IRPT_BCKEND-S1); the runner's _assert_destination refuses any key outside investor-reporting/ mechanically, before the put.",
+      "artifact_covered_by": [
+        "S1-AC1",
+        "S1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-inf/investor-reporting/qa/directory/latest.json",
+      "kind": "s3_object",
+      "commit_or_etag": "c19333fa02e5624d4b9fb6789478f6a9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api head-object rc=0 ContentLength=273, re-read by THIS instance inside arm (f). 293 entries, as_of 2026-09-10, source_completion_date 2026-09-10; fetched back and censused (450,726 bytes).",
+      "artifact_covered_by": [
+        "S1-AC1",
+        "S1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/investor-reporting/qa/directory/latest.json",
+      "kind": "s3_object",
+      "commit_or_etag": "b9122ed1f7b1cc3e52727f8970b2ba4c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api head-object rc=0 ContentLength=273, re-read by THIS instance inside arm (f). 260 entries, as_of 2026-09-09, source_completion_date 2026-09-09; fetched back and censused (417,709 bytes).",
+      "artifact_covered_by": [
+        "S1-AC1",
+        "S1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-directory-search.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "woeOoLg5DL7qM_xwuX7ntbuVVMmOkFg0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "s3api head-object rc=0 ContentLength=5497, Metadata.content-sha256=7OOoRBhYUc9t8pjV48MJR7erKIifjFFdOJu3zdH4enk=, VersionId woeOoLg5DL7qM_xwuX7ntbuVVMmOkFg0. This is the BUILD-INPUT side of the served-bytes comparison in arm (f); the SERVED side is get-function-configuration's CodeSha256 on a different object entirely. aws lambda update-function-code was never used (NEVER-9) -- the function's code pointer is Terraform's.",
+      "artifact_covered_by": [
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_1.py",
+      "kind": "test",
+      "commit_or_etag": "d8b063c49f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S1-AC1 acceptance battery, arms (a)-(f). Pinned at d8b063c49f, which is THIS instance's commit of the arm-(f) repairs the previous instance of this slot had left uncommitted (the aws.cmd shim resolution on nt, the head_ok counter replacing the build's own 'uploaded' flag, and the estate-wide-vs-this-slug scoping of deploy_ledger.py check). The battery GRADES and never ACTS: arm (a) builds with upload=False, so nothing in a battery run touches the world.",
+      "artifact_covered_by": [
+        "S1-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_1.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The battery's .result.md, named by the face's DELIVERABLE clause. Rides this proof's own commit. Carries the re-grounding table (what this instance re-measured and with which instrument), the verbatim arm summaries, the S1-AC2 plan output, and the full S1-AC3 judgment text.",
+      "artifact_covered_by": [
+        "S1-AC1",
+        "S1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/comp-adversary.IB-s-1.validation_context_declaration.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The comp-adversary v1 validation_context_declaration for this instance, landed so 3.0.0_SA_CVO receives what this author's evidence context WAS and what it was NOT (11,613 B). Rides this proof's own commit.",
+      "artifact_covered_by": [
+        "S1-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S1-AC1",
+      "criterion_verbatim": "S1-AC1 -- PASSES BY OUTPUT -- the directory built, validated, landed and searchable; provider calls zero by census. (a) THREE FIRMS, THREE DIRECTORIES, EVERY ENTRY VALID. (b) THE FIXTURE CASES RESOLVE TO THE EXPECTED AUTHORIZED SET. (c) NO DOUBLE COUNT, EVERY GAP REASONED. (d) ZERO PROVIDER CALLS -- THE CENSUS. (e) THE DIFFERENCE CONTROL ON SCOPE. (f) LANDED AND DEPLOYED.",
+      "method": "command",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_1.py",
+      "output_evidence": "rc=0.  ARM (a) PASS: 3 of 3 firms built; 5062 of 5062 entries validate against DirectoryEntry.schema.json | ARM (b) PASS: 5 of 5 fixture cases resolve to the expected authorized set | ARM (c) PASS: 49F 6155 of 6155 unique accounts preserved across 201 groups; INF unmapped 0 of 874 (live, vacuous) + positive control 3 of 3; COT 835 unique accounts of 850 rows, fan-out declared | ARM (d) PASS: 0 of 22 imports are vendor clients; 0 of 100 keystrokes raised on a stubbed network (stub verified live) | ARM (e) PASS: A n B = 0 of 2/1 results; revoked -> 0 results, 0 accounts; A->B direct resolve refused | ARM (f) PASS: 3 of 3 firm QA latest.json objects head-object rc=0 with a non-zero ContentLength; CodeSha256 == built artifact content-sha256 (7OOoRBhYUc9t8pjV48MJR7erKIifjFFdOJu3zdH4enk=); ledger CLOSED with 5 of 5 legs proven, committed 4d3d2d10dd, sentinel removed by the close, no BYPASS | 6 of 6 arms PASS | IBS1-DIRECTORY-SERVED",
+      "denominator": "6 of 6 arms PASS. Within them: 3 of 3 registry kind=client firms built (of 5 registry firms; test/demo excluded BY KIND); 5062 of 5062 entries valid against DirectoryEntry.schema.json; 5 of 5 fixture cases; 49F unique accounts 6155 BEFORE == 6155 AFTER across 201 groups; INF unmapped 0 of 874 LIVE (VACUOUS, declared) with a constructed positive control at 3 of 3; 0 of 22 module-level imports resolve to any of 14 forbidden vendor tokens (matcher positive-controlled at 2 tokens); 0 of 100 stubbed keystrokes raised; 3 of 3 firm QA latest.json objects head-object rc=0; 5 of 5 ledger legs CLOSED; 0 of 7 deploy_ledger.py check finding lines name this slug (scan denominator 6 of 6 sentinels).",
+      "status": "PASS",
+      "expect": "IBS1-DIRECTORY-SERVED"
+    },
+    {
+      "criterion_id": "S1-AC2",
+      "criterion_verbatim": "S1-AC2 -- THE ROOT IS CONVERGED after this cell's apply. Run after the apply and after the ledger closes.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/directory plan -no-color -input=false -lock=false",
+      "output_evidence": "rc=0. 'No changes. Your infrastructure matches the configuration.' / 'Terraform has compared your real infrastructure against your configuration and found no differences, so no changes are needed.' Refreshed first: module.irpt_directory_search.aws_cloudwatch_log_group.lambda [id=/aws/lambda/irpt-directory-search]; aws_iam_role.irpt_directory [id=irpt-directory-role]; aws_iam_role_policy.irpt_directory [id=irpt-directory-role:irpt-directory-policy]; module.irpt_directory_search.aws_lambda_function.this [id=irpt-directory-search].",
+      "denominator": "4 of 4 resources in this root refreshed against live AWS, 0 drifted. Run AFTER the apply (Apply complete! Resources: 4 added, 0 changed, 0 destroyed) and AFTER the ledger closed at 20260910T231318Z; re-run by THIS instance rather than carried from the previous instance's report. Binary tool used by its provisioned path .tools/terraform.exe, never a PATH substitute (a substitute re-pins remote state).",
+      "status": "PASS",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\."
+    },
+    {
+      "criterion_id": "S1-AC3",
+      "criterion_verbatim": "S1-AC3 -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: which identity inputs you treated as AUTHORITATIVE and which as reconciliation prior art, with the line you read for each; whether the masked discriminator can leak a name; and what an advisor could still be shown that the entitlement half (IB-s-2) must refuse. No verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "Direct source reads at HEAD of wk-irpt_bckend-1-2 (a DIFFERENT instrument from the runner docstring that asserts them): data/assets/scripts/gold/runners_49f/a01_dim_relationship.py:3-4; data/inf/scripts/gold/runners_inf/a00_dim_account.py:8; data/inf/scripts/gold/runners_inf/a01_dim_relationship.py:11-12,57-58; data/cot/scripts/gold/runners_cot/a01_dim_relationship.py:4; data/assets/scripts/gold/investor_reporting/directory_runner.py:130-140,436-443; infra/aws/lambda/investor-reporting/directory/handler.py:121-149,165-208. PLUS a census of the SERVED artifacts, not the builder: aws s3api get-object on all three firm QA directory.json objects, then a shape census of every masked_discriminator. Full text: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_1.result.md section 'S1-AC3'.",
+      "output_evidence": "AUTHORITATIVE (custodian/vendor STATES the fact, the runner carries it): 49F relationship grouping -- a01_dim_relationship.py:3-4 'the CUSTODIAN-DELIVERED family grouping (fact_fam) SUPERSEDES this file's prior' inferred union-find; 49F dim_account account_is_open/closed_date; INF in-universe -- a00_dim_account.py:8 'an account is IN-UNIVERSE iff its rep_id appears in silver/api_dims/representatives'; INF household mapping -- a01_dim_relationship.py:11-12 MAPPED / SELF-FAMILY disposition; COT relationship grain -- runners_cot/a01_dim_relationship.py:4 'Relationship ID ships ON EVERY custody row (relationship-grain by construction)', '0' = the vendor NO-RELATIONSHIP sentinel. || RECONCILIATION PRIOR ART (provenance only, never authority): 49F dim_account_xref match_method/match_as_of/in_0833_universe (carried per-account; match_method='unresolved' is reported IN BAND and never removes an account); a06 dim_identity_crosswalk (a join aid); dim_portfolio_group/bridge_group_account (the 201 groups OVERLAP by design -- read for the census, never for a scope); fuzzy name matching (build_schwab_bd_account_xref.py) is NOT USED HERE AT ALL. A NAME NEVER AUTHORIZES. || CAN THE MASKED DISCRIMINATOR LEAK A NAME? Not on any bytes this cell produced: masked_discriminator() takes the account number reduced to its last four DIGITS (non-digits stripped first, so no letter survives that limb) plus the custodian's account-TYPE token, punctuation-stripped and truncated to 24 chars; no name-derived value is passed to it. Measured on the three SERVED QA objects fetched back out of the firm buckets: 0 of 5062 discriminators fail the ****dddd[ / TYPE] shape; 36 distinct type tokens, all account-type vocabulary (IRA 2843, S1 1705, INDIVIDUAL RETIREMENT AC 119, JOINT 68, BROKERAGE 62, ...). RESIDUAL, STATED NOT ARGUED AWAY: the type limb is an UNCONSTRAINED custodian string, not an enumeration this cell validates -- a custodian that writes a REGISTRATION TITLE into its account-type column would have its first 24 characters flow into the discriminator and nothing here would refuse it; closing that means binding the limb to a ratified enum on DirectoryEntry, which is IB-s-18's surface and outside this order's paths. || WHAT AN ADVISOR COULD STILL BE SHOWN THAT IB-s-2 MUST REFUSE, five items: (1) THE SCOPE IS AN INPUT, NOT A PROOF -- the handler consumes a caller-supplied ResolvedScope, so any principal able to invoke the function can hand it a scope it wrote itself; the function is deployed UNWIRED (no route, no schedule, no event source) so today's only invokers are IAM principals, but IB-s-2/IB-s-15 must mint the scope SERVER-SIDE from a verified session and never accept one off the request body. (2) THE CROSS-FIRM FILTER IS CONDITIONAL ON A CALLER-SUPPLIED FIELD -- handler.py:135 reads 'if firm and ids.get(\"firm_id\") and ids[\"firm_id\"] != firm: continue', so a scope that OMITS verified_request_firm_id disables the firm filter entirely and leaves only the account-set intersection standing; IB-s-2 must make that field MANDATORY. (3) A CARDINALITY DISCLOSURE -- search results carry scope_completeness=PARTIAL and withheld_account_count by design (a silently narrowed answer looks exactly like a complete one), but that count tells an advisor HOW MANY sibling accounts exist in a household it only partly serves; the ruling on whether it survives or collapses to a boolean is IB-s-2's. (4) TERMINATION DATES TRAVEL WITH VISIBILITY -- a terminated client stays VISIBLE by Andrew's fixed constraint and the result carries termination.effective_date with it. (5) THE PROJECTION IS IN-PROCESS, THE OBJECT IS FIRM-WIDE -- one directory.json per firm holds every entry and irpt-directory-role can GetObject it in all three firm buckets; nothing today returns the unprojected set (search() builds each result from an explicit field whitelist, resolve() intersects), but the blast radius of any future path that forgets project() is the whole firm.",
+      "denominator": "5062 of 5062 served entries censused for discriminator shape across 3 of 3 firm QA objects (6,371,481 + 450,726 + 417,709 bytes fetched); 0 non-conforming; 36 distinct account-type tokens; 5 AUTHORITATIVE inputs and 4 PRIOR-ART inputs enumerated, 3 of 3 externally-cited source lines re-verified at source by this instance; 5 residuals named for IB-s-2.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=\"true\" at the cut). Graded at L9 by 3.0.0_SA_CVO and never self-graded: this row carries its OUTPUT and no verdict. The substitute oracle is 3.0.0_SA_CVO's L9 adjudication.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three mutations inside the battery, each aimed at an assertion that would otherwise be a constant: (1) arm (f) compares the served CodeSha256 against a BOGUS sha as well as the real artifact metadata; (2) arm (d) runs the vendor-token matcher over a SYNTHETIC import line that does contain vendor tokens; (3) arm (d) calls socket() DIRECTLY under the same stub that the 100 keystrokes run under. A passing assertion never mutated has never been tested.",
+      "expected": "(1) the bogus comparison must read False; (2) the matcher must go NON-ZERO; (3) the stub must RAISE on the direct call.",
+      "observed": "(1) 'NEGATIVE CONTROL: served == a bogus sha? False (must be False, else the comparison is a constant)'; (2) 'POSITIVE CONTROL on the matcher: synthetic import line matches 2 token(s) -> the census can go non-zero'; (3) 'NEGATIVE CONTROL: the stub itself fires on a direct socket() call: True'. Additionally arm (c)'s INF limb is VACUOUS on the live population (0 of 874 unmapped) and says so out loud, with a constructed positive control at 3 of 3 standing in for the evidence the empty set cannot carry.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The S1-AC1 battery was run TWICE end-to-end by this instance on identical inputs (same commit d8b063c49f, same live sources) and the per-arm verdict lines plus the arm count and the token line were diffed.",
+      "observed": "diff of the two runs' summary blocks: no differences. 'DETERMINISM: summaries IDENTICAL across 2 of 2 runs'; both runs rc=0 and both printed IBS1-DIRECTORY-SERVED.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The real entitlement resolver (ResolvedScope production) and everything that depends on a true entitlement decision",
+      "reason": "Cell IB-s-2's, explicitly: this face says 'a FIXTURE scope in this cell; IB-s-2 supplies the real resolver next in this slot'. Arms (b) and (e) therefore prove only that the handler NEVER WIDENS the scope it is given -- not that any scope is correct."
+    },
+    {
+      "item": "The runner's PRODUCTION schedule and its scheduled trigger",
+      "reason": "Cell IB-s-4's. This cell runs the runner AD HOC for QA (permitted by the face) and deploys the HANDLER. Ad-hoc artifacts are never production evidence and are landed under investor-reporting/qa/."
+    },
+    {
+      "item": "Any route, API wiring or CloudFront behavior for irpt-directory-search",
+      "reason": "Cell IB-s-15's. The function is applied UNWIRED on purpose: no route, no schedule, no event source. None of the 28 existing CloudFront behaviors or 14 existing scoped routes was read-modified."
+    },
+    {
+      "item": "Editing _contracts/DirectoryEntry.schema.json to type ids.relationship_id as nullable, and to bind masked_discriminator's account-type limb to an enum",
+      "reason": "The contracts are IB-s-18's surface and are outside this order's <paths>. The relationship_id defect is filed ARMED as row IRPT_BCKEND-W2-S2 and worked around WITHOUT editing the contract (the key is omitted, which is valid -- it is not in ids.required). The enum question is raised in the S1-AC3 judgment for 3.0.0_SA_CVO, not acted on."
+    },
+    {
+      "item": "A first-mint of the runner into a shared-home S3 prefix under safe-deploy.sh",
+      "reason": "safe-deploy.sh found the shared-home prefix carries 0 members and printed SKIP-NOT-MEMBER / NOTHING WAS DEPLOYED at rc=0. A first-mint is an explicit act this order does not authorize; filed as row IRPT_BCKEND-W2-S5 (ARMED, disarm_owner 2.0.0_SA_COO~B) rather than performed."
+    },
+    {
+      "item": "Any live vendor call (Black Diamond, Orion, YCharts, SmartX) and any mailbox read",
+      "reason": "Bound 1 of the decomposition's s.8: availability is not authorization. This cell carries NO live arm at all -- arm (d) proves the absence structurally (0 of 22 imports resolve to a vendor client; the only network call in the handler's closure is one s3:GetObject, off the search path)."
+    },
+    {
+      "item": "Any monitor, alarm, SNS topic, SES send or notification",
+      "reason": "Bound 2 of s.8 and the standing moratorium. The applied root creates exactly four resources -- a role, its policy, the function and its log group -- and 'Apply complete! Resources: 4 added, 0 changed, 0 destroyed' is the census."
+    },
+    {
+      "item": "The APPLIED-plane IAM verdict on irpt-directory-role",
+      "reason": "comp-iam reads the DESIRED plane (the repo's Terraform), declared as the preflight's own blind spot: a GRANTED-BROAD wildcard cannot be falsified by a resource check. The role's live existence and 0-drift are evidenced by the post-apply plan, which is a different question from a simulated authorization verdict."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W2-S1: the INF and COT identity runners the face names live under data/inf/ and data/cot/, not under data/assets/scripts/gold/; second-order, all three firms ship a module named runner_common, so a bare import binds the wrong firm's bucket constants. INERT.",
+    "IRPT_BCKEND-W2-S2: DirectoryEntry.schema.json types ids.relationship_id as bare \"string\" while its own description says an account-only entry carries null -- 263 entries were rejected by the contract that prescribes them. Worked around by omitting the key (valid: not in ids.required); the contract is IB-s-18's surface and was not edited. ARMED, disarm_owner 2.0.0_SA_COO~B.",
+    "IRPT_BCKEND-W2-S3: the face names 79 unmapped INF accounts; the live vintage carries 0 of 874, so arm (c)'s live half is VACUOUS and says so, with a constructed positive control at 3 of 3 beside it. INERT.",
+    "IRPT_BCKEND-W2-S4: match_method/match_as_of/in_0833_universe belong to dim_account_xref (bd49f_dim_conversion), not to a06_dim_identity_crosswalk as the face states. INERT.",
+    "IRPT_BCKEND-W2-S5: safe-deploy.sh did NOT refuse this worker serial (the hypothesis row IRPT_BCKEND-S4 carries) -- it ACCEPTED it, found the shared-home prefix carries 0 members, printed SKIP-NOT-MEMBER and NOTHING WAS DEPLOYED, and exited rc=0 under an 'OK: safe-deploy gate PASS' headline. A third outcome the face does not contemplate, and the rc is the part that does not carry it. ARMED, disarm_owner 2.0.0_SA_COO~B.",
+    "IRPT_BCKEND-W2-S6: deploy_ledger.py close DELETES the sentinel as the act of closing, so the face's 'the sentinel COMMITTED' clause and the tool's contract cannot both be satisfied -- a sentinel present at grading time can only mean the entry is still OPEN. Arm (f) grades the ledger ENTRY instead, three ways. INERT."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_1.result.md",
+  "compiler_tools": [
+    {
+      "tool": "battery_ib_s_1.py (the S1-AC1 acceptance battery)",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_s_1.py",
+      "result": "rc=0, 6 of 6 arms PASS, IBS1-DIRECTORY-SERVED. Run TWICE by this instance; summaries identical."
+    },
+    {
+      "tool": ".tools/terraform.exe (provisioned in this worktree by the issuer; never a PATH substitute)",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/directory plan -no-color -input=false -lock=false",
+      "result": "rc=0, 'No changes. Your infrastructure matches the configuration.', 4 of 4 resources refreshed with 0 drift."
+    },
+    {
+      "tool": "pytest (Python 3.12.10)",
+      "invocation": "timeout 300 python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_directory_runner.py infra/aws/lambda/investor-reporting/directory/tests/test_handler.py -q",
+      "result": "34 passed in 1.08s (34 of 34)."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (the NEVER-2 change-management contract tool)",
+      "invocation": "python .tools/deploy_ledger.py check (run inside arm (f))",
+      "result": "rc=1 ESTATE-WIDE (other seats' entries: 4 OPEN, 2 HELD-STALE), 7 finding lines, SCAN DENOMINATOR 6 of 6 sentinels; lines naming irpt-bckend-s1: 0 of 7. This cell's entry reads Status CLOSED with 5 of 5 legs, committed 4d3d2d10dd."
+    },
+    {
+      "tool": "comp-iam (Phase-1 DESIRED-plane grading named by this order's preflight)",
+      "invocation": "timeout 120 comp-iam roles | grep -i irpt",
+      "result": "'irpt-directory-role  tf_resource: irpt_directory' resolves; 192 IAM roles parsed, was 191 at the cut's preflight -- the delta is this cell's role. BLIND SPOT carried from the preflight: DESIRED plane only."
+    },
+    {
+      "tool": "aws s3api / aws lambda via the .tools/aws shim (CLI v1; CRLF stripped on every parse)",
+      "invocation": "s3api head-object on 3 firm QA latest.json + the artifact zip; lambda get-function-configuration --function-name irpt-directory-search; s3api get-object on all 3 firm QA directory.json",
+      "result": "3 of 3 QA pointers rc=0 (275/273/273 B); artifact ContentLength=5497 content-sha256=7OOoRBhYUc9t8pjV48MJR7erKIifjFFdOJu3zdH4enk=; served CodeSha256 identical; 3 of 3 directory objects fetched (6,371,481 + 450,726 + 417,709 B) and censused for the S1-AC3 discriminator question."
+    },
+    {
+      "tool": "comp-adversary (validator-context composer; the assignee's instrument at report time)",
+      "invocation": "timeout 300 comp-adversary compose org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/IRPT_BCKEND.TO-IB-s-1.the-directory-runner-and-the-search-resolve-handler.proof_of_spec.json --out <declaration>",
+      "result": "rc=0, declaration written (11,613 B) and LANDED for the validator at org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/comp-adversary.IB-s-1.validation_context_declaration.md. Author profile: 22 repo paths, 11 file:line cites, 4 tool mentions, 0 commit pins PARSED. TWO FLAGS THIS INSTANCE READ RATHER THAN SKIMMED: (1) source 2 cited-path vintage 22 attempted / 21 stable / 1 flagged -- 'org/critical_paths/.open_deploys/irpt-bckend-s1.json : GONE (cited path absent at read-vintage)'. That is CORRECT and is the point: the sentinel is absent BY CONTRACT because deploy_ledger.py close deletes it (row IRPT_BCKEND-W2-S6); the instance cites the path to say so. (2) 'HEX RUNS PRESENT BUT ZERO PARSED AS PINS (9 runs)' -- the 9 runs are 3654197107, 4d3d2d10dd, 62301f71e0, d8b063c49f (real commits, cited in prose rather than in COMMIT_RE's form), the AWS account id 313476888478, and 3 S3 ETags plus a base64 sha; so source 1's '0 attempted' is a PARSER zero, not an evidence zero, exactly as the tool warns. Source 3 (T11): owned cell IB-s-1, dependencies ONE HOP = 0 from BOTH carriers, 2 neighborhood members digested of 2, 0 UNPROVEN dependencies, 911 directory siblings DEMOTED. 5 complement sources run / 0 deferred / 5 declared-excluded."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/IRPT_BCKEND.TO-IB-s-1.the-directory-runner-and-the-search-resolve-handler.proof_of_spec.json S1-AC1,S1-AC2,S1-AC3",
+      "result": "run BEFORE the complete flip; the ids are positional and ONLY the exit code is the verdict. Result recorded in the worker report and in the flip commit's message."
+    }
+  ]
+}
