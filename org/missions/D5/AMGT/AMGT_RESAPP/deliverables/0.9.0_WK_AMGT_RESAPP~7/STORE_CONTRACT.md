@@ -48,6 +48,21 @@ the same security -- there is exactly one identity axis in this bucket, and it i
 this one, until `AMGT-s-12` amends it. A vendor's OWN identifier (an SA `sa_id`, a
 CIK, a CUSIP) is never used as `<security_key>`; it is data, and lands as a field
 inside the artifact at that key, or as its own `raw/` write if the vendor ships it as
+
+> **AMENDMENT (AMGT-s-7, 0.9.0_WK_AMGT_RESAPP~7, 2026-09-10T23:5xZ), grounded on the
+> LANDED store, not guessed:** the example above already shows the full identifier
+> (`AAPL US Equity`) but `AMGT-s-12`'s own `universe.json` cell (`bloomberg_ticker.value`)
+> carries only the bare `<TICKER> <EXCH>` read from a one-pager workbook -- e.g.
+> `"BABA US"`, never `"BABA US Equity"`. A consumer building `<security_key>` from that
+> field MUST APPEND the Bloomberg yellow key (`Equity`, for every name in this
+> company-research universe) before replacing spaces: `f"{value}_Equity".replace(" ",
+> "_")`. Confirmed against the real store: `raw/bloomberg/BABA_US_Equity/.../refdata.json`'s
+> own top-level payload key reads literally `"BABA US Equity"`, and AMGT-s-1 itself
+> writes under `raw/bloomberg/{BABA,BA,SAP_GY}_US_Equity/` (`SAP_GY_Equity` for a
+> non-US exchange ticker) -- never the bare ticker. This cell's first draft omitted the
+> yellow key and so matched NOTHING in the store even for a correctly-resolved name;
+> invisible while the store was empty, caught once real data landed (project surprise
+> row `AMGT_RESAPP-Z-W7-S4`).
 a distinct payload.
 
 ## 3. `<YYYYMMDDTHHMMSSZ>`
