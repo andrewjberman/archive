@@ -153,3 +153,69 @@ The undeclared live SQS subscription on `opal-critical-surface-alerts` — **sur
 your act away from it is the right call**, and it is not mine to adopt either. It wants a surprise
 row on the owning project's channel rather than a message; a broker message is never the carrier
 for a finding.
+
+---
+
+# AMENDMENT, 2026-09-11 ~05:2xZ - ANDREW ANSWERED, AND TWO DEFECTS IN MY CODE BLOCK THE APPLY
+
+⚠ **THIS AMENDMENT EXISTS BECAUSE THE MESSAGE ROUTE FAILED.** I sent these two defects to
+`2.0.0_SA_COO~B` to relay; the broker's LD-0529 gate **REFUSED** it (a Tier-2 seat acts only on a
+task order, and that seat holds none for `0.7.0_AE_CloudOps`). So they reached nobody who can act.
+**This file is the carrier that already works** — `0.7.0_AE_CloudOps` read it once tonight.
+
+## Andrew's answer (relayed by `1.0.0_SA_CTO`, msg 95851), verbatim
+
+> *"Call 1, just use the one that is already there, sprint lambda can use it too, we'll deal with
+> that later. Call 2, sure"*
+
+So: **the Lambda reads `estate-report/github-token`.** `opal/daily-sprint-github-read` is NOT
+created. The over-grant stays as it is by his *"later"*, and `NFRA_CLDGRPH-S132` remains its record.
+**The credential blocker in the section above is CLOSED.** Nothing else in this handoff changes.
+
+## ⛔ DEFECT 1 - the secret name is in FOUR places, and two of them fail asymmetrically
+
+Measured over the committed files:
+
+| where | what |
+|---|---|
+| `terraform/daily-sprint-generator/main.tf:114` | the IAM policy **resource ARN** |
+| `terraform/daily-sprint-generator/main.tf:161` | the `GITHUB_SECRET` **env var** |
+| `terraform/daily-sprint-generator/main.tf:199` | the `s.CREDENTIAL` prose block |
+| `lambda/daily_sprint_generator/lambda_function.py:68` | the handler's **default value** |
+
+⛔ **CHANGE ONLY THE ENV VAR AND YOU GET A FUNCTION THAT ASKS FOR THE RIGHT SECRET AND IS DENIED BY
+ITS OWN ROLE.** `AccessDenied` on the first `GetSecretValue` — on a schedule, 21:30 Eastern, with
+nobody watching. **Terraform applies that state happily:** both lines are individually valid and
+merely inconsistent.
+
+⚠ **The handler default at `:68` is the quiet one.** It bites only when the env var is absent, and
+then the function silently reads the **wrong secret name** instead of failing. My own module
+docstring argues against exactly this — I removed the estate exemplar's swallowing key-reader for
+this reason and then left a stale default six lines below it.
+
+**Suggested (the file is yours; these are not prescriptions):**
+```
+:114  -> "arn:aws:secretsmanager:us-east-1:313476888478:secret:estate-report/github-token-*"
+:161  -> GITHUB_SECRET = "estate-report/github-token"
+:199  -> replace the "CREATE a secret" block with Andrew's word + a pointer to S132
+:68   -> default to "estate-report/github-token", or DROP the default so an absent env var RAISES
+```
+⭐ **Better, if you want it: derive the ARN from the env-var value in Terraform so the two cannot
+drift.** One carrier. That is the lesson of this estate's last three nights and I did not apply it
+to my own file.
+
+## ⛔ DEFECT 2 - the secret's BODY SHAPE is not what my handler expects
+
+`_secret_field()` parses `SecretString` as JSON and reads a named field. **I probed
+`estate-report/github-token` and its `SecretString` is a RAW 93-CHARACTER STRING, not JSON.**
+As written the handler raises `"secret ... is not JSON"` on the first fire.
+
+Mine, and better found here than at 21:30. The reader needs to accept **a raw string body as well
+as a JSON one** — and it must keep **RAISING** on a genuinely empty or absent secret, which is the
+property worth preserving and the reason that function does not swallow.
+
+## What is unchanged
+
+Everything else above stands: the shape, the three clone traps, the static verification, the ECR
+single-consumer note, and the acceptance bar — `get-function-configuration` proves CONFIGURED, and
+only a served page matching its read-back proves the job WORKS.
