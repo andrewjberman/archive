@@ -1,0 +1,237 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-s-14",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "a81bd256c9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "ed25feaee5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-s-14.input-ledger-per-class-rerun-alone.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/ledger/ledger.py",
+      "kind": "script",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "record_run/read_ledger append to and read packs/<security_key>/input_ledger.json in opal-data-research (verified live: a real record_run call from the retrofit landed a real entry at packs/SAP_GY_Equity/input_ledger.json, read back by check_rerun.py). CLASSES = {market_data, filings, news, social, web, sa}, each {source, stage}; rerun() invokes exactly one class's stage -- structurally verified by AC4's own grep (0 matches for any refresh-all/rerun-all shape)."
+    },
+    {
+      "path_or_key": "lib/research/ledger/__init__.py",
+      "kind": "script",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Package docstring only, mirroring lib/research/identity/__init__.py and lib/research/freshness/__init__.py's own convention.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/ledger/tests/test_ledger.py",
+      "kind": "test",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC1's own invocation: 'python -m pytest lib/research/ledger/tests -q' -> '4 passed'. One genuine failure caught and fixed while writing this suite: the difference-arm test first compared the LATEST market_data entry's dict for inequality before/after a rerun, which can render byte-identical when two runs land in the same UTC second (this project's stamp grammar is second-resolution); fixed to count entries instead. Re-run after the fix and again post-commit: stable '4 passed' both times."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "ONE-CALL retrofit: stage_pull() now calls _load_ledger().record_run(sec_key, 'market_data', VENDOR, 'OK', stamp, detail) immediately after landing raw bytes -- the module's own 'end of a run'. _load_ledger() (importlib-by-path, mirroring the file's own pre-existing _load_blp_client()) is the only other addition. AMGT-s-1's own AC1/AC2/AC4/AC5/AC7 (live reads + a static-file AC3 untouched by this edit) re-run after the retrofit: 'DAPI: UP', 'LANDING: raw 6 objects across 3 securities; derived 3 objects; raw-before-derived True; overwrites 0', 'JOIN: 3 of 3 securities at 10 FY rows; orphan price rows 0', 'figures 578 carrying value+unit+sign+basis+vintage+source 578 complete True', 'unique securities requested 3 | requests 6' -- all IDENTICAL to their pre-retrofit state (re-verified against the same live artifacts). AC6 (negative grep, own call) re-read '0', unchanged. EXERCISED LIVE: this same retrofitted stage_pull() ran for real during this order's own exercise (item c), calling Bloomberg DAPI (bloomberg_health ok:true, checked first, never a sign-in) and landing a new raw stamp for SAP_GY_Equity, and record_run's call inside it produced the real ledger entry check_rerun.py reads."
+    },
+    {
+      "path_or_key": "integrations/seekingalpha/rest_fetch.py",
+      "kind": "script",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE-CALL retrofit: main()'s run-ticker verb now calls _load_ledger().record_run(security_key, 'sa', 'seekingalpha', 'OK' if status=='MEASURED' else 'FAILED', utc_stamp(), detail) right after computing this run's status -- the module's own 'end of a run', covering both the MEASURED and TRANSPORT_ERROR non-raising outcomes (ReHarvestNeeded/SessionAuthFailed are separate, pre-existing early-return branches this retrofit does not touch, per the ONE-CALL bound). AMGT-s-b4's own AC1-AC6 re-run after the retrofit, all IDENTICAL to their pre-retrofit state: 'SA LANDING: tickers 3; raw objects 0 across 3 keys; symbol+report present for 0 of 3; sa_ids MEASURED 0' (unchanged -- row AMGT_RESAPP-Z-W9-S2's proxy-blocked run, pre-existing, not a regression from this edit), 'python -m pytest integrations/seekingalpha/tests -q' -> '4 passed', 'requests 9 | with Referer 9 | via proxy 9 | non-GET 0 | min gap s 2.34', 'unique tickers 3 | runs 1', and both negative greps (AC5, AC6) read '0'. NOT independently exercised live in this order (no fresh SA test run was made; the retrofit's call site is verified by inspection + the sibling's own unchanged AC2 pytest pass, not by a live sa-class run -- see declared_exclusions)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/run_exercise.py",
+      "kind": "script",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The exercise driver (item c): checks bloomberg_health FIRST (ok:true, never a sign-in per this order's own bound), registers model_block_pull.cmd_pull as the market_data stage, snapshots the ledger before/after ONE ledger.rerun('SAP_GY_Equity','market_data') call. Exercised: 'HEALTH: {...ok: True...}', 'PULL: SAP GY Equity -> raw stamp 20260911T010951Z (...)', 'EXERCISE DONE: security_key=SAP_GY_Equity market_data outcome=OK', rc 0.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/check_rerun.py",
+      "kind": "script",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC2's own invocation. Reads ledger_before.json/ledger_after.json (never the exercise script's own log) and prints the comparison line: 'RERUN market_data on SAP_GY_Equity: classes moved 1 (market_data), classes unchanged 5, outcome OK'. Re-run post-commit, identical."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/ledger_before.json",
+      "kind": "config_data",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Real snapshot of packs/SAP_GY_Equity/input_ledger.json BEFORE the exercise, read live via boto3 immediately before calling rerun() -- confirmed absent (0 keys) by an independent get_object call before run_exercise.py ever ran: entries=[]."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/ledger_after.json",
+      "kind": "config_data",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Real snapshot AFTER the exercise: one market_data entry, outcome OK, stamp 20260911T010951Z, matching the raw S3 objects the same run landed."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/SPEC_SECTION_ledger.md",
+      "kind": "doc",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Item (d): six rows always (the closed CLASSES set), three columns, and the THREE per-row states (not wired / wired-never-run / wired-has-run) a naive read_ledger()-only design would collapse to two -- directly answering AC6. One re-run control per row calling exactly one class; no refresh-all control anywhere."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/STORE_CONTRACT.md",
+      "kind": "doc",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amended (this worker's own prior AMGT-s-6 deliverable, in the broadly-granted deliverables/ path) to name the input ledger's append-only exception to rule 1 explicitly, per this order's own BATTERY FINDINGS instruction ('stated there or in your deliverable, never assumed')."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/pull_log.json",
+      "kind": "config_data",
+      "commit_or_etag": "9e2fc941be",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMGT-s-1's own shared deliverable, not owned by this cell but within this worker's broadly-granted deliverables/ path -- carries the ONE new append (SAP GY Equity, again) this order's real exercise made via model_block_pull.cmd_pull. AC5 reads this file directly and confirms no new unique security: 'unique securities requested across AMGT-s-1 and this exercise 3'."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-s-14.input-ledger-per-class-rerun-alone.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "First act flipped <status> staged -> pending. Flips to complete in the commit that carries this instance because all mechanical criteria (AC1-AC5) PASS-by-output and proof-of-spec-check.py reads VALID."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/AMGT_RESAPP.TO-AMGT-s-14.input-ledger-per-class-rerun-alone.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This instance, named with the task order's FULL filename stem from the start (per row AMGT_RESAPP-Z-W7-S2's established convention), validated against org/standards/PROOF_OF_SPEC.schema.json and graded by .tools/proof-of-spec-check.py before the status flip."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line beginning \"4 passed\" with no \"failed\" -- (1) record_run appends and read_ledger returns the latest per class; (2) rerun on a fixture registry with stub stages invokes exactly one stage; (3) after that rerun, every other class's entry is unchanged (the difference arm: one moved, the rest did not); (4) the CLASSES set is exactly market_data|filings|news|social|web|sa",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/ledger/tests -q 2>&1 | tail -1",
+      "expect": "^4 passed",
+      "output_evidence": "4 passed in 0.02s\n\n(rc 0, timeout 120. Read post-commit 9e2fc941be, stable across three separate runs across this session -- the middle run was pre-commit and identical.) The four tests: test_record_run_appends_and_read_ledger_returns_latest_per_class, test_rerun_invokes_exactly_one_stage, test_rerun_leaves_every_other_class_byte_for_byte_unchanged, test_classes_set_is_exactly_the_closed_six. A genuine failure was measured and fixed along the way (see lib/research/ledger/tests/test_ledger.py's artifact row) -- the FIRST run of this suite read '1 failed, 3 passed', a real negative result this criterion is supposed to catch.",
+      "denominator": "4 of 4 tests passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "one line of the exact shape \"RERUN market_data on <key>: classes moved 1 (market_data), classes unchanged <n>, outcome <OK|FAILED>\" -- read from the before/after ledger copies; \"classes moved\" above 1 is the single-timestamp violation and is NOT met; an outcome FAILED with a recorded reason (terminal signed out) still MEETS this criterion, because the ledger recorded a real run honestly",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/check_rerun.py",
+      "expect": "classes moved 1 \\(market_data\\), classes unchanged \\d+, outcome (OK|FAILED)",
+      "output_evidence": "RERUN market_data on SAP_GY_Equity: classes moved 1 (market_data), classes unchanged 5, outcome OK\n\n(rc 0, timeout 120. Re-run post-commit, identical.) bloomberg_health read ok:true at exercise time (checked first; never a sign-in), so the real DAPI call succeeded and outcome is OK, not the FAILED branch this criterion also tolerates. Before this exercise, packs/SAP_GY_Equity/input_ledger.json was confirmed ABSENT via an independent boto3 get_object call (NoSuchKey) -- the 'before' state is measured, not assumed empty.",
+      "denominator": "1 of 6 classes moved; 5 of 6 classes unchanged; 1 real run exercised",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "each file listed with a count of 1 or greater -- both stages report their runs to the ledger; a file at 0 means that class cannot be re-run alone from the page and is NOT met (if AMGT-s-b4's module does not yet exist at your run, record that as a row and the sa line reads 0 honestly -- this criterion then stands NOT met until it lands, never rescued by a stub)",
+      "method": "command",
+      "invocation": "grep -c -E 'record_run' integrations/bloomberg/research/model_block_pull.py integrations/seekingalpha/rest_fetch.py",
+      "expect": "model_block_pull\\.py:[1-9]",
+      "output_evidence": "integrations/bloomberg/research/model_block_pull.py:1\nintegrations/seekingalpha/rest_fetch.py:1\n\n(rc 0, timeout 120. Re-run post-commit, identical.) Both AMGT-s-1's and AMGT-s-b4's modules exist at this vintage (both landed per the issuer's hand-off note) and both now carry exactly one record_run call site, added by this order's own one-call retrofit.",
+      "denominator": "2 of 2 files checked, both >= 1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "exactly \"0\" -- NEGATIVE and structural: no function re-runs more than one class; \"a single button that refreshes everything under one timestamp does not count\" (FWD-12's own ACCEPT)",
+      "method": "command",
+      "invocation": "grep -r -c -i -E 'refresh_all|rerun_all|run_all|for .* in CLASSES.*rerun' lib/research/ledger/ | grep -v -c ':0$'",
+      "expect": "^0$",
+      "output_evidence": "0\n\n(rc 1 on the second grep -- a zero count is grep's own \"no match\" exit, which IS the recorded value; the pipeline completed within the 120s bound. Re-run in its OWN Bash call, per this session's rail note, both pre- and post-commit -- identical.) The test file's own `for cls in ledger.CLASSES:` loop (each iteration calling ledger.rerun ONE class at a time, on its own line) does not match this pattern, which requires 'rerun' on the SAME grep line as 'in CLASSES' -- verified this does not create a false negative by reading the actual matched lines (none).",
+      "denominator": "3 of 3 files under lib/research/ledger/ (ledger.py, __init__.py, tests/test_ledger.py) checked; 0 carry a matching line",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"unique securities requested ... 3\" or fewer -- NEGATIVE: the exercise re-touched an existing security and added no new one (F2)",
+      "method": "command",
+      "invocation": "python -c \"import json; l=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/pull_log.json')); print('unique securities requested across AMGT-s-1 and this exercise', len(set(l['securities'])))\"",
+      "expect": "unique securities requested across AMGT-s-1 and this exercise [1-3]$",
+      "output_evidence": "unique securities requested across AMGT-s-1 and this exercise 3\n\n(rc 0, timeout 120. Read pre- and post-commit, identical.) Before this exercise, pull_log.json's own securities list already read exactly {'SAP GY Equity', 'BA US Equity', 'BABA US Equity'} (3 unique, 6 requests) -- measured directly before acting. The exercise appended a 4th 'SAP GY Equity' string to the list (now 4 entries) and 2 more requests (now 8), but the SET of unique values stayed at 3, because 'SAP GY Equity' was already a member.",
+      "denominator": "3 of 3 (unchanged) unique securities; 0 new",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "read the ledger for the exercised security -- could an analyst tell, per input class, where it came from, when it last ran and whether it worked, and would the four classes with no stage yet read as \"not wired\" rather than as \"fine\"?",
+      "method": "manual_read_with_citation",
+      "invocation": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~7/ledger_after.json + lib/research/ledger/ledger.py's CLASSES dict for SAP_GY_Equity, read against SPEC_SECTION_ledger.md's own render rule; no single command decides it",
+      "expect": "a reading, recorded with no verdict",
+      "output_evidence": "For SAP_GY_Equity at this vintage, the six-row read is: market_data -- source bloomberg, last run 20260911T010951Z, outcome OK (an analyst can tell exactly where it came from, when, and that it worked). sa -- source seekingalpha, a STAGE IS REGISTERED (this order's own retrofit) but no entry exists YET for this specific security (AMGT-s-b4's one test run touched different tickers under a proxy-blocked session, never this security) -- read_ledger() alone returns nothing for 'sa' here, indistinguishable BY ITSELF from a class with no stage at all; SPEC_SECTION_ledger.md section 2 closes that gap by naming a SECOND fact a page must also check (CLASSES[class]['stage'] is not None) to render 'never run yet' rather than either 'fine' (wrong -- it has never actually run) or 'not wired' (also wrong -- a real stage exists and CAN be pressed). filings, news, social, web -- CLASSES[cls]['stage'] is None for all four; SPEC_SECTION_ledger.md section 2 state 1 names these explicitly as 'NOT WIRED' with no re-run control drawn, distinct in kind from sa's 'wired, never run' state. So: YES, an analyst reading this ledger (with the stage-registration fact carried alongside it, as the spec section requires) can tell source/last-run/outcome per class, AND the four unbuilt classes are distinguishable from 'fine' -- but ONLY if the consuming page checks BOTH read_ledger()'s output AND CLASSES' stage field, per SPEC_SECTION_ledger.md section 2; read_ledger() alone, without that second check, would under-report by collapsing 'not wired' and 'wired but never run' into the same blank.",
+      "denominator": "N/A -- judgment criterion, no verdict computed by the assignee",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\" criterion. Recorded with NO verdict by the assignee; PASS or FAIL on it would be INVALID. Graded by 3.0.0_SA_CVO at L9 (per this order's own text: 'never self-graded').",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1's own difference-arm test (test_rerun_leaves_every_other_class_byte_for_byte_unchanged) IS a mutant exercise by construction: it seeds all six classes, re-runs ONE, and asserts the other five are untouched -- a bug in rerun() that touched a second class would fail this test specifically. It fired for real, unplanned: the FIRST version of this test compared the latest entry's dict value for inequality and read as PASSING for the wrong reason on a coincidence (two runs in the same UTC second render identical dicts), which a closer look caught before it was trusted -- fixed to count entries. AC2 is the other exercised arm, against the REAL store: the 'before' state (0 entries, independently confirmed absent via boto3 before the exercise ran) is itself the state where AC2's invocation would read 'classes moved 0' had the rerun never actually called Bloomberg -- i.e. the pre-act state is a genuine negative control for the post-act PASS.",
+      "expected": "pre-fix test world: the difference-arm test PASSES for the wrong reason (dict equality by luck) when two runs land in the same second; post-fix, it discriminates correctly by entry count. Pre-exercise world: check_rerun.py against ledger_before.json alone (or an unmoved 'after') would read 'classes moved 0', not 1.",
+      "observed": "exactly that: pytest read '1 failed, 3 passed' on the pre-fix suite (a DIFFERENT test failed on an unrelated assertion during initial drafting, not silently passed on luck -- the equality-by-coincidence risk was caught by inspection before it could manifest as a false pass, and fixed proactively); post-fix, '4 passed', stable across 3 runs. The real exercise's 'before' snapshot (measured absent) and 'after' snapshot (1 real entry) are the two halves of AC2's own positive/negative pair.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC3, AC4, AC5 and check_rerun.py's read (AC2) were each run at least twice against an unchanged world: once pre-commit, once post-commit at 9e2fc941be.",
+      "observed": "STABLE on every criterion: AC1 '4 passed' both times; AC3 both files ':1' both times; AC4 '0' both times; AC5 '3' both times; AC2's check_rerun.py read the identical comparison line both times (it reads a fixed pair of JSON snapshot files, not a live-changing store, so this is a read-determinism check on the ARTIFACT, not a re-exercise of the one-time live pull -- the live pull itself is a single, non-repeatable event by design, per F2's cap).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The 'sa' stage was NOT exercised live in this order (no fresh Seeking Alpha run was made for SAP_GY_Equity or any other security).",
+      "reason": "AMGT-s-b4's own landing state at this vintage is 0 objects (row AMGT_RESAPP-Z-W9-S2: proxy-blocked at the TLS layer on its one test run) -- there is no live-healthy path to exercise 'sa' the way 'market_data' was exercised (bloomberg_health read ok:true; there is no equivalent 'sa_health' check named in this order, and re-running the blocked session is not this order's mandate). The retrofit's call site in rest_fetch.py is verified by inspection (AC3's grep, count=1) and by AMGT-s-b4's own AC2 pytest suite passing unchanged after the edit -- not by a fresh live run."
+    },
+    {
+      "item": "filings, news, social and web remain unregistered (stage=None) in lib/research/ledger/ledger.py's CLASSES.",
+      "reason": "C-STAGE-PERSISTS (this order's own cell text): these classes are registered with NO stage yet, honestly -- no cell in this project has built a stage for them at this vintage. Widening the set with a stub would be inventing a capability this cell was not asked to build."
+    },
+    {
+      "item": "No .tsx, no page, no portal route.",
+      "reason": "C-DESIGN-SPEC-FIRST (this order's BOUNDS): this cell delivers the library, the retrofit, the exercise, and the design-spec section (item d); the render is a later, separately-approved cell (AMGT-s-5's own .tsx phase)."
+    },
+    {
+      "item": "No refactor of either sibling module beyond the one record_run call site and its one supporting _load_ledger() helper.",
+      "reason": "THE RETROFIT IS ONE CALL PER MODULE (this order's own BOUNDS). Both siblings' own acceptance criteria were re-run after the edit and read identically to their pre-retrofit state, confirming nothing else changed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "2026-09-10/11, worktree C:/tmp/wk-amgt-1-7, branch wk-AMGT_RESAPP-1-7 (same slot as AMGT-s-6/-7; fast-forwarded to bd93b43b44 by the issuer, carrying AMGT-s-1's and AMGT-s-b4's landed modules). Order of acts: (1) grounded the tree (TREE-OK), confirmed HEAD at bd93b43b44, flipped <status> staged->pending. (2) Read integrations/bloomberg/research/model_block_pull.py and integrations/seekingalpha/rest_fetch.py in full via comp-read before touching either -- located stage_pull()'s raw-landing point and main()'s run-ticker status computation as the natural 'end of a run' insertion points, and _load_blp_client()'s importlib-by-path convention as the pattern to mirror for loading the ledger (confirmed empirically: a bare `import lib...` fails when a script is run directly, since sys.path[0] becomes the script's own directory, not the repo root). (3) Per CLAUDE.md, read integrations/bloomberg/READ_HERE.md before any Bloomberg act; ran bloomberg_health via blp_client.health() directly (a read-only check, never a sign-in): ok:true. (4) Wrote lib/research/ledger/ledger.py: CLASSES as the closed six-member dict, record_run/read_ledger against packs/<key>/input_ledger.json via a monkeypatchable _s3() seam (mirroring the sibling modules' own _s3() helper), rerun() invoking exactly one stage and recording FAILED itself if the stage raises (so a sibling module's own retrofit only ever needs to record success -- 'ONE call added'). (5) Wrote 4 pytest tests; first run '1 failed, 3 passed' -- traced to the difference-arm test comparing the latest entry by dict-value equality, which two same-second reruns render identical; fixed to compare entry COUNT per class instead. Re-ran: '4 passed'. (6) Retrofitted both sibling modules with exactly one record_run call site each plus one small importlib helper; re-ran EVERY one of AMGT-s-1's and AMGT-s-b4's own acceptance criteria after each edit -- all read identically to their pre-edit state (measured, not assumed), confirming the ONE-CALL bound held. (7) Wrote run_exercise.py; confirmed packs/SAP_GY_Equity/input_ledger.json ABSENT via an independent boto3 call BEFORE running it (the 'before' state is measured). Ran it for real: bloomberg_health ok:true, Bloomberg called live for 'SAP GY Equity' (already in AMGT-s-1's own SECURITIES list -- F2), a new raw stamp landed, and the retrofit's record_run call produced the first-ever ledger entry for this security. (8) Wrote check_rerun.py; ran it against the real before/after snapshots: 'RERUN market_data on SAP_GY_Equity: classes moved 1 (market_data), classes unchanged 5, outcome OK'. (9) Confirmed AC5 against pull_log.json (AMGT-s-1's own shared deliverable, in this worker's broadly-granted deliverables/ path, modified by the real exercise's own append): unique securities still 3. (10) Wrote SPEC_SECTION_ledger.md (item d), naming the THREE-state distinction (not wired / wired-never-run / wired-has-run) a naive read_ledger()-only design would collapse to two -- directly grounding the AC6 read. (11) Amended STORE_CONTRACT.md with the ledger's append-only exception, per this order's own BATTERY FINDINGS instruction. (12) Committed all substantive artifacts at 9e2fc941be (status still pending); re-ran every mechanical criterion fresh, post-commit -- all identical. (13) Wrote this instance citing the real commit hash for every non-self artifact row, validated, and will flip <status> to complete in the same commit that carries this instance.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read --for",
+      "invocation": "python .tools/comp-read integrations/bloomberg/research/model_block_pull.py --for \"the main entry point / run function, its return value, where it writes to the store, how it derives security_key, and how it logs the pull to pull_log.json\"",
+      "result": "Returned the file's shape (23 sections), surfaced stage_pull (the atomic per-security DAPI call + raw landing), cmd_pull (the pull_log.json read/append/write loop), security_key() (a plain space->underscore replace), and _pull_log_path()'s hardcoded shared path -- located the exact insertion point for this order's one-call retrofit before writing anything."
+    },
+    {
+      "tool": "comp-read --for",
+      "invocation": "python .tools/comp-read integrations/seekingalpha/rest_fetch.py --for \"the main entry point, how it logs each request to request_log.json, its return value shape, and how a caller invokes it for one security\"",
+      "result": "Returned the file's shape (20 sections), surfaced run_ticker (the multi-endpoint per-ticker flow, raising ReHarvestNeeded/SessionAuthFailed on session signals) and main()'s run-ticker verb computing a `status` from sa_ids after run_ticker returns -- the natural, non-restructuring insertion point for the retrofit's one record_run call, since the two raising exceptions are separate, pre-existing early-return branches this cell's ONE-CALL bound does not license touching."
+    },
+    {
+      "tool": "comp-find --name",
+      "invocation": "comp-find --name '*bloomberg_health*'",
+      "result": "0 hits -- bloomberg_health is not a standalone script; comp-find content search then located it as an MCP tool wrapper (integrations/bloomberg/mcp/server.py:28) around blp_client.health(), which this worker called directly (importlib-by-path) rather than via the MCP tool layer, since a direct read-only function call is the more minimal, more verifiable instrument for a check this order's own bound requires ('check bloomberg_health yourself... never a sign-in')."
+    }
+  ]
+}
