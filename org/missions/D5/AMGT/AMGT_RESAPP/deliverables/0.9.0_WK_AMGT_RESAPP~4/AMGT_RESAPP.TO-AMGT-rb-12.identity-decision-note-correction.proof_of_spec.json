@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rb-12",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-12.identity-decision-note-correction.md",
+    "group": "OTHER",
+    "vintage_commit": "3f2189f28bb2102eda0fa12fe277cc2246290702"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "192c1982316e49a38c0a41807c2468a7bdf49658",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-12.identity-decision-note-correction.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~4/DESIGN_QUESTION_identity_fallback.md",
+      "kind": "doc",
+      "commit_or_etag": "9b92772e682c4745d5e6b4a59d245eb2447a5052",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the two incoherent 'MEASURED-or-better 34 -> 49' claims (lines 57, 79 of the pre-correction text) are replaced with the honest split (34 MEASURED + up to 15 INFERRED candidates, never combined); the failure-mode section is split into explicit OBSERVED (Nokia FH, real in this corpus) and HYPOTHETICAL (a future directory renaming, not observed here) subsections; a new section names the two concrete downstream gates in lib/research/identity/ that bear on an INFERRED bloomberg_ticker and states plainly which refuses it (coverage_pass.py's ACCEPTANCE RULE) and which does not yet (resolver.py's render_together()); the fallback stays stated as UNIMPLEMENTED pending Andrew's decision.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every count \"0\" -- NEGATIVE: the incoherent \"MEASURED-or-better 34 -> 49\" claim is GONE from the doc in all its forms. Any non-zero count is the mixed-category claim still present and is NOT met",
+      "method": "command",
+      "invocation": "python -c \"t=open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~4/DESIGN_QUESTION_identity_fallback.md', encoding='utf-8').read().lower(); print('measured-or-better', t.count('measured-or-better'), '| as high as 49', t.count('as high as 49'), '| to 49', t.count('to 49'), '| 49 of 89', t.count('49 of 89'))\"",
+      "output_evidence": "measured-or-better 0 | as high as 49 0 | to 49 0 | 49 of 89 0",
+      "denominator": "4 of 4 forbidden substrings counted over the whole doc; all four 0",
+      "status": "PASS",
+      "expect": "measured-or-better 0 \\| as high as 49 0 \\| to 49 0 \\| 49 of 89 0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "all four True -- the doc states 34 MEASURED, up to 15 INFERRED candidates, names at least one downstream gate that refuses INFERRED, and separates observed ambiguity from hypothetical renaming. A missing term is NOT met",
+      "method": "command",
+      "invocation": "python -c \"t=open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~4/DESIGN_QUESTION_identity_fallback.md', encoding='utf-8').read(); low=t.lower(); print('states 34 MEASURED', ('34 measured' in low), '| up to 15 INFERRED', ('15' in low and 'inferred candidate' in low), '| names an INFERRED-refusing gate', ('inferred' in low and ('refuse' in low or 'refuses' in low or 'reject' in low)), '| separates observed-vs-hypothetical', ('observed' in low and ('hypothetical' in low or 'renaming' in low)))\"",
+      "output_evidence": "states 34 MEASURED True | up to 15 INFERRED True | names an INFERRED-refusing gate True | separates observed-vs-hypothetical True",
+      "denominator": "4 of 4 boolean checks True",
+      "status": "PASS",
+      "expect": "states 34 MEASURED True.*up to 15 INFERRED True.*names an INFERRED-refusing gate True.*separates observed-vs-hypothetical True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"fallback-coded files 0\" with a non-zero \"py files\" denominator -- NEGATIVE: no directory-name-to-ticker fallback is implemented in lib/research/identity/*.py; the mechanism stays a DOCUMENTED design question only",
+      "method": "command",
+      "invocation": "python -c \"import pathlib,re; fs=list(pathlib.Path('lib/research/identity').rglob('*.py')); pat=re.compile(r'(?is)(\\.name\\b|basename|folder_name|dir_name).{0,60}(bloomberg_ticker|security_key)|(bloomberg_ticker|security_key)\\s*=\\s*[^\\n]{0,50}(\\.name\\b|basename|rsplit)'); hits=[str(f) for f in fs if pat.search(f.read_text(encoding='utf-8'))]; print('py files', len(fs), '| fallback-coded files', len(hits), hits)\"",
+      "output_evidence": "py files 5 | fallback-coded files 0 []",
+      "denominator": "5 of 5 .py files in lib/research/identity/ scanned; 0 carry the fallback pattern",
+      "status": "PASS",
+      "expect": "fallback-coded files 0"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "does the corrected note present a benefit Andrew can rule on (34 MEASURED + up-to-15 INFERRED candidates, not 49 measured-or-better), cleanly separate observed ambiguity from hypothetical renaming, and name where INFERRED is still refused downstream? This is the C-S13 regrade.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~4/DESIGN_QUESTION_identity_fallback.md@9b92772e68 in full (judgment, never self-graded)",
+      "output_evidence": "Not self-graded per task-order instruction. The corrected doc states the benefit as 34 MEASURED (unchanged) plus up to 15 additional INFERRED candidates in two never-combined counts (lines under '## The benefit, in one denominator's categories'); splits '## Confidence and failure mode' into an explicit '### OBSERVED (real in this corpus): an ambiguous trailing token' (Nokia FH) and '### HYPOTHETICAL (not observed in this corpus): a future renaming' subsection, stating the renaming case is not counted in either figure; and adds '## Which gates still refuse INFERRED (downstream admissibility)' naming coverage_pass.py's ACCEPTANCE RULE (refuses a directory-name-derived candidate from becoming MEASURED) and resolver.py's render_together() (does not yet discriminate INFERRED from MEASURED, an open question named for Andrew rather than resolved silently). This is a record of what the corrected text says, not this worker's grade of whether it clears C-S13.",
+      "denominator": "N/A -- judgment criterion, no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; per this cell's WORKER FACE instruction, this worker does not self-grade AC4. The grade is 3.0.0_SA_CVO~Z's at L9 adjudication (the C-S13 regrade named in the cell text)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: this is a doc-only correction (BOUND: BLOCK NO FALLBACK CODED, BLOCK NO DATA RE-LITIGATION) -- no code path, no executable assertion exists to mutate. AC1-AC3 are direct string/regex reads of the corrected doc and the unchanged .py tree, not a behavioral assertion over a mutable code path.",
+      "expected": "N/A -- no code artifact this cell produces or is permitted to produce",
+      "observed": "N/A -- confirmed by AC3's own run: lib/research/identity/*.py is byte-identical to AMGT-r-12's landing (0 fallback-coded files, same as the prior round's proof instance)",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1/AC2/AC3's three invocations re-run twice against the same committed doc bytes (commit 9b92772e68), outputs compared verbatim",
+      "observed": "run1 == run2 for all three: 'measured-or-better 0 | as high as 49 0 | to 49 0 | 49 of 89 0'; 'states 34 MEASURED True | up to 15 INFERRED True | names an INFERRED-refusing gate True | separates observed-vs-hypothetical True'; 'py files 5 | fallback-coded files 0 []' -- deterministic (pure string/regex reads over a committed, unchanging file, no randomness, no network call, no timestamp-dependent field)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Implementing the directory-name-derived identifier fallback itself",
+      "reason": "BOUND: BLOCK NO FALLBACK CODED -- this cell is a doc correction only; AC3 refuses any version of it in lib/research/identity/*.py and none is present."
+    },
+    {
+      "item": "Re-measuring, adding or removing a MEASURED bloomberg_ticker value",
+      "reason": "BOUND: BLOCK NO DATA RE-LITIGATION -- the 34 MEASURED stand from AMGT-r-12's landed universe.json (read-only here, not touched)."
+    },
+    {
+      "item": "Resolving the open design question of whether resolver.py's render_together() should admit, refuse, or treat differently a future INFERRED bloomberg_ticker",
+      "reason": "Out of this cell's scope: the cell asks the doc to NAME which gates refuse INFERRED today, not to decide or code new gate behavior. Named as an open question for Andrew in the corrected doc rather than resolved here."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~4/AMGT_RESAPP.TO-AMGT-rb-12.identity-decision-note-correction.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python (AC1 forbidden-substring count)",
+      "invocation": "python -c \"t=open('.../DESIGN_QUESTION_identity_fallback.md', encoding='utf-8').read().lower(); print(...)\"",
+      "result": "rc 0; measured-or-better 0 | as high as 49 0 | to 49 0 | 49 of 89 0"
+    },
+    {
+      "tool": "python (AC2 four-boolean corrected-content check)",
+      "invocation": "python -c \"t=open('.../DESIGN_QUESTION_identity_fallback.md', encoding='utf-8').read(); ...\"",
+      "result": "rc 0; states 34 MEASURED True | up to 15 INFERRED True | names an INFERRED-refusing gate True | separates observed-vs-hypothetical True"
+    },
+    {
+      "tool": "python (AC3 negative fallback-coded scan)",
+      "invocation": "python -c \"import pathlib,re; fs=list(pathlib.Path('lib/research/identity').rglob('*.py')); ...\"",
+      "result": "rc 0; py files 5 | fallback-coded files 0 []"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate + surprise-row-gate + to-pipeline-gate pre-commit chain)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~4 <0.9.0_WK_AMGT_RESAPP~4@opal.agent>\" -F .scratch/commit_msg_1.txt -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~4/DESIGN_QUESTION_identity_fallback.md",
+      "result": "commit 9b92772e68: commit-gate WARN (0 of 1 file checked -- .md falls through the .py/.sh/.tf/org-projects-json gate, as documented); to-pipeline-gate OK (no task_orders/*.md staged this commit); surprise-row-gate OK (no surprise-channel rows in this commit); risk-reflex REFLEX CLEAN (1 of 1 file, 0 danger hits)"
+    }
+  ]
+}
