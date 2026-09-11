@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-7",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-7.holdings-parse-validate-and-the-correction-state.md",
+    "group": "B",
+    "vintage_commit": "5236a7603d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "5236a7603d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-7.holdings-parse-validate-and-the-correction-state.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/parse.py",
+      "kind": "script",
+      "commit_or_etag": "5708161e8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NO DEPLOY IN THIS CELL, by its own bounds -- the intake Lambda's next build in this slot carries it. The module is a library the poller's next stage calls in-process; it is not registered in lambda-source-map.json by this cell because that registration belongs to the build that ships it.",
+      "artifact_covered_by": ["S7-AC1", "S7-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/corrections.py",
+      "kind": "script",
+      "commit_or_etag": "5708161e8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Same cell, same bound: no deploy. Carries the immutable RevisionStore, the FirmBinding proof on every firm-scoped write, the sanitized key path through _authz.cache_key_for, the StatusEnvelope this cell produces, and the deliberately EMPTY ROUTES table the guard census reads.",
+      "artifact_covered_by": ["S7-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/settings.json",
+      "kind": "config_data",
+      "commit_or_etag": "5708161e8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The seven recorded settings AS DATA with their sources, verified by arm (e): 7 of 7 carry a named source, management_fee == 0.003, the superseded 0.01 kept and dated, 2 cautions. IB-s-9 verifies these against the created YCharts portfolio after the first authorized live run; until then every value is RECORDED, not CONFIRMED, and the file says so.",
+      "artifact_covered_by": ["S7-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/fixtures/holdings/",
+      "kind": "test",
+      "commit_or_etag": "5708161e8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six files plus FIXTURE_MANIFEST.json, whose `claim` field is SYNTHESIZED and whose provenance paragraph states that every byte is synthetic because no real advisor-supplied specimen exists in this repository. No client name, account number or e-mail address appears in any of them.",
+      "artifact_covered_by": ["S7-AC1", "S7-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/intake/tests/test_parse.py",
+      "kind": "test",
+      "commit_or_etag": "5708161e8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 package tests, 15 passing (unittest, run directly: pytest over a DIRECTORY collects zero when any module raises SystemExit at import, and this package now has several modules with module-level work). They are narrower than the battery and complementary to it.",
+      "artifact_covered_by": ["S7-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "5708161e8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 IB-s-7 entries appended, entries_total 234 -> 241. Verified APPEND-ONLY against the prior blob: the first 234 entries compare EQUAL. One of the eight paths offered was already registered by IB-s-3 and was not duplicated.",
+      "artifact_covered_by": ["S7-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_7.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S7-AC1 battery. Committed in the same commit as this instance and the status flip. It was RUN against the already-committed build at 5708161e8e, so the graded output is a reading of committed bytes.",
+      "artifact_covered_by": ["S7-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-7_mutant_control.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The two monkeypatch mutants and their recorded output. Edits no production file; the mutation lives in one process.",
+      "artifact_covered_by": ["S7-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S7-AC1",
+      "criterion_verbatim": "S7-AC1 -- PASSES BY OUTPUT -- deterministic, lossless, correctable. (a) DETERMINISTIC. The same specimen parsed twice yields byte-identical normalized holdings; printed. (b) NOTHING DROPPED -- THE DIFFERENCE CONTROL. A specimen with one unresolvable ticker: the output carries it as a finding with its source cell; a deliberately broken parser build that drops it FAILS the same arm. Both printed. (c) UNITS, CELLS, TOTALS, CASH. Every normalized row carries units and its source cell; the sum of rows equals the specimen's stated total (or a finding names the difference); $:CASH is preserved as cash. Printed with denominators. (d) THE CORRECTION STATE. Uncertain items enter needs-correction; a correction produces revision r+1 and leaves r untouched (hashes printed); an approved substitution is explicit on r+1. (e) SETTINGS ARE DATA. settings.json carries the seven recorded settings with sources; management_fee == 0.003. Printed. (amend) GUARDED, BOUND, AND SILENT ON THE REFUSED VALUE (issuer amendment at the IB-s-3 drain, rows W2-S9 / W2-S10). unguarded_routes() over this cell's routes reads 0 of N (N printed); every firm-scoped read binds through FirmBinding and a fixture with a non-reconciling binding is REFUSED with FIRM_BINDING rather than served empty; a fixture that keys by a client display name is refused and the whole envelope (body + reason + audit trail) contains 0 occurrences of the refused value (census printed). Where this cell ships no handler, the arm reads over routes.json at the replay.",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_7.py",
+      "expect": "IBS7-PARSE-DETERMINISTIC",
+      "output_evidence": "rc 0. Final lines verbatim: '  arm (a): PASS' / '  arm (b): PASS' / '  arm (c): PASS' / '  arm (d): PASS' / '  arm (e): PASS' / '  arm (amend): PASS' / '  ARMS: 6 of 6' / 'IBS7-PARSE-DETERMINISTIC'. PRECONDITION printed first: 'a specimen with no header row is REFUSED, never parsed positionally' -> ParseRefused. (a) '4 of 4 specimens byte-identical across two parses', each with its digest and byte count, and the note that the serialization carries no timestamp and no random value. (b) CORRECT BUILD: 'unmatched holdings CARRIED: 1' -- \"'PRIVATE PLACEMENT 2019' at holdings_unmatched.csv!C3, quantity {'value': 250.0, 'units': 'SHARES'}, verbatim '250'\", 'finding: UNMATCHED_IDENTIFIER / UNCERTAIN', 'source cell named in the finding: yes', 'needs_correction: True'. BROKEN BUILD (drop_unmatched=True): 'unmatched holdings carried: 0', reconciliation '{\"rows_seen\": 5, \"normalized_holdings\": 2, \"findings_standing_in_for_a_row\": 0, \"declared_skips\": 1, \"header_rows\": 1, \"accounted\": 4, \"unaccounted\": 1, \"balances\": false}', and \"the arm's own predicate on this build: FAIL, as it must\". Then the identity on every specimen: '4 of 4 specimens balance; unaccounted rows across all: 0'. (c) 'denominators: 15 of 15 rows carry units or a UNITS_UNDETERMINED finding; 15 of 15 rows carry sheet+row+column+verbatim text; 4 of 4 specimens carry $:CASH and all 4 kept it as CASH; 4 of 4 specimens reconcile their stated total or name the difference', with holdings_share_class.csv printing 'computed={\"USD\": 500000.0} stated={\"value\": 500100.0, \"units\": \"USD\", \"source_cell\": \"holdings_share_class.csv!C6\"} difference -100.0 NAMED BY A FINDING', and 'CONTRACT: 4 of 4 specimens validate against the shared AnalysisRequest schema'. (d) 'revision 0 written: stage=NEEDS_CORRECTION', 'StatusEnvelope.state = NEEDS_CORRECTION', 'hash(r0) at open' equal to 'hash(r0) after r1' with 'r0 UNCHANGED = True', \"r1 corrections[] = [{\\\"finding_code\\\": \\\"SHARE_CLASS_SUBSTITUTION_PROPOSED\\\", \\\"approved_by\\\": \\\"analyst:alyssa\\\", \\\"from_value\\\": \\\"VTSAX\\\", \\\"to_value\\\": \\\"VTI\\\"}]\", 'r0 still holds VTSAX = True', 'r1 holds VTI = True', 'overwrite of r0 REFUSED', 'store: writes=2 refused_overwrites=1 revisions=[0, 1]', 'a substitution with NO approver is refused: True'. (e) 'settings recorded: 7; with a named source: 7 of 7', 'management_fee == 0.003 : True (superseded value 0.01, kept and dated)', \"cautions recorded: 2 -- ['TAX_DEFAULT_IS_NOT_CLIENT_STATUS', 'NO_BENCHMARK_TEMPLATE_KEEPS_THE_CALCULATION_BENCHMARK']\". (amend) 'unguarded_routes(corrections.ROUTES) -> 0 of 0 unguarded  OK: every route is guarded' printed together with '0 of 0 IS VACUOUS ON ITS OWN', then 'CONTROL, an UNGUARDED handler wired to a route: 1 of 1 unguarded' and 'CONTROL, the SAME handler wrapped by guard(): 0 of 1 unguarded'; 'route-reachability census: 9 public callable(s) added by this cell, 0 wired to any route table in the corpus'; 'reconciling binding -> written, revision 0, refusal=None' and 'NON-reconciling binding -> result=None refusal code=FIRM_BINDING' with the envelope printed and 'the failing opaque id is NOT echoed in the envelope: confirmed'; 'THROUGH guard() -> serve(): outcome code = KEY_REFUSED', reason \"1 of 2 key parameter(s) were refused by the key grammar: ['client'] ...\", 'audit trail entries: 1', 'CENSUS over the WHOLE envelope (body + reason + AUDIT TRAIL), 809 bytes: occurrences of the refused value: 0', and the library path the same at 473 bytes. Full verbatim output: org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-7_S7-AC1_battery_output.txt",
+      "denominator": "arms 6 of 6; arm (a) 4 of 4 specimens byte-identical over two parses; arm (b) 1 of 1 unresolvable identifier carried with its source cell, 0 carried by the broken build, 4 of 4 specimens balance with 0 unaccounted rows across all; arm (c) 15 of 15 rows carry units or a UNITS_UNDETERMINED finding, 15 of 15 carry sheet+row+column+verbatim, 4 of 4 specimens preserve $:CASH as CASH, 4 of 4 reconcile or name the difference, 4 of 4 validate against the shared contract; arm (d) hash(r0) equal across 2 reads spanning the r+1 write, 1 of 1 overwrite refused, 1 correction recorded on r+1, 1 of 1 unapproved substitution refused; arm (e) 7 settings, 7 of 7 with a named source, 2 cautions; arm (amend) 0 of 0 routes unguarded on this cell's (empty) table with 1 of 1 unguarded and 0 of 1 guarded on the two controls, 0 of 9 public callables route-reachable, 1 of 1 non-reconciling binding refused with FIRM_BINDING, 0 occurrences of the refused value across 809 bytes of envelope plus a 1-entry audit trail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S7-AC2",
+      "criterion_verbatim": "S7-AC2 -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: which holdings shapes your synthetic specimens cannot represent (multi-sheet workbooks, merged cells, non-USD), and how a real specimen would change the parser; and where 'programmatic by default, review the exception' could quietly become 'review everything'. No verdict: the instance row carries the output under UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "judgment -- recorded, not self-graded; the reads behind it are: the five committed specimens and their FIXTURE_MANIFEST.json; the parser's own finding-code table and reconciliation identity; _contracts/AnalysisRequest.schema.json; the battery's per-specimen finding counts; and the IB-s-6 evidence that no real forwarded specimen exists",
+      "judgment": true,
+      "output_evidence": "(1) WHAT THE SPECIMENS CANNOT REPRESENT, AND HOW A REAL ONE WOULD CHANGE THE PARSER. The three the criterion names, plus five it does not. (i) MULTI-SHEET WORKBOOKS. read_xlsx reads the FIRST worksheet and REPORTS the rest rather than pretending they are absent: result.workbook carries sheets_in_workbook and sheets_not_read. A real custodian export routinely puts positions on one sheet and a cash/transaction ledger on another, and 'first sheet' would then parse the positions and lose the cash entirely -- silently, because the reconciliation identity is computed PER SHEET READ and would balance perfectly on the sheet it saw. THE FIX IS NOT 'read every sheet': it is to make the CHOICE explicit -- parse each sheet, reconcile each, and refuse when more than one carries an identifier header, because which sheet is 'the holdings' is a question only the specimen's own shape can answer. (ii) MERGED CELLS. openpyxl writes none and my reader ignores the mergeCells part entirely. A merged group label spanning A5:C5 arrives as text in A5 and EMPTY B5/C5, which my group-header heuristic ('one populated cell, no number on the row') happens to classify correctly -- BY LUCK, not by reading the merge. A merged HEADER (a two-row header with 'Market Value' merged over 'USD') would break the header detector outright, and the specimen would be refused rather than misparsed, which is the safe direction but is not the same as handling it. (iii) NON-USD. There is no currency ANYWHERE in the pipeline: the contract's units enum is SHARES / USD / WEIGHT_DECIMAL, and USD is a UNIT, not a currency field. A specimen with a CAD column would parse to units USD and be arithmetically summed with dollar rows -- the single worst failure available here, because it is silent, it is a number, and it is wrong by an exchange rate. A real non-USD specimen does not change the parser; IT CHANGES THE CONTRACT, and that is a PRD-level act, not a cell-level one. (iv) NESTED OR SUBTOTALLED GROUPING. My grouping is flat and a subtotal row that is not labelled 'Total' would parse as a HOLDING and double-count into the computed total; the TOTAL_MISMATCH finding would fire, which is the system noticing, but the finding would name the wrong cause. (v) A HOLDINGS TABLE PASTED INTO THE MAIL BODY with no attachment at all -- the poller persists the body's MIME but nothing here reads it. (vi) itemAttachment / referenceAttachment (a OneDrive link rather than bytes), carried from the IB-s-6 judgment because the parser is downstream of it. (vii) DATES IN A QUANTITY COLUMN: openpyxl and Excel both store dates as serial numbers, so a 'Maturity' column read as a quantity yields 45,678 of something. My units vocabulary does not contain 'maturity', so such a column is not selected -- but only because the vocabulary is a closed list, which is a defence that holds exactly as long as nobody adds a permissive synonym. (viii) NON-ASCII NAMES AND TICKERS. _TICKER_RE is ASCII-only and a non-ASCII identifier lands UNMATCHED -- correct, but a reviewer reading the finding sees the identifier round-tripped through Python's %r, which is a display question this cell did not solve. (2) WHERE 'PROGRAMMATIC BY DEFAULT, REVIEW THE EXCEPTION' COULD QUIETLY BECOME 'REVIEW EVERYTHING'. This is the question I would put highest for the CVO, because the mechanism is already visible in the battery's own numbers and it is not a hypothetical. needs_correction is TRUE when ANY finding has severity UNCERTAIN or BLOCKING, and the finding table assigns UNCERTAIN to FIVE of its seven codes -- UNMATCHED_IDENTIFIER, AMBIGUOUS_IDENTIFIER, SHARE_CLASS_SUBSTITUTION_PROPOSED, UNITS_UNDETERMINED and TOTAL_MISMATCH. MEASURED ON THIS CELL'S OWN SPECIMENS: 2 of 4 enter needs-correction, and the two that do are the two that carry any real-world messiness at all. THREE WAYS THIS BECOMES 'REVIEW EVERYTHING', in increasing order of how quietly it happens. (a) THE SHARE-CLASS PROPOSAL IS THE LOUDEST OFFENDER. It is UNCERTAIN, so a portfolio holding two mutual-fund share classes -- entirely ordinary -- enters review every single time, forever, even when the advisor NEVER wants the substitution. Nothing in this cell records a REJECTION durably; corrections.apply_corrections applies approvals, and a rejected proposal simply comes back on the next submission of the same holding. A standing 'this advisor does not substitute share classes' decision is the missing artifact, and without it the proposal is not an exception, it is a recurring tax. (b) TOTAL_MISMATCH FIRES ON ROUNDING. The comparison is exact (difference != 0 after rounding to 6 places). A custodian export that states a total rounded to the dollar while listing cents will mismatch by pennies on most real files. That single code could put nearly every real specimen into review while being, every time, correct about the arithmetic and useless to the reviewer. A tolerance is the obvious repair and it is NOT in this cell, deliberately -- choosing a tolerance is choosing what difference does not matter, which is a decision about someone's money and not a parser's to make quietly. (c) THE RATIO NOBODY IS WATCHING. There is no measurement anywhere of what fraction of requests enter needs-correction, so the drift from 'the exception' to 'everything' would be invisible until a person said the workflow felt slower. The cheap instrument is a count of requests by stage over a window, and it is not built here because this project builds no monitor without Andrew's word (bound 2) -- so the honest statement is that the DRIFT IS CURRENTLY UNOBSERVABLE BY CONSTRUCTION, and that is a thing the CVO should weigh rather than a gap to fill inside this cell. (3) ONE MORE, UNASKED, BECAUSE IT BEARS ON HOW THE ABOVE IS READ: every number in (2) is measured on FIVE SYNTHETIC SPECIMENS I WROTE, and I chose their messiness. The 2-of-4 needs-correction rate is a property of my fixture set, not of the advisor population. It should be re-measured on the first ten real specimens before any tolerance, severity or suppression is chosen on the strength of it.",
+      "denominator": "3 shapes named by the criterion, 3 answered, plus 5 the criterion did not name; 3 mechanisms by which review-the-exception becomes review-everything, each with its measured or structural evidence; 1 unasked caveat on the provenance of those measurements; 5 of 7 finding codes carry UNCERTAIN; 2 of 4 parseable specimens enter needs-correction",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion. Graded by 3.0.0_SA_CVO at L9 and never self-graded: the output is recorded here without a verdict, per the task order's own instruction and spine v3 L9."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two claims this cell rests on, each mutated by monkeypatch in a process that edits no production file: M1 makes RevisionStore.put OVERWRITE instead of refusing, against the claim that revision r is never rewritten; M2 makes the share-class mapping APPLY instead of propose, against the claim that an unmatched holding is never silently substituted. A passing assertion never mutated has never been tested, and the specific risk is that a parser's tests, written by the parser's author, agree with it.",
+      "expected": "the arm (d) predicate (hash(r0) stable across the r+1 write AND the overwrite refused) BREAKS under M1; the arm (b) predicate (the advisor's VTSAX is still there and no VTI was invented) BREAKS under M2",
+      "observed": "baseline immutability: hash(r0) at open == after r1 == after the tamper attempt, overwrite_refused true -> predicate HOLDS. M1: hash(r0) moves from d526b682343f8cfa to 94c09080b629d72e on the tamper attempt and overwrite_refused is false -> predicate BREAKS. baseline substitution: identifiers ['VTSAX','FXAIX','OPAL-SIP','$:CASH'] with 2 proposals emitted -> predicate HOLDS. M2: identifiers ['VTI','IVV','OPAL-SIP','$:CASH'] with ZERO proposals emitted -> predicate BREAKS. M2 is the one that matters: the parser returns a portfolio the advisor never sent and emits nothing to say so. Recorded verbatim in IB-s-7_mutant_control_output.json. A THIRD control SHIPS INSIDE THE BATTERY: arm (b) builds the parser with drop_unmatched=True and prints the reconciliation identity going to 'unaccounted: 1, balances: false', so the battery can be observed failing on its own central arm. Each other arm also carries its own negative: (a) two parses compared as bytes, (c) the shared contract validating the same rows as a second judge, (d) the tamper attempt and the unapproved substitution, (amend) an UNGUARDED handler reading 1 of 1 against the SAME handler wrapped reading 0 of 1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two full runs of the battery on the same inputs, compared LINE BY LINE over the ENTIRE output rather than a chosen subset. Nothing in the output carries a timestamp, an ephemeral port or a random value -- the revision hashes are over canonical JSON of deterministic content and the request ids are literals -- so byte-equality of the whole output is achievable and is the stronger claim available.",
+      "observed": "126 lines in each run, BYTE-IDENTICAL, zero differing lines. Both runs printed IBS7-PARSE-DETERMINISTIC at rc 0. Determinism is also asserted independently inside arm (a) at the parser level: 4 of 4 specimens produce byte-identical serializations across two parses.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deploy: no Terraform root, no Lambda build, no artifact upload, no change-management entry",
+      "reason": "The cell's own bound: 'No deploy in this cell (the intake Lambda's next build in this slot carries it).' Nothing here changes the world, so there is no act for a ledger entry to cover. The modules are libraries the poller's next stage calls in-process."
+    },
+    {
+      "item": "Registering parse.py / corrections.py in infra/aws/lambda/ci/lambda-source-map.json",
+      "reason": "That path is NOT in this order's <paths> grant, and the registration belongs to the build that ships them. Registering members of a zip this cell does not build would put a member list in the map that no artifact matches."
+    },
+    {
+      "item": "A route handler and anything wrapped by _authz.guard() in production code",
+      "reason": "This cell ships a parser and a correction state inside the intake package -- the issuer's own reading at hand-off. guard() wraps HANDLERS; wrapping a library function to make a census look busy would put an authorization decision where no request arrives. corrections.ROUTES is exported EMPTY so the census has a real object and a future handler lands where the census already looks."
+    },
+    {
+      "item": "Editing infra/aws/lambda/investor-reporting/_keys/keys.py",
+      "reason": "Not in this order's <paths>, and the amendment says so explicitly: the sanitised exception is the issuer's round-2 item on IB-s-17's surface. This cell routes around it instead -- keys are built through _authz.cache_key_for, whose refusal names parameter NAMES only."
+    },
+    {
+      "item": "Editing the directory and performance handlers that predate the wrapper",
+      "reason": "The amendment names them as a decomposition sequencing defect carried to L10 and says this cell does not edit them; IB-sb-3's replay is where their unguarded state is measured."
+    },
+    {
+      "item": "A tolerance on TOTAL_MISMATCH, and any suppression of the share-class proposal",
+      "reason": "Both would reduce the review load and both are decisions about what difference does not matter -- a decision about someone's money. Named in the S7-AC2 judgment as the two most likely routes from 'review the exception' to 'review everything', for the CVO to weigh, rather than chosen quietly here."
+    },
+    {
+      "item": "Multi-sheet, merged-cell and non-USD handling",
+      "reason": "No specimen represents them and a filter written against an unmeasured shape is a guess that silently drops an advisor's data. read_xlsx REPORTS sheets_not_read rather than pretending a workbook has one sheet, and the rest is enumerated in the judgment."
+    },
+    {
+      "item": "Any measurement of what fraction of real requests enter needs-correction",
+      "reason": "It would be the right instrument for the drift named in the judgment, and building it is building a monitor, which this project does not do without Andrew's explicit word (bound 2). Stated there as currently unobservable BY CONSTRUCTION rather than left as an absence."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W3-S5: The `routes.json` the issuer amendment names as the fallback for the unguarded-route census DOES NOT EXIST anywhere in the corpus -- comp-find --name over 32,481 files returns one hit, this same worker's unrelated IB-s-8 YCharts HAR fixture, and no IRPT route registry exists in any form (the api root that would carry one is an unapplied skeleton). Since this cell ships no handler, that fallback was the arm's whole content. The census was run over this cell's own EMPTY exported route table, PRINTED AS VACUOUS, and paired with two controls on the censor itself (an unguarded handler reads 1 of 1; the same handler wrapped reads 0 of 1). ARMED because every later cell that ships no handler inherits the same unsatisfiable fallback and may report a vacuous pass instead.",
+    "IRPT_BCKEND-W3-S6: The face and the PRD row name the StatusEnvelope value `needs-correction`; the generated contract's `state` enum is CLOSED and carries `NEEDS_CORRECTION`, so the face's spelling would be rejected by the schema on both sides. This cell emits the contract's spelling and states the difference at the constant in corrections.py rather than resolving it silently. INERT -- the two carriers mean the same state -- but filed because the next cell to produce a StatusEnvelope reads the same prose."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-s-7_session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find --name (the read that turned an assumption into a measurement)",
+      "invocation": "comp-find --name 'routes.json'",
+      "result": "DENOMINATOR: 1 hit(s) across 32481 file(s) scanned in scope [corpus=all]. The single hit is infra/aws/ec2/investor-reporting-ycharts/tests/fixtures/har_derived_routes.json -- this worker's own IB-s-8 fixture, matched on a basename SUBSTRING and unrelated. Followed by a content census 'route_table|unguarded_routes|ROUTES' over the investor-reporting lambda tree, which finds only the function's own definition, its unit test, and performance/tenants.py's per-firm vendor-host map. Row IRPT_BCKEND-W3-S5."
+    },
+    {
+      "tool": "comp-read --for / --enumerate",
+      "invocation": "comp-read _authz/enforce.py --for 'what does guard() wrap and return, what is FirmBinding's constructor and refusal, and what does unguarded_routes take and return'; comp-read _authz/enforce.py --enumerate 'REFUSAL_CODES'; comp-read _authz/tests/fixtures.py --for 'what factory functions exist'",
+      "result": "Established that guard() MARKS the wrapper (__irpt_guarded__), which is what makes unguarded_routes a census rather than a hope; that cache_key_for is PUBLIC and raises KeyRefused with a sanitized message built by re-running the PUBLIC cache_key per parameter; and that the test fixtures expose DIRECTORY/OWNERSHIP/POLICY/Deps/headers, which this cell reuses so its binding arm is proven against the SAME artifact shape the enforcement library's own tests use."
+    },
+    {
+      "tool": "comp-adversary compose",
+      "invocation": "comp-adversary compose infra/aws/lambda/investor-reporting/intake/parse.py --out .scratch/adversary_ib_s_7.txt",
+      "result": "declaration written (3966 bytes), read-vintage HEAD @5708161e8e, artifact-vintage 5708161e8e. It reports, verbatim: 'ZERO MACHINE-EXTRACTABLE PINS: this artifact's evidence is prose-cited or externally homed -- the validator must derive the evidence set BY READING. A zero here is a signal, never a clean pass.' Carried unedited: parse.py cites the contract, the layer and the runtime in prose, not in file:line @commit form -- the same finding this worker's IB-s-6 poller drew."
+    },
+    {
+      "tool": "openpyxl as an INDEPENDENT second implementation",
+      "invocation": "openpyxl WRITES holdings_weights.xlsx at fixture-authoring time; parse.read_xlsx reads it with zipfile + xml.etree only",
+      "result": "Two different libraries on the same bytes. openpyxl is installed in this worktree and is NOT in the python3.12 runtime or the irpt-common layer, so a parser built on it would pass every local test and fail on the first deployed invocation -- which is why the READER is stdlib and openpyxl is confined to authoring."
+    },
+    {
+      "tool": "unittest (not pytest, deliberately)",
+      "invocation": "python infra/aws/lambda/investor-reporting/intake/tests/test_parse.py",
+      "result": "Ran 15 tests ... OK. unittest rather than pytest because pytest over a DIRECTORY collects ZERO when any module raises SystemExit at import, and this package now carries several modules with module-level work."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~3 <0.9.0_WK_IRPT_BCKEND~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "5708161e8e (the build, committed BEFORE the graded run so the graded output reads committed bytes -- the rule this worker's IB-s-6 turn learned when eleven uncommitted lines had already produced a graded output) and the flip commit carrying this instance. Both msg-verify MATCH."
+    }
+  ]
+}

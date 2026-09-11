@@ -1,0 +1,172 @@
+IB-s-13 BATTERY -- narrative events, dated evidence, contemporaneity
+  package     : C:\tmp\wk-irpt-1-4\infra\aws\lambda\investor-reporting\narrative
+  policy      : irpt-narrative-materiality v1.0.0 (materiality 0.0050)
+  store       : recorded fixture (no credential, no host, no socket)
+
+==============================================================================
+(a) DETERMINISTIC -- the same series and history select the same moments twice
+==============================================================================
+  series points fed to the detector : 92
+  daily_cumulative_series length    : 92  (declared denominator asserted equal)
+  series window                     : 2026-06-10 .. 2026-09-09
+  series_fingerprint                : a872f77a65924b42d9f31ccd8682d38d
+  episodes found / material         : 5 / 2
+  movement windows raw / merged     : 35 / 4  (31 collapsed by the merge)
+    PEAK      2026-06-15  cumulative=+0.023904514
+    MOVEMENT  2026-07-12  cumulative=+0.015827206
+    TROUGH    2026-07-29  cumulative=+0.002547528
+    RECOVERY  2026-08-04  cumulative=+0.031194428
+    MOVEMENT  2026-08-07  cumulative=+0.034727727
+    PEAK      2026-08-13  cumulative=+0.037590599
+    MOVEMENT  2026-08-20  cumulative=+0.026459443
+    TROUGH    2026-09-09  cumulative=+0.018564905
+    MOVEMENT  2026-09-09  cumulative=+0.018564905
+  run-to-run event diff             : 0 entry(ies)  <- empty is the arm
+  CONTROL: a 14-point display curve -> REFUSE_DOWNSAMPLED
+  PASS:  the same series selects the same moments twice, on the pre-downsample daily series  -- 9 of 9 events identical across two runs; 92 point(s) in and 92 asserted; a downsampled curve is REFUSED
+
+==============================================================================
+(b) THE FUTURE IS EXCLUDED BY DATE -- the difference control
+==============================================================================
+  cutoff                            : 2026-09-09T23:59:59Z
+    EXCLUDED_FUTURE ev-2d3ef1827ea81f56 published 2026-09-10T12:00:00Z > cutoff 2026-09-09T23:59:59Z
+  future ids in the PROSE            : 0 of 1 future item(s)  <- 0 is the arm
+  CONTROL (a policy that admits it) : cutoff moved to 2026-12-31 -> 0 excluded, 5 admitted; the SAME code admits the same article, so the exclusion is a decision and not a coincidence of the fixture
+  undated (never assumed)           : 1 item(s)
+    EXCLUDED_UNDATED ev-81b6d400ecaae9ea -- no parseable publication instant; undated evidence cannot be shown to predate th
+  PASS:  future information is excluded BY DATE and the exclusion is recorded, not dropped  -- 1 future item(s) excluded and 0 of 1 reach the prose; moving the cutoff changes the answer (1 -> 0 excluded)
+
+==============================================================================
+(c) MISSING HISTORY IS AN ANSWER, NOT AN EMPTY LIST
+==============================================================================
+  store coverage bounds             : ['2026-10-01', '2026-10-07']
+  windows evaluated / covered       : 9 / 0
+  missing_history                   : MISSING_HISTORY
+  reason                            : the MISSING HISTORY control -- a store whose coverage begins AFTER every event window. NOT an empty store: an empty store and a store that does not re
+  prose says MISSING HISTORY        : True
+  prose still VALIDATED             : VALIDATED (an honest empty answer is not punished; otherwise 'say nothing' would be the cheapest way to pass)
+  CONTRAST: the covered store       : missing_history=NONE, 9 of 9 windows
+  PASS:  a window predating the history renders MISSING HISTORY with its bounds  -- 9 of 9 windows uncovered against bounds ['2026-10-01', '2026-10-07']; the covered store renders NONE
+
+==============================================================================
+(e) SECONDARY SIGNALS GATED; SYNDICATED CONTEXT DEDUPLICATED
+==============================================================================
+    rsi_14      ADMIT    2026-07-29
+    fear_greed  REFUSE   value_state=CURRENT -- a current/neutral/fallback value is not a historical observation
+    regime      REFUSE   missing observed_at; a signal without a historical date and a universe cannot be shown to descr
+    best_worst  REFUSE   missing universe; a signal without a historical date and a universe cannot be shown to describe
+  syndication collapsed (all events): 72 copy(ies) folded into their first id
+    ev-7551052fea841f96  copies=4  sources=MarketWatch  dates=['2026-09-06', '2026-09-07']
+    ev-45b98ac7ffea45dc  copies=2  sources=SYNTHETIC-OUTLET-A,SYNTHETIC-OUTLET-B  dates=['2026-09-08']
+    ev-7e49d3c3f7b79f9d  copies=2  sources=Financial Times  dates=['2026-09-09']
+  evidence ids unique in the window : 48 of 48
+  PASS:  a current/neutral value is refused as history; syndicated copies collapse to one id  -- 1 of 4 signals admitted (the three refused name what they lack); 72 syndicated copy(ies) collapsed; 48 of 48 ids unique
+
+==============================================================================
+(f) CONTEMPORANEITY, NEVER CAUSE
+==============================================================================
+    ACCEPT  VALIDATED  contemporaneity=True causation=False
+    REJECT  REJECTED  hits=['because']
+    REJECT  REJECTED  hits=['drove / driven by']
+    REJECT  REJECTED  hits=['in response to']
+  the SHIPPED prose                 : VALIDATED, contemporaneity=True, causation=False
+  citations resolved                : 45 of 45 (unknown: none)
+  every cited id is a SELECTED id   : True (40 cited of 40 admitted)
+  news text as DATA                 : 1 instruction-shaped marker(s) seen and neutralised across the window; the prose template has no slot an instruction could occupy
+  PASS:  a contemporaneous sentence is accepted, three causal phrasings are rejected, every citation resolves  -- 1 of 1 accepted, 3 of 3 rejected, citations 45 of 45
+
+==============================================================================
+(d) THE TIMEZONE IS VERIFIED FROM THE PRODUCER'S OWN BYTES
+==============================================================================
+    infra/aws/lambda/news_layer3_curation/lambda_function.py:2256
+      date = event.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d'))
+      -> the trending table's `date` partition is a UTC calendar date  [measured]
+    infra/aws/lambda/news_layer3_curation/lambda_function.py:1908
+      'created_at': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+      -> the trending table's `created_at` is an explicit UTC instant  [measured]
+    infra/aws/lambda/news_trending_analysis/lambda_function.py:1366
+      now = datetime.now()  # archive_key = trending_reports/{now:%Y/%m/%d}/...
+      -> the S3 archive PATH date is the writer's naive LOCAL clock and is not evidence of any timezone  [measured]
+    infra/aws/lambda/news_trending_analysis/lambda_function.py:1167
+      'generated_at': datetime.now(timezone.utc).isoformat()
+      -> the only timezone-bearing stamp inside the archive bytes is UTC  [measured]
+    infra/aws/lambda/news_trending_analysis/lambda_function.py:334
+      published_dt = published_dt.replace(tzinfo=timezone.utc)
+      -> a naive article publication time is ASSUMED UTC by the producer  [measured]
+    infra/aws/lambda/investor-reporting/narrative/evidence.py:0
+      PUBLICATION_TIMEZONE = 'UTC'
+      -> Eastern Time is NOT established by any producer byte; the packet therefore declares UTC and never ET  [held -- an absence of evidence for ET, stated rather than filled in]
+  per-item timezone basis (window)  : {'EXPLICIT_OFFSET': 47, 'UNDATED': 1}
+  DECLARED publication timezone     : UTC -- and ET is NOT written anywhere, because no producer byte establishes it
+
+  SOCKET GUARD, arms (a)-(f) and the read above:
+    outbound attempts              : 0
+    of which to a VENDOR host      : 0 (denominator: bd3.bdreporting.com,api.cloud.orionadvisor.com)
+    of which to a MODEL host       : 0 (denominator: api.openai.com,api.anthropic.com,bedrock-runtime.us-east-1.amazonaws.com)
+    POSITIVE CONTROL               : guard fired=True; vendor attempts moved 0 -> 1, so the zeros above are MEASURED, not a dead guard
+
+  LIVE READS (named, READ-ONLY) that established the usable coverage:
+    dynamodb opal-news-trending-daily : 5156 item(s) scanned of 5156 reported (ScannedCount), 289 distinct date(s)
+      coverage                     : 2025-11-21 .. 2026-09-10 = 294 calendar day(s), 289 present, 5 absent
+      LAST 30 DAYS                 : 599 item(s) across 30 of 30 date(s)
+    s3 s3://opal-data-news-v2/trending_reports/ : 696 object(s), 695 dated archive object(s) across 277 day(s) 2025-12-01 .. 2026-09-10
+      NOTE: the archive PATH date is the writer's naive local clock, so these day counts bound the ARCHIVE, never a publication date. The dated evidence of record is the DynamoDB table above, whose `date` partition is a verified UTC calendar date.
+  PASS:  the cutoff/timezone is read from the producer's own bytes and the live coverage is measured  -- 6 of 6 timezone facts cited to file:line; dynamodb 5156 item(s) over 289 date(s) (599 in the last 30 days); s3 696 object(s); 0 vendor and 0 model connections with a positive control that moved the counter
+
+==============================================================================
+(h) THE SHARED LAYER IS BUILT, PINNED AND ATTACHED (issuer amendment, row W4-S3)
+==============================================================================
+  assembled from                    : infra/aws/lambda/opal-assets/opal-assets-bd49f-reporting-pull/lambda_function.py
+  pin                               : 3788926beb9ba19eb9243c6d80c706accf3e85c2  [measured -- git log -1 --full-history on the path]
+  method                            : git show <pin>:<path> then an AST closure over the named helpers; NEVER a hand copy and NEVER the whole module
+  helpers                           : 6 of 6 requested helper(s) emitted
+    emitted   body_performance_period, requested_range_index, _ytd_ranges, _trailing_12m_range, _calendar_year_ranges, _minus_one_year
+    constants BENCHMARK_IDS, YTD_MODES, INCEPTION_ANCHORS ; imports os
+    NOT carried _request (the network call and its DRY_RUN egress gate); the .bd.identity session chain; the S3 bronze writer; boto3 clients created at module import
+  zip                               : 154 member(s), 621748 bytes, sha256 JWKuEDIoIPgt1zaYmymEhmHS9HZtG2XCwEc7LXKagf4=
+  CLEAN-PYTHON IMPORT over the extracted layer (python -E -s, sys.path = the layer's own python/ only):
+    bd_helpers                     : OK: imported; built a request body with 6 dateRange(s) and a requested_range_index of 6 row(s): Custom,Year To Date,Trailing 12 Months,2025,2024,Since Inception
+    jsonschema                     : ERROR: ModuleNotFoundError: No module named 'rpds.rpds'
+    native member(s)               : python/rpds/rpds.cpython-312-x86_64-linux-gnu.so
+      jsonschema's only native dependency is built for LINUX (cp312 x86_64), which is what a Lambda needs and what this Windows host cannot load. A host import of it would prove the layer is WRONG. The import that matters is on the RUNTIME, below.
+  ATTACHED (live get-function-configuration):
+    irpt-performance-adapter       : ['arn:aws:lambda:us-east-1:313476888478:layer:irpt-common:2']
+    irpt-narrative                 : ['arn:aws:lambda:us-east-1:313476888478:layer:irpt-common:2']
+    functions carrying irpt-common : 2 of 2
+    INVOKE F-INF (Orion)          contract_validated=True  absences=['fee_basis', 'accrual_basis', 'annualization', 'money_weighted_return', 'benchmark', 'history_before_2026-06-10']
+      helper-degraded cell(s)      : 0  <- 0 is the arm (IB-s-11 shipped 1 here)
+    INVOKE F-49F (Black Diamond)  contract_validated=True  absences=['money_weighted_return']
+      helper-degraded cell(s)      : 0  <- 0 is the arm (IB-s-11 shipped 1 here)
+  LEDGER irpt-bckend-s13-layer      : entry reads CLOSED=True; sentinel on disk=False (removed by the close, as designed)
+    sentinel commit                : 2a514e276739f1827dd90d13f42fcaf220f32962 IB-s-13: both deploy ledgers closed -- eight legs proven, and the dep
+  PASS:  the layer is built from a pin, attached to both functions, and the deployed adapter validates its contract on BOTH provider paths  -- 6 of 6 requested helper(s) emitted from pin 3788926beb; 2 of 2 functions carry irpt-common; 2 of 2 invokes return contract_validated=true with 0 helper-degraded cells; ledger CLOSED
+
+==============================================================================
+(g) SCHEMA-VALID, READ-ONLY, LEDGER CLOSED
+==============================================================================
+  packet contract_validated (worktree): True
+  packet contract_validated (DEPLOYED): True  [prose VALIDATED]
+  iam.tf write/secret/model actions  : 0 of 10 probed  <- 0 is the arm
+    probed: dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem, dynamodb:BatchWriteItem, s3:PutObject, s3:DeleteObject, dynamodb:*, s3:*, secretsmanager:GetSecretValue, bedrock:
+  the store seam refuses a write     : True
+  irpt-narrative CodeSha256          : nuMb7eMlN8ou41LSSUOsUDR8T5U5uilo7N1XUcwU1IQ=
+  built zip sha256 (source map)      : nuMb7eMlN8ou41LSSUOsUDR8T5U5uilo7N1XUcwU1IQ=
+  equal                              : True
+  LEDGER irpt-bckend-s13             : entry reads CLOSED=True
+    sentinel commit                 : 2a514e276739f1827dd90d13f42fcaf220f32962 IB-s-13: both deploy ledgers closed -- eight legs proven, and the dep
+  PASS:  the packet validates, the role carries no write on the news resources, the served bytes are the built bytes and the ledger is closed  -- 0 of 10 write/secret/model actions granted; CodeSha256 == the built zip; contract_validated true in the worktree AND on the deployed function
+
+==============================================================================
+VERDICT
+==============================================================================
+  PASS  (a) the same series selects the same moments twice, on the pre-downsample daily series
+  PASS  (b) future information is excluded BY DATE and the exclusion is recorded, not dropped
+  PASS  (c) a window predating the history renders MISSING HISTORY with its bounds
+  PASS  (e) a current/neutral value is refused as history; syndicated copies collapse to one id
+  PASS  (f) a contemporaneous sentence is accepted, three causal phrasings are rejected, every citation resolves
+  PASS  (d) the cutoff/timezone is read from the producer's own bytes and the live coverage is measured
+  PASS  (h) the layer is built from a pin, attached to both functions, and the deployed adapter validates its contract on BOTH provider paths
+  PASS  (g) the packet validates, the role carries no write on the news resources, the served bytes are the built bytes and the ledger is closed
+
+  8 of 8 mechanical arms passed
+IBS13-NARRATIVE-DETERMINISTIC

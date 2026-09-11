@@ -1,0 +1,88 @@
+==============================================================================
+BATTERY IB-s-6 -- S6-AC1: durability, idempotency, the gate, the scheduler disabled
+repo: C:/tmp/wk-irpt-1-3
+==============================================================================
+
+(a) PERSIST BEFORE CHECKPOINT -- THE DIFFERENCE CONTROL
+    RUN 1, kill AFTER the attachment+receipt and BEFORE the completion mark (kill injected AFTER the receipt, BEFORE the outbox row)
+      checkpoint after the kill: None   message claimed: False
+      killed message REQ-ae07aabff2062559d9d7904c: distinct objects 3 -> 3, DUPLICATES 0; put calls 3 -> 6
+      on restart: 5 message(s) re-read, checkpoint then advanced=True to https://graph.microsoft.com/v1.0/users/opalbloomberg@opalinvest.com/mailFolders/inbox/messages/delta?deltatoken=final1
+    RUN 2, kill AFTER the mark and BEFORE the checkpoint
+      checkpoint after the kill: None
+      killed message on restart: outcome=ALREADY_COMPLETE, NEW writes=0, requests_created=4, already_complete=1, checkpoint advanced=True
+    CONTROL, kill AFTER the checkpoint advanced -- NO RE-READ
+      scan 1: 5 message(s), checkpoint -> https://graph.microsoft.com/v1.0/users/opalbloomberg@opalinvest.com/mailFolders/inbox/messages/delta?deltatoken=final1
+      scan 2: 0 message(s) re-read, 0 put call(s) added, checkpoint -> https://graph.microsoft.com/v1.0/users/opalbloomberg@opalinvest.com/mailFolders/inbox/messages/delta?deltatoken=final2
+
+(b) DELTA, PAGINATION, RESYNC, RETRY-AFTER -- 4 of 4
+    pagination: 3 page(s), 5 message(s), order matches the fixture chain: True
+      ids in order: ['AAMk-49f-0001', 'AAMk-spoof-0002', 'AAMk-cot-0003', 'AAMk-opal-0004', 'AAMk-49f-0005']
+    deltaLink persists: https://graph.microsoft.com/v1.0/users/opalbloomberg@opalinvest.com/mailFolders/inbox/messages/delta?deltatoken=final1
+    delta expiry -> resync: resyncs=1, messages after resync=5, resynced=True
+      declared: 410/syncStateNotFound discards the token and replays from IRPT_INITIAL_CUTOFF=2026-09-01T00:00:00Z, exactly once per run
+    Retry-After honoured: waits=[7] seconds (injected clock recorded [7]); ceiling 300s, max 3 retries; messages after the wait=5
+
+(c) ONE REQUEST PER FORWARD; A NEW REQUEST FOR IDENTICAL HOLDINGS
+    first delivery : 5 message(s) -> 5 request(s)
+    SAME messages delivered again: 5 message(s) -> 0 NEW request(s), 5 already-complete
+    distinct requests across both deliveries: 5; queue sends: 5
+    byte-identical holdings, two different messages: sha256 a5b4e369e6366951 == a5b4e369e6366951 -> True
+      request ids REQ-ae07aabff2062559d9d7904c vs REQ-87f5609a510bb1701f8be9c2 -> distinct: True
+    keyed on: message IDENTITY (internetMessageId, falling back to the mailbox id), never a content hash alone
+
+(d) THE ORIGINAL SENDER, NOT DISPLAY From
+    display_from_is_a_firm_domain_original_is_not
+      message AAMk-spoof-0002: display From=advisor@49financial.com | VERIFIED original=stranger@unknown.example (method FORWARDING_ARRANGEMENT_HEADERS, display_from_used=False)
+      gate -> Quarantined firm_id=None
+      reason: sender domain 'unknown.example' matches no enumerated firm and is not the Opal domain -- an unrecognized external origin is quarantined for review, ne
+    display_from_is_the_forwarder_original_is_the_firm
+      message AAMk-49f-0001: display From=requests@opalinvest.com | VERIFIED original=advisor@49financial.com (method FORWARDING_ARRANGEMENT_HEADERS, display_from_used=False)
+      gate -> BoundRequest firm_id=49financial
+
+(e) LANDS ONLY WHERE THE POLICY SAYS -- 14 of 14
+    enumerated prefixes (read FROM the policy, not typed): ['firms/49financial/intake/', 'firms/cottonwood/intake/', 'firms/inflection/intake/', 'quarantine/']
+    keys written 14; inside 14; OUTSIDE []
+    per enumerated prefix: {"firms/49financial/intake/": 6, "firms/cottonwood/intake/": 3, "firms/inflection/intake/": 0, "quarantine/": 5}
+      firms/49financial/intake/2026/09/11/REQ-87f5609a510bb1701f8be9c2/attachments/att-0005__holdings.xlsx
+      firms/49financial/intake/2026/09/11/REQ-87f5609a510bb1701f8be9c2/original.mime
+      firms/49financial/intake/2026/09/11/REQ-87f5609a510bb1701f8be9c2/receipt.json
+      quarantine/mailbox-intake/2026-09-11/REQ-7caf75f4016cc08b35ce04d9/attachments/att-0002__holdings.xlsx
+      quarantine/mailbox-intake/2026-09-11/REQ-7caf75f4016cc08b35ce04d9/original.mime
+      quarantine/mailbox-intake/2026-09-11/REQ-7caf75f4016cc08b35ce04d9/receipt.json
+    NEGATIVE FIXTURE, a cross-firm destination while bound:
+      destination_for: requested firm 'cottonwood' does not match the bound firm '49financial' -- a write into a second firm's location is refused before any key is built
+
+(f) THE INSPECTION IS RECORDED -- printed from infra/aws/lambda/investor-reporting/intake/ib_s_6_graph_inspection.md (8451 bytes)
+    Graph permission model found in the gateway: DELEGATED
+    one-mailbox Mail.Read grant: UNVERIFIED
+    **The effective `Mail.Read` grant for the intake is `UNVERIFIED`, and it is unverified because
+    artifacts read and tabulated: 10
+    ApplicationAccessPolicy found anywhere in the corpus: no
+
+(g) NOTHING LEFT THE MACHINE; THE SCHEDULER IS DISABLED; THE LEDGER CLOSED
+    netguard (offline subprocess): 0 external of 0 connection attempt(s); loopback allowed 0
+      attempts_observed is 0 because the offline suite opens NO SOCKET AT ALL: the recorded transport reads committed fixture files. A 0-of-0 refusal count is VACUOUS on its own -- it reads identically whether the guard is installed or absent -- so the POSITIVE CONTROL below is the load-bearing evidence that the instrument is live, and the zero above is the stronger statement it makes true: there was no outbound network activity of any kind to refuse.
+    POSITIVE CONTROL -- the guard must be able to fire, or its zero is a constant:
+      attempted graph.microsoft.com:443 -> refused=True, guard external 0 -> 1
+      NETGUARD: refused external connection to graph.microsoft.com:443 -- the IB-s-6 suite is offline by construction and NO LIVE MAILBOX READ is authorized
+    served bytes: CodeSha256 JbZrYN+jgVMNxU428sahOsan6ngXAUNHp555x9gnap0=
+      rebuilt zip JbZrYN+jgVMNxU428sahOsan6ngXAUNHp555x9gnap0= (49281 bytes, 28 members); source-map registration JbZrYN+jgVMNxU428sahOsan6ngXAUNHp555x9gnap0=
+      served == rebuilt: True | registered == rebuilt: True
+      Layers: None (no layer -- jsonschema is absent from the runtime and a layer is a second moving artifact this cell does not own)
+    scheduler get-schedule --name irpt-intake-poll -> State: DISABLED  (cron(0/15 8-23 * * ? *) America/New_York)
+    ledger 20260911T0149Z_irpt-bckend-s6_deploy_completion.md: CLOSED=True, legs declared=6, open-leg markers=0, sentinel on disk=False
+      61fbbd22ae IB-s-6: close change-management entry irpt-bckend-s6 -- all six legs proven
+      DISCLOSED: sentinel ever committed = False. The sentinel was never committed in its OPEN state: the source commit landed before the entry was opened and the entry opened and closed inside one turn. The open window is in the entry's own header and its proven legs, not in git. Filed as channel row IRPT_BCKEND-W3-S4 rather than left as an absence.
+
+==============================================================================
+  arm (a): PASS
+  arm (b): PASS
+  arm (c): PASS
+  arm (d): PASS
+  arm (e): PASS
+  arm (f): PASS
+  arm (g): PASS
+  ARMS: 7 of 7
+==============================================================================
+IBS6-INTAKE-DURABLE
