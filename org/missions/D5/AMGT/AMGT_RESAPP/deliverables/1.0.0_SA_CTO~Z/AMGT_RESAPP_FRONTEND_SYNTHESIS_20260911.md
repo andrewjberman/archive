@@ -109,7 +109,10 @@ Proposed new constraints (mint at the round-3 boundary with FWD-15, not now):
 - **C-SERVER-SIDE-RANKING** (Andrew-direct ~07:2xZ) -- Trending/Breakout/Price/Chatter are computed
   SERVER-SIDE by daily backend jobs and written as pre-computed per-ticker rows; the Lead Panel READS them
   and never re-derives a ranking from raw counts at render time. Chatter axis = the committed chatter-volume
-  gate (30-day, 0-100 normalized, TOP_N=10). Price axis = B3.
+  gate (30-day, 0-100 normalized, TOP_N=10). Price axis = B3. The pre-computed ranking rows land in a
+  SEPARATE metrics table `opal-amgt-security-metrics` -- its own table, distinct from `opal-amgt-articles`
+  (content), mirroring the proven `opal-news-articles` / `opal-news-trending-daily` split (CRO holes-scan
+  3b; CTO design call, taken).
 - **C-PRICE-RANKING-BOXSIDE** (B3) -- the price axis reads Bloomberg historical/intraday and therefore needs
   the BOX-SIDE puller shape (the ETF-daily-pull shape, A3), not a Lambda calling Bloomberg; 30-day window
   (Andrew unified price + chatter to 30). This is the one new backend SURFACE under FWD-15.
@@ -152,5 +155,29 @@ Proposed new constraints (mint at the round-3 boundary with FWD-15, not now):
 - **`4.0.0_SA_CRO` (lane-level, done / decided):** the vision (delivered); one-shared-box for the four
   harvesters; fix S8 (peer set, 88.9% stale) BEFORE the Security-mode peer overlay ships.
 - **BUILD LANES (AE/infra, round 3):** B1-B4 per the constraints above.
+
+## 7. OPEN BACKEND GAPS -- the CRO's holes-scan (`4.0.0_SA_CRO` `HOLES_SCAN_AMGT_RESAPP_20260911.md`, msg 21295), each dispositioned
+
+The scan's point 1 (this seat's older `FRONTEND_FRAMEWORK` doc stale on 5 points) is ALREADY RESOLVED --
+this SYNTHESIS @`46f12d206f` supersedes the framework on exactly those five (star=marker, Starred as the
+3rd dropdown option, the explicit Refresh action, 30-day, the `opal-amgt-articles` store); the scan raced
+this commit. The scan's six NEW gaps, folded here so they are not lost, all round-3 (surface-build) work:
+- **(a) S12 per-platform identity hand-off.** The chatter gate's ticker-keyed output must resolve to each
+  platform's OWN identifier before dispatch -- SA symbol-slug, Bloomberg `"TICKER US Equity"`, FT internal
+  id. A build detail under S12/FWD-13 + C-AMGT-ARTICLES-STORE. Round-3 cell.
+- **(b) Two tables, adopted** (folded into C-SERVER-SIDE-RANKING above): `opal-amgt-articles` (content) +
+  `opal-amgt-security-metrics` (computed rankings), mirroring the news split. CTO design call, taken.
+- **(c) Refresh wake path.** The Refresh action queues a pull, but the harvester EC2 is stopped-between-runs
+  (C-HARVESTER-COMPUTE) -- Refresh needs an SSM / inf-jwt-trigger-style wake or it no-ops while the box is
+  stopped. Folds into C-HARVESTER-COMPUTE. Round-3 cell.
+- **(d) Portal READ API.** S2 (on-demand pull) covers only WRITES (the pull-request queue); the Lead Panel
+  and Coverage tab need a GET path to read `opal-amgt-articles` + the metrics table. New read affordance,
+  round-3 cell (not covered by any existing surface -- S2 is write-side).
+- **(e) Starred-list ownership -- per-user vs per-firm.** Determines the starred table's key design.
+  ANDREW's call (product): does each PM keep their own starred set, or does the firm share one? Added to
+  s.6's Andrew list.
+- **(f) The 30-day backfill needs an owner + task cell.** Runs once, ad hoc, against the proven harvester
+  scripts (does NOT need B1's EC2), but must land in B2's `opal-amgt-articles` -- so it sequences after B2.
+  Round-3 cell, owner TBD.
 
 **Push state:** LOCAL at write time. `0.0.0_AB_MSTR~Z` pushes.
