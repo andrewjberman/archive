@@ -1,0 +1,348 @@
+Error extracting data for UST: 'str' object has no attribute 'get'
+Error extracting data for ST: 'str' object has no attribute 'get'
+Error extracting data for INT: 'str' object has no attribute 'get'
+Error extracting data for LT: 'str' object has no attribute 'get'
+Error extracting data for ULT: 'str' object has no attribute 'get'
+Error extracting data for AGG: 'str' object has no attribute 'get'
+============================================================================================================
+T3-AC2  HOP HARNESS -- five-class probe value 'Commodities' through both sibling consumers
+worktree: C:\tmp\wk-posn-t3
+============================================================================================================
+
+--- DENOMINATORS (independent recount; instrument = substring occurrence, NOT comp-read) ---
+  infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-allocation-summary/lambda_function.py
+    file lines=379 | token hits=93 | distinct lines carrying the token=67 | HOPS=60 | mentions=7
+  infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-holdings-attribution/lambda_function.py
+    file lines=697 | token hits=49 | distinct lines carrying the token=32 | HOPS=28 | mentions=4
+  RECONCILE vs T3-AC1 comp-read: allocation-summary expect 93, got 93 MATCH | holdings-attribution expect 49, got 49 MATCH
+
+--- AC1 CLASSIFICATION: every distinct token line, banded (A = allocation-summary) ---
+  [A] infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-allocation-summary/lambda_function.py
+     A:173  x2  transform-assign       qtd_asset_classes = aggregate_by_asset_class(
+     A:177  x2  transform-assign       ytd_asset_classes = aggregate_by_asset_class(
+     A:181  x2  transform-assign       one_year_asset_classes = aggregate_by_asset_class(
+     A:185  x2  transform-assign       si_asset_classes = aggregate_by_asset_class(
+     A:192  x2  output-field           'asset_classes': qtd_asset_classes,
+     A:193  x1  output-field           'total': calculate_total(qtd_asset_classes)
+     A:196  x2  output-field           'asset_classes': ytd_asset_classes,
+     A:197  x1  output-field           'total': calculate_total(ytd_asset_classes)
+     A:200  x2  output-field           'asset_classes': one_year_asset_classes,
+     A:201  x1  output-field           'total': calculate_total(one_year_asset_classes)
+     A:204  x2  output-field           'asset_classes': si_asset_classes,
+     A:205  x1  output-field           'total': calculate_total(si_asset_classes)
+     A:209  x4  mention                logger.info(f"Extracted asset classes for {model_code}: QTD={len(qtd_asset_classes)}, YTD={le...
+     A:220  x1  output-field           'qtd': {'asset_classes': [], 'total': empty_total},
+     A:221  x1  output-field           'ytd': {'asset_classes': [], 'total': empty_total},
+     A:222  x1  output-field           '1y': {'asset_classes': [], 'total': empty_total},
+     A:223  x1  output-field           'si': {'asset_classes': [], 'total': empty_total}
+     A:233  x1  mention                def aggregate_by_asset_class(holdings: List[Dict[str, Any]], model_code: str) -> List[Dict[st...
+     A:240  x1  transform-assign       asset_class_groups = {}
+     A:243  x2  default-lookup         raw_asset_class = holding.get('asset_class', 'Unknown')
+     A:247  x1  comparison-branch      if raw_asset_class.lower() in ('fixed_income', 'fixed income'):
+     A:248  x1  transform-assign       asset_class = 'Fixed Income'
+     A:249  x1  comparison-branch      elif raw_asset_class.lower() == 'equity':
+     A:250  x1  transform-assign       asset_class = 'Equity'
+     A:251  x1  comparison-branch      elif raw_asset_class.lower() == 'cash':
+     A:252  x1  transform-assign       asset_class = 'Fixed Income'
+     A:253  x1  comparison-branch      elif raw_asset_class.lower() == 'hedge':
+     A:254  x1  transform-assign       asset_class = 'Equity'
+     A:256  x2  transform-assign       asset_class = raw_asset_class
+     A:258  x2  comparison-branch      if asset_class not in asset_class_groups:
+     A:259  x2  subscript              asset_class_groups[asset_class] = []
+     A:260  x2  subscript              asset_class_groups[asset_class].append(holding)
+     A:263  x1  subscript              asset_classes = []
+     A:265  x2  container-plumbing     for asset_class_name, class_holdings in asset_class_groups.items():
+     A:267  x1  transform-assign       policy_weight = benchmark_allocations.get(asset_class_name, 0.0)
+     A:271  x2  transform-assign       subtotal_data = next((h.get('_asset_class_subtotal') for h in class_holdings if '_asset_class...
+     A:276  x1  mention                logger.info(f"      {asset_class_name}: Using subtotal attribution (asset_alloc={asset_alloca...
+     A:280  x1  mention                logger.info(f"      {asset_class_name}: Summed from holdings (asset_alloc={asset_allocation:....
+     A:282  x1  container-plumbing     asset_classes.append({
+     A:283  x1  output-field           'name': asset_class_name,
+     A:291  x1  output-field           asset_class_order = {'Fixed Income': 1, 'Equity': 2}
+     A:292  x2  subscript              asset_classes.sort(key=lambda x: asset_class_order.get(x['name'], 99))
+     A:295  x1  subscript              total_style_weight = sum(ac['style_weight'] for ac in asset_classes)
+     A:296  x1  comparison-branch      if len(asset_classes) > 0 and abs(total_style_weight - 100.0) > 0.001:
+     A:297  x2  subscript              largest_idx = max(range(len(asset_classes)), key=lambda i: asset_classes[i]['style_weight'])
+     A:299  x2  subscript              asset_classes[largest_idx]['style_weight'] = round(asset_classes[largest_idx]['style_weight']...
+     A:300  x1  subscript              asset_classes[largest_idx]['bet'] = round(
+     A:301  x2  subscript              asset_classes[largest_idx]['style_weight'] - asset_classes[largest_idx]['policy_weight'], 2
+     A:303  x1  mention                logger.info(f"    Normalized weights: adjusted {asset_classes[largest_idx]['name']} by {adjus...
+     A:306  x1  comparison-branch      if len(asset_classes) == 2:
+     A:307  x1  subscript              fi_idx = next((i for i, ac in enumerate(asset_classes) if ac['name'] == 'Fixed Income'), None)
+     A:308  x1  subscript              eq_idx = next((i for i, ac in enumerate(asset_classes) if ac['name'] == 'Equity'), None)
+     A:310  x1  subscript              fi_bet = asset_classes[fi_idx]['bet']
+     A:311  x1  subscript              asset_classes[eq_idx]['bet'] = round(-fi_bet, 2)
+     A:314  x1  container-plumbing     return asset_classes
+     A:317  x1  mention                def calculate_total(asset_classes: List[Dict[str, Any]]) -> Dict[str, float]:
+     A:318  x1  mention                """Calculate total row by summing values from asset_classes"""
+     A:319  x1  comparison-branch      if not asset_classes:
+     A:328  x1  output-field           'style_weight': sum(row.get('style_weight', 0.0) for row in asset_classes),
+     A:329  x1  output-field           'policy_weight': sum(row.get('policy_weight', 0.0) for row in asset_classes),
+     A:330  x1  output-field           'asset_allocation': sum(row.get('asset_allocation', 0.0) for row in asset_classes),
+     A:331  x1  output-field           'total': sum(row.get('total', 0.0) for row in asset_classes)
+     A:339  x1  transform-assign       asset_class_rows = [
+     A:347  x2  output-field           'qtd': {'asset_classes': [r.copy() for r in asset_class_rows], 'total': empty_total.copy()},
+     A:348  x2  output-field           'ytd': {'asset_classes': [r.copy() for r in asset_class_rows], 'total': empty_total.copy()},
+     A:349  x2  output-field           '1y': {'asset_classes': [r.copy() for r in asset_class_rows], 'total': empty_total.copy()},
+     A:350  x2  output-field           'si': {'asset_classes': [r.copy() for r in asset_class_rows], 'total': empty_total.copy()}
+  [B] infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-holdings-attribution/lambda_function.py
+     B:345  x1  mention                - 1: asset_class
+     B:346  x1  mention                - 2: sub_asset_class
+     B:394  x1  output-field           'asset_class': str(df.iloc[row, 1]).strip() if pd.notna(df.iloc[row, 1]) else None,
+     B:395  x1  output-field           'sub_asset_class': str(df.iloc[row, 2]).strip() if df.shape[1] > 2 and pd.notna(df.iloc[row, ...
+     B:410  x1  mention                # Fill in asset_class from previous row if empty
+     B:411  x2  comparison-branch      if not holding['asset_class'] or holding['asset_class'] == 'nan':
+     B:413  x2  default-lookup         if prev_holding.get('asset_class') and prev_holding['asset_class'] != 'nan':
+     B:414  x2  subscript              holding['asset_class'] = prev_holding['asset_class']
+     B:417  x2  comparison-branch      if not holding['sub_asset_class'] or holding['sub_asset_class'] == 'nan':
+     B:419  x2  comparison-branch      if prev_holding.get('sub_asset_class') and prev_holding['sub_asset_class'] != 'nan':
+     B:420  x2  subscript              holding['sub_asset_class'] = prev_holding['sub_asset_class']
+     B:485  x2  mention                # Track hierarchical context (asset_class, sub_asset_class carry forward)
+     B:487  x1  transform-assign       current_asset_class = ""
+     B:488  x1  transform-assign       current_sub_asset_class = ""
+     B:491  x1  transform-assign       asset_class_subtotals = {}
+     B:531  x1  subscript              asset_class_subtotals[normalized_name] = {
+     B:558  x1  transform-assign       current_asset_class = col_b
+     B:562  x1  transform-assign       current_sub_asset_class = col_c
+     B:585  x3  default-lookup         asset_class = classification.get('asset_class', current_asset_class or 'equity')
+     B:586  x3  transform-assign       sub_asset_class = classification.get('sub_asset_class', current_sub_asset_class)
+     B:589  x3  transform-assign       asset_class = current_asset_class if current_asset_class else 'equity'
+     B:590  x2  transform-assign       sub_asset_class = current_sub_asset_class
+     B:594  x1  comparison-branch      if asset_class in ('fixed_income', 'Fixed income'):
+     B:595  x1  transform-assign       asset_class = 'Fixed Income'
+     B:596  x1  comparison-branch      elif asset_class in ('equity', 'hedge'):
+     B:597  x1  transform-assign       asset_class = 'Equity'
+     B:627  x2  output-field           'asset_class': asset_class,
+     B:628  x2  output-field           'sub_asset_class': sub_asset_class,
+     B:643  x1  transform-assign       normalized_ac = asset_class.lower().replace(' ', '_')
+     B:644  x1  comparison-branch      if normalized_ac in asset_class_subtotals:
+     B:645  x2  subscript              holding['_asset_class_subtotal'] = asset_class_subtotals[normalized_ac]
+     B:647  x1  subscript              holding['policy_return'] = asset_class_subtotals[normalized_ac].get('policy_return', 0)
+
+============================================================================================================
+CONSUMER A -- yang-generate-allocation-summary :: REAL call to aggregate_by_asset_class()
+============================================================================================================
+  SKEW run (hedge present, weights sum 89 not 100) OUTPUT: ['Fixed Income', 'Equity', 'Commodities', 'Real Estate']  err=None
+     row name=Fixed Income   style_weight=20.0     policy_weight=40.0    bet=-20.0
+     row name=Equity         style_weight=59.0     policy_weight=60.0    bet=-1.0
+     row name=Commodities    style_weight=12.0     policy_weight=0.0     bet=12.0
+     row name=Real Estate    style_weight=9.0      policy_weight=0.0     bet=9.0
+  EXCEPT-branch run (malformed portfolio) INT/qtd asset_classes: []  err=None
+  OUTER generate_allocation_summary (five-class S3 payload) INT/qtd rows: ['Fixed Income', 'Equity', 'Commodities', 'Real Estate']  err=None
+  calculate_total over the five-class rows: {'style_weight': 100.0, 'policy_weight': 100.0, 'asset_allocation': 1.0, 'total': 1.3}  err=None
+  generate_placeholder_data rows: ['Fixed Income', 'Equity']  err=None   <-- FIXED-KEY placeholder path
+  five-class input  : ['Commodities', 'Equity', 'Fixed Income', 'Real Estate', 'Cash']
+  five-class OUTPUT : ['Fixed Income', 'Equity', 'Commodities', 'Real Estate']   err=None
+  two-class  OUTPUT : ['Fixed Income', 'Equity']   err=None   (negative control: no five-class value present)
+     row name=Fixed Income   style_weight=30.0     policy_weight=40.0    bet=-10.0    asset_allocation=0.3
+     row name=Equity         style_weight=50.0     policy_weight=60.0    bet=-10.0    asset_allocation=0.5
+     row name=Commodities    style_weight=10.0     policy_weight=0.0     bet=10.0     asset_allocation=0.1
+     row name=Real Estate    style_weight=10.0     policy_weight=0.0     bet=10.0     asset_allocation=0.1
+  POSITIVE CONTROL (known-dropping reducer) OUTPUT: ['Fixed Income', 'Equity'] -> harness verdict SILENTLY DROPPED
+
+  EXECUTED-LINE TRACE (five-class run) -- which enumerated hops actually RAN:
+    lines of file A executed under the five-class call: 109
+    enumerated HOP lines in file A: 60
+
+============================================================================================================
+CONSUMER B -- yang-generate-holdings-attribution :: VERBATIM exec of the real source lines
+============================================================================================================
+
+  HOP (394, 395)  [raw read from Excel cols 1-2 (df row -> asset_class)]
+      | 'asset_class': str(df.iloc[row, 1]).strip() if pd.notna(df.iloc[row, 1]) else None,
+      | 'sub_asset_class': str(df.iloc[row, 2]).strip() if df.shape[1] > 2 and pd.notna(df.iloc[row, 2]) else None,
+      -> SURVIVES   err=None   state={'_probe': {'asset_class': 'Commodities', 'sub_asset_class': 'Commodities'}}
+
+  HOP (417, 421)  [sub_asset_class carry-forward (417-421)]
+      | if not holding['sub_asset_class'] or holding['sub_asset_class'] == 'nan':
+      |     for prev_holding in reversed(holdings):
+      |         if prev_holding.get('sub_asset_class') and prev_holding['sub_asset_class'] != 'nan':
+      |             holding['sub_asset_class'] = prev_holding['sub_asset_class']
+      |             break
+      -> SURVIVES   err=None   state={'holding': {'asset_class': 'Commodities', 'sub_asset_class': 'Energy'}}
+
+  HOP (487, 491)  [hierarchy/subtotal INITIALISERS (487-491)]
+      | current_asset_class = ""
+      | current_sub_asset_class = ""
+      | 
+      | # Track asset class subtotals (these have the attribution effects)
+      | asset_class_subtotals = {}
+      -> N/A PROBE-ABSENT (got '  {}' -- hardcoded default, TO-S1-1's defect, not a five-class drop)   err=None   state={'current_asset_class': '', 'current_sub_asset_class': '', 'asset_class_subtotals': {}}
+
+  HOP (562, 562)  [Excel sub-hierarchy capture (562)]
+      | current_sub_asset_class = col_c
+      -> SURVIVES   err=None   state={'current_sub_asset_class': 'Commodities'}
+
+  HOP (411, 415)  [carry-forward fill when blank (411-414)]
+      | if not holding['asset_class'] or holding['asset_class'] == 'nan':
+      |     for prev_holding in reversed(holdings):
+      |         if prev_holding.get('asset_class') and prev_holding['asset_class'] != 'nan':
+      |             holding['asset_class'] = prev_holding['asset_class']
+      |             break
+      -> SURVIVES   err=None   state={'holding': {'asset_class': 'Commodities', 'sub_asset_class': ''}}
+
+  HOP (411, 415)  [carry-forward when ALREADY the probe (411-414)]
+      | if not holding['asset_class'] or holding['asset_class'] == 'nan':
+      |     for prev_holding in reversed(holdings):
+      |         if prev_holding.get('asset_class') and prev_holding['asset_class'] != 'nan':
+      |             holding['asset_class'] = prev_holding['asset_class']
+      |             break
+      -> SURVIVES   err=None   state={'holding': {'asset_class': 'Commodities', 'sub_asset_class': 'Energy'}}
+
+  HOP (524, 536)  [subtotal-name normalization else-branch (524-536)]
+      | if col_b.lower() == 'fixed income' or col_b.lower() == 'fixed_income':
+      |     normalized_name = 'fixed_income'
+      | elif col_b.lower() == 'equity':
+      |     normalized_name = 'equity'
+      | else:
+      |     normalized_name = col_b.lower()
+      | 
+      | asset_class_subtotals[normalized_name] = {
+      |     'policy_return': policy_return_subtotal or 0,
+      |     'asset_allocation': asset_allocation_subtotal or 0,
+      |     'style_allocation': style_allocation_subtotal or 0,
+      |     'total_attribution': total_subtotal or 0
+      | }
+      -> SURVIVES   err=None   state={'normalized_name': 'commodities', 'asset_class_subtotals': {'commodities': {'policy_return': 0.1, 'asset_allocation': 0.2, 'style_allocation': 0.3, 'total_attribution': 0.4}}}
+
+  HOP (558, 558)  [Excel hierarchy capture (558)]
+      | current_asset_class = col_b
+      -> SURVIVES   err=None   state={'current_asset_class': 'Commodities'}
+
+  HOP (585, 586)  [registry hit -> asset_class (585-586)]
+      | asset_class = classification.get('asset_class', current_asset_class or 'equity')
+      | sub_asset_class = classification.get('sub_asset_class', current_sub_asset_class)
+      -> SURVIVES   err=None   state={'asset_class': 'Commodities', 'sub_asset_class': 'Energy'}
+
+  HOP (589, 590)  [registry MISS -> Excel hierarchy fallback (589-590)]
+      | asset_class = current_asset_class if current_asset_class else 'equity'
+      | sub_asset_class = current_sub_asset_class
+      -> SURVIVES   err=None   state={'asset_class': 'Commodities', 'sub_asset_class': 'Energy'}
+
+  HOP (589, 590)  [registry MISS and NO hierarchy -> hardcoded default (589-590)]
+      | asset_class = current_asset_class if current_asset_class else 'equity'
+      | sub_asset_class = current_sub_asset_class
+      -> N/A PROBE-ABSENT (got 'equity ' -- hardcoded default, TO-S1-1's defect, not a five-class drop)   err=None   state={'asset_class': 'equity', 'sub_asset_class': ''}
+
+  HOP (594, 597)  [display normalization chain, NO else (594-597)]
+      | if asset_class in ('fixed_income', 'Fixed income'):
+      |     asset_class = 'Fixed Income'
+      | elif asset_class in ('equity', 'hedge'):
+      |     asset_class = 'Equity'
+      -> SURVIVES   err=None   state={'asset_class': 'Commodities'}
+
+  HOP (627, 628)  [output field emit (627-628)]
+      | 'asset_class': asset_class,
+      | 'sub_asset_class': sub_asset_class,
+      -> SURVIVES   err=None   state={'_emit': {'asset_class': 'Commodities', 'sub_asset_class': 'Energy'}}
+
+  HOP (643, 647)  [subtotal key derive + lookup, subtotal PRESENT (643-647)]
+      | normalized_ac = asset_class.lower().replace(' ', '_')
+      | if normalized_ac in asset_class_subtotals:
+      |     holding['_asset_class_subtotal'] = asset_class_subtotals[normalized_ac]
+      |     # Use subtotal policy_return (policy benchmarks don't have individual holdings)
+      |     holding['policy_return'] = asset_class_subtotals[normalized_ac].get('policy_return', 0)
+      -> SURVIVES   err=None   state={'normalized_ac': 'commodities', 'holding': {'_asset_class_subtotal': {'policy_return': 0.9, 'asset_allocation': 0.1}, 'policy_return': 0.9}}
+
+  HOP (643, 647)  [subtotal key derive + lookup, subtotal ABSENT (643-647)]
+      | normalized_ac = asset_class.lower().replace(' ', '_')
+      | if normalized_ac in asset_class_subtotals:
+      |     holding['_asset_class_subtotal'] = asset_class_subtotals[normalized_ac]
+      |     # Use subtotal policy_return (policy benchmarks don't have individual holdings)
+      |     holding['policy_return'] = asset_class_subtotals[normalized_ac].get('policy_return', 0)
+      -> SURVIVES   err=None   state={'normalized_ac': 'commodities', 'holding': {}}
+
+============================================================================================================
+T3-AC2 HOP TABLE -- one row per hop per consumer
+============================================================================================================
+#  LINE   HOP KIND                 FILE:LINE                                      VERDICT
+------------------------------------------------------------------------------------------------------------
+1  173    transform-assign         A yang-generate-allocation-summary:173         RAN, probe not bound at this line
+2  177    transform-assign         A yang-generate-allocation-summary:177         RAN, probe not bound at this line
+3  181    transform-assign         A yang-generate-allocation-summary:181         RAN, probe not bound at this line
+4  185    transform-assign         A yang-generate-allocation-summary:185         RAN, probe not bound at this line
+5  192    output-field             A yang-generate-allocation-summary:192         RAN, probe not bound at this line
+6  193    output-field             A yang-generate-allocation-summary:193         RAN, probe not bound at this line
+7  196    output-field             A yang-generate-allocation-summary:196         RAN, probe not bound at this line
+8  197    output-field             A yang-generate-allocation-summary:197         RAN, probe not bound at this line
+9  200    output-field             A yang-generate-allocation-summary:200         RAN, probe not bound at this line
+10 201    output-field             A yang-generate-allocation-summary:201         RAN, probe not bound at this line
+11 204    output-field             A yang-generate-allocation-summary:204         RAN, probe not bound at this line
+12 205    output-field             A yang-generate-allocation-summary:205         RAN, probe not bound at this line
+13 220    output-field             A yang-generate-allocation-summary:220         NOT-REACHED under five classes (runs ONLY on the 2-class / error path)
+14 221    output-field             A yang-generate-allocation-summary:221         NOT-REACHED under five classes (runs ONLY on the 2-class / error path)
+15 222    output-field             A yang-generate-allocation-summary:222         NOT-REACHED under five classes (runs ONLY on the 2-class / error path)
+16 223    output-field             A yang-generate-allocation-summary:223         NOT-REACHED under five classes (runs ONLY on the 2-class / error path)
+17 240    transform-assign         A yang-generate-allocation-summary:240         RAN, probe not bound at this line
+18 243    default-lookup           A yang-generate-allocation-summary:243         SURVIVES
+19 247    comparison-branch        A yang-generate-allocation-summary:247         SURVIVES
+20 248    transform-assign         A yang-generate-allocation-summary:248         SURVIVES
+21 249    comparison-branch        A yang-generate-allocation-summary:249         SURVIVES
+22 250    transform-assign         A yang-generate-allocation-summary:250         SURVIVES
+23 251    comparison-branch        A yang-generate-allocation-summary:251         SURVIVES
+24 252    transform-assign         A yang-generate-allocation-summary:252         SURVIVES
+25 253    comparison-branch        A yang-generate-allocation-summary:253         SURVIVES
+26 254    transform-assign         A yang-generate-allocation-summary:254         SURVIVES
+27 256    transform-assign         A yang-generate-allocation-summary:256         SURVIVES
+28 258    comparison-branch        A yang-generate-allocation-summary:258         SURVIVES
+29 259    subscript                A yang-generate-allocation-summary:259         SURVIVES
+30 260    subscript                A yang-generate-allocation-summary:260         SURVIVES
+31 263    subscript                A yang-generate-allocation-summary:263         SURVIVES
+32 265    container-plumbing       A yang-generate-allocation-summary:265         SURVIVES
+33 267    transform-assign         A yang-generate-allocation-summary:267         SURVIVES
+34 271    transform-assign         A yang-generate-allocation-summary:271         SURVIVES
+35 282    container-plumbing       A yang-generate-allocation-summary:282         SURVIVES
+36 283    output-field             A yang-generate-allocation-summary:283         SURVIVES
+37 291    output-field             A yang-generate-allocation-summary:291         SURVIVES
+38 292    subscript                A yang-generate-allocation-summary:292         SURVIVES
+39 295    subscript                A yang-generate-allocation-summary:295         SURVIVES
+40 296    comparison-branch        A yang-generate-allocation-summary:296         SURVIVES
+41 297    subscript                A yang-generate-allocation-summary:297         SURVIVES
+42 299    subscript                A yang-generate-allocation-summary:299         SURVIVES
+43 300    subscript                A yang-generate-allocation-summary:300         SURVIVES
+44 301    subscript                A yang-generate-allocation-summary:301         SURVIVES
+45 306    comparison-branch        A yang-generate-allocation-summary:306         SURVIVES
+46 307    subscript                A yang-generate-allocation-summary:307         NOT-REACHED under five classes (runs ONLY on the 2-class / error path)
+47 308    subscript                A yang-generate-allocation-summary:308         NOT-REACHED under five classes (runs ONLY on the 2-class / error path)
+48 310    subscript                A yang-generate-allocation-summary:310         NOT-REACHED under five classes (runs ONLY on the 2-class / error path)
+49 311    subscript                A yang-generate-allocation-summary:311         NOT-REACHED under five classes (runs ONLY on the 2-class / error path)
+50 314    container-plumbing       A yang-generate-allocation-summary:314         SURVIVES
+51 319    comparison-branch        A yang-generate-allocation-summary:319         SURVIVES
+52 328    output-field             A yang-generate-allocation-summary:328         SURVIVES
+53 329    output-field             A yang-generate-allocation-summary:329         SURVIVES
+54 330    output-field             A yang-generate-allocation-summary:330         SURVIVES
+55 331    output-field             A yang-generate-allocation-summary:331         SURVIVES
+56 339    transform-assign         A yang-generate-allocation-summary:339         RAN, probe not bound at this line
+57 347    output-field             A yang-generate-allocation-summary:347         RAN, probe not bound at this line
+58 348    output-field             A yang-generate-allocation-summary:348         RAN, probe not bound at this line
+59 349    output-field             A yang-generate-allocation-summary:349         RAN, probe not bound at this line
+60 350    output-field             A yang-generate-allocation-summary:350         RAN, probe not bound at this line
+61 394    exec:raw read from Exce  B yang-generate-holdings-attribution:394       SURVIVES
+62 417    exec:sub_asset_class ca  B yang-generate-holdings-attribution:417       SURVIVES
+63 487    exec:hierarchy/subtotal  B yang-generate-holdings-attribution:487       N/A PROBE-ABSENT (got '  {}' -- hardcoded default, TO-S1-1's defect, not a five-class drop)
+64 562    exec:Excel sub-hierarch  B yang-generate-holdings-attribution:562       SURVIVES
+65 411    exec:carry-forward fill  B yang-generate-holdings-attribution:411       SURVIVES
+66 411    exec:carry-forward when  B yang-generate-holdings-attribution:411       SURVIVES
+67 524    exec:subtotal-name norm  B yang-generate-holdings-attribution:524       SURVIVES
+68 558    exec:Excel hierarchy ca  B yang-generate-holdings-attribution:558       SURVIVES
+69 585    exec:registry hit -> as  B yang-generate-holdings-attribution:585       SURVIVES
+70 589    exec:registry MISS -> E  B yang-generate-holdings-attribution:589       SURVIVES
+71 589    exec:registry MISS and   B yang-generate-holdings-attribution:589       N/A PROBE-ABSENT (got 'equity ' -- hardcoded default, TO-S1-1's defect, not a five-class drop)
+72 594    exec:display normalizat  B yang-generate-holdings-attribution:594       SURVIVES
+73 627    exec:output field emit   B yang-generate-holdings-attribution:627       SURVIVES
+74 643    exec:subtotal key deriv  B yang-generate-holdings-attribution:643       SURVIVES
+75 643    exec:subtotal key deriv  B yang-generate-holdings-attribution:643       SURVIVES
+------------------------------------------------------------------------------------------------------------
+HOPS ENUMERATED (AC1, non-mention lines): A=60  B=28  TOTAL=88
+HOPS COVERED BY AN EXECUTED SPAN:         A=52/60  B=28/28  TOTAL=80/88
+HOPS COVERED BY *ANY* RUN (incl. 2-class + error path): A=60/60  B=28/28  TOTAL=88/88
+UNCOVERED BY ANY RUN -- A: none | B: none
+REACHED ONLY OUTSIDE A FIVE-CLASS INPUT -- A: [220, 221, 222, 223, 307, 308, 310, 311]
+UNCOVERED HOP LINES (five-class runs only) -- A: [220, 221, 222, 223, 307, 308, 310, 311]
+UNCOVERED HOP LINES (five-class runs only) -- B: none
+HOP TEST ROWS IN THIS TABLE:            A=60  B=15  TOTAL=75
+SILENTLY-DROPPED SITES: NONE -- the probe value is never silently discarded
+
+FIVE-CLASS END-TO-END (consumer A, the decisive read): input classes=5 -> output rows=['Fixed Income', 'Equity', 'Commodities', 'Real Estate']
+PROBE 'Commodities' IN CONSUMER A OUTPUT: SURVIVES
+PROBE 'Commodities' THROUGH CONSUMER B CHAIN: SEE TABLE
