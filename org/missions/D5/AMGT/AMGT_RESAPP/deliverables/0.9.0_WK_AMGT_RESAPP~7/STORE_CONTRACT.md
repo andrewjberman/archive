@@ -92,6 +92,14 @@ refresh under one timestamp is a violation" (`AMGT-s-14`'s own bar).
    maintaining one would be a second place that can go stale against the keys
    themselves, and the stamp already sorts correctly.
 
+> **AMENDMENT (AMGT-s-14, 0.9.0_WK_AMGT_RESAPP~7): ONE NAMED EXCEPTION to rule 1 above.**
+> `packs/<security_key>/input_ledger.json` (the input ledger, `lib/research/ledger/ledger.py`)
+> is APPENDED to at a FIXED path, never re-stamped -- its whole purpose is a running history of
+> every run any input class has ever had for a security, one growing JSON object, not a
+> per-run snapshot. Bucket versioning still applies (each append is a new S3 object version),
+> so no history is lost even though the KEY itself never changes. This is the only writer in
+> the store that works this way; every other writer still mints a fresh stamp per rule 1.
+
 ## 5. Outcome, so `AMGT-s-14` never has to ask
 
 `AMGT-s-14` (THE INPUT LEDGER) renders, per input class: source, last run, outcome,
