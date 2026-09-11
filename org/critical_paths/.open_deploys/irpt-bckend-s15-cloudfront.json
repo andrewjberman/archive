@@ -1,0 +1,55 @@
+{
+  "slug": "irpt-bckend-s15-cloudfront",
+  "title": "IRPT IB-s-15: ONE ordered_cache_behavior for /api/scoped/investor-reporting/* on distribution EVTSA9VEHNZVH (portal-auth root, a SERVED SURFACE fronting 28 behaviors)",
+  "author": "0.9.0_WK_IRPT_BCKEND~2",
+  "status": "OPEN",
+  "opened_at": "2026-09-11T08:55:05.333823+00:00",
+  "window_hours": 4.0,
+  "entry_path": "org/critical_paths/change_management/20260911T0855Z_irpt-bckend-s15-cloudfront_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "git",
+      "target": "wk-irpt_bckend-1-2 source commit for the one behavior in infra/aws/terraform/portal-auth/cloudfront-distribution.tf",
+      "proof_required": "commit hash on the worker branch (LOCAL, never pushed)",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "verify",
+      "target": "the PRE-APPLY plan on portal-auth shows EXACTLY ONE change and nothing else",
+      "proof_required": "plan output printed verbatim; any other line is a STOP and a BLOCKING row, never an apply",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "activation",
+      "target": "terraform apply of infra/aws/terraform/portal-auth adding the behavior",
+      "proof_required": "safe-apply output; the distribution is the whole portal so 0 destroyed is not enough -- the behavior COUNT and the 27 existing path patterns are diffed before and after",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "get-distribution-config BEFORE vs AFTER: the 27 existing behaviors read delta 0 and the new one is present with its edge association",
+      "proof_required": "the two configs diffed, counts printed",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "verify",
+      "target": "the unauthenticated difference control: the same request that returned the SPA before the behavior now returns 401 or 403",
+      "proof_required": "both statuses and first bytes recorded",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260911T085505Z OPENED by 0.9.0_WK_IRPT_BCKEND~2 with 5 leg(s)"
+  ],
+  "last_red_at": null
+}
