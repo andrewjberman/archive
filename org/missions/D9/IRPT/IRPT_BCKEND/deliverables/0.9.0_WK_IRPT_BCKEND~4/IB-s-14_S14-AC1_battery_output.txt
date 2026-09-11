@@ -1,0 +1,170 @@
+IB-s-14 BATTERY -- export bundle freeze, render worker, receipt, download
+  package     : C:\tmp\wk-irpt-1-4\infra\aws\lambda\investor-reporting\export
+  renderer    : headless-browser
+  SECTIONS    : FIXTURE. IB-s-10 is `staged` at this vintage and its certified
+                sections are not on CLOUD, so arms (f) and (v0.11) render FIXTURE
+                sections and say so. The re-run on the real certified sections is
+                IB-sb-3's replay, not this order's act.
+
+==============================================================================
+(a) SAME BUNDLE, SAME PDF -- preview, render, retry
+==============================================================================
+  bundle sha256, preview/render/retry : ['04c1a2393553117c', '04c1a2393553117c', '04c1a2393553117c']
+  equal across the three              : True (3 of 3)
+  rendered content hash, render/retry : 82cb9cb440093454 / 82cb9cb440093454
+  content hash equal                  : True  <- the arm
+  RAW sha256, render/retry            : 2a011d105645c41a / 1ca5d0f76627f257
+  RAW equal                           : False -- Chromium stamps a creation date and
+    a document /ID into every PDF, so the raw digest CANNOT be stable. It is what
+    the receipt's artifact.sha256 carries (an artifact hash must name the object
+    that exists); the reproducibility claim is on the content hash above.
+  pages / validation                  : 2 / PASSED
+  PASS:  one frozen bundle renders one document, three times  -- bundle hash equal 3 of 3; content hash equal render-vs-retry; the raw digest is NOT equal and is not claimed to be
+
+==============================================================================
+(b) BRANDING IS A NEW REVISION, NOT A RECALCULATION
+==============================================================================
+  export revision                     : r1 -> r2
+  brand revision                      : V.01 -> V.02
+  bundle sha256                       : 04c1a2393553117c -> 304d641c2edf0fe1 (different: True)
+  receipt export_id                   : EXP-518f70faab012639 -> EXP-ddb1db528bbbe4b0 (different: True)
+  PERFORMANCE revision                : [('REP-0001', 'rev-7')] -> [('REP-0001', 'rev-7')]  <- UNCHANGED is the arm
+  rebrand() carried the revisions     : True (its own assertion, sha 74d64d93a12a)
+  logo used in r2                     : OPAL_TEMPLATE_FALLBACK
+  PASS:  a branding change makes a NEW export revision with a different receipt and the performance revision unchanged  -- 2 of 2 identities moved (bundle sha, export id); 1 of 1 performance revision held at [('REP-0001', 'rev-7')]
+
+==============================================================================
+(c) NO VENDOR CALL IN RENDER -- THE CENSUS
+==============================================================================
+  renders performed under the guard   : 4 (preview, render, retry, rebrand)
+  EXTERNAL outbound attempts          : 0  <- 0 is the arm
+  of which to a VENDOR host           : 0 (denominator: bd3.bdreporting.com,api.cloud.orionadvisor.com,ycharts.com,api.ycharts.com)
+  LOOPBACK connects PERMITTED         : 4 -- the print path drives the browser
+    over a LOCAL channel and asyncio builds its self-pipe with socketpair(). A
+    guard that refused these would stop the render from starting and then report
+    zero external connections for a render that never happened.
+  bundle field the renderer asserts   : live_vendor_request_during_render=False
+  POSITIVE CONTROL                    : guard fired=True; vendor attempts moved 0 -> 1, so the zero above is MEASURED, not a dead guard
+  PASS:  no external connection during preview or render  -- 0 of 0 vendor connections across 4 renders; the positive control moved the counter to 1
+
+==============================================================================
+(d) ASSETS VERIFIED, NOT FETCHED -- 5 of 5
+==============================================================================
+    wrong-firm  REFUSED BINDING           the asset is bound to a different firm than this export's verified firm; a
+    wrong-type  REFUSED UNSUPPORTED_TYPE  kind 'gif' is not one of the declared kinds ['svg', 'png']; the set is an 
+    wrong-sum   REFUSED CHECKSUM          the resolved bytes hash to 221229bde28b... and the approval names 00000000
+    script-svg  REFUSED UNSAFE_SVG        the SVG carries 1 construct(s) with an execution or fetch model (a <script
+    url-field   REFUSED URL_FETCH         the reference is URL-shaped. Assets are resolved from the approved catalog
+  a report field carrying a URL is never fetched: refused BEFORE any lookup, and
+  the socket guard counter did not move (0 vendor attempt(s) since the control)
+  the APPROVED asset still verifies   : acme-logo
+  PASS:  four bad assets refused by name and a URL field never fetched  -- 4 of 4 refusals matched their expected code, plus 1 of 1 URL refusal = 5 of 5; the approved asset still verifies, so the arm is not passing by refusing everything
+
+==============================================================================
+(e) REAUTHORIZED EVEN WHEN THE ARTIFACT EXISTS -- THE DIFFERENCE CONTROL
+==============================================================================
+  download 1 (grant intact)           : ok=True artifact_existed=True reauthorized=True
+  the URL                             : Opal-signed=True ttl=120s problems=none
+    host whitelist, not a vendor blacklist: an enumerated ban list lapses silently
+    when a vendor's name changes.
+  REVOKED the fixture grant. The artifact is STILL PRESENT and the cache was NOT
+  cleared -- so a refusal now cannot be explained by a cold cache or a missing
+  object, which are the two things a reader would otherwise suspect.
+  download 2 (grant revoked)          : ok=False code=EMPTY_GRANT
+  artifact still recorded present     : True
+  cache entries at refusal time       : 1
+  PASS:  the download reauthorizes on every request, including the one that finds the artifact already there  -- 1 served then 1 REFUSED (EMPTY_GRANT) with the object still present and the cache untouched; the URL is Opal-signed with a 120s ttl and no vendor host
+
+==============================================================================
+(f) THE ANALYSIS EXPORT -- same input, own orientation, no narrative
+==============================================================================
+  section source                      : FIXTURE (IB-s-10 is `staged`; its
+                                        certified sections are not on CLOUD)
+  same report revisions as the preview: True
+  orientation, preview -> analysis    : PORTRAIT -> LANDSCAPE
+  brand revision (same brand)         : V.01
+  pages / validation                  : 1 / PASSED
+  NARRATIVE census in the rendered TEXT: {'Narrative': 0}  <- 0 is the arm
+  and structurally: the analysis template has no {{NARRATIVE}} slot, so a caller
+  passing narrative text cannot render one. Two independent halves.
+  analysis template is slotless       : True
+  PASS:  the Analysis export renders at the same input and configuration, in its own orientation, and carries no performance narrative  -- 0 of 1 narrative markers in the rendered text AND the template is slotless; orientation LANDSCAPE against the preview's PORTRAIT; sections are FIXTURES and the arm says so
+
+==============================================================================
+(amend) GUARDED, BOUND, AND SILENT ON THE REFUSED VALUE (rows W2-S9 / W2-S10)
+==============================================================================
+  routes THIS cell registers          : ['export_download', 'export_submit']
+  unguarded census                    : 0 of 2  (OK: every route is guarded)
+  routes.json (IB-s-15's deliverable) : present=False
+    It does not exist at this vintage, so a census over it would be 0 of 0 -- a
+    VACUOUS pass. It is printed as vacuous and the CENSOR is proved instead, with
+    the two controls IB-s-7's battery ran:
+      an UNGUARDED handler censuses   : 1 of 1
+      the SAME handler wrapped        : 0 of 1
+  a NON-RECONCILING firm binding      : ok=False code=FIRM_BINDING
+    refused rather than served the EMPTY SET an unbound firm produces -- which is
+    the failure no per-module test can see, because it looks like a revocation.
+  a parameter keyed by a client NAME  : ok=False code=KEY_REFUSED
+  occurrences of the refused VALUE in the WHOLE envelope (body + reason + audit):
+      0  <- 0 is the arm (envelope is 1202 bytes)
+  the refused parameter NAME is named : True
+  PASS:  every route is guarded, the firm binding refuses rather than serving empty, and no refused value leaves the handler  -- 0 of 2 routes unguarded with the censor proved both ways (1 of 1 / 0 of 1); FIRM_BINDING on a non-reconciling binding; 0 occurrences of the refused value in the whole envelope while its NAME is named
+
+==============================================================================
+(g) RECEIPT AND ARTIFACT; LEDGER CLOSED
+==============================================================================
+  artifact key                        : firms/49financial/generations/GENIBS14SYN/attempts/1/exports/r1/report.pdf
+  under the bound firm's prefix       : True
+  built by _keys.s3_evidence_key      : every segment validated by SHAPE, so a
+                                        client name cannot become a path
+  stored object bytes                 : 43848 (put rc ok=True, get ok=True)
+  receipt artifact_hash               : 2a011d105645c41a0a63bc63
+  stored object sha256                : 2a011d105645c41a0a63bc63
+  equal                               : True -- the stored object hashes to the artifact_hash the receipt declares
+  receipt validates against contract  : True
+  server_only / reauthorization / vendor url: True / True / False
+  irpt-export-render CodeSha256       : HSuSKsWzsnqS4tIO/b+Zu4hYdpx2RNZxmeqavv7XwUw=
+  built zip sha256 (source map)       : HSuSKsWzsnqS4tIO/b+Zu4hYdpx2RNZxmeqavv7XwUw=
+  equal                               : True
+  layer attached                      : ['arn:aws:lambda:us-east-1:313476888478:layer:irpt-common:2']
+  LEDGER irpt-bckend-s14              : entry reads CLOSED=True; sentinel on disk=False
+    sentinel commit                   : 6813489244d803b77b280736c16e7db429ef5faf IB-s-14: the deploy ledger closed -- four legs proven, and the 
+  PASS:  the receipt names the object that exists, the key is under the bound firm's prefix, and the served bytes are the built bytes  -- artifact_hash == the stored object's sha256; CodeSha256 == the built zip; ledger CLOSED and its sentinel removed by the close
+
+==============================================================================
+(v0.11) THE ANALYSIS EXPORT ON REAL VENDOR INPUT -- 3 variants
+==============================================================================
+  source: s3://opal-data-ycharts/research/20260911/variants/... (an OPAL-OWNED S3 read under KMS
+          key 86324aae-..., NOT a vendor call -- bound 1 is untouched)
+    overview      573677 bytes  sha256 abab2ffe8411a29b  == pdf_validation.json: True  (declared 23 pp)
+      bundle 38753e307c2e | 1 pp | narrative markers 0 | stored hash equal True | vendor_synthetic_holdings true
+      key firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-overview/report.pdf
+    comparison    820984 bytes  sha256 f01cbd48a5771cb5  == pdf_validation.json: True  (declared 31 pp)
+      bundle 86c38f465c00 | 1 pp | narrative markers 0 | stored hash equal True | vendor_synthetic_holdings true
+      key firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-comparison/report.pdf
+    multicomp     854115 bytes  sha256 0a67ecf76732832e  == pdf_validation.json: True  (declared 35 pp)
+      bundle 9f89d01d4fa7 | 1 pp | narrative markers 0 | stored hash equal True | vendor_synthetic_holdings true
+      key firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-multicomp/report.pdf
+  SHA-256 verified BEFORE use         : 3 of 3
+  variants exported and stored        : 3 of 3
+  NEVER marked complete on the generator's 201 or on a PDF's existence: every
+  variant above was hashed against pdf_validation.json first, rendered, stored,
+  and READ BACK. The sections remain FIXTURES (IB-s-10 is `staged`), and
+  REPRESENTATIVE REAL-CLIENT specimens remain the proof gap on FWD-4 / FWD-8.
+  PASS:  the three retained vendor PDFs are verified by digest and exported as Analysis bundles labelled vendor_synthetic_holdings  -- 3 of 3 SHA-256 equal to pdf_validation.json before use; 3 of 3 rendered, stored and read back with 0 narrative markers and the label set
+
+==============================================================================
+VERDICT
+==============================================================================
+  PASS  (a) one frozen bundle renders one document, three times
+  PASS  (b) a branding change makes a NEW export revision with a different receipt and the performance revision unchanged
+  PASS  (c) no external connection during preview or render
+  PASS  (d) four bad assets refused by name and a URL field never fetched
+  PASS  (e) the download reauthorizes on every request, including the one that finds the artifact already there
+  PASS  (f) the Analysis export renders at the same input and configuration, in its own orientation, and carries no performance narrative
+  PASS  (amend) every route is guarded, the firm binding refuses rather than serving empty, and no refused value leaves the handler
+  PASS  (g) the receipt names the object that exists, the key is under the bound firm's prefix, and the served bytes are the built bytes
+  PASS  (v0.11) the three retained vendor PDFs are verified by digest and exported as Analysis bundles labelled vendor_synthetic_holdings
+
+  9 of 9 mechanical arms passed
+IBS14-EXPORT-REPRODUCIBLE
