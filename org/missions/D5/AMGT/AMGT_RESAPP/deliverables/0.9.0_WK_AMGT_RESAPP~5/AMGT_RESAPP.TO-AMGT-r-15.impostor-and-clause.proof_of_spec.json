@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-r-15",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-r-15.impostor-and-clause.md",
+    "group": "OTHER",
+    "vintage_commit": "3730474e77e1a9c930eb0e77380ee7567c540aa0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "3d2d7af6e076563fe241f36b5a4e80124e0110c2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-r-15.impostor-and-clause.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~5",
+  "session_log": "AMGT_RESAPP.TO-AMGT-r-15, cell AMGT-r-15, round 2 (FWD-14, fixes AMGT-s-15's AC6 FAIL). Worker 0.9.0_WK_AMGT_RESAPP~5, spine-v3 L7 subagent of 2.0.0_SA_COO~ZZZ, branch wk-AMGT_RESAPP-2-5 in worktree C:/tmp/wk-amgt-2-5, cut by hand from SITEZ at 3730474e77. THE BAR FIRST: branch read wk-AMGT_RESAPP-2-5, org/ + .tools/ both present (TREE-OK) before any act; TO status flipped staged->pending as the first act. THE PROBLEM: AMGT-s-15's official_vs_impostor_test was a bare OR of three unequal checks (check1: company's own web presence links to the account; check2: platform verification mark; check3: account bio names the company's domain) -- an impostor with a copied 'official account of <domain>' bio admitted OFFICIAL on check3 alone, the exact gap AMGT-s-15's own AC6 judgment row disclosed and this round's L10 analysis (@4d31cf4caa s.2) named as FWD-14. THE FIX: (a) build_lists.py's OFFICIAL_VS_IMPOSTOR_TEST constant rewritten to state THE AND-CLAUSE explicitly -- official := (check1 OR check2) AND (any further evidence); check3 must CO-OCCUR with check1 or check2 to count toward OFFICIAL at all, and is NOT sufficient/insufficient by itself -- the same rewritten text propagated into the already-landed deliverable social_accounts.json (verified: `git diff --stat` on that file showed exactly 1 line changed -- the official_vs_impostor_test field only; all 267 entries and every other top-level field byte-identical, confirming nothing was admitted or measured for a real account). (b) new module lib/research/lists/impostor.py, evaluate_official_vs_impostor(check1, check2, check3) -> ImpostorVerdict(status, reason) -- a pure rule over an account's already-resolved boolean attributes (no handle fetched, no vendor call, G-24/AC3); returns 'official' | 'impostor' | 'unresolved' with a reason naming exactly which check(s) drove the verdict, never a bare boolean (A VALUE MUST CARRY ITS CLAIM). (c) lib/research/lists/tests/test_impostor.py, the difference arm the cell asks for, two pytest functions holding the module's total at AC1's 4-test denominator: test_impostor_account_passing_only_check3_is_refused (check1=False, check2=False, check3=True) asserts status=='impostor' -- the exact shape that beat the prior bare-OR test; test_official_account_passing_check3_and_check1_is_admitted (check1=True, check2=False, check3=True) asserts status=='official', and in the SAME test body (not a separate pytest node, to hold the 4-test total) also exercises the other half of (check1 OR check2) with check1=False, check2=True, check3=True, also asserting 'official'. VERIFIED: `python -m pytest lib/research/lists/tests -q` -> '4 passed' (2 pre-existing rot tests unchanged + this refuse-then-admit pair). `python -c \"...\"` reading the committed deliverable's official_vs_impostor_test field -> 'states an AND-clause True | check3-alone insufficient stated True'. `grep -r -c -i -E 'requests\\.|urllib\\.request|httpx|brightdata|api\\.|twitter\\.com|x\\.com|linkedin\\.com' lib/research/lists/ | grep -v -c ':0$'` -> '0' (no HTTP client, vendor host or platform URL anywhere under the module; the fix is to the rule, exercised on fixtures, never a live lookup). `bash .tools/commit-gate.sh lib/research/lists/build_lists.py lib/research/lists/impostor.py lib/research/lists/tests/test_impostor.py` -> clean 3 of 3. MUTANT: impostor.py's `strong = check1 or check2` line replaced with `strong = True  # MUTANT: AND-clause disabled, always strong` (backed up first to .scratch/impostor_backup.py); re-run produced '1 failed, 3 passed' with the failure exactly on test_impostor_account_passing_only_check3_is_refused (AssertionError: assert 'official' == 'impostor') -- the other three tests (both rot tests, the check1/check2-admit test) were unaffected, since a mutant that makes the AND-clause vacuous can only ever break the REFUSAL case. Reverted from the backup, `diff .scratch/impostor_backup.py lib/research/lists/impostor.py` empty (byte-identical), `git status --short` showed no residual diff against the committed file, re-verified '4 passed'. DETERMINISM: AC1/AC2/AC3's exact invocations run twice back-to-back post-commit, identical both times ('4 passed' / 'states an AND-clause True | check3-alone insufficient stated True' / '0'). BOUNDS held: the two lists' owners stay UNASSIGNED (untouched, C-NO-CONTACT); all 267 social_accounts.json entries remain status UNRESOLVED, handle null (nothing admitted/measured for a real account); no vendor/HTTP call anywhere in the module (AC3, 0/0). No surprise row filed this cell -- the one thing that looked odd (new files under lib/research/lists/ are matched by .gitignore's broad `lib/` venv-convention rule, line 47) is DOCUMENTED, EXPECTED mechanism: safe-commit.sh's own usage text (lines 49, 445-446) states staging force-adds via `git add -f`, which is exactly what happened (git status confirmed both new files land as tracked, not untracked, after the commit) -- not a surprise, a working mechanism doing what its own docs say. Commits: 26316f09b3 (the fix: build_lists.py, impostor.py, test_impostor.py, the deliverable social_accounts.json field, TO status staged->pending), then this instance with the flip to complete.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/lists/build_lists.py",
+      "kind": "script",
+      "commit_or_etag": "26316f09b3b32e0e81ee0317bfe7de4b7df392a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "OFFICIAL_VS_IMPOSTOR_TEST rewritten to state the AND-clause; verified by AC2 against the propagated deliverable copy, and by AC1/AC3 (compile + gate clean).",
+      "introduces": ["AND-CLAUSE"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/lists/impostor.py",
+      "kind": "script",
+      "commit_or_etag": "26316f09b3b32e0e81ee0317bfe7de4b7df392a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "evaluate_official_vs_impostor(check1, check2, check3) -> ImpostorVerdict(status, reason) -- the predicate; verified by AC1 (imported and exercised by test_impostor.py) and by AC3 (no vendor/HTTP import).",
+      "artifact_covered_by": ["AC1", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/lists/tests/test_impostor.py",
+      "kind": "test",
+      "commit_or_etag": "26316f09b3b32e0e81ee0317bfe7de4b7df392a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The refuse-then-admit fixture pair: check3-only is refused as impostor; check3+check1 (and, within the same test body, check3+check2) is admitted official -- verified by AC1.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~5/lists/social_accounts.json",
+      "kind": "config_data",
+      "commit_or_etag": "26316f09b3b32e0e81ee0317bfe7de4b7df392a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "official_vs_impostor_test field updated to state the AND-clause; the ONLY field touched (git diff --stat: 1 line changed) -- all 267 entries and every other field unchanged, verified by AC2 which reads this exact file.",
+      "introduces": ["AND-CLAUSE"],
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-r-15.impostor-and-clause.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "status pending -> complete rides this same commit, per the bar's own instruction (rc 0 AND every mechanical criterion PASS-by-output)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line beginning \"4 passed\" with no \"failed\" -- AMGT-s-15's original 2 rot tests still pass, PLUS the impostor pair: (1) an account passing ONLY check (3) (a copied \"official account of <domain>\" bio) is REFUSED as not-official; (2) an account passing check (3) AND (check1 OR check2) is ADMITTED official (the difference arm). A bare-OR test that admits the check-3-only impostor fails this and is NOT met",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/lists/tests -q 2>&1 | tail -1",
+      "output_evidence": "4 passed in 0.04s",
+      "denominator": "4 of 4 tests: test_old_reviewed_at_is_reported_stale, test_fresh_reviewed_at_is_not_reported_stale (AMGT-s-15's original 2), test_impostor_account_passing_only_check3_is_refused, test_official_account_passing_check3_and_check1_is_admitted (this cell's 2, the second exercising both check1- and check2-admit halves in one body)",
+      "status": "PASS",
+      "expect": "^4 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"states an AND-clause True | check3-alone insufficient stated True\" -- the schema's official_vs_impostor_test text names the co-occurrence rule (check 3 must accompany check 1 or 2) and says check 3 alone is insufficient; a schema still describing a bare OR is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import json; s=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~5/lists/social_accounts.json')); t=json.dumps(s.get('official_vs_impostor_test','')); import re; print('states an AND-clause', bool(re.search(r'(check ?3|bio|self.?desc).*(co-?occur|AND|together with).*(check ?1|check ?2)|(check ?1|check ?2).*AND.*(check ?3)', t, re.I)), '| check3-alone insufficient stated', 'alone' in t.lower() or 'not sufficient' in t.lower() or 'insufficient' in t.lower())\"",
+      "output_evidence": "states an AND-clause True | check3-alone insufficient stated True",
+      "denominator": "N/A -- boolean check over the single official_vs_impostor_test field in the one committed deliverable file",
+      "status": "PASS",
+      "expect": "states an AND-clause True \\| check3-alone insufficient stated True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "exactly \"0\" -- NEGATIVE: no HTTP client, no vendor host, no platform URL under the module; the test is a rule over attributes exercised on fixtures, not a live lookup (G-24)",
+      "method": "command",
+      "invocation": "grep -r -c -i -E 'requests\\.|urllib\\.request|httpx|brightdata|api\\.|twitter\\.com|x\\.com|linkedin\\.com' lib/research/lists/ | grep -v -c ':0$'",
+      "output_evidence": "0 (0 of 1 sweep: no file under lib/research/lists/ -- __init__.py, rot.py, build_lists.py, impostor.py, tests/test_rot.py, tests/test_impostor.py -- names an HTTP client, a vendor host, or a platform URL; re-run post-commit at 26316f09b3 confirmed the same 0)",
+      "denominator": "0 of 1 sweep over lib/research/lists/ (negative/boolean census across all 6 tracked .py files under the module -- __init__.py, rot.py, build_lists.py, impostor.py, tests/test_rot.py, tests/test_impostor.py)",
+      "status": "PASS",
+      "expect": "^0"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "is the AND-clause one that would actually separate a fan/impostor account from the company's own -- would a real copied-bio impostor be refused, and a real official account (verified or IR-linked) still admitted?",
+      "method": "manual_read_with_citation",
+      "invocation": "READ lib/research/lists/impostor.py's evaluate_official_vs_impostor(), lib/research/lists/tests/test_impostor.py's two fixtures, and the deliverable social_accounts.json's official_vs_impostor_test field, at commit 26316f09b3b32e0e81ee0317bfe7de4b7df392a9",
+      "output_evidence": "THE AND-CLAUSE, READ FOR DISCRIMINATION: YES for the refuse-then-admit pair this cell was asked to exercise. A copied 'official account of <domain>' bio is check3 alone; under official := (check1 OR check2) AND (any further evidence), check3 alone leaves check1 and check2 both False, so evaluate_official_vs_impostor returns status 'impostor' -- REFUSED, never official on the forgeable check by itself (exercised: test_impostor_account_passing_only_check3_is_refused, PASS). An account carrying the SAME copied bio (check3=True) but ALSO linked from the company's own measured web presence (check1=True) or carrying the platform's own verification mark (check2=True) is ADMITTED official (exercised: test_official_account_passing_check3_and_check1_is_admitted, PASS both halves). The refuse-then-admit pair genuinely turns on check1/check2, not on check3 -- the exact discrimination the L10 analysis asked for ('require check3 to CO-OCCUR with check1 OR check2'). RESIDUAL, DISCLOSED NOT HIDDEN (carried over unchanged from AMGT-s-15's own AC6 judgment row -- this cell's remit is the AND-clause only, not a re-audit of check1/check2's individual strength): (a) check1 (company web presence linking to the account) is currently UNUSABLE for all 89 names in AMGT-s-12's universe.json, because no ir_domain has resolved yet (G-24) -- until AMGT-s-4/-b4 resolve at least one, the only practical route to OFFICIAL for a real handle is check2. (b) check2 itself reads stronger in the schema's prose than it now is in practice: on at least one major platform, paid verification has been decoupled from identity verification since 2023, and neither the schema nor this cell's fix names that caveat -- it is out of the AND-clause's stated scope, flagged here rather than silently left unread. (c) The AND-clause closes the SPECIFIC exploit FWD-14 named (check3-alone admission) precisely and testably; it does not, and was not asked to, make check2 a strong signal again -- an impostor holding a paid verification mark and a copied bio would still pass (check2 OR check1) AND (further evidence) under today's rule, because check2 is trusted at face value. That is a different, disclosed gap, not this cell's remit. CONCLUSION: the AND-clause as built is the correct, minimal, testable fix to the one defect FWD-14 named, verified by the refuse-then-admit fixture pair; it does not fix check2's separately-weakened trust level.",
+      "denominator": "N/A -- judgment row, no mechanical denominator; the module, its tests and the deliverable's schema field are read in full at the cited commit",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "judgment criterion per spine v3 L9 -- graded by 3.0.0_SA_CVO~Z, never self-graded"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "impostor.py's `strong = check1 or check2` line replaced with `strong = True  # MUTANT: AND-clause disabled, always strong`, leaving every other line (including the check3-only branch, now unreachable) untouched. A passing assertion never mutated has never been tested.",
+      "expected": "test_impostor_account_passing_only_check3_is_refused FAILS (the check3-only impostor now reads 'official' since strong is forced True regardless of check1/check2); the other 3 tests (both rot tests, the check1/check2-admit test) are UNAFFECTED, since they already expect 'official' or the unrelated staleness behavior.",
+      "observed": "ACTUALLY RUN: `python -m pytest lib/research/lists/tests -q` against the mutated file produced `F...` then `FAILED lib/research/lists/tests/test_impostor.py::test_impostor_account_passing_only_check3_is_refused - AssertionError: assert 'official' == 'impostor'` and `1 failed, 3 passed in 0.16s`. The file was then restored from a pre-mutation backup (.scratch/impostor_backup.py) and compared: `diff .scratch/impostor_backup.py lib/research/lists/impostor.py` produced no output (byte-identical), `git status --short` showed no residual diff against the committed file, and a clean re-run produced `4 passed in 0.05s`. The committed impostor.py at 26316f09b3 is the pre-mutation, correct version -- the mutant never rode any commit.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's exact invocations were each run twice, back-to-back, post-commit, with no regeneration of any file between runs.",
+      "observed": "AC1: identical both runs ('4 passed'). AC2: identical both runs ('states an AND-clause True | check3-alone insufficient stated True'). AC3: identical both runs ('0').",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "naming an owner for either list",
+      "reason": "C-NO-CONTACT / this cell's own BOUNDS: the two lists' owners stay UNASSIGNED -- Andrew names them, this cell does not."
+    },
+    {
+      "item": "admitting or measuring any real social handle",
+      "reason": "this cell's own BOUNDS: nothing is admitted or measured for a real account -- the fix is to the TEST; the map's handles stay UNRESOLVED (AMGT-s-13's vendor word is what would ever move them). All 267 social_accounts.json entries remain status UNRESOLVED, handle null, unchanged by this commit."
+    },
+    {
+      "item": "re-auditing or strengthening check2 (platform verification mark), whose real-world trust level has weakened since 2023 on at least one major platform",
+      "reason": "out of this cell's stated remit (the AND-clause between check3 and check1/check2, per FWD-14 and the L10 analysis); disclosed in AC4's output_evidence rather than silently left unaddressed."
+    },
+    {
+      "item": "any live handle resolution, HTTP fetch or vendor lookup",
+      "reason": "G-24: no vendor call, no social lookup, no HTTP fetch -- the test is a rule over an account's attributes, exercised on fixtures; verified 0 by AC3."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/lists/build_lists.py lib/research/lists/impostor.py lib/research/lists/tests/test_impostor.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/lists/tests -q",
+      "result": "4 passed"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~5/AMGT_RESAPP.TO-AMGT-r-15.impostor-and-clause.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "PENDING-THIS-COMMIT (the exit code is the verdict; run before the flip and recorded in the commit message)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~5 <0.9.0_WK_AMGT_RESAPP~5@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "PENDING-THIS-COMMIT (two commits: 26316f09b3 the fix, then this instance with the flip to complete)"
+    }
+  ]
+}
