@@ -1,0 +1,285 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-5",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "assignee": "0.9.0_WK_IRPT_BCKEND~1",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-5.firm-destination-policy-and-the-ingestion-gate.md",
+    "group": "OTHER",
+    "vintage_commit": "6800337403"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "68003374034f5c1da5b282e0587d4c0129712c4e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-5.firm-destination-policy-and-the-ingestion-gate.md"
+  },
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/firm-destination-policy-and-the-ingestion-gate.result.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/roles.tf",
+      "kind": "terraform",
+      "commit_or_etag": "14ad90c621",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPLIED and READ BACK: safe-apply rc=0 'Apply complete! Resources: 13 added, 0 changed, 0 destroyed.', then the battery read the live plane with get-role (read-only). 4 role stubs (irpt-core-firm-49financial/cottonwood/inflection, irpt-core-quarantine), trust-policy-only (get-role confirms lambda.amazonaws.com trust on 4 of 4). Also generates firm_destination_policy.json (local_file) from the SAME locals layout.json renders from.",
+      "introduces": [
+        "local.firm_destinations"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/iam_firm_conditions.tf",
+      "kind": "terraform",
+      "commit_or_etag": "14ad90c621",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPLIED and READ BACK: safe-apply rc=0 'Apply complete! Resources: 13 added, 0 changed, 0 destroyed.', then the battery read the live plane with get-role (read-only). 3 per-firm scoped policies (read/write on firms/<id>/* only) + 1 quarantine policy (write-only on quarantine/*, zero access to any firms/* prefix), each attached only to its own role. Read back via terraform plan (0-diff) after apply.",
+      "introduces": [
+        "aws_iam_role_policy_attachment"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/outputs.tf",
+      "kind": "terraform",
+      "commit_or_etag": "14ad90c621",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "APPENDED (not created) by IB-s-5: firm_destination_policy_path, firm_execution_roles, quarantine_execution_role. Applied and printed by the apply's own Outputs: block.",
+      "introduces": [
+        "firm_destination_policy_path"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_gate/gate.py",
+      "kind": "script",
+      "commit_or_etag": "14ad90c621",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bind_firm() and destination_for(): the ingestion gate. Reuses keys.TenantBinding (IB-s-17) for immutability rather than reimplementing it. A red-first mutant on __setattr__ revealed the property's own missing setter provides a SECOND independent protection layer on .firm_id -- the test suite was strengthened (a fourth attempt against the _binding slot) to discriminate the mechanism it claims to test. commit-gate rc=0.",
+      "introduces": [
+        "destination_for"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_gate/tests/test_gate.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "20 tests, 20 passed, 0 failed. Every named acceptance arm plus the slot-targeting immutability test added after a weak mutant was found. NOTE: the slot-targeting test was ADDED after the sources commit (during red-first mutant remediation) and rides THIS commit, not 14ad90c621.",
+      "introduces": [
+        "test_internal_slots_are_protected_independent_of_the_firm_id_property"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_gate/tests/test_policy_completeness.py",
+      "kind": "test",
+      "commit_or_etag": "14ad90c621",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FAILS LOUD demonstrated against a scratch registry with a planted 4th firm, using the SAME env-var override keys.py already defines. 3 passed at HEAD.",
+      "introduces": [
+        "check_completeness"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/core/firm_destination_policy.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "WRITTEN BY THE APPLY (local_file). policy_version '1', owner '0.7.0_AE_CloudOps', 3 firms each with sender_domain read from the registry, execution_role, tables/queues by name, and 6 rendered destination kinds matching layout.json's own prefix_families/generation_artifacts.",
+      "introduces": [
+        "opal_domain"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260910T2352Z_irpt-bckend-s5_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "fd7382ef68",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The change-management entry: OPENED at 68551e7e40 before anything was applied, four legs each closed on its own proof, CLOSED and committed at fd7382ef68 BEFORE the reads that grade the act."
+    },
+    {
+      "path_or_key": "org/critical_paths/.open_deploys/irpt-bckend-s5.json",
+      "kind": "doc",
+      "commit_or_etag": "68551e7e40",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The sentinel, COMMITTED WHILE OPEN at 68551e7e40 and removed by the close at fd7382ef68."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_5.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S5-AC1 battery, six arms, 4 read-only get-role AWS calls. Fixed twice during red-first mutant testing: a defensive read for arm (c)'s outcome.reason, and a fourth immutability attempt in arm (d) targeting the _binding slot directly. commit-gate rc=0.",
+      "introduces": [
+        "IBS5-POLICY-BOUND"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IB-s-5_S5-AC1_battery_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The battery's full transcript as run, rc=0."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IB-s-5_S5-AC2_plan_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The graded plan transcript: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/firm-destination-policy-and-the-ingestion-gate.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The criteria with rc, deciding lines and denominators; what was applied; the mechanism and what the red-first mutants found in it; the row filed; the bounds observed."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 entries APPENDED -- 98 to 113 -- covering the 7 repo files and the 8 AWS resources this cell applied (4 roles, 4 policies). Pure append confirmed by git diff -U0: only the two _meta.denominators counters changed, no existing entry touched.",
+      "introduces": [
+        "iam-role://irpt-core-firm-49financial"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE appended row, W1-S6, OBSERVATION/INERT. Pure append: 25 insertions, 0 deletions.",
+      "introduces": [
+        "IRPT_BCKEND-W1-S6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-5.firm-destination-policy-and-the-ingestion-gate.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The <status> flip to complete. The staged-to-pending flip rode 14ad90c621. The flip is LAST, after every apply, per the coordinator's own restated rule."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S5-AC1",
+      "criterion_verbatim": "PASSES BY OUTPUT -- the gate and the policy, each arm with its denominator. (a) EACH FIRM LANDS ONLY IN ITS OWN LOCATIONS. For each of the 3 registry firms, a fixture message from that firm's domain binds to that firm and destination_for returns keys under firms/<id>/ only, for every destination kind; print 3 of 3 firms x K of K kinds. (b) A WRITE INTO A SECOND FIRM'S LOCATION IS REFUSED -- THE DIFFERENCE CONTROL. With a request bound to firm A, request a destination under firm B and show the refusal; then the same call for firm A succeeds. Both printed. (c) UNKNOWN, SPOOFED, CONTRADICTORY, OPAL-ORIGIN. Four fixtures: an unregistered domain, a display-From that disagrees with the verified original sender, contradictory evidence, an opalinvest.com origin with no target-firm rule -> Quarantined/Unresolved as the policy says, NEVER a firm; 4 of 4 printed. (d) THE BOUND FIRM IS IMMUTABLE. After binding, an attempt to set the firm to another value RAISES; printed. (e) COMPLETENESS FAILS LOUD. test_policy_completeness.py passes at HEAD (registry 3 == policy 3); then, in a scratch copy of the registry, plant a fourth enabled client firm and show the test FAILS naming the missing firm. Both runs printed. (f) THE POLICY IS VERSIONED AND OWNED; THE IAM HALF IS APPLIED. Print policy_version and owner; get-role on each stub role prints its trust policy; the ledger for this slug is CLOSED and its sentinel committed (hash printed).",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_5.py",
+      "output_evidence": "rc=0. Final line: 'IBS5-POLICY-BOUND'; above it 'arms: 6 of 6 evaluated; arms holding: 6 of 6; assertions failed: 0'. Full transcript committed as IB-s-5_S5-AC1_battery_output.txt. 4 AWS calls, ALL read-only get-role -- 0 writes.\n\n(a) EACH FIRM LANDS ONLY IN ITS OWN LOCATIONS. 'DENOMINATOR: 3 firm(s) in the applied policy'. Per firm: '49financial 6 of 6 destination kind(s) land under firms/49financial/ only', same for cottonwood and inflection -- '3 of 3 firm(s) x every destination kind land only in their own locations'. Each key was also checked against EVERY OTHER firm's prefix (not just its own), so a key that happened to land under neither its own nor a sibling's prefix would still be caught as a leak.\n\n(b) A WRITE INTO A SECOND FIRM'S LOCATION IS REFUSED. 'cross-firm request (49financial bound, asking for cottonwood) REFUSED: destination_for: requested firm 'cottonwood' does not match the bound firm '49financial' -- a write into a second firm's location is refused'. THEN: 'same-firm request (49financial bound, 49financial requested) SUCCEEDED: firms/49financial/requests/X/revisions/0/' -- the refusal is about the firm mismatch specifically, not about the call shape.\n\n(c) UNKNOWN, SPOOFED, CONTRADICTORY, OPAL-ORIGIN. All 4 named fixtures printed with their outcome type and reason: unknown domain -> Quarantined ('matches no enumerated firm and is not the Opal domain'); spoofed display-From -> Quarantined ('display_from_used is True, not False -- ... the spoofing/contradiction signal'); contradictory evidence -> Quarantined ('verified is VERIFIED but verification_method is UNKNOWN -- ... an internal contradiction'); Opal-origin -> Unresolved ('opalinvest.com is Opal's own ... no target-firm rule exists for it and none is guessed'). '4 of 4 fixture(s) NEVER became a firm, each with the policy's own outcome type'.\n\n(d) THE BOUND FIRM IS IMMUTABLE. Four attempts printed, all RAISING: attribute set ('BoundRequest is immutable: once bound the firm is immutable'), rebind() (delegates to keys.TenantBinding, 'a bound firm is never rebound'), attribute delete, and a FOURTH attempt against the internal _binding slot directly ('bound._binding = None -> RAISED GateRefusal'). The fourth attempt exists because a red-first mutant on __setattr__ showed the first three are ALSO protected independently by the read-only firm_id property (no setter/deleter) -- see the controls block. '4 of 4 mutation attempt(s) RAISED; firm_id after all attempts: 49financial (unchanged: True)'.\n\n(e) COMPLETENESS FAILS LOUD. RUN 1 (HEAD): 'rc=0 -- 3 passed in 0.13s'. RUN 2 (scratch registry + planted 4th firm 'planted4th'): 'rc=1 -- 1 failed, 2 deselected in 0.33s' with 'the failure output NAMES the missing firm 'planted4th': True' -- the assertion message printed \"MISSING_FROM_POLICY=['planted4th']\" verbatim. Both runs use the SAME env-var override (IRPT_FIRM_REGISTRY) keys.py already defines -- no code path exists solely for this demonstration.\n\n(f) THE POLICY IS VERSIONED AND OWNED; THE IAM HALF IS APPLIED. \"policy_version = '1'\" and \"owner = '0.7.0_AE_CloudOps'\". get-role on 4 of 4 roles: 'irpt-core-firm-49financial rc=0 trust-to-lambda=True' (same for cottonwood, inflection, irpt-core-quarantine) -- '4 of 4 role(s) exist with a trust policy naming lambda.amazonaws.com'. 'deploy_ledger.py check -> line(s) naming this slug: 0' (post-close) and 'git log -1 --format=%H -- .../.open_deploys/irpt-bckend-s5.json -> fd7382ef6849bc833bd204360ba277dbb4df3ca3'.",
+      "denominator": "6 of 6 arms evaluated, 6 of 6 holding, 0 failed assertions; 3 of 3 firms x 6 of 6 destination kinds landing correctly; 1 cross-firm refusal + 1 same-firm success; 4 of 4 fixtures never bound with correct outcome types; 4 of 4 immutability attempts raised; completeness 3 passed at HEAD, 1 failed naming the planted firm; 4 of 4 roles trust-confirmed; 4 of 4 read-only AWS calls; 4 of 4 red-first mutants fired",
+      "expect": "IBS5-POLICY-BOUND",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC2",
+      "criterion_verbatim": "THE ROOT IS CONVERGED after this cell's apply. Run after the apply and after the ledger closes.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/core plan -no-color -input=false -lock=false",
+      "output_evidence": "rc=0. Deciding line, verbatim: 'No changes. Your infrastructure matches the configuration.' Transcript committed as IB-s-5_S5-AC2_plan_output.txt. Run in the order named: after the apply (fd7382ef68 closed the ledger) and after the close was committed. All 13 new resources plus the 10 IB-s-17 resources refreshed and matched.",
+      "denominator": "23 of 23 resources (13 new + 10 from IB-s-17) refreshed and matching; 0 to add/change/destroy",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "S5-AC3",
+      "criterion_verbatim": "JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: what 'verified original sender through the forwarding arrangement' can and cannot mean before the intake cell has inspected the mailbox (which header fields your fixtures assume exist); whether the owner named here is the right maintainer; and what an operator still cannot see from the policy file alone. No verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "Evidence assembled for 3.0.0_SA_CVO from: the AnalysisRequest.sender_evidence contract (IB-s-18); surprise row IRPT_BCKEND-S3 (the mailbox implementation is UNVERIFIED); data/firm_registry.json's own _meta.authority; iam_firm_conditions.tf read against the trust-only get-role evidence; S17-AC3's export-prefix finding re-read against this policy's destinations. NOT self-graded (spine v3 L9).",
+      "output_evidence": "RECORDED FOR L9, NO VERDICT.\n\n1. WHAT 'VERIFIED ORIGINAL SENDER THROUGH THE FORWARDING ARRANGEMENT' CAN AND CANNOT MEAN BEFORE IB-s-6 HAS INSPECTED A REAL MAILBOX. This cell's fixtures assume the SHARED AnalysisRequest.sender_evidence contract shape verbatim (IB-s-18): verified (VERIFIED/UNVERIFIED/REJECTED), original_sender_address, verification_method (FORWARDING_ARRANGEMENT_HEADERS/ORIGINAL_MIME/UNKNOWN), display_from_used (bool). WHAT THIS CAN MEAN TODAY: a FIELD-LEVEL contract that four downstream cells (this one, B6, B7, B9 via AnalysisRequest) all validate against, so a change to the evidence shape breaks visibly rather than silently. WHAT IT CANNOT MEAN YET: the METHOD BY WHICH those four fields are actually populated. Row IRPT_BCKEND-S3 (filed at IB-s-18's cut) already records that the brief names NO existing Graph/certificate mailbox implementation and that infra/aws/ec2/opal-gateway/app/config.py is an UNVERIFIED candidate. Until B6 inspects that gateway (or whatever mailbox client actually exists) and states EXACTLY which Graph API fields it reads -- Internet Message Headers 'Authentication-Results', a DKIM/SPF verdict, the raw MIME From vs a forwarding X-header -- this cell's verified='VERIFIED' fixtures are a HYPOTHESIS about what B6 will produce, not a measurement of it. Concretely: 'FORWARDING_ARRANGEMENT_HEADERS' as a verification_method NAMES a mechanism (headers set by a trusted forwarding arrangement) that this cell has never seen a real header for. If the real mailbox implementation turns out to verify via SPF/DKIM alignment instead of a forwarding header, the enum value ORIGINAL_MIME might be the truer label, or a third value may be needed -- and gate.py's _VALID_METHODS tuple would need a matching edit, which is exactly the kind of drift a single shared contract is supposed to prevent but cannot prevent for a field whose REAL values are still unmeasured. This cell's SPOOFING check (display_from_used != False) is the one arm I am confident survives contact with the real mailbox regardless of method, because the shared contract's const:false is a STATEMENT ABOUT THE FIELD'S MEANING, not about how it is measured.\n\n2. IS THE OWNER NAMED HERE THE RIGHT MAINTAINER? '0.7.0_AE_CloudOps' is the decomposition's OWN assignment (s.2), not my choice, and I did not second-guess it -- but I can name what the choice implies and what it does not settle. AE_CloudOps is the estate's cloud-infrastructure seat; the policy IS infrastructure (Terraform, IAM, S3 layout) so the assignment is coherent on THAT axis. What it does NOT settle: the policy also encodes a BUSINESS decision (which domains map to which firms, and the special-casing of the Opal domain), and a firm's own domain change (a rebrand, a new sending domain) is a data/firm_registry.json edit that AE_CloudOps does not own end to end -- data/firm_registry.json's own _meta names NFRA_PSTMRT / an Andrew-direct handover as its authority, a DIFFERENT owner than 0.7.0_AE_CloudOps. So today: the registry's OWNER and the policy DOCUMENT's owner are two different seats, joined only by test_policy_completeness.py's assertion that their firm SETS agree -- the test cannot verify that the RIGHT PERSON was consulted when a firm's domain (as opposed to its presence) changes, only that the firm ID sets stay in sync. A firm whose email_domain is edited in place (not added or removed) passes completeness silently while re-routing every future message from that firm's old domain to Quarantined -- worth a second owner's eyes specifically on domain EDITS, not just adds.\n\n3. WHAT AN OPERATOR STILL CANNOT SEE FROM firm_destination_policy.json ALONE. (i) WHETHER THE IAM CONDITIONS ACTUALLY ENFORCE WHAT THE POLICY DECLARES. The JSON names an execution_role per firm; nothing in the file states that role's policy is SCOPED to that firm's prefix -- that fact lives in iam_firm_conditions.tf and was verified separately (get-role read the TRUST policy only; the ATTACHED permission policy's content was verified by 0-diff terraform plan, a DIFFERENT instrument, not by reading this JSON). A reader trusting the JSON alone would be trusting a claim the JSON cannot itself prove. (ii) WHETHER A GIVEN ROLE HAS EVER BEEN ASSUMED. No Lambda exists yet; the roles are live but unused, and row IRPT_BCKEND-W1-S6 records that comp-iam's own census cannot see this either. (iii) THE EXPORT-DESTINATION GAP IB-s-17's S17-AC3 ALREADY NAMED, WHICH THIS POLICY DOES NOT CLOSE. This policy's destinations mirror layout.json's three families exactly (intake, requests, generations, plus the three generation artifacts); it inherits IB-s-17's finding that a PERFORMANCE export -- one with no YCharts generation attempt to nest under -- has no declared prefix and therefore no enumerated destination or IAM condition here either. IB-s-14 will hit this gap directly. (iv) WHETHER QUARANTINE IS EVER DRAINED. The policy names quarantine's prefix and role; nothing anywhere (this cell, IB-s-17, or the decomposition as read so far) names a process that reviews or ages out a quarantined item -- it is a write-only destination with no declared reader. (v) THAT policy_version '1' HAS NEVER CHANGED. A single version string with no history gives an operator no way to tell 'this is the first version' from 'this has been silently regenerated many times with no version bump' -- the local_file resource has no logic that increments it, so a future edit to roles.tf would apply under the SAME version number unless a human remembers to bump it by hand.",
+      "denominator": "4 evidence fields assumed from one shared contract against 1 UNVERIFIED mailbox implementation; 2 distinct owners (policy vs registry) joined by 1 completeness assertion that covers only the firm-id set, not domain edits; 5 things an operator cannot see from the policy file alone",
+      "expect": "JUDGMENT -- graded by 3.0.0_SA_CVO at L9; no worker verdict recorded",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: graded at L9 by 3.0.0_SA_CVO and explicitly NOT self-graded ('No verdict'). The substitute oracle for head 1 -- whether the evidence shape survives contact with a real mailbox -- is IB-s-6's own measurement, which does not exist yet; this record states that limit rather than converting it into a claim."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The load-bearing claims are that a firm's destination is only ever its own, that a cross-firm/spoofed/contradictory/unknown origin never binds, and that a bound firm cannot be reassigned. FOUR red-first mutants, TWO of which found real gaps in the FIRST draft of the battery/tests rather than in gate.py itself, and BOTH are fixed and reported here rather than quietly patched. (1) Disabling destination_for's cross-firm check (arm b) fired cleanly first try. (2) Disabling the spoofing signal (arm c) CRASHED the battery with an AttributeError -- a spoofed fixture that wrongly bound has no .reason attribute, and the printer assumed every outcome carried one. Fixed to report the wrong bind as data instead of crashing on it. (3) Disabling BoundRequest.__setattr__'s raise (arm d) did NOT fire against the criterion's own three named attempts (set/rebind/delete on .firm_id) -- because .firm_id is a read-only PROPERTY with no setter, so Python's own descriptor protocol independently blocks all three regardless of __setattr__. This is a WEAK mutant that exposed a real design fact (immutability here is TWO-LAYERED, not one) rather than a real gap; the test suite and battery were both strengthened with a FOURTH attempt against `_binding`, an actual __slots__ member the property does not protect, which DOES discriminate the mutation. (4) Pointing the battery's arm (f) at a nonexistent role name fired cleanly.",
+      "expected": "Each mutant must produce rc=1, WITHHOLD the token, print an arm-tagged ERROR line, and restore byte-for-byte. A mutant that instead crashes uncontrolled, or that a criterion's own literal wording lets survive via an UNRELATED mechanism, is named as such rather than counted as a pass.",
+      "observed": "4 of 4 FIRED-AS-EXPECTED after both fixes. (b) cross-firm refusal disabled -> rc=1, 'a cross-firm destination request did NOT raise'. (c) spoofing signal disabled -> rc=1, 'spoofed display-From: never_firm=False right_type=False detail=BOUND to firm_id=\\'49financial\\' -- THIS FIXTURE SHOULD NEVER HAVE BOUND'. (d) __setattr__ disabled -> rc=1, 'only 3 of 4 mutation attempts raised' (the internal-slot attempt succeeding under the mutation, the property-guarded ones still blocked independently -- exactly the asymmetry the fourth attempt was added to surface). (f) nonexistent role -> rc=1, 'irpt-core-firm-nonexistent: rc=255 assumes_lambda=False'. All four files restored byte-for-byte (sha256 compared, 4 of 4 equal), battery green at rc=0 with the token before and after. 20 of 20 gate tests and the completeness suite were re-run clean after both battery fixes and the new test was added.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Arms (a)-(d) are pure in-memory computation over the applied policy JSON, no AWS call. Arm (e) runs pytest twice in subprocesses against fixed files (one real, one scratch-generated deterministically from the real registry plus one literal appended firm). Arm (f) makes 4 read-only get-role calls plus a ledger check and two git reads.",
+      "observed": "Every green run produced identical counts: 3 of 3 firms x 6 of 6 kinds, 4 of 4 immutability attempts, 4 of 4 fixtures with the same outcome types and reason text, 20 of 20 tests, 4 of 4 roles with trust confirmed. The battery was run to completion at least eight times across development, the pre-close read, the graded run, and the four mutant cycles (each run twice: mutated and restored), and every green run's printed counts matched.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any read of a real mailbox or creation of a real request.",
+      "reason": "The order's bound: sender evidence in this cell is FIXTURES; the intake is IB-s-6's. S5-AC3 head 1 names exactly what remains unmeasured until that cell inspects a real mailbox."
+    },
+    {
+      "item": "Widening any existing role, or attaching a permission to a role used by another project.",
+      "reason": "The four roles are NEW stubs created by this cell; no existing role's policy was touched."
+    },
+    {
+      "item": "A KMS grant, a DynamoDB permission, or an SQS permission on any of the four new roles.",
+      "reason": "comp-iam reads ZERO investor-reporting roles that need one yet -- no Lambda exists to run under these roles. Each later cell that runs code under one of these roles attaches the permissions IT needs, scoped to what IT does (iam_firm_conditions.tf's own header comment)."
+    },
+    {
+      "item": "A fourth prefix family covering the performance-export gap S17-AC3 named.",
+      "reason": "This policy mirrors layout.json's declared families exactly. IB-s-5 binds to whatever that file declares; it does not invent a family layout.json does not carry. Recorded again in S5-AC3 head 3(iii) for IB-s-14 and the CVO."
+    },
+    {
+      "item": "A version-bump mechanism on policy_version.",
+      "reason": "Not named in the PRD row or the decomposition. S5-AC3 head 3(v) records its absence as a standing property rather than filling it silently."
+    },
+    {
+      "item": "A change to gate.py's _VALID_METHODS enum or verification_method handling based on a guess about what B6's real mailbox client will produce.",
+      "reason": "S5-AC3 head 1 states plainly that this is a hypothesis until B6 measures it; changing the enum now would be guessing twice."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W1-S6: the preflight named comp-iam service irpt-core / comp-iam gaps as the Phase 1/2 reads for this cell's role. Post-apply, both see nothing: comp-iam stats reads 191 roles unchanged before and after, while the same apply's own comp-tagauthz sweep (a live iam:GetAccountAuthorizationDetails call) counts 231, confirming the four roles are real. comp-iam's static census walks backward from a Lambda/EC2 service definition to its role; a role stub with no compute assuming it yet has no entry point into that walk. Not a gap finding -- an absence from the tool's population. OBSERVATION, INERT."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "the S5-AC1 battery (this worker's)",
+      "invocation": "timeout 300 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_s_5.py",
+      "result": "rc=0 -- 'arms: 6 of 6 evaluated; arms holding: 6 of 6; assertions failed: 0' then 'IBS5-POLICY-BOUND'. 4 read-only get-role calls."
+    },
+    {
+      "tool": ".tools/safe-apply.sh (NEVER-9)",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/core apply -auto-approve -no-color -input=false",
+      "result": "rc=0 -- 'Apply complete! Resources: 13 added, 0 changed, 0 destroyed.' halt-gate scanned issuer 2.0.0_SA_COO~B; comp-tagauthz PASSED (0 candidates); tombstone-gate CLEAN on 13 creates vs 7 tombstones."
+    },
+    {
+      "tool": ".tools/terraform.exe v1.9.8 (the worktree-provisioned binary)",
+      "invocation": "-chdir=infra/aws/terraform/investor-reporting/core init | plan (x2)",
+      "result": "init rc=0; pre-apply plan '13 to add, 0 to change, 0 to destroy'; post-apply plan 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "tool": "terraform fmt (own-file hygiene, scoped to files this cell authored)",
+      "invocation": "terraform fmt -check -diff infra/aws/terraform/investor-reporting/core/{roles,iam_firm_conditions,outputs}.tf",
+      "result": "roles.tf needed one alignment fix (applied, verified clean after); iam_firm_conditions.tf and outputs.tf were already clean. main.tf/s3.tf/sqs.tf carry PRE-EXISTING fmt drift from IB-s-17 and were left untouched -- not this cell's file, not fixed (BOUNDS: never fix a neighbouring defect)."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (NEVER-2)",
+      "invocation": "open --slug irpt-bckend-s5 (4 legs, window 4h); close-leg x4; close; check",
+      "result": "OPENED before the act, committed at 68551e7e40 with its sentinel; all four legs closed on their own proof; CLOSED and committed at fd7382ef68 BEFORE the grading reads."
+    },
+    {
+      "tool": "pytest (the gate suite and the completeness suite, by their own file paths)",
+      "invocation": "python -m pytest infra/aws/lambda/investor-reporting/_gate/tests/ -q --color=no",
+      "result": "rc=0, 20 passed (test_gate.py) + 3 passed (test_policy_completeness.py, via the same collection). Run BY PATH, never by directory-only collection."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (rule 14)",
+      "invocation": "bash .tools/commit-gate.sh gate.py test_gate.py test_policy_completeness.py battery_ib_s_5.py",
+      "result": "rc=0 -- 'All checks passed!' x4, 'OK: pre-commit gate clean for 4 of 4 file(s)'."
+    },
+    {
+      "tool": "comp-iam (stats, roles, service, role) -- the preflight's OWN named instrument",
+      "invocation": "comp-iam stats; comp-iam service irpt-core; comp-iam role irpt-core-firm-49financial",
+      "result": "191 roles parsed, unchanged pre/post-apply; 'No service matching irpt-core'; 'No role matching irpt-core-firm-49financial' -- the tool's population does not include this cell's roles (row IRPT_BCKEND-W1-S6). Cross-checked against the LIVE plane via the apply's own comp-tagauthz sweep (231 roles), confirming the roles exist and the miss is the tool's."
+    },
+    {
+      "tool": "four red-first mutants (.scratch/mutants5.py)",
+      "invocation": "each mutant applied to the real deliverable, battery re-run, file restored from its original bytes, restore verified by sha256",
+      "result": "4 of 4 FIRED-AS-EXPECTED after fixing two battery defects the mutants themselves exposed (an unguarded .reason read that crashed on arm c; a weak mutant on arm d that needed a slot-targeting fourth attempt). 4 of 4 restored, battery green before and after."
+    }
+  ]
+}
