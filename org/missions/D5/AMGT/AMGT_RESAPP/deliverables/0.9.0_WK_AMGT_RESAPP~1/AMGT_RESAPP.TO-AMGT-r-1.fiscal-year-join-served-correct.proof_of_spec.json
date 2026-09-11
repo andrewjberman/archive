@@ -1,0 +1,220 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-r-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-r-1.fiscal-year-join-served-correct.md",
+    "group": "OTHER",
+    "vintage_commit": "3730474e77e1a9c930eb0e77380ee7567c540aa0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "3d2d7af6e076563fe241f36b5a4e80124e0110c2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-r-1.fiscal-year-join-served-correct.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/fye_join.py",
+      "kind": "script",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THE FIX: a join module beside model_block_pull.py, never touching or replacing its own merge_by_fiscal_year (which stays importable as the control's defect arm). fiscal_period_join re-keys the group to the date a fundamentals row is itself dated at (never date[:4], never an assumed December FYE) and pairs the nearest price on/before that date from whichever price rows are handed to it. Exercised live via derive_fye_fixed.py on all 3 landed securities (max gaps 2/2/3 days) and via test_fye_join.py (AC1).",
+      "introduces": ["fiscal_period_join", "extract_price_series", "_nearest_price", "max_gap_days"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/pull_baba_daily_px.py",
+      "kind": "script",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A box-side script run directly under python; health-checked (bloomberg_health ok:true), never signed in. Exercised live: landed 2514 DAILY PX_LAST rows for BABA US Equity (the SAME already-landed security, no new unique name -- F2/G-24) at raw/bloomberg/BABA_US_Equity/20260911T073221Z/histdata_daily_px.json, and appended one HistoricalDataRequest entry to pull_log.json.",
+      "introduces": ["main"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/derive_fye_fixed.py",
+      "kind": "script",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Reads raw bytes back from S3 (never an in-process result), runs fye_join.fiscal_period_join per security, and lands the served block at derived/model_block_fye/<security_key>/<stamp>/model_block_fye.json -- a DISTINCT engine name from AMGT-s-1's model_block/, so nothing already served is overwritten or aliased. Exercised live: 3 of 3 securities derived, max_gap_days 2/2/3.",
+      "introduces": ["derive_one"],
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_fye_join.py",
+      "kind": "test",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "runnable as `python -m pytest integrations/bloomberg/research/tests/test_fye_join.py -q`; reads BABA's raw histdata.json and the dense daily PX_LAST landing straight from S3 (never a fixture); rc 0, '2 passed' both this run and the determinism re-run.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_join_fye.py",
+      "kind": "test",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "runnable as `python .../check_join_fye.py`; reads the SERVED block (derive_fye_fixed.py's landed derived/model_block_fye/ JSON), never the pull log; rc 0, identical 3-line output across two runs (determinism control).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_fye_BABA_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a local copy of BABA's latest landed model_block_fye.json (stamp 20260911T073934Z): 10 fiscal years, max_gap_days 3, every period_end/price/price_date/gap_days field populated.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_fye_BA_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a local copy of BA's latest landed model_block_fye.json (stamp 20260911T073934Z): 10 fiscal years, max_gap_days 2.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_fye_SAP_GY_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a local copy of SAP's latest landed model_block_fye.json (stamp 20260911T073934Z): 10 fiscal years, max_gap_days 2.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/pull_log.json",
+      "kind": "config_data",
+      "commit_or_etag": "17f7cba83435ccd721e0275a2ec947122b98bc66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the DAILY re-pull appended one request for BABA US Equity (already-landed security); the artifact AC3 reads directly.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1ab5ecf5a0802e766fa517896d4f6fd83decfb01",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row AMGT_RESAPP-Z-W1-S5 appended; surprise-row-gate.py OK: 1 new row(s) of 25 total checked (24 pre-existing, NOT re-graded)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line beginning \"2 passed\" with no \"failed\" -- on BABA's landed data: (1) the CALENDAR-YEAR grouping control mispairs a period-end fundamental with a price ~9 months off and FAILS a same-period-alignment assertion (the defect, demonstrated); (2) the FISCAL-PERIOD grouping PASSES it (the fix, the difference arm). Fewer than 2, or a control that does not fail under calendar-year grouping, is NOT met",
+      "method": "test_suite",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_fye_join.py -q 2>&1 | tail -1",
+      "output_evidence": "2 passed in 2.96s",
+      "denominator": "2 of 2 tests passed: test_calendar_year_grouping_fails_same_period_alignment (asserts max_gap > 180 days on BABA's raw data under round 1's unmodified merge_by_fiscal_year; measured 274 days, assertion holds) and test_fiscal_period_grouping_passes_same_period_alignment (asserts max_gap <= 45 days under fye_join.fiscal_period_join with the dense daily price series; measured 3 days, assertion holds)",
+      "status": "PASS",
+      "expect": "^2 passed.*(?<!failed)$"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a line per landed security ending \"max fundamental-to-price gap N days\" with N under 45 for EVERY security including BABA (the fiscal-period join aligns the price to the period end); any security with a gap above 180 days is the calendar-year defect and is NOT met -- read from the served block, not the pull log",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_join_fye.py",
+      "output_evidence": "FYE JOIN: SAP GY Equity -> max fundamental-to-price gap 2 days\nFYE JOIN: BA US Equity -> max fundamental-to-price gap 2 days\nFYE JOIN: BABA US Equity -> max fundamental-to-price gap 3 days",
+      "denominator": "3 of 3 landed securities, each gap read from its own latest derived/model_block_fye/<security_key>/<stamp>/model_block_fye.json (never pull_log.json); all 3 under the 45-day bar, none above 180",
+      "status": "PASS",
+      "expect": "max fundamental-to-price gap \\d+ days"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"unique securities requested\" of 3 or fewer -- NEGATIVE: the fix and its control re-used BABA and added no new unique security (F2)",
+      "method": "command",
+      "invocation": "python -c \"import json; l=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/pull_log.json')); print('unique securities requested', len(set(l['securities'])))\"",
+      "output_evidence": "unique securities requested 3",
+      "denominator": "3 of 3 unique securities across all pull_log.json entries (SAP GY Equity, BA US Equity, BABA US Equity); the DAILY re-pull this cell ran added another BABA US Equity entry (now 5 total requests logged) but 0 new unique names",
+      "status": "PASS",
+      "expect": "unique securities requested [1-3]$"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "pick one BABA fiscal year -- is the price beside its fundamentals the one an analyst would defend as \"as of that period end\", and would the same join be correct for a December filer (the fix is general, not a BABA special case)?",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_fye_BABA_US_Equity.json's FY2025 record, and fye_join.py's fiscal_period_join/_nearest_price",
+      "output_evidence": "BABA US Equity FY2025 record (model_block_fye_BABA_US_Equity.json): period_end \"2025-03-31\", price 132.23, price_date \"2025-03-31\", gap_days 0, IS_EPS 55.12, SALES_REV_TURN 996347.0, EBITDA_ADJUSTED 209364.0 -- the price landed on the exact fiscal period-end trading day, so an analyst asked 'as of when' answers with BABA's own FY2025 close, not a December snapshot ~9 months later. Generality: fiscal_period_join reads the period end off whichever date a fundamentals-bearing row itself carries (never a hardcoded month) and pairs the nearest on/before price from whatever series is supplied; on SAP GY Equity and BA US Equity (both December filers) the SAME function, with no dense series supplied, measures 2-day gaps from their own already-landed annual data -- the December case is not special-cased, it simply already had a dense-enough series to begin with.",
+      "denominator": "N/A -- judgment criterion, read against the deliverable and the join module, no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, not self-graded here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "fye_join.fiscal_period_join's load-bearing behavior is that it uses the DENSE price series (dense_price_rows) when supplied, rather than silently falling back to the coarse annual series that produces the ~274-day defect gap. .scratch/mutant_test_fye_join.py (not committed) calls the REAL function (with BABA's daily price series, as the passing AC1 test does) and a MUTANT call that drops dense_price_rows (simulating a plumbing bug in the fix).",
+      "expected": "REAL call: max_gap_days <= 45 (passes the same-period-alignment bar). MUTANT call (dense series dropped): max_gap_days > 45 (fails it) -- the same signature as round 1's calendar-year defect.",
+      "observed": "REAL (dense price plumbed): max_gap_days=3, <=45? True. MUTANT (dense price dropped): max_gap_days=274, <=45? False. CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "check_join_fye.py and the pytest suite (test_fye_join.py) each run twice against the live (unchanged) S3 state.",
+      "observed": "check_join_fye.py: identical 3-line output both runs (SAP 2 days, BA 2 days, BABA 3 days). pytest: '2 passed' both runs (2.96s and 2.34s wall time, same pass/fail outcome).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Modifying or overwriting AMGT-s-1's own served model_block_<SECURITY>.json / derived/model_block/ artifacts",
+      "reason": "Treated as READ per the task order's own instruction ('AMGT-s-1's deliverables and the store are READ'). The fix lands a NEW, distinct served artifact (model_block_fye_<SECURITY>.json / derived/model_block_fye/) rather than mutating what AMGT-s-3/AMGT-s-5's render consumers already depend on."
+    },
+    {
+      "item": "Wiring the fiscal-period join into the render/print path (AMGT-s-3's provenance face, AMGT-s-5's print renderer)",
+      "reason": "Out of this cell's WHAT TO PRODUCE (the join fix, its control, and the readback only); those cells' own consumers are a different worker's <paths>, not this order's write surface."
+    },
+    {
+      "item": "Testing FISCAL_YEAR_END alternatives, or otherwise resolving the CRO's field map gap",
+      "reason": "Filed as surprise row AMGT_RESAPP-Z-W1-S5: the cell's own bound is satisfiable without that field (the period end is read off the record's own dates), and repairing the CRO's field-map document is outside this worker's <paths>."
+    },
+    {
+      "item": "A fourth security, or re-pulling SAP GY Equity / BA US Equity",
+      "reason": "F2/G-24 + this cell's own BOUNDS: BABA US Equity is already landed and is the only security this fix's control needs; SAP and BA's already-landed annual data was sufficient (2-day gaps) with no re-pull."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W1-S5: the cell's bound (a) names 'Bloomberg's fiscal-period fields the CRO mapped' as the source for the issuer's FYE month, but the CRO's field map records FISCAL_YEAR_END as BAD_FLD/INVALID_FIELD with no alternative tested -- no such field exists for this coverage. The fix reads the fiscal period end off the DATE a fundamentals-bearing row is itself reported on (already present in every landed histdata.json), never off a FISCAL_YEAR_END lookup and never an assumed December FYE. Non-blocking; AC1/AC2 both pass on the implemented (date-of-record) method."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bloomberg_health (blp_client.health, pre-flight for the re-pull)",
+      "invocation": "python -c \"import sys; sys.path.insert(0,'integrations/bloomberg/mcp'); import blp_client; print(blp_client.health())\"",
+      "result": "rc 0; {'ok': True, 'endpoint': '127.0.0.1:8194', 'service': '//blp/refdata'} -- checked before pull_baba_daily_px.py ran, never a sign-in"
+    },
+    {
+      "tool": "pull_baba_daily_px.py",
+      "invocation": "python integrations/bloomberg/research/pull_baba_daily_px.py",
+      "result": "rc 0; PULL DAILY PX: BABA US Equity -> 2514 rows landed at s3://opal-data-research/raw/bloomberg/BABA_US_Equity/20260911T073221Z/histdata_daily_px.json"
+    },
+    {
+      "tool": "derive_fye_fixed.py",
+      "invocation": "python integrations/bloomberg/research/derive_fye_fixed.py",
+      "result": "rc 0; DERIVE FYE DONE: 3 of 3 securities derived (SAP GY Equity max_gap_days=2, BA US Equity max_gap_days=2, BABA US Equity max_gap_days=3)"
+    },
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_fye_join.py -q",
+      "result": "rc 0; 2 passed (run twice, identical outcome, see controls.determinism)"
+    },
+    {
+      "tool": "check_join_fye.py (AC2)",
+      "invocation": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_join_fye.py",
+      "result": "rc 0; identical 3-line output across two runs (SAP 2 days, BA 2 days, BABA 3 days)"
+    },
+    {
+      "tool": ".scratch/mutant_test_fye_join.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/mutant_test_fye_join.py",
+      "result": "rc 0; REAL (dense price plumbed) max_gap_days=3; MUTANT (dense price dropped) max_gap_days=274; CONTROL FIRED-AS-EXPECTED"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh integrations/bloomberg/research/fye_join.py integrations/bloomberg/research/pull_baba_daily_px.py integrations/bloomberg/research/derive_fye_fixed.py integrations/bloomberg/research/tests/test_fye_join.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/check_join_fye.py",
+      "result": "OK: pre-commit gate clean for 5 of 5 file(s)"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate + surprise-row-gate + to-pipeline-gate + missions-tree-check pre-commit chain)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~1 <0.9.0_WK_AMGT_RESAPP~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit 1 (17f7cba834): code+data, commit-gate OK 5 of 9 checkable files, surprise-row-gate OK (no rows in this commit). commit 2 (1ab5ecf5a0): investigation file, surprise-row-gate OK: 1 new row(s) of 25 total checked (24 pre-existing, NOT re-graded)."
+    }
+  ]
+}
