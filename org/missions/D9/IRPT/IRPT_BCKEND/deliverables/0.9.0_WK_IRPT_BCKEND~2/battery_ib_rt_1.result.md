@@ -101,8 +101,17 @@ for a non-conformance. None validates, for a reason that is structural rather th
 
 * **The eleven published schemas are DOCUMENT contracts, not RESPONSE contracts.** They are the
   PRD CONTRACTS table's artifacts. Two of them can never be an HTTP response at all:
-  `AnalysisRequest` is the queue message the intake produces, and `FirmDestinationPolicy` is firm
-  configuration.
+  `AnalysisRequest` is the queue message the intake produces, and `RenderPackage` is the package
+  handed to the export renderer.
+  **CORRECTED IN PLACE, and row `IRPT_BCKEND-W2-S17` is its notice:** this sentence first named
+  `FirmDestinationPolicy`, which is not one of the eleven -- it exists in this project as
+  `firm_destination_policy.json` inside the intake and ycharts zips, which is why the wrong name
+  was plausible. The eleventh published schema is `RenderPackage`. The claim survives the
+  substitution and arm (b)'s `0 of 11` is unaffected. Row `IRPT_BCKEND-W2-S16`, which carries the
+  same sentence, is **not** edited: the channel is append-only and W2-S17 corrects it there.
+  **`RenderPackage` also inverts this cell's governing bound for exactly one contract:** its
+  `x-contract` names the **producer as FNTEND** and the consumer as BCKEND B14. It is the one of
+  the eleven the frontend defines and this backend conforms to.
 * **The six handlers return three different envelopes.** `directory/handler.py` returns
   `{ok, op, result, reason}`; `performance`, `narrative` and `export` return the API-Gateway
   `{statusCode, body}`; `ycharts/generate/job.py` returns
@@ -196,6 +205,7 @@ is left **unedited** -- it is the only artifact showing the STOP was taken befor
 | `IRPT_BCKEND-W2-S14` | OBSERVATION / INERT | field naming is totally disjoint: 194 of 293 producer names snake, 0 camel; 139 of 220 consumer keys camel, 0 snake; 55 of 194 match only after camelizing |
 | `IRPT_BCKEND-W2-S15` | OBSERVATION / INERT | `ops/status.py` builds its own S3 client -- the in-process reach limit, named not hidden |
 | `IRPT_BCKEND-W2-S16` | **BLOCKING / ARMED** | the published schemas are document contracts, not response contracts; **0 of 7** reachable operations validate; disarm owner `2.0.0_SA_COO~B` |
+| `IRPT_BCKEND-W2-S17` | OBSERVATION / INERT | **self-correction on W2-S16**, filed rather than edited: the eleventh published schema is `RenderPackage`, not `FirmDestinationPolicy` -- and `RenderPackage` is the one contract of the eleven the **frontend** produces |
 
 ---
 
