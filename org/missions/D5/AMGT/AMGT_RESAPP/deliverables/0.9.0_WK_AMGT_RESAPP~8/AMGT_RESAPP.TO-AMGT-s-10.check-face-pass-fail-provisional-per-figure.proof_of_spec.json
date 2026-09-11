@@ -1,0 +1,296 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-s-10",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-s-10.check-face-pass-fail-provisional-per-figure.md",
+  "group": "OTHER",
+  "vintage_commit": "f8c76bd3a4"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "ed25feaee5",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-s-10.check-face-pass-fail-provisional-per-figure.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~8",
+ "session_log": "AMGT_RESAPP.TO-AMGT-s-10, cell AMGT-s-10, round 1, same slot as AMGT-s-11. Worker 0.9.0_WK_AMGT_RESAPP~8, branch wk-AMGT_RESAPP-1-8 in worktree C:/tmp/wk-amgt-1-8, fast-forwarded to SITEZ @f8c76bd3a4 by the issuer between orders (carrying AMGT-s-1's landed model blocks and this worker's own AMGT-s-11 rules module). THE BAR FIRST: branch read wk-AMGT_RESAPP-1-8 at f8c76bd3a4 (matched the issuer's stated hash) and org/ + .tools/ both present (TREE-OK); TO status flipped staged->pending as the first act. THE WORK: lib/research/checkface/ applies AMGT-s-11's figure rule (READ-ONLY, applied exactly as shipped -- not modified) to every figure in a landed model_block.json. The rule's qualify() reads a single `unit_status` field; a landed figure carries separate `unit`/`sign` free-text fields and an optional `currency_caveat`, so run_checks.unit_status_for() is the ADAPTER this cell contributes: unit text containing 'INFERRED' -> 'INFERRED'; the 'SEE field_map.json ... not yet built' placeholder AMGT-s-1 itself prints -> 'NOT-YET-BUILT'; sign text containing 'UNRESOLVED' -> 'SIGN-UNRESOLVED' (all three fall to the rule's existing REFUSE branch, since none is 'MEASURED' or 'PENDING'); a live `currency_caveat` -> 'PENDING' (PROVISIONAL); otherwise -> 'MEASURED' (PASS). No new verdict, no new numeric constant -- only the routing into the rule's three EXISTING buckets. RUN OVER THE THREE REAL BLOCKS AMGT-s-1 LANDED, count-in==count-out on all three: SAP_GY_Equity 203 figures, 203 PASS/0 REFUSE/0 PROVISIONAL (the clean case); BA_US_Equity 179 figures, 169 PASS/10 REFUSE/0 PROVISIONAL (the 10 REFUSE are all IS_DIV_PER_SHR FY2016-2025, whose `unit` field is AMGT-s-1's own 'not yet built' placeholder -- a REAL refusal on REAL data, not only the fixture); BABA_US_Equity 196 figures, 93 PASS/0 REFUSE/103 PROVISIONAL (the 103 all carry AMGT-s-1's real currency_caveat on the PE/CRNCY reconciliation gap). THE FIXTURE (5 figures, lib/research/checkface/fixtures.py) carries the two NAMED inputs literally: one figure with unit INFERRED, one with sign UNRESOLVED -- both REFUSE with a reason; one PASS; one PROVISIONAL (a currency_caveat matching BABA_US_Equity's real shape). check_face_fixture.md renders PASS as the bare value, REFUSE as '[REFUSED: <reason>]' IN PLACE OF the value (the raw value stays in the JSON, never shown as trusted), PROVISIONAL as '<value> [PROVISIONAL]' -- verified directly: 5 checks in, 5 lines rendered, 2 REFUSED markers, 1 PROVISIONAL marker, 0 empty cells ('|  |' count 0). 3 tests (lib/research/checkface/tests/test_checkface.py): a REFUSE renders marked in place of the value; the SAME figure made MEASURED instead renders its bare value (the difference arm); a 5-figure block yields 5 rendered lines, none dropped. No Bloomberg call, no HTTP client anywhere in the module (AC5, 0 on first run). CONTROLS, both ACTUALLY RUN: (1) figure.py's mutant was already exercised in the prior TO (AMGT-s-11's own proof) and is not repeated here since this cell reads that module read-only; instead this cell's OWN control mutates render_print.render_value() to an unconditional `return str(value)` passthrough -- 2 of 3 tests failed ('2 failed, 1 passed'), reverted, verified byte-identical to the committed file (git diff empty). (2) Determinism: check_face_*.json for all three real blocks regenerated a second time from the same landed input, byte-diffed against the committed copies -- identical on all three. Commits: 26527f9d2c the module, the render, the fixture, the three real check-face runs, the spec section, TO status staged->pending; this commit carries the proof instance and the flip to complete, together per the bar.",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/checkface/__init__.py",
+   "kind": "script",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Package docstring naming the module's shape and the FWD-10/C-MARK-NOT-DEGRADE contract.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2",
+    "AC3",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/checkface/run_checks.py",
+   "kind": "script",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "unit_status_for() (the raw-figure -> rule-input adapter), figure_id(), check_one(), check_block() (count-in==count-out), run_model_block(), run_raw_block(), and the CLI.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/checkface/fixtures.py",
+   "kind": "script",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "FIXTURE_BLOCK: 5 figures carrying the two NAMED refusal inputs (INFERRED unit, UNRESOLVED sign) plus a PASS and a PROVISIONAL (currency_caveat) figure.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/checkface/render_print.py",
+   "kind": "script",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "render_value()/render_markdown(): PASS->bare value, REFUSE->'[REFUSED: reason]' in place of the value, PROVISIONAL->'value [PROVISIONAL]'; pipe-escaped, never an empty cell.",
+   "artifact_covered_by": [
+    "AC3",
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/checkface/tests/test_checkface.py",
+   "kind": "test",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "3 tests: refuse-renders-marked, the difference arm (same figure, MEASURED), N figures -> N rendered lines.",
+   "artifact_covered_by": [
+    "AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_SAP_GY_Equity.json",
+   "kind": "config_data",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "203 figures in, 203 checks out, all PASS.",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_BA_US_Equity.json",
+   "kind": "config_data",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "179 figures in, 179 checks out, 169 PASS + 10 REFUSE (a real REFUSE on landed data).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_BABA_US_Equity.json",
+   "kind": "config_data",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "196 figures in, 196 checks out, 93 PASS + 103 PROVISIONAL (a real PROVISIONAL on landed data).",
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_fixture.json",
+   "kind": "config_data",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "5 figures, 2 PASS/2 REFUSE/1 PROVISIONAL -- the exercise that MUST refuse, exercised.",
+   "artifact_covered_by": [
+    "AC1",
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/model_block_fixture.json",
+   "kind": "config_data",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The raw fixture block (AMGT-s-1's schema) run_checks.py consumed to build check_face_fixture.json.",
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_fixture.md",
+   "kind": "doc",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The print-path render AC3 reads directly.",
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_SAP_GY_Equity.md",
+   "kind": "doc",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Print-path render of the clean 100%-PASS block.",
+   "artifact_covered_by": [
+    "AC6"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_BA_US_Equity.md",
+   "kind": "doc",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Print-path render carrying 10 real REFUSE rows.",
+   "artifact_covered_by": [
+    "AC6"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_BABA_US_Equity.md",
+   "kind": "doc",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Print-path render carrying 103 real PROVISIONAL rows.",
+   "artifact_covered_by": [
+    "AC6"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/SPEC_SECTION_checkface.md",
+   "kind": "doc",
+   "commit_or_etag": "26527f9d2c697679831d24327f3bfa229521c0a9",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Deliverable (d): the at-a-glance contract for AMGT-s-5, with the measured counts as its worked example.",
+   "artifact_covered_by": [
+    "AC6"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-s-10.check-face-pass-fail-provisional-per-figure.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "status pending -> complete rides this same commit, per the bar's own instruction."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "no figure dropped on any real block.",
+   "method": "command",
+   "invocation": "python -c \"import json,glob; out=[]; [out.append((f.split('check_face_')[-1], len(json.load(open(f.replace('check_face_','model_block_').replace('~8','~1')))['figures']) if 'fixture' not in f else None, len(json.load(open(f))['checks']))) for f in glob.glob('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_*.json')]; print('runs', len(out), '| real runs with count in == count out', sum(1 for k,i,o in out if i is not None and i==o), 'of', sum(1 for k,i,o in out if i is not None))\"",
+   "output_evidence": "runs 4 | real runs with count in == count out 3 of 3",
+   "denominator": "4 runs found (3 real + 1 fixture); 3 of 3 real runs have count-in == count-out (203/203 SAP_GY, 179/179 BA_US, 196/196 BABA_US)",
+   "status": "PASS",
+   "expect": "real runs with count in == count out 3 of 3"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "the check refused something, with reasons. The bar that binds all six classes.",
+   "method": "command",
+   "invocation": "python -c \"import json; c=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_fixture.json'))['checks']; v={}; [v.__setitem__(x['verdict'], v.get(x['verdict'],0)+1) for x in c]; print('fixture verdicts', v, '| refusals with a reason', sum(1 for x in c if x['verdict']=='REFUSE' and x.get('reason')))\"",
+   "output_evidence": "fixture verdicts {'PASS': 2, 'REFUSE': 2, 'PROVISIONAL': 1} | refusals with a reason 2",
+   "denominator": "2 REFUSE of 5 fixture figures, both carrying a non-empty reason (2 of 2)",
+   "status": "PASS",
+   "expect": "\\{'PASS': 2, 'REFUSE': 2, 'PROVISIONAL': 1\\}[\\s\\S]*refusals with a reason 2"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "every refusal is a marked value in the render; nothing blank.",
+   "method": "command",
+   "invocation": "python -c \"import io,json; t=io.open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_fixture.md',encoding='utf-8').read(); c=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_fixture.json'))['checks']; print('lines rendered', sum(1 for l in t.splitlines() if l.strip().startswith('|') and not l.strip().startswith('|-') and 'figure' not in l.lower()), '| checks', len(c), '| REFUSED markers', t.count('[REFUSED:'), '| PROVISIONAL markers', t.count('[PROVISIONAL]'), '| empty value cells', t.count('|  |'))\"",
+   "output_evidence": "lines rendered 5 | checks 5 | REFUSED markers 2 | PROVISIONAL markers 1 | empty value cells 0",
+   "denominator": "5 rendered lines == 5 checks; 2 REFUSED markers == the fixture's 2 REFUSE; 1 PROVISIONAL marker == the fixture's 1 PROVISIONAL; 0 empty value cells",
+   "status": "PASS",
+   "expect": "lines rendered 5 \\| checks 5 \\| REFUSED markers 2 \\| PROVISIONAL markers 1 \\| empty value cells 0"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "refuse-renders-marked and pass-renders-value, both arms.",
+   "method": "command",
+   "invocation": "python -m pytest lib/research/checkface/tests -q 2>&1 | tail -1",
+   "output_evidence": "\u001b[32m\u001b[32m\u001b[1m3 passed\u001b[0m\u001b[32m in 0.07s\u001b[0m\u001b[0m",
+   "denominator": "3 of 3 tests (refuse-marked-render, the difference arm, count-preservation N->N)",
+   "status": "PASS",
+   "expect": "3 passed"
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "no fetch -- NEGATIVE: the checks run over landed records; no Bloomberg call, no fetch.",
+   "method": "command",
+   "invocation": "grep -r -c -i -E 'blpapi|blp_client|8194|requests\\.get|httpx' lib/research/checkface/ | grep -v -c ':0$'",
+   "output_evidence": "grep -r -c -i -E 'blpapi|blp_client|8194|requests\\.get|httpx' lib/research/checkface/ | grep -v -c ':0$'\n0\n(0 of 1 sweep: no file under lib/research/checkface/ names blpapi/blp_client/the DAPI port/an HTTP client -- the checks run entirely over already-landed model_block.json records, no fetch)",
+   "denominator": "0 of 1 sweep over lib/research/checkface/",
+   "status": "PASS",
+   "expect": "^0$"
+  },
+  {
+   "criterion_id": "AC6",
+   "criterion_verbatim": "look at the fixture render -- would an analyst tell at a glance which figures failed, and would the real blocks' PROVISIONAL figures (held-back rule) read as \"not yet checked\" rather than as \"fine\"?",
+   "method": "manual_read_with_citation",
+   "invocation": "READ org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/check_face_fixture.md and check_face_BABA_US_Equity.md at commit 26527f9d2c697679831d24327f3bfa229521c0a9",
+   "output_evidence": "check_face_fixture.md's 5 rows: 'Fixture Co' and '500' render plain; '[REFUSED: EBITDA_FIXTURE: unit/sign convention is 'INFERRED', not MEASURED]' and '[REFUSED: CAPEX_FIXTURE: unit/sign convention is 'SIGN-UNRESOLVED', not MEASURED]' render as bracketed text WHERE A NUMBER WOULD BE -- an analyst scanning the column would see a broken-looking cell, not a plausible number, at both REFUSE rows; this is the strongest of the three signals (a REFUSE cannot be mistaken for a value at all). '12345 [PROVISIONAL]' keeps the number visible with a suffix tag -- LESS visually distinct than a REFUSE bracket, since the number is still the dominant text in the cell; AT A GLANCE (a fast scan, not a careful read) a PROVISIONAL row is more likely to be skimmed as 'a number, fine' than a REFUSE row is to be mistaken for one. This is a REAL LIMIT of the current print-path text rendering, named rather than hidden: the task's own s.1 spec section (SPEC_SECTION_checkface.md) says the eventual .tsx needs a DIFFERENT visual marker (colour/icon) for PROVISIONAL precisely because bracket text alone is not equally salient to REFUSE's -- that is a DEFERRED design decision, not something this cell's plaintext render can supply. On BABA_US_Equity.md: 103 of 196 rows carry '[PROVISIONAL]' (real data, not a fixture) -- e.g. 'header:CUR_MKT_CAP | 269839299644.40002 [PROVISIONAL]'. Read against the question's second half ('read as not-yet-checked rather than fine'): the word PROVISIONAL itself denotes non-finality in English, and it sits immediately beside the number rather than, say, in a footnote -- so a reader who reads the word at all should not conclude 'fine'. But 103 of 196 rows (53%) carrying the tag on ONE security is a lot of ink, and a reader scanning quickly across that many tagged rows may habituate to the tag and stop registering it -- a volume effect this cell's render does not address (BA_US's 10-of-179 REFUSE rows are a much smaller fraction and less likely to habituate the same way). DECLARED, NOT RESOLVED: whether 53% PROVISIONAL is itself a signal that the currency_caveat root cause (BABA_US_Equity's PE/CRNCY reconciliation gap) should be chased down rather than carried forward as a per-figure flag is a question for the cell that owns that finding, not this one.",
+   "denominator": "N/A -- judgment row, no mechanical denominator; check_face_fixture.md (5 rows) and check_face_BABA_US_Equity.md (196 rows, 103 PROVISIONAL) read in full at the cited commit",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "judgment": true,
+   "status_reason": "judgment criterion per spine v3 L9 -- graded by 3.0.0_SA_CVO~Z, never self-graded"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "render_print.render_value() mutated to an unconditional `return str(value)` passthrough (deleting the verdict branch entirely) -- this must break the REFUSE-renders-marked test and the difference-arm test (both assert the REFUSE render differs from the bare value), while leaving the count-preservation test untouched (it does not inspect rendered text content, only row counts).",
+   "expected": "test_refuse_renders_marked_value_in_place_of_the_value FAILS; test_same_figure_measured_renders_its_value_the_difference_arm FAILS; test_a_block_of_n_figures_yields_n_check_lines still PASSES",
+   "observed": "ACTUALLY RUN: `python -m pytest lib/research/checkface/tests -q` -> '2 failed, 1 passed in 0.13s' -- FAILED test_refuse_renders_marked_value_in_place_of_the_value (assert False, the rendered text no longer started with '[REFUSED:'), FAILED test_same_figure_measured_renders_its_value_the_difference_arm (assert '999' != '999' -- both arms now render identically, so the difference the test asserts on no longer exists), test_a_block_of_n_figures_yields_n_check_lines PASSED (count preservation is independent of render TEXT). Matches the prediction exactly. Mutant reverted via `cp` from a pre-mutation copy; verified IDENTICAL to the committed file (`git diff -- lib/research/checkface/render_print.py`, empty, and a clean re-run: '3 passed'). The committed module at 26527f9d2c is the pre-mutation, correct version -- the mutant never rode any commit.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The three real check_face_*.json files regenerated a second time (fresh run_model_block() calls over the same landed model_block.json inputs, written to .scratch/rerun/) and diffed byte-for-byte against the committed copies. Two back-to-back runs of `python -m pytest lib/research/checkface/tests -q`.",
+   "observed": "`diff` empty on all three (SAP_GY_Equity, BA_US_Equity, BABA_US_Equity) -- the landed blocks are static JSON and the adapter/rule are pure functions, so the check output is byte-identical across runs. pytest: '3 passed' both runs.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the .tsx page render",
+   "reason": "C-DESIGN-SPEC-FIRST: 'no page until the spec is approved.' This cell delivers the data face and the print-path (Markdown) render; SPEC_SECTION_checkface.md is the section AMGT-s-5 folds into the approved spec before any .tsx exists."
+  },
+  {
+   "item": "a mutation control on lib/research/rules/figure.py itself",
+   "reason": "figure.py is READ ONLY in this order (AMGT-s-11 shipped and proved it, including its own mutant, in the prior TO). This cell's control targets the code IT contributes (render_print.py's render_value()), not the upstream rule."
+  },
+  {
+   "item": "resolving WHY BABA_US_Equity's currency_caveat exists (the PE/CRNCY gap's root cause)",
+   "reason": "out of scope: that finding is AMGT-s-1's own measurement; this cell only renders the caveat as PROVISIONAL, per the figure rule as shipped. Named in AC6's own reading as a question for the cell that owns the finding."
+  }
+ ],
+ "surprises": [],
+ "compiler_tools": [
+  {
+   "tool": "commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh <the 5 .py files this order authored>",
+   "result": "OK: pre-commit gate clean for 5 of 5 file(s) (py_compile + ds-precommit + ruff py39)"
+  },
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest lib/research/checkface/tests -q",
+   "result": "3 passed"
+  },
+  {
+   "tool": "proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~8/AMGT_RESAPP.TO-AMGT-s-10.check-face-pass-fail-provisional-per-figure.proof_of_spec.json AC1,AC2,AC3,AC4,AC5,AC6",
+   "result": "PENDING-THIS-COMMIT (the exit code is the verdict; run before the flip and recorded in the commit message)"
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~8 <0.9.0_WK_AMGT_RESAPP~8@opal.agent>\" -F <msgfile> -- <paths>",
+   "result": "PENDING-THIS-COMMIT (two commits: 26527f9d2c the acts, then this instance with the status flip)"
+  }
+ ]
+}
