@@ -1,0 +1,85 @@
+session STALE -- states: ['BAD_REQUEST', 'BAD_REQUEST']. No capture triggered (v0.9: the dedicated runner owns the login).
+==============================================================================
+IB-rt-9 / RT9-AC1 -- ARM (a) ONLY, under the managed wind-down
+==============================================================================
+(a1) CENSUS -- every reader of ycharts/session/current in the repository
+      DENOMINATOR: 33107 file(s) scanned (git ls-files, tracked) | 58 name the secret | 7 are CODE | 4 of those RESOLVE it (a Secrets Manager read API) | 3 only MENTION it
+      MIGRATED     infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js
+                   the v0.9 runner: leases, fences and persists the versioned bundle
+      MIGRATED     infra/aws/lambda/investor-reporting/ycharts/generate/transport.py
+                   IB-s-9 replay/live transport: holds the bundle by name, verifies schema, identity and transport before resuming
+      RETIRED      infra/aws/lambda/ycharts-session-capture/index.mjs
+                   handler refuses; schedule DISABLED; the probe no longer invokes it
+      MIGRATED     infra/aws/lambda/ycharts-session-probe/lambda_function.py
+                   this cell: fence read + positive allowlist replace the non-403 predicate
+      MENTION      docs/research/investor_reporting_ycharts_auth_20260910/collect_evidence.py
+                   names the secret but calls no Secrets Manager read API
+      MENTION      infra/aws/ec2/investor-reporting-ycharts/tests/fakes.js
+                   names the secret but calls no Secrets Manager read API
+      MENTION      org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_8.py
+                   names the secret but calls no Secrets Manager read API
+  PASS    a1 readers migrated or retired: 4 of 4  --  denominator is the census, not the table
+
+(a2) CENSUS -- legacy any-non-403 authentication predicates
+      DENOMINATOR: 6727 code file(s) scanned, 6174 of them comment/string-stripped | 0 line(s) match (a NEGATIVE 403 comparison AND an authentication word, in CODE)
+  PASS    a2 legacy any-non-403 probes remaining: 0
+  PASS    a2 POSITIVE CONTROL: the detector fires on the retired predicate verbatim  --  the line this cell removed from ycharts-session-probe
+  PASS    a2 NEGATIVE CONTROL: the detector is silent on a correct 403-means-refused line  --  ycharts_session.js:272, which the first shape of this detector wrongly flagged
+
+(a3) DIFFERENCE CONTROL -- old predicate vs new, over a recorded matrix
+      case                     status new state                  new      old      truth
+      healthy json 200         200    AUTHENTICATED              True     True     True
+      hard eviction 403        403    FORBIDDEN_HARD_EVICTION    False    False    False
+      disturbed 403            403    FORBIDDEN_DISTURBED        False    False    False
+      bad params 400           400    BAD_REQUEST                False    True     False
+      unauthenticated 401      401    UNAUTHENTICATED            False    True     False
+      not found 404            404    NOT_FOUND                  False    True     False
+      rate limited 429         429    RATE_LIMITED               False    True     False
+      server error 500         500    SERVER_ERROR               False    True     False
+      waf interstitial 200     200    CHALLENGE                  False    True     False
+      login page 200           200    REDIRECTED_TO_LOGIN        False    True     False
+      redirect to login        302    REDIRECTED_TO_LOGIN        False    True     False
+      transport failure        None   TRANSPORT_ERROR            False    False    False
+      html body, json ctype    200    UNPARSEABLE_BODY           False    True     False
+      teapot 418               418    UNEXPECTED_STATUS          False    True     False
+      DENOMINATOR: 14 recorded case(s) | old predicate wrong on 10 | new predicate wrong on 0 | they disagree on 10
+      OLD-FALSE-GREEN  bad params 400 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  unauthenticated 401 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  not found 404 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  rate limited 429 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  server error 500 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  waf interstitial 200 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  login page 200 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  redirect to login -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  html body, json ctype -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  teapot 418 -- the retired predicate called this authenticated
+  PASS    a3 new predicate correct on every recorded case: 14 of 14
+  PASS    a3 the matrix DISCRIMINATES: the old predicate is wrong on 10 of 14 case(s)  --  a matrix on which both predicates agree proves nothing
+  PASS    a3 every state produced is in the closed vocabulary: 13 of 13  --  outside: []
+
+(a4) THE RETIRED READER, AND THE FENCE THE MIGRATED ONE READS
+  PASS    a4 capture handler refuses on entry
+  PASS    a4 the retirement says WHY in source
+  PASS    a4 the probe no longer invokes the capture Lambda
+      live read: aws events describe-rule --name ycharts-session-capture-schedule -> State=DISABLED
+  PASS    a4 the retired reader's schedule is DISABLED  --  measured live, not asserted from the .tf
+  PASS    a4 a versioned bundle reads OK with its fence: verdict=OK fence=7
+  PASS    a4 legacy flat cookie string bundle is NOT_VERSIONED (not graded stale, not graded fresh): NOT_VERSIONED
+  PASS    a4 legacy field-assembled bundle is NOT_VERSIONED (not graded stale, not graded fresh): NOT_VERSIONED
+  PASS    a4 an unset secret is NOT_CONFIGURED: NOT_CONFIGURED
+  PASS    a4 fence unchanged + all probes authenticated -> FRESH
+  PASS    a4 fence unchanged + a refusal -> STALE
+  PASS    a4 fence ADVANCED mid-probe -> SUPERSEDED, not STALE  --  another runner published a newer session; the reading is discarded
+  PASS    a4 a fence that went BACKWARDS is not SUPERSEDED  --  only a forward fence means someone else published
+  PASS    a4 END TO END: every probe 400 -> verdict=STALE, SessionFresh=[0.0]  --  THE CUTOVER IN ONE LINE: the retired predicate returned fresh=True here
+  PASS    a4 the same run under the OLD predicate would have reported FRESH  --  difference control on the deployed path, not just on classify()
+
+------------------------------------------------------------------------------
+  NOT RUN  (b) FENCING    two capture attempts on the fixture -- not built
+  NOT RUN  (c) ROTATION   publish a new version, old refused -- not built
+  NOT RUN  (d) EVICTION   401 mid-job, ONE refresh, resume at checkpoint -- not built
+  NOT RUN  (e) ABSORBED   ledger + state mv + apply -- FORBIDDEN this session (managed wind-down, 0.0.0_AB_MSTR 2026-09-11 17:30Z)
+  NOT RUN  (f) NO EGRESS  guard log across the whole battery -- not built
+------------------------------------------------------------------------------
+ARM (a) checks failed: 0
+FINAL: ARM-A-ONLY, INCOMPLETE-UNDER-WINDDOWN -- RT9-AC1 is NOT met by this run and its acceptance token is deliberately absent from this output.
