@@ -2,33 +2,50 @@
 
 **Worker:** `0.9.0_WK_IRPT_FNTEND~2` · **Cell:** `FE-s-14` (round 2, decomp v0.2 @430c5fcb4a)
 **Branch (both repos):** `wk-irpt_fntend-2-4-fe-s-14` · **push state:** LOCAL (never pushed; no `ls-remote` claim is made)
-**Workspace worktree:** `/c/tmp/wk-irpt_fntend-2-4-fe-s-14` (HEAD at seating `ffa98ac525`)
+**Workspace worktree:** `/c/tmp/wk-irpt_fntend-2-4-fe-s-14` (HEAD at seating `ffa98ac525`; order AMENDED by the issuer at `25862ece09` -- R1 item 7)
 **Portal worktree:** `/c/tmp/wk-irpt_fntend-2-4-fe-s-14/portal` (base `8cc43736`)
 
 ## VERDICT
 
-**16 of 17 criteria PASS by output; `F14-AC10` FAILS; `F14-AC11` is RECORDED (judgment).**
-**The order stays OPEN.** The proof instance is VALID (`proof-of-spec-check` rc=0) -- and a valid
-instance is not a met order.
+**16 mechanical criteria PASS by output; `F14-AC11` is RECORDED (judgment, graded at L9).**
+**`<status>` flipped to `complete`.** The proof instance is VALID (`proof-of-spec-check` rc=0) and
+every mechanical criterion passes by its own output -- both halves, not one.
 
-`F14-AC10` (`bun test src/pages/InvestorReporting` -> `0 fail`) reads **381 pass, 1 skip, 1 fail**.
-The one failure is `__tests__/fe-s-1/fixtures.test.ts:116`, which asserts that
-`fixtures/smoke/default.json`'s key set EQUALS the eleven flat consumer slugs. R1 item 5 of this
-order re-bases that same file to the eleven DECLARED v1 paths, and `F14-AC16` grades the re-base.
-`__tests__/fe-s-1/` is not in this order's `<paths>`, and the two key sets cannot both hold:
-`IR_OPERATIONS` carries the two operations v1 serves with **no** route and omits
-`holdings-snapshot`, which v1 declares. Filed as **BLOCKING row `IRPT_FNTEND-W2-S10`**, which also
-names the SECOND pin on the same file -- the counterpart's `test_seam_paired.py`, which this branch
-arms for the drain.
+### The one bar that first failed, and how it closed
+
+As first reported, `F14-AC10` (`bun test src/pages/InvestorReporting` -> `0 fail`) read
+**381 pass, 1 skip, 1 fail**. The failure was `__tests__/fe-s-1/fixtures.test.ts:116`, asserting
+that `fixtures/smoke/default.json`'s key set EQUALS the eleven round-1 flat consumer slugs -- while
+R1 item 5 of this same order re-bases that file to the eleven DECLARED v1 paths and `F14-AC16`
+grades the re-base. The two key sets cannot both hold (`IR_OPERATIONS` carries the two operations v1
+serves with **no** route and omits `holdings-snapshot`, which v1 declares), and `__tests__/fe-s-1/`
+was not in the original `<paths>`. This worker refused to flip on a VALID instance with a failing
+bar and filed **BLOCKING row `IRPT_FNTEND-W2-S10`**.
+
+The ISSUER AMENDED the order on that row (workspace `25862ece09`, **R1 item 7**): `__tests__/fe-s-1/`
+is granted for exactly that ONE assertion, which now reads the eleven DECLARED v1 paths from
+`docs/contracts/investor-reporting/v1/routes.json` -- the same set `F14-AC16` grades -- comparing per
+route TEMPLATE, since the keys bind real path parameters no route table can predict. Three lines were
+removed inside that single test (`git diff -U0` -> `@@ -119,3 +145,23 @@`); no other line of
+`__tests__/fe-s-1/` changed, and the file's other eight tests pass untouched. `F14-AC10` now reads
+**382 pass, 1 skip, 0 fail**; `F14-AC1` stays `rc=0`.
+
+**The row is NOT closed by that amendment and was not edited.** Its second pin stands and is not this
+worker's to touch: the counterpart's
+`infra/aws/lambda/investor-reporting/_contracts/tests/test_seam_paired.py` still asserts the OLD
+consumer form (`len(smoke) == 11`, the last-segment set, `consumer_path in smoke`) and will read RED
+against a consumer file that is now MORE conformant, not less, once this branch reaches the primary
+checkout. The issuer carries it to L10.
 
 ## THE BASE THIS ORDER WAS HANDED, AND WHAT IT READS NOW
 
 | | ORDERED BASE `8cc43736` | this branch `e1d78ce6` |
 |---|---|---|
 | `bun run typecheck` | rc=2 (2 errors) | **rc=0** |
-| `bun test src/pages/InvestorReporting` | 351 pass / 1 skip / **6 fail** (55 files) | 381 pass / 1 skip / **1 fail** (60 files) |
+| `bun test src/pages/InvestorReporting` | 351 pass / 1 skip / **6 fail** (55 files) | 382 pass / 1 skip / **0 fail** (60 files) |
 
-All six base failures are repaired. The one remaining failure is new, ordered, and rowed.
+All six base failures are repaired. The seventh -- created by the ordered re-base of
+`default.json`, rowed as `W2-S10` and closed under the amended grant -- is repaired too.
 
 ## CRITERIA
 
@@ -43,7 +60,7 @@ All six base failures are repaired. The one remaining failure is new, ordered, a
 | F14-AC7 | PASS | `DID NOT LAND` (`LOC : /market`) |
 | F14-AC8 | PASS | `GLOBAL PATH: absent` |
 | F14-AC9 | PASS | `CLICKED: Holdings` (internal Global) |
-| F14-AC10 | **FAIL** | `1 fail` -- row `IRPT_FNTEND-W2-S10` |
+| F14-AC10 | PASS | `0 fail` (382 pass / 1 skip / 0 fail across 60 files), after R1 item 7 |
 | F14-AC11 | RECORDED | judgment; four PNGs described in the instance, no verdict |
 | F14-AC12 | PASS | `ROUTES MATCHED: 11 of 11`, `CONSUMER-UNCALLED ROUTES: 3`, `NOT-YET-EXERCISABLE: 1` |
 | F14-AC13 | PASS | `ENVELOPES PARSED: 11 of 11` |
@@ -115,6 +132,13 @@ All six base failures are repaired. The one remaining failure is new, ordered, a
   every composed bundle (row W2-S13).
 - `__tests__/fe-s-14/published-map.test.ts` -- NEW (F14-AC16).
 
+### R1 item 7 -- the one round-1 assertion (commit `9e68a9aa`, the issuer's amendment)
+- `portal/src/pages/InvestorReporting/__tests__/fe-s-1/fixtures.test.ts` -- the assertion pinning
+  `default.json`'s keys reads the eleven DECLARED v1 paths from the contract's own `routes.json`
+  (bidirectional: each route owns exactly one key, each key resolves to exactly one route), with the
+  retired form's count still printed beside it as a recorded number. One hunk, three lines removed,
+  nothing else under `fe-s-1/` touched.
+
 ### R1 item 6 + THE CELL (commit `e1d78ce6`)
 - `src/lib/firmAccess.ts` -- three added lines, nothing else (`+3 -0` against `edab15b5`).
 - `__tests__/fe-s-14/{allowlist,one-firm}.test.ts`, `__tests__/fe-s-14/gen-maps.ts`,
@@ -129,11 +153,9 @@ All six base failures are repaired. The one remaining failure is new, ordered, a
 
 ## WHAT THE ISSUER MUST DECIDE (not decided here)
 
-1. **The default.json collision (W2-S10).** Two files outside this grant pin the old key form:
-   `portal/src/pages/InvestorReporting/__tests__/fe-s-1/fixtures.test.ts` and the counterpart's
-   `infra/aws/lambda/investor-reporting/_contracts/tests/test_seam_paired.py`. Until both are
-   re-based, `F14-AC10` cannot read `0 fail` and the producer's seam test will read RED on a
-   consumer file that is now more conformant, not less.
+1. **The counterpart half of W2-S10, still open.** The portal pin is closed by R1 item 7. The
+   producer's `_contracts/tests/test_seam_paired.py` still asserts the old consumer form and will
+   read RED on the drain; it is the counterpart's file, named in the row and carried to L10.
 2. **The pre-envelope carry (W2-S11).** One line closes it, plus one out-of-grant test edit.
 3. **`submitExport`'s narrowing (W2-S12)** -- interface change or an FE-s-16 read.
 4. **v1 fixtures (W2-S9)** -- publish them, or name the producer package as the fixture source.
