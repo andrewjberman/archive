@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rd-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-1.article-store-table.md",
+    "group": "OTHER",
+    "vintage_commit": "dcbebda22c3f527f051c1a0206cb19f52adfb3df"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "dcbebda22c3f527f051c1a0206cb19f52adfb3df",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-1.article-store-table.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/amgt-resapp/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "b679dcb294c4bdb753176d599b4c4990224e61dd",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "terraform init + validate clean; safe-apply ran this root and created aws_dynamodb_table.amgt_articles (1 added, 0 changed, 0 destroyed); backend s3 key amgt-resapp/tfstate initialized against opal-313476888478-terraform-state.",
+      "introduces": ["amgt-resapp/tfstate", "default_tags"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/amgt-resapp/dynamodb.tf",
+      "kind": "terraform",
+      "commit_or_etag": "b679dcb294c4bdb753176d599b4c4990224e61dd",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "describe-table --table-name opal-amgt-articles: TableStatus ACTIVE, BillingModeSummary.BillingMode PAY_PER_REQUEST -- the live plane matches the declaration, not merely a .tf file.",
+      "introduces": ["opal-amgt-articles", "platform_date_index", "ticker_date_index"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T1722Z_amgt-resapp-rd1-article-store-table_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "c34b41d392176fa2011c22baad019c2d40a357ab",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Change-management ledger for this deploy: OPENED before the safe-apply (commit db28a5d1be) with 3 legs (git/activation/verify), all 3 CLOSED with proof (commit c34b41d392) before this grading read, per NEVER-2. Sentinel org/critical_paths/.open_deploys/amgt-resapp-rd1-article-store-table.json removed by deploy_ledger.py close and its removal committed at c34b41d392 -- confirmed absent from `deploy_ledger.py check`'s 6-of-6 sentinel sweep."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/AMGT_RESAPP.TO-AMGT-rd-1.shape-record.md",
+      "kind": "doc",
+      "commit_or_etag": "b679dcb294c4bdb753176d599b4c4990224e61dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "(c) THE SHAPE RECORD: names the landed attribute set (security_key/published_at key schema, platform_date_index + ticker_date_index GSIs, PITR) beside opal-news-articles' LIVE-measured attribute set (article_date/url_hash key schema, source_date_index GSI, PAY_PER_REQUEST, SSE-KMS, deletion protection), axis by axis, and states GENUINELY SEPARATE against both bounded stores."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"Success! The configuration is valid.\" -- the new module parses and type-checks. A validate error, or a missing module directory, is NOT met",
+      "method": "command",
+      "invocation": "cd infra/aws/terraform/amgt-resapp && timeout 110 terraform validate -no-color 2>&1 | tail -5",
+      "output_evidence": "Success! The configuration is valid.",
+      "denominator": "N/A -- boolean check (valid or not); re-run twice for determinism, identical both times",
+      "status": "PASS",
+      "expect": "Success! The configuration is valid\\."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"opal-amgt-articles\" with TableStatus ACTIVE and BillingMode PAY_PER_REQUEST -- the table is LIVE on the plane, not merely declared in a .tf file. A ResourceNotFoundException means the apply did not land and is NOT met",
+      "method": "live_read",
+      "invocation": "timeout 110 .tools/aws dynamodb describe-table --table-name opal-amgt-articles --query \"Table.[TableName,TableStatus,BillingModeSummary.BillingMode]\" --output text 2>&1 | tail -3",
+      "output_evidence": "opal-amgt-articles\\tACTIVE\\tPAY_PER_REQUEST",
+      "denominator": "N/A -- single live-table read; re-run twice for determinism, identical both times",
+      "status": "PASS",
+      "expect": "opal-amgt-articles.*ACTIVE.*PAY_PER_REQUEST"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a ResourceNotFoundException -- NEGATIVE CONTROL proving AC2's describe-table actually discriminates present from absent rather than returning success for any name. If this bogus name ALSO returns a table, AC2 proves nothing and this criterion is NOT met",
+      "method": "live_read",
+      "invocation": "timeout 110 .tools/aws dynamodb describe-table --table-name opal-amgt-articles-NOPE-xyz --query \"Table.TableName\" --output text 2>&1 | tail -2",
+      "output_evidence": "aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: opal-amgt-articles-NOPE-xyz not found",
+      "denominator": "N/A -- single negative-control read; re-run twice for determinism, identical both times",
+      "status": "PASS",
+      "expect": "ResourceNotFoundException"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "is the table GENUINELY SEPARATE in the sense Andrew's constraint meant -- its own store for per-ticker research content, carrying ticker/security_key and platform as first-class, shaped after opal-news-articles rather than being that table with a filter -- and was the mirroring MEASURED against the live table rather than asserted?",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read infra/aws/terraform/amgt-resapp/dynamodb.tf and AMGT_RESAPP.TO-AMGT-rd-1.shape-record.md against the cell text (AMGT-rd-1 WHAT TO PRODUCE + BOUNDS) and the live-measured opal-news-articles shape",
+      "output_evidence": "dynamodb.tf declares aws_dynamodb_table.amgt_articles as a wholly separate resource (own name opal-amgt-articles, own key schema HASH security_key/RANGE published_at, two own GSIs platform_date_index and ticker_date_index) -- no filter, GSI or tenant column was added to the existing opal-news-articles table, and no aws_s3_bucket resource of any kind appears in this module, so opal-data-research is untouched. security_key, ticker and platform are each a declared key attribute (table hash key or a GSI hash key), never a payload-blob field. The shape-record deliverable states the live describe-table read taken on opal-news-articles (drift=LIVE-no-DECLARED, so there was no .tf source to copy) and maps each axis of the new table's shape back to it explicitly (published_at as the shared date-ordering key; platform_date_index as the direct mirror of source_date_index; PAY_PER_REQUEST billing matched). This worker judges the mirroring MEASURED rather than asserted, on the evidence above; the verdict on whether that satisfies Andrew's constraint as he meant it is not self-graded here.",
+      "denominator": "N/A -- judgment criterion, no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, not self-graded here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO arms. (1) AC1's instrument: a scratch copy of dynamodb.tf (.scratch/, never committed) had billing_mode mutated from \"PAY_PER_REQUEST\" to the invalid \"NOT_A_REAL_BILLING_MODE\" -- proving terraform validate actually type-/enum-checks provider arguments rather than passing any HCL that merely parses (an earlier attempt removing the published_at attribute block did NOT fire, because validate does not cross-check key-schema attribute references against AttributeDefinitions -- that is an AWS-side plan/apply-time check, not a local validate-time one; recorded so the chosen mutant is the one that actually exercises the instrument AC1 invokes). (2) AC2's instrument: AC3 IS the designed negative control, run for real against the live plane, not simulated.",
+      "expected": "(1) terraform validate on the mutated copy FAILS with an error naming billing_mode. (2) describe-table on a name that was never created returns ResourceNotFoundException, not a table.",
+      "observed": "(1) `Error: expected billing_mode to be one of [\"PROVISIONED\" \"PAY_PER_REQUEST\"], got NOT_A_REAL_BILLING_MODE` -- validate on the mutant FAILED as expected; validate on the real, unmutated module (re-checked immediately after, same worktree) still reads Success. (2) `opal-amgt-articles-NOPE-xyz` -> ResourceNotFoundException (AC3's own recorded output). CONTROLS FIRED-AS-EXPECTED on both arms.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's invocations each run twice in the same worktree/live-plane state (post-apply).",
+      "observed": "AC1: 'Success! The configuration is valid.' both runs, byte-identical. AC2: 'opal-amgt-articles\\tACTIVE\\tPAY_PER_REQUEST' both runs, byte-identical. AC3: identical ResourceNotFoundException text both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "SSE-KMS encryption block / DeletionProtectionEnabled on opal-amgt-articles, both present on the live opal-news-articles table",
+      "reason": "Not named by the cell's WHAT TO PRODUCE (a), which specifies only PAY_PER_REQUEST billing and the key-attribute shape; not added to keep this create to exactly what was asked plus the one named house-convention addition (PITR, matching every sibling DynamoDB module measured in this estate). Left for CVO/COO to require explicitly if intended -- adding encryption/deletion-protection settings after the fact is a straightforward follow-on, not a rebuild."
+    }
+  ],
+  "surprises": ["AMGT_RESAPP-Z-W1-S7: safe-apply's HALTGT checkpoint required writing org/mcp/sessions/<session>.serial (gitignored, outside this TO's <paths>) to resolve this worker's identity before the BLOCK-bounded safe-apply could run at all; judged as tool plumbing and written, safe-apply then applied cleanly."],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "terraform validate (AC1)",
+      "invocation": "cd infra/aws/terraform/amgt-resapp && terraform validate -no-color",
+      "result": "rc 0; Success! The configuration is valid. (run twice, identical)"
+    },
+    {
+      "tool": ".tools/aws dynamodb describe-table (AC2, AC3)",
+      "invocation": "timeout 110 .tools/aws dynamodb describe-table --table-name opal-amgt-articles ... / --table-name opal-amgt-articles-NOPE-xyz ...",
+      "result": "AC2 rc 0, ACTIVE/PAY_PER_REQUEST (run twice, identical). AC3 rc nonzero, ResourceNotFoundException (run twice, identical)."
+    },
+    {
+      "tool": ".tools/safe-apply.sh (the deploy itself, not an acceptance criterion but the mechanism AC2/AC3 verify the outcome of)",
+      "invocation": "timeout 110 .tools/safe-apply.sh apply -input=false -auto-approve <saved plan>",
+      "result": "rc 0; HALTGT passed (worker inbox absent, issuer 2.0.0_SA_COO~ZZZ scanned clean), comp-tagauthz gate PASSED (0 candidate resources), tombstone-gate CLEAN, Apply complete! Resources: 1 added, 0 changed, 0 destroyed."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (NEVER-2 change-management ledger)",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-resapp-rd1-article-store-table ... ; close-leg L1/L2/L3 ... ; close --slug amgt-resapp-rd1-article-store-table",
+      "result": "OPENED before the apply (commit db28a5d1be); all 3 legs closed with proof and the ledger CLOSED (commit c34b41d392) before this grading read; deploy_ledger.py check's 6-of-6 sentinel sweep no longer lists this slug."
+    }
+  ]
+}
