@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rc-20",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rc-20.vintage-derivation-identity.md",
+    "group": "OTHER",
+    "vintage_commit": "af0a64a7ec82126506be458e66dd9258bc87e5b7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "af0a64a7ec82126506be458e66dd9258bc87e5b7",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rc-20.vintage-derivation-identity.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/provenance/render_print.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "load_corrected_price_overlay now retains the fye document's own _derived_key on every returned row as _derivation_key. apply_corrected_price_overlay no longer overwrites fig.vintage with corrected.price_date -- vintage stays untouched; two NEW, separate fields carry what it used to collapse: observation_date (corrected.price_date) and derivation_key (corrected._derivation_key), the latter set on both RESOLVED and UNRESOLVED rows. render_figure_line now emits figure.get('source') or '?' instead of a hardcoded 'Bloomberg' literal, and appends observation_date/derivation_key as their own labelled segments (via the new _provenance_suffix helper) when the figure carries them. Exercised live: BABA's real, RESOLVED FY2025 figure now carries vintage=2026-09-10T23:20:19Z (unchanged), observation_date=2025-03-31, derivation_key=derived/model_block_fye/BABA_US_Equity/20260911T073934Z/model_block_fye.json (the real _derived_key), source=bloomberg-dapi (fiscal-period join, model_block_fye); the on-disk original model_block_BABA_US_Equity.json file's FY2025 PX_LAST stays value=146.58/vintage=2026-09-10T23:20:19Z, byte-unchanged (STORE_CONTRACT rule 1).",
+      "introduces": ["_derivation_key", "observation_date", "derivation_key", "_provenance_suffix"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_vintage_derivation_identity.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "4 new tests, discovered by pytest integrations/bloomberg/research/tests: two RE-DERIVATIONS of the SAME security (same local model_block_fye_<sec_key>.json filename, overwritten between runs -- a genuine re-derivation on disk) sharing ONE observation date (2025-03-31) but carrying DIFFERENT derivation stamps/keys (DERIVATION_KEY_1 vs DERIVATION_KEY_2, one even with a corrected price, 132.23 vs 132.50) are shown to carry and RENDER distinct derivation identities (never the same line for both); plus the vintage-never-overwritten companion and a line-level distinctness check for both fields.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_consumer_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "AMGT-rb-2's own pre-existing test_wired_consumer_load_model_block_returns_fiscal_period_price_not_calendar_year asserted fig['vintage'] == '2025-03-31' -- itself an encoding of the C-S20 defect rc-20's own task order names and mandates removing. Updated (this worker's own prior test, this cell's own <paths>) to assert the NEW, correct contract: vintage stays the figure's own original vintage (read fresh off the on-disk original file, never a literal), and the corrected observation date now lives in its own observation_date field. Filed as surprise row AMGT_RESAPP-Z-W1-S6. All other assertions in the file are unchanged. 18 of 18 tests in this directory pass after the update.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line beginning with a passed count and no \"failed\" -- the existing consumer/unresolved tests still pass PLUS a NEW test distinguishing two derived vintages that share ONE observation date: two model_block_fye derivations with the same price_date but different derivation keys/stamps carry (or render) DISTINCT derivation identities. A test where both collapse to the same line is NOT met",
+      "method": "test_suite",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests -q 2>&1 | tail -1",
+      "output_evidence": "18 passed in 4.51s",
+      "denominator": "18 of 18 tests passed: 5 test_consumer_wiring.py (one assertion updated per surprise row AMGT_RESAPP-Z-W1-S6, see declared_exclusions/surprises) + 5 test_fye_join.py (unchanged) + 4 test_unresolved_overlay_renders_marked.py (rc-19, unchanged, still preserving BABA's resolved sample and the UNRESOLVED-overlay marking) + 4 NEW test_vintage_derivation_identity.py (the AC1-mandated difference arm). Re-run twice, identical '18 passed' both times (see controls.determinism).",
+      "status": "PASS",
+      "expect": "^\\d+ passed.*(?<!failed)$"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"emits source True\" (render_figure_line renders fig.source, so the fiscal-period-join source appears) AND \"not hardcoded-only Bloomberg True\" (a non-Bloomberg source is not overridden to Bloomberg) AND \"carries observation date True\" (the observation date 2025-03-31 appears distinct from the derivation identity) -- the line carries observation date and derivation source as distinct facts. A line that still hardcodes Bloomberg over the source is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import importlib.util as u; s=u.spec_from_file_location('rp','lib/research/provenance/render_print.py'); m=u.module_from_spec(s); s.loader.exec_module(m); fig={'value':132.23,'unit':'USD','mnemonic':'PX_LAST','basis':{'mnemonic':'PX_LAST','definition':'last price'},'vintage':'20260911T073934Z','observation_date':'2025-03-31','source':'fiscal-period join (model_block_fye)','derivation_key':'derived/model_block_fye/BABA_US_Equity/20260911T073934Z/model_block_fye.json'}; line=m.render_figure_line(fig); print('emits source', ('fiscal-period join' in line or 'model_block_fye' in line), '| not hardcoded-only Bloomberg', ('Bloomberg' not in line) or ('model_block_fye' in line), '| carries observation date', ('2025-03-31' in line))\"",
+      "output_evidence": "emits source True | not hardcoded-only Bloomberg True | carries observation date True",
+      "denominator": "3 of 3 conditions True; re-run twice, identical (see controls.determinism).",
+      "status": "PASS",
+      "expect": "emits source True.*not hardcoded-only Bloomberg True.*carries observation date True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"renders the given source True\" AND \"does not force Bloomberg True\" -- NEGATIVE: a figure whose source is TEST-SRC-XYZ renders that source and is NOT overridden to a hardcoded \"Bloomberg\". A line still hardcoding \"Bloomberg\" is the C-S20 defect and is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import importlib.util as u; s=u.spec_from_file_location('rp','lib/research/provenance/render_print.py'); m=u.module_from_spec(s); s.loader.exec_module(m); line=m.render_figure_line({'value':1,'unit':'x','basis':{'mnemonic':'M','definition':'d'},'vintage':'v','source':'TEST-SRC-XYZ'}); print('renders the given source', 'TEST-SRC-XYZ' in line, '| does not force Bloomberg', 'Bloomberg' not in line)\"",
+      "output_evidence": "renders the given source True | does not force Bloomberg True",
+      "denominator": "2 of 2 conditions True; re-run twice, identical (see controls.determinism).",
+      "status": "PASS",
+      "expect": "renders the given source True.*does not force Bloomberg True"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "are observation date and derivation identity distinct, the corrected artifact key retained through the consumer and provenance, so a reader can tell which corrected derivation produced a served figure and two vintages at one observation date apart? This completes C-S16 with rc-19.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read lib/research/provenance/render_print.py, test_vintage_derivation_identity.py, test_consumer_wiring.py, and the surprise row AMGT_RESAPP-Z-W1-S6 against the CTO ruling @21343 and the L10 round-3 analysis @38948db85c s.C-S20",
+      "output_evidence": "Evidence offered for the CVO's judgment (never self-graded): fig.vintage is no longer touched by apply_corrected_price_overlay anywhere (measured: BABA's real FY2025 figure's vintage stays 2026-09-10T23:20:19Z, its own original pull timestamp, not 2025-03-31); observation_date (corrected.price_date) and derivation_key (the fye document's own _derived_key, e.g. derived/model_block_fye/BABA_US_Equity/20260911T073934Z/model_block_fye.json) are carried as two SEPARATE fields, retained through load_corrected_price_overlay -> apply_corrected_price_overlay -> the named consumer (render_pack.load_model_block) -> the provenance render (render_model_block/render_figure_line). render_figure_line reads figure.get('source') (never a hardcoded vendor string); a plain, never-overlaid figure still reads its own 'bloomberg-dapi' source unaffected (measured: the header PX_LAST figure, untouched by the overlay, renders its own source string, no observation/derivation suffix, since is_fiscal_year_price_figure excludes header scope). The AC1 test directly demonstrates two RE-DERIVATIONS sharing one observation date rendering two DIFFERENT lines, each carrying its OWN derivation_key and never the other's -- the exact discrimination C-S20 asked for. rc-19's unresolved-overlay qualification is unregressed: 4 of 4 of its own tests still pass, corrected_overlay_status/UNRESOLVED-figure marking is unchanged (derivation_key is now ALSO recorded on the UNRESOLVED branch, additive, not a behavior change to the qualification/marking itself).",
+      "denominator": "N/A -- judgment criterion, read against the module, both new/updated test files, and the surprise row; no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, never self-graded here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/ (not committed) re-implemented the OLD render_figure_line (hardcodes the literal 'Bloomberg', never reads figure.get('source')) and compared its output against the REAL (fixed) render_figure_line on the identical AC3 fixture (source='TEST-SRC-XYZ').",
+      "expected": "MUTANT (old hardcode): renders '... . Bloomberg' -- does NOT carry 'TEST-SRC-XYZ', DOES carry 'Bloomberg' -- the C-S20 defect, reproduced. REAL (this cell's fix): renders '... . TEST-SRC-XYZ' -- carries the given source, never 'Bloomberg'.",
+      "observed": "MUTANT line: '1 x . M (d) . as of v . Bloomberg' -- contains TEST-SRC-XYZ: False, contains Bloomberg: True (the defect reproduced). REAL line: '1 x . M (d) . as of v . TEST-SRC-XYZ' -- contains TEST-SRC-XYZ: True, contains Bloomberg: False. CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's invocations each run twice against the same committed (worktree) state.",
+      "observed": "AC1: '18 passed' both runs (4.51s and 4.10s wall time, same outcome). AC2: identical 'True | True | True' both runs. AC3: identical 'True | True' both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Modifying AMGT-r-1/derive_fye_fixed.py or any other landed cell's module to change how _derived_key is produced",
+      "reason": "Out of this cell's <paths> and BOUNDS -- derive_fye_fixed.py already writes _derived_key exactly in the shape (derived/model_block_fye/<sec>/<stamp>/model_block_fye.json) this cell needed to retain; nothing there required a fix, only that the value be READ and CARRIED forward, which this cell's changes to render_print.py now do."
+    },
+    {
+      "item": "Regenerating the served provenance_render_*.md / pack_*.pdf/.txt artifacts for BABA/SAP/BA US",
+      "reason": "Not named in this cell's WHAT TO PRODUCE; the fix is proven via the new AC1 vintage/derivation test and the direct AC2/AC3 rule-level checks against the exact functions render_pack.build_pack already calls (render_figure_line), so the class-level benefit flows through to any future regeneration automatically without a code change to render_pack.py itself."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W1-S6: AC1's own bar ('the existing consumer/unresolved tests still pass') and AC1's own mandate (stop substituting price_date for fig.vintage) were jointly unsatisfiable for one pre-existing assertion in test_consumer_wiring.py, which directly encoded the C-S20 defect; updated that one assertion, in this cell's own <paths>, to the new correct contract."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests -q",
+      "result": "rc 0; 18 passed (run twice, identical outcome, see controls.determinism)"
+    },
+    {
+      "tool": "AC2 render_figure_line direct invocation (spec_from_file_location)",
+      "invocation": "python -c \"import importlib.util as u; s=u.spec_from_file_location('rp','lib/research/provenance/render_print.py'); ...\"",
+      "result": "rc 0; emits source True | not hardcoded-only Bloomberg True | carries observation date True (run twice, identical)"
+    },
+    {
+      "tool": "AC3 render_figure_line negative control (spec_from_file_location)",
+      "invocation": "python -c \"import importlib.util as u; s=u.spec_from_file_location('rp','lib/research/provenance/render_print.py'); ...\"",
+      "result": "rc 0; renders the given source True | does not force Bloomberg True (run twice, identical)"
+    },
+    {
+      "tool": "py_compile + ruff (target-version py39)",
+      "invocation": "python -m py_compile lib/research/provenance/render_print.py integrations/bloomberg/research/tests/test_vintage_derivation_identity.py integrations/bloomberg/research/tests/test_consumer_wiring.py && python -m ruff check --target-version py39 <same files>",
+      "result": "rc 0 both; PY_COMPILE OK; ruff: All checks passed!"
+    },
+    {
+      "tool": "ds-precommit-check.py",
+      "invocation": "python .tools/ds-precommit-check.py lib/research/provenance/render_print.py integrations/bloomberg/research/tests/test_vintage_derivation_identity.py integrations/bloomberg/research/tests/test_consumer_wiring.py",
+      "result": "rc 0, no output"
+    },
+    {
+      "tool": ".scratch mutant harness (not committed -- old hardcoded-Bloomberg render vs the real fix)",
+      "invocation": "python -c \"...mutant_render_figure_line (hardcodes Bloomberg) vs real render_figure_line, same AC3 fixture...\"",
+      "result": "rc 0; MUTANT hardcodes Bloomberg and drops the given source (the C-S20 defect); REAL renders the given source, never Bloomberg. CONTROL FIRED-AS-EXPECTED."
+    },
+    {
+      "tool": "lib/research/rules/tests + lib/research/checkface/tests regression sweep (rc-19 non-regression, not itself an AC1 file but re-checked)",
+      "invocation": "python -m pytest lib/research/rules/tests lib/research/checkface/tests -q",
+      "result": "rc 0; 21 passed -- rc-19's own qualification-rule tests and the check-face pipeline are unaffected by this cell's changes"
+    }
+  ]
+}
