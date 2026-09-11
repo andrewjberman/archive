@@ -1,199 +1,189 @@
-# `battery_ib_rt_4.result.md` -- RT4-AC1, five arms, **4 of 5 -- FAIL**
+# `battery_ib_rt_4.result.md` -- RT4-AC1, five arms, **5 of 5**
 
 **TO:** `IRPT_BCKEND.TO-IB-rt-4` | **cell:** `IB-rt-4` (PRD cell B17) | **assignee:** `0.9.0_WK_IRPT_BCKEND~3`
-**Branch:** `wk-irpt_bckend-2-3` | **worktree:** `/c/tmp/wk-irpt-2-3` | **base:** `7478fdf144`
+**Branch:** `wk-irpt_bckend-2-3` | **worktree:** `/c/tmp/wk-irpt-2-3` | **base:** `77b2acc7a9` (merged tip)
 
 **Invocation (the one the task order names):**
 ```
 timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_rt_4.py
 ```
-**rc 1. `ARMS: 4 of 5`. `IBRT4-KEYS-TYPED` WITHHELD.** Full verbatim output:
+**rc 0. `ARMS: 5 of 5`. Last line `IBRT4-KEYS-TYPED`.** Full verbatim output (188 lines):
 `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/IB-rt-4_RT4-AC1_battery_output.txt`.
 
-**The order stays open.** Arms (a)-(d) -- the whole substance of CTO ruling 4 -- pass. Arm (e)
-fails on one of five Terraform roots for a reason that is not this cell's code and cannot be
-cleared by this cell's authority. That is row `IRPT_BCKEND-W3-S17` and it is the report.
+This is the second execution of this order. The first reported `4 of 5` with arm (e) blocked on
+row `W3-S17`; the issuer routed that row, the premise turned out to be wrong in a way that
+changed nothing about the withheld apply being correct, and the work completes here at the
+merged tip.
 
 ---
 
-## Arm (e) first, because it is the one that fails
-
-`terraform plan` on `infra/aws/terraform/investor-reporting/export`, **before any change of
-mine**:
-
-```
-# aws_iam_role_policy.export_render_dispatch will be destroyed
-#   (because aws_iam_role_policy.export_render_dispatch is not in configuration)
-# aws_iam_role_policy.export_render_evidence will be destroyed
-#   (because aws_iam_role_policy.export_render_evidence is not in configuration)
-# aws_ssm_document.export_render_run will be destroyed
-#   (because aws_ssm_document.export_render_run is not in configuration)
-Plan: 0 to add, 1 to change, 3 to destroy.
-```
-
-Three resources sit in **state** and not in **configuration**, left that way when IB-s-14
-removed them from the `.tf` at `1beda4bf49` without applying. Two of them are **IAM role
-policies on a live function**.
-
-The face's own condition for this cell's deploy is *"plans show only the code changes"*. This
-plan does not. Destroying two live IAM role policies is a served-surface act (bound 7) with a
-blast radius nobody signed, and finishing another cell's half-landed change is not in this
-order's rectangle. **So `irpt-export-render`'s code change is committed and its apply is
-withheld.**
-
-A second writer is also on that root: `irpt-export-render`'s served `CodeSha256` moved from
-`11ZotLOJLP5xWjGU` to `iq1u0SatjV0+OtFJ` (LastModified `2026-09-11T12:57:39Z`) during this
-cell's run, by no act of mine.
-
-**What DID deploy, verified:**
-
-| root | apply | post-apply plan |
-|---|---|---|
-| directory | `0 added, 2 changed, 0 destroyed` | `No changes.` |
-| intake | `0 added, 1 changed, 0 destroyed` | `No changes.` |
-| ycharts | `0 added, 1 changed, 0 destroyed` | `No changes.` |
-| ops | `0 added, 1 changed, 0 destroyed` | `No changes.` |
-| **export** | **withheld** | **`0 to add, 1 to change, 3 to destroy`** |
-
-Every pre-apply plan on the four was checked **before** the apply and the only differing
-attributes on any resource were `s3_object_version` and `source_code_hash`. Five of six
-functions serve the new bytes with `CodeSha256` equal to the zip rebuilt from committed source
-**and** to the source-map registration -- three values compared against each other rather than
-any one asserted. Four ledgers CLOSED, 5 legs each, 0 open markers, each sentinel carrying two
-commits (open at `48313e9c0e` before the act, removed at `a36c28a079`).
-
----
-
-## The arms that pass
+## The arms
 
 ### (a) N OF N CONSTRUCTORS -- `27 of 28` refused, `0` leaks
 
-**The denominator is read off the module by AST, not from a list I wrote:**
-`11 public callables - 4 readers = 7 constructors`. A builder added later is in the denominator
-whether or not anyone remembers this file.
+`11 public callables - 4 readers = 7 constructors`, read off the module by AST rather than from
+a written list. Every constructor takes each of the four negatives; `27` refused with `0`
+occurrences of the refused value across **seven renderings each** -- `str()`, `repr()`, `'%s'`,
+`'%r'`, an f-string, `exc.args` and the public log line. One rendering is not a census; a leak
+wearing a different syntax is the same leak.
 
-**Measured at round-1 HEAD, six of twenty-four pairs were ACCEPTED:**
+The 28th is `TenantBinding` admitting a firm id in its **tenant position**, printed as an
+ADMISSION and excluded from the refusal count rather than hidden inside it. That is the one
+place a firm id belongs.
 
-| constructor | display name | e-mail | raw upstream key | firm token |
-|---|---|---|---|---|
-| `s3_evidence_key` | **ACCEPTED** | refused | **ACCEPTED** | refused |
-| `quarantine_key` | **ACCEPTED** | **ACCEPTED** | **ACCEPTED** | **ACCEPTED** |
-| `cache_key` / `idempotency_key` / `key_digest` / `queue_message` | refused | refused | refused | refused |
-| `TenantBinding` | refused | refused | refused | *admitted -- tenant position* |
-
-**The ruling named only `s3_evidence_key`.** `quarantine_key` is the worse of the two to have
-left open, and the reason is what quarantine *is*: a message is written there precisely when its
-origin could **not** be verified, so its components are the least trusted input this system
-handles. Row `IRPT_BCKEND-W3-S13`. Had this cell verified the one constructor the ruling named,
-`quarantine_key` would have passed untouched and the round would have recorded W3-S12 closed.
-
-**`TenantBinding` admitting a firm id in its tenant position is printed as an ADMISSION, not
-counted as a refusal.** That is the one place a firm id belongs -- bound from the sender's
-domain at ingestion, not supplied by a request. A rule that refused it everywhere would be
-wrong, and hiding the exception in a pass count would be worse.
-
-**Both holes are closed by a POSITIVE ALLOWLIST of segment shapes** -- digits, ISO date, 64-hex
-fingerprint, namespaced opaque id, enum token, structural word, file name -- which are exactly
-the shapes the round-1 evidence keys already contain. A blocklist of bad-looking values fails
-open on the first name nobody thought of.
-
-**The refusal carries no value, and seven renderings are censused per refusal**: `str()`,
-`repr()`, `'%s'`, `'%r'`, an f-string, `exc.args`, and the public log line. `0` occurrences in
-`27 of 27` refusals. One rendering is not a census -- a leak wearing a different syntax is the
-same leak. `args` holds only the public message, so even a default traceback line is safe.
-
-**`%r` placeholders inside a refusal construction: `0`.** The ruling says *twelve* become zero;
-the module carried **eighteen across sixteen sites** when this cell measured it, so the fix is
-defined by the census and both numbers are printed. Row `IRPT_BCKEND-W3-S16`. The six `%r` left
-in the module are in `verify_against_layout`, comparing config to config.
+`%r` placeholders inside a refusal construction: **0**. The ruling says twelve; the module
+carried **eighteen across sixteen sites** (row `W3-S16`), so the fix is defined by the census.
 
 ### (b) THE POSITIVE STILL BUILDS -- `12 of 12` identical
 
-**The oracle is the module at round-1 HEAD, loaded from git** -- not a remembered list of
-expected strings, which the same hand that changed the code would have updated. Twelve round-1
-valid inputs, including the IB-s-9 vendor-PDF key and the IB-s-10 sections key verbatim, build
-byte-identical keys. **The refusal did not change the grammar.**
+Against `_keys` at `7478fdf144`, loaded from git -- not a remembered list of expected strings,
+which the same hand that changed the code would have updated. The IB-s-9 vendor-PDF key and the
+IB-s-10 sections key are in the set verbatim. **The refusal did not change the grammar.**
 
-### (c) THE ENVELOPE EVERYWHERE -- `0 of 49` render the exception
+### (c) THE ENVELOPE EVERYWHERE -- `0 of 57`
 
-25 modules, 49 except handlers, 18 binding the exception, **10 rendering it before this cell and
-0 after**.
+**The census re-ran over the MERGED module set, and that is what earned its keep.** The
+population grew from 25 modules / 49 handlers to **30 / 57**. Nine paths rendered the caught
+exception at this tip and only **two** were ones this order had seen before; seven were in code
+that did not exist at the first cut, one of them a whole module (`dispatch.py`) the census had
+never read. **Re-applying a remembered diff would have closed the two and left the seven.**
 
-**The census is structural and it lives in the package, not the battery**
-(`_authz/error_path_census.py`), so a later cell can re-run it. It counts `str(exc)`,
-`repr(exc)`, a `%`-format operand, an f-string value and `.format(exc)`, and it does **not**
-count `type(exc).__name__`.
+| module | what was leaking |
+|---|---|
+| `handler.py` | an `IdentityRefused`/`KeyError` 400 body -- a `KeyError`'s message **is** the missing key |
+| `handler.py` | `PackageUnavailable` -> `str(exc)`, which quotes a portal checkout path |
+| `handler.py` | the capabilities contract read -> a filesystem path |
+| `dispatch.py` x2 | botocore error messages -- ARN, account id, request id |
+| `render.py` x3 | `pypdf` ImportErrors -- import-machinery paths |
+| `render.py` | the PDF parser message, which quotes the document's own bytes |
 
-**Its first cut reported TWELVE, and two were false positives** -- `directory/refresh.py` and
-`ycharts/extract/extract.py` render only the exception's type, and `refresh.py` cites row
-W2-S10 in a comment for doing exactly that. A census that over-fires sends a careful reader to
-"fix" correct code and inflates the denominator its own fix is graded against.
+`PUBLIC_REASONS` is a closed 14-member enum; `error_envelope()` refuses anything outside it and
+has **no parameter an exception fits into**. Arm (c)'s denominator is **not** widened (row
+`W3-S15`, carried to L10 by name): it counts except handlers, the one ordinary-return instance
+is fixed, and the dataflow census is not this order's to build.
 
-**The sharpest of the ten was `intake/parse.py`:** a `jsonschema.ValidationError`'s first line
-quotes the **instance**, so a holdings row carrying a client name went straight into a
-contract-validation report. It now carries the failing keyword and the path.
+### (d) INJECTED NEGATIVES -- `0 of 18`, and `18 of 18` the other way
 
-`PUBLIC_REASONS` is a closed 14-member enum and `error_envelope()` refuses anything outside it.
-There is **no parameter on it an exception fits into**, so the leak cannot type-check its way
-back in.
+A client name, an e-mail and an S3 key per family across six families: `0` occurrences across
+body + headers + the public log, and `18 of 18` correlation ids resolving to an internal record
+that **does** carry the value. The detail moved; it did not disappear. Envelope fields are
+`['correlation_id', 'ok', 'public_reason_code']` -- no field for a message, a stack or a path
+to travel in.
 
-### (d) INJECTED NEGATIVES -- `0 of 18`
+### (e) DEPLOYED -- the amendment's five steps
 
-A client name, an e-mail and an S3 key injected per family across six families. `0` occurrences
-across body + headers + the public log. The envelope's only fields are
-`['correlation_id', 'ok', 'public_reason_code']` -- **no field for a message, a stack or a path
-to travel in**, which is stronger than a rule that they must not be set.
+**(1) Plans.** `directory`, `intake`, `ycharts`, `ops`: `No changes`. `export`: not clean, and
+every residual is another cell's --
 
-**And the correlation id resolves the other way:** the internal record *does* carry the detail,
-for all 18. The detail moved; it did not disappear. A redaction that destroys the diagnostic
-gets switched off the first time someone is debugging at 2am.
+```
+FOREIGN-RESOURCE   aws_iam_role_policy.render_host_export_evidence    not in this branch's configuration
+STALE-DECLARATION  aws_ssm_document.export_render_run                 live content is a sibling's newer version
+STALE-DECLARATION  module.irpt_export_render.aws_lambda_function.this live content is a sibling's newer version
+```
+
+**Attribution rests on one verifiable fact: this order changed no Terraform configuration at
+all** -- `git status --porcelain -- infra/aws/terraform/` is empty -- so no diff in any of those
+plans can originate from this order's edits. Applying would **destroy** a live S3 grant on the
+ycharts runner role, **delete** 21 command lines of render-host preflight including the
+`RENDERER_MODULE_ABSENT` refusal branch, and **revert** `IRPT_PORTAL_ORIGIN` from
+`portal.opalcapital.co` to `opalinvest.dev`. Row `W3-S20`.
+
+This order's own convergence was measured **at the time of the act** and is in the ledger:
+pre-apply `0 to add, 1 to change, 0 to destroy` with `source_code_hash` the only differing
+attribute; post-apply `No changes`.
+
+**Row `W3-S17` is closed by the tree.** The export root's baseline plan at this tip read
+`No changes` *before* any upload. The three resources the pre-merge worktree read as orphans
+were IB-rt-8's live declarations and the route was the merge. The withheld apply was still
+correct -- that plan would have destroyed two live IAM role policies -- and the premise it was
+reported under was wrong.
+
+**(2) Import closure `6 of 6`**, in the real `/var/task` + `/opt/python` layout, using the
+**published** layer zip fetched from S3. Row `W3-S14` is closed: `enforce.py`, `errors.py` and
+`resolve.py` are in the export build input. `keys.py` is **not** -- the layer carries it, and a
+second copy at `/var/task` would shadow the layer's and put two key grammars in one runtime.
+
+**(3) The layer, and why it is not republished.** `3 of 3` functions on `irpt-common:5`; runtime
+capabilities read on the **deployed** function returns `statusCode 200`, `FunctionError None`,
+`CONTRACTS AVAILABLE: 5 of 5`. The published layer already carries the union at this tip --
+measured in the zip itself: 5 contracts, `keys.py`, `firm_registry.json`, `bd_helpers.py`
+present; `enforce.py`/`errors.py`/`resolve.py` absent, which is exactly why those three ride
+the export zip. A rebuild is a 0-diff on content and a republish would mint a version with
+identical bytes, on a surface three functions share. Row `W3-S21` records that the layer's own
+`BUILD_MANIFEST` disagrees with what is published.
+
+**(4) The ledger** CLOSED, 5 legs, 0 open markers, sentinel absent with **two** commits --
+`862b0e4a6e` (OPEN, before the act) and `1577717530` (close, before the grading reads).
+
+**(5) Triple equality `6 of 6`** -- `artifact_sha256 == S3 content-sha256 == live CodeSha256`,
+three values compared against each other rather than any one asserted. **It read `0 of 6` at the
+merged tip** (row `W3-S18`/`W3-S19`), because the drain took this order's code half and not its
+registration half. Rebuilding from the merged tree reproduced the **live** bytes for five of six,
+so those needed an honest registration and nothing else -- no upload, no apply, no churn.
+
+---
+
+## Controls
+
+**Every arm was observed FAILING on the real artifact before it passed** -- a mutation of the
+subject, not of a copy:
+
+| arm | the failing observation |
+|---|---|
+| (a) | at round-1 HEAD, `6 of 24` (constructor, negative) pairs were **accepted** |
+| (c) | `9` handlers rendered the exception at this tip, `0` after |
+| (b) | the oracle **is** the round-1 module; a grammar change shows as a differing key |
+| (e) | this order's first execution read `4 of 5` and withheld the token |
+
+Two negative controls are built in: `error_envelope("MADE_UP_REASON")` must raise (prints
+`a free-string reason is refused: True`), and the import-closure check was run against a
+genuinely incomplete zip and reported `4 of 6` before the packaging repair.
+
+**DETERMINISM, stated precisely rather than as one verdict.** Arms (a)-(d) are **byte-identical**
+across three runs -- 109 lines each, 0 differing. **Arm (e) is not, and cannot be**: it reads a
+live plane that sibling cells are writing while this order grades. Between two consecutive runs
+the `ycharts` root moved from `No changes` to a pending `aws_ec2_instance_state.runner` change,
+because a sibling touched the IB-s-8 host. **All five verdicts were identical across both runs**;
+what moves is arm (e)'s narrative, not its answer.
 
 ---
 
 ## What went wrong in my own instruments
 
-Both were caught by having two instruments disagree, which is the only reason either surfaced.
+Three, each caught by two instruments disagreeing or by reading the actual diff.
 
-1. **The battery reported a cleaner import closure than the truth.** `import_closure_report()`
-   ran the check in-process and printed `6 of 6 CLOSED` while the standalone script printed
-   `5 of 6`. The battery imports modules of its own first, so a packaged module's
-   `import enforce` resolved from a leftover `sys.modules` entry instead of failing -- the check
-   whose entire purpose is to prove a zip stands alone was leaning on the process it ran in.
-   **A saved-and-restored `sys.modules` is not isolation; only a new interpreter is.** It now
-   runs in a clean subprocess and reports `5 of 6`.
-2. **The error-path census over-fired 2 of 12**, above.
-
-The import-closure check exists at all because `CodeSha256` equality proves the bytes AWS serves
-are the bytes we built and says **nothing** about whether they can be imported. It found a
-second, unrelated defect: `export/download.py` has imported `enforce` at module level since
-round 1 and `enforce.py` has never been in that function's zip, so the deployed download route
-is dead on first call while every deploy-time rung reads green. Row `IRPT_BCKEND-W3-S14`.
+1. **The ownership classifier labelled my own function FOREIGN.** A module-nested address
+   (`module.irpt_export_render.aws_lambda_function.this`) has the inner name `this`, which
+   appears in no root `.tf` -- so a name-only test called this order's own resource someone
+   else's. That is precisely the self-serving label the classifier exists to avoid. The
+   declaring token for a module-nested address is the **module** name.
+2. **The first classifier called the SSM document "OURS"** because this branch declares that
+   resource -- when the diff was that the live document is a sibling's version 3 and this
+   branch's content is older. The resource was declared here; the **diff** was not. Reading the
+   actual 21 removed lines is what showed it.
+3. **Four roots reported `rc 1`** in the first graded run -- a missing `terraform init` in a new
+   worktree, not a measurement. An rc is not a reading.
 
 ---
 
 ## Rows filed
 
-| id | class | hazard | one line |
-|---|---|---|---|
-| `W3-S13` | OBSERVATION | ARMED | The ruling named one leaky constructor; the census found two, and `quarantine_key` -- handling the least trusted input in the system -- accepted all four negatives. |
-| `W3-S14` | OBSERVATION | ARMED | The deployed export download route is dead on import: it needs `enforce`, which its zip has never contained. |
-| `W3-S15` | OBSERVATION | ARMED | Arm (c)'s denominator is except handlers; a public reason built on an ordinary return path is outside it, and one was reflecting caller input. |
-| `W3-S16` | OBSERVATION | INERT | The ruling says twelve `%r` sites; the module carried eighteen across sixteen. |
-| `W3-S17` | **BLOCKING** | ARMED | The export root would destroy three live resources that this ruling did not order; the apply is withheld and arm (e) fails. |
-| `W3-S18` | OBSERVATION | ARMED | The source map's registered hash for `irpt-export-render` agrees with neither S3 nor the live function, and nothing standing catches that. |
+| id | hazard | one line |
+|---|---|---|
+| `W3-S19` | ARMED | A two-part change was split by the drain: the code half merged, the packaging half did not, and the source map declared builds for two functions that cannot import. |
+| `W3-S20` | ARMED | A sibling is writing to the shared export Terraform state while this order is non-terminal; converging from here would destroy one live resource and revert two. |
+| `W3-S21` | ARMED | The `irpt-common` layer's own `BUILD_MANIFEST` disagrees with the layer that is published -- a wrong record on a surface three functions share. |
+| `W3-S22` | ARMED | Two modules named `dispatch.py` collide on the flat `sys.path`, so IB-rt-8's own tests cannot see its dispatch module; in a zip carrying both, one would overwrite the other. |
 
 ---
 
 ## What this arm set does NOT show
 
-1. **`irpt-export-render` is not running the fix.** Five of six functions are; that one serves
-   round-1 bytes for the error path. The split is stated rather than averaged away.
-2. **`parse.py` and `corrections.py` are in no function's packaged file list**, so two of the
-   ten error-path fixes are not deployed anywhere by anyone. They are correct in the repo and
-   serve nothing today.
-3. **No S3 key already written was examined for a name-shaped component.** The bound forbids
-   renaming one, and the census the `RT4-AC2` judgment record owes the CVO is a listing, not a
-   move.
-4. **The refusal's developer-only value can still be reached by a frame-locals dump.** No
-   exception class can close that; it is closed by not enabling locals-bearing tracebacks in a
-   request path, and it is stated in `errors.py`'s own docstring rather than left implied.
+1. **The export root is left non-converged**, by a sibling's in-flight work. This order's change
+   is deployed and verified; the residual is named, addressed and rowed, not swept.
+2. **`intake/parse.py` and `intake/corrections.py` are still in no function's file list**, so
+   three of the ten error paths fixed in the first pass serve nothing today.
+3. **Arm (c) counts except handlers**, not every expression that reaches a public reason
+   (`W3-S15`).
+4. **The `_authz/dispatch.py` collision is latent, not fixed** -- no function packages both
+   today, and renaming either is another cell's module.
