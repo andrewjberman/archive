@@ -1,23 +1,41 @@
 """IB-rt-8 acceptance battery -- RT8-AC1.
 
-Six arms -- (a) through (f) -- each printing its own denominators, and the token only when
+Seven arms -- (a) through (g) -- each printing its own denominators, and the token only when
 every one holds. The token is IBRT8-EXPORT-RENDERS.
 
 THE SUBJECT IS THE REAL ARTIFACT, NEVER A COPY THIS FILE WRAPS (bound 12). Arm (a) runs
 against the DEPLOYED controller by `aws lambda invoke`; arm (c) reads the DEPLOYED layer and
-the three DEPLOYED functions; arm (e) censuses the FOUR OBJECTS THAT EXIST in the bucket; arm
-(f) reads the ledger entry and re-plans the three real roots. Nothing here registers a
-handler with itself and then measures it.
+the three DEPLOYED functions; arm (e) censuses the objects that exist in the bucket; arm
+(f) reads the ledger entry and re-plans the three real roots; arm (g) reads the world for
+whether four named objects are gone. Nothing here registers a handler with itself and then
+measures it.
 
-THE RENDER ARM IS HUMAN-GATED AND SAYS SO, WITH THE RECORD VERBATIM. RT8-AC1 (a) admits that
-as the arm's own rule. What is gated is exactly one step -- a browser opening the
-counterpart's print route -- and every step around it is taken on the served service and
-printed.
+ARM (g) IS AN ADDENDUM ON ANDREW'S WORD (2026-09-11 13:48Z, VERBATIM "yes on synthetic
+exports"), and IT DOES NOT PERFORM THE DELETE. The act was taken once, under its own
+change-management ledger whose sentinel was committed BEFORE it; this arm VERIFIES the
+result and is therefore re-runnable. A battery that deleted on every run would pass the
+first time and fail the second, and its receipts would be its own claim rather than a
+measurement.
+
+ARM (e) CHANGED WITH THE WORLD. It read FIVE live objects and asserted 5 of 5 still headed
+200; four of those are now gone by the same word. It now censuses what LIVES and re-runs the
+four deleted keys from the COMMITTED RECORD, labelled a record -- the readers are pure
+functions of (key, metadata), and whether the objects exist is arm (g)'s measurement.
+
+THE RENDER RAN, AND IT READS SESSION-GATED. Andrew's word of 2026-09-11 ~14:5xZ ("Yes
+ycharts runner may be started") turned the HUMAN-GATED arm into an act: the host was started,
+`irpt-export-render-run` was sent, Chromium opened the REAL portal origin, and the print route
+answered with a SIGN-IN SCREEN -- so the host half refused SESSION_ABSENT, which it is built
+to do and never signs in around. The issuer's amendment names that branch, so SESSION-GATED is
+the arm's own rule rather than a skip, and the host was returned to the state its root
+declares. The battery does not start a host: it reads the RECORD of the act and reads the
+WORLD for where the host ended up.
 
 ASCII only. Python 3.12.
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 import pathlib
 import subprocess
@@ -30,6 +48,13 @@ IRPT = PACKAGE.parent
 LEDGER = (REPO / "org" / "critical_paths" / "change_management" /
           "20260911T1227Z_irpt-bckend-rt8_deploy_completion.md")
 SENTINEL = REPO / "org" / "critical_paths" / ".open_deploys" / "irpt-bckend-rt8.json"
+HERE = pathlib.Path(__file__).resolve().parent
+DELETE_RECEIPTS = HERE / "RT8-g_delete_receipts.json"
+RENDER_RECORD = HERE / "RT8-a_render_record.json"
+DELETE_LEDGER = (REPO / "org" / "critical_paths" / "change_management" /
+                 "20260911T1454Z_irpt-bckend-rt8-synthetic-delete_deploy_completion.md")
+DELETE_SENTINEL = (REPO / "org" / "critical_paths" / ".open_deploys" /
+                   "irpt-bckend-rt8-synthetic-delete.json")
 AWS = ["cmd", "/c", str(REPO / ".tools" / "aws.cmd")]
 TERRAFORM = str(REPO / ".tools" / "terraform.exe")
 
@@ -47,12 +72,30 @@ for _p in (PACKAGE, IRPT / "_authz", IRPT / "_authz" / "tests", IRPT / "_keys"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-import dispatch as dispatch_mod    # noqa: E402
-import download as download_mod    # noqa: E402
-import enforce as _authz           # noqa: E402
-import exclusion as exclusion_mod  # noqa: E402
-import fixtures as authz_fixtures  # noqa: E402
-import package as package_mod      # noqa: E402
+
+def _load(path, name):
+    """Load a module BY PATH, so sys.path order cannot decide which file answers.
+
+    IT ALREADY DECIDED ONCE, WRONGLY. Round 2's sibling cell IB-rt-2 added
+    `_authz/dispatch.py` beside this package's `export/dispatch.py`; both directories are on
+    this battery's path, the later insert wins, and `import dispatch` silently resolved to the
+    OTHER cell's module -- an AttributeError on HUMAN_GATED, which is the LUCKY failure. Had
+    the two modules shared a function name with different semantics, the battery would have
+    measured the wrong module and PASSED. A module name is not an identity; a path is.
+    """
+    spec = importlib.util.spec_from_file_location(name, str(path))
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+dispatch_mod = _load(PACKAGE / "dispatch.py", "irpt_export_dispatch")
+exclusion_mod = _load(PACKAGE / "exclusion.py", "irpt_export_exclusion")
+package_mod = _load(PACKAGE / "package.py", "irpt_export_package")
+download_mod = _load(PACKAGE / "download.py", "irpt_export_download")
+_authz = _load(IRPT / "_authz" / "enforce.py", "irpt_authz_enforce")
+authz_fixtures = _load(IRPT / "_authz" / "tests" / "fixtures.py", "irpt_authz_fixtures")
 
 RESULTS = []
 
@@ -231,16 +274,47 @@ def main():
             print("        $ %s" % act)
         print("      the UNSENT request           : %s"
               % json.dumps(dispatch_rec.get("request", {}).get("Parameters", {}))[:150])
-        print("  RENDER ARM                       : HUMAN-GATED -- admitted by RT8-AC1 (a) as")
-        print("      the arm's own rule. The record above is the operator's act, executable")
-        print("      rather than described. The render itself (a browser opening the print")
-        print("      route) is the ONE step not taken; every step around it ran on the served")
-        print("      service. See infra/aws/ec2/investor-reporting-export/README.md for why")
-        print("      no reachable host may be started by this cell.")
-        print("  0 EXTERNAL CONNECTIONS DURING THE RENDER: no render ran, so there is no host")
-        print("      guard log to read. THIS IS PRINTED AS VACUOUS, never as a pass (bound 12).")
-        print("      The guard exists in the host half and writes render_guard.json beside the")
-        print("      PDF with its own denominator; it is measured at the operator's run.")
+        # THE RENDER WAS RUN. Andrew's word of 2026-09-11 ~14:5xZ ("Yes ycharts runner may be
+        # started") turned the HUMAN-GATED arm into an act, taken ONCE under its own ledger
+        # and recorded here. The battery does NOT start a host: it reads the record of the act
+        # and reads the WORLD for where the host ended up.
+        render = json.loads(RENDER_RECORD.read_text(encoding="utf-8"))
+        rmeta = render["_meta"]
+        print("  THE RENDER, ON ANDREW'S WORD     : \"%s\"" % rmeta["word"])
+        print("      source                       : %s" % rmeta["word_source"].split(";")[0])
+        print("      host / document              : %s / %s" % (rmeta["host"], rmeta["document"]))
+        for step in render["cycle"]:
+            print("      [%s] %-10s rc=%s" % (step["at"], step["step"], step["rc"]))
+        print("      SSM command status           : %s" % render["command"]["status"])
+        print("      the refusal, VERBATIM        : %s"
+              % render["command"]["stderr"].splitlines()[0][:150])
+        guard = render["network_guard"] or {}
+        print("  THE NETWORK GUARD -- A REAL BROWSER ON A REAL HOST, with its denominator:")
+        print("      %s" % guard.get("denominator"))
+        for origin, count in sorted((guard.get("requests_by_origin") or {}).items()):
+            print("      %-34s %d request(s)%s"
+                  % (origin, count,
+                     "  <- FOREIGN" if origin in (guard.get("foreign_origins") or []) else ""))
+        print("      vendor requests              : %s  <- the number the bound is about"
+              % guard.get("vendor_requests"))
+        print("      NOT 'ZERO EXTERNAL CONNECTIONS': the sign-in page this render reached")
+        print("      pulls webfonts from fonts.googleapis.com and fonts.gstatic.com, so the")
+        print("      honest figure is 2 foreign of 12 with 0 of them vendor. Printing 'zero'")
+        print("      here would have been a claim the guard itself refutes. Row W4-S23.")
+        print("  RENDER ARM                       : SESSION-GATED -- the browser opened, reached")
+        print("      the REAL portal origin and found a SIGN-IN SCREEN; render_export.cjs")
+        print("      refuses SESSION_ABSENT by design and never signs in. An authenticated")
+        print("      session for the host is IB-rtb-1's build item. The issuer's amendment")
+        print("      names exactly this branch, so this is the arm's own rule, not a skip.")
+        host_state = aws_json(["ec2", "describe-instances", "--instance-ids",
+                               rmeta["host"].split("(")[-1].strip(") "),
+                               "--region", "us-east-1", "--query",
+                               "Reservations[].Instances[].State.Name", "--output", "json"])
+        live_state = host_state[0] if isinstance(host_state, list) and host_state else None
+        print("  THE HOST RETURNED TO ITS DECLARED STATE: record says %s, LIVE read says %s"
+              % (render["final_instance_state"], live_state))
+        print("      The word is a CYCLE, not a new resting state -- a host left running after")
+        print("      a render is drift against aws_ec2_instance_state.runner, not a permission.")
 
         # THE DOWNLOAD HALF, on the real guarded route with the real authz library.
         enforcer, deps = _enforcer()
@@ -262,13 +336,27 @@ def main():
                 and not failed(headed) and headed.get("ContentLength")
                 and dispatch_rec.get("decision") == dispatch_mod.HUMAN_GATED
                 and dispatch_rec.get("sent") is False
-                and served.ok and url_ok and not again.ok)
+                and served.ok and url_ok and not again.ok
+                # THE RENDER HALF: the command RAN on the host, the guard MEASURED the
+                # traffic, no vendor origin was touched, and the host is back where the
+                # ycharts root declares it. The refusal itself is not a failure of this arm --
+                # the amendment admits SESSION-GATED by name -- but a SILENT one would be.
+                and render["command"]["status"] in ("Success", "Failed")
+                and "SESSION_ABSENT" in render["command"]["stderr"]
+                and guard.get("vendor_requests") == 0
+                and guard.get("requests_total", 0) > 0
+                and render["final_instance_state"] == "stopped"
+                and live_state == "stopped")
     record("a", ok_a,
            "the served controller freezes and PERSISTS the bundle before any render, decides "
-           "the dispatch, and the download reauthorizes -- the render step reads HUMAN-GATED",
+           "the dispatch, the download reauthorizes, and the RENDER RAN on the host and reads "
+           "SESSION-GATED with its network denominator measured",
            "bundle persisted and read back equal, confirmed by an independent head-object; "
-           "dispatch HUMAN_GATED with the operator act printed verbatim and 0 commands sent; "
-           "1 download served and 1 refused after revocation")
+           "dispatch HUMAN_GATED with the operator act printed verbatim and 0 commands sent by "
+           "the CONTROLLER; 1 download served and 1 refused after revocation; the OPERATOR "
+           "cycle ran the document on i-0167fd745ad906a66, the browser reached the portal "
+           "origin and refused SESSION_ABSENT, the guard measured 2 foreign of 12 requests "
+           "with 0 vendor, and the host is back to stopped on a LIVE read")
 
     # ---------------------------------------------------------------- (c)
     head("(c) FIVE OF FIVE IN THE RUNTIME")
@@ -376,10 +464,15 @@ def main():
            "attempt id is explicit and distinct in both")
 
     # ---------------------------------------------------------------- (e)
-    head("(e) EXCLUSION PROVED -- and nothing moved, nothing deleted")
+    head("(e) EXCLUSION PROVED -- and the population is SMALLER, BY ANDREW'S WORD")
     # BOTH SYNTHETIC GENERATIONS, not just the one the ruling named. This cell's own proof
     # submits write bundles under GENRT8PROOF, and an arm that censused only GENIBS14SYN
     # would have left its own objects outside the population it was proving clean.
+    #
+    # THIS ARM USED TO READ FIVE LIVE OBJECTS AND ASSERT 5 OF 5 STILL HEADED 200. Four of
+    # them were deleted by arm (g) on Andrew's word, so it cannot read them live any more --
+    # and the honest form is to say which half is live and which is a record, not to keep an
+    # assertion that would now be false or to quietly drop the four from the denominator.
     rows = []
     for prefix in (SYNTHETIC_PREFIX, PROOF_PREFIX):
         listing = aws_json(["s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix",
@@ -394,7 +487,7 @@ def main():
         inventory.append({"Key": row["Key"], "Size": row["Size"],
                           "Metadata": headed.get("Metadata", {}),
                           "head_rc_ok": not failed(headed)})
-    print("  INVENTORY, both synthetic generations : %d object(s)" % len(inventory))
+    print("  LIVE INVENTORY, both synthetic generations : %d object(s)" % len(inventory))
     for row in inventory:
         print("      %-58s %7d  %s"
               % (row["Key"].split("exports/")[-1], row["Size"], row["Metadata"]))
@@ -415,38 +508,77 @@ def main():
     after = [aws_json(["s3api", "head-object", "--bucket", BUCKET, "--key", r["Key"],
                        "--output", "json"]) for r in inventory]
     still = sum(1 for h in after if not failed(h))
-    print("  0 DELETES ISSUED                 : all %d key(s) still head-object 200 AFTER the"
-          % still)
-    print("      battery. This cell has no writer on them: exclusion.py contains no")
-    print("      delete_object, copy_object or put_object, asserted by a test. Deletion is")
-    print("      Andrew's word and is CARRIED on the instance, not taken here.")
+    print("  NOTHING THIS ARM READS WAS TOUCHED BY IT: %d of %d live key(s) still head-object"
+          % (still, len(inventory)))
+    print("      200 AFTER the census. exclusion.py contains no delete_object, copy_object or")
+    print("      put_object -- asserted by a test, not by this sentence. The four deletes are")
+    print("      arm (g)'s, taken under their own ledger on Andrew's word, never here.")
+
+    # THE FOUR DELETED KEYS, RE-RUN FROM THE COMMITTED RECORD. The readers are pure functions
+    # of (key, metadata); the record supplies both. What the record CANNOT supply is whether
+    # the objects exist -- that is arm (g)'s live 404, and it is not claimed here.
+    recorded = json.loads(DELETE_RECEIPTS.read_text(encoding="utf-8"))
+    gone_rows = [{"Key": k, "Metadata": (recorded["before"]["head"][k].get("Metadata") or {})}
+                 for k in recorded["keys"]]
+    gone_verdicts = [exclusion_mod.classify(r["Key"], r["Metadata"])[0] for r in gone_rows]
+    gone_census = exclusion_mod.census(gone_rows)
+    print("  THE FOUR DELETED KEYS, from the COMMITTED RECORD (%s):"
+          % DELETE_RECEIPTS.name)
+    print("      classification               : %s" % gone_verdicts)
+    for row in gone_census:
+        print("      %-14s admitted %d of %d" % (row["reader"], row["admitted"], row["objects"]))
+    print("      THIS IS A RECORD, NOT A LIVE READ -- the objects are gone. Whether they are")
+    print("      gone is measured in arm (g); what is measured HERE is only that the readers")
+    print("      excluded them on the key and metadata they carried while they existed.")
+
     readers_ok = all(r["admitted"] == 0 for r in census_rows)
     control_ok = all(r["admitted"] == 1 for r in control if r["reader"] in
                      ("export_status", "download"))
-    ruling_four = [r for r in inventory if "GENIBS14SYN" in r["Key"]]
-    record("e", len(ruling_four) == 4
+    gone_ok = (len(gone_rows) == 4
+               and all(v == exclusion_mod.EXCLUDED_BY_BOTH for v in gone_verdicts)
+               and all(r["admitted"] == 0 for r in gone_census))
+    record("e", len(inventory) >= 1
            and all(v == exclusion_mod.EXCLUDED_BY_BOTH for v in verdicts)
-           and readers_ok and control_ok and still == len(inventory),
-           "the four synthetic objects are inventoried, every production reader excludes "
-           "them, and none was moved or deleted",
-           "%d of %d objects EXCLUDED_BY_BOTH predicates (the ruling's 4 under GENIBS14SYN "
-           "plus this cell's own proof bundles under GENRT8PROOF); %d of %d readers admit 0 "
-           "of %d; the control shows the readers still admit an ordinary object; %d of %d "
-           "keys still head 200 after"
+           and readers_ok and control_ok and gone_ok and still == len(inventory),
+           "every production reader excludes the synthetic evidence -- the objects that live "
+           "and the four the word removed",
+           "LIVE: %d of %d objects EXCLUDED_BY_BOTH and %d of %d readers admit 0 of %d, with "
+           "the control still admitting an ordinary object; RECORDED: 4 of 4 deleted keys "
+           "EXCLUDED_BY_BOTH and %d of %d readers admit 0 of 4; %d of %d live keys still head "
+           "200 after"
            % (len(verdicts), len(inventory), len(census_rows), len(census_rows),
-              len(inventory), still, len(inventory)))
+              len(inventory), len(gone_census), len(gone_census), still, len(inventory)))
 
     # ---------------------------------------------------------------- (f)
     head("(f) LEDGERS AND PLANS")
     ledger_text = LEDGER.read_text(encoding="utf-8")
     closed = "**Status:** CLOSED" in ledger_text
-    sha = subprocess.run(["git", "log", "-1", "--format=%H %s", "--",
+    # --full-history OR THIS READS EMPTY. The sentinel was ADDED and DELETED inside a branch
+    # that was merged, and `git log -- <path>` simplifies exactly that shape away: the file
+    # never appears on the first-parent walk, so a plain log prints nothing and the arm would
+    # report "no sentinel commit" about a sentinel that was committed and removed correctly.
+    sha = subprocess.run(["git", "log", "-1", "--full-history", "--format=%H %s", "--",
                           "org/critical_paths/.open_deploys/irpt-bckend-rt8.json"],
                          cwd=str(REPO), capture_output=True)
     print("  LEDGER irpt-bckend-rt8           : entry reads CLOSED=%s; sentinel on disk=%s"
           % (closed, SENTINEL.exists()))
     print("      sentinel commit              : %s"
           % sha.stdout.decode("utf-8", "replace").strip()[:104])
+    # THE YCHARTS ROOT IS PLANNED TOO, because this cell amended it. Its edit is a header
+    # comment and one OUTPUT DESCRIPTION, and Terraform stores neither in state -- so the
+    # honest thing to print is that the plan is clean AND that a clean plan does not prove the
+    # description changed. The file is the evidence for the description; the plan is the
+    # evidence that nothing ELSE moved, which is the part that could have gone wrong.
+    ycharts = subprocess.run(
+        [TERRAFORM, "-chdir=infra/aws/terraform/investor-reporting/ycharts", "plan",
+         "-no-color", "-input=false", "-lock=false"], cwd=str(REPO), capture_output=True)
+    ytext = ycharts.stdout.decode("utf-8", "replace")
+    yclean = "No changes. Your infrastructure matches the configuration." in ytext
+    print("      ycharts      plan             : %s (rc=%d) -- the root this cell amended;"
+          % ("No changes" if yclean else "DRIFT", ycharts.returncode))
+    print("      the amendment is a comment block and an output DESCRIPTION, which Terraform")
+    print("      does not hold in state, so this line proves nothing ELSE moved -- not that")
+    print("      the description changed. The file is the evidence for that.")
     converged = []
     for root in ROOTS:
         proc = subprocess.run(
@@ -463,10 +595,69 @@ def main():
             # battery down AFTER it had measured the drift it was reporting.
             for line in text.splitlines()[-14:]:
                 print("          %s" % line.encode("ascii", "replace").decode("ascii"))
-    record("f", closed and not SENTINEL.exists() and all(converged),
-           "the ledger is closed with its sentinel committed and all three roots re-plan clean",
-           "1 of 1 entries CLOSED; %d of %d roots report No changes"
-           % (sum(converged), len(ROOTS)))
+    record("f", closed and not SENTINEL.exists() and all(converged) and yclean,
+           "the ledger is closed with its sentinel committed and every root this cell touched "
+           "re-plans clean",
+           "1 of 1 entries CLOSED; %d of %d project roots report No changes, plus the ycharts "
+           "root this cell amended" % (sum(converged), len(ROOTS)))
+
+    # ---------------------------------------------------------------- (g)
+    head("(g) THE FOUR SYNTHETIC EXPORTS DELETED ON ANDREW'S WORD")
+    rec = json.loads(DELETE_RECEIPTS.read_text(encoding="utf-8"))
+    meta, keys = rec["_meta"], rec["keys"]
+    print("  THE WORD, VERBATIM               : \"%s\"" % meta["word"])
+    print("      source                       : %s" % meta["word_source"])
+    print("      it covers                    : %d key(s) in %s, and NOTHING else -- no other"
+          % (len(keys), meta["bucket"]))
+    print("                                     object, prefix or firm")
+    print("  THE LEDGER                       : %s" % pathlib.Path(meta["ledger"]).name)
+    print("      sentinel committed BEFORE    : %s" % meta["sentinel_commit"])
+    print("  THE RECEIPTS (a receipt is a CLAIM; the 404 beside it is the MEASUREMENT):")
+    live_gone, receipts_ok = 0, 0
+    for row in rec["receipts"]:
+        key, resp = row["key"], row["response"]
+        headed = aws_json(["s3api", "head-object", "--bucket", BUCKET, "--key", key,
+                           "--output", "json"])
+        gone = failed(headed) and ("404" in headed["_error"] or "Not Found" in headed["_error"])
+        live_gone += 1 if gone else 0
+        receipts_ok += 1 if resp.get("DeleteMarker") else 0
+        print("      %-50s DeleteMarker=%s marker=%s"
+              % (key.split("exports/")[-1], resp.get("DeleteMarker"),
+                 str(resp.get("VersionId"))[:18]))
+        print("      %-50s LIVE head-object -> %s"
+              % ("", "404 Not Found" if gone else "STILL PRESENT (the arm fails)"))
+    listing = aws_json(["s3api", "list-objects-v2", "--bucket", BUCKET,
+                        "--prefix", rec["_meta"].get("prefix", SYNTHETIC_PREFIX),
+                        "--output", "json"])
+    remaining = [c["Key"] for c in listing.get("Contents", [])] if not failed(listing) else []
+    unexpected = [k for k in remaining if k not in keys]
+    print("  LIVE listing under %-36s : %d object(s) remaining, %d unexpected"
+          % (SYNTHETIC_PREFIX, len(remaining), len(unexpected)))
+    spare_key = rec["after"]["blast_radius_control"]["key"]
+    spare = aws_json(["s3api", "head-object", "--bucket", BUCKET, "--key", spare_key,
+                      "--output", "json"])
+    spare_ok = not failed(spare)
+    print("  THE BLAST-RADIUS CONTROL         : an object the word does NOT cover --")
+    print("      %s" % spare_key)
+    print("      still head-object 200        : %s  <- a delete that removed everything would"
+          % spare_ok)
+    print("                                     be indistinguishable from this one without it")
+    print("  THE GRAIN, STATED RATHER THAN IMPLIED:")
+    for line in _wrap(meta["delete_grain"], 70):
+        print("      %s" % line)
+    g_closed = "**Status:** CLOSED" in DELETE_LEDGER.read_text(encoding="utf-8")
+    print("  LEDGER irpt-bckend-rt8-synthetic-delete : CLOSED=%s; sentinel on disk=%s"
+          % (g_closed, DELETE_SENTINEL.exists()))
+    print("\n  %d of %d deleted, %d of %d remaining, %d unexpected objects"
+          % (live_gone, len(keys), len(keys) - live_gone, len(keys), len(unexpected)))
+    record("g", live_gone == 4 and receipts_ok == 4 and not unexpected and spare_ok
+           and g_closed and not DELETE_SENTINEL.exists(),
+           "the four synthetic exports named by Andrew's word are gone, and nothing else was "
+           "touched",
+           "4 of 4 delete receipts carry DeleteMarker=true and 4 of 4 keys now head 404; %d "
+           "unexpected object(s) under the prefix; the uncovered control object still heads "
+           "200; the deletion ledger is CLOSED with its sentinel committed before the act"
+           % len(unexpected))
 
     # ---------------------------------------------------------------- verdict
     head("VERDICT")
@@ -474,7 +665,8 @@ def main():
         print("  %s  (%s) %s" % ("PASS" if ok else "FAIL", arm, claim))
     passed = sum(1 for _, ok, _, _ in RESULTS if ok)
     print("\n  %d of %d mechanical arms passed" % (passed, len(RESULTS)))
-    print("  RENDER STEP: HUMAN-GATED, record printed verbatim in arm (a).")
+    print("  RENDER STEP: RAN on i-0167fd745ad906a66 and reads SESSION-GATED; the")
+    print("  network guard measured 2 foreign of 12 requests, 0 of them vendor.")
     if passed == len(RESULTS):
         print("IBRT8-EXPORT-RENDERS")
         return 0
