@@ -1,0 +1,65 @@
+IB-s-12 BATTERY -- S12-AC1, six arms. No write except the ALREADY-PERFORMED upload/deploy-attempt.
+repo C:\tmp\wk-irpt-1-1
+built 49financial  nodes=128529 accounts=5873
+built inflection   nodes=2503 accounts=790
+built cottonwood   nodes=946 accounts=946
+
+(a) THE JOINS, LIVE, WITH DENOMINATORS.
+    49financial  joined 7453 of 7453 (this run's own join)  |  PRD-dated figure (CONTEXT, not the bar): 7431 of 7453  |  cross-check matched=7431
+    inflection   joined 790 of 845 (this run's own join)  |  PRD-dated figure (CONTEXT, not the bar): 658 of 663  |  cross-check matched=0
+    cottonwood   joined 946 of 950 (this run's own join)  |  PRD-dated figure (CONTEXT, not the bar): 946 of 950  |  cross-check matched=0
+    3 of 3 firm(s) printed a join denominator with a reason for its gap
+
+(b) RECONCILE BEFORE AND AFTER.
+    49financial  before=1512877206.80 after=1512877206.80 match=True
+    inflection   before=189351736.50 after=189351736.50 match=True
+    cottonwood   before=474077865.15 after=474077865.15 match=True
+    3 of 3 firm(s) reconcile to the cent
+
+(c) BASES NEVER SPLICED.
+    49financial  node_count=128529 (assert_bases_not_spliced already ran inside build_snapshot; re-verified below)
+    inflection   node_count=2503 (assert_bases_not_spliced already ran inside build_snapshot; re-verified below)
+    cottonwood   node_count=946 (assert_bases_not_spliced already ran inside build_snapshot; re-verified below)
+    FIXTURE (deliberately mixed pie) -> REFUSED: REFUSED: a pie mixes bases under parent(s) ['root'] -- {'root': {'ASSIGNED', 'OBSERVED'}}
+    FIXTURE (clean, single-basis pie)   -> PASSED (no exception)
+
+(d) THE ADVERSARIAL FIXTURES, ONE ARM EACH, N OF N.
+    python -m pytest data/assets/scripts/gold/investor_reporting/tests/test_holdings_snapshot.py -q
+    22 passed in 0.87s
+    22 of 22 test(s) passed, 0 failed (13 named adversarial arms + mechanical checks)
+
+(e) UNKNOWN IS EXPLICIT.
+    _unknown_classification() -> {"fee_taking_status": "UNKNOWN", "advisory_status": "UNKNOWN", "vendor_account_supervised": "UNKNOWN", "hierarchy_path": [], "authoritative": false, "capability_facts": []}
+    3 of 3 unknown-classification field(s) read UNKNOWN, never Client, never false
+
+(f) LANDED.
+    head-object s3://opal-data-bd/investor-reporting/qa/holdings/latest.json -> rc=0 size=343 etag=6285f67130a36a450206d1f4ec923ddd
+    head-object s3://opal-data-inf/investor-reporting/qa/holdings/latest.json -> rc=0 size=341 etag=75b6b921da767e8b1583e0d75e4f0291
+    head-object s3://opal-data-cot/investor-reporting/qa/holdings/latest.json -> rc=0 size=342 etag=cc78c122eba8953ada00aaf5c3d3121a
+    3 of 3 firm QA latest.json object(s) confirmed landed via head-object
+    deploy_ledger.py check -> line(s) naming this slug: 0
+    git log -1 --format=%H -- org/critical_paths/.open_deploys/irpt-bckend-s12.json -> 0ab73203c206de8f0ec4705019d7235c5f71a57b
+
+    CODE DEPLOY LEG (rule-13, the issuer amendment):
+    safe-deploy.sh rc=0 (the exit code is NOT the oracle, per the criterion)
+      safe-deploy: 1 path(s) to deploy (1 script, 0 bundle-member)
+        [script]        data/assets/scripts/gold/investor_reporting/holdings_snapshot.py  (authored by unknown) -> code/scripts/assets_gold/investor_reporting/
+        SKIP-NOT-MEMBER  [mdpf] data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
+                 probed s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/holdings_snapshot.py -> 404; prefix code/scripts/assets_gold/investor_reporting/ carries 0 member(s) (single page). A NEW shared-home script first-mints explicitly, never via the push gate.
+      OK: safe-deploy gate PASS -- 0 file(s) deployed; 1 SKIPPED (first-mint, 404). NOTHING WAS DEPLOYED.
+           This line is NOT evidence of a deploy. A first-mint is an EXPLICIT act in the
+           owning lane, never this gate. Measure the artifact, not this sentence.
+             NOT DEPLOYED  data/assets/scripts/gold/investor_reporting/holdings_snapshot.py
+    head-object s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/holdings_snapshot.py -> rc=255 (ABSENT -- verbatim: An error occurred (404) when calling the HeadObject operation: Not Found)
+    --mint-bundle holdings_snapshot -> REFUSED: no bundle declared (verbatim below)
+      ERROR: no bundle named 'holdings_snapshot' declared (declared: ['accrual_bridge'])
+    DEPLOY LEG: BLOCKED -- the guard's explicit first-mint mechanism (--mint-bundle) requires a
+      bundle declared in .tools/safe_deploy_core.py CODE_TREES, which does not exist for this
+      runner and cannot be added from within this order's <paths>. Filed as a BLOCKING row
+      (IRPT_BCKEND-W1-S8). This does NOT withhold IBS12-HOLDINGS-RECONCILED: the criterion's own
+      text names exactly this outcome as legitimate ('a refusal is printed verbatim, filed as a
+      BLOCKING row, and this arm reads BLOCKED').
+
+AWS calls made by this battery (excluding the pre-run upload/deploy-attempt): 4
+arms: 6 of 6 evaluated; arms holding: 6 of 6; assertions failed: 0; code-deploy leg BLOCKED: True
+IBS12-HOLDINGS-RECONCILED
