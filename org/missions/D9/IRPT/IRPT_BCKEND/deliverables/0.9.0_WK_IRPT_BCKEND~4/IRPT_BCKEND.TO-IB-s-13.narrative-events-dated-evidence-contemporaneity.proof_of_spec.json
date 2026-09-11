@@ -1,0 +1,402 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s-13",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-13.narrative-events-dated-evidence-contemporaneity.md",
+    "group": "OTHER",
+    "vintage_commit": "a2e5071940d29d0271625bd6e39325d6aa052f8a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "b3050e30960c9726cf429788008b58fe6799424f",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s-13.narrative-events-dated-evidence-contemporaneity.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/events.py",
+      "kind": "script",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Packaged into irpt-narrative.zip (sha256 nuMb7eMlN8ou41LSSUOsUDR8T5U5uilo7N1XUcwU1IQ=) whose digest equals the live CodeSha256 read by `aws lambda get-function-configuration --function-name irpt-narrative`. Event detection on the VERIFIED daily cumulative TWR before any display downsampling, with three refusals that fire on the INPUT rather than converting it: REFUSE_SUBSTITUTED_BASIS (money-weighted / annualized / wrong-unit), REFUSE_ZERO_FILLED (a 0.0 point after the first, or a duplicated date), REFUSE_DOWNSAMPLED (fewer points than the declared daily denominator). No clock, no randomness; a trough tie breaks on the EARLIER date, stated.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/evidence.py",
+      "kind": "script",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same zip, same CodeSha256 tie. Dated topic evidence, READ-ONLY on the news plane: future excluded BY DATE and recorded as EXCLUDED_FUTURE, undated recorded as EXCLUDED_UNDATED and never assumed contemporaneous, syndicated context deduplicated across the window on the normalized headline with copies and dates kept on the survivor, MISSING HISTORY distinguished from an empty topic list. PUBLICATION_TIMEZONE_EVIDENCE carries six producer citations as DATA so the battery prints them rather than a human retyping them. The store seam exposes no writer and raises NewsWriteRefused if one is called.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/prose.py",
+      "kind": "script",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same zip, same CodeSha256 tie. A deterministic template -- NO EXTERNAL MODEL API CALL is made and versions.model_version says so. The VALIDATOR is the gate, not the generator: 18 causal patterns rejected, a contemporaneity marker required, every citation resolved against the SELECTED set. Uncited prose is refused only when evidence exists to cite, so an honest MISSING HISTORY answer is not punished.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/handler.py",
+      "kind": "script",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Same zip; the live Handler field reads handler.lambda_handler and Runtime python3.12, read directly from get-function-configuration. EXERCISED IN THE CLOUD: an invoke of the deployed function over its offline fixture returns statusCode 200 with contract_validated=true, prose VALIDATED, 9 events and 42 cited-evidence rows. cited_evidence carries the items the packet CITES plus EVERY exclusion.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/event_policy.json",
+      "kind": "config_data",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Packaged in the zip and carried into the packet (policy_id, policy_version, materiality_threshold). The DECLARED, versioned materiality policy; the 0.005 threshold records its own reason -- the September 10 Orion window moves +1.86% in total, so a 2% threshold would select NOTHING on real data.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/fixtures/performance_report_inf.json",
+      "kind": "config_data",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PRODUCED, not handwritten: the IB-s-11 performance adapter run over its OWN committed September 10 capture through the `recorded` transport. 92 daily points, 2026-06-10..2026-09-09 -- the same series whose percent-vs-factor tie measured 0.0 and whose linked curve tied the vendor summary to 1.2e-13. Test data."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/fixtures/topics_window.json",
+      "kind": "config_data",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "162 REAL dated topic rows read from opal-news-trending-daily for the 54 window dates the detected events need, trimmed to the fields the evidence layer reads, plus 4 clearly flagged synthetic controls (_synthetic: true) the real record does not reliably contain: a FUTURE-dated article, a SYNDICATED pair, an UNDATED article and an INJECTION headline. Public news headlines, sources and URLs only -- no client identifier, account number, position or firm name."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/fixtures/topics_predating.json",
+      "kind": "config_data",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The MISSING HISTORY control: a store whose coverage begins AFTER every event window. NOT an empty store -- an empty store and a store that does not reach back are different answers and the cell must not merge them."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/fixtures/FIXTURE_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fixture provenance: per-file sha256 and the event denominators (9 events, 5 episodes of which 2 material, 35 raw movement windows merged to 4, 92 series points, the series fingerprint)."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/narrative/tests/test_narrative.py",
+      "kind": "test",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "37 offline tests, `python -m pytest infra/aws/lambda/investor-reporting/narrative/tests -q` -> 37 passed. Every refusal arm is paired with its permitted case so the suite cannot go green by refusing everything. One of them FOUND A REAL DEFECT in this cell's own code (an evidence_id collision, 48 candidates and 46 ids), which was fixed rather than accommodated."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/narrative/main.tf",
+      "kind": "terraform",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Backend state key investor-reporting/narrative/tfstate; locals carry the four news-plane names once so the IAM grant and any future reader agree on the same strings. Re-planned after the apply: 'No changes. Your infrastructure matches the configuration.' rc=0."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/narrative/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_iam_role.narrative + irpt-narrative-logs + irpt-narrative-news-read, created by the apply (5 added, 0 changed, 0 destroyed) and refreshed clean in the 0-diff plan. READ-ONLY on the news plane: dynamodb Query/GetItem/Scan/DescribeTable on the two tables, s3:GetObject on the trending_reports/ prefix and a prefix-CONDITIONED ListBucket. The battery probes 10 write/secret/model actions against the file with comment lines EXCLUDED -- so the named NOT-GRANTED list cannot be miscounted as a grant -- and finds 0 of 10."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/narrative/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "module.irpt_narrative.aws_lambda_function.this + its log group, both refreshed clean in the 0-diff plan. The irpt-common layer is READ by name here (data aws_lambda_layer_version) and declared in the performance root, so attaching it cannot create, move or destroy it. No schedule, no event source, no notification."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/performance/layers.tf",
+      "kind": "terraform",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_lambda_layer_version.irpt_common, published as arn:aws:lambda:us-east-1:313476888478:layer:irpt-common:2 by safe-apply and refreshed clean in the S13-AC4 0-diff plan. source_code_hash reads the S3 object's content-sha256 metadata, so the plan is a CONTENT comparison and a re-apply of the same bytes is a 0-diff. Declared in the root that owns its first consumer so the layer and the attach land in one apply and can never disagree."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/investor-reporting/performance/lambda.tf",
+      "kind": "terraform",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The layer attach plus IRPT_BD_HELPERS_PATH=/opt/python/bd_helpers.py and IRPT_CONTRACTS_DIR=/opt/python/irpt_contracts. Verified live: get-function-configuration irpt-performance-adapter returns Layers[0]=...irpt-common:2 and both env values.",
+      "artifact_covered_by": ["S13-AC1", "S13-AC4"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/performance/normalize.py",
+      "kind": "script",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The contract-resolution change surprise row IRPT_BCKEND-W4-S6 records: env -> /opt/python/irpt_contracts -> the repo path, resolved BY PRESENCE OF THE FILE so an empty layer directory cannot shadow a worktree run, with the repo path LAST and unchanged. Rebuilt into irpt-performance-adapter.zip (sha256 GvxYnH9LIwWRfdbFdCpWxNZ0RJe9AItzPKX9bfdKgoI=, 61499 bytes) and applied. Verified two ways: the 28 IB-s-11 tests still pass in the worktree, and the DEPLOYED function returns contract_validated=true on both provider paths where it previously returned false with a named absence.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/layers/irpt-common/requirements.txt",
+      "kind": "config_data",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "jsonschema 4.26.0 with EVERY transitive version pinned (attrs, jsonschema-specifications, referencing, rpds-py, typing_extensions). A layer whose deps float is a layer whose rebuild is not the same artifact."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/layers/irpt-common/build_layer.py",
+      "kind": "script",
+      "commit_or_etag": "8e5d8cadad8c8a8b9746490cbca0936f811b8ef9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The layer build: pinned manylinux2014_x86_64/cp312 wheels (a source-only resolution FAILS the build rather than producing a host-shaped layer), an AST closure over the six bounded BD helpers read at a pinned commit with `git show`, the IRPT contract schemas at their pins, and a deterministic zip. Two consecutive builds are byte-identical (cmp clean, 154 members, 621748 bytes). This pin is the THIRD revision and carries the two fixes rows W4-S7 records: module-level IMPORTS joined into the closure, and a build-time exec of the generated module in a clean namespace so a missed closure member fails the BUILD rather than the deployed function.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/layers/irpt-common/BUILD_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "8e5d8cadad8c8a8b9746490cbca0936f811b8ef9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The pin 3788926beb9ba19eb9243c6d80c706accf3e85c2 with its claim, the method, 6 of 6 requested helpers emitted with 3 constants and 1 import, the four things NOT carried, the two excluded_members with their reason, the contract pins, and the zip digest JWKuEDIoIPgt1zaYmymEhmHS9HZtG2XCwEc7LXKagf4= / 621748 bytes -- which head-object reads back off the live S3 object.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-layers/irpt-common.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "JWKuEDIoIPgt1zaYmymEhmHS9HZtG2XCwEc7LXKagf4=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "put-object then head-object read back: ContentLength=621748 and Metadata content-sha256=JWKuEDIoIPgt1zaYmymEhmHS9HZtG2XCwEc7LXKagf4=, both equal to the built zip. Because the build is reproducible, this digest is RE-DERIVABLE from BUILD_MANIFEST rather than only recorded by it. Ledger leg L2 of irpt-bckend-s13-layer.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-narrative.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "nuMb7eMlN8ou41LSSUOsUDR8T5U5uilo7N1XUcwU1IQ=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "build-and-upload.sh investor-reporting irpt-narrative: import-closure OK for 4 packaged .py files, SHA256 nuMb7eMlN8ou41LSSUOsUDR8T5U5uilo7N1XUcwU1IQ=, 53013 bytes, write VERIFIED by the script and re-read here by head-object. The live CodeSha256 equals this digest, so the served bytes are tied to the BUILD INPUT and not to a filename.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-layer-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "8e5d8cadad8c8a8b9746490cbca0936f811b8ef9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-common registered as a MANAGED layer with its source_dir, requirements_file, build_script, build_manifest, tf_file/tf_resource, the vendored source pin and the build digest. The map previously declared no layer providing jsonschema at all -- 0 hits across its 180 lines -- which is the condition row IRPT_BCKEND-W4-S3 named."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "8e5d8cadad8c8a8b9746490cbca0936f811b8ef9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "irpt-narrative registered (source_dir, 9 files, tf_file, tf_resource, artifact key, iam_role, layers) and both functions' artifact_sha256 values written by the build. The battery reads irpt-narrative.artifact_sha256 from this file as the BUILD INPUT side of the CodeSha256 comparison."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/PATH_MANIFEST.json",
+      "kind": "config_data",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "28 entries registered_by IB-s-13 of 185 total: 19 repo paths and 9 AWS-plane entries (the layer and function artifacts, the state key, the layer/function/role/log-group ARNs, and the three news-plane resources marked access=READ)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T0103Z_irpt-bckend-s13-layer_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "2a514e276739f1827dd90d13f42fcaf220f32962",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened 20260911T0103Z BEFORE the layer acts and closed after them; four legs each CLOSED with its own proof. Its sentinel org/critical_paths/.open_deploys/irpt-bckend-s13-layer.json was added at a12b0df4e7 and removed by the close in this same commit, so the two can never disagree. The battery re-reads the entry and asserts it says CLOSED."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T0103Z_irpt-bckend-s13_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "2a514e276739f1827dd90d13f42fcaf220f32962",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened 20260911T0103Z BEFORE the narrative apply and closed after it; four legs each CLOSED. Sentinel added at a12b0df4e7 and removed by the close here."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_s_13.py",
+      "kind": "test",
+      "commit_or_etag": "5d3b99dbebf43b230a3ddeb07aa2ae24f806542c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S13-AC1 battery, eight arms. Offline arms run under a socket guard whose zero is proved by a positive control; the live arms take NAMED reads through the estate's own aws shim (via its .cmd face -- see row IRPT_BCKEND-W4-S8).",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/make_narrative_fixtures.py",
+      "kind": "script",
+      "commit_or_etag": "a12b0df4e749b40d644f79458e81bf015e270b7d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The fixture generator: runs the IB-s-11 adapter for the performance report, computes which window dates the detected events need, reads those dates READ-ONLY from opal-news-trending-daily, trims to the consumed fields and appends four flagged synthetic controls. It is a ONE-SHOT PRODUCER, not a graded artifact: what S13-AC1 grades is its OUTPUT -- fixtures/performance_report_inf.json, topics_window.json, topics_predating.json and FIXTURE_MANIFEST.json, each of which carries its own artifact row and its own artifact_covered_by.",
+      "artifact_covered_by": ["S13-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/IB-s-13_S13-AC1_battery_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "5d3b99dbebf43b230a3ddeb07aa2ae24f806542c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim transcript of the S13-AC1 run, ending IBS13-NARRATIVE-DETERMINISTIC."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/IB-s-13_S13-AC2_plan_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "5d3b99dbebf43b230a3ddeb07aa2ae24f806542c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim transcript of the narrative-root plan, ending 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/IB-s-13_S13-AC4_plan_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "5d3b99dbebf43b230a3ddeb07aa2ae24f806542c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim transcript of the performance-root plan after the layer attach, ending 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/S13-AC3_judgment.md",
+      "kind": "doc",
+      "commit_or_etag": "5d3b99dbebf43b230a3ddeb07aa2ae24f806542c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The S13-AC3 judgment OUTPUT, carrying no verdict: the measured history against the brief's ask, the prefilter-vs-final Topic Cloud read with its citations, and four places a reader still infers causation."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_s_13.result.md",
+      "kind": "doc",
+      "commit_or_etag": "5d3b99dbebf43b230a3ddeb07aa2ae24f806542c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The order's `.result.md` and this instance's session log; it names the three defects this cell found in its own work and how each was caught."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S13-AC1",
+      "criterion_verbatim": "`S13-AC1` -- PASSES BY OUTPUT -- determinism, exclusion of the future, missing history, contemporaneity. (a) DETERMINISTIC. One known drawdown window replayed twice against the same dated history selects the SAME moments (diff empty, printed); events computed on the pre-downsample series (assert the input length equals the daily series length). (b) THE FUTURE IS EXCLUDED -- THE DIFFERENCE CONTROL. A fixture history carrying an article dated after the window: excluded (0 future ids in the packet); a deliberately broken policy that admits it FAILS the arm. Both printed. (c) MISSING HISTORY IS AN ANSWER. A window predating the history renders `MISSING HISTORY` with the coverage bounds, never an empty topic list. Printed. (d) THE TIMEZONE IS VERIFIED FROM THE PRODUCER. Print the cutoff/timezone evidence you read from the producer's own output or code (file and line), and the live read of `opal-news-trending-daily` (item count in a 30-day window, denominator printed) and the S3 prefix (object count) that established the usable coverage. (e) SECONDARY SIGNALS GATED; SYNDICATION DEDUPED. A current neutral value is refused as a historical observation; two syndicated copies collapse to one evidence id. Printed. (f) CONTEMPORANEITY, NEVER CAUSE. The prose validator ACCEPTS a contemporaneous sentence and REJECTS three causal phrasings (fixtures printed); every citation resolves to a selected evidence id (`N of N`). (h) THE SHARED LAYER IS BUILT, PINNED AND ATTACHED (issuer amendment, row W4-S3). The layer zip imports `jsonschema` and `bd_helpers` in a clean Python (printed); `BUILD_MANIFEST.json` names the reporting-pull pin and the helper functions vendored (`N of N` named in IB-s-11's face); `get-function-configuration` on `irpt-performance-adapter` AND `irpt-narrative` prints a `Layers[].Arn` containing `irpt-common` (2 of 2); the performance root's ledger `irpt-bckend-s13-layer` CLOSED (entry hash); an invocation of the deployed performance function with its offline fixture event (no vendor transport) returns `contract_validated: true`. (g) SCHEMA-VALID, READ-ONLY, LEDGER CLOSED. The packet validates; the role's policy carries no write on the news resources (printed from `iam.tf`); `get-function-configuration irpt-narrative` `CodeSha256` equals the built zip's; sentinel committed (hash).",
+      "method": "command",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_s_13.py",
+      "output_evidence": "rc=0. VERDICT block, verbatim: 'PASS  (a) the same series selects the same moments twice, on the pre-downsample daily series' / 'PASS  (b) future information is excluded BY DATE and the exclusion is recorded, not dropped' / 'PASS  (c) a window predating the history renders MISSING HISTORY with its bounds' / 'PASS  (e) a current/neutral value is refused as history; syndicated copies collapse to one id' / 'PASS  (f) a contemporaneous sentence is accepted, three causal phrasings are rejected, every citation resolves' / 'PASS  (d) the cutoff/timezone is read from the producer's own bytes and the live coverage is measured' / 'PASS  (h) the layer is built from a pin, attached to both functions, and the deployed adapter validates its contract on BOTH provider paths' / 'PASS  (g) the packet validates, the role carries no write on the news resources, the served bytes are the built bytes and the ledger is closed' then '  8 of 8 mechanical arms passed' and the token 'IBS13-NARRATIVE-DETERMINISTIC'.  DECIDING NUMBERS PER ARM. (a) 'series points fed to the detector : 92' against 'daily_cumulative_series length : 92 (declared denominator asserted equal)'; 'run-to-run event diff : 0 entry(ies)'; 'episodes found / material : 5 / 2'; 'movement windows raw / merged : 35 / 4  (31 collapsed by the merge)'; 'CONTROL: a 14-point display curve -> REFUSE_DOWNSAMPLED'.  (b) 'EXCLUDED_FUTURE ev-... published 2026-09-10T12:00:00Z > cutoff 2026-09-09T23:59:59Z'; 'future ids in the PROSE : 0 of 1 future item(s)'; 'CONTROL (a policy that admits it) : cutoff moved to 2026-12-31 -> 0 excluded, 5 admitted'; 'undated (never assumed) : 1 item(s)'.  (c) 'store coverage bounds : [2026-10-01, 2026-10-07]'; 'windows evaluated / covered : 9 / 0'; 'missing_history : MISSING_HISTORY'; 'prose says MISSING HISTORY : True'; 'prose still VALIDATED : VALIDATED'; 'CONTRAST: the covered store : missing_history=NONE, 9 of 9 windows'.  (d) six producer citations printed with their source lines -- news_layer3_curation:2256 and :1908, news_trending_analysis:1366, :1167 and :334, and the held statement that ET is established nowhere; 'per-item timezone basis (window) : {EXPLICIT_OFFSET: 47, UNDATED: 1}'; live 'dynamodb opal-news-trending-daily : 5156 item(s) scanned of 5156 reported (ScannedCount), 289 distinct date(s)', 'coverage : 2025-11-21 .. 2026-09-10 = 294 calendar day(s), 289 present, 5 absent', 'LAST 30 DAYS : 599 item(s) across 30 of 30 date(s)', 's3 s3://opal-data-news-v2/trending_reports/ : 696 object(s), 695 dated archive object(s) across 277 day(s) 2025-12-01 .. 2026-09-10'.  (e) 'rsi_14 ADMIT', 'fear_greed REFUSE value_state=CURRENT -- a current/neutral/fallback value is not a historical observation', 'regime REFUSE missing observed_at', 'best_worst REFUSE missing universe'; 'syndication collapsed (all events): 72 copy(ies) folded into their first id'; 'evidence ids unique in the window : 48 of 48'.  (f) 'ACCEPT VALIDATED contemporaneity=True causation=False' then three 'REJECT REJECTED hits=[because] / [drove / driven by] / [in response to]'; 'the SHIPPED prose : VALIDATED, contemporaneity=True, causation=False'; 'citations resolved : 45 of 45 (unknown: none)'; 'every cited id is a SELECTED id : True'.  (h) 'pin : 3788926beb9ba19eb9243c6d80c706accf3e85c2  [measured -- git log -1 --full-history on the path]'; 'helpers : 6 of 6 requested helper(s) emitted'; 'constants BENCHMARK_IDS, YTD_MODES, INCEPTION_ANCHORS ; imports os'; 'NOT carried _request (the network call and its DRY_RUN egress gate); the .bd.identity session chain; the S3 bronze writer; boto3 clients created at module import'; 'zip : 154 member(s), 621748 bytes, sha256 JWKuEDIoIPgt1zaYmymEhmHS9HZtG2XCwEc7LXKagf4='; 'bd_helpers : OK: imported; built a request body with 6 dateRange(s) and a requested_range_index of 6 row(s): Custom,Year To Date,Trailing 12 Months,2025,2024,Since Inception'; 'jsonschema : ERROR: ModuleNotFoundError: No module named rpds.rpds' WITH 'native member(s) : python/rpds/rpds.cpython-312-x86_64-linux-gnu.so' (row IRPT_BCKEND-W4-S5 -- the host import CANNOT succeed precisely because the layer is built for Linux, and the runtime import is proved by the invokes below); 'functions carrying irpt-common : 2 of 2'; 'INVOKE F-INF (Orion) contract_validated=True' and 'INVOKE F-49F (Black Diamond) contract_validated=True', each with 'helper-degraded cell(s) : 0  <- 0 is the arm (IB-s-11 shipped 1 here)'; 'LEDGER irpt-bckend-s13-layer : entry reads CLOSED=True; sentinel on disk=False' with 'sentinel commit : 2a514e276739f1827dd90d13f42fcaf220f32962'.  (g) 'packet contract_validated (worktree): True'; 'packet contract_validated (DEPLOYED): True  [prose VALIDATED]'; 'iam.tf write/secret/model actions : 0 of 10 probed'; 'the store seam refuses a write : True'; 'irpt-narrative CodeSha256 : nuMb7eMlN8ou41LSSUOsUDR8T5U5uilo7N1XUcwU1IQ=' equal to 'built zip sha256 (source map)'; 'LEDGER irpt-bckend-s13 : entry reads CLOSED=True'.  SOCKET GUARD: 'outbound attempts : 0', 'of which to a VENDOR host : 0', 'of which to a MODEL host : 0', 'POSITIVE CONTROL : guard fired=True; vendor attempts moved 0 -> 1, so the zeros above are MEASURED, not a dead guard'.",
+      "denominator": "8 of 8 mechanical arms; 92 of 92 daily points fed to the detector; 9 events with a 0-entry run-to-run diff; 35 raw movement windows merged to 4; 0 of 1 future ids in the prose; 9 of 9 windows uncovered in the missing-history arm against 9 of 9 covered in the control; 6 of 6 timezone facts cited to file:line; 5,156 of 5,156 table items scanned over 289 of 294 calendar days with 599 in the last 30; 696 S3 objects; 1 of 4 secondary signals admitted; 72 syndicated copies collapsed and 48 of 48 ids unique; 1 of 1 prose fixture accepted and 3 of 3 rejected with 45 of 45 citations resolved; 6 of 6 helpers emitted; 2 of 2 functions carrying the layer; 2 of 2 deployed invokes contract_validated with 0 helper-degraded cells; 0 of 10 probed write/secret/model IAM actions; 0 of 0 vendor and model connections with a live positive control.",
+      "status": "PASS",
+      "expect": "IBS13-NARRATIVE-DETERMINISTIC"
+    },
+    {
+      "criterion_id": "S13-AC2",
+      "criterion_verbatim": "`S13-AC2` -- THE ROOT IS CONVERGED after this cell's apply. Run after the apply and after the ledger closes.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/narrative plan -no-color -input=false -lock=false",
+      "output_evidence": "rc=0. Verbatim tail: 'aws_iam_role.narrative: Refreshing state... [id=irpt-narrative-role]' / 'aws_iam_role_policy.narrative_logs: Refreshing state...' / 'aws_iam_role_policy.narrative_news_read: Refreshing state...' / 'module.irpt_narrative.data.aws_s3_object.artifact: Read complete after 0s [id=opal-313476888478-lambda-artifacts/investor-reporting/irpt-narrative.zip]' / 'module.irpt_narrative.aws_cloudwatch_log_group.lambda: Refreshing state... [id=/aws/lambda/irpt-narrative]' / 'module.irpt_narrative.aws_lambda_function.this: Refreshing state... [id=irpt-narrative]' then 'No changes. Your infrastructure matches the configuration.' -- run AFTER the apply ('Apply complete! Resources: 5 added, 0 changed, 0 destroyed.') and AFTER the irpt-bckend-s13 ledger closed and its sentinel removal was committed at 2a514e2767.",
+      "denominator": "5 of 5 managed resources refreshed (role, two policies, log group, lambda function) plus 2 data sources; 0 changes proposed of 5 resources under management.",
+      "status": "PASS",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\."
+    },
+    {
+      "criterion_id": "S13-AC4",
+      "criterion_verbatim": "`S13-AC4` -- THE PERFORMANCE ROOT IS CONVERGED after the layer is attached (issuer amendment, row W4-S3). Run after the layer apply and after its ledger closes.",
+      "method": "command",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/performance plan -no-color -input=false -lock=false",
+      "output_evidence": "rc=0. Verbatim tail: 'aws_lambda_layer_version.irpt_common: Refreshing state... [id=arn:aws:lambda:us-east-1:313476888478:layer:irpt-common:2]' / 'aws_iam_role.performance_adapter: Refreshing state... [id=irpt-performance-adapter-role]' / 'module.irpt_performance_adapter.data.aws_s3_object.artifact: Read complete after 0s' / 'module.irpt_performance_adapter.aws_lambda_function.this: Refreshing state... [id=irpt-performance-adapter]' then 'No changes. Your infrastructure matches the configuration.' -- run AFTER the layer apply and AFTER the irpt-bckend-s13-layer ledger closed at 2a514e2767. The root now carries 5 resources where IB-s-11 left 4; the added one is the layer version, and the function's `layers` and two new env values are converged.",
+      "denominator": "5 of 5 managed resources refreshed (layer version, role, role policy, log group, lambda function) plus 3 data sources; 0 changes proposed of 5 resources under management.",
+      "status": "PASS",
+      "expect": "No changes\\. Your infrastructure matches the configuration\\."
+    },
+    {
+      "criterion_id": "S13-AC3",
+      "criterion_verbatim": "`S13-AC3` -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for `3.0.0_SA_CVO`: how much usable history you measured (first and last dated topic, gaps) versus the 'almost a full year' the brief requested; whether the prefilter archive IS the final Topic Cloud (what you read to decide); and where a reader of the page would still read causation despite the wording. No verdict: the instance row carries the output under `UNVERIFIABLE-BY-INSTRUMENT` with `status_reason` naming `3.0.0_SA_CVO` at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "A full projection scan of opal-news-trending-daily and a full list-objects-v2 of s3://opal-data-news-v2/trending_reports/ and of s3://opal-data-portal-v2/json/sentiment/, plus a source read of news_trending_analysis/lambda_function.py and keyword_drilldown_generator/lambda_function.py; output written to org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/S13-AC3_judgment.md",
+      "output_evidence": "HOW MUCH USABLE HISTORY. DynamoDB opal-news-trending-daily -- the dated evidence of record -- runs 2025-11-21 to 2026-09-10: a 294-day calendar span with 289 days PRESENT and 5 ABSENT, 5,156 items, 2 to 26 per day. The five absent days are named rather than averaged away: 2025-11-23 (1), 2025-12-08..09 (2), 2025-12-31..2026-01-01 (2); two of the three runs straddle a holiday. Recent density is 599 items across 30 of the last 30 days. The S3 prefilter archive runs 2025-12-01 to 2026-09-10, 695 dated objects across 277 days. AGAINST THE BRIEF'S 'almost a full year': 294 calendar days is 9.7 months, 80% of a year, so the request is SUBSTANTIALLY MET AND NOT MET IN FULL, and the shortfall is at the OLD end -- there is nothing anywhere before 2025-11-21, so a window opening earlier gets MISSING HISTORY with these bounds rather than a thin answer. A SECOND ASYMMETRY: the table reaches 10 days FURTHER BACK than the archive (2025-11-21 vs 2025-12-01), so the two carriers are not interchangeable at the boundary and a cell that reached for the archive because it is easier to list would silently lose those days.  IS THE PREFILTER ARCHIVE THE FINAL TOPIC CLOUD? NO -- AND THE FINAL ONE HAS NO HISTORY AT ALL. Three reads decided it. (1) The archive carries the PRE-FILTER set: save_report_to_s3 writes report['trending_topics'], which is the top TOP_N_TOPICS = 100 detected keywords (news_trending_analysis/lambda_function.py:75, :594, :1186). (2) The final Topic Cloud is a DIFFERENT, SMALLER, FURTHER-FILTERED set: in the same function, balanced_topics = select_balanced_keywords(report['trending_topics'], total_keywords=50) runs AFTER the archive write and is then put through a sports-keyword filter before being written to s3://opal-data-portal-v2/json/sentiment/keyword-sentiments.json (:1405, the _TOPICCLOUD_SPORTS_KEYWORDS block, :1522-1527), and the consumer confirms the arrow -- keyword_drilldown_generator/lambda_function.py:9 and :108 read that exact key as 'the TopicCloud source file'. (3) THAT FINAL FILE HAS NO DATED ARCHIVE: list-objects-v2 over s3://opal-data-portal-v2/json/sentiment/ returns 722 keys of which EXACTLY 2 are top-level files (keyword-sentiments.json and fear-greed-index.json); the other 720 are keyword-history-articles/ (360) and keyword-history-summary/ (360), keyed by KEYWORD and not by date. There is ONE Topic Cloud object and it is overwritten in place. So the order's condition -- use the prefilter archive as the final historical Topic Cloud only after proof that it is -- fails, and the harder finding is that a historical Topic Cloud does not exist in the estate at all. The archive is used here as a CORROBORATOR only, with its own caveat printed: its object PATH date is the writer's naive local clock (news_trending_analysis:1366).  WHERE A READER WOULD STILL READ CAUSATION. Four places, none of which a sentence-level validator can reach. (i) ADJACENCY IS AN ARGUMENT -- putting a market moment and a headline in one sentence is the claim, whatever the verb is, and the closing disclaimer is a sentence competing with a layout. (ii) THE EVIDENCE IS SELECTED BY THE EVENT, so the set is not neutral: a 7-day lookback anchored on the event date means a reader sees topic-and-drawdown together every time and NEVER sees the quiet-window negative case that would falsify the causal reading; a control panel of topics from a quiet window would be the cheapest honest counterweight and is not in this order. (iii) RANK IS READ AS RELEVANCE -- topic_rank values like bearish-1 order the list, so the first topic beside a drawdown reads as the most RELATED when it is the most TRENDING, and nothing in the packet distinguishes the two. (iv) THE VALIDATOR'S DOMAIN IS DECLARED, NOT EXHAUSTIVE -- 18 regexes, and prose.py says so in its own comment; a model-written paragraph would find the uncovered member ('amid', 'as X slid', 'against a backdrop of') and pass. It binds today only because the generator is a template with no causal slot; on the day a model writes the prose the validator alone is NOT sufficient, and that is a decision to take deliberately rather than discover. Full text: S13-AC3_judgment.md.",
+      "denominator": "294 calendar days examined, 289 present and 5 absent in 3 named runs, over 5,156 of 5,156 scanned table items; 695 dated archive objects across 277 days; 722 keys under json/sentiment/ of which 2 are top-level files; 3 source reads across 2 producer Lambdas with 6 cited line numbers; 4 causation residues named.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: the task order marks it judgment=\"true\" and forbids self-grading. The substitute oracle is 3.0.0_SA_CVO at L9, which grades this output in its adjudication row. This worker carries the output and no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "FIVE difference controls, each required to FAIL so that the passing arm beside it means something, plus one that ran outside the battery. (1) THE DOWNSAMPLE CONTROL: the same detector handed a 14-point 7th-of-the-points curve against a declared daily denominator of 92. (2) THE CUTOFF CONTROL, which is arm (b)'s named difference control: the same code, the same fixture, a cutoff moved past the future article. (3) THE MISSING-HISTORY CONTROL: a store whose bounds postdate every window, against the covered store. (4) THE PROSE CONTROL: three causal paragraphs put through the validator that passes the shipped text. (5) THE SOCKET POSITIVE CONTROL: a deliberate outbound connect after the offline arms. And outside the battery: the narrative test suite's own id-uniqueness assertion, which FOUND a real evidence_id collision in this cell's code.",
+      "expected": "(1) REFUSE_DOWNSAMPLED; (2) the future article ADMITTED, i.e. the exclusion count falls; (3) MISSING_HISTORY at 9 of 9 against NONE at 9 of 9; (4) REJECTED with the pattern named, three for three; (5) the vendor-connection counter to move off zero; (6) a failing test on the collision.",
+      "observed": "(1) 'CONTROL: a 14-point display curve -> REFUSE_DOWNSAMPLED'. (2) 'CONTROL (a policy that admits it) : cutoff moved to 2026-12-31 -> 0 excluded, 5 admitted' against 1 excluded under the real cutoff -- the SAME code admits the SAME article, so the exclusion is a decision and not a coincidence of the fixture. (3) 'windows evaluated / covered : 9 / 0, missing_history : MISSING_HISTORY' against 'CONTRAST: the covered store : missing_history=NONE, 9 of 9 windows'. (4) three REJECTED verdicts with hits [because], [drove / driven by], [in response to], while the shipped prose reads VALIDATED. (5) 'guard fired=True; vendor attempts moved 0 -> 1'. (6) test_syndicated_copies_collapse_to_one_id failed with 'assert 48 == 46' and the evidence_id key was corrected from the TOPIC headline to the ARTICLE headline plus url and source.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The S13-AC1 battery was run TWICE end to end and the transcripts diffed -- including the live DynamoDB scan, the S3 listing and the three Lambda invokes, which are the parts a reader would expect to move. Separately the layer build was run twice and the zips compared with cmp, because a layer version is published on a digest and a build that will not reproduce cannot be re-derived from its own manifest.",
+      "observed": "diff(run1, run2) = 0 lines, both rc 0, both ending IBS13-NARRATIVE-DETERMINISTIC with '8 of 8 mechanical arms passed'. Layer: two consecutive builds cmp-clean at 154 members / 621748 bytes / sha256 JWKuEDIoIPgt1zaYmymEhmHS9HZtG2XCwEc7LXKagf4=, after two host artifacts were excluded (see declared_exclusions).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live Black Diamond, Orion or YCharts call.",
+      "reason": "BOUNDS 1: NO LIVE VENDOR CALL is authorized by this document. The absence is MEASURED, not asserted: 0 vendor connections during the offline arms with a positive control that moved the counter to 1. The narrative cell makes no vendor call at all -- it reads a PerformanceReport it is handed and the news plane."
+    },
+    {
+      "item": "Any external model API call for the prose step.",
+      "reason": "The order's bound and the endpoint's. The prose is a DETERMINISTIC TEMPLATE and the packet says so in versions.model_version = 'none -- deterministic template' rather than leaving a reader to assume a model wrote it. Three independent halves: 0 model-host connections measured, no model-invocation action in the role (0 of 10 probed, `bedrock:` among them), and no model client in the package."
+    },
+    {
+      "item": "A clean-Python import of `jsonschema` from the layer on this build host.",
+      "reason": "Filed as surprise row IRPT_BCKEND-W4-S5. It CANNOT succeed here and that is the evidence the layer is right: its one native member is python/rpds/rpds.cpython-312-x86_64-linux-gnu.so, a Linux cp312 extension. A host import succeeding would mean the layer had been built for the wrong platform. The arm's substance is proved on the runtime instead -- 2 of 2 functions carry irpt-common:2 and 2 of 2 deployed invokes return contract_validated=true, which is only reachable by importing jsonschema from the layer inside the Lambda. Both readings are printed side by side."
+    },
+    {
+      "item": "The pip console-script launchers and their dist-info RECORD line in the layer zip.",
+      "reason": "python/bin/jsonschema.exe is a Windows executable a Linux Lambda can never run, and it was the ONLY non-reproducible member: three builds of identical inputs gave 674531 / 674530 / 674529 bytes and three digests, differing only there and in the RECORD line that hashes it. Both are excluded and both are RECORDED in BUILD_MANIFEST.excluded_members with the reason, so a reader can tell a deliberate omission from a packaging accident."
+    },
+    {
+      "item": "A control panel of topics from a QUIET window (one with no detected event).",
+      "reason": "Named in the S13-AC3 judgment as the cheapest honest counterweight to the causal inference, and deliberately NOT built: the order scopes evidence to each event's own window, and adding an unrequested comparison surface would widen the cell. It is handed to the CVO as a finding rather than taken as a licence."
+    },
+    {
+      "item": "Reading opal-news-articles in code.",
+      "reason": "The role grants READ on it because the dated evidence path may need article-level lookups, and the PATH_MANIFEST entry says so; no code path in this cell reads it today. Declared so the grant is not mistaken for a use."
+    },
+    {
+      "item": "Any write, of any kind, to the news plane; and any change to the three news producer Lambdas.",
+      "reason": "The producers are READ and their ownership is unchanged. Enforced in two independent halves: the store seam exposes no writer and raises NewsWriteRefused (asserted by the battery and by a test), and the role carries 0 of 10 probed mutating/secret/model actions."
+    },
+    {
+      "item": "Any monitor, alarm, SNS topic, SES send, schedule or event source.",
+      "reason": "BOUNDS 2 and the standing moratorium. Neither function has a trigger; both default to their recorded/offline transport, so no trigger created later could silently become a vendor call."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W4-S5: S13-AC1 arm (h) asks for a clean-Python import of `jsonschema` from the layer; it cannot succeed on this Windows build host precisely BECAUSE the layer is correct -- its one native member is rpds.cpython-312-x86_64-linux-gnu.so. The arm's substance is proved on the runtime instead (2 of 2 functions carry irpt-common:2; 2 of 2 deployed invokes return contract_validated=true), and both readings are printed. OBSERVATION, INERT.",
+    "IRPT_BCKEND-W4-S6: the issuer amendment names two missing dependencies and there is a THIRD -- the contract SCHEMA FILE is not in the performance zip either, because normalize.py resolved it at <package>/../_contracts which is /var/_contracts on the runtime; jsonschema alone would have moved contract_validated from false-for-want-of-a-library to false-for-want-of-a-file and the arm would still have failed. The layer carries the contracts and normalize.py resolves env -> layer -> repo by PRESENCE OF THE FILE, repo last and unchanged. OBSERVATION, INERT.",
+    "IRPT_BCKEND-W4-S7: the first assembled bd_helpers PARSED and could not IMPORT -- the AST closure carried functions and constants but not module-level IMPORTS, so it raised NameError: name 'os' is not defined on the runtime; compile() passed it. It was invisible to the first verification invoke because that invoke used the Orion path, which never loads those helpers -- one provider read GREEN on a layer broken for the other. The remedy is the closure AND the falsifier: the build now execs what it generated in a clean namespace. The same build was also not reproducible as first written (three builds, three digests). OBSERVATION, INERT.",
+    "IRPT_BCKEND-W4-S8: `.tools/aws` cannot be spawned from a Windows Python (OSError WinError 193 -- it is a bash script with no Windows launcher), so any battery or generator that shells the estate's AWS shim from Python dies at the first call with an error that names Win32 rather than the shim. The usable face is the sibling `.tools/aws.cmd` via cmd /c -- same shim, same credentials. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_s_13.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the S13-AC1 battery (this cell's)",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_s_13.py",
+      "result": "rc=0 -- '8 of 8 mechanical arms passed' then 'IBS13-NARRATIVE-DETERMINISTIC'. Run twice; the two transcripts diff to 0 lines. Transcript committed as IB-s-13_S13-AC1_battery_output.txt."
+    },
+    {
+      "tool": "terraform (the worktree-provisioned .tools/terraform.exe, never a PATH substitute)",
+      "invocation": "timeout 120 .tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/{narrative,performance} plan -no-color -input=false -lock=false",
+      "result": "rc=0 on both roots -- 'No changes. Your infrastructure matches the configuration.' Transcripts committed as IB-s-13_S13-AC2_plan_output.txt and IB-s-13_S13-AC4_plan_output.txt."
+    },
+    {
+      "tool": ".tools/safe-apply.sh (NEVER a bare terraform apply; NEVER aws lambda update-function-code)",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/{performance,narrative} apply -auto-approve -no-color -input=false",
+      "result": "performance root, three applies: '1 added, 1 changed, 0 destroyed' (publish + attach), '0 added, 1 changed, 0 destroyed' (the rebuilt adapter), '1 added, 1 changed, 1 destroyed' (irpt-common:2; the destroy is version 1, created minutes earlier by this same cell and consumed by nothing else). narrative root: 'Apply complete! Resources: 5 added, 0 changed, 0 destroyed.' No existing bucket, table, route, behavior or other Lambda was touched by any of them."
+    },
+    {
+      "tool": "pytest (the narrative suite, and the IB-s-11 suite as the regression control on the normalize.py change)",
+      "invocation": "timeout 400 python -m pytest infra/aws/lambda/investor-reporting/narrative/tests -q ; timeout 300 python -m pytest infra/aws/lambda/investor-reporting/performance/tests -q",
+      "result": "'37 passed' and '28 passed' -- 37 of 37 and 28 of 28, all offline. The narrative suite FOUND a real evidence_id collision (assert 48 == 46) which was fixed rather than accommodated."
+    },
+    {
+      "tool": "aws lambda get-function-configuration and invoke (the APPLIED plane, read directly)",
+      "invocation": "cmd /c .tools/aws.cmd lambda get-function-configuration --function-name {irpt-performance-adapter,irpt-narrative} --region us-east-1 ; cmd /c .tools/aws.cmd lambda invoke --function-name ... --payload file://...",
+      "result": "Both functions Active with Layers[0]=arn:aws:lambda:us-east-1:313476888478:layer:irpt-common:2; irpt-narrative CodeSha256 equals its built zip. Three invokes: irpt-performance-adapter on BOTH provider paths (contract_validated=true, 0 helper-degraded cells) and irpt-narrative (statusCode 200, contract_validated=true, prose VALIDATED)."
+    },
+    {
+      "tool": "python .tools/deploy_ledger.py (open / close-leg / close)",
+      "invocation": "python .tools/deploy_ledger.py open --slug {irpt-bckend-s13-layer,irpt-bckend-s13} ... ; close-leg per leg ; close --slug ...",
+      "result": "Two entries, 4 legs each, opened BEFORE the acts and closed after: 'OK: CLOSED deploy ledger irpt-bckend-s13-layer -- all 4 legs proven; sentinel removed' and the same for irpt-bckend-s13. Both sentinel removals committed at 2a514e2767 with the closed entries."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (CLAUDE.md rule 14 -- py_compile + ds-precommit + ruff py39)",
+      "invocation": "timeout 400 bash .tools/commit-gate.sh <each new .py>",
+      "result": "Clean on all seven new/changed Python files after three ruff F401 unused-import refusals were fixed (handler.py, make_narrative_fixtures.py, battery_ib_s_13.py)."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/IRPT_BCKEND.TO-IB-s-13.narrative-events-dated-evidence-contemporaneity.proof_of_spec.json S13-AC1,S13-AC2,S13-AC4,S13-AC3",
+      "result": "recorded in the commit that carries this instance; only the exit code is the verdict."
+    }
+  ]
+}
