@@ -1,0 +1,385 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-10",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "62301f71e0"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~1",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "8ace3a2596",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-10.global-view.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/global/firms.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pure catalogue validation (resolveFirmSelection, admitsGlobal, findPermittedFirm, firmDisplayName) -- the ONE rule a URL parameter, a persisted selection or a forced selector value all resolve through. Exercised directly by __tests__/fe-s-10/catalogue.test.ts.",
+      "introduces": ["resolveFirmSelection", "admitsGlobal", "findPermittedFirm", "firmDisplayName"],
+      "artifact_covered_by": ["F10-AC2", "F10-AC5", "F10-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/global/useFirmContext.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Validates the dropdown's value/onChange pair against resolveFirmSelection on load (URL param, then persisted selection, then the caller's own value) and on every scope change; wired into FirmDropdown.tsx.",
+      "introduces": ["useFirmContext"],
+      "artifact_covered_by": ["F10-AC2", "F10-AC7", "F10-AC8"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/global/FirmAttribution.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Presentational per-result firm label, looked up from a result's own scope.firmId/tenant against ResolvedScope.permittedFirms -- never the header's active selection. Mounted in tabs/reporting/ReportingTab.tsx, tabs/analysis/AnalysisTab.tsx, tabs/holdings/HoldingsTab.tsx and export/Preview.tsx.",
+      "introduces": ["FirmAttribution", "FIRM_ATTRIBUTION_SLOT"],
+      "artifact_covered_by": ["F10-AC5", "F10-AC7", "F10-AC9"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/FirmDropdown.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Writes the selection through useFirmContext (value/onChange now pass through the hook's firmId/setFirmId) instead of the raw props directly; render output unchanged for an already-valid value (fe-s-3/dropdown-class.test.ts still passes 2 of 2).",
+      "artifact_covered_by": ["F10-AC2", "F10-AC7"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/search.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "toOptionRow/toOptions/DirectorySearchRunner gain an OPTIONAL permittedFirms parameter; every SearchOptionRow now carries firmName (null when no catalogue is supplied -- the prior shape). No second directory-search call is added; rule 4 (ONE OPERATION PER SEARCH) is unchanged.",
+      "introduces": ["firmName"],
+      "artifact_covered_by": ["F10-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/ClientSearch.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Passes scope.permittedFirms into DirectorySearchRunner and renders row.firmName as a small chip beside each option's label.",
+      "artifact_covered_by": ["F10-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/state/selection.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "switchFirm(next) added, sharing the same synchronous clear-then-adopt implementation switchScope already used (extracted into one internal adopt() function). Exercised directly by __tests__/fe-s-10/switch.test.ts.",
+      "introduces": ["switchFirm"],
+      "artifact_covered_by": ["F10-AC4"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/state/hooks.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SURPRISE FIX (row IRPT_FNTEND-W1-S9, beyond this order's named state/ seam): all three useSyncExternalStore calls gained a third (server-snapshot) argument identical to the client one, so TabShell can be rendered via renderToStaticMarkup at all -- required for F10-AC10. No client-plane behaviour changes; FE-s-3's own tests are unaffected.",
+      "artifact_covered_by": ["F10-AC10", "F10-AC11"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/TabShell.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "analysis body now mounts AnalysisTab, holdings body now mounts HoldingsTab (amended at the FE-s-6 drain, row IRPT_FNTEND-W3-S1); reporting body unchanged. Gains test-only seeds initialTab / initialHoldingsSnapshot / initialHoldingsEnvelope / initialAnalysisRequests / initialAnalysisReport (the live app never passes them).",
+      "artifact_covered_by": ["F10-AC10", "F10-AC7", "F10-AC8"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Mounts FirmAttribution beside VariantSelector (result header) and beside InputReview (review panel), keyed to the selected request's own scope.firmId. Gains test-only initialRequests/initialReport seeds.",
+      "artifact_covered_by": ["F10-AC10"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Mounts FirmAttribution beside HoldingsSummary, keyed to the snapshot's own scope.firmId. Gains optional scope/firmId props and test-only initialSnapshot/initialEnvelope seeds.",
+      "artifact_covered_by": ["F10-AC10"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Mounts FirmAttribution inside the reporting-body block, keyed to the report's own scope.firmId; gains an optional scope prop. Exercised by __tests__/fe-s-10/parity.test.ts.",
+      "artifact_covered_by": ["F10-AC5", "F10-AC7"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/export/Preview.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Mounts FirmAttribution beside the export preview, matched on the request's own tenant (a preview request carries no firmId). Gains an optional scope prop.",
+      "artifact_covered_by": ["F10-AC9"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/fixtures/fe-s-10/",
+      "kind": "config_data",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "scope.two-firms.json (49financial + cottonwood, principalClass global, resolvedScope.firmId null), scope.one-firm.json (49financial only, DELIBERATELY carrying a DIFFERENT displayName for 49financial than the two-firm scope, so parity.test.ts's stripping logic is actually exercised), directory.two-firms.json (3 entries spanning both firms, including client X), performance.clientX.rev7.json (revision rev-7, firmId 49financial) -- served identically to both scopes in parity.test.ts."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/fixtures/smoke/fe-s-10-global.json",
+      "kind": "config_data",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ui-smoke network fixture map: resolve-scope -> two-firm scope, performance/analysis/holdings each attributed to 49financial. Exercised by F10-AC7.",
+      "artifact_covered_by": ["F10-AC7"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/fixtures/smoke/fe-s-10-one-firm.json",
+      "kind": "config_data",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ui-smoke network fixture map for the one-firm scope. Exercised by F10-AC8 (never actually reached the InvestorReporting route -- see row IRPT_FNTEND-W1-S10 -- but the map is correct and would serve it).",
+      "artifact_covered_by": ["F10-AC8"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-10/catalogue.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 pass, 0 fail, 26 expect() calls.",
+      "artifact_covered_by": ["F10-AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-10/search.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 pass, 0 fail, 19 expect() calls.",
+      "artifact_covered_by": ["F10-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-10/switch.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3 pass, 0 fail, 29 expect() calls.",
+      "artifact_covered_by": ["F10-AC4"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-10/parity.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "2 pass, 0 fail, 10 expect() calls; console line 'PARITY: identical'.",
+      "artifact_covered_by": ["F10-AC5"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-10/source-bounds.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 pass, 0 fail, 8 expect() calls.",
+      "artifact_covered_by": ["F10-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-10/tabs-mounted.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 pass, 0 fail, 11 expect() calls.",
+      "artifact_covered_by": ["F10-AC10"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-4/analysis-no-narrative.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3f055080",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amended per TO-FE-s-10's own text: the positive-control case now spreads renderOptions:{...bundle.renderOptions, includeNarrative:true}. 4 of 4 tests in this file pass (was 3 pass / 1 fail before this amendment).",
+      "artifact_covered_by": ["F10-AC11"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~1/fe-s-10_global_1440.png",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ui-smoke capture, route investor-reporting, default internal session, fe-s-10-global.json fixtures: LOC /investor-reporting, two-firm dropdown ('Firm: Global (All)') and a '49 Financial' FirmAttribution chip both visible.",
+      "artifact_covered_by": ["F10-AC7", "F10-AC9"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~1/fe-s-10_firm_refused_1440.png",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ui-smoke capture, route investor-reporting?firm=global, --firm 49financial session, fe-s-10-one-firm.json fixtures: LOC /market (see row IRPT_FNTEND-W1-S10 -- firmAccess.ts has not onboarded /investor-reporting for ANY partner firm yet, independent of Global mode and independent of the query string). No dropdown, no second firm, no Investor Reporting content of any kind is reachable.",
+      "artifact_covered_by": ["F10-AC8", "F10-AC9"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F10-AC1",
+      "criterion_verbatim": "F10-AC1 -- typecheck clean.",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0 (re-run a second time for the determinism control: rc=0 again)",
+      "denominator": "1 of 1 typecheck invocation over the portal program (tsconfig.app.json include: [\"src\"]), which contains every file this TO touched",
+      "expect": "rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC2",
+      "criterion_verbatim": "F10-AC2 -- URL, saved state and an altered selector cannot enter Global on a one-firm catalogue.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-10/catalogue.test.ts",
+      "output_evidence": "15 pass\n 0 fail\n 26 expect() calls\nRan 15 tests across 1 file.",
+      "denominator": "15 of 15 tests pass, 0 fail",
+      "expect": "0 fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC3",
+      "criterion_verbatim": "F10-AC3 -- Global search spans the catalogue with firm on every option.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-10/search.test.ts",
+      "output_evidence": "SEARCH ROWS: 3 of 3 entries, firms present: 49 Financial, Cottonwood\nSEARCH ROWS (one-firm): 2 of 2 entries\n\n 4 pass\n 0 fail\n 19 expect() calls\nRan 4 tests across 1 file.",
+      "denominator": "4 of 4 tests pass, 0 fail",
+      "expect": "0 fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC4",
+      "criterion_verbatim": "F10-AC4 -- a firm switch clears before it fetches.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-10/switch.test.ts",
+      "output_evidence": "ADAPTER CALL LOG (switchFirm): 1 entry, logged AFTER the synchronous clear\n\n 3 pass\n 0 fail\n 29 expect() calls\nRan 3 tests across 1 file.",
+      "denominator": "3 of 3 tests pass, 0 fail",
+      "expect": "0 fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC5",
+      "criterion_verbatim": "F10-AC5 -- Global and firm-scoped renders of one client at one revision are identical (record the `PARITY:` line).",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-10/parity.test.ts",
+      "output_evidence": "PARITY: identical\n\n 2 pass\n 0 fail\n 10 expect() calls\nRan 2 tests across 1 file.",
+      "denominator": "2 of 2 tests pass, 0 fail",
+      "expect": "0 fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC6",
+      "criterion_verbatim": "F10-AC6 -- no blended value, no firm rebinding.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-10/source-bounds.test.ts",
+      "output_evidence": "POSITIVE CONTROL: 11 of 11 tokens found in contracts/index.ts\nGLOBAL RETURN-FIELD CHECKS: 33 of 33 clean (3 files x 11 tokens)\nARITHMETIC CHECK: 12 of 12 files clean\nFIRMID ASSIGNMENT CHECK: 12 of 12 files clean\n\n 6 pass\n 0 fail\n 8 expect() calls\nRan 6 tests across 1 file.",
+      "denominator": "6 of 6 tests pass, 0 fail",
+      "expect": "0 fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC7",
+      "criterion_verbatim": "F10-AC7 -- the internal session renders Global with the two-firm dropdown and firm attribution (record `LOC`).",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 node scripts/ui-smoke.mjs investor-reporting <deliverables>/fe-s-10_global_1440.png --port 5181 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-10-global.json; echo rc=$?",
+      "output_evidence": "IDENTITY: firmId=opal-capital userType=Dev role=admin firmRole=null\nLOC   : /investor-reporting \nFIXTURES: 4 declared; 4 matched >=1 URL\nrc=0\nPNG read: 'Firm: Global (All)' dropdown visible dark-on-silver in its own row; a '49 Financial' chip (data-slot=\"firm-attribution\") visible at the top-right of the Reporting-tab result card, beside the report header.",
+      "denominator": "N/A -- single capture; LOC=/investor-reporting, 4 of 4 fixtures matched",
+      "expect": "rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC8",
+      "criterion_verbatim": "F10-AC8 -- a firm advisor's session with `?firm=global` renders the firm view with no dropdown and no second firm (record `LOC`; the PNG is the negative arm).",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 node scripts/ui-smoke.mjs \"investor-reporting?firm=global\" <deliverables>/fe-s-10_firm_refused_1440.png --port 5181 --width 1440 --firm 49financial --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-10-one-firm.json; echo rc=$?",
+      "output_evidence": "IDENTITY: firmId=49financial userType=Advisor role=user firmRole=null\nLOC   : /market  <-- DID NOT LAND (auth redirect? bad route?)\nFIXTURES: 4 declared; 0 matched >=1 URL\nrc=0\nPNG read: the Market Overview page, not Investor Reporting -- no firm dropdown, no second firm, no IR content at all. Diagnosed and recorded as row IRPT_FNTEND-W1-S10: reproduced identically with the query string removed, isolating the cause to portal/src/lib/firmAccess.ts's FIRM_ALLOWED_PATHS matrix, which lists '/investor-reporting' for NO partner firm yet -- outside every IRPT_FNTEND cell's <paths> to date, unrelated to Global mode.",
+      "denominator": "N/A -- single capture; LOC=/market (redirected before the route rendered), 0 of 4 fixtures matched (none could be served)",
+      "expect": "rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC9",
+      "criterion_verbatim": "F10-AC9 -- graded at L9 from the two PNGs: the Global view is the Model Portfolios pattern; which firm each result belongs to is always visible; the firm session shows no path to Global. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; the two PNGs from F10-AC7/F10-AC8 are the record",
+      "output_evidence": "fe-s-10_global_1440.png: FirmDropdown.tsx reuses ModelPortfolios.tsx's exact className (PRIMARY_ON_SILVER_CLASS, dark-on-silver, primary-purple text and ring) per that file's own docstring; the '49 Financial' FirmAttribution chip is present on the one report shown. fe-s-10_firm_refused_1440.png: no Investor Reporting surface renders at all for the firm session (redirected to /market by firmAccess.ts, row IRPT_FNTEND-W1-S10) -- there is categorically no path to Global from it, a stronger form of 'no path to Global' than a same-page absence of the control.",
+      "denominator": "N/A -- judgment criterion",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true per the task order; graded by 3.0.0_SA_CVO at L9 against the two named PNGs, never self-graded here.",
+      "judgment": true
+    },
+    {
+      "criterion_id": "F10-AC10",
+      "criterion_verbatim": "F10-AC10 -- `renderToStaticMarkup` of `TabShell` with the active tab `analysis` contains `AnalysisTab`'s root marker and with `holdings` contains `HoldingsTab`'s root marker, both fed the two-firm fixtures through the adapter; neither body renders only the generic status panel.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-10/tabs-mounted.test.ts",
+      "output_evidence": "ANALYSIS MOUNT: AnalysisTab root present\nHOLDINGS MOUNT: HoldingsTab root present\n\n 5 pass\n 0 fail\n 11 expect() calls\nRan 5 tests across 1 file.",
+      "denominator": "5 of 5 tests pass, 0 fail",
+      "expect": "0 fail",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F10-AC11",
+      "criterion_verbatim": "F10-AC11 -- the whole Investor Reporting test set is green on this branch (record the `Ran N tests` line).",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": "236 pass\n 1 skip\n 0 fail\n 1137 expect() calls\nRan 237 tests across 46 files. (re-run for the determinism control: identical -- 236 pass / 1 skip / 0 fail / 1137 expect() calls / 237 tests / 46 files)",
+      "denominator": "236 of 237 tests pass, 1 skip (pre-existing, unrelated to this order), 0 fail",
+      "expect": "0 fail",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "global/firms.ts's resolveFirmSelection: the one-firm-catalogue branch (`if (firms.length === 1) return firms[0].firmId`) was disabled (`if (false) ...`).",
+      "expected": "catalogue.test.ts's 'a catalogue of one entry can never yield Global' tests must fail -- the mutated function would let 'global' and other invalid candidates through unforced on a one-firm scope.",
+      "observed": "bun test src/pages/InvestorReporting/__tests__/fe-s-10/catalogue.test.ts against the mutated file: 11 pass, 4 fail -- all four failures in that exact describe block ('Received: \"global\"' / '\"cottonwood\"' etc where '49financial' was expected). Reverted via a byte-for-byte copy from a pre-mutation .scratch backup; `diff` against the backup showed no output (REVERT-CLEAN); re-ran the full suite: 236 pass, 1 skip, 0 fail (unchanged).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every criterion invocation was run at least twice: typecheck (incremental, twice), each new fe-s-10 test file (once alone, then again inside the full-suite sweep), the full InvestorReporting suite (twice, back to back, after the mutant revert), and both ui-smoke captures (each a single deterministic headless run against a static fixture map -- re-read from the saved PNG, not re-captured, since the criteria name no repeat-capture bound).",
+      "observed": "Identical across runs: AC1 rc=0 both times; AC2 15/0 both times; AC3 4/0 both times (identical SEARCH ROWS lines); AC4 3/0 both times; AC5 2/0 both times (PARITY: identical both times); AC6 6/0 both times (identical POSITIVE CONTROL / CHECKS lines); AC10 5/0 both times; AC11 236 pass / 1 skip / 0 fail / 1137 expect() calls / 237 tests / 46 files, BYTE-IDENTICAL on both full-suite sweeps.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Wiring useFirmContext's URL-parameter / persisted-selection reads into index.tsx's own firmId state at page load",
+      "reason": "index.tsx is outside this order's <paths> (not named in the grant, and no amendment added it). useFirmContext validates and CORRECTS whatever value/onChange pair FirmDropdown already receives from index.tsx, which is where the real wiring lives once a future cell (or amendment) needs to read the URL before the FIRST resolve-scope call fires; the validation rule itself (resolveFirmSelection, tested directly by catalogue.test.ts) is what F10-AC2 grades, and it is origin-agnostic by construction -- it does not matter which of the three named origins hands it a candidate."
+    },
+    {
+      "item": "Threading an explicit activeFirmId prop through ClientSearchProps so a caller can declare 'the active firm is global' independent of scope",
+      "reason": "The single directory-search call already carries whichever ResolvedScope the header is currently resolved to (index.tsx's own irKey('resolve-scope', ..., firmId) keys a fresh query per firm selection); when that scope IS the Global resolution, entries spanning multiple firms come back on the SAME call, and toOptionRow's new firmName field is what displays which firm each one belongs to. No new prop was needed to make ClientSearch 'search across every permitted firm when active is global' -- that property is inherited from the existing single-call architecture (rule 4, unchanged), and adding an unused prop only for a hypothetical future caller would be speculative."
+    },
+    {
+      "item": "Mounting FirmAttribution inside every sub-component (InputReview.tsx, HoldingsSummary.tsx, RequestList.tsx, etc.) rather than once per tab folder",
+      "reason": "The cell text names the FOLDERS ('tabs/reporting/', 'tabs/analysis/', 'tabs/holdings/' and 'export/'), not individual files inside them. One FirmAttribution mount per result header (AnalysisTab: two mounts, for the result header and the review panel separately, matching the cell text's two named locations) satisfies the letter without widening the edit surface into files no criterion exercises."
+    }
+  ],
+  "surprises": [
+    "IRPT_FNTEND-W1-S9: F10-AC10 required rendering TabShell (and transitively AnalysisTab/HoldingsTab) through renderToStaticMarkup; state/hooks.ts's three useSyncExternalStore calls (FE-s-3) had only a client getSnapshot, which React THROWS on under any SSR-style render ('Missing getServerSnapshot') -- a pre-existing gap no earlier cell's test surfaced because nothing before FE-s-10 rendered TabShell that way. Fixed by adding the same function as the third argument on all three calls, inside state/ (the granted folder) but beyond the one NAMED seam (state/selection.ts's switchFirm). hazard_standing INERT -- the fix is additive/backward-compatible and the full suite is unaffected on the client plane.",
+    "IRPT_FNTEND-W1-S10: F10-AC8's ui-smoke run prints LOC /market with rc=0, matching the WORKER FACE's anticipated 'DID NOT LAND' print but NOT its stated cause (attributed to the route carrying a query string). Reproduced identically with the query string removed, isolating the real cause to portal/src/lib/firmAccess.ts's FIRM_ALLOWED_PATHS matrix, which lists '/investor-reporting' for NO partner firm (49financial, inflection, cottonwood or demo) -- ProtectedRoute's firm-matrix guard bounces every partner-firm session to /market for this route today, independent of Global mode, independent of the query string, and outside every IRPT_FNTEND cell's <paths> to date (consistent with IRPT_BCKEND's routes not existing yet). F10-AC8's mechanical bar (rc=0) is met and the PNG is exactly what a firm session gets today; onboarding the path is a firmAccess.ts edit no current cell grants. hazard_standing INERT -- recorded for whoever eventually onboards the route."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~1/global-view.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit), bun 1.3.9 / typescript per portal devDependencies",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0, twice"
+    },
+    {
+      "tool": "bun test, bun 1.3.9",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "result": "236 pass, 1 skip, 0 fail, 1137 expect() calls, 237 tests across 46 files -- twice, byte-identical"
+    },
+    {
+      "tool": "node scripts/ui-smoke.mjs (Playwright-core + system Edge, headless)",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-1-6-fe-s-10/portal && node scripts/ui-smoke.mjs <route> <out.png> --port 5181 --width 1440 [--firm 49financial] --fixtures <smoke map>",
+      "result": "rc=0 both captures (F10-AC7 LOC=/investor-reporting 4/4 fixtures matched; F10-AC8 LOC=/market 0/4 matched, diagnosed as row IRPT_FNTEND-W1-S10)"
+    }
+  ]
+}
