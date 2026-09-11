@@ -83,7 +83,13 @@ def build_session(use_proxy=True):
             "parked bundle carries no %s cookie -- it was not harvested logged-in"
             % IDENTITY_COOKIE
         )
-    kwargs = {"impersonate": "chrome", "timeout": 70}
+    # BUG FIXED 2026-09-10 (found while building the FT/WSJ standing scripts, never caught here
+    # because this function was never exercised end-to-end after commit): Bright Data's proxy
+    # SSL-bumps traffic, which curl_cffi's default strict cert verification rejects outright
+    # (CertificateVerifyError) -- every scratch prototype during the original investigation had
+    # verify=False; this committed version never did, so a real run through the proxy would have
+    # failed here on its first call.
+    kwargs = {"impersonate": "chrome", "timeout": 70, "verify": False}
     if use_proxy:
         px = json.loads(_secret(PROXY_SECRET_ID))
         user = "%s-country-%s-session-sa%d" % (
