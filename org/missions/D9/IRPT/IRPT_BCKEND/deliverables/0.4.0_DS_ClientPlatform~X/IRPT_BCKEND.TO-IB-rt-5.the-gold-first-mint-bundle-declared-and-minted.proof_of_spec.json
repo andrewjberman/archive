@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rt-5",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "e6ba5d9878"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7478fdf144",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rt-5.the-gold-first-mint-bundle-declared-and-minted.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~X",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/safe_deploy_core.py",
+      "kind": "script",
+      "commit_or_etag": "36e4fbf826",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE_TREES['mdpf']['bundles'] gains investor_reporting (+35 lines, 0 deletions). The guard's OWN declared list is the oracle, not the diff: `bash .tools/safe-deploy.sh --mint-bundle nonexistent` prints \"ERROR: no bundle named 'nonexistent' declared (declared: ['accrual_bridge', 'investor_reporting'])\", denominator 2. PRE-EDIT NEGATIVE CONTROL on the same command: \"declared: ['accrual_bridge']\", rc=2 -- round 1's rows W1-S8 / W2-S5 reproduced directly. Push state: LOCAL to wk-irpt_bckend-2-ds, not pushed; the issuer merges at the drain.",
+      "artifact_covered_by": [
+        "RT5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz",
+      "kind": "s3_object",
+      "commit_or_etag": "cd188f6edb7270300a7409d66f9a3432",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Minted through the guard's own explicit first-mint path (.tools/safe-deploy.sh --mint-bundle investor_reporting, rc=0), never a bare aws s3 cp. Verified with a DIFFERENT instrument than the mint's internal check -- aws s3api head-object plus sha256sum of the repo bytes: ContentLength=26935, ETag=cd188f6edb7270300a7409d66f9a3432 equal to the mint's local md5, VersionId=BAv6hA9Iut0wlKFtuq5PsOKfl4hMEKy5, SSE AES256; Metadata directory-runner-sha256=431e89285a609fbf3cd695f4cc88722d2f912c37b5e3e88149a9fcd3dff2f491 and holdings-snapshot-sha256=18838c953c4b2c6fb24a83aa546ab7a69a4471dcad7909a4083846e2076b8dc3, each EQUAL to sha256sum of its repo file. 2 of 2 MEMBERS on 1 of 1 KEY; the prefix held 0 objects before the act (list-objects-v2 returned no Contents) and length(Contents)=1 after.",
+      "artifact_covered_by": [
+        "RT5-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T1227Z_irpt-bckend-rt5-mint_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "e9a6ba27db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened before the act with 3 legs, all three closed with proof, entry CLOSED and the OPEN sentinel org/critical_paths/.open_deploys/irpt-bckend-rt5-mint.json removed -- committed BEFORE any grading read (NEVER-2, row W3-S4's rule). Sentinel OPEN commit 36e4fbf826, removal commit e9a6ba27db, both read from git history by the battery rather than typed.",
+      "artifact_covered_by": [
+        "RT5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.4.0_DS_ClientPlatform~X/battery_ib_rt_5.py",
+      "kind": "test",
+      "commit_or_etag": "ace1be49f9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The RT5-AC1 acceptance battery, four arms. Wraps nothing (BOUNDS 12): every arm's subject is the real guard on disk, the real S3 object, the real git history and the real ledger entry, and every hash is re-derived at run time from repo bytes and the served object rather than read from a manifest this cell wrote.",
+      "artifact_covered_by": [
+        "RT5-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.4.0_DS_ClientPlatform~X/run_tools_tests.sh",
+      "kind": "test",
+      "commit_or_etag": "9a98a1292f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Runs each .tools/tests/*.py standalone and prints its denominator. Committed because pytest over that directory collects ZERO -- test_fabric_check_classify.py raises SystemExit at import and takes the whole directory with it -- so the 47-of-55 count has to be reproducible rather than asserted.",
+      "artifact_covered_by": [
+        "RT5-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "RT5-AC1",
+      "criterion_verbatim": "RT5-AC1 -- PASSES BY OUTPUT -- the bundle declared, the guard green, the artifacts served and verified. (a) DECLARED. .tools/safe-deploy.sh --mint-bundle nonexistent prints the declared list and it contains investor_reporting (printed); the guard's self-test and .tools/tests/ pass (counts printed). (b) MINTED THROUGH THE GUARD. The mint invocation's output printed verbatim; head-object on each of the 2 keys prints size and the sha metadata equal to sha256sum of the repo file (2 of 2). (c) MEMBER NOW. A no-op change to a runner committed on the branch runs the push gate and reads MEMBER / deployed or verified, never SKIP-NOT-MEMBER (the gate's own line printed) -- the gate's own run is the authority, not a resolver call. (d) LEDGER. The entry CLOSED; the sentinel's OPEN commit hash and its removal commit hash printed.",
+      "method": "command",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.4.0_DS_ClientPlatform~X/battery_ib_rt_5.py",
+      "output_evidence": "rc=0. Final lines: 'RT5-AC1: 4 of 4 arms PASS' then 'IBRT5-FIRST-MINT-SERVED'. (a) DECLARED PASS -- guard's own line \"ERROR: no bundle named 'nonexistent' declared (declared: ['accrual_bridge', 'investor_reporting'])\", declared bundles denominator 2; self-test used as the CONTROL per BOUNDS because BOTH suites were ALREADY red pre-edit: .tools/test_code_trees_invariant.py baseline 3/18 -> now 3/18 (output BYTE-IDENTICAL), .tools/test_safe_deploy.py baseline 7/14 -> now 7/14 (differs only by a tempdir nonce inside a pre-existing failure line), and .tools/tests/*.py standalone 47 PASS / 8 FAIL of 55 before and after, same 8 files. (b) MINTED PASS -- head-object rc=0 ContentLength=26935 ETag=cd188f6edb7270300a7409d66f9a3432; directory-runner-sha256 MATCH 431e89285a609fbf3cd695f4cc88722d2f912c37b5e3e88149a9fcd3dff2f491 == sha256sum of the repo file; holdings-snapshot-sha256 MATCH 18838c953c4b2c6fb24a83aa546ab7a69a4471dcad7909a4083846e2076b8dc3 == sha256sum of the repo file; MEMBERS verified 2 of 2, KEYS at the prefix 1 of 1. (c) MEMBER PASS -- over the two REAL commits that ADDED the runners (3654197107~1..3654197107 and 2dbc92e956~1..2dbc92e956, byte-identical input to round 1's SKIP-NOT-MEMBER finding) the gate prints 'BUNDLE-ROUTED: data/assets/scripts/gold/investor_reporting/directory_runner.py -> bundle investor_reporting (loose leg frozen 2026-08-11, X-iii)' and the same for holdings_snapshot.py, rc=0 both; IN-RUN NEGATIVE CONTROL, same run and same prefix, each sibling tests/*.py still prints 'SKIP-NOT-MEMBER [mdpf] ... probed s3://... -> 404; prefix ... carries 0 member(s)'; runners BUNDLE-ROUTED 2 of 2, sibling tests still SKIP-NOT-MEMBER 2 of 2; IDEMPOTENCE distinct md5 across every mint this run = 1, ['cd188f6edb7270300a7409d66f9a3432']. (d) LEDGER PASS -- entry CLOSED True, OPEN sentinel present on disk False, sentinel OPEN commit 36e4fbf826, sentinel removal commit e9a6ba27db.",
+      "denominator": "4 of 4 arms PASS. Arm (a): 2 declared bundles, 2 self-test suites both UNMOVED from baseline, 55 files in .tools/tests. Arm (b): 2 of 2 MEMBERS verified on 1 of 1 KEY (prefix held 0 before the act). Arm (c): 2 of 2 runners BUNDLE-ROUTED, 2 of 2 sibling tests still SKIP-NOT-MEMBER, 1 distinct md5 across 3 mints. Arm (d): 3 of 3 ledger legs proven, 2 of 2 commit hashes read from git. TWO DENOMINATORS DIFFER FROM THE FACE AND BOTH ARE STATED RATHER THAN QUIETLY SATISFIED: (i) '2 keys' is 1 key -- mint_bundle does a single s3 cp to a single b['s3_key'] and the members are tar members inside one payload, so a two-key denominator is not producible through the mandated mechanism; minting loose twins would satisfy the words and is refused because the X-iii design freezes the loose leg for a bundle member (CTO 2026-08-06). Row IRPT_BCKEND-S27. (ii) 'the guard's self-test and .tools/tests/ pass' -- neither passed at baseline, for reasons unreachable from a bundle addition, so BOUNDS' own words ('the self-test run is the control') govern and UNMOVED is what the control asserts. Row IRPT_BCKEND-S29.",
+      "status": "PASS",
+      "expect": "IBRT5-FIRST-MINT-SERVED"
+    },
+    {
+      "criterion_id": "RT5-AC2",
+      "criterion_verbatim": "RT5-AC2 -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: whether the bundle's member list is the whole runner (imports it needs at run time on the host) or only the two files; which host will execute them and whether that host's tree already carries their dependencies (pandas, the silver registry); and what the served artifact proves and does not prove about a scheduled run. No verdict: the instance row carries the output under UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9.",
+      "method": "manual_read_with_citation",
+      "invocation": "AST import census over both members (ast.walk for Import/ImportFrom, classified against sys.stdlib_module_names); direct read of the runners' repo-root derivation at directory_runner.py:80-95 and holdings_snapshot.py:84-86; comp-find content census for the minted tarball name and for the S3 code prefix; direct read of the two round-1 batteries at battery_ib_s_4.py:320-324 and battery_ib_s_12.py:39,279-292.",
+      "output_evidence": "ONLY THE TWO FILES, NOT THE WHOLE RUNNER. The AST census over 15 distinct modules imported across both members returns 4 non-stdlib imports, identical for both: boto3, jsonschema, pandas, trading_calendar. The bundle carries 2 files and zero dependencies. trading_calendar is FIRST-PARTY (lib/trading_calendar.py, present in the repo) and is NOT a pip package: both runners reach it with _REPO = Path(__file__).resolve().parents[4] then sys.path.insert(0, str(_REPO / 'lib')) then 'import trading_calendar as tcal'. parents[4] resolves to the repo root only because the file sits at data/assets/scripts/gold/investor_reporting/. WHICH HOST -- UNDETERMINED BY ANY READ THIS CELL MADE. The accrual_bridge precedent unpacks FLAT ('tar -xzf' into /opt/mdpf/scripts/gold/, per the CODE_TREES member-name comment). If this bundle is unpacked the same way, _HERE.parents[4] is not a repo root, lib/ is not beside it, and 'import trading_calendar' raises at import time before any runner logic executes. Whether the target host carries pandas, boto3 and jsonschema was NOT measured: no host was identified, and no SSM or on-instance read was in this cell's bounds. NO CONSUMER EXISTS YET: a comp-find content census for 'investor-reporting\\.tar\\.gz' returns 9 hits across 31,208 files scanned -- the CODE_TREES declaration, this cell's own artifacts and scratch, and the ledger entry. Nothing fetches the object, nothing untars it, no schedule or trigger references it. WHAT THE SERVED ARTIFACT PROVES: the declaration resolves in the guard; the bytes landed under content-addressed ETag; both member stamps equal sha256sum of their repo files; a future commit to either member routes to the bundle and not to the frozen loose leg. WHAT IT DOES NOT PROVE: that either runner executes at all, on any host, against any data, on any schedule -- DEPLOYED, never EXERCISED. Not one line of either runner was executed by this cell. A FURTHER CONSEQUENCE THE CVO SHOULD HOLD BEFORE RE-RUNNING ANYTHING: both round-1 batteries grade 'served' as head-object on a LOOSE per-file key (battery_ib_s_4.py:320-324 key = SHARED_CODE_PREFIX + 'directory_runner.py', landed = (rc == 0); battery_ib_s_12.py:39,279 CODE_KEY = '.../holdings_snapshot.py', artifact_landed = (rc_h == 0)), and those keys are permanent 404s now by design. battery_ib_s_12.py additionally probes '--mint-bundle holdings_snapshot', a bundle name that does not exist -- the declared bundle is investor_reporting, of which that file is a MEMBER -- so it will still print 'DEPLOY LEG: BLOCKED' after a successful first-mint. Row IRPT_BCKEND-S32. The current instrument for this surface is battery_ib_rt_5.py.",
+      "denominator": "2 of 2 members AST-censused (15 distinct modules seen, 4 non-stdlib, identical across both members); 1 of 4 non-stdlib imports is first-party and carried by neither the bundle nor any declared artifact; 0 hosts identified; 0 runner lines executed; 9 of 31,208 files mention the minted object, 0 of them consume it; 2 of 2 round-1 batteries will read a false RED.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion, graded at L9 by 3.0.0_SA_CVO and never self-graded (spine v3 L9). The facts above are measured and cited; the verdict on whether a two-file bundle is a sufficient deployment unit, and on which host must carry the remaining dependencies, belongs to the CVO with IB-rt-6 (the schedule) in view.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Every arm carries a control able to move its own instrument the other way. (a) THE PRE-EDIT NEGATIVE CONTROL: the identical command before the edit printed \"declared: ['accrual_bridge']\" with rc=2, so the post-edit list is a measured change and not a constant. (b) THE SELF-TEST CONTROL RUNS IN BOTH DIRECTIONS: the invariant suite's output is byte-identical before and after, which is only meaningful because that suite demonstrably CAN fail -- it is failing 3 of 18 right now, and its own MUTANT cases ('breaking assets_gold's repo_home BREAKS routing (detected)', 'cot->opal-data-bd is DETECTED') pass, so the net is live rather than dead. (c) THE IN-RUN NEGATIVE CONTROL: in the same gate runs, on the same prefix, the sibling tests/*.py files still read SKIP-NOT-MEMBER with a probed 404 and a 0-member prefix denominator -- so BUNDLE-ROUTED is a discriminating verdict and not a blanket pass, and 'tests excluded from the bundle' is measured rather than assumed. The input is held FIXED across the before/after: the two commit ranges are the real commits that added the runners, byte-identical to what produced round 1's SKIP-NOT-MEMBER. (d) The ledger hashes are read from git history by the battery, so a hand-typed hash cannot pass. IDEMPOTENCE is its own control: 3 mints, 1 distinct md5.  INSTRUMENT INDEPENDENCE (folded in here because the schema forbids extra keys under controls): the mint's own verify -- mint_bundle's internal ETag and metadata-echo check -- was NOT reused as the acceptance evidence. Arm (b) re-derives with aws s3api head-object plus sha256sum of the repo bytes, a different instrument reading the same object, per Rule 22's prohibition on re-running the same command as corroboration.  KNOWN INSTRUMENT TRAPS: two were HIT and repaired before the passing run, both of which fail QUIETLY. (1) Bare 'bash' on this box is the WSL stub -- it answers 'Windows Subsystem for Linux has no installed distributions' on stdout and exits, so the first battery run read 'declared bundles (denominator 0): []' and scored arm (a) FAIL while the declaration was live; repaired with .tools/git_bash_resolver.bash_argv. (2) .tools/aws is an extensionless bash wrapper and CreateProcess raises OSError WinError 193 on it from Windows Python, the same trap safe_deploy_core.py records about comp-pipescript; repaired with the .cmd twin plus CRLF stripping. A third was avoided rather than hit: pytest over .tools/tests/ collects ZERO because test_fabric_check_classify.py raises SystemExit at import, so that suite is run file-by-file with its denominator printed.",
+      "expected": "Before the CODE_TREES edit: the guard refuses the mint by name, and both runners route to the loose leg as non-members. After it: the guard names the bundle, both runners route to the bundle, and a NON-member at the same prefix must STILL read SKIP-NOT-MEMBER -- otherwise the MEMBER verdict is a blanket pass rather than a discrimination. The self-test suites must not move a single case.",
+      "observed": "PRE-EDIT, same command: rc=2, \"ERROR: no bundle named 'investor_reporting' declared (declared: ['accrual_bridge'])\" -- round 1's rows W1-S8 / W2-S5 reproduced. POST-EDIT: \"declared: ['accrual_bridge', 'investor_reporting']\", and over the two REAL commits that added the runners both print 'BUNDLE-ROUTED ... -> bundle investor_reporting'. IN-RUN NEGATIVE CONTROL held: in those same runs, at the same prefix, each sibling tests/*.py still printed 'SKIP-NOT-MEMBER ... probed s3://... -> 404; prefix ... carries 0 member(s)' -- 2 of 2. SELF-TEST CONTROL held: test_code_trees_invariant.py 3/18 -> 3/18 with BYTE-IDENTICAL output, test_safe_deploy.py 7/14 -> 7/14 differing only by a tempdir nonce, .tools/tests 47 PASS / 8 FAIL of 55 before and after with the same 8 files. That suite is demonstrably ALIVE rather than a dead net: its own mutant cases ('breaking assets_gold's repo_home BREAKS routing (detected)', 'cot->opal-data-bd is DETECTED by the frozen comparison') pass while three unrelated cases fail.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The battery was run twice on identical input, back to back, and the two transcripts were compared with diff. Separately, the mint itself was performed three times across this cell (one explicit --mint-bundle and two gate commit-range runs) and the resulting object md5 compared each time.",
+      "observed": "diff of the two battery transcripts: BYTE-IDENTICAL, both rc=0, both ending 'RT5-AC1: 4 of 4 arms PASS' then 'IBRT5-FIRST-MINT-SERVED'. All three mints produced md5 cd188f6edb7270300a7409d66f9a3432 -- distinct md5 count 1 -- which is build_bundle_payload's design working: sorted member order, zeroed mtime/uid/gid and gzip mtime=0 make a re-mint a byte-identical overwrite, so the ETag is a content address and not a timestamp lottery.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any production run of either runner",
+      "reason": "BOUNDS: 'No production run of either runner in this cell; the mint lands code, the schedule (IB-rt-6) runs it.' Zero lines of either runner were executed. This is why RT5-AC2 reports DEPLOYED and not EXERCISED."
+    },
+    {
+      "item": "Any edit to directory_runner.py or holdings_snapshot.py",
+      "reason": "BOUNDS 1: 'Declare and mint; do not edit the runners.' This collides with RT5-AC1(c), which asks for a no-op change to a runner committed on the branch (row IRPT_BCKEND-S31). Resolved by running the gate's own --commit-range path over the two REAL commits that added the runners, which exercises the identical code path on byte-identical input and mutates nothing."
+    },
+    {
+      "item": "Repair of the guard's two red self-test suites and of the 8 failing .tools/tests files",
+      "reason": "BOUNDS: 'The guard's other bundles and trees are untouched; the self-test run is the control.' All were red BEFORE this cell touched anything, for causes unreachable from a bundle addition (a frozen PIPELINE_MAP predating the advi tree; fixtures built outside the workspace; a bytes-vs-str hashing bug). Row IRPT_BCKEND-S29 carries it ARMED with the owner named, because a red invariant suite is the live net under every future CODE_TREES edit."
+    },
+    {
+      "item": "Repair of battery_ib_s_4.py and battery_ib_s_12.py, which will now read a false RED",
+      "reason": "They are the deliverables of IB-s-4 and IB-s-12, not of this cell; editing another cell's artifact is outside these bounds. Surfaced as row IRPT_BCKEND-S32 with 2.0.0_SA_COO~B named to route the correction."
+    },
+    {
+      "item": "The loose per-file twins the face's '2 keys' wording implies",
+      "reason": "Refused on the ratified design rather than on preference: safe_deploy_core.py routes a bundle member away from the loose leg and the X-iii note states a member's loose S3 objects are deprecated-in-place, never updated (CTO 2026-08-06, no S3 roster twin). Row IRPT_BCKEND-S27."
+    },
+    {
+      "item": "comp-schedule, comp-iam and comp-adversary",
+      "reason": "DECLARED-NOT-APPLICABLE at the cut by the order's own preflight block. This cell creates, changes and fires no schedule, rule or trigger; the S3 write is the guard's own under the DS lane's credentials, and the guard's gate line at mint time is the authority. Blind spots as stated in the preflight are inherited, not re-run here."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-S27: TO-IB-rt-5 grades on 'each of the 2 keys (2 of 2)', but the guard's bundle mechanism mints EXACTLY ONE S3 object -- the tar.gz at b['s3_key'] -- so a two-key denominator is not producible through the mandated mint path. Reported as 2 of 2 MEMBERS on 1 of 1 KEY instead; minting loose twins is refused because the X-iii design freezes the loose leg for a bundle member.",
+    "IRPT_BCKEND-S28: the decomposition's literal 'sha_metadata_key: script-sha256' for BOTH members collides inside build_bundle_payload (shas[spec['sha_metadata_key']] assigned in a loop over sorted members) and silently drops directory_runner.py's sha; implemented literally it produces a stamp that verifies one file while reading as though it covered both. Shipped with distinct per-member keys; the ARMED hazard is the decomp text.",
+    "IRPT_BCKEND-S29: the guard's own self-test suites were ALREADY FAILING before this cell touched anything (test_code_trees_invariant.py 3 of 18, test_safe_deploy.py 7 of 14, .tools/tests 8 of 55), so RT5-AC1(a)'s 'pass' is unachievable within this cell's bounds; the run is used as the CONTROL that BOUNDS names, and UNMOVED is what it asserts.",
+    "IRPT_BCKEND-S30: the face instructs a DS lane to mint row ids of the form IRPT_BCKEND-D-S<k>, which the ratified investigation-item schema REFUSES -- the id pattern admits only the Z-, W<n>- and C- infixes. These rows use the valid seat form.",
+    "IRPT_BCKEND-S31: the face contradicts itself -- RT5-AC1(c) instructs a no-op CHANGE to a runner committed on the branch while BOUNDS 1 of the same face says 'do not edit the runners'. Resolved without editing either runner by running the gate's own commit-range path over the two real commits that added them.",
+    "IRPT_BCKEND-S32: both round-1 batteries grade the first-mint by head-object on a LOOSE per-file key, so now that the mint has correctly landed as a BUNDLE they will read ABSENT / DEPLOY LEG BLOCKED -- a FALSE RED that says the opposite of what happened."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.4.0_DS_ClientPlatform~X/battery_ib_rt_5.result.md",
+  "compiler_tools": [
+    {
+      "tool": "battery_ib_rt_5.py (the RT5-AC1 acceptance battery, arms a-d)",
+      "invocation": "timeout 600 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.4.0_DS_ClientPlatform~X/battery_ib_rt_5.py",
+      "result": "rc=0, 4 of 4 arms PASS, IBRT5-FIRST-MINT-SERVED. Two earlier runs failed on environment traps, not on the world: run 1 on the WSL-stub bash (arm (a) read an empty declared list while the declaration was live) and run 2 on a SyntaxError from a heredoc halving the backslashes in a CRLF literal. Both repaired; the passing run is run 3."
+    },
+    {
+      "tool": "run_tools_tests.sh (.tools/tests/*.py run standalone, with its denominator)",
+      "invocation": "bash org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.4.0_DS_ClientPlatform~X/run_tools_tests.sh",
+      "result": "47 PASS / 8 FAIL of 55 total, BEFORE and AFTER the CODE_TREES edit, same 8 files. Written because pytest over that directory collects ZERO (test_fabric_check_classify.py raises SystemExit at import -> INTERNALERROR, 'no tests ran')."
+    },
+    {
+      "tool": ".tools/safe-deploy.sh --mint-bundle (the guard's own explicit first-mint path)",
+      "invocation": "bash .tools/safe-deploy.sh --mint-bundle investor_reporting",
+      "result": "rc=0. BUNDLE MINTED [mdpf] investor_reporting -> s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz (md5=cd188f6edb7270300a7409d66f9a3432), with both per-member sha stamps printed. Pre-edit control on the same command: rc=2, \"no bundle named 'investor_reporting' declared (declared: ['accrual_bridge'])\"."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (open / close-leg / close)",
+      "invocation": "python .tools/deploy_ledger.py open --slug irpt-bckend-rt5-mint ... ; close-leg L1,L2,L3 ; close --slug irpt-bckend-rt5-mint",
+      "result": "Opened with 3 legs before the act (sentinel committed at 36e4fbf826); all 3 legs closed with proof; CLOSED and the sentinel removed, committed at e9a6ba27db before any grading read."
+    },
+    {
+      "tool": "comp-find (content census, corpus=all)",
+      "invocation": "comp-find \"investor-reporting\\.tar\\.gz\" --limit 20 ; comp-find \"assets_gold/investor_reporting\" --limit 20",
+      "result": "9 hits across 31,208 files scanned for the tarball (declaration + this cell's artifacts + the ledger; NO consumer), and 44 hits for the prefix, which is what surfaced the two round-1 batteries that grade the frozen loose keys (row IRPT_BCKEND-S32)."
+    },
+    {
+      "tool": "aws s3api head-object / list-objects-v2 (the independent verify instrument)",
+      "invocation": ".tools/aws s3api head-object --bucket opal-data-mdpf --key code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz --output json ; .tools/aws s3api list-objects-v2 --bucket opal-data-mdpf --prefix code/scripts/assets_gold/investor_reporting/ --query \"length(Contents)\" --output text",
+      "result": "ContentLength 26935, ETag cd188f6edb7270300a7409d66f9a3432, both member sha stamps present and equal to sha256sum of their repo files; length(Contents)=1 after the act, no Contents key at all before it."
+    }
+  ]
+}
