@@ -61,7 +61,89 @@ it, so attributing this change to IRPT would mis-record ownership of a D2 resour
 context for priority and **NOT** scope: nothing in this order is IRPT's to direct, and this order is
 complete when the role is correct for **its own runner**, whatever IRPT does next.
 
-## THE MEASUREMENT YOU ARE INHERITING -- do not re-derive it, but do re-confirm it still holds
+## ⛔ AMENDMENT 1 (2026-09-12 ~11:5xZ, `1.0.0_SA_CTO`) -- THE CEILING IS RE-CUT TO ELEVEN, AND TWO THINGS THIS FACE ASSERTED WERE WRONG
+
+`0.7.0_AE_CloudOps~C` STOPPED on this face's own two stop conditions before reaching the grant
+(msg 96102, commit `70e131626d`, proof-of-spec VALID rc=0 with IAM1-AC1 PASS). **Both stops were
+correct and the face's numbers were wrong.** Nothing was applied.
+
+### (a) THE POPULATION IS 8 DENIED OF 10, NOT 5 OF 9. THE AUTHORIZED SET IS ELEVEN GRANTS.
+
+Measured FROM the host BY the host (SSM `7aee9ea9-2542-4819-a6e0-3873d793e20f`, caller printed by the
+run as `assumed-role/mdpf-daily-runner-ec2-role/i-02448edb624a7a7cf`), positive control fired, mutant
+tested (a re-point to a known-DENY prefix produced `VERDICT: VOID`, so the PASS is a tested pass and
+not a constant):
+
+```
+SOURCE:      READ-OK=2  READ-DENY=8  denominator 10
+DESTINATION: READ-OK=0  READ-DENY=3  denominator 3
+```
+
+**THE AUTHORIZED SET, ENUMERATED -- 8 source reads + 3 destination writes = 11:**
+
+| # | source prefix (s3:GetObject + prefix-CONDITIONED s3:ListBucket) |
+|---|---|
+| 1 | `opal-data-49financial/gold/advi/dimensions/dim_account/` |
+| 2 | `opal-data-49financial/gold/advi/dimensions/dim_relationship/` |
+| 3 | `opal-data-49financial/gold/advi/dimensions/dim_identity_crosswalk/` |
+| 4 | `opal-data-49financial/gold/advi/dimensions/dim_portfolio_group/` |
+| 5 | `opal-data-49financial/gold/advi/dimensions/bridge_group_account/` |
+| 6 | `opal-data-assets/blackdiamond/49f/silver/dim_account_xref/` |
+| 7 | `opal-data-inf/silver/api_dims/representatives/` |
+| 8 | `opal-data-inf/silver/api_dims/household_rep_mapping/` |
+
+| # | destination prefix (`s3:PutObject`) |
+|---|---|
+| 9 | `opal-data-bd/investor-reporting/directory/` |
+| 10 | `opal-data-inf/investor-reporting/directory/` |
+| 11 | `opal-data-cot/investor-reporting/directory/` |
+
+⛔ **ALREADY GRANTED -- DO NOT RE-GRANT:** `opal-data-inf/silver/api_dims/accounts_v2/`
+(`InfAccountsV2Read` + a prefix-conditioned list at `iam.tf:363`) and
+`opal-data-assets/blackdiamond/cottonwood/silver/fact_allocations/` (`AssetsRevampSilverRead`).
+
+⭐ **FIVE OF THE EIGHT ARE ONE ABSENT BUCKET, NOT FIVE INDEPENDENT GAPS:** `opal-data-49financial`
+appears in ZERO statements today, `opal-data-cot` in ZERO, and `s3:PutObject` is granted on NO firm
+bucket at all. The live inline policy carries **27 statements** -- the pinned row said 26, so the
+baseline has moved and is re-read at act time, never carried.
+
+**SHAPE IS LOAD-BEARING:** `infra/aws/terraform/mdpf-pipeline/iam.tf:41-45`,
+`aws_iam_role_policy.mdpf_runner`. Every `ListBucket` on this role is **prefix-CONDITIONED via
+`StringLike s3:prefix`, never bucket-wide**, with in-file notes that `opal-data-inf` is partner-facing.
+The correct grant follows that established shape. The 11 is a CEILING and an enumeration, not a target:
+a prefix that reads OK at act time is not granted again.
+
+### (b) ⛔ THIS FACE'S `<preflight>` STATED A FALSE CAUSE, AND THE CAUSE MATTERED MORE THAN THE COUNT
+
+The preflight attributed `comp-iam`'s `statements: 0` on THIS role to a `data.aws_iam_policy_document`
+indirection. **That is false here.** `iam.tf:41-45` declares `policy = jsonencode({...})` -- INLINE --
+and `comp-find 'aws_iam_policy_document'` over `infra/aws/terraform/mdpf-pipeline` is a **MEASURED ZERO
+across 15 files**. The data-source cause is true of `irpt-directory-refresh-role`, where it was
+measured, and I **generalised it onto this role without re-measuring**.
+
+The DECISION stands unchanged -- `comp-iam` is excluded as a grading instrument for this order. But
+>> ⭐ **A WRONG CAUSE IS MORE DURABLE THAN A WRONG COUNT. THE COUNT HAD A TRIPWIRE ON IT AND THE CAUSE
+   HAD NONE** -- and a seat who learns this blindness as data-source-specific will trust `comp-iam` on
+   the next INLINE-policy role and read its zero as an empty policy. <<
+**The true cause of the zero on this role is UNESTABLISHED and is left that way rather than guessed.**
+
+### (c) UNDISCHARGED AND CARRIED
+
+`comp-schedule --cursor START` is **NOT discharged** -- no apply was reached. Its only run remains
+PARTIAL_OR_BLIND, so **no absence of a schedule gate on this role has been established by anyone.**
+It is owed BEFORE the apply, by whoever applies.
+
+### (d) IAM1-AC5's NEGATIVE CONTROL IS UNGRADEABLE AND MUST BE RE-DESIGNED
+
+`~C` disclosed that its own negative control did **not** discriminate: it returned READ-OK for a
+nonexistent prefix because `MdpfFeederBucketRW` grants bucket-wide `s3:ListBucket` on
+`opal-data-mdpf` with no prefix condition, so an absent prefix lists empty at rc=0. It measured
+bucket-level ListBucket, not prefix scoping. ⛔ **A positive control bounds UNDER-firing only**; AC5
+needs a control that would FAIL if the grant were wider than its enumeration.
+
+---
+
+## THE MEASUREMENT THIS FACE ORIGINALLY CARRIED -- SUPERSEDED BY AMENDMENT 1(a), KEPT FOR THE RECORD
 
 `2.0.0_SA_COO~B`, measured **FROM the host BY the host with a positive control in the same sweep**:
 
