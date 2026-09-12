@@ -45,8 +45,19 @@ AWS = os.path.join(REPO, ".tools", "aws.cmd")
 SOURCE_MAP = os.path.join(REPO, "infra", "aws", "lambda", "ci", "lambda-source-map.json")
 LAYER_ZIP = os.path.join(REPO, ".scratch", "layer", "irpt-common-5.zip")
 
-# MEASURED FROM TERRAFORM (`layers = []` vs an arn), never from the layer map.
-LAYERED = {"irpt-performance-adapter", "irpt-narrative", "irpt-export-render"}
+# THERE IS NO LAYER LIST IN THIS FILE ANY MORE, AND THAT IS THE FIX RATHER THAN A TIDY-UP.
+#
+# This file used to keep its own `LAYERED` set beside the packager's. The two diverged the moment
+# amendment 3 granted holdings: the packager learned that irpt-holdings attaches irpt-common and
+# this verifier did not, so it probed the SERVED holdings artifact with NO /opt/python and reported
+# `IMPORT-FAIL: No module named 'keys'` on a sound zip -- a false RED on a function that had just
+# been applied, which is the most expensive direction for this instrument to be wrong in. It is the
+# THIRD time in this cell that two hand-maintained copies of one fact disagreed (the two in-lane
+# test sets, the battery reading the wrong one of them, and now this).
+#
+# So the attachment is READ FROM THE FUNCTION ITSELF, at the same moment as its handler and its
+# CodeSha256 -- one read, of the thing that decides. A list that cannot drift is better than a list
+# that is currently correct.
 
 PROBE = (
     "import sys, os\n"
@@ -106,11 +117,28 @@ def probe(task_dir, layered, label):
 
 def verify(function):
     print("%s" % function)
-    handler, live_sha, state, status = aws(
+    # PADDED, BECAUSE AN EMPTY LAST FIELD DISAPPEARS. `--output text` renders the five values
+    # tab-separated, and a function with no layers renders the fifth as EMPTY -- so the line ends
+    # in a tab, `aws()` strips trailing whitespace, and `split` returns FOUR fields. Unpacking
+    # five raised `ValueError: not enough values to unpack`. The count is padded rather than the
+    # strip removed, because the strip is what keeps the other four clean.
+    _fields = aws(
         "lambda", "get-function-configuration", "--function-name", function,
         "--region", "us-east-1", "--output", "text",
-        "--query", "[Handler,CodeSha256,State,LastUpdateStatus]").split("\t")
-    print("    live: handler=%s state=%s/%s" % (handler, state, status))
+        # NULL-SAFE, AND IT TOOK A FAILURE TO LEARN WHY. `join(',', Layers[].Arn)` raises
+        # "invalid type for value: None, expected array-string" on a function with NO layers --
+        # which is three of these six -- so the expression that READS the attachment must tolerate
+        # its absence. `Layers || `[]`` supplies the empty array before the join sees it. The first
+        # version of this query worked on holdings (which HAS a layer) and failed on every
+        # layer-less function, so running it over ONE function would have looked clean.
+        "--query", "[Handler,CodeSha256,State,LastUpdateStatus,"
+                   "join(',', (Layers || `[]`)[].Arn)]").split("\t")
+    while len(_fields) < 5:
+        _fields.append("")
+    handler, live_sha, state, status, layer_arns = _fields[:5]
+    layered = bool(layer_arns.strip())
+    print("    live: handler=%s state=%s/%s layers=%s"
+          % (handler, state, status, layer_arns.strip() or "NONE"))
 
     location = aws("lambda", "get-function", "--function-name", function,
                    "--region", "us-east-1", "--output", "text", "--query", "Code.Location")
@@ -135,9 +163,9 @@ def verify(function):
         os.makedirs(task)
         with zipfile.ZipFile(blob) as zf:
             zf.extractall(task)
-        layered = function in LAYERED
-        print("    layout: /var/task + %s" % ("/opt/python (layer attached)" if layered
-                                              else "no layer (layers = [])"))
+        print("    layout: /var/task + %s"
+              % ("/opt/python (the LIVE function attaches a layer)" if layered
+                 else "no layer (the LIVE function attaches none)"))
         ok = probe(task, layered, "SERVED")
 
         # THE NEGATIVE CONTROL, on the SERVED tree: delete served.py and re-import.
