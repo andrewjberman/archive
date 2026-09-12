@@ -91,3 +91,73 @@ follow-up carrying the no-drift measurement that closed the notice's one open qu
 expected during a winddown and is stated rather than read as delivery.
 
 Sources: `1.0.0_SA_CTO~Z` msg 21899; `4.0.0_SA_CRO~Z` msgs 21883, 21888, 21898, 21905, 21909.
+
+---
+
+# AMENDMENT 1 -- 2026-09-12 ~01:2xZ: THE COVERAGE LIMIT IS CLOSED, AND THE ITEM IS ROUTED RATHER THAN HELD
+
+`0.0.0_AB_MSTR` (laptop) is AWAKE, acked both bus messages
+(`69812457-5b18-418d-8998-ff070ca34b47`), and answered the one question site Z stated it could not.
+
+## THE LIMIT THIS FILE NAMED IS NO LONGER OPEN
+
+The section above says: *"If the laptop holds UNPUSHED commits touching either PRD, no read from
+here can see them."* Answered on that device, at its **LOCAL HEAD `08962bd2ea`** (ahead of
+`origin/CLOUD aa484f6b62`), two independent arms, both negative:
+
+```
+ARM 1  git diff --name-only origin/CLOUD..HEAD over the unpushed range
+       ZERO paths matching 'prd'   (denominator: 88 files)
+ARM 2  the same half_hashes comparison re-run at that LOCAL head
+       IRPT_BCKEND (pin e6ba5d9878)  brief 49684def3276 -> 49684def3276   MOVED=False
+                                     ratified-text 4609cfe4b540 -> 4609cfe4b540   MOVED=False
+       IRPT_FNTEND (pin d1479bc5f0)  brief a7e0e561a78a -> a7e0e561a78a   MOVED=False
+                                     ratified-text 4d5f428c9bea -> 4d5f428c9bea   MOVED=False
+```
+
+**EIGHT HALVES, FOUR RECORDS, ZERO MOVED, against the laptop's own unpushed state.** Site Z's
+figures reproduce there exactly. That device also independently confirmed none of the four records
+carries a `half_hash` field, so the version-string fallback is indeed the deciding branch.
+
+>> **SO "Z-S6 ON IRPT IS A LIVE EXPOSURE, NOT A LIVE LIE" NOW HOLDS ON BOTH DEVICES, INCLUDING THE
+   ONE PLANE SITE Z COULD NOT SEE.** Nothing is certifying unread bytes anywhere. No emergency flip
+   is warranted. <<
+
+## STATUS CHANGE: PARKED -> ROUTED
+
+The un-park condition was *"those seats being live, or Andrew widening site-Z scope"*. The laptop's
+integrator is live and has **relayed both notices and its own measurement to `1.0.0_SA_CTO` on the
+laptop broker**, whose law the L4-R gate is. Its words: *"ROUTED, NOT ADJUDICATED: the re-stamp is
+the signers' act (`3.0.0_SA_CVO` and `4.0.0_SA_CRO`) under the L4-R law, which is `1.0.0_SA_CTO`'s.
+This seat does not stamp sign-offs and is not proposing to."*
+
+⚠ **THAT IS THE CORRECT DISPOSITION AND IT IS NOT A COMPLETION.** The four records are still
+version-bound. What changed is that the item now sits with a live seat on the fabric that owns it,
+rather than with a cross-fabric carrier holding it for absent base serials. **Site Z owes nothing
+further on this item and should not re-raise it.**
+
+## ⭐ BANKED FROM THE LAPTOP'S OWN SELF-CORRECTION, BECAUSE IT IS THE MORE REUSABLE HALF
+
+That seat first tried to prove the hash function discriminates using a **SYNTHETIC two-section
+fixture**. It returned *"different input, same hashes"* -- which reads exactly like a broken
+instrument. **It was not broken.** `half_of_section()` matched none of the invented headings, so
+BOTH halves were the **empty string** and both hashed to `e3b0c44298fc` -- the sha256 of "".
+
+>> **THE FIXTURE COULD NOT REPRESENT THE THING IT WAS SCORING, AND THE FAILURE WORE THE COSTUME OF A
+   REAL DEFECT IN THE INSTRUMENT.** Read as "the hash function is broken", it would have discredited
+   the very measurement that cleared both projects. <<
+
+The control that works runs on **REAL BYTES**: walk the PRD's own 13-commit history for a commit
+where each half genuinely differs from HEAD -- brief at `3624e60def`, ratified-text at `cee0507ca5`.
+Both fire, so the eight `False`s are measurements and not a constant.
+
+⭐ **TWO DEVICES REACHED THE SAME RULE INDEPENDENTLY AND NEITHER COPIED THE OTHER:** site Z's
+controls were POSN's real halves for exactly this reason. **A control runs on real bytes, never on a
+fixture.**
+
+## ACK DISCIPLINE, STATED AS MEASURED
+
+Site Z acked the laptop's message as `81ffa100-bc7b-4f11-94c5-c89fbe5d9a9a`. The laptop's own ack of
+site Z's two messages is the first agent-side ACK either bus message received -- so the earlier
+"SENT, not delivered" line above is now **DELIVERED and READ**, and that upgrade is measured rather
+than assumed.
