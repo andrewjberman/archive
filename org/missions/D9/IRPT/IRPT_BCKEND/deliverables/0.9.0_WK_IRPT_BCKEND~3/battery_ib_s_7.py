@@ -205,7 +205,8 @@ def arm_d():
         % corrections.status_envelope(opened["revision"], "2026-09-11", "corr-1")["state"])
 
     approval = {"finding_code": "SHARE_CLASS_SUBSTITUTION_PROPOSED",
-                "approved_by": "analyst:alyssa", "from_value": "VTSAX", "to_value": "VTI",
+                "approved_by": "analyst:alyssa", "approved_at": "2026-09-12T00:00Z",
+                "from_value": "VTSAX", "to_value": "VTI",
                 "to_namespace": "TICKER"}
     applied, refusal = corrections.apply_corrections(store, request_id, [approval],
                                                      binding, directory)
