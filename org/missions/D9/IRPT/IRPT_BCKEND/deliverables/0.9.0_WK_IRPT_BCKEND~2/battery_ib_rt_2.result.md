@@ -1,27 +1,24 @@
 # BATTERY `IB-rt-2` -- RESULT
 
 **Run:** `timeout 900 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_2.py`
-**Vintage:** branch `wk-irpt_bckend-2-2b`, after amendments 3 and 4 and the six-root deploy.
+**Vintage:** branch `wk-irpt_bckend-2-2b` @ `36e4c5f70b`, after amendment 5 and the second deploy.
 **Verbatim stdout:** `battery_ib_rt_2.result.txt` beside this file. This document QUOTES that run.
 
 > **`15 of 15 ARMS PASS. THE TOKEN IBRT2-SIX-GUARDED IS PRINTED.`**
-> **AND THE ORDER IS DELIBERATELY NOT FLIPPED TERMINAL.** Four subject files are at NO COMMIT,
-> the run says so above its own token, and the `<paths>` grant that would let them be committed is
-> live ONLY while this order is non-terminal -- so flipping it would permanently orphan them.
-
-**THIS SUPERSEDES the `10 of 13` vintage of this file.** New run, not a correction.
+> **AND THE VINTAGE IS CLEAN:** `0 subject file(s) differ from HEAD: every byte above is IN THE
+> RECORD.` The previous run printed the same token over four uncommitted files; this one does not.
+> **`<status>` IS STILL NOT FLIPPED, for one reason that is not bookkeeping -- see the last section.**
 
 ---
 
-## WHAT CHANGED SINCE THE `10 of 13` RUN, AND WHY EACH ARM MOVED
+## WHAT MOVED SINCE THE `15 of 15 over uncommitted bytes` RUN
 
 | arm | was | is | why |
 |---|---|---|---|
-| `a2` whole file | `1 of 12` BLOCKED | `0 of 12` PASS | amendment 3 C1 granted the holdings paths and the handler moved under the mark. **The census was NOT loosened.** |
-| `g3` refusal validates | `0 of 11` BLOCKED | `11 of 11` PASS | the CTO ruled the contract (PRD v0.14 @`b8e98d5a4d`): `business_date` is state-conditional. Not a workaround here. |
-| `g2` success responses | BLOCKED | **HUMAN-GATED** | ruled by the issuer as the face's own rule applied to a dependent arm; graded by READING its record, 10 of 10 elements. |
-| `d3` (new) | -- | PASS x2 | the post-read obligation the contract deliberately stopped carrying, plus its negative control. |
-| `f` the principal | PASS | **HUMAN-GATED** | same verdict, now under a verb that cannot be mistaken for a measurement. |
+| vintage | 4 files at no commit | **0** | amendment 5 E1 put the holdings paths in `<paths>`; the lane gate had been right and the grant was prose. |
+| `a1` in lane | `0 of 11` | `0 of 12` | holdings is in lane and guarded, so in-lane IS the published file. |
+| `e` deployed | 6 of 6 | **7 of 7** | the second deploy applied six roots; holdings' handler moved; all seven re-verified on served bytes. |
+| `g1`/`g3` | 11 of 11, 1 excluded | **12 of 12, 0 excluded** | the holdings route's guarded handler is live, so nothing is excluded any more. |
 
 ---
 
@@ -31,157 +28,120 @@
 denominator: 12 published route(s) = 12 with a declared handler + 0 without
 IN LANE (the 7 functions this order may open): 0 of 12 unguarded
 WHOLE FILE                                   : 0 of 12 unguarded
-[PASS] a1 zero in lane | [PASS] a2 zero over the whole file | [PASS] a3 the control fires
-  the control, on a THROWAWAY copy of the TABLE (never of a handler): 3 of 3 victim(s)
-2 basename match(es) across 8 function directory(ies) x 7 shared module(s):
-  2 declared vendored copy(ies), 0 true collision(s)          [PASS] a4
+[PASS] a1 | [PASS] a2 | [PASS] a3  -- control 3 of 3 victims moved the verdict to `1 of 12`
+2 basename match(es): 2 declared vendored copy(ies), 0 true collision(s)   [PASS] a4
 ```
 
-**`irpt-holdings` EARNED THE MARK; THE INSTRUMENT DID NOT MOVE.** `is_guarded` still tests the one
-thing `guard()` sets. Row `W2-S31` established that this was a MARK gap and not a live cross-firm
-hole -- the handler enforced the same `FirmBinding` inline -- and the issuer and the CTO both ruled
-that an inline enforcement the instrument cannot see should stay VISIBLE rather than be absorbed.
-So `holdings/entry.py` puts the boundary in front and the Terraform root names it.
-
-⛔ **AND NOTHING A CALLER REACHES WIDENED, WHICH TOOK A DECISION RATHER THAN A DEFAULT.**
-`make_holdings_enforcer` defaults the ownership map to `_no_grant` and the deployed handler never
-supplied a real one, so every `FIRM_ADVISOR` resolves to an EMPTY permitted set today. Handing
-`Entry` the shared `_loaders.deps` -- what the other six do -- would have turned a route that
-serves nothing into one that serves real holdings. **That is IB-rt-7's decision, not this cell's**,
-so `entry.py` composes the SAME triple that surface already used.
-
-**THIS FILE HAS NOW ASSERTED THE CURRENT GAP TWICE AND BEEN RIGHT TWICE:** `3 of 11` for
-`irpt-status` before `W2-S19`, then `1 of 12` for `irpt-holdings` before `W2-S30`. Each time the
-assertion's own failure was the notice that the gap had closed.
+`irpt-holdings` earned the mark; **the instrument did not move.** `is_guarded` still tests the one
+thing `guard()` sets. The handler moved under it, and **nothing a caller reaches widened** -- its
+`Entry` composes the same grant-nothing ownership triple that surface already used, because wiring
+the shared loaders would have turned a route that serves nothing into one that serves real holdings,
+and that is IB-rt-7's decision.
 
 ---
 
-## ARMS (b) (c) (d) -- THROUGH THE REAL ENTRY POINTS
+## ARMS (b) (c) (d) AND (d3)
 
 ```
-(b) six swaps x 6 dispatched function(s) ........................... 36 of 36
-    the swap census covers 6 function(s); irpt-holdings carries the C1 MARK and is NOT in the
-    swap set -- its deploy is HELD (rows W2-S38, W2-S41), named here and counted in neither direction
-    difference control -- the authorized request is NOT refused .....  6 of 6
-    ROW W1-S16, the seventh negative: an ADMIN principal addressing an advisor
-    outside the verified firm is refused ...........................  6 of 6
-    and its difference control -- an IN-FIRM advisor is NOT refused OBJECT_NOT_COVERED  6 of 6
-(c) 6 of 6 and 6 of 6   (d) 6 of 6 and 6 of 6   [PASS] x4 including the envelope key set
+(b) 36 of 36 swaps over the SIX the face names; difference control 6 of 6
+    W1-S16's seventh negative 6 of 6, with ITS control 6 of 6
+(c) 6 of 6 / 6 of 6      (d) 6 of 6 / 6 of 6      [PASS] x4
+(d3) denominator READ FROM THE CONTRACT: 9 states; 5 ANSWER-BEARING; 4 NO-ANSWER [9 MINUS 5]
+     the boundary's own three sets agree with the contract's, member for member: True
+     6 of 6 POST-READ refusals carry business_date; 6 of 6 PRE-READ omit it; 0 of 12 null
+     an ANSWER-BEARING state with no business_date RAISES at the boundary: True   [PASS] x2
 ```
 
-**`36 of 36` is the face's bar over the SIX the face names.** Three arms briefly went red in an
-earlier run of this battery for a reason that had nothing to do with them: the battery was reading
-the ROUTE census's in-lane set as the SWAP census's denominator, so when amendment 3 granted
-holdings the expected count became `7 x 6 = 42` while the suite ran 36. **Each arm now reads the
-set from the module that OWNS it.** That is the two-separate-lists trap the wind-down hand-off
-named, arriving from the other side.
+**The state set is a SUBTRACTION from the contract's own nine, not a forward list.** My first cut was
+pre-read vs post-read -- a distinction about *refusals* -- and QUEUED and RUNNING are not refusals,
+so both would have kept failing. The issuer caught that and it is the load-bearing correction here.
 
 ---
 
-## ARM (d3) -- THE BUSINESS DATE, WHERE THE SCHEMA CANNOT REACH
+## ARM (e) -- DEPLOYED AND VERIFIED -- 7 of 7
 
 ```
-denominator, READ FROM THE CONTRACT not from this file: 9 state(s) in the enum
-  ANSWER-BEARING (business_date REQUIRED): 5 -- READY, PARTIAL, STALE, NEEDS_CORRECTION, UNCERTAIN
-  NO-ANSWER  (may be ABSENT, never null) : 4 -- QUEUED, RUNNING, UNAVAILABLE, FAILED  [9 MINUS 5]
-the boundary's own three sets agree with the contract's, member for member: True
-  6 of 6 POST-READ refusals carry business_date = 2026-09-10 (from the ARTIFACT)
-  6 of 6 PRE-READ refusals omit it -- ABSENT, and 0 of 12 envelopes carry it as NULL
-an ANSWER-BEARING state built with no business_date raises at the boundary: True
-[PASS] d3 the post-read business date | [PASS] d3 an answer-bearing state cannot ship dateless
+7 of 7: declared artifact_sha256 == live CodeSha256 | handler is the guarded entry | Active/Successful
+IMPORT-OK 7 of 7 | negative control FIRES 7 of 7 | VERIFIED 7 of 7
+ledger: 2 entry(ies), sentinel removed=True, post-apply plans reading `No changes`: 12
+HELD ROOT, named: ycharts -- its plan NOW reads `0 to add, 0 to change, 2 to destroy`
 ```
 
-**THE STATE SET IS A SUBTRACTION FROM THE CONTRACT'S OWN NINE, NOT A FORWARD LIST.** My first cut
-of this rule was PRE-READ vs POST-READ -- a distinction about REFUSALS -- and **QUEUED and RUNNING
-are not refusals at all**, so both would have gone on failing validation exactly as before. The
-issuer caught it and said so plainly; the subtraction cannot lose a member without the count
-disagreeing.
+Six roots in this act, one at a time, each verified on its **served bytes** before the next was
+touched. Every applied root planned only `s3_object_version` + `source_code_hash`, and holdings
+alone also the handler.
 
-**THE OBLIGATION IS HONOURED WHERE THE SCHEMA GAVE UP.** The contract's own `allOf` `$comment`
-records that it can no longer catch a post-read refusal that omits a date it HAS. A post-read
-refusal has an artifact and now states it. **And the arm has a negative control**: without the
-raise, "the date is present" could be satisfied by a boundary that never checks.
+⛔ **A VERIFY READ RED BEFORE IT READ GREEN, AND THE INSTRUMENT WAS WRONG.** holdings' first verify
+said `IMPORT-FAIL: No module named 'keys'` on a sound zip, because this verifier kept **its own**
+hand-maintained list of which functions attach the layer, beside the packager's -- and the two
+diverged the moment holdings was granted. **That is the fourth time in this cell that two
+hand-maintained copies of one fact disagreed.** Each time the fix was to delete a copy:
+
+| copy | where it diverged | fix |
+|---|---|---|
+| two in-lane test sets | `irpt-status` added to one | both now read from their owner |
+| the battery reading the wrong one | holdings granted -> 42 expected, 36 run | each arm reads the set that owns it |
+| the verifier's layer list | holdings granted -> probed with no `/opt/python` | **deleted**; read from the live function |
+| the battery's `DEPLOYED` list | holdings deployed -> arm (e) said 6 of 7 | **deleted**; imported from the packager |
+
+Two further defects surfaced in that same read and are fixed: `join(',', Layers[].Arn)` **raises**
+on a function with no layers (three of six), and `--output text` renders an empty last field that
+`strip()` removes, so unpacking five values got four. **A one-function probe would have looked clean.**
+
+⛔ **AND A POST-APPLY `No changes` IS A PERISHABLE CLAIM.** The ycharts root read `No changes` after
+this cell's first apply and now reads **`0 to add, 0 to change, 2 to destroy`**: a LIVE secret
+(`ycharts/session/research-20260911`, `DeletedDate null`) and a log group that IB-rt-9 removed from
+the configuration at `f83f73ce6c` without applying. **Any apply of that root by any cell now destroys
+them.** Row `W2-S42`, ARMED. Found only because this arm re-read the plan instead of trusting the
+recorded one.
 
 ---
 
-## ARM (e) -- DEPLOYED AND VERIFIED -- 6 of 6
+## ARMS (f) AND (g2) -- HUMAN-GATED
 
 ```
-declared artifact_sha256 == live CodeSha256: 6 of 6; handler is the guarded entry: 6 of 6;
-Active/Successful: 6 of 6
-IMPORT-OK 6 of 6 | negative control FIRES 6 of 6 | VERIFIED 6 of 6
-ledger: entry present=True, sentinel removed=True, post-apply `No changes`: 6 of 6
+[HUMAN-GATED] f  -- 9 of 9 record elements, 0 secret values
+[HUMAN-GATED] g2 -- 10 of 10 record elements, 0 secret values, 0 of 12 success responses MEASURED
 ```
 
-Six roots, one at a time, each verified on its SERVED bytes before the next was touched. **Two
-runtime-only defects meant none of the six could have served a production event before this order**
--- the package roots derived from the parent of `/var/task`, and `operation_of` resolving the
-operation by READING `routes.json` on exactly the event shape the API delivers
-(`integrations.tf:57`, `payload_format_version = "2.0"`, no request template). **A guard that cannot
-import is not a guard, and three matching hashes say nothing about either.**
-
-⛔ **AND A DEFECT THIS CELL INTRODUCED AND REMOVED -- row `W2-S39`.** `served.Entry` held ONE cache
-dict for the MODULE'S lifetime. Found by accident: a holdings test refused a bad snapshot alone and
-**SERVED** it when a valid request ran first. Authorization was never at risk (both branches
-reauthorize; the key carries tenant and scope fingerprint). Freshness was. **A better key cannot
-fix it** -- the key is built from what the BOUNDARY sees and a compute reads artifacts the boundary
-never sees -- so the cache is now PER-REQUEST unless explicitly shared, which is what the
-pre-existing holdings path did. ⚠ Still ARMED in the world until the next deploy ships it.
+A third verb, because `PASS` would claim something unexercised and `BLOCKED` would report a met rule
+as unmet. Both are graded by READING their record for the elements the rule names. **The wrong way to
+close g2 is the easy one:** a fabricated advisor id returns a REFUSAL, which cannot validate against
+a response contract at all.
 
 ---
 
-## ARMS (f) AND (g2) -- HUMAN-GATED, UNDER A VERB THAT IS NEITHER PASS NOR BLOCKED
+## ARM (g) -- ENVELOPE CONFORMANCE, SERVED -- 12 of 12, NOTHING EXCLUDED
 
 ```
-[HUMAN-GATED] f the principal  -- 9 of 9 required elements, 0 secret values
-[HUMAN-GATED] g2 success responses validate, SERVED -- 10 of 10 elements, 0 secret values,
-              0 of 11 success responses MEASURED and none claimed
+denominator: 12 route(s) whose guarded handler is DEPLOYED at this HEAD; 0 excluded
+a mismatched X-Contract-Version is refused CONTRACT_VERSION on the DEPLOYED function: 12 of 12
+the refusal validates against v1 StatusEnvelope: 12 of 12        [PASS] g1 | [PASS] g3
 ```
 
-**A THIRD VERB WAS NEEDED.** `PASS` would claim something unexercised; `BLOCKED` would report a met
-rule as unmet. Both arms are graded by READING their record for the elements the rule names, as
-literal strings, so a reworded record fails rather than being read charitably.
-
-**AND THE WRONG WAY TO CLOSE g2 IS THE EASY ONE:** invoking a deployed function with a FABRICATED
-advisor id returns a REFUSAL, which cannot validate against a response contract at all (row
-`W2-S25`). Counting that would record the opposite of what the arm asks. The record names the
-operator's act as **step 3b of arm (f)'s same bounded run**, with the two ENQUEUEING routes
-excluded on their own line under bounds 1 and 2.
+**"Is it deployed" is now a MEASUREMENT, not a membership:** the arm reads each function's live
+`Handler` and includes the route when it equals the guarded entry. A list cannot tell you whether an
+apply landed; the function can.
 
 ---
 
-## ARM (g) -- ENVELOPE CONFORMANCE, SERVED
+## WHY `<status>` IS STILL OPEN -- ONE REASON, AND IT IS NOT BOOKKEEPING
 
-```
-denominator: 11 route(s) whose guarded handler is DEPLOYED at this HEAD; 1 excluded and named:
-  EXCLUDED, neither a pass nor a fail: GET .../holdings/{accountSetId} -- irpt-holdings
-  (guarded in the TREE at this commit, apply HELD: rows W2-S38 and W2-S41)
-a mismatched X-Contract-Version is refused CONTRACT_VERSION on the DEPLOYED function: 11 of 11
-the refusal validates against v1 StatusEnvelope: 11 of 11
-[PASS] g1 the version check is SERVED | [PASS] g3 the refusal validates against StatusEnvelope
-```
+Every criterion passes by output and the vintage is clean. **One of the seven functions this cell
+owns is still serving code without this cell's own fix.** `irpt-ycharts-generate` keeps the previous
+`served.py`, so it alone lacks the v0.14 state-conditional envelope and the post-read
+`business_date` -- and **row `W2-S39`'s cache-lifetime defect, which this cell INTRODUCED, remains
+ARMED on it.**
 
-**`g1`'s denominator is "routes whose guarded handler is DEPLOYED", which is NOT "routes this order
-may open".** Counting the twelfth would have reported another cell's deployed behaviour as this
-arm's failure; omitting it silently would have overstated the sweep. It is named.
+It cannot be fixed by this cell right now, and the reason is not a preference:
 
----
+* **`W2-S38`** -- amendment 5 E3 instructs a STOP if that zip carries `settings.json` without
+  `fixtures/holdings/security_mapping.json`, or either without `parse.py`. Re-measured at HEAD the
+  literal condition is TRUE (`parse.py` is declared by **0 of 214** functions). The issuer's call.
+* **`W2-S42`** -- and independently, **no cell can apply that root at all** without destroying a live
+  secret another cell removed from configuration.
 
-## THE VINTAGE -- WHY THE TOKEN IS NOT A TERMINAL ORDER
-
-```
-HEAD: 0562ba4708
-4 subject file(s) are NOT at HEAD:
-   M _authz/tests/test_unguarded_census.py      M terraform/investor-reporting/holdings/lambda.tf
-  ?? holdings/entry.py                          ?? holdings/tests/test_entry_guarded.py
-```
-
-Amendment 3 C1 grants the holdings paths in **PROSE**; the `<paths>` block does not name them, and
-the lane gate refuses them. **The gate is right** -- it reads the machine-readable grant -- and an
-author override is the one escape `ADHC_OWNPTH.005` forbids. Row `W2-S41`, **ARMED**, because the
-work exists only on this device's filesystem.
-
-⛔ **AND THIS IS WHY THE `<status>` STAYS OPEN.** The `<paths>` grant is live **only while the order
-is NON-TERMINAL**. Flipping to `complete` would retire the grant and permanently orphan C1's
-work -- a terminal order whose deliverables exist at no commit is not a record. **One line of
-`<paths>` turns this disclosure into a record and this order terminal.**
+**A terminal flip would retire the `<paths>` grant this cell needs for that last apply**, and it
+would assert the work is complete while a defect this cell introduced is still served. So the order
+stays open on two rows whose owners are named, `IB-rt-6` and `IB-rtb-1` wait on one ruling, and the
+flip is the last act -- not the act that frees anyone to finish.

@@ -54,13 +54,27 @@ SHARED_ROOTS = [
 ]
 
 SIX = ["irpt-directory-search", "irpt-performance-adapter", "irpt-narrative",
-       "irpt-export-render", "irpt-status", "irpt-ycharts-generate"]
+       "irpt-export-render", "irpt-status", "irpt-ycharts-generate",
+       # THE SEVENTH, granted at amendment 3 C1 and committed once amendment 5 E1 put the paths in
+       # the <paths> block. Its shared modules come from its OWN source_dir -- `stage.py` staged
+       # enforce.py, errors.py and resolve.py there from a PINNED commit and STAGE_MANIFEST.json
+       # records each sha256 -- so the resolver's source_dir-first rule picks the PINNED bytes and
+       # that manifest's claim stays true. Only entry.py, served.py and loaders.py come from the
+       # tree. The single behavioural delta between the pinned enforce.py and HEAD's is covers()'s
+       # advisor branch (row W1-S16), and it is UNREACHABLE for this function: served.Entry builds
+       # its Request from event["object_kind"], a deployed HTTP API v2 event carries none, and this
+       # function's compute checks the permitted set directly rather than through covers().
+       "irpt-holdings"]
 
 # MEASURED FROM TERRAFORM AT THIS CUT, never from the layer map: `layers = []` means the zip is
 # the only carrier. The layered three take ids/keys/jsonschema from irpt-common and MUST NOT gain
 # a second copy of keys.py -- row IRPT_BCKEND-W3-S28 (the layer's keys.py and the tree's differ,
 # two grammars are live, and it is not this order's to repair).
-LAYERED = {"irpt-performance-adapter", "irpt-narrative", "irpt-export-render"}
+LAYERED = {"irpt-performance-adapter", "irpt-narrative", "irpt-export-render",
+           # MEASURED FROM ITS OWN ROOT: terraform/investor-reporting/holdings/lambda.tf declares
+           # layers = [data.aws_lambda_layer_version.irpt_common.arn], so keys and ids come from
+           # /opt/python and this zip must NOT gain a second copy of either (row W3-S28).
+           "irpt-holdings"}
 
 ZIP_DATE = (2026, 9, 11, 0, 0, 0)
 
