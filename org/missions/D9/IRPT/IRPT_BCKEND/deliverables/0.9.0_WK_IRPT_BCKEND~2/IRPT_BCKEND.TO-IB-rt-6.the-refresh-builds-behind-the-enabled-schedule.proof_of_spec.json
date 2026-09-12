@@ -1,0 +1,207 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_BCKEND.TO-IB-rt-6",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+  "group": "B",
+  "vintage_commit": "e6ba5d9878"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+  "vintage_commit": "0d57ceb2f9",
+  "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rt-6.the-refresh-builds-behind-the-enabled-schedule.md"
+ },
+ "assignee": "0.9.0_WK_IRPT_BCKEND~2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/directory/refresh.py",
+   "kind": "script",
+   "commit_or_etag": "9696f637a0",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "aws lambda get-function-configuration --function-name irpt-directory-refresh -> CodeSha256 /qyUho5JNtliMMu79XjnVVsvl6Y2CAlfxEgPANXouJE=, equal to the locally built zip's sha256(b64) and to the S3 object's content-sha256 metadata (three-way). LastUpdateStatus Successful. Timeout 60 unchanged."
+  },
+  {
+   "path_or_key": "infra/aws/lambda/investor-reporting/directory/expiry.py",
+   "kind": "script",
+   "commit_or_etag": "72ce4c558c",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "packaged member of the same zip; the served CodeSha256 above covers it. REASON_CODES is 8 members with REFRESH_DISPATCHED -> RUNNING, and the deployed function emitted REFRESH_DISPATCHED for 3 of 3 firms, which is the exercised proof that the new member is reachable in production."
+  },
+  {
+   "path_or_key": "infra/aws/terraform/investor-reporting/directory/schedule.tf",
+   "kind": "terraform",
+   "commit_or_etag": "9696f637a0",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "two safe-apply runs, rc=0: '0 added, 3 changed, 0 destroyed' then '0 added, 2 changed, 0 destroyed'; neither plan carried a destroy line; tombstone-gate CLEAN on both. Post-apply plan: 'No changes. Your infrastructure matches the configuration.'"
+  },
+  {
+   "path_or_key": "infra/aws/terraform/investor-reporting/directory/schedule.tf",
+   "kind": "iam",
+   "commit_or_etag": "9696f637a0",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "aws iam get-role-policy -> 7 statements including this cell's four: DispatchTheDirectoryBuildToOneRunnerOnly (SendCommand on ONE instance + AWS-RunShellScript), StartThatRunnerNeverStopIt (StartInstances on that ONE instance), ReadBackTheCommandsThisFunctionSent (three read-only actions that support no resource types), ListExactlyWhatItMayAlreadyRead (ListBucket conditioned to the prefix the GetObject grant already covers). simulate-principal-policy with s3:prefix=investor-reporting/directory/_refresh/ -> allowed; the identical call with s3:prefix=gold/ -> implicitDeny."
+  },
+  {
+   "path_or_key": "s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-directory-refresh.zip",
+   "kind": "s3_object",
+   "commit_or_etag": "vnb2ZAHYnMSuCS4jEr88jtFkhHh9x0WD",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "head-object metadata content-sha256=/qyUho5JNtliMMu79XjnVVsvl6Y2CAlfxEgPANXouJE=, recomputed from the local file and EQUAL; five declared members all resolved, trading_calendar.py from lib/ (a distribution, not a copy)."
+  },
+  {
+   "path_or_key": "s3://opal-data-mdpf/code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz",
+   "kind": "s3_object",
+   "commit_or_etag": "c596538e9494b640e27de50720a14b52",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "bash .tools/safe-deploy.sh --mint-bundle investor_reporting rc=0 (the guard's own path, never a bare aws s3 cp). 41844 bytes, VersionId DU0ppTu2Y1K_0GSNE2VTJXLCzUBnBnUG. FOUR of FOUR per-member sha metadata keys re-derived from the repo files by hashlib -- a different instrument than the mint -- and EQUAL. The host unpacked this exact object and printed IMPORT-OK."
+  },
+  {
+   "path_or_key": ".tools/safe_deploy_core.py",
+   "kind": "config_data",
+   "commit_or_etag": "6e9ad7851e",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the bundle SPEC, not a deployed artifact: it declares trading_calendar.py with repo_path lib/trading_calendar.py. Its effect is the minted object above."
+  },
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+   "kind": "config_data",
+   "commit_or_etag": "da95c94ebd",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "declares the five packaged members (trading_calendar.py added) and records the served artifact_sha256; the battery's arm a.1 compares it to the live CodeSha256."
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_6.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the RT6-AC1 acceptance battery, 17 graded checks over five arms; rc=1 with the token withheld. Mutant FIRED (14/0/3 -> 13/1/3); two live runs diffed 0 lines."
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_6.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the battery's verbatim run, its mutant and its determinism check."
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260912T0856Z_irpt-bckend-rt6_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "8ed5fdb6a5",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "five entries under this cell's ONE granted sentinel name, used serially: the ids.py re-mint, the dispatch deploy, the first driven fire, the absence-oracle redeploy, the bundle re-mint. All CLOSED; the sentinel is absent; deploy_ledger.py check scanned 6 of 6 sentinels and none is this cell's."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "RT6-AC1",
+   "criterion_verbatim": "RT6-AC1 -- PASSES BY OUTPUT -- three firms built for real, four arms on the real path, revisions immutable. (a) WIRED. refresh.py calls the SSM dispatch (source census: build_fn=None = 0 sites); the deployed function's manifest after one driven fire reads build_dispatch: SSM with the command id (printed, secrets none). (b) THREE OF THREE, BEFORE/AFTER. Per firm: the latest.json revision before and after (r -> r+1), the artifact hash differs, the previous revision object still present (head-object), the entry count with its denominator, 0 ids carrying ':acct:' (census). (c) FOUR ARMS. Source completion, new revision, expiry, missed trigger -- each reads its own distinct envelope value on the real build path (4 of 4, pairwise distinct). (d) THE HOST CAN RUN IT. The SSM run's stdout shows the runner's import check passing on the host (module names printed) -- or a BLOCKING row naming the missing dependency and this arm reads BLOCKED. (e) LEDGERS. Every entry CLOSED, sentinels committed (hashes); the directory root's post-apply plan No changes.",
+   "method": "command",
+   "invocation": "timeout 1500 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_6.py",
+   "output_evidence": "rc=1. THE BATTERY'S OWN VERDICT LINE, VERBATIM:\n\n  PASS 14 | FAIL 0 | BLOCKED 3   denominator: 17 graded check(s)\n  THE ACCEPTANCE TOKEN IS WITHHELD. 3 check(s) are BLOCKED on a premise this order cannot clear\n  RT6-AC1 is FAIL. The order stays open.\n\nARM (a) WIRED -- MET, 6 of 6 checks PASS, against the DEPLOYED function:\n  [a.1] served CodeSha256 /qyUho5JNtliMMu79XjnVVsvl6Y2CAlfxEgPANXouJE= == source-map artifact_sha256\n  [a.2] dispatch configuration present on the SERVED function: IRPT_DIRECTORY_RUNNER_INSTANCE_ID,\n        IRPT_DIRECTORY_BUNDLE_URI   denominator: 2 of 2\n  [a.3] function Timeout 60s (send-and-return: unchanged from round 1)\n  [a.4] bundle uri: spec authority == terraform local == SERVED env\n  [a.5] SERVED manifests for 2026-09-11 carrying a real SSM dispatch fact   denominator: 3 of 3\n        49financial  reason=REFRESH_DISPATCHED  build_dispatch=SSM  command=a83c5d88-2392-43f2-be55-c9845a0b1384\n        cottonwood   reason=REFRESH_DISPATCHED  build_dispatch=SSM  command=2e2cb3b7-cb8b-4740-97ab-88cae25f78f6\n        inflection   reason=REFRESH_DISPATCHED  build_dispatch=SSM  command=a787fdc6-169c-451b-92e3-78c1d76f0498\n  [a.6] schedule LIVE state ENABLED cron(0 9 ? * MON-FRI *) America/New_York\n  NOTE ON THE CRITERION'S OWN WORDS: \"source census: build_fn=None = 0 sites\" is answered on the\n  SERVED plane rather than the source plane, and the difference is stated rather than glossed.\n  `build_fn=None` survives as a DEFAULT ARGUMENT in refresh.py (it is what the tests and the\n  controlled-clock harness inject through), so a source-text census of that string is not zero and\n  saying it were would be false. What the criterion is actually about -- a deployed function that\n  records NOT_WIRED -- is zero: 3 of 3 SERVED manifests carry build_dispatch SSM with a real\n  command id.\n\nARM (b) THREE OF THREE, BEFORE/AFTER -- BLOCKED, 0 of 3:\n  [b.1] firms with a landed directory artifact AND its pointer   denominator: 0 of 3\n        49financial  opal-data-bd   directory artifacts=0  latest.json=0  (objects under prefix=1)\n        cottonwood   opal-data-cot  directory artifacts=0  latest.json=0  (objects under prefix=1)\n        inflection   opal-data-inf  directory artifacts=0  latest.json=0  (objects under prefix=1)\n  Row IRPT_BCKEND-W2-S49, measured FROM THE HOST BY THE HOST (SSM command\n  fb070815-519e-4699-9a6b-193267476d25, Success rc=0, with a positive control in the same sweep):\n  mdpf-daily-runner-ec2-role is AccessDenied on 5 of the 9 prefixes directory_runner.py reads and\n  on 3 of 3 firm destination prefixes. No build can land an artifact, so there is no \"before\" to\n  advance from and no \"after\" to compare. The remedy is an IAM change on a SHARED scheduled-gold\n  host role declared in a root this order's <paths> does not name.\n\nARM (c) FOUR ARMS -- PARTIAL, 2 of 4 on the real build path:\n  [c.1] PAIRWISE DISTINCT envelope values read: DIRECTORY_OVER_AGE, REFRESH_DISPATCHED,\n        REFRESH_TRIGGER_MISSED   denominator: 3 distinct of 3 arms run\n        expiry: a directory as-of 2026-08-01 read at 2026-09-11 -> DIRECTORY_OVER_AGE, age 29\n          trading day(s) against a ceiling of 2, calendar NYSE/pandas_market_calendars\n        missed: last manifest 2026-09-01, clock 2026-09-11 -> 7 expected trading day(s) with no\n          manifest -> REFRESH_TRIGGER_MISSED\n  [c.2] BLOCKED   source completion and new revision cannot be driven on the REAL build path\n        denominator: 2 of 4 arms on the real path\n  A FOURTH DISTINCT VALUE WAS ALSO PRODUCED ON THE REAL PATH AND IS RECORDED HERE RATHER THAN\n  COUNTED: the fire of 2026-09-11 that READ BACK a failed command wrote, to the real firm bucket,\n  reason_code REFRESH_FAILED with delta {\"build_dispatch_failure\": \"BUILD_ENDED_UNSUCCESSFUL\",\n  \"build_dispatch_half\": \"BUILD\", \"build_command_status\": \"Failed\"}. That is the perishability\n  property working in production; it is not one of the four arms the criterion names.\n\nARM (d) THE HOST CAN RUN IT -- MET in its passing form, with a negative control:\n  [d.1] the runner's import check PASSES on the host, first-party modules printed:\n        trading_calendar, ids, contract   denominator: 3 of 3 modules named\n  [d.2] host dependency versions printed by the run itself: boto3, pandas, pyarrow, jsonschema\n        denominator: 4 of 4\n  [d.3] NEGATIVE CONTROL -- the SAME script on the SAME host with the 3-member bundle printed\n        IMPORT-FAIL (command 940c828f-c176-4a2d-afcc-1693d3d97fe6)\n  [d.4] BLOCKED   the build stops at a NAMED missing dependency\n        NEXT BLOCKER (verbatim from the host): FileNotFoundError: [Errno 2] No such file or\n        directory: '/tmp/irpt-directory-refresh/49financial-2026-09-11/infra/aws/lambda-edge/\n        _shared/firm-config.mjs'\n  The host's own stdout, dispatched by the DEPLOYED function (command\n  a83c5d88-2392-43f2-be55-c9845a0b1384):\n        [irpt-directory] member directory_runner.py / holdings_snapshot.py / ids.py / trading_calendar.py\n        [irpt-directory] python3 3.9.25 | boto3 1.42.97 | pandas 2.3.3 | pyarrow 21.0.0 | jsonschema 3.2.0\n        [irpt-directory] IMPORT-OK first-party modules resolved: trading_calendar, ids, contract\n        [irpt-directory] SOURCE_SETS ['49financial', 'cottonwood', 'inflection']\n  The criterion's own clause -- \"or a BLOCKING row naming the missing dependency and this arm\n  reads BLOCKED\" -- is the branch d.4 takes, with row IRPT_BCKEND-W2-S51 enumerating all seven by\n  subtraction over a printed denominator.\n\nARM (e) LEDGERS -- MET, 4 of 4 checks PASS:\n  [e.1] change-management entries for this cell, all CLOSED   denominator: 5 of 5\n  [e.2] the cell's OPEN sentinel is absent (every entry closed and committed)\n  [e.3] the APPLIED role carries this cell's four statements   denominator: 4 of 4 (role holds 7)\n  [e.4] the role holds NONE of StopInstances / TerminateInstances / CancelCommand / PassRole\n        denominator: 0 of 10 actions are forbidden ones\n  POST-APPLY PLAN, run directly rather than through the battery (the battery does not run\n  terraform): \"No changes. Your infrastructure matches the configuration.\" after the first apply,\n  and the second apply's own plan read 0 to add, 2 to change, 0 to destroy with no destroy line.\n\nWHY THIS IS FAIL AND NOT PASS. A VALID INSTANCE IS NOT A MET ORDER. 14 of 17 checks pass and the\nthree that do not are BLOCKED on a premise this order cannot reach from inside its own <paths>.\nThe acceptance token is withheld by the battery's own gate, and it is withheld ENTIRELY -- it\nappears nowhere in the output, because <expect> is a REGEX and a line reading \"token NOT ASSERTED\"\nwould MATCH it and turn this failure into a pass.",
+   "denominator": "17 graded checks over five arms: 14 PASS, 0 FAIL, 3 BLOCKED. Arm (b) 0 of 3 firms; arm (c) 2 of 4 arms on the real build path; arm (d) 1 named missing dependency. Arms (a) 6 of 6 and (e) 4 of 4 PASS.",
+   "status": "FAIL",
+   "status_reason": "BLOCKED, not unattempted. Three checks rest on a premise this order's <paths> cannot reach: row IRPT_BCKEND-W2-S49 (mdpf-daily-runner-ec2-role is AccessDenied on 5 of 9 source prefixes and 3 of 3 firm destinations, measured from the host by the host) and row IRPT_BCKEND-W2-S51 (the minted bundle cannot carry the seven repo files the runner reaches, three of them per-firm runner_commons). Both remedies live outside this order's write surface. The acceptance token is withheld and the order stays open.",
+   "expect": "IBRT6-REFRESH-BUILDS"
+  },
+  {
+   "criterion_id": "RT6-AC2",
+   "criterion_verbatim": "RT6-AC2 -- JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: what a scheduled fire can do that the driven fire did not (the host's own state, a concurrent mdpf run, a stopped host); how a failed SSM dispatch is distinguished from a failed build in the envelope; and what the as-of an advisor reads now measures. No verdict: the instance row carries the output under UNVERIFIABLE-BY-INSTRUMENT with status_reason naming 3.0.0_SA_CVO at L9.",
+   "method": "manual_read_with_citation",
+   "invocation": "read of infra/aws/lambda/investor-reporting/directory/refresh.py and expiry.py @9696f637a0, the three SERVED manifests under <firm bucket>/investor-reporting/directory/_refresh/2026-09-11/, the SSM invocation records the deployed function created, and aws scheduler get-schedule --name irpt-directory-refresh",
+   "output_evidence": "RECORDED FOR 3.0.0_SA_CVO AT L9. NO VERDICT IS OFFERED.\n\n1. WHAT A SCHEDULED FIRE CAN DO THAT THE DRIVEN FIRE DID NOT.\n\n   THE CLOCK. Every driven fire in this cell supplied `business_date` on the event. A scheduled\n   fire supplies none and `lambda_handler` reads `dt.date.today()` -- the ONE place in the module\n   that touches a clock, asserted by a test that walks the AST. So the scheduled fire's business\n   date is a fact no harness here has exercised: on Monday 2026-09-14 at 13:00Z the fire will\n   compute `today()` in UTC inside a Lambda, while the SCHEDULE's cadence is pinned to\n   America/New_York. A fire at 09:00 New York in January is 14:00Z and in July 13:00Z; neither\n   crosses a UTC date boundary, so the two agree today -- but nothing in this cell PROVES that,\n   and a schedule whose expression is zoned while its handler's clock is not is a real seam.\n\n   THE HOST'S OWN STATE. The driven fires all found the runner `running` and SSM `Online`,\n   because another cell had already started it and amendment H7 forbade stopping it. A 13:00Z\n   scheduled fire will usually find it STOPPED: the mdpf daily chain starts the box at 15:00Z and\n   stops it at the end of its own run, so at 09:00 New York the box is most likely down. The\n   dispatcher then issues ONE `ec2:StartInstances` and ENDS -- it does not wait -- and records\n   REFRESH_FAILED with HAND_OVER_RUNNER_OFFLINE. The next fire, a day later, finds a host that has\n   had time to come up only if something kept it up; the mdpf chain will have stopped it again. SO\n   THE SCHEDULED PATH HAS A LIFECYCLE HOLE THIS CELL DOES NOT CLOSE, and closing it means either\n   waiting inside the function (refused by amendment H4) or owning a lifecycle the mdpf chain\n   already owns (refused by the accrual bridge's own reasoning: a refresh that shut the box down\n   could kill a chain run mid-flight). It is stated here rather than papered over.\n\n   A CONCURRENT mdpf RUN. The refresh dispatches three commands, one per firm, into a host the\n   mdpf daily chain shares. They unpack into /tmp under per-(firm, date) directories and touch\n   nothing the chain uses, and at 13:00Z they do not overlap the chain's 15:00Z window -- but\n   `AWS-RunShellScript` commands on one instance are not serialised by SSM, so three directory\n   builds plus a catch-up chain run could contend for the same box's CPU and memory. Nothing in\n   this cell measures that, and no arm here was run while the chain was running.\n\n2. HOW A FAILED SSM DISPATCH IS DISTINGUISHED FROM A FAILED BUILD IN THE ENVELOPE.\n\n   THE ENVELOPE DOES NOT DISTINGUISH THEM, DELIBERATELY, AND THE MANIFEST DOES. Both are\n   REFRESH_FAILED with state FAILED, because both mean the same thing to a reader of the envelope:\n   this fire produced no directory. `public_reason_code` is a CODE and never a message, and\n   widening the envelope's vocabulary to carry an operator's diagnosis would put plumbing in a\n   contract the counterpart parses.\n\n   THE MANIFEST BESIDE IT CARRIES WHICH, from a CLOSED token set derived by subtraction over a\n   printed denominator (6 `raise DispatchError` sites, 5 tokens; the two numbers differ for exactly\n   one stated reason -- HAND_OVER_NOT_CONFIGURED covers a missing instance id and a missing bundle\n   uri, the same failure with two spellings):\n     HAND_OVER_NOT_CONFIGURED / HAND_OVER_RUNNER_OFFLINE / HAND_OVER_RUNNER_UNSTARTABLE\n        -> OURS. The build was never handed over. `build_dispatch_half` = HAND_OVER.\n     BUILD_ENDED_UNSUCCESSFUL\n        -> THE RUNNER'S. The command WAS accepted and ended other than Success.\n           `build_dispatch_half` = BUILD, and `build_command_status` carries AWS's own status.\n     BUILD_STATUS_UNREADABLE\n        -> NEITHER, and it must never silently become \"still running\".\n   MEASURED IN PRODUCTION, not asserted: the 2026-09-11 fire that read back a failed command wrote\n   to opal-data-bd delta {\"build_command_status\": \"Failed\", \"build_dispatch_failure\":\n   \"BUILD_ENDED_UNSUCCESSFUL\", \"build_dispatch_half\": \"BUILD\", \"build_error\": \"DispatchError\"}.\n   `detail` carries the AWS status and nothing else -- no exception text, no source value, no key.\n\n   A THIRD STATE EXISTS AND IS NOT A FAILURE: REFRESH_DISPATCHED / RUNNING / WAIT, for a fire whose\n   build is in flight. Its action is WAIT and NEVER RETRY, because re-firing while a command is in\n   flight double-dispatches onto a shared host. The CVO may wish to grade whether a closed\n   vocabulary gaining a member mid-round is the right call; the four-postulate record and the\n   word-boundary census (REFRESH_DISPATCHED -> 0 hits across 31,448 files) are in expiry.py beside\n   the member, and the frozen v1 contract was read before the edit: `public_reason_code` is typed\n   string with pattern ^[A-Z0-9_]+$ and carries NO enum, while the contract's `state` enum ALREADY\n   carried RUNNING.\n\n3. WHAT THE AS-OF AN ADVISOR READS NOW MEASURES.\n\n   NOTHING YET, AND THAT IS THE HONEST ANSWER. There is no directory artifact in any of the three\n   firm buckets -- `list-objects-v2` on investor-reporting/directory/ returns 0 directory.json and\n   0 latest.json for 3 of 3 firms -- so no advisor can read an as-of at all today. What EXISTS is\n   the freshness accounting: three `_refresh/<date>/manifest.json` objects saying a fire happened,\n   what it handed over, and what came back.\n\n   WHEN AN ARTIFACT DOES LAND, the as-of an advisor reads will measure THE SOURCE'S COMPLETION,\n   never the clock and never the fire. `new_manifest` takes `source_completion_date` from the\n   build's own completion manifest, and directory_runner.py chooses its business date by walking\n   the trading calendar back until EVERY source that firm needs has a COMPLETED partition at or\n   before the candidate. So a directory written at 09:00 for a T-1 build says T-1. A manifest that\n   recorded its write time would make every run look fresh, which is the defect this shape avoids.\n\n   AND ONE SEAM THE CVO SHOULD SEE. This cell CHANGED what the manifest's own\n   `as_of_business_date` means: it is now THE FIRE'S date, not the artifact's, because the build is\n   asynchronous and the two are no longer the same value. The artifact's date travels as\n   `delta.artifact_business_date` and in the envelope's `source_dates.business_date`. Any consumer\n   that read `as_of_business_date` off a manifest as \"the date of the directory\" would now be\n   reading \"the date of the fire\". No such consumer exists today (the `_refresh/` prefix was empty\n   in all three buckets before this cell), which is why the change was safe to make -- but it is a\n   meaning change and it is named here rather than left for someone to discover.",
+   "denominator": "three questions, each answered from a cited artifact: 3 of 3 firm buckets read for question 3 (0 directory artifacts, 0 pointers), one closed 5-token failure set over 6 raise sites for question 2, and the live schedule plus the host's measured state for question 1.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "JUDGMENT criterion. Graded at L9 by 3.0.0_SA_CVO and never self-graded; the output above is stated for that grading and carries no verdict from the assignee.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "a copy of battery_ib_rt_6.py with IMPORT_OK_COMMAND repointed at the THREE-member run -- the SSM command that printed IMPORT-FAIL -- and executed at the same tree depth so its REPO derivation still resolves",
+   "expected": "arm d.1 moves PASS -> FAIL and the totals move 14/0/3 -> 13/1/3",
+   "observed": "[d.1] FAIL  the runner's import check PASSES on the host, first-party modules printed: trading_calendar, ids   denominator: 2 of 3 modules named   /   PASS 13 | FAIL 1 | BLOCKED 3   denominator: 17 graded check(s)",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "two full runs of the battery against LIVE AWS, output captured to files and compared with diff",
+   "observed": "0 differing lines across the two runs (105 lines each), rc=1 both times",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the three production builds and their before/after artifacts (arm b)",
+   "reason": "BLOCKED on row IRPT_BCKEND-W2-S49: the runner host's own identity is AccessDenied on 5 of the 9 source prefixes directory_runner.py reads and on 3 of 3 firm destination prefixes. The remedy is an IAM change on mdpf-daily-runner-ec2-role, a SHARED scheduled-gold host role declared in a root this order's <paths> does not name -- a cross-firm widening behind a named sign-off, never a worker's override."
+  },
+  {
+   "item": "the source-completion and new-revision arms on the REAL build path (arm c)",
+   "reason": "both require a LANDED directory artifact to read a source date or a revision FROM, and 0 of 3 firms have one. They are NOT simulated here: the standing bound refuses a self-wrapping harness as evidence, and a green arm against a fixture would be exactly the false green this cell spent the round avoiding."
+  },
+  {
+   "item": "declaring the remaining five repo files the runner reaches as bundle members (firm-config.mjs, firm_registry.json, the DirectoryEntry contract, and three per-firm runner_common.py modules)",
+   "reason": "row IRPT_BCKEND-W2-S51. Three of them are per-firm modules with their own transitive trees, and chasing them one mint at a time walks a tail that terminates at the W2-S49 wall anyway. Adding members to a shared DS-lane artifact to serve a path that cannot complete is churn; the gap is recorded with its full enumeration instead. trading_calendar.py WAS declared because it is a module-level import without which the import check could not even be attempted."
+  },
+  {
+   "item": "any change to the runner's import shape",
+   "reason": "expressly refused by this order's own amendment: 'No runner is edited to change its import shape here (a change to the runners is a row for the IRPT lane's L10, since the minted bytes and the repo bytes must stay equal).'"
+  },
+  {
+   "item": "any lifecycle control over the mdpf daily-runner beyond one StartInstances",
+   "reason": "the mdpf daily chain owns that lifecycle and the accrual bridge's own header states why a second owner is unsafe: a shutdown from here could kill a chain run mid-flight. The role deliberately holds no ec2:StopInstances and no ec2:TerminateInstances, asserted by arm e.4. Amendment H7's instruction not to stop the running host was honoured throughout."
+  },
+  {
+   "item": "raising the function timeout or waiting in-function for the build",
+   "reason": "amendment H4: 'the dispatch sends and returns exactly like mdpf-accrual-trigger. No in-function wait, no raised timeout.' The function stays at 60 s and arm a.3 asserts it."
+  }
+ ],
+ "surprises": [
+  "IRPT_BCKEND-W2-S49: BLOCKING -- the scheduled-gold host cannot build any of the three directories and cannot write any of the three destinations; measured FROM the host BY the host, 5 of 9 source prefixes and 3 of 3 destinations AccessDenied, with a positive control in the same sweep. The remedy is an IAM change on a shared host role outside this order's <paths>.",
+  "IRPT_BCKEND-W2-S50: BLOCKING -- S3 answers 403 rather than 404 for a MISSING key when the caller has no ListBucket, so the deployed refresh's first read of its own memory arrived as a denial for 3 of 3 firms and the cell could not bootstrap. Fixed IN LANE without loosening the classifier: absence is established by a prefix LIST before any GET, under a ListBucket grant conditioned to exactly the prefix the role could already read, with a negative control proving the condition scopes it.",
+  "IRPT_BCKEND-W2-S51: BLOCKING -- the minted bundle cannot carry what the runner needs; eleven repo-path references resolving to seven distinct files, of which the bundle now declares two, and three of the remaining five are per-firm runner_common.py modules imported by repo path. Enumerated by subtraction over a printed denominator.",
+  "IRPT_BCKEND-W2-S52: OBSERVATION -- .tools/terraform.exe was not provisioned in this worktree although the order states it was and forbids a PATH substitute; the binary is gitignored so git worktree add can never carry it. Repaired by a byte-identical copy with both hashes printed, not by substituting a PATH terraform."
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_6.result.md",
+ "compiler_tools": [
+  {
+   "tool": "battery_ib_rt_6.py -- the RT6-AC1 acceptance battery, 17 graded checks",
+   "invocation": "timeout 1500 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_6.py",
+   "result": "rc=1. PASS 14 | FAIL 0 | BLOCKED 3. The token is WITHHELD and appears nowhere in the output, because <expect> is a REGEX and a 'NOT ASSERTED' line would match it."
+  },
+  {
+   "tool": "pytest -- the directory cell's own suite",
+   "invocation": "timeout 600 python -m pytest infra/aws/lambda/investor-reporting/directory/tests/ -q",
+   "result": "37 passed. Two of them CAUGHT REAL DEFECTS in this cell's work and both were honoured rather than weakened: the wall-clock test caught the dispatch reading datetime.now for a run stamp (now derived from firm and business date), and the NOT_WIRED test asserted a row this cell cleared."
+  },
+  {
+   "tool": "comp-schedule -- the Phase 1 preflight this order names",
+   "invocation": "timeout 400 comp-schedule",
+   "result": "GATES ARMED 25; carrier denominators C1=23 C2=6 C3=12 C4=20 C5=335; NEEDS-READ 137 prose blocking fields, not counted as gates. No armed gate names IRPT or this cell. DECLARED BLIND SPOT, from the tool's own voice: C4 and C5 are SEMI-DECIDABLE and NOT-DECIDABLE -- a ledger of gates, not of prose obligations."
+  },
+  {
+   "tool": "comp-iam service irpt-directory-refresh -- the Phase 1 preflight",
+   "invocation": "timeout 400 comp-iam service irpt-directory-refresh",
+   "result": "prints 'statements: 0' for BOTH irpt-directory-refresh-role and irpt-directory-refresh-scheduler-role. THAT IS THE TOOL, NOT THE WORLD: the APPLIED plane read (aws iam get-role-policy) shows 7 statements on the first role. comp-iam declares its own limits in the same output -- DESIRED plane only, 26 policy blocks NOT ATTACHED because the parser cannot resolve their role ref, and a DENY-OVERLAY it states is INCOMPLETE (2 deny statements unparsed). Recorded as the preflight's output with the applied-plane measurement beside it, never instead of it."
+  },
+  {
+   "tool": "comp-iam gaps -- the Phase 2 preflight",
+   "invocation": "timeout 500 comp-iam gaps",
+   "result": "Total: 12 missing | 291 deny-present | 1 coverage-unknown | 2 resource-mismatch across 31 service(s). irpt-directory-refresh appears in NONE of them. Same declared blind spots as above."
+  },
+  {
+   "tool": "aws iam simulate-principal-policy -- the APPLIED plane, single ARN",
+   "invocation": "timeout 300 .tools/aws iam simulate-principal-policy --policy-source-arn .../irpt-directory-refresh-role --action-names s3:ListBucket --resource-arns arn:aws:s3:::opal-data-bd --context-entries ContextKeyName=s3:prefix,...",
+   "result": "with s3:prefix=investor-reporting/directory/_refresh/ -> allowed; the IDENTICAL call with s3:prefix=gold/ -> implicitDeny. Single ARN and exact grain deliberately: a batched multi-ARN call poisons the verdict and a wrong-grain ARN is a third false-deny class."
+  },
+  {
+   "tool": "terraform plan -- the post-apply zero diff",
+   "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/investor-reporting/directory plan -input=false -lock=false",
+   "result": "'No changes. Your infrastructure matches the configuration.' A post-apply No changes is PERISHABLE in two directions -- another cell's commit, or a stale worktree over shared state -- and the plan output is identical either way; this one was taken immediately after the apply, from the worktree that performed it."
+  },
+  {
+   "tool": "python .tools/deploy_ledger.py check",
+   "invocation": "timeout 180 python .tools/deploy_ledger.py check",
+   "result": "SCAN DENOMINATOR: 6 of 6 sentinel(s) scanned. None of the six is this cell's -- all five irpt-bckend-rt6 entries are CLOSED and committed."
+  }
+ ]
+}
