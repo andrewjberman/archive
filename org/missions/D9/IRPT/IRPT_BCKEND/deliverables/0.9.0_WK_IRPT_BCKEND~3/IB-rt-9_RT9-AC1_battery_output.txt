@@ -1,9 +1,9 @@
 session STALE -- states: ['BAD_REQUEST', 'BAD_REQUEST']. No capture triggered (v0.9: the dedicated runner owns the login).
 ==============================================================================
-IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED
+IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (e), (f)
 ==============================================================================
 (a1) CENSUS -- every reader of ycharts/session/current in the repository
-      DENOMINATOR: 33186 file(s) scanned (git ls-files, tracked) | 65 name the secret | 10 are CODE | 6 of those RESOLVE it (a Secrets Manager read API) | 4 only MENTION it | 1 of the resolvers are this cell's OWN TEST HARNESS, listed below and excluded from the estate denominator
+      DENOMINATOR: 33246 file(s) scanned (git ls-files, tracked) | 67 name the secret | 10 are CODE | 6 of those RESOLVE it (a Secrets Manager read API) | 4 only MENTION it | 1 of the resolvers are this cell's OWN TEST HARNESS, listed below and excluded from the estate denominator
       MIGRATED     infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js
                    the v0.9 runner: leases, fences and persists the versioned bundle
       MIGRATED     infra/aws/lambda/investor-reporting/ycharts/generate/transport.py
@@ -28,7 +28,7 @@ IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED
   PASS    a1 the HARNESS exclusion removed 0 declared estate reader(s): 1 of 1 excluded file(s) are under deliverables/  --  an exclusion that can remove a real reader is a hole, not a class
 
 (a2) CENSUS -- legacy any-non-403 authentication predicates
-      DENOMINATOR: 6742 code file(s) scanned, 6189 of them comment/string-stripped | 0 line(s) match (a NEGATIVE 403 comparison AND an authentication word, in CODE)
+      DENOMINATOR: 6751 code file(s) scanned, 6197 of them comment/string-stripped | 0 line(s) match (a NEGATIVE 403 comparison AND an authentication word, in CODE)
   PASS    a2 legacy any-non-403 probes remaining: 0
   PASS    a2 POSITIVE CONTROL: the detector fires on the retired predicate verbatim  --  the line this cell removed from ycharts-session-probe
   PASS    a2 NEGATIVE CONTROL: the detector is silent on a correct 403-means-refused line  --  ycharts_session.js:272, which the first shape of this detector wrongly flagged
@@ -85,14 +85,14 @@ IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED
       DENOMINATOR: 3 race case(s) driven | 3 passing
       (b1) SIMULTANEOUS -- A holds the lease, B asks for it
            lease A ok=True fence=1 | lease B ok=False reason=CONDITIONAL_CHECK_FAILED (lease held by another runner and not expired)
-           published fence=1 by=runner-A digest=66bee565a4ae -> after the loser tried: fence=1 by=runner-A digest=66bee565a4ae
+           published fence=1 by=runner-A digest=34019964ddbd -> after the loser tried: fence=1 by=runner-A digest=34019964ddbd
   PASS    b1 1 wins, 1 refuses: the loser raises LeaseError (LEASE_NOT_HELD) and never reaches the secret  --  secret put calls across the whole case: 1
-  PASS    b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest 66bee565a4ae == 66bee565a4ae  --  compared over the published BYTES, not over a field
+  PASS    b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest 34019964ddbd == 34019964ddbd  --  compared over the published BYTES, not over a field
       (b2) THE SLOW RUNNER -- A's lease expired mid-capture and A still holds a fence-1 lease object
            A fence=1 -> B takes over fence=2 -> B publishes fence=2
            A's late write: FenceError/FENCED my_fence=1 stored_fence=2 -- another runner took the lease and advanced the fence while this one was mid-session
-  PASS    b2 the stale-fence write is REFUSED and the published version is unchanged: digest 8d6c817ee22c == 8d6c817ee22c  --  this is the shape NOTHING AT THE LEASE can see
-  PASS    b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (3) DOES publish (digest changes to 516bb577466d)  --  so the refusal is the FENCE, not a fake that refuses everything
+  PASS    b2 the stale-fence write is REFUSED and the published version is unchanged: digest 0dbe6f3739e8 == 0dbe6f3739e8  --  this is the shape NOTHING AT THE LEASE can see
+  PASS    b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (3) DOES publish (digest changes to 175e1b17cf7e)  --  so the refusal is the FENCE, not a fake that refuses everything
   PASS    b3 a persist with NO held lease never reaches the secret: 0 put call(s)  --  otherwise the lease is optional and a caller that forgot it looks like a winner
 
 (c) ROTATION -- a new version published, the next invocation uses it, the old refused
@@ -116,6 +116,26 @@ IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED
   PASS    d CONTROL: a 422 CONTRACT failure at the same step is NOT_AN_EVICTION with 0 refresh(es)  --  without this, 'the broker refreshed' cannot be told from 'the broker refreshes on any failure' -- the login storm the rule exists to stop
   PASS    d the read vocabulary is covered, not just its happy member: {"legacy_flat_cookie_bundle": "NOT_VERSIONED", "secret_with_no_awscurrent_version": "NOT_CONFIGURED", "unparseable_value": "UNPARSEABLE"}  --  legacy flat bundle, unset secret and unparseable value
 
+(e) ABSORBED, STOPPED, CONVERGED -- the research root's resources under the ycharts root
+      tracked files under infra/aws/terraform/investor-reporting/ycharts-research-20260911: worktree=0, HEAD=0, before the deleting commit cbc1e4e2fd=2
+  PASS    e the research root is GONE FROM THE TREE: 0 tracked file(s) at HEAD, down from 2 at cbc1e4e2fd~1  --  asked of git, not of the filesystem -- the gitignored .terraform/ provider cache still leaves the DIRECTORY on disk in this worktree and os.path.isdir cannot tell that apart from a root that is still declared; and the baseline is the DELETING commit's parent, found by git, never a relative ref that drifts as commits land
+      ycharts state list: 19 resource(s); the absorbed pair:
+        aws_secretsmanager_secret.research_session     PRESENT
+        aws_cloudwatch_log_group.research_probe        PRESENT
+  PASS    e the absorbed resources are under the ycharts root's state: 2 of 2, in a 19-resource state  --  state list printed, not asserted
+      NAIVE INSTRUMENT, RETIRED: `terraform state list` in the deleted root -> rc=1, 0 stdout line(s)
+        │ Error: Backend initialization required, please run "terraform init"
+  PASS    e the retired instrument's refusal is DISTINGUISHED from an empty state: rc=1 with 0 stdout lines  --  an emptiness check reading stdout alone would have PASSED on this -- a refusal and a clean zero are identical there, which is why the reading below is taken from the state OBJECT instead
+      research STATE OBJECT read directly from S3: serial=13, 0 resource(s) []
+  PASS    e the research state OBJECT holds 0 resource(s) -- the pair is under ONE root, not two  --  read from the tfstate object itself, so it needs neither the deleted backend declaration nor terraform; a resource left in BOTH states is the dangerous outcome of a half-done move and only this reading can see it
+      live control plane: secret='ycharts/session/research-20260911' log_group='/aws/lambda/irpt-ycharts-research-20260911'
+  PASS    e NOTHING WAS DESTROYED -- both objects still exist, read from the AWS control plane: secret PRESENT, log group PRESENT  --  the move was import-then-state-rm; state rm FORGETS and never deletes, and this is the instrument that can tell those apart
+      ycharts post-apply plan: No changes. Your infrastructure matches the configuration.
+  PASS    e the ycharts root's POST-APPLY plan reads No changes  --  run with the worktree's .tools/terraform.exe after init; the apply that preceded it reported 'Apply complete! Resources: 0 added, 2 changed, 0 destroyed'
+  PASS    e the runner host is STOPPED: i-0167fd745ad906a66 -> 'stopped'  --  read live from the control plane, never asserted from instance.tf -- bound 1 holds, no login and no capture rode on any of this
+      ledger: status CLOSED=True | leg proofs closed=6 | sentinel present=False | entry tracked=True
+  PASS    e the ledger is CLOSED with 6 leg(s) proven, its sentinel REMOVED, and the entry committed  --  a CLOSED entry whose sentinel is still present is a half-landed close; an absent sentinel with no entry is a ledger nobody opened -- so both are read
+
 (f) NOTHING LEFT THE MACHINE -- both guards, their denominators, and their controls
       node  infra/aws/ec2/investor-reporting-ycharts (arm b)
         guard=netguard.js installed=True | attempts_observed=1 (DENOMINATOR) loopback_allowed=0 external_refused=1
@@ -128,8 +148,7 @@ IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED
   PASS    f both guards are DEMONSTRABLY able to fire: 2 of 2 positive control(s) refused and counted  --  a guard reporting 0 external and a guard that was never installed read identically
 
 ------------------------------------------------------------------------------
-  NOT RUN  (e) ABSORBED   ledger + state mv + apply -- BLOCKED, row IRPT_BCKEND-W3-S26: the ycharts root's plan carries an unapplied handler flip to entry.lambda_handler and entry.py is in no zip, so the apply this arm REQUIRES takes irpt-ycharts-generate down
-------------------------------------------------------------------------------
-ARMS RUN: 5 of 6  (a, b, c, d, f -- e is BLOCKED, not unbuilt)
+ARMS RUN: 6 of 6  (a cutover, b fencing, c rotation, d eviction, e absorbed, f no egress)
 checks failed: 0
-FINAL: INCOMPLETE -- RT9-AC1 needs SIX arms in one run and this run has five. The acceptance token is absent from this output in EVERY form, including negated: the expect is graded as a REGEX and a negated line would MATCH and grade this run PASS. It goes in only in the edit that makes arm (e) run.
+------------------------------------------------------------------------------
+IBRT9-BROKER-FENCED

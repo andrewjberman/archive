@@ -50,6 +50,7 @@ RECORDED fixture through an injected seam.
 """
 from __future__ import annotations
 
+import io
 import json
 import os
 import re
@@ -741,9 +742,191 @@ def arm_f():
           "a guard reporting 0 external and a guard that was never installed read identically")
 
 
+RESEARCH_ROOT = "infra/aws/terraform/investor-reporting/ycharts-research-20260911"
+YCHARTS_ROOT = os.path.join(REPO, "infra", "aws", "terraform", "investor-reporting", "ycharts")
+TERRAFORM = os.path.join(REPO, ".tools", "terraform.exe")
+AWS = os.path.join(REPO, ".tools", "aws.cmd")
+LEDGER = os.path.join(REPO, "org", "critical_paths", "change_management",
+                      "20260912T0314Z_irpt-bckend-rt9_deploy_completion.md")
+SENTINEL = os.path.join(REPO, "org", "critical_paths", ".open_deploys",
+                        "irpt-bckend-rt9.json")
+ABSORBED = ("aws_secretsmanager_secret.research_session",
+            "aws_cloudwatch_log_group.research_probe")
+HOST = "i-0167fd745ad906a66"
+
+
+def sh(cmd, cwd=None, timeout=900):
+    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout,
+                          shell=False)
+
+
+def arm_e():
+    print()
+    print("(e) ABSORBED, STOPPED, CONVERGED -- the research root's resources under the "
+          "ycharts root")
+
+    # -- the research root is GONE FROM THE TREE. Asked of git, not of the filesystem: a
+    # gitignored .terraform/ cache can leave the DIRECTORY on disk while the ROOT is gone,
+    # and `os.path.isdir` cannot tell those apart.
+    tracked = sh(["git", "ls-files", RESEARCH_ROOT], cwd=REPO).stdout.strip()
+    n_tracked = len([ln for ln in tracked.splitlines() if ln.strip()])
+    at_head = sh(["git", "ls-tree", "-r", "--name-only", "HEAD", "--", RESEARCH_ROOT],
+                 cwd=REPO).stdout.strip()
+    n_head = len([ln for ln in at_head.splitlines() if ln.strip()])
+    # THE BASELINE IS SELF-LOCATED, NOT COUNTED BACK FROM HEAD. The first version of this
+    # check read `HEAD~2` -- true on the run that wrote it and FALSE two commits later, when
+    # HEAD~2 had become the deletion commit itself and the arm read "down from 0" and FAILED.
+    # A relative ref as a baseline is a moving target, and an arm whose pin drifts stops
+    # meaning what it said. So the DELETING COMMIT is found by asking git which commit deleted
+    # the path, and the baseline is that commit's PARENT -- a reference that cannot drift
+    # however many commits land after it.
+    deleting = sh(["git", "log", "--diff-filter=D", "-1", "--format=%H", "--",
+                   RESEARCH_ROOT], cwd=REPO).stdout.strip()
+    n_parent = 0
+    if deleting:
+        parent = sh(["git", "ls-tree", "-r", "--name-only", deleting + "~1", "--",
+                     RESEARCH_ROOT], cwd=REPO).stdout.strip()
+        n_parent = len([ln for ln in parent.splitlines() if ln.strip()])
+    print("      tracked files under %s: worktree=%d, HEAD=%d, before the deleting commit "
+          "%s=%d" % (RESEARCH_ROOT, n_tracked, n_head, (deleting or "<none>")[:10], n_parent))
+    check("e the research root is GONE FROM THE TREE: %d tracked file(s) at HEAD, down from %d "
+          "at %s~1" % (n_head, n_parent, (deleting or "<none>")[:10]),
+          n_head == 0 and n_tracked == 0 and n_parent == 2 and bool(deleting),
+          "asked of git, not of the filesystem -- the gitignored .terraform/ provider cache "
+          "still leaves the DIRECTORY on disk in this worktree and os.path.isdir cannot tell "
+          "that apart from a root that is still declared; and the baseline is the DELETING "
+          "commit's parent, found by git, never a relative ref that drifts as commits land")
+
+    # -- both resources are under the YCHARTS root's state.
+    listed = sh([TERRAFORM, "state", "list"], cwd=YCHARTS_ROOT)
+    addresses = [ln.strip() for ln in listed.stdout.splitlines() if ln.strip()]
+    present = [a for a in ABSORBED if a in addresses]
+    print("      ycharts state list: %d resource(s); the absorbed pair:" % len(addresses))
+    for a in ABSORBED:
+        print("        %-46s %s" % (a, "PRESENT" if a in addresses else "ABSENT"))
+    check("e the absorbed resources are under the ycharts root's state: %d of %d, in a "
+          "%d-resource state" % (len(present), len(ABSORBED), len(addresses)),
+          listed.returncode == 0 and len(present) == len(ABSORBED) and len(addresses) == 19,
+          "state list printed, not asserted")
+
+    # -- and they are under NO OTHER root: the research state key is empty. A resource in TWO
+    # states is the dangerous end state of a botched move, and a check that only looks at the
+    # destination cannot see it.
+    # THE NAIVE INSTRUMENT CANNOT BE USED HERE, AND IT FAILS IN THE WORST DIRECTION.
+    # `terraform state list` in the research directory now REFUSES -- deleting main.tf removed
+    # the backend declaration, so terraform reports "Backend initialization required ...
+    # Unsetting the previously set backend s3", writes NOTHING to stdout and exits 1. An
+    # emptiness check that read stdout alone would parse that refusal as ZERO RESOURCES and
+    # PASS on a command that never looked at the state. This is not a transient failure that
+    # an `init` would fix: the declaration that addressed the state is gone by design, so the
+    # refusal is permanent and the instrument is retired, not retried. Row IRPT_BCKEND-W3-S37.
+    research_dir = os.path.join(REPO, RESEARCH_ROOT)
+    naive = sh([TERRAFORM, "state", "list"], cwd=research_dir, timeout=300) \
+        if os.path.isdir(os.path.join(research_dir, ".terraform")) else None
+    if naive is not None:
+        first = next((ln.strip() for ln in (naive.stdout + naive.stderr).splitlines()
+                      if "Error:" in ln), "<no error line>")
+        print("      NAIVE INSTRUMENT, RETIRED: `terraform state list` in the deleted root -> "
+              "rc=%d, %d stdout line(s)" % (naive.returncode, len(naive.stdout.split())))
+        print("        %s" % re.sub(r"\x1b\[[0-9;]*m", "", first)[:110])
+        check("e the retired instrument's refusal is DISTINGUISHED from an empty state: rc=%d "
+              "with 0 stdout lines" % naive.returncode,
+              naive.returncode != 0 and not naive.stdout.strip(),
+              "an emptiness check reading stdout alone would have PASSED on this -- a refusal "
+              "and a clean zero are identical there, which is why the reading below is taken "
+              "from the state OBJECT instead")
+
+    # SO THE EMPTINESS IS READ FROM THE STATE OBJECT ITSELF -- an instrument that needs neither
+    # the deleted declaration nor terraform, and that answers the actual question: does any
+    # OTHER state still own these two resources?
+    obj = os.path.join(REPO, ".scratch", "research_tfstate_read.json")
+    # The rc is not read here on purpose: the ORACLE is whether the object parses and what it
+    # holds, and `sh` already captures the call. An absent or unreadable object leaves
+    # `remaining` None, which FAILS the check below -- so a missing read cannot pass as empty.
+    sh([AWS, "s3api", "get-object", "--bucket",
+        "opal-313476888478-terraform-state", "--key",
+        "investor-reporting/ycharts-research-20260911/tfstate",
+        "--region", "us-east-1", obj,
+        "--query", "ContentLength", "--output", "text"], timeout=300)
+    remaining = None
+    if os.path.exists(obj):
+        with io.open(obj, "r", encoding="utf-8") as fh:
+            doc = json.load(fh)
+        remaining = [r.get("type", "") + "." + r.get("name", "")
+                     for r in (doc.get("resources") or [])]
+        print("      research STATE OBJECT read directly from S3: serial=%s, %d resource(s) %s"
+              % (doc.get("serial"), len(remaining), remaining))
+    check("e the research state OBJECT holds %s resource(s) -- the pair is under ONE root, "
+          "not two" % (len(remaining) if remaining is not None else "UNREADABLE"),
+          remaining == [],
+          "read from the tfstate object itself, so it needs neither the deleted backend "
+          "declaration nor terraform; a resource left in BOTH states is the dangerous outcome "
+          "of a half-done move and only this reading can see it")
+
+    # -- the objects THEMSELVES survived. A DIFFERENT INSTRUMENT than the one that moved them:
+    # `state rm` reporting "Removed" is terraform describing itself, and it cannot distinguish
+    # a forgotten resource from a deleted one.
+    secret = sh([AWS, "secretsmanager", "describe-secret", "--secret-id",
+                 "ycharts/session/research-20260911", "--region", "us-east-1",
+                 "--query", "Name", "--output", "text"], timeout=300)
+    group = sh([AWS, "logs", "describe-log-groups", "--log-group-name-prefix",
+                "/aws/lambda/irpt-ycharts-research-20260911", "--region", "us-east-1",
+                "--query", "logGroups[].logGroupName", "--output", "text"], timeout=300)
+    s_ok = "ycharts/session/research-20260911" in secret.stdout
+    g_ok = "irpt-ycharts-research-20260911" in group.stdout
+    print("      live control plane: secret=%r log_group=%r"
+          % (secret.stdout.strip()[:60], group.stdout.strip()[:60]))
+    check("e NOTHING WAS DESTROYED -- both objects still exist, read from the AWS control "
+          "plane: secret %s, log group %s"
+          % ("PRESENT" if s_ok else "MISSING", "PRESENT" if g_ok else "MISSING"),
+          s_ok and g_ok,
+          "the move was import-then-state-rm; state rm FORGETS and never deletes, and this is "
+          "the instrument that can tell those apart")
+
+    # -- the ycharts root CONVERGED.
+    plan = sh([TERRAFORM, "plan", "-input=false", "-no-color"], cwd=YCHARTS_ROOT)
+    converged = "No changes. Your infrastructure matches the configuration." in plan.stdout
+    line = next((ln.strip() for ln in plan.stdout.splitlines()
+                 if "No changes" in ln or ln.strip().startswith("Plan:")), "<no verdict line>")
+    print("      ycharts post-apply plan: %s" % line)
+    check("e the ycharts root's POST-APPLY plan reads No changes", converged,
+          "run with the worktree's .tools/terraform.exe after init; the apply that preceded it "
+          "reported 'Apply complete! Resources: 0 added, 2 changed, 0 destroyed'")
+
+    # -- the host is STOPPED, live.
+    host = sh([AWS, "ec2", "describe-instances", "--instance-ids", HOST, "--region",
+               "us-east-1", "--query", "Reservations[].Instances[].State.Name",
+               "--output", "text"], timeout=300)
+    state = host.stdout.strip()
+    check("e the runner host is STOPPED: %s -> %r" % (HOST, state),
+          state == "stopped",
+          "read live from the control plane, never asserted from instance.tf -- bound 1 holds, "
+          "no login and no capture rode on any of this")
+
+    # -- the ledger is CLOSED and its sentinel is gone. Both, because either alone is
+    # ambiguous: a CLOSED entry with a sentinel still present is a half-landed close, and an
+    # absent sentinel with no entry is a ledger that was never opened.
+    with io.open(LEDGER, "r", encoding="utf-8") as fh:
+        entry = fh.read()
+    closed = "**Status:** CLOSED" in entry
+    legs_closed = entry.count("CLOSED 2026")
+    sentinel_gone = not os.path.exists(SENTINEL)
+    committed = sh(["git", "ls-files", "--error-unmatch",
+                    "org/critical_paths/change_management/"
+                    "20260912T0314Z_irpt-bckend-rt9_deploy_completion.md"], cwd=REPO)
+    print("      ledger: status CLOSED=%s | leg proofs closed=%d | sentinel present=%s | "
+          "entry tracked=%s" % (closed, legs_closed, not sentinel_gone,
+                                committed.returncode == 0))
+    check("e the ledger is CLOSED with %d leg(s) proven, its sentinel REMOVED, and the entry "
+          "committed" % legs_closed,
+          closed and legs_closed >= 6 and sentinel_gone and committed.returncode == 0,
+          "a CLOSED entry whose sentinel is still present is a half-landed close; an absent "
+          "sentinel with no entry is a ledger nobody opened -- so both are read")
+
+
 def main():
     print("=" * 78)
-    print("IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED")
+    print("IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (e), (f)")
     print("=" * 78)
     code_hits = arm_a1()
     arm_a2(code_hits)
@@ -752,25 +935,23 @@ def main():
     arm_b()
     arm_c()
     arm_d()
+    arm_e()
     arm_f()
     print()
     print("-" * 78)
-    for arm, why in (
-            ("(e) ABSORBED", "ledger + state mv + apply -- BLOCKED, row IRPT_BCKEND-W3-S26: "
-                             "the ycharts root's plan carries an unapplied handler flip to "
-                             "entry.lambda_handler and entry.py is in no zip, so the apply "
-                             "this arm REQUIRES takes irpt-ycharts-generate down"),):
-        print("  NOT RUN  %-14s %s" % (arm, why))
-    print("-" * 78)
-    print("ARMS RUN: 5 of 6  (a, b, c, d, f -- e is BLOCKED, not unbuilt)")
+    print("ARMS RUN: 6 of 6  (a cutover, b fencing, c rotation, d eviction, e absorbed, "
+          "f no egress)")
     print("checks failed: %d" % len(FAILURES))
     for f in FAILURES:
         print("  FAILED: %s" % f)
-    print("FINAL: INCOMPLETE -- RT9-AC1 needs SIX arms in one run and this run has five. "
-          "The acceptance token is absent from this output in EVERY form, including "
-          "negated: the expect is graded as a REGEX and a negated line would MATCH and "
-          "grade this run PASS. It goes in only in the edit that makes arm (e) run.")
-    return 1 if FAILURES else 0
+    print("-" * 78)
+    if FAILURES:
+        print("FINAL: INCOMPLETE -- the acceptance token is deliberately absent from this "
+              "output in EVERY form, including negated: the expect is graded as a REGEX and a "
+              "negated line would MATCH and grade a failing run PASS.")
+        return 1
+    print("IBRT9-BROKER-FENCED")
+    return 0
 
 
 if __name__ == "__main__":
