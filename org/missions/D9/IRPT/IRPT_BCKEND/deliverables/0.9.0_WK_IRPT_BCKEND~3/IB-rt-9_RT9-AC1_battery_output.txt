@@ -3,7 +3,7 @@ session STALE -- states: ['BAD_REQUEST', 'BAD_REQUEST']. No capture triggered (v
 IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (e), (f)
 ==============================================================================
 (a1) CENSUS -- every reader of ycharts/session/current in the repository
-      DENOMINATOR: 33245 file(s) scanned (git ls-files, tracked) | 66 name the secret | 10 are CODE | 6 of those RESOLVE it (a Secrets Manager read API) | 4 only MENTION it | 1 of the resolvers are this cell's OWN TEST HARNESS, listed below and excluded from the estate denominator
+      DENOMINATOR: 33246 file(s) scanned (git ls-files, tracked) | 67 name the secret | 10 are CODE | 6 of those RESOLVE it (a Secrets Manager read API) | 4 only MENTION it | 1 of the resolvers are this cell's OWN TEST HARNESS, listed below and excluded from the estate denominator
       MIGRATED     infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js
                    the v0.9 runner: leases, fences and persists the versioned bundle
       MIGRATED     infra/aws/lambda/investor-reporting/ycharts/generate/transport.py
@@ -85,14 +85,14 @@ IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (e), (f)
       DENOMINATOR: 3 race case(s) driven | 3 passing
       (b1) SIMULTANEOUS -- A holds the lease, B asks for it
            lease A ok=True fence=1 | lease B ok=False reason=CONDITIONAL_CHECK_FAILED (lease held by another runner and not expired)
-           published fence=1 by=runner-A digest=e81abef9cdac -> after the loser tried: fence=1 by=runner-A digest=e81abef9cdac
+           published fence=1 by=runner-A digest=34019964ddbd -> after the loser tried: fence=1 by=runner-A digest=34019964ddbd
   PASS    b1 1 wins, 1 refuses: the loser raises LeaseError (LEASE_NOT_HELD) and never reaches the secret  --  secret put calls across the whole case: 1
-  PASS    b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest e81abef9cdac == e81abef9cdac  --  compared over the published BYTES, not over a field
+  PASS    b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest 34019964ddbd == 34019964ddbd  --  compared over the published BYTES, not over a field
       (b2) THE SLOW RUNNER -- A's lease expired mid-capture and A still holds a fence-1 lease object
            A fence=1 -> B takes over fence=2 -> B publishes fence=2
            A's late write: FenceError/FENCED my_fence=1 stored_fence=2 -- another runner took the lease and advanced the fence while this one was mid-session
-  PASS    b2 the stale-fence write is REFUSED and the published version is unchanged: digest a9e2704eb548 == a9e2704eb548  --  this is the shape NOTHING AT THE LEASE can see
-  PASS    b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (3) DOES publish (digest changes to 753ce7ff55a8)  --  so the refusal is the FENCE, not a fake that refuses everything
+  PASS    b2 the stale-fence write is REFUSED and the published version is unchanged: digest 0dbe6f3739e8 == 0dbe6f3739e8  --  this is the shape NOTHING AT THE LEASE can see
+  PASS    b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (3) DOES publish (digest changes to 175e1b17cf7e)  --  so the refusal is the FENCE, not a fake that refuses everything
   PASS    b3 a persist with NO held lease never reaches the secret: 0 put call(s)  --  otherwise the lease is optional and a caller that forgot it looks like a winner
 
 (c) ROTATION -- a new version published, the next invocation uses it, the old refused
@@ -117,8 +117,8 @@ IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (e), (f)
   PASS    d the read vocabulary is covered, not just its happy member: {"legacy_flat_cookie_bundle": "NOT_VERSIONED", "secret_with_no_awscurrent_version": "NOT_CONFIGURED", "unparseable_value": "UNPARSEABLE"}  --  legacy flat bundle, unset secret and unparseable value
 
 (e) ABSORBED, STOPPED, CONVERGED -- the research root's resources under the ycharts root
-      tracked files under infra/aws/terraform/investor-reporting/ycharts-research-20260911: worktree=0, HEAD=0, HEAD~2=2
-  PASS    e the research root is GONE FROM THE TREE: 0 tracked file(s) at HEAD, down from 2  --  asked of git, not of the filesystem -- the gitignored .terraform/ provider cache still leaves the DIRECTORY on disk in this worktree and os.path.isdir cannot tell that apart from a root that is still declared
+      tracked files under infra/aws/terraform/investor-reporting/ycharts-research-20260911: worktree=0, HEAD=0, before the deleting commit cbc1e4e2fd=2
+  PASS    e the research root is GONE FROM THE TREE: 0 tracked file(s) at HEAD, down from 2 at cbc1e4e2fd~1  --  asked of git, not of the filesystem -- the gitignored .terraform/ provider cache still leaves the DIRECTORY on disk in this worktree and os.path.isdir cannot tell that apart from a root that is still declared; and the baseline is the DELETING commit's parent, found by git, never a relative ref that drifts as commits land
       ycharts state list: 19 resource(s); the absorbed pair:
         aws_secretsmanager_secret.research_session     PRESENT
         aws_cloudwatch_log_group.research_probe        PRESENT

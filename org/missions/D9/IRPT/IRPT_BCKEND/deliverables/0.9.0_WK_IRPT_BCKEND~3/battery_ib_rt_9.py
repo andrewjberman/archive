@@ -773,17 +773,29 @@ def arm_e():
     at_head = sh(["git", "ls-tree", "-r", "--name-only", "HEAD", "--", RESEARCH_ROOT],
                  cwd=REPO).stdout.strip()
     n_head = len([ln for ln in at_head.splitlines() if ln.strip()])
-    parent = sh(["git", "ls-tree", "-r", "--name-only", "HEAD~2", "--", RESEARCH_ROOT],
-                cwd=REPO).stdout.strip()
-    n_parent = len([ln for ln in parent.splitlines() if ln.strip()])
-    print("      tracked files under %s: worktree=%d, HEAD=%d, HEAD~2=%d"
-          % (RESEARCH_ROOT, n_tracked, n_head, n_parent))
-    check("e the research root is GONE FROM THE TREE: %d tracked file(s) at HEAD, down from %d"
-          % (n_head, n_parent),
-          n_head == 0 and n_tracked == 0 and n_parent == 2,
+    # THE BASELINE IS SELF-LOCATED, NOT COUNTED BACK FROM HEAD. The first version of this
+    # check read `HEAD~2` -- true on the run that wrote it and FALSE two commits later, when
+    # HEAD~2 had become the deletion commit itself and the arm read "down from 0" and FAILED.
+    # A relative ref as a baseline is a moving target, and an arm whose pin drifts stops
+    # meaning what it said. So the DELETING COMMIT is found by asking git which commit deleted
+    # the path, and the baseline is that commit's PARENT -- a reference that cannot drift
+    # however many commits land after it.
+    deleting = sh(["git", "log", "--diff-filter=D", "-1", "--format=%H", "--",
+                   RESEARCH_ROOT], cwd=REPO).stdout.strip()
+    n_parent = 0
+    if deleting:
+        parent = sh(["git", "ls-tree", "-r", "--name-only", deleting + "~1", "--",
+                     RESEARCH_ROOT], cwd=REPO).stdout.strip()
+        n_parent = len([ln for ln in parent.splitlines() if ln.strip()])
+    print("      tracked files under %s: worktree=%d, HEAD=%d, before the deleting commit "
+          "%s=%d" % (RESEARCH_ROOT, n_tracked, n_head, (deleting or "<none>")[:10], n_parent))
+    check("e the research root is GONE FROM THE TREE: %d tracked file(s) at HEAD, down from %d "
+          "at %s~1" % (n_head, n_parent, (deleting or "<none>")[:10]),
+          n_head == 0 and n_tracked == 0 and n_parent == 2 and bool(deleting),
           "asked of git, not of the filesystem -- the gitignored .terraform/ provider cache "
           "still leaves the DIRECTORY on disk in this worktree and os.path.isdir cannot tell "
-          "that apart from a root that is still declared")
+          "that apart from a root that is still declared; and the baseline is the DELETING "
+          "commit's parent, found by git, never a relative ref that drifts as commits land")
 
     # -- both resources are under the YCHARTS root's state.
     listed = sh([TERRAFORM, "state", "list"], cwd=YCHARTS_ROOT)
