@@ -50,6 +50,7 @@ def immutability_probe(label):
     corrections.apply_corrections(
         store, REQUEST_ID,
         [{'finding_code': 'SHARE_CLASS_SUBSTITUTION_PROPOSED', 'approved_by': 'analyst:a',
+          'approved_at': '2026-09-12T00:00Z',
           'from_value': 'VTSAX', 'to_value': 'VTI'}], binding, directory)
     after = corrections.revision_hash(store.get(REQUEST_ID, 0))
     overwrite_refused = True
