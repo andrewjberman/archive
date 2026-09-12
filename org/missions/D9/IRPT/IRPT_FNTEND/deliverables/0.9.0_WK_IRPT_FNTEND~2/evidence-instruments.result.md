@@ -4,9 +4,15 @@
 `wk-irpt_fntend-3-6-fe-s-22` (workspace) and `wk-irpt_fntend-3-6-fe-s-22` (portal)
 | portal commit `25062fce` LOCAL | cut from CLOUD `e4298a984e` / DEV `baf230eb`.
 
-**Eight of nine mechanical criteria PASS by output. `F22-AC8` is REFUSED with its
-measurement** (row `IRPT_FNTEND-W2-S17`); `F22-AC9` is RECORDED for the CVO at L9.
-The order stays OPEN.
+**All eight mechanical criteria PASS by output**; `F22-AC9` is RECORDED for the
+CVO at L9. The order is `complete`.
+
+> **AMENDED MID-ORDER.** `F22-AC8` was first measured against the bar as cut,
+> `0 fail`, and REFUSED -- row `IRPT_FNTEND-W2-S17`. The issuer then corrected
+> that bar to `1 fail` with a name check (CLOUD `0e25c1d422`, issuer row `S45`),
+> the amended face was read AT THAT COMMIT with a positive control, and the
+> criterion was re-measured and now PASSES. Section 4 carries both readings. The
+> measurement never changed; the bar did.
 
 ---
 
@@ -173,25 +179,63 @@ spurious lines.
 
 ---
 
-## 4. WHAT IS REFUSED
+## 4. `F22-AC8` -- REFUSED AT THE BAR AS CUT, PASSING AT THE CORRECTED ONE
 
-**`F22-AC8` -- `bun test src/pages/InvestorReporting`, expected `0 fail`.**
+Both readings are kept, because the second one is only trustworthy beside the
+first: **the measured world is identical in both, and only the bar moved.**
 
-Measured: `446 pass / 1 skip / 1 fail`, `2021 expect() calls`,
-`Ran 448 tests across 75 files`, rc=1. The single failure is
+**As cut (`0 fail`) -- REFUSED.** Measured: `446 pass / 1 skip / 1 fail`,
+`2021 expect() calls`, `Ran 448 tests across 75 files`, rc=1. BLOCKING row
+`IRPT_FNTEND-W2-S17`, which stands unchanged -- the channel is append-only and a
+landed row is never edited.
+
+**Corrected (`1 fail`, with a name check) -- PASSES.** `2.0.0_SA_COO~F` corrected
+the bar on CLOUD at `0e25c1d422` after this worktree was cut, carrying its own
+row `S45`: the `0 fail` was a prediction that `F18-AC3`'s collision would clear
+once the seam landed, and it cannot (row `S44` -- the three Holdings smoke maps
+carry no `status` members and no round-3 cell holds the fixtures). Re-measured
+against the corrected bar, with the dev server restarted on 5182 so the run is
+comparable:
 
 ```
-F18-AC3 -- the captures are the files the manifest claims
-  > UNIQUE HASHES -- no two entries share a hash (FAILS at this commit; see the file header)
+FAIL-MARKED LINES (denominator of failures): 1
+  FAILING TEST NAME: F18-AC3 -- the captures are the files the manifest claims
+                     > UNIQUE HASHES -- no two entries share a hash
+446 pass / 1 skip / 1 fail / 2021 expect() calls
+Ran 448 tests across 75 files.
 ```
 
-in `src/pages/InvestorReporting/__tests__/fe-s-18/manifest.test.ts`. That folder
-is outside this order's grant in as many words (`__tests__/fe-s-18/ IS NOT IN
-YOUR GRANT AND MUST NOT BE TOUCHED`), and the defect is not source-movable
-anyway: `S44` measured that `F18-AC3`'s population is eleven **committed PNG
-files** with committed digests, so it needs captures re-taken against fixtures
-that do not yet exist. This cell's own 13 tests read 0 fail. BLOCKING row
-`IRPT_FNTEND-W2-S17`. Refused with its measurement rather than passed with a note.
+Identical totals to the pre-amendment run, as expected -- the amendment touches
+no source, no fixture and no test file. **The name check is answered with its own
+denominator:** exactly one fail-marked line, and it IS `F18-AC3`'s. No second
+failure and no different one, so the corrected bar's BLOCKING condition did not
+trigger. The failing test is still `__tests__/fe-s-18/manifest.test.ts`, still
+outside this order's grant, and this cell's own 13 tests still read 0 fail.
+
+**How the amendment was taken** (procedure row `IRPT_FNTEND-S43`, invented by the
+worker on slot ~1 under exactly this condition): `git merge-base --is-ancestor
+0e25c1d422 HEAD` = FALSE and `git cat-file -t 0e25c1d422` = `commit` -- reachable
+in the shared object store, **absent from this branch**, so this tree's own copy
+still held the retracted bar and grading from it would have been wrong. The face
+was read with `git show 0e25c1d422:<order>` (12125 bytes, rc=0) **beside a
+positive control**, because a mangled `git show` returns clean-empty on this box:
+the same command on a non-existent path at the same ref returned `fatal: path ...
+does not exist in '0e25c1d422'` at rc=128, not empty. The diff was bounded before
+anything was written -- 115 lines each side, **exactly two differing** (61 and
+62), both inside the `F22-AC8` block, `<status>` `pending` on both sides -- and
+only those two lines were written, CRLF preserved (114/114 measured after the
+write), the result verified byte-identical to the blob modulo EOL.
+`git diff --numstat` read `2	2`. No merge, rebase, `checkout --` or `clean` was
+run in either repo. Row `IRPT_FNTEND-W2-S19` carries the re-measurement; it
+carries **no** `adjudicates` field, because dispositioning `W2-S17` is the CVO's
+act at L9 and not this worker's.
+
+**`F22-AC1` was not re-run, and that is a decision with a reason rather than an
+omission:** the only file this pass changed is the task order's own markdown,
+which lives in the workspace repo and is not in the portal's TypeScript program
+(`tsconfig.app.json` includes `src`). No source file, fixture or test file moved,
+so the recorded `tsc -b --noEmit` rc=0 stands over the same program. The other
+six criteria were not re-run on the same ground.
 
 ## 5. WHAT THIS CELL DID NOT TOUCH
 
