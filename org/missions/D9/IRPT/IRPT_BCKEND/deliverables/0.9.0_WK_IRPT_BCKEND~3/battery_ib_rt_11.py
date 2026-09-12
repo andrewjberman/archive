@@ -424,9 +424,12 @@ def arm_d():
     tests = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s",
                             os.path.join(INTAKE, "tests"), "-p", "test_*.py"],
                            capture_output=True, text=True, cwd=REPO, timeout=240)
+    # THE COUNT, NOT THE DURATION. unittest prints "Ran 15 tests in 0.022s", and the wall clock
+    # makes this battery's own saved output non-reproducible for a reason that is not a result.
+    # The count is the measurement; the seconds are the machine.
     ran = [ln for ln in tests.stderr.splitlines() if ln.startswith("Ran ")]
-    check("d the intake package's own unit tests pass: %s"
-          % (ran[0] if ran else "<no count>"),
+    count = ran[0].split(" in ")[0] if ran else "<no count>"
+    check("d the intake package's own unit tests pass: %s" % count,
           tests.returncode == 0,
           "the third instrument on the same claim")
 

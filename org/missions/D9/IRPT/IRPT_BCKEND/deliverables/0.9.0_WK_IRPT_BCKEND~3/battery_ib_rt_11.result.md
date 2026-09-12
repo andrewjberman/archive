@@ -5,6 +5,22 @@ timeout 300 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_B
 rc 0 | checks failed: 0 | ARMS: 5 of 5 | IBRT11-INTAKE-CONTROLLED
 ```
 
+**Two full runs of this battery diff BYTE-IDENTICAL.** They did not at first: `unittest` prints
+`Ran 15 tests in 0.022s` and the wall clock made the saved artifact irreproducible for a reason
+that is not a result, so arm (d) reports the test COUNT and not the duration.
+
+> **THE FIRST COMPLETE FLIP WAS WRONG AND WAS REVERTED, AND THAT IS ON THE RECORD.** `3c28723d20`
+> pinned `parse.py` at `dc5d119b84` -- a version that does NOT carry the `load_intake_controls`
+> refusal that arm (e)'s negative arm proves. The edit was made after that commit and never
+> committed, so the arm passed against the WORKTREE while the instance named bytes that could not
+> produce it. Found by reading `git status` after the flip, not by trusting it: the checker had
+> returned rc=0 and the criterion read PASS-by-output, and both were reading a file the record did
+> not carry. Re-opened at `3db8d67f17`, the refusal committed at `51db4a7d66`, and the row is now
+> CONTENT-resolved -- the token is present at the pin and ABSENT at its parent. A mechanical note
+> worth keeping: the lane gate REFUSED the `parse.py` commit the moment the order went terminal
+> (`no NON-TERMINAL task order ... names this path`), so a worker who flips early cannot quietly
+> patch afterwards.
+
 Full output: `IB-rt-11_RT11-AC1_battery_output.txt`. Mutant control:
 `IB-rt-11_mutant_control.py` / `IB-rt-11_mutant_control_output.json` -- **FIRED-AS-EXPECTED**,
 determinism **STABLE**.
