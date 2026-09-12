@@ -3,7 +3,7 @@ session STALE -- states: ['BAD_REQUEST', 'BAD_REQUEST']. No capture triggered (v
 IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED
 ==============================================================================
 (a1) CENSUS -- every reader of ycharts/session/current in the repository
-      DENOMINATOR: 33184 file(s) scanned (git ls-files, tracked) | 63 name the secret | 10 are CODE | 6 of those RESOLVE it (a Secrets Manager read API) | 4 only MENTION it | 1 of the resolvers are this cell's OWN TEST HARNESS, listed below and excluded from the estate denominator
+      DENOMINATOR: 33186 file(s) scanned (git ls-files, tracked) | 65 name the secret | 10 are CODE | 6 of those RESOLVE it (a Secrets Manager read API) | 4 only MENTION it | 1 of the resolvers are this cell's OWN TEST HARNESS, listed below and excluded from the estate denominator
       MIGRATED     infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js
                    the v0.9 runner: leases, fences and persists the versioned bundle
       MIGRATED     infra/aws/lambda/investor-reporting/ycharts/generate/transport.py
@@ -85,14 +85,14 @@ IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED
       DENOMINATOR: 3 race case(s) driven | 3 passing
       (b1) SIMULTANEOUS -- A holds the lease, B asks for it
            lease A ok=True fence=1 | lease B ok=False reason=CONDITIONAL_CHECK_FAILED (lease held by another runner and not expired)
-           published fence=1 by=runner-A digest=ef74e0637f5b -> after the loser tried: fence=1 by=runner-A digest=ef74e0637f5b
+           published fence=1 by=runner-A digest=66bee565a4ae -> after the loser tried: fence=1 by=runner-A digest=66bee565a4ae
   PASS    b1 1 wins, 1 refuses: the loser raises LeaseError (LEASE_NOT_HELD) and never reaches the secret  --  secret put calls across the whole case: 1
-  PASS    b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest ef74e0637f5b == ef74e0637f5b  --  compared over the published BYTES, not over a field
+  PASS    b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest 66bee565a4ae == 66bee565a4ae  --  compared over the published BYTES, not over a field
       (b2) THE SLOW RUNNER -- A's lease expired mid-capture and A still holds a fence-1 lease object
            A fence=1 -> B takes over fence=2 -> B publishes fence=2
            A's late write: FenceError/FENCED my_fence=1 stored_fence=2 -- another runner took the lease and advanced the fence while this one was mid-session
-  PASS    b2 the stale-fence write is REFUSED and the published version is unchanged: digest 50fc727daae0 == 50fc727daae0  --  this is the shape NOTHING AT THE LEASE can see
-  PASS    b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (3) DOES publish (digest changes to 2cce4b5464f1)  --  so the refusal is the FENCE, not a fake that refuses everything
+  PASS    b2 the stale-fence write is REFUSED and the published version is unchanged: digest 8d6c817ee22c == 8d6c817ee22c  --  this is the shape NOTHING AT THE LEASE can see
+  PASS    b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (3) DOES publish (digest changes to 516bb577466d)  --  so the refusal is the FENCE, not a fake that refuses everything
   PASS    b3 a persist with NO held lease never reaches the secret: 0 put call(s)  --  otherwise the lease is optional and a caller that forgot it looks like a winner
 
 (c) ROTATION -- a new version published, the next invocation uses it, the old refused

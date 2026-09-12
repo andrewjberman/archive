@@ -11,6 +11,14 @@ timeout 900 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_B
 Full output: `IB-rt-9_RT9-AC1_battery_output.txt`. Arm (a) excerpt of the same run:
 `IB-rt-9_RT9-AC1_arm_a_output.txt`.
 
+> **TWO FIELDS IN THAT OUTPUT MOVE BETWEEN RUNS, BOTH CORRECTLY, AND NEITHER IS A DEFECT.**
+> (i) a1's file-count denominator is a LIVE census over `git ls-files` -- committing any file
+> that names the secret moves it, which is the arm doing its job (rows `W3-S29`, `W3-S33`).
+> (ii) arm (b)'s published digests differ per run because `persistSession` stamps
+> `persisted_at` into the bundle it writes. **The arm never asserts a digest VALUE; it asserts
+> that the digest BEFORE and AFTER the loser's write are the same, within one run.** A fixed
+> expected digest would have been an assertion about the clock.
+
 > **RT9-AC1 IS NOT MET AND THE TOKEN IS ABSENT ON PURPOSE.** The criterion needs arms (a)
 > through (f) in ONE run. Arm (e) is BLOCKED by row `IRPT_BCKEND-W3-S26`. The `<expect>` is
 > graded as a REGEX over this output, so a line reading `<token>: NOT ASSERTED` would MATCH
