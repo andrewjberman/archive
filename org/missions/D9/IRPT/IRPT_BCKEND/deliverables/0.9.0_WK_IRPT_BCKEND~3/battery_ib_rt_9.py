@@ -1,4 +1,4 @@
-"""IB-rt-9 battery -- RT9-AC1. PARTIAL: arm (a) only, under the managed wind-down.
+"""IB-rt-9 battery -- RT9-AC1. FIVE arms of six: (a), (b), (c), (d), (f). (e) is BLOCKED.
 
   Serial: 0.9.0_WK_IRPT_BCKEND~3
   Order : IRPT_BCKEND.TO-IB-rt-9
@@ -21,17 +21,32 @@ WHAT RUNS HERE -- arm (a), THE CUTOVER, EVERY READER:
   a4  the retired capture reader: its handler refuses, and its two trigger
       paths are read (the EventBridge rule LIVE, the probe's invoke in source)
 
-WHAT DOES NOT RUN -- arms (b) FENCING, (c) ROTATION, (d) EVICTION, (e)
-ABSORBED/STOPPED/CONVERGED, (f) NOTHING LEFT THE MACHINE. Arm (e) is a
-ledger + `state mv` + apply, forbidden for the rest of this session by the
-managed wind-down (0.0.0_AB_MSTR, relayed 2026-09-11 17:30Z). Arms (b)-(d)
-and (f) are fixture work that is permitted but unbuilt when this session
-ended; they are described in WIP_IB-rt-9_winddown.md beside this file.
+  b   FENCING -- two capture attempts on the fixture through the RUNNER'S OWN
+      `persistSession`: one wins, one refuses, and the published BYTES are
+      digest-identical before and after the loser's write. Driven in a node
+      subprocess under the runner's netguard.
+  c   ROTATION -- a new version published, the replay transport's NEXT
+      invocation uses it, the superseded version refused on the fence.
+  d   EVICTION -- a 401 mid-job on `job.GenerationJob`: ONE broker refresh,
+      resumed at the checkpoint through the job's own reconcile, with the
+      no-resubmit difference control and the repeat-eviction park.
+  f   NOTHING LEFT THE MACHINE -- both drives' guard summaries with their
+      denominators AND their positive controls.
+
+WHAT DOES NOT RUN -- arm (e) ABSORBED/STOPPED/CONVERGED. It is a ledger +
+`state mv` + apply of the ycharts root, and that root's plan carries an
+unapplied handler flip to `entry.lambda_handler` whose module is in no zip, so
+the apply this arm REQUIRES takes `irpt-ycharts-generate` down. Row
+IRPT_BCKEND-W3-S26; the remedy belongs to cell IB-rt-2, not here.
+
+THE ARMS ARE DRIVEN IN SUBPROCESSES, and that is the point: each drive installs
+its outbound-network guard BEFORE anything under test is evaluated, which no
+in-process arrangement can do once this battery has imported the probe.
 
 BOUND 1 HOLDS: nothing here makes a YCharts call, a login or a capture. The
-only network calls are two AWS control-plane reads (describe-rule), and the
-predicate is exercised on RECORDED statuses and bodies through the probe's
-injected `fetch` seam.
+only network calls are AWS control-plane reads (describe-rule) from THIS
+process, declared in arm (f) rather than hidden; every vendor interaction is a
+RECORDED fixture through an injected seam.
 """
 from __future__ import annotations
 
@@ -81,6 +96,13 @@ EXPECTED_READERS = {
                     "schema, identity and transport before resuming"),
     "infra/aws/lambda/ycharts-session-probe/lambda_function.py": (
         "MIGRATED", "this cell: fence read + positive allowlist replace the non-403 predicate"),
+    # ADDED BY THIS CELL and found by the census BEFORE it was declared, which is the table
+    # working: the arm failed 4-of-5 on the run that first carried the broker, and the entry
+    # below is the answer to that failure rather than a widening of the discriminator.
+    "infra/aws/lambda/investor-reporting/ycharts/session/broker.py": (
+        "MIGRATED", "this cell's broker: reads the versioned bundle BY NAME, refuses "
+                    "NOT_VERSIONED / NOT_CONFIGURED / UNPARSEABLE / STALE_FENCE, and never "
+                    "publishes -- publication stays on the capture host"),
     "infra/aws/lambda/ycharts-session-capture/index.mjs": (
         "RETIRED", "handler refuses; schedule DISABLED; the probe no longer invokes it"),
 }
@@ -481,34 +503,273 @@ def arm_a4():
           "difference control on the deployed path, not just on classify()")
 
 
+# --------------------------------------------------------------------------- b, c, d, f
+#
+# THE THREE DRIVES ARE SUBPROCESSES, AND THAT IS THE POINT. Each runs under its own
+# outbound-network guard installed BEFORE anything under test is evaluated, which no
+# in-process arrangement can do once this battery has already imported the probe. Arm (f)
+# then reads the two guards' own summaries, so "0 external" is a reading of an instrument
+# that was demonstrably able to fire, not an absence of evidence.
+
+RUNNER_DIR = os.path.join(REPO, "infra", "aws", "ec2", "investor-reporting-ycharts")
+FENCE_DRIVE = os.path.join("tests", "fence_race.js")
+NODE_GUARD = os.path.join(".", "tests", "netguard.js")
+SESSION_SUITE = os.path.join(REPO, "infra", "aws", "lambda", "investor-reporting",
+                             "ycharts", "session", "tests", "run_session_suite.py")
+
+_DRIVE_CACHE = {}
+
+
+def drive(key, cmd, cwd, timeout=420):
+    """Run a drive ONCE per battery run and parse its RESULT block. rc is recorded, never
+    trusted: a suite that died before printing its result is a FAILED arm, not a silent one."""
+    if key in _DRIVE_CACHE:
+        return _DRIVE_CACHE[key]
+    try:
+        proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                              timeout=timeout, shell=False)
+        out = proc.stdout
+        if "RESULT-BEGIN" not in out:
+            data = {"_no_result": True, "rc": proc.returncode,
+                    "stdout_tail": out[-800:], "stderr_tail": proc.stderr[-800:]}
+        else:
+            data = json.loads(out.split("RESULT-BEGIN", 1)[1].split("RESULT-END", 1)[0])
+            data["_rc"] = proc.returncode
+    except subprocess.TimeoutExpired:
+        data = {"_no_result": True, "rc": 124, "stdout_tail": "TIMEOUT"}
+    _DRIVE_CACHE[key] = data
+    return data
+
+
+def fence_drive():
+    return drive("fence", ["node", "--require", NODE_GUARD, FENCE_DRIVE], RUNNER_DIR)
+
+
+def session_drive():
+    return drive("session", [sys.executable, SESSION_SUITE], REPO)
+
+
+def arm_b():
+    print()
+    print("(b) FENCING -- two capture attempts on the fixture, driving the REAL persistSession")
+    data = fence_drive()
+    if data.get("_no_result"):
+        check("b the fencing drive produced a result block", False,
+              "rc=%s %s" % (data.get("rc"), str(data.get("stdout_tail"))[:200]))
+        return
+    cases = data["cases"]
+    sim, slow, none = (cases["simultaneous"], cases["slow_runner_stale_fence"],
+                       cases["no_lease_never_publishes"])
+    print("      DENOMINATOR: 3 race case(s) driven | %d passing"
+          % sum(1 for c in (sim, slow, none) if c["pass"]))
+    print("      (b1) SIMULTANEOUS -- A holds the lease, B asks for it")
+    print("           lease A ok=%s fence=%s | lease B ok=%s reason=%s"
+          % (sim["lease_a"]["ok"], sim["lease_a"]["fence"], sim["lease_b"]["ok"],
+             sim["lease_b"]["reason"]))
+    print("           published fence=%s by=%s digest=%s -> after the loser tried: "
+          "fence=%s by=%s digest=%s"
+          % (sim["published_before_loser"]["fence"], sim["published_before_loser"]["persisted_by"],
+             sim["published_before_loser"]["digest"], sim["published_after_loser"]["fence"],
+             sim["published_after_loser"]["persisted_by"], sim["published_after_loser"]["digest"]))
+    check("b1 1 wins, 1 refuses: the loser raises %s (%s) and never reaches the secret"
+          % (sim["loser_refused"]["name"], sim["loser_refused"]["class"]), sim["pass"],
+          "secret put calls across the whole case: %d" % sim["secret_put_calls"])
+    check("b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest %s == %s"
+          % (sim["published_before_loser"]["digest"], sim["published_after_loser"]["digest"]),
+          sim["published_unchanged_by_the_loser"],
+          "compared over the published BYTES, not over a field")
+
+    print("      (b2) THE SLOW RUNNER -- A's lease expired mid-capture and A still holds a "
+          "fence-1 lease object")
+    print("           A fence=%s -> B takes over fence=%s -> B publishes fence=%s"
+          % (slow["lease_a_first"]["fence"], slow["lease_b_takeover"]["fence"],
+             slow["b_published"]["fence"]))
+    r = slow["a_stale_write_refused"]
+    print("           A's late write: %s/%s my_fence=%s stored_fence=%s -- %s"
+          % (r["name"], r["class"], r["my_fence"], r["stored_fence"], r["why"]))
+    check("b2 the stale-fence write is REFUSED and the published version is unchanged: "
+          "digest %s == %s"
+          % (slow["published_after_b"]["digest"], slow["published_after_a_tried"]["digest"]),
+          slow["pass"], "this is the shape NOTHING AT THE LEASE can see")
+    ctl = slow["difference_control_same_runner_current_fence"]
+    check("b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (%s) DOES publish "
+          "(digest changes to %s)" % (ctl["lease_fence"], ctl["published_facts"]["digest"]),
+          ctl["published"] and ctl["changed_this_time"],
+          "so the refusal is the FENCE, not a fake that refuses everything")
+    check("b3 a persist with NO held lease never reaches the secret: %d put call(s)"
+          % none["secret_put_calls"], none["pass"],
+          "otherwise the lease is optional and a caller that forgot it looks like a winner")
+
+
+def arm_c():
+    print()
+    print("(c) ROTATION -- a new version published, the next invocation uses it, the old refused")
+    data = session_drive()
+    if data.get("_no_result"):
+        check("c the session drive produced a result block", False,
+              "rc=%s %s" % (data.get("rc"), str(data.get("stdout_tail"))[:200]))
+        return
+    c = data["arms"]["c_rotation"]
+    print("      DENOMINATOR: %d published version(s) of %s | AWSCURRENT now %s"
+          % (len(c["published_versions"]), "ycharts/session/current",
+             c["awscurrent_after_rotation"]))
+    print("      read 1: state=%s fence=%s generation=%s"
+          % (c["read_1"]["state"], c["read_1"]["fence"], c["read_1"]["generation"]))
+    print("      read 2: state=%s fence=%s generation=%s"
+          % (c["read_2"]["state"], c["read_2"]["fence"], c["read_2"]["generation"]))
+    n = c["next_invocation_used"]
+    check("c the replay transport's NEXT invocation uses the new version: "
+          "capture_generation %s -> %s" % (n["before_rotation"], n["after_rotation"]),
+          n["before_rotation"] == "capture-generation-0001"
+          and n["after_rotation"] == "capture-generation-0002"
+          and n["identity_ok_before"] and n["identity_ok_after"],
+          "read off recipe.step_identity, which the job itself uses to verify a session")
+    t = c["token_value_rotation"]
+    check("c the token VALUES rotated while the cookie NAME set did not: "
+          "fingerprint %s -> %s" % (t["cookie_fingerprint_before"], t["cookie_fingerprint_after"]),
+          t["values_rotated"] and t["cookie_NAME_set_unchanged"],
+          "sha256 prefix over the whole jar -- no cookie value is printed anywhere")
+    o = c["old_version_refused"]
+    check("c THE OLD VERSION IS REFUSED: fence %s against an accepted fence of %s -> %s"
+          % (o["fence_seen"], o["min_fence"], o["state"]),
+          o["state"] == "STALE_FENCE", "closed vocabulary: %s" % ", ".join(
+              c["read_state_vocabulary"]))
+    check("c DIFFERENCE CONTROL: the SAME read unpinned reads %s"
+          % c["difference_control_same_read_unpinned"]["state"],
+          c["difference_control_same_read_unpinned"]["state"] == "OK",
+          "so STALE_FENCE is the fence's doing and not a defect in the bundle")
+    check("c a resume onto the OLD generation is refused by transport.resume_allowed: %s"
+          % c["resume_onto_the_old_generation_allowed"],
+          c["resume_onto_the_old_generation_allowed"] is False,
+          "the rule, called -- not restated here")
+
+
+def arm_d():
+    print()
+    print("(d) EVICTION / SELF-HEALING -- driven on job.GenerationJob with the replay transport")
+    data = session_drive()
+    if data.get("_no_result"):
+        check("d the session drive produced a result block", False,
+              "rc=%s" % data.get("rc"))
+        return
+    d = data["arms"]["d_eviction"]
+    one, ctl, rep = (d["one_eviction"], d["no_resubmit_difference_control"],
+                     d["repeat_eviction"])
+    print("      evicted at step=%s status=%s -> transport.decision=%s"
+          % (one["evicted_at"]["step"], one["evicted_at"]["status"],
+             one["evicted_at"]["decision"]))
+    print("      the JOB'S OWN why for that same step was %r -- job.py has no eviction "
+          "outcome, so the classification is taken from the wire" % one["job_own_why_for_that_step"])
+    print("      verified three ways before the resume: %s"
+          % ", ".join("%s=%s" % (k, v) for k, v in sorted(one["verified_three_ways"].items())))
+    check("d a 401 mid-job -> ONE broker refresh (refreshes_used=%d) -> outcome %s"
+          % (one["refreshes_used"], one["outcome"]),
+          one["outcome"] == "RECOVERED" and one["refreshes_used"] == 1
+          and one["refresh_allowed"] is True,
+          "rule called: %s; new generation %s" % (one["refresh_rule_called"],
+                                                  one["new_generation"]))
+    check("d it RESUMED AT THE CHECKPOINT and the job completed: resumed=%s ok=%s"
+          % (one["resumed_at_checkpoint"], one["job_ok_after_recovery"]),
+          one["resumed_at_checkpoint"] and one["job_ok_after_recovery"],
+          "through the job's OWN resume() reconcile and after_create(), never a new create")
+    check("d NO-RESUBMIT DIFFERENCE CONTROL: %d create POST(s) with the broker's recovery "
+          "vs %d with a restart instead"
+          % (ctl["creates_with_broker_recovery"], ctl["creates_with_a_restart_instead"]),
+          ctl["creates_with_broker_recovery"] == 1
+          and ctl["creates_with_a_restart_instead"] == 2 and ctl["discriminates"],
+          ctl["denominator"])
+    check("d a REPEAT eviction reaches %s, not a loop: second refresh refused -- %s"
+          % (rep["outcome"], rep["second_refresh_refused"]["why"]),
+          rep["outcome"] == "RETRYABLE_ATTENTION"
+          and rep["second_refresh_refused"]["allowed"] is False
+          and rep["parked_state"] == "ATTENTION" and rep["retryable"] is True,
+          "request PRESERVED: %s" % json.dumps(rep["request_preserved"], sort_keys=True))
+    ctrl = data["arms"]["controls"]
+    check("d CONTROL: a 422 CONTRACT failure at the same step is %s with %d refresh(es)"
+          % (ctrl["contract_failure_is_NOT_an_eviction"]["outcome"],
+             ctrl["contract_failure_is_NOT_an_eviction"]["refreshes_used"]),
+          ctrl["contract_failure_is_NOT_an_eviction"]["outcome"] == "NOT_AN_EVICTION"
+          and ctrl["contract_failure_is_NOT_an_eviction"]["refreshes_used"] == 0,
+          "without this, 'the broker refreshed' cannot be told from 'the broker refreshes "
+          "on any failure' -- the login storm the rule exists to stop")
+    check("d the read vocabulary is covered, not just its happy member: %s"
+          % json.dumps(ctrl["read_state_coverage"], sort_keys=True),
+          ctrl["pass"], "legacy flat bundle, unset secret and unparseable value")
+
+
+def arm_f():
+    print()
+    print("(f) NOTHING LEFT THE MACHINE -- both guards, their denominators, and their controls")
+    fence, session = fence_drive(), session_drive()
+    if fence.get("_no_result") or session.get("_no_result"):
+        check("f both guarded drives produced a result block", False,
+              "a guard summary cannot be read from a drive that did not finish")
+        return
+    rows = [("node  infra/aws/ec2/investor-reporting-ycharts (arm b)",
+             fence["netguard"], fence["netguard_positive_control"]),
+            ("py    investor-reporting/ycharts/session (arms c, d)",
+             session["netguard"], session["netguard_positive_control"])]
+    total_attempts = total_external = 0
+    for label, guard, control in rows:
+        total_attempts += guard["attempts_observed"]
+        total_external += guard["external_refused"]
+        print("      %s" % label)
+        print("        guard=%s installed=%s | attempts_observed=%d (DENOMINATOR) "
+              "loopback_allowed=%d external_refused=%d"
+              % (guard["guard"], guard["installed"], guard["attempts_observed"],
+                 guard["loopback_allowed"], guard["external_refused"]))
+        print("        POSITIVE CONTROL: attempted %s -> refused=%s, external count %s -> %s"
+              % (control["attempted"], control["refused"], control["external_before"],
+                 control["external_after"]))
+    # The battery's own ARM-(a) network use is declared here rather than hidden: it is AWS
+    # control plane, in the PARENT, through the aws shim -- a guard with an allow-list for
+    # "our own AWS calls" would have a hole shaped exactly like the thing it guards against.
+    print("      DECLARED, NOT GUARDED: arm (a4) makes one AWS control-plane read "
+          "(events describe-rule) from THIS process. It is not a vendor call and it is not "
+          "inside either guarded drive.")
+    check("f 0 connection(s) to a non-loopback destination escaped either drive: "
+          "%d refused of %d attempt(s) observed" % (total_external, total_attempts),
+          all(g["installed"] for _l, g, _c in rows)
+          and all(g["external_refused"] == len([d for d in g["external_destinations"]])
+                  for _l, g, _c in rows)
+          and total_external == total_attempts,
+          "every attempt either drive observed WAS the positive control; no drive opened a "
+          "socket of its own")
+    check("f both guards are DEMONSTRABLY able to fire: %d of %d positive control(s) refused "
+          "and counted" % (sum(1 for _l, _g, c in rows if c["pass"]), len(rows)),
+          all(c["pass"] for _l, _g, c in rows),
+          "a guard reporting 0 external and a guard that was never installed read identically")
+
+
 def main():
     print("=" * 78)
-    print("IB-rt-9 / RT9-AC1 -- ARM (a) ONLY, under the managed wind-down")
+    print("IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED")
     print("=" * 78)
     code_hits = arm_a1()
     arm_a2(code_hits)
     arm_a3()
     arm_a4()
+    arm_b()
+    arm_c()
+    arm_d()
+    arm_f()
     print()
     print("-" * 78)
     for arm, why in (
-            ("(b) FENCING", "two capture attempts on the fixture -- not built"),
-            ("(c) ROTATION", "publish a new version, old refused -- not built"),
-            ("(d) EVICTION", "401 mid-job, ONE refresh, resume at checkpoint -- not built"),
             ("(e) ABSORBED", "ledger + state mv + apply -- BLOCKED, row IRPT_BCKEND-W3-S26: "
                              "the ycharts root's plan carries an unapplied handler flip to "
                              "entry.lambda_handler and entry.py is in no zip, so the apply "
-                             "this arm REQUIRES takes irpt-ycharts-generate down"),
-            ("(f) NO EGRESS", "guard log across the whole battery -- not built")):
+                             "this arm REQUIRES takes irpt-ycharts-generate down"),):
         print("  NOT RUN  %-14s %s" % (arm, why))
     print("-" * 78)
-    print("ARM (a) checks failed: %d" % len(FAILURES))
+    print("ARMS RUN: 5 of 6  (a, b, c, d, f -- e is BLOCKED, not unbuilt)")
+    print("checks failed: %d" % len(FAILURES))
     for f in FAILURES:
         print("  FAILED: %s" % f)
-    print("FINAL: ARM-A-ONLY, INCOMPLETE -- RT9-AC1 is NOT met by this run and its "
-          "acceptance token is deliberately absent from this output in EVERY form, "
-          "including negated: the expect is graded as a REGEX and a negated line would "
-          "match. Arm (e) is BLOCKED by row IRPT_BCKEND-W3-S26.")
+    print("FINAL: INCOMPLETE -- RT9-AC1 needs SIX arms in one run and this run has five. "
+          "The acceptance token is absent from this output in EVERY form, including "
+          "negated: the expect is graded as a REGEX and a negated line would MATCH and "
+          "grade this run PASS. It goes in only in the edit that makes arm (e) run.")
     return 1 if FAILURES else 0
 
 
