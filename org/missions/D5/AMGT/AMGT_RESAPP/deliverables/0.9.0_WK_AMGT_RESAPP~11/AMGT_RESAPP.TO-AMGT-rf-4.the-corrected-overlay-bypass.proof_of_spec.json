@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rf-4",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-4.the-corrected-overlay-bypass.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-4.the-corrected-overlay-bypass.md",
+    "group": "OTHER",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ],
+      "deploy_evidence": "THE WIRING. `read_model_block` returned ONLY the raw historical model, so every fiscal PX_LAST row this API served was the uncorrected number -- measured on the landed BABA artifact: 10 raw fiscal PX_LAST rows, 10 corrected rows, ALL TEN VALUES DIFFER, FY2025 raw 146.58 against corrected 132.23. It now applies the SHARED corrected-price overlay and implements no correction of its own: `_apply_corrected_overlay` is a delegating wrapper around lib/research/provenance/render_print.py's `load_corrected_price_overlay` + `apply_corrected_price_overlay`, whose other consumer is the Print path. A second implementation here would be two writers of one corrected value, which the slug explicitly warns against. APPLIED AT read_model_block AND NOT AT EACH ROUTE, so there is ONE wiring point rather than one per consumer -- the same reasoning that made the second implementation wrong. THE IMPORT IS AT CALL TIME, matching how this module already reaches the check face, so the API package does not pull the print/provenance tree at import. MUTATION SAFETY, stated because the contract mutates in place: `_read_json_artifact` opens the file on every call and returns a fresh object, so nothing is cached and the on-disk artifact is never written back. No historical model artifact is rewritten -- this is a new-consumer regression, not a re-opening of the round-4 Print grade."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_corrected_overlay_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deploy_evidence": "NEW, 9 tests, and HALF OF THEM ARE THE UNRESOLVED ARM because that is the branch that shipped broken. RESOLVED: FY2025 serves 132.23 not 146.58; all 10 of 10 rows tagged RESOLVED (so a fix that corrected only the named row fails); provenance on every row; vintage preserved and distinct from observation_date; and the header PX_LAST snapshot NOT overlaid, since it is a spot price and not a fiscal-period pairing. UNRESOLVED: the BABACVOCTRL control keeps its original value, is tagged UNRESOLVED, carries no observation_date, and is REFUSED by the check face with the reason naming the unresolved overlay. Plus a NEGATIVE CONTROL on the refusal itself -- the resolved security must NOT be refused, or 'everything refuses' would pass the refusal test while the API served nothing usable. And a wiring test that reads the adapter's source to refuse a second implementation. PROVEN ABLE TO FAIL: see controls.mutant."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the fiscal `PX_LAST` rows are served from the CORRECTED overlay, so a row whose corrected value is known (FY2025 corrected **132.23**) does NOT read the raw **146.58**. \u26d4 A row carrying 146.58 is the measured bypass and is NOT met. \u26d4 AND EVERY ROW MUST CARRY ITS PROVENANCE -- original vintage, observation date, derivation identity -- because a corrected number without its derivation identity is indistinguishable from a raw one to the next consumer, and a value that cannot carry its claim may not be treated as measured",
+      "method": "command",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; b=s.read_thesis_bundle('BABA US Equity'); rows=[r for r in (b.get('fiscal_year_figures') or []) if 'PX_LAST' in str(r)]; print('PX_LAST_ROWS=%d' % len(rows)); [print(r) for r in rows[:12]]\"",
+      "output_evidence": "THE NAMED INVOCATION, VERBATIM AND UNALTERED:\n  PX_LAST_ROWS=0        (exit code 0, no rows printed)\nNOT MET, AND THE ZERO IS A VACUOUS GREEN RATHER THAN A RED. Both of this clause's limbs are NEGATIVE or UNIVERSAL -- 'a row ... does NOT read the raw 146.58' and 'EVERY ROW MUST CARRY ITS PROVENANCE' -- and the EMPTY SET satisfies both. No row reads 146.58 because there are no rows; every row carries provenance because there are no rows. A grader reading only this line would record the bypass as repaired on evidence identical to what it would print if nothing had been done at all. Row AMGT_RESAPP-Z-W11-S6.\nTWO INDEPENDENT DEFECTS IN THE INSTRUMENT, both measured:\n  (1) THE KEY FORM. `'BABA US Equity'` (spaces) loads no artifact; the adapter's own convention is the underscore form. Same invocation with `'BABA_US_Equity'`: PX_LAST_ROWS=110. This is the same root cause as row Z-W11-S4 on rf-3's AC2, recurring in an order that was not amended -- but with the OPPOSITE consequence, because rf-3's AC2 asserted a positive number and so ALWAYS-FAILED while this one asserts only negatives and so ALWAYS-PASSES.\n  (2) THE SELECTOR. `'PX_LAST' in str(r)` is a substring test over the row's whole serialised repr, not a field selector. Over the 183 fiscal figures it selects 110 where `r.get('mnemonic')=='PX_LAST'` selects 10 -- a difference of exactly 100 = 10 non-price mnemonics x 10 fiscal years (SALES_REV_TURN, IS_OPER_INC, EBITDA, EBITDA_ADJUSTED, IS_EPS, BOOK_VAL_PER_SH and others), which match because they carry a prose field `currency_caveat = \"fiscal-year-2025-merged naive PE (PX_LAST/IS_EPS = 2.6593) disagrees with Bloomberg's own PE_RATIO...\"`. So with the key fixed and the selector left alone, 'rows with full provenance' reads 10 OF 110 and the criterion FAILS CORRECT WORK.\nTHE CELL'S ACTUAL REQUIREMENT, MEASURED ON THE 10 REAL FISCAL PX_LAST ROWS AND REPORTED AS A DIAGNOSTIC RATHER THAN AS AC1's OUTPUT: rows reading the raw 146.58 = 0 of 10; rows tagged RESOLVED = 10 of 10; FY2025 serves 132.23 against raw 146.58; every one carries corrected_overlay_status, observation_date and derivation_key with its ORIGINAL vintage preserved (2026-09-10T23:20:19Z, distinct from the 2025-03-31 observation date). That number is NOT offered as AC1's result -- it comes from an invocation the order did not name.",
+      "denominator": "named invocation: 0 rows selected. Diagnostic under the adapter's own key: 110 selected by the criterion's substring filter, of which 10 are real fiscal PX_LAST rows out of 183 fiscal figures; 0 of those 10 read the raw 146.58 and 10 of 10 carry full provenance.",
+      "status": "FAIL",
+      "expect": "VERBATIM AND UNALTERED:\\s*\\n\\s*PX_LAST_ROWS=[1-9]\\d*",
+      "status_reason": "NOT MET, AND I AM DECLINING A VACUOUS GREEN. The named invocation prints PX_LAST_ROWS=0. Every clause in this criterion is NEGATIVE or UNIVERSAL, so the empty set satisfies all of them -- no row reads 146.58, every row carries provenance -- and a literal reading would call that a PASS. It is not one: nothing was served from the corrected overlay because nothing was served at all, and recording that as met would be exactly the always-passes shape section 2 of this order says to treat as a defect. TWO INDEPENDENT INSTRUMENT DEFECTS, BOTH MEASURED, ROW AMGT_RESAPP-Z-W11-S6. (1) The key is the space form, which loads no artifact -- the same root cause as row Z-W11-S4 on rf-3's AC2, recurring in an order that was not amended, but with the OPPOSITE consequence: rf-3's AC2 asserted a positive number and always-FAILED; this one asserts only negatives and always-PASSES. (2) The selector `'PX_LAST' in str(r)` is a substring test over the serialised row, not a field selector: it takes 110 of 183 fiscal figures where the mnemonic takes 10, the extra 100 being 10 non-price mnemonics across 10 fiscal years whose prose `currency_caveat` mentions PX_LAST. So fixing ONLY the key would convert this criterion from always-passing into one that FAILS CORRECT WORK, 10 of 110 on the provenance clause against work that is right 10 of 10. THE SUBSTANCE IS DELIVERED AND IS EVIDENCED UNDER AC2 AND AC3 RATHER THAN SMUGGLED IN HERE: 0 of 10 rows read the raw 146.58, FY2025 serves 132.23, all 10 are RESOLVED with observation_date and derivation_key and their original vintage intact. That measurement comes from an invocation the order did not name, so it is recorded as a labelled diagnostic and NOT as AC1's output -- reporting it as AC1's result would be the substitution shape rf-3's own AC2 clause forbids by name. AMGT-rf-4 is left OPEN."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "both suites pass, and the API suite contains tests exercising BOTH the RESOLVED overlay and the UNRESOLVED case with its explicit refusal. \u26d4 A green run with only the resolved arm is NOT met: an unresolved overlay must produce a stated refusal, not a silent fallback to the raw value, and the silent-fallback branch is the one that shipped",
+      "method": "test_suite",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ lib/research/rules/tests/ -q 2>&1 | tail -4",
+      "output_evidence": "`timeout 110 python -m pytest lib/research/api/tests/ lib/research/rules/tests/ -q | tail -4` -> `56 passed in 0.11s`, rc 0. BOTH suites pass.\nTHE RESOLVED ARM, asserted by name:\n  test_fy2025_serves_the_corrected_price_and_not_the_raw_one -- FY2025 == 132.23 and != 146.58\n  test_every_fiscal_price_row_is_served_corrected -- all 10 of 10 rows tagged RESOLVED, so a fix that corrected only the row the slug names would pass the first test and fail this one\n  test_every_served_row_carries_its_provenance -- corrected_overlay_status, observation_date, derivation_key and vintage on every row\n  test_the_original_vintage_is_preserved_and_not_overwritten_by_the_correction -- vintage != observation_date, the two claims AMGT-rc-20 separated\n  test_the_header_price_snapshot_is_not_overlaid -- the header PX_LAST spot snapshot carries no corrected claim and must not be tagged\nTHE UNRESOLVED ARM, which the clause says a green run without is NOT met:\n  test_an_unresolved_overlay_keeps_the_original_value_and_is_tagged_unresolved -- BABACVOCTRL_US_Equity FY2025 keeps its own 146.58, is tagged UNRESOLVED, and carries NO observation_date because there is no valid observation to date\n  test_an_unresolved_overlay_is_REFUSED_by_the_check_face_not_silently_served -- the check face returns verdict REFUSE with the reason naming the unresolved overlay, VERBATIM: `fiscal_year_line_item:PX_LAST:2025` -> `REFUSE` -> `PX_LAST: corrected fiscal-period overlay is UNRESOLVED (the corrected lane covers this fiscal year but has no valid price for it -- never silently kept as the old value, C-S19)`. That is a STATED REFUSAL, not a silent fallback.\n  test_the_resolved_security_is_not_refused_for_the_same_reason -- the NEGATIVE control on the refusal itself: if everything refused, the test above would pass while the API served nothing usable. 0 of 10 resolved rows are refused.\nPROVEN ABLE TO FAIL, not assumed -- see controls.mutant.",
+      "denominator": "56 of 56 tests passed across lib/research/api/tests (41) and lib/research/rules/tests (15); 9 new tests here, of which 4 are the UNRESOLVED arm and its negative control.",
+      "status": "PASS",
+      "expect": "56 passed[\\s\\S]*RESOLVED ARM[\\s\\S]*UNRESOLVED ARM[\\s\\S]*REFUSE",
+      "status_reason": "MET INCLUDING THE CLAUSE'S DISCRIMINATOR. Both suites pass, AND the API suite carries BOTH arms -- which is the whole clause: 'A green run with only the resolved arm is NOT met: an unresolved overlay must produce a stated refusal, not a silent fallback to the raw value, and the silent-fallback branch is the one that shipped.' The unresolved arm is exercised against a REAL landed control (BABACVOCTRL_US_Equity, whose corrected lane covers FY2025 with no valid price), not a synthetic fixture, and the assertion is on the CHECK FACE's verdict -- `REFUSE`, with the reason naming the unresolved overlay -- rather than on the figure alone, because a tagged figure that nothing refuses is still a silent fallback one layer along. A negative control on the refusal keeps the everything-refuses degenerate case from passing."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a PRINTED DENOMINATOR, and the adapter now REFERENCES the shared corrected-model consumer contract rather than carrying its own copy of the overlay logic. \u26d4 A second implementation of the correction inside `scoped_amgt.py` is NOT met -- two writers of the same corrected value is the shared-dependency shape this estate keeps paying for, and the slug says to WIRE to the existing contract. A denominator of 0 is OUT-OF-CORPUS and is NOT met",
+      "method": "command",
+      "invocation": "timeout 110 comp-find \"load_model_block|corrected_overlay|corrected_model\" lib/research --limit 20",
+      "output_evidence": "`timeout 110 comp-find \"load_model_block|corrected_overlay|corrected_model\" lib/research --limit 20` ->\n  DENOMINATOR: 39 hit(s) across 87 file(s) scanned in scope [corpus=all] | 47 EPHEMERAL-FLOOR, NOT searched\n  BANDS (true totals, not this page): HEAD=18 DEF=3 SURFACED=18\nPre-cell baseline for the same census: 28 hit(s) across 86 file(s), HEAD=11 DEF=2 SURFACED=15 -- so the delta is this cell's wiring and its tests, and the denominator is not zero.\nTHE ADAPTER REFERENCES THE SHARED CONTRACT AND CARRIES NO COPY OF THE OVERLAY LOGIC. Second census, scoped to the adapter: `comp-find \"load_corrected_price_overlay|apply_corrected_price_overlay\" lib/research/api` -> 6 hit(s) across 7 file(s) scanned, BANDS SURFACED=5 TEST=1, all five source hits in lib/research/api/scoped_amgt.py at :480 (docstring), :484-:485 (the import) and :488-:489 (the two calls). The DEF band is empty in the adapter -- the two definitions live where they always did, in lib/research/provenance/render_print.py, whose other consumer is the Print path's lib/research/print/render_pack.py:load_model_block.\nASSERTED, NOT JUST CENSUSED: test_the_adapter_wires_to_the_shared_contract_and_does_not_reimplement_it reads the adapter's source and requires the import to be present, requires the only corrected-overlay definition in the module to be the delegating wrapper `_apply_corrected_overlay`, and refuses the adapter reading `corrected[\"price\"]` itself -- a second reader of that field would be a second writer of the same claim.",
+      "denominator": "39 hit(s) across 87 file(s) scanned [corpus=all], 47 ephemeral-floor not searched (pre-cell baseline 28 of 86). Adapter-scoped census: 6 hit(s) across 7 file(s), 5 in the adapter, DEF band empty there.",
+      "status": "PASS",
+      "expect": "DENOMINATOR: [1-9]\\d* hit\\(s\\) across [1-9]\\d* file\\(s\\) scanned[\\s\\S]*load_corrected_price_overlay[\\s\\S]*render_print\\.py",
+      "status_reason": "MET ON BOTH LIMBS. The denominator is printed and non-zero (39 of 87, up from a pre-cell 28 of 86, so it is a delta and not a standing state), and the adapter REFERENCES the shared contract rather than carrying its own copy: all five adapter-side hits are an import and two calls, and the DEF band inside lib/research/api is EMPTY -- the two definitions remain in lib/research/provenance/render_print.py, whose other consumer is the Print path. This is asserted as well as censused: a test reads the adapter's source and refuses both a missing import and any corrected-overlay definition other than the delegating wrapper, and refuses the adapter reading `corrected[\"price\"]` itself. That guard was over-broad on its first run -- it matched `read_security_overlay`, a pre-existing route function with nothing to do with the price correction -- and was narrowed to `corrected`-shaped definitions, which is recorded because a guard that flags the wrong thing looks strict while testing nothing."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a FAILURE or COLLECTION ERROR, AND `RESTORED_BYTE_IDENTICAL`. Working-tree snapshot, never `git checkout --` (row `Z-W10-S1`). Either half missing is NOT met",
+      "method": "command",
+      "invocation": "cp lib/research/api/scoped_amgt.py /tmp/rf4.pre; printf \"\\nBROKEN_SENTINEL_RF4 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf4.pre lib/research/api/scoped_amgt.py; cmp -s /tmp/rf4.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "output_evidence": "pytest tail WITH the sentinel appended:\n  ERROR lib/research/api/tests/test_scoped_amgt_mount.py - ZeroDivisionError: division by zero\n  !!!!!!!!!!!!!!!!!!! Interrupted: 4 errors during collection !!!!!!!!!!!!!!!!!!!\n  4 errors in 0.16s\nRESTORED_BYTE_IDENTICAL\nBaseline immediately before: 56 passed across the two suites (41 in lib/research/api/tests alone). So the suite goes green -> 4 collection errors on the sentinel alone; FOUR because four test modules import the mutated file (test_scoped_amgt.py, test_scoped_amgt_mount.py, test_fiscal_scope_contract.py, test_corrected_overlay_wiring.py).\nRESTORE IS FROM A WORKING-TREE SNAPSHOT (/tmp/rf4.pre), never `git checkout --` (row Z-W10-S1). INDEPENDENTLY CORROBORATED: sha256 of the restored file == sha256 of the pre-mutation insurance copy .scratch/INSURANCE_rf4.py == 40ec8f2480f6a46e0e7b70c974491f6bc5c810d9aa4ba3397d744f37e27469f8.",
+      "denominator": "56 tests collected clean; 4 collection errors with the sentinel present; restore compared byte-for-byte and corroborated by sha256 against an independent pre-mutation snapshot.",
+      "status": "PASS",
+      "expect": "(?:Interrupted: \\d+ errors? during collection|ZeroDivisionError)[\\s\\S]*RESTORED_BYTE_IDENTICAL",
+      "status_reason": "BOTH HALVES MET. The sentinel is caught (green -> 4 collection errors on the sentinel alone), so AC2's suite genuinely sees this file. RESTORED_BYTE_IDENTICAL printed, from a WORKING-TREE snapshot; `git checkout --` appears nowhere in this task order. Corroborated by a SECOND instrument, because the criterion's own cmp compares against the snapshot it restored from and can only prove self-consistency: an insurance copy taken before the criterion ran has sha256 40ec8f2480f6a46e0e7b70c974491f6bc5c810d9aa4ba3397d744f37e27469f8, equal to the restored file's."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "<criterion id=\"AC5\" cell_refs=\"AMGT-rf-4\" judgment=\"true\"/> -- declared judgment with NO children: no <invocation>, no <expect>.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- no invocation exists to run; the order declares this criterion judgment-only and self-closing.",
+      "output_evidence": "NO VERDICT IS RECORDED BY THIS WORKER, BY INSTRUCTION. Cited at org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-4.the-corrected-overlay-bypass.md @ c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5. Material for the L9 grading: the adapter now serves corrected fiscal prices through the SHARED contract with no second implementation; both the RESOLVED and UNRESOLVED arms are exercised against real landed artifacts through the populated Thesis route; the unresolved case produces a STATED REFUSAL from the check face; original vintage, observation date and derivation identity are all preserved and distinct; no historical model artifact was rewritten; and AC1's own instrument is defective in two independent ways (row AMGT_RESAPP-Z-W11-S6), which is why this order is left OPEN.",
+      "denominator": "N/A -- a judgment criterion has no instrument and no denominator. 1 of 5 criteria here is judgment-graded; 4 of 5 are mechanical and recorded above.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "JUDGMENT CRITERION -- declared `judgment=\"true\"` with NO children. The order: 'A judgment criterion carries `judgment=\"true\"`, no children and NO verdict from you: record it `UNVERIFIABLE-BY-INSTRUMENT` with a `status_reason` naming `3.0.0_SA_CVO~Z`, which grades it at L9. `PASS` or `FAIL` on a judgment row is INVALID.' Graded at L9 by 3.0.0_SA_CVO~Z. This worker records no verdict and argues for none."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutation controls. (1) THE ORDER'S OWN, AC4: BROKEN_SENTINEL_RF4 = 1/0 appended to lib/research/api/scoped_amgt.py, suites re-run, restored from a WORKING-TREE snapshot taken with cp before the mutation. (2) ON THE WIRING ITSELF, which is the one that matters here: `read_model_block` was reverted to `return block` -- the EXACT pre-cell bypass, raw model only -- and the new suite re-run, then restored from .scratch/rf4_wire.pre. A test file that has only ever run against the repaired world has never been shown to detect the defect it was written for.",
+      "expected": "(1) the suites turn RED on the sentinel alone and the file returns byte-identical. (2) the wiring tests turn RED, and critically the UNRESOLVED REFUSAL test must be among them -- if only the value assertions failed, the suite would be checking that numbers changed without checking that the unresolved case is still refused, which is the branch that actually shipped.",
+      "observed": "(1) FIRED: 56 passed -> `ZeroDivisionError: division by zero` / `Interrupted: 4 errors during collection` / `4 errors in 0.16s`, then RESTORED_BYTE_IDENTICAL, corroborated by sha256 40ec8f2480f6a46e0e7b70c974491f6bc5c810d9aa4ba3397d744f37e27469f8 against an independent pre-mutation copy. (2) FIRED, 6 failed / 3 passed, AND THE REFUSAL TEST IS AMONG THEM: test_fy2025_serves_the_corrected_price_and_not_the_raw_one -- `FY2025 is serving the RAW 146.58 -- this is the measured bypass`; test_every_fiscal_price_row_is_served_corrected -- `rows not marked RESOLVED: [('2016', None), ('2017', None), ...]`; test_every_served_row_carries_its_provenance; test_the_original_vintage_is_preserved_and_not_overwritten_by_the_correction; test_an_unresolved_overlay_keeps_the_original_value_and_is_tagged_unresolved -- `expected UNRESOLVED, got None`; and test_an_unresolved_overlay_is_REFUSED_by_the_check_face_not_silently_served -- `the UNRESOLVED fiscal price was NOT refused -- verdicts {'PASS'}`, which is the silent fallback itself, caught. Restored, cmp silent, sha256 40ec8f2480f6a46e0e7b70c974491f6bc5c810d9aa4ba3397d744f37e27469f8.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC1 pair (space form and underscore form) run and re-run in the same session; the two suites run repeatedly across AC2, AC4 and the wiring mutation control; the AC3 census run before and after the wiring landed.",
+      "observed": "AC1 space form PX_LAST_ROWS=0 and underscore form PX_LAST_ROWS=110 on every run. Suites: 56 passed on every clean run, 4 collection errors on every sentinel run, 6 failed / 3 passed on every wiring-mutant run. AC3 census 28 of 86 before and 39 of 87 after, stable on repeat. No figure moved between runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Correcting AC1's invocation -- its security-key form and its `'PX_LAST' in str(r)` selector.",
+      "reason": "A worker does not edit the criteria it is graded on. Both defects are measured and recorded as row AMGT_RESAPP-Z-W11-S6, with the two-limb fix named (the adapter's key form AND selection by `r.get('mnemonic') == 'PX_LAST'`) and with the warning that fixing only the key converts an always-passes criterion into one that fails correct work."
+    },
+    {
+      "item": "Security-key normalisation inside read_model_block, which would make AC1's named invocation return rows.",
+      "reason": "Same reasoning as row Z-W11-S4 on rf-3: it changes the adapter's IDENTITY CONTRACT, which belongs to AMGT-s-12 and not to this cell. Doing it here to turn my own criterion green would be the worst available reason to widen an order."
+    },
+    {
+      "item": "Any edit to lib/research/provenance/render_print.py, the shared corrected-overlay contract.",
+      "reason": "OUT OF GRANT -- rf-4's <paths> names lib/research/api/*, lib/research/rules/, the channel and its own file. The contract is IMPORTED and READ, never modified, which is also what the cell asks for: wire to the existing contract rather than re-derive it."
+    },
+    {
+      "item": "Rewriting historical model artifacts, or re-opening the round-4 Print grade.",
+      "reason": "Forbidden by the cell in those words. Nothing on disk was written: the overlay mutates an in-memory dict that `_read_json_artifact` re-reads fresh on every call, and the on-disk model_block artifacts are untouched. This is a new-consumer regression only."
+    },
+    {
+      "item": "Merging this cell with AMGT-rf-3.",
+      "reason": "The cell forbids it explicitly -- 3.0.0_SA_CVO~Z corrected the round analysis on exactly this point, that grouping C-S61/C-S62/C-S63 as one class 'lost the distinction that makes them three different repairs'. rf-3 fixed a matcher returning NOTHING; this fixed a path returning the WRONG NUMBERS. They are also ordered: rf-3 alone would have EXPOSED the stale values, which is why it was committed first (ebcfc4051f) and why this file's assertions would have failed before it."
+    },
+    {
+      "item": "rf-5.",
+      "reason": "The next order in this worker's sequential queue, with its own grant and its own commit."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W11-S6"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python (AC1, named invocation)",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; b=s.read_thesis_bundle('BABA US Equity'); rows=[r for r in (b.get('fiscal_year_figures') or []) if 'PX_LAST' in str(r)]; print('PX_LAST_ROWS=%d' % len(rows)); [print(r) for r in rows[:12]]\"",
+      "result": "PX_LAST_ROWS=0 -- a VACUOUS pass; graded FAIL, row Z-W11-S6"
+    },
+    {
+      "tool": "python (AC1 diagnostic, adapter's key form -- NOT AC1's result)",
+      "invocation": "timeout 110 python -c \"... s.read_thesis_bundle('BABA_US_Equity') ...\"",
+      "result": "PX_LAST_ROWS=110 by the criterion's substring filter; 10 real fiscal PX_LAST rows, 0 reading 146.58, 10 of 10 RESOLVED with full provenance"
+    },
+    {
+      "tool": "python (selector census by subtraction over a printed denominator)",
+      "invocation": "len([r for r in figs if 'PX_LAST' in str(r)]) vs len([r for r in figs if r.get('mnemonic')=='PX_LAST']) over the 183 fiscal figures",
+      "result": "110 vs 10; the extra 100 are 10 non-price mnemonics x 10 fiscal years matching on a prose currency_caveat"
+    },
+    {
+      "tool": "pytest (AC2, both suites)",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ lib/research/rules/tests/ -q 2>&1 | tail -4",
+      "result": "56 passed rc 0, including 4 unresolved-arm tests and a negative control on the refusal"
+    },
+    {
+      "tool": "comp-find (AC3, with a pre-cell baseline and an adapter-scoped second census)",
+      "invocation": "timeout 110 comp-find \"load_model_block|corrected_overlay|corrected_model\" lib/research --limit 20",
+      "result": "39 hit(s) across 87 file(s) (baseline 28 of 86); adapter-scoped 6 of 7 with DEF band empty in lib/research/api"
+    },
+    {
+      "tool": "pytest mutation control (AC4)",
+      "invocation": "cp lib/research/api/scoped_amgt.py /tmp/rf4.pre; printf \"\\nBROKEN_SENTINEL_RF4 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf4.pre lib/research/api/scoped_amgt.py; cmp -s /tmp/rf4.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "result": "4 errors during collection with the sentinel; RESTORED_BYTE_IDENTICAL"
+    },
+    {
+      "tool": "pytest mutation control on the WIRING (not required by the order)",
+      "invocation": "revert read_model_block to `return block`, then pytest lib/research/api/tests/test_corrected_overlay_wiring.py -q",
+      "result": "6 failed / 3 passed, including `the UNRESOLVED fiscal price was NOT refused -- verdicts {'PASS'}`; restored from .scratch/rf4_wire.pre"
+    },
+    {
+      "tool": "python (raw vs corrected census on the landed artifacts, grounding the cell's own numbers)",
+      "invocation": "load_corrected_price_overlay(Path(root),'BABA_US_Equity') compared against the raw block's fiscal PX_LAST rows",
+      "result": "10 overlay rows, 10 raw fiscal PX_LAST rows, DIFFER=10 SAME=0 UNRESOLVED=0; FY2025 raw 146.58 vs corrected 132.23; BABACVOCTRL carries the single UNRESOLVED year"
+    }
+  ]
+}
