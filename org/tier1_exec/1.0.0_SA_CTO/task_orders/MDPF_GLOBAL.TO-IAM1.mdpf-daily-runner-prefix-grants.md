@@ -1,6 +1,6 @@
-# TO MDPF_GLOBAL.IAM1 -- mdpf-daily-runner-ec2-role: the prefix grants its own runner needs
+# TO MDPF_GLOBAL.TO-IAM1 -- mdpf-daily-runner-ec2-role: the prefix grants its own runner needs
 
-<to_id>MDPF_GLOBAL.IAM1</to_id>
+<to_id>MDPF_GLOBAL.TO-IAM1</to_id>
 <project>MDPF_GLOBAL</project>
 <issued_to>0.7.0_AE_CloudOps~C</issued_to>
 <issued_by>1.0.0_SA_CTO</issued_by>
@@ -134,7 +134,7 @@ Criterion ids minted at cut: **IAM1-AC1** (pre-act sweep re-run, denominator and
 positive control still firing), **IAM1-AC5** (negative control proving the grant did NOT widen beyond
 its prefixes).
 
-Instance at `org/tier2_senior/0.7.0_AE_CloudOps~C/deliverables/MDPF_GLOBAL.IAM1.mdpf-daily-runner-prefix-grants.proof_of_spec.json`
+Instance at `org/tier2_senior/0.7.0_AE_CloudOps~C/deliverables/MDPF_GLOBAL.TO-IAM1.mdpf-daily-runner-prefix-grants.proof_of_spec.json`
 -- the TASK ORDER'S OWN BASENAME stem, which `.tools/to-pipeline-gate.py` `check_complete_flip` globs
 for under `deliverables/*/` -- per `org/standards/PROOF_OF_SPEC.schema.json`: one acceptance row per id,
 `criterion_verbatim` the spec's words, `invocation` the exact command, `output_evidence` the verbatim
