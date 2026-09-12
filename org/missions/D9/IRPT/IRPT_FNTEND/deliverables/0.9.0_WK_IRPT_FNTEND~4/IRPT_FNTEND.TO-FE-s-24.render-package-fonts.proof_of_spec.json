@@ -1,0 +1,206 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_FNTEND.TO-FE-s-24",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "d1479bc5f0"
+ },
+ "assignee": "0.9.0_WK_IRPT_FNTEND~4",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+  "vintage_commit": "38f68b965c",
+  "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-24.render-package-fonts.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/pages/InvestorReporting/render/manifest.ts",
+   "kind": "frontend_component",
+   "commit_or_etag": "5500c4ae",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "PORTAL repo, branch wk-irpt_fntend-3-4-fe-s-24, commit 5500c4ae (LOCAL, never pushed -- portal is frozen). ONE value changed: `RENDER_PACKAGE.fonts` goes from ['Lato-Regular.ttf', 'Lato-Light.ttf', 'Lato-SemiBold.ttf'] to the same three plus 'Lato-Bold.ttf', in the order `fontPackage.files` and fonts.manifest.json list them. The doc comment's WARN paragraph (which stated the list was short by one and WHY, citing the typed-in 3 in fe-s-4) is replaced by the closing note plus the three-file rule for adding a face. NOTHING ELSE IN THE FILE MOVED: no fontPackage entry, no sha256, no byte count, no template, no supportedContracts value. Under render/ this cell owns manifest.ts ONLY, and assets/fonts/, print.css and narrative/ are untouched -- `git show --stat 5500c4ae` lists exactly three paths, all named in <paths>.",
+   "artifact_covered_by": [
+    "F24-AC1",
+    "F24-AC2",
+    "F24-AC5",
+    "F24-AC6",
+    "F24-AC7"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-4/manifest.test.ts",
+   "kind": "test",
+   "commit_or_etag": "5500c4ae",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "THE SHAPE FIX, which is the cell. `expect(RENDER_PACKAGE.fonts.length).toBe(3)` is GONE and is NOT replaced by a 4. The expected face list is computed by `fontNameAgreement(pkg)`, which reads `pkg.fontPackage.files.map(f => f.name)` -- the package's own declaration -- and compares NAMES and ORDER against the flat array, so the next packaging change moves both sides or fails here naming the face it missed. Three arms: the agreement itself (prints FONT NAMES: 4 of 4 with the missing/foreign sets), a SEEDED one-face disagreement in both directions (prints DISAGREEMENT CAUGHT: 1 of 1), and a self-source scan for a font count graded against a typed-in digit. The pre-existing `test('the manifest names three faces and two templates')` was retitled and now calls the same derived rule rather than a digit.",
+   "artifact_covered_by": [
+    "F24-AC2",
+    "F24-AC3",
+    "F24-AC4",
+    "F24-AC6"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-17/fonts.test.ts",
+   "kind": "test",
+   "commit_or_etag": "5500c4ae",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "ONE test changed: 'the FLAT `fonts` list is a SHORT subset, and this test says by how much' asserted `missing == ['Lato-Bold.ttf']` and `flat` of length 3 -- both of which the widened array falsifies, so this file was IN the grant for exactly this reason. It becomes 'the FLAT `fonts` list is the packaged set EXACTLY -- equality restored': missing == [], foreign == [], flat == packaged, plus a non-vacuity guard (flat.length > 0) so an empty package could not satisfy the equality silently. GRAIN: this arm grades the flat array against fonts.manifest.json, the HASHED record on disk -- a different source from the one fe-s-4 derives its count from (the typed fontPackage), so the two files are not one instrument twice. No other test in this file moved; the hash, weight, stand-in, licence and @font-face arms are untouched.",
+   "artifact_covered_by": [
+    "F24-AC5",
+    "F24-AC7"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md",
+   "kind": "doc",
+   "commit_or_etag": "77b714db26",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "WORKSPACE repo, branch wk-irpt_fntend-3-4-fe-s-24, commit 77b714db26 (LOCAL). Two appended rows, IRPT_FNTEND-W4-S3 and IRPT_FNTEND-W4-S4, 47 insertions, no existing row edited. The row gate's own run is the authority: '[surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields', '2 new row(s) of 59 total checked (57 pre-existing, NOT re-graded)', and '[surprise-corpus] OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'.",
+   "artifact_covered_by": [
+    "F24-AC3"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "F24-AC1",
+   "criterion_verbatim": "F24-AC1 -- the whole portal typechecks.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+   "output_evidence": "$ tsc -b --noEmit\nrc=0\n\n(No diagnostics. Run twice: once after the three edits and again at the committed tree 5500c4ae -- rc=0 and zero diagnostic output both times.)",
+   "denominator": "Whole-program `tsc -b --noEmit` over the portal's entire src/ via tsconfig project references, not a scoped or per-file check. All three edited files are inside tsconfig.app.json's include: ['src'], so the structural `FontBearingPackage` parameter type, the readonly-tuple widening it accepts, and the two new node:fs / node:url imports are all inside the program that returned rc=0.",
+   "expect": "rc=0",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F24-AC2",
+   "criterion_verbatim": "F24-AC2 -- `RENDER_PACKAGE.fonts` names all four packaged faces, and the test prints the count it DERIVED from the package beside the count it found in the array.",
+   "method": "test_suite",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-4/manifest.test.ts",
+   "output_evidence": "PACKAGED FACES (fontPackage.files): Lato-Regular.ttf, Lato-Light.ttf, Lato-SemiBold.ttf, Lato-Bold.ttf\nFLAT LIST (RENDER_PACKAGE.fonts):   Lato-Regular.ttf, Lato-Light.ttf, Lato-SemiBold.ttf, Lato-Bold.ttf\n  NOT NAMED IN THE FLAT LIST: (none)\n  NAMED BUT NOT PACKAGED:     (none)\nFONT NAMES: 4 of 4\n\n12 pass, 0 fail, Ran 12 tests across 1 file.",
+   "denominator": "4 of 4 -- the numerator is the count of DERIVED names (read off fontPackage.files) that the flat array also names; the denominator is the length of that derived list, never the array's own length. Both lists are printed in full beside the number, so the ratio can be re-read from its members rather than trusted. The assertion is on NAMES AND ORDER (`expect(flat).toEqual(derived)`), not on the count: two lists of four that disagree on a member fail.",
+   "expect": "FONT NAMES: 4 of 4",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F24-AC3",
+   "criterion_verbatim": "F24-AC3 -- the assertion's shape: a source scan of `__tests__/fe-s-4/manifest.test.ts` for a literal length comparison against a digit returns zero hits, printed with a positive control proving the scan can find one.",
+   "method": "test_suite",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-4/manifest.test.ts",
+   "output_evidence": "SOURCE SCANNED: 352 lines of manifest.test.ts\nLITERAL COUNT COMPARISONS: 8 of 8 found, 0 of them grade the FONT count\n  (kept, not a font count) expect(files.length > 8).toBe(true)\n  (kept, not a font count) const unlisted = names.filter((name) => supportedVersionsFor(name).length === 0)\n  (kept, not a font count) if (unlisted.length > 0) console.log('UNLISTED CONTRACTS: ' + unlisted.join(', '))\n  (kept, not a font count) expect(RENDER_PACKAGE.templates.length).toBe(2)\n  (kept, not a font count) return { derived, flat, matched, missing, foreign, agrees: missing.length === 0 && foreign.length === 0 && flat.join('|') === derived.join('|') }\n  (kept, not a font count) console.log(`  NOT NAMED IN THE FLAT LIST: ${agreement.missing.length === 0 ? '(none)' : agreement.missing.join(', ')}`)\n  (kept, not a font count) console.log(`  NAMED BUT NOT PACKAGED:     ${agreement.foreign.length === 0 ? '(none)' : agreement.foreign.join(', ')}`)\n  (kept, not a font count) expect(agreement.derived.length > 0).toBe(true)\nPOSITIVE CONTROL: scan of a seeded typed-in line found 1 hit -- expect(RENDER_PACKAGE.fonts.length).toBe(4)\nFONT NAME COUNT IS DERIVED, NOT LITERAL",
+   "denominator": "0 of 8 over 352 source lines of the file itself (read at run time via import.meta.url, so the scan grades the bytes that ran, not a copy). SCOPING DISCLOSED AND FILED AS ROW IRPT_FNTEND-W4-S3: the ZERO is over the FONT-count subset, which is the subject the cell names ('manifest.test.ts asserts a LITERAL 3. Changing it to a literal 4 reproduces the defect one face later'). The UNSCOPED figure is 8 and every hit is printed rather than filtered away -- two of them (`files.length > 8`, `templates.length).toBe(2)`) predate this cell at portal DEV @f0443ba8 and are not its subject; six are `=== 0` emptiness checks and `> 0` non-vacuity guards, which are the ordinary idiom of the derived rule the cell ordered. An unscoped zero was reachable only by deleting a bar this cell does not own. The positive control runs the SAME scoped predicate over a seeded line and must return exactly that line; the seed is assembled from three fragments so the control is not itself a hit when the file scans its own source -- written whole it would plant the line it looks for and the arm would be a constant.",
+   "expect": "COUNT IS DERIVED, NOT LITERAL",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F24-AC4",
+   "criterion_verbatim": "F24-AC4 -- the difference control. A seeded package in which `fonts` and `fontPackage` disagree by one face turns the assertion RED. Without this arm a derived count could be derived from the array itself and would agree with everything forever.",
+   "method": "test_suite",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-4/manifest.test.ts",
+   "output_evidence": "SEEDED (flat short by one): flat 3, packaged 4, missing Lato-Bold.ttf\nDISAGREEMENT CAUGHT: 1 of 1\nSEEDED (flat names an unpackaged face): foreign Lato-Thin.ttf\nDISAGREEMENT CAUGHT (reverse direction): 1 of 1\n\n(and the control on the control, same run: the SAME rule applied to the real RENDER_PACKAGE agrees.)",
+   "denominator": "1 of 1 on the ordered direction (the flat list short by one face -- the exact state this cell repaired), plus a second, differently-signed arm: 1 of 1 on a flat list naming a face the package does not ship. Both seeded on COPIES; RENDER_PACKAGE itself is never mutated, and the same run re-asserts that the real package agrees, so the arm cannot pass by refusing everything. WHY TWO DIRECTIONS: a count that derived itself from `fonts` would pass BOTH seeded cases; a rule read off `fontPackage.files` fails both. A LIVE mutant on the committed artifact is recorded under controls.mutant -- the in-test arms grade the rule FUNCTION, the live mutant proves the test is wired to the real RENDER_PACKAGE and not to a fixture.",
+   "expect": "DISAGREEMENT CAUGHT: 1 of 1",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F24-AC5",
+   "criterion_verbatim": "F24-AC5 -- FE-s-17's font battery still passes against the widened array, including the Bold entry's sha256 8a0aace75d33794eece4b28187bfc1df0bbd2888b5d8a56e01788c8d65d16be1.",
+   "method": "test_suite",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-17/fonts.test.ts",
+   "output_evidence": "ON DISK: 4 .ttf -- Lato-Bold.ttf, Lato-Light.ttf, Lato-Regular.ttf, Lato-SemiBold.ttf\nDECLARED: 4 entr(ies) -- Lato-Bold.ttf, Lato-Light.ttf, Lato-Regular.ttf, Lato-SemiBold.ttf\n  Lato-Bold.ttf  weight=700 style=normal bytes=656544/656544  sha256=8a0aace75d33794e...  MATCH\nFONTS: 4 of 4\nBOLD ON DISK: Lato-Bold.ttf bytes=656544 sha256=8a0aace75d33794eece4b28187bfc1df0bbd2888b5d8a56e01788c8d65d16be1\nMIRRORED ROWS: 4 of 4\nFLAT FONT LIST: 4 of 4 packaged faces named\n  NOT NAMED IN THE FLAT LIST: (none)\n  NAMED BUT NOT PACKAGED: (none)\n\n11 pass, 0 fail, Ran 11 tests across 1 file.",
+   "denominator": "FONTS: 4 of 4 -- every .ttf on disk under render/assets/fonts/ re-hashed from its BYTES and compared to its fonts.manifest.json entry, the ON DISK and DECLARED sets printed and compared both ways (4 and 4). The Bold sha256 the criterion names is printed in full and MATCHes. NO FONT FILE WAS TOUCHED BY THIS CELL: the four faces and their hashes are FE-s-18's, unchanged; `git show --stat 5500c4ae` names no path under render/assets/. The flat-list arm is the only test in this file this cell changed, and it moved from 'short by one' to equality because the array it reads moved.",
+   "expect": "FONTS: 4 of 4",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F24-AC6",
+   "criterion_verbatim": "F24-AC6 -- the whole fe-s-4 folder is green, including the determinism bounds that also read `RENDER_PACKAGE`.",
+   "method": "test_suite",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-4",
+   "output_evidence": "31 pass\n0 fail\n105 expect() calls\nRan 31 tests across 5 files. [838.00ms]",
+   "denominator": "31 of 31 tests across 5 of 5 files in the folder (analysis-no-narrative, determinism, determinism-bounds, fields, manifest) -- the whole directory, not the one file this cell edited. The pre-edit baseline for this folder was 28 tests; the three added are FE-s-24's own arms, so the delta is +3 pass and 0 fail either side. determinism-bounds.test.ts reads RENDER_PACKAGE's page geometry and is inside this run.",
+   "expect": "0 fail",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "F24-AC7",
+   "criterion_verbatim": "F24-AC7 -- the whole Investor Reporting set moves NEITHER way: exactly the two failures that exist at this cut (`F18-AC3`'s capture collision, `FE-s-19`'s; and the one stale schema pin, `FE-s-20`'s) and no third. The bar is `2 fail` because this cell cannot clear either and must not introduce one. **Print both failing test names**; if either is not one of those two, that is a BLOCKING row.",
+   "method": "test_suite",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+   "output_evidence": "(fail) producer fixtures > the generated wire types were generated from THESE schemas\n(fail) F18-AC3 -- the captures are the files the manifest claims > UNIQUE HASHES -- no two entries share a hash (FAILS at this commit; see the file header)\n\n422 pass\n1 skip\n2 fail\nRan 425 tests across 69 files. [1.56s]",
+   "denominator": "2 fail of 425 tests across 69 files -- the whole src/pages/InvestorReporting tree. BOTH FAILING NAMES PRINTED AND MATCHED AGAINST THE ORDERED PAIR: 'producer fixtures > the generated wire types were generated from THESE schemas' is the stale schema pin (FE-s-20's, one contract -- StatusEnvelope -- per row IRPT_FNTEND-S35's correction of S33), and 'F18-AC3 ... UNIQUE HASHES' is the capture-hash collision (FE-s-19's). Neither is this cell's and neither is clearable inside its grant. THE SAME TWO, BY NAME, IN THE PRE-EDIT BASELINE run on this worktree before any file was touched: 419 pass, 1 skip, 2 fail -- so the number did not move either way and the +3 pass is exactly this cell's three new arms. No third failure appeared.",
+   "expect": "2 fail",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "TWO ARMS on the COMMITTED artifact (5500c4ae), applied and reverted one at a time by .scratch/mutant.py, which reverts in a `finally` so a dead runner cannot leave a mutant applied. The in-test seeded arms of F24-AC4 grade the rule FUNCTION over copies; these grade the WIRING -- is the assertion reading the real RENDER_PACKAGE, and does it fail for the right reason with the right face named? ARM A mutates the FLAT ARRAY (Lato-Bold.ttf removed from RENDER_PACKAGE.fonts -- the exact pre-cell state). ARM B mutates the PACKAGE side instead (fontPackage.files' fourth entry renamed to Lato-Boldx.ttf), which a check that derived its expectation from the array would not notice at all.",
+   "expected": "ARM A: the derived count falls to `FONT NAMES: 3 of 4` with `NOT NAMED IN THE FLAT LIST: Lato-Bold.ttf`, and the suite goes RED -- proving the expectation comes from fontPackage.files and not from the array being graded. ARM B: `FONT NAMES: 3 of 4` with the mutated name in MISSING and the real Lato-Bold.ttf in `NAMED BUT NOT PACKAGED`, red again -- proving the rule is symmetric and reads the package side live.",
+   "observed": "ARM A: `FONT NAMES: 3 of 4`; `NOT NAMED IN THE FLAT LIST: Lato-Bold.ttf`; `NAMED BUT NOT PACKAGED: (none)`; 9 pass, 3 fail. ARM B: `FONT NAMES: 3 of 4`; `NOT NAMED IN THE FLAT LIST: Lato-Boldx.ttf`; `NAMED BUT NOT PACKAGED: Lato-Bold.ttf`; 9 pass, 3 fail. Both reverted; `git diff --stat` on manifest.ts reads clean (worktree equals HEAD) after the run. DISCLOSED: the first attempt at this control crashed inside ARM A (subprocess could not resolve the MSYS-style bun path on the Windows plane) and left the mutated bytes on disk. It was restored from `git show HEAD:<path>` -- not `git checkout`, which this worker may not run -- with the worktree EOL re-applied, and `git diff --stat` verified clean before anything else ran; the `finally` limb was added so the failure mode cannot recur. No commit was taken while the mutant was applied: the portal artifact commit 5500c4ae predates the control, the worktree was verified clean against it after the revert, and no portal commit follows.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Two same-input runs of the graded file, outputs filtered of the runner's own timing lines ([NNms], 'Ran N tests') and diffed byte for byte: `bun test .../fe-s-4/manifest.test.ts` twice into .scratch/det1.txt and det2.txt, then `diff`.",
+   "observed": "43 lines compared, diff empty -- identical. Expected to be stable by construction: every arm reads either a module constant (RENDER_PACKAGE) or this file's own source bytes; nothing here reads a clock, the network, a directory listing order that varies, or a random seed. The one filesystem read is the test file itself, by import.meta.url.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Re-packaging, re-fetching, re-hashing or moving any font file, and any edit under render/assets/fonts/ including fonts.manifest.json",
+   "reason": "The order forbids it verbatim ('DO NOT RE-PACKAGE, RE-FETCH OR MOVE A FONT FILE ... This cell changes what the manifest SAYS, never what the package CONTAINS'), and render/ is narrowed in <paths> to manifest.ts alone. Nothing was fetched from any host. The four faces were verified present and hash-MATCHing by FE-s-17's existing battery (4 of 4 on disk, 4 of 4 declared, every sha256 MATCH including the Bold), which is a READ, not a write -- so the BLOCKING condition the order names for an absent or mismatched binary did not arise."
+  },
+  {
+   "item": "Clearing either of the two standing failures in the Investor Reporting set (the capture-hash collision, FE-s-19's; the stale StatusEnvelope schema pin, FE-s-20's)",
+   "reason": "Neither is this cell's and both sit in files outside this order's <paths>; F24-AC7's bar is `2 fail` precisely so this cell moves the number neither way. Both failing test names are printed under F24-AC7 and matched against the ordered pair, and both are the SAME two the pre-edit baseline run showed on this worktree."
+  },
+  {
+   "item": "Deriving the TEMPLATE count in __tests__/fe-s-4/manifest.test.ts, so that F24-AC3's scan would return zero UNSCOPED",
+   "reason": "Out of this cell's subject and a bad trade. The cell names the font count ('manifest.test.ts asserts a LITERAL 3'); `expect(RENDER_PACKAGE.templates.length).toBe(2)` predates this cell at portal DEV @f0443ba8, and the only derivation available for it is Object.keys(pageOptions).length, which the very next line already asserts equal to templates -- so deriving it would make the assertion tautological and LOSE the bar 'there are exactly two templates'. The hit is not hidden: the scan prints its unscoped denominator (8) and lists every line, and the scoping is filed as row IRPT_FNTEND-W4-S3 rather than decided silently."
+  },
+  {
+   "item": "A dev server, a browser capture, or any ui-smoke run",
+   "reason": "The order states the cell does not need one ('Dev server. Not needed for this cell.'). None was started, so none needed killing. No print.css or rendered-output claim is made here; whether the fourth face is SERVED is FE-s-17's fonts-served battery, which this cell did not touch and which runs inside F24-AC7's 425."
+  },
+  {
+   "item": "bun install / any node_modules change",
+   "reason": "Forbidden by the identity line (node_modules is a junction). Not run; the existing junction served every invocation."
+  }
+ ],
+ "surprises": [
+  "IRPT_FNTEND-W4-S3: F24-AC3's bar as written -- 'a source scan of __tests__/fe-s-4/manifest.test.ts for a literal length comparison against a digit returns zero hits' -- cannot be met UNSCOPED: that file already carried two such comparisons before this cell touched it (a lower bound on render/ sources and the TEMPLATE count), neither about fonts, and an unscoped zero would require deleting a bar this cell does not own. The scan is scoped to the FONT count, which is the subject the cell text names, and prints 0 of 8 with the full unscoped denominator and every hit listed, so the scoping is visible to a grader rather than hidden in a green. OBSERVATION, INERT, UNDER_INVESTIGATION.",
+  "IRPT_FNTEND-W4-S4: the order's minting instruction ('starting at IRPT_FNTEND-W4-S1 (the W4 coordinate has no round-3 rows yet; if the file carries no W4 sequence, yours opens it)') produces a REFUSED COMMIT when followed literally -- INVESTIGATION_v2.md carries no W4 sequence, but INVESTIGATION_v1.md already holds W4-S1 and W4-S2 from round 1, and .tools/surprise-row-gate.py allocates over the whole channel PLANE, not per document. The ordered id was minted, staged and BLOCKED by the gate's own run; the uncommitted block was backed out (file verified byte-identical to HEAD) and re-minted at W4-S3/W4-S4, the next unused numbers over both documents. The trap is Rule 24's: my pre-mint re-read was scoped to the document the face named, and a zero from a scoped domain read as an absence. OBSERVATION, INERT, UNDER_INVESTIGATION."
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~4/render-package-fonts.result.md",
+ "compiler_tools": [
+  {
+   "tool": "tsc -b --noEmit via `bun run typecheck`, bun 1.3.9 (cf6cdbbb)",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+   "result": "rc=0, no diagnostics, both runs (post-edit and at the committed tree 5500c4ae)."
+  },
+  {
+   "tool": "bun test, bun 1.3.9 (cf6cdbbb)",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+   "result": "422 pass, 1 skip, 2 fail, 425 tests across 69 files. PRE-EDIT BASELINE on the same worktree: 419 pass, 1 skip, 2 fail, 422 tests across 69 files -- same two failing test names, +3 pass being this cell's own arms."
+  },
+  {
+   "tool": "python mutant harness (.scratch/mutant.py) -- edit, run, revert in a finally, then git diff as the revert oracle",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24/portal && timeout 300 python ../.scratch/mutant.py",
+   "result": "Both arms FIRED (9 pass / 3 fail each, FONT NAMES: 3 of 4, the offending face named in each direction); revert oracle printed '(clean -- worktree equals HEAD)'."
+  },
+  {
+   "tool": ".tools/safe-commit.sh with the surprise-row gate, corpus gate and missions-tree check (workspace); same script from the portal worktree",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_FNTEND~4 <0.9.0_WK_IRPT_FNTEND~4@opal.agent>\" -F <msgfile> -- <paths>",
+   "result": "Workspace 77b714db26 (2 rows, gate OK: 'all new rows carry their step-7/step-10 fields'; corpus at the exact legacy baseline). Portal 5500c4ae, 3 files, 169 insertions / 29 deletions. One EARLIER attempt was BLOCKED by the row gate on the ordered id W4-S1 as a cross-document collision -- that refusal is row W4-S4's evidence."
+  },
+  {
+   "tool": "python .tools/proof-of-spec-check.py",
+   "invocation": "cd /c/tmp/wk-irpt_fntend-3-4-fe-s-24 && python .tools/proof-of-spec-check.py org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~4/IRPT_FNTEND.TO-FE-s-24.render-package-fonts.proof_of_spec.json F24-AC1,F24-AC2,F24-AC3,F24-AC4,F24-AC5,F24-AC6,F24-AC7",
+   "result": "see the result file -- run BEFORE the <status> flip, and only the exit code is the verdict."
+  }
+ ]
+}
