@@ -1,12 +1,18 @@
 # FE-s-19 -- the envelope-to-view seam: the state the wire sends is the state the view gets
 
 **Task order:** `IRPT_FNTEND.TO-FE-s-19` · **Worker:** `0.9.0_WK_IRPT_FNTEND~1`, slot ~1
-**Workspace branch:** `wk-irpt_fntend-3-1-fe-s-19` (cut from CLOUD @9762d5b8a3) · **Portal branch:** `wk-irpt_fntend-3-1-fe-s-19` (cut from DEV @f0443ba8)
-**Push state:** LOCAL in both repos. Portal is frozen by Andrew-direct; nothing was pushed, merged, rebased or checked out.
+**Workspace branch:** `wk-irpt_fntend-3-1-fe-s-19` (cut from CLOUD @9762d5b8a3) · **Portal branch:** `wk-irpt_fntend-3-1-fe-s-19` (cut from DEV @f0443ba8, **DEV re-merged into the branch at `64c1365f` by `2.0.0_SA_COO~F` mid-order**)
+**Push state:** LOCAL in both repos. Portal is frozen by Andrew-direct; nothing was pushed, merged, rebased or checked out by this worker.
 
-**ORDER STATUS: NOT COMPLETE.** Nine of the ten criteria pass by output; `F19-AC9` is a judgment
-criterion recorded without a verdict; **`F19-AC8` FAILS** and is carried as `IRPT_FNTEND-W1-S38`.
-The `<status>` is NOT flipped. Section 6 states the failure and its measurement.
+**ORDER STATUS: COMPLETE.** All nine mechanical criteria pass by output ON THE MERGED BYTES;
+`F19-AC10` is the judgment criterion, recorded without a verdict for L9.
+
+⚠ **THIS FILE WAS RE-MEASURED IN FULL AFTER THE BASE MOVED, AND AFTER `F19-AC8`'s BAR WAS
+CORRECTED BY THE ISSUER.** Read section 6 first: it carries the correction, the re-measurement and
+what is NOT re-runnable. Every number in section 8 is from the merged bytes (portal `64c1365f`);
+no earlier output is carried forward. The one thing that could not be re-taken is section 4's
+negative-control ledger -- those runs happened on the pre-fix bytes, which no longer exist on this
+branch, and re-running them would prove nothing. They stand as history and are labelled as such.
 
 ---
 
@@ -107,6 +113,15 @@ the ONE parser, where every consumer gets it rather than one method of one clien
 Each of the three new test files was written, RUN AGAINST THE UNMODIFIED BYTES, and its failure
 recorded, BEFORE any source file was touched. Raw captures: `.scratch/red1.txt`, `red2.txt`,
 `red3.txt`, `green1.txt`, `green2.txt`, `green3.txt` (scratch, not committed).
+
+⚠ **THIS SECTION IS HISTORY AND IS THE ONE PART OF THIS FILE THAT WAS *NOT* RE-MEASURED AFTER THE
+DEV MERGE, DELIBERATELY.** A negative control is a statement about bytes that existed at ONE moment
+-- the pre-fix tree, before this cell's first source edit. Those bytes are not on this branch any
+more and cannot be re-created, so re-running these six commands today would produce six PASSES and
+destroy the only evidence that the tests could ever fail. The "after" figures quoted below are the
+PRE-MERGE passing runs, kept beside their reds so each pair is one comparison on one tree; the
+merged-bytes figures that GRADE the criteria are in section 8, measured separately. Re-running
+`F19-AC9` only re-counts the headings in this file, which is all that criterion asks.
 
 ### PRE-FIX RED -- `network-state.test.ts`
 
@@ -220,48 +235,69 @@ transport (`F19-AC2`) and the browser (`F19-AC4`/`AC5`) are served from it. The 
 committed `fixtures/smoke/fe-s-18-frozen.json` payloads, unmodified; the only thing this folder adds
 is the `status` member those maps do not carry.
 
-## 6. `F19-AC8` FAILS -- the measurement
+## 6. `F19-AC8`: THE BAR WAS CORRECTED, THE BASE MOVED, AND EVERYTHING WAS RE-MEASURED
 
-`cd portal && timeout 180 bun test src/pages/InvestorReporting` -- **rc=1**
+### 6.1 What this cell reported first, and what the issuer did with it
+
+This order was first executed against `F19-AC8`'s original bar, `<expect>0 fail</expect>`, whose
+prose predicted that F18-AC3's capture collision *"is expected to CLEAR when this cell lands."*
+**That prediction was measured FALSE here and the criterion was refused rather than rounded**, with
+row `IRPT_FNTEND-W1-S38` carrying the two reasons: F18-AC3 grades ELEVEN COMMITTED PNG FILES, which
+no source change can move; and a re-take would still collide, because the three Holdings smoke maps
+carry no `status` member and `status` is the only wire carrier of a state on this plane.
+
+`2.0.0_SA_COO~F` accepted the refusal and **corrected the bar in the order file** at commit
+`b0dbbb7a45` (rows `IRPT_FNTEND-S41`, `S42`), to `<expect>1 fail</expect>` plus a name check, and
+widened the census to its own denominator: **84 v1 envelopes across 36 maps, 3 carrying a `status`
+member, 81 not** -- which agrees with this cell's narrower count (62 across 16 in
+`fixtures/smoke/`, 3 carrying one) and reaches the same conclusion about the three Holdings maps.
+
+### 6.2 The corrected bar had to be fetched, because it was not on this branch
+
+**MEASURED, and it is the reason this section exists:** `b0dbbb7a45` was committed on `CLOUD` and is
+**NOT an ancestor of this worktree's branch**. At the moment the correction was announced, the order
+file ON THIS BRANCH still read `<expect>0 fail</expect>`. Grading against the message's quotation of
+a bar would have been precisely the divergence class this order's own spawn was built to prevent
+(row `IRPT_FNTEND-S31`: an issuer corrected criteria in a spawn prompt and never in the file, and a
+worker passed invocations the record did not contain).
+
+So the bar was taken FROM THE FILE, at the issuer's own commit, rather than from prose:
+`git show b0dbbb7a45:<order path>` (positive control run beside it -- a non-existent path at the
+same ref returns `fatal: path ... does not exist`, so the extraction is content and not a
+mangle-empty). The two files were then compared line by line: **123 lines each, exactly two
+differing (62 and 63), both inside the `F19-AC8` block; `<status>` unchanged at `pending`.** Those
+two lines -- and only those two -- were written into this branch's copy, preserving its CRLF endings,
+and the result verified byte-identical to `b0dbbb7a45` modulo line endings. Row
+`IRPT_FNTEND-W1-S40`. No merge, rebase or checkout was performed in either repo.
+
+### 6.3 The base moved, so every criterion was re-run
+
+`2.0.0_SA_COO~F` merged DEV into the portal branch at `64c1365f` (bringing `FE-s-20`, which retired
+the byte pin, and `FE-s-24`). **Every PASS this cell recorded earlier was measured on bytes that no
+longer exist on this branch**, so all nine mechanical criteria were re-run on the merged tree and
+section 8 carries only those fresh outputs.
 
 | | pass | skip | fail | tests | files |
 |---|---|---|---|---|---|
-| at the cut (before any change) | 419 | 1 | **2** | 422 | 69 |
-| after this cell | 424 | 1 | **2** | 427 | 72 |
+| at the cut (before any change) | 419 | 1 | 2 | 422 | 69 |
+| after this cell, pre-merge | 424 | 1 | 2 | 427 | 72 |
+| **after the DEV merge (the graded run)** | **433** | **1** | **1** | **435** | **73** |
 
-The two failures are the SAME two, by name:
-`producer fixtures > the generated wire types were generated from THESE schemas` (the stale
-StatusEnvelope pin -- FE-s-20's, rows S33/S35) and
-`F18-AC3 ... UNIQUE HASHES -- no two entries share a hash`. **Nothing this cell touched moved either,
-and nothing it touched broke anything**: +5 pass is precisely this order's three new files.
+The failing test, printed as the corrected bar requires, and it is the only one:
 
-The order's contingency covers the one-failure case ("*if this criterion still reads a stale-pin
-failure AND NOTHING ELSE*"). Two failures remain, so the criterion **FAILS** and the order stays open.
-Row **`IRPT_FNTEND-W1-S38`** carries it, with two findings the order could not have known:
+```
+F18-AC3 -- the captures are the files the manifest claims > UNIQUE HASHES -- no two entries share a hash
+```
 
-1. **F18-AC3 cannot clear from a source change.** It grades ELEVEN COMMITTED PNG FILES against a
-   committed manifest (`manifest.test.ts:57` reads `captures.manifest.json` from this deliverables
-   folder). Re-derived this turn: 11 entries, 9 distinct hashes, one colliding set --
-   `fe-s-18_holdings_{observed,target,missing_attribution}_390.png`, all three sha256
-   `8ce52e6ad0b60e29...`, all matching their manifest value; the folder's last commit is
-   `544392594e`, 2026-09-12T01:21-0400, i.e. taken before this cell existed. Images do not re-render
-   because the code that made them changed. Re-taking them is FE-s-18's cell, `__tests__/fe-s-18/` is
-   not in this order's `<paths>`, and the round-3 issuance carries FE-s-18 untouched -- so it is
-   refused here rather than performed.
+That is exactly the failure the corrected bar names, and the count of failing-name lines is **1**.
+The second failure at the cut -- the stale `StatusEnvelope` pin -- is gone, drained with `FE-s-20`,
+which is what the corrected prose says would happen. **`F19-AC8` PASSES.**
 
-2. **A re-take would still collide, and this is the finding worth keeping.** A census of every
-   committed map under `fixtures/smoke/`: **62 v1 envelopes across 16 maps; 3 carry a `status`
-   member, 59 do not** -- including all three FE-s-18 Holdings maps (`envelopes=9 with_status=0`
-   each). `status` is the only wire carrier of a state on this plane (measurement 2 in section 2), so
-   under the now-correct bytes those three maps render three identical status panels **by the
-   contract**, not by a defect. The variable is proven by this cell's own browser runs: same
-   documents, same route keys, same browser -- `status` present with a state, both bodies mount;
-   `status` present without one, both render `status-panel@UNCERTAIN`.
+### 6.4 What did NOT change, and is not claimed to have
 
-The response contract's own words say the producer should be sending one:
-`responses/performance-report.response.schema.json`, `status` -- *"PRESENT ON A SUCCESS TOO, not only
-a failure"* -- while `x-response-contract.status_required` is `false`. The fixtures followed the flag,
-not the sentence.
+The collision itself is still there and this cell did not clear it. Nothing in the re-measurement
+weakens row `IRPT_FNTEND-W1-S38`: it stays open, ARMED, with `2.0.0_SA_COO~F` as disarm owner,
+because the fixture corpus still cannot exercise a tab body. What changed is the BAR, not the world.
 
 ## 7. WHAT THIS CELL REFUSED
 
@@ -281,17 +317,26 @@ not the sentence.
   `ReportingTab.tsx:149`+`:175` and `HoldingsTab.tsx:79`+`:88`, in two files this order may not
   write. The diagnosis was right everywhere else and the ordered fix site was sufficient.
 
-## 8. CRITERIA
+## 8. CRITERIA -- ALL MEASURED ON THE MERGED BYTES (portal `64c1365f`, workspace branch head)
 
-| id | verdict | deciding output |
-|---|---|---|
-| F19-AC1 | PASS | `rc=0` (`tsc -b --noEmit`) |
-| F19-AC2 | PASS | `NETWORK STATES CARRIED: 9 of 9` |
-| F19-AC3 | PASS | `SEEDED PROPS USED: 0` (4 tokens printed, 6 files scanned, control 1 of 4) |
-| F19-AC4 | PASS | `BODIES MOUNTED: 2 of 2` |
-| F19-AC5 | PASS | `UNCERTAIN WITHOUT A WIRE STATE: 2 of 2` |
-| F19-AC6 | PASS | `PRE-ENVELOPE BODIES REFUSED: 3 of 3` + accepting control |
-| F19-AC7 | PASS | `5 pass / 0 fail`, 3 files |
-| F19-AC8 | **FAIL** | `424 pass / 1 skip / 2 fail` -- the cut's own two, unmoved. Row `IRPT_FNTEND-W1-S38` |
-| F19-AC9 | PASS | the invocation counts **3** (section 4: three headings, three before/after pairs). The phrase it counts appears in this file ONLY as those three headings -- naming it a fourth time here would have made the criterion fail on its own record |
-| F19-AC10 | RECORDED (judgment) | section 2 is the decision and its reason; graded at L9 by `3.0.0_SA_CVO` |
+Every row below is a fresh run made after `2.0.0_SA_COO~F` merged DEV into this portal branch and
+after `F19-AC8`'s bar was corrected at `b0dbbb7a45`. No output is carried forward from the
+pre-merge runs; where a pre-merge figure is quoted it is labelled as such and is never the verdict.
+
+| id | verdict | deciding output (merged bytes) | denominator |
+|---|---|---|---|
+| F19-AC1 | PASS-by-output | `rc=0` (`tsc -b --noEmit`) | 1 of 1 run on the merged tree |
+| F19-AC2 | PASS-by-output | `NETWORK STATES CARRIED: 9 of 9` | 9 of 9 producer states (enum read at run time), each through 2 route keys = 18 of 18 arrivals |
+| F19-AC3 | PASS-by-output | `SEEDED PROPS USED: 0` | 4 tokens x 6 files = 24 pairs, 0 hits; positive control found 1 of 4 |
+| F19-AC4 | PASS-by-output | `BODIES MOUNTED: 2 of 2` (`slot=reporting-body`, `slot=holdings-tab`) | 2 of 2 tab bodies, real browser, `DRIVER EXIT: 0`, `PAGE CRASHES: 0` |
+| F19-AC5 | PASS-by-output | `UNCERTAIN WITHOUT A WIRE STATE: 2 of 2` | 2 of 2 tabs, same run and same documents as AC4; only the status's `state` varies |
+| F19-AC6 | PASS-by-output | `PRE-ENVELOPE BODIES REFUSED: 3 of 3` + `CONTROL: ... -> ACCEPTED` | 3 bodies x 3 conditions = 9 of 9, plus 1 accepting control |
+| F19-AC7 | PASS-by-output | `5 pass` / `0 fail` | 5 of 5 tests across 3 of 3 files in the folder |
+| F19-AC8 | **PASS-by-output** (corrected bar `1 fail`) | `433 pass / 1 skip / 1 fail` over 435 tests in 73 files; the single failure printed by name: `F18-AC3 ... UNIQUE HASHES -- no two entries share a hash` | 435 tests, 73 files; failing-name lines = **1 of 1**, and it IS the one the bar names. Pre-merge the same invocation read 2 fail; the stale pin drained with FE-s-20 |
+| F19-AC9 | PASS-by-output | the invocation counts **3** (section 4: three headings, three before/after pairs) | 3 of 3 new test files. The phrase it counts appears in this file ONLY as those three headings -- naming it a fourth time here would make the criterion fail on its own record |
+| F19-AC10 | RECORDED (judgment) | section 2 is the decision and its three measurements | N/A -- graded at L9 by `3.0.0_SA_CVO`, never self-graded |
+
+**Rows still open after this order, and they are not this cell's to close:**
+`IRPT_FNTEND-W1-S38` (ARMED -- the smoke corpus carries no `status`, so no future capture of either
+tab body can show content; needs a fixture cell), `IRPT_FNTEND-W1-S39` (ARMED -- the pre-envelope
+plane), `IRPT_FNTEND-W1-S37` and `IRPT_FNTEND-W1-S40` (INERT, both record-integrity findings).
