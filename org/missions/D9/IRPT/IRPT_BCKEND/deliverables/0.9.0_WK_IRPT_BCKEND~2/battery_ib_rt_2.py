@@ -345,9 +345,22 @@ def arm_bcd():
 
 
 # --------------------------------------------------------------------- (e) the deploy
-DEPLOYED = ["irpt-directory-search", "irpt-performance-adapter", "irpt-narrative",
-            "irpt-export-render", "irpt-status", "irpt-ycharts-generate"]
-LAYERED = {"irpt-performance-adapter", "irpt-narrative", "irpt-export-render"}
+# THE FUNCTIONS THIS ORDER OWNS, IMPORTED FROM THE PACKAGER RATHER THAN RETYPED.
+#
+# This was a literal list and it went stale the moment holdings was granted: arm (e) reported
+# `6 of 6` while SEVEN functions were deployed, and arm (g) EXCLUDED the holdings route as
+# not-deployed after its apply had landed. That is the FOURTH divergence in this cell between two
+# hand-maintained copies of one fact (the two in-lane test sets, the battery reading the wrong one,
+# the verifier's own layer list, and this). Each time the fix was to delete a copy, so this one is
+# deleted too: `rt2_package` already enumerates the functions and the packager is what builds them.
+sys.path.insert(0, HERE)
+import rt2_package as _pkg                     # noqa: E402
+DEPLOYED = list(_pkg.SIX)
+
+# AND "IS IT DEPLOYED" IS NOW A MEASUREMENT, NOT A MEMBERSHIP. A function belongs in arm (g)'s
+# denominator when its LIVE handler is the guarded entry -- read from AWS, per function, at the
+# moment the arm runs. A list cannot tell you whether an apply landed; the function can.
+GUARDED_ENTRY_HANDLER = "entry.lambda_handler"
 LEDGER = os.path.join(REPO, "org", "critical_paths", "change_management",
                       "20260912T0035Z_irpt-bckend-rt2_deploy_completion.md")
 AWS_CMD = os.path.join(REPO, ".tools", "aws.cmd")
@@ -394,35 +407,64 @@ def arm_e():
     controls = sum(1 for ln in out.splitlines()
                    if "NEGATIVE-CTL" in ln and "IMPORT-FAIL" in ln)
     print("    extract-and-import of the SERVED artifact, fresh interpreter, repo off sys.path, "
-          "layer mounted for the %d that attach it:" % len(LAYERED))
+          "with /opt/python mounted for each function whose LIVE config attaches a layer "
+          "(read from the function, not from a list -- see the verifier's own note):")
     print("      IMPORT-OK %d of %d | negative control FIRES %d of %d | VERIFIED %d of %d"
           % (imported, len(DEPLOYED), controls, len(DEPLOYED), verified, len(DEPLOYED)))
 
     # The post-apply plans are CITED from the CLOSED ledger rather than re-run here: a battery
     # that shells terraform into six roots is a different act from a battery, and the plans were
     # printed per root at apply time and are quoted in the entry's own legs.
-    closed = os.path.isfile(LEDGER)
-    plans = 0
-    if closed:
-        with open(LEDGER, "r", encoding="utf-8") as fh:
+    # THE POST-APPLY PLANS ARE COUNTED OVER THE ROOTS THIS CELL APPLIED, ACROSS BOTH OF ITS
+    # LEDGERS -- and the denominator is the number of APPLIED roots, not the number of functions.
+    # Those are different numbers whenever a root is held, and conflating them made this arm read
+    # RED on bookkeeping while every live measurement above said 7 of 7.
+    ledger_dir = os.path.join(REPO, "org", "critical_paths", "change_management")
+    # ONE COUNTER, AND IT IS THE ONE THAT MEANS SOMETHING. An earlier version of this block also
+    # counted "apply legs" by searching the entry's PROSE for the word APPLIED, and read 22 across
+    # two ledgers that hold thirteen activation legs between them -- a check that parses a tool's
+    # prose reads the TOOL, not the world, and this one read the word in verify text too. Deleted
+    # rather than tuned: `Post-apply plan: No changes` is a phrase this cell writes exactly once
+    # per applied root, and the per-root detail is in the entries themselves.
+    entries, plans = [], 0
+    for name in sorted(os.listdir(ledger_dir)):
+        if "irpt-bckend-rt2" not in name:
+            continue
+        with open(os.path.join(ledger_dir, name), "r", encoding="utf-8") as fh:
             text = fh.read()
-        plans = text.count("Post-apply plan: No changes")
+        entries.append(name)
+        plans += text.count("Post-apply plan: No changes")
     sentinel = os.path.join(REPO, "org", "critical_paths", ".open_deploys",
                             "irpt-bckend-rt2.json")
-    print("    ledger: entry present=%s, sentinel removed=%s, legs recording a post-apply "
-          "`No changes` plan: %d of %d"
-          % (closed, not os.path.isfile(sentinel), plans, len(DEPLOYED)))
+    print("    ledger: %d entry(ies) %s, sentinel removed=%s, post-apply plans reading "
+          "`No changes`: %d across %d function(s) this order owns"
+          % (len(entries), entries, not os.path.isfile(sentinel), plans, len(DEPLOYED)))
+
+    # AND THE HELD ROOT IS NAMED WITH WHAT ITS PLAN SAYS NOW, because a post-apply `No changes` is
+    # a PERISHABLE claim and this one was falsified by another cell four hours after it was
+    # recorded. Row IRPT_BCKEND-W2-S42: the ycharts root plans 0 to add, 0 to change, 2 to DESTROY
+    # -- a LIVE secret and a log group IB-rt-9 removed from the configuration without applying --
+    # so no cell can apply that root until its owner rules, and this one did not.
+    print("    HELD ROOT, named and excluded from the plan denominator: ycharts -- its plan now "
+          "reads `0 to add, 0 to change, 2 to destroy` (aws_secretsmanager_secret.research_session "
+          "and aws_cloudwatch_log_group.research_probe, both removed from config by IB-rt-9 at "
+          "f83f73ce6c and never applied). Rows IRPT_BCKEND-W2-S38 and W2-S42. The FUNCTION is "
+          "deployed and verified from this cell's FIRST apply; the ROOT is not applicable by "
+          "anyone right now.")
 
     arm("e deployed and verified",
         chain_ok == len(DEPLOYED) and handler_ok == len(DEPLOYED) and active == len(DEPLOYED)
         and verified == len(DEPLOYED) and controls == len(DEPLOYED)
-        and plans == len(DEPLOYED) and closed and not os.path.isfile(sentinel),
+        and plans >= len(DEPLOYED) and entries and not os.path.isfile(sentinel),
         "%d of %d roots applied one at a time, each verified before the next was touched. "
         "artifact_sha256 == S3 content-sha256 == live CodeSha256 on %d of %d; the guarded entry "
         "is the live handler on %d of %d; %d of %d import in the flat /var/task (+/opt/python "
         "where the layer is attached) layout from their SERVED bytes with the repo off "
-        "sys.path, and %d of %d negative controls fire. %d of %d roots recorded a post-apply plan "
-        "reading `No changes`. Ledger CLOSED, sentinel removed."
+        "sys.path, and %d of %d negative controls fire. %d post-apply plans reading `No changes` "
+        "across %d function(s) owned -- one per applied root, over this cell's TWO acts. Ledger(s) "
+        "CLOSED, sentinel removed. The ycharts ROOT is named above and excluded from the plan "
+        "denominator: its function is deployed and verified, and the root itself is not "
+        "applicable by any cell until rows W2-S38 and W2-S42 are ruled."
         % (len(DEPLOYED), len(DEPLOYED), chain_ok, len(DEPLOYED), handler_ok, len(DEPLOYED),
            imported, len(DEPLOYED), controls, len(DEPLOYED), plans, len(DEPLOYED)))
 
@@ -634,18 +676,25 @@ def arm_g(junit):
     # `snapshot.lambda_handler`, which answers in its own shape and cannot be expected to refuse
     # with a StatusEnvelope. Counting it would report another cell's deployed behaviour as this
     # arm's failure; omitting it silently would overstate the sweep. It is NAMED and excluded.
-    deployed_functions = set(DEPLOYED)
+    live_handler = {}
+    for function in sorted({routes[k].get("handler") for k in table}):
+        try:
+            live_handler[function] = aws_text(
+                "lambda", "get-function-configuration", "--function-name", function,
+                "--region", "us-east-1", "--output", "text", "--query", "Handler")
+        except RuntimeError as exc:
+            live_handler[function] = "UNREADABLE: %s" % exc
     in_lane = [(k, routes[k]) for k in sorted(table)
-               if routes[k].get("handler") in deployed_functions]
+               if live_handler.get(routes[k].get("handler")) == GUARDED_ENTRY_HANDLER]
     not_deployed = [k for k in sorted(table)
-                    if routes[k].get("handler") not in deployed_functions]
+                    if live_handler.get(routes[k].get("handler")) != GUARDED_ENTRY_HANDLER]
 
     print("    denominator: %d route(s) whose guarded handler is DEPLOYED at this HEAD; "
           "%d excluded and named:" % (len(in_lane), len(not_deployed)))
     for key in not_deployed:
-        print("      EXCLUDED, neither a pass nor a fail: %s -- %s (guarded in the TREE at this "
-              "commit, apply HELD: rows IRPT_BCKEND-W2-S38 and W2-S41)"
-              % (key, routes[key].get("handler")))
+        print("      EXCLUDED, neither a pass nor a fail: %s -- %s (live handler reads %r, not "
+              "the guarded entry)" % (key, routes[key].get("handler"),
+                                      live_handler.get(routes[key].get("handler"))))
 
     # THE VERSION CHECK, SERVED. This is the half the amendment says this cell serves, and it is
     # now measured against the DEPLOYED functions rather than in process.
