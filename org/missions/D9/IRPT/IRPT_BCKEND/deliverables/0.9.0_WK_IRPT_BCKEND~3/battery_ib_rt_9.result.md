@@ -1,4 +1,4 @@
-# `battery_ib_rt_9.py` -- RT9-AC1, FIVE ARMS OF SIX
+# `battery_ib_rt_9.py` -- RT9-AC1, SIX ARMS OF SIX, 0 CHECKS FAILED
 
 **Invocation the task order names, run verbatim:**
 
@@ -6,7 +6,7 @@
 timeout 900 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_rt_9.py
 ```
 
-**rc 0 | checks failed: 0 | ARMS RUN: 5 of 6 | `grep -c IBRT9-BROKER-FENCED` on the output = 0**
+**rc 0 | checks failed: 0 | ARMS RUN: 6 of 6 | `IBRT9-BROKER-FENCED` printed**
 
 Full output: `IB-rt-9_RT9-AC1_battery_output.txt`. Arm (a) excerpt of the same run:
 `IB-rt-9_RT9-AC1_arm_a_output.txt`.
@@ -19,11 +19,12 @@ Full output: `IB-rt-9_RT9-AC1_battery_output.txt`. Arm (a) excerpt of the same r
 > that the digest BEFORE and AFTER the loser's write are the same, within one run.** A fixed
 > expected digest would have been an assertion about the clock.
 
-> **RT9-AC1 IS NOT MET AND THE TOKEN IS ABSENT ON PURPOSE.** The criterion needs arms (a)
-> through (f) in ONE run. Arm (e) is BLOCKED by row `IRPT_BCKEND-W3-S26`. The `<expect>` is
-> graded as a REGEX over this output, so a line reading `<token>: NOT ASSERTED` would MATCH
-> and grade an incomplete run PASS -- which is why the token appears nowhere, in no form,
-> including negated. It goes in only in the edit that makes arm (e) run.
+> **THE TOKEN IS PRINTED, AND ONLY BECAUSE ALL SIX ARMS PASS.** It went in in the same edit
+> that made arm (e) run, and it is printed from the FINAL branch that is only reached when
+> `checks failed` is 0 -- never negated, never as `NOT ASSERTED`, because the `<expect>` is
+> graded as a REGEX and such a line would MATCH and grade a failing run PASS. Arm (e) was
+> blocked by row `IRPT_BCKEND-W3-S26` until slot ~2's deploy landed; the issuer confirmed it
+> and the block is discharged.
 
 ---
 
@@ -161,7 +162,57 @@ both guards DEMONSTRABLY able to fire: 2 of 2 positive controls refused and coun
   A guard with an allow-list for "our own AWS calls" would have a hole shaped exactly like the
   thing it guards against.
 
-### (e) ABSORBED, STOPPED, CONVERGED -- **BLOCKED, not unbuilt**
+### (e) ABSORBED, STOPPED, CONVERGED -- DONE, 7 checks, nothing destroyed
+
+```
+tracked files under .../ycharts-research-20260911: worktree=0, HEAD=0, HEAD~2=2
+ycharts state list: 19 resource(s) -- aws_secretsmanager_secret.research_session PRESENT
+                                      aws_cloudwatch_log_group.research_probe    PRESENT
+NAIVE INSTRUMENT, RETIRED: terraform state list in the deleted root -> rc=1, 0 stdout line(s)
+research STATE OBJECT read directly from S3: serial=13, 0 resource(s) []
+live control plane: secret PRESENT, log group PRESENT
+ycharts post-apply plan: No changes. Your infrastructure matches the configuration.
+runner host i-0167fd745ad906a66 -> 'stopped'
+ledger: CLOSED, 6 leg proofs, sentinel REMOVED, entry committed
+```
+
+**The move was `import` then `state rm`, not `state mv`, and the ordering IS the safety
+argument.** Across two S3-backed states, `state mv` is performed by pulling two state files,
+hand-editing them and pushing them back, and a hand-edited state is the one artifact in this
+estate with no undo. Import first means a failure leaves the research root still owning the
+resource; `state rm` only FORGETS one; no object is ever destroyed and re-created. The
+acceptance grades the outcome and the outcome is identical.
+
+**Four things this arm reads that a weaker version of it would not:**
+
+* **`git ls-tree`, not `os.path.isdir`.** The gitignored `.terraform/` cache leaves the
+  DIRECTORY on disk in this worktree; only git can say the ROOT is gone. `HEAD~2=2 -> HEAD=0`
+  is the delta, printed.
+* **A DIFFERENT INSTRUMENT for "nothing was destroyed."** `state rm` reporting `Removed` is
+  terraform describing itself and cannot distinguish a forgotten resource from a deleted one.
+  `describe-secret` and `describe-log-groups` can, and both objects are still there.
+* **The SOURCE state, not just the destination.** A resource left in BOTH states is the
+  dangerous outcome of a half-done move, and a check that reads only where it landed cannot
+  see it.
+* **The refusal that reads like a clean zero.** Deleting `main.tf` removed the `backend "s3"`
+  block, so `terraform state list` in that directory now exits 1 with EMPTY STDOUT -- and the
+  first version of this arm parsed that as `0 resource(s)`. It failed only because the
+  predicate also required `rc == 0`. The instrument is RETIRED (the refusal is permanent by
+  design, not a missing `init`), the emptiness is read from the tfstate OBJECT, and the
+  refusal is now its own printed check. Row `IRPT_BCKEND-W3-S37`.
+
+**The only world change in the whole arm:** `tags_all` gains `Project = OpalPortal` on two
+resources, from the ycharts root's own `default_tags`. `Owner = 4.0.0_SA_CRO` and
+`Purpose = YChartsBoundaryTest` are carried VERBATIM -- they are true of these objects, and
+rewriting them to tidy a tag set would erase the one fact a reader would want.
+
+**Left in place and named rather than abandoned** (row `IRPT_BCKEND-W3-S38`): the research
+root's S3 state object, now empty and addressed by nothing -- deleting an S3 object needs a
+human's word; the 686 MB gitignored `.terraform/` cache, in this worktree only; and the
+research artifacts and synthetic vendor portfolio, which are data and a vendor-side object,
+not Terraform resources of either root.
+
+### (e) -- the superseded record: BLOCKED, not unbuilt
 
 Row `IRPT_BCKEND-W3-S26`. The arm requires a `state mv` and an apply of
 `infra/aws/terraform/investor-reporting/ycharts/`, and that root's plan carries an unapplied
