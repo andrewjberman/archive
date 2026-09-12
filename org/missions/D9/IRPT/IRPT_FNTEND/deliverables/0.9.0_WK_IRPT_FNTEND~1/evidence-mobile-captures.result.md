@@ -319,3 +319,58 @@ outside this order's `<paths>`, so it is named and not edited.
 confirmed both are true failures reporting `IRPT_FNTEND-W1-S33` and is deliberately not amending them.
 No other criterion was re-run. `RENDER_PACKAGE.fonts` is left at three names (`W1-S28`), as instructed.
 Portal remains FROZEN; both commits are LOCAL.
+
+
+---
+
+# ADDENDUM 2 -- THE ISSUER RULING ON F18-AC3's ARM
+
+**The narrowing recorded in Addendum 1 is REVERTED.** `2.0.0_SA_COO~F` ruled that F18-AC3's prose --
+*no two entries share a file or a hash* -- is correct as written and stays, and that the fault was never in
+the arm: **it was that the control had been made a manifest entry at all.**
+
+The ruling names the criterion's own first clause as the test of what belongs in the population: *"every PNG
+**this order names** exists under the deliverables folder"*. **Eleven criteria name a capture** -- F18-AC4,
+AC5, AC6, AC7, AC8, AC9, AC10, AC11, AC12, AC13, AC14. `fe-s-18_print_frozen_control_1440.png` is named by
+none of them. It is PROVENANCE for the S31 amendment, not evidence for a bar.
+
+The issuer also recorded that the narrowing traced to its own message rather than to my reading: the
+"fixtures differ" formulation arrived as a standing rule being carried to L10, which is a recommendation and
+not law until the CTO rules it, and a criterion patched through a message is a defective face. I am
+recording that here because the instance's earlier FAIL reason attributed the rule to the issuer without
+saying it had no standing yet.
+
+## What changed
+
+1. **The arm is back to the literal rule** -- no two manifest entries share a file or a hash. The
+   fixtures-differ classification and the `UNEXPECTED COLLISIONS` line are gone with it. One rule, as cut.
+   The test's comment now carries the whole history so the next reader does not re-derive the wrong repair.
+2. **`captures.manifest.json` is rebuilt over the eleven criterion captures only.** `entry_count` is 11.
+3. **The control file stays on disk and is not lost by leaving the manifest.** Recorded here:
+
+   | file | sha256 | what it is |
+   |---|---|---|
+   | `fe-s-18_print_frozen_control_1440.png` | `f125df3b33388a1b9962acb42f64b7c22bd707a3b846b21326320ff65344d277` | **NOT A CRITERION CAPTURE.** The control run from the refusal pass: `investor-reporting/print?bundle=fe-s-18-frozen&tenant=F-49F&scope=fp-49f-0824&revision=rev-49f-000091`, which printed `REFS RESOLVED: 1 of 1` while the criterion's own URL refused. It is what localised the fault to the URL and is the evidence the F18-AC6 amendment (`74cefaf7a2`, row `IRPT_FNTEND-S31`) was made on. It is byte-identical to the amended F18-AC6 capture, because `&narrative=0` is the package default. |
+
+   **Twelve PNGs are on disk; eleven are manifest entries.** That difference is deliberate and is stated in
+   the manifest's own `population` field as well as here.
+
+## F18-AC3 -- re-run under the restored rule, STILL FAILS
+
+    MANIFEST: 11 entries / MISSING FILES: 0 / DRIFTED HASHES: 0 / FIELDS COMPLETE: 11 of 11 entries
+    DISTINCT FILES: 11 of 11 / UNIQUE FILES: ok
+    DISTINCT HASHES: 9 of 11
+      BYTE-IDENTICAL CAPTURES (8ce52e6ad0b60e29): fe-s-18_holdings_observed_390.png, fe-s-18_holdings_target_390.png, fe-s-18_holdings_missing_attribution_390.png
+    COLLIDING SETS: 1
+    4 pass, 1 fail
+
+**One colliding set, and it is the real defect.** The criterion is unweakened and the signal is clean --
+which is the outcome the narrowing was reaching for and did not deserve to reach by moving the bar. Three
+fixtures, one picture, `IRPT_FNTEND-W1-S33`.
+
+## Unchanged
+
+`<status>` stays `pending`. F18-AC17 remains FAIL and was not re-run (the only file that changed,
+`manifest.test.ts`, still reads 4 pass / 1 fail on the same single arm). F18-AC6 remains PASS on the amended
+invocation. No capture was re-taken in this pass -- no dev server was started, and the eleven PNG bytes are
+untouched, which the manifest's own `DRIFTED HASHES: 0` re-confirms against the files on disk.
