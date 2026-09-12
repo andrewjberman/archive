@@ -218,3 +218,104 @@ Ten files under `contracts/wire/` show as modified in `git status` with `git dif
 lines changed -- the generator writes LF and the worktree is `autocrlf`. They are **not staged**; only the
 three files with real content changes (`AnalysisReport.ts`, `StatusEnvelope.ts`, `index.ts`) are. Nothing was
 `checkout --`ed or cleaned to tidy this, per the standing prohibition.
+
+
+---
+
+# ADDENDUM -- THE ISSUER AMENDMENT (74cefaf7a2, rows IRPT_FNTEND-S30 and S31)
+
+A short pass, on the issuer's instruction: **re-run F18-AC6 and F18-AC3, update the instance, do not re-run
+anything else, do not flip `<status>`.** Everything above stands unless contradicted here.
+
+## Re-grounding, before re-running
+
+`74cefaf7a2` is reachable from this worktree (linked worktrees share the object database), so the amended
+invocation was read **from the file at the commit** rather than trusted from the message:
+`git show 74cefaf7a2:org/.../IRPT_FNTEND.TO-FE-s-18.evidence-mobile-captures.md` line 59 carries the new
+F18-AC6 invocation character for character as the issuer stated it, `&narrative=0` included, with
+`<expect>REFS RESOLVED: 1 of 1</expect>` unchanged. **My branch was cut at `7b04394dcb`, before the
+amendment, so the task-order file IN THIS WORKTREE still carries the pre-amendment URL.** The run below used
+the AMENDED invocation. That divergence is stated rather than glossed: the record's authority is the file at
+`74cefaf7a2`, not the copy on this branch.
+
+Lines 77 and 80 of the same file now carry the F18-AC12 and F18-AC13 URLs I had already run (the issuer's
+own `IRPT_FNTEND-S31` records that those corrections had reached my spawn prompt but not the file). Neither
+was re-run, per instruction.
+
+## F18-AC6 -- NOW PASSES
+
+Invocation, exactly as amended:
+
+    cd /c/tmp/wk-irpt_fntend-2-7-fe-s-18/portal && timeout 120 node scripts/ui-smoke.mjs \
+      "investor-reporting/print?bundle=fe-s-18-frozen&narrative=0&tenant=F-49F&scope=fp-49f-0824&revision=rev-49f-000091" \
+      <deliverables>/fe-s-18_print_frozen_1440.png --port 5181 --width 1440 \
+      --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-frozen.json --console "REFS RESOLVED"; echo rc=$?
+
+Output: `CONSOLE[log]: REFS RESOLVED: 1 of 1` (twice), `VIEWPORT: 1440x900`,
+`FIXTURES: 9 declared; 1 matched >=1 URL`, `rc=0`. **PASS.**
+
+The PNG at `fe-s-18_print_frozen_1440.png` **replaced** the refusal image under the same filename: it is now
+the frozen report printed in full over three pages -- the nine-point cumulative series, the three summary
+returns including the `UNAVAILABLE (NOT_ENOUGH_HISTORY)` 3Y row, both accounts, and the Methods and Sources
+page. Its figures match `fe-s-18_preview_frozen_1440.png` (both read `2026-01-02 to 2026-09-09`,
+`rev-49f-000091`), so **the preview/print half of F18-AC18's pair is now a real comparison.**
+
+**WHICH FILE IS WHICH, since two now resolve:**
+
+- `fe-s-18_print_frozen_1440.png` -- **the criterion's capture**, from the amended invocation.
+- `fe-s-18_print_frozen_control_1440.png` -- **kept, and not a criterion capture.** It is the control run
+  from the refusal pass, the thing that localised the fault to the URL and the evidence the amendment was
+  made on. It differs from the criterion capture only in carrying no `&narrative=0`.
+
+## F18-AC3 -- RE-MEASURED, STILL FAILS, AND ITS RULE IS NOW THE RIGHT ONE
+
+The AC6 re-capture changed that file's bytes, so the manifest was rebuilt and the test re-run. It reads:
+
+    MANIFEST: 12 entries / MISSING FILES: 0 / DRIFTED HASHES: 0 / FIELDS COMPLETE: 12 of 12 entries
+    DISTINCT FILES: 12 of 12 / UNIQUE FILES: ok
+    DISTINCT HASHES: 9 of 12
+      BYTE-IDENTICAL CAPTURES (f125df3b33388a1b): fe-s-18_print_frozen_1440.png, fe-s-18_print_frozen_control_1440.png
+        1 distinct fixture(s) -> EXPECTED-BY-CONSTRUCTION -- one fixture, one render
+      BYTE-IDENTICAL CAPTURES (8ce52e6ad0b60e29): fe-s-18_holdings_observed_390.png, fe-s-18_holdings_target_390.png, fe-s-18_holdings_missing_attribution_390.png
+        3 distinct fixture(s) -> UNEXPECTED -- different fixtures, identical pixels
+    COLLIDING SETS: 2; UNEXPECTED COLLISIONS: 1
+    4 pass, 1 fail
+
+**A SECOND COLLISION APPEARED AND IT IS NOT A DEFECT.** The amended F18-AC6 capture is byte-identical to its
+own control: `&narrative=0` is the package default, so the two URLs request the identical render. A flat
+"no two entries share a hash" assertion would have counted that as a second failure and buried the real one
+underneath it.
+
+So the arm was re-scoped to **the rule the issuer is carrying to L10 -- a capture set asserts DISTINCT HASHES
+*whenever its fixtures differ*.** The classification is computed from the manifest's own `fixture` field,
+never from a list of filenames, so it cannot absorb a defect: any future collision across different fixtures
+still fails. Under it the Holdings three still FAIL, which is the point.
+
+**This is a narrowing of the arm and it is disclosed as one.** Under the criterion's literal prose
+("no two entries share a file or a hash") the AC6/control pair is also a violation; under the rule the
+prose is trying to express, it is not. I applied the second reading and printed both, so a grader can take
+either. **F18-AC3 remains FAIL either way**, and the reason is unchanged: three fixtures, one picture,
+`IRPT_FNTEND-W1-S33`.
+
+## F18-AC17 -- NOT RE-RUN, and what is therefore claimed about it
+
+Per instruction. Its recorded output (`420 pass, 1 skip, 1 fail` across 422 tests in 69 files) predates the
+AC6 re-run. What **was** measured just now is the only file that changed: `manifest.test.ts` still has 5
+tests and still reads 4 pass / 1 fail, on the same single arm. The suite totals therefore do not move, and
+that sentence is an inference from a direct measurement of the changed file, **not** a re-run of the suite.
+
+## Rows added in this pass
+
+`IRPT_FNTEND-W1-S36` OBSERVATION/INERT -- `ui-smoke.mjs:341` compares `window.location.pathname` against the
+full route STRING, so `<-- DID NOT LAND (auth redirect? bad route?)` prints on **every** query-bearing route
+whether or not anything went wrong. Observed on the AC6 run that landed and rendered three pages. Five of
+this order's twelve captures use query-bearing routes, so the round's evidence carries an alarming line that
+means nothing; no criterion turns on it (`REFS RESOLVED` is the real oracle). `scripts/ui-smoke.mjs` is
+outside this order's `<paths>`, so it is named and not edited.
+
+## What did NOT change
+
+`<status>` stays `pending`. F18-AC3 and F18-AC17 remain FAIL and the order stays open -- the issuer has
+confirmed both are true failures reporting `IRPT_FNTEND-W1-S33` and is deliberately not amending them.
+No other criterion was re-run. `RENDER_PACKAGE.fonts` is left at three names (`W1-S28`), as instructed.
+Portal remains FROZEN; both commits are LOCAL.
