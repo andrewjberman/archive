@@ -1,13 +1,15 @@
 # BATTERY `IB-rt-2` -- RESULT
 
 **Run:** `timeout 900 python org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rt_2.py`
-**Vintage:** branch `wk-irpt_bckend-2-2b` @ `36e4c5f70b`, after amendment 5 and the second deploy.
+**Vintage:** branch `wk-irpt_bckend-2-2b`, after amendment 6 and the THIRD and final deploy.
 **Verbatim stdout:** `battery_ib_rt_2.result.txt` beside this file. This document QUOTES that run.
 
 > **`15 of 15 ARMS PASS. THE TOKEN IBRT2-SIX-GUARDED IS PRINTED.`**
-> **AND THE VINTAGE IS CLEAN:** `0 subject file(s) differ from HEAD: every byte above is IN THE
-> RECORD.` The previous run printed the same token over four uncommitted files; this one does not.
-> **`<status>` IS STILL NOT FLIPPED, for one reason that is not bookkeeping -- see the last section.**
+> **THE VINTAGE IS CLEAN:** `0 subject file(s) differ from HEAD: every byte above is IN THE RECORD.`
+> **NO ROOT IS HELD:** all SEVEN functions are applied and verified on their SERVED bytes, over three
+> acts, one root at a time. **THE ORDER IS TERMINAL** -- and two of its fifteen arms are
+> HUMAN-GATED rather than measured, printed under their own verb so neither can be read as a
+> measurement.
 
 ---
 
@@ -125,23 +127,47 @@ apply landed; the function can.
 
 ---
 
-## WHY `<status>` IS STILL OPEN -- ONE REASON, AND IT IS NOT BOOKKEEPING
+## THE ORDER IS TERMINAL -- WHAT CLOSED IT, AND WHAT IT DOES NOT CLAIM
 
-Every criterion passes by output and the vintage is clean. **One of the seven functions this cell
-owns is still serving code without this cell's own fix.** `irpt-ycharts-generate` keeps the previous
-`served.py`, so it alone lacks the v0.14 state-conditional envelope and the post-read
-`business_date` -- and **row `W2-S39`'s cache-lifetime defect, which this cell INTRODUCED, remains
-ARMED on it.**
+The last root applied in a third act and **no root is held**: all seven functions this order owns
+are live on the guarded entry and verified on their **served** bytes, and that final apply is what
+**disarmed row `W2-S39`** -- the cache-lifetime defect this cell introduced is no longer served
+anywhere, and the v0.14 envelope and the post-read `business_date` are on every function.
 
-It cannot be fixed by this cell right now, and the reason is not a preference:
+**Amendment 6 F2 asked for a restore and none was needed, because my own row had the cause wrong.**
+`W2-S42` said IB-rt-9 removed two declarations; `git show --stat` on that commit shows it ADDED 28
+lines to `iam.tf` and removed nothing. The declarations were **added** at `244d3a968d` in
+`research_absorbed.tf`, and my worktree predated them while the shared state already held the
+imports. Row `W2-S43` corrects it. **`git log -- <path>` answers what last TOUCHED a path, never what
+CHANGED a thing** -- its top entry is a neighbour, not a cause. The observed fact was real, the
+secret is preserved and untouched, and no act was taken on the wrong attribution.
 
-* **`W2-S38`** -- amendment 5 E3 instructs a STOP if that zip carries `settings.json` without
-  `fixtures/holdings/security_mapping.json`, or either without `parse.py`. Re-measured at HEAD the
-  literal condition is TRUE (`parse.py` is declared by **0 of 214** functions). The issuer's call.
-* **`W2-S42`** -- and independently, **no cell can apply that root at all** without destroying a live
-  secret another cell removed from configuration.
+⛔ **AND A PASSING ARM WAS PRINTING THAT FALSE SENTENCE FOR ONE RUN.** Arm (e) carried a hardcoded
+"HELD ROOT ... not applicable by anyone right now" paragraph after both halves had become false. It
+is a measurement now, not a paragraph. A green arm is not licence for the prose beside it.
 
-**A terminal flip would retire the `<paths>` grant this cell needs for that last apply**, and it
-would assert the work is complete while a defect this cell introduced is still served. So the order
-stays open on two rows whose owners are named, `IB-rt-6` and `IB-rtb-1` wait on one ruling, and the
-flip is the last act -- not the act that frees anyone to finish.
+### What this order still does NOT claim
+
+* **Two arms are HUMAN-GATED, not measured.** `f` and `g2` wait on one principal a worker may not
+  mint. Each is graded by READING its record (9 of 9 and 10 of 10 elements, 0 secret values).
+  **0 of 12 success responses are measured and none is claimed.**
+* **The test principal was never minted**, so how it would differ from a real advisor's claims is
+  UNANSWERED BY MEASUREMENT -- and arm `g2` inherits exactly that gap.
+* **What the in-process swaps cannot show** is what `IB-rtb-1` must add: that the EDGE VALIDATOR
+  injects the headers the boundary trusts, for a token the AUTHORIZER accepted, end to end through
+  CloudFront.
+* **The holdings zip is internally skewed by design** -- IB-rt-7's pinned `enforce` beside the tree's
+  `served` -- so that cell's `STAGE_MANIFEST` claims stay true. The one behavioural delta is measured
+  unreachable for that function, but only against today's call graph.
+* **Whether the two research resources should ever be retired is not this round's question.** They
+  are preserved; that is the whole of what this record says about them.
+
+### The pattern this cell is worth remembering for
+
+Five times one fact was kept in two places and the copies diverged, and **every divergence surfaced
+the moment a function was GRANTED**: the two in-lane test sets, the battery reading the wrong one of
+them, the verifier's own layer list, the battery's `DEPLOYED` list -- and finally a duplicated
+**VIEW** rather than duplicated data, when a stale worktree over a shared state produced a plan that
+read exactly like a configuration-versus-world disagreement. Each of the first four was fixed by
+**deleting a copy rather than syncing it**. The fifth is why a post-apply `No changes` is perishable
+in **two** directions, and only one of them is somebody else's commit.

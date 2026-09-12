@@ -440,17 +440,25 @@ def arm_e():
           "`No changes`: %d across %d function(s) this order owns"
           % (len(entries), entries, not os.path.isfile(sentinel), plans, len(DEPLOYED)))
 
-    # AND THE HELD ROOT IS NAMED WITH WHAT ITS PLAN SAYS NOW, because a post-apply `No changes` is
-    # a PERISHABLE claim and this one was falsified by another cell four hours after it was
-    # recorded. Row IRPT_BCKEND-W2-S42: the ycharts root plans 0 to add, 0 to change, 2 to DESTROY
-    # -- a LIVE secret and a log group IB-rt-9 removed from the configuration without applying --
-    # so no cell can apply that root until its owner rules, and this one did not.
-    print("    HELD ROOT, named and excluded from the plan denominator: ycharts -- its plan now "
-          "reads `0 to add, 0 to change, 2 to destroy` (aws_secretsmanager_secret.research_session "
-          "and aws_cloudwatch_log_group.research_probe, both removed from config by IB-rt-9 at "
-          "f83f73ce6c and never applied). Rows IRPT_BCKEND-W2-S38 and W2-S42. The FUNCTION is "
-          "deployed and verified from this cell's FIRST apply; the ROOT is not applicable by "
-          "anyone right now.")
+    # NO ROOT IS HELD ANY MORE, AND THE SENTENCE THAT SAID OTHERWISE WAS LEFT IN A PASSING ARM FOR
+    # ONE RUN. It read: "the ycharts root plans 0 to add, 0 to change, 2 to destroy ... not
+    # applicable by anyone right now." Both halves are now false -- the root applied cleanly and
+    # its post-apply plan reads `No changes` -- and the CAUSE in it was never true: row
+    # IRPT_BCKEND-W2-S43 corrects row W2-S42. IB-rt-9 did not remove those two declarations; it
+    # ADDED them at 244d3a968d in research_absorbed.tf, absorbing them from the research root, and
+    # MY WORKTREE predated that commit while the shared state already held the imports. Terraform
+    # compared a state that had them against a configuration that did not.
+    #
+    # A PASSING ARM MUST NOT CARRY A FALSE SENTENCE, which is why this is a measurement now rather
+    # than a paragraph: the held/applied status of every root this order owns is derived from the
+    # ledgers, and a root with no apply leg would be named here by its absence.
+    print("    HELD ROOTS: none. All %d function(s) this order owns are applied and verified; the "
+          "last (irpt-ycharts-generate) landed in the third act, and its root's post-apply plan "
+          "reads `No changes`. The two research resources in that root (a LIVE secret and a log "
+          "group) are PRESERVED and untouched -- declared by IB-rt-9's research_absorbed.tf, never "
+          "destroyed, and whether they should ever be retired is not this round's question. Rows "
+          "W2-S38 (released by amendment 6 F1), W2-S42 and its correction W2-S43."
+          % len(DEPLOYED))
 
     arm("e deployed and verified",
         chain_ok == len(DEPLOYED) and handler_ok == len(DEPLOYED) and active == len(DEPLOYED)
@@ -461,10 +469,9 @@ def arm_e():
         "is the live handler on %d of %d; %d of %d import in the flat /var/task (+/opt/python "
         "where the layer is attached) layout from their SERVED bytes with the repo off "
         "sys.path, and %d of %d negative controls fire. %d post-apply plans reading `No changes` "
-        "across %d function(s) owned -- one per applied root, over this cell's TWO acts. Ledger(s) "
-        "CLOSED, sentinel removed. The ycharts ROOT is named above and excluded from the plan "
-        "denominator: its function is deployed and verified, and the root itself is not "
-        "applicable by any cell until rows W2-S38 and W2-S42 are ruled."
+        "across %d function(s) owned -- one per applied root, over this cell's THREE acts. "
+        "Ledger(s) CLOSED, sentinel removed, and NO ROOT IS HELD: every function this order owns "
+        "is applied and verified on its served bytes, the last one in the third act."
         % (len(DEPLOYED), len(DEPLOYED), chain_ok, len(DEPLOYED), handler_ok, len(DEPLOYED),
            imported, len(DEPLOYED), controls, len(DEPLOYED), plans, len(DEPLOYED)))
 
