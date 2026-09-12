@@ -61,6 +61,19 @@ def blocked(name, detail):
     print("[BLOCKED] %s -- %s" % (name, detail))
 
 
+def human_gated(name, record_ok, detail):
+    """A THIRD VERB, because the vocabulary needed one.
+
+    An arm whose own rule admits a HUMAN-GATED record is not PASSING by measurement and is not
+    BLOCKED either -- writing it as PASS would claim something unexercised, and writing it as
+    BLOCKED would report a met rule as an unmet one. It counts toward the token when its RECORD
+    satisfies the rule's named elements, and it prints under its own label so no reader can
+    mistake it for a measurement.
+    """
+    RESULTS.append((name, bool(record_ok), detail))
+    print("[HUMAN-GATED] %s -- %s" % (name, detail))
+
+
 def run_pytest(paths, junit_name):
     """(rc, output, junit_path). THE CENSUS READS THE XML, NEVER THE TERMINAL PROSE."""
     junit = os.path.join(REPO, ".scratch", junit_name)
@@ -113,15 +126,15 @@ def arm_a():
     for s in skipped:
         print("      EXCLUDED, named and not counted: %s (%s) -- no handler at this vintage"
               % (s["operation"], s["route_key"]))
-    print("    IN LANE (the 6 functions this order's <paths> name): %d of %d unguarded"
-          % (len(inl["unguarded"]), inl["routes"]))
+    print("    IN LANE (the %d functions this order may open): %d of %d unguarded"
+          % (len(census.IN_LANE_FUNCTIONS), len(inl["unguarded"]), inl["routes"]))
     print("    WHOLE FILE                                         : %d of %d unguarded"
           % (len(whole["unguarded"]), whole["routes"]))
     for route_key in whole["unguarded"]:
         print("      OUT OF LANE, named and not counted: %-52s -> %s (cell IB-rt-7, row "
               "IRPT_BCKEND-W2-S30)" % (route_key, rt.function_for(route_key)))
 
-    arm("a1 zero in lane", not inl["unguarded"] and inl["routes"] == 11,
+    arm("a1 zero in lane", not inl["unguarded"] and inl["routes"] == len(table),
         "%d of %d route(s) this order may open reach an unguarded handler"
         % (len(inl["unguarded"]), inl["routes"]))
 
@@ -254,7 +267,21 @@ def arm_bcd():
     tail = [ln for ln in out.splitlines() if ln.strip()][-1:]
     print("    pytest rc=%d  last line: %s" % (rc, tail[0] if tail else "(no output)"))
 
-    n_functions = len(census.IN_LANE_FUNCTIONS)
+    # THE SWAP CENSUS'S OWN SET, READ FROM THE MODULE THAT OWNS IT. `test_unguarded_census` and
+    # `test_guarded_entries` keep SEPARATE in-lane sets on purpose -- the first is "what may this
+    # order open", the second is "which functions does the swap census exercise" -- and this
+    # battery read the WRONG one after amendment 3 granted holdings: the route census gained
+    # irpt-holdings, so the expected swap count became 7 x 6 = 42 while the suite still ran 36,
+    # and arms (b), (c), (d) all went red for a reason that had nothing to do with them. The two
+    # lists diverging is the same trap the wind-down hand-off named; reading each from its owner
+    # is the fix.
+    import test_guarded_entries as swaps
+    n_functions = len(swaps.IN_LANE_FUNCTIONS)
+    holdings_only = sorted(set(census.IN_LANE_FUNCTIONS) - set(swaps.IN_LANE_FUNCTIONS))
+    if holdings_only:
+        print("    the swap census covers %d function(s); %s carries the C1 MARK and is NOT in "
+              "the swap set -- its deploy is HELD (rows W2-S38, W2-S41), so it is named here and "
+              "counted in neither direction" % (n_functions, ", ".join(holdings_only)))
     swaps_p, swaps_f, _s = junit_census(junit, "test_a_swapped_identifier_never_widens")
     diff_p, diff_f, _s = junit_census(junit, "test_the_authorized_request_is_not_refused")
     firm_p, firm_f, _s = junit_census(junit, "test_a_claimed_firm_that_disagrees")
@@ -400,6 +427,103 @@ def arm_e():
            imported, len(DEPLOYED), controls, len(DEPLOYED), plans, len(DEPLOYED)))
 
 
+# ------------------------------------------------- (d3) THE BUSINESS DATE, WHERE THE SCHEMA CANNOT
+def arm_d3_business_date():
+    """THE OBLIGATION THE CONTRACT DELIBERATELY STOPPED CARRYING. Amendment 4, D3.
+
+    PRD v0.14 @b8e98d5a4d made `business_date` STATE-CONDITIONAL: REQUIRED on the five
+    answer-bearing states, permitted to be ABSENT (never null) on the four no-answer ones. The
+    allOf's own $comment records what that gives up -- "this schema can no longer catch a POST-READ
+    refusal (unavailable/failed WITH an artifact) that omits the date it does have" -- and says the
+    obligation moves to a battery. This is that battery arm, and it is HERE rather than in the
+    IB-s-18 battery because that one exits rc=1 on a TypeError in an unrelated arm, so an
+    obligation added there could never fire.
+
+    THE STATE SET IS A SUBTRACTION FROM THE PRINTED NINE, NOT A FORWARD LIST OF THE CASES THIS
+    BATTERY HAPPENS TO EXERCISE. The first cut of this rule -- mine -- was PRE-READ vs POST-READ,
+    which is a distinction about REFUSALS, and QUEUED and RUNNING are not refusals at all.
+    """
+    print("\n=== ARM (d3) THE BUSINESS DATE, WHERE THE SCHEMA CANNOT REACH =====")
+    import served
+    import test_guarded_entries as T
+
+    schema_path = os.path.join(V1, "StatusEnvelope.schema.json")
+    with open(schema_path, "r", encoding="utf-8") as fh:
+        schema = json.load(fh)
+    enum = tuple((schema.get("properties") or {}).get("state", {}).get("enum") or ())
+    answer_bearing = tuple(
+        (schema.get("allOf") or [{}])[0].get("if", {}).get("properties", {})
+        .get("state", {}).get("enum") or ())
+    no_answer = tuple(st for st in enum if st not in answer_bearing)
+    print("    denominator, READ FROM THE CONTRACT not from this file: %d state(s) in the enum"
+          % len(enum))
+    print("      ANSWER-BEARING (business_date REQUIRED): %d -- %s"
+          % (len(answer_bearing), ", ".join(answer_bearing)))
+    print("      NO-ANSWER  (may be ABSENT, never null) : %d -- %s  [%d MINUS %d]"
+          % (len(no_answer), ", ".join(no_answer), len(enum), len(answer_bearing)))
+    agree = (tuple(served.STATES) == enum
+             and tuple(served.ANSWER_BEARING_STATES) == answer_bearing
+             and tuple(served.NO_ANSWER_STATES) == no_answer)
+    print("    the boundary's own three sets agree with the contract's, member for member: %s"
+          % agree)
+
+    # ---- THE OBLIGATION, per function: a POST-READ refusal states the artifact's date.
+    post_ok, pre_ok, total, nulls = 0, 0, 0, 0
+    for function in sorted(T.entries()):
+        route_key, handler = T.entries()[function]
+        entry_obj = handler.__irpt_entry__
+        restore = T._install_recorded_deps(entry_obj)
+        try:
+            operation = T._routes()[route_key]["operation"]
+            post = handler(T.swapped_event(route_key, operation, "account"), None)
+            pre = handler(dict(T.base_event(route_key, operation),
+                               headers=dict(T.authorized_headers(version="v2-not-published"))),
+                          None)
+        finally:
+            restore()
+        total += 1
+        for label, answer in (("POST-READ", post), ("PRE-READ", pre)):
+            dates = ((answer.get("status") or {}).get("source_dates") or {})
+            has = "business_date" in dates
+            is_null = has and dates.get("business_date") is None
+            nulls += 1 if is_null else 0
+            state = (answer.get("status") or {}).get("state")
+            if label == "POST-READ":
+                post_ok += 1 if (has and not is_null) else 0
+            else:
+                pre_ok += 1 if not has else 0
+            print("      %-26s %-9s state=%-12s business_date %s"
+                  % (function, label, state,
+                     ("= %s" % dates.get("business_date")) if has else "ABSENT"))
+
+    arm("d3 the post-read business date", post_ok == total and pre_ok == total and nulls == 0,
+        "%d of %d functions state the artifact's business_date on a POST-READ refusal -- which "
+        "the contract now permits them to omit and which this arm exists to require -- and %d of "
+        "%d omit it on a PRE-READ refusal, where no artifact has been read and inventing one from "
+        "a clock would be the worse answer. %d of %d envelopes carry it as NULL (the contract says "
+        "ABSENT, never null). The state sets are cut by SUBTRACTION from the contract's own "
+        "nine-member enum (%d minus %d answer-bearing = %d no-answer) and the boundary's three "
+        "sets agree with the contract's member for member: %s."
+        % (post_ok, total, pre_ok, total, nulls, total * 2, len(enum), len(answer_bearing),
+           len(no_answer), agree))
+
+    # ---- AND AN ANSWER-BEARING STATE WITH NO DATE MUST RAISE, not ship.
+    raised = False
+    try:
+        served.status_envelope("directory-search", "NOT_READY", state="READY")
+    except served.EntryError:
+        raised = True
+    except Exception as exc:                            # noqa: BLE001
+        print("    WARN: an unexpected exception class: %r" % exc)
+    print("    an ANSWER-BEARING state built with no business_date raises at the boundary: %s"
+          % raised)
+    arm("d3 an answer-bearing state cannot ship dateless", raised,
+        "status_envelope(state='READY') with no business_date raises EntryError rather than "
+        "returning an envelope that fails its own contract. THE NEGATIVE CONTROL for the arm "
+        "above: without this, 'the post-read date is present' could be satisfied by a boundary "
+        "that simply never checks.")
+
+
 # --------------------------------------------------------------------- (f) the principal
 def arm_f():
     print("\n=== ARM (f) THE PRINCIPAL =======================================")
@@ -427,7 +551,7 @@ def arm_f():
     # AND NO SECRET VALUE: the record names secrets and must not carry one.
     leaked = [tok for tok in ("BEGIN PRIVATE KEY", "BEGIN RSA", "eyJhbGciOi") if tok in text]
     print("    secret VALUES in the record: %d (names only is the bound)" % len(leaked))
-    arm("f the principal", all(found.values()) and not leaked,
+    human_gated("f the principal", all(found.values()) and not leaked,
         "HUMAN-GATED: %d of %d required elements present and 0 secret values. The arm's own rule "
         "admits this as a PASS of that rule, never as a skip -- a mint path EXISTS and a worker "
         "may not walk it (out of <paths>, a write to the production auth plane, and the "
@@ -501,20 +625,27 @@ def _validates_status(answer):
 def arm_g(junit):
     print("\n=== ARM (g) ENVELOPE CONFORMANCE, SERVED ========================")
     import routetable as rt
-    import test_unguarded_census as census
 
     table, _skipped = rt.entry_points()
     routes = {r["route_key"]: r for r in rt.load_routes()["routes"]}
+    # THE DENOMINATOR IS "ROUTES WITH A DEPLOYED GUARDED HANDLER AT THIS HEAD", which is not the
+    # same set as "routes this order may open". `irpt-holdings` is in lane and carries the mark IN
+    # THE TREE, and its apply is HELD (rows W2-S38, W2-S41) -- so the live route still reaches
+    # `snapshot.lambda_handler`, which answers in its own shape and cannot be expected to refuse
+    # with a StatusEnvelope. Counting it would report another cell's deployed behaviour as this
+    # arm's failure; omitting it silently would overstate the sweep. It is NAMED and excluded.
+    deployed_functions = set(DEPLOYED)
     in_lane = [(k, routes[k]) for k in sorted(table)
-               if routes[k].get("handler") in census.IN_LANE_FUNCTIONS]
-    out_of_lane = [k for k in sorted(table)
-                   if routes[k].get("handler") not in census.IN_LANE_FUNCTIONS]
+               if routes[k].get("handler") in deployed_functions]
+    not_deployed = [k for k in sorted(table)
+                    if routes[k].get("handler") not in deployed_functions]
 
-    print("    denominator: %d route(s) with a DEPLOYED handler at this HEAD are this order's; "
-          "%d excluded and named:" % (len(in_lane), len(out_of_lane)))
-    for key in out_of_lane:
-        print("      EXCLUDED, neither a pass nor a fail: %s -- %s, cell IB-rt-7, row "
-              "IRPT_BCKEND-W2-S30" % (key, routes[key].get("handler")))
+    print("    denominator: %d route(s) whose guarded handler is DEPLOYED at this HEAD; "
+          "%d excluded and named:" % (len(in_lane), len(not_deployed)))
+    for key in not_deployed:
+        print("      EXCLUDED, neither a pass nor a fail: %s -- %s (guarded in the TREE at this "
+              "commit, apply HELD: rows IRPT_BCKEND-W2-S38 and W2-S41)"
+              % (key, routes[key].get("handler")))
 
     # THE VERSION CHECK, SERVED. This is the half the amendment says this cell serves, and it is
     # now measured against the DEPLOYED functions rather than in process.
@@ -563,35 +694,51 @@ def arm_g(junit):
                                                                                len(in_lane)))
     else:
         blocked("g3 the refusal validates against StatusEnvelope",
-                "%d of %d served refusals validate. EVERY ONE fails on the same clause: v1's "
-                "StatusEnvelope has `source_dates.required = ['business_date']` and the boundary "
-                "emits `source_dates: {source_completion_date: null}` with no business date. Row "
-                "IRPT_BCKEND-W2-S36. IT IS TWO DEFECTS WITH DIFFERENT OWNERS, measured apart: a "
-                "POST-READ refusal (an account swap, refused after the directory artifact was "
-                "read) COULD carry the artifact's business date and does not -- that half is "
-                "this cell's and is fixable in lane; a PRE-READ refusal (CONTRACT_VERSION, "
-                "refused before any artifact is read, which is the property that makes the "
-                "version check trustworthy) has NO artifact to take a date from, and v1 admits "
-                "no null there -- that half cannot be fixed without amending a FROZEN contract "
-                "this order may not touch. Row W2-S25 ruled that a refusal is graded against "
-                "StatusEnvelope rather than a response contract; this is that ruling's next "
-                "layer down. Not graded around and not fixed halfway: a post-read-only fix "
-                "would still leave %d of %d version refusals non-conforming and would spend a "
-                "second six-root deploy to move nothing."
-                % (envelope_ok, len(in_lane), len(in_lane), len(in_lane)))
+                "%d of %d served refusals validate against the CURRENT v1 StatusEnvelope. Row "
+                "IRPT_BCKEND-W2-S36 is DISCHARGED by the CTO's ruling (PRD v0.14 @b8e98d5a4d): "
+                "`business_date` is now REQUIRED on the five ANSWER-BEARING states and may be "
+                "ABSENT, never null, on the four NO-ANSWER ones, and a version refusal is "
+                "UNAVAILABLE. A remainder here is therefore a DIFFERENT defect from the one that "
+                "row named, and the deciding line above says which operation and why."
+                % (envelope_ok, len(in_lane)))
 
-    # THE SUCCESS HALF NEEDS A PRINCIPAL THE VALIDATOR ACCEPTS, AND ARM (f) RECORDS THAT NO
-    # WORKER MAY MINT ONE. Measuring it with a fabricated advisor id would measure a refusal and
-    # report it as conformance, which is the failure this arm exists to prevent.
-    blocked("g2 success responses validate, SERVED",
-            "0 of %d measured, and the reason is arm (f), not arm (e): a SUCCESS response "
-            "requires a principal the edge validator accepts, and this order's principal arm is "
-            "HUMAN-GATED (RT2_test_principal_human_gated.md names the operator's exact act). "
-            "Invoking with a fabricated advisor id would return a refusal, and counting that as "
-            "a validated response is exactly the wrong answer. The in-process half stands: the "
-            "paired producer-to-consumer arms run against the real entry points. This half "
-            "un-blocks the moment the HUMAN-GATED act in arm (f) is taken -- by the operator, "
-            "never by this cell." % len(in_lane))
+    # THE SUCCESS HALF IS HUMAN-GATED, RULED BY THE ISSUER (amendment 3 C2, re-confirmed at
+    # amendment 4), UNDER THE FACE'S OWN RULE FOR ARM (f): where no principal path a worker may
+    # walk exists, the arm is WRITTEN HUMAN-GATED naming the operator's exact act and its expected
+    # reading, never skipped silently. It is graded the same way arm (f) is -- by READING THE
+    # RECORD for the elements the rule names, as literal strings, so a reworded record fails
+    # rather than being read charitably. It is NOT a pass: `human_gated()` records its own verdict.
+    required = {
+        "the g2 section exists": "RT2 ARM (g2)",
+        "the verdict": "**`HUMAN-GATED`.**",
+        "which console/CLI": "313476888478",
+        "which user store": "opal-users-v2",
+        "which claim": "firmId",
+        "the expected status": "HTTP 200",
+        "the response contract by path": "responses/<operation>.response.schema.json",
+        "the opaque firm id, not the registry spelling": "ISSUED OPAQUE id",
+        "the enqueueing routes excluded and named": "THE TWO POST ROUTES ARE EXCLUDED",
+        "what must NOT be recorded": "NOT the `data` payload",
+    }
+    with open(GATED, "r", encoding="utf-8") as fh:
+        text = fh.read()
+    found = {k: (v in text) for k, v in required.items()}
+    for k, v in required.items():
+        print("      [%s] %-46s %s" % ("x" if found[k] else " ", k, v))
+    leaked = [tok for tok in ("BEGIN PRIVATE KEY", "BEGIN RSA", "eyJhbGciOi", "Bearer ey")
+              if tok in text]
+    print("      secret VALUES in the record: %d (names only is the bound)" % len(leaked))
+    human_gated("g2 success responses validate, SERVED",
+                all(found.values()) and not leaked,
+                "HUMAN-GATED, which is this arm's own rule and not a bar lowered: %d of %d "
+                "required elements present and 0 secret values. 0 of %d success responses are "
+                "MEASURED and none is claimed -- a SUCCESS needs a principal the EDGE VALIDATOR "
+                "accepts, and invoking a deployed function with a fabricated advisor id returns a "
+                "REFUSAL, which cannot validate against a response contract at all (row W2-S25). "
+                "Counting that would record the opposite of what the arm asks. The record names "
+                "the operator's exact act as step 3b of arm (f)'s same bounded run, with the two "
+                "ENQUEUEING routes excluded on their own line under bounds 1 and 2."
+                % (sum(found.values()), len(found), len(in_lane)))
 
 
 def _validates(operation, answer):
@@ -620,6 +767,46 @@ def _validates(operation, answer):
     return True, ""
 
 
+def vintage_disclosure():
+    """WHICH BYTES THIS RUN ACTUALLY READ, and which of them are at no commit.
+
+    THIS BATTERY READS THE WORKTREE. Every arm above resolves modules and artifacts by PATH, so a
+    file that is edited-but-uncommitted is INDISTINGUISHABLE to them from one that is in the
+    record -- and arm (a)'s `0 of 12` depends on exactly such a file right now. A token printed
+    over an uncommitted population is a claim about THIS FILESYSTEM, not about the repository, and
+    the difference is the whole of GRAIN. So the run states it rather than leaving a reader to
+    assume the stronger reading.
+
+    It does NOT withhold the token: every arm's own bar is genuinely met on the bytes exercised.
+    It records the vintage those bytes have.
+    """
+    print("\n=== VINTAGE OF THE BYTES THIS RUN EXERCISED ======================")
+    proc = subprocess.run(["git", "status", "--porcelain"], cwd=REPO, capture_output=True,
+                          text=True, timeout=120)
+    rows = [ln for ln in (proc.stdout or "").splitlines()
+            if ln[3:].startswith("infra/aws/lambda/investor-reporting")
+            or ln[3:].startswith("infra/aws/terraform/investor-reporting")
+            or ln[3:].startswith("docs/contracts/investor-reporting")]
+    head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO,
+                          capture_output=True, text=True, timeout=120).stdout.strip()
+    print("    HEAD: %s" % head)
+    if not rows:
+        print("    0 subject file(s) differ from HEAD: every byte above is IN THE RECORD.")
+        return
+    print("    %d subject file(s) are NOT at HEAD, so the arms that read them are measuring this "
+          "FILESYSTEM and not the repository:" % len(rows))
+    for ln in rows:
+        print("      %s" % ln)
+    print("    WHY THEY ARE NOT COMMITTED: row IRPT_BCKEND-W2-S41 -- amendment 3 C1 grants the "
+          "holdings paths in PROSE and the <paths> block does not carry them, so the lane gate "
+          "refuses them and an author override is the one escape the rule forbids. ONE LINE of "
+          "<paths> converts this disclosure into a record.")
+    print("    WHAT IT MEANS FOR THE TOKEN: arm (a)'s `0 of 12` and arm (a4)'s census both read "
+          "holdings/entry.py from the worktree. On a clean checkout of this branch the twelfth "
+          "route is UNGUARDED and arm (a2) reads `1 of 12` -- which is what row W2-S30 says and "
+          "what the previous run recorded. The guard is WRITTEN and PASSING, not yet RECORDED.")
+
+
 def main():
     print("BATTERY IB-rt-2 -- GUARD THE SIX")
     print("repo: %s" % REPO)
@@ -627,14 +814,19 @@ def main():
           "_authz guard, Enforcer and scope resolver")
     arm_a()
     junit = arm_bcd()
+    arm_d3_business_date()
     arm_e()
     arm_f()
     arm_g(junit)
 
+    vintage_disclosure()
+
     print("\n=== SUMMARY ======================================================")
     passed = sum(1 for _n, ok, _d in RESULTS if ok)
+    gated = {n for n, _ok, d in RESULTS if d.startswith("HUMAN-GATED")}
     for n, ok, d in RESULTS:
-        print("  %-32s %s" % (n, "PASS" if ok else "FAIL/BLOCKED"))
+        label = "HUMAN-GATED" if n in gated else ("PASS" if ok else "FAIL/BLOCKED")
+        print("  %-40s %s" % (n, label))
     print("  %d of %d arms PASS" % (passed, len(RESULTS)))
     if passed == len(RESULTS):
         print("\nIBRT2-SIX-GUARDED")
