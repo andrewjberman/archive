@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rf-2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-2.the-mount-and-its-iam.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-2.the-mount-and-its-iam.md",
+    "group": "OTHER",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NEW. THE MOUNT: aws_iam_role opal-amgt-scoped-api-role + its policy, the yang-lambda module declaration (opal-amgt-scoped-api, python3.11, timeout 29 to sit under the API Gateway 29s integration ceiling), the AWS_PROXY integration, ELEVEN aws_apigatewayv2_route resources via for_each over one declared set, and the lambda:InvokeFunction permission scoped to the portal API's execute-api ARN. PLACED IN harvest/ AND NOT amgt-resapp/ ON THE ESTATE'S OWN INSTRUCTION: harvest/main.tf records that this module REPLACES amgt-resapp/tfstate and that 'ALL worker terraform consolidates into this one harvester tf' (Andrew-direct 2026-09-11 ~17:3xZ); the metrics table the API reads is declared in this module's dynamodb.tf, so the IAM references the resource instead of retyping an ARN. THE IAM IS SCOPED TO THE ADAPTER'S ACTUAL CALL SHAPES, read out of its source rather than from a template: Query + GetItem + BatchGetItem on the table AND '${arn}/index/*' (a Query against axis-rank-index is authorized on the INDEX arn -- granting only the table is the standard way this returns AccessDenied in production while every local test passes), and PutItem + DeleteItem for the watchlist star markers. NO Scan is granted anywhere, because the adapter makes none. THE TRUSTED EDGE BOUNDARY: every route is authorization_type CUSTOM against the same portal authorizer every other /api/scoped/* route uses -- that is what makes _firm_id()'s X-Firm-Id trustworthy, and a route declared NONE would leave the header client-settable and turn a firm boundary into a suggestion. NOT DEPLOYED: no terraform apply, no artifact built or uploaded, nothing pushed."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_scoped_amgt_mount.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NEW, 5 tests. THE DRIFT GUARD the mount needs and nothing previously had: it parses the terraform's declared route list and diffs it against the adapter's own scoped_amgt_route_table() in BOTH directions, printing both denominators and the symmetric difference -- because '11 == 11' is not evidence that two SETS agree. It also refuses a vacuously empty pair (both sets at zero would satisfy a diff and prove nothing -- the always-passes shape this round exists to remove), refuses a route outside the /api/scoped/amgt prefix, refuses a route key with no HTTP verb, and fails loudly if the mount file is absent rather than comparing against an empty set. PROVEN ABLE TO FAIL, not assumed: see controls.mutant."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a printed integer STRICTLY GREATER THAN ZERO -- the adapter's call sites now APPEAR in `comp-iam`'s own output, which is the exact thing row `Z-S27` says is missing. \u26d4 ZERO IS THE MEASURED DEFECT and is NOT met. \u26d4 AND UNCHANGED AGGREGATE TOTALS DO NOT SUBSTITUTE: before this cell the same tool returned 835 calls / 96 roles / 12 missing / 291 deny-present with `lib/` and `scoped_amgt` appearing 0 times against a POSITIVE CONTROL of 37 lines naming `infra/aws/lambda/`. A run that reproduces those totals and still shows 0 here is NOT met",
+      "method": "command",
+      "invocation": "timeout 110 comp-iam 2>&1 | grep -c -E \"scoped_amgt|lib/research/api\"",
+      "output_evidence": "AC1_COUNT=0   (the named invocation's printed integer, run AFTER the mount landed)\nPOSITIVE CONTROL in the same 992-line output: lines naming `infra/aws/lambda/` = 37, so the instrument certainly DOES report call sites -- it never sees this one.\nAGGREGATE TOTALS, which the clause says do not substitute and which are recorded to show they did not move: `RESOURCE PLANE: 835 call(s) verdicted across 96 mapped role(s); 629 UNRESOLVABLE-RESOURCE, 142 GRANTED, 51 GRANTED-BROAD, 11 UNGRANTED, 2 GRANTED-ACTION / UNGRANTED-RESOURCE` -- BYTE-IDENTICAL to the pre-cell baseline.\nTHE ONE THING THAT DID MOVE, and it is not a pass: comp-iam's scanned-file denominator went `scanned 3 trees (467 .tf files)` -> `scanned 3 trees (468 .tf files)`, so the tool demonstrably READ the new mount file. The new role name `opal-amgt-scoped-api` still appears 0 times, because a role with no service profile bound to it contributes no calls to verdict.\nNOT MET, AND THE BLOCKER IS A GRANT, NOT THE WORK -- row AMGT_RESAPP-Z-W11-S2.",
+      "denominator": "0 matching lines out of a 992-line comp-iam output; POSITIVE CONTROL 37 lines naming infra/aws/lambda/ in the same output. Discovery corpora censused by subtraction: 0 of 214 lambda-source-map entries and 0 of 27 EC2_MANIFEST services reach lib/.",
+      "status": "FAIL",
+      "expect": "AC1_COUNT=[1-9]\\d*",
+      "status_reason": "NOT MET, AND NOT MEETABLE FROM THIS ORDER'S GRANT. The clause requires an integer STRICTLY GREATER THAN ZERO; the measured value is 0, before and after the mount landed. THE CAUSE IS MECHANICAL AND WAS READ AT SOURCE, not inferred: org/modules/graph/extract_iam.py:1-14 names lambda-source-map.json as its first authoritative input, and _load_lambda_profiles (:2604-2657) discovers Lambda call sites ONLY through that file -- for a directory entry it globs exactly lambda_function.py and index.py, no rglob and no other route. Censused by subtraction over full denominators: 0 of 214 source-map entries and 0 of 27 EC2_MANIFEST services reach lib/, and there are ZERO AMGT or scoped entries. AMGT-rf-2's <paths> grants the terraform trees but NOT infra/aws/lambda/, where every handler package in the estate lives -- including this project's own sibling, infra/aws/lambda/research/pull_enqueue/lambda_function.py, which THIS module's build-and-upload.sh reads. The order's own instruction is 'a surface not named in <paths> is a WALL ... do not route around a missing path; file a row and stop on that clause', so that is what was done: row AMGT_RESAPP-Z-W11-S2, class BLOCKING, hazard ARMED, disarm_owner 2.0.0_SA_COO~ZZZ. ONE MEASUREMENT WORTH THE CVO'S ATTENTION BECAUSE IT REFINES ROW Z-S27: the mount DID move comp-iam's scanned-file denominator (467 -> 468 .tf files), proving the tool read the new file, while the RESOURCE PLANE totals stayed byte-identical and the new role appears 0 times. Z-S27's lesson was that an UNCHANGED denominator proves the instrument never saw the consumer; this shows the converse is not safe either -- a MOVED denominator is not evidence anything was verdicted. The role entered the POLICY corpus and the calls never entered the CALL corpus, and one summary line does not distinguish them."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a PRINTED DENOMINATOR of files scanned, and at least one `route_key`-bearing declaration in the CONFIG or DEF band under `infra/` -- the route is DECLARED in infrastructure, not only in library code. \u26d4 Hits confined to the DOC or TEST band are NOT met: a route named only in prose or a fake is the exact shape that let sixteen tests pass against nothing mounted. A denominator of 0 files scanned is OUT-OF-CORPUS, not a zero, and is NOT met",
+      "method": "command",
+      "invocation": "timeout 110 comp-find \"api/scoped/amgt\" infra --limit 20",
+      "output_evidence": "`timeout 110 comp-find \"api/scoped/amgt\" infra --limit 20` ->\n  DENOMINATOR: 13 hit(s) across 6602 file(s) scanned in scope [corpus=all] | 1 EPHEMERAL-FLOOR, NOT searched | 1604 BINARY, NOT searched\n  BANDS (true totals, not this page): HEAD=13\n  PAGE 1 of 1 (showing 13 of 13) -- all 13 in infra/aws/terraform/harvest/scoped-amgt-api.tf\nELEVEN OF THE THIRTEEN ARE THE ROUTE KEYS THEMSELVES, at :170-180 -- \"GET /api/scoped/amgt/lead-panel/rankings/{movement}/{subject}\", \"GET /api/scoped/amgt/lead-panel/timeseries/{movement}/{subject}\", \"GET /api/scoped/amgt/watchlist\", \"POST /api/scoped/amgt/watchlist/star\", \"POST /api/scoped/amgt/watchlist/unstar\", \"GET /api/scoped/amgt/security/{security_key}/overlay\", \"GET /api/scoped/amgt/security/{security_key}/thesis\", \"GET /api/scoped/amgt/security/{security_key}/peers\", \"GET /api/scoped/amgt/security/{security_key}/coverage\", \"GET /api/scoped/amgt/security/{security_key}/print\", \"POST /api/scoped/amgt/refresh\". The other two are the prefix local and a comment.\nPRE-CELL BASELINE, so the 13 is a delta and not a standing state: `0 hit(s) across 6601 file(s) scanned` -- the route was genuinely not declared in infrastructure before this cell.\nBAND IS HEAD, NOT CONFIG OR DEF, AND THAT IS A PROPERTY OF THE TOOL: positive control on a route this cell did not write -- `comp-find \"route_key\" infra/aws/terraform/harvest` -> 4 hit(s) across 7 file(s), BANDS SURFACED=4, including the long-live `harvest/api-gateway.tf:106: route_key = \"POST /api/private/research/pull\"`. Estate-wide: `comp-find \"route_key\" infra/aws/terraform` -> 68 hit(s) across 577 file(s), BANDS SURFACED=68. 68 of 68 terraform route_key hits band SURFACED; ZERO band CONFIG or DEF. See row AMGT_RESAPP-Z-W11-S3.",
+      "denominator": "13 hit(s) across 6602 file(s) scanned [corpus=all], 1 ephemeral-floor and 1604 binary not searched; 11 of the 13 are route keys. Pre-cell baseline 0 of 6601. Band controls: 4 of 4 SURFACED in harvest/, 68 of 68 SURFACED estate-wide, 0 of 68 CONFIG or DEF.",
+      "status": "PASS",
+      "expect": "DENOMINATOR: [1-9]\\d* hit\\(s\\) across [1-9]\\d* file\\(s\\) scanned[\\s\\S]*infra/aws/terraform/harvest/scoped-amgt-api\\.tf[\\s\\S]*GET /api/scoped/amgt/watchlist",
+      "status_reason": "MET ON ITS DISCRIMINATING CLAUSE; ITS LITERAL BAND SUB-CLAUSE IS NOT MET AND CANNOT BE BY ANY TERRAFORM FILE, AND THAT DISCREPANCY IS DISCLOSED RATHER THAN ABSORBED. MET: a printed denominator that is not zero (13 of 6602, against a genuine pre-cell baseline of 0 of 6601 -- so the route really was undeclared in infrastructure before), eleven route_key declarations in first-party infrastructure source, and hits that are neither DOC nor TEST, which is the clause the criterion actually leans on ('Hits confined to the DOC or TEST band are NOT met'). NOT MET LITERALLY: the clause also says the declaration must sit 'in the CONFIG or DEF band'. It bands HEAD here, and that is a property of the instrument, not of this file -- positive control on a route this cell did not write, harvest/api-gateway.tf:106's long-live `route_key = \"POST /api/private/research/pull\"`, bands SURFACED; estate-wide 68 of 68 terraform route_key hits band SURFACED and ZERO band CONFIG or DEF. Section 1 of this same order MANDATES that pattern ('Follow the existing precedent -- infra/aws/terraform/bd-pipeline/api-gateway.tf ... that is the pattern'), so the two halves of the order disagree: the mandated artifact type never produces the required band. The only way to satisfy the band literally is the investor-reporting JSON-contract pattern, i.e. to abandon the mandated precedent so a classification label comes out right -- letting the shape of the evidence dictate the shape of the thing, which is the same disease as a criterion that cannot fail. The precedent was followed and row AMGT_RESAPP-Z-W11-S3 records the conflict. 3.0.0_SA_CVO~Z may re-grade this FAIL on the literal reading; the raw output and both readings are recorded here so that re-grading needs no re-measurement. ONE THING AC2 CAUGHT THAT IS WORTH KEEPING: the first draft built the route keys as \"GET ${local.scoped_amgt_prefix}/...\" and this census then returned ONE hit -- the prefix definition -- with all eleven mounted routes invisible to every text instrument. The interpolation was removed and each key written out in full."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the suite passes AND the firm-header boundary is present with a printed denominator. \u26d4 THIS CRITERION IS DELIBERATELY NOT SUFFICIENT AND YOU SHOULD SAY SO IN YOUR INSTANCE: sixteen passing fake-boundary tests are exactly what round 6 delivered, and L9 called them out because they *\"do not validate an edge JWT, deployed origin isolation, handler package or served route\"*. Record what these tests DO and DO NOT establish. The SERVED-plane exercise is AC5's judgment, not this instrument's",
+      "method": "test_suite",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -4; echo \"---\"; timeout 60 comp-find \"X-Firm-Id\" lib/research/api --limit 10 2>&1 | grep -E \"DENOMINATOR|hit\"",
+      "output_evidence": "`timeout 110 python -m pytest lib/research/api/tests/ -q | tail -4` -> `22 passed in 0.05s`, rc 0 (17 pre-existing + 5 new mount drift-guard tests).\n---\n`timeout 60 comp-find \"X-Firm-Id\" lib/research/api --limit 10 | grep -E \"DENOMINATOR|hit\"` -> `DENOMINATOR: 5 hit(s) across 5 file(s) scanned in scope [corpus=all] | 6 EPHEMERAL-FLOOR, NOT searched (--corpus raw reads these)`.\nWHAT THESE TESTS DO ESTABLISH, stated because the clause requires it: (1) the adapter reads firm identity from exactly one place, `_firm_id()`, which takes the edge-injected header and FAILS CLOSED with 401 when it is absent -- a firm cannot be named from a path or a body; (2) the route set TERRAFORM MOUNTS and the route set the HANDLER SERVES are the same 11-member set, diffed in BOTH directions with both denominators printed, so a route handled-but-unmounted (404s forever) or mounted-but-unhandled (falls to the catch-all) now fails a test.\nWHAT THEY DO NOT ESTABLISH, and this criterion is DELIBERATELY NOT SUFFICIENT: they do not validate an edge JWT, deployed origin isolation, the handler package, or a served route. Every one of the 22 runs in-process against dictionaries; none makes a network call, none authenticates, none invokes a deployed Lambda. L9's objection to round 6 was exactly that sixteen passing fake-boundary tests are not a boundary, and adding six more does not change the category. The handler package does not exist and could not be written from this grant (row Z-W11-S2), so there is no served plane to exercise at all. The served-plane exercise is AC5's judgment.",
+      "denominator": "22 of 22 tests passed in lib/research/api/tests/ (17 pre-existing + 5 new); X-Firm-Id census 5 hit(s) across 5 file(s) scanned, 6 ephemeral-floor not searched. 0 of the 22 tests touch a network, an authorizer or a deployed route.",
+      "status": "PASS",
+      "expect": "22 passed[\\s\\S]*DENOMINATOR: [1-9]\\d* hit\\(s\\) across [1-9]\\d* file\\(s\\) scanned[\\s\\S]*WHAT THEY DO NOT ESTABLISH",
+      "status_reason": "MET AS AN INSTRUMENT, AND THE CLAUSE ITSELF SAYS THAT IS NOT SUFFICIENT -- recorded here because it instructs 'you should say so in your instance'. THE SUITE PASSES (22) AND THE FIRM-HEADER BOUNDARY IS PRESENT WITH A PRINTED DENOMINATOR (5 of 5). WHAT IS ESTABLISHED: firm identity has exactly one source, the edge-injected header read by _firm_id(), which fails closed with 401 when absent, so no code path lets a client name a firm from a path or a body; and the mounted route set now provably equals the handled route set, both directions, both denominators printed. WHAT IS NOT ESTABLISHED, verbatim from L9's objection these tests do NOT answer: 'an edge JWT, deployed origin isolation, handler package or served route'. All 22 run in-process against dictionaries. Round 6 shipped on sixteen such tests and L9 called them out; adding five more does not move the category, and saying otherwise would be the exact defect this round exists to remove. There is currently NO served plane to exercise at all: the handler package does not exist and could not be written from this grant (row Z-W11-S2), and nothing was deployed. The served-plane exercise is AC5's judgment, graded by 3.0.0_SA_CVO~Z."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the pytest tail shows a FAILURE or COLLECTION ERROR, AND the final line reads `RESTORED_BYTE_IDENTICAL`. \u26d4 A green run with the sentinel present means AC3's suite is blind to this file, which would make AC3 unfailable, and is NOT met. The restore is from a WORKING-TREE snapshot, never `git checkout --` (row `Z-W10-S1`); `RESTORE_FAILED` is NOT met",
+      "method": "command",
+      "invocation": "cp lib/research/api/scoped_amgt.py /tmp/rf2.pre; printf \"\\nBROKEN_SENTINEL_RF2 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf2.pre lib/research/api/scoped_amgt.py; cmp -s /tmp/rf2.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "output_evidence": "pytest tail WITH the sentinel appended:\n  ERROR lib/research/api/tests/test_scoped_amgt_mount.py - ZeroDivisionError: division by zero\n  !!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!\n  2 errors in 0.18s\nRESTORED_BYTE_IDENTICAL\nThe baseline immediately before was `22 passed in 0.05s`, so the suite goes 22-passed -> 2-collection-errors on the sentinel alone: AC3's suite is NOT blind to this file and AC3 is therefore not unfailable. TWO errors rather than one because both test_scoped_amgt.py and the new test_scoped_amgt_mount.py import the module the sentinel broke -- the new drift guard is wired to the same file, which is itself the point.\nRESTORE IS FROM A WORKING-TREE SNAPSHOT (`cp` to /tmp/rf2.pre before the mutation), never `git checkout --` (row Z-W10-S1's ~90-line loss). INDEPENDENTLY CORROBORATED by a second snapshot taken before the criterion ran: sha256 of the restored file == sha256 of .scratch/INSURANCE_rf2_scoped.py == d8474d5b843702133f82dbe1e7d70cb129840c01740b3ed2618cd9b4f8a2978c, so the restored bytes are the PRE-MUTATION working-tree bytes and not merely self-consistent with the snapshot they came from.",
+      "denominator": "22 tests collected clean; 2 collection errors with the sentinel present; restore compared byte-for-byte over the whole 32342-byte file and corroborated by sha256 against an independent pre-mutation snapshot.",
+      "status": "PASS",
+      "expect": "(?:Interrupted: \\d+ errors? during collection|ZeroDivisionError)[\\s\\S]*RESTORED_BYTE_IDENTICAL",
+      "status_reason": "BOTH LIMBS MET. The sentinel IS caught (22 passed -> 2 collection errors on the sentinel alone), so AC3's suite can see this file and AC3 is not unfailable -- which is this criterion's entire job. The restore printed RESTORED_BYTE_IDENTICAL and was taken from a WORKING-TREE snapshot; `git checkout --` appears nowhere in this task order, which is row Z-W10-S1's whole lesson. CORROBORATED BY A SECOND INSTRUMENT, because the criterion's own cmp compares against the snapshot it restored FROM and so can only prove self-consistency: an insurance copy taken before the criterion ran has sha256 d8474d5b843702133f82dbe1e7d70cb129840c01740b3ed2618cd9b4f8a2978c, equal to the restored file's."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "<criterion id=\"AC5\" cell_refs=\"AMGT-rf-2\" judgment=\"true\"/> -- declared judgment in the task order with NO children: no <invocation> and no <expect>.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- no invocation exists to run; the order declares this criterion judgment-only and self-closing.",
+      "output_evidence": "NO VERDICT IS RECORDED BY THIS WORKER, BY INSTRUCTION. Cited at org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-2.the-mount-and-its-iam.md @ c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5. The one fact bearing on the served-plane judgment routed here by AC3: there is no served plane to exercise -- the handler package and its comp-iam source-map registration lie outside this order's <paths> (row AMGT_RESAPP-Z-W11-S2), no artifact was built or uploaded, and no terraform apply was run.",
+      "denominator": "N/A -- a judgment criterion has no instrument and no denominator. 1 of 5 criteria here is judgment-graded; 4 of 5 are mechanical and recorded above.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "JUDGMENT CRITERION -- declared `judgment=\"true\"` with NO children. The order: \"A judgment criterion carries `judgment=\"true\"`, no children and NO verdict from you: record it `UNVERIFIABLE-BY-INSTRUMENT` with a `status_reason` naming `3.0.0_SA_CVO~Z`, which grades it at L9. `PASS` or `FAIL` on a judgment row is INVALID.\" AC3's clause additionally routes the SERVED-PLANE exercise here: \"The SERVED-plane exercise is AC5's judgment, not this instrument's.\" THIS WORKER RECORDS NO VERDICT and notes only the fact that bears on 3.0.0_SA_CVO~Z's grading: there is currently NO served plane to exercise, because the handler package and its source-map registration lie outside AMGT-rf-2's <paths> (row AMGT_RESAPP-Z-W11-S2). Nothing was deployed."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutation controls. (1) THE ORDER'S OWN, AC4: BROKEN_SENTINEL_RF2 = 1/0 appended to lib/research/api/scoped_amgt.py, the suite re-run, then restored from a WORKING-TREE snapshot taken with cp before the mutation (never `git checkout --`, which reads the INDEX -- row Z-W10-S1's ~90-line loss). (2) ONE THIS ORDER DID NOT ASK FOR, ON THE GUARD I WROTE MYSELF: the new drift guard asserts the terraform route set equals the handler's route set, and a guard that has only ever been run against an agreeing pair has never been tested. One route ('POST /api/scoped/amgt/watchlist/unstar') was deleted from the terraform list, the guard re-run, and the file restored from its own working-tree snapshot (.scratch/rf2_tf.pre).",
+      "expected": "(1) the suite turns RED on the sentinel alone and the file returns byte-identical -- a green with the sentinel present would prove AC3's suite cannot see the file and would make AC3 unfailable. (2) the drift guard FAILS naming the direction and both denominators; if it passed with a route missing it would be decorative.",
+      "observed": "(1) FIRED: 22 passed -> `ZeroDivisionError: division by zero` / `Interrupted: 2 errors during collection` / `2 errors in 0.18s`, then RESTORED_BYTE_IDENTICAL, corroborated by sha256 against an independent pre-mutation copy (d8474d5b843702133f82dbe1e7d70cb129840c01740b3ed2618cd9b4f8a2978c). (2) FIRED: `2 failed, 3 passed` -- test_mounted_routes_and_handled_routes_are_the_same_set with `AssertionError: route sets disagree -- handled=11 mounted=10; HANDLED BUT NOT MOUNTED ...`, and test_the_route_set_is_not_vacuously_empty with `terraform mounts 10 routes, expected 11`. Restored from .scratch/rf2_tf.pre, cmp silent, sha256 12d18da38fab34cde718d02891d48ff8a59dc53e7357516f42f7a07fb3663a6f matching the pre-mutation snapshot.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's comp-iam run taken twice (pre-mount baseline and post-mount), both captured to files and compared on their summary lines; the api suite run repeatedly across the criteria.",
+      "observed": "comp-iam: 992 output lines both times, RESOURCE PLANE line byte-identical (835/96/629/142/51/11/2), AC1 count 0 both times, positive control 37 both times; the ONLY differing line is the scanned-file count 467 -> 468, which is the new file and is the expected delta. pytest: 22 passed on every clean run, 2 collection errors on every sentinel run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The handler package (infra/aws/lambda/research/scoped_amgt_api/lambda_function.py), its artifact build+upload, and its infra/aws/lambda/ci/lambda-source-map.json registration.",
+      "reason": "OUT OF GRANT. AMGT-rf-2's <paths> does not name infra/aws/lambda/ in any form. The order's own bound: 'A SURFACE NOT NAMED IN <paths> IS A WALL ... Do not route around a missing path; file a row and stop on that clause.' Row AMGT_RESAPP-Z-W11-S2, class BLOCKING, hazard ARMED. This is why AC1 is FAIL and why the order is NOT flipped to complete."
+    },
+    {
+      "item": "terraform apply / terraform plan against the live account, and the artifact upload to s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip.",
+      "reason": "NOTHING WAS DEPLOYED AND NOTHING COULD BE: the artifact cannot be built without the out-of-grant handler package, and yang-lambda reads the object's content-sha256 as source_code_hash. No terraform apply was run, nothing was pushed. NEVER-2's ledger entry and .open_deploys sentinel are therefore NOT owed by this commit -- the obligation attaches to an act that can deploy, and no such act was taken. Both paths were granted for that obligation and are correctly left untouched."
+    },
+    {
+      "item": "Adding the mount to infra/aws/terraform/amgt-resapp/ instead of infra/aws/terraform/harvest/ (both are granted).",
+      "reason": "harvest/main.tf states that this module REPLACES amgt-resapp/tfstate and that 'ALL worker terraform consolidates into this one harvester tf' (Andrew-direct 2026-09-11 ~17:3xZ). Adding a new route + Lambda to a module being retired, whose backend block already conflicts, would have landed the mount in the wrong state file. The metrics table the adapter reads is declared in harvest/dynamodb.tf, so the IAM can reference the resource rather than retyping an ARN."
+    },
+    {
+      "item": "The investor-reporting JSON-contract route pattern, which WOULD satisfy AC2's literal CONFIG-band clause.",
+      "reason": "Section 1 of this order mandates the bd-pipeline .tf pattern by name. Switching patterns to make a comp-find band label come out right would let the instrument's classification drive the architecture. Recorded as row AMGT_RESAPP-Z-W11-S3 instead."
+    },
+    {
+      "item": "rf-3, rf-4, rf-5.",
+      "reason": "Separate task orders in this worker's sequential queue, each with its own grant and its own commit."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W11-S2",
+    "AMGT_RESAPP-Z-W11-S3"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-iam (AC1)",
+      "invocation": "timeout 110 comp-iam 2>&1 | grep -c -E \"scoped_amgt|lib/research/api\"",
+      "result": "printed 0; positive control 37 lines naming infra/aws/lambda/; totals 835/96 byte-identical to baseline; scanned .tf count 467 -> 468"
+    },
+    {
+      "tool": "comp-find (AC2 census, with pre-cell baseline and two band controls)",
+      "invocation": "timeout 110 comp-find \"api/scoped/amgt\" infra --limit 20",
+      "result": "13 hit(s) across 6602 file(s), BANDS HEAD=13 (baseline 0 of 6601); controls: 4 of 4 SURFACED in harvest/, 68 of 68 SURFACED estate-wide, 0 CONFIG/DEF"
+    },
+    {
+      "tool": "pytest + comp-find (AC3)",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -4; echo \"---\"; timeout 60 comp-find \"X-Firm-Id\" lib/research/api --limit 10 2>&1 | grep -E \"DENOMINATOR|hit\"",
+      "result": "22 passed rc 0; X-Firm-Id 5 hit(s) across 5 file(s)"
+    },
+    {
+      "tool": "pytest mutation control (AC4)",
+      "invocation": "cp lib/research/api/scoped_amgt.py /tmp/rf2.pre; printf \"\\nBROKEN_SENTINEL_RF2 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf2.pre lib/research/api/scoped_amgt.py; cmp -s /tmp/rf2.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "result": "2 errors during collection with the sentinel; RESTORED_BYTE_IDENTICAL"
+    },
+    {
+      "tool": "pytest mutation control on the NEW drift guard (not required by the order)",
+      "invocation": "delete one route from local.scoped_amgt_routes, then python -m pytest lib/research/api/tests/test_scoped_amgt_mount.py -q",
+      "result": "2 failed, 3 passed -- 'route sets disagree -- handled=11 mounted=10'; restored from .scratch/rf2_tf.pre, sha256 12d18da38fab34cde718d02891d48ff8a59dc53e7357516f42f7a07fb3663a6f"
+    },
+    {
+      "tool": "source-read of the discovery mechanism (grounding row Z-W11-S2)",
+      "invocation": "comp-read org/modules/graph/extract_iam.py --enumerate '...'; sed -n '2600,2740p'; python census of lambda-source-map.json and EC2_MANIFEST.json",
+      "result": "_load_lambda_profiles reads only lambda-source-map.json; 0 of 214 entries and 0 of 27 EC2 services reach lib/"
+    }
+  ]
+}
