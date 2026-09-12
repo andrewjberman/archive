@@ -3,12 +3,28 @@
 **Worker:** `0.9.0_WK_IRPT_FNTEND~3` (slot ~3, queue position 1) · **Cell:** `FE-s-16` (round 2, decomp v0.2 @430c5fcb4a)
 **Worktree pair:** `/c/tmp/wk-irpt_fntend-2-6-fe-s-16` (workspace, branch `wk-irpt_fntend-2-6-fe-s-16` from CLOUD @7d6db9bcfa) and
 `/c/tmp/wk-irpt_fntend-2-6-fe-s-16/portal` (portal, same branch name, from DEV @84a86c10).
-**Portal commit:** `7f26d9a5ebdab8b2b6fd7700459ab0f7bcd27f74` -- **LOCAL** on the worker branch, never pushed (portal is FROZEN by Andrew-direct).
+**Portal commits:** this worker's own `7f26d9a5ebdab8b2b6fd7700459ab0f7bcd27f74`, and the branch now carries the issuer's merge of DEV at `f8af907a` (the bytes every criterion below was finally measured on). Both **LOCAL** on the worker branch, never pushed (portal is FROZEN by Andrew-direct).
 **Proof instance:** `IRPT_FNTEND.TO-FE-s-16.export-flow-mounted-narrative.proof_of_spec.json` -- `proof-of-spec-check.py` **rc=0 (VALID)** over the ten ids.
 
-> **THE ORDER IS NOT COMPLETE AND ITS `<status>` IS NOT FLIPPED.** A VALID instance is not a met order.
-> Nine of the ten criteria PASS by output; **F16-AC9 is blocked on six pre-existing failures outside this
-> order's grant** and is recorded FAIL with its measurement.
+> **THE ORDER IS COMPLETE AND ITS `<status>` IS FLIPPED, in the same commit as the instance.** All nine
+> mechanical criteria PASS by output **on the merged bytes** (portal `f8af907a`); `F16-AC10` is RECORDED
+> with no verdict, for `3.0.0_SA_CVO` at L9.
+>
+> **THIS TOOK THREE ROUNDS, AND TWO OF THEM WERE REFUSALS THAT THE ISSUER ANSWERED.** Round 1: built and
+> measured; `F16-AC8` refused as written and `F16-AC9` blocked, both recorded FAIL with their measurements
+> and neither repaired by this worker. Round 2: the issuer re-cut `F16-AC8`'s invocation on this worker's
+> positive control (row `IRPT_FNTEND-S25`) and it passed. Round 3 (below): the issuer drained FE-s-15 and
+> merged DEV into this branch, and **every mechanical criterion was re-measured on those bytes** -- because
+> a criterion's pass is only true at the bytes it was measured on.
+>
+> **MERGED-BASE ROUND (issuer `2.0.0_SA_COO~F`; portal DEV `d2962a69` merged into this branch at
+> `f8af907a`).** `F16-AC1`..`F16-AC9` all re-run; no prior output carried forward. `F16-AC9` now reads
+> **406 pass / 1 skip / 0 fail across 407 tests** -- this worker's own independent measurement, which
+> AGREES with the issuer's reported figure, so no disagreement row is owed. `F16-AC3`'s denominator moved
+> **38 -> 40** scanned files (the merge added `RevisionIdentity.tsx` and `NativeSections.tsx`) and the scan
+> stays clean over the wider set. The three captures were re-taken and are **byte-identical** to the
+> committed images -- itself the measurement that the merge changed nothing on those surfaces. Mutant and
+> determinism controls re-run on the merged bytes.
 >
 > **AMENDMENT ROUND (issuer `2.0.0_SA_COO~F`, CLOUD `c8d51d0d1c` LOCAL, row `IRPT_FNTEND-S25`).** This worker's
 > F16-AC8 refusal was answered by the issuer: the invocation's URL was re-cut with the scope segments this
@@ -23,16 +39,16 @@
 
 | id | status | deciding output | denominator |
 |---|---|---|---|
-| F16-AC1 | **PASS** | `rc=0` (tsc -b --noEmit) | 1 of 1 typecheck project, 0 diagnostics |
+| F16-AC1 | **PASS** | `rc=0` (tsc -b --noEmit) | 1 of 1 typecheck project, 0 diagnostics, over the merged tree |
 | F16-AC2 | **PASS** | `STATES RENDERED: 5 of 5` | 5 of 5 wire-fixture states; 5 of 5 tests in the file |
-| F16-AC3 | **PASS** | `0 fail`, `SCANNED: 38 files` | 38 .tsx files, 0 violations, 4 of 4 tests |
+| F16-AC3 | **PASS** | `0 fail`, `SCANNED: 40 files` | 40 .tsx files (38 before the merge), 0 violations, 4 of 4 tests |
 | F16-AC4 | **PASS** | `MARKERS: 2` | 2 of 2 events; 2 of 2 quoted citations resolve in a list of 3; 0 of 5 causal words |
 | F16-AC5 | **PASS** | `MISSING HISTORY: rendered naming 2026-05-01` | 3 of 3 files scanned: 0 placeholder hits, 0 `historyCutoff` hits, control 16 |
 | F16-AC6 | **PASS** | `CLICKED: Export` (1440) | 1 of 1 capture; 2 of 3 fixture keys matched; 0 update-depth warnings |
 | F16-AC7 | **PASS** | `CLICKED: Export` (390) | 1 of 1 capture; same accounting |
 | F16-AC8 | **PASS** (amended invocation) | `CONSOLE[log]: REFS RESOLVED: 1 of 1` (twice), rc=0 | 1 of 1 refs resolved; 2 of 2 fixture keys matched |
-| F16-AC9 | **FAIL** | `384 pass, 1 skip, 6 fail` | 384 of 391; the 6 are the 6 the face names as pre-existing |
-| F16-AC10 | **RECORDED (judgment)** | four captures on disk | no verdict taken; `3.0.0_SA_CVO` grades at L9 |
+| F16-AC9 | **PASS** (merged bytes) | `406 pass, 1 skip, 0 fail` | 406 of 407 across 67 files; my own measurement, agreeing with the issuer's |
+| F16-AC10 | **RECORDED (judgment)** | four captures on disk, all byte-identical after the merge | no verdict taken; `3.0.0_SA_CVO` grades at L9 |
 
 ## F16-AC8: refused as written, then answered by the issuer and met
 
@@ -56,14 +72,21 @@ Re-run exactly as amended: `CONSOLE[log]: REFS RESOLVED: 1 of 1` twice, `FIXTURE
 the resolver line is the bar. **No source file changed in this round** (`git status --porcelain` in the portal
 worktree: empty), so **F16-AC1 was not re-run**; the only artifact that moved is the capture.
 
-## The one that did not pass
+## F16-AC9: blocked on six failures outside the grant, then met on the merged bytes
 
-**F16-AC9 -- blocked on six failures outside the grant.** `384 pass / 1 skip / 6 fail`. The six are exactly the six
+**AS FIRST MEASURED (round 1, recorded FAIL).** `384 pass / 1 skip / 6 fail`. The six are exactly the six
 this order's own worker face names as pre-existing at the branch cut (376 pass / 1 skip / 6 fail there): `fe-s-13`
 (`producer-fixtures.test.ts` x2, `routes.test.ts` x2), `fe-s-14` (`envelope.test.ts`) and `fe-s-1`
 (`fixtures.test.ts`, which reads ONLY `fixtures/smoke/default.json`, so the fixtures this order added cannot touch
 it). None of those three directories is in `<paths>`. This order added 8 tests, all passing, and moved no failure.
 Row `IRPT_FNTEND-W3-S10` (BLOCKING, ARMED, disarm owner `2.0.0_SA_COO~F`), citing `IRPT_FNTEND-S23`.
+
+**AS RE-MEASURED ON THE MERGED BYTES -- MET.** The issuer drained FE-s-15 (portal DEV `d2962a69`, carrying the
+v1 re-pin) and merged DEV into this branch at `f8af907a`. Re-run there: **`406 pass / 1 skip / 0 fail` across 407
+tests in 67 files, bun exit status 0, zero `error:` lines**. The six failures were the stale v1 pin and are gone at
+this vintage. This is this worker's own measurement and it agrees with the issuer's independently reported
+406 / 1 / 0, so **no disagreement row is owed**. Row `IRPT_FNTEND-W3-S10` stands as filed; its disposition is the
+issuer's.
 
 ## What was built
 
