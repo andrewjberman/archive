@@ -7,10 +7,11 @@ stopped: **the owed deploy it calls "your first act" cannot be taken.**
 | | |
 |---|---|
 | Order | `org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rt-9.ycharts-session-broker-on-the-fixed-cloud-chain.md` |
-| Status | `pending` -- NOT flipped. Arms (b)-(f) are not built and arm (e) is BLOCKED. |
+| Status | `pending` -- NOT flipped. Arms (a), (b), (c), (d), (f) PASS in one run; **arm (e) is BLOCKED**, so `RT9-AC1` is not met. |
 | Worker | `0.9.0_WK_IRPT_BCKEND~3` (cold start, post-reboot) |
 | Worktree | `/c/tmp/wk-irpt-2-3b`, branch `wk-irpt_bckend-2-3b`, cut at `a296eac0f4` |
-| Rows filed | `IRPT_BCKEND-W3-S26` (BLOCKING/ARMED), `S27`, `S28`, `S29`, `S30` |
+| Rows filed | `IRPT_BCKEND-W3-S26` (BLOCKING/ARMED), `S27`, `S28`, `S29`, `S30`, `S31`, `S32`, `S33` |
+| Next free row id | **`W3-S34`** -- re-read the channel at HEAD before minting; the drain moves it |
 
 ---
 
@@ -108,10 +109,25 @@ END 400 -> STALE`. Output saved at `IB-rt-9_RT9-AC1_arm_a_output.txt`.
 **THE ACCEPTANCE TOKEN IS STILL ABSENT FROM THE OUTPUT IN EVERY FORM** (`grep -c` = 0). Add it
 only in the edit that makes all six arms pass.
 
+## 3b. SUPERSEDED BY THE ISSUER'S RULING AND THE WORK THAT FOLLOWED IT
+
+`2.0.0_SA_COO~B` ruled the refusal CORRECT and accepted it in full: **the deploy of the three
+functions is NO LONGER THIS SLOT'S** -- it went to slot ~2, because the packaging and the
+handler flip must land in ONE artifact. Section 3 above is the measurement that produced that
+ruling; it is not a task any successor should pick up.
+
+**Arms (b), (c), (d) and (f) are BUILT AND PASSING.** `battery_ib_rt_9.py` now runs `5 of 6`
+arms, rc 0, 0 checks failed, and `grep -c` on the acceptance token still reads 0. What each
+arm proves and which control makes it discriminate is in `battery_ib_rt_9.result.md` beside
+this file -- read that, not this section.
+
+Arm (e) remains the only blocked arm, for exactly the reason in section 1.
+
 ## 4. WHAT REMAINS, AND WHY RT9-AC1 CANNOT PASS UNTIL THE BLOCK LIFTS
 
 `RT9-AC1` needs arms (a)-(f) **in one run**. (b) FENCING, (c) ROTATION, (d) EVICTION and
-(f) NO EGRESS are pure fixture work and are NOT blocked -- the mechanisms already exist
+(f) NO EGRESS are BUILT AND PASSING as of fd2e3e9f7b; they were pure fixture work and were
+never blocked -- the mechanisms already exist
 (`ycharts_session.js` `acquireLease`/`persistSession`; `transport.py:426` `ReplayTransport`;
 `transport.py:202` `resume_allowed`; `battery_ib_s_9.py`'s egress guard), and `battery_ib_s_8.py`
 already drives the fakes. **(e) is BLOCKED by `W3-S26`:** it requires a `state mv` and an apply

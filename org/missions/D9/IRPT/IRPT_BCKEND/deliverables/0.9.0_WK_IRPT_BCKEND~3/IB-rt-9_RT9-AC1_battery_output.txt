@@ -1,0 +1,135 @@
+session STALE -- states: ['BAD_REQUEST', 'BAD_REQUEST']. No capture triggered (v0.9: the dedicated runner owns the login).
+==============================================================================
+IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (f); arm (e) BLOCKED
+==============================================================================
+(a1) CENSUS -- every reader of ycharts/session/current in the repository
+      DENOMINATOR: 33186 file(s) scanned (git ls-files, tracked) | 65 name the secret | 10 are CODE | 6 of those RESOLVE it (a Secrets Manager read API) | 4 only MENTION it | 1 of the resolvers are this cell's OWN TEST HARNESS, listed below and excluded from the estate denominator
+      MIGRATED     infra/aws/ec2/investor-reporting-ycharts/ycharts_session.js
+                   the v0.9 runner: leases, fences and persists the versioned bundle
+      MIGRATED     infra/aws/lambda/investor-reporting/ycharts/generate/transport.py
+                   IB-s-9 replay/live transport: holds the bundle by name, verifies schema, identity and transport before resuming
+      MIGRATED     infra/aws/lambda/investor-reporting/ycharts/session/broker.py
+                   this cell's broker: reads the versioned bundle BY NAME, refuses NOT_VERSIONED / NOT_CONFIGURED / UNPARSEABLE / STALE_FENCE, and never publishes -- publication stays on the capture host
+      RETIRED      infra/aws/lambda/ycharts-session-capture/index.mjs
+                   handler refuses; schedule DISABLED; the probe no longer invokes it
+      MIGRATED     infra/aws/lambda/ycharts-session-probe/lambda_function.py
+                   this cell: fence read + positive allowlist replace the non-403 predicate
+      MENTION      docs/research/investor_reporting_ycharts_auth_20260910/collect_evidence.py
+                   names the secret but calls no Secrets Manager read API
+      MENTION      infra/aws/ec2/investor-reporting-ycharts/tests/fakes.js
+                   names the secret but calls no Secrets Manager read API
+      MENTION      infra/aws/lambda/investor-reporting/ycharts/session/tests/fakes.py
+                   names the secret but calls no Secrets Manager read API
+      MENTION      org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_s_8.py
+                   names the secret but calls no Secrets Manager read API
+      HARNESS      org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~3/battery_ib_rt_9.py
+                   this cell's own battery under deliverables/: its FAKE Secrets Manager client defines the read API and reaches no AWS
+  PASS    a1 readers migrated or retired: 5 of 5  --  denominator is the census, not the table
+  PASS    a1 the HARNESS exclusion removed 0 declared estate reader(s): 1 of 1 excluded file(s) are under deliverables/  --  an exclusion that can remove a real reader is a hole, not a class
+
+(a2) CENSUS -- legacy any-non-403 authentication predicates
+      DENOMINATOR: 6742 code file(s) scanned, 6189 of them comment/string-stripped | 0 line(s) match (a NEGATIVE 403 comparison AND an authentication word, in CODE)
+  PASS    a2 legacy any-non-403 probes remaining: 0
+  PASS    a2 POSITIVE CONTROL: the detector fires on the retired predicate verbatim  --  the line this cell removed from ycharts-session-probe
+  PASS    a2 NEGATIVE CONTROL: the detector is silent on a correct 403-means-refused line  --  ycharts_session.js:272, which the first shape of this detector wrongly flagged
+
+(a3) DIFFERENCE CONTROL -- old predicate vs new, over a recorded matrix
+      case                     status new state                  new      old      truth
+      healthy json 200         200    AUTHENTICATED              True     True     True
+      hard eviction 403        403    FORBIDDEN_HARD_EVICTION    False    False    False
+      disturbed 403            403    FORBIDDEN_DISTURBED        False    False    False
+      bad params 400           400    BAD_REQUEST                False    True     False
+      unauthenticated 401      401    UNAUTHENTICATED            False    True     False
+      not found 404            404    NOT_FOUND                  False    True     False
+      rate limited 429         429    RATE_LIMITED               False    True     False
+      server error 500         500    SERVER_ERROR               False    True     False
+      waf interstitial 200     200    CHALLENGE                  False    True     False
+      login page 200           200    REDIRECTED_TO_LOGIN        False    True     False
+      redirect to login        302    REDIRECTED_TO_LOGIN        False    True     False
+      transport failure        None   TRANSPORT_ERROR            False    False    False
+      html body, json ctype    200    UNPARSEABLE_BODY           False    True     False
+      teapot 418               418    UNEXPECTED_STATUS          False    True     False
+      DENOMINATOR: 14 recorded case(s) | old predicate wrong on 10 | new predicate wrong on 0 | they disagree on 10
+      OLD-FALSE-GREEN  bad params 400 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  unauthenticated 401 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  not found 404 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  rate limited 429 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  server error 500 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  waf interstitial 200 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  login page 200 -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  redirect to login -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  html body, json ctype -- the retired predicate called this authenticated
+      OLD-FALSE-GREEN  teapot 418 -- the retired predicate called this authenticated
+  PASS    a3 new predicate correct on every recorded case: 14 of 14
+  PASS    a3 the matrix DISCRIMINATES: the old predicate is wrong on 10 of 14 case(s)  --  a matrix on which both predicates agree proves nothing
+  PASS    a3 every state produced is in the closed vocabulary: 13 of 13  --  outside: []
+
+(a4) THE RETIRED READER, AND THE FENCE THE MIGRATED ONE READS
+  PASS    a4 capture handler refuses on entry
+  PASS    a4 the retirement says WHY in source
+  PASS    a4 the probe no longer invokes the capture Lambda
+      live read: aws events describe-rule --name ycharts-session-capture-schedule -> State=DISABLED
+  PASS    a4 the retired reader's schedule is DISABLED  --  measured live, not asserted from the .tf
+  PASS    a4 a versioned bundle reads OK with its fence: verdict=OK fence=7
+  PASS    a4 legacy flat cookie string bundle is NOT_VERSIONED (not graded stale, not graded fresh): NOT_VERSIONED
+  PASS    a4 legacy field-assembled bundle is NOT_VERSIONED (not graded stale, not graded fresh): NOT_VERSIONED
+  PASS    a4 an unset secret is NOT_CONFIGURED: NOT_CONFIGURED
+  PASS    a4 fence unchanged + all probes authenticated -> FRESH
+  PASS    a4 fence unchanged + a refusal -> STALE
+  PASS    a4 fence ADVANCED mid-probe -> SUPERSEDED, not STALE  --  another runner published a newer session; the reading is discarded
+  PASS    a4 a fence that went BACKWARDS is not SUPERSEDED  --  only a forward fence means someone else published
+  PASS    a4 END TO END: every probe 400 -> verdict=STALE, SessionFresh=[0.0]  --  THE CUTOVER IN ONE LINE: the retired predicate returned fresh=True here
+  PASS    a4 the same run under the OLD predicate would have reported FRESH  --  difference control on the deployed path, not just on classify()
+
+(b) FENCING -- two capture attempts on the fixture, driving the REAL persistSession
+      DENOMINATOR: 3 race case(s) driven | 3 passing
+      (b1) SIMULTANEOUS -- A holds the lease, B asks for it
+           lease A ok=True fence=1 | lease B ok=False reason=CONDITIONAL_CHECK_FAILED (lease held by another runner and not expired)
+           published fence=1 by=runner-A digest=66bee565a4ae -> after the loser tried: fence=1 by=runner-A digest=66bee565a4ae
+  PASS    b1 1 wins, 1 refuses: the loser raises LeaseError (LEASE_NOT_HELD) and never reaches the secret  --  secret put calls across the whole case: 1
+  PASS    b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest 66bee565a4ae == 66bee565a4ae  --  compared over the published BYTES, not over a field
+      (b2) THE SLOW RUNNER -- A's lease expired mid-capture and A still holds a fence-1 lease object
+           A fence=1 -> B takes over fence=2 -> B publishes fence=2
+           A's late write: FenceError/FENCED my_fence=1 stored_fence=2 -- another runner took the lease and advanced the fence while this one was mid-session
+  PASS    b2 the stale-fence write is REFUSED and the published version is unchanged: digest 8d6c817ee22c == 8d6c817ee22c  --  this is the shape NOTHING AT THE LEASE can see
+  PASS    b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (3) DOES publish (digest changes to 516bb577466d)  --  so the refusal is the FENCE, not a fake that refuses everything
+  PASS    b3 a persist with NO held lease never reaches the secret: 0 put call(s)  --  otherwise the lease is optional and a caller that forgot it looks like a winner
+
+(c) ROTATION -- a new version published, the next invocation uses it, the old refused
+      DENOMINATOR: 2 published version(s) of ycharts/session/current | AWSCURRENT now ycharts-session-current-v0002
+      read 1: state=OK fence=7 generation=capture-generation-0001
+      read 2: state=OK fence=8 generation=capture-generation-0002
+  PASS    c the replay transport's NEXT invocation uses the new version: capture_generation capture-generation-0001 -> capture-generation-0002  --  read off recipe.step_identity, which the job itself uses to verify a session
+  PASS    c the token VALUES rotated while the cookie NAME set did not: fingerprint 828c02de839d -> 0efc96f0fce5  --  sha256 prefix over the whole jar -- no cookie value is printed anywhere
+  PASS    c THE OLD VERSION IS REFUSED: fence 7 against an accepted fence of 8 -> STALE_FENCE  --  closed vocabulary: OK, NOT_CONFIGURED, UNPARSEABLE, NOT_VERSIONED, STALE_FENCE
+  PASS    c DIFFERENCE CONTROL: the SAME read unpinned reads OK  --  so STALE_FENCE is the fence's doing and not a defect in the bundle
+  PASS    c a resume onto the OLD generation is refused by transport.resume_allowed: False  --  the rule, called -- not restated here
+
+(d) EVICTION / SELF-HEALING -- driven on job.GenerationJob with the replay transport
+      evicted at step=read_back status=401 -> transport.decision=REFRESH
+      the JOB'S OWN why for that same step was 'SETTINGS_DRIFTED' -- job.py has no eviction outcome, so the classification is taken from the wire
+      verified three ways before the resume: identity_verified=True, schema_verified=True, transport_verified=True
+  PASS    d a 401 mid-job -> ONE broker refresh (refreshes_used=1) -> outcome RECOVERED  --  rule called: transport.resume_allowed; new generation capture-generation-0002
+  PASS    d it RESUMED AT THE CHECKPOINT and the job completed: resumed=True ok=True  --  through the job's OWN resume() reconcile and after_create(), never a new create
+  PASS    d NO-RESUBMIT DIFFERENCE CONTROL: 1 create POST(s) with the broker's recovery vs 2 with a restart instead  --  POST /model_portfolios/fixed/ counted on the transports' own evidence records across every attempt of ONE request
+  PASS    d a REPEAT eviction reaches RETRYABLE_ATTENTION, not a loop: second refresh refused -- refreshes_used==2 (the rule allows exactly 1); generation UNCHANGED -- this is the evicted session, not a new one  --  request PRESERVED: {"job_id": "irpt-generate-0001", "request_id": "REQ-abababababababababababab", "revision": 0}
+  PASS    d CONTROL: a 422 CONTRACT failure at the same step is NOT_AN_EVICTION with 0 refresh(es)  --  without this, 'the broker refreshed' cannot be told from 'the broker refreshes on any failure' -- the login storm the rule exists to stop
+  PASS    d the read vocabulary is covered, not just its happy member: {"legacy_flat_cookie_bundle": "NOT_VERSIONED", "secret_with_no_awscurrent_version": "NOT_CONFIGURED", "unparseable_value": "UNPARSEABLE"}  --  legacy flat bundle, unset secret and unparseable value
+
+(f) NOTHING LEFT THE MACHINE -- both guards, their denominators, and their controls
+      node  infra/aws/ec2/investor-reporting-ycharts (arm b)
+        guard=netguard.js installed=True | attempts_observed=1 (DENOMINATOR) loopback_allowed=0 external_refused=1
+        POSITIVE CONTROL: attempted ycharts.com:443 -> refused=True, external count 0 -> 1
+      py    investor-reporting/ycharts/session (arms c, d)
+        guard=ycharts/generate/tests/netguard.py installed=True | attempts_observed=1 (DENOMINATOR) loopback_allowed=0 external_refused=1
+        POSITIVE CONTROL: attempted ycharts.com:443 -> refused=True, external count 0 -> 1
+      DECLARED, NOT GUARDED: arm (a4) makes one AWS control-plane read (events describe-rule) from THIS process. It is not a vendor call and it is not inside either guarded drive.
+  PASS    f 0 connection(s) to a non-loopback destination escaped either drive: 2 refused of 2 attempt(s) observed  --  every attempt either drive observed WAS the positive control; no drive opened a socket of its own
+  PASS    f both guards are DEMONSTRABLY able to fire: 2 of 2 positive control(s) refused and counted  --  a guard reporting 0 external and a guard that was never installed read identically
+
+------------------------------------------------------------------------------
+  NOT RUN  (e) ABSORBED   ledger + state mv + apply -- BLOCKED, row IRPT_BCKEND-W3-S26: the ycharts root's plan carries an unapplied handler flip to entry.lambda_handler and entry.py is in no zip, so the apply this arm REQUIRES takes irpt-ycharts-generate down
+------------------------------------------------------------------------------
+ARMS RUN: 5 of 6  (a, b, c, d, f -- e is BLOCKED, not unbuilt)
+checks failed: 0
+FINAL: INCOMPLETE -- RT9-AC1 needs SIX arms in one run and this run has five. The acceptance token is absent from this output in EVERY form, including negated: the expect is graded as a REGEX and a negated line would MATCH and grade this run PASS. It goes in only in the edit that makes arm (e) run.
