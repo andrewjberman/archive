@@ -1,5 +1,141 @@
 # IRPT_FNTEND.TO-FE-s-18 -- evidence, mobile captures, Lato Bold, R3 re-pin
 
+# ROUND 4 RE-RUN -- THIS SECTION GOVERNS; THE ROUND-2 RECORD BELOW STANDS WHERE THIS DOES NOT CONTRADICT IT
+
+`0.9.0_WK_IRPT_FNTEND~1`, 2026-09-13 | workspace branch `wk-irpt_fntend-4-5-fe-s-18` @`c44180ab9b` |
+portal branch `wk-irpt_fntend-4-5-fe-s-18` @`4ee0d105` (current portal DEV, carrying FE-s-19, -21, -22, -25, -26, -27).
+**Push state: LOCAL in the workspace repo. The portal carries NO commit from this round -- no portal file changed**
+(`git status --porcelain` in the portal worktree: 0 lines). Portal is FROZEN; nothing pushed, merged, rebased, checked out or cleaned.
+
+## HEADLINE
+
+**The order stays OPEN on ONE criterion: F18-AC17 FAILS by output (483 pass / 1 skip / 3 fail).** All three failures
+are assertions under `__tests__/fe-s-22/` and `__tests__/fe-s-26/` that pin the round-2 byte-identical Holdings PNGs
+in this folder. This round's re-capture replaced those PNGs, and that is what turns the assertions red. Both folders are outside
+this order's `<paths>`. Row **`IRPT_FNTEND-W1-S54`** (BLOCKING, ARMED, disarm `2.0.0_SA_COO~F`).
+
+**F18-AC3 now PASSES** (`DISTINCT HASHES: 11 of 11`, `COLLIDING SETS: 0`): FE-s-26 (portal `ed90ce2d`) gave the three
+Holdings maps distinct states, and the three captures now differ. Every other mechanical criterion passes by output.
+
+## THE PIN CHECK, BEFORE ANY CAPTURE (ROUND-4 ISSUER AMENDMENT, item 1)
+
+`bun test __tests__/fe-s-13/content-pins.test.ts __tests__/fe-s-13/producer-fixtures.test.ts` -> **11 pass, 0 fail, rc=0**.
+Both files print `PRODUCER VINTAGE: 58e387b454`, equal to `git log -1 --format=%h -- docs/contracts/investor-reporting/v1`
+in this worktree. `RETIRED PIN SYMBOL 'WIRE_SCHEMA_PINS': 0 hit(s)`; `FIXTURE COPIES AGREE ON CONSUMED CONTENT: 11 of 11`.
+Nothing under `contracts/` or `fixtures/wire/` was touched. Every capture below was taken after this run.
+
+## DEV-SERVER STATE, PER CRITERION
+
+| state | criteria |
+|---|---|
+| DOWN (no server started yet) | the pin check, F18-AC1 |
+| being launched in the same moment (indeterminate; neither test reads a server) | F18-AC2, F18-AC19, F18-AC20 |
+| UP on 5186 (`bun run dev --port 5186`; vite printed `Local: http://localhost:5186/`) | F18-AC4..AC14, F18-AC15, F18-AC16, F18-AC3 first run, F18-AC17 first run |
+| UP on 5186 AND 5181 (5181 = the fe-s-19/fe-s-27 default port; `PRECONDITION ... MET`) | F18-AC3 deciding run, **F18-AC17 deciding run** |
+| both killed before this report | `netstat`: 0 listeners on 5181, 0 on 5186 |
+
+The first F18-AC17 run (5186 only) read 480 pass / 4 skip / 3 fail. The fe-s-19 browser arms SKIPPED there because they look
+on 5181. The deciding run with 5181 up reads 483 / 1 / 3. The same three failures appear in both runs, so they do not depend on the server.
+
+## CRITERIA (deciding output; the proof instance carries each verbatim)
+
+| id | verdict | deciding output |
+|---|---|---|
+| F18-AC1 | PASS | `$ tsc -b --noEmit`, `rc=0` |
+| F18-AC2 | PASS | `PAIRED: 1 report, 3 views`, `PERFORMANCE BODY sha256: 9c8b821b4aeb...`, 3 pass 0 fail |
+| F18-AC3 | PASS | `MANIFEST: 11 entries`, `UNIQUE FILES: ok`, `DISTINCT HASHES: 11 of 11`, `COLLIDING SETS: 0`, 5 pass 0 fail |
+| F18-AC4 | PASS (bar) | `CLICKED: Reporting`, `FIXTURES: 9 declared; 3 matched`, rc=0 -- body is StatusPanel, **W1-S51** |
+| F18-AC5 | PASS | `CLICKED: Export`, `FIXTURES: 9 declared; 3 matched`, rc=0 |
+| F18-AC6 | PASS | `CONSOLE[log]: REFS RESOLVED: 1 of 1`, `FIXTURES: 9 declared; 1 matched`, rc=0 |
+| F18-AC7 | PASS | `CLICKED: Analysis`, `FIXTURES: 5 declared; 3 matched`, rc=0 |
+| F18-AC8 | PASS | `CLICKED: Analysis`, `FIXTURES: 5 declared; 3 matched`, rc=0 |
+| F18-AC9 | PASS (bar) | `CLICKED: Holdings`, `FIXTURES: 9 declared; 3 matched`, rc=0 -- body mounts, donut and table empty, **W1-S52** |
+| F18-AC10 | PASS | `CLICKED: Holdings`, rc=0 |
+| F18-AC11 | PASS | `CLICKED: Holdings`, rc=0 |
+| F18-AC12 | PASS | `CONSOLE[log]: REFS RESOLVED: 1 of 1`, `FIXTURES: 2 declared; 2 matched`, rc=0 |
+| F18-AC13 | PASS | `CONSOLE[log]: REFS RESOLVED: 1 of 1`, `FIXTURES: 2 declared; 2 matched`, rc=0 |
+| F18-AC14 | PASS (bar) | `CLICKED: Holdings`, `FIXTURES: 2 declared; 2 matched`, rc=0 -- body reads Failed, **W1-S53** |
+| F18-AC15 | PASS | `COMPONENTS: 70 (REUSED 27, NEW 43)`, `DEFINED-BUT-NOT-IMPORTED: 0`, `PRD-REUSE-ROWS: 11 of 11 accounted`, rc=0 |
+| F18-AC16 | PASS | `SCANNED: 40 files`, 4 pass, **0 fail** (one run; it is the deciding run) |
+| F18-AC17 | **FAIL** | **483 pass, 1 skip, 3 fail**, 487 tests / 84 files, rc=1 -- **W1-S54** |
+| F18-AC18 | RECORDED (judgment) | no verdict; L9, `3.0.0_SA_CVO` |
+| F18-AC19 | PASS | `FONTS: 4 of 4`, Bold `8a0aace7...6be1`, 11 pass 0 fail |
+| F18-AC20 | PASS | `STAND-INS: 0`, `NOT PACKAGED ... italic`, `FACES CHECKED: 4; WEIGHT MISMATCHES: 0` |
+
+"PASS (bar)" means the criterion's stated bar is met by output, but the image does not show what the criterion's prose
+names. Each such case has a row. None of those rows changes a verdict.
+
+**F18-AC17's three failures, by site (portal @4ee0d105):**
+- `__tests__/fe-s-22/capture-hash.test.ts:257`: `expect(verdict.distinctDigests).toBe(1)`, received 3 (`ROUND-2 COLLISION REPRODUCED: 0 of 3`)
+- `__tests__/fe-s-22/capture-hash.test.ts:295`: `expect(stripped.refusedPairs).toHaveLength(3)`, received 0
+- `__tests__/fe-s-26/not-defective.test.ts:170`: `expect(verdict.refused).toBe(true)`, received false. Its own log line reads "That is FE-s-18`s re-capture, carried, not this cell`s."
+
+## CAPTURES: ALL ELEVEN RE-TAKEN
+
+Eight came out with new bytes. Three (F18-AC6, AC12, AC13, the print route) are **byte-identical to round 2**, which
+is a determinism control on the instrument. The three Holdings captures now differ:
+
+- observed: body MOUNTS (READY)
+- target: `Uncertain / TARGET_BLEND_MODEL_REVISION_UNNAMED`
+- missing-attribution: `Partial / NODE_ATTRIBUTION_UNAVAILABLE`
+
+`fe-s-18_print_frozen_control_1440.png` is untouched, is not a manifest entry, and remains round-2 provenance (see below).
+A 1440 probe of the observed map was taken to `.scratch/` only. It is not evidence and not in the manifest.
+
+## LAYOUT EDITS -- NONE IN ROUND 4; THE SIX FROM ROUND 2 AT THEIR CURRENT LINES (portal @4ee0d105)
+
+| file | line(s) now | edit (round 2, unchanged) | seen in a round-4 capture? |
+|---|---|---|---|
+| `tabs/TabShell.tsx` | 191, 196 | `overflow-x-auto` wrapper; responsive `className` on `TabNavigation` | YES -- AC4, AC7..AC11 at 390; AC14 shows the 1440 strip unmoved |
+| `tabs/reporting/PeriodControls.tsx` | 73, 80, 88 | `flex-wrap` on the custom-range label; `min-w-0` on both date inputs | YES -- AC4 |
+| `tabs/reporting/PeriodControls.tsx` | 107, 108, 114 | date window `flex flex-wrap gap-x-3 gap-y-1`; each statement `whitespace-nowrap` | YES -- AC4 |
+| `tabs/holdings/SliceTable.tsx` | 55 (inside the existing `overflow-x-auto` at 45) | `w-full min-w-[640px]` | HEADER ONLY -- AC9, the table has no rows (W1-S52) |
+| `tabs/holdings/HoldingsTab.tsx` | 103-104 | the firm chip on its own right-aligned row | NOT VISIBLE -- no chip renders above the AC9 summary card |
+| `tabs/holdings/HoldingsSummary.tsx` | 54 | `p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4` | YES -- AC9, stacked one column, no overlap |
+
+**Why round 4 adds no edit:** in every round-4 capture, each surface that renders at 390 stays inside its card. The
+remaining visible problems are not layout:
+- the empty donut and table are the fixture's parentless node tree, and they look the same at 1440 (W1-S52);
+- the screen view of the pair is a StatusPanel (W1-S51);
+- the `ASSET CATEGORY VIEWS` card's footer date wraps at 390 (`5:00p` / `ET`), but it lives in `@/components/CategoryViewTree`,
+  a shared component outside the grant and not in the cell's list. It is named here for the L9 read only.
+
+The pie labels remain excluded: the fix is a prop change (W1-S35), and the donut now renders nothing to clip.
+
+## WHAT MOVED SINCE ROUND 2
+
+- `W1-S33` (tab bodies cannot mount from the wire): resolved on the Holdings path when a status arrives (FE-s-19/FE-s-25
+  plus FE-s-26's states). The Reporting path mounts too when its envelope carries a status; the frozen map's does not (W1-S51).
+- `W1-S34`: the F18-AC3 half is resolved by output. The F18-AC17 half persists for a NEW reason (W1-S54).
+- `W1-S28`: closed by FE-s-24 (portal `5500c4ae`). `RENDER_PACKAGE.fonts` names 4 of 4, and fonts.test prints `FLAT FONT LIST: 4 of 4`.
+
+## CENSUS
+
+`COMPONENTS: 70 (REUSED 27, NEW 43)`. NEW rows without a reason: **0 of 43**, counted from `component-census.json`
+(`classification == NEW` with an empty `reason`). Both outputs were overwritten in place. Their diff against round 2 is 4 lines each,
+all `TabShell.tsx` import line numbers moved +9 by later cells.
+
+## FOR THE L9 READ (F18-AC18 -- RECORDED, NO VERDICT)
+
+1. **The frozen pair:** the preview (AC5) and the print view (AC6) both render the frozen report, `2026-01-02 to 2026-09-09`,
+   `rev-49f-000091`. The screen third (AC4) shows the PeriodControls card reading `Answered 2026-01-02 to 2026-09-09`
+   and then a StatusPanel where the report body belongs (W1-S51). F18-AC2 hashes the one performance body the three views get.
+2. **At 390:** the tab strip, PeriodControls, the stacked Holdings summary card and the Analysis composer
+   (clean and needs-correction) are each shown whole. The slice table is shown as a header only and the donut as an empty area (W1-S52).
+3. **Global at 1440 (AC14)** is the layout control for the 390 tab repair and holds. Its Holdings body reads Failed and
+   no second firm is named on the page (W1-S53).
+
+## ROWS FILED THIS ROUND (4)
+
+- `IRPT_FNTEND-W1-S51` OBSERVATION / ARMED (`2.0.0_SA_COO~F`): the frozen map carries a status on 0 of 9 envelopes, so the screen view of the pair is a StatusPanel.
+- `IRPT_FNTEND-W1-S52` OBSERVATION / ARMED (`2.0.0_SA_COO~F`): the Holdings donut and table are empty at both widths; the generator's three nodes are all parentless at level 0.
+- `IRPT_FNTEND-W1-S53` OBSERVATION / INERT: F18-AC14's Global map has no holdings key, so the body reads Failed.
+- `IRPT_FNTEND-W1-S54` **BLOCKING** / ARMED (`2.0.0_SA_COO~F`): F18-AC17 is refused on three out-of-grant assertions that pin the round-2 defect.
+
+---
+
+# ROUND 2 RECORD, WITH ITS TWO ADDENDA (superseded where the round-4 section above differs)
+
 `0.9.0_WK_IRPT_FNTEND~1` | workspace branch `wk-irpt_fntend-2-7-fe-s-18` (cut from CLOUD @7b04394dcb) |
 portal branch `wk-irpt_fntend-2-7-fe-s-18` (cut from DEV @774c595b) | dev server `bun run dev --port 5181`,
 started once from the portal worktree and killed before this report (`netstat` on 5181 reads 0 listeners).

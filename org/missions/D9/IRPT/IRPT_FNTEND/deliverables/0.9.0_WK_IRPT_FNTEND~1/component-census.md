@@ -10,7 +10,7 @@ COMPONENTS: 70 (REUSED 27, NEW 43) across 40 scanned tree files.
 |---|---|---|---|---|
 | AccountDetail | `./AccountDetail` | NEW | FE-s-4 -- per-account detail, INCLUDING THE ACCOUNTS THE REPORT COULD NOT COVER. | src/pages/InvestorReporting/render/performance/PerformanceDocument.tsx:30; src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:57 |
 | AnalysisDocument | `../render/analysis/AnalysisDocument` | NEW | FE-s-4 -- the ANALYSIS document: the portrait-letter template. | src/pages/InvestorReporting/export/Preview.tsx:32; src/pages/InvestorReporting/render/PrintEntry.tsx:69 |
-| AnalysisTab | `./analysis/AnalysisTab` | NEW | AnalysisTab -- FE-s-6, the Analysis tab. | src/pages/InvestorReporting/tabs/TabShell.tsx:53 |
+| AnalysisTab | `./analysis/AnalysisTab` | NEW | AnalysisTab -- FE-s-6, the Analysis tab. | src/pages/InvestorReporting/tabs/TabShell.tsx:62 |
 | AppliedBranding | `./AppliedBranding` | NEW | FE-s-9 -- shows what branding was ACTUALLY APPLIED, read from the PREVIEW BUNDLE, not from what was merely requested. With no logo asset present on the bundle the applied label reads 'Opal' regardless of the requested choice -- a preview that came back with nothing to apply is not the same fact as a request for something else, and the two are never conflated. | src/pages/InvestorReporting/export/ExportModal.tsx:49 |
 | CartesianGrid | `recharts` | REUSED | portal/node_modules/recharts | src/pages/InvestorReporting/render/performance/CumulativeReturnChart.tsx:24 |
 | CategoryViewTree | `@/components/CategoryViewTree` | REUSED | portal/src/components/CategoryViewTree.tsx | src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx:43 |
@@ -35,7 +35,7 @@ COMPONENTS: 70 (REUSED 27, NEW 43) across 40 scanned tree files.
 | FirmDropdown | `./header/FirmDropdown` | NEW | FirmDropdown -- the header's firm selector. | src/pages/InvestorReporting/index.tsx:33 |
 | GenerateComposer | `./GenerateComposer` | NEW | GenerateComposer -- FE-s-15, the Analysis tab's Generate composer. | src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx:46 |
 | HoldingsSummary | `./HoldingsSummary` | NEW | HoldingsSummary -- the Holdings tab's top strip (FE-s-7). | src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx:46 |
-| HoldingsTab | `./holdings/HoldingsTab` | NEW | HoldingsTab -- the Holdings tab body (FE-s-7). | src/pages/InvestorReporting/tabs/TabShell.tsx:54 |
+| HoldingsTab | `./holdings/HoldingsTab` | NEW | HoldingsTab -- the Holdings tab body (FE-s-7). | src/pages/InvestorReporting/tabs/TabShell.tsx:63 |
 | InputReview | `./InputReview` | NEW | InputReview -- FE-s-6. | src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx:47 |
 | InvestorReporting | `./pages/InvestorReporting` | NEW | Investor Reporting -- page shell (FE-s-2), tab shell mount (FE-s-3). | src/App.tsx:34 |
 | InvestorReportingPrint | `./pages/InvestorReporting/render/PrintEntry` | NEW | FE-s-4 -- THE PRINT ENTRY POINT: route `/investor-reporting/print`. | src/App.tsx:35 |
@@ -62,7 +62,7 @@ COMPONENTS: 70 (REUSED 27, NEW 43) across 40 scanned tree files.
 | Preview | `./Preview` | NEW | FE-s-9 -- the preview: requests the `ExportBundle` preview through the typed client with the CURRENT performance (or analysis) revision and the chosen options, resolves it (`resolveBundle.ts`) and renders `PerformanceDocument` or `AnalysisDocument` from `render/` inside the modal. | src/pages/InvestorReporting/export/ExportButton.tsx:58 |
 | ReceiptPanel | `./ReceiptPanel` | NEW | FE-s-9 -- the receipt panel: the `ExportReceipt` and `StatusEnvelope` drive the job state through `StatusPanel` (FE-s-3, IMPORTED, never edited), and, on `READY`, a download link to the receipt's `authorizedDownloadRoute` and nothing else -- no vendor URL ever appears here (see `submit.ts`'s `downloadRouteFor`). | src/pages/InvestorReporting/export/ExportModal.tsx:50 |
 | RechartsTooltip | `recharts` | REUSED | portal/node_modules/recharts | src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx:42 |
-| ReportingTab | `./reporting/ReportingTab` | NEW | FE-s-5 -- the Reporting tab: the package's performance components mounted inside the tab with the advisor's controls. NOTHING HERE COMPUTES A RETURN. | src/pages/InvestorReporting/tabs/TabShell.tsx:55 |
+| ReportingTab | `./reporting/ReportingTab` | NEW | FE-s-5 -- the Reporting tab: the package's performance components mounted inside the tab with the advisor's controls. NOTHING HERE COMPUTES A RETURN. | src/pages/InvestorReporting/tabs/TabShell.tsx:64 |
 | RequestList | `./RequestList` | NEW | RequestList -- FE-s-6. | src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx:48 |
 | ResponsiveContainer | `recharts` | REUSED | portal/node_modules/recharts | src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx:42 |
 | RevisionIdentity | `./RevisionIdentity` | NEW | RevisionIdentity -- FE-s-15 (W3-S2). | src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx:49 |
@@ -72,7 +72,7 @@ COMPONENTS: 70 (REUSED 27, NEW 43) across 40 scanned tree files.
 | StageDisplay | `./StageDisplay` | NEW | StageDisplay -- FE-s-6. | src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx:50 |
 | StatusPanel | `../tabs/StatusPanel` | NEW | StatusPanel -- the status renderer every tab uses (FE-s-3). | src/pages/InvestorReporting/export/ReceiptPanel.tsx:26; src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx:44; src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:69 |
 | Summary | `./Summary` | NEW | FE-s-4 -- the summary block: beginning value, ending value, period return. | src/pages/InvestorReporting/render/performance/PerformanceDocument.tsx:35; src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx:60 |
-| TabNavigation | `@/components/TabNavigation` | REUSED | portal/src/components/TabNavigation.tsx | src/pages/InvestorReporting/tabs/TabShell.tsx:45 |
+| TabNavigation | `@/components/TabNavigation` | REUSED | portal/src/components/TabNavigation.tsx | src/pages/InvestorReporting/tabs/TabShell.tsx:54 |
 | TabShell | `./tabs/TabShell` | NEW | TabShell -- the tab strip and its three mount points (FE-s-3). | src/pages/InvestorReporting/index.tsx:37 |
 | VariantSelector | `./VariantSelector` | NEW | VariantSelector -- FE-s-6. | src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx:51 |
 | VendorPdfPreview | `./VendorPdfPreview` | NEW | VendorPdfPreview -- FE-s-6. | src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx:52 |
