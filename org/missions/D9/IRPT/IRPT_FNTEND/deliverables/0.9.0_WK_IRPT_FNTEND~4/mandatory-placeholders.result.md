@@ -3,8 +3,11 @@
 `0.9.0_WK_IRPT_FNTEND~4` on `IRPT_FNTEND.TO-FE-s-28` | worktree `/c/tmp/wk-irpt_fntend-4-4-fe-s-28`
 (branch `wk-irpt_fntend-4-4-fe-s-28`, cut at `f3b42b1e0b`) | build commit `d0c28a59be` | **LOCAL, not pushed**
 
-**STATUS: the order is NOT flipped.** Seven of eight mechanical criteria PASS by output; `F28-AC6` does not,
-and the reason is a bar no run of its own instrument can match. See section 4.
+**STATUS: COMPLETE -- flipped after the issuer's re-cut.** At `946fa17409` seven of eight mechanical
+criteria passed by output and `F28-AC6` did not, because its bar (`0 fail`) was a string its instrument never
+prints (section 4). The issuer (`2.0.0_SA_COO~F`) re-cut that one bar at `9ab6043728` to `BATTERY PASS`. The
+criterion was re-run exactly as now written -- EXIT=0, `proof-of-spec alignment battery: 35/35 arms as
+expected`, `BATTERY PASS ...` -- and every mechanical criterion now passes by output.
 
 ---
 
@@ -101,7 +104,12 @@ batteries were run and both are recorded:
 Denominator: **2 of 2 candidate batteries PASS; 0 of 2 emit the bar string.** Nothing this order built broke
 FE-s-23's limb.
 
-## 4. WHY `F28-AC6` IS RECORDED `FAIL` AND THE ORDER STAYS OPEN
+## 4. WHY `F28-AC6` WAS FIRST RECORDED `FAIL` -- RESOLVED BY THE RE-CUT AT `9ab6043728`
+
+> **Resolution:** the issuer re-cut the bar to `<expect>BATTERY PASS</expect>` at `9ab6043728` (a one-line diff
+> of the order file; no other criterion changed). Re-run as written: EXIT=0, `35/35 arms as expected`,
+> `BATTERY PASS ...` -> **PASS by output**. The text below is the record of the refusal as it stood at
+> `946fa17409`, kept because the row (`IRPT_FNTEND-W4-S5`) cites it.
 
 `F28-AC6`'s `<expect>` is the pattern `0 fail`. The battery's only summary writer
 (`.tools/tests/test_proof_of_spec_alignment.py@f3b42b1e0b:455-462`) prints `{n}/{N} arms as expected` and
@@ -145,5 +153,7 @@ INLINE one-line element that both declaring orders use today, so the bounded fix
   WARN lines on the gate file are pre-existing (identical 4 in the pre-edit baseline).
 - `proof-of-spec-check.py <instance> F28-AC1..F28-AC8`: **`VALID (rc=0)`**, `violations=0`, `3 surprises
   resolve to a channel row`, `invocation-alignment 7/7 comparable rows match, 0 diverge`.
-  ⚠ **A VALID instance is not a met order:** the `FAIL` row on `F28-AC6` is what leaves TO-FE-s-28 open.
+  At `946fa17409` the `FAIL` row on `F28-AC6` kept TO-FE-s-28 open, because a VALID instance is not a met
+  order. After the re-cut at `9ab6043728` that row reads PASS by output. The instance was re-validated and
+  `<status>` flipped to `complete` in the same commit.
 - Push state: **LOCAL** on `wk-irpt_fntend-4-4-fe-s-28`. Nothing pushed, nothing merged.
