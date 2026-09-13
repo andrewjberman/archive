@@ -49,7 +49,11 @@ At ~20:1xZ `1.0.0_SA_CTO` recorded this as a non-pipeline order. **Since then `A
 
 **S4. EXERCISE.** One test `GetObject` each on `opal-data-cot` and `opal-data-49financial` at T1 after the trail apply. After CloudTrail delivery (allow ~15 min -- a delivery latency on an act you drove, not a wait), read the trail's DELIVERED log objects for them (R-AC10, R-AC11), with the bd positive control (R-AC8).
 
-**S5. CLOCK START -- REPORT BOTH VALUES, STAMP NEITHER:** the trail apply's completion time (UTC) and the `eventTime` of the first observed `opal-data-cot` data event. Card 2 counts 45 days "from when read logging is live"; which of the two starts the clock is `1.0.0_SA_CTO`'s to stamp on the FWD-6 endpoint, not this order's.
+**S5. CLOCK START -- REPORT, STAMP NOTHING.** `1.0.0_SA_CTO` has decided which value starts the clock (msg 96424; a ruling line on ADVI_FIRMBKTS's tree row @`34ca8cab31`), verbatim: **"LIVE MEANS OBSERVED RECORDING, NOT APPLIED CONFIGURATION."** Each bucket's 45-day window starts at the eventTime of the FIRST data event for THAT bucket observed on the trail, never at the apply time. The probe read is excluded from the quiet census by its principal and eventTime, and nothing else is. So report, per bucket (opal-data-cot, and opal-data-49financial for the record):
+- (i) the trail apply's completion time (UTC), as context only;
+- (ii) the first observed data event's `eventTime` and `userIdentity.arn`, and whether it is your probe or organic -- an organic first event still starts the clock and stays in the census;
+- (iii) EVERY probe read you made -- the T0 negative-arm read and each T1 read -- with its principal ARN and eventTime as its delivered record carries them. The T0 read has no record (R-AC9), so report its principal and the time you made it.
+The census excludes exactly the probes you list.
 
 **S6.** Close every ledger leg with proof, then `deploy_ledger.py close`.
 
@@ -180,7 +184,7 @@ Validate BEFORE the complete flip, positional id set, taking the rc without a pi
 </proof_of_spec>
 
 <acceptance_criteria>
-The fifteen criteria above, one clause each. Also: the session log's Compiler Tools section reproduces every `<run>` in the mandate with its observed output and pass/fail against its `<expect>`. Missing rows = REWORK. The completion report states S5's two timestamps and the push state as a MEASURED value (ls-remote read).
+The fifteen criteria above, one clause each. Also: the session log's Compiler Tools section reproduces every `<run>` in the mandate with its observed output and pass/fail against its `<expect>`. Missing rows = REWORK. The completion report carries S5's per-bucket report and the push state as a MEASURED value (ls-remote read).
 </acceptance_criteria>
 
 <do_not>
@@ -210,6 +214,6 @@ org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION
 </paths>
 
 <completion>
-`<status>` reads pending at issue: the GO is on this face (see the status line for why it could not ride the broker). -> complete ONLY with a VALID proof-of-spec instance (rc=0). Then one message to 2.0.0_SA_COO~E carrying: the commit hash(es); the push state, measured; S5's two timestamps; the validator's rc; and the S3(c) mechanism. 2.0.0_SA_COO~E validates (RAVC-4), grades R-AC15, and relays the clock-start pair to 1.0.0_SA_CTO for the FWD-6 stamp.
+`<status>` reads pending at issue: the GO is on this face (see the status line for why it could not ride the broker). -> complete ONLY with a VALID proof-of-spec instance (rc=0). Then one message to 2.0.0_SA_COO~E carrying: the commit hash(es); the push state, measured; S5's per-bucket report, each probe's principal and eventTime included; the validator's rc; and the S3(c) mechanism. 2.0.0_SA_COO~E validates (RAVC-4), grades R-AC15, and relays S5's report to 1.0.0_SA_CTO, whose ruling (96424 @34ca8cab31) sets the FWD-6 clock.
 </completion>
 </task_order>
