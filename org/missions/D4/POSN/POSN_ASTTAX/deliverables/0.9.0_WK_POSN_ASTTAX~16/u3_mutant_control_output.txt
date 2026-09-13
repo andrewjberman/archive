@@ -1,0 +1,64 @@
+====================================================================================================
+MUTANT / DISCRIMINATION CONTROL -- SCRATCH ONLY, NOTHING IN THE REPO IS TOUCHED
+====================================================================================================
+  original bytes : C:\tmp\wk-posn-u3\.scratch\head\seed_canonical_securities.py (sha fbbc7165d331, == HEAD object fbbc7165d331)
+  patched bytes  : C:\tmp\wk-posn-u3\.scratch\run\patched_seed_canonical_securities.py  (SCRATCH ONLY -- not the repo file)
+  proposed diff  : C:\tmp\wk-posn-u3\.scratch\run\u3_proposed_patch.diff  (94 diff lines, +57/-2)
+  repo file at data/black_diamond/scripts/classification/seed_canonical_securities.py is UNTOUCHED -- it is outside this worker's <paths> grant
+
+====================================================================================================
+ARM: NEGATIVE CONTROL -- pre-patch bytes, same input (must still revert)
+====================================================================================================
+  TICKER BEFORE         AFTER          RATIFIED       VERDICT
+  VXX    Structured     equity         Structured     CLOBBERED
+  UVXY   Structured     equity         Structured     CLOBBERED
+  QBER   Structured     fixed_income   Structured     CLOBBERED
+  PDBC   Commodities    equity         Commodities    CLOBBERED
+  SURVIVED 0 of 4 | CLOBBERED 4 | rc=None
+  MINT CONTROL: 'CASH_USD' MINTED -- the seeder is writing   (yang update_item=57, get_item=0, minted=53)
+
+====================================================================================================
+ARM: MUTANT -- patched bytes, same input (the verdict must flip)
+====================================================================================================
+  TICKER BEFORE         AFTER          RATIFIED       VERDICT
+  VXX    Structured     Structured     Structured     SURVIVED
+  UVXY   Structured     Structured     Structured     SURVIVED
+  QBER   Structured     Structured     Structured     SURVIVED
+  PDBC   Commodities    Commodities    Commodities    SURVIVED
+  SURVIVED 4 of 4 | CLOBBERED 0 | rc=1
+  MINT CONTROL: 'CASH_USD' MINTED -- the seeder is writing   (yang update_item=53, get_item=57, minted=53)
+  [PRESERVED] QBER       asset_class: table serves 'Structured', seeder asserts 'fixed_income' -- table wins, pass --force to override
+  [PRESERVED] QBER       name: table serves 'QBER', seeder asserts 'TrueShares Quarterly Bear Hedge ETF' -- table wins, pass --force to override
+  [PRESERVED] VXX        asset_class: table serves 'Structured', seeder asserts 'equity' -- table wins, pass --force to override
+  [PRESERVED] VXX        name: table serves 'VXX', seeder asserts 'iPath Series B S&P 500 VIX Short-Term Futures ETN' -- table wins, pass --force to override
+  [PRESERVED] UVXY       asset_class: table serves 'Structured', seeder asserts 'equity' -- table wins, pass --force to override
+  [PRESERVED] UVXY       name: table serves 'UVXY', seeder asserts 'ProShares Ultra VIX Short-Term Futures ETF' -- table wins, pass --force to override
+  [PRESERVED] PDBC       asset_class: table serves 'Commodities', seeder asserts 'equity' -- table wins, pass --force to override
+  [PRESERVED] PDBC       name: table serves 'PDBC', seeder asserts 'Invesco Optimum Yield Diversified Commodity Strategy No K-1 ETF' -- table wins, pass --force to override
+
+====================================================================================================
+ARM: OVERRIDE -- patched bytes with --force (must revert again)
+====================================================================================================
+  TICKER BEFORE         AFTER          RATIFIED       VERDICT
+  VXX    Structured     equity         Structured     CLOBBERED
+  UVXY   Structured     equity         Structured     CLOBBERED
+  QBER   Structured     fixed_income   Structured     CLOBBERED
+  PDBC   Commodities    equity         Commodities    CLOBBERED
+  SURVIVED 0 of 4 | CLOBBERED 4 | rc=0
+  MINT CONTROL: 'CASH_USD' MINTED -- the seeder is writing   (yang update_item=57, get_item=57, minted=53)
+
+====================================================================================================
+DISCRIMINATION VERDICT
+====================================================================================================
+  pre-patch  : CLOBBERED 4 of 4, minted=True
+  patched    : SURVIVED  4 of 4, minted=True, rc=1
+  --force    : CLOBBERED 4 of 4  (the override still overrides)
+
+  OK: THE CONTROL DISCRIMINATES. The two arms read DIFFERENTLY on the same
+  input, the mint control fires in BOTH, and --force still overrides -- so
+  'CLOBBERED' in AC1 is a property of the seeder's write rule, not of this
+  instrument. A first mint still mints: 53 row(s) minted under the patch.
+
+  RESTATED: this is a SCRATCH demonstration for the issuer. U3-AC2 and U3-AC3
+  remain BLOCKED -- the repo file is outside the <paths> grant (W16-S1) and no
+  edit to it was made.

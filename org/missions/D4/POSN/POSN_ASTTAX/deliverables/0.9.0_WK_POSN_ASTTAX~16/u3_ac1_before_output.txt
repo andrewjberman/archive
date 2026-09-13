@@ -1,0 +1,82 @@
+====================================================================================================
+U3-AC1 -- BEFORE MEASUREMENT. THE LIVE TABLES ARE NEVER OPENED.
+====================================================================================================
+SUBJECT (real bytes, from the git object store -- the file is outside
+         this worktree's sparse cone):
+  repo path : data/black_diamond/scripts/classification/seed_canonical_securities.py
+  blob sha  : fbbc7165d33198789d3a7788a557ed3f5ce75614
+  asserted == HEAD object: fbbc7165d33198789d3a7788a557ed3f5ce75614
+  bytes     : 15000
+
+THE SEEDER'S asset_class VOCABULARY, enumerated over its own list:
+  denominator: 57 rows in CANONICAL_SECURITIES
+    'equity'          24 row(s)
+    'fixed_income'    33 row(s)
+  DISTINCT VALUES: 2 -- ['equity', 'fixed_income']
+  INTERSECTION WITH THE RATIFIED FIVE CLASSES:
+    ['Fixed Income / Cash', 'Equity', 'Structured', 'Commodities', 'Alternatives']
+    -> <empty>  (0 of 5)
+
+RETAG-SET MEMBERSHIP, RE-MEASURED (W14-S3 says 4 of 11; not inherited):
+  denominator: 11 retag members against 57 seeder rows
+    DBC    absent from the seeder's list
+    GLD    absent from the seeder's list
+    GSG    absent from the seeder's list
+    IAU    absent from the seeder's list
+    SLV    absent from the seeder's list
+    USO    absent from the seeder's list
+    VIXY   absent from the seeder's list
+    VXX    PRESENT  seeder asserts asset_class='equity'         ratified=Structured
+    UVXY   PRESENT  seeder asserts asset_class='equity'         ratified=Structured
+    QBER   PRESENT  seeder asserts asset_class='fixed_income'   ratified=Structured
+    PDBC   PRESENT  seeder asserts asset_class='equity'         ratified=Commodities
+  MEASURED: 4 of 11 retag members carried by this seeder -- ['VXX', 'UVXY', 'QBER', 'PDBC']
+  the other 7 are absent: ['DBC', 'GLD', 'GSG', 'IAU', 'SLV', 'USO', 'VIXY']
+
+MINT PROBE: 'CASH_USD' -- written by the seeder, seeded ABSENT from the scratch
+  store. If the run does not create it, the seeder is not writing at all
+  and any 'survived' verdict below would be worthless.
+
+----------------------------------------------------------------------------------------------------
+RUNNING THE REAL SEEDER BYTES: seed(upload=True, sync_yang=True)
+----------------------------------------------------------------------------------------------------
+    SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)
+    SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)
+  Seeding 57 canonical securities
+  ... 58 line(s) of seeder stdout suppressed ...
+    [WRITE] PDBC       equity          / Commodities
+  Seeded 57 items to bd-securities.
+  Seeded 57 items to etf-classifications.
+
+  scratch etf-classifications    update_item calls:  57   rows minted: 53
+  scratch bd-securities          update_item calls:  57   rows minted: 57
+
+====================================================================================================
+THE READ-BACK -- asset_class, stated AS A VALUE
+====================================================================================================
+  TICKER BEFORE         AFTER          RATIFIED       VERDICT
+  VXX    Structured     equity         Structured     CLOBBERED
+  UVXY   Structured     equity         Structured     CLOBBERED
+  QBER   Structured     fixed_income   Structured     CLOBBERED
+  PDBC   Commodities    equity         Commodities    CLOBBERED
+
+  CLOBBERED: 4 of 4 members present in the seeder -- ['VXX', 'UVXY', 'QBER', 'PDBC']
+
+NON-OWNED ATTRIBUTES (the seeder's docstring claims these survive):
+  VXX    management_style/sector  before=('passive', 'Broad')  after=('passive', 'Broad')  SURVIVED
+  UVXY   management_style/sector  before=('passive', 'Broad')  after=('passive', 'Broad')  SURVIVED
+  QBER   management_style/sector  before=('passive', 'Broad')  after=('passive', 'Broad')  SURVIVED
+  PDBC   management_style/sector  before=('passive', 'Broad')  after=('passive', 'Broad')  SURVIVED
+
+MINT CONTROL: 'CASH_USD' was absent before the run; after the run it is PRESENT (asset_class='fixed_income')
+  -> the seeder IS writing. A 'survived' verdict is therefore meaningful.
+
+====================================================================================================
+BEFORE RESULT: THE PREMISE HOLDS. 4 of 4 retag members present in
+this seeder had a ratified five-class asset_class CLOBBERED by one
+re-seed. The BEFORE state, as values:
+  VXX    'Structured'  ->  'equity'
+  UVXY   'Structured'  ->  'equity'
+  QBER   'Structured'  ->  'fixed_income'
+  PDBC   'Commodities'  ->  'equity'
+====================================================================================================
