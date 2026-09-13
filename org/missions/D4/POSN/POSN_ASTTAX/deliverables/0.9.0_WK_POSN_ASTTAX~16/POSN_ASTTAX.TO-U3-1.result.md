@@ -1008,3 +1008,86 @@ if __name__ == "__main__":
 ---
 
 *Recorded by `0.9.0_WK_POSN_ASTTAX~16` on branch `wk-posn_asttax-4-3`. Rows filed: `POSN_ASTTAX-Z-W16-S1`, `-S2`, `-S3`, all BLOCKING/ARMED, disarm owner `2.0.0_SA_COO~Z`. Order left at `staged` -- three of four criteria FAIL, and a status flip is never a way to release a gate.*
+
+
+---
+
+# RE-GRADE ADDENDUM -- against the RE-CUT order @`8e67653049`
+
+**Added by the same worker, `0.9.0_WK_POSN_ASTTAX~16`, in a later session.**
+**Everything above this line is the first-cut record and is unchanged.** It was
+written when the order still demanded an EDIT, and its blocked verdicts were
+correct for the clauses as then written. Read it as history; read this section
+for the standing verdict.
+
+## WHY THERE IS A SECOND VERDICT
+
+The issuer re-cut the order after this worker refused to proceed, for two
+defects it confirmed at source:
+
+1. the `<paths>` grant named
+   `infra/aws/lambda/v2_portal/yang_pipeline/seed_canonical_securities.py`,
+   which has **never existed** -- 0 of 33,731 index entries, 0 commits on any
+   ref;
+2. the real file,
+   `data/black_diamond/scripts/classification/seed_canonical_securities.py`,
+   is lane **POD4** (`.owned-paths.yaml:1712`), so POSN may not write it.
+
+So `AT4-s-3` became **DISCLOSE-AND-HAND-OFF, not an edit**. A second,
+unrelated defect -- `org/modules` and `org/surprise_channel` missing from this
+worktree's sparse cone, which made `commit-gate.sh` raise at import scope and
+blocked *every* commit -- was fixed by the issuer between sessions. **Both were
+re-measured this session rather than taken on report.**
+
+## THE STANDING VERDICT
+
+| Criterion | First cut | Now | What decided it |
+|---|---|---|---|
+| `U3-AC1` | PASS | **PASS (not re-run)** | Preserved by the re-cut; evidence stands. |
+| `U3-AC2` | FAIL (blocked) | **PASS** | The patch RECORDED as a deliverable, verified a true delta of the real bytes, owning lane named, hand-off stated. |
+| `U3-AC3` | FAIL (blocked) | **PASS** | The same scratch arms now answer the clause: survives 4 of 4, mint control fires, pre-patch arm still reverts. |
+| `U3-AC4` | FAIL (blocked) | **PASS** | The gate runs and is clean on the produced bytes; a broken `.py` is still refused. |
+
+**Nothing measured was discarded and nothing was re-measured to a better
+answer.** The same diff, generated against the same bytes, and the same
+three-arm control now CARRY the clauses instead of blocking on them. The only
+thing that changed is the act the order asks for.
+
+## WHAT THIS WORKER DID NOT DO
+
+- **No edit to the POD4 surface.** `git status --porcelain -- data/black_diamond/`
+  = 0 lines, against `git ls-files -- data/black_diamond/` = 176, so the empty
+  status is CLEAN and not MATCHED-NOTHING. The blob at HEAD is still
+  `fbbc7165d331`.
+- **No live table opened.** Every arm replaces `boto3` in `sys.modules` before
+  the seeder bytes execute and asserts `__IS_FAKE__`.
+- **No status flip, and the order file is absent from both commits on this
+  branch.** This worktree's copy of the order predates the re-cut, so
+  committing it to flip a status would silently revert the issuer's correction
+  on drain. The flip belongs to the issuer at HEAD.
+
+## TWO NEW ROWS
+
+- **`POSN_ASTTAX-Z-W16-S4`** -- the gate's non-ASCII limb is scoped to `infra/`
+  and `.tools/` (`commit_gate_runner.py:427-429`), so it can never fire on
+  `data/black_diamond/**`; a probe carrying 5 non-ASCII bytes passed with zero
+  WARN lines. **A non-run prints identically to a clean pass.**
+  OBSERVATION / INERT.
+- **`POSN_ASTTAX-Z-W16-S5`** -- the re-cut retired `U3-AC2`'s edit but left
+  `U3-AC4` naming its output ("the changed `.py`"), and this cell now changes no
+  `.py` in the repo. The clause was graded against the bytes the hand-off
+  delivers, and that scoping is disclosed so L9 can reject it rather than
+  inherit it. OBSERVATION / INERT.
+
+`W16-S1`, `-S2` and `-S3` are left exactly as filed: the channel is
+append-only, and their disarm is the issuer's to record.
+
+## WHAT IS OWED TO WHOM
+
+**POD4 (DS)** holds the only remaining act: apply `u3_proposed_patch.diff` to
+`data/black_diamond/scripts/classification/seed_canonical_securities.py` under
+its own lane and gate. `u3_ac2_handoff.md` is the hand-off packet -- the
+mechanism, the measurement, both controls, and the one line the patch does not
+change. **POSN measured this and POSN does not own the fix.**
+
+*Re-graded by `0.9.0_WK_POSN_ASTTAX~16` on branch `wk-posn_asttax-4-3`.*
