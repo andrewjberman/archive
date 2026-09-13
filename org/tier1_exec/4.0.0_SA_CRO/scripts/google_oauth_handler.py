@@ -411,18 +411,25 @@ def _navigate_dynamic(page, goal_description, max_turns=40, max_seconds=300):
     return False
 
 
-def handle_google_oauth(sentinel, state, screenshot_bytes, context=None, page_hint=None):
+def handle_google_oauth(sentinel, state, screenshot_bytes, context=None, page_hint=None,
+                         creds_secret_id="google/officialmadeaux/credentials"):
     """captcha_sentinel.py dispatch handler for GOOGLE_OAUTH_POPUP. `context` is the Playwright
     BrowserContext (so every open page/popup can be searched for the actual Google page, since the
     sentinel's screenshot is full-screen and does not itself identify WHICH Playwright Page object
     is showing it). Success oracle is always the CALLER's own post-OAuth identity check on the
     origin site -- this function returns True only for "the Google-side flow completed without an
     unhandled error", never for "the origin site accepted the identity".
+
+    `creds_secret_id` picks WHICH Google account signs in -- different third-party sites can be
+    wired to different Google accounts (Andrew-direct 2026-09-11: a second account,
+    google/andrew-goldengate/credentials, for Bloomberg.com's Google sign-in, distinct from
+    officialmadeaux's Seeking Alpha/general-purpose one). Defaults to the original account for
+    backward compatibility with existing callers.
     """
     if context is None:
         log("no context supplied -- cannot locate the Google page; the caller must pass context=")
         return False
-    creds = json.loads(_secret("google/officialmadeaux/credentials"))
+    creds = json.loads(_secret(creds_secret_id))
     email, password = creds["email"], creds["password"]
 
     gpage = page_hint

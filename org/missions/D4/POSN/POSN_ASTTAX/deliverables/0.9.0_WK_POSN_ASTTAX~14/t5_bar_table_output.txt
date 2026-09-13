@@ -1,0 +1,837 @@
+======================================================================================================================
+POSN_ASTTAX.TO-T5-1  cell AT3-s-5  --  THE BAR, step (2) of C-RETAG-SAFETY @3832ac543c
+FOUR clauses x 11 retag-set members x 19 surfaces = 836 cells
+======================================================================================================================
+
+### THE RETAG SET (T5-AC1) -- derived by subtraction over all 285 registry rows
+   DBC    served now hedge         -> ratified Commodities 
+   GLD    served now hedge         -> ratified Commodities 
+   GSG    served now hedge         -> ratified Commodities 
+   IAU    served now hedge         -> ratified Commodities 
+   SLV    served now hedge         -> ratified Commodities 
+   USO    served now hedge         -> ratified Commodities 
+   VIXY   served now hedge         -> ratified Structured  
+   VXX    served now equity        -> ratified Structured    [LIVE WEIGHT in A1]
+   UVXY   served now equity        -> ratified Structured    [live rows in A2]
+   QBER   served now fixed_income  -> ratified Structured    [live rows in A2]
+   PDBC   served now equity        -> ratified Commodities   [live rows in A2]
+
+### THE SURFACE SET (T5-AC2) -- 19 surfaces SURVIVING the subtraction
+   A1   ARTIFACT  s3://opal-data-portal-v2/json/positioning/positioning_data.json  <- yang-generate-positioning
+        vintage: LastModified 2026-09-11T11:06:24+00:00, ContentLength 8123 (gzip; 73790 raw), ETag 90c464008b3ffe962367e6667a1c2391 | DEPLOYED lambda_function.py 94164 B md5 cc79aff7506f8c39e17453f386c69551
+   A2   ARTIFACT  s3://opal-data-portal-v2/json/positioning/holdings_attribution_data.json  <- yang-generate-holdings-attribution
+        vintage: LastModified 2026-09-04T13:51:29+00:00, ContentLength 386689, ETag 6455a15c85827a4e3f58a181b7d28114 | DEPLOYED lambda_function.py 30110 B md5 c7307781723c4c37f295288930fa9b21 == HEAD bytes (IDENTICAL)
+   A3   ARTIFACT  s3://opal-data-portal-v2/json/positioning/allocation_summary.json  <- yang-generate-allocation-summary
+        vintage: LastModified 2026-09-11T11:06:28+00:00, ContentLength 967 (gzip; 6576 raw), ETag 4e53306dd0557eb15aa9eca61578ccae | DEPLOYED lambda_function.py 15709 B md5 06bf1c106208791b1ea3b3d852b01bb1 == HEAD bytes (IDENTICAL)
+   A4   ARTIFACT  s3://opal-data-portal-v2/platinum/etfs/positioning_data.json  <- data/etfs/scripts/gold/etf_positioning_publisher.py
+        vintage: LastModified 2026-09-11T13:01:27+00:00, ContentLength 148526, ETag 367fba76d3537fae874bd7db6c23279f (LIVE, written today)
+   A5   STORE     DynamoDB bd-securities  <- seeded FROM etf-classifications by data/black_diamond/scripts/classification/seed_bd_securities.py
+        vintage: source read at 3ce0c0e372; SOURCE_TABLE = 'etf-classifications' (:21), full item copy
+   A6   ARTIFACT  partner-firm served data  <- infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data (ETFClassifier over bd-securities)
+        vintage: source read at 3ce0c0e372 (:62 import, :1026 'via ETFClassifier (bd-securities DynamoDB table)', :1270 groupby asset_class)
+   A7   ARTIFACT  BD + COT gold client artifacts  <- data/{black_diamond,cot}/scripts/gold/{C_06,D_03,D_04,E_25} via lib/etf_classifier.py (bd-securities)
+        vintage: source read at 3ce0c0e372; ETFClassifier.__init__ default table_name='bd-securities'
+   A8   ARTIFACT  49F dim_asset_classification  <- data/assets/scripts/gold/runners_49f/a07_dim_asset_classification.py
+        vintage: source read at 3ce0c0e372; :231/:239 return ('alternatives' if ac == 'hedge' else ac)
+   R1   RENDERED  portal src/pages/Positioning/tabs/HoldingsTab.tsx  (Positioning > Holdings)
+        vintage: portal submodule pin e85f6eb84f (superproject gitlink at 3ce0c0e372)
+   R2   RENDERED  portal src/pages/Attribution/tabs/SelectionTab.tsx  (Attribution > Selection)
+        vintage: portal pin e85f6eb84f
+   R3   RENDERED  portal src/pages/Attribution/components/AssetAllocationSummary.tsx
+        vintage: portal pin e85f6eb84f
+   R4   RENDERED  portal src/pages/Attribution/components/StylePolicyComparison.tsx
+        vintage: portal pin e85f6eb84f
+   R5   RENDERED  portal src/pages/Positioning/constants/etf-categories.ts  (the Positioning page's OWN taxonomy)
+        vintage: portal pin e85f6eb84f
+   R6   RENDERED  portal src/pages/Attribution/constants/etf-categories.ts  (the Attribution page's OWN taxonomy)
+        vintage: portal pin e85f6eb84f
+   R7   RENDERED  portal src/lib/chartColors.ts + src/pages/Attribution/constants/holdings-shared.tsx  (the color plane, FWD-4)
+        vintage: portal pin e85f6eb84f
+   R8   RENDERED  portal src/pages/CapitalMarketAssumptions/* (the SECOND ratified surface, C-TWO-SURFACES)
+        vintage: portal pin e85f6eb84f
+   R9   RENDERED  portal src/pages/AdvisorIntelligence/_shared/{lib/composition.ts, perfrp/PerfrpAllocation.tsx}
+        vintage: portal pin e85f6eb84f
+   R10  RENDERED  portal src/pages/Positioning/panels/PositioningSummary.tsx
+        vintage: portal pin e85f6eb84f
+   R11  RENDERED  portal src/pages/Positioning/shared/etfAdapter.ts  (adapts A4 into the Positioning page)
+        vintage: portal pin e85f6eb84f
+
+### SUBTRACTED, WITH THE PROOF PER SUBTRACTION
+   - s3://opal-data-portal-v2/json/capital-markets/{assumptions,views}.json <- yang-generate-cma
+       PROOF: NOT REACHABLE BY THE RETAG: its asset_class comes from an Excel column ('Asset Class', lambda_function.py:266), not from the registry -- measured on the live artifact, whose 27 class values are a DIFFERENT vocabulary ('Equities','GSCI','Gold','Private Equity',...) and contain 0 of 11 members. KEPT AS A NAMED RISK: C-TWO-SURFACES requires this surface to AGREE with Positioning, and a retag moves one and not the other.
+   - s3://opal-data-portal-v2/json/benchmarks/etf_returns.json <- yang-generate-etf-returns
+       PROOF: NOT REACHABLE: its asset_class values are a hardcoded 5-entry literal at lambda_function.py:31-35 (BIL/VGSH/AGG/IVV/ACWI), none of which is a retag-set member, and the served field is read from that literal (:104), never from the registry.
+   - market-overview-tiered-generator + market-rsi-tiered-generator
+       PROOF: NOT REACHABLE: asset_class is derived from ASSET_CLASS_MAP.get(entity_type) (:401) in one and is a function PARAMETER (:565) in the other; neither reads etf-classifications. They appeared in the comp-find census and are subtracted with this proof rather than by omission.
+   - 468 record-plane blobs under org/ docs/ rcg/ memory/ .scratch/
+       PROOF: NOT A SURFACE: project records, task orders, proofs and prose. They carry the token and serve nothing.
+   - 118 code-plane blobs carrying the token with NO registry, module or artifact reference
+       PROOF: NOT REACHABLE: measured by pattern over the same object-store census (etf-classifications|ETF_CLASSIFICATIONS|etf_classifications_dynamodb|ETFClassifier|classify_etf|etf_classification). The subtracted set is printed by top directory in t5_readings.txt so it can be falsified, not asserted.
+   - infra/aws/terraform/yang-pipeline/etf-classifications.tf + shared-infra/main.tf + CHANGELOG.json
+       PROOF: NOT A SERVED SURFACE: they DECLARE the table and its two GSIs. They carry no class value to any consumer.
+   - projects/ADVI_REFACTOR/** + projects/ATOM_DECOMP/** contract markdown (4 files)
+       PROOF: NOT A SURFACE: contract prose for a different project; no executable path.
+
+### THE FULL TABLE -- SURFACE x MEMBER x CLAUSE (T5-AC3/4/5/6)
+
+--- A1  [ARTIFACT]  s3://opal-data-portal-v2/json/positioning/positioning_data.json  <- yang-generate-positioning
+    clause (a) served asset_class == ratified five-class label
+        VERDICT FAIL          GRAIN MEASURED-EXERCISED       the DEPLOYED bytes RAISE KeyError at calculate_allocations():239 on the ratified label, so NO artifact is written and no served value exists to equal the label
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-EXERCISED       same raise -- label-grouped weight for the target label is 0.000000 BEFORE and UNOBTAINABLE AFTER (the generator dies)
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   even with a payload, the only rendered consumer (R1) iterates a hardcoded ['Fixed Income','Equity'] so the row renders nowhere
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-EXERCISED       no artifact is produced, so there are no subtotals to sum; at HEAD bytes the payload sums to 1.000000 while the two RENDERED groups sum to 0.985000 -- difference 0.015000, the PROD v2.1.167 shape with a new value
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- A2  [ARTIFACT]  s3://opal-data-portal-v2/json/positioning/holdings_attribution_data.json  <- yang-generate-holdings-attribution
+    clause (a) served asset_class == ratified five-class label
+        VERDICT PASS          GRAIN MEASURED-SOURCE-AT-PIN   lambda_function.py:594-597 folds only fixed_income/Fixed income -> 'Fixed Income' and equity/hedge -> 'Equity'; a value 'Commodities'/'Structured' matches neither branch and passes through unchanged
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT PASS          GRAIN MEASURED-SOURCE-AT-PIN   the holding keeps its own weight field; grouping the served rows by the new label returns that weight -- no accumulator drops it
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   its rendered consumers R2/R3/R4 each gate on a hardcoded ['Fixed Income','Equity'] pair
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :643-647 links a holding to asset_class_subtotals by the normalised class name; a class with no subtotal row gets no subtotal and policy_return 0, so the new class's weight is in the grand total with no subtotal behind it
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- A3  [ARTIFACT]  s3://opal-data-portal-v2/json/positioning/allocation_summary.json  <- yang-generate-allocation-summary
+    clause (a) served asset_class == ratified five-class label
+        VERDICT PASS          GRAIN MEASURED-SOURCE-AT-PIN   read-dependency W12-S2 measured the value SURVIVES all hops (:255-256 else is a pass-through); my own read shows the deployed bytes are byte-identical to the ones it measured
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT PASS          GRAIN MEASURED-SOURCE-AT-PIN   same measured run: style_weight carries the full weight (10.0 on a 10.0 input)
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   W12-S3: the placeholder path :339-341 emits a hardcoded two-row list, and the sort key :291-292 knows two names, so a new class renders in insertion order or not at all
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   W12-S2: BENCHMARK_ALLOCATIONS :45-52 is a two-key dict and :267 defaults every other class to policy_weight 0.0, so bet == the row's entire weight; W12-S3 site 4: the :296-301 renormalisation dumps the whole gap on the largest row
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- A4  [ARTIFACT]  s3://opal-data-portal-v2/platinum/etfs/positioning_data.json  <- data/etfs/scripts/gold/etf_positioning_publisher.py
+    clause (a) served asset_class == ratified five-class label
+        VERDICT VACUOUS-PASS  GRAIN MEASURED-EXERCISED       holdings[].asset_class carries the ETFClassifier value verbatim (:416), so the ratified label would be served -- but 0 of 11 members hold a row in this artifact at this vintage, so nothing is actually asserted
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-EXERCISED       the book-level allocation object is a FOUR-KEY literal at :469-472 {cash,fixed_income,equity,hedge}; measured in the live bytes for all 4 books. A Commodities/Structured weight has no key to land in
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   its portal consumer src/pages/Positioning/shared/etfAdapter.ts:105 carries a FOURTH copy of the same four-key ZERO_ALLOCATION shape
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-EXERCISED       live label-grouped read: Equity 3.953400 + Fixed Income 0.046300 = 3.999700 over 189 rows, across a four-key allocation; a fifth class cannot enter the sum
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- A5  [STORE]  DynamoDB bd-securities  <- seeded FROM etf-classifications by data/black_diamond/scripts/classification/seed_bd_securities.py
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   a store, not a served surface: it carries whatever the retag writes, on a MANUAL trigger
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   no weight lives here
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   nothing renders here
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   no totals live here
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- A6  [ARTIFACT]  partner-firm served data  <- infra/aws/lambda/v2_portal/partners/lambdas/opal-partners-data (ETFClassifier over bd-securities)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      reachable only after a manual bd-securities re-seed; I did not read this lambda's served output or its deployed bytes
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      same -- its mix is a groupby on asset_class (:1270) and would gain a new group, but I did not measure the served artifact
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      its rendered consumer is the AdvisorIntelligence plane, whose maps (R9) are four-key -- but I did not trace this artifact to a specific view
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      not read
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- A7  [ARTIFACT]  BD + COT gold client artifacts  <- data/{black_diamond,cot}/scripts/gold/{C_06,D_03,D_04,E_25} via lib/etf_classifier.py (bd-securities)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      conditional reach via A5; served outputs not read by this cell
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      not read
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      not read
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      not read
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- A8  [ARTIFACT]  49F dim_asset_classification  <- data/assets/scripts/gold/runners_49f/a07_dim_asset_classification.py
+    clause (a) served asset_class == ratified five-class label
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   this producer REWRITES the class: a row served 'hedge' becomes 'alternatives' here. After the retag the six commodity members arrive as 'Commodities' and fall to the else, so this surface silently changes what it publishes for them without any code change
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      its weights were not read by this cell
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      not traced to a view
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      not read
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R1  [RENDERED]  portal src/pages/Positioning/tabs/HoldingsTab.tsx  (Positioning > Holdings)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   a view renders a value, it does not serve one
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :1382-1383 folds only Cash->Fixed Income and Hedge->Equity; after the retag no member is 'Hedge' any more, so the fold no longer catches them
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :1392 const assetClassOrder = ['Fixed Income', 'Equity'] then .filter(ac => groupedHoldings[ac]) -- a group keyed Commodities/Structured is NEVER ITERATED
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :1364-1372 documents this exact failure for Cash on PROD v2.1.167 (PFDE 90 -> 89 rows, 99.98 under 100.01); the weight stays in the grand total while the row does not render
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R2  [RENDERED]  portal src/pages/Attribution/tabs/SelectionTab.tsx  (Attribution > Selection)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   a view
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   no fold at all for the new labels
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :321 const assetClassOrder = ['Fixed Income', 'Equity'] -- the SECOND hardcoded pair, in a file the PRD's known-site list does not name
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   same shape as R1: unrendered rows keep their weight in the total
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R3  [RENDERED]  portal src/pages/Attribution/components/AssetAllocationSummary.tsx
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   a view
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :129/:132 branch only on 'Equity' and 'Fixed Income'
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :92 const requiredAssetClasses = ['Fixed Income', 'Equity']
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   subtotals are computed over the required pair only
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R4  [RENDERED]  portal src/pages/Attribution/components/StylePolicyComparison.tsx
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   a view
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   its comparison is built per required class
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :156 const requiredAssetClasses = ['Fixed Income', 'Equity']
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   same
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R5  [RENDERED]  portal src/pages/Positioning/constants/etf-categories.ts  (the Positioning page's OWN taxonomy)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :5 the TYPE is assetClass: 'Fixed Income' | 'Equity' | 'Cash' -- a ratified label is not in the union; and :66 hardcodes UVXY as Equity/Volatility, a SECOND source of truth that the registry retag cannot reach
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   segments are enumerated per class at :83-85; a new class has no segment list
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :76-78 the ORDER array is ['Cash','Fixed Income','Equity']
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   totals follow the order array
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R6  [RENDERED]  portal src/pages/Attribution/constants/etf-categories.ts  (the Attribution page's OWN taxonomy)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :7 type union 'Fixed Income'|'Equity'|'Cash'|'Hedge'; and :94/:95/:98/:59 hardcode UVXY, VXX, PDBC and QBER to Equity/Fixed Income BY TICKER -- four of the eleven retag-set members are re-classified in the frontend, so the registry retag is overridden here
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :115-118 segment lists per class; 'Hedge': [] is empty
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :108-110 order array ['Cash','Fixed Income','Equity']
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   same
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R7  [RENDERED]  portal src/lib/chartColors.ts + src/pages/Attribution/constants/holdings-shared.tsx  (the color plane, FWD-4)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   a color map serves no class value
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   no weight
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   no key 'Structured' exists as a top-level class anywhere in portal src (measured: every 'Structured' hit in 6 files is 'Structured Credit', a FIXED-INCOME segment); a Structured group has no color and collides by name with an existing concept
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   no totals
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R8  [RENDERED]  portal src/pages/CapitalMarketAssumptions/* (the SECOND ratified surface, C-TWO-SURFACES)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   types.ts:10 category union uses 'Equities', not the ratified 'Equity'; the two ratified surfaces do not share a vocabulary
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   CMA carries expectations, not portfolio weights
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   ExpectationsTab.tsx:98-102 maps BOTH 'Alternatives' and 'Commodities' onto ASSET_CLASS.alternatives, so two ratified classes render as one colour -- and no 'Structured' key exists
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   no portfolio totals on this surface
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R9  [RENDERED]  portal src/pages/AdvisorIntelligence/_shared/{lib/composition.ts, perfrp/PerfrpAllocation.tsx}
+    clause (a) served asset_class == ratified five-class label
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   composition.ts:36-58 carries THREE four-key maps keyed cash/equity/fixed_income/alternatives -- no structured, no commodities
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   a value outside those keys has no display row to carry its weight
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   PerfrpAllocation.tsx:42-45 the same four keys
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT NOT-MEASURED  GRAIN NOT-MEASURABLE-HERE      I did not read this plane's total arithmetic
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R10  [RENDERED]  portal src/pages/Positioning/panels/PositioningSummary.tsx
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   a view
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :194-195 the summary rows are a hardcoded two-element list of labels
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   same two-element list decides what is shown
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   not measured on this panel
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+--- R11  [RENDERED]  portal src/pages/Positioning/shared/etfAdapter.ts  (adapts A4 into the Positioning page)
+    clause (a) served asset_class == ratified five-class label
+        VERDICT NOT-GRADED    GRAIN MEASURED-SOURCE-AT-PIN   an adapter
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (b) LABEL-GROUPED weight NON-ZERO and equal to pre-retag
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   :105 ZERO_ALLOCATION = { cash, fixed_income, equity, hedge } -- a fourth copy of the four-key shape; a fifth class has nowhere to go
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (c) the row RENDERS -- served row count == DOM row count
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   it feeds R1, which iterates two labels
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+    clause (d) class subtotals sum to the grand total
+        VERDICT FAIL          GRAIN MEASURED-SOURCE-AT-PIN   delta is built from the same four-key shape
+        applies IDENTICALLY to all 11 members (one cell each, 11 cells)
+
+### GRAIN COUNTS (T5-AC6) -- every cell carries its own claim; denominator 836 cells
+   MEASURED-EXERCISED           66 cells
+   MEASURED-SOURCE-AT-PIN      638 cells
+   NOT-MEASURABLE-HERE         132 cells
+   SUM                         836 cells  (must equal the denominator)
+
+### VERDICT COUNTS
+   FAIL              473 cells
+   NOT-GRADED        176 cells
+   NOT-MEASURED      132 cells
+   PASS               44 cells
+   VACUOUS-PASS       11 cells
+
+### T5-AC7 -- THE CONDITION'S TRUTH VALUE
+   GO requires EVERY member to pass ALL FOUR clauses on EVERY surface in the set.
+   FAILING (member, surface, clause) triples: 473 of 836 cells
+   distinct failing (surface, clause) pairs : 43
+   members with at least one failing cell   : 11 of 11
+
+   VERDICT: NO-GO
+
+   THE FAILING (member, surface, clause) TRIPLES, in full:
+      (DBC, A1, a)
+      (GLD, A1, a)
+      (GSG, A1, a)
+      (IAU, A1, a)
+      (SLV, A1, a)
+      (USO, A1, a)
+      (VIXY, A1, a)
+      (VXX, A1, a)
+      (UVXY, A1, a)
+      (QBER, A1, a)
+      (PDBC, A1, a)
+      (DBC, A1, b)
+      (GLD, A1, b)
+      (GSG, A1, b)
+      (IAU, A1, b)
+      (SLV, A1, b)
+      (USO, A1, b)
+      (VIXY, A1, b)
+      (VXX, A1, b)
+      (UVXY, A1, b)
+      (QBER, A1, b)
+      (PDBC, A1, b)
+      (DBC, A1, c)
+      (GLD, A1, c)
+      (GSG, A1, c)
+      (IAU, A1, c)
+      (SLV, A1, c)
+      (USO, A1, c)
+      (VIXY, A1, c)
+      (VXX, A1, c)
+      (UVXY, A1, c)
+      (QBER, A1, c)
+      (PDBC, A1, c)
+      (DBC, A1, d)
+      (GLD, A1, d)
+      (GSG, A1, d)
+      (IAU, A1, d)
+      (SLV, A1, d)
+      (USO, A1, d)
+      (VIXY, A1, d)
+      (VXX, A1, d)
+      (UVXY, A1, d)
+      (QBER, A1, d)
+      (PDBC, A1, d)
+      (DBC, A2, c)
+      (GLD, A2, c)
+      (GSG, A2, c)
+      (IAU, A2, c)
+      (SLV, A2, c)
+      (USO, A2, c)
+      (VIXY, A2, c)
+      (VXX, A2, c)
+      (UVXY, A2, c)
+      (QBER, A2, c)
+      (PDBC, A2, c)
+      (DBC, A2, d)
+      (GLD, A2, d)
+      (GSG, A2, d)
+      (IAU, A2, d)
+      (SLV, A2, d)
+      (USO, A2, d)
+      (VIXY, A2, d)
+      (VXX, A2, d)
+      (UVXY, A2, d)
+      (QBER, A2, d)
+      (PDBC, A2, d)
+      (DBC, A3, c)
+      (GLD, A3, c)
+      (GSG, A3, c)
+      (IAU, A3, c)
+      (SLV, A3, c)
+      (USO, A3, c)
+      (VIXY, A3, c)
+      (VXX, A3, c)
+      (UVXY, A3, c)
+      (QBER, A3, c)
+      (PDBC, A3, c)
+      (DBC, A3, d)
+      (GLD, A3, d)
+      (GSG, A3, d)
+      (IAU, A3, d)
+      (SLV, A3, d)
+      (USO, A3, d)
+      (VIXY, A3, d)
+      (VXX, A3, d)
+      (UVXY, A3, d)
+      (QBER, A3, d)
+      (PDBC, A3, d)
+      (DBC, A4, b)
+      (GLD, A4, b)
+      (GSG, A4, b)
+      (IAU, A4, b)
+      (SLV, A4, b)
+      (USO, A4, b)
+      (VIXY, A4, b)
+      (VXX, A4, b)
+      (UVXY, A4, b)
+      (QBER, A4, b)
+      (PDBC, A4, b)
+      (DBC, A4, c)
+      (GLD, A4, c)
+      (GSG, A4, c)
+      (IAU, A4, c)
+      (SLV, A4, c)
+      (USO, A4, c)
+      (VIXY, A4, c)
+      (VXX, A4, c)
+      (UVXY, A4, c)
+      (QBER, A4, c)
+      (PDBC, A4, c)
+      (DBC, A4, d)
+      (GLD, A4, d)
+      (GSG, A4, d)
+      (IAU, A4, d)
+      (SLV, A4, d)
+      (USO, A4, d)
+      (VIXY, A4, d)
+      (VXX, A4, d)
+      (UVXY, A4, d)
+      (QBER, A4, d)
+      (PDBC, A4, d)
+      (DBC, A8, a)
+      (GLD, A8, a)
+      (GSG, A8, a)
+      (IAU, A8, a)
+      (SLV, A8, a)
+      (USO, A8, a)
+      (VIXY, A8, a)
+      (VXX, A8, a)
+      (UVXY, A8, a)
+      (QBER, A8, a)
+      (PDBC, A8, a)
+      (DBC, R1, b)
+      (GLD, R1, b)
+      (GSG, R1, b)
+      (IAU, R1, b)
+      (SLV, R1, b)
+      (USO, R1, b)
+      (VIXY, R1, b)
+      (VXX, R1, b)
+      (UVXY, R1, b)
+      (QBER, R1, b)
+      (PDBC, R1, b)
+      (DBC, R1, c)
+      (GLD, R1, c)
+      (GSG, R1, c)
+      (IAU, R1, c)
+      (SLV, R1, c)
+      (USO, R1, c)
+      (VIXY, R1, c)
+      (VXX, R1, c)
+      (UVXY, R1, c)
+      (QBER, R1, c)
+      (PDBC, R1, c)
+      (DBC, R1, d)
+      (GLD, R1, d)
+      (GSG, R1, d)
+      (IAU, R1, d)
+      (SLV, R1, d)
+      (USO, R1, d)
+      (VIXY, R1, d)
+      (VXX, R1, d)
+      (UVXY, R1, d)
+      (QBER, R1, d)
+      (PDBC, R1, d)
+      (DBC, R2, b)
+      (GLD, R2, b)
+      (GSG, R2, b)
+      (IAU, R2, b)
+      (SLV, R2, b)
+      (USO, R2, b)
+      (VIXY, R2, b)
+      (VXX, R2, b)
+      (UVXY, R2, b)
+      (QBER, R2, b)
+      (PDBC, R2, b)
+      (DBC, R2, c)
+      (GLD, R2, c)
+      (GSG, R2, c)
+      (IAU, R2, c)
+      (SLV, R2, c)
+      (USO, R2, c)
+      (VIXY, R2, c)
+      (VXX, R2, c)
+      (UVXY, R2, c)
+      (QBER, R2, c)
+      (PDBC, R2, c)
+      (DBC, R2, d)
+      (GLD, R2, d)
+      (GSG, R2, d)
+      (IAU, R2, d)
+      (SLV, R2, d)
+      (USO, R2, d)
+      (VIXY, R2, d)
+      (VXX, R2, d)
+      (UVXY, R2, d)
+      (QBER, R2, d)
+      (PDBC, R2, d)
+      (DBC, R3, b)
+      (GLD, R3, b)
+      (GSG, R3, b)
+      (IAU, R3, b)
+      (SLV, R3, b)
+      (USO, R3, b)
+      (VIXY, R3, b)
+      (VXX, R3, b)
+      (UVXY, R3, b)
+      (QBER, R3, b)
+      (PDBC, R3, b)
+      (DBC, R3, c)
+      (GLD, R3, c)
+      (GSG, R3, c)
+      (IAU, R3, c)
+      (SLV, R3, c)
+      (USO, R3, c)
+      (VIXY, R3, c)
+      (VXX, R3, c)
+      (UVXY, R3, c)
+      (QBER, R3, c)
+      (PDBC, R3, c)
+      (DBC, R3, d)
+      (GLD, R3, d)
+      (GSG, R3, d)
+      (IAU, R3, d)
+      (SLV, R3, d)
+      (USO, R3, d)
+      (VIXY, R3, d)
+      (VXX, R3, d)
+      (UVXY, R3, d)
+      (QBER, R3, d)
+      (PDBC, R3, d)
+      (DBC, R4, b)
+      (GLD, R4, b)
+      (GSG, R4, b)
+      (IAU, R4, b)
+      (SLV, R4, b)
+      (USO, R4, b)
+      (VIXY, R4, b)
+      (VXX, R4, b)
+      (UVXY, R4, b)
+      (QBER, R4, b)
+      (PDBC, R4, b)
+      (DBC, R4, c)
+      (GLD, R4, c)
+      (GSG, R4, c)
+      (IAU, R4, c)
+      (SLV, R4, c)
+      (USO, R4, c)
+      (VIXY, R4, c)
+      (VXX, R4, c)
+      (UVXY, R4, c)
+      (QBER, R4, c)
+      (PDBC, R4, c)
+      (DBC, R4, d)
+      (GLD, R4, d)
+      (GSG, R4, d)
+      (IAU, R4, d)
+      (SLV, R4, d)
+      (USO, R4, d)
+      (VIXY, R4, d)
+      (VXX, R4, d)
+      (UVXY, R4, d)
+      (QBER, R4, d)
+      (PDBC, R4, d)
+      (DBC, R5, a)
+      (GLD, R5, a)
+      (GSG, R5, a)
+      (IAU, R5, a)
+      (SLV, R5, a)
+      (USO, R5, a)
+      (VIXY, R5, a)
+      (VXX, R5, a)
+      (UVXY, R5, a)
+      (QBER, R5, a)
+      (PDBC, R5, a)
+      (DBC, R5, b)
+      (GLD, R5, b)
+      (GSG, R5, b)
+      (IAU, R5, b)
+      (SLV, R5, b)
+      (USO, R5, b)
+      (VIXY, R5, b)
+      (VXX, R5, b)
+      (UVXY, R5, b)
+      (QBER, R5, b)
+      (PDBC, R5, b)
+      (DBC, R5, c)
+      (GLD, R5, c)
+      (GSG, R5, c)
+      (IAU, R5, c)
+      (SLV, R5, c)
+      (USO, R5, c)
+      (VIXY, R5, c)
+      (VXX, R5, c)
+      (UVXY, R5, c)
+      (QBER, R5, c)
+      (PDBC, R5, c)
+      (DBC, R5, d)
+      (GLD, R5, d)
+      (GSG, R5, d)
+      (IAU, R5, d)
+      (SLV, R5, d)
+      (USO, R5, d)
+      (VIXY, R5, d)
+      (VXX, R5, d)
+      (UVXY, R5, d)
+      (QBER, R5, d)
+      (PDBC, R5, d)
+      (DBC, R6, a)
+      (GLD, R6, a)
+      (GSG, R6, a)
+      (IAU, R6, a)
+      (SLV, R6, a)
+      (USO, R6, a)
+      (VIXY, R6, a)
+      (VXX, R6, a)
+      (UVXY, R6, a)
+      (QBER, R6, a)
+      (PDBC, R6, a)
+      (DBC, R6, b)
+      (GLD, R6, b)
+      (GSG, R6, b)
+      (IAU, R6, b)
+      (SLV, R6, b)
+      (USO, R6, b)
+      (VIXY, R6, b)
+      (VXX, R6, b)
+      (UVXY, R6, b)
+      (QBER, R6, b)
+      (PDBC, R6, b)
+      (DBC, R6, c)
+      (GLD, R6, c)
+      (GSG, R6, c)
+      (IAU, R6, c)
+      (SLV, R6, c)
+      (USO, R6, c)
+      (VIXY, R6, c)
+      (VXX, R6, c)
+      (UVXY, R6, c)
+      (QBER, R6, c)
+      (PDBC, R6, c)
+      (DBC, R6, d)
+      (GLD, R6, d)
+      (GSG, R6, d)
+      (IAU, R6, d)
+      (SLV, R6, d)
+      (USO, R6, d)
+      (VIXY, R6, d)
+      (VXX, R6, d)
+      (UVXY, R6, d)
+      (QBER, R6, d)
+      (PDBC, R6, d)
+      (DBC, R7, c)
+      (GLD, R7, c)
+      (GSG, R7, c)
+      (IAU, R7, c)
+      (SLV, R7, c)
+      (USO, R7, c)
+      (VIXY, R7, c)
+      (VXX, R7, c)
+      (UVXY, R7, c)
+      (QBER, R7, c)
+      (PDBC, R7, c)
+      (DBC, R8, a)
+      (GLD, R8, a)
+      (GSG, R8, a)
+      (IAU, R8, a)
+      (SLV, R8, a)
+      (USO, R8, a)
+      (VIXY, R8, a)
+      (VXX, R8, a)
+      (UVXY, R8, a)
+      (QBER, R8, a)
+      (PDBC, R8, a)
+      (DBC, R8, c)
+      (GLD, R8, c)
+      (GSG, R8, c)
+      (IAU, R8, c)
+      (SLV, R8, c)
+      (USO, R8, c)
+      (VIXY, R8, c)
+      (VXX, R8, c)
+      (UVXY, R8, c)
+      (QBER, R8, c)
+      (PDBC, R8, c)
+      (DBC, R9, a)
+      (GLD, R9, a)
+      (GSG, R9, a)
+      (IAU, R9, a)
+      (SLV, R9, a)
+      (USO, R9, a)
+      (VIXY, R9, a)
+      (VXX, R9, a)
+      (UVXY, R9, a)
+      (QBER, R9, a)
+      (PDBC, R9, a)
+      (DBC, R9, b)
+      (GLD, R9, b)
+      (GSG, R9, b)
+      (IAU, R9, b)
+      (SLV, R9, b)
+      (USO, R9, b)
+      (VIXY, R9, b)
+      (VXX, R9, b)
+      (UVXY, R9, b)
+      (QBER, R9, b)
+      (PDBC, R9, b)
+      (DBC, R9, c)
+      (GLD, R9, c)
+      (GSG, R9, c)
+      (IAU, R9, c)
+      (SLV, R9, c)
+      (USO, R9, c)
+      (VIXY, R9, c)
+      (VXX, R9, c)
+      (UVXY, R9, c)
+      (QBER, R9, c)
+      (PDBC, R9, c)
+      (DBC, R10, b)
+      (GLD, R10, b)
+      (GSG, R10, b)
+      (IAU, R10, b)
+      (SLV, R10, b)
+      (USO, R10, b)
+      (VIXY, R10, b)
+      (VXX, R10, b)
+      (UVXY, R10, b)
+      (QBER, R10, b)
+      (PDBC, R10, b)
+      (DBC, R10, c)
+      (GLD, R10, c)
+      (GSG, R10, c)
+      (IAU, R10, c)
+      (SLV, R10, c)
+      (USO, R10, c)
+      (VIXY, R10, c)
+      (VXX, R10, c)
+      (UVXY, R10, c)
+      (QBER, R10, c)
+      (PDBC, R10, c)
+      (DBC, R11, b)
+      (GLD, R11, b)
+      (GSG, R11, b)
+      (IAU, R11, b)
+      (SLV, R11, b)
+      (USO, R11, b)
+      (VIXY, R11, b)
+      (VXX, R11, b)
+      (UVXY, R11, b)
+      (QBER, R11, b)
+      (PDBC, R11, b)
+      (DBC, R11, c)
+      (GLD, R11, c)
+      (GSG, R11, c)
+      (IAU, R11, c)
+      (SLV, R11, c)
+      (USO, R11, c)
+      (VIXY, R11, c)
+      (VXX, R11, c)
+      (UVXY, R11, c)
+      (QBER, R11, c)
+      (PDBC, R11, c)
+      (DBC, R11, d)
+      (GLD, R11, d)
+      (GSG, R11, d)
+      (IAU, R11, d)
+      (SLV, R11, d)
+      (USO, R11, d)
+      (VIXY, R11, d)
+      (VXX, R11, d)
+      (UVXY, R11, d)
+      (QBER, R11, d)
+      (PDBC, R11, d)

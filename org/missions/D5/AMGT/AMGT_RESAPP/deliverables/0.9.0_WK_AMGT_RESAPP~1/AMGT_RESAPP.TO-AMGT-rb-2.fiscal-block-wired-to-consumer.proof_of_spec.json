@@ -1,0 +1,178 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rb-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-2.fiscal-block-wired-to-consumer.md",
+    "group": "OTHER",
+    "vintage_commit": "15dd12638b774a8dced16828f8b96898bcea0532"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "192c1982316e49a38c0a41807c2468a7bdf49658",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-2.fiscal-block-wired-to-consumer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/provenance/render_print.py",
+      "kind": "script",
+      "commit_or_etag": "bdf3dc8f70358ae6f052b96d28b78f6bafa1ece6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new functions: load_corrected_price_overlay (reads model_block_fye_<sec_key>.json if landed, keyed by fiscal_year, {} otherwise) and apply_corrected_price_overlay (overlays the corrected price/price_date onto each fiscal-year PX_LAST figure, in-memory only). main() now calls both before render_model_block(). Exercised live via AC1/AC2/AC3 and test_consumer_wiring.py.",
+      "introduces": ["load_corrected_price_overlay", "apply_corrected_price_overlay"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "bdf3dc8f70358ae6f052b96d28b78f6bafa1ece6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "load_model_block now imports and calls apply_corrected_price_overlay(mb, load_corrected_price_overlay(DELIVERABLES, sec_key)) before returning -- the smallest correct switch. Exercised live: load_model_block('BABA_US_Equity') FY2025 PX_LAST returns 132.23 @ 2025-03-31, source tagged '(fiscal-period join, model_block_fye)'.",
+      "introduces": ["apply_corrected_price_overlay"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_consumer_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "bdf3dc8f70358ae6f052b96d28b78f6bafa1ece6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 new tests, discovered by `pytest integrations/bloomberg/research/tests`: the calendar-year negative control (on-disk file unchanged), the wired consumer's fiscal-period difference arm (AC1's own bar), the render_print path's own overlay + rendered-markdown check, the header-price-untouched guard, and the no-landed-lane no-op. rc 0, '10 passed' both this run and the determinism re-run.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/consumer_integration.result.md",
+      "kind": "doc",
+      "commit_or_etag": "bdf3dc8f70358ae6f052b96d28b78f6bafa1ece6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Names the consumer, describes the overlay wiring, records the measured calendar-vs-fiscal figures through the WIRED consumer (146.58 vs 132.23), and documents the provenance-render regeneration decision (all 3 regenerated; PDF pack left as-is, reasoned).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/provenance_render_BABA_US_Equity.md",
+      "kind": "doc",
+      "commit_or_etag": "bdf3dc8f70358ae6f052b96d28b78f6bafa1ece6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Regenerated via `python -m lib.research.provenance.render_print <model_block_BABA_US_Equity.json>` (the same invocation AMGT-s-3's own proof used) now that the consumer is wired -- FY2025 line reads '132.23 ... as of 2025-03-31' (was '146.58 ... as of 2026-09-10T23:20:19Z'); 10 of 10 fiscal-year PX_LAST lines changed, 0 non-price lines changed."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/provenance_render_SAP_GY_Equity.md",
+      "kind": "doc",
+      "commit_or_etag": "bdf3dc8f70358ae6f052b96d28b78f6bafa1ece6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Regenerated for consistency (December filer, small pre-existing 0-2 day gaps); 10 of 10 fiscal-year PX_LAST lines updated to the exact fiscal-period price/date."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/provenance_render_BA_US_Equity.md",
+      "kind": "doc",
+      "commit_or_etag": "bdf3dc8f70358ae6f052b96d28b78f6bafa1ece6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Regenerated for consistency (December filer, small pre-existing 0-2 day gaps); 10 of 10 fiscal-year PX_LAST lines updated to the exact fiscal-period price/date."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line beginning with a passed count and no \"failed\" -- the existing fye tests still pass PLUS a NEW consumer test: the named provenance/print consumer, when reading the corrected model_block_fye lane, returns the fiscal-period-end price for BABA and NOT the calendar-year-end price the original model_block lane gives (the end-to-end difference arm). A test that does not exercise the consumer, or does not show the lane difference, is NOT met",
+      "method": "test_suite",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests -q 2>&1 | tail -1",
+      "output_evidence": "10 passed in 4.28s",
+      "denominator": "10 of 10 tests passed: 5 pre-existing (AMGT-r-1's 2 + AMGT-rb-1's 3 direction tests, unchanged) + 5 new consumer-wiring tests, including test_wired_consumer_load_model_block_returns_fiscal_period_price_not_calendar_year, which directly asserts the named consumer (render_pack.load_model_block) returns 132.23 (fiscal-period) and NOT 146.58 (calendar-year) for BABA FY2025.",
+      "status": "PASS",
+      "expect": "^\\d+ passed.*(?<!failed)$"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "all four True -- consumer-wiring as its OWN criterion: the result doc NAMES the concrete consumer module, names the corrected model_block_fye lane, shows the calendar-vs-fiscal difference for the wired consumer, and at least one test file reads the corrected lane. A missing element is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import pathlib; r=open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/consumer_integration.result.md', encoding='utf-8').read(); low=r.lower(); tf=[str(p) for p in pathlib.Path('integrations/bloomberg/research/tests').rglob('*.py') if 'model_block_fye' in p.read_text(encoding='utf-8')]; print('names a consumer module', ('.py' in low and 'consumer' in low), '| names model_block_fye', ('model_block_fye' in low), '| shows calendar-vs-fiscal', ('calendar' in low and 'fiscal' in low), '| a test reads the corrected lane', len(tf)>0)\"",
+      "output_evidence": "names a consumer module True | names model_block_fye True | shows calendar-vs-fiscal True | a test reads the corrected lane True",
+      "denominator": "4 of 4 conditions True; the 4th resolves to True because test_consumer_wiring.py (under integrations/bloomberg/research/tests) contains the literal string 'model_block_fye' (imports load_corrected_price_overlay and reads model_block_fye_<sec_key>.json's contract directly).",
+      "status": "PASS",
+      "expect": "consumer module True.*model_block_fye True.*calendar-vs-fiscal True.*corrected lane True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "both True -- NEGATIVE: the corrected lane stays the DISTINCT model_block_fye engine and the original model_block artifacts are not overwritten or aliased (STORE_CONTRACT rule 1). If derive_fye_fixed no longer writes a distinct model_block_fye engine, it is NOT met",
+      "method": "command",
+      "invocation": "python -c \"t=open('integrations/bloomberg/research/derive_fye_fixed.py', encoding='utf-8').read(); print('corrected lane is a distinct engine', ('model_block_fye' in t), '| original model_block not aliased in derive_fye_fixed', (t.count('ENGINE = \\\"model_block_fye\\\"') + t.count(chr(39)+'model_block_fye'+chr(39)) >= 1))\"",
+      "output_evidence": "corrected lane is a distinct engine True | original model_block not aliased in derive_fye_fixed True",
+      "denominator": "2 of 2 conditions True; derive_fye_fixed.py is byte-unchanged by this cell (still committed at 17f7cba834). Separately verified: `git diff --stat` against each of the 3 original model_block_<security_key>.json files shows 0 changes -- the wiring's overlay is applied only to the in-memory dict each consumer function returns, never persisted back to the on-disk artifact the overlay reads alongside.",
+      "status": "PASS",
+      "expect": "distinct engine True.*not aliased.*True"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "does the served analyst pack now genuinely read the corrected fiscal join through the named, tested consumer path -- so C-S16 closes and the fiscal alignment can be claimed LIVE, not merely correct on a sample?",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read consumer_integration.result.md, lib/research/print/render_pack.py, lib/research/provenance/render_print.py, and test_consumer_wiring.py against the CVO evidence @b3acbcf3dd (C-S16), the CTO holes-scan tick 2 @f15af4dd7e, and AMENDMENT 1's L9 scope note",
+      "output_evidence": "YES, for the named consumer path this cell wires -- with one scope caveat AMENDMENT 1 itself flags. render_pack.py::load_model_block and render_print.py::main both now read the corrected model_block_fye lane (via load_corrected_price_overlay) and overlay it onto every fiscal-year PX_LAST figure before returning/rendering; live-exercised, BABA FY2025 resolves to 132.23 @ 2025-03-31 (fiscal), not 146.58 (calendar). The provenance render OUTPUT (provenance_render_BABA_US_Equity.md, AMGT-s-3's own served artifact) was regenerated through this wired path and now carries the corrected figure end-to-end, not just at the function-call level. STORE_CONTRACT rule 1 holds: the original model_block_<security_key>.json files are verified byte-unchanged on disk. CAVEAT (AMENDMENT 1's own L9 scope note, restated): no `.tsx` is served yet (round 3), so no LIVE served artifact reaching an end user moves as a result of this cell -- what moves is the box-side consumer's OWN OUTPUT (the .pdf/.txt/.md files this worker slot's own deliverables produce), which is what 'the served analyst pack' concretely IS at this stage of the project. The PDF pack (pack_SAP_GY_Equity.pdf) was deliberately NOT regenerated (reasoned in consumer_integration.result.md: not named in the ALSO instruction, no BABA/BA US pack exists yet to be stale, SAP's own gap was already small) -- left to the CVO whether that scope choice is correct or whether full pack regeneration should also be demanded before C-S16 is called fully closed.",
+      "denominator": "N/A -- judgment criterion, read against the deliverable and the two named consumer modules plus the regenerated render output, no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, not self-graded here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/ (not committed) re-implemented the OLD, unwired load_model_block (no overlay call at all -- exactly AMGT-r-1/rb-2-first-cut's original function body) and compared its BABA FY2025 PX_LAST result against the REAL, wired render_pack.load_model_block.",
+      "expected": "MUTANT (unwired): returns 146.58 (the calendar-year price) -- if the test suite's key assertion (== 132.23) were run against this, it would FAIL. REAL (wired): returns 132.23 (the fiscal-period price) -- the assertion PASSES.",
+      "observed": "MUTANT (unwired) FY2025 PX_LAST: 146.58 -- expected test assertion (== 132.23) would FAIL: True. REAL (wired) FY2025 PX_LAST: 132.23 -- test assertion (== 132.23) PASSES: True. CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's invocations each run twice against the same committed (unchanged) worktree state.",
+      "observed": "AC1: '10 passed' both runs (3.88s and 4.28s wall time, same outcome). AC2: identical 'True | True | True | True' both runs. AC3: identical 'True | True' both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Regenerating pack_SAP_GY_Equity.pdf/.txt (AMGT-s-5's PDF pack) via the wired build_pack()",
+      "reason": "Not named in the coordinator's ALSO instruction (scoped to the provenance render .md output); no BABA or BA US pack exists yet to be stale in the first place; SAP GY's own pre-existing calendar-vs-fiscal gap was already only 2 days, so regenerating it would not demonstrate the C-S16 difference this cell exists to prove. Documented as a scope decision in consumer_integration.result.md and flagged to the CVO at AC4."
+    },
+    {
+      "item": "Filing a new surprise row",
+      "reason": "No refusal or blocking condition this round -- the amended <paths> grant made the wiring possible exactly as intended; nothing surprised this worker. The prior S6 row lived on the now-retired branch and is not carried forward (per the coordinator's own note)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests -q",
+      "result": "rc 0; 10 passed (run twice, identical outcome, see controls.determinism)"
+    },
+    {
+      "tool": "AC2 consumer_integration.result.md shape check",
+      "invocation": "python -c \"import pathlib; ...\" (see acceptance[1].invocation)",
+      "result": "rc 0; True | True | True | True (run twice, identical)"
+    },
+    {
+      "tool": "AC3 derive_fye_fixed.py distinct-engine check",
+      "invocation": "python -c \"t=open('integrations/bloomberg/research/derive_fye_fixed.py'...).read(); ...\"",
+      "result": "rc 0; True | True (run twice, identical)"
+    },
+    {
+      "tool": "render_print.py (provenance render regeneration)",
+      "invocation": "python -m lib.research.provenance.render_print org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_{BABA_US_Equity,SAP_GY_Equity,BA_US_Equity}.json",
+      "result": "rc 0 x3; RENDERED 196/203/179 figures respectively, each provenance_render_<security>.md regenerated with the corrected fiscal-period prices"
+    },
+    {
+      "tool": ".scratch mutant harness (not committed -- scratch control harness)",
+      "invocation": "python -c \"...unwired reimplementation vs real load_model_block...\"",
+      "result": "rc 0; MUTANT 146.58 (would fail the assertion), REAL 132.23 (passes); CONTROL FIRED-AS-EXPECTED"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/print/render_pack.py lib/research/provenance/render_print.py integrations/bloomberg/research/tests/test_consumer_wiring.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate + surprise-row-gate + to-pipeline-gate chain)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~1 <0.9.0_WK_AMGT_RESAPP~1@opal.agent>\" -F <msgfile> -- lib/research/print/render_pack.py lib/research/provenance/render_print.py integrations/bloomberg/research/tests/test_consumer_wiring.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/consumer_integration.result.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/provenance_render_BABA_US_Equity.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/provenance_render_BA_US_Equity.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/provenance_render_SAP_GY_Equity.md",
+      "result": "commit bdf3dc8f70: risk-reflex REFLEX CLEAN (7 of 7 files, 0 hits against 1662 danger nodes); commit-gate OK 3 of 7 checkable files; surprise-row-gate OK (no rows in this commit); to-pipeline-gate OK (no task_orders/*.md staged)"
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rf-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-1.the-cross-at-the-producer.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-1.the-cross-at-the-producer.md",
+    "group": "OTHER",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/metrics/movement_gate.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NEW, 487 lines. The ONE place the cross is declared and the movement math is written. Holds the producer axis registry: `_SUBJECT_PRODUCERS` maps each subject to the module+entrypoint that writes it (CHATTER -> lib.research.metrics.chatter_axis:compute_chatter_axis; PRICE -> integrations.bloomberg.research.price_axis_pull:build_movement_rows), and `PRODUCER_AXES` is BUILT as the product MOVEMENTS x SUBJECTS (Rule 24(i): a product over a printed denominator, never a typed list of four strings -- `CROSSED_AXES` carries a construction-time assertion that raises if len != len(MOVEMENTS)*len(SUBJECTS), and `_UNMEASURED_CELLS` is a SUBTRACTION that raises with the missing members printed if any crossed cell lacks a declared measure). `producer_declared_axes()` returns frozenset(PRODUCER_AXES) -- this is what the read adapter derives its landed set from. NOT DEPLOY SCOPE BY THIS WORKER: no terraform apply was run and no zip was built; the module is packaged into the chatter-axis lambda only when build_zip.py is re-run and `terraform apply` redeploys."
+    },
+    {
+      "path_or_key": "lib/research/metrics/chatter_axis.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "PRODUCER REPAIR, CHATTER half. Was writing ONE subject-only partition `CHATTER#<date>`; now iterates `for axis in axes_for_subject(SUBJECT)` (:429) and writes one CROSSED partition per movement, `axis_date = \"%s#%s\" % (axis, as_of_date)` (:342), carrying `movement_basis` from the gate's own provenance (:354). Declares no axis literal of its own -- :29 records that movement_gate.py is the one place they are declared. THIS IS THE ACT L9 DEMANDED: the repair is at the producer, not a membership edit in a reader or a test."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/price_axis_pull.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "PRODUCER REPAIR, PRICE half. Same shape: imports `axes_for_subject` from the gate (:112-113), loops `for axis in axes_for_subject(AXIS)` (:185) and writes `\"axis_date\": f\"{axis}#{as_of_key}\"` (:198). NO VENDOR CALL WAS MADE AND NONE IS AUTHORIZED -- this edit changes the PARTITION SHAPE the producer writes, which is a pure code change; the harvester box is not up and no live pull was attempted. The file's location under integrations/bloomberg/ does not authorize egress and was not treated as doing so."
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "READ ADAPTER. `PRODUCER_LANDED_AXES = movement_gate.producer_declared_axes()` (:136) -- DERIVED, so this module now holds NO axis literal of its own and a membership edit here or in a test can no longer make an axis available. `resolve_axis` (:174-219) returns the RESOLUTION record every payload carries verbatim: requested_axis, served_axis, resolution (CROSSED | SUBJECT_ONLY_FALLBACK), movement_basis (MEASURED | ABSENT), movement_measure, producer, availability_basis. NO RANK IS COMPUTED, COMPARED OR RE-ASSIGNED ANYWHERE IN THIS MODULE -- the cell forbids deriving the movement dimension on the read side, so a read may only SELECT a partition a producer already wrote. THE FALLBACK BRANCH IS DELIBERATELY RETAINED and is not dead code: it is what discloses a retired producer on the page instead of serving a 'Breakout' list that is quietly something else."
+    },
+    {
+      "path_or_key": "lib/research/metrics/tests/test_producer_axis_registry.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NEW, 189 lines. The round-trip exercised AGAINST THE PRODUCERS THEMSELVES, which is the answer to L9's objection that patching a reader-side set 'demonstrates code selection, not producer availability': it asserts the partitions the producers actually emit carry movement_basis MEASURED (:93, :148) and that `scoped_amgt.resolve_axis(movement, subject)[\"served_axis\"]` (:183) lines up with them."
+    },
+    {
+      "path_or_key": "lib/research/metrics/tests/test_movement_gate.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NEW, 184 lines. Covers the gate's domains, the product construction and the movement math."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_scoped_amgt.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "EXTENDED. Asserts all four combinations resolve CROSSED with movement_basis MEASURED (:143, :150) AND keeps a NEGATIVE arm that pins the fallback's shape (:217-220: requested BREAKOUT_PRICE / served PRICE / movement_basis ABSENT), so the fallback branch stays tested rather than becoming unreachable-and-unwatched."
+    },
+    {
+      "path_or_key": "lib/research/metrics/tests/test_chatter_axis.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "EXTENDED for the crossed partitions the producer now writes (:191 asserts movement_basis MEASURED on an emitted row)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/amgt-resapp/lambda_src/build_zip.py",
+      "kind": "terraform",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PACKAGING, and the reason it had to change: chatter_axis.py now imports movement_gate.py, and the lambda zip is built from a HAND-KEPT `_ENTRIES` list. A module missing from that list does not fail at build time -- it fails at 10:00 UTC inside the deployed function as an ImportError nobody is watching for. movement_gate.py was added to _ENTRIES, and a new `verify()` (:74) now derives the needed set BY AST FROM THE PRODUCER'S OWN SOURCE rather than from a second hand-kept list, raising SystemExit on the first import the zip does not carry. VERIFIED NOT DEAD: `comp-read ... --enumerate 'verify'` -> 3 hits across 131 lines / 5 sections, bands DOCSTRING=1 COMMENT=0 DEF=1 CODE=1, the CODE hit being `checked = verify(output)` at :124 -- it is called, not merely defined. NOT DEPLOY SCOPE: no zip is tracked in the repo and none exists on disk (`git ls-files infra/aws/terraform/amgt-resapp/` returns 4 files, none a zip; `ls lambda_src/` shows only build_zip.py and lambda_function.py). No `terraform apply` was run, nothing was pushed, and no artifact reached AWS -- so NEVER-2's ledger entry is NOT owed by this worker; the deploy remains a separate, later act."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "`SERVED_EQ_REQUESTED=4 of 4` -- all four requested combinations resolve to a partition that IS the one requested. \u26d4 The measured defect is 4 of 4 FALLING BACK, so any number below 4 is NOT met. \u26d4 AND THE PRINTED `LANDED` SET IS THE DISCRIMINATOR: it must contain four crossed values (a TRENDING_* and a BREAKOUT_* form), not the two subject-only values `CHATTER`/`PRICE`. A pass with `LANDED` still reading two values means the read side was taught to stop reporting the fallback rather than the producer being fixed, and is NOT met",
+      "method": "command",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; combos=[(m,x) for m in ('trending','breakout') for x in ('price','chatter')]; res=[s.resolve_axis(m,x) for m,x in combos]; served=sum(1 for r in res if r.get('served_axis')==r.get('requested_axis')); print('SERVED_EQ_REQUESTED=%d of %d' % (served,len(combos))); print('LANDED=%s' % sorted(s.PRODUCER_LANDED_AXES))\"",
+      "output_evidence": "SERVED_EQ_REQUESTED=4 of 4\nLANDED=['BREAKOUT_CHATTER', 'BREAKOUT_PRICE', 'TRENDING_CHATTER', 'TRENDING_PRICE']\n(exit code 0)",
+      "denominator": "4 of 4 requested combinations (the full cross: MOVEMENTS {trending, breakout} x SUBJECTS {price, chatter}); LANDED set printed at 4 members.",
+      "status": "PASS",
+      "expect": "SERVED_EQ_REQUESTED=4 of 4[\\s\\S]*LANDED=\\['BREAKOUT_CHATTER', 'BREAKOUT_PRICE', 'TRENDING_CHATTER', 'TRENDING_PRICE'\\]",
+      "status_reason": "BOTH LIMBS MET, AND THE SECOND IS THE ONE THAT MATTERS. SERVED_EQ_REQUESTED=4 of 4 against a measured defect of 4 of 4 FALLING BACK. THE DISCRIMINATOR: LANDED prints ['BREAKOUT_CHATTER', 'BREAKOUT_PRICE', 'TRENDING_CHATTER', 'TRENDING_PRICE'] -- four CROSSED values carrying a TRENDING_* and a BREAKOUT_* form, NOT the two subject-only values CHATTER/PRICE the clause refuses. So this is not the read side being taught to stop reporting the fallback. THE SET IS NOT TYPED ANYWHERE A TEST CAN REACH: it is `movement_gate.producer_declared_axes()`, derived from the producer registry, and each producer builds the partitions it writes from `axes_for_subject()` on that same registry -- so the partitions written and the partitions queried are one declaration."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "`REFUSED=2 of 2` -- the NEGATIVE CONTROL. An unlanded movement (`sideways`) and an unlanded subject (`volume`) must still be REFUSED after the repair. \u26d4 If the fix is \"accept everything\", both of these start passing and AC1 becomes unfailable -- that is the always-passes shape this round exists to eliminate, and `REFUSED` below 2 is NOT met",
+      "method": "command",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; bad=[('sideways','chatter'),('trending','volume')]; n=0; [n:=n+1 for _ in ()]; out=[]\nfor m,x in bad:\n    try: out.append((m,x,'ACCEPTED',s.resolve_axis(m,x)))\n    except Exception as e: out.append((m,x,'REFUSED',type(e).__name__))\nprint('REFUSED=%d of %d' % (sum(1 for o in out if o[2]=='REFUSED'), len(bad)))\n[print(o) for o in out]\"",
+      "output_evidence": "REFUSED=2 of 2\n('sideways', 'chatter', 'REFUSED', 'AdapterError')\n('trending', 'volume', 'REFUSED', 'AdapterError')\n(exit code 0)",
+      "denominator": "2 of 2 negative-control pairs: ('sideways','chatter') unlanded MOVEMENT, ('trending','volume') unlanded SUBJECT.",
+      "status": "PASS",
+      "expect": "REFUSED=2 of 2[\\s\\S]*\\('sideways', 'chatter', 'REFUSED'[\\s\\S]*\\('trending', 'volume', 'REFUSED'",
+      "status_reason": "REFUSED=2 of 2, both AdapterError. THIS IS THE ARM THAT KEEPS AC1 FAILABLE: the repair did not widen the domain to make the cross pass. The refusal comes from the gate's own domain check re-raised as the adapter's HTTP 400 (normalise_movement/normalise_subject wrap movement_gate.MovementGateError), so one domain is enforced in one place for producer and reader alike rather than each boundary inventing its own."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the pytest tail shows a FAILURE or COLLECTION ERROR (the deliberately broken sentinel IS caught by the same suite the other criteria rely on), AND the final line reads `RESTORED_BYTE_IDENTICAL`. \u26d4 A green pytest run with the sentinel present means the suite cannot see this file at all and is NOT met. \u26d4 AND THE RESTORE IS FROM A WORKING-TREE SNAPSHOT, NEVER `git checkout --`: round 6's criterion used the index and destroyed ~90 lines of a worker's uncommitted work while printing its expected number (row `Z-W10-S1`). `RESTORE_FAILED`, or an absent final line, is NOT met regardless of the test result",
+      "method": "command",
+      "invocation": "cp lib/research/api/scoped_amgt.py \"$TMPDIR/rf1.pre\" 2>/dev/null || cp lib/research/api/scoped_amgt.py /tmp/rf1.pre; printf \"\\nBROKEN_SENTINEL_RF1 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf1.pre lib/research/api/scoped_amgt.py 2>/dev/null || cp \"$TMPDIR/rf1.pre\" lib/research/api/scoped_amgt.py; cmp -s /tmp/rf1.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "output_evidence": "BASELINE FIRST, so that a FAILURE discriminates rather than merely occurring -- `python -m pytest lib/research/api/tests/ -q | tail -5` with NO sentinel present: `17 passed in 0.04s`, rc 0.\nTHEN the criterion as named, sentinel appended:\n  ERROR lib/research/api/tests/test_scoped_amgt.py - ZeroDivisionError: division by zero\n  !!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n  1 error in 0.16s\n  RESTORED_BYTE_IDENTICAL\nSo the suite goes 17-passed -> 1-collection-error on the sentinel alone: it can see this file and it is not a green that cannot fail.",
+      "denominator": "17 tests collected in lib/research/api/tests/ clean; 1 collection error with the sentinel present; restore compared byte-for-byte over the whole 32342-byte file.",
+      "status": "PASS",
+      "expect": "(?:Interrupted: \\d+ error during collection|ZeroDivisionError)[\\s\\S]*RESTORED_BYTE_IDENTICAL",
+      "status_reason": "BOTH LIMBS MET. (1) The sentinel IS caught -- collection fails with ZeroDivisionError, against a clean baseline of 17 passed taken immediately before, so the suite genuinely sees this file and the criterion is not a green that cannot fail. (2) `RESTORED_BYTE_IDENTICAL` printed. THE RESTORE WAS FROM A WORKING-TREE SNAPSHOT, NEVER THE INDEX: `git checkout --` was not used anywhere in this task order (row Z-W10-S1 is the ~90-line loss that rule exists to prevent). CORROBORATED BY A SECOND, INDEPENDENT INSTRUMENT, because the criterion's own `cmp` can only prove the restore matched the snapshot it restored FROM: an insurance copy was taken to .scratch/INSURANCE_scoped_amgt.py BEFORE the criterion ran, and sha256 of the restored file equals sha256 of that insurance copy (d8474d5b843702133f82dbe1e7d70cb129840c01740b3ed2618cd9b4f8a2978c, both), confirming the restored bytes are the PRE-MUTATION working-tree bytes and not merely self-consistent. NOTE ON THE INVOCATION'S OWN SHAPE, recorded because it decides which branch ran: $TMPDIR is EMPTY in this shell, so `cp ... \"$TMPDIR/rf1.pre\"` resolves to the unwritable filesystem root, fails, and the `|| cp ... /tmp/rf1.pre` fallback is the branch that fired -- which is also the path the final `cmp -s /tmp/rf1.pre ...` reads, so the comparison is genuine rather than a cmp against a file that was never written."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a PRINTED DENOMINATOR of files scanned, and the resolution record present on BOTH the library and the surface side -- `requested` and `served` identities are carried visibly to the consumer, not silently collapsed. \u26d4 A denominator of 0 files scanned is OUT-OF-CORPUS, NOT a zero, and is NOT met -- note `portal/` is a submodule and the panel lives at `c6728146`, so a census over an unchecked-out portal returns a false zero (decomp s.15e item 1)",
+      "method": "command",
+      "invocation": "timeout 110 comp-find \"movement_basis|requested_axis|served_axis\" lib/research portal/src/pages/SecurityAnalysis --limit 20   [AND the full sweep, because page 1 is not an answer: timeout 110 comp-find \"movement_basis|requested_axis|served_axis\" lib/research portal/src/pages/SecurityAnalysis --all ; and timeout 110 comp-find ... --files]",
+      "output_evidence": "PAGE 1 IS LIBRARY-ONLY AND IS NOT THE ANSWER -- the named `--limit 20` invocation returns `PAGE 1 of 3 (showing 20 of 43)` and every row on it is `lib/research/...`. Concluding from it would have recorded the portal side as absent. The full sweep (`--all`) was run and is what is graded here.\nPRINTED DENOMINATOR, identical on both runs: `DENOMINATOR: 43 hit(s) across 101 file(s) scanned in scope [corpus=all] | 18 EPHEMERAL-FLOOR, NOT searched (--corpus raw reads these)`; `BANDS (true totals, not this page): SURFACED=29 TEST=14`. 101 is not 0, so this is a scanned corpus and not the OUT-OF-CORPUS false zero the clause refuses.\nBOTH SIDES CARRY THE RESOLUTION RECORD -- 10 files, via `--files`:\n  LIBRARY (3): lib/research/api/scoped_amgt.py, lib/research/metrics/chatter_axis.py, lib/research/metrics/movement_gate.py\n  SURFACE (3): portal/src/pages/SecurityAnalysis/components/LeadPanel.tsx, portal/src/pages/SecurityAnalysis/components/RankedList.tsx, portal/src/pages/SecurityAnalysis/types.ts\n  TEST (4): lib/research/api/tests/test_scoped_amgt.py, lib/research/metrics/tests/test_chatter_axis.py, lib/research/metrics/tests/test_movement_gate.py, lib/research/metrics/tests/test_producer_axis_registry.py\nThe surface side carries requested AND served, not a collapsed single axis -- `types.ts:66-69` declares `requested_axis: CrossedAxis` / `served_axis: RankingAxis` / `movement_basis: 'MEASURED' | 'ABSENT'`, and `LeadPanel.tsx:94` renders `Served by the producer partition {resolution.served_axis} (movement dimension: ...` while `:101-102` renders the fallback disclosure naming BOTH `{resolution.requested_axis}` and `{resolution.served_axis}`.\nTHE DENOMINATOR IS LOAD-BEARING AND ITS ENABLING STATE IS NOT IN THE COMMIT -- see surprise row AMGT_RESAPP-Z-W11-S1. Measured with a positive control: at the superproject's BASE gitlink `e85f6eb84f`, `git ls-tree -r --name-only e85f6eb84f -- src/pages/SecurityAnalysis | wc -l` = 0 files; at the checked-out `c67281460a` the same read = 18 files. This criterion is met because this worktree carries the panel; `portal` is in NO order's <paths> in this queue, so the pointer cannot ride any of the five commits.",
+      "denominator": "43 hit(s) across 101 file(s) scanned, corpus=all, 18 EPHEMERAL-FLOOR not searched; bands SURFACED=29 TEST=14; 10 of 101 files carry the record, split 3 library / 3 portal surface / 4 test. Portal-side control: 18 files under src/pages/SecurityAnalysis at gitlink c67281460a vs 0 at base gitlink e85f6eb84f.",
+      "status": "PASS",
+      "expect": "DENOMINATOR: \\d+ hit\\(s\\) across [1-9]\\d* file\\(s\\) scanned[\\s\\S]*lib/research/api/scoped_amgt\\.py[\\s\\S]*portal/src/pages/SecurityAnalysis/components/LeadPanel\\.tsx",
+      "status_reason": "MET, WITH ITS ENABLING CONDITION DISCLOSED RATHER THAN ASSUMED. The denominator is 101 files scanned, not 0, so this is not the OUT-OF-CORPUS false zero the clause refuses; and the resolution record is present on BOTH sides, carrying requested AND served identities to the consumer rather than collapsing them. THE NAMED `--limit 20` INVOCATION ALONE WOULD HAVE MISLED: its page 1 of 3 is entirely lib/research, and stopping there reads as 'library only, surface side absent'. A page is not an answer, so the `--all` sweep is what is graded. THE CRITERION'S OWN WARNING IS LIVE AND IS FILED AS A ROW (AMGT_RESAPP-Z-W11-S1): the portal side is visible only because this worktree's submodule sits at c67281460a, and `portal` appears in NO order's <paths> across all five orders in this queue, so that pointer cannot be committed here. Re-running this census from the committed branch, where the gitlink is e85f6eb84f, would scan 0 of 18 panel files and grade the criterion the opposite way."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "<criterion id=\"AC5\" cell_refs=\"AMGT-rf-1\" judgment=\"true\"/> -- declared judgment in the task order with NO children: the order carries no <invocation> and no <expect> for this id.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- no invocation exists to run. The order declares this criterion judgment-only and self-closing.",
+      "output_evidence": "NO VERDICT IS RECORDED BY THIS WORKER, BY INSTRUCTION. The order states: \"A judgment criterion carries `judgment=\"true\"`, no children and NO verdict from you\" and \"`PASS` or `FAIL` on a judgment row is INVALID.\" The task order is cited at org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-1.the-cross-at-the-producer.md @ c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5.",
+      "denominator": "N/A -- a judgment criterion has no instrument and therefore no denominator. 1 of 5 criteria in this order is judgment-graded; 4 of 5 are mechanical and are recorded above.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "JUDGMENT CRITERION -- the order declares it `judgment=\"true\"` with NO children (no <invocation>, no <expect>), and instructs verbatim: \"A judgment criterion carries `judgment=\"true\"`, no children and NO verdict from you: record it `UNVERIFIABLE-BY-INSTRUMENT` with a `status_reason` naming `3.0.0_SA_CVO~Z`, which grades it at L9. `PASS` or `FAIL` on a judgment row is INVALID.\" Graded at L9 by 3.0.0_SA_CVO~Z. This worker records no verdict and offers no argument for one. The material 3.0.0_SA_CVO~Z will grade against is listed in artifacts_produced and in AC1-AC4's output_evidence above."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutation controls, because the order names one and the deliverable needed a second to be honest. (1) THE ORDER'S OWN, AC3: `BROKEN_SENTINEL_RF1 = 1/0` appended to lib/research/api/scoped_amgt.py, the api suite re-run, then the file restored FROM A WORKING-TREE SNAPSHOT taken with `cp` before the mutation (never `git checkout --`, which reads the INDEX and is how row Z-W10-S1 destroyed ~90 lines of a peer's uncommitted work while printing its expected number). (2) THE NEGATIVE-CONTROL ARM, AC2: two deliberately unlanded pairs -- an unlanded MOVEMENT ('sideways','chatter') and an unlanded SUBJECT ('trending','volume') -- held against the repaired resolver to prove the four-way pass was not bought by widening the domain.",
+      "expected": "(1) the suite turns RED on the sentinel alone (a green would prove the suite cannot see the file, making every other criterion that leans on it vacuous), and the file returns byte-identical. (2) both unlanded pairs still REFUSE; if either started being ACCEPTED, AC1 would become unfailable -- the exact always-passes shape this round exists to eliminate.",
+      "observed": "(1) FIRED: baseline `17 passed in 0.04s` -> with sentinel `ERROR lib/research/api/tests/test_scoped_amgt.py - ZeroDivisionError: division by zero` / `Interrupted: 1 error during collection` / `1 error in 0.16s`, then `RESTORED_BYTE_IDENTICAL`, independently confirmed by sha256 equality against a pre-mutation insurance copy (d8474d5b843702133f82dbe1e7d70cb129840c01740b3ed2618cd9b4f8a2978c). (2) FIRED: `REFUSED=2 of 2`, both AdapterError.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's named invocation run TWICE, same input, stdout captured to two files and compared with `cmp`; and the combined suite (lib/research/api/tests + lib/research/metrics/tests) run twice.",
+      "observed": "AC1: BYTE-IDENTICAL ACROSS 2 RUNS (`cmp -s` silent, rc 0). Suite: `61 passed in 0.10s` then `61 passed in 0.11s` -- identical counts, wall-clock differing only in the timing field, which is not part of the assertion.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The SECOND branch of row Z-W10-S2's remedy -- \"obtain an explicit specification correction before claiming four distinct ranking products\", i.e. narrowing the surface to a two-way cross.",
+      "reason": "NOT THIS WORKER'S TO CHOOSE, and the order says so: the issuer selected the producer-repair branch (decomp s.15e item 2) because the four-way cross is what L9 demanded and it serves FWD-15, so correcting the spec would NARROW a ratified outcome. The producer repair proved feasible -- AC1 reads 4 of 4 with four crossed values landed -- so the infeasibility escape (file a row and stop on that clause) was never reached."
+    },
+    {
+      "item": "Any live vendor pull through integrations/bloomberg/research/price_axis_pull.py (Seeking Alpha / FT / Bloomberg / WSJ).",
+      "reason": "NO VENDOR API CALL IS AUTHORIZED and availability is not authorization. The edit changes the PARTITION SHAPE the producer writes, which needs no egress; the harvester box is not up. The file's location under integrations/bloomberg/ does not authorize a call and was not read as doing so."
+    },
+    {
+      "item": "terraform apply / building and shipping the chatter-axis lambda zip, and the NEVER-2 change-management ledger entry that a deploy would oblige.",
+      "reason": "NOTHING WAS DEPLOYED. No zip is tracked in the repo and none exists on disk; build_zip.py was edited but not run to produce a shipped artifact, no terraform apply was run, nothing was pushed. The ledger obligation attaches to an act that can deploy; this commit cannot. The scheduled 10:00 UTC fire remains the acceptance for the producer change, exactly as the order frames it."
+    },
+    {
+      "item": "The `portal` gitlink move (e85f6eb84f -> c67281460a) now standing dirty in this worktree.",
+      "reason": "OUT OF GRANT, ON EVERY ORDER IN THIS QUEUE. `portal` appears in none of the five <paths> blocks (rf-1..rf-5), and a surface not named in <paths> is a wall (RULING 1) -- routing around it is forbidden, so it is filed as row AMGT_RESAPP-Z-W11-S1 and left for the drain. Separately PORTAL IS FROZEN, COMMIT YES / PROMOTE NO: nothing was pushed, merged to DEV or PROD, or promoted. The portal submodule worktree is CLEAN at c67281460a, so no portal content is uncommitted."
+    },
+    {
+      "item": "rf-2 through rf-5 (the mount and its IAM, the fiscal row matcher, the corrected-overlay bypass, the incomplete-read signal).",
+      "reason": "Separate task orders in this worker's sequential queue, each with its own <paths> grant and its own commit. One commit per task order: no path outside rf-1's grant rides this commit."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W11-S1"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python (AC1, the cross at the producer)",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; combos=[(m,x) for m in ('trending','breakout') for x in ('price','chatter')]; res=[s.resolve_axis(m,x) for m,x in combos]; served=sum(1 for r in res if r.get('served_axis')==r.get('requested_axis')); print('SERVED_EQ_REQUESTED=%d of %d' % (served,len(combos))); print('LANDED=%s' % sorted(s.PRODUCER_LANDED_AXES))\"",
+      "result": "rc 0; SERVED_EQ_REQUESTED=4 of 4; LANDED=['BREAKOUT_CHATTER', 'BREAKOUT_PRICE', 'TRENDING_CHATTER', 'TRENDING_PRICE']"
+    },
+    {
+      "tool": "python (AC2, negative control)",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; bad=[('sideways','chatter'),('trending','volume')]; n=0; [n:=n+1 for _ in ()]; out=[]\nfor m,x in bad:\n    try: out.append((m,x,'ACCEPTED',s.resolve_axis(m,x)))\n    except Exception as e: out.append((m,x,'REFUSED',type(e).__name__))\nprint('REFUSED=%d of %d' % (sum(1 for o in out if o[2]=='REFUSED'), len(bad)))\n[print(o) for o in out]\"",
+      "result": "rc 0; REFUSED=2 of 2, both AdapterError"
+    },
+    {
+      "tool": "pytest (AC3 mutation control + baseline)",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ -q  [baseline, then again with BROKEN_SENTINEL_RF1 appended]",
+      "result": "baseline 17 passed rc 0; with sentinel 1 error during collection (ZeroDivisionError); RESTORED_BYTE_IDENTICAL"
+    },
+    {
+      "tool": "comp-find (AC4 census, full sweep -- page 1 of the named --limit 20 run is library-only and was NOT treated as the answer)",
+      "invocation": "timeout 110 comp-find \"movement_basis|requested_axis|served_axis\" lib/research portal/src/pages/SecurityAnalysis --all   (and --files, and the named --limit 20)",
+      "result": "DENOMINATOR 43 hit(s) across 101 file(s) scanned [corpus=all], 18 EPHEMERAL-FLOOR not searched; SURFACED=29 TEST=14; 10 record-carrying files = 3 library + 3 portal + 4 test"
+    },
+    {
+      "tool": "pytest (whole-deliverable regression, api + metrics)",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ lib/research/metrics/tests/ -q",
+      "result": "61 passed, run twice with identical counts (determinism control)"
+    },
+    {
+      "tool": "git ls-tree (portal gitlink control for AC4's denominator, with a positive control)",
+      "invocation": "git ls-tree -r --name-only <gitlink> -- src/pages/SecurityAnalysis | wc -l, inside portal/, at e85f6eb84f and at c67281460a",
+      "result": "0 files at base e85f6eb84f; 18 files at c67281460a -- so the base-pointer zero is a true absence, not a broken query. Grounds row AMGT_RESAPP-Z-W11-S1."
+    },
+    {
+      "tool": "comp-read --enumerate (is build_zip.py's new verify() dead code?)",
+      "invocation": "timeout 110 comp-read infra/aws/terraform/amgt-resapp/lambda_src/build_zip.py --enumerate 'verify'",
+      "result": "3 hits across 131 lines / 5 sections; DOCSTRING=1 COMMENT=0 DEF=1 CODE=1; the CODE hit is `checked = verify(output)` at :124 -- called, not merely defined"
+    }
+  ]
+}

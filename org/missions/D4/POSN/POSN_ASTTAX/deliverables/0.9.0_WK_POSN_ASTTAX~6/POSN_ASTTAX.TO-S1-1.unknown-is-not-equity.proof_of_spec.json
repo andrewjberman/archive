@@ -1,0 +1,214 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_ASTTAX.TO-S1-1",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round2.md",
+    "vintage_commit": "2b07a3431409f95f3ba768ad2a9ac431f66a9e55",
+    "to_ref": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-S1-1.unknown-is-not-equity.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/prd/POSN_ASTTAX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "66ded3a0c56009fcdef37635d9ef793dbfce3fc5"
+  },
+  "assignee": "0.9.0_WK_POSN_ASTTAX~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT DEPLOYED, by this order's BOUNDS ('DO NOT DEPLOY. Source change only') and by CLAUDE.md section 5 ('NEVER aws lambda update-function-code -- Terraform only'). No deploy command of any kind was run and no AWS call of any kind was made: both scripts in this deliverable replace etf_classifications_dynamodb.ETFClassifier with an in-process stub BEFORE the generator's module body executes, so the DynamoDB client is never constructed against the live table. The serving Lambda still runs the pre-fix bytes until a Terraform-plane act lands, which is outside this order's write surface. The change is proved at the SOURCE level by S1-AC3, which loads both byte-vintages in one process.",
+      "introduces": [
+        "UNCLASSIFIED_ASSET_CLASS = 'unclassified'",
+        "def asset_class_is_recognized(asset_class_raw):",
+        "'asset_class_recognized': asset_class_is_recognized(asset_class_raw),",
+        "'assetClassRecognized': asset_class_is_recognized(asset_class_raw),",
+        "WARN: calculate_benchmark_allocations_from_holdings:",
+        "WARN: calculate_weighted_etf_characteristics: asset_class"
+      ],
+      "artifact_covered_by": [
+        "S1-AC1",
+        "S1-AC2",
+        "S1-AC3",
+        "S1-AC4",
+        "S1-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~6/negative_control_unknown_is_not_equity.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A verification harness, not a deployable. It is the S1-AC3 control: it loads the committed bytes (git show HEAD:<gen>) and the worktree bytes into two module objects against ONE stubbed registry and runs four arms of the real generator functions through both. Exits 0 only if the absent ticker is INDISTINGUISHABLE from a genuine holding BEFORE and DISTINGUISHABLE from both AFTER; --falsify puts the old bytes in both arms and exits 1.",
+      "artifact_covered_by": [
+        "S1-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~6/ac6_served_grain_readings.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A reading instrument for the JUDGMENT criterion S1-AC6, not a deployable and not a grader. It prints five readings across four populations (a carryable ratified class, two ratified-but-not-carryable classes from PRD s.3, and an absent ticker) and ends with 'END OF READINGS. The grade is 3.0.0_SA_CVO~Z's at L9.' It emits no verdict.",
+      "artifact_covered_by": [
+        "S1-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Append-only channel file. Two rows appended as ONE new fenced json block at the END of the file; no existing block or row was edited. Both rows were validated against org/surprise_channel/schemas/investigation_item.schema.json with jsonschema Draft7Validator BEFORE the append (0 errors each) and the appended bytes were checked pure-ASCII and LF-only.",
+      "artifact_covered_by": [
+        "S1-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-S1-1.unknown-is-not-equity.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The order file itself; the only edit is the <status> flip from staged to complete, made AFTER proof-of-spec-check.py returned rc=0 on this instance, and landed in the same single commit as the instance and the deliverables.",
+      "artifact_covered_by": [
+        "S1-AC5"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "S1-AC1",
+      "criterion_verbatim": "every numbered line pasted verbatim, the `asset_class` subset separated from other fields, each with its default named, and the count of DISTINCT defaults across the asset_class sites only.",
+      "method": "command",
+      "invocation": "timeout 120 grep -n \"Default to\\|registry_field(ticker, 'asset_class'\" infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py   [cwd /c/tmp/wk-posn-s1 (repo root). RUN TWICE: once on the PRE-EDIT bytes @f937521939 -- which is the re-take this criterion asks for -- and once on the POST-EDIT worktree bytes. The pre-edit run is byte-reproducible at any time by `git show f937521939:<gen>` and re-running the same pattern.]",
+      "output_evidence": "RUN 1 -- PRE-EDIT BYTES @f937521939 (the vintage this criterion re-takes), rc=0, 4 lines:\n-----8<-----\n91:    return registry_field(ticker, 'management_style', 'passive')  # Default to passive if unknown\n219:    return registry_field(ticker, 'asset_class', 'fixed_income')  # Default to FI if unknown\n390:            asset_class = registry_field(ticker, 'asset_class', 'equity')  # Default to equity if unknown\n550:            asset_class = registry_field(ticker, 'asset_class', 'equity')\n-----8<-----\n\nSEPARATION, as the criterion requires:\nOTHER FIELD, NOT COUNTED (1 line) -- :91 field='management_style', default='passive', in classify_management_style(). The criterion and the worker face both say to separate it and not count it. It is NOT changed by this order.\n\nasset_class SUBSET (3 lines), each with its default NAMED:\n  :219 in classify_etf()                              default = 'fixed_income'   comment 'Default to FI if unknown'\n  :390 in calculate_benchmark_allocations_from_holdings() default = 'equity'     comment 'Default to equity if unknown'\n  :550 in calculate_weighted_etf_characteristics()     default = 'equity'         no comment\n\nDISTINCT DEFAULTS ACROSS THE asset_class SITES: 2 of 3 sites -- the set is {'fixed_income', 'equity'}. THE THREE SITES DISAGREE, and round 1's S1a-AC8 finding is CONFIRMED at this vintage. Both members of that set are RATIFIED classes (PRD s.3), which is the defect: an unrecognised security was filed under a real class either way.\n\nLINE NUMBERS: the order's prose cites :209/:360/:520 and the worker face supplies the map old->new (:209->:219, :360->:390, :520->:550) because cell AT2-s-6 inserted +30 net lines into this file at commit 7f247caae0. The measured numbers above are this worker's own re-measurement and are the ones that bind; navigation was by symbol, not by offset.\n\nRUN 2 -- POST-EDIT WORKTREE BYTES, same invocation, same cwd, rc=0, 2 lines:\n-----8<-----\n91:    return registry_field(ticker, 'management_style', 'passive')  # Default to passive if unknown\n258:    return registry_field(ticker, 'asset_class', UNCLASSIFIED_ASSET_CLASS)\n-----8<-----\nasset_class subset = 1 site, 1 default, and that default is the SENTINEL rather than a ratified class. The three sites collapsed to one because the two benchmark sites now route through classify_etf(); the disagreement is resolved as a CONSEQUENCE of the fix, not as the fix. Filed as surprise row POSN_ASTTAX-Z-W6-S2 because a re-run of this criterion at the resulting commit returns RUN 2, not RUN 1.",
+      "denominator": "4 of 4 lines returned by the named pattern at the pre-edit vintage are reproduced verbatim; 3 of those 4 are the asset_class subset and 1 of 4 is the separated management_style line; DISTINCT defaults across the asset_class subset = 2 of 3 sites. Whole-file denominator: 2298 lines pre-edit (grep scanned all of them; the pattern is unanchored and case-sensitive, which is how the order wrote it). Post-edit: 2 of 2 lines returned, 1 of 2 in the asset_class subset, out of 2391 lines.",
+      "status": "PASS",
+      "expect": "219:.*'asset_class', 'fixed_income'.*390:.*'asset_class', 'equity'.*550:.*'asset_class', 'equity'.*DISTINCT DEFAULTS ACROSS THE asset_class SITES: 2 of 3 sites"
+    },
+    {
+      "criterion_id": "S1-AC2",
+      "criterion_verbatim": "AST-OK with a line count, proving the edited file still parses.",
+      "method": "command",
+      "invocation": "timeout 120 python -c \"import ast; src=open('infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py',encoding='utf-8').read(); ast.parse(src); print('AST-OK', len(src.splitlines()),'lines')\"   [cwd /c/tmp/wk-posn-s1, POST-EDIT bytes]",
+      "output_evidence": "AST-OK 2391 lines\nRC=0\n\nCorroborated by two DIFFERENT instruments on the same bytes, both rc=0:\n  python -m py_compile <gen> + both deliverable scripts -> PYCOMPILE_RC=0 (bytecode compile, not just a parse tree)\n  python -m ruff check --target-version py39 <gen> + both deliverable scripts -> 'All checks passed!' (ruff 0.15.11)\n  python .tools/ds-precommit-check.py <gen> + both deliverable scripts -> DSPRE_RC=0, no output\nLine count moved 2298 -> 2391 (+93), consistent with the S1-AC4 diffstat of 101 insertions / 8 deletions.",
+      "denominator": "1 of 1 edited generator file parses; 2391 of 2391 lines parsed as one module (ast.parse is whole-file or it raises); 3 of 3 .py files this order writes pass all three Rule-14 gate limbs (py_compile, ds-precommit-check, ruff py39).",
+      "status": "PASS",
+      "expect": "AST-OK 2391 lines"
+    },
+    {
+      "criterion_id": "S1-AC3",
+      "criterion_verbatim": "TWO runs side by side for a ticker ABSENT from the registry: BEFORE, it is indistinguishable from a genuine equity holding; AFTER, it is distinguishable, and the means of distinguishing is named. Both outputs pasted verbatim.",
+      "method": "command",
+      "invocation": "timeout 180 python \"org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~6/negative_control_unknown_is_not_equity.py\"   [cwd /c/tmp/wk-posn-s1. Falsification arm: the same command with a trailing --falsify, which loads the OLD bytes into BOTH arms.]",
+      "output_evidence": "rc=0. Header: 'BEFORE : git show HEAD:<file>  (2298 lines)' / 'AFTER  : worktree <file>       (2391 lines)' / \"absent ticker 'ZZZZ' is not a registry key; 'SPY' and 'AGG' are genuine rows\" / \"compared projection excludes identity fields ('ticker', 'name')\". Generator progress banners are elided below with [...]; every DECIDING line is verbatim.\n\n---------------- BEFORE (HEAD bytes) ----------------\n  ARM 1  generator raw class      classify_etf()\n    ABSENT  ZZZZ  : {\"classify_etf\": \"fixed_income\"}\n    genuine SPY   : {\"classify_etf\": \"equity\"}\n    genuine AGG   : {\"classify_etf\": \"fixed_income\"}\n    DISTINGUISHABLE from SPY by: classify_etf ('fixed_income' vs 'equity')\n    INDISTINGUISHABLE from AGG -- every class-bearing field is identical\n\n  ARM 2  portfolio allocation     calculate_allocations()\n    ABSENT  ZZZZ  : {\"fixed_income\": 100.0}\n    genuine SPY   : {\"equity\": 100.0}\n    genuine AGG   : {\"fixed_income\": 100.0}\n    DISTINGUISHABLE from SPY by: equity ('<absent>' vs 100.0); fixed_income (100.0 vs '<absent>')\n    INDISTINGUISHABLE from AGG -- every class-bearing field is identical\n[...]\n  ARM 3  SERVED holding           calculate_aggregated_holdings()\n    ABSENT  ZZZZ  : {\"active\": 0, \"asset_class\": \"Fixed Income\", \"aum\": 1000.0, \"beta\": null, \"credit\": \"AA\", \"duration\": 5.0, \"fee\": 0.001, \"model_breakdown\": {\"ST\": 1.0}, \"name\": \"Security Under Test\", \"sub_asset_class\": \"Other\", \"ticker\": \"ZZZZ\", \"weight\": 1.0, \"yield\": 0.02}\n    genuine SPY   : {\"active\": 0, \"asset_class\": \"Equity\", \"aum\": 1000.0, \"beta\": 1.0, \"credit\": \"AA\", \"duration\": null, \"fee\": 0.001, \"model_breakdown\": {\"ST\": 1.0}, \"name\": \"Genuine Equity Holding\", \"sub_asset_class\": \"Other\", \"ticker\": \"SPY\", \"weight\": 1.0, \"yield\": 0.02}\n    genuine AGG   : {\"active\": 0, \"asset_class\": \"Fixed Income\", \"aum\": 1000.0, \"beta\": null, \"credit\": \"AA\", \"duration\": 5.0, \"fee\": 0.001, \"model_breakdown\": {\"ST\": 1.0}, \"name\": \"Genuine Fixed Income Holding\", \"sub_asset_class\": \"Other\", \"ticker\": \"AGG\", \"weight\": 1.0, \"yield\": 0.02}\n    DISTINGUISHABLE from SPY by: asset_class ('Fixed Income' vs 'Equity'); beta (None vs 1.0); duration (5.0 vs None)\n    INDISTINGUISHABLE from AGG -- every class-bearing field is identical\n\n  ARM 4  benchmark allocation     calculate_benchmark_allocations_from_holdings()\n    ABSENT  ZZZZ  : {\"cash\": 0.0, \"equity\": 100.0, \"fixed_income\": 0.0, \"hedge\": 0.0}\n    genuine SPY   : {\"cash\": 0.0, \"equity\": 100.0, \"fixed_income\": 0.0, \"hedge\": 0.0}\n    genuine AGG   : {\"cash\": 0.0, \"equity\": 0.0, \"fixed_income\": 100.0, \"hedge\": 0.0}\n    INDISTINGUISHABLE from SPY -- every class-bearing field is identical\n    DISTINGUISHABLE from AGG by: equity (100.0 vs 0.0); fixed_income (0.0 vs 100.0)\n\n---------------- AFTER (worktree bytes) ----------------\n  ARM 1  generator raw class      classify_etf()\n    ABSENT  ZZZZ  : {\"classify_etf\": \"unclassified\"}\n    genuine SPY   : {\"classify_etf\": \"equity\"}\n    genuine AGG   : {\"classify_etf\": \"fixed_income\"}\n    DISTINGUISHABLE from SPY by: classify_etf ('unclassified' vs 'equity')\n    DISTINGUISHABLE from AGG by: classify_etf ('unclassified' vs 'fixed_income')\n\nWARN: calculate_allocations: unseeded asset_class 'unclassified' (ticker ZZZZ) -- carried under its own key, not dropped\n  ARM 2  portfolio allocation     calculate_allocations()\n    ABSENT  ZZZZ  : {\"unclassified\": 100.0}\n    genuine SPY   : {\"equity\": 100.0}\n    genuine AGG   : {\"fixed_income\": 100.0}\n    DISTINGUISHABLE from SPY by: equity ('<absent>' vs 100.0); unclassified (100.0 vs '<absent>')\n    DISTINGUISHABLE from AGG by: fixed_income ('<absent>' vs 100.0); unclassified (100.0 vs '<absent>')\n[...]\n  ARM 3  SERVED holding           calculate_aggregated_holdings()\n    ABSENT  ZZZZ  : {\"active\": 0, \"asset_class\": \"Unknown\", \"asset_class_recognized\": false, \"aum\": 1000.0, \"beta\": null, \"credit\": \"AA\", \"duration\": null, \"fee\": 0.001, \"model_breakdown\": {\"ST\": 1.0}, \"name\": \"Security Under Test\", \"sub_asset_class\": \"Other\", \"ticker\": \"ZZZZ\", \"weight\": 1.0, \"yield\": 0.02}\n    genuine SPY   : {\"active\": 0, \"asset_class\": \"Equity\", \"asset_class_recognized\": true, \"aum\": 1000.0, \"beta\": 1.0, \"credit\": \"AA\", \"duration\": null, \"fee\": 0.001, \"model_breakdown\": {\"ST\": 1.0}, \"name\": \"Genuine Equity Holding\", \"sub_asset_class\": \"Other\", \"ticker\": \"SPY\", \"weight\": 1.0, \"yield\": 0.02}\n    genuine AGG   : {\"active\": 0, \"asset_class\": \"Fixed Income\", \"asset_class_recognized\": true, \"aum\": 1000.0, \"beta\": null, \"credit\": \"AA\", \"duration\": 5.0, \"fee\": 0.001, \"model_breakdown\": {\"ST\": 1.0}, \"name\": \"Genuine Fixed Income Holding\", \"sub_asset_class\": \"Other\", \"ticker\": \"AGG\", \"weight\": 1.0, \"yield\": 0.02}\n    DISTINGUISHABLE from SPY by: asset_class ('Unknown' vs 'Equity'); asset_class_recognized (False vs True); beta (None vs 1.0)\n    DISTINGUISHABLE from AGG by: asset_class ('Unknown' vs 'Fixed Income'); asset_class_recognized (False vs True); duration (None vs 5.0)\n\nWARN: calculate_benchmark_allocations_from_holdings: asset_class 'unclassified' (ticker ZZZZ, model ST) is outside the four ratified classes -- carried under its own key, not dropped\n  ARM 4  benchmark allocation     calculate_benchmark_allocations_from_holdings()\n    ABSENT  ZZZZ  : {\"cash\": 0.0, \"equity\": 0.0, \"fixed_income\": 0.0, \"hedge\": 0.0, \"unclassified\": 100.0}\n    genuine SPY   : {\"cash\": 0.0, \"equity\": 100.0, \"fixed_income\": 0.0, \"hedge\": 0.0}\n    genuine AGG   : {\"cash\": 0.0, \"equity\": 0.0, \"fixed_income\": 100.0, \"hedge\": 0.0}\n    DISTINGUISHABLE from SPY by: equity (0.0 vs 100.0); unclassified (100.0 vs '<absent>')\n    DISTINGUISHABLE from AGG by: fixed_income (0.0 vs 100.0); unclassified (100.0 vs '<absent>')\n\nBEFORE: absent ticker indistinguishable from a genuine holding somewhere : YES -- THE DEFECT\nAFTER : absent ticker distinguishable from BOTH genuine holdings in every arm : YES\nCONTROL: OK: the fix changed the world in the asserted direction\n\nTHE CRITERION'S LITERAL WORDING LANDS ON ARM 4: BEFORE, the absent ticker ZZZZ and the genuine equity SPY produce the SAME benchmark allocation dict, to the digit -- 'INDISTINGUISHABLE from SPY'. That is the site whose old default was 'equity'. On ARMS 1-3 the absorption is into fixed_income instead, because classify_etf's old default was 'fixed_income'; the absent ticker is indistinguishable from the genuine AGG there. Both are the same defect (absorbed into a RATIFIED class), and the control asserts absorption into EITHER comparator rather than only the one the criterion names.\n\nTHE MEANS OF DISTINGUISHING, NAMED: (1) generator grain -- classify_etf returns 'unclassified', a value that is not a member of the ratified taxonomy, so any consumer can test for it; (2) allocation grain -- the weight accumulates under an 'unclassified' key whose PRESENCE is itself the signal, and two WARN lines name the ticker and the value; (3) served grain -- the boolean field asset_class_recognized is false, and false ONLY for the sentinel. See S1-AC6 for what the served asset_class STRING alone can and cannot separate.\n\nFALSIFICATION ARM (the control must be able to fail): the same script with --falsify loads the OLD bytes into BOTH arms -> 'AFTER : absent ticker distinguishable from BOTH genuine holdings in every arm : NO' / 'CONTROL: ERROR: the control does not hold', FALSIFY_RC=1. So the control FAILS ON THE OLD BYTES and passes only on the new ones.",
+      "denominator": "4 of 4 arms run on 2 of 2 byte-vintages (BEFORE 2298 lines via git show HEAD:<gen>, AFTER 2391 lines from the worktree) = 8 of 8 arm-vintage cells, each over 3 of 3 populations (1 absent ticker + 2 genuine comparators) = 24 records compared. BEFORE: the absent ticker is indistinguishable from a genuine holding in 4 of 4 arms. AFTER: distinguishable from BOTH comparators in 4 of 4 arms, i.e. 8 of 8 pairwise comparisons differ. 1 of 1 falsification arm exits 1.",
+      "status": "PASS",
+      "expect": "BEFORE \\(HEAD bytes\\).*INDISTINGUISHABLE from SPY -- every class-bearing field is identical.*AFTER \\(worktree bytes\\).*asset_class_recognized \\(False vs True\\).*BEFORE: absent ticker indistinguishable from a genuine holding somewhere : YES -- THE DEFECT.*AFTER : absent ticker distinguishable from BOTH genuine holdings in every arm : YES.*FALSIFY_RC=1"
+    },
+    {
+      "criterion_id": "S1-AC4",
+      "criterion_verbatim": "the diffstat pasted verbatim, showing no registry or infrastructure path was touched.",
+      "method": "diff",
+      "invocation": "timeout 120 git -C . diff --stat HEAD -- infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py   [cwd /c/tmp/wk-posn-s1; corroborated by the UNSCOPED `git status --porcelain`, which is the read that can see a path this scoped diffstat cannot.]",
+      "output_evidence": "-----8<----- the named invocation, verbatim, rc=0 -----8<-----\n .../yang-generate-positioning/lambda_function.py   | 109 +++++++++++++++++++--\n 1 file changed, 101 insertions(+), 8 deletions(-)\n-----8<-----\n\nWHAT THE SCOPED DIFFSTAT CANNOT SEE, read separately so the claim is not scoped to its own subject -- `git status --porcelain` over the whole worktree, run after every edit including the status flip, returns exactly 5 entries, verbatim:\n M infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning/lambda_function.py\n M org/missions/D4/POSN/POSN_ASTTAX/surprise-channel/investigations/INVESTIGATION_v1.md\n M org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-S1-1.unknown-is-not-equity.md\n?? .scratch/\n?? org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~6/\n4 of those 5 are the four entries of this order's <paths> write grant, one for one. The 5th, .scratch/, is this worker's own transient run output (the mandated per-worktree scratch, not the shared session scratchpad); it is NOT passed to safe-commit and is NOT committed, which the post-commit `git show --stat` confirms rather than asserts. ZERO registry paths (no DynamoDB row, no etf_classifications_dynamodb.py, no _shared/etf_classification.py), ZERO infrastructure paths (no infra/aws/terraform/**, no .tf, no deploy.sh, no BUILD_MANIFEST.json), ZERO portal paths.\n\nThe 8 deletions are the 3 old default call lines plus the 3-line classify_etf definition it replaced and the 2 comment lines on the benchmark sites; no functional line was removed without a replacement, which the S1-AC3 BEFORE/AFTER arms exercise rather than assert.",
+      "denominator": "1 of 1 file in the scoped diffstat; 5 of 5 entries in the unscoped `git status --porcelain` accounted for -- 4 of 5 are the 4 of 4 entries of the <paths> grant and the 5th is the uncommitted .scratch/; 0 of 5 are registry or infrastructure paths. 101 insertions + 8 deletions = 109 changed lines of 2391 in the post-edit file.",
+      "status": "PASS",
+      "expect": "1 file changed, 101 insertions\\(\\+\\), 8 deletions\\(-\\).*ZERO registry paths"
+    },
+    {
+      "criterion_id": "S1-AC5",
+      "criterion_verbatim": "the status line pasted verbatim reading `complete`; if not, this order STOPS and files a row rather than editing the same file underneath an unfinished cell.",
+      "method": "command",
+      "invocation": "timeout 120 grep -n \"<status>\" ../task-orders/POSN_ASTTAX.TO-S6-1.harden-the-generator.md   [RUN VERBATIM, TWICE, from two cwds. The command text is identical in both runs -- no instrument was substituted. Run A cwd = /c/tmp/wk-posn-s1 (the repo root, where S1-AC1/AC2/AC4 must run). Run B cwd = /c/tmp/wk-posn-s1/org/missions/D4/POSN/POSN_ASTTAX/deliverables, a sibling of task-orders, where the criterion's relative path resolves.]",
+      "output_evidence": "RUN A -- cwd = repo root, the command exactly as the criterion writes it:\n  grep: ../task-orders/POSN_ASTTAX.TO-S6-1.harden-the-generator.md: No such file or directory\n  RC=2\nThe comp-tool rail did NOT deny this single-file grep, so the anticipated substitution (adding '# rail-checked:') was neither needed nor made. The failure is the relative path, and rc=2 with 'No such file or directory' is the SAME output a genuinely missing predecessor order would produce -- filed as surprise row POSN_ASTTAX-Z-W6-S1 (ARMED, disarm_owner 2.0.0_SA_COO~Z).\n\nRUN B -- same command text, cwd a sibling of task-orders:\n-----8<-----\n8:<status>complete</status>\n68:  `<status>` to `complete`.\n-----8<-----\n  RC=0\nLine 8 is the order's own <status> element and it reads complete. Line 68 is prose inside the order's CLOSING OUT instructions, not a status element; it is printed because the pattern matches the literal string and is separated here rather than counted.\n\nSECOND, DIFFERENT INSTRUMENT (not a re-run of the grep, per Rule 22's repetition-is-not-corroboration clause): `git log --oneline -6 -- <gen>` lists as the most recent commit on the file this order edits:\n  7f247caae0 L7(POSN_ASTTAX.TO-S6-1, 0.9.0_WK_POSN_ASTTAX~2): harden the positioning generator so an unexpected classification value cannot blank the page for four firms (cell AT2-s-6, chain head)\nThat commit is an ancestor of this worktree's HEAD f937521939, so AT2-s-6's work is already IN the bytes this order edits. The grep reads the order's DECLARED status; the log reads the ARTIFACT. Both say terminal, by different means.\n\nAT2-s-6's work was NOT re-done: its hardening (the 'unknown' placeholder guard in registry_field, the .get()-based accumulators and the two unseeded-value WARNs in calculate_allocations) is untouched by this order's diff and is visible working in the S1-AC3 AFTER arm, where its WARN line fires on this order's new sentinel value.",
+      "denominator": "1 of 1 predecessor task order (AT2-s-6, the only read-dependency this order's <decomp_ref> declares as 'Read-dependency, NOT claimed'); 2 of 2 lines returned by the pattern reproduced and separated (1 status element + 1 prose line); 2 of 2 independent instruments agree (declared status, and the artifact's commit history).",
+      "status": "PASS",
+      "expect": "8:<status>complete</status>"
+    },
+    {
+      "criterion_id": "S1-AC6",
+      "criterion_verbatim": "JUDGMENT, GRADED BY `3.0.0_SA_CVO~Z` AT L9. Whether \"not recognised\" is now genuinely distinguishable from a real class at the served grain, or only inside the generator. Record the readings and offer NO verdict.",
+      "method": "command",
+      "invocation": "timeout 180 python \"org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~6/ac6_served_grain_readings.py\"   [cwd /c/tmp/wk-posn-s1, POST-EDIT bytes. Four populations: a ratified class the display map carries; two ratified-by-PRD-s.3 classes it does not carry; and an absent ticker.]",
+      "output_evidence": "rc=0. Generator progress banners elided as [...]; every reading line verbatim.\n\nREADING 1 -- the SERVED asset_class string, per population\n    SPY   registry='equity'      -> served asset_class='Equity'        RATIFIED and CARRYABLE -- a class the served display map holds\n    GLD   registry='Commodities' -> served asset_class='Unknown'       RATIFIED by PRD s.3 and NOT CARRYABLE -- outside the display map\n    VXX   registry='Structured'  -> served asset_class='Unknown'       RATIFIED by PRD s.3 and NOT CARRYABLE -- outside the display map\n    ZZZZ  registry=None          -> served asset_class='Unknown'       NOT IN THE REGISTRY -- the population this cell is about\n\nREADING 2 -- the DISCRIMINATOR this cell adds, same populations\n    SPY   served asset_class='Equity'        asset_class_recognized=True\n    GLD   served asset_class='Unknown'       asset_class_recognized=True\n    VXX   served asset_class='Unknown'       asset_class_recognized=True\n    ZZZZ  served asset_class='Unknown'       asset_class_recognized=False\n\nREADING 3 -- collisions on the SERVED STRING ALONE\n    served 'Equity'       <- SPY                (unique)\n    served 'Unknown'      <- GLD,VXX,ZZZZ       (COLLISION)\n\nREADING 4 -- the GENERATOR grain (raw value, never served)\n    SPY   classify_etf='equity'         portfolio buckets={\"equity\": 100.0}\nWARN: calculate_allocations: unseeded asset_class 'Commodities' (ticker GLD) -- carried under its own key, not dropped\n    GLD   classify_etf='Commodities'    portfolio buckets={\"Commodities\": 100.0}\nWARN: calculate_allocations: unseeded asset_class 'Structured' (ticker VXX) -- carried under its own key, not dropped\n    VXX   classify_etf='Structured'     portfolio buckets={\"Structured\": 100.0}\nWARN: calculate_allocations: unseeded asset_class 'unclassified' (ticker ZZZZ) -- carried under its own key, not dropped\n    ZZZZ  classify_etf='unclassified'   portfolio buckets={\"unclassified\": 100.0}\n\nREADING 5 -- full served record for the two populations that share a display string\n    GLD   {\"active\": 0, \"asset_class\": \"Unknown\", \"asset_class_recognized\": true, \"aum\": 1000.0, \"beta\": null, \"credit\": \"AA\", \"duration\": null, \"fee\": 0.001, \"model_breakdown\": {\"ST\": 1.0}, \"name\": \"Row tagged Commodities\", \"sub_asset_class\": \"Other\", \"ticker\": \"GLD\", \"weight\": 1.0, \"yield\": 0.02}\n    ZZZZ  {\"active\": 0, \"asset_class\": \"Unknown\", \"asset_class_recognized\": false, \"aum\": 1000.0, \"beta\": null, \"credit\": \"AA\", \"duration\": null, \"fee\": 0.001, \"model_breakdown\": {\"ST\": 1.0}, \"name\": \"Security Under Test\", \"sub_asset_class\": \"Other\", \"ticker\": \"ZZZZ\", \"weight\": 1.0, \"yield\": 0.02}\n\nSTRUCTURAL READINGS, for the same question, read from the bytes rather than run:\n  (i) THREE served display maps exist, all identical in shape and all four-valued: lines 1272-1277 (agg_holdings, key 'asset_class'), 1416-1421 (extract_current_holdings, key 'asset_class'), 1908-1913 (key 'assetClass') at the pre-edit vintage. Each is `{...}.get(asset_class_raw, 'Unknown')`. All three now carry the flag; the flag's key follows each payload's own convention (snake_case at the first two, camelCase at the third).\n  (ii) The PRD ratifies FIVE classes (POSN_ASTTAX_PRD.md s.3 @66ded3a0c5: Fixed Income/Cash, Equity, Structured, Commodities, Alternatives). The served display maps carry FOUR values. So READING 3's collision is not hypothetical after AT2-s-2's retag lands -- it is what a Commodities or Structured row will do.\n  (iii) BEFORE this change the served asset_class for an absent ticker was 'Fixed Income' (classify_etf's old default), not 'Equity'. The two 'equity' defaults S1-AC1 measures are at the two BENCHMARK sites, which do not pass through a display map. So at the served grain the pre-fix absorption was into fixed income, and at the benchmark grain it was into equity.\n  (iv) WHAT IS NOT MEASURED HERE: no portal or frontend consumer was read. portal/ is outside this worktree's sparse cone AND outside this order's <paths>, so whether any consumer reads the new field, and whether an additive key is inert for every existing one, is UNREAD by this worker rather than asserted.\n\nNO VERDICT IS OFFERED. The readings are recorded for 3.0.0_SA_CVO~Z at L9.",
+      "denominator": "4 of 4 populations read (1 carryable ratified class, 2 ratified-but-not-carryable, 1 absent) across 5 of 5 readings; 3 of 3 served display maps in the file inspected and all 3 carry the flag; 4 served display values in the maps versus 5 classes ratified by PRD s.3; 1 of 3 populations sharing the served string 'Unknown' is the not-recognised one. 0 verdicts offered of 1 judgment criterion.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion, declared judgment=\"true\" in the task order and reserved to 3.0.0_SA_CVO~Z at L9 by the criterion's own text ('Record the readings and offer NO verdict. Do not self-grade this one.'). No invocation available to this worker can decide whether the resulting distinguishability is 'genuine at the served grain'; that reading depends on what a consumer does with the served payload, which is outside this worker's cone and write surface. The substitute oracle is the CVO's L9 adjudication row; this row carries the instrument readings only.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The mutant IS the pre-fix vintage, and it is the load-bearing control of this order because the broken system already PASSES the outcome (FWD-1's 'every holding lands in exactly one class' is satisfied by a default that files everything unrecognised as a real class). The S1-AC3 script loads the committed bytes (git show HEAD:<gen>, 2298 lines) and the worktree bytes (2391 lines) in ONE process against ONE stubbed registry and runs four arms of the real generator functions through both. A harness that passed on both vintages would prove the change did nothing, so the script exits 1 unless it observes ABSORPTION before and SEPARATION after. The --falsify switch makes that failure reachable on demand by loading the old bytes into both arms.",
+      "expected": "BEFORE: the absent ticker ZZZZ is indistinguishable from a genuine holding in at least one arm (specifically: identical to the genuine EQUITY holding in the benchmark-allocation arm, whose old default was 'equity', and identical to the genuine FIXED INCOME holding in the other three, whose default came from classify_etf). AFTER: distinguishable from BOTH genuine comparators in every arm. --falsify: exit 1.",
+      "observed": "Exactly that. rc=0 on the real run with 'BEFORE: absent ticker indistinguishable from a genuine holding somewhere : YES -- THE DEFECT' / 'AFTER : absent ticker distinguishable from BOTH genuine holdings in every arm : YES' / 'CONTROL: OK: the fix changed the world in the asserted direction'. BEFORE arm 4: ZZZZ and SPY both return {\"cash\": 0.0, \"equity\": 100.0, \"fixed_income\": 0.0, \"hedge\": 0.0} -- 'INDISTINGUISHABLE from SPY'. AFTER arm 4: ZZZZ returns {\"cash\": 0.0, \"equity\": 0.0, \"fixed_income\": 0.0, \"hedge\": 0.0, \"unclassified\": 100.0}. FALSIFICATION: the same script with --falsify printed 'AFTER : ... : NO' / 'CONTROL: ERROR: the control does not hold' and exited FALSIFY_RC=1, so the control demonstrably fails on the old bytes. Positive controls inside the harness: it refuses to run unless the BEFORE bytes contain both old default literals and the AFTER bytes contain UNCLASSIFIED_ASSET_CLASS, so a wrong-object retrieval raises instead of silently comparing a file with itself.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The S1-AC3 harness was run twice, same input, same two byte-vintages, output captured to two separate files and compared byte-for-byte and by sha256. The S1-AC1, S1-AC2, S1-AC4 and S1-AC5 invocations are pure reads of fixed bytes and were each run at least twice in the course of this order (S1-AC1 at two vintages, S1-AC5 from two cwds).",
+      "observed": "IDENTICAL True, 8037 bytes each, sha256 prefix 2bbf1709e83f08f3 for both runs; RUN1_RC=0 and RUN2_RC=0. No timestamp, path or ordering varies between runs: the registry is a literal dict, the module load order is fixed, and dict iteration order is insertion order in this interpreter (python 3.11.9).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Retagging any registry row, and adding Commodities/Alternatives to the stored vocabulary.",
+      "reason": "Forbidden by this order's BOUNDS ('DO NOT RETAG ANY REGISTRY ROW ... AT2-s-2 owns retagging') and by the worker face, which adds that AT2-s-2 is currently NO-GO. This cell changes only how an ABSENT ticker is handled. Zero DynamoDB calls were made -- the registry is stubbed in-process in both scripts."
+    },
+    {
+      "item": "Deploying the changed Lambda.",
+      "reason": "Forbidden by this order's BOUNDS ('DO NOT DEPLOY. Source change only') and by CLAUDE.md section 5 (aws lambda update-function-code is Terraform-only, estate-wide). The serving Lambda runs the pre-fix bytes until a Terraform-plane act lands; that act is outside this order's <paths>."
+    },
+    {
+      "item": "Widening the three served display maps from four values to the PRD's five ratified classes.",
+      "reason": "NOT DONE DELIBERATELY, and it is the main thing this change does not fix. Adding 'Commodities'/'Structured'/'Alternatives' to those maps would change a served enum whose consumers are in portal/, outside this worktree's cone and outside this order's <paths>; and the five-class rendering is AT2-s-2's and the retag cells' subject, not this cell's. The consequence is recorded as S1-AC6 READING 3: the served string 'Unknown' is a three-way collision, separated only by the additive flag this order adds."
+    },
+    {
+      "item": "Reading any portal/frontend consumer of the served positioning payload.",
+      "reason": "portal/ is not in this worktree's sparse cone and is not in this order's <paths>. Whether any consumer reads asset_class_recognized / assetClassRecognized, and whether an additive key is inert for every existing consumer, is therefore UNREAD by this worker and is stated as unread rather than assumed. An additive key is the conventional low-blast-radius shape, but that is a convention, not a measurement."
+    },
+    {
+      "item": "An end-to-end run of the generator against a real model PKL.",
+      "reason": "Requires S3 reads and a Yang model PKL, i.e. AWS egress, which this order does not authorize and which no criterion names. The four arms of S1-AC3 and the five readings of S1-AC6 exercise the real functions on synthetic inputs instead; the BEFORE/AFTER discrimination does not depend on real data."
+    },
+    {
+      "item": "Renaming or re-homing the 'hedge' class, and the management_style default at :91.",
+      "reason": "Out of cell. The management_style site is explicitly separated and not counted by S1-AC1 and is untouched by the diff; 'hedge' is C-VOL-HEDGE-STRUCTURED's subject and belongs to the retag cells."
+    }
+  ],
+  "surprises": [
+    "POSN_ASTTAX-Z-W6-S1: S1-AC5's invocation cannot run from the cwd its sibling criteria require -- it names ../task-orders/... while S1-AC1/AC2/AC4 name repo-root-relative paths, so run as written from the repo root it returns rc=2 'No such file or directory', which is the same output a genuinely missing predecessor order would produce (the criterion is a STOP condition). Resolved by cwd only, same command text; ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+    "POSN_ASTTAX-Z-W6-S2: S1-AC1 measures a property of the INPUT bytes that this order's own act removes -- it asks for three disagreeing asset_class default sites and a count of distinct defaults, but the fix collapses the three sites to one, so the same invocation re-run at the resulting commit returns one site and one default. Both readings, with their vintages, are carried in the S1-AC1 row; INERT."
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface (the order names the task-order file, this worker's deliverables/ dir, the surprise-channel investigations file and the generator, and nothing else). The full session is this turn's transcript; every invocation, its cwd, its exit code and its verbatim deciding output are carried in the acceptance rows above, and the two executable instruments are committed beside this instance so any reading can be re-taken.",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile <gen> <negative_control> <ac6_readings>",
+      "result": "PYCOMPILE_RC=0 -- 3 of 3 files compile to bytecode"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 <gen> <negative_control> <ac6_readings>",
+      "result": "'All checks passed!' (ruff 0.15.11), rc=0 -- 3 of 3 files"
+    },
+    {
+      "tool": ".tools/ds-precommit-check.py",
+      "invocation": "python .tools/ds-precommit-check.py <gen> <negative_control> <ac6_readings>",
+      "result": "DSPRE_RC=0, no output -- 3 of 3 files. The module-level-while refusal the worker face warns about was not triggered: neither script binds any name in a module-level loop body; all logic is inside functions behind a __main__ guard."
+    },
+    {
+      "tool": "jsonschema Draft7Validator",
+      "invocation": "validated each new surprise row against org/surprise_channel/schemas/investigation_item.schema.json before appending",
+      "result": "'OK: POSN_ASTTAX-Z-W6-S1 validates against the schema' / 'OK: POSN_ASTTAX-Z-W6-S2 validates against the schema' -- 2 of 2 rows, 0 errors"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~6/POSN_ASTTAX.TO-S1-1.unknown-is-not-equity.proof_of_spec.json S1-AC1,S1-AC2,S1-AC3,S1-AC4,S1-AC5,S1-AC6",
+      "result": "RECORDED IN THE COMMIT MESSAGE AND THE WORKER REPORT -- run from inside this worktree, rc read as the only verdict."
+    }
+  ]
+}

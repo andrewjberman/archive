@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rf-5",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-5.the-incomplete-read-signal.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-5.the-incomplete-read-signal.md",
+    "group": "OTHER",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ],
+      "deploy_evidence": "THE INCOMPLETE-READ SIGNAL. `read_rank_series` read `Responses` from BatchGetItem and NOTHING ELSE, so keys returned in `UnprocessedKeys` were dropped on the floor: a partially-processed read produced a shorter series with no error, no completeness field and no retry, and was indistinguishable from a genuinely empty producer day. THREE THINGS ADDED. (1) A BOUNDED RETRY: `_BATCH_GET_MAX_ATTEMPTS` (default 4, env knob) re-asks the unprocessed keys per chunk and then STOPS, recording what remains -- never re-asking forever and never dropping. (2) `_read_completeness()`, a record carrying `complete` as a machine-rejectable token beside its DENOMINATOR (requested/resolved/unresolved key counts, attempts_used, max_attempts) and a `reason` that states in words that the missing points are NOT evidence the producer wrote nothing. (3) A PER-TICKER `unresolved_point_count` on every series entry, because a single global flag cannot tell a page WHICH line it may trust when some tickers are whole and others are short. THE SAME SHAPE ON BOTH RETURN PATHS, including the no-tickers early return: a completeness field present on one branch and absent on another teaches consumers to use .get() and treat missing as fine. NO SLEEP BETWEEN ATTEMPTS, AND THAT IS A DECISION RECORDED IN THE SOURCE, NOT AN OMISSION: this adapter sits behind an API Gateway HTTP API with a 29-second integration ceiling, so a backoff long enough to outlast real throttling converts a partial read the caller could have rendered into a 504 that tells it nothing."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_unprocessed_keys.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deploy_evidence": "NEW, 7 tests, one per required response shape plus three that guard the distinction itself. The fake is a SCRIPTED resource -- a test says 'unprocessed, then processed' and the adapter actually walks that path -- and it RECORDS EVERY CALL, because the original defect was invisible partly because the old fake recorded one call and nobody asserted on the count, so a missing retry looked exactly like a retry that was not needed. The four shapes: fully processed (complete, 1 call), genuinely absent (complete, zero points, 1 call -- a quiet day must NOT read as a broken read), partially processed (2 calls, attempts_used 2, complete, and the retried point collected), retry-exhausted (incomplete, denominator preserved, bounded at _BATCH_GET_MAX_ATTEMPTS). Plus the load-bearing one: shape 2 and shape 4 both yield ZERO points and must remain distinguishable on both `complete` and `unresolved_point_count`."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a NON-ZERO number of tests selected and all passing. \u26d4 `no tests ran` IS THE MEASURED DEFECT -- sixteen tests pass today precisely because none of them returns `UnprocessedKeys` -- and a zero selection is NOT met. The four shapes (processed / genuinely-absent / partially-processed / retry-exhausted) must each have a test, and a selection of fewer than four is NOT met",
+      "method": "test_suite",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ -q -k \"unprocessed or incomplete or retry or exhaust\" 2>&1 | tail -5",
+      "output_evidence": "`timeout 110 python -m pytest lib/research/api/tests/ -q -k \"unprocessed or incomplete or retry or exhaust\" | tail -5` ->\n  7 passed, 40 deselected in 0.04s        (rc 0)\nNON-ZERO SELECTION AND ALL PASSING. `no tests ran` is the measured defect and would have been a zero selection; 7 of 47 were selected and 7 of 7 pass.\nTHE FOUR SHAPES EACH HAVE THEIR OWN TEST, which the clause requires and a selection of fewer than four would fail:\n  1 FULLY PROCESSED     test_shape_1_fully_processed_reports_complete_and_no_unresolved\n  2 GENUINELY ABSENT    test_shape_2_genuinely_absent_is_complete_with_zero_points\n  3 PARTIALLY PROCESSED test_shape_3_partially_processed_is_retried_and_then_complete\n  4 RETRY-EXHAUSTED     test_shape_4_retry_exhausted_reports_incomplete_and_keeps_the_denominator\nand three beyond the four: test_shape_4_is_bounded_and_does_not_re_ask_forever, test_absent_and_incomplete_are_distinguishable_from_each_other, and test_the_no_tickers_path_carries_the_same_completeness_shape.\nTHE SHAPE-2 vs SHAPE-4 PAIR IS THE ONE THAT MATTERS: both produce ZERO points, and before this cell they were byte-identical to a consumer. The dedicated test asserts they differ on `read_completeness.complete` AND on the per-ticker `unresolved_point_count`, so if they ever collapse back into one another it fails whatever else passes.\nPROVEN ABLE TO FAIL, not assumed -- see controls.mutant.",
+      "denominator": "7 tests selected of 47 collected, 7 of 7 passing; 4 of the 7 are the four required response shapes, one test each.",
+      "status": "PASS",
+      "expect": "[1-9]\\d* passed[\\s\\S]*FULLY PROCESSED[\\s\\S]*GENUINELY ABSENT[\\s\\S]*PARTIALLY PROCESSED[\\s\\S]*RETRY-EXHAUSTED",
+      "status_reason": "MET ON BOTH LIMBS THE CLAUSE NAMES. The selection is NON-ZERO (7, against `no tests ran` as the measured defect) and all pass; and the four shapes each have their own test, so a selection of fewer than four is not in question. The two that carry the cell are shape 3 -- where `len(resource.calls) == 2` is what proves the retry actually re-asked rather than the key happening to arrive -- and shape 4, where the read stops at the bound and reports the denominator instead of going silent. A dedicated test holds shape 2 and shape 4 apart: both yield zero points, and before this cell they were byte-identical to a consumer."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a PRINTED DENOMINATOR, with hits in BOTH the CODE band (the handler acts on the field) and the TEST band (a fake returns it). \u26d4 Hits only in TEST means the fake was taught the shape and the handler still ignores it, and is NOT met. Hits only in CODE means nothing exercises the branch, and is NOT met either. A denominator of 0 files scanned is OUT-OF-CORPUS, not a zero, and is NOT met",
+      "method": "command",
+      "invocation": "timeout 110 comp-find \"UnprocessedKeys\" lib/research --limit 20",
+      "output_evidence": "`timeout 110 comp-find \"UnprocessedKeys\" lib/research --limit 20` ->\n  DENOMINATOR: 9 hit(s) across 88 file(s) scanned in scope [corpus=all] | 49 EPHEMERAL-FLOOR, NOT searched (--corpus raw reads these)\n  BANDS (true totals, not this page): SURFACED=5 TEST=4\n  PAGE 1 of 1 (showing 9 of 9)\nBOTH SIDES ARE PRESENT, which is what the clause's two refusals actually test:\n  HANDLER SIDE (5, band SURFACED = 'plain content match in first-party source'), and TWO of them are EXECUTABLE rather than prose -- scoped_amgt.py:467 `((response.get(\"UnprocessedKeys\") or {}).get(METRICS_TABLE) or {}).get(\"Keys\") or []`, the read itself, and :385, which builds the incomplete-read reason string. The other three (:124, :361, :460) are a comment and docstrings.\n  EXERCISE SIDE (4, band TEST), including test_unprocessed_keys.py:79 `return {\"Responses\": {table: []}, \"UnprocessedKeys\": {table: {\"Keys\": list(keys)}}}` -- the fake that returns the shape the old fixtures never produced.\nSo 'hits only in TEST' is refuted and 'hits only in CODE' is refuted, and the denominator is 88 files rather than 0.\nTHE LITERAL BAND NAME CANNOT BE PRODUCED BY THE INVOKED TOOL AND I AM NOT CLAIMING IT WAS. `comp-find --help` prints its whole vocabulary: `--band B  show only band B (HEAD|DEF|SURFACED|CONFIG|TEST|DOC|COLD)`. There is NO CODE band. `CODE` is `comp-read --enumerate`'s band (DOCSTRING|COMMENT|DEF|CODE), a different tool. The criterion invokes comp-find and grades on comp-read's vocabulary. Row AMGT_RESAPP-Z-W11-S7.",
+      "denominator": "9 hit(s) across 88 file(s) scanned [corpus=all], 49 ephemeral-floor not searched; SURFACED=5 (2 executable, 3 prose) and TEST=4.",
+      "status": "PASS",
+      "expect": "DENOMINATOR: [1-9]\\d* hit\\(s\\) across [1-9]\\d* file\\(s\\) scanned[\\s\\S]*SURFACED=[1-9]\\d*[\\s\\S]*TEST=[1-9]\\d*[\\s\\S]*scoped_amgt\\.py:467",
+      "status_reason": "MET ON THE TEST THE CLAUSE ACTUALLY MAKES; ITS LITERAL BAND NAME CANNOT BE PRODUCED BY THE INVOKED TOOL, AND THAT IS DISCLOSED RATHER THAN PAPERED OVER. The clause's two refusals are both refuted with a printed non-zero denominator: not TEST-only (5 first-party-source hits, including the handler's live read at scoped_amgt.py:467) and not source-only (4 TEST hits, including the fake at test_unprocessed_keys.py:79 that returns the shape the old fixtures never produced). This is the best-designed clause in the order -- two-sided, so neither half can be faked alone. NOT MET LITERALLY: `comp-find` has NO CODE band. Its vocabulary, from its own --help, is HEAD|DEF|SURFACED|CONFIG|TEST|DOC|COLD; first-party source bands SURFACED. `CODE` is `comp-read --enumerate`'s band (DOCSTRING|COMMENT|DEF|CODE) -- the criterion invokes one tool and grades on another's vocabulary. I did NOT swap the instrument to produce the label: reaching for comp-read to get a literal CODE band would yield a green nobody could reproduce with the invocation the order names, which is worse than the discrepancy. Row AMGT_RESAPP-Z-W11-S7, same class as Z-W11-S3 and a different mechanism. 3.0.0_SA_CVO~Z may re-grade on the literal reading; the raw output and both readings are recorded so that needs no re-measurement. ONE THING THE BAND COUNT ALONE WOULD HAVE HIDDEN: of the 5 source-side hits only TWO are executable (:467 the read, :385 the reason string); three are a comment and docstrings. The clause's real requirement is that the handler ACTS on the field, and that is evidenced by :467 and by AC1's behavioural tests, not by a band label."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "`MENTIONS_UNPROCESSED` at least 1 and `HAS_REFUSAL_OR_RETRY=True`. \u26d4 THIS IS A WEAK CRITERION ON PURPOSE AND YOU MUST SAY SO IN YOUR INSTANCE: a token census over source proves the WORDS are present, never that the BRANCH behaves. It exists only as a cheap cross-check on AC1/AC2, and if it is the strongest evidence you can produce for this cell then the cell is not done. Record that judgment rather than letting three green token counts stand in for behaviour",
+      "method": "command",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; import inspect; src=inspect.getsource(s); print('MENTIONS_UNPROCESSED=%d' % src.count('UnprocessedKeys')); print('HAS_REFUSAL_OR_RETRY=%s' % bool(('incomplete' in src.lower()) or ('retry' in src.lower())))\"",
+      "output_evidence": "`timeout 110 python -c \"... src=inspect.getsource(s); print('MENTIONS_UNPROCESSED=%d' % src.count('UnprocessedKeys')); print('HAS_REFUSAL_OR_RETRY=%s' % bool(('incomplete' in src.lower()) or ('retry' in src.lower())))\"` ->\n  MENTIONS_UNPROCESSED=5\n  HAS_REFUSAL_OR_RETRY=True\nBoth limbs met: at least 1 mention, and the refusal/retry token present.\nAND THIS IS A WEAK CRITERION, WHICH THE CLAUSE ORDERS ME TO SAY AND WHICH I AM SAYING WITHOUT QUALIFICATION. A token census over source proves the WORDS are present and NOTHING about behaviour. Every one of these two numbers would read exactly the same if `_read_completeness` always returned `complete: True`, if the retry loop re-asked zero times, or if the handler parsed `UnprocessedKeys` and then discarded it -- the count is 5 and the boolean is True in all of those broken worlds. It is a cheap cross-check on AC1/AC2 and it is not evidence of the cell.\nWHAT THE ACTUAL EVIDENCE IS, so this row is not mistaken for it: the seven behavioural tests under AC1, which drive a scripted fake through all four response shapes and assert on the RESULT -- call counts (1 for a complete read, 2 for one retry, exactly _BATCH_GET_MAX_ATTEMPTS when exhausted), the completeness record's own fields, and the per-ticker unresolved denominator. And the mutation control, which removes the UnprocessedKeys read and turns 4 of those 7 RED while these three token counts would not move at all. If AC3 were the strongest evidence available for this cell, the cell would not be done.",
+      "denominator": "2 of 2 token limbs satisfied: MENTIONS_UNPROCESSED=5 (>= 1) and HAS_REFUSAL_OR_RETRY=True. 0 of the 2 measure behaviour.",
+      "status": "PASS",
+      "expect": "MENTIONS_UNPROCESSED=[1-9]\\d*[\\s\\S]*HAS_REFUSAL_OR_RETRY=True[\\s\\S]*WEAK CRITERION",
+      "status_reason": "MET, AND IT IS WEAK, AND THE CLAUSE ORDERS ME TO SAY SO RATHER THAN LET A GREEN TOKEN COUNT STAND IN FOR BEHAVIOUR. Both limbs are satisfied. They prove the WORDS are present and nothing else: MENTIONS_UNPROCESSED=5 and HAS_REFUSAL_OR_RETRY=True would read EXACTLY THE SAME if `_read_completeness` always returned complete, if the retry loop re-asked zero times, or if the handler parsed UnprocessedKeys and discarded it. THE DISCRIMINATING TEST OF THAT, run rather than asserted: the mutation control that removes the UnprocessedKeys read turns 4 of AC1's 7 tests RED while these three token counts DO NOT MOVE AT ALL -- the mutant still mentions UnprocessedKeys 5 times in its comments and docstrings. So AC3 is green in the broken world. THE CELL'S ACTUAL EVIDENCE IS AC1's seven behavioural tests, which drive a scripted fake through all four response shapes and assert on call counts, the completeness record and the per-ticker unresolved denominator. If AC3 were the strongest evidence available here, this cell would not be done -- and it is not the strongest."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a FAILURE or COLLECTION ERROR, AND `RESTORED_BYTE_IDENTICAL`. Working-tree snapshot, never `git checkout --` (row `Z-W10-S1`). Either half missing is NOT met",
+      "method": "command",
+      "invocation": "cp lib/research/api/scoped_amgt.py /tmp/rf5.pre; printf \"\\nBROKEN_SENTINEL_RF5 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf5.pre lib/research/api/scoped_amgt.py; cmp -s /tmp/rf5.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "output_evidence": "pytest tail WITH the sentinel appended:\n  ERROR lib/research/api/tests/test_unprocessed_keys.py - ZeroDivisionError: division by zero\n  !!!!!!!!!!!!!!!!!!! Interrupted: 5 errors during collection !!!!!!!!!!!!!!!!!!!\n  5 errors in 0.21s\nRESTORED_BYTE_IDENTICAL\nBaseline immediately before: `47 passed in 0.10s`. So the suite goes green -> 5 collection errors on the sentinel alone; FIVE because five test modules now import this file (test_scoped_amgt.py, test_scoped_amgt_mount.py, test_fiscal_scope_contract.py, test_corrected_overlay_wiring.py, test_unprocessed_keys.py).\nRESTORE IS FROM A WORKING-TREE SNAPSHOT (/tmp/rf5.pre), never `git checkout --` (row Z-W10-S1). INDEPENDENTLY CORROBORATED: sha256 of the restored file == sha256 of the pre-mutation insurance copy .scratch/INSURANCE_rf5.py == 67ff2052c34a8a14a06667cd8526f02a979b666904981540b8d505b4fbd5b585.",
+      "denominator": "47 tests collected clean; 5 collection errors with the sentinel present; restore compared byte-for-byte and corroborated by sha256 against an independent pre-mutation snapshot.",
+      "status": "PASS",
+      "expect": "(?:Interrupted: \\d+ errors? during collection|ZeroDivisionError)[\\s\\S]*RESTORED_BYTE_IDENTICAL",
+      "status_reason": "BOTH HALVES MET. The sentinel is caught (47 passed -> 5 collection errors on the sentinel alone), so AC1's suite genuinely sees this file. RESTORED_BYTE_IDENTICAL printed, from a WORKING-TREE snapshot; `git checkout --` appears nowhere in this task order. Corroborated by a SECOND instrument because the criterion's own cmp compares against the snapshot it restored from and can only prove self-consistency: an insurance copy taken before the criterion ran has sha256 67ff2052c34a8a14a06667cd8526f02a979b666904981540b8d505b4fbd5b585, equal to the restored file's."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "<criterion id=\"AC5\" cell_refs=\"AMGT-rf-5\" judgment=\"true\"/> -- declared judgment with NO children: no <invocation>, no <expect>.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- no invocation exists to run; the order declares this criterion judgment-only and self-closing.",
+      "output_evidence": "NO VERDICT IS RECORDED BY THIS WORKER, BY INSTRUCTION. Cited at org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-5.the-incomplete-read-signal.md @ c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5. Material for the L9 grading: a bounded retry plus an explicit incomplete-read record now handle UnprocessedKeys; the unresolved denominator is preserved globally and PER TICKER; all four response shapes are exercised; and the shape-2/shape-4 distinction -- a genuinely empty producer day versus a read that did not complete -- is asserted directly. STATED BECAUSE THE CELL REQUIRES IT: NO LIVE THROTTLING EVENT WAS MEASURED. This is a transport-handling gap found BY CONSTRUCTION from the BatchGetItem contract, not an observed outage, and nothing here is described as a missing producer day.",
+      "denominator": "N/A -- a judgment criterion has no instrument and no denominator. 1 of 5 criteria here is judgment-graded; 4 of 5 are mechanical and recorded above.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "JUDGMENT CRITERION -- declared `judgment=\"true\"` with NO children. The order: 'A judgment criterion carries `judgment=\"true\"`, no children and NO verdict from you: record it `UNVERIFIABLE-BY-INSTRUMENT` with a `status_reason` naming `3.0.0_SA_CVO~Z`, which grades it at L9. `PASS` or `FAIL` on a judgment row is INVALID.' Graded at L9 by 3.0.0_SA_CVO~Z. This worker records no verdict and argues for none."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutation controls. (1) THE ORDER'S OWN, AC4: BROKEN_SENTINEL_RF5 = 1/0 appended to lib/research/api/scoped_amgt.py, suite re-run, restored from a WORKING-TREE snapshot taken with cp before the mutation. (2) ON THE UNPROCESSED-KEYS HANDLING ITSELF: the `pending = ((response.get(\"UnprocessedKeys\") ...))` read was replaced with `pending = []` -- the EXACT pre-cell silence, the field parsed by nobody -- and the new suite re-run, then restored from .scratch/rf5_wire.pre. This second control is also what measures AC3's weakness: it produces a world where the behaviour is broken and AC3's token counts are unchanged.",
+      "expected": "(1) the suite turns RED on the sentinel alone and the file returns byte-identical. (2) the four-shape suite turns RED, and specifically test_absent_and_incomplete_are_distinguishable_from_each_other must be among the failures -- if only the retry-count tests failed, the suite would be checking that a retry happened without checking that the two zero-point states remain distinguishable, which is the defect itself.",
+      "observed": "(1) FIRED: 47 passed -> `ZeroDivisionError: division by zero` / `Interrupted: 5 errors during collection` / `5 errors in 0.21s`, then RESTORED_BYTE_IDENTICAL, corroborated by sha256 67ff2052c34a8a14a06667cd8526f02a979b666904981540b8d505b4fbd5b585 against an independent pre-mutation copy. (2) FIRED, 4 failed / 3 passed, AND THE DISTINCTION TEST IS AMONG THEM: test_shape_3_partially_processed_is_retried_and_then_complete -- `expected exactly one retry, saw 1 call(s)`; test_shape_4_retry_exhausted_reports_incomplete_and_keeps_the_denominator -- `assert True is False` (it reported COMPLETE on an exhausted read); test_shape_4_is_bounded_and_does_not_re_ask_forever -- `made 1 calls against a bound of 4`; and test_absent_and_incomplete_are_distinguishable_from_each_other -- `assert True != True`, which IS the defect: a genuinely empty day and an incomplete read reporting the same thing. AC3's token counts were unchanged in that same mutant world. Restored, cmp silent, sha256 67ff2052c34a8a14a06667cd8526f02a979b666904981540b8d505b4fbd5b585.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The four-shape suite and the full api suite run repeatedly across AC1, AC4 and the handling mutation control; the AC2 census and the AC3 token count each run more than once.",
+      "observed": "AC1 selection 7 passed / 40 deselected on every run. Full suite 47 passed on every clean run, 5 collection errors on every sentinel run, 4 failed / 3 passed on every handling-mutant run. AC2 census 9 hits across 88 files, SURFACED=5 TEST=4, stable. AC3 MENTIONS_UNPROCESSED=5 and HAS_REFUSAL_OR_RETRY=True, stable -- including in the mutant world, which is the point of recording it.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Exponential backoff or any sleep between retry attempts.",
+      "reason": "DELIBERATE, recorded in the source beside the constant. This adapter sits behind an API Gateway HTTP API with a 29-second integration ceiling, so a backoff long enough to outlast real throttling converts a PARTIAL READ THE CALLER COULD HAVE RENDERED into a 504 carrying no information. The retry is immediate and bounded; the honest report of what did not complete carries the weight. Flagged for revisiting by anyone who actually measures a throttling event."
+    },
+    {
+      "item": "Raising an AdapterError on an incomplete read (the 'explicit incomplete-read refusal' the cell offers as an alternative).",
+      "reason": "The cell permits EITHER a bounded retry OR an explicit refusal. A raise was rejected because it DESTROYS the partial data and the denominator: the cell also requires 'preserve the unresolved denominator so a consumer can tell this key has no data from this read did not complete', and an exception carries neither the points that did arrive nor the count of those that did not. The bounded retry plus a machine-rejectable completeness record satisfies both halves; silence would satisfy neither."
+    },
+    {
+      "item": "Any claim that a throttling or outage event occurred.",
+      "reason": "NO LIVE THROTTLING EVENT WAS MEASURED, and the cell names that misdescription explicitly. This is a transport-handling gap found by construction from the BatchGetItem contract. Every fake in the new test file is an explicit construction of a shape the AWS API permits; none is evidence the shape has occurred on this table."
+    },
+    {
+      "item": "Swapping AC2's invocation to comp-read to obtain a literal CODE band.",
+      "reason": "The order names comp-find. Changing the instrument to make a classification label appear would produce a green nobody could reproduce with the named invocation -- worse than the discrepancy it hides. Recorded as row AMGT_RESAPP-Z-W11-S7 instead."
+    },
+    {
+      "item": "Any change to read_rankings or read_point.",
+      "reason": "Neither uses BatchGetItem -- read_rankings is a Query on the GSI and read_point is a GetItem, and neither API returns UnprocessedKeys. The cell is scoped to the batched series read and so is this change."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W11-S7"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest -k (AC1, the four shapes)",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ -q -k \"unprocessed or incomplete or retry or exhaust\" 2>&1 | tail -5",
+      "result": "7 passed, 40 deselected, rc 0; one test per required shape plus three guarding the distinction"
+    },
+    {
+      "tool": "comp-find (AC2)",
+      "invocation": "timeout 110 comp-find \"UnprocessedKeys\" lib/research --limit 20",
+      "result": "9 hit(s) across 88 file(s) scanned, BANDS SURFACED=5 TEST=4; handler read at scoped_amgt.py:467, fake at test_unprocessed_keys.py:79"
+    },
+    {
+      "tool": "comp-find --help (grounds row Z-W11-S7)",
+      "invocation": "timeout 60 comp-find --help | grep -E '--band'",
+      "result": "--band B  show only band B (HEAD|DEF|SURFACED|CONFIG|TEST|DOC|COLD) -- no CODE band exists in the invoked tool"
+    },
+    {
+      "tool": "python token census (AC3, the deliberately weak one)",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; import inspect; src=inspect.getsource(s); print('MENTIONS_UNPROCESSED=%d' % src.count('UnprocessedKeys')); print('HAS_REFUSAL_OR_RETRY=%s' % bool(('incomplete' in src.lower()) or ('retry' in src.lower())))\"",
+      "result": "MENTIONS_UNPROCESSED=5, HAS_REFUSAL_OR_RETRY=True -- and UNCHANGED in the mutant world where the behaviour is broken"
+    },
+    {
+      "tool": "pytest mutation control (AC4)",
+      "invocation": "cp lib/research/api/scoped_amgt.py /tmp/rf5.pre; printf \"\\nBROKEN_SENTINEL_RF5 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf5.pre lib/research/api/scoped_amgt.py; cmp -s /tmp/rf5.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "result": "5 errors during collection with the sentinel; RESTORED_BYTE_IDENTICAL"
+    },
+    {
+      "tool": "pytest mutation control on the UnprocessedKeys handling (not required by the order)",
+      "invocation": "replace the UnprocessedKeys read with `pending = []`, then pytest lib/research/api/tests/test_unprocessed_keys.py -q",
+      "result": "4 failed / 3 passed, including `assert True != True` on the absent-vs-incomplete distinction; restored from .scratch/rf5_wire.pre"
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rf-3",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-3.the-fiscal-row-matcher.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-3.the-fiscal-row-matcher.md",
+    "group": "OTHER",
+    "vintage_commit": "c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/checkface/scopes.py",
+      "kind": "script",
+      "commit_or_etag": "ebcfc4051f241b81ec770935f0addd79cce89bca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW. THE MODEL-BLOCK SCOPE CONTRACT -- the one declaration of what a figure's `scope` may be, for every reader of a landed model_block.json. Declares SCOPE_HEADER and SCOPE_FISCAL_YEAR_LINE_ITEM plus MODEL_BLOCK_SCOPES, and `unknown_scopes(figures)` which answers by SUBTRACTION over the observed set (Rule 24(i)) rather than by a forward list. PLACED IN checkface/ AND NOT IN THE API ADAPTER because the check face and the read adapter are two consumers of the same artifact -- a constant in either would be the other's literal. THE CONTRACT IS THE PRODUCER'S: the vocabulary is transcribed from integrations/bloomberg/research/model_block_pull.py:392/400/421/426, the only thing that writes the field, and the transcription is NOT trusted on its word -- a test parses that producer's source and asserts set equality. A DELIBERATE NON-ADDITION is documented in the file: no second `figures_in_scope()` matcher that raises on an undeclared scope, because two matchers over one artifact reintroduces this very defect one layer up, and because returning [] for a scope nobody writes is CORRECT -- the defect was that nobody compared the QUESTION against the contract, which is a test-time property."
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "ebcfc4051f241b81ec770935f0addd79cce89bca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THE REPAIR ITSELF, three lines. read_thesis_bundle asked `_figures(model_block, \"fiscal_year\")` (:499) against an artifact whose rows carry `fiscal_year_line_item` -- zero matches, 13 headers and ZERO fiscal figures and ZERO checks returned for 183 real rows, and nothing failed because an empty list is a perfectly good list. All three call sites (:485 in read_security_overlay, :498 and :499 in read_thesis_bundle) now take their scope from the contract. MEASURED AFTERWARDS: the module holds NO scope literal of its own -- `comp-read lib/research/api/scoped_amgt.py --enumerate 'fiscal_year\"|\"header\"|fiscal_year_line_item'` returns 0 hit(s) across 743 lines / 41 sections. `_figures` itself is UNCHANGED and remains the tolerant equality filter, deliberately: AC3's negative control calls it with a bogus scope and requires a COUNT of 0, so making it raise would break the order's own control."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_fiscal_scope_contract.py",
+      "kind": "test",
+      "commit_or_etag": "ebcfc4051f241b81ec770935f0addd79cce89bca",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW, 9 tests. Asserts the fiscal count is 183 and not zero (the criterion this cell was cut for), pins the 196 denominator first, pins HEADER at 13, and asserts 196 figures in -> 196 check rows out. TIES THE CONTRACT TO BOTH ENDS rather than restating it a third time: to the PRODUCER by parsing model_block_pull.py for the `\"scope\": \"...\"` values it emits and asserting set equality in both directions with the two difference sets named; and to the LANDED ARTIFACT by subtraction over the real block. Carries the NON-VACUOUS negative control AC3 was meant to be -- bogus scope 0 AND the historically wrong 'fiscal_year' still 0, both against a real 196-figure block. Refuses a vacuous parse (a producer scan returning the empty set fails loudly rather than passing against anything), and refuses a fixture fallback if the artifact cannot be read."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the suite passes, INCLUDING a new test that asserts the fiscal-figure count for the populated model is the measured 183 and not zero. \u26d4 A green suite that contains no test naming a fiscal-row COUNT is NOT met -- the previous attempt's sixteen tests were green over a matcher returning zero, because nothing asserted a count",
+      "method": "test_suite",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -4",
+      "output_evidence": "`timeout 110 python -m pytest lib/research/api/tests/ -q | tail -4` -> `31 passed in 0.07s`, rc 0.\nTHE NEW TEST THE CLAUSE REQUIRES, BY NAME AND BY NUMBER: lib/research/api/tests/test_fiscal_scope_contract.py::test_fiscal_figure_count_is_183_and_not_zero asserts `len(bundle['fiscal_year_figures']) == 183` -- a COUNT, not 'non-empty'. Beside it: test_landed_artifact_carries_the_measured_figure_counts pins the 196 denominator first (so a thinner artifact cannot make the other counts pass against a smaller truth), test_header_count_did_not_move pins HEADER at 13, and test_every_fiscal_figure_gets_a_check_and_none_is_dropped asserts 196 figures in -> 196 check rows out.\n31 = 17 pre-existing + 5 from rf-2's mount drift guard + 9 new here (8 named + 1 parametrised into 2 cases, less the 1 that is the parametrisation's base).\nPROVEN ABLE TO FAIL, not assumed -- see controls.mutant: setting the contract back to the defective literal turns 5 of these RED, including the producer tie.",
+      "denominator": "31 of 31 tests passed in lib/research/api/tests/; the count-bearing test asserts 183 of 183 fiscal figures against a pinned 196-figure artifact.",
+      "status": "PASS",
+      "expect": "31 passed[\\s\\S]*test_fiscal_figure_count_is_183_and_not_zero[\\s\\S]*== 183",
+      "status_reason": "MET, INCLUDING THE CLAUSE'S DISCRIMINATOR. The suite passes AND it now contains a test naming a fiscal-row COUNT -- which is the whole clause: 'A green suite that contains no test naming a fiscal-row COUNT is NOT met -- the previous attempt's sixteen tests were green over a matcher returning zero, because nothing asserted a count.' The assertion is `== 183`, an equality on a measured denominator, not a truthiness check; a non-empty-but-wrong result fails it. The 196 total is pinned separately so that a thinner artifact cannot make 183 pass relative to a smaller truth."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "`FISCAL` STRICTLY GREATER THAN ZERO and consistent with the measured 183 `fiscal_year_line_item` rows; `HEADER` remains 13. \u26d4 `FISCAL=0` is the exact defect and is NOT met. \u26d4 AND A `HEADER` THAT MOVED IS ALSO NOT MET: the headers already matched, so changing their count means the fix broke a working path. If the artifact cannot be read in this environment, record the read failure verbatim as the output -- do NOT substitute a fixture and report a number, which is the stand-in shape that failed round 6",
+      "method": "command",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; b=s.read_thesis_bundle('BABA_US_Equity'); h=len(b.get('header_figures') or []); f=len(b.get('fiscal_year_figures') or []); print('HEADER=%d FISCAL=%d TOTAL=%d' % (h,f,h+f))\"",
+      "output_evidence": "THE AMENDED INVOCATION, VERBATIM:\n  HEADER=13 FISCAL=183 TOTAL=196        (exit code 0)\nMET on every limb the clause names: FISCAL is STRICTLY GREATER THAN ZERO and is exactly the measured 183 fiscal_year_line_item rows, and HEADER REMAINS 13 -- the headers already matched before this repair, so an unmoved 13 is the evidence the fix did not break a working path. TOTAL 196 equals the artifact's own figure count.\nAGAINST THE PRE-REPAIR WORLD: the same call returned HEADER=13 FISCAL=0 before the scope contract landed, and 183 of 183 fiscal rows carried no check face at all.\nON THE AMENDMENT ITSELF, because the issuing seat asked to be held to it: the ONLY change to AC2 is the security key, 'BABA US Equity' -> 'BABA_US_Equity'. The expectation text is otherwise byte-identical -- FISCAL strictly greater than zero, consistent with 183, HEADER remains 13, and the no-fixture-substitution clause all stand. THIS RAISES THE BAR RATHER THAN LOWERING IT: the criterion went from ALWAYS-FAILS (it could not read the artifact under any implementation, and its failure returned the same HEADER=0 FISCAL=0 as the unrepaired matcher) to one that passes ONLY IF the scope repair is real. Nothing was weakened; a criterion that could not discriminate now can. Row AMGT_RESAPP-Z-W11-S4 stays on the record as filed.",
+      "denominator": "183 of 183 fiscal_year_line_item rows and 13 of 13 header rows out of the artifact's 196 figures; 196 of 196 check-face rows.",
+      "status": "PASS",
+      "expect": "HEADER=13 FISCAL=183 TOTAL=196\\s+\\(exit code 0\\)",
+      "status_reason": "MET ON EVERY LIMB, AGAINST THE AMENDED INVOCATION. FISCAL=183 is strictly greater than zero and is exactly the measured count, not merely non-empty; HEADER=13 is unmoved, which is the clause's own guard that the repair did not damage the path that already worked; TOTAL=196 equals the artifact's figure count. WHAT MADE IT PASSABLE was the issuing seat's amendment 1, correcting the security key from 'BABA US Equity' to 'BABA_US_Equity' after row AMGT_RESAPP-Z-W11-S4 was filed and accepted. THE WORK ITSELF DID NOT CHANGE between the FAIL and this PASS: the scope contract, the three call sites and the tests were all committed at ebcfc4051f, and the underscore-form measurement recorded there as a labelled diagnostic (HEADER=13 FISCAL=183 TOTAL=196 CHECKS=196) is byte-for-byte what the amended criterion now returns as its own output. ON WHETHER THE AMENDMENT LOWERED A BAR, which the issuing seat asked to be held to: IT DID NOT. The only edit is the key; the expectation text is otherwise byte-identical, including the no-fixture-substitution clause. The criterion moved from ALWAYS-FAILS -- unreadable under any implementation, and failing with the same HEADER=0 FISCAL=0 signature as the defect it grades -- to one that passes only if the scope repair is real. A criterion that could not discriminate now can, which is a repair. Row Z-W11-S4 stays on the record exactly as filed."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "BOTH arms, and the POSITIVE one is what makes the negative one evidence: `POSITIVE` STRICTLY GREATER THAN ZERO (183 on the landed artifact) AND `WRONG_SCOPE=0`. A scope that does not exist must match NOTHING. STOP: `WRONG_SCOPE` non-zero means the matcher was loosened into matching everything, which would make AC2 pass for the wrong reason, and is NOT met. STOP: AND `POSITIVE=0` IS ALSO NOT MET EVEN WITH `WRONG_SCOPE=0` -- a zero beside a zero means the block was never read, so the negative control proves nothing. That is the amended defect, not a pass. AMENDED 2026-09-12 ~22:3xZ; see amendment 1 below",
+      "method": "command",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; m=s.read_model_block('BABA_US_Equity'); print('POSITIVE=%d WRONG_SCOPE=%d' % (len(s._figures(m,'fiscal_year_line_item') or []), len(s._figures(m,'not_a_real_scope_NOPE_xyz') or [])))\"",
+      "output_evidence": "THE AMENDED INVOCATION, VERBATIM:\n  POSITIVE=183 WRONG_SCOPE=0        (exit code 0)\nBOTH ARMS MET, AND THE POSITIVE ONE IS WHAT MAKES THE NEGATIVE ONE EVIDENCE. POSITIVE=183 proves the block was actually read and the matcher actually matches; WRONG_SCOPE=0 then proves a scope nobody writes matches NOTHING -- so the zero is a genuine refusal over 196 real figures, not an empty input. Had the repair been 'loosen the matcher', WRONG_SCOPE would read 196.\nWHAT THE ORIGINAL PRINTED, for the contrast: `WRONG_SCOPE=0` alone, produced by filtering `b.get('model_block')` -- a key read_thesis_bundle does not return -- so the input was always None and the expected token printed for EVERY possible matcher.\nON THE AMENDMENT ITSELF: it reads the block directly AND adds a POSITIVE arm whose zero is explicitly NOT met even beside WRONG_SCOPE=0. THIS IS STRICTLY HARDER THAN WHAT IT REPLACED -- the criterion went from UNFAILABLE to carrying its own positive control, which is the one thing that could have caught it. No expectation was weakened. Row AMGT_RESAPP-Z-W11-S5 stays on the record as filed.",
+      "denominator": "POSITIVE 183 of 196 figures matched the declared fiscal scope; WRONG_SCOPE 0 of the same 196 matched an undeclared scope. Both arms over ONE loaded block, so the zero is a refusal and not an empty input.",
+      "status": "PASS",
+      "expect": "POSITIVE=[1-9]\\d* WRONG_SCOPE=0",
+      "status_reason": "BOTH ARMS MET, AND THE CRITERION CAN NOW FAIL. POSITIVE=183 proves the block was read and the matcher matches; WRONG_SCOPE=0 then proves an undeclared scope matches nothing over those same 196 figures. Had the repair been 'loosen the matcher', WRONG_SCOPE would read 196 and this would fail. THE ORIGINAL COULD NOT FAIL, which is why row AMGT_RESAPP-Z-W11-S5 was filed: it filtered `b.get('model_block')`, a key read_thesis_bundle does not return, so the input was always None and the expected token printed for every possible matcher. ON WHETHER THE AMENDMENT LOWERED A BAR: IT DID THE OPPOSITE, and this is the clearer of the two. It reads the block directly AND adds a POSITIVE arm whose zero is explicitly NOT met even beside WRONG_SCOPE=0 -- so the amended criterion refuses the exact output the original accepted. Strictly harder. Row Z-W11-S5 stays as filed."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a FAILURE or COLLECTION ERROR from pytest, AND `RESTORED_BYTE_IDENTICAL`. The restore is from a WORKING-TREE snapshot, never `git checkout --` (row `Z-W10-S1`, which cost a peer ~90 lines while printing its expected number). Either half missing is NOT met",
+      "method": "command",
+      "invocation": "cp lib/research/api/scoped_amgt.py /tmp/rf3.pre; printf \"\\nBROKEN_SENTINEL_RF3 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf3.pre lib/research/api/scoped_amgt.py; cmp -s /tmp/rf3.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "output_evidence": "pytest tail WITH the sentinel appended:\n  ERROR lib/research/api/tests/test_scoped_amgt_mount.py - ZeroDivisionError: division by zero\n  !!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!\n  3 errors in 0.24s\nRESTORED_BYTE_IDENTICAL\nBaseline immediately before: `31 passed in 0.07s`. So 31-passed -> 3-collection-errors on the sentinel alone; the suite is not blind to this file. THREE errors because three test modules import it (test_scoped_amgt.py, test_scoped_amgt_mount.py, test_fiscal_scope_contract.py).\nRestore from a WORKING-TREE snapshot (/tmp/rf3.pre), never `git checkout --` (row Z-W10-S1). INDEPENDENTLY CORROBORATED: sha256 of the restored file == sha256 of the pre-mutation insurance copy .scratch/INSURANCE_rf3b.py == c1a2dee1b136ffd820b030e3c472036c8b35c75defa838ab724446631d258db2.",
+      "denominator": "31 tests collected clean; 3 collection errors with the sentinel present; restore compared byte-for-byte over the whole file and corroborated by sha256 against an independent pre-mutation snapshot.",
+      "status": "PASS",
+      "expect": "(?:Interrupted: \\d+ errors? during collection|ZeroDivisionError)[\\s\\S]*RESTORED_BYTE_IDENTICAL",
+      "status_reason": "BOTH HALVES MET. 31 passed -> 3 collection errors on the sentinel alone, so the suite the other criteria lean on genuinely sees this file. RESTORED_BYTE_IDENTICAL printed, from a WORKING-TREE snapshot; `git checkout --` appears nowhere in this task order, which is row Z-W10-S1's lesson. Corroborated by a SECOND instrument because the criterion's own cmp can only prove self-consistency with the snapshot it restored from: an insurance copy taken before the criterion ran has sha256 c1a2dee1b136ffd820b030e3c472036c8b35c75defa838ab724446631d258db2, equal to the restored file's."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "<criterion id=\"AC5\" cell_refs=\"AMGT-rf-3\" judgment=\"true\"/> -- declared judgment with NO children: no <invocation>, no <expect>.",
+      "method": "manual_read_with_citation",
+      "invocation": "NONE -- no invocation exists to run; the order declares this criterion judgment-only and self-closing.",
+      "output_evidence": "NO VERDICT IS RECORDED BY THIS WORKER, BY INSTRUCTION. Cited at org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rf-3.the-fiscal-row-matcher.md @ c9b1fc5ed09cdfcf8707b5b7d2ff28670371a0f5. The material for the L9 grading: the scope repair is landed and measurable (183 fiscal figures, 13 header, 196 checks, via the adapter's own key form), the contract is tied to the producer's source and to the landed artifact by tests, and TWO criteria of this order are themselves defective -- AC2 cannot pass as written (row Z-W11-S4) and AC3 cannot fail (row Z-W11-S5).",
+      "denominator": "N/A -- a judgment criterion has no instrument and no denominator. 1 of 5 criteria here is judgment-graded; 4 of 5 are mechanical and recorded above.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "JUDGMENT CRITERION -- declared `judgment=\"true\"` with NO children. The order: 'A judgment criterion carries `judgment=\"true\"`, no children and NO verdict from you: record it `UNVERIFIABLE-BY-INSTRUMENT` with a `status_reason` naming `3.0.0_SA_CVO~Z`, which grades it at L9. `PASS` or `FAIL` on a judgment row is INVALID.' Graded at L9 by 3.0.0_SA_CVO~Z. This worker records no verdict and argues for none."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutation controls. (1) THE ORDER'S OWN, AC4: BROKEN_SENTINEL_RF3 = 1/0 appended to lib/research/api/scoped_amgt.py, suite re-run, restored from a WORKING-TREE snapshot taken with cp before the mutation. (2) ONE THE ORDER DID NOT ASK FOR, ON THE CONTRACT I WROTE: a contract that has only ever been run in agreement with its artifact has never been tested. SCOPE_FISCAL_YEAR_LINE_ITEM was set back to the defective literal 'fiscal_year' -- i.e. the pre-repair world -- and the new suite re-run, then scopes.py restored from its own working-tree snapshot (.scratch/rf3_scopes.pre).",
+      "expected": "(1) the suite turns RED on the sentinel alone and the file returns byte-identical. (2) the contract tests turn RED and, critically, the PRODUCER TIE fires -- if only the count assertions failed, the contract would be pinned to a hardcoded number rather than to the producer, and a future producer rename would still slip through.",
+      "observed": "(1) FIRED: 31 passed -> `ZeroDivisionError: division by zero` / `Interrupted: 3 errors during collection` / `3 errors in 0.24s`, then RESTORED_BYTE_IDENTICAL, corroborated by sha256 against an independent pre-mutation copy (c1a2dee1b136ffd820b030e3c472036c8b35c75defa838ab724446631d258db2). (2) FIRED, 5 failed / 4 passed, and the producer tie is among them: test_declared_contract_equals_the_scopes_the_producer_emits -- `AssertionError: producer emits ['fiscal_year_line_item', 'header']; contract declares ...`; plus test_fiscal_figure_count_is_183_and_not_zero (`returned 0 fiscal figures, expected 183`), test_every_fiscal_figure_gets_a_check_and_none_is_dropped (`figures into the check face = 13, expected 196`), test_declared_contract_equals_the_scopes_the_landed_artifact_carries, and the parametrised per-scope count. Restored from .scratch/rf3_scopes.pre, cmp silent, sha256 7d87d8cc663fa23276c3442e55406f0036497fd2791b201889ab2d2e512eb500 matching the pre-mutation snapshot; full suites re-run 36 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The AC2 pair (space form and underscore form) run in the same session and re-run; the suite run repeatedly across AC1, AC4 and the second mutation control.",
+      "observed": "AC2 space form HEADER=0 FISCAL=0 on every run; underscore form HEADER=13 FISCAL=183 TOTAL=196 CHECKS=196 on every run. Suite: 31 passed on every clean run of lib/research/api/tests/, 36 passed with lib/research/checkface/tests/ added, 3 collection errors on every sentinel run. No figure moved between runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Security-key normalisation (making read_model_block/read_peer_set accept both 'BABA US Equity' and 'BABA_US_Equity').",
+      "reason": "WOULD MAKE AC2 PASS AND IS NOT THIS CELL'S TO TAKE. It changes the adapter's IDENTITY CONTRACT, which is AMGT-s-12's identity layer; this cell owns the fiscal-row SCOPE matcher. Adopting it here would be widening the order on my own authority to turn my own criterion green, which is the worst possible reason to widen. Recorded with both candidate resolutions as row AMGT_RESAPP-Z-W11-S4 for the issuer."
+    },
+    {
+      "item": "Amending AC3's invocation so its negative control is not vacuous.",
+      "reason": "A worker does not edit the criteria it is graded on. The defect is recorded as row AMGT_RESAPP-Z-W11-S5 with the one-line fix named (filter a model block that is actually loaded), and the non-vacuous control is delivered as a test instead."
+    },
+    {
+      "item": "A `figures_in_scope()` matcher in scopes.py that raises on an undeclared scope.",
+      "reason": "Considered and deliberately not shipped, with the reasoning left in the file: two matchers over one artifact means whichever one a future caller missed would be the unguarded one, reintroducing this defect a layer up; and AC3's own negative control requires _figures to RETURN a count of 0 for a bogus scope, so a raise would break the order's control."
+    },
+    {
+      "item": "Any edit to integrations/bloomberg/research/model_block_pull.py, the producer of the scope vocabulary.",
+      "reason": "OUT OF GRANT -- rf-3's <paths> names lib/research/api/*, lib/research/checkface/, the channel and its own file. The producer is READ (its source is parsed by a test to tie the contract to it), never written. No vendor call was made or authorized."
+    },
+    {
+      "item": "rf-4 and rf-5.",
+      "reason": "Separate orders in this worker's sequential queue. rf-4 in particular MUST follow rf-3, because the slug states that fixing the scope filter alone 'would expose stale values' -- that is rf-4's subject and is not pre-empted here."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W11-S4",
+    "AMGT_RESAPP-Z-W11-S5"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -4",
+      "result": "31 passed rc 0, including test_fiscal_figure_count_is_183_and_not_zero"
+    },
+    {
+      "tool": "python (AC2, named invocation)",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; b=s.read_thesis_bundle('BABA_US_Equity'); h=len(b.get('header_figures') or []); f=len(b.get('fiscal_year_figures') or []); print('HEADER=%d FISCAL=%d TOTAL=%d' % (h,f,h+f))\"",
+      "result": "HEADER=0 FISCAL=0 TOTAL=0 -- FAIL; cause is the key form, row Z-W11-S4"
+    },
+    {
+      "tool": "python (AC2 diagnostic, adapter's own key form -- NOT AC2's result)",
+      "invocation": "timeout 110 python -c \"... s.read_thesis_bundle('BABA_US_Equity') ...\"",
+      "result": "HEADER=13 FISCAL=183 TOTAL=196 CHECKS=196"
+    },
+    {
+      "tool": "python (AC3)",
+      "invocation": "timeout 110 python -c \"import sys; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as s; m=s.read_model_block('BABA_US_Equity'); print('POSITIVE=%d WRONG_SCOPE=%d' % (len(s._figures(m,'fiscal_year_line_item') or []), len(s._figures(m,'not_a_real_scope_NOPE_xyz') or [])))\"",
+      "result": "WRONG_SCOPE=0 -- passes, and cannot fail: m is None, row Z-W11-S5"
+    },
+    {
+      "tool": "python (AC3's missing non-vacuous control, run against the real block)",
+      "invocation": "_figures(block,'not_a_real_scope_NOPE_xyz') and _figures(block,'fiscal_year_line_item') on the 196-figure BABA block",
+      "result": "0 and 183 respectively -- a true refusal, not an empty input"
+    },
+    {
+      "tool": "pytest mutation control (AC4)",
+      "invocation": "cp lib/research/api/scoped_amgt.py /tmp/rf3.pre; printf \"\\nBROKEN_SENTINEL_RF3 = 1/0\\n\" >> lib/research/api/scoped_amgt.py; timeout 110 python -m pytest lib/research/api/tests/ -q 2>&1 | tail -3; cp /tmp/rf3.pre lib/research/api/scoped_amgt.py; cmp -s /tmp/rf3.pre lib/research/api/scoped_amgt.py && echo RESTORED_BYTE_IDENTICAL || echo RESTORE_FAILED",
+      "result": "3 errors during collection with the sentinel; RESTORED_BYTE_IDENTICAL"
+    },
+    {
+      "tool": "pytest mutation control on the NEW scope contract (not required by the order)",
+      "invocation": "set SCOPE_FISCAL_YEAR_LINE_ITEM back to 'fiscal_year', then pytest lib/research/api/tests/test_fiscal_scope_contract.py -q",
+      "result": "5 failed / 4 passed, producer tie among them; restored, sha256 7d87d8cc663fa23276c3442e55406f0036497fd2791b201889ab2d2e512eb500"
+    },
+    {
+      "tool": "python (scope census over the landed artifact, by subtraction)",
+      "invocation": "collections.Counter(f['scope'] for f in model_block['figures'])",
+      "result": "DENOMINATOR 196 figures = 183 fiscal_year_line_item + 13 header; sum equals the denominator"
+    },
+    {
+      "tool": "comp-read --enumerate (no scope literal left in the adapter)",
+      "invocation": "timeout 110 comp-read lib/research/api/scoped_amgt.py --enumerate 'fiscal_year\"|\"header\"|fiscal_year_line_item'",
+      "result": "0 hit(s) across 743 lines / 41 sections -- a measured zero with its denominator"
+    }
+  ]
+}

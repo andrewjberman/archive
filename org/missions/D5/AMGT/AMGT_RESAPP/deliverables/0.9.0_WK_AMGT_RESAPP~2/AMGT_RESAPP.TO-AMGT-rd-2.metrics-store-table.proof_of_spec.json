@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rd-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-2.metrics-store-table.md",
+    "group": "OTHER",
+    "vintage_commit": "dcbebda22c3f527f051c1a0206cb19f52adfb3df"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "d0efe81ca84b3856c917a3efefb59d56d3414591",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-2.metrics-store-table.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/amgt-resapp/security-metrics-table.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8eb2bf72692f1e0982c835cfc6b61473351b1bb0",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws dynamodb describe-table --table-name opal-amgt-security-metrics --query Table.[TableName,TableStatus,BillingModeSummary.BillingMode] --output text => opal-amgt-security-metrics ACTIVE PAY_PER_REQUEST (measured live, post safe-apply). Declares aws_dynamodb_table.security_metrics: hash_key=axis_date, range_key=ticker, GSI axis-rank-index (hash_key=axis_date, range_key=rank_sort). This cell's own file inside the shared infra/aws/terraform/amgt-resapp/ module directory; carries its own terraform{}/backend block with a cell-scoped state key (amgt-resapp/rd-2-security-metrics/tfstate) so this cell's apply cannot race AMGT-rd-1's concurrent apply on the same remote state file -- drain-time consolidation of the two roots' backend config is the issuing COO's call (round-5 issuance note, 2.0.0_SA_COO~ZZZ @dcbebda22c).",
+      "introduces": [
+        "opal-amgt-security-metrics",
+        "axis-rank-index",
+        "rank_sort"
+      ],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T1720Z_amgt-resapp-rd-2-security-metrics-table_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "31d62349507a80eca687a0d7cded8384742ddc77",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Change-management ledger for this deploy. OPENED before the apply (commit f4cc9669ba4ea738b8e7f21caf3495063f7079e1, NEVER-2), both legs closed with measured proof (L1 activation: safe-apply Apply complete! Resources: 1 added, 0 changed, 0 destroyed; L2 verify: live describe-table ACTIVE/PAY_PER_REQUEST) and CLOSED before this instance's grading read (commit 31d62349507a80eca687a0d7cded8384742ddc77). Nothing stranded.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/critical_paths/.open_deploys/amgt-resapp-rd-2-security-metrics-table.json",
+      "kind": "config_data",
+      "commit_or_etag": "f4cc9669ba4ea738b8e7f21caf3495063f7079e1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The deploy-open sentinel, committed together with the ledger .md at open time (commit f4cc9669ba4ea738b8e7f21caf3495063f7079e1) so the OPEN state survives a worktree teardown, per deploy_ledger.py's own required-commit-pathspec instruction. Removed (git rm) and that removal committed at close (commit 31d62349507a80eca687a0d7cded8384742ddc77) once both legs were proven -- both the entry AND the sentinel are committed at each state transition, per bound (b)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/AMGT-rd-2.read-pattern-record.md",
+      "kind": "doc",
+      "commit_or_etag": "8390ee66c7c3f35e813eb5750905b6e52ec258d3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Bound (c): states the key schema, the exact GetItem/Query reads the Lead Panel will issue, and the opal-news-trending-daily (hash_key=date, range_key=topic_rank) / opal-news-articles (hash_key=article_date, range_key=url_hash, GSI source_date_index) shapes this table mirrors -- both read directly via aws dynamodb describe-table (2026-09-11), not asserted, since neither has a declarative Terraform source in this repo (drift=LIVE-no-DECLARED).",
+      "artifact_covered_by": ["AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"Success! The configuration is valid.\" -- the module including your new table file parses and type-checks. A validate error is NOT met",
+      "method": "command",
+      "invocation": "cd infra/aws/terraform/amgt-resapp && timeout 110 terraform validate -no-color 2>&1 | tail -5",
+      "output_evidence": "Success! The configuration is valid.",
+      "denominator": "1 of 1 module directory validated (infra/aws/terraform/amgt-resapp, this worker's worktree copy -- one file, this cell's own security-metrics-table.tf; AMGT-rd-1's sibling file does not exist in this isolated worktree, per the round-5 issuance note that each root owns its own file)",
+      "status": "PASS",
+      "expect": "Success! The configuration is valid\\."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"opal-amgt-security-metrics\" with TableStatus ACTIVE and BillingMode PAY_PER_REQUEST -- LIVE on the plane, not merely declared. A ResourceNotFoundException means the apply did not land and is NOT met",
+      "method": "live_read",
+      "invocation": "timeout 110 .tools/aws dynamodb describe-table --table-name opal-amgt-security-metrics --query \"Table.[TableName,TableStatus,BillingModeSummary.BillingMode]\" --output text 2>&1 | tail -3",
+      "output_evidence": "opal-amgt-security-metrics\tACTIVE\tPAY_PER_REQUEST",
+      "denominator": "1 of 1 named table described; both TableStatus and BillingMode present in the same live read (post safe-apply: Apply complete! Resources: 1 added, 0 changed, 0 destroyed)",
+      "status": "PASS",
+      "expect": "opal-amgt-security-metrics(?:.|\\n)*ACTIVE(?:.|\\n)*PAY_PER_REQUEST"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a ResourceNotFoundException -- NEGATIVE CONTROL proving AC2's instrument discriminates present from absent. If this bogus name ALSO returns a table, AC2 proves nothing and this criterion is NOT met",
+      "method": "live_read",
+      "invocation": "timeout 110 .tools/aws dynamodb describe-table --table-name opal-amgt-security-metrics-NOPE-xyz --query \"Table.TableName\" --output text 2>&1 | tail -2",
+      "output_evidence": "aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: opal-amgt-security-metrics-NOPE-xyz not found",
+      "denominator": "1 of 1 deliberately-bogus table name queried against the same instrument as AC2; ResourceNotFoundException returned, not a table -- the instrument can say NO",
+      "status": "PASS",
+      "expect": "ResourceNotFoundException"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "(JUDGMENT) does the key schema actually make the Lead Panel's read a PRE-COMPUTED point/query read rather than a scan-and-sort -- i.e. does it enforce C-SERVER-SIDE-RANKING structurally rather than by convention -- and was the opal-news-trending-daily mirroring measured against the live table rather than asserted?",
+      "method": "manual_read_with_citation",
+      "invocation": "read infra/aws/terraform/amgt-resapp/security-metrics-table.tf and org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/AMGT-rd-2.read-pattern-record.md",
+      "output_evidence": "The Lead Panel's stated read (\"give me the ranked set for this axis\") maps to Query(IndexName=axis-rank-index, KeyConditionExpression=axis_date=:ad, ScanIndexForward=true) -- a single Query returning rows already sorted by rank_sort ascending; there is no unindexed scan-and-client-sort path that is cheaper, so the pre-computed read is the structurally natural one, not a convention. The per-ticker point read (bound (a)) maps to GetItem(axis_date, ticker) on the base table. opal-news-trending-daily's live shape (hash_key=date, range_key=topic_rank; TableStatus ACTIVE, BillingMode PAY_PER_REQUEST, ItemCount 5175) was read directly via aws dynamodb describe-table on 2026-09-11 (no declarative Terraform source exists for it in this repo -- drift=LIVE-no-DECLARED per the battery finding) and is quoted verbatim in the read-pattern-record deliverable, not asserted from memory or from the TO text.",
+      "denominator": "N/A -- judgment criterion, no verdict computed by this instance",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order's own annotation: 'do NOT grade it. Record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z. PASS or FAIL on a judgment row is INVALID.' The grade lands in 3.0.0_SA_CVO~Z's L9 adjudication row.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This cell has no application code path to mutate -- it is a declarative Terraform resource plus a live AWS create, no logic under this cell's ownership. The functional equivalent (proving the acceptance instrument can say NO as well as YES) is built into the battery itself as AC3, a deliberately bogus table name run against the SAME describe-table instrument AC2 uses. Reproduced here as the control rather than treated as free-standing: AC3's own measured output.",
+      "expected": "The bogus name opal-amgt-security-metrics-NOPE-xyz returns ResourceNotFoundException, not a table -- proving AC2's PASS reflects a real live table and not an instrument that would say ACTIVE/PAY_PER_REQUEST for anything.",
+      "observed": "aws: [ERROR]: An error occurred (ResourceNotFoundException) when calling the DescribeTable operation: Requested resource not found: Table: opal-amgt-security-metrics-NOPE-xyz not found -- fired exactly as expected; AC2's real table (opal-amgt-security-metrics) returns ACTIVE/PAY_PER_REQUEST on the identical instrument.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "terraform validate and the live describe-table read were each run twice in this session: once as a pre-formal check immediately after building the .tf file / after the safe-apply, and once as the formal graded invocation recorded above.",
+      "observed": "terraform validate: 'Success! The configuration is valid.' both times, byte-identical. aws dynamodb describe-table --table-name opal-amgt-security-metrics: 'opal-amgt-security-metrics ACTIVE PAY_PER_REQUEST' both times, byte-identical (pre-formal check run immediately after the safe-apply completed; formal AC2 run after closing the deploy ledger -- no drift between the two live reads).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The chatter-axis writer (AMGT-rd-5) and the price-axis writer (AMGT-rd-6)",
+      "reason": "Bound: DO NOT BUILD THE WRITERS -- they are separate cells later in this queue. This cell builds the store, not its producers; no item is written to the table by this cell."
+    },
+    {
+      "item": "The starred watchlist (AMGT-rd-7)",
+      "reason": "Named explicitly out of scope in the cell text ('you are NOT building the writers or the watchlist'). The schema does not preclude it (a firm-scoped axis_date value or a sibling keyspace both remain open), stated in the read-pattern-record deliverable, but nothing for it is built here."
+    },
+    {
+      "item": "point_in_time_recovery, deletion_protection_enabled, and server_side_encryption are left at Terraform/AWS default (unset) rather than explicitly configured",
+      "reason": "YAGNI (CLAUDE.md s.4): not named by the cell text or its bounds; comp-find over .tools/ds-precommit-check.py and .tools/commit-gate.sh found 0 hits for point_in_time_recovery, so no gate requires it. Mirrors the existing market-overview module's aws_dynamodb_table.market_updates, which also leaves these at default."
+    },
+    {
+      "item": "Reconciling or consolidating this cell's backend state key with AMGT-rd-1's (opal-amgt-articles) backend key into one shared amgt-resapp/tfstate",
+      "reason": "Explicitly reserved to the issuing COO by the round-5 issuance note: 'If the two collide at the drain, the resolution is mine, not theirs.' This cell's own backend key (amgt-resapp/rd-2-security-metrics/tfstate) is self-sufficient and independently verified live; consolidating two roots' Terraform state from two concurrent worktrees is a drain-time act, not something a single-cell worker can safely do mid-round."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (the task order names only infra/aws/terraform/amgt-resapp/, org/critical_paths/change_management/, org/critical_paths/.open_deploys/, deliverables/, the surprise-channel investigation file, and the task-order file itself). The full session is this turn's transcript; every invocation and output is carried verbatim in the acceptance rows above and in the read-pattern-record deliverable.",
+  "compiler_tools": [
+    {
+      "tool": "aws dynamodb describe-table (pre-build re-measure)",
+      "invocation": "timeout 110 .tools/aws dynamodb describe-table --table-name opal-amgt-security-metrics --output text",
+      "result": "ResourceNotFoundException: Requested resource not found -- confirms the cell's stated GENUINE CREATE (surprise row AMGT_RESAPP-Z-S5: 0 hits across 2445 aws nodes at the cut) was still true immediately before this cell's own apply, not merely trusted from the battery finding."
+    },
+    {
+      "tool": "terraform init",
+      "invocation": "cd infra/aws/terraform/amgt-resapp && timeout 110 terraform init -no-color",
+      "result": "Successfully configured the backend s3! Installed hashicorp/aws v5.100.0. Terraform has been successfully initialized!"
+    },
+    {
+      "tool": "terraform plan",
+      "invocation": "cd infra/aws/terraform/amgt-resapp && timeout 110 terraform plan -no-color",
+      "result": "Plan: 1 to add, 0 to change, 0 to destroy. (aws_dynamodb_table.security_metrics will be created)"
+    },
+    {
+      "tool": "deploy_ledger.py open",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-resapp-rd-2-security-metrics-table --title \"AMGT_RESAPP rd-2: create opal-amgt-security-metrics DynamoDB table (pre-computed ranking store)\" --author 0.9.0_WK_AMGT_RESAPP~2 --leg \"L1|activation|terraform apply infra/aws/terraform/amgt-resapp (aws_dynamodb_table.security_metrics)|safe-apply output: 1 added, 0 changed, 0 destroyed\" --leg \"L2|verify|opal-amgt-security-metrics live describe-table|aws dynamodb describe-table TableStatus ACTIVE + BillingMode PAY_PER_REQUEST\" --window-hours 2",
+      "result": "OK: OPENED deploy ledger 'amgt-resapp-rd-2-security-metrics-table' (2 legs) -> org/critical_paths/change_management/20260911T1720Z_amgt-resapp-rd-2-security-metrics-table_deploy_completion.md; both required paths staged."
+    },
+    {
+      "tool": "safe-commit.sh (open-ledger commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~2 <0.9.0_WK_AMGT_RESAPP~2@opal.agent>\" -F <msgfile> -- org/critical_paths/.open_deploys/amgt-resapp-rd-2-security-metrics-table.json org/critical_paths/change_management/20260911T1720Z_amgt-resapp-rd-2-security-metrics-table_deploy_completion.md",
+      "result": "commit f4cc9669ba4ea738b8e7f21caf3495063f7079e1: risk-reflex REFLEX CLEAN (2 of 2 files, PRESENT_WITH_ZERO_RESULTS); to-pipeline-gate OK; surprise-row-gate OK (0 rows this commit); msg-verify MATCH."
+    },
+    {
+      "tool": "safe-apply.sh apply",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/amgt-resapp apply -auto-approve -no-color",
+      "result": "HALT-gate clean; comp-tagauthz gate PASSED (0 candidate resources overwrite an access-granting tag); tombstone-gate CLEAN (0 of 7 tombstones match); aws_dynamodb_table.security_metrics: Creation complete after 23s [id=opal-amgt-security-metrics]. Apply complete! Resources: 1 added, 0 changed, 0 destroyed."
+    },
+    {
+      "tool": "safe-commit.sh (terraform-file commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~2 <0.9.0_WK_AMGT_RESAPP~2@opal.agent>\" -F <msgfile> -- infra/aws/terraform/amgt-resapp/security-metrics-table.tf",
+      "result": "commit 8eb2bf72692f1e0982c835cfc6b61473351b1bb0: commit-gate OK (pre-commit gate clean for 1 of 1 file(s)); risk-reflex REFLEX CLEAN; msg-verify MATCH."
+    },
+    {
+      "tool": "deploy_ledger.py close-leg (x2) + close",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug amgt-resapp-rd-2-security-metrics-table --leg-id L1 --proof \"...\"; python .tools/deploy_ledger.py close-leg --slug amgt-resapp-rd-2-security-metrics-table --leg-id L2 --proof \"...\"; python .tools/deploy_ledger.py close --slug amgt-resapp-rd-2-security-metrics-table",
+      "result": "OK: leg L1 closed. OK: leg L2 closed. Remaining open: NONE. OK: CLOSED deploy ledger -- all 2 legs proven; sentinel removed."
+    },
+    {
+      "tool": "safe-commit.sh (close-ledger commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~2 <0.9.0_WK_AMGT_RESAPP~2@opal.agent>\" -F <msgfile> -- org/critical_paths/.open_deploys/amgt-resapp-rd-2-security-metrics-table.json org/critical_paths/change_management/20260911T1720Z_amgt-resapp-rd-2-security-metrics-table_deploy_completion.md",
+      "result": "commit 31d62349507a80eca687a0d7cded8384742ddc77: 2 files changed (1 delete: the sentinel; 1 update: the ledger .md marked CLOSED); msg-verify MATCH. Ledger closed and sentinel removal committed BEFORE the formal grading read below (NEVER-2)."
+    },
+    {
+      "tool": "safe-commit.sh (deliverable commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~2 <0.9.0_WK_AMGT_RESAPP~2@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/AMGT-rd-2.read-pattern-record.md",
+      "result": "commit 8390ee66c7c3f35e813eb5750905b6e52ec258d3: missions-tree-check OK (0 violations); msg-verify MATCH."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/AMGT_RESAPP.TO-AMGT-rd-2.metrics-store-table.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "see final report -- run after this instance was written, before the status-flip commit"
+    }
+  ]
+}

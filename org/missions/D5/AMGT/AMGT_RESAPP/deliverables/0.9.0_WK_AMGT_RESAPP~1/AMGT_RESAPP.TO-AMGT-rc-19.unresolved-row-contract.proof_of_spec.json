@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rc-19",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rc-19.unresolved-row-contract.md",
+    "group": "OTHER",
+    "vintage_commit": "af0a64a7ec82126506be458e66dd9258bc87e5b7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "af0a64a7ec82126506be458e66dd9258bc87e5b7",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rc-19.unresolved-row-contract.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/rules/figure.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "qualify() now reads corrected_overlay_status (RESOLVED/UNRESOLVED/ABSENT), checked BEFORE the unit/sign check: UNRESOLVED -> REFUSE categorically; RESOLVED/ABSENT fall through unchanged to the pre-existing unit/sign logic. Also switched the module's own Rule/Verdict import from package-relative to absolute + repo-root-bootstrapped, since AC3's own invocation loads this file standalone via importlib.util.spec_from_file_location, which raised ImportError on the pre-existing relative import (verified against the committed HEAD copy before this change -- a pre-existing condition, not introduced by this cell).",
+      "introduces": ["OVERLAY_RESOLVED", "OVERLAY_UNRESOLVED", "OVERLAY_ABSENT", "corrected_overlay_status"],
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/provenance/render_print.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "load_corrected_price_overlay now keeps EVERY fiscal-year row (not just price-not-None ones), so an UNRESOLVED row (present, price None) is distinguishable from ABSENT (no row at all). apply_corrected_price_overlay tags corrected_overlay_status (RESOLVED when the price was applied, UNRESOLVED when the overlay has a row but no valid price -- value/vintage/source left untouched, STORE_CONTRACT rule 1). render_figure_line routes every fiscal-year PX_LAST figure through lib.research.rules.figure's qualify() and, for anything short of PASS, renders it via lib.research.checkface.render_print.render_value + lib.research.checkface.markers.marker_for (S10/AMGT-rb-10's own marker, reused not reimplemented) instead of the bare value. Exercised live: BABA's real, RESOLVED FY2025 still renders bare/132.23 (PASS); the CVO control's UNRESOLVED FY2025 renders '[BLOCKED] [REFUSED: ...]', never the bare 146.58.",
+      "introduces": ["is_fiscal_year_price_figure", "_figure_rule_input"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/checkface/run_checks.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "check_one's adapted dict now forwards corrected_overlay_status (defaulting to ABSENT), so the pre-existing S10 check-face pipeline (apply-rule-to-every-figure-in-a-model-block) stays class-level too: any figure carrying the field is qualified correctly by the SAME rule, with zero behaviour change for a figure that never carries it (verified: lib/research/checkface/tests, 5 of 5 pre-existing tests still pass unchanged).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/rules/tests/test_corrected_overlay_qualification.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "4 new tests, discovered by pytest lib/research/rules/tests: the class-level negative control (UNRESOLVED-corrected figure with a clean unit_status still REFUSEs/PROVISIONALs, calling qualify() DIRECTLY, no consumer), the RESOLVED PASS companion, the two ABSENT fall-through arms (a clean figure still PASSes; a figure REFUSED for its own unrelated unit_status defect still REFUSEs, for its own reason), and a backward-compatibility check (no corrected_overlay_status field at all defaults to ABSENT, pre-existing REFUSAL_INPUT/PASS_INPUT fixtures unaffected).",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "4 new tests, discovered by pytest integrations/bloomberg/research/tests: the CVO control (a synthetic security, DIFFERENT key from BABA's own landed data, whose corrected fye row is produced by actually RUNNING fye_join.fiscal_period_join on a period_end 2025-03-31 fundamentals row against a future-only 2025-04-02 price, genuinely resolving to price None -- never hand-set) driven through the named consumers (render_pack.load_model_block, render_print.render_figure_line/render_model_block): tags UNRESOLVED and never fabricates a value; renders marked and never the bare 146.58 at the line level; never the bare 146.58 anywhere in the full rendered document; and BABA's real, RESOLVED FY2025 overlay (132.23) plus the on-disk original file (146.58, byte-unchanged) are both preserved.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/unresolved_row_contract.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Records the defect (C-S19), the class-level fix, the before(silent-keep)/after(marked) rendered lines for the CVO control (period_end 2025-03-31, only a 2025-04-02 price -> corrected None), the class-level negative control, and BABA's preserved resolved sample.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_fye_BABACVOCTRL_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The CVO control's corrected-lane fixture, as produced by fye_join.fiscal_period_join on a genuinely future-only price series (regenerated identically, byte-for-byte, by the committed test's own _write_fixtures() on every run -- not a stale/hand-authored copy)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/model_block_BABACVOCTRL_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The CVO control's original model_block fixture (FY2025 PX_LAST = 146.58, the stale calendar price C-S19 named), regenerated identically by the committed test on every run."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line beginning with a passed count and no \"failed\" -- the existing rule + consumer tests still pass PLUS: (1) a figure-rule test where an UNRESOLVED-corrected figure qualifies REFUSE or PROVISIONAL and a resolved one PASSes; (2) an end-to-end test where the CVO control (period_end 2025-03-31, only a 2025-04-02 price -> corrected None) through the named consumer renders MARKED, never the bare 146.58. A test that renders the stale calendar price unmarked is NOT met",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/rules/tests integrations/bloomberg/research/tests -q 2>&1 | tail -1",
+      "output_evidence": "30 passed in 7.09s",
+      "denominator": "30 of 30 tests passed: 22 pre-existing (12 rule tests + 4 fye_join tests + 6 consumer_wiring tests, unchanged) + 4 new class-level rule tests (test_corrected_overlay_qualification.py) + 4 new end-to-end CVO-control tests (test_unresolved_overlay_renders_marked.py). Re-run twice, identical '30 passed' both times (see controls.determinism).",
+      "status": "PASS",
+      "expect": "^\\d+ passed.*(?<!failed)$"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "all four True -- the result doc shows the CVO None control rendered MARKED (REFUSE/PROVISIONAL, not the bare 146.58 presented as trusted), the qualification made by the S11 FIGURE RULE (class-level), and the three states (resolved / present-but-unresolved / lane-absent) distinguished. A missing element is NOT met",
+      "method": "command",
+      "invocation": "python -c \"r=open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/unresolved_row_contract.result.md', encoding='utf-8').read(); low=r.lower(); print('names the None control', ('2025-03-31' in r and 'none' in low), '| renders MARKED not stale', (('refuse' in low or 'provisional' in low or 'mark' in low) and '146.58' in r), '| via the S11 figure rule', ('figure' in low and ('rule' in low or 'qualif' in low)), '| three states distinguished', ('resolved' in low and 'unresolved' in low and ('missing' in low or 'absent' in low)))\"",
+      "output_evidence": "names the None control True | renders MARKED not stale True | via the S11 figure rule True | three states distinguished True",
+      "denominator": "4 of 4 conditions True; re-run twice, identical (see controls.determinism).",
+      "status": "PASS",
+      "expect": "names the None control True.*renders MARKED not stale True.*via the S11 figure rule True.*three states distinguished True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"not PASS True\" with the verdict REFUSE or PROVISIONAL -- NEGATIVE + CLASS-LEVEL: the S11 FIGURE RULE itself, called DIRECTLY with no consumer, refuses/holds an unresolved-corrected figure (the exact figure that was silently passing). This proves the fix is a class-level rule reusable by any consumer, not a bespoke consumer branch. A verdict of PASS is the C-S19 defect and is NOT met. The refusing input is the figure's corrected_overlay_status: UNRESOLVED (the stable field the cell mandates), exercised here directly on the rule per C-CHECK-MUST-REFUSE",
+      "method": "command",
+      "invocation": "python -c \"import importlib.util as u; s=u.spec_from_file_location('fr','lib/research/rules/figure.py'); m=u.module_from_spec(s); s.loader.exec_module(m); v=m.qualify({'field':'PX_LAST','value':146.58,'unit_status':'MEASURED','corrected_overlay_status':'UNRESOLVED'}); print('rule verdict on unresolved-corrected figure', v.verdict, '| not PASS', v.verdict != 'PASS')\"",
+      "output_evidence": "rule verdict on unresolved-corrected figure REFUSE | not PASS True",
+      "denominator": "N/A -- single direct call, boolean check. Re-run twice, identical 'REFUSE | not PASS True' both times (see controls.determinism). Verified this exact invocation FAILED with ImportError on the committed, pre-cell HEAD copy of figure.py (a pre-existing import-style defect unrelated to corrected_overlay_status, fixed here because AC3's own invocation depends on it loading standalone).",
+      "status": "PASS",
+      "expect": "not PASS True"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "is this a genuine CLASS-LEVEL S11 qualification rule (covers ANY consumer of a corrected value, per the CTO ruling @21343 / Rule 22) rather than a bespoke per-consumer fallback, and does S10 render the unresolved figure REFUSE/PROVISIONAL (never the stale calendar price)? C-S19 closes; C-S16 closes with rc-20.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read lib/research/rules/figure.py, lib/research/provenance/render_print.py, lib/research/checkface/run_checks.py, unresolved_row_contract.result.md, and both new test files against the CTO ruling @21343 and Rule 22",
+      "output_evidence": "Evidence offered for the CVO's judgment (never self-graded): the qualification decision (RESOLVED->fall-through, UNRESOLVED->REFUSE categorical, ABSENT->fall-through) lives ENTIRELY inside lib/research/rules/figure.py::qualify() -- no keep-or-mark branch exists inside load_corrected_price_overlay or apply_corrected_price_overlay, which only tag the stable corrected_overlay_status field (bookkeeping, not the decision). The rule is reached by TWO independent paths with identical results: AC3's standalone spec_from_file_location load, and the normal lib.research.rules.RULES['figure'] package import the new rule test uses. lib/research/checkface/run_checks.py's PRE-EXISTING, GENERAL (any model_block figure, unrelated to fiscal-year price overlays) check-face pipeline was extended by one field-forwarding line and now qualifies any corrected_overlay_status-carrying figure correctly too -- direct evidence the rule is reusable by a consumer this cell did not write. Rendering: render_figure_line routes every fiscal-year PX_LAST figure through the rule and, for anything short of PASS, renders via lib.research.checkface.render_print.render_value + markers.marker_for (S10/AMGT-rb-10's OWN marker convention, imported and reused, not reimplemented) -- measured: the CVO control's UNRESOLVED figure renders '[BLOCKED] [REFUSED: ...]' (146.58 absent from both the line and the full render_model_block document); BABA's real RESOLVED FY2025 still renders bare/132.23; the mutant control (the OLD price-not-None filter) reproduces the exact C-S19 defect (bare 146.58) on the same fixture. C-S16 is left to rc-20 per the task order's own dependency note (rc-20 depends on rc-19 and is queued next, not worked here).",
+      "denominator": "N/A -- judgment criterion, read against the rule, both consumer modules, the check-face adapter, and the two new test files plus the mutant control; no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, never self-graded here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/ (not committed) re-implemented the OLD load_corrected_price_overlay (filters fiscal-year rows to row.get('price') is not None, dropping the UNRESOLVED row entirely -- the exact pre-cell C-S19 behaviour) and compared its output, applied via the REAL apply_corrected_price_overlay + render_figure_line, against the REAL (wired) render_pack.load_model_block, both on the identical CVO control fixture (BABACVOCTRL_US_Equity, FY2025).",
+      "expected": "MUTANT (old filter): overlay dict is EMPTY for this security ({}), apply_corrected_price_overlay finds no entry, the figure is left untouched, and render_figure_line renders the bare '146.58 ... Bloomberg' line -- the C-S19 defect, reproduced. REAL (this cell's fix): the figure is tagged UNRESOLVED and renders '[BLOCKED] [REFUSED: ...]', never the bare 146.58.",
+      "observed": "MUTANT overlay dict: {} (empty -- confirmed the UNRESOLVED row was filtered out). MUTANT rendered line: '146.58 PRICE (local trading currency, per share/unit) ... Bloomberg' -- contains bare 146.58: True (the defect reproduced). REAL rendered line: '[BLOCKED] [REFUSED: PX_LAST: corrected fiscal-period overlay is UNRESOLVED ...] PRICE (local trading currency, per share/unit) ... Bloomberg' -- contains bare 146.58: False. CONTROL FIRED-AS-EXPECTED.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's invocations each run twice against the same committed (worktree) state.",
+      "observed": "AC1: '30 passed' both runs (7.09s and 4.81s wall time, same outcome). AC2: identical 'True | True | True | True' both runs. AC3: identical 'REFUSE | not PASS True' both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AMGT-rc-20 (extending the S11 rule/consumer wiring further, per the task order's own dependency note)",
+      "reason": "Explicitly queued AFTER rc-19 lands, not worked in this cell -- the task order states 'AMGT-rc-20 DEPENDS ON this cell -- same consumer, queued after rc-19 lands' and the coordinator's own instruction says 'do not start it now'."
+    },
+    {
+      "item": "Regenerating the served .pdf/.txt research packs (render_pack.build_pack) for BABA/SAP/BA US",
+      "reason": "Not named in this cell's WHAT TO PRODUCE; the class-level fix is proven via the rule test (AC3) and the end-to-end consumer test (AC1/AC2) against the CVO control and BABA's real data. render_pack.build_pack() calls render_figure_line internally with no code change needed (the class-level benefit flows through automatically), but regenerating the PDF artifacts themselves was not requested and would not add discriminating evidence beyond what the committed tests already exercise."
+    },
+    {
+      "item": "Extending peer.py/identity.py/item.py/source.py/sentence.py's own package-relative Rule/Verdict imports to the same absolute + bootstrap style figure.py now uses",
+      "reason": "Out of this cell's scope (Rule 22 here names the corrected-overlay-UNRESOLVED class, not the sibling rule files' import style) -- AC3 loads ONLY figure.py standalone; the other five rule files were never exercised via spec_from_file_location by this task order and changing their import style is a separate, unrequested act."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/rules/tests integrations/bloomberg/research/tests -q",
+      "result": "rc 0; 30 passed (run twice, identical outcome, see controls.determinism)"
+    },
+    {
+      "tool": "AC2 unresolved_row_contract.result.md shape check",
+      "invocation": "python -c \"r=open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/unresolved_row_contract.result.md', encoding='utf-8').read(); ...\"",
+      "result": "rc 0; True | True | True | True (run twice, identical)"
+    },
+    {
+      "tool": "AC3 direct rule invocation (spec_from_file_location)",
+      "invocation": "python -c \"import importlib.util as u; s=u.spec_from_file_location('fr','lib/research/rules/figure.py'); ...\"",
+      "result": "rc 0; REFUSE | not PASS True (run twice, identical). Confirmed rc=1 ImportError on the committed pre-cell HEAD copy of figure.py."
+    },
+    {
+      "tool": "py_compile + ruff (target-version py39)",
+      "invocation": "python -m py_compile lib/research/rules/figure.py lib/research/checkface/run_checks.py lib/research/provenance/render_print.py lib/research/rules/tests/test_corrected_overlay_qualification.py integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py && python -m ruff check --target-version py39 <same files>",
+      "result": "rc 0 both; PY_COMPILE OK; ruff: All checks passed!"
+    },
+    {
+      "tool": "ds-precommit-check.py",
+      "invocation": "python .tools/ds-precommit-check.py lib/research/rules/figure.py lib/research/checkface/run_checks.py lib/research/provenance/render_print.py lib/research/rules/tests/test_corrected_overlay_qualification.py integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py",
+      "result": "rc 0, no output"
+    },
+    {
+      "tool": ".scratch mutant harness (not committed -- old price-not-None filter vs the real fix)",
+      "invocation": "python -c \"...mutant_load_corrected_price_overlay (old filter) vs real render_pack.load_model_block, same CVO control fixture...\"",
+      "result": "rc 0; MUTANT reproduces bare 146.58 (the C-S19 defect); REAL renders '[BLOCKED] [REFUSED: ...]', no bare 146.58. CONTROL FIRED-AS-EXPECTED."
+    }
+  ]
+}

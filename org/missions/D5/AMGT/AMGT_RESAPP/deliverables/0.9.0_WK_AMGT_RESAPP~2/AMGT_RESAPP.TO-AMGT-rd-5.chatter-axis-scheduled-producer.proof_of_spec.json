@@ -1,0 +1,242 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rd-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-5.chatter-axis-scheduled-producer.md",
+    "group": "OTHER",
+    "vintage_commit": "dcbebda22c3f527f051c1a0206cb19f52adfb3df"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "dcbebda22c3f527f051c1a0206cb19f52adfb3df",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rd-5.chatter-axis-scheduled-producer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/metrics/chatter_gate.py",
+      "kind": "script",
+      "commit_or_etag": "bc7d46b85920c0c5d84c529143af21a19b807405",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The ONE place WINDOW_DAYS=30, SCORE_MIN=0, SCORE_MAX=100, TOP_N=10 are declared, cited to PRD v0.3 s.3b and Andrew-direct 2026-09-11 ~07:2xZ. Running live inside the deployed Lambda (packaged byte-identical via build_zip.py, no copy) and exercised by the ad-hoc CLI run that wrote 10 live rows to opal-amgt-security-metrics.",
+      "introduces": ["WINDOW_DAYS", "SCORE_MIN", "SCORE_MAX", "TOP_N"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/metrics/chatter_axis.py",
+      "kind": "script",
+      "commit_or_etag": "bc7d46b85920c0c5d84c529143af21a19b807405",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "window_bounds/read_universe_tickers/normalize_scores/rank_top_n/build_rows/compute_chatter_axis + the real boto3 count/write functions. Ad hoc: `python -m lib.research.metrics.chatter_axis` wrote 10 live rows (as_of=2026-09-11, tickers_considered=34, rows_ranked=10, rows_written=10). Also running live inside the deployed Lambda (two invokes, 2026-09-11T18:14Z/18:15Z, StatusCode 200, identical summary, clean CloudWatch logs).",
+      "introduces": ["compute_chatter_axis", "normalize_scores", "rank_top_n"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/metrics/tests/test_chatter_axis.py",
+      "kind": "test",
+      "commit_or_etag": "bc7d46b85920c0c5d84c529143af21a19b807405",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "22 tests: AC1's three pins (window/scale/TOP_N) read from chatter_gate.py plus a source-text check that chatter_axis.py declares none of the four names itself; window_bounds; normalize_scores (min-max + degenerate/all-zero); rank_top_n (cap, order, deterministic tie-break, fewer-than-TOP_N); build_rows (key shape matching AMGT-rd-2's schema); orchestration with injected fake reader/writer (no AWS in the test run).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/amgt-resapp/chatter-axis-schedule.tf",
+      "kind": "terraform",
+      "commit_or_etag": "bc7d46b85920c0c5d84c529143af21a19b807405",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_iam_role/aws_iam_role_policy (lambda: query opal-amgt-articles' ticker_date_index GSI only, write opal-amgt-security-metrics only, own log stream; scheduler: lambda:InvokeFunction on this one function only), aws_lambda_function.chatter_axis_producer, aws_scheduler_schedule.chatter_axis_daily. safe-apply: 'Apply complete! Resources: 6 added, 0 changed, 0 destroyed.' Live: `aws lambda get-function --function-name amgt-resapp-chatter-axis` => State=Active LastUpdateStatus=Successful Runtime=python3.12. `aws scheduler get-schedule --name amgt-resapp-chatter-axis-daily --query [Name,State,ScheduleExpression] --output text` => amgt-resapp-chatter-axis-daily ENABLED cron(0 10 * * ? *) -- a real clock trigger, not success-of-upstream (bound (b) / AC4). Declares NO terraform{}/provider\"aws\"{}/backend{} block of its own (relies entirely on security-metrics-table.tf's, per bound and surprise rows AMGT_RESAPP-Z-S9/-S10) -- terraform init/validate/plan all pass cleanly against the shared module directory, plan showing 6 to add / 0 to change / 0 to destroy (zero diff against AMGT-rd-2's already-applied table). Built via lambda_src/build_zip.py (this cell's own script, run once this session: 'OK: built .../chatter-axis-producer.zip (13572 bytes, 5 entries)') instead of Terraform's archive_file -- see row AMGT_RESAPP-Z-W2-S7.",
+      "introduces": [
+        "amgt-resapp-chatter-axis-lambda-role",
+        "amgt-resapp-chatter-axis",
+        "amgt-resapp-chatter-axis-scheduler-role"
+      ],
+      "artifact_covered_by": ["AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/amgt-resapp/lambda_src/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "bc7d46b85920c0c5d84c529143af21a19b807405",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Thin Lambda handler, packaged into the live function via build_zip.py. Two live invokes returned StatusCode 200 with the expected summary payload and clean CloudWatch logs (RequestId 5df28004.../4fe38f2e..., ~10-16s each, well inside the 60s timeout).",
+      "introduces": ["def handler"],
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/amgt-resapp/lambda_src/build_zip.py",
+      "kind": "script",
+      "commit_or_etag": "bc7d46b85920c0c5d84c529143af21a19b807405",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not itself deployed -- its OUTPUT (.build/chatter-axis-producer.zip, gitignored) is what chatter-axis-schedule.tf's aws_lambda_function references via filebase64sha256(). Run once this session: 'OK: built .../chatter-axis-producer.zip (13572 bytes, 5 entries)', consumed by the safe-apply that follows (AC4's deploy trail; see the terraform artifact row above and AMGT-rd-5.window-record.md's 'Why the Lambda's source is a static zip' section). See row AMGT_RESAPP-Z-W2-S7 for why this exists instead of Terraform's archive_file.",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260911T1812Z_amgt-resapp-rd-5-chatter-axis-schedule_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "bc7d46b85920c0c5d84c529143af21a19b807405",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Change-management ledger for this deploy. OPENED before the apply (deploy_ledger.py open, 2 legs), both legs closed with measured proof (tf-lambda leg: Apply complete + live get-function + live invoke; L2 verify: live get-schedule), CLOSED before this instance's grading read. Nothing stranded.",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/AMGT-rd-5.window-record.md",
+      "kind": "doc",
+      "commit_or_etag": "bc7d46b85920c0c5d84c529143af21a19b807405",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Bound (c): states the window (30 days, exact inclusive definition), the normalization (0-100 min-max, degenerate/all-zero handling), and TOP_N=10, each cited to the committed chatter gate rather than chosen here; plus the schedule's deploy trail and the archive_file blocker's full trace.",
+      "artifact_covered_by": ["AC1", "AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1fbedc189f5497ca5e2dc96a84371f14bc608224",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new rows appended (AMGT_RESAPP-Z-W2-S6, AMGT_RESAPP-Z-W2-S7), committed separately and promptly per task-order instruction. surprise-row-gate.py confirms 2 new rows of 37 total, both carrying step-7/step-10 fields."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line with a passed count and no \"failed\" -- including a test asserting the window is 30 DAYS, the scale is 0-100, and TOP_N is 10, each read from the committed chatter gate rather than a literal re-declared in this cell. A suite that does not pin all three is NOT met",
+      "method": "command",
+      "invocation": "timeout 110 python -m pytest lib/research -q -k \"chatter\" 2>&1 | tail -3",
+      "output_evidence": "22 passed, 50 deselected in 0.22s",
+      "denominator": "22 of 22 chatter-selected tests passed (0 failed); includes test_chatter_gate_window_is_30_days, test_chatter_gate_scale_is_0_to_100, test_chatter_gate_top_n_is_10 (each reads lib.research.metrics.chatter_gate's constants) and test_chatter_axis_imports_the_gate_not_a_local_redeclaration (asserts chatter_axis.py's own source text carries no WINDOW_DAYS=/SCORE_MIN=/SCORE_MAX=/TOP_N= assignment)",
+      "status": "PASS",
+      "expect": "passed.*(?!.*failed)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pre-computed chatter rows present -- at most TOP_N=10 ranked entries for the chatter axis, each carrying a ticker and a score in the 0-100 range. An empty table means the producer never ran and is NOT met; more than 10 chatter entries for one as-of date breaks TOP_N and is NOT met",
+      "method": "live_read",
+      "invocation": "timeout 110 .tools/aws dynamodb scan --table-name opal-amgt-security-metrics --max-items 12 --output text 2>&1 | tail -10",
+      "output_evidence": "AS_OF_DATE 2026-09-11 / AXIS CHATTER / AXIS_DATE CHATTER#2026-09-11 / RANK 10 / RANK_SORT 00010 / RAW_CHATTER_COUNT 0 / SCORE 0 / TICKER Enel IM / WINDOW_DAYS 30 (last item of the scan's text rendering)",
+      "denominator": "Full-table read confirms exactly 10 of 10 items total (dynamodb scan --select COUNT => 10; axis-rank-index Query on axis_date=CHATTER#2026-09-11 => Count 10, rank_sort 00001..00010, every score present and within [0,100] -- all 0 given opal-amgt-articles' current 0-item state, itself a valid point in the normalized range, not a missing value)",
+      "status": "PASS",
+      "expect": "TICKER"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a printed denominator with ZERO hits in this cell's own new code -- NEGATIVE: the producer adds no alert, SNS topic, email send, freshness checker or alarm. Any hit inside code this cell authored violates the standing moratorium and is NOT met. A denominator of 0 files scanned is OUT-OF-CORPUS, not a zero, and is NOT met either",
+      "method": "command",
+      "invocation": "timeout 110 comp-find \"sns|publish_alert|send_email|freshness_check|cloudwatch_alarm\" lib/research infra/aws/terraform/amgt-resapp --limit 20 2>&1 | tail -10",
+      "output_evidence": "DENOMINATOR: 0 hit(s) across 76 file(s) scanned in scope [corpus=all] | 53 EPHEMERAL-FLOOR, NOT searched | 3 BINARY, NOT searched -- NO HITS.",
+      "denominator": "76 files scanned (corpus=all), non-zero denominator so not out-of-corpus; re-run with --corpus raw for full coverage (including the ephemeral floor -- .terraform/ provider binaries, .build/ zip+tfplan): still 0 hits across 76 files scanned, 56 binary (compiled provider/zip artifacts, not authored code)",
+      "status": "PASS",
+      "expect": "0 hit\\(s\\)"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "(JUDGMENT, unspecified prose per the task order's proof_of_spec block -- graded by 3.0.0_SA_CVO~Z against the cell's full bar: producer-not-monitor, pre-computed-only, scheduled, axis fidelity)",
+      "method": "manual_read_with_citation",
+      "invocation": "read lib/research/metrics/chatter_gate.py, chatter_axis.py, infra/aws/terraform/amgt-resapp/chatter-axis-schedule.tf, and org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/AMGT-rd-5.window-record.md",
+      "output_evidence": "The axis (30/0-100/10) is read from chatter_gate.py, never re-declared; the producer writes PRE-COMPUTED rows only (no render-time derivation exists anywhere in this cell); the schedule is a real daily cron via aws_scheduler_schedule, ENABLED and live-verified, not success-of-upstream; nothing here watches the output table or notifies anyone (AC3). The one deviation from the repo's usual Lambda-packaging shape (archive_file) is disclosed in full, with its own measured cause, in the window record and surprise row AMGT_RESAPP-Z-W2-S7.",
+      "denominator": "N/A -- judgment criterion, no verdict computed by this instance",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order's own annotation: 'do NOT grade it. Record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~Z. PASS or FAIL on a judgment row is INVALID.' The grade lands in 3.0.0_SA_CVO~Z's L9 adjudication row.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "chatter_gate.TOP_N mutated from 10 to 11 in the live worktree file (not committed), then AC1's exact invocation re-run to prove the test suite discriminates a real defect rather than passing unconditionally.",
+      "expected": "At least the three tests directly pinning TOP_N (test_chatter_gate_top_n_is_10, test_rank_top_n_caps_at_top_n, and any orchestration test asserting rows_ranked==TOP_N) FAIL.",
+      "observed": "4 failed, 18 passed: test_chatter_gate_top_n_is_10, test_rank_top_n_caps_at_top_n, test_compute_chatter_axis_ranks_and_caps_at_top_n, test_compute_chatter_axis_all_zero_signal_still_writes_top_n all failed with 'assert 11 == 10' / 'where 11 = chatter_gate.TOP_N' -- fired exactly as expected. Reverted immediately after (sed TOP_N=11 -> TOP_N=10); re-ran AC1's invocation: 22 passed, 50 deselected, byte-identical to the pre-mutation run; `git status`/`git diff` confirm zero residual diff against the committed file.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 (pytest) and AC2 (live dynamodb query/scan) were each run more than once in this session: pytest ran before the mutant test, was re-run after reverting the mutant, and ran once more as the final formal AC1 invocation recorded above. The chatter-axis Query (axis-rank-index) was run both via the ad-hoc `python -m lib.research.metrics.chatter_axis` CLI (dry-run then write) and via the deployed Lambda (two live invokes) -- both wrote/read the SAME 10-row set for as_of_date=2026-09-11 (overwrite_by_pkeys on axis_date+ticker, so a re-run does not duplicate rows).",
+      "observed": "pytest: '22 passed, 50 deselected' identical across all three non-mutated runs. Live table: Count=10 both before and after the Lambda's own two invokes (each invoke recomputes and overwrites the same 10 keys, since the underlying opal-amgt-articles signal has not changed) -- rank_sort 00001..00010 and score=0 for every ticker, byte-stable across reads.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The read side (AMGT-rd-8, the Lead Panel) -- no route, component or client-side sort",
+      "reason": "Bound: DO NOT BUILD THE READ SIDE. AMGT-rd-8 reads these rows; this cell only writes them."
+    },
+    {
+      "item": "Any alert, alarm, SNS topic, SES send, or freshness checker on opal-amgt-security-metrics",
+      "reason": "Standing moratorium (bound); AC3 mechanically confirms 0 hits for that class of code in this cell's own files."
+    },
+    {
+      "item": "Editing infra/aws/terraform/amgt-resapp/security-metrics-table.tf, or the module's terraform{}/provider{}/backend{} content",
+      "reason": "Explicit bound; surprise rows AMGT_RESAPP-Z-S9/-S10 name the pre-existing rd-1/rd-2 collision as routed to AMGT-rd-3, not this cell's to touch. This cell's new file (chatter-axis-schedule.tf) declares no terraform{}/provider{}/backend{} block of its own."
+    },
+    {
+      "item": "A DynamoDB-backed or otherwise canonical universe source (replacing the worker-numbered universe.json read)",
+      "reason": "Out of this cell's paths grant (no infra/aws/terraform path for a new table beyond amgt-resapp, and no owned home for such a store named by the cell text). Surfaced as row AMGT_RESAPP-Z-W2-S6 rather than built unilaterally."
+    },
+    {
+      "item": "Migrating the Lambda's packaging from a hand-built static zip to Terraform's archive_file",
+      "reason": "Blocked by the module's one-required-providers ceiling, in a file this cell may not edit (row AMGT_RESAPP-Z-W2-S7). Left as a documented follow-on for whichever cell reconciles the module (AMGT-rd-3)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W2-S6: AMGT-rd-5's cell text never names the ticker universe or its source (only AMGT-rd-2 is a declared dependency); this worker read AMGT-r-12's landed universe.json (worker slot ~4), restricted to bloomberg_ticker status MEASURED, as a reasonable but not spec-mandated choice.",
+    "AMGT_RESAPP-Z-W2-S7: Terraform's archive_file (the repo's usual Lambda-packaging shape) needs the `archive` provider, and this module directory already has its one allowed required_providers block in a file this cell is barred from touching (S9/S10) -- terraform init measured the 'only one required providers configuration' refusal directly; worked around with a static zip built outside Terraform (lambda_src/build_zip.py) instead of stopping."
+  ],
+  "session_log": "N/A -- no session-log path is inside this worker's <paths> write surface (the task order names only lib/research/, infra/aws/terraform/amgt-resapp/, org/critical_paths/change_management/, org/critical_paths/.open_deploys/, deliverables/, the surprise-channel investigation file, and the task-order file itself; org/mcp/sessions/ was added by the coordinator's amendment 898fef5268 purely for safe-apply's identity resolution, written but not a session-log surface). The full session is this turn's transcript; every invocation and output is carried verbatim in the acceptance rows, controls, and compiler_tools above and in the window-record deliverable.",
+  "compiler_tools": [
+    {
+      "tool": "aws dynamodb describe-table / scan (pre-build re-measure)",
+      "invocation": "timeout 60 .tools/aws dynamodb describe-table --table-name opal-amgt-articles --query \"Table.[TableName,TableStatus,ItemCount]\" --output text; timeout 60 .tools/aws dynamodb describe-table --table-name opal-amgt-articles --query \"Table.[KeySchema,GlobalSecondaryIndexes[].{IndexName:IndexName,KeySchema:KeySchema}]\" --output json",
+      "result": "opal-amgt-articles ACTIVE 0 items. KeySchema security_key(HASH)/published_at(RANGE); GSIs platform_date_index (platform/published_at), ticker_date_index (ticker/published_at) -- confirms the exact GSI this producer's default_article_count queries."
+    },
+    {
+      "tool": "python -m pytest (pre-formal, and the mutant control)",
+      "invocation": "timeout 110 python -m pytest lib/research -q -k chatter",
+      "result": "22 passed pre-mutation; 4 failed / 18 passed with TOP_N mutated to 11 (mutant control, see controls.mutant); 22 passed again after revert -- byte-identical to the pre-mutation run."
+    },
+    {
+      "tool": "python -m lib.research.metrics.chatter_axis (ad hoc QA)",
+      "invocation": "timeout 110 python -m lib.research.metrics.chatter_axis --dry-run; timeout 110 python -m lib.research.metrics.chatter_axis",
+      "result": "Dry-run: tickers_considered=34 rows_ranked=10 rows_written=0. Write: tickers_considered=34 rows_ranked=10 rows_written=10 -- confirms the same ranking is computed either way, and only the write mode touches AWS."
+    },
+    {
+      "tool": "terraform init / validate / plan",
+      "invocation": "cd infra/aws/terraform/amgt-resapp && timeout 100 terraform init -input=false; timeout 100 terraform validate; timeout 110 terraform plan -input=false -out=.build/plan.tfplan",
+      "result": "init: 'Successfully configured the backend s3! Installed hashicorp/aws v5.100.0. Terraform has been successfully initialized!' (after removing the second required_providers block that had refused init -- see row S7). validate: 'Success! The configuration is valid.' plan: '6 to add, 0 to change, 0 to destroy.'"
+    },
+    {
+      "tool": "deploy_ledger.py open",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-resapp-rd-5-chatter-axis-schedule --title \"AMGT_RESAPP rd-5: chatter axis writer Lambda + daily EventBridge Scheduler\" --author 0.9.0_WK_AMGT_RESAPP~2 --lambda amgt-resapp-chatter-axis --leg \"L2|verify|amgt-resapp-chatter-axis-daily schedule|aws scheduler get-schedule --name amgt-resapp-chatter-axis-daily State ENABLED\" --window-hours 2",
+      "result": "OK: OPENED deploy ledger 'amgt-resapp-rd-5-chatter-axis-schedule' (2 legs) -> org/critical_paths/change_management/20260911T1812Z_amgt-resapp-rd-5-chatter-axis-schedule_deploy_completion.md"
+    },
+    {
+      "tool": "safe-apply.sh apply",
+      "invocation": "bash .tools/safe-apply.sh -chdir=infra/aws/terraform/amgt-resapp apply -input=false -auto-approve .build/plan.tfplan",
+      "result": "HALT-gate scanned issuer 2.0.0_SA_COO~ZZZ's inbox (worker has none of its own); comp-tagauthz gate PASSED (0 candidate resources overwrite an access-granting tag); tombstone-gate CLEAN (0 of 7 tombstones match). Apply complete! Resources: 6 added, 0 changed, 0 destroyed. Outputs: chatter_axis_lambda_arn, chatter_axis_schedule_state=ENABLED."
+    },
+    {
+      "tool": "aws lambda get-function / scheduler get-schedule / lambda invoke / logs tail (post-apply live verification)",
+      "invocation": "timeout 60 .tools/aws lambda get-function --function-name amgt-resapp-chatter-axis --query Configuration.[FunctionName,State,LastUpdateStatus,Runtime] --output text; timeout 60 .tools/aws scheduler get-schedule --name amgt-resapp-chatter-axis-daily --query [Name,State,ScheduleExpression] --output text; timeout 60 .tools/aws lambda invoke --function-name amgt-resapp-chatter-axis .out.json; timeout 60 .tools/aws logs tail /aws/lambda/amgt-resapp-chatter-axis --since 5m",
+      "result": "Lambda Active/Successful/python3.12. Schedule ENABLED cron(0 10 * * ? *). Invoke StatusCode 200, payload {as_of_date:2026-09-11, tickers_considered:34, rows_ranked:10, rows_written:10}. Logs: two clean 'OK:' lines, no error, ~10-16s each."
+    },
+    {
+      "tool": "deploy_ledger.py close-leg (x2) + close",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug amgt-resapp-rd-5-chatter-axis-schedule --leg-id amgt-resapp-chatter-axis --proof \"...\"; python .tools/deploy_ledger.py close-leg --slug amgt-resapp-rd-5-chatter-axis-schedule --leg-id L2 --proof \"...\"; python .tools/deploy_ledger.py close --slug amgt-resapp-rd-5-chatter-axis-schedule",
+      "result": "OK: leg amgt-resapp-chatter-axis closed. OK: leg L2 closed. Remaining open: NONE. OK: CLOSED deploy ledger -- all 2 legs proven; sentinel removed."
+    },
+    {
+      "tool": "comp-find (AC3 + universe/citation research)",
+      "invocation": "timeout 110 comp-find \"sns|publish_alert|send_email|freshness_check|cloudwatch_alarm\" lib/research infra/aws/terraform/amgt-resapp --limit 20; timeout 60 comp-find \"sns|publish_alert|send_email|freshness_check|cloudwatch_alarm\" lib/research infra/aws/terraform/amgt-resapp --corpus raw --limit 20",
+      "result": "0 hits across 76 files scanned (corpus=all, 53 ephemeral-floor + 3 binary excluded); 0 hits across 76 files scanned (corpus=raw, 56 binary -- provider/zip artifacts, not authored code)."
+    },
+    {
+      "tool": "safe-commit.sh (surprise-row commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~2 <0.9.0_WK_AMGT_RESAPP~2@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 1fbedc189f5497ca5e2dc96a84371f14bc608224: surprise-row-gate OK (2 new rows of 37 total, both carry step-7/step-10 fields); msg-verify MATCH."
+    },
+    {
+      "tool": "safe-commit.sh (build + deploy-record commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~2 <0.9.0_WK_AMGT_RESAPP~2@opal.agent>\" -F <msgfile> -- lib/research/metrics/ infra/aws/terraform/amgt-resapp/chatter-axis-schedule.tf infra/aws/terraform/amgt-resapp/lambda_src/ org/critical_paths/change_management/20260911T1812Z_amgt-resapp-rd-5-chatter-axis-schedule_deploy_completion.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/AMGT-rd-5.window-record.md",
+      "result": "commit bc7d46b85920c0c5d84c529143af21a19b807405: 10 files changed, 1205 insertions; commit-gate OK (pre-commit gate clean for 8 of 10 files, 2 non-.py/.sh/.tf/.json skipped by design); missions-tree-check OK (0 violations); to-pipeline-gate OK; surprise-row-gate OK (0 rows this commit); msg-verify MATCH."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~2/AMGT_RESAPP.TO-AMGT-rd-5.chatter-axis-scheduled-producer.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "see final report -- run after this instance was written, before the status-flip commit"
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rb-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-1.fiscal-join-direction-correct.md",
+    "group": "OTHER",
+    "vintage_commit": "3f2189f28bb2102eda0fa12fe277cc2246290702"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "192c1982316e49a38c0a41807c2468a7bdf49658",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rb-1.fiscal-join-direction-correct.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/fye_join.py",
+      "kind": "script",
+      "commit_or_etag": "c5060df50968ec191a0a1dc95715727d857cec61",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THE FIX (C-S15): _nearest_price no longer falls back to the nearest point in EITHER direction -- it returns UNRESOLVED (None) whenever the series has nothing on or before period_end, full stop. gap_days is now the true elapsed (period_end - price_date).days (comment states the invariant), never abs() over a possible future price. fiscal_period_join's None-price branch is unchanged (already carried UNRESOLVED through). Exercised live via AC1 (test suite) and AC2 (direct _nearest_price call on the C-S15 synthetic scenario).",
+      "introduces": ["UNRESOLVED (None)"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_fye_join.py",
+      "kind": "test",
+      "commit_or_etag": "c5060df50968ec191a0a1dc95715727d857cec61",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "runnable as `python -m pytest integrations/bloomberg/research/tests/test_fye_join.py -q`; AMGT-r-1's original 2 tests unchanged PLUS 3 new: (1) test_nearest_price_future_only_returns_unresolved -- the exact C-S15 negative control (period_end 2025-12-31, only a 2026-01-02 price -> None, synthetic dates, no vendor call); (2) test_nearest_price_on_or_before_still_resolves_and_never_after -- the ordinary case still resolves and never picks a future date; (3) test_fiscal_period_join_direction_assertion_all_landed_securities -- every RESOLVED row across all 3 already-landed securities (SAP GY, BA US, BABA US) has price_date <= period_end. rc 0, '5 passed' both this run and the determinism re-run.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a summary line beginning with a passed count and no \"failed\" -- AMGT-r-1's tests still pass PLUS (1) a FUTURE-ONLY negative control: period_end 2025-12-31 with only a 2026-01-02 price returns UNRESOLVED (price None), never a resolved row at gap 2; and (2) a DIRECTION assertion: every resolved row's price_date <= period_end. A test that still accepts the future price, or omits the direction assertion, is NOT met",
+      "method": "test_suite",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_fye_join.py -q 2>&1 | tail -1",
+      "output_evidence": "5 passed in 4.08s",
+      "denominator": "5 of 5 tests passed: the 2 AMGT-r-1 tests (unchanged) + test_nearest_price_future_only_returns_unresolved (the future-only negative control) + test_nearest_price_on_or_before_still_resolves_and_never_after (ordinary case) + test_fiscal_period_join_direction_assertion_all_landed_securities (the direction assertion, across all 3 landed securities)",
+      "status": "PASS",
+      "expect": "^\\d+ passed.*(?<!failed)$"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"future_only_resolves_to None\" (a future-only series is UNRESOLVED, never clamped to the future price) AND \"on_or_before_picks 2025-12-30\" AND \"on_or_before_not_after True\" -- when an on-or-before price exists it is chosen and is never after the period end. A non-None future_only result is the C-S15 defect and is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import importlib.util as u,datetime as dt; s=u.spec_from_file_location('fj','integrations/bloomberg/research/fye_join.py'); m=u.module_from_spec(s); s.loader.exec_module(m); pe=dt.date(2025,12,31); fut=m._nearest_price([(dt.date(2026,1,2),100.0)], pe); ob=m._nearest_price([(dt.date(2025,12,30),99.0),(dt.date(2026,1,2),100.0)], pe); print('future_only_resolves_to', fut, '| on_or_before_picks', (ob[0].isoformat() if ob else None), '| on_or_before_not_after', (ob is None or ob[0] <= pe))\"",
+      "output_evidence": "future_only_resolves_to None | on_or_before_picks 2025-12-30 | on_or_before_not_after True",
+      "denominator": "2 of 2 synthetic scenarios checked (future-only, on-or-before-plus-future); both match the exact expected literals",
+      "status": "PASS",
+      "expect": "future_only_resolves_to None.*on_or_before_picks 2025-12-30.*on_or_before_not_after True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"unique securities requested\" of 3 or fewer -- NEGATIVE: the direction fix and its control added no new unique security (F2/G-24)",
+      "method": "command",
+      "invocation": "python -c \"import json; l=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/pull_log.json')); print('unique securities requested', len(set(l['securities'])))\"",
+      "output_evidence": "unique securities requested 3",
+      "denominator": "3 of 3 unique securities in pull_log.json (SAP GY Equity, BA US Equity, BABA US Equity); this cell made no vendor call, so pull_log.json is byte-identical to AMGT-r-1's landed version (still committed at 17f7cba834)",
+      "status": "PASS",
+      "expect": "unique securities requested [1-3]$"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "is UNRESOLVED the right answer when no on-or-before price exists (never a hidden future clamp), and is the direction assertion sound and complete? This is the C-S15 regrade.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read integrations/bloomberg/research/fye_join.py's _nearest_price/fiscal_period_join and tests/test_fye_join.py's 3 new tests, against CVO evidence @b3acbcf3dd (C-S15) and BOUNDS block C-FISCAL-YEAR-JOIN/DIRECTION",
+      "output_evidence": "_nearest_price now has exactly one resolving branch (on_or_before non-empty -> max by date) and one UNRESOLVED branch (empty on_or_before -> None); the either-direction fallback (`min(price_series, key=lambda t: abs(...))`) is deleted entirely, not merely guarded, so there is no code path left that can return a price dated after period_end. gap_days is (period_end - price_date).days with no abs(), so a bug that reintroduced a future price would surface as a NEGATIVE gap_days rather than silently passing an under-45-day check -- the invariant is now structurally visible, not just behaviorally enforced. The direction assertion (test_fiscal_period_join_direction_assertion_all_landed_securities) reads price_date <= period_end off fiscal_period_join's own output rows (the production join, not a synthetic reimplementation) across all 3 already-landed securities -- December filers (SAP GY, BA US) via their own annual series and the non-December filer (BABA US) via its dense DAILY series -- and additionally checks gap_days >= 0 on every resolved row, which the removed abs() could previously have masked. The negative control (test_nearest_price_future_only_returns_unresolved) reproduces the exact CVO scenario (@b3acbcf3dd: period_end 2025-12-31, only 2026-01-02 at price 100) and asserts None; a companion test confirms the ordinary on-or-before case still resolves correctly (no regression). Left to the CVO's judgment: whether UNRESOLVED (rather than e.g. a flagged/annotated future price) is the right SEMANTIC answer for downstream consumers, and whether checking 3 landed securities' resolved rows plus 1 synthetic negative control is a COMPLETE direction assertion or whether a wider synthetic battery (e.g. price exactly on period_end, price series entirely empty) should be demanded.",
+      "denominator": "N/A -- judgment criterion, read against the deliverable and the join module, no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, not self-graded here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/mutant_test_direction.py (not committed) runs the OLD either-direction-fallback+abs `_nearest_price` (reconstructed inline, matching AMGT-r-1's pre-fix code exactly) against the SAME C-S15 future-only scenario (period_end 2025-12-31, only a 2026-01-02 price) that AC2 exercises against THE FIX.",
+      "expected": "OLD (mutant): resolves to the future price (2026-01-02, 100.0) at gap_days 2 -- the C-S15 defect. NEW (the fix): None (UNRESOLVED).",
+      "observed": "OLD (mutant, either-direction+abs): result=(datetime.date(2026, 1, 2), 100.0) gap_days=2. NEW (the fix): result=None. CONTROL FIRED-AS-EXPECTED: True.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The pytest suite (test_fye_join.py) and the AC2 command each run twice against the live (unchanged) S3 state and the same synthetic literals.",
+      "observed": "pytest: '5 passed' both runs (4.08s and 3.80s wall time, same pass/fail outcome). AC2 command: identical output both runs -- 'future_only_resolves_to None | on_or_before_picks 2025-12-30 | on_or_before_not_after True'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Re-running derive_fye_fixed.py to re-serve the model_block_fye blocks",
+      "reason": "BOUND 'PRESERVE THE PASSING SAMPLE': 0 of 30 already-served rows were affected by the C-S15 defect at this vintage (all had a genuine on-or-before price), so re-deriving would change nothing but would move the served artifacts' pins/etags for no reason -- the cell requires the served sample and its exact pins NOT move."
+    },
+    {
+      "item": "A 4th security, or re-pulling SAP GY Equity / BA US Equity / BABA US Equity",
+      "reason": "F2/G-24 + BOUND 'NO NEW UNIQUE SECURITY': the direction fix and its new tests use only synthetic dates plus the 3 already-landed securities' already-landed raw data; no vendor call was made (pull_log.json is untouched, still committed at 17f7cba834)."
+    },
+    {
+      "item": "Any change to check_join_fye.py, derive_fye_fixed.py, pull_baba_daily_px.py, or the served model_block_fye_*.json local copies",
+      "reason": "Out of this cell's WHAT TO PRODUCE (the _nearest_price direction fix and its negative control/direction-assertion tests only); this round's cell is scoped to fye_join.py and tests/test_fye_join.py, not the readback or derivation scripts, which are unaffected by the fix (0 of 30 rows moved)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_fye_join.py -q",
+      "result": "rc 0; 5 passed (run twice, identical outcome, see controls.determinism)"
+    },
+    {
+      "tool": "AC2 direct _nearest_price probe",
+      "invocation": "python -c \"import importlib.util as u,datetime as dt; ...\" (see acceptance[1].invocation)",
+      "result": "rc 0; future_only_resolves_to None | on_or_before_picks 2025-12-30 | on_or_before_not_after True (run twice, identical)"
+    },
+    {
+      "tool": "AC3 pull_log.json unique-security count",
+      "invocation": "python -c \"import json; l=json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/pull_log.json')); print('unique securities requested', len(set(l['securities'])))\"",
+      "result": "rc 0; unique securities requested 3"
+    },
+    {
+      "tool": ".scratch/mutant_test_direction.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/mutant_test_direction.py",
+      "result": "rc 0; OLD (mutant) result=(2026-01-02, 100.0) gap_days=2; NEW (the fix) result=None; CONTROL FIRED-AS-EXPECTED: True"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh integrations/bloomberg/research/fye_join.py integrations/bloomberg/research/tests/test_fye_join.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate + surprise-row-gate + to-pipeline-gate chain)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~1 <0.9.0_WK_AMGT_RESAPP~1@opal.agent>\" -F <msgfile> -- integrations/bloomberg/research/fye_join.py integrations/bloomberg/research/tests/test_fye_join.py",
+      "result": "commit c5060df509: risk-reflex REFLEX CLEAN (2 of 2 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 2 files; to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}

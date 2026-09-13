@@ -18,7 +18,6 @@ import base64
 import io
 import json
 import os
-import random
 import re
 import sys
 import time
@@ -30,6 +29,12 @@ try:
     from PIL import Image
 except ImportError:
     Image = None
+
+# Factored out to press_and_hold_lib.py 2026-09-11 so Bloomberg.com's harvester (a second site
+# hitting the same PerimeterX-style widget) can reuse this proven mechanism without duplicating it
+# or importing this module (which runs a full SA login as a side effect at import time).
+from press_and_hold_lib import press_and_hold as _pahl_press_and_hold
+from press_and_hold_lib import press_and_hold_adaptive as _pahl_press_and_hold_adaptive
 
 S = os.path.dirname(os.path.abspath(__file__))
 A = sys.argv
@@ -262,100 +267,11 @@ def locate(page, screenshot_fn, description):
 
 
 def press_and_hold(page, x, y, hold_s):
-    # FIX (live human observation, 2026-09-10): the PerimeterX widget's fill bar DE-FILLS if held
-    # too long -- there is a target window, not "longer is safer". The original escalating
-    # duration (6 + 2*walls: 8s, 10s, 12s, 14s...) assumed more time on each retry was strictly
-    # better and is backwards past the fill point. Also adds small in-hold jitter: a perfectly
-    # stationary press for several seconds is itself a bot signature real vendors check for.
-    log(f"press-and-hold at ({x},{y}) for {hold_s}s (with jitter)")
-    page.mouse.move(x, y, steps=12)
-    time.sleep(0.3)
-    page.mouse.down()
-    elapsed = 0.0
-    step = 0.25
-    while elapsed < hold_s:
-        time.sleep(step)
-        elapsed += step
-        jx = x + random.uniform(-1.5, 1.5)
-        jy = y + random.uniform(-1.5, 1.5)
-        page.mouse.move(jx, jy, steps=1)
-    page.mouse.up()
-
-
-_CENTER_LO, _CENTER_HI = 10, 22  # middle ~37.5% of a 32x32 grid
-
-
-def _crop_scores(page, bbox, baseline_full, baseline_center):
-    """Cheap LOCAL pixel-diff signals -- NO Kimi call. Returns (whole_score, center_score): mean
-    absolute grayscale difference of the current crop vs. the pre-press baseline, over the WHOLE
-    widget and over just its CENTER sub-region. whole_score tracks the fill bar/ring sweeping in;
-    center_score is scoped to where a checkmark icon appears -- Andrew-direct 2026-09-10, after
-    manually completing a run himself: 'its not enough to wait until the black bar is filled, a
-    check mark will appear in the center of the bar, that is the true marker.' A checkmark is a
-    small, SUDDEN, localized event, shaped very differently from the bar's smoother, wider fill
-    sweep -- whole_score alone can plateau on the sweep whether or not a checkmark ever appears, so
-    it needs its own spatially-scoped signal."""
-    png = page.screenshot(clip=bbox, timeout=3000)
-    px = list(Image.open(io.BytesIO(png)).convert("L").resize((32, 32)).getdata())
-    whole = sum(abs(a - b) for a, b in zip(px, baseline_full)) / len(px)
-    center_idx = [yy * 32 + xx for yy in range(_CENTER_LO, _CENTER_HI) for xx in range(_CENTER_LO, _CENTER_HI)]
-    center_px = [px[i] for i in center_idx]
-    center = sum(abs(a - b) for a, b in zip(center_px, baseline_center)) / len(center_px)
-    return whole, center
+    _pahl_press_and_hold(page, x, y, hold_s, log)
 
 
 def press_and_hold_adaptive(page, x, y, bbox, max_hold_s=8.0, poll_interval=0.15):
-    """Andrew-direct 2026-09-10: Kimi is far too slow (10-20s/call, measured) to close this loop --
-    the fill/checkmark/de-fill animation runs in a few seconds -- so Kimi's role stops at LOCATING
-    the button; release timing is a purely LOCAL, fast pixel-diff loop with zero network calls
-    during the hold. PRIMARY release trigger is a sudden, sharp jump in the CENTER-region signal --
-    the checkmark appearing, per Andrew's direct ground-truth correction after manually finishing a
-    run and watching it happen. FALLBACK trigger (if no such spike is ever seen) is the whole-crop
-    fill signal peaking, as before -- kept so a checkmark too small/subtle for a 32x32 crop to
-    resolve does not strand the hold forever."""
-    if Image is None or bbox is None:
-        log("adaptive press-and-hold unavailable (no PIL or no bbox) -- falling back to a fixed hold")
-        press_and_hold(page, x, y, random.uniform(1.8, 3.2))
-        return
-    try:
-        baseline_png = page.screenshot(clip=bbox, timeout=3000)
-        baseline_full = list(Image.open(io.BytesIO(baseline_png)).convert("L").resize((32, 32)).getdata())
-        center_idx = [yy * 32 + xx for yy in range(_CENTER_LO, _CENTER_HI) for xx in range(_CENTER_LO, _CENTER_HI)]
-        baseline_center = [baseline_full[i] for i in center_idx]
-    except Exception as e:
-        log(f"adaptive press-and-hold: baseline crop failed {type(e).__name__} -- falling back to a fixed hold")
-        press_and_hold(page, x, y, random.uniform(1.8, 3.2))
-        return
-    log(f"adaptive press-and-hold at ({x:.0f},{y:.0f}) -- watching for the center checkmark spike (fallback: whole-bar peak)")
-    page.mouse.move(x, y, steps=12)
-    time.sleep(0.2)
-    page.mouse.down()
-    whole_scores, center_scores = [], []
-    started = time.monotonic()
-    try:
-        while time.monotonic() - started < max_hold_s:
-            time.sleep(poll_interval)
-            page.mouse.move(x + random.uniform(-1.0, 1.0), y + random.uniform(-1.0, 1.0), steps=1)
-            try:
-                w, c = _crop_scores(page, bbox, baseline_full, baseline_center)
-            except Exception:
-                continue
-            whole_scores.append(w)
-            center_scores.append(c)
-            elapsed = time.monotonic() - started
-            if len(center_scores) >= 2 and center_scores[-1] > 18 and center_scores[-1] > center_scores[-2] * 1.4:
-                log(f"CHECKMARK signal: center delta jumped {center_scores[-2]:.1f} -> {center_scores[-1]:.1f} "
-                    f"after {elapsed:.2f}s -- releasing")
-                break
-            if len(whole_scores) >= 3 and whole_scores[-1] <= whole_scores[-2] and whole_scores[-2] >= whole_scores[-3]:
-                log(f"fallback signal: whole-bar delta peaked at {whole_scores[-2]:.1f} after {elapsed:.2f}s "
-                    f"(no checkmark spike seen) -- releasing")
-                break
-        else:
-            log(f"adaptive press-and-hold: no checkmark or peak detected within {max_hold_s}s "
-                f"(whole tail={whole_scores[-5:]}, center tail={center_scores[-5:]}) -- releasing anyway")
-    finally:
-        page.mouse.up()
+    _pahl_press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=max_hold_s, poll_interval=poll_interval)
 
 
 def _locate_botwall(ctx, page):
