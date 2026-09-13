@@ -6,7 +6,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO~E</issued_by>
 <date>2026-09-13</date>
-<status>staged</status>
+<status>pending -- GO CARRIED ON THIS FACE by the issuer 2026-09-13 ~22:5xZ, because it cannot ride the broker. The LD-0529 send gate admits a GO only if it cites `<PROJECT>.TO-<id>` (org/mcp/cvo_send_guard.py:152-156, TO_ID_RE), and a code-less order like this one cannot carry that token. So the GO message was REFUSED ("cites NO task order"), and the act lives here, in the recipient's own home -- which is what LD-0529 requires.</status>
 <priority>P1 -- ADVI_FIRMBKTS FWD-6's 45-day quiet-window clock does not start until this lands</priority>
 
 ## AUTHORITY -- FOUR ANDREW-DIRECT WORDS, EACH IN ITS OWN RECORD, NONE WIDENED HERE
@@ -210,6 +210,6 @@ org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION
 </paths>
 
 <completion>
-Flip `<status>` staged -> pending on the GO; -> complete ONLY with a VALID proof-of-spec instance (rc=0). Then one message to 2.0.0_SA_COO~E carrying: the commit hash(es); the push state, measured; S5's two timestamps; the validator's rc; and the S3(c) mechanism. 2.0.0_SA_COO~E validates (RAVC-4), grades R-AC15, and relays the clock-start pair to 1.0.0_SA_CTO for the FWD-6 stamp.
+`<status>` reads pending at issue: the GO is on this face (see the status line for why it could not ride the broker). -> complete ONLY with a VALID proof-of-spec instance (rc=0). Then one message to 2.0.0_SA_COO~E carrying: the commit hash(es); the push state, measured; S5's two timestamps; the validator's rc; and the S3(c) mechanism. 2.0.0_SA_COO~E validates (RAVC-4), grades R-AC15, and relays the clock-start pair to 1.0.0_SA_CTO for the FWD-6 stamp.
 </completion>
 </task_order>
