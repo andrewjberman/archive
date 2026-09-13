@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_ASTTAX.TO-U3-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/prd/POSN_ASTTAX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "ae66157381"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round4.md",
+    "vintage_commit": "21a5b94864",
+    "to_ref": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-U3-1.extend-preserve-dont-clobber-to-the-seed-script.md"
+  },
+  "assignee": "0.9.0_WK_POSN_ASTTAX~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/POSN_ASTTAX.TO-U3-1.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The cell's record: the BEFORE measurement stated as a value, the proposed diff and what it does not alter, the AFTER/mutant proof with both controls named, and the full verbatim source of both control scripts (embedded because the commit gate cannot run in this worktree and no .py can be committed from it). 44,674 bytes, 0 non-ASCII."
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_proposed_patch.diff",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NOT APPLIED ANYWHERE -- this row is COMMITTED-NOT-DEPLOY-SCOPE because the enum carries no value for 'recorded but deliberately not applied', and that distinction is stated here rather than implied by a state name. The preserve-don't-clobber change U3-AC2 asks for, generated as a unified diff against the REAL bytes of data/black_diamond/scripts/classification/seed_canonical_securities.py (blob fbbc7165d3) and exercised on a scratch copy. +57/-2. DELIBERATELY NOT APPLIED: the target is outside the <paths> grant (row W16-S1). This artifact is the change RECORDED, never the change MADE, and the repo file is byte-identical to HEAD."
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_ac1_before_output.txt",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim rc-0 output of the U3-AC1 BEFORE control against the in-process scratch target, 4,916 bytes. Carries both SCRATCH TARGET interception lines, the blob-sha assertion, the vocabulary denominator, the re-measured 4-of-11, the CLOBBERED read-back and the firing mint control."
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_mutant_control_output.txt",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim rc-0 output of the three-arm mutant/discrimination control: pre-patch CLOBBERED 4 of 4, patched SURVIVED 4 of 4 with rc=1, --force CLOBBERED 4 of 4, mint control firing in all three arms. This is the deliverable's controls.mutant evidence and an issuer-facing demonstration; it is NOT a pass on U3-AC3."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "U3-AC1",
+      "criterion_verbatim": "on a SCRATCH copy only -- never the live table -- seed a record carrying a five-class value, re-run the seeding path, read the value back, and state the BEFORE result as a VALUE, not a description. If it does NOT clobber, say so plainly and stop here: a cell that finds its premise false has done its job. Name the scratch target explicitly so a reader can see the live table was untouched.",
+      "method": "command",
+      "invocation": "timeout 300 python .scratch/run/u3_ac1_before_control.py",
+      "output_evidence": "$ timeout 300 python .scratch/run/u3_ac1_before_control.py   (rc 0)\n  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)\n  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)\n  repo path : data/black_diamond/scripts/classification/seed_canonical_securities.py\n  blob sha  : fbbc7165d33198789d3a7788a557ed3f5ce75614\n  asserted == HEAD object: fbbc7165d33198789d3a7788a557ed3f5ce75614\n  denominator: 57 rows in CANONICAL_SECURITIES\n    'equity'          24 row(s)\n    'fixed_income'    33 row(s)\n  DISTINCT VALUES: 2 -- ['equity', 'fixed_income']\n  INTERSECTION WITH THE RATIFIED FIVE CLASSES:\n    ['Fixed Income / Cash', 'Equity', 'Structured', 'Commodities', 'Alternatives']\n    -> <empty>  (0 of 5)\n  MEASURED: 4 of 11 retag members carried by this seeder -- ['VXX', 'UVXY', 'QBER', 'PDBC']\n  the other 7 are absent: ['DBC', 'GLD', 'GSG', 'IAU', 'SLV', 'USO', 'VIXY']\n  TICKER BEFORE         AFTER          RATIFIED       VERDICT\n  VXX    Structured     equity         Structured     CLOBBERED\n  UVXY   Structured     equity         Structured     CLOBBERED\n  QBER   Structured     fixed_income   Structured     CLOBBERED\n  PDBC   Commodities    equity         Commodities    CLOBBERED\n  CLOBBERED: 4 of 4 members present in the seeder -- ['VXX', 'UVXY', 'QBER', 'PDBC']\n  VXX    management_style/sector  before=('passive', 'Broad')  after=('passive', 'Broad')  SURVIVED\nMINT CONTROL: 'CASH_USD' was absent before the run; after the run it is PRESENT (asset_class='fixed_income')\n  -> the seeder IS writing. A 'survived' verdict is therefore meaningful.\n  scratch etf-classifications    update_item calls:  57   rows minted: 53\n  scratch bd-securities          update_item calls:  57   rows minted: 57\nBEFORE RESULT: THE PREMISE HOLDS. 4 of 4 retag members present in\nthis seeder had a ratified five-class asset_class CLOBBERED by one\nre-seed. The BEFORE state, as values:\n  VXX    'Structured'  ->  'equity'\n  UVXY   'Structured'  ->  'equity'\n  QBER   'Structured'  ->  'fixed_income'\n  PDBC   'Commodities'  ->  'equity'",
+      "denominator": "4 of 11 retag-set members are carried by this seeder (re-measured by ast.literal_eval over its own 57-row CANONICAL_SECURITIES, not inherited from W14-S3); 4 of those 4 were clobbered. The seeder's asset_class vocabulary is 2 distinct values over 57 rows (equity 24, fixed_income 33), intersecting the ratified five classes 0 of 5. Scratch write volume: 57 update_item calls and 53 rows minted on the etf-classifications scratch target, 57 and 57 on bd-securities.",
+      "expect": "MEASURED: 4 of 11 retag members[\\s\\S]*VXX\\s+Structured\\s+equity\\s+Structured\\s+CLOBBERED[\\s\\S]*CLOBBERED: 4 of 4 members present in the seeder[\\s\\S]*MINT CONTROL[\\s\\S]*PRESENT[\\s\\S]*BEFORE RESULT: THE PREMISE HOLDS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "U3-AC2",
+      "criterion_verbatim": "the diff implementing preserve-don-t-clobber, matching the mechanism the SIBLING writer already uses -- read that writer and reuse its pattern rather than inventing a second one. Plus one line naming what the change does NOT alter: a first mint must still mint.",
+      "method": "diff",
+      "invocation": "timeout 180 git diff -- infra/aws/lambda/v2_portal/yang_pipeline/seed_canonical_securities.py",
+      "output_evidence": "$ timeout 180 git diff -- infra/aws/lambda/v2_portal/yang_pipeline/seed_canonical_securities.py\nrc=0\n--- bytes of diff output ---\n0\n=== THE DISCRIMINATOR: empty diff = CLEAN, or MATCHED NOTHING? ===\nindex entries matching the GRANTED pathspec: 0\nindex entries matching the REAL pathspec (positive control): 1\n$ git log --all --oneline -- infra/aws/lambda/v2_portal/yang_pipeline/seed_canonical_securities.py | wc -l\n0\n  ^ commits touching the granted path (0 = never existed)\n$ git log --all --oneline -- data/black_diamond/scripts/classification/seed_canonical_securities.py | wc -l\n4\n  ^ commits touching the real path\n$ git ls-files | wc -l   ->   33731   (full index, not the 3270-file readable cone)\n$ exact-basename match for seed_canonical_securities.py over all 33731 entries:\n  data/black_diamond/scripts/classification/seed_canonical_securities.py   (exactly 1 hit)\nVERDICT: the diff is EMPTY because the pathspec MATCHED NOTHING, not because the file is clean. The granted path has never existed on any ref; the file the cell is about is outside the <paths> grant. NO EDIT WAS MADE to it and the granted path was NOT created.",
+      "denominator": "0 of 1 granted code paths is writable-and-real: the <paths> block names 4 entries, 3 of which exist (the order file, the deliverables dir, the investigation channel) and 1 of which -- the only code path, and the whole subject of the cell -- has 0 commits across --all and 0 of 33,731 index entries. The real subject has 4 commits and 1 index entry and is not in the grant.",
+      "expect": "index entries matching the GRANTED pathspec: 0[\\s\\S]*index entries matching the REAL pathspec \\(positive control\\): 1[\\s\\S]*MATCHED NOTHING",
+      "status": "FAIL",
+      "status_reason": "BLOCKED, not failed-on-merit. Row POSN_ASTTAX-Z-W16-S1. The <paths> grant names infra/aws/lambda/v2_portal/yang_pipeline/seed_canonical_securities.py, which has never existed on any ref; the file the cell is about is data/black_diamond/scripts/classification/seed_canonical_securities.py, which is outside the grant AND outside this worktree's sparse cone. <paths> IS the write grant, so a path the order lacks is a blocking row, never an override -- no edit was made and the granted path was not created to make the order executable. The change that WOULD satisfy this clause is recorded in full as u3_proposed_patch.diff (+57/-2), generated against the real bytes, reusing seed-etf-classifications.py:72-120 merge_item()'s conflict rule (the is_placeholder half is inert here because this seeder never emits a placeholder), and exercised on a scratch copy. WHAT IT DOES NOT ALTER: a first mint still mints (53 rows minted under the patch, the same 53 as pre-patch); the bd-securities limb is untouched; the dry-run path is untouched; --force still overrides; non-owned attributes are unaffected. UNBLOCKS ON: the issuer re-cutting <paths> to the measured path."
+    },
+    {
+      "criterion_id": "U3-AC3",
+      "criterion_verbatim": "the five-class value SURVIVES the re-seed. POSITIVE CONTROL, REQUIRED: the same run still MINTS a record that did not previously exist -- a script that preserves everything by refusing to write at all would pass this clause and be worthless. NEGATIVE CONTROL, REQUIRED: the pre-patch script on the same input still reverts. If both arms read the same, the control is not discriminating and you report that rather than the result.",
+      "method": "command",
+      "invocation": "timeout 300 python .scratch/run/u3_mutant_control.py",
+      "output_evidence": "AC3's named invocation requires the PATCHED script, which does not exist because AC2 is blocked. No AFTER arm against a repo-resident patched script could be run.\nWHAT WAS RUN INSTEAD, scratch-only, as this deliverable's controls.mutant:\n$ timeout 300 python .scratch/run/u3_mutant_control.py   (rc 0)\nARM: NEGATIVE CONTROL -- pre-patch bytes, same input (must still revert)\n  SURVIVED 0 of 4 | CLOBBERED 4 | rc=None\n  MINT CONTROL: 'CASH_USD' MINTED -- the seeder is writing   (yang update_item=57, get_item=0, minted=53)\nARM: MUTANT -- patched bytes, same input (the verdict must flip)\n  VXX    Structured     Structured     Structured     SURVIVED\n  UVXY   Structured     Structured     Structured     SURVIVED\n  QBER   Structured     Structured     Structured     SURVIVED\n  PDBC   Commodities    Commodities    Commodities    SURVIVED\n  SURVIVED 4 of 4 | CLOBBERED 0 | rc=1\n  MINT CONTROL: 'CASH_USD' MINTED -- the seeder is writing   (yang update_item=53, get_item=57, minted=53)\n  [PRESERVED] VXX        asset_class: table serves 'Structured', seeder asserts 'equity' -- table wins, pass --force to override\n  REFUSED 4 etf-classifications row(s): the table serves a value this seeder disagrees with.\nARM: OVERRIDE -- patched bytes with --force (must revert again)\n  SURVIVED 0 of 4 | CLOBBERED 4 | rc=0\nDISCRIMINATION VERDICT\n  pre-patch  : CLOBBERED 4 of 4, minted=True\n  patched    : SURVIVED  4 of 4, minted=True, rc=1\n  --force    : CLOBBERED 4 of 4  (the override still overrides)\n  OK: THE CONTROL DISCRIMINATES.\n  RESTATED: this is a SCRATCH demonstration for the issuer. U3-AC2 and U3-AC3 remain BLOCKED -- the repo file is outside the <paths> grant (W16-S1) and no edit to it was made.",
+      "denominator": "3 arms over the same 4 present retag members: pre-patch CLOBBERED 4 of 4; patched SURVIVED 4 of 4; --force CLOBBERED 4 of 4. Mint control fired in 3 of 3 arms (CASH_USD minted; 53 yang rows minted under the patch vs 53 pre-patch). Patch size +57/-2 over the 296-line original.",
+      "expect": "SURVIVED 4 of 4 \\| CLOBBERED 0 \\| rc=1[\\s\\S]*MINT CONTROL: 'CASH_USD' MINTED[\\s\\S]*pre-patch  : CLOBBERED 4 of 4, minted=True[\\s\\S]*OK: THE CONTROL DISCRIMINATES[\\s\\S]*U3-AC2 and U3-AC3 remain\\s+BLOCKED",
+      "status": "FAIL",
+      "status_reason": "BLOCKED by U3-AC2, and stated as BLOCKED rather than passed on the strength of the scratch arms. Row POSN_ASTTAX-Z-W16-S1. This clause asks for the AFTER arm against THE PATCHED SCRIPT; no patched script exists in the repo because the file is outside the <paths> grant. All three arms the clause names were nonetheless measured on a SCRATCH copy and all three fire -- negative control reverts 4 of 4, the mint/positive control fires in every arm (53 rows minted under the patch), and the five-class value survives 4 of 4 with the run refusing (rc=1) rather than silently reverting -- but that is this deliverable's controls.mutant entry and a demonstration for the issuer, NOT a pass on this criterion. The arms read DIFFERENTLY on identical input, so the instrument discriminates; the criterion is unmet only because the change could not be made where it must be made. UNBLOCKS ON: the same re-cut that unblocks U3-AC2."
+    },
+    {
+      "criterion_id": "U3-AC4",
+      "criterion_verbatim": "clean on the changed .py, output cited. Check BOTH ASCII limbs and say so: the commit-MESSAGE arm is BLOCKING while a staged .py arm is WARN-ONLY and ships, so clearing the one that stopped you teaches nothing about the other.",
+      "method": "command",
+      "invocation": "timeout 180 bash .tools/commit-gate.sh org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_ac1_before_control.py",
+      "output_evidence": "$ timeout 180 bash .tools/commit-gate.sh org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_ac1_before_control.py\nTraceback (most recent call last):\n  File \"C:\\tmp\\wk-posn-u3\\.tools\\commit_gate_runner.py\", line 96, in <module>\n    import comp_constants_cli   # noqa: E402\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\nModuleNotFoundError: No module named 'comp_constants_cli'\nGATE_RC=1\nFAIL-CLOSED, EXERCISED not inferred:\n$ bash .tools/safe-commit.sh --author \"0.9.0_WK_POSN_ASTTAX~16 <...>\" -F <msg> -- <the .py>\n  [risk-reflex] ...python.exe: can't open file 'C:\\tmp\\wk-posn-u3\\org\\modules\\graph\\comp_pulse.py': [Errno 2] No such file or directory\nERROR: BLOCKED -- commit-gate failed (py_compile / ruff / lint). Commit aborted; files unstaged.\n  Fix the reported issue(s) and re-commit. This gate is UNIVERSAL + fail-closed on ALL .py (Rule 14); --force does NOT bypass a gate failure (it only overrides the contamination check).\nSAFECOMMIT_RC=1  -- and `git log --oneline -1` was unchanged: nothing committed.\nCAUSE (gate's own source): commit_gate_runner.py:78 GRAPH_DIR = WORKSPACE/'org'/'modules'/'graph'; :91-93 sys.path.insert; :96-100 import comp_constants_cli, manifest_check_cli, shell_cli, log_open_lint, ses_sender_lint_cli. `git sparse-checkout list` = .tools, infra/aws/lambda/v2_portal, org/missions, org/projects, org/ref, org/standards -- org/modules IS NOT IN THE CONE.\nPOSITIVE CONTROL FIRES: the gate's IN-CONE dependency loaded -- :87 loads ds-precommit-check.py from .tools/ without raising and the traceback frame is nine lines later at :96. So this is an out-of-cone import, not a broken gate/python/argument.\nBOTH ASCII LIMBS, checked rather than the one that stopped me:\n  commit-MESSAGE arm (BLOCKING): message file written by a non-shell writer, byte-scanned 0 non-ASCII before use. CLEAN.\n  staged-.py arm (WARN-ONLY, ships): UNMEASURED, and stated as unmeasured rather than clean -- the gate never reached file dispatch. My own byte scan of every deliverable artifact reports 0 non-ASCII, which is NOT the gate's verdict and is not offered as one.",
+      "denominator": "0 of 6 gate limbs ran (py_compile, AST undefined-name, ruff, comp-constants drift, comp-manifest-check, log-open-lint): the runner raised at import time, before any file was dispatched. 0 of 2 ASCII arms measured BY THE GATE; the commit-MESSAGE arm was satisfied independently (0 non-ASCII bytes in the message file) and the staged-.py arm is UNMEASURED. 1 of 6 sparse-cone entries would have to change (org/modules) for the gate to run at all. 1 of 1 commit attempts refused (SAFECOMMIT_RC=1, HEAD unchanged).",
+      "expect": "ModuleNotFoundError: No module named 'comp_constants_cli'[\\s\\S]*GATE_RC=1[\\s\\S]*ERROR: BLOCKED -- commit-gate failed[\\s\\S]*org/modules IS NOT IN THE CONE[\\s\\S]*staged-\\.py arm \\(WARN-ONLY, ships\\): UNMEASURED",
+      "status": "FAIL",
+      "status_reason": "BLOCKED twice over, and neither is a check failure. Rows POSN_ASTTAX-Z-W16-S2 (primary) and -S1. FIRST: the .py this clause is about -- the change to seed_canonical_securities.py -- does not exist, because U3-AC2 is blocked, so the clause has no subject. SECOND, and independent of the first: the gate CANNOT RUN in this worktree. commit_gate_runner.py:96 imports comp_constants_cli from org/modules/graph, which is outside this worktree's six-entry sparse cone, so the runner raises at import and exits 1 before dispatching any file -- and safe-commit.sh:652-658 is fail-closed on that rc, which was EXERCISED: a probe commit of one .py returned SAFECOMMIT_RC=1 with HEAD unchanged, and the gate's own text says --force does not bypass it. Consequence recorded honestly: no .py can be committed from this worktree, so both control scripts live under .scratch/ with their full source embedded verbatim in result.md. They were NOT renamed to a non-.py suffix -- dodging a gate by extension is not a remedy. UNBLOCKS ON: adding org/modules (at minimum org/modules/graph and org/modules/graph/compproof) to this worktree's cone, which is a provisioning act the issuer owns. REFINED BY W16-S3: the refusal is NOT limited to .py -- the gate fails at import scope, so it refuses an .md-only list and an EMPTY list alike, and the real delivery commit (zero .py files) was refused with SAFECOMMIT_RC=1 and HEAD unchanged. This instance is therefore VALID and UNCOMMITTED."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC1 control had only ever printed CLOBBERED, and a control that ALWAYS prints CLOBBERED reads identically. Mutate the one thing the verdict should depend on -- the seeder's write rule -- on a SCRATCH copy of the real bytes, and require the verdict to flip while the mint control keeps firing. A third arm runs the patched bytes with --force to confirm the override still overrides.",
+      "expected": "pre-patch CLOBBERED 4 of 4 with mint firing; patched SURVIVED 4 of 4 with mint still firing; --force CLOBBERED 4 of 4. If any two arms read the same, the control does not discriminate and the result must not be reported.",
+      "observed": "pre-patch: CLOBBERED 4 of 4, minted=True (53 yang rows minted). patched: SURVIVED 4 of 4, minted=True (53 yang rows minted), rc=1 with 'REFUSED 4 etf-classifications row(s)'. --force: CLOBBERED 4 of 4, rc=0. The three arms read differently on identical input and the mint control fired in 3 of 3, so AC1's CLOBBERED is a property of the seeder's write rule and not of the instrument.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The U3-AC1 control was run twice on identical input in the same worktree and the two captured outputs compared with `diff -q`.",
+      "observed": "Both runs rc=0 and byte-identical at 4,916 bytes each; `diff -q` reported no difference. The seeder's datetime.now() value lands only in last_updated, which no arm prints or compares, so there is no clock in the compared surface.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Editing data/black_diamond/scripts/classification/seed_canonical_securities.py -- the actual second registry writer.",
+      "reason": "Outside the <paths> grant. The grant IS the write surface; a path the order lacks is a BLOCKING row, never an override. Row W16-S1. The change is recorded in full as u3_proposed_patch.diff instead."
+    },
+    {
+      "item": "Creating infra/aws/lambda/v2_portal/yang_pipeline/seed_canonical_securities.py so the order's own invocation would resolve.",
+      "reason": "That is reconstructing the tree to make an order executable, which the worker bar refuses outright. It would also mint a second copy of a producer, which is the shadow-pipeline shape."
+    },
+    {
+      "item": "Widening this worktree's sparse cone, or pointing PYTHONPATH at another tree's org/modules/graph, to make the commit gate run.",
+      "reason": "Same tree-reconstruction refusal; and grading THIS tree's bytes with ANOTHER tree's checks is a wrong-grain reading even when it returns clean. Row W16-S2 names the cone as the cause and the issuer as the disarm owner."
+    },
+    {
+      "item": "Running the seeder against the live etf-classifications or bd-securities DynamoDB tables.",
+      "reason": "The cell's hard stop. boto3 was replaced in sys.modules before the seeder bytes executed in every arm, boto3.client raises, and each arm asserts the fake was not displaced afterwards. No network client was ever constructed."
+    },
+    {
+      "item": "Re-running round 3's AT3-s-4 / TO-T4-1.",
+      "reason": "Named in <decomp_ref> as a read-dependency, NOT claimed. Its preserve-don't-clobber mechanism was read at seed-etf-classifications.py:40-120 and reused; its cell was not re-executed and its result is not re-asserted here."
+    },
+    {
+      "item": "Re-deriving the 11-member retag set from the live registry.",
+      "reason": "Cited to PRD s.3 and 0.9.0_WK_POSN_ASTTAX~14's t5_bar_table.py:16-28, which derived it by subtraction over all 285 rows. The preflight asked for the 4-of-11 INTERSECTION to be re-measured, and that was re-measured against the seeder's own list; the parent set was not."
+    },
+    {
+      "item": "Flipping the task order's <status> from staged to complete.",
+      "reason": "Three of four criteria are FAIL. A VALID instance is not a met order, and a status flip is never a way to release a gate. The order stays open."
+    },
+    {
+      "item": "Whether either seeder has a scheduled trigger, i.e. whether the revert is 'a manual run reverts' or 'a job will revert'.",
+      "reason": "Not measured and not claimed, carrying forward W14-S3's own explicit non-claim. Every statement in this deliverable is scoped to what one re-seed DOES, never to how often one happens."
+    }
+  ],
+  "surprises": [
+    "POSN_ASTTAX-Z-W16-S1: TO-U3-1's <paths> grant names infra/aws/lambda/v2_portal/yang_pipeline/seed_canonical_securities.py, which has 0 commits across --all and 0 of 33,731 index entries -- it has never existed -- while the second registry writer the cell exists to harden is data/black_diamond/scripts/classification/seed_canonical_securities.py, outside the grant and outside this worktree's cone. BLOCKING/ARMED, disarm owner 2.0.0_SA_COO~Z. U3-AC1 executed to completion anyway; U3-AC2/AC3/AC4 blocked.",
+    "POSN_ASTTAX-Z-W16-S2: .tools/commit-gate.sh cannot run in this worktree -- commit_gate_runner.py:96 imports comp_constants_cli from org/modules/graph, which is outside the six-entry sparse cone, so it exits 1 from an ImportError before dispatching any file, and safe-commit.sh:652-658 is fail-closed on that rc (EXERCISED: SAFECOMMIT_RC=1, HEAD unchanged, --force does not bypass). No .py can be committed from this worktree and neither ASCII limb was measured by the gate. BLOCKING/ARMED, disarm owner 2.0.0_SA_COO~Z.",
+    "POSN_ASTTAX-Z-W16-S3: filed against my own W16-S2, which understated its blast radius in the dangerous direction. commit-gate.sh:59 is a bare `exec python commit_gate_runner.py \"$@\"` with NO bash-side filtering and the runner raises at import scope, so the gate exits 1 on an .md-only list AND on an EMPTY argument list; safe-commit.sh:640-660 has no rc=2 branch and none of its four audited overrides covers the commit gate. NOTHING can be committed from this worktree, not merely no .py -- measured on the real delivery (a .py-free file set returned SAFECOMMIT_RC=1, HEAD unchanged). This instance and all three rows are consequently LOCAL AND UNCOMMITTED. BLOCKING/ARMED, disarm owner 2.0.0_SA_COO~Z; does not disarm S2."
+  ],
+  "session_log": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/POSN_ASTTAX.TO-U3-1.result.md -- this worker writes no separate log; the result document is the session record and the spine's L7 step log is read from git.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/lambda/v2_portal/yang_pipeline/seed-etf-classifications.py --for \"what is the preserve-don't-clobber mechanism...\"",
+      "result": "306 lines / 8 sections; surfaced merge_item:72-120 and is_placeholder:40-58 as the mechanism, plus the :293-294 --force qualifier. This is the pattern U3-AC2 says to reuse rather than invent a second one."
+    },
+    {
+      "tool": "comp-read --enumerate",
+      "invocation": "comp-read org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round4.md --enumerate 'seed_canonical_securities|seed-etf-classifications|black_diamond|yang_pipeline'",
+      "result": "1 hit across 144 lines / 29 sections, 0 whole-value / 1 substring, PROSE band, line 103 -- the decomp names the bare filename and supplies NO directory, so the <paths> grant's directory was added at the cut."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'VIXY' --all --files",
+      "result": "135 hits across 3,270 files scanned [corpus=all], 30,426 UNREADABLE. Used ONLY to locate the retag-set enumeration inside org/missions (which is in the cone). DELIBERATELY NOT used for the seed_canonical_securities.py basename census, because a 3,270-file sweep over a 33,731-entry index would have returned a confident zero -- that census used `git ls-files` over the full index instead."
+    },
+    {
+      "tool": "git object-store read",
+      "invocation": "git show HEAD:data/black_diamond/scripts/classification/seed_canonical_securities.py > .scratch/head/...; git hash-object <dump>; git rev-parse HEAD:<path>",
+      "result": "15,000 bytes; dumped sha fbbc7165d33198789d3a7788a557ed3f5ce75614 asserted EQUAL to the HEAD object before every run. This is how a file outside the sparse cone was read without checking it out or widening the cone."
+    }
+  ]
+}

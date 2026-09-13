@@ -1,0 +1,94 @@
+--- a/data/black_diamond/scripts/classification/seed_canonical_securities.py
++++ b/data/black_diamond/scripts/classification/seed_canonical_securities.py
+@@ -204,7 +204,35 @@
+ }
+ 
+ 
+-def seed(upload: bool = False, sync_yang: bool = False) -> None:
++# The fields this seeder OWNS on the Yang table. A value the table already
++# serves for one of these, that DISAGREES with the seeder's, is a CONFLICT --
++# the same rule seed-etf-classifications.py:72-120 merge_item() applies.
++YANG_OWNED_FIELDS = ('asset_class', 'sub_asset_class', 'name')
++
++
++def _yang_conflicts(yang_table, sec):
++    """Fields the table already serves with a DIFFERENT non-blank value.
++
++    Returns [(field, live_value, seeder_value), ...]. An absent row returns []
++    -- a FIRST MINT is never a conflict and must still mint.
++    """
++    got = yang_table.get_item(Key={'ticker': sec['ticker']})
++    live = got.get('Item') or {}
++    if not live:
++        return []
++    out = []
++    for field in YANG_OWNED_FIELDS:
++        live_value = live.get(field)
++        if live_value is None or str(live_value).strip() == '':
++            continue
++        seeder_value = sec['name'] if field == 'name' else sec[field]
++        if str(live_value) != str(seeder_value):
++            out.append((field, live_value, seeder_value))
++    return out
++
++
++def seed(upload: bool = False, sync_yang: bool = False,
++         force: bool = False) -> int:
+     dynamodb = boto3.resource('dynamodb', region_name=REGION)
+     bd_table = dynamodb.Table(BD_SECURITIES_TABLE)
+     yang_table = dynamodb.Table(YANG_TABLE) if sync_yang else None
+@@ -212,6 +240,7 @@
+     now = datetime.now(timezone.utc).isoformat()
+     written_bd = 0
+     written_yang = 0
++    preserved_yang = []
+ 
+     print(f'Seeding {len(CANONICAL_SECURITIES)} canonical securities')
+     print(f'  bd-securities: {"UPLOAD" if upload else "DRY RUN"}')
+@@ -256,6 +285,21 @@
+ 
+         # -- etf-classifications item (Yang table) --
+         if sync_yang:
++            # PRESERVE-DON'T-CLOBBER. This seeder's asset_class vocabulary is two
++            # legacy values ('equity', 'fixed_income') and the served registry
++            # carries the ratified five-class vocabulary, so an unconditional SET
++            # here REVERTS a retag. Measured on a scratch copy 2026-09-13: 4 of 4
++            # retag members present in this list were reverted by one re-seed
++            # (VXX/UVXY 'Structured'->'equity', QBER 'Structured'->'fixed_income',
++            # PDBC 'Commodities'->'equity').
++            conflicts = _yang_conflicts(yang_table, sec) if upload else []
++            if conflicts and not force:
++                preserved_yang.append((ticker, conflicts))
++                for field, live_value, seeder_value in conflicts:
++                    print(f'  [PRESERVED] {ticker:10s} {field}: table serves '
++                          f'{live_value!r}, seeder asserts {seeder_value!r} -- '
++                          f'table wins, pass --force to override')
++                continue
+             if upload:
+                 yang_table.update_item(
+                     Key={'ticker': ticker},
+@@ -282,6 +326,13 @@
+         print(f'{action} {written_yang} items to etf-classifications.')
+     if not upload:
+         print('DRY RUN -- no items written. Pass --upload to write.')
++    if preserved_yang:
++        print()
++        print(f'REFUSED {len(preserved_yang)} etf-classifications row(s): the table '
++              f'serves a value this seeder disagrees with.')
++        print('Nothing was reverted. Re-run with --force to overwrite them.')
++        return 1
++    return 0
+ 
+ 
+ if __name__ == '__main__':
+@@ -292,5 +343,9 @@
+                         help='Write items to DynamoDB (default: dry run)')
+     parser.add_argument('--yang', action='store_true',
+                         help='Also sync to etf-classifications (Yang table)')
++    parser.add_argument('--force', action='store_true',
++                        help='Overwrite an etf-classifications value the table '
++                             'already serves. Without this flag such a run REFUSES.')
+     args = parser.parse_args()
+-    seed(upload=args.upload, sync_yang=args.yang)
++    raise SystemExit(seed(upload=args.upload, sync_yang=args.yang,
++                          force=args.force))
