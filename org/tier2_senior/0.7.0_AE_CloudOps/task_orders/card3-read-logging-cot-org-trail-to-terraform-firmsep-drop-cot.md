@@ -36,7 +36,7 @@ At ~20:1xZ `1.0.0_SA_CTO` recorded this as a non-pipeline order. **Since then `A
 - activation, portal-auth -- the FIRMSEP pattern narrowed. ROLLBACK: restore the pattern from `rule_pre.json`.
 - activation, trail import -- `terraform import` of the `aws_cloudtrail` resource only. ROLLBACK: `terraform state rm` (no AWS change).
 - activation, trail selector -- cot and 49financial added to the ReadOnly selector. ROLLBACK: `put-event-selectors` from `selectors_pre.json`.
-- verify -- R-AC6 through R-AC13.
+- verify -- R-AC6 through R-AC13, and R-AC16 (added ~23:5xZ on route (a)).
 
 **S1. CAPTURE PRE-STATE** into `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/CARD3_READ_LOGGING/`: `selectors_pre.json` (get-event-selectors), `trail_pre.json` (describe-trails), `rule_pre.json` (describe-rule), `targets_pre.json` (list-targets-by-rule). **The pre-captures are the rollback artifacts and the differential baselines.** Then one test `GetObject` on a small `opal-data-cot` object at T0, recorded (the negative arm, R-AC9).
 
@@ -85,9 +85,9 @@ Author `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/CARD3_READ_LOGGING/card3
   </phase>
   <phase id="2" when="before each apply">
     <step>
-      <run>safe-apply's plan for portal-auth</run>
-      <expect>Exactly 1 in-place update, aws_cloudwatch_event_rule.firmsep_s3_bypass; 0 to add; 0 to destroy.</expect>
-      <if_mismatch>STOP. Unrelated drift in portal-auth is NOT swept into this apply; surface it as a row and hold.</if_mismatch>
+      <run>.tools/safe-apply.sh -chdir=infra/aws/terraform/portal-auth apply -target=aws_cloudwatch_event_rule.firmsep_s3_bypass   (its plan, read before approving)</run>
+      <expect>Exactly 1 in-place update, aws_cloudwatch_event_rule.firmsep_s3_bypass; 0 to add; 0 to destroy. ROUTED 2026-09-13 ~23:5xZ by 2.0.0_SA_COO~E on 0.7.0_AE_CloudOps's HOLD (msg 96438, route (a)). The untargeted portal-auth plan carries one PRE-EXISTING, unrelated in-place update: aws_wafv2_web_acl.opal_cloudfront_protection (row ADVI_FIRMBKTS-S1 @926e18a2ce). Its managed-rule blocks plan as remove-and-re-add, with content equal to live. This order does NOT apply that update, so the portal-auth apply is TARGETED at the rule. safe-apply forwards its arguments to terraform (.tools/safe-apply.sh:274, :291).</expect>
+      <if_mismatch>STOP. Anything in the targeted plan beyond the one rule update is not this order's; surface it as a row and hold.</if_mismatch>
     </step>
     <step>
       <run>safe-apply's plan for the trail module after the S3 edit</run>
@@ -102,7 +102,7 @@ Author `org/tier2_senior/0.7.0_AE_CloudOps/deliverables/CARD3_READ_LOGGING/card3
   </phase>
   <phase id="3" when="after both applies">
     <step>
-      <run>R-AC3 through R-AC14, in order</run>
+      <run>R-AC3 through R-AC14, then R-AC16, in order</run>
       <expect>Each matches its expect below.</expect>
       <if_mismatch>Roll back per the ledger leg that failed; report the failure to 2.0.0_SA_COO~E. Never leave one apply landed and the other not: if the trail apply fails after portal-auth landed, the rule is narrowed and nothing is armed, so report the failure and hold -- that half-state is safe. The reverse order is the one this sequence exists to prevent.</if_mismatch>
     </step>
@@ -118,7 +118,7 @@ comp-adversary: DECLARED-NOT-APPLICABLE -- every figure inherited on this face (
 # pipeline-override: this order stands OUTSIDE the pipeline by construction -- it is Andrew's card-3 ruling (~18:4xZ "recs approved", remedy (a) ~21:3xZ "yes 2 all"), written by a COO lane he seated for exactly this one order, addressed to the seat he approved (~19:0xZ "yes to both"). It is not a cell of ADVI_FIRMBKTS, whose registration (@f25395446e, dep_stage REGISTERED) came after 1.0.0_SA_CTO recorded this as a non-pipeline order at ~20:1xZ, and whose PRD and decomposition do not exist. Filing it under that project to satisfy layer 3 would assert a decomposition that is not there. <preflight> and <proof_of_spec> are PRESENT and not overridden; only layer 3's project-row limb is.
 
 <proof_of_spec>
-<expected_criteria>R-AC1,R-AC2,R-AC3,R-AC4,R-AC5,R-AC6,R-AC7,R-AC8,R-AC9,R-AC10,R-AC11,R-AC12,R-AC13,R-AC14,R-AC15</expected_criteria>
+<expected_criteria>R-AC1,R-AC2,R-AC3,R-AC4,R-AC5,R-AC6,R-AC7,R-AC8,R-AC9,R-AC10,R-AC11,R-AC12,R-AC13,R-AC14,R-AC15,R-AC16</expected_criteria>
 
 <criterion id="R-AC1" judgment="false">
   <invocation>aws cloudtrail get-event-selectors --trail-name opal-organization-trail --query "EventSelectors[?ReadWriteType=='ReadOnly'].DataResources[].Values[]" --output text | tr -d '\r' | tr '\t' '\n' | sort | tr '\n' ' '</invocation>
@@ -165,8 +165,12 @@ comp-adversary: DECLARED-NOT-APPLICABLE -- every figure inherited on this face (
   <expect>DATA_EVENTS bucket=opal-data-49financial n=[1-9][0-9]* first=20[0-9][0-9]-</expect>
 </criterion>
 <criterion id="R-AC12" judgment="false">
-  <invocation>terraform -chdir=infra/aws/terraform/portal-auth plan -detailed-exitcode -input=false; echo "PLAN_RC=$?"</invocation>
+  <invocation>terraform -chdir=infra/aws/terraform/portal-auth plan -target=aws_cloudwatch_event_rule.firmsep_s3_bypass -detailed-exitcode -input=false; echo "PLAN_RC=$?"   (RE-CUT ~23:5xZ on route (a): the rule's declared state equals live. The pre-existing WAF diff belongs to R-AC16, not this criterion.)</invocation>
   <expect>PLAN_RC=0(?![0-9])</expect>
+</criterion>
+<criterion id="R-AC16" judgment="false">
+  <invocation>terraform -chdir=infra/aws/terraform/portal-auth plan -input=false -no-color | tr -d '\r' | grep -E '^  # .* (will be|must be) ' | tr '\n' '|'   (DIFFERENTIAL, after the targeted apply: the untargeted plan carries EXACTLY the one pre-existing WAF update that row ADVI_FIRMBKTS-S1 records, and nothing this order introduced)</invocation>
+  <expect>^  # aws_wafv2_web_acl\.opal_cloudfront_protection will be updated in-place\|$</expect>
 </criterion>
 <criterion id="R-AC13" judgment="false">
   <invocation>terraform -chdir=infra/aws/terraform/(trail module) plan -detailed-exitcode -input=false; echo "PLAN_RC=$?"   (after the trail apply)</invocation>
@@ -180,11 +184,11 @@ comp-adversary: DECLARED-NOT-APPLICABLE -- every figure inherited on this face (
 
 <instance_path>org/tier2_senior/0.7.0_AE_CloudOps/deliverables/CARD3_READ_LOGGING/CARD3_READ_LOGGING_PROOF_OF_SPEC.json</instance_path>
 
-Validate BEFORE the complete flip, positional id set, taking the rc without a pipe: `python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps/deliverables/CARD3_READ_LOGGING/CARD3_READ_LOGGING_PROOF_OF_SPEC.json "R-AC1,R-AC2,R-AC3,R-AC4,R-AC5,R-AC6,R-AC7,R-AC8,R-AC9,R-AC10,R-AC11,R-AC12,R-AC13,R-AC14,R-AC15"`. The parenthesised values -- the trail module, T0, T1, the ledger-open time and the apply times -- are yours to fill, and each is recorded in the instance as the value used.
+Validate BEFORE the complete flip, positional id set, taking the rc without a pipe: `python .tools/proof-of-spec-check.py org/tier2_senior/0.7.0_AE_CloudOps/deliverables/CARD3_READ_LOGGING/CARD3_READ_LOGGING_PROOF_OF_SPEC.json "R-AC1,R-AC2,R-AC3,R-AC4,R-AC5,R-AC6,R-AC7,R-AC8,R-AC9,R-AC10,R-AC11,R-AC12,R-AC13,R-AC14,R-AC15,R-AC16"`. The parenthesised values -- the trail module, T0, T1, the ledger-open time and the apply times -- are yours to fill, and each is recorded in the instance as the value used.
 </proof_of_spec>
 
 <acceptance_criteria>
-The fifteen criteria above, one clause each. Also: the session log's Compiler Tools section reproduces every `<run>` in the mandate with its observed output and pass/fail against its `<expect>`. Missing rows = REWORK. The completion report carries S5's per-bucket report and the push state as a MEASURED value (ls-remote read).
+The sixteen criteria above, one clause each. Also: the session log's Compiler Tools section reproduces every `<run>` in the mandate with its observed output and pass/fail against its `<expect>`. Missing rows = REWORK. The completion report carries S5's per-bucket report and the push state as a MEASURED value (ls-remote read).
 </acceptance_criteria>
 
 <do_not>
@@ -193,7 +197,7 @@ The fifteen criteria above, one clause each. Also: the session log's Compiler To
   <rule>Do not touch the SMS leg or the d12 ledger (org/critical_paths/.open_deploys/d12-sms-tfn-registration-and-production-access.json -- LD-0537, 0.0.0_AB_MSTR's).</rule>
   <rule>Do not add any opal-data-* bucket beyond cot and the template's opal-data-49financial (20 exist; bd and inf are already present). Do not use a prefix or wildcard selector. Do not convert the trail's basic selectors to advanced ones.</rule>
   <rule>Do not import or modify the trail's log bucket, its policy, a KMS key or opal-served-key-write-trail. Import the aws_cloudtrail resource only.</rule>
-  <rule>Do not sweep unrelated portal-auth or shared-infra drift into either apply.</rule>
+  <rule>Do not sweep unrelated portal-auth or shared-infra drift into either apply. This order does NOT apply the pre-existing aws_wafv2_web_acl.opal_cloudfront_protection update (row ADVI_FIRMBKTS-S1); disposing of it is that row's owner's job.</rule>
   <rule>Do not push. CLOUD is pushed only by 0.0.0_AB_MSTR on Andrew's word (LD-0522). Commit, and state the push state as LOCAL with the ls-remote hash.</rule>
   <rule>Do not touch the base seat's five other non-terminal orders (96399 FLAG B). They are out of contention by Andrew's ~20:1xZ word.</rule>
 </do_not>
