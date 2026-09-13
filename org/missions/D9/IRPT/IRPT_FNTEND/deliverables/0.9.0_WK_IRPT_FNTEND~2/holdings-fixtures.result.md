@@ -1,8 +1,8 @@
 # TO-FE-s-26 -- holdings fixtures: result
 
 Worker `0.9.0_WK_IRPT_FNTEND~2`, branch `wk-irpt_fntend-4-2-fe-s-26` (workspace and portal). Portal commits
-`ed90ce2d` (the fixtures and `__tests__/fe-s-26/`) and `f95fa1db` (FE-s-22 input re-point), both LOCAL and never
-pushed, because PORTAL IS FROZEN. Workspace base `f3b42b1e0b`; grant widened by the issuer at `bf95fb7b9a`.
+`ed90ce2d` (the fixtures and `__tests__/fe-s-26/`) `f95fa1db` (FE-s-22 input re-point) and `346d2b90` (the pair correction), all LOCAL and never
+pushed, because PORTAL IS FROZEN. Workspace base `f3b42b1e0b`; grant widened by the issuer at `bf95fb7b9a` and the bound corrected at `49f4026218`.
 
 **Every mechanical criterion, F26-AC1 through F26-AC8, passes by output, and the order is flipped to `complete`.**
 F26-AC9 is recorded without a verdict, for L9.
@@ -14,7 +14,10 @@ At `ed90ce2d`, F26-AC8 read `26 pass / 2 fail`. Two assertions in `__tests__/fe-
 state, but they read the LIVE files this order repairs. So F26-AC5 and F26-AC8 could not both pass. That file was
 outside `<paths>`, so I refused and filed `IRPT_FNTEND-W2-S20` (BLOCKING). The issuer added the one file to
 `<paths>` at `bf95fb7b9a`, with a bound: re-point only those two assertions' INPUT, do not change what either
-claims, and show both readings. That was done at `f95fa1db`.
+claims, and show both readings. That was done at `f95fa1db`. My row `W2-S22` then showed that the bound had split a PAIR: FE-s-22's
+exact-vs-suffix control read `exact` from the round-2 copy but `suffix` from the live map, where it hit
+the real holdings `status`, so nothing was demonstrated. The issuer corrected the bound at `49f4026218`,
+and at `346d2b90` both halves and the path denominator read the same round-2 copy.
 
 ## What changed
 
@@ -32,8 +35,12 @@ schema's `allOf` requires it. Every `source_dates` value comes from the document
 - `:252`'s `verdict` and `:282`'s `exact` now read that copy. The live maps are printed beside each.
 - **The two `expect(...)` lines are byte-identical:** 0 of the changed lines contains `expect(`.
 - `capture-hash.ts`, the RULE, has an empty diff against HEAD and against `25062fce`.
-- Every other arm still reads `fileSources` exactly as written. That includes the same control's `suffix`, which
-  I recorded as row `W2-S22` rather than editing.
+- Every other arm still reads `fileSources` exactly as written.
+- **Pair correction (`346d2b90`, numstat 6/5, bound `49f4026218`):** the control's `suffix` and its printed path
+  denominator now read the same round-2 copy as `exact`, so the control reads ONE map. On it the exact path has
+  0 hits in 325 paths, and the suffix hits `/api/scoped/investor-reporting/analysis/.data.extraction_validation.status`,
+  a field on a different response. That is the false pass shown by output, and it matches FE-s-22's own output
+  at `237a9027`. Again, 0 changed lines contain `expect(`, and `capture-hash.ts` is unchanged.
 
 ## The state given to each map, and why it is legitimate for that basis
 
@@ -74,26 +81,28 @@ records what it costs FE-s-18. The issuer has said the row reaches FE-s-18's re-
 
 | id | invocation (from `<WS>/portal`) | graded at | deciding output | verdict |
 |---|---|---|---|---|
-| F26-AC1 | `timeout 180 bun run typecheck; echo rc=$?` | `f95fa1db` | `$ tsc -b --noEmit` / `rc=0` | PASS |
+| F26-AC1 | `timeout 180 bun run typecheck; echo rc=$?` | `346d2b90` | `$ tsc -b --noEmit` / `rc=0` | PASS |
 | F26-AC2 | `timeout 120 bun test .../fe-s-26/fixtures-carry-status.test.ts` | `ed90ce2d` | `HOLDINGS MAPS CARRYING status: 3 of 3` | PASS |
 | F26-AC3 | same file | `ed90ce2d` | `STATES DISTINCT ACROSS THE THREE: 3 of 3` | PASS |
 | F26-AC4 | same file | `ed90ce2d` | `ENVELOPES STILL VALID: 27 of 27` | PASS |
 | F26-AC5 | `timeout 120 bun test .../fe-s-26/not-defective.test.ts` | `ed90ce2d` | `DEFECTIVE FIXTURES: 0 of 3` | PASS |
 | F26-AC6 | same file | `ed90ce2d` | `RULE IS IMPORTED, NOT COPIED: 1 module` | PASS |
 | F26-AC7 | `timeout 120 bun test .../fe-s-26/renders-differently.test.ts` | `ed90ce2d` | `PANELS DISTINCT: 3 of 3` | PASS |
-| F26-AC8 | `timeout 120 bun test .../fe-s-26 .../fe-s-22` | `f95fa1db` | `28 pass` / `0 fail`, rc=0 | PASS |
+| F26-AC8 | `timeout 120 bun test .../fe-s-26 .../fe-s-22` | `346d2b90` | `28 pass` / `0 fail`, rc=0 | PASS |
 | F26-AC9 | judgment | -- | recorded above; no verdict | RECORDED |
 
-**Why AC2–AC7 were not re-run:** they are graded at `ed90ce2d`. `git diff --name-only ed90ce2d f95fa1db` lists one
+**Why AC2–AC7 were not re-run:** they are graded at `ed90ce2d`. `git diff --name-only ed90ce2d 346d2b90` lists one
 path, `fe-s-22/capture-hash.test.ts`, and none of those six tests reads it. Their inputs are byte-identical at the
 final HEAD, so a second run would repeat the first rather than confirm anything.
 
-**Both readings, from F26-AC8's own output at `f95fa1db`:**
+**Both readings, from F26-AC8's own output at `346d2b90`:**
 ```
 ROUND-2 SHAPED COPY (status absent): DEFECTIVE FIXTURES: 3 of 3
 LIVE MAPS (repaired by FE-s-26): DEFECTIVE FIXTURES: 0 of 3
 EXACT '/api/scoped/investor-reporting/holdings/.status' (round-2 shaped copy, status absent, 325 paths): 0 hit(s)
+PATH DENOMINATOR: 325 paths in src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json (round-2 shaped copy, status absent)
 EXACT '/api/scoped/investor-reporting/holdings/.status' (live map, repaired by FE-s-26): 1 hit(s)
+SUFFIX 'status': 1 hit(s) -- /api/scoped/investor-reporting/analysis/.data.extraction_validation.status
 ```
 
 **Controls, each run and each firing:**
@@ -111,9 +120,9 @@ EXACT '/api/scoped/investor-reporting/holdings/.status' (live map, repaired by F
 - `IRPT_FNTEND-W2-S20`, BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO`: the AC5/AC8 contradiction. It is resolved by
   the widening at `bf95fb7b9a` and the re-point at `f95fa1db`. The row is not edited; its disposition is the CVO's.
 - `IRPT_FNTEND-W2-S21`, OBSERVATION, ARMED, disarm_owner `3.0.0_SA_CVO`: only READY mounts the Holdings body.
-- `IRPT_FNTEND-W2-S22`, OBSERVATION, INERT: the bound re-points `exact` but not `suffix`, so FE-s-22's exact-path
-  control reads its two halves from two different maps and no longer shows its false pass on one map. The one-line
-  remedy is stated in the row and was not taken.
+- `IRPT_FNTEND-W2-S22`, OBSERVATION, INERT: the first widened bound split FE-s-22's exact-vs-suffix control
+  across two maps. It is resolved by the issuer's correction at `49f4026218` and the pair re-point at `346d2b90`.
+  The row is not edited; its disposition is the CVO's.
 
 ## What the set still reads, so nobody reads this wider than it is
 
