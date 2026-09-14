@@ -613,7 +613,7 @@ with sync_playwright() as p:
                 {k: v for k, v in e.items() if k != "ts"} for e in net_events
             ],
         }
-        json.dump(bundle, open(bundle_path, "w"), indent=1)
+        json.dump(bundle, open(bundle_path, "w", encoding="utf-8"), indent=1)
         log(f"session bundle -> {bundle_path} ({len(cookies)} cookies)")
         if PARK:
             import boto3
