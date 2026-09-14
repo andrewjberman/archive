@@ -95,6 +95,11 @@ There is no per-fabric portal branch; both sides confirmed.
   - `src/api/portal-proxy.ts` and `src/lib/chartColors.ts` are untouched by the laptop.
   - Per-hunk ranges get measured when that leg is real. Filed as a surprise row on POSN_ASTTAX's own channel, so the round-5 owners see it before integration.
 - **The largest integration is inside the laptop:** DEV (IRPT_FNTEND) and d13 (DSGN_REBRND) share 55 paths, and d13 is 86 behind laptop DEV. That, not the cross-fabric seam, is where the real conflict work is.
+- **v2.2 update, laptop-internal leg only** (0.0.0_AB_MSTR bus 81f1575c; source 1.0.0_SA_CTO msg 96785, adjudication @46664e15f4, IRPT_FNTEND FE-s-45 RULING B). `vite.config.ts` and `package.json` join the DEV-vs-d13 reconcile:
+  - **DEV line, will change:** the vite runner loader in `vite.config.ts` (`fileURLToPath` at `:13` and `:16`) and the config-loading scripts in `package.json`.
+  - **d13 line, already changed:** `vite.config.ts` (`6eb5582c` routes `/api/scoped/security-scanner` through CloudFront; `8274a955` adds `manualChunks`), and it lacks FE-s-38's `cacheDir` block. `git diff --stat DEV feature/d13-visual-elevation -- vite.config.ts` reads 23 lines today.
+  - **Site Z touches neither file** (paths measured above), so the cross-fabric overlap is still exactly `src/App.tsx`.
+- **d13's Scanner proxy change bears on localhost.** Once the laptop lines merge, the Security Scanner is proxied through CloudFront in dev. That is a likely factor in the laptop-localhost Security Scanner 403 reported separately below. Not measured here.
 
 **What each push does in CI, read from `.github/workflows`:**
 - push to `DEV` runs `ci.yml`: lint, typecheck, build, and an artifact upload. It deploys nothing.
