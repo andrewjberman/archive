@@ -78,3 +78,85 @@ coverage line. It never asked whether the coverage line was the only thing refus
 A second staleness, not a refusal: the fixture pin `abc1234` does not resolve, so the resolution limb reads the row as
 UNRESOLVED-HERE (announced), and the artifact row is never resolved at all. Real committed instances pin a commit that
 carries the path. The remedy uses one.
+
+## 2. THE REMEDY -- the battery only (`051379eac7`)
+
+`org/standards/test_artifact_coverage_both_grammars.py`:
+- **In-tree instances.** `run()` writes each instance under `<tree>/.scratch/aco_inst_*/`, inside the tree whose
+  checker grades it.
+- **Named-violation controls.** `judge()`:
+  - A PASS arm needs rc=0, zero VIOLATION lines, and a header of `violations=0`.
+  - A CONTROL needs rc=1 and at least one named line; every VIOLATION line must start with its named text, and the
+    header count must equal the named lines.
+  - The named texts are the uncovered artifact for C and D, and the dangling `['WP9-9']` citation for F.
+  - Each control prints the lines it matched, tagged `named` or `OTHER`.
+- **A real pin.** The artifact row pins the commit that last touched `data/mdpf/scripts/gold/dim_mdpf_aum_metrics.py`
+  (`4707880967`). It is derived with `git log` and checked with `git cat-file -e`, and the battery exits 2 loud if no
+  commit carries the path.
+- **Real shape, checked by the battery on every run.** The comparison instance is
+  `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IRPT_BCKEND.TO-IB-rt-7.the-holdings-handler-and-the-attribution-holdouts.proof_of_spec.json`,
+  read as the committed blob at `b9a3fcc335` (RULING AC). It is BUILD-GENERAL / FABRIC / OTHER; its gold script row
+  is `data/assets/scripts/gold/investor_reporting/holdings_snapshot.py @d9c940244a`, and its PASS rows use method
+  `command` and carry `expect`.
+  - The fixture's keys: 13 of 13 top-level, 6 of 6 artifact-row and 8 of 8 acceptance-row keys are carried by the real
+    instance.
+  - Its vocabulary: 7 of 7 fields carry only values the real instance carries.
+  - The one real key the fixture omits is `decomp_ref`. That is deliberate: `to_id` `FIXTURE.T` resolves no governing
+    order, so every order-bound limb announces and the six arms isolate the instance-intrinsic rules.
+- **Real exemplars for each route**, from a census of all 373 committed instances (624 script/s3 artifacts):
+  - naming route: 12, all id-prefix coincidences. The closest to arm A is
+    `NFRA_C3MATERIALIZE.TO-L3S7B-CCY.measurement`, where token `CCY` of `build_ccy_proof.py` appears in `L3S7B-CCY-AC1`.
+  - row-reference route (arm B's): 459.
+  - `artifact_covered_by` route (arm E's): 148, IB-rt-7 among them.
+  - exclusion-item route: 5.
+  - uncovered: 0.
+- **The mutant runs every time.** The checker's bytes are copied to `<tree>/.scratch/aco_mutant_*.py`, one level under
+  the tree, because the checker derives its tree as `parent.parent`. The per-artifact coverage loop is replaced by
+  `for a in []`, at exactly 1 site. All six arms run on the copy, and the copy is unlinked in a `finally`. The line
+  reads `yes` only if all three controls go red AND all three positive arms stay green.
+- **Exit.** rc 0 only on 6/6, controls 3 of 3, mutant yes and shape yes.
+
+`.tools/proof-of-spec-check.py` is **byte-identical**: blob `7e324c78c2a6cdd92739b341286a77d740b05869` at the base,
+at HEAD and in the working copy, and `git diff --stat 4d11c008c2 HEAD -- .tools/proof-of-spec-check.py` is empty.
+
+## 3. RESULTS (run as written, on committed bytes `051379eac7`)
+
+| criterion | deciding line | denominator |
+|---|---|---|
+| F44-AC1 | `ARTIFACT-COVERAGE BATTERY: 6/6 PASS (denominator 6)`, rc=0 | 6 of 6 arms |
+| F44-AC2 | `CONTROLS FAIL FOR THEIR NAMED VIOLATION: 3 of 3`, rc=0 | 3 of 3 controls, 1 named violation each, 0 other |
+| F44-AC3 | `WITH THE COVERAGE RULE DISABLED IN A SCRATCH COPY, THE CONTROLS CATCH IT: yes`, rc=0 | 3 of 3 controls red, 3 of 3 positives green, 1 of 1 site; copy removed |
+| F44-AC4 | `RESULT: 42 of 42 arm(s) behaved`, rc=0 | 42 of 42 (unchanged; checker untouched, no arm owed) |
+| F44-AC5 | `EVERY .tools BATTERY THAT CALLS EITHER TOOL: 12 of 12 green`; `governing-binding battery: 19 of 19 arm(s) as expected (277 s wall)`, rc=0 | 12 of 12 batteries (census domain: 63 .py under .tools/tests/, 13 name either tool, 12 run) |
+| F44-AC6 | `[to-pipeline-gate --self-test] RESULT: 0 arm(s) failed of 72`, rc=0 | 72 of 72 |
+| F44-AC7 | judgment, recorded for 3.0.0_SA_CVO at L9 | 3 heads |
+
+## 4. CONTROLS
+
+- **The mutant (in-battery, every run)**: `mutant: 3 of 3 controls go red; 3 of 3 positive arms stay green`. The
+  copy is removed, which is re-read after the unlink.
+- **The defect's own coordinate (negative control, by hand)**: a scratch copy of the NEW battery with `SCRATCH` set to
+  the OS temp dir reads `ARTIFACT-COVERAGE BATTERY: 0/6 PASS`, `CONTROLS FAIL FOR THEIR NAMED VIOLATION: 0 of 3`, and
+  mutant `no`, rc=1. Each control lists `violation (OTHER): artifact-resolution/CHECKER-SCOPE`. The old battery
+  counted exactly this state as 3 control passes. The copy was removed.
+- **Determinism**: two runs, one on the working copy before commit and one deciding run on committed bytes. Both
+  produced identical verdicts and violation lines.
+
+## 5. ROWS
+
+- **IRPT_FNTEND-W6-S1** (OBSERVATION, INERT), appended to `INVESTIGATION_v2.md`. At the base, the census of record
+  read `11 of 12 green`: `test_seeded_limb.py` hit the census's own 560 s per-battery bound (rc=124) while the box was
+  shared. Alone on `051379eac7` the same battery ran in 275 s and the census read `12 of 12`, with neither tool
+  changed. The census's row shape does not separate load from regression.
+- Not re-filed: the gap in the census domain (`org/standards/` lies outside `.tools/tests/`). That is W4-S15 / C-S90,
+  the row this cell answers.
+
+## 6. NAMED WEAKNESSES
+
+- The fixture shares the real instance's FIELD SHAPE and VOCABULARY, not its governing order. That is deliberate: a
+  resolving `to_id` would bring the alignment, invocation and drives limbs in, and the arms would stop isolating the
+  coverage rule.
+- The mutant disables the whole per-artifact loop. A narrower mutant, such as dropping only the `:208` exclusion-item
+  precision, is not exercised as its own arm. Arm D is the arm that would catch the regression to the old blob match.
+- The pin is derived, not frozen. If `dim_mdpf_aum_metrics.py` were ever deleted, `git log -1` would name the deletion
+  commit, and the battery exits 2 loud rather than grading.
