@@ -6,7 +6,7 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-39.adapter-states-what-the-document-states.md",
     "group": "OTHER",
-    "vintage_commit": "1f5d387e17"
+    "vintage_commit": "0294183b65"
   },
   "decomp_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
@@ -20,7 +20,7 @@
       "kind": "frontend_component",
       "commit_or_etag": "794d4899a164f0f42f5cc08453572199b37b134f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "LOCAL portal commit on wk-irpt_fntend-6-3-fe-s-39 (portal frozen). Changes: carryDocumentReading hands a view null businessAsOf to readingFromValue as undefined (RULING V); advisoryFromWire carries an out-of-enum Holdings advisory_status as { outOfEnum: token } (RULING W) at the Holdings use site; ADVISORY_FOR_WIRE is typed to its partition members so the directory cohort site is unchanged."
+      "deploy_evidence": "LOCAL portal commit on wk-irpt_fntend-6-3-fe-s-39 (portal frozen), unchanged since and carried to portal HEAD 45d5c1de. Changes: carryDocumentReading hands a view null businessAsOf to readingFromValue as undefined (RULING V); advisoryFromWire carries an out-of-enum Holdings advisory_status as { outOfEnum: token } (RULING W) at the Holdings use site; ADVISORY_FOR_WIRE is typed to its partition members so the directory cohort site is unchanged."
     },
     {
       "path_or_key": "portal/src/pages/InvestorReporting/contracts/index.ts",
@@ -62,7 +62,21 @@
       "kind": "test",
       "commit_or_etag": "794d4899a164f0f42f5cc08453572199b37b134f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Loads the portal vite.config.ts at runtime with vite's loadConfigFromFile and merges only cacheDir = <WS>/.scratch/vite-cache-fe-s-39. Exercised: the F39-AC8 server on 5263 printed 'VITE v7.3.5 ready' and the cache directory was created under .scratch/."
+      "deploy_evidence": "The first run's worktree-local cache override. NOT used in this run: AMENDMENT 1 says FE-s-38 has drained and the override is no longer needed, so this run's server was a plain 'bun run dev --port 5263 --strictPort'."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-34/no-status.test.ts",
+      "kind": "test",
+      "commit_or_etag": "45d5c1de5b36a38214af302ce6a43716c0811fdd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1, RULING V, F34-AC9's path 1 NULL arm (the VIEW plane) only: expects an absence wording other than SOURCE_DATE_MALFORMED and prints it both ways on every run. Path 2 NULL (the WIRE plane) unchanged: still requires SOURCE_DATE_MALFORMED. Run: 3 pass / 0 fail; path 1 NULL reads 'Ready -- Source time unknown' (RULING V's rule: accepted; the removed rule: rejected); path 2 NULL reads 'Uncertain -- Source date malformed'. Mutant m4 (the view-null rule reverted in adapt.ts): 0 of 2, 2 pass / 1 fail."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-32/holdings-in-a-browser.test.ts",
+      "kind": "test",
+      "commit_or_etag": "45d5c1de5b36a38214af302ce6a43716c0811fdd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 1, RULING W, CLAIM_READERS.classification only, plus one name added to the existing slices import (ADVISORY_OUT_OF_ENUM_WORDS; row IRPT_FNTEND-W3-S32). Accepts a partition, or an out-of-enum token shown verbatim and followed by the flag; rejects an out-of-enum token without the flag, and each flagged row proves that arm on its own token. The ADVISORY list is unchanged. Mutant m5 (the flag words removed from SliceTable): F32-AC5 NOT FOUND on observed and target, 4 of 6, 6 pass / 1 fail."
     }
   ],
   "acceptance": [
@@ -73,7 +87,7 @@
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
       "expect": "rc=0(?![0-9])",
       "output_evidence": "$ tsc -b --noEmit\nrc=0",
-      "denominator": "1 of 1 portal typecheck (tsc -b over tsconfig.app.json + tsconfig.node.json), 0 diagnostics. The first attempt read rc=2 (adapt.ts(583,7) TS2322, the directory cohort site; row IRPT_FNTEND-W3-S29) and was fixed before the commit.",
+      "denominator": "1 of 1 portal typecheck (tsc -b over tsconfig.app.json + tsconfig.node.json), 0 diagnostics, on the portal tree that is HEAD 45d5c1de (20545436 + the two amended test files; nothing else differs). ENVIRONMENT: IRPT_FE_DEV_PORT=5273 exported (measured closed).",
       "status": "PASS"
     },
     {
@@ -82,8 +96,8 @@
       "method": "test_suite",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-39/adapter-plane.test.ts",
       "expect": "VIEW DOCUMENT WITH A NULL businessAsOf -> ABSENCE NAMED, NOT MALFORMED: 3 of 3(?![0-9])",
-      "output_evidence": "MAP fe-s-3-loading.json: 4 view documents; businessAsOf null on 3\n  investor-reporting/performance-report served by FixtureAdapter -> state=LOADING, availability.sourceDate={\"fact\":\"ABSENT\",\"businessAsOf\":null} -> panel \"No source age yet\" (pure rule \"No source age yet\") [absence named, not malformed: yes]\n    both ways: the WIRE plane's rule on the same null reads \"Source date malformed\"\n  investor-reporting/analysis-requests[0] served by FixtureAdapter -> state=LOADING, availability.sourceDate={\"fact\":\"ABSENT\",\"businessAsOf\":null} -> panel \"No source age yet\" (pure rule \"No source age yet\") [absence named, not malformed: yes]\n  investor-reporting/holdings-snapshot served by FixtureAdapter -> state=LOADING, availability.sourceDate={\"fact\":\"ABSENT\",\"businessAsOf\":null} -> panel \"No source age yet\" (pure rule \"No source age yet\") [absence named, not malformed: yes]\nVIEW DOCUMENT WITH A NULL businessAsOf -> ABSENCE NAMED, NOT MALFORMED: 3 of 3\n 5 pass\n 0 fail",
-      "denominator": "3 of 3 null-businessAsOf view documents, out of 4 view documents in fe-s-3-loading.json (the 4th, resolve-scope, carries 2026-09-09). Run at portal@794d4899; 5 tests of 5 pass in the file. ENVIRONMENT: run with IRPT_FE_DEV_PORT=5273 exported (measured closed).",
+      "output_evidence": "VIEW DOCUMENT WITH A NULL businessAsOf -> ABSENCE NAMED, NOT MALFORMED: 3 of 3\n 5 pass\n 0 fail\nRan 5 tests across 1 file. [1036.00ms]\nrc=0",
+      "denominator": "3 of 3 null-businessAsOf view documents, out of 4 view documents in fe-s-3-loading.json; 5 of 5 tests in the file pass. Run on the portal tree that is HEAD 45d5c1de. ENVIRONMENT: IRPT_FE_DEV_PORT=5273 exported (measured closed, curl rc=7).",
       "status": "PASS"
     },
     {
@@ -92,8 +106,8 @@
       "method": "test_suite",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-39/adapter-plane.test.ts",
       "expect": "WIRE NULL business_date STILL READS MALFORMED: yes",
-      "output_evidence": "  v1 performance-report, status READY, source_dates.business_date=null -> availability.sourceDate={\"fact\":\"NULL\",\"businessAsOf\":null} -> panel \"Source date malformed\" [malformed: yes]\n  v1 holdings-snapshot, NO status, clocks.business_date=null         -> availability.sourceDate={\"fact\":\"NULL\",\"businessAsOf\":null} -> panel \"Source date malformed\" [malformed: yes]\nWIRE ARMS READING MALFORMED: 2 of 2\nWIRE NULL business_date STILL READS MALFORMED: yes",
-      "denominator": "2 of 2 wire arms (the status-carried null the criterion names, plus a no-status document null on the wire plane). Run at portal@794d4899. ENVIRONMENT: run with IRPT_FE_DEV_PORT=5273 exported (measured closed).",
+      "output_evidence": "WIRE ARMS READING MALFORMED: 2 of 2\nWIRE NULL business_date STILL READS MALFORMED: yes",
+      "denominator": "2 of 2 wire arms (the status-carried null the criterion names, plus a no-status document null on the wire plane). Same run as F39-AC2. ENVIRONMENT: IRPT_FE_DEV_PORT=5273 exported (measured closed).",
       "status": "PASS"
     },
     {
@@ -102,8 +116,8 @@
       "method": "test_suite",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-39/adapter-plane.test.ts",
       "expect": "businessDateOf PROVENANCE KEYS ON producerState: 2 of 2(?![0-9])",
-      "output_evidence": "  no-status VIEW document (/api/scoped/investor-reporting/resolve-scope) via FixtureAdapter -> producerState=undefined, availability.sourceDate={\"fact\":\"PRESENT\",\"businessAsOf\":\"2026-09-09\"} -> {\"fact\":\"PRESENT\",\"businessDate\":\"2026-09-09\",\"from\":\"document\"} [expected from:document 2026-09-09: yes; a sourceDate-presence rule would say from:status]\n  v1 performance-report body, status READY carrying business_date      -> producerState=READY, availability.sourceDate={\"fact\":\"PRESENT\",\"businessAsOf\":\"2026-09-11\"} -> {\"fact\":\"PRESENT\",\"businessDate\":\"2026-09-11\",\"from\":\"status\"} [expected from:status 2026-09-11: yes; a sourceDate-presence rule would say from:status]\nbusinessDateOf PROVENANCE KEYS ON producerState: 2 of 2",
-      "denominator": "2 of 2 provenance cases (1 no-status document, 1 status-carried). state/availability.ts is not edited; it is guarded. Run at portal@794d4899. ENVIRONMENT: run with IRPT_FE_DEV_PORT=5273 exported (measured closed).",
+      "output_evidence": "businessDateOf PROVENANCE KEYS ON producerState: 2 of 2",
+      "denominator": "2 of 2 provenance cases (1 no-status document, 1 status-carried). state/availability.ts not edited; guarded. Same run as F39-AC2. ENVIRONMENT: IRPT_FE_DEV_PORT=5273 exported (measured closed).",
       "status": "PASS"
     },
     {
@@ -112,8 +126,8 @@
       "method": "test_suite",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-21/source-age.test.ts",
       "expect": "F21 GRADES THE DOCUMENT'S BUSINESS DATE, NOT AN INSTANT: yes",
-      "output_evidence": "  business_date 2026-09-11 ages to \"Business date age: 2d\"; the as_of instant 2026-09-11T12:00:00Z would age to \"Business date age: 1d\"\n  WIRE READY            -> view READY            business_date=2026-09-11 -> \"Business date age: 2d\" (kind=age: true)\n    ruling V check, both ways: \"Business date age: 2d\" -> true; the instant's \"Business date age: 1d\" -> false; \"No source age yet\" -> false\nANSWER-BEARING STATES: 5 of 5\nF21 GRADES THE DOCUMENT'S BUSINESS DATE, NOT AN INSTANT: yes\n 8 pass\n 0 fail",
-      "denominator": "5 of 5 answer-bearing wire states graded on the business date's age (2d), none on the instant's (1d); 8 of 8 tests in the file pass, every pre-existing assertion kept. ENVIRONMENT: run with IRPT_FE_DEV_PORT=5273 exported (measured closed).",
+      "output_evidence": "    ruling V check, both ways: \"Business date age: 2d\" -> true; the instant's \"Business date age: 1d\" -> false; \"No source age yet\" -> false\nANSWER-BEARING STATES: 5 of 5\nF21 GRADES THE DOCUMENT'S BUSINESS DATE, NOT AN INSTANT: yes\n 8 pass\n 0 fail\nRan 8 tests across 1 file. [140.00ms]\nrc=0",
+      "denominator": "5 of 5 answer-bearing wire states graded on the business date's age (2d), none on the instant's (1d); 8 of 8 tests in the file pass. ENVIRONMENT: IRPT_FE_DEV_PORT=5273 exported (measured closed).",
       "status": "PASS"
     },
     {
@@ -122,8 +136,8 @@
       "method": "test_suite",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-39/adapter-plane.test.ts",
       "expect": "OUT-OF-ENUM ADVISORY ON A READY ANSWER -> VERBATIM AND FLAGGED: 3 of 3(?![0-9])",
-      "output_evidence": "PRODUCER advisory_status ENUM (HoldingsSnapshot.schema.json): ADVISED, RESIDUAL, UNKNOWN\nMAP fe-s-18-holdings-observed.json: holdings status.state=READY -> view READY; presentation=complete; slice rows rendered: 3\n  N-MODELS  wire advisory_status=\"ADVISORY\" (in the producer enum: no) -> cell \"ADVISORY (not a contract advisory value -- shown as sent)\" [verbatim: yes, flagged: yes, reads \"unknown\": no]\n  N-SMA     wire advisory_status=\"ADVISORY\" (in the producer enum: no) -> cell \"ADVISORY (not a contract advisory value -- shown as sent)\" [verbatim: yes, flagged: yes, reads \"unknown\": no]\n  N-CLIENT  wire advisory_status=\"ADVISORY\" (in the producer enum: no) -> cell \"ADVISORY (not a contract advisory value -- shown as sent)\" [verbatim: yes, flagged: yes, reads \"unknown\": no]\n  READER CONTROL: the same reading over the map with advisory_status=ADVISED finds verbatim-and-flagged cells: 0 of 3\nOUT-OF-ENUM ADVISORY ON A READY ANSWER -> VERBATIM AND FLAGGED: 3 of 3",
-      "denominator": "3 of 3 slice rows on the READY observed answer (the root's three children); the reader control finds 0 of 3 on an in-enum render. Run at portal@794d4899. ENVIRONMENT: run with IRPT_FE_DEV_PORT=5273 exported (measured closed).",
+      "output_evidence": "OUT-OF-ENUM ADVISORY ON A READY ANSWER -> VERBATIM AND FLAGGED: 3 of 3",
+      "denominator": "3 of 3 slice rows on the READY observed answer. Same run as F39-AC2. ENVIRONMENT: IRPT_FE_DEV_PORT=5273 exported (measured closed).",
       "status": "PASS"
     },
     {
@@ -132,8 +146,8 @@
       "method": "test_suite",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-39/adapter-plane.test.ts",
       "expect": "IN-ENUM ADVISORY UNCHANGED: yes",
-      "output_evidence": "  advisory_status=ADVISED  -> 3 cells: <td class=\"py-1 pr-3 text-slate-700\" data-slot=\"slice-advisory\" data-classification-authoritative=\"true\">advised</td> | ... [exactly as before: yes]\n  advisory_status=RESIDUAL -> 3 cells: <td class=\"py-1 pr-3 text-slate-700\" data-slot=\"slice-advisory\" data-classification-authoritative=\"true\">residual</td> | ... [exactly as before: yes]\n  advisory_status=UNKNOWN  -> 3 cells: <td class=\"py-1 pr-3 text-slate-700\" data-slot=\"slice-advisory\" data-classification-authoritative=\"true\">unknown</td> | ... [exactly as before: yes]\nIN-ENUM TOKENS RENDERED EXACTLY AS BEFORE: 3 of 3\nIN-ENUM ADVISORY UNCHANGED: yes",
-      "denominator": "3 of 3 producer-enum tokens x 3 of 3 cells each, compared byte for byte to the cell markup SliceTable.tsx rendered at portal@741bb54b. ENVIRONMENT: run with IRPT_FE_DEV_PORT=5273 exported (measured closed).",
+      "output_evidence": "IN-ENUM TOKENS RENDERED EXACTLY AS BEFORE: 3 of 3\nIN-ENUM ADVISORY UNCHANGED: yes",
+      "denominator": "3 of 3 producer-enum tokens x 3 cells each, compared byte for byte to the markup SliceTable.tsx rendered at portal@741bb54b. Same run as F39-AC2. ENVIRONMENT: IRPT_FE_DEV_PORT=5273 exported (measured closed).",
       "status": "PASS"
     },
     {
@@ -142,8 +156,8 @@
       "method": "test_suite",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 300 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-32/holdings-in-a-browser.test.ts",
       "expect": "HOLDINGS UNDER THE GATE, IN A BROWSER: 4 of 4(?![0-9])",
-      "output_evidence": "PRECONDITION: dev server on http://localhost:5263 -- MET (HTTP 200 from http://localhost:5263/) [port from env; set IRPT_FE_DEV_PORT to change it]\nHOLDINGS UNDER THE GATE, IN A BROWSER: 4 of 4\nDRIVER EXIT: 0; PAGE CRASHES: 0\nPARTIAL: CLASSIFICATION GAP SHOWN AS UNKNOWN\nUNCERTAIN: MODEL REVISION STATED AS UNNAMED\n    classification: NOT FOUND [opal-supervised/ADVISORY (not a contract advisory value -- shown as sent) | ...]   (F18-AC9, observed)\n    classification: NOT FOUND [opal-supervised/ADVISORY (not a contract advisory value -- shown as sent) | ...]   (F18-AC10, target)\n    classification: FOUND [unknown/unknown | unknown/unknown | unknown/unknown]   (F18-AC11)\nCLAIMED FIELD PRESENT IN THE RENDERED DOM: 4 of 6\nPIE LABELS INSIDE THE CHART: 18 of 18\n 6 pass\n 1 fail   (F32-AC5 -- the classification reader, turned red by RULING W: BLOCKING row IRPT_FNTEND-W3-S28)\nrc=1",
-      "denominator": "The anchor: 4 of 4 scenarios (observed READY, target UNCERTAIN, missing-attribution PARTIAL, no-answer UNAVAILABLE) at 390 and 1440 in a real browser on this worker's own server. DISCLOSED: the same run is 6 pass / 1 fail, rc=1. F32-AC5 reads 4 of 6 claimed fields because its reader (fe-s-32, outside this grant) accepts only advised/residual/unknown and RULING W renders the verbatim token; BLOCKING IRPT_FNTEND-W3-S28. The criterion's invocation and expect are met; the run is not green. ENVIRONMENT: run with IRPT_FE_DEV_PORT=5263 exported, against this worker's own server started by 'bun run dev --port 5263 --strictPort --config src/pages/InvestorReporting/__tests__/fe-s-39/vite.worktree.config.mjs' (5263 measured closed first; the server killed after and 5263 measured closed again).",
+      "output_evidence": "PRECONDITION: dev server on http://localhost:5263 -- MET (HTTP 200 from http://localhost:5263/; served from worktree C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal: GET /@fs/C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal/package.json -> HTTP 200, byte-identical to this worktree's package.json (2355 bytes)) [required worktree C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal; port: env IRPT_FE_DEV_PORT; set IRPT_FE_DEV_PORT to change it]\nHOLDINGS UNDER THE GATE, IN A BROWSER: 4 of 4\nDRIVER EXIT: 0; PAGE CRASHES: 0\nPARTIAL: CLASSIFICATION GAP SHOWN AS UNKNOWN\nUNCERTAIN: MODEL REVISION STATED AS UNNAMED\n    classification: FOUND [opal-supervised/ADVISORY (not a contract advisory value -- shown as sent) [RULING W: verbatim and flagged -> accepted; the same token unflagged \"ADVISORY\" -> rejected] | ... x3]   (observed)\n    classification: FOUND [opal-supervised/ADVISORY (not a contract advisory value -- shown as sent) [RULING W: verbatim and flagged -> accepted; the same token unflagged \"ADVISORY\" -> rejected] | ... x3]   (target)\n    classification: FOUND [unknown/unknown | unknown/unknown | unknown/unknown]\nCLAIMED FIELD PRESENT IN THE RENDERED DOM: 6 of 6\nPIE LABELS INSIDE THE CHART: 18 of 18\n 7 pass\n 0 fail\nRan 7 tests across 1 file. [41.05s]\nrc=0",
+      "denominator": "4 of 4 scenarios (observed READY, target UNCERTAIN, missing-attribution PARTIAL, no-answer UNAVAILABLE) at 390 and 1440, in a real browser (chromium under node) on this worker's own server; the run is 7 pass / 0 fail, rc=0, F32-AC5 6 of 6 claimed fields. The deciding run is the one after mutant m5 was restored (18:06:32Z-18:07:14Z); the run before m5 read the same (4 of 4, 7 pass / 0 fail, rc=0). ENVIRONMENT: IRPT_FE_DEV_PORT=5263 exported, against this worker's own server, started with 'bun run dev --port 5263 --strictPort' from C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal (vite 7.3.5, cache portal/.vite inside the worktree) after 5263 was measured closed (curl rc=7). The server was killed after the run (taskkill PIDs 27064 and 29308), and 5263 was measured closed again (curl rc=7, no LISTENING row).",
       "status": "PASS"
     },
     {
@@ -152,17 +166,16 @@
       "method": "test_suite",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__",
       "expect": "(?<![0-9])0 fail",
-      "output_evidence": "(fail) F34-AC9 -- a no-status document without a business date: the absence is named and no age is shown > both paths, the business date ABSENT and, separately, NULL\n  StageDisplay    path 1 NULL   -> \"Ready -- Source time unknown\"  [named as \"Source date malformed\", no age: NO]\n  VariantSelector path 1 NULL   -> \"Ready -- Source time unknown\"  [named as \"Source date malformed\", no age: NO]\nNO-STATUS DOCUMENT WITHOUT A BUSINESS DATE -> ABSENCE NAMED, NO AGE: 0 of 2\n 527 pass\n 13 skip\n 1 fail\n 2273 expect() calls\nRan 541 tests across 95 files.\nrc=1",
-      "denominator": "541 tests across 95 files: 527 pass, 13 skip, 1 fail. Baseline at portal@741bb54b before any edit, same invocation and port: 536 tests across 94 files, 523 pass, 13 skip, 0 fail, rc=0. The +5 tests / +1 file are fe-s-39's. The 1 fail is outside the grant. ENVIRONMENT: run with IRPT_FE_DEV_PORT=5273 exported (measured closed: PROBE UNREACHABLE ECONNREFUSED).",
-      "status": "FAIL",
-      "status_reason": "1 test outside this order's grant is turned red by RULING V's view-plane change: __tests__/fe-s-34/no-status.test.ts F34-AC9 'path 1 NULL' requires a view null to read 'Source date malformed', the reading RULING V removes. Not edited. BLOCKING row IRPT_FNTEND-W3-S27 (ARMED, disarm owner 2.0.0_SA_COO~F). The order stays open."
+      "output_evidence": " 532 pass\n 14 skip\n 0 fail\n 2306 expect() calls\nRan 546 tests across 96 files. [5.99s]\nrc=0",
+      "denominator": "546 tests across 96 files: 532 pass, 14 skip, 0 fail, at portal HEAD 45d5c1de with a clean portal status. The first run read 541 tests across 95 files (527 / 13 / 1). The +1 file is __tests__/fe-s-38/isolation.test.ts, which the FE-s-38 sync brought in; the two amended files keep their own counts (fe-s-34 3 tests, fe-s-32 7). DISCLOSED: on a closed port, fe-s-32's five browser tests SKIP by name under ruling C, so this census cannot see F32-AC5; F39-AC8 is its exercise. ENVIRONMENT: IRPT_FE_DEV_PORT=5273 exported, measured closed in the same call (curl rc=7); no server was up (5263 measured closed before the run).",
+      "status": "PASS"
     },
     {
       "criterion_id": "F39-AC10",
       "criterion_verbatim": "F39-AC10 -- graded at L9: nothing the adapter hands the view says more, or less, than the document did. RECORD; NO VERDICT.",
       "method": "manual_read_with_citation",
-      "invocation": "none -- a judgment criterion; the record is the F39-AC2..AC7 runs above at portal@794d4899 and the reads cited here",
-      "output_evidence": "RECORD, NO VERDICT. What the adapter now hands the view, per case, at portal@794d4899: (1) a VIEW document's null businessAsOf -> availability.sourceDate {fact: ABSENT} -> 'No source age yet' on LOADING (F39-AC2, 3 of 3); decided in contracts/adapt.ts carryDocumentReading. (2) a WIRE null business_date (status-carried, or a no-status document's clocks) -> {fact: NULL} -> 'Source date malformed' (F39-AC3, 2 of 2); decided in contracts/adapt.ts readingFromValue, unchanged. (3) businessDateOf provenance keys on producerState (F39-AC4, 2 of 2), state/availability.ts unchanged. (4) fe-s-21 now grades the business date's age (2d), not the as_of instant's (1d) (F39-AC5). (5) a Holdings out-of-enum advisory_status -> { outOfEnum: 'ADVISORY' }, rendered verbatim with a flag (F39-AC6, 3 of 3); in-enum tokens byte-identical to before (F39-AC7). WHAT IS STILL LESS THAN THE DOCUMENT: the DirectoryEntry cohort (adapt.ts directory site) still renames an out-of-enum advisory_status to 'unknown' -- row IRPT_FNTEND-W3-S29, INERT (no emitter). A classification with authoritative=false still renders every partition 'unknown' by the contract's own rule (slices.ts renderedClassification), unchanged. WHAT IS AT ODDS ELSEWHERE: contracts/validate.ts still pins advisory to three values (row W3-S30); fe-s-34 F34-AC9 and fe-s-32 F32-AC5 assert the removed behaviour (rows W3-S27, W3-S28).",
+      "invocation": "none -- a judgment criterion; the record is the F39-AC2..AC9 runs above, on the portal tree that is HEAD 45d5c1de, and the reads cited here",
+      "output_evidence": "RECORD, NO VERDICT. What the adapter hands the view, per case (adapter code at portal@794d4899, unchanged at HEAD 45d5c1de): (1) a VIEW document's null businessAsOf -> availability.sourceDate {fact: ABSENT} -> 'No source age yet' on LOADING (F39-AC2, 3 of 3) and 'Source time unknown' on READY (fe-s-34 F34-AC9 path 1 NULL, amended under RULING V); decided in contracts/adapt.ts carryDocumentReading. (2) a WIRE null business_date (status-carried, or a no-status document's clocks) -> {fact: NULL} -> 'Source date malformed' (F39-AC3, 2 of 2; fe-s-34 path 2 NULL unchanged); decided in contracts/adapt.ts readingFromValue, unchanged. (3) businessDateOf provenance keys on producerState (F39-AC4, 2 of 2); state/availability.ts unchanged. (4) fe-s-21 grades the business date's age (2d), not the as_of instant's (1d) (F39-AC5). (5) a Holdings out-of-enum advisory_status -> { outOfEnum: 'ADVISORY' }, rendered verbatim with a flag (F39-AC6, 3 of 3; in a browser, F39-AC8 F32-AC5 6 of 6); in-enum tokens byte-identical to before (F39-AC7). STILL LESS THAN THE DOCUMENT: the DirectoryEntry cohort (the adapt.ts directory site) still renames an out-of-enum advisory_status to 'unknown' (row IRPT_FNTEND-W3-S29, INERT: no emitter). A classification with authoritative=false still renders every partition 'unknown' by the contract's own rule (slices.ts renderedClassification), unchanged. AT ODDS ELSEWHERE: contracts/validate.ts still pins advisory to three values (row W3-S30). The flag is recognised by the browser reader from the cell's text alone, because the driver reads textContent only (row W3-S32).",
       "denominator": "N/A -- judgment criterion, graded at L9 by 3.0.0_SA_CVO",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "Judgment criterion: graded at L9 by 3.0.0_SA_CVO, the oracle; this row is the record, with no verdict.",
@@ -171,29 +184,21 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Two mutants of contracts/adapt.ts at portal@794d4899 (byte copy taken first, restored from it after; 'git diff --quiet' on adapt.ts read CLEAN vs HEAD). m1: the view-plane null rule reverted ('readingFromValue(businessAsOf === null ? undefined : businessAsOf)' -> 'readingFromValue(businessAsOf)'). m2: the out-of-enum advisory rule reverted ('{ outOfEnum: token }' -> 'unknown').",
-      "expected": "m1 fails F39-AC2 only; m2 fails F39-AC6 only; the controls AC3, AC4 and AC7 stay green under both.",
-      "observed": "m1: 'VIEW DOCUMENT WITH A NULL businessAsOf -> ABSENCE NAMED, NOT MALFORMED: 0 of 3', F39-AC2 failed, 4 pass / 1 fail, rc=1; AC3 'yes', AC4 '2 of 2', AC6 '3 of 3', AC7 'yes'. m2: 'OUT-OF-ENUM ADVISORY ON A READY ANSWER -> VERBATIM AND FLAGGED: 0 of 3', F39-AC6 failed, 4 pass / 1 fail, rc=1; AC2 '3 of 3', AC3 'yes', AC4 '2 of 2', AC7 'yes'.",
+      "description": "Four mutants, each applied to a byte copy's original and restored from it, with 'git diff --quiet' on the mutated file reading clean against HEAD after restore. m1 and m2 are the first run's, at portal@794d4899: m1 reverted the view-plane null rule in contracts/adapt.ts, and m2 reverted the out-of-enum advisory rule. m4 and m5 are this run's, on the tree that is HEAD 45d5c1de. m4: adapt.ts 'readingFromValue(businessAsOf === null ? undefined : businessAsOf)' -> 'readingFromValue(businessAsOf)', run against the amended fe-s-34. m5: SliceTable.tsx '({ADVISORY_OUT_OF_ENUM_WORDS})' removed, so the out-of-enum token renders verbatim WITHOUT its flag, run against the amended fe-s-32 on the 5263 server.",
+      "expected": "m1 fails F39-AC2 only; m2 fails F39-AC6 only. m4 fails fe-s-34 F34-AC9 on its path 1 NULL arm (the amended arm must reject a view null read as malformed). m5 fails fe-s-32 F32-AC5 (the amended reader must reject an out-of-enum token shown without the flag).",
+      "observed": "m1: F39-AC2 '0 of 3', 4 pass / 1 fail. m2: F39-AC6 '0 of 3', 4 pass / 1 fail. m4: 'StageDisplay path 1 NULL -> \"Ready -- Source date malformed\" [absence named, not malformed (RULING V), no age: NO]', both ways 'under RULING V's rule -> rejected; under the removed rule -> accepted'; 'ABSENCE NAMED, NO AGE: 0 of 2'; 2 pass / 1 fail, rc=1; adapt.ts restored clean. m5: 'classification: NOT FOUND [opal-supervised/ADVISORY | opal-supervised/ADVISORY | opal-supervised/ADVISORY]' on observed and target; 'CLAIMED FIELD PRESENT IN THE RENDERED DOM: 4 of 6'; 6 pass / 1 fail, rc=1; SliceTable.tsx restored clean, and the post-restore run read 6 of 6, 7 pass / 0 fail.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "adapter-plane.test.ts run twice back to back at portal@794d4899 (after the mutant restore), ANSI stripped, outputs diffed.",
-      "observed": "59 lines each; exactly one differing line, the wall-clock 'Ran 5 tests across 1 file. [886.00ms]' vs '[834.00ms]'. Both rc=0.",
+      "method": "F39-AC8 run twice on this run's server with identical bytes (before m5, and after m5's restore); and, from the first run, adapter-plane.test.ts twice back to back at portal@794d4899.",
+      "observed": "F39-AC8: both runs 'HOLDINGS UNDER THE GATE, IN A BROWSER: 4 of 4', 'CLAIMED FIELD PRESENT IN THE RENDERED DOM: 6 of 6', 7 pass / 0 fail, rc=0 (73.22s and 41.05s). adapter-plane (first run): 59 lines each, differing only on the wall-clock line.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "The DirectoryEntry cohort's advisory (the second ADVISORY_FOR_WIRE use site, contracts/adapt.ts:558 at 741bb54b) is not carried verbatim.",
+      "item": "The DirectoryEntry cohort's advisory (the second ADVISORY_FOR_WIRE use site in contracts/adapt.ts) is not carried verbatim.",
       "reason": "Its view type is CohortValue, which three axes share and which is not 'the advisory view type' the bound grants, and its display is header/ScopeSummary.tsx, outside the grant. The table is typed to its partition members so that site behaves as before. Row IRPT_FNTEND-W3-S29, INERT: no emitter."
-    },
-    {
-      "item": "__tests__/fe-s-34/no-status.test.ts F34-AC9 (path 1 NULL) is not amended.",
-      "reason": "Outside the grant; BOUNDS: a test your change turns red is a BLOCKING row, never an edit. Row IRPT_FNTEND-W3-S27. F39-AC9 is FAIL on it."
-    },
-    {
-      "item": "__tests__/fe-s-32/holdings-in-a-browser.test.ts F32-AC5's classification reader is not amended.",
-      "reason": "Outside the grant. Row IRPT_FNTEND-W3-S28."
     },
     {
       "item": "contracts/validate.ts:448 still pins a Holdings view's advisory to advised/residual/unknown.",
@@ -201,19 +206,24 @@
     },
     {
       "item": "state/status.ts is not changed.",
-      "reason": "No absence wording was needed: a view null now arrives as fact ABSENT, and the existing wordings name it ('No source age yet' on a no-answer state, 'Source time unknown' on an answer-bearing one)."
+      "reason": "No absence wording was needed: a view null arrives as fact ABSENT, and the existing wordings name it ('No source age yet' on a no-answer state, 'Source time unknown' on an answer-bearing one)."
     },
     {
-      "item": "The 9 files F39-AC8's run rewrote under deliverables/0.9.0_WK_IRPT_FNTEND~2/ (FE-s-32's captures and manifest) are not staged, committed or restored.",
-      "reason": "Outside the grant; restoring them would itself be a write outside the grant. Row IRPT_FNTEND-W3-S31."
+      "item": "In fe-s-32/holdings-in-a-browser.test.ts, one import line changed beside CLAIM_READERS.classification.",
+      "reason": "The reader needs the flag's words, and the ONE RULE bound forbids re-typing them. Row IRPT_FNTEND-W3-S32, INERT. Nothing else in that file changed (portal 45d5c1de diff: the import line and the reader). holdings-no-answer.json is not touched."
+    },
+    {
+      "item": "The files F39-AC8's runs rewrite under deliverables/0.9.0_WK_IRPT_FNTEND~2/ (FE-s-32's captures and manifest, 9 files) are not staged, committed or restored.",
+      "reason": "Outside the grant; restoring them would itself be a write outside the grant. Row IRPT_FNTEND-W3-S31. This run wrote them three times (the pre-m5 run, m5, and the deciding post-restore run), so the bytes left there are the deciding run's render of the restored code."
     }
   ],
   "surprises": [
-    "IRPT_FNTEND-W3-S27: RULING V turns fe-s-34/no-status.test.ts F34-AC9 (path 1 NULL, which requires a view null to read 'Source date malformed') red -- outside the grant; the whole suite reads 1 fail. BLOCKING, ARMED.",
-    "IRPT_FNTEND-W3-S28: RULING W turns fe-s-32 F32-AC5 red in F39-AC8's own run -- its classification reader accepts only advised/residual/unknown, so the verbatim ADVISORY reads NOT FOUND (4 of 6). BLOCKING, ARMED.",
+    "IRPT_FNTEND-W3-S27: RULING V turned fe-s-34/no-status.test.ts F34-AC9 (path 1 NULL) red; AMENDMENT 1 granted its view arm and this run amended it (portal 45d5c1de). BLOCKING, ARMED as filed; disposition is the disarm owner's.",
+    "IRPT_FNTEND-W3-S28: RULING W turned fe-s-32 F32-AC5 red in F39-AC8's run; AMENDMENT 1 granted its classification reader and this run amended it (portal 45d5c1de). BLOCKING, ARMED as filed; disposition is the disarm owner's.",
     "IRPT_FNTEND-W3-S29: the DirectoryEntry cohort's ADVISORY_FOR_WIRE use site still renames an out-of-enum advisory to 'unknown' (CohortValue + ScopeSummary outside the grant). OBSERVATION, INERT.",
     "IRPT_FNTEND-W3-S30: contracts/validate.ts:448 still pins a Holdings view's advisory to three values, disagreeing with AdvisoryValue. OBSERVATION, INERT.",
-    "IRPT_FNTEND-W3-S31: F39-AC8's invocation writes FE-s-32's captures into deliverables/0.9.0_WK_IRPT_FNTEND~2/, outside this grant (9 files modified, not staged). OBSERVATION, INERT."
+    "IRPT_FNTEND-W3-S31: F39-AC8's invocation writes FE-s-32's captures into deliverables/0.9.0_WK_IRPT_FNTEND~2/, outside this grant (9 files modified, not staged). OBSERVATION, INERT.",
+    "IRPT_FNTEND-W3-S32: AMENDMENT 1's 'change nothing else in that file' and the ONE RULE bound meet at fe-s-32's import line; one name (ADVISORY_OUT_OF_ENUM_WORDS) was added to the existing slices import so the flag's words are read, not re-typed. OBSERVATION, INERT."
   ],
   "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~3/adapter-states-what-the-document-states.result.md",
   "compiler_tools": [
@@ -225,12 +235,12 @@
     {
       "tool": "bun test 1.3.9",
       "invocation": "cd C:/tmp/wk-irpt_fntend-6-3-fe-s-39/portal && export IRPT_FE_DEV_PORT=5273 && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__",
-      "result": "541 tests across 95 files: 527 pass, 13 skip, 1 fail (fe-s-34 F34-AC9), rc=1 (F39-AC9)"
+      "result": "546 tests across 96 files: 532 pass, 14 skip, 0 fail, rc=0 (F39-AC9)"
     },
     {
       "tool": "vite 7.3.5 dev server (via bun run dev) + playwright-core chromium under node (fe-s-32 driver)",
-      "invocation": "bun run dev --port 5263 --strictPort --config src/pages/InvestorReporting/__tests__/fe-s-39/vite.worktree.config.mjs; then IRPT_FE_DEV_PORT=5263 bun test .../fe-s-32/holdings-in-a-browser.test.ts",
-      "result": "HOLDINGS UNDER THE GATE, IN A BROWSER: 4 of 4; 6 pass / 1 fail (F32-AC5), rc=1 (F39-AC8); server killed after, 5263 measured closed (ECONNREFUSED)"
+      "invocation": "bun run dev --port 5263 --strictPort (from <WS>/portal); then IRPT_FE_DEV_PORT=5263 bun test .../fe-s-32/holdings-in-a-browser.test.ts",
+      "result": "HOLDINGS UNDER THE GATE, IN A BROWSER: 4 of 4; 7 pass / 0 fail, rc=0 (F39-AC8); server killed after, 5263 measured closed (curl rc=7)"
     }
   ]
 }
