@@ -5,7 +5,12 @@
 **For:** 1.0.0_SA_CTO~Z (L2/L4 owner), on Andrew's word of 2026-09-14 ~16:00Z and ~16:34Z
 (records `deliverables/ANDREW_DIRECT_20260914_1600Z_...md` @d5f883ce90 and
 `deliverables/ANDREW_DIRECT_20260914_1634Z_...md`)
-**Status:** v0.1 DRAFT -- pitched to Andrew at this seat's terminal; delivered to the CTO on his acceptance.
+**Status:** v0.2 -- pitched to Andrew at this seat's terminal ~16:5xZ; read by `1.0.0_SA_CTO~Z` from the tree at
+v0.1 @ee4b7e5539 and carried into its close-out breakdown
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/POSN_ASTTAX_CLOSEOUT_BREAKDOWN_20260914_Z.md` @a35baa02ea, which is now
+the cell-level authority (its s.3 eight cells supersede s.4 step 2 below). **v0.2 (2026-09-14 ~17:2xZ):** file
+locations corrected on the CTO's measurement (msg 22836) -- `SelectionTab.tsx` and `holdings-shared.tsx` are
+ATTRIBUTION files at pin `e85f6eb84f`, not Positioning; s.8 added with this seat's alignment notes on the breakdown.
 **Not a recon engagement; no RCN id.** Everything below is measured on the LIVE plane at the vintages
 stated, never from a document's description of it.
 
@@ -108,7 +113,7 @@ those fields have no backfill.
 |---|---|---|
 | producer | `cot-satellites-registry-producer` (daily, reads the same bronze partition, writes `s3://opal-data-cot/platinum/satellites/registry.json`) | emit a sibling key in the same prefix on the same schedule, `holdings.json`: `{as_of, source, claim, satellites: {code: [{ticker, weight, sleeves:[{book, weight}], weight_models_blend, overlay, asset_class, sub_asset_class}]}}`. ETFClassifier read from a lambda is established (`_shared/etf_classifications_dynamodb.py`). |
 | route | `@/api/endpoints/satelliteRegistry` over the scoped satellites route (ETFS_SATELLITES TO-7/TO-8) | the new key rides the same route family; no new route class, no new bucket (cot stays in cot -- CLAUDE.md NEVER cross-firm) |
-| portal | `satelliteAdapter.ts` union-blends Yang holdings (B) and blends book measures (A) | (B) is replaced by the served coalesced holdings; the allocation block becomes five-class from served labels; (A) stays for measures where per-ticker characteristics are missing. `HoldingsTab` / `SelectionTab` render the satellite column through the same five-class order and colour fix every mode needs. |
+| portal | `satelliteAdapter.ts` union-blends Yang holdings (B) and blends book measures (A) | (B) is replaced by the served coalesced holdings; the allocation block becomes five-class from served labels; (A) stays for measures where per-ticker characteristics are missing. `HoldingsTab` and `PositioningSummary` render the satellite column through the same five-class order and colour fix every mode needs (both bind colour through `src/lib/chartColors.ts`); `SelectionTab` is an Attribution file and gets only a one-line no-regression guard. |
 | untouched | Yang's PKL, the models generator's holdings, the Models toggle, the ETFs toggle, the registry producer's membership predicate | -- |
 
 No shadow pipeline, no parallel artifact, no monitor. One producer, one artifact family, one adapter.
@@ -121,7 +126,7 @@ No shadow pipeline, no parallel artifact, no monitor. One producer, one artifact
 | 0b | CVO adjudicates round 4 (packet handed 2026-09-13T07:54Z, 25 rows); COO marks `TO-S2-1`/`TO-S3-1` **superseded** by `TO-T6-1`/`TO-T7-1` (their own headers say so); round-4 slug | CVO / COO | 4 carried orders block the L10 refuser |
 | 0c | Round-4 analysis + **PRD v0.7 addendum**: (i) this design as constraint `C-SATELLITE-SOURCE` and a fourth surface row **S4 -- satellite holdings, coalesced from BD**; (ii) FWD-6 narrowed to Positioning's own surfaces (Models / ETFs / Satellites toggles; Summary / Holdings / Selection tabs) with Philosophy/CMA carved to a later item on Andrew's ~16:34Z word -- an ENDPOINT byte change, so the CVO half re-signs; (iii) the retag set settled at TWELVE | CTO (L4); CVO + CRO re-sign | PRD at v0.6 |
 | 1 | **Deploy the positioning generator** (committed 2026-09-11, running bytes 2026-08-18): CTO + COO never-widen halves with the writer census printed (N >= 3), Terraform, then read the served `positioning_data.json` for the five-class keys | CTO + COO | approved 2026-09-13 conditional; no half drafted |
-| 2 | **Round 5, one issuance**: AT5-s-1 producer `holdings.json` (R1-R4); AT5-s-2 portal five-class order + colour (4 literals `HoldingsTab.tsx:1392` / `SelectionTab.tsx:321` + `chartColors.ts` + `holdings-shared.tsx`; gold token minted; `PositioningAllocation` widened to five keys); AT5-s-3 `satelliteAdapter.ts` reads the coalesced holdings; AT5-s-4 BD seeder patch applied, then the 12-ticker retag in BOTH stores (`TO-T6-1` recut) and `is_hedge` (`TO-T7-1`); AT5-s-5 the bars exercised on the local build against the nine real satellites | COO cuts; workers | FWD-4 / FWD-6 measured, unserved |
+| 2 | **Round 5, one issuance**: AT5-s-1 producer `holdings.json` (R1-R4); AT5-s-2 portal five-class order + colour on the Positioning page's 14 files (`HoldingsTab.tsx:1392` order literal, `:215` colour map, `:1381-1383` Hedge-to-Equity fold; `PositioningSummary.tsx:545-546`; `src/lib/chartColors.ts` pink + a minted gold token; `PositioningAllocation` widened to five keys) -- `SelectionTab.tsx:321` and `holdings-shared.tsx` are ATTRIBUTION files at the pin and receive only a one-line no-regression guard (the breakdown's F4); AT5-s-3 `satelliteAdapter.ts` reads the coalesced holdings; AT5-s-4 BD seeder patch applied, then the 12-ticker retag in BOTH stores (`TO-T6-1` recut) and `is_hedge` (`TO-T7-1`); AT5-s-5 the bars exercised on the local build against the nine real satellites | COO cuts; workers | FWD-4 / FWD-6 measured, unserved |
 | 3 | Portal promote on Andrew's word (the freeze); bars re-graded on PROD; L10 | Andrew; CTO | frozen |
 
 Sequencing that is load-bearing: the retag (2/s-4) lands only after the deploy (1) and after s-2/s-3 are
@@ -133,8 +138,9 @@ retag; it will simply show GLD under `hedge` until the retag flips it, which is 
 
 - **FWD-1 / FWD-2**: on the local build, Sat 15 shows a Commodities bucket of 8.34% and Sat 80 shows
   VXX under Structured; class subtotals sum to the grand total on every satellite; served rows = DOM rows.
-- **FWD-3 / FWD-4**: one order and one colour across all 11 readers the round-4 census derived, including
-  `holdings-shared.tsx` (3 of 11 readers bind there, not in `chartColors.ts`).
+- **FWD-3 / FWD-4**: one order and one colour across the Positioning page's readers (`HoldingsTab`,
+  `PositioningSummary`, both adapters), all of which bind through `src/lib/chartColors.ts`. The round-4 census's
+  other readers, `holdings-shared.tsx` among them, are Attribution and out of scope beyond the F4 guard.
 - **FWD-5**: change one boundary in the table (e.g. PDBC hedge -> Commodities) and read it flow through
   the served `holdings.json` and the page with no portal edit.
 - **FWD-6 (narrowed)**: Models, ETFs and Satellites toggles and the three tabs agree on the five classes,
@@ -164,3 +170,54 @@ act is the CTO's; the L5/L6 cut is the COO's; the promote and the freeze are And
 **Vintages:** rebalancer bronze 2026-09-14 (81 files); registry `as_of 2026-09-14`; served models
 `data_as_of 2026-09-11`; DynamoDB `etf-classifications` 285 rows, last write 2026-08-25; portal gitlink
 `e85f6eb84f`; positioning lambda `LastModified 2026-08-18T18:34:43Z`; PRD v0.6 @ae66157381.
+
+---
+
+## 8. ALIGNMENT NOTES ON THE CTO BREAKDOWN @a35baa02ea (v0.2, before Andrew aligns)
+
+Read in full. The breakdown carries R1-R4 and the eight cards faithfully; its s.3 eight cells are the
+cell-level authority from here and supersede s.4 step 2 above. Six notes, each with a recommendation;
+AGREE where nothing needs to change.
+
+**A1 -- AGREE:** cells B1-B3 / F1-F4 / R1, the sequencing (R1 strictly last), F4 as a no-regression
+guard on Attribution, and card 6 (cut `is_hedge()`, no live caller; cut the `bd-securities`
+reconciliation, it changes nothing the Positioning page shows).
+
+**N1 -- FLAG, B1 widens the approved deploy.** Andrew's 2026-09-13 approval (card 5, LD-0562) covered
+*the committed repairs* to `yang-generate-positioning`. B1 as written adds a NEW code change to a
+SECOND function -- `yang-generate-allocation-summary` (`BENCHMARK_ALLOCATIONS`; `LastModified
+2026-08-04`; writes `allocation_summary.json`, a different served artifact). *Rec:* split into **B1a**
+(the approved deploy: one function, one artifact) and **B1b** (the labelled-zero benchmark rows: new
+code, its own never-widen half naming `allocation_summary.json` and the delta/spread rows), or have the
+one sign-off name BOTH functions and BOTH artifacts explicitly. An approved act that grows silently is
+the exact shape the NEVER#1 sign-off rule is written against.
+
+**N2 -- FLAG, B2's write surface includes Terraform, measured.** The producer role
+(`infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf`) holds `s3:GetObject` on the two
+bronze prefixes and `s3:PutObject` on exactly `platinum/satellites/registry.json` -- no DynamoDB action,
+no read on `opal-data-portal-v2`. So B2 needs a second pinned `PutObject` key (`holdings.json`) and a
+DynamoDB read on `etf-classifications`, both in that `.tf`. *Rec:* compute `weight_models_blend` and
+`overlay` in the ADAPTER (F3), which already holds the models payload -- then the producer needs no
+cross-bucket read and no new bucket grant, and `holdings.json` carries one plane only (BD facts + labels).
+Keep the per-ticker sleeve breakdown (`sleeves:[{book, weight}]`) in `holdings.json`; it is what makes
+"coalesced" legible (GLD in Sat 30 = ST 6.26 + INT 1.00).
+
+**N3 -- FLAG, F3's cell text must carry R4 explicitly.** `holdings.json` carries weights and labels,
+not characteristics. Fee / yield / duration / beta / returns are carried per ticker from the models
+payload's `current_holdings` where any Yang book holds the ticker, NULL otherwise, with the (A) measure
+blends over books kept as the satellite-level fallback. A worker reading only "reads `holdings.json`"
+ships a satellites column with no fee or yield. Also: the satellite's `data_as_of` becomes the BD
+partition date (`holdings.json as_of`), not the models payload's -- today's adapter inherits the models
+vintage, which would stamp 09-11 on 09-14 holdings.
+
+**N4 -- FLAG, R1's FWD-5 fixture.** The breakdown proves FWD-5 with a PDBC boundary flip; PDBC is one
+of the two L5 judgment calls (C-MEMBERSHIP-AT-L5; CVO `C-S53`), so the flip and the ruling would be one
+act. *Rec:* grade FWD-5 on the retag itself -- twelve rows changed in the one place, every Positioning
+mode reflecting it with no portal edit -- and drop the extra flip.
+
+**N5 -- AGREE with a note, card 2 / F4.** Andrew's word was "solely around the Positioning page"; F4
+touches three Attribution files as a guard, not a feature, and it is carded rather than assumed. Right.
+
+**N6 -- NOTE, card 8.** The Bloomberg pull edit lands on the BBG box's working tree (an edit there is a
+deploy); the owner is `0.0.3_BG_BBGTerminal`, live now. Name the recipient on the card so a "yes" has
+somewhere to go the same hour.
