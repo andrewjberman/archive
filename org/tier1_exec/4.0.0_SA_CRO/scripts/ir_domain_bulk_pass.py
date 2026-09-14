@@ -315,6 +315,120 @@ def adjudicate(name: str, results: list, held_domain):
     return None, "UNRESOLVED", reasons
 
 
+# ---------------------------------------------------------------- blog branch
+
+# A path or host segment that says "this is the company's own editorial feed".
+BLOG_MARKERS = ("blog", "blogs", "news", "newsroom", "stories", "press",
+                "insights", "media", "articles")
+
+
+def _marks(segment: str) -> bool:
+    """
+    True if this host label or path segment IS a blog marker, reading a
+    hyphen/underscore-joined segment as the words it is made of.
+
+    An EXACT segment match is too strict and an unanchored SUBSTRING match is
+    too loose. Measured on the first blog batch: 'press-releases' and
+    'media-centre' are unmistakably editorial and fail an exact match, while a
+    bare substring test would accept 'newsagents' or 'expressway'. Splitting on
+    the separators the segment already uses is the reading that matches how
+    these URLs are actually built.
+    """
+    return any(w in BLOG_MARKERS
+               for w in re.split(r"[-_]+", segment) if w)
+
+
+def adjudicate_blog(held_domain, results: list):
+    """
+    THE BLOG RULE IS TIGHTER THAN THE IR RULE, AND DELIBERATELY SO.
+
+    By the time this runs the company's registrable domain is ALREADY HELD from
+    the IR pass. So test (c) -- 'the domain matches a value already held for
+    that company from another key' -- stops being the dead branch it was on the
+    IR pass and becomes the PRIMARY and only test:
+
+        A BLOG URL IS ACCEPTED ONLY IF ITS REGISTRABLE DOMAIN EQUALS THE HELD
+        ir_domain. Everything else is discarded, whatever its rank.
+
+    That is not a heuristic. It is an identity constraint, and it makes the
+    wrong-company failure mode -- the one that forced this whole criterion --
+    STRUCTURALLY IMPOSSIBLE here rather than merely unlikely.
+
+    The cost is an honest narrowing: a company with no held ir_domain cannot
+    have a blog resolved either, so this layer's denominator is the IR pass's
+    resolved count, NOT 89. Said here so the smaller number is not read as a
+    worse result.
+    """
+    if not held_domain:
+        return [], "UNRESOLVED", {
+            "verdict": "REFUSED -- no ir_domain is held for this company, so "
+                       "the only test available cannot run. Resolving the IR "
+                       "domain is the prerequisite, not more searching.",
+            "held_domain": None,
+        }
+
+    on_domain, off_domain = [], []
+    for item in results:
+        link = item.get("link", "")
+        dom = registrable(link)
+        if dom == held_domain:
+            on_domain.append(link)
+        elif dom:
+            off_domain.append(dom)
+
+    hosts = []
+    for link in on_domain:
+        parts = urllib.parse.urlsplit(link)
+        host = (parts.hostname or "").lower()
+        segs = [s for s in (parts.path or "").lower().split("/") if s]
+
+        # A marker in the HOST makes the whole host the blog root.
+        if any(_marks(lbl) for lbl in host.split(".")):
+            root = host
+        else:
+            # A marker in the PATH makes the root the prefix UP TO AND
+            # INCLUDING that segment.
+            #
+            # THIS USED TO TAKE segs[0] AND THAT WAS WRONG IN 3 OF THE FIRST 7.
+            # On a localized site the first segment is the LOCALE, not the
+            # blog: asml.com/en/news/... yielded 'www.asml.com/en', and
+            # astrazeneca.com/content/.../news yielded '.../content'. Each is a
+            # real URL prefix, so nothing errored and nothing looked wrong --
+            # the value was simply not a blog. Found by reading the seven
+            # outputs instead of reading the "4 of 7 accepted" line above them.
+            idx = next((k for k, sg in enumerate(segs) if _marks(sg)), None)
+            if idx is None:
+                continue
+            root = host + "/" + "/".join(segs[:idx + 1])
+        if root not in hosts:
+            hosts.append(root)
+
+    reasons = {
+        "held_domain": held_domain,
+        "results_on_held_domain": len(on_domain),
+        "results_off_held_domain": sorted(set(off_domain)),
+        # STORED so a later repair to this rule can be replayed offline at ZERO
+        # call cost -- which is exactly what the IR pass's stored domain list
+        # bought, and what this branch did not have when it needed it.
+        "on_domain_links": on_domain,
+        "blog_roots": hosts,
+    }
+    if hosts:
+        reasons["verdict"] = (
+            "ACCEPTED -- %d blog root(s) on the held domain %s, out of %d "
+            "result(s) that were on it at all." % (len(hosts), held_domain,
+                                                   len(on_domain))
+        )
+        return hosts, "INFERRED", reasons
+    reasons["verdict"] = (
+        "REFUSED -- %d result(s) landed on the held domain %s but none carried "
+        "a blog/news/press marker in its host or path. A company may simply not "
+        "run a public editorial feed; that is a finding, not a gap."
+        % (len(on_domain), held_domain)
+    )
+    return [], "UNRESOLVED", reasons
+
+
 # ------------------------------------------------------------------- the call
 
 def cse_search(key: str, cx: str, query: str, num: int = 10):
@@ -354,12 +468,34 @@ def main() -> int:
                          "so no name is paid for twice")
     ap.add_argument("--out", default="")
     ap.add_argument("--sleep", type=float, default=0.3)
+    ap.add_argument("--mode", choices=("ir", "blog"), default="ir",
+                    help="blog mode REQUIRES --held-domains: a company with no "
+                         "resolved ir_domain cannot have a blog resolved, so "
+                         "the blog denominator is the IR pass's resolved "
+                         "count, never 89")
+    ap.add_argument("--held-domains", default="",
+                    help="path to the IR pass output, read for its resolved "
+                         "ir_domain values")
     args = ap.parse_args()
 
     universe = json.load(open(UNIVERSE, encoding="utf-8"))
     names = universe["names"]
 
     by_folder = {r["folder"]: r for r in names}
+
+    held_domains = {}
+    if args.mode == "blog":
+        if not args.held_domains:
+            print("ERROR: --mode blog requires --held-domains.", file=sys.stderr)
+            return 2
+        prior = json.load(open(args.held_domains, encoding="utf-8"))
+        for r in prior["records"]:
+            v = (r.get("ir_domain") or {}).get("value")
+            if v:
+                held_domains[r["folder"]] = v
+        print("HELD DOMAINS   %d of %d -- THE BLOG DENOMINATOR IS %d, NOT %d. "
+              "A name with no resolved ir_domain cannot have a blog resolved."
+              % (len(held_domains), len(names), len(held_domains), len(names)))
 
     if args.folders:
         wanted = [ln.strip() for ln in
@@ -375,6 +511,12 @@ def main() -> int:
         targets = names[args.offset:]
         if args.limit:
             targets = targets[:args.limit]
+
+    if args.mode == "blog":
+        before = len(targets)
+        targets = [t for t in targets if t["folder"] in held_domains]
+        print("NO HELD DOMAIN %d target(s) dropped -- refused by the IR "
+              "pass, so not paid for again here" % (before - len(targets)))
 
     skipped = 0
     if args.exclude_done:
@@ -398,9 +540,14 @@ def main() -> int:
         print("MODE           DRY RUN -- zero calls\n")
         for rec in targets:
             nm = company_name(rec["folder"])
-            print("  %-42s -> q=%-38s tokens=%s"
-                  % (rec["folder"], '"%s investor relations"' % nm,
-                     name_tokens(nm)))
+            if args.mode == "blog":
+                print("  %-42s -> q=%-26s held=%s"
+                      % (rec["folder"], '"%s blog"' % nm,
+                         held_domains.get(rec["folder"])))
+            else:
+                print("  %-42s -> q=%-38s tokens=%s"
+                      % (rec["folder"], '"%s investor relations"' % nm,
+                         name_tokens(nm)))
         return 0
 
     raw = sys.stdin.read().strip()
@@ -420,11 +567,15 @@ def main() -> int:
     out = []
     spent = 0
     accepted = 0
+    failed = 0
     for i, rec in enumerate(targets, 1):
         folder = rec["folder"]
         nm = company_name(folder)
-        held = (rec.get("ir_domain") or {}).get("value")
-        query = "%s investor relations" % nm
+        held = held_domains.get(folder) if args.mode == "blog" \
+            else (rec.get("ir_domain") or {}).get("value")
+        key_name = "blog_roots" if args.mode == "blog" else "ir_domain"
+        query = ("%s blog" % nm) if args.mode == "blog" \
+            else ("%s investor relations" % nm)
         try:
             payload = cse_search(key, cx, query)
             spent += 1
@@ -432,18 +583,34 @@ def main() -> int:
             print("  [%2d] %-40s CALL FAILED: %s" % (i, folder, exc))
             out.append({
                 "folder": folder, "company_name": nm, "query": query,
-                "ir_domain": {
+                key_name: {
                     "value": None, "status": "UNRESOLVED",
                     "evidence": "Google CSE call failed: %s" % exc,
                     "resolved_at": datetime.datetime.utcnow()
                                    .strftime("%Y-%m-%dT%H:%MZ"),
                 },
             })
+            failed += 1
+            if failed >= 3:
+                print("\n  STOPPING: 3 consecutive-or-more call failures. A "
+                      "quota wall or a credential fault is not something to "
+                      "spend the rest of the batch discovering one call at a "
+                      "time.")
+                break
             continue
+        failed = 0
 
         items = payload.get("items", []) or []
         total = (payload.get("searchInformation", {}) or {}).get("totalResults")
-        dom, status, reasons = adjudicate(nm, items, held)
+        if args.mode == "blog":
+            dom, status, reasons = adjudicate_blog(held, items)
+            crit = ("the blog root's registrable domain must EQUAL the "
+                    "ir_domain already held for this company -- test (c) of "
+                    "s.13, which the IR pass could not use and this pass can.")
+        else:
+            dom, status, reasons = adjudicate(nm, items, held)
+            crit = ("a domain is accepted only if independently tied to the "
+                    "company, never by rank.")
         if status == "INFERRED":
             accepted += 1
 
@@ -451,16 +618,15 @@ def main() -> int:
             "Google Custom Search (customsearch/v1), SEARCH ONLY, under "
             "Andrew-direct 2026-09-13 ~04:0xZ card 4. Query %r, %d result(s) "
             "returned of %s reported. Acceptance criterion "
-            "HARVEST_BACKFILL_PLAN_20260911_Z.md s.13: a domain is accepted "
-            "only if independently tied to the company, never by rank. %s"
-            % (query, len(items), total, reasons["verdict"])
+            "HARVEST_BACKFILL_PLAN_20260911_Z.md s.13: %s %s"
+            % (query, len(items), total, crit, reasons["verdict"])
         )
         out.append({
             "folder": folder,
             "company_name": nm,
             "query": query,
             "results_returned": len(items),
-            "ir_domain": {
+            key_name: {
                 "value": dom,
                 "status": status,
                 "evidence": evidence,
@@ -469,8 +635,10 @@ def main() -> int:
             },
             "adjudication": reasons,
         })
+        shown = dom if isinstance(dom, str) else (
+            ", ".join(dom)[:28] if dom else None)
         print("  [%2d] %-40s %-28s %s"
-              % (i, folder, dom or "-- UNRESOLVED --", reasons["verdict"][:70]))
+              % (i, folder, shown or "-- UNRESOLVED --", reasons["verdict"][:70]))
         if args.sleep:
             time.sleep(args.sleep)
 
@@ -482,7 +650,9 @@ def main() -> int:
     if args.out:
         with open(args.out, "w", encoding="utf-8", newline="\n") as fh:
             json.dump({
-                "artifact": "ir_domain RESOLUTION PASS -- Google Custom Search",
+                "artifact": ("blog_roots DISCOVERY PASS" if args.mode == "blog"
+                             else "ir_domain RESOLUTION PASS")
+                            + " -- Google Custom Search",
                 "author": "4.0.0_SA_CRO~Z",
                 "generated_at": datetime.datetime.utcnow()
                                 .strftime("%Y-%m-%dT%H:%MZ"),
