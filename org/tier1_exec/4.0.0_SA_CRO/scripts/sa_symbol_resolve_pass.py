@@ -1,0 +1,358 @@
+#!/usr/bin/env python
+"""
+sa_symbol_resolve_pass.py -- resolve sa_symbol for the AMGT_RESAPP 89-name
+universe, and MEASURE each resolved name's article density in the same sweep.
+
+WHY BOTH IN ONE PASS. HARVEST_BACKFILL_PLAN_20260911_Z.md s.18 measured that the
+two things gating the SA backfill are (1) sa_symbol identity -- the Bloomberg root
+404s for every non-US name, only the US ADR resolves -- and (2) article DENSITY,
+because a thinly-covered ADR cannot clear s.11's >=3-mentions bar no matter how
+the harvest is run. The news call that corroborates a symbol is the same call that
+measures its density, so doing them together costs nothing extra.
+
+NO VENDOR. Direct HTTPS to seekingalpha.com, unauthenticated, no proxy, no quota.
+s.18: the vendor path for this endpoint returned a SMALLER, structurally corrupted
+payload than the direct GET.
+
+THE ACCEPTANCE RULE, and it is s.14's discipline carried onto the symbol axis.
+    s.18 measured the failure it exists to stop: 'ROG' returns HTTP 200 with 50
+    well-formed records spanning three years, and it is ROGERS CORPORATION, not
+    Roche. A 200 with fifty clean records is NOT evidence of the right company.
+    So a symbol is accepted only when BOTH hold:
+      (a) SA'S OWN COMPANY NAME for that symbol shares a distinctive token with
+          the subject company -- never by rank, never by relevance score; and
+      (b) THE RETURNED ARTICLE TITLES tie to the subject company.
+    (b) is free: the titles arrive in the payload the density read already pays
+    for. Where either fails, the value is UNRESOLVED, not a best guess.
+
+USAGE
+    python sa_symbol_resolve_pass.py --dry-run            # 0 calls, prints queries
+    python sa_symbol_resolve_pass.py --out <path>         # the full pass
+    python sa_symbol_resolve_pass.py --limit 6 --out ...  # a bounded batch
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import os
+import re
+import sys
+import time
+import urllib.error
+import unicodedata
+import urllib.parse
+import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from ir_domain_bulk_pass import (  # noqa: E402  -- one rule, one definition
+    STOP_TOKENS, UNIVERSE, company_name, name_tokens,
+)
+
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+      "(KHTML, like Gecko) Chrome/128.0 Safari/537.36")
+SEARCH = ("https://seekingalpha.com/api/v3/searches"
+          "?filter%5Bquery%5D={q}&filter%5Btype%5D=symbols&page%5Bsize%5D=10")
+NEWS = "https://seekingalpha.com/api/v3/symbols/{s}/news"
+
+WINDOW_DAYS = 30          # lib/research/metrics/chatter_axis.py
+DENSITY_MIN = 3           # BREAKOUT's minimum raw mentions
+
+
+def get_json(url):
+    """(status, parsed_or_None). A non-200 is a VALUE, never an exception."""
+    req = urllib.request.Request(url, headers={"User-Agent": UA,
+                                               "Accept": "application/json"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            raw = r.read().decode("utf-8", "replace")
+            code = r.status
+    except urllib.error.HTTPError as e:
+        return e.code, None
+    except Exception as e:
+        return type(e).__name__, None
+    try:
+        return code, json.loads(raw)
+    except Exception:
+        return code, None
+
+
+def strip_tags(s: str) -> str:
+    """
+    SA MARKS THE MATCHED SUBSTRING WITH <b> IN *EVERY* FIELD, INCLUDING `name`.
+    Measured: a search for "ASML" returned the symbol as '<b>ASML</b>', so the
+    news URL became /symbols/%3Cb%3EASML%3C/b%3E/news and 404'd. That produced
+    FALSE REFUSALS on exactly the EASIEST names -- the ones where the query
+    matched the ticker itself. Strip tags from the symbol, not just the label.
+    """
+    return re.sub(r"<[^>]+>", "", s or "")
+
+
+def fold(s: str) -> str:
+    """
+    Accent-fold before comparing. 'America Movil' vs SA's 'America Movil,
+    S.A.B. de C.V.' -- written with the accents it actually carries -- failed
+    every token test, because stripping non-ASCII turned the accented name into
+    'amricamvil'. THE CORRECT ANSWER WAS REJECTED FOR HAVING ACCENTS.
+    """
+    return unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode()
+
+
+def _words(s: str) -> set:
+    """Distinctive word tokens, accent-folded, corporate furniture removed."""
+    return {w for w in re.split(r"[^a-z0-9]+", fold(s).lower())
+            if len(w) >= 4 and w not in STOP_TOKENS}
+
+
+def name_matches(subject: str, sa_name: str):
+    """
+    TEST (a). Returns (passed, overlap) comparing SA's own company name to ours.
+
+    THIS USED TO BE 'does SA's name CONTAIN any one of our tokens', AND THAT
+    RULE SHIPPED A WRONG COMPANY ON ITS FIRST BATCH: 'America Movil' matched
+    'Liberty Latin **America** Ltd.' on the token 'america' and was accepted
+    with 48 of 50 titles "confirming" it -- because test (b) uses THE SAME
+    TOKENS, so both tests failed together on one weak geographic word. Two
+    tests that share a dependency are one test (Rule 22).
+
+    The fix is not a longer stopword list written from recall -- it is a
+    SYMMETRIC measure, derived from the two names themselves:
+        jaccard(our distinctive words, SA's distinctive words) >= 0.5
+    'America Movil' vs 'Liberty Latin America' = 1/4 -> REFUSED.
+    'America Movil' vs 'America Movil, S.A.B. de C.V.' = 2/2 -> ACCEPTED.
+    A containment match on the concatenated forms also passes, so
+    "L'Air Liquide S.A." still matches 'Air Liquide'.
+    """
+    a, b = _words(subject), _words(strip_tags(sa_name))
+    ca = re.sub(r"[^a-z0-9]+", "", fold(subject).lower())
+    cb = re.sub(r"[^a-z0-9]+", "", fold(strip_tags(sa_name)).lower())
+    if ca and cb and (ca in cb or cb in ca):
+        return True, 1.0
+    if not a or not b:
+        return False, 0.0
+    j = len(a & b) / float(len(a | b))
+    return j >= 0.5, round(j, 3)
+
+
+def titles_match(subject: str, records: list) -> tuple:
+    """TEST (b). Do the articles' own titles name this company? Returns (hits, n)."""
+    toks = [fold(t) for t in name_tokens(subject)]
+    hits = 0
+    for rec in records:
+        t = re.sub(r"[^a-z0-9]+", "",
+                   fold(str((rec.get("attributes") or {}).get("title", ""))).lower())
+        if any(tok in t for tok in toks):
+            hits += 1
+    return hits, len(records)
+
+
+def density(records: list, today: datetime.date) -> dict:
+    pubs = sorted(str((r.get("attributes") or {}).get("publishOn", ""))
+                  for r in records)
+    pubs = [p for p in pubs if p]
+    if not pubs:
+        return {"records": 0, "in_window": 0, "oldest": None, "newest": None,
+                "distinct_days": 0, "covers_window": False}
+    cut = (today - datetime.timedelta(days=WINDOW_DAYS)).isoformat()
+    return {
+        "records": len(pubs),
+        "in_window": sum(1 for p in pubs if p[:10] >= cut),
+        "oldest": pubs[0][:10],
+        "newest": pubs[-1][:10],
+        "distinct_days": len({p[:10] for p in pubs}),
+        # The window is COVERED when the payload reaches back past the cut --
+        # otherwise the 30 days are not all represented in what we hold.
+        "covers_window": pubs[0][:10] <= cut,
+    }
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--max-candidates", type=int, default=2,
+                    help="news probes per name; each is free but not instant")
+    ap.add_argument("--out", default="")
+    ap.add_argument("--sleep", type=float, default=0.25)
+    args = ap.parse_args()
+
+    universe = json.load(open(UNIVERSE, encoding="utf-8"))
+    names = universe["names"]
+    targets = names[:args.limit] if args.limit else names
+    today = datetime.date.today()
+
+    print("UNIVERSE       %s" % UNIVERSE)
+    print("DENOMINATOR    %d folders   THIS BATCH %d" % (len(names), len(targets)))
+    print("PROVIDER       seekingalpha.com, DIRECT, unauthenticated, no vendor")
+    print("BARS           window %d days, density >= %d in window"
+          % (WINDOW_DAYS, DENSITY_MIN))
+
+    if args.dry_run:
+        print("MODE           DRY RUN -- zero calls\n")
+        for rec in targets:
+            nm = company_name(rec["folder"])
+            print("  %-42s -> search %-34s tokens=%s"
+                  % (rec["folder"], repr(nm), name_tokens(nm)))
+        return 0
+
+    print("MODE           LIVE\n")
+    out, calls = [], 0
+    resolved = served = 0
+    consecutive_refusals = 0
+
+    for i, rec in enumerate(targets, 1):
+        folder = rec["folder"]
+        nm = company_name(folder)
+        code, payload = get_json(SEARCH.format(q=urllib.parse.quote(nm)))
+        calls += 1
+        cands = (payload or {}).get("symbols", []) if code == 200 else []
+
+        # A VENDOR REFUSAL IS NOT A FINDING ABOUT THE COMPANY. Measured
+        # 2026-09-14: this endpoint served 17 queries then returned HTTP 403
+        # for the remaining 72, and without this stop the pass spent 72 calls
+        # recording "no SA symbol" for Costco, Netflix, Visa and Mastercard.
+        # The IR pass had this guard; this one did not, because it was written
+        # after it -- a control does not travel between scripts on its own.
+        if code != 200:
+            consecutive_refusals += 1
+            out.append({
+                "folder": folder, "company_name": nm, "search_http": code,
+                "sa_symbol": {
+                    "value": None, "status": "UNRESOLVED",
+                    "evidence": ("NOT ASKED -- the search endpoint returned "
+                                 "HTTP %s. THIS IS NOT A FINDING ABOUT THIS "
+                                 "COMPANY and carries no evidence either way "
+                                 "about whether it has an SA symbol." % code),
+                    "resolved_at": datetime.datetime.utcnow()
+                                   .strftime("%Y-%m-%dT%H:%MZ"),
+                },
+                "candidates_probed": [], "candidates_rejected_on_name": [],
+            })
+            print("  [%2d] %-40s --       NOT ASKED, HTTP %s" % (i, folder[:40], code))
+            if consecutive_refusals >= 3:
+                print("\n  STOPPING: 3 consecutive vendor refusals. The rest "
+                      "of the batch would record absences never asked about.")
+                break
+            continue
+        consecutive_refusals = 0
+
+        # TEST (a) -- SA's own company name must carry a distinctive token.
+        # Rank and score are RECORDED but never decide.
+        scored = [(c, ) + name_matches(nm, c.get("content", "")) for c in cands]
+        passed = [c for c, ok, _ in scored if ok]
+        overlap = {strip_tags(c.get("name")): j for c, ok, j in scored if ok}
+        rejected = [{"symbol": c.get("name"),
+                     "sa_company": strip_tags(c.get("content", "")),
+                     "score": c.get("score"),
+                     "name_overlap": j}
+                    for c, ok, j in scored if not ok][:3]
+
+        best, probes = None, []
+        for c in passed[:args.max_candidates]:
+            sym = strip_tags(c.get("name"))
+            ncode, npayload = get_json(NEWS.format(s=urllib.parse.quote(sym)))
+            calls += 1
+            recs = (npayload or {}).get("data", []) if ncode == 200 else []
+            hits, n = titles_match(nm, recs)          # TEST (b) -- free
+            d = density(recs, today)
+            probe = {"symbol": sym, "sa_company": strip_tags(c.get("content", "")),
+                     "name_overlap": overlap.get(sym),
+                     "http": ncode, "title_hits": hits, "title_of": n, **d}
+            probes.append(probe)
+            # (b) must fire on at least one title, else this symbol is not
+            # demonstrably about this company whatever its name said.
+            if hits > 0 and (best is None or probe["records"] > best["records"]):
+                best = probe
+            if args.sleep:
+                time.sleep(args.sleep)
+
+        if best:
+            resolved += 1
+            ok = best["in_window"] >= DENSITY_MIN and best["covers_window"]
+            served += 1 if ok else 0
+            status, value = "INFERRED", best["symbol"]
+            verdict = ("ACCEPTED %s -- SA names it %r (test a) and %d of %d "
+                       "returned titles name the company (test b). Window: %s .. "
+                       "%s, %d in the last %d days -- density bar (>=%d) %s."
+                       % (best["symbol"], best["sa_company"], best["title_hits"],
+                          best["title_of"], best["oldest"], best["newest"],
+                          best["in_window"], WINDOW_DAYS, DENSITY_MIN,
+                          "MET" if ok else "NOT MET"))
+        else:
+            status, value = "UNRESOLVED", None
+            verdict = ("REFUSED -- %d candidate(s) returned, %d passed the "
+                       "name test, and none had a single returned title naming "
+                       "the company. A symbol that resolves is not a symbol "
+                       "that is right (s.18: ROG is Rogers Corp, not Roche)."
+                       % (len(cands), len(passed)))
+
+        out.append({
+            "folder": folder, "company_name": nm, "search_http": code,
+            "sa_symbol": {
+                "value": value, "status": status,
+                "evidence": ("seekingalpha.com/api/v3, DIRECT and "
+                             "unauthenticated. " + verdict),
+                "resolved_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ"),
+            },
+            "candidates_probed": probes,
+            "candidates_rejected_on_name": rejected,
+        })
+        print("  [%2d] %-40s %-8s %s"
+              % (i, folder[:40], value or "--", verdict[:66]))
+        if args.sleep:
+            time.sleep(args.sleep)
+
+    # A VENDOR REFUSAL AND A REFUSAL ON EVIDENCE ARE DIFFERENT FACTS. The first
+    # run of this pass printed "RESOLVED 17 of 89 / REFUSED 72 of 89" when 72 of
+    # those had returned HTTP 403 and were never asked -- which reads as
+    # "Costco, Netflix, Visa and Mastercard have no SA symbol".
+    asked = [r for r in out if r["search_http"] == 200]
+    notasked = (len(out) - len(asked)) + (len(targets) - len(out))
+    print("\nCALLS          %d (all free, direct, no quota)" % calls)
+    print("ASKED          %d of %d" % (len(asked), len(targets)))
+    print("NOT ASKED      %d  <- vendor refusal, NOT a finding about those names"
+          % notasked)
+    print("RESOLVED       %d of %d asked" % (resolved, len(asked)))
+    print("REFUSED        %d of %d asked  <- a 0 here means the rule is NOT "
+          "discriminating" % (len(asked) - resolved, len(asked)))
+    print("SERVEABLE      %d of %d asked  <- resolved AND clearing the density "
+          "bar" % (served, len(asked)))
+
+    if args.out:
+        json.dump({
+            "artifact": "sa_symbol RESOLUTION + ARTICLE DENSITY PASS",
+            "author": "4.0.0_SA_CRO~Z",
+            "generated_at": datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%MZ"),
+            "provider": "seekingalpha.com/api/v3 -- DIRECT, unauthenticated, "
+                        "NO VENDOR, no quota",
+            "criterion": "HARVEST_BACKFILL_PLAN_20260911_Z.md s.18: accepted only "
+                         "when SA's own company name carries a distinctive token "
+                         "(a) AND a returned article title names the company (b). "
+                         "Never by rank, never by relevance score.",
+            "bars": {"window_days": WINDOW_DAYS, "density_min": DENSITY_MIN},
+            "status_note": "INFERRED, not MEASURED: SA's own naming plus its own "
+                           "article titles are two readings of ONE source. An "
+                           "independent confirmation would be a second provider.",
+            "denominator": {
+                "universe": len(names),
+                "ASKED": len(asked),
+                "NOT_ASKED_vendor_refusal": notasked,
+                "resolved_of_asked": resolved,
+                "refused_on_evidence_of_asked": len(asked) - resolved,
+                "serveable_at_the_density_bar": served,
+                "calls": calls,
+                "partition_note": "A VENDOR REFUSAL AND A REFUSAL ON EVIDENCE "
+                                  "ARE DIFFERENT FACTS. Collapsing them would "
+                                  "report companies as having no SA symbol when "
+                                  "nothing was ever asked about them.",
+            },
+            "records": out,
+        }, open(args.out, "w", encoding="utf-8", newline="\n"),
+            indent=2, ensure_ascii=True)
+        print("WROTE          %s" % args.out)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
