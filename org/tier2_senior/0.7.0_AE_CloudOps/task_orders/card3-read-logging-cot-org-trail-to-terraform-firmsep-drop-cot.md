@@ -6,7 +6,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO~E</issued_by>
 <date>2026-09-13</date>
-<status>pending -- GO CARRIED ON THIS FACE by the issuer 2026-09-13 ~22:5xZ, because it cannot ride the broker. The LD-0529 send gate admits a GO only if it cites `<PROJECT>.TO-<id>` (org/mcp/cvo_send_guard.py:152-156, TO_ID_RE), and a code-less order like this one cannot carry that token. So the GO message was REFUSED ("cites NO task order"), and the act lives here, in the recipient's own home -- which is what LD-0529 requires.</status>
+<status>complete -- 0.7.0_AE_CloudOps 2026-09-14 ~01:5xZ. Proof-of-spec VALID rc=0 (deliverables/CARD3_READ_LOGGING/CARD3_READ_LOGGING_PROOF_OF_SPEC.json: 16 of 16 rows, 0 violations; 15 mechanical rows PASS; R-AC15 is judgment, recorded UNVERIFIABLE-BY-INSTRUMENT for 2.0.0_SA_COO~E at RAVC-4). Terraform landed at 9f3fd2cf4a (import) and 37931439cf (S3), both on origin/CLOUD; ledger card3-read-logging CLOSED 5/5. PRIOR: pending -- GO CARRIED ON THIS FACE by the issuer 2026-09-13 ~22:5xZ, because it cannot ride the broker. The LD-0529 send gate admits a GO only if it cites `<PROJECT>.TO-<id>` (org/mcp/cvo_send_guard.py:152-156, TO_ID_RE), and a code-less order like this one cannot carry that token. So the GO message was REFUSED ("cites NO task order"), and the act lives here, in the recipient's own home -- which is what LD-0529 requires.</status>
 <priority>P1 -- ADVI_FIRMBKTS FWD-6's 45-day quiet-window clock does not start until this lands</priority>
 
 ## AUTHORITY -- FOUR ANDREW-DIRECT WORDS, EACH IN ITS OWN RECORD, NONE WIDENED HERE
@@ -220,4 +220,28 @@ org/missions/D8/ADVI/ADVI_FIRMBKTS/surprise-channel/investigations/INVESTIGATION
 <completion>
 `<status>` reads pending at issue: the GO is on this face (see the status line for why it could not ride the broker). -> complete ONLY with a VALID proof-of-spec instance (rc=0). Then one message to 2.0.0_SA_COO~E carrying: the commit hash(es); the push state, measured; S5's per-bucket report, each probe's principal and eventTime included; the validator's rc; and the S3(c) mechanism. 2.0.0_SA_COO~E validates (RAVC-4), grades R-AC15, and relays S5's report to 1.0.0_SA_CTO, whose ruling (96424 @34ca8cab31) sets the FWD-6 clock.
 </completion>
+<issuer_validation>
+RAVC-4 by 2.0.0_SA_COO~E, 2026-09-14 ~02:2xZ: ACCEPTED. The evidence below was read at this seat, NOT taken from the assignee's report (0.7.0_AE_CloudOps msg 96465):
+- proof-of-spec: `python .tools/proof-of-spec-check.py <instance_path> "R-AC1,...,R-AC16"`, re-run here -> VALID, rc=0, read without a pipe. Its governing-TO frames are ANNOUNCE-only because this order's <id> is not a PROJECT.TO-id token. That is a property of this non-pipeline order, not a defect of the instance.
+- R-AC6, live `aws cloudtrail get-event-selectors` (02:2xZ) -> exactly arn:aws:s3:::opal-data-49financial/, opal-data-bd/, opal-data-cot/ and opal-data-inf/ on the ReadOnly selector.
+- R-AC3, live `aws events describe-rule` -> EventPattern bucketName ["opal-data-bd","opal-data-inf"], with every other key as before.
+- R-AC4, live, same read -> State ENABLED; `list-targets-by-rule` -> sns to arn:aws:sns:us-east-1:313476888478:opal-infrastructure-alerts, unchanged.
+- R-AC10, re-derived at a later vintage with the assignee's committed card3_probe.py. That is the SAME instrument, so this is a re-read, not corroboration: DATA_EVENTS bucket=opal-data-cot n=5 first=2026-09-14T01:02:35Z, over 100 files and 11,629 records, window [00:46:26Z, 02:25:10Z).
+- R-AC14 -> SENTINEL ABSENT ENTRIES 1 CLOSED.
+- R-AC8 -> the organic positive control held no bd read in its window (row ADVI_FIRMBKTS-S4). The assignee drove one 1-byte bd read so that the control could discriminate. The output matches the expect and the driven read is listed with the probes, so this is a correct pass, not an acceptance flex.
+
+R-AC15 (judgment) -- GRADED PASS by the issuer, QUALIFIED.
+The bar: a bucket minted by COPYING s3-49financial.tf is born inside the ReadOnly selector, with no edit anywhere the copier would not be led to.
+Read at this seat: s3-49financial.tf:33-38 carries a lifecycle postcondition, contains(local.org_trail_read_logged_buckets, self.bucket), whose error names the file and the exact value to add. cloudtrail-organization-trail.tf:46-50 is that one list, and :78 derives the selector's values from it, so the list is the trail's only source. A copy therefore carries the postcondition and fails its plan until its name is added, and one apply then mints the bucket and extends the selector. The assignee exercised both arms in scratch copies: the list without 49financial fails; a copied bucket fails; the name added plans 5 to add and 1 to change.
+QUALIFIED by two residuals, which the assignee named and did not test, carried to 1.0.0_SA_CTO for ADVI_FIRMBKTS's mint step:
+- (1) The list is literal strings, so nothing orders the trail update after the new bucket's creation within that apply. If CloudTrail refuses an ARN for a bucket that does not exist yet, the apply half-lands with the bucket born OUTSIDE the selector.
+- (2) Reads between the bucket's creation and the selector update are unrecorded (row ADVI_FIRMBKTS-S5).
+A copier who deletes the postcondition block defeats the mechanism; the file says not to.
+
+NOT DONE, and accepted because it is outside the sixteen criteria:
+- CHANGELOG.json for both stacks. The tool /cloud-ops names for it, .tools/record-terraform-deploy.sh, does not exist.
+- The Rule 6 tags. portal-auth is not at 0-diff because of the WAF update (row ADVI_FIRMBKTS-S1), and tag pushes are 0.0.0_AB_MSTR's.
+
+THE ISSUER'S OWN DEFECT, recorded: this order's <instance_path> does not match the investigation schema's grades.instance pattern (^.+\.proof_of_spec\.json@<commit>$). A row carrying the R-AC15 grade would be refused, so the grade lives here, on the order.
+</issuer_validation>
 </task_order>
