@@ -1,0 +1,90 @@
+
+==============================================================================
+1. THE STATE MACHINE, AND THE EVIDENCE IT IS THE ONE THAT WRITES THE KEY
+==============================================================================
+state machines in the account: 1
+   YangDataPipeline           arn:aws:states:us-east-1:313476888478:stateMachine:YangDataPipeline
+
+YangDataPipeline carries 28 Task state(s); the state(s) invoking yang-generate-positioning (whose OUTPUT_KEY is json/positioning/positioning_data.json): ['GeneratePositioning']
+
+==============================================================================
+2. THE LAST SUCCEEDED EXECUTION AND ITS INPUT
+==============================================================================
+name      : 20260911_v1-1c95bba7
+arn       : arn:aws:states:us-east-1:313476888478:execution:YangDataPipeline:20260911_v1-1c95bba7
+started   : 2026-09-12T07:03:26.311000-04:00
+stopped   : 2026-09-12T07:07:23.135000-04:00
+input     : {"pipeline_execution_id": "1c95bba7-0ba9-4371-bfdd-4162483a6452", "pipeline_started_at": "2026-09-12T11:03:26.025733+00:00", "data_as_of_date": "2026-09-11", "manifest": {"version": "20260911_v1", "date": "2026-09-11", "uploaded_at": "2026-09-12T11:03:21+00:00", "files": {"data_pkl": "data 20260911 v1.pkl", "model_pkl": "model 20260911 v1.pkl"}}, "detail": {"bucket": {"name": "opal-data-portal-v2"}, "object": {"key": "uploads/manifest.json"}}, "source": "yang-pipeline-trigger"}
+
+==============================================================================
+3. THE PREMISE GATE -- do the objects that input NAMES still exist?
+==============================================================================
+  ABSENT   s3://opal-data-portal-v2/uploads/manifest.json  -> 404
+  ABSENT   s3://opal-data-portal-v2/uploads/data 20260911 v1.pkl  -> 404
+  ABSENT   s3://opal-data-portal-v2/uploads/model 20260911 v1.pkl  -> 404
+
+DENOMINATOR: 3 object(s) named by the input, 0 present, 3 ABSENT
+
+==============================================================================
+4. THE SIGNED RADIUS vs THE ACT'S WRITE SET
+==============================================================================
+SIGNED for B1 by both never-widen halves at HEAD -- 2 key(s):
+   s3://opal-data-portal-v2/json/positioning/positioning_data.json
+   s3://opal-data-portal-v2/json/positioning/allocation_summary.json
+CTO half, B1 table, last row: "anything else -- NOT SIGNED".
+
+The act this criterion names starts the WHOLE state machine, whose 28 Task states invoke these functions:
+   CaptureOutputVersions                      yang-capture-output-versions
+   CleanupUploads                             yang-cleanup-uploads
+   GenerateAllocationSummary                  yang-generate-allocation-summary
+   GenerateAllocationSummaryAfterAttribution  yang-generate-allocation-summary
+   GenerateCMA                                yang-generate-cma
+   GenerateCorrelation                        yang-generate-correlation
+   GenerateETFReturns                         yang-generate-etf-returns
+   GenerateFactorTilts                        yang-generate-factor-tilts
+   GenerateHoldingsAttribution                yang-generate-holdings-attribution
+   GenerateLatest                             yang-generate-latest
+   GenerateMacro                              yang-generate-macro
+   GenerateMacroTimeseries                    yang-generate-macro-timeseries
+   GenerateManifest                           yang-generate-manifest
+   GenerateMarketOverviewTiered               opal-market-overview-tiered-generator
+   GenerateMarketRegime                       opal-market-regime-classifier
+   GenerateModelPortfolioBenchmarks           yang-model-portfolio-benchmarks
+   GeneratePeerPerformance                    yang-generate-peer-performance
+   GeneratePositioning                        yang-generate-positioning
+   GenerateRSITiered                          opal-market-rsi-tiered-generator
+   GenerateRiskPremium                        yang-generate-risk-premium
+   GenerateValuation                          yang-generate-valuation
+   GetPriorMetadata                           yang-get-prior-metadata
+   IngestDynamoDB                             yang-ingest-dynamodb
+   InvalidateCloudFront                       yang-invalidate-cloudfront
+   MoveToProcessed                            yang-move-to-processed
+   ReadManifest                               yang-validate-files
+   RunInterlock                               yang-canon-interlock
+   VarflagShadowCheck                         yang-varflag-check
+
+Three of them act on objects rather than writing a served JSON:
+   MoveToProcessed      MOVES the upload objects out of uploads/
+   CleanupUploads       DELETES upload objects (an S3 delete)
+   InvalidateCloudFront issues a CDN invalidation
+
+==============================================================================
+5. THE SERVED KEYS RIGHT NOW (before anything this script might start)
+==============================================================================
+  s3://opal-data-portal-v2/json/positioning/positioning_data.json
+     LastModified=2026-09-12T11:05:33+00:00 VersionId=4Q1qjgD52FSKZ38EfHGqdKGHyJ_ktlka bytes=8168  (pre-deploy anchor 4Q1qjgD52FSKZ38EfHGqdKGHyJ_ktlka; same=True)
+  s3://opal-data-portal-v2/json/positioning/allocation_summary.json
+     LastModified=2026-09-12T11:05:36+00:00 VersionId=FiY95KdKcmtt5els.v44XVZciDBtUDrw bytes=969  (pre-deploy anchor FiY95KdKcmtt5els.v44XVZciDBtUDrw; same=True)
+
+==============================================================================
+REFUSED -- rc=2. NOTHING WAS STARTED.
+==============================================================================
+THE MEASUREMENT: 3 of 3 object(s) the last SUCCEEDED execution's input names are ABSENT from the live plane (printed in section 3). This pipeline consumes its own input (MoveToProcessed, CleanupUploads), so re-feeding that input cannot reproduce the run: ReadManifest reads s3://opal-data-portal-v2/uploads/manifest.json, which is gone, and its Catch routes States.ALL to PipelineFailed.
+
+CONSEQUENCE, stated rather than worked around: starting it would produce a FAILED execution and NO regeneration -- the criterion's named result is unreachable by its named invocation today.
+
+AND THE ACT IS WIDER THAN THE SIGN-OFF EITHER WAY (section 4): on the branch where the input DID exist, the run writes every key its 28 Task states produce, moves and then deletes upload objects and invalidates the CDN, while the halves sign exactly 2 served keys and say "anything else -- NOT SIGNED".
+
+NOT REPAIRED HERE, BY RULE: the task order's refusal clause -- "A criterion you cannot satisfy as written is REFUSED with its measurement, never repaired, widened or satisfied by another route." Re-uploading an input, hand-building a manifest, or invoking the two producers directly would each be a different act from the one V1-AC11 names.
+
+WHAT IS COVERED AND AVAILABLE TO THE ISSUER: the CTO half's own R1 amendment (~20:0xZ) already sanctions the DRIVEN refresh as "invokes, once each and in dependency order" the producers -- yang-generate-positioning, then yang-generate-holdings-attribution, then yang-generate-allocation-summary -- writing exactly the signed keys and nothing else. That is a re-cut of this criterion, which is the issuer's act, not this worker's.
