@@ -1,0 +1,361 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_ASTTAX.TO-V2-1",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/prd/POSN_ASTTAX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "99cc431075"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round5.md",
+    "vintage_commit": "945d1ddd95aa5ab63cdcdf3ee47f1197d9bf8023",
+    "to_ref": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-V2-1.holdings-json-beside-registry-json.md"
+  },
+  "assignee": "0.9.0_WK_POSN_ASTTAX~20",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/gold/build_satellites_registry.py",
+      "kind": "script",
+      "commit_or_etag": "97fe1221bd547347113935f87111316f4d57bc47",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Committed at 97fe1221bd and packaged into the uploaded zip (member sha256 d4680be66ec394fc...), but NOT running: the live function still carries CodeSha256 WfuD8gLfKN2W9U3DUmk6pxfUDn3QW3tOuopTecNRCv0= (the 2026-08-28 build). The gate it awaits is the terraform apply, blocked by V2-AC8 / row POSN_ASTTAX-Z-W20-S3.",
+      "introduces": [
+        "HOLDINGS_KEY",
+        "build_holdings",
+        "load_classifier",
+        "sleeve_rows",
+        "to_pct"
+      ],
+      "artifact_covered_by": [
+        "V2-AC3",
+        "V2-AC4",
+        "V2-AC5",
+        "V2-AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-satellites-registry-producer/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "97fe1221bd547347113935f87111316f4d57bc47",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Committed and packaged (member sha256 7f48c69988af1845...); not running, same gate. The only change is that the response now names BOTH keys (`keys`), with `key` left at its original meaning so no existing reader changes meaning under it.",
+      "introduces": [
+        "producer.HOLDINGS_KEY"
+      ],
+      "artifact_covered_by": [
+        "V2-AC3",
+        "V2-AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/cot-pipeline/cot-satellites-registry-producer/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "97fe1221bd547347113935f87111316f4d57bc47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A build-time tool: it never ships inside the zip it builds. Exercised at V2-AC6 -- 6 members from the pin, and its moving-ref control REFUSED --pin HEAD rc=1.",
+      "introduces": [
+        "infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py"
+      ],
+      "artifact_covered_by": [
+        "V2-AC3",
+        "V2-AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "97fe1221bd547347113935f87111316f4d57bc47",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "DESIRED plane only. Read directly at V2-AC7 (5 Sids, 0 bare-wildcard resources, cross-firm deny unchanged). NOT applied: no plan could be produced from this worktree (V2-AC8), and the live role, memory_size 192 and timeout 60 are unchanged.",
+      "introduces": [
+        "WriteSatellitesHoldings",
+        "ReadEtfClassifications"
+      ],
+      "artifact_covered_by": [
+        "V2-AC3",
+        "V2-AC7",
+        "V2-AC8"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/cot-pipeline/cot-satellites-registry-producer.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "mgzFeamx2_MIO_R.lBF6IYGUNM5aXcir",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Uploaded 2026-09-14T19:15:56Z and READ BACK by s3api head-object (not taken from the put response): ContentLength 105484 matching the local build, metadata content-sha256 eFToEJ0FNu1sMO7cJ1WNdRoGSVuNuHSM9ToBzHGkF1I=. THE FUNCTION IS NOT UPDATED -- it still reads the prior VersionId qXzZE63fhPXwG2dXU86eLbTh48cFn0vQ. Because the module resolves data.aws_s3_object.artifact.version_id at PLAN time, the next apply of cot-pipeline by anyone picks this up; that standing state is named in POSN_ASTTAX-Z-W20-S3 with its rollback.",
+      "artifact_covered_by": [
+        "V2-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~20/dry_run_holdings.py",
+      "kind": "test",
+      "commit_or_etag": "97fe1221bd547347113935f87111316f4d57bc47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Evidence artifact, re-runnable by the verifier from the repo root. Exercises V2-AC4 against the live partition and the live table and writes nothing.",
+      "artifact_covered_by": [
+        "V2-AC3",
+        "V2-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~20/negative_control_yang_not_added.py",
+      "kind": "test",
+      "commit_or_etag": "97fe1221bd547347113935f87111316f4d57bc47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Evidence artifact, re-runnable. Carries its own non-discrimination arm (rc=2, reports nothing, if Yang's copy ever agrees with BD).",
+      "artifact_covered_by": [
+        "V2-AC3",
+        "V2-AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260914T1844Z_posn-round5-b2-satellites-holdings_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "97fe1221bd547347113935f87111316f4d57bc47",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The deploy ledger entry, opened before the first code byte and committed with its sentinel (org/critical_paths/.open_deploys/posn-round5-b2-satellites-holdings.json). OPEN by design: L8 is the organic arm; L3-L6 are open on the V2-AC8 blocker and the entry blares past its 4h window, which is the intended loud signal.",
+      "artifact_covered_by": [
+        "V2-AC2",
+        "V2-AC13"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "V2-AC1",
+      "criterion_verbatim": "both blobs listed. Absent either: STOP, row.",
+      "method": "command",
+      "invocation": "timeout 60 git ls-tree HEAD -- org/missions/D4/POSN/POSN_ASTTAX/ledger/NEVER_WIDEN_ROUND5_COO_HALF.md org/missions/D4/POSN/POSN_ASTTAX/ledger/NEVER_WIDEN_ROUND5_CTO_HALF.md",
+      "output_evidence": "rc=0\n100644 blob f5720329a0a0960890d0d03ecd55e1f875561f3c\torg/missions/D4/POSN/POSN_ASTTAX/ledger/NEVER_WIDEN_ROUND5_COO_HALF.md\n100644 blob 0e9b8efc5bb5f9346c46b5c2cf90f5945d4bf56c\torg/missions/D4/POSN/POSN_ASTTAX/ledger/NEVER_WIDEN_ROUND5_CTO_HALF.md\n\nBOTH READ IN FULL BEFORE THE FIRST COMMAND, not merely listed. The COO half's B2 row binds registry.json's payload unchanged for the same partition and names the rollback (artifact VersionId qXzZE63fhPXwG2dXU86eLbTh48cFn0vQ); the CTO half's B2 row says 'registry.json is expected BYTE-IDENTICAL in content for the same input' and marks 'anything else' NOT SIGNED. The producer therefore publishes registry.json FIRST and appends holdings.json after, so the new work cannot re-shape, delay or suppress the already-served artifact.",
+      "denominator": "2 of 2 halves present at HEAD",
+      "status": "PASS",
+      "expect": "NEVER_WIDEN_ROUND5_COO_HALF\\.md.*NEVER_WIDEN_ROUND5_CTO_HALF\\.md"
+    },
+    {
+      "criterion_id": "V2-AC2",
+      "criterion_verbatim": "the entry path printed with 8 legs OPEN, opened before any code change. L8 is the ORGANIC arm and is NOT yours to wait on: you close L1-L7 and leave L8 OPEN by design, named in your report.",
+      "method": "command",
+      "invocation": "timeout 120 python .tools/deploy_ledger.py open --slug posn-round5-b2-satellites-holdings --title \"POSN_ASTTAX B2: cot-satellites-registry-producer emits holdings.json beside registry.json\" --author 0.9.0_WK_POSN_ASTTAX~20 --leg \"L1|git|SITEZ commit of producer + trigger + build_package + tf|hash\" --leg \"L2|s3-prefix|opal-313476888478-lambda-artifacts cot-pipeline/cot-satellites-registry-producer.zip|sha256\" --leg \"L3|verify|plan scoped|summary\" --leg \"L4|activation|safe-apply|summary\" --leg \"L5|verify|0-diff|No changes\" --leg \"L6|verify|QA invocation lands holdings.json|s3api head + content read\" --leg \"L7|verify|schedule enabled with the function as target|describe-rule + list-targets\" --leg \"L8|verify|next scheduled 07:00Z fire lands holdings.json organically (the negative arm; recorded by the COO, not waited on here)|s3api head after the fire\"",
+      "output_evidence": "rc=0\nOK: OPENED deploy ledger 'posn-round5-b2-satellites-holdings' (8 legs) -> org/critical_paths/change_management/20260914T1844Z_posn-round5-b2-satellites-holdings_deploy_completion.md\n  OPEN L1 [git] ... OPEN L8 [verify] next scheduled 07:00Z fire lands holdings.json organically (the negative arm; recorded by the COO, not waited on here)\n\nORDERING PROVED, not asserted: the ledger was opened at 2026-09-14T18:44:36Z and the FIRST code byte was written after it -- the code commit is 97fe1221bd at 19:0xZ and `git status` before the open showed only the two ledger files staged (by the tool itself).\n\nLEG STATE AT REPORT TIME (timeout 60 python .tools/deploy_ledger.py check): OPEN: posn-round5-b2-satellites-holdings age=0.6h window=4.0h [in-window] stranded=['L3','L4','L5','L6','L8'] author=0.9.0_WK_POSN_ASTTAX~20. CLOSED WITH PROOF: L1 (commit 97fe1221bd), L2 (artifact VersionId mgzFeamx2_MIO_R.lBF6IYGUNM5aXcir read back by head-object), L7 (rule ENABLED cron(0 7 * * ? *), target = the function ARN). L8 OPEN BY DESIGN, the organic arm, the COO's to record after 07:00Z. L3-L6 OPEN NOT BY DESIGN -- blocked, see V2-AC8 and row POSN_ASTTAX-Z-W20-S3.",
+      "denominator": "8 legs opened; 3 closed with proof (L1, L2, L7), 1 OPEN by design (L8), 4 OPEN on the V2-AC8 blocker (L3-L6)",
+      "status": "PASS",
+      "expect": "OK: OPENED deploy ledger 'posn-round5-b2-satellites-holdings' \\(8 legs\\)"
+    },
+    {
+      "criterion_id": "V2-AC3",
+      "criterion_verbatim": "clean on every changed .py and .tf, output cited, both ASCII limbs read. `git diff --stat -- data/assets/scripts/gold/satellites_registry.py` reads 0 lines (the oracle untouched).",
+      "method": "command",
+      "invocation": "timeout 180 bash .tools/commit-gate.sh",
+      "output_evidence": "THE INVOCATION AS WRITTEN, run first, rc=0:\n  'WARN: commit-gate checked 0 of 0 file(s) -- NOTHING WAS CHECKED. / This line is NOT evidence of a clean gate. This gate reads only .py / .sh / .tf / org/projects/*.json; every other suffix falls through unexamined.'\n  The gate takes its subjects as ARGV (its own Usage block); the bare form has no subject. Filed as POSN_ASTTAX-Z-W20-S2.\n\nTHE DECIDING RUN, same gate, subjects named, rc=0:\n  'All checks passed!' x5 + 'OK: no unguarded strict-utf8 log reads.' x5\n  'OK: pre-commit gate clean for 6 of 6 file(s)'\n  Subjects: data/assets/scripts/gold/build_satellites_registry.py, infra/aws/lambda/cot-pipeline/cot-satellites-registry-producer/lambda_function.py, .../build_package.py, infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf, deliverables/0.9.0_WK_POSN_ASTTAX~20/dry_run_holdings.py, .../negative_control_yang_not_added.py\n\nTHE GATE CAN REFUSE AND DID REFUSE THIS WORKER, first attempt: rc=1, 'BLOCKED: ruff check failed on ...negative_control_yang_not_added.py' (F401 `io` imported but unused). Fixed, re-run clean. A gate that never refused me is untested.\n\nASCII, BOTH LIMBS, measured with len(bytes)-len(decoded) rather than read from the gate: the three .py files this cell touches were pure ASCII before and are pure ASCII after (delta 0); an earlier draft introduced 3 non-ASCII glyphs into build_satellites_registry.py and they were stripped, because CLAUDE.md's keep-one-raising-glyph clause has an explicit non-application for a file that is ALREADY pure ASCII. The .tf carried 18 non-ASCII bytes before and carries 18 after -- the patch asserts the count cannot FALL, so a pre-existing raising glyph could not be deleted by this edit. Commit message: pure ASCII.\n\nTHE ORACLE, UNTOUCHED: `git diff --stat -- data/assets/scripts/gold/satellites_registry.py | wc -l` = 0, and the file is absent from `git status --short`. It was READ, and its 'never decides' contract is why the holdings logic went into the producer beside it.",
+      "denominator": "6 of 6 dispatched files clean (the gate's own denominator); oracle diff 0 of 0 lines",
+      "status": "PASS",
+      "expect": "OK: pre-commit gate clean for 6 of 6 file\\(s\\)"
+    },
+    {
+      "criterion_id": "V2-AC4",
+      "criterion_verbatim": "nine satellites; for `Opal Satellite 15` the GLD row reads weight 8.34 with one sleeve (ST 8.34); for `Opal Satellite 30` GLD reads 7.25 with sleeves ST 6.26 + INT 1.00 (the CRO's measured example); every ticker appears ONCE per satellite; `asset_class`/`sub_asset_class` equal the table's CURRENT served values (GLD: hedge / Gold today) -- never a value the table does not serve; `coverage.labelled + coverage.unlabelled` equals the row count per satellite. Print the nine coverage pairs.",
+      "method": "command",
+      "invocation": "timeout 600 python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~20/dry_run_holdings.py",
+      "output_evidence": "rc=0, run against the LIVE 2026-09-14 bronze partition and the LIVE etf-classifications table; nothing written.\n\nOK: as_of=2026-09-14   roster=s3://opal-data-assets/blackdiamond/cottonwood/bronze/rebalancer_models/2026-09-14/page_000.json\nOK: 9 member(s) derived of 63 roster row(s)   <- DENOMINATOR\n\nTHE NINE COVERAGE PAIRS (labelled / unlabelled of rows):\n  Opal Satellite 15    rows  16   labelled  16   unlabelled   0\n  Opal Satellite 30    rows  24   labelled  24   unlabelled   0\n  Opal Satellite 40    rows  24   labelled  24   unlabelled   0\n  Opal Satellite 50    rows  24   labelled  24   unlabelled   0\n  Opal Satellite 60    rows  20   labelled  20   unlabelled   0\n  Opal Satellite 70    rows  21   labelled  21   unlabelled   0\n  Opal Satellite 80    rows  16   labelled  16   unlabelled   0\n  Opal Satellite 90    rows  16   labelled  16   unlabelled   0\n  Opal Satellite 98    rows  16   labelled  16   unlabelled   0\n\nCLAUSES:\n  PASS  nine satellites                                got=9 want=9\n  PASS  Sat 15 GLD weight                              got=8.34 want=8.34\n  PASS  Sat 15 GLD sleeves                             got=[{'book': 'ST', 'weight': 8.34}] want=[{'book': 'ST', 'weight': 8.34}]\n  PASS  Sat 30 GLD weight                              got=7.25 want=7.25\n  PASS  Sat 30 GLD sleeves                             got=[('INT', 1.0), ('ST', 6.26)] want=[('INT', 1.0), ('ST', 6.26)]\n  PASS  no ticker twice in a satellite (over 177 rows / 9 satellites) got=[] want=[]\n  PASS  coverage sums to the row count on all 9        got=[] want=[]\n  PASS  every label equals the table's CURRENT served value (25 distinct tickers) got=[] want=[]\n  distinct tickers: 25   served-with-a-class: 25   NOT in the table: 0\n  GLD   served now: asset_class='hedge' sub_asset_class='Gold'\n  VXX   served now: asset_class='equity' sub_asset_class='Volatility'\nOK: every V2-AC4 clause passed on the live partition.\n\nTHE LABEL CLAUSE IS CORROBORATED, NOT REPEATED: the builder reads through boto3.resource('dynamodb').Table.get_item (the shared ETFClassifier); the check re-reads all 25 through the LOW-LEVEL boto3.client('dynamodb').get_item. Two code paths, one table, 0 mismatches.\n\nTHE unlabelled PATH IS EXERCISED DELIBERATELY, because the live table labels 25 of 25 and a branch that only ever reports zero is indistinguishable from one that cannot fire. Withholding GLD at the classifier (the same None the real client returns on a miss): row becomes {'ticker':'GLD','weight':8.34,'asset_class':null,'sub_asset_class':null,...} and coverage moves 16/0 -> 15/1 with the row count unchanged at 16 -- counted, not dropped, weight intact.\n\nTWO ARITHMETIC TRAPS, MEASURED: (1) the sum is over absoluteAllocation -- Sat 30's INT sleeve carries relativeAllocation 0.25 and GLD within it reads abs 0.009975 vs rel 0.0399, so summing the relative figures gives 12.33 for a 7.25 position. (2) 0.06255*100.0 evaluates to 6.254999999999999, so every rounding rule then rounds DOWN to 6.25 against the estate's 6.26; the unit conversion is exact in Decimal and the quantize is ROUND_HALF_UP. DISCLOSED: the total is the rounded SUM, not the sum of the rounded sleeves (Sat 30 GLD prints 6.26 + 1.00 with a total of 7.25; the exact sum is 7.2525).",
+      "denominator": "9 of 9 satellites, 177 holding rows, 25 of 25 distinct tickers cross-checked on a second instrument; 8 of 8 criterion clauses PASS",
+      "status": "PASS",
+      "expect": "Opal Satellite 15\\s+rows\\s+16\\s+labelled\\s+16\\s+unlabelled\\s+0"
+    },
+    {
+      "criterion_id": "V2-AC5",
+      "criterion_verbatim": "LT VXX would read 3.37 (1.87 + 1.50) under the summed-both-sources arm, and reads 1.87 under your builder -- the two arms DIFFER, proving the builder does not add Yang's copy. If both arms read the same, the control is not discriminating: say so and do not report the result.",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~20/negative_control_yang_not_added.py",
+      "output_evidence": "rc=0\nSUBJECT  Opal Satellite 80 / VXX   (sleeves: [('LT', 1.87)])\nINPUT A  s3://opal-data-assets/blackdiamond/cottonwood/bronze/rebalancer_model_detail/2026-09-14/439fc4b6-4857-4a05-82d4-b66224aa9cb3.json  as_of=2026-09-14   (Black Diamond, the rebalancer detail)\nINPUT B  s3://opal-data-portal-v2/json/positioning/positioning_data.json  data_as_of=2026-09-11 VersionId=4Q1qjgD52FSKZ38EfHGqdKGHyJ_ktlka   (Yang's served copy of book LT)\n\nARM A -- producer.build_holdings, what ships        LT VXX  = 1.87\nARM B -- the same rows PLUS Yang's served copy      LT VXX  = 3.37  (1.87 + 1.500)\n\n  PASS    the arms DIFFER                     A=1.87  B=3.37  delta=1.50\n  PASS    ARM A is Black Diamond's figure     1.87\n  PASS    ARM B is the summed-both figure     3.37\n\nARM B IS NOT SYNTHETIC: it reads the SECOND SOURCE THE PORTAL ACTUALLY BLENDS (satelliteAdapter.ts's holding-weight union), and Yang's LT VXX weight 0.015 is a live served value at a named VersionId. The subject is Opal Satellite 80 because it blends ONE sleeve at 100% (Opal Conservative Growth = book LT), which makes the satellite's VXX weight and the LT model's VXX weight THE SAME QUANTITY measured by two vendors rather than two different numbers. The control carries its own non-discrimination arm (if Yang ever agreed to the cent it returns rc=2 and reports nothing); it did not fire.",
+      "denominator": "1 ticker x 1 satellite x 2 arms; delta 1.50 percentage points (the whole of Yang's copy)",
+      "status": "PASS",
+      "expect": "ARM A .*= 1\\.87.*ARM B .*= 3\\.37"
+    },
+    {
+      "criterion_id": "V2-AC6",
+      "criterion_verbatim": "the zip built from GIT at your pin (never the working tree); its member list printed and includes data/assets/scripts/gold/<your builder>.py and infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py at the repo-mirroring layout; a deliberately WRONG pin (a moving ref) is REFUSED by the builder (its own control).",
+      "method": "command",
+      "invocation": "timeout 600 python infra/aws/lambda/cot-pipeline/cot-satellites-registry-producer/build_package.py --pin 97fe1221bd547347113935f87111316f4d57bc47",
+      "output_evidence": "rc=0\npin resolved: 97fe1221bd547347113935f87111316f4d57bc47\nOK: cot-satellites-registry-producer.zip 105484 bytes sha256=7854e8109d0536ed6c30eedc27558d751a06495b8db8748cf53a01cc71a41752\nOK: 6 members from pin 97fe1221bd\n     lambda_function.py                                      7713 B  7f48c69988af1845\n     data/assets/scripts/gold/build_satellites_registry.py   35362 B  d4680be66ec394fc\n     data/assets/scripts/gold/satellites_registry.py        19819 B  443eff90c383fabd\n     data/assets/scripts/gold/satellites_weights.py         18501 B  bb41b55d0888ca60\n     lib/trading_calendar.py                                 6979 B  41b1c0c12651c62e\n     infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py   14027 B  c677e8a5f6996555\n\nTHE BUILDER IS data/assets/scripts/gold/build_satellites_registry.py -- EXTENDED, not a sibling module, and the reason is the INPUT: both artifacts derive from the SAME ten objects in the SAME run, so a sibling would re-read all ten, re-derive membership through a second copy of the canonical-name predicate and resolve as_of off a second clock. The failure that produces is SILENT (two artifacts stamped with one as_of built from two partitions). The order asked which and why; this is it.\n\nTHE _shared MEMBER SHIPS AT ITS REPO PATH. It is NOT importable package-qualified -- `lambda` is a Python keyword, so `infra.aws.lambda.v2_portal._shared` is a SyntaxError at PARSE time rather than an ImportError -- so the producer puts that directory on sys.path and imports it flat. build_package.py's member grammar is a (zip-path, repo-path) pair list and admitted the path with no change to its shape (the preflight named this as unconfirmed).\n\nTHE BUILDER'S OWN CONTROL, RUN: `--pin HEAD` -> rc=1, 'REFUSED: --pin \\'HEAD\\' is not an immutable pin (must be 7-40 hex chars; rejects HEAD, branch/tag names and every symbolic form).' No zip written.\n\nFROM GIT, NOT THE WORKING TREE: the builder reads each member with `git show <pin>:<path>`; the working tree was clean of these files at build time (all six committed in 97fe1221bd).",
+      "denominator": "6 of 6 declared members read from the pin; 1 of 1 negative control fired",
+      "status": "PASS",
+      "expect": "infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb\\.py"
+    },
+    {
+      "criterion_id": "V2-AC7",
+      "criterion_verbatim": "the new .tf statements resolve: the second PutObject key and the DynamoDB read on etf-classifications are GRANTED to cot-satellites-registry-producer-role; no wildcard resource introduced; the cross-firm deny still present; the tool's DESIRED-plane caveat quoted (it cannot see APPLIED).",
+      "method": "command",
+      "invocation": "timeout 300 comp-iam gaps",
+      "output_evidence": "comp-iam gaps, rc=0:\n  'Total: 0 missing | 0 deny-present | 0 coverage-unknown | 0 resource-mismatch  across 0 service(s)'\n  'No ACTION-plane permission gaps detected. (6 services scanned, 7 IAM roles parsed)'\n\nTHE CAVEAT, QUOTED FROM THE TOOL'S OWN HEADER: 'PLANE: DESIRED (Terraform). This does NOT read live AWS. comp-iam parses Terraform. It cannot tell landed from planned, and it is blind to any grant Terraform does not declare. A live simulate-principal-policy is the APPLIED plane; exercising the call is the only EXERCISED evidence. Rule 22a: DESIRED != APPLIED != EXERCISED.'\n\nTWO FURTHER LIMITS, STATED RATHER THAN SWALLOWED. (a) The order's own preflight records comp-iam as BLIND on this producer: '0 boto3 call sites in the trigger (the logic is vendored by pin), so its verdict is computed from nothing'. Its zeros therefore do not mention this role or these statements at all. (b) IN THIS WORKTREE the tool reports 'scanned 3 trees (25 .tf files)' against the preflight's 474 -- the sparse cone narrows its population, so the denominator behind the zeros is 25, not 474.\n\nTHE DECIDING EVIDENCE IS THEREFORE THE DESIRED PLANE READ DIRECTLY, comments stripped so a commented example cannot be counted as a grant (122 of 309 lines are code):\n  Sids: ReadCottonwoodRebalancerBronze | WriteSatellitesRegistry | WriteSatellitesHoldings | ReadEtfClassifications | DenyCrossFirmBuckets\n  Allow s3:PutObject  -> arn:aws:s3:::${local.cot_bucket}/platinum/satellites/registry.json   (pre-existing)\n  Allow s3:PutObject  -> arn:aws:s3:::${local.cot_bucket}/platinum/satellites/holdings.json   (NEW -- the KEY, never the prefix)\n  Allow dynamodb:GetItem, dynamodb:BatchGetItem -> arn:aws:dynamodb:${local.region}:${local.account_id}:table/etf-classifications  (NEW)\n  Deny  s3:* -> opal-data-bd, opal-data-bd/*, opal-data-inf, opal-data-inf/*   (UNCHANGED, mirrored not widened)\n  BARE `Resource = \"*\"` occurrences: 0   <- the wildcard the criterion forbids\n  wildcard-SUFFIXED ARNs: 4, ALL PRE-EXISTING (2 bronze read prefixes + 2 deny entries). None added by this cell.\n\nBOTH NEW STATEMENTS LIVE INSIDE THE EXISTING aws_iam_role_policy.cot_satellites_registry_producer_s3 RESOURCE, deliberately: a new aws_iam_role_policy resource would be '1 to add' and V2-AC8 requires 0 to add, and renaming the existing policy (its name still reads s3-read-cot-bronze-write-cot-platinum) would FORCE-REPLACE it -- an add plus a destroy. The stale name is recorded in the .tf.\n\nDISCLOSED, NOT DISCOVERED LATER: BatchGetItem is granted because the cell specifies it and is NOT exercised by the shipped code path (the shared ETFClassifier is a per-ticker get_item with a cache, and that module is not modified from here). 25 distinct tickers per run.",
+      "denominator": "5 of 5 policy Sids enumerated from the file; 0 bare-wildcard resources of 10 ARNs declared; comp-iam's own denominator 25 .tf files (cone-narrowed from 474)",
+      "status": "PASS",
+      "expect": "BARE `Resource = \\\"\\*\\\"` occurrences: 0"
+    },
+    {
+      "criterion_id": "V2-AC8",
+      "criterion_verbatim": "0 to add, exactly 2 to change (the function's artifact version, the s3 policy), 0 to destroy; any other resource is a STOP with a row.",
+      "method": "command",
+      "invocation": "timeout 600 terraform -chdir=infra/aws/terraform/cot-pipeline plan -target=module.cot_satellites_registry_producer -target=aws_iam_role_policy.cot_satellites_registry_producer_s3 -out=.scratch/b2.tfplan",
+      "output_evidence": "rc=1 -- NO PLAN PRODUCED. Verbatim:\n  Error: Invalid function argument\n    on ec2.tf line 68, in resource \"aws_instance\" \"cot_exporter\":\n    68:   user_data = base64encode(file(\"${path.module}/../../ec2/cot-exporter/user-data.sh\"))\n      while calling file(path); path.module is \".\"\n  Invalid value for \"path\" parameter: no file exists at \"./../../ec2/cot-exporter/user-data.sh\"\n\nTHE INIT SUCCEEDED FIRST (rc=0, 'Terraform has been successfully initialized!', hashicorp/aws v5.100.0), so this is not a provider or backend state.\n\nTHE CAUSE IS THE WORKTREE'S SPARSE CONE, NOT THE STACK: `git ls-tree HEAD -- infra/aws/ec2/cot-exporter/user-data.sh` returns 100644 blob 0545afd9264c86c419a5f39005d5667c5477c571 -- the file EXISTS at HEAD -- while `ls infra/aws/ec2/` returns 'No such file or directory' and `git sparse-checkout list` (15 entries) carries no infra/aws/ec2. Terraform evaluates the WHOLE root module before a -target filter applies, so the error is raised by a resource NEITHER target names.\n\nTHE DENOMINATOR, so the remedy is exact: comp-find 'file[(]|templatefile[(]|filebase64[(]|filemd5[(]|abspath[(]' over infra/aws/terraform/cot-pipeline = 1 hit across 21 files scanned. ONE out-of-cone path in the entire stack.\n\nREFUSED, NOT ROUTED AROUND: no `git sparse-checkout add` (the spawn prompt: 'that is a BLOCKING row on that criterion, never a cone widening by you'), no plan from the main tree (forbidden), no -lock=false or hand-built plan. Row POSN_ASTTAX-Z-W20-S3.",
+      "denominator": "1 of 1 out-of-cone path references in the 21-file stack; 0 of 2 targeted resources planned",
+      "status": "FAIL",
+      "status_reason": "BLOCKED by the worktree's sparse cone, which omits infra/aws/ec2/cot-exporter/user-data.sh -- a file ec2.tf reads at EVALUATION time, so the whole root module fails to evaluate and no plan of any scope can be produced. The file exists at HEAD (blob 0545afd926); this is a worktree-provisioning gap, not a defect in the order, the code or the stack. Widening the cone is not this worker's act. Filed as POSN_ASTTAX-Z-W20-S3 (class BLOCKING, hazard ARMED, disarm_owner 2.0.0_SA_COO~Z). Remedy is one line: add infra/aws/ec2 to the cone and re-run V2-AC8 through V2-AC13."
+    },
+    {
+      "criterion_id": "V2-AC9",
+      "criterion_verbatim": "Apply complete! Resources: 0 added, 2 changed, 0 destroyed; the HALTGT checkpoint output pasted.",
+      "method": "command",
+      "invocation": "timeout 900 .tools/safe-apply.sh -chdir=infra/aws/terraform/cot-pipeline apply .scratch/b2.tfplan",
+      "output_evidence": "NOT RUN, AND DELIBERATELY SO. The plan file .scratch/b2.tfplan does not exist: V2-AC8 produced no plan (rc=1). Applying without the scoped plan the never-widen halves were signed against would be an unbounded act -- both halves mark 'anything else' NOT SIGNED and require the cell to STOP before the deploy on anything outside the stated bounds.\n\nTHE WORLD IS UNCHANGED AND THAT IS MEASURED, NOT ASSUMED: `lambda get-function-configuration --function-name cot-satellites-registry-producer` reads CodeSha256 WfuD8gLfKN2W9U3DUmk6pxfUDn3QW3tOuopTecNRCv0=, MemorySize 192, Timeout 60, LastModified 2026-08-28T02:45:45Z -- every one the PRE-change value. `s3api head-object` on opal-data-cot platinum/satellites/holdings.json returns 404 Not Found. Nothing deployed, no served key moved.\n\nSTANDING STATE THE NEXT OPERATOR MUST KNOW: the new artifact IS uploaded and IS the current version of its key, and the module reads data.aws_s3_object.artifact.version_id AT PLAN TIME -- so the next apply of cot-pipeline by anyone picks it up. It sits inside the signed blast radius (both halves cover exactly this function and this key), the ledger entry is OPEN with L3-L6 unproven and blares past its 4h window. Named in POSN_ASTTAX-Z-W20-S3 with its rollback (VersionId qXzZE63fhPXwG2dXU86eLbTh48cFn0vQ).",
+      "denominator": "0 of 1 applies run; function config re-read on 4 of 4 fields, all pre-change",
+      "status": "FAIL",
+      "status_reason": "Gated on V2-AC8: there is no plan file to apply. Not attempted rather than attempted-and-failed, because an unscoped apply is outside what either never-widen half signed. Blocker and remedy in POSN_ASTTAX-Z-W20-S3."
+    },
+    {
+      "criterion_id": "V2-AC10",
+      "criterion_verbatim": "No changes.",
+      "method": "command",
+      "invocation": "timeout 600 terraform -chdir=infra/aws/terraform/cot-pipeline plan -target=module.cot_satellites_registry_producer -target=aws_iam_role_policy.cot_satellites_registry_producer_s3",
+      "output_evidence": "NOT RUN. This is the 0-diff re-plan of an apply that did not happen, and it uses the same command that failed at V2-AC8 -- it would return the identical 'no file exists at ./../../ec2/cot-exporter/user-data.sh' error, which is a fact about the cone and would say nothing whatever about drift. Recording a re-run of a known-broken invocation as evidence would be theatre.",
+      "denominator": "0 of 1 re-plans run",
+      "status": "FAIL",
+      "status_reason": "Gated on V2-AC8 and V2-AC9: a 0-diff check is only meaningful after an apply, and the invocation itself cannot evaluate the stack from this worktree. Blocker and remedy in POSN_ASTTAX-Z-W20-S3."
+    },
+    {
+      "criterion_id": "V2-AC11",
+      "criterion_verbatim": "StatusCode 200 and the response body naming both keys written; then `s3api head-object` on platinum/satellites/holdings.json returns 200 with an `as_of` of 2026-09-14 inside the body, and `registry.json`'s body is CONTENT-IDENTICAL to its pre-deploy version `sDM2rbJ.m2yyArr8utwAaleSJyntdVbj` for the same partition (diff printed, empty). This is the ON-DEMAND proof; it is QA, never production evidence.",
+      "method": "live_read",
+      "invocation": "timeout 300 .tools/aws lambda invoke --function-name cot-satellites-registry-producer --payload '{}' .scratch/b2_invoke.json",
+      "output_evidence": "NOT RUN, AND INVOKING WOULD HAVE BEEN WORSE THAN NOT INVOKING. The deployed function is still the 2026-08-28 build (CodeSha256 WfuD8gLfKN2W9U3DUmk6pxfUDn3QW3tOuopTecNRCv0=), which has no holdings half at all: an invocation would return a body naming ONE key, would not create holdings.json, and would rewrite registry.json from the old code -- a world act with no criterion value that moves a served key's LastModified for nothing.\n\nTHE PRE-STATE IS RECORDED so the next operator can run this criterion without re-deriving it: registry.json LastModified 2026-09-14T07:00:19Z, 2196 bytes, ETag c713f2c8288bde9667c37b29dc7be64f, VersionId sDM2rbJ.m2yyArr8utwAaleSJyntdVbj (the exact version the criterion names); holdings.json 404 Not Found.\n\nWHAT IS ALREADY PROVED ABOUT THE PAYLOAD THIS INVOCATION WOULD WRITE, on the live partition, at V2-AC4: 54,985 bytes, 9 satellites, top-level keys ['as_of','claim','satellites','schema_version','source'], as_of 2026-09-14. That is the LOCAL exercise the order asks for FIRST; it is not a substitute for the on-demand proof and is not offered as one.",
+      "denominator": "0 of 1 invocations run; 2 of 2 pre-state reads recorded (registry.json 200, holdings.json 404)",
+      "status": "FAIL",
+      "status_reason": "Gated on V2-AC9: the code that writes holdings.json is not deployed, so this criterion's subject does not exist on the live plane. Blocker and remedy in POSN_ASTTAX-Z-W20-S3."
+    },
+    {
+      "criterion_id": "V2-AC12",
+      "criterion_verbatim": "State ENABLED, ScheduleExpression cron(0 7 * * ? *); then list-targets-by-rule names the function ARN. The SCHEDULE is the standing mechanism; the organic fire is ledger leg L8, recorded by the COO after 07:00Z tomorrow, NOT waited on by you.",
+      "method": "live_read",
+      "invocation": "timeout 120 .tools/aws events describe-rule --name cot-satellites-registry-producer-daily --query '{state:State,expr:ScheduleExpression}' --output json",
+      "output_evidence": "rc=0\n{\n    \"state\": \"ENABLED\",\n    \"expr\": \"cron(0 7 * * ? *)\"\n}\n\nrc=0\n{\n    \"Targets\": [\n        {\n            \"Id\": \"CotSatellitesRegistryProducerDaily\",\n            \"Arn\": \"arn:aws:lambda:us-east-1:313476888478:function:cot-satellites-registry-producer\"\n        }\n    ]\n}\n\n1 of 1 targets, and it is the function itself. This is the APPLIED plane (EventBridge, live), not the .tf.\n\nTHIS CRITERION IS UNAFFECTED BY THE V2-AC8 BLOCKER and is reported as measured: no schedule resource is edited by this cell, so the standing mechanism is in exactly the state it was before. Ledger leg L7 closed on this read.\n\nWHAT IT DOES AND DOES NOT PROVE: it proves the SCHEDULE fires this function daily at 07:00Z. It does NOT prove the 07:00Z fire will write holdings.json -- that requires the code to be deployed (V2-AC9), and today's fire at 2026-09-14T07:00:19Z wrote registry.json only. L8 stays OPEN by design and is the COO's to record.",
+      "denominator": "1 of 1 rules read; 1 of 1 targets enumerated",
+      "status": "PASS",
+      "expect": "\"state\": \"ENABLED\".*\"expr\": \"cron\\(0 7 \\* \\* \\? \\*\\)\""
+    },
+    {
+      "criterion_id": "V2-AC13",
+      "criterion_verbatim": "the deploy recorded per that script's contract (if this pipeline is recorded by record-terraform-deploy.sh instead, run that with --plan .scratch/b2.tfplan and say so); legs L1-L7 closed with proofs; L8 left OPEN by design and named.",
+      "method": "command",
+      "invocation": "timeout 300 bash infra/aws/lambda/ci/record-resource-deploy.sh cot-pipeline",
+      "output_evidence": "NOT RUN, on two grounds, both measured.\n\n(1) WRONG RECORDER FOR THIS PIPELINE, and the order anticipated this: record-resource-deploy.sh's own header scopes it to 'modules that have NO Lambda functions ... via a {module}-resource-map.json instead', and `ls infra/aws/lambda/ci/*-resource-map.json` finds exactly ONE, shared-infra-resource-map.json -- there is no cot-pipeline-resource-map.json. cot-pipeline's functions are in lambda-source-map.json (cot-satellites-registry-producer is an entry there), so the correct recorder is record-terraform-deploy.sh cot-pipeline --plan .scratch/b2.tfplan. SAID, as the criterion asks.\n\n(2) THERE IS NOTHING TO RECORD, AND RECORDING IT WOULD BE A FALSE RECORD. Both recorders write a deploy entry (CHANGELOG.json + last_deployed_commit) and COMMIT it. No apply happened (V2-AC9), the function still carries the 2026-08-28 bytes, and --plan .scratch/b2.tfplan does not exist. A recorder run here would assert a deploy that did not occur into the estate's drift-detection input, which is precisely the state drift-check exists to catch.\n\nTHE LEDGER HALF IS DONE AS FAR AS THE WORLD ALLOWS: L1 (commit 97fe1221bd), L2 (artifact VersionId mgzFeamx2_MIO_R.lBF6IYGUNM5aXcir, read back) and L7 (schedule ENABLED, 1 target) are CLOSED WITH PROOF; L3-L6 remain OPEN on the blocker; L8 is OPEN BY DESIGN and is named here and in the report as the organic 07:00Z arm the COO records.",
+      "denominator": "0 of 1 recorder runs; 1 of 1 resource-map files present and it is not cot-pipeline's; 3 of 7 worker-closable legs closed with proof",
+      "status": "FAIL",
+      "status_reason": "Gated on V2-AC9: there is no deploy to record, and both recorders commit a deploy claim. The criterion's own alternative clause is answered on the evidence: cot-pipeline is recorded by record-terraform-deploy.sh (no cot-pipeline-resource-map.json exists), and that is the invocation to run once the apply lands. Blocker and remedy in POSN_ASTTAX-Z-W20-S3."
+    },
+    {
+      "criterion_id": "V2-AC14",
+      "criterion_verbatim": "Whether holdings.json's per-ticker totals are what an analyst would call \"what the satellite holds\" -- the sleeve sum, nothing added, nothing dropped -- and whether coverage.unlabelled is disclosed where it should be. Record the readings and offer NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "JUDGMENT -- no invocation; graded at L9",
+      "output_evidence": "READINGS ONLY. NO VERDICT IS OFFERED.\n\n1. WHAT THE TOTAL IS, EXACTLY. weight = the sum of `absoluteAllocation` over every sleeve of that satellite that holds the ticker, converted to percentage points and quantized once at 2 dp, half-up. Sat 15 GLD 8.34 from one sleeve (ST 8.34). Sat 30 GLD 7.25 from two (ST 6.26 + INT 1.00; exact sum 7.2525). Sat 80 VXX 1.87 from one (LT 1.87).\n\n2. NOTHING ADDED. The function's whole input is the Black Diamond detail artifact; there is no second source in its scope. Exercised rather than asserted at V2-AC5: the same builder plus Yang's live served LT copy reads 3.37 where the shipped arm reads 1.87.\n\n3. NOTHING DROPPED, and the refusals rather than the successes are the evidence. A component with no metadata.symbol, a component with no absoluteAllocation, a sleeve whose name resolves to no book, and a security at the SATELLITE ROOT (outside every sleeve) each RAISE rather than skip. 177 rows over 9 satellites; per satellite the exact sum of absoluteAllocation is 100.000000 on 9 of 9.\n\n4. THE ROUNDING IS VISIBLE IN THE ARTIFACT AND IS DISCLOSED IN THE CODE. The total is the rounded SUM, not the sum of the rounded sleeves, so a reader adding the printed sleeve figures may land 0.01 from the printed total (Sat 30 GLD: 6.26 + 1.00 = 7.26 printed against a 7.25 total). Likewise the published 2 dp weights sum to 100.00-100.07 per satellite while the exact figures sum to 100.000000 on all nine. Neither is corrected by renormalising, which would move a measured figure to make a display add up.\n\n5. WHAT coverage DISCLOSES AND WHERE. coverage is PER SATELLITE, beside its own holdings list, as {labelled, unlabelled}; labelled+unlabelled == the row count is asserted IN CODE and refuses the build otherwise. TODAY BOTH ARMS ARE NOT EXERCISED BY THE DATA: the served table labels 25 of 25 distinct tickers, so every pair reads N/0. The unlabelled path was exercised by withholding one ticker at the classifier -- the row carries asset_class null, sub_asset_class null, keeps its weight, and the pair moves 16/0 -> 15/1.\n\n6. WHAT IS NOT DISCLOSED, STATED SO THE GRADER DOES NOT HAVE TO FIND IT. There is no per-satellite WEIGHT of the unlabelled rows -- only a COUNT. One unlabelled 0.1% position and one unlabelled 30% position produce the same coverage pair. There is also no ESTATE-LEVEL coverage line: a consumer wanting 'how much of this artifact is unlabelled' computes it from the rows. Neither was specified by the order, and adding a field would have changed the schema B4 and F3 bind verbatim.\n\n7. THE LABELS ARE THE TABLE'S, AT RUN TIME, WITH NO LOCAL COPY. GLD serves hedge/Gold and VXX equity/Volatility TODAY -- the PRE-retag values -- which the order states is correct for this cell: R1 changes the table and this artifact follows on its next fire with no code change. A ticker the table does not carry is null, never 'unknown' (the shared client's get_asset_class() answers the STRING 'unknown', which a consumer cannot distinguish from a served label; this code reads the row instead).\n\n8. THE STANDING CAVEAT ON ALL OF THE ABOVE: every reading here is from the LOCAL exercise against the live partition. holdings.json is NOT on the served plane -- V2-AC8 blocked the deploy -- so no reading in this row has been taken from a published artifact.",
+      "denominator": "8 readings; 9 of 9 satellites and 177 of 177 rows behind them; 0 verdicts offered",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=\"true\" in the task order). Spine v3 L9: it is never self-graded by the worker and never graded by the checker. The oracle is 3.0.0_SA_CVO~Z at L9, whose verdict lands in an adjudication row's `grades` array against this instance.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO MUTANTS, because this cell's two load-bearing claims fail in opposite directions. ARM 1 (the source claim): the SAME builder is re-run with Yang's live served LT copy added to the Black Diamond sum -- the arm that would exist if the estate's 'never add Yang' rule were violated. ARM 2 (the coverage claim): the classifier is made to withhold one ticker, returning the same None the real client returns on a table miss, which is the only way to exercise a disclosure path the live data leaves at zero on all nine satellites.",
+      "expected": "ARM 1: the mutated arm reads 3.37 where the shipped arm reads 1.87 -- the two DIFFER, so the control discriminates. ARM 2: the withheld ticker's row carries asset_class null and sub_asset_class null, is COUNTED in coverage.unlabelled rather than dropped, and keeps its weight.",
+      "observed": "ARM 1 FIRED: ARM A = 1.87, ARM B = 3.37, delta 1.50 (Yang's LT VXX weight 0.015 read live at VersionId 4Q1qjgD52FSKZ38EfHGqdKGHyJ_ktlka). ARM 2 FIRED: GLD -> {'asset_class': null, 'sub_asset_class': null, 'weight': 8.34}, coverage 16/0 -> 15/1, row count unchanged at 16. A THIRD control fired unplanned and is reported because it proves the instruments can refuse THIS worker: build_package.py rejected --pin HEAD (rc=1) and commit-gate.sh rejected the first draft of the negative-control script (rc=1, ruff F401).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The package is built TWICE from the same pin (97fe1221bd) to different output paths and the two zips' sha256 compared -- the builder fixes every zip entry timestamp precisely so this is a real question. Separately, the holdings build is a pure function of the ten input artifacts plus the table, and was run repeatedly across the session against the same partition.",
+      "observed": "build1 7854e8109d0536ed6c30eedc27558d751a06495b8db8748cf53a01cc71a41752 / build2 7854e8109d0536ed6c30eedc27558d751a06495b8db8748cf53a01cc71a41752 -- IDENTICAL, 105484 bytes both. The dry run returned the same nine coverage pairs and the same GLD/VXX figures on every execution.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "V2-AC8 (scoped plan), V2-AC9 (safe-apply), V2-AC10 (0-diff), V2-AC11 (QA invocation), V2-AC13 (deploy recorder)",
+      "reason": "NOT excluded by choice -- BLOCKED and recorded FAIL, each with its measurement. The worktree's sparse cone omits infra/aws/ec2/cot-exporter/user-data.sh, which ec2.tf reads at evaluation time, so terraform cannot evaluate the cot-pipeline root module at all and no plan of any scope is producible here. Widening the cone is explicitly not this worker's act. POSN_ASTTAX-Z-W20-S3."
+    },
+    {
+      "item": "Ledger leg L8 -- the organic 07:00Z scheduled fire landing holdings.json",
+      "reason": "OPEN BY DESIGN, per the order: the negative arm is recorded by the COO after 07:00Z, not waited on here. It additionally cannot fire correctly until the apply lands."
+    },
+    {
+      "item": "A rollback of the uploaded artifact to VersionId qXzZE63fhPXwG2dXU86eLbTh48cFn0vQ",
+      "reason": "NOT DONE, and disclosed instead. Upload-then-plan is the module's own documented sequence ('Upload a new zip with build-and-upload.sh BEFORE running terraform plan'), the function is untouched and serving its prior bytes, both never-widen halves cover exactly this key and function, and the ledger entry is OPEN and blares. A second unverified world act by a blocked worker is worse than a disclosed staged artifact. The rollback command is recorded in the row for whoever owns the decision."
+    },
+    {
+      "item": "Any edit to infra/aws/lambda/v2_portal/_shared/etf_classifications_dynamodb.py (e.g. a batch_get helper)",
+      "reason": "Outside this order's <paths> and shared by three other lambdas. The producer reads it as-is, per-ticker with the module's own cache; the .tf records that BatchGetItem is granted as the cell specifies and is not exercised by the shipped code path."
+    },
+    {
+      "item": "A sum-to-100 guard on holdings.json",
+      "reason": "Not specified, and deliberately not added. The registry half has one because its consumer declares the invariant; for holdings the exact per-satellite sums are 100.000000 on 9 of 9 while the published 2 dp figures sum to 100.00-100.07, so a naive guard on the published values would refuse a correct partition. The exact sums are printed by the dry run as a disclosure."
+    },
+    {
+      "item": "Any change to satellites_registry.py (the conformance oracle) or satellites_weights.py",
+      "reason": "The order forbids converting the oracle; git diff --stat reads 0 lines on it. satellites_weights.py is read-only here -- NAME_TO_BOOK is imported, not copied."
+    }
+  ],
+  "surprises": [
+    "POSN_ASTTAX-Z-W20-S1: the ledger tool V2-AC2 names writes TWO files and demands both in one commit (entry + sentinel), while the order's <paths> grants only org/critical_paths/change_management/; both were committed because .owned-paths.yaml maps org/critical_paths/** to lane ANY for mechanism-written files and committing the entry alone would manufacture the tool's own false-clean gate-bypass state.",
+    "POSN_ASTTAX-Z-W20-S2: V2-AC3's invocation as written checks nothing and exits 0 -- `bash .tools/commit-gate.sh` with no file arguments prints 'checked 0 of 0 file(s) -- NOTHING WAS CHECKED. This line is NOT evidence of a clean gate.'; the gate takes its subjects as ARGV, so the deciding run named the six changed files (6 of 6 clean).",
+    "POSN_ASTTAX-Z-W20-S3: BLOCKING -- the B2 deploy cannot be planned from this worktree. The sparse cone omits infra/aws/ec2/cot-exporter/user-data.sh, which ec2.tf:68 reads at evaluation time, and terraform evaluates the whole root module before -target applies, so V2-AC8 exits 1 with no plan and AC9/AC10/AC11/AC13 are unreachable. One out-of-cone path reference in the 21-file stack; the file exists at HEAD (blob 0545afd926)."
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface (the order names the task-order file, this worker's deliverables/ directory, the project's investigation file, the four source files and org/critical_paths/change_management/). Every invocation, its exit code and its verbatim deciding output are carried in the acceptance rows above, and the deploy legs are carried in the change-management ledger entry org/critical_paths/change_management/20260914T1844Z_posn-round5-b2-satellites-holdings_deploy_completion.md.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh (Rule 14: py_compile + ds-precommit undefined-name + ruff py39 + comp-constants drift + manifest-check + log-open-lint)",
+      "invocation": "timeout 180 bash .tools/commit-gate.sh <the 6 changed .py/.tf files>  (and, first, the bare form the order names)",
+      "result": "rc=0, 'OK: pre-commit gate clean for 6 of 6 file(s)'. The bare form returned rc=0 on 0 of 0 files with its own 'NOT evidence of a clean gate' warning (row W20-S2). The gate refused an earlier draft (rc=1, ruff F401), so it is a tested instrument here rather than an agreeing one."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_POSN_ASTTAX~20 <0.9.0_WK_POSN_ASTTAX~20@opal.agent>\" -F <msgfile written by a non-shell writer> -- <10 paths>",
+      "result": "rc=0, commit 97fe1221bd on wk-posn_asttax-5-20, 10 files / 1016 insertions. Sub-gates: [surprise-row-gate] '2 new row(s) of 99 total checked ... all new rows carry their step-7/step-10 fields'; [surprise-corpus] 'documents=69 rows=2145 malformed_blocks=0 ... new=0'; [to-pipeline-gate] 'no task_orders/*.md in this commit (denominator: 10 dispatched path(s))'; [msg-verify] MATCH len=5495. LOCAL, never pushed."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "open --slug posn-round5-b2-satellites-holdings (8 legs); close-leg L1 / L2 / L7; check",
+      "result": "Entry opened 18:44:36Z BEFORE any code change; L1, L2, L7 closed with proof; check reports 'OPEN: posn-round5-b2-satellites-holdings age=0.6h window=4.0h [in-window] stranded=['L3','L4','L5','L6','L8']' across a scan denominator of 8 of 8 sentinels."
+    },
+    {
+      "tool": "comp-iam gaps (DESIRED plane, Terraform-parsed)",
+      "invocation": "timeout 300 comp-iam gaps",
+      "result": "rc=0, 'Total: 0 missing | 0 deny-present | 0 coverage-unknown | 0 resource-mismatch'. Denominator in THIS worktree: 25 .tf files (the sparse cone) against the order's preflight figure of 474. BLIND on this producer by the preflight's own statement, so the deciding V2-AC7 evidence is the direct .tf read."
+    },
+    {
+      "tool": "comp-find (content census, printed denominator)",
+      "invocation": "comp-find 'file[(]|templatefile[(]|filebase64[(]|filemd5[(]|abspath[(]' infra/aws/terraform/cot-pipeline",
+      "result": "1 hit across 21 files scanned [corpus=all] -- exactly one out-of-cone path reference in the whole stack, which is what makes the V2-AC8 remedy a single cone entry. A first attempt used escaped parens and the tool WARNED that python re treats them literally; re-run with character classes."
+    },
+    {
+      "tool": "comp-read (shape + enumerate, single-file rail)",
+      "invocation": "comp-read .owned-paths.yaml --enumerate 'open_deploys|critical_paths|0\\.9\\.0_WK'; comp-read .tools/owned-paths-validate.py --for '<question>'; comp-read <decomp> --for '<question>'",
+      "result": "Located the worker_grant stanza (serial_glob 0.9.0_WK_*, source task-order-paths) and the org/critical_paths/** lane-ANY entry at :1387, which is the evidence behind row W20-S1's finding that the two authorities disagree in the safe direction."
+    },
+    {
+      "tool": "terraform 1.x (init + plan, hashicorp/aws v5.100.0)",
+      "invocation": "terraform -chdir=infra/aws/terraform/cot-pipeline init -input=false; then the scoped plan V2-AC8 names",
+      "result": "init rc=0 'Terraform has been successfully initialized!'; plan rc=1 'Invalid value for \"path\" parameter: no file exists at \"./../../ec2/cot-exporter/user-data.sh\"' from ec2.tf:68 -- a resource neither -target names. No plan file produced; no apply attempted."
+    },
+    {
+      "tool": ".tools/aws (the shim; s3api, dynamodb, lambda, events)",
+      "invocation": "s3api head-object / put-object / get-object; dynamodb describe-table + get-item; lambda get-function-configuration; events describe-rule + list-targets-by-rule",
+      "result": "Every live figure in this instance came through it and every write was READ BACK rather than taken from the response: artifact 105484 B at VersionId mgzFeamx2..., function still CodeSha256 WfuD8g... / 192 MB / 60 s, registry.json 2196 B at VersionId sDM2rbJ..., holdings.json 404, rule ENABLED cron(0 7 * * ? *) with 1 target, table etf-classifications ACTIVE (ticker HASH)."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> V2-AC1,V2-AC2,V2-AC3,V2-AC4,V2-AC5,V2-AC6,V2-AC7,V2-AC8,V2-AC9,V2-AC10,V2-AC11,V2-AC12,V2-AC13,V2-AC14",
+      "result": "recorded in the worker report with its exit code; the ids are positional and only the exit code is the verdict."
+    }
+  ]
+}
