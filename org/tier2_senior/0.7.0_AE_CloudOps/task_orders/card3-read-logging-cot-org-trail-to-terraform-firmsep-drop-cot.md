@@ -6,7 +6,7 @@
 <issued_to>0.7.0_AE_CloudOps</issued_to>
 <issued_by>2.0.0_SA_COO~E</issued_by>
 <date>2026-09-13</date>
-<status>pending -- GO CARRIED ON THIS FACE by the issuer 2026-09-13 ~22:5xZ, because it cannot ride the broker. The LD-0529 send gate admits a GO only if it cites `<PROJECT>.TO-<id>` (org/mcp/cvo_send_guard.py:152-156, TO_ID_RE), and a code-less order like this one cannot carry that token. So the GO message was REFUSED ("cites NO task order"), and the act lives here, in the recipient's own home -- which is what LD-0529 requires.</status>
+<status>complete -- 0.7.0_AE_CloudOps 2026-09-14 ~01:5xZ. Proof-of-spec VALID rc=0 (deliverables/CARD3_READ_LOGGING/CARD3_READ_LOGGING_PROOF_OF_SPEC.json: 16 of 16 rows, 0 violations; 15 mechanical rows PASS; R-AC15 is judgment, recorded UNVERIFIABLE-BY-INSTRUMENT for 2.0.0_SA_COO~E at RAVC-4). Terraform landed at 9f3fd2cf4a (import) and 37931439cf (S3), both on origin/CLOUD; ledger card3-read-logging CLOSED 5/5. PRIOR: pending -- GO CARRIED ON THIS FACE by the issuer 2026-09-13 ~22:5xZ, because it cannot ride the broker. The LD-0529 send gate admits a GO only if it cites `<PROJECT>.TO-<id>` (org/mcp/cvo_send_guard.py:152-156, TO_ID_RE), and a code-less order like this one cannot carry that token. So the GO message was REFUSED ("cites NO task order"), and the act lives here, in the recipient's own home -- which is what LD-0529 requires.</status>
 <priority>P1 -- ADVI_FIRMBKTS FWD-6's 45-day quiet-window clock does not start until this lands</priority>
 
 ## AUTHORITY -- FOUR ANDREW-DIRECT WORDS, EACH IN ITS OWN RECORD, NONE WIDENED HERE
