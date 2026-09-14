@@ -1,50 +1,79 @@
 # IRPT_FNTEND.TO-FE-s-34 -- business-date label: result
 
-Worker: `0.9.0_WK_IRPT_FNTEND~3`. Worktree pair `/c/tmp/wk-irpt_fntend-5-3-fe-s-34` (CLOUD 0a74710f33, amended order at
-12eef1910c) and its `portal/` (DEV c2eb8eb4). Both portal commits are **LOCAL** on branch `wk-irpt_fntend-5-3-fe-s-34`:
+Worker: `0.9.0_WK_IRPT_FNTEND~3`. Worktree pair `/c/tmp/wk-irpt_fntend-5-3-fe-s-34`, on the order as amended at `1df5ac405f`,
+and its `portal/`. All portal commits are **LOCAL** on branch `wk-irpt_fntend-5-3-fe-s-34`:
 
-- `944499a9b4f1e7b00572b80727c0daec32ca2e1b` -- the relabel and the reroute, plus `__tests__/fe-s-34/`.
-- `f7b2d98657089f7a2251ca808487c524651a1333` -- the amendment: the two `startsWith('Updated ')` checks, and nothing else.
+- `944499a9` -- ruling K (the label) and ruling O (the reroute), plus `__tests__/fe-s-34/label.test.ts`.
+- `f7b2d986` -- amendment 1: the two `startsWith('Updated ')` checks.
+- `fa9cbee2` -- amendment 2, ruling R: the no-status path ages the document's own business date, never an instant.
 
-Proof instance: `IRPT_FNTEND.TO-FE-s-34.business-date-label.proof_of_spec.json` (in this folder). **Every mechanical criterion
-passes by output, so the order's `<status>` is flipped to `complete`.**
+The portal branch also carries the issuer's sync merge `c18a2aab` of DEV `e85498be`.
 
-## What changed
+**The order is OPEN (`<status>pending</status>`).** F34-AC6 has one failure, `__tests__/fe-s-3/status.test.ts:121`. That file is
+outside the grant, and the line asserts exactly the instant hand-through that ruling R ends (row W3-S24).
 
-- **Ruling K.** `formatSourceAge` in `state/status.ts` now reads **`Business date age: <figure>`**, where the figure is `under 1m`,
-  `Nm`, `Nh` or `Nd`. It used to read `Updated ... ago`. The figure and the branch boundaries are unchanged.
-- **Ruling O.** `StageDisplay.tsx` and `VariantSelector.tsx` now call
-  `formatSourceAgeForState(envelope.state, envelope.sourceAsOf)`, the path `StatusPanel` takes. Zero `formatSourceAge(` call
-  sites remain outside `state/status.ts`.
-- **Amendment 12eef1910c (on row W3-S19).** Two checks were replaced; each cites ruling K and prints itself both ways:
-  - `fe-s-21/source-age.test.ts:166`: `pure.startsWith('Updated ')` became equality with `formatSourceAge(AS_OF, now)`. The
-    comparison uses `AS_OF`, the date this file's `pure` is actually computed from (row W3-S22).
-  - `fe-s-25/source-age-field.test.ts:65`: the check became equality with `formatSourceAge(BUSINESS_DATE, now)`.
+## Amendment 2 (ruling R): what changed
 
-  Every other assertion in both files is as written.
+- **`contracts/adapt.ts`**
+  - `wireEnvelope` already built the document's business-date reading from `businessAsOf` and then dropped it. It now puts that
+    reading on `availability.sourceDate`.
+  - `carryAvailabilityFromStatus` keeps the document's own reading when no status arrives. When a status does arrive, the
+    status's reading still wins, as before.
+- **`state/status.ts`, `envelopeFromAvailability`**
+  - The no-status branch changed from `sourceDate === undefined ? sourceAsOf : sourceDate` to `sourceDate ?? ABSENT_SOURCE_DATE`.
+  - The panel is now handed a business-date reading or the stated absence. It is never handed an instant.
+- **fe-s-25 claims moved (only these):**
+  - The `source-age-field.test.ts:128` regex pinned the instant fallback. It is replaced by a behavioural no-status check that
+    cites ruling R and is shown both ways.
+  - That check prints the F34-AC10 line only when it holds.
+  - Every other assertion in the folder is as written.
+- **New test:** `__tests__/fe-s-34/no-status.test.ts`, for F34-AC8 and F34-AC9.
 
-## Criteria (deciding runs on the amended tree)
+## Criteria (deciding runs on the portal `fa9cbee2` bytes)
 
 | id | verdict | deciding line |
 |---|---|---|
 | F34-AC1 | PASS | `rc=0` |
-| F34-AC2 | PASS | `formatSourceAge( CALL SITES OUTSIDE state/status.ts: 0 (across 215 files)` |
+| F34-AC2 | PASS | `formatSourceAge( CALL SITES OUTSIDE state/status.ts: 0 (across 217 files)` |
 | F34-AC3 | PASS | `ANALYSIS PANELS AGE THE BUSINESS DATE: 2 of 2` |
 | F34-AC4 | PASS | `THE LABEL NAMES THE BUSINESS DATE: yes` |
 | F34-AC5 | PASS | `"UPDATED" ON A BUSINESS-DATE AGE: 0 (source 0 + render 0 + pure 0)` |
-| F34-AC6 | PASS | ` 61 pass` / ` 0 fail` / `Ran 61 tests across 14 files.` |
-| F34-AC7 | RECORDED (judgment, L9) | labels recorded in the instance; no verdict |
+| F34-AC6 | **FAIL** | ` 84 pass` / ` 2 skip` / ` 1 fail` -- `fe-s-3/status.test.ts:121` (row W3-S24) |
+| F34-AC7 | RECORDED (judgment, L9) | no verdict |
+| F34-AC8 | PASS | `NO-STATUS DOCUMENT, INSTANT AND BUSINESS DATE DIFFER -> BOTH PANELS AGE THE BUSINESS DATE: 2 of 2` |
+| F34-AC9 | PASS | `NO-STATUS DOCUMENT WITHOUT A BUSINESS DATE -> ABSENCE NAMED, NO AGE: 2 of 2` |
+| F34-AC10 | PASS | `NO-STATUS ENVELOPE CARRIES THE DOCUMENT'S BUSINESS-DATE READING, NOT THE INSTANT: yes` |
 
-Before the amendment, F34-AC6 ran 59 passing tests and two failures (F21-AC3 and F25-AC4). That run is kept in the row's
-`status_reason`.
+F34-AC6 ran with `IRPT_FE_DEV_PORT=54034`, a port measured closed on `localhost`, `127.0.0.1` and `[::1]`. Its 2 skips are FE-s-30's
+dev-server tests, which skip when their precondition is absent.
+
+**Before the ruling-R edit:** F34-AC8 read `0 of 2`, F34-AC9 read `0 of 2`, and the F34-AC10 check printed its "DOES NOT CARRY" line.
+
+**Whole InvestorReporting suite:** 509 / 6 / 0 before, 510 pass / 6 skip / 1 fail after, the one failure being W3-S24's line.
 
 ## Rows
 
-- **IRPT_FNTEND-W3-S19** -- BLOCKING, ARMED. **Resolved** by amendment 12eef1910c, which granted the two checks. They were replaced
-  at `f7b2d986`, and F34-AC6 now runs 61 of 61.
-- **IRPT_FNTEND-W3-S20** -- OBSERVATION, INERT. On a reading, the two panels already aged `business_date`, so the reroute changed
-  the wording for an absent or null date.
-- **IRPT_FNTEND-W3-S21** -- OBSERVATION, ARMED. On the no-status fixture path the panels age an instant under the business-date
-  label. Still open; the issuer routed it to 1.0.0_SA_CTO.
-- **IRPT_FNTEND-W3-S22** -- OBSERVATION, INERT (new). fe-s-21's `pure` is computed from `as_of`, so "the same date" for its
-  amended check is `AS_OF`, not the business date.
+| row | class, hazard | status |
+|---|---|---|
+| W3-S19 | BLOCKING | Resolved by amendment 1 (`f7b2d986`). |
+| W3-S20 | OBSERVATION, INERT | Unchanged. |
+| W3-S21 | OBSERVATION, ARMED | Answered by ruling R, implemented at `fa9cbee2`. |
+| W3-S22 | OBSERVATION, INERT | Not this amendment's. |
+| **W3-S23** (new) | OBSERVATION, ARMED | See below. |
+| **W3-S24** (new) | BLOCKING, ARMED | See below. |
+| **W3-S25** (new) | OBSERVATION, INERT | See below. |
+
+- **W3-S23.** F34-AC8's named *availability* instant cannot exist on a no-status v1 document, because only a status writes it.
+  - The criterion's dates belong to the fe-s-6 VIEW fixture, which ruling R's adapter remedy never reaches.
+  - That fixture now names an absence instead of ageing its instant.
+  - F34-AC8 is graded on the committed no-status Holdings body, using the document's own instant.
+- **W3-S24.** `fe-s-3/status.test.ts:121` asserts the instant is handed through, which ruling R ends; the file is outside the grant.
+- **W3-S25.** FE-s-30's `businessDateOf` now reports `from:'status'` for a no-status document's own reading. Measured; no current
+  render path reaches it.
+
+## For the issuer
+
+1. Grant `__tests__/fe-s-3/status.test.ts:121` for one purpose: assert the ABSENT reading (or that no instant is handed), citing
+   ruling R. F34-AC6 then re-runs.
+2. Route W3-S23 and W3-S25, which sit in files outside the grant: the FixtureAdapter or the view fixtures, and FE-s-30's
+   `businessDateOf`.
