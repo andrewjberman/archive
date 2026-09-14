@@ -15,4 +15,6 @@
 | E2R-AC3 | `timeout 120 python .../fixed_inputs/r2/check_ln_r2.py e2-named` | `ITEMS: 18  NAMED (a RAISE is an answer): 18  MISSING: []` / `VERDICT: PASS-ALL-NAMED` | 0 |
 | E2R-AC4 | `timeout 120 python .../fixed_inputs/r2/check_ln_r2.py e2-v16` | `BASE: 619dec559f...  NAMING_SCHEMA.json version there: v1.6` / `VERDICT: PASS-BRIEFED-ON-V16` | 0 |
 
-No surprise rows were filed. Whether the two namers agree is for a later cell to measure. This worker does not measure it.
+One surprise row was filed after the run: `LGIC_NAMING-W2-S5` (OBSERVATION, ARMED, disarm owner `2.0.0_SA_COO~G`). The checker reads `e2.prompt.txt` and `e2.answer.txt` byte-exact (`check_ln_r2.py:42-46`, `:107-109` @619dec559f), but this box writes those LF files as CRLF on any checkout. After the drain, a re-run of E2R-AC1 and E2R-AC2 would therefore grade this clean seat FAIL. The PASSes above were read on the LF bytes the seat wrote, committed at 59f68115a4.
+
+Whether the two namers agree is for a later cell to measure. This worker does not measure it.
