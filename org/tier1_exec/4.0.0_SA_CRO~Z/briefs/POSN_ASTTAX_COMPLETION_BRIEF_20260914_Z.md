@@ -11,6 +11,9 @@ v0.1 @ee4b7e5539 and carried into its close-out breakdown
 the cell-level authority (its s.3 eight cells supersede s.4 step 2 below). **v0.2 (2026-09-14 ~17:2xZ):** file
 locations corrected on the CTO's measurement (msg 22836) -- `SelectionTab.tsx` and `holdings-shared.tsx` are
 ATTRIBUTION files at pin `e85f6eb84f`, not Positioning; s.8 added with this seat's alignment notes on the breakdown.
+**v0.3 (2026-09-14 ~17:2xZ):** Andrew RULED all six cards at this terminal (record
+`deliverables/ANDREW_DIRECT_20260914_172xZ_POSN_ASTTAX_SIX_CARDS_RULED.md`) -- s.0a carries the words and what
+each one changes; R2 and R4 in s.2 and N2/N3 in s.8 are SUPERSEDED where marked, kept as written for the record.
 **Not a recon engagement; no RCN id.** Everything below is measured on the LIVE plane at the vintages
 stated, never from a document's description of it.
 
@@ -27,6 +30,25 @@ toggle from Black Diamond's flattened holdings, coalesced by ticker, classified 
 and to keep the Models toggle on Yang. The two must never be summed: they are two versions of one model,
 and the satellite column takes the traded one. Everything else on this project (deploy, retag, seed
 script, frontend) is already priced and is small.
+
+## 0a. ANDREW'S RULINGS, 2026-09-14 ~17:2xZ -- what each one changes below
+
+VERBATIM, ENTIRE: *"Call 1, they should be summed because the goal is not to see what's yangs models versus
+what's external residuual in the satellite; it is to see total GLD listed as Commodity Asset, Metals Sub-Asset,
+and to see Total VXX (or whatever hedge securities) as Structured Asset, Hedge Sub-Asset. Call 2 Yes. Call 3,
+mint some yellow color, yes. Call 4 Yes. Call 5 Yes. Call 6, definitely B, models do not get updated because
+they are not changing, Satellites simply need to have an additional lambda to do weighted characteristics
+aggregates ."*
+
+| card | ruling | effect on this brief |
+|---|---|---|
+| 1 | ONE TOTAL per ticker per satellite, classified; NO Yang-vs-residual split on the page | **R1 stands** (BD flattened, summed by ticker across sleeves -- that sum IS "in-model + residual"). **R2's disclosure column is REJECTED**: no `weight_models_blend`, no `overlay` on the surface. ⚠ "Summed" is across SLEEVES; Yang's copy is NOT added on top of BD's (LT VXX 1.87 + 1.50 = 3.37 would double count) -- put back to Andrew as one line; until he says otherwise, total = BD coalesced. |
+| 1 | sub-asset labels: GLD -> `Commodities` / **`Metals`**; VXX "or whatever hedge securities" -> `Structured` / **`Hedge`** | **R1 retag changes BOTH levels** (today GLD sub=`Gold`, VXX sub=`Volatility`). `Hedge` as a SUB value must stay distinct from the legacy TOP-level `hedge` that dissolves -- the encoding is the CTO's L4 call. |
+| 2 | Yes | FWD-6 rewritten to the Positioning page's own surfaces (ENDPOINT edit; CVO re-sign). CMA/Philosophy out. |
+| 3 | mint a new token, **yellow** | F1 mints a yellow token for Commodities; amber stays Cash. |
+| 4 | Yes | GLD + VXX into `etf_daily_pull.py FUNDS` today -- relayed to `0.0.3_BG_BBGTerminal` (its working tree). |
+| 5 | Yes | explicit, labelled "no benchmark" zero for the three new classes now; proxies later with Yang. |
+| 6 | (b), models untouched; **"an additional lambda to do weighted characteristics aggregates"** | Yang's PKL and the Models toggle are not changed. **R4 is REFINED:** the satellites' weighted characteristics (fee / yield / duration / beta / returns) are computed SERVER-SIDE in a lambda over the coalesced holdings, not in the portal adapter. s.8 N2's "compute in the adapter" rec is SUPERSEDED (moot: no overlay is shown). Whether "additional" is a second output of `cot-satellites-registry-producer` or a separate function is an L4 / AE build-ladder call; its grants (BD bronze, `etf-classifications`, Yang's `positioning_data.json` for per-ticker characteristics, the BBG pull once card 4 lands) are part of the cell's write surface. |
 
 ## 1. WHAT IS TRUE, MEASURED 2026-09-14
 
@@ -88,7 +110,9 @@ across its sleeves, group by `metadata.symbol`, sum `absoluteAllocation`. That i
 rule, and it already handles the case BD does not exercise today (a security at the satellite root;
 0 of 9 now) with no code change if it ever appears.
 
-**R2. The Models toggle stays Yang's.** Models = the design; Satellites = as-traded. They will disagree
+**R2. The Models toggle stays Yang's.** ⛔ **SUPERSEDED IN PART at v0.3 (s.0a card 1 / card 6): the Models
+toggle DOES stay Yang's, but the per-ticker disclosure below (`weight_models_blend`, `overlay`) is REJECTED --
+the page shows one total per ticker, nothing else. Kept as written for the record.** Models = the design; Satellites = as-traded. They will disagree
 by exactly the overlay, and the artifact DISCLOSES it rather than hiding it: each coalesced row carries
 `weight` (BD), `weight_models_blend` (what the Yang blend would have said) and `overlay = weight -
 weight_models_blend`. A negative overlay (Yang holds more than BD, e.g. ULT VXX) is a drift flag, surfaced
@@ -100,7 +124,9 @@ allocation is computed from those labels times the coalesced weights. This is FW
 exercised on real satellites, and it is where the retag lands: Sat 15 renders Commodities 8.34% in its
 own bucket. This is the outcome Andrew named as the reason the project exists.
 
-**R4. Characteristics.** Per-ticker fee / yield / duration / beta / returns are carried from Yang's
+**R4. Characteristics.** ⛔ **REFINED at v0.3 (s.0a card 6): the weighted aggregates are computed in a LAMBDA
+over the coalesced holdings, not in the portal adapter; the per-ticker sources named below are that lambda's
+inputs.** Per-ticker fee / yield / duration / beta / returns are carried from Yang's
 `current_holdings` for any ticker a Yang book holds (VXX and the ETFs -- the established precedent in
 `satelliteAdapter.ts`), and are NULL for tickers no Yang book holds (GLD, CASH) until the Bloomberg daily
 pull carries them. Null renders today (VXX's yield/duration already do). Adding GLD and VXX to
@@ -146,7 +172,7 @@ retag; it will simply show GLD under `hedge` until the retag flips it, which is 
 - **FWD-6 (narrowed)**: Models, ETFs and Satellites toggles and the three tabs agree on the five classes,
   their order and colours. Philosophy/CMA: Yang's sheet, later, not this project.
 
-## 6. CARDS FOR ANDREW (decisions only; each carries this seat's recommendation)
+## 6. CARDS FOR ANDREW -- ALL RULED at v0.3 (s.0a); kept as put, with the recommendations he answered
 
 1. **The source rule** (R1/R2): Satellites = Black Diamond as-traded; Models = Yang; disagreements
    disclosed, never summed. *Rec: yes -- it is the only rule under which the satellite column is true.*
@@ -192,7 +218,10 @@ code, its own never-widen half naming `allocation_summary.json` and the delta/sp
 one sign-off name BOTH functions and BOTH artifacts explicitly. An approved act that grows silently is
 the exact shape the NEVER#1 sign-off rule is written against.
 
-**N2 -- FLAG, B2's write surface includes Terraform, measured.** The producer role
+**N2 -- FLAG, B2's write surface includes Terraform, measured.** ⛔ **REC SUPERSEDED at v0.3 (s.0a card 6):
+the characteristics aggregates go in a lambda by Andrew's word, so the cross-bucket reads are PART OF THE CELL,
+not avoided; the measurement of today's grants below still stands and is why the `.tf` is in the write
+surface.** The producer role
 (`infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf`) holds `s3:GetObject` on the two
 bronze prefixes and `s3:PutObject` on exactly `platinum/satellites/registry.json` -- no DynamoDB action,
 no read on `opal-data-portal-v2`. So B2 needs a second pinned `PutObject` key (`holdings.json`) and a
