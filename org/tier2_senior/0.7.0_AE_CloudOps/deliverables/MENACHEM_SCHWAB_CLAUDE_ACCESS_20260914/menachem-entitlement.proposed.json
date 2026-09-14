@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "status": "proposed_disabled",
+  "profile_id": "menachem_schwab_v1",
+  "policy_revision": 1,
+  "identity": {
+    "display_email": "menachem@opalinvest.com",
+    "entra_tenant_id": null,
+    "entra_object_id": null,
+    "activation_requires_verified_immutable_identity": true
+  },
+  "integration": "opal-gateway",
+  "gateway_role_tier": "READ_ONLY",
+  "restricted_tool_profile_required": true,
+  "allowed_tools": [
+    "schwab_get_access",
+    "schwab_list_files",
+    "schwab_describe_dataset",
+    "schwab_query",
+    "schwab_prepare_download"
+  ],
+  "masters": {
+    "08242234": {
+      "label": "SmartX",
+      "account_scope": "all_in_master_proposed"
+    },
+    "08335338": {
+      "label": "BlackDiamond",
+      "account_scope": "all_in_master_proposed"
+    }
+  },
+  "cross_master_join": false,
+  "cross_master_aggregate": false,
+  "datasets": {
+    "dim_position": {
+      "read": true,
+      "download_csv": true,
+      "download_original": false,
+      "columns": [
+        "account_ref",
+        "business_date",
+        "cusip",
+        "ticker_symbol",
+        "l_s",
+        "quantity_settled_unsettled",
+        "quantity_settled",
+        "quantity_unsettled_long",
+        "quantity_unsettled_short",
+        "market_value_settled_unsettled",
+        "closing_price"
+      ],
+      "hidden_source_columns": [
+        "account_id"
+      ],
+      "transforms": {
+        "account_ref": "server-only keyed opaque alias of master + account_id"
+      }
+    },
+    "dim_balance": {
+      "read": true,
+      "download_csv": true,
+      "download_original": false,
+      "columns": [
+        "account_ref",
+        "business_date",
+        "mkt_value_long",
+        "mkt_value_short",
+        "net_mv_positions",
+        "net_mv_plus_cash",
+        "cash_balance_settled_only",
+        "bank_sweep_ibf",
+        "bank_cash"
+      ],
+      "hidden_source_columns": [
+        "account_id",
+        "account_title_line_1",
+        "account_title_line_2",
+        "account_title_line_3"
+      ],
+      "transforms": {
+        "account_ref": "server-only keyed opaque alias of master + account_id"
+      }
+    },
+    "dim_asset": {
+      "read": true,
+      "download_csv": true,
+      "download_original": false,
+      "columns": [
+        "cusip",
+        "ticker_symbol",
+        "security_description_line_1",
+        "security_description_line_2",
+        "security_description_line_3",
+        "closing_price",
+        "maturity_date",
+        "prod_code",
+        "prodcatg_code"
+      ]
+    }
+  },
+  "dates": {
+    "mode": "latest_complete_business_date_and_previous_29_calendar_days",
+    "query_one_snapshot_date": true
+  },
+  "denied_by_default": [
+    "all unlisted tools, masters, datasets, columns, accounts and operations",
+    "bronze originals",
+    "fact_acc",
+    "fact_transaction and tax-lot datasets",
+    "tax IDs",
+    "mailing addresses",
+    "account titles",
+    "arbitrary S3 keys and URLs",
+    "arbitrary SQL",
+    "all writes and deletes"
+  ],
+  "source_reader_role_arn": "arn:aws:iam::313476888478:role/opal-mcp-emp-menachem-schwab-read",
+  "limits": {
+    "chat_max_rows": 500,
+    "chat_max_bytes": 262144,
+    "query_timeout_seconds": 30,
+    "max_source_objects": 12,
+    "max_source_bytes": 67108864,
+    "export_max_rows": 250000,
+    "export_max_bytes": 52428800
+  },
+  "download": {
+    "preferred": "browser SSO + entitlement checked before streaming",
+    "ticket_ttl_seconds": 300,
+    "ticket_bound_to_identity_and_policy_revision": true,
+    "raw_s3_presigned_urls": false
+  },
+  "enforcement": {
+    "on_every_tool_call": true,
+    "on_every_download": true,
+    "unavailable_profile": "deny",
+    "revoked_profile": "deny",
+    "unknown_identity": "deny",
+    "cache_key_includes_identity_master_policy_revision": true
+  },
+  "note": "Design defaults only. No account membership, date/field scope, original-file permission or AWS role has been provisioned. User confirmed both masters kept separate, questions plus downloads, existing opal-gateway, and filtered CSVs initially with original-file access later."
+}
