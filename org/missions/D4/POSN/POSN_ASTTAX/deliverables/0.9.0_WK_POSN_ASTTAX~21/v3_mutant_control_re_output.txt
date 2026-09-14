@@ -1,0 +1,98 @@
+====================================================================================================
+U3_MUTANT_CONTROL_RE -- TO-V3-1 / AT5-s-3. SCRATCH ONLY.
+====================================================================================================
+  SCRATCH TARGET  : an in-process dict per table name. NO network client is
+                    ever constructed (boto3.client raises). The live tables
+                    'etf-classifications' and 'bd-securities' are NEVER
+                    opened for read or write by this process. --upload is
+                    never passed to a real table because none exists here.
+  machinery       : C:\tmp\wk-posn-5-21\.scratch\u3_ac1_before_control.py (round 4's, sha256 ae72cab7dfbeb62f, asserted unmodified)
+  APPLIED subject : C:\tmp\wk-posn-5-21\data/black_diamond/scripts/classification/seed_canonical_securities.py
+                    blob 803721e2c15464ed4ba054a02aba2311d5506164, 17700 bytes  <- the file this cell changed
+  PRE-PATCH subj  : git show HEAD:data/black_diamond/scripts/classification/seed_canonical_securities.py
+                    blob fbbc7165d33198789d3a7788a557ed3f5ce75614, 15000 bytes  <- round 4's subject, by CONTENT
+  the two subjects DIFFER: True
+
+====================================================================================================
+ARM: V3-AC5 NEGATIVE -- PRE-PATCH bytes, same input (must still revert)
+====================================================================================================
+  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)
+  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)
+  TICKER BEFORE         AFTER          RATIFIED       VERDICT
+  VXX    Structured     equity         Structured     CLOBBERED
+  UVXY   Structured     equity         Structured     CLOBBERED
+  QBER   Structured     fixed_income   Structured     CLOBBERED
+  PDBC   Commodities    equity         Commodities    CLOBBERED
+  SURVIVED 0 of 4 | CLOBBERED 4 | rc=None
+  MINT CONTROL: 'CASH_USD' MINTED (asset_class='fixed_income') -- the seeder IS writing   (yang update_item=57, get_item=0, minted=53)
+
+====================================================================================================
+ARM: V3-AC4 MUTANT -- APPLIED REPO BYTES, same input (verdict must flip)
+====================================================================================================
+  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)
+  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)
+  TICKER BEFORE         AFTER          RATIFIED       VERDICT
+  VXX    Structured     Structured     Structured     SURVIVED
+  UVXY   Structured     Structured     Structured     SURVIVED
+  QBER   Structured     Structured     Structured     SURVIVED
+  PDBC   Commodities    Commodities    Commodities    SURVIVED
+  SURVIVED 4 of 4 | CLOBBERED 0 | rc=1
+  MINT CONTROL: 'CASH_USD' MINTED (asset_class='fixed_income') -- the seeder IS writing   (yang update_item=53, get_item=57, minted=53)
+  REFUSED 4 etf-classifications row(s): the table serves a value this seeder disagrees with.
+  Nothing was reverted. Re-run with --force to overwrite them.
+  [PRESERVED] QBER       asset_class: table serves 'Structured', seeder asserts 'fixed_income' -- table wins, pass --force to override
+  [PRESERVED] QBER       name: table serves 'QBER', seeder asserts 'TrueShares Quarterly Bear Hedge ETF' -- table wins, pass --force to override
+  [PRESERVED] VXX        asset_class: table serves 'Structured', seeder asserts 'equity' -- table wins, pass --force to override
+  [PRESERVED] VXX        name: table serves 'VXX', seeder asserts 'iPath Series B S&P 500 VIX Short-Term Futures ETN' -- table wins, pass --force to override
+  [PRESERVED] UVXY       asset_class: table serves 'Structured', seeder asserts 'equity' -- table wins, pass --force to override
+  [PRESERVED] UVXY       name: table serves 'UVXY', seeder asserts 'ProShares Ultra VIX Short-Term Futures ETF' -- table wins, pass --force to override
+  [PRESERVED] PDBC       asset_class: table serves 'Commodities', seeder asserts 'equity' -- table wins, pass --force to override
+  [PRESERVED] PDBC       name: table serves 'PDBC', seeder asserts 'Invesco Optimum Yield Diversified Commodity Strategy No K-1 ETF' -- table wins, pass --force to override
+
+====================================================================================================
+ARM: OVERRIDE -- applied bytes with --force (must revert again)
+====================================================================================================
+  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)
+  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)
+  TICKER BEFORE         AFTER          RATIFIED       VERDICT
+  VXX    Structured     equity         Structured     CLOBBERED
+  UVXY   Structured     equity         Structured     CLOBBERED
+  QBER   Structured     fixed_income   Structured     CLOBBERED
+  PDBC   Commodities    equity         Commodities    CLOBBERED
+  SURVIVED 0 of 4 | CLOBBERED 4 | rc=0
+  MINT CONTROL: 'CASH_USD' MINTED (asset_class='fixed_income') -- the seeder IS writing   (yang update_item=57, get_item=57, minted=53)
+
+====================================================================================================
+DISCRIMINATION VERDICT (V3-AC4 vs V3-AC5, same input, two subjects)
+====================================================================================================
+  V3-AC5 pre-patch : CLOBBERED 4 of 4, minted=True, rc=None
+  V3-AC4 applied   : SURVIVED  4 of 4, minted=True, rc=1
+  override --force : CLOBBERED 4 of 4, rc=0
+  THE TWO ARMS DIFFER: True
+
+  OK: THE CONTROL DISCRIMINATES on the APPLIED file. The two arms read
+  DIFFERENTLY on identical input, the mint control fires in BOTH arms
+  (53 row(s) minted under the guard), and --force still overrides.
+
+====================================================================================================
+V3-AC7 READINGS -- WHICH FIELDS THE GUARD ACTUALLY OWNS (no verdict)
+====================================================================================================
+  YANG_OWNED_FIELDS as applied : ('asset_class', 'sub_asset_class', 'name')
+  the seeder's Yang UpdateExpression writes: asset_class, sub_asset_class,
+  name, last_updated, updated_by  (5 fields; the guard owns the first 3)
+
+  PER-FIELD PROBE: live row agrees with the seeder on every owned field
+  EXCEPT the one named; does the guard refuse on that field ALONE?
+
+  FIELD PROBED       IN TUPLE  rc         OUTCOME
+  asset_class        YES       1          REFUSED, 4 [PRESERVED] line(s)
+  sub_asset_class    YES       1          REFUSED, 4 [PRESERVED] line(s)
+  name               YES       1          REFUSED, 4 [PRESERVED] line(s)
+  last_updated       no        0          WROTE THROUGH, no conflict raised
+  sector             no        0          WROTE THROUGH, no conflict raised
+
+  NOTE FOR THE GRADER: the live etf-classifications rows for the four
+  members currently serve asset_class equity/equity/equity/fixed_income
+  (read at the top of this cell) -- i.e. the retag AT5-s-8 performs has
+  NOT yet run. The guard reads the LIVE row, so what it protects is
+  whatever the table serves AT RE-SEED TIME, not a value compiled in.
