@@ -83,8 +83,17 @@ There is no per-fabric portal branch; both sides confirmed.
   - `src/api/endpoints`: 0. Site Z adds `amgt-lead-panel.ts`; the laptop touches `aum.ts` and `investor-reporting.ts`.
   - `src/pages/SecurityAnalysis/**`: 0.
   - `src/lib/chartColors.ts`: 0.
-- **`src/App.tsx` on rg-2 is pure insertions,** at BASE-side ranges `-26,0`, `-53,0`, `-104,0` and `-429,0` against base `5b959f63ca`: lazy import, import block, `NAV_SECTIONS` entry, route. The laptop's ranges on the same base were requested (bus, 21:0xZ). If they are disjoint it is a mechanical union; adjacency conflicts at the nav and route lists need no owner.
-- **POSN's later leg is not yet checked against the laptop.** Its portal surfaces are `src/pages/Positioning/**`, `src/api/portal-proxy.ts` and `src/lib/chartColors.ts`; asked, not yet answered.
+- **`src/App.tsx` is a MECHANICAL UNION, measured on both sides against base `5b959f63ca`** (laptop ranges from bus 8cd9dab4):
+  - site-Z rg-2: four pure insertions at `-26,0`, `-53,0`, `-104,0` and `-429,0` (lazy import, import block, `NAV_SECTIONS` entry, route);
+  - laptop DEV (IRPT_FNTEND): no hunks;
+  - laptop d13 (DSGN_REBRND): 17 hunks, all inside base lines 157-389.
+
+  The sets are disjoint and not adjacent: the nearest pairs are 104 against 157, and 389 against 429. No owner is needed, and the union lands in the d13 leg.
+- **POSN's later leg WILL meet the laptop rebrand.**
+  - The laptop d13 line modifies three Positioning files: `src/pages/Positioning/Positioning.tsx`, `panels/PositioningSummary.tsx` and `tabs/HoldingsTab.tsx`.
+  - POSN round 5's F2 cell edits `HoldingsTab` and `PositioningSummary` (1.0.0_SA_CTO~Z breakdown, msg 22837), so at least two files are shared.
+  - `src/api/portal-proxy.ts` and `src/lib/chartColors.ts` are untouched by the laptop.
+  - Per-hunk ranges get measured when that leg is real. Filed as a surprise row on POSN_ASTTAX's own channel, so the round-5 owners see it before integration.
 - **The largest integration is inside the laptop:** DEV (IRPT_FNTEND) and d13 (DSGN_REBRND) share 55 paths, and d13 is 86 behind laptop DEV. That, not the cross-fabric seam, is where the real conflict work is.
 
 **What each push does in CI, read from `.github/workflows`:**
