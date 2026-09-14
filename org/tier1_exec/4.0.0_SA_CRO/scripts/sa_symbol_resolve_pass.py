@@ -361,10 +361,25 @@ def main() -> int:
     # "Costco, Netflix, Visa and Mastercard have no SA symbol".
     # `carried` entries are already-answered records folded back in, so the
     # partition below is over the WHOLE universe, not just this run.
+    # ⛔ THIS ARITHMETIC WAS WRONG AND IT PRINTED A NUMBER THAT CANNOT BE TRUE:
+    # "ASKED 19 of 6" and "NOT ASKED -13". Cause: `out` is seeded with the
+    # CARRIED records while `targets` is the LIMITED batch, so
+    # `len(targets) - len(out)` goes negative the moment --limit is combined
+    # with --exclude-done. Each field was right on its own and the SUBTRACTION
+    # mixed two different populations.
+    # >> A DENOMINATOR SMALLER THAN ITS NUMERATOR, AND A NEGATIVE COUNT, ARE THE
+    #    TELL. Neither needed a vendor to detect -- the arithmetic convicts
+    #    itself, which is why a count that cannot be true is worth more than a
+    #    count that is merely surprising.
     asked = [r for r in out if r.get("search_http") == 200]
-    notasked = (len(out) - len(asked)) + (len(targets) - len(out))
+    attempted_this_run = len(out) - len(carried)
+    never_reached = max(0, len(targets) - attempted_this_run)
+    notasked = (len(out) - len(asked)) + never_reached
     print("\nCALLS          %d (all free, direct, no quota)" % calls)
-    print("ASKED          %d of %d" % (len(asked), len(targets)))
+    print("POPULATION     %d carried + %d this batch = %d record(s)"
+          % (len(carried), len(targets), len(carried) + len(targets)))
+    print("ASKED          %d of %d" % (len(asked), len(carried) + len(targets)))
+    print("NEVER REACHED  %d  <- the stop guard fired before these" % never_reached)
     print("NOT ASKED      %d search-refused + %d news-refused  <- vendor "
           "refusals, NOT findings about those names"
           % (notasked, not_asked_news))
@@ -377,6 +392,11 @@ def main() -> int:
           "discriminating" % (len(asked) - resolved - not_asked_news, len(asked)))
     print("SERVEABLE      %d of %d asked  <- resolved AND clearing the density "
           "bar" % (served, len(asked)))
+
+    # SELF-CHECK: refuse to write an artifact whose own arithmetic is
+    # impossible. Cheaper than a reader discovering it later.
+    assert len(asked) <= len(carried) + len(targets), "ASKED exceeds population"
+    assert notasked >= 0, "negative NOT-ASKED"
 
     if args.out:
         json.dump({
@@ -395,7 +415,9 @@ def main() -> int:
                            "independent confirmation would be a second provider.",
             "denominator": {
                 "universe": len(names),
+                "population_this_output": len(carried) + len(targets),
                 "ASKED": len(asked),
+                "never_reached_stop_guard": never_reached,
                 "NOT_ASKED_search_refused": notasked,
                 "NOT_ASKED_news_refused": not_asked_news,
                 "resolved_of_asked": resolved,
