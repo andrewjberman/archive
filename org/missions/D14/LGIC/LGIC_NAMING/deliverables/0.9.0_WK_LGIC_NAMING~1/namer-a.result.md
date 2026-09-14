@@ -23,4 +23,8 @@ SEAT: OK cell=e1 rows=18 session=b100c432-0c42-4493-98e7-702644d33b1b base=619de
 | E1R-AC3 | `timeout 120 python .../fixed_inputs/r2/check_ln_r2.py e1-named` | `ITEMS: 18  NAMED (a RAISE is an answer): 18  MISSING: []` / `VERDICT: PASS-ALL-NAMED` | 0 |
 | E1R-AC4 | `timeout 120 python .../fixed_inputs/r2/check_ln_r2.py e1-v16` | `BASE: 619dec559f...  NAMING_SCHEMA.json version there: v1.6` / `VERDICT: PASS-BRIEFED-ON-V16` | 0 |
 
-No surprise rows were filed. Whether the two namers agree is for LN-e-3 to measure; this worker does not grade it.
+## Surprise filed
+
+- `LGIC_NAMING-W1-S6` (OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~G). The seat files are committed as LF, but `core.autocrlf=true` and no attribute pins their line endings. `check_ln_r2.py` hashes `e1.prompt.txt` and `e1.answer.txt` byte for byte. If a checkout rewrites them as CRLF, E1R-AC1 and E1R-AC2 read FAIL even though the seat was clean. In this worktree all four criteria PASS against LF files. Nothing was changed.
+
+Whether the two namers agree is for LN-e-3 to measure; this worker does not grade it.
