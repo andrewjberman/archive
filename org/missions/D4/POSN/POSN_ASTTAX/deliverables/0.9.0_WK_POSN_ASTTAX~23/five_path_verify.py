@@ -296,6 +296,15 @@ def main():
     ap.add_argument("--out")
     ap.add_argument("--compare", nargs=2)
     a = ap.parse_args()
+    # NO ARGUMENTS = re-render the verdict from the two committed captures.
+    # The task order names this instrument as `python <FIVE_PATH_VERIFY_AUTHENTICATED>`
+    # with NO arguments, so the bare invocation has to be the one that produces the
+    # criterion's table. The captures are committed beside this file, which also makes
+    # the table re-derivable by a later reader without re-touching the live plane.
+    if not (a.compare or a.phase):
+        here = os.path.dirname(os.path.abspath(__file__))
+        a.compare = [os.path.join(here, "five_path_verify.BEFORE.json"),
+                     os.path.join(here, "five_path_verify.AFTER.json")]
     if a.compare:
         with open(a.compare[0]) as f:
             b = json.load(f)
