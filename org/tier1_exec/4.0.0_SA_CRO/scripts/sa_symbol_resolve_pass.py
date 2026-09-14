@@ -200,6 +200,7 @@ def main() -> int:
     out, calls = [], 0
     resolved = served = 0
     consecutive_refusals = 0
+    not_asked_news = 0
 
     for i, rec in enumerate(targets, 1):
         folder = rec["folder"]
@@ -249,10 +250,13 @@ def main() -> int:
                     for c, ok, j in scored if not ok][:3]
 
         best, probes = None, []
+        news_refused = 0
         for c in passed[:args.max_candidates]:
             sym = strip_tags(c.get("name"))
             ncode, npayload = get_json(NEWS.format(s=urllib.parse.quote(sym)))
             calls += 1
+            if ncode != 200:
+                news_refused += 1
             recs = (npayload or {}).get("data", []) if ncode == 200 else []
             hits, n = titles_match(nm, recs)          # TEST (b) -- free
             d = density(recs, today)
@@ -279,6 +283,22 @@ def main() -> int:
                           best["title_of"], best["oldest"], best["newest"],
                           best["in_window"], WINDOW_DAYS, DENSITY_MIN,
                           "MET" if ok else "NOT MET"))
+        elif news_refused and news_refused >= len(probes):
+            # NOT ASKED, NOT REFUSED. Measured 2026-09-14: this vendor's block
+            # MOVES BETWEEN ENDPOINTS -- the SEARCH limit lifted at the same
+            # moment the NEWS limit engaged. Without this branch, test (b) reads
+            # zero titles for a reason that has nothing to do with the company,
+            # and the record says "REFUSED ON EVIDENCE".
+            # >> THE SEARCH SIDE ALREADY HAD THIS GUARD AND THE NEWS SIDE DID
+            #    NOT. That is the third time tonight a control failed to travel
+            #    to the sibling surface it obviously applies to.
+            status, value = "UNRESOLVED", None
+            not_asked_news += 1
+            verdict = ("NOT ASKED -- the name test passed for %d candidate(s), "
+                       "but every news call was refused by the vendor (HTTP %s). "
+                       "THIS IS NOT A FINDING ABOUT THIS COMPANY: test (b) never "
+                       "ran." % (len(passed),
+                                 ", ".join(str(p["http"]) for p in probes)))
         else:
             status, value = "UNRESOLVED", None
             verdict = ("REFUSED -- %d candidate(s) returned, %d passed the "
@@ -311,8 +331,9 @@ def main() -> int:
     notasked = (len(out) - len(asked)) + (len(targets) - len(out))
     print("\nCALLS          %d (all free, direct, no quota)" % calls)
     print("ASKED          %d of %d" % (len(asked), len(targets)))
-    print("NOT ASKED      %d  <- vendor refusal, NOT a finding about those names"
-          % notasked)
+    print("NOT ASKED      %d search-refused + %d news-refused  <- vendor "
+          "refusals, NOT findings about those names"
+          % (notasked, not_asked_news))
     print("RESOLVED       %d of %d asked" % (resolved, len(asked)))
     print("REFUSED        %d of %d asked  <- a 0 here means the rule is NOT "
           "discriminating" % (len(asked) - resolved, len(asked)))
@@ -337,9 +358,11 @@ def main() -> int:
             "denominator": {
                 "universe": len(names),
                 "ASKED": len(asked),
-                "NOT_ASKED_vendor_refusal": notasked,
+                "NOT_ASKED_search_refused": notasked,
+                "NOT_ASKED_news_refused": not_asked_news,
                 "resolved_of_asked": resolved,
-                "refused_on_evidence_of_asked": len(asked) - resolved,
+                "refused_on_evidence_of_asked": len(asked) - resolved
+                                               - not_asked_news,
                 "serveable_at_the_density_bar": served,
                 "calls": calls,
                 "partition_note": "A VENDOR REFUSAL AND A REFUSAL ON EVIDENCE "
