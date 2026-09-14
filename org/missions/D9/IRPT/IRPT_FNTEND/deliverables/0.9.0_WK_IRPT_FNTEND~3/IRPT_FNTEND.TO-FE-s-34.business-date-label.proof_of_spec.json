@@ -6,7 +6,7 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-34.business-date-label.md",
     "group": "OTHER",
-    "vintage_commit": "1df5ac405f"
+    "vintage_commit": "7fd807ab76"
   },
   "assignee": "0.9.0_WK_IRPT_FNTEND~3",
   "decomp_ref": {
@@ -20,7 +20,7 @@
       "kind": "frontend_component",
       "commit_or_etag": "fa9cbee21bb6810aa52bf12eb47a0abab25d2a13",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Ruling K label (\"Business date age: <figure>\", portal 944499a9). Ruling R: envelopeFromAvailability's no-status branch `sourceDate === undefined ? sourceAsOf : sourceDate` -> `sourceDate ?? ABSENT_SOURCE_DATE` (ABSENT_SOURCE_DATE imported from contracts/adapt.ts); availability.sourceAsOf is no longer read there. No other function touched.",
+      "deploy_evidence": "Ruling K label (944499a9); ruling R, envelopeFromAvailability's no-status branch -> `sourceDate ?? ABSENT_SOURCE_DATE` (fa9cbee2). Not changed by amendment 3.",
       "artifact_covered_by": [
         "F34-AC4",
         "F34-AC5",
@@ -32,13 +32,36 @@
     {
       "path_or_key": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
       "kind": "frontend_component",
-      "commit_or_etag": "fa9cbee21bb6810aa52bf12eb47a0abab25d2a13",
+      "commit_or_etag": "c6ee044e7ae709ebc83542ce6dc767b7a9446343",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Ruling R: wireEnvelope puts the reading it already built (readingFromValue(businessAsOf), or the status's) on availability.sourceDate; carryAvailabilityFromStatus keeps the document's own reading when no status arrived, and the status's reading still wins when one did. Nothing else changed.",
+      "deploy_evidence": "Ruling R: wireEnvelope carries the reading on availability; carryAvailabilityFromStatus keeps it with no status (fa9cbee2). Amendment 3: carryDocumentReading, the same readingFromValue rule applied to a view-shaped document.",
       "artifact_covered_by": [
         "F34-AC8",
         "F34-AC9",
-        "F34-AC10"
+        "F34-AC10",
+        "F34-AC11"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/api/endpoints/investor-reporting.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "c6ee044e7ae709ebc83542ce6dc767b7a9446343",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amendment 3, FixtureAdapter.serve VIEW-fixture branch only: `: loaded` -> `: carryDocumentReading(loaded)`, plus that name in the existing contracts/adapt import list. No other region touched (FE-s-31 holds submitExport).",
+      "artifact_covered_by": [
+        "F34-AC8",
+        "F34-AC9",
+        "F34-AC11"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/state/availability.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "c6ee044e7ae709ebc83542ce6dc767b7a9446343",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amendment 3: businessDateOf reports from:'status' only when availability.producerState is present; nothing else moved.",
+      "artifact_covered_by": [
+        "F34-AC11"
       ]
     },
     {
@@ -66,9 +89,9 @@
     {
       "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "kind": "test",
-      "commit_or_etag": "fa9cbee21bb6810aa52bf12eb47a0abab25d2a13",
+      "commit_or_etag": "c6ee044e7ae709ebc83542ce6dc767b7a9446343",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "F34-AC2..AC5 (portal 944499a9); its not-graded no-status disclosure line reworded for ruling R at the amendment-2 commit.",
+      "deploy_evidence": "F34-AC2..AC5 (944499a9); its not-graded no-status disclosure line prints the reading it finds (amendment 3).",
       "artifact_covered_by": [
         "F34-AC2",
         "F34-AC3",
@@ -85,19 +108,19 @@
       "deploy_evidence": "Type-only: declares bun:test setSystemTime.",
       "artifact_covered_by": [
         "F34-AC1",
-        "F34-AC3",
-        "F34-AC8"
+        "F34-AC3"
       ]
     },
     {
       "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-34/no-status.test.ts",
       "kind": "test",
-      "commit_or_etag": "fa9cbee21bb6810aa52bf12eb47a0abab25d2a13",
+      "commit_or_etag": "c6ee044e7ae709ebc83542ce6dc767b7a9446343",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "NEW (amendment 2): F34-AC8 and F34-AC9 on whole no-status v1 bodies through parseIrEnvelope. Printed 0 of 2 and 0 of 2 before the ruling-R source edit.",
+      "deploy_evidence": "F34-AC8, AC9 and AC11: the view-fixture path via FixtureAdapter first, a whole v1 body second, the provenance with a status-carried control. Before the amendment-3 source edit: 0 of 2, 0 of 2, 1 of 2.",
       "artifact_covered_by": [
         "F34-AC8",
         "F34-AC9",
+        "F34-AC11",
         "F34-AC6"
       ]
     },
@@ -116,10 +139,30 @@
       "kind": "test",
       "commit_or_etag": "fa9cbee21bb6810aa52bf12eb47a0abab25d2a13",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Amendment 1: :65 -> equality with formatSourceAge(BUSINESS_DATE, now), ruling K cited (portal f7b2d986). Amendment 2: the :128 regex pinning the no-status instant fallback -> a behavioural no-status check that prints the F34-AC10 line, ruling R cited. Every other assertion as written.",
+      "deploy_evidence": "Amendment 1: :65 -> equality with formatSourceAge(BUSINESS_DATE, now), ruling K (f7b2d986). Amendment 2: the :128 regex -> a behavioural no-status check printing the F34-AC10 line, ruling R (fa9cbee2).",
       "artifact_covered_by": [
         "F34-AC6",
         "F34-AC10"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-3/status.test.ts",
+      "kind": "test",
+      "commit_or_etag": "c6ee044e7ae709ebc83542ce6dc767b7a9446343",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amendment 3, one assertion: :121 `expect(built.sourceAsOf).toBe('2026-09-10T10:00:00Z')` -> the ABSENT reading, ruling R cited, shown both ways.",
+      "artifact_covered_by": [
+        "F34-AC6"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-6/correction.test.ts",
+      "kind": "test",
+      "commit_or_etag": "c6ee044e7ae709ebc83542ce6dc767b7a9446343",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Amendment 3, one assertion: :94 `expect(original).toEqual(rawFixture)` -> equality with carryDocumentReading(rawFixture), ruling R cited, shown both ways; its immutability job is unchanged.",
+      "artifact_covered_by": [
+        "F34-AC6"
       ]
     }
   ],
@@ -131,7 +174,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
       "expect": "rc=0(?![0-9])",
       "output_evidence": "$ tsc -b --noEmit\nrc=0",
-      "denominator": "1 of 1 invocation on the amendment-2 bytes (portal@fa9cbee2), rc read without a pipe. tsc -b covers tsconfig.app.json + tsconfig.node.json (include: src): the whole portal, including every file this order touched and the merged FE-s-30/33/35 work. rc=0 also at every earlier stage (c2eb8eb4, 944499a9, f7b2d986, c18a2aab).",
+      "denominator": "1 of 1 invocation on the final amendment-3 bytes (portal@c6ee044e), rc read without a pipe; the whole portal (tsconfig include: src). An intermediate run on these files read rc=2 -- a `Bun.deepEquals` in a log line of fe-s-6/correction.test.ts, the Bun global being undeclared in this program -- and was fixed before the commit.",
       "status": "PASS"
     },
     {
@@ -141,7 +184,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "expect": "formatSourceAge\\( CALL SITES OUTSIDE state/status.ts: 0(?![0-9])",
       "output_evidence": "FILES SCANNED -- every non-test file under src/pages/InvestorReporting/ (every __tests__/ excluded): 218 (.json 133, .tsx 41, .ts 37, .ttf 4, .txt 1, .svg 1, .css 1)\n  of which OUTSIDE state/status.ts: 217\nPOSITIVE CONTROL (the token is readable): formatSourceAge( in state/status.ts code = 2 (its definition + the call inside formatSourceAgeForState)\nPOSITIVE CONTROL (a seeded call site): tabs/analysis/StageDisplay.tsx with its pre-FE-s-34 call put back -> the scan finds 1 call site(s) (seed landed: true)\nformatSourceAge REFERENCES OUTSIDE state/status.ts (import, alias or call): 0\nformatSourceAge( CALL SITES OUTSIDE state/status.ts: 0 (across 217 files)",
-      "denominator": "217 of 217 non-test files outside state/status.ts (218 scanned, walked from disk; comments stripped). label.test.ts deciding run on the portal@fa9cbee2 bytes: 4 pass / 0 fail, rc=0.",
+      "denominator": "217 of 217 non-test files outside state/status.ts (218 scanned, walked from disk; comments stripped). label.test.ts deciding run on the portal@c6ee044e bytes: 4 pass / 0 fail, rc=0.",
       "status": "PASS"
     },
     {
@@ -151,7 +194,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "expect": "ANALYSIS PANELS AGE THE BUSINESS DATE: 2 of 2(?![0-9])",
       "output_evidence": "  status source_dates.business_date = 2026-09-10\n  status source_dates.as_of         = 2026-09-05T00:00:00Z  (5 days earlier)\nPINNED CLOCK 2026-09-12T00:00:00.000Z: the business_date age reads \"Business date age: 2d\"; the as_of age would read \"Business date age: 7d\"\n  StatusPanel (the path FE-s-25 fixed) renders \"Business date age: 2d\"\n  StageDisplay    READY  business_date=2026-09-10, as_of=2026-09-05T00:00:00Z -> \"Ready -- Business date age: 2d (STATE_REPORTED)\"  [the business-date age, not the as_of age: yes]\n  StageDisplay    QUEUED business_date ABSENT,     as_of=2026-09-05T00:00:00Z -> \"Loading -- No source age yet (STATE_REPORTED)\"  [says \"No source age yet\", no as_of fallback: yes]\n  StageDisplay    READY  business_date NULL,       as_of=2026-09-05T00:00:00Z -> \"Ready -- Source date malformed (STATE_REPORTED)\"  [says \"Source date malformed\", no as_of fallback: yes]\n  VariantSelector READY  business_date=2026-09-10, as_of=2026-09-05T00:00:00Z -> \"Ready -- Business date age: 2d\"  [the business-date age, not the as_of age: yes]\n  VariantSelector QUEUED business_date ABSENT,     as_of=2026-09-05T00:00:00Z -> \"Loading -- No source age yet\"  [says \"No source age yet\", no as_of fallback: yes]\n  VariantSelector READY  business_date NULL,       as_of=2026-09-05T00:00:00Z -> \"Ready -- Source date malformed\"  [says \"Source date malformed\", no as_of fallback: yes]\nANALYSIS PANELS AGE THE BUSINESS DATE: 2 of 2",
-      "denominator": "2 of 2 panels, each counted only if all THREE arms hold (the business-date age and not the as_of age; an absent business date on a no-answer state; a null one), on a status carried by carryAvailabilityFromStatus. The age arm alone passes on the pre-FE-s-34 source too (row IRPT_FNTEND-W3-S20). label.test.ts deciding run on the portal@fa9cbee2 bytes: 4 pass / 0 fail, rc=0.",
+      "denominator": "2 of 2 panels, each counted only if all THREE arms hold (the business-date age and not the as_of age; an absent business date on a no-answer state; a null one), on a status carried by carryAvailabilityFromStatus. The age arm alone passes on the pre-FE-s-34 source too (row IRPT_FNTEND-W3-S20). label.test.ts deciding run on the portal@c6ee044e bytes: 4 pass / 0 fail, rc=0.",
       "status": "PASS"
     },
     {
@@ -161,7 +204,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "expect": "THE LABEL NAMES THE BUSINESS DATE: yes",
       "output_evidence": "  FRESH     business_date=2026-09-12 at 2026-09-12T00:00:20Z -> \"Business date age: under 1m\"   (StatusPanel \"Business date age: under 1m\"; StageDisplay \"Ready -- Business date age: under 1m\"; VariantSelector \"Ready -- Business date age: under 1m\")\n  HOURS-OLD business_date=2026-09-12 at 2026-09-12T05:00:00Z -> \"Business date age: 5h\"   (StatusPanel \"Business date age: 5h\"; StageDisplay \"Ready -- Business date age: 5h\"; VariantSelector \"Ready -- Business date age: 5h\")\n  DAYS-OLD  business_date=2026-09-09 at 2026-09-12T00:00:00Z -> \"Business date age: 3d\"   (StatusPanel \"Business date age: 3d\"; StageDisplay \"Ready -- Business date age: 3d\"; VariantSelector \"Ready -- Business date age: 3d\")\nLABELS NAMING THE BUSINESS DATE: 3 of 3\nTHE LABEL NAMES THE BUSINESS DATE: yes",
-      "denominator": "3 of 3 ages, each pure (injected clock) and rendered on all three panels under a pinned clock; a case counts only if \"business date\" is in it, its figure is right and the three panels agree. label.test.ts deciding run on the portal@fa9cbee2 bytes: 4 pass / 0 fail, rc=0.",
+      "denominator": "3 of 3 ages, each pure (injected clock) and rendered on all three panels under a pinned clock; a case counts only if \"business date\" is in it, its figure is right and the three panels agree. label.test.ts deciding run on the portal@c6ee044e bytes: 4 pass / 0 fail, rc=0.",
       "status": "PASS"
     },
     {
@@ -171,7 +214,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "expect": "\"UPDATED\" ON A BUSINESS-DATE AGE: 0(?![0-9])",
       "output_evidence": "POSITIVE CONTROL (source): state/status.ts with one pre-FE-s-34 label appended -> 1 occurrence(s), against 0 in the real file\nSOURCE SCAN: 0 occurrence(s) of the word across 218 non-test files\nPOSITIVE CONTROL (render): the detector fires on a pre-FE-s-34 rendering: true; stays quiet on 'updatedAt' and the new label: true\nRENDER SWEEP: 0 of 27 rendered panel ages (3 panels x 9 ages); PURE SWEEP: 0 of 18 (2 formatters x 9 ages)\n\"UPDATED\" ON A BUSINESS-DATE AGE: 0 (source 0 + render 0 + pure 0)",
-      "denominator": "218 of 218 non-test files (case-insensitive whole word, comments stripped) + 27 of 27 rendered panel ages + 18 of 18 pure ages across every branch of the formatter. At c2eb8eb4 the whole count was 50. label.test.ts deciding run on the portal@fa9cbee2 bytes: 4 pass / 0 fail, rc=0.",
+      "denominator": "218 of 218 non-test files (case-insensitive whole word, comments stripped) + 27 of 27 rendered panel ages + 18 of 18 pure ages across every branch of the formatter. At c2eb8eb4 the whole count was 50. label.test.ts deciding run on the portal@c6ee044e bytes: 4 pass / 0 fail, rc=0.",
       "status": "PASS"
     },
     {
@@ -180,10 +223,10 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 240 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-3 src/pages/InvestorReporting/__tests__/fe-s-6 src/pages/InvestorReporting/__tests__/fe-s-21 src/pages/InvestorReporting/__tests__/fe-s-25 src/pages/InvestorReporting/__tests__/fe-s-34",
       "expect": "(?<![0-9])0 fail",
-      "output_evidence": "121 |     expect(built.sourceAsOf).toBe('2026-09-10T10:00:00Z')\n                                   ^\nerror: expect(received).toBe(expected)\n\nExpected: \"2026-09-10T10:00:00Z\"\nReceived: {\n  fact: \"ABSENT\",\n  businessAsOf: null,\n}\n\n      at <anonymous> (C:\\tmp\\wk-irpt_fntend-5-3-fe-s-34\\portal\\src\\pages\\InvestorReporting\\__tests__\\fe-s-3\\status.test.ts:121:30)\n\u2717 deriving safe actions for a contract Availability carries none of its own > envelopeFromAvailability carries state, sourceAsOf and reason through, and derives actions\nPRECONDITION: dev server on http://localhost:54034 -- ABSENT (ECONNREFUSED from http://localhost:54034/) [port from env; set IRPT_FE_DEV_PORT to change it]\n 84 pass\n 2 skip\n 1 fail\nRan 87 tests across 19 files. [2.17s]\nrc=1",
-      "denominator": "84 of 87 tests across 19 files pass, 2 skip, 1 fails. The folder arguments are prefix filters, so fe-s-3 also admits fe-s-30, fe-s-33, fe-s-34 and fe-s-35. Run with IRPT_FE_DEV_PORT=54034 exported, a port measured closed on localhost, 127.0.0.1 and [::1]; the 2 skips are fe-s-30's dev-server tests with their precondition absent. The one failure is __tests__/fe-s-3/status.test.ts:121, outside the grant (row IRPT_FNTEND-W3-S24).",
-      "status": "FAIL",
-      "status_reason": "BLOCKING, row IRPT_FNTEND-W3-S24. fe-s-3/status.test.ts:121 asserts that envelopeFromAvailability hands an availability's instant through as the panel slot; ruling R ('never an instant, on any path') ends exactly that, and __tests__/fe-s-3/ is not in the <paths> grant. Every other test in the battery passes, and it is the only failure in the whole InvestorReporting suite (510 pass / 6 skip / 1 fail across 90 files). HISTORY: after amendment 12eef1910c this battery ran 61 of 61 (portal f7b2d986); after the issuer's sync c18a2aab, before the ruling-R edit, 83 pass and 2 skips with no failure across 18 files."
+      "output_evidence": "    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n  ruling K check, both ways: \"Business date age: 2d\" -> true; \"Source time unknown\" -> false\n  ruling R check, both ways: the slot handed over {\"fact\":\"PRESENT\",\"businessAsOf\":\"2026-09-09\"} -> true; the availability instant null -> false\n  ruling R check, both ways: the slot handed over {\"fact\":\"ABSENT\",\"businessAsOf\":null} -> true; the instant \"2026-09-10T10:00:00Z\" -> false\nPRECONDITION: dev server on http://localhost:54034 -- ABSENT (ECONNREFUSED from http://localhost:54034/) [port from env; set IRPT_FE_DEV_PORT to change it]\n  ruling R check, both ways: original vs the re-read as served -> true; original vs the raw bytes -> false\n 86 pass\n 2 skip\n 0 fail\nRan 88 tests across 19 files. [2.13s]\nrc=0",
+      "denominator": "All tests across 19 files pass bar 2 skips, 0 fail. The folder arguments are prefix filters, so fe-s-3 also admits fe-s-30, fe-s-33, fe-s-34 and fe-s-35. Run with IRPT_FE_DEV_PORT=54034 exported, a port measured closed on localhost, 127.0.0.1 and [::1]; the 2 skips are fe-s-30's dev-server tests, precondition absent. The ruling-K and ruling-R lines are the replaced checks printing themselves both ways (fe-s-21:166, fe-s-25:65, fe-s-25:128, fe-s-3/status.test.ts:121, fe-s-6/correction.test.ts:94).",
+      "status": "PASS",
+      "status_reason": "Resolves BLOCKING rows IRPT_FNTEND-W3-S19 (amendment 1) and IRPT_FNTEND-W3-S24 (amendment 3). HISTORY of this invocation: portal 944499a9 -> 59 passing, two failing (the \"Updated \" prefix checks); f7b2d986 -> 61 of 61; fa9cbee2 (ruling R) -> 84 passing, 2 skips, one failing at fe-s-3/status.test.ts:121, which pinned the instant hand-through; after amendment 3 that line asserts the absent reading and the battery is green."
     },
     {
       "criterion_id": "F34-AC7",
@@ -191,19 +234,19 @@
       "method": "manual_read_with_citation",
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "judgment": true,
-      "output_evidence": "RECORDED, NO VERDICT. The label as a reader meets it (portal@fa9cbee2, pinned clocks):\n  StatusPanel slot:  \"Business date age: 3d\"\n  StageDisplay:      \"Ready -- Business date age: 3d (STATE_REPORTED)\"\n  VariantSelector:   \"Ready -- Business date age: 3d\"\n  fresh / hours-old: \"Business date age: under 1m\" / \"Business date age: 5h\"\n  no status (ruling R): \"Uncertain -- Business date age: 4d\" (the document's own 2026-09-08, not its instant)\n  absences, unchanged words: \"No source age yet\", \"Source date malformed\", \"Source time unknown\"\nBEFORE (portal@c2eb8eb4): \"Ready -- Updated 3d ago\".",
-      "denominator": "3 panels x 3 ages, the no-status age, and the 3 absence wordings the label sits beside; the reader is the L9 grader.",
+      "output_evidence": "RECORDED, NO VERDICT. The label as a reader meets it (portal@c6ee044e, pinned clocks):\n  StatusPanel slot:  \"Business date age: 3d\"\n  StageDisplay:      \"Ready -- Business date age: 3d (STATE_REPORTED)\"\n  VariantSelector:   \"Ready -- Business date age: 3d\"\n  fresh / hours-old: \"Business date age: under 1m\" / \"Business date age: 5h\"\n  no status, the view fixture the analysis tab renders: \"Ready -- Business date age: 4d\" (its own 2026-09-08, not its instant)\n  no status, a v1 body: \"Uncertain -- Business date age: 4d\"\n  absences, unchanged words: \"No source age yet\", \"Source date malformed\", \"Source time unknown\"\nBEFORE (portal@c2eb8eb4): \"Ready -- Updated 3d ago\".",
+      "denominator": "3 panels x 3 ages, the two no-status paths, and the 3 absence wordings; the reader is the L9 grader.",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "JUDGMENT criterion (judgment=\"true\" in the order): graded at L9 by 3.0.0_SA_CVO and never self-graded; this row records the rendered labels and carries no verdict."
     },
     {
       "criterion_id": "F34-AC8",
-      "criterion_verbatim": "F34-AC8 -- ruling R outcome (a) (AMENDMENT 2): a document with NO status whose availability instant is 2026-09-10T18:05:00Z and whose own business date is 2026-09-08, parsed from a whole v1 body through the real adapter (never a hand-built envelope), renders the business-date age on StageDisplay and on VariantSelector. The test prints both dates and both rendered strings. <invocation>cd <WS>/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/no-status.test.ts</invocation><expect>NO-STATUS DOCUMENT, INSTANT AND BUSINESS DATE DIFFER -> BOTH PANELS AGE THE BUSINESS DATE: 2 of 2(?![0-9])</expect>",
+      "criterion_verbatim": "F34-AC8 -- ruling R outcome (a) (AMENDMENT 2, prose corrected by AMENDMENT 3): a document with NO status whose availability instant is 2026-09-10T18:05:00Z and whose own business date is 2026-09-08, served through the path the analysis tab renders today -- `FixtureAdapter` serving fe-s-6-ready's analysis documents, never a hand-built envelope -- renders the business-date age on StageDisplay and on VariantSelector. The test prints both dates and both rendered strings, and ALSO runs a whole v1 body with no status through the real adapter (whose instant is null by construction) as the second path. <invocation>cd <WS>/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/no-status.test.ts</invocation><expect>NO-STATUS DOCUMENT, INSTANT AND BUSINESS DATE DIFFER -> BOTH PANELS AGE THE BUSINESS DATE: 2 of 2(?![0-9])</expect>",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/no-status.test.ts",
       "expect": "NO-STATUS DOCUMENT, INSTANT AND BUSINESS DATE DIFFER -> BOTH PANELS AGE THE BUSINESS DATE: 2 of 2(?![0-9])",
-      "output_evidence": "WHOLE v1 BODY: operation=holdings-snapshot, the committed fe-s-18 Holdings data, clocks set; parsed by parseIrEnvelope\n  DOCUMENT: status member ABSENT; availability.state=UNCERTAIN; availability.sourceAsOf=null; sourceTimestamps.sourceAsOf (the document's instant)=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=2026-09-08\n  business date 2026-09-08   instant 2026-09-10T18:05:00Z\nPINNED CLOCK 2026-09-12T00:00:00.000Z: the business-date age reads \"Business date age: 4d\"; the instant's age would read \"Business date age: 1d\"\n  StatusPanel slot: \"Business date age: 4d\"\n  StageDisplay    -> \"Uncertain -- Business date age: 4d\"  [the business-date age, not the instant's: yes]\n  VariantSelector -> \"Uncertain -- Business date age: 4d\"  [the business-date age, not the instant's: yes]\nNOT GRADED HERE (row IRPT_FNTEND-W3-S23): the VIEW fixture request.overview.json (availability.sourceAsOf=2026-09-10T18:05:00Z, no reading; sourceTimestamps.businessAsOf=2026-09-08) -> StageDisplay \"Ready -- Source time unknown\"\nNO-STATUS DOCUMENT, INSTANT AND BUSINESS DATE DIFFER -> BOTH PANELS AGE THE BUSINESS DATE: 2 of 2",
-      "denominator": "2 of 2 panels, each counted only if it shows the business-date age, not the instant's, and agrees with StatusPanel. The document is the committed no-status Holdings v1 body (fe-s-18-frozen via fe-s-19 _wire.ts) with clocks.business_date=2026-09-08 and clocks.as_of_timestamp=2026-09-10T18:05:00Z, parsed by parseIrEnvelope (status: null). DEVIATION, DISCLOSED (row IRPT_FNTEND-W3-S23): the named instant is the DOCUMENT's own (sourceTimestamps.sourceAsOf); availability.sourceAsOf is null on every no-status v1 document, whose only writer is a status's as_of. The fe-s-6 request supplies the panels' non-age fields only; analysis-requests requires a status. Before the ruling-R edit the same file printed 0 of 2 (\"Uncertain -- Source time unknown\"). Deciding run at portal@fa9cbee2: 2 pass / 0 fail, rc=0.",
+      "output_evidence": "PATH 1 -- VIEW FIXTURE: fe-s-6-ready.json /api/scoped/investor-reporting/analysis-requests, served by FixtureAdapter, envelope as AnalysisTab.tsx builds it\n  DOCUMENT: status ABSENT; availability.state=READY; availability.sourceAsOf=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=2026-09-08; availability.sourceDate={\"fact\":\"PRESENT\",\"businessAsOf\":\"2026-09-08\"}\nPATH 2 -- WHOLE v1 BODY: operation=holdings-snapshot, the committed fe-s-18 Holdings data, clocks set; parsed by parseIrEnvelope\n  DOCUMENT: status ABSENT; availability.state=UNCERTAIN; availability.sourceAsOf=null; sourceTimestamps.sourceAsOf (the document's instant)=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=2026-09-08\n  business date 2026-09-08   instant 2026-09-10T18:05:00Z\nPINNED CLOCK 2026-09-12T00:00:00.000Z: the business-date age reads \"Business date age: 4d\"; the instant's age would read \"Business date age: 1d\"\n  StatusPanel slot -- path 1: \"Business date age: 4d\"; path 2: \"Business date age: 4d\"\n  StageDisplay    path 1 (view fixture) -> \"Ready -- Business date age: 4d\"  [the business-date age, not the instant's: yes]\n  StageDisplay    path 2 (v1 body)      -> \"Uncertain -- Business date age: 4d\"  [the business-date age, not the instant's: yes]\n  VariantSelector path 1 (view fixture) -> \"Ready -- Business date age: 4d\"  [the business-date age, not the instant's: yes]\n  VariantSelector path 2 (v1 body)      -> \"Uncertain -- Business date age: 4d\"  [the business-date age, not the instant's: yes]\nNO-STATUS DOCUMENT, INSTANT AND BUSINESS DATE DIFFER -> BOTH PANELS AGE THE BUSINESS DATE: 2 of 2",
+      "denominator": "2 of 2 panels, each counted only if BOTH paths show the business-date age and not the instant's, agreeing with StatusPanel. Path 1: fixtures/smoke/fe-s-6-ready.json's analysis document served by the real FixtureAdapter (availability.sourceAsOf 2026-09-10T18:05:00Z, businessAsOf 2026-09-08), envelope as AnalysisTab.tsx builds it. Path 2: the committed no-status Holdings v1 body with clocks.business_date 2026-09-08 and clocks.as_of_timestamp 2026-09-10T18:05:00Z, parsed by parseIrEnvelope. Before the amendment-3 source edit the same file printed 0 of 2 (path 1 read \"Ready -- Source time unknown\"). no-status.test.ts deciding run on the portal@c6ee044e bytes: 3 pass / 0 fail, rc=0.",
       "status": "PASS"
     },
     {
@@ -212,8 +255,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/no-status.test.ts",
       "expect": "NO-STATUS DOCUMENT WITHOUT A BUSINESS DATE -> ABSENCE NAMED, NO AGE: 2 of 2(?![0-9])",
-      "output_evidence": "WHOLE v1 BODY: operation=holdings-snapshot, the committed fe-s-18 Holdings data, parsed by parseIrEnvelope\n  business_date ABSENT: status member ABSENT; availability.state=UNCERTAIN; availability.sourceAsOf=null; sourceTimestamps.sourceAsOf (the document's instant)=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=null\n  business_date NULL  : status member ABSENT; availability.state=UNCERTAIN; availability.sourceAsOf=null; sourceTimestamps.sourceAsOf (the document's instant)=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=null\n  the instant's age, which must appear nowhere: \"Business date age: 1d\"\n  StageDisplay    ABSENT -> \"Uncertain -- Source time unknown\"  [absence named, no age: yes]\n  StageDisplay    NULL   -> \"Uncertain -- Source date malformed\"  [named as \"Source date malformed\", no age: yes]\n  VariantSelector ABSENT -> \"Uncertain -- Source time unknown\"  [absence named, no age: yes]\n  VariantSelector NULL   -> \"Uncertain -- Source date malformed\"  [named as \"Source date malformed\", no age: yes]\nNO-STATUS DOCUMENT WITHOUT A BUSINESS DATE -> ABSENCE NAMED, NO AGE: 2 of 2",
-      "denominator": "2 of 2 panels, each counted only if BOTH arms hold: business_date ABSENT names an absence with no age, and business_date NULL reads \"Source date malformed\" with no age; neither shows the instant's age. The ABSENT arm also passed before the edit (the v1 slot was null); the NULL arm did not (\"Source time unknown\"), which is what makes the count discriminate -- 0 of 2 before. Deciding run at portal@fa9cbee2: 2 pass / 0 fail, rc=0.",
+      "output_evidence": "PATH 1 -- VIEW FIXTURE: fe-s-6-ready.json /api/scoped/investor-reporting/analysis-requests, served by FixtureAdapter\n  businessAsOf ABSENT: status ABSENT; availability.state=READY; availability.sourceAsOf=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=undefined; availability.sourceDate={\"fact\":\"ABSENT\",\"businessAsOf\":null}\n  businessAsOf NULL  : status ABSENT; availability.state=READY; availability.sourceAsOf=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=null; availability.sourceDate={\"fact\":\"NULL\",\"businessAsOf\":null}\nPATH 2 -- WHOLE v1 BODY: operation=holdings-snapshot, parsed by parseIrEnvelope\n  business_date ABSENT: status ABSENT; availability.state=UNCERTAIN; availability.sourceAsOf=null; sourceTimestamps.sourceAsOf (the document's instant)=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=null\n  business_date NULL  : status ABSENT; availability.state=UNCERTAIN; availability.sourceAsOf=null; sourceTimestamps.sourceAsOf (the document's instant)=2026-09-10T18:05:00Z; sourceTimestamps.businessAsOf=null\n  the instant's age, which must appear nowhere: \"Business date age: 1d\"\n  StageDisplay    path 1 ABSENT -> \"Ready -- Source time unknown\"  [absence named, no age: yes]\n  StageDisplay    path 1 NULL   -> \"Ready -- Source date malformed\"  [named as \"Source date malformed\", no age: yes]\n  StageDisplay    path 2 ABSENT -> \"Uncertain -- Source time unknown\"  [absence named, no age: yes]\n  StageDisplay    path 2 NULL   -> \"Uncertain -- Source date malformed\"  [named as \"Source date malformed\", no age: yes]\n  VariantSelector path 1 ABSENT -> \"Ready -- Source time unknown\"  [absence named, no age: yes]\n  VariantSelector path 1 NULL   -> \"Ready -- Source date malformed\"  [named as \"Source date malformed\", no age: yes]\n  VariantSelector path 2 ABSENT -> \"Uncertain -- Source time unknown\"  [absence named, no age: yes]\n  VariantSelector path 2 NULL   -> \"Uncertain -- Source date malformed\"  [named as \"Source date malformed\", no age: yes]\nNO-STATUS DOCUMENT WITHOUT A BUSINESS DATE -> ABSENCE NAMED, NO AGE: 2 of 2",
+      "denominator": "2 of 2 panels, each counted only if all FOUR arms hold -- both paths, business date ABSENT (an absence named, no age) and NULL (\"Source date malformed\", no age) -- and the instant's age appears nowhere. The NULL arms discriminate: before the ruling-R edits they read \"Source time unknown\" (0 of 2). Path 1's NULL reading follows the one rule the amendment mandates (row IRPT_FNTEND-W3-S26). no-status.test.ts deciding run on the portal@c6ee044e bytes: 3 pass / 0 fail, rc=0.",
       "status": "PASS"
     },
     {
@@ -223,43 +266,57 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-25/source-age-field.test.ts",
       "expect": "NO-STATUS ENVELOPE CARRIES THE DOCUMENT'S BUSINESS-DATE READING, NOT THE INSTANT: yes",
       "output_evidence": "  NO-STATUS body (parser status: null): the document's business date 2026-09-09, its availability instant null\n  ruling R check, both ways: the slot handed over {\"fact\":\"PRESENT\",\"businessAsOf\":\"2026-09-09\"} -> true; the availability instant null -> false\nNO-STATUS ENVELOPE CARRIES THE DOCUMENT'S BUSINESS-DATE READING, NOT THE INSTANT: yes\n 3 pass\n 0 fail",
-      "denominator": "1 of 1 no-status body (the committed performance-report data via fe-s-19 _wire.ts, no status member) through parseIrEnvelope and envelopeFromAvailability; the check is shown both ways (true for the slot handed over, false for the availability instant). It replaces the :128 regex that pinned the instant fallback; every other assertion in the file is as written, and all 3 of its tests pass. Before the ruling-R edit it printed the \"DOES NOT CARRY\" line and failed. Deciding run at portal@fa9cbee2, rc=0.",
+      "denominator": "1 of 1 no-status body (the committed performance-report data via fe-s-19 _wire.ts, no status member) through parseIrEnvelope and envelopeFromAvailability; shown both ways. It replaces the :128 regex that pinned the instant fallback; every other assertion in the file is as written, and all 3 of its tests pass. Deciding run at portal@c6ee044e, rc=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F34-AC11",
+      "criterion_verbatim": "F34-AC11 -- AMENDMENT 3, row W3-S25: for a no-status document on both paths (the view fixture through `FixtureAdapter`, and a whole v1 body through the real adapter), `businessDateOf` reports `from: 'document'`; a document whose status carried the date still reports `from: 'status'` (printed as the control). <invocation>cd <WS>/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/no-status.test.ts</invocation><expect>NO-STATUS BUSINESS DATE PROVENANCE -> document: 2 of 2(?![0-9])</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/no-status.test.ts",
+      "expect": "NO-STATUS BUSINESS DATE PROVENANCE -> document: 2 of 2(?![0-9])",
+      "output_evidence": "  path 1 VIEW FIXTURE via FixtureAdapter, no status -> {\"fact\":\"PRESENT\",\"businessDate\":\"2026-09-08\",\"from\":\"document\"}  [from the document, its own 2026-09-08: yes]\n  path 2 WHOLE v1 BODY, no status                -> {\"fact\":\"PRESENT\",\"businessDate\":\"2026-09-08\",\"from\":\"document\"}  [from the document, its own 2026-09-08: yes]\nSTATUS-CARRIED CONTROL (a v1 body whose status carries business_date=2026-09-11, producerState=READY) -> {\"fact\":\"PRESENT\",\"businessDate\":\"2026-09-11\",\"from\":\"status\"}\nNO-STATUS BUSINESS DATE PROVENANCE -> document: 2 of 2",
+      "denominator": "2 of 2 no-status documents (path 1 the fe-s-6-ready view document via FixtureAdapter; path 2 the no-status Holdings v1 body) report from:\"document\" with their own 2026-09-08; the control, a performance-report v1 body whose status carries business_date 2026-09-11 (producerState READY), reports from:\"status\". Before the amendment-3 edit the same file printed 1 of 2: the v1 body reported from:\"status\". no-status.test.ts deciding run on the portal@c6ee044e bytes: 3 pass / 0 fail, rc=0.",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Each new test file ran against the source it grades BEFORE that source changed. label.test.ts against portal c2eb8eb4's status.ts / StageDisplay / VariantSelector; no-status.test.ts and the amended fe-s-25 file against portal c18a2aab's adapt.ts / status.ts (before the ruling-R edit).",
+      "description": "Each graded test ran against the source it grades BEFORE that source changed: label.test.ts against c2eb8eb4; no-status.test.ts and the fe-s-25 check against c18a2aab (amendment 2); the rewritten no-status.test.ts against fa9cbee2 (amendment 3, before its source edit).",
       "expected": "every anchor misses before its edit",
-      "observed": "label.test.ts: 2 call sites, 0 of 2, \"no\", 50 -- 0 pass / 4 fail. no-status.test.ts: \"BOTH PANELS AGE THE BUSINESS DATE: 0 of 2\", \"ABSENCE NAMED, NO AGE: 0 of 2\". fe-s-25: \"NO-STATUS ENVELOPE DOES NOT CARRY THE DOCUMENT'S BUSINESS-DATE READING\". 2 pass / 3 fail across the two amendment-2 files.",
+      "observed": "label.test.ts: 2 call sites, 0 of 2, \"no\", 50. Amendment 2: 0 of 2, 0 of 2, \"DOES NOT CARRY\". Amendment 3: \"BOTH PANELS AGE THE BUSINESS DATE: 0 of 2\", \"ABSENCE NAMED, NO AGE: 0 of 2\", \"PROVENANCE -> document: 1 of 2\" -- 0 pass / 3 fail.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "Every graded test file ran at least twice on the final bytes -- standalone (the evidence above) and inside the full InvestorReporting suite -- plus the F34-AC6 battery. Every graded age runs on an injected or setSystemTime-pinned clock.",
-      "observed": "Identical anchor lines each time: label 4 of 4, no-status 2 of 2, fe-s-25 3 of 3; the full suite 510 pass / 6 skip / 1 fail and the battery 84 / 2 / 1, the one failure being fe-s-3/status.test.ts:121 both times.",
+      "method": "Every graded file ran at least twice on the final test bytes -- standalone (the evidence above) and inside the whole InvestorReporting suite -- plus the F34-AC6 battery. Every graded age runs on an injected or pinned clock.",
+      "observed": "Identical anchor lines each time: label 4 of 4, no-status 3 of 3, fe-s-25 3 of 3; the whole suite 512 pass / 6 skip / 0 fail across 90 files, and the battery green.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "__tests__/fe-s-3/status.test.ts:121, the one failing assertion in F34-AC6",
-      "reason": "NOT EDITED: outside the <paths> grant. Row IRPT_FNTEND-W3-S24 (BLOCKING, ARMED, disarm 2.0.0_SA_COO~F)."
+      "item": "__tests__/fe-s-22/, fe-s-26/, fe-s-31/ and fe-s-32/",
+      "reason": "NOT TOUCHED, per amendment 3; the whole InvestorReporting suite on these bytes has no failure in them or anywhere."
     },
     {
-      "item": "state/availability.ts businessDateOf, which now reports from:'status' for a no-status document's own reading",
-      "reason": "NOT EDITED: FE-s-30's file, outside the grant; latent today. Row IRPT_FNTEND-W3-S25 (INERT)."
+      "item": "every region of src/api/endpoints/investor-reporting.ts other than FixtureAdapter.serve's VIEW branch and one name in its contracts/adapt import list",
+      "reason": "FE-s-31 holds submitExport in that file this round."
     },
     {
-      "item": "the FixtureAdapter and the round-1 VIEW fixtures, which never pass through contracts/adapt.ts",
-      "reason": "NOT EDITED: outside the grant. Ruling R's bound holds there (no instant is aged; the absence is named) but outcome (a) does not reach it. Row IRPT_FNTEND-W3-S23 (ARMED)."
+      "item": "everything in state/availability.ts other than businessDateOf's from:'status' condition",
+      "reason": "FE-s-31 and FE-s-32 consume that file now."
+    },
+    {
+      "item": "every assertion in __tests__/fe-s-3/, fe-s-6/, fe-s-21/ and fe-s-25/ other than the five listed in the result file",
+      "reason": "One purpose each: only an assertion pinning a superseded source date (ruling K's \"Updated\", ruling R's instant)."
     },
     {
       "item": "fe-s-21's test-built as_of envelope",
-      "reason": "Row IRPT_FNTEND-W3-S22; not this amendment's, per the issuer."
+      "reason": "Row IRPT_FNTEND-W3-S22; not in any amendment."
     },
     {
-      "item": "every other assertion in __tests__/fe-s-21/ and __tests__/fe-s-25/",
-      "reason": "The grants are one purpose each (ruling K; ruling R); nothing else in those files was changed."
+      "item": "a view document's null businessAsOf read as absence",
+      "reason": "Would be a second rule; row IRPT_FNTEND-W3-S26 (INERT)."
     },
     {
       "item": "tabs/analysis/composer.ts",
@@ -271,15 +328,16 @@
     }
   ],
   "surprises": [
-    "IRPT_FNTEND-W3-S19: F34-AC5 and F34-AC6 could not both pass under the original grant (fe-s-21:166 and fe-s-25:65 asserted 'Updated '). RESOLVED by amendment 12eef1910c; the two checks were replaced at portal f7b2d986.",
+    "IRPT_FNTEND-W3-S19: two out-of-grant tests asserted the \"Updated \" prefix. RESOLVED by amendment 12eef1910c (portal f7b2d986).",
     "IRPT_FNTEND-W3-S20: on a reading the two analysis panels already aged business_date; the ruling-O re-route moved the absent/null wording. OBSERVATION, INERT.",
-    "IRPT_FNTEND-W3-S21: on the no-status path the panels aged an instant under the business-date label. ANSWERED by ruling R (amendment 1df5ac405f), implemented at portal fa9cbee2: the v1 no-status path now ages the document's own business date.",
-    "IRPT_FNTEND-W3-S22: fe-s-21's `pure` is aged from the as_of instant, so its amended check compares with formatSourceAge(AS_OF). OBSERVATION, INERT; not this amendment's.",
-    "IRPT_FNTEND-W3-S23: F34-AC8's named availability instant cannot exist on a no-status v1 document (only a status writes it); the dates are the fe-s-6 VIEW fixture's, which ruling R's adapter remedy never reaches -- that fixture now names an absence. OBSERVATION, ARMED, disarm 2.0.0_SA_COO~F.",
-    "IRPT_FNTEND-W3-S24: fe-s-3/status.test.ts:121 asserts the instant is handed through envelopeFromAvailability, which ruling R ends; outside the grant, so F34-AC6 has 1 failure. BLOCKING, ARMED, disarm 2.0.0_SA_COO~F.",
-    "IRPT_FNTEND-W3-S25: FE-s-30's businessDateOf reads any availability.sourceDate as the status's, so a no-status document's own reading now reports from:'status'. Measured; latent. OBSERVATION, INERT."
+    "IRPT_FNTEND-W3-S21: on the no-status path the panels aged an instant under the business-date label. ANSWERED by ruling R: amendment 1df5ac405f (portal fa9cbee2) on the v1 path, amendment 7fd807ab76 (portal c6ee044e) on the view-fixture path.",
+    "IRPT_FNTEND-W3-S22: fe-s-21's `pure` is aged from the as_of instant, so its amended check compares with formatSourceAge(AS_OF). OBSERVATION, INERT; not in any amendment.",
+    "IRPT_FNTEND-W3-S23: the view-fixture path the analysis tab renders was out of reach. RESOLVED by amendment 7fd807ab76: FixtureAdapter gives the view document its own reading (portal c6ee044e); F34-AC8 path 1 reads the business-date age.",
+    "IRPT_FNTEND-W3-S24: fe-s-3/status.test.ts:121 pinned the instant hand-through. RESOLVED by amendment 7fd807ab76: the line asserts the absent reading (portal c6ee044e); F34-AC6 is green.",
+    "IRPT_FNTEND-W3-S25: businessDateOf labelled a no-status document's own date from:'status'. RESOLVED by amendment 7fd807ab76: it keys on producerState (portal c6ee044e); F34-AC11 2 of 2.",
+    "IRPT_FNTEND-W3-S26: the one reading rule turns a view document's null businessAsOf (the view contract's \"no clock\") into NULL, \"Source date malformed\". 3 of 134 view documents, all in a smoke map. OBSERVATION, INERT."
   ],
-  "session_log": "0.9.0_WK_IRPT_FNTEND~3 on IRPT_FNTEND.TO-FE-s-34, worktree pair /c/tmp/wk-irpt_fntend-5-3-fe-s-34 + /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal, branch wk-irpt_fntend-5-3-fe-s-34. ROUND 1: ruling K label + ruling O re-route, portal 944499a9; F34-AC6 failed on two out-of-grant 'Updated ' checks (W3-S19). AMENDMENT 1 (12eef1910c): the two checks replaced, portal f7b2d986; all mechanical criteria passed; order flipped complete (workspace 69886501a5). AMENDMENT 2 (1df5ac405f, ruling R for W3-S21) reopened the order with F34-AC8..AC10. The issuer had synced portal DEV e85498be into the branch (merge c18a2aab). Baseline there: typecheck rc=0; the F34-AC6 battery 83 pass / 2 skip / 0 fail (IRPT_FE_DEV_PORT=54034, measured closed on three host forms); the whole InvestorReporting suite 509 / 6 / 0. Wrote no-status.test.ts and the fe-s-25 ruling-R check first; against the unedited source they printed 0 of 2, 0 of 2 and \"DOES NOT CARRY\". Then adapt.ts (wireEnvelope carries the reading; the carry keeps it with no status) and status.ts (envelopeFromAvailability hands a reading or the stated absence, never the instant). After: F34-AC8 2 of 2, AC9 2 of 2, AC10 yes, AC2..AC5 unchanged, typecheck rc=0; the whole suite 510 / 6 / 1, the one failure fe-s-3/status.test.ts:121, outside the grant (W3-S24). Portal commit fa9cbee2. F34-AC6 FAILS, so <status> stays pending. Rows W3-S23..S25 filed. All commits LOCAL.",
+  "session_log": "0.9.0_WK_IRPT_FNTEND~3 on IRPT_FNTEND.TO-FE-s-34, worktree pair /c/tmp/wk-irpt_fntend-5-3-fe-s-34 + /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal, branch wk-irpt_fntend-5-3-fe-s-34. Portal 944499a9 (ruling K + O), f7b2d986 (amendment 1), fa9cbee2 (amendment 2, ruling R on the v1 path; F34-AC6 then failed on fe-s-3:121, W3-S24). AMENDMENT 3 (7fd807ab76) answered W3-S23..S25. Rewrote no-status.test.ts first (fixture path first, v1 second, AC11) and ran it against fa9cbee2: 0 of 2, 0 of 2, 1 of 2. Census of view fixtures: 134 documents, 131 with a businessAsOf, 3 null (fe-s-3-loading smoke map), 0 missing (W3-S26). Then carryDocumentReading in adapt.ts, the FixtureAdapter view branch, businessDateOf's condition, fe-s-3:121. The whole suite then showed one failure, fe-s-6/correction.test.ts:94 (the served view document vs the raw bytes), in the grant; edited under the one-purpose bound. A log line used Bun.deepEquals (typecheck rc=2); replaced with a JSON-equality helper. Final: typecheck rc=0; the whole suite 512 / 6 / 0 across 90 files; F34-AC6 green; AC8 2 of 2, AC9 2 of 2, AC10 yes, AC11 2 of 2; AC2..AC5 unchanged. Portal commit c6ee044e. Every mechanical criterion passes by output, so <status> flips to complete. All commits LOCAL.",
   "compiler_tools": [
     {
       "tool": "bun 1.3.9 (cf6cdbbb)",
@@ -293,8 +351,8 @@
     },
     {
       "tool": "python 3.12",
-      "invocation": "python .scratch/apply_ruling_r_src.py",
-      "result": "OK: contracts/adapt.ts 2 edits, state/status.ts 2 edits, CRLF preserved"
+      "invocation": "python .scratch/apply_amend3_src.py; python .scratch/apply_amend3_fe_s_6.py",
+      "result": "OK: exact, count-asserted edits, CRLF preserved"
     }
   ]
 }
