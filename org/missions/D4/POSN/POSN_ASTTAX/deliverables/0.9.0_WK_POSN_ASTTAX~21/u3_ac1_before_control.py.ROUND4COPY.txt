@@ -1,0 +1,326 @@
+#!/usr/bin/env python3
+"""POSN_ASTTAX.TO-U3-1 / cell AT4-s-3 / U3-AC1 -- the BEFORE measurement.
+
+WHAT THIS MEASURES, AND WHAT IT DELIBERATELY DOES NOT TOUCH
+-----------------------------------------------------------
+Row W14-S3 ASSERTS that seed_canonical_securities.py reverts a five-class
+asset_class on re-seed. This control TESTS that assertion; it does not confirm
+it. If the value survives, this script says so and that is the answer.
+
+THE SCRATCH TARGET IS NAMED EXPLICITLY AND THERE IS NO NETWORK CLIENT:
+  boto3 is replaced in sys.modules BEFORE the seeder's real bytes are executed.
+  boto3.client raises AssertionError. boto3.resource('dynamodb').Table(name)
+  returns an in-process dict-backed ScratchTable and PRINTS which name it
+  intercepted. The live DynamoDB tables 'etf-classifications' and
+  'bd-securities' are never opened, read or written by this process.
+
+THE SEEDER IS REAL BYTES, NOT A RE-IMPLEMENTATION. A control that
+re-implements the producer proves nothing about the producer. The bytes come
+from the git object store (the file is outside this worktree's sparse cone)
+and their sha is asserted against the object before the run.
+
+UPDATE_ITEM FIDELITY: the scratch table implements DynamoDB SET semantics --
+comma-separated 'path = :value' assignments, '#alias' resolved through
+ExpressionAttributeNames, ':token' through ExpressionAttributeValues, and an
+absent key UPSERTS (creates the item). That upsert is what makes the mint
+probe meaningful.
+"""
+import ast
+import io
+import os
+import subprocess
+import sys
+import types
+from contextlib import redirect_stdout
+
+ROOT = os.getcwd()
+SEEDER_PATH_IN_REPO = "data/black_diamond/scripts/classification/seed_canonical_securities.py"
+SEEDER_BYTES = os.path.join(ROOT, ".scratch", "head", "seed_canonical_securities.py")
+
+YANG_TABLE = "etf-classifications"
+BD_TABLE = "bd-securities"
+
+# The 11-member retag set with its RATIFIED five-class target, from PRD s.3 and
+# 0.9.0_WK_POSN_ASTTAX~14's t5_bar_table.py:16-28 (derived there by subtraction
+# over all 285 registry rows). Not re-derived here; cited.
+RETAG = [
+    ("DBC", "Commodities"), ("GLD", "Commodities"), ("GSG", "Commodities"),
+    ("IAU", "Commodities"), ("SLV", "Commodities"), ("USO", "Commodities"),
+    ("VIXY", "Structured"), ("VXX", "Structured"), ("UVXY", "Structured"),
+    ("QBER", "Structured"), ("PDBC", "Commodities"),
+]
+FIVE_CLASSES = ["Fixed Income / Cash", "Equity", "Structured",
+                "Commodities", "Alternatives"]
+
+
+class ScratchTable(object):
+    """In-process stand-in for a DynamoDB table. A dict. Never the network."""
+
+    def __init__(self, name):
+        self.name = name
+        self.store = {}
+        self.updates = 0
+        self.minted = []
+
+    def update_item(self, Key=None, UpdateExpression=None,
+                    ExpressionAttributeValues=None,
+                    ExpressionAttributeNames=None, **_):
+        names = ExpressionAttributeNames or {}
+        values = ExpressionAttributeValues or {}
+        key = Key["ticker"]
+        existed = key in self.store
+        item = self.store.setdefault(key, dict(Key))
+        if not existed:
+            self.minted.append(key)
+        expr = (UpdateExpression or "").strip()
+        assert expr.upper().startswith("SET "), "only SET is modelled: %r" % expr
+        for clause in expr[4:].split(","):
+            lhs, rhs = clause.split("=", 1)
+            lhs, rhs = lhs.strip(), rhs.strip()
+            attr = names.get(lhs, lhs)
+            item[attr] = values[rhs]
+        self.updates += 1
+
+
+def make_fake_boto3(tables):
+    mod = types.ModuleType("boto3")
+    mod.__IS_FAKE__ = True
+
+    class _Resource(object):
+        def Table(self, name):
+            print("  SCRATCH TARGET: boto3 Table(%r) INTERCEPTED -> in-process dict "
+                  "(no network client exists in this process)" % name)
+            return tables.setdefault(name, ScratchTable(name))
+
+    def resource(name, **kwargs):
+        assert name == "dynamodb", name
+        return _Resource()
+
+    def client(*a, **k):
+        raise AssertionError("the control must never construct a real client")
+
+    mod.resource = resource
+    mod.client = client
+    return mod
+
+
+def seeder_source():
+    with open(SEEDER_BYTES, "rb") as fh:
+        raw = fh.read()
+    sha = subprocess.check_output(
+        ["git", "hash-object", SEEDER_BYTES]).decode().strip()
+    obj = subprocess.check_output(
+        ["git", "rev-parse", "HEAD:" + SEEDER_PATH_IN_REPO]).decode().strip()
+    assert sha == obj, "scratch bytes %s != object %s" % (sha, obj)
+    return raw.decode("utf-8"), sha, obj
+
+
+def canonical_securities(src):
+    """The seeder's own list, by ast.literal_eval over its real source."""
+    tree = ast.parse(src)
+    for node in tree.body:
+        if isinstance(node, ast.Assign):
+            for tgt in node.targets:
+                if isinstance(tgt, ast.Name) and tgt.id == "CANONICAL_SECURITIES":
+                    return ast.literal_eval(node.value)
+    raise AssertionError("CANONICAL_SECURITIES not found in the seeder source")
+
+
+def baseline(members_in_script, mint_probe):
+    """The scratch registry as a COMPLETED retag would leave the live one.
+
+    Every member carries its RATIFIED five-class asset_class, plus two curator
+    fields the seeder does not own (management_style, sector) so the run also
+    reports whether a non-owned attribute survives.
+    """
+    store = {}
+    for ticker, five_class in RETAG:
+        if ticker not in members_in_script:
+            continue
+        store[ticker] = {
+            "ticker": ticker,
+            "asset_class": five_class,
+            "sub_asset_class": ("Volatility" if five_class == "Structured"
+                                else "Commodities"),
+            "management_style": "passive",
+            "sector": "Broad",
+            "name": ticker,
+            "last_updated": "2026-09-12T00:00:00Z",
+            "updated_by": "posn-asttax-retag",
+        }
+    assert mint_probe not in store, "the mint probe must start ABSENT"
+    return store
+
+
+def run_seeder(src, tables):
+    saved = sys.modules.get("boto3")
+    sys.modules["boto3"] = make_fake_boto3(tables)
+    buf = io.StringIO()
+    err = None
+    try:
+        mod = types.ModuleType("seeder_under_test")
+        mod.__file__ = os.path.join(ROOT, SEEDER_PATH_IN_REPO)
+        mod.__name__ = "seeder_under_test"   # so its __main__ guard does NOT fire
+        with redirect_stdout(buf):
+            exec(compile(src, SEEDER_PATH_IN_REPO, "exec"), mod.__dict__)
+            mod.seed(upload=True, sync_yang=True)
+    except Exception as exc:
+        err = "%s: %s" % (type(exc).__name__, exc)
+    finally:
+        assert sys.modules["boto3"].__IS_FAKE__ is True, "the fake boto3 was displaced"
+        if saved is None:
+            sys.modules.pop("boto3", None)
+        else:
+            sys.modules["boto3"] = saved
+    return buf.getvalue(), err
+
+
+def main():
+    src, sha, obj = seeder_source()
+    secs = canonical_securities(src)
+    by_ticker = {s["ticker"]: s for s in secs}
+
+    print("=" * 100)
+    print("U3-AC1 -- BEFORE MEASUREMENT. THE LIVE TABLES ARE NEVER OPENED.")
+    print("=" * 100)
+    print("SUBJECT (real bytes, from the git object store -- the file is outside")
+    print("         this worktree's sparse cone):")
+    print("  repo path : %s" % SEEDER_PATH_IN_REPO)
+    print("  blob sha  : %s" % sha)
+    print("  asserted == HEAD object: %s" % obj)
+    print("  bytes     : %d" % len(src.encode("utf-8")))
+    print("")
+
+    # ---- the seeder's own vocabulary, with its denominator ------------------
+    vocab = {}
+    for sec in secs:
+        vocab[sec["asset_class"]] = vocab.get(sec["asset_class"], 0) + 1
+    print("THE SEEDER'S asset_class VOCABULARY, enumerated over its own list:")
+    print("  denominator: %d rows in CANONICAL_SECURITIES" % len(secs))
+    for value in sorted(vocab):
+        print("    %-16s %3d row(s)" % (repr(value), vocab[value]))
+    print("  DISTINCT VALUES: %d -- %s" % (len(vocab), sorted(vocab)))
+    overlap = sorted(set(vocab) & set(FIVE_CLASSES))
+    print("  INTERSECTION WITH THE RATIFIED FIVE CLASSES:")
+    print("    %s" % FIVE_CLASSES)
+    print("    -> %s  (%d of 5)" % (overlap if overlap else "<empty>", len(overlap)))
+
+    # ---- re-measure the row's "4 of 11" -------------------------------------
+    present = [t for t, _ in RETAG if t in by_ticker]
+    absent = [t for t, _ in RETAG if t not in by_ticker]
+    print("")
+    print("RETAG-SET MEMBERSHIP, RE-MEASURED (W14-S3 says 4 of 11; not inherited):")
+    print("  denominator: %d retag members against %d seeder rows"
+          % (len(RETAG), len(secs)))
+    for ticker, five_class in RETAG:
+        if ticker in by_ticker:
+            print("    %-6s PRESENT  seeder asserts asset_class=%-16s ratified=%s"
+                  % (ticker, repr(by_ticker[ticker]["asset_class"]), five_class))
+        else:
+            print("    %-6s absent from the seeder's list" % ticker)
+    print("  MEASURED: %d of %d retag members carried by this seeder -- %s"
+          % (len(present), len(RETAG), present))
+    print("  the other %d are absent: %s" % (len(absent), absent))
+
+    # ---- the mint probe -----------------------------------------------------
+    retag_names = dict(RETAG)
+    mint_probe = next(s["ticker"] for s in secs if s["ticker"] not in retag_names)
+    print("")
+    print("MINT PROBE: %r -- written by the seeder, seeded ABSENT from the scratch"
+          % mint_probe)
+    print("  store. If the run does not create it, the seeder is not writing at all")
+    print("  and any 'survived' verdict below would be worthless.")
+
+    # ---- the exercise -------------------------------------------------------
+    yang = ScratchTable(YANG_TABLE)
+    bd = ScratchTable(BD_TABLE)
+    yang.store = baseline(by_ticker, mint_probe)
+    tables = {YANG_TABLE: yang, BD_TABLE: bd}
+    before = {t: yang.store[t]["asset_class"] for t in present}
+    before_curated = {t: (yang.store[t].get("management_style"),
+                          yang.store[t].get("sector")) for t in present}
+
+    print("")
+    print("-" * 100)
+    print("RUNNING THE REAL SEEDER BYTES: seed(upload=True, sync_yang=True)")
+    print("-" * 100)
+    out, err = run_seeder(src, tables)
+    tail = [ln for ln in out.splitlines() if ln.strip()]
+    for line in tail[:3]:
+        print("  " + line)
+    print("  ... %d line(s) of seeder stdout suppressed ..." % max(0, len(tail) - 6))
+    for line in tail[-3:]:
+        print("  " + line)
+    if err:
+        print("  SEEDER RAISED: %s" % err)
+    print("")
+    print("  scratch %-22s update_item calls: %3d   rows minted: %d"
+          % (YANG_TABLE, yang.updates, len(yang.minted)))
+    print("  scratch %-22s update_item calls: %3d   rows minted: %d"
+          % (BD_TABLE, bd.updates, len(bd.minted)))
+
+    # ---- read the value back ------------------------------------------------
+    print("")
+    print("=" * 100)
+    print("THE READ-BACK -- asset_class, stated AS A VALUE")
+    print("=" * 100)
+    print("  %-6s %-14s %-14s %-14s %s"
+          % ("TICKER", "BEFORE", "AFTER", "RATIFIED", "VERDICT"))
+    reverted = []
+    for ticker in present:
+        after = yang.store[ticker]["asset_class"]
+        verdict = "SURVIVED" if after == before[ticker] else "CLOBBERED"
+        if after != before[ticker]:
+            reverted.append(ticker)
+        print("  %-6s %-14s %-14s %-14s %s"
+              % (ticker, before[ticker], after, retag_names[ticker], verdict))
+    print("")
+    print("  CLOBBERED: %d of %d members present in the seeder -- %s"
+          % (len(reverted), len(present), reverted))
+
+    # ---- the non-owned attributes -------------------------------------------
+    print("")
+    print("NON-OWNED ATTRIBUTES (the seeder's docstring claims these survive):")
+    for ticker in present:
+        now = (yang.store[ticker].get("management_style"),
+               yang.store[ticker].get("sector"))
+        print("  %-6s management_style/sector  before=%s  after=%s  %s"
+              % (ticker, before_curated[ticker], now,
+                 "SURVIVED" if now == before_curated[ticker] else "LOST"))
+
+    # ---- the mint control ---------------------------------------------------
+    minted_ok = mint_probe in yang.store
+    if minted_ok:
+        state = "PRESENT (asset_class=%r)" % yang.store[mint_probe]["asset_class"]
+    else:
+        state = "STILL ABSENT"
+    print("")
+    print("MINT CONTROL: %r was absent before the run; after the run it is %s"
+          % (mint_probe, state))
+    print("  -> the seeder %s writing. A 'survived' verdict is therefore %s."
+          % ("IS" if minted_ok else "is NOT",
+             "meaningful" if minted_ok else "WORTHLESS"))
+
+    print("")
+    print("=" * 100)
+    if not minted_ok:
+        print("BEFORE RESULT: INDETERMINATE -- the seeder minted nothing, so this")
+        print("control cannot distinguish preservation from inaction.")
+        return 1
+    if reverted:
+        print("BEFORE RESULT: THE PREMISE HOLDS. %d of %d retag members present in"
+              % (len(reverted), len(present)))
+        print("this seeder had a ratified five-class asset_class CLOBBERED by one")
+        print("re-seed. The BEFORE state, as values:")
+        for ticker in reverted:
+            print("  %-6s %r  ->  %r"
+                  % (ticker, before[ticker], yang.store[ticker]["asset_class"]))
+    else:
+        print("BEFORE RESULT: THE PREMISE IS FALSE. Every five-class value SURVIVED")
+        print("the re-seed. W14-S3's assertion does not reproduce.")
+    print("=" * 100)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
