@@ -4,6 +4,7 @@ Archetype: implementation specification
 Owner: 0.7.0_AE_CloudOps
 Date: 2026-09-14
 State: PROPOSED; investigation complete; no access grant or deployment performed.
+Revision: 2, incorporating the supplied Claude Remote MCP requirements document; [review and evidence](REQUIREMENTS_REVIEW.md).
 Authority: [Andrew's verbatim request and clarifications](ANDREW_DIRECT.md).
 
 ## Recommended experience
@@ -99,11 +100,29 @@ Expand older dates, selected accounts, transactions, columns and whole-file down
 
 ## Claude application login
 
+The gateway remains Claude's OAuth issuer; Entra supplies the upstream work identity. The brief's direct-Entra Application ID URI requirements apply only if Claude is changed to discover Entra directly. No such issuer migration is required for this design.
+
 Retain the gateway authorization server and extend its OAuth flow. Claude's hosted application uses **https://claude.ai/api/mcp/auth_callback**; Claude Code uses loopback redirects. Allow the exact hosted callback at registration and authorization, bound to the registered client and code. Retain S256 PKCE, state validation, one-use codes, token audience/issuer checks and refresh revocation. Reject arbitrary HTTPS callbacks and wildcard Claude domains. Unauthenticated MCP requests return 401 with protected-resource metadata. [Claude authentication contract](https://claude.com/docs/connectors/building/authentication)
 
 Preserve existing Code clients and exercise both flows. The work-login leg must establish identity without requiring unrelated Microsoft mail or file-write consent. Factor authentication from Graph-token acquisition for the data integration.
 
 DCR can remain the registration mechanism. Registration/code state currently lives in process memory: use one active instance for the pilot or add shared state before multiple workers/replicas; test reconnect after restart. Verify the deployed artifact before treating the source callback restriction as a measured production failure. Discovery alone does not prove login.
+
+**Refresh correction:** checked-in server.py validates the incoming refresh token and mints a replacement without consuming the old token. Add atomic, durable refresh-token rotation with client/scope/resource binding, replay detection and token-family revocation. A replacement token alone is insufficient. Test concurrent refreshes, replay, restart and revoked users; return invalid_grant for unusable refresh tokens. The store must survive deploys and coordinate every worker. [OAuth refresh-token protection](https://www.rfc-editor.org/rfc/rfc9700.html#section-4.14.2)
+
+Accept form-urlencoded token/refresh requests and JSON registration. Validate the requested resource against the canonical MCP URL and bind it to the grant. Budget OAuth discovery, registration and initial token responses below 10 seconds, and refresh below 30 seconds; these are separate from the data-query deadline. [Claude OAuth requirements](https://claude.com/docs/connectors/building/authentication)
+
+Use 401 plus a Bearer challenge for missing/expired authentication. Reserve 403 plus insufficient_scope for an actual OAuth scope step-up. An account entitlement denial is a terminal access-denied result; repeated sign-in cannot grant a dataset. All five Schwab tools require identity, including access/file metadata; no anonymous Schwab catalog is proposed. [Authentication error handling](https://claude.com/docs/connectors/building/lazy-authentication)
+
+## Network and front-door contract
+
+Use Streamable HTTP at the exact /mcp endpoint. Preserve Authorization, WWW-Authenticate, protocol/session headers and streaming responses through the ALB and any WAF/proxy. MCP and OAuth/discovery paths reach the application without the ALB's browser-cookie login gate; the gateway enforces bearer authorization. The download page uses the browser SSO path and independently checks the bound identity and current entitlement. Changes to routing and application guards must be deployed together.
+
+[Measured at 18:43:46Z](requirements-review-evidence.json): the live internet-facing IPv4 ALB already forwards the MCP/OAuth paths under priority 10/20 rules. An unauthenticated GET /mcp returned 401 with the correct resource_metadata challenge in 93 ms, without redirect; both discovery documents returned 200 in about 110 ms. The metadata identifies the gateway as issuer. Default browser OIDC remains present. This does not exercise Claude's network or authenticated transport.
+
+Validate public IPv4 DNS, globally routable answers, no cross-host redirect, and WAF/proxy preservation from the actual Claude connection. Where network filters apply, permit the current Anthropic outbound range, 160.79.104.0/21, on required MCP/OAuth paths; keep work-browser login/download reachability. An IP range never establishes user identity. [Network compatibility](https://claude.com/docs/connectors/building/troubleshooting), [published egress](https://platform.claude.com/docs/en/api/ip-addresses)
+
+The measured ALB idle timeout is 60 seconds. Keep the 30-second query deadline; bound export preparation and avoid idle streaming gaps. Do not assume Claude's longer tool timeout overrides the load balancer. Verify Host/Origin behavior with Claude while retaining origin validation where applicable; clientInfo names and versions are telemetry only. [Connector testing](https://claude.com/docs/connectors/building/testing)
 
 ## Tool and query contract
 
@@ -123,11 +142,15 @@ Each response includes master ID/label, business date, dataset, source/version r
 
 Positions and balances are snapshots: aggregate within one date. Date comparisons return separate snapshots/deltas, not their sum. Requests about both masters execute independent calls and present independent results. Security-reference joins, when introduced, require the same master, compatible date and a tested unique join key.
 
-Initial operating limits to benchmark: 30-second query deadline, 12 source objects/64 MiB per request, 500 rows/256 KiB to chat, 250,000 rows/50 MiB per export. Reject or narrow oversized requests; never report a total calculated from only the first page. Pagination binds identity, scope, master and versions. Run queries outside the gateway event loop with bounded concurrency to protect existing tools.
+Initial operating limits to benchmark: 30-second query deadline, 12 source objects/64 MiB per request, 500 rows and BOTH 100,000 characters/128 KiB per complete serialized MCP response, 250,000 rows/50 MiB per export. Count all content blocks, structured results and envelope; duplicated text/structured representations share the same budget. This replaces the original 256 KiB cap, which could exceed Claude's approximately 150,000-character limit. Its published tool deadline is 240 seconds; our lower query deadline still applies. [Claude runtime limits](https://claude.com/docs/connectors/building)
+
+Reject or narrow oversized requests; never report a total calculated from only the first page. Pagination binds identity, scope, master and versions. Run queries outside the gateway event loop with bounded concurrency to protect existing tools. The five tools need no sampling, subscriptions, draft capabilities or binary-in-chat export feature.
 
 ## Downloads and revocation
 
 Claude returns a gateway HTTPS link. Menachem opens a simple page, signs in with his work identity if needed, and clicks **Download CSV**. The gateway rechecks the entitlement and streams the authorized projection. A five-minute opaque ticket identifies the export and requires the matching browser identity; the URL alone grants nothing. Use a separate browser SSO callback, secure cookies, no-store responses and safe filenames.
+
+Custom-connector links can show Claude's external-link confirmation before the browser page; include that step in onboarding. [Custom connector behavior](https://claude.com/docs/connectors/building/directory-vs-custom)
 
 CSV applies the same row/field policy as queries, including spreadsheet-formula escaping for text cells while preserving numeric types. Include master, date and field definitions alongside the export. Gateway audit writes and ephemeral export state are separate from source access.
 
@@ -157,6 +180,12 @@ This is policy-model evidence. It establishes no deployed grant, role trust, res
 
 ## Implementation and acceptance
 
+For owner setup, prepare [this prefilled organization connector form](https://claude.ai/admin-settings/connectors?modal=add-custom-connector&connectorName=Opal%20Gateway&connectorUrl=https%3A%2F%2Fmcp.opalinvest.dev%2Fmcp). It only prefills settings; it grants no access. Reuse an existing organization connector when appropriate. Give Menachem a short Connect / enable in chat / try a sample query / download walkthrough. Custom connectors need no directory listing. [Install-link contract](https://claude.com/docs/connectors/building/directory-vs-custom)
+
+Preserve existing connector settings during the pilot. Changing stored OAuth credentials or request headers requires removing/recreating the connector and reconnecting members; treat that as a planned migration if needed. Shared static headers are not Menachem's identity. [Connector settings](https://claude.com/docs/connectors/custom/remote-mcp)
+
+Enterprise Managed Auth is an optional future simplification for Team/Enterprise: it needs trusted identity assertions, JWT-bearer exchange and compatible client registration; current DCR alone does not support it. It is not implied by existing Entra login. [Managed authentication](https://claude.com/docs/connectors/building/enterprise-managed-auth) Private MCP tunnels are unnecessary for the existing public gateway; revisit only if network policy changes. [Tunnel applicability](https://claude.com/docs/connectors/mcp-tunnels/overview)
+
 Implement in the existing gateway: principal context and hosted callback support; a default-deny data-entitlement module; Schwab catalog/query integration; authenticated download route; dedicated Terraform role. Enforce discovery and dispatch, classify tools in existing guards/audit, and keep data tools independent of Graph-token acquisition.
 
 Use the checked-in employee-role security review and normal gateway release process. This artifact authorizes neither apply nor a user grant. Before rollout, resolve Menachem's immutable identity, confirm proposed initial fields/date/account scope, verify workspace connector controls, and measure gateway headroom. Initial filtered CSVs are confirmed.
@@ -178,7 +207,12 @@ Acceptance must demonstrate:
 13. Deployed permissions are measured; test disallowed operations with safe isolated fixtures/live-policy evidence, never destructive probes against production data.
 14. Concurrent queries/exports fit gateway limits; audit principal, operation, master, dataset, policy/version, counts and outcome without copying sensitive values or tokens.
 15. Revocation/rollback disables the new grant/integration while source data and ingestion remain intact.
+16. Actual Claude web/desktop handshake preserves the Bearer challenge, headers, negotiated protocol and transport through the deployed edge; validate first with MCP Inspector, then the real custom connector.
+17. Refresh atomically invalidates the prior token, rejects replay/wrong client/wrong resource, revokes the affected family on reuse and survives restart/concurrency. Existing Code clients pass the same regression checks.
+18. Complete serialized responses stay within both character and byte limits, including Unicode and duplicated structured/text content; paginated totals remain correct.
+19. Auth endpoint latency meets its separate deadlines; query/export traffic respects ALB idle behavior and cancellation. No user is sent into an OAuth loop for a denied data entitlement.
+20. The owner/member walkthrough covers external-link confirmation, reconnect and troubleshooting. Record tool, UTC timestamp, connector URL and sanitized server correlation; collect an ofid_ reference if Claude supplies one for a connection failure.
 
-Planning estimate: **4-7 engineering days**, including authentication compatibility, entitlement/query/export work and validation. This is an estimate, not measured delivery evidence; gateway capacity and original-file scope can change it. Measure latency, export sizes, CPU/memory, S3 requests and operating cost during the pilot.
+Original planning estimate: **4-7 engineering days**, before the explicit refresh lifecycle gap identified in revision 2. Re-estimate after scoping durable token state, migration and regression testing; this is not a committed delivery date. Measure latency, export sizes, CPU/memory, S3 requests and operating cost during the pilot.
 
 All changes in this package are local specification and evidence files.
