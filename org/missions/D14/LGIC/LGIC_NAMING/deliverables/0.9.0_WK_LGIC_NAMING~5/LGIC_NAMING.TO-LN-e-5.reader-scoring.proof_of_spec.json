@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_NAMING.TO-LN-e-5",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/decompositions/LGIC_NAMING_DECOMP.md",
+    "vintage_commit": "62b5c0819f",
+    "to_ref": "org/missions/D14/LGIC/LGIC_NAMING/task-orders/LGIC_NAMING.TO-LN-e-5.reader-scoring.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/prd/LGIC_NAMING_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e04b802fe9"
+  },
+  "assignee": "0.9.0_WK_LGIC_NAMING~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/n3-reader-score.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "exercise score record under deliverables/; nothing is deployed by this cell (PRD S13: no live name moves)",
+      "artifact_covered_by": ["E5-AC1", "E5-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~5/reader-scoring.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "result record named by the task order's proof_of_spec block; repo document, no deploy scope"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E5-AC1",
+      "criterion_verbatim": "`E5-AC1` -- the reader marked the expected firm or product token on every name.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-1-5 && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_ln.py e5-correct",
+      "output_evidence": "WRONG: i07  name=mdpf-gold-read-policy  marked=mdpf  expected=none\nWRONG: i08  name=etfs-price-refresh-dlq  marked=etfs  expected=none\nWRONG: i14  name=mdpf/global/code/gold/mdpf-accrual-bridge.tar.gz  marked=mdpf  expected=global\nWRONG: i17  name=etfs-pipeline-alerts  marked=etfs  expected=none\nITEMS: 18  CORRECT: 14  WRONG: 4\nVERDICT: FAIL-MISREAD\nrc=0",
+      "denominator": "14 of 18 N3 items (N3_KEY.json) carry the key's token as the reader's mark in n3-reader.tsv",
+      "status": "FAIL",
+      "status_reason": "The invocation printed VERDICT: FAIL-MISREAD, not the expected VERDICT: PASS-ALL-CORRECT. 4 of 18 marks differ from the key, all on shared rows: i07, i08 and i17 are 'none' in the key and the reader marked the product token (mdpf, etfs, etfs); i14 is 'global' in the key and the reader marked mdpf. This cell scores and does not read or name, so no mark is changed here. Surprise row LGIC_NAMING-W5-S3.",
+      "expect": "VERDICT: PASS-ALL-CORRECT"
+    },
+    {
+      "criterion_id": "E5-AC2",
+      "criterion_verbatim": "`E5-AC2` -- no token the reader marked as a firm or product is read otherwise in another name.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-1-5 && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_ln.py e5-consistent",
+      "output_evidence": "NAMES: 18  TOKENS MARKED AS A FIRM OR PRODUCT: 9  A MARKED TOKEN READ OTHERWISE ELSEWHERE: 5 [('mdpf-cot-exporter-sg', 'mdpf', 'cot'), ('mdpf-cot-publisher-lambda', 'mdpf', 'cot'), ('mdpf-demo-publish-failure-alarm', 'mdpf', 'demo'), ('mdpf-inf-delivery-status-table', 'mdpf', 'inf'), ('mdpf/49financial/platinum/advisor_books/advisor_id=A123', 'mdpf', '49financial')]\nVERDICT: FAIL-TWO-REFERENTS\nrc=0",
+      "denominator": "5 of 18 names carry a token the reader marked elsewhere as a firm or product and read otherwise here; 9 distinct tokens marked",
+      "status": "FAIL",
+      "status_reason": "The invocation printed VERDICT: FAIL-TWO-REFERENTS, not the expected VERDICT: PASS-CONSISTENT. All 5 clashes are the token mdpf: marked on i07 and i14, and read as the product prefix rather than the mark on i01, i09, i13, i16 and i18. Read, not run: N3_KEY.json:8 has etfs on i11 and none on i08 and i17, which both carry etfs, so a reader who marked exactly the key would print 2 clashes under check_ln.py:308-314. Surprise row LGIC_NAMING-W5-S4.",
+      "expect": "VERDICT: PASS-CONSISTENT"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The task order names no mutant control for E5-AC1 or E5-AC2; both criteria are graded by the issuer's fixed checker over the committed answer files and key.",
+      "expected": "none named",
+      "observed": "not run -- the worker face names no mutant and the worker definition bars re-measuring beyond the named invocation. The E5-AC1 output split the 18 items into 14 CORRECT and 4 WRONG, each WRONG line naming its own item, so the checker did not return one constant result across the items.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- one read of static committed input files (N3_ITEMS.json, N3_KEY.json, n3-namer-a.tsv, n3-reader.tsv) by a static checker; no clock, network or randomness in the path",
+      "observed": "single run per criterion, rc=0 each: VERDICT: FAIL-MISREAD (E5-AC1), VERDICT: FAIL-TWO-REFERENTS (E5-AC2)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "changing any mark in n3-reader.tsv, any name in n3-namer-a.tsv, or the key",
+      "reason": "out of this cell by construction: LN-e-5 scores and does not read or name; a wrong mark is the outcome's evidence, and those files are outside this order's paths"
+    },
+    {
+      "item": "judging whether the reader, the key or the criteria are at fault, including the read-not-run observation that the key's own marks would fail E5-AC2",
+      "reason": "the worker judges a surprise's form, never its significance; the facts are recorded in LGIC_NAMING-W5-S3 and W5-S4 for 3.0.0_SA_CVO at L8"
+    }
+  ],
+  "surprises": [
+    "LGIC_NAMING-W5-S3: E5-AC1 invocation printed VERDICT: FAIL-MISREAD (14 of 18 correct); the 4 misses are the shared rows i07, i08, i17 (key none) and i14 (key global), where the reader marked the product token",
+    "LGIC_NAMING-W5-S4: E5-AC2 invocation printed VERDICT: FAIL-TWO-REFERENTS (5 clashes, all token mdpf); read, not run, the key's own marks would print 2 clashes on token etfs (i08, i17)"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~5/reader-scoring.result.md",
+  "compiler_tools": [
+    {
+      "tool": "check_ln.py (issuer fixed input, 2.0.0_SA_COO~G)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_ln.py e5-correct",
+      "result": "VERDICT: FAIL-MISREAD, rc=0, 14 of 18 correct"
+    },
+    {
+      "tool": "check_ln.py (issuer fixed input, 2.0.0_SA_COO~G)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_ln.py e5-consistent",
+      "result": "VERDICT: FAIL-TWO-REFERENTS, rc=0, 5 clashes across 18 names"
+    }
+  ]
+}
