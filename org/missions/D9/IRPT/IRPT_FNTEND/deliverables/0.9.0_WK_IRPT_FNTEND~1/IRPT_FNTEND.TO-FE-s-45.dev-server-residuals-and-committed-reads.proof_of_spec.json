@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-45",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "d1479bc5f0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "0ad0ea1fa9",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-45.dev-server-residuals-and-committed-reads.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/package.json",
+      "kind": "config_data",
+      "commit_or_etag": "df3a3353",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The dev line only: \"vite\" -> \"bun --bun vite --configLoader native\" (diff 1 line; overrides block untouched). Portal frozen, local commit.",
+      "artifact_covered_by": ["F45-AC2", "F45-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-19/mounted-from-wire.test.ts",
+      "kind": "test",
+      "commit_or_etag": "df3a3353",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The comment at :56 only, re-worded per RULING U: the environment variable, else a port derived from the worktree, else the helper refuses; no fallback port.",
+      "artifact_covered_by": ["F45-AC4", "F45-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-41/one-writer.test.ts",
+      "kind": "test",
+      "commit_or_etag": "df3a3353",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F41-AC5 and its control read git cat-file blob HEAD:<path> through one reader (committedMapIn), plus the seeded uncommitted in-place control (RULING AC).",
+      "artifact_covered_by": ["F45-AC5"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-45/residuals.test.ts",
+      "kind": "test",
+      "commit_or_etag": "df3a3353",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F45-AC2, AC3 and AC4. The same commit deletes the four per-cell overrides (fe-s-31/vite.worktree.config.mjs, fe-s-32/vite.worktree.config.ts, fe-s-39/vite.worktree.config.mjs, fe-s-40/vite.worktree.config.mjs), which AC3 reads absent from git ls-tree -r HEAD.",
+      "artifact_covered_by": ["F45-AC2", "F45-AC3", "F45-AC4"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-45/dev-script-writes.mjs",
+      "kind": "test",
+      "commit_or_etag": "df3a3353",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The F45-AC2 driver under node: each arm is started on a port measured closed, under a watch of node_modules/.vite-temp, then stopped by taskkill /T /F and measured closed.",
+      "artifact_covered_by": ["F45-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F45-AC1",
+      "criterion_verbatim": "`F45-AC1` -- the whole portal typechecks after the four overrides are removed.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "expect": "rc=0(?![0-9])",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "1 of 1 run over the WHOLE portal program (tsc -b --noEmit) at portal df3a3353, with the four overrides deleted.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F45-AC2",
+      "criterion_verbatim": "`F45-AC2` -- W1-S63. The test starts the portal's OWN `dev` script on a port it has measured closed, waits until the server answers, then stops it. It reads `<WS>/portal/node_modules/.vite-temp` (through the junction) before and after, and prints both. A positive control shows the old script DOES write there.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 240 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-45/residuals.test.ts",
+      "expect": "DEV SCRIPT WRITES NOTHING THROUGH THE JUNCTION: yes",
+      "output_evidence": "dev line -- committed at HEAD: \"bun --bun vite --configLoader native\"; working copy: \"bun --bun vite --configLoader native\"; at 35797660: \"vite\"\nARM NEW SCRIPT: bun run dev --port 5900 --strictPort\n  port 5900 before start: ECONNREFUSED in 31 ms\n  answered: HTTP 200 after 1787 ms\n  served from: PROBE REACHABLE ... served from worktree C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal ... byte-identical to this worktree's package.json (2387 bytes)\n  .vite-temp BEFORE: []  AFTER: []\n  writes seen during the start: 0 []\n  stopped: port 5900 after stop: ECONNREFUSED in 2 ms\nARM POSITIVE CONTROL (the old script \"vite\"): bun run vite --port 5901 --strictPort\n  .vite-temp BEFORE: []  AFTER: []\n  writes seen during the start: 3 [\"rename:vite.config.ts.timestamp-1789426715315-bc83446f47a4e8.mjs\",\"change:...\",\"rename:...\"]\n  stopped: port 5901 after stop: ECONNREFUSED in 2 ms\nPOSITIVE CONTROL -- the old script \"vite\": 3 write(s) under .vite-temp during its start (FIRED)\nTHE NEW SCRIPT \"bun --bun vite --configLoader native\": 0 write(s); answered HTTP 200; serves this worktree; stopped and port closed\nworking dev line equals the committed one: yes\nDEV SCRIPT WRITES NOTHING THROUGH THE JUNCTION: yes\n3 pass\n0 fail",
+      "denominator": "2 of 2 arms reported (the new script plus the old-script positive control), each on a port measured closed and stopped closed. The verdict covers node_modules/.vite-temp, the criterion's location. The wider whole-node_modules read is in the result file and is not claimed. IRPT_FE_DEV_PORT=5261 exported, measured closed (both arms avoid it and 5263).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F45-AC3",
+      "criterion_verbatim": "`F45-AC3` -- W1-S65, read from the COMMITTED tree (`git ls-tree -r HEAD`), so an uncommitted deletion cannot pass it.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-45/residuals.test.ts",
+      "expect": "PER-CELL VITE OVERRIDES REMAINING: 0 of 4(?![0-9])",
+      "output_evidence": "portal HEAD df3a3353: 1461 tracked paths; 35797660: 1463\nCONTROL -- the same rule at 35797660, before FE-s-45: 4 of 4 present\nany committed vite*.config.* under __tests__/ at HEAD: 0\nPER-CELL VITE OVERRIDES REMAINING: 0 of 4\n3 pass\n0 fail",
+      "denominator": "0 of 4 named overrides in 1461 committed paths at df3a3353. The control finds 4 of 4 at 35797660. Pre-deletion reference census: 830 files in src + scripts, 21 hits in 4 files, 0 outside the four.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F45-AC4",
+      "criterion_verbatim": "`F45-AC4` -- W1-S64, read from the committed blob of `fe-s-19/mounted-from-wire.test.ts`.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-45/residuals.test.ts",
+      "expect": "fe-s-19 NAMES NO DEFAULT PORT: yes",
+      "output_evidence": "HEAD:src/pages/InvestorReporting/__tests__/fe-s-19/mounted-from-wire.test.ts -- 1 paragraph(s) name the helper:\n  \"... It now comes from `../fe-s-27/_dev-server.ts` -- `IRPT_FE_DEV_PORT` first, else a port derived from this worktree, else the helper REFUSES: it has no fallback port (1.0.0_SA_CTO RULING U; this line re-worded at FE-s-45). ...\"\nCONTROL -- 35797660:... -- 1 paragraph(s): \"... environment first, documented default second. ...\"\nCONTROL verdict before FE-s-45: NAMES A DEFAULT\nthe committed paragraph names the refusal: yes\nfe-s-19 NAMES NO DEFAULT PORT: yes",
+      "denominator": "1 of 1 header paragraph naming the helper, in the committed blob at df3a3353. The control reads the same paragraph at 35797660 and grades it NAMES A DEFAULT.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F45-AC5",
+      "criterion_verbatim": "`F45-AC5` -- W5-S7. F41-AC5's maps are read with `git cat-file blob HEAD:<path>`. Add a seeded control: an uncommitted in-place edit that names `perf-9` must NOT move the verdict.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-41/one-writer.test.ts",
+      "expect": "F41-AC5 READS THE COMMITTED BLOB: 5 of 5(?![0-9])",
+      "output_evidence": "read as git cat-file blob HEAD:<path> at portal HEAD df3a3353, never the checkout (RULING AC): 5 paths, rc=0 each\nFROZEN NARRATIVE BOUND TO ITS OWN PERFORMANCE REVISION: rev-49f-000091 -- 5 of 5 maps\nCONTROL -- narrative re-pointed to perf-9 in memory: maps bound 0 of 5\nSCRATCH REPOSITORY .../.scratch/fe-s-41-inplace-lgKZ8m: commit f17534e6 holds the portal HEAD's own blob for 5 of 5 maps\nSEEDED: each map's narrative re-pointed to perf-9 IN PLACE, not committed -- git status: 5 of 5 modified\nVERDICT WITH THE EDIT IN PLACE: committed read rev-49f-000091; checkout read (the pre-FE-s-45 read) NOT BOUND\nF41-AC5 READS THE COMMITTED BLOB: 5 of 5 maps -- an uncommitted perf-9 edit moved the checkout read and not the committed one\nWRITERS OF fe-s-14-global.json: 1 of 146 source files -- fe-s-14/gen-maps.ts\n11 pass\n0 fail",
+      "denominator": "5 of 5 frozen maps (the frozen map and its 4 Holdings descendants). Each is read from the committed blob and is unmoved by the seeded uncommitted edit, while the checkout read of the same bytes moved (0 of 5 bound). 11 of 11 tests in the file pass.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F45-AC6",
+      "criterion_verbatim": "`F45-AC6` -- the changed dev script, exercised end to end. PRECONDITION: your own dev server, started with `bun run dev` under the new script from `<WS>/portal`.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 240 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-19/mounted-from-wire.test.ts",
+      "expect": "BODIES MOUNTED: 2 of 2(?![0-9])",
+      "output_evidence": "PRECONDITION: dev server on http://localhost:5261 -- MET (HTTP 200 from http://localhost:5261/; served from worktree C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal: GET /@fs/C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal/package.json -> HTTP 200, byte-identical to this worktree's package.json (2387 bytes)) [required worktree C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal; port: env IRPT_FE_DEV_PORT; ...]\nPAGE CRASHES: 0\nDRIVER EXIT: 0\nREADY WIRE -> reporting  slot=reporting-body\nREADY WIRE -> holdings   slot=holdings-tab\nBODIES MOUNTED: 2 of 2\nUNCERTAIN WITHOUT A WIRE STATE: 2 of 2\n2 pass\n0 fail",
+      "denominator": "2 of 2 tab bodies, on my own server: `bun run dev --port 5261 --strictPort` under the new script ('$ bun --bun vite --configLoader native --port \"5261\" --strictPort', 'VITE v7.3.5 ready in 1829 ms'), started after 5261 was measured closed. IRPT_FE_DEV_PORT=5261.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F45-AC7",
+      "criterion_verbatim": "`F45-AC7` -- the whole-suite census of record, with `IRPT_FE_DEV_PORT` exported to a port you have measured closed.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__",
+      "expect": "(?<![0-9])0 fail",
+      "output_evidence": "PROBE UNREACHABLE ECONNREFUSED from http://localhost:5261/ (my server killed first)\nIRPT_FE_DEV_PORT=5261\n 553 pass\n 16 skip\n 0 fail\n 2401 expect() calls\nRan 569 tests across 101 files. [46.24s]",
+      "denominator": "569 of 569 tests across 101 files: 553 pass, 16 skip (browser criteria skipped by name, precondition ABSENT), 0 fail. The run includes DEV SCRIPT WRITES NOTHING THROUGH THE JUNCTION: yes, PER-CELL VITE OVERRIDES REMAINING: 0 of 4, fe-s-19 NAMES NO DEFAULT PORT: yes, and F41-AC5 READS THE COMMITTED BLOB: 5 of 5.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F45-AC8",
+      "criterion_verbatim": "`F45-AC8` -- graded at L9: RULING U leaves no residual, and F41-AC5 grades what is committed. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "read org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~1/dev-server-residuals-and-committed-reads.result.md (the mechanism section and F45-AC8), rows IRPT_FNTEND-W1-S67 and IRPT_FNTEND-W1-S68, and portal df3a3353",
+      "output_evidence": "RECORDED, NOT GRADED.\nThe three named residuals are retired at df3a3353. The dev script writes 0 times under .vite-temp (the old script's control writes 3). fe-s-19's paragraph names no default port. The 4 of 4 overrides are gone from the committed tree.\nOne residual remains, outside this grant: FE-s-38's fe-s-38/resolve-config.mjs loads the config with the bundle loader. Each run of isolation.test.ts therefore writes vite.config.ts.timestamp-*.mjs through the junction (3 events measured), and its header's reason ('the loader the dev server uses') no longer holds (row W1-S68).\nThe mechanism runs the dev server under bun, not node (row W1-S67). Across the whole node_modules tree during a start: 0 files created or deleted, and 5 change events on 3 packages that could not be attributed either way.\nF41-AC5 reads the committed blob, and a seeded uncommitted perf-9 edit does not move it (5 of 5).",
+      "denominator": "3 of 3 named residuals (W1-S63, W1-S64, W1-S65) retired by output. 1 further residual found and filed (W1-S68). 5 of 5 F41-AC5 maps read committed.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "judgment=\"true\": graded at L9 by 3.0.0_SA_CVO; this worker records and does not grade."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-run controls, one per mechanical claim: (1) F45-AC2, the old dev script run the same way under the same watch; (2) F45-AC3, the same ls-tree rule at 35797660; (3) F45-AC4, the same paragraph rule on the 35797660 blob; (4) F45-AC5, a scratch repository holding the portal HEAD's own five blobs, each edited in place to perf-9 and left uncommitted, read by the committed reader and by the pre-FE-s-45 checkout reader; (5) F41-AC5's in-memory perf-9 control, now from the committed blob; (6) F41-AC2's seeded second writer, direct and wrapped, after the control was added.",
+      "expected": "(1) at least 1 write under .vite-temp; (2) 4 of 4 present; (3) NAMES A DEFAULT; (4) committed read unmoved and checkout read NOT BOUND; (5) 0 of 5 bound; (6) 2, 2 and 1 writers, the one-writer test itself never among them.",
+      "observed": "(1) 3 writes (rename/change/rename of vite.config.ts.timestamp-1789426715315-bc83446f47a4e8.mjs), FIRED; (2) '4 of 4 present'; (3) 'CONTROL verdict before FE-s-45: NAMES A DEFAULT'; (4) 'committed read rev-49f-000091; checkout read (the pre-FE-s-45 read) NOT BOUND', 5 of 5; (5) 'maps bound 0 of 5'; (6) 'writers found 2 of 147', '2 of 147', '1 of 147', one-writer.test.ts not among them.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "residuals.test.ts ran under both its invocations (timeout 240, then timeout 120) and again inside the whole suite. one-writer.test.ts ran standalone and inside the whole suite.",
+      "observed": "The same verdict lines every time. The new script took 0 writes in each run and the control 3. The ports were 5900/5901 each time, measured closed. OVERRIDES 0 of 4, NAMES NO DEFAULT PORT yes, F41-AC5 5 of 5 each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal/vite.config.ts (__dirname at :13 and :16)",
+      "reason": "Outside <paths>. It is the change that would let runner/native load under node. Its absence is why the dev line runs vite under bun (row W1-S67)."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/__tests__/fe-s-38/resolve-config.mjs",
+      "reason": "BOUNDS, NOT YOURS. It still bundle-loads the config and writes through the junction once per isolation.test.ts run (row W1-S68)."
+    },
+    {
+      "item": "portal/package.json overrides block",
+      "reason": "BOUNDS. Untouched; the diff is the one dev line. The main checkout's uncommitted edit there was never read into this worktree."
+    },
+    {
+      "item": "portal/scripts/ui-smoke.mjs; fe-s-27/; the other files in the fe-s-31, fe-s-32, fe-s-39 and fe-s-40 folders",
+      "reason": "BOUNDS, NOT YOURS. Not touched."
+    },
+    {
+      "item": "A claim about the whole node_modules tree",
+      "reason": "Not what F45-AC2 grades. During a start, 0 files were created or deleted and 5 change events on 3 packages could not be attributed (the read-only control produced 0 events). Disclosed in the result file and row W1-S67."
+    }
+  ],
+  "surprises": [
+    "IRPT_FNTEND-W1-S67: the dev line alone cannot stop vite's config write under node (runner and native both fail on the committed vite.config.ts's __dirname). The one working mechanism in the granted line runs vite under the bun runtime, so every `bun run dev` user's dev server moves from node to bun. OBSERVATION, INERT.",
+    "IRPT_FNTEND-W1-S68: FE-s-38's resolve-config.mjs still loads vite.config.ts with the bundle loader, so every whole-suite run writes a temp file through the junction, and its header's reason ('the loader the dev server uses') no longer holds. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~1/dev-server-residuals-and-committed-reads.result.md -- the loader measurements and the choice, the package.json diff, the .vite-temp readings, each criterion's deciding run, and the servers started and stopped. Portal commit df3a3353, LOCAL; portal frozen.",
+  "compiler_tools": [
+    {
+      "tool": "tsc (via bun run typecheck)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0 at portal df3a3353."
+    },
+    {
+      "tool": "bun test, fe-s-45/residuals.test.ts",
+      "invocation": "IRPT_FE_DEV_PORT=5261 exported (measured closed); cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 240 ... then timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-45/residuals.test.ts",
+      "result": "3 pass / 0 fail in both runs."
+    },
+    {
+      "tool": "bun test, fe-s-41/one-writer.test.ts",
+      "invocation": "IRPT_FE_DEV_PORT=5261 exported (measured closed); cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-41/one-writer.test.ts",
+      "result": "11 pass / 0 fail."
+    },
+    {
+      "tool": "bun test, fe-s-19/mounted-from-wire.test.ts on my own server",
+      "invocation": "IRPT_FE_DEV_PORT=5261 exported (server up: bun run dev --port 5261 --strictPort); cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 240 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-19/mounted-from-wire.test.ts",
+      "result": "2 pass / 0 fail; BODIES MOUNTED 2 of 2."
+    },
+    {
+      "tool": "bun test, the WHOLE InvestorReporting suite",
+      "invocation": "IRPT_FE_DEV_PORT=5261 exported (server killed, measured closed); cd C:/tmp/wk-irpt_fntend-7-1-fe-s-45/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__",
+      "result": "553 pass / 16 skip / 0 fail across 569 tests in 101 files."
+    }
+  ]
+}
