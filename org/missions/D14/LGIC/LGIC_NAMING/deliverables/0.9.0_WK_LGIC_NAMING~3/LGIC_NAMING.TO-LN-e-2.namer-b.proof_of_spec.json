@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_NAMING.TO-LN-e-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/prd/LGIC_NAMING_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e04b802fe9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/decompositions/LGIC_NAMING_DECOMP.md",
+    "vintage_commit": "62b5c0819f",
+    "to_ref": "org/missions/D14/LGIC/LGIC_NAMING/task-orders/LGIC_NAMING.TO-LN-e-2.namer-b.md"
+  },
+  "assignee": "0.9.0_WK_LGIC_NAMING~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/n3-namer-b.tsv",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A record under deliverables/; nothing is deployed (PRD S13, this order's BOUNDS: nothing live moves).",
+      "artifact_covered_by": ["E2-AC1", "E2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~3/namer-b.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The order's result file; a record, not a deploy.",
+      "artifact_covered_by": ["E2-AC1", "E2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E2-AC1",
+      "criterion_verbatim": "E2-AC1 -- every one of the 18 items has a name in n3-namer-b.tsv.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-1-3 && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_ln.py e2-named",
+      "output_evidence": "ITEMS: 18  NAMED: 18  MISSING: []\nVERDICT: PASS-ALL-NAMED\nrc=0",
+      "denominator": "18 of 18 N3 items named (N3_ITEMS.json denominator 18); i13's answer is RAISE, the order's prescribed answer for an item the two briefing files cannot derive (row LGIC_NAMING-W3-S1)",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-ALL-NAMED"
+    },
+    {
+      "criterion_id": "E2-AC2",
+      "criterion_verbatim": "E2-AC2 -- the file records the worktree base commit it was named from.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-1-3 && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_ln.py e2-base",
+      "output_evidence": "BASE: 6a5b276f8b382edca90673d1f425320a251ca0e5\nVERDICT: PASS-BASE-RECORDED\nrc=0",
+      "denominator": "1 of 1 base line; the sha is git rev-parse HEAD in the worktree read before this order's first commit (6a5b276f8b382edca90673d1f425320a251ca0e5)",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-BASE-RECORDED"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants on the graded file, each restored byte-identical afterwards (cmp against a .scratch backup): (1) the i18 line removed, then e2-named; (2) the base sha replaced by 40 zeros, then e2-base.",
+      "expected": "(1) a non-PASS verdict naming i18 missing; (2) a non-PASS base verdict.",
+      "observed": "(1) 'ITEMS: 18  NAMED: 17  MISSING: ['i18'] / VERDICT: FAIL-UNNAMED'; (2) 'BASE: 0000000000000000000000000000000000000000 / VERDICT: FAIL-NO-BASE'; restore 'RESTORED-IDENTICAL'. Note: check_ln.py exits rc=0 on FAIL too, so the VERDICT line is the grade and never the exit code.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each criterion's invocation run twice on the same unchanged file (before and after the mutant/restore cycle) and the outputs compared.",
+      "observed": "e2-named: 'ITEMS: 18  NAMED: 18  MISSING: [] / VERDICT: PASS-ALL-NAMED' both runs; e2-base: 'BASE: 6a5b276f8b382edca90673d1f425320a251ca0e5 / VERDICT: PASS-BASE-RECORDED' both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "i13 carries RAISE instead of a key",
+      "reason": "NAMING_SCHEMA v1.4 key.partition '{entity}={id}' does not say whether {entity} is the entity name (advisor) or its key (advisor_id), and the item states both; the order prescribes RAISE and a row for an underivable name (row LGIC_NAMING-W3-S1)."
+    },
+    {
+      "item": "Whether the names match namer A's or the key",
+      "reason": "Outside this cell: the order forbids reading N3_KEY.json, the other namer's exercise and any grading rule; the comparison is another cell's."
+    }
+  ],
+  "surprises": [
+    "LGIC_NAMING-W3-S1: N3 item i13 answered RAISE -- key.partition '{entity}={id}' does not say whether {entity} is the entity name (advisor) or its key column (advisor_id), and the item states both.",
+    "LGIC_NAMING-W3-S2: the function/purpose slot is an open vocabulary; 14 of 18 names carry a function or purpose token chosen by a stated rule, not a lookup (the schema also admits the noun 'publisher' as a function token).",
+    "LGIC_NAMING-W3-S3: three names turn on a scope/system choice the briefing leaves open -- i14 PRODUCT vs GLOBAL scope, i11 and i15 vendor as system -- each resolved by a stated reading."
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~3/namer-b.result.md",
+  "compiler_tools": [
+    {
+      "tool": "check_ln.py (issuer's fixed-input checker)",
+      "invocation": "timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_ln.py e2-named | e2-base",
+      "result": "VERDICT: PASS-ALL-NAMED (18 of 18); VERDICT: PASS-BASE-RECORDED"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~3/LGIC_NAMING.TO-LN-e-2.namer-b.proof_of_spec.json E2-AC1,E2-AC2",
+      "result": "run before the complete flip; its exit code is recorded in namer-b.result.md"
+    }
+  ]
+}
