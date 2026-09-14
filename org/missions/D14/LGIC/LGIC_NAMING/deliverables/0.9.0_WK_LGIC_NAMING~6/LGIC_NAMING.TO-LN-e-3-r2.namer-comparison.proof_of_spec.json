@@ -1,0 +1,90 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_NAMING.TO-LN-e-3-r2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/decompositions/LGIC_NAMING_DECOMP.md",
+    "vintage_commit": "32795c348c",
+    "to_ref": "org/missions/D14/LGIC/LGIC_NAMING/task-orders/LGIC_NAMING.TO-LN-e-3-r2.namer-comparison.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/prd/LGIC_NAMING_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2706014705"
+  },
+  "assignee": "0.9.0_WK_LGIC_NAMING~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/r2/n3-compare.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A naming-exercise record under deliverables/. Nothing live moves in this project (PRD S13). It lands in the same commit as this instance.",
+      "artifact_covered_by": ["E3R-AC1", "E3R-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~6/namer-comparison.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The result file the order names, next to this instance. It is a record with no deploy scope.",
+      "artifact_covered_by": ["E3R-AC1", "E3R-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E3R-AC1",
+      "criterion_verbatim": "E3R-AC1 -- the two namers' answer files are identical on every item.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-2-6 && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_ln_r2.py e3-identical",
+      "output_evidence": "DIFFERS: i03  A=orion-inf-ingest-daily  B=orion-inf-orion-ingest-daily\nDIFFERS: i10  A=smartx-49f-platform-export-weekly  B=smartx-49f-smartx-platform-export-weekly\nDIFFERS: i11  A=pathfinder-etfs-ingest-task  B=pathfinder-etfs-pathfinder-ingest-task\nITEMS: 18  IDENTICAL: 15  DIFFERENT: 3\nVERDICT: FAIL-DIFFERENT\nrc=0",
+      "denominator": "15 of 18 items identical, 3 of 18 different (i03, i10, i11). The 15 include i05 and i15, disclosed by row LGIC_NAMING-S15.",
+      "status": "FAIL",
+      "status_reason": "The checker printed VERDICT: FAIL-DIFFERENT, not the expected VERDICT: PASS-IDENTICAL. The order says a difference is the outcome's evidence, not a defect to fix, so the round's FWD-1 measurement is recorded as it stands. On all 3 different items namer A wrote the ruled name from the round-1 analysis s.2 table and namer B wrote none (n3-compare.md). Graded for FWD-1 by 3.0.0_SA_CVO at L9 and 1.0.0_SA_CTO at L10.",
+      "expect": "VERDICT: PASS-IDENTICAL"
+    },
+    {
+      "criterion_id": "E3R-AC2",
+      "criterion_verbatim": "E3R-AC2 -- the two seats received the identical prompt, in two different sessions and folders.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-2-6 && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_ln_r2.py e3-blind",
+      "output_evidence": "PROMPT A sha: 84ac10b1eaf8339fdc30b1bc8fcb0103eb3503ad7560c99daeb924a0501ba100  PROMPT B sha: 84ac10b1eaf8339fdc30b1bc8fcb0103eb3503ad7560c99daeb924a0501ba100  (identical input: neither seat was given anything but the briefing)\nSESSION A: b100c432-0c42-4493-98e7-702644d33b1b  SESSION B: e01a546a-27da-4d0e-b8c7-4c8475c4efc3\nVERDICT: PASS-NAMERS-UNCONFERRED\nrc=0",
+      "denominator": "2 of 2 seat records (e1, e2). The prompt sha matches each seat record and the two are equal. The session_ids differ (2 distinct) and the seat_dirs differ (2 distinct).",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-NAMERS-UNCONFERRED"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Run in memory from .scratch/controls.py, with no tracked file edited. The script imports check_ln_r2.py. (a) AC1 positive control: ANSWER_FILE['e2'] points at a scratch copy of n3-namer-a.tsv. (b) AC2 mutant: seat_parts is wrapped so that seat B's record carries seat A's session_id and seat_dir. Each arm is followed by an unmutated run of the same import.",
+      "expected": "(a) VERDICT: PASS-IDENTICAL with IDENTICAL: 18. (b) VERDICT: FAIL-NAMERS-NOT-SEPARATED.",
+      "observed": "(a) ITEMS: 18  IDENTICAL: 18  DIFFERENT: 0 / VERDICT: PASS-IDENTICAL. The unmutated run gave VERDICT: FAIL-DIFFERENT (3 of 18). So the checker can return PASS, and the FAIL is a result of the input. (b) SESSION B: b100c432-... / VERDICT: FAIL-NAMERS-NOT-SEPARATED. The unmutated run gave VERDICT: PASS-NAMERS-UNCONFERRED. git status afterwards showed no tracked file modified.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each criterion's invocation run twice on the same tree, with the outputs compared by cmp.",
+      "observed": "e3-identical: both runs byte-identical (FAIL-DIFFERENT, 3 of 18). e3-blind: both runs byte-identical (PASS-NAMERS-UNCONFERRED).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Whether the 15 identical names equal the ruled names",
+      "reason": "The order asks for the ruled name only on each DIFFERS item. This cell compares and does not name or grade. FWD-1's grade belongs to 3.0.0_SA_CVO at L9."
+    },
+    {
+      "item": "The CRLF exposure of the seat files (rows LGIC_NAMING-W1-S6, W2-S5)",
+      "reason": "Not this cell's coordinate. In this worktree git ls-files --eol reads the exercises/r2/seats files as i/lf w/lf attr/-text, and e3-blind passed on them. No row was filed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- a worker writes no telemetry (L7 reads from git); branch wk-lgic-naming-2-6",
+  "compiler_tools": [
+    {
+      "tool": "check_ln_r2.py (issuer fixed input)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_ln_r2.py e3-identical | e3-blind",
+      "result": "e3-identical FAIL-DIFFERENT (15 of 18 identical); e3-blind PASS-NAMERS-UNCONFERRED"
+    }
+  ]
+}
