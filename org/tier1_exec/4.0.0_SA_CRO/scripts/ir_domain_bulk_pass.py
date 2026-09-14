@@ -321,6 +321,21 @@ def adjudicate(name: str, results: list, held_domain):
 BLOG_MARKERS = ("blog", "blogs", "news", "newsroom", "stories", "press",
                 "insights", "media", "articles")
 
+# A RECRUITING BLOG IS REAL COMPANY CONTENT OF THE WRONG KIND, AND THE MARKER
+# TEST CANNOT TELL THE DIFFERENCE. Measured over the first full blog pass: 9 of
+# 52 accepted roots were careers or jobs sites --
+#     careers.mastercard.com/us/en/blog · jobs.uber.com/en/people-stories
+#     careers.msci.com/articles · careers.sse.com/blogs
+#     careers.intuitive.com/en/employee-stories
+# Every one carries a genuine blog marker AND sits on the company's own domain,
+# so both of the rule's tests pass. They are simply not what s.11's chatter axis
+# consumes: employee stories do not move a security, and feeding them into a
+# market-chatter signal is a CORRECTNESS defect, not untidiness.
+# >> INVESTOR-RELATIONS paths are deliberately NOT in this set. A press release
+#    IS market-relevant, so investors.intuit.com/news-events stays.
+RECRUITING = ("careers", "career", "jobs", "job", "recruiting", "recruitment",
+              "talent", "hiring")
+
 
 def _marks(segment: str) -> bool:
     """
@@ -377,10 +392,20 @@ def adjudicate_blog(held_domain, results: list):
             off_domain.append(dom)
 
     hosts = []
+    recruiting = []
     for link in on_domain:
         parts = urllib.parse.urlsplit(link)
         host = (parts.hostname or "").lower()
         segs = [s for s in (parts.path or "").lower().split("/") if s]
+
+        # A recruiting site disqualifies the root outright, however good its
+        # blog marker is. Recorded separately rather than dropped silently,
+        # so the count of what was excluded is visible.
+        words = [w for part in host.split(".") + segs
+                 for w in re.split(r"[-_]+", part) if w]
+        if any(w in RECRUITING for w in words):
+            recruiting.append(link)
+            continue
 
         # A marker in the HOST makes the whole host the blog root.
         if any(_marks(lbl) for lbl in host.split(".")):
@@ -411,6 +436,7 @@ def adjudicate_blog(held_domain, results: list):
         # call cost -- which is exactly what the IR pass's stored domain list
         # bought, and what this branch did not have when it needed it.
         "on_domain_links": on_domain,
+        "excluded_recruiting": recruiting,
         "blog_roots": hosts,
     }
     if hosts:
@@ -521,10 +547,22 @@ def main() -> int:
     skipped = 0
     if args.exclude_done:
         prior = json.load(open(args.exclude_done, encoding="utf-8"))
-        done = {r["folder"] for r in prior["records"]}
+        # SKIP ONLY WHAT WAS GENUINELY ANSWERED. This limb used to skip every
+        # folder PRESENT in the prior output, which silently included the ones
+        # the vendor had refused -- so a resume would carry a quota wall forward
+        # forever as though it were a finding. Sixth instance of this class in
+        # one session, and this time in the script the others copied it FROM.
+        key = "blog_roots" if args.mode == "blog" else "ir_domain"
+        done = {r["folder"] for r in prior["records"]
+                if not str((r.get(key) or {}).get("evidence", ""))
+                .lstrip().upper().startswith(("NOT ASKED", "GOOGLE CSE CALL FAILED"))}
+        retried = len(prior["records"]) - len(done)
         before = len(targets)
         targets = [t for t in targets if t["folder"] not in done]
         skipped = before - len(targets)
+        print("CARRIED        %d already-ANSWERED folder(s) skipped" % len(done))
+        print("RETRIED        %d folder(s) the vendor refused -- never answered"
+              % retried)
 
     print("UNIVERSE       %s" % UNIVERSE)
     print("DENOMINATOR    %d folders" % len(names))
