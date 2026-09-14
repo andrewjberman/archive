@@ -173,13 +173,37 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--max-candidates", type=int, default=2,
                     help="news probes per name; each is free but not instant")
+    ap.add_argument("--exclude-done", default="",
+                    help="path to a prior output JSON; any folder it ANSWERED "
+                         "is skipped. FOURTH instance of the same lesson: "
+                         "ir_domain_bulk_pass.py has had this limb all along "
+                         "and this pass shipped without it. The scarce resource "
+                         "here is not calls -- they are free -- it is RATE-LIMIT "
+                         "HEADROOM, and re-asking 17 already-answered names "
+                         "spends ~50 calls of it before reaching an unasked one.")
     ap.add_argument("--out", default="")
     ap.add_argument("--sleep", type=float, default=0.25)
     args = ap.parse_args()
 
     universe = json.load(open(UNIVERSE, encoding="utf-8"))
     names = universe["names"]
-    targets = names[:args.limit] if args.limit else names
+    targets = names
+    carried = []
+    if args.exclude_done:
+        prior = json.load(open(args.exclude_done, encoding="utf-8"))
+        # ONLY a folder that was genuinely ANSWERED is skipped. One the vendor
+        # refused was NEVER ASKED, so it must be retried -- skipping it would
+        # bake a rate limit into the result as though it were a finding.
+        done = {r["folder"] for r in prior["records"]
+                if r.get("search_http") == 200}
+        carried = [r for r in prior["records"] if r["folder"] in done]
+        refused_before = len(prior["records"]) - len(done)
+        targets = [t for t in targets if t["folder"] not in done]
+        print("CARRIED        %d already-ANSWERED folder(s) skipped and carried "
+              "into the output" % len(done))
+        print("RETRIED        %d folder(s) the vendor had refused -- a refusal "
+              "is not an answer" % refused_before)
+    targets = targets[:args.limit] if args.limit else targets
     today = datetime.date.today()
 
     print("UNIVERSE       %s" % UNIVERSE)
@@ -197,8 +221,16 @@ def main() -> int:
         return 0
 
     print("MODE           LIVE\n")
-    out, calls = [], 0
-    resolved = served = 0
+    out, calls = list(carried), 0
+    # SEED THE COUNTERS FROM THE CARRIED RECORDS. `out` starts non-empty, so
+    # counters starting at 0 would report a resume as though the carried names
+    # had all failed -- an undercount that reads exactly like a regression.
+    resolved = sum(1 for r in carried
+                   if r.get("sa_symbol", {}).get("status") == "INFERRED")
+    served = sum(1 for r in carried
+                 for p in [max(r.get("candidates_probed") or [{}],
+                               key=lambda x: x.get("records", 0))]
+                 if p.get("in_window", 0) >= DENSITY_MIN and p.get("covers_window"))
     consecutive_refusals = 0
     not_asked_news = 0
 
@@ -327,7 +359,9 @@ def main() -> int:
     # run of this pass printed "RESOLVED 17 of 89 / REFUSED 72 of 89" when 72 of
     # those had returned HTTP 403 and were never asked -- which reads as
     # "Costco, Netflix, Visa and Mastercard have no SA symbol".
-    asked = [r for r in out if r["search_http"] == 200]
+    # `carried` entries are already-answered records folded back in, so the
+    # partition below is over the WHOLE universe, not just this run.
+    asked = [r for r in out if r.get("search_http") == 200]
     notasked = (len(out) - len(asked)) + (len(targets) - len(out))
     print("\nCALLS          %d (all free, direct, no quota)" % calls)
     print("ASKED          %d of %d" % (len(asked), len(targets)))
@@ -335,8 +369,12 @@ def main() -> int:
           "refusals, NOT findings about those names"
           % (notasked, not_asked_news))
     print("RESOLVED       %d of %d asked" % (resolved, len(asked)))
+    # THE PRINT AND THE JSON MUST USE ONE FORMULA. They did not: the JSON
+    # subtracted the news-refused and this line did not, so a NOT-ASKED was
+    # printed as a REFUSAL -- the exact conflation the whole partition exists to
+    # prevent, surviving in the line a reader actually looks at.
     print("REFUSED        %d of %d asked  <- a 0 here means the rule is NOT "
-          "discriminating" % (len(asked) - resolved, len(asked)))
+          "discriminating" % (len(asked) - resolved - not_asked_news, len(asked)))
     print("SERVEABLE      %d of %d asked  <- resolved AND clearing the density "
           "bar" % (served, len(asked)))
 
