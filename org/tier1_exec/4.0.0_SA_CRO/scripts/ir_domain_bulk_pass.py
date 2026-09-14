@@ -324,8 +324,8 @@ BLOG_MARKERS = ("blog", "blogs", "news", "newsroom", "stories", "press",
 # A RECRUITING BLOG IS REAL COMPANY CONTENT OF THE WRONG KIND, AND THE MARKER
 # TEST CANNOT TELL THE DIFFERENCE. Measured over the first full blog pass: 9 of
 # 52 accepted roots were careers or jobs sites --
-#     careers.mastercard.com/us/en/blog · jobs.uber.com/en/people-stories
-#     careers.msci.com/articles · careers.sse.com/blogs
+#     careers.mastercard.com/us/en/blog | jobs.uber.com/en/people-stories
+#     careers.msci.com/articles | careers.sse.com/blogs
 #     careers.intuitive.com/en/employee-stories
 # Every one carries a genuine blog marker AND sits on the company's own domain,
 # so both of the rule's tests pass. They are simply not what s.11's chatter axis

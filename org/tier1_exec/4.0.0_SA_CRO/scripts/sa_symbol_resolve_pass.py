@@ -361,7 +361,7 @@ def main() -> int:
     # "Costco, Netflix, Visa and Mastercard have no SA symbol".
     # `carried` entries are already-answered records folded back in, so the
     # partition below is over the WHOLE universe, not just this run.
-    # ⛔ THIS ARITHMETIC WAS WRONG AND IT PRINTED A NUMBER THAT CANNOT BE TRUE:
+    # THIS ARITHMETIC WAS WRONG AND IT PRINTED A NUMBER THAT CANNOT BE TRUE:
     # "ASKED 19 of 6" and "NOT ASKED -13". Cause: `out` is seeded with the
     # CARRIED records while `targets` is the LIMITED batch, so
     # `len(targets) - len(out)` goes negative the moment --limit is combined
