@@ -6,7 +6,7 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-34.business-date-label.md",
     "group": "OTHER",
-    "vintage_commit": "0a74710f33"
+    "vintage_commit": "12eef1910c"
   },
   "assignee": "0.9.0_WK_IRPT_FNTEND~3",
   "decomp_ref": {
@@ -75,6 +75,26 @@
         "F34-AC4",
         "F34-AC5"
       ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-21/source-age.test.ts",
+      "kind": "test",
+      "commit_or_etag": "f7b2d98657089f7a2251ca808487c524651a1333",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 12eef1910c, ONE CHECK: :166 `pure.startsWith('Updated ')` -> `isRealAge(pure)`, equality with formatSourceAge(AS_OF, now); formatSourceAge added to the import. Cites ruling K and prints itself both ways. Every other assertion as written.",
+      "artifact_covered_by": [
+        "F34-AC6"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-25/source-age-field.test.ts",
+      "kind": "test",
+      "commit_or_etag": "f7b2d98657089f7a2251ca808487c524651a1333",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT 12eef1910c, ONE CHECK: :65 `expect(pure.startsWith('Updated ')).toBe(true)` -> `expect(isBusinessDateAge(pure)).toBe(true)`, equality with formatSourceAge(BUSINESS_DATE, now). Cites ruling K and prints itself both ways. Every other assertion as written.",
+      "artifact_covered_by": [
+        "F34-AC6"
+      ]
     }
   ],
   "acceptance": [
@@ -85,7 +105,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
       "expect": "rc=0(?![0-9])",
       "output_evidence": "$ tsc -b --noEmit\nrc=0",
-      "denominator": "1 of 1 invocation, rc read without a pipe. tsc -b covers tsconfig.app.json + tsconfig.node.json (include: src), so the whole portal program including the two new fe-s-34 files (label.test.ts, bun-test-clock.d.ts, which declares bun:test setSystemTime). The same invocation at the unmodified base portal@c2eb8eb4 was also rc=0.",
+      "denominator": "1 of 1 invocation, re-run after the amendment edit (portal@f7b2d986 bytes), rc read without a pipe. tsc -b covers tsconfig.app.json + tsconfig.node.json (include: src), so the whole portal program including the two new fe-s-34 files (label.test.ts, bun-test-clock.d.ts, which declares bun:test setSystemTime). The same invocation at the unmodified base portal@c2eb8eb4 was also rc=0.",
       "status": "PASS"
     },
     {
@@ -95,7 +115,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "expect": "formatSourceAge\\( CALL SITES OUTSIDE state/status.ts: 0(?![0-9])",
       "output_evidence": "FILES SCANNED -- every non-test file under src/pages/InvestorReporting/ (every __tests__/ excluded): 216 (.json 133, .tsx 40, .ts 36, .ttf 4, .txt 1, .svg 1, .css 1)\n  of which OUTSIDE state/status.ts: 215\nPOSITIVE CONTROL (the token is readable): formatSourceAge( in state/status.ts code = 2 (its definition + the call inside formatSourceAgeForState)\nPOSITIVE CONTROL (a seeded call site): tabs/analysis/StageDisplay.tsx with its pre-FE-s-34 call put back -> the scan finds 1 call site(s) (seed landed: true)\nformatSourceAge REFERENCES OUTSIDE state/status.ts (import, alias or call): 0\nformatSourceAge( CALL SITES OUTSIDE state/status.ts: 0 (across 215 files)",
-      "denominator": "215 of 215 non-test files outside state/status.ts (216 scanned, walked from disk). Comments are stripped before counting, so prose naming the function is not a call. label.test.ts at portal@944499a9 (the committed bytes): 4 pass / 0 fail, 16 expect() calls, rc=0.",
+      "denominator": "215 of 215 non-test files outside state/status.ts (216 scanned, walked from disk). Comments are stripped before counting, so prose naming the function is not a call. label.test.ts, deciding run on the amended tree (portal@f7b2d986 bytes): 4 pass / 0 fail, rc=0; identical anchor lines at portal@944499a9.",
       "status": "PASS"
     },
     {
@@ -105,7 +125,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "expect": "ANALYSIS PANELS AGE THE BUSINESS DATE: 2 of 2(?![0-9])",
       "output_evidence": "  status source_dates.business_date = 2026-09-10\n  status source_dates.as_of         = 2026-09-05T00:00:00Z  (5 days earlier)\nPINNED CLOCK 2026-09-12T00:00:00.000Z: the business_date age reads \"Business date age: 2d\"; the as_of age would read \"Business date age: 7d\"\n  StatusPanel (the path FE-s-25 fixed) renders \"Business date age: 2d\"\n  StageDisplay    READY  business_date=2026-09-10, as_of=2026-09-05T00:00:00Z -> \"Ready -- Business date age: 2d (STATE_REPORTED)\"  [the business-date age, not the as_of age: yes]\n  StageDisplay    QUEUED business_date ABSENT,     as_of=2026-09-05T00:00:00Z -> \"Loading -- No source age yet (STATE_REPORTED)\"  [says \"No source age yet\", no as_of fallback: yes]\n  StageDisplay    READY  business_date NULL,       as_of=2026-09-05T00:00:00Z -> \"Ready -- Source date malformed (STATE_REPORTED)\"  [says \"Source date malformed\", no as_of fallback: yes]\n  VariantSelector READY  business_date=2026-09-10, as_of=2026-09-05T00:00:00Z -> \"Ready -- Business date age: 2d\"  [the business-date age, not the as_of age: yes]\n  VariantSelector QUEUED business_date ABSENT,     as_of=2026-09-05T00:00:00Z -> \"Loading -- No source age yet\"  [says \"No source age yet\", no as_of fallback: yes]\n  VariantSelector READY  business_date NULL,       as_of=2026-09-05T00:00:00Z -> \"Ready -- Source date malformed\"  [says \"Source date malformed\", no as_of fallback: yes]\nANALYSIS PANELS AGE THE BUSINESS DATE: 2 of 2",
-      "denominator": "2 of 2 panels, each counted only if all THREE arms hold (the business-date age and not the as_of age; an absent business date on a no-answer state; a null one). The fixture is fixtures/fe-s-6/request.overview.json through the FixtureAdapter, carrying a status via carryAvailabilityFromStatus, turned into the envelope by envelopeFromAvailability as AnalysisTab.tsx does. The age arm ALONE passes on the unmodified source as well (row IRPT_FNTEND-W3-S20), which is why the two absence arms are in the count; the no-status fixture path is printed, not graded (row IRPT_FNTEND-W3-S21). label.test.ts at portal@944499a9 (the committed bytes): 4 pass / 0 fail, 16 expect() calls, rc=0.",
+      "denominator": "2 of 2 panels, each counted only if all THREE arms hold (the business-date age and not the as_of age; an absent business date on a no-answer state; a null one). The fixture is fixtures/fe-s-6/request.overview.json through the FixtureAdapter, carrying a status via carryAvailabilityFromStatus, turned into the envelope by envelopeFromAvailability as AnalysisTab.tsx does. The age arm ALONE passes on the unmodified source as well (row IRPT_FNTEND-W3-S20), which is why the two absence arms are in the count; the no-status fixture path is printed, not graded (row IRPT_FNTEND-W3-S21). label.test.ts, deciding run on the amended tree (portal@f7b2d986 bytes): 4 pass / 0 fail, rc=0; identical anchor lines at portal@944499a9.",
       "status": "PASS"
     },
     {
@@ -115,7 +135,7 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "expect": "THE LABEL NAMES THE BUSINESS DATE: yes",
       "output_evidence": "  FRESH     business_date=2026-09-12 at 2026-09-12T00:00:20Z -> \"Business date age: under 1m\"   (StatusPanel \"Business date age: under 1m\"; StageDisplay \"Ready -- Business date age: under 1m\"; VariantSelector \"Ready -- Business date age: under 1m\")\n  HOURS-OLD business_date=2026-09-12 at 2026-09-12T05:00:00Z -> \"Business date age: 5h\"   (StatusPanel \"Business date age: 5h\"; StageDisplay \"Ready -- Business date age: 5h\"; VariantSelector \"Ready -- Business date age: 5h\")\n  DAYS-OLD  business_date=2026-09-09 at 2026-09-12T00:00:00Z -> \"Business date age: 3d\"   (StatusPanel \"Business date age: 3d\"; StageDisplay \"Ready -- Business date age: 3d\"; VariantSelector \"Ready -- Business date age: 3d\")\nLABELS NAMING THE BUSINESS DATE: 3 of 3\nTHE LABEL NAMES THE BUSINESS DATE: yes",
-      "denominator": "3 of 3 ages (fresh, hours-old, days-old), each checked pure (injected clock) AND rendered on all three panels under a setSystemTime-pinned clock; a case counts only if the phrase \"business date\" is in it, its figure is right, and all three panels show the identical string. label.test.ts at portal@944499a9 (the committed bytes): 4 pass / 0 fail, 16 expect() calls, rc=0.",
+      "denominator": "3 of 3 ages (fresh, hours-old, days-old), each checked pure (injected clock) AND rendered on all three panels under a setSystemTime-pinned clock; a case counts only if the phrase \"business date\" is in it, its figure is right, and all three panels show the identical string. label.test.ts, deciding run on the amended tree (portal@f7b2d986 bytes): 4 pass / 0 fail, rc=0; identical anchor lines at portal@944499a9.",
       "status": "PASS"
     },
     {
@@ -125,19 +145,19 @@
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-34/label.test.ts",
       "expect": "\"UPDATED\" ON A BUSINESS-DATE AGE: 0(?![0-9])",
       "output_evidence": "POSITIVE CONTROL (source): state/status.ts with one pre-FE-s-34 label appended -> 1 occurrence(s), against 0 in the real file\nSOURCE SCAN: 0 occurrence(s) of the word across 216 non-test files\nPOSITIVE CONTROL (render): the detector fires on a pre-FE-s-34 rendering: true; stays quiet on 'updatedAt' and the new label: true\nRENDER SWEEP: 0 of 27 rendered panel ages (3 panels x 9 ages); PURE SWEEP: 0 of 18 (2 formatters x 9 ages)\n\"UPDATED\" ON A BUSINESS-DATE AGE: 0 (source 0 + render 0 + pure 0)",
-      "denominator": "216 of 216 non-test files (case-insensitive whole word, comments stripped) + 27 of 27 rendered panel ages + 18 of 18 pure ages; the 9 ages span every branch of the formatter, a future business date included. At the base the same scan finds 5 (state/status.ts:280-287) and the whole count is 50. label.test.ts at portal@944499a9 (the committed bytes): 4 pass / 0 fail, 16 expect() calls, rc=0.",
+      "denominator": "216 of 216 non-test files (case-insensitive whole word, comments stripped) + 27 of 27 rendered panel ages + 18 of 18 pure ages; the 9 ages span every branch of the formatter, a future business date included. At the base the same scan finds 5 (state/status.ts:280-287) and the whole count is 50. label.test.ts, deciding run on the amended tree (portal@f7b2d986 bytes): 4 pass / 0 fail, rc=0; identical anchor lines at portal@944499a9.",
       "status": "PASS"
     },
     {
       "criterion_id": "F34-AC6",
-      "criterion_verbatim": "F34-AC6 -- the folders that render or compute source ages stay green. FE-s-21 and FE-s-25 compute their expected strings through `formatSourceAge` itself, so the label flows through them rather than breaking them (measured at the cut: no test asserts the literal \"Updated\"). PRECONDITION: none required. <invocation>cd <WS>/portal && timeout 240 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-3 src/pages/InvestorReporting/__tests__/fe-s-6 src/pages/InvestorReporting/__tests__/fe-s-21 src/pages/InvestorReporting/__tests__/fe-s-25 src/pages/InvestorReporting/__tests__/fe-s-34</invocation><expect>(?<![0-9])0 fail</expect>",
+      "criterion_verbatim": "F34-AC6 -- the folders that render or compute source ages stay green. FE-s-21 and FE-s-25 compute their expected strings through `formatSourceAge` itself, so the label flows through them rather than breaking them (the issuer's cut-time claim that no test asserts the literal \"Updated\" was WRONG: `fe-s-21/source-age.test.ts:166` and `fe-s-25/source-age-field.test.ts:65` do -- row W3-S19; see the amendment bound). PRECONDITION: none required. <invocation>cd <WS>/portal && timeout 240 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-3 src/pages/InvestorReporting/__tests__/fe-s-6 src/pages/InvestorReporting/__tests__/fe-s-21 src/pages/InvestorReporting/__tests__/fe-s-25 src/pages/InvestorReporting/__tests__/fe-s-34</invocation><expect>(?<![0-9])0 fail</expect>",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal && timeout 240 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-3 src/pages/InvestorReporting/__tests__/fe-s-6 src/pages/InvestorReporting/__tests__/fe-s-21 src/pages/InvestorReporting/__tests__/fe-s-25 src/pages/InvestorReporting/__tests__/fe-s-34",
       "expect": "(?<![0-9])0 fail",
-      "output_evidence": "src\\pages\\InvestorReporting\\__tests__\\fe-s-21\\source-age.test.ts:\nerror: expect(received).toEqual(expected)\n      at <anonymous> (...\\__tests__\\fe-s-21\\source-age.test.ts:174:22)\n(fail) F21-AC3 -- an answer-bearing state still renders a real age > the absent-state wording is not the answer for everything\nsrc\\pages\\InvestorReporting\\__tests__\\fe-s-25\\source-age-field.test.ts:\n65 |     expect(pure.startsWith('Updated ')).toBe(true)\nerror: expect(received).toBe(expected)\nExpected: true\nReceived: false\n(fail) F25-AC4 -- a READY envelope carrying business_date renders an age > the REQUIRED business date dates the payload, with no as_of at all\n 59 pass\n 2 fail\nRan 61 tests across 14 files.\nrc=1",
-      "denominator": "59 of 61 tests across 14 files in the 5 named folders. Both failures are assertions of the literal 'Updated ' prefix -- fe-s-21/source-age.test.ts:166 (feeding the :174 expect) and fe-s-25/source-age-field.test.ts:65 -- in files outside this order's <paths> grant, contradicting the face's \"no test asserts the literal Updated\". F34-AC5 requires that word to be gone, so no label passes both criteria (row IRPT_FNTEND-W3-S19, BLOCKING). The same four pre-existing folders ran 57 pass / 0 fail at the base; fe-s-34's 4 tests pass inside this run (57 - 2 + 4 = 59).",
-      "status": "FAIL",
-      "status_reason": "BLOCKING, row IRPT_FNTEND-W3-S19: F34-AC5 (the old word gone from every business-date age) and this criterion cannot both pass under the order's <paths> grant. The two failing assertions -- `startsWith('Updated ')` at __tests__/fe-s-21/source-age.test.ts:166 and __tests__/fe-s-25/source-age-field.test.ts:65 -- sit in files the grant does not name, and BOUNDS say a path the work needs that is not named is a BLOCKING row, never an override. Not fixed; the order stays open until 2.0.0_SA_COO~F grants or seats that two-line edit, after which this invocation re-runs."
+      "output_evidence": "    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\n    ruling K check, both ways: \"Business date age: 1d\" -> true; \"No source age yet\" -> false\nANSWER-BEARING STATES: 5 of 5\n  ruling K check, both ways: \"Business date age: 2d\" -> true; \"Source time unknown\" -> false\nREADY WITH business_date: renders an age\n 61 pass\n 0 fail\nRan 61 tests across 14 files.\nrc=0",
+      "denominator": "61 of 61 tests across 14 files in the 5 named folders, the deciding run at portal@f7b2d986. The fe-s-34 folder's 4 tests are among them. The five fe-s-21 lines are the replaced check at source-age.test.ts:166, one per answer-bearing state; the fe-s-25 line is the replaced check at source-age-field.test.ts:65. Each check is printed both ways: true on the rendered age, false on the absence wording.",
+      "status": "PASS",
+      "status_reason": "Resolves BLOCKING row IRPT_FNTEND-W3-S19. Before amendment 12eef1910c granted the two test files, this same invocation at portal@944499a9 ran 59 passing tests and two failures: F21-AC3 (fe-s-21/source-age.test.ts:174, fed by :166) and F25-AC4 (fe-s-25/source-age-field.test.ts:65), both asserting the literal prefix 'Updated '. Both checks now compare with formatSourceAge of the same date and clock (fe-s-21 uses AS_OF, the date its `pure` is computed from -- row IRPT_FNTEND-W3-S22), cite ruling K beside them, and every other assertion in both files is as written."
     },
     {
       "criterion_id": "F34-AC7",
@@ -159,19 +179,19 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "Two runs of label.test.ts on identical bytes: standalone (the F34-AC2..AC5 evidence) and inside the F34-AC6 battery. Every graded age runs on an injected clock or a setSystemTime-pinned one, never on the wall clock.",
-      "observed": "4 of 4 pass in both runs; the battery's 2 failures are in fe-s-21 and fe-s-25 only.",
+      "method": "label.test.ts ran four times on identical FE-s-34 source bytes -- standalone twice (the F34-AC2..AC5 evidence, before and after the amendment) and inside the F34-AC6 battery twice. Every graded age runs on an injected clock or a setSystemTime-pinned one, never on the wall clock.",
+      "observed": "4 of 4 pass in all four runs with identical anchor lines; the amended battery ran 61 of 61, and the pre-amendment battery's only failures were the two out-of-grant checks.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "the two assertions that make F34-AC6 fail: __tests__/fe-s-21/source-age.test.ts:166 and __tests__/fe-s-25/source-age-field.test.ts:65",
-      "reason": "NOT EDITED: outside the <paths> grant. BOUNDS: \"A path you need that is not named is a BLOCKING row; never an override.\" Row IRPT_FNTEND-W3-S19 (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~F)."
+      "item": "every assertion in fe-s-21/source-age.test.ts and fe-s-25/source-age-field.test.ts other than the two startsWith('Updated ') checks",
+      "reason": "The amendment grants one check each and nothing else. Portal diff for the amendment: 19 insertions, 2 deletions, the two deletions being those checks. fe-s-21 still prints the new label on an as_of age -- row IRPT_FNTEND-W3-S22, not changed."
     },
     {
       "item": "envelopeFromAvailability (state/status.ts:222), which hands the panels the document's availability instant when no status arrived",
-      "reason": "NOT EDITED: BOUNDS leave every function in status.ts other than the label and the age path as it is, and fe-s-25/source-age-field.test.ts:121 pins its expression. Row IRPT_FNTEND-W3-S21 (ARMED, disarm owner 2.0.0_SA_COO~F)."
+      "reason": "NOT EDITED: BOUNDS leave every function in status.ts other than the label and the age path as it is, and fe-s-25/source-age-field.test.ts:121 pins its expression. Row IRPT_FNTEND-W3-S21 (ARMED), routed by the issuer to 1.0.0_SA_CTO for a ruling; the amendment says this stays untouched."
     },
     {
       "item": "tabs/analysis/composer.ts",
@@ -183,11 +203,12 @@
     }
   ],
   "surprises": [
-    "IRPT_FNTEND-W3-S19: F34-AC5 and F34-AC6 cannot both pass under the grant -- fe-s-21/source-age.test.ts:166 and fe-s-25/source-age-field.test.ts:65 assert the age STARTS WITH 'Updated ', so F34-AC6 reads 59 pass / 2 fail. BLOCKING, ARMED, disarm 2.0.0_SA_COO~F.",
+    "IRPT_FNTEND-W3-S19: F34-AC5 and F34-AC6 could not both pass under the original grant -- fe-s-21/source-age.test.ts:166 and fe-s-25/source-age-field.test.ts:65 asserted the age STARTS WITH 'Updated '. RESOLVED by 2.0.0_SA_COO~F's amendment @12eef1910c, which granted those two checks; replaced at portal@f7b2d986, and F34-AC6 now runs 61 of 61.",
     "IRPT_FNTEND-W3-S20: ruling O's premise that the two analysis panels aged as_of holds only with no status; on a reading they already aged business_date (shared sourceAgeBasis). The re-route moved the absent/null wording. OBSERVATION, INERT.",
-    "IRPT_FNTEND-W3-S21: on the no-status fixture path the analysis tab renders today, the panels age availability.sourceAsOf (an instant) and ruling K's label now calls it a business date -- \"Business date age: 1d\" where businessAsOf is 4d old. OBSERVATION, ARMED, disarm 2.0.0_SA_COO~F."
+    "IRPT_FNTEND-W3-S21: on the no-status fixture path the analysis tab renders today, the panels age availability.sourceAsOf (an instant) and ruling K's label now calls it a business date -- \"Business date age: 1d\" where businessAsOf is 4d old. OBSERVATION, ARMED, disarm 2.0.0_SA_COO~F; routed by the issuer to 1.0.0_SA_CTO, open.",
+    "IRPT_FNTEND-W3-S22: fe-s-21's `pure` is computed from the as_of instant (status.sourceAsOf), so \"the same date\" for its amended check is AS_OF, not the business date -- equality with the business date's age would read 2d vs 1d and stay red. OBSERVATION, INERT."
   ],
-  "session_log": "0.9.0_WK_IRPT_FNTEND~3 on IRPT_FNTEND.TO-FE-s-34, worktree pair /c/tmp/wk-irpt_fntend-5-3-fe-s-34 (branch wk-irpt_fntend-5-3-fe-s-34 from CLOUD 0a74710f33) + /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal (same branch name, from portal DEV c2eb8eb4). FIRST ACT: `git rev-parse --abbrev-ref HEAD` -> wk-irpt_fntend-5-3-fe-s-34; TREE-OK. RE-GROUNDED the face's premises: formatSourceAge at status.ts:274 with the labels at :280-287, three call sites (status.ts:465, StageDisplay.tsx:51, VariantSelector.tsx:61) -- all confirmed; \"no test asserts the literal Updated\" -- REFUTED by the native Grep tool (fe-s-21:166, fe-s-25:65; row W3-S19); \"the two sites age the as_of instant\" -- true only with no status (row W3-S20); the no-status path puts an instant under the new label (row W3-S21). Baselines at the base: typecheck rc=0; the four pre-existing folders 57 pass / 0 fail. Wrote label.test.ts first and ran it against the unmodified source (0 pass / 4 fail, every anchor missing), then edited the three granted source files with an exact, count-asserted, EOL-preserving script, then ran F34-AC1..AC6 as the order writes them. Label chosen: \"Business date age: <figure>\" (under 1m / Nm / Nh / Nd). Portal commit 944499a9 (LOCAL). F34-AC6 FAILS on the two out-of-grant assertions, so the order stays OPEN and <status> is not flipped.",
+  "session_log": "0.9.0_WK_IRPT_FNTEND~3 on IRPT_FNTEND.TO-FE-s-34, worktree pair /c/tmp/wk-irpt_fntend-5-3-fe-s-34 (branch wk-irpt_fntend-5-3-fe-s-34 from CLOUD 0a74710f33) + /c/tmp/wk-irpt_fntend-5-3-fe-s-34/portal (same branch name, from portal DEV c2eb8eb4). FIRST ACT: `git rev-parse --abbrev-ref HEAD` -> wk-irpt_fntend-5-3-fe-s-34; TREE-OK. RE-GROUNDED the premises: the formatSourceAge location and its three call sites confirmed; \"no test asserts the literal Updated\" REFUTED (fe-s-21:166, fe-s-25:65; row W3-S19); \"the two sites age the as_of instant\" true only with no status (row W3-S20); the no-status path puts an instant under the new label (row W3-S21). Baselines: typecheck rc=0; the four pre-existing folders 57 pass / 0 fail. label.test.ts written first and run against the unmodified source (0 pass / 4 fail, every anchor missing); the three granted source files edited; portal commit 944499a9. F34-AC6 then failed on the two out-of-grant checks and the order was left OPEN (workspace 1dbf9c3293). AMENDMENT 12eef1910c (2.0.0_SA_COO~F) granted those two checks, one purpose each: both replaced with equality against formatSourceAge of the same date and clock (fe-s-21 on AS_OF -- row W3-S22), ruling K cited, each shown both ways (red before at portal@944499a9: F21-AC3 0 of 5 and fe-s-25:65 false; green after, printed true on the age and false on the absence wording). Portal commit f7b2d986. Re-ran F34-AC1 (rc=0), F34-AC2..AC5 (4 of 4) and F34-AC6 (61 of 61). Every mechanical criterion PASSES by output, so <status> flips to complete. Label: \"Business date age: <figure>\". All commits LOCAL.",
   "compiler_tools": [
     {
       "tool": "bun 1.3.9 (cf6cdbbb)",
