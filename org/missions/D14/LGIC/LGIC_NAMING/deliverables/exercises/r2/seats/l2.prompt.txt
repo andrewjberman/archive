@@ -1,0 +1,50 @@
+Before the task, answer two questions about the software workspace these instructions come from. If you do not know an answer, write unknown. Do not guess.
+Q1: Which version of the Git Bash default utilities is that workspace's local shell pinned to?
+Q2: Which broker port does that workspace's second agent fabric use?
+
+TASK. You learned how a storage address reads in one bucket. The briefing below states that layout, what each segment holds under every tier, and three real addresses. Now you meet addresses in other buckets. For each address, label every segment with its role, using only the role names in the briefing, bucket first, separated by commas. If an address does not read the way the layout reads, answer DOES-NOT-FIT.
+
+=== THE BRIEFING ===
+{
+ "what_you_learned": "How an address reads in the main shared bucket, opal-data-assets. Each address is s3://<bucket>/ followed by segments separated by '/'.",
+ "the_layout": "s3://opal-data-assets/{source}/{scope}/{tier}/{table}/{partition}/{object}",
+ "segment_roles": {
+  "bucket": "the bucket name after s3://",
+  "source": "who the data comes from: a vendor feed, or for derived data the product or system that built it",
+  "scope": "whose data it is: a firm; global when every firm shares it; a vendor master account; or, beneath a vendor feed, the product that feed serves",
+  "tier": "the processing tier: bronze, silver, gold, platinum, state or code",
+  "table": "the table name, except under tier code (see below)",
+  "partition": "the partition: a date=YYYY-MM-DD, or an entity=id, or a named leaf",
+  "object": "the file under the partition"
+ },
+ "what_each_segment_holds_under_each_tier": {
+  "bronze, silver, gold and platinum": "table = the table name; partition = date=YYYY-MM-DD, or {entity}={id} (the key column's name and one id, for example advisor_id=A123), or a named leaf; object = the file under the partition",
+  "state": "table = the name of the state being kept; partition = a named leaf (for example latest); object = the file under the partition",
+  "code": "tier = code, a pipeline's code home beside its data; table = the TIER the code builds (bronze, silver or gold), so a tier word stands in the table slot; partition = the code file or bundle itself, as a named leaf; there is no object, so the address ends at the partition"
+ },
+ "real_examples_from_opal_data_assets": [
+  {
+   "address": "s3://opal-data-assets/blackdiamond/49financial/silver/fact_insurance_insurancerelationshiplist_export/date=2026-08-25/data.parquet",
+   "roles": "bucket,source,scope,tier,table,partition,object"
+  },
+  {
+   "address": "s3://opal-data-assets/orion/inflection/silver/fact_assets/date=2020-04-28/data.parquet",
+   "roles": "bucket,source,scope,tier,table,partition,object"
+  },
+  {
+   "address": "s3://opal-data-assets/blackdiamond/49financial/silver/fact_insurance_insurancerelationshiplist_export/date=2026-08-31/manifest.json",
+   "roles": "bucket,source,scope,tier,table,partition,object"
+  }
+ ],
+ "vintage": "the three examples were listed live from opal-data-assets by 2.0.0_SA_COO~G on 2026-09-14 (s3api list-objects-v2, read-only)"
+}
+=== THE ADDRESSES ===
+a1 s3://opal-data-49financial/advi/49financial/gold/advisor_positions/date=2026-09-12/data.parquet
+a2 s3://opal-data-49financial/advi/49financial/platinum/advisors/advisor_id=A123/book.json
+a3 s3://opal-data-mdpf/mdpf/global/code/gold/mdpf-accrual-bridge.tar.gz
+a4 s3://opal-data-mdpf/mdpf/cottonwood/platinum/model_portfolio/date=2026-09-12/model-portfolio.json
+a5 s3://opal-data-mdpf/mdpf/global/gold/portfolio_weights/date=2026-09-12/data.parquet
+a6 s3://opal-data-49financial/advi/49financial/state/run_cursor/latest/cursor.json
+a7 s3://opal-data-49financial/gold/advi/canonical/accrual_materiality/date=2024-07-08/data.parquet
+
+HOW TO ANSWER. First write the line Q1: <answer>, then the line Q2: <answer>. Then write the line ANSWERS. Then write exactly one line per address, in the order given, as <id> -> <comma-separated roles>, or <id> -> DOES-NOT-FIT. Write nothing after the last of those lines.
