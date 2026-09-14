@@ -19,6 +19,7 @@ SWATCHES = {
     'yellow500 (Commodities, this order)': '#eab308',
     'amber500  (Cash, pre-existing)':      '#f59e0b',
     'pink500   (Structured, this order)':  '#ec4899',
+    'pink600   (Hedge, the amendment)':    '#db2777',
     'green500  (Fixed Income)':            '#10b981',
     'blue500   (Equity)':                  '#3b82f6',
     'orange500 (Alternatives)':            '#f97316',
@@ -94,9 +95,10 @@ for label, hx in SWATCHES.items():
     rgb = hex_to_rgb(hx)
     print('  %-38s %-9s %6.2f  %s' % (label, hx, contrast(rgb, canvas), rgb))
 print('')
-print('TEXT ON THE TWO CHIPS (getSubAssetTextColor picks white unless the hex is in its')
-print('lightBackgrounds list; yellow500 is NOT in that list at this pin):')
-for label, hx in [('yellow500', '#eab308'), ('amber500', '#f59e0b')]:
+print('TEXT ON THE CHIPS (getSubAssetTextColor picks white unless the hex is in its')
+print('lightBackgrounds list; the amendment PUT yellow500 in that list, so the yellow')
+print('chips now take gray900 -- see V5-AC8 for the executed reading):')
+for label, hx in [('yellow500', '#eab308'), ('amber500', '#f59e0b'), ('pink600', '#db2777'), ('green900', '#064e3b')]:
     rgb = hex_to_rgb(hx)
     print('  %-10s white #ffffff on it: %5.2f   gray900 #111827 on it: %5.2f'
           % (label, contrast(rgb, hex_to_rgb('#ffffff')), contrast(rgb, hex_to_rgb('#111827'))))
@@ -109,6 +111,13 @@ print('  CONTROL  blue500 vs orange500       dE76 = %6.2f   (a pair nobody dispu
       % de76(hex_to_rgb('#3b82f6'), hex_to_rgb('#f97316')))
 print('  CONTROL  green400 vs green500       dE76 = %6.2f   (an adjacent ramp step inside one family)'
       % de76(hex_to_rgb('#34d399'), hex_to_rgb('#10b981')))
+print('')
+print('CIE76 dE(Lab) -- THE AMENDMENT PAIR (Hedge left green900 for pink600)')
+print('  SUBJECT  pink600 vs pink500 (class base)  dE76 = %6.2f   (the cell asked for a shade DISTINCT'
+      % de76(hex_to_rgb('#db2777'), hex_to_rgb('#ec4899')))
+print('           from ASSET_CLASS.structured; read this against the controls above)')
+print('  CONTEXT  pink600 vs green900 (the old binding) dE76 = %6.2f'
+      % de76(hex_to_rgb('#db2777'), hex_to_rgb('#064e3b')))
 print('')
 print('Lab COORDINATES OF THE SUBJECT PAIR (L*, a*, b*)')
 print('  yellow500 %s' % (tuple(round(v, 2) for v in rgb_to_lab(y)),))

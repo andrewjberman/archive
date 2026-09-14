@@ -243,3 +243,72 @@ the very distinction this criterion asks to be judged.
 Branch `wk-posn-5-22-portal`, head `c475e31e7014cb7e18ccf0c1cb6a335ad0720044`, cut from
 `e85f6eb84f3a1771a37011a7e77e372570bad02a`, destination `refs/drains/posn-5-portal`. Recorded at
 `org/missions/D4/POSN/POSN_ASTTAX/ledger/PORTAL_REFS.md`, created by this order.
+
+---
+
+# AMENDMENT SESSION (2026-09-14 ~19:3x-19:5xZ) -- THE ORDER IS NOW CLOSED
+
+**EVERYTHING ABOVE THIS LINE IS THE FIRST SESSION'S RECORD AND IS LEFT EXACTLY AS IT WAS
+WRITTEN.** It states that `V5-AC2` and `V5-AC5` were REFUSED and that `<status>` was not
+flipped. That was true of the order as it read at `945d1ddd95`. The issuer amended the order
+at `7e4c3c01bb` (~19:0xZ), graduating rows `W22-S1`, `W22-S2` and `W22-S4` as `Z-S68`,
+`Z-S69`, `Z-S70`, and this section records what changed. Where the two disagree, THIS
+SECTION IS THE CURRENT ONE.
+
+## WHAT THE AMENDMENT CHANGED, AND WHAT THIS SESSION DID ABOUT IT
+
+| row I filed | what the amendment did | what this session did |
+|---|---|---|
+| `W22-S1` -- `'Hedge'` cannot be ADDED; it already exists at `:294` on `PALETTE.green900` | the cell now says **RE-BIND** to a pink-family token, and the issuer supplies the measurement that the green binding is dead (285 served rows scanned, no `LastEvaluatedKey`, **0** rows with `sub_asset_class = Hedge`) | re-bound `'Hedge'` to `PALETTE.pink600` `#db2777`, a shade distinct from the class base `pink500` `#ec4899` (dE76 = 11.81). `'Volatility'` left alone, as the cell says |
+| `W22-S2` -- `V5-AC5`'s `git diff --submodule=log -- portal` limb is non-empty BY CONSTRUCTION once the mandated portal commit exists | the gitlink is now read as `git ls-tree HEAD -- portal` **and** an empty `git diff --cached -- portal` | both read clean, plus a `git ls-files -- portal` = 1 discriminator so the empty read is CLEAN and not matched-nothing |
+| `W22-S4` -- `SUB_ASSET_COLORS` feeds `getSubAssetTextColor`, whose `lightBackgrounds` set held no yellow, so the new chips shipped white-on-yellow at 1.92:1 | `PALETTE.yellow500` is to be ADDED to `lightBackgrounds`; the pink family joins it **only if it measures below 4.5:1**; and a new criterion `V5-AC8` grades the readings | `yellow500` added (chips now read `gray900` at **9.250**); `pink600` **NOT** added, because white-on-pink600 measures **4.597 >= 4.5** and `gray900`-on-pink600 would have measured **3.859**, i.e. adding it would have broken the chip it was meant to fix |
+
+## THE SECOND PORTAL COMMIT
+
+`6c0deebd9121d5e955943d5a7507de51a102f480`, parent `c475e31e7014cb7e18ccf0c1cb6a335ad0720044`,
+branch `wk-posn-5-22-portal`, base pin `e85f6eb84f3a1771a37011a7e77e372570bad02a`, destination
+`refs/drains/posn-5-portal`. One file, `+2/-1`. **`c475e31e70` WAS NOT AMENDED OR REWRITTEN** --
+it is already on the drain ref, so rewriting it would move a ref this worker does not own. The
+superproject gitlink still reads `160000 commit e85f6eb84f3a...` and nothing was staged, pushed,
+promoted or merged. `PORTAL_REFS.md` gained a second line, append-only.
+
+## THE CONTRAST TABLE (`V5-AC8`, the new criterion)
+
+Text colour is **obtained by calling the file's own `getSubAssetTextColor`**, never asserted;
+the instrument self-tests against the WCAG spec endpoints (white/black 21.000, white/white
+1.000) before any subject is read.
+
+| key | background | text | ratio | floor 4.5 |
+|---|---|---|---|---|
+| `Metals` | `yellow500` `#eab308` | `gray900` `#111827` | **9.250** | PASS |
+| `Commodities` | `yellow500` `#eab308` | `gray900` `#111827` | **9.250** | PASS |
+| `Hedge` | `pink600` `#db2777` | `white` `#ffffff` | **4.597** | PASS |
+| negative control (pre-amendment) | `yellow500` `#eab308` | `white` `#ffffff` | **1.918** | BELOW -- this is what the amendment fixed |
+
+## THE CRITERIA AT THIS VINTAGE
+
+`V5-AC2`, `V5-AC3`, `V5-AC4`, `V5-AC5`, `V5-AC6`, `V5-AC8` PASS by output; `V5-AC1` is carried
+from the pre-write moment its own clause scopes it to and was NOT re-run (its detach branch
+would abandon two commits -- row `W22-S5`); `V5-AC7` is judgment and carries readings with no
+verdict. **`<status>` IS FLIPPED TO `complete` in the same commit as the 8-row proof instance.**
+
+## TWO NEW ROWS
+
+- **`POSN_ASTTAX-Z-W22-S6`** (OBSERVATION / ARMED, disarm owner `2.0.0_SA_COO~Z`) -- the CLASS
+  map has no text-colour function at all: `ASSET_CLASS.structured` `pink500` reads **3.527:1**
+  against white and `ASSET_CLASS.commodities` `yellow500` reads **1.918:1**, both below the same
+  floor `V5-AC8` applies to the chips, and `getSubAssetTextColor` never sees either. `V5-AC8`'s
+  domain is the chip map, so the order's own contrast criterion cannot see this. Out of this
+  order's `<paths>`; not chased.
+- **`POSN_ASTTAX-Z-W22-S7`** (OBSERVATION / INERT) -- `V5-AC5`'s `<expect>` still reads *"one
+  commit ... parent e85f6eb84f"* after the same amendment ordered a second edit that cannot land
+  in that commit. Both readings are printed in the instance's `V5-AC5` row; graded PASS on the
+  substance (authorship, the pin as the branch's BASE proved by `merge-base`, the gitlink
+  unmoved), which is how the issuer restates it.
+
+## ONE DEFECT OF MY OWN, CAUGHT AND CORRECTED
+
+`ac7_swatch_readings.py` had `green900` **retyped** as `#14532d` -- Tailwind's native green-900.
+This `PALETTE` maps `green900` to `#064e3b`. Caught by reading the hexes out of the file instead
+of trusting the memory of them, which is the discipline the `V5-AC3` and `V5-AC8` instruments
+enforce by construction and which this one script had escaped.
