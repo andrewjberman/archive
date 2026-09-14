@@ -94,12 +94,17 @@ exact lifecycle before.
 **WHAT MUST NEVER BE RECORDED:** the token, the private key, any `get-secret-value` output, or the
 `Authorization` header. The two status lines and the two reason codes are the whole evidence.
 
-**AND ONE THING THIS RUN WILL NOT PROVE, stated so it is not over-read:** it exercises the REAL
-path only once `IB-rt-2`'s deploy has landed. At this vintage the guarded entry points are
-COMMITTED AND NOT SERVED (rows `IRPT_BCKEND-W2-S21`, `W2-S22`, `W2-S24`), so today the same request
-would reach the OLD unguarded handler and answer in its ad-hoc envelope. **The operator act above
-belongs AFTER the deploy, not before it** -- running it now would produce a passing-looking 200
-from the very code this cell exists to replace.
+**THE PRECONDITION THIS RECORD CARRIED IS NOW MET, AND THE PARAGRAPH IT REPLACES SAID OTHERWISE.**
+When this record was written the guarded entry points were COMMITTED AND NOT SERVED (rows
+`IRPT_BCKEND-W2-S21`, `W2-S22`, `W2-S24`), so the act above would have produced a passing-looking
+200 from the very code this cell exists to replace. **That is no longer the vintage.** Six roots
+were applied one at a time and each verified on its SERVED bytes before the next was touched
+(ledger `irpt-bckend-rt2`, CLOSED, 12 legs): `entry.lambda_handler` is the live handler on 6 of 6,
+`artifact_sha256 == S3 content-sha256 == live CodeSha256` on 6 of 6, and 6 of 6 import in the flat
+`/var/task` layout from their served bytes with the repo off `sys.path`. **So the operator act is
+now LIVE-READY for the six.** The one route still on its old handler is `irpt-holdings`, whose
+mark is written and held (row `IRPT_BCKEND-W2-S41`); an operator exercising the directory route
+above is unaffected by that.
 
 ---
 
@@ -111,3 +116,75 @@ entry points with the REAL guard, the REAL Enforcer and the REAL scope resolver 
 run cannot show is exactly what this record hands to the operator and to `IB-rtb-1`: that the EDGE
 VALIDATOR injects the headers the boundary trusts, for a token the AUTHORIZER accepted, on the
 deployed function.
+
+
+---
+
+# RT2 ARM (g2) -- SERVED ENVELOPE CONFORMANCE IS **HUMAN-GATED**, ON THE SAME PRINCIPAL
+
+**Ruled by the issuer, amendment 3 C2 and re-confirmed at amendment 4:** *"g2 depends on the SAME
+principal and therefore takes the SAME treatment -- write it HUMAN-GATED with the exact operator
+act and its expected reading. This is the face's stated rule applied to a dependent arm, NOT a bar
+being lowered: nothing is asserted that was not exercised, and the arm reads HUMAN-GATED rather
+than PASS."*
+
+## WHY IT CANNOT BE MEASURED WITHOUT THE ACT ABOVE
+
+Arm (g) has two halves and only one of them needs a principal.
+
+| half | what it needs | state |
+|---|---|---|
+| the version check, SERVED | any request the boundary refuses BEFORE reading anything | **MET, 11 of 11** on the deployed functions |
+| a SUCCESS response validating against `responses/<operation>.response.schema.json` | a principal the EDGE VALIDATOR accepts | **HUMAN-GATED** -- this record |
+
+**AND THE WRONG WAY TO CLOSE IT IS THE EASY ONE.** Invoking a deployed function by name with a
+FABRICATED advisor id returns a refusal, not a response. A refusal cannot validate against a
+response contract at all (row `IRPT_BCKEND-W2-S25`, RULED), so counting that as conformance would
+be recording the opposite of what the arm asks. The arm reads `HUMAN-GATED` instead.
+
+## THE OPERATOR'S EXACT ACT FOR g2 -- ONE MORE READ ON THE SAME SESSION
+
+**WHO / WHERE:** the same seat and account as the act above -- `0.7.0_AE_CloudOps` or Andrew,
+account `313476888478`, `us-east-1`. **This is step 3b of that run, not a second run:** it uses the
+token minted in step 2 and is covered by the same bounded create-exercise-delete.
+
+**THE ACT:** with the same `Authorization: Bearer <token>` and `X-Contract-Version: v1`, issue ONE
+authorized GET per deployed operation and keep ONLY the pass/fail of a schema validation:
+
+1. `GET /api/scoped/investor-reporting/directory/search?q=`
+2. `POST /api/scoped/investor-reporting/directory/resolve` with a selection of accounts the
+   principal's own ownership map grants
+3. `GET /api/scoped/investor-reporting/performance/{accountSetId}` for one such account
+4. `GET /api/scoped/investor-reporting/narrative/{reportId}` for a report of that firm
+5. `GET /api/scoped/investor-reporting/status` and `GET .../status/{jobId}`
+6. `GET /api/scoped/investor-reporting/export/{exportId}` for a receipt of that firm
+
+**EXPECTED READING, per operation:** HTTP 200 and a body that validates against
+`docs/contracts/investor-reporting/v1/responses/<operation>.response.schema.json` -- the ONE
+envelope `{contract_version:"v1", operation, firm_id:"fir_...", data, status?}` with
+`additionalProperties: false`, and `data` validating against the producer document's own schema.
+**The `firm_id` MUST be the ISSUED OPAQUE id (`fir_...`), never the registry spelling** -- that
+distinction is what rows `W2-S27` and bound 13 exist for, and it is the one field a reader can
+check at a glance.
+
+**WHAT TO RECORD:** per operation, the HTTP status, the `operation` string, whether the body
+validated, and the FIRST validation error if it did not. **NOT the `data` payload** -- these are
+real client holdings, and this arm needs the verdict, not the bytes.
+
+**THE TWO POST ROUTES ARE EXCLUDED AND NAMED:** `POST /analysis` (`analysis-requests`) and
+`POST /export` (`submit-export`) ENQUEUE work. Bound 1 forbids a live vendor call and bound 2
+forbids this project notifying anyone, and an enqueued analysis job is the head of a chain that
+ends in a YCharts call. **They are excluded on their own line and counted as neither a pass nor a
+fail** -- exactly as the no-handler route is in arm (a). An operator who wants them covered needs
+Andrew's per-use word first, and that is a different decision from this one.
+
+**AND WHAT THIS STILL WILL NOT PROVE:** `export-download` returns a signed URL; its parameters are
+never logged (bound 6), so the arm records only that the envelope validated.
+
+## THE VERDICT
+
+**`HUMAN-GATED`.** The same three reasons that gate arm (f) gate this: the principal is out of this
+order's `<paths>`, minting one writes to the production authentication plane, and the alternative
+is a worker using a private key to mint itself an identity. Nothing here is asserted as measured:
+the in-process paired arms stand on their own and are reported separately, and the served half
+waits on one bounded operator run.

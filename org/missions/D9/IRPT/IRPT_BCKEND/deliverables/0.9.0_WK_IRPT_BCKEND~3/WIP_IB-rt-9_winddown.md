@@ -1,3 +1,11 @@
+> ⛔ **SUPERSEDED IN ONE PLACE, AND IT IS SECTION 3.** Read
+> `WIP_IB-rt-9_coldstart2_blocked.md` (same folder) FIRST. **The "one deploy that is owed" below
+> CANNOT BE TAKEN** -- all three Terraform roots carry a committed, unapplied
+> `handler -> entry.lambda_handler` flip and the `entry` module is in no zip, so the apply that
+> lands the `ids.py` fix takes three live functions down (row `IRPT_BCKEND-W3-S26`, measured
+> 2026-09-11 ~23:3xZ by extract-and-import, 3 of 3). Section 5's "next free id is W3-S26" is also
+> spent: the next free id is **`W3-S31`**. Everything else below still holds.
+
 # WIP HAND-OFF -- IRPT_BCKEND.TO-IB-rt-9, stopped at a managed wind-down
 
 **Written for a SUCCESSOR who has none of my context.** Read this before you read the task

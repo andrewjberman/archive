@@ -10,20 +10,38 @@
   "assignee": "0.7.0_AE_CloudOps~K",
   "artifacts_produced": [
     {
-      "path_or_key": "arn:aws:iam::313476888478:role/cot-rebalancer-runner-role",
+      "path_or_key": "infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf",
       "kind": "iam",
       "commit_or_etag": "5d49bd8b1",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "deploy_evidence": "Scoped execution role, landed 2026-07-21 via safe-apply (10 resources added), ledger org/critical_paths/change_management/20260721T2314Z_cot-ws5-rebalancer-runner_deploy_completion.md CLOSED 20260721T234513Z, 5 legs proven. RE-VERIFIED LIVE ON THE PRIMITIVE by 0.7.0_AE_CloudOps~K on 2026-08-26, not inherited from that ledger. Three inline policies (cot-rebalancer-runner-session-read, cot-rebalancer-runner-write-cot, cot-rebalancer-runner-invoke-silver-blackdiamond) plus attached opal-assets-one-way-fan-in-fence and AWSLambdaBasicExecutionRole. The write-cot policy carries an explicit Deny s3:* on arn:aws:s3:::opal-data-assets/blackdiamond/49f/* -- firm separation.",
-      "artifact_covered_by": ["WS5-AC1"]
+      "deploy_evidence": "APPLIED IDENTITY: arn:aws:iam::313476888478:role/cot-rebalancer-runner-role -- live and drift=DECLARED (comp-find --corpus aws, 7 hits / 2511 nodes, graph built 2026-09-12T05:56:58Z: the role, its 3 inline policies, the daily rule, the lambda and its log group). THIS ROW NOW CITES THE DECLARING TERRAFORM rather than the ARN, because an ARN is not a git (commit, path) pair and no commit can contain one; the applied state is carried here, which is the estate's existing convention (16 of 23 iam/schedule rows estate-wide do this). Class recorded as WSE_COTMDL-S5 @fcec8d20e1. Scoped execution role, landed 2026-07-21 via safe-apply (10 resources added), ledger org/critical_paths/change_management/20260721T2314Z_cot-ws5-rebalancer-runner_deploy_completion.md CLOSED 20260721T234513Z, 5 legs proven. RE-VERIFIED LIVE ON THE PRIMITIVE by 0.7.0_AE_CloudOps~K on 2026-08-26, not inherited from that ledger. Three inline policies (cot-rebalancer-runner-session-read, cot-rebalancer-runner-write-cot, cot-rebalancer-runner-invoke-silver-blackdiamond) plus attached opal-assets-one-way-fan-in-fence and AWSLambdaBasicExecutionRole. The write-cot policy carries an explicit Deny s3:* on arn:aws:s3:::opal-data-assets/blackdiamond/49f/* -- firm separation.",
+      "artifact_covered_by": [
+        "WS5-AC1"
+      ]
     },
     {
-      "path_or_key": "EventBridge rules cot-rebalancer-runner-daily, cot-bronze-complete, cot-silver-complete",
+      "path_or_key": "infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf",
       "kind": "schedule",
       "commit_or_etag": "5d49bd8b1",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "deploy_evidence": "cot-rebalancer-runner-daily ENABLED, cron(0 6 * * ? *), target arn:aws:lambda:us-east-1:313476888478:function:cot-rebalancer-runner. cot-bronze-complete and cot-silver-complete both ENABLED, each targeting arn:aws:lambda:us-east-1:313476888478:function:cot-bd-session-trigger. Targets read directly via list-targets-by-rule. The daily schedule is EXERCISED, not merely configured: it fired 2026-08-26T06:00:41Z and produced the run scored under TO-R1-AE/TO-R2-AE.",
-      "artifact_covered_by": ["WS5-AC2"]
+      "deploy_evidence": "cot-rebalancer-runner-daily -- DECLARED AT infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf:168, its name INTERPOLATED as \"${local.cot_rebalancer_runner_name}-daily\", which is why a literal name search returns a MEASURED ZERO across 11,670 files: the zero is the instrument, not the world. APPLIED: aws events describe-rule -> ENABLED, cron(0 6 * * ? *), target arn:aws:lambda:us-east-1:313476888478:function:cot-rebalancer-runner. EXERCISED, not merely configured: fired 2026-08-26T06:00:41Z, RequestId 62303f80-a76b-4c50-87f9-b63a92d65a6c, producing the manifest scored under TO-R1-AE/TO-R2-AE. THIS IS THE ONLY EventBridge rule WS5 PRODUCED; see the sibling row for the two it VERIFIES.",
+      "artifact_covered_by": [
+        "WS5-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/eventbridge.tf",
+      "kind": "schedule",
+      "commit_or_etag": "80225d60ac",
+      "introduces": [
+        "cot-bronze-complete",
+        "cot-silver-complete"
+      ],
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "PROVENANCE FIRST, BECAUSE THIS ROW IS NOT A PRODUCTION CLAIM: cot-bronze-complete and cot-silver-complete PREDATE WS5. Both were introduced into infra/aws/terraform/cot-pipeline/eventbridge.tf on 2026-06-09 by 0.6.2_AE_PartnerETL at 80225d60ac (git log -S, full-history), six weeks before WS5's own work at 5d49bd8b1 -- which touched ONLY infra/aws/terraform/opal-assets/cot_rebalancer_runner.tf and never this root. WS5-AC2 reads \"stamp-triggers live (mirror estate)\" with method live_read, so these two are the criterion's VERIFICATION TARGETS, and carrying them here as artifacts WS5 produced would be an over-claim. They are retained in artifacts_produced, correctly pinned and provenance-stated, rather than deleted, so the record shows what was verified and by whom it was built. PIN VERIFIED WITH A NEGATIVE CONTROL: both tokens appear 2x at 80225d60ac and 0x at its parent. APPLIED: aws events describe-rule -> both ENABLED, each on an S3 Object Created pattern over opal-data-cot (_BRONZE_COMPLETE.json and silver_complete.json respectively), each targeting function:cot-bd-session-trigger. SPLIT FROM A SINGLE COMPOUND ROW under 1.0.0_SA_CTO ruling 96099: one (commit, path) pin cannot span two terraform roots without fabricating a vintage on one of them.",
+      "artifact_covered_by": [
+        "WS5-AC2"
+      ]
     },
     {
       "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
@@ -31,15 +49,19 @@
       "commit_or_etag": "77ab810b71",
       "deployed_state": "DEPLOYED-VERIFIED",
       "deploy_evidence": "functions.cot-rebalancer-runner carries source_dir infra/aws/lambda/cot-pipeline/cot-rebalancer-runner, files [lambda_function.py, landing_guard.py], tf_file, tf_resource module.cot_rebalancer_runner.aws_lambda_function.this, artifact_s3_key opal-assets/cot-rebalancer-runner.zip, iam_role cot-rebalancer-runner-role. The two declared files match the two members of the live deployed package exactly, checked by reading the downloaded zip's namelist.",
-      "artifact_covered_by": ["WS5-AC3"]
+      "artifact_covered_by": [
+        "WS5-AC3"
+      ]
     },
     {
       "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~K/logs/2026-08-26/session_20260826T1345-1500Z.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING_SAFE_COMMIT_20260826",
+      "commit_or_etag": "5edabd600a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Session log whose Compiler Tools section reproduces all 8 simulate-principal-policy invocations including the 49f negative control, with the action-name typo trap explicitly handled.",
-      "artifact_covered_by": ["WS5-AC4"]
+      "deploy_evidence": "Committed at 5edabd600a (git log --full-history -- author 0.0.0_AB_MSTR~Z, 2026-08-27, an INTEGRATOR MERGE, which is why a simplified git log can miss the commit that carries it). Replaces the placeholder PENDING_SAFE_COMMIT_20260826, which was never substituted at authoring time and is an ordinary defect of this seat, unrelated to the WSE_COTMDL-S5 class. Session log whose Compiler Tools section reproduces all 8 simulate-principal-policy invocations including the 49f negative control, with the action-name typo trap explicitly handled.",
+      "artifact_covered_by": [
+        "WS5-AC4"
+      ]
     }
   ],
   "acceptance": [

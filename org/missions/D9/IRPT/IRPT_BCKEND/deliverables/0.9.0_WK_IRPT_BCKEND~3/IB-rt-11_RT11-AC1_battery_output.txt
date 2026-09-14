@@ -1,0 +1,98 @@
+==============================================================================
+IB-rt-11 / RT11-AC1 -- intake currency and unit controls: QUARANTINE OVER RELABELING
+==============================================================================
+
+(a) FOUR OF FOUR -- each control, its own finding, its source cell, and quarantine
+      SPECIMEN PROVENANCE, stated on the arm: every specimen below is SYNTHETIC and
+      ADVERSARIAL BY CONSTRUCTION -- written to hit a named control. No real
+      advisor-supplied workbook exists in this repository and none was manufactured
+      to look like one. This is a result about the controls, NOT a certification
+      against real client input.
+      holdings_non_usd.csv           UNSUPPORTED_CURRENCY   source=holdings_non_usd.csv!C2            quarantined=True
+  PASS    a holdings_non_usd.csv -> UNSUPPORTED_CURRENCY (CAD established at two agreeing coordinates; not in the supported set)  --  findings: ROW_SKIPPED_NOT_A_HOLDING, UNSUPPORTED_CURRENCY
+      holdings_subtotals.csv         SUBTOTAL_ROW_PRESENT   source=holdings_subtotals.csv!C5          quarantined=True
+  PASS    a holdings_subtotals.csv -> SUBTOTAL_ROW_PRESENT (a subtotal row excluded from the computed total)  --  findings: ROW_SKIPPED_NOT_A_HOLDING, SUBTOTAL_ROW_PRESENT
+      holdings_multi_sheet.xlsx      MULTI_SHEET_WORKBOOK   source=Holdings!(workbook)                quarantined=True
+  PASS    a holdings_multi_sheet.xlsx -> MULTI_SHEET_WORKBOOK (2 worksheets, 1 read; the unread sheet named)  --  findings: AMBIGUOUS_CURRENCY, MULTI_SHEET_WORKBOOK
+      holdings_ambiguous_total.csv   AMBIGUOUS_TOTAL        source=holdings_ambiguous_total.csv!C5    quarantined=True
+  PASS    a holdings_ambiguous_total.csv -> AMBIGUOUS_TOTAL (two disagreeing stated totals; the parser picks NEITHER)  --  findings: AMBIGUOUS_TOTAL, ROW_SKIPPED_NOT_A_HOLDING
+  PASS    a four controls fired: 4 of 4  --  denominator is the declared control table, not the findings that happened to appear
+
+      WHICH COORDINATE ESTABLISHED (or refused to establish) THE CURRENCY:
+        holdings_non_usd.csv         holdings_non_usd.csv!C2  state=ESTABLISHED currency=CAD    coordinates_read=DECLARED_CURRENCY_COLUMN,VALUE_COLUMN_HEADER,VALUE_CELL_TEXT
+        holdings_non_usd.csv         holdings_non_usd.csv!C3  state=ESTABLISHED currency=CAD    coordinates_read=DECLARED_CURRENCY_COLUMN,VALUE_COLUMN_HEADER,VALUE_CELL_TEXT
+        holdings_non_usd.csv         holdings_non_usd.csv!C4  state=ESTABLISHED currency=CAD    coordinates_read=DECLARED_CURRENCY_COLUMN,VALUE_COLUMN_HEADER,VALUE_CELL_TEXT
+        holdings_multi_sheet.xlsx    Holdings!C2  state=AMBIGUOUS   currency=-      coordinates_read=VALUE_COLUMN_HEADER,XLSX_NUMBER_FORMAT
+        holdings_multi_sheet.xlsx    Holdings!C3  state=AMBIGUOUS   currency=-      coordinates_read=VALUE_COLUMN_HEADER,XLSX_NUMBER_FORMAT
+        holdings_multi_sheet.xlsx    Holdings!C4  state=AMBIGUOUS   currency=-      coordinates_read=VALUE_COLUMN_HEADER,XLSX_NUMBER_FORMAT
+  PASS    a the non-USD currency is ESTABLISHED at a coordinate, not inferred: 3 of 3 money row(s), currency=['CAD']  --  coordinates: DECLARED_CURRENCY_COLUMN, VALUE_CELL_TEXT, VALUE_COLUMN_HEADER
+  PASS    a the values are KEPT and NO unit is claimed -- quarantine, not deletion and not relabeling: 3 holding(s), units=['None']  --  an unsupported position is never silently removed (endpoint constraint)
+  PASS    a the xlsx NUMBER FORMAT coordinate is read, and a bare symbol there does NOT establish: 3 of 3 money row(s) AMBIGUOUS  --  this is the coordinate a <v>-only reader cannot see: the stored value is a bare number and the symbol lives in the format
+  PASS    a the ambiguous total is NOT resolved: stated=None, candidates=2  --  picking one of two readings is the defect; picking none and saying so is correct
+  PASS    a the subtotal is excluded from the computed total: computed={'USD': 700000.0} stated=700000.0 matches=True  --  and the grand total AGREES with the holdings, which is what makes the defect build below visible
+
+(b) THE DIFFERENCE CONTROL -- a relabeling build vs the correct build
+      CORRECT     ROW-COUNT balances=True  | CURRENCY consistent=True  violations=0 []
+                  units claimed: [None, None, None] | computed total: {}
+      RELABELING  ROW-COUNT balances=True  | CURRENCY consistent=False violations=3 ['holdings_non_usd.csv!C2', 'holdings_non_usd.csv!C3', 'holdings_non_usd.csv!C4']
+                  units claimed: ['USD', 'USD', 'USD'] | computed total: {'USD': 210000.0}
+  PASS    b the relabeling build FAILS the reconcile: currency_consistent=False, 3 violating cell(s)  --  it converted CAD to USD
+  PASS    b the correct build HOLDS: currency_consistent=True, 0 violation(s)  --  same specimen, same code path, one flag apart
+  PASS    b AND THE ROW-COUNT LEG PASSES THE DEFECT: balances=True in BOTH builds  --  this is row W4-S28's lesson made mechanical -- every count is right when a CAD column is called USD, so a certification that reads only counts passes it
+      SECOND INSTANCE, subtotal-as-holding:
+      CORRECT     holdings=4 computed={'USD': 700000.0} stated=700000.0 matches=True ROW-COUNT balances=True
+      DEFECT      holdings=6 computed={'USD': 1350000.0} stated=700000.0 matches=False ROW-COUNT balances=True
+  PASS    b the subtotal defect double-counts (1350000.0 vs stated 700000.0) while the ROW COUNT still balances (True)  --  two independent controls, the same blind spot in a count-only check
+
+(c) PROVENANCE -- who / when / from-what on r+1, r untouched, and a re-parse that cannot overwrite it
+  PASS    c revision 0 opened on a quarantined parse: stage=NEEDS_CORRECTION  --  a quarantine is a reportable outcome, and this is what the advisor's request looks like while it holds
+      r+1 correction_provenance[0]: {"applied_on_revision": 1, "approved_at": "2026-09-12T01:45Z", "approved_by": "analyst:alyssa", "finding_code": "SHARE_CLASS_SUBSTITUTION_PROPOSED", "from_value": "VTSAX", "holdings_changed": 1, "source_cell": "holdings_share_class.csv!A2", "to_value": "VTI"}
+  PASS    c the correction carries WHO (analyst:alyssa), WHEN (2026-09-12T01:45Z) and FROM-WHAT (VTSAX)  --  approved_at is REQUIRED, not optional: an optional provenance field drifts to unpopulated
+  PASS    c the CONTRACT's corrections item keeps exactly its four keys: approved_by, finding_code, from_value, to_value  --  the schema is additionalProperties:false and _contracts/ is not this order's to edit -- row IRPT_BCKEND-W3-S35 carries that the WHEN cannot travel in the contract
+  PASS    c REVISION 0 IS UNTOUCHED: hash a605b90ec31a8d29 == a605b90ec31a8d29  --  an ExportBundle pins the revision it was built from; if r could move, a bundle would describe a portfolio nobody submitted
+  PASS    c NEGATIVE CONTROL: a second write to revision 0 is REFUSED (True), so the identical hash above is immutability and not merely absence of an attempt  --  a hash that never moved because nothing tried to move it proves nothing
+      after re-parse, r+2 identifiers: ['VTI', 'FXAIX', 'OPAL-SIP', '$:CASH']
+      r+2 reparse record: {"base_revision": 1, "corrections_carried": 1, "corrections_carried_unapplied": [], "corrections_reapplied": 1, "overwrote_corrections": false, "source_digest": "aaab6a83cc85537799945c80692ab39b900f069a564d2af23b058cbccf8bdac1"}
+  PASS    c A RE-PARSE DOES NOT OVERWRITE THE CORRECTION: r+2 carries 1 correction(s), 1 re-applied, and the corrected identifier VTI is present  --  the parser's fresh view is the advisor's ORIGINAL; writing it over the top would erase the human's decision with no artifact anywhere that disagreed
+  PASS    c DIFFERENCE CONTROL: the naive re-parse DOES lose it -- 0 correction(s) on r+3 and the identifier is back to VTSAX  --  same function, one flag apart -- so the preservation above is the carry-forward working, not the re-parse happening to agree
+  PASS    c and r+1 is STILL intact after both re-parses: provenance 009a73f755ae9ffc  --  every revision is append-only; a later revision losing a correction does not reach back
+
+(d) ROUND 1 STILL HOLDS -- both sides re-derived, never compared to a stored hash
+      holdings_clean.csv           IDENTICAL before=e4e598d4110da5a0 after=e4e598d4110da5a0
+      holdings_no_header.csv       IDENTICAL before=REFUSED after=REFUSED
+      holdings_share_class.csv     IDENTICAL before=df18b77deba0aca0 after=df18b77deba0aca0
+      holdings_unmatched.csv       IDENTICAL before=7c4ff135e7fe6445 after=7c4ff135e7fe6445
+      holdings_weights.xlsx        IDENTICAL before=fbc058bb36045bf7 after=fbc058bb36045bf7
+  PASS    d the five round-1 specimens parse byte-identically: 5 of 5  --  pinned parser at 72db64c153 vs the worktree parser, both run in fresh interpreters
+  PASS    d POSITIVE CONTROL: on a NEW specimen the two parsers DISAGREE (ffd46fc90fde vs e26d554bbccc)  --  so the 5-of-5 above is agreement, not a comparator that cannot see a difference
+      round-1 battery rc=0  ARMS: 6 of 6  token printed=True
+  PASS    d round 1's OWN battery still passes against the changed library: ARMS: 6 of 6  --  a digest says the bytes did not move; this says the acceptance did not either
+  PASS    d the intake package's own unit tests pass: Ran 15 tests  --  the third instrument on the same claim
+
+(e) WHERE THE CHECK RUNS vs WHERE THE VALUE IS CONSUMED
+      DENOMINATOR: 214 function(s) in lambda-source-map.json | 0 ship parse.py | 1 ship settings.json ['irpt-ycharts-generate']
+  PASS    e the honest answer is stated, not implied: parse.py is packaged by 0 of 214 functions, so these controls have NO runtime yet  --  recorded as row IRPT_BCKEND-W3-S36; a 0 printed with its denominator is a finding, and this arm does the closest thing available instead of claiming a deployed check
+      flat /var/task run: module=parse.py | repo on sys.path=False
+        holdings_non_usd.csv           repo=ROW_SKIPPED_NOT_A_HOLDING,UNSUPPORTED_CURRENCY
+                                       flat=ROW_SKIPPED_NOT_A_HOLDING,UNSUPPORTED_CURRENCY  SAME
+        holdings_subtotals.csv         repo=ROW_SKIPPED_NOT_A_HOLDING,SUBTOTAL_ROW_PRESENT
+                                       flat=ROW_SKIPPED_NOT_A_HOLDING,SUBTOTAL_ROW_PRESENT  SAME
+        holdings_ambiguous_total.csv   repo=AMBIGUOUS_TOTAL,ROW_SKIPPED_NOT_A_HOLDING
+                                       flat=AMBIGUOUS_TOTAL,ROW_SKIPPED_NOT_A_HOLDING  SAME
+        holdings_multi_sheet.xlsx      repo=AMBIGUOUS_CURRENCY,MULTI_SHEET_WORKBOOK
+                                       flat=AMBIGUOUS_CURRENCY,MULTI_SHEET_WORKBOOK  SAME
+  PASS    e the controls fire IDENTICALLY in the flat /var/task layout: 4 of 4 specimen(s)  --  fresh interpreter, -I, repo stripped from sys.path -- the environment the value would actually be consumed in
+      with settings.json ABSENT from /var/task:
+        holdings_non_usd.csv           the intake currency/unit policy is not readable at 'settings.json'. This module REFUSES ra
+        holdings_subtotals.csv         the intake currency/unit policy is not readable at 'settings.json'. This module REFUSES ra
+        holdings_ambiguous_total.csv   the intake currency/unit policy is not readable at 'settings.json'. This module REFUSES ra
+        holdings_multi_sheet.xlsx      the intake currency/unit policy is not readable at 'settings.json'. This module REFUSES ra
+  PASS    e NEGATIVE ARM: with the policy absent the parser REFUSES rather than defaulting to the supported currency: 4 of 4 specimen(s) refused  --  a built-in default would relabel a non-USD value precisely when the policy failed to ship -- the one condition under which nobody is watching
+  PASS    e the four specimens are byte-reproducible from their committed generator (rc=0, git reports no change after regeneration)  --  a specimen nobody can rebuild is a specimen nobody can check
+  PASS    e every FIXTURE_MANIFEST hash re-derived from disk: 11 of 11  --  row IRPT_BCKEND-W3-S9's rule: a manifest of hashes is re-derived by the battery every run, never carried
+
+------------------------------------------------------------------------------
+checks failed: 0
+------------------------------------------------------------------------------
+ARMS: 5 of 5  (a four-of-four, b difference, c provenance, d round 1, e environment)
+IBRT11-INTAKE-CONTROLLED

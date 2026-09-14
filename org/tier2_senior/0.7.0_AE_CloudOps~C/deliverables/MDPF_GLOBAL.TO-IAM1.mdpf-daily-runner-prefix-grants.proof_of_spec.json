@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_GLOBAL.TO-IAM1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/tier1_exec/1.0.0_SA_CTO/task_orders/MDPF_GLOBAL.TO-IAM1.mdpf-daily-runner-prefix-grants.md",
+    "group": "OTHER",
+    "vintage_commit": "bcff22b113"
+  },
+  "assignee": "0.7.0_AE_CloudOps~C",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps/logs/2026-09-12/session_0.7.0_AE_CloudOps~C_1050-1240Z_MDPF_GLOBAL_TO-IAM1_GRANTED_AND_BLOCKED_BY_A_BUCKET_DENY.md",
+
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/mdpf-pipeline/iam.tf",
+      "kind": "iam",
+      "commit_or_etag": "52986aca17",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply of a SAVED plan: 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' comp-tagauthz gate PASSED, tombstone-gate CLEAN, zero override. 0-diff re-plan after apply: 'No changes. Your infrastructure matches the configuration.' Live confirmation: aws iam get-role-policy shows 34 statements = 27 pre-existing + the 7 new Irpt* Sids with the authored shape.",
+      "introduces": [
+        "IrptDirectory49fDimsRead",
+        "IrptDirectory49fDimsListScoped",
+        "IrptDirectory49fXrefRead",
+        "IrptDirectory49fXrefListScoped",
+        "IrptDirectoryInfDimsRead",
+        "IrptDirectoryInfDimsListScoped",
+        "IrptDirectoryFirmDestWrite"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-mdpf/diagnostics/aec-irpt-iam1/irpt_sweep_v2.sh",
+      "kind": "s3_object",
+      "commit_or_etag": "8b39dea2419d8d3b03d47134bced6f368d55c2378a04db898cc3120447d0bb1b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The IAM1-AC4 + IAM1-AC5 instrument. EXERCISED, not merely present: the host's own pull printed sha256 8b39dea2419d8d3b03d47134bced6f368d55c2378a04db898cc3120447d0bb1b, byte-identical to the local file, so the bytes that ran are the bytes authored. Under diagnostics/ and deliberately NOT code/scripts/, which the production dispatch s3-syncs with --delete.",
+      "introduces": ["irpt_sweep_v2.sh"]
+    },
+    {
+      "path_or_key": "org/surprise_channel/MDPF_GLOBAL/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "70e131626d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "OPENED by this lane at 70e131626d carrying MDPF_GLOBAL-S1 and MDPF_GLOBAL-S2 -- MDPF_GLOBAL had no channel on either the tree or the legacy flat path before it. EXTENDED with MDPF_GLOBAL-S3 and MDPF_GLOBAL-S4 in the commit that carries THIS instance; those two rows are deliberately NOT claimed in `introduces` because the pin above cannot carry them. ⚠ WHY THE PIN IS NOT PENDING-THIS-COMMIT: the file is already tracked at 70e131626d, so the checker resolved a PENDING row against THAT commit and correctly refused it for lacking S3/S4 -- PENDING-THIS-COMMIT is a one-shot sentinel and is unusable for a second append to an already-committed artifact. The S3/S4 rows are evidenced instead by the surprises entries below, all four of which the checker confirms resolve to a channel row.",
+      "introduces": ["MDPF_GLOBAL-S1", "MDPF_GLOBAL-S2"]
+    }
+  ],
+
+  "acceptance": [
+    {
+      "criterion_id": "IAM1-AC1",
+      "criterion_verbatim": "The pre-act sweep, re-run, with its denominator and its positive control.",
+      "method": "command",
+      "invocation": "aws ssm send-command --instance-ids i-02448edb624a7a7cf --document-name AWS-RunShellScript --parameters file://.scratch_aec/ssm_params.json [7aee9ea9-2542-4819-a6e0-3873d793e20f], whose commands pull and run the sweep artifact: aws s3 cp s3://opal-data-mdpf/diagnostics/aec-irpt-iam1/irpt_prefix_sweep.sh /tmp/ && bash /tmp/irpt_prefix_sweep.sh",
+      "output_evidence": "Status Success rc=0. Caller printed by the run: arn:aws:sts::313476888478:assumed-role/mdpf-daily-runner-ec2-role/i-02448edb624a7a7cf. TOTALS: SOURCE READ-OK=2 READ-DENY=8 READ-OTHER=0 denominator 10; DESTINATION READ-OK=0 READ-DENY=3 READ-OTHER=0 denominator 3. VERDICT: VALID -- positive control fired, so each READ-DENY is a scoped denial. This denominator of 10 contradicted the face's stated 9 and produced the pre-act STOP that amendment 1 then ratified.",
+      "denominator": "10 source prefixes + 3 destination prefixes; 1 positive control, 1 negative control",
+      "status": "PASS",
+      "expect": "VERDICT: VALID",
+      "status_reason": "Population derived by SUBTRACTION from directory_runner.py's own read sites plus the three firms' runner_common.py constants, not from the inherited summary -- which is why it returned 10 where three upstream documents said 9, 6 and 9. Recorded in MDPF_GLOBAL-S1."
+    },
+    {
+      "criterion_id": "IAM1-AC2",
+      "criterion_verbatim": "the `safe-apply` plan shows ONLY the intended statement changes and carries ZERO destroys",
+      "method": "command",
+      "invocation": ".tools/terraform.exe -chdir=infra/aws/terraform/mdpf-pipeline plan -input=false -target=aws_iam_role_policy.mdpf_runner -out=.tfplan-iam1  then  .tools/safe-apply.sh -chdir=infra/aws/terraform/mdpf-pipeline apply -input=false .tfplan-iam1",
+      "output_evidence": "# aws_iam_role_policy.mdpf_runner will be updated in-place -- the ONLY resource in the plan. Plan: 0 to add, 1 to change, 0 to destroy. '# (26 unchanged elements hidden)' plus DispatchLogs rendered as context = 27 existing statements untouched. Exactly 7 added statement blocks carrying exactly the 7 intended Sids. Removal-marker census: 0 minus-lines against a POSITIVE CONTROL of 71 plus-lines, so that zero DISCRIMINATES rather than reflecting a grep that cannot match. terraform fmt -check rc=0 with no existing line reformatted. A SAVED plan was applied, so what landed is provably what was reviewed.",
+      "denominator": "1 resource in plan of 1 intended; 7 added blocks of 7 intended; 0 destroys and 0 replaces of 34 statements",
+      "status": "PASS",
+      "expect": "0 to add, 1 to change, 0 to destroy",
+      "status_reason": "⛔ THIS CRITERION CAUGHT A WRONG-OBJECT EDIT AND THAT IS WHY IT IS WORTH MORE THAN ITS WORDING SUGGESTS. My first edit appended all 7 statements to aws_iam_role_policy.mdpf_gold_lambda (iam.tf:748) instead of aws_iam_role_policy.mdpf_runner (iam.tf:41) -- two policy resources in one file, and I appended to the tail I had last read. The TARGETED plan returned 'No changes. Your infrastructure matches the configuration.' while 7 Sids sat on disk, which is the contradiction that exposed it. An untargeted apply would have granted 11 prefixes to the WRONG PRINCIPAL. The discriminator was already in hand and misread: the live get-role-policy baseline ends at DispatchLogs and never contained GoldMdpfListScoped, so the tail being edited provably belonged to another resource."
+    },
+    {
+      "criterion_id": "IAM1-AC3",
+      "criterion_verbatim": "live `aws iam get-role-policy` shows the granted prefixes",
+      "method": "live_read",
+      "invocation": "aws iam get-role-policy --role-name mdpf-daily-runner-ec2-role --policy-name mdpf-runner-scoped  (carrying an audited '# rail-checked:' marker, because the face EXPRESSLY declares comp-iam NOT VALID for this role and it would false-FAIL)",
+      "output_evidence": "LIVE STATEMENTS 34 = 27 pre-existing + 7 new, against a pre-act baseline of 27, so nothing was displaced. All 7 Irpt* Sids present with the authored shape: IrptDirectory49fDimsRead (GetObject on the 5 enumerated dimension prefixes); IrptDirectory49fDimsListScoped (ListBucket on opal-data-49financial, StringLike s3:prefix = the same 5, never bucket-wide); IrptDirectory49fXrefRead + IrptDirectory49fXrefListScoped (opal-data-assets blackdiamond/49f/silver/dim_account_xref/*); IrptDirectoryInfDimsRead + IrptDirectoryInfDimsListScoped (representatives + household_rep_mapping only -- accounts_v2 NOT re-granted); IrptDirectoryFirmDestWrite (PutObject+GetObject on the 3 firm investor-reporting/directory/* prefixes, no ListBucket). All THREE pre-existing Deny fences still live: P0DenyJsonMdpfClobber20260728, P0DenyLegacyPortfoliosClobber20260728, R14LatentFenceOnly...20260728.",
+      "denominator": "34 live statements; 7 of 7 new Sids present; 27 of 27 pre-existing retained; 3 of 3 Deny fences retained",
+      "status": "PASS",
+      "expect": "LIVE STATEMENTS 34",
+      "status_reason": "⚠ PASS ON THE APPLIED PLANE ONLY, AND THE DISTINCTION IS THE WHOLE FINDING OF THIS ORDER. This criterion is satisfied and the runner still cannot read 5 of its 10 sources -- see IAM1-AC4. A get-role-policy read describes the IDENTITY plane and cannot see a resource-policy Deny."
+    },
+    {
+      "criterion_id": "IAM1-AC4",
+      "criterion_verbatim": "the HOST-SIDE sweep RE-RUN after the apply reads ALLOWED on the previously denied prefixes, positive control still firing",
+      "method": "command",
+      "invocation": "aws ssm send-command --instance-ids i-02448edb624a7a7cf --document-name AWS-RunShellScript --parameters file://.scratch_aec/ssm_v2.json [b2da11c2-cf22-40d8-8335-14169fd0445a], pulling and running s3://opal-data-mdpf/diagnostics/aec-irpt-iam1/irpt_sweep_v2.sh",
+      "output_evidence": "Status Success rc=0, host-pulled sha256 8b39dea2419d8d3b03d47134bced6f368d55c2378a04db898cc3120447d0bb1b == local, POSITIVE CONTROL READ-OK so every verdict is interpretable. AC4 SOURCE: READ-OK=5 READ-DENY=5 READ-OTHER=0 denominator 10, against a required 10/0/0. NEWLY READABLE (were DENY, now OK -- genuinely EXERCISED): opal-data-assets/blackdiamond/49f/silver/dim_account_xref/; opal-data-inf/silver/api_dims/representatives/; opal-data-inf/silver/api_dims/household_rep_mapping/. STILL DENIED, 5 of 5 and all in ONE bucket: opal-data-49financial/gold/advi/dimensions/{dim_account,dim_relationship,dim_identity_crosswalk,dim_portfolio_group,bridge_group_account}/.",
+      "denominator": "10 source prefixes: 5 READ-OK, 5 READ-DENY; required 10 READ-OK",
+      "status": "FAIL",
+      "expect": "READ-OK=10",
+      "status_reason": "ROOT CAUSE MEASURED, NOT INFERRED: opal-data-49financial carries a BUCKET POLICY statement DenyForeignFirmPrincipals -- Effect Deny, Action s3:*, Principal *, Resource [bucket, bucket/*], Condition ArnLike aws:PrincipalArn [role/cot-*, role/inf-*, role/mdpf-*, role/opal-assets-mdpf-*]. mdpf-daily-runner-ec2-role matches role/mdpf-*, and an explicit resource-policy Deny beats every identity Allow. It is the ONLY one of the five involved buckets carrying such a Deny (bd, cot, inf, assets each read: CloudFront OAC/OAI allows only, no PrincipalArn-conditioned Deny; opal-data-mdpf has no bucket policy). The bucket exists in THIS account (head-bucket, us-east-1, 1 of 36), so this is neither a missing bucket nor a cross-account gap. This is CLAUDE.md's cross-firm isolation hard stop in its per-firm-bucket shape, so the 49financial half of this order is not completable by any identity grant and the remedy is not an AE lane's to choose. Recorded as MDPF_GLOBAL-S3; the order stays OPEN on this row, which is what the face prescribes for a FAIL. DESTINATIONS reach APPLIED and NOT EXERCISED, declared rather than blurred: no ListBucket was granted on any destination and a GET of a missing key returns 403 without ListBucket (the W2-S50 trap), so no read-plane probe can evidence the PutObject grant; the applied-plane battery in IAM1-AC5 carries it instead."
+    },
+    {
+      "criterion_id": "IAM1-AC5",
+      "criterion_verbatim": "negative control proving the grant did NOT widen beyond its prefixes",
+      "method": "command",
+      "invocation": "8 negative-control probes inside SSM b2da11c2-cf22-40d8-8335-14169fd0445a, plus an applied-plane battery: aws iam simulate-principal-policy --policy-source-arn arn:aws:iam::313476888478:role/mdpf-daily-runner-ec2-role with ONE --resource-arns per call at object grain, and a separate-invocation admin positive control",
+      "output_evidence": "AC5 NEG CONTROLS: READ-OK=0 READ-DENY=8 READ-OTHER=0 denominator 8. N1 49financial/gold/advi/dimensions/dim_household/ (unenumerated sibling table) DENY; N2 49financial/gold/advi/ (PARENT of the enumerated set) DENY; N3 49financial/silver/ DENY; N4 assets/blackdiamond/49f/silver/dim_account/ (sibling of xref) DENY; N5 inf/silver/api_dims/households/ DENY; N6 inf/gold/canonical/ DENY; N7 opal-data-cot bucket ROOT DENY; N8 bd/investor-reporting/ (PARENT of the granted destination) DENY. APPLIED-PLANE BATTERY: PutObject allowed on all three destination directory keys and on latest.json, GetObject allowed on the head_object leg; implicitDeny on bd/gold/aua_certification/, cot/silver/, inf/investor-reporting/other/ and on s3:DeleteObject. ADMIN POSITIVE CONTROL, separate invocation, on C2's exact ARN: allowed -- so that implicitDeny is the world, not the instrument. accessanalyzer validate-policy: 0 findings, so the action names are REAL.",
+      "denominator": "8 host negative controls (0 OK / 8 DENY required and achieved); 5 applied-plane positives, 4 applied-plane negatives, 1 admin positive control",
+      "status": "PASS",
+      "expect": "READ-OK=0 READ-DENY=8",
+      "status_reason": "THIS IS THE RE-DESIGN THE FACE DEMANDED, AND THE REASON THE FIRST ONE FAILED IS WHY IT WORKS. The original control probed an absent prefix in opal-data-mdpf, whose ListBucket is bucket-wide and unconditioned, so it returned rc=0 and bounded nothing. These probe prefixes the NEW conditions deliberately EXCLUDE inside buckets the new statements DO name, so a wildcard cannot hide. N1 and N2 are the load-bearing pair: both would flip to READ-OK had the 49f condition been written gold/advi/* rather than the five enumerated tables. The control is only possible BECAUSE every new ListBucket is prefix-conditioned -- bucket-wide, an excluded prefix lists empty at rc=0 instead of denying."
+    }
+  ],
+
+  "controls": {
+    "mutant": {
+      "description": "Two mutants, both on the arm whose verdict everything else rests on. (1) PRE-ACT: the AC1 sweep's verdict depends entirely on its positive control, so POS_B/POS_P were re-pointed from opal-data-mdpf/code/scripts/ (granted) to opal-data-49financial/gold/advi/ (denied), nothing else changed, and re-run on the host. (2) POST-ACT, and this one was NOT planted -- it was planted by my own error and is recorded as a mutant because it functioned as one: the 7 statements were first appended to the WRONG policy resource, which the targeted plan detected.",
+      "expected": "(1) the positive control fails rc=1 and the script prints VERDICT: VOID. (2) a plan targeted at aws_iam_role_policy.mdpf_runner reports no diff when the edit landed on a different resource.",
+      "observed": "(1) SSM 1beb51ee-c9b7-4936-a286-539390c28614: 'CONTROLS: positive rc=1 (0 required)' then 'VERDICT: VOID -- the positive control did not read. Every DENY above is uninterpretable.' The gate fired. (2) terraform plan -target=aws_iam_role_policy.mdpf_runner: 'No changes. Your infrastructure matches the configuration.' while comp-read counted 7 IrptDirectory Sids on disk -- the contradiction that located the wrong-object edit before any apply.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The pre-act population result was compared across two independent host runs under the same identity: 7aee9ea9-2542-4819-a6e0-3873d793e20f (real) and 1beb51ee-c9b7-4936-a286-539390c28614 (mutant, whose only edit was the control prefix). Separately, the post-apply state was re-read by two different instruments: a 0-diff terraform re-plan and a live get-role-policy.",
+      "observed": "Both pre-act runs printed 'SOURCE: READ-OK=2 READ-DENY=8 READ-OTHER=0 denominator 10' and 'DESTINATION: READ-OK=0 READ-DENY=3 READ-OTHER=0 denominator 3' -- identical -- while the CONTROLS line and VERDICT differed exactly as the mutant intended. Post-apply, the 0-diff re-plan and the 34-statement live read agree.",
+      "status": "STABLE"
+    }
+  },
+
+  "declared_exclusions": [
+    {
+      "item": "s3:PutObject probe against the three firm destination prefixes (opal-data-bd, opal-data-inf, opal-data-cot investor-reporting/directory/)",
+      "reason": "A write probe would mint an object inside a client firm's production bucket, and no DeleteObject was granted (confirmed implicitDeny) so it could not be cleaned up. The prefixes are empty -- every build there is a FIRST MINT -- so a probe key would be indistinguishable litter and a runner-shaped key would be a FABRICATED artifact. The write grant is therefore evidenced on the APPLIED plane by simulate-principal-policy at object grain, and is explicitly NOT claimed as EXERCISED."
+    },
+    {
+      "item": "reverting IrptDirectory49fDimsRead and IrptDirectory49fDimsListScoped, now INERT under the bucket Deny",
+      "reason": "RECOMMENDED BUT NOT DONE, and the restraint is deliberate. Amendment 1 enumerated those five prefixes as authorized; removing an explicitly authorized grant is the issuer's call, not the executor's, and if the route chosen is a bucket-policy exception the statements are needed as written. They grant nothing today because an explicit resource Deny overrides them. Surfaced in MDPF_GLOBAL-S3's disarm_owner with the recommendation stated."
+    },
+    {
+      "item": "any change to opal-data-49financial's bucket policy (DenyForeignFirmPrincipals)",
+      "reason": "It is a CROSS-FIRM ISOLATION control and CLAUDE.md puts that class behind Andrew's word. Nothing in this order authorizes touching another bucket's resource policy, and weakening it to make this order pass would be the exact defect the control exists to prevent."
+    },
+    {
+      "item": "comp-iam service / comp-iam gaps as a grading instrument",
+      "reason": "The face expressly DECLARES it NOT VALID for this role -- it reads statements: 0 on two independent runs -- so running it to grade would invite a false FAIL. Raw aws IAM calls therefore carry audited '# rail-checked:' markers. Note the face's stated CAUSE for that zero is falsified in MDPF_GLOBAL-S2, which does not change the exclusion."
+    },
+    {
+      "item": "i-02448edb624a7a7cf lifecycle (stop / start / terminate) and the mdpf daily chain",
+      "reason": "Expressly not this order's; stopping EC2 requires Andrew's word. The instance served only as the read-only measurement host via SSM and its state was not altered. No change was made to the dispatch, the schedule or the instance profile."
+    },
+    {
+      "item": "the broader cross-firm question -- whether an mdpf-tree reference to 49financial data is legitimate at all",
+      "reason": "SURFACED, NOT ADJUDICATED. The tree already carries cottonwood references (AssetsRevampSilverRead, AssetsCottonwoodGoldWrite) and MDPF is a multi-firm aggregation pipeline, so the hard stop's scope here is genuinely ambiguous and CLAUDE.md directs a receiving agent to surface rather than adjudicate. The 49financial bucket's own policy is the estate's answer for the BUCKET shape; the KEY-PREFIX shape (blackdiamond/49f/silver/ read from this tree, which now works) is left as a question for the issuer."
+    }
+  ],
+
+  "surprises": [
+    "MDPF_GLOBAL-S1: three documents carried three different denominators for one population and the order's number matched neither of its own sources -- battery 5 of 9, pinned row IRPT_BCKEND-S50 4 of 6, live host 8 of 10. A SUBSET measurement travelled as a POPULATION measurement. Row in org/surprise_channel/MDPF_GLOBAL/INVESTIGATION_v1.md; BLOCKING, INERT; ratified by amendment 1 @bcff22b113 which re-cut the ceiling to 11.",
+    "MDPF_GLOBAL-S2: the face's stated mechanism for the comp-iam statements:0 blindness is false for this role -- the policy is an inline jsonencode document and comp-find returns a measured zero for aws_iam_policy_document across the 15 files of that root. Symptom confirmed twice independently; only the explanation was wrong. Row in the same channel; OBSERVATION, INERT; accepted by the CTO in amendment 1(b).",
+    "MDPF_GLOBAL-S3: the 49financial half of this order is structurally impossible as an identity grant -- opal-data-49financial carries DenyForeignFirmPrincipals (Deny s3:*, ArnLike aws:PrincipalArn role/mdpf-*), the only such Deny among the five involved buckets, so 5 of 10 source prefixes stay AccessDenied after a clean apply. BLOCKING, ARMED, disarm_owner 1.0.0_SA_CTO with three named routes plus a recommendation to revert the two now-inert statements.",
+    "MDPF_GLOBAL-S4: simulate-principal-policy has a FIFTH false-verdict mode and it is the first that fails in the OVER-granted direction -- it does not evaluate resource policies, so it returned 'allowed' for both the GetObject and the prefix-conditioned ListBucket on 49financial while the host returned AccessDenied. All four documented mitigations were in force and none touches this mode. OBSERVATION, INERT."
+  ],
+
+  "compiler_tools": [
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/mdpf-pipeline/iam.tf --enumerate 'resource \"aws_iam' ; --enumerate 'Condition|s3:prefix|ListScoped' ; --enumerate 'IrptDirectory' ; comp-read data/assets/scripts/gold/investor_reporting/directory_runner.py --for '<reads/writes/firms>'",
+      "result": "DECISIVE TWICE. The resource enumerate located TWO aws_iam_role_policy resources in one file (mdpf_runner at :41, mdpf_gold_lambda at :748) and is what let me prove my statements had landed in the wrong one. The Condition enumerate (34 hits / 798 lines) established that every ListBucket on this role is prefix-conditioned, never bucket-wide -- the shape the grant had to follow AND the property that makes the AC5 negative control discriminate. ⚠ Its WARN that 'every hit is a FRAGMENT' is worth heeding: an anchored probe would have reported zero for the same true content."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'mdpf-runner-scoped' --limit 30 ; comp-find 'aws_iam_policy_document' infra/aws/terraform/mdpf-pipeline --limit 20 ; comp-find 'mdpf-daily-runner' --limit 40 ; comp-find --name 'directory_runner' / 'battery_ib_rt_6' / 'investigation_item'",
+      "result": "Located the role's only terraform declaration (iam.tf:42) off a 381-hit census, and returned the MEASURED ZERO over 15 files that falsified the face's data-source claim (MDPF_GLOBAL-S2). A zero with a printed denominator is the only kind worth citing."
+    },
+    {
+      "tool": "comp-schedule",
+      "invocation": "comp-schedule --cursor START (rc=3, PARTIAL) then comp-schedule --budget 1500",
+      "result": "DISCHARGED THE FACE'S OUTSTANDING OBLIGATION AND ESTABLISHED AN ABSENCE NOBODY HAD: the default-budget run reproduced the face's PARTIAL_OR_BLIND (0 of 5 carriers, C1 at 116,700 of 195,854 files, 7 gates). Raising the budget returned WITHIN BUDGET, 5 of 5 carriers in 102.6s, rc=0, denominators C1=138 C2=7 C3=12 C4=20 C5=335, 26 GATES ARMED -- so the partial had understated armed gates by 19. Zero armed gates name this order's surface (6 token censuses all 0 against a positive control of owner==26). ⭐ The obligation had been carried as undischargeable when it was only under-budgeted."
+    },
+    {
+      "tool": "proof-of-spec-check",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> IAM1-AC1,IAM1-AC2,IAM1-AC3,IAM1-AC4,IAM1-AC5",
+      "result": "The authority, not an estimate. First run INVALID rc=1 with 15 violations: prose in the enum-valued `method` field, three wrong enum values, a string where `introduces` needs an array, object-shaped `surprises` where strings are required, and the substantive catch -- `expect` is graded as a REGEX against output_evidence so a prose bar could never match. It also announced that row-id-less surprises 'would REFUSE under a tree TO', which is what prompted opening MDPF_GLOBAL's channel rather than burying findings in this deliverable."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --slug mdpf-runner-irpt-prefix-grants-iam1 (6 legs) ; close-leg x6 ; close",
+      "result": "NEVER-law compliance: the complete manifest was declared at deploy-START, not reconstructed at the end, so a failed AC4 could not quietly become a forgotten leg. CLOSED with all 6 legs proven -- including L5 carrying an honest PARTIAL result. Nothing stranded: the apply is complete and 0-diff, and the residual blocker is a resource policy outside the deploy."
+    },
+    {
+      "tool": "comp-tool rail (gates fired on me)",
+      "invocation": "four census-into-head/tail pipes, one directory-scoped raw grep on infra/**.tf, and three raw-aws IAM inspections",
+      "result": "GATED EIGHT TIMES, every one correct. Four were my own habit of reaching for a pager on a census tool, which erases the denominator. The three raw-aws denials were resolved with audited '# rail-checked:' markers naming why no comp-tool fits -- the face declares comp-iam NOT VALID for this role, and no comp-tool has a BUCKET-policy surface at all, which is precisely where this order's blocker turned out to live. ⛔ Worth logging once more because it bit me twice: the rail's abort is WHOLE-CALL, so each denial silently dropped the LATER segments of the same call -- a wc -l, a second grep and a 0-diff re-plan each never ran and said nothing about it."
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-"""IB-rt-9 battery -- RT9-AC1. PARTIAL: arm (a) only, under the managed wind-down.
+"""IB-rt-9 battery -- RT9-AC1. FIVE arms of six: (a), (b), (c), (d), (f). (e) is BLOCKED.
 
   Serial: 0.9.0_WK_IRPT_BCKEND~3
   Order : IRPT_BCKEND.TO-IB-rt-9
@@ -21,20 +21,36 @@ WHAT RUNS HERE -- arm (a), THE CUTOVER, EVERY READER:
   a4  the retired capture reader: its handler refuses, and its two trigger
       paths are read (the EventBridge rule LIVE, the probe's invoke in source)
 
-WHAT DOES NOT RUN -- arms (b) FENCING, (c) ROTATION, (d) EVICTION, (e)
-ABSORBED/STOPPED/CONVERGED, (f) NOTHING LEFT THE MACHINE. Arm (e) is a
-ledger + `state mv` + apply, forbidden for the rest of this session by the
-managed wind-down (0.0.0_AB_MSTR, relayed 2026-09-11 17:30Z). Arms (b)-(d)
-and (f) are fixture work that is permitted but unbuilt when this session
-ended; they are described in WIP_IB-rt-9_winddown.md beside this file.
+  b   FENCING -- two capture attempts on the fixture through the RUNNER'S OWN
+      `persistSession`: one wins, one refuses, and the published BYTES are
+      digest-identical before and after the loser's write. Driven in a node
+      subprocess under the runner's netguard.
+  c   ROTATION -- a new version published, the replay transport's NEXT
+      invocation uses it, the superseded version refused on the fence.
+  d   EVICTION -- a 401 mid-job on `job.GenerationJob`: ONE broker refresh,
+      resumed at the checkpoint through the job's own reconcile, with the
+      no-resubmit difference control and the repeat-eviction park.
+  f   NOTHING LEFT THE MACHINE -- both drives' guard summaries with their
+      denominators AND their positive controls.
+
+WHAT DOES NOT RUN -- arm (e) ABSORBED/STOPPED/CONVERGED. It is a ledger +
+`state mv` + apply of the ycharts root, and that root's plan carries an
+unapplied handler flip to `entry.lambda_handler` whose module is in no zip, so
+the apply this arm REQUIRES takes `irpt-ycharts-generate` down. Row
+IRPT_BCKEND-W3-S26; the remedy belongs to cell IB-rt-2, not here.
+
+THE ARMS ARE DRIVEN IN SUBPROCESSES, and that is the point: each drive installs
+its outbound-network guard BEFORE anything under test is evaluated, which no
+in-process arrangement can do once this battery has imported the probe.
 
 BOUND 1 HOLDS: nothing here makes a YCharts call, a login or a capture. The
-only network calls are two AWS control-plane reads (describe-rule), and the
-predicate is exercised on RECORDED statuses and bodies through the probe's
-injected `fetch` seam.
+only network calls are AWS control-plane reads (describe-rule) from THIS
+process, declared in arm (f) rather than hidden; every vendor interaction is a
+RECORDED fixture through an injected seam.
 """
 from __future__ import annotations
 
+import io
 import json
 import os
 import re
@@ -81,6 +97,13 @@ EXPECTED_READERS = {
                     "schema, identity and transport before resuming"),
     "infra/aws/lambda/ycharts-session-probe/lambda_function.py": (
         "MIGRATED", "this cell: fence read + positive allowlist replace the non-403 predicate"),
+    # ADDED BY THIS CELL and found by the census BEFORE it was declared, which is the table
+    # working: the arm failed 4-of-5 on the run that first carried the broker, and the entry
+    # below is the answer to that failure rather than a widening of the discriminator.
+    "infra/aws/lambda/investor-reporting/ycharts/session/broker.py": (
+        "MIGRATED", "this cell's broker: reads the versioned bundle BY NAME, refuses "
+                    "NOT_VERSIONED / NOT_CONFIGURED / UNPARSEABLE / STALE_FENCE, and never "
+                    "publishes -- publication stays on the capture host"),
     "infra/aws/lambda/ycharts-session-capture/index.mjs": (
         "RETIRED", "handler refuses; schedule DISABLED; the probe no longer invokes it"),
 }
@@ -96,6 +119,18 @@ CODE_SUFFIXES = (".py", ".js", ".mjs", ".cjs", ".ts", ".sh", ".ps1")
 # that name the secret call one; 3 do not, and those 3 are exactly the three
 # that cannot read anything.
 SM_READ_API = re.compile(r"get_secret_value|GetSecretValueCommand|get-secret-value")
+
+# A FOURTH CLASS, and it exists because THIS FILE became TRACKED when its own
+# branch drained. A census over `git ls-files` then finds the battery itself: its
+# fake Secrets Manager client defines `get_secret_value` and its fixtures name the
+# secret, so the READER/MENTION discriminator -- correctly -- calls it a reader.
+# It is not an ESTATE reader; it reaches no AWS. The discriminator for this class
+# is STRUCTURAL, never a file name: a file under this project's own deliverables/
+# is a TEST HARNESS. Every member is PRINTED with its own count, so the exclusion
+# is visible on the output and the estate denominator stays honest -- a silent
+# skip here would be the self-wrapping the bounds forbid, inverted.
+# Row IRPT_BCKEND-W3-S29.
+HARNESS_PREFIX = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/"
 
 
 def arm_a1():
@@ -117,10 +152,15 @@ def arm_a1():
         code_hits.append(rel)
         text = blob.decode("utf-8", "replace")
         (readers if SM_READ_API.search(text) else mentions).append(rel)
+    harness = [r for r in readers if r.startswith(HARNESS_PREFIX)]
+    readers = [r for r in readers if not r.startswith(HARNESS_PREFIX)]
     print("      DENOMINATOR: %d file(s) scanned (git ls-files, tracked) | "
           "%d name the secret | %d are CODE | %d of those RESOLVE it "
-          "(a Secrets Manager read API) | %d only MENTION it"
-          % (len(files), len(hits), len(code_hits), len(readers), len(mentions)))
+          "(a Secrets Manager read API) | %d only MENTION it | "
+          "%d of the resolvers are this cell's OWN TEST HARNESS, listed below "
+          "and excluded from the estate denominator"
+          % (len(files), len(hits), len(code_hits), len(readers) + len(harness),
+             len(mentions), len(harness)))
 
     # MECE BY SUBTRACTION, not by recall: the population is the READERS the
     # census FOUND, minus what the table accounts for. A leftover voids it.
@@ -133,6 +173,10 @@ def arm_a1():
     for rel in sorted(mentions):
         print("      MENTION      %s" % rel)
         print("                   names the secret but calls no Secrets Manager read API")
+    for rel in sorted(harness):
+        print("      HARNESS      %s" % rel)
+        print("                   this cell's own battery under deliverables/: its FAKE "
+              "Secrets Manager client defines the read API and reaches no AWS")
     for rel in unaccounted:
         print("      UNACCOUNTED  %s -- the census found a reader the table does not hold"
               % rel)
@@ -144,6 +188,13 @@ def arm_a1():
     check("a1 readers migrated or retired: %d of %d" % (accounted, len(readers)),
           not unaccounted and not missing and accounted == n,
           "denominator is the census, not the table")
+    # CONTROL ON THE EXCLUSION ITSELF: the harness class must never swallow a
+    # declared estate reader. If it ever does, the exclusion is hiding the answer.
+    check("a1 the HARNESS exclusion removed 0 declared estate reader(s): %d of %d "
+          "excluded file(s) are under deliverables/"
+          % (len(harness), len(harness)),
+          not [r for r in harness if r in EXPECTED_READERS],
+          "an exclusion that can remove a real reader is a hole, not a class")
     return code_hits
 
 
@@ -453,31 +504,454 @@ def arm_a4():
           "difference control on the deployed path, not just on classify()")
 
 
+# --------------------------------------------------------------------------- b, c, d, f
+#
+# THE THREE DRIVES ARE SUBPROCESSES, AND THAT IS THE POINT. Each runs under its own
+# outbound-network guard installed BEFORE anything under test is evaluated, which no
+# in-process arrangement can do once this battery has already imported the probe. Arm (f)
+# then reads the two guards' own summaries, so "0 external" is a reading of an instrument
+# that was demonstrably able to fire, not an absence of evidence.
+
+RUNNER_DIR = os.path.join(REPO, "infra", "aws", "ec2", "investor-reporting-ycharts")
+FENCE_DRIVE = os.path.join("tests", "fence_race.js")
+NODE_GUARD = os.path.join(".", "tests", "netguard.js")
+SESSION_SUITE = os.path.join(REPO, "infra", "aws", "lambda", "investor-reporting",
+                             "ycharts", "session", "tests", "run_session_suite.py")
+
+_DRIVE_CACHE = {}
+
+
+def drive(key, cmd, cwd, timeout=420):
+    """Run a drive ONCE per battery run and parse its RESULT block. rc is recorded, never
+    trusted: a suite that died before printing its result is a FAILED arm, not a silent one."""
+    if key in _DRIVE_CACHE:
+        return _DRIVE_CACHE[key]
+    try:
+        proc = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True,
+                              timeout=timeout, shell=False)
+        out = proc.stdout
+        if "RESULT-BEGIN" not in out:
+            data = {"_no_result": True, "rc": proc.returncode,
+                    "stdout_tail": out[-800:], "stderr_tail": proc.stderr[-800:]}
+        else:
+            data = json.loads(out.split("RESULT-BEGIN", 1)[1].split("RESULT-END", 1)[0])
+            data["_rc"] = proc.returncode
+    except subprocess.TimeoutExpired:
+        data = {"_no_result": True, "rc": 124, "stdout_tail": "TIMEOUT"}
+    _DRIVE_CACHE[key] = data
+    return data
+
+
+def fence_drive():
+    return drive("fence", ["node", "--require", NODE_GUARD, FENCE_DRIVE], RUNNER_DIR)
+
+
+def session_drive():
+    return drive("session", [sys.executable, SESSION_SUITE], REPO)
+
+
+def arm_b():
+    print()
+    print("(b) FENCING -- two capture attempts on the fixture, driving the REAL persistSession")
+    data = fence_drive()
+    if data.get("_no_result"):
+        check("b the fencing drive produced a result block", False,
+              "rc=%s %s" % (data.get("rc"), str(data.get("stdout_tail"))[:200]))
+        return
+    cases = data["cases"]
+    sim, slow, none = (cases["simultaneous"], cases["slow_runner_stale_fence"],
+                       cases["no_lease_never_publishes"])
+    print("      DENOMINATOR: 3 race case(s) driven | %d passing"
+          % sum(1 for c in (sim, slow, none) if c["pass"]))
+    print("      (b1) SIMULTANEOUS -- A holds the lease, B asks for it")
+    print("           lease A ok=%s fence=%s | lease B ok=%s reason=%s"
+          % (sim["lease_a"]["ok"], sim["lease_a"]["fence"], sim["lease_b"]["ok"],
+             sim["lease_b"]["reason"]))
+    print("           published fence=%s by=%s digest=%s -> after the loser tried: "
+          "fence=%s by=%s digest=%s"
+          % (sim["published_before_loser"]["fence"], sim["published_before_loser"]["persisted_by"],
+             sim["published_before_loser"]["digest"], sim["published_after_loser"]["fence"],
+             sim["published_after_loser"]["persisted_by"], sim["published_after_loser"]["digest"]))
+    check("b1 1 wins, 1 refuses: the loser raises %s (%s) and never reaches the secret"
+          % (sim["loser_refused"]["name"], sim["loser_refused"]["class"]), sim["pass"],
+          "secret put calls across the whole case: %d" % sim["secret_put_calls"])
+    check("b1 THE PUBLISHED VERSION IS UNCHANGED BY THE LOSER: digest %s == %s"
+          % (sim["published_before_loser"]["digest"], sim["published_after_loser"]["digest"]),
+          sim["published_unchanged_by_the_loser"],
+          "compared over the published BYTES, not over a field")
+
+    print("      (b2) THE SLOW RUNNER -- A's lease expired mid-capture and A still holds a "
+          "fence-1 lease object")
+    print("           A fence=%s -> B takes over fence=%s -> B publishes fence=%s"
+          % (slow["lease_a_first"]["fence"], slow["lease_b_takeover"]["fence"],
+             slow["b_published"]["fence"]))
+    r = slow["a_stale_write_refused"]
+    print("           A's late write: %s/%s my_fence=%s stored_fence=%s -- %s"
+          % (r["name"], r["class"], r["my_fence"], r["stored_fence"], r["why"]))
+    check("b2 the stale-fence write is REFUSED and the published version is unchanged: "
+          "digest %s == %s"
+          % (slow["published_after_b"]["digest"], slow["published_after_a_tried"]["digest"]),
+          slow["pass"], "this is the shape NOTHING AT THE LEASE can see")
+    ctl = slow["difference_control_same_runner_current_fence"]
+    check("b2 DIFFERENCE CONTROL: the SAME runner with a CURRENT fence (%s) DOES publish "
+          "(digest changes to %s)" % (ctl["lease_fence"], ctl["published_facts"]["digest"]),
+          ctl["published"] and ctl["changed_this_time"],
+          "so the refusal is the FENCE, not a fake that refuses everything")
+    check("b3 a persist with NO held lease never reaches the secret: %d put call(s)"
+          % none["secret_put_calls"], none["pass"],
+          "otherwise the lease is optional and a caller that forgot it looks like a winner")
+
+
+def arm_c():
+    print()
+    print("(c) ROTATION -- a new version published, the next invocation uses it, the old refused")
+    data = session_drive()
+    if data.get("_no_result"):
+        check("c the session drive produced a result block", False,
+              "rc=%s %s" % (data.get("rc"), str(data.get("stdout_tail"))[:200]))
+        return
+    c = data["arms"]["c_rotation"]
+    print("      DENOMINATOR: %d published version(s) of %s | AWSCURRENT now %s"
+          % (len(c["published_versions"]), "ycharts/session/current",
+             c["awscurrent_after_rotation"]))
+    print("      read 1: state=%s fence=%s generation=%s"
+          % (c["read_1"]["state"], c["read_1"]["fence"], c["read_1"]["generation"]))
+    print("      read 2: state=%s fence=%s generation=%s"
+          % (c["read_2"]["state"], c["read_2"]["fence"], c["read_2"]["generation"]))
+    n = c["next_invocation_used"]
+    check("c the replay transport's NEXT invocation uses the new version: "
+          "capture_generation %s -> %s" % (n["before_rotation"], n["after_rotation"]),
+          n["before_rotation"] == "capture-generation-0001"
+          and n["after_rotation"] == "capture-generation-0002"
+          and n["identity_ok_before"] and n["identity_ok_after"],
+          "read off recipe.step_identity, which the job itself uses to verify a session")
+    t = c["token_value_rotation"]
+    check("c the token VALUES rotated while the cookie NAME set did not: "
+          "fingerprint %s -> %s" % (t["cookie_fingerprint_before"], t["cookie_fingerprint_after"]),
+          t["values_rotated"] and t["cookie_NAME_set_unchanged"],
+          "sha256 prefix over the whole jar -- no cookie value is printed anywhere")
+    o = c["old_version_refused"]
+    check("c THE OLD VERSION IS REFUSED: fence %s against an accepted fence of %s -> %s"
+          % (o["fence_seen"], o["min_fence"], o["state"]),
+          o["state"] == "STALE_FENCE", "closed vocabulary: %s" % ", ".join(
+              c["read_state_vocabulary"]))
+    check("c DIFFERENCE CONTROL: the SAME read unpinned reads %s"
+          % c["difference_control_same_read_unpinned"]["state"],
+          c["difference_control_same_read_unpinned"]["state"] == "OK",
+          "so STALE_FENCE is the fence's doing and not a defect in the bundle")
+    check("c a resume onto the OLD generation is refused by transport.resume_allowed: %s"
+          % c["resume_onto_the_old_generation_allowed"],
+          c["resume_onto_the_old_generation_allowed"] is False,
+          "the rule, called -- not restated here")
+
+
+def arm_d():
+    print()
+    print("(d) EVICTION / SELF-HEALING -- driven on job.GenerationJob with the replay transport")
+    data = session_drive()
+    if data.get("_no_result"):
+        check("d the session drive produced a result block", False,
+              "rc=%s" % data.get("rc"))
+        return
+    d = data["arms"]["d_eviction"]
+    one, ctl, rep = (d["one_eviction"], d["no_resubmit_difference_control"],
+                     d["repeat_eviction"])
+    print("      evicted at step=%s status=%s -> transport.decision=%s"
+          % (one["evicted_at"]["step"], one["evicted_at"]["status"],
+             one["evicted_at"]["decision"]))
+    print("      the JOB'S OWN why for that same step was %r -- job.py has no eviction "
+          "outcome, so the classification is taken from the wire" % one["job_own_why_for_that_step"])
+    print("      verified three ways before the resume: %s"
+          % ", ".join("%s=%s" % (k, v) for k, v in sorted(one["verified_three_ways"].items())))
+    check("d a 401 mid-job -> ONE broker refresh (refreshes_used=%d) -> outcome %s"
+          % (one["refreshes_used"], one["outcome"]),
+          one["outcome"] == "RECOVERED" and one["refreshes_used"] == 1
+          and one["refresh_allowed"] is True,
+          "rule called: %s; new generation %s" % (one["refresh_rule_called"],
+                                                  one["new_generation"]))
+    check("d it RESUMED AT THE CHECKPOINT and the job completed: resumed=%s ok=%s"
+          % (one["resumed_at_checkpoint"], one["job_ok_after_recovery"]),
+          one["resumed_at_checkpoint"] and one["job_ok_after_recovery"],
+          "through the job's OWN resume() reconcile and after_create(), never a new create")
+    check("d NO-RESUBMIT DIFFERENCE CONTROL: %d create POST(s) with the broker's recovery "
+          "vs %d with a restart instead"
+          % (ctl["creates_with_broker_recovery"], ctl["creates_with_a_restart_instead"]),
+          ctl["creates_with_broker_recovery"] == 1
+          and ctl["creates_with_a_restart_instead"] == 2 and ctl["discriminates"],
+          ctl["denominator"])
+    check("d a REPEAT eviction reaches %s, not a loop: second refresh refused -- %s"
+          % (rep["outcome"], rep["second_refresh_refused"]["why"]),
+          rep["outcome"] == "RETRYABLE_ATTENTION"
+          and rep["second_refresh_refused"]["allowed"] is False
+          and rep["parked_state"] == "ATTENTION" and rep["retryable"] is True,
+          "request PRESERVED: %s" % json.dumps(rep["request_preserved"], sort_keys=True))
+    ctrl = data["arms"]["controls"]
+    check("d CONTROL: a 422 CONTRACT failure at the same step is %s with %d refresh(es)"
+          % (ctrl["contract_failure_is_NOT_an_eviction"]["outcome"],
+             ctrl["contract_failure_is_NOT_an_eviction"]["refreshes_used"]),
+          ctrl["contract_failure_is_NOT_an_eviction"]["outcome"] == "NOT_AN_EVICTION"
+          and ctrl["contract_failure_is_NOT_an_eviction"]["refreshes_used"] == 0,
+          "without this, 'the broker refreshed' cannot be told from 'the broker refreshes "
+          "on any failure' -- the login storm the rule exists to stop")
+    check("d the read vocabulary is covered, not just its happy member: %s"
+          % json.dumps(ctrl["read_state_coverage"], sort_keys=True),
+          ctrl["pass"], "legacy flat bundle, unset secret and unparseable value")
+
+
+def arm_f():
+    print()
+    print("(f) NOTHING LEFT THE MACHINE -- both guards, their denominators, and their controls")
+    fence, session = fence_drive(), session_drive()
+    if fence.get("_no_result") or session.get("_no_result"):
+        check("f both guarded drives produced a result block", False,
+              "a guard summary cannot be read from a drive that did not finish")
+        return
+    rows = [("node  infra/aws/ec2/investor-reporting-ycharts (arm b)",
+             fence["netguard"], fence["netguard_positive_control"]),
+            ("py    investor-reporting/ycharts/session (arms c, d)",
+             session["netguard"], session["netguard_positive_control"])]
+    total_attempts = total_external = 0
+    for label, guard, control in rows:
+        total_attempts += guard["attempts_observed"]
+        total_external += guard["external_refused"]
+        print("      %s" % label)
+        print("        guard=%s installed=%s | attempts_observed=%d (DENOMINATOR) "
+              "loopback_allowed=%d external_refused=%d"
+              % (guard["guard"], guard["installed"], guard["attempts_observed"],
+                 guard["loopback_allowed"], guard["external_refused"]))
+        print("        POSITIVE CONTROL: attempted %s -> refused=%s, external count %s -> %s"
+              % (control["attempted"], control["refused"], control["external_before"],
+                 control["external_after"]))
+    # The battery's own ARM-(a) network use is declared here rather than hidden: it is AWS
+    # control plane, in the PARENT, through the aws shim -- a guard with an allow-list for
+    # "our own AWS calls" would have a hole shaped exactly like the thing it guards against.
+    print("      DECLARED, NOT GUARDED: arm (a4) makes one AWS control-plane read "
+          "(events describe-rule) from THIS process. It is not a vendor call and it is not "
+          "inside either guarded drive.")
+    check("f 0 connection(s) to a non-loopback destination escaped either drive: "
+          "%d refused of %d attempt(s) observed" % (total_external, total_attempts),
+          all(g["installed"] for _l, g, _c in rows)
+          and all(g["external_refused"] == len([d for d in g["external_destinations"]])
+                  for _l, g, _c in rows)
+          and total_external == total_attempts,
+          "every attempt either drive observed WAS the positive control; no drive opened a "
+          "socket of its own")
+    check("f both guards are DEMONSTRABLY able to fire: %d of %d positive control(s) refused "
+          "and counted" % (sum(1 for _l, _g, c in rows if c["pass"]), len(rows)),
+          all(c["pass"] for _l, _g, c in rows),
+          "a guard reporting 0 external and a guard that was never installed read identically")
+
+
+RESEARCH_ROOT = "infra/aws/terraform/investor-reporting/ycharts-research-20260911"
+YCHARTS_ROOT = os.path.join(REPO, "infra", "aws", "terraform", "investor-reporting", "ycharts")
+TERRAFORM = os.path.join(REPO, ".tools", "terraform.exe")
+AWS = os.path.join(REPO, ".tools", "aws.cmd")
+LEDGER = os.path.join(REPO, "org", "critical_paths", "change_management",
+                      "20260912T0314Z_irpt-bckend-rt9_deploy_completion.md")
+SENTINEL = os.path.join(REPO, "org", "critical_paths", ".open_deploys",
+                        "irpt-bckend-rt9.json")
+ABSORBED = ("aws_secretsmanager_secret.research_session",
+            "aws_cloudwatch_log_group.research_probe")
+HOST = "i-0167fd745ad906a66"
+
+
+def sh(cmd, cwd=None, timeout=900):
+    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout,
+                          shell=False)
+
+
+def arm_e():
+    print()
+    print("(e) ABSORBED, STOPPED, CONVERGED -- the research root's resources under the "
+          "ycharts root")
+
+    # -- the research root is GONE FROM THE TREE. Asked of git, not of the filesystem: a
+    # gitignored .terraform/ cache can leave the DIRECTORY on disk while the ROOT is gone,
+    # and `os.path.isdir` cannot tell those apart.
+    tracked = sh(["git", "ls-files", RESEARCH_ROOT], cwd=REPO).stdout.strip()
+    n_tracked = len([ln for ln in tracked.splitlines() if ln.strip()])
+    at_head = sh(["git", "ls-tree", "-r", "--name-only", "HEAD", "--", RESEARCH_ROOT],
+                 cwd=REPO).stdout.strip()
+    n_head = len([ln for ln in at_head.splitlines() if ln.strip()])
+    # THE BASELINE IS SELF-LOCATED, NOT COUNTED BACK FROM HEAD. The first version of this
+    # check read `HEAD~2` -- true on the run that wrote it and FALSE two commits later, when
+    # HEAD~2 had become the deletion commit itself and the arm read "down from 0" and FAILED.
+    # A relative ref as a baseline is a moving target, and an arm whose pin drifts stops
+    # meaning what it said. So the DELETING COMMIT is found by asking git which commit deleted
+    # the path, and the baseline is that commit's PARENT -- a reference that cannot drift
+    # however many commits land after it.
+    deleting = sh(["git", "log", "--diff-filter=D", "-1", "--format=%H", "--",
+                   RESEARCH_ROOT], cwd=REPO).stdout.strip()
+    n_parent = 0
+    if deleting:
+        parent = sh(["git", "ls-tree", "-r", "--name-only", deleting + "~1", "--",
+                     RESEARCH_ROOT], cwd=REPO).stdout.strip()
+        n_parent = len([ln for ln in parent.splitlines() if ln.strip()])
+    print("      tracked files under %s: worktree=%d, HEAD=%d, before the deleting commit "
+          "%s=%d" % (RESEARCH_ROOT, n_tracked, n_head, (deleting or "<none>")[:10], n_parent))
+    check("e the research root is GONE FROM THE TREE: %d tracked file(s) at HEAD, down from %d "
+          "at %s~1" % (n_head, n_parent, (deleting or "<none>")[:10]),
+          n_head == 0 and n_tracked == 0 and n_parent == 2 and bool(deleting),
+          "asked of git, not of the filesystem -- the gitignored .terraform/ provider cache "
+          "still leaves the DIRECTORY on disk in this worktree and os.path.isdir cannot tell "
+          "that apart from a root that is still declared; and the baseline is the DELETING "
+          "commit's parent, found by git, never a relative ref that drifts as commits land")
+
+    # -- both resources are under the YCHARTS root's state.
+    listed = sh([TERRAFORM, "state", "list"], cwd=YCHARTS_ROOT)
+    addresses = [ln.strip() for ln in listed.stdout.splitlines() if ln.strip()]
+    present = [a for a in ABSORBED if a in addresses]
+    print("      ycharts state list: %d resource(s); the absorbed pair:" % len(addresses))
+    for a in ABSORBED:
+        print("        %-46s %s" % (a, "PRESENT" if a in addresses else "ABSENT"))
+    check("e the absorbed resources are under the ycharts root's state: %d of %d, in a "
+          "%d-resource state" % (len(present), len(ABSORBED), len(addresses)),
+          listed.returncode == 0 and len(present) == len(ABSORBED) and len(addresses) == 19,
+          "state list printed, not asserted")
+
+    # -- and they are under NO OTHER root: the research state key is empty. A resource in TWO
+    # states is the dangerous end state of a botched move, and a check that only looks at the
+    # destination cannot see it.
+    # THE NAIVE INSTRUMENT CANNOT BE USED HERE, AND IT FAILS IN THE WORST DIRECTION.
+    # `terraform state list` in the research directory now REFUSES -- deleting main.tf removed
+    # the backend declaration, so terraform reports "Backend initialization required ...
+    # Unsetting the previously set backend s3", writes NOTHING to stdout and exits 1. An
+    # emptiness check that read stdout alone would parse that refusal as ZERO RESOURCES and
+    # PASS on a command that never looked at the state. This is not a transient failure that
+    # an `init` would fix: the declaration that addressed the state is gone by design, so the
+    # refusal is permanent and the instrument is retired, not retried. Row IRPT_BCKEND-W3-S37.
+    research_dir = os.path.join(REPO, RESEARCH_ROOT)
+    naive = sh([TERRAFORM, "state", "list"], cwd=research_dir, timeout=300) \
+        if os.path.isdir(os.path.join(research_dir, ".terraform")) else None
+    if naive is not None:
+        first = next((ln.strip() for ln in (naive.stdout + naive.stderr).splitlines()
+                      if "Error:" in ln), "<no error line>")
+        print("      NAIVE INSTRUMENT, RETIRED: `terraform state list` in the deleted root -> "
+              "rc=%d, %d stdout line(s)" % (naive.returncode, len(naive.stdout.split())))
+        print("        %s" % re.sub(r"\x1b\[[0-9;]*m", "", first)[:110])
+        check("e the retired instrument's refusal is DISTINGUISHED from an empty state: rc=%d "
+              "with 0 stdout lines" % naive.returncode,
+              naive.returncode != 0 and not naive.stdout.strip(),
+              "an emptiness check reading stdout alone would have PASSED on this -- a refusal "
+              "and a clean zero are identical there, which is why the reading below is taken "
+              "from the state OBJECT instead")
+
+    # SO THE EMPTINESS IS READ FROM THE STATE OBJECT ITSELF -- an instrument that needs neither
+    # the deleted declaration nor terraform, and that answers the actual question: does any
+    # OTHER state still own these two resources?
+    obj = os.path.join(REPO, ".scratch", "research_tfstate_read.json")
+    # The rc is not read here on purpose: the ORACLE is whether the object parses and what it
+    # holds, and `sh` already captures the call. An absent or unreadable object leaves
+    # `remaining` None, which FAILS the check below -- so a missing read cannot pass as empty.
+    sh([AWS, "s3api", "get-object", "--bucket",
+        "opal-313476888478-terraform-state", "--key",
+        "investor-reporting/ycharts-research-20260911/tfstate",
+        "--region", "us-east-1", obj,
+        "--query", "ContentLength", "--output", "text"], timeout=300)
+    remaining = None
+    if os.path.exists(obj):
+        with io.open(obj, "r", encoding="utf-8") as fh:
+            doc = json.load(fh)
+        remaining = [r.get("type", "") + "." + r.get("name", "")
+                     for r in (doc.get("resources") or [])]
+        print("      research STATE OBJECT read directly from S3: serial=%s, %d resource(s) %s"
+              % (doc.get("serial"), len(remaining), remaining))
+    check("e the research state OBJECT holds %s resource(s) -- the pair is under ONE root, "
+          "not two" % (len(remaining) if remaining is not None else "UNREADABLE"),
+          remaining == [],
+          "read from the tfstate object itself, so it needs neither the deleted backend "
+          "declaration nor terraform; a resource left in BOTH states is the dangerous outcome "
+          "of a half-done move and only this reading can see it")
+
+    # -- the objects THEMSELVES survived. A DIFFERENT INSTRUMENT than the one that moved them:
+    # `state rm` reporting "Removed" is terraform describing itself, and it cannot distinguish
+    # a forgotten resource from a deleted one.
+    secret = sh([AWS, "secretsmanager", "describe-secret", "--secret-id",
+                 "ycharts/session/research-20260911", "--region", "us-east-1",
+                 "--query", "Name", "--output", "text"], timeout=300)
+    group = sh([AWS, "logs", "describe-log-groups", "--log-group-name-prefix",
+                "/aws/lambda/irpt-ycharts-research-20260911", "--region", "us-east-1",
+                "--query", "logGroups[].logGroupName", "--output", "text"], timeout=300)
+    s_ok = "ycharts/session/research-20260911" in secret.stdout
+    g_ok = "irpt-ycharts-research-20260911" in group.stdout
+    print("      live control plane: secret=%r log_group=%r"
+          % (secret.stdout.strip()[:60], group.stdout.strip()[:60]))
+    check("e NOTHING WAS DESTROYED -- both objects still exist, read from the AWS control "
+          "plane: secret %s, log group %s"
+          % ("PRESENT" if s_ok else "MISSING", "PRESENT" if g_ok else "MISSING"),
+          s_ok and g_ok,
+          "the move was import-then-state-rm; state rm FORGETS and never deletes, and this is "
+          "the instrument that can tell those apart")
+
+    # -- the ycharts root CONVERGED.
+    plan = sh([TERRAFORM, "plan", "-input=false", "-no-color"], cwd=YCHARTS_ROOT)
+    converged = "No changes. Your infrastructure matches the configuration." in plan.stdout
+    line = next((ln.strip() for ln in plan.stdout.splitlines()
+                 if "No changes" in ln or ln.strip().startswith("Plan:")), "<no verdict line>")
+    print("      ycharts post-apply plan: %s" % line)
+    check("e the ycharts root's POST-APPLY plan reads No changes", converged,
+          "run with the worktree's .tools/terraform.exe after init; the apply that preceded it "
+          "reported 'Apply complete! Resources: 0 added, 2 changed, 0 destroyed'")
+
+    # -- the host is STOPPED, live.
+    host = sh([AWS, "ec2", "describe-instances", "--instance-ids", HOST, "--region",
+               "us-east-1", "--query", "Reservations[].Instances[].State.Name",
+               "--output", "text"], timeout=300)
+    state = host.stdout.strip()
+    check("e the runner host is STOPPED: %s -> %r" % (HOST, state),
+          state == "stopped",
+          "read live from the control plane, never asserted from instance.tf -- bound 1 holds, "
+          "no login and no capture rode on any of this")
+
+    # -- the ledger is CLOSED and its sentinel is gone. Both, because either alone is
+    # ambiguous: a CLOSED entry with a sentinel still present is a half-landed close, and an
+    # absent sentinel with no entry is a ledger that was never opened.
+    with io.open(LEDGER, "r", encoding="utf-8") as fh:
+        entry = fh.read()
+    closed = "**Status:** CLOSED" in entry
+    legs_closed = entry.count("CLOSED 2026")
+    sentinel_gone = not os.path.exists(SENTINEL)
+    committed = sh(["git", "ls-files", "--error-unmatch",
+                    "org/critical_paths/change_management/"
+                    "20260912T0314Z_irpt-bckend-rt9_deploy_completion.md"], cwd=REPO)
+    print("      ledger: status CLOSED=%s | leg proofs closed=%d | sentinel present=%s | "
+          "entry tracked=%s" % (closed, legs_closed, not sentinel_gone,
+                                committed.returncode == 0))
+    check("e the ledger is CLOSED with %d leg(s) proven, its sentinel REMOVED, and the entry "
+          "committed" % legs_closed,
+          closed and legs_closed >= 6 and sentinel_gone and committed.returncode == 0,
+          "a CLOSED entry whose sentinel is still present is a half-landed close; an absent "
+          "sentinel with no entry is a ledger nobody opened -- so both are read")
+
+
 def main():
     print("=" * 78)
-    print("IB-rt-9 / RT9-AC1 -- ARM (a) ONLY, under the managed wind-down")
+    print("IB-rt-9 / RT9-AC1 -- arms (a), (b), (c), (d), (e), (f)")
     print("=" * 78)
     code_hits = arm_a1()
     arm_a2(code_hits)
     arm_a3()
     arm_a4()
+    arm_b()
+    arm_c()
+    arm_d()
+    arm_e()
+    arm_f()
     print()
     print("-" * 78)
-    for arm, why in (
-            ("(b) FENCING", "two capture attempts on the fixture -- not built"),
-            ("(c) ROTATION", "publish a new version, old refused -- not built"),
-            ("(d) EVICTION", "401 mid-job, ONE refresh, resume at checkpoint -- not built"),
-            ("(e) ABSORBED", "ledger + state mv + apply -- FORBIDDEN this session "
-                             "(managed wind-down, 0.0.0_AB_MSTR 2026-09-11 17:30Z)"),
-            ("(f) NO EGRESS", "guard log across the whole battery -- not built")):
-        print("  NOT RUN  %-14s %s" % (arm, why))
-    print("-" * 78)
-    print("ARM (a) checks failed: %d" % len(FAILURES))
+    print("ARMS RUN: 6 of 6  (a cutover, b fencing, c rotation, d eviction, e absorbed, "
+          "f no egress)")
+    print("checks failed: %d" % len(FAILURES))
     for f in FAILURES:
         print("  FAILED: %s" % f)
-    print("FINAL: ARM-A-ONLY, INCOMPLETE-UNDER-WINDDOWN -- RT9-AC1 is NOT met by this run "
-          "and its acceptance token is deliberately absent from this output.")
-    return 1 if FAILURES else 0
+    print("-" * 78)
+    if FAILURES:
+        print("FINAL: INCOMPLETE -- the acceptance token is deliberately absent from this "
+              "output in EVERY form, including negated: the expect is graded as a REGEX and a "
+              "negated line would MATCH and grade a failing run PASS.")
+        return 1
+    print("IBRT9-BROKER-FENCED")
+    return 0
 
 
 if __name__ == "__main__":
