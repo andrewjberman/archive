@@ -1,0 +1,336 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-z-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0aa50dbc0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8768f46770",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-z-1.policy-guard.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "kind": "script",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module, source only; nothing deploys. The principal_profile record (POLICY#<tid>#<oid> / principal_profile: profile_kind restricted, status pending|active|revoked, revision, grant_revision) and the versioned data_entitlement record (data_entitlement#<revision, 10 digits>: status, scope of masters, datasets, accounts per master, dates fixed_dates|rolling_complete_window, columns per dataset, operations), through app/access_state.py. It also carries: strict parsing (malformed denies); the tool classification (35 native + 9 integration legacy, the contract's 5 Schwab); the guard functions tool_denial / visible_tools / route_denial, each deciding from a strong read of the request principal's profile and grant; the per-dimension check_scope / authorize; and the operator record builders (optimistic revision condition, grant revisions written once).",
+      "introduces": [
+        "def tool_denial",
+        "def visible_tools",
+        "def route_denial",
+        "def current_access",
+        "def check_scope",
+        "def authorize",
+        "def profile_put_op",
+        "def grant_put_op",
+        "TOOL_CLASSES"
+      ],
+      "artifact_covered_by": [
+        "OGZ1-AC1", "OGZ1-AC2", "OGZ1-AC3", "OGZ1-AC4", "OGZ1-AC5", "OGZ1-AC6", "OGZ1-AC7", "OGZ1-AC8",
+        "OGZ1-AC9", "OGZ1-AC10", "OGZ1-AC11", "OGZ1-AC12"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "kind": "script",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only. `mcp` is now _PolicyGuardedMCP, a FastMCP subclass. Its list_tools filters discovery through data_entitlement.visible_tools, and its call_tool denies through data_entitlement.tool_denial before the tool function runs; both do the store read off the event loop with the principal passed explicitly. _run checks data_entitlement.tool_denial after the identity and tier resolution, before identity_scope, the guard and any token fetch. The 35 tool functions are unchanged.",
+      "introduces": [
+        "class _PolicyGuardedMCP(FastMCP)",
+        "_ent = data_entitlement.tool_denial(tool)"
+      ],
+      "artifact_covered_by": ["OGZ1-AC4", "OGZ1-AC5", "OGZ1-AC6", "OGZ1-AC7", "OGZ1-AC11", "OGZ1-AC12", "OGZ1-AC13"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/base.py",
+      "kind": "script",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only. run_integration_tool checks data_entitlement.tool_denial before identity_scope, min_tier and the credential provider, and returns the denial with its integration id.",
+      "introduces": ["_ent = _entitlement_denial(tool)"],
+      "artifact_covered_by": ["OGZ1-AC4", "OGZ1-AC5", "OGZ1-AC7", "OGZ1-AC12"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/registry.py",
+      "kind": "script",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only. register_enabled reports the tools data_entitlement.py does not classify (report[id]['unclassified']), which the guard hides and denies until they are classified.",
+      "introduces": ["report[iid][\"unclassified\"]"],
+      "artifact_covered_by": ["OGZ1-AC5"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only. _entitlement_block runs on /teams/poll and /query/v0 after bearer validation and the blocklist, before token_broker.get_token or query_v0.handle: 403 for a restricted profile, 503 for an unreadable store, None for a principal with no profile. /query/v0 marks its allowed check for the request so handle() does not read again. No route added or changed (29 declarations; OGZ1-AC14).",
+      "introduces": ["def _entitlement_block"],
+      "artifact_covered_by": ["OGZ1-AC2", "OGZ1-AC3", "OGZ1-AC8", "OGZ1-AC9", "OGZ1-AC13", "OGZ1-AC14"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/query_v0.py",
+      "kind": "script",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only. handle() checks data_entitlement.route_denial first, ahead of the rate limit, the email-domain internality (_principal), the catalog gate and the S3 fetch. OGZ1-AC9 calls it directly with a restricted principal: 403.",
+      "introduces": ["blocked = data_entitlement.route_denial(\"/query/v0\", get_current_principal())"],
+      "artifact_covered_by": ["OGZ1-AC9"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py",
+      "kind": "test",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_ogz1_ac01 .. test_ogz1_ac12, offline. It imports test_principal_cutover's harness helpers (local issuer, fake MSAL client, moto) and starts its own module-scoped app lifespan. Every credential fetch and data read carries a recorder. The three buildable integrations are registered per test, and a stand-in integration registers the contract's five Schwab names (row W3-S23). Whole module: 12 passed. commit-gate: 'OK: pre-commit gate clean for 8 of 8 file(s)'.",
+      "introduces": ["def test_ogz1_ac01", "def test_ogz1_ac12", "class _SchwabStandIn"],
+      "artifact_covered_by": [
+        "OGZ1-AC1", "OGZ1-AC2", "OGZ1-AC3", "OGZ1-AC4", "OGZ1-AC5", "OGZ1-AC6", "OGZ1-AC7", "OGZ1-AC8",
+        "OGZ1-AC9", "OGZ1-AC10", "OGZ1-AC11", "OGZ1-AC12"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_z1.py",
+      "kind": "script",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC14 probe, reusing og_a3's git, route and diff readers. From git objects it reads app/server.py's route declarations at the cut base and HEAD (for the routes this cell adds) and tests/test_principal_cutover.py at both vintages plus their -U0 diff. It requires the worktree to equal HEAD for that file. It first runs its judge against 7 synthetic cases (2 must pass, 5 must fail).",
+      "introduces": ["def ac14", "def judge"],
+      "artifact_covered_by": ["OGZ1-AC14"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d88cd32d0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows W3-S22 .. W3-S24 appended inside the fenced json array: '[surprise-row-gate] ... 3 new row(s) of 59 total checked (56 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields'.",
+      "introduces": ["NFRA_OPLGTW-W3-S22", "NFRA_OPLGTW-W3-S23", "NFRA_OPLGTW-W3-S24"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGZ1-AC1",
+      "criterion_verbatim": "`OGZ1-AC1` (`test_ogz1_ac01`) -- profile and grant records are keyed by `tid`/`oid`, carry status pending, active or revoked and a revision, and a revoked record is a tombstone. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac01 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac01 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC1: principal_profile key pk=POLICY#<tid>#<oid> sk=principal_profile (no email in the key); data_entitlement key sk=data_entitlement#0000000001 in the same partition; statuses seen pending -> active -> revoked at revisions 1 -> 2 -> 3; stale-revision update refused (ConditionFailed), grant revision rewrite refused (ConditionFailed); status values refused before AWS: ['enabled', '', None] and 'live' for a grant; delete of the profile refused (AccessStateRefused) -- the revoked record stays, the grant record stays; revoked principal: whoami -> entitlement_denied, discovery 0 tools; the same email under another oid: whoami served (Test User)\n1 passed in 1.86s\nrc=0",
+      "denominator": "1 principal: 1 profile record and 1 grant record in one partition; 3 statuses at 3 revisions, each written through the operator transaction. Refused: 1 stale-revision update, 1 grant rewrite, 3 profile status values plus 1 grant status value before AWS, and 1 delete. After revocation the revoked principal gets 0 tools and whoami is denied. Control: 1 principal with the same email under another oid is served. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC2",
+      "criterion_verbatim": "`OGZ1-AC2` (`test_ogz1_ac02`) -- every request strongly reads the current profile and grant. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac02 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac02 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC2: tools/list -> profile reads 1, grant reads 1 (rev 1), all strong; tools/call schwab_list_files -> profile reads 1, grant reads 1 (rev 1), all strong; tools/call schwab_describe_dataset -> profile reads 1, grant reads 1 (rev 1), all strong; GET /teams/poll -> profile reads 1, grant reads 1 (rev 1), all strong; POST /query/v0 -> profile reads 1, grant reads 1 (rev 1), all strong; after grant revision 2 (operator transaction between requests): tools/call schwab_describe_dataset -> profile reads 1, grant reads 1 (rev 2); tools/list -> profile reads 1, grant reads 1 (rev 2); a principal with no profile: 3 tools/list -> 3 strong profile reads; POLICY reads in the whole test 17, strong 17 of 17 (get_item ConsistentRead=True), cached 0\n1 passed in 1.75s\nrc=0",
+      "denominator": "Requests 5 of 5, across all four request kinds (tools/list, tools/call, /teams/poll, /query/v0), each with a fresh strong read of the profile and the grant. A grant revision written between requests is read by the next 2 of 2 requests. 3 of 3 requests by a principal with no profile each read its absent profile strongly. POLICY reads in the test: 17 of 17 strong get_item. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC3",
+      "criterion_verbatim": "`OGZ1-AC3` (`test_ogz1_ac03`) -- (difference) with the store unavailable or a record malformed, restricted access is denied, and with the store healthy it is served. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac03 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac03 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC3: healthy -> schwab_query served (1 credential fetch), discovery 2 tools, /query/v0 403 (restricted); 9 failure arms -> schwab_query entitlement_unavailable/UNAVAILABLE, 0 credential fetches, discovery 0 tools, /query/v0 503, on 9 of 9: store unavailable (POLICY reads fail at the endpoint); profile status 'enabled'; profile revision not a number; profile tid not its key's; profile kind missing; profile names absent grant revision 9; grant operations include download_original; grant scope without columns; grant status 'live'; healthy again -> served\n1 passed in 1.95s\nrc=0",
+      "denominator": "Healthy: 2 of 2 arms (before and after) served, 1 credential fetch each. Failure arms: 9 of 9 denied with entitlement_unavailable/UNAVAILABLE, 0 credential fetches, discovery 0 tools and /query/v0 503. The arms are 1 store outage (POLICY reads fail at the endpoint while the authentication layer's RUNTIME reads answer) and 8 malformed records (5 profile, 3 grant). 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC4",
+      "criterion_verbatim": "`OGZ1-AC4` (`test_ogz1_ac04`) -- an unknown user sees no Schwab tool in discovery and a direct Schwab call fails. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac04 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac04 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC4: registered tools 49 (Schwab 5); unknown user: discovery 44 tools, Schwab among them 0 of 5; direct tools/call of the 5 Schwab tools -> entitlement_denied 5 of 5; the chokepoint (run_integration_tool) -> entitlement_denied 5 of 5; credential fetches and tool bodies 0; master_admin with no profile: discovery 44 tools, Schwab among them 0 of 5; direct tools/call of the 5 Schwab tools -> entitlement_denied 5 of 5; the chokepoint (run_integration_tool) -> entitlement_denied 5 of 5; credential fetches and tool bodies 0; control: an active restricted profile sees 5 of 5 Schwab tools and schwab_get_access is served\n1 passed in 1.84s\nrc=0",
+      "denominator": "49 registered tools, 5 of them Schwab (stand-ins carrying the contract's names; row W3-S23). 2 unknown principals: an unlisted user and a master_admin, neither with a profile. Each gets 0 of 5 Schwab tools in discovery, 5 of 5 denied over MCP and 5 of 5 at the chokepoint, with 0 credential fetches or tool bodies. Control: 1 active restricted profile sees 5 of 5. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC5",
+      "criterion_verbatim": "`OGZ1-AC5` (`test_ogz1_ac05`) -- a newly registered, unclassified tool is denied to the restricted profile. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac05 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac05 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC5: 'brand_new_data_tool' registered on the served MCP surface outside both chokepoints and unclassified: restricted profile -> hidden from discovery, tools/call tool_unclassified, tools._run tool_unclassified, run_integration_tool tool_unclassified; no-profile principal -> the same (tool_unclassified); tool body runs 0, credential fetches 0; the registry reports an unclassified integration tool (['fresh_unclassified']); control: once classified legacy, the no-profile principal is served (body runs 1) and the restricted profile is still entitlement_denied\n1 passed in 1.88s\nrc=0",
+      "denominator": "1 unclassified tool, registered straight on the served surface so that only the MCP-layer guard stands between a caller and its body. Restricted profile: 4 of 4 paths deny it (discovery, tools/call, tools._run, run_integration_tool). A no-profile principal is denied the same way (PRD C2 binds every principal; row W3-S24). 0 body runs. The registry reports 1 of 1 unclassified integration tool. Control: once classified, the no-profile principal is served and the restricted profile is still denied. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC6",
+      "criterion_verbatim": "`OGZ1-AC6` (`test_ogz1_ac06`) -- the restricted profile's discovery lists only its allowed tools. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac06 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac06 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC6: registered tools 49 (native 35, integration 9, Schwab stand-ins 5); grant ['list', 'describe'] -> 3 of 49 registered: ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files']; grant ['query', 'download_filtered'] -> 3 of 49 registered: ['schwab_get_access', 'schwab_prepare_download', 'schwab_query']; grant ['list', 'describe', 'query', 'download_filtered'] -> 5 of 49 registered: ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files', 'schwab_prepare_download', 'schwab_query']; pending profile -> 0; revoked profile -> 0; control: a principal with no profile -> 44 (every registered tool but the 5 Schwab)\n1 passed in 2.19s\nrc=0",
+      "denominator": "49 registered tools. 3 grants list exactly their allowed tools: 3, 3 and 5 of 49, each equal to the expected set. Pending and revoked profiles list 0 of 49. Control: a principal with no profile lists 44 of 49. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC7",
+      "criterion_verbatim": "`OGZ1-AC7` (`test_ogz1_ac07`) -- every other native and integration tool is denied to the restricted profile before any credential fetch, over all tools, denominator printed. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac07 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac07 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC7: registered tools 49 = Schwab 5 allowed + 44 others (native 35, integration 9: graph_cypher, graph_status, opal_data_refresh_upload, ycharts_freshness, ycharts_fund_series, ycharts_risk_return_scatter, ycharts_search, ycharts_snapshot_metrics, ycharts_time_series); tools/call of the 44 others as the restricted profile -> entitlement_denied 44 of 44; the chokepoints with the MCP layer bypassed (tools._run 35, run_integration_tool 9) -> entitlement_denied 44 of 44; credential fetches (delegated Graph token, silent MSAL, integration credential providers), Graph calls and tool bodies during those 88 calls: 0; control: schwab_query served with 1 credential fetch\n1 passed in 2.96s\nrc=0",
+      "denominator": "All 49 registered tools: 5 allowed plus 44 others (35 native, 9 integration). 44 of 44 denied over MCP and 44 of 44 at the chokepoints, 88 calls in all, with 0 credential fetches, Graph calls or tool bodies. Control: 1 allowed tool served with exactly 1 credential fetch. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC8",
+      "criterion_verbatim": "`OGZ1-AC8` (`test_ogz1_ac08`) -- `/teams/poll`, `/query/v0` and every other non-MCP route are denied to the restricted profile before any credential or data read, over all route declarations, denominator printed. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac08 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac08 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC8: route declarations 29 = MCP 1 (/mcp: the tool-level guard; its discovery for this profile is its 5 Schwab tools) + non-MCP 28; the restricted profile's own gateway token on each non-MCP route: access 2 -> /query/v0 403, /teams/poll 403; access-layer 5 -> /login 401, /sprint 401, /sprint/ 401, /sprint/archive 401, /sprint/{day} 401; capability 7 -> /ms/health 401, /ms/onedrive_children 401, /ms/search 401, /ms/site_children 401, /ms/sites 401, /otp/fetch 401, /otp/health 401; public 10 -> /.well-known/jwks.json 200, /.well-known/oauth-authorization-server 200, /.well-known/oauth-protected-resource 200, /authorize 400, /callback 400, /health 200, /register 201, /schwab/download/callback 400, /schwab/download/login 503, /token 400; static 2 -> /graph/cypher 401, /graph/health 401; static-exchange 2 -> /ms/token 401, /otp/token 401; credential or data reads during the 28 probes: 0 (delegated Graph token, silent MSAL, code redemption, Graph, Teams poll, catalog, S3, OTP, MS ingest, graph read, capability mint, sprint pages); control: a principal with no profile -> /teams/poll 200, /query/v0 200, reads recorded 5\n1 passed in 1.58s\nrc=0",
+      "denominator": "29 route declarations = 29 app.routes = the 29 ROUTE_CLASS keys. 1 MCP route and 28 non-MCP routes. On all 28 the restricted profile's gateway token gets no credential or data read (recorder snapshot unchanged 28 of 28): the 2 access routes 403 entitlement_denied; the 11 capability, static-exchange and static routes 401; the 5 access-layer routes 401; the 10 public routes the same status as without the bearer. Positive control: a no-profile principal on the 2 access routes, 200 twice, with 5 reads recorded. Residual: the same person's ALB-email session on the 5 access-layer routes and the legacy-consent callback is row W3-S22 (ARMED). 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC9",
+      "criterion_verbatim": "`OGZ1-AC9` (`test_ogz1_ac09`) -- a restricted principal with an `opalinvest.com` email is denied on `/query/v0`. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac09 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac09 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC9: restricted principals whose email domain query_v0 classes as opal-internal: opalinvest.com -> 403; handle() direct, opalinvest.com -> 403; opalinvest.dev -> 403; handle() direct, opalinvest.dev -> 403; catalog gate and S3 fetch calls 0; control: a principal with no profile at opalinvest.com -> 200, catalog gate called with principal class opal-internal, S3 fetch 1\n1 passed in 1.88s\nrc=0",
+      "denominator": "2 restricted principals, one at opalinvest.com and one at opalinvest.dev; each domain alone makes query_v0._principal return opal-internal. 4 of 4 denied 403: the route twice, and handle() called directly (server.py bypassed) twice. Catalog gate and S3 fetch calls: 0. Control: 1 no-profile principal at opalinvest.com gets 200, the catalog gate called with opal-internal, and 1 S3 fetch. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC10",
+      "criterion_verbatim": "`OGZ1-AC10` (`test_ogz1_ac10`) -- scope is enforced separately on master, dataset, account IDs, dates, columns and operations. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac10 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac10 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC10: base request in scope (0 failures); one dimension out at a time, 6 of 6 fail exactly that dimension: operations: operation 'describe' is not granted; masters: master '08335338' is not granted; datasets: dataset 'dim_balance' is not granted; accounts: 1 of 2 requested account(s) are not granted for master '08242234'; dates: 1 of 2 requested date(s) are outside the granted fixed_dates; columns: column(s) ['cost_basis'] are not granted for dataset 'dim_position'; download_original -> operations (disabled by the contract); the same account id under the other granted master -> accounts only; rolling window anchored at 2026-09-11: 2026-08-13 in, 2026-08-12 out, no qualified date -> dates; raw account ids in the reasons 0; malformed scopes refused 6 of 6; through the store: allowed at grant revision 1, a column outside -> ['columns'], after revocation -> profile\n1 passed in 1.51s\nrc=0",
+      "denominator": "6 of 6 scope dimensions (SCOPE_DIMENSIONS). Each variant moves one dimension out of scope and fails exactly that one. Also: 1 contract-disabled operation; 1 same-account-id-other-master case (accounts only); 3 rolling-window cases; 6 of 6 malformed scopes refused; 0 raw account ids in the reasons. Through the store, 3 of 3 decisions: allowed at revision 1, denied on columns, and denied as profile after revocation. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC11",
+      "criterion_verbatim": "`OGZ1-AC11` (`test_ogz1_ac11`) -- (difference) every existing identity-scope entry and an unlisted internal user keep exactly their current tool set, before against after. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac11 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac11 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC11: identity-scope entries 1 (seed + identity_tool_allowlist.txt overlay) + 1 unlisted internal user; registered tools 44; opalbloomberg@opalinvest.com (allowlist 10): discovery before == after (44 tools), dispatch verdicts before == after 44 of 44 (bodies reached 7); unlisted.internal@opalinvest.com (allowlist 0): discovery before == after (44 tools), dispatch verdicts before == after 44 of 44 (bodies reached 29); control: a restricted principal before -> discovery 44, reached 29; after -> discovery 0, reached 0\n1 passed in 2.64s\nrc=0",
+      "denominator": "The identity-scope population is 1 entry (the seed's opalbloomberg@opalinvest.com, widened by the repo overlay's 1 row to 10 tools), plus 1 unlisted internal user. The tool population is the 44 tools registered at the cut. BEFORE is the chain without this cell's guard; AFTER is the chain as built. Discovery equal 2 of 2 identities (44 = 44 = FastMCP's unfiltered list); dispatch verdicts equal 44 of 44 for each (88 of 88). Control: the same measurement on a restricted principal differs (reached 29 before, 0 after). 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC12",
+      "criterion_verbatim": "`OGZ1-AC12` (`test_ogz1_ac12`) -- removing an overlay row does not reopen the unlisted path for a restricted profile. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac12 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py::test_ogz1_ac12 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ1-AC12: restricted profile scoped by an overlay row: bodies reached ['schwab_list_files'], discovery 3; row removed (identity_scope now returns None -- unlisted): bodies reached ['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files'], discovery 3, legacy tools reached 0 of 44 and listed 0 of 44; control: a principal with no profile and an overlay row -> reached ['whoami'], row removed -> reached 29 tools (the unlisted path reopens for it)\n1 passed in 3.24s\nrc=0",
+      "denominator": "1 restricted profile whose identity_scope overlay row is removed; identity_scope then returns None (unlisted). Its reachable set stays inside its 3 grant tools: 1 with the row, 3 without. Legacy tools reached and listed: 0 of 44 without the row. Control: 1 no-profile principal with the same overlay change goes from 1 reached tool to 29, which is the unlisted path the restricted profile does not get. 1 of 1 test, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC13",
+      "criterion_verbatim": "`OGZ1-AC13` -- `tests/test_principal_cutover.py` passes after your guard changes. <invocation>cd <WS> && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py -q -p no:cacheprovider --color=no -m \"not live\"</invocation><expect>(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py -q -p no:cacheprovider --color=no -m \"not live\"",
+      "expect": "(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC4: route declarations in app/server.py 29 (Route 28, Mount 1) == app.routes 29; protected 19 (access 3, access-layer 5, capability 7, static 2, static-exchange 2), public 10; legacy access token (exp valid) rejected 401 on 19 of 19 protected routes, and the OG-a-1-shape legacy token naming a LIVE family rejected 401 invalid_token with the resource challenge on 3 of 3 access-token routes; the same family's current token accepted 200 on 3 of 3 (/mcp, /query/v0, /teams/poll); public routes: the legacy bearer changes no status on 10 of 10\n[OGA2-AC1 .. AC3 and AC5 .. AC11 denominator lines as printed, in .scratch/v/ac13.log]\n11 passed in 5.97s\nrc=0",
+      "denominator": "11 of 11 tests of the module, rc=0, with the file byte-equal to the cut base (OGZ1-AC14). The guard is live for these tests: every /mcp, /teams/poll and /query/v0 request reads its principal's (absent) profile; OGA2-AC4 still reads 29 declarations and a 200 for the current token on 3 of 3 access routes. 1 of 1 module, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ1-AC14",
+      "criterion_verbatim": "`OGZ1-AC14` -- (discriminating) the diff of `tests/test_principal_cutover.py` against your cut base is empty, or exactly `ROUTE_CLASS` entries for routes this cell adds, one per new path, and no other line; the probe prints the added paths with their classes and `VERDICT: PASS-OGZ1-AC14` or `VERDICT: FAIL-OGZ1-AC14 <reason>`. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_z1.py AC14</invocation><expect>(?m)^VERDICT: PASS-OGZ1-AC14(?![0-9])</expect>",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_z1.py AC14",
+      "expect": "(?m)^VERDICT: PASS-OGZ1-AC14(?![0-9])",
+      "output_evidence": "judge control: no route added, file unchanged -> pass (expected pass)\njudge control: one route added, its one entry -> pass (expected pass)\njudge control: one route added, no entry -> fail (expected fail)\njudge control: an entry with no added route -> fail (expected fail)\njudge control: an assertion changed -> fail (expected fail)\njudge control: a base entry re-classed -> fail (expected fail)\njudge control: a comment added outside -> fail (expected fail)\nHEAD d88cd32d0c, cut base 7f1ab996a0, file infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py\nserver.py route declarations: base 29, HEAD 29; added by this cell 0 []; removed 0 []\nROUTE_CLASS entries: base 29, HEAD 29; gained {}; removed 0; re-classed 0\ndiff of infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py, cut base 7f1ab996a0 -> HEAD d88cd32d0c: 0 byte(s); 0 line(s) removed or changed, 0 added\nmodule outside ROUTE_CLASS structurally identical at both vintages: yes\nworktree == HEAD for the file: yes\nVERDICT: PASS-OGZ1-AC14\nrc=0",
+      "denominator": "1 file, both vintages read from git objects. This cell adds 0 routes (server.py: 29 declarations at base and HEAD, 0 added, 0 removed), so the diff must be empty, and it is: 0 bytes, 0 lines. ROUTE_CLASS has 29 entries at both vintages, 0 gained, removed or re-classed. The worktree equals HEAD. The judge's 7 of 7 controls read as expected. 1 of 1 probe run, verbatim at d88cd32d0c.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three in-process mutants via a pytest plugin (.scratch/og_mutants.py, loaded with -p og_mutants and PYTHONPATH=.scratch; the committed bytes untouched), each run against the criteria it must break. guard_off: data_entitlement.decide always allows (AC4, AC7, AC11). routes_off: data_entitlement.route_denial always allows (AC8, AC9). cached_read: current_access memoised per principal across requests (AC2). Also AC14: the probe's judge is controlled against 7 synthetic cases before it reads git.",
+      "expected": "guard_off: 3 failed. routes_off: 2 failed. cached_read: 1 failed. AC14 judge: 2 pass and 5 fail, as labelled.",
+      "observed": "guard_off: 'MUTANT guard_off' | AC4 \"AssertionError: ('unknown user', ...)\" (the 5 Schwab tools listed to an unknown user) | AC7 \"AssertionError: ('create_draft', 200, ...)\" | AC11 discovery lists differ | '3 failed in 4.07s', rc=1. routes_off: 'MUTANT routes_off' | AC8 \"AssertionError: ('/query/v0', ['catalog:load', 'catalog:gate', 's3:query_v0'])\" | AC9 'assert (200 == 403)' | '2 failed in 3.14s', rc=1. cached_read: 'MUTANT cached_read' | AC2 \"AssertionError: ('tools/call schwab_list_files', [])\" (no read on the request) | '1 failed in 2.47s', rc=1. AC14 judge: 7 of 7 as expected (in its output evidence).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The 12 'OGZ1-AC' denominator lines of a whole-module run (.scratch/ogz1_second.log, 12 passed; the gateway tree byte-equal to d88cd32d0c) compared, by diff, with the 12 verbatim single-test runs at d88cd32d0c (.scratch/v/ac1..12.log). AC13: the module run before commit (11 passed, .scratch/ac13_pre.log) against the verbatim run (11 passed).",
+      "observed": "12 of 12 denominator lines identical (diff empty). AC13: 11 passed both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The same person's ALB-email session on the 5 access-layer routes (/login, /sprint*) and the legacy-consent /callback branch.",
+      "reason": "Row NFRA_OPLGTW-W3-S22 (ARMED, disarm 1.0.0_SA_CTO). Those routes carry only an ALB email, and the restricted profile is keyed by tid/oid (PRD C1/C2). Every candidate fix lies outside this grant: a sprint roster, an ALB rule, or an email-keyed deny index in the access-state table. The restricted profile's own gateway token is denied on all 28 non-MCP routes (OGZ1-AC8)."
+    },
+    {
+      "item": "The real Schwab tools, and applying scope before filtering, projection, grouping, totals, cache lookup and export.",
+      "reason": "OG-q-2's cell. This cell classifies the five contract names, guards their discovery and dispatch, and provides data_entitlement.authorize(), the per-dimension check behind a strong read that the tool layer calls. The criteria ran against stand-ins (row W3-S23)."
+    },
+    {
+      "item": "The operator administration command (validate, scope diff, conditional activation, approver and source reference).",
+      "reason": "OG-z-2's cell. This cell provides the record model and the builders it uses: profile_put_op with the optimistic revision condition, grant_put_op write-once, and operator_audit_op."
+    },
+    {
+      "item": "The keyed account_ref alias.",
+      "reason": "OG-z-3's cell. Accounts are raw ids inside the grant only; no denial reason carries one (OGZ1-AC10)."
+    },
+    {
+      "item": "An edit of app/identity_scope.py.",
+      "reason": "Granted but not needed. The restricted profile does not depend on it (OGZ1-AC12), and the existing identity-scope behaviour is regression, kept exactly (OGZ1-AC11)."
+    },
+    {
+      "item": "A whole-suite single-process run of infra/aws/ec2/opal-gateway/tests.",
+      "reason": "Row NFRA_OPLGTW-W3-S12 and the order: modules are run separately. Every existing module was run in its own process after the change, 14 of 14 green (result file)."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order. Every commit is LOCAL on branch wk-nfra_oplgtw-1-3e."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W3-S22: the ALB-email routes and the legacy-consent callback cannot see the tid/oid profile before a read; a person with a restricted profile can reach /sprint* and the /login consent through an ALB session. OBSERVATION, ARMED (disarm 1.0.0_SA_CTO).",
+    "NFRA_OPLGTW-W3-S23: no Schwab tool is built at the cut, so the criteria are exercised against stand-ins carrying the contract's five names; the operation map is this cell's choice. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-W3-S24: 'a newly added tool is denied until classified' binds every principal (PRD C2), not only the restricted profile; later orders adding a tool need app/data_entitlement.py in their paths. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/policy-guard.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest under .venv-og (py -3.12 venv, --system-site-packages, requirements + msal moto pytest; mcp 1.28.0, moto 5.2.3)",
+      "invocation": "the 13 pytest invocations of OGZ1-AC1 .. OGZ1-AC13, verbatim, from /c/tmp/wk-oplgtw-1-3e at d88cd32d0c",
+      "result": "OGZ1-AC1 .. AC12: '1 passed' each, rc=0; OGZ1-AC13: '11 passed in 5.97s', rc=0."
+    },
+    {
+      "tool": "probes/og_z1.py under .venv-og",
+      "invocation": "og_z1.py AC14, verbatim, at d88cd32d0c",
+      "result": "'VERDICT: PASS-OGZ1-AC14', rc=0."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ruff py39, ds-precommit)",
+      "invocation": "bash .tools/commit-gate.sh on the 8 touched .py files (full paths)",
+      "result": "'OK: pre-commit gate clean for 8 of 8 file(s)', rc=0. The first run's ruff F811 (a fixture parameter shadowing the imported app_client) was fixed with a module-own served_app fixture. A WARN on non-ASCII in tools.py concerns lines present at the cut base."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~3 <0.9.0_WK_NFRA_OPLGTW~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "d88cd32d0c (9 files, 1804 insertions, 6 deletions; surprise-row-gate 3 new rows OK; msg-verify MATCH len=1522), LOCAL on wk-nfra_oplgtw-1-3e."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> OGZ1-AC1,OGZ1-AC2,OGZ1-AC3,OGZ1-AC4,OGZ1-AC5,OGZ1-AC6,OGZ1-AC7,OGZ1-AC8,OGZ1-AC9,OGZ1-AC10,OGZ1-AC11,OGZ1-AC12,OGZ1-AC13,OGZ1-AC14",
+      "result": "see the result file -- only the exit code is the verdict"
+    }
+  ]
+}
