@@ -78,10 +78,31 @@ for (const [code, p] of Object.entries(models.portfolios)) {
     console.log('   ' + code + '  benchmark  ' + fmt(bv))
   }
 }
-console.log('  EXPECTED MODELS presence (portfolio view, ' + mPortfolio.length + ' columns): ' +
-            JSON.stringify(presentOver(mPortfolio)))
-console.log('  EXPECTED MODELS presence (benchmark view, ' + (mPortfolio.length + mBenchmark.length) +
-            ' columns = portfolio + benchmark): ' + JSON.stringify(presentOver([...mPortfolio, ...mBenchmark])))
+// THE DRAWN-COLUMNS RULE (TO-W3-1 act 1 as RE-CUT ~05:2xZ on row W26-S6): each view's
+// presence set is computed over EXACTLY the columns that view draws -- portfolio values in
+// the Portfolio view, BENCHMARK VALUES ONLY in the Benchmark view, the DELTAS in the
+// Relative view. Computed here from the served bytes before any render is read.
+const mRelative = mPortfolio.map((cv, i) => Object.fromEntries(
+  ASSET_CLASSES.map(([k]) => [k, cv[k] - (mBenchmark[i] ? mBenchmark[i][k] : 0)])))
+console.log('  EXPECTED MODELS presence (PORTFOLIO view, ' + mPortfolio.length +
+            ' drawn columns = the books\' portfolio values): ' + JSON.stringify(presentOver(mPortfolio)))
+console.log('  EXPECTED MODELS presence (BENCHMARK view, ' + mBenchmark.length +
+            ' drawn columns = the benchmark values ONLY): ' + JSON.stringify(presentOver(mBenchmark)))
+for (const [i, code] of Object.keys(models.portfolios).entries()) {
+  console.log('     benchmark column ' + code + '  ' + fmt(mBenchmark[i]))
+}
+console.log('  EXPECTED MODELS presence (RELATIVE view, ' + mRelative.length +
+            ' drawn columns = the deltas): ' + JSON.stringify(presentOver(mRelative)))
+for (const [i, code] of Object.keys(models.portfolios).entries()) {
+  console.log('     delta column ' + code + '  ' + fmt(mRelative[i]))
+}
+console.log('  PORTFOLIO-ONLY CLASSES (non-zero in a portfolio column, ZERO in every ' +
+            'benchmark column -- ABSENT from the Benchmark view under the re-cut rule, ' +
+            'PRESENT under the superseded union rule): ' + JSON.stringify(
+              presentOver(mPortfolio).filter((c) => !presentOver(mBenchmark).includes(c))))
+console.log('  SUPERSEDED union rule would have listed (portfolio + benchmark, ' +
+            (mPortfolio.length + mBenchmark.length) + ' columns): ' +
+            JSON.stringify(presentOver([...mPortfolio, ...mBenchmark])))
 console.log('  BENCHMARK-ONLY CLASSES (present in a benchmark column, absent from every ' +
             'portfolio column): ' + JSON.stringify(
               presentOver(mBenchmark).filter((c) => !presentOver(mPortfolio).includes(c))))
