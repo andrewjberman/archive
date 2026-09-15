@@ -118,6 +118,20 @@ def git(*args):
     return run(["git"] + list(args))
 
 
+def run_bash(script_args, env=None, timeout=110):
+    """Run a bash script by the ABSOLUTE Git Bash the estate's resolver names (.tools/git_bash_resolver.py; CLAUDE.md:
+    Python shelling to bash goes through it). A bare 'bash' on this box resolves to the WSL launcher (row
+    LGIC_ENFORCE-W3-S5), and there is no aws.exe, only the .tools/aws shim, so the aws CLI runs as a bash script too
+    (row LGIC_ENFORCE-W1-S16)."""
+    try:
+        b = load_module(".tools/git_bash_resolver.py", "git_bash_resolver_under_check").git_bash()
+    except Exception as exc:  # noqa: BLE001
+        return 127, "NOT RUNNABLE: the Git Bash resolver failed: %s" % exc
+    if not b:
+        return 127, "NOT RUNNABLE: .tools/git_bash_resolver.py found no Git Bash"
+    return run([b] + list(script_args), env=env, timeout=timeout)
+
+
 def load_module(path, modname, extra_path=None):
     if not os.path.isfile(path):
         raise FileNotFoundError(path)
@@ -174,7 +188,7 @@ def channel_ids():
 
 
 def aws_json(args):
-    rc, out = run(["aws"] + args + ["--output", "json"], timeout=60)
+    rc, out = run_bash([".tools/aws"] + args + ["--output", "json"], timeout=60)
     if rc != 0:
         return None, out
     try:
@@ -612,8 +626,8 @@ def f1_prior():
     p = D + "/FENCE_PRIOR_POLICY.json"
     try:
         prior = json.loads(read(p))
-    except (OSError, ValueError):
-        say("FAIL-NO-PRIOR", "%s absent or unparseable" % p)
+    except (OSError, TypeError, ValueError):
+        return say("FAIL-NO-PRIOR", "%s absent or unparseable" % p)
     live, raw = _live_policy()
     ok = live is not None and prior == live
     say("PASS-PRIOR-VERBATIM" if ok else "FAIL-PRIOR-DIFFERS", "PRIOR == LIVE (read now): %s  %s" % (live is not None and prior == live, "" if live is not None else raw[-200:]))
@@ -642,8 +656,25 @@ def _entry_text():
     return read(p) if p and os.path.isfile(p) else ""
 
 
+def _entry_history_text():
+    """Every committed version of the ledger entry, joined. deploy_ledger.py rebuilds the entry from its sentinel on each
+    close-leg, so SIGNOFF lines written before the apply are gone from the file after L2 closes (row
+    LGIC_ENFORCE-W1-S17); the criterion's question -- did both seats sign before the apply -- is read from the history."""
+    s = _sentinel() or {}
+    p = s.get("entry_path")
+    if not p:
+        return ""
+    rc, out = git("log", "--format=%H", "--", p)
+    texts = []
+    for h in (out.split() if rc == 0 else []):
+        r, body = git("show", "%s:%s" % (h, p))
+        if r == 0:
+            texts.append(body)
+    return "\n".join(texts)
+
+
 def f2_signoff():
-    t = _entry_text()
+    t = _entry_text() + "\n" + _entry_history_text()
     s = _sentinel() or {}
     l2 = {leg.get("id"): leg for leg in s.get("legs", [])}.get("L2", {})
     applied = str(l2.get("closed_at") or "")
@@ -655,7 +686,7 @@ def f2_signoff():
 def f2_policy_live():
     live, raw = _live_policy()
     if live is None:
-        say("FAIL-NO-LIVE-POLICY", raw[-200:])
+        return say("FAIL-NO-LIVE-POLICY", raw[-200:])
     txt = json.dumps(live)
     sids = [st.get("Sid") for st in live.get("Statement", [])]
     stale = [p for p in OLD_PATTERNS if p in txt]
@@ -694,10 +725,10 @@ def f2_probe_exempt():
 
 def f2_removed():
     if not (fenced_json(D + "/FENCE_PROBES.md") or {}).get("probes"):
-        say("FAIL-NO-PROBES-RUN", "FENCE_PROBES.md has no probes: roles that were never created are not 'removed'")
+        return say("FAIL-NO-PROBES-RUN", "FENCE_PROBES.md has no probes: roles that were never created are not 'removed'")
     res = {}
     for r in PROBES:
-        rc, out = run(["aws", "iam", "get-role", "--role-name", r], timeout=40)
+        rc, out = run_bash([".tools/aws", "iam", "get-role", "--role-name", r], timeout=40)
         res[r] = "ABSENT" if rc != 0 and "NoSuchEntity" in out else ("PRESENT" if rc == 0 else "UNREAD: " + out.strip()[-80:])
     ok = all(v == "ABSENT" for v in res.values())
     say("PASS-PROBES-REMOVED" if ok else "FAIL-PROBES-REMAIN", "PROBE ROLES: %s" % res)
@@ -903,8 +934,21 @@ def _stub_tf(marker):
 def _apply(tree):
     marker = os.path.join(tempfile.mkdtemp(), "called.txt")
     stub = _stub_tf(marker)
-    rc, out = run(["bash", ".tools/safe-apply.sh", "-chdir=" + FI + "/tests/t2/" + tree, "apply"],
-                  env={"SAFE_APPLY_TERRAFORM": stub, "HALT_ACK": "1", "NAMING_GATE_ENFORCE": "1"})
+    # safe-apply's halt checkpoint resolves the invoker ONLY from org/mcp/sessions/<CLAUDE_CODE_SESSION_ID>.serial under
+    # the repo root, which a worker worktree does not carry (row LGIC_ENFORCE-W3-S6). Seat the running serial there for
+    # this one run under a synthetic session id, and remove the file afterwards.
+    sid = "check-en-t2-%d" % os.getpid()
+    sess = os.path.join("org", "mcp", "sessions", sid + ".serial")
+    os.makedirs(os.path.dirname(sess), exist_ok=True)
+    with open(sess, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write((os.environ.get("OPAL_AGENT_SERIAL") or "0.9.0_WK_LGIC_ENFORCE~3") + "\n")
+    try:
+        rc, out = run_bash([".tools/safe-apply.sh", "-chdir=" + FI + "/tests/t2/" + tree, "apply"],
+                           env={"SAFE_APPLY_TERRAFORM": stub, "HALT_ACK": "1", "NAMING_GATE_ENFORCE": "1",
+                                "CLAUDE_CODE_SESSION_ID": sid})
+    finally:
+        if os.path.exists(sess):
+            os.remove(sess)
     return rc, out, os.path.exists(marker)
 
 
@@ -984,14 +1028,29 @@ def p1():
 
 
 def p1_surface():
+    """The first carrier, by (path, line), whose token grades OUT-OF-PATTERN. A RAISE is not OUT-OF-PATTERN, so the rule
+    passes over a carrier whose grade raises RaiseDefect (row LGIC_ENFORCE-W2-S7); it is counted, not fatal."""
     d, c = p1(), c1()
     try:
         o = opal()
         cands = sorted((x.get("path"), x.get("line") or 0, x.get("token")) for x in (c or {}).get("carriers", []))
-        want = next(p for p, _, tok in cands if tok and o.grade(tok, "S3Key")[0] == "OUT-OF-PATTERN")
-    except Exception as exc:
-        say("FAIL-NOT-EVALUABLE", "%s: %s" % (type(exc).__name__, exc))
-    say("PASS-SURFACE-BY-RULE" if d.get("surface") == want else "FAIL-SURFACE", "RECORD: %s  BY RULE: %s" % (d.get("surface"), want))
+        want, raised, seen = None, 0, 0
+        for p, _, tok in cands:
+            if not tok:
+                continue
+            seen += 1
+            try:
+                verdict = o.grade(tok, "S3Key")[0]
+            except o.RaiseDefect:
+                raised += 1
+                continue
+            if verdict == "OUT-OF-PATTERN":
+                want = p
+                break
+    except Exception as exc:  # noqa: BLE001
+        return say("FAIL-NOT-EVALUABLE", "%s: %s" % (type(exc).__name__, exc))
+    say("PASS-SURFACE-BY-RULE" if want and d.get("surface") == want else "FAIL-SURFACE",
+        "RECORD: %s  BY RULE: %s  (carriers read: %d of %d, passed over on a RAISE: %d)" % (d.get("surface"), want, seen, len(cands), raised))
 
 
 def p1_refused():
