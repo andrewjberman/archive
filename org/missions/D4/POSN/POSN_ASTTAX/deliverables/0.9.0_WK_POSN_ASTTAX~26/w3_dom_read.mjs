@@ -88,14 +88,20 @@ const CLS = [
 const cv = (a) => Object.fromEntries(CLS.map(([k, , s]) => [k, s.reduce((t, f) => t + (a?.[f] ?? 0), 0)]))
 const presentOver = (cols) => CLS.filter(([k]) => cols.some((c) => Number.isFinite(c[k]) && c[k] !== 0))
 // drawn = the columns whose values are DRAWN as labels; presenceCols = the columns the
-// presence rule reads (portfolio always, benchmark when the benchmark numbers are drawn).
-const expectedLabels = (drawn, presenceCols) => {
+// presence rule reads. RE-CUT 2026-09-15 ~05:2xZ (act 1, row W26-S6): presenceCols is now
+// EXACTLY the columns the view draws -- for the Benchmark view that is the BENCHMARK
+// COLUMNS ONLY, so the two arguments are the same array there and the union is gone.
+// `fmt`/`draws` carry the RELATIVE view's different label rule: a signed one-decimal delta,
+// drawn for every NON-ZERO value rather than every positive one.
+const PCT = { fmt: (v) => String(Number(v.toFixed(2))) + '%', draws: (v) => v > 0 }
+const DELTA = { fmt: (v) => (v > 0 ? '+' : '') + v.toFixed(1), draws: (v) => v !== 0 }
+const expectedLabels = (drawn, presenceCols, style = PCT) => {
   const present = presentOver(presenceCols)
   const out = []
   for (const col of drawn) {
     for (const [k, label] of present) {
       const v = col.values[k]
-      if (v > 0) out.push({ book: col.book, cls: label, raw: String(v), rendered: String(Number(v.toFixed(2))) + '%' })
+      if (style.draws(v)) out.push({ book: col.book, cls: label, raw: String(v), rendered: style.fmt(v) })
     }
   }
   return out
@@ -117,13 +123,29 @@ const sPort = registry.books
     return { book: b.code, values: cv(alloc) }
   })
 const vals = (cols) => cols.map((c) => c.values)
+// THE RELATIVE COLUMNS, book by book: model minus benchmark, class by class (the panel's
+// getAllocationData 'relative' arm). Computed here from the fixture so the rendered set can
+// be JOINED to the served bytes rather than inspected.
+const mRel = mPort.map((c, i) => ({
+  book: c.book,
+  values: Object.fromEntries(CLS.map(([k]) => [k, c.values[k] - (mBench[i] ? mBench[i].values[k] : 0)])),
+}))
 const EXPECTED = {
   'MODELS / Portfolio view (Expand Details open)': expectedLabels(mPort, vals(mPort)),
-  // THE BENCHMARK VIEW DRAWS BENCHMARK VALUES, but the presence set unions the portfolio
-  // columns too (the order's act 1) -- so the two arguments differ here and only here.
-  'MODELS / Benchmark view': expectedLabels(mBench, vals([...mPort, ...mBench])),
+  // EACH VIEW'S PRESENCE SET IS ITS OWN DRAWN COLUMNS (re-cut act 1): benchmark values only
+  // in the Benchmark view, the deltas in the Relative view.
+  'MODELS / Benchmark view': expectedLabels(mBench, vals(mBench)),
+  'MODELS / Relative view': expectedLabels(mRel, vals(mRel), DELTA),
   'ETFS / Portfolio view': expectedLabels(ePort, vals(ePort)),
   'SATELLITES / Portfolio view': expectedLabels(sPort, vals(sPort)),
+}
+// THE EXPECTED PRESENCE SET PER VIEW, from the fixture, printed beside the rendered legend.
+const EXPECTED_PRESENCE = {
+  'MODELS / Portfolio view (Expand Details open)': presentOver(vals(mPort)).map(([, l]) => l),
+  'MODELS / Benchmark view': presentOver(vals(mBench)).map(([, l]) => l),
+  'MODELS / Relative view': presentOver(vals(mRel)).map(([, l]) => l),
+  'ETFS / Portfolio view': presentOver(vals(ePort)).map(([, l]) => l),
+  'SATELLITES / Portfolio view': presentOver(vals(sPort)).map(([, l]) => l),
 }
 
 const readState = () => page.evaluate(() => {
@@ -189,8 +211,14 @@ const readState = () => page.evaluate(() => {
 const report = (title, s) => {
   console.log('\n================ ' + title + ' ================')
   console.log('SUBTITLE : ' + s.subtitle.replace(/\n/g, ' | '))
-  console.log('LEGEND   : ' + s.legend.length + ' entries')
+  const expPresence = EXPECTED_PRESENCE[title] || []
+  console.log('LEGEND   : ' + s.legend.length + ' entries  (EXPECTED from the fixture: ' +
+              expPresence.length + ' ' + JSON.stringify(expPresence) + ')')
   for (const e of s.legend) console.log('   ' + JSON.stringify(e.label) + '  ' + e.color)
+  const legendLabels = s.legend.map((e) => e.label)
+  console.log('PRESENCE SET: rendered ' + JSON.stringify(legendLabels) + '  vs expected ' +
+              JSON.stringify(expPresence) + '  ' +
+              (JSON.stringify(legendLabels) === JSON.stringify(expPresence) ? 'AGREE' : 'DISAGREE'))
   console.log('SECTIONS : ' + JSON.stringify(s.sections))
   console.log('COUNTS   : ' + JSON.stringify(s.sectionCounts.map((c) => c.section)))
   console.log('ROWS(' + s.rowLabels.length + ') : ' + JSON.stringify(s.rowLabels))
@@ -245,6 +273,11 @@ report('MODELS / Portfolio view (Expand Details open)', await readState())
 
 await click('Benchmark')
 report('MODELS / Benchmark view', await readState())
+
+// THE RELATIVE VIEW (re-cut act 1): the drawn columns are the DELTAS, so the presence set
+// is the classes with a non-zero delta -- either side holding it is enough.
+await click('Relative')
+report('MODELS / Relative view', await readState())
 
 await click('Portfolio')
 await click('ETFs')
