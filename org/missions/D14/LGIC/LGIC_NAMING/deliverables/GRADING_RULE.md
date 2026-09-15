@@ -1,10 +1,18 @@
 # GRADING_RULE -- `grade(name, type) -> (verdict, canonical_form)`, applied by hand
 
 **Cell:** LGIC_NAMING `LN-g-1` (PRD candidate N2), task order `LGIC_NAMING.TO-LN-g-1`, written by
-`0.9.0_WK_LGIC_NAMING~1` on branch `wk-lgic-naming-1-1` off CLOUD @`6a5b276f8b`.
+`0.9.0_WK_LGIC_NAMING~1` on branch `wk-lgic-naming-1-1` off CLOUD @`6a5b276f8b`. **Re-cut in round 3** by
+`0.9.0_WK_LGIC_NAMING~3` (task order `LGIC_NAMING.TO-LN-g-1-r3`, branch `wk-lgic-naming-3-3` off CLOUD @`6705066c68`):
+R5 gains v1.7's two function-slot steps and the reason a function's words are kept, and R3 states its test as
+adjacency. No other step moved.
 
-**What it reads, all at that HEAD.** Every clause below cites where its rule comes from:
-- `org/standards/NAMING_SCHEMA.json` v1.4, cited as `DATA.<field>`;
+**Grades against `NAMING_SCHEMA.json v1.7`** (the round-3 re-cut; the function slot is `DATA.resource.function`,
+rulings FN1b and FN1c of the round-2 analysis s.2, `org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND2_20260915.md`
+@`02f08322af`).
+
+**What it reads.** Every clause below cites where its rule comes from:
+- `org/standards/NAMING_SCHEMA.json`, cited as `DATA.<field>`: v1.7 for R5; every other step as cut at v1.4 (row
+  `LGIC_NAMING-W3-S6`);
 - `infra/logic/05_IDENTITY_SPINE.md` v0.1, the registry seed, cited as SEED;
 - `infra/logic/09_NAMING_CENSUS.md`, cited as CENSUS;
 - `LGIC_NAMING_PRD.md` v1.4, S1-S13;
@@ -160,7 +168,9 @@ the tokens after the system.
 **R3 `bd`** is refused in every slot (S10). It is the VENDOR `blackdiamond` when a V4 firm token is next to it,
 before or after, and the FIRM `49financial` otherwise. CENSUS s.1 item 4 gives both readings: in
 `bd-49f-session-trigger` it is the vendor, in `bd-allocations` the firm. Either way it is an alias, and the canonical
-form spells `blackdiamond`, or the firm's form for the slot.
+form spells `blackdiamond`, or the firm's form for the slot. The test is ADJACENCY to a V4 firm token, never position:
+`bd` first with no firm token next to it (`bd-allocations`) is the firm, and `bd` next to a firm token wherever it sits
+(`bd-49f-...` first, `cot-bd-session-trigger-lambda-role` second) is the vendor (row `LGIC_NAMING-W4-S1`).
 
 **R4 THE SCOPE SLOT.** The scope tokens are the V4 tokens, plus `bd` read as the firm.
 - **No scope token:** the resource is shared or scoped by its system. The slot is omitted, never filled with a
@@ -171,8 +181,32 @@ form spells `blackdiamond`, or the firm's form for the slot.
 - **Two different firms** (after R3): RAISE. A resource has one scope.
 
 **R5 FUNCTION AND QUALIFIER.** Once R1 and R4 have taken the system and scope tokens out, the remaining tokens, in
-order, are the function slot, and the last of them is checked by R6 or R7. The function is free vocabulary. A
+order, are the function slot, and the last of them is checked by R6 or R7. The function is every remaining token except
+the one R6 or R7 keeps in the last slot. Two steps then act on it, in this order (`DATA.resource.function`, v1.7):
+- **R5.a Tokens already written (FN1b).** Every function token equal to a token written in the system slot or the scope
+  slot, as the canonical form spells it (after R2, R3 and R4's short form), is dropped: `orion-inf-orion-ingest-daily`
+  becomes `orion-inf-ingest-daily`. A placeholder (`{system}`) writes no token and drops nothing. If this leaves no
+  function token, RAISE (`DATA.grade.unplaceable`).
+- **R5.b The own kind (FN1c).** The resource's OWN kind, any kind in `DATA.kind.by_type` for its type, is never written
+  in its function, and is dropped from it: a LAMBDA `mdpf-lambda-gold` becomes `mdpf-gold-lambda`. Another type's kind
+  that names the subject the resource serves is not the resource's own kind, and stays in the function as R6 already
+  says (`blackdiamond-49f-runner-role` keeps `runner`, the runner the role serves). A type with no `kind.by_type` row
+  (EVENT_RULE, SCHEDULE) has no own kind, so this step drops nothing. If this step leaves no function token, v1.7 does
+  not say what follows (row `LGIC_NAMING-W3-S5`).
+
+Beyond these two steps the function is free vocabulary, and here is why. A grade reads a name and its type, and has no
+item description. FN1's word-choice clauses (an agent noun describing the resource is written as its verb; a noun phrase
+is written as named) therefore bind the NAMER only, who has the description. The grade keeps a function's words as
+written and grades the grammar: slots, spellings and kinds. So `advi-49f-floor-scheduler-role` keeps `scheduler`. A
 qualifier cannot be told from a function token by hand, and is graded the same way.
+
+**R5 re-graded over round 2's firm patterns.** R5.a and R5.b were applied to every attributed canonical form in round
+2's LN-f-1 record (`org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/r2/n4-firm-patterns.md` @`a4480344e3`, the
+`attributed` object of its one json block). All are IAM_ROLE (own kind `role`), and each has one scope token. None
+carries its system or scope token in its function, none carries `role` there, and none is left without a function
+token. LN-f-1's record is therefore not re-graded.
+
+FORMS CHANGED BY THE v1.7 STEPS: 0 of 68
 
 **R6 THE LAST SLOT, for kind types.**
 - If the last remaining token is a kind of this type (V5), it stays.
@@ -315,6 +349,9 @@ These gaps are filed as rows on the project channel, not settled here:
 - `LGIC_NAMING-W1-S2`: the registry seed holds no platform-subsystem row, so V1 is interim and V2 RAISES.
 - `LGIC_NAMING-W1-S3`: some canonical forms need a slot the name does not carry, so they carry a placeholder.
 - `LGIC_NAMING-W1-S4`: names AWS fixes sit inside graded types, and G2 RAISES them.
+- `LGIC_NAMING-W3-S5`: R5.b can leave a function empty, and v1.7 names a RAISE for R5.a's subtraction only.
+- `LGIC_NAMING-W3-S6`: the header names v1.7, but only R5 was re-cut; other fields the rule's steps cite changed
+  between v1.4 and v1.7.
 
 ## 9. WORKED CASES
 
