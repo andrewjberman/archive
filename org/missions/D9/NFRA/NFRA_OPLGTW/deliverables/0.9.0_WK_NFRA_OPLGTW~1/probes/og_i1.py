@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """og_i1.py -- the acceptance probe for NFRA_OPLGTW.TO-OG-i-1 (cell OG-i-1).
 
-Usage:  og_i1.py AC<n>      n = 1..9
+Usage:  og_i1.py AC<n>      n = 1..12
 
 Each arm prints its measurement with its vintage (the UTC time of a live read, or the source's own timestamp) and its
 denominator, then exactly one final line:  VERDICT: PASS-OGI1-AC<n>  or  VERDICT: FAIL-OGI1-AC<n> <reason>.
 
 Arms and instruments:
-  AC1  the saved plan og_i1.plan.json (redacted from `terraform show -json` of the saved planfile) -- a file.
+  AC1  the saved plan og_i1.plan.json (redacted from `terraform show -json` of the saved planfile) -- a file. The only
+       admitted changes to existing resources are the two WAF description backfills (ruling 97237; AC10 grades them).
   AC2  git: the commit that ADDED the ledger sentinel, against evidence/apply.json (the safe-apply run's recorded
        start), corroborated by the AWS-side creation times of the table and the operator role.
   AC3  git: the commit that DELETED the sentinel (the ledger close) with the entry reading CLOSED at that commit,
@@ -20,6 +21,13 @@ Arms and instruments:
   AC7  live, on the Gateway host through SSM with the instance's own role: a POLICY# write against a RUNTIME# write.
   AC8  live, operator role assumed from this checkout: two concurrent conditional revisions of one POLICY# record.
   AC9  live: a POLICY# probe record written by the operator path, strongly read back, against the live TTL name.
+  AC10 the saved plan og_i1.plan.json: the changes outside this cell are exactly the two admitted WAF updates,
+       description only, addresses absent from the diff; the in-apply plan the approval guard judged is printed beside.
+  AC11 evidence/waf_pre.json + evidence/waf_post.json (get-ip-set immediately before/after the apply, written by
+       og_i1_act.py: counts and sha256 of the sorted list, never the addresses) against evidence/apply.json's start
+       and end, and the ledger entry at its close commit carrying both reads.
+  AC12 a FRESH `terraform plan` of the root run by this arm (-lock=false, read-only), graded on the two WAF sets and
+       this cell's four resources; its redacted summary is written to evidence/postplan.json.
 
 Writes: only isolated RUNTIME#probe-og-i1-<utc> and POLICY#probe-og-i1-<utc> items, and only once the table exists.
 DynamoDB has no TransactWriteItems IAM action: a transaction is authorized per item against PutItem / UpdateItem, so
@@ -67,6 +75,15 @@ EXPECTED_CREATES = {
     "aws_iam_role.access_admin",
     "aws_iam_role_policy.access_admin_policy",
 }
+ADMITTED_UPDATES = {  # ruling 97237: the two WAF description backfills, admitted by name
+    "aws_wafv2_ip_set.opal_blocked_ips_regional_v4",
+    "aws_wafv2_ip_set.opal_blocked_ips_regional_v6",
+}
+WAF_PRE = os.path.join(EVID, "waf_pre.json")
+WAF_POST = os.path.join(EVID, "waf_post.json")
+POSTPLAN = os.path.join(EVID, "postplan.json")
+TF = os.path.join(REPO, ".tools", "terraform.exe")
+TF_ROOT = os.path.join(REPO, "infra", "aws", "terraform", "opal-gateway")
 WRITE_ACTIONS = {"putitem", "updateitem", "deleteitem", "batchwriteitem", "partiqlinsert", "partiqlupdate",
                  "partiqldelete", "conditioncheckitem"}
 ADMIN_ACTIONS = {"createtable", "deletetable", "updatetable", "updatetimetolive", "updatecontinuousbackups",
@@ -252,16 +269,23 @@ def ac1() -> int:
         print("  create      %s" % a)
     for r in others:
         print("  NOT-CREATE  %s %s changed=%s" % (r["address"], "+".join(r["actions"]),
-                                                  json.dumps(r.get("changed_attributes", {}), sort_keys=True)))
+                                                  json.dumps(sorted(r.get("changed_attributes", {})))))
     missing, extra = sorted(EXPECTED_CREATES - creates), sorted(creates - EXPECTED_CREATES)
+    destroys = [r["address"] for r in rc if "delete" in r["actions"]]
+    admitted = [r for r in others if r["address"] in ADMITTED_UPDATES and r["actions"] == ["update"]]
+    unadmitted = [r for r in others if r not in admitted]
     print("EXPECTED creates present: %d of %d; missing %s; extra %s"
           % (len(EXPECTED_CREATES & creates), len(EXPECTED_CREATES), missing, extra))
-    print("changes/destroys/replaces to existing resources: %d of %d resource_changes" % (len(others), len(rc)))
+    print("changes to existing resources: %d of %d resource_changes; admitted WAF updates %d of %d; unadmitted %d; "
+          "destroys %d" % (len(others), len(rc), len(admitted), len(ADMITTED_UPDATES), len(unadmitted), len(destroys)))
     if missing or extra:
         return verdict(1, False, "create set differs: missing %s extra %s" % (missing, extra))
-    if others:
-        return verdict(1, False, "%d change(s) to existing resources: %s"
-                       % (len(others), ", ".join("%s %s" % (r["address"], "+".join(r["actions"])) for r in others)))
+    if destroys:
+        return verdict(1, False, "destroy in plan: %s" % destroys)
+    if unadmitted:
+        return verdict(1, False, "%d unadmitted change(s) to existing resources: %s"
+                       % (len(unadmitted), ", ".join("%s %s" % (r["address"], "+".join(r["actions"]))
+                                                     for r in unadmitted)))
     return verdict(1, True)
 
 
@@ -636,12 +660,152 @@ def ac9() -> int:
     return verdict(9, ok, "" if ok else "a POLICY# probe record carries the TTL attribute or is absent")
 
 
-ARMS = {"AC1": ac1, "AC2": ac2, "AC3": ac3, "AC4": ac4, "AC5": ac5, "AC6": ac6, "AC7": ac7, "AC8": ac8, "AC9": ac9}
+def load_json(path: str) -> dict:
+    with open(path, encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def ac10() -> int:
+    if not os.path.isfile(PLAN):
+        print("MEASURED: plan file absent at %s" % rel(PLAN))
+        return verdict(10, False, "plan file absent")
+    d = load_json(PLAN)
+    rc = d["resource_changes"]
+    print("SOURCE: %s -- terraform %s, plan timestamp %s, source show-json sha256 %s, plan line %r"
+          % (rel(PLAN), d.get("terraform_version"), d.get("timestamp"), d.get("source_sha256"), d.get("plan_line")))
+    outside = [r for r in rc if r["address"] not in EXPECTED_CREATES and r["actions"] != ["no-op"]]
+    destroys = [r["address"] for r in rc if "delete" in r["actions"]]
+    print("DENOMINATOR: %d resource_changes; %d are outside this cell's %d creates and not no-op"
+          % (len(rc), len(outside), len(EXPECTED_CREATES)))
+    rows = [("exactly 2 out-of-cell changes", len(outside) == 2, [r["address"] for r in outside]),
+            ("their addresses == the two admitted WAF sets", {r["address"] for r in outside} == ADMITTED_UPDATES,
+             sorted(r["address"] for r in outside))]
+    for r in outside:
+        a = r["address"]
+        ch = sorted(r.get("changed_attributes", {}))
+        rows.append(("%s actions == [update]" % a, r["actions"] == ["update"], r["actions"]))
+        rows.append(("%s changes only description" % a, ch == ["description"],
+                     {k: r["changed_attributes"][k] for k in ch}))
+        rows.append(("%s addresses absent from the diff" % a,
+                     "addresses" not in ch and "addresses" not in r.get("unknown_after", []),
+                     {"changed": ch, "unknown_after": r.get("unknown_after"),
+                      "addresses_count_before": r.get("addresses_count_before"),
+                      "addresses_count_after": r.get("addresses_count_after")}))
+        rows.append(("%s no replace_paths" % a, not r.get("replace_paths"), r.get("replace_paths")))
+    rows.append(("nothing destroyed (delete actions in the plan)", not destroys, destroys))
+    ok = print_rows(rows)
+    if os.path.isfile(APPLY_REC):
+        g = load_json(APPLY_REC).get("guard") or {}
+        print("SUPPLEMENTARY (not deciding): the in-apply plan the approval guard judged -- plan line %r, creates %s, "
+              "updates %s, attribute lines %s, other headers %s, verdict ok=%s"
+              % (g.get("plan_line"), sorted(g.get("creates", [])), sorted(g.get("updates", [])),
+                 json.dumps(g.get("update_attr_lines"), sort_keys=True), g.get("other_headers"), g.get("ok")))
+    return verdict(10, ok, "" if ok else "the out-of-cell changes are not exactly the two admitted description updates")
+
+
+def ac11() -> int:
+    missing = [rel(p) for p in (WAF_PRE, WAF_POST, APPLY_REC) if not os.path.isfile(p)]
+    if missing:
+        print("MEASURED %s: evidence absent %s" % (iso(now()), missing))
+        return verdict(11, False, "evidence absent: %s" % missing)
+    pre, post, rec = load_json(WAF_PRE), load_json(WAF_POST), load_json(APPLY_REC)
+    t_pre, t_post = parse_ts(pre["read_utc"]), parse_ts(post["read_utc"])
+    t_start, t_end = parse_ts(rec["start_utc"]), parse_ts(rec["end_utc"])
+    print("SOURCES: %s (read %s), %s (read %s), %s (apply start %s end %s rc %s); instrument %s"
+          % (rel(WAF_PRE), pre["read_utc"], rel(WAF_POST), post["read_utc"], rel(APPLY_REC), rec["start_utc"],
+             rec["end_utc"], rec.get("rc"), pre.get("instrument")))
+    rows, supp = [], []
+    for k in ("v4", "v6"):
+        a, b = pre["sets"][k], post["sets"][k]
+        print("  %s %s (%s): PRE count %d sha256 %s | POST count %d sha256 %s | lock token %s -> %s"
+              % (k, a["name"], a["id"], a["count"], a["sha256_sorted"], b["count"], b["sha256_sorted"],
+                 a["lock_token_sha256_12"], b["lock_token_sha256_12"]))
+        rows.append(("%s address list identical before/after (count %d == %d, sha256 of the sorted list equal)"
+                     % (k, a["count"], b["count"]),
+                     a["count"] == b["count"] and a["sha256_sorted"] == b["sha256_sorted"], None))
+        supp.append(("%s lock token rotated pre->post (the reads bracket an applied UpdateIPSet)" % k,
+                     a["lock_token_sha256_12"] != b["lock_token_sha256_12"], None))
+        supp.append(("%s description present after the apply" % k, b["description_present"], a["description_present"]))
+    rows.append(("pre read precedes the apply start", t_pre <= t_start,
+                 "%.1f s before" % (t_start - t_pre).total_seconds()))
+    rows.append(("post read follows the apply end", t_post >= t_end,
+                 "%.1f s after" % (t_post - t_end).total_seconds()))
+    deleted = commits(SENTINEL, "D")
+    text, h_close = "", None
+    if deleted:
+        h_close = min(deleted, key=lambda x: x[1])[0]
+        for e in sorted(glob.glob(os.path.join(REPO, ENTRY_GLOB))):
+            try:
+                text += git("show", "%s:%s" % (h_close, rel(e)))
+            except RuntimeError:
+                pass
+    tokens = ["PRE %s" % pre["read_utc"], "POST %s" % post["read_utc"]]
+    for w in (pre, post):
+        for k in ("v4", "v6"):
+            tokens.append("%s count=%d sha256=%s" % (k, w["sets"][k]["count"], w["sets"][k]["sha256_sorted"][:16]))
+    absent = [t for t in tokens if t not in text]
+    rows.append(("both reads recorded in the change-management entry at its close commit %s (%d of %d tokens)"
+                 % (h_close[:10] if h_close else None, len(tokens) - len(absent), len(tokens)),
+                 bool(h_close) and not absent, absent))
+    print("DECIDING (%d):" % len(rows))
+    ok = print_rows(rows)
+    print("SUPPLEMENTARY (%d, printed, not deciding):" % len(supp))
+    print_rows(supp)
+    return verdict(11, ok, "" if ok else "the before/after address lists or their record did not hold (see NOT lines)")
+
+
+def ac12() -> int:
+    scratch = os.path.join(REPO, ".scratch")
+    os.makedirs(scratch, exist_ok=True)
+    pf = os.path.join(scratch, "og_i1.post.%s.tfplan" % stamp())
+    t0 = now()
+    r = subprocess.run([TF, "-chdir=%s" % TF_ROOT, "plan", "-input=false", "-lock=false", "-no-color",
+                        "-detailed-exitcode", "-out=%s" % pf], capture_output=True, text=True, timeout=95)
+    t1 = now()
+    summary = [ln.strip() for ln in r.stdout.splitlines() if ln.startswith("Plan:") or ln.startswith("No changes.")]
+    print("MEASURED %s..%s: terraform plan -lock=false -detailed-exitcode rc %d (0 no changes, 2 changes, 1 error); %s"
+          % (iso(t0), iso(t1), r.returncode, summary))
+    if r.returncode not in (0, 2):
+        print("STDERR: %s" % r.stderr.strip()[-2000:])
+        return verdict(12, False, "fresh plan failed rc %d" % r.returncode)
+    s = subprocess.run([TF, "-chdir=%s" % TF_ROOT, "show", "-json", pf], capture_output=True, text=True, timeout=60)
+    try:
+        os.remove(pf)
+    except OSError:
+        pass
+    d = json.loads(s.stdout)
+    rcs = d.get("resource_changes", [])
+    by = {x["address"]: x["change"]["actions"] for x in rcs}
+    counts = Counter("+".join(v) for v in by.values())
+    graded = sorted(EXPECTED_CREATES | ADMITTED_UPDATES)
+    elsewhere = sorted(a for a, v in by.items() if v != ["no-op"] and a not in graded)
+    print("DENOMINATOR: %d resource_changes in the fresh plan, by action %s; %d graded (2 WAF sets + this cell's 4)"
+          % (len(rcs), json.dumps(dict(sorted(counts.items()))), len(graded)))
+    rows = [("%s -> no-op" % a, by.get(a) == ["no-op"], by.get(a)) for a in graded]
+    ok = print_rows(rows)
+    print("SUPPLEMENTARY (not deciding): changes elsewhere in the root: %s" % (elsewhere or "none"))
+    write_json(POSTPLAN, {"plan_utc": iso(t0), "terraform_version": d.get("terraform_version"),
+                          "rc_detailed_exitcode": r.returncode, "summary": summary,
+                          "counts": dict(sorted(counts.items())), "graded": {a: by.get(a) for a in graded},
+                          "changes_elsewhere": elsewhere})
+    print("RECORDED %s" % rel(POSTPLAN))
+    return verdict(12, ok, "" if ok else "a graded resource is not no-op in the fresh plan (see NOT lines)")
+
+
+def write_json(path: str, obj) -> None:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump(obj, fh, indent=1)
+        fh.write("\n")
+
+
+ARMS = {"AC1": ac1, "AC2": ac2, "AC3": ac3, "AC4": ac4, "AC5": ac5, "AC6": ac6, "AC7": ac7, "AC8": ac8, "AC9": ac9,
+        "AC10": ac10, "AC11": ac11, "AC12": ac12}
 
 
 def main(argv: list) -> int:
     if len(argv) != 2 or argv[1].upper() not in ARMS:
-        print("usage: og_i1.py AC<1..9>")
+        print("usage: og_i1.py AC<1..12>")
         return 2
     arm = argv[1].upper()
     n = int(arm[2:])
