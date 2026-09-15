@@ -726,6 +726,9 @@ def ac11() -> int:
         supp.append(("%s lock token rotated pre->post (the reads bracket an applied UpdateIPSet)" % k,
                      a["lock_token_sha256_12"] != b["lock_token_sha256_12"], None))
         supp.append(("%s description present after the apply" % k, b["description_present"], a["description_present"]))
+    rows.append(("the bracketed apply completed (rc 0 and an Apply complete line)",
+                 rec.get("rc") == 0 and bool(rec.get("apply_complete")),
+                 {"rc": rec.get("rc"), "answer": rec.get("answer"), "apply_complete": rec.get("apply_complete")}))
     rows.append(("pre read precedes the apply start", t_pre <= t_start,
                  "%.1f s before" % (t_start - t_pre).total_seconds()))
     rows.append(("post read follows the apply end", t_post >= t_end,

@@ -1,85 +1,109 @@
-# NFRA_OPLGTW.TO-OG-i-1 -- result (0.9.0_WK_NFRA_OPLGTW~1)
+# NFRA_OPLGTW.TO-OG-i-1 -- result (0.9.0_WK_NFRA_OPLGTW~1), re-run on the order as amended @fd2f1e4b31
 
-**Outcome: REFUSED AT THE PLAN. Nothing was applied; no ledger entry was opened; the order stays `pending`.**
-Branch `wk-nfra_oplgtw-1-1`, worktree `/c/tmp/wk-oplgtw-1-1`, base `417631ae6f`.
+**Outcome: BLOCKED AT SAFE-APPLY'S HALT GATE, BEFORE TERRAFORM RAN. Nothing was applied in AWS. The ledger entry is
+OPEN (committed before the act, @4b9671ec09). The order stays `pending`.**
+Branch `wk-nfra_oplgtw-1-1b`, worktree `/c/tmp/wk-oplgtw-1-1b`, base `09668e3207`.
 
-## What stopped it
+## What happened, in order (UTC, 2026-09-15)
 
-`.tools/terraform.exe` v1.9.8, `plan -input=false -out` on `infra/aws/terraform/opal-gateway`, 2026-09-15T10:42:25Z..10:42:38Z,
-rc 0: **`Plan: 4 to add, 2 to change, 0 to destroy.`** -- 71 resource_changes = 65 no-op + 4 create + 2 update.
+1. Tree check `TREE-OK` on `wk-nfra_oplgtw-1-1b` @09668e3207. `.tools/terraform.exe` v1.9.8 present.
+2. Disk on C: -- 5.0G free at hand-off, 4.9G immediately before `terraform init` (21:31:55Z), 4.2G after it, 5.6G
+   immediately before the apply (21:56:41Z; the driver's own read 5.53 GiB at 21:56:43Z). Never under the 2 GB floor.
+3. `schwab_access_state.tf` restored from `59b567eed0`, byte-identical (sha256 68397bd897e6c2e9...).
+4. `terraform init` rc 0 (lock file unchanged). `terraform plan` 21:35:26Z..21:35:48Z rc 0:
+   **`Plan: 4 to add, 2 to change, 0 to destroy.`** -- this cell's 4 creates, and the 2 admitted in-place
+   `+ description` updates on `aws_wafv2_ip_set.opal_blocked_ips_regional_v4` / `_v6`, with `addresses` absent from the
+   diff. OGI1-AC1 and OGI1-AC10 PASS on the redacted plan `og_i1.plan.json`.
+5. A live WAF read at 21:49:30Z found both regional blocked-IP sets holding **0 addresses**, the same count the plan's
+   prior state carries. So the description update cannot drop a live list, and AC11 compares two empty lists
+   (row `NFRA_OPLGTW-W1-S5`).
+6. The ledger was opened at 21:52Z with 5 legs: L1 git, L2 activation, and L3-L5 verify, which carry the ruling's four
+   conditions, one line each. Its sentinel and entry were committed @4b9671ec09 at 21:54:38Z, together with the
+   declaration, the probes, the plan JSON and rows W1-S4/W1-S5.
+7. The ONE guarded safe-apply run, `probes/og_i1_act.py apply`, 21:56:44.893672Z..21:56:47.841644Z: WAF pre-read,
+   then `bash .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply -no-color`, which exited **3** with
+   `HALT-GATE: IDENTITY UNRESOLVED -- BLOCKED (fail-closed)`. That is safe-apply's first stage, so the run stopped before
+   the naming, tag-authz and tombstone limbs and before any plan: no approval prompt, no answer, terraform never
+   invoked. The WAF post-read (21:56:48.609510Z) reads 0 and 0 with **the same lock tokens** as the pre-read
+   (a2f2440b0dcf, 133af1a2f3f2), which confirms that no UpdateIPSet ran.
 
-- the 4 creates are exactly this cell's: `aws_dynamodb_table.access_state`, `aws_iam_role_policy.gw_access_state_runtime`,
-  `aws_iam_role.access_admin`, `aws_iam_role_policy.access_admin_policy`;
-- the 2 updates are in-place `+ description` backfills on the EXISTING `aws_wafv2_ip_set.opal_blocked_ips_regional_v4` and
-  `_v6` (NFRA_OPSEC202609's sets; `addresses` is excluded by `ignore_changes`). Commit `3758b14afc` (2026-09-04) already
-  recorded this as "THE ONLY REMAINING DIFF ON ALL FOUR SETS".
+## Why it stopped -- row `NFRA_OPLGTW-W1-S6` (BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~O`)
 
-The order's blast-radius bound: *"A plan that shows any change or destroy is refused: a BLOCKING row, no apply."*, and
-`-target` is forbidden. So the apply was not run. Row **`NFRA_OPLGTW-W1-S1`** (BLOCKING, INERT).
+`.tools/halt-gate-check.sh` @09668e3207 resolves the acting serial only from
+`<worktree>/org/mcp/sessions/${CLAUDE_CODE_SESSION_ID}.serial` or a `${CLAUDE_CODE_SESSION_ID}.*.orphan-cleaned` marker
+(`:52-120`). It never reads `OPAL_AGENT_SERIAL`: 0 occurrences in the file. `org/mcp/sessions/` is gitignored
+(`.gitignore:423`), absent in this fresh worktree, and not named in the order's `<paths>`. The gate's remedy is to write
+that file, and the gate says not to override it. The order's Grant bound makes an unnamed path a BLOCKING row, never an
+override. So no apply was attempted past the gate.
+
+**ARMED, for the issuer:** (1) do not drain `schwab_access_state.tf` from this branch to CLOUD before an order-bound
+apply, or any later apply of the root creates the table and grants outside this ledger; (2) the OPEN sentinel will blare
+RED past its 2 h window once it is on CLOUD, although nothing deployed. A re-run needs one of three things: the session
+serial file admitted by a re-cut `<paths>` (worktree-local, gitignored, never committed); a serial file the issuer
+provisions at spawn, as it does `.tools/terraform.exe`; or an apply by a seat whose identity the gate resolves. The re-run
+can reuse the open ledger, because `open` refuses a second open of the same slug.
 
 ## The two ARNs (DECLARED, NOT CREATED)
 
 | object | ARN | state |
 |---|---|---|
-| table | `arn:aws:dynamodb:us-east-1:313476888478:table/opal-gateway-access-state` | declared in `schwab_access_state.tf`; `describe-table` -> ResourceNotFoundException at 2026-09-15T10:56:37Z |
-| operator role | `arn:aws:iam::313476888478:role/opal-gateway-access-admin` | declared; `get-role` -> NoSuchEntity at 2026-09-15T10:56:40Z |
+| table | `arn:aws:dynamodb:us-east-1:313476888478:table/opal-gateway-access-state` | declared (`pk` HASH S, `sk` RANGE S, TTL `expires_at`, PAY_PER_REQUEST, SSE, PITR, deletion protection); `describe-table` -> ResourceNotFoundException at 22:08:14Z |
+| operator role | `arn:aws:iam::313476888478:role/opal-gateway-access-admin` | declared (trust: the account root, refusing `aws:PrincipalArn` = `opal-gateway-role`; policy GetItem + PutItem/UpdateItem under LeadingKeys `POLICY#*`); `get-role` -> NoSuchEntity at 22:08:20Z |
 
-The declaration is on this branch only. Draining `schwab_access_state.tf` to CLOUD before this order re-runs would let any
-later apply of the root create these objects outside this order's ledger (stated in W1-S1's `world_is`).
+The runtime grant `opal-gateway-access-state-runtime` on `opal-gateway-role` (GetItem; PutItem/UpdateItem under
+LeadingKeys `RUNTIME#*`): `get-role-policy` -> NoSuchEntity at 22:08:17Z.
 
-## What the declaration is (for the re-run)
+## Ledger
 
-- Table: `pk` (S, HASH) + `sk` (S, RANGE); PAY_PER_REQUEST; SSE with the AWS-managed KMS key; PITR on; TTL attribute
-  `expires_at` (cleanup only); deletion protection on. `POLICY#<tid>#<oid>` and `RUNTIME#<namespace>` partition keys.
-- Runtime grant `opal-gateway-access-state-runtime` on `opal-gateway-role`: GetItem on the exact table ARN; PutItem and
-  UpdateItem under `ForAllValues:StringLike dynamodb:LeadingKeys ["RUNTIME#*"]` plus `Null dynamodb:LeadingKeys false`.
-  Before this cell the role held no DynamoDB grant (8 inline + 1 attached policy read live, none DynamoDB).
-- Operator role `opal-gateway-access-admin`: trusts the account root, refuses `aws:PrincipalArn` = `opal-gateway-role`;
-  policy `opal-gateway-access-admin-policy` = GetItem, plus PutItem/UpdateItem under LeadingKeys `POLICY#*`.
-- Neither holds DeleteItem, BatchWriteItem, PartiQL or a table-admin action. `TransactWrite` is not an IAM action
-  (Access Analyzer: `INVALID_ACTION` for `dynamodb:TransactWriteItems`, no finding for `dynamodb:PutItem`); a transaction is
-  authorized per item against PutItem/UpdateItem -- row **`NFRA_OPLGTW-W1-S3`**.
-- AC8 cannot run with the instance's own role (the runtime principal); the probe runs it under the operator role from the
-  checkout -- row **`NFRA_OPLGTW-W1-S2`**.
-- Naming limb (`.tools/naming-apply-gate.py`, WARN mode, no `org/mcp/naming-gate.enforce`): the four names are expressions,
-  listed `unresolved before plan`, not graded.
+`org/critical_paths/change_management/20260915T2152Z_nfra-oplgtw-og-i-1-access-state_deploy_completion.md` and
+`org/critical_paths/.open_deploys/nfra-oplgtw-og-i-1-access-state.json`: **OPEN, L1-L5 unproven**, committed @4b9671ec09.
+L1's fact holds: the declaration was committed before any apply. It was not close-legged, because the act it precedes has
+not happened.
 
-## Criteria (all run under `timeout 120`, 2026-09-15T10:56:33Z..10:56:46Z)
+## Criteria (all under `timeout 120`, 2026-09-15T22:08:05Z..22:08:49Z)
 
 | id | verdict line | why |
 |---|---|---|
-| OGI1-AC1 | `FAIL-OGI1-AC1 2 change(s) to existing resources` | the plan (W1-S1) |
-| OGI1-AC2 | `FAIL-OGI1-AC2 no commit adds the ledger sentinel` | no act, so no ledger |
+| OGI1-AC1 | `PASS-OGI1-AC1` | 4 of 4 creates; 2 of 71 change existing resources, both admitted; 0 destroys |
+| OGI1-AC2 | `FAIL-OGI1-AC2 probe error ResourceNotFoundException` | sentinel committed 21:54:38Z before the run (21:56:44Z), but the run exited 3 and created nothing (W1-S6) |
 | OGI1-AC3 | `FAIL-OGI1-AC3 no commit deletes the ledger sentinel` | no act, so no close |
 | OGI1-AC4 | `FAIL-OGI1-AC4 table absent: ResourceNotFoundException` | not applied |
 | OGI1-AC5 | `FAIL-OGI1-AC5 runtime grant absent: NoSuchEntity` | not applied |
 | OGI1-AC6 | `FAIL-OGI1-AC6 operator role absent: NoSuchEntity` | not applied |
-| OGI1-AC7 | `FAIL-OGI1-AC7 precondition: table absent` | not applied; no on-host write |
+| OGI1-AC7 | `FAIL-OGI1-AC7 precondition: table absent` | not applied; no SSM command sent |
 | OGI1-AC8 | `FAIL-OGI1-AC8 precondition: table absent` | not applied; no race |
-| OGI1-AC9 | `FAIL-OGI1-AC9 precondition: table absent` | not applied; no record |
+| OGI1-AC9 | `FAIL-OGI1-AC9 precondition: table absent` | not applied; no record written |
+| OGI1-AC10 | `PASS-OGI1-AC10` | 11 of 11 checks: exactly the two admitted `description` updates, `addresses` count 0 -> 0, not in the diff |
+| OGI1-AC11 | `FAIL-OGI1-AC11 the before/after address lists or their record did not hold` | lists identical (0/0), but the bracketed apply exited 3 and the entry has no close commit (0 of 6 tokens) |
+| OGI1-AC12 | `FAIL-OGI1-AC12 a graded resource is not no-op in the fresh plan` | fresh plan 22:08:37Z still `Plan: 4 to add, 2 to change, 0 to destroy.`; 0 changes elsewhere |
 
-Controls: AC1 PASSes on a creates-only mutant of the saved plan and FAILs on a mutant missing the operator role; an AC1
-re-run is identical except for its run-time line (12 of 13 lines). The live-exercise paths of AC6-AC9 (and the
-SSM harness of AC7) are **unexercised against a real table**: their first run is the re-run after W1-S1 clears.
+Controls: the approval guard said yes on the real plan and no on 3 of 3 mutants (an extra `- addresses` line, a
+`must be replaced` header, an unadmitted WAF address). AC11 refuses a record whose bracketed apply did not complete.
+AC1 and AC10 are stable across two runs.
 
 ## comp-iam re-run
 
-No apply happened, so there is no "after the apply" re-run. The lens was re-run over the root with the new file present,
-2026-09-15T10:58:25Z, `.tools/comp-iam service opal-gateway`, rc 0: PLANE DESIRED, 3 trees / 474 .tf files scanned,
-393 policy blocks attached, 28 NOT ATTACHED, 2 deny statements unparsed; service `opal-gateway`, role `opal-gateway-role`,
-**3 operations, all UNRESOLVABLE-RESOURCE** (s3:PutObject audit.py:48, secretsmanager:GetSecretValue base.py:204,
-s3:GetObject query_v0.py:101). It lists no DynamoDB operation because no Gateway code calls DynamoDB yet; its operation
-list is a floor built from call sites, so it cannot see this cell's grants. AC5-AC8 are the APPLIED and EXERCISED reads.
+No apply happened, so there is no after-the-apply re-run. The lens was re-run over the root with the declaration present,
+2026-09-15T22:11:48Z, `.tools/comp-iam service opal-gateway`, rc 0: **PLANE DESIRED** (Terraform; does not read live
+AWS). It scanned 3 trees (473 .tf files): 393 policy blocks attached, 27 NOT ATTACHED, 13 standalone; 2 deny statements
+unparsed. For service `opal-gateway` and role `opal-gateway-role` it lists **27 operations: 14 UNGRANTED,
+11 UNRESOLVABLE-RESOURCE, 2 GRANTED-ACTION/UNGRANTED-RESOURCE**, and 8 UNMAPPED-METHOD calls (among them
+`raw.transact_write_items`). It now lists DynamoDB operations, because the merged adapter's tests call DynamoDB:
+`dynamodb:GetItem`/`PutItem` UNRESOLVABLE-RESOURCE at `tests/test_access_state.py:110`, `:118`; `dynamodb:Scan` and
+`DeleteItem` UNGRANTED at `:312`, `:470`. Those are test calls against moto, and this cell grants neither of those two
+by design. The APPLIED and EXERCISED planes are AC5-AC8's, and they did not run.
 
 ## Interpreter
 
 `.venv-og` = `py -3.12 -m venv --system-site-packages`, then
-`pip install -r infra/aws/ec2/opal-gateway/requirements.txt msal moto pytest` (rc 0; pip warned that the system awscli
-1.44.44 pins botocore 1.42.54 while the venv resolved botocore 1.42.97). Python 3.12.10, boto3 1.42.54, botocore 1.42.97.
+`pip install -r infra/aws/ec2/opal-gateway/requirements.txt msal moto pytest`: rc 0. pip warned that the system awscli
+1.44.44 pins botocore 1.42.54 while the venv resolved 1.42.97, and that mitmproxy 12.2.3 wants typing-extensions
+<=4.14. Python 3.12.10, boto3 1.42.54, botocore 1.42.97. The freeze has 318 lines. It differs from the first run's by
+one line: `duckdb==1.5.0` then, `duckdb==1.2.2` now.
 
 ## pip freeze (.venv-og)
 
-318 lines, captured 2026-09-15 from .venv-og/Scripts/python -m pip freeze.
+318 lines, captured 2026-09-15 ~22:11Z from .venv-og/Scripts/python -m pip freeze.
 
 ```
 aiobotocore==3.7.0
@@ -138,7 +162,7 @@ docker==7.1.0
 dockerd==1.0.0
 docstring_parser==0.17.0
 docutils==0.18.1
-duckdb==1.5.0
+duckdb==1.2.2
 easygui==0.98.3
 et_xmlfile==2.0.0
 exchange_calendars==4.13.2
