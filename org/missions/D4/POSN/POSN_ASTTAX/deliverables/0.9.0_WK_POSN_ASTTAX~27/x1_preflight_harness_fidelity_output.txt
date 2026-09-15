@@ -1,0 +1,42 @@
+====================================================================================================
+X1 PREFLIGHT ITEM 1 -- DOES THE HARNESS FAKE TABLE HONOUR SET SEMANTICS?
+====================================================================================================
+  machinery   : C:\tmp\wk-posn-7-27\.scratch\u3_ac1_before_control.py
+                sha256 ae72cab7dfbeb62f9acb2e6e15347672a478adce3c0421e12e49750c7bf13aca
+                asserted == ae72cab7dfbeb62f9acb2e6e15347672a478adce3c0421e12e49750c7bf13aca : True
+  V3 harness  : C:\tmp\wk-posn-7-27\org/missions/D4/POSN/POSN_ASTTAX/deliverables\0.9.0_WK_POSN_ASTTAX~21\v3_mutant_control_re.py
+                sha256 6342be43813fff1f8bce87bf47982d926ea67706381a591ea8876fdb48e0daf9
+                asserted == 6342be43813fff1f8bce87bf47982d926ea67706381a591ea8876fdb48e0daf9 : True
+  imported    : v3h.ScratchTableWithGet (adds get_item to ac1.ScratchTable)
+                ac1.ScratchTable / ac1.make_fake_boto3 / ac1.YANG_TABLE='etf-classifications'
+
+  THROWAWAY ROW BEFORE (8 field(s)):
+    asset_class        'structured'
+    last_updated       '2026-09-12T00:00:00Z'
+    management_style   'active'
+    name               'Throwaway Probe Row'
+    sector             'Broad'
+    sub_asset_class    'Hedge'
+    ticker             'ZZTEST'
+    updated_by         'posn-asttax-retag'
+
+  THROWAWAY ROW AFTER the seeder's exact SET clause (8 field(s)):
+    asset_class        'fixed_income'
+    last_updated       '2026-09-15T13:30:00+00:00'
+    management_style   'active'
+    name               'TrueShares Quarterly Bear Hedge ETF'
+    sector             'Broad'
+    sub_asset_class    'Volatility'
+    ticker             'ZZTEST'
+    updated_by         'canonical_si_seed'
+
+  FIELDS OUTSIDE THE SET CLAUSE, by subtraction from the row's 8 field(s):
+    ['management_style', 'sector', 'ticker']  (denominator 3 of 8)
+    SURVIVED 3 of 3: ['management_style', 'sector', 'ticker']
+
+  MEASURED: update_item MERGES into the existing item (DynamoDB SET semantics) -- the instrument
+            can carry an unowned field across a write, so X1-AC2's negative
+            control CAN discriminate. No extension of the harness is needed.
+  source of the behaviour: ac1.ScratchTable.update_item -- 'item = self.store.setdefault(key, dict(Key))' then per-clause 'item[attr] = values[rhs]'
+  (a merge into the existing dict; no rebind, no clear)
+====================================================================================================

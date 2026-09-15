@@ -1,0 +1,78 @@
+diff --git a/data/black_diamond/scripts/classification/seed_canonical_securities.py b/data/black_diamond/scripts/classification/seed_canonical_securities.py
+index 803721e2c1..6a6c3aaa88 100644
+--- a/data/black_diamond/scripts/classification/seed_canonical_securities.py
++++ b/data/black_diamond/scripts/classification/seed_canonical_securities.py
+@@ -207,8 +207,62 @@ OPAL_ALIASES = {
+ # The fields this seeder OWNS on the Yang table. A value the table already
+ # serves for one of these, that DISAGREES with the seeder's, is a CONFLICT --
+ # the same rule seed-etf-classifications.py:72-120 merge_item() applies.
++#
++# THE WRITE SURFACE, MEASURED (2026-09-15, POSN_ASTTAX AT7-s-1 / C-S177). This
++# seeder's ENTIRE write to the Yang table is the ONE update_item() call in
++# seed(), which passes YANG_UPDATE_KWARGS below: a SET clause that assigns the
++# three OWNED fields (asset_class, sub_asset_class, and name through the '#n'
++# alias) plus the two audit fields (last_updated, updated_by) and NOTHING ELSE.
++# So the guard owns exactly what this seeder writes -- 3 of 3, neither more nor
++# less -- and that equality is ASSERTED at import below, not just asserted here.
++#
++# EVERY FIELD OUTSIDE THAT CLAUSE IS OUT OF THIS SEEDER'S REACH: it is never
++# written, never cleared, never reverted and never compared by any re-seed.
++# That covers management_style (written by the retag, not here), sector,
++# rationale, firm_origin and the rest -- the preservation the module docstring
++# promises. Two consequences worth stating because they look like gaps:
++#   * management_style does NOT belong in YANG_OWNED_FIELDS. No record in
++#     CANONICAL_SECURITIES carries the key, so _yang_conflicts() would raise
++#     KeyError on the first row (or, guarded, compare a live value against
++#     nothing) -- a vacuous check that reads as protection. The field wants a
++#     guard in the script that WRITES it; a seeder cannot defend a field it
++#     cannot touch.
++#   * VNQ is not a member of CANONICAL_SECURITIES at all, so no re-seed ever
++#     visits that row, with or without --force.
+ YANG_OWNED_FIELDS = ('asset_class', 'sub_asset_class', 'name')
+ 
++# THE ONE COPY of the Yang write's static kwargs. seed() passes this object to
++# update_item() verbatim, and the assertion below parses the owned names back
++# out of the SAME object -- so the guard is graded against the bytes that do
++# the writing, never against a sibling copy that can drift.
++# The SET clause is ONE unsplit literal on purpose: an implicit-concatenation
++# split makes every textual read of it stop at the first quote (measured on the
++# pre-AT7-s-1 bytes, a regex read returned 2 of the 5 assignments and reported
++# no truncation).
++YANG_UPDATE_KWARGS = dict(
++    UpdateExpression='SET asset_class = :ac, sub_asset_class = :sac, #n = :n, last_updated = :ts, updated_by = :ub',
++    ExpressionAttributeNames={'#n': 'name'},  # 'name' is a DynamoDB reserved word
++)
++
++# The two fields the SET clause writes that the guard deliberately does NOT
++# own: this seeder stamps both on every write, so neither can ever conflict.
++YANG_AUDIT_FIELDS = ('last_updated', 'updated_by')
++
++# The write surface read BACK OUT of the clause: the identifier before ' = :'
++# in each SET assignment, with a '#alias' resolved through
++# ExpressionAttributeNames.
++_YANG_SET_LHS = [assignment.split('=', 1)[0].strip() for assignment
++                 in YANG_UPDATE_KWARGS['UpdateExpression'].split('SET ', 1)[1].split(',')]
++YANG_SET_FIELDS = tuple(YANG_UPDATE_KWARGS['ExpressionAttributeNames'].get(lhs, lhs)
++                        for lhs in _YANG_SET_LHS)
++
++assert set(YANG_SET_FIELDS) - set(YANG_AUDIT_FIELDS) == set(YANG_OWNED_FIELDS), (
++    'GUARD/WRITE-SURFACE DIVERGENCE: the Yang SET clause writes %r, minus the '
++    'audit fields %r, but the guard owns %r. Reconcile them before re-seeding: '
++    'a guard narrower than the write clobbers; a guard wider than the write is '
++    'vacuous (POSN_ASTTAX AT7-s-1, C-S177).'
++    % (YANG_SET_FIELDS, YANG_AUDIT_FIELDS, YANG_OWNED_FIELDS))
++
+ 
+ def _yang_conflicts(yang_table, sec):
+     """Fields the table already serves with a DIFFERENT non-blank value.
+@@ -303,9 +357,7 @@ def seed(upload: bool = False, sync_yang: bool = False,
+             if upload:
+                 yang_table.update_item(
+                     Key={'ticker': ticker},
+-                    UpdateExpression=('SET asset_class = :ac, sub_asset_class = :sac, '
+-                                      '#n = :n, last_updated = :ts, updated_by = :ub'),
+-                    ExpressionAttributeNames={'#n': 'name'},  # 'name' is a DynamoDB reserved word
++                    **YANG_UPDATE_KWARGS,  # the asserted SET clause + '#n' alias
+                     ExpressionAttributeValues={
+                         ':ac': sec['asset_class'],
+                         ':sac': sec['sub_asset_class'],
