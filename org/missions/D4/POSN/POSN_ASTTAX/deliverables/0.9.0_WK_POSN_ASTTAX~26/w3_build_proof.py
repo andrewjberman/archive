@@ -21,6 +21,9 @@ TO_PATH = ('org/missions/D4/POSN/POSN_ASTTAX/task-orders/'
 OUT = os.path.join(D, 'POSN_ASTTAX.TO-W3-1.positioning-summary-presence-rounding-footer-copy'
                       '.proof_of_spec.json')
 PORTAL_PIN = '10a2799c67c519288fcd7d4ae6e3b86d5ed48b5a'
+# The workspace commit that CARRIED the ledger append and the first cut of this instance;
+# read back from git (2191049ef1~0.9.0_WK_POSN_ASTTAX~26~L7(POSN_ASTTAX.TO-W3-1 ...)), never assumed.
+LEDGER_PIN = '2191049ef15440df83a00ef131ea972fb8f0f7e2'
 
 # The placeholder values this worker resolved, ONE value per token (the checker
 # back-references a repeated token, so a second value would diverge).
@@ -332,12 +335,15 @@ INST = {
         {
             'path_or_key': 'org/missions/D4/POSN/POSN_ASTTAX/ledger/PORTAL_REFS.md',
             'kind': 'doc',
-            'commit_or_etag': 'PENDING-THIS-COMMIT',
-            'deployed_state': 'STAGED-AWAITING-GATE',
+            'commit_or_etag': LEDGER_PIN,
+            'deployed_state': 'COMMITTED-NOT-DEPLOY-SCOPE',
             'deploy_evidence': 'One appended row naming branch wk-posn-6-26-portal at '
                                '10a2799c67c519288fcd7d4ae6e3b86d5ed48b5a, cut from dd1d33c6db, drain ref '
-                               'refs/drains/posn-6-portal; committed in the same workspace commit as this '
-                               'instance and re-pinned after it (Z-S105).',
+                               'refs/drains/posn-6-portal. RE-PINNED after the commit that carried it '
+                               '(Z-S105): this instance first went in as PENDING-THIS-COMMIT and the row now '
+                               'names the workspace commit git log reports for it, '
+                               '2191049ef15440df83a00ef131ea972fb8f0f7e2. A ledger append is a record, not a '
+                               'deploy.',
             'artifact_covered_by': ['W3-AC7'],
         },
     ],
