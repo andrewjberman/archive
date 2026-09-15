@@ -1,0 +1,319 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-a-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0aa50dbc0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8768f46770",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-a-1.durable-oauth.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/oauth_as.py",
+      "kind": "script",
+      "commit_or_etag": "51b0f7d823e13a6faed65e82aaeacde987b0315d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source change only; the release is OG-r-1's. Every OAuth record now goes through app/access_state.py (OG-d-1): clients RUNTIME#client#<id>; pending authorizations RUNTIME#pending_auth#<arid> (600 s, nonce-bound); codes RUNTIME#code#<sha256> (60 s, single use); refresh families RUNTIME#refresh#<fid> plus one record per generation #g<n> (tokens stored only as SHA-256; one conditional transaction per rotation; reuse revokes; 30 d absolute / 7 d idle). Access tokens 900 s with an fid claim. principal_key() is the one function OG-a-2 changes. The stateless JWT refresh functions are removed (row NFRA_OPLGTW-W3-S3).",
+      "introduces": ["def exchange_refresh", "def exchange_code", "def principal_key", "def enforced_configuration"],
+      "artifact_covered_by": ["OGA1-AC1", "OGA1-AC2", "OGA1-AC3", "OGA1-AC4", "OGA1-AC5", "OGA1-AC6", "OGA1-AC7", "OGA1-AC8", "OGA1-AC9", "OGA1-AC10", "OGA1-AC11", "OGA1-AC12", "OGA1-AC13", "OGA1-AC14", "OGA1-AC15", "OGA1-AC16"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "51b0f7d823e13a6faed65e82aaeacde987b0315d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source change only. /register accepts JSON only and /token form encoding only; register, authorize, callback and token run their blocking work on a dedicated pool under the C1 budgets (oauth_as.AUTH_ENDPOINT_SECONDS 10, REFRESH_ENDPOINT_SECONDS 30) and answer 503 when a budget elapses; the callback resumes the durable pending authorization before it asks the upstream for the identity; OAuth route paths come from oauth_as constants.",
+      "introduces": ["_within_budget", "_bridge_callback", "application/x-www-form-urlencoded"],
+      "artifact_covered_by": ["OGA1-AC13", "OGA1-AC15", "OGA1-AC16", "OGA1-AC17", "OGA1-AC18"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py",
+      "kind": "test",
+      "commit_or_etag": "51b0f7d823e13a6faed65e82aaeacde987b0315d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file: test_oga1_ac01 .. test_oga1_ac18, one per criterion. The tests are offline: moto 5.2.3 sits behind a per-request lock that models DynamoDB's request serialization, the upstream identity provider is a local issuer with an RSA key generated at test time, the Fernet key is generated at test time, and fake AWS credentials plus an empty config are forced. The HTTP arms drive the real Starlette app in-process. Each test prints its denominator line. The fixture restores the builtin time.monotonic that tests/test_ratelimit.py replaces process-wide (row NFRA_OPLGTW-W3-S6).",
+      "introduces": ["def test_oga1_ac01", "def test_oga1_ac18"],
+      "artifact_covered_by": ["OGA1-AC1", "OGA1-AC2", "OGA1-AC3", "OGA1-AC4", "OGA1-AC5", "OGA1-AC6", "OGA1-AC7", "OGA1-AC8", "OGA1-AC9", "OGA1-AC10", "OGA1-AC11", "OGA1-AC12", "OGA1-AC13", "OGA1-AC14", "OGA1-AC15", "OGA1-AC16", "OGA1-AC17", "OGA1-AC18", "OGA1-AC19"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "4daf5659fa2e1928dfa5dc3e9b75624bf55570c8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Four rows appended (NFRA_OPLGTW-W3-S3 .. W3-S6), committed on their own before this proof: '[surprise-row-gate] ... 4 new row(s) of 8 total checked (4 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.'",
+      "introduces": ["NFRA_OPLGTW-W3-S6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGA1-AC1",
+      "criterion_verbatim": "OGA1-AC1 (test_oga1_ac01) -- registration (JSON) accepts exactly `https://claude.ai/api/mcp/auth_callback` and registered loopback redirects with RFC 8252 port handling. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac01 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac01 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC1: registration 201 JSON for 4 redirects; authorize accepted 7 of 7 registered forms (any loopback port), refused 11 of 11 unregistered forms; hosted-only client: loopback refused, callback accepted\n1 passed in 1.58s\nrc=0",
+      "denominator": "4 of 4 registered redirects echoed in the 201 JSON response; 7 of 7 registered forms accepted at authorize (307), including 4 loopback port variants; 11 of 11 unregistered forms refused (400): 5 variants of the hosted callback (trailing slash, query, explicit :443, upper-case host, http), plus other path, other loopback host, lookalike host, https loopback, extra query and fragment; a client registered with only the hosted callback: 1 of 1 loopback refused, 1 of 1 callback accepted; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC2",
+      "criterion_verbatim": "OGA1-AC2 (test_oga1_ac02) -- registration refuses an arbitrary hosted redirect. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac02 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac02 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC2: 11 of 11 hosted/malformed registrations refused invalid_redirect_uri, 0 client records written; control https://claude.ai/api/mcp/auth_callback -> 201, 1 client record\n1 passed in 1.36s\nrc=0",
+      "denominator": "11 of 11 hosted or malformed redirect lists refused 400 invalid_redirect_uri, including a list that mixes the exact callback with a hosted URI, and an empty list; a full table scan after them finds 0 client records; control: 1 of 1 exact-callback registration 201, 1 client record; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC3",
+      "criterion_verbatim": "OGA1-AC3 (test_oga1_ac03) -- (difference) code redemption without the issued `client_id` is refused, and the same redemption with it succeeds. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac03 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac03 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC3: same code -- no client_id 400 invalid_request; other client 400 invalid_grant; issued client_id 200 (token client_id=mcp-rXIV9Sa1mc105FwrhU5anw)\n1 passed in 1.28s\nrc=0",
+      "denominator": "One authorization code, 3 redemptions in order: without client_id 400 invalid_request; with another registered client's id 400 invalid_grant; with the issued client_id 200, and that access token carries the issued client_id; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC4",
+      "criterion_verbatim": "OGA1-AC4 (test_oga1_ac04) -- authorization with an unregistered `client_id` is refused. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac04 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac04 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC4: 4 of 4 unregistered client_ids refused 400, upstream hops 0, pending records 0; registered control 307, 1 pending record\n1 passed in 1.13s\nrc=0",
+      "denominator": "4 of 4 unregistered client_ids (a well-formed unknown id, one containing '#', an empty one, a 300-character one) refused 400 with a loopback redirect, with 0 upstream redirects and 0 pending records; 1 of 1 registered control 307 with 1 pending record; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC5",
+      "criterion_verbatim": "OGA1-AC5 (test_oga1_ac05) -- a requested resource other than the advertised one is refused at authorize and at token exchange. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac05 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac05 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC5: advertised http://localhost:8080/mcp; authorize other=400 adv=307 none=307; code exchange other=400 adv=200; refresh other=400 adv=200; token aud == advertised\n1 passed in 1.33s\nrc=0",
+      "denominator": "The advertised resource is read from /.well-known/oauth-protected-resource. 7 arms in total: 3 at authorize (other 400 invalid_target, advertised 307, absent 307), 2 at code exchange (other 400 invalid_target, advertised 200) and 2 at refresh (other 400 invalid_target, advertised 200). The access token's aud equals the advertised resource. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC6",
+      "criterion_verbatim": "OGA1-AC6 (test_oga1_ac06) -- PKCE S256 is required and `plain` is refused. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac06 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac06 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC6: authorize plain=400 absent-method=400 absent-challenge=400 S256=307; token wrong-verifier=400 plain-trick=400 right-verifier=200; advertised ['S256']\n1 passed in 1.36s\nrc=0",
+      "denominator": "4 authorize arms: plain, absent method and absent challenge each 400; S256 307. 3 token arms on 3 separate codes: a wrong verifier 400 invalid_grant, verifier == challenge (the plain trick) 400 invalid_grant, the right verifier 200. The advertised code_challenge_methods_supported is ['S256']. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC7",
+      "criterion_verbatim": "OGA1-AC7 (test_oga1_ac07) -- a second redemption of one authorization code returns invalid_grant. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac07 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac07 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC7: first redemption 200, second 400 invalid_grant; family from the first: revoked (authorization_code_replay), its refresh 400\n1 passed in 1.54s\nrc=0",
+      "denominator": "1 code redeemed twice: 200, then 400 invalid_grant carrying no token; the family the first redemption created reads revoked (authorization_code_replay), and its refresh token is refused 400; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC8",
+      "criterion_verbatim": "OGA1-AC8 (test_oga1_ac08) -- a refresh rotates the family's generation by one conditional transaction. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac08 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac08 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC8: write calls during one refresh: 1 (transact_write_items), items 3 ['Update', 'Update', 'Put'], every item conditional; head generation 1 -> 2; g1 consumed, g2 installed with the successor's sha256; raw refresh tokens found in the table: 0\n1 passed in 1.36s\nrc=0",
+      "denominator": "A spy on the DynamoDB client records the write calls of 1 refresh: exactly 1, a transact_write_items. 3 of 3 of its items carry a ConditionExpression (Update head, Update g1, Put g2). Head generation 1 -> 2; g1 has consumed_at; g2's token_hash equals sha256(successor), as does the head's. A full table scan finds neither refresh token nor its secret: 0 of 2 tokens present. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC9",
+      "criterion_verbatim": "OGA1-AC9 (test_oga1_ac09) -- reuse of a consumed refresh token revokes the family, so the newest token then fails too. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac09 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac09 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC9: reuse of consumed g1 -> 400 invalid_grant, family revoked (refresh_token_reuse); newest g2 -> 400; control family's newest -> 200\n1 passed in 1.43s\nrc=0",
+      "denominator": "Family A: g1 rotated to g2; reusing g1 -> 400 invalid_grant, the head reads revoked (refresh_token_reuse), and g2 -> 400. Control family B, with no reuse: its g2 refreshes 200. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC10",
+      "criterion_verbatim": "OGA1-AC10 (test_oga1_ac10) -- N concurrent refreshes of one token yield exactly one success, and every loser gets invalid_grant with no second valid successor. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac10 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac10 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC10: 8 concurrent refreshes of one token -> 1 x 200, 7 x 400 invalid_grant; head generation 2, successors installed 1 (generation records 2: g1 consumed + g2); the one successor refreshes -> 200\n1 passed in 1.56s\nrc=0",
+      "denominator": "8 of 8 concurrent HTTP refreshes of one token, each held at a barrier after its family read so that all read before any writes: 1 x 200 and 7 x 400 invalid_grant; 0 of 7 losers carry a token. Head generation 2; the family holds 2 generation records (g1 consumed, g2) and no g3. The one successor then refreshes 200. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC11",
+      "criterion_verbatim": "OGA1-AC11 (test_oga1_ac11) -- a refresh never returns a broader scope than the family's, and a narrower requested scope is recorded. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac11 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac11 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC11: family scope 'mcp mcp.read'; broader request -> 400 invalid_scope (no rotation); narrower 'mcp.read' -> 200, recorded on head (scope_reduced_at) and g2 (scope_reduced_from); no-scope refresh -> 'mcp.read'; re-broaden -> 400 invalid_scope; configured set grown -> 'mcp.read'\n1 passed in 1.44s\nrc=0",
+      "denominator": "A two-scope configuration ('mcp mcp.read') so that a reduction is expressible; 5 refresh arms: a broader request 400 invalid_scope with the generation unchanged; narrower 'mcp.read' 200, recorded on the head (scope 'mcp.read', granted_scope kept, scope_reduced_at) and on g2 (scope_reduced_from), with the access-token scope 'mcp.read'; no scope requested -> 'mcp.read'; re-broadening to 'mcp' -> 400 invalid_scope; configured set grown to three scopes -> still 'mcp.read'; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC12",
+      "criterion_verbatim": "OGA1-AC12 (test_oga1_ac12) -- access tokens last 15 minutes and refresh families 30 days absolute and 7 days idle, with logical expiry enforced while records are present. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac12 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac12 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC12: access exp-iat=900 expires_in=900; head absolute-created=2592000 idle-last_used=604800; idle 7d-1s -> 200, 7d -> 400 (record present); absolute 30d-1s -> 200, 30d -> 400 (record present, idle not reached)\n1 passed in 2.30s\nrc=0",
+      "denominator": "3 of 3 contract limits (read from org/standards/NFRA_OPLGTW_CONTRACT.json at test time) equal the module constants. 1 access token: exp-iat 900 and expires_in 900. Head fields: absolute-created 2592000, idle-last_used 604800, expires_at == min of the two. 2 idle arms: 7 d-1 s 200; 7 d 400 with the raw record still present. 1 absolute arm: 5 refreshes at 6, 12, 18 and 24 d and at 30 d-1 s, all 200; then 30 d 400 with the raw record present and idle expiry not yet reached. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC13",
+      "criterion_verbatim": "OGA1-AC13 (test_oga1_ac13) -- (difference) a restart between authorize and callback resumes the bound transaction or returns an explicit restart-login error, and never guesses an identity. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac13 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac13 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC13: after restart, resume -> 302 to the bound redirect with the original state, token sub=resume@opalinvest.com; lost transaction arms ['expired', 'gone', 'nonce'] -> 400 restart_login each, upstream identity lookups 0, codes minted 0\n1 passed in 1.57s\nrc=0",
+      "denominator": "The restart is simulated in-process: a new adapter and a new client over the same table and a new HTTP client, plus an AST check that oauth_as.py holds 0 module-level mutable stores. 1 resume arm: 302 to the bound loopback redirect with the original state, and the code exchanges for a token whose sub is the upstream's email. 3 of 3 lost-transaction arms (record deleted, 601 s past its logical expiry, wrong nonce): each 400 restart_login with no Location header, 0 upstream identity lookups and 0 codes minted. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC14",
+      "criterion_verbatim": "OGA1-AC14 (test_oga1_ac14) -- client registrations survive a process restart. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac14 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac14 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC14: module-level mutable OAuth stores in oauth_as.py: 0; client registered, restart, authorize -> 307; same client_id over a table without the registration -> 400 invalid_client\n1 passed in 2.15s\nrc=0",
+      "denominator": "0 module-level mutable stores in oauth_as.py (AST). 1 client registered, then a restart (new adapter and client over the same table), then authorize with a new loopback port: 307. Control: the same client_id over a table that never saw the registration -> 400 invalid_client. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC15",
+      "criterion_verbatim": "OGA1-AC15 (test_oga1_ac15) -- (difference) with the state store failing, new and refresh exchanges fail closed, and with it healthy they succeed. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac15 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac15 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC15: store failing -> code 503, refresh 503, register 503, authorize 503, legacy JWT refresh 400, alarms 4; store healthy -> same code 200, same refresh 200, legacy JWT refresh 400\n1 passed in 2.37s\nrc=0",
+      "denominator": "Store failing (every DynamoDB call raises a connection error): 5 of 5 arms fail closed. The code exchange, the refresh and the registration each answer 503 temporarily_unavailable carrying no token; authorize answers 503 with no redirect; a stateless legacy refresh JWT answers 400 invalid_grant. 4 fail-closed alarms. Store healthy again: the same code 200 and the same refresh token 200; the legacy refresh JWT is still 400. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC16",
+      "criterion_verbatim": "OGA1-AC16 (test_oga1_ac16) -- the advertised metadata equals the enforced configuration field by field. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac16 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac16 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC16: 13 fields compared equal to the enforced configuration (issuer, authorization_endpoint, token_endpoint, registration_endpoint, jwks_uri, scopes_supported, code_challenge_methods_supported, grant_types_supported, response_types_supported, token_endpoint_auth_methods_supported, resource, authorization_servers, scopes_supported(prm)); endpoints routed; token iss/aud/scope == advertised; plain, response_type=token, other resource, client_secret_basic and client_credentials all refused\n1 passed in 1.63s\nrc=0",
+      "denominator": "13 of 13 advertised fields (10 authorization-server metadata fields plus 3 protected-resource fields) equal oauth_as.enforced_configuration(). 4 of 4 advertised endpoints are routed by the app with their method. An issued token's iss, aud and scope equal the advertised issuer, resource and scopes. 5 of 5 behaviour probes against advertised limits refused: plain, response_type=token, another resource, client_secret_basic, client_credentials. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC17",
+      "criterion_verbatim": "OGA1-AC17 (test_oga1_ac17) -- token exchange is form encoded. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac17 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac17 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC17: token exchange as JSON -> 400 invalid_request; the same code as form -> 200 (Cache-Control no-store); registration as form -> 400\n1 passed in 1.93s\nrc=0",
+      "denominator": "1 code: sent as a JSON body -> 400 invalid_request, which consumes nothing; the same code form-encoded -> 200 with Cache-Control no-store. 1 form-encoded registration -> 400. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC18",
+      "criterion_verbatim": "OGA1-AC18 (test_oga1_ac18) -- under the harness load, discovery, registration and token responses stay under 10 seconds and refresh under 30 seconds of server time. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac18 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac18 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA1-AC18: 12 parallel connections; max server time (s) per class, n: discovery 0.031 n=24, registration 0.077 n=12, authorize 0.088 n=12, callback 0.306 n=12, token 0.740 n=12, refresh 0.851 n=24; budgets 10/30; overrun arm (1.5 s work, 0.3 s budget): registration 503 in 0.32 s, refresh 503 in 0.32 s\n1 passed in 5.93s\nrc=0",
+      "denominator": "12 parallel complete connections, 96 timed in-process responses: discovery 24, registration 12, authorize 12, callback 12, token 12 (each class max < 10 s; the highest 0.740 s) and refresh 24 (max 0.851 s < 30 s). The two budgets are read from the contract at test time (10/30). Enforcement arm: 2 of 2 overrunning requests (1.5 s of handler work under a 0.3 s budget) answered 503 in 0.32 s. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA1-AC19",
+      "criterion_verbatim": "OGA1-AC19 -- the whole `infra/aws/ec2/opal-gateway/tests/` suite passes, count printed, with the one known red test of row NFRA_OPLGTW-S1 deselected by name. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests -q -p no:cacheprovider --color=no -m \"not live\" -k \"not test_scoped_deny_by_default\"</invocation><expect>(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests -q -p no:cacheprovider --color=no -m \"not live\" -k \"not test_scoped_deny_by_default\"",
+      "expect": "(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))",
+      "output_evidence": "....................................   [100%]\n108 passed, 1 deselected, 34 subtests passed in 22.74s\nrc=0",
+      "denominator": "108 of 109 collected Gateway tests passed; 1 was deselected by name (test_scoped_deny_by_default, row NFRA_OPLGTW-S1); 34 subtests passed; 0 failed. The cut base measured 90 passed and 1 deselected, so the 18 new tests are this cell's. The same invocation failed 1 of 108 twice before row NFRA_OPLGTW-W3-S6's guard was added (test_oga1_ac18, frozen process clock). 1 of 1 suite run.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "oauth_as.py exchange_code: the code-consumption condition 'condition=expr + \" AND attribute_not_exists(#og_used)\",' reduced to 'condition=expr,' and the replay check 'if rec.get(\"consumed_at\") is not None:' replaced by 'if False:', so an authorization code becomes redeemable twice (.scratch/mutate.py, byte copy taken first, restored from it afterwards). test_oga1_ac07 and test_oga1_ac01 are run against the mutant.",
+      "expected": "test_oga1_ac07 fails because the second redemption succeeds; test_oga1_ac01 (redirect registration, which never redeems a code) still passes.",
+      "observed": "'1 failed, 1 passed in 1.92s', rc=1: test_oga1_ac07 failed at 'assert (200 == 400)' with an access_token in the body of the second redemption; test_oga1_ac01 passed. Restored: sha256 dd3f966301ddaad01aa0d0dbb7c28242984a199b7e97844b9b9caf22a2b1de75 for the restored module, the byte copy and 'git show HEAD:infra/aws/ec2/opal-gateway/app/oauth_as.py'; 'git diff --quiet' clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The whole test file (18 tests) run twice back to back with the same invocation shape on the committed tree; the two outputs diffed.",
+      "observed": "Both runs rc=0, '18 passed'. 3 lines differ: the AC3 line's randomly minted client_id (by design), the AC18 line's measured timings, and the wall-clock summary ('18 passed in 11.52s' vs '11.82s'). Every other printed denominator line is byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live access-state table, its IAM LeadingKeys grant and a real DynamoDB round trip.",
+      "reason": "OG-i-1's cell. Every criterion here runs offline against moto 5.2.3, as the order specifies. The attribute names the adapter uses must match OG-i-1's table (row NFRA_OPLGTW-W3-S1, ARMED, from the previous order)."
+    },
+    {
+      "item": "The immutable tid/oid principal, legacy access-JWT rejection on protected routes, the family-status check on every protected request, the inventory of registered clients and the one-time reconnect notice.",
+      "reason": "OG-a-2's cell (the order: 'The immutable principal (tid/oid) and the legacy cutover are the NEXT cell's'). This cell binds families through principal_key() and puts the family id in each access token (fid claim) for that cell to check. The legacy REFRESH refusal already lands here (row NFRA_OPLGTW-W3-S3)."
+    },
+    {
+      "item": "An HTTP logout or token-revocation endpoint.",
+      "reason": "No criterion names one and no such route exists today. Family revocation is revoke_family(); the existing operator kill path (revocation lists, by family id and by user cutoff or blocklist) revokes a family at its next refresh. A new public route would widen the ALB and rate-limit surface beyond this order."
+    },
+    {
+      "item": "A restart across two operating-system processes.",
+      "reason": "AC13/AC14 simulate the restart in-process: a new adapter and client over the same table, plus an AST assertion that oauth_as.py holds no process-local store. A two-process test needs a DynamoDB endpoint that outlives a process; moto's server mode needs flask, which is not installed in .venv-og, and the order grants no dependency change."
+    },
+    {
+      "item": "Removing the dead GATEWAY_TOKEN_TTL / GATEWAY_REFRESH_TTL keys from config.py, and scoping test_ratelimit.py's process-wide clock patch.",
+      "reason": "Both files are outside this order's <paths> grant, and the order forbids editing existing tests. Rows NFRA_OPLGTW-W3-S4 and NFRA_OPLGTW-W3-S6."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order; the release is OG-r-1's. Every commit is LOCAL on branch wk-nfra_oplgtw-1-3b; the COO drains it."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W3-S3: OG-a-1's durable refresh route cannot keep the stateless JWT refresh branch without breaking C1's no-stateless-branch rule, so it already refuses every pre-durable refresh token with invalid_grant, a refusal the decomposition gives to OG-a-2's legacy cutover. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-W3-S4: token lifetimes now come from the contract's limits, which leaves config.py's GATEWAY_TOKEN_TTL / GATEWAY_REFRESH_TTL declared but read by nothing; config.py is outside the grant. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-W3-S5: C1 names no lifetime for a client record; every Dynamic Client Registration is stored without expiry, bounded only by the per-IP auth rate limit. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-W3-S6: tests/test_ratelimit.py replaces time.monotonic for the whole test process at import, freezing asyncio's loop clock for every later Gateway test; it failed test_oga1_ac18 in the whole suite until the OG-a-1 fixture guarded itself. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/durable-oauth.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest under .venv-og (py -3.12 venv, Python 3.12.10, --system-site-packages) with moto 5.2.3, starlette 0.52.1, httpx 0.28.1",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3b && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac<01..18> -q -p no:cacheprovider --color=no; and the AC19 whole-suite invocation",
+      "result": "18 of 18 invocations '1 passed', rc=0 each (OGA1-AC1..AC18); AC19 '108 passed, 1 deselected, 34 subtests passed', rc=0"
+    },
+    {
+      "tool": "base-implementation discrimination control (a second instrument: the same tests against the code they replace)",
+      "invocation": "git archive 8d8b221ee6 infra/aws/ec2/opal-gateway into .scratch/base, the new test file copied in (its oauth_as._clock patch made raising=False, the only change), then pytest tests/test_oauth_durable.py from there",
+      "result": "'18 failed in 4.65s': against the pre-change oauth_as.py/server.py every criterion test fails. 15 fail on behaviour (e.g. AC4 authorize of unregistered clients 307, AC13 no Location, AC14 module-level stores at lines 336-338) and 3 on a missing contract constant or function (AC12, AC16, AC18)."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ruff py39, ds-precommit, log-open-lint) and ruff check --target-version py39",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/oauth_as.py infra/aws/ec2/opal-gateway/app/server.py infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s), rc=0 (and again inside safe-commit); ruff 'All checks passed!'"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~3 <0.9.0_WK_NFRA_OPLGTW~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "51b0f7d823 (3 files, msg-verify MATCH len=3190) and 4daf5659fa (4 surprise rows, surprise-row-gate OK, 4 new of 8), both LOCAL on wk-nfra_oplgtw-1-3b"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/NFRA_OPLGTW.TO-OG-a-1.durable-oauth.proof_of_spec.json OGA1-AC1,OGA1-AC2,OGA1-AC3,OGA1-AC4,OGA1-AC5,OGA1-AC6,OGA1-AC7,OGA1-AC8,OGA1-AC9,OGA1-AC10,OGA1-AC11,OGA1-AC12,OGA1-AC13,OGA1-AC14,OGA1-AC15,OGA1-AC16,OGA1-AC17,OGA1-AC18,OGA1-AC19",
+      "result": "see the result file -- only the exit code is the verdict"
+    }
+  ]
+}
