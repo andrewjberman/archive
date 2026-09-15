@@ -1,0 +1,198 @@
+$ timeout 60 git -C /c/tmp/wk-aggfix-1-3/portal diff edf85ce503 HEAD -- src/pages/Positioning/shared/bookSet.ts
+(portal HEAD 63edeeeb51b9bec8988f86c12dc92b5768ca2532)
+diff --git a/src/pages/Positioning/shared/bookSet.ts b/src/pages/Positioning/shared/bookSet.ts
+index 993490c8..bd782116 100644
+--- a/src/pages/Positioning/shared/bookSet.ts
++++ b/src/pages/Positioning/shared/bookSet.ts
+@@ -1,4 +1,5 @@
+ import { PALETTE } from '@/lib/chartColors'
++import type { OpalAggregateResponse, PositioningDataResponse } from '@/api/portal-proxy'
+ 
+ /**
+  * Positioning BOOK SET -- the one place the page's membership is declared
+@@ -38,13 +39,19 @@ import { PALETTE } from '@/lib/chartColors'
+  *
+  * A THIRD coupling used to sit here -- the AGG AUM denominator, where
+  * `sum(aumByModel[code] || 0)` over a SHORT list still normalised to 1.0, so an
+- * omitted book rendered a confident wrong weight rather than a visible gap. It
+- * is gone because the AGG view is gone (2026-08-24). Recording it rather than
+- * deleting it silently: it was not a hypothetical. The live artifact carried
+- * SEVEN models while the producer's name->code map covered FIVE, so two "Opal
+- * Blend" books ($32.1M and $7.3M) dropped out of both numerator and denominator
+- * with nothing on screen to show it. If an aggregate is ever rebuilt on any
+- * page, this is the failure it must be built against.
++ * omitted book rendered a confident wrong weight rather than a visible gap. The
++ * client-side AGG view that carried it was removed 2026-08-24. It was not a
++ * hypothetical: the live artifact carried SEVEN models while the producer's
++ * name->code map covered FIVE, so two "Opal Blend" books ($32.1M and $7.3M)
++ * dropped out of both numerator and denominator with nothing on screen to show it.
++ *
++ * POSN_AGGFIX brings the aggregate back FOR OPAL VIEWERS ONLY, and builds it
++ * against exactly that failure rather than around it: this plane computes NO
++ * aggregate denominator at all. The rollup, its weights, its member set and what it
++ * left out arrive in a separate Opal-only served key (opal_aggregate.json, read by
++ * portal-proxy getOpalAggregate), and the page merges that block only when the file
++ * says status OK and carries holdings (mergeOpalAggregate below). No count of books
++ * on this plane feeds it, so a short list can no longer normalise to a wrong 1.0.
+  *
+  * No non-ASCII in this file (CLAUDE.md code-quality rule).
+  */
+@@ -221,6 +228,104 @@ export const resolveBooks = (
+   return [...declared, ...extras]
+ }
+ 
++/**
++ * THE OPAL AGGREGATE AS A VIEWER-SCOPED BOOK (POSN_AGGFIX, cells AF1-s-13 / AF1-s-15).
++ *
++ * The code the aggregate is keyed under in `current_holdings` -- the key the producer has
++ * always written and the removed selector entry used (`d53049a0`).
++ */
++export const AGGREGATE_BOOK = 'AGG'
++
++/**
++ * Which family the aggregate is a rollup OF. MODE-TOTAL, and deliberately NOT a
++ * BookSetCapabilities member (read the note above that interface): this is a data-shape
++ * fact -- the aggregate is built from the five MODEL books -- on the same axis as
++ * HOLDING_NOUN, and it grants nothing by itself. Whether a viewer is offered the book is
++ * decided per VIEWER in resolveViewerBooks.
++ */
++export const AGGREGATE_ROLLS_UP: Record<PositioningMode, boolean> = {
++  models: true,
++  etfs: false,
++  satellites: false,
++}
++
++/** True when the data carries an aggregate block with at least one holding. */
++export const hasOpalAggregate = (data: PositioningDataResponse | null | undefined): boolean =>
++  (data?.current_holdings?.[AGGREGATE_BOOK]?.holdings?.length ?? 0) > 0
++
++/**
++ * Merge the Opal-only aggregate into the models payload the page renders.
++ *
++ * ONE rule, from the 1.1 contract: the aggregate is offered ONLY when the file says
++ * `status: "OK"` AND `current_holdings.AGG.holdings` is non-empty. Anything else --
++ * UNAVAILABLE, an empty block, or no payload because the query never ran for this viewer --
++ * returns the input object ITSELF, so a viewer who is not offered the aggregate renders from
++ * exactly the object they rendered from before.
++ *
++ * Pure: the input is never mutated. A merge returns a new object whose new
++ * `current_holdings` carries the five books' entries by reference and the aggregate block.
++ */
++export const mergeOpalAggregate = (
++  data: PositioningDataResponse | null,
++  payload: OpalAggregateResponse | null | undefined
++): PositioningDataResponse | null => {
++  if (!data || !payload || payload.status !== 'OK') return data
++  const block = payload.current_holdings?.[AGGREGATE_BOOK]
++  if (!block || !Array.isArray(block.holdings) || block.holdings.length === 0) return data
++  return {
++    ...data,
++    current_holdings: { ...(data.current_holdings ?? {}), [AGGREGATE_BOOK]: block },
++  }
++}
++
++/**
++ * The book set FOR THIS VIEWER: `resolveBooks` unchanged, with the aggregate FIRST when, and
++ * only when, all three hold -- the family is one the aggregate rolls up, the viewer passes
++ * the page's internal predicate, and the data carries an aggregate with holdings. For every
++ * other viewer and state the result IS `resolveBooks`, so the five books cannot move.
++ */
++export const resolveViewerBooks = (
++  mode: PositioningMode,
++  availableCodes: readonly string[] | null | undefined,
++  viewer: { internal: boolean },
++  data: PositioningDataResponse | null | undefined
++): string[] => {
++  const books = resolveBooks(mode, availableCodes)
++  if (!(AGGREGATE_ROLLS_UP[mode] && viewer.internal && hasOpalAggregate(data))) return books
++  return [AGGREGATE_BOOK, ...books.filter((b) => b !== AGGREGATE_BOOK)]
++}
++
++/**
++ * A remembered (or hand-edited) book is kept ONLY when THIS viewer's own book set holds it --
++ * the same guard usePersistentToggle applies to the remembered MODE against `visibleModes`
++ * (Positioning.tsx): a stored value is untrusted input, validated against what this viewer
++ * may see, never against what exists. A client whose storage says 'AGG' is refused here,
++ * because their set (resolveViewerBooks) never contains it.
++ */
++export const rememberedBookFor = (
++  remembered: string | null | undefined,
++  books: readonly string[]
++): string | null => (remembered != null && books.includes(remembered) ? remembered : null)
++
++/**
++ * Where a viewer lands: the remembered book when this viewer's set holds it and it is not a
++ * book-level shell; else the ordinary default -- PREFERRED_DEFAULT_BOOK where the set has it
++ * and it carries rows, else the first book that carries rows, else the first book. These are
++ * the layers HoldingsTab's `defaultBook` applies today, stated as a pure function so the
++ * remembered-choice check can be exercised without a browser.
++ */
++export const landingBook = (
++  remembered: string | null | undefined,
++  books: readonly string[],
++  bookStatus: Record<string, 'full' | 'book_only'> = {}
++): string => {
++  const carriesRows = (b: string) => bookStatus[b] !== 'book_only'
++  const kept = rememberedBookFor(remembered, books)
++  if (kept && carriesRows(kept)) return kept
++  if (books.includes(PREFERRED_DEFAULT_BOOK) && carriesRows(PREFERRED_DEFAULT_BOOK)) return PREFERRED_DEFAULT_BOOK
++  return books.find(carriesRows) ?? books[0] ?? ''
++}
++
+ /**
+  * Feature availability by mode -- stated as data rather than scattered `mode ===`
+  * checks, so a reader can see in one place what a mode does and does not support.
+@@ -236,25 +341,36 @@ export const resolveBooks = (
+  *    contract is model-specific. It is deliberately NOT generalised to ETFs.
+  *
+  * THERE IS NO `aggregate` CAPABILITY, AND THE REASON MATTERS -- READ IT BEFORE
+- * RE-ADDING ONE (Andrew-direct 2026-08-24, verbatim: "pulling 'Agg' toggle view
+- * from those three pages ... nobody cares about this view and its more trouble
+- * than its worth").
++ * ADDING ONE.
+  *
+- * The removed 'AGG' column was a rollup weighted by OPAL'S OWN FIRM-WIDE AUM,
+- * pooled across all three partner firms -- measured on the live artifact
+- * 2026-08-24: json/portfolios/aum-metrics.json carries total.aum
++ * The 'AGG' column was removed for every viewer 2026-08-24 (Andrew-direct,
++ * verbatim: "pulling 'Agg' toggle view from those three pages ... nobody cares
++ * about this view and its more trouble than its worth"). It was a rollup weighted
++ * by OPAL'S OWN FIRM-WIDE AUM, pooled across all three partner firms -- measured on
++ * the live artifact 2026-08-24: json/portfolios/aum-metrics.json carries total.aum
+  * $1,951,676,164.42 whose own meta.fee_basis_components splits it exactly three
+  * ways (49financial / inflection / cottonwood), with ZERO advisor dimension
+- * anywhere in the file. The producer weights each model by model_aum/total_aum
+- * (yang-generate-positioning lambda_function.py:1193-1218 @69b867c4eb), which
+- * put LT at 49.15% of every AGG weight.
+- *
+- * So the column answered "how is OPAL positioned", while sitting on a page an
+- * advisor reads as "how am I positioned". An advisor whose book is entirely
+- * Short-Term saw an "Aggregate" that was 49% Long-Term Conservative. It was not
+- * a display bug -- the number was correct for a question nobody on this page was
+- * asking. A per-advisor rollup would need an advisor-scoped AUM source that does
+- * not exist today; until one does, the honest answer is no aggregate at all.
++ * anywhere in the file. The producer weighted each model by model_aum/total_aum
++ * (yang-generate-positioning lambda_function.py:1193-1218 @69b867c4eb), which put
++ * LT at 49.15% of every AGG weight. So the column answered "how is OPAL
++ * positioned" on a page an advisor reads as "how am I positioned": an advisor whose
++ * book is entirely Short-Term saw an "Aggregate" that was 49% Long-Term. The number
++ * was correct for a question nobody on that side of the page was asking.
++ *
++ * POSN_AGGFIX RESTORES IT AS A VIEWER-SCOPED BOOK, NEVER AS A MODE CAPABILITY. For
++ * an Opal viewer "how is Opal positioned" IS the question, so the aggregate returns
++ * for the page's internal predicate only (`isInternal() || isDev()`, Positioning.tsx),
++ * from an Opal-only served key the page fetches only for that viewer and only in
++ * Models mode. It enters the book set through `resolveViewerBooks` above, which needs
++ * THREE things together: a family the aggregate rolls up, an internal viewer, and a
++ * merged block that carries holdings.
++ *
++ * A capability here would be the wrong shape twice over. Capabilities are keyed on
++ * the MODE, so every viewer of Models mode -- advisors and clients included -- would
++ * inherit it and the advisor problem above would come straight back; and a capability
++ * cannot see the viewer at all. So `capabilitiesFor` stays mode-only, and an advisor
++ * or a client -- including one whose browser remembers, or is hand-edited to, 'AGG' --
++ * never has the book (`rememberedBookFor` / `landingBook` above).
+  */
+ export interface BookSetCapabilities {
+   benchmark: boolean
+EXIT=0
