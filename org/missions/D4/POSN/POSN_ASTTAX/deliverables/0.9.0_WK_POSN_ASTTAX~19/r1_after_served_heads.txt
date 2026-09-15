@@ -1,0 +1,33 @@
+R1 SERVED HEADS AFTER THE DRIVEN REFRESH -- POSN_ASTTAX.TO-V8-1 V8-AC12
+read at 2026-09-15T01:18:01Z by 0.9.0_WK_POSN_ASTTAX~19
+
+PURPOSE: the COO diffs the ORGANIC fires against this. The next scheduled fires are
+NOT waited on here: cot-satellites-registry-producer 07:00Z, cot-satellites-
+characteristics-producer 07:20Z, the yang pipeline on its own schedule.
+
+bucket         key                                              LastModified           VersionId                          bytes      vs PRE-RETAG
+portal-v2      json/positioning/positioning_data.json           2026-09-15T00:56:11Z   AqBtm_5o.2QeiCBRP_veC8HV2Xk0OSaj   8757       REFRESHED (was OuevyO7kCIJdEqzGlJWd.z.8S8pqiXJk)
+portal-v2      json/positioning/allocation_summary.json         2026-09-15T00:56:26Z   CmdUs93O1Ti0gwfQmDpgz5suiruCtiT8   969        REFRESHED (was HfPxh0kkU6s5yCYCyKvv7SRP977Dhijp)
+portal-v2      json/positioning/holdings_attribution_data.json  2026-09-04T13:51:29Z   mOBBmXhjOyNPM2ue_.3C9G1eR79lUrlk   386689     UNCHANGED (still mOBBmXhjOyNPM2ue_.3C9G1eR79lUrlk)
+cot            platinum/satellites/registry.json                2026-09-14T19:53:58Z   XaX6zaVWH7ybXnRBu2jeF2PNABUhezuM   2196       UNCHANGED (still XaX6zaVWH7ybXnRBu2jeF2PNABUhezuM)
+cot            platinum/satellites/holdings.json                2026-09-14T19:53:59Z   BRjqyqnB0pIdLUHOvDY3B_Sh9b0EXIPw   54985      UNCHANGED (still BRjqyqnB0pIdLUHOvDY3B_Sh9b0EXIPw)
+cot            platinum/satellites/characteristics.json         2026-09-14T21:45:13Z   rt61ogajZQy79meUlsY1X_mIdPngxJTZ   54825      UNCHANGED (still rt61ogajZQy79meUlsY1X_mIdPngxJTZ)
+
+SUMMARY: 2 of 6 keys refreshed by the driven act (positioning_data.json,
+allocation_summary.json, both by V8-AC14 direct invokes at 00:56Z).
+4 of 6 did NOT refresh and the reasons are measured, not assumed:
+  holdings_attribution_data.json -- its only recorded event names a workbook the
+    pipeline deleted (404); the invoke returned FunctionError Unhandled/NoSuchKey
+    and wrote nothing. Row POSN_ASTTAX-Z-W19-S15.
+  registry.json + holdings.json  -- cot-satellites-registry-producer REFUSED:
+    today's roster partition (2026-09-15) is absent; upstream lands ~06:00:43Z.
+    Row POSN_ASTTAX-Z-W19-S16.
+  characteristics.json           -- cot-satellites-characteristics-producer
+    REFUSED: its T-1 business day partition bbg/2026-09-14/ does not exist (the
+    newest is bbg/2026-09-11). Row POSN_ASTTAX-Z-W19-S17.
+
+SO THE ORGANIC DIFF THE COO TAKES TOMORROW HAS A SHARP EXPECTATION:
+  registry.json   should stay BYTE-IDENTICAL (it carries no labels).
+  holdings.json   should move to the retagged labels -- GLD commodities/Metals,
+                  VXX structured/Hedge -- at unchanged per-satellite weights.
+  characteristics.json moves only if a bbg partition for its T-1 day exists.
