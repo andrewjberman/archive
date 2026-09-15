@@ -764,10 +764,79 @@ def compare_payloads(label, x, y):
     return not d
 
 
+AGG_EQUAL_FIELDS = ['status', 'weights', 'weights_source', 'members', 'left_out', 'reconciliation']
+
+
+def path_of(p):
+    return p.split(' (')[0]
+
+
+def amendment1_excluded(p):
+    """A2-AC13 AMENDMENT 1: current_holdings AGG and the five book aum values are outside the compared set."""
+    q = path_of(p)
+    if q == '$.current_holdings.AGG' or q.startswith('$.current_holdings.AGG.') or q.startswith('$.current_holdings.AGG['):
+        return True
+    return q in ['$.current_holdings.%s.aum' % c for c in CODES]
+
+
+def cli_vs_handler_path_set(label, cli, handler):
+    """The shared file's CLI-versus-handler difference, as a path set with the AMENDMENT 1 exclusion applied."""
+    x = dict(cli)
+    y = dict(handler)
+    gx = x.pop('generated_at', None)
+    gy = y.pop('generated_at', None)
+    d = diff_paths(x, y)
+    kept = [p for p in d if not amendment1_excluded(p)]
+    excl = [p for p in d if amendment1_excluded(p)]
+    kept_set = sorted({path_of(p) for p in kept})
+    print('%s: generated_at %s vs %s (excluded); %d differing leaf path(s): %d excluded by AMENDMENT 1 '
+          '(current_holdings AGG, the five book aum), %d compared (%d distinct paths)'
+          % (label, gx, gy, len(d), len(excl), len(kept), len(kept_set)))
+    print_diff_summary('    compared', kept, limit=50)
+    if excl:
+        print_diff_summary('    excluded', excl, limit=50)
+    for p in kept_set:
+        print('    path %s' % p)
+    return kept_set
+
+
+def agg_fields_equal(label, X, H, show=True):
+    """opal_aggregate.json CLI vs handler over the AMENDMENT 1 fields; the verdict is value equality."""
+    rows = []
+    for f in AGG_EQUAL_FIELDS:
+        present = f in X and f in H
+        rows.append((f, present and X[f] == H[f], present and canon(X[f]) == canon(H[f]),
+                     canon(X.get(f))[:110], canon(H.get(f))[:110]))
+    xa = (X.get('current_holdings') or {}).get('AGG') or {}
+    ha = (H.get('current_holdings') or {}).get('AGG') or {}
+    present = 'total_aum' in xa and 'total_aum' in ha
+    rows.append(('current_holdings.AGG.total_aum', present and xa['total_aum'] == ha['total_aum'],
+                 present and canon(xa['total_aum']) == canon(ha['total_aum']), canon(xa.get('total_aum')), canon(ha.get('total_aum'))))
+    tx = [(h.get('ticker'), h.get('weight')) for h in xa.get('holdings') or []]
+    th = [(h.get('ticker'), h.get('weight')) for h in ha.get('holdings') or []]
+    multiset_eq = len(tx) > 0 and len(tx) == len(th) and sorted(tx, key=canon) == sorted(th, key=canon)
+    rows.append(('current_holdings.AGG.holdings[*] (ticker, weight)', multiset_eq, tx == th,
+                 '%d holdings, first %s' % (len(tx), canon(tx[:3])), '%d holdings, first %s' % (len(th), canon(th[:3]))))
+    ok = all(r[1] for r in rows)
+    if show:
+        for f, eq, beq, xs, hs in rows:
+            print('    %s FIELD %-50s %s (serialized bytes %s)  cli=%s  handler=%s'
+                  % (label, f, 'EQUAL' if eq else 'NOT EQUAL', 'equal' if beq else 'differ', xs, hs))
+    print('%s: %d of %d fields EQUAL -> %s' % (label, sum(1 for r in rows if r[1]), len(rows), 'ALL EQUAL' if ok else 'NOT ALL EQUAL'))
+    return ok
+
+
 def mode_cli_upload(fresh):
+    import copy
     ev = recorded_event()
     print_event(ev)
     e = json.loads(ev['event_raw'])
+    head = subprocess.run(['git', 'rev-parse', '--short=10', 'HEAD'], cwd=str(WS), capture_output=True, text=True).stdout.strip()
+    head_bytes = subprocess.run(['git', 'show', 'HEAD:' + PRODUCER_REL], cwd=str(WS), capture_output=True).stdout
+    work_bytes = (WS / PRODUCER_REL).read_bytes()
+    at_head = len(head_bytes) > 0 and head_bytes == work_bytes
+    print('AFTER SOURCE = HEAD %s: working %s sha256 %s, git show HEAD sha256 %s (%d bytes) -> %s'
+          % (head, PRODUCER_REL, sha256_bytes(work_bytes)[:16], sha256_bytes(head_bytes)[:16], len(head_bytes), at_head))
     (ad, _, aw) = run('normal-after', 'AFTER', 'handler', ev, fresh=False)
     (cd, ccfg, cw) = run('cli-after', 'AFTER', 'cli', ev, fresh=fresh)
     print('CLI argv: %s (AWS_LAMBDA_FUNCTION_NAME=%s set by the harness, as for the handler runs)' % (' '.join(ccfg['cli_argv']), FUNCTION_NAME))
@@ -776,33 +845,67 @@ def mode_cli_upload(fresh):
     print('MODEL PKL: event %s (handler VersionId %s); CLI read %s'
           % (e['processed']['model_pkl_key'], hreads[0]['VersionId'] if hreads else None,
              ', '.join('%s VersionId %s' % (r['key'], r['VersionId']) for r in pkl_reads)))
-    same_pkl = len(pkl_reads) == 1 and hreads and pkl_reads[0]['key'] == hreads[0]['key'] and pkl_reads[0]['VersionId'] == hreads[0]['VersionId']
+    same_pkl = len(pkl_reads) == 1 and bool(hreads) and pkl_reads[0]['key'] == hreads[0]['key'] and pkl_reads[0]['VersionId'] == hreads[0]['VersionId']
     print('MODEL PKL SAME AS THE HANDLER RUN: %s' % same_pkl)
     print('CLI main() return: %s' % cw.get('main_return'))
     print_captures('CLI AFTER', cw)
     keys = [c['params'].get('Key') for c in cw['captures']]
     two = sorted(keys) == sorted([SHARED_KEY, AGG_KEY]) and len(keys) == 2
     print('EXACTLY TWO PUTS %s AND %s: %s' % (SHARED_KEY, AGG_KEY, two))
-    ok = bool(same_pkl) and two and cw.get('main_return') == 0
+    ok = at_head and same_pkl and two and cw.get('main_return') == 0
+    payloads = {}
     for key in (SHARED_KEY, AGG_KEY):
         c, X = captured(cd, cw, key)
-        if c is None:
+        _, H = captured(ad, aw, key)
+        if c is None or H is None:
+            print('CAPTURE MISSING %s: cli %s handler %s' % (key, c is not None, H is not None))
             ok = False
             continue
         p = c['params']
         shape_ok = (p.get('ContentType'), p.get('ContentEncoding'), p.get('CacheControl')) == ('application/json', 'gzip', 'no-cache')
         print('PUT SHAPE %s: ContentType=%s ContentEncoding=%s CacheControl=%s -> %s'
               % (key, p.get('ContentType'), p.get('ContentEncoding'), p.get('CacheControl'), 'OK' if shape_ok else 'NOT OK'))
-        _, H = captured(ad, aw, key)
-        same = compare_payloads('PAYLOAD %s CLI vs handler AFTER (%s)' % (key, ad.name), X, H)
-        ok = ok and shape_ok and same
-    # Control: the same comparison at the BEFORE anchor, where neither write site was changed.
+        ok = ok and shape_ok
+        payloads[key] = (X, H)
+    # The shared file: the CLI-versus-handler difference path set at the BEFORE anchor and at HEAD.
     (bd, _, bw) = run('normal-before', 'BEFORE', 'handler', ev, fresh=False)
     (cbd, _, cbw) = run('cli-before', 'BEFORE', 'cli', ev, fresh=fresh)
-    print_captures('CLI BEFORE (control)', cbw)
+    print_captures('CLI BEFORE', cbw)
     _, XB = captured(cbd, cbw, SHARED_KEY)
     _, HB = captured(bd, bw, SHARED_KEY)
-    compare_payloads('CONTROL %s CLI vs handler at BEFORE %s' % (SHARED_KEY, BEFORE_COMMIT), XB, HB)
+    same_set = False
+    if XB is None or HB is None or SHARED_KEY not in payloads:
+        print('SHARED FILE CAPTURE MISSING: cli-before %s normal-before %s head pair %s' % (XB is not None, HB is not None, SHARED_KEY in payloads))
+        ok = False
+    else:
+        kb = cli_vs_handler_path_set('SHARED %s CLI vs handler at BEFORE %s' % (SHARED_KEY, BEFORE_COMMIT), XB, HB)
+        kh = cli_vs_handler_path_set('SHARED %s CLI vs handler at HEAD %s' % (SHARED_KEY, head), *payloads[SHARED_KEY])
+        only_head = sorted(set(kh) - set(kb))
+        only_base = sorted(set(kb) - set(kh))
+        for q in only_head:
+            print('    only at HEAD: %s' % q)
+        for q in only_base:
+            print('    only at %s: %s' % (BEFORE_COMMIT, q))
+        same_set = len(kh) > 0 and not only_head and not only_base
+        print('PATH SET at %s: %d; at HEAD: %d; only at HEAD (NEW): %d; only at %s: %d'
+              % (BEFORE_COMMIT, len(kb), len(kh), len(only_head), BEFORE_COMMIT, len(only_base)))
+        print('SHARED FILE CLI-vs-HANDLER DIFFERENCE PATH SET SAME AT %s AND AT HEAD (apart from current_holdings AGG and the five book aum): %s'
+              % (BEFORE_COMMIT, same_set))
+        injected = set(kh) | {'$.control.injected_path'}
+        print('CONTROL one path injected into the HEAD set in memory: same=%s -> %s'
+              % (injected == set(kb), 'REPORTED AS A DIFFERENCE (FIRED)' if injected != set(kb) else 'NOT REPORTED (DID NOT FIRE)'))
+    ok = ok and same_set
+    agg_ok = False
+    if AGG_KEY in payloads:
+        X, H = payloads[AGG_KEY]
+        print('AGGREGATE %s CLI vs handler at HEAD %s: generated_at %s vs %s (not compared)' % (AGG_KEY, head, X.get('generated_at'), H.get('generated_at')))
+        agg_ok = agg_fields_equal('AGG', X, H)
+        XM = copy.deepcopy(X)
+        if XM.get('current_holdings', {}).get('AGG', {}).get('holdings'):
+            XM['current_holdings']['AGG']['holdings'][0]['weight'] = XM['current_holdings']['AGG']['holdings'][0]['weight'] + 0.0001
+            fired = not agg_fields_equal('CONTROL (first AGG holding weight +0.0001 in the CLI copy, in memory)', XM, H, show=False)
+            print('CONTROL aggregate field check -> %s' % ('REPORTED AS A DIFFERENCE (FIRED)' if fired else 'NOT REPORTED (DID NOT FIRE)'))
+    ok = ok and agg_ok
     print('VERDICT A2-AC13 %s' % ('ALL CHECKS HOLD' if ok else 'A CHECK FAILED'))
     return 0 if ok else 1
 
