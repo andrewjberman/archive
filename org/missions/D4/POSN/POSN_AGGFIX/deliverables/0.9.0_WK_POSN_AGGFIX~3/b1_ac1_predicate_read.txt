@@ -1,0 +1,72 @@
+$ timeout 120 python org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~3/b1_ac1_predicate_read.py
+BASE: portal edf85ce503 = edf85ce503aad961b84b5ea3b2074eb84d416a16
+READ: edf85ce503:src/contexts/AuthContext.tsx  (850 lines, 31884 chars)
+READ: edf85ce503:src/pages/Positioning/Positioning.tsx  (652 lines, 34346 chars)
+
+=== isInternal and isDev bodies (src/contexts/AuthContext.tsx @edf85ce503) ===
+  :736    const isInternal = useCallback(() => {
+  :737      return state.claims?.firmId === 'opal-capital'
+  :738    }, [state.claims])
+  :750    const isDev = useCallback(() => {
+  :751      return state.claims?.userType === 'Dev'
+  :752    }, [state.claims])
+
+=== every line in src/contexts/AuthContext.tsx naming firmId or userType (DENOMINATOR = all such lines) ===
+  :35  const internal = claims?.firmId === 'opal-capital'
+  :36  // ADVI_SHARED.006 hotfix — was hardcoded 'bd' (legacy raw firmId). Pre-.006
+  :99  firmId?: string | null
+  :100  userType?: string | null
+  :118  // userType is specifically 'Dev' or null
+  :119  const userType = userData.userType === 'Dev' ? 'Dev' : null
+  :136  firmId: parseNullable(userData.firmId),
+  :137  userType,
+  :224  firmId: claims.firmId ?? undefined,
+  :347  claims = { firmId: null, userType: null, advisorId: null, firmRole: null, advisorRole: null }
+  :372  firmId: claims.firmId ?? undefined,
+  :692  firmId: effectiveFirmId,
+  :693  userType: isAdvisorMode ? null : 'Dev',
+  :718  firmId: effectiveFirmId ?? 'opal-capital',
+  :737  return state.claims?.firmId === 'opal-capital'
+  :751  return state.claims?.userType === 'Dev'
+  :756  * With tier removed, internal = firmId opal-capital; all others pass.
+  :760  if (requiredTier === 'internal') return state.claims.firmId === 'opal-capital'
+  :768  const canAccessFirm = useCallback((firmId: string) => {
+  :771  if (state.claims.firmId === 'opal-capital') return true
+  :773  return state.claims.firmId === firmId
+  :791  if (state.user?.role === 'admin' || state.claims?.firmId === 'opal-capital') return true
+  :797  if (state.user?.role === 'admin' || state.claims?.firmId === 'opal-capital') return true
+  :802  if (state.user?.role === 'admin' || state.claims?.firmId === 'opal-capital') return true
+  :807  return state.user?.role === 'admin' || state.claims?.firmId === 'opal-capital'
+  DENOMINATOR: 25 line(s) of 850
+
+=== where claims.firmId and claims.userType are ASSIGNED, and from what source ===
+  :110  function parseClaims(userData: RawUserData): Claims {   <- the parser (input: the server user record)
+  :119  const userType = userData.userType === 'Dev' ? 'Dev' : null   <- userType: 'Dev' ONLY when the server sends exactly 'Dev', else null
+  :136  firmId: parseNullable(userData.firmId),   <- firmId: the server value verbatim (string "null" -> null)
+  parseClaims CALL SITES: 3
+    :187  claims = parseClaims(data.user)   <- payload of /auth/refresh
+    :200  claims = parseClaims(meData.user)   <- payload of /auth/me
+    :344  claims = parseClaims(meData.user)   <- payload of /auth/me
+  every other firmId/userType write, by the object it sits in:
+    :224  firmId: claims.firmId ?? undefined,   <- OpalAnalytics.init user payload -- READS claims, assigns nothing to them
+    :347  claims = { firmId: null, userType: null, advisorId: null, firmRole: null, advisorRole: null }   <- a LITERAL claims object assigned here (no parser): every claim null -- inside the branch after the fetch at :337: const meResponse = await fetch(`${API_BASE}/auth/me`, {
+    :372  firmId: claims.firmId ?? undefined,   <- OpalAnalytics.init user payload -- READS claims, assigns nothing to them
+    :692  firmId: effectiveFirmId,   <- devBypass devClaims (DEV-ONLY: window.__devBypass under import.meta.env.DEV)
+    :693  userType: isAdvisorMode ? null : 'Dev',   <- devBypass devClaims (DEV-ONLY: window.__devBypass under import.meta.env.DEV)
+    :718  firmId: effectiveFirmId ?? 'opal-capital',   <- OpalAnalytics.init user payload -- READS claims, assigns nothing to them
+
+=== the page predicate (src/pages/Positioning/Positioning.tsx @edf85ce503) ===
+  :260  const { claims, isInternal, isDev } = useAuth()
+  :267  const internal = isInternal() || isDev()
+  isInternal reads ONLY firmId === opal-capital : True
+  isDev reads ONLY userType === Dev               : True
+  page joins them with OR                        : True
+
+PAGE PREDICATE: firmId === 'opal-capital' OR userType === 'Dev'
+
+=== viewer classes the predicate admits BEYOND firmId opal-capital ===
+ADMITTED BEYOND OPAL STAFF: a viewer whose server-issued userType is 'Dev' at ANY firmId other than 'opal-capital' -- isDev (:750-752) does not read firmId, so the page treats a Dev-typed partner-firm account as internal.
+NOT ADMITTED (read from the same file): claims null (auth unresolved; ProtectedRoute holds the page), firmId null (/auth/me failed), a partner advisor or partner user (userType null, firmId a partner slug), and devBypass(advisorRole) (userType null, firmId VITE_DEV_FIRM_ID).
+INSIDE OPAL STAFF, NOT BEYOND: devBypass() with no argument mints firmId 'opal-capital' AND userType 'Dev' (DEV builds only).
+NOT READ HERE, STATED: whether any ISSUED account carries userType 'Dev' with a firmId other than 'opal-capital' is a fact of the auth plane, not of this file; the portal cannot answer it.
+EXIT=0

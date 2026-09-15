@@ -1,0 +1,64 @@
+$ git -C portal diff edf85ce503 HEAD -- src/pages/Positioning/Positioning.tsx
+diff --git a/src/pages/Positioning/Positioning.tsx b/src/pages/Positioning/Positioning.tsx
+index 5d83be7d..a53e0b28 100644
+--- a/src/pages/Positioning/Positioning.tsx
++++ b/src/pages/Positioning/Positioning.tsx
+@@ -37,6 +37,7 @@ import { useYangDataAsOf } from '@/hooks/useDataSource'
+ import {
+   getPositioningData,
+   getEtfPositioningData,
++  getOpalAggregate,
+   etfBookIntegrityIssues,
+   etfHoldingsStatusByCode,
+   type PositioningDataResponse,
+@@ -44,7 +45,7 @@ import {
+ import { PositioningSummary } from './panels/PositioningSummary'
+ import { HoldingsTab } from './tabs/HoldingsTab'
+ import { DEFAULT_CUSTOM_BLEND_STATE, type CustomBlendState } from './shared/customBlend'
+-import { MODE_LABELS, type PositioningMode } from './shared/bookSet'
++import { MODE_LABELS, mergeOpalAggregate, type PositioningMode } from './shared/bookSet'
+ import {
+   modesFor,
+   satelliteSelectableFirms,
+@@ -357,6 +358,31 @@ export function Positioning() {
+     gcTime: 10 * 60 * 1000,   // 10 minutes - cache garbage collection
+   })
+ 
++  // THE OPAL AGGREGATE (POSN_AGGFIX, cell AF1-s-13) -- an Opal-only served key, asked for ONLY
++  // by a viewer the page's internal predicate admits (`internal`, above: isInternal() ||
++  // isDev()) and ONLY in Models mode. An advisor or a client never enables this query, so
++  // their browser issues NO request for the key -- the fetch is gated, not just its result.
++  // The Models query above is untouched: same key, same function, same options.
++  //
++  // Its OWN query key, like the ETF artifact's. `retry: false` so an unavailable file settles
++  // at once into "no aggregate" instead of holding a retry loop.
++  const aggregateWanted = internal && mode === 'models'
++  const { data: opalAggregate = null } = useQuery({
++    queryKey: ['opal-aggregate'],
++    queryFn: getOpalAggregate,
++    enabled: aggregateWanted,
++    retry: false,
++    staleTime: 5 * 60 * 1000,
++    gcTime: 10 * 60 * 1000,
++  })
++
++  // THE MERGE. A DISABLED query still returns whatever its cache holds (e.g. after a flip from
++  // Models to ETFs), so the gate is applied AGAIN to the value: outside (internal AND Models)
++  // the payload handed over is null and nothing merges. On status OK with holdings,
++  // current_holdings.AGG joins the models payload; otherwise this IS `positioningData`,
++  // the same object (shared/bookSet.ts mergeOpalAggregate).
++  const modelsData = mergeOpalAggregate(positioningData, aggregateWanted ? opalAggregate : null)
++
+   // ETF artifact -- its OWN query key, fetched only while ETF mode is selected.
+   // Distinct key means the two payloads can never share a cache entry.
+   const {
+@@ -442,7 +468,7 @@ export function Positioning() {
+   // MODE-TOTAL data selection. Records, not ternaries: a mode added to the type
+   // must state its own payload rather than inherit the models one.
+   const dataByMode: Record<PositioningMode, PositioningDataResponse | null> = {
+-    models: positioningData,
++    models: modelsData,
+     etfs: etfData,
+     satellites: satellites.data,
+   }
+EXIT=0
