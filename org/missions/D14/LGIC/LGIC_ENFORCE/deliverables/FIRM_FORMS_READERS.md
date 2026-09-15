@@ -13,11 +13,11 @@ list: each is a historical record (a round's record, a review, an adjudication, 
 - `eae996fb8e` (the checker's spawn base, git merge-base HEAD CLOUD (row LGIC_ENFORCE-S20)): 55
 - `bf506e53be` (lgic-v19-landing, NAMING_SCHEMA.json v1.9 ADMITTED): 38
 - `bd0f5d2c6c` (lgic-v19-group, this worktree's base): 56
-- the tip (this branch's worktree): 54
+- the tip (this branch's worktree, plus this order's own proof and result): 57
 
-Their union is 56 files, MINUS 1 issuer instrument(s) under `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/` (excluded by the order; R3-AC1 prints the exclusion: `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py`) MINUS this record itself = **55 files, each listed below**.
+Their union is 59 files, MINUS 1 issuer instrument(s) under `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/` (excluded by the order; R3-AC1 prints the exclusion: `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py`) MINUS this record itself = **57 files, each listed below**.
 
-**Dispositions:** another-project 29, historical-record 24, repointed 2. `repointed` means the file no longer names the token at the tip;
+**Dispositions:** another-project 29, historical-record 26, repointed 2. `repointed` means the file no longer names the token at the tip;
 no file marked `repointed` names it there (checked when this file was built).
 
 **Readers that are code and not this order's.** Three files outside this order's paths still READ the schema list as code: LGIC_NAMING round 3's `blind_seat.py` and `check_ln_r3.py` (row LGIC_ENFORCE-W1-S23, for the issuer) and LGIC_CANON round 1's `check_canon_r1.py` (row LGIC_ENFORCE-W1-S24). A fourth, LGIC_CANON's `render_naming_section.py`, reads it only while it exists and falls back to the registry. None is edited here.
@@ -126,6 +126,11 @@ no file marked `repointed` names it there (checked when this file was built).
    "why": "A round-1 record of this project (a proof, a result, or an exercise or census record), read by no code."
   },
   {
+   "path": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/LGIC_ENFORCE.TO-EN-r-3-r2.one-carrier.proof_of_spec.json",
+   "disposition": "historical-record",
+   "why": "This order's proof-of-spec instance: it quotes the checker's output, which names the list. Read by no code."
+  },
+  {
    "path": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/LGIC_ENFORCE.TO-EN-x-1.fwd2-real-resource.proof_of_spec.json",
    "disposition": "historical-record",
    "why": "A round-1 record of this project (a proof, a result, or an exercise or census record), read by no code."
@@ -134,6 +139,11 @@ no file marked `repointed` names it there (checked when this file was built).
    "path": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/fwd2-real-resource.result.md",
    "disposition": "historical-record",
    "why": "A round-1 record of this project (a proof, a result, or an exercise or census record), read by no code."
+  },
+  {
+   "path": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/one-carrier.r2.result.md",
+   "disposition": "historical-record",
+   "why": "This order's result file: it records the checker's output verbatim, which names the list. Read by no code."
   },
   {
    "path": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~8/LGIC_ENFORCE.TO-EN-d-1.fwd7-demo-firm.proof_of_spec.json",
