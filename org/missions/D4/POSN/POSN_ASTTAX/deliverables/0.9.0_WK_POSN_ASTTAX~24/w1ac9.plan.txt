@@ -1,0 +1,134 @@
+module.cot_satellites_characteristics_producer.data.aws_s3_object.artifact: Reading...
+aws_iam_role.cot_satellites_characteristics_producer: Refreshing state... [id=cot-satellites-characteristics-producer-role]
+aws_cloudwatch_event_rule.cot_satellites_characteristics_producer_daily: Refreshing state... [id=cot-satellites-characteristics-producer-daily]
+module.cot_satellites_characteristics_producer.aws_cloudwatch_log_group.lambda: Refreshing state... [id=/aws/lambda/cot-satellites-characteristics-producer]
+module.cot_satellites_characteristics_producer.data.aws_s3_object.artifact: Read complete after 1s [id=opal-313476888478-lambda-artifacts/cot-pipeline/cot-satellites-characteristics-producer.zip]
+aws_iam_role_policy.cot_satellites_characteristics_producer_s3: Refreshing state... [id=cot-satellites-characteristics-producer-role:s3-read-three-inputs-write-satellites-characteristics]
+module.cot_satellites_characteristics_producer.aws_lambda_function.this: Refreshing state... [id=cot-satellites-characteristics-producer]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # aws_cloudwatch_event_rule.cot_satellites_characteristics_producer_daily will be updated in-place
+  ~ resource "aws_cloudwatch_event_rule" "cot_satellites_characteristics_producer_daily" {
+      ~ description         = "Daily Cottonwood satellite weighted-characteristics aggregate: holdings.json weights x per-ticker inputs (positioning_data first, Bloomberg second) -> platinum/satellites/characteristics.json. Fires 20 minutes after the registry producer's 07:00Z run, on its own clock." -> "Daily Cottonwood satellite weighted-characteristics aggregate + the per-ticker block: holdings.json weights x per-ticker inputs (positioning_data first, Bloomberg second) -> platinum/satellites/characteristics.json. Fires 12:30Z on its own clock, AFTER the 07:00 America/New_York Bloomberg pull in both DST states."
+        id                  = "cot-satellites-characteristics-producer-daily"
+        name                = "cot-satellites-characteristics-producer-daily"
+      ~ schedule_expression = "cron(20 7 * * ? *)" -> "cron(30 12 * * ? *)"
+        tags                = {}
+        # (8 unchanged attributes hidden)
+    }
+
+  # aws_iam_role_policy.cot_satellites_characteristics_producer_s3 will be updated in-place
+  ~ resource "aws_iam_role_policy" "cot_satellites_characteristics_producer_s3" {
+        id          = "cot-satellites-characteristics-producer-role:s3-read-three-inputs-write-satellites-characteristics"
+        name        = "s3-read-three-inputs-write-satellites-characteristics"
+      ~ policy      = jsonencode(
+          ~ {
+              ~ Statement = [
+                    # (2 unchanged elements hidden)
+                    {
+                        Action   = [
+                            "s3:GetObject",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:s3:::opal-data-etfs/bbg/*/characteristics.parquet",
+                            "arn:aws:s3:::opal-data-etfs/bbg/*/run_manifest.json",
+                        ]
+                        Sid      = "ReadBloombergEtfDaily"
+                    },
+                  + {
+                      + Action    = [
+                          + "s3:ListBucket",
+                        ]
+                      + Condition = {
+                          + StringLike = {
+                              + "s3:prefix" = [
+                                  + "bbg/*",
+                                  + "bbg-testpull/tickers/*",
+                                ]
+                            }
+                        }
+                      + Effect    = "Allow"
+                      + Resource  = [
+                          + "arn:aws:s3:::opal-data-etfs",
+                        ]
+                      + Sid       = "ListBloombergHistoryPrefixes"
+                    },
+                  + {
+                      + Action   = [
+                          + "s3:GetObject",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:s3:::opal-data-etfs/bbg/*/history_topup.parquet",
+                          + "arn:aws:s3:::opal-data-etfs/bbg-testpull/tickers/*/history.csv",
+                        ]
+                      + Sid      = "ReadBloombergReturnHistory"
+                    },
+                  + {
+                      + Action   = [
+                          + "dynamodb:GetItem",
+                        ]
+                      + Effect   = "Allow"
+                      + Resource = [
+                          + "arn:aws:dynamodb:us-east-1:313476888478:table/etf-classifications",
+                        ]
+                      + Sid      = "ReadEtfClassifications"
+                    },
+                    {
+                        Action   = [
+                            "s3:PutObject",
+                        ]
+                        Effect   = "Allow"
+                        Resource = [
+                            "arn:aws:s3:::opal-data-cot/platinum/satellites/characteristics.json",
+                        ]
+                        Sid      = "WriteSatellitesCharacteristics"
+                    },
+                ]
+                # (1 unchanged attribute hidden)
+            }
+        )
+        # (2 unchanged attributes hidden)
+    }
+
+  # module.cot_satellites_characteristics_producer.aws_lambda_function.this will be updated in-place
+  ~ resource "aws_lambda_function" "this" {
+        id                             = "cot-satellites-characteristics-producer"
+      ~ last_modified                  = "2026-09-14T21:43:59.302+0000" -> (known after apply)
+      ~ s3_object_version              = "sZ0o.m4CGbylNMV7KPN1oR9bgRZnlEml" -> "ZM8X7mpXR6zBymgcjMx_hO.Dw9FBzyIw"
+      ~ source_code_hash               = "6M4Co5N81OD/SxD+fS0/pzbByeBKeYaVh8z/kszV3Vk=" -> "rN/jcmeQk4F/HJsQHfasjdWFgIjWXOrYHeBPkf5TbOU="
+        tags                           = {
+            "ManagedBy" = "Terraform"
+            "Module"    = "yang-lambda"
+            "System"    = "CottonwoodPipeline"
+        }
+        # (28 unchanged attributes hidden)
+
+        # (3 unchanged blocks hidden)
+    }
+
+Plan: 0 to add, 3 to change, 0 to destroy.
+╷
+│ Warning: Resource targeting is in effect
+│ 
+│ You are creating a plan with the -target option, which means that the
+│ result of this plan may not represent all of the changes requested by the
+│ current configuration.
+│ 
+│ The -target option is not for routine use, and is provided only for
+│ exceptional situations such as recovering from errors or mistakes, or when
+│ Terraform specifically suggests to use it as part of an error message.
+╵
+
+─────────────────────────────────────────────────────────────────────────────
+
+Saved the plan to: C:/tmp/wk-posn-6-24/.scratch/b6.tfplan
+
+To perform exactly these actions, run the following command to apply:
+    terraform apply "C:/tmp/wk-posn-6-24/.scratch/b6.tfplan"
