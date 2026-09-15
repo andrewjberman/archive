@@ -1,0 +1,200 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-rj-7",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "73938cdae4",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rj-7.the-similarity-ranker.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+  "group": "C",
+  "vintage_commit": "1170b4da69"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~21",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/peers/universe.py",
+   "kind": "script",
+   "commit_or_etag": "ff90cac77d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "THE ONE DATABASE: six boto3 GetObject reads of s3://opal-data-portal-v2/json/security_scanner/latest/universes/<id>/universe_data.json UNION the landed model-block header scalars, folded to one row per ticker, vintage carried. Library code; this order deploys nothing."
+  },
+  {
+   "path_or_key": "lib/research/peers/taxonomy.py",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ],
+   "kind": "script",
+   "commit_or_etag": "ff90cac77d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the GICS-sector-to-scanner-sector map (basis held, residue ['Non-Corporate'] named) and the ISO2-to-scanner-country map (basis measured over the 47 values the database carries minus the '@Na' sentinel), plus residue_over_database() which re-measures both against whatever database is loaded."
+  },
+  {
+   "path_or_key": "lib/research/peers/csc.py",
+   "artifact_covered_by": [
+    "AC2",
+    "AC3",
+    "AC5"
+   ],
+   "kind": "script",
+   "commit_or_etag": "ff90cac77d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Adam's 17 CSC columns quoted from SUBSTRATE_CARDS.md:73-76, checked against the scanner's 289-factor registry and the 284 codes a UniverseDataRow carries; PRESENT 5, ABSENT 12 written as the denominator MINUS the present."
+  },
+  {
+   "path_or_key": "lib/research/peers/engine.py",
+   "kind": "script",
+   "commit_or_etag": "ff90cac77d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the four lexicographic rungs with exclusive-depth MECE accounting, the |log(cap ratio)| tiebreak, the R-1 object, the pool writer with read-back, and the batch CLI (--as-of/--security-key/--dry-run/--write-pool/--limit/--offset/--json)."
+  },
+  {
+   "path_or_key": "lib/research/peers/tests/test_peers.py",
+   "kind": "test",
+   "commit_or_etag": "ff90cac77d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "26 unittest.TestCase cases, up from 4 bare pytest functions which `python -m unittest` collected as ZERO ('Ran 0 tests ... OK' is a green that measured nothing). No network: every case passes an explicit candidate_universe and resolve_identities=False."
+  },
+  {
+   "path_or_key": "s3://opal-data-harvest/peers/v1/<security_key>/2026-09-15.json",
+   "kind": "s3_object",
+   "commit_or_etag": "sha256 per object in Metadata document-sha256; BABA 4273e1383ad9e254849306be8df25449ef72db82fb3f3655cc491be971b3f6d9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "INTERFACE R-1, 33 objects written and every one read back (33 of 33 sha match against both the local body and the metadata); pool census peers/v1/ length(Contents) = 33 after the run, 0 before. Readers: rj-9, rj-11."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~21/candidate_universe.json",
+   "kind": "config_data",
+   "commit_or_etag": "ff90cac77d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "the READ VINTAGE: the folded 2851-row database at scanner asOf 2026-08-06 with its denominators and the 284 row value codes, so a re-run grades the same database the batch graded. Beside it: scanner_factor_metadata.json (289 factors, asOf 2026-08-06), peers_batch.2026-09-15.{log,json} and baba_dry_run.2026-09-15.{log,json}."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "vintage 2026-08-06 (or the asOf the files carry at your read, printed), per-file denominators for six files plus the model-block headers, candidates at least 2000 (the six universes folded to one row per ticker), with-sector, with-industryGroup, with-country and with-mktVal each at least 90 percent of candidates. A loader that reads fewer than six files without naming which failed is NOT met",
+   "method": "command",
+   "invocation": "timeout 115 python -c \"from lib.research.peers import universe as u; c=u.load_candidate_universe(); print('vintage', c.get('vintage'), 'per-file', c.get('denominators'), 'candidates', len(c.get('rows') or []), 'with-sector', sum(1 for r in c['rows'] if r.get('sector')), 'with-industryGroup', sum(1 for r in c['rows'] if r.get('industryGroup')), 'with-country', sum(1 for r in c['rows'] if r.get('country')), 'with-mktVal', sum(1 for r in c['rows'] if r.get('mktVal')))\"",
+   "output_evidence": "vintage 2026-08-06 per-file {'database': 2851, 'files_expected': 6, 'files_read': 6, 'model_block_files_read': 4, 'model_block_headers_classified': 3, 'model_block_headers_skipped_unclassified': 1, 'model_block_joined_to_scanner_row': 1, 'model_block_rows_added': 2, 'row_value_codes': 284, 'scanner_acwx': 1830, 'scanner_duplicates_folded': 2433, 'scanner_eafe': 660, 'scanner_eafev': 399, 'scanner_r1000': 1022, 'scanner_r1000v': 869, 'scanner_rows_read': 5282, 'scanner_sp500': 502, 'scanner_unique_tickers': 2849} candidates 2851 with-sector 2851 with-industryGroup 2849 with-country 2851 with-mktVal 2850",
+   "denominator": "6 of 6 scanner files read (files_read 6, files_expected 6, read_failures {}), per-file sp500 502 + r1000 1022 + r1000v 869 + acwx 1830 + eafe 660 + eafev 399 = 5282 rows -> 2849 unique tickers (2433 duplicates folded), UNION 4 model-block files (3 classified, 1 skipped for carrying no GICS_SECTOR_NAME, 1 joined to its scanner row by US ticker root, 2 added as rows) = DATABASE 2851 of 2851. Field coverage over that denominator: sector 2851 of 2851 (100.0%), country 2851 of 2851 (100.0%), industryGroup 2849 of 2851 (99.93%), mktVal 2850 of 2851 (99.96%) -- each above the 90% bar. Vintage 2026-08-06, carried by 6 of 6 files (no file disagrees), read 2026-09-15.",
+   "status": "PASS",
+   "expect": "(?=[\\s\\S]*vintage\\ 2026\\-08\\-06)(?=[\\s\\S]*'files_read':\\ 6)(?=[\\s\\S]*'scanner_sp500':\\ 502)(?=[\\s\\S]*'scanner_acwx':\\ 1830)(?=[\\s\\S]*'database':\\ 2851)(?=[\\s\\S]*candidates\\ 2851)(?=[\\s\\S]*with\\-sector\\ 2851)(?=[\\s\\S]*with\\-industryGroup\\ 2849)(?=[\\s\\S]*with\\-country\\ 2851)(?=[\\s\\S]*with\\-mktVal\\ 2850)"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "a set with basis derived, members N at least 5 and at most 25, EVERY member with the subject's sector, a market cap inside 0.2x-5x of the subject's, rung_reached printed per member, denominators per rung (sector, band, country, industryGroup) whose excluded plus retained equals the database at each rung, universe_vintage printed, csc_columns listing present codes and absent columns. A member outside the sector or the band, or a rung without its denominator, is NOT met",
+   "method": "command",
+   "invocation": "python -m lib.research.peers.engine --security-key BABA_US_Equity --as-of 2026-09-15 --dry-run 2>&1 | tail -16",
+   "output_evidence": "SUBJECT BABA_US_Equity sector='Consumer Discretionary' [GICS_SECTOR_NAME] -> scanner ['Consumer Cyclicals', 'Consumer Services'] | country='HK' -> 'Hong Kong' | industryGroup=None | cap=269839.3 MUSD [model_block_header]\nDATABASE 2851 candidate(s) | universe_vintage 2026-08-06 | minus self 1 (ticker 1, exact-name 0) = 2850 graded\nRUNG 1 sector         retained   254 excluded  2596 (254 + 2596 = 2850 graded) field=UniverseDataRow.sector (scanner) / GICS_SECTOR_NAME (model-block\nRUNG 2 size_band      retained    35 excluded  2815 (35 + 2815 = 2850 graded) field=UniverseDataRow.mktVal (USD millions) / CUR_MKT_CAP (model-block\nRUNG 3 country        retained     2 excluded  2848 (2 + 2848 = 2850 graded) field=UniverseDataRow.country (scanner) / CNTRY_OF_DOMICILE (model-blo\nRUNG 4 industry_group retained     0 excluded  2850 (0 + 2850 = 2850 graded) field=UniverseDataRow.industryGroup (the scanner's subsector; the land\nMECE exclusive depth counts r0=2596 r1=219 r2=33 r3=2 r4=0 sum=2850 of 2850 graded (+1 self = 2851 database) holds=True\nMEMBERS 12 of 35 eligible (cap 12), rung_reached per member: 653665(rung=3) BGJW37(rung=3) 406141(rung=2) 7203(rung=2) BP9DL9(rung=2) HD(rung=2) 525397(rung=2) MCD(rung=2) DIS(rung=2) 9983(rung=2) BKNG(rung=2) BCRWZ1(rung=2)\nMEMBER-CHECK sector 12 of 12 in ['Consumer Cyclicals', 'Consumer Services']; band 12 of 12 within 0.2x-5.0x of 269839.3 MUSD\nTIEBREAK |log(cap ratio)| over the members: min 0.0178 max 1.3133 (deepest rung first, then this distance)\nCSC present 5 of 17: Price=price(row_field); Mkt Cap=mkt_val_sec(factor_code); EV=ev(factor_code); P/E 2025=ey(factor_code); P/E 2026=ey_ntm(factor_code)\nCSC absent 12 of 17 (denominator minus present): Shares; Debt; Preferred; Minority; Cash; P/E 2027; Debt/Equity; Net Debt/Equity; Net Debt/Capital; 5-yr growth Revenue; 5-yr growth EBIT; 5-yr growth FCF\nSA_CANDIDATES ABSENT-ACCESS (called=False) -- the 11 defs of sa_rest_fetch.py minus the 6 non-endpoint helpers leave 5 endpoints (symbol, news, report, analysis, article) and none returns a compar\nIDENTITY X-1 subject MEASURED -> BABA_US_Equity; members resolved 1 of 12\nBASIS derived -- derived over 2850 candidate(s) (2851 database minus 1 self) at universe vintage 2026-08-06: rung 1 sector 'Consumer Discretionary' retained 254, rung 2 band 0.2x-5.0x ret\nDRY-RUN wrote nothing (the key would be s3://opal-data-harvest/peers/v1/BABA_US_Equity/2026-09-15.json)",
+   "denominator": "basis derived; MEMBERS 12 of 35 eligible (cap 12, inside the 5..25 bar); EVERY member checked, not asserted -- sector 12 of 12 inside the subject's mapped ['Consumer Cyclicals', 'Consumer Services'] and band 12 of 12 inside 0.2x-5.0x of 269839.3 MUSD; rung_reached printed for all 12 (2 at rung 3, 10 at rung 2). Per-rung denominators over 2850 graded candidates (2851 database minus 1 self): rung 1 sector 254 + 2596 = 2850, rung 2 band 35 + 2815 = 2850, rung 3 country 2 + 2848 = 2850, rung 4 industryGroup 0 + 2850 = 2850. MECE exclusive counts 2596 + 219 + 33 + 2 + 0 = 2850 of 2850, holds=True. universe_vintage 2026-08-06 printed. csc_columns 5 present + 12 absent = 17 of 17.",
+   "status": "PASS",
+   "expect": "(?=[\\s\\S]*BASIS\\ derived)(?=[\\s\\S]*MEMBERS\\ 12\\ of\\ 35\\ eligible)(?=[\\s\\S]*rung_reached\\ per\\ member)(?=[\\s\\S]*MEMBER\\-CHECK\\ sector\\ 12\\ of\\ 12)(?=[\\s\\S]*band\\ 12\\ of\\ 12\\ within\\ 0\\.2x\\-5\\.0x)(?=[\\s\\S]*holds=True)(?=[\\s\\S]*universe_vintage\\ 2026\\-08\\-06)(?=[\\s\\S]*CSC\\ present\\ 5\\ of\\ 17)(?=[\\s\\S]*CSC\\ absent\\ 12\\ of\\ 17)"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "basis absent with a reason naming the missing classification (the control: an unknown subject produces an absent set, never an empty derived one); the suite ends OK with 0 failures and 0 errors and covers the four rungs, the tiebreak, the MECE sum and the absent arms",
+   "method": "test_suite",
+   "invocation": "python -m lib.research.peers.engine --security-key ZZZ_NOPE_US_Equity --as-of 2026-09-15 --dry-run 2>&1 | tail -4; python -m unittest lib.research.peers.tests.test_peers -q 2>&1 | tail -3",
+   "output_evidence": "SUBJECT ZZZ_NOPE_US_Equity sector=None country=None cap=None\nDATABASE 2851 candidate(s) | universe_vintage 2026-08-06\nBASIS absent -- reason: no classification for 'ZZZ_NOPE_US_Equity': no landed model_block_ZZZ_NOPE_US_Equity.json (AMGT-s-1's record is the only permitted subject read -- F2/G-24, no new Bloomberg call) and no scanner row for the US ticker root 'ZZZ_NOPE' in the 2851-candidate database\nDRY-RUN wrote nothing (the key would be s3://opal-data-harvest/peers/v1/ZZZ_NOPE_US_Equity/2026-09-15.json)\nRan 26 tests in 0.007s\n\nOK",
+   "denominator": "The control: an unknown subject over the SAME 2851-candidate database yields basis absent with 0 members and a reason naming the missing classification on both arms it tried (no landed model_block_ZZZ_NOPE_US_Equity.json, and no scanner row for the US ticker root 'ZZZ_NOPE' in 2851 candidates) -- never an empty derived set. Suite: 26 of 26 tests OK, 0 failures, 0 errors, covering the four rungs with their one-rung-short arms (6 cases), the tiebreak in both directions (2), the MECE sum and the per-rung retained+excluded identity (3), the absent arms (5: unknown subject, empty database, sector with nothing in the band, a record with no classification, the analyst path), the two vocabulary maps and the 1e6 unit seam (5), the CSC subtraction (3) and C-SHARED-DEFECT's REFUSE and ADMIT (2).",
+   "status": "PASS",
+   "expect": "(?=[\\s\\S]*BASIS\\ absent)(?=[\\s\\S]*no\\ classification\\ for\\ 'ZZZ_NOPE_US_Equity')(?=[\\s\\S]*Ran\\ 26\\ tests)(?=[\\s\\S]*OK)"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "a batch summary: names N from the universe object, derived D, absent A with D plus A equal to N, uploaded N with read-back; the pool's peers/v1 object count at least N. A skipped name (N greater than uploaded) is NOT met; a batch over 115 s is split by --limit and --offset flags the worker adds and names in a row, never truncated",
+   "method": "live_read",
+   "invocation": "timeout 115 python -m lib.research.peers.engine --as-of 2026-09-15 --write-pool 2>&1 | tail -6; .tools/aws s3api list-objects-v2 --bucket opal-data-harvest --prefix peers/v1/ --query \"length(Contents)\" --output text",
+   "output_evidence": "QA5 BA_US_Equity=derived(n=12) | COST_US_Equity=derived(n=12) | HD_US_Equity=derived(n=12) | SAP_GY_Equity=derived(n=12) | BABA_US_Equity=derived(n=12)\nBATCH as_of=2026-09-15 names N=33 (of 256 universe names; 223 carry no security_key)\nDERIVED D=10 ABSENT A=23 D+A=33 N=33 EQUAL\nUPLOADED 33 of 33 to s3://opal-data-harvest/peers/v1/<security_key>/2026-09-15.json with read-back 33 of 33 (Metadata document-sha256 + schema-version)\nSHARED-DEFECT ADMIT over 33 emitted set(s), 0 violation(s) (C-SHARED-DEFECT: two subjects in different sectors carrying one identical set is the F6 shape)\nBATCH COMPLETE names 33 derived 10 absent 23 uploaded 33 read-back-ok 33\n33",
+   "denominator": "names N=33 -- the union universe object carries 256 names and 33 of them carry a security_key, which is the R-1 key; the other 223 are UNRESOLVED in U-1 and have NO pool coordinate (row AMGT_RESAPP-Z-W21-S4 states the reading and both denominators). DERIVED 10 + ABSENT 23 = 33 = N, so no name with a coordinate was skipped and every absent object carries its reason. UPLOADED 33 of 33 with read-back 33 of 33 (each object re-fetched and its sha256 compared against both the local body and the document-sha256 metadata). Pool census after the run: peers/v1/ length(Contents) = 33, at least N. Runtime 12 s of the 115 s bound, so no --limit/--offset split was needed.",
+   "status": "PASS",
+   "expect": "(?=[\\s\\S]*names\\ N=33)(?=[\\s\\S]*DERIVED\\ D=10\\ ABSENT\\ A=23\\ D\\+A=33\\ N=33\\ EQUAL)(?=[\\s\\S]*UPLOADED\\ 33\\ of\\ 33)(?=[\\s\\S]*read\\-back\\ 33\\ of\\ 33)(?=[\\s\\S]*\\\n33)"
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "Metadata with document-sha256 and schema-version 1; basis derived; members equal to AC2's N; vintage printed; sa_candidates LIST, ABSENT-ACCESS or ABSENT (measured and recorded, never the rule); csc-present plus csc-absent equal to the CSC column count you enumerated (at least 15). A CSC map that lists only the present columns is NOT met (the absent half is the subtraction)",
+   "method": "live_read",
+   "invocation": ".tools/aws s3api get-object --bucket opal-data-harvest --key peers/v1/BABA_US_Equity/2026-09-15.json .scratch/rj7.baba.json --query \"[ContentLength,Metadata]\" --output json; python -c \"import json,io; d=json.load(io.open('.scratch/rj7.baba.json',encoding='utf-8')); print('basis', d['basis'], 'members', len(d['members']), 'vintage', d.get('universe_vintage'), 'sa_candidates', (d.get('sa_candidates') or {}).get('status') if isinstance(d.get('sa_candidates'), dict) else ('LIST' if d.get('sa_candidates') else 'ABSENT'), 'csc-present', len((d.get('csc_columns') or {}).get('present') or []), 'csc-absent', len((d.get('csc_columns') or {}).get('absent') or []))\"",
+   "output_evidence": "[\n    16894,\n    {\n        \"schema-version\": \"1\",\n        \"document-sha256\": \"8c389da4ebebbe8ec154fc61b5e30f70a5b261ba870c4b2343ed7e6cda2c49c7\"\n    }\n]\nbasis derived members 12 vintage 2026-08-06 sa_candidates ABSENT-ACCESS csc-present 5 csc-absent 12",
+   "denominator": "One object of the 33 written, read back from the pool (not from the local emitter): ContentLength 16894 bytes, Metadata carrying document-sha256 and schema-version '1'. basis derived; members 12, equal to AC2's N=12; universe_vintage 2026-08-06; sa_candidates ABSENT-ACCESS (measured from the module surface and the vault requirement, never called); csc-present 5 + csc-absent 12 = 17 of the 17 CSC columns enumerated verbatim from the CTO's card 3 (above the 15 bar), so the absent half is the subtraction and not a forward list.",
+   "status": "PASS",
+   "expect": "(?=[\\s\\S]*document\\-sha256)(?=[\\s\\S]*\"schema\\-version\":\\ \"1\")(?=[\\s\\S]*basis\\ derived\\ members\\ 12)(?=[\\s\\S]*vintage\\ 2026\\-08\\-06)(?=[\\s\\S]*sa_candidates\\ ABSENT\\-ACCESS)(?=[\\s\\S]*csc\\-present\\ 5\\ csc\\-absent\\ 12)"
+  },
+  {
+   "criterion_id": "AC6",
+   "criterion_verbatim": "commits by this serial touching lib/research/peers/; nonascii 0; bloomberg-calls 0 (no new Bloomberg call; F2/G-24). A Bloomberg call in the ranker is NOT met",
+   "method": "command",
+   "invocation": "git log --format=\"%h %an %s\" -4 -- lib/research/peers/ | cut -c1-140; python -c \"import io,glob; fs=glob.glob('lib/research/peers/*.py'); print('files', len(fs), 'nonascii', sum(sum(1 for ch in io.open(f,encoding='utf-8').read() if ord(ch)>127) for f in fs), 'bloomberg-calls', sum(io.open(f,encoding='utf-8').read().count('blpapi') + io.open(f,encoding='utf-8').read().count('bloomberg_reference_data') for f in fs))\"",
+   "output_evidence": "ff90cac77d 0.9.0_WK_AMGT_RESAPP~21 L7(AMGT_RESAPP.TO-AMGT-rj-7, 0.9.0_WK_AMGT_RESAPP~21): the similarity ranker -- one comparable set comput\n48a0f15e7a 0.9.0_WK_AMGT_RESAPP~4 L7(AMGT_RESAPP.TO-AMGT-s-8, 0.9.0_WK_AMGT_RESAPP~4): the peer engine -- basis analyst|derived|absent, neve\nfiles 6 nonascii 0 bloomberg-calls 0",
+   "denominator": "git log over lib/research/peers/ shows 2 commits in the path's whole history, the head one authored by this serial (0.9.0_WK_AMGT_RESAPP~21, ff90cac77d) and the prior one by 0.9.0_WK_AMGT_RESAPP~4 (AMGT-s-8, the engine this order extends). Structural sweep over 6 of 6 lib/research/peers/*.py files: non-ASCII characters 0, and 0 occurrences of blpapi or bloomberg_reference_data -- no new Bloomberg call anywhere in the ranker (F2/G-24). The subject read is the landed model block or the scanner row already in the database, both of which are files.",
+   "status": "PASS",
+   "expect": "(?=[\\s\\S]*0\\.9\\.0_WK_AMGT_RESAPP\\~21)(?=[\\s\\S]*files\\ 6\\ nonascii\\ 0\\ bloomberg\\-calls\\ 0)"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Re-inject the defect row AMGT_RESAPP-Z-W21-S2 names: set universe.MODEL_BLOCK_CAP_DIVISOR from 1e6 to 1.0, so a model-block subject's CUR_MKT_CAP (full currency units) is compared raw against the scanner's mktVal (USD millions), and re-run the whole battery plus the live BABA set.",
+   "expected": "the unit-seam tests FAIL and the live derived set collapses to absent -- if neither happens the battery is not testing the normalisation it claims to test",
+   "observed": "FIRED-AS-EXPECTED. Suite: ran 26, failures 2, errors 0 -- VocabularyAndUnits.test_model_block_cap_is_divided_by_1e6_before_the_band and VocabularyAndUnits.test_a_non_usd_model_block_carries_the_fx_caveat_forward. Live: BABA basis=absent members=0 reason='no candidate reaches rung 2: 254 of 2850 candidate(s) share the subject's sector ... and NONE sits inside the 0.2x-5.0x size band'. Unmutated, the same 26 tests are OK and BABA is derived with 12 members.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "peers() run twice per subject on the same cached database for BABA_US_Equity and BA_US_Equity, the run stamp (`vintage`, the only wall-clock field) removed, the remaining object hashed with sha256 and the member lists compared.",
+   "observed": "BABA sha 9b01e06381cc872f on both runs; BA sha e8bac37470d1b12c on both runs; member lists identical on both subjects (BABA ['653665', 'BGJW37', '406141', ...], BA ['DE', 'ETN', 'UNP', ...]). The ONLY non-deterministic field is the run stamp, which is named and excluded rather than assumed absent.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No portal edit: the Peers tab's table over R-1 is rj-9's cell.",
+   "reason": "the cell's BOUND names it; this order's interface is the pool object."
+  },
+  {
+   "item": "No new Bloomberg call and no new security (F2 / G-24).",
+   "reason": "the subject's classification comes from AMGT-s-1's landed model block or from the scanner row already in the database; AC6 measures 0 blpapi / bloomberg_reference_data occurrences across 6 of 6 module files."
+  },
+  {
+   "item": "No deploy, no Terraform, no schedule, and no edit to scoped_amgt.py.",
+   "reason": "the route (AMGT_PEER_SET_ROOT / read_peer_set) is chain A's; the only live writes here are the 33 pool objects under this operator's own credentials."
+  },
+  {
+   "item": "No Seeking Alpha call.",
+   "reason": "MEASURED ABSENT-ACCESS: the SA module exposes 5 endpoints (symbol, news, report, analysis, article), none returning comparables, and build_session() needs the parked session bundle from Secrets Manager 'seeking-alpha/session' -- the CRO's session vault. The cell's own instruction is to record ABSENT-ACCESS and stop."
+  },
+  {
+   "item": "No R-1 object for the 223 union-universe names that carry no security_key.",
+   "reason": "the R-1 key IS the security_key; those names are UNRESOLVED in U-1 and minting a key from a raw identifier is what the crosswalk explicitly refuses. Row AMGT_RESAPP-Z-W21-S4 carries both denominators (33 of 256) rather than one."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W21-S1: the database's two halves carry DIFFERENT sector vocabularies (the scanner's 13 values vs GICS_SECTOR_NAME); rung 1 on raw strings returns 0 candidates for BABA and SAP, so the ranker carries a declared GICS-to-scanner map with its residue named.",
+  "AMGT_RESAPP-Z-W21-S2: the two halves quote market cap in different UNITS (USD millions vs full currency units, as the model block's own basis definition states); the raw band ratio is 2.5e-7 and nothing clears it. Normalised by 1e6 and covered by the mutant control.",
+  "AMGT_RESAPP-Z-W21-S3: SAP SE sits in the database twice under identifiers X-1 cannot join, so the subject ranked as its own top peer; disarmed in-code by an exact normalised-name arm, with the cross-listing residual stated and routed, not closed by guessing.",
+  "AMGT_RESAPP-Z-W21-S4: 33 of the union universe's 256 names carry a security_key and therefore a pool coordinate; the batch writes 33 objects and prints both denominators rather than silently choosing one.",
+  "AMGT_RESAPP-Z-W21-S5: the size band is graded across two currencies and two vintages (SAP's cap is EUR at 2026-09-10, every candidate is USD at 2026-08-06); no FX rate is applied and none is invented -- the caveat is carried on the object and in the printed label (MEUR).",
+  "AMGT_RESAPP-Z-W21-S6: only 5 of Adam's 17 CSC columns map to anything the scanner serves, so the Peers tab cannot be filled from this database alone; the other 12 need the per-peer Bloomberg fields card 3 names, i.e. a model block per peer, which F2's quota does not cover."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~21/SESSION_LOG.md",
+ "compiler_tools": [
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh lib/research/peers/__init__.py lib/research/peers/universe.py lib/research/peers/taxonomy.py lib/research/peers/csc.py lib/research/peers/engine.py lib/research/peers/tests/test_peers.py",
+   "result": "OK: pre-commit gate clean for 6 of 6 file(s) -- one ruff F401 (an unused typing.Iterable) was raised and fixed first"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~21 <0.9.0_WK_AMGT_RESAPP~21@opal.agent>\" -F <msgfile> -- <13 explicit file paths, never a directory pathspec>",
+   "result": "[wk-amgt_resapp-11-4 ff90cac77d] 13 files changed, 4180 insertions(+), 194 deletions(-); [surprise-row-gate] 6 new row(s) of 191 total checked (185 pre-existing, NOT re-graded), all carrying their step-7 fields; [msg-verify] MATCH len=3847"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4,AC5,AC6",
+   "result": "see the worker report -- run from THIS worktree's own copy"
+  }
+ ]
+}
