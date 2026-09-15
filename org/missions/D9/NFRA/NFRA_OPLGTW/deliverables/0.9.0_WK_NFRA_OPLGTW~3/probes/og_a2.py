@@ -168,13 +168,13 @@ def _unmatched(items, other_keys):
 
 
 def _comparands(node, field):
-    """The unparsed right-hand sides of every `<x>["field"] == <y>` inside node."""
+    """The right-hand-side nodes of every `<x>["field"] == <y>` inside node."""
     found = []
     for sub in ast.walk(node):
         if (isinstance(sub, ast.Compare) and len(sub.ops) == 1 and isinstance(sub.ops[0], ast.Eq)
                 and isinstance(sub.left, ast.Subscript) and isinstance(sub.left.slice, ast.Constant)
                 and sub.left.slice.value == field):
-            found.append(ast.unparse(sub.comparators[0]))
+            found.append(sub.comparators[0])
     return found
 
 
@@ -209,30 +209,40 @@ def judge(base_src, head_src, diff_text, named_text):
     if len(orig) != 1:
         problems.append("the base assertion carries %d `[\"sub\"] ==` comparisons (1 required)" % len(orig))
         return problems, facts
-    email = orig[0]
-    new_sub, new_email = _comparands(a[3], "sub"), _comparands(a[3], "email")
-    facts.update(email=email, new_sub=new_sub, new_email=new_email)
+    email = ast.unparse(orig[0])                                   # structural form: the AST comparison
+    email_text = ast.get_source_segment(base_src, orig[0]) or ""   # as written: the line comparison
+    new_sub = [ast.unparse(n) for n in _comparands(a[3], "sub")]
+    new_email = [ast.unparse(n) for n in _comparands(a[3], "email")]
+    facts.update(email=email_text, new_sub=new_sub, new_email=new_email)
     if email not in new_email:
         problems.append("the HEAD assertion does not compare [\"email\"] to the original %s" % email)
     if len(new_sub) != 1 or new_sub[0] == email:
         problems.append("the HEAD assertion's [\"sub\"] comparand is %s (one, re-targeted from %s, required)"
                         % (new_sub, email))
-    if email not in head_line:
-        problems.append("the HEAD line does not carry the text %s" % email)
+    if not email_text or email_text not in head_line:
+        problems.append("the HEAD line does not carry the original text %s" % (email_text or "<unreadable>"))
     return problems, facts
 
 
 def _control() -> bool:
-    """judge() must pass a one-line re-target that keeps the email half and fail one that drops it."""
-    base = 'def t():\n    assert f(t)["sub"] == email\n'
-    good = 'def t():\n    assert (c := f(t))["sub"] == K and c["email"] == email\n'
-    bad = 'def t():\n    assert f(t)["sub"] == K\n'
+    """judge() must pass a one-line re-target that keeps the email half and fail one that drops or swaps it,
+    for an email held in a variable and for one written as a double-quoted literal."""
     diff = "@@ -2 +2 @@\n"
-    ok_good = not judge(base, good, diff, '    assert f(t)["sub"] == email')[0]
-    ok_bad = bool(judge(base, bad, diff, '    assert f(t)["sub"] == email')[0])
-    print("judge control: email half kept -> %s (expected pass); email half dropped -> %s (expected fail)"
-          % ("pass" if ok_good else "fail", "fail" if ok_bad else "pass"))
-    return ok_good and ok_bad
+    arms = []
+    for email in ("email", '"a@b.c"'):
+        base_line = '    assert f(t)["sub"] == %s' % email
+        base = "def t():\n%s\n" % base_line
+        cases = (("kept", 'c["email"] == %s' % email, True),
+                 ("dropped", None, False),
+                 ("swapped", 'c["email"] == "x@y.z"', False))
+        for label, half, expect_pass in cases:
+            line = '    assert (c := f(t))["sub"] == K' + (" and " + half if half else "")
+            passed = not judge(base, "def t():\n%s\n" % line, diff, base_line)[0]
+            arms.append((email, label, passed, expect_pass))
+    for email, label, passed, expect_pass in arms:
+        print("judge control: email %s, email half %s -> %s (expected %s)"
+              % (email, label, "pass" if passed else "fail", "pass" if expect_pass else "fail"))
+    return all(p == e for _, _, p, e in arms)
 
 
 def ac14() -> int:
