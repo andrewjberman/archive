@@ -1,0 +1,257 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ri-2",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "b4439b997d07289f7379617fa6a505420c261137",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ri-2.the-producer-consolidated-and-repointed.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ri-2.the-producer-consolidated-and-repointed.md",
+    "group": "OTHER",
+    "vintage_commit": "59b7b179095de36eb4026fb002bded5763f91193"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~17",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/harvest/chatter-axis-schedule.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ea6cd450fafca2493b89df98646558d24e134ea2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Moved from infra/aws/terraform/amgt-resapp/ by git mv (git records it as a rename, 52% similarity) and repointed. The IAM policy now interpolates aws_dynamodb_table.harvest_articles.arn, that ARN + /index/ticker_date_index, and aws_dynamodb_table.harvest_security_metrics.arn -- resource references, never retyped ARNs. The dangling aws_dynamodb_table.security_metrics reference (row C-S49, declared zero times in the estate) is gone, and `terraform validate` in this root now returns 'Success! The configuration is valid.' NOT DEPLOYED: the import/plan/apply half of this cell is REFUSED, see AC5-AC10 and row AMGT_RESAPP-Z-W17-S2. The six matching live resources remain tracked in amgt-resapp/rd-2-security-metrics/tfstate and are untouched.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/s3.tf",
+      "kind": "terraform",
+      "commit_or_etag": "ea6cd450fafca2493b89df98646558d24e134ea2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC1 guard. Two lines (bucket + Name tag) moved from the DELETED bucket opal-data-research to opal-data-harvest, which is what harvest/tfstate actually tracks for aws_s3_bucket.harvest. `bucket` is ForceNew, so without this a plan proposes DESTROYING the live harvest bucket. Applied from the patch named in the order's paths; post-image blob 08a99843b1763ab950816c89c63569db2e8dd960 equals the patch's stated post-image AND equals the shared checkout's own uncommitted working copy of s3.tf -- two independent instruments agreeing. Carries the 20260911T1915Z migration ledger's unfinished step 2 and row AMGT_RESAPP-Z-S89.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/lambda_src/build_zip.py",
+      "kind": "script",
+      "commit_or_etag": "ea6cd450fafca2493b89df98646558d24e134ea2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Moved by git mv (82% similarity). Docstring paths point at the new home; LOGIC UNCHANGED -- _REPO_ROOT = _HERE.parents[4] resolves to the repo root from harvest/lambda_src/ at exactly the depth it had from amgt-resapp/lambda_src/, and _OUTPUT resolves to harvest/.build/chatter-axis-producer.zip. Proved by running it: 6 entries, 24370 bytes, both OK: lines.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/lambda_src/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "ea6cd450fafca2493b89df98646558d24e134ea2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Moved by git mv (80% similarity); docstring path corrected to the new home and the stale archive_file description corrected to the build_zip.py route actually in use. Handler logic byte-unchanged.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/.build/chatter-axis-producer.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "sha256 local b64 pending -- built, NOT uploaded; gitignored by .gitignore:95 (*.zip)",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Built by build_zip.py in the new home: 24370 bytes, 6 entries. Its chatter_axis.py member is byte-identical to HEAD's source (sha256 31679cace92214ee...) and carries 7 occurrences of opal-harvest-, i.e. the packaged producer already defaults to the LIVE tables. NEVER DEPLOYED: the apply is refused (AC7), so the live function still carries the 2026-09-11 zip, CodeSha256 TtTSpotkwWuVuMFbPv0RWTv2zqqifa/xfHQtBtuo924=.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ea6cd450fafca2493b89df98646558d24e134ea2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended inside the one fenced JSON array, 156 -> 158, every pre-existing row byte-identical (compared by parsed equality before and after each append). Row -W17-S1 committed at ea6cd450fa and graded by the gate ('1 new row(s) of 157 total checked ... OK'); row -W17-S2 appended after the terraform refusals and committed with this instance.",
+      "artifact_covered_by": [
+        "AC5",
+        "AC6"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "harvest 1 research 0, run BEFORE any terraform plan. STOP: if it prints research 1, do NOT plan -- git apply the saved patch named in your paths, re-run this criterion, and carry the two lines in your commit citing the 1915Z ledger and row AMGT_RESAPP-Z-S89. A plan taken while this reads research 1 proposes destroying the live harvest bucket",
+      "method": "command",
+      "invocation": "python -c \"t=open('infra/aws/terraform/harvest/s3.tf',encoding='utf-8').read(); i=t.find('resource \\\"aws_s3_bucket\\\" \\\"harvest\\\"'); print(t[i:i+110].replace(chr(10),' | ')); print('harvest', t.count('bucket = \\\"opal-data-harvest\\\"'), 'research', t.count('bucket = \\\"opal-data-research\\\"'))\"",
+      "output_evidence": "FIRST RUN (before any plan, as ordered): 'resource \"aws_s3_bucket\" \"harvest\" { |   bucket = \"opal-data-research\" |  |   tags = { |     Name      = \"opal-data-re' / 'harvest 0 research 1' -- the STOP branch. No plan was run. Patch pre-image verified first: the patch's index line names 755bfd588a and `git hash-object infra/aws/terraform/harvest/s3.tf` printed 755bfd588a4456c65cf33bf4015d0d3871aa0e7a; `git apply --check -v` rc 0; `git apply` rc 0; post-image 08a99843b1763ab950816c89c63569db2e8dd960 equals the patch's stated post-image 08a99843b1; `git diff --stat` = '1 file changed, 2 insertions(+), 2 deletions(-)'. SECOND RUN (after the patch): 'resource \"aws_s3_bucket\" \"harvest\" { |   bucket = \"opal-data-harvest\" |  |   tags = { |     Name      = \"opal-data-har' / 'harvest 1 research 0'. MET.",
+      "denominator": "2 of 2 counted tokens at the expected values (harvest 1, research 0); exactly 2 of 2 lines changed in s3.tf, 0 other lines touched",
+      "status": "PASS",
+      "expect": "harvest 1 research 0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the status lines show the two renames INTO infra/aws/terraform/harvest/ (the schedule file and lambda_src/), the deletion of infra/aws/terraform/amgt-resapp/main.tf, and s3.tf modified only if AC1 required the patch; then old-names 0, dangling 0, articles-ref at least 2, metrics-ref at least 1, nonascii 0. A retyped literal ARN in a Resource list is NOT met; any surviving opal-amgt- token is NOT met",
+      "method": "command",
+      "invocation": "git status --porcelain -- infra/aws/terraform/; python -c \"t=open('infra/aws/terraform/harvest/chatter-axis-schedule.tf',encoding='utf-8').read(); print('old-names', t.count('opal-amgt-'), 'dangling', t.count('aws_dynamodb_table.security_metrics'), 'articles-ref', t.count('aws_dynamodb_table.harvest_articles'), 'metrics-ref', t.count('aws_dynamodb_table.harvest_security_metrics'), 'nonascii', sum(1 for b in open('infra/aws/terraform/harvest/chatter-axis-schedule.tf','rb').read() if b>127))\"",
+      "output_evidence": "STATUS: 'D  infra/aws/terraform/amgt-resapp/main.tf' / 'RM infra/aws/terraform/amgt-resapp/chatter-axis-schedule.tf -> infra/aws/terraform/harvest/chatter-axis-schedule.tf' / 'RM infra/aws/terraform/amgt-resapp/lambda_src/build_zip.py -> infra/aws/terraform/harvest/lambda_src/build_zip.py' / 'RM infra/aws/terraform/amgt-resapp/lambda_src/lambda_function.py -> infra/aws/terraform/harvest/lambda_src/lambda_function.py' / ' M infra/aws/terraform/harvest/s3.tf' -- the two renames INTO harvest/, the main.tf deletion, and s3.tf modified exactly because AC1 required the patch. COUNTS: 'old-names 0 dangling 0 articles-ref 3 metrics-ref 2 nonascii 0'. NO RETYPED ARN: the two table Resource entries are aws_dynamodb_table.harvest_articles.arn and \"${aws_dynamodb_table.harvest_articles.arn}/index/ticker_date_index\", the write is aws_dynamodb_table.harvest_security_metrics.arn; the only literal ARN left in the file is the CloudWatch log-group, which the criterion's own cell text preserves and which now uses local.account_id (verified equal to the live account: sts get-caller-identity -> 313476888478) after the data \"aws_caller_identity\" block was deleted as the order permits. The commit records the moves as renames (52%/82%/80% similarity). MET.",
+      "denominator": "5 of 5 counted tokens at or above their bars (old-names 0=0, dangling 0=0, articles-ref 3>=2, metrics-ref 2>=1, nonascii 0=0); 5 of 5 expected git status lines present, 0 unexpected",
+      "status": "PASS",
+      "expect": "old-names 0 dangling 0 articles-ref [2-9] metrics-ref [1-9] nonascii 0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "two OK: lines from build_zip (built, and N producer imports verified), zip-member-equals-HEAD-source True, entries 6, defaults-in-member at least 2 -- the packaged producer is HEAD's, which already defaults to the harvest tables. A False, a missing universe_snapshot.json, or a FATAL from verify() is NOT met",
+      "method": "command",
+      "invocation": "python infra/aws/terraform/harvest/lambda_src/build_zip.py && python -c \"import zipfile,hashlib; z=zipfile.ZipFile('infra/aws/terraform/harvest/.build/chatter-axis-producer.zip'); a=hashlib.sha256(z.read('lib/research/metrics/chatter_axis.py')).hexdigest(); b=hashlib.sha256(open('lib/research/metrics/chatter_axis.py','rb').read()).hexdigest(); print('zip-member-equals-HEAD-source', a==b, a[:16]); print('entries', len(z.namelist())); print('defaults-in-member', z.read('lib/research/metrics/chatter_axis.py').decode('utf-8').count('opal-harvest-'))\"",
+      "output_evidence": "'OK: built C:\\tmp\\wk-amgt-10-2\\infra\\aws\\terraform\\harvest\\.build\\chatter-axis-producer.zip (24370 bytes, 6 entries)' / 'OK: verified 2 producer import(s) of lib.research.metrics are packaged' / 'zip-member-equals-HEAD-source True 31679cace92214ee' / 'entries 6' / 'defaults-in-member 7'. Two OK: lines present, no FATAL from verify(), universe_snapshot.json present (build_zip raises SystemExit on any missing source and did not). Note the zip built from the NEW home without any logic edit, which is the positive control on the move: _REPO_ROOT = parents[4] still resolves.",
+      "denominator": "6 of 6 zip entries; 2 of 2 producer imports verified by AST; 1 of 1 member hash compared, equal; defaults-in-member 7 against a bar of 2",
+      "status": "PASS",
+      "expect": "zip-member-equals-HEAD-source True.*entries 6.*defaults-in-member [2-9]"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "init-rc=0 and a line saying Terraform has been successfully initialized, provider hashicorp/aws v5.100.0 per the lock file, backend s3 key harvest/tfstate. A backend-init failure, a lock-file mismatch, or a timeout (rc 124, retried once) is NOT met and is a BLOCKING row",
+      "method": "command",
+      "invocation": "cd infra/aws/terraform/harvest && timeout 115 terraform init -input=false -no-color > ../../../../.scratch/ri2.init.txt 2>&1; echo init-rc=$?; tail -4 ../../../../.scratch/ri2.init.txt; terraform version | head -1",
+      "output_evidence": "'init-rc=0'; from ri2.init.txt: 'Successfully configured the backend \"s3\"! Terraform will automatically use this backend unless the backend configuration changes.' / '- Reusing previous version of hashicorp/aws from the dependency lock file' / '- Installing hashicorp/aws v5.100.0...' / '- Installed hashicorp/aws v5.100.0 (signed by HashiCorp)' / 'Terraform has been successfully initialized!'; 'Terraform v1.15.8'. Backend key harvest/tfstate per main.tf:58. No lock-file mismatch, no timeout, rc 0 first attempt. PRECONDITION DISCLOSED: .terraform.lock.hcl is gitignored (.gitignore:206 '**/.terraform.lock.hcl') and therefore absent from a linked worktree, which materialises only committed content. The pinned lock was staged into the worktree from the shared checkout before init so that init resolved the SAME provider the criterion names rather than whatever ~> 5.0 floats to; the file's content was read first and confirmed to pin version = \"5.100.0\", constraints = \"~> 5.0\", and the init output above confirms 5.100.0 was what installed.",
+      "denominator": "1 of 1 provider resolved, at the pinned version 5.100.0; 3 of 3 named expectations present (init-rc=0, successfully-initialized line, backend s3 harvest/tfstate)",
+      "status": "PASS",
+      "expect": "init-rc=0.*v5\\.100\\.0.*successfully initialized"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "six lines each ending Import successful! (an already-managed resource on a re-run prints an error naming it as already managed -- record it and do not import twice), then state-resources 22 and chatter 6 (the 16 resources harvest/tfstate carried at this cut plus the six). Fewer than six imported, or a chatter count under 6, is NOT met",
+      "method": "command",
+      "invocation": "cd infra/aws/terraform/harvest && for pair in \"aws_iam_role.chatter_axis_lambda amgt-resapp-chatter-axis-lambda-role\" \"aws_iam_role_policy.chatter_axis_lambda amgt-resapp-chatter-axis-lambda-role:amgt-resapp-chatter-axis-lambda-policy\" \"aws_iam_role.chatter_axis_scheduler amgt-resapp-chatter-axis-scheduler-role\" \"aws_iam_role_policy.chatter_axis_scheduler amgt-resapp-chatter-axis-scheduler-role:amgt-resapp-chatter-axis-scheduler-invoke\" \"aws_lambda_function.chatter_axis_producer amgt-resapp-chatter-axis\" \"aws_scheduler_schedule.chatter_axis_daily default/amgt-resapp-chatter-axis-daily\"; do set -- $pair; printf \"IMPORT %s <- %s: \" \"$1\" \"$2\"; timeout 100 terraform import -input=false -no-color \"$1\" \"$2\" 2>&1 | tail -1; done; terraform state list | python -c \"import sys; t=sys.stdin.read().split(); print('state-resources', len(t), 'chatter', sum(1 for x in t if 'chatter_axis' in x))\"",
+      "output_evidence": "ZERO of six imported. The literal invocation printed six 'IMPORT <addr> <- <id>: ' lines with an EMPTY tail (terraform's last line on this failure is blank) and then 'state-resources 16 chatter 0'. Re-run with the exit code and the first Error line exposed (the allowed single retry), all six identical: 'rc=1 :: Error: reading S3 Bucket (opal-313476888478-lambda-artifacts) Object (research/opal-amgt-scoped-api.zip): couldn't find resource', attributed to 'module.scoped_amgt_api.data.aws_s3_object.artifact, on ..\\modules\\yang-lambda\\main.tf line 17'; state after the retry again 'state-resources 16 chatter 0'. CAUSE: a data source in a SIBLING module of this root is read during evaluation and 404s, so no terraform operation in infra/aws/terraform/harvest/ can run at all. The object's absence is real and controlled: head-object -> 404 Not Found, while list-objects-v2 on prefix research/ returns exactly ONE object, research/opal-research-pull-enqueue.zip (1964 bytes), which the sibling module read successfully in the same run. It is DELIBERATE and documented at infra/aws/terraform/harvest/scoped-amgt-api.tf:40-47 @ea6cd450fa: 'STILL NOT DONE, and deliberately so ... NO artifact has been built or uploaded to s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip'. REFUSED rather than routed around, per the order's s.4 refusal clause: building/uploading that artifact is a world act on another cell's surface which a seat directed not be taken, and no -target route was invented. Nothing is half-written: state is 16/0 before and after, identical.",
+      "denominator": "0 of 6 imports succeeded (6 of 6 rc=1, twice); state-resources 16 of an expected 22, chatter 0 of an expected 6",
+      "status": "FAIL",
+      "status_reason": "Blocked by a cause outside this cell's grant and not named by the order: module.scoped_amgt_api.data.aws_s3_object.artifact 404s during evaluation, so import cannot run in this root. Filed as BLOCKING row AMGT_RESAPP-Z-W17-S2 (ARMED, disarm_owner 2.0.0_SA_COO~W).",
+      "expect": "state-resources 22.*chatter 6"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "Success! The configuration is valid, then PLAN Plan: 0 to add, N to change, 0 to destroy with N between 2 and 6, replace-marks 0, destroy-marks 0, create-marks 0, plan-rc=2, and every listed address a chatter_axis resource being updated in-place (the policy's resources, the function's filename/source_code_hash, default-tag adds). STOP: aws_s3_bucket.harvest appearing at all is AC1 unmet; any add, replace or destroy is NOT met and no apply runs",
+      "method": "command",
+      "invocation": "cd infra/aws/terraform/harvest && timeout 60 terraform validate -no-color && timeout 115 terraform plan -input=false -no-color -detailed-exitcode -out=../../../../.scratch/ri2.tfplan > ../../../../.scratch/ri2.plan.txt 2>&1; echo plan-rc=$?; python -c \"import re; t=open('../../../../.scratch/ri2.plan.txt',encoding='utf-8',errors='replace').read(); m=re.search(r'Plan: (\\d+) to add, (\\d+) to change, (\\d+) to destroy',t); print('PLAN', m.group(0) if m else 'NO-PLAN-LINE'); print('replace-marks', t.count('must be replaced'), 'destroy-marks', t.count('will be destroyed'), 'create-marks', t.count('will be created')); [print(' ', l.strip()[:110]) for l in t.splitlines() if l.strip().startswith('#') and ('will be' in l or 'must be' in l)]\"",
+      "output_evidence": "VALIDATE PASSED: 'Success! The configuration is valid.' -- which is itself the proof that this cell's repoint cleared row C-S49's dangling reference, since before it the module could not validate at all. PLAN FAILED: 'plan-rc=1' (with -detailed-exitcode, 2 means changes-present and 1 means ERROR, so rc=1 is the error branch and NOT the expected 2). 'PLAN Plan: 11 to add, 0 to change, 0 to destroy' / 'replace-marks 0 destroy-marks 0 create-marks 11' against an expected 0 to add and create-marks 0. The 11 addresses: aws_iam_role.chatter_axis_lambda, aws_iam_role.chatter_axis_scheduler, aws_iam_role.scoped_amgt_api, aws_iam_role_policy.chatter_axis_lambda, aws_iam_role_policy.chatter_axis_scheduler, aws_iam_role_policy.scoped_amgt_api_grants, aws_iam_role_policy_attachment.scoped_amgt_api_logs, aws_lambda_function.chatter_axis_producer, aws_scheduler_schedule.chatter_axis_daily, terraform_data.scoped_amgt_route_count_check, module.scoped_amgt_api.aws_cloudwatch_log_group.lambda -- all 'will be created', none 'updated in place'. ri2.plan.txt:384 carries the same error as AC5. GOOD NEWS ON AC1's STOP: aws_s3_bucket.harvest does NOT appear anywhere in the plan, no destroy-mark and no replace-mark anywhere -- the s3.tf guard held exactly as designed. THE SIX chatter_axis addresses read as CREATES only because AC5's imports were blocked; they exist live. THE DEEPER FINDING, recorded in row -W17-S2: 5 of the 11 are the MOUNT's own unapplied resources, which live in THIS SAME ROOT, so ri-2's whole-root plan must always count them as adds -- AC6's '0 to add' bar is unreachable by ri-2 at any time before the mount lands, with or without the missing artifact. NO APPLY WAS RUN, per this criterion's own STOP clause.",
+      "denominator": "11 of an expected 0 creates; plan-rc 1 of an expected 2; 0 of 11 planned addresses were in-place updates; 0 destroys and 0 replaces (the one bar that held)",
+      "status": "FAIL",
+      "status_reason": "Two independent causes, both outside this cell: (a) the plan errors on the same 404 data source as AC5, and (b) even absent that, the mount's unapplied resources share this root so '0 to add' cannot be produced by ri-2 alone. BLOCKING per the order's closing instruction. Filed as AMGT_RESAPP-Z-W17-S2.",
+      "expect": "Plan: 0 to add, \\d+ to change, 0 to destroy"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "a commit hash printed for the COMMITTED sentinel (a staged-only sentinel is destroyed by a forced teardown -- commit it BEFORE this criterion), then apply-rc=0 and the line Apply complete! Resources: 0 added, N changed, 0 destroyed. with N equal to AC6's change count. A halt-gate BLOCK is recorded verbatim and is NOT met until its named cause is read; a non-zero destroyed count is a hard stop and a BLOCKING row",
+      "method": "command",
+      "invocation": "printf '%s' 0.9.0_WK_AMGT_RESAPP~17 > \"org/mcp/sessions/${CLAUDE_CODE_SESSION_ID}.serial\"; test -f org/critical_paths/.open_deploys/amgt-chatter-axis-consolidation-and-repoint.json && git log -1 --format=%h -- org/critical_paths/.open_deploys/amgt-chatter-axis-consolidation-and-repoint.json; HALT_ACK=1 timeout 115 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -input=false -no-color ../../../../.scratch/ri2.tfplan > .scratch/ri2.apply.txt 2>&1; echo apply-rc=$?; tail -6 .scratch/ri2.apply.txt",
+      "output_evidence": "NOT EXECUTED -- the invocation is recorded above verbatim so the record stays governed by the TO, but no apply was run. AC6, its precondition, FAILED, and AC6's own expectation ends 'any add, replace or destroy is NOT met and no apply runs'. NO WORLD ACT WAS TAKEN: no serial was written to the halt gate, no deploy-completion entry was opened, and no sentinel exists -- an entry opened for an act that will not run is itself the half-landed-deploy condition the ledger exists to detect. The plan artifact AC7 would have consumed is not applicable in any case: 'terraform show' on .scratch/ri2.tfplan prints 'Terraform planned the following actions, but then encountered a problem', i.e. an INCOMPLETE plan, and applying it would have attempted to CREATE 11 resources of which the 6 chatter_axis ones are LIVE. THE WORLD IS PROVABLY UNTOUCHED, read from the live plane AFTER all failures: get-function-configuration -> 'TtTSpotkwWuVuMFbPv0RWTv2zqqifa/xfHQtBtuo924= 2026-09-11T18:13:38.063+0000 13572', byte-for-byte the figures the task order recorded at the cut; get-role-policy -> 'harvest-articles 0 harvest-metrics 0 old-amgt 3'; terraform state list -> 16 resources, 0 chatter. Net effect on the world: 0 added, 0 changed, 0 destroyed, because no apply ran.",
+      "denominator": "0 of 1 applies run; 0 resources added, 0 changed, 0 destroyed in the world; live CodeSha256 unchanged (1 of 1 live reads equal to the pre-cell value)",
+      "status": "FAIL",
+      "status_reason": "Not met because its precondition AC6 failed and the criterion's governing clause forbids an apply on such a plan. BLOCKING, but the world is NOT half-moved -- verified on the live plane, not inferred.",
+      "expect": "Apply complete! Resources: 0 added, \\d+ changed, 0 destroyed"
+    },
+    {
+      "criterion_id": "AC8",
+      "criterion_verbatim": "the live CodeSha256 EQUAL to LOCAL-ZIP-SHA256-B64 and NOT TtTSpotkwWuVuMFbPv0RWTv2zqqifa/xfHQtBtuo924=, LastModified dated today, then harvest-articles 2, harvest-metrics 1, old-amgt 0 -- read from the LIVE role policy, never from the .tf. An unchanged CodeSha256 means the apply did not move the function and is NOT met",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda get-function-configuration --function-name amgt-resapp-chatter-axis --query \"[CodeSha256,LastModified,CodeSize]\" --output text; python -c \"import hashlib,base64; print('LOCAL-ZIP-SHA256-B64', base64.b64encode(hashlib.sha256(open('infra/aws/terraform/harvest/.build/chatter-axis-producer.zip','rb').read()).digest()).decode())\"; .tools/aws iam get-role-policy --role-name amgt-resapp-chatter-axis-lambda-role --policy-name amgt-resapp-chatter-axis-lambda-policy --query \"PolicyDocument.Statement[].Resource\" --output text | python -c \"import sys; t=sys.stdin.read(); print('harvest-articles', t.count('table/opal-harvest-articles'), 'harvest-metrics', t.count('table/opal-harvest-security-metrics'), 'old-amgt', t.count('opal-amgt-'))\"",
+      "output_evidence": "Run IN FULL on the LIVE plane, all three segments (the role-policy half read from IAM, never from the .tf): 'TtTSpotkwWuVuMFbPv0RWTv2zqqifa/xfHQtBtuo924=\t2026-09-11T18:13:38.063+0000\t13572' / 'LOCAL-ZIP-SHA256-B64 fj8wqp9jaZWfMaBrrAyUImGnt2c5Xeb7losUr+i65mM=' / 'harvest-articles 0 harvest-metrics 0 old-amgt 3'. EVERY LIMB IS THE NOT-MET BRANCH, and the comparison the criterion turns on is explicit: the live CodeSha256 TtTSpotkwWuVuMFbPv0RWTv2zqqifa/xfHQtBtuo924= DOES NOT EQUAL the local zip hash fj8wqp9jaZWfMaBrrAyUImGnt2c5Xeb7losUr+i65mM=, and it IS byte-for-byte the value the criterion names as the forbidden one; LastModified is 2026-09-11, not today; the policy still grants 3 opal-amgt- resources and 0 harvest ones. That is the criterion's own words -- 'An unchanged CodeSha256 means the apply did not move the function' -- and is the correct reading given AC7 did not run. Read from the live plane rather than skipped, so the record carries the measured pre-cell world for whoever re-cuts this cell.",
+      "denominator": "3 of 3 policy counts at their NOT-met values (harvest-articles 0 of 2, harvest-metrics 0 of 1, old-amgt 3 of 0); CodeSha256 unchanged, 1 of 1",
+      "status": "FAIL",
+      "status_reason": "Consequent on AC7 not running. Recorded from the live plane rather than skipped, so the record carries the measured pre-cell world.",
+      "expect": "harvest-articles 2.*harvest-metrics 1.*old-amgt 0"
+    },
+    {
+      "criterion_id": "AC9",
+      "criterion_verbatim": "200 None, a JSON payload with rows_written strictly greater than 0 and tickers_considered greater than 0, COUNT for today at least 1 and at most 10, and COUNT for 2026-09-13 exactly 0 (the day the deployed producer failed -- the control that shows the query discriminates). A FunctionError, a rows_written of 0, or a today count of 0 is NOT met. Copy .scratch/ri2.invoke.json into your deliverables folder as chatter-axis.qa-invoke.json",
+      "method": "live_read",
+      "invocation": ".tools/aws lambda invoke --function-name amgt-resapp-chatter-axis --cli-binary-format raw-in-base64-out --payload \"{}\" .scratch/ri2.invoke.json --query \"[StatusCode,FunctionError]\" --output text; cat .scratch/ri2.invoke.json; echo; TODAY=$(date -u +%F); for d in \"$TODAY\" 2026-09-13; do printf \"COUNT TRENDING_CHATTER#%s: \" \"$d\"; .tools/aws dynamodb query --table-name opal-harvest-security-metrics --key-condition-expression \"axis_date = :ad\" --expression-attribute-values \"{\\\":ad\\\":{\\\"S\\\":\\\"TRENDING_CHATTER#$d\\\"}}\" --select COUNT --query Count --output text; done",
+      "output_evidence": "NOT EXECUTED -- the invocation is recorded above verbatim so the record stays governed by the TO, but no QA invoke was fired. AC7 did not run, so the deployed artifact is still the STALE 2026-09-11 zip (live CodeSha256 TtTSpotkwWuVuMFbPv0RWTv2zqqifa/xfHQtBtuo924=, 13572 bytes) and the role policy still grants ONLY the two DELETED tables (measured this session: harvest-articles 0, harvest-metrics 0, old-amgt 3). An invoke would therefore have reproduced the exact ResourceNotFoundException the task order already measured 3-of-3 times on 2026-09-14, written nothing, added a fourth failed invocation to today's log, and produced a deliverables/chatter-axis.qa-invoke.json showing a PRE-CELL failure under this cell's name. Withheld deliberately rather than run to manufacture a misleading artifact; no qa-invoke.json is written.",
+      "denominator": "0 of 1 invocations run; 0 of 2 row counts read",
+      "status": "FAIL",
+      "status_reason": "Consequent on AC7 not running. Withheld rather than run against the stale deployment, which would have manufactured a misleading artifact.",
+      "expect": "200\\s+None.*rows_written"
+    },
+    {
+      "criterion_id": "AC10",
+      "criterion_verbatim": "entries 1, CLOSED-in-head True, sentinel-present False (the tool unlinks the sentinel on close, so ABSENT is the closed state and PRESENT means a leg is unproven), and the close COMMITTED (a hash whose subject names the close). Run this LAST, after the close commit",
+      "method": "command",
+      "invocation": "python -c \"import glob,os; fs=glob.glob('org/critical_paths/change_management/*amgt-chatter-axis-consolidation-and-repoint*.md'); print('entries', len(fs)); [print(f, 'CLOSED-in-head', 'CLOSED' in open(f,encoding='utf-8').read()[:800]) for f in fs]; print('sentinel-present', os.path.exists('org/critical_paths/.open_deploys/amgt-chatter-axis-consolidation-and-repoint.json'))\"; git log -1 --format=\"%h %s\" -- org/critical_paths/change_management/",
+      "output_evidence": "'entries 0' and 'sentinel-present False'. No deploy-completion entry was opened and no sentinel was created, because the activation leg (the apply, AC7) was refused before any world act. sentinel-present False is the SAFE reading here but it is NOT the closed state the criterion means -- it is the never-opened state, and the two are distinguished only by 'entries 0' against the expected 1. Recording this explicitly so a later reader does not mistake an unopened ledger for a cleanly closed one.",
+      "denominator": "0 of 1 expected ledger entries; 0 of 4 legs opened or closed",
+      "status": "FAIL",
+      "status_reason": "No deploy occurred, so no deploy-completion entry was opened. Opening one for an act that was refused would itself be the half-landed-deploy hazard the ledger exists to prevent.",
+      "expect": "entries 1.*CLOSED-in-head True.*sentinel-present False"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC1's guard is the load-bearing assertion of the whole cell -- it is the one thing standing between a terraform plan and a proposal to DESTROY the live opal-data-harvest bucket, and it was tested by running it against BOTH states of the file rather than only the fixed one. The pre-patch working tree IS the mutant: s3.tf naming the deleted bucket opal-data-research, which is what HEAD actually carried.",
+      "expected": "Against the unfixed file the criterion should print 'harvest 0 research 1' and send the worker down its STOP branch; against the patched file it should print 'harvest 1 research 0'. If the criterion could not tell the two apart it would certify a bucket-destroying plan as safe.",
+      "observed": "FIRED. Unfixed: 'harvest 0 research 1' with the resource block showing bucket = \"opal-data-research\". Patched: 'harvest 1 research 0' with bucket = \"opal-data-harvest\". Corroborated downstream by an instrument the criterion does not use: the AC6 plan, taken after the fix, contains NO aws_s3_bucket.harvest address at all and 0 destroy-marks and 0 replace-marks -- so the guard demonstrably prevented the destroy it names.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The two criteria whose failure carries the cell's whole verdict were re-run rather than reported from one observation. AC5's six-import loop was executed TWICE in full (the order's allowed single retry), the second time with exit codes and the first Error line exposed instead of `tail -1`, which is what revealed that the empty tails were hiding a hard failure. `terraform state list` was read after each run. AC1 was run twice by construction (before and after the patch). The live-plane reads behind AC7/AC8 were taken AFTER all terraform failures, so they date the world at the end of the session, not the start.",
+      "observed": "IDENTICAL ACROSS RUNS. AC5: 6 of 6 imports rc=1 both times, same error string every time; state-resources 16 / chatter 0 both before and after both runs. AC6: plan-rc=1 with the same error at ri2.plan.txt:384. The 404 behind them was confirmed independently of terraform (head-object 404 with a positive control on the sibling key in the same call), so the determinism is a property of the world and not of one instrument.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Building and uploading s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip, the missing artifact that blocks every terraform operation in this root",
+      "reason": "OUT OF CELL AND EXPLICITLY DIRECTED AGAINST. It belongs to the mount (AMGT-rf-2 / the round-10 mount cell), and infra/aws/terraform/harvest/scoped-amgt-api.tf:40-47 records that the issuing seat 'ruled AC1 a SOURCE-plane criterion and directed that no world act be taken'. Uploading it would be a world act on another cell's surface against a recorded direction, and ri-2 s.4's refusal clause forbids satisfying a criterion 'by a route this order did not name'. Refused and filed as AMGT_RESAPP-Z-W17-S2 instead."
+    },
+    {
+      "item": "A -target'ed terraform import/plan/apply that would route around the failing sibling data source",
+      "reason": "AC6 and AC7 name an UNTARGETED whole-root plan and the apply of that exact plan file. A targeted plan is a different artifact with a different blast radius than the one the never-widen co-sign covers, and inventing it is precisely the 'repaired, widened or satisfied by a route this order did not name' the refusal clause bars."
+    },
+    {
+      "item": "Any alert, alarm, SNS topic, SES send, freshness checker, log subscription or monitor",
+      "reason": "Standing moratorium, restated as a BOUND by this order. None was added. The only schedule touched is the pre-existing daily EventBridge Scheduler entry, which is a PRODUCER trigger and not a monitor."
+    },
+    {
+      "item": "Renaming the Lambda function, touching any DynamoDB table, or removing anything from any terraform state",
+      "reason": "Forbidden by the order's BOUND (function_name is ForceNew, so a rename is a destroy). No table was touched; no `state rm` was run against any state. The stale amgt-resapp/tfstate and amgt-resapp/rd-2-security-metrics/tfstate objects remain in S3, inert, as the CRO's clean-up under C-S49."
+    },
+    {
+      "item": "org/critical_paths/.open_deploys/ sentinel and the deploy-completion entry",
+      "reason": "Not created. The ledger's activation leg is the apply, which was refused before any world act; an entry opened against an act that never runs is itself the half-landed-deploy condition the ledger exists to detect."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W17-S1: the patch file AC1's STOP clause and this order's <paths> both name does not exist in a linked worktree -- it is untracked in the shared checkout, and a worktree materialises only committed content; the named object was found, byte-verified on pre- and post-image, and applied with the named verb.",
+    "AMGT_RESAPP-Z-W17-S2: BLOCKING/ARMED -- no terraform operation of any kind can run in infra/aws/terraform/harvest/ because module.scoped_amgt_api.data.aws_s3_object.artifact 404s during evaluation, refusing AC5-AC10; and ri-2's AC6 bar of '0 to add' is unreachable by ri-2 alone because the mount's unapplied resources share this root, so ri-2 and ri-4 are inverted in this worker's queue."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~17/ri2.plan.txt",
+  "compiler_tools": [
+    {
+      "tool": "terraform validate",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest validate -no-color",
+      "result": "Success! The configuration is valid. -- and this is a NEW state for this module: before this cell's repoint it could not validate at all (row C-S49's aws_dynamodb_table.security_metrics, declared zero times in the estate)."
+    },
+    {
+      "tool": "terraform init",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest init -input=false -no-color",
+      "result": "rc 0; Installed hashicorp/aws v5.100.0 (signed by HashiCorp); backend s3 harvest/tfstate configured; Terraform v1.15.8"
+    },
+    {
+      "tool": "build_zip.py",
+      "invocation": "python infra/aws/terraform/harvest/lambda_src/build_zip.py",
+      "result": "OK: built ...harvest\\.build\\chatter-axis-producer.zip (24370 bytes, 6 entries); OK: verified 2 producer import(s) of lib.research.metrics are packaged"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~17 <0.9.0_WK_AMGT_RESAPP~17@opal.agent>\" -F .scratch/msg1.txt -- <8 explicit file paths> org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc 0, commit ea6cd450fa, 6 files changed, 98 insertions(+), 115 deletions(-), 3 renames recorded. A FIRST attempt using DIRECTORY pathspecs was correctly REFUSED by the commit-gate: safe-commit stages with `git add -f`, which overrides .gitignore (documented at .tools/safe-commit.sh:47-52), so the directory swept in the 685MB provider binary that terraform init had just downloaded into .terraform/. Re-run with explicit file paths. Not filed as a surprise: the tool documents this behaviour and instructs 'Pass EXPLICIT file paths ... never a bare directory', so the world matched the spec and the defect was mine."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: all new rows carry their step-7/step-10 fields; corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved). Row -W17-S1 graded at commit time: '1 new row(s) of 157 total checked'."
+    }
+  ]
+}
