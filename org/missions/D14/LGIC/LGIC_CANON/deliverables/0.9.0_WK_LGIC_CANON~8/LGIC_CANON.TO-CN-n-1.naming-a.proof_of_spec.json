@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_CANON.TO-CN-n-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/decompositions/LGIC_CANON_DECOMP.md",
+    "vintage_commit": "2b61346713d4feba92f8d911495695d6a2e7a0dd",
+    "to_ref": "org/missions/D14/LGIC/LGIC_CANON/task-orders/LGIC_CANON.TO-CN-n-1.naming-a.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/prd/LGIC_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5b2336a5e40f165a916dabf68af8fc45def633bb"
+  },
+  "assignee": "0.9.0_WK_LGIC_CANON~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/deliverables/exercises/naming-a.tsv",
+      "kind": "doc",
+      "commit_or_etag": "69f406a6962f50e1a681e97c10141ff6059a0de7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A naming-exercise record under the project's deliverables. PRD DEC-9: nothing live moves, so there is nothing to deploy.",
+      "artifact_covered_by": ["N1-AC1", "N1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "69f406a6962f50e1a681e97c10141ff6059a0de7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The surprise-channel row LGIC_CANON-W8-S1, appended. A record, not a deployable.",
+      "introduces": ["LGIC_CANON-W8-S1"],
+      "artifact_covered_by": ["N1-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "N1-AC1",
+      "criterion_verbatim": "N1-AC1 -- every item of the fixed naming job carries a name taken from the registry and the schema, with the registry row cited.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-8 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py n1-named",
+      "output_evidence": "ITEMS: 6  NAMED FROM A CITED REGISTRY ROW: 6\nVERDICT: PASS-NA-NAMES-CITED\nrc=0",
+      "denominator": "6 of 6 items in CN_NAMING_JOB.json (n1-n6)",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-NA-NAMES-CITED"
+    },
+    {
+      "criterion_id": "N1-AC2",
+      "criterion_verbatim": "N1-AC2 -- the record states its worktree base commit.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-8 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py n1-base",
+      "output_evidence": "BASE: f95470f38400da6d2a40eeaa7469651e32ddb95e  resolves to a commit: True\nVERDICT: PASS-NA-BASE-STATED\nrc=0",
+      "denominator": "1 of 1 base line in naming-a.tsv (boolean: the stated base resolves to a commit)",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-NA-BASE-STATED"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own n_named('a') was run against a scratch copy of naming-a.tsv (.scratch/naming-a.mutant.tsv). In that copy n1 cites infra/logic/registry/scopes.json#49finance, a key that no registry row carries. The module was loaded with importlib and NAMING['a'] was repointed. The fixed input was not edited.",
+      "expected": "VERDICT: FAIL-NA-NAMES-UNCITED, with 5 of 6 named from a cited registry row",
+      "observed": "ITEM n1: no name, or no registry row cited that exists\nITEMS: 6  NAMED FROM A CITED REGISTRY ROW: 5\nVERDICT: FAIL-NA-NAMES-UNCITED",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each criterion's invocation was run twice on the same worktree, and each pair of outputs was compared with cmp.",
+      "observed": "n1-named: the two outputs are byte-identical. n1-base: the two outputs are byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A fix for the builder/grader disagreement on n3 in lib/opal_naming.py",
+      "reason": "lib/opal_naming.py is outside this order's <paths>. It is filed as row LGIC_CANON-W8-S1, and the answer file carries the builder's output as the order directs."
+    }
+  ],
+  "surprises": [
+    "LGIC_CANON-W8-S1: for n3, lib/opal_naming.py address() writes the platinum key ending advisor_id=A123. grade() calls that same key OUT-OF-PATTERN and gives advisor-id=a123 as canonical, which contradicts NAMING_SCHEMA key.partition's own example. The answer carries the builder's output."
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~8/naming-a.r1.result.md",
+  "compiler_tools": [
+    {
+      "tool": "lib/opal_naming.py key(), address(), name(), lookup()",
+      "invocation": "lookup('49financial')['bucket']; key('mdpf','49financial','gold','category_views','date=2026-09-15'); address('advi','49financial','platinum','advisors','advisor_id=A123'); name('advi','49financial','dashboard-publish','lambda'); name('irpt','49financial','export','dlq'); name('blackdiamond','49financial','session-runner','role')",
+      "result": "opal-data-49financial; mdpf/49financial/gold/category_views/date=2026-09-15; s3://opal-data-49financial/advi/49financial/platinum/advisors/advisor_id=A123; advi-49f-dashboard-publish-lambda; irpt-49f-export-dlq; blackdiamond-49f-session-runner-role"
+    },
+    {
+      "tool": "lib/opal_naming.py grade()",
+      "invocation": "grade(answer, type) for each answer: S3_BUCKET, S3Key, LAMBDA, SQS_QUEUE, IAM_ROLE",
+      "result": "5 of 6 CONFORMANT. n3's key gives OUT-OF-PATTERN with canonical advisor-id=a123 (row LGIC_CANON-W8-S1)."
+    },
+    {
+      "tool": "lib/opal_naming.py validate",
+      "invocation": "timeout 120 python lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 16 system row(s), 9 scope row(s), 9 warning(s) at registry@ba5318901b937130; rc=0"
+    }
+  ]
+}
