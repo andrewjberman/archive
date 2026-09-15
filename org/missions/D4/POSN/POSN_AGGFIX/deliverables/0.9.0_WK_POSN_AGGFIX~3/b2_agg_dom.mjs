@@ -16,11 +16,18 @@
  *   --viewer opal-staff --aggregate-fixture unavailable B2-AC7  no entry, ordinary landing, no group, no page error
  *   [--port <p>] default 5242
  *
+ * TO-B3-1 (the same slot) ADDS ONE OPTION and changes no arm above it: --fixtures <dir> replaces the VersionId-pinned
+ * fixtures with the LIVE bytes <LIVE_FIXTURES_B3> wrote to <dir> -- the NEW shared file (the version TO-A3-1's run
+ * produced) and the live opal_aggregate.json -- keeping the attribution and ETF feeds pinned. B3-AC3 runs the
+ * --remembered none arm that way; its screenshot is written under its own name so TO-B2-1's is never overwritten.
+ *
  * THE STORAGE KEY a remembered book is read from is usePersistentToggle's: prefix 'opal:toggle:v1:' + HoldingsTab's
  * `positioning:book:${bookMode}` -- set in sessionStorage once per tab, before any page script runs.
  */
 import { createRequire } from 'node:module'
 import { spawn, spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import net from 'node:net'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -250,8 +257,36 @@ let browser = null
 try {
   const unavailable = opt('--aggregate-fixture') === 'unavailable'
   if (opt('--aggregate-fixture') && !unavailable) throw new Error('usage: --aggregate-fixture unavailable')
-  const fx = buildFixtures(ROOT, unavailable ? { aggregate: 'unavailable' } : {})
-  fx.lines.forEach((l) => console.log(l))
+  const liveDir = opt('--fixtures')
+  let fx
+  if (liveDir) {
+    // ---- B3-AC3: the NEW shared file and the LIVE aggregate bytes, as <LIVE_FIXTURES_B3> wrote them ----
+    if (unavailable) throw new Error('usage: --fixtures and --aggregate-fixture unavailable are exclusive')
+    const dir = path.resolve(liveDir)
+    const rd = (n) => {
+      const p = path.join(dir, n)
+      const b = readFileSync(p)
+      console.log('LIVE FIXTURE FILE ' + path.relative(ROOT, p) + ' bytes=' + b.length +
+        ' md5=' + createHash('md5').update(b).digest('hex'))
+      return JSON.parse(b.toString('utf8'))
+    }
+    const newShared = rd('new_shared.json')
+    const aggregate = rd('aggregate.json')
+    const posnKey = '/api/general/positioning/positioning_data.json'
+    const attrKey = '/api/general/positioning/holdings_attribution_data.json'
+    const etfKey = '/api/general/etfs/positioning_data.json'
+    const base = buildFixtures(ROOT)
+    base.lines.filter((l) => l.includes(attrKey) || l.includes(etfKey)).forEach((l) => console.log('PINNED ' + l))
+    fx = { fixtures: { [posnKey]: newShared, [attrKey]: base.fixtures[attrKey], [etfKey]: base.fixtures[etfKey],
+      [AGG_URLKEY]: aggregate }, lines: [] }
+    console.log('SHARED FILE (live, NEW): current_holdings ' + JSON.stringify(Object.keys(newShared.current_holdings)) +
+      ' generated_at ' + newShared.generated_at)
+    console.log('AGGREGATE (live bytes): status=' + aggregate.status + ' generated_at=' + aggregate.generated_at +
+      ' AGG holdings=' + aggregate.current_holdings.AGG.holdings.length)
+  } else {
+    fx = buildFixtures(ROOT, unavailable ? { aggregate: 'unavailable' } : {})
+    fx.lines.forEach((l) => console.log(l))
+  }
   // The OK payload's holdings are the reference count for every arm; the UNAVAILABLE arm reads its own (empty) block.
   const okFx = unavailable ? buildFixtures(ROOT).fixtures[AGG_URLKEY] : fx.fixtures[AGG_URLKEY]
   const fxHoldings = okFx.current_holdings.AGG.holdings
@@ -301,7 +336,7 @@ try {
       console.log('SAMPLES EQUAL: ' + sampleOk + ' of ' + idx.length)
       console.log('PAGE ERRORS: ' + s.errors.length + (s.errors.length ? ' ' + JSON.stringify(s.errors) : '') +
         '  UNFIXTURED(404) distinct: ' + new Set(s.unfixtured).size)
-      await shot(s.page, 'b2_ac2_opal_staff_lands_on_aggregate.png')
+      await shot(s.page, liveDir ? 'b3_ac3_opal_staff_live_aggregate.png' : 'b2_ac2_opal_staff_lands_on_aggregate.png')
       const ok = v.book.selected === 'Aggregate' && v.book.entries[0] === 'Aggregate' &&
         v.composition.nodes === fxHoldings.length && v.breakdown.holding_rows === fxHoldings.length &&
         JSON.stringify(afterWeight) === JSON.stringify(MB_CODES) && /model breakdown/i.test(groupRow[1] || '') &&

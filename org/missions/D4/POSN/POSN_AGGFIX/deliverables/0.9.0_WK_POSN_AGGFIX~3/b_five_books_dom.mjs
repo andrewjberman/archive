@@ -21,6 +21,15 @@
  * TO-B2-1 (the same slot) changes --network-arms in two places and nothing else: (a) its bar is the one B2-AC11 states,
  * Opal staff in Models EXACTLY 1 request (it was >= 1); (b) at any portal HEAD other than TO-B1-1's 63edeeeb51 the
  * request record is written to network_arms_requests_<HEAD10>.json, so TO-B1-1's committed record is never overwritten.
+ *
+ * TO-B3-1 (the same slot) ADDS ONE MODE and changes nothing above it:
+ *   node <this> --prior-vs-new <dir>   B3-AC2  advisor + client x UST ST INT LT ULT rendered TWICE at the portal
+ *                                      branch HEAD -- once on the PRIOR served shared file and once on the NEW one
+ *                                      (the two VersionIds TO-A3-1 recorded, written to <dir> by <LIVE_FIXTURES_B3>)
+ *                                      -- compared per book, plus a mutated-weight control on the NEW fixture.
+ * The other two feeds are the SAME PINNED objects in both arms, so the shared file is the only thing that differs.
+ * The PRIOR arm carries NO aggregate fixture: at that VersionId the Opal-only key did not exist (TO-A3-1's BEFORE
+ * head read 404), and answering it 404 is what the world did, not a convenience.
  */
 import { createRequire } from 'node:module'
 import { spawn, spawnSync } from 'node:child_process'
@@ -383,6 +392,85 @@ try {
       get('ETFs', 'opal-staff') === 0 && get('ETFs', 'advisor') === 0 && get('ETFs', 'client') === 0
     console.log('EXPECTATION (Models: staff exactly 1, advisor 0, client 0; ETFs: 0, 0, 0): ' + (want ? 'MET' : 'NOT MET'))
     exit = want ? 0 : 1
+  } else if (flag('--prior-vs-new')) {
+    // ---- B3-AC2: the five model views on the PRIOR and on the NEW shared file, at the portal branch HEAD ----
+    const dirArg = opt('--prior-vs-new')
+    if (!dirArg) throw new Error('usage: --prior-vs-new <fixture dir>')
+    const dir = path.resolve(dirArg)
+    const rd = (n) => {
+      const p = path.join(dir, n)
+      const b = readFileSync(p)
+      console.log('FIXTURE FILE ' + path.relative(ROOT, p) + ' bytes=' + b.length + ' md5=' + md5(b))
+      return JSON.parse(b.toString('utf8'))
+    }
+    const priorShared = rd('prior_shared.json')
+    const newShared = rd('new_shared.json')
+    const aggregate = rd('aggregate.json')
+    console.log('PRIOR shared file: current_holdings ' + JSON.stringify(Object.keys(priorShared.current_holdings)) +
+      '  generated_at ' + priorShared.generated_at)
+    console.log('NEW   shared file: current_holdings ' + JSON.stringify(Object.keys(newShared.current_holdings)) +
+      '  generated_at ' + newShared.generated_at)
+    console.log('AGGREGATE (NEW arm only): status=' + aggregate.status + ' AGG holdings=' +
+      aggregate.current_holdings.AGG.holdings.length)
+    const posnKey = '/api/general/positioning/positioning_data.json'
+    const attrKey = '/api/general/positioning/holdings_attribution_data.json'
+    const etfKey = '/api/general/etfs/positioning_data.json'
+    // The attribution and ETF feeds are the PINNED objects, identical in both arms, so they cannot be the source
+    // of a difference; only the shared file changes between the arms.
+    const base = buildFixtures(ROOT)
+    base.lines.filter((l) => l.includes(attrKey) || l.includes(etfKey)).forEach((l) => console.log('PINNED ' + l))
+    const priorFx = { [posnKey]: priorShared, [attrKey]: base.fixtures[attrKey], [etfKey]: base.fixtures[etfKey] }
+    const newFx = { [posnKey]: newShared, [attrKey]: base.fixtures[attrKey], [etfKey]: base.fixtures[etfKey],
+      [AGG_URLKEY]: aggregate }
+    console.log('PRIOR arm fixture keys: ' + JSON.stringify(Object.keys(priorFx)) + ' (no ' + AGG_URLKEY +
+      ' -- absent at that VersionId, so it is answered 404 and listed)')
+    console.log('NEW   arm fixture keys: ' + JSON.stringify(Object.keys(newFx)))
+    server = await startVite()
+    browser = await chromium.launch({ executablePath: EDGE, headless: true })
+    const arms = {}
+    for (const [arm, fixtures] of [['PRIOR', priorFx], ['NEW', newFx]]) {
+      console.log('== ARM ' + arm + ' ==')
+      const caps = {}
+      for (const viewer of ['advisor', 'client']) {
+        const r = await captureViewer(browser, viewer, fixtures)
+        Object.assign(caps, r.captures)
+        console.log('  ' + arm + '/' + viewer + ' unfixtured(404): ' + JSON.stringify(r.unfixtured) +
+          ' page errors: ' + r.errors.length)
+      }
+      arms[arm] = caps
+    }
+    let same = 0
+    const keys = Object.keys(arms.PRIOR)
+    console.log('COMPARED PER BOOK (composition labels and breakdown rows; PRIOR is BEFORE, NEW is NOW):')
+    for (const k of keys) {
+      const d = arms.NEW[k] ? firstDiff(compared(arms.PRIOR[k]), compared(arms.NEW[k])) : 'MISSING IN THE NEW ARM'
+      if (!d) same += 1
+      console.log('  ' + k.padEnd(12) + ' ' + (d ? 'DIFFERENT -- ' + d : 'IDENTICAL'))
+    }
+    console.log('IDENTICAL ' + same + ' of ' + keys.length)
+    // THE CONTROL: the NEW fixture with ONE holding weight mutated, rendered and compared the same way.
+    const ctlShared = JSON.parse(JSON.stringify(newShared))
+    const ch = ctlShared.current_holdings.UST.holdings[0]
+    const was = ch.weight
+    ch.weight = Math.round((ch.weight + 0.05) * 10000) / 10000
+    console.log('CONTROL (NEW fixture, one weight mutated): current_holdings.UST.holdings[0] ' + ch.ticker +
+      ' weight ' + was + ' -> ' + ch.weight)
+    const ctlFx = { ...newFx, [posnKey]: ctlShared }
+    const cs = await openViewer(browser, 'advisor', ctlFx, 'models')
+    let ctlVerdict = 'NOT RUN'
+    try {
+      await settle(cs.page, (v) => v.family.selected === 'Models' && v.book.entries.length > 0, 'control load')
+      await cs.page.getByRole('group', { name: 'Book' }).getByRole('button', { name: 'UST', exact: true }).click()
+      const v = await settle(cs.page, (x) => x.book.selected === 'UST' && x.breakdown.row_count > 0, 'control UST')
+      const d = firstDiff(compared(arms.NEW['advisor/UST']), compared(v))
+      ctlVerdict = d ? 'DIFFERENT -- ' + d : 'IDENTICAL'
+    } finally { await cs.ctx.close() }
+    console.log('CONTROL advisor/UST, the NEW arm vs the mutated NEW fixture: ' + ctlVerdict)
+    const rec = path.join(HERE, 'b3_ac2_prior_vs_new_' + st.head.slice(0, 10) + '.json')
+    writeFileSync(rec, JSON.stringify({ portal: st, fixture_dir: path.relative(ROOT, dir), identical: same,
+      of: keys.length, control: ctlVerdict, arms }, null, 1) + '\n')
+    console.log('WROTE ' + path.relative(ROOT, rec))
+    exit = same === keys.length && keys.length === 10 && ctlVerdict.startsWith('DIFFERENT') ? 0 : 1
   } else if (flag('--probe')) {
     // DIAGNOSTIC ONLY (not a criterion invocation): open one viewer, wait, print what the read returns or throws.
     const viewer = opt('--probe', 'advisor')
@@ -402,7 +490,7 @@ try {
     await s.ctx.close()
     exit = 0
   } else {
-    console.log('usage: --capture-before --out <f> | --network-arms | --compare-before <f>')
+    console.log('usage: --capture-before --out <f> | --network-arms | --compare-before <f> | --prior-vs-new <dir>')
     exit = 2
   }
 } catch (e) {
