@@ -1,0 +1,19 @@
+import functools, json, sys, os
+sys.path.insert(0, os.getcwd()); sys.path.insert(0, os.path.join(os.getcwd(), 'infra/aws/terraform/harvest/lambda_src'))
+import lambda_function as lf
+from lib.research.metrics import chatter_axis as ca
+seen = {}
+real = ca.compute_chatter_axis
+def dry(**kw):
+    kw['write_fn'] = None
+    s = real(**kw); seen['s'] = s; seen.setdefault('calls', []).append(sorted(kw)); return s
+lf.compute_chatter_axis = dry
+out = lf.handler({}, None)
+print('HANDLER-RETURN', json.dumps(out))
+print('compute-calls', seen['calls'])
+s = seen['s']
+for p in s['products']:
+    print('axis', p['axis'], 'rows_ranked', p['rows_ranked'], 'state', p['state'])
+rows = s['rows']
+print('rows', len(rows), 'rows-with-key', sum(1 for r in rows if r.get('security_key')))
+print('sample', [(r.get('ticker'), r.get('security_key'), r.get('identity_status')) for r in rows[:5]])

@@ -1,0 +1,27 @@
+import functools, json, sys, os
+ROOT = sys.argv[1]
+sys.path.insert(0, ROOT); sys.path.insert(0, os.path.join(ROOT, 'infra/aws/terraform/harvest/lambda_src'))
+import lambda_function as lf
+from lib.research.metrics import chatter_axis as ca
+def boom(as_of=None, client=None):
+    raise PermissionError('stubbed AccessDenied on universe/v1/')
+ca._read_pool_universe = boom
+lf._UNIVERSE_SNAPSHOT_PATH = os.path.join(ROOT, ca.DEFAULT_UNIVERSE_PATH)
+real = ca.compute_chatter_axis
+calls = []
+def dry(**kw):
+    calls.append(sorted(kw)); kw['write_fn'] = None; kw['count_fn'] = lambda identity, s, e: {}
+    return real(**kw)
+lf.compute_chatter_axis = dry
+print('cwd', os.getcwd(), 'repo-fallback-exists', os.path.exists(ca.DEFAULT_UNIVERSE_PATH))
+out = lf.handler({}, None)
+print('HANDLER-RETURN', json.dumps(out)[:600])
+print('compute-calls', calls)
+# negative arm: an unrelated FileNotFoundError must re-raise, not fall back
+def other(**kw):
+    raise FileNotFoundError(2, 'No such file', '/var/task/other.json')
+lf.compute_chatter_axis = other
+try:
+    lf.handler({}, None); print('NEG unrelated FileNotFoundError: SWALLOWED')
+except FileNotFoundError as e:
+    print('NEG unrelated FileNotFoundError: RE-RAISED', e.filename)
