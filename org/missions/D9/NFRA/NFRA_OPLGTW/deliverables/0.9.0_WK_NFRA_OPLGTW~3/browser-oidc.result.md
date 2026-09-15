@@ -1,82 +1,97 @@
-# NFRA_OPLGTW.TO-OG-a-3: the download browser's own OIDC login
+# NFRA_OPLGTW.TO-OG-a-3: the download browser's own OIDC login (as amended @6886ddd314)
 
 **Worker:** `0.9.0_WK_NFRA_OPLGTW~3` | **Branch:** `wk-nfra_oplgtw-1-3d` (worktree `/c/tmp/wk-oplgtw-1-3d`, cut from
 `CLOUD` at `7459929520`, after OG-a-2 merged) | **Commits (LOCAL):**
-- `6a4e94d734`: the code, the test module and `BROWSER_PATHS.json`;
-- `b2648343dc`: rows W3-S16 .. W3-S21;
-- the commit that carries this file, the proof instance and the `<status>` flip.
+- first run: `6a4e94d734` (the code, the test module and `BROWSER_PATHS.json`), `b2648343dc` (rows W3-S16 .. W3-S21),
+  `06a9aec60d` (its completion);
+- the issuer's amendment `6886ddd314` (status back to pending; ROUTE_CLASS granted; AC7 restated; AC8 .. AC10 added);
+- this run: `9828b0e96e` (the ROUTE_CLASS entries, the superset AC7 and the AC8/AC10 probe), then the commit that
+  carries this file, the proof instance and the `<status>` flip.
 
 Nothing was pushed, merged or deployed.
 
-## Read this first: 7 of 7 criteria pass by output
+## Read this first: 10 of 10 criteria pass by output
 
-Each criterion's invocation was run verbatim at `6a4e94d734` and read `1 passed`, rc=0. One effect lands outside the
-grant: OG-a-2's `test_oga2_ac04` now fails on the two new routes (row W3-S16, ARMED, disarm `2.0.0_SA_COO~O`).
+Every invocation ran verbatim at `9828b0e96e`:
+- the eight pytest criteria read `1 passed` each (AC1 .. AC7) and `11 passed` (AC9), each with rc=0;
+- the two probes print `VERDICT: PASS-OGA3-AC8` and `VERDICT: PASS-OGA3-AC10`, each with rc=0.
 
-## What was built
+The first run's two route-table couplings are gone:
+- `test_oga2_ac04` is green again (row W3-S16);
+- AC7 now survives a later cell's new routes (row W3-S17).
+
+## What this run changed
 
 | path | what |
 |---|---|
-| `infra/aws/ec2/opal-gateway/app/browser_oidc.py` (new) | the login, the callback, the cookies, `read_session` / `session_principal` |
-| `infra/aws/ec2/opal-gateway/app/server.py` | the import, the 2 `Route` declarations after `/callback`, and 1 auth-model docstring entry |
-| `infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py` (new) | `test_oga3_ac01` .. `test_oga3_ac07` |
-| `deliverables/0.9.0_WK_NFRA_OPLGTW~3/BROWSER_PATHS.json` | the two exact paths and their methods, for OG-i-3 |
+| `infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py` | 2 lines added to `ROUTE_CLASS` (`:498`, `:499`), each `"public"`; nothing else |
+| `infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py` | `test_oga3_ac07` rewritten as a superset, plus 2 helpers (`_in_order`, `_declared_middleware`) |
+| `deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a3.py` (new) | the AC8 and AC10 probe |
 
-- **Paths:** `GET /schwab/download/login` and `GET /schwab/download/callback` (Starlette also serves HEAD for each).
-- **Login:** mints a random state and nonce and seals them, with a return path under `/schwab/download`, in a
-  transaction cookie (600 s). It then redirects to the upstream for OpenID scopes only, with the new callback as the
-  redirect URI.
-- **Callback:** refuses unless the state equals the transaction cookie's, and does so before any code exchange. It
-  redeems the code for its own redirect URI and validates the ID token with OG-a-2's
-  `token_broker.verify_upstream_id_token` (the principal function reused, not a second one). That checks the
-  authorized tenant, the RS256 signature against the tenant's published key, the exact issuer, the audience (client
-  id), expiry and this sign-in's nonce. The callback then applies the kill switch and blocklist, and sets the session
-  (900 s).
-- **Cookies:** `__Secure-` names, Secure, HttpOnly, SameSite=Lax, host-only, `Path=/schwab/download`. They are
-  Fernet tokens under a key derived from `FERNET_KEY` for this use only, so a browser cookie can never be read as the
-  MCP bridge state or the legacy consent state. SameSite is Lax, not Strict, because the callback is a top-level
-  navigation back from the upstream's origin, and a Strict cookie is withheld from it.
-- **For OG-x-1:** `session_principal(request)` returns the principal (tid, oid; email for display). It re-checks the
-  authorized tenants and principal revocation on every read.
-- **Not used:** `identity.py`'s ALB helper and any identity header.
+`app/browser_oidc.py`, `app/server.py` and `BROWSER_PATHS.json` are unchanged since `6a4e94d734`, as the amendment
+says ("Your AC1..AC6 code stands").
 
-## Criteria (each invocation verbatim at `6a4e94d734`)
+- **AC7, superset.** It checks five things:
+  - every base route is still served, row for row (kind, path, methods, endpoint), in base order, each base path
+    once;
+  - both browser routes are served by `app.browser_oidc`;
+  - the live middleware equals the base's `app.add_middleware` calls, reversed (read from the base git object);
+  - `/login`, `/sprint` and `/sprint/archive` still refuse without the access-layer header;
+  - the new login redirects to the upstream.
+
+  It no longer asserts what HEAD adds, so the next cell's routes keep it green.
+- **AC8, one-time record.** The probe reads three things:
+  - `app/server.py`'s route declarations at the base and at HEAD, both from git objects by AST, comparing each
+    declaration's whole structural dump;
+  - `BROWSER_PATHS.json` at HEAD;
+  - the served table of the app imported from the worktree. It refuses unless `app/` equals HEAD, and it imports
+    under a no-egress guard.
+
+  HEAD must equal the base plus exactly the listed rows.
+- **AC10.** The probe reads the file at both vintages and the `-U0` diff:
+  - 0 lines are removed;
+  - every added line is inside `ROUTE_CLASS`, and together the added lines read as exactly the two entries;
+  - the module with `ROUTE_CLASS` blanked is structurally identical at both vintages.
+
+## Criteria (each invocation verbatim at `9828b0e96e`)
 
 | id | verdict | deciding line |
 |---|---|---|
-| OGA3-AC1 | PASS-by-output | `BROWSER_PATHS.json lists 2 path(s) ...; app routes served by app.browser_oidc 2; browser_oidc.BROWSER_ROUTES 2; all three sets equal; 4 of 4 (path, method) pairs answered` / `1 passed in 1.66s` |
-| OGA3-AC2 | PASS-by-output | `refused 400 with no redirect and no session cookie on 4 of 4 arms ...; upstream redemptions for the 3 state arms [0, 0, 0]` / `1 passed in 1.24s` |
-| OGA3-AC3 | PASS-by-output | `refused 400, no session cookie, on 3 of 3 arms, each by its own check: InvalidSignatureError; InvalidIssuerError; InvalidAudienceError` / `1 passed in 1.32s` |
-| OGA3-AC4 | PASS-by-output | `2 of 2 cookies ... Secure + HttpOnly + SameSite=lax + Path=/schwab/download + no Domain; ... sends the session to 4 of 4 download URLs and to 0 of 10 others` / `1 passed in 1.11s` |
-| OGA3-AC5 | PASS-by-output | `MCP OAuth principal key == browser session principal key (True), tid equal True, oid equal True; ... same email, another oid -> another key (True)` / `1 passed in 1.25s` |
-| OGA3-AC6 | PASS-by-output | `imports of app/identity.py and references to 4 ALB helper names or the ALB OIDC header 0 ...; controls: app/server.py 4 hit(s), 5 of 5 specimens caught` / `1 passed in 1.08s` |
-| OGA3-AC7 | PASS-by-output | `routes at the base 27 (git object 7459929520: 27 declared ...); now 29; added 2; removed 0; changed 0; middleware unchanged` / `1 passed in 1.34s` |
+| OGA3-AC1 | PASS-by-output | `BROWSER_PATHS.json lists 2 path(s) ...; all three sets equal; 4 of 4 (path, method) pairs answered` / `1 passed in 1.93s` |
+| OGA3-AC2 | PASS-by-output | `refused 400 with no redirect and no session cookie on 4 of 4 arms ...; upstream redemptions for the 3 state arms [0, 0, 0]` / `1 passed in 1.84s` |
+| OGA3-AC3 | PASS-by-output | `refused 400, no session cookie, on 3 of 3 arms, each by its own check` / `1 passed in 1.68s` |
+| OGA3-AC4 | PASS-by-output | `2 of 2 cookies ... Secure + HttpOnly + SameSite=lax + Path=/schwab/download ...; 4 of 4 download URLs and 0 of 10 others` / `1 passed in 1.43s` |
+| OGA3-AC5 | PASS-by-output | `MCP OAuth principal key == browser session principal key (True), tid equal True, oid equal True` / `1 passed in 1.81s` |
+| OGA3-AC6 | PASS-by-output | `imports of app/identity.py and references to 4 ALB helper names or the ALB OIDC header 0` / `1 passed in 1.32s` |
+| OGA3-AC7 | PASS-by-output | `base routes still served unchanged 27 of 27, in base order, each path once; browser routes served 2 of 2; middleware ... == the base's add_middleware calls reversed; ... 401 (3 of 3)` / `1 passed in 1.89s` |
+| OGA3-AC8 | PASS-by-output | `declared routes: base 27 ..., HEAD 29`; `added 2; removed 0; changed 0; base order kept: yes`; `served routes ... 29; equal to the HEAD declarations row for row: yes; ... egress attempts during import 0` / `VERDICT: PASS-OGA3-AC8` |
+| OGA3-AC9 | PASS-by-output | `OGA2-AC4: route declarations in app/server.py 29 ... == app.routes 29; ... public 10; ... the legacy bearer changes no status on 10 of 10` / `11 passed in 5.43s` |
+| OGA3-AC10 | PASS-by-output | `ROUTE_CLASS entries: base 27, HEAD 29; gained {2, both public}; removed 0; re-classed 0`; `0 line(s) removed or changed, 2 added`; `module outside ROUTE_CLASS structurally identical: yes` / `VERDICT: PASS-OGA3-AC10` |
 
 ## Controls
 
-- **Mutants** (in-process plugins; the worktree was not touched):
-  - the state check disabled: `test_oga3_ac02` fails on the forged-state arm (`('forged state', 302, '')`), 1 failed and 6 passed;
-  - the cookies at `Path=/`: `test_oga3_ac04` fails, 1 failed and 6 passed.
-- **Egress:** under a plugin that refuses every non-loopback connect and name lookup: `7 passed`, `EGRESS-ATTEMPTS: 0`.
-- **Regression census,** one process per module: 13 of 14 modules pass. `test_principal_cutover` reads `1 failed,
-  10 passed`, the failure being `test_oga2_ac04` on exactly `['/schwab/download/callback', '/schwab/download/login']`
-  (row W3-S16). The known-red `test_identity_scope` read 6 of 6 (row W3-S21). The `test_ogq1_ac02` flake did not
-  occur (13 passed).
-- **Commit gate:** `OK: pre-commit gate clean for 3 of 3 file(s)`.
+- **AC7 mutants** (in-process, worktree untouched):
+  - 2 extra routes injected (29 -> 31): `1 passed`. The superset holds where the first run's pinned AC7 would fail.
+  - `/sprint/archive` removed: `1 failed`.
+  - `/login` re-bound to POST only: `1 failed`.
+- **Probe judges:** each verb runs its judge first on 6 synthetic cases, and 6 of 6 came out as expected on both AC8
+  and AC10.
+- **AC10 negative arm:** at the pre-edit HEAD `6886ddd314`, the probe printed `VERDICT: FAIL-OGA3-AC10 git diff ...
+  rc=0 bytes=0`, rc=1.
+- **AC9 negative arm:** the first run at `6a4e94d734` read `1 failed, 10 passed` on `test_oga2_ac04` (row W3-S16).
+- **Determinism:** the pre-commit module runs (7 passed; 11 passed) agree with the verbatim runs, and the AC8
+  counts are identical at `6886ddd314` and `9828b0e96e`.
+- **Commit gate:** `OK: pre-commit gate clean for 3 of 3 file(s)`. It raised one advisory, not blocking, on
+  `test_principal_cutover.py:527`, a line present at the cut base.
 
-## Rows filed (`INVESTIGATION_v1.md` @ `b2648343dc`)
+## Rows
 
-- **W3-S16** OBSERVATION, ARMED (disarm `2.0.0_SA_COO~O`): `test_oga2_ac04`'s `ROUTE_CLASS` lacks the two new paths.
-- **W3-S17** OBSERVATION, ARMED (disarm `2.0.0_SA_COO~O`): OGA3-AC7 pins the base table, so the next cell that adds
-  a route (OG-x-1, OG-z-1) turns it red.
-- **W3-S18** OBSERVATION, INERT: the new endpoints are not in `ratelimit.AUTH_PATHS`.
-- **W3-S19** OBSERVATION, INERT: the new callback must be registered as a redirect URI upstream, and no cell names
-  that act.
-- **W3-S20** OBSERVATION, INERT: no download path is named anywhere, so `/schwab/download` was chosen (from the audit
-  test's sentinel URL). This binds OG-x-1.
-- **W3-S21** OBSERVATION, INERT: the order's known-red test passed here.
+This run filed no new row. The rows from the first run (`INVESTIGATION_v1.md` @ `b2648343dc`) are listed in the
+proof's `surprises`:
+- W3-S16 and W3-S17: both ARMED, disarm owner `2.0.0_SA_COO~O`. The amendment addresses both.
+- W3-S18 .. W3-S21: INERT.
 
 ## Proof check
 
-`py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/NFRA_OPLGTW.TO-OG-a-3.browser-oidc.proof_of_spec.json OGA3-AC1,OGA3-AC2,OGA3-AC3,OGA3-AC4,OGA3-AC5,OGA3-AC6,OGA3-AC7`:
-the exit code is recorded in the final worker report and the commit that carries this file.
+`py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/NFRA_OPLGTW.TO-OG-a-3.browser-oidc.proof_of_spec.json OGA3-AC1,OGA3-AC2,OGA3-AC3,OGA3-AC4,OGA3-AC5,OGA3-AC6,OGA3-AC7,OGA3-AC8,OGA3-AC9,OGA3-AC10`:
+the exit code is recorded in the final worker report and in the commit that carries this file.

@@ -20,7 +20,7 @@
       "kind": "script",
       "commit_or_etag": "6a4e94d734",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "New module, source only; nothing deploys (the release is OG-r-1's, the ALB OG-i-3's). GET /schwab/download/login mints a random state and nonce, seals them with the return path in a transaction cookie and redirects to the upstream for OpenID scopes only, with this callback as the redirect URI. GET /schwab/download/callback refuses unless the state equals the transaction cookie's (before any code exchange), redeems the code for this callback's redirect URI, validates the ID token with OG-a-2's token_broker.verify_upstream_id_token against the transaction's nonce, applies the kill switch and blocklist, and sets the session cookie. Cookies: Secure, HttpOnly, SameSite=Lax, host-only, Path=/schwab/download, Fernet tokens under a key derived from FERNET_KEY for this use only. read_session / session_principal give the download routes the principal, re-checked against the authorized tenants and principal revocation. No import of identity.py. commit-gate: 'OK: pre-commit gate clean for 3 of 3 file(s)'.",
+      "deploy_evidence": "New module, source only, unchanged since 6a4e94d734 (the amendment keeps AC1..AC6's code; 9828b0e96e touches no file under app/). Nothing deploys (the release is OG-r-1's, the ALB OG-i-3's). GET /schwab/download/login mints a random state and nonce, seals them with the return path in a transaction cookie and redirects to the upstream for OpenID scopes only, with this callback as the redirect URI. GET /schwab/download/callback refuses unless the state equals the transaction cookie's (before any code exchange), redeems the code for this callback's redirect URI, validates the ID token with OG-a-2's token_broker.verify_upstream_id_token against the transaction's nonce, applies the kill switch and blocklist, and sets the session cookie. Cookies: Secure, HttpOnly, SameSite=Lax, host-only, Path=/schwab/download. No import of identity.py.",
       "introduces": [
         "def login",
         "def callback",
@@ -42,25 +42,26 @@
       "kind": "script",
       "commit_or_etag": "6a4e94d734",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Source only. The import of browser_oidc, the two Route declarations (GET, served GET and HEAD) after /callback, and one auth-model docstring entry. No other route, handler or middleware changes: OGA3-AC7 reads added 2, removed 0, changed 0, middleware (RateLimit, Guard) unchanged.",
+      "deploy_evidence": "Source only, unchanged since 6a4e94d734. The import of browser_oidc, the two Route declarations (GET, served GET and HEAD) after /callback, and one auth-model docstring entry. OGA3-AC8 at 9828b0e96e reads base 27 declared routes, HEAD 29, added 2, removed 0, changed 0, base order kept, and the served table equal to the HEAD declarations row for row.",
       "introduces": [
         "Route(browser_oidc.LOGIN_PATH, browser_oidc.login, methods=[\"GET\"])",
         "Route(browser_oidc.CALLBACK_PATH, browser_oidc.callback, methods=[\"GET\"])"
       ],
       "artifact_covered_by": [
         "OGA3-AC1",
-        "OGA3-AC7"
+        "OGA3-AC7",
+        "OGA3-AC8"
       ]
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py",
       "kind": "test",
-      "commit_or_etag": "6a4e94d734",
+      "commit_or_etag": "9828b0e96e",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "New file: test_oga3_ac01 .. test_oga3_ac07, one per criterion, each printing its denominator line. Offline: the upstream is a local issuer (RSA key generated at test time) behind a fake MSAL client, and OG-a-2's ID-token validation runs against it; DynamoDB (the MCP OAuth half of AC5) is moto behind a per-request lock. The real app runs in-process over https://gateway.test without its lifespan. Under a plugin refusing every non-loopback socket and name lookup: '7 passed', 'EGRESS-ATTEMPTS: 0 []'.",
+      "deploy_evidence": "test_oga3_ac01 .. test_oga3_ac06 as at 6a4e94d734; test_oga3_ac07 rewritten at 9828b0e96e as the amendment's superset. Every base route of 7459929520 is still served unchanged (kind, path, methods, endpoint), in base order, each base path once. The two browser routes are served by app.browser_oidc. The middleware equals the base's add_middleware calls reversed. /login, /sprint and /sprint/archive refuse without the access-layer header. It no longer pins head-minus-base; that exact fact is OGA3-AC8's. Offline: local test issuer, fake MSAL client, moto. commit-gate: 'OK: pre-commit gate clean for 3 of 3 file(s)'.",
       "introduces": [
-        "def test_oga3_ac01",
-        "def test_oga3_ac07"
+        "def _in_order",
+        "def _declared_middleware"
       ],
       "artifact_covered_by": [
         "OGA3-AC1",
@@ -73,17 +74,50 @@
       ]
     },
     {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py",
+      "kind": "test",
+      "commit_or_etag": "9828b0e96e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Entries only, per the amendment's grant: two lines added to ROUTE_CLASS (HEAD :498 '\"/schwab/download/login\": \"public\",' and :499 '\"/schwab/download/callback\": \"public\",'). OGA3-AC10 reads 0 lines removed or changed, 2 added, both inside ROUTE_CLASS, and the module outside ROUTE_CLASS structurally identical to the cut base. The commit gate's MANIFEST-ADVISORY names :527, a line present at the base; it is advisory, not blocking.",
+      "introduces": [
+        "\"/schwab/download/login\": \"public\"",
+        "\"/schwab/download/callback\": \"public\""
+      ],
+      "artifact_covered_by": [
+        "OGA3-AC9",
+        "OGA3-AC10"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a3.py",
+      "kind": "script",
+      "commit_or_etag": "9828b0e96e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC8 and AC10 probe. AC8 reads the route declarations of app/server.py at the cut base and at HEAD from git objects by AST (the whole declaration's structural dump, so a changed handler or method list is a CHANGED route), BROWSER_PATHS.json from its git object at HEAD, and the served table of the app imported from the worktree (refused unless app/ equals HEAD; imported under a guard refusing non-loopback connects and name lookups). AC10 reads test_principal_cutover.py at both vintages and the -U0 diff. Each verb first runs its judge against 6 synthetic cases (1 must pass, 5 must fail).",
+      "introduces": [
+        "def ac8",
+        "def ac10",
+        "def judge_tables",
+        "def judge_route_class"
+      ],
+      "artifact_covered_by": [
+        "OGA3-AC8",
+        "OGA3-AC10"
+      ]
+    },
+    {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/BROWSER_PATHS.json",
       "kind": "doc",
       "commit_or_etag": "6a4e94d734",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The file OG-i-3 reads to decide the ALB rules: 2 entries, one per path, each with its served methods (GET, HEAD), exact match, forwarded without authenticate-oidc. Also records the cookie path (not an ALB path; the download page is OG-x-1's) and the upstream redirect URI (not an ALB rule; row W3-S19). OGA3-AC1 asserts the served routes equal this file.",
+      "deploy_evidence": "Unchanged since 6a4e94d734. The file OG-i-3 reads to decide the ALB rules: 2 entries, one per path, each with its served methods (GET, HEAD), exact match, forwarded without authenticate-oidc. OGA3-AC1 asserts the served routes equal it; OGA3-AC8 reads it from its git object at HEAD and finds the added routes equal to it.",
       "introduces": [
         "\"path\": \"/schwab/download/login\"",
         "\"path\": \"/schwab/download/callback\""
       ],
       "artifact_covered_by": [
-        "OGA3-AC1"
+        "OGA3-AC1",
+        "OGA3-AC8"
       ]
     },
     {
@@ -91,7 +125,7 @@
       "kind": "doc",
       "commit_or_etag": "b2648343dc",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Rows W3-S16 .. W3-S21 at b2648343dc: '[surprise-row-gate] ... 6 new row(s) of 53 total checked (47 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.'",
+      "deploy_evidence": "Rows W3-S16 .. W3-S21 at b2648343dc, from the first run: '[surprise-row-gate] ... 6 new row(s) of 53 total checked (47 pre-existing, NOT re-graded)'. This run filed no new row.",
       "introduces": [
         "NFRA_OPLGTW-W3-S16",
         "NFRA_OPLGTW-W3-S21"
@@ -105,8 +139,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac01 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA3-AC1: BROWSER_PATHS.json lists 2 path(s) ['/schwab/download/callback', '/schwab/download/login']; app routes served by app.browser_oidc 2; browser_oidc.BROWSER_ROUTES 2; all three sets equal; 4 of 4 (path, method) pairs answered (statuses [302, 400]), POST -> 405 on 2 of 2; 3 of 3 unlisted paths under /schwab/download -> 404\n1 passed in 1.66s\nrc=0",
-      "denominator": "2 of 2 paths in BROWSER_PATHS.json, one entry per path. The set of (path, methods) served by app.browser_oidc's routes in the live app equals the file's set and the module's BROWSER_ROUTES: 2 = 2 = 2. 4 of 4 (path, method) pairs answer (login 302 to the upstream, callback 400 with no transaction), never 404 or 405; an unlisted method (POST) is 405 on 2 of 2; 3 of 3 unlisted paths under /schwab/download are 404. 1 of 1 test, verbatim at 6a4e94d734.",
+      "output_evidence": "OGA3-AC1: BROWSER_PATHS.json lists 2 path(s) ['/schwab/download/callback', '/schwab/download/login']; app routes served by app.browser_oidc 2; browser_oidc.BROWSER_ROUTES 2; all three sets equal; 4 of 4 (path, method) pairs answered (statuses [302, 400]), POST -> 405 on 2 of 2; 3 of 3 unlisted paths under /schwab/download -> 404\n1 passed in 1.93s\nrc=0",
+      "denominator": "2 of 2 paths in BROWSER_PATHS.json, one entry per path. The set of (path, methods) served by app.browser_oidc's routes in the live app equals the file's set and the module's BROWSER_ROUTES: 2 = 2 = 2. 4 of 4 (path, method) pairs answer, never 404 or 405; POST is 405 on 2 of 2; 3 of 3 unlisted paths under /schwab/download are 404. 1 of 1 test, verbatim at 9828b0e96e.",
       "status": "PASS"
     },
     {
@@ -115,8 +149,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac02 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA3-AC2: refused 400 with no redirect and no session cookie on 4 of 4 arms (forged state, another browser's state, no transaction cookie, mismatched nonce); upstream redemptions for the 3 state arms [0, 0, 0] (refused before the code exchange), for the nonce arm 1; control (state and nonce match) -> 302 /schwab/download with a session naming the signed-in principal\n1 passed in 1.24s\nrc=0",
-      "denominator": "4 of 4 mismatch arms refused 400, with no Location and no session cookie: a forged state; another browser's code and state delivered to this browser (login CSRF); no transaction cookie; and a matching state whose ID token carries another nonce. The 3 state arms are refused before the code is redeemed (0, 0, 0 upstream redemptions); the nonce arm after exactly 1, by OG-a-2's nonce check. Control: 1 matching sign-in completes with 302 /schwab/download and a session naming the signed-in principal. 1 of 1 test, verbatim at 6a4e94d734.",
+      "output_evidence": "OGA3-AC2: refused 400 with no redirect and no session cookie on 4 of 4 arms (forged state, another browser's state, no transaction cookie, mismatched nonce); upstream redemptions for the 3 state arms [0, 0, 0] (refused before the code exchange), for the nonce arm 1; control (state and nonce match) -> 302 /schwab/download with a session naming the signed-in principal\n1 passed in 1.84s\nrc=0",
+      "denominator": "4 of 4 mismatch arms refused 400, with no Location and no session cookie: a forged state; another browser's code and state (login CSRF); no transaction cookie; a matching state whose ID token carries another nonce. The 3 state arms are refused before the code is redeemed (0, 0, 0 upstream redemptions); the nonce arm after exactly 1. Control: 1 matching sign-in completes with 302 and the principal's session. 1 of 1 test, verbatim at 9828b0e96e.",
       "status": "PASS"
     },
     {
@@ -125,8 +159,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac03 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA3-AC3: refused 400, no session cookie, on 3 of 3 arms, each by its own check: wrong signature -> InvalidSignatureError; wrong issuer -> InvalidIssuerError; wrong audience -> InvalidAudienceError; control (correct signature, issuer and audience) -> 302 with the principal's session; key lookups 4\n1 passed in 1.32s\nrc=0",
-      "denominator": "3 of 3 bad ID tokens refused 400 with no session cookie, each by its own check, as the refusal page names it: signed by another key under the published kid (InvalidSignatureError), an issuer that is not the tenant's exact issuer (InvalidIssuerError), an audience that is not this app's client id (InvalidAudienceError). Control: the same sign-in with a correct token completes with the principal's session. 4 signing-key lookups, one per sign-in. 1 of 1 test, verbatim at 6a4e94d734.",
+      "output_evidence": "OGA3-AC3: refused 400, no session cookie, on 3 of 3 arms, each by its own check: wrong signature -> InvalidSignatureError; wrong issuer -> InvalidIssuerError; wrong audience -> InvalidAudienceError; control (correct signature, issuer and audience) -> 302 with the principal's session; key lookups 4\n1 passed in 1.68s\nrc=0",
+      "denominator": "3 of 3 bad ID tokens refused 400 with no session cookie, each by its own check: another key under the published kid (InvalidSignatureError), an issuer that is not the tenant's exact issuer (InvalidIssuerError), an audience that is not this app's client id (InvalidAudienceError). Control: the same sign-in with a correct token completes. 4 signing-key lookups, one per sign-in. 1 of 1 test, verbatim at 9828b0e96e.",
       "status": "PASS"
     },
     {
@@ -135,8 +169,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac04 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA3-AC4: 2 of 2 cookies (__Secure-og_dl_login, __Secure-og_dl_session) Secure + HttpOnly + SameSite=lax + Path=/schwab/download + no Domain + Max-Age 600s/900s; the transaction cookie is cleared (Max-Age=0) at the callback; the jar sends the session to 4 of 4 download URLs and to 0 of 10 others (incl. /login, /mcp, /schwab/downloadx and plain http)\n1 passed in 1.11s\nrc=0",
-      "denominator": "2 of 2 cookies this cell sets (the session and the sign-in's transaction) carry Secure, HttpOnly, SameSite=lax, Path=/schwab/download, no Domain (host-only) and their Max-Age (900 s, 600 s), read from the Set-Cookie headers. The transaction cookie is cleared at the callback. The browser's cookie jar sends the session to 4 of 4 URLs under /schwab/download and to 0 of 10 others: /, /login, /callback, /mcp, /sprint, /authorize, /token, /schwab, /schwab/downloadx, and the download path over plain http. 1 of 1 test, verbatim at 6a4e94d734.",
+      "output_evidence": "OGA3-AC4: 2 of 2 cookies (__Secure-og_dl_login, __Secure-og_dl_session) Secure + HttpOnly + SameSite=lax + Path=/schwab/download + no Domain + Max-Age 600s/900s; the transaction cookie is cleared (Max-Age=0) at the callback; the jar sends the session to 4 of 4 download URLs and to 0 of 10 others (incl. /login, /mcp, /schwab/downloadx and plain http)\n1 passed in 1.43s\nrc=0",
+      "denominator": "2 of 2 cookies this cell sets carry Secure, HttpOnly, SameSite=lax, Path=/schwab/download, no Domain and their Max-Age (600 s, 900 s), read from the Set-Cookie headers. The transaction cookie is cleared at the callback. The browser's jar sends the session to 4 of 4 URLs under /schwab/download and to 0 of 10 others. 1 of 1 test, verbatim at 9828b0e96e.",
       "status": "PASS"
     },
     {
@@ -145,8 +179,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac05 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA3-AC5: one fixture (tid, oid, email): MCP OAuth principal key == browser session principal key (True), tid equal True, oid equal True; upstream redirect URIs differ (MCP /callback, browser /schwab/download/callback), scopes OpenID-only both; difference: same email, another oid -> another key (True)\n1 passed in 1.25s\nrc=0",
-      "denominator": "1 user fixture (tid, oid, email) signed in twice, independently. Through MCP OAuth (register, authorize, upstream, /callback, /token): the principal of the validated access token. Through this login: the principal of the session cookie. They are equal on key, tid, oid and display email (4 of 4). The two sign-ins are separate at the upstream, each with its own redirect URI (/callback, /schwab/download/callback), and both ask for OpenID scopes only. Difference: 1 principal with the same email and another oid gets another key through this login. 1 of 1 test, verbatim at 6a4e94d734.",
+      "output_evidence": "OGA3-AC5: one fixture (tid, oid, email): MCP OAuth principal key == browser session principal key (True), tid equal True, oid equal True; upstream redirect URIs differ (MCP /callback, browser /schwab/download/callback), scopes OpenID-only both; difference: same email, another oid -> another key (True)\n1 passed in 1.81s\nrc=0",
+      "denominator": "1 user fixture signed in twice, independently: through MCP OAuth (register, authorize, upstream, /callback, /token) and through this login. The two principals are equal on key, tid, oid and display email (4 of 4). The upstream sign-ins are separate, each with its own redirect URI, both OpenID-only. Difference: 1 principal with the same email and another oid gets another key. 1 of 1 test, verbatim at 9828b0e96e.",
       "status": "PASS"
     },
     {
@@ -155,38 +189,68 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac06 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA3-AC6: browser_oidc.py (268 lines): imports of app/identity.py and references to 4 ALB helper names or the ALB OIDC header 0 (module globals bound to identity 0); controls: app/server.py 4 hit(s) incl. 'from .identity' and get_user_email, 5 of 5 specimens caught\n1 passed in 1.08s\nrc=0",
-      "denominator": "1 module, browser_oidc.py (268 lines), read by AST: 0 imports of app/identity.py, 0 references to its 4 ALB helper names (_alb_oidc_identity, get_user_email, _fetch_elb_public_key, _PROVIDERS; each checked to exist in identity.py), and 0 string references to the ALB OIDC header; 0 module globals bound to anything identity.py defines. Controls: the same checker finds 4 hits in app/server.py (incl. 'from .identity' and get_user_email) and catches 5 of 5 one-line specimens of each form. 1 of 1 test, verbatim at 6a4e94d734.",
+      "output_evidence": "OGA3-AC6: browser_oidc.py (268 lines): imports of app/identity.py and references to 4 ALB helper names or the ALB OIDC header 0 (module globals bound to identity 0); controls: app/server.py 4 hit(s) incl. 'from .identity' and get_user_email, 5 of 5 specimens caught\n1 passed in 1.32s\nrc=0",
+      "denominator": "1 module, browser_oidc.py (268 lines), read by AST: 0 imports of app/identity.py, 0 references to its 4 ALB helper names (each checked to exist in identity.py), 0 string references to the ALB OIDC header, 0 module globals bound to identity.py. Controls: 4 hits in app/server.py and 5 of 5 one-line specimens caught. 1 of 1 test, verbatim at 9828b0e96e.",
       "status": "PASS"
     },
     {
       "criterion_id": "OGA3-AC7",
-      "criterion_verbatim": "`OGA3-AC7` (`test_oga3_ac07`) -- the route table differs from the one at your base only by the new paths. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac07 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "criterion_verbatim": "`OGA3-AC7` (`test_oga3_ac07`) -- (superset) every route at the cut base `7459929520` is still served, unchanged and in order; the two browser routes are served; the middleware is unchanged; and the existing browser authentication still guards `/login`, `/sprint` and `/sprint/archive`. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac07 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py::test_oga3_ac07 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA3-AC7: routes at the base 27 (git object 7459929520: 27 declared, equal to the recorded table); now 29; added 2 ['/schwab/download/login', '/schwab/download/callback']; removed 0; changed 0; order of the 27 base routes kept; middleware unchanged (RateLimit, Guard); /login, /sprint, /sprint/archive without the access-layer header -> 401 (3 of 3), /mcp without a bearer -> 401, /schwab/download/login -> 302 to the upstream\n1 passed in 1.34s\nrc=0",
-      "denominator": "27 routes at the cut base 7459929520, recorded from the running app there, and re-derived from the git object of server.py at that commit by AST (27 declarations, equal on kind, path and served methods). 29 now: the live table minus the 2 new rows equals the base table row for row (kind, path, methods, endpoint) and in order, so 2 added, 0 removed, 0 changed; the source's declarations agree. The middleware stack is unchanged. Behaviour: /login, /sprint and /sprint/archive still refuse a request without the access-layer header (401, 3 of 3), /mcp refuses without a bearer (401), and only the new login path opens to the upstream (302). 1 of 1 test, verbatim at 6a4e94d734.",
+      "output_evidence": "OGA3-AC7: base routes 27 (git object 7459929520: 27 declared, equal to the recorded table); served now 29; base routes still served unchanged 27 of 27, in base order, each path once; browser routes served 2 of 2 ['/schwab/download/login', '/schwab/download/callback']; middleware ['RateLimitMiddleware', 'GuardMiddleware'] == the base's add_middleware calls reversed ['GuardMiddleware', 'RateLimitMiddleware']; /login, /sprint, /sprint/archive without the access-layer header -> 401 (3 of 3), /mcp without a bearer -> 401, /schwab/download/login -> 302 to the upstream\n1 passed in 1.89s\nrc=0",
+      "denominator": "27 of 27 routes of the cut base 7459929520 (recorded table, re-derived from the git object by AST: 27 declarations, equal) still served row for row (kind, path, methods, endpoint), in base order, each base path once; 29 served now. 2 of 2 browser routes served by app.browser_oidc. Middleware: the live stack equals the base's 2 add_middleware calls reversed. 3 of 3 access-layer paths refuse without the header (401); /mcp 401 without a bearer. Superset: with 2 extra routes injected in-process the test still passes (see controls). 1 of 1 test, verbatim at 9828b0e96e.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA3-AC8",
+      "criterion_verbatim": "`OGA3-AC8` -- (one-time record) at this cell's HEAD, the served route table equals the table at the cut base `7459929520` plus exactly the paths in `BROWSER_PATHS.json`, none removed or changed; the probe prints the counts and `VERDICT: PASS-OGA3-AC8` or `VERDICT: FAIL-OGA3-AC8 <reason>`. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a3.py AC8</invocation><expect>(?m)^VERDICT: PASS-OGA3-AC8(?![0-9])</expect>",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a3.py AC8",
+      "expect": "(?m)^VERDICT: PASS-OGA3-AC8(?![0-9])",
+      "output_evidence": "table judge control: base + the 2 listed -> pass (expected pass)\ntable judge control: base + the 2 listed + 1 more -> fail (expected fail)\ntable judge control: a base route removed -> fail (expected fail)\ntable judge control: a base route's methods changed -> fail (expected fail)\ntable judge control: one listed route missing -> fail (expected fail)\ntable judge control: base routes reordered -> fail (expected fail)\nHEAD 9828b0e96e, cut base 7459929520\nBROWSER_PATHS.json @9828b0e96e: 2 entries, 2 distinct (path, methods): [('/schwab/download/callback', ('GET', 'HEAD')), ('/schwab/download/login', ('GET', 'HEAD'))]\ndeclared routes: base 27 (git object 7459929520), HEAD 29 (git object 9828b0e96e)\nadded 2 ['/schwab/download/login', '/schwab/download/callback']; removed 0 []; changed 0 []; base order kept: yes; duplicate paths 0\nWARN: GATEWAY_JWT_PRIVATE_KEY unset -- generating an EPHEMERAL RSA key (dev only; tokens do NOT survive a restart).\nserved routes (app imported from the worktree, app/ == HEAD): 29; equal to the HEAD declarations row for row (kind, path, methods): yes; served by app.browser_oidc: [('/schwab/download/callback', ('GET', 'HEAD')), ('/schwab/download/login', ('GET', 'HEAD'))]; egress attempts during import 0 []\nVERDICT: PASS-OGA3-AC8\nrc=0",
+      "denominator": "27 declared routes at the cut base (git object), 29 at HEAD 9828b0e96e (git object), 29 served by the app imported from the worktree (app/ equal to HEAD, porcelain empty). Added 2 = the 2 entries of BROWSER_PATHS.json (read at HEAD), by path and methods; removed 0 of 27; changed 0 of 27 (structural dump of each declaration); base order kept; duplicates 0. Served table = HEAD declarations, 29 of 29 rows. 0 egress attempts during import. Judge controls 6 of 6 as expected. The WARN line is the app's own dev-key notice at import (no key is configured in the probe), not a verdict.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA3-AC9",
+      "criterion_verbatim": "`OGA3-AC9` -- `tests/test_principal_cutover.py` passes, 11 of 11, with the two browser paths classed in `ROUTE_CLASS`. <invocation>cd <WS> && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py -q -p no:cacheprovider --color=no -m \"not live\"</invocation><expect>(?m)^11 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py -q -p no:cacheprovider --color=no -m \"not live\"",
+      "expect": "(?m)^11 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC4: route declarations in app/server.py 29 (Route 28, Mount 1) == app.routes 29; protected 19 (access 3, access-layer 5, capability 7, static 2, static-exchange 2), public 10; legacy access token (exp valid) rejected 401 on 19 of 19 protected routes, and the OG-a-1-shape legacy token naming a LIVE family rejected 401 invalid_token with the resource challenge on 3 of 3 access-token routes; the same family's current token accepted 200 on 3 of 3 (/mcp, /query/v0, /teams/poll); public routes: the legacy bearer changes no status on 10 of 10\n[OGA2-AC1 .. AC3 and AC5 .. AC11 denominator lines as printed, in .scratch/v_ac9.log]\n11 passed in 5.43s\nrc=0",
+      "denominator": "11 of 11 tests of the module, rc=0. test_oga2_ac04, the test the first run turned red (row W3-S16, '1 failed, 10 passed' at 6a4e94d734), now reads 29 declarations == 29 app routes, public 10 (8 at the base + the 2 browser paths), and the legacy bearer changes no status on 10 of 10 public routes, the 2 browser paths among them. Verbatim at 9828b0e96e.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA3-AC10",
+      "criterion_verbatim": "`OGA3-AC10` -- (discriminating) the diff of `tests/test_principal_cutover.py` against the cut base `7459929520` is exactly two added `ROUTE_CLASS` entries, `/schwab/download/login` and `/schwab/download/callback`, each `\"public\"`, and no other line; the probe prints `VERDICT: PASS-OGA3-AC10` or `VERDICT: FAIL-OGA3-AC10 <reason>`. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a3.py AC10</invocation><expect>(?m)^VERDICT: PASS-OGA3-AC10(?![0-9])</expect>",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3d && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a3.py AC10",
+      "expect": "(?m)^VERDICT: PASS-OGA3-AC10(?![0-9])",
+      "output_evidence": "ROUTE_CLASS judge control: the two entries, public -> pass (expected pass)\nROUTE_CLASS judge control: one entry classed access -> fail (expected fail)\nROUTE_CLASS judge control: a third entry -> fail (expected fail)\nROUTE_CLASS judge control: an assertion changed -> fail (expected fail)\nROUTE_CLASS judge control: a base entry re-classed -> fail (expected fail)\nROUTE_CLASS judge control: a comment added outside -> fail (expected fail)\nHEAD 9828b0e96e, cut base 7459929520, file infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py\nROUTE_CLASS entries: base 27, HEAD 29; gained {'/schwab/download/login': 'public', '/schwab/download/callback': 'public'}; removed 0; re-classed 0\ndiff vs base: 0 line(s) removed or changed, 2 added (ROUTE_CLASS spans HEAD lines 487-500)\n  +498  \"/schwab/download/login\": \"public\",\n  +499  \"/schwab/download/callback\": \"public\",\nadded lines outside ROUTE_CLASS 0; added lines read as entries: {'/schwab/download/login': 'public', '/schwab/download/callback': 'public'}; module outside ROUTE_CLASS structurally identical at both vintages: yes\nworktree==HEAD: yes\nVERDICT: PASS-OGA3-AC10\nrc=0",
+      "denominator": "1 file, both vintages from git objects: ROUTE_CLASS 27 entries at the base, 29 at HEAD 9828b0e96e; gained exactly the 2 named entries, each public; 0 of 27 removed or re-classed. Diff: 0 lines removed or changed, 2 added, 2 of 2 inside ROUTE_CLASS. The module with ROUTE_CLASS blanked is structurally identical at both vintages (no assertion or other statement moved). Judge controls 6 of 6 as expected. Negative arm: the same probe at the pre-edit HEAD 6886ddd314 printed 'VERDICT: FAIL-OGA3-AC10 git diff 7459929520 6886ddd314 -- ... rc=0 bytes=0', rc=1.",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Two mutants, each in-process through a pytest plugin (the worktree untouched), running the whole module. (1) browser_oidc._eq always True: the callback's state comparison is disabled. (2) browser_oidc._set_cookie with Path=/: the cookies are not scoped to the download paths.",
-      "expected": "(1) test_oga3_ac02 fails on the forged-state arm (302 instead of 400), the other 6 pass. (2) test_oga3_ac04 fails, the other 6 pass.",
-      "observed": "(1) 'MUTANT: browser_oidc._eq always True (state check disabled)' | 'AssertionError: ('forged state', 302, '')' | 'FAILED ...::test_oga3_ac02' | '1 failed, 6 passed in 4.72s', rc=1. (2) 'MUTANT: browser_oidc._set_cookie with Path=/' | 'FAILED ...::test_oga3_ac04' | '1 failed, 6 passed in 3.58s', rc=1. OGA3-AC6's checker carries its own positive controls (app/server.py 4 hits; 5 of 5 specimens).",
+      "description": "AC7 superset, three in-process route-table mutants through a pytest plugin (.scratch/ac7_mutants.py; the worktree untouched), each running test_oga3_ac07 at the committed bytes: (extra) 2 routes injected, one mid-table and one at the end; (drop) /sprint/archive removed; (rebind) /login re-declared POST-only in place. AC8/AC10: each probe verb runs its judge against 6 synthetic cases before reading git. AC1..AC6 mutants from the first run at 6a4e94d734 stand (code unchanged): the state check disabled fails test_oga3_ac02; the cookies at Path=/ fail test_oga3_ac04.",
+      "expected": "(extra) 1 passed -- a later cell adding routes keeps AC7 green, which the pinned AC7 of the first run would not. (drop) and (rebind) 1 failed each. Probe judges: 1 pass and 5 fails per verb, as labelled.",
+      "observed": "(extra) 'MUTANT extra: 29 -> 31 routes' | '1 passed in 1.31s', rc=0. (drop) 'MUTANT drop: 29 -> 28 routes' | \"AssertionError: [('Route', '/sprint/archive', ('GET', 'HEAD'), 'app.sprint_view.sprint_archive')]\" | '1 failed in 2.18s', rc=1. (rebind) 'MUTANT rebind: 29 -> 29 routes' | \"AssertionError: [('Route', '/login', ('GET', 'HEAD'), 'app.server.login')]\" | '1 failed in 1.77s', rc=1. Probe judges: 6 of 6 as expected on AC8 and 6 of 6 on AC10 (in the output evidence). AC10 negative arm at 6886ddd314: FAIL, rc=1.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "The module was run 4 times on the committed bytes: the first run (7 passed in 5.15s), the per-module census (7 passed in 3.68s), the no-egress run (7 passed in 4.61s), and the 7 verbatim criterion invocations at 6a4e94d734 (1 passed each). The seven denominator lines were compared across runs, modulo the wall-clock.",
-      "observed": "7 of 7 denominator lines byte-identical between the first run and the verbatim runs; 7 passed in each of the 3 module runs.",
+      "method": "Pre-commit runs on the same bytes compared with the verbatim criterion runs at 9828b0e96e: test_browser_oidc.py whole module (7 passed in 2.92s) vs the 7 verbatim single-test runs; test_principal_cutover.py (11 passed in 6.31s) vs its verbatim run; the AC8 probe at 6886ddd314 (app/ identical) vs at 9828b0e96e.",
+      "observed": "The OGA3-AC3 and OGA3-AC7 denominator lines of the module run are byte-identical to their verbatim runs; 11 passed both times for AC9; the AC8 counts (27, 29, added 2, removed 0, changed 0, served 29, egress 0) identical at both HEADs.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
       "item": "A live Entra sign-in through the new callback.",
-      "reason": "The order forbids an interactive Entra sign-in or a vendor call; the upstream is a local test issuer. The live half, and registering the new redirect URI at the app registration (row NFRA_OPLGTW-W3-S19), fall to OG-r-1, OG-v-2 and OG-v-4."
+      "reason": "The order forbids an interactive Entra sign-in or a vendor call; the upstream is a local test issuer. The live half, and registering the new redirect URI at the app registration (row NFRA_OPLGTW-W3-S19), fall to later cells."
     },
     {
       "item": "The download page, the ticket exchange and the hashed pending ticket bound to the browser session (PRD C5).",
@@ -197,16 +261,16 @@
       "reason": "OG-i-3's cell; it reads BROWSER_PATHS.json."
     },
     {
-      "item": "Adding the two paths to ratelimit.AUTH_PATHS, and to test_principal_cutover.py's ROUTE_CLASS.",
-      "reason": "Both files are outside the grant: rows W3-S18 (INERT) and W3-S16 (ARMED, 2.0.0_SA_COO~O)."
+      "item": "Adding the two paths to ratelimit.AUTH_PATHS.",
+      "reason": "ratelimit.py is outside the grant: row W3-S18 (INERT). The ROUTE_CLASS half of the first run's exclusion is now done under the amendment's grant (OGA3-AC9, OGA3-AC10)."
     },
     {
       "item": "PKCE on the upstream leg of the browser sign-in.",
       "reason": "PRD C1 names state/nonce and exact issuer, audience and signature validation for this login, and all four are enforced; the upstream exchange is a confidential-client redemption, as the MCP bridge's is (token_broker, OG-a-2)."
     },
     {
-      "item": "A whole-suite run of infra/aws/ec2/opal-gateway/tests in one process.",
-      "reason": "Row NFRA_OPLGTW-W3-S12, and the order: run modules separately. The census was taken one process per module: 13 of 14 green, the 14th test_principal_cutover with 1 failure (row W3-S16)."
+      "item": "A whole-suite run of infra/aws/ec2/opal-gateway/tests, and a fresh per-module regression census.",
+      "reason": "Row NFRA_OPLGTW-W3-S12 and the order: run modules separately. This run changed two test files and added a probe, no app code; the two modules those files are were each run (7 of 7, 11 of 11). The first run's per-module census at 6a4e94d734 read 13 of 14 green, the 14th being test_principal_cutover, now green."
     },
     {
       "item": "Deploy, push, merge or rebase.",
@@ -214,8 +278,8 @@
     }
   ],
   "surprises": [
-    "NFRA_OPLGTW-W3-S16: the two new routes turn tests/test_principal_cutover.py::test_oga2_ac04 red; its ROUTE_CLASS table lacks them and the file is outside the grant. OBSERVATION, ARMED (disarm 2.0.0_SA_COO~O).",
-    "NFRA_OPLGTW-W3-S17: OGA3-AC7 as written pins the base route table, so the next cell that adds or changes a route (OG-x-1, OG-z-1) turns test_oga3_ac07 red. OBSERVATION, ARMED (disarm 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-W3-S16: the two new routes turned tests/test_principal_cutover.py::test_oga2_ac04 red; ROUTE_CLASS lacked them. OBSERVATION, ARMED (disarm 2.0.0_SA_COO~O). Addressed by the amendment @6886ddd314: the entries are added (OGA3-AC9 11 of 11, OGA3-AC10 PASS).",
+    "NFRA_OPLGTW-W3-S17: OGA3-AC7 as first written pinned the base route table. OBSERVATION, ARMED (disarm 2.0.0_SA_COO~O). Addressed by the amendment @6886ddd314: AC7 is a superset (the extra-routes mutant passes) and the exact fact is OGA3-AC8.",
     "NFRA_OPLGTW-W3-S18: the browser OIDC endpoints are rate-limited in the coarse FAIL-OPEN global bucket, not the auth bucket (ratelimit.py outside the grant). OBSERVATION, INERT.",
     "NFRA_OPLGTW-W3-S19: the new callback must be registered as a redirect URI at the upstream app registration; no cell names that act. OBSERVATION, INERT.",
     "NFRA_OPLGTW-W3-S20: neither the contract nor the PRD names a download path; /schwab/download was chosen as the cookie scope, which binds OG-x-1's page location. OBSERVATION, INERT.",
@@ -225,32 +289,27 @@
   "compiler_tools": [
     {
       "tool": "pytest under .venv-og (py -3.12 venv, --system-site-packages, requirements + msal moto pytest)",
-      "invocation": "the 7 invocations of OGA3-AC1 .. OGA3-AC7, verbatim, from /c/tmp/wk-oplgtw-1-3d at 6a4e94d734",
-      "result": "7 of 7 '1 passed', rc=0 each."
+      "invocation": "the 8 pytest invocations of OGA3-AC1 .. OGA3-AC7 and OGA3-AC9, verbatim, from /c/tmp/wk-oplgtw-1-3d at 9828b0e96e",
+      "result": "OGA3-AC1 .. AC7: '1 passed' each, rc=0; OGA3-AC9: '11 passed in 5.43s', rc=0."
     },
     {
-      "tool": "regression census, one process per Gateway module, AUDIT_PATH pointed at .scratch",
-      "invocation": "for each infra/aws/ec2/opal-gateway/tests/test_*.py: timeout 600 .venv-og/Scripts/python -m pytest <module> -q -p no:cacheprovider --color=no -m \"not live\"",
-      "result": "14 modules: 13 rc=0 (access_state 7, attachment_tools 5, browser_oidc 7, identity_scope 6, jwt_cve_lock 6, min_tier_gate 3, oauth_durable 18, ratelimit 6, schwab_audit 7, schwab_engine 13, sprint_view 8, ssavail_contract 8, teams_format 35); test_principal_cutover '1 failed, 10 passed' (test_oga2_ac04, row W3-S16). The tracked audit.jsonl is untouched."
-    },
-    {
-      "tool": "no-egress plugin (.scratch/no_egress.py: refuses every non-loopback connect and name lookup)",
-      "invocation": "PYTHONPATH=.scratch timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py -q -p no:cacheprovider --color=no -p no_egress -s",
-      "result": "'7 passed in 4.61s', 'EGRESS-ATTEMPTS: 0 []'."
+      "tool": "probes/og_a3.py under .venv-og",
+      "invocation": "og_a3.py AC8 and og_a3.py AC10, verbatim, at 9828b0e96e",
+      "result": "'VERDICT: PASS-OGA3-AC8' rc=0; 'VERDICT: PASS-OGA3-AC10' rc=0."
     },
     {
       "tool": ".tools/commit-gate.sh (py_compile, ruff py39, ds-precommit)",
-      "invocation": "bash .tools/commit-gate.sh app/browser_oidc.py app/server.py tests/test_browser_oidc.py",
-      "result": "'OK: pre-commit gate clean for 3 of 3 file(s)', rc=0 (and again inside safe-commit)."
+      "invocation": "bash .tools/commit-gate.sh tests/test_browser_oidc.py tests/test_principal_cutover.py probes/og_a3.py (full paths)",
+      "result": "'OK: pre-commit gate clean for 3 of 3 file(s)', rc=0, and again inside safe-commit; one MANIFEST-ADVISORY (advisory, not blocking) on test_principal_cutover.py:527, a line present at the cut base."
     },
     {
       "tool": ".tools/safe-commit.sh",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~3 <0.9.0_WK_NFRA_OPLGTW~3@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "6a4e94d734 (4 files, msg-verify MATCH len=1998), b2648343dc (rows W3-S16 .. W3-S21; surprise-row-gate 6 new of 53 OK; MATCH len=920), both LOCAL on wk-nfra_oplgtw-1-3d."
+      "result": "9828b0e96e (3 files, 519 insertions, 17 deletions; msg-verify MATCH len=1351), LOCAL on wk-nfra_oplgtw-1-3d."
     },
     {
       "tool": ".tools/proof-of-spec-check.py",
-      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> OGA3-AC1,OGA3-AC2,OGA3-AC3,OGA3-AC4,OGA3-AC5,OGA3-AC6,OGA3-AC7",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> OGA3-AC1,OGA3-AC2,OGA3-AC3,OGA3-AC4,OGA3-AC5,OGA3-AC6,OGA3-AC7,OGA3-AC8,OGA3-AC9,OGA3-AC10",
       "result": "see the result file -- only the exit code is the verdict"
     }
   ]
