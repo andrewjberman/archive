@@ -1,0 +1,691 @@
+Before the task, answer two questions about the software workspace these instructions come from. If you do not know an answer, write unknown. Do not guess.
+Q1: Which version of the Git Bash default utilities is that workspace's local shell pinned to?
+Q2: Which broker port does that workspace's second agent fabric use?
+
+TASK. You name NEW cloud resources for one organization. Your ONLY briefing is the documents below: its naming schema (JSON) and its identity registry (three JSON files: its scopes, its systems and its tiers). Derive every name from them alone. If a name cannot be derived from them, the answer for that item is RAISE.
+For a resource, give the full name. For an S3 key, give the key without the bucket, up to and including the partition, as the item says. For a bucket, give the bucket name.
+
+=== DOCUMENT 1: NAMING_SCHEMA.json ===
+{
+ "title": "NAMING_SCHEMA -- the D14 Platform Logic naming schema's CLOSED ENUMERATIONS, as data",
+ "version": "v1.7",
+ "ratified_by": "org/missions/D14/LGIC/LGIC_NAMING/prd/LGIC_NAMING_PRD.md v1.7 (L4, 1.0.0_SA_CTO; v1.5, v1.6 and v1.7 at L10). Spine L4: a decision that is an enumeration is closed as data in org/standards/ and cited.",
+ "changelog": [
+  "v1.0 -- first issue with LGIC_NAMING_PRD v1.0 @c65a169ba0.",
+  "v1.1 -- on 4.0.0_SA_CRO~D's REFUSED brief half (review @1e4e3e10fd): kind.by_type keys are the live plane's node_type strings (CODEBUILD -> CODEBUILD_PROJECT, ECS_TASK -> ECS_TASK_DEFINITION); every node type not graded by kind is enumerated by subtraction; lb and cluster added for the two minted types that had no kind.",
+  "v1.2 -- on 3.0.0_SA_CVO's ratified-text review (@48eab96ed5): key.grammar is the ruled five-segment string verbatim; the bucket (container) and the object (leaf) are separate fields, so a key builder never writes a bucket name into a key.",
+  "v1.3 -- on 1.0.0_SA_CTO's adjudication of rows LGIC_NAMING-S6, S7 and S8 (org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ADJUDICATION_LGIC_NAMING_20260914T103xZ_S6_S7_S8_ENTITY_PARTITION_CODE_TIER_LEGACY_SERVED_PATHS.md): key.partition gains the entity partition; key.table_case bounds kebab-case to NEW served leaves; key.legacy_served_path and key.code are new. The five ruled segments are unchanged.",
+  "v1.4 -- on 1.0.0_SA_CTO's adjudication of row LGIC_NAMING-S10 (org/tier1_exec/1.0.0_SA_CTO/deliverables/CTO_ADJUDICATION_LGIC_NAMING_20260914T113xZ_S10_LEGACY_MEMBERSHIP_IS_DATA.md): legacy-served membership is data -- key.legacy_served_paths names its home, its producer (cell LN-g-1) and its claim, and grade() RAISES on a key whose verdict turns on it until the list lands, so the grade stays (name, type) over this file; key.code gives a legacy root code/ key its verdict (OUT-OF-PATTERN, the code-tier canonical form).",
+  "v1.5 -- at L10, on 1.0.0_SA_CTO's ROUND-1 ANALYSIS (org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND1_20260914.md), ruling the four slots round 1 measured as unruled (carrier C-S5) and two FWD-5 gaps (C-S8): resource.function (FN1), resource.qualifier (FN2, FN3), secret.purpose and iam_policy.purpose_slot (FN4), key.partition's {entity} (P1), key.scope_rule (SC1), system.vendor_through_tiers (SY1), grade.placeholder (PH1) and aws_fixed (AW1). The five ruled key segments are unchanged.",
+  "v1.6 -- on 4.0.0_SA_CRO's refusal of PRD v1.5's brief half (@3a9a0c2f91, R3): key.scope_rule states the vendor MASTER case. A master keeps its own scope under doctrine R3 (two masters of one firm are two scopes, never commingled), and the audience rule decides FIRM or global for every other key. v1.5 had put a Schwab master under its firm.",
+  "v1.7 -- at L10, on 1.0.0_SA_CTO's ROUND-2 ANALYSIS (org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND2_20260915.md): resource.function -- a noun-phrase function drops every token already written in the system or scope slot (FN1b, row C-S14), and only the resource's OWN kind is barred from its function (FN1c, row W4-S2); both bind the grade as well as the namer, while FN1's word-choice clauses bind the namer only. firm_forms.demo cites the registry row that defines it (RULING DM, row W6-S4). rows_owner: the registry now exists and governs where it and the seed differ. system.vendor_through_tiers' worked example is a name outside every naming-exercise item set (RULING EX1, row S15). The five ruled key segments, the grade signature and its verdicts are unchanged."
+ ],
+ "authority": [
+  "SOURCE-FIRST key string -- Andrew-direct 2026-09-13 ~03:2xZ card 1, 'all recs approved' (relayed 4.0.0_SA_CRO~D 96332)",
+  "WHICH firm short forms exist (49f, inf, cot beside the long forms; bd refused in every slot) -- Andrew-direct 2026-09-13 ~03:5xZ card 2 (record @38f2268d48)",
+  "Remediation shape (a): D14 owns the rule, registry, builders and flagger; every fix goes where the resource lives -- Andrew-direct 2026-09-13 ~03:5xZ",
+  "WHERE each form is used (the per-slot split) -- RATIFIED AT L4 by 1.0.0_SA_CTO in LGIC_NAMING_PRD, revertible on Andrew's word; it narrows nothing he ruled"
+ ],
+ "rows_owner": "The ROWS (which firms, products, vendors and platform subsystems exist, with their keys and aliases) belong to the identity registry, which LGIC_ENFORCE owns under ruling (a): infra/logic/registry/ (LGIC_ENFORCE EN-r-1 @a925c8a642). The seed infra/logic/05_IDENTITY_SPINE.md served until the registry existed; where the two differ, the registry governs (v1.7). This file fixes the SHAPE and the closed lists; it mints no row.",
+ "node_type_vocabulary": {
+  "owner": "the live-plane CloudNode graph read by comp-find --corpus aws. Every type key in this file (kind.by_type and types_not_graded_by_kind) IS a node_type value that instrument returns, spelled exactly as it returns it.",
+  "measured": "comp-find --corpus aws '.' --budget 600 by 1.0.0_SA_CTO 2026-09-13 ~22:4xZ; graph vintage 'Built from the estate as of 2026-09-13 12:15:54 UTC', manifest 48bf196564e6; 2,531 nodes, 33 node types",
+  "denominator": 33,
+  "partition": "kind.by_type (18) + types_not_graded_by_kind (15) = 33, disjoint"
+ },
+ "key": {
+  "grammar": "{source}/{scope}/{tier}/{table}/{partition}",
+  "ruled": "Andrew-direct 2026-09-13 ~03:2xZ card 1, verbatim; the five segments and their order are the ruling",
+  "container": "{bucket} -- the bucket that holds the key; NEVER a segment of the key",
+  "leaf": "{object} -- the file under {partition}; not part of the ruled string",
+  "full_address": "s3://{bucket}/{source}/{scope}/{tier}/{table}/{partition}/{object}",
+  "same_string_in_every_bucket": true,
+  "source": "a registry VENDOR key (a feed) or, for derived tiers, a PRODUCT or SYSTEM key",
+  "scope_classes": ["FIRM", "PRODUCT", "MASTER", "GLOBAL"],
+  "scope_rule": "a vendor MASTER keeps its own scope (doctrine R3: two masters of one firm are two scopes, never commingled -- schwab/08242234/, never schwab/49financial/). For every other key the scope is its AUDIENCE: a FIRM when the data is one firm's; global when every firm shares it. A PRODUCT key is a scope only beneath a VENDOR source (a feed for the product: pathfinder/etfs), never beneath itself as the source -- mdpf/global/..., never mdpf/mdpf/... (SC1, v1.5; the master case written at v1.6)",
+  "scope_form": "LONG",
+  "entity_id_in_scope": "REFUSED (doctrine R2)",
+  "tier": ["bronze", "silver", "gold", "platinum", "state", "code"],
+  "table_case": "snake_case; a NEW platinum leaf is a kebab-case .json file (the served names); see legacy_served_path",
+  "legacy_served_path": "below {source}/{scope}/platinum/, a LEGACY served path keeps its bytes -- the table, a bare entity-id segment in the partition slot, and the file name -- because the frozen portal requests it by path; the kebab-case and hive forms bind NEW served families only (LGIC_NAMING v1.3, rows S6 and S8). MEMBERSHIP is data, never a name's shape: a path is legacy only if legacy_served_paths lists it (LGIC_NAMING v1.4, row S10)",
+  "legacy_served_paths": {"home": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/LEGACY_SERVED_PATHS.json", "producer": "LGIC_NAMING cell LN-g-1: every served path below {source}/{scope}/platinum/ that the frozen portal requests, with the portal vintage it read and the denominator printed. A CLOSED list: a frozen portal adds no request.", "claim": "absent until LN-g-1 lands it", "until_present": "grade() RAISES on a platinum key whose verdict turns on legacy membership -- a defect in this file, fixed here (grade.unplaceable), never guessed CONFORMANT or OUT-OF-PATTERN"},
+  "code": "tier code is a pipeline's code home (R16), beside its data: {source}/{scope}/code/{built_tier}/{file} -- the table slot carries the tier the code builds (bronze, silver or gold) and the file or bundle is a named leaf; Lambda deployment artifacts take the same form (R16 does not reach them; R1 grades their key). Legacy root code/ homes stay until their pipelines move (LGIC_NAMING v1.3, row S7; the canon's carve-out narrowed as LGIC_CANON-S1). A legacy root code/ key grades OUT-OF-PATTERN, its canonical_form the code-tier key; a verdict is not a mandate to move, so MDPF_CANON's frozen rollback objects keep that verdict and stay (LGIC_NAMING v1.4, row S10)",
+  "partition": ["date=YYYY-MM-DD", "a named leaf", "{entity}={id} -- an entity partition; {entity} is the KEY COLUMN's name as the table carries it (advisor_id=A123), as date is the column in date=YYYY-MM-DD; the file is the object under it (doctrine R2; P1, v1.5)"]
+ },
+ "bucket": {
+  "data_bucket": "opal-data-{scope}",
+  "data_bucket_scope_form": "LONG",
+  "platform_bucket": "opal-{account-id}-{purpose}",
+  "standing_shared": ["opal-data-assets", "opal-data-portal-v2"],
+  "vendor_name_in_a_new_bucket": "REFUSED"
+ },
+ "resource": {
+  "grammar": "{system}-{scope}-{function}[-{qualifier}]-{last}",
+  "case": "kebab-case, lowercase, ASCII",
+  "scope_form": "SHORT",
+  "scope_when_shared": "OMITTED -- a shared resource carries no scope token, never a placeholder",
+  "last_slot": {"default": "kind", "EVENT_RULE": "cadence", "SCHEDULE": "cadence"},
+  "function": "names what the resource does. Where the item DESCRIBES the action with a verb, the function is that verb in its base form (publish, fetch, read, build, download); an agent noun describing the resource ITSELF is written as its verb (publisher -> publish, exporter -> export, scanner -> scan), because the kind names the thing. Where the item NAMES the process or subject as a noun phrase (the SmartX platform export, the Orion ingest, the price-refresh queue, pipeline alerts, delivery status), the function is that phrase as named, kebab-case, ONE token (as silver-chain), LESS every token already written in the system or scope slot: Inflection's Orion ingest is orion-inf-ingest, never orion-inf-orion-ingest; a subtraction that leaves no function token RAISES (grade.unplaceable) (FN1b, v1.7). The resource's OWN kind (kind.by_type for its type) is never written in its function; another type's kind that names the subject the resource serves is part of that phrase and stays (mdpf-gold-lambda-role is the role the gold lambda assumes) (FN1c, v1.7). FN1b and FN1c bind the GRADE as well as the namer, because both are read from the name alone; the word-choice clauses before them bind the NAMER, who has the item's description, and a grade keeps a function's words as written (FN1, v1.5; v1.7)",
+  "qualifier": "optional narrowing, written after the function: the TIER (bronze, silver, gold, platinum) or the named TABLE the action acts on, when the item names one -- any other object (figures, files, data, session data) is not written (FN2); a leg; or an environment (dev | prod). A CW_ALARM's qualifier is its condition noun (failure, error, latency), always written (FN3, v1.5)"
+ },
+ "kind": {
+  "values": ["lambda", "role", "policy", "profile", "sg", "api", "table", "queue", "dlq", "topic", "alerts", "alarm", "layer", "runner", "build", "document", "task", "sfn", "lb", "cluster"],
+  "by_type": {
+   "LAMBDA": ["lambda"],
+   "IAM_ROLE": ["role"],
+   "IAM_POLICY": ["policy"],
+   "INSTANCE_PROFILE": ["profile"],
+   "SECURITY_GROUP": ["sg"],
+   "API_GW": ["api"],
+   "DYNAMODB_TABLE": ["table"],
+   "SQS_QUEUE": ["queue", "dlq"],
+   "SNS_TOPIC": ["topic", "alerts"],
+   "CW_ALARM": ["alarm"],
+   "LAMBDA_LAYER": ["layer"],
+   "EC2_INSTANCE": ["runner"],
+   "CODEBUILD_PROJECT": ["build"],
+   "SSM_DOCUMENT": ["document"],
+   "ECS_TASK_DEFINITION": ["task"],
+   "STATE_MACHINE": ["sfn"],
+   "LOAD_BALANCER": ["lb"],
+   "ECS_CLUSTER": ["cluster"]
+  },
+  "closed_at_l4": "By subtraction from the live plane's 33 node types: ECS_TASK_DEFINITION, STATE_MACHINE, LOAD_BALANCER and ECS_CLUSTER had no kind in the brief's list -- added as task, sfn, lb and cluster (the last two each have one live node, opal-gateway and opal-globgrph, and are resources this estate mints). secret was DROPPED: secrets keep their own slash-path grammar, where a kind suffix would repeat the type. The brief's measured suffixes trigger, publisher, scanner are FUNCTION tokens, not kinds; their canonical spellings are the verbs trigger, publish and scan (FN1, v1.5)."
+ },
+ "types_not_graded_by_kind": {
+  "EVENT_RULE": "resource grammar with a CADENCE as the last slot (resource.last_slot)",
+  "SCHEDULE": "resource grammar with a CADENCE as the last slot (resource.last_slot)",
+  "LOG_GROUP": "derived: /aws/{service}/{resource-name}; conforms when its resource does (log_group)",
+  "S3_BUCKET": "the bucket grammar (bucket)",
+  "S3_BUCKET_POLICY": "carries its bucket's name exactly (15 of 15 live nodes); graded as that bucket",
+  "S3Key": "the key grammar (key)",
+  "SECRET": "the slash-path secret grammar (secret)",
+  "IAM_USER": "NOT GRADED: named by its holder or issuer -- a person, the account root, an external identity provider named by its issuer URL (4 live nodes). The one machine user among them (github-actions-portal) is recorded, not graded; a remediation that converts it to a role takes the role grammar",
+  "KMS_KEY": "NOT GRADED: AWS-issued identifier (not_covered)",
+  "CLOUDFRONT_DISTRIBUTION": "NOT GRADED: AWS-issued identifier (not_covered)",
+  "SERVICE_PRINCIPAL": "NOT GRADED: AWS-issued identifier (not_covered)",
+  "VPC_ENDPOINT": "NOT GRADED: AWS-issued identifier (not_covered)",
+  "ROUTE53_RECORD": "NOT GRADED: a DNS record name (not_covered)",
+  "API_ROUTE": "NOT GRADED: a served route contract (not_covered; infra/logic/07_ROUTING_REDERIVATION.md)",
+  "EVENT_SOURCE": "NOT GRADED: an event-source expression or service name, a different grammar (not_covered)"
+ },
+ "cadence": {
+  "values": ["daily", "weekly", "monthly", "hourly"],
+  "event_form": "on-{event}",
+  "event_token_regex": "^[a-z0-9]+(-[a-z0-9]+)*$"
+ },
+ "secret": {"grammar": "{system}/{scope}/{purpose}", "scope_form": "SHORT", "case": "lowercase, ASCII, slash-separated", "purpose": "the credential's kind (credentials, token, key, password, certificate), preceded by the interface it opens when the item names one: api-credentials (FN4, v1.5)"},
+ "log_group": {"grammar": "/aws/{service}/{resource-name}", "derived": true},
+ "iam_policy": {"grammar": "{system}-{scope}-{purpose}-policy", "purpose_slot": "function -- FN1 and FN2 apply, written as one compound token (read-gold) (FN4, v1.5)", "duplicate_name": "REFUSED"},
+ "firm_forms": [
+  {"key": "49financial", "short": "49f"},
+  {"key": "inflection", "short": "inf"},
+  {"key": "cottonwood", "short": "cot"},
+  {"key": "demo", "short": "demo", "note": "one token; the long and short forms are the same string. The identity registry defines it: infra/logic/registry/scopes.json row demo reads class FIRM, tenancy FIRM, tenant kind demo, so in every naming slot demo reads as a firm (RULING DM, row W6-S4, v1.7)"}
+ ],
+ "global_scope": {"key": "global", "short": "global"},
+ "refused_tokens": {
+  "bd": "refused in EVERY slot (Andrew ~03:5xZ card 2). The vendor is blackdiamond; the firm is 49financial.",
+  "mockadv": "an alias only, recorded in the registry's alias rows as history; never minted"
+ },
+ "system": {
+  "classes": ["PRODUCT", "PLATFORM_SUBSYSTEM", "VENDOR"],
+  "vendor_as_system_only_when": "the resource IS the vendor integration",
+  "vendor_through_tiers": "a resource that builds a firm's data from ONE vendor's feed IS that vendor's integration at every tier it builds (blackdiamond-cot-build-silver-profile); a resource that combines feeds takes the PRODUCT or PLATFORM_SUBSYSTEM that owns the combination (SY1, v1.5). A worked example here is kept outside every naming-exercise item set, so a briefing that carries this file never spells an item's answer (RULING EX1, row S15, v1.7)",
+  "never_a_system": ["a firm", "a project code", "a workstream code", "a cadence", "a generic noun"],
+  "reserved": {"opal": "account-level platform resources only; never a null prefix before a real system"}
+ },
+ "grade": {
+  "signature": "(name, type) -> (verdict, canonical_form); type is a node_type value (node_type_vocabulary)",
+  "verdicts": ["CONFORMANT", "ALIAS", "OUT-OF-PATTERN"],
+  "ALIAS": "the grammar holds but a slot carries a registry alias spelling (for example inflection or bd in a resource name's scope slot); canonical_form is printed",
+  "OUT-OF-PATTERN": "the grammar fails (order, separator, case, a missing or unknown kind, a firm in the system slot); canonical_form is printed",
+  "not_graded": "a type marked NOT GRADED in types_not_graded_by_kind returns no verdict and is outside the grade's domain -- it is excluded, not a fourth verdict",
+  "placeholder": "a canonical_form may carry {system}, {source}, {scope} or {cadence} ONLY for a slot the name does not carry. Each is a typed gap, never a guess, filled from its source: {system} from the identity registry's resource-to-system rows (LGIC_ENFORCE), {source}/{scope} from the bucket, {cadence} from the schedule. The verdict stays exact, and the signature stays (name, type). FWD-5's correct name is complete for a name only when no placeholder remains (PH1, v1.5)",
+  "unplaceable": "RAISES. A name the tokeniser cannot place, a node_type absent from this file, or a token no registry row resolves, is a defect in the tokeniser, this file or the registry and is fixed there -- it is never filed under one of the three verdicts, and there is no fourth"
+ },
+ "not_covered": [
+  "Terraform resource labels and module names (the executable layer's authoring surface; measured before its flagger is specified)",
+  "tag keys and values",
+  "AWS-issued identifiers (KMS key ids, CloudFront distribution ids, service principals, VPC endpoint ids)",
+  "DNS record names (Route 53)",
+  "event-source expressions and service names",
+  "API route grammar (a served contract; infra/logic/07_ROUTING_REDERIVATION.md)"
+ ],
+ "aws_fixed": {
+  "rule": "names AWS fixes are OUTSIDE the grade's domain, like the NOT GRADED types: excluded, never a fourth verdict. Extended when a new AWS-fixed name is measured (AW1, v1.5)",
+  "by_arn": "an IAM_POLICY whose ARN's account field is aws (arn:aws:iam::aws:policy/...) is AWS-managed -- read from the node's ARN, never from the name (ReadOnlyAccess carries no prefix)",
+  "by_name": {"SECURITY_GROUP": ["default"], "LOG_GROUP": ["RDSOSMetrics", "prefix: aws-waf-logs-", "prefix: /aws/ecs/containerinsights/"]},
+  "measured": "row LGIC_NAMING-W1-S4 over LIVE_NAMES.json (vintage 2026-09-14 12:13:53 UTC): SECURITY_GROUP 1 of 26; IAM_POLICY 9 of 417 by prefix, plus ReadOnlyAccess; LOG_GROUP 4 of 264"
+ },
+ "renames_authorized": "NONE. This schema grades; it moves no live name. Each remediation is minted where the resource lives, cites a row of the tension ranking, and carries its own sign-off."
+}
+
+=== DOCUMENT 2: scopes.json ===
+{
+  "_about": {
+    "what": "The identity registry's SCOPE rows (LGIC_ENFORCE DEC-1): every firm, product, master and the global scope, each with its long and short forms, its tenancy, its bucket and every alias the estate spells it with.",
+    "row_fields": "key (the LONG form); class, one of NAMING_SCHEMA.json key.scope_classes; long; short (NAMING_SCHEMA.json firm_forms owns which firm short forms exist); tenancy, a key of tiers.json homes; bucket, the scope's data bucket in the schema's LONG form opal-data-{long} (a master takes its firm's; the global scope owns none and names its platinum home); bucket_provisioned; aliases.",
+    "alias_fields": "spelling; planes, where the spelling lives; where, the artifacts that spell it; lookup false when lookup() must not resolve it (a bucket name, a pattern, prose, or another row's key); routed true on the bucket the deployed router serves the tenant from; provisioned on a bucket alias; tenant, when the alias is also a served tenant id.",
+    "view_fields": "tenant (the served tenant: display name, kind, surfaces, bindings), monolith_scopes (the spellings each vendor's monolith tree uses for the scope), pipeline_trees (a firm pipeline directory and the firms it is separated from) and trees (a product's legacy per-firm tree) are the facts the DEC-5 generated views are rendered from.",
+    "seeded_from": "infra/logic/05_IDENTITY_SPINE.md s.3, with the tenant facts read from the eight DEC-5 carriers at @e0171ca585 (org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/CARRIER_CENSUS.md s.4).",
+    "validator": "python lib/opal_naming.py validate"
+  },
+  "tenant_kinds": ["client", "test", "demo"],
+  "scopes": [
+    {
+      "key": "49financial",
+      "class": "FIRM",
+      "long": "49financial",
+      "short": "49f",
+      "tenancy": "FIRM",
+      "bucket": "opal-data-49financial",
+      "bucket_provisioned": true,
+      "masters": ["08242234", "08335338"],
+      "monolith_scopes": {"blackdiamond": ["49f", "49financial"]},
+      "pipeline_trees": [
+        {
+          "dir": "data/black_diamond/",
+          "vendor": "blackdiamond",
+          "separated_from": ["cottonwood"],
+          "authority": "Andrew sovereign 2026-06-10 (NFRA_DTAFLP) and the key-prefix extension of 2026-08-11, as .tools/ds-precommit-check.py:55-113 @e0171ca585 records them"
+        }
+      ],
+      "trees": {
+        "advi": {
+          "gold_root": "gold/advi",
+          "silver_master": "08335338",
+          "serve_bucket": "opal-data-portal-v2",
+          "serve_root": "platinum/advi/49financial",
+          "canon": "a legacy tier-first tree: platinum/advi/49financial/ in opal-data-portal-v2 is R6 VIOLATED (infra/logic/02_DOCTRINE.md:159) and infra/logic/08_TENSION_MAP.md s.1 item 3; data/assets/scripts/gold/runners_49f/perfrp_firm_pin.py FIRM_TREES serves it"
+        }
+      },
+      "tenant": {
+        "display_name": "49 Financial",
+        "kind": "client",
+        "enabled": true,
+        "email_domain": "49financial.com",
+        "surfaces": {"portal": true, "mdpf": true, "pipeline": true},
+        "bindings": {"aua_source": null, "model_source": null, "fee_scope": null, "series_start": "DYNAMIC", "delivery_cadence": null}
+      },
+      "aliases": [
+        {
+          "spelling": "bd",
+          "planes": ["serving-route", "tree-token"],
+          "where": "X-Firm-Id from the JWT and shared-advisor-router (05_IDENTITY_SPINE.md s.3); data/firm_registry.json tree_token",
+          "refused": "NAMING_SCHEMA.json refused_tokens: refused in every slot; the vendor is blackdiamond, the firm is 49financial"
+        },
+        {
+          "spelling": "opal-data-bd",
+          "planes": ["bucket"],
+          "provisioned": true,
+          "routed": true,
+          "lookup": false,
+          "where": "the deployed router's target (infra/aws/lambda-edge/_shared/firm-config.mjs FIRM_CONFIG), holding the served platinum; bronze, silver, gold and platinum all live (08_TENSION_MAP.md s.1 item 1). Graded ALIAS of opal-data-49financial (GRADING_RULE.md)."
+        },
+        {
+          "spelling": "49f",
+          "planes": ["monolith-scope", "catalog"],
+          "where": "opal-data-assets blackdiamond/49f/; org/modules/graph/variance_dimensions.yaml dimensions.firm firm_aliases, carried as data/firm_registry.json aliases"
+        },
+        {
+          "spelling": "bd49f",
+          "planes": ["catalog"],
+          "where": "org/modules/graph/variance_dimensions.yaml dimensions.firm firm_aliases, carried as data/firm_registry.json aliases"
+        },
+        {
+          "spelling": "blackdiamond",
+          "planes": ["catalog"],
+          "lookup": false,
+          "where": "org/modules/graph/variance_dimensions.yaml dimensions.firm firm_aliases, carried as data/firm_registry.json aliases",
+          "note": "a VENDOR key (systems.json); the catalog lists it beside this firm, so lookup() never resolves it to this scope"
+        },
+        {
+          "spelling": "mockadv",
+          "planes": ["tenant-id"],
+          "where": "infra/aws/lambda-edge/_shared/firm-config.mjs FIRM_CONFIG and data/firm_registry.json firms: a test tenant served from this firm's routed bucket",
+          "refused": "NAMING_SCHEMA.json refused_tokens: an alias only, recorded as history; never minted",
+          "tenant": {
+            "display_name": "Mock Advisor (test account)",
+            "kind": "test",
+            "enabled": true,
+            "email_domain": null,
+            "surfaces": {"portal": true, "mdpf": false, "pipeline": false},
+            "bindings": {"aua_source": null, "model_source": null, "fee_scope": null, "series_start": "DYNAMIC", "delivery_cadence": null}
+          }
+        },
+        {
+          "spelling": "F-49F",
+          "planes": ["tenant-code"],
+          "where": "performance/tenants.py (row IRPT_BCKEND-W2-S27)"
+        },
+        {
+          "spelling": "49f:acct:",
+          "planes": ["namespace"],
+          "lookup": false,
+          "where": "the namespaced account ids (row IRPT_BCKEND-W2-S11); a prefix, not a spelling of the scope"
+        },
+        {
+          "spelling": "fir_",
+          "planes": ["opaque-id"],
+          "lookup": false,
+          "where": "the issued opaque firm id's prefix (row IRPT_BCKEND-W2-S27)"
+        },
+        {
+          "spelling": "49F",
+          "planes": ["prose"],
+          "lookup": false,
+          "where": "prose"
+        }
+      ]
+    },
+    {
+      "key": "inflection",
+      "class": "FIRM",
+      "long": "inflection",
+      "short": "inf",
+      "tenancy": "FIRM",
+      "bucket": "opal-data-inflection",
+      "bucket_provisioned": false,
+      "monolith_scopes": {"orion": ["inflection"], "eclipse": ["inflection"]},
+      "tenant": {
+        "display_name": "Inflection Wealth Management",
+        "kind": "client",
+        "enabled": true,
+        "email_domain": "inflectionwealth.com",
+        "surfaces": {"portal": true, "mdpf": true, "pipeline": true},
+        "bindings": {"aua_source": null, "model_source": null, "fee_scope": null, "series_start": "DYNAMIC", "delivery_cadence": null}
+      },
+      "aliases": [
+        {
+          "spelling": "inf",
+          "planes": ["tree-token"],
+          "where": "data/firm_registry.json tree_token; the legacy bucket suffix (05_IDENTITY_SPINE.md s.3)"
+        },
+        {
+          "spelling": "opal-data-inf",
+          "planes": ["bucket"],
+          "provisioned": true,
+          "routed": true,
+          "lookup": false,
+          "where": "the deployed router's target (firm-config.mjs FIRM_CONFIG); four tiers live (08_TENSION_MAP.md s.1 item 1). opal-data-inflection does not exist yet."
+        },
+        {
+          "spelling": "F-INF",
+          "planes": ["tenant-code"],
+          "where": "performance/tenants.py (05_IDENTITY_SPINE.md s.3)"
+        }
+      ]
+    },
+    {
+      "key": "cottonwood",
+      "class": "FIRM",
+      "long": "cottonwood",
+      "short": "cot",
+      "tenancy": "FIRM",
+      "bucket": "opal-data-cottonwood",
+      "bucket_provisioned": false,
+      "monolith_scopes": {"blackdiamond": ["cottonwood"]},
+      "pipeline_trees": [
+        {
+          "dir": "data/cot/",
+          "vendor": "blackdiamond",
+          "separated_from": ["49financial", "inflection"],
+          "authority": "Andrew sovereign 2026-06-10 (NFRA_DTAFLP), the inflection ban and the 2026-08-27 additions, as .tools/ds-precommit-check.py:55-113 @e0171ca585 records them"
+        }
+      ],
+      "tenant": {
+        "display_name": "Cottonwood Capital Advisors",
+        "kind": "client",
+        "enabled": true,
+        "email_domain": "cottonwoodmail.com",
+        "surfaces": {"portal": true, "mdpf": true, "pipeline": true},
+        "bindings": {"aua_source": null, "model_source": null, "fee_scope": null, "series_start": "DYNAMIC", "delivery_cadence": null}
+      },
+      "aliases": [
+        {
+          "spelling": "cot",
+          "planes": ["tree-token"],
+          "where": "data/firm_registry.json tree_token; the legacy bucket suffix (05_IDENTITY_SPINE.md s.3)"
+        },
+        {
+          "spelling": "opal-data-cot",
+          "planes": ["bucket"],
+          "provisioned": true,
+          "routed": true,
+          "lookup": false,
+          "where": "the deployed router's target (firm-config.mjs FIRM_CONFIG); four tiers live (08_TENSION_MAP.md s.1 item 1). opal-data-cottonwood does not exist yet. Graded ALIAS of opal-data-cottonwood (GRADING_RULE.md)."
+        },
+        {
+          "spelling": "F-COT",
+          "planes": ["tenant-code"],
+          "where": "performance/tenants.py (05_IDENTITY_SPINE.md s.3)"
+        }
+      ]
+    },
+    {
+      "key": "demo",
+      "class": "FIRM",
+      "long": "demo",
+      "short": "demo",
+      "tenancy": "FIRM",
+      "bucket": "opal-data-demo",
+      "bucket_provisioned": true,
+      "note": "a tenant class the doctrine does not define (05_IDENTITY_SPINE.md s.3, tick-list row 17); its long and short forms are one token (NAMING_SCHEMA.json firm_forms)",
+      "tenant": {
+        "display_name": "Demo Advisory (demo tenant)",
+        "kind": "demo",
+        "enabled": true,
+        "email_domain": "demo.test",
+        "surfaces": {"portal": true, "mdpf": false, "pipeline": false},
+        "bindings": {"aua_source": null, "model_source": null, "fee_scope": null, "series_start": "DYNAMIC", "delivery_cadence": null}
+      },
+      "aliases": []
+    },
+    {
+      "key": "global",
+      "class": "GLOBAL",
+      "long": "global",
+      "short": "global",
+      "tenancy": "COMPOSITE",
+      "bucket": "opal-data-portal-v2",
+      "bucket_provisioned": true,
+      "bucket_basis": "a COMPOSITE scope owns no bucket: this is its platinum home (R6, R7); its gold, state and code take the source product's bucket (tiers.json)",
+      "tenant": {
+        "pseudo": true,
+        "kind": "aggregate",
+        "display_name": "Global (All)",
+        "note": "The mdpf all-firms aggregate channel. NOT a firm: it appears at the firm position in served paths (mdpf/global/) and FE selectors, but completeness assertions never require it and separation rules never apply to it."
+      },
+      "aliases": []
+    },
+    {
+      "key": "08242234",
+      "class": "MASTER",
+      "long": "08242234",
+      "short": "08242234",
+      "tenancy": "FIRM",
+      "firm": "49financial",
+      "vendor": "schwab",
+      "label": "49F Schwab SmartX",
+      "bucket": "opal-data-49financial",
+      "bucket_provisioned": true,
+      "aliases": []
+    },
+    {
+      "key": "08335338",
+      "class": "MASTER",
+      "long": "08335338",
+      "short": "08335338",
+      "tenancy": "FIRM",
+      "firm": "49financial",
+      "vendor": "schwab",
+      "label": "49F Schwab Black Diamond",
+      "bucket": "opal-data-49financial",
+      "bucket_provisioned": true,
+      "aliases": []
+    },
+    {
+      "key": "mdpf",
+      "class": "PRODUCT",
+      "long": "mdpf",
+      "short": "mdpf",
+      "tenancy": "PRODUCT",
+      "bucket": "opal-data-mdpf",
+      "bucket_provisioned": true,
+      "aliases": [
+        {
+          "spelling": "mdpf_revamp",
+          "planes": ["monolith-path"],
+          "where": "opal-data-assets gold/mdpf_revamp/ (ruled non-canonical A-2; 05_IDENTITY_SPINE.md s.3)"
+        },
+        {
+          "spelling": "portal/gold/mdpf",
+          "planes": ["monolith-path"],
+          "lookup": false,
+          "where": "opal-data-assets portal/gold/mdpf (ruled non-canonical A-2); a path, not a spelling of the scope"
+        }
+      ]
+    },
+    {
+      "key": "etfs",
+      "class": "PRODUCT",
+      "long": "etfs",
+      "short": "etfs",
+      "tenancy": "PRODUCT",
+      "bucket": "opal-data-etfs",
+      "bucket_provisioned": true,
+      "aliases": []
+    }
+  ]
+}
+
+=== DOCUMENT 3: systems.json ===
+{
+  "_about": {
+    "what": "The identity registry's SYSTEM rows (LGIC_ENFORCE DEC-1): every token that may fill a resource name's {system} slot or a key's {source}.",
+    "row_fields": "key; class, one of NAMING_SCHEMA.json system.classes; long, the spelled-out name where the estate uses one (a directive title or a repository tree), else the key; short, only where a short form is sanctioned (none is, at this seed); owner_directive, the D-code of the owning directive, which must resolve in org/missions/DIRECTIVES.yaml; owner_claim, measured (a DIRECTIVES.yaml line or a mission-tree project names the owner) or inferred (a reading, owed a confirmation); owner_basis, the citation.",
+    "seeded_from": "infra/logic/05_IDENTITY_SPINE.md s.3 (PRODUCTS, VENDORS) and org/missions/D14/LGIC/LGIC_NAMING/deliverables/GRADING_RULE.md V1, V2 and V3 (the interim vocabularies, read from infra/logic/09_NAMING_CENSUS.md s.3).",
+    "not_here": "Kinds and cadences belong to org/standards/NAMING_SCHEMA.json, which lib/opal_naming.py reads at run time and never copies. Firms, products-as-scopes, masters and global are scopes.json rows. opal is never a row (NAMING_SCHEMA.json system.reserved).",
+    "platform_subsystems": "none at this seed: the census does not say which V2 tokens are subsystems and which are project codes (row LGIC_NAMING-W1-S2), so they are listed under unresolved.",
+    "validator": "python lib/opal_naming.py validate"
+  },
+  "systems": [
+    {
+      "key": "mdpf",
+      "class": "PRODUCT",
+      "long": "model-portfolios",
+      "long_basis": "D8's directive document D8_MODEL_PORTFOLIOS_PIPELINE_FORTIFICATION_PRD.md and the PORTAL.MODEL_PORTFOLIOS subgroup (org/missions/DIRECTIVES.yaml)",
+      "owner_directive": "D8",
+      "owner_claim": "measured",
+      "owner_basis": "org/missions/DIRECTIVES.yaml D8 projects MDPF_CANON, MDPF_HEALGAP, MDPF_COTREMEDIATION; mission tree org/missions/D8/MDPF/"
+    },
+    {
+      "key": "etfs",
+      "class": "PRODUCT",
+      "long": "etfs",
+      "owner_directive": "D4",
+      "owner_claim": "measured",
+      "owner_basis": "org/missions/DIRECTIVES.yaml D4 projects ETFS_CANON, ETFS_POSITIONING, ETFS_INGEST, ETFS_SATELLITES (D8 also holds ETFS_GUARDRAIL, org/missions/D8/ETFS/)"
+    },
+    {
+      "key": "irpt",
+      "class": "PRODUCT",
+      "long": "investor-reporting",
+      "long_basis": "the repository trees infra/aws/terraform/investor-reporting/ and infra/aws/lambda/investor-reporting/",
+      "owner_directive": "D9",
+      "owner_claim": "measured",
+      "owner_basis": "mission tree org/missions/D9/IRPT/ (IRPT_BCKEND, IRPT_FNTEND)"
+    },
+    {
+      "key": "advi",
+      "class": "PRODUCT",
+      "long": "advisor-intelligence",
+      "long_basis": "org/missions/DIRECTIVES.yaml D2 title 'Advisor Intelligence'",
+      "owner_directive": "D2",
+      "owner_claim": "measured",
+      "owner_basis": "org/missions/DIRECTIVES.yaml D2 projects ADVI_49F, ADVI_PERFRP, ADVI_STITCH and seven more ADVI_* projects (D8's ADVI_FIRMBKTS migrates the firm buckets; it does not own the product)"
+    },
+    {
+      "key": "amgt",
+      "class": "PRODUCT",
+      "long": "asset-management",
+      "long_basis": "org/missions/DIRECTIVES.yaml D5 title 'Asset Management'",
+      "owner_directive": "D5",
+      "owner_claim": "measured",
+      "owner_basis": "org/missions/DIRECTIVES.yaml D5 project AMGT_RESAPP; mission tree org/missions/D5/AMGT/"
+    },
+    {
+      "key": "yang",
+      "class": "PRODUCT",
+      "long": "yang",
+      "owner_directive": "D9",
+      "owner_claim": "inferred",
+      "owner_basis": "org/missions/DIRECTIVES.yaml D9 :362 and :375 name the Yang/Alyssa meeting that gates D9's pipeline-build orders; no project names the yang system"
+    },
+    {
+      "key": "schwab",
+      "class": "VENDOR",
+      "long": "schwab",
+      "owner_directive": "D8",
+      "owner_claim": "inferred",
+      "owner_basis": "a feed no directive names as its own is read as D8's (title 'Data Pipelines'); DIRECTIVES.yaml mentions Schwab under D2 :67 and D3 :75 without naming an owner"
+    },
+    {
+      "key": "blackdiamond",
+      "class": "VENDOR",
+      "long": "blackdiamond",
+      "owner_directive": "D8",
+      "owner_claim": "inferred",
+      "owner_basis": "a feed no directive names as its own is read as D8's (title 'Data Pipelines')"
+    },
+    {
+      "key": "orion",
+      "class": "VENDOR",
+      "long": "orion",
+      "owner_directive": "D8",
+      "owner_claim": "inferred",
+      "owner_basis": "a feed no directive names as its own is read as D8's (title 'Data Pipelines')"
+    },
+    {
+      "key": "eclipse",
+      "class": "VENDOR",
+      "long": "eclipse",
+      "owner_directive": "D8",
+      "owner_claim": "inferred",
+      "owner_basis": "a feed no directive names as its own is read as D8's (title 'Data Pipelines')"
+    },
+    {
+      "key": "smartx",
+      "class": "VENDOR",
+      "long": "smartx",
+      "owner_directive": "D8",
+      "owner_claim": "inferred",
+      "owner_basis": "a feed no directive names as its own is read as D8's (title 'Data Pipelines'); DIRECTIVES.yaml mentions SmartX under D3 :75 and D9 :362 without naming an owner"
+    },
+    {
+      "key": "pathfinder",
+      "class": "VENDOR",
+      "long": "pathfinder",
+      "owner_directive": "D4",
+      "owner_claim": "inferred",
+      "owner_basis": "infra/logic/05_IDENTITY_SPINE.md s.3: every pathfinder scope (filepoint, PFDE, PFOE) resolves to the etfs product, whose owner is D4"
+    },
+    {
+      "key": "trueshares",
+      "class": "VENDOR",
+      "long": "trueshares",
+      "owner_directive": "D4",
+      "owner_claim": "measured",
+      "owner_basis": "org/missions/DIRECTIVES.yaml D4 :229-246 carry the TrueShares capture and egress confirm as D4's work"
+    },
+    {
+      "key": "ycharts",
+      "class": "VENDOR",
+      "long": "ycharts",
+      "owner_directive": "D9",
+      "owner_claim": "measured",
+      "owner_basis": "org/missions/DIRECTIVES.yaml D9 :370-373: 'YCharts FOLDS INTO D9'"
+    },
+    {
+      "key": "fred",
+      "class": "VENDOR",
+      "long": "fred",
+      "owner_directive": "D8",
+      "owner_claim": "inferred",
+      "owner_basis": "a feed no directive names as its own is read as D8's (title 'Data Pipelines')"
+    },
+    {
+      "key": "seeking-alpha",
+      "class": "VENDOR",
+      "long": "seeking-alpha",
+      "owner_directive": "D8",
+      "owner_claim": "inferred",
+      "owner_basis": "a feed no directive names as its own is read as D8's (title 'Data Pipelines'); the vendor's name is two tokens, matched as one (GRADING_RULE.md V1)"
+    }
+  ],
+  "refused_keys": {
+    "basis": "NAMING_SCHEMA.json system.never_a_system names the classes; the members below are GRADING_RULE.md V3's. Firms come from scopes.json, cadences from NAMING_SCHEMA.json cadence.values and project codes from org/missions/DIRECTIVES.yaml, each read at run time.",
+    "workstream_code": ["wsb", "wsd"],
+    "generic_noun": ["historical", "exec", "infrastructure", "market", "etf", "ec2", "cloudfront", "portfolio"],
+    "purpose_word": ["cross", "s3", "cloudwatch", "invoke", "secretsmanager", "lambda", "kms", "secrets"]
+  },
+  "unresolved": [
+    {"token": "estate", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "globgrph", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided (row LGIC_NAMING-W1-S2)"},
+    {"token": "semantic", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "agentbus", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "cmtque", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "opsec", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "firmsep", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "consolidation", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "canonical", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "gldinc", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "quartz", "why": "GRADING_RULE.md V2: a platform subsystem or a project code, undecided"},
+    {"token": "find", "why": "infra/logic/05_IDENTITY_SPINE.md s.3 marks harvest/find UNRESOLVED (tick-list row 18)"},
+    {"token": "harvest", "why": "infra/logic/05_IDENTITY_SPINE.md s.3 marks harvest/find UNRESOLVED (tick-list row 18)"},
+    {"token": "imo", "why": "infra/logic/05_IDENTITY_SPINE.md s.3: whether imo is a product, a vendor or retired is a word (tick-list row 18)"},
+    {"token": "astn", "why": "GRADING_RULE.md V1 lists it as a PRODUCT, but no DIRECTIVES.yaml line and no mission-tree project names its owner, so owner_directive cannot be written (row LGIC_ENFORCE-W1-S6)"},
+    {"token": "trade", "why": "GRADING_RULE.md V1 lists it as a PRODUCT, but no DIRECTIVES.yaml line and no mission-tree project names its owner, so owner_directive cannot be written (row LGIC_ENFORCE-W1-S6)"},
+    {"token": "news", "why": "GRADING_RULE.md V1 lists it as a PRODUCT, but no DIRECTIVES.yaml line and no mission-tree project names its owner, so owner_directive cannot be written (row LGIC_ENFORCE-W1-S6)"}
+  ]
+}
+
+=== DOCUMENT 4: tiers.json ===
+{
+  "_about": {
+    "what": "The tier home rule per tenancy (LGIC_ENFORCE DEC-1): for a key's tier and its scope's tenancy, the bucket that holds it. address() takes the bucket from here and never from an argument (DEC-2).",
+    "tiers": "The tier names are NAMING_SCHEMA.json key.tier, read at run time; every tenancy below names a home for each of them.",
+    "home_kinds": "shared: the named standing shared bucket (NAMING_SCHEMA.json bucket.standing_shared); scope: the scope row's bucket (scopes.json); source: the bucket of the scope row whose key is the key's {source}, a product.",
+    "rules": "infra/logic/02_DOCTRINE.md R4 (:127), R5 (:139), R6 (:154), R7 (:167), R8 (:180), R16 (:275), R21 (:322).",
+    "what_it_does_not_say": "Where a firm's data lives TODAY during the legacy-bucket migration: that is each scope's bucket aliases (scopes.json, routed and provisioned), not a tier rule."
+  },
+  "homes": {
+    "FIRM": {
+      "bronze": {"home": "shared", "bucket": "opal-data-assets", "rule": "R4: bronze and silver have one home"},
+      "silver": {"home": "shared", "bucket": "opal-data-assets", "rule": "R4: bronze and silver have one home"},
+      "gold": {"home": "scope", "rule": "R5; R7: a slice attributable to one firm is that firm's data, firm bucket, MANDATORY"},
+      "platinum": {"home": "scope", "rule": "R6: client-confidential platinum lives in opal-data-{firm}/platinum/; R7"},
+      "state": {"home": "scope", "rule": "R21: state lives in the bucket whose tenancy it belongs to"},
+      "code": {"home": "scope", "rule": "R16: one code home per pipeline, beside the gold code (R5)"}
+    },
+    "PRODUCT": {
+      "bronze": {"home": "shared", "bucket": "opal-data-assets", "rule": "R4; R8: bronze still lands in opal-data-assets"},
+      "silver": {"home": "shared", "bucket": "opal-data-assets", "rule": "R4; R8 lets general silver sit in the product bucket only with a declared reason (R20)"},
+      "gold": {"home": "scope", "rule": "R5: product-shaped gold lives in opal-data-{product}"},
+      "platinum": {"home": "shared", "bucket": "opal-data-portal-v2", "rule": "R6: general platinum lives in opal-data-portal-v2/platinum/"},
+      "state": {"home": "scope", "rule": "R21"},
+      "code": {"home": "scope", "rule": "R16"}
+    },
+    "COMPOSITE": {
+      "bronze": {"home": "shared", "bucket": "opal-data-assets", "rule": "R4"},
+      "silver": {"home": "shared", "bucket": "opal-data-assets", "rule": "R4"},
+      "gold": {"home": "source", "rule": "R7: a cross-firm composite takes product-bucket gold"},
+      "platinum": {"home": "shared", "bucket": "opal-data-portal-v2", "rule": "R7: a cross-firm composite takes opal-data-portal-v2 platinum"},
+      "state": {"home": "source", "rule": "R21"},
+      "code": {"home": "source", "rule": "R16; R7: the product pipeline's code lives in the product bucket regardless"}
+    }
+  }
+}
+
+=== THE ITEMS ===
+- i01 (LAMBDA): The Lambda function that publishes Cottonwood's figures from the model-portfolio product (the model delivery product) every day. This is the example the outcome itself names.
+- i02 (IAM_ROLE): The IAM role that the Black Diamond integration assumes when it fetches 49 Financial's daily session data from Black Diamond.
+- i03 (EVENT_RULE): The EventBridge rule that starts the Orion ingest for Inflection once a day.
+- i04 (SECRET): The Secrets Manager secret holding Schwab's API credentials used for 49 Financial.
+- i05 (S3_BUCKET): The S3 bucket that holds Cottonwood's own data.
+- i06 (S3Key): The S3 key, without the bucket, of Eclipse's silver table for Inflection named account_holdings, for the day 2026-09-14. Give the key only, up to and including the partition.
+- i07 (IAM_POLICY): The IAM policy that lets the model-portfolio product's single shared publisher read every firm's gold data. The publisher serves all firms.
+- i08 (SQS_QUEUE): The dead-letter queue behind the ETF product's price-refresh queue, which is shared by every firm.
+- i09 (CW_ALARM): The CloudWatch alarm that fires when the daily model-portfolio publish for the demo firm fails.
+- i10 (SCHEDULE): The EventBridge Scheduler schedule that runs the SmartX platform export for 49 Financial once a week.
+- i11 (ECS_TASK_DEFINITION): The ECS task definition that runs the Pathfinder ingest for the ETF product.
+- i12 (SSM_DOCUMENT): The SSM document that downloads Black Diamond files for Cottonwood.
+- i13 (S3Key): The S3 key, without the bucket and without the file, of a NEW served family for the model-portfolio product for 49 Financial: one file per advisor, the table is advisor_books, the entity is the advisor keyed advisor_id, and the advisor id is A123. The file under it would be book.json; give the key up to and including the partition.
+- i14 (S3Key): The S3 key, without the bucket, of the model-portfolio product's code bundle that builds its gold tier, shared across all firms. The bundle file is named mdpf-accrual-bridge.tar.gz.
+- i15 (INSTANCE_PROFILE): The EC2 instance profile for the Orion runner host that builds Inflection's gold data.
+- i16 (SECURITY_GROUP): The security group for the model-portfolio product's exporter host that serves Cottonwood.
+- i17 (SNS_TOPIC): The SNS topic for the ETF product's pipeline alerts, which is shared by every firm.
+- i18 (DYNAMODB_TABLE): The DynamoDB table holding the model-portfolio product's delivery status for Inflection.
+
+HOW TO ANSWER. First write the line Q1: <answer>, then the line Q2: <answer>. Then write the line ANSWERS. Then write exactly one line per item, in the order given, as <item id> -> <name>. Write nothing after the last of those lines.
