@@ -7,6 +7,10 @@
 //
 // Every raw object is accepted ONLY on md5 equality with this manifest; a missing raw is fetched BY VERSIONID,
 // never by key alone (a key-only read returns whatever is served that minute).
+//
+// TO-B2-1 (the same slot) adds ONE option, opts.aggregate = 'unavailable': the aggregate fixture then takes the
+// UNAVAILABLE shape the decomposition's contract 1.1 names -- status "UNAVAILABLE", a one-line reason, and
+// current_holdings.AGG.holdings = [] -- with every other key unchanged. The default (no option) is byte-identical.
 import { readFileSync, existsSync, mkdirSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { gunzipSync } from 'node:zlib'
@@ -50,6 +54,7 @@ const md5 = (b) => createHash('md5').update(b).digest('hex')
 /**
  * @param root   the workspace root (the fixtures live under <root>/.scratch/fx)
  * @param opts.mutate  optional (fixtures) => description; applied to a DEEP COPY after the build (the control)
+ * @param opts.aggregate  optional 'unavailable' -> the 1.1 UNAVAILABLE payload in place of the OK one
  * @returns { fixtures, lines } -- lines is the printed provenance, one fixture key per line
  */
 export function buildFixtures(root, opts = {}) {
@@ -114,6 +119,14 @@ export function buildFixtures(root, opts = {}) {
     },
   }
 
+  if (opts.aggregate === 'unavailable') {
+    aggregate.status = 'UNAVAILABLE'
+    aggregate.reason = 'FIXTURE: contract 1.1 UNAVAILABLE shape (holdings empty, reason present)'
+    aggregate.current_holdings = { AGG: { holdings: [], total_aum: 0 } }
+  } else if (opts.aggregate) {
+    throw new Error('BLOCKED: unknown opts.aggregate ' + JSON.stringify(opts.aggregate))
+  }
+
   let fixtures = {
     '/api/general/positioning/positioning_data.json': shared,
     '/api/general/positioning/holdings_attribution_data.json': raws['/api/general/positioning/holdings_attribution_data.json'],
@@ -122,8 +135,13 @@ export function buildFixtures(root, opts = {}) {
   }
   lines.push('SHARED-FILE FIXTURE: current_holdings keys ' + JSON.stringify(Object.keys(shared.current_holdings)) +
     ' (AGG removed; the source carried ' + JSON.stringify(Object.keys(posn.current_holdings)) + ')')
-  lines.push('AGGREGATE FIXTURE (1.1, status OK): AGG holdings=' + agg.holdings.length + ' total_aum=' + agg.total_aum +
-    ' per-book aum=' + JSON.stringify(aum) + ' weights=' + JSON.stringify(weights))
+  if (opts.aggregate === 'unavailable') {
+    lines.push('AGGREGATE FIXTURE (1.1, status UNAVAILABLE): AGG holdings=' + aggregate.current_holdings.AGG.holdings.length +
+      ' reason=' + JSON.stringify(aggregate.reason))
+  } else {
+    lines.push('AGGREGATE FIXTURE (1.1, status OK): AGG holdings=' + agg.holdings.length + ' total_aum=' + agg.total_aum +
+      ' per-book aum=' + JSON.stringify(aum) + ' weights=' + JSON.stringify(weights))
+  }
 
   if (opts.mutate) {
     fixtures = JSON.parse(JSON.stringify(fixtures))

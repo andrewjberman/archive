@@ -1,0 +1,217 @@
+$ timeout 120 python org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~3/b2_ac1_prior_layout_map.py
+PORTAL HEAD 3ec1f83cabb1780d4468c4f80fd16453df800f00  branch wk-aggfix-1-3-portal  src working-tree changes: NONE
+REMOVAL d53049a0 = d53049a0d06a75fa3f09cbf25a69c0f2aa12b489  (old side = d53049a0^:src/pages/Positioning/tabs/HoldingsTab.tsx, 1769 lines; HEAD side = HEAD:src/pages/Positioning/tabs/HoldingsTab.tsx, 1967 lines)
+
+DENOMINATOR: d53049a0 removed 294 lines from src/pages/Positioning/tabs/HoldingsTab.tsx
+  E1   RESTORABLE old :33-33  removed lines 1  the AGG_PORTFOLIO entry
+  E2   RESTORABLE old :73-84  removed lines 6  the prepend (portfoliosFor's aggregate parameter and return)
+  E2b  RESTORABLE old :680-680  removed lines 1  the prepend's call site (caps.aggregate passed to portfoliosFor)
+  E3   RESTORABLE old :600-600  removed lines 1  the default (initial selection on the aggregate)
+  E4   RESTORABLE old :706-706  removed lines 1  the landing (defaultBook returns the aggregate)
+  E5   RESTORABLE old :574-574  removed lines 1  the Model Breakdown header tint (HDR_ORANGE)
+  E6   RESTORABLE old :1168-1177  removed lines 10  the Model Breakdown group: its five <col> widths
+  E7   RESTORABLE old :1169-1226  removed lines 4  the Model Breakdown group: its group header cell (colSpan 5)
+  E8   RESTORABLE old :1272-1291  removed lines 20  the Model Breakdown group: its five column header cells UST ST INT LT ULT
+  E9   RESTORABLE old :1449-1478  removed lines 30  the Model Breakdown group: its five body cells (model_breakdown x 100 at one decimal, or '-')
+  E10  RESTORABLE old :1608-1617  removed lines 10  the Model Breakdown group: its five subtotal filler cells
+  E11  RESTORABLE old :1692-1701  removed lines 10  the Model Breakdown group: its five grand-total filler cells
+  D1   DEAD       old :35-60  removed lines 26  aggregateWeighting (the client-side AUM weighting, its doc block)
+  D2   DEAD       old :615-616  removed lines 2  the aumByModel state
+  D3   DEAD       old :643-672  removed lines 30  the /api/general/portfolios/aum-metrics.json fetch (getAUMSummary)
+  D4   DEAD       old :762-801  removed lines 40  the holdings AGG builder behind selectedPeriod !== 'Current' (selectedPeriod is a const 'Current')
+  D5   DEAD       old :882-958  removed lines 77  the attribution AGG builder behind the same unreachable period branch
+  N1   NOT-AGG    removed lines 3  import lines the commit rewrote (getAUMSummary and getCanonicalModelName dropped with the dead code; HOLDINGS_VIEW_MODES added for persistence)
+  N2   NOT-AGG    removed lines 2  toggle persistence (viewMode useState -> usePersistentToggle; the selector onClick -> selectBook)
+  N3   NOT-AGG    removed lines 16  comment or blank lines (doc and inline comments the commit rewrote)
+  UNASSIGNED removed lines: 3
+    old :1227  </th>
+    old :1228  )}
+    old :1229  <th colSpan={7} className={`px-2 py-1 border-b border-white/10 ${selectedPortfolio === 'AGG' ? '' : 'rounded-tr-lg'} text-center`} style={tintHeaderStyle(HDR_GREEN)}>
+  elements whose span holds NO removed line (a span that missed): none
+
+ELEMENT BY ELEMENT (old = d53049a0^, HEAD = 3ec1f83cab)
+
+E1  RESTORABLE  -- the AGG_PORTFOLIO entry
+    REMOVED  old :33    const AGG_PORTFOLIO = { id: 'AGG', name: 'Aggregate', color: PALETTE.opalIndigo }
+    HEAD     :73     const AGG_PORTFOLIO = { id: AGGREGATE_BOOK, name: 'Aggregate', color: PALETTE.opalIndigo }
+    RESTORED
+
+E2  RESTORABLE  -- the prepend (portfoliosFor's aggregate parameter and return)
+    REMOVED  old :75    mode: PositioningMode,
+    REMOVED  old :76    aggregate: boolean
+    REMOVED  old :77    ): Array<{ id: string; name: string; color: string }> => {
+    REMOVED  old :78    const named = books.map((code, i) => ({
+    REMOVED  old :83    return aggregate ? [AGG_PORTFOLIO, ...named] : named
+    REMOVED  old :84    }
+    HEAD     :807    const aggregateOffered = books.includes(AGGREGATE_BOOK)
+    HEAD     :809    const basePortfolios = aggregateOffered ? [AGG_PORTFOLIO, ...namedPortfolios] : namedPortfolios
+    RESTORED
+
+E2b  RESTORABLE  -- the prepend's call site (caps.aggregate passed to portfoliosFor)
+    REMOVED  old :680   const basePortfolios = portfoliosFor(books, bookMode, caps.aggregate)
+    HEAD     :808    const namedPortfolios = portfoliosFor(books.filter((b) => b !== AGGREGATE_BOOK), bookMode)
+    RESTORED
+
+E3  RESTORABLE  -- the default (initial selection on the aggregate)
+    REMOVED  old :600   const [selectedPortfolio, setSelectedPortfolio] = useState(caps.aggregate ? 'AGG' : '')
+    HEAD     :912    const selectionKey = `${bookMode}:${statusKnown}:${aggregateOffered}`
+    HEAD     :933    if (!selectedPortfolio && books.length > 0) {
+    RESTORED
+
+E4  RESTORABLE  -- the landing (defaultBook returns the aggregate)
+    REMOVED  old :706   if (caps.aggregate) return 'AGG'
+    HEAD     :868    if (aggregateOffered && carriesRows(AGGREGATE_BOOK)) return AGGREGATE_BOOK
+    RESTORED
+
+E5  RESTORABLE  -- the Model Breakdown header tint (HDR_ORANGE)
+    REMOVED  old :574   const HDR_ORANGE = 'rgba(249, 115, 22, 0.1)' // orange-500/10 (MODEL BREAKDOWN)
+    HEAD     :603    const HDR_ORANGE = 'rgba(249, 115, 22, 0.1)'  // orange-500 at 10% over the opaque base (MODEL BREAKDOWN)
+    RESTORED
+
+E6  RESTORABLE  -- the Model Breakdown group: its five <col> widths
+    REMOVED  old :1169  {selectedPortfolio === 'AGG' && (
+    REMOVED  old :1170  <>
+    REMOVED  old :1171  <col style={{ width: '45px' }} /> {/* UST */}
+    REMOVED  old :1172  <col style={{ width: '45px' }} /> {/* ST */}
+    REMOVED            ... 2 more code lines ...
+    REMOVED  old :1175  <col style={{ width: '45px' }} /> {/* ULT */}
+    REMOVED  old :1176  </>
+    REMOVED  old :1177  )}
+    HEAD     :1338   {/* Model Breakdown (5 columns) -- the Opal aggregate only, FIRST */}
+    HEAD     :1340   <col key={`mb-col-${code}`} style={{ width: '45px' }} />
+    RESTORED
+
+E7  RESTORABLE  -- the Model Breakdown group: its group header cell (colSpan 5)
+    REMOVED  old :1224  {selectedPortfolio === 'AGG' && (
+    REMOVED  old :1225  <th colSpan={5} className="px-2 py-1 border-b border-r border-white/10 text-center" style={tintHeaderStyle(HDR_ORANGE)}>
+    REMOVED  old :1226  <span className="text-orange-300 font-semibold uppercase text-[10px]">MODEL BREAKDOWN</span>
+    HEAD     :1389   <th colSpan={MODEL_BREAKDOWN_CODES.length} className="px-2 py-1 border-b border-r border-white/10 text-center" style={tintHeaderStyle(HDR_ORANGE)}>
+    HEAD     :1390   <span className="font-bold uppercase text-[10px]" style={MB_INK}>Model Breakdown - All of Opal</span>
+    RESTORED
+
+E8  RESTORABLE  -- the Model Breakdown group: its five column header cells UST ST INT LT ULT
+    REMOVED  old :1273  {selectedPortfolio === 'AGG' && (
+    REMOVED  old :1274  <>
+    REMOVED  old :1275  <th className="px-2 py-2 border-b border-r border-white/10 text-right" style={tintHeaderStyle(HDR_ORANGE)}>
+    REMOVED  old :1276  <span className="text-orange-300 font-semibold uppercase text-xs">UST</span>
+    REMOVED            ... 12 more code lines ...
+    REMOVED  old :1289  </th>
+    REMOVED  old :1290  </>
+    REMOVED  old :1291  )}
+    HEAD     :1439   <th key={`mb-th-${code}`} className="px-2 py-2 border-b border-r border-white/10 text-right" style={tintHeaderStyle(HDR_ORANGE)}>
+    RESTORED
+
+E9  RESTORABLE  -- the Model Breakdown group: its five body cells (model_breakdown x 100 at one decimal, or '-')
+    REMOVED  old :1450  {selectedPortfolio === 'AGG' && (
+    REMOVED  old :1451  <>
+    REMOVED  old :1452  <td className="px-2 py-1.5 border-r border-white/10 text-right bg-orange-500/5">
+    REMOVED  old :1453  <span className="text-sm font-mono text-white">
+    REMOVED            ... 22 more code lines ...
+    REMOVED  old :1476  </td>
+    REMOVED  old :1477  </>
+    REMOVED  old :1478  )}
+    HEAD     :1670   <td key={`mb-td-${code}`} className="px-2 py-1.5 border-r border-white/10 text-right" style={MB_CELL_STYLE}>
+    HEAD     :1672   {breakdownCellText(holding.model_breakdown, code)}
+    HEAD     :618    return v ? (v * 100).toFixed(1) : '-'
+    RESTORED
+
+E10  RESTORABLE  -- the Model Breakdown group: its five subtotal filler cells
+    REMOVED  old :1609  {selectedPortfolio === 'AGG' && (
+    REMOVED  old :1610  <>
+    REMOVED  old :1611  <td className="px-2 py-2 border-r border-white/10 bg-white/5"></td>
+    REMOVED  old :1612  <td className="px-2 py-2 border-r border-white/10 bg-white/5"></td>
+    REMOVED            ... 2 more code lines ...
+    REMOVED  old :1615  <td className="px-2 py-2 border-r border-white/10 bg-white/5"></td>
+    REMOVED  old :1616  </>
+    REMOVED  old :1617  )}
+    HEAD     :1825   <td key={`mb-sub-${code}`} className="px-2 py-2 border-r border-white/10 bg-white/5"></td>
+    RESTORED
+
+E11  RESTORABLE  -- the Model Breakdown group: its five grand-total filler cells
+    REMOVED  old :1693  {selectedPortfolio === 'AGG' && (
+    REMOVED  old :1694  <>
+    REMOVED  old :1695  <td className="px-2 py-3 border-r border-white/10 bg-white/10"></td>
+    REMOVED  old :1696  <td className="px-2 py-3 border-r border-white/10 bg-white/10"></td>
+    REMOVED            ... 2 more code lines ...
+    REMOVED  old :1699  <td className="px-2 py-3 border-r border-white/10 bg-white/10"></td>
+    REMOVED  old :1700  </>
+    REMOVED  old :1701  )}
+    HEAD     :1900   <td key={`mb-tot-${code}`} className="px-2 py-3 border-r border-white/10"></td>
+    RESTORED
+
+D1  DEAD  -- aggregateWeighting (the client-side AUM weighting, its doc block)
+    REMOVED  old :53    function aggregateWeighting(books: readonly string[], aumByModel: Record<string, number>) {
+    REMOVED  old :54    const totalAUM = books.reduce((sum, code) => sum + (aumByModel[code] || 0), 0)
+    REMOVED  old :55    const hasAUM = totalAUM > 0
+    REMOVED  old :56    const missingAum = books.filter((code) => !(aumByModel[code] > 0))
+    REMOVED  old :57    const getPortfolioWeight = (code: string) =>
+    REMOVED  old :58    hasAUM ? (aumByModel[code] || 0) / totalAUM : 1 / Math.max(1, books.length)
+    REMOVED  old :59    return { getPortfolioWeight, hasAUM, missingAum }
+    REMOVED  old :60    }
+    NOT RESTORED -- dead code (the order: "were DEAD code and are NOT restored")
+
+D2  DEAD  -- the aumByModel state
+    REMOVED  old :616   const [aumByModel, setAumByModel] = useState<Record<string, number>>({})
+    NOT RESTORED -- dead code (the order: "were DEAD code and are NOT restored")
+
+D3  DEAD  -- the /api/general/portfolios/aum-metrics.json fetch (getAUMSummary)
+    REMOVED  old :644   useEffect(() => {
+    REMOVED  old :645   getAUMSummary()
+    REMOVED  old :646   .then(data => {
+    REMOVED  old :647   const aumMap: Record<string, number> = {}
+    REMOVED            ... 18 more code lines ...
+    REMOVED  old :670   })
+    REMOVED  old :671   .catch(() => {})
+    REMOVED  old :672   }, [])
+    NOT RESTORED -- dead code (the order: "were DEAD code and are NOT restored")
+
+D4  DEAD  -- the holdings AGG builder behind selectedPeriod !== 'Current' (selectedPeriod is a const 'Current')
+    REMOVED  old :763   if (selectedPortfolio === 'AGG') {
+    REMOVED  old :764   const allPortfolios = books
+    REMOVED  old :765   const { getPortfolioWeight } = aggregateWeighting(allPortfolios, aumByModel)
+    REMOVED  old :767   const holdingsMap = new Map<string, { ticker: string; name: string; assetClass: string; weightedSum: number }>()
+    REMOVED            ... 24 more code lines ...
+    REMOVED  old :798   })).sort((a, b) => b.weight - a.weight)
+    REMOVED  old :800   return result
+    REMOVED  old :801   }
+    NOT RESTORED -- dead code (the order: "were DEAD code and are NOT restored")
+
+D5  DEAD  -- the attribution AGG builder behind the same unreachable period branch
+    REMOVED  old :883   if (selectedPortfolio === 'AGG') {
+    REMOVED  old :884   const allPortfolios = books
+    REMOVED  old :885   const { getPortfolioWeight } = aggregateWeighting(allPortfolios, aumByModel)
+    REMOVED  old :887   const holdingsMap = new Map<string, {
+    REMOVED            ... 61 more code lines ...
+    REMOVED  old :955   })).sort((a, b) => b.weight - a.weight)
+    REMOVED  old :957   return result
+    REMOVED  old :958   }
+    NOT RESTORED -- dead code (the order: "were DEAD code and are NOT restored")
+
+ORDER AT HEAD (the Model Breakdown line number before the first ETF Characteristics line of the same region):
+  colgroup           Model Breakdown :[1340]  ETF Characteristics :[1342]  FIRST
+  group header row   Model Breakdown :[1389]  ETF Characteristics :[1393]  FIRST
+  column header row  Model Breakdown :[1439]  ETF Characteristics :[1443]  FIRST
+  body row           Model Breakdown :[1670]  ETF Characteristics :[1676]  FIRST
+  column order: HEAD :[611]  const MODEL_BREAKDOWN_CODES = ['UST', 'ST', 'INT', 'LT', 'ULT'] as const
+
+NOT CARRIED, stated: the removed group-header line also held the ETF CHARACTERISTICS header's corner class toggle (`selectedPortfolio === 'AGG' ? '' : 'rounded-tr-lg'`, old :[1229]). It is a class on the NEIGHBOURING group, not a part of the Model Breakdown group: ETF CHARACTERISTICS is the rightmost group with or without the aggregate, so its top-right corner class stays as HEAD has it.
+
+RESTORED 12 of 12 (the elements that are not dead code: E1, E2, E2b, E3, E4, E5, E6, E7, E8, E9, E10, E11)
+
+FORBIDDEN CLASSES in the restored hunks: the 131 added lines of `git diff edf85ce503 HEAD -- src/pages/Positioning/tabs/HoldingsTab.tsx`
+  text-white       0
+  text-orange-300  0
+  bg-white/10      0
+  bg-orange-500/5  0
+  (beside them, text-white/<n> variants in the same lines: 0)
+  TOTAL 0
+CONTROL -- the same counter over the 84 lines d53049a0 removed from the Model Breakdown group:
+  text-white       5
+  text-orange-300  6
+  bg-white/10      5
+  bg-orange-500/5  5
+  TOTAL 21 (must be > 0: the counter can see the classes it is asked to count)
+
+VERDICT INPUTS: restored 12/12, unassigned 3, empty spans 0, order FIRST 4/4, forbidden 0, control 21, src clean True -> NOT MET
+EXIT=1
+SHELL-EXIT=1
