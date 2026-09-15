@@ -1,84 +1,77 @@
-# LGIC_ENFORCE.TO-EN-f-1 -- the fence, authored: result
+# LGIC_ENFORCE.TO-EN-f-1 -- the fence, authored: result (re-run)
 
-**Worker:** `0.9.0_WK_LGIC_ENFORCE~1`, worktree `.worktrees/wk-lgic-enforce-1-1-f1`, branch `wk-lgic-enforce-1-1-f1`,
-base CLOUD @`39aae459ed`. **Cell:** `EN-f-1` (PRD candidate E5, first half; DEC-4). **Nothing was applied.**
+**Worker:** `0.9.0_WK_LGIC_ENFORCE~1`, worktree `.worktrees/wk-lgic-enforce-1-1-f1r`, branch `wk-lgic-enforce-1-1-f1r`,
+base CLOUD @`9a05002d39`. **Cell:** `EN-f-1` (PRD candidate E5, first half; DEC-4). **Nothing was applied.**
 
-**Status: the order stays OPEN.** F1-AC4 reads FAIL by its output: the checker's `aws` read cannot start on this
-box (row `LGIC_ENFORCE-W1-S16`). F1-AC1, F1-AC2, F1-AC3 and F1-AC5 PASS by output. F1-J1 is 3.0.0_SA_CVO's, at L9.
+**Status: every mechanical criterion PASSES by output on this run.** F1-AC1 through F1-AC5 all read PASS.
+F1-J1 is graded by 3.0.0_SA_CVO at L9.
 
-## What landed
+## What this run did
 
-| Commit | What |
+This is a re-run. The cell's work was built by this slot's earlier run and merged at this base (drain
+@`07cb65ab63`). That run read F1-AC4 FAIL because its checker launched a bare `aws` (row `LGIC_ENFORCE-W1-S16`).
+The checker was fixed at @`c30637c49c` (issuer row `LGIC_ENFORCE-S11`).
+
+This run rebuilt, re-planned, re-opened and closed nothing. It did three things:
+
+- re-ran every criterion from this worktree;
+- ran one negative control for F1-AC4, which the earlier run could not run;
+- updated this file and the proof instance.
+
+## The artifacts, pinned to the commits that carried them
+
+Each pin below is an ancestor of HEAD `9a05002d39`, checked with `git merge-base --is-ancestor` (positive control:
+`HEAD~1` is an ancestor). `git diff --stat <pin> HEAD` over each set is empty, so every artifact is unchanged since
+its pin.
+
+| Pin | Artifacts |
 |---|---|
-| `080e1b97c6` | The authored change (ledger leg L1): `exemptions.json` rows, module output, the Deny, the probe roles, rows W1-S13..S15 |
-| `887cf01419` | The ledger entry and sentinel (OPEN, L1 closed), `FENCE_PRIOR_POLICY.json`, `fence_plan.json`, `FENCE_PLAN.md` |
-| next commit | Rows W1-S16 and W1-S17 |
-| the commit after | This result file and the proof instance |
-
-- **`infra/logic/registry/exemptions.json`.** 16 rows under `opal-data-49financial`, one for each principal of
-  that bucket in `FENCE_WRITER_CENSUS.md` (16 of 16). `fence_patterns("49financial")` matches none of them.
-  - Each row has `reason`, drawn from the census grant and token basis.
-  - Each row has `signoff_ref`, naming the ledger entry and its two SIGNOFF lines.
-  - Each row has `arn`, the census ARN (row W1-S15).
-  - `validate` reads OK at registry@`ba5318901b937130`.
-- **`infra/aws/terraform/modules/opal_name/`.** `generated_locals.tf` and `tests/vectors.json` are regenerated
-  at the new registry hash; only their header lines change. `main.tf` adds output `fence_exemption_arns`, read from
-  `exemptions.json` with `file()` and `jsondecode()`, because `generate()` renders no exemptions local (row W1-S13).
-  The module tests pass: `terraform test` 37 of 37, no `data "external"`.
-- **`shared-infra/s3-49financial.tf`.** The four typed patterns of `DenyForeignFirmPrincipals` are replaced by an
-  `ArnNotLike` over `concat(module.opal_name.fence_patterns["49financial"], module.opal_name.fence_exemption_arns[<bucket>])`.
-  A `REPLACED` notice follows the old comment, and `module "opal_name"` is declared beside the policy. The
-  LGIC_NAMING notice (`:16-20`) and the read-logging block are untouched.
-- **`shared-infra/lgic-enforce-fence-probes.tf`.** Three roles, each named by module `opal_name`, with the system
-  held at `mdpf` and only the scope varied:
-  - `mdpf-49f-fenceprobe-role`
-  - `mdpf-cot-fenceprobe-role`
-  - `mdpf-fenceprobe-role`
-
-  Each has one inline policy, GetObject and ListBucket on `opal-data-49financial` only, and trusts this
-  account's root.
-- **The plan.** Read-only, `plan -lock=false`, as `user/Andrew_Berman`: `Plan: 6 to add, 1 to change, 0 to
-  destroy`. 7 of 238 resource changes are not no-op. The plan's `before` policy equals `FENCE_PRIOR_POLICY.json`.
-  The `after` policy holds 17 ArnNotLike values: 1 derived pattern and the 16 exemption ARNs.
-- **The ledger.** `lgic-enforce-fence-49financial` is OPEN with legs L1..L4, and L1 is closed with `080e1b97c6`.
-  The entry and its sentinel are committed. Two blank SIGNOFF slots are left for `1.0.0_SA_CTO` and
-  `2.0.0_SA_COO~G`; the tool's next re-render erases them (row W1-S17).
-- **`FENCE_PLAN.md`.** The sign-off packet:
-  - the blast radius (7 resources);
-  - every principal whose access changes, partitioned by denied-before and denied-after;
-  - the rollback for each touched resource;
-  - four branches.
+| `080e1b97c6` | `infra/logic/registry/exemptions.json`; module `opal_name` `main.tf`, `generated_locals.tf`, `tests/vectors.json`; `shared-infra/s3-49financial.tf`; `shared-infra/lgic-enforce-fence-probes.tf` |
+| `887cf01419` | `fence_plan.json`; `FENCE_PRIOR_POLICY.json` (428 bytes); the ledger sentinel; the ledger entry `20260915T0334Z_lgic-enforce-fence-49financial_deploy_completion.md`; `FENCE_PLAN.md` |
+| `080e1b97c6`, `103a4348a4` | Rows W1-S13..S15 and W1-S16..S17 in `INVESTIGATION_v1.md` |
 
 ## Criteria (outputs verbatim in the proof instance)
 
-| id | verdict | deciding line |
+| id | verdict | deciding line | rc |
+|---|---|---|---|
+| F1-AC1 | PASS-by-output | `WRITERS OF opal-data-49financial: 16  COVERED: 16  UNCOVERED: []` | 0 |
+| F1-AC2 | PASS-by-output | `DENY REGION FOUND: True  TYPED ARN LITERALS: []` | 0 |
+| F1-AC3 | PASS-by-output | `CHANGES: {('create', 'aws_iam_role'): 3, ('create', 'aws_iam_role_policy'): 3, ('update', 'aws_s3_bucket_policy'): 1} ... OTHER: []` | 0 |
+| F1-AC4 | PASS-by-output | `PRIOR == LIVE (read now): True` (read 2026-09-15T06:00:15Z..06:00:26Z; again at 06:08:19Z, identical) | 0 |
+| F1-AC5 | PASS-by-output | `STATUS: OPEN  LEGS: ['L1', 'L2', 'L3', 'L4']  L1 PROOF COMMIT EXISTS: True` | 0 |
+| F1-J1 | RECORDED (judgment) | graded by 3.0.0_SA_CVO at L9; the artifact is `FENCE_PLAN.md`@`887cf01419` | -- |
+
+## F1-AC4's negative control
+
+This control tests whether F1-AC4's PASS could appear if the claim were false.
+
+**Setup.**
+- Two scratch directories under `.scratch/mut_prior/`. Each holds only `.tools/git_bash_resolver.py`, `.tools/aws`
+  and a copy of `FENCE_PRIOR_POLICY.json`.
+- The unchanged fixed `check_en.py` runs `f1-prior` by absolute path, with each directory as its working directory.
+- Each run reads the live policy through the shim, read-only.
+
+**Arms.**
+
+| Arm | Change to the copy | Result |
 |---|---|---|
-| F1-AC1 | PASS-by-output | `WRITERS OF opal-data-49financial: 16  COVERED: 16  UNCOVERED: []` |
-| F1-AC2 | PASS-by-output | `DENY REGION FOUND: True  TYPED ARN LITERALS: []` |
-| F1-AC3 | PASS-by-output | `CHANGES: {('create', 'aws_iam_role'): 3, ('create', 'aws_iam_role_policy'): 3, ('update', 'aws_s3_bucket_policy'): 1} ... OTHER: []` |
-| F1-AC4 | **FAIL** | `PRIOR == LIVE (read now): False  NOT RUNNABLE: [WinError 2] The system cannot find the file specified` |
-| F1-AC5 | PASS-by-output | `STATUS: OPEN  LEGS: ['L1', 'L2', 'L3', 'L4']  L1 PROOF COMMIT EXISTS: True` |
-| F1-J1 | RECORDED (judgment) | graded by 3.0.0_SA_CVO at L9 |
+| unmutated | none | `PRIOR == LIVE (read now): True`, `PASS-PRIOR-VERBATIM`, rc=0 |
+| drop_pattern | `role/opal-assets-mdpf-*` removed from the Deny's `ArnLike` (3 of 4 left) | `PRIOR == LIVE (read now): False`, `FAIL-PRIOR-DIFFERS`, rc=1 |
 
-F1-AC4's FAIL is the instrument's. The same comparison through the `.tools/aws` shim read the file byte-equal
-(428 bytes) to the live policy at 2026-09-15T04:18:57Z, and a negative control read unequal. That supports the
-record. It is not the criterion's output, and the order is not flipped on it.
+**Reading.** The unmutated arm rules out an environment failure in the scratch setup. So the drop_pattern FAIL is
+a real difference, and the instrument can go non-zero. No fixed input was edited.
 
-## Rows filed
+## Rows
 
-| Row | Class and hazard | Subject |
-|---|---|---|
-| W1-S13 | OBSERVATION, INERT | Exemptions reach the policy through a module local, not a generated local |
-| W1-S14 | OBSERVATION, ARMED (2.0.0_SA_COO~G) | 7 generated views outside the grant carry the old registry hash; header-only, measured |
-| W1-S15 | OBSERVATION, INERT | Rows carry `arn`, because the checker keys by name and the policy needs the true ARN |
-| W1-S16 | BLOCKING, ARMED (2.0.0_SA_COO~G) | F1-AC4's `aws` cannot start from Python on this box |
-| W1-S17 | OBSERVATION, ARMED (2.0.0_SA_COO~G) | The ledger tool's re-render erases the SIGNOFF slots |
+None filed by this run. Rows W1-S13..S17 are this slot's earlier run's, and they stay in the proof's `surprises`.
+The checker fix @`c30637c49c` states that it disarms W1-S16. Its row is not edited.
 
 ## Not claimed
 
-- Nothing was applied, and no principal was probed.
-- The access partition in `FENCE_PLAN.md` is over the census population and the plan. It is not a sweep of every
+- Nothing was applied, and no principal was probed. The fence reaches the live plane only through EN-f-2, after
+  gate G-E. That gate is the two SIGNOFF lines, which belong to `1.0.0_SA_CTO` and `2.0.0_SA_COO~G`; they were not
+  touched.
+- The mutant arms for F1-AC1, AC2, AC3 and AC5 are the earlier run's. They were not re-run here, because the
+  artifacts they read are unchanged since their pins (see the pin table).
+- The access partition in `FENCE_PLAN.md` covers the census population and the plan. It is not a sweep of every
   IAM principal.
-- The naming gate (WARN mode) printed REFUSE verdicts on three probe-file lines: the `"49f"`/`"cot"` map keys, and
-  the inline policy name `fenceprobe-read-opal-data-49financial`. It printed OUT-OF-PATTERN on the `"49financial"`
-  index in the Deny. None blocked, and they are left as authored, because the probe file is removed at L4.
