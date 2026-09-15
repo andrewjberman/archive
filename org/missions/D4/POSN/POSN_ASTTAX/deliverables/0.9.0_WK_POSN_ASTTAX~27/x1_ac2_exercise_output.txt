@@ -1,0 +1,233 @@
+====================================================================================================
+X1-AC2 -- CAN A RE-SEED MOVE management_style? SCRATCH ONLY.
+====================================================================================================
+  SCRATCH TARGET  : an in-process dict per table name. boto3 is replaced in
+                    sys.modules before any seeder byte runs; boto3.client()
+                    raises; NO network client is ever constructed. The live
+                    tables 'etf-classifications' and 'bd-securities' are
+                    NEVER opened, read or written by this process.
+  harness         : C:\tmp\wk-posn-7-27\org/missions/D4/POSN/POSN_ASTTAX/deliverables\0.9.0_WK_POSN_ASTTAX~21\v3_mutant_control_re.py
+                    sha256 6342be43813fff1f8bce87bf47982d926ea67706381a591ea8876fdb48e0daf9 (asserted)
+  machinery       : C:\tmp\wk-posn-7-27\.scratch\u3_ac1_before_control.py
+                    sha256 ae72cab7dfbeb62f9acb2e6e15347672a478adce3c0421e12e49750c7bf13aca (asserted)
+  APPLIED subject : data/black_diamond/scripts/classification/seed_canonical_securities.py blob 6a6c3aaa882323827f072457f97607e9e62be42b, 20842 bytes
+  PRE-PATCH subj  : blob 803721e2c15464ed4ba054a02aba2311d5506164 (as issued @cd214384a6), 17700 bytes
+  the two subjects DIFFER: True
+  FLAGS           : seed(upload=True, sync_yang=True, force=False) is exactly
+                    what `--yang --upload` builds -- the file's __main__ block
+                    maps --upload->upload, --yang->sync_yang, --force->force.
+                    --force is NEVER passed anywhere in this exercise.
+  PREFLIGHT-1     : the fake table's update_item MERGES (DynamoDB SET semantics) -- an unowned field CAN cross a write,
+                    so the negative control below can discriminate.
+
+====================================================================================================
+  ARM: MAIN -- APPLIED BYTES   rc=1
+====================================================================================================
+    SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)
+    SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)
+
+    ROW (a) QBER  -- the seeder asserts fixed_income / Volatility -> REFUSE
+      BEFORE (8 field(s)):
+        asset_class        'structured'
+        last_updated       '2026-08-18T19:10:00Z'
+        management_style   'active'
+        name               'TrueShares Quarterly Bear Hedge ETF'
+        sector             'Broad'
+        sub_asset_class    'Hedge'
+        ticker             'QBER'
+        updated_by         'posn-asttax-retag'
+      AFTER  (8 field(s)):
+        asset_class        'structured'
+        last_updated       '2026-08-18T19:10:00Z'
+        management_style   'active'
+        name               'TrueShares Quarterly Bear Hedge ETF'
+        sector             'Broad'
+        sub_asset_class    'Hedge'
+        ticker             'QBER'
+        updated_by         'posn-asttax-retag'
+      FIELDS THAT MOVED: []  (of 8 field(s) before)
+      management_style : before='active' after='active'  BYTE-IDENTICAL: True
+      touched by the run: get_item 1, update_item 0
+
+    ROW (b) AGG   -- agrees with the seeder on all 3 owned fields -> WRITE
+      BEFORE (8 field(s)):
+        asset_class        'fixed_income'
+        last_updated       '2026-08-18T18:00:00Z'
+        management_style   'passive'
+        name               'iShares Core U.S. Aggregate Bond ETF'
+        sector             'Broad'
+        sub_asset_class    'Intermediate'
+        ticker             'AGG'
+        updated_by         'posn-asttax-retag'
+      AFTER  (8 field(s)):
+        asset_class        'fixed_income'
+        last_updated       '2026-09-15T13:39:34.116809+00:00'
+        management_style   'passive'
+        name               'iShares Core U.S. Aggregate Bond ETF'
+        sector             'Broad'
+        sub_asset_class    'Intermediate'
+        ticker             'AGG'
+        updated_by         'canonical_si_seed'
+      FIELDS THAT MOVED: ['last_updated', 'updated_by']  (of 8 field(s) before)
+      management_style : before='passive' after='passive'  BYTE-IDENTICAL: True
+      touched by the run: get_item 1, update_item 1
+
+    ROW (c) VNQ   -- not a seeder record -> never visited
+      BEFORE (8 field(s)):
+        asset_class        'alternatives'
+        last_updated       '2026-08-18T18:05:00Z'
+        management_style   'passive'
+        name               'Vanguard Real Estate ETF'
+        sector             'Real Estate'
+        sub_asset_class    'Real Estate'
+        ticker             'VNQ'
+        updated_by         'posn-asttax-retag'
+      AFTER  (8 field(s)):
+        asset_class        'alternatives'
+        last_updated       '2026-08-18T18:05:00Z'
+        management_style   'passive'
+        name               'Vanguard Real Estate ETF'
+        sector             'Real Estate'
+        sub_asset_class    'Real Estate'
+        ticker             'VNQ'
+        updated_by         'posn-asttax-retag'
+      FIELDS THAT MOVED: []  (of 8 field(s) before)
+      management_style : before='passive' after='passive'  BYTE-IDENTICAL: True
+      touched by the run: get_item 0, update_item 0
+
+    REFUSED 1 etf-classifications row(s): the table serves a value this seeder disagrees with.
+    Nothing was reverted. Re-run with --force to overwrite them.
+    [PRESERVED] QBER       asset_class: table serves 'structured', seeder asserts 'fixed_income' -- table wins, pass --force to override
+    [PRESERVED] QBER       sub_asset_class: table serves 'Hedge', seeder asserts 'Volatility' -- table wins, pass --force to override
+    yang table: get_item 57, update_item 56, rows minted 55 (the MINT CONTROL: the seeder IS writing)
+    every key the run WROTE on the yang table, deduped: 56 of 56 rows
+    VNQ in read keys: False | VNQ in write keys: False
+    DISTINCT UpdateExpression(s) the yang table received: 1
+      'SET asset_class = :ac, sub_asset_class = :sac, #n = :n, last_updated = :ts, updated_by = :ub'
+    value tokens passed: [':ac', ':n', ':sac', ':ts', ':ub']  ('management_style' among them: False)
+
+====================================================================================================
+  ARM: NEG-1 INSTRUMENT CONTROL -- SCRATCH MUTANT of the PRE-PATCH bytes: the SET clause also writes management_style   rc=1
+====================================================================================================
+    mutant: C:\tmp\wk-posn-7-27\.scratch\x1ac2_mutant_neg1_prepatch.py (working tree untouched)
+    its SET clause(s), as received by the fake table:
+      'SET asset_class = :ac, sub_asset_class = :sac, #n = :n, last_updated = :ts, updated_by = :ub, management_style = :ms'
+
+    ROW (a) QBER  -- the seeder asserts fixed_income / Volatility -> REFUSE
+      BEFORE (8 field(s)):
+        asset_class        'structured'
+        last_updated       '2026-08-18T19:10:00Z'
+        management_style   'active'
+        name               'TrueShares Quarterly Bear Hedge ETF'
+        sector             'Broad'
+        sub_asset_class    'Hedge'
+        ticker             'QBER'
+        updated_by         'posn-asttax-retag'
+      AFTER  (8 field(s)):
+        asset_class        'structured'
+        last_updated       '2026-08-18T19:10:00Z'
+        management_style   'active'
+        name               'TrueShares Quarterly Bear Hedge ETF'
+        sector             'Broad'
+        sub_asset_class    'Hedge'
+        ticker             'QBER'
+        updated_by         'posn-asttax-retag'
+      FIELDS THAT MOVED: []  (of 8 field(s) before)
+      management_style : before='active' after='active'  BYTE-IDENTICAL: True
+      touched by the run: get_item 1, update_item 0
+
+    ROW (b) AGG   -- agrees with the seeder on all 3 owned fields -> WRITE
+      BEFORE (8 field(s)):
+        asset_class        'fixed_income'
+        last_updated       '2026-08-18T18:00:00Z'
+        management_style   'passive'
+        name               'iShares Core U.S. Aggregate Bond ETF'
+        sector             'Broad'
+        sub_asset_class    'Intermediate'
+        ticker             'AGG'
+        updated_by         'posn-asttax-retag'
+      AFTER  (8 field(s)):
+        asset_class        'fixed_income'
+        last_updated       '2026-09-15T13:39:34.120215+00:00'
+        management_style   'MUTANT-WROTE-THIS'
+        name               'iShares Core U.S. Aggregate Bond ETF'
+        sector             'Broad'
+        sub_asset_class    'Intermediate'
+        ticker             'AGG'
+        updated_by         'canonical_si_seed'
+      FIELDS THAT MOVED: ['last_updated', 'management_style', 'updated_by']  (of 8 field(s) before)
+      management_style : before='passive' after='MUTANT-WROTE-THIS'  BYTE-IDENTICAL: False
+      touched by the run: get_item 1, update_item 1
+
+    ROW (c) VNQ   -- not a seeder record -> never visited
+      BEFORE (8 field(s)):
+        asset_class        'alternatives'
+        last_updated       '2026-08-18T18:05:00Z'
+        management_style   'passive'
+        name               'Vanguard Real Estate ETF'
+        sector             'Real Estate'
+        sub_asset_class    'Real Estate'
+        ticker             'VNQ'
+        updated_by         'posn-asttax-retag'
+      AFTER  (8 field(s)):
+        asset_class        'alternatives'
+        last_updated       '2026-08-18T18:05:00Z'
+        management_style   'passive'
+        name               'Vanguard Real Estate ETF'
+        sector             'Real Estate'
+        sub_asset_class    'Real Estate'
+        ticker             'VNQ'
+        updated_by         'posn-asttax-retag'
+      FIELDS THAT MOVED: []  (of 8 field(s) before)
+      management_style : before='passive' after='passive'  BYTE-IDENTICAL: True
+      touched by the run: get_item 0, update_item 0
+
+====================================================================================================
+  ARM: NEG-2 -- the SAME mutation on the APPLIED bytes (the new import-time assertion must refuse it)
+====================================================================================================
+    mutant: C:\tmp\wk-posn-7-27\.scratch\x1ac2_mutant_neg2_applied.py
+    rc=None  RAISED: AssertionError: GUARD/WRITE-SURFACE DIVERGENCE: the Yang SET clause writes ('asset_class', 'sub_asset_class', 'name', 'last_updated', 'updated_by', 'management_style'), minus the audit fields ('last_updated', 'updated_by'), but the guard owns ('asset_class', 'sub_asset_class', 'name'). Reconcile them before re-seeding: a guard narrower than the write clobbers; a guard wider than the write is vacuous (POSN_ASTTAX AT7-s-1, C-S177).
+    yang update_item calls: 0 (the write never happened)
+
+====================================================================================================
+  ARM: NEG-3 -- clause mutated AND management_style added to YANG_OWNED_FIELDS (the rejected alternative)
+====================================================================================================
+    mutant: C:\tmp\wk-posn-7-27\.scratch\x1ac2_mutant_neg3_widened_tuple.py
+    rc=None  RAISED: KeyError: 'management_style'
+    yang get_item 20, update_item 19 before it died; rows minted 19
+    the row it died on: 'AGG' -- the FIRST row that already EXISTS (an
+    absent row returns [] from _yang_conflicts before any field is read)
+    MEASURED: no record in CANONICAL_SECURITIES carries a
+    'management_style' key, so the guard loop raises KeyError on the
+    first live row. The alternative is not merely vacuous -- it is fatal.
+
+====================================================================================================
+  ARM: IDENTITY -- pre-patch bytes vs applied bytes, one frozen clock
+====================================================================================================
+    yang update_item calls  : pre 56, applied 56, IDENTICAL: True
+    bd   update_item calls  : pre 57, applied 57, IDENTICAL: True
+    stdout                  : pre 3793 bytes, applied 3793 bytes, IDENTICAL: True
+    resulting yang store    : IDENTICAL: True
+    return code             : pre 1, applied 1, IDENTICAL: True
+    -> the change is STATEMENT AND ASSERTION ONLY: on this input the two
+       builds are BYTE-IDENTICAL in every observable: True
+
+====================================================================================================
+X1-AC2 SUMMARY -- each line a measurement, not a restatement
+====================================================================================================
+  (a) QBER REFUSED, both class fields [PRESERVED], rc 1        : True
+  (a) QBER management_style 'active' byte-identical after      : True
+  (b) AGG  WRITTEN (last_updated and updated_by moved)         : True
+  (b) AGG  management_style 'passive' byte-identical after     : True
+  (c) VNQ  never visited (no get_item, no update_item, ==)     : True
+  NEG-1 the mutant MOVES (b)'s management_style                : True
+  NEG-2 the assertion REFUSES that mutation at import          : True
+  NEG-3 the WIDENED TUPLE raises KeyError on the first live row: True
+  IDENTITY pre-patch == applied on every observable            : True
+
+  OK: 9 of 9. The MAIN and NEG-1 arms read DIFFERENTLY on the same input
+  and the same rows, so 'management_style did not move' is a MEASUREMENT
+  by an instrument that demonstrably can see such a write -- not an
+  absence of evidence. A re-seed cannot write, clear or revert
+  management_style, and never reaches VNQ at all.
+====================================================================================================
