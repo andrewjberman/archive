@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_NAMING.TO-LN-e-3-r3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/decompositions/LGIC_NAMING_DECOMP.md",
+    "vintage_commit": "2f8cc63b8e",
+    "to_ref": "org/missions/D14/LGIC/LGIC_NAMING/task-orders/LGIC_NAMING.TO-LN-e-3-r3.namer-comparison.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/prd/LGIC_NAMING_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0a830c15f"
+  },
+  "assignee": "0.9.0_WK_LGIC_NAMING~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/r3/n3-compare.md",
+      "kind": "doc",
+      "commit_or_etag": "b4f6c98c2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A naming-exercise record under deliverables/, committed at b4f6c98c2e on wk-lgic-naming-3-6. Nothing live moves in this project (PRD S13).",
+      "artifact_covered_by": ["E3T-AC1", "E3T-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~6/namer-comparison.result.md",
+      "kind": "doc",
+      "commit_or_etag": "b4f6c98c2e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The result file the order names, next to this instance, committed at b4f6c98c2e. It replaced round 2's result at the same path (row LGIC_NAMING-S18). It is a record with no deploy scope.",
+      "artifact_covered_by": ["E3T-AC1", "E3T-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E3T-AC1",
+      "criterion_verbatim": "E3T-AC1 -- the two namers' answer files are identical on every item.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-3-6 && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_ln_r3.py e3-identical",
+      "output_evidence": "ITEMS: 18  IDENTICAL: 18  DIFFERENT: 0\nVERDICT: PASS-IDENTICAL\nrc=0",
+      "denominator": "18 of 18 items identical, 0 of 18 different. The 18 include i05, disclosed by row LGIC_NAMING-S15.",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-IDENTICAL"
+    },
+    {
+      "criterion_id": "E3T-AC2",
+      "criterion_verbatim": "E3T-AC2 -- the two seats received the identical prompt, in two different sessions and folders.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-3-6 && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_ln_r3.py e3-blind",
+      "output_evidence": "PROMPT A sha: 5dbd254833e4fc538099f692b7f62c02c774f2e15bc1f0902b4594cda956d0fe  PROMPT B sha: 5dbd254833e4fc538099f692b7f62c02c774f2e15bc1f0902b4594cda956d0fe  (identical input: neither seat was given anything but the briefing)\nSESSION A: 11cdb5f4-3285-4f8a-961e-f8795c4c1756  SESSION B: a9e21681-56a0-48c8-839d-042847b8aecc\nVERDICT: PASS-NAMERS-UNCONFERRED\nrc=0",
+      "denominator": "2 of 2 seat records (e1, e2). The prompt sha matches each seat record and the two are equal. The session_ids differ (2 distinct) and the seat_dirs differ (2 distinct: opal_blindseat_r3_e1_lhkou35j, opal_blindseat_r3_e2__w6jmyl3).",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-NAMERS-UNCONFERRED"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Run in memory from .scratch/controls.py, with no tracked file edited. The script imports check_ln_r3.py. (a) AC1 mutant: tsv() is wrapped so that namer B's i05 name gets a '-mutant' suffix. (b) AC2 mutant: seat_parts() is wrapped so that seat B's record carries seat A's session_id and seat_dir. (c) AC2 mutant: seat B's prompt text gets one extra byte. Each arm is followed by an unmutated run of the same import.",
+      "expected": "(a) VERDICT: FAIL-DIFFERENT with DIFFERENT: 1. (b) VERDICT: FAIL-NAMERS-NOT-SEPARATED. (c) VERDICT: FAIL-NAMERS-NOT-SEPARATED.",
+      "observed": "(a) DIFFERS: i05  A=opal-data-cottonwood  B=opal-data-cottonwood-mutant / ITEMS: 18  IDENTICAL: 17  DIFFERENT: 1 / VERDICT: FAIL-DIFFERENT. The unmutated run gave VERDICT: PASS-IDENTICAL (18 of 18). (b) SESSION B: 11cdb5f4-... (A's) / VERDICT: FAIL-NAMERS-NOT-SEPARATED. (c) VERDICT: FAIL-NAMERS-NOT-SEPARATED. The unmutated run gave VERDICT: PASS-NAMERS-UNCONFERRED. So each checker can return FAIL, and the PASS is a result of the input. git status afterwards showed no tracked file modified.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each criterion's invocation run twice on the same tree, with the outputs compared by cmp.",
+      "observed": "e3-identical: both runs byte-identical (cmp rc=0, PASS-IDENTICAL 18 of 18). e3-blind: both runs byte-identical (cmp rc=0, PASS-NAMERS-UNCONFERRED).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Whether the 18 identical names equal the ruled names of the round-1 analysis s.2 table",
+      "reason": "The order asks for the ruled name only on each DIFFERS item, and there are none. This cell compares and does not name or grade. FWD-1's grade belongs to 3.0.0_SA_CVO at L9."
+    },
+    {
+      "item": "The seat conditions beyond e3-blind (clean folder, no tools, canary)",
+      "reason": "Those are the e1/e2 cells' criteria (e1-seat, e2-seat, e1-canary, e2-canary), measured by LN-e-1 and LN-e-2 round 3. Re-measuring them is outside this cell."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- a worker writes no telemetry (L7 reads from git); branch wk-lgic-naming-3-6",
+  "compiler_tools": [
+    {
+      "tool": "check_ln_r3.py (issuer fixed input)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_ln_r3.py e3-identical | e3-blind",
+      "result": "e3-identical PASS-IDENTICAL (18 of 18 identical); e3-blind PASS-NAMERS-UNCONFERRED"
+    }
+  ]
+}
