@@ -1,0 +1,181 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_CANON.TO-CN-k-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/decompositions/LGIC_CANON_DECOMP.md",
+    "vintage_commit": "2b61346713",
+    "to_ref": "org/missions/D14/LGIC/LGIC_CANON/task-orders/LGIC_CANON.TO-CN-k-1.canon.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/prd/LGIC_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5b2336a5e4"
+  },
+  "assignee": "0.9.0_WK_LGIC_CANON~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/02_DOCTRINE.md",
+      "kind": "doc",
+      "commit_or_etag": "fa9212974e9c0759dfacc1abb4111542256df945",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The canon, edited in place from v0.3 to v1.0: the census line, the generated naming section between its two marker lines, R1 citing that section, D10 s.2 and s.6 absorbed, section 4 keeping the schema and pointing at the ledger for entries, and section 6 closed or naming deciders. It is a document with nothing to deploy, and nothing live moves (PRD DEC-9).",
+      "introduces": [
+        "RULES CARRYING ALL THREE PARTS: 21 of 21",
+        "<!-- BEGIN GENERATED NAMING SECTION -->",
+        "the LEGACY root `code/` homes (R16)"
+      ],
+      "artifact_covered_by": ["K1-AC1", "K1-AC2", "K1-AC3", "K1-AC4", "K1-AC5", "K1-AC6", "K1-AC7", "K1-J1"]
+    },
+    {
+      "path_or_key": "infra/logic/render_naming_section.py",
+      "kind": "script",
+      "commit_or_etag": "fa9212974e9c0759dfacc1abb4111542256df945",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A new repo script with --write, --check, --canon, --schema and --registry. It reads NAMING_SCHEMA.json, and the registry's FIRM rows when firm_forms is absent, and writes neither. It is run locally and by the drain (gate G-V19R), and never deployed. It passed the commit gate in commit fa9212974e (py_compile, ds-precommit, ruff).",
+      "introduces": [
+        "def render(schema_path, registry_path):",
+        "stamp: %s %s sha256:%s"
+      ],
+      "artifact_covered_by": ["K1-AC2", "K1-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~1/canon.r1.result.md",
+      "kind": "doc",
+      "commit_or_etag": "d6547d2f75e4fb4c5958678e07ec2801bb035c80",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The result file the order names beside this instance. It records the pre-edit baseline (all seven criteria FAIL), each criterion's deciding output, rc and denominator at fa9212974e, what the edit did per item, the choices left for L9, and the rows filed. Nothing to deploy.",
+      "introduces": [
+        "# LGIC_CANON.TO-CN-k-1 -- result (cell CN-k-1, round 1)"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "K1-AC1",
+      "criterion_verbatim": "K1-AC1 -- the canon's printed `RULES CARRYING ALL THREE PARTS` line equals the checker's recount, and every rule carries all three parts.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-1 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py k1-census",
+      "output_evidence": "RECOUNT BY THIS CHECKER: 21 of 21 rules carry authority, census and non-application\nPRINTED: 21 of 21  RECOUNTED: 21 of 21\nVERDICT: PASS-K1-CENSUS-OK\nrc=0 (run at HEAD fa9212974e, clean worktree)",
+      "denominator": "21 of 21 rule blocks carry authority, census and non-application; printed line 21 of 21",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-K1-CENSUS-OK"
+    },
+    {
+      "criterion_id": "K1-AC2",
+      "criterion_verbatim": "K1-AC2 -- `render_naming_section.py --check` exits 0: the section's bytes equal a fresh render of the stamped files.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-1 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py k1-render",
+      "output_evidence": "render --check rc=0\nOK: stamp org/standards/NAMING_SCHEMA.json v1.8 sha256:4ff4e61930b3c8cdcd767ba660e32d0e37e527196a340cec3c94e27f1dd9b8c0 equals the live file\nOK: the section's bytes equal a fresh render (135 lines, CRLF normalised)\nCHECK: FRESH -- 0 failure(s)\nSTAMP LINES IN THE SECTION: 1  --check rc: 0\nVERDICT: PASS-K1-RENDER-FRESH\nrc=0 (run at HEAD fa9212974e, clean worktree)",
+      "denominator": "1 of 1 stamp line matches its live file; 135 of 135 section lines equal a fresh render",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-K1-RENDER-FRESH"
+    },
+    {
+      "criterion_id": "K1-AC3",
+      "criterion_verbatim": "K1-AC3 -- on a scratch copy with a doctored stamp, `--check` exits non-zero, while the clean copy exits 0 (N4).",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-1 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py k1-stale",
+      "output_evidence": "clean copy --check rc=0  doctored copy --check rc=1\ne27f1dd9b8c0\nERROR: the section differs from a fresh render at section line 4 (section 135 lines, render 135 lines)\n  section: stamp: org/standards/NAMING_SCHEMA.json v1.8 sha256:0ff4e61930b3c8cdcd767ba660e32d0e37e527196a340cec3c94e27f1dd9b8c0\n  render:  stamp: org/standards/NAMING_SCHEMA.json v1.8 sha256:4ff4e61930b3c8cdcd767ba660e32d0e37e527196a340cec3c94e27f1dd9b8c0\nCHECK: STALE -- 2 failure(s)\nA DOCTORED STAMP IS REFUSED: True (and the clean copy passes: True)\nVERDICT: PASS-K1-STALE-REFUSED\nrc=0 (run at HEAD fa9212974e, clean worktree)",
+      "denominator": "2 of 2 arms: the clean scratch copy exits 0 and the doctored scratch copy exits 1",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-K1-STALE-REFUSED"
+    },
+    {
+      "criterion_id": "K1-AC4",
+      "criterion_verbatim": "K1-AC4 -- a census of the schema's enumerations outside the generated section returns 0, denominator printed.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-1 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py k1-noenum",
+      "output_evidence": "LINES OUTSIDE THE GENERATED SECTION: 441  ENUMERATIONS FOUND THERE: 0\nVERDICT: PASS-K1-NO-ENUM-OUTSIDE\nrc=0 (run at HEAD fa9212974e, clean worktree)",
+      "denominator": "0 enumerations over 441 of 441 lines outside the generated section (two grammar templates and five enumeration sets: firm forms, refused tokens, tiers, cadences, kinds)",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-K1-NO-ENUM-OUTSIDE"
+    },
+    {
+      "criterion_id": "K1-AC5",
+      "criterion_verbatim": "K1-AC5 -- every item of section 6 is closed or names its decider.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-1 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py k1-s6",
+      "output_evidence": "ITEMS: 9  CLOSED OR NAMING A DECIDER: 9\nVERDICT: PASS-K1-S6-CLOSED\nrc=0 (run at HEAD fa9212974e, clean worktree)",
+      "denominator": "9 of 9 section 6 items closed (RULED or struck) or naming a decider",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-K1-S6-CLOSED"
+    },
+    {
+      "criterion_id": "K1-AC6",
+      "criterion_verbatim": "K1-AC6 -- D10 s.2 and s.6 are absorbed: the five axes and the register schema are in the canon, and every D10 s.2/s.6 citation says `absorbed`.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-1 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py k1-d10",
+      "output_evidence": "AXES DEFINED: 5 of 5  REGISTER SCHEMA LINE: True  D10 s.2/s.6 CITATIONS: 3  NOT MARKED ABSORBED: 0\nVERDICT: PASS-K1-D10-ABSORBED\nrc=0 (run at HEAD fa9212974e, clean worktree)",
+      "denominator": "5 of 5 axes defined; 1 of 1 register schema line; 3 of 3 D10 s.2/s.6 citations marked absorbed",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-K1-D10-ABSORBED"
+    },
+    {
+      "criterion_id": "K1-AC7",
+      "criterion_verbatim": "K1-AC7 -- R1's non-application names only the LEGACY root `code/` homes (S1).",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-1-1 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py k1-r1code",
+      "output_evidence": "R1 NON-APPLICATION LINES NAMING code/: 1  WITHOUT 'legacy': 0\nVERDICT: PASS-K1-R1-LEGACY-CODE\nrc=0 (run at HEAD fa9212974e, clean worktree)",
+      "denominator": "1 of 1 R1 non-application line naming code/ carries 'legacy'",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-K1-R1-LEGACY-CODE"
+    },
+    {
+      "criterion_id": "K1-J1",
+      "criterion_verbatim": "K1-J1 -- graded at L9 by 3.0.0_SA_CVO: a seat can apply each rule from this document alone. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; the order gives it no invocation. Graded at L9 by 3.0.0_SA_CVO.",
+      "output_evidence": "RECORDED, no verdict. The worker's choices for the grader are listed in canon.r1.result.md@d6547d2f75, section 'For L9': the ADVI clause's decider, the RULED marks citing PRD DEC-3 and DEC-4, the section 1 rewording (row LGIC_CANON-W1-S1), and X6's out-of-schema axis in the ledger (row LGIC_CANON-W1-S2).",
+      "denominator": "N/A -- a judgment criterion has no instrument denominator",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\": graded at L9 by 3.0.0_SA_CVO, never self-graded by the worker",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's own mutant is K1-AC3, a scratch copy of the canon with the first sha256 stamp's first hex digit changed, checked with render_naming_section.py --check --canon <copy>. The worker also ran a second arm on scratch copies under <WS>/.scratch/: a schema with firm_forms removed switches the render to the registry's FIRM rows with two stamp lines. --check read 0 against that schema and 1 against the live schema.",
+      "expected": "doctored copy --check rc != 0; clean copy --check rc == 0",
+      "observed": "clean copy --check rc=0  doctored copy --check rc=1 (K1-AC3); registry-branch arm: check-v19 rc=0, check against the live schema rc=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The seven criteria were run twice on the same bytes: once on the uncommitted worktree just before commit fa9212974e, and once at HEAD fa9212974e on a clean worktree. The deciding lines were compared.",
+      "observed": "7 of 7 verdict lines and denominators identical across the two runs; the section's stamp hash is 4ff4e619...9b8c0 both times",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The ledger's register entry X6, whose axis 'tenancy' lies outside the A1-A5 domain of the schema line the canon keeps",
+      "reason": "infra/logic/06_CONFORMANCE_LEDGER.md is outside this order's <paths> (it is cell CN-l-1's surface). The worker filed row LGIC_CANON-W1-S2 and did not edit the file."
+    },
+    {
+      "item": "The G-V19R re-render when NAMING_SCHEMA v1.9 lands",
+      "reason": "It is the issuer's drain act, not this cell's: whichever of this branch's drain and GROUP V19's merge lands second re-runs --write. The worker exercised the registry branch on scratch copies only, and the committed section stamps v1.8."
+    },
+    {
+      "item": "K1-J1's verdict",
+      "reason": "A judgment criterion is graded at L9 by 3.0.0_SA_CVO and never self-graded."
+    }
+  ],
+  "surprises": [
+    "LGIC_CANON-W1-S1: the section 1 vocabulary contradicted the generated tier list and the schema's code tier (state 'NOT a tier', the root code/gold/ given as the code home), and the worker aligned three rows' words; OBSERVATION, INERT",
+    "LGIC_CANON-W1-S2: the register's two carriers had diverged by X6 (ledger only), and X6's axis 'tenancy' is outside the A1-A5 schema the canon keeps; OBSERVATION, INERT"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~1/canon.r1.result.md",
+  "compiler_tools": [
+    {
+      "tool": "check_canon_r1.py (issuer fixed input, 2.0.0_SA_COO~G)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py {k1-census,k1-render,k1-stale,k1-noenum,k1-s6,k1-d10,k1-r1code}",
+      "result": "7 of 7 PASS at fa9212974e; all 7 read FAIL on the v0.3 baseline before any edit"
+    },
+    {
+      "tool": "render_naming_section.py (this cell's artifact)",
+      "invocation": "python infra/logic/render_naming_section.py --check",
+      "result": "CHECK: FRESH -- 0 failure(s), rc=0"
+    }
+  ]
+}
