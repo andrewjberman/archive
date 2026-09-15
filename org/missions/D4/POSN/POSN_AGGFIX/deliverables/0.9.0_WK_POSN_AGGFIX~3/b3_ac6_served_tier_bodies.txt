@@ -1,0 +1,33 @@
+$ timeout 900 node org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~3/b3_served_tier_bodies.mjs
+RC OBSERVED: 0
+SERVED_TIER_BODIES_B3 -- B3-AC6 (AMENDMENT 1) at 2026-09-15T23:35:42.616Z against https://opalinvest.dev
+CLASS DEFINITIONS imported from org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~2/c1_classes.mjs sha256=8b952e3f890cd3fd (read, never edited)
+KEY READ: comp-secrets get opal/auth/jwt-private-key --reveal rc=0; shape=PEM; type=rsa; modulus=2048 bits; sign/verify self-check=OK; value REDACTED
+TOKENS iat=1789515345 exp=1789515645 (lifetime 300 s, the order's bound)
+  CLAIMS opal: {"sub":"qa-posn-aggfix-opal","name":"QA POSN_AGGFIX Opal staff","role":"user","tier":"internal","firmId":"opal-capital","iss":"opal-portal-auth","aud":"opal-portal-api","iat":1789515345,"exp":1789515645} (token REDACTED)
+  CLAIMS dev: {"sub":"qa-posn-aggfix-dev","name":"QA POSN_AGGFIX Dev","role":"user","tier":"advisor","firmId":"49financial","userType":"Dev","iss":"opal-portal-auth","aud":"opal-portal-api","iat":1789515345,"exp":1789515645} (token REDACTED)
+  CLAIMS advisor: {"sub":"qa-posn-aggfix-advisor","name":"QA POSN_AGGFIX advisor","role":"user","tier":"advisor","firmId":"49financial","advisorKey":"qa-posn-aggfix-advisor","advisorName":"QA POSN_AGGFIX advisor","advisorRole":"implementor","advisorId":"qa-posn-aggfix-advisor","iss":"opal-portal-auth","aud":"opal-portal-api","iat":1789515345,"exp":1789515645} (token REDACTED)
+  CLAIMS client: {"sub":"qa-posn-aggfix-client","name":"QA POSN_AGGFIX client","role":"user","tier":"client","firmId":"49financial","iss":"opal-portal-auth","aud":"opal-portal-api","iat":1789515345,"exp":1789515645} (token REDACTED)
+
+B3-AC6 -- one row per (class, URL): what the session RECEIVES, parsed
+   1 MATCH    advisor  /api/general/positioning/positioning_data.json     200  len=67273   sha256=86314ec65f3877e6 body.status=null  current_holdings=[UST ST INT LT ULT] AGG=ABSENT   [expect 200 and current_holdings WITHOUT AGG]
+   2 MATCH    client   /api/general/positioning/positioning_data.json     200  len=67273   sha256=86314ec65f3877e6 body.status=null  current_holdings=[UST ST INT LT ULT] AGG=ABSENT   [expect 200 and current_holdings WITHOUT AGG]
+   3 MATCH    advisor  /api/general/positioning/opal_aggregate.json       401  len=62      sha256=af13fcd7f718529f body.status=null  current_holdings=(none: no current_holdings object) AGG=n/a   [expect 401]
+   4 MATCH    advisor  /api/general/json/positioning/opal_aggregate.json  401  len=62      sha256=af13fcd7f718529f body.status=null  current_holdings=(none: no current_holdings object) AGG=n/a   [expect 401]
+   5 MATCH    client   /api/general/positioning/opal_aggregate.json       401  len=62      sha256=af13fcd7f718529f body.status=null  current_holdings=(none: no current_holdings object) AGG=n/a   [expect 401]
+   6 MATCH    client   /api/general/json/positioning/opal_aggregate.json  401  len=62      sha256=af13fcd7f718529f body.status=null  current_holdings=(none: no current_holdings object) AGG=n/a   [expect 401]
+   7 MATCH    opal     /api/general/positioning/opal_aggregate.json       200  len=14410   sha256=1d8f9fbb6d8b3877 body.status=OK    current_holdings=[AGG] AGG=PRESENT   [expect 200 with body status OK]
+   8 MATCH    dev      /api/general/positioning/opal_aggregate.json       200  len=14410   sha256=1d8f9fbb6d8b3877 body.status=OK    current_holdings=[AGG] AGG=PRESENT   [expect 200 with body status OK]
+
+POSITIVE CONTROL -- the SAME parsed check against TO-A3-1's PRIOR shared-file version, by VersionId
+  PRIOR_FETCH source instance: org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~1/POSN_AGGFIX.TO-A3-1.deploy-the-producer-and-read-the-served-result.proof_of_spec.json @6ffc81479930f20c74770d32e2012e8fbaee9d89
+  PRIOR_FETCH   from A3-AC8: {"shared_new": "dFjRdciig4Y.4DBiK_F0eyHtn1.YBCOC", "shared_prior": "aJ7nhwRKko3H_AMRzsNvvwkf1NiO9aou"}
+  PRIOR_FETCH   from A3-AC9: {"shared_new": "dFjRdciig4Y.4DBiK_F0eyHtn1.YBCOC", "shared_prior": "aJ7nhwRKko3H_AMRzsNvvwkf1NiO9aou"}
+  PRIOR_FETCH loci carrying a prior id: 2; distinct values: 1; agree: True
+  fetched json/positioning/positioning_data.json @VersionId aJ7nhwRKko3H_AMRzsNvvwkf1NiO9aou (from 6ffc81479930f20c74770d32e2012e8fbaee9d89, loci agree true)
+  LastModified 2026-09-15T11:06:20Z  ContentLength 8657  ContentEncoding gzip  stored md5 797a5947d5c2a4a93920c6dd9d3096e8  decompressed 80704 bytes sha256=806bfe06c991e6b0 (read back equal: true)
+  PARSED by the SAME aggReading(): current_holdings=[UST ST INT LT ULT AGG] AGG=PRESENT body.status=null
+  CONTROL: the AGG check reports PRESENT on the prior version -- FIRED-AS-EXPECTED (the check can fail)
+
+TABLE ROWS 8; MATCH 8 of 8
+POSITIVE CONTROL AGG PRESENT ON THE PRIOR VERSION: TRUE
