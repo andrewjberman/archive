@@ -1,86 +1,99 @@
-# NFRA_OPLGTW.TO-OG-a-2: principal cutover result (second run, order as amended @adc6874dea)
+# NFRA_OPLGTW.TO-OG-a-2: principal cutover result (third run, order as amended @1efed70736)
 
 **Worker:** `0.9.0_WK_NFRA_OPLGTW~3` | **Branch:** `wk-nfra_oplgtw-1-3c` (worktree `/c/tmp/wk-oplgtw-1-3c`, cut from
-`CLOUD` at `3f94e0a024`) | **Commits (LOCAL, this run):** `318e119c4f` fixtures + AC13 probe; `840de8bd66` rows
-W3-S13, W3-S14; and the commit carrying this file and the rebuilt proof instance. First run: `d02e73c272` code,
-`5f47166b4b` rows, `fed567f54e` proof. Nothing was pushed, merged or deployed.
+`CLOUD` at `3f94e0a024`) | **Commits (LOCAL, this run):**
+- `7183f7a3d3`: the three re-targets and the AC14 probe;
+- `5c2f6d8ed1`: the probe's line-check fix;
+- `189e70f340`: row W3-S15;
+- the commit that carries this file, the rebuilt proof instance and the `<status>` flip.
 
-## Read this first: the order stays OPEN (OGA2-AC12 FAIL, refused as written; row W3-S13 BLOCKING, ARMED)
+Earlier runs: `d02e73c272` code, `5f47166b4b` rows, `fed567f54e` first proof, `318e119c4f` fixtures, `840de8bd66`
+rows, `f8feaf081e` second proof. Nothing was pushed, merged or deployed.
 
-12 of 13 criteria pass by output. **OGA2-AC12 does not:** the three granted modules read `3 failed, 28 passed`
-(they read `16 failed, 15 passed` before the amendment's grant).
+## Read this first: 14 of 14 criteria pass by output; `<status>` is `complete`
 
-- **Why they fail:** each of the 3 fails on an untouched assertion that compares a validated token's `sub` to an
-  email. The three assertions are `test_oauth_durable.py:710`, `test_jwt_cve_lock.py:117` and
-  `test_schwab_audit.py:342` @`318e119c4f`.
-- **Why a fixture cannot fix them:** OGA2-AC1 requires `sub = <tid>/<oid>` with no `@`, and `validate_access_token`
-  refuses any other `sub`. So no fixture yields an email subject. Each test already reaches its assertion holding a
-  token the gateway accepted.
-- **Why the worker stopped there:** the grant is fixture-only ("no assertion is removed, weakened or re-targeted").
-  Passing these three means re-targeting each one, to the principal key or to the email claim. The worker left all
-  three as written.
-- **What would disarm it:** an issuer amendment that permits that one-expression re-target. OGA2-AC13 cannot tell
-  such a re-target from none, because the assert counts would not move.
+The ruling in msg 97141 re-targets exactly three assertions. With them re-targeted, the three granted modules read
+`31 passed` (OGA2-AC12). The assert counts per module are unchanged at 123/123, 6/6 and 63/63 (OGA2-AC13). The diff
+against `3f94e0a024` changes exactly 3 assertion lines, the three named ones, and each still compares the email
+claim to its original email (OGA2-AC14).
 
-The proof instance validates (checker rc 0). Per the order, a VALID instance with a FAIL row is not a met order, so
-`<status>` is left `pending`.
+## What changed this run
 
-## What changed this run (`318e119c4f`, fixture-only)
+| file | line | before (@`f8feaf081e`) | after (@`7183f7a3d3`) |
+|---|---|---|---|
+| `tests/test_oauth_durable.py` | 710 | `...["sub"] == email` | `...["sub"] == LocalIssuer.TID + "/" + LocalIssuer.oid_for(email) and claims["email"] == email` |
+| `tests/test_jwt_cve_lock.py` | 117 | `...["sub"] == "attacker@opalinvest.com"` | `...["sub"] == _TENANT + "/" + str(uuid.uuid5(uuid.NAMESPACE_URL, "cve-lock/attacker@opalinvest.com")) and claims["email"] == "attacker@opalinvest.com"` |
+| `tests/test_schwab_audit.py` | 342 -> 343 | `claims["sub"] == "colleague@opalinvest.com" and claims["typ"] == "access"` | `claims["sub"] == _TENANT + "/" + str(uuid.uuid5(uuid.NAMESPACE_URL, "ogo1-ac06/colleague@opalinvest.com")) and claims["email"] == "colleague@opalinvest.com" and claims["typ"] == "access"` |
 
-| file | change |
-|---|---|
-| `tests/test_oauth_durable.py` | The LocalIssuer's ID token carries a `tid` (the harness tenant) and an `oid` fixed per email. The fixture patches `token_broker.redeem_code_for_principal` with `LocalIssuer.redeem_principal`, which verifies the token and returns `make_principal(tid, oid, email)`, and sets `TENANT_ID` to the harness tenant. The email-only `redeem_code_for_email` patch is gone. |
-| `tests/test_jwt_cve_lock.py` | The control test takes a `family_store` fixture (moto DynamoDB, fake credentials, harness tenant, revocation files in `tmp_path`) and mints its token from a refresh family: register, pending authorization, code, PKCE S256 exchange. |
-| `tests/test_schwab_audit.py` | `test_ogo1_ac06` mints its token the same way, inside its existing `mock_aws`. |
-| `probes/og_a2.py` (deliverables) | The AC13 probe. It counts assert statements per module by AST, from git objects at HEAD and at `3f94e0a024`. A failed or empty git read is a FAIL, never a zero. |
+- **How each assertion was written:** each stays one physical line. The first two bind the validated claims once
+  with `:=`. Each `<tid>/<oid>` expression is the one that test's own fixture mints its principal from.
+- **The one extra line:** `test_schwab_audit.py` gains `import uuid` at module scope (line 15), because that test's
+  oid can only be written with it. It is the only non-assertion line changed since `f8feaf081e`, and it is row
+  W3-S15.
+- **The probe:** `probes/og_a2.py` gains AC14. It reads each module two ways:
+  - the assert statements, matched structurally between base and HEAD;
+  - the `-U0` diff hunks that fall inside an assertion.
 
-No assert, `self.assert*` or `pytest.raises` line was added, removed or edited. `git diff -U0` over the three files
-shows 107 changed lines, and 0 of them name an assertion. The app modules and `tests/test_principal_cutover.py` are
-byte-identical to `d02e73c272` (`git diff --quiet` rc 0). The commit gate read `OK ... 4 of 4 file(s)`.
+  Each must read 1 per module. The changed base line must be the named line @`f8feaf081e`. The HEAD line must compare
+  `["email"]` to the original `["sub"]` comparand and carry it as written.
+- **Unchanged:** the app modules and `tests/test_principal_cutover.py` are byte-identical to `d02e73c272`.
 
-## Criteria (each invocation run verbatim at `318e119c4f`, and AC13 again at `840de8bd66`)
+## Criteria (each invocation run verbatim; AC1..AC12 at `7183f7a3d3`, AC13 and AC14 at `189e70f340`)
 
 | id | verdict | deciding output |
 |---|---|---|
-| OGA2-AC1 .. AC11 | PASS-by-output, 11 of 11 | `1 passed` each, rc 0. The denominator lines are byte-identical to the first run's (11 of 11) |
-| OGA2-AC12 | **FAIL** (refused as written) | `3 failed, 28 passed in 17.08s`, rc 1. FAILED: `test_oauth_durable.py::test_oga1_ac13`, `test_jwt_cve_lock.py::test_control_valid_token_accepted`, `test_schwab_audit.py::test_ogo1_ac06` |
+| OGA2-AC1 .. AC11 | PASS-by-output, 11 of 11 | `1 passed` each, rc 0. The denominator lines are byte-identical to the previous runs' (11 of 11) |
+| OGA2-AC12 | PASS-by-output | `31 passed in 18.37s`, rc 0 (31 of 31) |
 | OGA2-AC13 | PASS-by-output | `VERDICT: PASS-OGA2-AC13`. HEAD == base: 123/123, 6/6, 63/63 (58 assert + 5 pytest.raises); modules equal 3 of 3 |
+| OGA2-AC14 | PASS-by-output | `VERDICT: PASS-OGA2-AC14`. Assertion statements changed 3, assertion lines changed 3; named line matched 3 of 3; email half kept 3 of 3 |
+
+**The probe's own defect, fixed in this run:** AC14's first run at `7183f7a3d3` read `VERDICT: FAIL-OGA2-AC14` on
+the jwt and schwab modules. The fault was in the probe. It compared `ast.unparse`'s single-quoted form of the
+original email with a source line that writes the literal double-quoted. The structural half had passed 3 of 3.
+The control had missed the fault because it used only a variable.
+
+`5c2f6d8ed1` fixes both:
+- the line check now reads the original's source segment;
+- the control now has 6 arms (a variable and a double-quoted literal, each with the email half kept, dropped or
+  swapped).
+
+The PASS above is the verbatim run after that fix.
 
 ## Controls
 
-- **Mutant:** AC13's own verdict path, run in-process with the HEAD copy of `test_jwt_cve_lock.py` minus one `assert`
-  line. Result: `VERDICT: FAIL-OGA2-AC13 test_jwt_cve_lock.py HEAD=5 base=6`, rc 1. FIRED-AS-EXPECTED. The first
-  run's code mutant (the family status check removed, so AC6 failed) still describes the unchanged code.
+- **Mutant:** AC14's own verdict path runs in-process with the HEAD copy of `test_jwt_cve_lock.py` minus its email
+  half. Result: `VERDICT: FAIL-OGA2-AC14 test_jwt_cve_lock.py: the HEAD assertion does not compare ["email"] to the
+  original ...`, rc 1. FIRED-AS-EXPECTED. The earlier AC13 mutant and code mutant stand on unchanged code.
 - **Determinism:**
-  - AC13: 3 runs, with identical per-module lines.
-  - AC12: 2 runs, with the same 3 FAILED ids and the same summary line.
-  - AC1..AC11: 11 of 11 denominator lines are identical to the first run's.
+  - AC14: 2 runs, with identical per-module lines.
+  - AC13: 2 runs, with identical module lines.
+  - AC12: `31 passed` in 2 of 2 runs.
+  - AC1..AC11: 11 of 11 denominator lines are identical to the previous runs'.
   - STABLE.
 
 ## Checker
 
-`py -3.12 .tools/proof-of-spec-check.py <instance> OGA2-AC1,...,OGA2-AC13` -> `VALID (rc=0)`, violations 0.
+`py -3.12 .tools/proof-of-spec-check.py <instance> OGA2-AC1,...,OGA2-AC14` -> `VALID (rc=0)`, violations 0.
 
 - **Artifacts:** 11 of 11 are content-resolved at their pins.
-- **Surprises:** 8 of 8 entries resolve to a channel row.
-- **Invocations:** 13 of 13 match the criterion text.
+- **Surprises:** 9 of 9 entries resolve to a channel row.
+- **Invocations:** 14 of 14 match the criterion text.
 
-The first check read `INVALID (rc=1)`. It found two defects in the instance itself: AC12 carried no
-`status_reason`, and one `introduces` token was not literal text at its pin. Both were corrected, and nothing else
-changed.
+The first check read `INVALID (rc=1)` on 5 `introduces` lists. They named tokens that earlier commits had made,
+not the pinned ones. Each now names a token its own pin introduced, and nothing else changed.
 
-## Rows filed this run (`840de8bd66`)
+## Rows
 
 | id | class | hazard | subject |
 |---|---|---|---|
-| NFRA_OPLGTW-W3-S13 | BLOCKING | ARMED (2.0.0_SA_COO~O) | Under the fixture-only grant OGA2-AC12 cannot pass: 3 untouched `sub == <email>` assertions against OGA2-AC1's `<tid>/<oid>` |
-| NFRA_OPLGTW-W3-S14 | OBSERVATION | INERT | `test_jwt_cve_lock.py`'s `__main__` smoke calls the control test without its new fixture; pytest is unaffected (INFERRED from source, not run) |
+| NFRA_OPLGTW-W3-S15 (new, `189e70f340`) | OBSERVATION | INERT | The ruled schwab re-target needs `uuid` at module scope, so one non-assertion `import uuid` line sits beside the three ruled lines |
 
-W3-S7 (the first run's BLOCKING row) is disarmed in part by the amendment: 13 of its 16 failures now pass. The
-remaining 3 are W3-S13. Rows W3-S8 .. W3-S12 stand as filed.
+- W3-S7 and W3-S13 were filed BLOCKING, ARMED. The two amendments disarm them in substance: AC12 now reads
+  31 passed. The rows themselves are unedited.
+- W3-S8 .. W3-S12 and W3-S14 stand as filed.
 
 ## Side effects outside the grant
 
-- The untracked `audit.jsonl` at the worktree root (a default `AUDIT_PATH` side effect of the test runs) is not
-  committed. The tracked `infra/aws/ec2/opal-gateway/audit.jsonl` is unmodified (`git status` clean for it).
+- The untracked `audit.jsonl` at the worktree root is not committed. The tracked
+  `infra/aws/ec2/opal-gateway/audit.jsonl` is unmodified.
 - `.venv-og/` and `.scratch/` are not committed.

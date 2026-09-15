@@ -135,70 +135,71 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py",
       "kind": "test",
-      "commit_or_etag": "318e119c4f",
+      "commit_or_etag": "7183f7a3d3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Fixture-only: the LocalIssuer's ID token carries tid (the harness tenant) and an oid fixed per email; the gw fixture patches token_broker.redeem_code_for_principal with LocalIssuer.redeem_principal (verify, then make_principal(tid, oid, email)) and sets TENANT_ID to the harness tenant; the email-only redeem_code_for_email patch is gone. 0 assertion lines changed.",
+      "deploy_evidence": "Fixture edits at 318e119c4f: the LocalIssuer's ID token carries tid (the harness tenant) and an oid fixed per email; the gw fixture patches token_broker.redeem_code_for_principal with LocalIssuer.redeem_principal and sets TENANT_ID to the harness tenant. Per ruling 97141, at 7183f7a3d3, 1 assertion re-targeted: line 710 compares the validated sub to LocalIssuer.TID + '/' + LocalIssuer.oid_for(email) and the email claim to email. 1 assertion line changed (OGA2-AC14).",
       "introduces": [
-        "def redeem_principal",
-        "def oid_for"
+        "claims[\"email\"] == email"
       ],
       "artifact_covered_by": [
         "OGA2-AC12",
-        "OGA2-AC13"
+        "OGA2-AC13",
+        "OGA2-AC14"
       ]
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_jwt_cve_lock.py",
       "kind": "test",
-      "commit_or_etag": "318e119c4f",
+      "commit_or_etag": "7183f7a3d3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Fixture-only: test_control_valid_token_accepted takes a family_store fixture (moto DynamoDB under fake credentials, harness tenant, revocation files in tmp_path) and mints its token from a refresh family (register, pending authorization, code, PKCE S256 exchange). 0 assertion lines changed; the __main__ smoke now lacks the fixture (row W3-S14).",
+      "deploy_evidence": "Fixture edits at 318e119c4f: test_control_valid_token_accepted takes a family_store fixture (moto DynamoDB under fake credentials, harness tenant, revocation files in tmp_path) and mints its token from a refresh family. Per ruling 97141, at 7183f7a3d3, 1 assertion re-targeted: line 117 compares sub to _TENANT + '/' + uuid5(URL, 'cve-lock/attacker@opalinvest.com') and the email claim to \"attacker@opalinvest.com\". The __main__ smoke lacks the fixture (row W3-S14).",
       "introduces": [
-        "def family_store",
-        "def _family_access_token"
+        "claims[\"email\"] == \"attacker@opalinvest.com\""
       ],
       "artifact_covered_by": [
         "OGA2-AC12",
-        "OGA2-AC13"
+        "OGA2-AC13",
+        "OGA2-AC14"
       ]
     },
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py",
       "kind": "test",
-      "commit_or_etag": "318e119c4f",
+      "commit_or_etag": "7183f7a3d3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Fixture-only: test_ogo1_ac06 mints its token from a refresh family inside its existing mock_aws (a DynamoDB table in moto, harness tenant). 0 assertion lines changed.",
+      "deploy_evidence": "Fixture edit at 318e119c4f: test_ogo1_ac06 mints its token from a refresh family inside its existing mock_aws. Per ruling 97141, at 7183f7a3d3, 1 assertion re-targeted: line 343 (342 @f8feaf081e) compares sub to _TENANT + '/' + uuid5(URL, 'ogo1-ac06/colleague@opalinvest.com'), the email claim to \"colleague@opalinvest.com\", and keeps typ == \"access\"; plus 1 module-level 'import uuid' for that expression (row W3-S15).",
       "introduces": [
-        "def _family_access_token"
+        "claims[\"email\"] == \"colleague@opalinvest.com\""
       ],
       "artifact_covered_by": [
         "OGA2-AC12",
-        "OGA2-AC13"
+        "OGA2-AC13",
+        "OGA2-AC14"
       ]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a2.py",
       "kind": "script",
-      "commit_or_etag": "318e119c4f",
+      "commit_or_etag": "5c2f6d8ed1",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "AC13's probe: per granted module, assert statements (assert, self.assert*, pytest.raises) counted by AST at HEAD and at 3f94e0a024 from git objects; a failed or empty git read is a FAIL, never a zero; counter positive control; prints VERDICT: PASS-OGA2-AC13 or FAIL-.",
+      "deploy_evidence": "The AC13 and AC14 probe. AC13: per granted module, assert statements (assert, self.assert*, pytest.raises) counted by AST at HEAD and at 3f94e0a024 from git objects. AC14: the same statements matched structurally (ast.dump) base vs HEAD, plus the -U0 hunks falling inside an assertion span; each must read 1 per module, the changed base line must be ruling 97141's named line @f8feaf081e, and the HEAD line must compare [\"email\"] to the original [\"sub\"] comparand and carry it as written. Non-assertion lines changed since f8feaf081e are printed as a disclosure. A failed or empty git read is a FAIL, never a zero. Controls: counter 1/1/1; judge 6 arms (variable and literal, email half kept/dropped/swapped). Added at 7183f7a3d3; the line check fixed at 5c2f6d8ed1.",
       "introduces": [
-        "def count",
-        "def ac13"
+        "ast.get_source_segment",
+        "email_text"
       ],
       "artifact_covered_by": [
-        "OGA2-AC13"
+        "OGA2-AC13",
+        "OGA2-AC14"
       ]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "840de8bd66",
+      "commit_or_etag": "189e70f340",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Rows W3-S7 .. W3-S12 at 5f47166b4b (first run); rows W3-S13, W3-S14 appended at 840de8bd66: '[surprise-row-gate] ... 2 new row(s) of 27 total checked (25 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.'",
+      "deploy_evidence": "Rows W3-S7 .. W3-S12 at 5f47166b4b, W3-S13 and W3-S14 at 840de8bd66, W3-S15 at 189e70f340: '[surprise-row-gate] ... 1 new row(s) of 28 total checked (27 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.'",
       "introduces": [
-        "NFRA_OPLGTW-W3-S13",
-        "NFRA_OPLGTW-W3-S14"
+        "NFRA_OPLGTW-W3-S15"
       ]
     }
   ],
@@ -209,8 +210,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac01 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC1: token claims tver=2 tid=True oid=True sub=<tid>/<oid> (no '@') email=first.name@opalinvest.com fid=family; family head principal/tid/oid/tver equal; request context Principal(tid, oid, email); after an email rename: same sub and context key, email renamed@opalinvest.com, Graph token from the same principal cache (cache files 1, the principal's)\n1 passed in 1.46s\nrc=0",
-      "denominator": "1 principal signed in twice (the second time with a renamed email). The token passes validate_access_token and carries 6 of 6 principal fields (tver 2, tid, oid, sub = <tid>/<oid> with no '@', the display email, fid). The family head carries 4 of 4 (principal, tid, oid, tver). 2 of 2 request-context captures through the real GuardMiddleware equal Principal(tid, oid, email). After the rename the sub and the context key are unchanged, and the Graph token comes from the one principal-keyed cache: 1 of 1 cache files. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC1: token claims tver=2 tid=True oid=True sub=<tid>/<oid> (no '@') email=first.name@opalinvest.com fid=family; family head principal/tid/oid/tver equal; request context Principal(tid, oid, email); after an email rename: same sub and context key, email renamed@opalinvest.com, Graph token from the same principal cache (cache files 1, the principal's)\n1 passed in 1.91s\nrc=0",
+      "denominator": "1 principal signed in twice (the second time with a renamed email). The token passes validate_access_token and carries 6 of 6 principal fields (tver 2, tid, oid, sub = <tid>/<oid> with no '@', the display email, fid). The family head carries 4 of 4 (principal, tid, oid, tver). 2 of 2 request-context captures through the real GuardMiddleware equal Principal(tid, oid, email). After the rename the sub and the context key are unchanged, and the Graph token comes from the one principal-keyed cache: 1 of 1 cache files. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -219,8 +220,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac02 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC2: sign-in scopes ['email']; code-redemption scopes ['email']; Graph scopes among them 0 of 17 configured; Graph tokens acquired during authentication 0; then /mcp tools/list 200 (35 tools); control: the /login consent URL asks 17 scopes incl. Mail.Read and Files.ReadWrite.All\n1 passed in 1.33s\nrc=0",
-      "denominator": "2 of 2 upstream requests of one sign-in (the authorization URL and the code redemption) asked for ['email'] only (MSAL adds openid, profile and offline_access). 0 of the 17 configured Graph scopes were asked for, and 0 scopes of the 12 Graph families. 0 Graph tokens were acquired to authenticate. The connection then works: /mcp tools/list 200, 35 tools. Control: the /login consent URL asks all 17 Graph scopes. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC2: sign-in scopes ['email']; code-redemption scopes ['email']; Graph scopes among them 0 of 17 configured; Graph tokens acquired during authentication 0; then /mcp tools/list 200 (35 tools); control: the /login consent URL asks 17 scopes incl. Mail.Read and Files.ReadWrite.All\n1 passed in 1.63s\nrc=0",
+      "denominator": "2 of 2 upstream requests of one sign-in (the authorization URL and the code redemption) asked for ['email'] only (MSAL adds openid, profile and offline_access). 0 of the 17 configured Graph scopes were asked for, and 0 scopes of the 12 Graph families. 0 Graph tokens were acquired to authenticate. The connection then works: /mcp tools/list 200, 35 tools. Control: the /login consent URL asks all 17 Graph scopes. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -229,8 +230,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac03 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC3: whoami -> 200, delegated Graph token acquired silently for the principal's oid at 8 tier scopes (User.Read Mail.Read Sites.Read.All Team.ReadBasic.All Channel.ReadBasic.All ChannelMessage.Read.All OnlineMeetingTranscript.Read.All Presence.Read.All), Graph /me called with it; difference: acquisition refused -> needs_login, Graph calls +0\n1 passed in 1.40s\nrc=0",
-      "denominator": "0 Graph acquisitions at sign-in, then 1 silent acquisition when whoami ran over /mcp. It was made for the principal's oid, at the 8 scopes of the principal's tier (read_only), and Graph /me was called with exactly that token. Difference arm: 1 principal whose silent acquisition returns nothing gets needs_login, with 0 Graph calls. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC3: whoami -> 200, delegated Graph token acquired silently for the principal's oid at 8 tier scopes (User.Read Mail.Read Sites.Read.All Team.ReadBasic.All Channel.ReadBasic.All ChannelMessage.Read.All OnlineMeetingTranscript.Read.All Presence.Read.All), Graph /me called with it; difference: acquisition refused -> needs_login, Graph calls +0\n1 passed in 1.99s\nrc=0",
+      "denominator": "0 Graph acquisitions at sign-in, then 1 silent acquisition when whoami ran over /mcp. It was made for the principal's oid, at the 8 scopes of the principal's tier (read_only), and Graph /me was called with exactly that token. Difference arm: 1 principal whose silent acquisition returns nothing gets needs_login, with 0 Graph calls. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -239,8 +240,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac04 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC4: route declarations in app/server.py 27 (Route 26, Mount 1) == app.routes 27; protected 19 (access 3, access-layer 5, capability 7, static 2, static-exchange 2), public 8; legacy access token (exp valid) rejected 401 on 19 of 19 protected routes, and the OG-a-1-shape legacy token naming a LIVE family rejected 401 invalid_token with the resource challenge on 3 of 3 access-token routes; the same family's current token accepted 200 on 3 of 3 (/mcp, /query/v0, /teams/poll); public routes: the legacy bearer changes no status on 8 of 8\n1 passed in 1.64s\nrc=0",
-      "denominator": "27 of 27 route declarations, counted from app/server.py's source (AST: 26 Route + 1 Mount) and equal to len(app.routes). A declared classification covers them all, and the test fails if a route is unclassified. 19 protected: a gateway-signed pre-cutover access token with a valid exp is refused 401 on 19 of 19. On the 3 access-token routes, an OG-a-1-shape legacy token naming a LIVE family is refused 401 invalid_token with the exact resource challenge, 3 of 3, while that family's current token is accepted 200, 3 of 3. The current access token is also refused on all 11 capability and static routes. 8 public routes: the legacy bearer changes no status, 8 of 8. The first run of this test failed on /ms/site_children (400 before the credential check, row W3-S11); the census now sends well-formed parameters, and this is the verbatim re-run after that edit. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC4: route declarations in app/server.py 27 (Route 26, Mount 1) == app.routes 27; protected 19 (access 3, access-layer 5, capability 7, static 2, static-exchange 2), public 8; legacy access token (exp valid) rejected 401 on 19 of 19 protected routes, and the OG-a-1-shape legacy token naming a LIVE family rejected 401 invalid_token with the resource challenge on 3 of 3 access-token routes; the same family's current token accepted 200 on 3 of 3 (/mcp, /query/v0, /teams/poll); public routes: the legacy bearer changes no status on 8 of 8\n1 passed in 1.91s\nrc=0",
+      "denominator": "27 of 27 route declarations, counted from app/server.py's source (AST: 26 Route + 1 Mount) and equal to len(app.routes). A declared classification covers them all, and the test fails if a route is unclassified. 19 protected: a gateway-signed pre-cutover access token with a valid exp is refused 401 on 19 of 19. On the 3 access-token routes, an OG-a-1-shape legacy token naming a LIVE family is refused 401 invalid_token with the exact resource challenge, 3 of 3, while that family's current token is accepted 200, 3 of 3. The current access token is also refused on all 11 capability and static routes. 8 public routes: the legacy bearer changes no status, 8 of 8. The first run of this test failed on /ms/site_children (400 before the credential check, row W3-S11); the census now sends well-formed parameters, and this is the verbatim re-run after that edit. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -249,8 +250,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac05 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC5: pre-durable JWT refresh token -> 400 invalid_grant; pre-cutover durable family (principal=email, no tver/tid/oid) -> 400 invalid_grant (this refresh token predates the principal cutover; reconnect from Claude), generation unchanged 1; control current family -> 200 with a tver-2 token\n1 passed in 1.76s\nrc=0",
-      "denominator": "2 of 2 legacy refresh shapes refused 400 invalid_grant, carrying no token. One is a pre-durable signed JWT refresh token; the other is a durable family in the pre-cutover shape (principal = email, no tver, tid or oid), which is left unrotated at generation 1. Control: 1 current family refreshes 200, and its new access token carries tver 2. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC5: pre-durable JWT refresh token -> 400 invalid_grant; pre-cutover durable family (principal=email, no tver/tid/oid) -> 400 invalid_grant (this refresh token predates the principal cutover; reconnect from Claude), generation unchanged 1; control current family -> 200 with a tver-2 token\n1 passed in 1.89s\nrc=0",
+      "denominator": "2 of 2 legacy refresh shapes refused 400 invalid_grant, carrying no token. One is a pre-durable signed JWT refresh token; the other is a durable family in the pre-cutover shape (principal = email, no tver, tid or oid), which is left unrotated at generation 1. Control: 1 current family refreshes 200, and its new access token carries tver 2. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -259,8 +260,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac06 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC6: before revocation 4 of 4 families' tokens -> 200; after: reuse (issued before the reuse) 401, reuse (issued by the rotation) 401, logout 401, operator 401 -> 401 invalid_token; live family's token -> 200\n1 passed in 1.91s\nrc=0",
-      "denominator": "4 families, whose tokens are 4 of 4 accepted (200 on /mcp) before any revocation. 3 revocation paths: refresh reuse (both the token issued before the reuse and the one issued by the rotation), logout (revoke_family) and operator revocation of the family id. After them, 4 of 4 affected access tokens are refused 401 invalid_token, and 1 of 1 live family's token is still 200. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC6: before revocation 4 of 4 families' tokens -> 200; after: reuse (issued before the reuse) 401, reuse (issued by the rotation) 401, logout 401, operator 401 -> 401 invalid_token; live family's token -> 200\n1 passed in 1.97s\nrc=0",
+      "denominator": "4 families, whose tokens are 4 of 4 accepted (200 on /mcp) before any revocation. 3 revocation paths: refresh reuse (both the token issued before the reuse and the one issued by the rotation), logout (revoke_family) and operator revocation of the family id. After them, 4 of 4 affected access tokens are refused 401 invalid_token, and 1 of 1 live family's token is still 200. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -269,8 +270,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac07 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC7: 11 forged identity headers (email x6, tenant x2, principal x2, role x1) plus query/body email/tid/oid/role: 4 of 4 /mcp arms (incl. IDENTITY_PROVIDER=header) carry the token's principal and tier read_only; the same headers without a token -> 401; /teams/poll and /query/v0 handlers receive the token's principal and email\n1 passed in 1.71s\nrc=0",
-      "denominator": "11 forged identity headers, plus email, tid, oid and role given in the query and in the body. 4 of 4 /mcp arms through the real GuardMiddleware carry exactly the token's principal and display email, with tier read_only: headers, headers+query, headers+body, and headers under IDENTITY_PROVIDER=header, the dev provider that trusts X-User-Email. The same headers without a token get 401, and the inner app is reached 0 times. 2 of 2 REST handlers (/teams/poll, /query/v0) receive the token's principal and email. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC7: 11 forged identity headers (email x6, tenant x2, principal x2, role x1) plus query/body email/tid/oid/role: 4 of 4 /mcp arms (incl. IDENTITY_PROVIDER=header) carry the token's principal and tier read_only; the same headers without a token -> 401; /teams/poll and /query/v0 handlers receive the token's principal and email\n1 passed in 1.58s\nrc=0",
+      "denominator": "11 forged identity headers, plus email, tid, oid and role given in the query and in the body. 4 of 4 /mcp arms through the real GuardMiddleware carry exactly the token's principal and display email, with tier read_only: headers, headers+query, headers+body, and headers under IDENTITY_PROVIDER=header, the dev provider that trusts X-User-Email. The same headers without a token get 401, and the inner app is reached 0 times. 2 of 2 REST handlers (/teams/poll, /query/v0) receive the token's principal and email. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -279,8 +280,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac08 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC8: two principals, one email, oids differ; B's principal on A's family -> 401 (the token's principal is not the one its family is bound to); B's Graph tool call used B's delegated token, not A's; A revoked by principal key -> A 401, B 200\n1 passed in 1.71s\nrc=0",
-      "denominator": "2 principals signing in with 1 email; their oids and subs differ. 3 denial arms. A gateway-signed token carrying B's principal but A's family is refused 401. B's Graph tool call used B's delegated token and not A's (2 calls, one per principal's cache). A revocation of A by principal key refuses A (401) and leaves B accepted (200). Control: A's own token was 200 before the revocation. 1 of 1 test. The tier and allowlist layer still reads the email (row W3-S9, outside this grant). Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC8: two principals, one email, oids differ; B's principal on A's family -> 401 (the token's principal is not the one its family is bound to); B's Graph tool call used B's delegated token, not A's; A revoked by principal key -> A 401, B 200\n1 passed in 1.67s\nrc=0",
+      "denominator": "2 principals signing in with 1 email; their oids and subs differ. 3 denial arms. A gateway-signed token carrying B's principal but A's family is refused 401. B's Graph tool call used B's delegated token and not A's (2 calls, one per principal's cache). A revocation of A by principal key refuses A (401) and leaves B accepted (200). Control: A's own token was 200 before the revocation. 1 of 1 test. The tier and allowlist layer still reads the email (row W3-S9, outside this grant). Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -289,8 +290,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac09 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC9: unauthorized-tenant sign-in -> 400 (no redirect, codes minted 0, signing-key lookups for the tenant 0); authorized tenant -> 302; a token of a de-authorized tenant: 200 while authorized, then 401 (the token's tenant is not authorized for this gateway), its refresh 400 invalid_grant\n1 passed in 1.52s\nrc=0",
-      "denominator": "At the upstream: 1 ID token from an unauthorized tenant is refused 400, with no Location, 0 codes minted and 0 signing-key lookups for that tenant. Control: 1 authorized-tenant sign-in 302 with 1 code. At the resource: 1 gateway token whose tenant is de-authorized after issue goes from 200 to 401, and its refresh is refused 400 invalid_grant. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC9: unauthorized-tenant sign-in -> 400 (no redirect, codes minted 0, signing-key lookups for the tenant 0); authorized tenant -> 302; a token of a de-authorized tenant: 200 while authorized, then 401 (the token's tenant is not authorized for this gateway), its refresh 400 invalid_grant\n1 passed in 1.32s\nrc=0",
+      "denominator": "At the upstream: 1 ID token from an unauthorized tenant is refused 400, with no Location, 0 codes minted and 0 signing-key lookups for that tenant. Control: 1 authorized-tenant sign-in 302 with 1 code. At the resource: 1 gateway token whose tenant is de-authorized after issue goes from 200 to 401, and its refresh is refused 400 invalid_grant. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -299,8 +300,8 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac10 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC10: 3 routes x 6 arms = 18 requests; missing/Basic -> 401 + 'Bearer resource_metadata=<http://localhost:8080/.well-known/oauth-protected-resource>'; garbage/expired -> 401 + that challenge with error=invalid_token; valid token of scope 'mcp.read' where 'mcp' is required -> 403 insufficient_scope with scope=\"mcp\"; full token -> 200, no challenge; advertised resource http://localhost:8080/mcp\n1 passed in 1.49s\nrc=0",
-      "denominator": "18 of 18 requests (3 protected routes x 6 arms) answered as specified. Missing credential and Basic: 401 with exactly 'Bearer resource_metadata=\"<metadata URL>\"'. Garbage and expired: 401 with the same challenge plus error=\"invalid_token\". A valid token of scope 'mcp.read' where 'mcp' is required: 403 insufficient_scope with scope=\"mcp\". A full token: 200, with no challenge. The metadata URL in the challenge serves the advertised resource. 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC10: 3 routes x 6 arms = 18 requests; missing/Basic -> 401 + 'Bearer resource_metadata=<http://localhost:8080/.well-known/oauth-protected-resource>'; garbage/expired -> 401 + that challenge with error=invalid_token; valid token of scope 'mcp.read' where 'mcp' is required -> 403 insufficient_scope with scope=\"mcp\"; full token -> 200, no challenge; advertised resource http://localhost:8080/mcp\n1 passed in 1.72s\nrc=0",
+      "denominator": "18 of 18 requests (3 protected routes x 6 arms) answered as specified. Missing credential and Basic: 401 with exactly 'Bearer resource_metadata=\"<metadata URL>\"'. Garbage and expired: 401 with the same challenge plus error=\"invalid_token\". A valid token of scope 'mcp.read' where 'mcp' is required: 403 insufficient_scope with scope=\"mcp\". A full token: 200, with no challenge. The metadata URL in the challenge serves the advertised resource. 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
@@ -309,20 +310,19 @@
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac11 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGA2-AC11: policy denial (read-only -> send_email) x2 -> HTTP 200, no WWW-Authenticate, tool result guard_denied code=read_only_denied, no needs_login/login_url, identical both times (MCP isError=False); Graph 403 -> HTTP 200, tool error 'Graph 403 ErrorAccessDenied: A' (isError=False); /teams/poll Graph 403 -> 502, no challenge; the same token then whoami -> 200\n1 passed in 1.40s\nrc=0",
-      "denominator": "2 of 2 policy denials (read-only principal -> send_email over /mcp) return HTTP 200 with no challenge and a tool result guard_denied code=read_only_denied; the result carries no needs_login, login_url or auth_required, and both are identical. 1 data-source denial (Graph 403 on read_email) returns a tool error in a 200. 1 REST data-source denial (/teams/poll, Graph 403) returns 502, neither 401 nor 403, with no challenge. The same token then succeeds on whoami. 0 of 4 denials carry a challenge or a login. The MCP isError flag reads False (row W3-S8). 1 of 1 test. Re-run verbatim at 318e119c4f after the amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet rc=0).",
+      "output_evidence": "OGA2-AC11: policy denial (read-only -> send_email) x2 -> HTTP 200, no WWW-Authenticate, tool result guard_denied code=read_only_denied, no needs_login/login_url, identical both times (MCP isError=False); Graph 403 -> HTTP 200, tool error 'Graph 403 ErrorAccessDenied: A' (isError=False); /teams/poll Graph 403 -> 502, no challenge; the same token then whoami -> 200\n1 passed in 1.59s\nrc=0",
+      "denominator": "2 of 2 policy denials (read-only principal -> send_email over /mcp) return HTTP 200 with no challenge and a tool result guard_denied code=read_only_denied; the result carries no needs_login, login_url or auth_required, and both are identical. 1 data-source denial (Graph 403 on read_email) returns a tool error in a 200. 1 REST data-source denial (/teams/poll, Graph 403) returns 502, neither 401 nor 403, with no challenge. The same token then succeeds on whoami. 0 of 4 denials carry a challenge or a login. The MCP isError flag reads False (row W3-S8). 1 of 1 test. Re-run verbatim at 7183f7a3d3 after the second amendment; the app modules and tests/test_principal_cutover.py are byte-identical to d02e73c272 (git diff --quiet d02e73c272 189e70f340 rc=0).",
       "status": "PASS"
     },
     {
       "criterion_id": "OGA2-AC12",
-      "criterion_verbatim": "`OGA2-AC12` -- the three granted modules, `tests/test_oauth_durable.py`, `tests/test_jwt_cve_lock.py` and `tests/test_schwab_audit.py`, pass, count printed. <invocation>cd <WS> && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py infra/aws/ec2/opal-gateway/tests/test_jwt_cve_lock.py infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py -q -p no:cacheprovider --color=no -m \"not live\"</invocation><expect>(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))</expect>",
+      "criterion_verbatim": "`OGA2-AC12` -- the three granted modules, `tests/test_oauth_durable.py`, `tests/test_jwt_cve_lock.py` and `tests/test_schwab_audit.py`, pass: 31 of 31. <invocation>cd <WS> && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py infra/aws/ec2/opal-gateway/tests/test_jwt_cve_lock.py infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py -q -p no:cacheprovider --color=no -m \"not live\"</invocation><expect>(?m)^31 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py infra/aws/ec2/opal-gateway/tests/test_jwt_cve_lock.py infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py -q -p no:cacheprovider --color=no -m \"not live\"",
-      "expect": "(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))",
-      "output_evidence": "E       AssertionError: assert (200 == 200 and '7f3a9c1e-2b4...-9fe92a84db07' == 'resume@opalinvest.com'\nE       AssertionError: assert '7f3a9c1e-2b4...-5eb28fbcefa6' == 'attacker@opalinvest.com'\nE       AssertionError: assert ('7f3a9c1e-2b4...-1f07712ff907' == 'colleague@opalinvest.com'\nFAILED infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py::test_oga1_ac13\nFAILED infra/aws/ec2/opal-gateway/tests/test_jwt_cve_lock.py::test_control_valid_token_accepted\nFAILED infra/aws/ec2/opal-gateway/tests/test_schwab_audit.py::test_ogo1_ac06\n3 failed, 28 passed in 17.08s\nrc=1",
-      "denominator": "31 tests collected across the 3 granted modules (test_oauth_durable 18, test_jwt_cve_lock 6, test_schwab_audit 7): 28 passed, 3 failed, rc=1. Before the fixture edits (adc6874dea) the same invocation read 16 failed, 15 passed; 13 of those 16 now pass. The 3 that fail are 3 of 3 untouched assertions comparing a validated token's sub to an email (test_oauth_durable.py:710, test_jwt_cve_lock.py:117, test_schwab_audit.py:342 @318e119c4f); each holds a token validate_access_token accepted, whose sub is <tid>/<oid> as OGA2-AC1 requires. The fixture-only bound forbids re-targeting them, so the criterion is REFUSED as written: row NFRA_OPLGTW-W3-S13. The same failing set in 2 of 2 runs (the worktree before 318e119c4f, byte-identical to it, and at 318e119c4f).",
-      "status": "FAIL",
-      "status_reason": "REFUSED as written. The fixture-only grant (edit only how each test obtains a principal or token; no assertion removed, weakened or re-targeted) cannot reach 3 untouched assertions that compare a validated token's sub to an email, while OGA2-AC1 requires sub = <tid>/<oid> with no '@'. Measured at 318e119c4f: 3 failed, 28 passed. Row NFRA_OPLGTW-W3-S13 (BLOCKING, ARMED, disarm 2.0.0_SA_COO~O)."
+      "expect": "(?m)^31 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "31 passed in 18.37s\nrc=0",
+      "denominator": "31 tests across the 3 granted modules (test_oauth_durable 18, test_jwt_cve_lock 6, test_schwab_audit 7, as collected at 318e119c4f; since then the diff is 3 assertion lines and 1 import, no test function added or removed): 31 passed, 0 failed, rc=0, verbatim at 7183f7a3d3. The test files are byte-identical at 189e70f340 (git diff --quiet 7183f7a3d3 189e70f340 -- infra/ rc=0). History of the same invocation: 16 failed at adc6874dea; 3 failed at 318e119c4f (row W3-S13); 0 failed after the three re-targets ruled in msg 97141. '31 passed' in 2 of 2 runs: the worktree before 7183f7a3d3, byte-identical to it (31 passed in 15.26s), and verbatim at 7183f7a3d3 (31 passed in 18.37s).",
+      "status": "PASS"
     },
     {
       "criterion_id": "OGA2-AC13",
@@ -330,29 +330,35 @@
       "method": "command",
       "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a2.py AC13",
       "expect": "(?m)^VERDICT: PASS-OGA2-AC13(?![0-9])",
-      "output_evidence": "counter positive control: assert=1 self.assert*=1 pytest.raises=1 total=3 (expected 1/1/1)\nHEAD 840de8bd66, cut base 3f94e0a024, modules 3\ntest_oauth_durable.py: HEAD assert=123 self.assert*=0 pytest.raises=0 total=123 (49175 bytes) | base assert=123 self.assert*=0 pytest.raises=0 total=123 (48511 bytes) | EQUAL | worktree==HEAD: yes\ntest_jwt_cve_lock.py: HEAD assert=6 self.assert*=0 pytest.raises=0 total=6 (7922 bytes) | base assert=6 self.assert*=0 pytest.raises=0 total=6 (5147 bytes) | EQUAL | worktree==HEAD: yes\ntest_schwab_audit.py: HEAD assert=58 self.assert*=0 pytest.raises=5 total=63 (17567 bytes) | base assert=58 self.assert*=0 pytest.raises=5 total=63 (15648 bytes) | EQUAL | worktree==HEAD: yes\nmodules equal: 3 of 3\nVERDICT: PASS-OGA2-AC13\nrc=0",
-      "denominator": "3 of 3 granted modules, each read from git objects at HEAD 840de8bd66 and at the cut base 3f94e0a024 (never the worktree; worktree == HEAD printed for 3 of 3): test_oauth_durable 123 = 123 (assert), test_jwt_cve_lock 6 = 6 (assert), test_schwab_audit 63 = 63 (58 assert + 5 pytest.raises); per kind equal too. The counter's positive control reads 1/1/1. A second instrument covers what equal counts cannot see (a re-targeted assertion): git diff -U0 over the three files before 318e119c4f -- 107 changed lines, 0 naming assert, self.assert* or pytest.raises.",
+      "output_evidence": "counter positive control: assert=1 self.assert*=1 pytest.raises=1 total=3 (expected 1/1/1)\nHEAD 189e70f340, cut base 3f94e0a024, modules 3\ntest_oauth_durable.py: HEAD assert=123 self.assert*=0 pytest.raises=0 total=123 (49261 bytes) | base assert=123 self.assert*=0 pytest.raises=0 total=123 (48511 bytes) | EQUAL | worktree==HEAD: yes\ntest_jwt_cve_lock.py: HEAD assert=6 self.assert*=0 pytest.raises=0 total=6 (8045 bytes) | base assert=6 self.assert*=0 pytest.raises=0 total=6 (5147 bytes) | EQUAL | worktree==HEAD: yes\ntest_schwab_audit.py: HEAD assert=58 self.assert*=0 pytest.raises=5 total=63 (17692 bytes) | base assert=58 self.assert*=0 pytest.raises=5 total=63 (15648 bytes) | EQUAL | worktree==HEAD: yes\nmodules equal: 3 of 3\nVERDICT: PASS-OGA2-AC13\nrc=0",
+      "denominator": "3 of 3 granted modules, each read from git objects at HEAD 189e70f340 and at the cut base 3f94e0a024 (never the worktree; worktree == HEAD printed for 3 of 3): test_oauth_durable 123 = 123 (assert), test_jwt_cve_lock 6 = 6 (assert), test_schwab_audit 63 = 63 (58 assert + 5 pytest.raises); per kind equal too. The counter's positive control reads 1/1/1. Equal counts cannot see a re-target; OGA2-AC14 grades that.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC14",
+      "criterion_verbatim": "`OGA2-AC14` -- (discriminating) across the three granted modules, the diff against the cut base `3f94e0a024` changes exactly 3 assertion lines, the three named in ruling 97141, and each changed line still contains its original email literal or variable; counts printed. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a2.py AC14</invocation><expect>(?m)^VERDICT: PASS-OGA2-AC14(?![0-9])</expect>",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a2.py AC14",
+      "expect": "(?m)^VERDICT: PASS-OGA2-AC14(?![0-9])",
+      "output_evidence": "judge control: email email, email half kept -> pass (expected pass)\njudge control: email email, email half dropped -> fail (expected fail)\njudge control: email email, email half swapped -> fail (expected fail)\njudge control: email \"a@b.c\", email half kept -> pass (expected pass)\njudge control: email \"a@b.c\", email half dropped -> fail (expected fail)\njudge control: email \"a@b.c\", email half swapped -> fail (expected fail)\nHEAD 189e70f340, cut base 3f94e0a024, named lines @f8feaf081e, modules 3\ntest_oauth_durable.py: assert statements base 123 / HEAD 123, unmatched base 1 / HEAD 1; diff vs base 8/18 lines (base/HEAD side), inside an assertion 1/1\n  base  :700  assert tok.status_code == 200 and oauth_as.validate_access_token(tok.json()[\"access_token\"])[\"sub\"] == email\n  HEAD  :710  assert tok.status_code == 200 and (claims := oauth_as.validate_access_token(tok.json()[\"access_token\"]))[\"sub\"] == LocalIssuer.TID + \"/\" + LocalIssuer.oid_for(email) and claims[\"email\"] == email\n  named :710 @f8feaf081e is the changed base assertion: yes\n  original [\"sub\"] comparand email -> HEAD [\"sub\"] [\"LocalIssuer.TID + '/' + LocalIssuer.oid_for(email)\"], HEAD [\"email\"] ['email']\n  since f8feaf081e: 1 HEAD-side line(s) changed, 1 inside an assertion; other: none\n  worktree==HEAD: yes\ntest_jwt_cve_lock.py: assert statements base 6 / HEAD 6, unmatched base 1 / HEAD 1; diff vs base 3/54 lines (base/HEAD side), inside an assertion 1/1\n  base  :66  assert oauth_as.validate_access_token(tok)[\"sub\"] == \"attacker@opalinvest.com\"\n  HEAD  :117  assert (claims := oauth_as.validate_access_token(tok))[\"sub\"] == _TENANT + \"/\" + str(uuid.uuid5(uuid.NAMESPACE_URL, \"cve-lock/attacker@opalinvest.com\")) and claims[\"email\"] == \"attacker@opalinvest.com\"\n  named :117 @f8feaf081e is the changed base assertion: yes\n  original [\"sub\"] comparand \"attacker@opalinvest.com\" -> HEAD [\"sub\"] [\"_TENANT + '/' + str(uuid.uuid5(uuid.NAMESPACE_URL, 'cve-lock/attacker@opalinvest.com'))\"], HEAD [\"email\"] [\"'attacker@opalinvest.com'\"]\n  since f8feaf081e: 1 HEAD-side line(s) changed, 1 inside an assertion; other: none\n  worktree==HEAD: yes\ntest_schwab_audit.py: assert statements base 63 / HEAD 63, unmatched base 1 / HEAD 1; diff vs base 3/41 lines (base/HEAD side), inside an assertion 1/1\n  base  :305  assert claims[\"sub\"] == \"colleague@opalinvest.com\" and claims[\"typ\"] == \"access\"\n  HEAD  :343  assert claims[\"sub\"] == _TENANT + \"/\" + str(uuid.uuid5(uuid.NAMESPACE_URL, \"ogo1-ac06/colleague@opalinvest.com\")) and claims[\"email\"] == \"colleague@opalinvest.com\" and claims[\"typ\"] == \"access\"\n  named :342 @f8feaf081e is the changed base assertion: yes\n  original [\"sub\"] comparand \"colleague@opalinvest.com\" -> HEAD [\"sub\"] [\"_TENANT + '/' + str(uuid.uuid5(uuid.NAMESPACE_URL, 'ogo1-ac06/colleague@opalinvest.com'))\"], HEAD [\"email\"] [\"'colleague@opalinvest.com'\"]\n  since f8feaf081e: 2 HEAD-side line(s) changed, 1 inside an assertion; other: ['15 import uuid']\n  worktree==HEAD: yes\nacross 3 modules: assertion statements changed 3, assertion lines changed 3 (3 and 3 required)\nVERDICT: PASS-OGA2-AC14\nrc=0",
+      "denominator": "3 of 3 granted modules, read from git objects at HEAD 189e70f340, the cut base 3f94e0a024 and the ruling's vintage f8feaf081e. Structural instrument: of 123/123, 6/6 and 63/63 assert statements (base/HEAD), 1 per module finds no structural partner on each side, so 3 assertion statements changed. Textual instrument: the -U0 diffs against base change 8/18, 3/54 and 3/41 lines (base/HEAD side); 1/1 per module falls inside an assertion, so 3 assertion lines changed. Each changed base assertion is the named line @f8feaf081e (710, 117, 342): 3 of 3. Each HEAD assertion compares [\"email\"] to its original [\"sub\"] comparand (email; \"attacker@opalinvest.com\"; \"colleague@opalinvest.com\") and carries it as written, and its [\"sub\"] comparand is that test's tid/oid expression: 3 of 3. Judge control: 6 of 6 arms as expected. Disclosure since f8feaf081e: 1 non-assertion line changed, test_schwab_audit.py:15 'import uuid' (row W3-S15). The probe's first run at 7183f7a3d3 read FAIL on 2 of 3 modules because of the probe's own quoting defect (ast.unparse's quotes compared against the source line); the structural half had passed 3 of 3 on that run. The probe was fixed at 5c2f6d8ed1, and this is the verbatim run after the fix.",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "In-process, the worktree untouched: og_a2.py's own ac13() driven with its git reader wrapped so that the HEAD copy of tests/test_jwt_cve_lock.py loses its first `assert` line; the base copies and the other two modules are read unaltered.",
-      "expected": "VERDICT: FAIL-OGA2-AC13 naming test_jwt_cve_lock.py HEAD=5 base=6, rc 1; the other two modules EQUAL.",
-      "observed": "'modules equal: 2 of 3', 'VERDICT: FAIL-OGA2-AC13 test_jwt_cve_lock.py HEAD=5 base=6', mutant rc=1; dropped line 'assert oauth_as.validate_access_token(tok)[\"sub\"] == \"attacker@opalinvest.com\"'. The first run's code mutant (validate_access_token's family status check removed: test_oga2_ac06 failed, test_oga2_ac02 passed, FIRED-AS-EXPECTED at d02e73c272) still describes the code at HEAD: git diff --quiet d02e73c272 HEAD over app/ and test_principal_cutover.py rc=0.",
+      "description": "In-process, the worktree untouched: og_a2.py's own ac14() driven with its git reader wrapped so that the HEAD copy of tests/test_jwt_cve_lock.py loses its email half (' and claims[\"email\"] == \"attacker@opalinvest.com\"'); the base copy, the f8feaf081e copy, the diff hunks and the other two modules read unaltered.",
+      "expected": "VERDICT: FAIL-OGA2-AC14 naming test_jwt_cve_lock.py's missing email comparison, rc 1; the other two modules clean.",
+      "observed": "MUTANT: HEAD test_jwt_cve_lock.py email half removed: True | VERDICT: FAIL-OGA2-AC14 test_jwt_cve_lock.py: the HEAD assertion does not compare [\"email\"] to the original 'attacker@opalinvest.com'; test_jwt_cve_lock.py: the HEAD line does not carry the original text \"attacker@opalinvest.com\" | mutant rc=1. The second run's AC13 mutant (one assert line dropped: 'VERDICT: FAIL-OGA2-AC13 test_jwt_cve_lock.py HEAD=5 base=6') and the first run's code mutant (the family status check removed, so test_oga2_ac06 failed) stand on unchanged probe and app code.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC13's invocation run 3 times (once at 318e119c4f, twice at 840de8bd66) and AC12's twice (the worktree before 318e119c4f, byte-identical to it, and at 318e119c4f), outputs compared modulo the wall-clock and the HEAD hash; AC1 .. AC11's first denominator line compared against the first run's.",
-      "observed": "AC13: the per-module lines are identical in all 3 runs, PASS each time. AC12: the same 3 FAILED ids and '3 failed, 28 passed' in 2 of 2 ('AC12 runs identical modulo wall-clock'). AC1 .. AC11: 11 of 11 denominator lines byte-identical to the first run's; the first run's whole-file determinism (11 passed twice, only the wall-clock differing) stands on byte-identical code.",
+      "method": "AC14's invocation run twice (at 7183f7a3d3 with the fixed probe, before committing it, and verbatim at 189e70f340), AC13's twice (7183f7a3d3, 189e70f340), AC12's twice (the worktree before 7183f7a3d3, byte-identical to it, and verbatim at 7183f7a3d3); outputs compared modulo the wall-clock and the HEAD hash; AC1 .. AC11's denominator lines compared against the previous runs'.",
+      "observed": "AC14: per-module lines identical in 2 of 2, PASS both times. AC13: module lines identical in 2 of 2, PASS both. AC12: '31 passed' in 2 of 2. AC1 .. AC11: 11 of 11 denominator lines byte-identical to the previous runs'.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
-    {
-      "item": "Passing the 3 remaining tests of the granted modules: test_oauth_durable.py::test_oga1_ac13, test_jwt_cve_lock.py::test_control_valid_token_accepted and test_schwab_audit.py::test_ogo1_ac06 (OGA2-AC12).",
-      "reason": "Row NFRA_OPLGTW-W3-S13 (BLOCKING, ARMED, disarm 2.0.0_SA_COO~O). Each fails on an untouched assertion comparing the validated token's sub to an email; OGA2-AC1 requires sub = <tid>/<oid>, and the amended grant is fixture-only with no assertion re-targeted. Left as written; OGA2-AC12 refused."
-    },
     {
       "item": "The standalone smoke of tests/test_jwt_cve_lock.py (its __main__ block).",
       "reason": "Row NFRA_OPLGTW-W3-S14: it calls the control test without the family_store fixture; the block is neither how a test obtains a token nor named by a criterion."
@@ -383,50 +389,51 @@
     }
   ],
   "surprises": [
-    "NFRA_OPLGTW-W3-S7: at the first run 16 existing tests asserted the pre-cutover sign-in; the amendment's fixture-only grant (1.0.0_SA_CTO msg 97114) turns 13 of them green at 318e119c4f, and the remaining 3 are row W3-S13. BLOCKING, ARMED.",
+    "NFRA_OPLGTW-W3-S7: at the first run 16 existing tests asserted the pre-cutover sign-in. The fixture-only grant (msg 97114) turned 13 green at 318e119c4f, and the 3 re-targets ruled in msg 97141 turned the last 3 green at 7183f7a3d3: OGA2-AC12 31 passed. Filed BLOCKING, ARMED; the row is unedited, and its disarm is the two amendments.",
     "NFRA_OPLGTW-W3-S8: a tool-layer denial comes back over MCP with isError false (tools._run returns a dict; tools.py outside the grant); never a 401, challenge or login. OBSERVATION, INERT.",
     "NFRA_OPLGTW-W3-S9: tier, tool allowlist, integration min-tier and the /query/v0 catalog still key on the display email, so a same-email principal inherits the first one's tier (outside the grant; OG-z-1). OBSERVATION, ARMED.",
     "NFRA_OPLGTW-W3-S10: the /login consent route was also changed to write the principal cache (not named by the order), and the first delegated Graph token now comes from an OpenID-only sign-in's refresh token, unmeasured live. OBSERVATION, INERT.",
     "NFRA_OPLGTW-W3-S11: /ms/site_children validates its parameters before its credential gate, so the AC4 census sends well-formed parameters. OBSERVATION, INERT.",
     "NFRA_OPLGTW-W3-S12: at base 3f94e0a024 the whole Gateway suite hangs in one process (W3-S6's frozen clock reaches test_schwab_engine::test_ogq1_ac02), whose lag bar is also load-sensitive. OBSERVATION, INERT.",
-    "NFRA_OPLGTW-W3-S13: under the fixture-only grant OGA2-AC12 cannot pass as written; 3 untouched assertions compare the token's sub to an email while OGA2-AC1 requires <tid>/<oid>. BLOCKING, ARMED.",
-    "NFRA_OPLGTW-W3-S14: test_jwt_cve_lock.py's __main__ smoke calls the control test without its new fixture; pytest unaffected. OBSERVATION, INERT."
+    "NFRA_OPLGTW-W3-S13: under the fixture-only grant 3 assertions compared the token's sub to an email. The amendment @1efed70736 (msg 97141) re-targets exactly those 3, done at 7183f7a3d3: OGA2-AC12 31 passed, OGA2-AC14 PASS. Filed BLOCKING, ARMED.",
+    "NFRA_OPLGTW-W3-S14: test_jwt_cve_lock.py's __main__ smoke calls the control test without its new fixture; pytest unaffected. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-W3-S15: the ruled re-target of test_schwab_audit.py:342 needs uuid at module scope, so one non-assertion line, 'import uuid', was added beside the three ruled lines. OBSERVATION, INERT."
   ],
   "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/principal-cutover.result.md",
   "compiler_tools": [
     {
       "tool": "pytest under .venv-og (py -3.12 venv, --system-site-packages), reused from the first run",
       "invocation": "the 12 test invocations of OGA2-AC1 .. OGA2-AC12, verbatim, from /c/tmp/wk-oplgtw-1-3c",
-      "result": "AC1 .. AC11: 11 of 11 '1 passed', rc=0 each, at 318e119c4f. AC12: '3 failed, 28 passed', rc=1."
+      "result": "AC1 .. AC11: 11 of 11 '1 passed', rc=0 each, at 7183f7a3d3. AC12: '31 passed in 18.37s', rc=0."
     },
     {
-      "tool": "AC13 probe og_a2.py",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a2.py AC13",
-      "result": "'VERDICT: PASS-OGA2-AC13' at 318e119c4f and twice at 840de8bd66; its mutant arm FAIL rc=1."
-    },
-    {
-      "tool": "git diff -U0 (a second instrument for OGA2-AC13's blind spot: a re-targeted assertion)",
-      "invocation": "git diff -U0 -- <the 3 granted test files> | grep -nE '^[-+][^-+].*(assert|pytest\\.raises)'",
-      "result": "107 changed lines, 0 naming an assertion (grep rc=1)."
+      "tool": "AC13/AC14 probe og_a2.py",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/probes/og_a2.py AC13 | AC14",
+      "result": "'VERDICT: PASS-OGA2-AC13' at 7183f7a3d3 and 189e70f340; 'VERDICT: PASS-OGA2-AC14' at 7183f7a3d3 (fixed probe, before its commit) and 189e70f340. The first AC14 run at 7183f7a3d3 read FAIL from the probe's quoting defect; its mutant arm FAIL rc=1."
     },
     {
       "tool": ".tools/commit-gate.sh (py_compile, ruff py39, ds-precommit)",
-      "invocation": "bash .tools/commit-gate.sh <the 3 test files> <probes/og_a2.py>",
-      "result": "'OK: pre-commit gate clean for 4 of 4 file(s)', rc=0 (and again inside safe-commit)."
+      "invocation": "bash .tools/commit-gate.sh <the 3 test files> <probes/og_a2.py>; then <probes/og_a2.py> alone",
+      "result": "'OK: pre-commit gate clean for 4 of 4 file(s)' and '... 1 of 1 file(s)', rc=0 each (and again inside safe-commit)."
     },
     {
       "tool": ".tools/safe-commit.sh",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~3 <0.9.0_WK_NFRA_OPLGTW~3@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "318e119c4f (4 files, msg-verify MATCH len=1842) and 840de8bd66 (rows W3-S13, W3-S14; surprise-row-gate 2 new of 27 OK; MATCH len=776), both LOCAL on wk-nfra_oplgtw-1-3c; the first run's d02e73c272 and 5f47166b4b stand."
+      "result": "7183f7a3d3 (4 files, msg-verify MATCH len=1403), 5c2f6d8ed1 (probe fix, MATCH len=1168), 189e70f340 (row W3-S15; surprise-row-gate 1 new of 28 OK; MATCH len=476), all LOCAL on wk-nfra_oplgtw-1-3c; the earlier commits of this order stand."
     },
     {
-      "tool": "first run's regression and egress censuses (historical, on byte-identical code)",
+      "tool": "git diff --quiet (bytes under test unchanged between the runs and HEAD)",
+      "invocation": "git diff --quiet 7183f7a3d3 HEAD -- infra/; git diff --quiet d02e73c272 HEAD -- app/ tests/test_principal_cutover.py",
+      "result": "rc=0 and rc=0 at 189e70f340."
+    },
+    {
+      "tool": "first run's regression and egress censuses (historical, on byte-identical app code)",
       "invocation": "see the first run's instance at fed567f54e",
-      "result": "the other 9 Gateway modules equal to base, one process each; EGRESS-ATTEMPTS: 0. Not re-run: the amendment changes only the three granted test files."
+      "result": "the other 9 Gateway modules equal to base, one process each; EGRESS-ATTEMPTS: 0. Not re-run: the amendments change only the three granted test files."
     },
     {
       "tool": ".tools/proof-of-spec-check.py",
-      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> OGA2-AC1,...,OGA2-AC13",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> OGA2-AC1,...,OGA2-AC14",
       "result": "see the result file -- only the exit code is the verdict"
     }
   ]
