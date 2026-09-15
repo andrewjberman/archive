@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ri-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ri-1.the-error-empty-boundary.md",
+    "group": "OTHER",
+    "vintage_commit": "59b7b179095de36eb4026fb002bded5763f91193"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "b4439b997d07289f7379617fa6a505420c261137",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ri-1.the-error-empty-boundary.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/LeadPanel.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "9aef37344cd68c06f37d9d33eb1f2bc886dd6c4c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The settled error now travels on its own wire: `const readError = rankingQuery.isError ? (rankingQuery.error as Error) : null`, passed to BOTH RankedList and StarredList; `rows = rankingQuery.data?.rows ?? []` is unchanged and nothing is derived. STOP: NOT REALIZED. LOCAL portal commit 9aef3734 on branch wk-amgt_resapp-10-1-portal only; never pushed, never promoted. The superproject gitlink stays at e85f6eb84f3a1771a37011a7e77e372570bad02a (re-measured AFTER the portal commit, AC6). Portal FROZEN both fabrics, COMMIT YES / PROMOTE NO."
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/RankedList.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "9aef37344cd68c06f37d9d33eb1f2bc886dd6c4c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A FOURTH state, checked before the row count: 'Read failure -- the ranked names could not be read.' plus what is NOT known ('the rows the producer may have written for this combination were NOT read. Whether any rows exist for today is UNKNOWN from this screen -- nothing here is a statement about the producer.') plus the error message and an HTTP status READ off the error object (`status` / `response.status`, numeric only, never parsed out of the message prose). Loading and populated render byte-identical to the pin (AC2 hashes 2cd44de4 and 15a6c66c unmoved); the empty sentence is untouched and now reserved for a successful empty read. STOP: NOT REALIZED -- LOCAL portal branch only, gitlink unmoved."
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/StarredList.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "9aef37344cd68c06f37d9d33eb1f2bc886dd6c4c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read-failure branch is the FIRST statement in the component body, above `const starredRows = rows.filter(...)`, so the filter never runs on a read that did not return and the view can no longer say 'None of the starred names carry a producer rank on this combination today' about a failed request. It renders RankedList's failure state (composition, the same single renderer this page already uses for rows). STOP: NOT REALIZED -- LOCAL portal branch only, gitlink unmoved."
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs",
+      "kind": "test",
+      "commit_or_etag": "9aef37344cd68c06f37d9d33eb1f2bc886dd6c4c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The instrument, in 3.0.0_SA_CVO~Z's own method (modelled on org/tier1_exec/3.0.0_SA_CVO/deliverables/AMGT_RESAPP_ROUND9_CVO_RENDER_20260914_Z.cjs): the ACTUAL LeadPanel/RankedList/StarredList TypeScript transpiled by the INSTALLED typescript, rendered by the ACTUAL react-dom/server, hooks and layout stubbed exactly as the CVO stubs them, base resolved as path.resolve(__dirname, '../../../..') and never a hardcoded C:/tmp path. It writes NO file (the CVO's wrote its JSON; mine prints only). GRAIN CONTROL: its pre-edit run hashed RankedList at 04fe4fe39771fee2d5c83f0803eeed6296e654047b26f8012ee01d8e29e1ef1e and LeadPanel at 2971edffd5ca0cd442b889e5779668a55241c0fb49b1543e07e4a259498bc93d -- BYTE-IDENTICAL to the hashes in the CVO's round-9 JSON, so the two instruments demonstrably read the same source bytes. A test artifact, not a deployable."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE PRE-EDIT ARM, run with the three components still at their pinned bytes: the checks JSON prints error_differs_from_empty false and error_claims_no_daily_row true, with failed_request and successful_empty carrying the SAME sha256, while loading_differs, populated_differs and populated_names_security print true; rc=1. STOP: if error_differs_from_empty prints true BEFORE you edit anything, your harness is not rendering the actual components through the actual query hook and is NOT measuring the CVO's defect -- fix the harness, never the components, until this arm reproduces the collision",
+      "method": "command",
+      "invocation": "cd portal && timeout 110 node src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs; echo rc=$?",
+      "output_evidence": "VERBATIM, run at 2026-09-15T01:10:33.338Z with all three components at their PINNED bytes (source_sha256 RankedList 04fe4fe39771fee2d5c83f0803eeed6296e654047b26f8012ee01d8e29e1ef1e, LeadPanel 2971edffd5ca0cd442b889e5779668a55241c0fb49b1543e07e4a259498bc93d -- both EQUAL to the CVO's round-9 hashes; StarredList 26427ae3b25a752266ea24aa7a444d0dad809cf7318038c4af10454e5985482f). states: successful_empty bytes 205 sha256 010993b7002fa22790db5a71505549ecbe520434970ee900a818d687e9e70f9b; failed_request bytes 205 sha256 010993b7002fa22790db5a71505549ecbe520434970ee900a818d687e9e70f9b (THE SAME sha256 -- the collision, and the same 205 bytes / same sha256 the CVO measured at round 9); loading bytes 126 sha256 2cd44de4126f53aa76d12bdcf1ef4b4fdc5c6946e4dffd4f3c73fb97665a9e71; populated bytes 1239 sha256 15a6c66cec884df0905f4df0b64f13ea05de4dc41af77c1b0fa6cb71f505029b; starred_successful_empty bytes 1446 sha256 381499e744929764c9d2be1503a4824e7f0222528b75d6999839248ad2a1046d; starred_failed_request bytes 1446 sha256 381499e744929764c9d2be1503a4824e7f0222528b75d6999839248ad2a1046d. checks: \"error_differs_from_empty\": false, \"error_names_read_failure\": false, \"error_claims_no_daily_row\": true, \"loading_differs\": true, \"populated_differs\": true, \"populated_names_security\": true, \"starred_error_differs_from_starred_empty\": false. Trailer: CHECKS-WRONG-WAY error_differs_from_empty,error_names_read_failure,error_claims_no_daily_row,starred_error_differs_from_starred_empty / rc=1. The failed_request HTML is character-for-character the empty-day sentence: 'No ranked names for this combination yet -- the daily job has not written a row for today&#x27;s date.' Full capture: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~16/errorEmpty.harness.pre.txt (7502 bytes).",
+      "denominator": "7 of 7 checks printed and read; 6 of 6 states rendered with bytes and sha256; 3 of 3 components transpiled from pinned bytes, 2 of which (RankedList, LeadPanel) hash EQUAL to the CVO's independently-measured round-9 values; every one of the four required readings met (error_differs_from_empty false, error_claims_no_daily_row true, error/empty sha256 equal, and loading_differs + populated_differs + populated_names_security all true) at rc=1 of an expected rc=1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE POST-EDIT ARM, the same instrument on the repaired components: error_differs_from_empty true, error_names_read_failure true, error_claims_no_daily_row false, loading_differs true, populated_differs true, populated_names_security true, starred_error_differs_from_starred_empty true; six distinct states printed with bytes and sha256; rc=0. STOP: the loading and populated sha256 values must be UNCHANGED from AC1's run (the repair touches only the error arm); a moved loading or populated hash is a regression and is NOT met",
+      "method": "command",
+      "invocation": "cd portal && timeout 110 node src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs; echo rc=$?",
+      "output_evidence": "VERBATIM, run at 2026-09-15T01:12:43.860Z on the repaired components (source_sha256 RankedList b2a5b6e7c237ec2a188d6f210830443adbe3ad1af3b373f020b869285d009c36, StarredList 7fce9341fa00faf53454b89e27a960741ba08a1cb6ef92910cd3c5488f4f9b51, LeadPanel f1e79435053e9a3ce1225dc6ef9d200fc8fb05f6867006ebf5bee429dec6e17e). checks: \"error_differs_from_empty\": true, \"error_names_read_failure\": true, \"error_claims_no_daily_row\": false, \"loading_differs\": true, \"populated_differs\": true, \"populated_names_security\": true, \"starred_error_differs_from_starred_empty\": true. Trailer: CHECKS-OK 7 of 7 / rc=0. states: successful_empty bytes 205 sha256 010993b7002fa22790db5a71505549ecbe520434970ee900a818d687e9e70f9b (UNMOVED); failed_request bytes 616 sha256 245eab5e775164b13e9666cef86a8c415119b0c21dd4009ae72b983ace158e98 (WAS 205 / 010993b7); loading bytes 126 sha256 2cd44de4126f53aa76d12bdcf1ef4b4fdc5c6946e4dffd4f3c73fb97665a9e71 (UNCHANGED FROM AC1, character for character); populated bytes 1239 sha256 15a6c66cec884df0905f4df0b64f13ea05de4dc41af77c1b0fa6cb71f505029b (UNCHANGED FROM AC1); starred_successful_empty bytes 1446 sha256 381499e744929764c9d2be1503a4824e7f0222528b75d6999839248ad2a1046d (UNMOVED); starred_failed_request bytes 616 sha256 245eab5e775164b13e9666cef86a8c415119b0c21dd4009ae72b983ace158e98 (WAS 1446 / 381499e7). The failed_request HTML now reads: 'Read failure -- the ranked names could not be read.' / 'This request did not return, so the rows the producer may have written for this combination were NOT read. Whether any rows exist for today is UNKNOWN from this screen -- nothing here is a statement about the producer. Try again, and if it keeps failing the read path itself is broken.' / 'Error reported by the read: HTTP 401: controlled rejected request' -- and contains no occurrence of 'daily job'. DECLARED, NOT HIDDEN: six distinct STATES are rendered and printed, but TWO of them (failed_request, starred_failed_request) share one sha256 at 616 bytes BECAUSE deliverable 3 of this same order requires StarredList to show 'the same read-failure state'; the other four carry four distinct hashes. Filed as AMGT_RESAPP-Z-W16-S1 rather than resolved by widening the text. Full capture: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~16/errorEmpty.harness.post.txt (6937 bytes).",
+      "denominator": "7 of 7 checks read the required way (6 true, 1 false as required); 6 of 6 states printed with bytes and sha256; 2 of 2 must-not-move hashes (loading, populated) verified byte-identical to AC1's run; 4 of 6 state hashes distinct, with the 2 coincident ones required to coincide by the order's own deliverable 3; rc=0 of an expected rc=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "rc=0, errorTS 0, and files in the LOW THOUSANDS. STOP: a files count of 0 or a small number is the vacuity defect that let round 6 ship (a references-only root examines zero files and therefore cannot fail) and is NOT met whatever errorTS says",
+      "method": "command",
+      "invocation": "cd portal && timeout 110 ./node_modules/.bin/tsc -b --force --listFiles --pretty false > ../.scratch/ri1.tsc.out 2>&1; echo rc=$?; python -c \"t=open('../.scratch/ri1.tsc.out',encoding='utf-8',errors='replace').read().splitlines(); print('files', sum(1 for l in t if l.rstrip().endswith(('.ts','.tsx'))), 'errorTS', sum(1 for l in t if 'error TS' in l))\"",
+      "output_evidence": "VERBATIM, two lines: 'rc=0' then 'files 2045 errorTS 0'. 2045 is in the low thousands, so the root examined real files and the zero-error reading is not the round-6 vacuity: a references-only root prints 0. Run AFTER the three component edits, so the new `readError` prop on RankedListProps and StarredListProps, the `readErrorStatus` narrowing of the error object and the LeadPanel cast all type-check.",
+      "denominator": "2045 of 2045 .ts/.tsx files listed by the build were examined; 0 of 2045 produced an 'error TS' line; rc 0 of an expected 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "run AFTER your portal commit: EXACTLY these paths and no others -- src/pages/SecurityAnalysis/components/LeadPanel.tsx, src/pages/SecurityAnalysis/components/RankedList.tsx, src/pages/SecurityAnalysis/components/StarredList.tsx, src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs (plus at most one fixture file under __harness__/ if the harness needs one) -- and portal-branch wk-amgt_resapp-10-1-portal. A path outside src/pages/SecurityAnalysis/ is NOT met; an uncommitted change (the list empty while your working tree is dirty) is NOT met",
+      "method": "command",
+      "invocation": "cd portal && git diff --name-only a845a8be75 HEAD -- src/ && printf \"portal-branch %s\\n\" \"$(git rev-parse --abbrev-ref HEAD)\"",
+      "output_evidence": "VERBATIM, five lines and no others: 'src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs' / 'src/pages/SecurityAnalysis/components/LeadPanel.tsx' / 'src/pages/SecurityAnalysis/components/RankedList.tsx' / 'src/pages/SecurityAnalysis/components/StarredList.tsx' / 'portal-branch wk-amgt_resapp-10-1-portal'. No fixture file was needed (the harness carries its controlled states inline). DIRTY-TREE FALSIFIER RUN BESIDE IT: `git status --porcelain` in portal printed NOTHING after the commit, so the empty-list-plus-dirty-tree failure mode is excluded rather than assumed. Commit: 9aef37344cd68c06f37d9d33eb1f2bc886dd6c4c, '4 files changed, 302 insertions(+)', author 0.9.0_WK_AMGT_RESAPP~16 <0.9.0_WK_AMGT_RESAPP~16@opal.agent>, LOCAL, never pushed.",
+      "denominator": "4 of 4 expected paths present and 0 of 4 outside src/pages/SecurityAnalysis/; 0 additional paths in the diff; 0 lines in `git status --porcelain`; 1 of 1 branch name matching.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "nonascii-now 0 on all four files, and for each component sort-now EQUAL to sort-pin (the pin carries 0 / 1 / 1 for LeadPanel / RankedList / StarredList; measured by the issuer before this cut). A sort count that MOVES is a ranking derived or removed on the client and is NOT met; any non-ASCII byte is NOT met",
+      "method": "command",
+      "invocation": "cd portal && python -c \"import subprocess; fs=['src/pages/SecurityAnalysis/components/LeadPanel.tsx','src/pages/SecurityAnalysis/components/RankedList.tsx','src/pages/SecurityAnalysis/components/StarredList.tsx']; [print(f, 'nonascii-now', sum(1 for b in open(f,'rb').read() if b>127), 'sort-now', open(f,encoding='utf-8').read().count('.sort('), 'sort-pin', subprocess.run(['git','show','a845a8be75:'+f],capture_output=True,text=True,encoding='utf-8').stdout.count('.sort(')) for f in fs]; h='src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs'; print(h, 'nonascii-now', sum(1 for b in open(h,'rb').read() if b>127))\"",
+      "output_evidence": "VERBATIM, four lines: 'src/pages/SecurityAnalysis/components/LeadPanel.tsx nonascii-now 0 sort-now 0 sort-pin 0' / 'src/pages/SecurityAnalysis/components/RankedList.tsx nonascii-now 0 sort-now 1 sort-pin 1' / 'src/pages/SecurityAnalysis/components/StarredList.tsx nonascii-now 0 sort-now 1 sort-pin 1' / 'src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs nonascii-now 0'. sort-now EQUALS sort-pin on all three components, and the issuer's stated pin values 0 / 1 / 1 are reproduced by the `git show a845a8be75:<file>` limb rather than taken on trust. The one surviving `.sort()` in StarredList is the pre-existing alphabetical listing of UNRANKED starred names; the one in RankedList is the docstring's 'no `.sort()`'.",
+      "denominator": "4 of 4 files at 0 non-ASCII bytes; 3 of 3 components with sort-now == sort-pin; 3 of 3 pin counts re-derived from the pinned blob, matching the issuer's declared 0 / 1 / 1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "five markers PRESENT, NEG ABSENT, and the superproject gitlink line reading e85f6eb84f3a1771a37011a7e77e372570bad02a, unmoved. STOP: PRESENCE is the instrument and a COUNT is not -- node_modules is a junction and a directory listing enumerates the reparse point as ONE entry; the NEG line is what makes the five PRESENT lines evidence. A marker reading ABSENT is a BLOCKING row, never an install; a moved gitlink is a hard stop",
+      "method": "command",
+      "invocation": "cd portal && for p in .bin/tsc react react-dom typescript vite; do printf \"%s %s\\n\" \"$p\" \"$(test -e node_modules/$p && echo PRESENT || echo ABSENT)\"; done; printf \"NEG %s\\n\" \"$(test -e node_modules/zzznosuchpkg && echo PRESENT || echo ABSENT)\"; git -C .. ls-files -s portal | cut -c1-60",
+      "output_evidence": "VERBATIM, identical on BOTH runs (once before any edit, once again after the portal commit 9aef3734): '.bin/tsc PRESENT' / 'react PRESENT' / 'react-dom PRESENT' / 'typescript PRESENT' / 'vite PRESENT' / 'NEG ABSENT' / '160000 e85f6eb84f3a1771a37011a7e77e372570bad02a 0\\tportal'. The NEG line discriminates: the same `test -e` returns ABSENT for a name that does not exist, so the five PRESENT readings are not a predicate that always says yes. NO INSTALL WAS RUN at any point (no bun install, no npm install, no npx); node_modules was read only.",
+      "denominator": "5 of 5 markers PRESENT, 1 of 1 negative control ABSENT, 1 of 1 gitlink line reading e85f6eb84f3a1771a37011a7e77e372570bad02a -- unmoved across the whole session, measured twice (pre-edit and post-portal-commit).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "<criterion id=\"AC7\" cell_refs=\"AMGT-ri-1\" judgment=\"true\"/> -- a self-closing judgment element with no children, no invocation and no expectation. Per the order: \"AC7 is a judgment criterion: record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~W, and offer no verdict. It asks whether the read-failure text a PERSON sees is honest -- names the failure, claims nothing about the producer, and is unmistakably not the empty day -- which the CVO grades at L9 on your rendered bytes.\"",
+      "method": "manual_read_with_citation",
+      "invocation": "NO INVOCATION EXISTS TO RUN -- the criterion names none by construction. This row carries the rendered bytes for the grader and offers no verdict.",
+      "output_evidence": "OUTPUT RECORDED FOR THE GRADER, NO VERDICT OFFERED. THE BYTES A PERSON SEES, rendered from the committed components at portal 9aef3734 (failed_request, 616 bytes, sha256 245eab5e775164b13e9666cef86a8c415119b0c21dd4009ae72b983ace158e98): '<div class=\"py-4\"><div class=\"text-sm text-amber-300\">Read failure -- the ranked names could not be read.</div><div class=\"text-xs text-white/60 mt-1\">This request did not return, so the rows the producer may have written for this combination were NOT read. Whether any rows exist for today is UNKNOWN from this screen -- nothing here is a statement about the producer. Try again, and if it keeps failing the read path itself is broken.</div><div class=\"text-xs text-white/40 mt-1\">Error reported by the read: HTTP 401: controlled rejected request</div></div>'. BESIDE IT, the successful-empty text it must not be mistaken for (205 bytes, sha256 010993b7...): 'No ranked names for this combination yet -- the daily job has not written a row for today&#x27;s date.' The starred view renders the SAME failure bytes (616, 245eab5e) in place of its own 1446-byte starred-empty text. WHAT THE INSTRUMENT CANNOT SAY: the harness proves the strings DIFFER and that the failure string contains 'read fail' and not 'daily job'; whether the sentence READS as honest to a person, and whether an HTTP status is carried prominently enough when the error object exposes one (the controlled error carries the status only inside its message, so the 'HTTP status <n>' clause did not render in these bytes), is a human reading. Routed to 3.0.0_SA_CVO~W at L9.",
+      "denominator": "N/A -- judgment criterion, no invocation and no denominator by construction; 1 of 1 rendered failure state and 1 of 1 rendered empty state supplied to the grader, plus the starred pair.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion (judgment=\"true\"): the oracle is 3.0.0_SA_CVO~W at L9, grading the honesty of the read-failure text on the rendered bytes recorded above. PASS/FAIL from this worker would be a self-grade and is refused.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE PRE-EDIT ARM IS THE NEGATIVE CONTROL, and it is the same instrument, same process shape, same fixtures: errorEmpty.harness.cjs was run FIRST against the three components at their PINNED bytes (before a single character was edited), then again against the repaired components. If the harness were rendering stubs rather than the real components, or reading the error off anything but the query hook, the pre-edit arm would have printed error_differs_from_empty true and the post-edit PASS would have proved nothing.",
+      "expected": "PRE-EDIT: error_differs_from_empty false, error_claims_no_daily_row true, failed_request and successful_empty byte-identical, and the same for the starred pair; rc=1. The harness must also agree with an INDEPENDENT instrument on the input bytes -- the CVO's round-9 source hashes.",
+      "observed": "FIRED AS EXPECTED. Pre-edit: error_differs_from_empty false, error_names_read_failure false, error_claims_no_daily_row true, starred_error_differs_from_starred_empty false, rc=1, with failed_request == successful_empty at 205 bytes / sha256 010993b7002fa22790db5a71505549ecbe520434970ee900a818d687e9e70f9b and the starred pair identical at 1446 bytes / 381499e7. GRAIN CORROBORATION on a DIFFERENT instrument: the CVO's independently-run round-9 script recorded RankedList 04fe4fe3... and LeadPanel 2971edff... and the 205-byte / 010993b7 collision -- my pre-edit arm reproduced all three values exactly, so the two harnesses read the same bytes and saw the same defect. Post-edit, the same instrument flipped every one of the four wrong-way checks and rc went 1 -> 0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "errorEmpty.harness.cjs run in TWO separate fresh node processes after the repair (once immediately after the edits, once after the portal commit), and the parsed `states`, `checks` and full `html` objects compared field by field rather than eyeballed.",
+      "observed": "STABLE. 'states equal: True', 'checks equal: True', 'html equal: True' across the two runs; both rc=0, both 'CHECKS-OK 7 of 7'; run 2 printed successful_empty 205/010993b7, failed_request 616/245eab5e, loading 126/2cd44de4, populated 1239/15a6c66c, starred_successful_empty 1446/381499e7, starred_failed_request 616/245eab5e -- identical to run 1. The only field that varies between runs is the `at` timestamp, by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "FWD-15 and FWD-9 REALIZATION",
+      "reason": "Stated by the order itself: this cell makes them REACHABLE and grades NEITHER realized -- a person must still have used the page. Nothing here is a claim that anyone did."
+    },
+    {
+      "item": "The served plane -- whether any browser, DEV or PROD, renders these bytes",
+      "reason": "Portal FROZEN both fabrics, COMMIT YES / PROMOTE NO. The work is a LOCAL commit on wk-amgt_resapp-10-1-portal; no push, no gitlink move, no DEV/PROD merge, no deploy. EXERCISED in a static render, never REALIZED on a served page."
+    },
+    {
+      "item": "The upstream cause -- the scoped ranked API not being deployed at the edge",
+      "reason": "Another cell's finding, named in this order's own section 1 as context. This cell repairs only the render boundary; it does not touch the API, the query key, the hook or any producer."
+    },
+    {
+      "item": "A DOM/browser-level test (mount, click, hydration) of the read-failure state",
+      "reason": "No test runner is in this grant and no install is permitted (node_modules is a shared junction). The order names the CVO's static-render method and that is the method used; whether the state reaches a real screen is exactly what is routed to 3.0.0_SA_CVO~W under AC7."
+    },
+    {
+      "item": "Error states of the OTHER reads on this panel (starred list, rank time series, security overlay, refresh mutation)",
+      "reason": "Out of scope as written: this cell's deliverables name the RANKED read's settled error and the three components that render it. The same boundary shape may exist on the sibling queries; that is not this order's question and was not widened into."
+    },
+    {
+      "item": "An HTTP status rendered for the controlled error",
+      "reason": "The failure state prints 'HTTP status <n>' only when the error OBJECT carries a numeric `status` or `response.status`. The order's controlled error (new Error('HTTP 401: controlled rejected request')) carries the status only inside its message text, which is displayed verbatim. Parsing a status out of prose would be inventing one, so the clause renders nothing and the message carries it."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W16-S1: AC2 asks for 'six distinct states' while deliverable 3 of the same order requires StarredList to show 'the same read-failure state' as RankedList -- so failed_request and starred_failed_request are byte-identical (616 bytes, sha256 245eab5e) by construction, and 'distinct' has two readings (six distinct INPUT states, which is met, or six distinct output hashes, which contradicts deliverable 3). Taken the first way, recorded rather than resolved by widening the text. OBSERVATION / INERT, UNDER_INVESTIGATION."
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface (the three components and __harness__/ under portal/src/pages/SecurityAnalysis/, the project's surprise-channel investigation file, this order file, plus the tree-granted deliverables home). The session's substance is in the acceptance rows, the controls block and the two committed harness captures beside this instance. Portal work: LOCAL commit 9aef37344cd68c06f37d9d33eb1f2bc886dd6c4c on branch wk-amgt_resapp-10-1-portal (4 files changed, 302 insertions(+)), on top of a845a8be7522c20ebc3dad896933c5cc84a8f332; never pushed, portal remote untouched, superproject gitlink still e85f6eb84f3a1771a37011a7e77e372570bad02a. Superproject work: worktree C:/tmp/wk-amgt-10-1 on LOCAL branch wk-amgt_resapp-10-1, cut from SITEZ at 59b7b179095de36eb4026fb002bded5763f91193; this instance, the two harness captures, one surprise row and the <status> flip are committed together with --only, never staging portal. Mutation discipline: the three components were copied to .scratch/snapshot/ before the first edit; no git checkout --, no git stash, no git show :path, and the snapshot was never needed. THIS ORDER FLIPS TO complete: AC1-AC6 PASS by output, AC7 recorded UNVERIFIABLE-BY-INSTRUMENT for 3.0.0_SA_CVO~W at L9.",
+  "compiler_tools": [
+    {
+      "tool": "node (the runtime the order names) driving errorEmpty.harness.cjs -- the installed `typescript` transpiling the ACTUAL components and the installed `react-dom/server` rendering them",
+      "invocation": "cd portal && timeout 110 node src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs; echo rc=$?",
+      "result": "PRE-EDIT rc=1 with 4 of 7 checks the wrong way (the collision reproduced: failed_request == successful_empty, 205 bytes, sha256 010993b7). POST-EDIT rc=0, 'CHECKS-OK 7 of 7', 6 states printed with bytes and sha256, loading and populated hashes unmoved. Run 3 times in fresh processes overall (1 pre-edit, 2 post-edit); the two post-edit runs compared equal on states, checks and html."
+    },
+    {
+      "tool": "typescript compiler, the worktree's own ./node_modules/.bin/tsc (project build, -b --force --listFiles)",
+      "invocation": "cd portal && timeout 110 ./node_modules/.bin/tsc -b --force --listFiles --pretty false > ../.scratch/ri1.tsc.out 2>&1; echo rc=$?",
+      "result": "rc=0; 'files 2045 errorTS 0' -- 2045 .ts/.tsx files actually examined (not the references-only vacuity), 0 type errors after the three component edits."
+    },
+    {
+      "tool": "git (portal repo) -- change-set and branch verification, plus a dirty-tree falsifier",
+      "invocation": "cd portal && git diff --name-only a845a8be75 HEAD -- src/ ; git status --porcelain",
+      "result": "Exactly 4 paths, all under src/pages/SecurityAnalysis/; branch wk-amgt_resapp-10-1-portal; `git status --porcelain` empty after the commit, so the empty-diff-with-dirty-tree failure mode is excluded."
+    },
+    {
+      "tool": "python 3.x -- byte-level ASCII and `.sort(` census against the PINNED blobs",
+      "invocation": "cd portal && python -c \"...sum(1 for b in open(f,'rb').read() if b>127)... open(f).read().count('.sort(') ... subprocess.run(['git','show','a845a8be75:'+f])...\"",
+      "result": "0 non-ASCII bytes on all 4 written files; sort-now == sort-pin on all 3 components (0 / 1 / 1), the pin values re-derived from the pinned blob rather than trusted."
+    },
+    {
+      "tool": "proof-of-spec-check.py -- THIS WORKTREE'S OWN copy, run from inside C:/tmp/wk-amgt-10-1",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~16/AMGT_RESAPP.TO-AMGT-ri-1.the-error-empty-boundary.proof_of_spec.json AC1,AC2,AC3,AC4,AC5,AC6,AC7",
+      "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+    }
+  ]
+}
