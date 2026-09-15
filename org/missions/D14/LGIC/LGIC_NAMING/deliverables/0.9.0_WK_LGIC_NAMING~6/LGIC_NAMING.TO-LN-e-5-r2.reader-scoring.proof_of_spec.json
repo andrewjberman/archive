@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_NAMING.TO-LN-e-5-r2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/decompositions/LGIC_NAMING_DECOMP.md",
+    "vintage_commit": "32795c348c",
+    "to_ref": "org/missions/D14/LGIC/LGIC_NAMING/task-orders/LGIC_NAMING.TO-LN-e-5-r2.reader-scoring.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_NAMING/prd/LGIC_NAMING_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "2706014705"
+  },
+  "assignee": "0.9.0_WK_LGIC_NAMING~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/r2/n3-reader-score.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "exercise score record under deliverables/; nothing is deployed by this cell (PRD S13: no live name moves)",
+      "artifact_covered_by": ["E5R-AC1", "E5R-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~6/reader-scoring.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "result record named by the task order's proof_of_spec block; repo document, no deploy scope"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "E5R-AC1",
+      "criterion_verbatim": "`E5R-AC1` -- the reader marked the expected firm, or none, on every item.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-2-6c && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_ln_r2.py e5-correct",
+      "output_evidence": "WRONG: i09  name=mdpf-demo-publish-failure-alarm  marked=none  expected=demo\nWRONG: i11  name=pathfinder-etfs-ingest-task  marked=pathfinder  expected=none\nITEMS: 18  CORRECT: 16  WRONG: 2 (key: N3_KEY_R2.json, firm or none)\nVERDICT: FAIL-MISREAD\nrc=0",
+      "denominator": "16 of 18 N3 items (N3_KEY_R2.json) carry the key's firm-or-none token as the reader's mark in r2/n3-reader.tsv",
+      "status": "FAIL",
+      "status_reason": "The invocation printed VERDICT: FAIL-MISREAD, not the expected VERDICT: PASS-ALL-CORRECT. 2 of 18 marks differ from the key: on i09 (mdpf-demo-publish-failure-alarm) the reader marked none and the key has demo, and on i11 (pathfinder-etfs-ingest-task) the reader marked pathfinder and the key has none. This cell scores and does not read or name, so no mark is changed here. Surprise row LGIC_NAMING-W6-S4.",
+      "expect": "VERDICT: PASS-ALL-CORRECT"
+    },
+    {
+      "criterion_id": "E5R-AC2",
+      "criterion_verbatim": "`E5R-AC2` -- no token the reader marked as a firm is read as another referent in another name.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-naming-2-6c && timeout 120 python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_ln_r2.py e5-consistent",
+      "output_evidence": "NAMES: 18  TOKENS MARKED AS A FIRM: 7  A MARKED TOKEN READ AS ANOTHER REFERENT ELSEWHERE: 0 []\nVERDICT: PASS-ONE-REFERENT-EACH\nrc=0",
+      "denominator": "0 of 18 names carry a token the reader marked elsewhere as a firm and read as another referent here; 7 distinct tokens marked",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-ONE-REFERENT-EACH"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The task order names no mutant control for E5R-AC1 or E5R-AC2. Both criteria are graded by the issuer's fixed checker over the committed answer files and key.",
+      "expected": "none named",
+      "observed": "Not run. The worker face names no mutant, and the worker definition bars measuring beyond the named invocation. The E5R-AC1 output split the 18 items into 16 CORRECT and 2 WRONG, and each WRONG line names its own item, so the checker did not return one constant result across the items.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- a static checker makes one read of static committed input files (N3_ITEMS.json, r2/N3_KEY_R2.json, r2/n3-namer-a.tsv, r2/n3-reader.tsv); there is no clock, network or randomness in the path",
+      "observed": "single run per criterion, rc=0 each: VERDICT: FAIL-MISREAD (E5R-AC1), VERDICT: PASS-ONE-REFERENT-EACH (E5R-AC2)",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "changing any mark in r2/n3-reader.tsv, any name in r2/n3-namer-a.tsv, or the key",
+      "reason": "out of this cell by construction: LN-e-5 scores and does not read or name; a wrong mark is the outcome's evidence, and those files are outside this order's paths"
+    },
+    {
+      "item": "judging whether the reader, the namer, the key or the criteria are at fault for the i09 and i11 misses",
+      "reason": "the worker judges a surprise's form, never its significance; the facts are recorded in LGIC_NAMING-W6-S4 for 3.0.0_SA_CVO at L8"
+    }
+  ],
+  "surprises": [
+    "LGIC_NAMING-W6-S4: E5R-AC1 invocation printed VERDICT: FAIL-MISREAD (16 of 18 correct); i09 marked none where the key reads demo, i11 marked pathfinder where the key reads none"
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/0.9.0_WK_LGIC_NAMING~6/reader-scoring.result.md",
+  "compiler_tools": [
+    {
+      "tool": "check_ln_r2.py (issuer fixed input, 2.0.0_SA_COO~G, @b9ea6f3686)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_ln_r2.py e5-correct",
+      "result": "VERDICT: FAIL-MISREAD, rc=0, 16 of 18 correct"
+    },
+    {
+      "tool": "check_ln_r2.py (issuer fixed input, 2.0.0_SA_COO~G, @b9ea6f3686)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_NAMING/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_ln_r2.py e5-consistent",
+      "result": "VERDICT: PASS-ONE-REFERENT-EACH, rc=0, 0 clashes across 18 names"
+    }
+  ]
+}
