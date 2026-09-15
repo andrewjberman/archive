@@ -4,15 +4,21 @@
 `0.9.0_WK_LGIC_NAMING~1` on branch `wk-lgic-naming-1-1` off CLOUD @`6a5b276f8b`. **Re-cut in round 3** by
 `0.9.0_WK_LGIC_NAMING~3` (task order `LGIC_NAMING.TO-LN-g-1-r3`, branch `wk-lgic-naming-3-3` off CLOUD @`6705066c68`):
 R5 gains v1.7's two function-slot steps and the reason a function's words are kept, and R3 states its test as
-adjacency. No other step moved.
+adjacency. **Re-cut in round 4** by `0.9.0_WK_LGIC_NAMING~3` (task order `LGIC_NAMING.TO-LN-g-1-r4`, branch
+`wk-lgic-naming-4-3` off `lgic-v19-group` @`bd0f5d2c6c`): the rule is re-cut against every schema field changed since
+v1.4, the version it was cut at, and section 10 prints which step reads each one (row `LGIC_NAMING-W3-S6`). R5 is one
+subtraction (FN1d); G2 excludes the names AWS fixes (AW1); V-2 takes the schema's four placeholders, so K3 and K4a
+RAISE where they emitted `{tier}` and `{entity}`; the vocabularies read the identity registry.
 
-**Grades against `NAMING_SCHEMA.json v1.7`** (the round-3 re-cut; the function slot is `DATA.resource.function`,
-rulings FN1b and FN1c of the round-2 analysis s.2, `org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND2_20260915.md`
-@`02f08322af`).
+**Grades against `NAMING_SCHEMA.json v1.9`** (every step; section 10 prints its coverage. Rulings FN1d and W3-S6 of the
+round-3 analysis s.2, `org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND3_20260915.md`
+@`2f554182b6`; FN1b and FN1c of the round-2 analysis s.2,
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND2_20260915.md` @`02f08322af`).
 
 **What it reads.** Every clause below cites where its rule comes from:
-- `org/standards/NAMING_SCHEMA.json`, cited as `DATA.<field>`: v1.7 for R5; every other step as cut at v1.4 (row
-  `LGIC_NAMING-W3-S6`);
+- `org/standards/NAMING_SCHEMA.json` v1.9, cited as `DATA.<field>`, for every step;
+- the identity registry `infra/logic/registry/` (`systems.json`, `scopes.json`), read at this rule's base
+  @`bd0f5d2c6c` and cited as REGISTRY. Where it and the seed differ, the registry governs (`DATA.rows_owner`);
 - `infra/logic/05_IDENTITY_SPINE.md` v0.1, the registry seed, cited as SEED;
 - `infra/logic/09_NAMING_CENSUS.md`, cited as CENSUS;
 - `LGIC_NAMING_PRD.md` v1.4, S1-S13;
@@ -33,7 +39,8 @@ Every name gets exactly one of five outputs:
   canonical form; for CONFORMANT it is the name itself.
 - **RAISE** -- the name cannot be placed. This is a defect in this rule, the data file or the registry, and the
   output names the step that raised (`DATA.grade.unplaceable`). It is never filed under a verdict.
-- **NOT-GRADED** -- the type is outside the grade's domain (`DATA.grade.not_graded`). This is not a fourth verdict.
+- **NOT-GRADED** -- the type is outside the grade's domain (`DATA.grade.not_graded`, G1.2), or the name is one AWS
+  fixes (`DATA.aws_fixed`, G2). This is not a fourth verdict.
 
 Apply the steps in order, **G1, G2, G3, then the grammar of the type, then G6**. The first step that returns an
 output decides.
@@ -41,7 +48,11 @@ output decides.
 ## G1. THE DOMAIN
 
 - **G1.1** The type must be one of the 33 keys of `DATA.kind.by_type` and `DATA.types_not_graded_by_kind`, spelled
-  exactly. Any other type RAISES.
+  exactly. Any other type RAISES. A caller that grades a Terraform resource takes the type from `DATA.tf_type_map`
+  (the resource type's `node_type`, always one of the 33) and the name from the attribute its `name_attribute` names
+  (`DATA.tf_type_map_note`); the four types whose `name_attribute` is null are all NOT GRADED (G1.2). A Terraform type
+  listed in `DATA.tf_unmapped_own_name` carries its own name but maps to no node type, so a grade of it RAISES here
+  until a node type is added (`DATA.tf_unmapped_own_name_note`).
 - **G1.2** A type whose `DATA.types_not_graded_by_kind` value begins `NOT GRADED` returns NOT-GRADED. There are 8 of
   them: IAM_USER, KMS_KEY, CLOUDFRONT_DISTRIBUTION, SERVICE_PRINCIPAL, VPC_ENDPOINT, ROUTE53_RECORD, API_ROUTE and
   EVENT_SOURCE.
@@ -55,17 +66,22 @@ output decides.
 | BUCKET (section B) | S3_BUCKET and S3_BUCKET_POLICY |
 | KEY (section K) | S3Key |
 
-## G2. NAMES AWS FIXES -> RAISE
+## G2. NAMES AWS FIXES -> NOT-GRADED
 
-AWS fixes these names, so none can take a canonical form. `DATA` excludes AWS-issued identifiers by TYPE only, and
-gives these graded types no exclusion (row `LGIC_NAMING-W1-S4`).
-- **G2.1** A SECURITY_GROUP named `default` (the default group of every VPC).
-- **G2.2** An IAM_POLICY or IAM_ROLE whose name begins `AWS` or `Amazon` (AWS-managed policies and service roles).
-- **G2.3** A LOG_GROUP whose name does not begin with `/` (for example `aws-waf-logs-*`, `RDSOSMetrics`), or that
-  begins `/aws/ecs/containerinsights/`.
+AWS fixes these names, so none can take a canonical form. They are outside the grade's domain, like the NOT GRADED
+types: the output is NOT-GRADED, never a RAISE and never a fourth verdict (`DATA.aws_fixed`, RULING AW1).
+- **G2.1 By name** (`DATA.aws_fixed.by_name`), exactly as it lists them:
+  - a SECURITY_GROUP named `default` (the default group of every VPC);
+  - a LOG_GROUP named `RDSOSMetrics`, or whose name begins `aws-waf-logs-` or `/aws/ecs/containerinsights/`.
+- **G2.2 By ARN** (`DATA.aws_fixed.by_arn`): an IAM_POLICY whose ARN's account field is `aws`
+  (`arn:aws:iam::aws:policy/...`) is AWS-managed, whatever its name says (`ReadOnlyAccess` carries no prefix).
+  `grade(name, type)` never receives an ARN, so the caller that holds the node's ARN applies this exclusion before it
+  calls the grade, and does not grade such a policy.
 
-The name is the only evidence. **An AWS-managed policy without the prefix (for example `ReadOnlyAccess`) is graded as
-written.**
+Nothing else is excluded by name. A name that `DATA.aws_fixed.by_name` does not list is graded as written, and so is a
+policy that reaches the grade without the caller's ARN test: an `AWS`- or `Amazon`-prefixed name then RAISES at R1,
+because `aws` and `amazon` are in no vocabulary. Adding an AWS-fixed name is an edit to the data file
+(`DATA.aws_fixed.rule`), never to this rule.
 
 ## G3. NORMALISE, TO FIND THE TOKENS
 
@@ -90,44 +106,50 @@ its canonical form.
 
 A token matches only as a WHOLE token: `bd49f` is not `bd`.
 
-**V1 SYSTEMS** fill the system slot, and a key's `{source}`.
+**V1 SYSTEMS** fill the system slot, and a key's `{source}`. They are the `systems` rows of REGISTRY `systems.json`,
+which governs where it and the seed differ (`DATA.rows_owner`). The table reads the 17 rows at this rule's base; a row
+the registry adds is in V1 from the commit that adds it, and this table is never a second source.
 
-| token | class | from |
-|---|---|---|
-| `mdpf`, `etfs` | PRODUCT | SEED s.3 |
-| `schwab`, `blackdiamond`, `orion`, `eclipse`, `smartx`, `pathfinder`, `trueshares`, `ycharts` | VENDOR | SEED s.3 |
-| `irpt`, `advi`, `yang`, `news`, `astn`, `amgt`, `trade` | PRODUCT | CENSUS s.3, row "PRODUCTS and VENDORS/FEEDS -- the real {system} values" |
-| `fred`, `seeking-alpha` | VENDOR (a feed) | the same CENSUS row. The census counts first tokens, so it lists `seeking`; the vendor's name is two tokens, matched as one. |
-| `opal` | reserved | `DATA.system.reserved`; see R2 |
+| token | class |
+|---|---|
+| `mdpf`, `etfs`, `irpt`, `advi`, `amgt`, `yang` | PRODUCT |
+| `schwab`, `blackdiamond`, `orion`, `eclipse`, `smartx`, `pathfinder`, `trueshares`, `ycharts`, `fred`, `seeking-alpha` | VENDOR (`fred` and `seeking-alpha` are feeds; `seeking-alpha` is two tokens, matched as one) |
+| `gateway` | PLATFORM_SUBSYSTEM (owner D9) |
+| `opal` | reserved: `DATA.system.reserved`; see R2 |
 
-V1 is INTERIM. The registry rows belong to `LGIC_ENFORCE` (PRD CONTRACTS row 3), and the seed has no
-PLATFORM_SUBSYSTEM row (row `LGIC_NAMING-W1-S2`). Splitting the CENSUS row into products and feeds is this rule's
-reading.
+The registry was seeded from SEED s.3 and from this rule's round-1 reading of CENSUS s.3. `astn`, `trade` and `news`,
+which that reading listed as PRODUCT, have no owning directive, and the registry holds them unresolved (row
+`LGIC_ENFORCE-W1-S6`), so they are V2.
 
-**V2 UNRESOLVED.** A V2 token RAISES wherever the system slot needs it:
+**V2 UNRESOLVED** are REGISTRY `systems.json`'s `unresolved` tokens. A V2 token RAISES wherever the system slot needs
+it:
 - `estate`, `globgrph`, `semantic`, `agentbus`, `cmtque`, `opsec`, `firmsep`, `consolidation`, `canonical`,
   `gldinc`, `quartz`. CENSUS s.3 lists these as "PLATFORM subsystems and PROJECT CODES used as systems" and does not
   say which is which. A subsystem is a system; a project code never is (S6).
 - `find`, `harvest`, `imo`. SEED s.3 marks them UNRESOLVED.
+- `astn`, `trade`, `news`: no directive owns them (above).
 
-**V3 NEVER A SYSTEM** (S6; CENSUS s.3):
+**V3 NEVER A SYSTEM** (S6; CENSUS s.3; REGISTRY `systems.json` `refused_keys` carries the same members):
 - every firm form in V4, and `bd` when it reads as the firm (R3);
 - workstream codes, cadences and generic nouns: `wsb`, `wsd`, `historical`, `daily`, `weekly`, `monthly`, `hourly`,
   `exec`, `infrastructure`, `market`, `etf`, `ec2`, `cloudfront`, `portfolio`;
 - the purpose words that open the purpose-first policies: `cross`, `s3`, `cloudwatch`, `invoke`, `secretsmanager`,
   `lambda`, `kms`, `secrets`.
 
-**V4 SCOPES** (`DATA.firm_forms`, `DATA.global_scope`):
+**V4 SCOPES.** A scope's forms are its REGISTRY `scopes.json` row: the `long` form (the key) and its one sanctioned
+`short` form. The data file carries no copy (`DATA.firm_forms_source`, RULING ONE, v1.9); v1.4's `DATA.firm_forms` is
+gone. The table reads the rows at this rule's base, and is never a second source:
 
-| key (long) | short |
-|---|---|
-| `49financial` | `49f` |
-| `inflection` | `inf` |
-| `cottonwood` | `cot` |
-| `demo` | `demo` |
-| `global` | `global` |
+| key (long) | short | class |
+|---|---|---|
+| `49financial` | `49f` | FIRM |
+| `inflection` | `inf` | FIRM |
+| `cottonwood` | `cot` | FIRM |
+| `demo` | `demo` | FIRM (`demo` reads as a firm in every naming slot, RULING DM) |
+| `global` | `global` | GLOBAL (`DATA.global_scope`) |
 
-- The MASTER keys `08242234` and `08335338` (SEED s.3) are scopes with a single form.
+- The MASTER rows `08242234` and `08335338` are scopes with a single form.
+- The registry's PRODUCT rows (`mdpf`, `etfs`) are not V4 tokens. B2 and K2 say where a product is a scope.
 - `bd` is a refused alias; see R3.
 - `mockadv` is an alias row of `49financial` and never a valid spelling (`DATA.refused_tokens`).
 
@@ -145,14 +167,14 @@ tokens.
 
 After G3 the name is a list of tokens t1 ... tn.
 
-**R1 THE SYSTEM SLOT.**
+**R1 THE SYSTEM SLOT.** V1 and V2 are REGISTRY rows (`DATA.rows_owner`).
 - **a.** If t1 is in V1 (other than `opal`), or t1 is `bd` read as the vendor (R3), the system is t1.
 - **b.** If t1 is `opal`, apply R2.
 - **c.** If t1 is in V2, RAISE.
 - **d.** If t1 is in V3, it is not the system. The system is the FIRST later token that is in V1:
   - if a V2 token comes before any V1 token, RAISE;
   - if no later token is in V1, the system slot is the placeholder `{system}`, because the name does not carry its
-    system (row `LGIC_NAMING-W1-S3`).
+    system (`DATA.grade.placeholder`: the registry's resource-to-system rows fill it; row `LGIC_NAMING-W1-S3`).
 - **e.** LAMBDA_LAYER only. A t1 in none of V1-V3 is a library (the CENSUS "library-first" layers), and is handled as
   in d.
 - **f.** Any other t1 is in no vocabulary. RAISE: a token no registry row resolves.
@@ -161,7 +183,7 @@ The system token leaves its position. Every token before it that is not a scope 
 the tokens after the system.
 
 **R2 `opal`** (`DATA.system.reserved`).
-- If t2 is in V1, `opal` is a null prefix: drop it, and the system is t2.
+- If t2 is in V1 (a REGISTRY system row), `opal` is a null prefix: drop it, and the system is t2.
 - If t2 is in V2, RAISE.
 - Otherwise the system is `opal`.
 
@@ -175,52 +197,64 @@ form spells `blackdiamond`, or the firm's form for the slot. The test is ADJACEN
 **R4 THE SCOPE SLOT.** The scope tokens are the V4 tokens, plus `bd` read as the firm.
 - **No scope token:** the resource is shared or scoped by its system. The slot is omitted, never filled with a
   placeholder (S5).
-- **One scope token:** it goes immediately after the system, in the SHORT form (S4). `49financial` becomes `49f`,
-  `inflection` becomes `inf`, `cottonwood` becomes `cot`, and `bd` read as the firm becomes `49f`. A scope token
-  anywhere else moves here.
+- **One scope token:** it goes immediately after the system, in the SHORT form (S4): the `short` of its REGISTRY
+  `scopes.json` row (`DATA.firm_forms_source`; `DATA.rows_owner`). `49financial` becomes `49f`, `inflection` becomes
+  `inf`, `cottonwood` becomes `cot`, and `bd` read as the firm becomes `49f`. A scope token anywhere else moves here.
 - **Two different firms** (after R3): RAISE. A resource has one scope.
 
 **R5 FUNCTION AND QUALIFIER.** Once R1 and R4 have taken the system and scope tokens out, the remaining tokens, in
 order, are the function slot, and the last of them is checked by R6 or R7. The function is every remaining token except
-the one R6 or R7 keeps in the last slot. Two steps then act on it, in this order (`DATA.resource.function`, v1.7):
-- **R5.a Tokens already written (FN1b).** Every function token equal to a token written in the system slot or the scope
-  slot, as the canonical form spells it (after R2, R3 and R4's short form), is dropped: `orion-inf-orion-ingest-daily`
-  becomes `orion-inf-ingest-daily`. A placeholder (`{system}`) writes no token and drops nothing. If this leaves no
-  function token, RAISE (`DATA.grade.unplaceable`).
-- **R5.b The own kind (FN1c).** The resource's OWN kind, any kind in `DATA.kind.by_type` for its type, is never written
-  in its function, and is dropped from it: a LAMBDA `mdpf-lambda-gold` becomes `mdpf-gold-lambda`. Another type's kind
-  that names the subject the resource serves is not the resource's own kind, and stays in the function as R6 already
-  says (`blackdiamond-49f-runner-role` keeps `runner`, the runner the role serves). A type with no `kind.by_type` row
-  (EVENT_RULE, SCHEDULE) has no own kind, so this step drops nothing. If this step leaves no function token, v1.7 does
-  not say what follows (row `LGIC_NAMING-W3-S5`).
+the one R6 or R7 keeps in the last slot. Then ONE subtraction acts on it (FN1d, `DATA.resource.function`, v1.8): remove
+from the function, in one pass, every token written in the system or scope slot, as the canonical form spells it after
+R2, R3 and R4's short form (FN1b), AND every token that is the resource's own kind, any kind in `DATA.kind.by_type` for
+its type (FN1c). If the subtraction removes the last function token, RAISE (`DATA.grade.unplaceable`), whichever of the
+two removed it.
+- It is a set subtraction, so it has no order and its result never depends on one. `orion-inf-orion-ingest-daily`
+  becomes `orion-inf-ingest-daily`; a LAMBDA `mdpf-lambda-gold` becomes `mdpf-gold-lambda`. A LAMBDA
+  `mdpf-lambda-lambda` RAISES, and so does a LAMBDA `orion-orion-lambda-lambda`, whose function [`orion`, `lambda`]
+  loses both tokens in the one pass (section 9).
+- A placeholder (`{system}`) writes no token and removes nothing.
+- Another type's kind that names the subject the resource serves is not the resource's own kind, and stays in the
+  function as R6 already says (`blackdiamond-49f-runner-role` keeps `runner`, the runner the role serves).
+- A type with no `kind.by_type` row (EVENT_RULE, SCHEDULE) has no own kind, so only system and scope tokens are
+  removed.
+- A function that is empty BEFORE the subtraction loses nothing to it, so this RAISE does not fire, and R6 or R7 still
+  fills the last slot (`opal-gateway` gives `gateway-lb`, section 9; row `LGIC_NAMING-W3-S7`).
 
-Beyond these two steps the function is free vocabulary, and here is why. A grade reads a name and its type, and has no
+Beyond this subtraction the function is free vocabulary, and here is why. A grade reads a name and its type, and has no
 item description. FN1's word-choice clauses (an agent noun describing the resource is written as its verb; a noun phrase
 is written as named) therefore bind the NAMER only, who has the description. The grade keeps a function's words as
-written and grades the grammar: slots, spellings and kinds. So `advi-49f-floor-scheduler-role` keeps `scheduler`. A
-qualifier cannot be told from a function token by hand, and is graded the same way.
+written and grades the grammar: slots, spellings and kinds. So `advi-49f-floor-scheduler-role` keeps `scheduler`, and a
+function written `publisher` or `scanner` keeps it, although `DATA.kind.closed_at_l4` gives their canonical spellings as
+`publish` and `scan`. A qualifier cannot be told from a function token by hand, and is graded the same way:
+`DATA.resource.qualifier`'s clauses on which object a qualifier writes (the tier or a named table, never figures or
+files: FN2) and on a CW_ALARM's condition noun (FN3) need the item's description, so they bind the namer too.
 
-**R5 re-graded over round 2's firm patterns.** R5.a and R5.b were applied to every attributed canonical form in round
-2's LN-f-1 record (`org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/r2/n4-firm-patterns.md` @`a4480344e3`, the
-`attributed` object of its one json block). All are IAM_ROLE (own kind `role`), and each has one scope token. None
-carries its system or scope token in its function, none carries `role` there, and none is left without a function
-token. LN-f-1's record is therefore not re-graded.
+**R5 re-graded over round 2's firm patterns.** Round 3 applied FN1b and FN1c, now R5's one subtraction, to every
+attributed canonical form in round 2's LN-f-1 record
+(`org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/r2/n4-firm-patterns.md` @`a4480344e3`, the `attributed` object
+of its one json block). All are IAM_ROLE (own kind `role`), and each has one scope token. None carries its system or
+scope token in its function, none carries `role` there, and none is left without a function token. The one subtraction
+removes what the two removed together, which is nothing, so LN-f-1's record is not re-graded.
 
 FORMS CHANGED BY THE v1.7 STEPS: 0 of 68
 
 **R6 THE LAST SLOT, for kind types.**
 - If the last remaining token is a kind of this type (V5), it stays.
 - Otherwise the type's kind is APPENDED, and that token stays in the function. This includes a token that is another
-  type's kind, such as `-runner` on a LAMBDA.
+  type's kind, such as `-runner` on a LAMBDA, and the suffixes `trigger`, `publisher` and `scanner`, which are function
+  tokens, never kinds (`DATA.kind.closed_at_l4`).
 - A type with two kinds appends the first: SQS_QUEUE appends `queue`, SNS_TOPIC appends `topic`.
 
 **R7 THE LAST SLOT, for EVENT_RULE and SCHEDULE: a cadence (V6).**
 - If the last token is a cadence, it stays.
 - Otherwise, if an `on-` run or a cadence token appears elsewhere in the name, it moves to the end.
-- Otherwise `{cadence}` is appended (row `LGIC_NAMING-W1-S3`).
+- Otherwise `{cadence}` is appended (`DATA.grade.placeholder`: the schedule fills it; row `LGIC_NAMING-W1-S3`).
 
 **R8 IAM_POLICY** is `{system}-{scope}-{purpose}-policy`: the kind is `policy` and the purpose sits in the function
-slot (S9, `DATA.iam_policy`).
+slot (S9, `DATA.iam_policy`), where R5 applies to it as to any function. `DATA.iam_policy.purpose_slot` (FN4) applies
+FN1 and FN2 to the purpose and writes it as one compound token (`read-gold`); that is word choice, and it binds the
+namer.
 - A name `X#policy` is a resource policy. Grade `X` by the grammar of the resource it names (a bucket name takes
   section B), and keep `#policy`.
 - A duplicate policy name is refused when it is minted (`DATA.iam_policy.duplicate_name`). One name cannot show a
@@ -235,17 +269,21 @@ with any N5 affix put back.
   as the purpose.
 - **S2** The first token of segment 1 is the system slot, and R1-R3 apply to it. If R1.d has to look further, it
   reads the first token of each later segment. The rest of segment 1 joins the purpose.
-- **S3** Segment 2 is the scope when it is a V4 token, in the SHORT form (`blackdiamond/49f/credentials`).
-  Otherwise the secret is shared: the slot is omitted (S5), and segment 2 begins the purpose. A V4 token found
-  anywhere else moves to the scope segment.
+- **S3** Segment 2 is the scope when it is a V4 token, in the SHORT form, the `short` of its REGISTRY row
+  (`blackdiamond/49f/credentials`). Otherwise the secret is shared: the slot is omitted (S5), and segment 2 begins the
+  purpose. A V4 token found anywhere else moves to the scope segment.
 - **S4** The purpose is every remaining segment, each lowercase kebab, joined by `/`. CENSUS s.2 counts 86
-  slash-path secrets, and many of them use more than one purpose segment.
+  slash-path secrets, and many of them use more than one purpose segment. `DATA.secret.purpose` (FN4) says what the
+  purpose names: the credential's kind (`credentials`, `token`, `key`, `password`, `certificate`), after the interface
+  it opens when the item names one (`api-credentials`). Like a function's words (R5), that binds the namer, and the
+  grade keeps the purpose as written.
 - **S5** The canonical form is `system/scope/purpose`, with the scope dropped when the secret has none.
 
 ## L. LOG GROUPS -- `/aws/{service}/{resource-name}` (S9, `DATA.log_group`)
 
-- **L1** After G2.3, a log group takes one of three shapes: `/aws/{service}/{rest}`,
-  `/aws/vendedlogs/{service}/{rest}`, or another `/`-path.
+- **L1** After G2, a log group takes one of three shapes: `/aws/{service}/{rest}`,
+  `/aws/vendedlogs/{service}/{rest}`, or another `/`-path. A log group in none of them (a name with no leading `/`
+  that `DATA.aws_fixed.by_name` does not list) RAISES: this rule gives it no service.
 - **L2** The service names the resource type:
 
 | service | resource type |
@@ -265,8 +303,8 @@ with any N5 affix put back.
 ## B. BUCKETS -- `opal-data-{scope}` and `opal-{account-id}-{purpose}` (S2, `DATA.bucket`)
 
 - **B1** `opal-data-assets` and `opal-data-portal-v2` stand (`DATA.bucket.standing_shared`): CONFORMANT.
-- **B2** `opal-data-{rest}`: `rest` must be exactly one scope key, in the LONG form. That is a V4 long form, a MASTER
-  key, `global`, or a PRODUCT in V1.
+- **B2** `opal-data-{rest}`: `rest` must be exactly one scope key, in the LONG form. That is a V4 long form (the
+  `long` of its REGISTRY row), a MASTER key, `global`, or a PRODUCT in V1.
   - A short form, or `bd` (the firm), is an alias: ALIAS, with canonical form `opal-data-{long}`.
   - A VENDOR in V1: OUT-OF-PATTERN, with canonical `opal-data-{scope}`. A data bucket's scope is never a vendor, and
     no new bucket carries a vendor name.
@@ -291,21 +329,32 @@ with any N5 affix put back.
   - If it is a V1 token, the key is SOURCE-FIRST: K2-K4.
   - Anything else RAISES, because segment 1 is neither a source nor a tier. That covers a V2 token, `json`,
     `config`, `cache` and a variable segment.
-- **K2 SCOPE.** Segment 2 is the scope, in the LONG form: a V4 long form, a MASTER, `global` or a PRODUCT key.
+- **K2 SCOPE.** Segment 2 is the scope, in the LONG form (the `long` of its REGISTRY row): a V4 long form, a MASTER,
+  `global`, or a PRODUCT key beneath a VENDOR source (`DATA.key.scope_rule`, SC1).
   - A short form or `bd` is an alias: it gives ALIAS with the long form.
+  - A PRODUCT key beneath any other source is not the key's scope (`mdpf/global/...`, never `mdpf/mdpf/...`): the
+    canonical form writes `{scope}` in its place, which the bucket decides (K5.c).
   - Anything else is not a scope: the canonical form inserts `{scope}` before it.
-- **K3 TIER AND TABLE.** Segment 3 is a tier; if it is not, the canonical form inserts `{tier}`. Segment 4 is the
-  table, in snake_case (`DATA.key.table_case`). In tier `code`, segment 4 is the tier the code builds: bronze, silver
-  or gold (`DATA.key.code`).
-- **K4 BELOW THE TABLE** (`DATA.key.partition`). Segment 5 is a `date=YYYY-MM-DD` partition, an `{entity}={id}`
-  entity partition with the object after it, or a named leaf.
+  - The rest of `DATA.key.scope_rule` (a vendor master keeps its own scope; any other key's scope is its AUDIENCE)
+    turns on what the data is, which a name does not carry. It binds the namer, and a MASTER or a firm in segment 2 is
+    graded as written.
+- **K3 TIER AND TABLE.** Segment 3 is a tier (V7). If it is not, RAISE (`DATA.grade.unplaceable`): the name does not
+  carry its tier and no source outside the name fills one, so the tier is not a placeholder (`DATA.grade.placeholder`
+  names the system, source, scope and cadence slots only). Segment 4 is the table, in snake_case
+  (`DATA.key.table_case`). In tier `code`, segment 4 is the tier the code builds: bronze, silver or gold
+  (`DATA.key.code`).
+- **K4 BELOW THE TABLE** (`DATA.key.partition`). Segment 5 is a `date=YYYY-MM-DD` partition, an entity partition
+  `{entity}={id}` with the object after it, or a named leaf. In an entity partition, `{entity}` is the KEY COLUMN's
+  name as the table carries it (`advisor_id=A123`), as `date` is the column in `date=YYYY-MM-DD` (P1).
   - **K4a Tier `platinum`.** If the key is ON the LIST (K7), the path keeps its bytes (`DATA.key.legacy_served_path`)
     and nothing below the table can fail. If it is not, it is a NEW served path:
     - its leaf must be a kebab-case `.json` file;
-    - an id segment in the partition slot must be an entity partition `{entity}={id}`.
+    - a segment in the partition slot must be an entity partition `{entity}={id}`.
 
-    A leaf with `_` or capitals fails, and the canonical leaf is lowercased with `_` turned to `-`. A bare variable
-    id segment fails, and becomes `{entity}={id}`.
+    A leaf with `_` or capitals fails, and the canonical leaf is lowercased with `_` turned to `-`. A partition
+    segment that is not an entity partition (a bare id, literal or variable) RAISES (`DATA.grade.unplaceable`): its
+    entity is the key column's name, which the name does not carry and no source outside the name fills, so it is not
+    a placeholder (`DATA.grade.placeholder`).
   - **K4b Other tiers.** Any segment is a valid named leaf, so below the table only K4a can fail.
 - **K5 TIER-FIRST.** This is the legacy layout of the firm buckets, portal-v2 and mdpf (CENSUS s.5), and it is always
   OUT-OF-PATTERN (order). Build the canonical form in four steps:
@@ -314,9 +363,10 @@ with any N5 affix put back.
   - **b.** In tier `platinum`, look up the tail (the segments after those that a consumed) in the LIST. Compare it
     with the part of each entry below `{source}/{scope}/platinum/`.
     - If exactly one entry matches, that entry gives the source (if a did not) and the tail keeps its bytes.
-    - If none matches, rewrite the tail by K4a's new-path forms.
-  - **c.** A source or scope still unknown becomes the placeholder `{source}` or `{scope}`. The S3Key node carries no
-    bucket, and the bucket is what decides them (SEED s.3; row `LGIC_NAMING-W1-S3`).
+    - If none matches, rewrite the tail by K4a's new-path forms; a bare id in it RAISES, as K4a says.
+  - **c.** A source or scope still unknown becomes the placeholder `{source}` or `{scope}`
+    (`DATA.grade.placeholder`: the bucket fills both). The S3Key node carries no bucket, and the bucket is what decides
+    them (SEED s.3; row `LGIC_NAMING-W1-S3`).
   - **d.** The canonical form is `source/scope/tier/tail`.
 - **K6 LEGACY ROOT `code/`.** A key whose segment 1 is `code` is a legacy root code home. It is OUT-OF-PATTERN, and
   its canonical form is the code-tier key `{source}/{scope}/code/{built_tier}/{file}`, built by K5.a and K5.c. The
@@ -331,11 +381,11 @@ with any N5 affix put back.
 ## G6. THE VERDICT
 
 - **V-1** Build the canonical form with the grammar of the type.
-- **V-2** If the canonical form carries a placeholder (`{system}`, `{source}`, `{scope}`, `{tier}`, `{cadence}` or
-  `{entity}`): OUT-OF-PATTERN.
+- **V-2** If the canonical form carries a placeholder (`{system}`, `{source}`, `{scope}` or `{cadence}`, exactly the set `DATA.grade.placeholder` allows): OUT-OF-PATTERN.
 - **V-3** If the canonical form equals the name byte for byte: CONFORMANT.
 - **V-4** If replacing alias tokens in place with their canonical spellings turns the name into the canonical form,
-  and nothing else changes: ALIAS. The alias replacements are:
+  and nothing else changes: ALIAS. The alias replacements, with a firm's forms read from its REGISTRY `scopes.json`
+  row (`DATA.firm_forms_source`), are:
   - `bd` to `blackdiamond`, or to the firm's form for the slot;
   - a long firm form to the short one, in a resource name or a secret;
   - a short form or `bd` to the long one, in a bucket or a key;
@@ -346,12 +396,11 @@ with any N5 affix put back.
 
 These gaps are filed as rows on the project channel, not settled here:
 - `LGIC_NAMING-W1-S1`: the portal census the order names reads too little. The LIST was built from a widened census.
-- `LGIC_NAMING-W1-S2`: the registry seed holds no platform-subsystem row, so V1 is interim and V2 RAISES.
+- `LGIC_NAMING-W1-S2`: a V2 token has no REGISTRY system row, so it RAISES wherever the system slot needs it.
 - `LGIC_NAMING-W1-S3`: some canonical forms need a slot the name does not carry, so they carry a placeholder.
-- `LGIC_NAMING-W1-S4`: names AWS fixes sit inside graded types, and G2 RAISES them.
-- `LGIC_NAMING-W3-S5`: R5.b can leave a function empty, and v1.7 names a RAISE for R5.a's subtraction only.
-- `LGIC_NAMING-W3-S6`: the header names v1.7, but only R5 was re-cut; other fields the rule's steps cite changed
-  between v1.4 and v1.7.
+- `LGIC_NAMING-W3-S7`: FN1d RAISES when the subtraction empties a function. A function that is empty before it
+  (`opal-gateway`) is outside that clause as R5 states it, while the ruling's reason, that a name with no function
+  cannot be placed, would reach it too.
 
 ## 9. WORKED CASES
 
@@ -362,16 +411,18 @@ These gaps are filed as rows on the project channel, not settled here:
  "vintage": "Built from the estate as of 2026-09-14 12:13:53 UTC",
  "worked_cases": [
   {"name": "mdpf-gold-lambda", "type": "LAMBDA", "verdict": "CONFORMANT", "canonical_form": "mdpf-gold-lambda", "why": "N1 ok; R1.a mdpf in V1 (SEED product); R4 no scope token (S5); R5 function gold; R6 last token lambda is LAMBDA's kind; V-3 equal"},
+  {"name": "mdpf-lambda-lambda", "type": "LAMBDA", "verdict": "RAISE", "specimen": true, "why": "R1.a mdpf in V1; R4 no scope token; R6 the last token lambda is LAMBDA's kind and stays; R5 the one subtraction (FN1d) removes lambda, the resource's own kind, from the function [lambda], and that was its last token: RAISE (DATA.grade.unplaceable)"},
+  {"name": "orion-orion-lambda-lambda", "type": "LAMBDA", "verdict": "RAISE", "specimen": true, "why": "R1.a orion in V1 (REGISTRY vendor); R4 no scope token; R6 the last lambda stays; R5 the one subtraction (FN1d) removes orion (written in the system slot, FN1b) and lambda (the own kind, FN1c) from the function [orion, lambda] in one pass, which leaves no function token: RAISE (DATA.grade.unplaceable), whichever rule removed the last token"},
   {"name": "inf-silver-chain", "type": "LAMBDA", "verdict": "OUT-OF-PATTERN", "canonical_form": "{system}-inf-silver-chain-lambda", "why": "R1.d t1 inf is a firm (V3): no later token in V1, so {system}; R4 scope inf (short); R6 chain is no kind, lambda appended; V-2 placeholder"},
   {"name": "inf-api-eclipse", "type": "LAMBDA", "verdict": "OUT-OF-PATTERN", "canonical_form": "eclipse-inf-api-lambda", "why": "R1.d t1 inf is a firm: the first later V1 token is eclipse (SEED vendor), the system; R4 scope inf after it; R5 function api; R6 api is API_GW's kind, not LAMBDA's, so lambda appended; V-5"},
   {"name": "etfs-canon-fanin-role", "type": "IAM_ROLE", "verdict": "CONFORMANT", "canonical_form": "etfs-canon-fanin-role", "why": "R1.a etfs (SEED product); R4 none; R5 canon-fanin; R6 role; V-3"},
   {"name": "bd-49f-runner-role", "type": "IAM_ROLE", "verdict": "ALIAS", "canonical_form": "blackdiamond-49f-runner-role", "why": "R3 bd next to firm 49f reads as the VENDOR blackdiamond; R1.a system bd->blackdiamond; R4 scope 49f short, in place; R6 role; V-4 the only change is the refused alias bd -> blackdiamond (S10)"},
-  {"name": "FredMacroIngestionLambdaRole", "type": "IAM_ROLE", "verdict": "OUT-OF-PATTERN", "canonical_form": "fred-macro-ingestion-lambda-role", "residue_class": "camel-iam", "why": "G2.2 no AWS/Amazon prefix; N1 fails (capitals); N2 fred macro ingestion lambda role; R1.a fred (CENSUS s.3 feed); R4 none; R6 role; V-5 case is not an alias change"},
+  {"name": "FredMacroIngestionLambdaRole", "type": "IAM_ROLE", "verdict": "OUT-OF-PATTERN", "canonical_form": "fred-macro-ingestion-lambda-role", "residue_class": "camel-iam", "why": "G2 not in DATA.aws_fixed.by_name; N1 fails (capitals); N2 fred macro ingestion lambda role; R1.a fred (CENSUS s.3 feed); R4 none; R6 role; V-5 case is not an alias change"},
   {"name": "irpt-directory-policy", "type": "IAM_POLICY", "verdict": "CONFORMANT", "canonical_form": "irpt-directory-policy", "why": "R8 policy grammar; R1.a irpt (CENSUS s.3 product); R4 none; R5 purpose directory; R6 policy; V-3"},
   {"name": "s3-etfs-read", "type": "IAM_POLICY", "verdict": "OUT-OF-PATTERN", "canonical_form": "etfs-s3-read-policy", "residue_class": "purpose-first-policy", "why": "R1.d t1 s3 is a purpose word (V3): the first later V1 token etfs is the system, and s3 joins the function ahead of read; R6 read is no kind, policy appended (R8); V-5"},
   {"name": "opal-data-49financial#policy", "type": "IAM_POLICY", "verdict": "CONFORMANT", "canonical_form": "opal-data-49financial#policy", "why": "R8 X#policy is a resource policy: X graded by B; B2 rest 49financial is a V4 long form; #policy kept; V-3"},
   {"name": "mdpf-daily-runner-profile", "type": "INSTANCE_PROFILE", "verdict": "CONFORMANT", "canonical_form": "mdpf-daily-runner-profile", "why": "R1.a mdpf; R4 none; R5 daily-runner (a cadence word is free inside the function); R6 profile; V-3"},
-  {"name": "default", "type": "SECURITY_GROUP", "verdict": "RAISE", "residue_class": "default-sg", "why": "G2.1 AWS names every VPC's default group and it cannot be renamed; DATA grants graded types no exclusion for an AWS-fixed name, so the defect is the data file's (row LGIC_NAMING-W1-S4)"},
+  {"name": "default", "type": "SECURITY_GROUP", "verdict": "NOT-GRADED", "residue_class": "default-sg", "why": "G2 (G2.1) DATA.aws_fixed.by_name lists default for SECURITY_GROUP: AWS names every VPC's default group and it cannot be renamed, so the name is outside the grade's domain (RULING AW1) -- never a RAISE and never a fourth verdict"},
   {"name": "etfs-reports-reporter-sg", "type": "SECURITY_GROUP", "verdict": "CONFORMANT", "canonical_form": "etfs-reports-reporter-sg", "why": "R1.a etfs; R4 none; R5 reports-reporter; R6 sg; V-3"},
   {"name": "opal-portal-data-proxy-api", "type": "API_GW", "verdict": "CONFORMANT", "canonical_form": "opal-portal-data-proxy-api", "why": "R2 t2 portal is in neither V1 nor V2, so the system is opal (reserved); R4 none; R5 portal-data-proxy; R6 api; V-3"},
   {"name": "irpt-jobs", "type": "DYNAMODB_TABLE", "verdict": "OUT-OF-PATTERN", "canonical_form": "irpt-jobs-table", "why": "R1.a irpt; R4 none; R5 jobs; R6 jobs is no kind, table appended; V-5"},
@@ -407,3 +458,30 @@ These gaps are filed as rows on the project channel, not settled here:
  ]
 }
 ```
+
+## 10. SCHEMA COVERAGE
+
+Every field of `NAMING_SCHEMA.json` that changed from v1.4 (@`e04b802fe9`, the version this rule was cut at) to v1.9
+(this rule's base @`bd0f5d2c6c`), as `check_ln_r4.py g1-coverage` derives them, never typed: a top-level key, or each
+second-level key of a key that is an object in both versions; a key added or removed whole counts once; `version`,
+`changelog` and `ratified_by` are excluded. Each line names every step of this rule that reads the field.
+
+- COVERS aws_fixed: G2, G2.1, G2.2, L1
+- COVERS firm_forms: R4, S3, B2, K2, V-4
+- COVERS firm_forms_source: R4, S3, B2, K2, V-4
+- COVERS grade.placeholder: V-2, R1, R7, K3, K4a, K5
+- COVERS iam_policy.purpose_slot: R8, R5
+- COVERS key.partition: K4, K4a
+- COVERS key.scope_rule: K2
+- COVERS kind.closed_at_l4: R5, R6
+- COVERS resource.function: R5
+- COVERS resource.qualifier: R5
+- COVERS rows_owner: R1, R2, R4
+- COVERS secret.purpose: S4
+- COVERS system.vendor_through_tiers: NO STEP -- which system a resource should take turns on what it builds from (one vendor's feed, or a combination of feeds), and grade(name, type) receives no description of that; R1 takes the system token the name carries, so the clause binds the namer.
+- COVERS tf_type_map: G1.1
+- COVERS tf_type_map_note: G1.1
+- COVERS tf_unmapped_own_name: G1.1
+- COVERS tf_unmapped_own_name_note: G1.1
+
+SCHEMA COVERAGE SINCE v1.4: 17 of 17
