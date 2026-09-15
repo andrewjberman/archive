@@ -35,10 +35,10 @@ The `bucket_for` body is byte-identical to the base. No consumer was repointed a
 
 ## Rows
 
-- `LGIC_ENFORCE-W5-S1` (OBSERVATION, ARMED, disarm_owner `2.0.0_SA_COO~G`). Under the checker's environment,
+- `LGIC_ENFORCE-W5-S4` (OBSERVATION, ARMED, disarm_owner `2.0.0_SA_COO~G`). Under the checker's environment,
   V4-AC2 grades only `bucket_for`'s refusal branch, so it would also pass a view whose mapped branch changed.
   This generation is unaffected: the body is unchanged, and the view reads EQUAL with the map set.
-- `LGIC_ENFORCE-W5-S2` (OBSERVATION, INERT). The pre-flip dry run of `proof-of-spec-check.py` refuses a tracked
+- `LGIC_ENFORCE-W5-S5` (OBSERVATION, INERT). The pre-flip dry run of `proof-of-spec-check.py` refuses a tracked
   carrier that was modified in place as "ALREADY COMMITTED at HEAD" (CCX) until the carrier is staged:
   - unstaged: rc 1;
   - staged in a temporary index copy: rc 0.
