@@ -86,9 +86,12 @@ def ticker(s, symbol):
     return r
 
 
-def search(s, query):
+def search(s, query, page=1):
     """Exact request observed from the site's search input on 2026-09-14."""
-    r = s.get(f"{BASE}/nemo-next/api/search/query", params={"query": query},
+    params = {"query": query}
+    if page > 1:
+        params["page"] = page
+    r = s.get(f"{BASE}/nemo-next/api/search/query", params=params,
               headers={"Referer": f"{BASE}/search?query={query}"})
     if r.status_code != 200:
         raise RuntimeError(f"Bloomberg search -> {r.status_code} ({len(r.content)} bytes)")
