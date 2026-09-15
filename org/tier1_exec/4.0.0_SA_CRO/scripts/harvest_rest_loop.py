@@ -117,6 +117,42 @@ def assess(record, ticker):
     return record
 
 
+def clean_bbg(story):
+    """Read Bloomberg's typed JSON article tree, never a rendered article DOM."""
+
+    def text(node):
+        if node.get("type") == "text":
+            return node.get("value", "")
+        return "".join(text(child) for child in node.get("content", []))
+
+    blocks = []
+    omitted = []
+    for node in (story.get("body") or {}).get("content", []):
+        kind = node.get("type")
+        if kind in (
+            "paragraph",
+            "heading",
+            "blockquote",
+            "ordered-list",
+            "unordered-list",
+            "table",
+        ):
+            value = text(node).strip()
+            if value:
+                blocks.append(value)
+        elif kind not in ("ad", "inline-newsletter"):
+            omitted.append(kind)
+    return {
+        "url": story.get("url") or story.get("seoCanonical"),
+        "title": story.get("headline"),
+        "published": story.get("publishedAt"),
+        "text": "\n\n".join(blocks),
+        "body_source": "bloomberg_rest_fetch.article.body",
+        "story_id": story.get("id"),
+        "omitted_node_types": omitted,
+    }
+
+
 def collect(pub, ticker, args, folder, result):
     m = client(pub)
     s = None
@@ -158,14 +194,24 @@ def collect(pub, ticker, args, folder, result):
                     urls.append(link)
             result["discovered_urls"] = urls
             for ix, link in enumerate(urls[: args.candidates]):
-                yield m.article(
-                    s,
-                    link.rsplit("/", 1)[-1],
-                    response_path=folder / f"response-{ix:02d}.html",
-                )
+                try:
+                    yield m.article(
+                        s,
+                        link.rsplit("/", 1)[-1],
+                        response_path=folder / f"response-{ix:02d}.html",
+                    )
+                except m.ArticleBodyUnavailable:
+                    yield {
+                        "url": link,
+                        "title": None,
+                        "text": "",
+                        "published": None,
+                        "completeness": "missing_body",
+                        "error_type": "ArticleBodyUnavailable",
+                    }
                 time.sleep(m.PACE_SECONDS)
         elif pub == "wsj":
-            payload = m.extract_ticker_news(ticker)
+            payload = m.extract_ticker_news(ticker, response_dir=folder)
             write(folder / "discovery-response.json", payload)
             if not payload.get("found_on_attempt"):
                 raise ValueError(
@@ -197,20 +243,19 @@ def collect(pub, ticker, args, folder, result):
                     }
                 time.sleep(m.PACE_SECONDS)
         else:
-            response = m.ticker(s, ticker + ":US")
-            result["ticker_http_status"] = response.status_code
-            write(
-                folder / "endpoint-gap.json",
-                {
-                    "ticker_status": response.status_code,
-                    "article_body_api": "not_implemented_in_canonical_consumer",
-                    "news_params": "full_observed_request_not_yet_captured",
-                    "next_step": "Capture authenticated browser network request, then implement HTTP replay.",
-                },
-            )
-            result["notes"].append(
-                "Canonical Bloomberg client has no article-body API; no browser-content fallback."
-            )
+            payload = m.search(s, COMPANY[ticker])
+            write(folder / "search-response.json", payload)
+            articles = [
+                a
+                for a in payload.get("results", [])
+                if a.get("subtype") == "Article" and a.get("resourceId")
+            ]
+            result["discovered_urls"] = [a.get("url") for a in articles]
+            for ix, article in enumerate(articles[: args.candidates]):
+                story = m.article(s, article["resourceId"])
+                write(folder / f"response-{ix:02d}.json", story)
+                yield clean_bbg(story)
+                time.sleep(1.5)
     finally:
         if s is not None:
             s.close()
@@ -271,6 +316,8 @@ def main():
     parser.add_argument("--candidates", type=int, default=20)
     parser.add_argument("--max-steps", type=int, default=10)
     parser.add_argument("--trace-hold", action="store_true")
+    parser.add_argument("--wsj-auth-pending", action="store_true",
+                        help="Record WSJ as awaiting subscriber credentials; continue other publishers in order.")
     parser.add_argument("--review-only", action="store_true")
     args = parser.parse_args()
     args.out = args.out.resolve()
@@ -308,6 +355,13 @@ def main():
                     Path(client(pub).__file__).read_bytes()
                 ).hexdigest(),
             }
+            if pub == "wsj" and args.wsj_auth_pending:
+                result["notes"].append("Awaiting subscriber login: paid-article entitlement returned no document key.")
+                result["error_type"] = "SubscriberCredentialPending"
+                row["results"][pub] = result
+                write(folder / "result.json", result)
+                write(path, state)
+                continue
             print(
                 json.dumps(
                     {

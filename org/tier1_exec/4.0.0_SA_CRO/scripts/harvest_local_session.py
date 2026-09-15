@@ -24,6 +24,15 @@ def harvest(pub, folder, max_steps=10, trace_hold=False):
     source = SCRIPTS / (NAMES[pub] + "_harvest_session.py")
     copied = folder / source.name
     copied.write_bytes(source.read_bytes())
+    source_hash = hashlib.sha256(copied.read_bytes()).hexdigest()
+    dependencies = {
+        p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in (
+            SCRIPTS / "press_and_hold_lib.py",
+            SCRIPTS / "nopecha_hcaptcha_lib.py",
+            SCRIPTS / "google_oauth_handler.py",
+        )
+    }
     driver = folder / "run.py"
     argv = [str(copied), "--max-steps", str(max_steps)]
     if trace_hold and pub in ("sa", "bbg"):
@@ -48,7 +57,8 @@ def harvest(pub, folder, max_steps=10, trace_hold=False):
     evidence = {
         "publisher": pub,
         "source": str(source),
-        "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+        "source_sha256": source_hash,
+        "dependency_sha256": dependencies,
         "exit_code": proc.returncode,
         "bundle_present": bool(bundle),
         "network_auth_corroborated": network_ok,

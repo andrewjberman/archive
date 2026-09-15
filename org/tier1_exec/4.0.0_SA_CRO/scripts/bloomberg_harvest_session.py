@@ -132,10 +132,10 @@ CLASSIFY = (
 )
 
 
-def classify(page, screenshot_fn):
+def classify(page, screenshot_fn, use_cache=True):
     shot = screenshot_fn()
     h = _img_hash(shot)
-    if h is not None:
+    if h is not None and use_cache:
         ck = next((k for k in _CLASSIFY_CACHE if _hamming(k, h) <= 4), None)
         if ck is not None:
             state, src = _CLASSIFY_CACHE[ck]
@@ -602,7 +602,11 @@ def is_logged_in(page, ctx, baseline_cookie_names):
     new_cookies = current_names - baseline_cookie_names
     if not new_cookies:
         return False, new_cookies
-    state, _ = classify(page, lambda: page.screenshot(timeout=15000))
+    # A whole-page perceptual hash missed the tiny Sign In -> account-menu change
+    # after OAuth on 2026-09-15. Fresh identity evidence must force a fresh visual
+    # decision; the cookie event alone still does not certify authentication.
+    identity_changed = bool(new_cookies & {"_user-id", "_user-token", "_user-jwt", "_breg-uid"})
+    state, _ = classify(page, lambda: page.screenshot(timeout=15000), use_cache=not identity_changed)
     return state == "LOGGED_IN", new_cookies
 
 

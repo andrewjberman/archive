@@ -181,28 +181,39 @@ def extract_balanced(text, start_marker):
     raise ValueError("unbalanced braces from " + start_marker)
 
 
-def extract_ticker_news(ticker, max_attempts=3):
+def extract_ticker_news(ticker, max_attempts=3, *, response_dir=None):
     """MEASURED INTERMITTENT: the market-data quote page's window.__STATE__ sometimes carries a
     per-ticker news array and sometimes does not, on an identical URL fetched seconds apart --
     Bright Data's static snapshot appears to race the page's own async hydration. Retries up to
     max_attempts and reports which attempt (if any) found it; NEVER claims absence proves no feed
     exists, and never fabricates a result on a miss."""
     url = f"https://www.wsj.com/market-data/quotes/{ticker.upper()}"
+    diagnostics = []
     for attempt in range(1, max_attempts + 1):
         html = web_unlocker(url)
+        diagnostic = {"attempt": attempt, "bytes": len(html), "state_marker_present": "window.__STATE__" in html}
+        diagnostics.append(diagnostic)
+        if response_dir is not None:
+            from pathlib import Path
+            folder = Path(response_dir)
+            folder.mkdir(parents=True, exist_ok=True)
+            (folder / f"quote-attempt-{attempt}.html").write_text(html, encoding="utf-8")
         try:
             blob = extract_balanced(html, "window.__STATE__ =")
             d = json.loads(blob)
-        except Exception:
+        except Exception as exc:
+            diagnostic["parse_error_type"] = type(exc).__name__
             time.sleep(PACE_SECONDS)
             continue
         keys = [k for k in d.get("data", {}) if k.startswith("quotes_latestNews_")]
+        diagnostic["news_key_count"] = len(keys)
         if keys:
             news = d["data"][keys[0]]
             return {"ticker": ticker.upper(), "url": url, "found_on_attempt": attempt, "attempts": attempt,
-                    "state_key": keys[0], "news_node": news}
+                    "state_key": keys[0], "news_node": news, "diagnostics": diagnostics}
         time.sleep(PACE_SECONDS)
     return {"ticker": ticker.upper(), "url": url, "found_on_attempt": None, "attempts": max_attempts,
+            "diagnostics": diagnostics,
             "note": "quotes_latestNews_ key not present in window.__STATE__ on any attempt -- "
                     "a timing/hydration race in the Unlocker's snapshot, not proof the feed is absent"}
 

@@ -86,6 +86,33 @@ def ticker(s, symbol):
     return r
 
 
+def search(s, query):
+    """Exact request observed from the site's search input on 2026-09-14."""
+    r = s.get(f"{BASE}/nemo-next/api/search/query", params={"query": query},
+              headers={"Referer": f"{BASE}/search?query={query}"})
+    if r.status_code != 200:
+        raise RuntimeError(f"Bloomberg search -> {r.status_code} ({len(r.content)} bytes)")
+    return r.json()
+
+
+def article(s, story_id, language="en"):
+    """Article-transporter JSON route from Bloomberg's loaded client code (2026-09-14)."""
+    from urllib.parse import quote
+    r = s.get(f"{BASE}/article/api/story/id/{quote(story_id, safe='')}",
+              params={"languagePreference": language}, headers={"Referer": f"{BASE}/"})
+    if r.status_code != 200:
+        raise RuntimeError(f"Bloomberg article -> {r.status_code} ({len(r.content)} bytes)")
+    return r.json()
+
+
+def chart_news(s, symbol, *, target_date, start_date, end_date, name, date_range="1D", security_type="EQT"):
+    """Full captured chart request. Caller supplies observed window boundaries."""
+    return s.get(f"{BASE}/bazaar/api/chart-news/{symbol}", params={
+        "targetDate": target_date, "startDate": start_date, "endDate": end_date,
+        "dateRange": date_range, "name": name.replace(" ", "+"), "type": security_type,
+    }, headers={"Referer": f"{BASE}/quote/{symbol}"})
+
+
 def news(s, symbol, name):
     now = datetime.datetime.utcnow()
     since = now - datetime.timedelta(days=1)

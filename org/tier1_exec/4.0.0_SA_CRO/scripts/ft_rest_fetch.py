@@ -67,6 +67,10 @@ class NotAuthorized(RuntimeError):
     """The parked bundle carries no FT identity cookie at all."""
 
 
+class ArticleBodyUnavailable(ReHarvestRequired):
+    """This response lacks an article body; session expiry is not established by one URL."""
+
+
 def _secret(name):
     d = os.environ.get("SA_SECRETS_DIR")
     if d:
@@ -147,7 +151,7 @@ def parse_article(html, content_id):
     pub = re.search(r'"datePublished"\s*:\s*"([^"]+)"', html)
     body = soup.select_one('[data-component="article-content-body"]')
     if body is None:
-        raise ReHarvestRequired("HTTP response has no article-content-body; session or entitlement requires verification")
+        raise ArticleBodyUnavailable("HTTP response has no article-content-body; session or entitlement requires verification")
     for node in body.select("script, style, noscript, button, form"):
         node.decompose()
     blocks = [node.get_text(" ", strip=True) for node in body.select("p, h2, h3, li, blockquote, table")
