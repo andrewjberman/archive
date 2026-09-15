@@ -99,10 +99,18 @@ def listing(section):
     return {"section": section, "url": url, "article_urls": found}
 
 
-def article(url):
-    """Copied verbatim from extract.py's extract_article() -- stdlib regex, longest-<p>-block
-    extraction (EXTEND, never rebuild)."""
+def article(url, *, response_path=None):
+    """Keep canonical Unlocker transport; normalize only the returned article body."""
     html = web_unlocker(url)
+    if response_path is not None:
+        from pathlib import Path
+        Path(response_path).write_text(html, encoding="utf-8")
+    return parse_article(html, url)
+
+
+def parse_article(html, url):
+    from bs4 import BeautifulSoup
+
     ogt = re.search(r'(?is)property="og:title"\s+content="([^"]+)"', html) or re.search(r"(?is)<title[^>]*>(.*?)</title>", html)
     title = htmlmod.unescape(ogt.group(1)).strip() if ogt else ""
     pub = re.search(r'(?is)property="article:published_time"\s+content="([^"]+)"', html) or re.search(r'(?is)"datePublished"\s*:\s*"([^"]+)"', html)
@@ -112,13 +120,33 @@ def article(url):
         r"for help please visit|cancel anytime during your trial|all rights reserved|"
         r"sign in|create an account|this copy is for your personal)", re.IGNORECASE,
     )
+    soup = BeautifulSoup(html, "html.parser")
+    body = soup.select_one('article .crawler section')
     paras = []
-    for m in re.finditer(r"(?is)<p[ >].*?</p>", html):
-        t = htmlmod.unescape(re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", m.group(0)))).strip()
-        if len(t) > 50 and not boilerplate.search(t):
-            paras.append(t)
+    if body:
+        for node in body.select("script, style, noscript, button, form"):
+            node.decompose()
+        for node in body.select("p, h2, h3, li, blockquote, table"):
+            if node.find_parent(["li", "blockquote", "table"]):
+                continue
+            t = node.get_text(" ", strip=True)
+            if t and not boilerplate.search(t):
+                paras.append(t)
     text = "\n\n".join(paras)
-    return {"url": url, "title": title, "published": published, "text_chars": len(text), "text": text}
+    expected_words = None
+    state_node = soup.select_one("#__NEXT_DATA__")
+    if state_node:
+        try:
+            props = json.loads(state_node.string)["props"]["pageProps"]
+            expected_words = props["articleData"]["meta"]["metrics"].get("wordCount")
+        except (TypeError, ValueError, KeyError):
+            pass
+    completeness = "requires_review" if body else "missing_body"
+    if isinstance(expected_words, (int, float)) and expected_words > len(text.split()) * 1.3:
+        completeness = "partial_body"
+    return {"url": url, "title": title, "published": published, "text_chars": len(text), "text": text,
+            "body_source": "web_unlocker_html.article.crawler.section",
+            "expected_word_count": expected_words, "completeness": completeness}
 
 
 def extract_balanced(text, start_marker):

@@ -11,6 +11,7 @@ ROE: never logs a credential/cookie/token value (this module never sees one).
 import io
 import random
 import time
+from pathlib import Path
 
 try:
     from PIL import Image
@@ -59,7 +60,8 @@ def _crop_scores(page, bbox, baseline_full, baseline_center):
     return whole, center
 
 
-def press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=8.0, poll_interval=0.15):
+def press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=8.0, poll_interval=0.15,
+                            trace_dir=None, release_on_pixel_peak=True):
     """Andrew-direct 2026-09-10: Kimi is far too slow (10-20s/call, measured) to close this loop --
     the fill/checkmark/de-fill animation runs in a few seconds -- so Kimi's (or a site's DOM's) role
     stops at LOCATING the button; release timing is a purely LOCAL, fast pixel-diff loop with zero
@@ -85,13 +87,18 @@ def press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=8.0, poll_interval
         log(f"adaptive press-and-hold: baseline crop failed {type(e).__name__} -- falling back to a fixed hold")
         press_and_hold(page, x, y, random.uniform(1.8, 3.2), log)
         return
-    log(f"adaptive press-and-hold at ({x:.0f},{y:.0f}) -- watching for the center checkmark spike (fallback: whole-bar peak)")
+    mode = "pixel-peak release" if release_on_pixel_peak else "drain -> release -> partial fall -> re-press"
+    log(f"adaptive press-and-hold at ({x:.0f},{y:.0f}) -- {mode}")
     page.mouse.move(x, y, steps=12)
     time.sleep(0.2)
     page.mouse.down()
     is_pressed = True
     whole_scores, center_scores = [], []
     started = time.monotonic()
+    trace_path = Path(trace_dir) if trace_dir else None
+    if trace_path:
+        trace_path.mkdir(parents=True, exist_ok=True)
+    trace_index = 0
     recoveries = 0
     MAX_RECOVERIES = 4
     try:
@@ -106,7 +113,12 @@ def press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=8.0, poll_interval
             whole_scores.append(w)
             center_scores.append(c)
             elapsed = time.monotonic() - started
-            if len(center_scores) >= 2 and center_scores[-1] > 18 and center_scores[-1] > center_scores[-2] * 1.4:
+            if trace_path:
+                page.screenshot(path=str(trace_path / f"widget-{trace_index:03d}.png"), clip=bbox, timeout=3000)
+                with (trace_path / "pixels.csv").open("a", encoding="utf-8") as fh:
+                    fh.write(f"{trace_index},{elapsed:.3f},{w:.3f},{c:.3f}\n")
+                trace_index += 1
+            if release_on_pixel_peak and len(center_scores) >= 2 and center_scores[-1] > 18 and center_scores[-1] > center_scores[-2] * 1.4:
                 log(f"CHECKMARK signal: center delta jumped {center_scores[-2]:.1f} -> {center_scores[-1]:.1f} "
                     f"after {elapsed:.2f}s -- releasing")
                 page.mouse.up()
@@ -121,15 +133,34 @@ def press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=8.0, poll_interval
             # right response is to physically release, pause, and re-press -- not just pick a
             # different moment to release once. Capped at MAX_RECOVERIES so a widget that drains
             # forever doesn't hold the process hostage.
-            if is_pressed and len(whole_scores) >= 2 and whole_scores[-2] > 15 \
-                    and whole_scores[-1] < whole_scores[-2] * 0.7 and recoveries < MAX_RECOVERIES:
+            recent_peak = max(whole_scores[-8:])
+            if is_pressed and len(whole_scores) >= 3 and recent_peak > 15 \
+                    and whole_scores[-1] < recent_peak * (0.85 if trace_path else 0.7) and recoveries < MAX_RECOVERIES:
                 recoveries += 1
-                log(f"DRAIN signal: whole-bar delta fell {whole_scores[-2]:.1f} -> {whole_scores[-1]:.1f} "
+                log(f"DRAIN signal: whole-bar delta fell from recent peak {recent_peak:.1f} -> {whole_scores[-1]:.1f} "
                     f"after {elapsed:.2f}s -- releasing for a beat, then pressing again "
                     f"(recovery {recoveries}/{MAX_RECOVERIES})")
                 page.mouse.up()
                 is_pressed = False
                 time.sleep(random.uniform(0.4, 0.8))
+                if trace_path:
+                    # Andrew's live Bloomberg correction: allow a visible partial fall
+                    # while released before pressing again. Preserve the original
+                    # baseline until that fall is measured, then reset for the new hold.
+                    release_score = whole_scores[-1]
+                    for pause_index in range(8):
+                        try:
+                            released_w, _ = _crop_scores(page, bbox, baseline_full, baseline_center)
+                            page.screenshot(path=str(trace_path / f"release-{recoveries}-{pause_index}.png"),
+                                            clip=bbox, timeout=3000)
+                            if released_w < release_score * 0.85:
+                                log(f"PARTIAL FALL while released: {release_score:.1f} -> {released_w:.1f}; re-pressing")
+                                break
+                        except Exception:
+                            break
+                        time.sleep(poll_interval)
+                    else:
+                        log("release pause bounded out without a measured partial fall; re-pressing for next observation")
                 try:
                     baseline_png = page.screenshot(clip=bbox, timeout=3000)
                     baseline_full = list(Image.open(io.BytesIO(baseline_png)).convert("L").resize((32, 32)).getdata())
@@ -141,7 +172,7 @@ def press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=8.0, poll_interval
                 is_pressed = True
                 whole_scores, center_scores = [], []  # reset series against the fresh baseline
                 continue
-            if is_pressed and len(whole_scores) >= 3 and whole_scores[-1] <= whole_scores[-2] and whole_scores[-2] >= whole_scores[-3]:
+            if release_on_pixel_peak and is_pressed and len(whole_scores) >= 3 and whole_scores[-1] <= whole_scores[-2] and whole_scores[-2] >= whole_scores[-3]:
                 log(f"fallback signal: whole-bar delta peaked at {whole_scores[-2]:.1f} after {elapsed:.2f}s "
                     f"(no checkmark spike seen) -- releasing")
                 break

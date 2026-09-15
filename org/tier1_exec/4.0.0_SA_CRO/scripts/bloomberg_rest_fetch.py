@@ -58,8 +58,9 @@ def _secret(name):
     return boto3.client("secretsmanager", region_name="us-east-1").get_secret_value(SecretId=name)["SecretString"]
 
 
-def build_session():
-    bundle = json.loads(_secret(SESSION_SECRET_ID))
+def build_session(*, bundle=None):
+    if bundle is None:
+        bundle = json.loads(_secret(SESSION_SECRET_ID))
     s = creq.Session(impersonate="chrome", timeout=30, verify=False)
     for c in bundle["all_cookies"]:
         s.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))

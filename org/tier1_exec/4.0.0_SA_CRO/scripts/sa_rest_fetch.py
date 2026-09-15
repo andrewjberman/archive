@@ -71,11 +71,12 @@ def _secret(name):
     )
 
 
-def build_session(use_proxy=True):
+def build_session(use_proxy=True, *, bundle=None):
     """A curl_cffi session carrying the parked jar, Chrome TLS impersonation, and the proxy egress."""
     from curl_cffi import requests as cr
 
-    bundle = json.loads(_secret(SESSION_SECRET_ID))
+    if bundle is None:
+        bundle = json.loads(_secret(SESSION_SECRET_ID))
     cookies = bundle["all_cookies"]
     names = {c["name"] for c in cookies}
     if IDENTITY_COOKIE not in names:
@@ -151,6 +152,17 @@ def symbol(s, ticker):
         "sa_id": d.get("id"),
         "attributes": d.get("attributes") or {},
     }
+
+
+def news(s, ticker, limit=20):
+    """Per-symbol news JSON; route measured in the later harvest consumer check."""
+    symbol_name = ticker.lower()
+    return get_json(
+        s,
+        f"/api/v3/symbols/{symbol_name}/news?filter[since]=0&filter[until]=0"
+        f"&id={symbol_name}&include=author,primaryTickers,sentiments&page[size]={limit}",
+        f"/symbol/{ticker.upper()}/news",
+    )
 
 
 def report(s, ticker, sa_id=None):

@@ -271,7 +271,12 @@ def press_and_hold(page, x, y, hold_s):
 
 
 def press_and_hold_adaptive(page, x, y, bbox, max_hold_s=8.0, poll_interval=0.15):
-    _pahl_press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=max_hold_s, poll_interval=poll_interval)
+    trace = "--trace-hold" in A
+    trace_dir = os.path.join(S, "hold-trace", str(time.time_ns())) if trace else None
+    _pahl_press_and_hold_adaptive(page, x, y, bbox, log,
+                                 max_hold_s=12.0 if trace else max_hold_s,
+                                 poll_interval=poll_interval, trace_dir=trace_dir,
+                                 release_on_pixel_peak=not trace)
 
 
 def _locate_botwall(ctx, page):
