@@ -1,60 +1,45 @@
-# RESULT -- LGIC_ENFORCE.TO-EN-p-1 (FWD-6 on a practice copy)
+# RESULT -- LGIC_ENFORCE.TO-EN-p-1 (FWD-6 on a practice copy) -- RE-RUN
 
-**Worker:** `0.9.0_WK_LGIC_ENFORCE~2` | **Slot branch:** `wk-lgic-enforce-1-2-p1`, cut from `CLOUD` @39aae459ed | **Scratch branch:**
-`prac-lgic-enforce-p1` (never pushed) | **Record:** `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/EXERCISE_FWD6.md` @89664b0829
+**Worker:** `0.9.0_WK_LGIC_ENFORCE~2` | **Slot branch:** `wk-lgic-enforce-1-2-p1r`, cut from `CLOUD` @9a05002d39 | **Scratch
+branch:** `prac-lgic-enforce-p1` @6640c8153d (never pushed, not touched by this run) | **Record:**
+`org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/EXERCISE_FWD6.md` @89664b0829
 
-**Verdict: THE ORDER STAYS OPEN.** P1-AC2, P1-AC3 and P1-AC4 PASS by output. P1-AC1 is FAIL by output, because its
-instrument cannot evaluate the rule (row `LGIC_ENFORCE-W2-S7`, BLOCKING, ARMED, disarm owner `2.0.0_SA_COO~G`). No
-`complete` flip.
+**Verdict: all four criteria PASS by output.** P1-AC1, P1-AC2, P1-AC3 and P1-AC4 each print their expected verdict with
+rc=0. The order flips to `complete`.
 
-## 1. The bar
+## 1. What this run is
 
-- `git rev-parse --abbrev-ref HEAD` read `wk-lgic-enforce-1-2-p1` at 39aae459ed, and `TREE-OK` printed. Every path the order
-  names was present: CARRIER_CENSUS.md, check_en.py, `.tools/naming-gate.py`, `lib/opal_naming.py`, and the five registry
-  files.
+This is a re-run. The cell's work was done by the prior slot-2 run on `wk-lgic-enforce-1-2-p1` (record @89664b0829, proof
+and result @0bbb96676c) and merged at the drain @38691b5c74. That run read P1-AC1 as FAIL-NOT-EVALUABLE because
+`check_en.py p1-surface` stopped on a carrier whose grade RAISES (row `LGIC_ENFORCE-W2-S7`). The issuer fixed the checker
+@c30637c49c (issuer row `LGIC_ENFORCE-S12`). This run did not redo the exercise. It made no practice copy, did not touch
+the scratch branch, and wrote no new surprise rows. It re-ran the four criteria and re-recorded them.
 
-## 2. Premises re-grounded
+## 2. The bar
 
-- **EN-g-1 and EN-r-1 are merged at base.** `.tools/naming-gate.py` and `infra/logic/registry/remediations.json` exist at
-  39aae459ed. The registry validates at base: `VALIDATE: OK 16 system row(s), 9 scope row(s), 9 warning(s) at
-  registry@50e4fabd1cb6a150`.
-- **The rule's surface.** Sorted by (path, line), there are 12,953 carriers. Carriers 1-22 are 18 RaiseDefect and 4
-  CONFORMANT. Carrier 23 is `.claude/skills/mdpf-refresh/mdpf_refresh.py:292`, token
-  `platinum/mdpf/inflection/aggregate-aua-timeseries.json`, OUT-OF-PATTERN. The file is tracked and not ignored.
-- **The premise that failed.** The order implies a row has to be planted before the touching diff is refused. At base,
-  MDPF_CANON (status `active`) already owns the key through `s3-prefix platinum/mdpf/`, and the pre-plant control refuses
-  (row `LGIC_ENFORCE-W2-S8`).
-- **The instrument.** `check_en.py p1-surface` raises on carrier 1 before it reaches carrier 23 (row `LGIC_ENFORCE-W2-S7`).
-  Fixed inputs are read-only, so the worker did not touch it.
+- `git rev-parse --abbrev-ref HEAD` read `wk-lgic-enforce-1-2-p1r`, HEAD 9a05002d39, and `TREE-OK` printed.
+- **Premises re-grounded at base:**
+  - 89664b0829 (EXERCISE_FWD6.md and rows W2-S7..S9), 0bbb96676c, c30637c49c and 38691b5c74 are each ancestors of HEAD
+    (`git merge-base --is-ancestor`).
+  - EXERCISE_FWD6.md's last touching commit is 89664b0829.
+  - `check_en.py`'s last touching commit is c30637c49c.
+  - The plant commit 6640c8153d is NOT on HEAD. That is expected: it lives only on the scratch branch.
 
-## 3. What was done
+## 3. Verdicts (each run under `timeout 120`, from `<WS>` = `C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-1-2-p1r`)
 
-1. Created the practice copy: `git worktree add -b prac-lgic-enforce-p1 <WS>/../prac-lgic-enforce-p1 HEAD`.
-2. **Arm 0, the pre-plant control.** The touching edit's diff was refused, naming MDPF_CANON, rc=1.
-3. **Planted ONE row**, `PRAC_FWD6REM`, owning `s3-prefix opal-data-portal-v2 platinum/mdpf/inflection/`, placed FIRST in the
-   array so the limb names it. Committed as `plant` = `6640c8153d4367520e8c1ea52f000d2f74f3d6fd`, with every safe-commit
-   stage clean (`[naming-gate] NAMING-GATE: PASS 0 graded`). Post-plant, `validate` refuses the row (row
-   `LGIC_ENFORCE-W2-S9`).
-4. **Arm 1, touching.** A trailing comment on line 292, with the string kept. `NAMING-GATE: REFUSE 1 graded`, naming the
-   surface and `PRAC_FWD6REM`, rc=1. Discarded.
-5. **Arm 2, removing.** The literal was replaced by a `key()` call. `NAMING-GATE: PASS 0 graded`, rc=0. Discarded.
-6. `git worktree remove` on the clean practice copy (0 porcelain lines; rc=0; the directory is gone). The branch was left in
-   place at 6640c8153d.
-7. Wrote EXERCISE_FWD6.md and rows W2-S7..S9, committed as 89664b0829.
-
-## 4. Verdicts (each run under `timeout 120`, from `<WS>`)
-
-| criterion | subcommand | verdict line | rc |
+| criterion | subcommand | deciding output | rc |
 |---|---|---|---|
-| P1-AC1 | p1-surface | `VERDICT: FAIL-NOT-EVALUABLE` (after `RaiseDefect: K1: segment 1 '\\"' is neither a source nor a tier`) | 1 |
-| P1-AC2 | p1-refused | `VERDICT: PASS-REFUSED` | 0 |
-| P1-AC3 | p1-passed | `VERDICT: PASS-REMOVAL-PASSES` | 0 |
-| P1-AC4 | p1-branch | `VERDICT: PASS-EVIDENCE-ON-BRANCH` | 0 |
+| P1-AC1 | p1-surface | `RECORD: .claude/skills/mdpf-refresh/mdpf_refresh.py  BY RULE: .claude/skills/mdpf-refresh/mdpf_refresh.py  (carriers read: 23 of 12953, passed over on a RAISE: 18)` / `VERDICT: PASS-SURFACE-BY-RULE` | 0 |
+| P1-AC2 | p1-refused | `NAMING REFUSE .claude/skills/mdpf-refresh/mdpf_refresh.py:292 ... the live remediation PRAC_FWD6REM` / `VERDICT: PASS-REFUSED` | 0 |
+| P1-AC3 | p1-passed | `NAMING-GATE: PASS 0 graded` / `VERDICT: PASS-REMOVAL-PASSES` | 0 |
+| P1-AC4 | p1-branch | `BRANCH: prac-lgic-enforce-p1  PLANTED-ROW COMMIT 6640c8153d4367520e8c1ea52f000d2f74f3d6fd ON IT: True` / `VERDICT: PASS-EVIDENCE-ON-BRANCH` | 0 |
 
-## 5. Limits
+## 4. Limits
 
-- **Arm 2 grades 0 strings.** The replacement sits inside `key()`, which is a permitted context. The pass means the string
-  left the post-image. Arm 1 on the same line is the control that shows the line is graded.
-- **The planted row is fictitious**, so the registry at `plant` is REFUSED by `validate`. The limb does not validate, and it
-  honoured the row.
+- **Same instrument.** P1-AC2, AC3 and AC4 were re-run with the same checker the prior run used. That is repetition, not
+  corroboration. Only P1-AC1's reading changed, and it changed because the instrument changed @c30637c49c.
+- **Limits carried from the exercise:**
+  - Arm 2 grades 0 strings, because the replacement sits in a permitted `key()` context.
+  - The surface was already owned by MDPF_CANON before the plant (row W2-S8).
+  - `validate` refuses the fictitious row (row W2-S9).
 - **Nothing live moved.** No AWS read or write, and no Terraform.
