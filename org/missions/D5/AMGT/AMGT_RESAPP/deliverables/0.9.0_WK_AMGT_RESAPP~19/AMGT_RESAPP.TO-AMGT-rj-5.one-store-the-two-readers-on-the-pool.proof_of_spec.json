@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rj-5",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "73938cdae4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rj-5.one-store-the-two-readers-on-the-pool.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1170b4da69"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~19",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/coverage/pool_reader.py",
+      "kind": "script",
+      "commit_or_etag": "fda8d96c0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "INTERFACE P-1, the ONE shared pool adapter: list_links / read_body / coverage_items / window_read / daily_counts, four failure states as four counters and four exception classes, bodies validated by the harvester's own catalog.validate. Library code; this order deploys nothing (rj-10 owns the deploy and the packaging seam -- the archive must carry this module, the two JSON schema files under lib/opal_data_harvest/ and jsonschema)."
+    },
+    {
+      "path_or_key": "lib/research/metrics/chatter_axis.py",
+      "kind": "script",
+      "commit_or_etag": "fda8d96c0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The producer repointed onto the pool through P-1 over the union universe, and the generation write (immutable partition + _CURRENT pointer + _FAILED marker) replacing the upsert writer. The deployed Lambda wrapper's four summary keys (as_of_date, tickers_considered, rows_ranked, rows_written) and its universe_path parameter are unchanged, so the existing entry point still runs; the zip itself is rj-10's."
+    },
+    {
+      "path_or_key": "lib/research/coverage/tests/test_pool_reader.py",
+      "kind": "test",
+      "commit_or_etag": "fda8d96c0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "25 unittest arms against a local fake of the two prefixes; no network, no credentials."
+    },
+    {
+      "path_or_key": "lib/research/metrics/tests/test_chatter_axis.py",
+      "kind": "test",
+      "commit_or_etag": "fda8d96c0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "16 unittest arms for the generation writer, including the replaced writer reproduced as the NEGATIVE CONTROL (the CRO's measured AAA #1 / BBB #1 / CCC #2), plus the pre-existing pytest arms updated to the generation partition."
+    },
+    {
+      "path_or_key": "lib/research/metrics/tests/test_producer_axis_registry.py",
+      "kind": "test",
+      "commit_or_etag": "fda8d96c0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The chatter arm updated to the generation write signature and the generation partition; it passes. Its three PRICE arms fail in this worktree for absence, not defect (row W19-S10)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/difference_control.py",
+      "kind": "script",
+      "commit_or_etag": "fda8d96c0a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "DELIVER item 4: the pool and the retired table printed beside each other for four names."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/rj5_dry_run_20260915.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC3 dry-run output kept beside the instance, as the order's s.6 requires."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/rj5_difference_control_20260915.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC5 difference-control output kept beside the instance, as the order's s.6 requires."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the association-key prefixes (at least three, carrying BA, COST and HD in the harvester's form, mapped by crosswalk.aliases) and a publications/v1 object count at least 80. Zero prefixes is a STOP and a BLOCKING row",
+      "method": "live_read",
+      "invocation": ".tools/aws s3api list-objects-v2 --bucket opal-data-harvest --prefix publication-links/v1/ --delimiter / --query \"CommonPrefixes[].Prefix\" --output text | tr \"\\t\" \"\\n\" | cat; .tools/aws s3api list-objects-v2 --bucket opal-data-harvest --prefix publications/v1/ --query \"length(Contents)\" --output text",
+      "output_evidence": "publication-links/v1/BA/\npublication-links/v1/COST/\npublication-links/v1/HD/\n7",
+      "denominator": "association-key prefixes 3 of 3 named (BA, COST, HD -- the harvester's own form, mapped by crosswalk.aliases to BA_US_Equity/COST_US_Equity/HD_US_Equity); publications/v1 objects 7, against the criterion's bar of 80. Corroborated on a SECOND instrument (client-side-paginated boto3 census of the whole bucket, 2026-09-15 09:0xZ): 73 objects total, publication-links/v1 7 and publications/v1 7 -- the s3api --query length() number is not a per-page artefact here.",
+      "status": "FAIL",
+      "expect": "publication-links/v1/BA/[\\s\\S]*publication-links/v1/COST/[\\s\\S]*publication-links/v1/HD/[\\s\\S]*\\n(?:[89]\\d|\\d{3,})\\s*$",
+      "status_reason": "The prefix half is MET (three prefixes, carrying BA, COST and HD). The count half is REFUSED BY THE WORLD, not by the instrument: the pool holds 7 publication bodies where the criterion names at least 80. Zero prefixes would have been the STOP the criterion defines; three is not that case, so the cell was built and every other criterion run. Row AMGT_RESAPP-Z-W19-S8. Not repaired and not widened: nothing was uploaded to make this bar pass."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "for BA_US_Equity, COST_US_Equity and HD_US_Equity: store_item_count at least 20 each, items at least 1 each, the first item carrying title, a canonical https url, publisher, published_at and article_key, states all 0 or a listed count, key_forms naming the harvester's form(s); for ZZZ_NOPE_US_Equity: store_item_count 0, items 0, no exception, states 0. An item lacking url or published_at, an item counted twice across aliases, or a control with items, is NOT met",
+      "method": "live_read",
+      "invocation": "python -c \"from lib.research.coverage import pool_reader as p; import json; [print(k, json.dumps({x:y for x,y in p.coverage_items(k, 30).items() if x!='items'}), 'items', len(p.coverage_items(k,30)['items']), 'first', json.dumps((p.coverage_items(k,30)['items'] or [{}])[0])[:170]) for k in ('BA_US_Equity','COST_US_Equity','HD_US_Equity','ZZZ_NOPE_US_Equity')]\"",
+      "output_evidence": "BA_US_Equity {\"identity\": \"BA_US_Equity\", \"counts\": {\"2026-09-03\": 1}, \"store_item_count\": 2, \"items_in_window\": 1, \"bodies_read\": 2, \"duplicate_links\": 0, \"states\": {\"missing_body\": 0, \"malformed\": 0, \"denied\": 0, \"partial\": 0}, \"complete\": true, \"window\": {\"start_date\": \"2026-08-17\", \"end_date\": \"2026-09-15\", \"days\": 30}, \"key_forms\": [\"BA\"], \"key_forms_probed\": [\"BA\", \"BA_US\", \"BA_US_Equity\"], \"crosswalk_status\": \"MEASURED\", \"read_at\": \"2026-09-15T09:20:41Z\", \"store\": \"s3://opal-data-harvest\", \"days\": 30} items 1 first {\"publisher\": \"wsj\", \"published_at\": \"2026-09-03T09:30:00Z\", \"article_key\": \"wsj:096c2a41-2655-4267-b089-7dc3b710dc56\", \"url\": \"https://www.wsj.com/business/boeings-8-4-b\nCOST_US_Equity {\"identity\": \"COST_US_Equity\", \"counts\": {\"2026-08-21\": 1}, \"store_item_count\": 2, \"items_in_window\": 1, \"bodies_read\": 2, \"duplicate_links\": 0, \"states\": {\"missing_body\": 0, \"malformed\": 0, \"denied\": 0, \"partial\": 0}, \"complete\": true, \"window\": {\"start_date\": \"2026-08-17\", \"end_date\": \"2026-09-15\", \"days\": 30}, \"key_forms\": [\"COST\"], \"key_forms_probed\": [\"COST\", \"COST_US\", \"COST_US_Equity\"], \"crosswalk_status\": \"MEASURED\", \"read_at\": \"2026-09-15T09:20:42Z\", \"store\": \"s3://opal-data-harvest\", \"days\": 30} items 1 first {\"publisher\": \"barrons\", \"published_at\": \"2026-08-21T23:10:00Z\", \"article_key\": \"barrons:SB52802093573997763609304593399022711014036\", \"url\": \"https://www.barrons.com/art\nHD_US_Equity {\"identity\": \"HD_US_Equity\", \"counts\": {\"2026-08-26\": 1, \"2026-09-01\": 1, \"2026-08-22\": 1}, \"store_item_count\": 3, \"items_in_window\": 3, \"bodies_read\": 3, \"duplicate_links\": 0, \"states\": {\"missing_body\": 0, \"malformed\": 0, \"denied\": 0, \"partial\": 0}, \"complete\": true, \"window\": {\"start_date\": \"2026-08-17\", \"end_date\": \"2026-09-15\", \"days\": 30}, \"key_forms\": [\"HD\"], \"key_forms_probed\": [\"HD\", \"HD_US\", \"HD_US_Equity\"], \"crosswalk_status\": \"MEASURED\", \"read_at\": \"2026-09-15T09:20:43Z\", \"store\": \"s3://opal-data-harvest\", \"days\": 30} items 3 first {\"publisher\": \"bbg\", \"published_at\": \"2026-09-01T11:00:00.002Z\", \"article_key\": \"bbg:TKNDM8T96OSI00\", \"url\": \"https://www.bloomberg.com/news/articles/2026-09-01/youtube-i\nZZZ_NOPE_US_Equity {\"identity\": \"ZZZ_NOPE_US_Equity\", \"counts\": {}, \"store_item_count\": 0, \"items_in_window\": 0, \"bodies_read\": 0, \"duplicate_links\": 0, \"states\": {\"missing_body\": 0, \"malformed\": 0, \"denied\": 0, \"partial\": 0}, \"complete\": true, \"window\": {\"start_date\": \"2026-08-17\", \"end_date\": \"2026-09-15\", \"days\": 30}, \"key_forms\": [], \"key_forms_probed\": [\"ZZZ_NOPE_US_Equity\"], \"crosswalk_status\": \"IDENTITY-ONLY\", \"read_at\": \"2026-09-15T09:20:44Z\", \"store\": \"s3://opal-data-harvest\", \"days\": 30} items 0 first {}",
+      "denominator": "4 of 4 identities read (3 commissioned + 1 control). store_item_count BA 2, COST 2, HD 3 against the bar of 20 each; items in the 30-day window BA 1 of 2, COST 1 of 2, HD 3 of 3 (the 2 excluded are published 2026-07-18 and 2026-07-26, genuinely outside the window ending 2026-09-15); four states 0 of 4 nonzero on every name; ZZZ_NOPE_US_Equity 0 store items, 0 items, no exception, crosswalk_status IDENTITY-ONLY. The five contracted fields need 259-296 characters and the invocation truncates the item at 170, so `title` is outside the recorded bytes (row W19-S11); it is present on every item and asserted by PoolReaderFeedTest.",
+      "status": "FAIL",
+      "expect": "\"store_item_count\": (?:[2-9]\\d|\\d{3,})",
+      "status_reason": "Every behavioural clause is MET: items >= 1 for each commissioned name, the first item carrying publisher, published_at, article_key and a canonical https url (title present but cut by the invocation's own 170-character truncation, row W19-S11), no article counted twice across the three probed alias forms (duplicate_links 0), key_forms naming the harvester's form, all states 0, and the control returning 0 with no exception. The store_item_count bar of 20 is REFUSED BY THE WORLD: the pool holds 2, 2 and 3 associations for these names. Row AMGT_RESAPP-Z-W19-S8."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "denominator lines (names read N from the universe object, names with links at least 3, bodies read at least 80, per-state counts), per-name counts with BA, COST and HD each at least 1 within the 30-day window, a top-10 list of rows each carrying security_key beside ticker, and the POINTER that would be written: generation_id, run_id, coverage_vintage, payload_hash (a 64-hex sha256 over the sorted rows), row_count equal to the rows listed, state COMPLETE, and its ATTRIBUTE NAMES printed with rank_sort ABSENT among them; NO DynamoDB table read in the output. A row without security_key, or a pointer without payload_hash, is NOT met",
+      "method": "live_read",
+      "invocation": "python -m lib.research.metrics.chatter_axis --as-of 2026-09-15 --dry-run 2>&1 | tail -24",
+      "output_evidence": "OK: chatter axis [DRY-RUN] as_of=2026-09-15 window=2026-08-17..2026-09-15 run_id=R20260915T092107Z tickers_considered=33 rows_ranked=10 rows_written=0\n  axis=TRENDING_CHATTER candidates=33 rows_ranked=10 rows_written=0 excluded=0 state=COMPLETE\n  axis=BREAKOUT_CHATTER candidates=0 rows_ranked=0 rows_written=0 excluded=33 state=EMPTY\nDENOMINATORS names_read=256 names_considered=33 names_with_links=3 links_listed=7 bodies_read=7 articles_in_window=5 dynamodb_reads=0 source=pool:universe/v1/2026-09-15.json\nSTATES missing_body=0 malformed=0 denied=0 partial=0 incomplete_names=0\nPER-NAME WINDOW COUNTS (2026-08-17..2026-09-15, names the store holds an article for): BA_US_Equity=1 COST_US_Equity=1 HD_US_Equity=3\nGENERATION TRENDING_CHATTER#2026-09-15#20260915T092114Z-adf383740a9e rows=10 state=COMPLETE\n  rank=00001 security_key=2317_TT_Equity ticker=2317 TT identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=0\n  rank=00002 security_key=9433_JP_Equity ticker=9433 JP identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=0\n  rank=00003 security_key=992_HK_Equity ticker=992 HK identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=0\n  rank=00004 security_key=ASML_NA_Equity ticker=ASML NA identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=0\n  rank=00005 security_key=BABA_US_Equity ticker=BABA US identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=0\n  rank=00006 security_key=BA_US_Equity ticker=BA US identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=1\n  rank=00007 security_key=BBSE3_BZ_Equity ticker=BBSE3 BZ identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=0\n  rank=00008 security_key=BP/_LN_Equity ticker=BP/ LN identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=0\n  rank=00009 security_key=COST_US_Equity ticker=COST US identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=1\n  rank=00010 security_key=ENEL_IM_Equity ticker=ENEL IM identity_status=MEASURED score=0.00 raw_chatter_count=0 window_total_count=0\nPOINTER axis_date=TRENDING_CHATTER#2026-09-15 ticker=_CURRENT generation_id=20260915T092114Z-adf383740a9e run_id=R20260915T092107Z coverage_vintage=pool:universe/v1/2026-09-15.json#as_of=2026-09-15 payload_hash=adf383740a9eeee910560739777082bdaa9986a311dd114c0076947b6cf90479 row_count=10 state=COMPLETE\nPOINTER ATTRIBUTE NAMES as_of_date,axis,axis_date,coverage_vintage,generation_id,payload_hash,record_type,row_count,run_id,state,ticker,written_at rank_sort=ABSENT\nGENERATION BREAKOUT_CHATTER#2026-09-15#20260915T092114Z-4f53cda18c2b rows=0 state=EMPTY\nPOINTER axis_date=BREAKOUT_CHATTER#2026-09-15 ticker=_CURRENT generation_id=20260915T092114Z-4f53cda18c2b run_id=R20260915T092107Z coverage_vintage=pool:universe/v1/2026-09-15.json#as_of=2026-09-15 payload_hash=4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945 row_count=0 state=EMPTY\nPOINTER ATTRIBUTE NAMES as_of_date,axis,axis_date,coverage_vintage,generation_id,payload_hash,record_type,row_count,run_id,state,ticker,written_at rank_sort=ABSENT\nNO LIVE WRITE: --dry-run; rows_written=0 pointers_written=0 -- the live publish is AMGT-rj-10's QA invoke",
+      "denominator": "names_read 256 of 256 from the pool's union universe object (universe/v1/2026-09-15.json), names_considered 33 (the names carrying a canonical security_key; 223 carry none and are counted, never guessed), names_with_links 3, links_listed 7, bodies_read 7 against the bar of 80, articles_in_window 5, four states all 0, dynamodb_reads 0. Top-10 rows 10 of 10 carry security_key beside ticker; pointer row_count 10 equals the rows listed; payload_hash 64 hex.",
+      "status": "FAIL",
+      "expect": "bodies_read=(?:[89]\\d|\\d{3,})",
+      "status_reason": "Every clause except the bodies-read count is MET and visible in the recorded output: the denominator lines, names_with_links 3 (>= 3), per-name window counts BA=1 COST=1 HD=3 (each >= 1), a top-10 list whose every row carries security_key beside ticker, and the pointer that WOULD be written with generation_id, run_id, coverage_vintage, payload_hash (64-hex sha256 over the sorted ranking payload), row_count 10, state COMPLETE and its attribute names printed with rank_sort ABSENT; no DynamoDB read appears in the output (dynamodb_reads=0). bodies_read is 7 because the store holds 7. Row AMGT_RESAPP-Z-W19-S8."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "producer-table-knob 0, producer-gsi 0, producer-pool-reader at least 1, overwrite-upsert 0 (the upsert-and-never-clear writer is gone), pointer-item at least 1, failed-marker at least 1, states at least 3; pointer-no-rank_sort-test at least 1 (the writer test asserts the pointer carries no rank_sort); adapter-diff-lines 0 (this cell did not touch scoped_amgt.py -- chain A owns it). A surviving overwrite_by_pkeys, a pointer with rank_sort, or any adapter diff, is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import io; s=io.open('lib/research/metrics/chatter_axis.py',encoding='utf-8').read(); print('producer-table-knob', s.count('HARVEST_ARTICLES_TABLE'), 'producer-gsi', s.count('ticker_date_index'), 'producer-pool-reader', s.count('pool_reader'), 'overwrite-upsert', s.count('overwrite_by_pkeys'), 'pointer-item', s.count('_CURRENT'), 'failed-marker', s.count('_FAILED'), 'states', s.count('COMPLETE') + s.count('EMPTY') + s.count('FAILED')); t=io.open('lib/research/metrics/tests/test_chatter_axis.py',encoding='utf-8').read(); print('pointer-no-rank_sort-test', t.count('rank_sort'))\"; git diff --stat SITEZ...HEAD -- lib/research/api/scoped_amgt.py | cat; echo \"adapter-diff-lines: $(git diff SITEZ...HEAD -- lib/research/api/scoped_amgt.py | wc -l)\"",
+      "output_evidence": "producer-table-knob 0 producer-gsi 0 producer-pool-reader 8 overwrite-upsert 0 pointer-item 3 failed-marker 9 states 25\npointer-no-rank_sort-test 15\nadapter-diff-lines: 0",
+      "denominator": "8 counted tokens over 2 files plus 1 diff. chatter_axis.py: HARVEST_ARTICLES_TABLE 0 (was 1), ticker_date_index 0 (was 2), pool_reader 8, overwrite_by_pkeys 0 (was 1), _CURRENT 3, _FAILED 9, COMPLETE+EMPTY+FAILED 25. test_chatter_axis.py: rank_sort 15. scoped_amgt.py diff SITEZ...HEAD: 0 lines, and git diff --stat printed nothing at all.",
+      "status": "PASS",
+      "expect": "producer-table-knob 0 producer-gsi 0 producer-pool-reader [1-9]\\d* overwrite-upsert 0 pointer-item [1-9]\\d* failed-marker [1-9]\\d* states (?:[3-9]|\\d{2,})[\\s\\S]*pointer-no-rank_sort-test [1-9]\\d*[\\s\\S]*adapter-diff-lines: 0"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "four lines (BA, COST, HD, the control), each printing pool-links N, pool-bodies-in-window M, per-state counts and table-items T (read ONCE from opal-harvest-articles via the old index, for the record), the three commissioned names showing N at least 20 and T 0 (nothing in the repo writes the table), the control N 0. The two stores differ; equal numbers would be the surprise",
+      "method": "live_read",
+      "invocation": "python \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/difference_control.py\" 2>&1 | tail -8",
+      "output_evidence": "DIFFERENCE CONTROL pool=s3://opal-data-harvest vs table=opal-harvest-articles (RETIRED as a source) window=2026-08-17..2026-09-15\nBA_US_Equity   ticker=BA US    pool-links 2   pool-bodies-in-window 1   states missing_body=0 malformed=0 denied=0 partial=0 key_forms=BA table-items 0 (pages=1)\nCOST_US_Equity ticker=COST US  pool-links 2   pool-bodies-in-window 1   states missing_body=0 malformed=0 denied=0 partial=0 key_forms=COST table-items 0 (pages=1)\nHD_US_Equity   ticker=HD US    pool-links 3   pool-bodies-in-window 3   states missing_body=0 malformed=0 denied=0 partial=0 key_forms=HD table-items 0 (pages=1)\nSAP_GY_Equity  ticker=SAP GY   pool-links 0   pool-bodies-in-window 0   states missing_body=0 malformed=0 denied=0 partial=0 key_forms=- table-items 0 (pages=1)\nTOTALS pool-links 7 pool-bodies-in-window 5 table-items 0 -- the two stores DIFFER (equal numbers would be the surprise); denominator 4 of 4 names read",
+      "denominator": "4 of 4 names (BA, COST, HD and the control SAP_GY_Equity, a round-11 QA name the pool holds no association for). pool-links 2 / 2 / 3 / 0 against the bar of 20 for the three commissioned names; pool-bodies-in-window 1 / 1 / 3 / 0; every state 0 on every name; table-items 0 / 0 / 0 / 0 from opal-harvest-articles via ticker_date_index, ONE query per ticker paginated to exhaustion (pages=1 each, printed) -- the table's own describe-table ItemCount is 0, so nothing in the estate writes it.",
+      "status": "FAIL",
+      "expect": "BA_US_Equity[^\\n]*pool-links (?:[2-9]\\d|\\d{3,})",
+      "status_reason": "The shape of the criterion is MET: four lines, each printing pool-links, pool-bodies-in-window, the four per-state counts and table-items; the control reads 0 links; T is 0 on all four names; and the two stores DIFFER, which is what the criterion calls for (equal numbers would be the surprise). The N >= 20 bar is REFUSED BY THE WORLD: the pool holds 2, 2 and 3 associations for these names. Row AMGT_RESAPP-Z-W19-S8."
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "both suites end OK with 0 failures and 0 errors; defect-reproduced at least 1 (the old write's surviving rows are the negative control), three-states at least 3, alias-once at least 1. A writer test without the empty and failed arms is NOT met",
+      "method": "test_suite",
+      "invocation": "python -m unittest discover -s lib/research/coverage/tests -p \"test_*.py\" -q 2>&1 | tail -3; python -m unittest lib.research.metrics.tests.test_chatter_axis -q 2>&1 | tail -3; python -c \"import io; t=io.open('lib/research/metrics/tests/test_chatter_axis.py',encoding='utf-8').read(); print('defect-reproduced', t.count('AAA') + t.count('overwrite_by_pkeys'), 'three-states', t.count('EMPTY') + t.count('FAILED') + t.count('COMPLETE'), 'alias-once', t.count('alias'))\"",
+      "output_evidence": "Ran 25 tests in 0.077s\n\nOK\nRan 16 tests in 0.147s\n\nOK\ndefect-reproduced 41 three-states 17 alias-once 2",
+      "denominator": "25 of 25 adapter arms OK (0 failures, 0 errors) and 16 of 16 writer arms OK (0 failures, 0 errors); 41 in the two suites. defect-reproduced 41, three-states 17, alias-once 2. BOTH suites are unittest.TestCase by construction -- a module of bare pytest functions is collected by `python -m unittest` as ZERO tests and reported OK, so a green here would otherwise measure nothing. The writer's empty and failed arms are present and named: test_a_successful_empty_product_clears_the_membership_through_the_pointer and test_a_failed_run_leaves_the_prior_generation_current_and_says_so.",
+      "status": "PASS",
+      "expect": "Ran \\d+ tests[\\s\\S]*\\nOK[\\s\\S]*Ran \\d+ tests[\\s\\S]*\\nOK[\\s\\S]*defect-reproduced [1-9]\\d* three-states (?:[3-9]|\\d{2,}) alias-once [1-9]\\d*"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "commits by this serial touching the two paths; nonascii 0; put_object-sites 0 and delete-sites 0 in the reader (it reads only). A write or delete in the reader is NOT met",
+      "method": "command",
+      "invocation": "git log --format=\"%h %an %s\" -4 -- lib/research/coverage/ lib/research/metrics/ | cut -c1-140; python -c \"import io,glob; fs=glob.glob('lib/research/coverage/*.py'); print('files', len(fs), 'nonascii', sum(sum(1 for ch in io.open(f,encoding='utf-8').read() if ord(ch)>127) for f in fs), 'put_object-sites', sum(io.open(f,encoding='utf-8').read().count('put_object') for f in fs), 'delete-sites', sum(io.open(f,encoding='utf-8').read().count('delete_object') + io.open(f,encoding='utf-8').read().count('delete_item') for f in fs))\"",
+      "output_evidence": "fda8d96c0a 0.9.0_WK_AMGT_RESAPP~19 build(AMGT_RESAPP AMGT-rj-5, P-1 + G-1): ONE STORE -- the pool adapter, the producer on the pool, and the\n08b2c49923 0.9.0_WK_AMGT_RESAPP~11 feat(AMGT_RESAPP AMGT-rf-1): the cross AT THE PRODUCER -- both producers now write four crossed partition\n5f7a59c846 4.0.0_SA_CRO~Z feat(HARVEST ESTATE): CUTOVER the table names -- 4 sites now default to opal-harvest-*, after 42/42 rows verified \n30c48abd42 4.0.0_SA_CRO~Z refactor(HARVEST ESTATE): make both table names env-overridable at all 4 LIVE sites -- step 1 of the table rename,\nfiles 8 nonascii 0 put_object-sites 0 delete-sites 0",
+      "denominator": "4 of 4 most recent commits on the two paths listed; the newest, fda8d96c0a, is this serial's. 8 of 8 files under lib/research/coverage/*.py counted: nonascii 0, put_object-sites 0, delete-sites 0 (the count spans the 7 pre-existing modules as well as pool_reader.py -- the criterion's denominator is the directory, not this cell's file).",
+      "status": "PASS",
+      "expect": "0\\.9\\.0_WK_AMGT_RESAPP~19[\\s\\S]*files \\d+ nonascii 0 put_object-sites 0 delete-sites 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants, each aimed at a property this cell claims. (1) The ADAPTER's read-only property: PoolReaderReadOnlyTest counts S3/DynamoDB write call names in pool_reader.py's own source. (2) The POINTER's index invisibility: feed assert_pointer_is_index_invisible an item carrying rank_sort.",
+      "expected": "(1) the arm FAILS while the module names a write call anywhere, including in prose; (2) the guard RAISES on an item carrying rank_sort and the ranked rows still carry it.",
+      "observed": "MUTANT 1 FIRED-AS-EXPECTED AND CAUGHT A REAL DEFECT IN THIS CELL'S OWN WORK: the first run failed with 'AssertionError: 1 != 0 : reader carries put_object' because the module DOCSTRING spelled the call name while promising not to use it -- the same token AC7 counts, so the criterion would have read NOT MET on a sentence rather than a call. The sentence was rewritten to describe the property without naming the calls and the arm now passes. MUTANT 2 FIRED-AS-EXPECTED: test_an_item_carrying_rank_sort_is_refused raises ValueError, while test_the_ranked_rows_DO_carry_rank_sort proves the guard did not strip the index key from the rows themselves (a guard that removed rank_sort everywhere would pass the first arm and break the reader).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The dry run was executed twice (09:04Z and 09:21Z) and the payload_hash of each product compared. The hash is computed over the sorted ranking payload (rank, security_key, ticker, score, raw count) with the clocks and the generation/run ids EXCLUDED, which is what makes it answer 'is this the same ranking?' rather than 'was this the same run?'.",
+      "observed": "STABLE: TRENDING payload_hash adf383740a9eeee910560739777082bdaa9986a311dd114c0076947b6cf90479 and BREAKOUT 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945 on both runs, while run_id and generation_id timestamps differ (R20260915T090433Z vs R20260915T092107Z) -- the two are meant to differ and do. PayloadHashTest asserts the same property both ways: identical rankings hash equal, a changed winner set does not.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No live DynamoDB write, no deploy and no Terraform.",
+      "reason": "the cell's BOUND: the dry run is this order's proof and rj-10's QA invoke is the live one. The single DynamoDB act here is the difference control's ONE read per ticker through the old index, which the cell explicitly commissions."
+    },
+    {
+      "item": "lib/research/api/scoped_amgt.py is untouched (0 diff lines, AC4).",
+      "reason": "chain A owns it; the coverage route lands on P-1 in rj-9. Two chains never edit one module."
+    },
+    {
+      "item": "lib/opal_data_harvest/ and lib/research/identity/ were READ, never written.",
+      "reason": "the cell marks them READ-ONLY; the adapter calls catalog.validate and crosswalk.aliases rather than re-implementing either."
+    },
+    {
+      "item": "The harvest collection mechanism, its cadence and any backfill were not touched or requested.",
+      "reason": "the cell's BOUND: the harvest's collection mechanism and cadence are Andrew's. This is why the seven-article store was measured and refused (row W19-S8) rather than filled."
+    },
+    {
+      "item": "The worktree sparse cone was not widened to make three PRICE test arms pass.",
+      "reason": "the arms fail for absence, not defect (row W19-S10); a cone is a worktree setting and this cell was not asked to change it."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W19-S8: BLOCKING -- the order's four volume bars (publications >= 80, store_item_count >= 20 each, bodies read >= 80, N >= 20) are cut against a pool that holds SEVEN bodies and SEVEN associations, measured on two agreeing instruments; AC1, AC2, AC3 and AC5 are refused on their counts alone and the order stays OPEN.",
+    "AMGT_RESAPP-Z-W19-S9: OBSERVATION -- TO-AMGT-rj-1, issued to 0.9.0_WK_AMGT_RESAPP~18 and staged, carries THIS worker's deliverables folder inside its <paths> write grant; the artifacts it actually needs from there are reads, and a read needs no grant.",
+    "AMGT_RESAPP-Z-W19-S10: OBSERVATION -- three of ninety pytest arms under lib/research/metrics fail in this worktree because integrations/bloomberg/research/price_axis_pull.py is tracked at HEAD but outside the sparse cone; absence, not defect, in a file this cell just edited.",
+    "AMGT_RESAPP-Z-W19-S11: OBSERVATION -- AC2's expectation names five fields on the first item while its own invocation truncates that item at 170 characters and the five fields need 259-296; title is present on every item but cannot appear in the recorded bytes."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/SESSION_LOG_rj5.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate limb)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~19 <0.9.0_WK_AMGT_RESAPP~19@opal.agent>\" -F .scratch/msg1.txt -- lib/research/coverage/pool_reader.py lib/research/coverage/tests/test_pool_reader.py lib/research/metrics/chatter_axis.py lib/research/metrics/tests/test_chatter_axis.py lib/research/metrics/tests/test_producer_axis_registry.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/difference_control.py",
+      "result": "OK: pre-commit gate clean for 6 of 6 file(s); commit fda8d96c0a; msg-verify MATCH len=4312"
+    },
+    {
+      "tool": "ruff (py39, the gate's own target)",
+      "invocation": "python -m ruff check --target-version py39 --output-format concise <the six changed files>",
+      "result": "All checks passed! (first run found 11: five unused typing imports in pool_reader.py and six E402s in the metrics test; both fixed at the source rather than ignored)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (surprise-row-gate limb)",
+      "invocation": "bash .tools/safe-commit.sh ... -- org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 4 new row(s) of 189 total checked (185 pre-existing, NOT re-graded); commit 5f8acb7f47"
+    },
+    {
+      "tool": "pytest (control beside the two graded unittest suites)",
+      "invocation": "python -m pytest lib/research/metrics lib/research/coverage -q",
+      "result": "3 failed, 87 passed -- the three are the sparse-cone absence of price_axis_pull (row W19-S10); every chatter, coverage and adapter arm passes"
+    }
+  ]
+}
