@@ -13,6 +13,7 @@ subcommand and asserts that NONE prints PASS on a tree where the cells have not 
 negative arm, run before issuance). Stdlib only. No non-ASCII.
 """
 import fnmatch
+import glob
 import hashlib
 import importlib.machinery
 import importlib.util
@@ -650,9 +651,19 @@ def f1_ledger_open():
     say("PASS-LEDGER-OPEN" if ok else "FAIL-LEDGER", "SENTINEL: %s  STATUS: %s  LEGS: %s  L1 PROOF COMMIT EXISTS: %s" % (SENTINEL, (s or {}).get("status"), sorted(legs), exists))
 
 
+def _entry_path():
+    """The ledger entry's path. The sentinel names it while the deploy is open; deploy_ledger.py close deletes the
+    sentinel, so a closed deploy is found by its slug under change_management/ (row LGIC_ENFORCE-W1-S18). More than one
+    match is no answer: the path stays empty and every reader of it fails."""
+    p = (_sentinel() or {}).get("entry_path")
+    if p:
+        return p
+    hits = sorted(glob.glob("org/critical_paths/change_management/*_%s_deploy_completion.md" % LEDGER_SLUG))
+    return hits[0].replace("\\", "/") if len(hits) == 1 else ""
+
+
 def _entry_text():
-    s = _sentinel() or {}
-    p = s.get("entry_path")
+    p = _entry_path()
     return read(p) if p and os.path.isfile(p) else ""
 
 
@@ -660,8 +671,7 @@ def _entry_history_text():
     """Every committed version of the ledger entry, joined. deploy_ledger.py rebuilds the entry from its sentinel on each
     close-leg, so SIGNOFF lines written before the apply are gone from the file after L2 closes (row
     LGIC_ENFORCE-W1-S17); the criterion's question -- did both seats sign before the apply -- is read from the history."""
-    s = _sentinel() or {}
-    p = s.get("entry_path")
+    p = _entry_path()
     if not p:
         return ""
     rc, out = git("log", "--format=%H", "--", p)
@@ -673,11 +683,18 @@ def _entry_history_text():
     return "\n".join(texts)
 
 
+def _l2_closed_at():
+    """L2's close time: from the sentinel while it exists, else from the entry's own log line, which the close keeps."""
+    l2 = {leg.get("id"): leg for leg in (_sentinel() or {}).get("legs", [])}.get("L2", {})
+    if l2.get("closed_at"):
+        return str(l2["closed_at"])
+    m = re.search(r"^- (\d{8}T\d{6}Z) LEG L2 closed:", _entry_text(), re.M)
+    return m.group(1) if m else ""
+
+
 def f2_signoff():
     t = _entry_text() + "\n" + _entry_history_text()
-    s = _sentinel() or {}
-    l2 = {leg.get("id"): leg for leg in s.get("legs", [])}.get("L2", {})
-    applied = str(l2.get("closed_at") or "")
+    applied = _l2_closed_at()
     signs = dict(re.findall(r"^SIGNOFF (1\.0\.0_SA_CTO|2\.0\.0_SA_COO~G) (\d{8}T\d{6}Z)", t, re.M))
     ok = len(signs) == 2 and applied and all(ts < applied for ts in signs.values())
     say("PASS-SIGNED-BEFORE-APPLY" if ok else "FAIL-SIGNOFF", "SIGNOFF LINES: %s  APPLY (L2 closed_at): %s" % (signs, applied or "none"))
@@ -735,9 +752,14 @@ def f2_removed():
 
 
 def f2_closed():
+    """Closed = the sentinel is gone (or reads CLOSED) AND the entry carries both the tool's CLOSED status and the order's
+    appended CLOSED line. The entry is found by slug once the close has deleted the sentinel (row LGIC_ENFORCE-W1-S18)."""
     s = _sentinel()
-    ok = (s is None or s.get("status") == "CLOSED") and "CLOSED" in _entry_text().upper()
-    say("PASS-LEDGER-CLOSED" if ok else "FAIL-LEDGER-OPEN", "SENTINEL: %s" % ("absent" if s is None else s.get("status")))
+    p = _entry_path()
+    t = _entry_text()
+    entry_closed = bool(re.search(r"^\*\*Status:\*\* CLOSED\b", t, re.M)) and bool(re.search(r"^CLOSED \d{8}T\d{6}Z", t, re.M))
+    ok = (s is None or s.get("status") == "CLOSED") and entry_closed
+    say("PASS-LEDGER-CLOSED" if ok else "FAIL-LEDGER-OPEN", "SENTINEL: %s  ENTRY: %s  ENTRY CLOSED: %s" % ("absent" if s is None else s.get("status"), p or "not found", entry_closed))
 
 
 # ------------------------------------------------------------------ EN-v-1..6
