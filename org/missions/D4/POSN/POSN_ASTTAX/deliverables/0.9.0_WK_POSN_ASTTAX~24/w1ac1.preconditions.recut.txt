@@ -1,0 +1,63 @@
+=== W1-AC1 (RE-CUT INVOCATION) -- run once at 2026-09-15T05:47Z in /c/tmp/wk-posn-6-24 @3f089f2928 ===
+
+WHY A SECOND READING: the order's RE-CUT added the head-object limb on the newest bbg
+partition's characteristics.parquet that W1-AC1's <expect> had always named. In the first
+run that limb was read in the SAME session but OUTSIDE the invocation (row W24-S7). This
+re-run makes the instance's recorded invocation the one that was actually executed.
+
+INVOCATION, verbatim as the amended order writes it:
+  timeout 120 bash -c "python3 .tools/prd-signoff.py status POSN_ASTTAX; git log -1 --format=%h -- org/missions/D4/POSN/POSN_ASTTAX/ledger/NEVER_WIDEN_ROUND6_COO_HALF.md; git log -1 --format=%h -- org/missions/D4/POSN/POSN_ASTTAX/ledger/NEVER_WIDEN_ROUND6_CTO_HALF.md; .tools/aws s3api head-object --bucket opal-data-cot --key platinum/satellites/characteristics.json --query '{v:VersionId,lm:LastModified,len:ContentLength}' --output json; .tools/aws s3api list-objects-v2 --bucket opal-data-etfs --prefix bbg/ --delimiter / --query 'CommonPrefixes[].Prefix' --output text | tr '\t' '\n' | sort | tail -3; p=$(.tools/aws s3api list-objects-v2 --bucket opal-data-etfs --prefix bbg/ --delimiter / --query 'CommonPrefixes[].Prefix' --output text | tr '\t' '\n' | sort | tail -1); .tools/aws s3api head-object --bucket opal-data-etfs --key "${p}characteristics.parquet" --query '{len:ContentLength,lm:LastModified}' --output json"
+
+--- OUTPUT (verbatim) ---
+POSN_ASTTAX  v0.10 @59113e257a  dep_stage=EXECUTING  ->  ADMITTED
+    ratified-text  SIGNED        3.0.0_SA_CVO~W         current
+    brief          SIGNED        4.0.0_SA_CRO~W         current
+56f4d41933
+{
+    "v": "74d9.pGWF16Ox7cXKGax.zQw.lhwi5yI",
+    "lm": "2026-09-15T04:53:42+00:00",
+    "len": 67782
+}
+bbg/2026-09-09/
+bbg/2026-09-10/
+bbg/2026-09-11/
+{
+    "len": 19802,
+    "lm": "2026-09-14T18:31:19+00:00"
+}
+EXIT=0
+--- END OUTPUT ---
+
+READING, with every vintage named (the two things this re-run does NOT re-establish):
+
+1. THE ROLLBACK PIN IS THE FIRST RUN'S VALUE, NOT THIS ONE'S. The served key's VersionId
+   printed here is 74d9.pGWF16Ox7cXKGax.zQw.lhwi5yI / 67782 bytes / 2026-09-15T04:53:42Z --
+   that is the POST-deploy object this cell's own driven run (W1-AC12) wrote. The rollback
+   <PRIOR_CHARACTERISTICS_VERSIONID> is the PRE-deploy reading taken by the first run of this
+   same invocation: rt61ogajZQy79meUlsY1X_mIdPngxJTZ / 54825 bytes / 2026-09-14T21:45:13Z.
+   A re-run after the write cannot re-read a pre-write version and does not claim to; both
+   values are recorded with their times so neither can be mistaken for the other.
+
+2. THE SECOND HASH PRINTS EMPTY ON THIS BRANCH, AND THAT IS THE KNOWN SUBSTITUTION.
+   `git log -1 --format=%h` on the CTO half returns nothing here because this worktree was cut
+   @910815809f, before the CTO half was written. Measured in the same call, with a positive
+   control so the empty line cannot be read as a broken instrument:
+     on this branch (HEAD):  COO half 56f4d41933   CTO half <empty>
+     at SITEZ:               COO half 6aaf98db39   CTO half 2c6b7d8887
+     positive control:       git log -1 --format=%h SITEZ -- CLAUDE.md -> 7a0ffb5ffa
+   So BOTH halves exist at the shared branch's HEAD (2 of 2) and the deploy leg's precondition
+   is met; only this worktree predates one of them.
+
+3. PRD VINTAGE. prd-signoff status reads the files THIS worktree carries, so it prints
+   v0.10 @59113e257a ADMITTED with both halves SIGNED current. SITEZ carries v0.11 @ab2ee8052a,
+   whose brief half was read SIGNED by 4.0.0_SA_CRO~Z at 04:10:52Z during the first run. The
+   ADMITTED verdict and the two SIGNED-current halves hold at both vintages.
+
+4. WHAT THE RE-CUT ADDED, AND IT PASSED: the newest bbg partition is bbg/2026-09-11/ (the 3
+   newest prefixes printed, 3 of 3) and its characteristics.parquet head-object returned 200
+   IN THIS SAME READING -- {"len": 19802, "lm": "2026-09-14T18:31:19+00:00"} -- which is what
+   the <expect> asks for and what the first run could only evidence separately.
+
+DENOMINATOR: 5 of 5 precondition limbs read + the 6th (the partition head-object) now inside
+the invocation = 6 of 6; 2 of 2 never-widen halves present at the shared HEAD; 1 of 1 served
+key; 3 of 3 newest bbg prefixes.

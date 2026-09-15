@@ -1,0 +1,82 @@
+=== W1-AC8 (RE-CUT) -- run 2026-09-15T05:5xZ in /c/tmp/wk-posn-6-24 @3f089f2928 ===
+INVOCATION: timeout 300 bash -c "comp-iam gaps 2>&1 | grep -n -B2 -A60 'cot-satellites-characteristics-producer'"
+--- stdout of the pipeline ---
+EXIT=1 (grep rc 1 = ZERO lines selected -> the lens prints NO per-role section: the criterion's SECOND branch)
+
+--- the SAME lens run unpiped: its whole output shape and the denominators it prints ---
+==============================================================================
+PLANE: DESIRED (Terraform). This does NOT read live AWS.
+  comp-iam parses Terraform. It cannot tell landed from planned, and it is
+  blind to any grant Terraform does not declare. A live
+  `simulate-principal-policy` is the APPLIED plane; exercising the call is
+  the only EXERCISED evidence. Rule 22a: DESIRED != APPLIED != EXERCISED.
+  That rule does NOT retire because this tool now compares resources.
+
+  scanned 3 trees (27 .tf files): infra/aws/terraform, infra/aws/multi-account/terraform, infra/aws/ec2
+  policy blocks attached 15; NOT ATTACHED 4  (a role ref this parser cannot resolve); standalone 0  (aws_iam_policy -- no role by design)
+  ^ statements comp-iam has NEVER SEEN. Its verdicts are computed WITHOUT
+    them, so a role may hold a grant this tool cannot find. Run
+    `comp-iam attach-census` for the list. NOT a plane limitation --
+    a parser limitation, and it is stated rather than swallowed.
+==============================================================================
+SURFACE: gaps -- TWO-PLANE (action + resource; Andrew-direct fix 2026-08-11).
+  Plane 1: ACTION gaps -- missing/deny-present/coverage-unknown, classes unchanged.
+  Plane 2: RESOURCE MISMATCHES -- the action is HELD, but NOT on the resource this
+  call touches (the class that previously FAILED GREEN on this surface).
+  GRANTED-BROAD (Resource:'*') is EXCLUDED, NOT CLEARED -- a wildcard cannot be
+  falsified by a resource check. Unresolvable resources are counted and named.
+  Still DESIRED-plane (parsed TF): for a fresh change ground on live get-role-policy;
+  for a NEW bucket/table/ARN the apply-time oracle stays simulate-principal-policy.
+==============================================================================
+
+No ACTION-plane permission gaps detected.
+  (27 services scanned, 9 IAM roles parsed)
+
+No MISSING-permission gaps among MODELED services.
+
+  RESOURCE PLANE: 25 call(s) verdicted across 23 mapped role(s); 22 UNRESOLVABLE-RESOURCE, 2 GRANTED-BROAD, 1 GRANTED
+    46 call(s) in 6 role-UNMAPPED service(s) NOT resource-checked (no role to verdict against -- honest hole, not a pass)
+    2 GRANTED-BROAD row(s) are EXCLUDED, NOT CLEARED -- a wildcard grant cannot be falsified by a resource check
+
+Total: 0 missing | 0 deny-present | 0 coverage-unknown | 0 resource-mismatch  across 0 service(s)
+
+--- the same lens's role census (the role IS parsed; the zero above is not a parse failure) ---
+IAM ROLES (9 found)
+
+  bd-cot-keepalive-role
+    tf_resource: bd_cot_keepalive
+    statements: 5  (6 Allow actions)
+    source: infra/aws/terraform/cot-pipeline/cot-detection-layer.tf
+  bd-exporter-ec2-role
+    tf_resource: bd_exporter
+    statements: 2  (6 Allow actions)
+    source: infra/aws/ec2/bd-exporter/terraform/main.tf
+  cot-bd-session-trigger-lambda-role
+    tf_resource: cot_bd_session_trigger
+    statements: 8  (15 Allow actions)
+    source: infra/aws/terraform/cot-pipeline/iam.tf
+  cot-etf-ownership-daily-role
+    tf_resource: cot_etf_ownership_daily
+    statements: 10  (13 Allow actions)
+    source: infra/aws/terraform/cot-pipeline/cot-etf-ownership-daily.tf
+  cot-exporter-ec2-role
+    tf_resource: cot_exporter
+    statements: 12  (29 Allow actions)
+    source: infra/aws/terraform/cot-pipeline/iam.tf
+  cot-gold-layer-ec2-role
+    tf_resource: cot_gold_layer
+    statements: 5  (18 Allow actions)
+    source: infra/aws/terraform/cot-pipeline/iam.tf
+  cot-satellites-characteristics-producer-role
+    tf_resource: cot_satellites_characteristics_producer
+    statements: 9  (10 Allow actions)
+    source: infra/aws/terraform/cot-pipeline/satellites-characteristics-producer.tf
+  cot-satellites-registry-producer-role
+    tf_resource: cot_satellites_registry_producer
+    statements: 6  (8 Allow actions)
+    source: infra/aws/terraform/cot-pipeline/satellites-registry-producer.tf
+  cot-session-scheduler-role
+    tf_resource: cot_session_scheduler
+    statements: 1  (1 Allow actions)
+    source: infra/aws/terraform/cot-pipeline/schedule-et.tf
+
