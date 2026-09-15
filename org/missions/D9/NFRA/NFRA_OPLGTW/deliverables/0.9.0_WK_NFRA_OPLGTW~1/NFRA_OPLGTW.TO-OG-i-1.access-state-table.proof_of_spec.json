@@ -1,0 +1,212 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-i-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f0aa50dbc0"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "8768f46770",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-i-1.access-state-table.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/schwab_access_state.tf",
+   "kind": "terraform",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "NOT APPLIED. Its plan read 'Plan: 4 to add, 2 to change, 0 to destroy.' (2026-09-15T10:42Z); the 2 changes are existing WAF ip-set description backfills, which the order's blast-radius bound refuses (row NFRA_OPLGTW-W1-S1). describe-table -> ResourceNotFoundException and get-role opal-gateway-access-admin -> NoSuchEntity at 10:56Z.",
+   "artifact_covered_by": ["OGI1-AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The acceptance probe named by every criterion; passes .tools/commit-gate.sh (1 of 1 file clean). Runs locally; its AC7 arm reaches the host only through SSM.",
+   "artifact_covered_by": ["OGI1-AC1", "OGI1-AC2", "OGI1-AC3", "OGI1-AC4", "OGI1-AC5", "OGI1-AC6", "OGI1-AC7", "OGI1-AC8", "OGI1-AC9"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/og_i1.plan.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Redacted from terraform show -json of the saved planfile (source sha256 00070fb8ea2e9c08b893c3be92f9a0d77bcc478d63a2d72d34012e0b00af13e1): every resource_changes entry with its actions, the create entries' planned after-values, update entries' changed attribute NAMES only; prior_state, planned_values and configuration dropped because the root carries Secrets Manager and WAF state.",
+   "artifact_covered_by": ["OGI1-AC1"]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/access-state-table.result.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The result file the order names: both ARNs (declared, not created), the comp-iam re-run, the venv's pip freeze.",
+   "artifact_covered_by": ["OGI1-AC1"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "OGI1-AC1",
+   "criterion_verbatim": "OGI1-AC1 -- the plan creates only the table, the runtime grant and the operator role and policy, with zero changes or destroys to existing resources.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC1",
+   "output_evidence": "PROBE og_i1.py AC1 run 2026-09-15T10:56:33.435870Z (repo C:/tmp/wk-oplgtw-1-1)\nSOURCE: org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/og_i1.plan.json -- terraform 1.9.8, plan timestamp 2026-09-15T10:42:32Z, source show-json sha256 00070fb8ea2e9c08b893c3be92f9a0d77bcc478d63a2d72d34012e0b00af13e1\nDENOMINATOR: 71 resource_changes; by action {\"create\": 4, \"no-op\": 65, \"update\": 2}\n  create      aws_dynamodb_table.access_state\n  create      aws_iam_role.access_admin\n  create      aws_iam_role_policy.access_admin_policy\n  create      aws_iam_role_policy.gw_access_state_runtime\n  NOT-CREATE  aws_wafv2_ip_set.opal_blocked_ips_regional_v4 update changed={\"description\": {\"after_count\": null, \"before_count\": null}}\n  NOT-CREATE  aws_wafv2_ip_set.opal_blocked_ips_regional_v6 update changed={\"description\": {\"after_count\": null, \"before_count\": null}}\nEXPECTED creates present: 4 of 4; missing []; extra []\nchanges/destroys/replaces to existing resources: 2 of 71 resource_changes\nVERDICT: FAIL-OGI1-AC1 2 change(s) to existing resources: aws_wafv2_ip_set.opal_blocked_ips_regional_v4 update, aws_wafv2_ip_set.opal_blocked_ips_regional_v6 update\nRC=1",
+   "denominator": "71 resource_changes in the saved plan: 4 of 4 expected creates present, 0 extra; 2 of 71 are changes to existing resources (both update, attribute description)",
+   "status": "FAIL",
+   "status_reason": "The plan changes two existing resources (in-place description backfills on the WAF regional blocked-IP sets, standing since 3758b14afc), so the order's blast-radius bound refuses the apply; -target is forbidden. BLOCKING row NFRA_OPLGTW-W1-S1.",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC1(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI1-AC2",
+   "criterion_verbatim": "OGI1-AC2 -- the apply runs through `safe-apply` under a ledger entry whose OPEN sentinel is committed before the act (the probe compares the sentinel's commit time with the apply's recorded start).",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC2",
+   "output_evidence": "PROBE og_i1.py AC2 run 2026-09-15T10:56:34.232381Z (repo C:/tmp/wk-oplgtw-1-1)\nMEASURED 2026-09-15T10:56:34.612054Z: commits that ADD org/critical_paths/.open_deploys/nfra-oplgtw-og-i-1-access-state.json: 0 []\nVERDICT: FAIL-OGI1-AC2 no commit adds the ledger sentinel -- no ledger entry was opened, so no apply ran\nRC=1",
+   "denominator": "0 commits add the sentinel; 0 apply records",
+   "status": "FAIL",
+   "status_reason": "No apply ran, because AC1's plan was refused (NFRA_OPLGTW-W1-S1); the ledger is opened only for the act, so there is no sentinel and no apply record to compare.",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC2(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI1-AC3",
+   "criterion_verbatim": "OGI1-AC3 -- the ledger entry is closed and committed before the reads below (the probe compares the close commit's time with the first readback's).",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC3",
+   "output_evidence": "PROBE og_i1.py AC3 run 2026-09-15T10:56:35.747334Z (repo C:/tmp/wk-oplgtw-1-1)\nMEASURED 2026-09-15T10:56:36.030294Z: commits that DELETE org/critical_paths/.open_deploys/nfra-oplgtw-og-i-1-access-state.json (the ledger close): 0 []\nVERDICT: FAIL-OGI1-AC3 no commit deletes the ledger sentinel -- the ledger was never closed and committed\nRC=1",
+   "denominator": "0 commits delete the sentinel; 0 first-readback records",
+   "status": "FAIL",
+   "status_reason": "No ledger was opened, because no apply ran (NFRA_OPLGTW-W1-S1); there is no close commit and no first readback of an applied table.",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC3(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI1-AC4",
+   "criterion_verbatim": "OGI1-AC4 -- `describe-table` reads SSE enabled, point-in-time recovery enabled, PAY_PER_REQUEST billing, the TTL attribute set and the designed key schema.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC4",
+   "output_evidence": "PROBE og_i1.py AC4 run 2026-09-15T10:56:36.660505Z (repo C:/tmp/wk-oplgtw-1-1)\nMEASURED 2026-09-15T10:56:37.102837Z: describe-table opal-gateway-access-state -> ResourceNotFoundException\nVERDICT: FAIL-OGI1-AC4 table absent: ResourceNotFoundException\nRC=1",
+   "denominator": "0 of 6 table properties readable (1 describe-table call, ResourceNotFoundException)",
+   "status": "FAIL",
+   "status_reason": "The table was not created: the apply was refused at the plan (NFRA_OPLGTW-W1-S1).",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC4(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI1-AC5",
+   "criterion_verbatim": "OGI1-AC5 -- the runtime grant allows Get, Put, Update and TransactWrite on exactly the table ARN, with write actions conditioned on `dynamodb:LeadingKeys` matching `RUNTIME#*`, and no DeleteItem or table-admin action.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC5",
+   "output_evidence": "PROBE og_i1.py AC5 run 2026-09-15T10:56:38.330115Z (repo C:/tmp/wk-oplgtw-1-1)\nMEASURED 2026-09-15T10:56:38.736711Z: get-role-policy opal-gateway-role/opal-gateway-access-state-runtime -> NoSuchEntity\nVERDICT: FAIL-OGI1-AC5 runtime grant absent: NoSuchEntity\nRC=1",
+   "denominator": "1 of 1 runtime policy looked up: absent",
+   "status": "FAIL",
+   "status_reason": "The runtime grant was not applied (NFRA_OPLGTW-W1-S1). When applied, TransactWrite is graded on PutItem/UpdateItem because dynamodb:TransactWriteItems is not an IAM action (NFRA_OPLGTW-W1-S3).",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC5(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI1-AC6",
+   "criterion_verbatim": "OGI1-AC6 -- the operator principal is separate, may conditionally update `POLICY#` records and append `operator_audit` in one transaction, and holds no DeleteItem on `POLICY#` and no table-admin action.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC6",
+   "output_evidence": "PROBE og_i1.py AC6 run 2026-09-15T10:56:40.076212Z (repo C:/tmp/wk-oplgtw-1-1)\nMEASURED 2026-09-15T10:56:40.472137Z: get-role/get-role-policy opal-gateway-access-admin -> NoSuchEntity\nVERDICT: FAIL-OGI1-AC6 operator role absent: NoSuchEntity\nRC=1",
+   "denominator": "1 of 1 operator role looked up: absent",
+   "status": "FAIL",
+   "status_reason": "The operator role was not created (NFRA_OPLGTW-W1-S1).",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC6(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI1-AC7",
+   "criterion_verbatim": "OGI1-AC7 -- (difference) from the Gateway host, an isolated runtime-principal write to a `POLICY#` key is AccessDenied, while the same write to a `RUNTIME#` key succeeds in the same harness (A13).",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC7",
+   "output_evidence": "PROBE og_i1.py AC7 run 2026-09-15T10:56:42.536769Z (repo C:/tmp/wk-oplgtw-1-1)\nMEASURED 2026-09-15T10:56:42.890763Z: describe-table opal-gateway-access-state -> ResourceNotFoundException; no on-host write attempted\nVERDICT: FAIL-OGI1-AC7 precondition: table absent\nRC=1",
+   "denominator": "0 of 2 deciding on-host writes attempted (precondition failed)",
+   "status": "FAIL",
+   "status_reason": "The table and the runtime grant were not applied (NFRA_OPLGTW-W1-S1); the arm writes nothing until the table exists.",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC7(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI1-AC8",
+   "criterion_verbatim": "OGI1-AC8 -- two concurrent operator revisions of one isolated `POLICY#` record yield exactly one success and one ConditionalCheckFailed (A13).",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC8",
+   "output_evidence": "PROBE og_i1.py AC8 run 2026-09-15T10:56:44.172601Z (repo C:/tmp/wk-oplgtw-1-1)\nMEASURED 2026-09-15T10:56:44.417874Z: describe-table opal-gateway-access-state -> ResourceNotFoundException; no race attempted\nVERDICT: FAIL-OGI1-AC8 precondition: table absent\nRC=1",
+   "denominator": "0 of 2 concurrent revisions attempted (precondition failed)",
+   "status": "FAIL",
+   "status_reason": "The table and the operator role were not applied (NFRA_OPLGTW-W1-S1). When applied, the arm runs under the operator role from the checkout, not the instance role (NFRA_OPLGTW-W1-S2).",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC8(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI1-AC9",
+   "criterion_verbatim": "OGI1-AC9 -- a probe `POLICY#` record carries no TTL attribute.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-1-1 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py AC9",
+   "output_evidence": "PROBE og_i1.py AC9 run 2026-09-15T10:56:45.676982Z (repo C:/tmp/wk-oplgtw-1-1)\nMEASURED 2026-09-15T10:56:45.993664Z: describe-table opal-gateway-access-state -> ResourceNotFoundException; no probe record written\nVERDICT: FAIL-OGI1-AC9 precondition: table absent\nRC=1",
+   "denominator": "0 probe POLICY# records written or read (precondition failed)",
+   "status": "FAIL",
+   "status_reason": "The table was not created (NFRA_OPLGTW-W1-S1).",
+   "expect": "(?m)^VERDICT: PASS-OGI1-AC9(?![0-9])"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The control that must be able to go either way is OGI1-AC1, the only criterion graded on a real artifact in this run. Its arm was loaded as a module and pointed at two mutants of the saved plan in .scratch/: (a) the two update entries removed (a creates-only plan), (b) the aws_iam_role.access_admin create removed.",
+   "expected": "(a) VERDICT: PASS-OGI1-AC1 -- the arm is not a constant FAIL; (b) VERDICT: FAIL-OGI1-AC1 create set differs -- the arm checks the create set as well as the change count.",
+   "observed": "(a) 'DENOMINATOR: 69 resource_changes; by action {create: 4, no-op: 65} ... changes/destroys/replaces to existing resources: 0 of 69 resource_changes / VERDICT: PASS-OGI1-AC1', rc 0. (b) 'EXPECTED creates present: 3 of 4; missing [aws_iam_role.access_admin] ... VERDICT: FAIL-OGI1-AC1 create set differs: missing [aws_iam_role.access_admin] extra []', rc 1. On the real plan the arm FAILs on the 2 updates.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "og_i1.py AC1 run twice on the same saved plan (10:56:33Z and again after the mutant runs), outputs diffed excluding the PROBE run-time line.",
+   "observed": "IDENTICAL except the PROBE run-time line (12 of 13 lines compared). AC2-AC9 each read live state that was absent throughout; their single runs are recorded verbatim.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The apply of schwab_access_state.tf through .tools/safe-apply.sh, and the change-management ledger entry (open, commit, close-leg, close, commit) around it.",
+   "reason": "The plan changes two existing resources; the order refuses such a plan with a BLOCKING row and no apply, and forbids -target (NFRA_OPLGTW-W1-S1). The ledger is opened for the act; with no act, none was opened."
+  },
+  {
+   "item": "The live-exercise paths of the probe: AC2/AC3 sequencing against real commits, AC4-AC6 reads of applied objects, the AC6 operator transaction, the AC7 SSM harness on i-07dccb1615503ac99, the AC8 race and the AC9 read-back.",
+   "reason": "Each needs the applied table and roles; each stopped at its precondition and wrote nothing. Their first exercise is the re-run after W1-S1 clears, so they are built and unexercised, stated here rather than implied by the probe's presence."
+  },
+  {
+   "item": "The status flip of NFRA_OPLGTW.TO-OG-i-1 to complete.",
+   "reason": "Every mechanical criterion reads FAIL by output; the order stays pending."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-W1-S1: the opal-gateway root plans 4 to add and 2 to change -- in-place description backfills on the existing WAF regional blocked-IP sets -- so the order's blast-radius bound refuses the apply (BLOCKING, INERT).",
+  "NFRA_OPLGTW-W1-S2: the order runs AC8 on the host with the instance's own role, which is the runtime principal and cannot write POLICY# keys; the race runs under the separate operator role (OBSERVATION, INERT).",
+  "NFRA_OPLGTW-W1-S3: dynamodb:TransactWriteItems is not an IAM action (Access Analyzer INVALID_ACTION); TransactWrite is authorized per item against PutItem/UpdateItem (OBSERVATION, INERT)."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the result file, the three channel rows and branch wk-nfra_oplgtw-1-1. AWS calls this session: reads (sts get-caller-identity, dynamodb describe-table x10, iam list-role-policies/list-attached-role-policies/get-role-policy on opal-gateway-role, iam get-role/get-role-policy on the absent operator role, ec2 describe-instances), accessanalyzer validate-policy x3, one read-only ssm send-command on i-07dccb1615503ac99 (which aws; aws --version; ls /opt/opal-gateway; boto3 import check), terraform init and plan on the opal-gateway root. No AWS write, no apply, no DynamoDB item written.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/terraform.exe v1.9.8",
+   "invocation": "-chdir=infra/aws/terraform/opal-gateway init -input=false; plan -input=false -out=.scratch/og_i1.tfplan; show -json .scratch/og_i1.tfplan (redacted into og_i1.plan.json)",
+   "result": "init rc 0, lock file unchanged (providers from the shared cache); plan rc 0 'Plan: 4 to add, 2 to change, 0 to destroy.' -- the refusal."
+  },
+  {
+   "tool": ".tools/naming-apply-gate.py",
+   "invocation": "py -3.12 .tools/naming-apply-gate.py infra/aws/terraform/opal-gateway",
+   "result": "rc 0, WARN mode, 'NAMING-GATE: WARN 19 graded'; the four new names are expressions, listed 'unresolved before plan', not graded."
+  },
+  {
+   "tool": "aws accessanalyzer validate-policy (via .tools/aws)",
+   "invocation": "--policy-type IDENTITY_POLICY with one Allow on the table ARN for dynamodb:TransactWriteItems, dynamodb:PutItem (positive control), dynamodb:TransactGetItems",
+   "result": "INVALID_ACTION for both Transact* names; no finding for PutItem (row W1-S3)."
+  },
+  {
+   "tool": ".tools/comp-iam",
+   "invocation": "comp-iam service opal-gateway (2026-09-15T10:58:25Z, after the file was written, no apply)",
+   "result": "rc 0, PLANE DESIRED, 474 .tf files scanned, 3 operations all UNRESOLVABLE-RESOURCE; no DynamoDB operation because no Gateway code calls DynamoDB yet."
+  },
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i1.py",
+   "result": "rc 0, 'OK: pre-commit gate clean for 1 of 1 file(s)'."
+  }
+ ]
+}
