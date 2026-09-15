@@ -1,0 +1,52 @@
+== AFTER ATTEMPT 1: nothing uploaded, source map untouched 2026-09-15T22:00:14Z ==
+LCmMHmpdHvv0P3FB76_anxuuors0CIlr	2026-09-14T20:13:30+00:00	33934	yCdQVNMOoSqvTvWIc+d3RjDqe7yy25dCs/h50Ge9K9s=
+rc=0
+git diff --stat source map: []
+
+== STANDALONE MANIFEST PROBE (the build script's own probe body, reporting its arm) ==
+PARSES CLEAN
+declared_blobs ABSENT
+rc 1
+
+== THE BUILD (attempt 2, BAU_MANIFEST_SKIP=1: the manifest declares no blobs, so the index gate has nothing to check; the script's set -e kills it on the probe's rc 1 before its SKIP branch prints, row POSN_ASTTAX W19-S1) ==
+$ BAU_MANIFEST_SKIP=1 timeout 900 bash infra/aws/lambda/ci/build-and-upload.sh yang-pipeline yang-generate-positioning
+
+Lambda Build-and-Upload
+  Pipeline:  yang-pipeline
+  Bucket:    s3://opal-313476888478-lambda-artifacts/yang-pipeline/
+  JSON tool: node
+  Function:  yang-generate-positioning (single-function mode)
+
+Found 1 function(s) to build
+
+-> yang-generate-positioning
+  Source:  infra/aws/lambda/v2_portal/yang_pipeline/positioning/yang-generate-positioning
+  Files:   lambda_function.py etf_classifications_dynamodb.py
+  OK: import-closure -- 2 packaged .py file(s), every top-level import satisfied by package/stdlib/runtime/layer. (Nested lazy imports exempt by design.)
+  SHA256:  riByGXEfWXdFTEavKGG0nFRj/k4JUAjIiVKfm06Tdgk=
+  Size:    36K
+  ✓ s3://opal-313476888478-lambda-artifacts/yang-pipeline/yang-generate-positioning.zip (write VERIFIED: size=36447, sha256 metadata match)
+
+================================================
+Complete — 1 function(s) built and uploaded
+
+Source map updated with artifact_s3_key + artifact_sha256.
+
+Next steps:
+  git add infra/aws/lambda/ci/lambda-source-map.json
+  git commit -m 'ci: upload artifacts for yang-pipeline'
+  cd infra/aws/terraform/yang-pipeline
+  .tools/terraform.exe plan    # should show Lambda updates
+  .tools/terraform.exe apply
+  .tools/terraform.exe plan    # must show No changes
+  bash infra/aws/lambda/ci/record-terraform-deploy.sh yang-pipeline --version yang-pipeline-vX.Y.Z \
+       --author "{your-serial} <{your-serial}@opal.agent>"
+  # --author is REQUIRED for correct attribution: record-terraform-deploy
+  # commits, and its commit must be authored by a permitted agent serial.
+  # Omitting it derives the serial from .comp-graph/.agent_context (shared,
+  # best-effort) -- pass it explicitly to be sure.
+rc=0
+
+== AFTER THE BUILD 2026-09-15T22:00:24Z ==
+RKnw3YkTo8okvldCf3vrTbDtWejlJjzs	2026-09-15T22:00:23+00:00	36447	riByGXEfWXdFTEavKGG0nFRj/k4JUAjIiVKfm06Tdgk=
+rc=0
