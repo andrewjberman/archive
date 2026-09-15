@@ -590,15 +590,21 @@ def _ac23(repo: Path) -> int:
     third = sorted(m for m in mine if m not in stdlib and m != "app")
     rc, ls, _ = _git(repo, "ls-tree", "-r", "--name-only", CUT_BASE, "--", GW_REL + "/app", GW_REL + "/tests")
     base_py = [p for p in ls.splitlines() if p.endswith(".py")]
-    base_imports = set()
+    base_imports, empty_blobs = set(), 0
     for p in base_py:
-        rc2, src, _ = _git(repo, "show", "%s:%s" % (CUT_BASE, p))
-        if rc2 != 0 or not src:
-            return _verdict(23, False, "git show %s:%s read failed or empty" % (CUT_BASE, p))
+        rc2, src, err = _git(repo, "show", "%s:%s" % (CUT_BASE, p))
+        if rc2 != 0:   # a FAILED read is a FAIL; an EMPTY blob is a real read (app/__init__.py is 0 bytes at the base)
+            return _verdict(23, False, "git show %s:%s failed (rc=%d %s)" % (CUT_BASE, p, rc2, err.strip()))
+        empty_blobs += 0 if src.strip() else 1
         try:
             base_imports |= _imports(src)
         except SyntaxError:
             continue
+    if not base_py or empty_blobs == len(base_py) or "starlette" not in base_imports:
+        return _verdict(23, False, "the base import census read nothing usable (%d files, %d empty; positive "
+                        "control 'starlette' present: %s)" % (len(base_py), empty_blobs, "starlette" in base_imports))
+    print("base import census: %d .py files read at %s, %d empty blob(s); positive control: 'starlette' imported by "
+          "the base Gateway (app/server.py)" % (len(base_py), CUT_BASE, empty_blobs))
     rc3, reqs, _ = _git(repo, "show", "%s:%s/requirements.txt" % (CUT_BASE, GW_REL))
     req_names = sorted({re.split(r"[=<>\[;#\s]", ln.strip(), maxsplit=1)[0].lower() for ln in reqs.splitlines()
                         if ln.strip() and not ln.strip().startswith("#")})
