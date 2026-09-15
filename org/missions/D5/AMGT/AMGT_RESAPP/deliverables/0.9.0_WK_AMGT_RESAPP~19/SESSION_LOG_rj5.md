@@ -59,3 +59,44 @@ collection, cadence or backfill touched or requested. No push, no merge, no reba
 the one world-fact in `W19-S8`. `AC4`, `AC6`, `AC7` are PASS-by-output. The remedy is the
 issuer's to choose: a harvest backfill and a re-run of the four invocations UNCHANGED, or
 a re-cut of the four bars against the store that exists.
+
+---
+
+## RE-RUN AGAINST AMENDMENT 2 (2026-09-15 ~09:4xZ, branch tip a33786b896)
+
+The issuer UPHELD row `W19-S8` and re-cut the four count bars to the store that exists
+(`AMENDMENT 2` @`a33786b896`): the pool's counts are now PRINTED as denominators and the
+discriminating clauses stay. AC2's truncation was widened 170 -> 400 on row `W19-S11`, so
+`title` is inside the recorded bytes at last.
+
+**Nothing was rebuilt.** No source file, test, script or deliverable logic changed in this
+pass; the seven invocations were extracted from the order file itself (so each ran LITERAL,
+byte-for-byte as amended) and executed under `timeout 120`, all seven rc=0.
+
+**Result: 7 of 7 PASS-by-output.**
+
+| criterion | the measurement |
+|---|---|
+| AC1 | 3 of 3 prefixes (BA, COST, HD); publications/v1 objects **7**, printed, not graded |
+| AC2 | store_item_count 2 / 2 / 3 = **7 of 7** associations; items in window 1 / 1 / 3; control 0; states 0,0,0,0; duplicate_links 0; title+url+publisher+published_at+article_key all inside the 400-char window |
+| AC3 | names_read=256, names_with_links=3, links_listed=7 **= bodies_read=7**, articles_in_window=5, dynamodb_reads=0; 10 of 10 rows carry security_key; pointer payload_hash 64-hex, row_count=10, state COMPLETE, **rank_sort ABSENT** |
+| AC4 | knob 0, GSI 0, pool_reader 8, overwrite_by_pkeys 0, _CURRENT 3, _FAILED 9, states 25; scoped_amgt.py **0 diff lines** |
+| AC5 | pool-links 2 / 2 / 3 / 0 = 7; bodies-in-window 1 / 1 / 3 / 0 = 5; table-items **0 on 4 of 4**; the two stores DIFFER |
+| AC6 | 25 + 16 = **41 of 41** arms OK, 0 failures 0 errors; defect-reproduced 41, three-states 17, alias-once 2 |
+| AC7 | this serial's commit most recent on both paths; reader nonascii 0, put_object 0, delete 0 |
+
+**The control on the re-cut itself.** A bar replaced by a printed denominator can lose its
+teeth silently, so every re-cut `expect` was run against a MUTATED copy of its own evidence:
+**13 of 13 mutations refused** (missing prefix, missing count line, a control carrying items,
+a renamed url field, duplicate_links 1, bodies_read 6 against links_listed 7, a pointer with
+no payload_hash, a pointer carrying rank_sort, a row missing security_key, dynamodb_reads 3,
+table-items 9 on HD, a control with 5 links, BA with 0). AC3's partial-read clause now reads
+as a BACKREFERENCE (`bodies_read` EQUAL to `links_listed`), which discriminates at any pool
+size -- strictly better than the fixed 80 it replaced.
+
+**Determinism, third observation.** The 09:48Z dry run reproduced both payload hashes from the
+09:04Z and 09:21Z runs exactly, while run_id and generation_id moved. STABLE on 3 of 3.
+
+**Bounds honoured again.** No live write of any kind; the one DynamoDB act was AC5's commissioned
+read (one per name, 4 pages of 4 complete). No deploy, no push, no merge, no rebase. The order's
+`<status>` is flipped to `complete` on this pass, with the instance VALID at rc=0.
