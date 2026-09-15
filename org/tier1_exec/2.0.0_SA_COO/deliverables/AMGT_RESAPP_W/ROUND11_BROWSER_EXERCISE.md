@@ -26,8 +26,8 @@ browser transport actually served; the same as-of day; and the rendered page rea
 - **Hashing.** The runner sandbox has no `URL`, `fetch`, `TextEncoder` or `crypto`. Paths are parsed by regex, files are read through
   the context's request API, and sha256 is a pure-JS implementation self-checked against sha256("abc") before any payload hash is
   trusted. The self-check passed in every arm that hashed.
-- **Scripts.** `pw_arm1_fresh_core.js`, `pw_arm2_navigate_tabs.js`, `pw_arm2b_tabs_directkey.js`, `pw_arm3_controls.js`, beside this
-  file.
+- **Scripts.** `pw_arm1_fresh_core.js`, `pw_arm2_navigate_tabs.js`, `pw_arm2b_tabs_directkey.js`, `pw_arm3_controls.js`, under
+  `round11_browser/`.
 
 ## 3. The payloads, as served
 
@@ -130,9 +130,9 @@ wording. They are not evidence; the rendered text above is.
 - The comparable's own bundles: DE_US_Equity's thesis and peers were not captured.
 - Any rendering of rj-12's Posture coverage lines from a SERVED payload, which Z-S107 makes impossible until the redeploy.
 
-## 7. Artifacts beside this file
+## 7. Artifacts, under `round11_browser/`
 
-| file | copied beside this file (UTC; the arms ran 20:4x-20:5xZ) | bytes |
+| file | copied there (UTC; the arms ran 20:4x-20:5xZ) | bytes |
 |---|---|---|
 | `ROUND11_BROWSER_arm-absent-no-pointer.png` | 21:08:57Z | 77038 |
 | `ROUND11_BROWSER_arm-empty-breakout.png` | 21:08:57Z | 81184 |
@@ -150,11 +150,11 @@ wording. They are not evidence; the rendered text above is.
 | `arm2b.tabs.record.json` | 21:08:57Z | 4093 |
 | `arm3.controls.record.json` | 21:08:57Z | 3100 |
 
-Payload copies under `payloads/` are byte-identical to the files the transport served (9 of 9 sha256 equal).
+Payload copies under `round11_browser/payloads/` are byte-identical to the files the transport served (9 of 9 sha256 equal).
 
 ## 8. Close-out
 
 - The view server was stopped: `[::1]:5175` refuses connections and netstat shows no listening socket on the port.
 - The nine staged payload copies in the view worktree's `public/__exercise/` were removed one by one, each only after `cmp` equal to
-  its copy under `payloads/` (9 removed, 0 kept), and the empty folder was removed.
+  its copy under `round11_browser/payloads/` (9 removed, 0 kept), and the empty folder was removed.
 - The view worktree is clean at `0e153399`. It was not removed.
