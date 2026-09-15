@@ -35,9 +35,30 @@ branch `wk-lgic-enforce-1-1-f2`, base `CLOUD` @d7d801c323. **Ledger:** `lgic-enf
 | F2-AC7 | `VERDICT: PASS-PROBES-REMOVED` (08:37:18Z) | 0 |
 | F2-AC8 | `SENTINEL: absent` / `VERDICT: FAIL-LEDGER-OPEN` (08:37:36Z) | 1 |
 
-**F2-AC8 is FAIL, so the order stays open.** Row `LGIC_ENFORCE-W1-S18` (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~G):
+**In the first session F2-AC8 was FAIL and the order stayed open.** Row `LGIC_ENFORCE-W1-S18` (BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~G):
 `deploy_ledger.py close` unlinks the sentinel (`:440`), and `check_en.py` reaches the entry only through it
 (`_entry_text` `:653-656`, `f2_closed` `:737-740`, `f2_signoff` `:676-683`, all @d7d801c323).
+
+## Re-run on the fixed checker
+
+A cold-start instance of `0.9.0_WK_LGIC_ENFORCE~1` re-ran F2-AC1 and F2-AC8 on the fixed checker: `check_en.py` @78f8820a58,
+synced onto this branch @af2dbd097e. The blob is `b60e1b18dd` at both commits. It re-ran all eight invocations as written, from
+this worktree at af2dbd097e, between 09:13:30Z (the sync commit) and 09:22:45Z (a `date -u` read taken after the runs). No live
+act was repeated. The ledger entry, the sentinel and FENCE_PROBES.md were not touched.
+
+| Id | Verdict line (re-run @af2dbd097e) | rc |
+|---|---|---|
+| F2-AC1 | `SIGNOFF LINES: {'1.0.0_SA_CTO': '20260915T072924Z', '2.0.0_SA_COO~G': '20260915T070844Z'}  APPLY (L2 closed_at): 20260915T081903Z` / `VERDICT: PASS-SIGNED-BEFORE-APPLY` | 0 |
+| F2-AC2 | `VERDICT: PASS-POLICY-LIVE` | 0 |
+| F2-AC3 | `VERDICT: PASS-49F-READS` | 0 |
+| F2-AC4 | `VERDICT: PASS-COT-DENIED` | 0 |
+| F2-AC5 | `VERDICT: PASS-UNSCOPED-DENIED` | 0 |
+| F2-AC6 | `VERDICT: PASS-EXEMPT-ALLOWED` | 0 |
+| F2-AC7 | `VERDICT: PASS-PROBES-REMOVED` | 0 |
+| F2-AC8 | `SENTINEL: absent  ENTRY: org/critical_paths/change_management/20260915T0334Z_lgic-enforce-fence-49financial_deploy_completion.md  ENTRY CLOSED: True` / `VERDICT: PASS-LEDGER-CLOSED` | 0 |
+
+8 of 8 mechanical criteria PASS by output. With the sentinel gone, the fixed checker finds the entry by slug and reads L2's close
+time from the entry's log line. Row W1-S18 stays as filed; the issuer disarms it after the drain.
 
 ## Not claimed
 
