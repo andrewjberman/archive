@@ -109,6 +109,7 @@ def press_and_hold_adaptive(page, x, y, bbox, log, max_hold_s=8.0, poll_interval
             if len(center_scores) >= 2 and center_scores[-1] > 18 and center_scores[-1] > center_scores[-2] * 1.4:
                 log(f"CHECKMARK signal: center delta jumped {center_scores[-2]:.1f} -> {center_scores[-1]:.1f} "
                     f"after {elapsed:.2f}s -- releasing")
+                page.mouse.up()
                 is_pressed = False
                 break
             # Andrew-direct 2026-09-11: "there are some cases where even as you hold it, they start
