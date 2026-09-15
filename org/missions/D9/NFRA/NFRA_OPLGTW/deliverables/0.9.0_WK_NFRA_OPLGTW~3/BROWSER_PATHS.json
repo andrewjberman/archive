@@ -1,0 +1,24 @@
+{
+  "schema": "og-a-3/browser-paths/v1",
+  "cell": "OG-a-3",
+  "producer": "0.9.0_WK_NFRA_OPLGTW~3",
+  "module": "infra/aws/ec2/opal-gateway/app/browser_oidc.py",
+  "routes_declared_in": "infra/aws/ec2/opal-gateway/app/server.py",
+  "paths": [
+    {
+      "path": "/schwab/download/login",
+      "methods": ["GET", "HEAD"],
+      "role": "login: starts the Gateway-owned OIDC sign-in and redirects to the upstream authorization endpoint"
+    },
+    {
+      "path": "/schwab/download/callback",
+      "methods": ["GET", "HEAD"],
+      "role": "oidc_callback: the upstream redirects the browser here with code and state"
+    }
+  ],
+  "match": "exact path; each path is forwarded WITHOUT authenticate-oidc; no wildcard and no other path is implied",
+  "cookie_path": "/schwab/download",
+  "cookie_path_note": "The Path attribute of this cell's cookies, NOT an ALB path. The download page and its routes are OG-x-1's; OG-x-1 names its own paths, and they must sit at or under this cookie path for the browser session to reach them.",
+  "upstream_redirect_uri": "<PUBLIC_BASE_URL>/schwab/download/callback -- listed on the upstream app registration; not an ALB rule",
+  "methods_note": "Starlette serves HEAD for every GET route, so HEAD is listed as served."
+}
