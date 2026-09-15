@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-d-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0aa50dbc0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8768f46770",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-d-1.access-state-adapter.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/access_state.py",
+      "kind": "script",
+      "commit_or_etag": "0c4a5edcd08b5f7648df91665b761bd30e6613a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module, not deployed by this cell (the Gateway release cells ship it). AccessState: get/query (ConsistentRead=True on every call and every query page), put_runtime/update_runtime/delete_runtime/transact_runtime (RUNTIME# keys only, refused before any AWS call; ConditionExpression required), operator_transact (one principal's POLICY# records plus their operator_audit append in one transaction; no delete, no TTL attribute), live_condition(); policy_key/runtime_key/namespace_of over the contract's 9 record types; DependencyUnavailable (DEPENDENCY_UNAVAILABLE), ConditionFailed, AccessStateRefused. Key attributes pk/sk/record_type/expires_at are this cell's choice (NFRA_OPLGTW-W3-S1).",
+      "artifact_covered_by": ["OGD1-AC1", "OGD1-AC2", "OGD1-AC3", "OGD1-AC4", "OGD1-AC5", "OGD1-AC6", "OGD1-AC7"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_access_state.py",
+      "kind": "test",
+      "commit_or_etag": "0c4a5edcd08b5f7648df91665b761bd30e6613a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_ogd1_ac01 .. test_ogd1_ac07, one per criterion, offline against moto 5.2.3 (mock_aws) with forced fake credentials and an empty AWS config; the one unreachable-store arm dials the closed loopback port 127.0.0.1:9. Each test prints its denominator lines with capture disabled.",
+      "artifact_covered_by": ["OGD1-AC1", "OGD1-AC2", "OGD1-AC3", "OGD1-AC4", "OGD1-AC5", "OGD1-AC6", "OGD1-AC7"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/conftest.py",
+      "kind": "test",
+      "commit_or_etag": "0c4a5edcd08b5f7648df91665b761bd30e6613a6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Registers the `live` marker (pytest_configure) and skips every @pytest.mark.live test unless OG_LIVE=1 (pytest_collection_modifyitems); puts the Gateway root on sys.path so `from app import ...` resolves when pytest runs from the workspace root, as every OGD1 invocation does. The whole Gateway suite under it: '1 failed, 83 passed, 34 subtests passed', the failure being row NFRA_OPLGTW-S1's known test.",
+      "artifact_covered_by": ["OGD1-AC1", "OGD1-AC2", "OGD1-AC3", "OGD1-AC4", "OGD1-AC5", "OGD1-AC6", "OGD1-AC7"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "e13bbe2b95",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended, NFRA_OPLGTW-W3-S1 and NFRA_OPLGTW-W3-S2, committed on their own before this proof: '[surprise-row-gate] ... 2 new row(s) of 3 total checked (1 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.'"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGD1-AC1",
+      "criterion_verbatim": "OGD1-AC1 (test_ogd1_ac01) -- every read is strongly consistent. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac01 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3 && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac01 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "READ CALLS: 8 of 8 client read calls passed ConsistentRead=True (get_item 3, query pages 5)\nREAD CALL SITES: 2 of 2 in app/access_state.py pass ConsistentRead=True (get_item:319, query:349)\n.                                                                        [100%]\n1 passed in 0.68s\nrc=0",
+      "denominator": "8 of 8 client read calls recorded by a spy (3 get_item incl. one runtime read of a POLICY record and one absent key; 5 query pages incl. a page_size=1 query over 3 grants); 2 of 2 read call sites in the module source (AST), each passing the literal ConsistentRead=True; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGD1-AC2",
+      "criterion_verbatim": "OGD1-AC2 (test_ogd1_ac02) -- every write is conditional, and every multi-item change is one transaction. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac02 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3 && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac02 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "WRITE ITEMS: 6 of 6 written items carried a ConditionExpression (3 write calls: transact_write_items)\nUNCONDITIONAL WRITES REFUSED: 15 of 15 attempts (5 write APIs x 3 empty conditions), 0 AWS calls\nTRANSACTIONS: failed condition wrote 0 of 2 items; satisfied condition wrote 2 of 2 in 1 call\nWRITE CALL SITES: 3 single-item sites all pass ConditionExpression; batch_write_item sites: 0\n.                                                                        [100%]\n1 passed in 0.69s\nrc=0",
+      "denominator": "6 of 6 items in the 3 transact_write_items calls recorded after the spy reset carried a ConditionExpression (the test's earlier put/update/delete calls are asserted by the AST arm: 3 of 3 single-item call sites pass ConditionExpression); 15 of 15 unconditional attempts refused with 0 AWS calls; a 2-item transaction with one failing condition wrote 0 of 2; batch_write_item call sites 0; a POLICY change without its operator_audit append refused; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGD1-AC3",
+      "criterion_verbatim": "OGD1-AC3 (test_ogd1_ac03) -- keys use the POLICY#<tid>#<oid> and RUNTIME#<kind>#... namespaces. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac03 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3 && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac03 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "KEYS: 9 of 9 contract record types map to one namespace (POLICY 3, RUNTIME 6)\nMALFORMED KEYS REFUSED: 7 of 7\nSTORED PARTITION KEYS: POLICY#tid-a#oid-b, POLICY#tid-a#oid-b, RUNTIME#ticket#hash-1\n.                                                                        [100%]\n1 passed in 0.88s\nrc=0",
+      "denominator": "9 of 9 record types read from org/standards/NFRA_OPLGTW_CONTRACT.json state_store.record_types at test time (POLICY 3, RUNTIME 6); 7 of 7 malformed key components refused; 3 of 3 partition keys actually stored in the emulated table are namespaced; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGD1-AC4",
+      "criterion_verbatim": "OGD1-AC4 (test_ogd1_ac04) -- (difference) the runtime write API refuses a POLICY# key before any AWS call, and accepts the same call on a RUNTIME# key. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac04 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3 && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac04 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "POLICY# REFUSED: 4 of 4 runtime write APIs, 0 AWS calls (client that fails on any touch)\nRUNTIME# ACCEPTED: 4 of 4, the same calls, 1 AWS call each\nLOOKALIKE KEYS REFUSED: 7 of 7 (x3 write APIs each), 0 AWS calls\n.                                                                        [100%]\n1 passed in 0.74s\nrc=0",
+      "denominator": "4 of 4 runtime write APIs (put, update, delete, transaction) refused on a POLICY# key against a client that fails the test on any attribute access; the same 4 calls accepted on a RUNTIME# key with exactly 1 AWS call each; 7 of 7 lookalike keys (lower-case, leading space, RUNTIMEX, unknown kind, empty id, forged record type, bare tuple) refused on 3 write APIs each; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGD1-AC5",
+      "criterion_verbatim": "OGD1-AC5 (test_ogd1_ac05) -- (difference) an expired-but-present record reads as absent, and the same record unexpired reads as present. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac05 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3 && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac05 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "EXPIRED-BUT-PRESENT: raw get_item present; adapter get -> None, query -> 0 records (expiry now-1 and now)\nUNEXPIRED: same record, expiry now+60 -> present; clock moved past expiry -> absent again\nLIVE CONDITION: consume on the expired record -> ConditionFailed; on the unexpired record -> applied\n.                                                                        [100%]\n1 passed in 0.72s\nrc=0",
+      "denominator": "One download_ticket record under 4 expiry states (now-1, now, now+60, and now+60 with the clock moved to its expiry): 3 of 3 expired states read absent through get and query while a raw strongly consistent get_item reads it present; 1 of 1 unexpired state reads present; the conditional consume refused on the expired state and applied on the unexpired one; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGD1-AC6",
+      "criterion_verbatim": "OGD1-AC6 (test_ogd1_ac06) -- an unavailable or malformed store returns DEPENDENCY_UNAVAILABLE and never a default or stateless fallback. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac06 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3 && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac06 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "UNAVAILABLE: 22 of 22 arms raised DEPENDENCY_UNAVAILABLE; 0 returned a value or a default\nARMS: no-table 5, unreachable 5, malformed records 10, malformed responses 2\nALARMS: 22 of 22 fail-closed alarms emitted\n.                                                                        [100%]\n1 passed in 5.99s\nrc=0",
+      "denominator": "22 of 22 arms raised DependencyUnavailable with code DEPENDENCY_UNAVAILABLE (a code present in the contract's error_codes, read at test time): table missing x 5 calls, closed loopback endpoint x 5 calls, 5 malformed records x (get, query), 2 malformed response shapes; 0 returned a value; 22 of 22 emitted the fail-closed alarm; 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGD1-AC7",
+      "criterion_verbatim": "OGD1-AC7 (test_ogd1_ac07) -- the tests run against an emulator that implements ConditionExpression and transaction semantics, named with its version (the test proves a failed condition raises ConditionalCheckFailed and prints the emulator's version). <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac07 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3 && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac07 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "EMULATOR: moto 5.2.3 (boto3 1.42.54, botocore 1.42.97), DynamoDB mocked in-process via mock_aws\nSINGLE-ITEM: failed ConditionExpression -> ConditionalCheckFailedException\nTRANSACTION: failed ConditionCheck -> TransactionCanceledException, CancellationReasons=['None', 'ConditionalCheckFailed']; its Put wrote 0 of 1\nPOSITIVE CONTROL: the same transaction with a satisfiable condition committed\nADAPTER: both surface as ConditionFailed, reasons [['ConditionalCheckFailed'], ['None', 'ConditionalCheckFailed']]\n.                                                                        [100%]\n1 passed in 0.66s\nrc=0",
+      "denominator": "Emulator named: moto 5.2.3. 2 of 2 failed-condition shapes observed (single-item ConditionalCheckFailedException; transaction TransactionCanceledException with a ConditionalCheckFailed reason and 0 of 1 other items written); 1 of 1 positive control committed; 2 of 2 surfaced by the adapter as ConditionFailed; 1 of 1 test.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "access_state.py: the runtime write guard in _require_runtime reduced from 'if k is None or namespace_of(k.pk) != \"RUNTIME\" or not k.pk.startswith(RUNTIME_PREFIX):' to 'if k is None:' (byte copy taken first, restored from it afterwards); test_ogd1_ac04 and test_ogd1_ac02 run against the mutant.",
+      "expected": "test_ogd1_ac04 fails because the POLICY# write now reaches the client; test_ogd1_ac02 (conditions and transactions, not namespaces) still passes.",
+      "observed": "'1 failed, 1 passed in 0.90s', rc=1: test_ogd1_ac04 failed at 'AssertionError: the adapter reached the client (put_item) before refusing'; test_ogd1_ac02 passed. Restored: sha256 aea443f3b06dff637253aa3beaed85135470159bb1bc250c3ac83abdbedb8cc3 for both the restored module and the byte copy, the same as before the mutation; the committed module is that file.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The whole test file (7 tests) run twice back-to-back on the restored tree with the same invocation shape; the two outputs diffed.",
+      "observed": "Both runs rc=0, '7 passed'. diff shows exactly one differing line, the wall-clock summary ('7 passed in 6.91s' vs '7 passed in 7.12s'); every denominator line printed by the 7 tests is byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live IAM dynamodb:LeadingKeys arm (a runtime-principal write to POLICY# refused by AWS) and the live table's key schema.",
+      "reason": "OG-i-1's cell (OGI1-AC5/AC7, AC4). moto cannot evaluate IAM conditions; this cell's code-side refusal (OGD1-AC4) is the independent twin. The attribute names this adapter uses must match OG-i-1's table: row NFRA_OPLGTW-W3-S1 (ARMED)."
+    },
+    {
+      "item": "Wiring the adapter into OAuth, the policy guard, the catalog or the export.",
+      "reason": "Later cells (OG-a-1, OG-z-1, OG-k-1, OG-x-1) build on this module; this cell writes only the adapter, its tests and the shared conftest."
+    },
+    {
+      "item": "A separate approval record type.",
+      "reason": "The contract's 9 record_types carry none; an approval (approver, timestamp, source authorization reference, PRD C2) is stored on its data_entitlement record, a POLICY record."
+    },
+    {
+      "item": "Restoring infra/aws/ec2/opal-gateway/audit.jsonl after the whole-suite run.",
+      "reason": "Outside this order's <paths> grant. The three appended lines are left uncommitted in the worktree only (row NFRA_OPLGTW-W3-S2)."
+    },
+    {
+      "item": "Push, merge or rebase.",
+      "reason": "Forbidden by the order. Every commit is LOCAL on branch wk-nfra_oplgtw-1-3; the COO drains it."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W3-S1: neither OG-d-1's order, OG-i-1's order nor the contract names the access-state table's key attribute names, sort key or TTL attribute; the adapter chose pk (HASH) + sk (RANGE) and expires_at (logical expiry and TTL attribute) while OG-i-1 designs the table in parallel. OBSERVATION, ARMED, disarm owner 2.0.0_SA_COO~O.",
+    "NFRA_OPLGTW-W3-S2: running the Gateway suite as row NFRA_OPLGTW-S1 records it appends three lines to the tracked infra/aws/ec2/opal-gateway/audit.jsonl, outside every Gateway code cell's grant; left uncommitted in this worktree. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/access-state-adapter.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest under .venv-og (py -3.12 venv, Python 3.12.10, --system-site-packages) with moto 5.2.3",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3 && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_access_state.py::test_ogd1_ac0<1..7> -q -p no:cacheprovider --color=no",
+      "result": "7 of 7 invocations '1 passed', rc=0 each (OGD1-AC1..AC7)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ruff py39, ds-precommit, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/access_state.py infra/aws/ec2/opal-gateway/tests/conftest.py infra/aws/ec2/opal-gateway/tests/test_access_state.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s), rc=0; re-run on the edited test file: 1 of 1 clean, rc=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~3 <0.9.0_WK_NFRA_OPLGTW~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "0c4a5edcd0 (3 files, 1068 insertions, msg-verify MATCH) and e13bbe2b95 (2 surprise rows, surprise-row-gate OK), both LOCAL on wk-nfra_oplgtw-1-3"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/NFRA_OPLGTW.TO-OG-d-1.access-state-adapter.proof_of_spec.json OGD1-AC1,OGD1-AC2,OGD1-AC3,OGD1-AC4,OGD1-AC5,OGD1-AC6,OGD1-AC7",
+      "result": "see the result file -- only the exit code is the verdict"
+    }
+  ]
+}
