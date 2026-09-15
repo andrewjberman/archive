@@ -4,6 +4,9 @@
 #   2. it runs in the portal worktree through the junctioned install; exit code and the count of `error TS` lines printed;
 #   3. the SAME command runs on a scratch copy of HEAD (git archive of the files tsc reads) carrying ONE deliberate
 #      type error, with node_modules junctioned to the same install -- and must exit non-zero on that line.
+# TO-B2-1: the three result lines print key=value fields separated by ; or , (exit_code=N; error_TS_line_count=M).
+#   The old layout "EXIT=2  error TS lines=1" put an exit code directly before the noun, which reads as "2 error" --
+#   to proof-of-spec-check's count-bar limb and to a person. Only the wording moved; every computed value is unchanged.
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # POSIX form of the root, from `pwd` and never from rev-parse: rev-parse prints `C:/...`, and a drive-letter colon
 # inside PATH splits the entry, so `tsc` was not found at all (first run: exit 127, recorded, not a portal result).
@@ -27,7 +30,7 @@ echo "=== RUN 1: the portal worktree at HEAD ==="
 rc1=$?
 cat "$SCR/run1.out"
 n1=$(cat "$SCR/run1.out" | grep -c "error TS")
-echo "RUN 1: EXIT=$rc1  error TS lines=$n1"
+echo "RUN 1: exit_code=$rc1; error_TS_line_count=$n1"
 
 echo ""
 echo "=== RUN 2: a scratch copy of HEAD carrying ONE deliberate type error ==="
@@ -48,10 +51,10 @@ rc2=$?
 cat "$SCR/run2.out"
 n2=$(cat "$SCR/run2.out" | grep -c "error TS")
 hit=$(cat "$SCR/run2.out" | grep -c "bookSet.ts($INJ_LINE,")
-echo "RUN 2: EXIT=$rc2  error TS lines=$n2  (on the injected line: $hit)"
+echo "RUN 2: exit_code=$rc2; error_TS_line_count=$n2; on_injected_line=$hit"
 
 echo ""
-echo "VERDICT INPUTS: run1 exit=$rc1 errors=$n1 (want 0, 0) | scratch copy exit=$rc2 errors=$n2 injected-line hits=$hit (want non-zero, >=1)"
+echo "VERDICT INPUTS: run1 exit_code=$rc1, error_TS_line_count=$n1 (want 0 and 0) | scratch copy exit_code=$rc2, error_TS_line_count=$n2, injected_line_hits=$hit (want non-zero and at least 1)"
 if [ "$rc1" = 0 ] && [ "$n1" = 0 ] && [ "$rc2" != 0 ] && [ "$hit" -ge 1 ]; then echo "EXIT=0"; exit 0; fi
 echo "EXIT=1"
 exit 1

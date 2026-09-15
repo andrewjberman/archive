@@ -17,6 +17,10 @@
  *   node <this> --network-arms                               opal-staff, advisor, client x Models, ETFs: aggregate request counts
  *   node <this> --compare-before <B_DOM_BEFORE.json>         the same 10 captures at HEAD, compared; plus a mutated-weight control
  *   [--port <p>]  default 5241
+ *
+ * TO-B2-1 (the same slot) changes --network-arms in two places and nothing else: (a) its bar is the one B2-AC11 states,
+ * Opal staff in Models EXACTLY 1 request (it was >= 1); (b) at any portal HEAD other than TO-B1-1's 63edeeeb51 the
+ * request record is written to network_arms_requests_<HEAD10>.json, so TO-B1-1's committed record is never overwritten.
  */
 import { createRequire } from 'node:module'
 import { spawn, spawnSync } from 'node:child_process'
@@ -370,13 +374,14 @@ try {
       console.log('  ' + t.family.padEnd(7) + ' ' + t.viewer.padEnd(11) + ' ' + String(t.aggregate_requests).padEnd(7) +
         ' (' + t.total_requests + ', ' + t.loc + ', ' + t.family_selected + ', ' + JSON.stringify(t.selector) + ')')
     }
-    const rec = path.join(HERE, 'b1_ac5_network_arms_requests.json')
+    const rec = path.join(HERE, st.head.startsWith('63edeeeb51') ? 'b1_ac5_network_arms_requests.json'
+      : 'network_arms_requests_' + st.head.slice(0, 10) + '.json')
     writeFileSync(rec, JSON.stringify(record, null, 1) + '\n')
     console.log('EVERY REQUEST URL RECORDED: ' + path.relative(ROOT, rec))
     const get = (f, v) => table.find((t) => t.family === f && t.viewer === v)?.aggregate_requests
-    const want = get('Models', 'opal-staff') >= 1 && get('Models', 'advisor') === 0 && get('Models', 'client') === 0 &&
+    const want = get('Models', 'opal-staff') === 1 && get('Models', 'advisor') === 0 && get('Models', 'client') === 0 &&
       get('ETFs', 'opal-staff') === 0 && get('ETFs', 'advisor') === 0 && get('ETFs', 'client') === 0
-    console.log('EXPECTATION (Models: staff >=1, advisor 0, client 0; ETFs: 0, 0, 0): ' + (want ? 'MET' : 'NOT MET'))
+    console.log('EXPECTATION (Models: staff exactly 1, advisor 0, client 0; ETFs: 0, 0, 0): ' + (want ? 'MET' : 'NOT MET'))
     exit = want ? 0 : 1
   } else if (flag('--probe')) {
     // DIAGNOSTIC ONLY (not a criterion invocation): open one viewer, wait, print what the read returns or throws.
