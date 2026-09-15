@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rj-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "73938cdae4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rj-2.drafted-sentences-beside-their-evidence.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1170b4da69"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~18",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "6cf202d134",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "READ 5 -- read_drafted_sections(): the pool read (drafting/v1/<key>.json, AMGT_DRAFTING_ROOT for an offline run), the THREE validations through AMGT-rj-6's own library (the marking contract via jsonschema; validate_evidence per sentence for existence/association/source version; the verbatim gate RE-RUN against the passage and compared with the verdict the object shipped), the id -> PASSAGE resolution, and the SERVED/ABSENT/INVALID + pool/local/none status pair. read_thesis_bundle's hardcoded \"drafted_sections\": [] is gone; it merges the block whole. The cell's BOUND names no deploy."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_drafted_sections.py",
+      "kind": "test",
+      "commit_or_etag": "6cf202d134",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "24 tests, offline by construction: every read goes through AMGT_DRAFTING_ROOT or a monkeypatched S3 seam, and the seam RAISES on any call in the local-root tests so 'the pool was not asked' cannot pass by accident. Carries the negative controls the cell names plus association, source version, the verbatim gate, the shipped-verdict mismatch, a missing limb, an unparseable object, an unresolved identity, the pool key itself, and NoSuchKey-vs-AccessDenied (a miss is a completed read; a denial is not)."
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ThesisTab.tsx + types.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "ffeb4840",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed in the PORTAL repo at ffeb4840 on wk-amgt_resapp-11-1-portal -- that pin does NOT resolve in the superproject by design, because this order forbids moving the gitlink (it stays at e85f6eb8). No title= evidence carrier survives in the file; each drafted sentence renders its machine marker, its verbatim_check as the CheckFaceBadge, and then every cited PASSAGE quoted as text with id, accession and location. DraftedSentence.evidence is now DraftedEvidence[] ({id, passage, source}), not a string -- a component cannot print words it was never given. PORTAL FROZEN: committed, not promoted."
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/drafting.harness.cjs + thesisBundle.drafted.BA_US_Equity.json",
+      "kind": "test",
+      "commit_or_etag": "ffeb4840",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed in the PORTAL repo at ffeb4840 (not the superproject). The actual ThesisTab and CheckFaceBadge transpiled with the installed typescript and rendered by react-dom/server over a fixture that is the VERBATIM return of read_thesis_bundle('BA_US_Equity') against the pool object -- re-compared against a fresh adapter call at instance time and identical but for generated_at. The walk is anchored on per-sentence indices, not on the sentence text, because a drafted sentence is often a substring of a passage printed above it."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/AMGT_RESAPP.TO-AMGT-rj-2.vite-build.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC6's build log, transcribed to ASCII with the transform stated in its header and the raw capture's sha256 recorded (15,072 bytes, 172 non-ASCII characters, all in vite's own progress rendering; sha256 444dab7287848a5c050e9b41c16dacf63e6e354b66bad897594c2db4db797400)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "drafting_status SERVED, drafting_source pool, sections 5, sentences N at least 10, with-passages EQUAL to N (every served sentence carries resolved evidence with passage text), generated-true EQUAL to N, verbatim-PASS EQUAL to N, held_uncited_count a printed integer, thesis_driver naming a series. A sentence served with an id and no passage is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import json; from lib.research.api import scoped_amgt as s; b=s.read_thesis_bundle('BA_US_Equity'); ds=b.get('drafted_sections') or []; ss=[q for x in ds for q in x.get('sentences',[])]; print('drafting_status', b.get('drafting_status'), 'drafting_source', b.get('drafting_source'), 'sections', len(ds), 'sentences', len(ss), 'with-passages', sum(1 for q in ss if q.get('evidence') and all(isinstance(e,dict) and e.get('passage') for e in q['evidence'])), 'generated-true', sum(1 for q in ss if q.get('generated') is True), 'verbatim-PASS', sum(1 for q in ss if q.get('verbatim_check')=='PASS'), 'held_uncited_count', b.get('held_uncited_count'), 'thesis_driver', json.dumps(b.get('thesis_driver'))[:120])\"",
+      "output_evidence": "drafting_status SERVED drafting_source pool sections 5 sentences 38 with-passages 38 generated-true 38 verbatim-PASS 38 held_uncited_count 0 thesis_driver {\"series\": \"BCA commercial aircraft deliveries (with 737 monthly production rate)\", \"unit\": \"aircraft delivered per year",
+      "denominator": "ONE bundle read live from the pool (s3://opal-data-harvest/drafting/v1/BA_US_Equity.json, boto3 us-east-1). Denominator N = 38 served sentences across 5 of 5 limbs (company_description 9, investment_thesis 10, risks 9, ceo_bio 0 with its `absent` statement, recommendation 10), and every one of the three per-sentence counts EQUALS it: with-passages 38 of 38, generated-true 38 of 38, verbatim-PASS 38 of 38. 48 evidence records are cited across those 38 sentences and each arrives as {id, passage, source} with non-empty passage text -- an id with no passage would not be counted by the with-passages arm. held_uncited_count is the integer 0, carried beside held_uncited_basis ABSENT_ON_OBJECT because 0 of 5 landed drafting/v1 objects declare the field at all (row W18-S8); thesis_driver names the series 'BCA commercial aircraft deliveries (with 737 monthly production rate)'. GRAIN: the object read hashes to sha256 684197b8861424f9..., the digest 0.9.0_WK_AMGT_RESAPP~20 recorded for the object it served.",
+      "status": "PASS",
+      "expect": "drafting_status SERVED drafting_source pool sections 5 sentences 38 with-passages 38 generated-true 38 verbatim-PASS 38 held_uncited_count 0 thesis_driver .*BCA commercial aircraft deliveries"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "absent-status ABSENT and absent-sections 0; goodroot SERVED 5 (the positive control: the pool's own object, fetched once into .scratch/ and read through a local root); badroot INVALID 0 (an unknown evidence id refuses the whole object); badroot2 INVALID 0 (an empty evidence array refuses it). A SERVED on either bad arm, or a positive control that is not SERVED, is NOT met",
+      "method": "command",
+      "invocation": "AMGT_DRAFTING_ROOT=\".scratch/no-such-root\" python -c \"from lib.research.api import scoped_amgt as s; b=s.read_thesis_bundle('BA_US_Equity'); print('absent-status', b.get('drafting_status'), 'absent-sections', len(b.get('drafted_sections') or []))\"; mkdir -p .scratch/goodroot .scratch/badroot .scratch/badroot2; .tools/aws s3api get-object --bucket opal-data-harvest --key drafting/v1/BA_US_Equity.json .scratch/goodroot/BA_US_Equity.json --query ContentLength --output text; python -c \"import json,io; d=json.load(io.open('.scratch/goodroot/BA_US_Equity.json',encoding='utf-8')); d['sections'][0]['sentences'][0]['evidence']=['no-such-id']; io.open('.scratch/badroot/BA_US_Equity.json','w',encoding='utf-8').write(json.dumps(d)); d['sections'][0]['sentences'][0]['evidence']=[]; io.open('.scratch/badroot2/BA_US_Equity.json','w',encoding='utf-8').write(json.dumps(d))\"; for r in goodroot badroot badroot2; do AMGT_DRAFTING_ROOT=\".scratch/$r\" python -c \"from lib.research.api import scoped_amgt as s; b=s.read_thesis_bundle('BA_US_Equity'); print('$r', b.get('drafting_status'), len(b.get('drafted_sections') or []))\"; done",
+      "output_evidence": "absent-status ABSENT absent-sections 0\n109540\ngoodroot SERVED 5\nbadroot INVALID 0\nbadroot2 INVALID 0",
+      "denominator": "FOUR arms over ONE object, 4 of 4 as specified. ABSENT arm: a root that does not exist -> ABSENT, 0 sections. POSITIVE CONTROL: the pool's own bytes fetched once (ContentLength 109540, the figure the s3api call printed) into .scratch/goodroot/ and read back through a local root -> SERVED, 5 sections -- so the two bad arms below cannot be passing because the local-root path is broken. NEGATIVE ARM 1: one sentence's evidence id rewritten to 'no-such-id' -> INVALID, 0 sections (EXISTENCE, pipeline.validate_evidence). NEGATIVE ARM 2: the same sentence's evidence emptied -> INVALID, 0 sections (the empty list refuses before any id check). Both bad objects differ from the good one by exactly that one field, so the refusal is attributable to it. 24 further arms, including ASSOCIATION, SOURCE VERSION, the verbatim gate and the shipped-verdict mismatch, are in lib/research/api/tests/test_drafted_sections.py.",
+      "status": "PASS",
+      "expect": "absent-status ABSENT absent-sections 0.*goodroot SERVED 5.*badroot INVALID 0.*badroot2 INVALID 0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "title-evidence-carrier 0 and title-Evidence-any 0, passage-render at least 2, source-label at least 1, blockquote-or-list at least 1, machine-marker at least 1, held-uncited-line at least 1. A surviving title= carrier for evidence is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import io; t=io.open('portal/src/pages/SecurityAnalysis/tabs/ThesisTab.tsx',encoding='utf-8').read(); print('title-evidence-carrier', t.count('title={sentence.evidence'), 'title-Evidence-any', t.count('Evidence: '), 'passage-render', t.count('passage'), 'source-label', t.count('accession'), 'blockquote-or-list', t.count('<blockquote') + t.count('<ul') + t.count('<ol'), 'machine-marker', t.count('machine'), 'held-uncited-line', t.count('held'))\"",
+      "output_evidence": "title-evidence-carrier 0 title-Evidence-any 0 passage-render 5 source-label 8 blockquote-or-list 2 machine-marker 2 held-uncited-line 4",
+      "denominator": "SEVEN token counts over the one file the criterion names (portal/src/pages/SecurityAnalysis/tabs/ThesisTab.tsx, 296 lines at portal ffeb4840). Both zero-bars are ZERO: title-evidence-carrier 0 and title-Evidence-any 0 -- and both are MEANINGFUL zeros, because the pre-edit file counted 1 and 1 on the identical invocation. Every floor is cleared: passage-render 5 (bar 2), source-label 8 (bar 1), blockquote-or-list 2 (bar 1 -- one <blockquote> per evidence record inside one <ul>), machine-marker 2 (bar 1), held-uncited-line 4 (bar 1). The file is pure ASCII (0 non-ASCII bytes).",
+      "status": "PASS",
+      "expect": "title-evidence-carrier 0 title-Evidence-any 0 passage-render [2-9]\\d* source-label [1-9]\\d* blockquote-or-list [1-9]\\d* machine-marker [1-9]\\d* held-uncited-line [1-9]\\d*"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "rc=0 and check lines: passage_after_each_sentence true, passage_before_next_sentence true, no_title_evidence_attribute true, sentences_checked N at least 10 equal to the served bundle's sentence count, machine_marker_per_sentence true, held_uncited_line_present true. A harness that checks fewer sentences than the bundle carries is NOT met",
+      "method": "command",
+      "invocation": "cd portal && timeout 110 node src/pages/SecurityAnalysis/__harness__/drafting.harness.cjs 2>&1 | tail -12; echo rc=$?",
+      "output_evidence": "  },\n  \"limits\": \"A static render boundary. It does not say what any browser received and it grades nothing about the pool object beyond the bytes the adapter served.\"\n}\nsentences_checked 38 of 38 (bundle sentence count)\nCHECK passage_after_each_sentence true (expected true)\nCHECK passage_before_next_sentence true (expected true)\nCHECK no_title_evidence_attribute true (expected true)\nCHECK sentence_markers_complete true (expected true)\nCHECK machine_marker_per_sentence true (expected true)\nCHECK verbatim_badge_per_sentence true (expected true)\nCHECK held_uncited_line_present true (expected true)\nCHECKS-OK 7 of 7\nrc=0",
+      "denominator": "38 of 38 -- 'sentences_checked 38 of 38 (bundle sentence count)' is the harness's own line and the two numbers are the walk and the fixture's independent counts, not one number printed twice: the walk counts data-drafted-sentence markers in the rendered HTML and the denominator counts sentences in the bundle. 38 is at least 10 and EQUALS AC1's served sentence count. 48 evidence records were positioned. All SEVEN checks true (the criterion names five of them; sentence_markers_complete and verbatim_badge_per_sentence are extra arms, not substitutions). rc=0 on the recorded line is `tail`'s status, not node's, so node's own exit code was measured UNPIPED in the same state: 0, and the CHECKS-OK / CHECKS-WRONG-WAY line carries the verdict inside the graded output (the shape row W18-S5 asked for). DISCRIMINATION: the identical checks against the PRE-EDIT component (portal ad275969, same fixture) report 0 sentence markers, 0 of 48 passages in the HTML and title=\"Evidence: [object Object]\" PRESENT.",
+      "status": "PASS",
+      "expect": "sentences_checked 38 of 38 .bundle sentence count.*CHECK passage_after_each_sentence true.*CHECK passage_before_next_sentence true.*CHECK no_title_evidence_attribute true.*CHECK machine_marker_per_sentence true.*CHECK held_uncited_line_present true.*CHECKS-OK 7 of 7\\nrc=0"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the adapter suite ends with N passed PRINTED (N at least 40; the collected count is the denominator) and 0 failed, 0 errors -- pytest, because unittest discover collected ZERO tests over this pytest-style suite (row W18-S1); drafting-diff-lines 0 (this cell did not touch lib/research/drafting/ -- chain C owns it). Any drafting diff is NOT met",
+      "method": "command",
+      "invocation": "python -m pytest lib/research/api/tests -q 2>&1 | tail -3; git diff --stat SITEZ...HEAD -- lib/research/drafting/ | cat; echo \"drafting-diff-lines: $(git diff SITEZ...HEAD -- lib/research/drafting/ | wc -l)\"",
+      "output_evidence": "........................................................................ [ 85%]\n............                                                             [100%]\n84 passed in 10.44s\ndrafting-diff-lines: 0",
+      "denominator": "84 of 84 collected tests passed, 0 failed, 0 errors -- the collected count IS the denominator and pytest prints it. 60 of those are the pre-existing suite measured at this worktree's tip before any edit; 24 are this cell's new lib/research/api/tests/test_drafted_sections.py. 84 is at least 40. pytest, not `unittest discover`, because that runner collects ZERO tests over this pytest-style suite (row W18-S1). drafting-diff-lines 0 and `git diff --stat SITEZ...HEAD -- lib/research/drafting/` printed NOTHING: this cell wrote no byte under chain C's library, measured AFTER its own commit 6cf202d134 so the range actually contains this work. The capture is the run's bytes with pytest's ANSI colour sequences removed (179 ESC bytes); nothing else was altered.",
+      "status": "PASS",
+      "expect": "84 passed.*drafting-diff-lines: 0"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "rc=0, js-assets above 20, TOKEN machine at least 1, TOKEN control 0; at least one new portal commit on the branch; gitlink e85f6eb8 unchanged. A moved gitlink is a hard stop",
+      "method": "command",
+      "invocation": "cd portal && timeout 110 ./node_modules/.bin/vite build --logLevel info > ../.scratch/rj2.build.txt 2>&1; echo rc=$?; python -c \"import glob,os; js=sorted(glob.glob('dist/assets/*.js')); toks={'machine':b'machine','control':b'zzz-no-such-string-rj2-control'}; hits={k:[os.path.basename(f) for f in js if v in open(f,'rb').read()] for k,v in toks.items()}; print('js-assets', len(js)); [print('TOKEN', k, len(v)) for k,v in hits.items()]\"; cd .. && git -C portal log --oneline -3 | cat; echo \"gitlink: $(git ls-tree HEAD portal | cut -c13-22)\"",
+      "output_evidence": "rc=0\njs-assets 55\nTOKEN machine 3\nTOKEN control 0\nffeb4840 L7(AMGT_RESAPP.TO-AMGT-rj-2, 0.9.0_WK_AMGT_RESAPP~18): every machine sentence prints the passage it rests on, directly beneath it\nad275969 L7(AMGT_RESAPP.TO-AMGT-rj-1, 0.9.0_WK_AMGT_RESAPP~18): the ranked click carries the canonical key, and a row without one does not navigate\n9aef3734 fix(AMGT-ri-1): a settled read failure is no longer rendered as an empty day\ngitlink: t e85f6eb8",
+      "denominator": "rc=0 from vite; 55 js assets in dist/assets (bar: above 20). TOKEN machine 1 of 55 assets carries it -- printed as the count of ASSETS containing the token (3), bar 1 -- and the CONTROL token 'zzz-no-such-string-rj2-control' is in 0 of 55, which is what makes the positive count evidence rather than a scan that finds everything. ONE new portal commit on the branch above rj-1's tip: ffeb4840 (4 files, 6024 insertions). The gitlink prints as 't e85f6eb8' -- `cut -c13-22` lands one character early, so the 't' is the tail of 'commit' and the value is e85f6eb8, the SAME hash the order names and the one it carried at spawn; no commit of this cell stages a `portal` path. Build log kept beside this instance as a pure-ASCII transcription; the raw capture is 15,072 bytes, 172 non-ASCII characters (all in vite's own progress rendering), sha256 444dab7287848a5c050e9b41c16dacf63e6e354b66bad897594c2db4db797400.",
+      "status": "PASS",
+      "expect": "rc=0\\njs-assets 55\\nTOKEN machine [1-9]\\d*\\nTOKEN control 0\\nffeb4840 L7\\(AMGT_RESAPP\\.TO-AMGT-rj-2, 0\\.9\\.0_WK_AMGT_RESAPP~18\\).*gitlink: t? ?e85f6eb8"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "THE MUTANT IS NOT SYNTHETIC -- it is the component the page actually shipped. The PRE-EDIT ThesisTab.tsx (portal HEAD ad275969, 6,022 bytes, extracted with `git -C portal show HEAD:...`) was rendered against the SAME served fixture with the SAME checks, off-repo in .scratch/, touching no committed file.",
+      "expected": "If the checks measure the repair, the shipped component must fail them: no sentence markers, no passage text in the HTML, and the title= evidence carrier present.",
+      "observed": "MUTANT FIRED-AS-EXPECTED. 'CONTROL sentence_markers_found 0', 'CONTROL passages_in_html 0 of 48', 'CONTROL title_evidence_attribute_present true' with the sample 'title=\"Evidence: [object Object]\"', 'CONTROL held_uncited_line_present false', against 38 of 38 and 48 of 48 on the committed component. SECOND, INDEPENDENT ARM on the route half: the two AC2 negative objects (unknown id; empty evidence array) both return INVALID 0 while the positive control -- the pool's own bytes through the same local-root path -- returns SERVED 5, so neither refusal is the read path failing.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 run twice on unchanged inputs and compared with cmp; AC4's deciding block (the 9 lines carrying sentences_checked, the seven CHECK lines and CHECKS-OK) run twice and compared with cmp. AC4's full JSON carries an `at` timestamp by design and is excluded for that reason, which is why the comparison is scoped to the block that decides. AC1's full line carries no clock.",
+      "observed": "AC1: two runs byte-identical ('drafting_status SERVED sections 5 sentences 38 with-passages 38'). AC4: two blocks byte-identical, 38 of 38 and CHECKS-OK 7 of 7 both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Nothing under lib/research/drafting/ was edited -- the validator is CALLED, never copied or changed.",
+      "reason": "The cell: 'You CALL that validator; lib/research/drafting/ is chain C's and is READ-ONLY for you.' AC5 measures it: drafting-diff-lines 0 after this cell's own commit."
+    },
+    {
+      "item": "The drafted documents themselves were not produced, re-produced or re-written; no model or vendor call was made.",
+      "reason": "BOUND: 'no model call, no vendor call'. The five drafting/v1 objects are AMGT-rj-6's; this cell reads them. The only writes to the pool this cell made are none -- every S3 call is a get_object."
+    },
+    {
+      "item": "held_uncited_count is served as 0 BY ABSENCE for every one of the five names, not as a measured withheld-claim count.",
+      "reason": "INTERFACE D-1 carries no such field (0 of 5 landed objects), row AMGT_RESAPP-Z-W18-S8. The count is carried beside held_uncited_basis so a consumer can reject on it; joining D-1 to F-1 to recover the real number would make this route a second reader of one quantity, and both files are outside this cell's <paths>."
+    },
+    {
+      "item": "Nothing is deployed, promoted or pushed; the portal gitlink is not moved; no install was run.",
+      "reason": "BOUNDS section 4 (PORTAL FROZEN, COMMIT YES / PROMOTE NO) and the worker face's NEVER RUN AN INSTALL. AC6 measures the gitlink at e85f6eb8, unchanged."
+    },
+    {
+      "item": "AMGT-rj-1's identifier-conversion guard was not re-worded, and no test of another cell was touched.",
+      "reason": "The REFUSAL CLAUSE: a defect outside this cell's named deliverables is filed, never repaired or widened into. Row AMGT_RESAPP-Z-W18-S9; this cell's own function moved to a split/join instead."
+    },
+    {
+      "item": "Only BA_US_Equity is exercised end-to-end through the page; the other four names are exercised at the route only.",
+      "reason": "Every criterion of this order names BA_US_Equity. The route was read against all five objects when measuring row W18-S8 (5 of 5 fetched, 5 of 5 without held_uncited); the render check's fixture is BA's because that is the bundle the criteria grade."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W18-S8: INTERFACE D-1 carries no `held_uncited` field at all -- 0 of 5 landed drafting/v1 objects have the key, though this cell's text and the decomposition's D-1 row both name it. It is F-1's field (lib/research/filings/analyze.py:610 @8940b7320c). held_uncited_count is therefore served as 0 with held_uncited_basis ABSENT_ON_OBJECT -- zero by absence, not by measurement -- and for SAP_GY_Equity the two genuinely differ (F-1 held 6).",
+    "AMGT_RESAPP-Z-W18-S9: AMGT-rj-1's identifier-conversion guard is a line-level text scan over the whole of scoped_amgt.py, so it refused a SECTION LABEL ('investment_thesis' -> 'Investment thesis') with a message asserting the line 'converts an identifier form'. The guard was not touched; this cell's function was rewritten as split/join and the suite is 84 passed."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/SESSION_LOG.AMGT-rj-2.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (superproject)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~18 <0.9.0_WK_AMGT_RESAPP~18@opal.agent>\" -F .scratch/msg_ws_rj2.txt -- lib/research/api/scoped_amgt.py lib/research/api/tests/test_drafted_sections.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "committed 6cf202d134 on wk-amgt_resapp-11-1; 3 files changed, 882 insertions(+), 3 deletions(-); surprise-row-gate OK (2 new rows of 212 checked, 210 pre-existing not re-graded); surprise-corpus OK (72 documents, 2424 rows, 4 known failures = the legacy baseline, 0 new); msg-verify MATCH len=3948"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (portal repo)",
+      "invocation": "cd portal && bash /c/tmp/wk-amgt-11-1/.tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~18 <0.9.0_WK_AMGT_RESAPP~18@opal.agent>\" -F /c/tmp/wk-amgt-11-1/.scratch/msg_portal_rj2.txt -- src/pages/SecurityAnalysis/tabs/ThesisTab.tsx src/pages/SecurityAnalysis/types.ts src/pages/SecurityAnalysis/__harness__/drafting.harness.cjs src/pages/SecurityAnalysis/__harness__/thesisBundle.drafted.BA_US_Equity.json",
+      "result": "committed portal ffeb4840 on wk-amgt_resapp-11-1-portal; 4 files changed, 6024 insertions(+), 26 deletions(-); superproject gitlink not staged; msg-verify MATCH len=3072. The commit-gate WARNED that it checked 0 of 4 files (it reads only .py/.sh/.tf/org/projects/*.json), which is why tsc and the render harness are the instruments cited for this half."
+    },
+    {
+      "tool": "tsc (supplementary control -- vite build does not typecheck)",
+      "invocation": "cd portal && ./node_modules/.bin/tsc --noEmit -p tsconfig.json",
+      "result": "rc=0, zero bytes of output, over the whole project including the re-typed DraftedSentence.evidence"
+    },
+    {
+      "tool": "ruff (the commit gate's own py39 limb, run ahead of the commit)",
+      "invocation": "python -m ruff check --target-version py39 lib/research/api/scoped_amgt.py lib/research/api/tests/test_drafted_sections.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "the pool, read for row W18-S8's denominator",
+      "invocation": "for k in BA_US_Equity COST_US_Equity SAP_GY_Equity HD_US_Equity BABA_US_Equity; do .tools/aws s3api get-object --bucket opal-data-harvest --key \"drafting/v1/$k.json\" ... --query ContentLength --output text; done",
+      "result": "109540 88475 84313 99745 102534; 5 of 5 objects fetched, 0 of 5 carry a `held_uncited` key, and BA's bytes hash to the digest AMGT-rj-6 recorded for the object it served"
+    }
+  ]
+}
