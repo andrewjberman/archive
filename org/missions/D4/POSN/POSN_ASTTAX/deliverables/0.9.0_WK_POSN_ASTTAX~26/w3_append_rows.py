@@ -18,6 +18,7 @@ import sys
 
 PATH = 'org/missions/D4/POSN/POSN_ASTTAX/surprise-channel/investigations/INVESTIGATION_v1.md'
 TS = '2026-09-15T04:26:05Z'
+TS7 = '2026-09-15T05:07:00Z'
 ME = '0.9.0_WK_POSN_ASTTAX~26'
 
 
@@ -28,7 +29,7 @@ def row(rid, one_line, spec_asserts, world_is, evidence, notes, klass='OBSERVATI
         'project': 'POSN_ASTTAX',
         'fabric': 'site-z',
         'surfaced_by': ME,
-        'surfaced_at': TS,
+        'surfaced_at': TS7 if rid.endswith('-S7') else TS,
         'one_line': one_line,
         'class': klass,
         'hazard_standing': hazard,
@@ -40,7 +41,7 @@ def row(rid, one_line, spec_asserts, world_is, evidence, notes, klass='OBSERVATI
     }
 
 
-NEW = [
+NEW_ALREADY_FILED = [
     row('POSN_ASTTAX-Z-W26-S1',
         'ACTED ON AN ISSUER AMENDMENT MID-ORDER, recorded as the notice required: 2.0.0_SA_COO~Z '
         '(~04:1xZ, then ~04:15Z) withdrew act 2 of TO-W3-1 (Math.round at PositioningSummary.tsx:1011) '
@@ -180,6 +181,49 @@ NEW = [
         'For L9/L10: keeping the portfolio columns in the set means a reader in Benchmark view sees the class the '
         'BOOK holds even where the benchmark holds none, which is arguably the intent; the narrower reading would '
         'hide a class the model is actually exposed to the moment the view is flipped. Named, not decided.'),
+]
+
+# S1..S6 above were appended by the FIRST run of this script and are already committed at
+# 2191049ef1; they are kept verbatim so the record shows what was filed, not a summary of it.
+# THIS run appends S7 only -- the guard below refuses any id that already exists in the file.
+NEW = [
+    row('POSN_ASTTAX-Z-W26-S7',
+        'A SPARSE-CONE WORKER WORKTREE CANNOT RUN THE MANDATED COMMIT GATES, and each one fails CLOSED '
+        'on a path the cone does not carry rather than on anything the commit contains. The round-6 '
+        'worktree was cut with the cone {.tools, docs/doctrine, org/critical_paths, '
+        'org/missions/D4/POSN/POSN_ASTTAX, org/standards}; safe-commit.sh refused FOUR times in a row, '
+        'each time naming a DIFFERENT absent path, and every refusal was correct.',
+        'CLAUDE.md Rule 14 (every .py edit passes .tools/commit-gate.sh, UNIVERSAL and fail-closed) and '
+        'Rule 14a (commit via safe-commit.sh); the task order says the worktree is a sparse cone at the '
+        'issuance commit and must not be re-created.',
+        'The four refusals, in order: (1) commit-gate -- ModuleNotFoundError: No module named '
+        '"comp_constants_cli" (commit_gate_runner.py imports it from org/modules/graph, 408 files / 18 MB, '
+        'outside the cone); (2) surprise-row-gate -- FileNotFoundError on '
+        'org/surprise_channel/schemas/investigation_item.schema.json (2 files / 19 KB); (3) the same '
+        'gate STANDING CORPUS pass -- FileNotFoundError on another project channel file '
+        '(org/missions/D0/NFRA/NFRA_CLDGRPH/surprise-channel/investigations/INVESTIGATION_v1.md; it grades '
+        'the WHOLE corpus, 76 channel files under org/missions plus 32 under org/surprise_channel); '
+        '(4) the tree-index limb -- 17 INDEX-MISSING violations, one per project with no '
+        'org/projects/<CODE>.json (458 files / 4.4 MB). REMEDY TAKEN: `git sparse-checkout add` for '
+        'org/modules/graph, org/surprise_channel, org/missions and org/projects -- a WORKTREE CHECKOUT '
+        'change, no repo edit, no gate bypassed, the audited '
+        '"# surprise-row-override" path NOT used. The gates then ran and passed, and the corpus pass '
+        'graded 240 rows (6 new, 234 pre-existing).',
+        ['The four refusal texts are in this worker session log; each names its own missing path and each '
+         'aborted the commit with "files unstaged".',
+         'MEASURED SIZES before widening (git ls-tree -r --long HEAD): org/modules/graph 408 files / 18 MB; '
+         'org/surprise_channel/schemas 2 files / 19 KB; org/missions 2261 files / 56 MB; org/projects 458 '
+         'files / 4.4 MB. org in full is 21276 files / 830 MB and was NOT added.',
+         'AFTER: the cone reads .tools, docs/doctrine, org/critical_paths, org/missions, org/modules/graph, '
+         'org/projects, org/standards, org/surprise_channel; safe-commit rc 0 twice (2191049ef1, 338b08b06d).',
+         'SIDE EFFECT WORTH NAMING: with org/projects absent, proof-of-spec-check.py read '
+         '"dep_stage=ABSENT (not pipeline-registered)" for POSN_ASTTAX and would have treated '
+         '<decomp_ref> as OPTIONAL; with it present the same instance reads "dep_stage=EXECUTING" and the '
+         'decomp_ref limb ENFORCES. The instance was re-validated after the widening (VALID rc=0 both ways).'],
+        'For the COO cutting worker worktrees: a cone of {.tools, docs/doctrine, org/critical_paths, '
+        '<project home>, org/standards, org/modules/graph, org/projects, org/surprise_channel, org/missions} '
+        'is what the commit path actually needs today -- the last four are what this worker had to add. '
+        'The alternative (the audited override) would have SKIPPED a real control rather than running it.'),
 ]
 
 

@@ -291,6 +291,10 @@ SURPRISES = [
     'POSN_ASTTAX-Z-W26-S6: the order\'s presence rule (portfolio columns ALWAYS in the set) and '
     'C-PRESENT-CLASSES\'s sentence ("any column the current view DRAWS") differ on the Benchmark view; the '
     'order\'s reading is what is implemented, and it shows Structured with no drawn benchmark segment.',
+    'POSN_ASTTAX-Z-W26-S7: a sparse-cone worker worktree cannot run the mandated commit gates -- '
+    'safe-commit refused four times, each on a DIFFERENT path the cone did not carry (org/modules/graph, '
+    'the surprise schema, the whole channel corpus under org/missions, org/projects); the cone was widened '
+    'so every gate RAN, and the audited override was not used.',
 ]
 
 INST = {
