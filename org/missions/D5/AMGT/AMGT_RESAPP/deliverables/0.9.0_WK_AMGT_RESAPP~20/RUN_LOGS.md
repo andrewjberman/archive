@@ -132,3 +132,66 @@ Denominator: 2 of 2 filings; 10 of 10 expected objects under filings/v1 (5 names
 schema-valid True sections 5 evidence_records 88 sentences 38 all-ids-resolve True with-evidence 38 generated-true 38 verbatim-PASS 38 dropped 2 thesis_driver {"series": "BCA commercial aircraft deliveries (with 737 monthly production rate)", "unit": "aircraft delivered per year (and per month)", "source_passage_id":
 ```
 
+
+---
+
+# AMENDMENT 1 RE-RUN -- 2026-09-15 ~11:4xZ, branch wk-amgt_resapp-11-3 @04b59f883c
+
+The issuer (`2.0.0_SA_COO~W`) amended AC6's task-query invocation at `04b59f883c` on rows
+`AMGT_RESAPP-Z-W20-S2` and `W20-S3`: the `MSYS_NO_PATHCONV=1` prefix and `/V` were added, the
+expectation was left unchanged. AC6 was re-run as now written and AC7 was re-run because it reads
+committed history and the working status, both of which moved with the drain at `f8b3475c87` and
+the branch fast-forward. AC1-AC5 were NOT re-run: their criterion text did not move, and re-running
+AC2-AC4 would spend five more model runs beyond the cell's five-run bound. Nothing was rebuilt.
+
+## AC6 -- the batch dry run and the task query, AMENDED invocation (rc 0, under timeout 120)
+
+```
+python -m lib.research.filings.batch --universe universe/v1/2026-09-15.json --dry-run 2>&1 | tail -5; MSYS_NO_PATHCONV=1 schtasks /Query /TN OpalResearch-FilingsAnalyzer /FO LIST /V 2>&1 | tr -d "\r" | grep -E "TaskName|Status|Schedule Type|Scheduled Task State" | cat
+```
+
+```
+BATCH: universe s3://opal-data-harvest/universe/v1/2026-09-15.json as_of 2026-09-15 names 256 with_filing_identity 12 would_fetch 12 unresolved_source 244 limit none
+WOULD-FETCH: ASML_NA_Equity(20-F cik 937966), BABA_US_Equity(20-F cik 1577552), BA_US_Equity(10-K cik 12927), COST_US_Equity(10-K cik 909832), HAL_US_Equity(10-K cik 45012), HD_US_Equity(10-K cik 354950), INTU_US_Equity(10-K cik 896878), KMB_US_Equity(10-K cik 55785), NU_US_Equity(20-F cik 1691493), PBR_US_Equity(20-F cik 1119639), SAP_GY_Equity(20-F cik 1000184), VLO_US_Equity(10-K cik 1035002)
+UNRESOLVED-SOURCE: 244 name(s), each an explicit object at filings/v1/<security_key>/UNRESOLVED-SOURCE.source.json
+DRY-RUN: nothing fetched, no model call, no pool write, no task run. 12 of 256 name(s) would be analyzed.
+TaskName:                             \OpalResearch-FilingsAnalyzer
+Status:                               Disabled
+Scheduled Task State:                 Disabled
+Schedule Type:                        Weekly
+```
+
+DENOMINATOR: limb 1 -- 256 names in the universe, 12 with a filing identity, 12 would-fetch, 244
+UNRESOLVED-SOURCE, 0 fetched / 0 model calls / 0 pool writes. limb 2 -- 4 of 4 named fields returned
+(TaskName, Status, Scheduled Task State, Schedule Type), against 0 of 4 as originally written. The
+world-state did not move: the task was Weekly and Disabled at the first pass and is Weekly and
+Disabled now; what changed is that the criterion's own invocation now produces the result it names.
+
+Corroboration, limb 2 alone at the top level with no `bash -c` wrapper, rc 0, same 4 of 4 fields:
+
+```
+env MSYS_NO_PATHCONV=1 schtasks /Query /TN OpalResearch-FilingsAnalyzer /FO LIST /V
+TaskName:                             \OpalResearch-FilingsAnalyzer
+Status:                               Disabled
+Scheduled Task State:                 Disabled
+Schedule Type:                        Weekly
+```
+
+## AC7 -- history, ASCII, no raw secret read, clean status (rc 0, under timeout 120)
+
+```
+a536333c92 0.9.0_WK_AMGT_RESAPP~20 fix(AMGT_RESAPP AMGT-rj-6, AC7): the docstring that promised no raw secret read spelled the token it prom
+8abfd829a7 0.9.0_WK_AMGT_RESAPP~20 build(AMGT_RESAPP AMGT-rj-6, F-1 + D-1): the filings analyzer -- two passes, every cited claim resolved t
+6093d06a0e 0.9.0_WK_AMGT_RESAPP~3 L7(AMGT_RESAPP.TO-AMGT-s-9, 0.9.0_WK_AMGT_RESAPP~3): THE DRAFTING FACE -- every machine sentence marked an
+files 11 nonascii 0 raw-secretsmanager-reads 0 lambda-or-terraform-files 0
+```
+
+DENOMINATOR: 2 of the 4 most recent commits on the two packages are this serial's (`git log -4`
+returns 3 commits for these paths; the third is the pre-existing AMGT-s-9 history); 11 of 11 package
+`.py` files at 0 non-ASCII; 0 raw secret reads of 11 files; 0 dirty paths of 2 directories --
+`git status --porcelain` on both packages printed NOTHING. Output identical to the first pass.
+
+VERDICT: AC6 PASS-by-output on the amended invocation; AC7 PASS-by-output at the new tip; the
+instance re-graded VALID (rc 0) by this worktree's own `.tools/proof-of-spec-check.py` on
+AC1,AC2,AC3,AC4,AC5,AC6,AC7. No new surprise row: nothing had to be done that the amended order did
+not say, and nothing it said could not be done.
