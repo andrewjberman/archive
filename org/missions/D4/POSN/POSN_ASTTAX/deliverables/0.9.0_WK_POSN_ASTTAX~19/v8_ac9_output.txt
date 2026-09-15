@@ -1,0 +1,78 @@
+====================================================================================================
+V8-AC9 -- THE GUARD BETWEEN A ROUTINE RE-SEED AND THE RETAG
+====================================================================================================
+  harness        : C:\tmp\wk-posn-5-19\org/missions/D4/POSN/POSN_ASTTAX/deliverables\0.9.0_WK_POSN_ASTTAX~21/v3_mutant_control_re.py
+  machinery      : C:\tmp\wk-posn-5-19\.scratch\u3_ac1_before_control.py (sha256 ae72cab7dfbeb62f asserted at import)
+  scratch tables : 'etf-classifications' (yang) and 'bd-securities' (bd) -- in-process dicts
+  subject        : data/black_diamond/scripts/classification/seed_canonical_securities.py
+                   blob 803721e2c15464ed4ba054a02aba2311d5506164, 17700 bytes, resolved BY CONTENT from HEAD
+                   pre-patch blob for comparison: fbbc7165d33198789d3a7788a557ed3f5ce75614 (DIFFERS: True)
+  sparse cone    : data/black_diamond/scripts/classification/seed_canonical_securities.py does not exist on disk (git ls-files -t reports S)
+  post-retag read: r1_after.json, Count 285 == ScannedCount 285
+
+DENOMINATOR -- the seeder carries 57 securities; of the thirteen it carries 5: PDBC,VXX,UVXY,QBER,JEPI
+the remaining 8 of 13 are absent from the seeder and CANNOT be reverted by it: DBC,GLD,GSG,IAU,SLV,USO,VIXY,VNQ
+
+THE SEEDER'S OWN VALUE vs THE RETAGGED TABLE, per carried member
+  ticker seeder says      table NOW says   table BEFORE said disagrees
+  PDBC   equity           commodities      equity           YES
+  VXX    equity           structured       equity           YES
+  UVXY   equity           structured       equity           YES
+  QBER   fixed_income     structured       fixed_income     YES
+  JEPI   equity           structured       equity           YES
+  members whose seeder value DISAGREES with the retagged table: 5 of 5
+
+====================================================================================================
+ARM: POST-RETAG (r1_after.json) -- the arm under test
+====================================================================================================
+  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)
+  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)
+  rc = 1   raised = none
+  scratch get_item (pre-read) count: 57   update_item count: 52   minted: 52
+  MINT CONTROL: 'CASH_USD' MINTED -- the seeder IS writing
+  ticker scratch BEFORE   scratch AFTER    seeder would set verdict
+  VXX    structured       structured       equity           SURVIVED
+  UVXY   structured       structured       equity           SURVIVED
+  QBER   structured       structured       fixed_income     SURVIVED
+  PDBC   commodities      commodities      equity           SURVIVED
+  SURVIVED 4 of 4 | CLOBBERED 0
+  REFUSED 5 etf-classifications row(s): the table serves a value this seeder disagrees with.
+  Nothing was reverted. Re-run with --force to overwrite them.
+  [PRESERVED] lines: 9
+    [PRESERVED] QBER       asset_class: table serves 'structured', seeder asserts 'fixed_income' -- table wins, pass --force to override
+    [PRESERVED] QBER       sub_asset_class: table serves 'Hedge', seeder asserts 'Volatility' -- table wins, pass --force to override
+    [PRESERVED] JEPI       asset_class: table serves 'structured', seeder asserts 'equity' -- table wins, pass --force to override
+    [PRESERVED] JEPI       sub_asset_class: table serves 'Options Income', seeder asserts 'US Large Cap' -- table wins, pass --force to override
+    [PRESERVED] VXX        asset_class: table serves 'structured', seeder asserts 'equity' -- table wins, pass --force to override
+    [PRESERVED] VXX        sub_asset_class: table serves 'Hedge', seeder asserts 'Volatility' -- table wins, pass --force to override
+    [PRESERVED] UVXY       asset_class: table serves 'structured', seeder asserts 'equity' -- table wins, pass --force to override
+    [PRESERVED] UVXY       sub_asset_class: table serves 'Hedge', seeder asserts 'Volatility' -- table wins, pass --force to override
+    [PRESERVED] PDBC       asset_class: table serves 'commodities', seeder asserts 'equity' -- table wins, pass --force to override
+
+====================================================================================================
+ARM: PRE-RETAG (r1_before.json) -- the positive control
+====================================================================================================
+  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)
+  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)
+  rc = 0   raised = none
+  scratch get_item (pre-read) count: 57   update_item count: 57   minted: 52
+  MINT CONTROL: 'CASH_USD' MINTED -- the seeder IS writing
+  ticker scratch BEFORE   scratch AFTER    seeder would set verdict
+  VXX    equity           equity           equity           SURVIVED
+  UVXY   equity           equity           equity           SURVIVED
+  QBER   fixed_income     fixed_income     fixed_income     SURVIVED
+  PDBC   equity           equity           equity           SURVIVED
+  SURVIVED 4 of 4 | CLOBBERED 0
+  [PRESERVED] lines: 0
+
+====================================================================================================
+V8-AC9 VERDICT
+====================================================================================================
+  upload arm on the POST-RETAG table : rc=1, 9 [PRESERVED] line(s), CLOBBERED 0 of 4
+  positive control, PRE-RETAG table  : rc=0, 0 [PRESERVED] line(s), CLOBBERED 0 of 4
+  the two arms DIFFER                : True
+  members that disagree with the retagged table: 5 (PDBC,VXX,UVXY,QBER,JEPI)
+  of those, named in a [PRESERVED] line        : 5 (JEPI,PDBC,QBER,UVXY,VXX)
+  get_item count > 0                          : True (57)
+
+  RESULT: PASS -- the guard PROVABLY stands between a routine re-seed and the retag
