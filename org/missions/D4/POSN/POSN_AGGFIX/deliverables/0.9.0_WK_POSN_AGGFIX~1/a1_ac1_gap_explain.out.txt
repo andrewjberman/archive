@@ -1,0 +1,55 @@
+== SERVED ==
+key             s3://opal-data-portal-v2/platinum/mdpf/global/aum-metrics.json
+VersionId       OVcFBOpgjFywfYJGYjowX2VSVwLdiyez
+LastModified    2026-09-15T13:50:50+00:00
+ContentEncoding None
+period          2026-09-14
+last_updated    2026-09-15T13:31:08.859979+00:00
+total.aum       2,081,782,901.82
+total.model_aum 1,800,437,987.06
+  by_model  Ultra Short-Term                  65,550,660.50
+  by_model  Short-Term                       133,205,460.44
+  by_model  Intermediate                     456,971,348.29
+  by_model  Long-Term Conservative           883,977,496.68
+  by_model  Long-Term Aggressive             209,446,529.75
+  by_model  Opal Blend 5050 Int Ltc           35,744,571.59
+  by_model  Opal Blend 5050 St Int             7,217,454.65
+sum(by_model[].aum) 1,792,113,521.90   rows=7
+GAP served = total.model_aum - sum(by_model[].aum) = 8,324,465.16
+
+== GOLD FOLD INPUT (dim_mdpf_aum_metrics.py AGG_GLOBAL_KEY) ==
+versions listed 112 (all pages); choosing the newest with LastModified <= served LastModified and as_of_last == 2026-09-14
+key             s3://opal-data-assets/gold/mdpf_revamp/global/aggregate_aua_timeseries.json
+VersionId       .UzblTWLJpsPRnUPs067bC5KuoRhP648
+LastModified    2026-09-15T13:31:07+00:00  (served LastModified 2026-09-15T13:50:50+00:00)
+as_of_last      2026-09-14   n_dates=475   meta.generated_at=2026-09-15T13:31:06Z   versions loaded=1
+model_aua frontier (row 474, 2026-09-14) 1,800,437,987.06   point_class=measured
+model_aua _frontier() 1,800,437,987.06
+per-key frontiers (fold by_model, every key):
+  model_key                              cohort in MODEL_ORDER     value@frontier        _frontier()
+  opal_ultra_short_term                  model  True                65,550,660.50      65,550,660.50
+  opal_short_term                        model  True               133,205,460.44     133,205,460.44
+  opal_intermediate                      model  True               456,971,348.29     456,971,348.29
+  opal_long_term_conservative            model  True               883,977,496.68     883,977,496.68
+  opal_long_term_aggressive              model  True               209,446,529.75     209,446,529.75
+  opal_growth_sma                        sma    False                4,128,850.14       4,128,850.14
+  opal_div_sma                           sma    False               17,662,383.00      17,662,383.00
+  opal_blend_5050_int_ltc                model  True                35,744,571.59      35,744,571.59
+  opal_blend_5050_st_int                 model  True                 7,217,454.65       7,217,454.65
+  opal_fixed_income                      model  False                8,324,465.16       8,324,465.16
+
+== REPRODUCTION ==
+producer MODEL_ORDER (data/mdpf/scripts/gold/dim_mdpf_aum_metrics.py@ed1db8f1db) = 7 keys
+sum over MODEL_ORDER keys by the :497-512 rule = 1,792,113,521.90
+GAP gold = model_aua frontier - that sum = 8,324,465.16
+GAP served 8,324,465.16  vs  GAP gold 8,324,465.16  |diff| = 0.00  -> REPRODUCED within 0.01
+served by_model rows equal to the fold's per-key value: 7 of 7
+identity: sum of ALL cohort 'model' keys at frontier = 1,800,437,987.06; model_aua - that = 0.00
+cohort 'model' keys OUTSIDE MODEL_ORDER: 1 -> opal_fixed_income (Fixed Income) 8,324,465.16
+their sum 8,324,465.16; GAP gold - their sum = 0.00
+non-model cohort keys (not in model_aua): opal_growth_sma [sma] 4,128,850.14; opal_div_sma [sma] 17,662,383.00
+
+== CONTROL ==
+raised by_model row 'Ultra Short-Term' by 1.00 in memory -> computed gap 8,324,464.16 (was 8,324,465.16); gap moved by 1.00 -> FIRED (exactly 1.00)
+
+WROTE org\missions\D4\POSN\POSN_AGGFIX\deliverables\0.9.0_WK_POSN_AGGFIX~1\AF1_S1_GAP_EXPLANATION.md (4653 B, non-ascii=0); verdict line: DEFECT: against the producer's own stated contract. `dim_mdp
