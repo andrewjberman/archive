@@ -1,0 +1,277 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-a-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0aa50dbc0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8768f46770",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-a-2.principal-cutover.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/context.py",
+      "kind": "script",
+      "commit_or_etag": "d02e73c272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source change only; the release is OG-r-1's. Principal(tid, oid, email) with principal_key(tid, oid) = '<tid>/<oid>' (canonical GUIDs) as the authorization identity and the email as display metadata; set_current_principal for the MCP/REST paths; authorized_tenants() = the configured TENANT_ID, fail closed when unset (MOCK_GRAPH only: the mock tenant).",
+      "introduces": ["class Principal", "def principal_key", "def authorized_tenants", "def set_current_principal"],
+      "artifact_covered_by": ["OGA2-AC1", "OGA2-AC7", "OGA2-AC8", "OGA2-AC9"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/token_broker.py",
+      "kind": "script",
+      "commit_or_etag": "d02e73c272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source change only. The /authorize bridge asks the upstream for OpenID scopes only (AUTHENTICATION_SCOPES); the callback validates the ID token (authorized tenant before any key fetch, RS256 against the tenant's published key, exact issuer, audience = client id, expiry, the nonce derived from this sign-in's state, GUID tid/oid) and returns the principal. Graph-using tools acquire their delegated token silently from the principal's cache when they run; the machine routes' fixed identities keep email-keyed caches; the legacy /login consent writes both (row W3-S10). An unconfigured upstream fails closed before any network call.",
+      "introduces": ["AUTHENTICATION_SCOPES", "def verify_upstream_id_token", "def redeem_code_for_principal", "def build_consent_url", "def redeem_consent"],
+      "artifact_covered_by": ["OGA2-AC1", "OGA2-AC2", "OGA2-AC3", "OGA2-AC8", "OGA2-AC9"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/oauth_as.py",
+      "kind": "script",
+      "commit_or_etag": "d02e73c272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source change only. Codes, refresh families and access tokens bind principal_key(tid, oid); access tokens carry tver=2, tid, oid, sub=<tid>/<oid>, email (display) and fid. validate_access_token refuses a legacy token (no tver or principal) while its exp is valid, an unauthorized tenant, and a family that is not live now, is bound to another principal or no longer grants the token's scope, then applies the kill path. Pre-cutover code records and refresh families are refused with invalid_grant.",
+      "introduces": ["ACCESS_TOKEN_VERSION", "def principal_from_claims", "def _principal_of"],
+      "artifact_covered_by": ["OGA2-AC1", "OGA2-AC4", "OGA2-AC5", "OGA2-AC6", "OGA2-AC8", "OGA2-AC9"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "d02e73c272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source change only. /mcp, /teams/poll and /query/v0 take their principal only from the validated token (_bearer_principal). _resource_error: a missing credential gets 401 + 'Bearer resource_metadata=...' with no error code; an invalid token gets 401 + error=\"invalid_token\"; a valid token lacking the scope gets 403 insufficient_scope with the scope; unreadable state gets 503. The per-identity rate limit is keyed by principal; the bridge callback mints the code for the validated principal.",
+      "introduces": ["def _bearer_principal", "def _resource_error", "class _MissingCredential"],
+      "artifact_covered_by": ["OGA2-AC4", "OGA2-AC7", "OGA2-AC10", "OGA2-AC11"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/revocation.py",
+      "kind": "script",
+      "commit_or_etag": "d02e73c272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source change only. is_principal_revoked (a principal-key line revokes that principal alone; an email line only adds denial); a family id on the jti list revokes that family's access tokens; revoke_principal and its CLI verb.",
+      "introduces": ["def is_principal_revoked", "def revoke_principal"],
+      "artifact_covered_by": ["OGA2-AC6", "OGA2-AC8"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py",
+      "kind": "test",
+      "commit_or_etag": "d02e73c272",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file: test_oga2_ac01 .. test_oga2_ac11, one per criterion, each printing its denominator line. Offline: the upstream is a local issuer (RSA key generated at test time) behind a fake MSAL client, and the gateway's own ID-token validation runs against it; DynamoDB is moto behind a per-request lock; Graph is a recorder. The real app runs in-process with its lifespan (once per module). Under a socket-and-DNS-refusing plugin: 'EGRESS-ATTEMPTS: 0'.",
+      "introduces": ["def test_oga2_ac01", "def test_oga2_ac11"],
+      "artifact_covered_by": ["OGA2-AC1", "OGA2-AC2", "OGA2-AC3", "OGA2-AC4", "OGA2-AC5", "OGA2-AC6", "OGA2-AC7", "OGA2-AC8", "OGA2-AC9", "OGA2-AC10", "OGA2-AC11"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "5f47166b4b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Six rows appended (NFRA_OPLGTW-W3-S7 .. W3-S12) and committed on their own before this proof: '[surprise-row-gate] ... 6 new row(s) of 25 total checked (19 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.'",
+      "introduces": ["NFRA_OPLGTW-W3-S12"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGA2-AC1",
+      "criterion_verbatim": "`OGA2-AC1` (`test_oga2_ac01`) -- the signed access token and the request context carry the validated Entra `tid` and `oid` and a token-version claim, and email is display metadata only. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac01 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac01 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC1: token claims tver=2 tid=True oid=True sub=<tid>/<oid> (no '@') email=first.name@opalinvest.com fid=family; family head principal/tid/oid/tver equal; request context Principal(tid, oid, email); after an email rename: same sub and context key, email renamed@opalinvest.com, Graph token from the same principal cache (cache files 1, the principal's)\n1 passed in 1.84s\nrc=0",
+      "denominator": "1 principal signed in twice (the second time with a renamed email). The token passes validate_access_token and carries 6 of 6 principal fields (tver 2, tid, oid, sub = <tid>/<oid> with no '@', the display email, fid). The family head carries 4 of 4 (principal, tid, oid, tver). 2 of 2 request-context captures through the real GuardMiddleware equal Principal(tid, oid, email). After the rename the sub and the context key are unchanged, and the Graph token comes from the one principal-keyed cache: 1 of 1 cache files. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC2",
+      "criterion_verbatim": "`OGA2-AC2` (`test_oga2_ac02`) -- authentication completes without Graph mail or file scopes. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac02 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac02 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC2: sign-in scopes ['email']; code-redemption scopes ['email']; Graph scopes among them 0 of 17 configured; Graph tokens acquired during authentication 0; then /mcp tools/list 200 (35 tools); control: the /login consent URL asks 17 scopes incl. Mail.Read and Files.ReadWrite.All\n1 passed in 1.86s\nrc=0",
+      "denominator": "2 of 2 upstream requests of one sign-in (the authorization URL and the code redemption) asked for ['email'] only (MSAL adds openid, profile and offline_access). 0 of the 17 configured Graph scopes were asked for, and 0 scopes of the 12 Graph families. 0 Graph tokens were acquired to authenticate. The connection then works: /mcp tools/list 200, 35 tools. Control: the /login consent URL asks all 17 Graph scopes. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC3",
+      "criterion_verbatim": "`OGA2-AC3` (`test_oga2_ac03`) -- a Graph-using tool still acquires its delegated Graph token in the harness. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac03 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac03 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC3: whoami -> 200, delegated Graph token acquired silently for the principal's oid at 8 tier scopes (User.Read Mail.Read Sites.Read.All Team.ReadBasic.All Channel.ReadBasic.All ChannelMessage.Read.All OnlineMeetingTranscript.Read.All Presence.Read.All), Graph /me called with it; difference: acquisition refused -> needs_login, Graph calls +0\n1 passed in 2.38s\nrc=0",
+      "denominator": "0 Graph acquisitions at sign-in, then 1 silent acquisition when whoami ran over /mcp. It was made for the principal's oid, at the 8 scopes of the principal's tier (read_only), and Graph /me was called with exactly that token. Difference arm: 1 principal whose silent acquisition returns nothing gets needs_login, with 0 Graph calls. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC4",
+      "criterion_verbatim": "`OGA2-AC4` (`test_oga2_ac04`) -- every protected MCP and REST route rejects an access token lacking the new token-version and principal claims while its `exp` is still valid, over all route declarations, denominator printed. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac04 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac04 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC4: route declarations in app/server.py 27 (Route 26, Mount 1) == app.routes 27; protected 19 (access 3, access-layer 5, capability 7, static 2, static-exchange 2), public 8; legacy access token (exp valid) rejected 401 on 19 of 19 protected routes, and the OG-a-1-shape legacy token naming a LIVE family rejected 401 invalid_token with the resource challenge on 3 of 3 access-token routes; the same family's current token accepted 200 on 3 of 3 (/mcp, /query/v0, /teams/poll); public routes: the legacy bearer changes no status on 8 of 8\n1 passed in 1.86s\nrc=0",
+      "denominator": "27 of 27 route declarations, counted from app/server.py's source (AST: 26 Route + 1 Mount) and equal to len(app.routes). A declared classification covers them all, and the test fails if a route is unclassified. 19 protected: a gateway-signed pre-cutover access token with a valid exp is refused 401 on 19 of 19. On the 3 access-token routes, an OG-a-1-shape legacy token naming a LIVE family is refused 401 invalid_token with the exact resource challenge, 3 of 3, while that family's current token is accepted 200, 3 of 3. The current access token is also refused on all 11 capability and static routes. 8 public routes: the legacy bearer changes no status, 8 of 8. The first run of this test failed on /ms/site_children (400 before the credential check, row W3-S11); the census now sends well-formed parameters, and this is the verbatim re-run after that edit. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC5",
+      "criterion_verbatim": "`OGA2-AC5` (`test_oga2_ac05`) -- a legacy refresh token returns invalid_grant. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac05 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac05 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC5: pre-durable JWT refresh token -> 400 invalid_grant; pre-cutover durable family (principal=email, no tver/tid/oid) -> 400 invalid_grant (this refresh token predates the principal cutover; reconnect from Claude), generation unchanged 1; control current family -> 200 with a tver-2 token\n1 passed in 2.51s\nrc=0",
+      "denominator": "2 of 2 legacy refresh shapes refused 400 invalid_grant, carrying no token. One is a pre-durable signed JWT refresh token; the other is a durable family in the pre-cutover shape (principal = email, no tver, tid or oid), which is left unrotated at generation 1. Control: 1 current family refreshes 200, and its new access token carries tver 2. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC6",
+      "criterion_verbatim": "`OGA2-AC6` (`test_oga2_ac06`) -- (difference) an access token of a revoked family is rejected, and one of a live family is accepted. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac06 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac06 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC6: before revocation 4 of 4 families' tokens -> 200; after: reuse (issued before the reuse) 401, reuse (issued by the rotation) 401, logout 401, operator 401 -> 401 invalid_token; live family's token -> 200\n1 passed in 2.64s\nrc=0",
+      "denominator": "4 families, whose tokens are 4 of 4 accepted (200 on /mcp) before any revocation. 3 revocation paths: refresh reuse (both the token issued before the reuse and the one issued by the rotation), logout (revoke_family) and operator revocation of the family id. After them, 4 of 4 affected access tokens are refused 401 invalid_token, and 1 of 1 live family's token is still 200. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC7",
+      "criterion_verbatim": "`OGA2-AC7` (`test_oga2_ac07`) -- a caller-supplied email, identity header, role or tenant never becomes the authorization identity. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac07 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac07 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC7: 11 forged identity headers (email x6, tenant x2, principal x2, role x1) plus query/body email/tid/oid/role: 4 of 4 /mcp arms (incl. IDENTITY_PROVIDER=header) carry the token's principal and tier read_only; the same headers without a token -> 401; /teams/poll and /query/v0 handlers receive the token's principal and email\n1 passed in 2.01s\nrc=0",
+      "denominator": "11 forged identity headers, plus email, tid, oid and role given in the query and in the body. 4 of 4 /mcp arms through the real GuardMiddleware carry exactly the token's principal and display email, with tier read_only: headers, headers+query, headers+body, and headers under IDENTITY_PROVIDER=header, the dev provider that trusts X-User-Email. The same headers without a token get 401, and the inner app is reached 0 times. 2 of 2 REST handlers (/teams/poll, /query/v0) receive the token's principal and email. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC8",
+      "criterion_verbatim": "`OGA2-AC8` (`test_oga2_ac08`) -- a principal with the same email and a different `oid` is denied (A3). <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac08 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac08 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC8: two principals, one email, oids differ; B's principal on A's family -> 401 (the token's principal is not the one its family is bound to); B's Graph tool call used B's delegated token, not A's; A revoked by principal key -> A 401, B 200\n1 passed in 2.58s\nrc=0",
+      "denominator": "2 principals signing in with 1 email; their oids and subs differ. 3 denial arms. A gateway-signed token carrying B's principal but A's family is refused 401. B's Graph tool call used B's delegated token and not A's (2 calls, one per principal's cache). A revocation of A by principal key refuses A (401) and leaves B accepted (200). Control: A's own token was 200 before the revocation. 1 of 1 test. The tier and allowlist layer still reads the email (row W3-S9, outside this grant).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC9",
+      "criterion_verbatim": "`OGA2-AC9` (`test_oga2_ac09`) -- a token from an unauthorized tenant is rejected. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac09 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac09 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC9: unauthorized-tenant sign-in -> 400 (no redirect, codes minted 0, signing-key lookups for the tenant 0); authorized tenant -> 302; a token of a de-authorized tenant: 200 while authorized, then 401 (the token's tenant is not authorized for this gateway), its refresh 400 invalid_grant\n1 passed in 1.63s\nrc=0",
+      "denominator": "At the upstream: 1 ID token from an unauthorized tenant is refused 400, with no Location, 0 codes minted and 0 signing-key lookups for that tenant. Control: 1 authorized-tenant sign-in 302 with 1 code. At the resource: 1 gateway token whose tenant is de-authorized after issue goes from 200 to 401, and its refresh is refused 400 invalid_grant. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC10",
+      "criterion_verbatim": "`OGA2-AC10` (`test_oga2_ac10`) -- (difference) a missing or invalid credential returns 401 with the resource challenge, while a valid token lacking a scope returns 403 insufficient_scope. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac10 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac10 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC10: 3 routes x 6 arms = 18 requests; missing/Basic -> 401 + 'Bearer resource_metadata=<http://localhost:8080/.well-known/oauth-protected-resource>'; garbage/expired -> 401 + that challenge with error=invalid_token; valid token of scope 'mcp.read' where 'mcp' is required -> 403 insufficient_scope with scope=\"mcp\"; full token -> 200, no challenge; advertised resource http://localhost:8080/mcp\n1 passed in 3.87s\nrc=0",
+      "denominator": "18 of 18 requests (3 protected routes x 6 arms) answered as specified. Missing credential and Basic: 401 with exactly 'Bearer resource_metadata=\"<metadata URL>\"'. Garbage and expired: 401 with the same challenge plus error=\"invalid_token\". A valid token of scope 'mcp.read' where 'mcp' is required: 403 insufficient_scope with scope=\"mcp\". A full token: 200, with no challenge. The metadata URL in the challenge serves the advertised resource. 1 of 1 test.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGA2-AC11",
+      "criterion_verbatim": "`OGA2-AC11` (`test_oga2_ac11`) -- a denied data entitlement returns a terminal tool error and never a 401 or an OAuth escalation. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac11 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac11 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGA2-AC11: policy denial (read-only -> send_email) x2 -> HTTP 200, no WWW-Authenticate, tool result guard_denied code=read_only_denied, no needs_login/login_url, identical both times (MCP isError=False); Graph 403 -> HTTP 200, tool error 'Graph 403 ErrorAccessDenied: A' (isError=False); /teams/poll Graph 403 -> 502, no challenge; the same token then whoami -> 200\n1 passed in 1.78s\nrc=0",
+      "denominator": "2 of 2 policy denials (read-only principal -> send_email over /mcp) return HTTP 200 with no challenge and a tool result guard_denied code=read_only_denied; the result carries no needs_login, login_url or auth_required, and both are identical. 1 data-source denial (Graph 403 on read_email) returns a tool error in a 200. 1 REST data-source denial (/teams/poll, Graph 403) returns 502, neither 401 nor 403, with no challenge. The same token then succeeds on whoami. 0 of 4 denials carry a challenge or a login. The MCP isError flag reads False (row W3-S8). 1 of 1 test.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In an archive of HEAD d02e73c272 under .scratch/mut (the worktree is not touched): app/oauth_as.py validate_access_token's family check 'if head is None or head.get(\"status\") != \"active\":' reduced to 'if head is None:' (grep count 1 before, 0 after), so a revoked family's access tokens are no longer refused. test_oga2_ac06 and test_oga2_ac02 are run against the mutant.",
+      "expected": "test_oga2_ac06 fails because a revoked family's token is accepted; test_oga2_ac02 (authentication scopes) still passes.",
+      "observed": "'1 failed, 1 passed in 4.55s', rc=1: test_oga2_ac06 failed at AssertionError ('reuse (issued before the reuse)', 200, ...) -- the revoked family's token served tools/list; test_oga2_ac02 passed. 'git diff --quiet HEAD -- app/oauth_as.py' in the worktree: equal.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The whole test file (11 tests) run twice back to back with the same invocation shape at d02e73c272; the two outputs diffed.",
+      "observed": "Both runs rc=0, '11 passed'. 1 line differs, the wall-clock summary ('11 passed in 35.38s' vs '27.37s'); every printed denominator line is byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Keeping tests/test_oauth_durable.py green (14 of its 18 tests now fail), and the two other existing tests that fail: test_jwt_cve_lock.py::test_control_valid_token_accepted and test_schwab_audit.py::test_ogo1_ac06.",
+      "reason": "Row NFRA_OPLGTW-W3-S7 (BLOCKING, ARMED, disarm 2.0.0_SA_COO~O). Each asserts the pre-cutover behaviour this order's criteria remove: an email-only upstream result, or a family-less access token for an email. The three files are outside <paths>, and the order forbids editing an existing test. Base 3f94e0a024, one process per module: 121 passed, 0 failed. At d02e73c272: those 16 fail, the other 9 modules are unchanged, and the refused callbacks make 0 network attempts."
+    },
+    {
+      "item": "Keying tier, the per-identity tool allowlist, the integration min-tier gate and the /query/v0 catalog principal on (tid, oid) rather than the display email.",
+      "reason": "Row NFRA_OPLGTW-W3-S9. Those consumers (tools.py, tier.py, identity_scope.py, integrations/base.py, query_v0.py) are outside the grant, and C2's grant layer is OG-z-1's."
+    },
+    {
+      "item": "Returning a tool-layer denial as an MCP error (isError true).",
+      "reason": "Row NFRA_OPLGTW-W3-S8: a change to tools._run, outside the grant. The denial is already terminal and never a 401, a challenge or a login (OGA2-AC11)."
+    },
+    {
+      "item": "A live Entra sign-in, and the silent Graph acquisition from an OpenID-only sign-in's refresh token.",
+      "reason": "The order forbids any interactive Entra sign-in or vendor call; the upstream is a local test issuer. The live half is for OG-v-2 and OG-v-4 (row NFRA_OPLGTW-W3-S10)."
+    },
+    {
+      "item": "The one-time reconnect notice and the inventory of registered clients before cutover.",
+      "reason": "No criterion of this order names them. The cutover itself refuses pre-cutover codes, families and access tokens with an explicit 'reconnect from Claude' description; the notice N-1 belongs to OG-r-1."
+    },
+    {
+      "item": "A whole-suite run of infra/aws/ec2/opal-gateway/tests in one process.",
+      "reason": "Row NFRA_OPLGTW-W3-S12: at base 3f94e0a024 the one-process suite hangs (test_ratelimit's frozen clock stalls test_schwab_engine::test_ogq1_ac02). The regression census was taken one process per module, and no criterion of this order names the whole suite."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order; the release is OG-r-1's. Every commit is LOCAL on branch wk-nfra_oplgtw-1-3c; the COO drains it."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W3-S7: three existing test files assert the pre-cutover behaviour the criteria remove; 16 existing tests fail (test_oauth_durable 14 of 18) while the order keeps test_oauth_durable green, forbids editing existing tests and grants none of the three. BLOCKING, ARMED.",
+    "NFRA_OPLGTW-W3-S8: a tool-layer denial comes back over MCP with isError false (tools._run returns a dict; tools.py outside the grant); never a 401, challenge or login. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-W3-S9: tier, tool allowlist, integration min-tier and the /query/v0 catalog still key on the display email, so a same-email principal inherits the first one's tier (outside the grant; OG-z-1). OBSERVATION, ARMED.",
+    "NFRA_OPLGTW-W3-S10: the /login consent route was also changed to write the principal cache (not named by the order), and the first delegated Graph token now comes from an OpenID-only sign-in's refresh token, unmeasured live. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-W3-S11: /ms/site_children validates its parameters before its credential gate, so the AC4 census sends well-formed parameters. OBSERVATION, INERT.",
+    "NFRA_OPLGTW-W3-S12: at base 3f94e0a024 the whole Gateway suite hangs in one process (W3-S6's frozen clock reaches test_schwab_engine::test_ogq1_ac02), whose lag bar is also load-sensitive. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/principal-cutover.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest under .venv-og (py -3.12 venv, --system-site-packages) with msal 1.38.0, PyJWT 2.11.0, starlette 0.52.1, moto",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py::test_oga2_ac<01..11> -q -p no:cacheprovider --color=no",
+      "result": "11 of 11 invocations '1 passed', rc=0 each (AC4 from its verbatim re-run after the census fix)"
+    },
+    {
+      "tool": "regression census, one process per module (a second instrument: the other Gateway test modules at base and at the build)",
+      "invocation": "for each of the 12 existing modules: timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/<module>.py -q -p no:cacheprovider --color=no -m \"not live\" -k \"not test_scoped_deny_by_default\"",
+      "result": "base 3f94e0a024: 121 passed, 1 deselected, 0 failed across 12 modules. d02e73c272: test_oauth_durable 14 failed / 4 passed, test_jwt_cve_lock 1 failed / 5 passed, test_schwab_audit 1 failed / 6 passed (row W3-S7); test_schwab_engine::test_ogq1_ac02 failed its 0.25 s lag bar twice under box load, then passed 2 of 2 alternating with base 2 of 2 (row W3-S12); the other 8 modules equal to base."
+    },
+    {
+      "tool": "egress census (a socket-and-DNS-refusing pytest plugin, .scratch/noegress_plugin.py, not committed)",
+      "invocation": "PYTHONPATH=.scratch .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_oauth_durable.py infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py -q -p no:cacheprovider --color=no -p noegress_plugin",
+      "result": "'EGRESS-ATTEMPTS: 0 []' over 29 tests (run before the AC4 census fix)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ruff py39, ds-precommit)",
+      "invocation": "bash .tools/commit-gate.sh <the 5 app modules> infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py",
+      "result": "'OK: pre-commit gate clean for 6 of 6 file(s)', rc=0 (and again inside safe-commit)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~3 <0.9.0_WK_NFRA_OPLGTW~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "d02e73c272 (6 files, msg-verify MATCH len=2790) and 5f47166b4b (6 surprise rows, surprise-row-gate OK, 6 new of 25), both LOCAL on wk-nfra_oplgtw-1-3c"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/NFRA_OPLGTW.TO-OG-a-2.principal-cutover.proof_of_spec.json OGA2-AC1,OGA2-AC2,OGA2-AC3,OGA2-AC4,OGA2-AC5,OGA2-AC6,OGA2-AC7,OGA2-AC8,OGA2-AC9,OGA2-AC10,OGA2-AC11",
+      "result": "see the result file -- only the exit code is the verdict"
+    }
+  ]
+}
