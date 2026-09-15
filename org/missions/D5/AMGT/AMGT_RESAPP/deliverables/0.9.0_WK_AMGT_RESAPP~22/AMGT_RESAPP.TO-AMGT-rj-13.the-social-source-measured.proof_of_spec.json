@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rj-13",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1170b4da69"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "73938cdae4",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rj-13.the-social-source-measured.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~22",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/social/collect.py",
+      "kind": "script",
+      "commit_or_etag": "f7bc52f173",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a local library + CLI; built at 5ac6e20930, output fixes at f7bc52f173. Exercised live in AC2 against the vendor's datasets API (one trigger, six resumes) and against the pool.",
+      "introduces": [
+        "prior_terminal"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/social/measurement.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "5ac6e20930",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "INTERFACE S-1, closed at every level; the X second candidate's identifiers live here as consts. The served record validates against it (AC3) and five mutants of that record are refused (controls).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/social/tests/test_collect.py",
+      "kind": "test",
+      "commit_or_etag": "f7bc52f173",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "29 stubbed tests, run in AC1.",
+      "introduces": [
+        "test_a_resumed_completed_job_keeps_its_first_latency"
+      ],
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/social/__init__.py",
+      "kind": "doc",
+      "commit_or_etag": "f7bc52f173",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one paragraph amending the package docstring's no-network-call sentence, which collect.py made false; the file's single non-ASCII glyph is preserved (1 before, 1 after).",
+      "introduces": [
+        "AMGT-rj-13 AMENDS THE SENTENCE ABOVE"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/social/v1/_measurement/2026-09-15.json",
+      "kind": "s3_object",
+      "commit_or_etag": "f6413a0ffa7630560f57f76b156db312",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "written by the graded AC2 run with Metadata {document-sha256: ad459b40bbbb7c71e3a66f78cf7e48a2fa0f73e66d5127b2c74d29908f23d424, schema-version: 1} and read back ('read-back sha256 MATCH'); re-read independently through .tools/aws in AC3 (12088 bytes). A byte copy sits beside this instance as social_measurement_BA_US_Equity_2026-09-15.json (same sha256).",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the suite ends OK with 0 failures and 0 errors (the five states, the cap, the window, the validator pass-through); dataset at least 1; discover-by-keyword at least 1; num_of_posts-cap at least 1; trigger-route at least 1; x-dataset-run 0 (the X method is named in the record, never run here); usd-guard at least 1; states at least 5; nonascii 0",
+      "method": "test_suite",
+      "invocation": "python -m unittest discover -s lib/research/social/tests -p \"test_*.py\" -q 2>&1 | tail -3; python -c \"import io; c=io.open('lib/research/social/collect.py',encoding='utf-8').read(); print('dataset', c.count('gd_lvz8ah06191smkebj4'), 'discover-by-keyword', c.count('keyword'), 'num_of_posts-cap', c.count('num_of_posts'), 'trigger-route', c.count('/datasets/v3/trigger'), 'x-dataset-run', c.count('gd_lwxkxvnf1cynvib9co') and c.count('profiles_array'), 'usd-guard', c.count('usd'), 'states', sum(c.count(s) for s in ('FAILED','ZERO','STALE','CAPPED','RUNNING')), 'nonascii', sum(1 for ch in c if ord(ch)>127))\"",
+      "output_evidence": "Ran 29 tests in 0.498s\n\nOK\ndataset 3 discover-by-keyword 34 num_of_posts-cap 12 trigger-route 2 x-dataset-run 0 usd-guard 38 states 43 nonascii 0",
+      "denominator": "29 of 29 unit tests OK, 0 failures 0 errors, across 6 test classes (five states + COMPLETE and the vendor zero-data mapping, cap, window, validator pass-through, ledger resume + usd guard + latency pin, record shape); 8 of 8 static counts in bound over 1 file (lib/research/social/collect.py): dataset 3, discover-by-keyword 34, num_of_posts-cap 12, trigger-route 2, x-dataset-run 0, usd-guard 38, states 43, nonascii 0. Run under timeout 120, rc=0.",
+      "status": "PASS",
+      "expect": "Ran 29 tests in [0-9.]+s\\s+OK\\s+dataset [1-9][0-9]* discover-by-keyword [1-9][0-9]* num_of_posts-cap [1-9][0-9]* trigger-route [1-9][0-9]* x-dataset-run 0 usd-guard [1-9][0-9]* states ([5-9]|[1-9][0-9]+) nonascii 0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "lines: METHOD reddit keyword with the dataset, the keywords, the cap 50 and the window; ESTIMATE with the USD cap check (under 5); JOB with the id and submitted_at persisted BEFORE polling; POLL with the interval, the waits and the final state (COMPLETE, or STILL_RUNNING at the max wait -- recorded as that state, a valid measurement outcome); DELIVERY with records, valid, admitted, rejected_by_rule, stale, capped; LATENCY seconds; COST usd; QUALITY with a 10-item relevance sample; OK: uploaded social/v1/_measurement/2026-09-15.json with read-back. A job without a persisted id, or a poll that resubmits discovery, is NOT met; a STILL_RUNNING outcome is met when the retrieval flow is documented in the record and a second retrieval is named in a row",
+      "method": "live_read",
+      "invocation": "timeout 115 python -m lib.research.social.collect --security-key BA_US_Equity --as-of 2026-09-15 --cap 50 --window-days 30 --write-pool 2>&1 | tail -14",
+      "output_evidence": "METHOD reddit keyword dataset=gd_lvz8ah06191smkebj4 type=discover_new route=/datasets/v3/trigger inputs=[('Boeing', 'company_name', 25), ('BA', 'ticker_ambiguity_control', 25)] cap=50 window=30d[2026-08-16..2026-09-15] api_date='Past month'\nESTIMATE usd 0.0750 = 50 records x usd 0.0015/record (claim: held) vs usd cap 5.00 -> UNDER CAP\nJOB id=sd_mu2wf4v3biieffcle submitted_at=2026-09-15T16:41:05Z RESUMED from ledger=org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~22/social_jobs/BA_US_Equity_2026-09-15.json request_sha256=5fdd9bac0e159dbc resumed=True -- no new discovery submitted\nPOLL interval=10.0s waits=[1.5] polls=1 elapsed=1.5s max_wait=70.0s final_vendor_status='ready' vendor_reported_records=48 state=COMPLETE\nDELIVERY records=48 valid=48 invalid=0 admitted=0 rejected_by_rule=22 provisional=26 stale=2 fresh=46 capped=False\nLATENCY 713.4 seconds (trigger submitted -> result retrieved; null while the job is STILL_RUNNING)\nCOST usd None unit=usd_per_job claim=absent estimate_usd=0.0750 usd_cap=5.00 basis=the vendor's progress payload carried no cost field (keys seen: ['avg_duration_per_input', 'collection_duration', 'dataset_id', 'errors', 'records', 'snapshot_id', 'status']) and the account balance route gave no usable delta; the pre-call estimate is held: the vendor's published social-datasets price band (about usd 1.00-1.50 per 1000 records); this is the GUARD's input, never a measured cost -- cost.usd below carri\nQUALITY relevance_sample 10 of 48 verdict_counts={\"PASS\": 0, \"PROVISIONAL\": 26, \"REFUSE\": 22} sample=[{\"item_id\": \"reddit:t3_1w81ohp\", \"admitted\": \"REFUSE\", \"rule_reason\": \"'BA' appears only in a broad affected_tickers tag list of 1 names alongside \\\"i don't understand Why people do BA, BCOM, BBA, BSC When there are no jobs in it\\\" -- contains the string, not ABOUT the security\", \"keyword\": \"BA\", \"community\": \"AskIndia\", \"posted_at\": \"2026-09-05T14:05:42.804Z\", \"url\": \"https://www.reddit.com/r/AskIndia/comments/1w81ohp/i_dont_understand_why_people_do_ba_bcom_bba_bsc/\", \"text\": \"i don't understand Why people do BA, BCOM, BBA, BSC When there are no jobs in it\", \"account_official\": \"UNRESOLVED\"}, {\"item_id\": \"reddit:t3_1vop4xn\", \"admitted\": \"PROVISIONAL\", \"rule_reason\": \"'BA' not found in this item's tags at all -- cannot determine aboutness\", \"keyword\": \"Boeing\", \"community\": \"boeing\", \"posted_at\": \"2026-08-15T01:09:27.007Z\", \"url\": \"https://www.reddit.com/r/boeing/comments/1vop4xn/how_secure_is_your_job_at_boeing/\", \"text\": \"How secure is your job at Boeing?\", \"account_official\": \"UNRESOLVED\"}, {\"item_id\": \"reddit:t3_1wdxild\", \"admitted\": \"PROVISIONAL\", \"rule_reason\": \"'BA' not found in this item's tags at all -- cannot determine aboutness\", \"keyword\": \"Boeing\", \"community\": \"SPEEA\", \"posted_at\": \"2026-09-12T00:23:21.282Z\", \"url\": \"https://www.reddit.com/r/SPEEA/comments/1wdxild/negotiation_team_receives_boeing_final_offer/\", \"text\": \"Negotiation Team receives Boeing final offer\", \"account_official\": \"UNRESOLVED\"}, {\"item_id\": \"reddit:t3_1w3ptbn\", \"admitted\": \"PROVISIONAL\", \"rule_reason\": \"'BA' not found in this item's tags at all -- cannot determine aboutness\", \"keyword\": \"Boeing\", \"community\": \"airplanes\", \"posted_at\": \"2026-08-31T20:24:54.454Z\", \"url\": \"https://www.reddit.com/r/airplanes/comments/1w3ptbn/is_boeing_actually_dead/\", \"text\": \"Is Boeing actually dead?\", \nOK: uploaded opal-data-harvest/social/v1/_measurement/2026-09-15.json bytes=12088 etag=f6413a0ffa7630560f57f76b156db312 document-sha256=ad459b40bbbb7c71 read-back sha256 MATCH metadata={\"document-sha256\": \"ad459b40bbbb7c71e3a66f78cf7e48a2fa0f73e66d5127b2c74d29908f23d424\", \"schema-version\": \"1\"}",
+      "denominator": "9 of 9 expected lines present over 1 job. The graded run (16:56:43Z, rc=0) is the SEVENTH run of this literal invocation and RESUMED the one job; the FIRST run of the same invocation (16:41:03Z, rc=0) printed 'JOB id=sd_mu2wf4v3biieffcle submitted_at=2026-09-15T16:41:05Z persisted-before-polling ledger=org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~22/social_jobs/BA_US_Equity_2026-09-15.json request_sha256=5fdd9bac0e159dbc resumed=False' -- the id was persisted before the first poll, and runs 2-7 each printed 'resumed=True -- no new discovery submitted' (1 trigger across 7 runs). delivery 48 records of cap 50; relevance sample 10 of 48; latency 713.4 s against the vendor's own collection_duration 709920 ms. Retrieval flow documented in the record's job.retrieval_flow; no second retrieval owed (COMPLETE).",
+      "status": "PASS",
+      "expect": "METHOD reddit keyword dataset=gd_lvz8ah06191smkebj4 .*?cap=50 window=30d.*?ESTIMATE usd [0-9.]+ .*?UNDER CAP\\s+JOB id=sd_[a-z0-9]+ submitted_at=2026-09-15T[0-9:]+Z .*?POLL interval=10\\.0s waits=\\[.*?\\] .*?state=(COMPLETE|STILL_RUNNING)\\s+DELIVERY records=[0-9]+ valid=[0-9]+ invalid=[0-9]+ admitted=[0-9]+ rejected_by_rule=[0-9]+ provisional=[0-9]+ stale=[0-9]+ fresh=[0-9]+ capped=(True|False)\\s+LATENCY [0-9.]+ seconds.*?COST usd \\S+ unit=usd_per_job claim=(measured|inferred|held|absent).*?QUALITY relevance_sample 10 of [0-9]+ .*?OK: uploaded opal-data-harvest/social/v1/_measurement/2026-09-15\\.json .*?read-back sha256 MATCH"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "Metadata with document-sha256 and schema-version 1; schema-valid True; method reddit keyword with cap 50; a job-state in the five states; records and admitted printed (0 is a valid measured outcome, distinguished from failure by the state); second_candidate NOT_RUN; cost printed with its unit. A record without the job identity is NOT met",
+      "method": "schema_validation",
+      "invocation": ".tools/aws s3api get-object --bucket opal-data-harvest --key social/v1/_measurement/2026-09-15.json .scratch/rj13.meas.json --query \"[ContentLength,Metadata]\" --output json; python -c \"import json,io,jsonschema; d=json.load(io.open('.scratch/rj13.meas.json',encoding='utf-8')); s=json.load(io.open('lib/research/social/measurement.schema.json',encoding='utf-8')); jsonschema.validate(d,s); print('schema-valid True method', d['method']['platform'], d['method']['discover_by'], 'cap', d['method']['cap'], 'job-state', d['job']['state'], 'records', d['delivery']['records'], 'admitted', d['delivery']['admitted'], 'second_candidate', d['second_candidate']['status'], 'cost', d['cost'])\"",
+      "output_evidence": "[\n    12088,\n    {\n        \"schema-version\": \"1\",\n        \"document-sha256\": \"ad459b40bbbb7c71e3a66f78cf7e48a2fa0f73e66d5127b2c74d29908f23d424\"\n    }\n]\nschema-valid True method reddit keyword cap 50 job-state COMPLETE records 48 admitted 0 second_candidate NOT_RUN cost {'basis': \"the vendor's progress payload carried no cost field (keys seen: ['avg_duration_per_input', 'collection_duration', 'dataset_id', 'errors', 'records', 'snapshot_id', 'status']) and the account balance route gave no usable delta; the pre-call estimate is held: the vendor's published social-datasets price band (about usd 1.00-1.50 per 1000 records); this is the GUARD's input, never a measured cost -- cost.usd below carries its own claim\", 'claim': 'absent', 'estimate_usd': 0.075, 'unit': 'usd_per_job', 'unit_price_usd': 0.0015, 'usd': None, 'usd_cap': 5.0}",
+      "denominator": "1 of 1 served object read (12088 bytes, sha256 matches Metadata document-sha256 ad459b40..), validated against 1 schema (measurement.schema.json, additionalProperties false at every level); job-state COMPLETE of the 6-value closed set; records 48, admitted 0 of 48; cost usd null with unit usd_per_job and claim absent (row S7). Both segments under timeout 120, rc=0 and rc=0.",
+      "status": "PASS",
+      "expect": "(?=.*\"document-sha256\": \"[0-9a-f]{64}\").*?12088,.*?\"schema-version\": \"1\".*?schema-valid True method reddit keyword cap 50 job-state (FAILED|STILL_RUNNING|ZERO_MATCHES|STALE_MATCHES|CAPPED|COMPLETE) records [0-9]+ admitted [0-9]+ second_candidate NOT_RUN cost \\{.*?'unit': 'usd_per_job'"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "commits by this serial; item-contract-diff-lines 0 (the item schema and the admission rule are untouched); raw-secretsmanager-reads 0; serp-zone-use 0. A rewritten admission rule is NOT met",
+      "method": "diff",
+      "invocation": "git log --format=\"%h %an %s\" -3 -- lib/research/social/ | cut -c1-140; git diff --stat SITEZ...HEAD -- lib/research/social/schema.json lib/research/social/validator.py | cat; echo \"item-contract-diff-lines: $(git diff SITEZ...HEAD -- lib/research/social/schema.json lib/research/social/validator.py | wc -l)\"; python -c \"import io,glob; fs=glob.glob('lib/research/social/*.py'); print('raw-secretsmanager-reads', sum(io.open(f,encoding='utf-8').read().count('get_secret_value') for f in fs), 'serp-zone-use', sum(io.open(f,encoding='utf-8').read().count('serp_brightdata') for f in fs))\"",
+      "output_evidence": "f7bc52f173 0.9.0_WK_AMGT_RESAPP~22 fix(AMGT_RESAPP AMGT-rj-13, 0.9.0_WK_AMGT_RESAPP~22): the outcome state on the POLL line, latency pinned \n5ac6e20930 0.9.0_WK_AMGT_RESAPP~22 build(AMGT_RESAPP AMGT-rj-13, 0.9.0_WK_AMGT_RESAPP~22): the social source's first real client -- one boun\n0800e9e479 0.9.0_WK_AMGT_RESAPP~6 L7(AMGT_RESAPP.TO-AMGT-s-13, 0.9.0_WK_AMGT_RESAPP~6): the measurement PLAN ready to run, the feed contract\nitem-contract-diff-lines: 0\nraw-secretsmanager-reads 0 serp-zone-use 0",
+      "denominator": "3 of 3 most recent commits touching lib/research/social/ printed, the top 2 by this serial (5ac6e20930, f7bc52f173) and the third by 0.9.0_WK_AMGT_RESAPP~6 (the prior cell); diff of schema.json + validator.py over SITEZ...HEAD (merge-base eff1b9f6ae) = 0 lines; 2 token counts over 4 of 4 lib/research/social/*.py files = 0 and 0. Under timeout 120, rc=0.",
+      "status": "PASS",
+      "expect": "f7bc52f173 0\\.9\\.0_WK_AMGT_RESAPP~22 .*?5ac6e20930 0\\.9\\.0_WK_AMGT_RESAPP~22 .*?item-contract-diff-lines: 0\\s+raw-secretsmanager-reads 0 serp-zone-use 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Positive control first, then five mutants of the SERVED S-1 record, each the exact defect the contract forbids: (1) the job identity removed, (2) a job state outside the closed set, (3) a smuggled 'feed' field, (4) the X second candidate marked as run, (5) the cap raised past the cell's 50.",
+      "expected": "the unmutated served record validates; each mutant is refused by measurement.schema.json with a message naming the violated property",
+      "observed": "CONTROL positive: the SERVED S-1 record -> VALID | MUTANT no-job-identity -> REFUSED: 'id' is a required property | MUTANT state-outside-the-closed-set -> REFUSED: 'SUCCESS' is not one of ['FAILED', 'STILL_RUNNING', 'ZERO_MATCHES', 'STALE_MATCHES', 'CAPPED', 'COMPLETE'] | MUTANT smuggled-field -> REFUSED: Additional properties are not allowed ('feed' was unexpected) | MUTANT second-candidate-run -> REFUSED: 'NOT_RUN' was expected | MUTANT cap-over-50 -> REFUSED: 51 is greater than the maximum of 50",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two same-input runs of collect.run (BA_US_Equity, 2026-09-15, cap 50, window 30, write_pool False) against the COMPLETED job, each resuming it; documents compared with generated_at removed, and each compared with the served record with generated_at removed",
+      "observed": "DETERMINISM run 1 state COMPLETE resumed True delivery {\"admitted\": 0, \"capped\": false, \"fresh\": 46, \"invalid\": 0, \"provisional\": 26, \"records\": 48, \"rejected_by_rule\": 22, \"stale\": 2, \"valid\": 48} latency 713.4 | DETERMINISM run 2 state COMPLETE resumed True delivery {\"admitted\": 0, \"capped\": false, \"fresh\": 46, \"invalid\": 0, \"provisional\": 26, \"records\": 48, \"rejected_by_rule\": 22, \"stale\": 2, \"valid\": 48} latency 713.4 | DETERMINISM two resumed runs identical minus generated_at: True | DETERMINISM resumed run vs SERVED record identical minus generated_at: True",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the X official-account method (second candidate)",
+      "reason": "NOT RUN by the cell's bound; named in the record with status NOT_RUN. Measured beside it: the account pass holds 0 X profile urls for Boeing (UNRESOLVED, client-rendered footer), so it is not runnable for this security from the named source either. Row S3."
+    },
+    {
+      "item": "cost.usd as a MEASURED value",
+      "reason": "not measurable with brightdata-api-key: no cost field on the progress payload (running or ready) or the snapshots listing, and /customer/balance refuses the key with 403. The record carries usd null, claim absent, and the held pre-call estimate usd 0.075 against the usd 5 cap. Row S7."
+    },
+    {
+      "item": "per-input truncation in delivery.capped",
+      "reason": "delivery.capped is job-total by construction (48 < 50 -> false), while the 'BA' input returned 25 of its own limit of 25, so that arm was truncated. Surfaced in row S8 rather than re-cut mid-grading; a feed cell decides whether capped becomes per-input."
+    },
+    {
+      "item": "a feed, a schedule, a second security, the SERP zone, any portal edit",
+      "reason": "the cell's BOUND; none was built, run or read."
+    },
+    {
+      "item": "the vendor's raw records",
+      "reason": "not persisted: the pool record carries the 10-item relevance sample (text normalised to ASCII, as ordered) and the job log beside this instance carries per-item verdicts only, with no post text and no author handles. Raw-before-derived storage is the CRO brief's later step, not this cell's."
+    },
+    {
+      "item": "a random relevance sample",
+      "reason": "the 10-item sample is the first 10 valid items in delivery order, with its denominator (48) stated; it is not a random draw."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W22-S3: the X second candidate has 0 profile urls for Boeing in the named account pass (UNRESOLVED, value null), so it is not runnable for this security from that source.",
+    "AMGT_RESAPP-Z-W22-S4: the vendor reports a genuine zero-match discovery as status=failed with the zero carried only in error_message; mapped to ZERO_MATCHES here by the two documented messages.",
+    "AMGT_RESAPP-Z-W22-S5: the vendor's date field is an enum with no 30-day literal; 'Past month' is sent and the 30-day window re-applied locally.",
+    "AMGT_RESAPP-Z-W22-S6: the S-1 key social/v1/_measurement/{as_of}.json has no security coordinate, so a second security on the same day would overwrite the first.",
+    "AMGT_RESAPP-Z-W22-S7: cost cannot be measured with brightdata-api-key on any route probed (no cost field; balance route 403).",
+    "AMGT_RESAPP-Z-W22-S8: the measurement -- 48 records of a 50 cap in 713.4 s, 48 valid, 0 admitted (22 REFUSE, 26 PROVISIONAL), 2 stale, 0 vendor errors, cost absent."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~22/SESSION_LOG_rj13.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m unittest",
+      "invocation": "python -m unittest discover -s lib/research/social/tests -p \"test_*.py\" -q 2>&1 | tail -3",
+      "result": "Ran 29 tests, OK, 0 failures 0 errors"
+    },
+    {
+      "tool": "ruff (py39 target)",
+      "invocation": "ruff check --target-version py39 lib/research/social/",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate + to-pipeline-gate + surprise-row-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~22 <0.9.0_WK_AMGT_RESAPP~22@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "5ac6e20930 (3 files, commit-gate All checks passed); f7bc52f173 (4 files, surprise-row-gate: 5 new row(s) of 219 checked, all carry their step-7/step-10 fields)"
+    }
+  ]
+}
