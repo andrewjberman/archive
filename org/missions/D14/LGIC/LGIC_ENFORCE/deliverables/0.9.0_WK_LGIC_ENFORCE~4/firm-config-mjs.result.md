@@ -32,7 +32,7 @@ base `CLOUD` @b02fdaa849 | **Cell:** `EN-v-2` (PRD candidate E6; DEC-5) | **Regi
 
 ## Row filed
 
-- `LGIC_ENFORCE-W4-S1`, OBSERVATION, INERT.
+- `LGIC_ENFORCE-W4-S2`, OBSERVATION, INERT.
   - Key order changed: base `49financial, inflection, mockadv, demo, cottonwood`, generated
     `49financial, inflection, cottonwood, mockadv, demo`. The same order carries through to `FIRM_BUCKET_MAP`.
   - The in-map history comments are gone.
@@ -41,6 +41,6 @@ base `CLOUD` @b02fdaa849 | **Cell:** `EN-v-2` (PRD candidate E6; DEC-5) | **Regi
 
 ## Not claimed
 
-- That insertion order is outside "what it exports". That call belongs to the issuer (row W4-S1).
+- That insertion order is outside "what it exports". That call belongs to the issuer (row W4-S2).
 - The tests of `auth-validator-edge` and `shared-advisor-router-response`, which were not run.
 - Any live or deployed state. AWS was not read.
