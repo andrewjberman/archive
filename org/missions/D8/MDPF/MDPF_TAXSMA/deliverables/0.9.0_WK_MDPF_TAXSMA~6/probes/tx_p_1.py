@@ -667,37 +667,266 @@ def verb_of(op: str) -> str:
     return re.split(r"[-:]", op, maxsplit=1)[0].lower()
 
 
+# AC10 as AMENDED by 1.0.0_SA_CTO ruling 97255 (option A) on row MDPF_TAXSMA-W6-S1: every logged call is a
+# read verb, OR it is AC7's ONE ssm send-command meeting four conditions. Graded on the EXISTING command log
+# and the recorded AC7 evidence (runs/AC7.txt, this probe's own census template); no AWS call is made here.
+AC7_RUN = DELIV / "runs" / "AC7.txt"
+AC7_REQUEST = SCRATCH / "ssm_census_request.json"   # untracked scratch: a corroborating arm only
+READ_ONLY_CMDS = {"set", "echo", "cd", "find", "tr", "wc", "xargs", "grep", "awk", "md5sum", "cut", "stat",
+                  "head", "lst0", "[", "exit"}
+DENY_TOKENS = {  # word-boundary census over the raw script text; any hit fails condition (2)
+    "sudo write": ["sudo", "su", "doas"],
+    "file write": ["tee", "dd", "cp", "mv", "rm", "rmdir", "mkdir", "touch", "chmod", "chown", "ln", "install",
+                   "truncate", "sed -i", "-delete", "-exec", "-execdir", "-fprint", "-fprintf", "-fls"],
+    "package or service action": ["yum", "dnf", "rpm", "pip", "pip3", "apt", "apt-get", "npm", "systemctl",
+                                  "service", "kill", "pkill", "killall", "reboot", "shutdown", "crontab"],
+    "network call": ["curl", "wget", "nc", "ncat", "ssh", "scp", "rsync", "aws", "git", "ping", "telnet",
+                     "/dev/tcp", "/dev/udp", "python", "python3"],
+}
+REDIRECT_RE = re.compile(r"(\d*)(>>|>\||&>|>)\s*(&?[^\s;|)]+)")
+
+
+def _shell_command_words(script: str) -> list:
+    """First word of every simple command, quotes stripped (a quoted literal is data, not a command)."""
+    s = re.sub(r"'[^'\n]*'", " Q ", script)                       # single-quoted literals -> data
+    s = re.sub(r'"([^"\n]*)"', lambda m: " ; ".join(re.findall(r"\$\([^()]*\)", m.group(1))) or " Q ", s)
+    s = s.replace("\\(", " ").replace("\\)", " ")
+    words = []
+    for seg in re.split(r"\$\(|\|\|?|;|&&|[{}()]|\n", s):
+        toks = seg.split()
+        if not toks or re.match(r"^\w+=", toks[0]) or toks[0] == "Q":
+            continue
+        words.append(toks[0])
+        if toks[0] == "xargs":                                     # the command xargs runs is a command too
+            rest = [t for t in toks[1:] if not t.startswith("-")]
+            if rest:
+                words.append(rest[0])
+    return words
+
+
+def _grade_script(script: str, root: str) -> tuple:
+    """Condition (2): the script ONLY reads. Returns (ok, reasons, report_lines)."""
+    lines, reasons = [], []
+    redirs = REDIRECT_RE.findall(script)
+    fd_dups = [r for r in redirs if r[2].startswith("&")]
+    null_dev = [r for r in redirs if r[2] == "/dev/null"]
+    paths = [r for r in redirs if not r[2].startswith("&") and r[2] != "/dev/null"]
+    lines.append("  (2a) output redirects in the script: %d total -- %d fd duplication(s) %s (no path), %d to /dev/null "
+                 "(the null device: bytes discarded, no file created or modified), %d to any other path %s"
+                 % (len(redirs), len(fd_dups), ["%s%s%s" % r for r in fd_dups], len(null_dev), len(paths),
+                    ["%s%s%s" % r for r in paths]))
+    if null_dev:
+        lines.append("       READING, stated so L9 can reject it: /dev/null is graded as the null device, not as a written "
+                     "path outside the SSM agent's working directory; a literal reading of 'any path' would FAIL this "
+                     "condition on these %d redirect(s) (row MDPF_TAXSMA-W6-S4)" % len(null_dev))
+    if paths:
+        reasons.append("(2) %d redirect(s) to a path: %s" % (len(paths), ["%s%s%s" % r for r in paths]))
+    under_root = [r for r in paths if r[2].startswith(root) or not r[2].startswith("/")]
+    lines.append("  (2b) redirect targets under the Gateway app root %s or relative to it (the script cd's there): %d"
+                 % (root, len(under_root)))
+    for cls, toks in DENY_TOKENS.items():
+        hits = {t: len(re.findall(r"(?<![\w/.-])%s(?![\w-])" % re.escape(t), script)) for t in toks}
+        hit = {t: n for t, n in hits.items() if n}
+        lines.append("  (2c) %-26s tokens checked %2d, hits %d %s" % (cls, len(toks), sum(hit.values()), hit or ""))
+        if hit:
+            reasons.append("(2) %s token(s) %s" % (cls, hit))
+    words = _shell_command_words(script)
+    census = {}
+    for w in words:
+        census[w] = census.get(w, 0) + 1
+    off = sorted(w for w in census if w not in READ_ONLY_CMDS)
+    lines.append("  (2d) command words: %d simple command(s), %d distinct %s; outside the read-only set: %d %s"
+                 % (len(words), len(census), cj(census), len(off), off))
+    if off:
+        reasons.append("(2) command(s) outside the read-only set: %s" % off)
+    if not words:
+        reasons.append("(2) no command word parsed -- the census cannot discriminate")
+    return not reasons, reasons, lines
+
+
+def _grade_ac10(recs: list, script: str, ac7: dict, request, gw: dict) -> tuple:
+    """The amended criterion over a command log + recorded AC7 evidence. Returns (ok, reasons, report_lines)."""
+    lines, reasons = [], []
+    sends = [r for r in recs if r["service"] == "ssm" and r["operation"] == "send-command"]
+    other_bad = [r for r in recs if verb_of(r["operation"]) not in READ_VERBS
+                 and not (r["service"] == "ssm" and r["operation"] == "send-command")]
+    lines.append("DENOMINATOR: %d AWS call(s) logged, first %s, last %s"
+                 % (len(recs), recs[0]["utc"] if recs else None, recs[-1]["utc"] if recs else None))
+    lines.append("READ-VERB CALLS: %d of %d; ssm send-command: %d of %d; any OTHER non-read: %d of %d"
+                 % (len(recs) - len(sends) - len(other_bad), len(recs), len(sends), len(recs), len(other_bad), len(recs)))
+    for r in other_bad:
+        lines.append("  OTHER NON-READ %s %s %s (criterion %s)" % (r["utc"], r["service"], r["operation"], r["criterion"]))
+    if other_bad:
+        reasons.append("%d other non-read call(s): %s" % (len(other_bad), sorted({"%s %s" % (r["service"], r["operation"])
+                                                                                   for r in other_bad})))
+    if not sends:
+        lines.append("No ssm send-command in the log: the four conditions are not engaged.")
+        return not reasons, reasons, lines
+    # (1) exactly one, AWS-RunShellScript, only the Gateway host
+    doc = ac7.get("document")
+    tgt = ac7.get("instance_ids")
+    one = len(sends) == 1 and sends[0]["criterion"] == "TXP1-AC7"
+    c1 = one and doc == "AWS-RunShellScript" and tgt == [gw["instance_id"]]
+    lines.append("(1) send-command count %d (criterion %s); DocumentName=%s; InstanceIds=%s vs the Gateway host %s "
+                 "(infra/aws/ec2/EC2_MANIFEST.json @%s) -> %s"
+                 % (len(sends), [r["criterion"] for r in sends], doc, tgt, gw["instance_id"], HEAD[:10],
+                    "MET" if c1 else "NOT MET"))
+    lines.append("    sources: DocumentName and InstanceIds from this probe's ac7() request literal; instance from "
+                 "runs/AC7.txt (%s) and the log's get-command-invocation --instance-id (%s); scratch request file: %s"
+                 % (ac7.get("run_instance"), ac7.get("log_instance"), ac7.get("request_arm")))
+    if not c1:
+        reasons.append("(1) not exactly one AWS-RunShellScript send-command to the Gateway host only")
+    if ac7.get("run_instance") != gw["instance_id"] or ac7.get("log_instance") != gw["instance_id"]:
+        reasons.append("(1) recorded instance differs from the Gateway host")
+    # (2) script text recorded with its sha256, and it only reads
+    full = hashlib.sha256(script.encode()).hexdigest()
+    rec = ac7.get("recorded_sha_prefix") or ""
+    c2hash = bool(rec) and full.startswith(rec)
+    lines.append("(2) script text (%d lines, root %s), regenerated from this probe's CENSUS_TMPL at %s:"
+                 % (len(script.splitlines()), ac7.get("root"), HEAD[:10]))
+    lines.extend("    | " + ln for ln in script.splitlines())
+    lines.append("    sha256 %s; runs/AC7.txt recorded at run time 'census script sha256=%s' -> %s"
+                 % (full, rec, "EQUAL (prefix of %d hex)" % len(rec) if c2hash else "DIFFERENT"))
+    if not c2hash:
+        reasons.append("(2) script sha256 does not match the recorded run-time value")
+    ok2, r2, l2 = _grade_script(script, ac7.get("root") or "")
+    lines.extend(l2)
+    reasons.extend(r2)
+    lines.append("    (2) -> %s" % ("MET" if c2hash and ok2 else "NOT MET"))
+    # (3) command id and the invocation's final status logged
+    cid_log, cid_run, status = ac7.get("log_command_id"), ac7.get("run_command_id"), ac7.get("status")
+    c3 = bool(cid_log) and cid_log == cid_run and status in ("Success", "Failed", "Cancelled", "TimedOut",
+                                                             "Cancelling", "DeliveryTimedOut", "ExecutionTimedOut",
+                                                             "Undeliverable", "Terminated")
+    lines.append("(3) CommandId in command_log.jsonl (get-command-invocation args) %s; in runs/AC7.txt %s; final status "
+                 "in runs/AC7.txt %s (ResponseCode %s, ExecutionEnd %s) -> %s"
+                 % (cid_log, cid_run, status, ac7.get("response_code"), ac7.get("end"), "MET" if c3 else "NOT MET"))
+    if not c3:
+        reasons.append("(3) command id or terminal status not logged")
+    # (4) side effects recorded as SSM's own bookkeeping; no Gateway app path changed
+    lines.append("(4) side effects of the ONE send-command, recorded as SSM's own bookkeeping:")
+    lines.append("    - SSM command-history record: %d (CommandId %s, sent %s)" % (len(sends), cid_run, ac7.get("sent_at")))
+    lines.append("    - SSM agent working files on the host: the agent's own per-command orchestration files (the "
+                 "script it materialises and its captured stdout/stderr) under its working directory; not re-read, "
+                 "because this criterion forbids a new AWS act")
+    app_writes = [r for r in REDIRECT_RE.findall(script)
+                  if not r[2].startswith("&") and r[2] != "/dev/null"]
+    mtime, md5 = ac7.get("server_mtime"), ac7.get("server_md5")
+    before = bool(mtime and ac7.get("sent_at")) and mtime[:19].replace(" ", "T") < ac7["sent_at"][:19]
+    blob = ac7.get("blob_md5")
+    lines.append("    - Gateway app paths: the script writes %d path(s) (2a/2c above); app/server.py read DURING the "
+                 "command: md5 %s, mtime %s -> %s the send at %s; git blob at deployed_commit %s md5 %s -> %s"
+                 % (len(app_writes), md5, mtime, "BEFORE" if before else "NOT before", ac7.get("sent_at"),
+                    (gw.get("deployed_commit") or "")[:10], blob, "EQUAL" if blob and blob == md5 else "NOT EQUAL/NOT READ"))
+    lines.append("    denominator: 1 of %s app files had md5 and mtime read at run time; 0 write targets are the "
+                 "static bound for all %s" % (ac7.get("files_all"), ac7.get("files_all")))
+    c4 = len(sends) == 1 and not app_writes and before and bool(blob) and blob == md5
+    lines.append("    (4) -> %s" % ("MET" if c4 else "NOT MET"))
+    if not c4:
+        reasons.append("(4) side effects not bounded to SSM bookkeeping on the recorded evidence")
+    return not reasons, reasons, lines
+
+
+def _ac7_evidence(gw: dict, recs: list) -> tuple:
+    """Everything AC10 reads about AC7's one send-command, from recorded evidence only. Returns (evidence, script)."""
+    txt = AC7_RUN.read_text(encoding="utf-8")
+
+    def one(pat):
+        m = re.search(pat, txt, re.M)
+        return m.group(1).strip() if m else None
+    ev = {"root": one(r"remote_path=(\S+)"), "run_instance": one(r"instance_id=(\S+)"),
+          "recorded_sha_prefix": one(r"census script sha256=([0-9a-f]+)"),
+          "run_command_id": one(r"send-command rc=0 CommandId=(\S+)"), "sent_at": one(r"CommandId=\S+ at (\S+)"),
+          "status": one(r"get-command-invocation Status=(\w+)"), "response_code": one(r"ResponseCode=(\S+)"),
+          "end": one(r"ExecutionEnd=(\S+)"), "files_all": one(r"^CENSUS FILES_ALL=(\d+)"),
+          "server_md5": one(r"^CENSUS SERVER_PY_MD5=(\w+)"), "server_mtime": one(r"^CENSUS SERVER_PY_MTIME=(.+)$")}
+    inv = [r for r in recs if r["service"] == "ssm" and r["operation"] == "get-command-invocation"]
+    m = re.search(r"--command-id (\S+) --instance-id (\S+)", inv[0]["args"]) if inv else None
+    ev["log_command_id"], ev["log_instance"] = (m.group(1), m.group(2)) if m else (None, None)
+    # DocumentName / InstanceIds: the request literal in this probe's ac7(), read by AST (the bytes that ran are
+    # tied to this source by the script sha256 check in condition (2)).
+    tree = ast.parse(Path(__file__).read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Dict):
+            keys = [k.value for k in node.keys if isinstance(k, ast.Constant)]
+            if "DocumentName" in keys and "InstanceIds" in keys:
+                dv = node.values[keys.index("DocumentName")]
+                iv = node.values[keys.index("InstanceIds")]
+                ev["document"] = dv.value if isinstance(dv, ast.Constant) else None
+                ev["instance_ids"] = ([ev["run_instance"]] if isinstance(iv, ast.List) and len(iv.elts) == 1
+                                      and isinstance(iv.elts[0], ast.Name) and iv.elts[0].id == "iid" else None)
+    script = CENSUS_TMPL % {"root": ev["root"]}
+    if AC7_REQUEST.exists():
+        req = json.loads(AC7_REQUEST.read_text(encoding="utf-8"))
+        same = ("\n".join(req["Parameters"]["commands"]) + "\n" == script
+                and req.get("DocumentName") == ev.get("document") and req.get("InstanceIds") == [ev["run_instance"]])
+        ev["request_arm"] = "present, DocumentName=%s InstanceIds=%s, script %s the regenerated text" % (
+            req.get("DocumentName"), req.get("InstanceIds"), "EQUALS" if same else "DIFFERS FROM")
+        if not same:
+            ev["document"] = "MISMATCH-WITH-SENT-REQUEST"
+    else:
+        ev["request_arm"] = "absent (NOT-EVALUATED; not required)"
+    dc = gw.get("deployed_commit")
+    if dc:
+        p = subprocess.run(["git", "show", "%s:infra/aws/ec2/opal-gateway/app/server.py" % dc],
+                           capture_output=True, cwd=str(WS))
+        ev["blob_md5"] = hashlib.md5(p.stdout).hexdigest() if p.returncode == 0 and p.stdout else None
+    return ev, script
+
+
 def ac10() -> tuple:
-    print("COMMAND LOG %s (read_at %s)" % (LOG.relative_to(WS).as_posix(), utc()))
+    print("COMMAND LOG %s (read_at %s); AC7 evidence %s; ruling 1.0.0_SA_CTO 97255 option A (row MDPF_TAXSMA-W6-S1)"
+          % (LOG.relative_to(WS).as_posix(), utc(), AC7_RUN.relative_to(WS).as_posix()))
+    print("No AWS call is made by this criterion.")
     if not LOG.exists():
         return False, "command log absent"
     recs = [json.loads(ln) for ln in LOG.read_text(encoding="utf-8").splitlines() if ln.strip()]
     if not recs:
         return False, "command log empty -- nothing to grade"
-    census = {}
-    bad = []
+    census, ops = {}, {}
     for r in recs:
-        v = verb_of(r["operation"])
-        census.setdefault(v, 0)
-        census[v] += 1
-        if v not in READ_VERBS:
-            bad.append(r)
-    print("self-test: get-object->%s put-object->%s send-command->%s"
-          % tuple("READ" if verb_of(x) in READ_VERBS else "NON-READ" for x in ("get-object", "put-object", "send-command")))
-    print("DENOMINATOR: %d AWS call(s) logged, first %s, last %s" % (len(recs), recs[0]["utc"], recs[-1]["utc"]))
-    ops = {}
-    for r in recs:
-        ops.setdefault("%s %s" % (r["service"], r["operation"]), 0)
-        ops["%s %s" % (r["service"], r["operation"])] += 1
+        census[verb_of(r["operation"])] = census.get(verb_of(r["operation"]), 0) + 1
+        k = "%s %s" % (r["service"], r["operation"])
+        ops[k] = ops.get(k, 0) + 1
     print("VERB CENSUS: %s" % cj(census))
     print("OPERATIONS: %s" % cj(ops))
-    print("READ-VERB CALLS: %d of %d; NON-READ: %d of %d" % (len(recs) - len(bad), len(recs), len(bad), len(recs)))
-    for r in bad:
-        print("  NON-READ %s %s %s (criterion %s)" % (r["utc"], r["service"], r["operation"], r["criterion"]))
-    if bad:
-        names = sorted({"%s %s" % (r["service"], r["operation"]) for r in bad})
-        return False, "%d of %d logged AWS calls are not Describe/Get/List/Head: %s" % (len(bad), len(recs), ", ".join(names))
-    return True, ""
+    man = json.loads((WS / "infra/aws/ec2/EC2_MANIFEST.json").read_text(encoding="utf-8"))
+
+    def walk(o):
+        if isinstance(o, dict):
+            if isinstance(o.get("opal-gateway"), dict) and "instance_id" in o["opal-gateway"]:
+                return o["opal-gateway"]
+            for v in o.values():
+                r = walk(v)
+                if r:
+                    return r
+        return None
+    gw = walk(man) or {}
+    ev, script = _ac7_evidence(gw, recs)
+    ok, reasons, lines = _grade_ac10(recs, script, ev, None, gw)
+    for ln in lines:
+        print(ln)
+    # Discrimination: the same grader over mutated copies of the SAME evidence; each must FAIL.
+    put = dict(recs[0], service="s3api", operation="put-object", utc="MUTANT")
+    mutants = [
+        ("an extra s3api put-object in the log", recs + [put], script, ev),
+        ("a second ssm send-command in the log", recs + [dict(sends, utc="MUTANT") for sends in recs
+                                                         if sends["operation"] == "send-command"], script, ev),
+        ("a redirect into the app root", recs, script.replace("--- end ---\"", "--- end ---\" > app/x.txt"), ev),
+        ("a sudo curl line in the script", recs, script + "sudo curl -s http://example.invalid\n", ev),
+        ("a different target instance", recs, script, dict(ev, instance_ids=["i-00000000000000000"])),
+        ("no terminal status recorded", recs, script, dict(ev, status=None)),
+    ]
+    fired = 0
+    for label, mrecs, mscript, mev in mutants:
+        mok, mre, _ = _grade_ac10(mrecs, mscript, mev, None, gw)
+        fired += (not mok)
+        print("MUTANT %-38s -> %s" % (label, "FAIL (as expected), %d reason(s): %s" % (len(mre), " | ".join(mre))
+                                              if not mok else "PASS (NOT DISCRIMINATING)"))
+    print("MUTANTS: %d of %d FAIL as expected" % (fired, len(mutants)))
+    if fired != len(mutants):
+        reasons.append("%d of %d mutants passed -- the grader does not discriminate" % (len(mutants) - fired, len(mutants)))
+    return not reasons, "; ".join(reasons)
 
 
 def main() -> int:

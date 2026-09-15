@@ -10,8 +10,11 @@ run returned Account `313476888478`, region `us-east-1`. No object body is kept 
 deployed zips live in `<worktree>/.scratch/tx_p_1/` only. Numeric values of the served `tax` node are printed
 masked (zero / nonzero / null), never as amounts.
 
-**Verdicts:** AC1-AC9 `PASS`; AC10 `FAIL` (1 non-read call, `ssm send-command`, which AC7 requires; row
-`MDPF_TAXSMA-W6-S1`). The order stays open.
+**Verdicts:** AC1-AC10 all `PASS` by output. AC1-AC9 were measured at HEAD `91b11ff0c9` and stand unchanged.
+AC10 first printed `FAIL` under its original wording (row `MDPF_TAXSMA-W6-S1`: AC7's census needs `ssm:SendCommand`);
+`1.0.0_SA_CTO` ruled option A in 97255 and `2.0.0_SA_COO~T` landed the amended criterion on CLOUD @`6be05d277f`,
+so AC10 was re-graded at HEAD `b9a15838d7` against the **existing** command log and the recorded AC7 evidence,
+with no new AWS call of any kind (the log still holds 48 records). The order is flipped `complete`.
 
 ---
 
@@ -149,17 +152,42 @@ bytecode written) plus `--co` for the collected count. Run 2026-09-15T21:26:29Z 
   `::test_carry_source_is_measured_never_interpolated`, `::test_carry_within_window_carries_and_labels`.
 - Agrees with the cut measurement (92 / 89 / 3, all in `test_global_fold_flag2.py`) and with row `MDPF_TAXSMA-S1`.
 
-## AC10 -- every AWS call in the command log is a read verb
+## AC10 -- every AWS call is a read verb, or AC7's ONE admitted send-command
 
-Instrument: `command_log.jsonl`, the verb taken from each operation name; classifier self-test get-object READ,
-put-object NON-READ, send-command NON-READ. Run 2026-09-15T21:47:59Z, over the log as it stood then.
+**Criterion as amended.** The first run (2026-09-15T21:47:59Z) printed `FAIL` under the original wording: 1 of 48
+logged calls was `ssm send-command`, which AC7's census requires and no read verb can replace (row
+`MDPF_TAXSMA-W6-S1`). `1.0.0_SA_CTO` ruled option A in 97255; `2.0.0_SA_COO~T` landed the amended criterion on
+CLOUD @`6be05d277f`. AC10 now admits exactly AC7's one send-command under four conditions, and every other call
+keeps the read-verb discrimination.
 
-- Denominator: **48 AWS calls** logged, 21:24:54Z to 21:47:53Z. Verbs: get 37, list 7, head 2, describe 1, **send 1**.
-- Read-verb calls 47 of 48. **Non-read: 1 of 48**, `ssm send-command` at 21:35:56Z (criterion TXP1-AC7).
-- **FAIL.** AC7's census cannot run without SendCommand, so AC7 and AC10 cannot both pass as written (row
-  `MDPF_TAXSMA-W6-S1`). No mutating S3, IAM, Lambda, Scheduler or Terraform call appears in the log.
-- Not covered by the log: the Gold test suite's own imports (the test folder has 0 `boto3`/`botocore` references);
-  the builders call only `git`.
+Instrument: `command_log.jsonl` and the recorded AC7 evidence (`runs/AC7.txt`, the probe's own `CENSUS_TMPL`),
+read at 2026-09-15T23:13:45Z at HEAD `b9a15838d7`. **This criterion makes no AWS call**, and the log still holds
+48 records, the same 48 the first run graded. Full output: `runs/AC10.txt`.
+
+- Denominator: **48 AWS calls**, 21:24:54Z to 21:47:53Z. Verbs: get 37, list 7, head 2, describe 1, send 1.
+  Read-verb calls **47 of 48**; the admitted `ssm send-command` **1 of 48**; **any other non-read 0 of 48**.
+
+| condition | measurement | verdict |
+|---|---|---|
+| (1) exactly one send-command, `AWS-RunShellScript`, Gateway host only | 1 send-command (criterion `TXP1-AC7`); `DocumentName=AWS-RunShellScript`; `InstanceIds=['i-07dccb1615503ac99']`, which is the `opal-gateway` `instance_id` in `infra/aws/ec2/EC2_MANIFEST.json`; the same id in `runs/AC7.txt` and in the log's `get-command-invocation --instance-id` | **MET** |
+| (2) script text recorded with its sha256, and it only reads | all 20 lines printed verbatim in `runs/AC10.txt`; sha256 `0892538431cbf66b9bc9ca8486745cce62ea6dce353e84c9288e7bde69ecfaad`, whose first 16 hex equal the value `runs/AC7.txt` recorded at run time. Redirects: 2 total, 1 fd duplication (`2>&1`, no path), 1 to `/dev/null`, **0 to any other path**. Token census: sudo 0 of 3, file-write 0 of 20, package/service 0 of 16, network 0 of 15. Command words: 55 simple commands, 16 distinct, **0 outside** the read-only set (`set, echo, cd, find, tr, wc, xargs, grep, awk, md5sum, cut, stat, head, lst0, [, exit`) | **MET** (see the `/dev/null` reading below) |
+| (3) command id and final status logged | CommandId `686530ff-12ce-46ab-b5b2-d07ef6985eaa` in `command_log.jsonl` (the `get-command-invocation` args) and in `runs/AC7.txt`, the two equal; final status `Success`, ResponseCode 0, ExecutionEnd 21:36:06.903Z | **MET** |
+| (4) side effects are SSM's own bookkeeping; no Gateway app path changed | 1 SSM command-history record (that CommandId, sent 21:36:04Z); the SSM agent's per-command orchestration files under its own working directory, **not re-read** because the criterion forbids a new AWS act; the script writes 0 paths; `app/server.py` read during the command is md5 `370d5568...`, mtime 2026-09-09 18:43:58Z, **before** the send, and equals the git blob at the manifest's `deployed_commit` `7bd89b5d71`. Denominator: 1 of 57 app files had md5 and mtime read; 0 write targets is the static bound for all 57 | **MET** |
+
+**The `/dev/null` reading, stated so it can be rejected.** Condition (2) says "no redirect or write to any path
+outside the SSM agent's own working directory". The script's one path redirect is `>/dev/null`, which discards
+grep's stdout so only error lines are counted. The probe grades `/dev/null` as the null device -- no file created
+or modified -- and prints that reading beside the measurement; **read literally, "any path" would FAIL condition (2)
+on that one redirect.** Which reading binds is the L9 adjudicator's call, not the worker's: row
+`MDPF_TAXSMA-W6-S4`.
+
+**Discrimination.** The same grader was run over six mutated copies of the same evidence; **6 of 6 FAIL**, each
+naming the limb that caught it: an extra `s3api put-object` (other non-read), a second send-command (condition 1),
+a redirect into the app root (conditions 2 and 4, and the sha256 link), a `sudo curl` line (three separate
+condition-2 limbs), a different target instance (condition 1), and a missing terminal status (condition 3).
+
+- Still not covered by the log: the Gold test suite's own imports (the test folder has 0 `boto3`/`botocore`
+  references); the builders call only `git`. No mutating S3, IAM, Lambda, Scheduler or Terraform call appears.
 
 ---
 
@@ -167,6 +195,7 @@ put-object NON-READ, send-command NON-READ. Run 2026-09-15T21:47:59Z, over the l
 
 | id | class / hazard | one line |
 |---|---|---|
-| `MDPF_TAXSMA-W6-S1` | BLOCKING / INERT | AC7 needs `ssm:SendCommand`, so AC10 cannot pass in the same cell as written |
+| `MDPF_TAXSMA-W6-S1` | BLOCKING / INERT | AC7 needs `ssm:SendCommand`, so AC10 cannot pass in the same cell as written -- **resolved at the source** by `1.0.0_SA_CTO` ruling 97255 option A (criterion amended @`6be05d277f`); AC10 now PASSES on the same log. The row's L9 disposition stays `3.0.0_SA_CVO`'s |
 | `MDPF_TAXSMA-W6-S2` | OBSERVATION / INERT | EC2_MANIFEST.json's opal-gateway checksums for server.py, config.py and audit.py match neither the host nor the blobs at its own deployed_commit |
 | `MDPF_TAXSMA-W6-S3` | OBSERVATION / INERT | the live publisher's `MDPF_PUBLISHER_COMMIT` (c0902245b0) is not the pin its deployed zip was built from (dc14d649bb) |
+| `MDPF_TAXSMA-W6-S4` | OBSERVATION / INERT | the census script's one path redirect is `>/dev/null`; amended AC10 condition (2) says "no redirect ... to any path outside the SSM agent's own working directory", and the probe grades `/dev/null` as the null device -- the reading is printed, and a literal reading would FAIL AC10 |

@@ -1,9 +1,55 @@
-TX-p-1 AC10 | worktree HEAD 91b11ff0c957cb3470d0ae4a1513488b228e12b7 | run_at 2026-09-15T21:47:59Z | probe tx_p_1.py
-COMMAND LOG org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~6/command_log.jsonl (read_at 2026-09-15T21:47:59Z)
-self-test: get-object->READ put-object->NON-READ send-command->NON-READ
-DENOMINATOR: 48 AWS call(s) logged, first 2026-09-15T21:24:54Z, last 2026-09-15T21:47:53Z
+TX-p-1 AC10 | worktree HEAD b9a15838d7481ac5c679fef8c03914c5fb541ea7 | run_at 2026-09-15T23:13:45Z | probe tx_p_1.py
+COMMAND LOG org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~6/command_log.jsonl (read_at 2026-09-15T23:13:45Z); AC7 evidence org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~6/runs/AC7.txt; ruling 1.0.0_SA_CTO 97255 option A (row MDPF_TAXSMA-W6-S1)
+No AWS call is made by this criterion.
 VERB CENSUS: {"describe":1,"get":37,"head":2,"list":7,"send":1}
 OPERATIONS: {"iam get-policy":2,"iam get-policy-version":2,"iam get-role":4,"iam get-role-policy":3,"iam list-attached-role-policies":2,"iam list-role-policies":2,"lambda get-function":4,"lambda get-function:Code.Location-presigned-s3-get":4,"s3api get-bucket-encryption":1,"s3api get-bucket-policy":1,"s3api get-bucket-versioning":1,"s3api get-object":2,"s3api get-public-access-block":1,"s3api head-object":2,"s3api list-objects-v2":1,"scheduler get-schedule":2,"scheduler list-schedules":2,"ssm describe-instance-information":1,"ssm get-command-invocation":1,"ssm send-command":1,"sts get-caller-identity":9}
-READ-VERB CALLS: 47 of 48; NON-READ: 1 of 48
-  NON-READ 2026-09-15T21:35:56Z ssm send-command (criterion TXP1-AC7)
-VERDICT: FAIL-TXP1-AC10 1 of 48 logged AWS calls are not Describe/Get/List/Head: ssm send-command
+DENOMINATOR: 48 AWS call(s) logged, first 2026-09-15T21:24:54Z, last 2026-09-15T21:47:53Z
+READ-VERB CALLS: 47 of 48; ssm send-command: 1 of 48; any OTHER non-read: 0 of 48
+(1) send-command count 1 (criterion ['TXP1-AC7']); DocumentName=AWS-RunShellScript; InstanceIds=['i-07dccb1615503ac99'] vs the Gateway host i-07dccb1615503ac99 (infra/aws/ec2/EC2_MANIFEST.json @b9a15838d7) -> MET
+    sources: DocumentName and InstanceIds from this probe's ac7() request literal; instance from runs/AC7.txt (i-07dccb1615503ac99) and the log's get-command-invocation --instance-id (i-07dccb1615503ac99); scratch request file: present, DocumentName=AWS-RunShellScript InstanceIds=['i-07dccb1615503ac99'], script EQUALS the regenerated text
+(2) script text (20 lines, root /opt/opal-gateway), regenerated from this probe's CENSUS_TMPL at b9a15838d7:
+    | set -u
+    | R='/opt/opal-gateway'
+    | [ -d "$R" ] || { echo "CENSUS ROOT_MISSING $R"; exit 3; }
+    | cd "$R"
+    | lst0() { find . \( -name venv -o -name .venv -o -name __pycache__ -o -name node_modules -o -name .git -o -name site-packages \) -prune -o -type f "$@" -print0; }
+    | echo "CENSUS ROOT=$R"
+    | echo "CENSUS PRUNED=venv,.venv,__pycache__,node_modules,.git,site-packages"
+    | echo "CENSUS FILES_ALL=$(lst0 | tr -cd '\0' | wc -c)"
+    | echo "CENSUS FILES_PY=$(lst0 -name '*.py' | tr -cd '\0' | wc -c)"
+    | echo "CENSUS GREP_ERRORS=$(lst0 | xargs -0 -r grep -l -F 'taxsma-workbook' -- 2>&1 >/dev/null | wc -l)"
+    | echo "CENSUS FILES_MATCHING_TAXSMA_WORKBOOK=$(lst0 | xargs -0 -r grep -l -F 'taxsma-workbook' -- | wc -l)"
+    | echo "CENSUS FILES_MATCHING_TAXSMA_ANYCASE=$(lst0 | xargs -0 -r grep -l -i -F 'taxsma' -- | wc -l)"
+    | echo "CENSUS ROUTE_LINES_WITH_TAXSMA_WORKBOOK=$(lst0 -name '*.py' | xargs -0 -r grep -h -F 'taxsma-workbook' -- | grep -c -F 'Route(')"
+    | echo "CENSUS CONTROL_ROUTE_DECL_LINES=$(lst0 -name '*.py' | xargs -0 -r grep -h -c -F 'Route(' -- | awk '{s+=$1} END{print s+0}')"
+    | echo "CENSUS CONTROL_HEALTH_ROUTE=$(grep -c -F 'Route("/health"' app/server.py)"
+    | echo "CENSUS SERVER_PY_MD5=$(md5sum app/server.py | cut -d' ' -f1)"
+    | echo "CENSUS SERVER_PY_MTIME=$(stat -c %y app/server.py)"
+    | echo "--- lines containing taxsma-workbook (max 40) ---"
+    | lst0 | xargs -0 -r grep -n -F 'taxsma-workbook' -- | head -40
+    | echo "--- end ---"
+    sha256 0892538431cbf66b9bc9ca8486745cce62ea6dce353e84c9288e7bde69ecfaad; runs/AC7.txt recorded at run time 'census script sha256=0892538431cbf66b' -> EQUAL (prefix of 16 hex)
+  (2a) output redirects in the script: 2 total -- 1 fd duplication(s) ['2>&1'] (no path), 1 to /dev/null (the null device: bytes discarded, no file created or modified), 0 to any other path []
+       READING, stated so L9 can reject it: /dev/null is graded as the null device, not as a written path outside the SSM agent's working directory; a literal reading of 'any path' would FAIL this condition on these 1 redirect(s) (row MDPF_TAXSMA-W6-S4)
+  (2b) redirect targets under the Gateway app root /opt/opal-gateway or relative to it (the script cd's there): 0
+  (2c) sudo write                 tokens checked  3, hits 0 
+  (2c) file write                 tokens checked 20, hits 0 
+  (2c) package or service action  tokens checked 16, hits 0 
+  (2c) network call               tokens checked 15, hits 0 
+  (2d) command words: 55 simple command(s), 16 distinct {"[":1,"awk":1,"cd":1,"cut":1,"echo":15,"exit":1,"find":1,"grep":8,"head":1,"lst0":9,"md5sum":1,"set":1,"stat":1,"tr":2,"wc":5,"xargs":6}; outside the read-only set: 0 []
+    (2) -> MET
+(3) CommandId in command_log.jsonl (get-command-invocation args) 686530ff-12ce-46ab-b5b2-d07ef6985eaa; in runs/AC7.txt 686530ff-12ce-46ab-b5b2-d07ef6985eaa; final status in runs/AC7.txt Success (ResponseCode 0, ExecutionEnd 2026-09-15T21:36:06.903Z) -> MET
+(4) side effects of the ONE send-command, recorded as SSM's own bookkeeping:
+    - SSM command-history record: 1 (CommandId 686530ff-12ce-46ab-b5b2-d07ef6985eaa, sent 2026-09-15T21:36:04Z)
+    - SSM agent working files on the host: the agent's own per-command orchestration files (the script it materialises and its captured stdout/stderr) under its working directory; not re-read, because this criterion forbids a new AWS act
+    - Gateway app paths: the script writes 0 path(s) (2a/2c above); app/server.py read DURING the command: md5 370d55689b57c33221317271f10d7bd3, mtime 2026-09-09 18:43:58.000000000 +0000 -> BEFORE the send at 2026-09-15T21:36:04Z; git blob at deployed_commit 7bd89b5d71 md5 370d55689b57c33221317271f10d7bd3 -> EQUAL
+    denominator: 1 of 57 app files had md5 and mtime read at run time; 0 write targets are the static bound for all 57
+    (4) -> MET
+MUTANT an extra s3api put-object in the log   -> FAIL (as expected), 1 reason(s): 1 other non-read call(s): ['s3api put-object']
+MUTANT a second ssm send-command in the log   -> FAIL (as expected), 2 reason(s): (1) not exactly one AWS-RunShellScript send-command to the Gateway host only | (4) side effects not bounded to SSM bookkeeping on the recorded evidence
+MUTANT a redirect into the app root           -> FAIL (as expected), 3 reason(s): (2) script sha256 does not match the recorded run-time value | (2) 1 redirect(s) to a path: ['>app/x.txt'] | (4) side effects not bounded to SSM bookkeeping on the recorded evidence
+MUTANT a sudo curl line in the script         -> FAIL (as expected), 4 reason(s): (2) script sha256 does not match the recorded run-time value | (2) sudo write token(s) {'sudo': 1} | (2) network call token(s) {'curl': 1} | (2) command(s) outside the read-only set: ['sudo']
+MUTANT a different target instance            -> FAIL (as expected), 1 reason(s): (1) not exactly one AWS-RunShellScript send-command to the Gateway host only
+MUTANT no terminal status recorded            -> FAIL (as expected), 1 reason(s): (3) command id or terminal status not logged
+MUTANTS: 6 of 6 FAIL as expected
+VERDICT: PASS-TXP1-AC10
