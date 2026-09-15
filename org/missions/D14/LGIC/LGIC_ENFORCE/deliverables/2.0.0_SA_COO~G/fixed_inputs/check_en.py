@@ -728,16 +728,31 @@ def _v_delta0(n):
     base = spawn_base()
     if not base:
         say("FAIL-NO-BASE", "git merge-base HEAD CLOUD failed")
-    tmp = tempfile.mkdtemp()
+    made = []
 
     def at_base(p):
-        dst = os.path.join(tmp, p)
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        # Beside the live file, so a carrier's __file__-relative imports (lib/, its ids directory, its siblings) resolve
+        # as they do for the live copy -- "as if it lived at path" (exports_of). Removed after the comparison.
+        dst = os.path.join(os.path.dirname(p) or ".", ".check_en_base__" + os.path.basename(p))
+        made.append(dst)
         rc, out = run(["git", "show", "%s:%s" % (base, p)])
         with open(dst, "w", encoding="utf-8", newline="\n") as fh:
             fh.write(out)
         return dst
-    eq, bad = _compare_carriers(VIEW_OF[n], at_base, lambda p: p)
+    # A base copy sits in a temp directory, so its own imports (the repo's lib/, its sibling modules) resolve only if
+    # those directories are on the path -- as they are for the live copy (row LGIC_ENFORCE-W1-S7).
+    extra = [os.path.abspath("lib")] + sorted({os.path.dirname(os.path.abspath(p)) for p in VIEW_OF[n]})
+    added = [x for x in extra if x not in sys.path]
+    sys.path[:0] = added
+    try:
+        eq, bad = _compare_carriers(VIEW_OF[n], at_base, lambda p: p)
+    finally:
+        for x in added:
+            if x in sys.path:
+                sys.path.remove(x)
+        for f in made:
+            if os.path.isfile(f):
+                os.remove(f)
     say("PASS-DELTA0" if not bad else "FAIL-DELTA-NONZERO", "BASE: %s  FILES: %d  EXPORTS EQUAL: %d  DIFFER: %s" % (base[:10], len(VIEW_OF[n]), len(eq), bad))
 
 
