@@ -765,6 +765,162 @@ def _selftest_s6():
     return out
 
 
+# ---------------------------------------------------------------- cell 7 arm (DEC-4 ii)
+#
+# RULING R-20: four live IAM roles carry a firm key but are LEGACY-NAMED, so the generated fence catches
+# none of them (0 of 4). DEC-4(ii): before a firm bucket's Deny lands on a principal the rule does not name,
+# that principal is RENAMED under name() by its OWNER (D9's IRPT projects; the ADVI family), or NAMED in
+# exemptions.json with its reason. R-20: an exemption is the interim THIS cell may write; a rename is not.
+# A role that genuinely never touches the bucket is recorded NOT_A_PRINCIPAL with its evidence.
+#
+# MEASURED BEFORE BUILDING, and it is why this arm is the only cell-7 limb cut now:
+#   - the generated fence is ALREADY APPLIED on opal-data-49financial (round 1, EN-f-2; ledger
+#     20260915T0334Z_lgic-enforce-fence-49financial_deploy_completion.md CLOSED 4 of 4 legs);
+#   - the three probe roles were removed at that entry's close (NoSuchEntity x3, re-plan 0-diff) and the live
+#     plane reads 0 'fenceprobe' nodes of 2,558 -- so "probes removed" would PASS before the cell runs and is
+#     NOT a criterion;
+#   - FWD-2's EXERCISED limb is an open call at 1.0.0_SA_CTO and is cut when ruled.
+#
+# THE RENAMED BRANCH RE-MEASURES the live plane rather than trusting the worker's field. Predicate measured
+# with controls before use: `^name$` returns 0 for roles that ARE live (the aws corpus matches name+arn+props
+# concatenated, so line anchors never hold) -- a broken predicate reading as an absence. `role/<name>` with a
+# negative lookahead returns exactly 1 for a live role and 0 for an invented one, and the returned node name
+# must equal the role exactly.
+
+LEGACY_WRITERS = [
+    {"role": "irpt-core-firm-49financial", "bucket": "opal-data-49financial"},
+    {"role": "irpt-core-firm-inflection", "bucket": "opal-data-inf"},
+    {"role": "irpt-core-firm-cottonwood", "bucket": "opal-data-cot"},
+    {"role": "demo-transform-runner-ec2-role", "bucket": "opal-data-demo"},
+]
+EXEMPTIONS = "infra/logic/registry/exemptions.json"
+DISPOSITIONS = ("EXEMPTED", "RENAMED", "NOT_A_PRINCIPAL")
+
+
+def _live_role(name):
+    """(present or None, vintage). None means the instrument did not answer -- never an absence."""
+    argv = [sys.executable, os.path.join(REPO, ".tools", "comp-find"), "--corpus", "aws",
+            r"role/%s(?![A-Za-z0-9_-])" % re.escape(name), "IAM_ROLE", "--limit", "10"]
+    try:
+        r = subprocess.run(argv, capture_output=True, text=True, timeout=180,
+                           env=dict(os.environ, PYTHONIOENCODING="utf-8"), cwd=REPO)
+    except subprocess.TimeoutExpired:
+        return None, None
+    out = (r.stdout or "") + (r.stderr or "")
+    den = re.search(r"DENOMINATOR: (\d+) hit\(s\) across (\d+) aws node", out)
+    vin = re.search(r"VINTAGE: Built from the estate as of ([0-9-]+ [0-9:]+ UTC)", out)
+    if not den or int(den.group(2)) == 0:
+        return None, None
+    names = re.findall(r"^    (\S+)\s+drift=", out, re.M)
+    return (name in names), (vin.group(1) if vin else None)
+
+
+def w7_writers_dispositioned(path=None, root=None, live_role=None):
+    """Each of R-20's four legacy writers carries a disposition that the ARTIFACT, not the worker, confirms."""
+    live_role = live_role or _live_role
+    p, why = _one("FENCE_WRITER_DISPOSITION.r3.json", path, root)
+    if p is None:
+        say(why)
+        say("FAIL-W7-DISPOSITION-UNREADABLE")
+        return 1
+    try:
+        with open(p, encoding="utf-8") as fh:
+            doc = json.load(fh)
+    except (OSError, ValueError) as exc:
+        say("unreadable disposition file: %s" % exc)
+        say("FAIL-W7-DISPOSITION-UNREADABLE")
+        return 1
+    rows = {r.get("role"): r for r in (doc.get("rows") or []) if isinstance(r, dict)}
+    with open(os.path.join(root or REPO, *EXEMPTIONS.split("/")), encoding="utf-8") as fh:
+        ex = json.load(fh).get("exemptions") or {}
+    bad = []
+    for w in LEGACY_WRITERS:
+        role, bucket = w["role"], w["bucket"]
+        row = rows.get(role)
+        if row is None:
+            say("  %-32s MISSING from the disposition file" % role)
+            bad.append(role)
+            continue
+        disp = row.get("disposition")
+        evidence = str(row.get("evidence") or "").strip()
+        if disp not in DISPOSITIONS:
+            say("  %-32s disposition %r is not one of %s" % (role, disp, DISPOSITIONS))
+            bad.append(role)
+        elif disp == "EXEMPTED":
+            named = [e for e in (ex.get(bucket) or []) if isinstance(e, dict) and e.get("principal") == role]
+            ok = bool(named) and len(str(named[0].get("reason") or "").strip()) >= 12
+            say("  %-32s EXEMPTED under %s: present with a reason in exemptions.json -> %s" % (role, bucket, ok))
+            if not ok:
+                bad.append(role)
+        elif disp == "RENAMED":
+            present, vintage = live_role(role)
+            say("  %-32s RENAMED: legacy name live at vintage %s -> %s" % (role, vintage, present))
+            if present is not False:
+                bad.append(role)
+        else:
+            ok = len(evidence) >= 40
+            say("  %-32s NOT_A_PRINCIPAL of %s: evidence %d chars -> %s" % (role, bucket, len(evidence), ok))
+            if not ok:
+                bad.append(role)
+    say("DENOMINATOR: %d legacy writer(s) ruled by R-20; %d without a confirmed disposition" % (len(LEGACY_WRITERS), len(bad)))
+    if bad:
+        say("FAIL-W7-WRITERS-UNDISPOSITIONED")
+        return 1
+    say("PASS-W7-WRITERS-DISPOSITIONED")
+    return 0
+
+
+def _selftest_w7():
+    """Every branch, both ways, against a temp root and an INJECTED live-plane reader -- the self-test never
+    reads the live plane, so its verdict cannot drift with the estate."""
+    out = []
+    base = _tempfile.mkdtemp(prefix="en_r3_w7_")
+    try:
+        os.makedirs(os.path.join(base, "infra", "logic", "registry"))
+        dl = os.path.join(base, *DELIV.split("/"), "0.9.0_WK_LGIC_ENFORCE~9")
+        os.makedirs(dl)
+
+        def write(exempt_rows, rows):
+            with open(os.path.join(base, *EXEMPTIONS.split("/")), "w", encoding="utf-8") as fh:
+                json.dump({"exemptions": exempt_rows}, fh)
+            fp = os.path.join(dl, "FENCE_WRITER_DISPOSITION.r3.json")
+            with open(fp, "w", encoding="utf-8") as fh:
+                json.dump({"rows": rows}, fh)
+            return fp
+
+        def gone(_n):
+            return False, "2026-09-16 12:17:46 UTC"
+
+        def still(_n):
+            return True, "2026-09-16 12:17:46 UTC"
+
+        def silent(_n):
+            return None, None
+
+        empty = {w["bucket"]: [] for w in LEGACY_WRITERS}
+        exempted = {w["bucket"]: [{"principal": w["role"], "reason": "reads its firm's bucket, measured in E1's census"}]
+                    for w in LEGACY_WRITERS}
+        all_exempted = [{"role": w["role"], "disposition": "EXEMPTED"} for w in LEGACY_WRITERS]
+
+        fp = write(empty, all_exempted)
+        out.append(("w7 RED   claimed EXEMPTED, absent from exemptions.json", w7_writers_dispositioned(fp, base, gone) == 1))
+        fp = write(exempted, all_exempted)
+        out.append(("w7 GREEN EXEMPTED and present with a reason", w7_writers_dispositioned(fp, base, gone) == 0))
+        renamed = [{"role": w["role"], "disposition": "RENAMED"} for w in LEGACY_WRITERS]
+        fp = write(empty, renamed)
+        out.append(("w7 RED   claimed RENAMED, legacy name still live", w7_writers_dispositioned(fp, base, still) == 1))
+        out.append(("w7 RED   claimed RENAMED, live plane did not answer", w7_writers_dispositioned(fp, base, silent) == 1))
+        out.append(("w7 GREEN RENAMED and gone from the live plane", w7_writers_dispositioned(fp, base, gone) == 0))
+        thin = [{"role": w["role"], "disposition": "NOT_A_PRINCIPAL", "evidence": "n/a"} for w in LEGACY_WRITERS]
+        fp = write(empty, thin)
+        out.append(("w7 RED   NOT_A_PRINCIPAL with no evidence", w7_writers_dispositioned(fp, base, gone) == 1))
+        fp = write(exempted, all_exempted[:3])
+        out.append(("w7 RED   one of the four missing", w7_writers_dispositioned(fp, base, gone) == 1))
+    finally:
+        _shutil.rmtree(base, ignore_errors=True)
+    return out
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -835,6 +991,7 @@ def selftest_arms():
     results.extend(_selftest_i3())
     results.extend(_selftest_r5())
     results.extend(_selftest_s6())
+    results.extend(_selftest_w7())
 
     say("")
     for label, ok in results:
@@ -845,6 +1002,7 @@ def selftest_arms():
 
 
 CMDS = {
+    "w7-writers-dispositioned": w7_writers_dispositioned,
     "s6-live-complete": s6_live_complete,
     "s6-repo-complete": s6_repo_complete,
     "s6-no-placeholder": s6_no_placeholder,
