@@ -35,9 +35,18 @@
     {
       "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~3/commit-limb.r2.result.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "717ea570d1c4efe0de95bbba5006d0c151199300",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The result file: the bar, premises re-grounded, what was built, the four verdicts (including G1R-AC1's fixture block), controls and limits. Rides the commit that carries this instance."
+      "deploy_evidence": "Rewritten to record the final all-PASS state: the fixture defect found and remedied mid-order, the independent re-verification of the issuer's fix (CRLF-normalized blob match, ancestry checks), and the four re-run verdicts. Committed together with the disposal row.",
+      "introduces": ["PASS-PLAN-FILE-NOT-GRADED"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "717ea570d1c4efe0de95bbba5006d0c151199300",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended (LGIC_ENFORCE-W3-S11, disposing W3-S10). surprise-row-gate: '1 new row(s) of 82 total checked (81 pre-existing, NOT re-graded)', 'OK: 1 file(s), all new rows carry their step-7/step-10 fields'. surprise-corpus: 'OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved)'.",
+      "introduces": ["LGIC_ENFORCE-W3-S11"]
     }
   ],
   "acceptance": [
@@ -47,10 +56,9 @@
       "method": "command",
       "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2b-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py g1r-plan-not-graded",
       "expect": "VERDICT: PASS-PLAN-FILE-NOT-GRADED",
-      "output_evidence": "MACHINE-WRITTEN PLAN FILE ADDED: rc=1  NAMING ERROR not a unified diff: the hunk at diff line 4 ends early (0/0 old, 12/13 new)\nCONTROL, THE SAME NAME IN AN AUTHORED JSON FILE: rc=1  on:2 mdpf-cottonwood-publisher-queue -> mdpf-cot-publisher-queue\n  why: NEW and ALIAS as SQS_QUEUE: REFUSE; hand-kept carrier of 'cottonwood' outside every permitted context: read it through lookup('cottonwood')\nNAMING-GATE: REFUSE 1 graded\nVERDICT: FAIL-PLAN-FILE-GRADED\nrc=1",
-      "denominator": "N/A -- the checker's own fixture (fixed_inputs/r2/tests/g1r/01_plan_json_added.patch) is a corrupt unified diff (hunk header declares 13 added lines, body carries 12), refused as unparseable by BOTH the pre-edit and the edited gate and independently by 'git apply --check' (rc=128); the commit limb's SKIP logic never runs. Confirmed correct on a header-corrected, byte-identical copy built in .scratch/ (never in fixed_inputs/, never committed): 'NAMING SKIP .../fixture_plan.r2.json:1 <machine-written plan file> -> -' then 'NAMING-GATE: PASS 1 graded', rc=0, with the authored-JSON control still refused. Filed LGIC_ENFORCE-W3-S10 (BLOCKING, ARMED, disarm 2.0.0_SA_COO~G).",
-      "status": "FAIL",
-      "status_reason": "The named invocation genuinely returns VERDICT: FAIL-PLAN-FILE-GRADED, rc=1, because its own fixed-input fixture is a corrupt unified diff (independently reproduced on the pre-edit gate and on real git; see denominator and row LGIC_ENFORCE-W3-S10). Recorded honestly per the proof-of-spec contract; the row does not resolve this FAIL because the fixed input is outside this order's <paths> and read-only."
+      "output_evidence": "MACHINE-WRITTEN PLAN FILE ADDED: rc=0  GIC_ENFORCE~9/fixture_plan.r2.json:1 <machine-written plan file> -> -\n  why: top level carries format_version, terraform_version and resource_changes or planned_values (a terraform show -json artifact): not graded\nNAMING-GATE: PASS 1 graded\nCONTROL, THE SAME NAME IN AN AUTHORED JSON FILE: rc=1  on:2 mdpf-cottonwood-publisher-queue -> mdpf-cot-publisher-queue\n  why: NEW and ALIAS as SQS_QUEUE: REFUSE; hand-kept carrier of 'cottonwood' outside every permitted context: read it through lookup('cottonwood')\nNAMING-GATE: REFUSE 1 graded\nVERDICT: PASS-PLAN-FILE-NOT-GRADED\nrc=0",
+      "denominator": "2 of 2 fixture diffs: the plan file (SKIPped, 1 row graded PASS) and the authored-JSON control (1 string graded, REFUSEd). The checker's own fixture, fixed_inputs/r2/tests/g1r/01_plan_json_added.patch, carried a corrupt hunk header (declared 13 added lines, body carried 12) that this worker found and filed as LGIC_ENFORCE-W3-S10 (BLOCKING); the issuer, 2.0.0_SA_COO~G, independently verified it on two instruments (a header-vs-body parser and 'git apply --check'), corrected the ONE wrong line (+1,13 -> +1,12, zero other bytes changed, all 17 CRLF endings intact) at commit 6f640ead30 (pinned, never PENDING-THIS-COMMIT), and drained this worker's branch into CLOUD at 4f7f050f2c. Re-run in this worktree against the corrected fixture (placed here by the issuer, still read-only and outside this order's <paths>, left uncommitted): VERDICT: PASS-PLAN-FILE-NOT-GRADED, rc=0. Independently re-verified before relying on it: git show 6f640ead30:<path> matches this worktree's copy byte-for-byte after CRLF normalization; git merge-base --is-ancestor 6f640ead30 4f7f050f2c and --is-ancestor 7bdcbfb325 4f7f050f2c both read true. Disposed as LGIC_ENFORCE-W3-S11 (GRADUATED, adjudicates LGIC_ENFORCE-W3-S10).",
+      "status": "PASS"
     },
     {
       "criterion_id": "G1R-AC2",
@@ -104,31 +112,38 @@
     {
       "item": ".tools/naming-apply-gate.py",
       "reason": "Not in this order's <paths> and not in its criteria (the plan-time limb is round 2's EN-t-2 cell). This order only keeps its ng.TF_NODE import resolving, verified by reading its usage, not by editing or re-testing the file."
-    },
-    {
-      "item": "A negative/mutant control for G1R-AC1's SKIP logic run through check_en_r2.py itself",
-      "reason": "The checker's own fixture is corrupt (see G1R-AC1's row); the SKIP logic was instead confirmed directly against .tools/naming-gate.py on a header-corrected, byte-identical copy of the same fixture, built in .scratch/ and never committed, per BOUNDS ('Fixed inputs are read-only ... Never edit any of them')."
     }
   ],
   "surprises": [
-    "LGIC_ENFORCE-W3-S10: G1R-AC1's own fixture (tests/g1r/01_plan_json_added.patch) is a corrupt unified diff -- hunk header declares 13 added lines, body carries 12 -- refused by both the pre-edit and the edited naming-gate.py and independently by git apply --check. BLOCKING, ARMED, disarm 2.0.0_SA_COO~G."
+    "LGIC_ENFORCE-W3-S10: G1R-AC1's own fixture (tests/g1r/01_plan_json_added.patch) is a corrupt unified diff -- hunk header declares 13 added lines, body carries 12 -- refused by both the pre-edit and the edited naming-gate.py and independently by git apply --check. BLOCKING, ARMED, disarm 2.0.0_SA_COO~G. DISPOSED by LGIC_ENFORCE-W3-S11.",
+    "LGIC_ENFORCE-W3-S11: disposes LGIC_ENFORCE-W3-S10 (disposition GRADUATED) -- 2.0.0_SA_COO~G corrected the fixture's hunk header (+1,13 -> +1,12, zero other bytes changed) at 6f640ead30, drained into CLOUD at 4f7f050f2c; G1R-AC1 now reads VERDICT: PASS-PLAN-FILE-NOT-GRADED, rc=0, independently re-verified by this worker. OBSERVATION, INERT."
   ],
   "session_log": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~3/commit-limb.r2.result.md",
   "compiler_tools": [
     {
       "tool": "python (stdlib)",
       "invocation": "python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py g1r-plan-not-graded|g1r-registry-first|g1r-map-from-schema|g1r-regression, each under timeout",
-      "result": "3 of 4 PASS (AC2, AC3, AC4); AC1 FAIL by the fixture's own corruption, independently reproduced on the pre-edit gate and on real git"
+      "result": "First pass: 3 of 4 PASS (AC2, AC3, AC4); AC1 FAIL by the fixture's own corruption, independently reproduced on the pre-edit gate and on real git. After the issuer corrected the fixture (6f640ead30) and this worker re-ran all four in this worktree: 4 of 4 PASS."
     },
     {
       "tool": "git",
       "invocation": "git apply --check org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/tests/g1r/01_plan_json_added.patch",
-      "result": "error: corrupt patch at ...:18, rc=128"
+      "result": "Before the fix: error: corrupt patch at ...:18, rc=128"
+    },
+    {
+      "tool": "git",
+      "invocation": "git show 6f640ead30:<fixture path> compared (CRLF-normalized) against the worktree's post-fix copy; git merge-base --is-ancestor 6f640ead30 4f7f050f2c; git merge-base --is-ancestor 7bdcbfb325 4f7f050f2c",
+      "result": "Blob content identical to the worktree copy once normalized to LF (0 vs 17 CRLF, a rendering artifact); both ancestor checks true -- independent re-verification of the coordinator's resume message, not a repetition of its own report"
     },
     {
       "tool": "bash",
       "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~3 <...>\" -F <msgfile> -- .tools/naming-gate.py org/missions/D14/LGIC/LGIC_ENFORCE/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "result": "commit-gate OK, naming-gate self-grade PASS 0 graded, surprise-row-gate OK (1 new row of 81), surprise-corpus OK (baseline 4/4), to-pipeline-gate OK, committed d49f538774194592cb77e89c71731c533bca1ce6"
+      "result": "commit-gate OK, naming-gate self-grade PASS 0 graded, surprise-row-gate OK (1 new row of 81), surprise-corpus OK (baseline 4/4), to-pipeline-gate OK, committed d49f538774194592cb77e89c71731c533bca1ce6 (the build)"
+    },
+    {
+      "tool": "bash",
+      "invocation": ".tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~3 <...>\" -F <msgfile> -- <result.md> <INVESTIGATION_v1.md> (the read-only fixed fixture explicitly excluded from the pathspec)",
+      "result": "surprise-row-gate OK (1 new row of 82), surprise-corpus OK (baseline 4/4), to-pipeline-gate OK, committed 717ea570d1c4efe0de95bbba5006d0c151199300 (the disposal); git status --porcelain afterward showed only the fixture modified (untouched, as intended) and .scratch/ untracked"
     },
     {
       "tool": "python",
