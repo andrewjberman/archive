@@ -594,10 +594,19 @@ def l2_recount():
     body = m.group(1) if m else ""
     # A count is REPRODUCED when section 7 carries a table row whose first cell is the label and
     # whose next cell is the number. Cells are compared after stripping, never by substring.
+    # ⛔ NORMALISE PRESENTATION OUT BEFORE COMPARING. The ledger BOLDS the counts it wants a
+    # reader's eye on -- `**23**`, `**13**`, `**3**` -- and markdown emphasis is presentation, not
+    # value. The FIRST repair of this criterion compared raw cells and reported those three as
+    # mismatches; the worker's own claim that 14 of 14 agree was correct and my instrument was
+    # wrong TWICE, in two different ways. A checker that reads how a number is DISPLAYED is not
+    # reading the number.
+    def cell(x):
+        return re.sub(r"[*`]", "", x).strip()
+
     rows_in_7 = []
     for ln in body.splitlines():
         if ln.strip().startswith("|"):
-            cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+            cells = [cell(c) for c in ln.strip().strip("|").split("|")]
             if len(cells) >= 2:
                 rows_in_7.append(cells)
     missing_rows = [(lab, n) for lab, n in tot
