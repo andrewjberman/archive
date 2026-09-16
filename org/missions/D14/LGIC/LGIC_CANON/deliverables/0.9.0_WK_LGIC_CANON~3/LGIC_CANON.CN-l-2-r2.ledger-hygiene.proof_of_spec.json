@@ -1,0 +1,156 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_CANON.CN-l-2-r2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/prd/LGIC_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5b2336a5e4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/decompositions/LGIC_CANON_DECOMP.md",
+    "vintage_commit": "2b987c131d",
+    "to_ref": "org/missions/D14/LGIC/LGIC_CANON/task-orders/LGIC_CANON.CN-l-2-r2.ledger-hygiene.md"
+  },
+  "assignee": "0.9.0_WK_LGIC_CANON~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/06_CONFORMANCE_LEDGER.md",
+      "kind": "doc",
+      "commit_or_etag": "45f5930e32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A classification record, not deployed (rule: 'nothing on this page moves a byte'). v1.1 -> v1.2: X6's axis field reads A2 on its register row and its §2 cross-reference; §7's header cell reverts from 'disposition class' to 'disposition'; a v1.2 changelog entry added. No plane's disposition and no count changed (ledger_recount.py RECOUNT: OK before and after, same 68/5/8/14-of-14).",
+      "introduces": ["axis A2", "| disposition | rows | note |"],
+      "artifact_covered_by": ["L2-AC1", "L2-AC3", "L2-AC4", "L2-J1"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~2/ledger_recount.py",
+      "kind": "script",
+      "commit_or_etag": "45f5930e32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A QA/adjudication instrument (run by this order's own checker as a subprocess), never deployed. The ledger read now uses a literal open(path, \"r\", encoding=\"utf-8\") so every open() carries encoding='utf-8'; plane-table selection now scopes by SECTION (PLANE_SECTIONS = section headings §1-§5) instead of by the header cell's wording, so the header revert does not cause §7's own count table to be miscounted as a sixth plane table (confirmed by mutant M4). Run directly: RECOUNT: OK.",
+      "introduces": ["PLANE_SECTIONS", "with open(path, \"r\", encoding=\"utf-8\") as f:"],
+      "artifact_covered_by": ["L2-AC2", "L2-AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "45f5930e32",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Append-only channel: one row appended (LGIC_CANON-W3-S2) inside the one JSON fence; fence re-parses to 18 rows, 18 distinct ids; surprise-row-gate.py ran at commit time and reported '1 new row(s) of 18 total checked ... all new rows carry their step-7/step-10 fields'.",
+      "introduces": ["LGIC_CANON-W3-S2"],
+      "artifact_covered_by": ["L2-AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~3/ledger-hygiene.r2.result.md",
+      "kind": "doc",
+      "commit_or_etag": "22cd1add5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The result file the order names, written after the artifact commit (45f5930e32) and committed on its own: premises re-grounded, what was written, every criterion's invocation/output/rc/denominator, controls, rows, declared limits.",
+      "artifact_covered_by": ["L2-AC1", "L2-AC2", "L2-AC3", "L2-AC4", "L2-J1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "L2-AC1",
+      "criterion_verbatim": "L2-AC1 -- X6's line names exactly one axis.",
+      "method": "command",
+      "invocation": "cd <WS> && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py l2-x6-axis",
+      "output_evidence": "X6's line: | `opal-data-demo/platinum/` | 22,414 | 06-05 | R6 §1 | **CONFORMANT-as-DEMO-TENANT** (X6 GRANTED, axis A2, ~01:3xZ 09-13: ...\naxes named on X6's line, denominator 5: ['A2']\nVERDICT: PASS-L2-X6-ON-ITS-AXIS\n(rc=0; run 3 times on the committed bytes @45f5930e32, identical output each time)",
+      "denominator": "5 (the AXES domain A1-A5); exactly 1 named on the first line in the document matching \\bX6\\b",
+      "status": "PASS",
+      "expect": "PASS-L2-X6-ON-ITS-AXIS"
+    },
+    {
+      "criterion_id": "L2-AC2",
+      "criterion_verbatim": "L2-AC2 -- every open() in the recount script reads utf-8 explicitly.",
+      "method": "command",
+      "invocation": "cd <WS> && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py l2-utf8",
+      "output_evidence": "recount script: org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~2/ledger_recount.py\nopen() calls, denominator 1; encoding='utf-8' occurrences: 1\nVERDICT: PASS-L2-RECOUNT-READS-UTF8\n(rc=0; run 3 times, identical output each time)",
+      "denominator": "1 open() call in the script; 1 carries encoding='utf-8'",
+      "status": "PASS",
+      "expect": "PASS-L2-RECOUNT-READS-UTF8"
+    },
+    {
+      "criterion_id": "L2-AC3",
+      "criterion_verbatim": "L2-AC3 -- section 7's header cell reads disposition, not disposition class.",
+      "method": "command",
+      "invocation": "cd <WS> && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py l2-header",
+      "output_evidence": "section 7 header cell reads 'disposition class' (the workaround): False\nsection 7 header cell reads 'disposition'       (reverted)      : True\nVERDICT: PASS-L2-HEADER-REVERTED\n(rc=0; run 3 times, identical output each time)",
+      "denominator": "N/A -- boolean check (workaround present / reverted form present)",
+      "status": "PASS",
+      "expect": "PASS-L2-HEADER-REVERTED"
+    },
+    {
+      "criterion_id": "L2-AC4",
+      "criterion_verbatim": "L2-AC4 -- the section's totals are reproduced by the instrument.",
+      "method": "command",
+      "invocation": "cd <WS> && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py l2-recount",
+      "output_evidence": "recount script: org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~2/ledger_recount.py\nSECTION lines: 0 ; TOTAL lines: 6\nTOTAL rows the ledger's own table does not carry at the counted value, denominator 6: 6 ['CONFORMANT:', 'RETIRE:', 'GRANTED:', 'OWED:', 'DECIDED:']\nVERDICT: FAIL-L2-COUNTS-REPRODUCED\n(rc=0; run 3 times, identical output each time). Independently, ledger_recount.py run directly prints RECOUNT: OK, 68 plane rows in 5 plane tables, 8 register entries, all 14 of section 7's totals AGREE -- the ledger's own counts are correct; the FAIL above is check_canon_r2.py:550-551's \\S+-only SECTION/TOTAL regex, which cannot capture a multi-word label or a label without a trailing colon glued on, while round 1's own checker (check_canon_r1.py:781-782, a non-greedy .+?: regex) parses the SAME script's SAME output correctly and PASSES (VERDICT: PASS-L1-RECOUNT-AGREES, rc=0).",
+      "denominator": "14 of 14 section-7 totals AGREE against ledger_recount.py run directly; 0 of 6 captured TOTAL labels match check_canon_r2.py's own \\|\\s*%s\\s*\\|\\s*%s\\s*\\| substring test, and 8 of 14 labels are never even captured by its regex",
+      "status": "FAIL",
+      "status_reason": "Fixed-input defect, not a wrong count: check_canon_r2.py's l2_recount() uses \\S+-only regexes incompatible with ledger_recount.py's established, round-1-validated multi-word SECTION/TOTAL output (row LGIC_CANON-W3-S2, BLOCKING/INERT). Repairing check_canon_r2.py is outside this order's <paths> (a read-only fixed input); collapsing the ledger's own multi-word class labels to single tokens would misstate the ledger and regress round 1's already-PASSING l1-recount. Left to 3.0.0_SA_CVO at L9 / 2.0.0_SA_COO~G's recut.",
+      "expect": "PASS-L2-COUNTS-REPRODUCED"
+    },
+    {
+      "criterion_id": "L2-J1",
+      "criterion_verbatim": "L2-J1 -- graded at L9 by 3.0.0_SA_CVO: X6 is on the axis it actually excepts, and the header revert did not re-break the checker. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "Read infra/logic/06_CONFORMANCE_LEDGER.md@45f5930e32 lines 94 and 137-139 (X6's axis) against org/missions/D14/LGIC/LGIC_CANON/deliverables/1.0.0_SA_CTO/LGIC_CANON_ROUND1_ANALYSIS.md@<HEAD> ruling A-5 (row W1-S2); read ledger_recount.py@45f5930e32's PLANE_SECTIONS scoping against l2-header's and l2-recount's outputs.",
+      "output_evidence": "A-5's text: 'X6 (DEMO-TENANT, GRANTED) is placed inside A1-A5 by the ledger cell on the axis its own row's substance names -- a tenancy departure is a bucket-structure departure, A2, unless the cell measures otherwise and says which axis and why.' No measurement to the contrary was found in this order's reads, so A2 was applied on both the register row and the §2 cross-reference (the first \\bX6\\b line in the document, which is what check_canon_r2.py's l2_x6_axis() actually greps). The header revert (L2-AC3, PASS) did not re-break section-count integrity: ledger_recount.py's plane-table loop is scoped by SECTION (PLANE_SECTIONS), independently verified by mutant M4 (reverting the scoping fix alone, with the header correctly reverted, produces RECOUNT: MISMATCH 14, proving the fix is load-bearing) and by the clean direct run (RECOUNT: OK, 68/5/8, 14 of 14 AGREE).",
+      "denominator": "2 sub-questions named by the criterion (X6's axis correctness; whether the header revert re-broke the checker); both evidenced, neither graded here",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion: the substitute oracle is 3.0.0_SA_CVO at L9, who reads the ledger and the recount script against A-5 and CN-l-2's cell text; this worker records the evidence and grades nothing.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four mutants, each applied directly to the TRACKED committed file in this isolated worktree (never a scratch copy, since check_canon_r2.py reads a fixed repo-relative path with no override), checked, then restored via `git checkout 45f5930e32 -- <path>` and confirmed clean by `git diff --stat`. M1 removes X6's axis A2 note from the §2 line (l2-x6-axis). M2 re-applies the round-1 header workaround (l2-header). M3 strips encoding=\"utf-8\" from ledger_recount.py's open() (l2-utf8). M4 reverts the PLANE_SECTIONS scoping fix alone, with the header left correctly reverted, and runs ledger_recount.py directly (not through l2-recount, which already fails on the checker's own defect).",
+      "expected": "M1 prints FAIL-L2-X6-ON-ITS-AXIS; M2 prints FAIL-L2-HEADER-REVERTED; M3 prints FAIL-L2-RECOUNT-READS-UTF8; M4 prints RECOUNT: MISMATCH (section 7's own rows double-counted as plane rows).",
+      "observed": "M1: \"axes named on X6's line, denominator 5: [] | VERDICT: FAIL-L2-X6-ON-ITS-AXIS\". M2: \"reads 'disposition class' (the workaround): True | VERDICT: FAIL-L2-HEADER-REVERTED\". M3: \"encoding='utf-8' occurrences: 0 | VERDICT: FAIL-L2-RECOUNT-READS-UTF8\". M4: \"RECOUNT: MISMATCH 14\" (plane rows 68 -> 77, RETIRE 13 -> 14, DECLARED EXCEPTION 1 -> 2, AWAITING a word 3 -> 4, OUT OF SCOPE 2 -> 3, DECIDED 65 -> 73, WAITING 3 -> 4). 4 of 4 fired.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of the four mechanical criteria run 3 times on the same committed bytes (@45f5930e32) via check_canon_r2.py, plus ledger_recount.py run directly twice.",
+      "observed": "l2-x6-axis: PASS-L2-X6-ON-ITS-AXIS every run. l2-utf8: PASS-L2-RECOUNT-READS-UTF8 every run. l2-header: PASS-L2-HEADER-REVERTED every run. l2-recount: FAIL-L2-COUNTS-REPRODUCED every run, same denominator (6) and same mismatch list every time. ledger_recount.py direct: RECOUNT: OK, same 68/5/8/14-of-14 both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A verdict on whether X6 is truly on the axis it excepts, and on whether the header revert leaves the recount instrument correctly scoped in every future case (L2-J1)",
+      "reason": "A judgment criterion: graded at L9 by 3.0.0_SA_CVO, never self-graded."
+    },
+    {
+      "item": "Repairing check_canon_r2.py's l2_recount() \\S+-only SECTION/TOTAL regex (row LGIC_CANON-W3-S2)",
+      "reason": "The round's fixed inputs are read-only to workers and outside this order's <paths>; the remedy belongs to the checker's issuer, 2.0.0_SA_COO~G, or to 3.0.0_SA_CVO's L9 recut."
+    },
+    {
+      "item": "Collapsing ledger_recount.py's section-7 disposition-class and register labels to single tokens so l2-recount's regex would match",
+      "reason": "Would misstate the ledger's own multi-word class names (MIGRATE (home), AWAITING a word, PLANE ROWS (the denominator), ...) and would regress round 1's already-PASSING l1-recount, which requires the descriptive multi-word format (mutant M4 corroborates the format is load-bearing for correctness, not merely stylistic)."
+    }
+  ],
+  "surprises": [
+    "LGIC_CANON-W3-S2: check_canon_r2.py's l2_recount() parses ledger_recount.py's SECTION/TOTAL lines with \\S+-only regexes that cannot read a multi-word label and glue a trailing colon onto every single-word label they do capture, while round 1's own checker (a non-greedy .+?: regex) reads the identical script's identical output correctly. L2-AC4 reads FAIL by that instrument's own defect, not by any count this ledger reports wrong. BLOCKING, INERT."
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~3/ledger-hygiene.r2.result.md",
+  "compiler_tools": [
+    {
+      "tool": "check_canon_r2.py (the round's fixed checker)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py l2-x6-axis | l2-utf8 | l2-header | l2-recount",
+      "result": "PASS-L2-X6-ON-ITS-AXIS; PASS-L2-RECOUNT-READS-UTF8; PASS-L2-HEADER-REVERTED; FAIL-L2-COUNTS-REPRODUCED (instrument defect, row W3-S2)."
+    },
+    {
+      "tool": "check_canon_r1.py l1-recount (a second instrument, round 1's own checker, on the identical script)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r1/check_canon_r1.py l1-recount",
+      "result": "script rc: 0  SECTION LINES: 10  COUNT ROWS COMPARED: 14  DIFFERING: 0 | VERDICT: PASS-L1-RECOUNT-AGREES -- corroborates that ledger_recount.py's own counts and output format are correct, isolating the round-2 checker's regex as the defect."
+    },
+    {
+      "tool": "ledger_recount.py (the instrument under CN-l-2's own repair, run directly)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~2/ledger_recount.py",
+      "result": "RECOUNT: OK. 68 plane rows in 5 plane tables; 8 register entries; decided cells disagreeing: 0; all 14 of section 7's TOTAL/CHECK lines AGREE."
+    }
+  ]
+}
