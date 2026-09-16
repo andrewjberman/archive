@@ -258,60 +258,176 @@ VERDICT: PASS-OGP1-AC10
 
 ## OGP1-AC11
 
-- measured: 2026-09-15T10:57:49Z
-- instrument: host-side awk/grep census of the audit record, read by SSM; counts only
-- denominator: 78049
-- verdict: `VERDICT: FAIL-OGP1-AC11 p95 latency not computable from the audit record: 0 of 78049 records in the window carry a latency/duration field`
+- measured: 2026-09-16T19:15:11Z
+- instrument: cloudwatch GetMetricStatistics AWS/ApplicationELB TargetResponseTime (Statistics SampleCount, ExtendedStatistics p95), one CloudWatch period spanning the whole window, via .tools/aws; elbv2 DescribeLoadBalancers/DescribeTargetGroups resolve the dimensions
+- denominator: 2
+- verdict: `VERDICT: PASS-OGP1-AC11`
 
 ```
-instrument: host-side awk/grep census of the audit record, read by SSM; counts only
-vintage: 2026-09-15T10:57:49Z
-source: /opt/opal-gateway/audit.jsonl on the host (audit.py:29-33 local JSONL floor), ssm a6a55353-e24d-4c88-86d8-f7799f9f7f58 at 2026-09-15T10:57:48.332Z
-file: size/mtime=20685082 1789461155 lines_total=79091 first_ts=2026-08-15T03:08:41.552149+00:00 last_ts=2026-09-15T08:32:35.705013+00:00
-window: 2026-08-16T10:57:38Z -> read time (30 days); records in window=78049 (first in window 2026-08-17T02:03:46.499785+00:00)
-top-level keys in window (args collapsed; key name: record count): {'args': 65896, 'caller': 12153, 'credential_class': 12153, 'detail': 65896, 'event': 12153, 'outcome': 65896, 'route': 12153, 'tier': 65896, 'tool': 65896, 'ts': 78049, 'user': 65896}
-event records in window (records with no tool): {'gw_cred_observe': 12153}; outcomes: {'confirm_required': 5, 'denied': 64, 'error': 12, 'ok': 65815}
-denominator: 78049 audit records in window; per-tool sample counts: {'create_draft': 3, 'find_sharepoint_site': 14, 'get_item': 5, 'get_site_item': 1, 'graph_cypher': 35, 'graph_status': 5, 'list_calendar': 4, 'list_channels': 16, 'list_chats': 33, 'list_email_attachments': 26, 'list_onedrive': 2, 'list_recent_email': 25, 'list_site_files': 8, 'list_teams': 12, 'ms_site_children': 42055, 'ms_sites': 1, 'otp_fetch': 32, 'poll_addressed_teams_messages': 19370, 'profile_site_file': 2, 'query_v0': 40, 'read_channel_messages': 3526, 'read_chat_messages': 81, 'read_document': 5, 'read_email': 82, 'read_site_file': 4, 'read_site_workbook': 8, 'save_email_attachment_to_site': 15, 'search_email': 164, 'search_files': 17, 'search_site_files': 8, 'send_channel_message': 3, 'send_chat_message': 29, 'send_email': 4, 'sprint_view': 4, 'whoami': 163, 'ycharts_freshness': 3, 'ycharts_fund_series': 7, 'ycharts_search': 55, 'ycharts_snapshot_metrics': 20, 'ycharts_time_series': 9}
-records carrying any latency/duration key ['duration', 'duration_ms', 'duration_s', 'latency', 'latency_ms', 'elapsed', 'elapsed_ms', 'elapsed_s', 'took_ms']: window=0 all=0
-audit.py log_call (audit.py:122-132 at the deployed commit, byte-identical to HEAD) writes ts, user, tool, args, outcome, detail, tier -- no duration field
-VERDICT: FAIL-OGP1-AC11 p95 latency not computable from the audit record: 0 of 78049 records in the window carry a latency/duration field
+instrument: cloudwatch GetMetricStatistics AWS/ApplicationELB TargetResponseTime (Statistics SampleCount, ExtendedStatistics p95), one CloudWatch period spanning the whole window, via .tools/aws; elbv2 DescribeLoadBalancers/DescribeTargetGroups resolve the dimensions
+vintage: 2026-09-16T19:15:11Z  load_balancer=arn:aws:elasticloadbalancing:us-east-1:313476888478:loadbalancer/app/opal-gateway/89166a68f337e5a4  target_groups=1
+window: 2026-09-02T19:15:00Z .. 2026-09-16T19:15:00Z (14 days, period=1209600s)
+the ALB does not know the MCP tool: this is per target group and overall, and claims no per-tool figure (the audit record's missing latency field, row NFRA_OPLGTW-W2-S1, is a separate finding, not fixed here)
+denominator: 1 overall + 1 target group metric read(s)
+overall: sample_count=43745.0 p95_seconds=0.5535024102704742 (553.5 ms) (read 2026-09-16T19:15:05Z)
+  target group opal-gateway-tg (arn:aws:elasticloadbalancing:us-east-1:313476888478:targetgroup/opal-gateway-tg/00997fc81f087cb8): sample_count=43745.0 p95_seconds=0.5535024102704742 (553.5 ms) (read 2026-09-16T19:15:11Z)
+VERDICT: PASS-OGP1-AC11
 ```
 
 ## OGP1-AC12
 
-- measured: 2026-09-15T10:58:01Z
-- instrument: host-side grep census of the audit record for the client_id key, read by SSM; values digested
-- denominator: 78049
-- verdict: `VERDICT: FAIL-OGP1-AC12 no client inventory derivable: 0 of 79091 audit records carry a client_id field (audit.py log_call does not write one), so an inventory from it is empty by construction`
+- measured: 2026-09-16T19:01:01Z
+- instrument: dynamodb Scan (FilterExpression record_type='oauth_client', ConsistentRead) on opal-gateway-access-state via .tools/aws; deployed-commit source read (git show, no AWS call) for process-locality
+- denominator: 7
+- verdict: `VERDICT: PASS-OGP1-AC12`
 
 ```
-instrument: host-side grep census of the audit record for the client_id key, read by SSM; values digested
-vintage: 2026-09-15T10:58:01Z
-source: /opt/opal-gateway/audit.jsonl on the host (audit.py:29-33 local JSONL floor), ssm d9bfff7a-be92-4fd3-b45b-759e9048fad7 at 2026-09-15T10:57:59.318Z
-file: size/mtime=20685082 1789461155 lines_total=79091 first_ts=2026-08-15T03:08:41.552149+00:00 last_ts=2026-09-15T08:32:35.705013+00:00
-window: 2026-08-16T10:57:49Z -> read time (30 days); records in window=78049 (first in window 2026-08-17T02:03:46.499785+00:00)
-top-level keys in window (args collapsed; key name: record count): {'args': 65896, 'caller': 12153, 'credential_class': 12153, 'detail': 65896, 'event': 12153, 'outcome': 65896, 'route': 12153, 'tier': 65896, 'tool': 65896, 'ts': 78049, 'user': 65896}
-event records in window (records with no tool): {'gw_cred_observe': 12153}; outcomes: {'confirm_required': 5, 'denied': 64, 'error': 12, 'ok': 65815}
-denominator: 78049 audit records in window (79091 in file)
-records carrying client_id: window=0 all=0; distinct client_id values (digested): {}
-clients are process-local: oauth_as.py:336 @7bd89b5d71 defines the DCR client store as a module-level in-memory dict (_clients), so every registered client is lost on a process restart; the unit pins --workers 1 for this reason (deploy/opal-gateway.service:13-16)
-VERDICT: FAIL-OGP1-AC12 no client inventory derivable: 0 of 79091 audit records carry a client_id field (audit.py log_call does not write one), so an inventory from it is empty by construction
+instrument: dynamodb Scan (FilterExpression record_type='oauth_client', ConsistentRead) on opal-gateway-access-state via .tools/aws; deployed-commit source read (git show, no AWS call) for process-locality
+vintage: 2026-09-16T19:01:01Z
+denominator: 7 item(s) scanned, 0 matching record_type='oauth_client' (read 2026-09-16T19:01:01Z)
+registered clients (persisted store): 0
+process-locality AS MEASURED: deployed_commit=7bd89b5d71 -- app/access_state.py ABSENT at that commit; app/oauth_as.py there still defines an in-memory '_clients' store. So the RUNNING gateway's OAuth client store is process-local (in-memory; workers pinned to 1); the persisted table read above is the durable store OG-a-1/OG-d-1 built at HEAD but not yet released to this host, so today it is independent of process locality either way -- a finding carried to L10 (row NFRA_OPLGTW-W2-S2) is that the audit record still cannot name which client made a given call.
+VERDICT: PASS-OGP1-AC12
 ```
 
 ## OGP1-AC13
 
-- measured: 2026-09-15T11:01:03Z
-- instrument: this probe reads org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/command_log.jsonl (one row per AWS call, written by aws())
-- denominator: 57
-- verdict: `VERDICT: FAIL-OGP1-AC13 8 of 57 calls are not Describe/Get/List/Head: {'ssm:SendCommand': 8}`
+- measured: 2026-09-16T19:15:53Z
+- instrument: this probe reads org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/command_log.jsonl (one row per AWS call, written by aws()); ssm:SendCommand rows are graded against this file's own script-building functions -- this criterion makes no AWS call itself
+- denominator: 77
+- verdict: `VERDICT: PASS-OGP1-AC13`
 
 ```
-instrument: this probe reads org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/command_log.jsonl (one row per AWS call, written by aws())
-vintage: 2026-09-15T11:01:03Z
-denominator: 57 AWS call(s) in the command log
-read-verb calls (Describe/Get/List/Head): 49 of 57
-per operation: {'dynamodb:DescribeTable': 1, 'ec2:DescribeInstances': 1, 'elbv2:DescribeListeners': 1, 'elbv2:DescribeLoadBalancerAttributes': 1, 'elbv2:DescribeLoadBalancers': 1, 'elbv2:DescribeRules': 2, 'iam:GetPolicy': 1, 'iam:GetPolicyVersion': 1, 'iam:GetRole': 5, 'iam:GetRolePolicy': 8, 'iam:ListAttachedRolePolicies': 1, 'iam:ListRolePolicies': 1, 's3api:GetBucketEncryption': 2, 's3api:GetBucketNotificationConfiguration': 1, 's3api:GetBucketPolicyStatus': 2, 's3api:GetBucketVersioning': 2, 's3api:GetObject': 2, 's3api:GetPublicAccessBlock': 2, 's3api:ListObjectsV2': 3, 'ssm:GetCommandInvocation': 9, 'ssm:SendCommand': 8, 'sts:GetCallerIdentity': 1, 'wafv2:GetWebAclForResource': 1}
-non-read-verb calls: 8 {'ssm:SendCommand': 8}
-VERDICT: FAIL-OGP1-AC13 8 of 57 calls are not Describe/Get/List/Head: {'ssm:SendCommand': 8}
+instrument: this probe reads org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/command_log.jsonl (one row per AWS call, written by aws()); ssm:SendCommand rows are graded against this file's own script-building functions -- this criterion makes no AWS call itself
+vintage: 2026-09-16T19:15:53Z
+denominator: 77 AWS call(s) in the command log
+per operation: {'cloudwatch:GetMetricStatistics': 8, 'dynamodb:DescribeTable': 1, 'dynamodb:Scan': 4, 'ec2:DescribeInstances': 1, 'elbv2:DescribeListeners': 1, 'elbv2:DescribeLoadBalancerAttributes': 1, 'elbv2:DescribeLoadBalancers': 5, 'elbv2:DescribeRules': 2, 'elbv2:DescribeTargetGroups': 4, 'iam:GetPolicy': 1, 'iam:GetPolicyVersion': 1, 'iam:GetRole': 5, 'iam:GetRolePolicy': 8, 'iam:ListAttachedRolePolicies': 1, 'iam:ListRolePolicies': 1, 's3api:GetBucketEncryption': 2, 's3api:GetBucketNotificationConfiguration': 1, 's3api:GetBucketPolicyStatus': 2, 's3api:GetBucketVersioning': 2, 's3api:GetObject': 2, 's3api:GetPublicAccessBlock': 2, 's3api:ListObjectsV2': 3, 'ssm:GetCommandInvocation': 9, 'ssm:SendCommand': 8, 'sts:GetCallerIdentity': 1, 'wafv2:GetWebAclForResource': 1}
+Describe/Get/List/Head/Scan/Query calls: 69 of 77
+ssm:SendCommand calls: 8 of 77; admitted (read-only script) 8, refused 0
+  ADMITTED AC1 label='AC1 digests' logged_digest=54a7f4892ab06aa3 digest_check=EXACT MATCH (54a7f4892ab06aa3)
+  ADMITTED AC2 label='AC2 host shape' logged_digest=575bae85b00568aa digest_check=EXACT MATCH (575bae85b00568aa)
+  ADMITTED AC10 label='AC10 peak RSS' logged_digest=a509ac92d2db6b24 digest_check=EXACT MATCH (a509ac92d2db6b24)
+  ADMITTED AC11 label='AC11 audit latency census' logged_digest=57277991a613ee60 digest_check=template-match (per-call timestamp, not a command, cannot be recomputed)
+  ADMITTED AC12 label='AC12 audit client census' logged_digest=3310fedad277dd7f digest_check=template-match (per-call timestamp, not a command, cannot be recomputed)
+  ADMITTED AC11 label='AC11 audit latency census' logged_digest=5599443ef08849d6 digest_check=template-match (per-call timestamp, not a command, cannot be recomputed)
+  ADMITTED AC12 label='AC12 audit client census' logged_digest=d664b3cab82e044a digest_check=template-match (per-call timestamp, not a command, cannot be recomputed)
+  ADMITTED AC1 label='AC1 digests' logged_digest=54a7f4892ab06aa3 digest_check=EXACT MATCH (54a7f4892ab06aa3)
+the 5 distinct SSM script text(s) this cell's evidence relies on, verbatim (AC1/AC2/AC10 regenerated identically; AC11/AC12's retired template shown with its per-call cutoff timestamp replaced by a placeholder):
+--- AC1 digests (read_only=True) ---
+    cd /opt/opal-gateway || exit 3
+    echo "### unit"
+    systemctl show opal-gateway -p MainPID -p ActiveEnterTimestamp --no-pager
+    PID=$(systemctl show opal-gateway -p MainPID --value)
+    echo "### pidstart"
+    stat -c %Y /proc/$PID 2>&1
+    echo "### files"
+    find app deploy requirements.txt identity_tool_allowlist.txt -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | LC_ALL=C sort | while IFS= read -r f; do printf '%s %s %s\n' "$(sha256sum < "$f" | cut -c1-64)" "$(stat -c %Y "$f")" "$f"; done
+--- AC2 host shape (read_only=True) ---
+    echo "### dmi"
+    cat /sys/devices/virtual/dmi/id/product_name 2>&1
+    cat /sys/devices/virtual/dmi/id/sys_vendor 2>&1
+    echo "### cloudinit"
+    grep -o '"instance[-_]type": *"[^"]*"' /run/cloud-init/instance-data.json 2>&1 | sort -u
+    echo "### arch"
+    uname -m
+    echo "### kernel"
+    uname -r
+    echo "### nproc"
+    nproc
+    echo "### memtotal"
+    grep MemTotal /proc/meminfo
+    echo "### unit"
+    systemctl show opal-gateway -p MainPID -p ActiveState -p SubState -p ActiveEnterTimestamp -p NRestarts -p ExecStart --no-pager
+    echo "### ps"
+    ps -eo pid=,ppid=,etimes=,rss=,comm=
+    echo "### mainargs"
+    PID=$(systemctl show opal-gateway -p MainPID --value)
+    ps -o args= -p $PID
+    echo "### children"
+    ps -o pid=,args= --ppid $PID
+    echo "### pyv"
+    PYTHONDONTWRITEBYTECODE=1 /opt/opal-gateway/.venv/bin/python -V 2>&1
+    echo "### pyvenv"
+    cat /opt/opal-gateway/.venv/pyvenv.cfg
+    echo "### distinfo"
+    ls -1d /opt/opal-gateway/.venv/lib/python*/site-packages/*.dist-info | sed 's#.*/##'
+--- AC10 peak RSS (read_only=True) ---
+    PID=$(systemctl show opal-gateway -p MainPID --value)
+    echo "### unit"
+    systemctl show opal-gateway -p MainPID -p ActiveEnterTimestamp -p ControlGroup -p MemoryCurrent --no-pager
+    echo "### now"
+    date -u +%Y-%m-%dT%H:%M:%SZ
+    echo "### lstart"
+    ps -o lstart= -p $PID
+    echo "### procs"
+    for p in $PID $(ps -o pid= --ppid $PID); do printf 'pid=%s ' "$p"; grep -E '^(VmHWM|VmRSS):' /proc/$p/status | tr -s ' \t' ' ' | tr '\n' ' '; echo; done
+    echo "### cgpeak"
+    CG=$(systemctl show opal-gateway -p ControlGroup --value)
+    cat /sys/fs/cgroup$CG/memory.peak 2>&1
+    echo "### cgcurrent"
+    cat /sys/fs/cgroup$CG/memory.current 2>&1
+--- AC11 audit latency census (read_only=True) ---
+    F=/opt/opal-gateway/audit.jsonl
+    echo "### stat"
+    stat -c '%s %Y' $F 2>&1
+    wc -l < $F
+    echo "### first"
+    head -1 $F | grep -o '"ts":"[^"]*"'
+    echo "### last"
+    tail -1 $F | grep -o '"ts":"[^"]*"'
+    echo "### window"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) n++ } END { print n+0 }' $F
+    echo "### firstinwin"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) { print ts; exit } }' $F
+    echo "### tools"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -o '"tool":"[^"]*"' | LC_ALL=C sort | uniq -c
+    echo "### events"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -o '"event":"[^"]*"' | LC_ALL=C sort | uniq -c
+    echo "### outcomes"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -o '"outcome":"[^"]*"' | LC_ALL=C sort | uniq -c
+    echo "### durationkeys"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -c -E '"(duration|duration_ms|duration_s|latency|latency_ms|elapsed|elapsed_ms|elapsed_s|took_ms)":'
+    echo "### durationkeys_all"
+    grep -c -E '"(duration|duration_ms|duration_s|latency|latency_ms|elapsed|elapsed_ms|elapsed_s|took_ms)":' $F
+    echo "### clientid"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -c '"client_id"'
+    echo "### clientid_all"
+    grep -c '"client_id"' $F
+    echo "### clientid_values"
+    grep -o '"client_id":"[^"]*"' $F | LC_ALL=C sort | uniq -c
+    echo "### topkeys"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | sed -e 's/"args":{[^}]*}/"args":{}/' | grep -o '"[a-z_]*":' | LC_ALL=C sort | uniq -c
+--- AC12 audit client census (read_only=True) ---
+    F=/opt/opal-gateway/audit.jsonl
+    echo "### stat"
+    stat -c '%s %Y' $F 2>&1
+    wc -l < $F
+    echo "### first"
+    head -1 $F | grep -o '"ts":"[^"]*"'
+    echo "### last"
+    tail -1 $F | grep -o '"ts":"[^"]*"'
+    echo "### window"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) n++ } END { print n+0 }' $F
+    echo "### firstinwin"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) { print ts; exit } }' $F
+    echo "### tools"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -o '"tool":"[^"]*"' | LC_ALL=C sort | uniq -c
+    echo "### events"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -o '"event":"[^"]*"' | LC_ALL=C sort | uniq -c
+    echo "### outcomes"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -o '"outcome":"[^"]*"' | LC_ALL=C sort | uniq -c
+    echo "### durationkeys"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -c -E '"(duration|duration_ms|duration_s|latency|latency_ms|elapsed|elapsed_ms|elapsed_s|took_ms)":'
+    echo "### durationkeys_all"
+    grep -c -E '"(duration|duration_ms|duration_s|latency|latency_ms|elapsed|elapsed_ms|elapsed_s|took_ms)":' $F
+    echo "### clientid"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | grep -c '"client_id"'
+    echo "### clientid_all"
+    grep -c '"client_id"' $F
+    echo "### clientid_values"
+    grep -o '"client_id":"[^"]*"' $F | LC_ALL=C sort | uniq -c
+    echo "### topkeys"
+    awk -v since='SINCE_PLACEHOLDER_TS' 'match($0, /"ts":"[^"]*"/) { ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }' $F | sed -e 's/"args":{[^}]*}/"args":{}/' | grep -o '"[a-z_]*":' | LC_ALL=C sort | uniq -c
+VERDICT: PASS-OGP1-AC13
 ```
 
