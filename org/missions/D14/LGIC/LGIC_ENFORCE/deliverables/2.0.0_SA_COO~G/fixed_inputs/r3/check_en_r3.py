@@ -16,6 +16,7 @@ Exit 0 on PASS, 1 on FAIL, 2 on usage/read error.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -27,6 +28,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, *([os.pardir] * 9)))
 DELIV = "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables"
 MAP = os.path.join(HERE, "PLACEMENT_MAP.json")
+
+# A REAL CSI sequence. The chr(27) is written as a CALL, not a literal ESC byte, so this line
+# survives being read through a terminal -- a raw ESC renders invisibly and the one character
+# that decides the pattern is the one a reader cannot see (measured 2026-09-16 on S55).
+_CSI = re.compile(chr(27) + r"\[[0-9;]*[A-Za-z]")
 
 
 def say(*parts):
@@ -150,6 +156,104 @@ def p4_citations(cwd=None, mapdoc=None):
     return 0
 
 
+# ---------------------------------------------------------------- cell 2 arms
+#
+# The gate's DOMAIN (R-11/R-13, R-15, A-6, A-7, A-8, S42, S45). These arms name the CONTRACT the
+# cell must build, and every one of them reads RED against .tools/naming-gate.py at the cut --
+# the gate prints no denominator, no declaration-tree record and no coverage line today. That is
+# the state a criterion must be in before its cell runs (W2-S11): a criterion that already passes
+# is not evidence the cell did anything.
+#
+# The contract is deliberately about PRINTED, CHECKABLE FACTS rather than an implementation. The
+# denominator and the coverage line exist because Rule 22 requires a claim to carry the set it
+# ranged over: a gate that grades "the files it could see" without printing what it could NOT see
+# is unfalsifiable at a glance, which is exactly S42's finding.
+
+GATE = ".tools/naming-gate.py"
+
+
+def _gate(args, cwd=None):
+    """Run the naming gate and return its combined output, ANSI-stripped."""
+    r = subprocess.run([sys.executable, GATE] + list(args),
+                       capture_output=True, text=True, cwd=cwd or REPO)
+    return _CSI.sub("", (r.stdout or "") + (r.stderr or ""))
+
+
+def _diff_fixture(tmp, body):
+    p = os.path.join(tmp, "fixture.diff")
+    with open(p, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(body)
+    return p
+
+
+_SAMPLE_DIFF = (
+    "diff --git a/infra/logic/x.tf b/infra/logic/x.tf\n"
+    "--- a/infra/logic/x.tf\n"
+    "+++ b/infra/logic/x.tf\n"
+    "@@ -0,0 +1,1 @@\n"
+    '+resource "aws_s3_bucket" "b" { bucket = "opal-data-assets" }\n'
+)
+
+
+def n2_denominator(cwd=None):
+    """Every run prints the DENOMINATOR of paths it graded."""
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="en_r3_n2_")
+    try:
+        out = _gate(["--diff", _diff_fixture(tmp, _SAMPLE_DIFF)], cwd)
+    finally:
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+    has = "DENOMINATOR" in out
+    say("gate output lines: %d; DENOMINATOR line present: %s" % (len(out.splitlines()), has))
+    if not has:
+        say("FAIL-N2-NO-DENOMINATOR")
+        return 1
+    say("PASS-N2-DENOMINATOR-PRINTED")
+    return 0
+
+
+def n2_coverage(cwd=None):
+    """Every run prints what it could NOT see -- the coverage half of the same claim (S42)."""
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="en_r3_n2c_")
+    try:
+        out = _gate(["--diff", _diff_fixture(tmp, _SAMPLE_DIFF)], cwd)
+    finally:
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+    has = "COVERAGE" in out
+    say("COVERAGE line (paths the gate cannot see) present: %s" % has)
+    if not has:
+        say("FAIL-N2-NO-COVERAGE")
+        return 1
+    say("PASS-N2-COVERAGE-PRINTED")
+    return 0
+
+
+def n2_declaration_subtraction(cwd=None):
+    """The declaration-tree set is printed as a SUBTRACTION from the denominator, never a list.
+
+    Rule 24(i): a forward list of trees omits silently; the same set written as denominator MINUS
+    exclusions cannot lose a member without the count disagreeing. `org/**` and `docs/**` are the
+    declared exclusions, so both must appear as EXCLUDED rather than merely be absent.
+    """
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="en_r3_n2d_")
+    try:
+        out = _gate(["--diff", _diff_fixture(tmp, _SAMPLE_DIFF)], cwd)
+    finally:
+        import shutil
+        shutil.rmtree(tmp, ignore_errors=True)
+    named = "EXCLUDED" in out and "org/" in out and "docs/" in out
+    say("declaration-tree subtraction printed with org/ and docs/ named EXCLUDED: %s" % named)
+    if not named:
+        say("FAIL-N2-NO-SUBTRACTION")
+        return 1
+    say("PASS-N2-SUBTRACTION-PRINTED")
+    return 0
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -226,6 +330,9 @@ def selftest_arms():
 
 
 CMDS = {
+    "n2-denominator": n2_denominator,
+    "n2-coverage": n2_coverage,
+    "n2-declaration-subtraction": n2_declaration_subtraction,
     "p4-population": p4_population,
     "p4-destinations": p4_destinations,
     "p4-citations": p4_citations,
