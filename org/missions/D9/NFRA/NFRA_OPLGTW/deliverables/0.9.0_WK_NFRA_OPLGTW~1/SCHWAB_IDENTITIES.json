@@ -1,0 +1,80 @@
+{
+ "cell": "OG-i-2",
+ "task_order": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-i-2.reader-identities.md",
+ "written_by": "0.9.0_WK_NFRA_OPLGTW~1",
+ "applied_utc": "2026-09-16T18:25:35Z",
+ "terraform": {
+  "root": "infra/aws/terraform/opal-gateway",
+  "file": "infra/aws/terraform/opal-gateway/schwab_reader_iam.tf",
+  "state_key": "opal-gateway/tfstate"
+ },
+ "values_recorded": false,
+ "note": "Names and ARNs only. No ExternalId value, key or credential is in this file. Every ARN below was read back live after the apply (iam get-role, secretsmanager describe-secret).",
+ "region": "us-east-1",
+ "account": "313476888478",
+ "gateway_role": {
+  "role_name": "opal-gateway-role",
+  "role_arn": "arn:aws:iam::313476888478:role/opal-gateway-role",
+  "assume_policy_name": "opal-gateway-assume-schwab-readers",
+  "assume_statement_sid": "AssumeSchwabReaderRoles",
+  "assume_statement": "Allow sts:AssumeRole on exactly the two reader role ARNs below, Condition StringEquals sts:ExternalId = the two dedicated ExternalIds"
+ },
+ "data_role": {
+  "role_name": "opal-mcp-emp-menachem-schwab-read",
+  "role_arn": "arn:aws:iam::313476888478:role/opal-mcp-emp-menachem-schwab-read",
+  "inline_policy_name": "opal-mcp-emp-menachem-schwab-read-policy",
+  "trust": "Principal AWS arn:aws:iam::313476888478:role/opal-gateway-role only; StringEquals sts:ExternalId = its dedicated ExternalId",
+  "external_id": {
+   "store": "secretsmanager",
+   "secret_name": "opal/mcp/opal-gateway-schwab-reader-external-ids",
+   "secret_arn": "arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/mcp/opal-gateway-schwab-reader-external-ids-2BSIrt",
+   "json_field": "data_read"
+  },
+  "bucket": "opal-data-assets",
+  "allowed_object_prefixes": [
+   "schwab/08242234/silver/dim_position/",
+   "schwab/08242234/silver/dim_balance/",
+   "schwab/08242234/silver/dim_asset/",
+   "schwab/08335338/silver/dim_position/",
+   "schwab/08335338/silver/dim_balance/",
+   "schwab/08335338/silver/dim_asset/"
+  ],
+  "allowed_actions": ["s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket (s3:prefix StringLike <prefix>*)"]
+ },
+ "catalog_role": {
+  "role_name": "opal-mcp-schwab-catalog-read",
+  "role_arn": "arn:aws:iam::313476888478:role/opal-mcp-schwab-catalog-read",
+  "inline_policy_name": "opal-mcp-schwab-catalog-read-policy",
+  "trust": "Principal AWS arn:aws:iam::313476888478:role/opal-gateway-role only; StringEquals sts:ExternalId = its dedicated ExternalId",
+  "external_id": {
+   "store": "secretsmanager",
+   "secret_name": "opal/mcp/opal-gateway-schwab-reader-external-ids",
+   "secret_arn": "arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/mcp/opal-gateway-schwab-reader-external-ids-2BSIrt",
+   "json_field": "catalog_read"
+  },
+  "bucket": "opal-data-assets",
+  "allowed_object_prefixes": [
+   "schwab/08242234/meta/complete/",
+   "schwab/08335338/meta/complete/"
+  ],
+  "allowed_actions": ["s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket (s3:prefix StringLike <prefix>*)"]
+ },
+ "account_ref_key": {
+  "store": "secretsmanager",
+  "secret_name": "opal/mcp/opal-gateway-schwab-account-ref-key",
+  "secret_arn": "arn:aws:secretsmanager:us-east-1:313476888478:secret:opal/mcp/opal-gateway-schwab-account-ref-key-Ffp6Tj",
+  "env_var_for_gateway": "SCHWAB_ACCOUNT_REF_SECRET_ID",
+  "value_shape": "{\"current_version\": \"v<n>\", \"keys\": {\"v<n>\": \"<base64 of >= 32 bytes>\"}}",
+  "current_version_at_provisioning": "v1",
+  "value_written_out_of_band_by": "probes/og_i2_act.py put-alias-key (evidence/og_i2/alias_key_put.json)"
+ },
+ "gateway_read_grants": {
+  "mechanism": "secret RESOURCE policy (principal opal-gateway-role, secretsmanager:GetSecretValue only) on each of the two secrets; the Gateway role's identity policies gain only the assume statement",
+  "secret_policy_sids": {
+   "opal/mcp/opal-gateway-schwab-reader-external-ids": "GatewayReadsSchwabReaderExternalIds",
+   "opal/mcp/opal-gateway-schwab-account-ref-key": "GatewayReadsSchwabAccountRefKey"
+  }
+ },
+ "encryption": "opal-data-assets default SSE AES256 (read 2026-09-16T18:0xZ); no KMS grant. Both secrets use the AWS-managed aws/secretsmanager key (KmsKeyId None).",
+ "rows": ["NFRA_OPLGTW-W1-S9", "NFRA_OPLGTW-W1-S10", "NFRA_OPLGTW-W1-S11"]
+}
