@@ -96,3 +96,65 @@ Mitigation, bound in the table above: the re-push happens BEFORE any merge, and 
 
 The portal branch is ON ORIGIN (`ls-remote` read). This record and every other workspace commit are
 LOCAL under the site-Z push hold, pending Andrew's word.
+
+---
+
+## AMENDMENT 1 -- the verification moves BEFORE the merge (laptop down)
+
+- recorded by: `0.0.0_AB_MSTR~Z`, 2026-09-16 ~00:5xZ
+- source: agent bus, MessageId `7a8ac897-0e78-4509-80b6-c59af6214f3f`, sent 2026-09-16T00:55:41Z by
+  `0.0.0_AB_MSTR` as its FINAL frame before stopping its own consumer.
+- why this is written down: same reason as the parent file. A bus body lives only in the receiving
+  session's Monitor output file, and the sender's consumer is now STOPPED, so neither box holds this
+  agreement anywhere durable. Recovered in full from the consumer task's output file, not from the
+  chat notification, which was truncated mid-sentence.
+
+**WHAT CHANGED.** The contract table above puts the laptop's verification at **post-(b)** -- it reads
+`origin/DEV` after this seat merges and pushes. The laptop has now moved its verification to
+**pre-(b)**, verbatim:
+
+> *"STANDING BETWEEN US, unchanged: POSN_AGGFIX step 2 -- on 1.0.0_SA_CTO~Z's 'step 2 due' you HOLD
+> at the gate, you do not merge unverified, and you send me the frame; I verify when Andrew restarts
+> this box."*
+
+It is offered as "unchanged". **It is not unchanged, and the difference is operational, not
+semantic:** under the parent table this seat merges on the gate and the peer checks afterwards; under
+this frame this seat **stops at the gate, sends the frame, and does not merge** until the peer has
+verified -- and the peer cannot verify until **Andrew restarts the laptop**. So a step that was
+self-serviceable now has an external precondition nobody on this box controls.
+
+**THE READ THIS SEAT IS ACTING ON, AND IT IS THE NARROW ONE:** hold. Do not merge on the gate alone.
+The narrow read is also the safe one here -- the cost of holding is delay, the cost of merging early
+is an unverified push to a shared branch (DEV) with the peer unable to catch it. Where the two
+documents differ, this amendment governs, because it is later and because its author is the party
+whose act was moved.
+
+**WHAT IS NOW REQUIRED TO FINISH STEP 2 -- three preconditions, not one:**
+
+1. `1.0.0_SA_CTO~Z` sends "POSN_AGGFIX step 2 due" naming the ref and head. (unchanged)
+2. This seat re-reads the drain, re-pushes `origin/sitez/aggfix-1-portal`, re-runs the whole
+   assessment at that vintage, and **sends the frame to the laptop. Then stops.** (changed: stops)
+3. **Andrew restarts the laptop** and `0.0.0_AB_MSTR` verifies and answers. (new, and it is the
+   binding one)
+
+Only then does (b) run. (c), the `/prod-deploy`, remains `1.0.0_SA_CTO~Z`'s and is unaffected.
+
+**SURFACED, NOT ADJUDICATED:** precondition 3 is a dependency on Andrew restarting a machine, which
+is not a fabric act and has no owner inside the fabric. If he wants the promote to proceed without
+the laptop, that is his call to make and this seat will not infer it from the fact that waiting is
+inconvenient. The alternative he may want to consider is naming a different verifier on this box;
+`1.0.0_SA_CTO~Z` is the obvious candidate and is already the (c) owner.
+
+## Corroboration this frame also supplied, unasked
+
+`origin/CLOUD` is **unchanged at 2033ff3ea6** with no laptop push. This seat had independently read
+`origin/CLOUD` at `2033ff3ea6` during its `/integrate` assessment ~00:2xZ, on a different box, before
+this frame arrived. Same object, two boxes, two instruments -- so the `/integrate` divergence numbers
+(CLOUD +685, base `56608aadd4`) are anchored on a head the producing fabric confirms it did not move.
+
+Laptop state at the frame: all six working seats parked and exited, `1.0.0_SA_CTO~A` parked with its
+Codex TUI held open for Andrew, every loop and cron deleted, every monitor stopped, **nothing
+half-landed** (`2.0.0_SA_COO~O`'s OG-i-1 apply FINISHED -- 4 added, 2 changed, 0 destroyed, ledger
+CLOSED, fresh plan "No changes"). Disk on that box: 5.0 GB free at the worst point tonight, 50 GB
+free after seat worktree drains plus an Andrew-authorized cleanup. Nothing of this fabric's was
+touched. The CLOUD<->SITEZ workspace merge and the laptop's CLOUD push both stay at Andrew.
