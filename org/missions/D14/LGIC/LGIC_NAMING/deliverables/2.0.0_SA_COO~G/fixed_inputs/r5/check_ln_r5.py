@@ -247,10 +247,67 @@ def g1_alias_adjacency():
     return 0
 
 
+# ------------------------------------------------------------------ LN-f-1 (item 2, W4-S3/C-S25)
+R4_HEADLINE = 49          # round 4's printed raise count, at a base where resources.json was ABSENT
+R4_BASE = "5e908a4929"    # that base, named so the two numbers can be compared or refused
+LIVE_NAMES = BASE + "/deliverables/2.0.0_SA_COO~G/fixed_inputs/LIVE_NAMES.json"
+RESOURCES = REGISTRY + "/resources.json"
+
+
+def _placeholders(mod, names, typ="IAM_ROLE"):
+    """(clean, placeholder rows, raised) for a population. A placeholder is a canonical form still
+    carrying a {token}, i.e. a name the registry cannot yet place."""
+    clean, ph, raised = 0, [], 0
+    for n in names:
+        try:
+            _v, canon = mod.grade(n, typ)
+        except Exception:
+            raised += 1
+            continue
+        if "{" in str(canon):
+            ph.append((n, canon))
+        else:
+            clean += 1
+    return clean, ph, raised
+
+
+def f1_gaps():
+    """Item 2: re-run the gaps at HEAD and print the new count BESIDE 49.
+
+    NOTE: 49 and the number printed here are NOT the same measurement unless their POPULATIONS
+    match, and this arm refuses to imply that they do. Round 4's 49 was counted at %s, where
+    infra/logic/registry/resources.json is ABSENT; that file rows 30 resource-to-system entries at
+    HEAD. An inherited `N of M` is a SUBSET until you ask what population it enumerated, so both
+    numbers are printed WITH their denominators and the comparison is left to the reader.""" % R4_BASE
+    mod = _naming()
+    if mod is None:
+        return missing(LIB, "F1-GAPS")
+    live = load_json(LIVE_NAMES)
+    if live is None:
+        return missing(LIVE_NAMES, "F1-GAPS")
+    names = (live.get("by_type") or {}).get("IAM_ROLE") or []
+    res = load_json(RESOURCES) or {}
+    rows = res.get("resources") or []
+    clean, ph, raised = _placeholders(mod, names)
+    print("POPULATION HERE: %d live IAM_ROLE names (%s)" % (len(names), LIVE_NAMES))
+    print("  graded clean %d | PLACEHOLDER %d | grade() raised %d" % (clean, len(ph), raised))
+    print("  registry resource-to-system rows at this tree: %d (%s)" % (len(rows), RESOURCES))
+    print("ROUND 4 PRINTED: %d, counted at %s where %s is ABSENT" % (R4_HEADLINE, R4_BASE, RESOURCES))
+    print("  the two numbers share no stated denominator, so they are printed side by side and")
+    print("  NOT subtracted; naming the populations is the cell's job, not this arm's")
+    for n, c in ph[:10]:
+        print("    PLACEHOLDER %-44s -> %s" % (n, c))
+    ok = len(names) > 0 and bool(rows)
+    say("PASS-GAPS-COUNTED-WITH-DENOMINATORS" if ok else "FAIL-GAPS-COUNTED-WITH-DENOMINATORS",
+        "an inherited count is a subset measurement until its population is named")
+    return 0
+
+
 SUBCOMMANDS = {
     "g2-globgrph": g2_globgrph,
     "g2-suite": g2_suite,
     "g1-adjacency": g1_alias_adjacency,
+    "f1-gaps": f1_gaps,
 }
 
 
@@ -306,6 +363,14 @@ def selftest_arms():
     p, f, n = suite_counts("2 failed, 80 passed in 0.40s\nFAILED lib/tests/x.py::test_a\n")
     results.append(("suite-counts-reads-failed", (p, f, n) == (80, 2, ["lib/tests/x.py::test_a"]),
                     "parsed passed=%d failed=%d named=%r" % (p, f, n)))
+
+    # ARM: the placeholder reader must SEE a placeholder, so a form carrying one must not read clean.
+    class _Ph:
+        def grade(self, name, typ):
+            return ("OUT-OF-PATTERN", "{system}-" + name)
+    c, ph, r = _placeholders(_Ph(), ["a", "b"])
+    results.append(("f1-placeholder-reader-sees-a-brace", c == 0 and len(ph) == 2,
+                    "two braced forms -> clean %d, placeholder %d" % (c, len(ph))))
 
     ok = all(r[1] for r in results)
     print("DISCRIMINATING SELF-TEST -- denominator %d arms" % len(results))
