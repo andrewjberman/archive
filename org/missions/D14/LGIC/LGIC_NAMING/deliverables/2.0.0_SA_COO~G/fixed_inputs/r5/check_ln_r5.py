@@ -251,6 +251,7 @@ def g1_alias_adjacency():
 R4_HEADLINE = 49          # round 4's printed raise count, at a base where resources.json was ABSENT
 R4_BASE = "5e908a4929"    # that base, named so the two numbers can be compared or refused
 LIVE_NAMES = BASE + "/deliverables/2.0.0_SA_COO~G/fixed_inputs/LIVE_NAMES.json"
+F1_RECORD = BASE + "/deliverables/exercises/r5/f1-gaps.r5.md"
 RESOURCES = REGISTRY + "/resources.json"
 
 
@@ -289,6 +290,24 @@ def f1_gaps():
     res = load_json(RESOURCES) or {}
     rows = res.get("resources") or []
     clean, ph, raised = _placeholders(mod, names)
+    # The CELL's deliverable is the record. Without it this arm would grade the tree and PASS
+    # before the worker had done anything -- a criterion that cannot fail, which is the defect
+    # this whole file's docstring is about. So the record is REQUIRED and its numbers must EQUAL
+    # the tree's, which is what makes the arm a check on the WORKER rather than on the issuer.
+    rec = None
+    rt = read(F1_RECORD)
+    if rt is None:
+        return missing(F1_RECORD, "F1-GAPS")
+    for block in _FENCE_JSON.findall(rt):
+        try:
+            d = json.loads(block)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and "placeholder_count" in d:
+            rec = d
+            break
+    if rec is None:
+        return missing(F1_RECORD + " (json fence with placeholder_count)", "F1-GAPS")
     print("POPULATION HERE: %d live IAM_ROLE names (%s)" % (len(names), LIVE_NAMES))
     print("  graded clean %d | PLACEHOLDER %d | grade() raised %d" % (clean, len(ph), raised))
     print("  registry resource-to-system rows at this tree: %d (%s)" % (len(rows), RESOURCES))
@@ -297,7 +316,13 @@ def f1_gaps():
     print("  NOT subtracted; naming the populations is the cell's job, not this arm's")
     for n, c in ph[:10]:
         print("    PLACEHOLDER %-44s -> %s" % (n, c))
-    ok = len(names) > 0 and bool(rows)
+    agree = (rec.get("placeholder_count") == len(ph)
+             and rec.get("population") == len(names)
+             and rec.get("r4_headline") == R4_HEADLINE)
+    print("THE CELL'S RECORD: population %s, placeholder_count %s, r4_headline %s -- agrees with this"
+          " tree: %s" % (rec.get("population"), rec.get("placeholder_count"),
+                         rec.get("r4_headline"), agree))
+    ok = len(names) > 0 and bool(rows) and agree
     say("PASS-GAPS-COUNTED-WITH-DENOMINATORS" if ok else "FAIL-GAPS-COUNTED-WITH-DENOMINATORS",
         "an inherited count is a subset measurement until its population is named")
     return 0
