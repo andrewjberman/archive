@@ -1,0 +1,194 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_ENFORCE.TO-EN-x-1-r2",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-x-1-r2.fwd2-one-carrier.md",
+  "group": "OTHER",
+  "vintage_commit": "4f9a9eb3f3"
+ },
+ "assignee": "0.9.0_WK_LGIC_ENFORCE~4",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+  "vintage_commit": "8e0d09e418",
+  "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-x-1-r2.fwd2-one-carrier.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/EXERCISE_FWD2_R2.md",
+   "kind": "doc",
+   "commit_or_etag": "d8173a219b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "introduces": [
+    "advi-f49-fwd2-exercise-queue",
+    "prac-lgic-enforce-x1-r2",
+    "3d119a4bc3802739be30df330400b283fdd2743f",
+    "dd4de95e584c90db0691754dc25dd82d64f1c3d6"
+   ],
+   "artifact_covered_by": [
+    "X1R-AC1",
+    "X1R-AC2",
+    "X1R-AC3"
+   ],
+   "deploy_evidence": "Round 2's FWD-2 record: prose, then ONE fenced json block carrying resource, plans, registry_row, scratch_branch, commits and new_short, which is the object all three criteria read (check_en_r2.py REC_X1). It is a repository document; nothing deploys it. The file is NEW at this pin -- `git show 7377655ef7:<path>` returns rc=128 'exists on disk, but not in 7377655ef7', so all four `introduces` tokens are absent at the parent by construction. Round 1's EXERCISE_FWD2.md is untouched and stays as its own record."
+  },
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~4/fwd2_plan_before.r2.json",
+   "kind": "doc",
+   "commit_or_etag": "d8173a219b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "introduces": [
+    "advi-49f-fwd2-exercise-queue"
+   ],
+   "artifact_covered_by": [
+    "X1R-AC2"
+   ],
+   "deploy_evidence": "`terraform show -json` of the READ-ONLY plan taken at the `before` commit against the real S3 backend from the practice copy: format_version 1.2, terraform_version 1.9.8, 1124681 bytes, 233 resource_changes of which exactly ONE is not no-op -- aws_sqs_queue.lgic_enforce_fwd2, actions ['create'], change.after.name advi-49f-fwd2-exercise-queue. NOTHING WAS APPLIED; the plan file itself stayed in the session scratch and only this json is kept."
+  },
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~4/fwd2_plan_after.r2.json",
+   "kind": "doc",
+   "commit_or_etag": "d8173a219b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "introduces": [
+    "advi-f49-fwd2-exercise-queue"
+   ],
+   "artifact_covered_by": [
+    "X1R-AC2"
+   ],
+   "deploy_evidence": "`terraform show -json` of the second READ-ONLY plan, taken at the `after` commit against the same real backend: 233 resource_changes of which TWO are not no-op -- aws_sqs_queue.lgic_enforce_fwd2 create with change.after.name advi-f49-fwd2-exercise-queue, and aws_s3_bucket_policy.opal_data_49financial UPDATE. Inside that policy's DenyForeignFirmPrincipals statement the before document carries arn:aws:iam::313476888478:role/*-49f-* once and *-f49-* zero times, and the after document carries *-f49-* once and *-49f-* zero times, every other principal byte-identical. NOTHING WAS APPLIED."
+  },
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "d8173a219b",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "introduces": [
+    "LGIC_ENFORCE-W4-S3"
+   ],
+   "deploy_evidence": "One appended OBSERVATION row. The channel was re-read at write time and the id minted by scanning the 98 ids actually present (W4-S1 and W4-S2 already existed from round 1's slot 4, so this row is W4-S3, not W4-S1); the append is byte surgery on the file's tail, asserting the tail shape exactly once and re-parsing the fence afterwards -- 'rows now 99 last id LGIC_ENFORCE-W4-S3'. The surprise-row gate ran inside safe-commit: '1 new row(s) of 99 total checked (98 pre-existing, NOT re-graded) ... OK: all new rows carry their step-7/step-10 fields'; corpus limb documents=87 rows=3010 malformed_blocks=0 failures=4 baseline=4 known=4 new=0 resolved=0."
+  },
+  {
+   "path_or_key": "infra/aws/terraform/shared-infra/lgic-enforce-fwd2-resource.tf",
+   "kind": "terraform",
+   "commit_or_etag": "3d119a4bc3802739be30df330400b283fdd2743f",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "artifact_covered_by": [
+    "X1R-AC1",
+    "X1R-AC2"
+   ],
+   "deploy_evidence": "PRACTICE COPY ONLY, and deliberately NOT on the slot branch. It lives on the scratch branch prac-lgic-enforce-x1-r2, which is never pushed and never merged; the order says 'The .tf never reaches your slot branch' and the identity line says anything but records on the slot branch is a defect the drain refuses. It declares ONE module opal_name instance (source ../modules/opal_name, system advi, scope 49financial, function fwd2-exercise, kind queue) and ONE aws_sqs_queue whose name is that module's output.name -- no data, and no cost until it is created, which it never is. NOTHING WAS APPLIED and safe-apply was never run; the only Terraform verbs used were init, plan -lock=false and show -json."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "X1R-AC1",
+   "criterion_verbatim": "between `before` and `after` exactly one file is hand-edited, `scopes.json`; every other changed file carries the GENERATED mark.",
+   "method": "command",
+   "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2e-4 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py x1r-one-hand-edit",
+   "expect": "VERDICT: PASS-ONE-HAND-EDIT",
+   "output_evidence": "before 3d119a4bc3 -> after dd4de95e58: 11 changed file(s)  WITHOUT THE GENERATED MARK: ['infra/logic/registry/scopes.json']  THE RESOURCE .tf AT before: True | VERDICT: PASS-ONE-HAND-EDIT | rc=0",
+   "denominator": "11 of 11 files changed between the two commits were examined for the mark, and exactly 1 lacks it. The ten that carry it are the generator's whole target set -- `python lib/opal_naming.py generate --out .` printed 'GENERATE: 10 written, 0 skipped, into . at registry@d47bb8c698a9f00f' and the generator's own known list is VIEWS (7 carriers) + LOCALS + VECTORS + TFTEST = 10, so the changed set is the generated set plus the one hand edit with nothing left over. The limb's fourth term, the resource .tf present at `before`, reads True.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "X1R-AC2",
+   "criterion_verbatim": "the resource's name in the plan moves from the old short form to the new one.",
+   "method": "command",
+   "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2e-4 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py x1r-name-moved",
+   "expect": "VERDICT: PASS-NAME-MOVED",
+   "output_evidence": "RESOURCE aws_sqs_queue.lgic_enforce_fwd2  NAME IN THE before PLAN: advi-49f-fwd2-exercise-queue  IN THE after PLAN: advi-f49-fwd2-exercise-queue  EXPECTED: advi-f49-fwd2-exercise-queue  (read only from the two plan JSONs) | VERDICT: PASS-NAME-MOVED | rc=0",
+   "denominator": "1 of 1 resource this cell declares. The limb reads the two plan JSONs and nothing else, finds the ONE resource_change whose address is aws_sqs_queue.lgic_enforce_fwd2 and whose actions include create, and compares its change.after.name token by token: 4 of 4 hyphen-delimited tokens are equal except the scope slot, which moves 49f -> f49. Population behind that single row: 233 resource_changes in each plan, 1 not no-op at `before` and 2 at `after`.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "X1R-AC3",
+   "criterion_verbatim": "the firm's fence pattern in the generated locals moves from the old short form to the new one.",
+   "method": "command",
+   "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2e-4 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py x1r-fence-moved",
+   "expect": "VERDICT: PASS-FENCE-MOVED",
+   "output_evidence": "fence_patterns IN infra/aws/terraform/modules/opal_name/generated_locals.tf: before carries 49f: True  after carries f49: True  (read only from the generated locals) | VERDICT: PASS-FENCE-MOVED | rc=0",
+   "denominator": "The fence_patterns block holds 4 of 4 FIRM rows the registry declares (49financial, inflection, cottonwood, demo). Exactly ONE of them moved: 49financial arn:aws:iam::313476888478:role/*-49f-* -> *-f49-*, while inflection *-inf-*, cottonwood *-cot-* and demo *-demo-* are byte-identical at both commits, which is the expected consequence of editing one row. The limb reads ONLY the generated locals at the two commits, so no single line can satisfy both this criterion and X1R-AC2 (the checker's own docstring, :23-24).",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Three arms, one per criterion, each running the SHIPPED limb of check_en_r2.py unchanged against a MUTATED record. The checker was loaded as a module and only its in-memory REC_X1 constant was redirected to a variant of EXERCISE_FWD2_R2.md under .scratch/mutant/; no fixed input was edited and none of the committed artifacts was touched. Arm 1, X1R-AC1's limb against a record whose `commits.before` names the round's base 7377655ef7 instead of the `before` commit -- the diff then also carries the resource .tf as a hand-authored addition. Arm 2, X1R-AC2's limb against a record whose `plans.after` points at the BEFORE plan json, so the name has nowhere to move. Arm 3, X1R-AC3's limb against a record whose `commits.after` equals `commits.before`, so the generated locals are the same object twice. Each arm is paired with a positive control: the SAME redirected module run against the REAL record.",
+   "expected": "Arm 1 FAIL-NOT-ONE-HAND-EDIT rc=1; arm 2 FAIL-NAME-DID-NOT-MOVE rc=1; arm 3 FAIL-FENCE-DID-NOT-MOVE rc=1 -- and each positive control the PASS verdict, which shows the redirection itself is not what produced the failure.",
+   "observed": "Arm 1: \"before 7377655ef7 -> after dd4de95e58: 12 changed file(s)  WITHOUT THE GENERATED MARK: ['infra/aws/terraform/shared-infra/lgic-enforce-fwd2-resource.tf', 'infra/logic/registry/scopes.json']  THE RESOURCE .tf AT before: False\" then VERDICT: FAIL-NOT-ONE-HAND-EDIT, rc=1. Arm 2: 'NAME IN THE before PLAN: advi-49f-fwd2-exercise-queue  IN THE after PLAN: advi-49f-fwd2-exercise-queue  EXPECTED: advi-f49-fwd2-exercise-queue' then VERDICT: FAIL-NAME-DID-NOT-MOVE, rc=1. Arm 3: 'before carries 49f: True  after carries f49: False' then VERDICT: FAIL-FENCE-DID-NOT-MOVE, rc=1. Positive controls on the same redirected module with the REAL record: PASS-ONE-HAND-EDIT rc=0, PASS-NAME-MOVED rc=0, PASS-FENCE-MOVED rc=0. `git status --porcelain` over fixed_inputs/ read EMPTY after the run, so the shipped checker's bytes are unchanged. 3 of 3 arms fired, 3 of 3 positive controls held.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "All three criterion invocations re-run a second time, verbatim, from the worktree root against the same committed artifacts, and the VERDICT lines compared. A NEGATIVE ARM AT BASE is reported in the same field because this schema carries no third control key and it must not be lost.",
+   "observed": "Run 1: PASS-ONE-HAND-EDIT, PASS-NAME-MOVED, PASS-FENCE-MOVED. Run 2: PASS-ONE-HAND-EDIT, PASS-NAME-MOVED, PASS-FENCE-MOVED. 3 of 3 identical; the rc=0 figures quoted in the acceptance rows are from the direct (unpiped) runs, because a `| tail -1` pipeline reports tail's status and not the checker's. NEGATIVE ARM AT BASE: all three limbs read EXERCISE_FWD2_R2.md, and that file did not exist at the round's base -- `git show 7377655ef7:org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/EXERCISE_FWD2_R2.md` returns rc=128, 'exists on disk, but not in 7377655ef7'. With the record absent, fenced_json returns None and every limb says FAIL-NO-X1-RECORD, so none of these three criteria could have passed before this cell ran. Unlike the sibling census cells, there is no criterion here that was already satisfied at base.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the apply",
+   "reason": "NEVER PERFORMED, and the order forbids it in terms ('**Never apply.**'). safe-apply was not run and no bare `terraform apply` was run. The only Terraform verbs used were `init -input=false -lockfile=readonly`, `plan -lock=false -input=false -out` (twice) and `show -json` (twice). The queue does not exist in AWS and the 49financial bucket policy is unchanged in the world; the `update` this cell measured is a PLANNED change, not an applied one."
+  },
+  {
+   "item": "the slot branch's contents",
+   "reason": "wk-lgic-enforce-2e-4 carries RECORDS ONLY -- the exercise record, the two plan JSONs, the surprise row, this instance, the result file and the <status> flip. The .tf, the registry edit and the ten regenerated carriers live on the scratch branch prac-lgic-enforce-x1-r2 and were committed there. The wide <paths> grant exists for the practice copy; exercising it on the slot branch would be the defect the drain refuses."
+  },
+  {
+   "item": "the scratch branch prac-lgic-enforce-x1-r2",
+   "reason": "LEFT IN PLACE at dd4de95e58, as the order directs -- deleting an unmerged branch is destructive git. Its worktree was removed clean after the run."
+  },
+  {
+   "item": "org/standards/NAMING_SCHEMA.json",
+   "reason": "Not in this order's <paths> and NOT TOUCHED. It is the file that blocked round 1 (its firm_forms pinned 49financial's short a second time, row LGIC_ENFORCE-W1-S19); v1.9 had already removed that key before this cell ran, which is why `validate` now returns rc=0 on the edited registry. This cell verified the removal by running the validator, not by editing anything."
+  },
+  {
+   "item": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/ and fixed_inputs/r2/",
+   "reason": "Fixed inputs, read-only by BOUNDS. check_en_r2.py (pinned 5e908a4929) was executed as ordered; the mutant arms loaded it as a module and redirected its in-memory REC_X1 constant only. `git status --porcelain` over that directory read empty after the run."
+  },
+  {
+   "item": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/EXERCISE_FWD2.md",
+   "reason": "Round 1's record. The order says it stays as its record; it was read for the resource shape and the round-1 refusal text, and not edited."
+  },
+  {
+   "item": "line endings",
+   "reason": "This worktree checks tracked LF files out as CRLF; git warned 'LF will be replaced by CRLF the next time Git touches it' on the record, both plan JSONs and, in the practice copy, scopes.json and three generated carriers. NOTHING WAS NORMALISED -- that is the COO's business at the drain, not a worker's edit."
+  },
+  {
+   "item": "provider fetching",
+   "reason": "NO EGRESS. `terraform init` ran with -lockfile=readonly and took hashicorp/aws v5.100.0 -- the exact version .terraform.lock.hcl pins -- from the local plugin cache C:/Users/AndrewBerman/.terraform.d/plugin-cache ('Using hashicorp/aws v5.100.0 from the shared cache directory'). Nothing was downloaded and nothing was fetched off Opal infrastructure."
+  }
+ ],
+ "surprises": [
+  "LGIC_ENFORCE-W4-S3"
+ ],
+ "session_log": "Worktree /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2e-4 on branch wk-lgic-enforce-2e-4, brought to CLOUD @7377655ef7 with git merge --ff-only. (1) Confirmed the branch and that org/, .tools/ and lib/ exist (TREE-OK). (2) Re-grounded the premises: read the three x1r limbs of check_en_r2.py so the criteria's exact terms were known before any work, read the opal_name module, scopes.json and s3-49financial.tf:120 (the fence reads module.opal_name.fence_patterns[\"49financial\"]), and read round 1's EXERCISE_FWD2.md for the refusal that stopped it. Checked the round-1 blocker directly: NAMING_SCHEMA.json now carries firm_forms only in its own ladder lines and a firm_forms_source note pointing at the registry. (3) Created the practice copy as ordered, git worktree add -b prac-lgic-enforce-x1-r2 at HEAD. (4) Wrote the .tf, ran terraform init -lockfile=readonly (rc 0, from the local plugin cache), then plan -lock=false -out and show -json; saved the json into this deliverables folder and committed the .tf on the scratch branch -- that commit is `before` 3d119a4bc3802739be30df330400b283fdd2743f. (5) Made the ONE hand edit in scopes.json by asserting the 4-line anchor occurs exactly once, ran validate (rc 0) and generate --out . (rc 0, 10 written, 0 skipped), and committed all eleven paths -- that commit is `after` dd4de95e584c90db0691754dc25dd82d64f1c3d6. (6) Planned again read-only and saved the second json. NOTHING WAS APPLIED at any point. (7) Read both plan JSONs: `before` 1 not-no-op, `after` 2, the second being aws_s3_bucket_policy.opal_data_49financial UPDATE -- the live-fence half round 1 could not reach -- and confirmed by parsing the policy documents that the only principal that moved is the *-49f-* glob. (8) Wrote EXERCISE_FWD2_R2.md, then corrected two fabrications in it before committing: a first draft carried an invented full hash for `before` and an abbreviated one for `after`, both replaced with git rev-parse output. (9) Re-read the channel at write time and appended ONE OBSERVATION row; the id had to be W4-S3, not W4-S1, because slot 4 already held two rows from round 1 -- an id minted from the order's template rather than from a read would have collided. (10) Committed the record, both plan JSONs and the row at d8173a219b. (11) Ran the three criteria, then the three mutant arms with their positive controls, then the determinism pair and the negative arm at base. (12) This instance and the result file follow in a later commit, per the pins-by-commit bound, and the <status> flip rides with them because all three mechanical criteria PASS by output. Disk was read three times during the run (14 GB, 12 GB, 14 GB free) and never approached the 5 GB floor; the clean practice worktree was removed at the end and its branch left in place.",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py",
+   "invocation": "one subcommand per criterion, each under timeout 120 from the worktree root: x1r-one-hand-edit, x1r-name-moved, x1r-fence-moved",
+   "result": "rc=0 PASS-ONE-HAND-EDIT; rc=0 PASS-NAME-MOVED; rc=0 PASS-FENCE-MOVED. Pinned at 5e908a49292663ac196cae7a29334a6d0e288cae. Re-run verbatim a second time: 3 of 3 identical."
+  },
+  {
+   "tool": "C:/Users/AndrewBerman/Desktop/ajb_workspace/.tools/terraform.exe (SAFE_APPLY_TERRAFORM), Terraform v1.9.8",
+   "invocation": "in the practice copy's infra/aws/terraform/shared-infra: init -input=false -lockfile=readonly; then, twice, plan -lock=false -input=false -out=<scratch> and show -json <scratch>",
+   "result": "init rc=0, provider from the local cache, no download, and .terraform.lock.hcl NOT rewritten (row W4-S3). plan rc=0 and show rc=0 on both passes. 233 resource_changes each; 1 not no-op at `before`, 2 at `after`. NOTHING APPLIED -- no apply verb was issued and safe-apply was not run."
+  },
+  {
+   "tool": "lib/opal_naming.py",
+   "invocation": "python lib/opal_naming.py validate; python lib/opal_naming.py generate --out .  (both in the practice copy, after the one hand edit)",
+   "result": "validate rc=0 -- 'VALIDATE: OK 24 system row(s), 9 scope row(s), 16 warning(s) at registry@d47bb8c698a9f00f', 0 refusals, where round 1 got 'REFUSED scopes.json[0].short: 'f49': NAMING_SCHEMA.json firm_forms gives '49f''. generate rc=0 -- 'GENERATE: 10 written, 0 skipped, into . at registry@d47bb8c698a9f00f'."
+  },
+  {
+   "tool": ".tools/surprise-row-gate.py (via .tools/safe-commit.sh)",
+   "invocation": "ran inside safe-commit on the staged set for commit d8173a219b",
+   "result": "OK -- '1 new row(s) of 99 total checked (98 pre-existing, NOT re-graded)'; corpus limb documents=87 rows=3010 malformed_blocks=0 failures=4 baseline=4 known=4 new=0 resolved=0."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~4/LGIC_ENFORCE.TO-EN-x-1-r2.fwd2-one-carrier.proof_of_spec.json X1R-AC1,X1R-AC2,X1R-AC3",
+   "result": "see the result file beside this instance; the run's exit code is the verdict and the <status> flip rides on it."
+  }
+ ]
+}
