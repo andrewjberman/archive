@@ -20,7 +20,9 @@ THE INSTRUMENT
 - A table row is a line opening with '|' below a header line and its '---' separator. Cells are split on '|' outside
   backtick code spans (an escaped '\\|' never splits). Every row's cell count is compared with its header's, and the split is
   compared with a plain split on every '|', so a pipe inside a cell is reported rather than absorbed.
-- A PLANE TABLE is a table whose header has a cell exactly 'disposition' (the order's 2d: sections 1 to 5). A plane row's
+- A PLANE TABLE is a table IN SECTIONS 1-5 (by heading number, never by header wording) whose header also has a cell
+  exactly 'disposition'; section 7's own count table carries the same header cell today and is excluded by SECTION,
+  not by renaming that cell -- the ledger is never shaped to fit this instrument. A plane row's
   CLASS is read from its disposition cell with bold markers and ~~struck~~ text removed, taking the first match in this order:
     AWAITING a word  the token AWAITING, or a named register entry X<n> whose section-6 state is not GRANTED;
     MIGRATE          the token MIGRATE; sub-class from the FIRST MIGRATE: '(format' -> format only; '(grammar' -> grammar;
@@ -41,6 +43,8 @@ LEDGER_REL = "infra/logic/06_CONFORMANCE_LEDGER.md"
 SEP = re.compile(r"^\s*\|?[\s:|-]+\|?\s*$")
 A3_RULES = {"R1", "R2", "R3"}
 MULT = "×"  # the multiplication sign the ledger uses for grouped planes (x11)
+PLANE_SECTIONS = {"§1", "§2", "§3", "§4", "§5"}  # A-12: plane tables live ONLY in these sections; section 7's
+# count table is excluded by SECTION even though its header cell reads 'disposition' like a plane table's does
 
 
 def repo_root():
@@ -133,7 +137,9 @@ def main(argv):
     if path is None or not path.is_file():
         print("ERROR: ledger not found: %s" % path)
         return 2
-    text = path.read_text(encoding="utf-8")
+    with open(path, "r", encoding="utf-8") as f:  # A-12: explicit utf-8 -- cp1252 (this device's platform
+        text = f.read()                            # default) mis-decodes non-ASCII bytes silently instead
+                                                     # of raising, so the loud failure would be the lucky case
     shown = LEDGER_REL if not args.ledger else str(path)
     sections = parse(text)
     problems = []
@@ -189,6 +195,8 @@ def main(argv):
     column_missing = column_bad = 0
     smartx = []
     for s in sections:
+        if sec_tag(s["heading"]) not in PLANE_SECTIONS:
+            continue
         for t in s["tables"]:
             if "disposition" not in t["hdr"]:
                 continue
