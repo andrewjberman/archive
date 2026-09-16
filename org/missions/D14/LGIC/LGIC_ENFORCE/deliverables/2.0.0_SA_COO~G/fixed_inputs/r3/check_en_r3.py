@@ -1024,6 +1024,198 @@ def _selftest_w7r():
     ]
 
 
+# ---------------------------------------------------------------- cell 8 arms
+#
+# The roots census, evaluated (A-12, T3R-J1, T3R-AC2). Round 2's LIMB_ROOTS_CENSUS carries 72 roots (68
+# planned, 4 NOT planned, each with a recorded plan rc=1 cause) and, per row, `plan_sha256` = the SHA-256 of the
+# FULL `terraform show -json` document the committed extract was reduced from. The full documents are not
+# committed.
+#
+# THE ANALYSIS TABLE'S WORDING IS UNSATISFIABLE, measured before this arm was written (LGIC_ENFORCE-S59): it says
+# the re-plan's "plan_sha256 equal to the extract's". Every full plan document carries its own creation
+# `timestamp` (measured on four committed full plans in this project: 03:47:57Z, 10:05:33Z, 11:19:12Z,
+# 11:23:25Z), so a re-plan's full document can NEVER byte-equal round 2's and its SHA-256 can never match -- a
+# PERFECT reproduction would FAIL. Round 2's own census states the achievable bar: "a spot re-plan of any planned
+# root reproduces its EXTRACT". So the arm compares the reduced extract (resource_changes, which carries no
+# timestamp) canonically, and requires the re-plan to be NEW (its own timestamp after the census vintage) so a
+# copied round-2 document cannot stand in for a run.
+
+ROOTS_CENSUS_R2 = "LIMB_ROOTS_CENSUS.md"
+
+
+def _canon(obj):
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"))
+
+
+def _census_rows(path):
+    d = _fenced(path)
+    return (d or {}).get("roots"), (d or {}).get("vintage")
+
+
+def t8_replan_reproduces_extract(path=None, root=None):
+    """A re-plan of ONE planned root, run with -lockfile=readonly and newer than the census, reduces to exactly the
+    committed round-2 extract for that root."""
+    p, why = _one("ROOTS_REPRODUCTION.r3.json", path, root)
+    if p is None:
+        say(why)
+        say("FAIL-T8-REPRODUCTION-UNREADABLE")
+        return 1
+    base = root or REPO
+    try:
+        with open(p, encoding="utf-8") as fh:
+            rep = json.load(fh)
+    except (OSError, ValueError) as exc:
+        say("unreadable reproduction record: %s" % exc)
+        say("FAIL-T8-REPRODUCTION-UNREADABLE")
+        return 1
+    census = os.path.join(base, *DELIV.split("/"), ROOTS_CENSUS_R2)
+    rows, vintage = _census_rows(census) if os.path.exists(census) else (None, None)
+    if rows is None:
+        # cell 4 relocates the round-2 census; the record may name where it now lives
+        alt = rep.get("census_path")
+        if alt and os.path.exists(os.path.join(base, *alt.split("/"))):
+            rows, vintage = _census_rows(os.path.join(base, *alt.split("/")))
+    if rows is None:
+        say("round-2 roots census not found at %s or the record's census_path" % ROOTS_CENSUS_R2)
+        say("FAIL-T8-CENSUS-UNREADABLE")
+        return 1
+    target = rep.get("root")
+    row = next((r for r in rows if r.get("root") == target), None)
+    say("root under reproduction: %s; in census: %s; planned there: %s"
+        % (target, row is not None, bool(row and row.get("planned"))))
+    if row is None or not row.get("planned") or not row.get("extract"):
+        say("FAIL-T8-ROOT-NOT-A-PLANNED-CENSUS-ROW")
+        return 1
+    cmd = str(rep.get("command") or "")
+    if "-lockfile=readonly" not in cmd:
+        say("command lacks -lockfile=readonly: %s" % cmd[:160])
+        say("FAIL-T8-LOCKFILE-NOT-READONLY")
+        return 1
+    try:
+        with open(os.path.join(base, *str(rep.get("full_plan") or "").split("/")), encoding="utf-8") as fh:
+            full = json.load(fh)
+        with open(os.path.join(base, *row["extract"].split("/")), encoding="utf-8") as fh:
+            committed = json.load(fh)
+    except (OSError, ValueError) as exc:
+        say("plan or extract unreadable: %s" % exc)
+        say("FAIL-T8-PLAN-UNREADABLE")
+        return 1
+    stamp = str(full.get("timestamp") or "")
+    fresh = bool(stamp) and bool(vintage) and stamp > str(vintage)
+    say("re-plan timestamp %s vs census vintage %s -> a new run: %s" % (stamp or "(none)", vintage, fresh))
+    if not fresh:
+        say("FAIL-T8-REPLAN-NOT-NEW")
+        return 1
+    ours, theirs = full.get("resource_changes"), committed.get("resource_changes")
+    same = ours is not None and theirs is not None and _canon(ours) == _canon(theirs)
+    say("DENOMINATOR: re-plan resource_changes %s; committed extract %s; canonical equal: %s"
+        % (len(ours) if isinstance(ours, list) else "?", len(theirs) if isinstance(theirs, list) else "?", same))
+    if not same:
+        say("FAIL-T8-EXTRACT-NOT-REPRODUCED")
+        return 1
+    say("PASS-T8-EXTRACT-REPRODUCED")
+    return 0
+
+
+def t8_init_flags(path=None, root=None):
+    """Every root row of the round-3 census prints the init flags it ran with (A-12)."""
+    p, why = _one("LIMB_ROOTS_CENSUS.r3.md", path, root)
+    if p is None:
+        say(why)
+        say("FAIL-T8-CENSUS-UNREADABLE")
+        return 1
+    rows, _v = _census_rows(p)
+    if not rows:
+        say("FAIL-T8-CENSUS-UNREADABLE")
+        return 1
+    missing = [r.get("root") for r in rows if not str(r.get("init_flags") or "").strip()]
+    say("DENOMINATOR: %d root row(s); %d without init_flags" % (len(rows), len(missing)))
+    for m in missing[:8]:
+        say("   NO INIT FLAGS:", m)
+    if missing:
+        say("FAIL-T8-INIT-FLAGS-MISSING")
+        return 1
+    say("PASS-T8-INIT-FLAGS-PRINTED")
+    return 0
+
+
+def regress_t8_unplanned_have_cause(path=None, root=None):
+    """REGRESSION (T3R-AC2 as A-12 re-reads it): a root recorded NOT planned is admitted only with its cause."""
+    p = path or os.path.join(root or REPO, *DELIV.split("/"), ROOTS_CENSUS_R2)
+    if not os.path.exists(p):
+        p, why = _one("LIMB_ROOTS_CENSUS.r3.md", None, root)
+        if p is None:
+            say(why)
+            say("FAIL-T8R-CENSUS-UNREADABLE")
+            return 1
+    rows, _v = _census_rows(p)
+    if not rows:
+        say("FAIL-T8R-CENSUS-UNREADABLE")
+        return 1
+    unplanned = [r for r in rows if not r.get("planned")]
+    silent = [r.get("root") for r in unplanned if not str(r.get("reason") or "").strip()]
+    say("DENOMINATOR: %d root(s); %d NOT planned; %d of those with no recorded cause"
+        % (len(rows), len(unplanned), len(silent)))
+    if silent:
+        say("FAIL-T8R-UNPLANNED-WITHOUT-CAUSE")
+        return 1
+    say("PASS-T8R-UNPLANNED-ROOTS-CARRY-CAUSE")
+    return 0
+
+
+def _selftest_t8():
+    """Temp-root fixtures only; the timestamp trap and the copied-document trap each held RED."""
+    out = []
+    base = _tempfile.mkdtemp(prefix="en_r3_t8_")
+    try:
+        dl = os.path.join(base, *DELIV.split("/"))
+        wk = os.path.join(dl, "0.9.0_WK_LGIC_ENFORCE~9")
+        os.makedirs(wk)
+        changes = [{"address": "aws_s3_bucket.b", "change": {"actions": ["no-op"]}}]
+        with open(os.path.join(wk, "extract.json"), "w", encoding="utf-8") as fh:
+            json.dump({"format_version": "1.2", "resource_changes": changes}, fh)
+        census = {"vintage": "2026-09-16T10:15:18Z", "roots": [
+            {"root": "infra/r1", "planned": True, "extract": DELIV + "/0.9.0_WK_LGIC_ENFORCE~9/extract.json",
+             "plan_sha256": "x", "reason": None, "init_flags": "-backend=true -lockfile=readonly"},
+            {"root": "infra/r2", "planned": False, "extract": None, "plan_sha256": None,
+             "reason": "terraform plan rc=1: No value for required variable", "init_flags": "-backend=true"}]}
+        _write_fenced(os.path.join(dl, ROOTS_CENSUS_R2), census)
+
+        def rec(full, cmd="terraform plan -lockfile=readonly -out=p", name="ROOTS_REPRODUCTION.r3.json"):
+            with open(os.path.join(wk, "full.json"), "w", encoding="utf-8") as fh:
+                json.dump(full, fh)
+            rp = os.path.join(wk, name)
+            with open(rp, "w", encoding="utf-8") as fh:
+                json.dump({"root": "infra/r1", "command": cmd,
+                           "full_plan": DELIV + "/0.9.0_WK_LGIC_ENFORCE~9/full.json"}, fh)
+            return rp
+
+        new = {"timestamp": "2026-09-16T19:00:00Z", "resource_changes": changes}
+        out.append(("t8 GREEN new re-plan reproduces the extract", t8_replan_reproduces_extract(rec(new), base) == 0))
+        drift = {"timestamp": "2026-09-16T19:00:00Z", "resource_changes": [{"address": "aws_s3_bucket.b",
+                                                                             "change": {"actions": ["update"]}}]}
+        out.append(("t8 RED   re-plan's changes differ", t8_replan_reproduces_extract(rec(drift), base) == 1))
+        old = {"timestamp": "2026-09-16T09:00:00Z", "resource_changes": changes}
+        out.append(("t8 RED   document older than the census (a copy)", t8_replan_reproduces_extract(rec(old), base) == 1))
+        out.append(("t8 RED   no -lockfile=readonly", t8_replan_reproduces_extract(rec(new, cmd="terraform plan"), base) == 1))
+
+        r3 = os.path.join(wk, "LIMB_ROOTS_CENSUS.r3.md")
+        _write_fenced(r3, census)
+        out.append(("t8 GREEN every row has init_flags", t8_init_flags(r3, base) == 0))
+        bare = json.loads(json.dumps(census))
+        del bare["roots"][1]["init_flags"]
+        out.append(("t8 RED   one row without init_flags", t8_init_flags(_write_fenced(r3, bare), base) == 1))
+
+        out.append(("t8r GREEN unplanned root carries its cause", regress_t8_unplanned_have_cause(None, base) == 0))
+        silent = json.loads(json.dumps(census))
+        silent["roots"][1]["reason"] = ""
+        sp = _write_fenced(os.path.join(base, "silent.md"), silent)
+        out.append(("t8r RED  unplanned root with no cause", regress_t8_unplanned_have_cause(sp, base) == 1))
+    finally:
+        _shutil.rmtree(base, ignore_errors=True)
+    return out
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -1096,6 +1288,7 @@ def selftest_arms():
     results.extend(_selftest_s6())
     results.extend(_selftest_w7())
     results.extend(_selftest_w7r())
+    results.extend(_selftest_t8())
 
     say("")
     for label, ok in results:
@@ -1106,6 +1299,9 @@ def selftest_arms():
 
 
 CMDS = {
+    "t8-replan-reproduces-extract": t8_replan_reproduces_extract,
+    "t8-init-flags": t8_init_flags,
+    "regress-t8-unplanned-have-cause": regress_t8_unplanned_have_cause,
     "regress-w7-applied-deny": regress_w7_applied_deny,
     "w7-writers-dispositioned": w7_writers_dispositioned,
     "s6-live-complete": s6_live_complete,
