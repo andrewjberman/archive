@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-z-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0aa50dbc0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8768f46770",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-z-3.account-alias.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/account_ref.py",
+      "kind": "script",
+      "commit_or_etag": "1006e6a702",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module, source only; nothing deploys and no caller is wired (OG-q-2 builds the Schwab tools). It carries: account_ref(master, account_id) = 'acr_<version>_' + base32(HMAC-SHA256(key, domain NUL version NUL master NUL account id)[:16]); parse_keyring / current_keyring / invalidate_key_cache, reading the key through app/integrations/base.py SecretsCredential from the secret named by SCHWAB_ACCOUNT_REF_SECRET_ID; resolve_refs / resolve_ref, which resolve only against the principal's CURRENT authorized account set after a fresh strong read of OG-z-1's profile and grant (data_entitlement.current_access), one master per request, all or nothing, constant-time comparison with no early exit; the Resolution result type, whose repr and str hide raw ids and whose denial() is data_entitlement's denial shape; and the REJECT retired-key rule (EXPIRED_REFERENCE, decided on the version token alone).",
+      "introduces": [
+        "def account_ref",
+        "def resolve_refs",
+        "def resolve_ref",
+        "def current_keyring",
+        "def parse_keyring",
+        "def invalidate_key_cache",
+        "class Keyring",
+        "class Resolution",
+        "class KeyUnavailable",
+        "SECRET_ID_ENV"
+      ],
+      "artifact_covered_by": ["OGZ3-AC1", "OGZ3-AC2", "OGZ3-AC3", "OGZ3-AC4", "OGZ3-AC5"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_account_ref.py",
+      "kind": "test",
+      "commit_or_etag": "1006e6a702",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_ogz3_ac01 .. test_ogz3_ac05, offline. moto's DynamoDB holds the access-state table, with profile and grant records written through data_entitlement's operator transaction; moto's Secrets Manager holds a locally generated 32-byte key under a test name, and the real secret is never read. Every GetSecretValue call is recorded through a boto3.client wrapper and every DynamoDB read through a recording client that can also fail at the endpoint. Whole module: 5 passed.",
+      "introduces": ["def test_ogz3_ac01", "def test_ogz3_ac05", "class _Rec", "def _expected_ref", "def _scan"],
+      "artifact_covered_by": ["OGZ3-AC1", "OGZ3-AC2", "OGZ3-AC3", "OGZ3-AC4", "OGZ3-AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1006e6a702",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_OPLGTW-W3-S25 and W3-S26 appended inside the fenced json array: '[surprise-row-gate] ... 2 new row(s) of 63 total checked (61 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields'.",
+      "introduces": ["NFRA_OPLGTW-W3-S25", "NFRA_OPLGTW-W3-S26"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGZ3-AC1",
+      "criterion_verbatim": "`OGZ3-AC1` (`test_ogz3_ac01`) -- `account_ref` is a versioned keyed HMAC over master and account ID, with its key read through the secret `OG-i-2` provisions. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac01 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac01 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ3-AC1: refs minted 6 (2 masters x 3 accounts); shape acr_v1_<26 base32> 6 of 6; equal to an independent HMAC-SHA256(key, domain|version|master|account)[:16] recomputation 6 of 6; key read through app/integrations/base.py SecretsCredential (secretsmanager:GetSecretValue), first 1 call(s) SecretId=opal-gateway/test/account-ref-key (the configured name, env SCHWAB_ACCOUNT_REF_SECRET_ID), cached across 6 mints; keyed: another key -> 6 of 6 differ, unkeyed SHA-256 -> 0 of 6 equal; versioned: the same key bytes under v2 -> 6 of 6 differ, prefix acr_v2_; fail closed 6 of 6: name unset -> KeyUnavailable, resolve UNAVAILABLE; no such secret -> KeyUnavailable, resolve UNAVAILABLE; not JSON -> KeyUnavailable, resolve UNAVAILABLE; 16-byte key -> KeyUnavailable, resolve UNAVAILABLE; no key for current_version -> KeyUnavailable, resolve UNAVAILABLE; key not base64 -> KeyUnavailable, resolve UNAVAILABLE; control: the configured secret again -> resolved\n1 passed in 1.05s\nrc=0",
+      "denominator": "6 references (2 masters x 3 account ids). Shape 6 of 6; equal to an independent HMAC-SHA256 recomputation in the test 6 of 6. KEYED: under a second key 6 of 6 differ and an unkeyed SHA-256 over the same message equals 0 of 6. VERSIONED: the same key bytes labelled v2 give 6 of 6 different digests under the acr_v2_ prefix. The key is read through app/integrations/base.py SecretsCredential (isinstance asserted): 1 GetSecretValue call, SecretId equal to the configured name, cached across all 6 mints. Fail closed 6 of 6 arms: the name unset, a name with no secret, and four malformed values (not JSON, a 16-byte key, no key for current_version, a key that is not base64), each raising KeyUnavailable on a mint and answering UNAVAILABLE on a resolution, with no key bytes in the message. Control: the configured secret again resolves. The test uses a locally generated key in moto; the real secret is never read. 1 of 1 test, verbatim at 1006e6a702.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ3-AC2",
+      "criterion_verbatim": "`OGZ3-AC2` (`test_ogz3_ac02`) -- one account ID in two masters yields two different references (A5). <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac02 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac02 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ3-AC2: population 200 account ids, each minted under 08242234 and 08335338: 200 of 200 pairs differ, 400 distinct references of 400; the principal is granted the same 2 account ids under both masters: own-master resolution 4 of 4; a reference presented under the other master -> ENTITLEMENT_DENIED 4 of 4 (1 of 1 account reference(s) are not in the principal's current authorized account set for master 08335338); a request mixing one reference of each master -> ENTITLEMENT_DENIED, 0 accounts returned\n1 passed in 0.88s\nrc=0",
+      "denominator": "200 account ids, each minted under both contract masters: 200 of 200 pairs differ, and the 400 references are 400 distinct values (no collision inside the population either). Resolution, for a principal granted the SAME 2 account ids under both masters: own-master 4 of 4 resolve to the right raw id; presented under the other master 4 of 4 are ENTITLEMENT_DENIED with 0 accounts returned, although that very account id is granted there. 1 mixed-master request is denied whole. 1 of 1 test, verbatim at 1006e6a702.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ3-AC3",
+      "criterion_verbatim": "`OGZ3-AC3` (`test_ogz3_ac03`) -- a reference outside the current authorized account set returns ENTITLEMENT_DENIED without revealing whether the account exists. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac03 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac03 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ3-AC3: control: a granted account resolves (revision 1); outside the set, 3 of 3 probes -> ENTITLEMENT_DENIED with 1 distinct denial body ({\"code\": \"entitlement_denied\", \"error\": \"1 of 1 account reference(s) are not in the principal's current authorized account set for master 08242234\", \"error_code\": \"ENTITLEMENT_DENIED\", \"guard_denied\": true}): an account granted to another principal, an account in no grant anywhere, a random well-formed reference; reads during the 3 probes 6, all strong get_item on the principal's own POLICY partition, other partitions 0, query/scan 0; the other principal resolves its own account (the account exists); after grant revision 2 drops one account's slot: the dropped account -> the same denial body, the kept account resolves at revision 2; after revocation -> ENTITLEMENT_DENIED (the principal holds no active data entitlement); raw account ids in the 5 denial bodies 0\n1 passed in 0.92s\nrc=0",
+      "denominator": "3 probes spanning the existence axis: an account that EXISTS in another principal's grant, an account in NO grant anywhere, and a random well-formed reference. All 3 return ENTITLEMENT_DENIED, and their denial bodies are 1 distinct value, so nothing in the answer separates an existing account from one that does not exist. The resolver consults no account inventory: the 6 reads during those probes are all strong get_item on the principal's OWN POLICY partition, 0 on any other partition, 0 query and 0 scan. CURRENT means current: after grant revision 2 drops one account, its reference returns that same denial body while the kept account resolves at revision 2, and after revocation the kept reference is denied too. Positive control: the other principal resolves the very account whose reference was denied to the first, so the denial was the grant's doing and not the account's. Raw account ids across the 5 denial bodies: 0. 1 of 1 test, verbatim at 1006e6a702.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ3-AC4",
+      "criterion_verbatim": "`OGZ3-AC4` (`test_ogz3_ac04`) -- a raw account ID appears in no log or audit line the harness captures. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac04 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac04 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ3-AC4: capture = the root logger at DEBUG (the SDK wire loggers botocore/boto3/urllib3/moto/s3transfer held at WARNING, their level on the host, which configures no logging), stdout and stderr at the file-descriptor level, and the audit JSONL through app/audit.py; arms 13: resolved, 3 references: resolved; resolved, the other master: resolved; another principal's account: ENTITLEMENT_DENIED; an account in no grant: ENTITLEMENT_DENIED; the other master's reference: ENTITLEMENT_DENIED; a raw account id passed as a reference: INVALID_REQUEST; a raw account id passed as the master: INVALID_REQUEST; no principal: ENTITLEMENT_DENIED; store unavailable: UNAVAILABLE; key unavailable: UNAVAILABLE; a retired key version: EXPIRED_REFERENCE; mint: a malformed account id: ValueError; mint: a raw account id as the master: ValueError; captured: log records 35 (opal_gateway.account_ref 11 = one per resolution), stderr lines 1 (the access-state alarm among them), audit lines 11; raw account ids found 0 across 5 ids x 5 corpora, key material (base64 and hex of 2 keys) found 0; control: the same scanner on a line carrying a raw id finds 1\n1 passed in 1.03s\nrc=0",
+      "denominator": "13 arms: 2 resolved, 3 entitlement denials, 2 malformed inputs (a RAW ACCOUNT ID passed as a reference, and one passed as the master), no principal, store unavailable, key unavailable, a retired key version, and 2 mint refusals. 5 corpora: the captured log records, stdout, stderr at the file-descriptor level, the audit JSONL written through app/audit.py, and every string handed to the tool layer (each Resolution's repr, str and denial body). 5 raw account ids and 4 key strings (base64 and hex of both keys) searched in all 5: 0 hits. The capture is the root logger at DEBUG, with the SDK wire loggers held at WARNING, their level on the host, which configures no logging -- row W3-S26 records what lies below that line. POSITIVE CONTROLS, so the zero is not an empty harness: 35 log records captured, 11 of them from opal_gateway.account_ref, exactly one per resolution, and 11 audit lines, one per resolution; the access-state alarm reached stderr; and the same scanner on a planted line carrying a raw id returns 1. 1 of 1 test, verbatim at 1006e6a702.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "OGZ3-AC5",
+      "criterion_verbatim": "`OGZ3-AC5` (`test_ogz3_ac05`) -- a reference under a retired key version is handled by the stated rule. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac05 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-3f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_account_ref.py::test_ogz3_ac05 -q -p no:cacheprovider --color=no",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
+      "output_evidence": "OGZ3-AC5: rule REJECT -- a reference whose version is not the current one -> EXPIRED_REFERENCE, decided on the version token alone; before rotation the v1 reference resolves; rotated to v2 (the v1 key left in the secret), the secret re-read 1 time(s): 5 of 5 probes -> EXPIRED_REFERENCE with 1 distinct denial body (1 of 1 account reference(s) were issued under a retired key version; obtain current references again): v1 reference of a granted account, v1 reference of another principal's account, v1 reference of an account in no grant, random v1 reference, v3 reference (never issued); the same account under v2 -> a new reference acr_v2_ (equal to an independent recomputation), resolved; a request mixing a v2 and a v1 reference -> EXPIRED_REFERENCE, 0 accounts; order: the entitlement is checked first, so a revoked principal's v1 reference -> ENTITLEMENT_DENIED\n1 passed in 0.97s\nrc=0",
+      "denominator": "THE STATED RULE, declared in app/account_ref.py's module docstring and in the result file: REJECT -- only the current key version is minted or resolved, and a well-formed reference under any other version is refused with EXPIRED_REFERENCE, read from the version token alone before any key or account is consulted. Before rotation the v1 reference resolves (control). After rotating to v2, with the retired v1 key deliberately LEFT in the secret, 5 of 5 probes are EXPIRED_REFERENCE with 1 distinct denial body: a v1 reference of a granted account, of another principal's account, of an account in no grant, a random v1 reference, and a v3 reference that was never issued -- so the answer cannot distinguish them and the retired key is never used. The same account re-minted under v2 differs from its v1 reference, equals an independent recomputation under the v2 key, and resolves. A request mixing a v2 and a v1 reference is EXPIRED_REFERENCE with 0 accounts. The rotation cost exactly 1 further GetSecretValue. Order: the entitlement is read first, so a revoked principal's v1 reference is ENTITLEMENT_DENIED, not EXPIRED_REFERENCE. 1 of 1 test, verbatim at 1006e6a702.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Five in-process mutants through a pytest plugin (.scratch/og_z3_mutants.py, loaded with -p og_z3_mutants and PYTHONPATH=.scratch; the committed bytes untouched), each run against the criteria it must break. unkeyed: _mac drops the key for a plain digest (AC1). no_master: _mac drops the master from the message (AC2). resolve_any: the module's hmac.compare_digest always returns True, so every reference matches the authorized set (AC2, AC3). accept_retired: the reference regex reports every reference as carrying the CURRENT version, removing the retired-key rule (AC5). log_raw: resolve_refs logs the resolved raw ids (AC4).",
+      "expected": "unkeyed: 1 failed. no_master: 1 failed. resolve_any: 2 failed. accept_retired: 1 failed. log_raw: 1 failed.",
+      "observed": "unkeyed: 'MUTANT unkeyed' | AC1 'AssertionError: (6, 0)' -- shape still 6 of 6, the independent keyed recomputation 0 of 6 | '1 failed in 1.19s', rc=1. no_master: 'MUTANT no_master' | AC2 'AssertionError: (0, 200)' -- 0 of 200 pairs differ across the masters | '1 failed in 1.22s', rc=1. resolve_any: 'MUTANT resolve_any' | AC2 \"AssertionError: ('08242234', Resolution(ok=True, ...))\" on the cross-master reference | AC3 \"assert (True and ('70412359',) == ('70412358',)\" | '2 failed in 1.14s', rc=1. accept_retired: 'MUTANT accept_retired' | AC5 'assert False' (the retired reference answers ENTITLEMENT_DENIED, not EXPIRED_REFERENCE) | '1 failed in 1.03s', rc=1. log_raw: 'MUTANT log_raw' | AC4 \"AssertionError: {('log records', '70412358'): 4, ('log records', '70412359'): 4, ('log records', '70412361'): 2}\" -- the scanner finds the raw ids | '1 failed in 1.07s', rc=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two whole-module runs in separate processes (.scratch/det_a.log, .scratch/det_b.log; the gateway tree byte-equal to 1006e6a702), their 5 'OGZ3-AC' denominator lines compared by diff; then the 5 verbatim single-test runs of the criteria above, at 1006e6a702, compared against them.",
+      "observed": "Run A '5 passed in 1.97s' rc=0, run B '5 passed in 2.57s' rc=0; diff of the denominator lines empty, 5 of 5 identical. The 5 verbatim single-test runs print the same 5 lines, '1 passed' each, rc=0. The only value that varies between runs is pytest's own elapsed time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Wiring account_ref into the Schwab responses, CSV exports and the dim_position / dim_balance projection.",
+      "reason": "OG-q-2's cell: no Schwab tool exists at this cut (row W3-S23). This cell provides the mint and the resolver the tool layer calls; the contract's account_ref field of dim_position and dim_balance is populated there."
+    },
+    {
+      "item": "Cache, cursor and ticket keys binding principal, revision, master, dataset, dates, projection and source versions (the rest of A5's 'requests/caches/cursors/tickets cannot mix masters').",
+      "reason": "OG-k-1 and OG-q-2/OG-q-3 own those keys (decomposition @8768f46770 :616, A5 row). This cell covers the REQUEST half: a reference of one master resolves under no other master (OGZ3-AC2)."
+    },
+    {
+      "item": "Provisioning the alias-key secret, its IAM read grant, and setting SCHWAB_ACCOUNT_REF_SECRET_ID on the host.",
+      "reason": "OG-i-2 provisions the secret and OG-r-1 ships the release; both files are outside this order's <paths>. The unstated interface between them and this module is row NFRA_OPLGTW-W3-S25 (ARMED, disarm 2.0.0_SA_COO~O). The tests use a locally generated key in moto and never touch the real secret, as the order requires."
+    },
+    {
+      "item": "A live read of the real secret or any AWS call.",
+      "reason": "The order forbids it and no egress leaves Opal infrastructure; every test is offline on moto."
+    },
+    {
+      "item": "Re-running the other Gateway test modules.",
+      "reason": "This cell adds two new files and edits none, so no existing module's behaviour changes; the order's criteria name only tests/test_account_ref.py. The known red test tests/test_identity_scope.py::test_scoped_deny_by_default (row NFRA_OPLGTW-S1) and identity_tool_allowlist.txt were not touched."
+    },
+    {
+      "item": "A timing-channel measurement of the resolver.",
+      "reason": "Not named by any criterion. The implementation compares every candidate with hmac.compare_digest and no early exit, but this deliverable claims no timing property."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order. Every commit is LOCAL on branch wk-nfra_oplgtw-1-3f."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W3-S25: no carrier states where the alias-key secret's NAME is configured or what its VALUE holds; app/config.py has no such setting and is outside this grant, and SCHWAB_IDENTITIES.json does not exist at the cut. This cell chose SCHWAB_ACCOUNT_REF_SECRET_ID and a JSON {current_version, keys} value, and fails closed on anything else. OBSERVATION, ARMED (disarm 2.0.0_SA_COO~O).",
+    "NFRA_OPLGTW-W3-S26: with the root logger at DEBUG, botocore logs a grant read's DynamoDB response body, which carries raw account ids; the Gateway configures no logging, so the host's root level is WARNING and the same read logs 0 lines. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~3/account-alias.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest under .venv-og (py -3.12 venv, --system-site-packages, requirements + msal moto pytest; moto 5.x, mcp 1.28.0 not raised)",
+      "invocation": "the 5 pytest invocations of OGZ3-AC1 .. OGZ3-AC5, verbatim, from /c/tmp/wk-oplgtw-1-3f at 1006e6a702",
+      "result": "'1 passed' each, rc=0 on 5 of 5."
+    },
+    {
+      "tool": "pytest under .venv-og with the mutant plugin",
+      "invocation": "PYTHONPATH=.scratch OG_Z3_MUTANT=<unkeyed|no_master|resolve_any|accept_retired|log_raw> pytest -p og_z3_mutants <the criteria that mutant must break>",
+      "result": "5 of 5 mutants fired on exactly the criteria named, rc=1 each (see controls.mutant.observed)."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/account_ref.py infra/aws/ec2/opal-gateway/tests/test_account_ref.py",
+      "result": "'OK: pre-commit gate clean for 2 of 2 file(s)', rc=0."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~3 <0.9.0_WK_NFRA_OPLGTW~3@opal.agent>\" -F .scratch/msg_ogz3.txt -- app/account_ref.py tests/test_account_ref.py INVESTIGATION_v1.md",
+      "result": "1006e6a702 (3 files, 790 insertions; surprise-row-gate '2 new row(s) of 63 total checked'; msg-verify MATCH len=2586), LOCAL on wk-nfra_oplgtw-1-3f."
+    },
+    {
+      "tool": "scratch probe (.scratch/botocore_debug_probe.py) under .venv-og -- the grounding of row W3-S26, not a criterion",
+      "invocation": ".venv-og/Scripts/python .scratch/botocore_debug_probe.py",
+      "result": "'root WARNING (host default): log lines 0, lines carrying the raw id 0'; 'root DEBUG: log lines 40, lines carrying the raw id 1'."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> OGZ3-AC1,OGZ3-AC2,OGZ3-AC3,OGZ3-AC4,OGZ3-AC5",
+      "result": "see the result file -- only the exit code is the verdict"
+    }
+  ]
+}

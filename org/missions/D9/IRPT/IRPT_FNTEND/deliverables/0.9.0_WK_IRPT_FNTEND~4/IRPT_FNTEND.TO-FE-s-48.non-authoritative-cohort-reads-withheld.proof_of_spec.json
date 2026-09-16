@@ -1,0 +1,160 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-48",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-48.non-authoritative-cohort-reads-withheld.md",
+    "group": "OTHER",
+    "vintage_commit": "e2d9f703e9"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~4",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "734eb61ac1",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-48.non-authoritative-cohort-reads-withheld.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/ScopeSummary.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "a06252eeb2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit a06252ee on branch wk-irpt_fntend-8-4-fe-s-48 (LOCAL; PORTAL IS FROZEN). 4 insertions, 2 deletions: the withheld fact `${c.axis}: unknown` -> `${c.axis}: withheld` (:120) and the header comment (:9-14). No class, colour, element, label or assertable-path change: F48-AC4 reads 1 of 111 code lines changed."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts",
+      "kind": "test",
+      "commit_or_etag": "e5c92f0c06",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit e5c92f0c (LOCAL). The F48-AC2..AC5 battery. In-memory render (renderToStaticMarkup), no server. Every inspected file is read as a committed blob or through git grep <rev> (RULING AC). The one working-copy read is the binding check (imported ScopeSummary.tsx == HEAD blob)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F48-AC1",
+      "criterion_verbatim": "`F48-AC1` -- the whole portal typechecks. <criterion id=\"F48-AC1\" cell_refs=\"FE-s-48\" drives=\"none\"><invocation>cd <WS>/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?</invocation><expect>rc=0(?![0-9])</expect></criterion>",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-8-4-fe-s-48/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "expect": "rc=0(?![0-9])",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0\ne5c92f0c068d12f2472f461b146be38a13001f0e\n(the last line is portal HEAD, printed after the run)",
+      "denominator": "the whole portal: tsc -b --noEmit over every project reference, rc 0 (0 errors)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F48-AC2",
+      "criterion_verbatim": "`F48-AC2` -- the ruling.\n- Render `ScopeSummary` in memory with a directory entry whose cohort axes are ALL non-authoritative. Build it from the committed fixture `fixtures/directory.unknown-cohort.json` (read with `git cat-file blob HEAD:<path>`) or from a wire body through the real adapter.\n- Print the rendered \"Cohort (not asserted)\" text.\n- Each axis reads `<axis>: withheld`, and the word \"unknown\" does not appear in that fact. The denominator is the axes the entry carries. <criterion id=\"F48-AC2\" cell_refs=\"FE-s-48\" drives=\"none\"><invocation>cd <WS>/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts</invocation><expect>NON-AUTHORITATIVE COHORT READS WITHHELD ON EVERY AXIS: (\\d+) of \\1(?![0-9])</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-8-4-fe-s-48/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts",
+      "expect": "NON-AUTHORITATIVE COHORT READS WITHHELD ON EVERY AXIS: (\\d+) of \\1(?![0-9])",
+      "output_evidence": "RENDER BOUND TO THE COMMITTED src/pages/InvestorReporting/header/ScopeSummary.tsx (working copy == HEAD blob, LF-normalised): yes\nARM: fixture src/pages/InvestorReporting/fixtures/directory.unknown-cohort.json @HEAD (partialReason \"Cohort facts for this relationship are not authoritative.\")\n  cohorts carried: [{\"axis\":\"supervision\",\"value\":\"unknown\",\"authoritative\":false},{\"axis\":\"billing\",\"value\":\"unknown\",\"authoritative\":false},{\"axis\":\"advisory\",\"value\":\"unknown\",\"authoritative\":false}]\n  every axis non-authoritative: yes\n  RENDERED \"Cohort (not asserted)\": \"supervision: withheld, billing: withheld, advisory: withheld\"\n    supervision  -> supervision: withheld [reads \"supervision: withheld\": yes]\n    billing      -> billing: withheld [reads \"billing: withheld\": yes]\n    advisory     -> advisory: withheld [reads \"advisory: withheld\": yes]\n    parts in the fact 3, axes carried 3 [one part per axis: yes]\n  \"unknown\" in the fact: no; cohort controls rendered: 0\nARM: DirectoryEntry.valid.json wire instance, cohort.authoritative=false, through parseIrEnvelope + toOptionRow\n  cohorts carried: [{\"axis\":\"supervision\",\"value\":\"opal-supervised\",\"authoritative\":false},{\"axis\":\"advisory\",\"value\":\"advised\",\"authoritative\":false}]\n  every axis non-authoritative: yes\n  RENDERED \"Cohort (not asserted)\": \"supervision: withheld, advisory: withheld\"\n    supervision  -> supervision: withheld [reads \"supervision: withheld\": yes]\n    advisory     -> advisory: withheld [reads \"advisory: withheld\": yes]\n    parts in the fact 2, axes carried 2 [one part per axis: yes]\n  \"unknown\" in the fact: no; cohort controls rendered: 0\n  READER CONTROL (DEV 1f3ce9f0's fact for the fixture, \"supervision: unknown, billing: unknown, advisory: unknown\"): 0 of 3 read withheld; \"unknown\" in the fact: yes\nNON-AUTHORITATIVE COHORT READS WITHHELD ON EVERY AXIS: 5 of 5\n4 pass\n0 fail\nRan 4 tests across 1 file. [9.44s]\nrc=0",
+      "denominator": "5 of 5 non-authoritative axes: 3 carried by the committed fixture directory.unknown-cohort.json + 2 by the wire instance through the real adapter",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F48-AC3",
+      "criterion_verbatim": "`F48-AC3` -- the control. An AUTHORITATIVE cohort whose advisory is ADVISED, RESIDUAL and UNKNOWN in turn renders exactly as at DEV 1f3ce9f0. UNKNOWN keeps reading `unknown`, because that is the producer's asserted value. <criterion id=\"F48-AC3\" cell_refs=\"FE-s-48\" drives=\"none\"><invocation>cd <WS>/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts</invocation><expect>IN-ENUM AUTHORITATIVE ADVISORY UNCHANGED: 3 of 3(?![0-9])</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-8-4-fe-s-48/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts",
+      "expect": "IN-ENUM AUTHORITATIVE ADVISORY UNCHANGED: 3 of 3(?![0-9])",
+      "output_evidence": "PRODUCER cohort.advisory_status ENUM (DirectoryEntry.schema.json @HEAD): ADVISED, RESIDUAL, UNKNOWN\nWIRE INSTANCE cohort.authoritative @HEAD: true; fee_taking_status OPAL_SUPERVISED\n  advisory_status=ADVISED  -> \"Cohortsupervision: opal-supervisedadvisory: advised\" [cohort block byte-identical to DEV 1f3ce9f0: yes; no \"Cohort (not asserted)\" fact: yes]\n  advisory_status=RESIDUAL -> \"Cohortsupervision: opal-supervisedadvisory: residual\" [cohort block byte-identical to DEV 1f3ce9f0: yes; no \"Cohort (not asserted)\" fact: yes]\n  advisory_status=UNKNOWN  -> \"Cohortsupervision: opal-supervisedadvisory: unknown\" [cohort block byte-identical to DEV 1f3ce9f0: yes; no \"Cohort (not asserted)\" fact: yes]\n  the producer's own UNKNOWN advisory still reads \"advisory: unknown\": yes\nIN-ENUM AUTHORITATIVE ADVISORY UNCHANGED: 3 of 3\n4 pass\n0 fail\nRan 4 tests across 1 file. [9.44s]\nrc=0",
+      "denominator": "3 of 3 producer advisory tokens (ADVISED, RESIDUAL, UNKNOWN), read from DirectoryEntry.schema.json @HEAD",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F48-AC4",
+      "criterion_verbatim": "`F48-AC4` -- the arm that can say no. Read DEV 1f3ce9f0's committed `ScopeSummary.tsx` (`git cat-file blob 1f3ce9f0:<path>`) and show its withheld fact built `: unknown`. HEAD's committed blob builds `: withheld`. Print both lines. <criterion id=\"F48-AC4\" cell_refs=\"FE-s-48\" drives=\"none\"><invocation>cd <WS>/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts</invocation><expect>BEFORE \\(DEV 1f3ce9f0\\): THE WITHHELD FACT READ unknown: yes</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-8-4-fe-s-48/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts",
+      "expect": "BEFORE \\(DEV 1f3ce9f0\\): THE WITHHELD FACT READ unknown: yes",
+      "output_evidence": "DEV 1f3ce9f0:src/pages/InvestorReporting/header/ScopeSummary.tsx  <Fact label=\"Cohort (not asserted)\" value={withheld.map((c) => `${c.axis}: unknown`).join(', ')} />\nHEAD:src/pages/InvestorReporting/header/ScopeSummary.tsx  <Fact label=\"Cohort (not asserted)\" value={withheld.map((c) => `${c.axis}: withheld`).join(', ')} />\nBEFORE (DEV 1f3ce9f0): THE WITHHELD FACT READ unknown: yes\nAFTER (HEAD): THE WITHHELD FACT READS withheld: yes\nCODE LINES CHANGED OUTSIDE THE HEADER COMMENT: 1 of 111 [only the withheld fact: yes]\nHEADER COMMENT: DEV 1f3ce9f0 says 'unknown' text: yes; HEAD says 'withheld' text: yes\n4 pass\n0 fail\nRan 4 tests across 1 file. [9.44s]\nrc=0",
+      "denominator": "2 of 2 committed blobs of header/ScopeSummary.tsx (DEV 1f3ce9f0, HEAD e5c92f0c); 1 of 111 code lines differs, the withheld fact",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F48-AC5",
+      "criterion_verbatim": "`F48-AC5` -- the reach, BY SUBTRACTION over the corpus (RULING X), from the COMMITTED tree.\n- Enumerate every consumer of a `CohortFact` (or of `authoritative`) outside `__tests__/`, and print the denominator.\n- Subtract the ones that do not render, printing each with its reason (`validate.ts`'s checks).\n- Every remaining render of a non-authoritative value reads \"withheld\". <criterion id=\"F48-AC5\" cell_refs=\"FE-s-48\" drives=\"none\"><invocation>cd <WS>/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts</invocation><expect>EVERY RENDER OF A WITHHELD COHORT VALUE READS withheld: (\\d+) of \\1(?![0-9])</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-8-4-fe-s-48/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-48/withheld.test.ts",
+      "expect": "EVERY RENDER OF A WITHHELD COHORT VALUE READS withheld: (\\d+) of \\1(?![0-9])",
+      "output_evidence": "CENSUS (git grep -l -i -w -e CohortFact -e cohorts -e authoritative HEAD -- src, outside __tests__/): 59 file(s) (8 under __tests__/ excluded)\nSUBTRACTED, WITH REASONS: 58 of 59\n  - src/api/endpoints/advisor-intelligence.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/main.tsx -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/AdvisorIntelligence/_partners/49financial/layout.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/AdvisorIntelligence/_partners/cottonwood/layout.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/AdvisorIntelligence/_partners/demo/layout.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/AdvisorIntelligence/_partners/inflection/layout.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/AdvisorIntelligence/_shared/AdvisorBookView.tsx -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/AdvisorIntelligence/_shared/tabs/DistributionTab.tsx -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/AdvisorIntelligence/_shared/types.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/AdvisorIntelligence/_shared/types/TenantLayoutConfig.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/InvestorReporting/contracts/adapt.ts -- PRODUCES CohortFacts from the wire (the adapter); a .ts module, no markup\n  - src/pages/InvestorReporting/contracts/index.ts -- DECLARES the CohortFact type; a .ts module, no markup\n  - src/pages/InvestorReporting/contracts/validate.ts -- CHECKS a CohortFact (axis, value, authoritative, sourceRevision) and pushes problem strings; a .ts module, no markup\n  - src/pages/InvestorReporting/contracts/wire/DirectoryEntry.ts -- DECLARES the wire cohort the adapter reads; a .ts module, no markup\n  - src/pages/InvestorReporting/contracts/wire/HoldingsSnapshot.ts -- holds no CohortFact (names none of CohortFact/cohorts/DirectoryEntry/SearchOptionRow); its 1 \"authoritative\" hit(s) belong to another fact or to prose\n  - src/pages/InvestorReporting/fixtures/directory.account-only.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/directory.duplicate-names.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/directory.multiple-relationships.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/directory.partly-authorized.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/directory.terminated-entitled.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/directory.unknown-cohort.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/directoryEntry.failure.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/directoryEntry.success.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-10/directory.two-firms.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-7/holdings.cash-remainder.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-7/holdings.cottonwood-target-blend.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-7/holdings.duplicate-relationship.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-7/holdings.eclipse-assigned.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-7/holdings.signed-denominator.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-7/holdings.smartx-observed.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-7/holdings.stale-overlay.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/fe-s-7/holdings.unknown-category.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/holdingsSnapshot.success.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/index.ts -- the fixture REGISTRY: types each fixture as DirectoryEntry data and describes it in a `proves` string; a .ts module, no markup; NAMED_NEGATIVES (the only carrier of `proves`) is named by 0 other non-test file(s) (the same read sees it in 2 file(s), tests included)\n  - src/pages/InvestorReporting/fixtures/smoke/default.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-10-global.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-10-one-firm.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-13-wire.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-14-global.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-15-clean.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-15-needs-correction.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-18-frozen.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-missing-attribution.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-target.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-21-queued.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-7-cottonwood.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/smoke/fe-s-7-smartx.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/wire/DirectoryEntry.valid.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/fixtures/wire/HoldingsSnapshot.valid.json -- fixture DATA: carries values, renders nothing\n  - src/pages/InvestorReporting/header/search.ts -- CARRIES the DirectoryEntry whole on the option row and reads no cohort; a .ts module, no markup\n  - src/pages/InvestorReporting/tabs/analysis/composer.ts -- holds no CohortFact (names none of CohortFact/cohorts/DirectoryEntry/SearchOptionRow); its 1 \"authoritative\" hit(s) belong to another fact or to prose\n  - src/pages/InvestorReporting/tabs/holdings/HoldingsTab.tsx -- holds no CohortFact (names none of CohortFact/cohorts/DirectoryEntry/SearchOptionRow); its 1 \"authoritative\" hit(s) belong to another fact or to prose\n  - src/pages/InvestorReporting/tabs/holdings/SliceTable.tsx -- holds no CohortFact (names none of CohortFact/cohorts/DirectoryEntry/SearchOptionRow); its 4 \"authoritative\" hit(s) belong to another fact or to prose\n  - src/pages/InvestorReporting/tabs/holdings/slices.ts -- holds no CohortFact (names none of CohortFact/cohorts/DirectoryEntry/SearchOptionRow); its 8 \"authoritative\" hit(s) belong to another fact or to prose\n  - src/pages/ModelPortfolios.tsx -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/Positioning/shared/satelliteSet.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\n  - src/pages/SecurityScanner/utils/categoryOrder.ts -- outside the Investor Reporting page and names nothing from it: no CohortFact can reach it\nUNCLASSIFIED: 0\nREMAINING RENDER SITES: 1 (59 - 58 - 0 unclassified)\n  = src/pages/InvestorReporting/header/ScopeSummary.tsx: <Fact label=\"Cohort (not asserted)\" value={withheld.map((c) => `${c.axis}: withheld`).join(', ')} /> [reads withheld: yes]\n  CENSUS CONTROL at DEV 1f3ce9f0: 59 file(s); render sites 1; reading withheld 0 of 1\n    = src/pages/InvestorReporting/header/ScopeSummary.tsx: <Fact label=\"Cohort (not asserted)\" value={withheld.map((c) => `${c.axis}: unknown`).join(', ')} />\nEVERY RENDER OF A WITHHELD COHORT VALUE READS withheld: 1 of 1\n4 pass\n0 fail\nRan 4 tests across 1 file. [9.44s]\nrc=0",
+      "denominator": "59 committed files outside __tests__/ (git grep -l -i -w); 58 subtracted with reasons; 0 unclassified; 1 of 1 render site reads withheld",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F48-AC6",
+      "criterion_verbatim": "`F48-AC6` -- **the whole-suite census of record**, with `IRPT_FE_DEV_PORT` exported to a port you have measured closed. If F41-AC5's control times out under load (FE-s-46's row, not yours), report it and re-run; never edit it. <criterion id=\"F48-AC6\" cell_refs=\"FE-s-48\" drives=\"none\"><invocation>cd <WS>/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__</invocation><expect>(?<![0-9])0 fail</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-8-4-fe-s-48/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__",
+      "expect": "(?<![0-9])0 fail",
+      "output_evidence": "PORT 5265 CLOSED ECONNREFUSED 1 ms\nIRPT_FE_DEV_PORT=5265 HEAD=e5c92f0c068d12f2472f461b146be38a13001f0e start=06:04:58Z\n0 pass\n2 skip\n0 fail\nRan 2 tests across 1 file. [387.00ms]\n564 pass\n18 skip\n0 fail\n2444 expect() calls\nRan 582 tests across 103 files. [84.78s]\nrc=0 end=06:06:24Z",
+      "denominator": "582 tests across 103 files: 564 pass, 18 skip, 0 fail (rc 0)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F48-AC7",
+      "criterion_verbatim": "`F48-AC7` -- graded at L9: a cohort value the panel declines to assert reads \"withheld\" at every render site, never \"unknown\", and a value the producer asserted is unchanged. RECORD; NO VERDICT. <criterion id=\"F48-AC7\" cell_refs=\"FE-s-48\" judgment=\"true\" drives=\"none\"/>",
+      "method": "manual_read_with_citation",
+      "invocation": "none -- judgment criterion, graded at L9",
+      "output_evidence": "RECORDED, NO VERDICT. Material for the grader: (1) the one render site of a non-authoritative CohortFact, header/ScopeSummary.tsx @portal e5c92f0c, builds `${c.axis}: withheld` (F48-AC4, AC5); rendered in memory it reads 'supervision: withheld, billing: withheld, advisory: withheld' for the committed fixture (F48-AC2). (2) The asserted path is byte-identical to DEV 1f3ce9f0, and the producer's own UNKNOWN still reads 'advisory: unknown' (F48-AC3). (3) The census subtracts Holdings' classification (slices.ts / SliceTable.tsx) as holding no CohortFact. It renders a non-authoritative classification's partitions as 'unknown' by the contract's own rule (contracts/index.ts:708 @1f3ce9f0). Whether RULING W reaches that surface is placed as row IRPT_FNTEND-W4-S19, not decided here.",
+      "denominator": "judgment -- 1 render site of a withheld cohort value (F48-AC5); graded by 3.0.0_SA_CVO at L9",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\": graded at L9 by 3.0.0_SA_CVO, never self-graded (Rule 27 L9). This worker records the material and no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The BEFORE arms, read from portal DEV 1f3ce9f0's committed tree. They are the unmodified component, so they are the mutant each reader must refuse: (a) the F48-AC2 reader over DEV 1f3ce9f0's fact for the fixture; (b) the F48-AC5 census run at rev 1f3ce9f0; (c) the F48-AC4 blob reader at 1f3ce9f0.",
+      "expected": "(a) 0 of 3 axes read withheld and 'unknown' is in the fact; (b) 1 render site, reading withheld 0 of 1; (c) the withheld fact built `: unknown`.",
+      "observed": "(a) \"READER CONTROL (DEV 1f3ce9f0's fact for the fixture, ...): 0 of 3 read withheld; \\\"unknown\\\" in the fact: yes\"; (b) \"CENSUS CONTROL at DEV 1f3ce9f0: 59 file(s); render sites 1; reading withheld 0 of 1\"; (c) \"BEFORE (DEV 1f3ce9f0): THE WITHHELD FACT READ unknown: yes\" -- all in the deciding run at portal e5c92f0c.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The four fe-s-48 verdict lines compared across two runs on byte-identical committed bytes (portal e5c92f0c): the standalone deciding run (F48-AC2..AC5) and the same file inside the whole-suite run (F48-AC6).",
+      "observed": "Both runs print: '...ON EVERY AXIS: 5 of 5', 'IN-ENUM AUTHORITATIVE ADVISORY UNCHANGED: 3 of 3', 'BEFORE (DEV 1f3ce9f0): THE WITHHELD FACT READ unknown: yes', 'EVERY RENDER OF A WITHHELD COHORT VALUE READS withheld: 1 of 1'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal/src/pages/InvestorReporting/tabs/holdings/slices.ts and SliceTable.tsx (Holdings classification renders 'unknown' when not authoritative)",
+      "reason": "NOT YOURS in this order, and not a CohortFact. Its reach under RULING W is placed as row IRPT_FNTEND-W4-S19 and was not edited."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/fixtures/index.ts:77 (the registry's `proves` prose for directory.unknown-cohort.json)",
+      "reason": "NOT YOURS (every fixture). The stale prose is placed as row IRPT_FNTEND-W4-S20 and was not edited."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/contracts/ (validate.ts included)",
+      "reason": "NOT YOURS. validate.ts checks a CohortFact and renders nothing; the order's line citation drift is row IRPT_FNTEND-W4-S18."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/__tests__/fe-s-42/",
+      "reason": "NOT YOURS. The whole suite ran green (0 fail); no FE-s-42 test asserts the old word."
+    }
+  ],
+  "surprises": [
+    "IRPT_FNTEND-W4-S18: the order places the CohortFact check at contracts/validate.ts:164-171; at DEV 1f3ce9f0 those are the termination/access checks and the cohort check is :178-192 (OBSERVATION, INERT).",
+    "IRPT_FNTEND-W4-S19: Holdings renders a non-authoritative classification's partitions as 'unknown' (slices.ts:100-102 @1f3ce9f0), the same withheld-by-authority shape one surface over; not a CohortFact and not in this grant, so it is placed for the ruling's owner (OBSERVATION, INERT).",
+    "IRPT_FNTEND-W4-S20: fixtures/index.ts:77 still says the unknown-cohort fixture's 'unknown renders as unknown'; the header now renders it 'withheld'. Fixtures are not in this grant (OBSERVATION, INERT)."
+  ],
+  "session_log": "0.9.0_WK_IRPT_FNTEND~4 on IRPT_FNTEND.TO-FE-s-48, worktree pair C:/tmp/wk-irpt_fntend-8-4-fe-s-48 (workspace branch wk-irpt_fntend-8-4-fe-s-48 @e2d9f703e9, descendant of the seat commit 716a9f4f6c) + portal (same branch, from DEV 1f3ce9f0). Edited ScopeSummary.tsx's withheld fact word and header comment; committed a06252ee after typecheck rc 0. Wrote fe-s-48/withheld.test.ts. Iterations before the deciding run were all in the test file: maxBuffer is not in the portal's spawnSync typing; per-file blob reads were too slow (19 s) and were replaced by git grep sets; the outside-page rule and the registry `proves` check were tightened to structural reads (NAMED_NEGATIVES). Committed e5c92f0c. The deciding runs are at portal e5c92f0c, all with IRPT_FE_DEV_PORT=5265, which was measured closed (ECONNREFUSED in 1-2 ms) before the first run and again immediately before the whole-suite run. The whole suite ran alone: 564 pass, 18 skip, 0 fail of 582, and F41-AC5's control did not time out this run. Three OBSERVATION/INERT rows were filed (W4-S18..S20). The new test file needed one explicit `git add` before the pathspec commit, because git will not commit an untracked path by pathspec alone.",
+  "compiler_tools": [
+    {
+      "tool": "bun 1.3.9",
+      "invocation": "/c/Users/AndrewBerman/.bun/bin/bun test ...",
+      "result": "the test runner for F48-AC2..AC6"
+    },
+    {
+      "tool": "tsc (via `bun run typecheck` = tsc -b --noEmit)",
+      "invocation": "/c/Users/AndrewBerman/.bun/bin/bun run typecheck",
+      "result": "rc=0 at portal e5c92f0c"
+    },
+    {
+      "tool": "Python 3.12",
+      "invocation": "python .tools/proof-of-spec-check.py ... --governing-order ...",
+      "result": "the proof instance check"
+    }
+  ]
+}

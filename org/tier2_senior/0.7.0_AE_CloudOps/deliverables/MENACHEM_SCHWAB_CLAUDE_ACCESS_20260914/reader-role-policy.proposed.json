@@ -1,0 +1,89 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DenyAllNonReadActions",
+      "Effect": "Deny",
+      "NotAction": [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:ListBucket"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "DenyReadsOutsideApprovedDatasets",
+      "Effect": "Deny",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion"
+      ],
+      "NotResource": [
+        "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_position/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_balance/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_asset/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_position/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_balance/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_asset/*"
+      ]
+    },
+    {
+      "Sid": "DenyListingOtherBuckets",
+      "Effect": "Deny",
+      "Action": "s3:ListBucket",
+      "NotResource": "arn:aws:s3:::opal-data-assets"
+    },
+    {
+      "Sid": "DenyListingOutsideApprovedPrefixes",
+      "Effect": "Deny",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::opal-data-assets",
+      "Condition": {
+        "StringNotLike": {
+          "s3:prefix": [
+            "schwab/08242234/silver/dim_position/*",
+            "schwab/08242234/silver/dim_balance/*",
+            "schwab/08242234/silver/dim_asset/*",
+            "schwab/08335338/silver/dim_position/*",
+            "schwab/08335338/silver/dim_balance/*",
+            "schwab/08335338/silver/dim_asset/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "AllowApprovedObjectReads",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion"
+      ],
+      "Resource": [
+        "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_position/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_balance/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08242234/silver/dim_asset/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_position/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_balance/*",
+        "arn:aws:s3:::opal-data-assets/schwab/08335338/silver/dim_asset/*"
+      ]
+    },
+    {
+      "Sid": "AllowApprovedPrefixListing",
+      "Effect": "Allow",
+      "Action": "s3:ListBucket",
+      "Resource": "arn:aws:s3:::opal-data-assets",
+      "Condition": {
+        "StringLike": {
+          "s3:prefix": [
+            "schwab/08242234/silver/dim_position/*",
+            "schwab/08242234/silver/dim_balance/*",
+            "schwab/08242234/silver/dim_asset/*",
+            "schwab/08335338/silver/dim_position/*",
+            "schwab/08335338/silver/dim_balance/*",
+            "schwab/08335338/silver/dim_asset/*"
+          ]
+        }
+      }
+    }
+  ]
+}

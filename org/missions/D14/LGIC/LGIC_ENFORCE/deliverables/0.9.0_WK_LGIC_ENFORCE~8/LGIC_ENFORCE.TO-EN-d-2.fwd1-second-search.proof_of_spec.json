@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_ENFORCE.TO-EN-d-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/prd/LGIC_ENFORCE_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "78128f29ea"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+    "vintage_commit": "53d221f334",
+    "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-d-2.fwd1-second-search.md"
+  },
+  "assignee": "0.9.0_WK_LGIC_ENFORCE~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/EXERCISE_FWD1_SEARCH.md",
+      "kind": "doc",
+      "commit_or_etag": "948fe90fe3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the search record the order names; a repo document with no deploy scope",
+      "artifact_covered_by": ["D2-AC1", "D2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "948fe90fe3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row LGIC_ENFORCE-W8-S3 appended; the surprise-row gate read '1 new row(s) of 64 total checked' and OK",
+      "introduces": ["LGIC_ENFORCE-W8-S3"],
+      "artifact_covered_by": ["D2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~8/fwd1-second-search.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the result file the order names; a repo document with no deploy scope",
+      "artifact_covered_by": ["D2-AC1", "D2-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "D2-AC1",
+      "criterion_verbatim": "D2-AC1 -- the pipeline holds no storage-location literal, by your search and by the checker's re-search.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-1-8-d2 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_en.py d2-zero",
+      "output_evidence": "WORKER HITS: []  CHECKER RE-SEARCH HITS: []  (92bc3b51bf2aac81152cd270aa146cadfb5159c7:org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~8/pipeline/qwt_positions.py)\nVERDICT: PASS-ZERO-LITERALS\nrc=0",
+      "denominator": "1 of 1 pipeline file, 64 of 64 lines at 92bc3b51bf searched for 6 of 6 patterns (opal-data-, s3://, bronze/, silver/, gold/, platinum/); 0 hits by grep and 0 by the checker's regex",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-ZERO-LITERALS"
+    },
+    {
+      "criterion_id": "D2-AC2",
+      "criterion_verbatim": "D2-AC2 -- the search's positive control finds exactly one planted literal.",
+      "method": "command",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-1-8-d2 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/check_en.py d2-control",
+      "output_evidence": "CONTROL: {'planted': 'opal-data-quillwater', 'planted_line': 'PLANTED = \"opal-data-quillwater\" (line 20 of a 65-line scratch copy, never committed)', 'hits': 1, 'unplanted_hits': 0, 'second_instrument': \"check_en.py's d2-zero regex over the planted copy: ['opal-data-quillwater']; over the unplanted copy: []\"}\nVERDICT: PASS-CONTROL-FIRES\nrc=0",
+      "denominator": "1 of 1 planted literal found in a 65-line scratch copy (1 match by grep -o, 1 by the checker's regex); 0 in the 64-line unplanted copy. The checker reads the recorded control field only (row LGIC_ENFORCE-W8-S3)",
+      "status": "PASS",
+      "expect": "VERDICT: PASS-CONTROL-FIRES"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A scratch copy of qwt_positions.py at 92bc3b51bf got one added line, PLANTED = \"opal-data-quillwater\", at line 20. diff against the unplanted copy prints exactly that line (19a20). The copy was never staged or committed.",
+      "expected": "the search reads exactly 1 hit on the planted copy and 0 on the unplanted one, by both instruments",
+      "observed": "grep: opal-data- 1 line, the other 5 patterns 0 lines; combined listing '20:PLANTED = \"opal-data-quillwater\"', grep -o count 1; unplanted copy count 0. check_en.py's d2-zero regex applied by hand: ['opal-data-quillwater'] on the planted copy, [] on the unplanted one.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the zero read by two different instruments over the same bytes: grep over git show output (this worker) and check_en.py d2-zero's Python regex over its own git show (the checker)",
+      "observed": "grep: 0 lines for each of 6 patterns, combined rc 1 (no match); checker: CHECKER RE-SEARCH HITS: []",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "bare tier words passed to key()/address() (\"bronze\", \"silver\" at :47; \"gold\" at :50, :51)",
+      "reason": "they carry no '/', so they are not tier or key prefixes in the order's pattern list; they are single segments passed to the builder. Disclosed in EXERCISE_FWD1_SEARCH.md disclosed_not_hits, not counted as hits"
+    },
+    {
+      "item": "committing the planted scratch copy",
+      "reason": "the order: 'plant one literal in a scratch copy of the file (never committed)'; the copy stays in <WS>/.scratch/d2/"
+    },
+    {
+      "item": "pushing, merging or checking out the scratch branch prac-lgic-enforce-d1",
+      "reason": "read only, with git show; the worker definition forbids push, merge and checkout"
+    }
+  ],
+  "surprises": ["LGIC_ENFORCE-W8-S3"],
+  "session_log": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~8/fwd1-second-search.result.md",
+  "compiler_tools": [
+    {
+      "tool": "git show + grep",
+      "invocation": "git show 92bc3b51bf2aac81152cd270aa146cadfb5159c7:<pipeline_path> | grep -F -i -c -e <pattern> (6 patterns), and | grep -E -i -n 'opal-data-|s3://|(bronze|silver|gold|platinum)/'",
+      "result": "denominator 1 file, 64 lines; 0 hits for each pattern; combined rc 1"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~8 <0.9.0_WK_LGIC_ENFORCE~8@opal.agent>\" -F .scratch/d2/msg1.txt -- <EXERCISE_FWD1_SEARCH.md> <INVESTIGATION_v1.md>",
+      "result": "948fe90fe3, rc 0; surprise-row gate '1 new row(s) of 64 total checked', OK; LOCAL"
+    }
+  ]
+}

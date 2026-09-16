@@ -66,3 +66,19 @@ uncommitted edit.
 
 Nothing here is lost if the answer is "discard" -- the patch is preserved in this directory and the
 restore is one `git apply`.
+
+## RESOLVED 2026-09-15 ~01:1xZ -- DISCARDED on Andrew's word
+
+**Trigger:** the un-park condition fired before the freeze lifted. `2.0.0_SA_COO~F` msg 96789 (HOLD, IRPT_FNTEND
+R7.8): FE-s-45 changes `package.json`'s scripts in another hunk, and git refuses a merge into a locally modified
+file, so the edit would block that drain into portal DEV.
+
+**His word, AskUserQuestion at the `0.0.0_AB_MSTR` terminal, the option chosen VERBATIM:** "Discard it (Recommended)"
+-- option text: "I revert package.json to its committed version; the saved patch stays in my folder, so restoring is
+one git apply. Installed packages aren't touched. FE-s-45's merge can then land."
+
+**Measured before the act:** the live diff and this directory's `.patch` matched line for line (12 of 12); the file's
+mtime was still 2026-09-11T05:52:39Z. **Measured after** (`git -C portal restore -- package.json`, 01:10:45Z):
+`package.json` 0 dirty, 0 dirty tracked files in the main portal checkout, `overrides` back to `{"lodash": "4.18.1"}`,
+portal HEAD unchanged at `DEV 0d075808`, and the `.patch` (311 bytes) still here. The author stays structurally
+unavailable, and no seat is named.
