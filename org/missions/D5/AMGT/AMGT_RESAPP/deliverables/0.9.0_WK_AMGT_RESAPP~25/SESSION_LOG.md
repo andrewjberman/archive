@@ -198,4 +198,55 @@ times across this session (before and after the `peers_v.py` guard-literal fix) 
 AC1 PASS, AC2 PASS, AC3 PASS. `<status>` flips to `complete`. No new surprise row filed -- every premise
 in the task order's own text (the "2 of 6" / "0 of 6" Robustness finding, the two absent `<paths>` grants)
 was independently verified against the live model-block artifact and matched exactly; nothing was found
+
+## `AMGT-rk-13` -- the similarity ranker re-run (third order in this chain)
+
+**AC3 self-match prewrite (before the batch wrote any new object).** Ran the AC3 census literally
+against the 33 pre-existing `peers/v1/` objects (2026-09-15): `self_match_suspects 0`, `mutant_suspects 2`
+-- matching `W25-S3`'s own re-measurement. Saved to
+`AMGT-rk-13.self_match_prewrite.txt` beside this file.
+
+**What was built.**
+1. `lib/research/peers/universe.py`: `model_block_pool_index()` / `read_model_block_from_pool()` --
+   lists `derived/model_block/` once (memoised), maps each key to its LATEST object, reads it on demand.
+2. `lib/research/peers/engine.py`: `_load_model_block()` now reads THROUGH THE POOL first (AC4), falling
+   back to the repo directory only for a key the pool does not carry; `read_pool` threaded through
+   `resolve_subject()`/`peers()`, gated by `resolve_identities` so the fixture battery (`resolve_identities
+   =False` on every call) stays NO-NETWORK (26 of 26 tests, 0.010s, confirmed no S3 traffic).
+3. `lib/research/peers/engine.py`: `build_widened_identity_index()` / an extended `resolve_identity()`
+   (AC2) -- falls through to AMGT-rk-4's widened identity set (`universe/v1/<as_of>.json`) when the
+   crosswalk alone is UNRESOLVED, a FIGI/CUSIP/SEDOL dedup against the crosswalk's older, narrower key
+   space. Built once per batch in `run_batch()`, threaded into every `peers()` call.
+
+**The re-run.** `python -m lib.research.peers.engine --as-of 2026-09-16 --write-pool`: 191 of 191 keyed
+names in the widened `universe/v1/2026-09-16.json` uploaded, read-back 191 of 191, SHARED-DEFECT ADMIT (0
+violations). DERIVED 121, ABSENT 70 -- exactly AC1's measured `populatable_expected`/`held_no_classification
+_source` split. Before/after (same grain, same invocation): `populated_subjects` 10 -> 121,
+`total_members` 120 -> 1408.
+
+**AC3 re-arm outcome (after the batch).** The same census, re-run against the 191 latest objects:
+`self_match_suspects 2` -- `GOOGL_US_Equity`/`GOOG_US_Equity` (Alphabet's two share classes) each name
+the other as a peer. This is the residual `W25-S3`'s `disarm_owner` predicted could surface among the
+newly-resolved names. No code fix attempted: `W25-S3` already found a broader self-exclusion fix UNSAFE
+on this same live database (over-excludes on generic corporate-suffix tokens, changed COST's served
+membership) and reverted it byte-for-byte; the substantive fix (a share-class/cross-listing-aware
+identity join) is INTERFACE X-1's owner's decision, routed to `3.0.0_SA_CVO~Z` at L9, exactly as `W25-S3`
+itself states. Filed as `AMGT_RESAPP-Z-W25-S6` (ARMED, `disarm_owner` `3.0.0_SA_CVO~Z` at L9).
+
+**Two further rows.** `W25-S7`: the mandated batch invocation writes `peers_batch.2026-09-16.json/.log`
+beside `universe.CACHE_DIR_DEFAULT` under worker `~21`'s deliverables directory -- outside this order's
+`<paths>`; left untracked, not committed. `W25-S8`: this order's `<paths>` names a literal
+`lib/research/universe/` directory that does not exist; the functionality lives in
+`lib/research/peers/universe.py` and `lib/research/identity/build_universe.py`, both already granted
+(same shape as `W25-S5` on the prior order, not repeated as identical since the grant text differs order
+to order).
+
+**Controls.** Mutant: `resolve_subject('NVDA_US_Equity', rows, d, read_pool=False)` (the pre-fix,
+dir-only read) flips the source from `model_block_header` back to `scanner_row` -- FIRED-AS-EXPECTED.
+Determinism: the AC1 census run twice against the same live store returns byte-identical numbers
+(`populated_subjects 121 expected 121 not_pop 0 outside 0`, both runs).
+
+**Result.** AC1 PASS, AC2 PASS, AC4 PASS, AC3 FAIL (refused as written per this order's Refusal Clause,
+row `AMGT_RESAPP-Z-W25-S6`). `<status>` stays `pending` -- a criterion refused as written is not a met
+order.
 off-task.
