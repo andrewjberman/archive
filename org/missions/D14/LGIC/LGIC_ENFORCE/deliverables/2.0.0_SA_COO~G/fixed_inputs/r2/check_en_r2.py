@@ -566,7 +566,7 @@ def r3_reader_census():
 
 def r3_tests():
     require_changed([OPAL])
-    new, here, at_base = red([([sys.executable, "-m", "pytest", "-q", OPAL_TESTS], None)], [OPAL, OPAL_TESTS])
+    new, here, at_base = red([([sys.executable, "-m", "pytest", "-q", "--color=no", OPAL_TESTS], None)], [OPAL, OPAL_TESTS])
     say("PASS-NO-NEW-LIB-TEST-FAILURE" if not new else "FAIL-NEW-LIB-TEST-FAILURE",
         "FAILING HERE: %d  FAILING AT THE BASE'S BYTES: %d  NEW: %s" % (len(here), len(at_base), new[:5]))
 
@@ -915,7 +915,7 @@ def r4_gaps_covered():
 
 def r4_tests():
     require_changed([OPAL])
-    new, here, at_base = red([([sys.executable, "-m", "pytest", "-q", OPAL_TESTS], None)], [OPAL, OPAL_TESTS])
+    new, here, at_base = red([([sys.executable, "-m", "pytest", "-q", "--color=no", OPAL_TESTS], None)], [OPAL, OPAL_TESTS])
     say("PASS-R4-NO-NEW-LIB-TEST-FAILURE" if not new else "FAIL-R4-NEW-LIB-TEST-FAILURE",
         "FAILING HERE: %d  FAILING AT THE BASE'S BYTES: %d  NEW: %s" % (len(here), len(at_base), new[:5]))
 
@@ -1528,7 +1528,7 @@ def r5_generate():
 
 def r5_tests():
     require_gateway_row()
-    new, here, at_base = red([([sys.executable, "-m", "pytest", "-q", OPAL_TESTS], None)], [OPAL, OPAL_TESTS])
+    new, here, at_base = red([([sys.executable, "-m", "pytest", "-q", "--color=no", OPAL_TESTS], None)], [OPAL, OPAL_TESTS])
     say("PASS-R5-NO-NEW-SUITE-FAILURE" if not new else "FAIL-R5-NEW-SUITE-FAILURE",
         "FAILING HERE: %d  FAILING AT THE BASE'S BYTES: %d  NEW: %s" % (len(here), len(at_base), new[:5]))
 
