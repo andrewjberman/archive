@@ -94,6 +94,25 @@ def rows(path):
     return [ln.split("\t") for ln in t.splitlines()[1:] if ln.strip()]
 
 
+def column(path, name):
+    """One NAMED column's cells, found by the TSV's own header rather than by position.
+
+    A column read by INDEX breaks silently when a column is inserted; a column read by
+    NAME refuses loudly. Returns None when the file or the named column is absent.
+    """
+    t = read(path)
+    if t is None:
+        return None
+    lines = [ln for ln in t.splitlines() if ln.strip()]
+    if not lines:
+        return None
+    head = [c.strip() for c in lines[0].split("\t")]
+    if name not in head:
+        return None
+    i = head.index(name)
+    return [ln.split("\t")[i] for ln in lines[1:] if len(ln.split("\t")) > i]
+
+
 def canon_rule_block(text, rid):
     """The text of one canon rule, from its bold heading to the next rule's."""
     m = re.search(r"^\*\*%s\b.*?$" % re.escape(rid), text, re.M)
@@ -303,12 +322,22 @@ def j_reach(which, tag):
     rs = rows(JUDGE[which])
     if rs is None:
         return missing(JUDGE[which], tag + "-REACH")
-    blob = "\t".join("\t".join(r) for r in rs)
-    reached = [r for r in SEVEN_RULES if re.search(r"\b%s\b" % r, blob)]
+    col = column(JUDGE[which], "reach")
+    if col is None:
+        print("the judge file carries no 'reach' column, so its reach cannot be read at all")
+        return out("FAIL-%s-REACH-PRINTED" % tag)
+    scoped = "\t".join(col)
+    reached = [r for r in SEVEN_RULES if re.search(r"\b%s\b" % r, scoped)]
     notreached = [r for r in SEVEN_RULES if r not in reached]
-    print("A-13's seven rules, denominator %d" % len(SEVEN_RULES))
+    blob = "\t".join("\t".join(r) for r in rs)
+    blob_reached = [r for r in SEVEN_RULES if re.search(r"\b%s\b" % r, blob)]
+    print("A-13's seven rules, denominator %d; judge rows %d" % (len(SEVEN_RULES), len(rs)))
     print("  REACHED     (%d): %s" % (len(reached), reached))
     print("  NOT REACHED (%d): %s" % (len(notreached), notreached))
+    if blob_reached != reached:
+        print("  DISCLOSED: a whole-row scan reads %d %s instead -- it counts a rule the judge"
+              % (len(blob_reached), blob_reached))
+        print("             NAMES while EXPLAINING it is NOT reached. This reads the reach column only.")
     print("the reach is PRINTED, which is what A-13 asks for; a non-empty NOT REACHED is not a failure")
     out(("PASS-%s-REACH-PRINTED" if reached else "FAIL-%s-REACH-PRINTED") % tag)
 
