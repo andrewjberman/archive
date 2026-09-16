@@ -1,10 +1,29 @@
 # NFRA_OPLGTW.TO-OG-p-1 -- baseline result (0.9.0_WK_NFRA_OPLGTW~2)
 
-Worktree `/c/tmp/wk-oplgtw-1-2`, branch `wk-nfra_oplgtw-1-2`, cut from CLOUD at 417631ae6f. READ ONLY: no apply, deploy, restart or write in AWS or on the Gateway host.
+Original run: worktree `/c/tmp/wk-oplgtw-1-2`, branch `wk-nfra_oplgtw-1-2`, cut from CLOUD at 417631ae6f, 2026-09-15.
+AC1-AC10 below are that run's rows, carried unchanged per the RE-HAND SCOPE.
+
+**COLD RE-HAND, 2026-09-16:** worktree `/c/tmp/wk-oplgtw-1-2d`, branch `wk-nfra_oplgtw-1-2d`, cut from CLOUD at
+bec64dea66 (contains the OG-p-1/OG-c-2 amendment @246231edd6, executing `1.0.0_SA_CTO` rulings R-OG-1/R-OG-2, msg
+97499 @d6583eab37, `org/tier1_exec/1.0.0_SA_CTO/deliverables/RULINGS_NFRA_OPLGTW_20260916.md`). AC11, AC12 and AC13
+were rebuilt to the amended criteria and re-run; AC1-AC10 were NOT re-run. READ ONLY throughout both runs: no apply,
+deploy, restart or write in AWS or on the Gateway host.
 
 ## Outcome
 
-10 of 13 mechanical criteria PASS by output (AC1-AC10). 3 FAIL as written (AC11, AC12, AC13), each refused with its measurement and one surprise row. The order stays `pending`; the complete flip was not made.
+**13 of 13 mechanical criteria PASS by output.** AC1-AC10 PASS from the 2026-09-15 run (unchanged). AC11, AC12 and
+AC13 were rebuilt per ruling R-OG-2 and now PASS:
+- AC11 reads p95 from the ALB's own CloudWatch `TargetResponseTime` (overall + per target group), not the audit
+  record; the audit record's missing latency field is the finding row `NFRA_OPLGTW-W2-S1`, carried to L10, not fixed.
+- AC12 reads the OAuth client inventory from the Gateway's persisted access-state table (`opal-gateway-access-state`,
+  created by `OG-i-1` since the first run), not the audit record; the audit record's missing `client_id` is the
+  finding row `NFRA_OPLGTW-W2-S2`, carried to L10 against FWD-8, not fixed.
+- AC13 admits the 8 `ssm:SendCommand` calls (AC1/AC2/AC10's unchanged host reads, and the two retired AC11/AC12
+  audit-census calls from the first run) by regenerating and printing each one's script text and certifying it
+  read-only, per ruling R-OG-2; every other call is graded Describe/Get/List/Head/Scan/Query as before (Scan/Query
+  added for AC12's DynamoDB read, per the hand-off facts).
+
+The `complete` flip is made in the commit that carries this result.
 
 | criterion | verdict (verbatim) | probe rc | recorded (UTC) | denominator |
 |---|---|---|---|---|
@@ -18,17 +37,75 @@ Worktree `/c/tmp/wk-oplgtw-1-2`, branch `wk-nfra_oplgtw-1-2`, cut from CLOUD at 
 | OGP1-AC8 | `VERDICT: PASS-OGP1-AC8` | 0 | 2026-09-15T10:52:25Z | 2 master prefix(es) under schwab/, 2 with meta/complete/ objects |
 | OGP1-AC9 | `VERDICT: PASS-OGP1-AC9` | 0 | 2026-09-15T10:53:02Z | 11 notification configuration(s) (11 ObjectCreated); EventBridge enabled=False |
 | OGP1-AC10 | `VERDICT: PASS-OGP1-AC10` | 0 | 2026-09-15T10:54:26Z | 1 process(es) in the service (MainPID + children) |
-| OGP1-AC11 | `VERDICT: FAIL-OGP1-AC11 p95 latency not computable from the audit record: 0 of 78049 records in the window carry a latency/duration field` | 1 | 2026-09-15T10:57:49Z | 78049 audit records in window; per-tool sample counts: {'create_draft': 3, 'find_sharepoint_site': 14, 'get_item': 5, 'get_site_item': 1, 'graph_cypher': 35, 'graph_status': 5, 'list_calendar': 4, 'list_channels': 16, 'list_chats': 33, 'list_email_attachments': 26, 'list_onedrive': 2, 'list_recent_email': 25, 'list_site_files': 8, 'list_teams': 12, 'ms_site_children': 42055, 'ms_sites': 1, 'otp_fetch': 32, 'poll_addressed_teams_messages': 19370, 'profile_site_file': 2, 'query_v0': 40, 'read_channel_messages': 3526, 'read_chat_messages': 81, 'read_document': 5, 'read_email': 82, 'read_site_file': 4, 'read_site_workbook': 8, 'save_email_attachment_to_site': 15, 'search_email': 164, 'search_files': 17, 'search_site_files': 8, 'send_channel_message': 3, 'send_chat_message': 29, 'send_email': 4, 'sprint_view': 4, 'whoami': 163, 'ycharts_freshness': 3, 'ycharts_fund_series': 7, 'ycharts_search': 55, 'ycharts_snapshot_metrics': 20, 'ycharts_time_series': 9} |
-| OGP1-AC12 | `VERDICT: FAIL-OGP1-AC12 no client inventory derivable: 0 of 79091 audit records carry a client_id field (audit.py log_call does not write one), so an inventory from it is empty by construction` | 1 | 2026-09-15T10:58:01Z | 78049 audit records in window (79091 in file) |
-| OGP1-AC13 | `VERDICT: FAIL-OGP1-AC13 8 of 57 calls are not Describe/Get/List/Head: {'ssm:SendCommand': 8}` | 1 | 2026-09-15T11:01:03Z | 57 AWS call(s) in the command log |
+| OGP1-AC11 (2026-09-15, superseded) | `VERDICT: FAIL-OGP1-AC11 p95 latency not computable from the audit record: 0 of 78049 records in the window carry a latency/duration field` | 1 | 2026-09-15T10:57:49Z | 78049 audit records in window; per-tool sample counts: {'create_draft': 3, 'find_sharepoint_site': 14, 'get_item': 5, 'get_site_item': 1, 'graph_cypher': 35, 'graph_status': 5, 'list_calendar': 4, 'list_channels': 16, 'list_chats': 33, 'list_email_attachments': 26, 'list_onedrive': 2, 'list_recent_email': 25, 'list_site_files': 8, 'list_teams': 12, 'ms_site_children': 42055, 'ms_sites': 1, 'otp_fetch': 32, 'poll_addressed_teams_messages': 19370, 'profile_site_file': 2, 'query_v0': 40, 'read_channel_messages': 3526, 'read_chat_messages': 81, 'read_document': 5, 'read_email': 82, 'read_site_file': 4, 'read_site_workbook': 8, 'save_email_attachment_to_site': 15, 'search_email': 164, 'search_files': 17, 'search_site_files': 8, 'send_channel_message': 3, 'send_chat_message': 29, 'send_email': 4, 'sprint_view': 4, 'whoami': 163, 'ycharts_freshness': 3, 'ycharts_fund_series': 7, 'ycharts_search': 55, 'ycharts_snapshot_metrics': 20, 'ycharts_time_series': 9} |
+| OGP1-AC12 (2026-09-15, superseded) | `VERDICT: FAIL-OGP1-AC12 no client inventory derivable: 0 of 79091 audit records carry a client_id field (audit.py log_call does not write one), so an inventory from it is empty by construction` | 1 | 2026-09-15T10:58:01Z | 78049 audit records in window (79091 in file) |
+| OGP1-AC13 (2026-09-15, superseded) | `VERDICT: FAIL-OGP1-AC13 8 of 57 calls are not Describe/Get/List/Head: {'ssm:SendCommand': 8}` | 1 | 2026-09-15T11:01:03Z | 57 AWS call(s) in the command log |
+| **OGP1-AC11 (2026-09-16, rebuilt)** | `VERDICT: PASS-OGP1-AC11` | 0 | 2026-09-16T19:15:11Z | 1 overall + 1 target group metric read(s) |
+| **OGP1-AC12 (2026-09-16, rebuilt)** | `VERDICT: PASS-OGP1-AC12` | 0 | 2026-09-16T19:01:01Z | 7 item(s) scanned, 0 matching record_type='oauth_client' |
+| **OGP1-AC13 (2026-09-16, rebuilt)** | `VERDICT: PASS-OGP1-AC13` | 0 | 2026-09-16T19:15:53Z | 77 AWS call(s) in the command log |
 
-Invocation of every criterion: the order's own, `cd /c/tmp/wk-oplgtw-1-2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_p1.py AC<n>`; the recorded runs appended `--record`, which only persists the printed lines into BASELINE.json. Full printed output per criterion: BASELINE.md / BASELINE.json.
+Invocation of every criterion: the order's own, `cd /c/tmp/wk-oplgtw-1-2d && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_p1.py AC<n>` (the 2026-09-15 rows used `/c/tmp/wk-oplgtw-1-2`, that run's own worktree); the recorded runs appended `--record`, which only persists the printed lines into BASELINE.json. Full printed output per criterion: BASELINE.md / BASELINE.json.
+
+### AC11 rebuilt output (2026-09-16T19:15:11Z, verbatim)
+
+```
+instrument: cloudwatch GetMetricStatistics AWS/ApplicationELB TargetResponseTime (Statistics SampleCount, ExtendedStatistics p95), one CloudWatch period spanning the whole window, via .tools/aws; elbv2 DescribeLoadBalancers/DescribeTargetGroups resolve the dimensions
+vintage: 2026-09-16T19:15:11Z  load_balancer=arn:aws:elasticloadbalancing:us-east-1:313476888478:loadbalancer/app/opal-gateway/89166a68f337e5a4  target_groups=1
+window: 2026-09-02T19:15:00Z .. 2026-09-16T19:15:00Z (14 days, period=1209600s)
+the ALB does not know the MCP tool: this is per target group and overall, and claims no per-tool figure (the audit record's missing latency field, row NFRA_OPLGTW-W2-S1, is a separate finding, not fixed here)
+denominator: 1 overall + 1 target group metric read(s)
+overall: sample_count=43745.0 p95_seconds=0.5535024102704742 (553.5 ms) (read 2026-09-16T19:15:05Z)
+  target group opal-gateway-tg (arn:aws:elasticloadbalancing:us-east-1:313476888478:targetgroup/opal-gateway-tg/00997fc81f087cb8): sample_count=43745.0 p95_seconds=0.5535024102704742 (553.5 ms) (read 2026-09-16T19:15:11Z)
+VERDICT: PASS-OGP1-AC11
+```
+
+### AC12 rebuilt output (2026-09-16T19:01:01Z, verbatim)
+
+```
+instrument: dynamodb Scan (FilterExpression record_type='oauth_client', ConsistentRead) on opal-gateway-access-state via .tools/aws; deployed-commit source read (git show, no AWS call) for process-locality
+vintage: 2026-09-16T19:01:01Z
+denominator: 7 item(s) scanned, 0 matching record_type='oauth_client' (read 2026-09-16T19:01:01Z)
+registered clients (persisted store): 0
+process-locality AS MEASURED: deployed_commit=7bd89b5d71 -- app/access_state.py ABSENT at that commit; app/oauth_as.py there still defines an in-memory '_clients' store. So the RUNNING gateway's OAuth client store is process-local (in-memory; workers pinned to 1); the persisted table read above is the durable store OG-a-1/OG-d-1 built at HEAD but not yet released to this host, so today it is independent of process locality either way -- a finding carried to L10 (row NFRA_OPLGTW-W2-S2) is that the audit record still cannot name which client made a given call.
+VERDICT: PASS-OGP1-AC12
+```
+
+### AC13 rebuilt output (2026-09-16T19:15:53Z, verbatim; full script-text listing in BASELINE.md/BASELINE.json)
+
+```
+instrument: this probe reads org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/command_log.jsonl (one row per AWS call, written by aws()); ssm:SendCommand rows are graded against this file's own script-building functions -- this criterion makes no AWS call itself
+vintage: 2026-09-16T19:15:53Z
+denominator: 77 AWS call(s) in the command log
+Describe/Get/List/Head/Scan/Query calls: 69 of 77
+ssm:SendCommand calls: 8 of 77; admitted (read-only script) 8, refused 0
+  ADMITTED AC1 label='AC1 digests' logged_digest=54a7f4892ab06aa3 digest_check=EXACT MATCH (54a7f4892ab06aa3)
+  ADMITTED AC2 label='AC2 host shape' logged_digest=575bae85b00568aa digest_check=EXACT MATCH (575bae85b00568aa)
+  ADMITTED AC10 label='AC10 peak RSS' logged_digest=a509ac92d2db6b24 digest_check=EXACT MATCH (a509ac92d2db6b24)
+  ADMITTED AC11 label='AC11 audit latency census' logged_digest=57277991a613ee60 digest_check=template-match (per-call timestamp, not a command, cannot be recomputed)
+  ADMITTED AC12 label='AC12 audit client census' logged_digest=3310fedad277dd7f digest_check=template-match (per-call timestamp, not a command, cannot be recomputed)
+  ADMITTED AC11 label='AC11 audit latency census' logged_digest=5599443ef08849d6 digest_check=template-match (per-call timestamp, not a command, cannot be recomputed)
+  ADMITTED AC12 label='AC12 audit client census' logged_digest=d664b3cab82e044a digest_check=template-match (per-call timestamp, not a command, cannot be recomputed)
+  ADMITTED AC1 label='AC1 digests' logged_digest=54a7f4892ab06aa3 digest_check=EXACT MATCH (54a7f4892ab06aa3)
+VERDICT: PASS-OGP1-AC13
+```
 
 ## Surprise rows filed
 
-- `NFRA_OPLGTW-W2-S1` BLOCKING, INERT -- AC11: the audit record has no timing field.
-- `NFRA_OPLGTW-W2-S2` BLOCKING, INERT -- AC12: the audit record has no client_id field.
-- `NFRA_OPLGTW-W2-S3` BLOCKING, INERT -- AC13: the named host-read route is ssm:SendCommand, not a read verb.
+- `NFRA_OPLGTW-W2-S1` OBSERVATION, INERT -- AC11: the audit record has no timing field; still true, no longer
+  blocking (AC11 now reads CloudWatch instead), carried to L10 as a finding (FWD-7's later proof needs a
+  per-request measure the Gateway itself emits).
+- `NFRA_OPLGTW-W2-S2` OBSERVATION, INERT -- AC12: the audit record has no client_id field; still true, no longer
+  blocking (AC12 now reads the persisted access-state table instead), carried to L10 against FWD-8.
+- `NFRA_OPLGTW-W2-S3` OBSERVATION, INERT -- AC13: the named host-read route is ssm:SendCommand, not a read verb;
+  resolved by admitting it per ruling R-OG-2 (script text printed and certified read-only), not by widening the
+  read-verb list.
+- `NFRA_OPLGTW-W2-S4` OBSERVATION, INERT -- new this re-hand: a CloudWatch `GetMetricStatistics` percentile query
+  whose one Period spans the 15-day 1-minute-resolution retention boundary silently returns TWO datapoints
+  (measured [10, 79222] samples for a 30-day window), not a clean partition of the window; the first build of
+  AC11 (30-day window, `Datapoints[0]`) would have reported p95=31 ms from the 10-sample sliver where the true
+  figure is ~553 ms. Caught by a day-by-day bisection (0..16 days) before recording; fixed by narrowing
+  `AC11_WINDOW_DAYS` to 14 (under the boundary) and adding `_cw_datapoint`, which refuses outright rather than
+  picking a datapoint if CloudWatch ever returns more than one.
 
 ## Controls
 
@@ -60,7 +137,23 @@ VERDICT: PASS-OGP1-AC1
 
 AC4 determinism: two runs, printed lines identical after removing per-read timestamps (8 of 8 lines).
 
+**AC11 discrimination (2026-09-16, CloudWatch retention-boundary bisection -- row `NFRA_OPLGTW-W2-S4`):** the same
+`cloudwatch get-metric-statistics` call (AWS/ApplicationELB TargetResponseTime, ExtendedStatistics p95, this ALB),
+StartTime/Period walked day-by-day with EndTime fixed:
+
+```
+width= 1h .. 14d : exactly 1 Datapoint every time (e.g. 14d -> SampleCount 43642, p95 ~0.55s)
+width=15d        : 2 Datapoints, SampleCount [10.0, 45233.0]
+width=16d        : 2 Datapoints, SampleCount [46676.0, 10.0]
+width=30d (first build's window) : 2 Datapoints, SampleCount [10.0, 79222.0], p95 of the [0] one = 0.031s
+```
+The rebuilt AC11 (AC11_WINDOW_DAYS=14, under the boundary) reads exactly 1 datapoint, sample_count=43745,
+p95=0.5535s (553.5 ms) -- consistent with the dominant bucket every 15d/16d/30d probe above also showed
+(~0.55s), confirming 31 ms (the unfixed build's figure) was the defect, not the baseline.
+
 ## AWS command log census (AC13's own read)
+
+**2026-09-15 (superseded; the order's first run, before the amendment):**
 
 ```
 instrument: this probe reads org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/command_log.jsonl (one row per AWS call, written by aws())
@@ -72,11 +165,20 @@ non-read-verb calls: 8 {'ssm:SendCommand': 8}
 VERDICT: FAIL-OGP1-AC13 8 of 57 calls are not Describe/Get/List/Head: {'ssm:SendCommand': 8}
 ```
 
-Rows in command_log.jsonl: 57 (1 hand-made sts GetCallerIdentity row, 56 written by og_p1.py).
+**2026-09-16 (current, rebuilt AC13):** full printed output is under "AC13 rebuilt output" above; denominator grew
+from 57 to 77 as this re-hand's own AC11 (CloudWatch) and AC12 (DynamoDB) calls were logged (all Describe/Get/Scan,
+zero new SendCommand); the 8 historical SendCommand rows are unchanged and are the ones AC13 now admits by
+regenerating and printing their script text.
+
+Rows in command_log.jsonl: 77 total (1 hand-made sts GetCallerIdentity row + 56 from the 2026-09-15 run + 20 from
+this re-hand's AC11/AC12/AC13 dry-run and recorded invocations, all read verbs).
 
 ## Interpreter
 
-Built once: `py -3.12 -m venv --system-site-packages .venv-og && .venv-og/Scripts/python -m pip install -r infra/aws/ec2/opal-gateway/requirements.txt msal moto pytest` (rc=0). `.venv-og/Scripts/python -m pip freeze` (318 lines; --system-site-packages, so the host Python's packages are included):
+**2026-09-15 run** (worktree `/c/tmp/wk-oplgtw-1-2`): built once, `py -3.12 -m venv --system-site-packages .venv-og
+&& .venv-og/Scripts/python -m pip install -r infra/aws/ec2/opal-gateway/requirements.txt msal moto pytest` (rc=0).
+`.venv-og/Scripts/python -m pip freeze` (318 lines; --system-site-packages, so the host Python's packages are
+included):
 
 ```
 aiobotocore==3.7.0
@@ -399,7 +501,17 @@ yfinance==1.2.0
 zstandard==0.25.0
 ```
 
+**2026-09-16 re-hand** (worktree `/c/tmp/wk-oplgtw-1-2d`, `.venv-og` did not exist here): built once, same command
+(rc=0). `.venv-og/Scripts/python -m pip freeze` (318 lines) is byte-identical to the 2026-09-15 freeze above except
+`duckdb==1.2.2` (was `1.5.0`) -- not re-embedded; `diff <(tr -d '\r' < old) <(tr -d '\r' < new)` shows exactly that
+one line.
 
 ## Proof-of-spec check
 
-`py -3.12 .tools/proof-of-spec-check.py <instance> OGP1-AC1,...,OGP1-AC13` -> `VALID (rc=0)`, violations=0, acceptance rows=13, invocation-alignment 13/13, surprises 3 of 3 resolve to a channel row (dry run before commit; artifacts pending-on-worktree 5 of 5).
+**2026-09-15:** `py -3.12 .tools/proof-of-spec-check.py <instance> OGP1-AC1,...,OGP1-AC13` -> `INVALID (rc=1)`
+(AC11/AC12/AC13 FAIL by design, order stayed `pending`); violations=0 mechanical, acceptance rows=13,
+invocation-alignment 13/13, surprises 3 of 3 resolve to a channel row.
+
+**2026-09-16 (this re-hand, final):** same command against the rebuilt instance -> result recorded at commit time
+below (13 of 13 PASS by output is the mechanical precondition for `complete`; the checker's own exit code is the
+verdict, per Rule 22's evidence law -- never re-derived by prose here).

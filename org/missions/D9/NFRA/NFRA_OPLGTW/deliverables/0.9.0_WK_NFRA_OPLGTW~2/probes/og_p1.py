@@ -39,7 +39,10 @@ GATEWAY_ROLE = "opal-gateway-role"
 ABSENT_ROLES = ("opal-mcp-emp-menachem-schwab-read", "opal-mcp-schwab-catalog-read")
 ABSENT_TABLE = "opal-gateway-access-state"
 ALB_NAME = "opal-gateway"
-READ_VERBS = ("Describe", "Get", "List", "Head")
+# Extended per the RE-HAND's hand-off facts ("GetItem/Query/Scan are read verbs"): AC12's OAuth client
+# inventory reads the access-state table with a Scan (no GSI on record_type exists to Query it), so
+# "Scan"/"Query" join the set AC13 grades every AWS call against. GetItem already matches "Get".
+READ_VERBS = ("Describe", "Get", "List", "Head", "Scan", "Query")
 
 # RECORDED values the task order gives as "facts to re-ground, not to trust" (certified L4 rectangle,
 # workflows/atom_decomposition/runs/nfra-oplgtw/20260914T1919Z/rectangle.final.certified.json). They are
@@ -195,6 +198,21 @@ def sections(out: str) -> dict:
 
 
 # ------------------------------------------------------------------------------------------- criteria
+def _ac1_script(remote: str) -> str:
+    """The exact read-only host script AC1 has always sent (extracted so AC13 can regenerate and grade
+    it byte-for-byte without touching AC1 itself; AC1 is not re-run this round)."""
+    return f"""
+cd {remote} || exit 3
+echo "### unit"
+systemctl show opal-gateway -p MainPID -p ActiveEnterTimestamp --no-pager
+PID=$(systemctl show opal-gateway -p MainPID --value)
+echo "### pidstart"
+stat -c %Y /proc/$PID 2>&1
+echo "### files"
+find app deploy requirements.txt identity_tool_allowlist.txt -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | LC_ALL=C sort | while IFS= read -r f; do printf '%s %s %s\\n' "$(sha256sum < "$f" | cut -c1-64)" "$(stat -c %Y "$f")" "$f"; done
+"""
+
+
 def ac1(commit_override: str = "") -> tuple:
     m = manifest()
     commit = commit_override or m["deployed_commit"]
@@ -216,16 +234,7 @@ def ac1(commit_override: str = "") -> tuple:
         data = subprocess.run(["git", "cat-file", "blob", blob], cwd=str(ROOT), capture_output=True,
                               check=True).stdout
         tree[rel] = sha256_bytes(data)
-    script = f"""
-cd {remote} || exit 3
-echo "### unit"
-systemctl show opal-gateway -p MainPID -p ActiveEnterTimestamp --no-pager
-PID=$(systemctl show opal-gateway -p MainPID --value)
-echo "### pidstart"
-stat -c %Y /proc/$PID 2>&1
-echo "### files"
-find app deploy requirements.txt identity_tool_allowlist.txt -type f ! -path '*/__pycache__/*' ! -name '*.pyc' | LC_ALL=C sort | while IFS= read -r f; do printf '%s %s %s\\n' "$(sha256sum < "$f" | cut -c1-64)" "$(stat -c %Y "$f")" "$f"; done
-"""
+    script = _ac1_script(remote)
     out, meta = ssm_read(script, "AC1 digests")
     sec = sections(out)
     host: dict = {}
@@ -268,9 +277,9 @@ find app deploy requirements.txt identity_tool_allowlist.txt -type f ! -path '*/
     return ok, ("" if ok else "comparison did not complete (empty side)"), measure, len(union)
 
 
-def ac2() -> tuple:
-    remote = manifest()["remote_path"].rstrip("/")
-    script = f"""
+def _ac2_script(remote: str) -> str:
+    """AC2's read-only host script, extracted for AC13's regeneration (AC2 is not re-run this round)."""
+    return f"""
 echo "### dmi"
 cat /sys/devices/virtual/dmi/id/product_name 2>&1
 cat /sys/devices/virtual/dmi/id/sys_vendor 2>&1
@@ -300,6 +309,11 @@ cat {remote}/.venv/pyvenv.cfg
 echo "### distinfo"
 ls -1d {remote}/.venv/lib/python*/site-packages/*.dist-info | sed 's#.*/##'
 """
+
+
+def ac2() -> tuple:
+    remote = manifest()["remote_path"].rstrip("/")
+    script = _ac2_script(remote)
     out, meta = ssm_read(script, "AC2 host shape")
     sec = sections(out)
     dmi = [x.strip() for x in sec.get("dmi", []) if x.strip()]
@@ -720,8 +734,9 @@ def ac9() -> tuple:
     return True, "", measure, len(rows)
 
 
-def ac10() -> tuple:
-    script = """
+def _ac10_script() -> str:
+    """AC10's read-only host script, extracted for AC13's regeneration (AC10 is not re-run this round)."""
+    return """
 PID=$(systemctl show opal-gateway -p MainPID --value)
 echo "### unit"
 systemctl show opal-gateway -p MainPID -p ActiveEnterTimestamp -p ControlGroup -p MemoryCurrent --no-pager
@@ -737,6 +752,10 @@ cat /sys/fs/cgroup$CG/memory.peak 2>&1
 echo "### cgcurrent"
 cat /sys/fs/cgroup$CG/memory.current 2>&1
 """
+
+
+def ac10() -> tuple:
+    script = _ac10_script()
     out, meta = ssm_read(script, "AC10 peak RSS")
     sec = sections(out)
     unit = dict(line.split("=", 1) for line in sec.get("unit", []) if "=" in line)
@@ -766,18 +785,58 @@ cat /sys/fs/cgroup$CG/memory.current 2>&1
     return peak is not None, ("" if peak is not None else "VmHWM unread"), measure, len(procs)
 
 
-AUDIT_WINDOW_DAYS = 30
+# AC11/AC12/AC13 rebuilt per 1.0.0_SA_CTO ruling R-OG-2 (msg 97499 @d6583eab37; RULINGS_NFRA_OPLGTW_20260916.md)
+# before this cold re-hand. AC1..AC10 above are UNCHANGED and NOT re-run; their script-building logic was
+# factored out (_ac1_script/_ac2_script/_ac10_script) only so AC13 can regenerate and grade those calls'
+# exact bytes without touching AC1/AC2/AC10 themselves.
+
 DURATION_KEYS = ("duration", "duration_ms", "duration_s", "latency", "latency_ms", "elapsed", "elapsed_ms",
                  "elapsed_s", "took_ms")
+# CloudWatch keeps 1-minute-resolution datapoints for exactly 15 days; a percentile (ExtendedStatistics)
+# query whose period spans that boundary does NOT clip to the requested window -- it silently SPLITS into
+# two datapoints at the retention boundary, and the two are NOT a clean partition of the window (measured
+# live: a 30-day query for this ALB returned SampleCount [10, 79222] -- taking Datapoints[0] alone would
+# have reported a p95 from a 10-sample sliver as if it were the whole 30-day window's 79232 samples, off by
+# ~17x). Empirically walked day-by-day (0..16) against this ALB: exactly 1 datapoint for every window <=14
+# days, 2 for every window >=15. AC11_WINDOW_DAYS stays under that boundary so ONE CloudWatch period always
+# covers the whole window in ONE bucket; _cw_datapoint below still refuses (never silently mis-picks) if
+# CloudWatch ever returns more than one anyway.
+AC11_WINDOW_DAYS = 14
+ALB_CW_NAMESPACE = "AWS/ApplicationELB"
+ALB_CW_METRIC = "TargetResponseTime"
+OAUTH_CLIENT_RECORD_TYPE = "oauth_client"
+
+# A coarse but printable read-only certifier for a host shell script: every mutating command token, and
+# every real file redirect ('>' not part of an fd-merge like '2>&1'), fails it. Used only to grade the
+# SSM scripts this probe itself sends (AC1/AC2/AC10 exactly; AC11/AC12's retired template structurally).
+_WRITE_TOKENS = re.compile(
+    r'(?:^|[\s;|&])(rm|mv|cp|chmod|chown|chgrp|kill|killall|reboot|shutdown|mkfs|mount|umount|'
+    r'truncate|useradd|userdel|usermod|passwd|visudo|crontab|apt|apt-get|yum|dnf|dpkg|rpm|touch|'
+    r'systemctl\s+(?:start|stop|restart|reload|kill|enable|disable|mask|unmask|set-)|'
+    r'service\s+\S+\s+(?:start|stop|restart)|tee|dd|mknod|ln\s+-s|sed\s+-i|'
+    r'pip\s+install|npm\s+install|curl\s+-o|curl\s+-O|wget\s+-O)\b')
+_WRITE_REDIRECT = re.compile(r'>(?!\s*[&=])')  # excludes an fd-merge ('2>&1') and a comparison ('>=', as in
+                                               # an awk/shell numeric test) -- neither is a file redirect
 
 
-def _audit_census(label: str) -> tuple:
-    """Host-side census of the Gateway's local audit record (the durable floor, audit.py:29-33), inside the
-    window. Prints counts only: never a user, never an argument value."""
-    remote = manifest()["remote_path"].rstrip("/")
-    since = (_dt.datetime.now(_dt.timezone.utc) - _dt.timedelta(days=AUDIT_WINDOW_DAYS)).strftime("%Y-%m-%dT%H:%M:%S")
+def _script_is_read_only(script: str) -> tuple:
+    bad = [ln.strip() for ln in script.splitlines() if _WRITE_TOKENS.search(ln) or _WRITE_REDIRECT.search(ln)]
+    return (not bad), bad
+
+
+def _ssm_script_digest(script: str) -> str:
+    """The exact digest ssm_read() logs for a script: sha256 of its lines plus the appended END marker,
+    first 16 hex chars -- so AC13 can recompute and compare against a logged command_log.jsonl row."""
+    lines = script.strip("\n").split("\n") + [f"echo {END}"]
+    return sha256_bytes("\n".join(lines).encode())[:16]
+
+
+def _audit_census_script(remote: str, since: str) -> str:
+    """The retired AC11/AC12 host script (unchanged text; AC11/AC12 no longer call it -- kept solely as
+    AC13's evidence of what those 8 historical ssm:SendCommand rows in command_log.jsonl actually ran).
+    `since` was call-time data (a computed cutoff timestamp), never a command; AC13 passes a placeholder."""
     dur_alt = "|".join(DURATION_KEYS)
-    script = f"""
+    return f"""
 F={remote}/audit.jsonl
 echo "### stat"
 stat -c '%s %Y' $F 2>&1
@@ -809,92 +868,201 @@ grep -o '"client_id":"[^"]*"' $F | LC_ALL=C sort | uniq -c
 echo "### topkeys"
 awk -v since='{since}' 'match($0, /"ts":"[^"]*"/) {{ ts=substr($0,RSTART+6,RLENGTH-7); if (ts>=since) print }}' $F | sed -e 's/"args":{{[^}}]*}}/"args":{{}}/' | grep -o '"[a-z_]*":' | LC_ALL=C sort | uniq -c
 """
-    out, meta = ssm_read(script, label)
-    sec = sections(out)
-
-    def one(name):
-        return " ".join(x.strip() for x in sec.get(name, []) if x.strip())
-
-    def counts(name):
-        """uniq -c lines: '  N "field":"value"' -> {value: N}; '  N "key":' (key census) -> {key: N}."""
-        res = {}
-        for line in sec.get(name, []):
-            mm = (re.match(r"\s*(\d+)\s+\"[a-z_]+\":\"([^\"]*)\"$", line)
-                  or re.match(r"\s*(\d+)\s+\"([a-z_]*)\":$", line))
-            if mm:
-                res[mm.group(2)] = int(mm.group(1))
-        return res
-
-    def ts(name):
-        mm = re.search(r'"ts":"([^"]*)"', one(name))
-        return mm.group(1) if mm else one(name)
-    stat = [x.strip() for x in sec.get("stat", []) if x.strip()]
-    c = {"file": f"{remote}/audit.jsonl", "stat_size_mtime": stat[0] if stat else "", "lines_total": stat[1] if len(stat) > 1 else "",
-         "first_ts": ts("first"), "last_ts": ts("last"), "window_since": since + "Z",
-         "window_days": AUDIT_WINDOW_DAYS, "window_records": int(one("window") or 0),
-         "first_ts_in_window": one("firstinwin"),
-         "tools": counts("tools"), "events": counts("events"), "outcomes": counts("outcomes"),
-         "records_with_duration_key_window": int(one("durationkeys") or 0),
-         "records_with_duration_key_all": int(one("durationkeys_all") or 0),
-         "records_with_client_id_window": int(one("clientid") or 0),
-         "records_with_client_id_all": int(one("clientid_all") or 0),
-         "client_id_values": {}, "top_level_keys": counts("topkeys"),
-         "ssm_command_id": meta["command_id"], "executed_utc": meta["executed_utc"]}
-    for line in sec.get("clientid_values", []):
-        mm = re.match(r"\s*(\d+)\s+\"client_id\":\"([^\"]*)\"", line)
-        if mm:
-            c["client_id_values"]["sha256:" + sha256_bytes(mm.group(2).encode())[:16]] = int(mm.group(1))
-    return c, meta
 
 
-def _say_census(c: dict) -> None:
-    say(f"source: {c['file']} on the host (audit.py:29-33 local JSONL floor), ssm {c['ssm_command_id']} at {c['executed_utc']}")
-    say(f"file: size/mtime={c['stat_size_mtime']} lines_total={c['lines_total']} first_ts={c['first_ts']} last_ts={c['last_ts']}")
-    say(f"window: {c['window_since']} -> read time ({c['window_days']} days); records in window={c['window_records']} "
-        f"(first in window {c['first_ts_in_window']})")
-    say(f"top-level keys in window (args collapsed; key name: record count): {c['top_level_keys']}")
-    say(f"event records in window (records with no tool): {c['events']}; outcomes: {c['outcomes']}")
+def _lb_dim(arn: str) -> str:
+    m = re.search(r":loadbalancer/(.+)$", arn)
+    if not m:
+        raise RuntimeError(f"cannot parse LoadBalancer ARN {arn!r}")
+    return m.group(1)
+
+
+def _tg_dim(arn: str) -> str:
+    m = re.search(r"(targetgroup/.+)$", arn)
+    if not m:
+        raise RuntimeError(f"cannot parse TargetGroup ARN {arn!r}")
+    return m.group(1)
+
+
+def _cw_p95(dims: list, start: str, end: str, period: int, note: str) -> tuple:
+    dim_args = [",".join(f"{k}={v}" for k, v in d.items()) for d in dims]
+    data, err, _ = aws("cloudwatch", "get-metric-statistics", "--namespace", ALB_CW_NAMESPACE,
+                       "--metric-name", ALB_CW_METRIC, "--dimensions", *dim_args,
+                       "--start-time", start, "--end-time", end, "--period", str(period),
+                       "--statistics", "SampleCount", "--extended-statistics", "p95", note=note)
+    return data, err
+
+
+def _cw_datapoint(data: dict) -> tuple:
+    """(sample_count, p95_seconds, problem). Refuses (problem set, values None) rather than silently
+    picking Datapoints[0] when CloudWatch returns more than one datapoint for a one-period query --
+    that split is the retention-boundary trap AC11_WINDOW_DAYS is sized to avoid; if it ever recurs this
+    is the second, independent guard."""
+    dps = (data or {}).get("Datapoints", [])
+    if not dps:
+        return None, None, None
+    if len(dps) > 1:
+        return None, None, (f"CloudWatch returned {len(dps)} datapoints for a one-period query "
+                            f"(expected 1): {[(d.get('Timestamp'), d.get('SampleCount')) for d in dps]} "
+                            "-- refusing rather than picking one")
+    dp = dps[0]
+    return dp.get("SampleCount"), (dp.get("ExtendedStatistics") or {}).get("p95"), None
 
 
 def ac11() -> tuple:
-    c, meta = _audit_census("AC11 audit latency census")
-    say("instrument: host-side awk/grep census of the audit record, read by SSM; counts only")
-    say(f"vintage: {utcnow()}")
-    _say_census(c)
-    say(f"denominator: {c['window_records']} audit records in window; per-tool sample counts: {c['tools']}")
-    say(f"records carrying any latency/duration key {list(DURATION_KEYS)}: window={c['records_with_duration_key_window']} "
-        f"all={c['records_with_duration_key_all']}")
-    say("audit.py log_call (audit.py:122-132 at the deployed commit, byte-identical to HEAD) writes ts, user, tool, "
-        "args, outcome, detail, tier -- no duration field")
-    ok = c["records_with_duration_key_window"] > 0
-    reason = "" if ok else (f"p95 latency not computable from the audit record: 0 of {c['window_records']} "
-                            f"records in the window carry a latency/duration field")
-    return ok, reason, {"census": c, "p95_ms_per_tool": None}, c["window_records"]
+    """R-OG-2: p95 from the ALB's own TargetResponseTime (CloudWatch), overall and per target group. The
+    ALB has no tool dimension, so no per-tool figure is claimed (row NFRA_OPLGTW-W2-S1 stays the finding
+    against the audit record's missing latency field; this criterion no longer depends on that record)."""
+    lbs, err, _ = aws("elbv2", "describe-load-balancers", "--names", ALB_NAME, note="AC11 resolve ALB")
+    if err:
+        return False, f"describe-load-balancers: {err[:200]}", {}, 0
+    arn = lbs["LoadBalancers"][0]["LoadBalancerArn"]
+    lb_dim = _lb_dim(arn)
+    tgs, err2, _ = aws("elbv2", "describe-target-groups", "--load-balancer-arn", arn, note="AC11 target groups")
+    if err2:
+        return False, f"describe-target-groups: {err2[:200]}", {}, 0
+    tg_arns = [tg["TargetGroupArn"] for tg in tgs.get("TargetGroups", [])]
+    end_dt = _dt.datetime.now(_dt.timezone.utc)
+    start_dt = end_dt - _dt.timedelta(days=AC11_WINDOW_DAYS)
+    start, end = start_dt.strftime("%Y-%m-%dT%H:%M:%SZ"), end_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    period = int((end_dt - start_dt).total_seconds())
+    period -= period % 60  # CloudWatch Period must be a multiple of 60; one datapoint spans the window
+    problems = []
+    overall, oerr = _cw_p95([{"Name": "LoadBalancer", "Value": lb_dim}], start, end, period,
+                           "AC11 overall p95 TargetResponseTime")
+    t_overall = utcnow()
+    if oerr:
+        problems.append(f"overall: {oerr[:160]}")
+    o_sample, o_p95, o_dp_problem = _cw_datapoint(overall)
+    if o_dp_problem:
+        problems.append(f"overall: {o_dp_problem}")
+    per_tg = {}
+    for tarn in tg_arns:
+        tname = tarn.split("/")[-2] if tarn.count("/") >= 2 else tarn
+        data, terr = _cw_p95([{"Name": "LoadBalancer", "Value": lb_dim}, {"Name": "TargetGroup", "Value": _tg_dim(tarn)}],
+                             start, end, period, f"AC11 p95 TargetResponseTime tg={tname}")
+        t = utcnow()
+        if terr:
+            problems.append(f"{tname}: {terr[:160]}")
+        tg_sample, tg_p95, tg_dp_problem = _cw_datapoint(data)
+        if tg_dp_problem:
+            problems.append(f"{tname}: {tg_dp_problem}")
+        per_tg[tname] = {"target_group_arn": tarn, "sample_count": tg_sample, "p95_seconds": tg_p95,
+                         "read_utc": t}
+    say("instrument: cloudwatch GetMetricStatistics AWS/ApplicationELB TargetResponseTime (Statistics "
+        "SampleCount, ExtendedStatistics p95), one CloudWatch period spanning the whole window, via "
+        ".tools/aws; elbv2 DescribeLoadBalancers/DescribeTargetGroups resolve the dimensions")
+    say(f"vintage: {utcnow()}  load_balancer={arn}  target_groups={len(tg_arns)}")
+    say(f"window: {start} .. {end} ({AC11_WINDOW_DAYS} days, period={period}s)")
+    say("the ALB does not know the MCP tool: this is per target group and overall, and claims no per-tool figure "
+        "(the audit record's missing latency field, row NFRA_OPLGTW-W2-S1, is a separate finding, not fixed here)")
+    say(f"denominator: 1 overall + {len(per_tg)} target group metric read(s)")
+    say(f"overall: sample_count={o_sample} p95_seconds={o_p95}"
+        + (f" ({o_p95 * 1000:.1f} ms)" if isinstance(o_p95, (int, float)) else "") + f" (read {t_overall})")
+    for tname, r in per_tg.items():
+        say(f"  target group {tname} ({r['target_group_arn']}): sample_count={r['sample_count']} "
+            f"p95_seconds={r['p95_seconds']}"
+            + (f" ({r['p95_seconds'] * 1000:.1f} ms)" if isinstance(r['p95_seconds'], (int, float)) else "")
+            + f" (read {r['read_utc']})")
+    measure = {"load_balancer_arn": arn, "window_start": start, "window_end": end, "period_seconds": period,
+              "overall": {"sample_count": o_sample, "p95_seconds": o_p95, "read_utc": t_overall},
+              "per_target_group": per_tg,
+              "per_tool": None, "per_tool_note": "the ALB has no tool dimension; no per-tool figure is claimed"}
+    ok = (not problems) and o_sample is not None
+    reason = "" if ok else ("; ".join(problems) or "overall TargetResponseTime returned no datapoint in the window")
+    return ok, reason, measure, 1 + len(per_tg)
+
+
+def _ddb_val(v):
+    if not isinstance(v, dict):
+        return v
+    for tag in ("S", "N", "BOOL"):
+        if tag in v:
+            return v[tag]
+    if "NULL" in v:
+        return None
+    if "L" in v:
+        return [_ddb_val(x) for x in v["L"]]
+    if "M" in v:
+        return {k: _ddb_val(x) for k, x in v["M"].items()}
+    if "SS" in v:
+        return v["SS"]
+    return v
 
 
 def ac12() -> tuple:
-    c, meta = _audit_census("AC12 audit client census")
+    """R-OG-2: the OAuth client inventory read from the Gateway's persisted registrations (the durable
+    access-state table OG-i-1 created), never the audit record (row NFRA_OPLGTW-W2-S2 stays the finding
+    against FWD-8: the audit record still carries no client_id). Process-locality is stated AS MEASURED
+    from the DEPLOYED commit's own code, not asserted from the (now durable, unreleased) HEAD design."""
     commit = manifest()["deployed_commit"]
     src = manifest()["source_path"].rstrip("/")
-    oauth = subprocess.run(["git", "show", f"{commit}:{src}/app/oauth_as.py"], cwd=str(ROOT),
-                           capture_output=True, text=True, encoding="utf-8", check=True).stdout
-    loc = [f"oauth_as.py:{i}" for i, line in enumerate(oauth.splitlines(), 1) if line.startswith("_clients")]
-    say("instrument: host-side grep census of the audit record for the client_id key, read by SSM; values digested")
-    say(f"vintage: {utcnow()}")
-    _say_census(c)
-    say(f"denominator: {c['window_records']} audit records in window ({c['lines_total']} in file)")
-    say(f"records carrying client_id: window={c['records_with_client_id_window']} all={c['records_with_client_id_all']}; "
-        f"distinct client_id values (digested): {c['client_id_values']}")
-    say(f"clients are process-local: {', '.join(loc)} @{commit[:10]} defines the DCR client store as a module-level "
-        f"in-memory dict (_clients), so every registered client is lost on a process restart; the unit pins --workers 1 "
-        f"for this reason (deploy/opal-gateway.service:13-16)")
-    ok = c["records_with_client_id_all"] > 0
-    reason = "" if ok else (f"no client inventory derivable: 0 of {c['lines_total']} audit records carry a client_id "
-                            f"field (audit.py log_call does not write one), so an inventory from it is empty by construction")
-    return ok, reason, {"census": c, "client_ids": c["client_id_values"], "process_local": True, "client_store": loc}, c["window_records"]
+    has_access_state = subprocess.run(
+        ["git", "cat-file", "-e", f"{commit}:{src}/app/access_state.py"], cwd=str(ROOT),
+        capture_output=True).returncode == 0
+    oauth_src = subprocess.run(["git", "show", f"{commit}:{src}/app/oauth_as.py"], cwd=str(ROOT),
+                               capture_output=True, text=True, encoding="utf-8", errors="replace",
+                               check=True).stdout
+    deployed_in_memory = re.search(r"_clients\s*[:=]", oauth_src) is not None
+    data, err, rc = aws("dynamodb", "scan", "--table-name", ABSENT_TABLE,
+                        "--filter-expression", "record_type = :rt",
+                        "--expression-attribute-values", json.dumps({":rt": {"S": OAUTH_CLIENT_RECORD_TYPE}}),
+                        "--projection-expression", "pk, client_id, created_at, redirect_uris",
+                        "--consistent-read", note="AC12 OAuth client inventory (Scan record_type=oauth_client)")
+    t = utcnow()
+    if err:
+        return False, f"dynamodb scan: {err[:200]}", {}, 0
+    items = [{k: _ddb_val(v) for k, v in it.items()} for it in (data or {}).get("Items", [])]
+    scanned, counted = (data or {}).get("ScannedCount"), (data or {}).get("Count", len(items))
+    clients = []
+    for it in items:
+        cid = it.get("client_id", "")
+        clients.append({"client_id_digest": ("sha256:" + sha256_bytes(cid.encode())[:16]) if cid else None,
+                        "created_at": it.get("created_at"), "redirect_uri_count": len(it.get("redirect_uris") or [])})
+    say(f"instrument: dynamodb Scan (FilterExpression record_type={OAUTH_CLIENT_RECORD_TYPE!r}, ConsistentRead) "
+        f"on {ABSENT_TABLE} via .tools/aws; deployed-commit source read (git show, no AWS call) for "
+        "process-locality")
+    say(f"vintage: {t}")
+    say(f"denominator: {scanned} item(s) scanned, {counted} matching record_type={OAUTH_CLIENT_RECORD_TYPE!r} (read {t})")
+    say(f"registered clients (persisted store): {len(clients)}")
+    for c in clients:
+        say(f"  client {c['client_id_digest']} created_at={c['created_at']} redirect_uris={c['redirect_uri_count']}")
+    say(f"process-locality AS MEASURED: deployed_commit={commit[:10]} -- app/access_state.py "
+        f"{'PRESENT' if has_access_state else 'ABSENT'} at that commit; app/oauth_as.py there "
+        f"{'still defines' if deployed_in_memory else 'does not define'} an in-memory '_clients' store. "
+        f"So the RUNNING gateway's OAuth client store is "
+        f"{'process-local (in-memory; workers pinned to 1)' if (not has_access_state and deployed_in_memory) else 'NOT process-local by this test'}"
+        f"; the persisted table read above is the durable store OG-a-1/OG-d-1 built at HEAD but not yet "
+        "released to this host, so today it is independent of process locality either way -- a finding "
+        "carried to L10 (row NFRA_OPLGTW-W2-S2) is that the audit record still cannot name which client "
+        "made a given call.")
+    measure = {"table": ABSENT_TABLE, "scanned_count": scanned, "matching_count": counted, "clients": clients,
+              "deployed_commit": commit, "deployed_has_access_state": has_access_state,
+              "deployed_client_store_process_local": (not has_access_state) and deployed_in_memory}
+    return True, "", measure, scanned  # denominator = items scanned, not matched (0 matches is legitimate)
+
+
+_NOTE_RE = re.compile(r"host read (?P<label>.+?); script sha256=(?P<digest>[0-9a-f]+)")
+_EXACT_DIGEST_LABELS = ("AC1 digests", "AC2 host shape", "AC10 peak RSS")
+
+
+def _known_script_texts() -> dict:
+    remote = manifest()["remote_path"].rstrip("/")
+    return {
+        "AC1 digests": _ac1_script(remote),
+        "AC2 host shape": _ac2_script(remote),
+        "AC10 peak RSS": _ac10_script(),
+        "AC11 audit latency census": _audit_census_script(remote, "SINCE_PLACEHOLDER_TS"),
+        "AC12 audit client census": _audit_census_script(remote, "SINCE_PLACEHOLDER_TS"),
+    }
 
 
 def ac13() -> tuple:
+    """R-OG-2: every AWS call is a read verb, except ssm:SendCommand is admitted iff its command text is
+    printed and is itself read-only. AC1/AC2/AC10's 3 scripts regenerate byte-identical (their digest is
+    recomputed and compared against the logged one); AC11/AC12's retired template (2 calls each, 4 total)
+    embedded a per-call cutoff timestamp that cannot be recomputed after the fact, so those are graded by
+    the unchanged surrounding template's own read-only shape instead of an exact digest."""
     rows = []
     if CMDLOG.exists():
         for line in CMDLOG.read_text(encoding="utf-8").splitlines():
@@ -903,22 +1071,78 @@ def ac13() -> tuple:
     by_op: dict = {}
     for r in rows:
         by_op[f"{r['service']}:{r['api_op']}"] = by_op.get(f"{r['service']}:{r['api_op']}", 0) + 1
-    non_read = [r for r in rows if not r["api_op"].startswith(READ_VERBS)]
+
+    scripts = _known_script_texts()
+    send_rows = [r for r in rows if r["api_op"] == "SendCommand"]
+    admitted, refused = [], []
+    for r in send_rows:
+        m = _NOTE_RE.search(r.get("note", ""))
+        label, logged_digest = (m.group("label"), m.group("digest")) if m else (None, None)
+        text = scripts.get(label)
+        if text is None:
+            refused.append({**r, "reason": f"label {label!r} not in the known script registry"})
+            continue
+        ro, bad = _script_is_read_only(text)
+        if not ro:
+            refused.append({**r, "reason": f"script contains a non-read line: {bad[:1]}"})
+            continue
+        digest_check = "template-match (per-call timestamp, not a command, cannot be recomputed)"
+        if label in _EXACT_DIGEST_LABELS:
+            recomputed = _ssm_script_digest(text)
+            if recomputed != logged_digest:
+                refused.append({**r, "reason": f"recomputed digest {recomputed} != logged {logged_digest}"})
+                continue
+            digest_check = f"EXACT MATCH ({recomputed})"
+        admitted.append({"criterion": r["criterion"], "label": label, "logged_digest": logged_digest,
+                        "digest_check": digest_check})
+
+    other = [r for r in rows if r["api_op"] != "SendCommand"]
+    non_read_other = [r for r in other if not r["api_op"].startswith(READ_VERBS)]
     nr_ops: dict = {}
-    for r in non_read:
+    for r in non_read_other:
         k = f"{r['service']}:{r['api_op']}"
         nr_ops[k] = nr_ops.get(k, 0) + 1
-    say(f"instrument: this probe reads {CMDLOG.relative_to(ROOT).as_posix()} (one row per AWS call, written by aws())")
+
+    say(f"instrument: this probe reads {CMDLOG.relative_to(ROOT).as_posix()} (one row per AWS call, written "
+        "by aws()); ssm:SendCommand rows are graded against this file's own script-building functions -- "
+        "this criterion makes no AWS call itself")
     say(f"vintage: {utcnow()}")
     say(f"denominator: {len(rows)} AWS call(s) in the command log")
-    say(f"read-verb calls (Describe/Get/List/Head): {len(rows) - len(non_read)} of {len(rows)}")
     say(f"per operation: {dict(sorted(by_op.items()))}")
-    say(f"non-read-verb calls: {len(non_read)} {dict(sorted(nr_ops.items()))}")
-    ok = bool(rows) and not non_read
-    reason = "" if ok else ("command log empty" if not rows else
-                            f"{len(non_read)} of {len(rows)} calls are not Describe/Get/List/Head: {dict(sorted(nr_ops.items()))}")
-    return ok, reason, {"calls": len(rows), "read_verb_calls": len(rows) - len(non_read), "per_operation": by_op,
-                        "non_read": nr_ops}, len(rows)
+    say(f"Describe/Get/List/Head/Scan/Query calls: {len(other) - len(non_read_other)} of {len(rows)}")
+    say(f"ssm:SendCommand calls: {len(send_rows)} of {len(rows)}; admitted (read-only script) "
+        f"{len(admitted)}, refused {len(refused)}")
+    for a in admitted:
+        say(f"  ADMITTED {a['criterion']} label={a['label']!r} logged_digest={a['logged_digest']} "
+            f"digest_check={a['digest_check']}")
+    say(f"the {len(scripts)} distinct SSM script text(s) this cell's evidence relies on, verbatim "
+        "(AC1/AC2/AC10 regenerated identically; AC11/AC12's retired template shown with its per-call "
+        "cutoff timestamp replaced by a placeholder):")
+    for label, text in scripts.items():
+        ro, bad = _script_is_read_only(text)
+        say(f"--- {label} (read_only={ro}) ---")
+        for line in text.strip("\n").splitlines():
+            say(f"    {line}")
+    if non_read_other:
+        say(f"non-read-verb, non-SendCommand calls: {len(non_read_other)} {dict(sorted(nr_ops.items()))}")
+    if refused:
+        say(f"refused SendCommand row(s): {len(refused)}")
+        for r in refused:
+            say(f"  REFUSED {r['criterion']} {r.get('reason')}")
+
+    problems = []
+    if not rows:
+        problems.append("command log empty")
+    if non_read_other:
+        problems.append(f"{len(non_read_other)} non-read, non-SendCommand call(s): {dict(sorted(nr_ops.items()))}")
+    if refused:
+        problems.append(f"{len(refused)} SendCommand call(s) not admitted as read-only")
+    ok = not problems
+    reason = "; ".join(problems)
+    measure = {"calls": len(rows), "per_operation": by_op, "send_command_calls": len(send_rows),
+              "send_command_admitted": admitted, "send_command_refused": refused,
+              "non_read_non_sendcommand": nr_ops}
+    return ok, reason, measure, len(rows)
 
 
 CRITERIA = {"AC1": ac1, "AC2": ac2, "AC3": ac3, "AC4": ac4, "AC5": ac5, "AC6": ac6, "AC7": ac7, "AC8": ac8,
