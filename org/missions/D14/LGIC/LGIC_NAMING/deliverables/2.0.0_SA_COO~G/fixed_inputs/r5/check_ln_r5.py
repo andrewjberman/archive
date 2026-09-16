@@ -303,11 +303,147 @@ def f1_gaps():
     return 0
 
 
+# ------------------------------------------------------------------ LN-f-2 (item 4, R-17 / R-20)
+F2_RECORD = BASE + "/deliverables/exercises/r5/f2-live-fence.r5.md"
+FIRMS = ("49financial", "inflection", "cottonwood", "demo")
+_FENCE_JSON = re.compile(r"```json\s*(.*?)```", re.S)
+
+
+def _f2_record():
+    """The worker's recorded live census: the comp-find --corpus aws read, as a json fence.
+
+    Shape: {"vintage": "<the DB's own built: line>", "nodes_scanned": <int>,
+            "firms": {"<firm key>": ["<live node name>", ...]}}
+    Absent until the cell runs, which is why every f2 arm FAILS cleanly before it does."""
+    t = read(F2_RECORD)
+    if t is None:
+        return None
+    for block in _FENCE_JSON.findall(t):
+        try:
+            d = json.loads(block)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and "firms" in d:
+            return d
+    return None
+
+
+def _probe(mod, firm):
+    """A name()-minted probe for the firm -- the builder's own output, never typed (Rule 30)."""
+    return mod.name("irpt", firm, "core", "role")
+
+
+def _fence(mod, firm):
+    pats = mod.fence_patterns(firm)
+    return pats[0] if pats else None
+
+
+def _arn(role):
+    return "arn:aws:iam::313476888478:role/" + role
+
+
+def f2_positive():
+    """R-20 clause (i): every canonical form the rule produces for a firm, and a name()-minted
+    probe, MATCH that firm's fence. Denominator printed. This is the clause that cannot be
+    satisfied by an empty claim set, because the probe is always present."""
+    import fnmatch
+    mod = _naming()
+    if mod is None:
+        return missing(LIB, "F2-POSITIVE")
+    rec = _f2_record()
+    rows, bad = [], []
+    for firm in FIRMS:
+        pat = _fence(mod, firm)
+        cands = [("probe", _probe(mod, firm))]
+        for node in ((rec or {}).get("firms") or {}).get(firm, []):
+            try:
+                cands.append(("canonical", mod.grade(node, "IAM_ROLE")[1]))
+            except Exception:
+                pass
+        for kind, s in cands:
+            hit = fnmatch.fnmatch(_arn(s), pat) if pat else False
+            rows.append((firm, kind, s, hit))
+            if not hit:
+                bad.append((firm, kind, s))
+    print("R-20 (i) POSITIVE -- denominator %d strings across %d firms" % (len(rows), len(FIRMS)))
+    for firm, kind, s, hit in rows:
+        print("   %-12s %-10s %-44s matches its fence: %s" % (firm, kind, s, hit))
+    ok = bool(rows) and not bad
+    say("PASS-FENCE-CLAIMS-ITS-OWN" if ok else "FAIL-FENCE-CLAIMS-ITS-OWN",
+        "%d of %d matched" % (len(rows) - len(bad), len(rows)))
+    return 0
+
+
+def f2_negative():
+    """R-20 clause (ii): no OTHER firm's canonical form or probe matches this firm's fence."""
+    import fnmatch
+    mod = _naming()
+    if mod is None:
+        return missing(LIB, "F2-NEGATIVE")
+    leaks, checked = [], 0
+    for firm in FIRMS:
+        pat = _fence(mod, firm)
+        for other in FIRMS:
+            if other == firm:
+                continue
+            s = _probe(mod, other)
+            checked += 1
+            if pat and fnmatch.fnmatch(_arn(s), pat):
+                leaks.append((firm, other, s))
+    print("R-20 (ii) NEGATIVE -- denominator %d cross-firm pairs" % checked)
+    for firm, other, s in leaks:
+        print("   LEAK %s's fence matches %s's %s" % (firm, other, s))
+    ok = checked > 0 and not leaks
+    say("PASS-FENCE-EXCLUDES-OTHERS" if ok else "FAIL-FENCE-EXCLUDES-OTHERS",
+        "%d leaks of %d pairs" % (len(leaks), checked))
+    return 0
+
+
+def f2_coverage():
+    """R-20 clause (iii): DISCLOSURE, NOT A BAR. Prints how many live nodes carrying a firm's key
+    that firm's fence actually catches, with the vintage and nodes-scanned, and lists every
+    UNCAUGHT node with its grade() verdict and canonical form. It reads 0 of 4 today, and that is
+    a number to route (DEC-4(ii) input, and a rename obligation on each role's owner), not a fail."""
+    import fnmatch
+    mod = _naming()
+    if mod is None:
+        return missing(LIB, "F2-COVERAGE")
+    rec = _f2_record()
+    if rec is None:
+        return missing(F2_RECORD, "F2-COVERAGE")
+    print("VINTAGE (the DB's own built: line): %s" % rec.get("vintage"))
+    print("NODES SCANNED: %s" % rec.get("nodes_scanned"))
+    caught = total = 0
+    uncaught = []
+    for firm in FIRMS:
+        pat = _fence(mod, firm)
+        for node in (rec.get("firms") or {}).get(firm, []):
+            total += 1
+            if pat and fnmatch.fnmatch(_arn(node), pat):
+                caught += 1
+            else:
+                try:
+                    v, c = mod.grade(node, "IAM_ROLE")
+                except Exception as exc:
+                    v, c = "RAISED", str(exc)[:40]
+                uncaught.append((firm, node, v, c))
+    print("COVERAGE: %d of %d live nodes carrying the firm key are caught by that firm's fence" % (caught, total))
+    for firm, node, v, c in uncaught:
+        print("   UNCAUGHT %-12s %-34s grade() %-16s canonical %s" % (firm, node, v, c))
+    say("PASS-COVERAGE-DISCLOSED",
+        "disclosure, not a bar (R-20 iii): the uncaught list routes to LGIC_ENFORCE's fence cell",
+        "as DEC-4(ii) input and to each role's owner as a rename obligation")
+    return 0
+
+
 SUBCOMMANDS = {
     "g2-globgrph": g2_globgrph,
     "g2-suite": g2_suite,
     "g1-adjacency": g1_alias_adjacency,
     "f1-gaps": f1_gaps,
+    "f2-positive": f2_positive,
+    "f2-negative": f2_negative,
+    "f2-coverage": f2_coverage,
 }
 
 
@@ -371,6 +507,16 @@ def selftest_arms():
     c, ph, r = _placeholders(_Ph(), ["a", "b"])
     results.append(("f1-placeholder-reader-sees-a-brace", c == 0 and len(ph) == 2,
                     "two braced forms -> clean %d, placeholder %d" % (c, len(ph))))
+
+    # ARM: the fence matcher must FAIL a string outside the glob, or (i) and (ii) are constants.
+    import fnmatch as _fn
+    _m = _naming()
+    if _m is not None:
+        _pat = _fence(_m, "49financial")
+        results.append(("f2-fence-rejects-a-foreign-string",
+                        bool(_pat) and _fn.fnmatch(_arn(_probe(_m, "49financial")), _pat)
+                        and not _fn.fnmatch(_arn("irpt-core-firm-49financial"), _pat),
+                        "own probe matches; the live long-form name does not (R-20's four)"))
 
     ok = all(r[1] for r in results)
     print("DISCRIMINATING SELF-TEST -- denominator %d arms" % len(results))
