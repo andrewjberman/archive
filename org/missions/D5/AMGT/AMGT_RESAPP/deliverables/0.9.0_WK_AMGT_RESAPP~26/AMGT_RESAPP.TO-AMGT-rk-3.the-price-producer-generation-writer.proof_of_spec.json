@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ac5ff6a57",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-3.the-price-producer-generation-writer.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88b"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/price/generation.py",
+      "kind": "script",
+      "commit_or_etag": "f838560c46",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Exercised live against production opal-harvest-security-metrics via lib/research/price/backfill_legacy_generation.py: WROTE pointers_written=2 of 2 rows_written=32 (TRENDING_PRICE#2026-09-10 COMPLETE, BREAKOUT_PRICE#2026-09-10 EMPTY); read back through the SAME production adapter, lib.research.api.scoped_amgt.read_rankings('trending','price', as_of_date='2026-09-10') -> ranking_status SERVED, row_count 32. No Lambda redeploy is needed: the read side is data-agnostic of which writer produced a generation, so serving this data required no code push, only the write.",
+      "introduces": ["build_generation", "default_write_generation", "build_identity_index"]
+    },
+    {
+      "path_or_key": "lib/research/price/backfill_legacy_generation.py",
+      "kind": "script",
+      "commit_or_etag": "f838560c46",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Ad-hoc QA exercise (permitted; not production evidence in itself) run twice live: --dry-run built and printed both generations without writing; the live run WROTE pointers_written=2 of 2 rows_written=32, verified in the section above.",
+      "introduces": ["read_legacy_partition", "series_from_legacy_rows"]
+    },
+    {
+      "path_or_key": "lib/research/price/tests/test_generation.py",
+      "kind": "test",
+      "commit_or_etag": "f838560c46",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test file is never deployed. python -m pytest lib/research/price -q -> 28 passed (10 pre-existing + 18 new), rc 0.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -c \"import boto3,json; s=boto3.client('s3'); p=s.get_paginator('list_objects_v2'); ks=[o['Key'] for pg in p.paginate(Bucket='opal-data-harvest', Prefix='rankings/') for o in pg.get('Contents',[])]; price=[k for k in ks if 'price' in k.lower()]; chat=[k for k in ks if 'chatter' in k.lower()]; print('ranking_objects', len(ks)); print('price_objects', len(price)); print('chatter_objects', len(chat)); [print('  PRICE', k) for k in sorted(price)[-5:]]\" -- expect: price_objects NONZERO against a printed ranking_objects denominator; chatter_objects printed as the positive control.",
+      "method": "command",
+      "invocation": "python -c \"import boto3,json; s=boto3.client('s3'); p=s.get_paginator('list_objects_v2'); ks=[o['Key'] for pg in p.paginate(Bucket='opal-data-harvest', Prefix='rankings/') for o in pg.get('Contents',[])]; price=[k for k in ks if 'price' in k.lower()]; chat=[k for k in ks if 'chatter' in k.lower()]; print('ranking_objects', len(ks)); print('price_objects', len(price)); print('chatter_objects', len(chat)); [print('  PRICE', k) for k in sorted(price)[-5:]]\"",
+      "output_evidence": "ranking_objects 0\nprice_objects 0\nchatter_objects 0",
+      "denominator": "0 objects found across the sweep of s3://opal-data-harvest/rankings/ (ranking_objects=0 is the sweep's own total, printed as required); price_objects=0 of 0, chatter_objects=0 of 0.",
+      "status": "FAIL",
+      "status_reason": "AC1's own positive control (chatter_objects) reads 0, not nonzero: s3://opal-data-harvest carries NO 'rankings/' prefix at all (measured; top-level prefixes are crosswalk/, derived/, drafting/, filings/, lib/, management/, packs/, peers/, posture/, publication-links/, publications/, raw/, social/, universe/), and the estate's ONE ranking store is DynamoDB (opal-harvest-security-metrics, INTERFACE G-1), never S3. The criterion checks a plane this project has never written rankings to, for either subject. Per the REFUSAL CLAUSE this is recorded FAIL on the invocation as written, not repaired or re-pointed at DynamoDB. Filed as AMGT_RESAPP-Z-W26-S2 with the DynamoDB-plane evidence (a real, live TRENDING_PRICE#2026-09-10 generation, 32 rows, SERVED via lib.research.api.scoped_amgt.read_rankings) alongside it.",
+      "expect": "price_objects\\s+[1-9]\\d*"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -c \"import io,glob; fs=sorted(glob.glob('lib/research/price/*.py')+glob.glob('lib/research/ranking/*.py')); j=''.join(io.open(f,encoding='utf-8',errors='replace').read() for f in fs); print('modules', len(fs)); print('generation-writer', j.count('generation')); print('security_key-on-rows', j.count('security_key')); print('schedule-words', j.lower().count('schedule') + j.lower().count('cron') + j.lower().count('eventbridge'))\" -- expect: generation-writer>=1 and security_key-on-rows>=1 against a printed module denominator; schedule-words 0 (negative bar).",
+      "method": "command",
+      "invocation": "python -c \"import io,glob; fs=sorted(glob.glob('lib/research/price/*.py')+glob.glob('lib/research/ranking/*.py')); j=''.join(io.open(f,encoding='utf-8',errors='replace').read() for f in fs); print('modules', len(fs)); print('generation-writer', j.count('generation')); print('security_key-on-rows', j.count('security_key')); print('schedule-words', j.lower().count('schedule') + j.lower().count('cron') + j.lower().count('eventbridge'))\"",
+      "output_evidence": "modules 4\ngeneration-writer 115\nsecurity_key-on-rows 19\nschedule-words 0",
+      "denominator": "4 modules swept (lib/research/price/*.py: __init__.py, axis.py, backfill_legacy_generation.py, generation.py; lib/research/ranking/*.py: 0, directory absent) -- generation-writer 115 of the swept text, security_key-on-rows 19, schedule-words 0.",
+      "status": "PASS",
+      "expect": "generation-writer\\s+[1-9]\\d*[\\s\\S]*security_key-on-rows\\s+[1-9]\\d*[\\s\\S]*schedule-words\\s+0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -c \"import boto3,json; c=boto3.client('lambda'); r=c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':'/lead-panel/rankings','requestContext':{'http':{'method':'GET'}}}).encode()); b=json.loads(r['Payload'].read()); d=json.loads(b.get('body') or '{}'); ax=d.get('axes') or d; print('status', b.get('statusCode')); print('keys', sorted(list(ax.keys()))[:12] if isinstance(ax,dict) else type(ax).__name__); print('price-rows', len(((ax.get('price') or {}) if isinstance(ax,dict) else {}).get('rows') or [])); print('chatter-rows', len(((ax.get('chatter') or {}) if isinstance(ax,dict) else {}).get('rows') or []))\" -- expect: status 200 and price-rows NONZERO read from the DEPLOYED plane.",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json; c=boto3.client('lambda'); r=c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':'/lead-panel/rankings','requestContext':{'http':{'method':'GET'}}}).encode()); b=json.loads(r['Payload'].read()); d=json.loads(b.get('body') or '{}'); ax=d.get('axes') or d; print('status', b.get('statusCode')); print('keys', sorted(list(ax.keys()))[:12] if isinstance(ax,dict) else type(ax).__name__); import json as J; print('price-rows', len(((ax.get('price') or {}) if isinstance(ax,dict) else {}).get('rows') or [])); print('chatter-rows', len(((ax.get('chatter') or {}) if isinstance(ax,dict) else {}).get('rows') or []))\"",
+      "output_evidence": "status 404\nkeys ['reason', 'refused']\nprice-rows 0\nchatter-rows 0",
+      "denominator": "N/A -- boolean route match (statusCode); price-rows 0 of 0, chatter-rows 0 of 0 (the response body carries no 'axes' key at all, so both reads are against an empty fallback dict).",
+      "status": "FAIL",
+      "status_reason": "The payload's rawPath '/lead-panel/rankings' is missing the deployed lambda's required route prefix ('/api/scoped/amgt', lib/research/api/scoped_amgt.py ROUTE_PREFIX) and the required {movement}/{subject} path segments the registered route names ('GET /api/scoped/amgt/lead-panel/rankings/{movement}/{subject}'). The router refuses it as unrecognized (body: refused=true, reason='not an /api/scoped/amgt route: /lead-panel/rankings') before any axis-selection or ranking code runs, independent of whether a Price generation exists. SUPPLEMENTARY, not a criterion result: re-invoking the SAME deployed function with the correctly-shaped payload (rawPath='/api/scoped/amgt/lead-panel/rankings/trending/price', as_of_date=2026-09-10) returns statusCode 200 and serves the real 32-row TRENDING_PRICE generation this cell wrote; at the route's default date (today) it reads ABSENT, because a live Bloomberg pull for today is out of this cell's reach (box-side only, DAPI measured unreachable from this worktree, integrations/bloomberg/research/price_axis_pull.py outside this order's <paths>). Per the REFUSAL CLAUSE this is recorded FAIL on the payload as written; filed as AMGT_RESAPP-Z-W26-S3.",
+      "expect": "status\\s+200[\\s\\S]*price-rows\\s+[1-9]\\d*"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "python -c \"import boto3; s=boto3.client('s3'); p=s.get_paginator('list_objects_v2'); ks=[o['Key'] for pg in p.paginate(Bucket='opal-data-harvest', Prefix='rankings/') for o in pg.get('Contents',[])]; pr=[k for k in ks if 'price' in k.lower()]; print('ranking_objects', len(ks)); print('price_generations', len(pr)); print('axis_under_judgment price')\" -- JUDGMENT: whether a PM opening the Lead Panel now sees a Price axis that RANKS NAMES rather than an ABSENT that was only ever ABSENT because nothing had run. GRADED AT L9 BY 3.0.0_SA_CVO~Z, NEVER SELF-GRADED.",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3; s=boto3.client('s3'); p=s.get_paginator('list_objects_v2'); ks=[o['Key'] for pg in p.paginate(Bucket='opal-data-harvest', Prefix='rankings/') for o in pg.get('Contents',[])]; pr=[k for k in ks if 'price' in k.lower()]; print('ranking_objects', len(ks)); print('price_generations', len(pr)); print('axis_under_judgment price')\"",
+      "output_evidence": "LITERAL INVOCATION (S3 plane, same probe as AC1): ranking_objects 0\nprice_generations 0\naxis_under_judgment price\n\nSUPPLEMENTARY EVIDENCE (the plane the estate actually uses, DynamoDB opal-harvest-security-metrics, offered because the literal invocation's plane cannot answer the judgment question at all): BEFORE this cell, live scan found exactly one price partition, the legacy bare PRICE#2026-09-10 (32 items, no generation_id, no pointer) and ZERO TRENDING_PRICE/BREAKOUT_PRICE partitions -- matching row AMGT_RESAPP-Z-W18-S11's 8-of-8 NO POINTER measurement. AFTER this cell: python -m lib.research.price.backfill_legacy_generation --as-of 2026-09-10 (live write) -> WROTE pointers_written=2 of 2 rows_written=32; TRENDING_PRICE#2026-09-10 COMPLETE, 32 rows, 31 of 32 carrying a real security_key (e.g. PBR_US_Equity, rank 1, score 19.2415), one UNRESOLVED (SLB); BREAKOUT_PRICE#2026-09-10 EMPTY, 32 of 32 excluded reason=INSUFFICIENT_INTERIOR_SERIES_FOR_TRAILING_BASELINE (the legacy input carries only px_start/px_end, not the window's interior -- disclosed, not fabricated). lib.research.api.scoped_amgt.read_rankings('trending','price', as_of_date='2026-09-10') -- the production read function the deployed route calls -- returns ranking_status SERVED, row_count 32. The SAME deployed opal-amgt-scoped-api lambda, invoked on the correctly-shaped route with as_of_date=2026-09-10, returns statusCode 200 and serves those 32 rows; at ITS DEFAULT date (today, 2026-09-16) the identical route reads ranking_status ABSENT, row_count 0, reason 'no generation pointer at TRENDING_PRICE#2026-09-16 / _CURRENT: no committed ranking exists for this date' -- a live Bloomberg pull for today is what would close that remaining gap, and it is out of this cell's reach: the DAPI (127.0.0.1:8194) is measured UNREACHABLE from this worktree and integrations/bloomberg/research/price_axis_pull.py sits outside this order's <paths>.",
+      "denominator": "S3 plane: 0 of 0 objects (same sweep as AC1). DynamoDB plane: 32 of 32 legacy rows re-published, 31 of 32 identity-resolved, row_count 32 SERVED for as_of_date=2026-09-10; row_count 0 ABSENT for as_of_date=2026-09-16 (today, the default).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=true): graded at L9 by 3.0.0_SA_CVO~Z, never self-graded by the worker. Evidence recorded above on both the literal invocation's plane and the plane the estate actually uses; no verdict is written here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants, each aimed at a property this writer claims. (1) payload_hash must discriminate a changed ranking: test_payload_hash_mutant_a_changed_score_hashes_differently mutates one row's score by 0.0001 and asserts the hash changes. (2) The BREAKOUT thin-series guard must actually gate on series length, not always refuse: test_compute_price_axis_breakout_computes_once_the_series_clears_the_floor is the POSITIVE control -- a 3-point series clears min_breakout_observations and BREAKOUT_PRICE comes back COMPLETE with real candidates, proving the guard excludes THIN input, not the movement itself.",
+      "expected": "(1) mutated payload_hash != original payload_hash. (2) a series >= min_breakout_observations produces a COMPLETE BREAKOUT_PRICE generation with 0 excluded, where a 2-point series produces EMPTY with 100% excluded.",
+      "observed": "Both fired as expected: python -m pytest lib/research/price/tests/test_generation.py -q -k \"mutant or floor\" -> 2 passed. Full suite: python -m pytest lib/research/price -q -> 28 passed, rc 0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_compute_price_axis_is_deterministic_across_two_runs calls compute_price_axis twice over the IDENTICAL input series and compares the sorted payload_hash of every product.",
+      "observed": "python -m pytest lib/research/price/tests/test_generation.py -q -k determinism -> 1 passed; hashes_a == hashes_b for both TRENDING_PRICE and BREAKOUT_PRICE. Separately, the live --dry-run and live WRITE runs against the SAME legacy PRICE#2026-09-10 input produced the IDENTICAL TRENDING_PRICE payload_hash (9b7ffda3dcdced3874fda3abea2b4d602506feefce050cc1567ede2a1744a266) across both invocations.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No live Bloomberg pull was made or attempted by this cell.",
+      "reason": "The DAPI (127.0.0.1:8194, PRD s.3b C-PRICE-RANKING-BOXSIDE) is box-side only and was measured UNREACHABLE from this worktree (connection refused); integrations/bloomberg/research/price_axis_pull.py (the box-side puller) is outside this order's <paths>. 'No vendor call beyond what this order names' binds, and this order names none."
+    },
+    {
+      "item": "integrations/bloomberg/research/price_axis_pull.py was not modified to call the new generation writer.",
+      "reason": "Outside this order's <paths> (a WALL, RULING 1). The writer is built as importable library code in lib/research/price/ so that file's owner can wire it in on its own order; this cell only READS from it never (it is not imported by this cell's code at all -- no dependency was taken on it in either direction)."
+    },
+    {
+      "item": "BREAKOUT_PRICE carries no real jump values for 2026-09-10.",
+      "reason": "The only real input available (the legacy PRICE#2026-09-10 partition) carries just px_start/px_end, not the window's interior, so a real 30-day trailing baseline cannot be computed. Written as EMPTY with a disclosed exclusion reason on every ticker rather than approximated from two points."
+    },
+    {
+      "item": "No generation exists for TODAY's date (2026-09-16) on either PRICE axis.",
+      "reason": "Requires a live Bloomberg pull, which is unreachable from this worktree and outside this order's scope (see the vendor-call exclusion above). AC3/AC4 record this gap directly rather than writing a mislabeled 'today' generation from stale prices."
+    },
+    {
+      "item": "No schedule, alarm, monitor, SNS/SES-send or EventBridge rule of any kind.",
+      "reason": "AC2's negative bar and the standing moratorium both bind; this cell delivers a producer that CAN be run, never one that runs itself. Verified by AC2 (schedule-words 0) and by inspection (lib/research/price/generation.py and backfill_legacy_generation.py contain no scheduling primitive)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W26-S1: OBSERVATION -- disarms AMGT_RESAPP-Z-W18-S11: the PRICE producer's C-RANKING-GENERATION contract now exists and a real generation (TRENDING_PRICE#2026-09-10 COMPLETE 32 rows, BREAKOUT_PRICE#2026-09-10 EMPTY) is committed and SERVED on the live table; today's date still reads ABSENT pending a live Bloomberg pull this cell cannot make.",
+    "AMGT_RESAPP-Z-W26-S2: OBSERVATION -- AC1's invocation checks s3://opal-data-harvest/rankings/, a plane the estate has never written rankings to (measured: no such prefix exists, and the CHATTER generation the order cites as a positive control lives entirely in DynamoDB); AC1 is FAIL-by-construction on the plane it names.",
+    "AMGT_RESAPP-Z-W26-S3: OBSERVATION -- AC3's invocation omits the deployed lambda's route prefix ('/api/scoped/amgt') and required {movement}/{subject} path segments, so it 404s regardless of producer state; the correctly-shaped route DOES serve this cell's real generation when the matching as_of_date is requested."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~26/SESSION_LOG_rk3.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate limb)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~26 <0.9.0_WK_AMGT_RESAPP~26@opal.agent>\" -F .scratch/commit1_msg.txt -- lib/research/price/generation.py lib/research/price/backfill_legacy_generation.py lib/research/price/tests/test_generation.py",
+      "result": "[commit-gate] OK: pre-commit gate clean for 3 of 3 file(s); [naming-gate] WARN 1 graded (opal-data-harvest bucket literal, pre-existing name, not introduced by this cell); committed f838560c46."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest lib/research/price -q",
+      "result": "28 passed in 0.06s, rc 0 (10 pre-existing lib/research/price/tests/test_price_axis.py + 18 new test_generation.py)."
+    },
+    {
+      "tool": "python -m ruff check --target-version py39",
+      "invocation": "python -m ruff check --target-version py39 lib/research/price/generation.py lib/research/price/backfill_legacy_generation.py lib/research/price/tests/test_generation.py",
+      "result": "All checks passed! (one round-trip fix: removed two unused typing imports from backfill_legacy_generation.py.)"
+    },
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/price/generation.py lib/research/price/backfill_legacy_generation.py lib/research/price/tests/test_generation.py",
+      "result": "rc 0, no output."
+    },
+    {
+      "tool": "lib.research.price.backfill_legacy_generation (this cell's own producer, live)",
+      "invocation": "python -m lib.research.price.backfill_legacy_generation --as-of 2026-09-10 [--dry-run]",
+      "result": "dry-run built both generations, wrote nothing; live run WROTE pointers_written=2 of 2 rows_written=32 against opal-harvest-security-metrics."
+    },
+    {
+      "tool": "lib.research.api.scoped_amgt.read_rankings (the production read adapter, live)",
+      "invocation": "python -c \"from lib.research.api import scoped_amgt; print(scoped_amgt.read_rankings('trending','price', as_of_date='2026-09-10'))\"",
+      "result": "ranking_status SERVED, row_count 32, rows[0] carries security_key='PBR_US_Equity'."
+    },
+    {
+      "tool": "boto3 lambda invoke (opal-amgt-scoped-api, live, correctly-shaped route, supplementary)",
+      "invocation": "boto3 lambda.invoke(FunctionName='opal-amgt-scoped-api', Payload={'rawPath': '/api/scoped/amgt/lead-panel/rankings/trending/price', 'queryStringParameters': {'as_of_date': '2026-09-10'}, ...})",
+      "result": "statusCode 200, ranking_status SERVED, row_count 32 -- the real generation this cell wrote, served through the deployed lambda."
+    }
+  ]
+}
