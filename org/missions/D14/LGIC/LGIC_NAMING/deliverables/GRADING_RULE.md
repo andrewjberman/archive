@@ -8,12 +8,26 @@ adjacency. **Re-cut in round 4** by `0.9.0_WK_LGIC_NAMING~3` (task order `LGIC_N
 `wk-lgic-naming-4-3` off `lgic-v19-group` @`bd0f5d2c6c`): the rule is re-cut against every schema field changed since
 v1.4, the version it was cut at, and section 10 prints which step reads each one (row `LGIC_NAMING-W3-S6`). R5 is one
 subtraction (FN1d); G2 excludes the names AWS fixes (AW1); V-2 takes the schema's four placeholders, so K3 and K4a
-RAISE where they emitted `{tier}` and `{entity}`; the vocabularies read the identity registry.
+RAISE where they emitted `{tier}` and `{entity}`; the vocabularies read the identity registry. **Re-cut in round 5**
+by `0.9.0_WK_LGIC_NAMING~1` (task order `LGIC_NAMING.TO-LN-g-1-r5`, branch `wk-lgic-naming-5-1` off CLOUD
+@`119a08a196`): re-based on `NAMING_SCHEMA.json v1.10` (@`5a12d0b97c`), which lifts R3's bd-adjacency test into
+`alias_adjacency` as data (A-3) and updates `refused_tokens.bd`'s prose to point at it -- section 10 adds both;
+the two `globgrph` worked cases (S22, RULING R-5) are re-verdicted from `grade()` now that `systems.json` carries
+the row (LGIC_ENFORCE EN-r-2); and the registry_hash decision below is stated for the first time.
 
-**Grades against `NAMING_SCHEMA.json v1.9`** (every step; section 10 prints its coverage. Rulings FN1d and W3-S6 of the
-round-3 analysis s.2, `org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND3_20260915.md`
+**Grades against `NAMING_SCHEMA.json v1.10`** (every step; section 10 prints its coverage. Rulings FN1d and W3-S6 of
+the round-3 analysis s.2, `org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND3_20260915.md`
 @`2f554182b6`; FN1b and FN1c of the round-2 analysis s.2,
-`org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND2_20260915.md` @`02f08322af`).
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND2_20260915.md` @`02f08322af`; A-3 of the
+round-4 analysis s.2, `org/tier1_exec/1.0.0_SA_CTO/deliverables/ROUND_ANALYSIS_LGIC_NAMING_ROUND4_20260916.md`
+@`5a12d0b97c`).
+
+**Registry hash: deliberately unpinned.** `grade()` reads the identity registry LIVE at call time, never at a
+stamped `registry_hash()` (`lib/opal_naming.py` `registry_hash()`, the sha256 GENERATED files carry as their
+drift stamp -- never this rule's). Pinning one would freeze a verdict against a stale registry, exactly the gap
+S22 exposed: the `globgrph` row landed between rounds (LGIC_ENFORCE EN-r-2) and the two held cases' verdict had
+to move with it at the next grade, not wait for a re-stamp. This rule cites the registry's base commit in its
+own history above (as every re-cut already did) but pins no hash inside `grade()` itself.
 
 **What it reads.** Every clause below cites where its rule comes from:
 - `org/standards/NAMING_SCHEMA.json` v1.9, cited as `DATA.<field>`, for every step;
@@ -192,7 +206,10 @@ before or after, and the FIRM `49financial` otherwise. CENSUS s.1 item 4 gives b
 `bd-49f-session-trigger` it is the vendor, in `bd-allocations` the firm. Either way it is an alias, and the canonical
 form spells `blackdiamond`, or the firm's form for the slot. The test is ADJACENCY to a V4 firm token, never position:
 `bd` first with no firm token next to it (`bd-allocations`) is the firm, and `bd` next to a firm token wherever it sits
-(`bd-49f-...` first, `cot-bd-session-trigger-lambda-role` second) is the vendor (row `LGIC_NAMING-W4-S1`).
+(`bd-49f-...` first, `cot-bd-session-trigger-lambda-role` second) is the vendor (row `LGIC_NAMING-W4-S1`). This test is
+also stated as data at `DATA.alias_adjacency.bd` (v1.10, A-3), lifted from this step so the canon's generated section
+can render it; this step is R3's own authored answer, and `DATA.alias_adjacency` carries no rule `grade()` does not
+already apply here. `DATA.refused_tokens.bd`'s prose points to `DATA.alias_adjacency` for the same reason (v1.10).
 
 **R4 THE SCOPE SLOT.** The scope tokens are the V4 tokens, plus `bd` read as the firm.
 - **No scope token:** the resource is shared or scoped by its system. The slot is omitted, never filled with a
@@ -433,10 +450,10 @@ These gaps are filed as rows on the project channel, not settled here:
   {"name": "mdpf-daily-runner", "type": "EC2_INSTANCE", "verdict": "CONFORMANT", "canonical_form": "mdpf-daily-runner", "why": "R1.a mdpf; R4 none; R5 daily; R6 runner is EC2_INSTANCE's kind; V-3"},
   {"name": "opal-stitch-produce", "type": "CODEBUILD_PROJECT", "verdict": "OUT-OF-PATTERN", "canonical_form": "opal-stitch-produce-build", "why": "R2 t2 stitch is in neither V1 nor V2, so the system is opal; R5 stitch-produce; R6 build appended; V-5"},
   {"name": "opal-cot-silver-run", "type": "SSM_DOCUMENT", "verdict": "OUT-OF-PATTERN", "canonical_form": "opal-cot-silver-run-document", "why": "R2 t2 cot is a firm, not a system, so the system is opal; R4 scope cot short, in place; R5 silver-run; R6 run is no kind, document appended; V-5"},
-  {"name": "globgrph-serving", "type": "ECS_TASK_DEFINITION", "verdict": "RAISE", "why": "R1.c t1 globgrph is in V2: CENSUS s.3 does not say whether it is a platform subsystem (a system) or a project code (never a system, S6); the registry row is owed (row LGIC_NAMING-W1-S2)"},
+  {"name": "globgrph-serving", "type": "ECS_TASK_DEFINITION", "verdict": "OUT-OF-PATTERN", "canonical_form": "globgrph-serving-task", "why": "R1.a t1 globgrph is now in V1: systems.json registers it (row key globgrph, class PLATFORM_SUBSYSTEM, minted by LGIC_ENFORCE EN-r-2), so the system is globgrph directly; R1.c's RAISE, cited when this case had no row (row LGIC_NAMING-W1-S2), no longer applies once the row lands (S22, RULING R-5); R4 no scope; R5 function serving; R6 serving is not ECS_TASK_DEFINITION's kind (task), so task is appended; V-5"},
   {"name": "YangDataPipeline", "type": "STATE_MACHINE", "verdict": "OUT-OF-PATTERN", "canonical_form": "yang-data-pipeline-sfn", "why": "N1 fails; N2 yang data pipeline; R1.a yang (CENSUS s.3 product); R5 data-pipeline; R6 sfn appended; V-5"},
   {"name": "opal-gateway", "type": "LOAD_BALANCER", "verdict": "OUT-OF-PATTERN", "canonical_form": "gateway-lb", "why": "R2 t2 gateway is in V1: systems.json registers it, class PLATFORM_SUBSYSTEM (2026-09-15, the registry owner under CLAUDE.md Rule 30, on 1.0.0_SA_CTO msg 97130), so opal before it is a null prefix and drops; R1.a system gateway; R4 none; R5 no function token; R6 lb appended; V-5"},
-  {"name": "opal-globgrph", "type": "ECS_CLUSTER", "verdict": "RAISE", "why": "R2 t2 globgrph is in V2: if it is a subsystem, opal is a null prefix; if a project code, opal is the system; the rule cannot place it (row LGIC_NAMING-W1-S2)"},
+  {"name": "opal-globgrph", "type": "ECS_CLUSTER", "verdict": "OUT-OF-PATTERN", "canonical_form": "globgrph-cluster", "why": "R2 t2 globgrph is in V1: systems.json registers it (row key globgrph, class PLATFORM_SUBSYSTEM, minted by LGIC_ENFORCE EN-r-2), so opal before it is a null prefix and drops, as with opal-gateway (section 9); R2's RAISE branch for an unresolved token, cited when this case had no row (row LGIC_NAMING-W1-S2), no longer applies once the row lands (S22, RULING R-5); R1.a system globgrph; R4 none; R5 no function token; R6 cluster appended (ECS_CLUSTER's kind); V-5"},
   {"name": "etfs-netassets-daily", "type": "EVENT_RULE", "verdict": "CONFORMANT", "canonical_form": "etfs-netassets-daily", "why": "R1.a etfs; R4 none; R5 netassets; R7 daily is a cadence (V6) in the last slot; V-3"},
   {"name": "bd-49f-session-complete", "type": "EVENT_RULE", "verdict": "OUT-OF-PATTERN", "canonical_form": "blackdiamond-49f-session-complete-{cadence}", "why": "R3 bd next to 49f is the vendor; R1.a system blackdiamond; R4 scope 49f; R5 session-complete; R7 no cadence token and no on- run, so {cadence} appended; V-2"},
   {"name": "wsb-49f-model-aua-pull-daily", "type": "SCHEDULE", "verdict": "OUT-OF-PATTERN", "canonical_form": "{system}-49f-wsb-model-aua-pull-daily", "residue_class": "workstream-schedule", "why": "R1.d t1 wsb is a workstream code (V3, S6 never a system): no later V1 token, so {system}; wsb joins the function; R4 scope 49f; R7 daily last; V-2"},
@@ -461,11 +478,17 @@ These gaps are filed as rows on the project channel, not settled here:
 
 ## 10. SCHEMA COVERAGE
 
-Every field of `NAMING_SCHEMA.json` that changed from v1.4 (@`e04b802fe9`, the version this rule was cut at) to v1.9
-(this rule's base @`bd0f5d2c6c`), as `check_ln_r4.py g1-coverage` derives them, never typed: a top-level key, or each
-second-level key of a key that is an object in both versions; a key added or removed whole counts once; `version`,
-`changelog` and `ratified_by` are excluded. Each line names every step of this rule that reads the field.
+Every field of `NAMING_SCHEMA.json` that changed from v1.4 (@`e04b802fe9`, the version this rule was cut at) to v1.10
+(this rule's base @`5a12d0b97c`), derived at this base by the same grain `check_ln_r4.py g1-coverage` used through
+v1.9, never typed: a top-level key, or each second-level key of a key that is an object in both versions; a key added
+or removed whole counts once; `version`, `changelog` and `ratified_by` are excluded. Each line names every step of
+this rule that reads the field. v1.9 -> v1.10 adds two: `alias_adjacency` (ADDED WHOLE) and `refused_tokens.bd`
+(its prose changed to point at `alias_adjacency`) -- both read by R3 (A-3, round-4 analysis s.2).
 
+- COVERS R3: reads `alias_adjacency` (`alias_adjacency.bd`) and `refused_tokens.bd` -- ADJACENCY to a firm token,
+  never position, decides whether `bd` reads as VENDOR `blackdiamond` or FIRM `49financial` (v1.10, A-3)
+- COVERS alias_adjacency: R3
+- COVERS refused_tokens.bd: R3
 - COVERS aws_fixed: G2, G2.1, G2.2, L1
 - COVERS firm_forms: R4, S3, B2, K2, V-4
 - COVERS firm_forms_source: R4, S3, B2, K2, V-4
@@ -484,4 +507,4 @@ second-level key of a key that is an object in both versions; a key added or rem
 - COVERS tf_unmapped_own_name: G1.1
 - COVERS tf_unmapped_own_name_note: G1.1
 
-SCHEMA COVERAGE SINCE v1.4: 17 of 17
+SCHEMA COVERAGE SINCE v1.4: 19 of 19
