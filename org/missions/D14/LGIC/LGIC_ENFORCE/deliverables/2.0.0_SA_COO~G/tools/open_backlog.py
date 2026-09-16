@@ -6,8 +6,10 @@ Each pass differed because a different subset of disposals happened to be machin
 
 RULING R-14 settles both halves:
   * The disarm CLOCK is the REMEDIATION row's `disarm.state`, written by 3.0.0_SA_CVO at
-    L9 as ARMED and advanced to DISARMED by the named owner. That is the one carrier with
-    a consumer.
+    L9 as ARMED and advanced to DISARMED by the named owner -- "landed in the CVO's lane on
+    the owner's word where the lane refuses the owner" (R-14 verbatim, and the carrier is
+    lane TREE_CVO, which refuses the named owner in 253 of 259 live cases: row S43). That
+    is the one carrier with a consumer.
   * An ISSUER's mid-round disarm row is EVIDENCE that the hazard is dead. It is read when
     the CVO graduates the item. IT CLOSES NOTHING BY ITSELF.
 
