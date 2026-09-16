@@ -1565,6 +1565,106 @@ def _selftest_g9():
     return out
 
 
+# ---------------------------------------------------------------- cell 4 arm: the FIRM_FORMS_READERS census
+#
+# R-2 / R-12: "apply the HELD 62-entry FIRM_FORMS_READERS.md edit". That edit no longer exists anywhere
+# readable: R-2 records it made, verified and REVERTED from the shared tree, and this seat's session log
+# (2026-09-16 05:20-07:49Z) says its re-apply script lived in that session's scratchpad. So cell 4 cannot APPLY
+# it; it RE-DERIVES the census.
+#
+# AND THE POPULATION MOVES, measured at the cut: `git grep -l firm_forms` names 82 tracked files at HEAD and 81 at
+# c8f9398b85 -- the doc lists 56 and misses 26, most of them records written ABOUT the doc since its census (this
+# checker among them). A bar of "every tracked file naming firm_forms is listed" breaks the moment anyone writes
+# about it, the worker's own result record included -- LGIC_ENFORCE-S21's class exactly. So the census is PINNED:
+# the doc's fenced json names a vintage commit, its exclusions, and every file with a class; the checker recomputes
+# `git grep -l firm_forms <vintage>` ITSELF and requires set equality, which does not move once pinned.
+
+READERS_DOC = "FIRM_FORMS_READERS.md"
+
+
+def _grep_at(vintage, token="firm_forms", cwd=None):
+    """(files or None). rc 1 from git grep means no match; anything else not 0 is an error, never an empty set."""
+    r = subprocess.run(["git", "grep", "-l", token, vintage, "--"], capture_output=True, text=True, cwd=cwd or REPO)
+    if r.returncode not in (0, 1):
+        return None
+    return {ln.split(":", 1)[1] for ln in r.stdout.splitlines() if ":" in ln}
+
+
+def p4_readers_census(path=None, root=None):
+    """The relocated FIRM_FORMS_READERS.md pins a vintage and lists exactly the tracked files naming firm_forms there,
+    minus its declared exclusions, each with a class; the S21 records are listed as another-project."""
+    p, why = (path, "") if path else _one(READERS_DOC, None, root)
+    if not p or not os.path.exists(p):
+        say(why or "named file does not exist: %s" % path)
+        say("FAIL-P4-READERS-UNREADABLE")
+        return 1
+    d = _fenced(p) or {}
+    vintage = str(d.get("vintage") or "")
+    exclusions = [str(x) for x in (d.get("exclusions") or [])]
+    rows = {str(r.get("path")): r for r in (d.get("files") or []) if isinstance(r, dict) and r.get("path")}
+    if not vintage or not rows:
+        say("the doc carries no fenced json with a vintage and a files list")
+        say("FAIL-P4-READERS-NOT-PINNED")
+        return 1
+    grepped = _grep_at(vintage, cwd=root)
+    if grepped is None:
+        say("git grep at vintage %s did not run cleanly" % vintage)
+        say("FAIL-P4-READERS-VINTAGE-UNREADABLE")
+        return 1
+    expected = {f for f in grepped if not any(f == e or (e.endswith("/") and f.startswith(e)) or
+                                              (e.endswith("**") and f.startswith(e[:-2])) for e in exclusions)}
+    listed = set(rows)
+    missing, extra = sorted(expected - listed), sorted(listed - expected)
+    unclassed = sorted(k for k, r in rows.items() if not str(r.get("class") or "").strip())
+    say("DENOMINATOR: git grep -l firm_forms @%s -> %d files; %d exclusion rule(s) -> %d expected; %d listed"
+        % (vintage, len(grepped), len(exclusions), len(expected), len(listed)))
+    for m in missing[:10]:
+        say("   AT THE VINTAGE, NOT LISTED:", m)
+    for x in extra[:10]:
+        say("   LISTED, NOT AT THE VINTAGE:", x)
+    for u in unclassed[:10]:
+        say("   LISTED WITHOUT A CLASS:", u)
+    if missing or extra or unclassed:
+        say("FAIL-P4-READERS-CENSUS-DISAGREES")
+        return 1
+    say("PASS-P4-READERS-CENSUS-EQUALS-VINTAGE")
+    return 0
+
+
+def _selftest_p4r():
+    out = []
+    base = _tempfile.mkdtemp(prefix="en_r3_p4r_")
+    try:
+        subprocess.run(["git", "init", "-q"], cwd=base, capture_output=True)
+        for name, body in (("a.py", "x = firm_forms"), ("b.md", "firm_forms is gone"), ("c.md", "nothing here")):
+            with open(os.path.join(base, name), "w", encoding="utf-8") as fh:
+                fh.write(body + NL)
+        subprocess.run(["git", "add", "-A"], cwd=base, capture_output=True)
+        subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "v"], cwd=base, capture_output=True)
+        vint = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=base).stdout.strip()
+
+        def doc(files, excl=()):
+            return _write_fenced(os.path.join(base, "readers.md"),
+                                 {"vintage": vint, "exclusions": list(excl), "files": files})
+
+        good = [{"path": "a.py", "class": "reader"}, {"path": "b.md", "class": "record"}]
+        out.append(("p4r GREEN listed equals the vintage", p4_readers_census(doc(good), base) == 0))
+        out.append(("p4r RED   one file missing", p4_readers_census(doc(good[:1]), base) == 1))
+        out.append(("p4r RED   a file listed that the vintage lacks",
+                    p4_readers_census(doc(good + [{"path": "c.md", "class": "record"}]), base) == 1))
+        out.append(("p4r RED   a row without a class", p4_readers_census(doc([{"path": "a.py"}, good[1]]), base) == 1))
+        out.append(("p4r GREEN an excluded file need not be listed", p4_readers_census(doc(good[:1], excl=["b.md"]), base) == 0))
+        # the moving-target trap: a file written AFTER the vintage does not break a pinned census
+        with open(os.path.join(base, "late.md"), "w", encoding="utf-8") as fh:
+            fh.write("a later record about firm_forms" + NL)
+        subprocess.run(["git", "add", "-A"], cwd=base, capture_output=True)
+        subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "late"], cwd=base, capture_output=True)
+        out.append(("p4r GREEN a later record does not move a pinned census", p4_readers_census(doc(good), base) == 0))
+    finally:
+        _shutil.rmtree(base, ignore_errors=True)
+    return out
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -1648,6 +1748,7 @@ def selftest_arms():
     results.extend(_selftest_t8())
     results.extend(_selftest_n2_tree())
     results.extend(_selftest_g9())
+    results.extend(_selftest_p4r())
 
     say("")
     for label, ok in results:
@@ -1658,6 +1759,7 @@ def selftest_arms():
 
 
 CMDS = {
+    "p4-readers-census": p4_readers_census,
     "g9-target-count": g9_target_count,
     "g9-s3-plane-agrees": g9_s3_plane_agrees,
     "g9-unclassified-refuses": g9_unclassified_refuses,
