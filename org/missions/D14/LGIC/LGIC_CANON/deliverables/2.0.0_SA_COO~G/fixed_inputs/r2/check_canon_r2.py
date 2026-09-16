@@ -571,21 +571,43 @@ def l2_header():
 
 
 def l2_recount():
-    """The counts are REPRODUCED by the instrument, never re-typed. Run it and compare."""
+    """The counts are REPRODUCED by the instrument, never re-typed. Run it and compare.
+
+    ⛔ THIS REGEX WAS WRONG AND A WORKER WAS BLOCKED BY IT (row LGIC_CANON-W3-S2, 0.9.0_WK_LGIC_CANON~3).
+    The first version anchored on a non-greedy-free label pattern for TOTAL and SECTION. MEASURED against the
+    script's real output: the TOTAL pattern captured 6 of 14 rows -- only the single-word labels, with
+    the trailing colon glued on -- and the SECTION pattern captured ZERO, because the actual shape is
+    `SECTION <label>: <n> rows (<instrument>)`, not `SECTION <label> <n>`. Round 1's checker read the
+    SAME script's SAME output correctly, which is the tell: the instrument changed, not the artifact.
+    The worker filed a row and refused to degrade the ledger's multi-word labels to fit my regex. That
+    was the right act and this is the repair."""
     cands = [p for p in (DEL + "/0.9.0_WK_LGIC_CANON~2/ledger_recount.py", DEL + "/ledger_recount.py")
              if os.path.exists(p)]
     if not cands:
         return missing(DEL + "/**/ledger_recount.py", "L2-RECOUNT")
     r = subprocess.run([sys.executable, cands[0]], capture_output=True, text=True)
     o = (r.stdout or "") + (r.stderr or "")
-    sec = re.findall(r"^SECTION\s+(\S+)\s+(\d+)", o, re.M)
-    tot = re.findall(r"^TOTAL\s+(\S+)\s+(\d+)", o, re.M)
+    sec = re.findall(r"^SECTION\s+(.+?):\s+(\d+)\s+rows", o, re.M)
+    tot = [(lab.strip(), n) for lab, n in re.findall(r"^TOTAL\s+(.+?):\s*(\d+)\s*$", o, re.M)]
+    ledger = read(LEDGER) or ""
+    m = re.search(r"^## .7\.(.*?)(^## |\Z)", ledger, re.S | re.M)
+    body = m.group(1) if m else ""
+    # A count is REPRODUCED when section 7 carries a table row whose first cell is the label and
+    # whose next cell is the number. Cells are compared after stripping, never by substring.
+    rows_in_7 = []
+    for ln in body.splitlines():
+        if ln.strip().startswith("|"):
+            cells = [c.strip() for c in ln.strip().strip("|").split("|")]
+            if len(cells) >= 2:
+                rows_in_7.append(cells)
+    missing_rows = [(lab, n) for lab, n in tot
+                    if not any(c[0] == lab and c[1] == n for c in rows_in_7)]
     print("recount script: %s" % cands[0])
-    print("SECTION lines: %d ; TOTAL lines: %d" % (len(sec), len(tot)))
-    mismatch = [k for k, v in tot if not re.search(r"\|\s*%s\s*\|\s*%s\s*\|" % (re.escape(k), v), read(LEDGER) or "")]
-    print("TOTAL rows the ledger's own table does not carry at the counted value, denominator %d: %d %s"
-          % (len(tot), len(mismatch), mismatch[:5]))
-    ok = bool(sec) and bool(tot) and not mismatch
+    print("SECTION lines parsed: %d | TOTAL lines parsed: %d | section-7 table rows: %d"
+          % (len(sec), len(tot), len(rows_in_7)))
+    print("TOTALs section 7 does not carry at the counted value, denominator %d: %d %s"
+          % (len(tot), len(missing_rows), missing_rows[:5]))
+    ok = bool(sec) and bool(tot) and not missing_rows
     out("PASS-L2-COUNTS-REPRODUCED" if ok else "FAIL-L2-COUNTS-REPRODUCED")
 
 
