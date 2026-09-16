@@ -390,9 +390,13 @@ def g2_typemap():
 def g2_suite():
     t = read(TESTS) or ""
     fn1d_test = "mdpf-lambda-lambda" in t
-    r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-rf", "-p", "no:cacheprovider", TESTS],
-                       capture_output=True, text=True)
-    out = r.stdout + r.stderr
+    # --color=no AND an ANSI strip, belt and braces. Row LGIC_NAMING-W2-S8 measured the defect:
+    # pytest COLOURISES on this device, so a colourised "FAILED ..." line begins with an escape
+    # sequence and the anchored ^FAILED never matches -- the failed set reads EMPTY while tests
+    # fail. That is a FALSE PASS, the one direction a grading checker must never fail in.
+    r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-rf", "-p", "no:cacheprovider",
+                        "--color=no", TESTS], capture_output=True, text=True)
+    out = re.sub(r"\[[0-9;]*[A-Za-z]", "", r.stdout + r.stderr)
     failed = set(re.findall(r"^FAILED (\S+)", out, re.M))
     m = re.search(r"(\d+) passed", out)
     passed = int(m.group(1)) if m else 0
