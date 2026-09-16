@@ -356,6 +356,39 @@ recommendation is to land 4.1 and 4.2 instead of deploying it.
 
 ---
 
+## 6. Post-review: Andrew's rulings and what was built (2026-09-16, ~03:0x-03:5xZ)
+
+Andrew-direct, same evening, on Section 4: 4.1 yes, and "get rid of the quality score
+flat out, shouldnt even be a factor"; 4.2 yes on gpt-4o-mini, flagged, "see what the cost
+structure looks like after a few days"; 4.3 NO -- "0 means finbert has no confidence, no
+confidence articles should not be pulling everything in to 0, we grade what actually gets
+scored ... use finbert when there is a score and gpt 4o when there isn't ... finbert not
+being sure is not a vote"; 4.4 yes.
+
+Built as four commits on SITEZ, each with a mocked-client harness (no vendor call from
+this box) and the commit gate clean; NONE deployed:
+
+| Commit | What | Replaces |
+|---|---|---|
+| `29892baeaa` | ISO-8601 publish dates at ingest (`published_raw` kept); `calculate_time_decay` parses RFC-822 via dateutil and WARNs on fallback; source quality score removed as a factor from L2 (function, fields, sort) and L3 (prompt line, stored fields); sample articles ordered by recency | F1, the quality ordering in F6 |
+| `a0f555d501` | FinBERT gap-fill: articles FinBERT scored 0.0 are scored once by gpt-4o-mini (batched, temperature 0), written back as `sentiment_gpt`/`_label`/`_model`/`_at` beside an untouched `sentiment_finbert`; `get_article_sentiment` = finbert non-zero, else gpt non-zero, else None (a 0.0 from either is not a vote); `sentiment_source` carried through every record; flags `GPT_GAPFILL_*`; `OPENAI_USAGE ... purpose=gapfill` per call + one `GAPFILL:` line per run | F2 (Andrew's way, not 4.3's) |
+| `29d74204ba` | Cluster-level market-direction judge at Layer 2 (gpt-4o-mini, 10 clusters/call, Andrew's cost/selloff rules in the prompt; bullish/bearish/mixed/not_market + reason + label check); disagreement -> `effective_sentiment` = sign(judge)x|mean| with `direction_override(_reason)`, mean never rewritten; zero-voter clusters stay None; mixed excluded from both L3 pools; not_market dropped; drift guard at 40%; flags `DIRECTION_JUDGE_*`; L3 reads the verdict through `_effective_sentiment()` and the `ed1a036b2b` regex patch is removed | F3, F4, F10; supersedes `ed1a036b2b` |
+| `c3804b3db5` | keyword-intelligence card keyed to the cloud's inputs (`inputs_fingerprint` over article URLs + sentiment bucket; recompute only on change; PK/SK unchanged so the proxy is untouched); articles sorted by parsed time, not string; flag `KIG_REFRESH_ON_CHANGE` | F5, the string sort in F6 |
+
+**Correction to F7:** the drilldown generator's EventBridge rule is already
+`state = "DISABLED"` in `infra/aws/terraform/news-pipeline/eventbridge.tf`; "still runs
+2x/day" was wrong, and the 2026-04-07 last-output date corroborates the disable. The
+Lambda itself remains and can be decommissioned in the hygiene pass (4.5).
+
+**Deploy:** all four functions ship by the same path -- zip to
+`s3://opal-313476888478-lambda-artifacts/news-pipeline/<function>.zip` with the
+`content-sha256` metadata Terraform reads, then `safe-apply` on `news-pipeline`. The
+per-directory `deploy.sh` scripts call `aws lambda update-function-code` and are not used.
+Awaiting Andrew's word; the first two trending runs after deploy absorb the 7-day gap-fill
+backlog (~3,800 articles, capped 1,500/run).
+
+---
+
 ## Appendix A -- Measurements (instrument, denominator)
 
 | # | Measurement | Value | Denominator | Instrument |
