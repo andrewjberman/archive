@@ -1,6 +1,6 @@
 # NAMING_CENSUS_REPORT -- census mode, the run (LGIC_ENFORCE EN-s-1, DEC-7)
 
-Written by `python lib/opal_naming.py census --live --repo --report <this file>` at registry@50e4fabd1cb6a150.
+Written by `python lib/opal_naming.py census --live --repo --report <this file>` at registry@254d4e9ece847acb.
 Every number below is recomputable from the fenced json at the end.
 
 ## Status
@@ -9,16 +9,16 @@ Every number below is recomputable from the fenced json at the end.
 
 ## The live plane
 
-- Vintage: `Built from the estate as of 2026-09-15 00:57:50 UTC. Stitch source: stitch-codebuild built 2026-09-14T03:01:18Z.  manifest: e8a06d444ae8`.
+- Vintage: `Built from the estate as of 2026-09-16 05:57:28 UTC. Stitch source: stitch-codebuild built 2026-09-16T03:01:17Z.  manifest: b2849dcf2cac`.
 - Instrument: `comp-find --corpus aws --name . API_GW API_ROUTE CLOUDFRONT_DISTRIBUTION CODEBUILD_PROJECT CW_ALARM DYNAMODB_TABLE EC2_INSTANCE ECS_CLUSTER ECS_TASK_DEFINITION EVENT_RULE EVENT_SOURCE IAM_POLICY IAM_ROLE IAM_USER INSTANCE_PROFILE KMS_KEY LAMBDA LAMBDA_LAYER LOAD_BALANCER LOG_GROUP ROUTE53_RECORD S3Key S3_BUCKET S3_BUCKET_POLICY SCHEDULE SECRET SECURITY_GROUP SERVICE_PRINCIPAL SNS_TOPIC SQS_QUEUE SSM_DOCUMENT STATE_MACHINE VPC_ENDPOINT --all --budget 600`.
-- live = **2148** nodes; minus 327 of the NOT GRADED types (API_ROUTE 184, CLOUDFRONT_DISTRIBUTION 2, EVENT_SOURCE 96, IAM_USER 4, KMS_KEY 14, ROUTE53_RECORD 3, SERVICE_PRINCIPAL 21, VPC_ENDPOINT 3); minus 16 names NAMING_SCHEMA.json aws_fixed puts outside the grade's domain (IAM_POLICY 10, LOG_GROUP 4, SECURITY_GROUP 2); live_nameable = **1805**.
-- judged_live = **3** of 1805. Verdicts: {'CONFORMANT': 2, 'OUT-OF-PATTERN': 1}.
+- live = **2176** nodes; minus 339 of the NOT GRADED types (API_ROUTE 195, CLOUDFRONT_DISTRIBUTION 2, EVENT_SOURCE 97, IAM_USER 4, KMS_KEY 14, ROUTE53_RECORD 3, SERVICE_PRINCIPAL 21, VPC_ENDPOINT 3); minus 16 names NAMING_SCHEMA.json aws_fixed puts outside the grade's domain (IAM_POLICY 10, LOG_GROUP 4, SECURITY_GROUP 2); live_nameable = **1821**.
+- judged_live = **3** of 1821. Verdicts: {'CONFORMANT': 2, 'OUT-OF-PATTERN': 1}.
 
 ## The repo plane
 
-- Terraform: 468 tracked .tf files under `infra/aws/terraform/`; the name attribute of each resource of a graded type (`CENSUS_TF_ATTR`), when it is ONE literal; 113 name(s) that are expressions are not names and are not judged.
-- Sources: 465 tracked files -- every config.py, and the Lambda sources under `infra/aws/lambda/` (.py, .mjs, .js, .cjs, .ts) -- after 2864 vendored and test files were excluded; each string literal `_census_classify` places as a name; 0 placed template(s) are not names; 0 file(s) unparsed.
-- repo = **1869** names; judged_repo = **0**. Verdicts: {}.
+- Terraform: 472 tracked .tf files under `infra/aws/terraform/`; the name attribute of each resource of a graded type (NAMING_SCHEMA.json tf_type_map), when it is ONE literal; 121 name(s) that are expressions are not names and are not judged.
+- Sources: 468 tracked files -- every config.py, and the Lambda sources under `infra/aws/lambda/` (.py, .mjs, .js, .cjs, .ts) -- after 2864 vendored and test files were excluded; each string literal `_census_classify` places as a name; 0 placed template(s) are not names; 0 file(s) unparsed.
+- repo = **1878** names; judged_repo = **0**. Verdicts: {}.
 
 ## Totals by type (judged rows)
 
@@ -30,18 +30,18 @@ The comparison against LGIC_NAMING's hand gradings is EN-s-2's and is not made h
 
 ```json
 {
- "vintage": "Built from the estate as of 2026-09-15 00:57:50 UTC. Stitch source: stitch-codebuild built 2026-09-14T03:01:18Z.  manifest: e8a06d444ae8",
+ "vintage": "Built from the estate as of 2026-09-16 05:57:28 UTC. Stitch source: stitch-codebuild built 2026-09-16T03:01:17Z.  manifest: b2849dcf2cac",
  "live_command": "comp-find --corpus aws --name . API_GW API_ROUTE CLOUDFRONT_DISTRIBUTION CODEBUILD_PROJECT CW_ALARM DYNAMODB_TABLE EC2_INSTANCE ECS_CLUSTER ECS_TASK_DEFINITION EVENT_RULE EVENT_SOURCE IAM_POLICY IAM_ROLE IAM_USER INSTANCE_PROFILE KMS_KEY LAMBDA LAMBDA_LAYER LOAD_BALANCER LOG_GROUP ROUTE53_RECORD S3Key S3_BUCKET S3_BUCKET_POLICY SCHEDULE SECRET SECURITY_GROUP SERVICE_PRINCIPAL SNS_TOPIC SQS_QUEUE SSM_DOCUMENT STATE_MACHINE VPC_ENDPOINT --all --budget 600",
  "denominators": {
-  "repo": 1869,
-  "live": 2148,
-  "live_nameable": 1805,
+  "repo": 1878,
+  "live": 2176,
+  "live_nameable": 1821,
   "judged_live": 3,
   "judged_repo": 0,
-  "live_not_graded_types": 327,
+  "live_not_graded_types": 339,
   "live_aws_fixed": 16
  },
- "registry": "50e4fabd1cb6a150",
+ "registry": "254d4e9ece847acb",
  "stopped": {
   "plane": "live",
   "type": "API_GW",
