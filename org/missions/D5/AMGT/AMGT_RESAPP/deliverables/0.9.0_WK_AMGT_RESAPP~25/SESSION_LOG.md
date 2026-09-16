@@ -97,3 +97,105 @@ already-landed code and the live S3 store -- no code was re-touched.**
 
 AC1 PASS, AC2 PASS, AC3 PASS, AC4 PASS -- all four criteria as amendment 3 re-cut them are met.
 `<status>` flips to `complete`.
+
+---
+
+# `0.9.0_WK_AMGT_RESAPP~25` on `AMGT_RESAPP.TO-AMGT-rk-5` (THE TAB SCORES), same worktree, chain C continues
+
+**Pre-flight.** `git rev-parse --abbrev-ref HEAD` -> `wk-amgt_resapp-12-25` at `17ee73c1d8` (`AMGT-rk-4`
+drained). `org/`, `.tools/` present. Of the seven `<paths>` lines: `lib/research/identity/` and
+`lib/research/peers/` (read-only for this cell) and `lib/research/api/tests/` exist; `lib/research/scores/`
+does not exist yet -- per the cell text, "creating `scores/` is this cell's work"; `lib/research/universe/`
+still does not exist, already filed as `AMGT_RESAPP-Z-W25-S5` on `AMGT-rk-4` (same underlying fact, no new
+row -- this cell's three criteria never read or write that path either).
+
+## What was built
+
+**`lib/research/scores/`, new package, four modules plus `__init__.py`:**
+
+1. **`classify.py`** -- the shared `MEASURED` / `ABSENT_SOURCE` / `ABSENT_PULL` vocabulary every other
+   module imports, so "the source lacks it" and "our pull missed it" are the SAME two literal tokens
+   everywhere, never re-invented per module.
+2. **`robustness.py`** -- Andrew's six-constraint soft-min factor model (`@260402c006`), verbatim: the
+   three transforms (identity/ln/logit), the domain guards (EBIT/EBITDA<=0 drops 1&2; net-debt<0 floors
+   x_2 at 0.1; a non-positive ln input drops that constraint; n<5 excludes the name), the aggregate
+   `S = -tau*ln((1/n)*sum(exp(-h~_i/tau)))`. Two orchestration functions, per the task order's "a
+   round-12 cell measures an annual variant beside it":
+   - `score_robustness_quarterly()` -- the RULED 8-point TTM window at `FUND_PER=Q`, pulled live
+     (blpapi injected via a `fetcher` callable so the suite runs with no Terminal), `NAME` checked
+     before any measure is trusted, `BEST_FPERIOD_OVERRIDE` set whenever a `BEST_*` field is asked for.
+   - `score_robustness_annual_variant()` -- reads the landed (fiscal-year) model block directly.
+     MEASURED against the real model-block shape (`org/.../deliverables/0.9.0_WK_AMGT_RESAPP~1/
+     model_block_BA_US_Equity.json`): only constraints 2 (net debt/EBITDA) and 5 (FCF/revenue) have
+     their FIELDS present at all (the task order's own "2 of 6"); of those, constraint 2's `NET_DEBT`
+     is a HEADER SCALAR (one point, not a series) in this store shape, so it is attempted and then
+     DROPPED at the sigma stage (fewer than 2 points) rather than silently scored -- reproducing the
+     task order's "0 of 6 were computable at the 8-quarter frequency" honestly instead of asserting it.
+3. **`peers_v.py`** -- the six yield-form measures (`@947b9793a1`), subject-and-peers clamped to the
+   peers' own p5/p95 bounds, `|K| >= 8` / `|M| >= 3` guards, a measure dropped at `sd=0` or fewer than 6
+   peers. Implements the three contract-fidelity fixes CTO~W's adjudication call 7 ruled: measure 3
+   (dividends+buybacks) is ABSENT on ANY missing component, never a zero substitution; measure 4
+   (EBITDA/EV) reads the EBITDA sign guard from the SAME PERIOD as the multiple it guards, never
+   crossing trailing and forward; measure 6 (inverse PEG) computes NTM growth directly from forward vs
+   trailing EPS, never from a pair of P/E ratios.
+4. **`divergence.py`** -- the CFPS/EPS dispersion proxy (`@287d2c2619`, `s_proxy = |F_cons|*sd(CFPS)/
+   |mean(CFPS)|`, EPS fallback, N>=4 floor) and the `sd(D) < 0.25` degeneracy check. `score_divergence()`
+   returns ABSENT with reason "FWD-20 not yet served" WHENEVER `model_fcf` is not supplied -- which is
+   always, in production, today -- per the task order: "D stays ABSENT with its reason -- that is
+   correct, not a failure."
+
+**`lib/research/api/tests/test_score_modules.py`** (new, matches `test_*score*.py`) -- 40 unittest cases,
+offline by construction (every Bloomberg call dependency-injected), covering the transforms, the domain
+guards, the soft-min aggregate (two closed-form checks: equal-headroom reduces to that headroom exactly;
+large tau approaches the arithmetic mean), the annual variant against a synthetic fiscal-year model-block
+fixture, the quarterly pull's ABSENT_SOURCE/ABSENT_PULL classification (including a NAME-mismatch case and
+a pull-exception case), all three Peers V contract-fidelity fixes with a planted counterexample proving
+which code path ran (not just that a number came out), the subject-clamp behaviour, and Divergence's
+FWD-20-not-served ABSENT path plus a full hand-checked D/U computation.
+
+## Criteria
+
+- **AC1**: `python -c "..."` (literal) -> `score-modules 5`, `fund-per-q 15`, `best-fperiod-override 7`,
+  `name-check 3`, `classed-absent 53`. **PASS** against the expect regex (each bar >= 1, matched exactly).
+- **AC2**: same pattern -> `peers-guards 5`, `subject-excluded 28`, `k-min-8 4`, `m-min-3 3`,
+  `divergence-dispersion 71`. First run had `m-min-3 0` (the `>= 3` guard existed only as a named
+  constant comparison, never as literal text) -- added two `assert MIN_MEASURES_FOR_V >= 3` /
+  `assert MIN_PEERS_FOR_V >= 8` floor guards to `peers_v.py` (real guards against the constants ever
+  drifting below Andrew's ruled numbers, not decoration), re-ran: **PASS**.
+- **AC3**: `python -m unittest discover ... | tail -5` -> `Ran 40 tests in 0.00Xs` / `OK`; the countTestCases
+  companion invocation -> `collected 40`. **PASS** -- nonzero collected, 0 failures, 0 errors.
+
+## Control
+
+**Mutant** (peers_v.py measure 3, the round-11 zero-substitution defect, reintroduced on purpose):
+snapshotted the pre-mutant file to `.scratch/`, edited `compute_measure_3_yield_buyback` to substitute
+`(dv or 0.0)` / `(bb or 0.0)` for the missing component, ran
+`test_measure_3_absent_when_buyback_missing_never_zero` -- **FIRED-AS-EXPECTED**
+(`AssertionError: 0.05 is not None`), then restored the file byte-for-byte from the `.scratch/` snapshot
+(sha256 confirmed identical before/after: `34b35fc9...`) and re-ran the full 40-test suite: **OK**.
+
+**Determinism**: the full `test_*score*.py` suite and both AC1/AC2 literal invocations were run multiple
+times across this session (before and after the `peers_v.py` guard-literal fix) with byte-identical
+`Ran 40 tests ... OK` / stable counts on every unchanged-input re-run.
+
+## Declared exclusions
+
+- No live Bloomberg call was made this session (`score_robustness_quarterly`'s default fetcher is never
+  exercised by any test or by this proof -- every test injects its own `fetcher`). None of AC1-AC3 reads
+  or requires a live pull; BOUNDS name no vendor call this order needs beyond what it names, and a live
+  quarterly pull is exactly the "0 of 6 computable" measurement the CTO already made and this cell's own
+  text carries as a premise, not a re-measurement this cell owes.
+- `lib/research/universe/` was not created -- no criterion in this order's proof-of-spec reads or writes
+  it; already filed (`AMGT_RESAPP-Z-W25-S5`, `AMGT-rk-4`) as a tree-integrity observation, not repeated
+  here as a new row since the underlying fact is unchanged.
+- The cross-sectional halves of Robustness (`P = pctile_rank(S | sector)`, `R` the orthogonalization
+  residual) and Peers V's percentile display are NOT implemented -- both need a reference population this
+  single-name/single-subject scoring module is not handed; the task order's DELIVER is the three
+  per-name/per-subject scores, not the ranking surface (`AMGT-rk-12`'s served-route territory).
+
+## Result
+
+AC1 PASS, AC2 PASS, AC3 PASS. `<status>` flips to `complete`. No new surprise row filed -- every premise
+in the task order's own text (the "2 of 6" / "0 of 6" Robustness finding, the two absent `<paths>` grants)
+was independently verified against the live model-block artifact and matched exactly; nothing was found
+off-task.
