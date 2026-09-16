@@ -1,0 +1,117 @@
+diff --git a/.tools/proof-of-spec-check.py b/.tools/proof-of-spec-check.py
+index e78a04872b..8065c6cab3 100644
+--- a/.tools/proof-of-spec-check.py
++++ b/.tools/proof-of-spec-check.py
+@@ -1129,15 +1129,34 @@ _TREE_TO_RE = re.compile(r"(^|/)org/missions/D(?:0|[1-9][0-9]?)/[^/]+/[^/]+/task
+ _FENCE_RE = re.compile(r"```json\s*(.*?)```", re.S)
+ 
+ 
+-def _channel_row_ids(code: str) -> tuple[set, int]:
+-    """(row ids, files scanned) across BOTH channel roots for one project. Reads the WORKTREE (this
++def _instance_checkout(inst_path) -> tuple[Path, str]:
++    """(root, how) -- the checkout that holds the INSTANCE being graded (LGIC_NAMING-S21, LGIC_ENFORCE EN-i-3).
++    The nearest ancestor of the instance carrying a `.git` entry (a directory in a main checkout, a FILE in a
++    linked worktree). No instance path, or no ancestor found -> WORKSPACE, the script's own checkout, and
++    `how` says so, so a frame can never present the fallback as the instance's tree."""
++    if inst_path is None:
++        return WORKSPACE, "script checkout (no instance path given)"
++    try:
++        start = Path(inst_path).resolve().parent
++    except Exception:  # noqa: BLE001
++        return WORKSPACE, "script checkout (instance path did not resolve)"
++    for d in [start] + list(start.parents):
++        if (d / ".git").exists():
++            return d, "instance checkout"
++    return WORKSPACE, "script checkout (no .git above the instance)"
++
++
++def _channel_row_ids(code: str, root: Path | None = None) -> tuple[set, int]:
++    """(row ids, files scanned) across BOTH channel roots for one project, under `root` (default WORKSPACE;
++    the limb passes the INSTANCE's checkout). Reads the WORKTREE (this
+     checker runs at completion, not at commit; the row gate is the staged-index reader). A fenced
+     block that does not parse is skipped and counted in the scan -- absence of an id is what the
+     caller grades, and a malformed channel file is the row gate's finding, not this limb's."""
+     if not code:
+         return set(), 0
+-    files = list(WORKSPACE.glob("org/surprise_channel/%s/INVESTIGATION_v*" % code))
+-    files += list(WORKSPACE.glob("org/missions/D*/*/%s/surprise-channel/investigations/INVESTIGATION_v*" % code))
++    root = WORKSPACE if root is None else root
++    files = list(root.glob("org/surprise_channel/%s/INVESTIGATION_v*" % code))
++    files += list(root.glob("org/missions/D*/*/%s/surprise-channel/investigations/INVESTIGATION_v*" % code))
+     ids: set = set()
+     for f in files:
+         try:
+@@ -1176,7 +1195,7 @@ def _governing_is_tree(inst: dict) -> tuple[bool, str]:
+ 
+ 
+ def surprises_check(inst: dict, enforce: bool | None = None, row_ids: set | None = None,
+-                    files_scanned: int | None = None) -> tuple[list[str], list[str]]:
++                    files_scanned: int | None = None, inst_path=None) -> tuple[list[str], list[str]]:
+     """(violations, frames). Every entry of `surprises` must open with a row id that resolves to a row
+     in the project's channel. ENFORCE -> violations; ANNOUNCE -> frame lines only. `enforce`,
+     `row_ids` and `files_scanned` are injectable so the self-test exercises the limb without a repo."""
+@@ -1190,8 +1209,12 @@ def surprises_check(inst: dict, enforce: bool | None = None, row_ids: set | None
+     else:
+         reason = "mode injected by caller"
+     code = _project_code(str(inst.get("to_id", "")))
++    root_note = ""
+     if row_ids is None:
+-        row_ids, files_scanned = _channel_row_ids(code)
++        # The channel is read from the checkout holding the INSTANCE, never the script's (LGIC_NAMING-S21).
++        ch_root, how = _instance_checkout(inst_path)
++        row_ids, files_scanned = _channel_row_ids(code, ch_root)
++        root_note = "; channel root %s (%s)" % (ch_root.as_posix(), how)
+     files_scanned = 0 if files_scanned is None else files_scanned
+     defects: list[str] = []
+     n_with_id = n_resolved = 0
+@@ -1212,9 +1235,9 @@ def surprises_check(inst: dict, enforce: bool | None = None, row_ids: set | None
+                            "(%d INVESTIGATION file(s) scanned on both roots) -- the row must be committed "
+                            "before the instance cites it" % (i, rid, code or "<unparsed project>", files_scanned))
+     frames.append("surprises-frame: %d entr%s; %d open with a row id; %d resolve to a channel row; %d channel "
+-                  "file(s) scanned (flat+tree) for %s; mode %s -- %s"
++                  "file(s) scanned (flat+tree) for %s; mode %s -- %s%s"
+                   % (len(entries), "y" if len(entries) == 1 else "ies", n_with_id, n_resolved, files_scanned,
+-                     code or "<unparsed project>", "ENFORCE" if enforce else "ANNOUNCE", reason))
++                     code or "<unparsed project>", "ENFORCE" if enforce else "ANNOUNCE", reason, root_note))
+     if enforce:
+         v.extend(defects)
+     else:
+@@ -1967,6 +1990,29 @@ def _self_test() -> int:
+         dict(base, surprises=["legacy free-string surprise"]), False, rows, 0, "surprises-announce")
+     arm("F ENFORCE + empty list -> 0 violations, frame says 0 entries",
+         dict(base, surprises=[]), True, rows, 0, "0 entries")
++    # ---- EN-i-3 (LGIC_NAMING-S21): the channel is resolved from the INSTANCE's checkout, not the script's ----
++    import shutil as _sh
++    import tempfile as _tf
++    _s21_tmp = Path(_tf.mkdtemp(prefix="pos_s21_"))
++    try:
++        (_s21_tmp / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8")  # linked-worktree shape
++        _ch = _s21_tmp / "org" / "missions" / "D99" / "TEST" / "NFRA_TESTPROJ" / "surprise-channel" / "investigations"
++        _ch.mkdir(parents=True)
++        (_ch / "INVESTIGATION_v1.md").write_text("```json\n" + json.dumps([{"id": "NFRA_TESTPROJ-S9991"}]) + "\n```\n",
++                                                  encoding="utf-8")
++        _dl = _s21_tmp / "org" / "missions" / "D99" / "TEST" / "NFRA_TESTPROJ" / "deliverables" / "w"
++        _dl.mkdir(parents=True)
++        _ip = _dl / "x.proof_of_spec.json"
++        _si = dict(base, surprises=["NFRA_TESTPROJ-S9991: planted only in the instance's checkout"])
++        _v_in, _f_in = surprises_check(_si, enforce=True, inst_path=_ip)
++        _v_own, _f_own = surprises_check(_si, enforce=True)
++        _s21_ok = (len(_v_in) == 0 and any("instance checkout" in x for x in _f_in)
++                   and len(_v_own) == 1 and any("script checkout" in x for x in _f_own))
++        arms.append(("S21 channel root: a row only in the INSTANCE's checkout resolves (0 violations); the "
++                     "script-rooted read of the same instance does not (1)", _s21_ok, len(_v_in) + len(_v_own), 1,
++                     (_f_in[-1] if _f_in else "")[-110:]))
++    finally:
++        _sh.rmtree(_s21_tmp, ignore_errors=True)
+     # ---- spine v3 carrier 4: the expect match and the judgment refusal (pure, conditional_checks) ----
+     def _row(**kw):
+         r = {"criterion_id": "V3-AC1", "criterion_verbatim": "the deciding line is printed", "method": "command",
+@@ -2265,7 +2311,7 @@ def main() -> int:
+     align_frames = list(bind_frames) + list(align_frames) + res_frames
+     # SURPRISES LIMB (2026-09-03): runs on every instance; ENFORCE vs ANNOUNCE is derived from the
+     # governing TO's root, never from a caller-side flag -- the same one-discriminator rule as layer 1.
+-    sur_violations, sur_frames = surprises_check(inst)
++    sur_violations, sur_frames = surprises_check(inst, inst_path=Path(args[0]))
+     violations.extend(sur_violations)
+     align_frames = align_frames + sur_frames
+     # INVOCATION ALIGNMENT LIMB (2026-09-12, FE-s-23): runs on EVERY instance and prints its

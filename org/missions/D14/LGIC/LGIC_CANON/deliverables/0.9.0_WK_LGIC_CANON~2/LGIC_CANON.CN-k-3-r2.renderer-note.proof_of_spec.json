@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_CANON.CN-k-3-r2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/decompositions/LGIC_CANON_DECOMP.md",
+    "vintage_commit": "2b987c131d",
+    "to_ref": "org/missions/D14/LGIC/LGIC_CANON/task-orders/LGIC_CANON.CN-k-3-r2.renderer-note.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/prd/LGIC_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5b2336a5e4"
+  },
+  "assignee": "0.9.0_WK_LGIC_CANON~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/render_naming_section.py",
+      "kind": "script",
+      "commit_or_etag": "4ee952a3e49829f8917e11d711695f8ae6dac910",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The renderer, with the two edits this cell names. (1) firm_rows() reads a FIRM row's `note` on the REGISTRY path, which it never did: the schema path emitted a per-firm note and the registry path hard-coded \"\", so NAMING_SCHEMA v1.9's move of the firm forms cost the canon's generated section the `demo` note carrying RULING DM (row LGIC_CANON-S3). (2) A new --content-diff arm (ruling A-11) that NEVER renders: it enumerates the CONTENT of the source files and reports, item by item, what the section does not carry, printing CONTENT-DIFF: <n>. Nothing deploys -- this script is run by hand and by the cells that check the canon.",
+      "introduces": [
+        "rows = [(r.get(\"key\", \"\"), r.get(\"long\", \"\"), r.get(\"short\", \"\"), r.get(\"note\", \"\") or \"\") for r in firms]",
+        "mode.add_argument(\"--content-diff\", dest=\"content_diff\", action=\"store_true\")",
+        "def content_diff(canon, schema_path, registry_path):",
+        "print(\"CONTENT-DIFF: %d\" % len(dropped))"
+      ],
+      "artifact_covered_by": ["K3-AC1", "K3-AC2", "K3-AC3", "K3-J1"]
+    },
+    {
+      "path_or_key": "infra/logic/02_DOCTRINE.md",
+      "kind": "doc",
+      "commit_or_etag": "4ee952a3e49829f8917e11d711695f8ae6dac910",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The canon, re-rendered with `python infra/logic/render_naming_section.py --write` after the note fix. The diff is exactly TWO inserted lines and zero deletions (git show --stat 4ee952a3e4: 2 insertions(+)): the `- **demo:** ...` bullet in N2 and its preceding blank line, rendered by the same notes block the schema path used. `No other output moves` holds as a measured statement, not a claim. Nothing deploys.",
+      "introduces": [
+        "- **demo:** tenancy DEMO-TENANT: neither a firm nor general, it serves prospective users with demo accounts (infra/logic/02_DOCTRINE.md s.1 demo tenant; ledger X6 GRANTED, Andrew ~01:3xZ 09-13 card 8, infra/logic/06_CONFORMANCE_LEDGER.md; RULING DEMO); its homes are tiers.json homes.DEMO-TENANT. Its class stays FIRM, so demo reads as a firm in every naming slot (RULING DM); its long and short forms are one token."
+      ],
+      "artifact_covered_by": ["K3-AC1", "K3-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "4ee952a3e49829f8917e11d711695f8ae6dac910",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended inside the single fenced json array, 27 pre-existing rows untouched and not re-graded (surprise-row-gate: '2 new row(s) of 29 total checked'). Both OBSERVATION/INERT, both left UNDER_INVESTIGATION for 3.0.0_SA_CVO.",
+      "introduces": [
+        "\"id\": \"LGIC_CANON-W2-S3\"",
+        "\"id\": \"LGIC_CANON-W2-S4\""
+      ],
+      "artifact_covered_by": ["K3-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~2/renderer-note.r2.result.md",
+      "kind": "doc",
+      "commit_or_etag": "f79b6ffed955237e9917a140f516511984a0ba25",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The result file the order names beside this instance: the three criteria's verbatim output with denominators, the FULL --content-diff run with its declared exclusions printed, and BOTH negative controls (the pre-fix renderer's FRESH-vs-CONTENT-DIFF-1 pair, and the producer-item pair on the fixed tree). Committed BEFORE this instance so it is pinned by commit, never PENDING-THIS-COMMIT.",
+      "introduces": [
+        "# renderer-note.r2.result -- LGIC_CANON.CN-k-3-r2 (cell CN-k-3, the renderer), 0.9.0_WK_LGIC_CANON~2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "K3-AC1",
+      "criterion_verbatim": "K3-AC1 -- every FIRM row's note reaches the canon's generated section.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-2-9 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py k3-note",
+      "output_evidence": "FIRM rows in the registry carrying a note, denominator 1: ['demo']\nof those, rendered into the canon's generated section: 1 -- ['demo']\nevery FIRM note reaches the section: True\nVERDICT: PASS-K3-FIRM-NOTE-RENDERED\nrc=0 (run at HEAD 4ee952a3e4, tracked worktree clean). BASELINE before the edit, same command, same tree: 'of those, rendered into the canon's generated section: 0 -- []' / VERDICT: FAIL-K3-FIRM-NOTE-RENDERED -- so the criterion discriminates and the PASS is the edit's, not the tree's.",
+      "denominator": "1 of 1 FIRM rows carrying a note reaches the section. Independently of the checker: of the registry's 4 FIRM rows (49financial, inflection, cottonwood, demo), exactly one key list includes `note`, which is demo.",
+      "status": "PASS",
+      "expect": "PASS-K3-FIRM-NOTE-RENDERED"
+    },
+    {
+      "criterion_id": "K3-AC2",
+      "criterion_verbatim": "K3-AC2 -- the content-diff arm exists and reads 0 dropped items on the true tree.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-2-9 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py k3-contentdiff",
+      "output_evidence": "renderer exposes --content-diff: True\n[...the checker prints the arm's last 400 chars...]\nregistry infra/logic/registry/scopes.json: FIRM rows 4, in-domain content items 13\nitems carried by the section: 198 of 198\nCONTENT-DIFF: 0\ncontent-diff reads 0 dropped items on the true tree: True\nVERDICT: PASS-K3-CONTENT-DIFF-ARM\nrc=0 (run at HEAD 4ee952a3e4, tracked worktree clean). BASELINE before the edit: 'renderer exposes --content-diff: False' / VERDICT: FAIL-K3-CONTENT-DIFF-ARM. The arm's OWN run (rc=0) is quoted in full in the result file.",
+      "denominator": "198 of 198 in-domain source content items carried by the section (185 schema + 13 registry FIRM-row), 0 dropped. Declared exclusions, all printed by the run: 17 schema paths, 15 field-named dicts, 4 registry FIRM-row scalar fields.",
+      "status": "PASS",
+      "expect": "PASS-K3-CONTENT-DIFF-ARM"
+    },
+    {
+      "criterion_id": "K3-AC3",
+      "criterion_verbatim": "K3-AC3 -- the render still reads FRESH after the edit.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-2-9 && timeout 120 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py k3-fresh",
+      "output_evidence": "OK: stamp infra/logic/registry/scopes.json - sha256:b2a54608f8ebbade98982de9fc8ae6a7d4e40ce83ee4f32c146f08cd69a0034b equals the live file\nOK: the section's bytes equal a fresh render (136 lines, CRLF normalised)\nCHECK: FRESH -- 0 failure(s)\nrender --check FRESH after the renderer edit: True\nVERDICT: PASS-K3-RENDER-STILL-FRESH\nrc=0 (run at HEAD 4ee952a3e4, tracked worktree clean).",
+      "denominator": "2 of 2 stamped files (NAMING_SCHEMA.json, scopes.json) hash equal to the live file; 0 failures; section 136 lines after the two-line re-render (134 before).",
+      "status": "PASS",
+      "expect": "PASS-K3-RENDER-STILL-FRESH"
+    },
+    {
+      "criterion_id": "K3-J1",
+      "criterion_verbatim": "K3-J1 -- graded at L9 by 3.0.0_SA_CVO: the content-diff arm compares CONTENT and would have caught the lost note, rather than re-implementing the freshness check under a new name. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no invocation. The worker's record is renderer-note.r2.result.md@f79b6ffed9, sections 'The arm, and why it is not the freshness check under a new name' and 'A second negative control'.",
+      "output_evidence": "THE DISCRIMINATING PAIR, one tree, one moment, two instruments: a copy of the renderer with the registry note read reverted to \"\" (the pre-fix behaviour, i.e. the file's state at 7db18a4464), run from .scratch/ctl/ two levels deep so Path(__file__).resolve().parents[2] still resolves to the worktree root, against the section as it then stood -- `--check` printed 'CHECK: FRESH -- 0 failure(s)' (rc=0) while `--content-diff` printed 'items carried by the section: 197 of 198' / 'DROPPED: infra/logic/registry/scopes.json scopes[demo]/note' / 'CONTENT-DIFF: 1'. The arm names the lost note BY PATH on the exact tree the freshness check calls clean. SECOND CONTROL, on the fixed tree: removing /key/legacy_served_paths/producer from the arm's declared exclusions prints '198 of 199' / 'CONTENT-DIFF: 1' naming that path while the live --check prints FRESH -- a second live item of the same shape. MECHANISM: content_diff() never calls render(); it walks the source JSONs and asks whether the section carries each item's text, so a field the renderer does not read is DROPPED here and invisible to --check by construction. DOMAIN: written as the printed denominator MINUS a declared exclusion (17 schema paths, 15 field-named dicts, 4 registry fields), every exclusion printed with its reason on every run, and a source field named nowhere is IN the domain by default.",
+      "denominator": "N/A -- a judgment criterion carries no PASS/FAIL denominator by construction",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true per the task order (K3-J1 'RECORD; NO VERDICT'); the checker has no k3-j1 subcommand, and self-grading would be a boundary read from a field the graded party writes. The oracle is 3.0.0_SA_CVO at L9, per CLAUDE.md Rule 27 (JUDGMENT criteria are graded HERE and never self-graded).",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names no mutant, and K3-AC2 names a negative control its own subcommand does not run (row LGIC_CANON-W2-S3), so one was supplied by hand: a copy of the renderer with the registry `note` read reverted to the pre-fix \"\", placed two directories under .scratch so its ROOT (parents[2]) still resolves to the worktree root and every default path is identical to the live script's. A SECOND mutant removed /key/legacy_served_paths/producer from the arm's declared exclusions.",
+      "expected": "Mutant 1: --check FRESH (the section IS a faithful render of what the pre-fix renderer reads) AND --content-diff non-zero naming scopes[demo]/note. Mutant 2: --content-diff non-zero naming /key/legacy_served_paths/producer while the live --check reads FRESH.",
+      "observed": "Mutant 1: 'CHECK: FRESH -- 0 failure(s)' rc=0, and 'items carried by the section: 197 of 198' / 'DROPPED: ... scopes[demo]/note' / 'CONTENT-DIFF: 1'. Mutant 2: 'items carried by the section: 198 of 199' / 'DROPPED: org/standards/NAMING_SCHEMA.json /key/legacy_served_paths/producer' / 'CONTENT-DIFF: 1', beside 'CHECK: FRESH -- 0 failure(s)' from the live renderer on the same tree. Both mutants lived only in .scratch/ctl/; neither the renderer nor any fixed input was modified to produce them, and git status --porcelain lists no fixed input.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of the three mechanical criteria was run twice against the same content: once before the commit and once at HEAD 4ee952a3e4 with the tracked worktree clean (git status --porcelain showing only the untracked .scratch/).",
+      "observed": "Identical verdicts and identical denominators on both runs (K3-AC1 1 of 1; K3-AC2 198 of 198; K3-AC3 2 stamps, 0 failures, 136 lines). The arm is a pure read of three files with no time- or environment-dependent branch; the only device-dependent step (CRLF) is normalised by lf_bytes()/read_canon() before every comparison.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Whether the arm's declared out-of-section set is the RIGHT set",
+      "reason": "The set is a judgment about what the generated section is for, printed in full on every run so it can be disputed. One member of it -- /key/legacy_served_paths/producer -- is a live dropped item and is filed as row LGIC_CANON-W2-S4 rather than decided here; K3-AC2 asks only that the arm read 0 on the true tree, and rendering that field would move output the cell froze ('No other output moves')."
+    },
+    {
+      "item": "The correctness of the demo note's TEXT",
+      "reason": "The cell restores the renderer's reading of a `note` the registry already carries; the note's wording, and RULING DM behind it, are the registry's and the canon's, not this cell's. The arm checks that the section CARRIES the source's text, never that the source is right."
+    },
+    {
+      "item": "Any repair to the fixed input check_canon_r2.py",
+      "reason": "Fixed inputs are read-only by the order's BOUNDS. The docstring defect in k3_contentdiff is filed as row LGIC_CANON-W2-S3 and the control it describes was supplied beside the criterion instead of inside it."
+    }
+  ],
+  "surprises": ["LGIC_CANON-W2-S3", "LGIC_CANON-W2-S4"],
+  "session_log": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~2/renderer-note.r2.result.md",
+  "compiler_tools": [
+    {
+      "tool": "check_canon_r2.py (issuer fixed input, 2.0.0_SA_COO~G, read-only)",
+      "invocation": "python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py {k3-note,k3-contentdiff,k3-fresh}",
+      "result": "3 of 3 PASS at 4ee952a3e4; the same three read FAIL, FAIL, PASS at the base 7db18a4464"
+    },
+    {
+      "tool": "render_naming_section.py --content-diff (this cell's own arm)",
+      "invocation": "python infra/logic/render_naming_section.py --content-diff",
+      "result": "CONTENT-DIFF: 0, items carried 198 of 198, rc=0 at 4ee952a3e4"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile + ds-precommit + ruff py39, surprise-row-gate, to-pipeline-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_LGIC_CANON~2 <0.9.0_WK_LGIC_CANON~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "rc=0 on 4ee952a3e4 and f79b6ffed9; surprise-row-gate: 2 new row(s) of 29 total checked, 27 pre-existing not re-graded"
+    }
+  ]
+}
