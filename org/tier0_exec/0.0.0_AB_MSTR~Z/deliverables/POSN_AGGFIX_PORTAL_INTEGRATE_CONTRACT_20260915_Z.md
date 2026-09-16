@@ -158,3 +158,82 @@ half-landed** (`2.0.0_SA_COO~O`'s OG-i-1 apply FINISHED -- 4 added, 2 changed, 0
 CLOSED, fresh plan "No changes"). Disk on that box: 5.0 GB free at the worst point tonight, 50 GB
 free after seat worktree drains plus an Andrew-authorized cleanup. Nothing of this fabric's was
 touched. The CLOUD<->SITEZ workspace merge and the laptop's CLOUD push both stay at Andrew.
+
+---
+
+## AMENDMENT 2 -- step (b) IS DONE. Amendment 1 was already stale when committed.
+
+- recorded by: `0.0.0_AB_MSTR~Z`, 2026-09-16 ~01:2xZ, on `1.0.0_SA_CTO~Z`'s msg 23317 (FREEZE WINDOW OPEN)
+- **AMENDMENT 1 IS SUPERSEDED AS A FORWARD INSTRUCTION.** Kept, because what was believed and when is
+  the point of this file, but NOTHING ARMS FROM IT.
+
+**MEASURED AT THE REMOTE, not taken from any seat's report** (`git ls-remote`, then `git log` / `git
+diff` against fetched refs, in `portal/`):
+
+| object | value |
+|---|---|
+| `origin/DEV` | `be8cf218743af0c04a4d57b908b28cf7435e119d` |
+| `origin/PROD` | `edf85ce503aad961b84b5ea3b2074eb84d416a16` (unmoved) |
+| content delta `PROD..DEV` | 7 files, 379 insertions, 46 deletions |
+| the files | the 5 Positioning files + `.github/workflows/ci.yml` + `promote-to-prod.yml` |
+| drain tip `3ec1f83c` on DEV | YES (`merge-base --is-ancestor`) |
+| the merge's own tree effect vs the drain | the 2 CI files ONLY -- it dragged in no other content |
+
+Consistent with this file's `+370/-44` measured on the drain alone; the extra `+9/-2` is `be8cf218`
+(Andrew's two post-smoke items) plus the CI pair. **Step (b) is COMPLETE at `be8cf218`.**
+
+## WHO PUSHED DEV -- and a wrong answer this seat nearly committed
+
+`1.0.0_SA_CTO~Z` **pushed DEV under an AUDITED OVERRIDE**, which is a recorded escape, not a silent
+violation. The decisive record, `org/git-author-override-audit.log`, last line:
+
+```
+2026-09-16T01:03:38Z NEVER-OVERRIDE serial=1.0.0_SA_CTO~Z rule=PUSHPULL_AUTHORITY
+  reason=Andrew-direct 2026-09-15 "Q" -- non-DT CTO~Z admitted by Step 0 Andrew-direct clause
+  cmd=git push origin HEAD:DEV
+```
+
+So msg 23317's *"1.0.0_SA_CTO~Z merged it forward onto current DEV and pushed at be8cf218"* is
+**CORRECT**, and it is the account to believe.
+
+**THE WRONG ANSWER, RECORDED BECAUSE IT IS THE REUSABLE PART.** This seat first read the commit
+identity lines and drafted an amendment concluding the opposite -- that `0.0.0_AB_MSTR` (laptop) had
+performed both pushes and *"the shared-branch law is SATISFIED"* -- and prepared to correct 23317's
+author on that basis. The evidence looked strong and was well-formed:
+
+- `a4ef8853` (the merge of the drain into DEV): author AND committer `0.0.0_AB_MSTR`, 00:56:51Z
+- `be8cf218`: author `1.0.0_SA_CTO~Z`, **committer `0.0.0_AB_MSTR`**, 01:02:12Z
+
+**A COMMIT'S AUTHOR AND COMMITTER LINES ARE NOT AN ORACLE FOR WHO PUSHED A SHARED BRANCH.** They
+record the git identity configured in whatever tree the work happened in -- here a portal worktree
+carrying the MSTR identity -- and a push leaves no trace in them at all. **Commit identity answers
+"who wrote this object"; it cannot answer "who moved this ref", which is the only question
+LD-0367/LD-0368 asks.** The instrument for that question is the **push-authority audit log**, and it
+answered in one `tail`.
+
+The near-miss was a **FALSE ALL-CLEAR on a shared-branch law question** -- the most expensive
+direction to be wrong in, because a clean finding closes the question and nobody re-opens it. It was
+caught only because a peer's message and this seat's inference DISAGREED, and the disagreement was
+worth one more read instead of a correction to the peer. **A peer contradicting your measurement is
+evidence about your instrument, not only about their claim.**
+
+## The freeze window -- ACKNOWLEDGED AND HONOURED
+
+`1.0.0_SA_CTO~Z` opened a FREEZE on **portal/DEV pushes only** until it posts FREEZE CLOSED, because
+its DEV->PROD merge runs against LIVE `origin/DEV` at GO time, so any push landing in the window rides
+into PROD as an unverified passenger. **This seat holds, and has no portal/DEV push pending -- step
+(b) is done, so it never will for this round.** Explicitly unaffected, per 23317 and agreed here: the
+LD-0522 **workspace** push hold is a different object and is untouched.
+
+## Where step 2 now stands
+
+(b) COMPLETE at `be8cf218`, pushed by `1.0.0_SA_CTO~Z` under the audited override above.
+(c) `/prod-deploy` is `1.0.0_SA_CTO~Z`'s and is unchanged. The laptop's verification is **no longer a
+precondition of anything** -- Amendment 1's precondition 3 is DISCHARGED, not waived. Round 1's L8/L9
+obligations at `3.0.0_SA_CVO~Z` are untouched by the promote and are not gated on it (23317).
+
+**OPEN, AND SURFACED RATHER THAN ADJUDICATED:** as of its 01:09Z bus frame the laptop MSTR still
+believed step (b) was pending and said it would *"re-read 9998f2a760 before I act on any step-2 leg."*
+It is being told on the bus, in the same turn as this commit, that (b) has landed. Two live MSTRs
+holding different beliefs about whether a shared-branch merge has happened is the condition worth
+clearing fast; it is cleared by this record plus that send, and nothing is asked of Andrew.
