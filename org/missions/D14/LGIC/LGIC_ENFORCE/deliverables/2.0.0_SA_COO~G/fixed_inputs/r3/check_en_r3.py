@@ -14,6 +14,7 @@ resolve differently, so recomputing the map at grade time would grade the cell's
 USAGE: check_en_r3.py <subcommand> | --list | selftest-arms
 Exit 0 on PASS, 1 on FAIL, 2 on usage/read error.
 """
+import importlib.util
 import json
 import os
 import re
@@ -1386,6 +1387,184 @@ def _selftest_n2_tree():
     ]
 
 
+# ---------------------------------------------------------------- cell 9 arms (R-16, R-26)
+#
+# The generator prints its TARGET LIST and the SHIP / REPO-ONLY split. The interface the order fixes, so an arm
+# can grade it:
+#   python lib/opal_naming.py targets [--extra-target <path>]
+#     TARGETS: <n>
+#     <SHIP|REPO-ONLY|UNCLASSIFIED> <plane> <path> measured: <instrument>     one row per target
+#     PLANE <plane>: <k>                                                       one line per plane
+#     HASH-PINNED CONSUMERS: <n> of <m> scanned                                the census, never UNKNOWN
+#   rc != 0 when any row is UNCLASSIFIED.
+# RULING R-26 @50f1786314: each plane's OWN record -- safe_deploy_core for S3/DS, lambda-source-map.json for Lambda
+# (shared imports resolved), the consuming Terraform root for Terraform; UNCLASSIFIED refuses the print; the two
+# opal_name test fixtures are REPO-ONLY with their plane named.
+#
+# The checker never trusts the printed numbers: the denominator is its OWN AST read of generate()'s `known` list,
+# and the S3/DS plane is its OWN call to safe_deploy_core. Measured at the cut: 10 targets (7 VIEWS + LOCALS_PATH,
+# VECTORS_PATH, TFTEST_PATH); safe_deploy_core claims 3; the `targets` subcommand does not exist (all arms RED).
+
+GEN = "lib/opal_naming.py"
+FIXTURES = ("infra/aws/terraform/modules/opal_name/tests/vectors.json",
+            "infra/aws/terraform/modules/opal_name/tests/opal_name.tftest.hcl")
+_ROW = re.compile(r"^(SHIP|REPO-ONLY|UNCLASSIFIED)\s+(\S+)\s+(\S+)\s+measured:\s*(\S.*)$")
+
+
+def _ast_target_count(root=None):
+    """VIEWS entries + the named extras in generate()'s `known = [...] + [A, B, C]`, read from the AST."""
+    import ast
+    with open(os.path.join(root or REPO, *GEN.split("/")), encoding="utf-8") as fh:
+        tree = ast.parse(fh.read())
+    views = None
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "VIEWS" for t in node.targets):
+            views = len(node.value.elts) if isinstance(node.value, (ast.Tuple, ast.List)) else None
+    extras = None
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == "generate":
+            for sub in ast.walk(node):
+                if isinstance(sub, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "known" for t in sub.targets):
+                    val = sub.value
+                    if isinstance(val, ast.BinOp) and isinstance(val.right, ast.List):
+                        extras = len(val.right.elts)
+    if views is None or extras is None:
+        return None
+    return views + extras
+
+
+def _targets_output(extra=None, root=None):
+    argv = [sys.executable, os.path.join(root or REPO, *GEN.split("/")), "targets"]
+    if extra:
+        argv += ["--extra-target", extra]
+    r = subprocess.run(argv, capture_output=True, text=True, timeout=180, cwd=root or REPO)
+    out = _CSI.sub("", (r.stdout or "") + (r.stderr or ""))
+    rows = [m.groups() for m in (_ROW.match(ln.strip()) for ln in out.splitlines()) if m]
+    tm = re.search(r"^TARGETS:\s*(\d+)", out, re.M)
+    return r.returncode, out, rows, (int(tm.group(1)) if tm else None)
+
+
+def g9_target_count(path=None, root=None, runner=None):
+    """TARGETS: printed equals the AST count, and one classified row is printed per target."""
+    rc, out, rows, printed = (runner or _targets_output)()
+    expected = _ast_target_count(root)
+    say("AST count of generate()'s known list: %s; printed TARGETS: %s; classified rows: %d" % (expected, printed, len(rows)))
+    if expected is None:
+        say("FAIL-G9-AST-UNREADABLE")
+        return 1
+    if printed != expected or len(rows) != expected:
+        say("FAIL-G9-TARGET-COUNT-DISAGREES")
+        return 1
+    say("PASS-G9-TARGET-COUNT-EQUALS-AST")
+    return 0
+
+
+def _sdc_claims(paths):
+    """The S3/DS plane's own answer, by calling safe_deploy_core itself."""
+    spec = importlib.util.spec_from_file_location("safe_deploy_core_r3", os.path.join(REPO, ".tools", "safe_deploy_core.py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return {p for p in paths if mod.file_to_s3_target(p) or mod.bundle_for_member(p)}
+
+
+def g9_s3_plane_agrees(path=None, root=None, runner=None, claims=None):
+    """Every target safe_deploy_core claims is printed SHIP on an S3/DS plane measured by safe_deploy_core, and no
+    target it does NOT claim is printed as measured by it."""
+    rc, out, rows, _n = (runner or _targets_output)()
+    if not rows:
+        say("no classified rows printed")
+        say("FAIL-G9-NO-SPLIT")
+        return 1
+    paths = [r[2] for r in rows]
+    claimed = (claims or _sdc_claims)(paths)
+    by_sdc = {r[2] for r in rows if "safe_deploy_core" in r[3]}
+    ship_by_sdc = {r[2] for r in rows if "safe_deploy_core" in r[3] and r[0] == "SHIP"}
+    say("DENOMINATOR: %d printed row(s); safe_deploy_core claims %d; printed as measured by it %d (SHIP %d)"
+        % (len(rows), len(claimed), len(by_sdc), len(ship_by_sdc)))
+    if ship_by_sdc != claimed or by_sdc - claimed:
+        for p in sorted(claimed - ship_by_sdc):
+            say("   CLAIMED BY THE GATE, NOT PRINTED SHIP BY IT:", p)
+        for p in sorted(by_sdc - claimed):
+            say("   PRINTED AS THE GATE'S, THE GATE DOES NOT CLAIM:", p)
+        say("FAIL-G9-S3-PLANE-DISAGREES-WITH-GATE")
+        return 1
+    say("PASS-G9-S3-PLANE-EQUALS-GATE")
+    return 0
+
+
+def g9_unclassified_refuses(path=None, root=None, runner=None):
+    """NEGATIVE CONTROL (R-16, generalised by R-26): a target no plane claims prints UNCLASSIFIED and the print refuses."""
+    planted = "zz-unclaimed/probe.txt"
+    rc, out, rows, _n = (runner or _targets_output)(planted)
+    flagged = any(r[0] == "UNCLASSIFIED" and r[2] == planted for r in rows)
+    say("planted %s: rc=%d; printed UNCLASSIFIED: %s" % (planted, rc, flagged))
+    if rc == 0 or not flagged:
+        say("FAIL-G9-UNCLASSIFIED-DOES-NOT-REFUSE")
+        return 1
+    say("PASS-G9-UNCLASSIFIED-REFUSES")
+    return 0
+
+
+def g9_fixtures_repo_only(path=None, root=None, runner=None):
+    """The two opal_name test fixtures print REPO-ONLY with their plane named (R-26)."""
+    rc, out, rows, _n = (runner or _targets_output)()
+    got = {r[2]: r for r in rows}
+    bad = [f for f in FIXTURES if f not in got or got[f][0] != "REPO-ONLY" or got[f][1] in ("", "-")]
+    say("fixtures printed REPO-ONLY with a plane: %d of %d" % (len(FIXTURES) - len(bad), len(FIXTURES)))
+    if bad:
+        say("FAIL-G9-FIXTURE-MISCLASSIFIED")
+        return 1
+    say("PASS-G9-FIXTURES-REPO-ONLY")
+    return 0
+
+
+def g9_consumer_census(path=None, root=None, runner=None):
+    """The hash-pinned-consumer census prints a COUNT and its denominator -- never UNKNOWN, never a bare zero."""
+    rc, out, rows, _n = (runner or _targets_output)()
+    m = re.search(r"^HASH-PINNED CONSUMERS:\s*(\d+)\s+of\s+(\d+)\s+scanned", out, re.M)
+    say("census line: %s" % (m.group(0) if m else "(absent or UNKNOWN)"))
+    if not m or int(m.group(2)) == 0:
+        say("FAIL-G9-CONSUMER-CENSUS-UNPRINTED")
+        return 1
+    say("PASS-G9-CONSUMER-CENSUS-PRINTED")
+    return 0
+
+
+def _selftest_g9():
+    good_rows = [
+        ("SHIP", "s3", "a.py", "safe_deploy_core"),
+        ("SHIP", "lambda", "b.mjs", "lambda-source-map.json"),
+        ("REPO-ONLY", "terraform", FIXTURES[0], "comp-find root census"),
+        ("REPO-ONLY", "terraform", FIXTURES[1], "comp-find root census"),
+    ]
+
+    def run(rows, n, rc=0, census="HASH-PINNED CONSUMERS: 2 of 40 scanned"):
+        text = ("TARGETS: %d" % n) + NL + NL.join("%s %s %s measured: %s" % r for r in rows) + NL + census + NL
+        return lambda extra=None: (rc, text, list(rows), n)
+
+    def unclassified_run(extra=None):
+        rows = good_rows + [("UNCLASSIFIED", "-", extra, "no plane claims it")]
+        return 1, "", rows, len(rows)
+
+    def silent_run(extra=None):
+        return 0, "", good_rows, len(good_rows)
+
+    claims = lambda _p: {"a.py"}  # noqa: E731 -- a one-line injected gate answer
+    out = []
+    out.append(("g9 s3 GREEN  printed equals the gate", g9_s3_plane_agrees(runner=run(good_rows, 4), claims=claims) == 0))
+    wrong = [("SHIP", "s3", "b.mjs", "safe_deploy_core")] + good_rows[2:]
+    out.append(("g9 s3 RED    printed as the gate's, gate disagrees", g9_s3_plane_agrees(runner=run(wrong, 3), claims=claims) == 1))
+    out.append(("g9 unclassified GREEN refuses", g9_unclassified_refuses(runner=unclassified_run) == 0))
+    out.append(("g9 unclassified RED   silently accepted", g9_unclassified_refuses(runner=silent_run) == 1))
+    out.append(("g9 fixtures GREEN", g9_fixtures_repo_only(runner=run(good_rows, 4)) == 0))
+    shipped = good_rows[:2] + [("SHIP", "terraform", FIXTURES[0], "x"), good_rows[3]]
+    out.append(("g9 fixtures RED  a fixture printed SHIP", g9_fixtures_repo_only(runner=run(shipped, 4)) == 1))
+    out.append(("g9 census GREEN", g9_consumer_census(runner=run(good_rows, 4)) == 0))
+    out.append(("g9 census RED   UNKNOWN", g9_consumer_census(runner=run(good_rows, 4, census="HASH-PINNED CONSUMERS: UNKNOWN")) == 1))
+    out.append(("g9 count RED    subcommand absent", g9_target_count(runner=lambda: (2, "unknown subcommand", [], None)) == 1))
+    return out
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -1468,6 +1647,7 @@ def selftest_arms():
     results.extend(_selftest_w7r())
     results.extend(_selftest_t8())
     results.extend(_selftest_n2_tree())
+    results.extend(_selftest_g9())
 
     say("")
     for label, ok in results:
@@ -1478,6 +1658,11 @@ def selftest_arms():
 
 
 CMDS = {
+    "g9-target-count": g9_target_count,
+    "g9-s3-plane-agrees": g9_s3_plane_agrees,
+    "g9-unclassified-refuses": g9_unclassified_refuses,
+    "g9-fixtures-repo-only": g9_fixtures_repo_only,
+    "g9-consumer-census": g9_consumer_census,
     "n2-record-tree-ungraded": n2_record_tree_ungraded,
     "n2-resolving-path-exempt": n2_resolving_path_exempt,
     "n2-binary-needs-reason": n2_binary_needs_reason,
