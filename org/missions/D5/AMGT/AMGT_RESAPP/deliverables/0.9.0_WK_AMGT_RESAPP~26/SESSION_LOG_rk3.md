@@ -72,3 +72,42 @@ mismatch), `AMGT_RESAPP-Z-W26-S3` (AC3 route mismatch). No row filed for the ISS
 worktree's copy of the task order was brought to the amended bytes by a manual edit, verified
 byte-identical against commit `6f433fc2a8` via `git diff`/`git show` (reads only -- no `git
 merge` was run, per this worker's own operating constraint).
+
+## ADDENDUM -- respawn after the 07:56Z reboot, ISSUER AMENDMENT 4 (2026-09-16 ~14:5xZ)
+
+This slot was respawned; the branch already carried the built generation writer (`f838560c46`,
+committed by the prior instance of this same slot) and the row+proof commit `9d5ec84fef`. Nothing
+in `lib/research/price/` was rebuilt. AC1 and AC2's invocations were also already replaced by
+ISSUER AMENDMENT 2 (commit `66ea4e4f7a`, before this respawn) from the S3-plane checks the
+original order carried to the DynamoDB-plane checks quoted in the current order text; AC3 was
+RE-CUT again in ISSUER AMENDMENT 4 (commit `9bcb368500`) because amendment 2's route-shape fix
+still parsed a body shape (`axes.price`/`axes.chatter`) the deployed route does not serve, and
+AC4's evidence invocation was replaced (it had still listed the vacuous S3 `rankings/` plane).
+
+Re-run of all four criteria against this amendment's literal text, `timeout 120`, all rc 0:
+
+- **AC1**: `s3_rankings_objects 0` (recorded, not a bar); `ddb_rows_scanned 130`,
+  `distinct_axis_dates 13`; `price_generations 1
+  ['TRENDING_PRICE#2026-09-10#20260916T065448Z-9b7ffda3dcdc']`; `price_generation_rows 32`;
+  `chatter_generations_CONTROL 3` (nonzero, control valid). **PASS.**
+- **AC2**: `modules 4`, `generation-writer 115`, `security_key-on-rows 19`, `schedule-words 0`.
+  **PASS** (unchanged from the first run of this slot).
+- **AC3** (re-cut): `price` -- `http 200 ranking_status ABSENT rows 0 row_count 0 as_of_date
+  2026-09-16 generation_id None`, `price_reason "no generation pointer at TRENDING_PRICE#2026-09-16
+  / _CURRENT: no committed ranking exists for this date -- this is not an empty membership"`,
+  `price_rows_with_security_key 0`; `chatter_CONTROL` -- `http 200 ranking_status SERVED rows 10
+  generation_id 20260916T100027Z-efd7e544dd59`. The control is nonzero (instrument proven live);
+  the price axis genuinely reads ABSENT because the only committed price generation in the store
+  is still dated 2026-09-10 (confirmed by AC1's own scan, same run) and producing one for today
+  needs a live Bloomberg pull this cell cannot make (DAPI unreachable from this worktree,
+  box-side puller outside `<paths>`, no vendor call authorized by this order). **FAIL, per the
+  REFUSAL CLAUSE** -- matches `2.0.0_SA_COO~Z`'s own diagnostic at `AMGT_RESAPP-Z-S118`/`S119`,
+  independently reproduced here and filed as `AMGT_RESAPP-Z-W26-S4`.
+- **AC4** (judgment): same invocation as AC3, evidence recorded, no verdict written; graded at L9
+  by `3.0.0_SA_CVO~Z`.
+
+Order stays OPEN (`<status>` not flipped to `complete`): AC3 is FAIL-by-output and the REFUSAL
+CLAUSE forbids repairing, widening, or satisfying it by an unnamed route. AC1/AC2 confirm the
+generation-writer mechanism itself (this cell's actual deliverable) is sound and proven live; the
+remaining gap is a live-data-cadence gap (no price observation newer than 2026-09-10 exists
+anywhere in the estate), not a defect in the writer this cell built.
