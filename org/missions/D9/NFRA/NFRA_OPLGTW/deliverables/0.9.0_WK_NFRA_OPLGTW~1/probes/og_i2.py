@@ -662,8 +662,10 @@ def ac10() -> int:
     ex, exd = exists_locally(key)
     print("KEY: s3://%s/%s -- before: %s" % (BUCKET, key, exd))
     body = s3_body(DATA_ARN, "DATA_EXT", "og-i2-ac10", r"""
-o=$(as_creds "$C" aws s3api put-object --region $R --bucket %s --key '%s' --body /dev/null 2>&1); rc=$?
-if [ $rc -eq 0 ]; then echo "PUT rc=0 WRITE_SUCCEEDED=STOP"; else echo "PUT rc=$rc err=$(errc "$o")"; fi
+EMPTY=$(mktemp); echo "EMPTY_BODY bytes=$(wc -c < "$EMPTY")"
+o=$(as_creds "$C" aws s3api put-object --region $R --bucket %s --key '%s' --body "$EMPTY" 2>&1); rc=$?
+rm -f "$EMPTY"
+if [ $rc -eq 0 ]; then echo "PUT rc=0 WRITE_SUCCEEDED=STOP"; else echo "PUT rc=$rc err=$(errc "$o") first_line_class=$(printf '%%s' "$o" | head -1 | cut -c1-60 | tr -c 'A-Za-z0-9\n' '_')"; fi
 """ % (BUCKET, key))
 
     def grade(out):
