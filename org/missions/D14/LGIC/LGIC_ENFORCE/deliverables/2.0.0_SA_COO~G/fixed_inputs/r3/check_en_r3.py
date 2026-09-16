@@ -1245,6 +1245,147 @@ def _selftest_t8():
     return out
 
 
+# ---------------------------------------------------------------- cell 2 arms, the tree axis (R-11/R-13, A-6, A-8)
+#
+# Each arm feeds ONE planted diff to the real gate under --enforce and reads its verdict lines. Measured at HEAD
+# before any arm was written (rc and the first NAMING line):
+#   A  a proof instance under org/ quoting advi-49f-fwd2-exercise-queue (W4-S4) and citing
+#      ...fwd7-demo-firm.md (W5-S6)                    rc=1  NAMING REFUSE ... -> RED, must become ungraded
+#   B  the same SQS name as a .tf resource name        rc=1  NAMING REFUSE      -> must STAY refused (regress)
+#   C  a lib/ .py literal RESOLVING to a tracked path  rc=1  NAMING REFUSE ... lookup('demo') -> RED, must be exempt
+#   D  the same literal, NOT resolving (a typo)        rc=1  NAMING REFUSE      -> must STAY refused (regress)
+#   E  .gitattributes `-diff` on a .tf, no reason      rc=0  PASS 0 graded      -> RED, must refuse
+#   E' the same line WITH a same-line reason comment    -> must pass (regress)
+# The pinned baseline @f1ecf97da7 (A-7: 3815 graded / 2917 REFUSE across 90 files) has no recorded invocation,
+# so it is a JUDGMENT criterion for 3.0.0_SA_CVO, not an arm.
+
+TRACKED_DEMO_PATH = "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-d-1-r2.fwd7-demo-firm.md"
+REC_PATH = DELIV + "/0.9.0_WK_LGIC_ENFORCE~9/zz-probe.proof_of_spec.json"
+TF_PATH = "infra/aws/terraform/zz-probe/main.tf"
+PY_PATH = "lib/zz_probe.py"
+
+
+def _plant(path, line):
+    return ("diff --git a/%s b/%s" + NL + "--- a/%s" + NL + "+++ b/%s" + NL + "@@ -0,0 +1,1 @@" + NL + "+%s" + NL) % (
+        path, path, path, path, line)
+
+
+def _run_gate(diff_text, cwd=None):
+    """(rc, NAMING lines, whole output) for one planted diff under --enforce."""
+    fd, p = _tempfile.mkstemp(suffix=".diff")
+    try:
+        os.write(fd, diff_text.encode("utf-8"))
+        os.close(fd)
+        r = subprocess.run([sys.executable, os.path.join(cwd or REPO, GATE), "--diff", p, "--enforce"],
+                           capture_output=True, text=True, cwd=cwd or REPO)
+        out = _CSI.sub("", (r.stdout or "") + (r.stderr or ""))
+        return r.returncode, [ln for ln in out.splitlines() if ln.startswith("NAMING")], out
+    finally:
+        try:
+            os.remove(p)
+        except OSError:
+            pass
+
+
+def _refuses(lines, path):
+    return any(ln.startswith("NAMING REFUSE") and path in ln for ln in lines)
+
+
+def n2_record_tree_ungraded(path=None, root=None, runner=None):
+    """A record under org/ is never opened: the W4-S4 name and the W5-S6 citation land under --enforce."""
+    run = runner or _run_gate
+    rc, lines, _o = run(_plant(REC_PATH, '{"output_evidence": "advi-49f-fwd2-exercise-queue", "spec_ref": {"doc": "%s"}}'
+                              % TRACKED_DEMO_PATH))
+    say("planted record under org/: rc=%d; refusals naming it: %s" % (rc, _refuses(lines, REC_PATH)))
+    if rc != 0 or _refuses(lines, REC_PATH):
+        say("FAIL-N2-RECORD-TREE-GRADED")
+        return 1
+    say("PASS-N2-RECORD-TREE-UNGRADED")
+    return 0
+
+
+def n2_resolving_path_exempt(path=None, root=None, runner=None):
+    """Inside a declaration tree, a value that resolves to a tracked path is a CITATION and is not graded."""
+    run = runner or _run_gate
+    rc, lines, _o = run(_plant(PY_PATH, 'P = "%s"' % TRACKED_DEMO_PATH))
+    say("resolving path literal in lib/: rc=%d; refused: %s" % (rc, _refuses(lines, PY_PATH)))
+    if _refuses(lines, PY_PATH):
+        say("FAIL-N2-CITATION-GRADED-AS-MINT")
+        return 1
+    say("PASS-N2-RESOLVING-PATH-EXEMPT")
+    return 0
+
+
+def n2_binary_needs_reason(path=None, root=None, runner=None):
+    """A `-diff` attribute on a declaration-tree path with no same-line reason comment is refused (A-6)."""
+    run = runner or _run_gate
+    rc, lines, out = run(_plant(".gitattributes", TF_PATH + " -diff"))
+    named = ".gitattributes" in out and rc != 0
+    say("-diff without a reason: rc=%d; refusal names .gitattributes: %s" % (rc, named))
+    if not named:
+        say("FAIL-N2-BINARY-BYPASS-UNGRADED")
+        return 1
+    say("PASS-N2-BINARY-NEEDS-REASON")
+    return 0
+
+
+def regress_n2_tf_name_refuses(path=None, root=None, runner=None):
+    """NEGATIVE CONTROL (S45, separate criterion): the same literal as a .tf resource name still refuses."""
+    run = runner or _run_gate
+    rc, lines, _o = run(_plant(TF_PATH, 'resource "aws_sqs_queue" "q" { name = "advi-49f-fwd2-exercise-queue" }'))
+    say(".tf resource name: rc=%d; refused: %s" % (rc, _refuses(lines, TF_PATH)))
+    if rc == 0 or not _refuses(lines, TF_PATH):
+        say("FAIL-N2R-TF-NAME-NO-LONGER-REFUSED")
+        return 1
+    say("PASS-N2R-TF-NAME-STILL-REFUSES")
+    return 0
+
+
+def regress_n2_nonresolving_path_refuses(path=None, root=None, runner=None):
+    """NEGATIVE ARM of the exemption: a path-shaped value that does NOT resolve is still graded and refused."""
+    run = runner or _run_gate
+    rc, lines, _o = run(_plant(PY_PATH, 'P = "%s"' % TRACKED_DEMO_PATH.replace(".md", "-typo-nope.md")))
+    say("non-resolving path literal: rc=%d; refused: %s" % (rc, _refuses(lines, PY_PATH)))
+    if rc == 0 or not _refuses(lines, PY_PATH):
+        say("FAIL-N2R-NONRESOLVING-PATH-EXEMPTED")
+        return 1
+    say("PASS-N2R-NONRESOLVING-PATH-REFUSES")
+    return 0
+
+
+def regress_n2_binary_with_reason_passes(path=None, root=None, runner=None):
+    """The positive side of A-6: the same attribute WITH a same-line reason comment is not refused."""
+    run = runner or _run_gate
+    rc, _lines, out = run(_plant(".gitattributes", TF_PATH + " -diff  # generated lockfile, reviewed as data"))
+    say("-diff with a reason: rc=%d" % rc)
+    if rc != 0:
+        say("FAIL-N2R-REASONED-ATTRIBUTE-REFUSED")
+        return 1
+    say("PASS-N2R-REASONED-ATTRIBUTE-PASSES")
+    return 0
+
+
+def _selftest_n2_tree():
+    """Injected gate outputs, so the verdicts cannot drift when a worker changes the gate."""
+    def fake(rc, refuse_path=None, extra=""):
+        lines = ["NAMING REFUSE %s:1 x -> y" % refuse_path] if refuse_path else []
+        return lambda _d: (rc, lines, NL.join(lines) + NL + extra)
+    return [
+        ("n2 record-tree RED   (refused at HEAD)", n2_record_tree_ungraded(runner=fake(1, REC_PATH)) == 1),
+        ("n2 record-tree GREEN (ungraded)", n2_record_tree_ungraded(runner=fake(0)) == 0),
+        ("n2 resolving RED     (refused at HEAD)", n2_resolving_path_exempt(runner=fake(1, PY_PATH)) == 1),
+        ("n2 resolving GREEN   (exempt)", n2_resolving_path_exempt(runner=fake(0)) == 0),
+        ("n2 binary RED        (PASS 0 graded at HEAD)", n2_binary_needs_reason(runner=fake(0, extra="NAMING-GATE: PASS 0 graded")) == 1),
+        ("n2 binary GREEN      (refused naming .gitattributes)", n2_binary_needs_reason(runner=fake(1, ".gitattributes")) == 0),
+        ("n2r tf-name GREEN    (still refuses)", regress_n2_tf_name_refuses(runner=fake(1, TF_PATH)) == 0),
+        ("n2r tf-name RED      (stopped refusing)", regress_n2_tf_name_refuses(runner=fake(0)) == 1),
+        ("n2r nonresolving GREEN", regress_n2_nonresolving_path_refuses(runner=fake(1, PY_PATH)) == 0),
+        ("n2r nonresolving RED (exempted a typo)", regress_n2_nonresolving_path_refuses(runner=fake(0)) == 1),
+        ("n2r reasoned GREEN", regress_n2_binary_with_reason_passes(runner=fake(0)) == 0),
+        ("n2r reasoned RED     (refused anyway)", regress_n2_binary_with_reason_passes(runner=fake(1, ".gitattributes")) == 1),
+    ]
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -1326,6 +1467,7 @@ def selftest_arms():
     results.extend(_selftest_w7())
     results.extend(_selftest_w7r())
     results.extend(_selftest_t8())
+    results.extend(_selftest_n2_tree())
 
     say("")
     for label, ok in results:
@@ -1336,6 +1478,12 @@ def selftest_arms():
 
 
 CMDS = {
+    "n2-record-tree-ungraded": n2_record_tree_ungraded,
+    "n2-resolving-path-exempt": n2_resolving_path_exempt,
+    "n2-binary-needs-reason": n2_binary_needs_reason,
+    "regress-n2-tf-name-refuses": regress_n2_tf_name_refuses,
+    "regress-n2-nonresolving-path-refuses": regress_n2_nonresolving_path_refuses,
+    "regress-n2-binary-with-reason-passes": regress_n2_binary_with_reason_passes,
     "t8-replan-reproduces-extract": t8_replan_reproduces_extract,
     "t8-init-flags": t8_init_flags,
     "regress-t8-unplanned-have-cause": regress_t8_unplanned_have_cause,
