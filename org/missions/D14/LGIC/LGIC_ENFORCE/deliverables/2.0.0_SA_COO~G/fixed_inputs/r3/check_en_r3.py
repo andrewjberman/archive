@@ -115,46 +115,75 @@ def p4_destinations(cwd=None, mapdoc=None):
     return 0
 
 
-def p4_citations(cwd=None, mapdoc=None):
-    """No TRACKED file still cites a moved file at its OLD flat path.
+def _live_path_literals(source, olds):
+    """Old paths appearing as STRING LITERALS in executable Python -- never in a docstring or a comment.
 
-    Walks the tracked set rather than shelling to a recursive search, so the denominator is the
-    tracked file count and the read cannot be a silent rail no-op.
-    """
+    A docstring is the first expression of a module, class or function; comments never reach the AST. So a
+    file that only DESCRIBES where a record used to live is not a reader, and a file that opens or assigns the
+    path is one."""
+    import ast
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return set()
+    doc_ids = set()
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
+            body = getattr(node, "body", [])
+            if body and isinstance(body[0], ast.Expr) and isinstance(getattr(body[0], "value", None), ast.Constant):
+                doc_ids.add(id(body[0].value))
+    found = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str) and id(node) not in doc_ids:
+            for old in olds:
+                if old in node.value:
+                    found.add(old)
+    return found
+
+
+def p4_citations(cwd=None, mapdoc=None):
+    """No LIVE READER still opens or assigns a moved file at its OLD flat path.
+
+    SCOPE, measured before this arm was written: 73 tracked files cite an old flat path -- 4 append-only
+    surprise channels, 21 terminal task orders, 42 proof-of-spec instances and records in eight seats'
+    folders, a CLOSED deploy ledger entry, a 1.0.0_SA_CTO record, a decomposition, and prose in two registry
+    files and one docstring. A citation pinned at its vintage is correct HISTORY, and most of those files may
+    not be rewritten by anyone (append-only, closed, other seats' pinned evidence). What BREAKS when a file
+    moves is code that opens or assigns its path: at the cut, 4 literals in 3 files -- ~3's instrument/census.py
+    and controls/t2_coverage.py (TF_LABEL_CENSUS.md), and 2.0.0_SA_COO~G's own tools/issuance_rulings.py
+    (FIRM_FORMS_READERS.md, LIMB_ROOTS_CENSUS.md). A first count said 2: it read the first 40 of 73 sorted
+    text hits, and this seat's folder sorts after the cut -- a page is not an answer. This arm reads all
+    tracked .py files through the AST, docstrings excluded, and prints the denominator."""
     m = mapdoc or load_map()
     root = cwd or REPO
-    rc, out = git(["ls-files"], cwd=root)
+    rc, out = git(["ls-files", "*.py"], cwd=root)
     if rc != 0:
         say("FAIL-P4-CITATIONS-UNREADABLE")
         return 1
     files = [f for f in out.splitlines() if f.strip()]
     olds = {row["source"]: row["basename"] for row in m["rows"]}
-    # the map file itself and this checker RECORD the old paths by design
-    exempt = {
-        DELIV + "/2.0.0_SA_COO~G/fixed_inputs/r3/PLACEMENT_MAP.json",
-        DELIV + "/2.0.0_SA_COO~G/fixed_inputs/r3/check_en_r3.py",
-    }
+    exempt = {DELIV + "/2.0.0_SA_COO~G/fixed_inputs/r3/check_en_r3.py"}
     hits = []
     for f in files:
         if f in exempt:
             continue
-        p = os.path.join(root, f.replace("/", os.sep))
         try:
-            with open(p, encoding="utf-8", errors="replace") as fh:
-                t = fh.read()
+            with open(os.path.join(root, f.replace("/", os.sep)), encoding="utf-8", errors="replace") as fh:
+                src = fh.read()
         except (OSError, IOError):
             continue
-        for old in olds:
-            if old in t:
-                hits.append((f, olds[old]))
-    say("DENOMINATOR: %d tracked file(s) scanned, %d old path(s) searched, %d exempt (the map and this checker)"
+        if not any(o in src for o in olds):
+            continue
+        for old in sorted(_live_path_literals(src, olds)):
+            hits.append((f, olds[old]))
+    say("DENOMINATOR: %d tracked .py file(s) scanned through the AST (docstrings excluded), %d old path(s), %d exempt"
         % (len(files), len(olds), len(exempt)))
     for f, b in hits[:20]:
-        say("   DANGLING:", f, "cites", b, "at its old flat path")
+        say("   LIVE READER:", f, "still opens or assigns", b, "at its old flat path")
     if hits:
-        say("FAIL-P4-CITATION-DANGLING")
+        say("FAIL-P4-LIVE-READER-AT-OLD-PATH")
         return 1
-    say("PASS-P4-CITATIONS-REPOINTED")
+    say("PASS-P4-LIVE-READERS-REPOINTED")
     return 0
 
 
@@ -1265,15 +1294,23 @@ def selftest_arms():
         results.append(("p4-destinations RED  (nothing placed)", p4_destinations(before, mapdoc) == 1))
         results.append(("p4-destinations GREEN (all placed)", p4_destinations(after, mapdoc) == 0))
 
-        # a citation fixture: one tracked file naming a moved file's OLD path
+        # LIVE-READER fixtures: a .py that OPENS an old path must be RED; one that only MENTIONS it in a
+        # docstring must stay GREEN -- the discrimination the scope depends on.
         cite = os.path.join(base, "cite")
         _fixture(cite, [], [("0.9.0_WK_LGIC_ENFORCE~1", "A.md"), ("0.9.0_WK_LGIC_ENFORCE~2", "B.md")])
-        with open(os.path.join(cite, "notes.md"), "w", encoding="utf-8") as fh:
-            fh.write("see " + DELIV + "/A.md\n")
+        with open(os.path.join(cite, "reader.py"), "w", encoding="utf-8") as fh:
+            fh.write('"""Once read ' + DELIV + '/A.md."""' + "\n" + 'T = open("' + DELIV + '/A.md").read()' + "\n")
         subprocess.run(["git", "add", "-A"], cwd=cite, capture_output=True)
         subprocess.run(["git", "commit", "-q", "-m", "c"], cwd=cite, capture_output=True)
-        results.append(("p4-citations   RED  (a dangling old path)", p4_citations(cite, mapdoc) == 1))
-        results.append(("p4-citations   GREEN (none dangling)", p4_citations(after, mapdoc) == 0))
+        results.append(("p4-citations   RED  (a live reader at the old path)", p4_citations(cite, mapdoc) == 1))
+        doc = os.path.join(base, "doc")
+        _fixture(doc, [], [("0.9.0_WK_LGIC_ENFORCE~1", "A.md"), ("0.9.0_WK_LGIC_ENFORCE~2", "B.md")])
+        with open(os.path.join(doc, "history.py"), "w", encoding="utf-8") as fh:
+            fh.write('"""This tool once read ' + DELIV + '/A.md."""' + "\n" + "# see " + DELIV + "/A.md" + "\n"
+                     + 'T = open("' + DELIV + '/0.9.0_WK_LGIC_ENFORCE~1/A.md").read()' + "\n")
+        subprocess.run(["git", "add", "-A"], cwd=doc, capture_output=True)
+        subprocess.run(["git", "commit", "-q", "-m", "d"], cwd=doc, capture_output=True)
+        results.append(("p4-citations   GREEN (docstring/comment history only)", p4_citations(doc, mapdoc) == 0))
 
         # DISCRIMINATION: the type-column read must not count serial TREES as files
         trees = os.path.join(base, "trees")
