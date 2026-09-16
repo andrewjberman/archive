@@ -1,0 +1,271 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-k-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0aa50dbc0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8768f46770",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-k-1.catalog.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/base.py",
+      "kind": "script",
+      "commit_or_etag": "6a77fbc7ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built and tested, NOT deployed (order bound: 'Nothing deploys'). Adds the ASSUMED_ROLE AuthKind member; DELEGATED_USER/SHARED_SECRET/NONE keep their names and values (asserted directly in OGK1-AC1).",
+      "introduces": ["ASSUMED_ROLE = \"assumed_role\""],
+      "artifact_covered_by": ["OGK1-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/aws_roles.py",
+      "kind": "script",
+      "commit_or_etag": "6a77fbc7ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built and tested, NOT deployed. New module: the assumed-role credential adapter (two roles, dedicated ExternalIds, policy-before-credential, no fallback/no chaining).",
+      "introduces": ["class AssumedRole", "def role_configs", "class RoleSession"],
+      "artifact_covered_by": ["OGK1-AC1", "OGK1-AC2", "OGK1-AC3", "OGK1-AC4"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/catalog.py",
+      "kind": "script",
+      "commit_or_etag": "6a77fbc7ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built and tested, NOT deployed. New module: contract-driven catalog construction, closure validation (the producer's rule carried), independent HEAD+GET by VersionId over the data_prefixes-intersected set, immutable RUNTIME# persistence, rolling/fixed-date availability with explicit dates and staleness.",
+      "introduces": ["class Catalog", "def validate_closure", "def head_set", "def membership_findings"],
+      "artifact_covered_by": ["OGK1-AC1", "OGK1-AC2", "OGK1-AC3", "OGK1-AC4", "OGK1-AC5", "OGK1-AC6", "OGK1-AC7", "OGK1-AC8", "OGK1-AC9", "OGK1-AC10", "OGK1-AC11", "OGK1-AC12", "OGK1-AC13", "OGK1-AC14", "OGK1-AC15", "OGK1-AC16", "OGK1-AC17"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py",
+      "kind": "test",
+      "commit_or_etag": "6a77fbc7ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Tests are not deployed. One function per criterion, test_ogk1_ac01 .. test_ogk1_ac17, against OG-v-1's fixture set under moto; the harness (CallLog/Spy) measures which access key signed every S3/STS client and call.",
+      "introduces": ["def test_ogk1_ac01", "def test_ogk1_ac17"],
+      "artifact_covered_by": ["OGK1-AC1", "OGK1-AC2", "OGK1-AC3", "OGK1-AC4", "OGK1-AC5", "OGK1-AC6", "OGK1-AC7", "OGK1-AC8", "OGK1-AC9", "OGK1-AC10", "OGK1-AC11", "OGK1-AC12", "OGK1-AC13", "OGK1-AC14", "OGK1-AC15", "OGK1-AC16", "OGK1-AC17"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6a77fbc7ef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Append-only channel: one row appended (NFRA_OPLGTW-W5-S3), inside the one json fence; the fence re-parsed to 62 rows total, last id NFRA_OPLGTW-W5-S3.",
+      "introduces": ["NFRA_OPLGTW-W5-S3"],
+      "artifact_covered_by": ["OGK1-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/catalog.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The result file the order names, with every criterion's invocation/output/rc, the mutant and determinism controls, the declared exclusions and the filed surprise.",
+      "artifact_covered_by": ["OGK1-AC1", "OGK1-AC17"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGK1-AC1",
+      "criterion_verbatim": "OGK1-AC1 (test_ogk1_ac01) -- the assumed-role adapter is a new AuthKind, and calls STS with the role's dedicated ExternalId.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac01 -q -p no:cacheprovider --color=no",
+      "output_evidence": "AUTHKIND: [('ASSUMED_ROLE', 'assumed_role'), ('DELEGATED_USER', 'delegated_user'), ('NONE', 'none'), ('SHARED_SECRET', 'shared_secret')]\nSTS: 2 AssumeRole call(s), 2 of 2 roles with their own ExternalId, duration 900s\n  reader  opal-mcp-emp-menachem-schwab-read ExternalId=ogk1-reader-external-id-0001\n  catalog opal-mcp-schwab-catalog-read ExternalId=ogk1-catalog-external-id-0002\nSIGNED BY: 2 of 2 sts client(s) built from the ambient identity (no role chaining)\nCONFIG REFUSALS: 4 of 4, each before any STS call\n.                                                                        [100%]\n1 passed in 2.64s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 2 of 2 roles carry their own ExternalId; 4 of 4 config refusals occur before any STS call",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC2",
+      "criterion_verbatim": "OGK1-AC2 (test_ogk1_ac02) -- the data-policy check precedes every credential fetch, by a call-order assertion.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac02 -q -p no:cacheprovider --color=no",
+      "output_evidence": "ORDER (fresh):   ['policy:call', 'policy:allowed', 'sts:AssumeRole:opal-mcp-emp-menachem-schwab-read']\nORDER (denied):  ['policy:call', 'policy:denied'] -- 0 STS calls\nORDER (cached):  ['policy:call', 'policy:allowed'] -- 0 STS calls, policy still ran\nORDER (expired): ['policy:call', 'policy:allowed', 'sts:AssumeRole:opal-mcp-emp-menachem-schwab-read']\nCATALOG BUILD:   2 of 2 AssumeRole call(s) preceded by an allowed policy check\n.                                                                        [100%]\n1 passed in 3.16s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 2 of 2 AssumeRole calls in the catalog build preceded by an allowed policy check",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC3",
+      "criterion_verbatim": "OGK1-AC3 (test_ogk1_ac03) -- (difference) with the adapter failing, no S3 client is built from ambient or instance credentials, and with it healthy the role session is used.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac03 -q -p no:cacheprovider --color=no",
+      "output_evidence": "FAILING ADAPTER: status=unavailable classes=('DEPENDENCY_UNAVAILABLE',) | s3 clients built 0 | s3 calls 0 | ambient-key s3 calls 0 of 0\nHEALTHY ADAPTER: status=complete | s3 clients built 2, all from assumed-role keys ['ASIAUR7FNW6PAWDVE2L3', 'ASIAUR7FNW6PGSLSO4X6'] | ambient-key s3 calls 0 of 10\n.                                                                        [100%]\n1 passed in 1.84s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 2 arms (failing, healthy); 0 of 0 and 0 of 10 ambient-key S3 calls respectively",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC4",
+      "criterion_verbatim": "OGK1-AC4 (test_ogk1_ac04) -- closure validation uses the catalog role only and data HEADs use the data role only.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac04 -q -p no:cacheprovider --color=no",
+      "output_evidence": "CATALOG ROLE (opal-mcp-schwab-catalog-read): 1 key(s), 1 of 1 under the contract's 2 completion prefixes; ops ['GetObject']\nDATA ROLE (opal-mcp-emp-menachem-schwab-read): 3 key(s), 3 of 3 under the contract's 6 data prefixes; ops ['GetObject', 'HeadObject']\nCROSSED: catalog-role keys under a data prefix 0 of 1; data-role keys under a completion prefix 0 of 3; ambient-key calls 0 of 10\n.                                                                        [100%]\n1 passed in 1.82s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 0 of 1 catalog-role keys under a data prefix; 0 of 3 data-role keys under a completion prefix",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC5",
+      "criterion_verbatim": "OGK1-AC5 (test_ogk1_ac05) -- every named silver object under the contract's data_prefixes is HEADed by its VersionId.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac05 -q -p no:cacheprovider --color=no",
+      "output_evidence": "NAMED: 7 object(s) in the closure; 3 under the contract's data_prefixes\nHEADED BY VersionId: 3 of 3\n  schwab/08242234/silver/dim_asset/date=2026-07-10/data.parquet 991453cb-fbb7-4606-be84-74a2d049be28\n  schwab/08242234/silver/dim_balance/date=2026-07-10/data.parquet ba60c295-d40b-4c4d-88f9-9b9e078241d2\n  schwab/08242234/silver/dim_position/date=2026-07-10/data.parquet b3ea2a29-3219-426a-9a0c-923fe7148abf\n.                                                                        [100%]\n1 passed in 3.19s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 3 of 3 data_prefix objects HEADed by their pinned VersionId, matching the bucket's own",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC6",
+      "criterion_verbatim": "OGK1-AC6 (test_ogk1_ac06) -- a null, unversioned, changed or unavailable object yields incomplete or unavailable, one fixture each.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac06 -q -p no:cacheprovider --color=no",
+      "output_evidence": "ARMS: 4 of 4, one fixture each (no arm is complete):\n  changed      2026-07-08 -> status=unavailable classes=('VERSION_CHANGED',)\n  null         2026-07-02 -> status=incomplete  classes=('UNVERSIONED_OBJECT',)\n  unavailable  2026-07-09 -> status=incomplete  classes=('VERSION_CHANGED', 'VERSION_UNAVAILABLE')\n  unversioned  2026-06-24 -> status=incomplete  classes=('INCONSISTENT_RECORD', 'UNVERSIONED_OBJECT')\n.                                                                        [100%]\n1 passed in 2.53s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 4 of 4 arms, none complete",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC7",
+      "criterion_verbatim": "OGK1-AC7 (test_ogk1_ac07) -- a marker naming another bucket, master or dataset is rejected.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac07 -q -p no:cacheprovider --color=no",
+      "output_evidence": "REJECTED: 3 of 3 arms, each with 0 silver reads:\n  another bucket   -> result=rejected classes=('REJECTED_FOREIGN_BUCKET',)\n  another dataset  -> result=rejected classes=('INCONSISTENT_GRAIN', 'INCONSISTENT_RECORD', 'REJECTED_FOREIGN_DATASET')\n  another master   -> result=rejected classes=('INCONSISTENT_GRAIN', 'REJECTED_FOREIGN_MASTER')\nCONTROL: the same marker without the foreign name -> status=complete, 3 file(s)\n.                                                                        [100%]\n1 passed in 1.79s\n(rc=0)\nMUTANT CONTROL: disabling the per-object foreign-master check (catalog.py membership_findings) flips this test's 'another master' arm red: AssertionError: assert 'incomplete' == 'rejected'. Reverted; back to 1 passed.",
+      "denominator": "1 of 1 selected test; 3 of 3 arms rejected with 0 silver reads each; 1 control accepted",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC8",
+      "criterion_verbatim": "OGK1-AC8 (test_ogk1_ac08) -- the catalog snapshot persisted under RUNTIME# carries the closure version, table, master, date, VersionIds, sizes, schema fingerprint, row counts, validation result and opaque file IDs.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac08 -q -p no:cacheprovider --color=no",
+      "output_evidence": "SNAPSHOT KEY: RUNTIME#catalog#08242234#2026-07-10#sha256:4b667de5cf6fbb24dabc369fd032c806754352e15ba787409a6585263d82b7d3 / catalog_snapshot\nVALIDATION: qualified\nFILES: 3 of 3 contract datasets, each with 8 of 8 required fields:\n  dim_asset    version=7b18979b-7f05-4897-a6b4-f42d2d837146 size=8425 rows=4 sha256:a35d0120e0bc id=sf-9007f2994470dfd14d5cc16f27c03068\n  dim_balance  version=e3a83730-c50c-4dbc-bade-04dc33a7c683 size=10687 rows=3 sha256:04f7cfa48480 id=sf-3b415b5fdbd58fa24e7758ecbe41028d\n  dim_position version=d30cc2bb-f83c-4056-9235-ec487c36d82f size=8663 rows=5 sha256:84c8ba1dfc8f id=sf-e020630dede4aed6ad49566a4b627096\n.                                                                        [100%]\n1 passed in 1.87s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 3 of 3 contract datasets present, 8 of 8 required fields each; caller-facing view carries none of key/VersionId/ETag",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC9",
+      "criterion_verbatim": "OGK1-AC9 (test_ogk1_ac09) -- a second write of one snapshot key is refused.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac09 -q -p no:cacheprovider --color=no",
+      "output_evidence": "WRITES: 1 accepted, 2 refused of 2 attempted (identical body and mutated body), refusal=ConditionFailed\nSTORED ITEM: unchanged (byte-equal DynamoDB item before and after both refusals)\nREBUILD: reused=True, 3 of 3 file IDs identical\n.                                                                        [100%]\n1 passed in 1.66s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 2 of 2 write attempts refused (identical and mutated body); DynamoDB item byte-equal before/after",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC10",
+      "criterion_verbatim": "OGK1-AC10 (test_ogk1_ac10) -- (difference) a legacy marker yields unavailable, and the qualified fixture for the same date yields a snapshot.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac10 -q -p no:cacheprovider --color=no",
+      "output_evidence": "LEGACY v1 MARKER (9 field(s), no closure): status=unavailable result=legacy_marker, 0 silver read(s)\nQUALIFIED CLOSURE, same date: status=complete, 3 file(s), closure sha256:4069c4c5770cd85a\n.                                                                        [100%]\n1 passed in 1.52s\n(rc=0)",
+      "denominator": "1 of 1 selected test; same key, 2 arms (legacy -> unavailable, 0 reads; qualified -> complete, 3 files)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC11",
+      "criterion_verbatim": "OGK1-AC11 (test_ogk1_ac11) -- the rolling window is the latest qualified business date plus the previous 29 calendar days, per master and dataset.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac11 -q -p no:cacheprovider --color=no",
+      "output_evidence": "  08242234 dim_position latest=2026-07-13 window=[2026-06-14 .. 2026-07-13] available=4 of 13 evaluated\n  08242234 dim_asset    latest=2026-07-10 window=[2026-06-11 .. 2026-07-10] available=4 of 14 evaluated\n  08335338 dim_position latest=2026-07-10 window=[2026-06-11 .. 2026-07-10] available=2 of 2 evaluated\nBOUNDARY: 2026-06-11 (anchor-29) is in dim_asset's window; 2026-06-10 (anchor-30) is in no window\nPER DATASET: 2026-07-13 delivers rld+rps only, so dim_position's anchor is 2026-07-13 while dim_asset's is 2026-07-10\n.                                                                        [100%]\n1 passed in 3.00s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 3 (master, dataset) windows checked; every window spans exactly 29 days first-to-last",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC12",
+      "criterion_verbatim": "OGK1-AC12 (test_ogk1_ac12) -- fixed-date mode takes an enumerated date set.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac12 -q -p no:cacheprovider --color=no",
+      "output_evidence": "ENUMERATED: 5 date(s) asked; 3 served; 2 refused\nNO WINDOW APPLIED: 2026-06-01 is 39 days before the latest qualified date and is served under the enumeration\nOUTSIDE THE SET: 2026-07-10 is complete and is NOT served\nREFUSALS: 4 of 4\n  a date that is not one   -> fixed date '2026-02-30' is not a calendar date\n  a mode the contract lacks -> date mode 'everything' is not one of the contract's (('rolling_complete_window', 'fixed_dates'),)\n  fixed with no dates      -> a fixed_dates grant is an enumerated date set; none was given\n  rolling with dates       -> a rolling_complete_window grant enumerates no dates\n.                                                                        [100%]\n1 passed in 3.10s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 5 of 5 enumerated dates judged, 4 of 4 malformed-input refusals",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC13",
+      "criterion_verbatim": "OGK1-AC13 (test_ogk1_ac13) -- the response returns the available dates and the latest qualified date.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac13 -q -p no:cacheprovider --color=no",
+      "output_evidence": "ROLLING: available_dates=['2026-07-07', '2026-07-09', '2026-07-10'] latest_qualified_date=2026-07-10\nFIXED:   available_dates=['2026-07-09'] latest_qualified_date=2026-07-09; refused [('2026-06-29', ['MISSING_OUTPUT'])]\nNOTHING QUALIFIED: available_dates=[] latest_qualified_date=None staleness=None -- stated, not omitted\n.                                                                        [100%]\n1 passed in 1.79s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 3 arms (rolling, fixed, nothing-qualifies), both fields present and explicit in every arm",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC14",
+      "criterion_verbatim": "OGK1-AC14 (test_ogk1_ac14) -- no date is filled from another master or dataset.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac14 -q -p no:cacheprovider --color=no",
+      "output_evidence": "ACROSS DATASETS: 2026-07-13 delivered rld+rps; dim_position lists it, dim_asset does not (reason [['DATASET_NOT_IN_CLOSURE']])\nACROSS MASTERS: SmartX serves ['2026-07-07', '2026-07-09', '2026-07-10', '2026-07-13']; BlackDiamond serves ['2026-07-09', '2026-07-10']; SmartX-only dates never appear under BlackDiamond: ['2026-07-07', '2026-07-13']\nFIXED GRANT of a SmartX-only date under BlackDiamond: []\nFILES: 9 of 9 resolve to their own master/dataset/date key\n.                                                                        [100%]\n1 passed in 2.61s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 9 of 9 served files resolve to their own master/dataset/date key",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC15",
+      "criterion_verbatim": "OGK1-AC15 (test_ogk1_ac15) -- staleness is reported as days since the qualified business date, with the observation time.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac15 -q -p no:cacheprovider --color=no",
+      "output_evidence": "ROLLING: latest=2026-07-10 days_since_business_date=3 source_observed_at=2026-07-10T12:00:00Z catalog_validated_at=2026-07-13T14:00:00Z\nCLOCK + 1 DAY: days_since_business_date=4 (same business date)\nFIXED GRANT of 2026-06-01: days_since_business_date=42\nBASIS: calendar days from the Schwab business-date label to the Gateway clock's UTC date; no business calendar is applied, so this is not a claim about lateness\n.                                                                        [100%]\n1 passed in 2.65s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 3 clock/grant arms; no 'late'/'sla' key present in the staleness object",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC16",
+      "criterion_verbatim": "OGK1-AC16 (test_ogk1_ac16) -- the set of keys the catalog HEADs and GETs, printed with its denominator, is a subset of the data_prefixes read from the contract file.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac16 -q -p no:cacheprovider --color=no",
+      "output_evidence": "SWEEP: 6 availability responses (2 masters x 3 datasets, rolling)\nDATA ROLE HEAD+GET: 69 call(s) over 18 distinct key(s); 18 of 18 under the 6 data_prefixes read from C:\\tmp\\wk-oplgtw-1-5c\\org\\standards\\NFRA_OPLGTW_CONTRACT.json\nCATALOG ROLE: 14 distinct key(s); 14 of 14 under the 2 completion_prefixes\nNOT VACUOUS: the bucket's closures name 90 distinct object(s), of which 53 lie outside the data_prefixes; 0 of those 53 were HEADed or GOT\nAMBIENT KEY: 0 of 159 calls\n.                                                                        [100%]\n1 passed in 2.70s\n(rc=0)",
+      "denominator": "18 of 18 distinct HEAD/GET keys under the 6 contract data_prefixes; 0 of 53 named-but-outside-prefix objects touched; 0 of 159 calls signed by the ambient key",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGK1-AC17",
+      "criterion_verbatim": "OGK1-AC17 (test_ogk1_ac17) -- (difference) a qualified closure that also names fact_* objects makes zero S3 calls under any fact_* key and still yields a snapshot on its dims, while the same closure with one dim object missing yields incomplete.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-1-5c && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py::test_ogk1_ac17 -q -p no:cacheprovider --color=no",
+      "output_evidence": "CLOSURE sha256:78e0b93cb1932e2f names 7 object(s): 3 dim, 4 fact\nARM 1 (all objects present): status=complete, 3 file(s) on dims, 0 of 4 S3 calls under a fact_ key\nARM 2 (one DIM object deleted, same closure_id): status=incomplete classes=('VERSION_UNAVAILABLE',), 0 S3 call(s) under a fact_ key\n.                                                                        [100%]\n1 passed in 3.60s\n(rc=0)",
+      "denominator": "1 of 1 selected test; 0 of 4 fact_* keys touched in either arm; 2 of 2 arms yield the stated status",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants, each applied with the Edit tool directly to the tracked file, run against the one criterion each targets, then reverted (confirmed by an empty `git diff --stat`) before the next test ran. M1: catalog.py membership_findings, the per-object master check (`if key_master != master:`) short-circuited to `if False and ...`. M2: aws_roles.py role_configs, the ExternalId-reuse refusal short-circuited the same way.",
+      "expected": "M1 turns OGK1-AC7's 'another master' arm from rejected to something else. M2 turns OGK1-AC1's 'one ExternalId reused' refusal arm from raising RoleConfigError to not raising.",
+      "observed": "M1: test_ogk1_ac07 FAILED -- AssertionError: assert 'incomplete' == 'rejected'. M2: test_ogk1_ac01 FAILED -- Failed: DID NOT RAISE <class 'app.integrations.schwab.aws_roles.RoleConfigError'>. Both reverted; test_ogk1_ac07 returned to '1 passed in 2.81s' and test_ogk1_ac01 to '1 passed in 2.26s'; git diff --stat on both files returned empty after each revert. (A first M1 attempt mutated the marker/closure-level master check in the same function and stayed GREEN -- the per-object key-parse check independently catches this fixture's arm, a real redundancy; recorded in catalog.result.md rather than discarded.)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every one of the 17 criteria ran once standalone (one selected test per pytest invocation, per this order's own <invocation>), and the whole module ran together in one process after both mutants were reverted.",
+      "observed": "17 of 17 standalone runs: '1 passed' each, rc=0 (table in catalog.result.md). Full module together, post-revert: '17 passed in 24.25s' -- no new failure, matching the 17 individual passes. AC8/AC9 depend on moto's own conditional-write semantics, not wall-clock timing; AC11/AC14/AC15's window and staleness arithmetic run off the fixture's fixed CLOCK constant, not the real clock.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {"item": "Deploy", "reason": "The order's bound: 'Nothing deploys'. .venv-og and .scratch/ are not committed."},
+    {"item": "A whole-suite regression run of every other gateway test module in one process", "reason": "The box is heavily loaded (~96% CPU per hand-off); the order directs one module or one test at a time. As a bounded check on the bound 'Existing AuthKind values and their integrations keep their behaviour', test_min_tier_gate.py (3 passed) and test_data_entitlement_guard.py (12 passed) were run standalone, both clean -- not a criterion of this order, and not exhaustive."},
+    {"item": "Any Schwab object read", "reason": "OGK1 is offline-only against moto (order bound); no Schwab object is read at any point."}
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W5-S3: the hand-off's 'known red test' (test_identity_scope.py::test_scoped_deny_by_default) passes unmodified at this worktree's base, contradicting the hand-off's premise that it fails there; neither that test nor identity_tool_allowlist.txt was touched by this worker. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/catalog.result.md",
+  "compiler_tools": [
+    {"tool": "comp-read", "invocation": "read of org/standards/NFRA_OPLGTW_CONTRACT.json, app/integrations/base.py, app/integrations/schwab/{aws_roles.py,catalog.py}, tests/test_schwab_catalog.py in full", "result": "data_prefixes (6), completion_prefixes (2), reader_role/catalog_role, catalog_statuses/grant_date_modes read and checked against parse_contract(); the CTO's msg-97078 HEAD/GET-set ruling implemented in head_set() as the closure's named objects intersected with data_prefixes"},
+    {"tool": ".tools/commit-gate.sh", "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/integrations/base.py infra/aws/ec2/opal-gateway/app/integrations/schwab/aws_roles.py infra/aws/ec2/opal-gateway/app/integrations/schwab/catalog.py infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py", "result": "OK: pre-commit gate clean for 4 of 4 file(s)"},
+    {"tool": ".tools/safe-commit.sh", "invocation": "safe-commit --author 0.9.0_WK_NFRA_OPLGTW~5 -F <msgfile> -- base.py aws_roles.py catalog.py test_schwab_catalog.py INVESTIGATION_v1.md", "result": "rc=0, 6a77fbc7ef (LOCAL on wk-nfra_oplgtw-1-5c); commit-gate/naming-gate/to-pipeline-gate/surprise-corpus/surprise-row-gate/missions-tree-check all clean"}
+  ]
+}
