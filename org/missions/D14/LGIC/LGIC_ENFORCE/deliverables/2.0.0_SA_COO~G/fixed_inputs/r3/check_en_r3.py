@@ -386,6 +386,157 @@ def _selftest_i3():
     return out
 
 
+# ---------------------------------------------------------------- cell 5 arms
+#
+# RULING R-6 on the six tokens EN-r-2 left `unresolved` in systems.json. Refused keys live INSIDE
+# infra/logic/registry/systems.json as the `refused_keys` dict -- there is NO refused_keys.json file.
+# Two carriers name one: this seat's own row LGIC_ENFORCE-S57 (the origin, a path typed into an act-census
+# script and never checked for existence) and RULING R-23, which copied it. LGIC_ENFORCE-S58. Measured at the cut: refused_keys
+# carries workstream_code / generic_noun / purpose_word and no `retired` class, and all six tokens --
+# find, harvest, imo, astn, trade, news -- still sit in `unresolved`. So every arm below reads RED
+# before the cell runs.
+#
+# NOT an arm here, on purpose: S19's stale scopes.json _about.row_fields sentence. It was introduced at
+# a925c8a642 (EN-r-1) and REMOVED at 22e86e55f5 (EN-r-3-r2, round 2); the schema's firm_forms key is
+# gone too. A criterion on it would PASS before the cell runs, which W2-S11 forbids.
+
+SYSTEMS = "infra/logic/registry/systems.json"
+
+# The `why` text each token carried at the cut. A token the cell leaves unresolved must carry a NEW,
+# measured why -- re-reading the old sentence is not a measurement (R-6 s.3).
+PRE_CELL_WHY = {
+    "find": "infra/logic/05_IDENTITY_SPINE.md s.3 marks harvest/find UNRESOLVED (tick-list row 18)",
+    "harvest": "infra/logic/05_IDENTITY_SPINE.md s.3 marks harvest/find UNRESOLVED (tick-list row 18)",
+    "imo": "infra/logic/05_IDENTITY_SPINE.md s.3: whether imo is a product, a vendor or retired is a word (tick-list row 18)",
+}
+PRE_CELL_WHY_PREFIX = "GRADING_RULE.md V1 lists it as a PRODUCT, but no DIRECTIVES.yaml line"
+PRODUCT_TOKENS = ["harvest", "astn", "news", "trade"]
+
+
+def _systems(root=None):
+    with open(os.path.join(root or REPO, SYSTEMS.replace("/", os.sep)), encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _unresolved(sy):
+    return {u.get("token"): u.get("why", "") for u in (sy.get("unresolved") or []) if isinstance(u, dict)}
+
+
+def r5_imo_retired(root=None):
+    """`imo` is a member of a refused_keys `retired` class carrying its basis, and is no longer unresolved."""
+    sy = _systems(root)
+    rk = sy.get("refused_keys") or {}
+    retired = rk.get("retired")
+    members = retired if isinstance(retired, list) else (retired or {}).get("members", []) if isinstance(retired, dict) else []
+    in_class = "imo" in members
+    still_open = "imo" in _unresolved(sy)
+    say("refused_keys classes: %s" % sorted(k for k in rk if k != "basis"))
+    say("retired class present: %s; imo a member: %s; imo still unresolved: %s"
+        % (retired is not None, in_class, still_open))
+    if not in_class or still_open:
+        say("FAIL-R5-IMO-NOT-RETIRED")
+        return 1
+    say("PASS-R5-IMO-RETIRED")
+    return 0
+
+
+def r5_find_refused(root=None):
+    """`find` is a refused workstream code (V3: a project code is never a system), no longer unresolved."""
+    sy = _systems(root)
+    wc = (sy.get("refused_keys") or {}).get("workstream_code") or []
+    in_class = "find" in wc
+    still_open = "find" in _unresolved(sy)
+    say("workstream_code members: %d; find a member: %s; find still unresolved: %s"
+        % (len(wc), in_class, still_open))
+    if not in_class or still_open:
+        say("FAIL-R5-FIND-NOT-REFUSED")
+        return 1
+    say("PASS-R5-FIND-REFUSED")
+    return 0
+
+
+def r5_product_owners(root=None):
+    """Each of harvest/astn/news/trade is EITHER a PRODUCT row whose owner_claim is `inferred` or
+    `measured` with a non-empty owner_basis citation, OR still unresolved with a NEW measured why.
+    Never the pre-cell sentence unchanged: that is the guess R-6 refuses."""
+    sy = _systems(root)
+    rows = {r.get("key"): r for r in (sy.get("systems") or []) if isinstance(r, dict)}
+    unres = _unresolved(sy)
+    bad = []
+    for tok in PRODUCT_TOKENS:
+        row = rows.get(tok)
+        if row is not None:
+            claim = row.get("owner_claim")
+            basis = (row.get("owner_basis") or "").strip()
+            ok = row.get("class") == "PRODUCT" and claim in ("measured", "inferred") and len(basis) >= 12
+            say("  %-8s ROW   class=%s owner_claim=%s basis_len=%d -> %s"
+                % (tok, row.get("class"), claim, len(basis), "ok" if ok else "DEFECT"))
+            if not ok:
+                bad.append(tok)
+        elif tok in unres:
+            why = unres[tok]
+            unchanged = why == PRE_CELL_WHY.get(tok) or why.startswith(PRE_CELL_WHY_PREFIX)
+            say("  %-8s OPEN  why changed from the cut: %s" % (tok, not unchanged))
+            if unchanged:
+                bad.append(tok)
+        else:
+            say("  %-8s GONE  neither a row nor unresolved -- a token cannot vanish" % tok)
+            bad.append(tok)
+    say("DENOMINATOR: %d product token(s) ruled by R-6; %d defective" % (len(PRODUCT_TOKENS), len(bad)))
+    if bad:
+        say("FAIL-R5-OWNERS-UNMEASURED")
+        return 1
+    say("PASS-R5-OWNERS-MEASURED")
+    return 0
+
+
+def _selftest_r5():
+    """Each arm RED on a copy of the registry as it stood at the cut, GREEN on a copy with the ruling
+    applied -- both built in a temp root, so the self-test never reads the live file."""
+    import copy
+    live = _systems()
+    out = []
+    for label, apply, fn in [
+        ("r5-imo-retired", lambda d: (d["refused_keys"].__setitem__("retired", ["imo"]),
+                                      d.__setitem__("unresolved", [u for u in d["unresolved"] if u["token"] != "imo"])),
+         r5_imo_retired),
+        ("r5-find-refused", lambda d: (d["refused_keys"]["workstream_code"].append("find"),
+                                       d.__setitem__("unresolved", [u for u in d["unresolved"] if u["token"] != "find"])),
+         r5_find_refused),
+        ("r5-product-owners", lambda d: [
+            (d["systems"].append({"key": t, "class": "PRODUCT", "long": t, "owner_directive": "D9",
+                                  "owner_claim": "inferred", "owner_basis": "lambda-source-map.json source_dir data/%s" % t}),
+             d.__setitem__("unresolved", [u for u in d["unresolved"] if u["token"] != t]))
+            for t in PRODUCT_TOKENS],
+         r5_product_owners),
+    ]:
+        for state in ("RED", "GREEN"):
+            doc = copy.deepcopy(live)
+            if state == "GREEN":
+                apply(doc)
+            base = _tempfile.mkdtemp(prefix="en_r3_r5_")
+            try:
+                d = os.path.join(base, *SYSTEMS.split("/")[:-1])
+                os.makedirs(d)
+                with open(os.path.join(base, *SYSTEMS.split("/")), "w", encoding="utf-8") as fh:
+                    json.dump(doc, fh)
+                rc = fn(base)
+            finally:
+                _shutil.rmtree(base, ignore_errors=True)
+            out.append(("%s %-5s" % (label, state), rc == (1 if state == "RED" else 0)))
+    # the SAME-SENTENCE trap: a token left unresolved with its cut-time why must stay RED
+    doc = copy.deepcopy(live)
+    base = _tempfile.mkdtemp(prefix="en_r3_r5s_")
+    try:
+        os.makedirs(os.path.join(base, *SYSTEMS.split("/")[:-1]))
+        with open(os.path.join(base, *SYSTEMS.split("/")), "w", encoding="utf-8") as fh:
+            json.dump(doc, fh)
+        out.append(("r5-product-owners unchanged-why stays RED", r5_product_owners(base) == 1))
+    finally:
+        _shutil.rmtree(base, ignore_errors=True)
+    return out
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -454,6 +605,7 @@ def selftest_arms():
         shutil.rmtree(base, ignore_errors=True)
 
     results.extend(_selftest_i3())
+    results.extend(_selftest_r5())
 
     say("")
     for label, ok in results:
@@ -464,6 +616,9 @@ def selftest_arms():
 
 
 CMDS = {
+    "r5-imo-retired": r5_imo_retired,
+    "r5-find-refused": r5_find_refused,
+    "r5-product-owners": r5_product_owners,
     "i3-channel-root": i3_channel_root,
     "n2-denominator": n2_denominator,
     "n2-coverage": n2_coverage,
