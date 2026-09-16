@@ -436,10 +436,75 @@ def f2_coverage():
     return 0
 
 
+R2_FIRM_PATTERNS = BASE + "/deliverables/exercises/r2/n4-firm-patterns.md"
+
+
+def g1_forms():
+    """Item 5b: the canonical forms re-grade with 0 CHANGES under NAMING_SCHEMA v1.10.
+
+    A regression arm: v1.10 lands alias_adjacency, and landing a field must not move a form that
+    was already canonical. The record is round 2's attributed set; the comparison is against
+    grade() at THIS tree, and the denominator is printed."""
+    mod = _naming()
+    if mod is None:
+        return missing(LIB, "G1-FORMS")
+    t = read(R2_FIRM_PATTERNS)
+    if t is None:
+        return missing(R2_FIRM_PATTERNS, "G1-FORMS")
+    rec = None
+    for block in _FENCE_JSON.findall(t):
+        try:
+            d = json.loads(block)
+        except ValueError:
+            continue
+        if isinstance(d, dict) and d.get("attributed"):
+            rec = d
+            break
+    if rec is None:
+        return missing(R2_FIRM_PATTERNS + " (attributed fence)", "G1-FORMS")
+    rows, placed, regressed = [], [], []
+    for firm, entries in (rec.get("attributed") or {}).items():
+        for a in entries or []:
+            nm, was = a.get("name"), a.get("canonical")
+            try:
+                now = mod.grade(nm, "IAM_ROLE")[1]
+            except Exception as exc:
+                now = "RAISED:%s" % type(exc).__name__
+            rows.append(nm)
+            if now == was:
+                continue
+            # A PLACEMENT is a {token} becoming a real one and NOTHING ELSE changing. That is the
+            # registry gaining a row, which is the system working. Anything else is a REGRESSION.
+            if "{" in str(was) and "{" not in str(now)                     and re.sub(r"^\{[a-z_]+\}", "", str(was)) == re.sub(r"^[a-z0-9]+", "", str(now), count=1):
+                placed.append((nm, was, now))
+            else:
+                regressed.append((nm, was, now))
+    doc = load_json(SCHEMA) or {}
+    res = load_json(RESOURCES) or {}
+    print("SCHEMA %s -- re-grading round 2's attributed forms, denominator %d"
+          % (doc.get("version"), len(rows)))
+    print("  UNCHANGED  %d" % (len(rows) - len(placed) - len(regressed)))
+    print("  PLACED     %d   a {token} filled and nothing else moved -- the registry gaining rows"
+          % len(placed))
+    print("             registry resource-to-system rows at this tree: %d"
+          % len(res.get("resources") or []))
+    print("  REGRESSED  %d   any other movement" % len(regressed))
+    for nm, was, now in placed[:5]:
+        print("    PLACED    %-38s %-34s -> %s" % (nm, was, now))
+    for nm, was, now in regressed[:10]:
+        print("    REGRESSED %-38s %-34s -> %s" % (nm, was, now))
+    ok = bool(rows) and not regressed
+    say("PASS-FORMS-NO-REGRESSION-AT-V110" if ok else "FAIL-FORMS-REGRESSED-AT-V110",
+        "landing a schema field must move no already-canonical form; a PLACEHOLDER being FILLED",
+        "is the registry working and is counted separately, never as a regression")
+    return 0
+
+
 SUBCOMMANDS = {
     "g2-globgrph": g2_globgrph,
     "g2-suite": g2_suite,
     "g1-adjacency": g1_alias_adjacency,
+    "g1-forms": g1_forms,
     "f1-gaps": f1_gaps,
     "f2-positive": f2_positive,
     "f2-negative": f2_negative,
