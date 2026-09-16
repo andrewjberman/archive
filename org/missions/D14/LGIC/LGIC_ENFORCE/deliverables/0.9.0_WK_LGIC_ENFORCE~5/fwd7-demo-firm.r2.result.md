@@ -66,6 +66,14 @@ checker reads the two commits from the object database, so removing the worktree
 
 ## Surprises
 
-None filed. No premise of the order failed, no path was missing, every named invocation produced its named
-result, and no tracked file outside `<paths>` was modified (`git diff --name-only` on the slot worktree
-prints 0 paths).
+**`LGIC_ENFORCE-W5-S6`** -- OBSERVATION, ARMED, `disarm_owner` `2.0.0_SA_COO~G`. Filed after the proof
+commit, on verdicts that commit itself printed: `.tools/naming-gate.py` grades a repo PATH STRING inside a
+fabric `.json` record as a hand-kept firm carrier, so this proof instance draws three REFUSE verdicts for
+nothing but citing its OWN task order, whose issuer-chosen filename carries the token `demo`. Two of the
+three are schema-REQUIRED fields (`spec_ref.doc`, `decomp_ref.to_ref`). Re-run under `--enforce` on the
+committed patch: `NAMING-GATE: REFUSE 3 graded`, rc 1. The gate is in its WARN window today, so commit
+`735b073531` landed.
+
+No premise of the order failed, no path was missing, every named invocation produced its named result, and
+no tracked file outside `<paths>` was modified (`git diff --name-only` on the slot worktree printed 0 paths
+before the row was appended). The row is off-criterion and blocks nothing in this cell.
