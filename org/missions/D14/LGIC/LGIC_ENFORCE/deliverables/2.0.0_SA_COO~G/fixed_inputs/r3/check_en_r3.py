@@ -17,8 +17,10 @@ Exit 0 on PASS, 1 on FAIL, 2 on usage/read error.
 import json
 import os
 import re
+import shutil as _shutil
 import subprocess
 import sys
+import tempfile as _tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 # r3 -> fixed_inputs -> 2.0.0_SA_COO~G -> deliverables -> LGIC_ENFORCE -> LGIC -> D14 -> missions -> org -> repo
@@ -254,6 +256,136 @@ def n2_declaration_subtraction(cwd=None):
     return 0
 
 
+# ---------------------------------------------------------------- cell 3a arm
+#
+# LGIC_NAMING-S21: proof-of-spec-check.py's surprises limb resolves a cited row by globbing
+# WORKSPACE = Path(__file__).resolve().parent.parent -- the checkout holding the SCRIPT -- not the
+# checkout holding the INSTANCE being graded. So the main checkout's script, pointed at an instance
+# on a side branch or in a linked worktree whose channel carries the row, reads "resolves to NO row"
+# although the row is committed in the graded tree. The CVO's L9 and the L10 gate run that script.
+#
+# The arm builds a throwaway git repo shaped like the tree: a channel carrying a planted row id that
+# the script's own checkout does NOT carry, and an instance citing it. It runs the script under test
+# against that instance and PASSes only when the limb resolves the planted row. Reproduced RED at
+# HEAD before this arm was written: "0 resolve to a channel row ... names row id LGIC_ENFORCE-S9990
+# which resolves to NO row".
+
+
+POS_CHECK = ".tools/proof-of-spec-check.py"
+_PLANTED_RID = "LGIC_ENFORCE-S9990"
+
+
+def _s21_fixture(root):
+    """A git repo at `root` whose channel carries _PLANTED_RID and whose instance cites it."""
+    subprocess.run(["git", "init", "-q"], cwd=root, capture_output=True)
+    ch = os.path.join(root, "org", "missions", "D14", "LGIC", "LGIC_ENFORCE", "surprise-channel", "investigations")
+    os.makedirs(ch, exist_ok=True)
+    with open(os.path.join(ch, "INVESTIGATION_v1.md"), "w", encoding="utf-8", newline="\n") as fh:
+        fh.write("# fixture\n\n```json\n" + json.dumps([{"id": _PLANTED_RID, "project": "LGIC_ENFORCE"}], indent=1)
+                 + "\n```\n")
+    dl = os.path.join(root, "org", "missions", "D14", "LGIC", "LGIC_ENFORCE", "deliverables", "0.9.0_WK_LGIC_ENFORCE~9")
+    os.makedirs(dl, exist_ok=True)
+    inst = os.path.join(dl, "LGIC_ENFORCE.TO-EN-q-9.fixture.proof_of_spec.json")
+    with open(inst, "w", encoding="utf-8", newline="\n") as fh:
+        json.dump({"schema_version": "1.0", "to_id": "LGIC_ENFORCE.TO-EN-q-9",
+                   "surprises": [_PLANTED_RID + ": planted row present ONLY in the graded checkout"]}, fh)
+    subprocess.run(["git", "add", "-A"], cwd=root, capture_output=True)
+    subprocess.run(["git", "-c", "user.email=t@t", "-c", "user.name=t", "commit", "-qm", "f"],
+                   cwd=root, capture_output=True)
+    return inst
+
+
+def _limb_resolves(script, inst):
+    """(resolved, evidence line). Reads the limb's OWN frame and announce lines."""
+    r = subprocess.run([sys.executable, script, inst], capture_output=True, text=True)
+    out = _CSI.sub("", (r.stdout or "") + (r.stderr or ""))
+    miss = "names row id %s which resolves to NO row" % _PLANTED_RID
+    frame = [ln for ln in out.splitlines() if ln.strip().startswith("surprises-frame:")]
+    ev = frame[0].strip() if frame else "(no surprises-frame line -- the limb did not run)"
+    if not frame:
+        return None, ev
+    return (miss not in out and " 1 resolve to a channel row" in ev), ev
+
+
+def i3_channel_root(script=None):
+    """The script under test resolves a cited row from the INSTANCE's checkout."""
+    token = _i3_verdict(script)
+    say(token)
+    return 0 if token.startswith("PASS-") else 1
+
+
+def _i3_verdict(script=None):
+    """The verdict TOKEN, printed evidence above it. A self-test compares tokens so a control can never
+    pass for the wrong reason (a RED that is really LIMB-DID-NOT-RUN is not a RED)."""
+    script = script or os.path.join(REPO, POS_CHECK)
+    base = _tempfile.mkdtemp(prefix="en_r3_i3_")
+    try:
+        inst = _s21_fixture(base)
+        # CONTROL on the premise: the planted id must be ABSENT from the script's own checkout, or a
+        # PASS would prove nothing about rooting.
+        own = os.path.abspath(os.path.join(os.path.dirname(script), os.pardir))
+        own_ch = os.path.join(own, "org", "missions", "D14", "LGIC", "LGIC_ENFORCE", "surprise-channel",
+                              "investigations", "INVESTIGATION_v1.md")
+        try:
+            with open(own_ch, encoding="utf-8", errors="replace") as fh:
+                premise_broken = _PLANTED_RID in fh.read()
+        except (OSError, IOError):
+            premise_broken = False
+        if premise_broken:
+            say("PREMISE: %s already exists in the script's own checkout -- the arm cannot discriminate" % _PLANTED_RID)
+            return "FAIL-I3-PREMISE-BROKEN"
+        resolved, ev = _limb_resolves(script, inst)
+        say("script under test: %s" % script)
+        say("planted row %s: present in the GRADED checkout, absent from the script's own" % _PLANTED_RID)
+        say("limb frame: %s" % ev[:220])
+        if resolved is None:
+            return "FAIL-I3-LIMB-DID-NOT-RUN"
+        if not resolved:
+            return "FAIL-I3-ROOTED-AT-SCRIPT-CHECKOUT"
+        return "PASS-I3-ROOTED-AT-INSTANCE-CHECKOUT"
+    finally:
+        _shutil.rmtree(base, ignore_errors=True)
+
+
+def _install_script(root):
+    """A copy of the live script under `root`, WITH the schema it reads relative to its own root
+    (org/standards/PROOF_OF_SPEC.schema.json) -- without it the copy exits rc=2 before any limb runs,
+    which is how a first version of this self-test reported a RED for the wrong reason."""
+    os.makedirs(os.path.join(root, ".tools"), exist_ok=True)
+    os.makedirs(os.path.join(root, "org", "standards"), exist_ok=True)
+    dst = os.path.join(root, ".tools", "proof-of-spec-check.py")
+    _shutil.copy(os.path.join(REPO, POS_CHECK), dst)
+    _shutil.copy(os.path.join(REPO, "org", "standards", "PROOF_OF_SPEC.schema.json"),
+                 os.path.join(root, "org", "standards", "PROOF_OF_SPEC.schema.json"))
+    return dst
+
+
+def _selftest_i3():
+    """Both controls use COPIES of the script, so the self-test does not depend on whether the live
+    script has been fixed yet. RED: a copy rooted in a checkout WITHOUT the row must return EXACTLY
+    FAIL-I3-ROOTED-AT-SCRIPT-CHECKOUT. GREEN: a copy rooted INSIDE the graded checkout -- what a correct
+    fix is equivalent to -- must resolve the row."""
+    out = []
+    elsewhere = _tempfile.mkdtemp(prefix="en_r3_i3_other_")
+    try:
+        mis = _install_script(elsewhere)
+        tok = _i3_verdict(mis)
+        out.append(("i3 RED   mis-rooted copy -> ROOTED-AT-SCRIPT (%s)" % tok[:28],
+                    tok == "FAIL-I3-ROOTED-AT-SCRIPT-CHECKOUT"))
+    finally:
+        _shutil.rmtree(elsewhere, ignore_errors=True)
+
+    base = _tempfile.mkdtemp(prefix="en_r3_i3_in_")
+    try:
+        inst = _s21_fixture(base)
+        rooted = _install_script(base)
+        resolved, _ev = _limb_resolves(rooted, inst)
+        out.append(("i3 GREEN copy rooted INSIDE the graded checkout", resolved is True))
+    finally:
+        _shutil.rmtree(base, ignore_errors=True)
+    return out
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -321,6 +453,8 @@ def selftest_arms():
     finally:
         shutil.rmtree(base, ignore_errors=True)
 
+    results.extend(_selftest_i3())
+
     say("")
     for label, ok in results:
         say("  %-46s %s" % (label, "OK" if ok else "BROKEN"))
@@ -330,6 +464,7 @@ def selftest_arms():
 
 
 CMDS = {
+    "i3-channel-root": i3_channel_root,
     "n2-denominator": n2_denominator,
     "n2-coverage": n2_coverage,
     "n2-declaration-subtraction": n2_declaration_subtraction,
