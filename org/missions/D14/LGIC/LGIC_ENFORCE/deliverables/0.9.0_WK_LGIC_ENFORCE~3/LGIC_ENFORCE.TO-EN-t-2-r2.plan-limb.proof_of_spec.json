@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_ENFORCE.TO-EN-t-2-r2",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-t-2-r2.plan-limb.md",
+    "group": "OTHER",
+    "vintage_commit": "4f9a9eb3f3"
+  },
+  "assignee": "0.9.0_WK_LGIC_ENFORCE~3",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+    "vintage_commit": "8e0d09e418",
+    "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-t-2-r2.plan-limb.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/naming-apply-gate.py",
+      "kind": "script",
+      "commit_or_etag": "0af3c52597",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "introduces": ["--plan-json", "def run_plan(path):"],
+      "deploy_evidence": "A --plan-json mode is added (run_plan(), _get_path(), _is_addition(), judge_capped(), _main_plan()) alongside the existing DIR mode (now _main_dir(), rewritten to grade every literal with judge_capped() so it structurally never refuses and prints '<n> expressions deferred to plan'). Both modes share judge()/judge_capped() and read the Terraform-type map from naming-gate.py's TF_NODE (the schema's map, EN-g-1), never a map of this file's own. A gate script invoked by safe-apply.sh and by hand: nothing deploys it directly.",
+      "artifact_covered_by": ["T2R-AC1", "T2R-AC2", "T2R-AC3", "T2R-AC4", "T2R-AC5", "T2R-AC6", "T2R-AC7", "T2R-AC8"]
+    },
+    {
+      "path_or_key": ".tools/safe-apply.sh",
+      "kind": "script",
+      "commit_or_etag": "0af3c52597",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "introduces": ["BLOCKED by the naming plan limb", "NPLAN_TMP="],
+      "deploy_evidence": "One new stage inserted between the existing pre-plan naming stage and the tag-authorization gate: renders the plan (terraform plan then show -json, reusing NAPPLY_TREE/NAPPLY_ENFORCE already computed for the pre-plan stage), runs naming-apply-gate.py --plan-json on it, and on a REFUSE while enforcing prints 'safe-apply: BLOCKED by the naming plan limb ...' and exits 7 before tag-authz, tombstone or apply run. WARN mode never changes the exit code. A wrapper script terraform is not; nothing deploys it, agents invoke it directly.",
+      "artifact_covered_by": ["T2R-AC7", "T2R-AC8"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "T2R-AC1",
+      "criterion_verbatim": "a created resource with a wrong literal name is refused with the canonical form `grade()` computes.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py t2r-create-literal",
+      "expect": "VERDICT: PASS-CREATE-REFUSED-WITH-CANONICAL",
+      "output_evidence": "FIXTURE create_bad_literal.json ENFORCING: rc=1 EXPECTED: NAMING REFUSE ... mdpf-cottonwood-publisher-queue -> mdpf-cot-publisher-queue | NAMING REFUSE aws_sqs_queue.pub mdpf-cottonwood-publisher-queue -> mdpf-cot-publisher-queue | NAMING-PLAN: REFUSE 1 graded | VERDICT: PASS-CREATE-REFUSED-WITH-CANONICAL",
+      "denominator": "1 resource_changes entry (actions=[create], an ADDITION); 1 graded, 1 refused (canonical form matched by refused_with())",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2R-AC2",
+      "criterion_verbatim": "a created resource whose wrong name an expression built is refused at plan with its canonical form.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py t2r-create-expression",
+      "expect": "VERDICT: PASS-EXPRESSION-REFUSED-AT-PLAN",
+      "output_evidence": "FIXTURE create_bad_expression.json ENFORCING: rc=1 EXPECTED: NAMING REFUSE ... etfs-inflection-netassets-queue -> etfs-inf-netassets-queue | NAMING REFUSE aws_sqs_queue.netassets etfs-inflection-netassets-queue -> etfs-inf-netassets-queue | NAMING-PLAN: REFUSE 1 graded | VERDICT: PASS-EXPRESSION-REFUSED-AT-PLAN",
+      "denominator": "1 resource_changes entry (actions=[create], an ADDITION, its after.name already the plan-resolved value of a local. reference); 1 graded, 1 refused",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2R-AC3",
+      "criterion_verbatim": "a rename to a wrong name is refused with its canonical form.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py t2r-rename",
+      "expect": "VERDICT: PASS-RENAME-REFUSED",
+      "output_evidence": "FIXTURE rename_bad.json ENFORCING: rc=1 EXPECTED: NAMING REFUSE ... mdpf-cottonwood-b-queue -> mdpf-cot-b-queue | NAMING REFUSE aws_sqs_queue.renamed mdpf-cottonwood-b-queue -> mdpf-cot-b-queue | NAMING-PLAN: REFUSE 1 graded | VERDICT: PASS-RENAME-REFUSED",
+      "denominator": "1 resource_changes entry (actions=[update], before.name='mdpf-cot-a-queue' != after.name='mdpf-cottonwood-b-queue' -> own-name attribute changed -> ADDITION); 1 graded, 1 refused",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2R-AC4",
+      "criterion_verbatim": "existing, name-keeping and deleted resources with wrong names only warn, enforcing.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py t2r-existing",
+      "expect": "VERDICT: PASS-EXISTING-ONLY-WARNS",
+      "output_evidence": "FIXTURE existing_bad.json (no-op, update without a name change, delete), ENFORCING: rc=0 | NAMING WARN aws_sqs_queue.legacy ... | NAMING WARN aws_sqs_queue.tuned ... | NAMING WARN aws_sqs_queue.retired ... (no NAMING REFUSE line) | NAMING-PLAN: WARN 3 graded | VERDICT: PASS-EXISTING-ONLY-WARNS",
+      "denominator": "3 resource_changes entries (no-op, update with before.name==after.name, delete), none an ADDITION; 3 graded via judge_capped(), 0 refused, 3 WARN (all three names are ALIAS-graded but capped)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2R-AC5",
+      "criterion_verbatim": "a correct create passes, enforcing.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py t2r-correct",
+      "expect": "VERDICT: PASS-CORRECT-CREATE-PASSES",
+      "output_evidence": "FIXTURE create_good.json, ENFORCING: rc=0 | NAMING CONFORMANT aws_sqs_queue.pub mdpf-cot-publisher-queue -> mdpf-cot-publisher-queue | NAMING-PLAN: PASS 1 graded (no NAMING REFUSE line) | VERDICT: PASS-CORRECT-CREATE-PASSES",
+      "denominator": "1 resource_changes entry (actions=[create], an ADDITION, after.name='mdpf-cot-publisher-queue' CONFORMANT); 1 graded, 0 refused",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2R-AC6",
+      "criterion_verbatim": "the pre-plan limb prints the deferred-expression count and never refuses, enforcing.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py t2r-deferred",
+      "expect": "VERDICT: PASS-DEFERRED-COUNT-PRINTED",
+      "output_evidence": "PRE-PLAN, ENFORCING, a tree with 1 literal and 2 expression names: rc=0 | NAMING-APPLY: .../preplan_tree: 1 .tf file(s), 3 resource-name attribute(s): 1 graded, 2 expressions deferred to plan (0 module-produced) | NAMING-GATE: WARN 1 graded (no NAMING-GATE: REFUSE anywhere) | VERDICT: PASS-DEFERRED-COUNT-PRINTED",
+      "denominator": "1 .tf file, 3 resource-name attributes total: 1 literal graded (ALIAS, capped to WARN), 2 expressions (template + local reference) deferred to plan; rc=0 despite --enforce because DIR mode never refuses",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2R-AC7",
+      "criterion_verbatim": "`safe-apply.sh`, enforcing, blocks on the plan limb before apply is invoked.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py t2r-wired-blocks",
+      "expect": "VERDICT: PASS-WIRED-PLAN-LIMB-BLOCKS",
+      "output_evidence": "safe-apply, ENFORCING, a plan creating mdpf-cottonwood-publisher-queue: rc=7 apply invoked: False terraform calls: ['-chdir=.../apply_tree plan -input=false -lock=false -out=...bin', '-chdir=.../apply_tree show -json ...bin'] | [naming-plan-gate] NAMING-PLAN: REFUSE 1 graded | safe-apply: BLOCKED by the naming plan limb (LGIC_ENFORCE DEC-6, ENFORCE mode, rc=1). Nothing was planned further or applied. | VERDICT: PASS-WIRED-PLAN-LIMB-BLOCKS",
+      "denominator": "2 terraform invocations recorded (plan, show) via the stub, 0 containing a standalone 'apply' token; the stub's show -json cats the fixture create_bad_literal.json, graded 1/1 refused, enforcing => safe-apply exits 7 before the tag-authz/tombstone stages or the real apply exec",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "T2R-AC8",
+      "criterion_verbatim": "`safe-apply.sh`, enforcing, passes the plan limb on a correct plan.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 && timeout 120 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py t2r-wired-passes",
+      "expect": "VERDICT: PASS-WIRED-PLAN-LIMB-PASSES",
+      "output_evidence": "safe-apply, ENFORCING, a plan creating a conformant name: rc=0 apply invoked: True terraform calls: [... plan ..., ... show -json ..., ... plan ... (tombstone), ... show -json ... (tombstone), '-chdir=.../apply_tree apply'] | [naming-plan-gate] NAMING-PLAN: PASS 1 graded | safe-apply: SKIP tag-authz gate -- no provider default_tags block matched ... | [tombstone-gate] CLEAN: no planned create matches a tombstoned resource. | VERDICT: PASS-WIRED-PLAN-LIMB-PASSES",
+      "denominator": "1 resource_changes entry (create_good.json, an ADDITION, CONFORMANT) graded 1/1 pass; 'BLOCKED by the naming plan limb' absent from output; 5 terraform invocations total (naming-plan render x2, tombstone render x2, the real apply) -- apply was invoked, i.e. this stage did not stop the run",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two hand-built scratch-copy mutants of the fixed t2r fixtures (fixed_inputs/ never edited in place; copies written to .scratch/mutant/), each flipping only the field the ADDITION/non-ADDITION branch (_is_addition()) reads: (a) create_bad_literal.json's change.actions ['create'] -> ['no-op'] with change.before set equal to change.after (the same bad name mdpf-cottonwood-publisher-queue, now NOT an addition); (b) existing_bad.json's first resource (legacy, actions=['no-op']) flipped to actions=['create'] with change.before -> null (the same bad name mdpf-cottonwood-legacy-queue, now an addition).",
+      "expected": "(a) the REFUSE the unmutated fixture produces (T2R-AC1) flips to a WARN and rc 1 -> 0 under --enforce, since the same bad name is no longer an addition. (b) the WARN the unmutated fixture produces (part of T2R-AC4) flips to a REFUSE and the overall NAMING-PLAN verdict/rc flips WARN/0 -> REFUSE/1 under --enforce, since the same bad name is now an addition.",
+      "observed": "(a) python .tools/naming-apply-gate.py --plan-json .scratch/mutant/create_bad_literal_as_noop.json --enforce -> rc=0, 'NAMING WARN aws_sqs_queue.pub mdpf-cottonwood-publisher-queue -> mdpf-cot-publisher-queue', why-line ends '...(existing): ... not confirmed as an addition here, so this only WARNs', 'NAMING-PLAN: WARN 1 graded'. (b) python .tools/naming-apply-gate.py --plan-json .scratch/mutant/existing_bad_legacy_as_create.json --enforce -> rc=1, 'NAMING REFUSE aws_sqs_queue.legacy mdpf-cottonwood-legacy-queue -> mdpf-cot-legacy-queue' (why-line says '(ADDITION)'), the other two resources (tuned, retired) still print 'NAMING WARN', 'NAMING-PLAN: REFUSE 3 graded'. Both mutants moved the verdict in exactly the predicted direction and nowhere else.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python .tools/naming-apply-gate.py --plan-json .../plans/create_bad_literal.json --enforce run twice back to back (stdout+stderr captured with 2>&1, compared byte-for-byte, rc compared).",
+      "observed": "Both runs: rc=1, identical 4-line output (the NAMING REFUSE line, its why: line, the NAMING-PLAN-DENOM line, the NAMING-PLAN: REFUSE 1 graded line) -- no timestamp or run-local data in the graded output (only org/mcp/naming-gate-verdicts.log, a separate gitignored side-effect file, carries a timestamp).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a real `terraform plan`/`terraform apply` against a live Terraform root, and any AWS call",
+      "reason": "BOUNDS and the cell's own text: 'Nothing real is planned in this cell... The criteria run on the fixtures under fixed_inputs/r2/tests/t2r/ and on a stub terraform; EN-t-3 is the cell that reads the real roots.' Every T2R-AC criterion here exercises the fixtures and the checker's terraform-stub script only."
+    },
+    {
+      "item": "the dotted own-name-attribute path lookup (_get_path, e.g. 'tags.Name' for aws_instance) for a node type whose own-name attribute is nested rather than a flat top-level key",
+      "reason": "Every t2r fixture grades aws_sqs_queue's flat 'name' attribute; _get_path's dot-splitting branch is implemented and reachable through the same schema map EN-g-1 wired (item 4), but no criterion's fixture exercises a nested path, so it is untested by this order's acceptance battery."
+    },
+    {
+      "item": "a plan resource whose actions are a replace (e.g. ['delete', 'create']) rather than a plain ['create'] or ['update']",
+      "reason": "_is_addition() treats any actions list containing 'create' as an ADDITION, which covers a replace by the same branch a plain create takes, but no t2r fixture supplies a replace action to demonstrate it."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Worktree /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-2c-3 on branch wk-lgic-enforce-2c-3, cut from CLOUD @1d519bff1b. Order of work: (1) read the task order, .tools/naming-apply-gate.py (pre-plan DIR mode, judge(), NOT_GRADED_TYPES), .tools/safe-apply.sh (the existing pre-plan naming stage's placement and env/flag conventions), .tools/naming-gate.py (TF_NODE, read from NAMING_SCHEMA.json's tf_type_map), and check_en_r2.py's t2r-* subcommands (_plan_gate, canonical(), refused_with(), _t2r_refused, _apply_r2) plus the five plans/*.json and two apply_tree/preplan_tree fixtures under fixed_inputs/r2/tests/t2r/; (2) confirmed via a direct grade() call which fixture names are ALIAS vs CONFORMANT before writing any code, so the expected canonical forms were measured, not assumed; (3) added plan mode to naming-apply-gate.py: _get_path (dotted attribute reader), _is_addition (create, or update whose own-name attribute changed), run_plan (grades resource_changes: judge() for an ADDITION, may REFUSE; judge_capped() -- a new wrapper that downgrades any REFUSE-worthy grade to WARN with refuses=False -- for everything else), and _main_plan (NAMING <verdict> <address> <name> -> <canonical> lines, then NAMING-PLAN: <PASS|WARN|REFUSE> <n> graded); (4) changed the pre-plan run()/_main_dir() to grade every literal with judge_capped() too (so DIR mode structurally can never refuse, refused is always 0) and changed its denominator line to print '<n> expression(s) deferred to plan' in the exact singular/plural phrasing the checker's regex requires; (5) added `import json` (missing, caught by a NameError on first plan-mode run); (6) wired safe-apply.sh: a new stage right after the existing pre-plan naming stage, reusing NAPPLY_TREE/NAPPLY_GATE/NAPPLY_ENFORCE, renders its own plan (terraform plan -out, then show -json) and runs naming-apply-gate.py --plan-json on it; on a REFUSE while enforcing it prints 'safe-apply: BLOCKED by the naming plan limb ...' and exits 7 before tag-authz/tombstone/apply; (7) ran all 8 direct checker subcommands (t2r-create-literal/-expression/-rename/-existing/-correct/-deferred/-wired-blocks/-wired-passes), all PASS; (8) ran .tools/commit-gate.sh on both files, clean; (9) committed .tools/naming-apply-gate.py and .tools/safe-apply.sh at 0af3c52597 (no surprise rows -- nothing in the cell required an override or hit a missing path); (10) built two scratch-copy mutants (never touching the read-only fixtures) flipping the addition/non-addition field to confirm the branch genuinely discriminates, and a determinism re-run, for the controls block; (11) re-ran all 8 subcommands at the committed bytes, identical PASS verdicts; (12) wrote this instance, to be validated with .tools/proof-of-spec-check.py before flipping <status> to complete. No message sent or received; no AWS call; no real terraform plan or apply; nothing live moved.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~3/LGIC_ENFORCE.TO-EN-t-2-r2.plan-limb.proof_of_spec.json T2R-AC1,T2R-AC2,T2R-AC3,T2R-AC4,T2R-AC5,T2R-AC6,T2R-AC7,T2R-AC8",
+      "result": "run after this instance was written; see the worker report for the rc and validation summary"
+    },
+    {
+      "tool": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_en_r2.py",
+      "invocation": "one subcommand per mechanical criterion (t2r-create-literal, t2r-create-expression, t2r-rename, t2r-existing, t2r-correct, t2r-deferred, t2r-wired-blocks, t2r-wired-passes), each under timeout, at commit 0af3c52597 and again on the pre-commit working tree",
+      "result": "8 of 8 printed a PASS verdict both times, identical text; the checker exits 0 on a FAIL verdict too, so each VERDICT line was read, never the exit code alone"
+    },
+    {
+      "tool": ".tools/naming-apply-gate.py",
+      "invocation": "direct --plan-json and DIR-mode invocations against the t2r fixtures and two hand-built scratch mutants (.scratch/mutant/), plus a determinism re-run, ahead of and independent of the checker's own subcommands",
+      "result": "matched the checker's own verdicts on every fixture; both mutants flipped verdict/rc in the predicted direction; the determinism re-run produced byte-identical output twice"
+    }
+  ]
+}
