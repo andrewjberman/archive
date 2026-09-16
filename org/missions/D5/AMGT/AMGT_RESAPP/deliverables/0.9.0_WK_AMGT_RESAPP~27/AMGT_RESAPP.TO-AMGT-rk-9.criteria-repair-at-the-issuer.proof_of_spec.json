@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-9",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-9.criteria-repair-at-the-issuer.md",
+    "group": "OTHER",
+    "vintage_commit": "2726497094"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ac5ff6a57",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-9.criteria-repair-at-the-issuer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/criteria_quality_checker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New file, untracked at grading time, rides this order's own status-flip commit (Rule 14a: no pre-add). 358 lines; py_compile clean; self-test (--self-test) discriminates 5 of 5 planted mutants refused and 1 of 1 clean control admitted, run twice with byte-identical stdout (determinism, see controls below)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Tracked file, modified in place (two new rows appended by textual splice, AMGT_RESAPP-Z-W27-S1 and AMGT_RESAPP-Z-W27-S2; the array grew from 254 to 256 items across this worker's edits, including a fast-forward merge that landed a sibling worker's own W28-S1 row in between). Rides this order's status-flip commit; pure LF preserved throughout (0 CRLF bytes at every checkpoint)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "checker-files at least 1, each listed by path with its line count -- the checker is a named artifact a grader can open and run, not a paragraph of guidance. 0 files is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import glob,io; fs=sorted(glob.glob('.tools/*criteri*')+glob.glob('.tools/*criterion*')); print('checker-files', len(fs)); [print('  ', f, len(io.open(f,encoding='utf-8',errors='replace').read().splitlines()), 'lines') for f in fs]\"",
+      "output_evidence": "checker-files 1\n   .tools\\criteria_quality_checker.py 358 lines\n-- exactly one file matched the glob union (.tools/*criteri* + .tools/*criterion*, deduplicated by sorted()), and it is listed by its path with a nonzero line count (358). This is the checker built for this cell -- .tools/criteria_quality_checker.py -- a named, runnable artifact, not prose.",
+      "denominator": "1 of 1 checker file located by the glob union (.tools/*criteri* + .tools/*criterion*, deduplicated by sorted()); 358 of 358 lines counted for that file",
+      "status": "PASS",
+      "expect": "checker-files 1[\\s\\S]*criteria_quality_checker\\.py \\d+ lines",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "rc 0 and the self-test printing, for EACH of the five shapes, a PLANTED MUTANT the checker REFUSED and a CLEAN CONTROL it ADMITTED -- five refusals and at least one admission, with the counts printed. A self-test that admits every input, or one that prints no denominator, is NOT met: a checker that cannot fail is the very defect this cell exists to remove",
+      "method": "command",
+      "invocation": "python -c \"import subprocess,sys,glob; f=sorted(glob.glob('.tools/*criteri*.py')+glob.glob('.tools/*criterion*.py'))[0]; r=subprocess.run([sys.executable,f,'--self-test'],capture_output=True,text=True,encoding='utf-8',errors='replace'); print('rc', r.returncode); print(r.stdout[-1800:]); print('STDERR', r.stderr[-400:])\"",
+      "output_evidence": "rc 0\nSELF-TEST -- five sealed planted mutants (one per shape) plus one clean control:\n  shape1-zero-collected    MUT-1          -> REFUSED\n  shape2-rc-swallowed      MUT-2          -> REFUSED\n  shape3-grain-mismatch    MUT-3-PRE/POST -> REFUSED\n  shape4-inexact-capture   MUT-4          -> REFUSED\n  shape5-no-timeout        MUT-5          -> REFUSED\n  clean-control            CTRL-1         -> ADMITTED\nDENOMINATOR: mutants-refused 5 of 5; controls-admitted 1 of 1\nSELF-TEST RESULT: DISCRIMINATES (5 of 5 mutants refused, 1 of 1 control admitted)\n\nSTDERR \n-- each of the five SEALED PLANTED MUTANTS is synthetic text embedded in the checker's own _self_test() function (never read from the estate): MUT-1 a test-suite row reading 'collected 0 items' / 'no tests ran'; MUT-2 'pytest tests/test_real.py -q | tee .scratch/out.log; echo rc=$?' (no pipefail/PIPESTATUS, so the printed rc is tee's, never pytest's); MUT-3-PRE/POST a pre-census on 'git ls-files ... | wc -l' paired with a post-census on 'find ... -type f | wc -l' in the same set (different instruments); MUT-4 'cat .scratch/result_*.json' asserting a specific captured file by a wildcard token; MUT-5 an invocation with no literal timeout bound. All five REFUSED. CTRL-1 is bounded (timeout 90), reads its own rc, collects a nonzero count, names one exact file and carries no pre/post pairing -- ADMITTED, as it must be for the checker to be discriminating rather than universally hostile.",
+      "denominator": "5 of 5 planted mutants (one per shape) refused; 1 of 1 clean control admitted; 2 of 2 self-test runs byte-identical (determinism)",
+      "status": "PASS",
+      "expect": "rc 0[\\s\\S]*mutants-refused 5 of 5; controls-admitted 1 of 1[\\s\\S]*DISCRIMINATES",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "orders-scanned NONZERO (the denominator, printed) and the checker's verdict per order printed. Run against THIS round's own sixteen orders it either admits them or names the criterion it refuses -- and a refusal here is a USEFUL result the worker reports rather than suppresses, because it means the issuer cut a bar that cannot fail",
+      "method": "command",
+      "invocation": "python -c \"import subprocess,sys,glob,json; f=sorted(glob.glob('.tools/*criteri*.py')+glob.glob('.tools/*criterion*.py'))[0]; import os; t='org/missions/D5/AMGT/AMGT_RESAPP/task-orders'; ords=sorted(os.listdir(t))[:40]; r=subprocess.run([sys.executable,f]+[os.path.join(t,o) for o in ords if o.endswith('.md')],capture_output=True,text=True,encoding='utf-8',errors='replace'); print('rc', r.returncode); print('orders-scanned', len([o for o in ords if o.endswith('.md')])); print(r.stdout[-2000:])\"",
+      "output_evidence": "LITERAL RUN (byte-for-byte, the invocation above): rc 0, orders-scanned 40, tail (last 2000 chars) ending:\n...VERDICT: REFUSALS PRESENT across 40 file(s)\nThe literal invocation's own bar is MET: orders-scanned is nonzero (40) and a verdict is printed per file. But the SET it scans is NOT this round's sixteen orders: sorted(os.listdir(t))[:40] takes the first 40 files alphabetically from the WHOLE 80-file task-orders directory (every round of this project), and alphabetical order places every r-/rb-/rc-/rd-/re-/rf-/rg-/rh-/ri-/rj- order before any rk- order -- the slice stops at AMGT_RESAPP.TO-AMGT-rj-13.the-social-source-measured.md and reaches 0 of the round's 16 rk-* orders (measured directly: rk-orders-in-first40 = 0). This scope/targeting mismatch inside AC3's own literal invocation is filed as row AMGT_RESAPP-Z-W27-S1.\n\nSUPPLEMENTARY RUN (same checker, same tool, invoked directly against the actual round-12 population, 'python .tools/criteria_quality_checker.py org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-*.md', to discharge the <expect> prose's stated intent): rc 0, orders-scanned 16.\n  16 of 16 orders REFUSED at least one criterion.\n  53 of 56 criteria flagged NO-TIMEOUT (invocation carries no literal `timeout <N>` bound).\n  2 criteria flagged RC-SWALLOWED (none in this population; 0 -- see note).\n  1 criterion flagged ZERO-COLLECTED: rk-5 AC3, matched on the pattern '\\bcollected\\s+0\\b' inside its own <expect> text, which reads '...collected is NONZERO. The collected count is the load-bearing half: a suite over an EMPTY collection prints OK and proves nothing... collected 0 is NOT met however green the runner looks.' Read against the full expect text (not the truncated match window), this is a FALSE POSITIVE by the checker's own crude substring logic: rk-5's issuer already wrote a criterion that explicitly PROHIBITS the zero-collected shape and demands a live nonzero count via a second, discriminating command -- the flagged text is the criterion's OWN defensive prose naming round 11's defect, not evidence of an actual zero-collected run. This is disclosed rather than silently accepted or silently patched around (the checker was not modified to suppress it, per the instruction not to soften it to make this round's orders pass); it is a genuine, disclosed LIMITATION of a pre-execution text heuristic that cannot yet see real output.\n  1 criterion flagged INEXACT-CAPTURE genuinely: rk-8 AC4 asserts a captured route set at '.scratch/rk8/*.json' (a wildcard token) beside the word 'captured' in its own <expect> -- a real instance of the shape, since [0]-style or glob-style selection over more than one candidate file is non-deterministic.\n  rk-9's own AC2/AC3 (this order's own criteria) initially also matched INEXACT-CAPTURE, on the wildcard resolution '.tools/*criteri*.py' used to locate the checker itself -- coincidentally triggered by the unrelated 'capture_output=True' subprocess.run() kwarg boilerplate present in the invocation text. That specific false-trigger word was fixed in the checker (CAPTURE_CONTEXT_RE now excludes 'capture_output') BEFORE this run, and rk-8's genuine 'captured' match was re-verified to still fire after the fix -- so the fix improved precision without silencing the real case.\n  0 GRAIN-MISMATCH pairs inside the 16 (that shape appeared only in the literal 40-file run, on orders outside this round -- e.g. AMGT-rh-10's AC2/AC9/AC11/AC12 pairing 'aws s3api' against 'git log').\nVERDICT (supplementary): REFUSALS PRESENT across 16 file(s) -- reported as a useful finding about the issuer's own bar (53 of 56 criteria in this round carry no literal timeout wrap), never softened or suppressed to make the round read clean.",
+      "denominator": "LITERAL invocation: 40 of 40 files in the first-40-alphabetical slice scanned (orders-scanned 40, printed), 0 of 16 round-12 rk-* orders among them. SUPPLEMENTARY invocation (same tool, actual round-12 population): 16 of 16 rk-* orders scanned (orders-scanned 16, printed); 16 of 16 REFUSED at least one criterion; of 56 total criteria across those 16 orders, 53 flagged NO-TIMEOUT, 1 flagged ZERO-COLLECTED (disclosed as a likely false positive on the criterion's own prohibitive prose), 1 flagged INEXACT-CAPTURE (genuine, rk-8 AC4), 0 flagged RC-SWALLOWED or GRAIN-MISMATCH within this population.",
+      "status": "PASS",
+      "expect": "orders-scanned 40[\\s\\S]*orders-scanned 16[\\s\\S]*VERDICT \\(supplementary\\): REFUSALS PRESENT across 16 file\\(s\\)",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the JUDGMENT is whether this checker WOULD HAVE REFUSED round 11's two criteria that could not fail -- the suite over an empty collection and the verbatim gate over input carrying no quotation marks -- and whether it admits an honest criterion unchanged. A checker that refuses everything is as useless as one that admits everything; the grader is asked whether it DISCRIMINATES. GRADED AT L9 BY 3.0.0_SA_CVO~Z, NEVER SELF-GRADED",
+      "method": "command",
+      "invocation": "python -c \"import glob; fs=sorted(glob.glob('.tools/*criteri*')+glob.glob('.tools/*criterion*')); print('checker_files', len(fs)); [print('  ', f) for f in fs]; print('round11_shapes_under_judgment: suite-over-empty-collection; verbatim-gate-over-unquoted-input')\"",
+      "output_evidence": "LITERAL RUN: checker_files 1;   .tools\\criteria_quality_checker.py; round11_shapes_under_judgment: suite-over-empty-collection; verbatim-gate-over-unquoted-input\n\nSUPPLEMENTARY EVIDENCE, three arms run against the checker as built (each a criterion dict fed to criteria_quality_checker.evaluate(), never a live re-execution of round 11's own commands):\n(1) THE REAL ROUND-11 ZERO-COLLECTED SUITE (row AMGT_RESAPP-Z-W18-S1, grounded at commit 10c74d0efb): invocation 'timeout 120 python -m unittest discover -s lib/research/api/tests -p \"test_*.py\" -q' with the row's own quoted output 'Ran 0 tests in 0.000s' then 'OK' -> REFUSED, reason ZERO-COLLECTED matching '\\bran\\s+0\\s+test'. (RUNNER_RE was widened during this build to recognize 'python -m unittest'/'unittest discover' precisely because the real W18-S1 invocation used that runner, not pytest -- without that widening the checker would have missed this real historical defect entirely; this is disclosed as a build correction, not a late patch to pass a test.)\n(2) THE REAL ROUND-11 VERBATIM-GATE VACUOUS PASS (row AMGT_RESAPP-Z-W20-S5, grounded on the served BA drafting object): reconstructed with a timeout bound added (to isolate the SEMANTIC question from the unrelated NO-TIMEOUT shape) -> ADMITTED. This is disclosed HONESTLY as a checker LIMITATION, not hidden: the verbatim-gate defect is a DATA/business-rule vacuous pass (a gate that could not fail because the test input -- live filing text -- happened to carry no quotation marks), which is a materially different class from the five TEXTUAL shapes this cell's DELIVER list names (zero-collected test count, swallowed pipe rc, pre/post grain mismatch, inexact wildcard capture, missing timeout bound). None of the five shapes reads a criterion's semantic coverage of its own test data; this checker does not claim to, and this arm proves it does not.\n(3) AN HONEST CRITERION, NONE OF THE FIVE SHAPES (bounded, rc genuinely read, nonzero collected count, one exact filename, no pre/post pairing) -> ADMITTED, unchanged.\nSO: the checker DISCRIMINATES on the textual defect class it was built for (arm 1, refused) and admits an honest criterion unchanged (arm 3), while HONESTLY NOT covering a different, semantic defect class outside its five named shapes (arm 2, admitted and the reason stated) -- this is presented as evidence for the L9 judgment, not a self-graded verdict.",
+      "denominator": "1 of 1 checker file; 3 of 3 discrimination arms run (the real round-11 zero-collected suite W18-S1: REFUSED; the real round-11 verbatim-gate vacuous pass W20-S5: ADMITTED and disclosed as outside the five named shapes; one honest control: ADMITTED unchanged)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=true) -- per spine v3 L9 and this schema's own rule, a judgment row carries evidence and NO self-graded verdict; PASS/FAIL is REFUSED by proof-of-spec-check.py for judgment rows. Graded at L9 by 3.0.0_SA_CVO~Z against the evidence above.",
+      "expect": "checker_files 1[\\s\\S]*round11_shapes_under_judgment",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's own --self-test embeds FIVE SEALED PLANTED MUTANTS (one per named shape) and ONE CLEAN CONTROL, all synthetic text authored inside the checker's _self_test() function -- never read from the estate -- so the mutant test is reproducible and inspectable. Additionally, three REAL specimens (not synthetic) were run for AC4: the actual round-11 W18-S1 zero-collected invocation and output (grounded at commit 10c74d0efb), the actual round-11 W20-S5 verbatim-gate vacuous-pass denominators, and one honest control row of this checker's own devising.",
+      "expected": "5 of 5 synthetic mutants REFUSED and 1 of 1 synthetic control ADMITTED (self-test); the real W18-S1 specimen REFUSED (it carries a named shape); the real W20-S5 specimen ADMITTED and disclosed as outside the five named shapes (it does not); the honest control ADMITTED.",
+      "observed": "Self-test: 5 of 5 refused, 1 of 1 admitted (DISCRIMINATES). W18-S1: REFUSED, reason ZERO-COLLECTED matching '\\bran\\s+0\\s+test'. W20-S5 (timeout-bounded to isolate the semantic question): ADMITTED. Honest control: ADMITTED. All four outcomes match expectation.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs each of (a) 'python .tools/criteria_quality_checker.py --self-test' and (b) 'python .tools/criteria_quality_checker.py org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-*.md', byte-compared.",
+      "observed": "(a) self-test run1 553 bytes, run2 553 bytes, identical=True. (b) 16-order sweep run1 6574 bytes, run2 6574 bytes, identical=True. The tool is pure text/regex over static files with no randomness or wall-clock content, so this is expected and confirmed rather than assumed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A sixth checker arm for 'an order whose mandated final write target is absent from its own <paths>' (the ISSUER AMENDMENT 1 specimen: 0 of 16 orders REFUSE at commit 2726497094, 16 of 16 ADMIT at HEAD after 6f433fc2a8).",
+      "reason": "The issuer's own mid-task message named this as a real candidate sixth shape but explicitly bounded this cell to its five named shapes and directed 'file a row naming it for round 13 instead' if building it would exceed this order's criteria. Filed as AMGT_RESAPP-Z-W27-S2 with the measured before/after specimen and a proposed detection recipe; not built here."
+    },
+    {
+      "item": "Fixing or widening AC3's own literal invocation so it scans the round's actual sixteen orders directly.",
+      "reason": "The REFUSAL CLAUSE: a criterion is proven AS WRITTEN, never repaired or widened by this worker. AC3's literal invocation was run byte-for-byte and its own bar (orders-scanned nonzero, verdicts printed) is met; the scope/targeting mismatch against its own <expect> prose is recorded as row AMGT_RESAPP-Z-W27-S1 and additionally discharged by a SUPPLEMENTARY run (not a substitute for the literal one) so the round-12 population is actually examined and reported."
+    },
+    {
+      "item": "Building a general-purpose fix for the checker's rk-5 AC3 false-positive class (prohibitive prose in <expect> text containing the words a real defect would also produce).",
+      "reason": "Per the issuer's explicit instruction not to soften the checker to make this round's orders pass, no change was made to suppress this specific match. It is disclosed in AC3's own evidence as a named, honest limitation of a PRE-EXECUTION text heuristic rather than patched silently."
+    },
+    {
+      "item": "Rows W17-S4 and W17-S5, left OPEN.",
+      "reason": "Per this order's own text: 'a criteria-repair obligation closes only when the NEXT cut writes better criteria.' Not touched, not closed, not claimed as remediated by this deliverable."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W27-S1: AC3's own literal invocation (sorted(os.listdir(t))[:40]) never reaches this round's sixteen rk-* orders -- it scans the first 40 alphabetically-sorted files of the whole 80-file task-orders directory and stops at rj-13, so 0 of 16 round-12 orders are in the scanned set; a supplementary run against the actual 16 orders was executed and recorded alongside the literal run.",
+    "AMGT_RESAPP-Z-W27-S2: a candidate SIXTH checker shape, surfaced by the issuer's own mid-task message and NOT built here on the issuer's explicit instruction -- an order whose mandated final write (the status flip) is outside its own <paths> grant; measured specimen 0 of 16 round-12 orders REFUSE-shaped at commit 2726497094, 16 of 16 ADMIT-shaped at HEAD after ISSUER AMENDMENT 1 (6f433fc2a8, drained f94429b776); filed for round 13."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile .tools/criteria_quality_checker.py",
+      "result": "COMPILE-OK, run after every edit (initial build, CAPTURE_CONTEXT_RE precision fix, RUNNER_RE widening for python -m unittest/unittest discover)"
+    },
+    {
+      "tool": ".tools/criteria_quality_checker.py --self-test",
+      "invocation": "python .tools/criteria_quality_checker.py --self-test",
+      "result": "rc 0; 5 of 5 planted mutants refused, 1 of 1 clean control admitted; DISCRIMINATES; run twice, byte-identical"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4",
+      "result": "see WORKER REPORT for the rc and printed verdict line"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, to-pipeline-gate, surprise-row-gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~27 <0.9.0_WK_AMGT_RESAPP~27@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see WORKER REPORT for the commit hash"
+    }
+  ]
+}
