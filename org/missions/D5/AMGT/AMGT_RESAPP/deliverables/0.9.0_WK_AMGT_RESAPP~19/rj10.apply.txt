@@ -1,0 +1,54 @@
+HALT-GATE: worker 0.9.0_WK_AMGT_RESAPP~19 has no inbox; scanning its issuer 2.0.0_SA_COO~W (a [STOP] to the issuer halts its workers)
+safe-apply: infra/aws/terraform/harvest sets default_tags -- running the comp-tagauthz pre-apply authorization gate.
+------------------------------------------------------------------------------
+SWEPT (derived from the account, one call: iam get-account-authorization-details):
+  roles 252   local+attached policies 56   users 7   groups 1
+  SCPs: NOT APPLICABLE -- account is not in an AWS Organization (AWSOrganizationsNotInUseException). Stated, not implied.
+NOT SWEPT (named, not implied): S3 bucket policies, KMS key policies,
+  permission boundaries, session policies, resource policies generally.
+tag-conditioned statements found: 9 (4 ours, 5 AWS service-linked)
+------------------------------------------------------------------------------
+
+default_tags keys in infra/aws/terraform/harvest: ['Directive', 'Environment', 'Estate', 'Macro', 'ManagedBy', 'Project']
+  *** KEY COLLISION: ['Project'] are BOTH default_tags keys AND authorization keys.
+
+MODE: GATE. Scoped to 0 candidate resource(s) this tree would manage.
+
+RESULT: none of the 0 candidate(s) carries a tag that infra/aws/terraform/harvest's default_tags ['Directive', 'Environment', 'Estate', 'Macro', 'ManagedBy', 'Project'] would overwrite.
+safe-apply: comp-tagauthz gate PASSED -- no plan resource overwrites an access-granting tag.
+[tombstone-gate] checked 0 create(s) in this plan against 7 tombstone(s)
+[tombstone-gate] CLEAN: no planned create matches a tombstoned resource.
+aws_iam_role_policy.scoped_amgt_api_grants: Modifying... [id=opal-amgt-scoped-api-role:opal-amgt-scoped-api-grants]
+aws_iam_role_policy.chatter_axis_lambda: Modifying... [id=amgt-resapp-chatter-axis-lambda-role:amgt-resapp-chatter-axis-lambda-policy]
+aws_lambda_function.chatter_axis_producer: Modifying... [id=amgt-resapp-chatter-axis]
+module.scoped_amgt_api.aws_lambda_function.this: Modifying... [id=opal-amgt-scoped-api]
+aws_iam_role_policy.scoped_amgt_api_grants: Modifications complete after 1s [id=opal-amgt-scoped-api-role:opal-amgt-scoped-api-grants]
+aws_iam_role_policy.chatter_axis_lambda: Modifications complete after 1s [id=amgt-resapp-chatter-axis-lambda-role:amgt-resapp-chatter-axis-lambda-policy]
+aws_lambda_function.chatter_axis_producer: Modifications complete after 6s [id=amgt-resapp-chatter-axis]
+module.scoped_amgt_api.aws_lambda_function.this: Modifications complete after 6s [id=opal-amgt-scoped-api]
+
+Apply complete! Resources: 0 added, 4 changed, 0 destroyed.
+
+Outputs:
+
+chatter_axis_lambda_arn = "arn:aws:lambda:us-east-1:313476888478:function:amgt-resapp-chatter-axis"
+chatter_axis_schedule_state = "ENABLED"
+harvest_articles_table_arn = "arn:aws:dynamodb:us-east-1:313476888478:table/opal-harvest-articles"
+harvest_articles_table_name = "opal-harvest-articles"
+harvest_requests_queue_arn = "arn:aws:sqs:us-east-1:313476888478:opal-research-pull-requests"
+harvest_requests_queue_url = "https://sqs.us-east-1.amazonaws.com/313476888478/opal-research-pull-requests"
+harvest_security_metrics_table_arn = "arn:aws:dynamodb:us-east-1:313476888478:table/opal-harvest-security-metrics"
+harvest_security_metrics_table_name = "opal-harvest-security-metrics"
+scoped_amgt_route_keys = [
+  "GET /api/scoped/amgt/lead-panel/rankings/{movement}/{subject}",
+  "GET /api/scoped/amgt/lead-panel/timeseries/{movement}/{subject}",
+  "GET /api/scoped/amgt/watchlist",
+  "POST /api/scoped/amgt/watchlist/star",
+  "POST /api/scoped/amgt/watchlist/unstar",
+  "GET /api/scoped/amgt/security/{security_key}/overlay",
+  "GET /api/scoped/amgt/security/{security_key}/thesis",
+  "GET /api/scoped/amgt/security/{security_key}/peers",
+  "GET /api/scoped/amgt/security/{security_key}/coverage",
+  "GET /api/scoped/amgt/security/{security_key}/print",
+  "POST /api/scoped/amgt/refresh",
+]

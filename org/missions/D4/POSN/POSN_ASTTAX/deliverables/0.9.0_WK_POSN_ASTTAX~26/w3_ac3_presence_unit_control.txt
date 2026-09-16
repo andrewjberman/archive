@@ -1,0 +1,53 @@
+W3-AC3 PRESENCE UNIT CONTROL -- helpers imported from
+  portal/src/pages/Positioning/panels/PositioningSummary.tsx (the rendered module)
+  declared ASSET_CLASSES order = ["fixedIncome","equity","structured","commodities","alternatives"]
+
+PASS  a  BENCHMARK view: a class non-zero ONLY in the benchmark columns -> PRESENT
+      input    = view=benchmark  DRAWN BASES=["benchmark"]  columns={"portfolio":[{"fixedIncome":55,"equity":40,"structured":5,"commodities":0,"alternatives":0}],"benchmark":[{"fixedIncome":55,"equity":40,"structured":0,"commodities":5,"alternatives":0}],"relative":[{"fixedIncome":0,"equity":0,"structured":5,"commodities":-5,"alternatives":0}]}
+      expected = ["fixedIncome","equity","commodities"]
+      got      = ["fixedIncome","equity","commodities"]
+PASS  a1  BENCHMARK view: a class non-zero ONLY in the portfolio columns -> ABSENT
+      input    = view=benchmark  DRAWN BASES=["benchmark"]  columns={"portfolio":[{"fixedIncome":12.7,"equity":85.8,"structured":1.5,"commodities":0,"alternatives":0}],"benchmark":[{"fixedIncome":15,"equity":85,"structured":0,"commodities":0,"alternatives":0}],"relative":[{"fixedIncome":-2.3,"equity":0.8,"structured":1.5,"commodities":0,"alternatives":0}]}
+      expected = ["fixedIncome","equity"]
+      got      = ["fixedIncome","equity"]
+PASS  a2  RELATIVE view: a class with a non-zero delta on EITHER side -> PRESENT
+      input    = view=relative  DRAWN BASES=["relative"]  columns={"portfolio":[{"fixedIncome":55,"equity":40,"structured":5,"commodities":0,"alternatives":0}],"benchmark":[{"fixedIncome":55,"equity":40,"structured":0,"commodities":5,"alternatives":0}],"relative":[{"fixedIncome":0,"equity":0,"structured":5,"commodities":-5,"alternatives":0}]}
+      expected = ["structured","commodities"]
+      got      = ["structured","commodities"]
+PASS  a3  CUSTOM view (valid blend): benchmark bars + portfolio ghosts -> the UNION
+      input    = view=benchmark +custom blendValid=true  DRAWN BASES=["benchmark","portfolio"]  columns={"portfolio":[{"fixedIncome":55,"equity":40,"structured":5,"commodities":0,"alternatives":0}],"benchmark":[{"fixedIncome":55,"equity":40,"structured":0,"commodities":5,"alternatives":0}],"relative":[{"fixedIncome":0,"equity":0,"structured":5,"commodities":-5,"alternatives":0}]}
+      expected = ["fixedIncome","equity","structured","commodities"]
+      got      = ["fixedIncome","equity","structured","commodities"]
+PASS  a4  PORTFOLIO view: a class non-zero ONLY in the benchmark columns -> ABSENT
+      input    = view=portfolio  DRAWN BASES=["portfolio"]  columns={"portfolio":[{"fixedIncome":55,"equity":40,"structured":5,"commodities":0,"alternatives":0}],"benchmark":[{"fixedIncome":55,"equity":40,"structured":0,"commodities":5,"alternatives":0}],"relative":[{"fixedIncome":0,"equity":0,"structured":5,"commodities":-5,"alternatives":0}]}
+      expected = ["fixedIncome","equity","structured"]
+      got      = ["fixedIncome","equity","structured"]
+
+PASS  b  class zero in EVERY column -> ABSENT
+      input    = [{"fixedIncome":30,"equity":70,"structured":0,"commodities":0,"alternatives":0},{"fixedIncome":40,"equity":60,"structured":0,"commodities":0,"alternatives":0}]
+      expected = ["fixedIncome","equity"]
+      got      = ["fixedIncome","equity"]
+PASS  c  order is ASSET_CLASSES order, though the columns arrive reversed
+      input    = [{"fixedIncome":0,"equity":0,"structured":0,"commodities":0,"alternatives":3},{"fixedIncome":0,"equity":0,"structured":0,"commodities":4,"alternatives":0},{"fixedIncome":0,"equity":0,"structured":5,"commodities":0,"alternatives":0},{"fixedIncome":0,"equity":6,"structured":0,"commodities":0,"alternatives":0},{"fixedIncome":7,"equity":0,"structured":0,"commodities":0,"alternatives":0}]
+      expected = ["fixedIncome","equity","structured","commodities","alternatives"]
+      got      = ["fixedIncome","equity","structured","commodities","alternatives"]
+PASS  d  non-finite values (NaN, +Inf, -Inf, the Custom "--" string) count as ZERO
+      input    = [{"fixedIncome":null,"equity":null,"structured":null,"commodities":"--","alternatives":0},{"fixedIncome":0,"equity":12,"structured":0,"commodities":0,"alternatives":0}]
+      expected = ["equity"]
+      got      = ["equity"]
+PASS  e  no columns at all -> empty set
+      input    = []
+      expected = []
+      got      = []
+PASS  f  a negative value is non-zero, so the class is PRESENT
+      input    = [{"fixedIncome":-2.5,"equity":2.5,"structured":0,"commodities":0,"alternatives":0}]
+      expected = ["fixedIncome","equity"]
+      got      = ["fixedIncome","equity"]
+FAIL  g  DELIBERATELY WRONG EXPECTATION -- this line MUST read FAIL
+      input    = [{"fixedIncome":0,"equity":50,"structured":0,"commodities":0,"alternatives":0}]
+      expected = ["fixedIncome","equity"]
+      got      = ["equity"]
+
+REAL CASES: 10 (a,a1,a2,a3,a4,b,c,d,e,f) -- failures 0 of 10
+FALSIFIER  : case g printed FAIL as required
+RESULT: OK (exit 0)

@@ -99,10 +99,18 @@ def listing(section):
     return {"section": section, "url": url, "article_urls": found}
 
 
-def article(url):
-    """Copied verbatim from extract.py's extract_article() -- stdlib regex, longest-<p>-block
-    extraction (EXTEND, never rebuild)."""
+def article(url, *, response_path=None):
+    """Keep canonical Unlocker transport; normalize only the returned article body."""
     html = web_unlocker(url)
+    if response_path is not None:
+        from pathlib import Path
+        Path(response_path).write_text(html, encoding="utf-8")
+    return parse_article(html, url)
+
+
+def parse_article(html, url):
+    from bs4 import BeautifulSoup
+
     ogt = re.search(r'(?is)property="og:title"\s+content="([^"]+)"', html) or re.search(r"(?is)<title[^>]*>(.*?)</title>", html)
     title = htmlmod.unescape(ogt.group(1)).strip() if ogt else ""
     pub = re.search(r'(?is)property="article:published_time"\s+content="([^"]+)"', html) or re.search(r'(?is)"datePublished"\s*:\s*"([^"]+)"', html)
@@ -112,13 +120,33 @@ def article(url):
         r"for help please visit|cancel anytime during your trial|all rights reserved|"
         r"sign in|create an account|this copy is for your personal)", re.IGNORECASE,
     )
+    soup = BeautifulSoup(html, "html.parser")
+    body = soup.select_one('article .crawler section')
     paras = []
-    for m in re.finditer(r"(?is)<p[ >].*?</p>", html):
-        t = htmlmod.unescape(re.sub(r"\s+", " ", re.sub(r"(?s)<[^>]+>", " ", m.group(0)))).strip()
-        if len(t) > 50 and not boilerplate.search(t):
-            paras.append(t)
+    if body:
+        for node in body.select("script, style, noscript, button, form"):
+            node.decompose()
+        for node in body.select("p, h2, h3, li, blockquote, table"):
+            if node.find_parent(["li", "blockquote", "table"]):
+                continue
+            t = node.get_text(" ", strip=True)
+            if t and not boilerplate.search(t):
+                paras.append(t)
     text = "\n\n".join(paras)
-    return {"url": url, "title": title, "published": published, "text_chars": len(text), "text": text}
+    expected_words = None
+    state_node = soup.select_one("#__NEXT_DATA__")
+    if state_node:
+        try:
+            props = json.loads(state_node.string)["props"]["pageProps"]
+            expected_words = props["articleData"]["meta"]["metrics"].get("wordCount")
+        except (TypeError, ValueError, KeyError):
+            pass
+    completeness = "requires_review" if body else "missing_body"
+    if isinstance(expected_words, (int, float)) and expected_words > len(text.split()) * 1.3:
+        completeness = "partial_body"
+    return {"url": url, "title": title, "published": published, "text_chars": len(text), "text": text,
+            "body_source": "web_unlocker_html.article.crawler.section",
+            "expected_word_count": expected_words, "completeness": completeness}
 
 
 def extract_balanced(text, start_marker):
@@ -153,28 +181,39 @@ def extract_balanced(text, start_marker):
     raise ValueError("unbalanced braces from " + start_marker)
 
 
-def extract_ticker_news(ticker, max_attempts=3):
+def extract_ticker_news(ticker, max_attempts=3, *, response_dir=None):
     """MEASURED INTERMITTENT: the market-data quote page's window.__STATE__ sometimes carries a
     per-ticker news array and sometimes does not, on an identical URL fetched seconds apart --
     Bright Data's static snapshot appears to race the page's own async hydration. Retries up to
     max_attempts and reports which attempt (if any) found it; NEVER claims absence proves no feed
     exists, and never fabricates a result on a miss."""
     url = f"https://www.wsj.com/market-data/quotes/{ticker.upper()}"
+    diagnostics = []
     for attempt in range(1, max_attempts + 1):
         html = web_unlocker(url)
+        diagnostic = {"attempt": attempt, "bytes": len(html), "state_marker_present": "window.__STATE__" in html}
+        diagnostics.append(diagnostic)
+        if response_dir is not None:
+            from pathlib import Path
+            folder = Path(response_dir)
+            folder.mkdir(parents=True, exist_ok=True)
+            (folder / f"quote-attempt-{attempt}.html").write_text(html, encoding="utf-8")
         try:
             blob = extract_balanced(html, "window.__STATE__ =")
             d = json.loads(blob)
-        except Exception:
+        except Exception as exc:
+            diagnostic["parse_error_type"] = type(exc).__name__
             time.sleep(PACE_SECONDS)
             continue
         keys = [k for k in d.get("data", {}) if k.startswith("quotes_latestNews_")]
+        diagnostic["news_key_count"] = len(keys)
         if keys:
             news = d["data"][keys[0]]
             return {"ticker": ticker.upper(), "url": url, "found_on_attempt": attempt, "attempts": attempt,
-                    "state_key": keys[0], "news_node": news}
+                    "state_key": keys[0], "news_node": news, "diagnostics": diagnostics}
         time.sleep(PACE_SECONDS)
     return {"ticker": ticker.upper(), "url": url, "found_on_attempt": None, "attempts": max_attempts,
+            "diagnostics": diagnostics,
             "note": "quotes_latestNews_ key not present in window.__STATE__ on any attempt -- "
                     "a timing/hydration race in the Unlocker's snapshot, not proof the feed is absent"}
 

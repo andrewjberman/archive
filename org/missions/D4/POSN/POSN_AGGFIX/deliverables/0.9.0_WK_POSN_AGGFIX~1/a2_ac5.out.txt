@@ -1,0 +1,115 @@
+$ timeout 1200 python org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~1/a2_producer_harness.py --aggregate-payload
+HARNESS a2_producer_harness.py at workspace C:/tmp/wk-aggfix-1-1 (HEAD 0c4650dc1c); BEFORE anchor 605c03f81f; captures under .scratch/a2/runs; nothing is served
+EVENT execution_arn   arn:aws:states:us-east-1:313476888478:execution:YangDataPipeline:20260914_v1-9dbd2129 (status SUCCEEDED, started 2026-09-15 07:03:54.694000-04:00; executions scanned newest-first: 1)
+EVENT resource        arn:aws:lambda:us-east-1:313476888478:function:yang-generate-positioning
+EVENT model_pkl_key   benchmarks/model_20260914_v1.pkl
+EVENT data_as_of_date 2026-09-14
+EVENT raw input       770 chars, sha256 8879bc84752d99ca5e045df79300f0253ca34f2f23ddf371ba068b5341f49773
+RUN normal-before    BEFORE handler READ CACHED .scratch/a2/runs/normal-before (source sha256 b4114f5c43f0c49d, PYTHONHASHSEED=0, finished 2026-09-15T21:01:44Z)
+RUN normal-after     AFTER handler READ CACHED .scratch/a2/runs/normal-after (source sha256 0781cf3b1149a522, PYTHONHASHSEED=0, finished 2026-09-15T21:01:52Z)
+CAPTURED PUT s3://opal-data-portal-v2/json/positioning/opal_aggregate.json  3907 bytes  ContentType=application/json ContentEncoding=gzip CacheControl=no-cache
+DECOMPRESSED PAYLOAD (holdings elided to count + first):
+{
+ "status": "OK",
+ "reason": null,
+ "generated_at": "2026-09-15T21:01:51Z",
+ "data_as_of": "2026-09-14",
+ "current_holdings": {
+  "AGG": {
+   "holdings": [
+    "<30 holdings; first: {\"ticker\":\"IEFA\",\"name\":\"iShares Core MSCI EAFE ETF\",\"asset_class\":\"Equity\",\"asset_class_recognized\":true,\"sub_asset_class\":\"Developed\",\"weight\":0.1352,\"model_breakdown\":{\"INT\":0.1469,\"LT\":0.161,\"ULT\":0.128},\"fee\":0.07,\"aum\":193101.96437,\"active\":0,\"yield\":3.198338125126053,\"duration\":null,\"credit\":null,\"beta\":1.0224498567514062,\"returns\":{\"1D\":-0.82,\"WTD\":null,\"MTD\":-0.66,\"1M\":-2.48,\"QTD\":2.71,\"1Q\":1.43,\"YTD\":12.1,\"1Y\":17.56}}>"
+   ],
+   "total_aum": 1792113521.8999999
+  }
+ },
+ "weights": {
+  "UST": 0.036577292509072275,
+  "ST": 0.07634236676030964,
+  "INT": 0.26697659247765987,
+  "LT": 0.5032325081275311,
+  "ULT": 0.11687124012542724
+ },
+ "weights_source": {
+  "key": "platinum/mdpf/global/aum-metrics.json",
+  "version_id": "OVcFBOpgjFywfYJGYjowX2VSVwLdiyez",
+  "period": "2026-09-14"
+ },
+ "members": {
+  "UST": 65550660.5,
+  "ST": 136814187.765,
+  "INT": 478452361.41,
+  "LT": 901849782.4749999,
+  "ULT": 209446529.75,
+  "blends": [
+   {
+    "model_name": "Opal Blend 5050 Int Ltc",
+    "aum": 35744571.59,
+    "constituents": {
+     "INT": 0.5,
+     "LT": 0.5
+    }
+   },
+   {
+    "model_name": "Opal Blend 5050 St Int",
+    "aum": 7217454.65,
+    "constituents": {
+     "ST": 0.5,
+     "INT": 0.5
+    }
+   }
+  ]
+ },
+ "left_out": [],
+ "reconciliation": {
+  "five_primary_sum": 1749151495.6599998,
+  "members_sum": 1792113521.8999999,
+  "file_total_model_aum": 1800437987.06,
+  "gap": 8324465.160000086,
+  "gap_explanation_ref": "org/missions/D4/POSN/POSN_AGGFIX/deliverables/0.9.0_WK_POSN_AGGFIX~1/AF1_S1_GAP_EXPLANATION.md"
+ }
+}
+CHECK put ContentType application/json                           PASS  application/json
+CHECK put ContentEncoding gzip                                   PASS  gzip
+CHECK put CacheControl no-cache                                  PASS  no-cache
+CHECK put body is gzip bytes                                     PASS
+CHECK top-level keys == contract 1.1 (10, in order)              PASS  status,reason,generated_at,data_as_of,current_holdings,weights,weights_source,members,left_out,reconciliation
+CHECK current_holdings keys == [AGG]                             PASS
+CHECK current_holdings.AGG keys == holdings,total_aum            PASS
+CHECK weights keys == UST ST INT LT ULT                          PASS
+CHECK weights_source keys == key,version_id,period               PASS
+CHECK members keys == UST ST INT LT ULT blends                   PASS
+CHECK members.blends entries carry model_name,aum,constituents   PASS
+CHECK left_out entries carry model_name,aum                      PASS
+CHECK reconciliation keys == contract                            PASS  five_primary_sum,members_sum,file_total_model_aum,gap,gap_explanation_ref
+CHECK generated_at is ISO Z                                      PASS  2026-09-15T21:01:51Z
+CHECK data_as_of == event data_as_of_date                        PASS  2026-09-14
+CHECK status OK                                                  PASS  OK
+CHECK reason null on OK                                          PASS
+CHECK holdings non-empty                                         PASS  30 holdings
+CHECK weights sum to 1 within 1e-9                               PASS  sum=1.0 |1-sum|=0.000e+00
+    weight UST 0.036577292509072  members[UST]/members_sum 0.036577292509072  |diff| 0.000e+00
+    weight ST  0.076342366760310  members[ST]/members_sum 0.076342366760310  |diff| 0.000e+00
+    weight INT 0.266976592477660  members[INT]/members_sum 0.266976592477660  |diff| 0.000e+00
+    weight LT  0.503232508127531  members[LT]/members_sum 0.503232508127531  |diff| 0.000e+00
+    weight ULT 0.116871240125427  members[ULT]/members_sum 0.116871240125427  |diff| 0.000e+00
+CHECK each weight == members[code]/members_sum (max |diff| <= 1e-12) PASS  max |diff| 0.000e+00 over 5 of 5
+CHECK AGG.total_aum == reconciliation.members_sum                PASS  1792113521.8999999 vs 1792113521.8999999
+CHECK gap == file_total_model_aum - members_sum                  PASS  gap 8324465.160000086 recomputed 8324465.160000086
+CHECK file_total_model_aum == the read file total.model_aum      PASS  1800437987.06
+CHECK members_sum == sum of primary + blend rows (within 1e-6)   PASS  members_sum 1792113521.8999999 rows 1792113521.8999999
+CHECK five_primary_sum == sum of the five primary rows           PASS  1749151495.6599998 vs 1749151495.6599998
+CHECK members.blends has 2 entries                               PASS  2
+    blend 'Opal Blend 5050 Int Ltc' aum 35744571.59 constituents {"INT": 0.5, "LT": 0.5}
+    blend 'Opal Blend 5050 St Int' aum 7217454.65 constituents {"ST": 0.5, "INT": 0.5}
+    members[UST] 65550660.5 = own row 65550660.5 + blend shares 0.0 (|diff| 0.000e+00)
+    members[ST ] 136814187.765 = own row 133205460.44 + blend shares 3608727.325 (|diff| 1.211e-08)
+    members[INT] 478452361.41 = own row 456971348.29 + blend shares 21481013.12 (|diff| 3.725e-09)
+    members[LT ] 901849782.4749999 = own row 883977496.68 + blend shares 17872285.795 (|diff| 4.470e-08)
+    members[ULT] 209446529.75 = own row 209446529.75 + blend shares 0.0 (|diff| 0.000e+00)
+CHECK left_out == every other row of the read file               PASS  0 left out of 7 rows (expected 0)
+CHECK weights_source.key == platinum key                         PASS
+CHECK weights_source.version_id == VersionId the run read        PASS  payload OVcFBOpgjFywfYJGYjowX2VSVwLdiyez read OVcFBOpgjFywfYJGYjowX2VSVwLdiyez
+CHECK weights_source.period == the read file period              PASS  2026-09-14
+CHECK gap_explanation_ref names the gap note                     PASS
+CHECKS PASS 31 of 31
+rc=0

@@ -58,8 +58,9 @@ def _secret(name):
     return boto3.client("secretsmanager", region_name="us-east-1").get_secret_value(SecretId=name)["SecretString"]
 
 
-def build_session():
-    bundle = json.loads(_secret(SESSION_SECRET_ID))
+def build_session(*, bundle=None):
+    if bundle is None:
+        bundle = json.loads(_secret(SESSION_SECRET_ID))
     s = creq.Session(impersonate="chrome", timeout=30, verify=False)
     for c in bundle["all_cookies"]:
         s.cookies.set(c["name"], c["value"], domain=c.get("domain"), path=c.get("path", "/"))
@@ -83,6 +84,36 @@ def ticker(s, symbol):
                headers={"Referer": f"{BASE}/quote/{symbol}"})
     print(f"OK: {symbol} HTTP {r.status_code} bytes={len(r.content)}")
     return r
+
+
+def search(s, query, page=1):
+    """Exact request observed from the site's search input on 2026-09-14."""
+    params = {"query": query}
+    if page > 1:
+        params["page"] = page
+    r = s.get(f"{BASE}/nemo-next/api/search/query", params=params,
+              headers={"Referer": f"{BASE}/search?query={query}"})
+    if r.status_code != 200:
+        raise RuntimeError(f"Bloomberg search -> {r.status_code} ({len(r.content)} bytes)")
+    return r.json()
+
+
+def article(s, story_id, language="en"):
+    """Article-transporter JSON route from Bloomberg's loaded client code (2026-09-14)."""
+    from urllib.parse import quote
+    r = s.get(f"{BASE}/article/api/story/id/{quote(story_id, safe='')}",
+              params={"languagePreference": language}, headers={"Referer": f"{BASE}/"})
+    if r.status_code != 200:
+        raise RuntimeError(f"Bloomberg article -> {r.status_code} ({len(r.content)} bytes)")
+    return r.json()
+
+
+def chart_news(s, symbol, *, target_date, start_date, end_date, name, date_range="1D", security_type="EQT"):
+    """Full captured chart request. Caller supplies observed window boundaries."""
+    return s.get(f"{BASE}/bazaar/api/chart-news/{symbol}", params={
+        "targetDate": target_date, "startDate": start_date, "endDate": end_date,
+        "dateRange": date_range, "name": name.replace(" ", "+"), "type": security_type,
+    }, headers={"Referer": f"{BASE}/quote/{symbol}"})
 
 
 def news(s, symbol, name):

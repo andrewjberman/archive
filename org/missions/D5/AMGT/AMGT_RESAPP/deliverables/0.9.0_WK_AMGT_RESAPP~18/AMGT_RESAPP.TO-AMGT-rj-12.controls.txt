@@ -1,0 +1,57 @@
+# AMGT_RESAPP.TO-AMGT-rj-12 CONTROLS -- ASCII TRANSCRIPT
+# 1. ROUTE MUTANT: raw capture .scratch/rj12.controls.route-mutant.txt, 7159 bytes, sha256 182bab579812bf9be512fa62f79aa1ed0a4cc89288efe8a38f4fadb07bb7cc38; transform: ANSI SGR removed, non-ASCII as <U+XXXX>
+# driver: git show 9ff31a8c5f:lib/research/api/scoped_amgt.py -> the read_posture def (up to def _model_cases) exec into the edited module globals; pytest -q -p no:cacheprovider lib/research/api/tests/test_generation_and_pool_routes.py -k test_14
+
+MUTANT: read_posture from 9ff31a8c5f (the pre-edit SERVED arm), 35 lines, exec into the edited module globals
+.F                                                                       [100%]
+================================== FAILURES ===================================
+____________ test_14b_posture_serves_what_the_posture_tab_renders _____________
+
+pool = <function pool.<locals>.write at 0x000001EF4CC5E840>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001EF4CC73710>
+
+    def test_14b_posture_serves_what_the_posture_tab_renders(pool, monkeypatch):
+        """AMGT-rj-12, rows AMGT_RESAPP-Z-W18-S16 and W18-S18: packs, fit, both membership records, the
+        comparable selection and name ride the SERVED arm verbatim; the comparable's identity is resolved
+        for the COMPARABLE's key only; and an absent-verdict object keeps its own reason."""
+        key = "CTRL_US_Equity"
+        asked = []
+    
+        def fake_resolve(requested):
+            asked.append(requested)
+            return _identity(requested)
+    
+        monkeypatch.setattr(scoped_amgt, "resolve_identity", fake_resolve)
+        packs = {
+            key: {"counts": {"drafted_sentences": 2}, "absent": [], "sources": {}},
+            "PEER_US_Equity": {"counts": {"drafted_sentences": 0}, "absent": ["Model: ABSENT x"], "sources": {}},
+        }
+        document = {
+            "security_key": key, "verdict": "worse", "comparable": "PEER_US_Equity", "comparable_name": "Peer Inc.",
+            "basis": [{"claim": "c", "cites": ["PEER_US_Equity/FIT:DIVZ"]}], "as_of": "2026-09-15",
+            "generation": {"run_id": "g1"}, "marked": "machine", "notice": "A machine's view.", "reason": None,
+            "membership": {"held": True}, "comparable_membership": {"held": False},
+            "comparable_selection": {"comparable": "PEER_US_Equity", "rung_reached": 2},
+            "fit": {key: {"presets": {}}}, "packs": packs, "cites_validated": 1, "cites_total": 1,
+        }
+        pool("posture/v1/CTRL_US_Equity/2026-09-15.json", document)
+        served = scoped_amgt.read_posture(key, identity=_identity(key))
+        assert list(served)[0] == "status" and served["status"] == "SERVED"
+        for field in ("verdict", "comparable", "basis", "marked", "reason", "comparable_name", "notice", "membership",
+                      "comparable_membership", "comparable_selection", "fit", "packs", "cites_validated", "cites_total"):
+>           assert served[field] == document[field], field
+                   ^^^^^^^^^^^^^
+E           KeyError: 'comparable_name'
+
+lib\research\api\tests\test_generation_and_pool_routes.py:500: KeyError
+=========================== short test summary info ===========================
+FAILED lib/research/api/tests/test_generation_and_pool_routes.py::test_14b_posture_serves_what_the_posture_tab_renders - KeyError: 'comparable_name'
+1 failed, 1 passed, 21 deselected in 0.80s
+MUTANT pytest rc 1
+
+
+# 2. DETERMINISM: two runs of posture.harness.cjs over the same inputs -- run A pre-commit (.scratch/rj12.posture.harness.txt, at 2026-09-15T18:43:36.078Z), run B after portal commit 0e153399 (.scratch/rj12.AC2.harness-full.txt, at 2026-09-15T18:49:13.186Z).
+CHECK/POSTURE/EMPTIED/ABSENT/CHECKS lines identical: True (37 lines)
+per_object detail identical (labels, sentences, header sentences, claim/cite counts, unresolved cite lists, comparable identities): True
+O-1 object records identical (bytes and sha256): True
+source sha256 map identical: True (15 sources)

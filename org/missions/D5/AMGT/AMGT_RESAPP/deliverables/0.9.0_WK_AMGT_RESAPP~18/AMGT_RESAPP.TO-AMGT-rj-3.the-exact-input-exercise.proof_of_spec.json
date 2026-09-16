@@ -1,0 +1,207 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-rj-3",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "73938cdae4",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rj-3.the-exact-input-exercise.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+  "group": "C",
+  "vintage_commit": "1170b4da69"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~18",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/join.harness.mjs",
+   "kind": "test",
+   "commit_or_etag": "b616b759",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "portal commit b616b759 on wk-amgt_resapp-11-1-portal; a harness, not part of the page bundle. --payload/--ranked arm added; the no-flag and --unresolved-control arms unchanged and green. Superproject gitlink e85f6eb8 not moved (PORTAL FROZEN: commit yes, promote no).",
+   "introduces": [
+    "function runExactInput()",
+    "const exactMode = payloadPath !== null || rankedPath !== null"
+   ],
+   "artifact_covered_by": [
+    "AC2"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/exactInput.cjs",
+   "kind": "test",
+   "commit_or_etag": "b616b759",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "portal commit b616b759; new shared reader: file-byte sha256 at input, re-read and re-hash at output, the ACTUAL RankedList render.",
+   "introduces": [
+    "function readExactInput(file)",
+    "function renderRankedList(body)"
+   ],
+   "artifact_covered_by": [
+    "AC2",
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/assembled.harness.cjs",
+   "kind": "test",
+   "commit_or_etag": "b616b759",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "portal commit b616b759; new assembled-page render check over the two captures, CHECKS-OK 13 of 13; mutant over the attempt1 captures node_rc=1.",
+   "introduces": [
+    "function clearBeforeArm(arm)",
+    "const persister = withWindow(() => source('src/lib/queryPersister.ts'))"
+   ],
+   "artifact_covered_by": [
+    "AC3"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "6f5c43ac92",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "rows AMGT_RESAPP-Z-W18-S19 and W18-S20 appended (247 -> 249) and committed before the harness edit; surprise-row-gate OK, 2 new rows checked.",
+   "introduces": [
+    "\"AMGT_RESAPP-Z-W18-S19\"",
+    "\"AMGT_RESAPP-Z-W18-S20\""
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "inputs 2 (one ranked payload, one thesis bundle, both captured from the DEPLOYED adapter under rj-10), each INPUT line with a 16-hex sha256 prefix: the ranked line with as_of_date 2026-09-15, a generation_id and a payload_hash; the thesis line with as_of_date None (the thesis route carries no as_of_date at any vintage, row AMGT_RESAPP-Z-W18-S19) and its generated_at_day AND its crosswalk_vintage BOTH equal to the ranked line's as_of_date. Inputs 0, a thesis day field that is None, or a day field that differs from the ranked as_of_date, is a STOP and a BLOCKING row -- the exercise has no exact input",
+   "method": "command",
+   "invocation": "python -c \"import hashlib,glob,json,io,os; fs=sorted(glob.glob('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/rankings.trending.chatter.response.*.json'))+sorted(glob.glob('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/thesis.*.response.*.json')); print('inputs', len(fs)); [print('INPUT', os.path.basename(f), hashlib.sha256(open(f,'rb').read()).hexdigest()[:16], (lambda b: ('as_of_date', b.get('as_of_date'), 'generation_id', b.get('generation_id'), 'payload_hash', (b.get('payload_hash') or '')[:16] or None, 'generated_at_day', (b.get('generated_at') or '')[:10] or None, 'crosswalk_vintage', (b.get('identity') or {}).get('crosswalk_vintage')))(json.loads(json.load(io.open(f,encoding='utf-8'))['body']))) for f in fs]\"",
+   "output_evidence": "inputs 2\nINPUT rankings.trending.chatter.response.2026-09-15.json 698c391592a41a21 ('as_of_date', '2026-09-15', 'generation_id', '20260915T200841Z-adf383740a9e', 'payload_hash', 'adf383740a9eeee9', 'generated_at_day', '2026-09-15', 'crosswalk_vintage', None)\nINPUT thesis.BA_US_Equity.response.2026-09-15.json f2e7c040727195a1 ('as_of_date', None, 'generation_id', None, 'payload_hash', None, 'generated_at_day', '2026-09-15', 'crosswalk_vintage', '2026-09-15')\nrc=0",
+   "denominator": "ONE run of the AMENDMENT 3 invocation (extracted byte-exact from the order at HEAD 254fcba914), bounded as 'timeout 120 bash <file holding the invocation>', from the worktree root, 2026-09-15T21:43:21Z; the trailing rc=0 is the bound's exit (python's own). 2 of 2 files matched by the two globs (attempt1.* not matched). Ranked line: as_of_date 2026-09-15, generation_id 20260915T200841Z-adf383740a9e, payload_hash prefix adf383740a9eeee9 (its crosswalk_vintage prints None, which the expect does not bar on the ranked line). Thesis line: as_of_date None (row AMGT_RESAPP-Z-W18-S19), generated_at_day 2026-09-15 and crosswalk_vintage 2026-09-15 -- 2 of 2 thesis day fields equal to the ranked as_of_date. The expect pattern was tested before recording against two mutants of this output (thesis crosswalk_vintage None; generated_at_day 2026-09-14): neither matches. Verbatim capture: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/AMGT_RESAPP.TO-AMGT-rj-3.AC1.txt.",
+   "status": "PASS",
+   "expect": "inputs 2\\nINPUT rankings\\.trending\\.chatter\\.response\\.\\S+ [0-9a-f]{16} \\('as_of_date', '(\\d{4}-\\d{2}-\\d{2})', 'generation_id', '[^']+', 'payload_hash', '[0-9a-f]{16}', [^\\n]*\\)\\nINPUT thesis\\.\\S+ [0-9a-f]{16} \\('as_of_date', None, [^\\n]*'generated_at_day', '\\1', 'crosswalk_vintage', '\\1'\\)\\nrc=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "rc=0; an INPUT line per file with its sha256 prefix and as_of_date (the ranked line 2026-09-15; the thesis line ABSENT, because the thesis route carries no as_of_date at any vintage, row AMGT_RESAPP-Z-W18-S19 -- the thesis bundle's day is proved in AC1 from the two day fields it does carry, and the sha256 equality barred here binds those same bytes); an OUTPUT line carrying the SAME sha256 prefixes beside the rendered row count (equal to the ranked payload's row_count) and the fiscal figure join of the CAPTURED payload's own security with both totals PRINTED from the payload (the thesis bundle rj-10 captured from the DEPLOYED adapter at 20:10:49Z, thesis.BA_US_Equity.response.2026-09-15.json sha256 f2e7c040727195a1ba4a2775d19eac0eb551dc3382902eb014ad4b465aed5cad, carries 0 fiscal and 0 header figures -- the deployed adapter reads model blocks from a repo-relative MODEL_BLOCK_ROOT that does not exist inside Lambda, row AMGT_RESAPP-Z-W19-S13 -- so the join prints 0/0 and the page renders the Model tab ABSENT-explicit; a nonzero figure count on that payload is NOT met, because only a harness that invents figures could print one); the committed BABA_US_Equity fixture run WITHOUT the flags still prints 183/183 and 13/13 (the regression arm, unchanged). A sha at output that differs from its input is NOT met",
+   "method": "command",
+   "invocation": "cd portal && R=$(ls ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/rankings.trending.chatter.response.*.json | head -1); T=$(ls ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/thesis.*.response.*.json | head -1); timeout 110 node src/pages/SecurityAnalysis/__harness__/join.harness.mjs --payload \"$T\" --ranked \"$R\" 2>&1 | tail -10; echo rc=$?",
+   "output_evidence": "=== AMGT-rj-3 EXACT-INPUT JOIN -- captured payloads hashed at input, re-read and re-hashed at output ===\nINPUT ranked rankings.trending.chatter.response.2026-09-15.json sha256=698c391592a41a21 as_of_date=2026-09-15 generation_id=20260915T200841Z-adf383740a9e payload_hash=adf383740a9eeee9 row_count=10 statusCode=200\nINPUT thesis thesis.BA_US_Equity.response.2026-09-15.json sha256=f2e7c040727195a1 as_of_date=ABSENT generated_at=2026-09-15T20:10Z crosswalk_vintage=2026-09-15 security_key=BA_US_Equity statusCode=200\nOUTPUT ranked sha256=698c391592a41a21 rendered_rows=10 of row_count 10 (keyed 10 of 10, served order true) sha_in==sha_out true\nOUTPUT thesis sha256=f2e7c040727195a1 security_key=BA_US_Equity fiscal 0/0 header 0/0 check_face=0 model_status=ABSENT sha_in==sha_out true\nREGRESSION committed fixture BABA_US_Equity (the no-flag arm's bundle) fiscal 183/183 header 13/13\nSUMMARY: exact-input arm; same as_of_date UNDECIDABLE (as_of_date ABSENT on thesis); 0 failing assertion(s).\nOK: harness green.\nrc=0",
+   "denominator": "ONE run of the literal invocation (byte-exact from the order at HEAD 254fcba914) under 'timeout 120 bash <file holding the invocation>' from the worktree root, portal b616b759 unchanged since the first run, 2026-09-15T21:43:39Z; outer bound rc=0; the printed rc=0 is tail's (pipeline). node's own exit is the first run's unpiped read at the same portal commit (node_rc=0, same 8 lines; org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/AMGT_RESAPP.TO-AMGT-rj-3.AC2.join-full-and-noflag-runs.txt); this re-run's 8 harness lines are identical to that run's recorded AC2 output. 2 of 2 inputs with a sha256 prefix at input and the SAME prefix at output (698c391592a41a21, f2e7c040727195a1); as_of_date ranked 2026-09-15, thesis ABSENT (the amended met value; its day is AC1's); rendered_rows 10 of row_count 10 (keyed 10 of 10); the captured thesis payload's own totals fiscal 0/0 header 0/0 (row W19-S13); regression fixture 183/183 and 13/13. The expect pattern was tested against a mutant with the thesis output sha changed by one hex digit: no match.",
+   "status": "PASS",
+   "expect": "INPUT ranked \\S+ sha256=([0-9a-f]{16}) as_of_date=2026-09-15 .*?INPUT thesis \\S+ sha256=([0-9a-f]{16}) as_of_date=ABSENT .*?OUTPUT ranked sha256=\\1 rendered_rows=(\\d+) of row_count \\3 .*?OUTPUT thesis sha256=\\2 .*?fiscal (\\d+)/\\4 header (\\d+)/\\5 .*?REGRESSION .*?fiscal 183/183 header 13/13.*?rc=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "rc=0 and check lines: tabs_rendered 5 (thesis, exec_management, peers, model, posture), header_ranked_rows equal to the ranked payload's row_count, header_description_present true or ABSENT-explicit, posture_line_present true or ABSENT-explicit, sha_in equal to sha_out for both payloads, cache_cleared_before_each_arm true, buster v2, error_arm_distinct true, empty_arm_distinct true, error_claims_no_daily_row false. A missing tab, a sha mismatch, or an arm that is not distinct is NOT met",
+   "method": "command",
+   "invocation": "cd portal && R=$(ls ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/rankings.trending.chatter.response.*.json | head -1); T=$(ls ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/thesis.*.response.*.json | head -1); timeout 110 node src/pages/SecurityAnalysis/__harness__/assembled.harness.cjs --payload \"$T\" --ranked \"$R\" 2>&1 | tail -16; echo rc=$?",
+   "output_evidence": "  \"limits\": \"A static render boundary over two captured adapter payloads. It says nothing about a browser, the live edge, a person session, or the persisted cache a browser holds; /overlay and /peers were not captured.\"\n}\nCHECK tabs_rendered 5 order thesis,exec_management,peers,model,posture (expected 5 in order thesis,exec_management,peers,model,posture)\nCHECK tab_bodies_match_payload true -- thesis sentences 38/38; exec_management officers 12/12; peers NO_BODY (/peers not captured); model ABSENT-explicit cells 0 of fiscal 0; posture SERVED verdict hold (expected true)\nCHECK header_ranked_rows 10 (expected 10 = ranked row_count; served order true; caption names 20260915T200841Z-adf383740a9e true)\nCHECK header_description_present ABSENT-explicit -- data-header-description=NOT_READ \"Description: not carried on this payload.\" (expected true or ABSENT-explicit)\nCHECK posture_line_present true -- data-header-posture=SERVED verdict hold (expected true or ABSENT-explicit)\nCHECK ranked_click_opens_thesis_key true -- rank 6 BA US sent [\"BA_US_Equity\"] (expected true)\nCHECK sha_in ranked 698c391592a41a21 sha_out 698c391592a41a21 equal true (expected true)\nCHECK sha_in thesis f2e7c040727195a1 sha_out f2e7c040727195a1 equal true (expected true)\nCHECK cache_cleared_before_each_arm true -- 4 of 4 arms: OPAL_PORTAL_QUERY_CACHE_v1 seeded, then cleared by clearQueryPersister() (expected true)\nCHECK buster v2 -- src/main.tsx:80 (expected v2)\nCHECK error_arm_distinct true -- \"Read failure -- the ranked names could not be read.\" (expected true)\nCHECK empty_arm_distinct true -- \"The committed ranking for TRENDING_CHATTER is EMPTY -- the producer ran and ranked no names.\" (expected true)\nCHECK error_claims_no_daily_row false (expected false)\nCHECKS-OK 13 of 13\nrc=0",
+   "denominator": "ONE run of the literal invocation at portal b616b759; the printed rc=0 is tail's (pipeline); node's own exit read on a second unpiped run: node_rc=0, CHECK lines 14 of 14 identical (True), full JSON detail in org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/AMGT_RESAPP.TO-AMGT-rj-3.AC3.assembled-full-run.txt. 13 of 13 checks. tabs_rendered 5 of 5 panels mounted; Peers mounts with NO body (/peers not captured) and the page's own header brief is NOT_RENDERED in Security mode (/overlay not captured) -- both row AMGT_RESAPP-Z-W18-S20; header_description_present is ABSENT-explicit from HeaderBrief over the thesis bundle's identity and posture leaves ('Description: not carried on this payload.'); posture_line_present true (SERVED, hold). header_ranked_rows 10 of row_count 10, served order, caption names generation 20260915T200841Z-adf383740a9e. Cache: 4 of 4 arms seeded then cleared by the real clearQueryPersister(). Buster read from src/main.tsx:80. The empty arm is a DERIVED copy of the ranked capture at row_count 0 in the adapter's EMPTY shape, not a capture.",
+   "status": "PASS",
+   "expect": "CHECK tabs_rendered 5 order thesis,exec_management,peers,model,posture .*?CHECK header_ranked_rows (\\d+) \\(expected \\1 = ranked row_count; served order true.*?CHECK header_description_present (?:true|ABSENT-explicit) .*?CHECK posture_line_present (?:true|ABSENT-explicit) .*?CHECK sha_in ranked ([0-9a-f]{16}) sha_out \\2 equal true.*?CHECK sha_in thesis ([0-9a-f]{16}) sha_out \\3 equal true.*?CHECK cache_cleared_before_each_arm true .*?CHECK buster v2 .*?CHECK error_arm_distinct true .*?CHECK empty_arm_distinct true .*?CHECK error_claims_no_daily_row false .*?CHECKS-OK (\\d+) of \\4\\nrc=0"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "rc=0 with every prior check at its met value (the regression control: nothing that held in rounds 8-11 moved) and the chart harness's 3 of 3 pairwise distinct. A number that MOVES is the finding and is NOT met",
+   "method": "command",
+   "invocation": "cd portal && timeout 110 node src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs 2>&1 | tail -14; echo rc=$?; timeout 110 node src/pages/SecurityAnalysis/__harness__/chart.harness.mjs 2>&1 | tail -4",
+   "output_evidence": "}\nCHECK error_differs_from_empty = true (expected true)\nCHECK error_names_read_failure = true (expected true)\nCHECK error_claims_no_daily_row = false (expected false)\nCHECK loading_differs = true (expected true)\nCHECK populated_differs = true (expected true)\nCHECK populated_names_security = true (expected true)\nCHECK starred_error_differs_from_starred_empty = true (expected true)\nCHECK ranked_row_click_handlers_found = true (expected true)\nCHECK unresolved_row_marker_rendered = true (expected true)\nCHECK unresolved_row_navigates = false (expected false)\nCHECK resolved_row_click_sends_canonical_key = true (expected true)\nCHECK a_click_sent_a_ticker = false (expected false)\nCHECKS-OK 12 of 12\nrc=0\nOK: producer series ordering preserved -- series order untouched: BABA US Equity, BA US Equity, SAP GY Equity, AAPL US Equity, MSFT US Equity\n\nSUMMARY: 3/3 pairs distinct; states absent=COMPLETE_EMPTY, partial=INCOMPLETE_PARTIAL, retry-exhausted=INCOMPLETE_NO_DATA. 0 failing assertion(s).\nOK: absent, partial and retry-exhausted produce distinguishable output.",
+   "denominator": "ONE run of the literal invocation at portal b616b759 (after the edit). errorEmpty 12 of 12 checks at their met values and chart 3 of 3 pairs distinct; the printed rc=0 is tail's. The same invocation run BEFORE any edit in this order (portal 0e153399) printed the identical 12 CHECK lines, CHECKS-OK 12 of 12 and 3/3 -- nothing moved. Neither harness was edited.",
+   "status": "PASS",
+   "expect": "CHECKS-OK 12 of 12\\nrc=0\\n.*?SUMMARY: 3/3 pairs distinct;.*?0 failing assertion\\(s\\)\\."
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "AC5 is the judgment criterion: record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO~W and pointing at the browser half's deliverable path, and offer no verdict. It asks whether the assembled page, populated from ONE captured payload whose hash travelled through the exercise, is the thing a person would call working -- figures on screen, a ranked row that navigates to the same security the direct key reaches, machine prose beside its evidence, the tabs Andrew named, an error arm a person can tell from an empty day.",
+   "method": "manual_read_with_citation",
+   "invocation": "none -- AC5 is judgment=\"true\" and carries no invocation (TO-AMGT-rj-3 s.5); its evidence is AC2, AC3 and AC6's recorded outputs",
+   "output_evidence": "HALF SETTLED: the MECHANICAL half only, by 0.9.0_WK_AMGT_RESAPP~18 (AC1-AC4, AC6). The BROWSER half is 2.0.0_SA_COO~W's (DELIVER step 4): org/tier1_exec/2.0.0_SA_COO/deliverables/AMGT_RESAPP_W/ROUND11_BROWSER_EXERCISE.md is PRESENT (AC6's listing at 2026-09-15T21:44:00Z; committed @e31a7cc5da, moved to that path @e8e2e01ce1); this worker did not read it for a verdict and offers none. What the mechanical half shows over ONE ranked capture (sha256 698c391592a41a21, as_of_date 2026-09-15, generation 20260915T200841Z-adf383740a9e) and ONE thesis capture (sha256 f2e7c040727195a1, generated_at_day 2026-09-15, crosswalk_vintage 2026-09-15), each re-hashed equal after the last render: the header ranks 10 rows in served order and the rank-6 row 'BA US' sends BA_US_Equity, the thesis capture's own key; Thesis renders 38 of 38 drafted sentences, each above its passage; Exec Management 12 of 12 officers; Model renders ABSENT-explicit with 0 figures (the capture carries 0 fiscal and 0 header figures, row W19-S13), so no figure is on screen for this name; Posture SERVED, verdict hold; Peers mounts with no body and the header's description and feed render not-carried, because /peers and /overlay were not among rj-10's captures (row W18-S20); the error arm reads 'Read failure -- the ranked names could not be read.' and the empty arm 'The committed ranking for TRENDING_CHATTER is EMPTY -- the producer ran and ranked no names.', distinct and without the daily-job claim. No live edge, person session or promotion is claimed.",
+   "denominator": "N/A -- judgment criterion; graded by 3.0.0_SA_CVO~W at L9, never self-graded",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment=true: graded only by 3.0.0_SA_CVO~W at L9. Substitute oracle: the browser half, 2.0.0_SA_COO~W's org/tier1_exec/2.0.0_SA_COO/deliverables/AMGT_RESAPP_W/ROUND11_BROWSER_EXERCISE.md -- PRESENT (committed @e31a7cc5da, moved to that path @e8e2e01ce1; listed by AC6 at 2026-09-15T21:44:00Z). This instance settles the mechanical half only and offers no verdict.",
+   "judgment": true
+  },
+  {
+   "criterion_id": "AC6",
+   "criterion_verbatim": "at least one portal commit above 9aef3734 for this order, a clean portal status, gitlink e85f6eb8 unchanged, and the listing showing whether ROUND11_BROWSER_EXERCISE.md is PRESENT or ABSENT (recorded either way; the judgment's status_reason names it)",
+   "method": "command",
+   "invocation": "git -C portal log --oneline 9aef3734..HEAD | wc -l; git -C portal status --porcelain | cat; echo \"gitlink: $(git ls-tree HEAD portal | cut -c13-22)\"; ls org/tier1_exec/2.0.0_SA_COO/deliverables/AMGT_RESAPP_W/ | cat",
+   "output_evidence": "5\ngitlink: t e85f6eb8\nANDREW_DIRECT_20260915_0504Z_EXECUTIVE_MANAGERS_LUSHA_AND_THE_HARVEST_POOL.md\nANDREW_DIRECT_20260915_0542Z_WHOLE_SITEZ_FABRIC_FREE_EGRESS_THIS_SESSION.md\nROUND10_BROWSER_EXERCISE.md\nROUND10_BROWSER_arm-empty-200.png\nROUND10_BROWSER_arm-error-503.png\nROUND10_BROWSER_arm-overlay-baba-us.png\nROUND10_BROWSER_arm-populated.png\nROUND10_BROWSER_arm-thesis-baba-us-equity.png\nROUND10_BROWSER_arm-thesis-baba-us.png\nROUND10_BROWSER_partB.json\nROUND11_BROWSER_EXERCISE.md\nUNFINISHED_EDIT_harvest_s3_tf_20260914.patch\nadapter-local.coverage.2317 TT.json\nadapter-local.coverage.BABA_US.json\nadapter-local.coverage.BABA_US_Equity.json\nadapter-local.overlay.2317 TT.json\nadapter-local.overlay.BABA_US.json\nadapter-local.overlay.BABA_US_Equity.json\nadapter-local.peers.2317 TT.json\nadapter-local.peers.BABA_US.json\nadapter-local.peers.BABA_US_Equity.json\nadapter-local.rankings.trending.chatter.2026-09-12.json\nadapter-local.rankings.trending.chatter.today.json\nadapter-local.thesis.2317 TT.json\nadapter-local.thesis.BABA_US.json\nadapter-local.thesis.BABA_US_Equity.json\nround11_browser\nrc=0",
+   "denominator": "ONE run of the literal invocation under 'timeout 120 bash <file holding the invocation>' from the worktree root at superproject 254fcba914 / portal b616b759, 2026-09-15T21:44:00Z; the trailing rc=0 is the bound's exit. 5 portal commits above 9aef3734, 1 of them this order's (b616b759; the other 4 are rj-1, rj-2, rj-9, rj-12); portal status 0 lines (clean); gitlink e85f6eb8 unchanged (cut -c13-22 prints 't e85f6eb8'); the listing holds 27 entries and ROUND11_BROWSER_EXERCISE.md is PRESENT (a round11_browser entry beside it). Verbatim capture: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/AMGT_RESAPP.TO-AMGT-rj-3.AC6.txt.",
+   "status": "PASS",
+   "expect": "\\A[1-9]\\d*\\ngitlink: t e85f6eb8\\n.*?^ROUND11_BROWSER_EXERCISE\\.md$.*?rc=0"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "DISCRIMINATING INPUT SWAP. The same assembled.harness.cjs run over the two PRE-APPLY captures from the old adapter (attempt1.rankings.trending.chatter.response.2026-09-15.json, attempt1.thesis.BA_US_Equity.response.2026-09-15.json, rows W19-S16/W19-S20) in place of the deployed captures. A harness that passed whatever it was handed, or printed a sha it did not read, would stay green and print 698c3915/f2e7c040.",
+   "expected": "node exit 1 with the payload-dependent checks wrong-way, and the printed shas equal to the attempt1 files' own (055e4cee82e7904e, a93cec12858f6dae), not the deployed captures'.",
+   "observed": "CHECK tab_bodies_match_payload false -- thesis sentences 0/0; exec_management officers 0/0; peers NO_BODY (/peers not captured); model ABSENT-explicit cells 0 of fiscal 0; posture NOT_READ verdict NONE (expected true) | CHECK header_ranked_rows 10 (expected 10 = ranked row_count; served order true; caption names undefined false) | CHECK sha_in ranked 055e4cee82e7904e sha_out 055e4cee82e7904e equal true (expected true) | CHECK sha_in thesis a93cec12858f6dae sha_out a93cec12858f6dae equal true (expected true) | CHECKS-WRONG-WAY tab_bodies_match_payload,header_ranked_rows,ranked_click_opens_thesis_key | node_rc=1 (full run: org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/AMGT_RESAPP.TO-AMGT-rj-3.controls.mutant-attempt1-captures.txt). The join harness no-flag arm's own negative control still prints PRE-REPAIR fiscal 0/183.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Same-input pairs: assembled.harness.cjs over the two captures twice (the AC3 invocation, then an unpiped full run), CHECK lines compared; join.harness.mjs exact arm twice (the AC2 invocation, then an unpiped full run), its 8 lines compared; errorEmpty/chart before and after the edit (AC4).",
+   "observed": "assembled CHECK lines 14 vs 14 identical=True; join exact-arm lines 8 identical=True; AC4 identical 12 CHECK lines and 3/3 before (portal 0e153399) and after (b616b759).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The browser half (DELIVER step 4): the served route driven with the same two payloads.",
+   "reason": "2.0.0_SA_COO~W's by the order; its deliverable org/tier1_exec/2.0.0_SA_COO/deliverables/AMGT_RESAPP_W/ROUND11_BROWSER_EXERCISE.md is PRESENT at the re-run (@e31a7cc5da, moved @e8e2e01ce1) and was neither written nor graded here. This instance settles the mechanical half only."
+  },
+  {
+   "item": "The live edge (API 7k3ed8px20 through the portal JWT), a person's session, a promotion.",
+   "reason": "WHAT THIS CELL DOES NOT CLAIM (s.1). No HTTP, credential, AWS or vendor call was made."
+  },
+  {
+   "item": "An /overlay and a /peers capture for BA_US_Equity.",
+   "reason": "Not among rj-10's captures and not within this order's paths to produce; the page's overlay and peers hooks answered no data and the render shows exactly that (row AMGT_RESAPP-Z-W18-S20). No /overlay field was built from other payloads."
+  },
+  {
+   "item": "An as_of_date for the thesis bundle.",
+   "reason": "The captured body carries no as_of_date and none was invented (row AMGT_RESAPP-Z-W18-S19). After AMENDMENT 3 the thesis day is read, by their own names, from the two day fields the bundle does carry -- generated_at_day 2026-09-15 and identity.crosswalk_vintage 2026-09-15 -- in AC1."
+  },
+  {
+   "item": "A browser's persisted query cache.",
+   "reason": "The harness clears OPAL_PORTAL_QUERY_CACHE_v1 through the real clearQueryPersister() over a storage stub before each of 4 arms; its hooks are stubs and read no persisted cache, so no browser cache state is claimed."
+  },
+  {
+   "item": "portal/src/lib/queryPersister.ts and portal/src/api/endpoints/amgt-lead-panel.ts.",
+   "reason": "Read-only by the order; unchanged (the portal commit touches 3 paths, all under __harness__/)."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W18-S19: the thesis bundle rj-10 captured from the deployed adapter carries no as_of_date key; the first run recorded AC1 and AC2 FAIL as printed, the issuer re-cut both in AMENDMENT 3 @254fcba914, and the re-run reads the thesis day from generated_at_day and crosswalk_vintage (both 2026-09-15).",
+  "AMGT_RESAPP-Z-W18-S20: the header's description, feed and posture line ride /overlay and the Peers tab reads /peers at portal 0e153399, and neither was captured, so from the two inputs the description and feed render not-carried and Peers mounts with no body."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/SESSION_LOG.AMGT-rj-3.txt",
+ "compiler_tools": [
+  {
+   "tool": ".tools/safe-commit.sh (superproject, rows)",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~18 <0.9.0_WK_AMGT_RESAPP~18@opal.agent>\" -F .scratch/msg_rj3_rows.txt -- org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "committed 6f5c43ac92; surprise-row-gate 2 new row(s) of 249 total checked, OK; msg-verify MATCH len=1084"
+  },
+  {
+   "tool": ".tools/safe-commit.sh (portal repo)",
+   "invocation": "cd portal && bash /c/tmp/wk-amgt-11-1/.tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~18 <0.9.0_WK_AMGT_RESAPP~18@opal.agent>\" -F /c/tmp/wk-amgt-11-1/.scratch/msg_portal_rj3.txt -- src/pages/SecurityAnalysis/__harness__/join.harness.mjs src/pages/SecurityAnalysis/__harness__/exactInput.cjs src/pages/SecurityAnalysis/__harness__/assembled.harness.cjs",
+   "result": "committed portal b616b759 above 0e153399; 3 files changed, 683 insertions(+), 1 deletion(-); msg-verify MATCH len=1849; portal status clean; superproject gitlink not staged"
+  },
+  {
+   "tool": "node v26.8.2 (harness runs)",
+   "invocation": "the AC2, AC3 and AC4 invocations verbatim, plus unpiped full runs and the attempt1 mutant run (outputs beside this instance)",
+   "result": "join exact arm node_rc=0; join no-flag node_rc=0; assembled node_rc=0 CHECKS-OK 13 of 13; mutant node_rc=1; errorEmpty 12 of 12; chart 3/3"
+  },
+  {
+   "tool": "re-run after AMENDMENT 3 (bash + python + node v26.8.2)",
+   "invocation": "the AC1, AC2 and AC6 invocations extracted byte-exact from the order at HEAD 254fcba914, each as 'timeout 120 bash .scratch/rj3_<id>.sh' from the worktree root; AC3 and AC4 not re-run (invocations and expects byte-identical after the amendment, portal unchanged at b616b759)",
+   "result": "AC1 inputs 2, thesis generated_at_day and crosswalk_vintage 2026-09-15 = ranked as_of_date; AC2 rc=0, shas equal in and out, 10 of 10 rows, 0/0 and 0/0, regression 183/183 13/13; AC6 5 commits, clean, gitlink e85f6eb8, ROUND11_BROWSER_EXERCISE.md PRESENT"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py (this worktree's copy)",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~18/AMGT_RESAPP.TO-AMGT-rj-3.the-exact-input-exercise.proof_of_spec.json AC1,AC2,AC3,AC4,AC5,AC6",
+   "result": "proof-of-spec-check | structural=jsonschema | acceptance rows=6 | violations=0 -- VALID (rc=0); surprises-frame 2 of 2 resolve; invocation-alignment 5/5 comparable rows match, 1 judgment row not comparable; 3 artifact rows UNRESOLVED-HERE (portal commit b616b759 lives in the portal repo, not this store; announced, not asserted)"
+  }
+ ]
+}

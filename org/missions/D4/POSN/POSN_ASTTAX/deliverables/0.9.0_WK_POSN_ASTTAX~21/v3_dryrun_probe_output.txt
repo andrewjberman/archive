@@ -1,0 +1,17 @@
+====================================================================================================
+DRY-RUN INERTNESS PROBE -- applied bytes blob 803721e2c15464ed4ba054a02aba2311d5506164
+guard gating line :295   conflicts = _yang_conflicts(...) if upload else []
+====================================================================================================
+
+  ARM                                              rc     [PRESERVED] REFUSED   get_item  clobbered
+  A  upload=True , store CONFLICTS (the live path) 1      8           1         57        0
+  B  upload=False, store CONFLICTS (the DRY RUN)   0      0           0         0         0
+  C  upload=False, store AGREES  (negative baseline) 0      0           0         0         0
+
+  ARM B and ARM C read IDENTICALLY: True
+  -> a DRY RUN reports 0 PRESERVED / rc=0 whether or not the table holds
+     a value the seeder would clobber. It performs ZERO get_item calls,
+     so it never looks. '0 PRESERVED from a dry run' is therefore not a
+     measurement of the guard -- it is the only value that path can emit.
+  -> the arm that DOES discriminate is A: upload=True, which REFUSES
+     (rc=1, 8 [PRESERVED]) on the same store.

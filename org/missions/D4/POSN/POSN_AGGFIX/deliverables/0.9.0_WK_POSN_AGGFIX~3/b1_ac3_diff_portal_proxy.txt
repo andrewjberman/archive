@@ -1,0 +1,73 @@
+$ timeout 60 git -C /c/tmp/wk-aggfix-1-3/portal diff edf85ce503 HEAD -- src/api/portal-proxy.ts
+(portal HEAD 63edeeeb51b9bec8988f86c12dc92b5768ca2532)
+diff --git a/src/api/portal-proxy.ts b/src/api/portal-proxy.ts
+index 62940dc5..d89db2a9 100644
+--- a/src/api/portal-proxy.ts
++++ b/src/api/portal-proxy.ts
+@@ -1377,6 +1377,65 @@ export async function getEtfPositioningData(): Promise<EtfPositioningResponse> {
+   return apiRequest<EtfPositioningResponse>('/api/general/etfs/positioning_data.json')
+ }
+ 
++// ============================================================================
++// Opal aggregate (POSN_AGGFIX, cell AF1-s-12) -- OPAL VIEWERS ONLY
++// ============================================================================
++//
++// A SEPARATE served key from positioning_data.json. The aggregate is Opal's own firm-wide
++// mix, so it is written where only an Opal viewer is served it, and the Positioning page asks
++// for it only for its internal predicate and only in Models mode (Positioning.tsx).
++// getPositioningData and the shared file are untouched by this section.
++//
++// Contract 1.1 (POSN_AGGFIX decomposition s.1.1). The page offers an aggregate ONLY when
++// `status === 'OK'` and `current_holdings.AGG.holdings` is non-empty
++// (pages/Positioning/shared/bookSet.ts mergeOpalAggregate).
++
++export type OpalAggregateStatus = 'OK' | 'UNAVAILABLE'
++
++/** A value per primary model, keyed by the five canonical model codes. */
++export interface OpalAggregateByModel {
++  UST: number
++  ST: number
++  INT: number
++  LT: number
++  ULT: number
++}
++
++export interface OpalAggregateBlend {
++  model_name: string
++  aum: number
++  constituents: Record<string, number>
++}
++
++export interface OpalAggregateResponse {
++  status: OpalAggregateStatus
++  /** null when OK; one line saying why when UNAVAILABLE. */
++  reason: string | null
++  generated_at: string
++  data_as_of: string
++  /** Exactly today's AGG holding shape: CurrentPortfolioHoldings, each holding carrying model_breakdown. */
++  current_holdings: { AGG: CurrentPortfolioHoldings }
++  weights: OpalAggregateByModel
++  weights_source: { key: string; version_id: string; period: string }
++  members: OpalAggregateByModel & { blends: OpalAggregateBlend[] }
++  left_out: Array<{ model_name: string; aum: number }>
++  reconciliation: {
++    five_primary_sum: number
++    members_sum: number
++    file_total_model_aum: number
++    gap: number
++    gap_explanation_ref: string
++  }
++}
++
++/**
++ * The Opal-only aggregate. Same helper, same headers and same error path as every other
++ * served JSON read in this file.
++ */
++export async function getOpalAggregate(): Promise<OpalAggregateResponse> {
++  return apiRequest<OpalAggregateResponse>('/api/general/positioning/opal_aggregate.json')
++}
++
+ // Model data from pickle file
+ export interface ModelHolding {
+   ticker: string
+EXIT=0

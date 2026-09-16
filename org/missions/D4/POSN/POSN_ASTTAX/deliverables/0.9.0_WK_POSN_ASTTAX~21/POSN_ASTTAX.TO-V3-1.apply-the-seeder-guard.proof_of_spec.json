@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0",
+  "to_id": "POSN_ASTTAX.TO-V3-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round5.md",
+    "vintage_commit": "6c7e292c93",
+    "to_ref": "org/missions/D4/POSN/POSN_ASTTAX/task-orders/POSN_ASTTAX.TO-V3-1.apply-the-seeder-guard.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D4/POSN/POSN_ASTTAX/prd/POSN_ASTTAX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "99cc431075"
+  },
+  "assignee": "0.9.0_WK_POSN_ASTTAX~21",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/black_diamond/scripts/classification/seed_canonical_securities.py",
+      "kind": "script",
+      "commit_or_etag": "8cad0526201dfa4417b6c0f7d7b70a8701073e44",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A repository .py with NO deploy surface: it is run by hand, not by a scheduler, a CI step or a Lambda. Measured rather than assumed -- a corpus search for 'seed_canonical_securities' returns 27 files, of which 1 is the script, 4 are this cell's scratch artifacts and 22 are record-class files (task orders, decompositions, deliverables, proof instances, the investigations channel, one change-management record); ZERO are call sites. The commit ran the universal gate in band: '[commit-gate] OK: pre-commit gate clean for 1 of 1 file(s)'. The live etf-classifications table was never written -- two read-only scans bracket the cell (Count 4, ScannedCount 285, no LastEvaluatedKey, both) and all 4 rows read IDENTICAL before and after.",
+      "introduces": [
+        "YANG_OWNED_FIELDS",
+        "_yang_conflicts",
+        "[PRESERVED]",
+        "--force"
+      ],
+      "artifact_covered_by": [
+        "V3-AC1",
+        "V3-AC2",
+        "V3-AC3",
+        "V3-AC4",
+        "V3-AC5",
+        "V3-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~21/POSN_ASTTAX.TO-V3-1.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The cell's record and this instance's session_log: every criterion's invocation and verbatim output with its rc, both control arms side by side, the before/after live reads, the V3-AC7 readings, and the four surprise rows.",
+      "artifact_covered_by": [
+        "V3-AC1",
+        "V3-AC6"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~21/v3_mutant_control_re.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The re-run of round 4's mutant/discrimination control against the APPLIED repo file. Round 4's machinery (the scratch table, the fake boto3, the retag set, the baseline builder, the mint probe) is imported UNMODIFIED and its sha256 is asserted at import, so the two rounds' numbers are comparable rather than merely similar. Committed so V3-AC4/V3-AC5 are re-runnable.",
+      "artifact_covered_by": [
+        "V3-AC4",
+        "V3-AC5",
+        "V3-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~21/v3_mutant_control_re_output.txt",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verbatim rc-0 output of the three-arm re-run plus the V3-AC7 per-field probe: pre-patch CLOBBERED 4 of 4, applied SURVIVED 4 of 4 rc=1 with 8 [PRESERVED] lines, --force CLOBBERED 4 of 4 again, 53 rows minted in every arm.",
+      "artifact_covered_by": [
+        "V3-AC4",
+        "V3-AC5",
+        "V3-AC7"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~21/v3_dryrun_inertness_probe.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The three-arm probe grounding POSN_ASTTAX-Z-W21-S1: whether a DRY RUN of the guarded seeder -- the reading the downstream cell AT5-s-8 is recorded as taking -- can distinguish a table that would lose four five-class values from one that would lose none. Committed with its output so the row's claim is re-runnable by its disarm owner.",
+      "artifact_covered_by": [
+        "V3-AC7"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "V3-AC1",
+      "criterion_verbatim": "rc=0, then `git apply` of the same diff, then `git diff --stat -- data/black_diamond/scripts/classification/seed_canonical_securities.py` reading +57/-2 (or the exact figure the patch carries -- print it). NEGATIVE CONTROL: the same diff with one context line corrupted is REFUSED by `git apply --check`.",
+      "method": "diff",
+      "invocation": "timeout 60 git apply --check org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_proposed_patch.diff",
+      "output_evidence": "$ git rev-parse HEAD:data/black_diamond/scripts/classification/seed_canonical_securities.py\nfbbc7165d33198789d3a7788a557ed3f5ce75614\n$ git hash-object data/black_diamond/scripts/classification/seed_canonical_securities.py\nfbbc7165d33198789d3a7788a557ed3f5ce75614      <- working tree == HEAD blob == round 4's subject\n$ wc -l -c <the file>\n  296 15000\n\nSTEP 1 -- the criterion's invocation, verbatim:\n$ timeout 60 git apply --check org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_proposed_patch.diff\nRC=0                                            <- no output; rc is the verdict\n\nNEGATIVE CONTROL (required by <expect>), run BEFORE applying, on a copy of the\nsame diff with ONE context line corrupted (line 40 of 95,\n'     now = datetime.now(timezone.utc).isoformat()' + '  # CORRUPTED-CONTEXT';\ndiff line count unchanged 95 -> 95, bytes 4299 -> 4320):\n$ timeout 60 git apply --check .scratch/u3_patch_MUTATED_context.diff\nerror: patch failed: data/black_diamond/scripts/classification/seed_canonical_securities.py:212\nerror: data/black_diamond/scripts/classification/seed_canonical_securities.py: patch does not apply\nRC=1                                            <- THE CHECK DISCRIMINATES\n\nSTEP 2 -- apply:\n$ timeout 60 git apply org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_proposed_patch.diff\nRC=0\n\nSTEP 3 -- the diffstat:\n$ timeout 60 git diff --stat -- data/black_diamond/scripts/classification/seed_canonical_securities.py\n .../classification/seed_canonical_securities.py    | 59 +++++++++++++++++++++-\n 1 file changed, 57 insertions(+), 2 deletions(-)\n$ git diff --numstat -- <the file>\n57      2       data/black_diamond/scripts/classification/seed_canonical_securities.py\n\nTHE FIGURE THE PATCH ITSELF CARRIES (printed, as <expect> requires):\npatch carries: +57/-2  (total diff lines 95)          <- equals the measured 57/2\n\nCORROBORATION ON A SECOND AXIS (grain): the applied bytes are byte-identical to\nthe bytes round 4's U3-AC3 exercised --\nrepo applied    : 17700 sha256 dde708491f6fa73d\nU3 scratch bytes: 17700 sha256 dde708491f6fa73d\nIDENTICAL: True\nWorking tree after the apply carried exactly ONE modified tracked path.",
+      "denominator": "1 of 1 patch applied; 95 of 95 diff lines consumed; 57 insertions and 2 deletions of a 57/2 patch; 2 of 2 check arms run (true diff rc=0, one-context-line mutant rc=1); 1 of 1 tracked path modified in the worktree",
+      "status": "PASS",
+      "expect": "1 file changed, 57 insertions\\(\\+\\), 2 deletions\\(-\\)"
+    },
+    {
+      "criterion_id": "V3-AC2",
+      "criterion_verbatim": "clean on the CHANGED file data/black_diamond/scripts/classification/seed_canonical_securities.py (py_compile + ds-precommit + ruff py39), output cited; the criterion's subject is that changed .py and nothing else (C-S93). Both ASCII limbs read and named.",
+      "method": "command",
+      "invocation": "timeout 180 bash .tools/commit-gate.sh",
+      "output_evidence": "ARM AS THE CRITERION WRITES IT (no argv -- recorded here verbatim because the\n<placeholders> declaration binds the recorded invocation to the criterion's):\n$ timeout 180 bash .tools/commit-gate.sh\nWARN: commit-gate checked 0 of 0 file(s) -- NOTHING WAS CHECKED.\n      This line is NOT evidence of a clean gate. This gate reads only .py / .sh / .tf / org/projects/*.json; every other suffix falls through unexamined.\nRC=0\n-- the gate takes its subjects from argv (.tools/commit-gate.sh header: 'Usage:\n   .tools/commit-gate.sh data/black_diamond/scripts/gold/B_00.py'; last line\n   'exec python commit_gate_runner.py \"$@\"'), so with no argument it dispatches\n   NOTHING. Its own exit-code table says rc=0 covers 'nothing was dispatched at\n   all'. Filed as POSN_ASTTAX-Z-W21-S2.\n\nARM WHOSE SUBJECT IS THE ONE <expect> NAMES ('the CHANGED file\ndata/black_diamond/scripts/classification/seed_canonical_securities.py ... and\nnothing else'):\n$ timeout 180 bash .tools/commit-gate.sh data/black_diamond/scripts/classification/seed_canonical_securities.py\nAll checks passed!\nOK: no unguarded strict-utf8 log reads.\nOK: pre-commit gate clean for 1 of 1 file(s)\nRC=0\nDENOMINATOR MOVES 0 of 0 -> 1 of 1, which is the entire difference between the arms.\n\nTHIRD, IN-BAND EXERCISE -- the same gate ran inside the commit that landed the\nfile, on the same single path (commit 8cad052620):\n  [commit-gate] All checks passed!\n  [commit-gate] OK: no unguarded strict-utf8 log reads.\n  [commit-gate] OK: pre-commit gate clean for 1 of 1 file(s)\n\nDISCRIMINATION CONTROL -- the instrument fires when given a bad subject:\n$ timeout 180 bash .tools/commit-gate.sh .scratch/v3_gate_negcontrol.py\n  File \".scratch/v3_gate_negcontrol.py\", line 1\n    def broken(:\n               ^\nSyntaxError: invalid syntax\nBLOCKED: py_compile failed on .scratch/v3_gate_negcontrol.py\nRC=1\n\nBOTH ASCII LIMBS, READ AND NAMED (as <expect> requires):\n  LIMB 1 -- STAGED-.py CONTENT, WARN-ONLY, NEVER BLOCKS:\n    .tools/commit_gate_runner.py:405-461 _nonascii_lint_one, docstring 'WARN-ONLY\n    (announce-then-enforce). Always returns 0'. ITS SCOPE IS infra/** AND\n    .tools/** ONLY (:429-431: 'if not (norm.startswith(\"infra/\") or\n    norm.startswith(\".tools/\")): return 0'). THE SUBJECT IS data/black_diamond/**,\n    SO THIS LIMB RETURNED 0 WITHOUT READING A BYTE OF IT -- it contributed\n    NOTHING to the clean reading above, and that is why V3-AC3 exists as a\n    separate instrument.\n  LIMB 2 -- COMMIT MESSAGE, BLOCKING:\n    .tools/git-hooks/commit-msg-ascii-check.sh, installed as the live\n    .git/hooks/commit-msg in this worktree's shared git-common-dir\n    (C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.git/hooks/commit-msg,\n    core.hooksPath unset). Header: 'SCOPE -- DELIBERATELY NARROW. This gate reads\n    the COMMIT MESSAGE ONLY. It does NOT inspect file contents.' It passed on\n    this cell's message, which was verified pure ASCII before the commit\n    (3048 bytes, 0 non-ASCII).",
+      "denominator": "1 of 1 changed .py checked on the subject-bearing arm (the literal arm checked 0 of 0 and is recorded as such); 3 of 3 gate instruments run on that file (py_compile + ds-precommit + ruff py39, reported as one 'All checks passed!'); 2 of 2 ASCII limbs read and named; 3 independent exercises of the gate on the same file (standalone, in-commit, plus 1 negative control that returned rc=1)",
+      "status": "PASS",
+      "expect": "OK: pre-commit gate clean for 1 of 1 file\\(s\\)"
+    },
+    {
+      "criterion_id": "V3-AC3",
+      "criterion_verbatim": "prints the path and 0 (pure ASCII). FIRING CONTROL, REQUIRED (C-S92): the same expression on a file known to carry non-ASCII (e.g. CLAUDE.md) prints a number greater than 0 -- an instrument that reads 0 on everything is not an instrument.",
+      "method": "command",
+      "invocation": "timeout 60 python -c \"import sys; p='data/black_diamond/scripts/classification/seed_canonical_securities.py'; b=open(p,'rb').read(); print(p, len(b)-len(b.decode('utf-8')))\"",
+      "output_evidence": "SUBJECT -- the criterion's invocation, verbatim:\n$ timeout 60 python -c \"import sys; p='data/black_diamond/scripts/classification/seed_canonical_securities.py'; b=open(p,'rb').read(); print(p, len(b)-len(b.decode('utf-8')))\"\ndata/black_diamond/scripts/classification/seed_canonical_securities.py 0\nRC=0\n\nFIRING CONTROL, REQUIRED BY <expect> (C-S92) -- the SAME expression on a file\nknown to carry non-ASCII:\n$ timeout 60 python -c \"import sys; p='CLAUDE.md'; b=open(p,'rb').read(); print(p, len(b)-len(b.decode('utf-8')))\"\nCLAUDE.md 427\nRC=0\n427 > 0, so the instrument is capable of a nonzero reading and the 0 above is a\nmeasurement rather than a constant.\n\nWHAT THE NUMBER IS, STATED EXACTLY (unit is part of the claim): the expression\nreturns len(bytes) - len(decoded characters), i.e. the count of EXTRA bytes\ncontributed by multi-byte characters -- NOT a count of non-ASCII characters. On\na file of N three-byte characters it reads 2N, which is why CLAUDE.md's 213\nnon-ASCII characters read 427 here (213 three-byte + 1 two-byte). On a pure\nASCII file the two lengths are equal and the result is exactly 0. The subject\nread 0, so the subject is pure ASCII.\n\nThe instrument SELECTS THE FILE by literal path, so it cannot report on the\nwrong object by inheriting a scope: unlike the gate's WARN-only limb (scoped to\ninfra/** and .tools/**, which excludes this subject entirely), this expression\nnames data/black_diamond/scripts/classification/seed_canonical_securities.py and\nnothing else.",
+      "denominator": "1 of 1 subject file measured over all 17700 of its bytes; 2 of 2 arms run (subject reads 0, firing control reads 427)",
+      "status": "PASS",
+      "expect": "classification/seed_canonical_securities\\.py 0"
+    },
+    {
+      "criterion_id": "V3-AC4",
+      "criterion_verbatim": "a row seeded with a five-class value SURVIVES the re-seed (REFUSED rc=1, printed as [PRESERVED] with table-wins), AND a record absent from the scratch copy is still MINTED by the same run (the positive control -- a script that refuses everything would pass the first half and be worthless). Name the scratch target so a reader sees the live table was never opened for write.",
+      "method": "test_suite",
+      "invocation": "timeout 600 python .scratch/v3_mutant_control_re.py",
+      "output_evidence": "U3_MUTANT_CONTROL_RE -- TO-V3-1 / AT5-s-3. SCRATCH ONLY.\n====================================================================================================\n  SCRATCH TARGET  : an in-process dict per table name. NO network client is\n                    ever constructed (boto3.client raises). The live tables\n                    'etf-classifications' and 'bd-securities' are NEVER\n                    opened for read or write by this process. --upload is\n                    never passed to a real table because none exists here.\n  machinery       : C:\\tmp\\wk-posn-5-21\\.scratch\\u3_ac1_before_control.py (round 4's, sha256 ae72cab7dfbeb62f, asserted unmodified)\n  APPLIED subject : C:\\tmp\\wk-posn-5-21\\data/black_diamond/scripts/classification/seed_canonical_securities.py\n                    blob 803721e2c15464ed4ba054a02aba2311d5506164, 17700 bytes  <- the file this cell changed\n  PRE-PATCH subj  : git show HEAD:data/black_diamond/scripts/classification/seed_canonical_securities.py\n                    blob fbbc7165d33198789d3a7788a557ed3f5ce75614, 15000 bytes  <- round 4's subject, by CONTENT\n  the two subjects DIFFER: True\n\n====================================================================================================\n\nARM: V3-AC4 MUTANT -- APPLIED REPO BYTES, same input (verdict must flip)\n====================================================================================================\n  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)\n  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)\n  TICKER BEFORE         AFTER          RATIFIED       VERDICT\n  VXX    Structured     Structured     Structured     SURVIVED\n  UVXY   Structured     Structured     Structured     SURVIVED\n  QBER   Structured     Structured     Structured     SURVIVED\n  PDBC   Commodities    Commodities    Commodities    SURVIVED\n  SURVIVED 4 of 4 | CLOBBERED 0 | rc=1\n  MINT CONTROL: 'CASH_USD' MINTED (asset_class='fixed_income') -- the seeder IS writing   (yang update_item=53, get_item=57, minted=53)\n  REFUSED 4 etf-classifications row(s): the table serves a value this seeder disagrees with.\n  Nothing was reverted. Re-run with --force to overwrite them.\n  [PRESERVED] QBER       asset_class: table serves 'Structured', seeder asserts 'fixed_income' -- table wins, pass --force to override\n  [PRESERVED] QBER       name: table serves 'QBER', seeder asserts 'TrueShares Quarterly Bear Hedge ETF' -- table wins, pass --force to override\n  [PRESERVED] VXX        asset_class: table serves 'Structured', seeder asserts 'equity' -- table wins, pass --force to override\n  [PRESERVED] VXX        name: table serves 'VXX', seeder asserts 'iPath Series B S&P 500 VIX Short-Term Futures ETN' -- table wins, pass --force to override\n  [PRESERVED] UVXY       asset_class: table serves 'Structured', seeder asserts 'equity' -- table wins, pass --force to override\n  [PRESERVED] UVXY       name: table serves 'UVXY', seeder asserts 'ProShares Ultra VIX Short-Term Futures ETF' -- table wins, pass --force to override\n  [PRESERVED] PDBC       asset_class: table serves 'Commodities', seeder asserts 'equity' -- table wins, pass --force to override\n  [PRESERVED] PDBC       name: table serves 'PDBC', seeder asserts 'Invesco Optimum Yield Diversified Commodity Strategy No K-1 ETF' -- table wins, pass --force to override\n\nARM: OVERRIDE -- applied bytes with --force (must revert again)\n====================================================================================================\n  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)\n  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)\n  TICKER BEFORE         AFTER          RATIFIED       VERDICT\n  VXX    Structured     equity         Structured     CLOBBERED\n  UVXY   Structured     equity         Structured     CLOBBERED\n  QBER   Structured     fixed_income   Structured     CLOBBERED\n  PDBC   Commodities    equity         Commodities    CLOBBERED\n  SURVIVED 0 of 4 | CLOBBERED 4 | rc=0\n  MINT CONTROL: 'CASH_USD' MINTED (asset_class='fixed_income') -- the seeder IS writing   (yang update_item=57, get_item=57, minted=53)\n\nTHE SCRATCH TARGET, NAMED (as <expect> requires): every table above is an\nin-process dict. boto3 is replaced in sys.modules BEFORE any seeder byte\nexecutes and boto3.client() RAISES, so no network client exists in the\nprocess; the interception prints the table name it caught. The live\netf-classifications and bd-securities tables were never opened for write in\nthis cell, and --upload was never passed to a real table because no real\ntable exists here. V3-AC6's before/after pair is the independent check on\nthat claim.\n\nTHE POSITIVE CONTROL <expect> DEMANDS (a script that refuses everything would\npass the first half and be worthless): the mint probe 'CASH_USD' starts ABSENT\nand is MINTED by the SAME run that refuses -- 53 rows minted under the guard,\nidentical to the 53 minted by the pre-patch arm. A first mint is never a\nconflict, so the guard costs nothing on a fresh table.",
+      "denominator": "4 of 4 carried five-class members SURVIVED (VXX, UVXY, QBER, PDBC -- the members of the 11-row retag set present in the seeder's 57-row list); 53 of 53 absent rows still MINTED; 8 [PRESERVED] lines over 4 tickers x 2 conflicting fields; 57 get_item pre-reads over 57 CANONICAL_SECURITIES rows; 2 of 2 table names intercepted to an in-process dict",
+      "status": "PASS",
+      "expect": "SURVIVED 4 of 4 \\| CLOBBERED 0 \\| rc=1"
+    },
+    {
+      "criterion_id": "V3-AC5",
+      "criterion_verbatim": "the pre-patch script REVERTS the five-class value on the same input -- the two arms DIFFER. If both arms read the same, the control is not discriminating: report that, not the result.",
+      "method": "test_suite",
+      "invocation": "timeout 600 python .scratch/v3_mutant_control_re.py",
+      "output_evidence": "ARM: V3-AC5 NEGATIVE -- PRE-PATCH bytes, same input (must still revert)\n====================================================================================================\n  SCRATCH TARGET: boto3 Table('bd-securities') INTERCEPTED -> in-process dict (no network client exists in this process)\n  SCRATCH TARGET: boto3 Table('etf-classifications') INTERCEPTED -> in-process dict (no network client exists in this process)\n  TICKER BEFORE         AFTER          RATIFIED       VERDICT\n  VXX    Structured     equity         Structured     CLOBBERED\n  UVXY   Structured     equity         Structured     CLOBBERED\n  QBER   Structured     fixed_income   Structured     CLOBBERED\n  PDBC   Commodities    equity         Commodities    CLOBBERED\n  SURVIVED 0 of 4 | CLOBBERED 4 | rc=None\n  MINT CONTROL: 'CASH_USD' MINTED (asset_class='fixed_income') -- the seeder IS writing   (yang update_item=57, get_item=0, minted=53)\n\nTHE OTHER ARM, SIDE BY SIDE (same script, same input, same run):\n  V3-AC5 pre-patch : CLOBBERED 4 of 4, minted=True, rc=None\n  V3-AC4 applied   : SURVIVED  4 of 4, minted=True, rc=1\n  override --force : CLOBBERED 4 of 4, rc=0\n  THE TWO ARMS DIFFER: True\n\nSUBJECT RESOLUTION -- BY CONTENT, NOT BY REF NAME. <expect> permits 'git show\nHEAD~1:<path> or the U3 scratch copy'. At the moment this arm ran, the patch\nwas applied in the working tree but NOT yet committed, so HEAD still carried\nthe pre-patch blob. All three candidate sources resolve to ONE blob and the\nharness asserts it before running:\n  HEAD                : fbbc7165d33198789d3a7788a557ed3f5ce75614\n  HEAD~1              : fbbc7165d33198789d3a7788a557ed3f5ce75614\n  U3 scratch head copy: fbbc7165d33198789d3a7788a557ed3f5ce75614\nso the order's literal HEAD~1 form and the form used are the SAME OBJECT and\nno deviation arises. The pre-patch subject is round 4's subject exactly.\n\nTHE ARMS DIFFER, SO THE CONTROL DISCRIMINATES: pre-patch CLOBBERED 4 of 4\n(rc=None), applied SURVIVED 4 of 4 (rc=1), on identical input, with the mint\ncontrol firing in BOTH arms (53 rows each). Had they read the same, this row\nwould report that and not the result.",
+      "denominator": "4 of 4 members CLOBBERED on the pre-patch arm against 0 of 4 on the applied arm, same input, same run; 53 of 53 rows minted in BOTH arms; 3 of 3 candidate pre-patch sources resolve to one blob fbbc7165d331",
+      "status": "PASS",
+      "expect": "SURVIVED 0 of 4 \\| CLOBBERED 4 \\| rc=None"
+    },
+    {
+      "criterion_id": "V3-AC6",
+      "criterion_verbatim": "Count 4 with ScannedCount printed, and the four rows' values IDENTICAL to a read of the same command taken BEFORE V3-AC4 ran (paste both) -- the live table did not move during this cell.",
+      "method": "live_read",
+      "invocation": "timeout 180 .tools/aws dynamodb scan --table-name etf-classifications --filter-expression \"ticker IN (:a,:b,:c,:d)\" --expression-attribute-values '{\":a\":{\"S\":\"VXX\"},\":b\":{\"S\":\"UVXY\"},\":c\":{\"S\":\"QBER\"},\":d\":{\"S\":\"PDBC\"}}' --projection-expression \"ticker, asset_class, sub_asset_class\" --no-paginate --output json",
+      "output_evidence": "BEFORE -- taken at 2026-09-14T18:45:19Z, BEFORE V3-AC4's exercise ran:\n$ timeout 180 .tools/aws dynamodb scan --table-name etf-classifications ... --no-paginate --output json\n{\n    \"Items\": [\n        {\n            \"asset_class\": {\n                \"S\": \"fixed_income\"\n            },\n            \"ticker\": {\n                \"S\": \"QBER\"\n            },\n            \"sub_asset_class\": {\n                \"S\": \"Volatility\"\n            }\n        },\n        {\n            \"asset_class\": {\n                \"S\": \"equity\"\n            },\n            \"ticker\": {\n                \"S\": \"UVXY\"\n            },\n            \"sub_asset_class\": {\n                \"S\": \"Volatility\"\n            }\n        },\n        {\n            \"asset_class\": {\n                \"S\": \"equity\"\n            },\n            \"ticker\": {\n                \"S\": \"VXX\"\n            },\n            \"sub_asset_class\": {\n                \"S\": \"Volatility\"\n            }\n        },\n        {\n            \"asset_class\": {\n                \"S\": \"equity\"\n            },\n            \"ticker\": {\n                \"S\": \"PDBC\"\n            },\n            \"sub_asset_class\": {\n                \"S\": \"Commodities\"\n            }\n        }\n    ],\n    \"Count\": 4,\n    \"ScannedCount\": 285\n}\nRC=0\n\nAFTER -- taken at 2026-09-14T18:55:31Z, AFTER V3-AC4 and V3-AC5 had run:\n$ <the identical command>\n{\n    \"Items\": [\n        {\n            \"asset_class\": {\n                \"S\": \"fixed_income\"\n            },\n            \"ticker\": {\n                \"S\": \"QBER\"\n            },\n            \"sub_asset_class\": {\n                \"S\": \"Volatility\"\n            }\n        },\n        {\n            \"asset_class\": {\n                \"S\": \"equity\"\n            },\n            \"ticker\": {\n                \"S\": \"UVXY\"\n            },\n            \"sub_asset_class\": {\n                \"S\": \"Volatility\"\n            }\n        },\n        {\n            \"asset_class\": {\n                \"S\": \"equity\"\n            },\n            \"ticker\": {\n                \"S\": \"VXX\"\n            },\n            \"sub_asset_class\": {\n                \"S\": \"Volatility\"\n            }\n        },\n        {\n            \"asset_class\": {\n                \"S\": \"equity\"\n            },\n            \"ticker\": {\n                \"S\": \"PDBC\"\n            },\n            \"sub_asset_class\": {\n                \"S\": \"Commodities\"\n            }\n        }\n    ],\n    \"Count\": 4,\n    \"ScannedCount\": 285\n}\nRC=0\n\nCOMPARISON, field by field:\nBEFORE Count=4 ScannedCount=285 LastEvaluatedKey=False\nAFTER  Count=4 ScannedCount=285 LastEvaluatedKey=False\n\nTICKER AC_BEFORE      AC_AFTER       SUB_BEFORE     SUB_AFTER      IDENTICAL\nPDBC   equity         equity         Commodities    Commodities    True\nQBER   fixed_income   fixed_income   Volatility     Volatility     True\nUVXY   equity         equity         Volatility     Volatility     True\nVXX    equity         equity         Volatility     Volatility     True\n\nALL FOUR ROWS IDENTICAL BEFORE vs AFTER: True\n\nCount 4 with ScannedCount 285 PRINTED on both reads, as <expect> requires, and\nneither response carries a LastEvaluatedKey -- so the Count is the whole\nfiltered result and not a page of it, which is the trap --no-paginate carries.\nThe live table did not move during this cell. It could not have: no write API\nwas called at any point, --upload was never passed, and the exercise ran\nagainst an in-process dict with boto3.client() raising.",
+      "denominator": "4 of 4 filtered rows compared field by field across 2 reads; Count 4 of ScannedCount 285 on both; 0 pages withheld (no LastEvaluatedKey on either response); 3 attributes per row compared (ticker, asset_class, sub_asset_class)",
+      "status": "PASS",
+      "expect": "ALL FOUR ROWS IDENTICAL BEFORE vs AFTER: True"
+    },
+    {
+      "criterion_id": "V3-AC7",
+      "criterion_verbatim": "Whether the guard as applied would refuse a re-seed that changes ONLY sub_asset_class or name (the YANG_OWNED_FIELDS tuple) -- i.e. whether the fields the guard owns are the fields R1 writes. Record the readings and offer NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "JUDGMENT -- no invocation; graded at L9",
+      "output_evidence": "RECORDED READINGS ONLY -- NO VERDICT IS OFFERED. Graded by 3.0.0_SA_CVO~Z at L9.\n\nREADING 1 -- WHAT THE GUARD OWNS, from the applied bytes:\n  YANG_OWNED_FIELDS as applied : ('asset_class', 'sub_asset_class', 'name')\n  (data/black_diamond/scripts/classification/seed_canonical_securities.py:207-211\n   @8cad052620)\n\nREADING 2 -- WHAT THE SEEDER WRITES to the Yang table, from its own\nUpdateExpression at :306-317 @8cad052620:\n  'SET asset_class = :ac, sub_asset_class = :sac, #n = :n, last_updated = :ts,\n   updated_by = :ub'   -- FIVE fields. The guard owns the first THREE; the two it\n  does not own (last_updated, updated_by) are metadata the seeder stamps on every\n  write and holds no prior opinion about.\n\nREADING 3 -- WHAT R1 (AT5-s-8) WRITES, from the round-5 decomposition\n(org/missions/D4/POSN/POSN_ASTTAX/decompositions/POSN_ASTTAX_DECOMP_round5.md:190-208\n@6c7e292c93), quoted: 'Write surface: the served DynamoDB etf-classifications\ntable (12 rows, both levels, VNQ's management_style)'. Its own table names the\nper-ticker targets as 'TARGET asset_class / sub_asset_class' for 12 tickers, plus\n'+ management_style fixed' on VNQ alone. So R1 writes: asset_class,\nsub_asset_class, and management_style (1 row).\n\nREADING 4 -- THE PER-FIELD PROBE, the guard exercised one field at a time. For\neach field the live row AGREES with the seeder on every other owned field and\nDISAGREES on the named one; the question is whether that single disagreement is\nenough to refuse:\n  FIELD PROBED       IN TUPLE  rc         OUTCOME\n  asset_class        YES       1          REFUSED, 4 [PRESERVED] line(s)\n  sub_asset_class    YES       1          REFUSED, 4 [PRESERVED] line(s)\n  name               YES       1          REFUSED, 4 [PRESERVED] line(s)\n  last_updated       no        0          WROTE THROUGH, no conflict raised\n  sector             no        0          WROTE THROUGH, no conflict raised\nSo the guard DOES refuse on sub_asset_class alone and on name alone, and does not\nrefuse on a field outside the tuple.\n\nREADING 5 -- THE SET COMPARISON, stated as sets rather than prose:\n  guard owns        = {asset_class, sub_asset_class, name}\n  R1 writes         = {asset_class, sub_asset_class, management_style}\n  INTERSECTION      = {asset_class, sub_asset_class}   (2)\n  R1 writes, guard does NOT own = {management_style}   (1, VNQ only)\n  guard owns, R1 does NOT write = {name}               (1)\n  The seeder does not write management_style at all (it is absent from the\n  UpdateExpression in READING 2), so a re-seed cannot revert it by any path --\n  round 4 measured management_style/sector SURVIVED 4 of 4 pre-patch, in the\n  non-owned-attribute class.\n\nREADING 6 -- THE 'name' ASYMMETRY, MEASURED AGAINST THE LIVE TABLE rather than\nassumed. The guard owns name and R1 does not write it, which raises the question\nwhether the guard could refuse a legitimate re-seed for a reason the retag never\ncaused. The mutant control's fixture sets name=<ticker> and therefore SHOWS name\nconflicts -- but that is the fixture, not the world. The live values:\n  VXX   live 'iPath Series B S&P 500 VIX Short-Term Futures ETN'  == seeder  AGREE\n  UVXY  live 'ProShares Ultra VIX Short-Term Futures ETF'         == seeder  AGREE\n  QBER  live 'TrueShares Quarterly Bear Hedge ETF'                == seeder  AGREE\n  PDBC  live 'Invesco Optimum Yield Diversified Commodity Strategy No K-1 ETF' == seeder AGREE\n  name AGREES on 4 of 4, so the guard raises NO name conflict for these members\n  and the fixture's name conflicts are an artifact of the fixture.\n  (Read-only scan, Count 4 / ScannedCount 285; disclosed as a third read against\n  a preflight declaring two -- POSN_ASTTAX-Z-W21-S3.)\n\nREADING 7 -- WHAT THE GUARD PROTECTS IS WHAT THE TABLE SERVES AT RE-SEED TIME,\nnot a value compiled into the seeder. _yang_conflicts() pre-reads the live row\nand compares; an ABSENT row returns [] and still mints. The four members' live\nasset_class today is equity/equity/equity/fixed_income (V3-AC6's reads), i.e.\nR1's retag has NOT yet run, so at this instant the seeder and the table AGREE on\nasset_class and the guard would raise no asset_class conflict at all. The guard\nbecomes load-bearing for these rows only AFTER R1 writes the five-class values.\n\nREADING 8 -- ADJACENT AND DISCLOSED because it bears on the same question: the\nguard computes conflicts at :295 as 'conflicts = _yang_conflicts(yang_table, sec)\nif upload else []', so on the DRY-RUN path no field is compared at all and the\nowned-field question is moot there. Measured, three arms, same store: upload=True\n-> rc=1, 8 [PRESERVED], 57 get_item; upload=False -> rc=0, 0 [PRESERVED], 0\nget_item; upload=False over an agreeing store -> identical to the second. Filed\nas POSN_ASTTAX-Z-W21-S1.",
+      "denominator": "3 fields in YANG_OWNED_FIELDS against 5 fields the seeder's UpdateExpression writes and 3 fields R1's write surface names; 5 of 5 fields exercised one at a time in the per-field probe (3 in-tuple, 2 out); 4 of 4 members' live name values read; 12 rows in R1's declared write surface",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=\"true\" in the task order): graded by 3.0.0_SA_CVO~Z at L9 and never self-graded by the worker. Eight readings are recorded with their citations and NO verdict is offered on whether the fields the guard owns are the fields R1 writes.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutants, on the two instruments this cell depends on. (1) THE PATCH CHECK: the same unified diff with ONE context line corrupted (line 40 of 95, the 'now = datetime.now(...)' context line, length-preserving so the hunk headers stay valid) handed to git apply --check. (2) THE SEEDER ITSELF: the pre-patch bytes and the applied bytes run against the identical scratch store, plus a --force arm -- the mutation is the ONE thing the verdict should depend on, the seeder's write rule. (3) THE COMMIT GATE: a planted 'def broken(:' .py.",
+      "expected": "(1) the corrupted diff REFUSED while the true diff passes. (2) the two seeder arms READ DIFFERENTLY on identical input, the mint control firing in BOTH so neither verdict is an artifact of a script that wrote nothing, and --force still reverting. (3) the gate BLOCKS the broken .py.",
+      "observed": "(1) true diff rc=0, no output; corrupted diff rc=1 'error: patch failed: ...:212 / patch does not apply'. (2) pre-patch CLOBBERED 4 of 4 rc=None; applied SURVIVED 4 of 4 rc=1 with 8 [PRESERVED] lines; --force CLOBBERED 4 of 4 rc=0; mint probe 'CASH_USD' MINTED in all three arms, 53 rows each. (3) 'BLOCKED: py_compile failed on .scratch/v3_gate_negcontrol.py' rc=1. ALSO EXERCISED: a per-field probe over 5 fields -- the 3 in YANG_OWNED_FIELDS refuse individually, the 2 outside it write through, so the guard's tuple is load-bearing and not decorative.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The V3-AC6 live scan is the determinism pair that matters here: the IDENTICAL command run twice, ten minutes apart, bracketing the cell's whole exercise, compared field by field rather than by eyeball. The mutant control is deterministic by construction -- the store is built from the seeder's own ast-parsed CANONICAL_SECURITIES and the retag set, with no clock, no network and no randomness in any arm; the only nondeterministic value the seeder computes is the last_updated timestamp, which no assertion reads.",
+      "observed": "Both scans: Count 4, ScannedCount 285, no LastEvaluatedKey. All 4 rows IDENTICAL across 3 compared attributes. The three-arm control was run twice during development and reported the same SURVIVED/CLOBBERED/rc triple each time, and its numbers also reproduce round 4's independently recorded run (CLOBBERED 4 of 4 pre-patch, SURVIVED 4 of 4 patched, 53 minted) on a different worktree and a different day.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running the seeder against the live etf-classifications table",
+      "reason": "EXPRESSLY FORBIDDEN by the cell: 'NEVER run the seeder against the live table: --upload is never passed in this cell.' It was not. No write API was called at any point; boto3.client() raises inside the harness, so no network client could be constructed even by accident. V3-AC6's before/after pair is the independent evidence."
+    },
+    {
+      "item": "Repairing V3-AC2's invocation, or the guard's dry-run path",
+      "reason": "The REFUSAL CLAUSE: 'A criterion you cannot satisfy as written is REFUSED with its measurement, never repaired, widened or satisfied by another route.' Both are recorded as surprise rows (POSN_ASTTAX-Z-W21-S2, -S1) for their owners rather than fixed here."
+    },
+    {
+      "item": "Aligning the module docstring at :13-19 with the new exit contract, and adding --force to its Usage block",
+      "reason": "The <paths> grant DOES cover the file, so this was possible and was declined deliberately: the cell's instruction is to apply a specific reviewed diff, and extra bytes would make the applied file differ from the bytes round 4 measured -- they are currently byte-identical (sha256 dde708491f6fa73d), which is itself a V3-AC1 corroboration. Filed as POSN_ASTTAX-Z-W21-S4."
+    },
+    {
+      "item": "Any edit to the round-5 decomposition, to AT5-s-8, or to any other cell",
+      "reason": "Outside this order's <paths>, which names exactly four paths. The grant IS the write surface; a path not named is a blocking row, never an override. The AT5-s-8 finding is carried as POSN_ASTTAX-Z-W21-S1 with 2.0.0_SA_COO~Z as disarm owner."
+    },
+    {
+      "item": "Re-deriving round 4's measurement of the defect (the 4-of-4 revert)",
+      "reason": "The <decomp_ref> names it a READ-dependency and says so explicitly: 'READ them, do not re-derive the measurement.' Round 4's artifacts were read and its control machinery imported UNMODIFIED with its sha256 asserted, so this cell's numbers are comparable to its."
+    },
+    {
+      "item": "Grading V3-AC7",
+      "reason": "judgment=\"true\": graded by 3.0.0_SA_CVO~Z at L9. Eight readings recorded, no verdict offered."
+    }
+  ],
+  "surprises": [
+    "POSN_ASTTAX-Z-W21-S1: the downstream cell AT5-s-8 is recorded as reading the guard by a DRY RUN expecting 0 PRESERVED, but the guard computes conflicts at :295 only 'if upload', so the dry run makes 0 get_item calls and 0 PRESERVED / rc=0 is the only value that path can emit -- measured against a store that would lose 4 of 4 five-class values, it reads identically to one with nothing to lose. ARMED, disarm owner 2.0.0_SA_COO~Z.",
+    "POSN_ASTTAX-Z-W21-S2: V3-AC2's invocation as written, 'timeout 180 bash .tools/commit-gate.sh', takes its subjects from argv and is given none, so it checks 0 of 0 files and exits 0 while its <expect> names the changed .py as the subject; both arms were run and recorded, and the criterion is graded on the arm whose subject the expectation names. ARMED, disarm owner 2.0.0_SA_COO~Z.",
+    "POSN_ASTTAX-Z-W21-S3: this worker ran a THIRD read-only scan of etf-classifications where the comp-iam preflight declares two, to ground V3-AC7's question about the 'name' field on a live value rather than the fixture's synthetic one; read-only, no write, same IAM posture, and it settled the question favourably (live name == seeder name on 4 of 4). INERT.",
+    "POSN_ASTTAX-Z-W21-S4: applying the approved diff verbatim leaves the module docstring at :13-19 asserting 'Idempotent ... the seeder's own fields are overwritten ... Safe to re-run at any time' with a Usage block that lists no --force, while the code it describes now refuses and exits 1; not edited, because that would put bytes in the commit the reviewed patch does not carry. INERT -- measured: zero call sites in the corpus."
+  ],
+  "session_log": "org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~21/POSN_ASTTAX.TO-V3-1.result.md -- this worker writes no separate log; the result document is the session record and the spine's L7 step log is read from git.",
+  "compiler_tools": [
+    {
+      "tool": "git apply --check",
+      "invocation": "timeout 60 git apply --check org/missions/D4/POSN/POSN_ASTTAX/deliverables/0.9.0_WK_POSN_ASTTAX~16/u3_proposed_patch.diff",
+      "result": "rc=0 on this worktree's HEAD 2a882703db, closing the preflight's stated gap (1) -- the issuer had verified it at HEAD but not here. The same diff with one context line corrupted returns rc=1."
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "timeout 180 bash .tools/commit-gate.sh data/black_diamond/scripts/classification/seed_canonical_securities.py",
+      "result": "'OK: pre-commit gate clean for 1 of 1 file(s)' rc=0. Note that round 4 could not run this gate at all in its worktree (its sparse cone lacked org/modules/graph); this worktree's cone includes org/modules and the gate runs."
+    },
+    {
+      "tool": ".tools/aws dynamodb scan",
+      "invocation": "timeout 180 .tools/aws dynamodb scan --table-name etf-classifications --filter-expression \"ticker IN (:a,:b,:c,:d)\" ... --no-paginate --output json",
+      "result": "Count 4, ScannedCount 285, no LastEvaluatedKey, rc=0 -- run twice, bracketing the cell; all 4 rows identical. A third read projecting 'name' grounded V3-AC7 reading 6."
+    },
+    {
+      "tool": "git hash-object / rev-parse (content resolution)",
+      "invocation": "git rev-parse HEAD:<path>, HEAD~1:<path>, git hash-object <the U3 scratch copy>",
+      "result": "all three fbbc7165d33198789d3a7788a557ed3f5ce75614 -- the pre-patch subject resolved BY CONTENT rather than by ref name, so V3-AC5's arm is provably round 4's subject and the order's HEAD~1 form and the form used are the same object."
+    },
+    {
+      "tool": "python (round 4's control machinery, imported unmodified)",
+      "invocation": "timeout 600 python .scratch/v3_mutant_control_re.py -- imports .scratch/u3_ac1_before_control.py with sha256 ae72cab7dfbeb62f asserted at import",
+      "result": "rc=0. Pre-patch CLOBBERED 4 of 4; applied SURVIVED 4 of 4 rc=1; --force CLOBBERED 4 of 4; 53 rows minted in every arm; per-field probe 3 in-tuple refuse / 2 out-of-tuple write through."
+    }
+  ]
+}

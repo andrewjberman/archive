@@ -1,0 +1,93 @@
+PORTAL: C:/tmp/wk-aggfix-1-3/portal  HEAD 63edeeeb51b9bec8988f86c12dc92b5768ca2532  branch wk-aggfix-1-3-portal
+src working-tree changes vs HEAD: 0
+BASE COPY: edf85ce503:src/pages/Positioning/shared/bookSet.ts -> .scratch/unit/bookSet.base.ts  rc=0  lines=644
+REWRITE (the only change to the base copy): 1 occurrence(s)
+  - import { PALETTE } from '@/lib/chartColors'
+  + import { PALETTE } from 'C:/tmp/wk-aggfix-1-3/portal/src/lib/chartColors.ts'
+RUNNER: bun 1.3.14  (cwd portal/)
+---
+B1-AC4 UNIT CONTROL -- helpers imported from portal/src/pages/Positioning/shared/bookSet.ts
+  exported helpers present: ["AGGREGATE_BOOK=string","hasOpalAggregate=function","mergeOpalAggregate=function","resolveViewerBooks=function","rememberedBookFor=function","landingBook=function"]
+  AGGREGATE_BOOK = "AGG"   PREFERRED_DEFAULT_BOOK = "INT"
+  viewers (claims -> page predicate): {"opal-staff":true,"advisor":false,"client":false}
+
+PASS  m1   status OK with holdings present: current_holdings.AGG is merged into the data, the five books untouched
+      input    = {"payload":"status OK, AGG holdings 2"}
+      expected = {"agg":[{"ticker":"IEFA","name":"IEFA fund","asset_class":"Equity","sub_asset_class":"Developed","weight":0.6,"model_breakdown":{"INT":0.1,"LT":0.2}},{"ticker":"VGSH","name":"VGSH fund","asset_class":"Equity","sub_asset_class":"Developed","weight":0.4,"model_breakdown":{"UST":0.3}}],"five":"{\"holdings\":[{\"ticker\":\"TUST\",\"name\":\"TUST fund\",\"asset_class\":\"Equity\",\"sub_asset_class\":\"Developed\",\"weight\":1}],\"aum\":100}{\"holdings\":[{\"ticker\":\"TULT\",\"name\":\"TULT fund\",\"asset_class\":\"Equity\",\"sub_asset_class\":\"Developed\",\"weight\":1}],\"aum\":100}","inputUnmutated":true}
+      got      = {"agg":[{"ticker":"IEFA","name":"IEFA fund","asset_class":"Equity","sub_asset_class":"Developed","weight":0.6,"model_breakdown":{"INT":0.1,"LT":0.2}},{"ticker":"VGSH","name":"VGSH fund","asset_class":"Equity","sub_asset_class":"Developed","weight":0.4,"model_breakdown":{"UST":0.3}}],"five":"{\"holdings\":[{\"ticker\":\"TUST\",\"name\":\"TUST fund\",\"asset_class\":\"Equity\",\"sub_asset_class\":\"Developed\",\"weight\":1}],\"aum\":100}{\"holdings\":[{\"ticker\":\"TULT\",\"name\":\"TULT fund\",\"asset_class\":\"Equity\",\"sub_asset_class\":\"Developed\",\"weight\":1}],\"aum\":100}","inputUnmutated":true}
+PASS  m2   status UNAVAILABLE merges nothing -- even with holdings in the payload (the status gate, not the emptiness)
+      input    = {"payload":"status UNAVAILABLE, AGG holdings 2"}
+      expected = {"hasAggKey":false,"sameObject":true}
+      got      = {"hasAggKey":false,"sameObject":true}
+PASS  m3   status OK with EMPTY holdings merges nothing
+      input    = {"payload":"status OK, AGG holdings 0"}
+      expected = {"hasAggKey":false,"sameObject":true}
+      got      = {"hasAggKey":false,"sameObject":true}
+PASS  m4   no payload (query disabled for this viewer) merges nothing
+      input    = {"payload":null}
+      expected = {"sameObject":true}
+      got      = {"sameObject":true}
+PASS  b1   internal viewer, aggregate merged: Aggregate FIRST, then the five in declared order
+      input    = {"viewer":"opal-staff","internal":true,"merged":true}
+      expected = ["AGG","UST","ST","INT","LT","ULT"]
+      got      = ["AGG","UST","ST","INT","LT","ULT"]
+PASS  b2   internal viewer, nothing merged: no Aggregate
+      input    = {"viewer":"opal-staff","internal":true,"merged":false}
+      expected = ["UST","ST","INT","LT","ULT"]
+      got      = ["UST","ST","INT","LT","ULT"]
+PASS  b3   advisor, even with the aggregate present in the data: no Aggregate
+      input    = {"viewer":"advisor","internal":false,"merged":true}
+      expected = ["UST","ST","INT","LT","ULT"]
+      got      = ["UST","ST","INT","LT","ULT"]
+PASS  b4   client, even with the aggregate present in the data: no Aggregate
+      input    = {"viewer":"client","internal":false,"merged":true}
+      expected = ["UST","ST","INT","LT","ULT"]
+      got      = ["UST","ST","INT","LT","ULT"]
+PASS  b5   internal viewer in ETFs mode with an aggregate in the data: no Aggregate (a rollup of the MODEL books only)
+      input    = {"viewer":"opal-staff","mode":"etfs","merged":true}
+      expected = ["DIVZ","IDVZ","PFDE","PFOE"]
+      got      = ["DIVZ","IDVZ","PFDE","PFOE"]
+PASS  b6   the five-book resolution itself is unchanged: resolveBooks(models) equals the base module's
+      input    = {"mode":"models","codes":["UST","ST","INT","LT","ULT"]}
+      expected = ["UST","ST","INT","LT","ULT"]
+      got      = ["UST","ST","INT","LT","ULT"]
+PASS  r1   client with a remembered 'AGG': falls back to the ordinary default
+      input    = {"remembered":"AGG","books":["UST","ST","INT","LT","ULT"]}
+      expected = "INT"
+      got      = "INT"
+PASS  r2   internal viewer with the aggregate merged and a remembered 'AGG': honoured
+      input    = {"remembered":"AGG","books":["AGG","UST","ST","INT","LT","ULT"]}
+      expected = "AGG"
+      got      = "AGG"
+PASS  r3   internal viewer, aggregate NOT merged, remembered 'AGG': falls back to the ordinary default
+      input    = {"remembered":"AGG","books":["UST","ST","INT","LT","ULT"]}
+      expected = "INT"
+      got      = "INT"
+PASS  r4   client with a remembered 'ST': honoured (a real book in the client's own set)
+      input    = {"remembered":"ST","books":["UST","ST","INT","LT","ULT"]}
+      expected = "ST"
+      got      = "ST"
+PASS  r5   client with nothing remembered: the ordinary default
+      input    = {"remembered":null,"books":["UST","ST","INT","LT","ULT"]}
+      expected = "INT"
+      got      = "INT"
+PASS  r6   rememberedBookFor keeps a code only when the viewer's own set holds it
+      input    = {"client":["AGG","LT"],"staff":["AGG"]}
+      expected = [null,"LT","AGG"]
+      got      = [null,"LT","AGG"]
+PASS  c1   capabilitiesFor(mode) output identical to the edf85ce503 version for every mode (3 of 3)
+      input    = {"modes":["models","etfs","satellites"]}
+      expected = {"models":{"benchmark":true,"relative":true,"customBlend":true,"attribution":true},"etfs":{"benchmark":false,"relative":false,"customBlend":false,"attribution":false},"satellites":{"benchmark":false,"relative":false,"customBlend":false,"attribution":false}}
+      got      = {"models":{"benchmark":true,"relative":true,"customBlend":true,"attribution":true},"etfs":{"benchmark":false,"relative":false,"customBlend":false,"attribution":false},"satellites":{"benchmark":false,"relative":false,"customBlend":false,"attribution":false}}
+PASS  c2   no capability key names an aggregate, in any mode
+      input    = {"keys":["benchmark","relative","customBlend","attribution"]}
+      expected = 0
+      got      = 0
+
+NEGATIVE CONTROL (the check disabled in memory: the client book list's includes() always true)
+      client book list = ["UST","ST","INT","LT","ULT"]  remembered = "AGG"
+      client lands on  = "AGG"   CONTROL FIRED: with the check disabled the client lands on 'AGG'
+
+REAL CASES 18   PASS 18   FAIL 0   NEGATIVE CONTROL FIRED
+---
+EXIT=0

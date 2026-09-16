@@ -67,6 +67,10 @@ class NotAuthorized(RuntimeError):
     """The parked bundle carries no FT identity cookie at all."""
 
 
+class ArticleBodyUnavailable(ReHarvestRequired):
+    """This response lacks an article body; session expiry is not established by one URL."""
+
+
 def _secret(name):
     d = os.environ.get("SA_SECRETS_DIR")
     if d:
@@ -80,9 +84,10 @@ def strip_html(t):
     return re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", htmlmod.unescape(t or ""))).strip()
 
 
-def build_session(use_proxy=True):
+def build_session(use_proxy=True, *, bundle=None):
     from curl_cffi import requests as cr
-    bundle = json.loads(_secret(SESSION_SECRET_ID))
+    if bundle is None:
+        bundle = json.loads(_secret(SESSION_SECRET_ID))
     names = set(bundle.keys())
     if not any(n in names for n in IDENTITY_COOKIES):
         raise NotAuthorized("parked bundle carries no FTSession/FTSession_s cookie -- it was not harvested logged-in")
@@ -128,15 +133,33 @@ def listing(s, section):
     return {"section": section, "url": url, "article_ids": [u.split("/")[-1] for u in links]}
 
 
-def article(s, content_id):
+def article(s, content_id, *, response_path=None):
     url = f"{BASE}/content/{content_id}"
     html = get_html(s, url, BASE + "/companies")
-    title_m = re.search(r"<title[^>]*>(.*?)</title>", html, re.S | re.I)
-    body_m = re.search(r'data-component="article-body"[^>]*>(.*?)</div>\s*</div>', html, re.S)
-    text = strip_html(body_m.group(1)) if body_m else strip_html(html)
-    pub_m = re.search(r'"datePublished"\s*:\s*"([^"]+)"', html)
-    return {"content_id": content_id, "url": url, "title": (title_m.group(1).strip() if title_m else None),
-            "published": (pub_m.group(1) if pub_m else None), "text_chars": len(text), "text": text}
+    if response_path is not None:
+        from pathlib import Path
+        Path(response_path).write_text(html, encoding="utf-8")
+    return parse_article(html, content_id)
+
+
+def parse_article(html, content_id):
+    """Normalize the existing HTTP response; never fall back to the page shell."""
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup(html, "html.parser")
+    title = soup.select_one('meta[property="og:title"]')
+    title_text = title.get("content") if title else (soup.title.get_text() if soup.title else None)
+    pub = re.search(r'"datePublished"\s*:\s*"([^"]+)"', html)
+    body = soup.select_one('[data-component="article-content-body"]')
+    if body is None:
+        raise ArticleBodyUnavailable("HTTP response has no article-content-body; session or entitlement requires verification")
+    for node in body.select("script, style, noscript, button, form"):
+        node.decompose()
+    blocks = [node.get_text(" ", strip=True) for node in body.select("p, h2, h3, li, blockquote, table")
+              if not node.find_parent(["li", "blockquote", "table"])]
+    text = "\n\n".join(x for x in blocks if x and x != "Recommended")
+    return {"content_id": content_id, "url": f"{BASE}/content/{content_id}", "title": title_text,
+            "published": pub.group(1) if pub else None, "text_chars": len(text), "text": text,
+            "body_source": "http_html.article-content-body", "completeness": "requires_review"}
 
 
 def quote(s, ticker, exchange):
