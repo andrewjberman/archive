@@ -332,7 +332,18 @@ def aws_dict_literals(path):
 
 # ------------------------------------------------------------------ RULING RED
 def failures(cmd, cwd=None):
+    # ANSI STRIP, and the reason is measured rather than defensive. pytest COLOURISES on this
+    # device, so a colourised "FAILED ..." line begins with an escape sequence and the ANCHORED
+    # ^FAILED never matches -- the named-failure set reads EMPTY while tests fail. The same defect
+    # was found in check_ln_r4.py by 0.9.0_WK_LGIC_NAMING~2 (row LGIC_NAMING-W2-S8) and fixed
+    # @68644b3c19; this is its SIBLING, found by asking what the two checkers SHARE rather than by
+    # re-checking the one that failed.
+    # ⚠ The rc!=0 fallback below already stopped this from being a SILENT pass on a wholly red
+    # suite -- but it degrades the check to "did the exit code change", so a cell that ADDS one
+    # failure while an existing one persists reads PASS: both sets carry the same synthetic entry
+    # and the difference is empty. That is the false pass this strip closes.
     rc, out = run(cmd, cwd=cwd, timeout=150)
+    out = re.sub(r"\[[0-9;]*[A-Za-z]", "", out)
     names = set(re.findall(r"^FAILED (\S+)", out, re.M))
     names |= {m.strip() for m in re.findall(r"^\(fail\) (.+)$", out, re.M)}
     if rc != 0 and not names:
