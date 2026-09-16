@@ -314,8 +314,13 @@ def j_reach(which, tag):
 
 
 def j6_noseverity():
-    """THE NEGATIVE ARM. Judge E's ORDER must not carry the severity order -- that withholding IS the
-    measurement, and a face that leaks it destroys the arm. Graded on the ORDER FILE, not on E's output."""
+    """⛔ THIS GRADES THE BRIEF, NOT THE ARM (1.0.0_SA_CTO RULING R-8, row LGIC_CANON-S6).
+
+    What is withheld from judge E is any BRIEF, order text or example STATING the severity order.
+    The CANON is where E is supposed to find it -- CN-k-2 puts it there, and the whole question is
+    whether the canon ALONE now supplies what round 1's orders supplied (the CVO's C-S9). So a clean
+    order file means the brief is clean and NOTHING MORE. The arm's own measurement lands at CN-j-7,
+    never self-graded: j7_e_vocab_from_canon censuses E's verdict values against the canon E read."""
     order = None
     d = ROOT + "/task-orders"
     if os.path.isdir(d):
@@ -362,6 +367,32 @@ def j7_reach():
     print("the comparison prints a NOT REACHED partition: %s" % printed)
     ok = len(named) == len(SEVEN_RULES) and printed
     out("PASS-J7-SEVEN-RULE-REACH-PRINTED" if ok else "FAIL-J7-SEVEN-RULE-REACH-PRINTED")
+
+
+def j7_e_vocab_from_canon():
+    """RULING R-8 (c). THE NEGATIVE ARM'S ACTUAL MEASUREMENT, and it lives here because a control
+    must never self-grade. Judge E was briefed with no severity order; if the canon now carries the
+    vocabulary and the order, E's verdict values must all OCCUR in the canon E read. A value E uses
+    that the canon does not carry is the finding -- it means E got it somewhere else, and the arm
+    says so instead of certifying."""
+    rs = rows(JUDGE["e"])
+    if rs is None:
+        return missing(JUDGE["e"], "J7-E-VOCAB")
+    canon = read(CANON)
+    if canon is None:
+        return missing(CANON, "J7-E-VOCAB")
+    used = set()
+    for r in rs:
+        for cell in r[1:1 + len(AXES)]:
+            v = cell.strip()
+            if v:
+                used.add(v)
+    absent = sorted(v for v in used
+                    if not re.search(r"(?<![A-Za-z0-9-])%s(?![A-Za-z0-9-])" % re.escape(v), canon))
+    print("distinct verdict values in judge E's output, denominator %d: %s" % (len(used), sorted(used)))
+    print("of those, NOT carried by the canon E read (whole-word): %d %s" % (len(absent), absent))
+    print("a value E used that the canon does not carry means E did not get it from the canon")
+    out("PASS-J7-E-VOCAB-FROM-CANON" if used and not absent else "FAIL-J7-E-VOCAB-FROM-CANON")
 
 
 def j7_blind():
@@ -573,6 +604,7 @@ CHECKS = {
     "j6-axes": lambda: j_axes("e", "J6"), "j6-cites": lambda: j_cites("e", "J6"),
     "j6-noseverity": j6_noseverity,
     "j7-traced": j7_traced, "j7-reach": j7_reach, "j7-blind": j7_blind,
+    "j7-e-vocab": j7_e_vocab_from_canon,
     "o3-family": o3_family, "o3-step10-stop": o3_step10_stop, "o3-step14-stop": o3_step14_stop,
     "o3-sovereign": o3_sovereign,
     "o4-zero-judgement": o4_zero_judgement, "o4-runnable": o4_runnable_or_stopped, "o4-distinct": o4_distinct,
