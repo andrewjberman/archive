@@ -537,6 +537,234 @@ def _selftest_r5():
     return out
 
 
+# ---------------------------------------------------------------- cell 6 arms
+#
+# The census, to the end (A-4, RULING ROWS, W2-S10). Round 2's run STOPPED on the first RAISE: its
+# report's own fenced json reads judged_live 3 of live_nameable 1821, judged_repo 0 of repo 1878, a
+# non-null `stopped`, and one row whose canonical carries the `{system}` placeholder. Each arm reads the
+# REPORT'S OWN FENCED JSON, never its prose, so a number is graded exactly as the tool wrote it.
+#
+# Every arm takes an optional path. A criterion names the round-3 file the cell writes; with no path the
+# arm looks for exactly ONE deliverables/*/NAMING_CENSUS_REPORT.r3.md (resp. COMPARISON), and zero or
+# several is a FAIL naming the count, never a silent pick.
+#
+# NOT MECHANICAL, and so NOT AN ARM: whether each hand row the comparison leaves uncompared has a stated
+# reason. No field decides that; it is a JUDGMENT criterion graded by 3.0.0_SA_CVO at L9.
+
+_FENCE = re.compile(r"```json\s*(.*?)```", re.S)
+HAND_POPULATIONS = {"N2": 45, "N6": 88}
+NL = "\n"
+
+# Round 2's measured numbers, EMBEDDED rather than read from round 2's files. Those files are ownerless
+# blobs that cell 4 MOVES; a self-test reading them at their flat path would, after cell 4 drains, fail on
+# "file missing" and still count as a RED -- a control passing for the wrong reason.
+ROUND2_REPORT = {
+    "vintage": "Built from the estate as of 2026-09-16 05:57:28 UTC.",
+    "denominators": {"repo": 1878, "live": 2176, "live_nameable": 1821, "judged_live": 3, "judged_repo": 0},
+    "stopped": {"plane": "live", "type": "API_GW", "current": "sentiment-query-api"},
+    "rows": [
+        {"current": "inf-otp-relay-api", "canonical": "{system}-inf-otp-relay-api", "verdict": "OUT-OF-PATTERN"},
+        {"current": "opal-portal-data-proxy-api", "canonical": "opal-portal-data-proxy-api", "verdict": "CONFORMANT"},
+        {"current": "opal-session-analytics-api", "canonical": "opal-session-analytics-api", "verdict": "CONFORMANT"},
+    ],
+}
+ROUND2_COMPARISON = {
+    "census": {"judged_live": 3, "live_nameable": 1821, "judged_repo": 0, "repo": 1878,
+               "stopped": {"plane": "live"}},
+    "against": {"N2": {"hand_population": 45, "compared": ["opal-portal-data-proxy-api"], "uncompared_hand_rows": 44},
+                "N6": {"hand_population": 88, "compared": ["inf-otp-relay-api", "opal-session-analytics-api"],
+                       "uncompared_hand_rows": 86}},
+}
+
+
+def _fenced(path):
+    with open(path, encoding="utf-8", errors="replace") as fh:
+        blocks = _FENCE.findall(fh.read())
+    if not blocks:
+        return None
+    try:
+        return json.loads(blocks[-1])
+    except ValueError:
+        return None
+
+
+def _one(pattern_name, path, root=None):
+    """(path or None, message). Exactly one match or a stated failure."""
+    if path:
+        return (path, "") if os.path.exists(path) else (None, "named file does not exist: %s" % path)
+    import glob as _glob
+    hits = sorted(_glob.glob(os.path.join(root or REPO, *DELIV.split("/"), "*", pattern_name)))
+    if len(hits) != 1:
+        return None, "%d file(s) match deliverables/*/%s (exactly one required)" % (len(hits), pattern_name)
+    return hits[0], ""
+
+
+def _report(path=None, root=None):
+    p, why = _one("NAMING_CENSUS_REPORT.r3.md", path, root)
+    if p is None:
+        say(why)
+        return None, None
+    d = _fenced(p)
+    if d is None:
+        say("no parseable fenced json in %s" % p)
+    return p, d
+
+
+def s6_live_complete(path=None, root=None):
+    """judged_live == live_nameable > 0, a built: vintage, and no stop."""
+    p, d = _report(path, root)
+    if d is None:
+        say("FAIL-S6-REPORT-UNREADABLE")
+        return 1
+    den = d.get("denominators") or {}
+    jl, ln = den.get("judged_live"), den.get("live_nameable")
+    vint = str(d.get("vintage") or "")
+    say("report: %s" % p)
+    say("DENOMINATOR: judged_live %s of live_nameable %s; live pulled %s; stopped=%s; vintage built-line: %s"
+        % (jl, ln, den.get("live"), d.get("stopped") is not None, "Built from the estate" in vint))
+    if d.get("stopped") is not None:
+        say("FAIL-S6-LIVE-STOPPED-ON-RAISE")
+        return 1
+    if not isinstance(ln, int) or ln <= 0 or jl != ln:
+        say("FAIL-S6-LIVE-INCOMPLETE")
+        return 1
+    if "Built from the estate" not in vint:
+        say("FAIL-S6-LIVE-NO-VINTAGE")
+        return 1
+    say("PASS-S6-LIVE-COMPLETE")
+    return 0
+
+
+def s6_repo_complete(path=None, root=None):
+    """judged_repo == repo > 0 and no stop."""
+    p, d = _report(path, root)
+    if d is None:
+        say("FAIL-S6-REPORT-UNREADABLE")
+        return 1
+    den = d.get("denominators") or {}
+    jr, rn = den.get("judged_repo"), den.get("repo")
+    say("DENOMINATOR: judged_repo %s of repo %s; stopped=%s" % (jr, rn, d.get("stopped") is not None))
+    if d.get("stopped") is not None:
+        say("FAIL-S6-REPO-STOPPED-ON-RAISE")
+        return 1
+    if not isinstance(rn, int) or rn <= 0 or jr != rn:
+        say("FAIL-S6-REPO-INCOMPLETE")
+        return 1
+    say("PASS-S6-REPO-COMPLETE")
+    return 0
+
+
+def s6_no_placeholder(path=None, root=None):
+    """No report row's canonical carries a `{...}` placeholder (W2-S10), against a non-empty row set."""
+    p, d = _report(path, root)
+    if d is None:
+        say("FAIL-S6-REPORT-UNREADABLE")
+        return 1
+    rows = d.get("rows") or []
+    leaked = [r for r in rows if "{" in str(r.get("canonical", ""))]
+    say("DENOMINATOR: %d report row(s); %d carry a placeholder in canonical" % (len(rows), len(leaked)))
+    for r in leaked[:10]:
+        say("   PLACEHOLDER:", r.get("current"), "->", r.get("canonical"))
+    if not rows:
+        say("FAIL-S6-NO-ROWS (an empty row set cannot be checked for placeholders)")
+        return 1
+    if leaked:
+        say("FAIL-S6-PLACEHOLDER-IN-REPORT")
+        return 1
+    say("PASS-S6-NO-PLACEHOLDER")
+    return 0
+
+
+def _complete(census, judged, total):
+    n = census.get(total)
+    return isinstance(n, int) and n > 0 and census.get(judged) == n
+
+
+def s6_comparison_arithmetic(path=None, root=None):
+    """The comparison runs over the REAL hand populations (N2 45, N6 88), each set's compared + uncompared
+    closes to its population, and the census embedded in it is COMPLETE on both planes.
+
+    CLOSING ARITHMETIC IS NOT ENOUGH, measured on round 2's own comparison: it closes on BOTH sets (N2 1+44=45,
+    N6 2+86=88) and is RED only because its census block is `stopped`. A comparison run against an unstopped
+    but INCOMPLETE census would close too, so the census it read must itself be complete."""
+    p, why = _one("NAMING_CENSUS_COMPARISON.r3.md", path, root)
+    if p is None:
+        say(why)
+        say("FAIL-S6-COMPARISON-UNREADABLE")
+        return 1
+    d = _fenced(p) or {}
+    against = d.get("against") or {}
+    bad = []
+    for name, pop in HAND_POPULATIONS.items():
+        a = against.get(name) or {}
+        hp = a.get("hand_population")
+        comp = len(a.get("compared") or [])
+        unc = a.get("uncompared_hand_rows")
+        closes = isinstance(unc, int) and comp + unc == hp
+        say("  %s: hand_population %s (ruled %d); compared %d + uncompared %s -> %s"
+            % (name, hp, pop, comp, unc, "closes" if closes and hp == pop else "DEFECT"))
+        if hp != pop or not closes:
+            bad.append(name)
+    census = d.get("census") if isinstance(d.get("census"), dict) else {}
+    stopped = census.get("stopped") is not None
+    live_done = _complete(census, "judged_live", "live_nameable")
+    repo_done = _complete(census, "judged_repo", "repo")
+    say("embedded census: stopped=%s; judged_live %s of %s; judged_repo %s of %s"
+        % (stopped, census.get("judged_live"), census.get("live_nameable"),
+           census.get("judged_repo"), census.get("repo")))
+    if bad or stopped or not live_done or not repo_done:
+        say("FAIL-S6-COMPARISON-NOT-OVER-REAL-POPULATION")
+        return 1
+    say("PASS-S6-COMPARISON-ARITHMETIC")
+    return 0
+
+
+def _write_fenced(path, doc):
+    with open(path, "w", encoding="utf-8", newline=NL) as fh:
+        fh.write("# fixture" + NL + NL + "```json" + NL + json.dumps(doc) + NL + "```" + NL)
+    return path
+
+
+def _selftest_s6():
+    """RED on round 2's EMBEDDED numbers; GREEN on synthesized complete documents; plus the trap arm for a
+    comparison that closes over an unstopped but incomplete census."""
+    out = []
+    base = _tempfile.mkdtemp(prefix="en_r3_s6_")
+    try:
+        r2r = _write_fenced(os.path.join(base, "r2_report.md"), ROUND2_REPORT)
+        r2c = _write_fenced(os.path.join(base, "r2_comparison.md"), ROUND2_COMPARISON)
+        good = {"vintage": "Built from the estate as of 2026-09-16 12:17:46 UTC.",
+                "denominators": {"live": 2176, "live_nameable": 2, "judged_live": 2, "repo": 1, "judged_repo": 1},
+                "stopped": None,
+                "rows": [{"current": "a", "canonical": "opal-a", "verdict": "CONFORMANT"},
+                         {"current": "b", "canonical": "opal-b", "verdict": "OUT-OF-PATTERN"}]}
+        gr = _write_fenced(os.path.join(base, "good_report.md"), good)
+        gcd = {"census": {"stopped": None, "judged_live": 2, "live_nameable": 2, "judged_repo": 1, "repo": 1},
+               "against": {"N2": {"hand_population": 45, "compared": ["x"] * 40, "uncompared_hand_rows": 5},
+                           "N6": {"hand_population": 88, "compared": ["y"] * 80, "uncompared_hand_rows": 8}}}
+        gc = _write_fenced(os.path.join(base, "good_comparison.md"), gcd)
+        opened = json.loads(json.dumps(gcd))
+        opened["against"]["N6"]["uncompared_hand_rows"] = 3
+        oc = _write_fenced(os.path.join(base, "open_comparison.md"), opened)
+        incomplete = json.loads(json.dumps(gcd))
+        incomplete["census"].update({"judged_live": 3, "live_nameable": 1821})
+        ic = _write_fenced(os.path.join(base, "incomplete_census_comparison.md"), incomplete)
+
+        out.append(("s6-live-complete RED  (round 2 numbers)", s6_live_complete(r2r) == 1))
+        out.append(("s6-live-complete GREEN", s6_live_complete(gr) == 0))
+        out.append(("s6-repo-complete RED  (round 2 numbers)", s6_repo_complete(r2r) == 1))
+        out.append(("s6-repo-complete GREEN", s6_repo_complete(gr) == 0))
+        out.append(("s6-no-placeholder RED (round 2 numbers)", s6_no_placeholder(r2r) == 1))
+        out.append(("s6-no-placeholder GREEN", s6_no_placeholder(gr) == 0))
+        out.append(("s6-comparison RED    (round 2 numbers)", s6_comparison_arithmetic(r2c) == 1))
+        out.append(("s6-comparison GREEN", s6_comparison_arithmetic(gc) == 0))
+        out.append(("s6-comparison RED    (arithmetic open)", s6_comparison_arithmetic(oc) == 1))
+        out.append(("s6-comparison RED    (closes, census incomplete)", s6_comparison_arithmetic(ic) == 1))
+    finally:
+        _shutil.rmtree(base, ignore_errors=True)
+    return out
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -606,6 +834,7 @@ def selftest_arms():
 
     results.extend(_selftest_i3())
     results.extend(_selftest_r5())
+    results.extend(_selftest_s6())
 
     say("")
     for label, ok in results:
@@ -616,6 +845,10 @@ def selftest_arms():
 
 
 CMDS = {
+    "s6-live-complete": s6_live_complete,
+    "s6-repo-complete": s6_repo_complete,
+    "s6-no-placeholder": s6_no_placeholder,
+    "s6-comparison-arithmetic": s6_comparison_arithmetic,
     "r5-imo-retired": r5_imo_retired,
     "r5-find-refused": r5_find_refused,
     "r5-product-owners": r5_product_owners,
@@ -631,8 +864,8 @@ CMDS = {
 
 
 def main():
-    if len(sys.argv) != 2:
-        say("usage: check_en_r3.py <subcommand> | --list | selftest-arms")
+    if len(sys.argv) not in (2, 3):
+        say("usage: check_en_r3.py <subcommand> [path] | --list | selftest-arms")
         return 2
     cmd = sys.argv[1]
     if cmd == "--list":
@@ -643,6 +876,8 @@ def main():
     if fn is None:
         say("unknown subcommand:", cmd)
         return 2
+    if len(sys.argv) == 3:
+        return fn(sys.argv[2])
     return fn()
 
 
