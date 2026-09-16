@@ -1,0 +1,84 @@
+{
+ "kind": "SUBJECT_CONTROL",
+ "schema_version": "1.0",
+ "project": "LGIC_LGCTFM",
+ "round": 1,
+ "cell": "LT-e-1",
+ "serves": ["FWD-1"],
+ "written_by": "2.0.0_SA_COO~G",
+ "written_utc": "2026-09-16T17:35Z",
+ "subject": "ADVI_FIRMBKTS -- the legacy firm buckets opal-data-{bd,inf,cot}",
+ "source": "docs/briefs/d8-legacy-firm-buckets-migration-brief-20260913.md@2b64208047 sections IV.1-IV.9",
+ "source_provenance": "Resolved from ADVI_FIRMBKTS's own PRD header brief_ref, NOT from a filename guess -- docs/briefs/d8-advi-gold-redesign-lgic-brief-20260915.md looks like the brief by its name and is NOT it.",
+ "what_this_is": "The HAND-BUILT composition of the first subject, measured by a human-driven census before this project existed. LT-e-1's walk is graded against it. The walk must REPRODUCE these rows from its own instruments; it is not given this file as input, and a walk that returns fewer rows than this control has a coverage defect, while a walk that returns more has found something the hand census missed -- which is a finding, not a failure.",
+ "planes": {
+  "repo": {
+   "instrument": "comp-find 'opal-data-(bd|inf|cot)\\b' infra/ data/ portal/src lib/ .tools/ --all",
+   "hits": 2641,
+   "files_scanned": 14169,
+   "files_matched": 781,
+   "bands": {"HEAD": 443, "DEF": 342, "SURFACED": 955, "CONFIG": 283, "TEST": 84, "DOC": 534},
+   "arithmetic_check": "443+342+955+283+84+534 = 2641, equal to the hit count -- the bands partition the hits with no remainder. Verified by this seat at the cut, not carried from the brief's prose.",
+   "repoint_surface": "the DEF band (where a bucket name is DEFINED -- a constant, a config key), 342 hits"
+  },
+  "live": {
+   "instrument": "comp-find --corpus aws 'opal-data-(bd|inf|cot)\\b'",
+   "vintage": "2026-09-13T00:53:52Z (the DB's own built: line)",
+   "hits": 249,
+   "nodes_scanned": 2511,
+   "by_type": {
+    "CLOUDFRONT_DISTRIBUTION": 1,
+    "EVENT_RULE": 11,
+    "IAM_POLICY": 3,
+    "S3_BUCKET": 3,
+    "S3_BUCKET_POLICY": 3,
+    "S3Key": 228
+   },
+   "arithmetic_check": "1+11+3+3+3+228 = 249, equal to the hit count across six types. Verified at the cut.",
+   "drift_note": "the three S3_BUCKET_POLICY nodes read drift=LIVE-no-DECLARED -- they are not in Terraform."
+  }
+ },
+ "key_classes": {
+  "denominator": 228,
+  "note": "IV.3 groups the 228 attributed keys by WHAT THEY ARE, not by their current prefix. Six classes, (a)-(f). The finding the walk must reproduce: the legacy gold/ prefix holds THREE TIERS' worth of things, so 'move gold' is not a move, it is a sort.",
+  "classes": [
+   {"id": "a", "label": "served JSON (PLATINUM by function, R12)"},
+   {"id": "b", "label": "analytical parquet"},
+   {"id": "c", "label": "operational state (the R21 state/ class)"},
+   {"id": "d", "label": "ingest tiers in the wrong bucket (R4 -> opal-data-assets)"},
+   {"id": "e", "label": "retire candidates (incl. a SHADOW under R18 and a dated singleton)"},
+   {"id": "f", "label": "code (code/gold/*, R16)"}
+  ]
+ },
+ "trigger_plane": {
+  "why_it_is_the_hard_one": "LGIC_LGCTFM's own brief IV.6: the trigger plane is TWO AWS services, and a census that reads one reads neither. LT-e-1 must print BOTH denominators; a single number here is a defect however large it is.",
+  "pattern_rules": 11,
+  "schedules_approx": 45,
+  "schedules_note": "~45 cron()/rate() triggers name NO bucket -- their LAMBDAS do. A bucket-name census over rules alone therefore misses every one of them, which is exactly the blind spot the row's `evidence.instrument` field exists to declare.",
+  "named_pattern_rules_sample": [
+   "FIRMSEP-s3-direct-access-bypass (watches GetObject on ALL THREE)",
+   "opal-{49f,cot,inf}-served-guard-on-write",
+   "cot-bronze-complete", "cot-silver-complete",
+   "inf-assets-trigger-bronze-complete",
+   "inf-gold-full-on-bronze-complete (DISABLED)",
+   "inf-silver-chain-bronze-complete",
+   "inf-otp-state-change",
+   "mdpf-feeder-accelerator (on the O7 prohibition key)"
+  ]
+ },
+ "serving_pointers": {
+  "router_map_firms": 5,
+  "detail": "shared-advisor-router v25 maps 49financial->opal-data-bd, inflection->opal-data-inf, mockadv->opal-data-bd, demo->opal-data-demo, cottonwood->opal-data-cot; source is the shared FIRM_CONFIG module @f215cfdddf.",
+  "independent_rederiver": "the origin-response guard shared-advisor-router-response:5 RE-DERIVES the bucket independently (LD-0442) -- a SECOND writer of the same property, so a census that reads only the router map reads one of two.",
+  "other_consumers": ["the CloudFront declared origin S3-opal-data-bd + OAI", "IRPT_BCKEND's FIRM_BUCKET_MAP", "portal/src/api/endpoint-mapping.ts"]
+ },
+ "identity_plane": {
+  "bucket_policies": "opal-data-{bd,inf,cot} each carry AllowScopedAdvisorOAI (OAI E139998VWH0PD) and an OAC grant on gold/* conditioned on distribution EVTSA9VEHNZVH; all three LIVE-no-DECLARED.",
+  "the_asymmetry": "opal-data-49financial carries ONLY DenyForeignFirmPrincipals -- no OAI grant, no OAC grant, so CloudFront cannot serve it today.",
+  "role_side_belts": "bd:534, cot:192, inf cross-firm-deny.tf -- all name the OLD buckets."
+ },
+ "unmeasured_arm": {
+  "why": "FWD-1 requires every row to say what its instrument CANNOT see. A walk that returns only what its instruments reach cannot be distinguished from a walk with perfect coverage.",
+  "how_graded": "LT-e-1 is graded by PLANTING a resource outside every instrument's scope and requiring it to surface as an UNMEASURED row rather than be silently absent. The plant is the cell's own act; this control does not name it, so the cell cannot pre-address it."
+ }
+}
