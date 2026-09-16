@@ -921,6 +921,109 @@ def _selftest_w7():
     return out
 
 
+# ---------------------------------------------------------------- cell 7 regression arm (R-25)
+#
+# RULING R-25 @96ebbde746: FWD-2's EXERCISED bar was met in round 1 -- mdpf-49f-fenceprobe-role, a real role
+# named by name(), was ALLOWED by the live generated fence in a real get-object while the cot and unscoped
+# probes were DENIED (FENCE_PROBES.md; ledger 20260915T0334Z_..._deploy_completion.md). Cell 7 carries the
+# REGRESSION READ: the Deny APPLIED on the real bucket still equals what the builder produces from the registry.
+#
+# This is a REGRESSION guard, not a progress criterion, and is named `regress-` so W2-S11 is not misread: it
+# PASSES before the cell runs because the fence is already live, and it must still PASS after the cell edits
+# exemptions.json -- which is exactly the point, since a new exemption row the cell writes must reach the
+# applied policy through the generator, never by hand.
+#
+# THE LIVE READ is `aws s3api get-bucket-policy`, which DEC-4 names as the APPLIED read. No comp-tool prints a
+# bucket-policy DOCUMENT (comp-find --corpus aws exposes the node and its drift class, not the statement). The
+# read fails CLOSED: empty output, unparseable JSON (the shim can truncate at rc=0) or a missing statement is a
+# FAIL naming the cause, never a pass. Measured at the cut: 17 of 17 equal (1 pattern + 16 exemption ARNs).
+
+FENCE_BUCKET = "opal-data-49financial"
+FENCE_FIRM = "49financial"
+FENCE_SID = "DenyForeignFirmPrincipals"
+
+
+def _live_policy(bucket):
+    """(policy dict or None, cause)."""
+    # the shim is a bash script with a .cmd twin (CLAUDE.md: both or neither); Windows Python can run only the .cmd
+    shim = os.path.join(REPO, ".tools", "aws.cmd" if os.name == "nt" else "aws")
+    argv = [shim, "s3api", "get-bucket-policy", "--bucket", bucket,
+            "--query", "Policy", "--output", "text"]
+    try:
+        r = subprocess.run(argv, capture_output=True, text=True, timeout=90, cwd=REPO)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return None, "live read did not run: %s" % exc
+    raw = (r.stdout or "").strip()
+    if r.returncode != 0 or not raw:
+        return None, "live read rc=%d, %d bytes: %s" % (r.returncode, len(raw), (r.stderr or "")[:160])
+    try:
+        return json.loads(raw), ""
+    except ValueError as exc:
+        return None, "live policy unparseable (%d bytes): %s" % (len(raw), exc)
+
+
+def _builder_expected(root=None):
+    sys.path.insert(0, os.path.join(root or REPO, "lib"))
+    import opal_naming  # noqa: E402 -- the builder under test lives in the repo, not on the default path
+    with open(os.path.join(root or REPO, *EXEMPTIONS.split("/")), encoding="utf-8") as fh:
+        ex = (json.load(fh).get("exemptions") or {}).get(FENCE_BUCKET) or []
+    return list(opal_naming.fence_patterns(FENCE_FIRM)) + [e["arn"] for e in ex if isinstance(e, dict) and e.get("arn")]
+
+
+def regress_w7_applied_deny(path=None, root=None, live_reader=None, expected=None):
+    """The applied Deny on the real bucket equals fence_patterns() + fence_exemption_arns(), as sets."""
+    policy, cause = (live_reader or _live_policy)(FENCE_BUCKET)
+    if policy is None:
+        say(cause)
+        say("FAIL-W7R-LIVE-UNREADABLE")
+        return 1
+    stmts = [s for s in (policy.get("Statement") or []) if isinstance(s, dict) and s.get("Sid") == FENCE_SID]
+    if len(stmts) != 1 or stmts[0].get("Effect") != "Deny":
+        say("statements named %s: %d (exactly one Deny required)" % (FENCE_SID, len(stmts)))
+        say("FAIL-W7R-NO-FENCE-STATEMENT")
+        return 1
+    live = ((stmts[0].get("Condition") or {}).get("ArnNotLike") or {}).get("aws:PrincipalArn") or []
+    live = [live] if isinstance(live, str) else list(live)
+    exp = expected if expected is not None else _builder_expected(root)
+    only_live = sorted(set(live) - set(exp))
+    only_builder = sorted(set(exp) - set(live))
+    say("DENOMINATOR: live ArnNotLike %d entr%s; builder %d (fence_patterns + exemptions.json[%s])"
+        % (len(live), "y" if len(live) == 1 else "ies", len(exp), FENCE_BUCKET))
+    for a in only_live[:10]:
+        say("   ON THE BUCKET, NOT FROM THE BUILDER:", a)
+    for a in only_builder[:10]:
+        say("   FROM THE BUILDER, NOT ON THE BUCKET:", a)
+    if not live or not exp:
+        say("FAIL-W7R-EMPTY-SET (an empty side cannot evidence equality)")
+        return 1
+    if only_live or only_builder:
+        say("FAIL-W7R-APPLIED-DENY-DRIFTED-FROM-BUILDER")
+        return 1
+    say("PASS-W7R-APPLIED-DENY-EQUALS-BUILDER")
+    return 0
+
+
+def _selftest_w7r():
+    """Injected live reader and expected set, so the verdict never drifts with the estate."""
+    pat = "arn:aws:iam::313476888478:role/*-49f-*"
+    exa = "arn:aws:iam::313476888478:role/aws-service-role/support.amazonaws.com/AWSServiceRoleForSupport"
+    exp = [pat, exa]
+
+    def policy(arns, sid=FENCE_SID, effect="Deny"):
+        return lambda _b: ({"Statement": [{"Sid": sid, "Effect": effect,
+                                           "Condition": {"ArnNotLike": {"aws:PrincipalArn": arns}}}]}, "")
+
+    typed = "arn:aws:iam::313476888478:role/cot-*"
+    return [
+        ("w7r GREEN live equals builder", regress_w7_applied_deny(live_reader=policy([exa, pat]), expected=exp) == 0),
+        ("w7r RED   an exemption missing on the bucket", regress_w7_applied_deny(live_reader=policy([pat]), expected=exp) == 1),
+        ("w7r RED   a hand-typed principal added", regress_w7_applied_deny(live_reader=policy([pat, exa, typed]), expected=exp) == 1),
+        ("w7r RED   statement is an Allow", regress_w7_applied_deny(live_reader=policy(exp, effect="Allow"), expected=exp) == 1),
+        ("w7r RED   live read failed closed", regress_w7_applied_deny(live_reader=lambda _b: (None, "rc=255"), expected=exp) == 1),
+        ("w7r RED   both sides empty", regress_w7_applied_deny(live_reader=policy([]), expected=[]) == 1),
+    ]
+
+
 # ---------------------------------------------------------------- self-test
 
 def _fixture(tmp, blobs, placed):
@@ -992,6 +1095,7 @@ def selftest_arms():
     results.extend(_selftest_r5())
     results.extend(_selftest_s6())
     results.extend(_selftest_w7())
+    results.extend(_selftest_w7r())
 
     say("")
     for label, ok in results:
@@ -1002,6 +1106,7 @@ def selftest_arms():
 
 
 CMDS = {
+    "regress-w7-applied-deny": regress_w7_applied_deny,
     "w7-writers-dispositioned": w7_writers_dispositioned,
     "s6-live-complete": s6_live_complete,
     "s6-repo-complete": s6_repo_complete,
