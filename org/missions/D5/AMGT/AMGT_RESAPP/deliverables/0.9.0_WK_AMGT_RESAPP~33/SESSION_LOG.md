@@ -87,3 +87,69 @@ INERT), `AMGT_RESAPP-Z-W33-S3` (missing `<status>` tag, INERT).
 
 The code change (`lib/research/filings/batch.py`) is structurally correct per the cell's own instruction and
 is committed as such; the order stays open on AC2/AC3 per the bar ("a VALID instance is not a met order").
+
+## 7. RESUMPTION -- ISSUER AMENDMENT 1 applied (fresh spawn, same worktree, commit 518737d938 already on branch)
+
+Re-grounded the premise: `git rev-parse --abbrev-ref HEAD` -> `wk-amgt-13-33-fpB`; `org/`, `.tools/`,
+`lib/research/filings/batch.py` present -> TREE-OK. `git log` confirms 518737d938 (the prior worker's
+producer fix) is the branch tip. The task-order file on disk carries the amended text as an uncommitted
+working-tree change, as flagged in the spawn prompt -- not reverted.
+
+**Two corrections applied, per ISSUER AMENDMENT 1:**
+
+**(a) Null-security_key skip.** Live re-count against `universe/v1/2026-09-16.json` (unchanged since the
+prior session): `unresolved_total=237`, of which `no_identity_out_of_scope=59` (security_key is null --
+the AMGT-rk-21 identity gap, not this cell's) and `in_scope_target=178`. Added, immediately inside the
+existing unresolved-write loop, a guard: `if not entry.get("security_key"): no_identity_skipped += 1;
+continue` -- before any `pool_key()`/`write_pool()` call, so the collision this order's own W33-S1 row
+surfaced (all 59 null-key entries writing to the literal same key
+`filings/v1/None/UNRESOLVED-SOURCE.source.json`) can no longer occur. Filed `AMGT_RESAPP-Z-W33-S4`
+disarming/graduating W33-S1 at this commit -- the issuer chose SKIP-AND-COUNT over MINT-A-KEY, so the
+disarm condition (no collision on a real run) is met by a different mechanism than W33-S1's disarm_owner
+note anticipated.
+
+**(b) `--skip-fetch` flag.** Added an `argparse` flag that, when set, skips the pre-existing (unedited)
+fetchable loop entirely and runs only the unresolved-write loop, printing a `SKIP-FETCH:` line naming how
+many fetchable entries were bypassed. `python -m py_compile` clean; `.tools/commit-gate.sh` clean.
+
+**AC3 measured TWICE more before passing** (this is the amended order's OWN literal invocation, a fresh
+measurement of a fresh flag -- not a third retry of the prior session's unfixed `--write-pool` command,
+which never had `--skip-fetch` at all): attempt 1 (`timeout 100 ... --skip-fetch 2>&1 | tail -5`): rc=124,
+no application stdout captured (tail pipe-receiver, nothing flushed before SIGTERM) -- saved as
+`AMGT-rk-24.AC3.amendment1.attempt1_rc124_no_output.txt`. Attempt 2 (unbuffered, redirected to file): rc=124
+again; captured output shows the 4 pre-loop summary lines (`BATCH:`/`WOULD-FETCH:`/`UNRESOLVED-SOURCE:`/
+`SKIP-FETCH:`) then nothing -- the unresolved-write loop itself (178 sequential `crosswalk.write_pool()`
+calls, each constructing a FRESH `boto3.client()` internally, per `write_pool(key, payload, bucket=...,
+client=None)`'s own default) did not finish inside 100s. Saved:
+`AMGT-rk-24.AC3.amendment1.attempt2_rc124_clienteach.txt`.
+
+**Diagnosed rather than retried a third time** (policy: retried once at most): timed 5x
+`boto3.client(...)` + `head_object` at 0.553s/call vs. 5x the same `head_object` reusing one pre-built
+client at 0.119s/call -- client construction, not the network round trip, is the dominant per-entry cost.
+`crosswalk.write_pool()` already accepts an optional shared `client=None` parameter (its own existing
+interface, `lib/research/identity/crosswalk.py:609`); batch.py now builds ONE `boto3.client("s3", ...)`
+before the unresolved-write loop (only when `--write-pool` is set) and passes it into every
+`write_pool()` call. This changes no write behaviour -- same 178 keys, same content, same read-back
+verification inside `write_pool()` -- only the per-call client-construction cost. Filed
+`AMGT_RESAPP-Z-W33-S5` naming this (the order's own text asserted the loop is "genuinely fast", which held
+for correctness but not, as first implemented mirroring `run_one()`'s pattern exactly, for speed at this
+population size).
+
+Re-ran (this counts as testing the FIX, a new measurement, not a further retry of the unfixed command):
+wall-clock 35.5s, rc=0, `UNRESOLVED-SOURCE DONE: 178 of 178 name(s) written this pass, 59 no-identity, out
+of scope (see AMGT-rk-21)`. Saved: `AMGT-rk-24.AC3.amendment1.attempt3_clientreuse_pass.txt`. Then ran the
+CRITERION's own exact literal invocation one more time (byte-for-byte, `timeout 100 ... | tail -5`) for the
+record: rc=0, same result. Saved:
+`AMGT-rk-24.AC3.amendment1.final_literal_invocation_pass.txt`.
+
+**AC2 after-state re-measured** with the same literal boto3 script: `objects_found=178` = `in_scope_count`,
+`objects_missing=[]`, `none_key_collision_object_exists=False` (both before AND after -- the guard means
+the collision key is never attempted, not merely absent by luck). Saved:
+`AMGT-rk-24.AC2.amendment1.after.txt`. Spot-checked one written object
+(`filings/v1/AAPL_US_Equity/UNRESOLVED-SOURCE.source.json`) -- shape matches `fetch.unresolved_source_object`'s
+own schema exactly.
+
+**Disposition: AC1 PASS, AC2 PASS, AC3 PASS.** `<status>` element: the task-order file still carries no
+literal `<status>` tag at this vintage (confirmed again, same as `AMGT_RESAPP-Z-W33-S3`'s prior finding) --
+nothing to flip; not invented here, same reasoning as before (the issuer's carrier, not a worker's to add).
+`proof-of-spec-check.py` is the top-level bar for this instance regardless of that tag's absence.
