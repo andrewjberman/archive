@@ -1,0 +1,11 @@
+AC3 amendment-1 attempt 1 (literal invocation, before the client-reuse fix):
+
+cd "$(git rev-parse --show-toplevel)" && timeout 100 python -m lib.research.filings.batch --universe universe/v1/2026-09-16.json --write-pool --skip-fetch 2>&1 | tail -5
+
+Result: rc=124. Console showed only the bash job-control line
+"Terminated                 timeout 100 python -m lib.research.filings.batch ..."
+-- the `tail -5` pipe receiver had nothing buffered/flushed to it before the SIGTERM, so no
+application stdout was captured for this attempt. This is the FIRST measured attempt of the
+--skip-fetch invocation, run before any client-reuse fix was applied; the write loop at this point
+still constructed a fresh boto3.client() inside every crosswalk.write_pool() call (mirroring
+run_one()'s RESOLVED-branch pattern exactly, per the cell's original instruction).
