@@ -1,0 +1,25 @@
+{
+  "schema": "og-x-1/download-paths/v1",
+  "cell": "OG-x-1",
+  "producer": "0.9.0_WK_NFRA_OPLGTW~5",
+  "module": "infra/aws/ec2/opal-gateway/app/download_routes.py",
+  "routes_declared_in": "infra/aws/ec2/opal-gateway/app/server.py",
+  "paths": [
+    {
+      "path": "/schwab/download",
+      "methods": ["GET", "HEAD"],
+      "route_class": "public",
+      "role": "download_page: the static, authenticated page (app/static/schwab_download/index.html); redirects an unauthenticated browser to OG-a-3's login"
+    },
+    {
+      "path": "/schwab/download/exchange",
+      "methods": ["POST"],
+      "route_class": "public",
+      "role": "exchange: anti-CSRF, Origin-checked POST body carrying the ticket (never a query/path/redirect/referrer); {\"start\": false|absent} peeks metadata without consuming, {\"start\": true} atomically consumes the ticket and streams the CSV"
+    }
+  ],
+  "match": "exact path; each path is forwarded by the ALB WITHOUT authenticate-oidc, exactly as OG-a-3's two paths are; no wildcard and no other path is implied",
+  "cookie_path": "/schwab/download",
+  "route_class_note": "Both entries are 'public' in tests/test_principal_cutover.py's ROUTE_CLASS -- the SAME reasoning as OG-a-3's /schwab/download/login and /schwab/download/callback (NFRA_OPLGTW-S14): neither route consults the Authorization bearer scheme or the ALB access-layer header at all, so their answer is invariant to both (the public-route arm at test_principal_cutover.py:551-557 and the else-branch at test_data_entitlement_guard.py:722-729 both grade exactly that invariance). The REAL guard -- OG-a-3's session cookie plus the ticket's own identity/grant/single-use checks -- is enforced independently in app/download_routes.py and app/integrations/schwab/export.py and is exercised by OGX1-AC1..AC16, never by ROUTE_CLASS.",
+  "methods_note": "Starlette serves HEAD for every GET route, so HEAD is listed as served for the page; the exchange is POST only."
+}
