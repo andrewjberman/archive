@@ -826,13 +826,31 @@ def e3_types():
 
 
 def core_untypeable(contract, plant):
-    nm = (plant or {}).get("name")
-    rows = rows_by_name(contract).get(nm, []) if nm else []
-    ids = {r.get("row_id") for r in rows}
-    nc = [r for r in rows if cell_value((r.get("desired") or {}).get("verdict")) == "NOT_COVERED"]
-    graded = [t.get("tension_id") for t in contract.get("tensions") or [] if t.get("row_id") in ids]
-    return bool(nc) and not graded, ["planted untypeable name %r: rows %d, NOT_COVERED %d, tensions on it %s"
-                                     % (nm, len(rows), len(nc), graded)]
+    """The untypeable node is RETURNED, never silently graded -- in either carrier shape (R-36).
+
+    OLD shape, round 1's first walk: the row sat in contract.rows carrying desired.verdict NOT_COVERED.
+    NEW shape, R-36: the row is NOT in contract.rows at all; it is carried in PLANT_UNTYPEABLE.json with
+    verdict NOT_COVERED and counted. Both grade here, so the historical artifact keeps its verdict and the
+    amendment's runs get graded on what they actually write.
+    """
+    entries, count = _carrier(plant)
+    if entries is None:
+        return False, ["the untypeable carrier is not an object"]
+    if any(e.get("_shape") == "old" for e in entries):
+        nm = entries[0].get("name")
+        rows = rows_by_name(contract).get(nm, []) if nm else []
+        ids = {r.get("row_id") for r in rows}
+        nc = [r for r in rows if cell_value((r.get("desired") or {}).get("verdict")) == "NOT_COVERED"]
+        graded = [t.get("tension_id") for t in contract.get("tensions") or [] if t.get("row_id") in ids]
+        return bool(nc) and not graded, ["OLD carrier shape; planted untypeable name %r: rows %d, "
+                                         "NOT_COVERED %d, tensions on it %s" % (nm, len(rows), len(nc), graded)]
+    names = [e.get("name") for e in entries]
+    by_name = rows_by_name(contract)
+    in_rows = [n for n in names if by_name.get(n)]
+    nc = [e for e in entries if e.get("verdict") == "NOT_COVERED"]
+    ok = bool(entries) and len(nc) == len(entries) and not in_rows and         (count is None or count == len(entries))
+    return ok, ["NEW carrier shape; carried %d, NOT_COVERED %d, also present in contract.rows %d %s, "
+                "carrier count %r" % (len(entries), len(nc), len(in_rows), in_rows[:3], count)]
 
 
 def e3_untypeable():
@@ -1492,6 +1510,260 @@ def v1_card():
 
 
 # ============================================================================ dispatch
+# ==================================================== the round-1 AMENDMENT (LT-e-4, RULING R-36)
+#
+# R-36 answered LGIC_LGCTFM-W2-S2. The contract enum stays EQUAL to NAMING_SCHEMA.json's 33 graded types by
+# subtraction -- that equality is what lets the contract say a type is ungraded at all (Rule 24(i)) -- so the
+# untypeable PLANT becomes OPT-IN behind --plant-untypeable, and a node whose type the naming schema does not
+# grade is neither written into contract.rows nor discarded: it is CARRIED in the run's own
+# PLANT_UNTYPEABLE.json with verdict NOT_COVERED, and its COUNT is printed in the contract as a required cell.
+# A printed zero is a measurement; an absent one is silence.
+AMEND_RUNS = W2 + "/AMENDMENT_RUNS.json"
+CARRIER_FILE = "PLANT_UNTYPEABLE.json"
+# CELL_STATUSES is defined ONCE at the top of this file as a SET; a second, tuple-shaped
+# definition here silently broke core_enums, which compares set(enum) == CELL_STATUSES.
+
+
+def _naming_graded_types():
+    """The node types NAMING_SCHEMA.json grades, read from the schema itself, never a literal list."""
+    n, _why = load_json(NAMING)
+    if n is None:
+        return set()
+    return set(((n.get("kind") or {}).get("by_type") or {}).keys()) | \
+        set((n.get("types_not_graded_by_kind") or {}).keys())
+
+
+def _carrier(plant):
+    """(entries, count) from EITHER carrier shape, so the historical artifact still grades.
+
+    OLD, round 1's first walk: {"name": "..."} -- one planted name whose ROW sat in contract.rows.
+    NEW, R-36: {"untypeable": [{name, node_type, verdict, ...}], "count": n} -- the row is carried HERE and is
+    absent from contract.rows. An entry carrying _shape=old is the first form, normalised.
+    """
+    if not isinstance(plant, dict):
+        return None, None
+    if isinstance(plant.get("untypeable"), list):
+        return plant["untypeable"], plant.get("count")
+    if plant.get("name"):
+        return [{"name": plant.get("name"), "verdict": "NOT_COVERED", "_shape": "old"}], None
+    return [], plant.get("count")
+
+
+def _amend_run(which):
+    d, why = load_json(AMEND_RUNS)
+    if d is None:
+        return None, "%s is unreadable: %s" % (AMEND_RUNS, why)
+    p = (d or {}).get(which)
+    if not p:
+        return None, "%s names no %r run (keys: %s)" % (AMEND_RUNS, which, sorted((d or {}).keys()))
+    return p, ""
+
+
+def _run_pair(which):
+    """(contract, carrier, lines_or_why) for one of the amendment's two named runs."""
+    rel, why = _amend_run(which)
+    if rel is None:
+        return None, None, why
+    c, why1 = load_json(os.path.join(rel, "contract.json"))
+    p, why2 = load_json(os.path.join(rel, CARRIER_FILE))
+    if c is None or p is None:
+        return None, None, "%s: %s" % (rel, why1 or why2)
+    return c, p, rel
+
+
+def core_plant_off(contract, carrier, graded):
+    """Default OFF: no row carries an ungraded node_type, the carrier is EMPTY, and the count PRINTS 0."""
+    rows = contract.get("rows") or []
+    off = [r.get("row_id") for r in rows if r.get("node_type") and r.get("node_type") not in graded]
+    entries, count = _carrier(carrier)
+    cnt = cell_value(contract.get("untypeable"))
+    lines = ["rows %d; carrying a node_type NAMING_SCHEMA.json does not grade: %d %s"
+             % (len(rows), len(off), off[:5]),
+             "carrier entries %s; contract untypeable count printed as %r (0 required with the plant off)"
+             % (len(entries) if entries is not None else "unreadable", cnt)]
+    ok = entries is not None and not off and len(entries) == 0 and cnt == 0
+    if count is not None and count != 0:
+        ok = False
+        lines.append("  DEFECT the carrier's own count reads %r beside an empty entry list" % count)
+    return ok, lines
+
+
+def core_flag_on(contract, carrier):
+    """Flag ON: the untypeable node is CARRIED with NOT_COVERED, COUNTED, and absent from rows."""
+    entries, count = _carrier(carrier)
+    if entries is None:
+        return False, ["the carrier is not an object"]
+    names = [e.get("name") for e in entries]
+    by_name = rows_by_name(contract)
+    in_rows = [n for n in names if by_name.get(n)]
+    nc = [e for e in entries if e.get("verdict") == "NOT_COVERED"]
+    cnt = cell_value(contract.get("untypeable"))
+    lines = ["carrier entries %d; NOT_COVERED %d; carried names found in contract.rows: %d %s"
+             % (len(entries), len(nc), len(in_rows), in_rows[:3]),
+             "contract untypeable count %r; carrier count %r (both must equal the entry count)" % (cnt, count)],
+    lines = lines[0]
+    ok = bool(entries) and len(nc) == len(entries) and not in_rows and cnt == len(entries) and \
+        (count is None or count == len(entries))
+    return ok, lines
+
+
+def core_count_typed(contract):
+    """The count is a CELL a consumer can reject on, never a bare integer (A VALUE MUST CARRY ITS CLAIM)."""
+    u = contract.get("untypeable")
+    if u is None:
+        return False, ["the contract carries no untypeable count at all -- an absent zero is silence, not a measurement"]
+    if not isinstance(u, dict):
+        return False, ["untypeable is %s, not a cell: a bare value carries no claim" % type(u).__name__]
+    val, status = u.get("value"), u.get("status")
+    ev = u.get("evidence") if isinstance(u.get("evidence"), dict) else {}
+    missing = [f for f in ("instrument", "blind_spot") if not str(ev.get(f) or "").strip()]
+    lines = ["untypeable cell: value=%r (int required), status=%r (one of %s), evidence missing %s"
+             % (val, status, "/".join(sorted(CELL_STATUSES)), missing or "nothing")]
+    ok = isinstance(val, int) and not isinstance(val, bool) and status in CELL_STATUSES and not missing
+    return ok, lines
+
+
+def core_schema_valid_docs(validator, docs):
+    """Every named contract validates against the REAL schema -- X1R1-AC1's own question, on real runs."""
+    lines, bad = [], 0
+    for label, doc in docs:
+        errs = validate(validator, doc)
+        bad += bool(errs)
+        lines.append("  %-12s %d validation error(s)%s" % (label, len(errs), (" -- " + errs[0][:90]) if errs else ""))
+    return (bad == 0 and bool(docs)), ["DENOMINATOR: %d run contract(s) validated; %d with errors" % (len(docs), bad)] + lines
+
+
+def a4_plant_off():
+    tag = "A4-PLANT-OFF-BY-DEFAULT"
+    c, p, rel = _run_pair("default_off")
+    if c is None:
+        return say("FAIL-" + tag, rel)
+    ok, lines = core_plant_off(c, p, _naming_graded_types())
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, ["run: %s" % rel] + lines)
+
+
+def a4_flag_on():
+    tag = "A4-FLAG-ON-CARRIES-AND-COUNTS"
+    c, p, rel = _run_pair("flag_on")
+    if c is None:
+        return say("FAIL-" + tag, rel)
+    ok, lines = core_flag_on(c, p)
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, ["run: %s" % rel] + lines)
+
+
+def a4_count_typed():
+    tag = "A4-COUNT-IS-A-TYPED-CELL"
+    c, _p, rel = _run_pair("default_off")
+    if c is None:
+        return say("FAIL-" + tag, rel)
+    ok, lines = core_count_typed(c)
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, ["run: %s" % rel] + lines)
+
+
+def a4_schema_valid():
+    tag = "A4-BOTH-RUNS-SCHEMA-VALID"
+    schema, why = load_json(SCHEMA)
+    if schema is None:
+        return say("FAIL-" + tag, why)
+    v, why2 = validator_for(schema)
+    if v is None:
+        return say("FAIL-" + tag, why2)
+    docs = []
+    for which in ("default_off", "flag_on"):
+        c, _p, rel = _run_pair(which)
+        if c is None:
+            return say("FAIL-" + tag, rel)
+        docs.append((which, c))
+    ok, lines = core_schema_valid_docs(v, docs)
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, lines)
+
+
+def a4_e3_exercised():
+    """R-36: LT-e-3's untypeable path stays exercised DELIBERATELY -- graded on the flag-on run's carrier."""
+    tag = "A4-E3-PATH-STILL-EXERCISED"
+    c, p, rel = _run_pair("flag_on")
+    if c is None:
+        return say("FAIL-" + tag, rel)
+    ok, lines = core_untypeable(c, p)
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, ["run: %s" % rel] + lines)
+
+
+def _selftest_a4():
+    """Every amendment arm driven ALONE: one fixture that must PASS, one doctored input that must FAIL."""
+    out = []
+    graded = {"S3_BUCKET", "SQS_QUEUE"}
+
+    def cellv(n):
+        return {"value": n, "status": "MEASURED",
+                "evidence": {"instrument": "the walk's type read against NAMING_SCHEMA.json", "blind_spot": "none"}}
+
+    off_contract = {"rows": [{"row_id": "R-0001", "node_type": "S3_BUCKET"}], "tensions": [], "untypeable": cellv(0)}
+    off_carrier = {"untypeable": [], "count": 0}
+    on_row = {"name": "opal-x-legacy-user-pool", "node_type": "COGNITO_USER_POOL", "verdict": "NOT_COVERED"}
+    on_contract = {"rows": [{"row_id": "R-0001", "node_type": "S3_BUCKET"}], "tensions": [], "untypeable": cellv(1)}
+    on_carrier = {"untypeable": [on_row], "count": 1}
+
+    # plant-off: GREEN clean; RED an ungraded row still in rows; RED a non-zero printed count
+    out.append(("a4-plant-off GREEN (no ungraded row, empty carrier, printed 0)",
+                core_plant_off(off_contract, off_carrier, graded)[0]))
+    leaked = {"rows": off_contract["rows"] + [{"row_id": "R-0002", "node_type": "COGNITO_USER_POOL"}],
+              "tensions": [], "untypeable": cellv(0)}
+    out.append(("a4-plant-off RED   (an ungraded row reached contract.rows)",
+                core_plant_off(leaked, off_carrier, graded)[0] is False))
+    out.append(("a4-plant-off RED   (carrier empty but count prints 1)",
+                core_plant_off({"rows": off_contract["rows"], "tensions": [], "untypeable": cellv(1)},
+                               off_carrier, graded)[0] is False))
+
+    # flag-on: GREEN carried+counted+absent from rows; RED each half alone
+    out.append(("a4-flag-on GREEN (carried, NOT_COVERED, counted, absent from rows)",
+                core_flag_on(on_contract, on_carrier)[0]))
+    out.append(("a4-flag-on RED   (carried name ALSO written into rows)",
+                core_flag_on({"rows": on_contract["rows"] + [{"row_id": "R-0009", "current": {"name": {"value": on_row["name"]}},
+                              "node_type": "COGNITO_USER_POOL"}], "tensions": [], "untypeable": cellv(1)},
+                             on_carrier)[0] is False))
+    out.append(("a4-flag-on RED   (verdict is not NOT_COVERED)",
+                core_flag_on(on_contract, {"untypeable": [dict(on_row, verdict="RAISE")], "count": 1})[0] is False))
+    out.append(("a4-flag-on RED   (count disagrees with the entry list)",
+                core_flag_on(on_contract, {"untypeable": [on_row], "count": 4})[0] is False))
+
+    # count-typed: GREEN a cell; RED a bare int, a missing key, a missing blind_spot
+    out.append(("a4-count-typed GREEN (value/status/evidence)", core_count_typed(off_contract)[0]))
+    out.append(("a4-count-typed RED   (bare integer, no claim)",
+                core_count_typed({"untypeable": 0})[0] is False))
+    out.append(("a4-count-typed RED   (absent key reads as silence)",
+                core_count_typed({"rows": []})[0] is False))
+    bad_ev = {"value": 0, "status": "MEASURED", "evidence": {"instrument": "x"}}
+    out.append(("a4-count-typed RED   (evidence without a blind spot)",
+                core_count_typed({"untypeable": bad_ev})[0] is False))
+    out.append(("a4-count-typed RED   (status off the enum)",
+                core_count_typed({"untypeable": dict(cellv(0), status="PROBABLY")})[0] is False))
+
+    # schema-valid: GREEN both docs clean against a permissive validator; RED one doc failing
+    v_ok, _w = validator_for({"type": "object"})
+    v_strict, _w2 = validator_for({"type": "object", "required": ["untypeable"]})
+    if v_ok is not None and v_strict is not None:
+        out.append(("a4-schema-valid GREEN (both runs validate)",
+                    core_schema_valid_docs(v_ok, [("default_off", off_contract), ("flag_on", on_contract)])[0]))
+        out.append(("a4-schema-valid RED   (one run missing the required count)",
+                    core_schema_valid_docs(v_strict, [("default_off", off_contract), ("flag_on", {"rows": []})])[0] is False))
+        out.append(("a4-schema-valid RED   (no run named at all)",
+                    core_schema_valid_docs(v_ok, [])[0] is False))
+
+    # e3 still exercised, on the NEW carrier shape, and the OLD shape still grades
+    out.append(("a4-e3 GREEN (new carrier shape grades)", core_untypeable(on_contract, on_carrier)[0]))
+    out.append(("a4-e3 RED   (carrier empty -- nothing was exercised)",
+                core_untypeable(on_contract, {"untypeable": [], "count": 0})[0] is False))
+    old_contract = {"rows": [{"row_id": "R-0185", "current": {"name": {"value": on_row["name"]}},
+                              "desired": {"verdict": {"value": "NOT_COVERED"}}}], "tensions": []}
+    out.append(("a4-e3 GREEN (OLD carrier shape still grades)",
+                core_untypeable(old_contract, {"name": on_row["name"]})[0]))
+    out.append(("a4-e3 RED   (OLD shape, row graded by a tension)",
+                core_untypeable({"rows": old_contract["rows"],
+                                 "tensions": [{"tension_id": "T-1", "row_id": "R-0185"}]},
+                                {"name": on_row["name"]})[0] is False))
+    return out
+
+
 SUBCOMMANDS = {
     "s1-valid": s1_valid, "s1-bare-value": s1_bare_value, "s1-one-api": s1_one_api,
     "s1-no-instrument": s1_no_instrument, "s1-node-types": s1_node_types, "s1-enums": s1_enums,
@@ -1512,6 +1784,8 @@ SUBCOMMANDS = {
     "x2-adding": x2_adding, "x2-removing": x2_removing, "x2-flag": x2_flag_untouched,
     "x3-two-runs": x3_two_runs, "x3-diff": x3_diff_reproduced, "x3-nontrivial": x3_nontrivial, "x3-filed": x3_opened_filed,
     "v1-reproduced": v1_reproduced, "v1-order": v1_order, "v1-not-author": v1_not_author, "v1-card": v1_card,
+    "a4-plant-off": a4_plant_off, "a4-flag-on": a4_flag_on, "a4-count-typed": a4_count_typed,
+    "a4-schema-valid": a4_schema_valid, "a4-e3-exercised": a4_e3_exercised,
 }
 
 
@@ -1541,6 +1815,8 @@ def selftest_arms():
     def arm(name, green, red, detail=""):
         res.append((name, bool(green) and not bool(red), detail))
 
+    for _n, _g in _selftest_a4():
+        res.append((_n, bool(_g), ""))
     planted = json.loads(read(PLANTED) or "{}")
     if not planted:
         return say("FAIL-ARMS-DISCRIMINATE", "absent: %s -- the self-test has no fixture" % PLANTED)
