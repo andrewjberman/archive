@@ -400,3 +400,102 @@ this cell can write changes `_LOG_SERVICE`'s membership.
 
 **Missing instrument:** a code change to `_LOG_SERVICE` (outside `<paths>`, a different project's
 lane).
+
+---
+
+## Card 16 -- semantic-clustering-lambda-build (live CODEBUILD_PROJECT, EN-h-24-r4)
+
+**Question:** does any directive own the CodeBuild project `semantic-clustering-lambda-build`?
+
+**Why it RAISEs:** its canonical form at the cut carries `{system}`-semantic-clustering-lambda-build
+(round 3's report, row `LGIC_ENFORCE-W2-S10`'s class); no `resources.json` row keyed
+`(semantic-clustering-lambda-build, CODEBUILD_PROJECT)` fills the slot.
+
+**What was measured:** `infra/aws/lambda/news_semantic_clustering/deploy_codebuild.sh:15` declares
+`CODEBUILD_PROJECT="semantic-clustering-lambda-build"` -- the project builds the
+`/aws/lambda/news-semantic-clustering` Lambda's Docker image via a shell script, not a Terraform
+resource (`comp-find "aws_codebuild_project" --pathspec infra/aws/lambda/news_semantic_clustering`:
+0 hits). The owning token is `news`, and `news` is `systems.json`'s own `unresolved` list
+(`:358-361`, the same row Card 2 above already measures): "news's 34 live resource names ... carry NO
+org/missions/DIRECTIVES.yaml line ... and NO mission-tree D<n> project ... owner_directive cannot be
+written." `resources.json`'s `system` field must resolve to a `systems.json` key (`c23-mint-basis`
+arm, `_systems_keys`); `news` is not one -- it is deliberately unresolved -- so no mint is possible
+here even with a declared source for the CodeBuild project itself. Same defect, same missing
+instrument as Card 2; extended to this CODEBUILD_PROJECT sibling of the `news`-token Lambda gaps.
+
+**Missing instrument:** a DIRECTIVES.yaml line or mission-tree D<n> project claiming the news
+pipeline, or Andrew's own card assigning it (Card 2's own missing-instrument line, unchanged).
+
+---
+
+## Card 17 -- ExecIncrParityFailure (live CW_ALARM, EN-h-24-r4)
+
+**Question:** does any `systems.json` PRODUCT/VENDOR/PLATFORM_SUBSYSTEM key own the alarm
+`ExecIncrParityFailure`?
+
+**Why it RAISEs:** its canonical form at the cut carries `{system}-exec-incrparity-failure-alarm`;
+no `resources.json` row keyed `(ExecIncrParityFailure, CW_ALARM)` fills the slot.
+
+**What was measured:** `infra/aws/terraform/bd-pipeline/alarms.tf:6-38` declares the alarm
+(`resource "aws_cloudwatch_metric_alarm" "incrparity_failure"`, `alarm_name = "ExecIncrParityFailure"`
+at `:16`). Its own header (`:1-2`, "BD Pipeline -- CloudWatch Alarms") and its `tags` block
+(`:34-37`, `System = "BDPipeline"`) name only the Terraform module's own pipeline-stage name, not a
+`systems.json` product -- the exact class `RESOURCE_ROWS.md` section 3 already measured and refused a
+mint for in round 2 (`bd-merge-daily-lambda-role`, `bd-pipeline-task-role`: "(a) tag is System=
+'BDPipeline' ... the Terraform module's own name ... no systems.json product"). The one bd-pipeline
+row that DID mint (`bd-silver-merge-role` -> `advi`) cited a file header naming a specific D2 ADVI
+project (`ADVI_BDAPIMIG`, `bd-silver-merge.tf:1-2`); `alarms.tf`'s header carries no such citation for
+this alarm, so borrowing that mint here would be inference from a SIBLING file, not this alarm's own
+declared source -- exactly the guess R-32/R-29 forbid.
+
+**Missing instrument:** a DIRECTIVES.yaml line, mission-tree D<n> project, or in-file citation naming
+a `systems.json` product for `bd-pipeline`'s `ExecIncrParityFailure` alarm specifically.
+
+---
+
+## Card 18 -- OPSEC-auth-login-rate-limit-blocked, OPSEC-auth-throttled (live CW_ALARM, EN-h-24-r4)
+
+**Question:** does any `systems.json` PRODUCT/VENDOR/PLATFORM_SUBSYSTEM key own these two alarms?
+
+**Why it RAISEs:** their canonical forms at the cut carry `{system}-opsec-auth-login-rate-limit-
+blocked-alarm` and `{system}-opsec-auth-throttled-alarm`; no `resources.json` row keyed to either
+`(name, CW_ALARM)` fills the slot.
+
+**What was measured:** `infra/aws/terraform/portal-auth/cloudwatch-alarms.tf:268-400` declares both
+alarms (`aws_cloudwatch_metric_alarm.auth_login_rate_limit_blocked` at `:334-356`,
+`aws_cloudwatch_metric_alarm.auth_throttled` at `:364-400`) under a header (`:268-302`) naming
+`NFRA_OPSEC202609.TO-OP-S-6` / `FWD-4`, a D12 NFRA mission-tree project -- not a `systems.json`
+PRODUCT (mdpf/etfs/irpt/advi/amgt/yang/harvest), VENDOR, or PLATFORM_SUBSYSTEM (gateway/agentbus/
+cmtque/estate/firmsep/globgrph). `gateway` (D9, opal-gateway/Schwab) and `firmsep` (the cross-firm
+credential sweep, this same `.tf` file's OTHER alarms at `:15-201`) were checked and do not cover a
+general login/auth-throttle alarm; no systems.json row claims security-operations alarming as its
+own. The alarm's own header states plainly this IS the moratorium-exception alarm class
+(`CLAUDE.md`'s alert veto, FWD-4 the one commissioned exception) -- a fact about WHY it exists, not
+about which product owns it.
+
+**Missing instrument:** a DIRECTIVES.yaml line or mission-tree D<n> project registering
+`NFRA_OPSEC202609`'s alarms under a `systems.json` PRODUCT/VENDOR/PLATFORM_SUBSYSTEM key, or a new
+key for security-operations tooling, or Andrew's own card assigning one.
+
+---
+
+## Card 19 -- PortfolioExcelGenerator-Errors (live CW_ALARM, EN-h-24-r4, LIVE-no-DECLARED)
+
+**Question:** does any declared Terraform source name the owning system of the alarm
+`PortfolioExcelGenerator-Errors`?
+
+**Why it RAISEs:** its canonical form at the cut carries `{system}-portfolio-excel-generator-errors-
+alarm`; no `resources.json` row keyed `(PortfolioExcelGenerator-Errors, CW_ALARM)` fills the slot.
+
+**What was measured:** `comp-find "PortfolioExcelGenerator-Errors" --files` returns 0 `[HEAD]`/
+`[SURFACED]` hits under `infra/aws/terraform` -- no `.tf` file sets `alarm_name =
+"PortfolioExcelGenerator-Errors"`. `docs/briefs/ses-cloudwatch-alarm-noise-removal-20260701.md:39-47`
+(the 2026-07-01 Andrew-direct census of all 67 live CloudWatch alarms) classifies it Class B, "NOT in
+Terraform ... console/app-deployed", explicitly: "No literal `alarm_name =` for these in any `.tf`
+under `infra/aws/terraform` (authoritative -- a TF alarm must set `alarm_name`)". R-32/EN-h-24's mint
+rule reads the system from `lambda-source-map.json`, `EC2_MANIFEST.json`, or the Terraform tree that
+DECLARES the alarm; none of the three exists for this alarm, so there is no declared source to read,
+measured or inferred.
+
+**Missing instrument:** a Terraform resource declaring this alarm (import it, or a DIRECTIVES.yaml/
+mission-tree project claiming it by another route), or Andrew's own card assigning an owner.
