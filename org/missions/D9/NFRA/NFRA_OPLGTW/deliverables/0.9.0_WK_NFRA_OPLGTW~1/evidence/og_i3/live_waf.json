@@ -1,0 +1,146 @@
+{
+    "WebACL": {
+        "Name": "opal-gateway-waf",
+        "Id": "181df35e-e886-40c6-a8dc-9d0b60346a44",
+        "ARN": "arn:aws:wafv2:us-east-1:313476888478:regional/webacl/opal-gateway-waf/181df35e-e886-40c6-a8dc-9d0b60346a44",
+        "DefaultAction": {
+            "Allow": {}
+        },
+        "Description": "SCTY_PREMCP C3 network-layer WAF for the opal-gateway ALB - rate-based + managed rules",
+        "Rules": [
+            {
+                "Name": "rate-based-ip",
+                "Priority": 0,
+                "Statement": {
+                    "RateBasedStatement": {
+                        "Limit": 2000,
+                        "EvaluationWindowSec": 300,
+                        "AggregateKeyType": "IP"
+                    }
+                },
+                "Action": {
+                    "Block": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "opal-gateway-rate-based-ip"
+                }
+            },
+            {
+                "Name": "ip-reputation",
+                "Priority": 1,
+                "Statement": {
+                    "ManagedRuleGroupStatement": {
+                        "VendorName": "AWS",
+                        "Name": "AWSManagedRulesAmazonIpReputationList"
+                    }
+                },
+                "OverrideAction": {
+                    "None": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "opal-gateway-ip-reputation"
+                }
+            },
+            {
+                "Name": "known-bad-inputs",
+                "Priority": 2,
+                "Statement": {
+                    "ManagedRuleGroupStatement": {
+                        "VendorName": "AWS",
+                        "Name": "AWSManagedRulesKnownBadInputsRuleSet"
+                    }
+                },
+                "OverrideAction": {
+                    "Count": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "opal-gateway-known-bad-inputs"
+                }
+            },
+            {
+                "Name": "common-rule-set",
+                "Priority": 3,
+                "Statement": {
+                    "ManagedRuleGroupStatement": {
+                        "VendorName": "AWS",
+                        "Name": "AWSManagedRulesCommonRuleSet",
+                        "RuleActionOverrides": [
+                            {
+                                "Name": "SizeRestrictions_BODY",
+                                "ActionToUse": {
+                                    "Allow": {}
+                                }
+                            },
+                            {
+                                "Name": "CrossSiteScripting_BODY",
+                                "ActionToUse": {
+                                    "Allow": {}
+                                }
+                            },
+                            {
+                                "Name": "NoUserAgent_HEADER",
+                                "ActionToUse": {
+                                    "Allow": {}
+                                }
+                            }
+                        ]
+                    }
+                },
+                "OverrideAction": {
+                    "Count": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "opal-gateway-common-rule-set"
+                }
+            },
+            {
+                "Name": "BlockedIPs",
+                "Priority": 4,
+                "Statement": {
+                    "OrStatement": {
+                        "Statements": [
+                            {
+                                "IPSetReferenceStatement": {
+                                    "ARN": "arn:aws:wafv2:us-east-1:313476888478:regional/ipset/opal-blocked-ips-regional/f073f448-eb85-4d23-9306-0cadf4573331"
+                                }
+                            },
+                            {
+                                "IPSetReferenceStatement": {
+                                    "ARN": "arn:aws:wafv2:us-east-1:313476888478:regional/ipset/opal-blocked-ips-regional-ipv6/85f90377-7cba-45dd-baca-397310d61f8e"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "Action": {
+                    "Block": {}
+                },
+                "VisibilityConfig": {
+                    "SampledRequestsEnabled": true,
+                    "CloudWatchMetricsEnabled": true,
+                    "MetricName": "opal-gateway-blocked-ips"
+                }
+            }
+        ],
+        "VisibilityConfig": {
+            "SampledRequestsEnabled": true,
+            "CloudWatchMetricsEnabled": true,
+            "MetricName": "opal-gateway-waf"
+        },
+        "Capacity": 929,
+        "ManagedByFirewallManager": false,
+        "LabelNamespace": "awswaf:313476888478:webacl:opal-gateway-waf:",
+        "RetrofittedByFirewallManager": false,
+        "OnSourceDDoSProtectionConfig": {
+            "ALBLowReputationMode": "ACTIVE_UNDER_DDOS"
+        }
+    }
+}
