@@ -1,0 +1,124 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-rk-19",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "62e9cfbf60",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-19.filings-producer-verification.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+  "group": "C",
+  "vintage_commit": "49aedcf88b"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~26",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/filings/analyze.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Landing in THIS commit, on this worker's own worktree branch (wk-amgt-13-26-fpA), not pushed. This is a producer-library change (no Lambda/infra deploy in this order's scope); the code is exercised directly by this session's python invocations against the real BA pool object, not merely committed.",
+   "introduces": ["verify_points_against_excerpt", "reverify_thesis_driver", "_apply_point_verification", "reverify_stored_thesis_driver"],
+   "artifact_covered_by": ["AC1", "AC2", "AC3"]
+  },
+  {
+   "path_or_key": "s3://opal-data-harvest/filings/v1/BA_US_Equity/000162828026004357.analysis.json",
+   "kind": "s3_object",
+   "commit_or_etag": "605c4f563171e31659500452a9d9e027d175d595efa5353ccd51ebe5557f0efa",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "put + read-back via crosswalk.write_pool, then re-GET twice more at 16:1xZ (both reads identical): thesis_driver.points 3 entries (2025/2024/2023) each with span+passage_id, held_uncited empty, resolution 'cited'. This is the ADDENDUM 2 item 4 one-time correction, run via `python -m lib.research.filings.analyze --security-key BA_US_Equity --reverify-stored 000162828026004357`.",
+   "artifact_covered_by": ["AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~26/SESSION_LOG_rk19.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "This session's build narrative, the in-session defect (naive locator) caught and fixed, the surprise filed, and the mutant/determinism controls."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "has_verify_fn True, and the PLANTED wrong-period point (2099: 528, a real value placed under a label that is not its own) is present in `held`, never in `verified` -- if the function name differs from `verify_points_against_excerpt`, the worker names the actual function it wrote and re-runs this invocation against it, recording the substitution in its report",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json\nfrom lib.research.filings import analyze\nexcerpt = 'Deliveries as of December 31: Total 528 Some other unrelated figure 999 for a year the block does not label'\nperiod_labels = {'2023': 0, '2099': len(excerpt)}\nverified, held = analyze.verify_points_against_excerpt({'2023': 528, '2099': 528}, excerpt, period_labels) if hasattr(analyze, 'verify_points_against_excerpt') else (None, None)\nprint('has_verify_fn', hasattr(analyze, 'verify_points_against_excerpt'))\nprint('verified', verified)\nprint('held', held)\n\"",
+   "output_evidence": "has_verify_fn True\nverified {'2023': {'value': 528, 'span': [36, 39]}}\nheld {'2099': {'value': 528, 'reason': 'value not found as a whole number inside the block carrying the 2099 label'}}",
+   "denominator": "2 of 2 planted points graded (2023 kept, 2099 held); run twice this session, byte-identical both times (determinism control)",
+   "status": "PASS",
+   "expect": "has_verify_fn True[\\s\\S]*verified \\{'2023'[\\s\\S]*held \\{'2099': \\{'value': 528, 'reason': 'value not found"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "2025, 2024 and 2023 all verify (each value is a whole number present in the block carrying its own period label, thousands-normalised), each carrying a character span; the PLANTED negative 2022:4242 (present nowhere in the excerpt) moves to held_uncited with a stated reason. If the function name differs, the worker names the real one and re-runs this exact invocation against it",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json\nfrom lib.research.filings import analyze\nexcerpt = 'BCA commercial aircraft deliveries, including intercompany deliveries, as of December 31: 2025 Total 600. 2024 Total 348. 2023 Deliveries 396 (9) 1 / 32 (14) 26 / 73 528.'\npoints = {'2025': 600, '2024': 348, '2023': 528, '2022': 4242}\nresult = analyze.reverify_thesis_driver(points, excerpt) if hasattr(analyze, 'reverify_thesis_driver') else None\nprint(json.dumps(result) if result is not None else 'NO reverify_thesis_driver FUNCTION -- name the actual one used')\n\"",
+   "output_evidence": "{\"points\": {\"2025\": {\"value\": 600, \"span\": [101, 104]}, \"2024\": {\"value\": 348, \"span\": [117, 120]}, \"2023\": {\"value\": 528, \"span\": [166, 169]}}, \"held_uncited\": {\"2022\": {\"value\": 4242, \"reason\": \"no period label for 2022 was located in the excerpt\"}}}",
+   "denominator": "4 of 4 planted points graded (2025, 2024, 2023 verified with span; 2022 held); run twice this session, byte-identical both times (determinism control)",
+   "status": "PASS",
+   "expect": "\"2025\": \\{\"value\": 600, \"span\"[\\s\\S]*\"2024\": \\{\"value\": 348, \"span\"[\\s\\S]*\"2023\": \\{\"value\": 528, \"span\"[\\s\\S]*\"held_uncited\": \\{\"2022\": \\{\"value\": 4242, \"reason\""
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "after this order's fix is applied and BA's stored object is corrected in place, `points` carries exactly 3 verified entries (2025, 2024, 2023) each with a span and, where a matching table passage exists, a `passage_id`; `held_uncited` is empty for BA specifically (all three of BA's real points DO verify per ADDENDUM 2); `resolution` reflects the corrected, value-checked state -- this is the live pool object, read fresh, not a cached copy",
+   "method": "live_read",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json\ns3 = boto3.client('s3')\nobj = s3.get_object(Bucket='opal-data-harvest', Key='filings/v1/BA_US_Equity/000162828026004357.analysis.json')\ndoc = json.loads(obj['Body'].read())\ntd = doc.get('thesis_driver', {})\nprint('points', td.get('points'))\nprint('held_uncited', td.get('held_uncited'))\nprint('resolution', td.get('resolution'))\nprint('has_passage_id_on_points', all('passage_id' in v for v in (td.get('points') or {}).values()) if isinstance(td.get('points'), dict) else 'points not a dict -- inspect actual shape')\n\"",
+   "output_evidence": "points [{'period': '2025', 'value': 600, 'span': [87536, 87539], 'passage_id': 'P0276'}, {'period': '2024', 'value': 348, 'span': [87629, 87632], 'passage_id': 'P0277'}, {'period': '2023', 'value': 528, 'span': [87725, 87728], 'passage_id': 'P0278'}]\nheld_uncited []\nresolution cited\nhas_passage_id_on_points points not a dict -- inspect actual shape",
+   "denominator": "3 of 3 stored points verified with span+passage_id; 0 of 3 held_uncited; read twice this session ~1 minute apart, byte-identical both times (determinism control). `points` is a LIST, not a dict (the schema at build_analysis time always emits an array of {period,value,units[,span,passage_id]}); the criterion's own invocation anticipates this exact case and its printed line names it rather than raising -- graded against the criterion's substantive bar (3 verified entries each with span and passage_id, held_uncited empty, resolution reflecting the corrected state), which the output meets.",
+   "status": "PASS",
+   "status_reason": "N/A -- PASS row; status_reason included only because 'points not a dict' could read as a failure signal: it is the criterion's own anticipated, named branch, not an error.",
+   "expect": "points \\[\\{'period': '2025', 'value': 600, 'span': \\[87536, 87539\\], 'passage_id': 'P0276'\\}[\\s\\S]*'period': '2024'[\\s\\S]*'passage_id': 'P0277'\\}[\\s\\S]*'period': '2023'[\\s\\S]*'passage_id': 'P0278'\\}\\]\\nheld_uncited \\[\\]\\nresolution cited"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "The naive locator (`locate_period_labels`'s first-occurrence-anywhere) run against BA's REAL 138K-char excerpt is a genuine, already-observed DEFECTIVE path: 'as of December 31' table years repeat inside ordinary MD&A prose hundreds of times (2025 x156, 2024 x131, 2023 x61) before the actual table, so anchoring on the first occurrence lands outside the table. This was the FIRST --reverify-stored run this session (before `_locate_period_labels_near_anchor` was added), and it was not a hypothetical -- it actually ran and actually wrote the wrong result to the live pool object.",
+   "expected": "The defective path (locate_period_labels alone, used as the production locator) produces a WRONG result: fewer than 3 of BA's 3 real points verify.",
+   "observed": "Confirmed: the first --reverify-stored run (16:05Z, pre-fix) wrote points=1 (2023 only), held_uncited=2 (2025, 2024) -- read back and printed verbatim this session. The corrected path (_locate_period_labels_near_anchor, standalone-line + anchor-nearest), re-run once more, restored points=3, held_uncited=0, matching the pre-existing correct spans/passage_ids exactly (verified twice, byte-identical).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1, AC2 and AC3's exact invocations each run TWICE this session with unchanged inputs (AC1/AC2 are pure functions over literal strings; AC3 is a live S3 read of the object after this order's one-time write), outputs diffed byte-for-byte.",
+   "observed": "AC1: identical both runs. AC2: identical both runs (byte-identical JSON). AC3: identical both runs (~1 minute apart), points/held_uncited/resolution unchanged.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "lib/research/api/scoped_amgt.py and portal/ untouched.",
+   "reason": "Section 1 item 3 of the order: adapter and page are the sibling orders' surfaces (chain B and chain A), explicitly outside this order's grant."
+  },
+  {
+   "item": "No new vendor (Anthropic) call, no re-fetch, no new accession minted.",
+   "reason": "BOUNDS section 4 and section 1's own instruction: this is a pure re-verification pass over excerpt.text already stored; the fix is plain Python text matching, exercised via boto3 S3 reads/writes only."
+  },
+  {
+   "item": "passages.py not edited.",
+   "reason": "The order grants only lib/research/filings/analyze.py for code; the TABLE-passage extension (RULING item 2) is implemented in analyze.py's own _apply_point_verification, appending to the passage_map list build_passage_map already returns, rather than modifying passages.py's segmentation itself."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-W26-S5: BA's live pool object was already in the CORRECTED state (3 verified points with span+passage_id, held_uncited empty, 282-entry passage_map) before this worker made any edit or write, contradicting this order's own section-1 MEASURED STATE (276 passages, unverified) -- most plausibly a prior CVO/CTO diagnostic (rows AMGT_RESAPP-Z-S150/Z-S151, filed the same morning ahead of any round-13 order existing) already applied an equivalent fix to this exact key. Also recorded there: this worker's own first (pre-anchor-fix) write was found reverted to the correct state on a later read without this worker writing in between, flagged as a possible concurrent writer to the shared pool key."
+ ],
+ "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~26/SESSION_LOG_rk19.md",
+ "compiler_tools": [
+  {
+   "tool": "python -m py_compile",
+   "invocation": "python -m py_compile lib/research/filings/analyze.py",
+   "result": "rc=0, no syntax errors, on every edit pass this session"
+  },
+  {
+   "tool": "python (direct function calls, AC1/AC2)",
+   "invocation": "python -c \"from lib.research.filings import analyze; ...\" (see AC1/AC2 invocations)",
+   "result": "verify_points_against_excerpt and reverify_thesis_driver both present and behave exactly as specified, run twice each for determinism"
+  },
+  {
+   "tool": "boto3 s3 client (read + write, AC3 and the one-time correction)",
+   "invocation": "python -m lib.research.filings.analyze --security-key BA_US_Equity --reverify-stored 000162828026004357",
+   "result": "First run (pre-fix locator): wrong result (points=1, held=2), diagnosed as a real locator defect. Second run (post-fix locator): correct result (points=3, held=0), ContentLength=279875 sha256=605c4f56...8efa, read back twice and confirmed stable."
+  }
+ ]
+}
