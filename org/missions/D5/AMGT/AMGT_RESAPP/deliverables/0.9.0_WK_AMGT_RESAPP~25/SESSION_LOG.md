@@ -250,3 +250,59 @@ Determinism: the AC1 census run twice against the same live store returns byte-i
 row `AMGT_RESAPP-Z-W25-S6`). `<status>` stays `pending` -- a criterion refused as written is not a met
 order.
 off-task.
+
+## AMGT-rk-14 -- THE FIT -- it needs a CODE to read AND a VALUE to read for it (final order, chain C)
+
+Resumed from prior-turn uncommitted work (`lib/research/peers/csc.py`, `engine.py`, `universe.py`,
+`lib/research/posture/fit.py`, `lib/research/posture/tests/test_posture.py`) already carrying END 1
+(presets name every code), END 2 (preset-bounded retention), END 3 (horizon derivation + CSC labels) and
+most of END 4 (row/scanner-side size-band comparability). Re-grounded via `git diff HEAD` before touching
+anything further, per the resume instructions.
+
+**Found and fixed one stale test.** `test_absent_factors_are_explicit_with_denominator` still asserted
+`pfoe["factors_named"] == 0`; PFOE now names all 16 codes (0 unnamed), so `factors_present` stays 0 (the
+fixture row carries no values -- the other end) but `factors_named` is 16. Fixed; 22 of 22 posture tests,
+48 of 48 posture+peers pass.
+
+**Found and fixed a citation defect (row `AMGT_RESAPP-Z-W25-S10`, DISMISSED_WITH_REASON same-turn, hazard_standing INERT).** `fit.py`'s
+`PRESET_SOURCE` and module docstring named portal gitlink commit `be8cf218743af0c04a4d57b908b28cf7435e119d`
+as "the commit THIS tree's HEAD records for the portal gitlink" -- `git ls-tree HEAD portal` (this worktree
+and the main workspace) actually reads `2453a7b4c6b7ff91ea89db499890a9486265d1a0`. `git diff` of
+`constants.ts` between the two commits is EMPTY (byte-identical), so no preset code/weight was wrong --
+only the provenance citation. Corrected both occurrences in the same commit.
+
+**Found and fixed a real gap in END 4.** `_subject_from_model_block()` (the subject builder used for
+model-block-sourced subjects -- BA/COST/HD/SAP/BABA, the actual pilot names, are ALL model-block subjects)
+carried NO `fx_basis`/`cap_currency`/`cap_vintage`/`size_band_basis` fields at all, only the older prose
+`cap_fx_caveat`. Verified directly (`engine.resolve_subject` on `BA_US_Equity` and `ZURN_SW_Equity` printed
+`fx_basis=None` for both before the fix). Added the four fields mirroring the scanner-row pattern already
+in `universe.py`: COMPARABLE when the model-block cap is USD, ABSENT with the currency named as the reason
+otherwise. Verified after the fix: `BA_US_Equity` -> `fx_basis` USD/COMPARABLE; `ZURN_SW_Equity` (CHF) ->
+both fields ABSENT naming CHF as the reason. This is exactly the class of gap AMGT-rk-14 exists to catch
+(one end fixed, a sibling path left untouched) -- found by testing the PILOT names specifically rather than
+only the scanner-row path AC3's own denominators exercise most heavily.
+
+**Committed the code fix** at `afb50db7d6` (5 files: csc.py, engine.py, universe.py, fit.py,
+test_posture.py). Commit-gate clean 5 of 5.
+
+**Re-served the SERVED plane twice.** `lib.research.peers.engine.run_batch` re-run against the live
+`universe/v1/2026-09-16` partition: first at `write_as_of=2026-09-17T0215Z` (before the subject-level
+fx_basis fix -- 191 of 191 uploaded, read-back 191 of 191), then again at `write_as_of=2026-09-17T0240Z`
+(after the fix -- 191 of 191 uploaded, read-back 191 of 191, SHARED-DEFECT ADMIT 0 of 191 violations, 142
+derived / 49 absent). AC3's own invocation reads the LATEST dated object per subject, so only the 0240Z
+write is what it grades.
+
+**AC3, before vs after the batch re-run (why the re-run was necessary, not optional).** Before any batch
+re-run, AC3's live invocation against the pre-existing served `peers/v1/` objects read `member_rows 1406,
+codes_named 0, values_present 0, horizons_labelled 0, fx_basis_stated 0` -- the code fix was committed
+locally but the SERVED plane (what AC3 actually reads) still carried the old objects with none of the new
+fields, which is precisely the failure mode this cell exists to catch: fixing the code and leaving the
+served plane untouched moves nothing a consumer can read. After the two batch re-runs:
+`member_rows 1658, codes_named 1657, values_present 1657, horizons_labelled 1658, fx_basis_stated 1658` --
+all four bars nonzero.
+
+**Result.** AC1 PASS (`preset-bounded-retention 40`), AC2 PASS (DIVZ 13 of 13, PFOE 16 of 16, 0 unnamed
+each), AC3 PASS (all four denominators nonzero over 1658 member rows), AC4 evidence recorded
+(UNVERIFIABLE-BY-INSTRUMENT, judgment, graded at L9 by `3.0.0_SA_CVO~Z`). Proof instance validated
+`VALID (rc=0)` by `.tools/proof-of-spec-check.py`. `<status>` flipped to `complete`. Chain C (rk-4, rk-5,
+rk-13, rk-14) is now fully drained for this worker; queue empty.
