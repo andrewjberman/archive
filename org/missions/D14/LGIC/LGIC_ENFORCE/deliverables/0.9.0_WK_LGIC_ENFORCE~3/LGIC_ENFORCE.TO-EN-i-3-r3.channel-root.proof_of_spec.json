@@ -1,0 +1,113 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_ENFORCE.TO-EN-i-3-r3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-i-3-r3.channel-root.md",
+  "group": "OTHER",
+  "vintage_commit": "faf031f8d3"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+  "vintage_commit": "bea120f78c",
+  "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-i-3-r3.channel-root.md"
+ },
+ "assignee": "0.9.0_WK_LGIC_ENFORCE~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/proof-of-spec-check.py",
+   "kind": "script",
+   "commit_or_etag": "b918930306",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Repo tool script, nothing deploys. THE FIX (LGIC_NAMING-S21): `_channel_row_ids(code)` used to glob `WORKSPACE` (this script's OWN checkout) unconditionally, so a checker running from one checkout but graded against an instance whose channel row is committed in a DIFFERENT checkout (a linked worktree, a side branch) read that row as absent. New `_instance_checkout_root(inst_path)` walks up from the instance path to the nearest `.git` entry (dir or file, covering a linked worktree) and returns that as the channel root, falling back to WORKSPACE when `inst_path` is None or no `.git` is found above it -- so every caller that omits `inst_path` (the pre-existing self-test arms A-L, any caller injecting `row_ids` directly) is byte-identical to before. `_channel_row_ids` grows an optional `root` parameter (default WORKSPACE, unchanged default). `surprises_check` grows an optional `inst_path` parameter threaded to `_channel_row_ids` only when `row_ids` is not injected. `main()` now passes `inst_path=Path(args[0])` into `surprises_check`, mirroring the pattern `artifact_resolution_check` already uses for the same argument. Every OTHER limb (`_governing_is_tree`/`_resolve_governing_to`, alignment, artifact-resolution, invocation-alignment, count-bar, drives, binding) is untouched -- confirmed by AC2's 45-of-45 self-test, which re-exercises every pre-existing arm unchanged plus the new arm M.",
+   "introduces": [
+    "def _instance_checkout_root",
+    "root: Path | None = None) -> tuple[set, int]",
+    "_channel_row_ids(code, _instance_checkout_root(inst_path))"
+   ],
+   "artifact_covered_by": [
+    "I3R3-AC1",
+    "I3R3-AC2"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "I3R3-AC1",
+   "criterion_verbatim": "AC1 reads RED at the cut (FAIL-I3-ROOTED-AT-SCRIPT-CHECKOUT, frame '0 resolve to a channel row'): it plants a row in a throwaway repo that the script's own checkout does not carry and runs YOUR script against an instance citing it.",
+   "method": "command",
+   "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-3-3 && timeout 300 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_en_r3.py i3-channel-root",
+   "expect": "PASS-I3-ROOTED-AT-INSTANCE-CHECKOUT",
+   "output_evidence": "script under test: C:\\Users\\AndrewBerman\\Desktop\\ajb_workspace\\.worktrees\\wk-lgic-enforce-3-3\\.tools/proof-of-spec-check.py\nplanted row LGIC_ENFORCE-S9990: present in the GRADED checkout, absent from the script's own\nlimb frame: surprises-frame: 1 entry; 1 open with a row id; 1 resolve to a channel row; 1 channel file(s) scanned (flat+tree) for LGIC_ENFORCE; mode ANNOUNCE -- governing TO unresolved -- no TO declares id=\"LGIC_ENFORCE.TO-EN-q-9\"\nPASS-I3-ROOTED-AT-INSTANCE-CHECKOUT\nrc=0",
+   "denominator": "1 of 1 verdict token, on the fixed .tools/proof-of-spec-check.py at this worktree; re-run twice, byte-identical (determinism, below)",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "I3R3-AC2",
+   "criterion_verbatim": "AC2 reads `RESULT: 44 of 44 arm(s) behaved` at the cut and must still read N of N, with your new arm among them.",
+   "method": "command",
+   "invocation": "cd C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-3-3 && timeout 300 python .tools/proof-of-spec-check.py --self-test",
+   "expect": "RESULT: ([0-9]+) of \\1 arm\\(s\\) behaved",
+   "output_evidence": "PASS  M channel-root: a row planted ONLY in the instance's own checkout resolves via inst_path (LGIC_NAMING-S21)  (violations got=0 expected=0)  surprises-frame: 1 entry; 1 open with a row id; 1 resolve to a channel row; 1 channel file(s) scanned (flat+tr\n  RESULT: 45 of 45 arm(s) behaved",
+   "denominator": "45 of 45 arm(s) behaved -- the 44 pre-existing arms (A-L surprises/v3, invocation-alignment, count-bar, drives, binding) all still PASS unchanged, plus the new arm M for LGIC_NAMING-S21",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "A scratch copy of the fixed .tools/proof-of-spec-check.py (.scratch/mutant_proof_of_spec_check.py, committed bytes untouched) with the ONE fix line reverted: `_channel_row_ids(code, _instance_checkout_root(inst_path))` replaced by the pre-fix `_channel_row_ids(code)`, dropping the root argument so the limb globs WORKSPACE again regardless of inst_path. Run via the fixed input's own i3-channel-root arm against the mutant path.",
+   "expected": "AC1's verdict token flips from PASS-I3-ROOTED-AT-INSTANCE-CHECKOUT to FAIL-I3-ROOTED-AT-SCRIPT-CHECKOUT -- the fix is load-bearing for exactly the discriminator AC1 grades.",
+   "observed": "script under test: .../.scratch/mutant_proof_of_spec_check.py; limb frame: 'surprises-frame: 1 entry; 1 open with a row id; 0 resolve to a channel row; ...'; verdict FAIL-I3-ROOTED-AT-SCRIPT-CHECKOUT, rc=1.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Both invocations (AC1's check_en_r3.py i3-channel-root, AC2's proof-of-spec-check.py --self-test) run twice back-to-back on the identical committed-pending tree, stdout+stderr captured to .scratch/ac{1,2}_run{1,2}.log and diffed.",
+   "observed": "diff .scratch/ac1_run1.log .scratch/ac1_run2.log: empty (byte-identical, both PASS-I3-ROOTED-AT-INSTANCE-CHECKOUT, rc=0). diff .scratch/ac2_run1.log .scratch/ac2_run2.log: empty (byte-identical, both 'RESULT: 45 of 45 arm(s) behaved', rc=0).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "Any change to `_governing_is_tree` / `_resolve_governing_to`, alignment, artifact-resolution, invocation-alignment, count-bar or drives limbs.",
+   "reason": "BOUNDS: 'Change only the channel-resolution root. Every other limb ... must behave exactly as before; AC2 is the regression read.' Confirmed unchanged by AC2's 45-of-45 (44 pre-existing arms PASS byte-for-byte plus the 1 new arm)."
+  },
+  {
+   "item": "Editing the fixed input `check_en_r3.py`.",
+   "reason": "BOUNDS: fixed inputs are read-only; not touched."
+  },
+  {
+   "item": "Deploy, push, merge or rebase.",
+   "reason": "Forbidden by the order. Every commit is LOCAL on branch wk-lgic-enforce-3-3."
+  }
+ ],
+ "surprises": [],
+ "session_log": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~3/channel-root.r3.result.md",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_en_r3.py (fixed input, read-only)",
+   "invocation": "cd <WS> && timeout 300 python .../fixed_inputs/r3/check_en_r3.py i3-channel-root",
+   "result": "PASS-I3-ROOTED-AT-INSTANCE-CHECKOUT, rc=0, twice (determinism-checked); FAIL-I3-ROOTED-AT-SCRIPT-CHECKOUT, rc=1, against the mutant (mutant control)"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py --self-test",
+   "invocation": "cd <WS> && timeout 300 python .tools/proof-of-spec-check.py --self-test",
+   "result": "RESULT: 45 of 45 arm(s) behaved, rc=0, twice (determinism-checked)"
+  },
+  {
+   "tool": ".tools/commit-gate.sh (py_compile, ruff py39, ds-precommit)",
+   "invocation": "bash .tools/commit-gate.sh .tools/proof-of-spec-check.py",
+   "result": "'All checks passed!' / 'OK: pre-commit gate clean for 1 of 1 file(s)', rc=0"
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~3 <0.9.0_WK_LGIC_ENFORCE~3@opal.agent>\" -F <msgfile> -- <paths>",
+   "result": "see WORKER REPORT for the resulting hash, LOCAL on wk-lgic-enforce-3-3"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py (self-validation)",
+   "invocation": "python .tools/proof-of-spec-check.py <this instance> I3R3-AC1,I3R3-AC2 --governing-order org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-i-3-r3.channel-root.md",
+   "result": "see channel-root.r3.result.md -- only the exit code is the verdict"
+  }
+ ]
+}
