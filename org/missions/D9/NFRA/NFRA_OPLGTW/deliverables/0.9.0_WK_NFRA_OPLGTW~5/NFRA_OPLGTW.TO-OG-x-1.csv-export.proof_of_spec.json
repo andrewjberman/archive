@@ -1,0 +1,579 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-x-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f0aa50dbc0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "8768f46770",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-x-1.csv-export.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/export.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module: ticket mint/validate/consume, CSV formula-escaping and writer, and the export-query orchestration wrapper. Not deployed (BOUNDS: nothing deploys).",
+      "artifact_covered_by": [
+        "OGX1-AC1",
+        "OGX1-AC2",
+        "OGX1-AC3",
+        "OGX1-AC6",
+        "OGX1-AC7",
+        "OGX1-AC10",
+        "OGX1-AC11",
+        "OGX1-AC12",
+        "OGX1-AC13",
+        "OGX1-AC14",
+        "OGX1-AC15",
+        "OGX1-AC16",
+        "OGX1-AC18",
+        "OGX1-AC19",
+        "OGX1-AC20",
+        "OGX1-AC21",
+        "OGX1-AC22",
+        "OGX1-AC26",
+        "OGX1-AC27"
+      ],
+      "introduces": [
+        "def mint(",
+        "def validate(",
+        "def consume(",
+        "def reauthorize(",
+        "def write_csv(",
+        "def generate_csv(",
+        "def _escape_formula(",
+        "def startup_cleanup("
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/download_routes.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module: the two Starlette route handlers (page GET, exchange POST) -- session check, Origin/CSRF check, the pending-login branch, and the atomic-consume-then-stream flow. Not deployed.",
+      "artifact_covered_by": [
+        "OGX1-AC4",
+        "OGX1-AC5",
+        "OGX1-AC6",
+        "OGX1-AC7",
+        "OGX1-AC8",
+        "OGX1-AC9",
+        "OGX1-AC10",
+        "OGX1-AC19",
+        "OGX1-AC23",
+        "OGX1-AC25",
+        "OGX1-AC27"
+      ],
+      "introduces": [
+        "def download_page(",
+        "def download_exchange(",
+        "def _origin_ok(",
+        "def _csrf_ok("
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/static/schwab_download/index.html",
+      "kind": "frontend_component",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New static asset: the download page's HTML + its one inline script (hashed into the page response's CSP). Not deployed.",
+      "artifact_covered_by": [
+        "OGX1-AC4",
+        "OGX1-AC5",
+        "OGX1-AC6",
+        "OGX1-AC8",
+        "OGX1-AC9"
+      ],
+      "introduces": [
+        "id=\"og-dl-script\"",
+        "history.replaceState",
+        "Download CSV"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Fills the ticket_issuer call site OG-q-2 left (build_default_service now wires export.make_ticket_issuer); adds default_service() as the one process-wide singleton the MCP tools and the download routes share; adds SchwabService.export_query, re-running a ticket's stored projection with full grant/scope/catalog parity to schwab_query, unbounded within export_rows. Not deployed.",
+      "artifact_covered_by": [
+        "OGX1-AC1",
+        "OGX1-AC17",
+        "OGX1-AC20"
+      ],
+      "introduces": [
+        "async def export_query(",
+        "def default_service(",
+        "ticket_issuer=_export.make_ticket_issuer(store)"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new Route() declarations (/schwab/download GET, /schwab/download/exchange POST) as LITERAL string paths (not a two-level module.attr reference), so tests/test_browser_oidc.py's AST route-table reader -- which resolves only one-level oauth_as./browser_oidc. attribute forms -- still parses app.server cleanly (verified: test_browser_oidc.py 7/7, test_data_entitlement_guard.py 12/12, test_principal_cutover.py 11/11, all green after this change). Not deployed.",
+      "artifact_covered_by": [
+        "OGX1-AC28",
+        "OGX1-AC29"
+      ],
+      "introduces": [
+        "Route(\"/schwab/download\", download_routes.download_page",
+        "Route(\"/schwab/download/exchange\", download_routes.download_exchange"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ENTRIES ONLY (ruling 97203 C): two new ROUTE_CLASS dict lines, '/schwab/download': 'public' and '/schwab/download/exchange': 'public' -- the diff against the cut base 96ed92aa4d is exactly those two lines (probes/og_x1.py AC29). Tests are not deployed.",
+      "artifact_covered_by": [
+        "OGX1-AC28",
+        "OGX1-AC29"
+      ],
+      "introduces": [
+        "\"/schwab/download\": \"public\"",
+        "\"/schwab/download/exchange\": \"public\""
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_export.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file: one test per criterion OGX1-AC1..AC27, on a real moto-backed app.access_state.AccessState (the atomic conditional consume runs against real conditional-update semantics) plus tests/test_schwab_query.py's synthetic catalog/engine/fetch harness (imported, not duplicated) and a minimal Starlette app carrying only app.download_routes's two routes. Tests are not deployed.",
+      "artifact_covered_by": [
+        "OGX1-AC1",
+        "OGX1-AC2",
+        "OGX1-AC3",
+        "OGX1-AC4",
+        "OGX1-AC5",
+        "OGX1-AC6",
+        "OGX1-AC7",
+        "OGX1-AC8",
+        "OGX1-AC9",
+        "OGX1-AC10",
+        "OGX1-AC11",
+        "OGX1-AC12",
+        "OGX1-AC13",
+        "OGX1-AC14",
+        "OGX1-AC15",
+        "OGX1-AC16",
+        "OGX1-AC17",
+        "OGX1-AC18",
+        "OGX1-AC19",
+        "OGX1-AC20",
+        "OGX1-AC21",
+        "OGX1-AC22",
+        "OGX1-AC23",
+        "OGX1-AC24",
+        "OGX1-AC25",
+        "OGX1-AC26",
+        "OGX1-AC27"
+      ],
+      "introduces": [
+        "def test_ogx1_ac01",
+        "class World",
+        "def _seed_grant("
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/DOWNLOAD_PATHS.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The exact page and exchange paths this cell serves, for OG-i-3's ALB rules. Not deployed.",
+      "artifact_covered_by": [
+        "OGX1-AC28",
+        "OGX1-AC29"
+      ],
+      "introduces": [
+        "\"path\": \"/schwab/download\"",
+        "\"path\": \"/schwab/download/exchange\""
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_x1.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC29's diff-discriminator probe: runs git diff <cut base> -- tests/test_principal_cutover.py, asserts the added lines are exactly one ROUTE_CLASS entry per DOWNLOAD_PATHS.json path and no other line. Run locally.",
+      "artifact_covered_by": [
+        "OGX1-AC29"
+      ],
+      "introduces": [
+        "def _run_ac29(",
+        "_CUT_BASE = \"96ed92aa4d\""
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGX1-AC1",
+      "criterion_verbatim": "OGX1-AC1 (test_ogx1_ac01) -- `schwab_prepare_download` returns only a Gateway HTTPS URL with the ticket in its fragment, and never a presigned S3 URL.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac01 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.62s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac01, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC2",
+      "criterion_verbatim": "OGX1-AC2 (test_ogx1_ac02) -- the ticket record holds a hashed ID, `tid`/`oid`, the grant revision, source versions, the normalized query and projection, creation and a 300-second expiry, and single-use state.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac02 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.66s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac02, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC3",
+      "criterion_verbatim": "OGX1-AC3 (test_ogx1_ac03) -- logical expiry is checked before TTL deletion.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac03 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.66s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac03, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC4",
+      "criterion_verbatim": "OGX1-AC4 (test_ogx1_ac04) -- the page script removes the fragment from history and exchanges it in an Origin-checked, CSRF-protected POST body.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac04 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.64s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac04, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC5",
+      "criterion_verbatim": "OGX1-AC5 (test_ogx1_ac05) -- the ticket never appears in a request path, query string, redirect URL or referrer, by request capture.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac05 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.98s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac05, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC6",
+      "criterion_verbatim": "OGX1-AC6 (test_ogx1_ac06) -- when login is needed, only a hashed pending ticket bound to the browser session is retained through `OG-a-3`'s login.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac06 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.92s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac06, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC7",
+      "criterion_verbatim": "OGX1-AC7 (test_ogx1_ac07) -- a synthetic ticket appears in no application log line.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac07 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.69s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac07, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC8",
+      "criterion_verbatim": "OGX1-AC8 (test_ogx1_ac08) -- the page carries a restrictive Content-Security-Policy.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac08 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.37s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac08, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC9",
+      "criterion_verbatim": "OGX1-AC9 (test_ogx1_ac09) -- the page shows master, date, file scope and field definitions, and a Download CSV control.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac09 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.19s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac09, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC10",
+      "criterion_verbatim": "OGX1-AC10 (test_ogx1_ac10) -- identity and the current grant are checked, then the ticket is consumed atomically at download start.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac10 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.32s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac10, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC11",
+      "criterion_verbatim": "OGX1-AC11 (test_ogx1_ac11) -- (difference) a ticket copied to another principal fails, and the same ticket for its own principal succeeds (A10).",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac11 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.01s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac11, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC12",
+      "criterion_verbatim": "OGX1-AC12 (test_ogx1_ac12) -- an expired ticket fails.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac12 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.38s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac12, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC13",
+      "criterion_verbatim": "OGX1-AC13 (test_ogx1_ac13) -- a replayed ticket fails.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac13 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.92s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac13, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC14",
+      "criterion_verbatim": "OGX1-AC14 (test_ogx1_ac14) -- a ticket whose grant revision changed fails.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac14 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.86s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac14, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC15",
+      "criterion_verbatim": "OGX1-AC15 (test_ogx1_ac15) -- a ticket whose grant was revoked fails.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac15 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.05s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac15, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC16",
+      "criterion_verbatim": "OGX1-AC16 (test_ogx1_ac16) -- a consumed ticket that fails midstream requires a new preparation.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac16 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.05s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac16, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC17",
+      "criterion_verbatim": "OGX1-AC17 (test_ogx1_ac17) -- the CSV applies the query's projection, filter and decimal rules, by parity with the same request through `schwab_query`.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac17 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.33s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac17, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC18",
+      "criterion_verbatim": "OGX1-AC18 (test_ogx1_ac18) -- the CSV is generated and validated completely before the response starts.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac18 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.46s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac18, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC19",
+      "criterion_verbatim": "OGX1-AC19 (test_ogx1_ac19) -- the response is reauthorized, then streamed without buffering on the event loop.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac19 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.64s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac19, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC20",
+      "criterion_verbatim": "OGX1-AC20 (test_ogx1_ac20) -- an export over 250,000 rows or 50 MiB fails and asks for a narrower scope, and is never truncated.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac20 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.42s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac20, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC21",
+      "criterion_verbatim": "OGX1-AC21 (test_ogx1_ac21) -- formula prefixes in text cells are escaped, leading whitespace and control characters included.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac21 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.27s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac21, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC22",
+      "criterion_verbatim": "OGX1-AC22 (test_ogx1_ac22) -- numeric values stay numeric strings with correct sign and precision, and headers carry units where needed.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac22 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.69s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac22, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC23",
+      "criterion_verbatim": "OGX1-AC23 (test_ogx1_ac23) -- the response has a safe filename, attachment disposition, `Cache-Control: no-store` and a referrer policy.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac23 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.16s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac23, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC24",
+      "criterion_verbatim": "OGX1-AC24 (test_ogx1_ac24) -- one ticket yields one artifact, and a second download attempt fails.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac24 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.16s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac24, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC25",
+      "criterion_verbatim": "OGX1-AC25 (test_ogx1_ac25) -- an original Parquet or bronze request fails for every profile, and no route serves an original (A11).",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac25 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.27s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac25, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC26",
+      "criterion_verbatim": "OGX1-AC26 (test_ogx1_ac26) -- local export files are gone after success, failure, cancellation and startup cleanup.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac26 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 2.71s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac26, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC27",
+      "criterion_verbatim": "OGX1-AC27 (test_ogx1_ac27) -- no token and no data value appears in an access log line.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac27 -q -p no:cacheprovider --color=no",
+      "output_evidence": "rc=0\n1 passed in 1.96s",
+      "denominator": "1 of 1 selected test (test_ogx1_ac27, one of 27 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC28",
+      "criterion_verbatim": "OGX1-AC28 -- `tests/test_principal_cutover.py` passes, with this cell's routes classed in `ROUTE_CLASS` and graded by their class's arm.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py -q -p no:cacheprovider --color=no -m \"not live\"",
+      "output_evidence": "rc=0\n11 passed in 9.04s",
+      "denominator": "11 of 11 tests in the module passed (the -m 'not live' selection)",
+      "status": "PASS",
+      "expect": "(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGX1-AC29",
+      "criterion_verbatim": "OGX1-AC29 -- (discriminating) the diff of `tests/test_principal_cutover.py` against your cut base is exactly `ROUTE_CLASS` entries for the paths in `DOWNLOAD_PATHS.json`, one per path, and no other line; the probe prints each path with its class and `VERDICT: PASS-OGX1-AC29` or `VERDICT: FAIL-OGX1-AC29 <reason>`.",
+      "method": "diff",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_x1.py AC29",
+      "output_evidence": "/schwab/download -> public\n/schwab/download/exchange -> public\nVERDICT: PASS-OGX1-AC29",
+      "denominator": "2 of 2 DOWNLOAD_PATHS.json paths matched by an added ROUTE_CLASS entry; 0 stray diff line(s)",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGX1-AC29(?![0-9])"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "One single-edit mutant: export.validate()'s principal-match check ('if rec.get(\"tid\") != principal.tid or rec.get(\"oid\") != principal.oid') short-circuited to 'if False and (...)', run against OGX1-AC11, then restored and its sha256 compared byte for byte.",
+      "expected": "test_ogx1_ac11 fails because principal2's exchange of principal1's ticket now succeeds (200) instead of being refused (403 ticket_invalid).",
+      "observed": "Mutated: rc=1 '1 failed in 3.33s' [\"E       assert (200 == 403)\", \"E        +  where 200 = <Response [200 OK]>.status_code\"]. Restored: sha256 8cac9243e29ac0f0f5ddb6626c6b638a2cf5c45f764474a73bc09cbf711823a7 == 8cac9243e29ac0f0f5ddb6626c6b638a2cf5c45f764474a73bc09cbf711823a7 (identical to the pre-mutation file); test_ogx1_ac11 back to '1 passed in 2.20s'.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The whole test_schwab_export.py file (27 tests) run twice back to back, plus every OGX1-AC1..AC27 test run individually once, plus test_principal_cutover.py's module run twice and probes/og_x1.py AC29 run twice.",
+      "observed": "Whole-file run 1: '27 passed in 9.73s'. Whole-file run 2: '27 passed in 9.86s'. Per-criterion: 27 of 27 individually 'rc=0, 1 passed'. test_principal_cutover.py: '11 passed' both runs. probes/og_x1.py AC29: 'VERDICT: PASS-OGX1-AC29' both runs, identical output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A real browser executing the page's JavaScript.",
+      "reason": "BOUNDS: 'browser behaviour is exercised through the ASGI test client and by reading the static script, never a real browser or Entra.' OGX1-AC4/AC5/AC6/AC8/AC9 read the shipped script's source (history.replaceState, window.location.hash, JSON.stringify, X-Requested-With) and independently verify the server-side enforcement (Origin/CSRF, CSP hash, peek/pending JSON) it drives."
+    },
+    {
+      "item": "A resumed download after the pending-login round trip.",
+      "reason": "PRD C5 asks only that a hashed pending ticket be retained while the OIDC flow completes -- hashing is one-way by construction, so the raw secret cannot be recovered after login to auto-resume the SAME ticket. The retained hash is a defensive/anti-fixation artifact, not a resumption mechanism the PRD promises; the user re-issues a download from Claude after signing in. Recorded as row NFRA_OPLGTW-W5-S8."
+    },
+    {
+      "item": "An export driven through the real spawned-child ExecutionEngine.",
+      "reason": "Same convention as OG-q-2's own proof: tests call OG-q-1's job function in-process (validate_plan, check_sources, _plan_job via tests/test_schwab_query.py's Engine stand-in, extended with run_export = run_query since the fake ignores the kind split) -- the process boundary is OG-q-1's own graded property."
+    },
+    {
+      "item": "Any deploy, IAM, Terraform or AWS call.",
+      "reason": "BOUNDS: 'nothing deploys.' The audit sink, policy store (moto-backed DynamoDB) and catalog/engine are in-process/local stand-ins; no live AWS endpoint was reached."
+    },
+    {
+      "item": "download_original / bronze / Parquet routes.",
+      "reason": "BOUNDS: 'download_original stays disabled for every profile; no route serves a Parquet or bronze object' -- OGX1-AC25 verifies no such route or string exists in this cell's code and that the contract disables the operation for every profile."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W5-S7: a two-level attribute path reference in app/server.py's new Route() declarations broke tests/test_browser_oidc.py's AST route reader (outside this cell's grant); fixed with literal string paths, re-verified green (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-W5-S8: the two new routes are classed 'public' in ROUTE_CLASS -- a reasoned choice (neither consults the Bearer/ALB axes ROUTE_CLASS grades), the same reasoning ruling 97203 A gave OG-a-3's login/callback, recorded for L9 to confirm (OBSERVATION, INERT).",
+    "NFRA_OPLGTW-W5-S9: PRD C5's pending-ticket retention is read as one-way/non-resumable (a hash only, never an auto-resume mechanism), an interpretation of underspecified text recorded for L9 (OBSERVATION, INERT)."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/csv-export.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.0.2 (Python 3.12.10, venv .venv-og, mcp 1.28.0, moto, boto3, pyarrow, starlette, cryptography)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_export.py::test_ogx1_ac<nn> -q -p no:cacheprovider --color=no  (nn = 01..27)",
+      "result": "27 of 27: rc=0, '1 passed' each; whole-file run twice, '27 passed' each time"
+    },
+    {
+      "tool": "tests/test_principal_cutover.py (AC28)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py -q -p no:cacheprovider --color=no -m \"not live\"",
+      "result": "rc=0 11 passed in 9.04s"
+    },
+    {
+      "tool": "probes/og_x1.py (AC29)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_x1.py AC29",
+      "result": "rc=0 VERDICT: PASS-OGX1-AC29"
+    },
+    {
+      "tool": "no-regression spot check (two sibling test files sharing app/server.py or ROUTE_CLASS)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_browser_oidc.py -q -p no:cacheprovider --color=no  &&  ...test_data_entitlement_guard.py (run separately)",
+      "result": "test_browser_oidc.py 7 passed; test_data_entitlement_guard.py 12 passed -- no regression from the two new server.py routes or the two new ROUTE_CLASS entries"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/download_routes.py infra/aws/ec2/opal-gateway/app/integrations/schwab/export.py infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py infra/aws/ec2/opal-gateway/app/server.py infra/aws/ec2/opal-gateway/tests/test_schwab_export.py infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_x1.py",
+      "result": "rc=0, 'OK: pre-commit gate clean' for every file"
+    }
+  ]
+}
