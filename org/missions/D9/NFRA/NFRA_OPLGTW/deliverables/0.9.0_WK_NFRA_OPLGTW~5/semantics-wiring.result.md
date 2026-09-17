@@ -181,9 +181,42 @@ Filed as surprise row `NFRA_OPLGTW-W5-S11` (class `BLOCKING`, `hazard_standing: 
 harness, not this cell's), so it is not edited here -- reported FAIL by measurement on all four criteria,
 never patched around.
 
-### This round's net proof state
+### This round's net proof state (superseded by the final re-hand below)
 
 AC1 FAIL, AC2 FAIL, AC3 FAIL, AC4 FAIL (all four blocked by `NFRA_OPLGTW-W5-S11`, a harness fixture defect
 outside this order's grant, introduced by the issuer's `CLOUD` merge and not by this cell's own wiring);
 AC5 PASS (25+14+27, R-OG-15's correction now makes the module clean); AC6 PASS; AC7 PASS. `<status>` stays
 `pending`; `proof_of_spec.json` rebuilt for all 7 ids with these results.
+
+## Final re-hand (0.9.0_WK_NFRA_OPLGTW~5, HEAD d6142bb1e7): all 7 criteria PASS, `<status>` -> `complete`
+
+The issuer merged `CLOUD` into this branch again, carrying `OG-v-2`'s drain (`65fa11a5ba`) which repairs
+`NFRA_OPLGTW-S24`/`NFRA_OPLGTW-W5-S11`: `tests/acceptance/conftest.py` now derives both Schwab role names
+from `org/standards/NFRA_OPLGTW_CONTRACT.json` instead of the pre-rename hardcoded ARNs (commit
+`96f0543faa`). Re-running `test_ogq4_ac01/02/03` unchanged (no edit to `query.py`, `integration.py` or
+`test_schwab_wiring.py`) now measures `1 passed` on all three: AC1/AC2/AC3 all PASS.
+
+`AC4`'s mutant control still FAILed at first re-run -- but for a NEW, unrelated, probe-side reason:
+`mutant run AC3 -> rc=4 last-line='1 error in ...s' outcome=FAIL` (a collection error, not an assertion
+failure). Traced: the mutant's scratch copy was nested at `.scratch/<name>/opal-gateway/`, one directory
+level SHALLOWER than the real tree; `tests/acceptance/conftest.py:52-57`'s own `_REPO = _GATEWAY.parents[3]`
+is a hardcoded depth with no `NFRA_OPLGTW_CONTRACT_PATH` (or any env) fallback, so at the shallow scratch
+depth it resolved ONE LEVEL ABOVE the real repo root and raised `FileNotFoundError` at import for
+`test_schwab_wiring.py`'s `import acceptance.conftest as h_` -- on all three of AC1/AC2/AC3 run against the
+mutant, masking the intended `AC1-FAIL/AC2-FAIL/AC3-PASS` split as a uniform collection error. Fixed in the
+probe itself (this worker's own deliverables grant, commit `e51ef17b11`): the scratch mutant copy now mirrors
+the real relative depth (`<scratch_root>/infra/aws/ec2/opal-gateway/...`) and carries a copy of the real,
+unmutated contract file mirrored at `<scratch_root>/org/standards/NFRA_OPLGTW_CONTRACT.json`, so both
+`conftest.py`'s `parents[3]` and `catalog.py`'s `parents[7]` resolve to a real file without either module
+needing env-var support. Filed as surprise row `NFRA_OPLGTW-W5-S12` (`OBSERVATION`, `INERT`, commit
+`d6142bb1e7`). Re-run: `mutant run AC1 -> FAIL`, `mutant run AC2 -> FAIL`, `mutant run AC3 -> rc=0 '1 passed'
+PASS`, `git status --porcelain` before==after -- `VERDICT: PASS-OGQ4-AC4`.
+
+`AC5`/`AC6`/`AC7` unaffected, re-measured clean at this HEAD: `AC5` 25+14+27 passed (`VERDICT:
+PASS-OGQ4-AC5`); `AC6` 3/3 diff hunks bounded inside `test_ogq2_ac07`/`test_ogq2_ac15` (`VERDICT:
+PASS-OGQ4-AC6`); `AC7` 25/25 collected both sides, both corrected tests carry the PRD C3 citation
+(`VERDICT: PASS-OGQ4-AC7`).
+
+**Net: AC1-AC7 all PASS at HEAD `d6142bb1e7`.** `proof_of_spec.json` rebuilt for all 7 ids with this
+round's evidence; `.tools/proof-of-spec-check.py` reads `VALID (rc=0)`. `<status>` flipped `pending` ->
+`complete`.
