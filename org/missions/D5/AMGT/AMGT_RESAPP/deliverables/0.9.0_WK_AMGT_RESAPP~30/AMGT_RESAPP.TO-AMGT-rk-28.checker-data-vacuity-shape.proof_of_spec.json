@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-28",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-28.checker-data-vacuity-shape.md",
+    "group": "OTHER",
+    "vintage_commit": "f0cbb2d813"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf60",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-28.checker-data-vacuity-shape.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~30",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/criteria_quality_checker.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Modified in place, tracked file (built by AMGT-rk-9). Added shape6_data_vacuity(c) following shape1's exact pattern (reads c.get(...) so it also works when called directly on a bare {id, invocation, expect} dict, as AC1's literal invocation does), wired into evaluate()'s per-criterion loop at the same position style as the other five shapes, one new sealed MUT-6/CTRL-6 pair in _self_test(), and the self-test summary logic generalized to detect any CTRL-* id (previously hardcoded to the single CTRL-1) and to print n-of-n denominators rather than the old hardcoded 5/1. Docstring updated FIVE->SIX shapes throughout. py_compile clean; 0 non-ASCII bytes (len(b)-len(b.decode('utf-8'))==0)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "has_shape6 is True; mutant_flagged is True (the rk-15 AC3-shaped criterion, a bare token count with no value assertion, IS refused); clean_passes is True (a criterion that names a specific expected value and checks it against a source is NOT refused) -- if the worker's actual function/mutant shape differs from this literal example, it names the real one and re-runs an equivalent substitution, showing both the flag and the pass",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom importlib import import_module\nmod = import_module('tools.criteria_quality_checker') if False else None\nimport sys\nsys.path.insert(0, '.tools')\nimport criteria_quality_checker as cqc\nprint('has_shape6', hasattr(cqc, 'shape6_data_vacuity'))\nmutant = {'id': 'AC3', 'invocation': 'python -c \\\"print(open(\\\\'x\\\\').read().count(\\\\'points\\\\'))\\\"', 'expect': 'points-emitted >= 6'}\nclean = {'id': 'AC9', 'invocation': 'python -c \\\"import json; d=json.load(open(\\\\'x\\\\')); print(d[\\\\'value\\\\'])\\\"', 'expect': 'value equals 42, matched against the source excerpt'}\nprint('mutant_flagged', bool(cqc.shape6_data_vacuity(mutant)) if hasattr(cqc, 'shape6_data_vacuity') else 'NO FUNCTION')\nprint('clean_passes', not bool(cqc.shape6_data_vacuity(clean)) if hasattr(cqc, 'shape6_data_vacuity') else 'NO FUNCTION')\n\"",
+      "output_evidence": "has_shape6 True\nmutant_flagged True\nclean_passes True\n(process exit code 0)",
+      "denominator": "1 of 1 function present (has_shape6 True); 1 of 1 mutant-shaped criterion flagged (mutant_flagged True); 1 of 1 clean-shaped criterion admitted (clean_passes True) -- run byte-for-byte as the literal invocation named in the order, no substitution needed (the real function/mutant shape matched the order's literal example exactly).",
+      "status": "PASS",
+      "expect": "has_shape6 True[\\s\\S]*mutant_flagged True[\\s\\S]*clean_passes True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the self-test suite passes with SIX sealed shape pairs now present (not five), the new shape6 mutant/clean pair among them, and no existing shape's pair regresses -- print the pass/fail line for every shape, not just an overall OK",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .tools/criteria_quality_checker.py --self-test 2>&1 | tail -20",
+      "output_evidence": "SELF-TEST -- 6 sealed planted mutants (one per shape) plus 2 clean control(s):\n  shape1-zero-collected    MUT-1          -> REFUSED\n  shape2-rc-swallowed      MUT-2          -> REFUSED\n  shape3-grain-mismatch    MUT-3-PRE/POST -> REFUSED\n  shape4-inexact-capture   MUT-4          -> REFUSED\n  shape5-no-timeout        MUT-5          -> REFUSED\n  shape6-data-vacuity      MUT-6          -> REFUSED\n  shape6-clean-control     CTRL-6         -> ADMITTED\n  clean-control            CTRL-1         -> ADMITTED\nDENOMINATOR: mutants-refused 6 of 6; controls-admitted 2 of 2\nSELF-TEST RESULT: DISCRIMINATES (6 of 6 mutants refused, 2 of 2 controls admitted)\n(process exit code 0)",
+      "denominator": "8 of 8 rows printed (6 mutants, one per shape including the new shape6, plus 2 clean controls); 6 of 6 mutants REFUSED; 2 of 2 controls ADMITTED; the five pre-existing shapes' pairs (MUT-1..MUT-5, CTRL-1) are unchanged in outcome from AMGT-rk-9's own build (all still REFUSED/ADMITTED respectively) -- no regression.",
+      "status": "PASS",
+      "expect": "SELF-TEST -- 6 sealed planted mutants[\\s\\S]*shape6-data-vacuity[\\s\\S]*mutants-refused 6 of 6; controls-admitted 2 of 2[\\s\\S]*DISCRIMINATES",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "shape6's own sealed MUT-6/CTRL-6 pair added to _self_test(): MUT-6 mirrors round-12's rk-15 AC3 defect shape (invocation `.count('points_emitted')` against a raw string; expect 'points-emitted >= 6', a bare comparator+number with no value check). CTRL-6 reads the actual field value via json.load and asserts it against a specific number, 'matched against the source excerpt'. Both invocations carry `timeout 30` so neither is confounded by the pre-existing shape5 (NO-TIMEOUT) check -- an earlier draft of CTRL-6 omitted the timeout bound and was wrongly flagged by shape5, not shape6; caught by running the self-test and reading which shape name fired, then fixed before this instance was written. SEPARATELY, AC1's own literal invocation calls cqc.shape6_data_vacuity(mutant/clean) DIRECTLY on bare {id, invocation, expect} dicts, never through _norm()/_mk() -- unlike shape1..shape5 (which index c['method']/c['verbatim'] and would KeyError on this call shape), shape6_data_vacuity reads every field with .get() specifically so it survives being called this way; this ran clean with correct verdicts on both dicts (see AC1 output_evidence).",
+      "expected": "MUT-6 REFUSED (flagged DATA-VACUITY); CTRL-6 ADMITTED; AC1's raw-dict calls raise no KeyError/AttributeError and return correct flag/admit verdicts; the five pre-existing mutant/control outcomes unchanged.",
+      "observed": "MUT-6 REFUSED (self-test line 'shape6-data-vacuity MUT-6 -> REFUSED'; direct call also shows flags {'MUT-6': ['NO-TIMEOUT: ...', 'DATA-VACUITY: ...']} when the timeout bound is removed, confirming shape6 itself fires independent of shape5). CTRL-6 ADMITTED. AC1's raw-dict calls (mutant/clean, no _norm()) ran clean, rc 0, both verdicts correct. MUT-1..MUT-5 all REFUSED, CTRL-1 ADMITTED, matching AMGT-rk-9's own build exactly -- 0 regressions.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs each of (a) 'python .tools/criteria_quality_checker.py --self-test' and (b) the AC1 direct-call script, byte-compared.",
+      "observed": "(a) self-test run1 and run2 stdout byte-identical (both end 'SELF-TEST RESULT: DISCRIMINATES (6 of 6 mutants refused, 2 of 2 controls admitted)'). (b) AC1 script run1 and run2 stdout byte-identical ('has_shape6 True\\nmutant_flagged True\\nclean_passes True' both times). The tool is pure text/regex over static in-process dicts with no randomness or wall-clock content, so this is expected and confirmed rather than assumed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any change to shape1..shape5's own function bodies, or to AMGT-rk-9's task order file.",
+      "reason": "Order Section 3: 'do not touch AMGT-rk-9's own task order file or any existing shape function's body.' Only shape6_data_vacuity was added; evaluate()'s loop and _self_test()'s summary/denominator logic were touched only to WIRE IN and REPORT the new shape (adding shape6_data_vacuity to the per-criterion tuple; generalizing the CTRL-1-only check to any CTRL-* id so the new CTRL-6 is graded by the same logic) -- no existing shape's detection logic was altered."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~30/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile .tools/criteria_quality_checker.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "non-ASCII scan",
+      "invocation": "python -c \"b=open('.tools/criteria_quality_checker.py','rb').read(); print('non-ascii bytes:', len(b)-len(b.decode('utf-8')))\"",
+      "result": "non-ascii bytes: 0"
+    },
+    {
+      "tool": ".tools/criteria_quality_checker.py --self-test",
+      "invocation": "python .tools/criteria_quality_checker.py --self-test",
+      "result": "rc 0; 6 of 6 planted mutants refused, 2 of 2 clean controls admitted; DISCRIMINATES"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see WORKER REPORT for the rc and printed verdict line"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, to-pipeline-gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~30 <0.9.0_WK_AMGT_RESAPP~30@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see WORKER REPORT for the commit hash"
+    }
+  ]
+}
