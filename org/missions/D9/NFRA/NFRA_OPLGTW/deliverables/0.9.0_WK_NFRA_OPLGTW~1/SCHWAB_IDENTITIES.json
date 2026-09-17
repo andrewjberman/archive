@@ -12,18 +12,30 @@
  "note": "Names and ARNs only. No ExternalId value, key or credential is in this file. Every ARN below was read back live after the apply (iam get-role, secretsmanager describe-secret).",
  "region": "us-east-1",
  "account": "313476888478",
+ "rename": {
+  "cell": "OG-i-3",
+  "ruling": "1.0.0_SA_CTO R-OG-7, msg 97548, org/tier1_exec/1.0.0_SA_CTO/deliverables/RULINGS_NFRA_OPLGTW_20260916.md @af1cd9f7d6, rows W1-S9/W1-S11",
+  "applied_utc": "2026-09-17T18:14Z-18:15Z (safe-apply, 8 added / 0 changed / 5 destroyed)",
+  "mapping": {
+   "opal-mcp-emp-menachem-schwab-read": "gateway-schwab-read-role",
+   "opal-mcp-schwab-catalog-read": "gateway-schwab-catalog-read-role",
+   "opal-gateway-assume-schwab-readers": "gateway-assume-schwab-readers-policy"
+  },
+  "note": "Trust/ExternalId pairs re-keyed at create (free at this hour, never again, per R-OG-7). OG-i-2's proof and evidence stand at their vintage under the old names; this file is rewritten with the new ARNs, live-read after the apply."
+ },
  "gateway_role": {
   "role_name": "opal-gateway-role",
   "role_arn": "arn:aws:iam::313476888478:role/opal-gateway-role",
-  "assume_policy_name": "opal-gateway-assume-schwab-readers",
+  "assume_policy_name": "gateway-assume-schwab-readers-policy",
   "assume_statement_sid": "AssumeSchwabReaderRoles",
-  "assume_statement": "Allow sts:AssumeRole on exactly the two reader role ARNs below, Condition StringEquals sts:ExternalId = the two dedicated ExternalIds"
+  "assume_statement": "Allow sts:AssumeRole on exactly the two reader role ARNs below, Condition StringEquals sts:ExternalId = the two dedicated ExternalIds (live-read 2026-09-17T18:2xZ: iam get-role-policy opal-gateway-role gateway-assume-schwab-readers-policy)"
  },
  "data_role": {
-  "role_name": "opal-mcp-emp-menachem-schwab-read",
-  "role_arn": "arn:aws:iam::313476888478:role/opal-mcp-emp-menachem-schwab-read",
-  "inline_policy_name": "opal-mcp-emp-menachem-schwab-read-policy",
-  "trust": "Principal AWS arn:aws:iam::313476888478:role/opal-gateway-role only; StringEquals sts:ExternalId = its dedicated ExternalId",
+  "role_name": "gateway-schwab-read-role",
+  "role_arn": "arn:aws:iam::313476888478:role/gateway-schwab-read-role",
+  "inline_policy_name": "gateway-schwab-read-role-policy",
+  "trust": "Principal AWS arn:aws:iam::313476888478:role/opal-gateway-role only; StringEquals sts:ExternalId = its dedicated ExternalId (live-read: Sid OnlyOpalGatewayRoleWithDataReaderExternalId, ExternalId 91b31fde-48d9-6958-2ba2-e21c04c8dd81)",
+  "inline_policy_sids_live": ["DenyAllNonReadActions", "DenyReadsOutsideApprovedDatasets", "DenyListingOtherBuckets", "DenyListingOutsideApprovedPrefixes", "AllowApprovedObjectReads", "AllowApprovedPrefixListing"],
   "external_id": {
    "store": "secretsmanager",
    "secret_name": "opal/mcp/opal-gateway-schwab-reader-external-ids",
@@ -42,10 +54,10 @@
   "allowed_actions": ["s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket (s3:prefix StringLike <prefix>*)"]
  },
  "catalog_role": {
-  "role_name": "opal-mcp-schwab-catalog-read",
-  "role_arn": "arn:aws:iam::313476888478:role/opal-mcp-schwab-catalog-read",
-  "inline_policy_name": "opal-mcp-schwab-catalog-read-policy",
-  "trust": "Principal AWS arn:aws:iam::313476888478:role/opal-gateway-role only; StringEquals sts:ExternalId = its dedicated ExternalId",
+  "role_name": "gateway-schwab-catalog-read-role",
+  "role_arn": "arn:aws:iam::313476888478:role/gateway-schwab-catalog-read-role",
+  "inline_policy_name": "gateway-schwab-catalog-read-role-policy",
+  "trust": "Principal AWS arn:aws:iam::313476888478:role/opal-gateway-role only; StringEquals sts:ExternalId = its dedicated ExternalId (live-read: Sid OnlyOpalGatewayRoleWithCatalogReaderExternalId, ExternalId a2d39502-1fc1-0a82-e307-c5967ec4f965)",
   "external_id": {
    "store": "secretsmanager",
    "secret_name": "opal/mcp/opal-gateway-schwab-reader-external-ids",
@@ -58,6 +70,17 @@
    "schwab/08335338/meta/complete/"
   ],
   "allowed_actions": ["s3:GetObject", "s3:GetObjectVersion", "s3:ListBucket (s3:prefix StringLike <prefix>*)"]
+ },
+ "readonly_host_document": {
+  "cell": "OG-i-3",
+  "ruling": "1.0.0_SA_CTO R-OG-6, msg 97522, extending R-OG-2, @f81896bae3",
+  "name": "gateway-readonly-host-document",
+  "arn": "arn:aws:ssm:us-east-1:313476888478:document/gateway-readonly-host-document",
+  "document_type": "Command",
+  "status_live": "Active",
+  "pin_policy_name": "gateway-access-admin-ssm-readonly-policy",
+  "pinned_role": "opal-gateway-access-admin",
+  "pinned_resources": ["arn:aws:ssm:us-east-1:313476888478:document/gateway-readonly-host-document", "the Gateway instance ARN (i-07dccb1615503ac99)"]
  },
  "account_ref_key": {
   "store": "secretsmanager",

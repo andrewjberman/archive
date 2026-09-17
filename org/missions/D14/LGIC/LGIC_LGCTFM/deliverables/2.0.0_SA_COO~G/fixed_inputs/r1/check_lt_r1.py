@@ -598,7 +598,15 @@ def core_reproduce(contract, builders):
         except Exception as exc:  # noqa: BLE001
             got, raised = None, exc
         if raised is not None:
-            good = cell_value(d.get("verdict")) == "RAISE" and bool(str(cell_value(d.get("missing_registry_row")) or "").strip())
+            v = cell_value(d.get("verdict"))
+            if v == "NOT_COVERED":
+                # LT-e-3 mints NOT_COVERED for a row whose node type the SCHEMA does not cover: grade()
+                # raises G1.1 and the engine must return the row NOT GRADED. Accepting it here needs both
+                # halves, or this branch would launder a fabricated form: the raise must be the coverage
+                # error, and the contract must carry NO form. A registry-defect RAISE keeps its own branch.
+                good = ("is not a node type" in str(raised)) and cell_value(d.get("form")) is None
+            else:
+                good = v == "RAISE" and bool(str(cell_value(d.get("missing_registry_row")) or "").strip())
         else:
             good = got == cell_value(d.get("form")) or str(got) == str(cell_value(d.get("form")))
         ok_n += good
@@ -1594,6 +1602,21 @@ def selftest_arms():
     rc2["rows"][0]["desired"]["form"]["value"] = "typed-by-hand"
     arm("e2-reproduce-typed", core_reproduce(rc, builders)[0], core_reproduce(rc2, builders)[0], "a typed desired form")
     arm("e2-reproduce-vacuous", core_reproduce(rc, builders)[0], core_reproduce({"rows": []}, builders)[0], "no callable row")
+    # LT-e-3's NOT_COVERED branch (row LGIC_LGCTFM-W1-S1). GREEN: the coverage raise with NO form.
+    # RED, each alone: the same verdict with a form typed in anyway, and the same verdict on a raise
+    # that is NOT the coverage error (a registry defect must keep going through the RAISE branch).
+    def uncovered(*a, **k):
+        raise ValueError("G1.1: 'COGNITO_USER_POOL' is not a node type of NAMING_SCHEMA.json")
+    builders_uncovered = dict(builders, name=uncovered)
+    rc_nc = {"rows": [{"row_id": "nc", "desired": {"builder": {"value": {"fn": "name", "args": ["sys"]}},
+                                                   "form": {"value": None},
+                                                   "verdict": {"value": "NOT_COVERED"}}}]}
+    rc_nc_formed = copy.deepcopy(rc_nc)
+    rc_nc_formed["rows"][0]["desired"]["form"]["value"] = "opal-typed-anyway"
+    arm("e2-not-covered", core_reproduce(rc_nc, builders_uncovered)[0],
+        core_reproduce(rc_nc_formed, builders_uncovered)[0], "NOT_COVERED carrying a form must FAIL")
+    arm("e2-not-covered-wrong-raise", core_reproduce(rc_nc, builders_uncovered)[0],
+        core_reproduce(rc_nc, builders_raise)[0], "NOT_COVERED on a non-coverage raise must FAIL")
 
     def prow(rid, path):
         return {"row_id": rid, "kind": "RESOURCE", "current": {"arn_or_path": {"value": path}}}
