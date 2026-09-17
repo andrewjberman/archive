@@ -29,10 +29,21 @@ after is printed and compared.
 The mutant copy's `catalog.default_contract_path()` derives the contract path from `Path(__file__).resolve()
 .parents[7]`, i.e. from catalog.py's OWN depth under the repo root (schwab/integrations/app/opal-gateway/ec2/
 aws/infra/<root>, 7 levels) -- a scratch copy nested under `.scratch/<name>/opal-gateway/...` sits at a
-DIFFERENT depth, so that derivation resolves to the wrong directory. This is a path-depth fact about the
-scratch copy's location, not a call-site change, so the mutant subprocess is launched with
-`NFRA_OPLGTW_CONTRACT_PATH` set to the REAL, unmutated contract file's absolute path (catalog.py's own
-documented override: "the explicit path, then NFRA_OPLGTW_CONTRACT_PATH, then the repository layout").
+DIFFERENT depth, so that derivation resolves to the wrong directory. **Measured 2026-09-17 by this seat: the
+SAME depth fact also breaks `tests/acceptance/conftest.py` at IMPORT TIME** -- its own `_CONTRACT_PATH` is
+`_GATEWAY.parents[3]` computed directly, with NO `NFRA_OPLGTW_CONTRACT_PATH` fallback at all (only
+`catalog.load_contract` reads that var), so setting the env var does not help `test_schwab_wiring.py`'s
+`import acceptance.conftest as h_`: at the shallow `.scratch/<name>/opal-gateway/` depth this raised
+`FileNotFoundError` for the mis-derived contract path one level ABOVE the real repo root (a
+`.../org/standards/NFRA_OPLGTW_CONTRACT.json` rooted at the scratch parent instead of the worktree) on
+every one of AC1/AC2/AC3 against the mutant, which is a probe defect (a depth mismatch), not a finding
+about the wiring. The fix is structural, not an env var: the mutant copy is nested at the SAME
+relative depth as the real tree (`<scratch_root>/infra/aws/ec2/opal-gateway/...`), and the real, unmutated
+contract file is mirrored at `<scratch_root>/org/standards/NFRA_OPLGTW_CONTRACT.json` -- so both
+`catalog.py`'s `parents[7]` fallback and `conftest.py`'s `parents[3]` computation resolve to a real file
+without either module needing to know it is running from scratch. `NFRA_OPLGTW_CONTRACT_PATH` is still set
+on the mutant subprocess as a second, redundant guard for `catalog.load_contract`'s own explicit override
+path; it was never sufficient on its own.
 
 AC5: `tests/test_schwab_query.py`, `tests/test_schwab_semantics.py` and `tests/test_schwab_export.py`, one
 pytest process per module (the harness's own "one module per pytest process" constraint -- BOUNDS), against
@@ -138,10 +149,18 @@ def ac4() -> int:
     if scratch_root.exists():
         shutil.rmtree(scratch_root)
     src_gateway = ws / "infra" / "aws" / "ec2" / "opal-gateway"
-    dst_gateway = scratch_root / "opal-gateway"
+    # mirror the REAL relative depth (repo_root/infra/aws/ec2/opal-gateway) so conftest.py's own
+    # `_GATEWAY.parents[3]` and catalog.py's `parents[7]` both resolve to a real directory instead of
+    # walking above a shallower scratch nesting (see module docstring, AC4 section).
+    dst_gateway = scratch_root / "infra" / "aws" / "ec2" / "opal-gateway"
     shutil.copytree(src_gateway, dst_gateway, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    print("AC4: copied %s -> %s (%d bytes source-side app/ dir)"
-         % (src_gateway, dst_gateway, sum(f.stat().st_size for f in (src_gateway / "app").rglob("*") if f.is_file())))
+    real_contract_src = ws / "org" / "standards" / "NFRA_OPLGTW_CONTRACT.json"
+    mirrored_contract = scratch_root / "org" / "standards" / "NFRA_OPLGTW_CONTRACT.json"
+    mirrored_contract.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(real_contract_src, mirrored_contract)
+    print("AC4: copied %s -> %s (%d bytes source-side app/ dir); mirrored contract %s -> %s"
+         % (src_gateway, dst_gateway, sum(f.stat().st_size for f in (src_gateway / "app").rglob("*") if f.is_file()),
+            real_contract_src, mirrored_contract))
 
     pin, pre_wiring_bytes = _pre_wiring_query_bytes(ws)
     mutant_query_py = dst_gateway / "app" / "integrations" / "schwab" / "query.py"
@@ -156,10 +175,9 @@ def ac4() -> int:
              "remove, the mutant control cannot discriminate" % pin)
         return 1
 
-    # scratch-depth fact (see module docstring): point the copy's contract loader at the REAL, unmutated
-    # contract file rather than let default_contract_path() mis-derive the root from the copy's own depth.
-    real_contract = ws / "org" / "standards" / "NFRA_OPLGTW_CONTRACT.json"
-    mutant_env = {"NFRA_OPLGTW_CONTRACT_PATH": str(real_contract)}
+    # redundant guard on top of the depth-mirrored copy above: catalog.load_contract's own explicit
+    # override still points at the REAL, unmutated contract file (see module docstring, AC4 section).
+    mutant_env = {"NFRA_OPLGTW_CONTRACT_PATH": str(real_contract_src)}
 
     mutant_test = dst_gateway / "tests" / "test_schwab_wiring.py"
     outcomes = {}
