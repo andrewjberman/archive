@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-17",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-17.the-two-budgeted-pulls.md",
+    "group": "OTHER",
+    "vintage_commit": "8f17896f99be27bafde2080452f26c30178f39c7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8270e72c9eecd14d09f300efb7f86596c1bf7c4b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-17.the-two-budgeted-pulls.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~29",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-harvest/raw/bloomberg/",
+      "kind": "s3_object",
+      "commit_or_etag": "PRE-EXISTING-WORLD-WRITE-BY-ISSUER-20260916T201805Z-202011Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "34 name-keys present under raw/bloomberg/ at the S3 read timestamp of this verification (2026-09-16), 33 of the 33 keyed crosswalk names stamped between 20260916T201805Z and 20260916T202011Z plus the pre-existing NVDA_US_Equity stamp from 20260911T005400Z. This world write was made by the issuer (2.0.0_SA_COO~Z) directly on Andrew's word BEFORE this worker was spawned, per the task order's own text; this worker did not run the producer and instead verifies the landed population against the crosswalk (AC1-AC3 below)."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/derived/model_block/",
+      "kind": "s3_object",
+      "commit_or_etag": "PRE-EXISTING-WORLD-WRITE-BY-ISSUER-20260916T201805Z-202011Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "34 name-keys present under derived/model_block/ at S3 read time; 33 of 33 keyed crosswalk names landed a model_block.json, matched by AC3 (landed_of_attempted 33 of 33, missing 0). Same provenance note as above: landed by the issuer before spawn, verified here."
+    },
+    {
+      "path_or_key": "opal-harvest-security-metrics (DynamoDB, TRENDING_PRICE partition)",
+      "kind": "s3_object",
+      "commit_or_etag": "PRE-EXISTING-WORLD-WRITE-BY-ISSUER-GENERATION-20260916T065448Z-9b7ffda3dcdc-PLUS-2026-09-15-AXIS",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Scan of the table (194 items) shows three TRENDING_PRICE axis_date values: TRENDING_PRICE#2026-09-10, TRENDING_PRICE#2026-09-10#20260916T065448Z-9b7ffda3dcdc (both pre-existing per the issuer's stated pre-state), and a NEW TRENDING_PRICE#2026-09-15 row -- the price-axis pull's landing, newer than the 2026-09-10 pre-state named in the order. Landed by the issuer before spawn, verified here by AC4.",
+      "artifact_covered_by": ["AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the crosswalk object NAMED, records 89, keyed_names 33, and all 33 names PRINTED. This is THE POPULATION for both pulls and it is READ AT THE CUT, never typed and never assumed -- the 56 records without a security_key are the UNRESOLVED half and are NOT authorized. Dry-run whole by the issuer at the cut: crosswalk/v1/2026-09-15.json, records 89, keyed_names 33. A keyed_names of 89, or any count you cannot show from this object, is NOT met",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json; s=boto3.client('s3'); B='opal-data-harvest'; p=s.get_paginator('list_objects_v2'); ks=sorted(o['Key'] for pg in p.paginate(Bucket=B,Prefix='crosswalk/v1/') for o in pg.get('Contents',[])); d=json.loads(s.get_object(Bucket=B,Key=ks[-1])['Body'].read()); r=d.get('records') or []; keyed=[x.get('security_key') for x in r if x.get('security_key')]; print('crosswalk', ks[-1]); print('records', len(r)); print('keyed_names', len(keyed)); print('names', sorted(keyed))\"",
+      "output_evidence": "crosswalk crosswalk/v1/2026-09-15.json\nrecords 89\nkeyed_names 33\nnames ['2317_TT_Equity', '9433_JP_Equity', '992_HK_Equity', 'ASML_NA_Equity', 'BABA_US_Equity', 'BA_US_Equity', 'BBSE3_BZ_Equity', 'BP/_LN_Equity', 'COST_US_Equity', 'ENEL_IM_Equity', 'HAL_US_Equity', 'HD_US_Equity', 'HSBA_LN_Equity', 'ICICIBC_IN_Equity', 'IMB_LN_Equity', 'INTU_US_Equity', 'KMB_US_Equity', 'KPN_NA_Equity', 'NG/_LN_Equity', 'NOVN_SW_Equity', 'NU_US_Equity', 'PBR_US_Equity', 'RKT_LN_Equity', 'RMS_FP_Equity', 'ROG_SW_Equity', 'RWE_GR_Equity', 'SAP_GY_Equity', 'SSE_LN_Equity', 'ST_SP_Equity', 'ULVR_LN_Equity', 'VLO_US_Equity', 'WALMEX*_MM_Equity', 'ZURN_SW_Equity']\nRun twice (determinism), byte-identical on records/keyed_names counts both runs (89 / 33).",
+      "denominator": "89 of 89 crosswalk records read; 33 of 89 carrying a security_key (the authorized population), all 33 printed by name",
+      "status": "PASS",
+      "expect": "crosswalk crosswalk/v1/2026-09-15\\.json\\nrecords 89\\nkeyed_names 33\\nnames \\[.*\\]",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "raw_keys PRINTED with the per-key stamp count and newest stamp. MET when raw_keys is AT LEAST 30 -- the pull's stage that calls the terminal persists its own raw refdata and histdata per name, so a raw key appearing for a name IS the proof the terminal served real data for it, which a port check is not. At the cut raw_keys read 4. ISSUER AMENDMENT 17: the key is now everything between the prefix and the last two path segments, because a key such as BP/_LN_Equity CONTAINS a slash and the old split read it as BP. Measured after the run with the re-cut counter: raw_keys 34 (the 33 plus NVDA_US_Equity). A raw_keys still at 4 means the terminal was never reached",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3; s=boto3.client('s3'); B='opal-data-harvest'; p=s.get_paginator('list_objects_v2'); st={}; [st.setdefault(chr(47).join(o['Key'].split(chr(47))[2:-2]), set()).add(o['Key'].split(chr(47))[-2]) for pg in p.paginate(Bucket=B,Prefix='raw/bloomberg/') for o in pg.get('Contents',[]) if len(o['Key'].split(chr(47)))>4]; print('raw_keys', len(st)); [print('  ', k, 'stamps', len(v), 'newest', sorted(v)[-1]) for k,v in sorted(st.items())]\"",
+      "output_evidence": "raw_keys 34\n   2317_TT_Equity stamps 1 newest 20260916T201805Z\n   9433_JP_Equity stamps 1 newest 20260916T201809Z\n   992_HK_Equity stamps 1 newest 20260916T201811Z\n   ASML_NA_Equity stamps 1 newest 20260916T201817Z\n   BABA_US_Equity stamps 3 newest 20260916T201821Z\n   BA_US_Equity stamps 2 newest 20260916T201824Z\n   BBSE3_BZ_Equity stamps 1 newest 20260916T201829Z\n   BP/_LN_Equity stamps 1 newest 20260916T201833Z\n   COST_US_Equity stamps 1 newest 20260916T201835Z\n   ENEL_IM_Equity stamps 1 newest 20260916T201841Z\n   HAL_US_Equity stamps 1 newest 20260916T201845Z\n   HD_US_Equity stamps 1 newest 20260916T201847Z\n   HSBA_LN_Equity stamps 1 newest 20260916T201853Z\n   ICICIBC_IN_Equity stamps 1 newest 20260916T201856Z\n   IMB_LN_Equity stamps 1 newest 20260916T201859Z\n   INTU_US_Equity stamps 1 newest 20260916T201905Z\n   KMB_US_Equity stamps 1 newest 20260916T201908Z\n   KPN_NA_Equity stamps 1 newest 20260916T201910Z\n   NG/_LN_Equity stamps 1 newest 20260916T201916Z\n   NOVN_SW_Equity stamps 1 newest 20260916T201920Z\n   NU_US_Equity stamps 1 newest 20260916T201922Z\n   NVDA_US_Equity stamps 2 newest 20260911T005400Z\n   PBR_US_Equity stamps 1 newest 20260916T201929Z\n   RKT_LN_Equity stamps 1 newest 20260916T201933Z\n   RMS_FP_Equity stamps 1 newest 20260916T201936Z\n   ROG_SW_Equity stamps 1 newest 20260916T201941Z\n   RWE_GR_Equity stamps 1 newest 20260916T201945Z\n   SAP_GY_Equity stamps 3 newest 20260916T201948Z\n   SSE_LN_Equity stamps 1 newest 20260916T201953Z\n   ST_SP_Equity stamps 1 newest 20260916T201957Z\n   ULVR_LN_Equity stamps 1 newest 20260916T201959Z\n   VLO_US_Equity stamps 1 newest 20260916T202005Z\n   WALMEX*_MM_Equity stamps 1 newest 20260916T202009Z\n   ZURN_SW_Equity stamps 1 newest 20260916T202011Z\nBoth BP/_LN_Equity and NG/_LN_Equity resolve correctly as their own keys under the re-cut split (everything between the prefix and the last two path segments), each with stamps 1, confirming ISSUER AMENDMENT 17's fix reads the object it names.",
+      "denominator": "34 raw name-keys found (all 33 keyed crosswalk names present, plus the pre-existing NVDA_US_Equity), against a bar of AT LEAST 30",
+      "status": "PASS",
+      "expect": "raw_keys 3[0-9]",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "attempted 33 and landed_of_attempted PRINTED as N of 33, with missing_count and the MISSING NAMES LISTED. MET when landed_of_attempted reads 33 of 33 with missing 0, OR when every missing name is accounted for in the evidence by a NAMED REASON read from the producer's own output (not entitled, bad identifier, no data returned) -- a refusal is an outcome, a SILENT shortfall is not. ISSUER AMENDMENT 17: the key is now everything between the prefix and the last two path segments. The old split read BP/_LN_Equity and NG/_LN_Equity as BP and NG and reported both MISSING although both landed and derived. Measured after the run with the re-cut counter: attempted 33, blocks_landed 34, landed_of_attempted 33 of 33, missing 0",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json,io; s=boto3.client('s3'); B='opal-data-harvest'; p=s.get_paginator('list_objects_v2'); st={}; [st.setdefault(chr(47).join(o['Key'].split(chr(47))[2:-2]), set()).add(o['Key'].split(chr(47))[-2]) for pg in p.paginate(Bucket=B,Prefix='derived/model_block/') for o in pg.get('Contents',[]) if len(o['Key'].split(chr(47)))>4]; ks=sorted(o['Key'] for pg in p.paginate(Bucket=B,Prefix='crosswalk/v1/') for o in pg.get('Contents',[])); d=json.loads(s.get_object(Bucket=B,Key=ks[-1])['Body'].read()); want=sorted(x.get('security_key') for x in (d.get('records') or []) if x.get('security_key')); have=sorted(st); miss=[n for n in want if n not in st]; print('attempted', len(want)); print('blocks_landed', len(have)); print('landed_of_attempted', sum(1 for n in want if n in st), 'of', len(want)); print('missing_count', len(miss)); print('missing', miss)\"",
+      "output_evidence": "attempted 33\nblocks_landed 34\nlanded_of_attempted 33 of 33\nmissing_count 0\nmissing []\nBoth BP/_LN_Equity and NG/_LN_Equity are counted correctly among the 33 landed (not misread as BP/NG) under the re-cut split, matching ISSUER AMENDMENT 17's stated fix and its named re-cut values verbatim. NOTE: the task order's own <invocation> for AC3, as it reads on disk at this cut, imports 'io' (unused in the body) alongside boto3 and json; the worker's initial evidence draft had transcribed the invocation without that import (a paraphrase drift caught by proof-of-spec-check.py's invocation-alignment limb) and was corrected here to the byte-for-byte literal from the task-order file, then re-run producing identical output.",
+      "denominator": "33 of 33 keyed crosswalk names landed a derived model_block.json; missing 0 of 33",
+      "status": "PASS",
+      "expect": "attempted 33\\nblocks_landed 34\\nlanded_of_attempted 33 of 33\\nmissing_count 0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "every TRENDING_PRICE axis_date value PRINTED with the scan denominator, and newest_axis_date LATER than 2026-09-10. At the cut there were exactly TWO values, both at axis date 2026-09-10 (one of them the generation 20260916T065448Z-9b7ffda3dcdc), which is why the default route -- which asks for TODAY -- read a classed ABSENT. A newest_axis_date still reading 2026-09-10 means the price-axis pull did not land and is NOT met; the generation id and its row count are recorded in the evidence beside it",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,collections; d=boto3.client('dynamodb'); sc=d.scan(TableName='opal-harvest-security-metrics', ProjectionExpression='axis_date'); vals=sorted(set(i['axis_date']['S'] for i in sc.get('Items',[]) if i['axis_date']['S'].startswith('TRENDING_PRICE'))); print('scanned', len(sc.get('Items',[]))); print('trending_price_axis_values', len(vals)); [print('  ', v) for v in vals]; dates=sorted(set(v.split(chr(35))[1] for v in vals if len(v.split(chr(35)))>1)); print('axis_dates', dates); print('newest_axis_date', dates[-1] if dates else 'NONE')\"",
+      "output_evidence": "scanned 194\ntrending_price_axis_values 3\n   TRENDING_PRICE#2026-09-10\n   TRENDING_PRICE#2026-09-10#20260916T065448Z-9b7ffda3dcdc\n   TRENDING_PRICE#2026-09-15\naxis_dates ['2026-09-10', '2026-09-15']\nnewest_axis_date 2026-09-15\nThe two pre-existing 2026-09-10 values (bare and the generation 20260916T065448Z-9b7ffda3dcdc) are still present unchanged; a new TRENDING_PRICE#2026-09-15 value has landed, moving newest_axis_date past the pre-state's 2026-09-10.",
+      "denominator": "194 items scanned (single un-paginated dynamodb scan call, per the literal invocation); 3 of 3 TRENDING_PRICE axis_date values printed; 2 of 2 distinct axis_dates printed (2026-09-10, 2026-09-15)",
+      "status": "PASS",
+      "expect": "newest_axis_date 2026-09-15",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the opal-shaped scheduled tasks ENUMERATED with their count. MET when opal_shaped_tasks reads EXACTLY 11, the count measured by the issuer at the cut, and the list carries no task this order created. The 11 at the cut are: Bloomberg Updater; Opal Data Harvest - Local Publications; OpalResearch-ExecManagement; OpalResearch-FilingsAnalyzer; OPAL_autolaunch_agents; OPAL_BBGTML_daily_pull; OPAL_BBGTML_freshness_check; OPAL_BLOOMBERG-FreezeTripwire (twice); OPAL_D7_ticket_intake; OPAL_vendor_watch. Andrew's word authorizes the RUNS and says nothing about recurrence, so a cadence is still RESERVED. A count of 12, a new trigger, or a previously DISABLED task found ENABLED is NOT met and is a BLOCKING row",
+      "method": "live_read",
+      "invocation": "python -c \"import subprocess; out=subprocess.run(['schtasks','/query','/fo','LIST'],capture_output=True,text=True,errors='replace').stdout; ls=[l for l in out.split(chr(10)) if 'TaskName' in l and ('opal' in l.lower() or 'bloomberg' in l.lower() or 'harvest' in l.lower())]; print('opal_shaped_tasks', len(ls)); [print('  ', l.strip()) for l in ls]; st=[l for l in out.split(chr(10)) if 'Status' in l]; print('status_lines', len(st))\"",
+      "output_evidence": "opal_shaped_tasks 11\n   TaskName:      \\Bloomberg Updater\n   TaskName:      \\Opal Data Harvest - Local Publications\n   TaskName:      \\OpalResearch-ExecManagement\n   TaskName:      \\OpalResearch-FilingsAnalyzer\n   TaskName:      \\OPAL_autolaunch_agents\n   TaskName:      \\OPAL_BBGTML_daily_pull\n   TaskName:      \\OPAL_BBGTML_freshness_check\n   TaskName:      \\OPAL_BLOOMBERG-FreezeTripwire\n   TaskName:      \\OPAL_BLOOMBERG-FreezeTripwire\n   TaskName:      \\OPAL_D7_ticket_intake\n   TaskName:      \\OPAL_vendor_watch\nstatus_lines 291\nRun twice (determinism), both runs printed opal_shaped_tasks 11 with the identical eleven names in the identical order. No task this order created appears in the list; the set matches the issuer's pre-stated 11 exactly, including the FreezeTripwire duplicate.",
+      "denominator": "11 of 11 opal-shaped tasks matching the pre-stated list, exact count match on both runs; 291 status lines in the full schtasks output (informational, not the bar)",
+      "status": "PASS",
+      "expect": "opal_shaped_tasks 11\\n(.|\\n)*OPAL_vendor_watch",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This order's five criteria are all live-read VERIFICATIONS of a world state the issuer already produced (two Bloomberg pulls run before this worker was spawned); no artifact or checker was built by this worker for the spec to plant a mutant against. The nearest available mutant-shaped evidence is ISSUER AMENDMENT 17 itself: the OLD key-split logic (split('/')[2]) is a real, historically-run 'mutant' shape that misread BP/_LN_Equity and NG/_LN_Equity as BP and NG and reported both MISSING in AC3 even though both had landed -- exactly the shape a planted mutant would need to expose.",
+      "expected": "The OLD split (chr(47).join way, i.e. o['Key'].split(chr(47))[2]) applied to the same live raw/bloomberg/ and derived/model_block/ listings should misclassify BP/_LN_Equity and NG/_LN_Equity as bare 'BP' and 'NG', undercounting landed_of_attempted from 33 to 31 and listing both as missing -- the exact defect ISSUER AMENDMENT 17 names as already measured.",
+      "observed": "Re-ran AC3's derived/model_block listing with the OLD single-segment split (o['Key'].split(chr(47))[2] instead of the AMENDMENT-17 join of segments [2:-2]) against the SAME live objects: BP and NG appear as separate bare keys (collapsing BP/_LN_Equity and NG/_LN_Equity), landed_of_attempted reads 31 of 33 with missing=['BP/_LN_Equity', 'NG/_LN_Equity'] -- reproducing the exact defect the amendment describes. The current (fixed) invocation, run in AC2/AC3 above, reads 33 of 33 with missing 0 on the identical live objects. The old logic (mutant) misfires; the new logic (as specified in this order) reads correctly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of AC1, AC2/AC3 (shared listing basis), AC4 and AC5's live reads was run twice against the same live S3/DynamoDB/schtasks state, output byte-compared on the deciding values.",
+      "observed": "AC1: run1 and run2 both printed 'crosswalk crosswalk/v1/2026-09-15.json', 'records 89', 'keyed_names 33' -- identical. AC2/AC3: raw_keys 34 and landed_of_attempted 33 of 33 stable across the invocation runs shown in the acceptance rows (re-derived from the same paginated listing both times). AC5: run1 and run2 both printed 'opal_shaped_tasks 11' with the identical eleven TaskName lines in the identical order. No randomness or wall-clock-dependent content in any of the five reads (they enumerate committed S3 objects, DynamoDB rows and installed scheduled tasks, none of which changed between runs).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Re-running model_block_pull.py or price_axis_pull.py.",
+      "reason": "The task order states explicitly, in its L7 IDENTITY section: 'THE TWO RUNS THIS ORDER NAMES HAVE ALREADY HAPPENED... DO NOT RE-RUN model_block_pull.py or price_axis_pull.py.' Both producers were run once each by the issuer (2.0.0_SA_COO~Z) directly on Andrew's word at 20:18-20:20Z UTC 2026-09-16, before this worker was spawned. This worker's whole job is to verify the landed population, not to attempt or re-attempt a pull."
+    },
+    {
+      "item": "Pulling the 56 unresolved (no security_key) crosswalk records.",
+      "reason": "The order is explicit: 'NOT THE 89. The population is the 33 KEYED COVERAGE NAMES... The other 56 records carry no security_key; they are the UNRESOLVED half and they are NOT authorized.' AC1 measures and prints the 33/89 split; the 56 are named as excluded by design, not by oversight."
+    },
+    {
+      "item": "Arming any schedule, cron, or recurring trigger for either pull.",
+      "reason": "The order states: 'NO CADENCE. NO SCHEDULE. ONE RUN EACH... A recurring pull is STILL RESERVED.' AC5 verifies the scheduled-task count stayed at the pre-stated 11 with no new trigger, confirming nothing was armed."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~29/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "boto3 s3 live_read (crosswalk + raw/bloomberg + derived/model_block listings)",
+      "invocation": "python -c \"...s3.get_paginator('list_objects_v2')...\" (see AC1-AC3 invocations above)",
+      "result": "All three listings read successfully against opal-data-harvest; run twice each for AC1 and the shared AC2/AC3 basis, byte-identical on the deciding counts both times."
+    },
+    {
+      "tool": "boto3 dynamodb live_read (opal-harvest-security-metrics scan)",
+      "invocation": "python -c \"...dynamodb.scan(TableName='opal-harvest-security-metrics', ProjectionExpression='axis_date')...\" (see AC4 invocation above)",
+      "result": "194 items scanned in one call; 3 TRENDING_PRICE axis_date values found, newest 2026-09-15, past the 2026-09-10 pre-state."
+    },
+    {
+      "tool": "schtasks /query /fo LIST",
+      "invocation": "python -c \"...subprocess.run(['schtasks','/query','/fo','LIST'],...)...\" (see AC5 invocation above)",
+      "result": "opal_shaped_tasks 11, matching the issuer's pre-stated list exactly; run twice, identical both times."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4,AC5",
+      "result": "see WORKER REPORT for the rc and printed verdict line"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, to-pipeline-gate, surprise-row-gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~29 <0.9.0_WK_AMGT_RESAPP~29@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see WORKER REPORT for the commit hash"
+    }
+  ]
+}
