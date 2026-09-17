@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-21",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88be8f29903a716218a83031c468d0b88"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-21.identity-resolve-56-unkeyed.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~28",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/coverage_residue.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a library module (the COVERAGE RESIDUE cross-reference), no deploy target of its own; imported and exercised directly by AC1/AC3's invocations against live S3/DynamoDB reads.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~28/AMGT_RESAPP.TO-AMGT-rk-21.identity-resolve-56-unkeyed.resolution.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a record artifact (the COVERAGE RESIDUE cross-reference result), not a deployable artifact; the pool (crosswalk/v1/) is NOT written by this order -- the coverage canonical-key space and the holdings compiled-stable_id space are different identity spaces, and this order mints no security_key. Read back and counted in AC3.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a fresh POSITIONING CHAIN line prints holdings_input, resolved and unresolved counts, all nonzero and internally consistent (resolved + unresolved == holdings_input) -- if build_universe.py has no such CLI flag, the worker imports and calls the module's own denominator-printing function directly, names the actual invocation used, and re-runs this exact substitute",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom lib.research.identity import build_universe, positioning_chain\nplane = build_universe.read_etf_plane()\nnon_cash = {}\nfor row in plane['rows']:\n    if row.get('is_cash') is True or not row.get('ticker'):\n        continue\n    non_cash.setdefault(str(row['ticker']).upper(), {'ticker': row['ticker'], 'cusip': row.get('cusip'), 'domicile': row.get('domicile')})\nidentities, denom = positioning_chain.build_positioning_identities(list(non_cash.values()), as_of=None)\nprint('POSITIONING CHAIN: holdings_input=%d resolved=%d unresolved=%d id_kind_counts=%s bbg=%s classifications=%s trade_ids=%s' % (denom['holdings_input'], denom['resolved'], denom['unresolved'], denom['id_kind_counts'], denom['bbg_characteristics'], denom['etf_classifications'], denom['trade_security_identifiers']))\n\"",
+      "output_evidence": "POSITIONING CHAIN: holdings_input=164 resolved=164 unresolved=0 id_kind_counts={'cusip': 161, 'figi': 1, 'sedol': 1, 'unclassified': 1} bbg={'date': '2026-09-16', 'rows': 172, 'key': 'bbg/2026-09-16/characteristics.parquet'} classifications={'rows': 285} trade_ids={'rows': 92}",
+      "denominator": "164 of 164 non-cash holdings classified (resolved+unresolved=164+0=164, internally consistent); the literal CLI flag --print-denominators is CONFIRMED ABSENT (rc=2, 'error: the following arguments are required: --as-of'), so this invocation IS the criterion's own named substitute (build_universe.py's read_etf_plane() + positioning_chain.build_positioning_identities(), printed in the module's own line format, build_universe.py:829-835), now recorded verbatim in the task order file itself. FRESH at this cut, not the order's stale 158/161 or 47 figures. Run twice (once standalone, once inside the delivered artifact's build script), identical both times. Under timeout 120, rc=0.",
+      "status": "PASS",
+      "expect": "holdings_input=\\d+\\s+resolved=\\d+\\s+unresolved=\\d+"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "total, keyed and unkeyed sum correctly and match this order's stated 89/33/56 ONLY if that is still current -- any drift from those numbers is printed and reported, not silently reconciled to match this document",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json\ns3 = boto3.client('s3')\nresp = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='crosswalk/v1/')\nlatest = sorted(o['Key'] for o in resp.get('Contents', []))[-1]\ndoc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=latest)['Body'].read())\nrecords = doc.get('records', doc if isinstance(doc, list) else [])\ntotal = len(records)\nkeyed = [r for r in records if r.get('security_key')]\nunkeyed = [r for r in records if not r.get('security_key')]\nprint('total', total, 'keyed', len(keyed), 'unkeyed', len(unkeyed))\n\"",
+      "output_evidence": "latest crosswalk/v1/2026-09-15.json\ntotal 89 keyed 33 unkeyed 56",
+      "denominator": "89 of 89 crosswalk records classified (33 keyed + 56 unkeyed = 89, sums correctly); NO DRIFT from this order's stated 89/33/56 -- the live pool's newest object (crosswalk/v1/2026-09-15.json) reads the SAME split at this cut. Run twice against the live S3 object, identical both times. Under timeout 120, rc=0.",
+      "status": "PASS",
+      "expect": "total 89 keyed 33 unkeyed 56"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the worker's own delivered artifact (named per its report, path substituted for the find-derived placeholder above if different) shows newly_resolved_count + card_bound_residue_count == 56 (the unkeyed denominator from AC2), and every card-bound residue name is individually listed, never a bare count",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && cat \"$(find org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~28 -iname '*residue*' -o -iname '*resolution*' 2>/dev/null | head -1)\" 2>&1 | python -c \"import sys,json; d=json.load(sys.stdin); print('newly_resolved', d.get('newly_resolved_count')); print('card_bound_residue', d.get('card_bound_residue_count')); print('residue_named', len(d.get('card_bound_residue_names', [])) == d.get('card_bound_residue_count'))\"",
+      "output_evidence": "newly_resolved 34\ncard_bound_residue 22\nresidue_named True",
+      "denominator": "34 newly_resolved + 22 card_bound_residue == 56 (matches AC2's unkeyed denominator exactly); 22 of 22 residue names individually listed in card_bound_residue_names (len matches the count, no bare bulk figure). find picked up exactly one matching file: AMGT_RESAPP.TO-AMGT-rk-21.identity-resolve-56-unkeyed.resolution.json (23350 bytes). Run twice, identical both times. Under timeout 120, rc=0.",
+      "status": "PASS",
+      "expect": "newly_resolved \\s*\\d+\\s+card_bound_residue \\s*\\d+\\s+residue_named True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "not a build cell with a single admission rule to mutate: the deliverable is a name-matching cross-reference over two already-existing, already-resolved read chains (crosswalk's S3 read, positioning_chain's S3+DynamoDB reads). The mutant is on the matcher's own two rungs (TICKER-EXACT, NAME-CONTAINMENT) in lib/research/identity/coverage_residue.py.",
+      "expected": "disabling the NAME-CONTAINMENT rung (rung 2) should strictly shrink newly_resolved_count (every ticker-exact match survives; every name-only match is lost) and grow card_bound_residue_count by the same amount, with the 56 total unchanged.",
+      "observed": "with rung 2 disabled (a standalone rung-1-only re-implementation run against the same 56 unkeyed records and the same positioning_identities): newly_resolved_count fell from 34 to 20 (TICKER-EXACT survivors: AZN, CPA, GSK, IDXX, ISRG, MA, MELI, MNST, NFLX, NOW, OMAB, QXO, RIO, SPOT, TSM, TTE, UBER, UBS, V, WDAY) and card_bound_residue_count rose from 22 to 36 -- the delta (14 lost) is exactly the 14 NAME-CONTAINMENT-only matches (AMX, BNPQY, BTI, BZLFY, CNI, CICHY, KOF, IBDRY, ISNPY, NSRGY, NOK, ORANY, SNY, UNVGY), and the 56 total is unchanged in both runs (34+22=56, 20+36=56) -- the mutant fires exactly as predicted.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's substitute invocation and AC2's live-S3 invocation each run twice in the same session, no intervening edit to either source plane",
+      "observed": "AC1 run 1 and run 2: byte-identical POSITIONING CHAIN line (holdings_input=164 resolved=164 unresolved=0, same id_kind_counts/bbg/classifications/trade_ids). AC2 run 1 and run 2: identical total 89 keyed 33 unkeyed 56, same latest key crosswalk/v1/2026-09-15.json. AC3 read back twice against the committed artifact: identical newly_resolved=34, card_bound_residue=22, residue_named True both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any genuine new Bloomberg lookup for the 22 CARD-BOUND residue names",
+      "reason": "explicitly forbidden by the order's BOUNDS ('NO NEW VENDOR CALL of any kind from this order'); each of the 22 is named individually in card_bound_residue_names, never bulk-counted, never dropped, never converted to a false negative."
+    },
+    {
+      "item": "minting a coverage security_key for any of the 34 newly_resolved matches",
+      "reason": "the coverage canonical key (<ROOT>_<CC>_Equity, crosswalk.py's own space) and the Positioning chain's compiled stable_id (CUSIP/FIGI/SEDOL/bloomberg-security-plus-classifier-name) are DIFFERENT identity spaces; forcing one into the other would be exactly the guess the RULED text forbids. This order records the cross-reference (this coverage name IS an already-resolved ETF holding, here is that holding's compiled identity) -- it does not write crosswalk/v1/."
+    },
+    {
+      "item": "a write to the crosswalk/v1/ pool or any new S3 upload",
+      "reason": "the task order's <paths> write grant is lib/research/identity/ plus the named repo paths under org/; the pool write is stated as OPTIONAL ('your choice') and this worker's choice, stated here, is the deliverables-folder JSON artifact only -- no new S3 object is written."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~28/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/identity/coverage_residue.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "python (non-ASCII byte check, Rule 4)",
+      "invocation": "python -c \"b=open('lib/research/identity/coverage_residue.py','rb').read(); print(len(b)-len(b.decode('utf-8')))\"",
+      "result": "0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate + to-pipeline-gate + surprise-row-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~28 <0.9.0_WK_AMGT_RESAPP~28@opal.agent>\" -F <msgfile> -- lib/research/identity/coverage_residue.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~28/ org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-21.identity-resolve-56-unkeyed.md",
+      "result": "PENDING-THIS-COMMIT -- run after this instance validates, hash recorded in the worker report"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance path> AC1,AC2,AC3",
+      "result": "PENDING -- run before flipping <status> to complete, rc recorded in the worker report"
+    }
+  ]
+}
