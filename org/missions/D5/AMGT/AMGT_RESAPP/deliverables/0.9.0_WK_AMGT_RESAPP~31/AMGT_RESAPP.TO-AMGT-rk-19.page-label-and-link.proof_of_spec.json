@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-19.page-label-and-link",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-19.page-label-and-link.md",
+    "group": "OTHER",
+    "vintage_commit": "f0cbb2d813c6bda20c630a2fd55060703c8f7ebb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-19.page-label-and-link.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "One row appended by textual splice this session (AMGT_RESAPP-Z-W31-S1, first row for this worker coordinate); python .tools/surprise-row-gate.py <path> run (staged) before this commit -> '1 new row(s) of 344 total checked ... OK'."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~31/SESSION_LOG.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New file, this session, recording the BLOCKING finding and the exact steps taken."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "at least one component contains the label text (a case-insensitive match on \"from the filing\", worded as the worker actually wrote it -- if the wording differs, the worker names its exact wording and re-runs this check against that literal string) and at least one reference to rendering/handling a passage link; both read 0 before this order lands",
+      "method": "command",
+      "invocation": "cd portal && python -c \"\nimport io, glob\nfs = glob.glob('src/pages/SecurityAnalysis/**/*.tsx', recursive=True)\nj = ''.join(io.open(f, encoding='utf-8', errors='replace').read() for f in fs)\nprint('components', len(fs))\nfor t in ('from the filing', 'passage', 'source ===', \\\"source ==\\\"):\n    print(t, j.lower().count(t.lower()))\n\"",
+      "output_evidence": "components 0\nfrom the filing 0\npassage 0\nsource === 0\nsource == 0\n(rc=0; run twice, byte-identical both times, 2026-09-17)",
+      "denominator": "0 of 0 .tsx files under portal/src/pages/SecurityAnalysis/ -- the directory itself does not exist in this worktree (portal/ is an unpopulated gitlink, see BLOCKING row below), so the glob is vacuous, not a genuine negative read against real source.",
+      "status": "FAIL",
+      "status_reason": "BLOCKING PREMISE FAILURE, not a design defect in the criterion or in any code this worker could write: this worktree's portal/ is an empty git submodule checkout (git ls-tree HEAD portal shows the gitlink commit 2453a7b4c6b7ff91ea89db499890a9486265d1a0, but ls -laR portal shows zero files -- no package.json, no src/, nothing). .gitmodules is 0 bytes (no URL mapping), so the standard git submodule update --init cannot resolve it in this linked worktree, and no .tools/ mechanism populates a portal checkout inside a worker worktree. Per this order's own first-act instruction (\"tests that org/, .tools/ and the paths in section 3 exist; if any is absent, STOP with a BLOCKING row\") and CLAUDE.md's bar (\"never rebuild, extract or reconstruct the tree to make an order executable\"), this worker did not clone/copy portal content from the main workspace's separately-managed portal checkout into this worktree. Filed as row AMGT_RESAPP-Z-W31-S1 (class BLOCKING, hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z). Per the REFUSAL CLAUSE this criterion is recorded as measured, not repaired, widened, or satisfied by a route this order did not name.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the merged tree's TypeScript build has no NEW errors attributable to this order's edited files (pre-existing unrelated errors, if any, are named and excluded, matching this project's own established practice of separating this cell's additions from inherited breakage)",
+      "method": "command",
+      "invocation": "cd portal && npx tsc -b 2>&1 | tail -30",
+      "output_evidence": "npx's own banner: 'This is not the tsc command you are looking for ... Use npm install typescript to first add TypeScript to your project before using npx ... Use yarn to avoid accidentally running code from un-installed packages' (rc=0 from the pipeline; run twice, byte-identical both times, 2026-09-17)",
+      "denominator": "N/A -- no build ran: there is no package.json / node_modules / tsconfig in this worktree's portal/ at all (the whole submodule checkout is absent, not merely missing this order's edits), so no TypeScript compilation was attempted and none could be attributed to this order's files, edited or otherwise. This order's own bound also forbids running an install (\"NEVER RUN AN INSTALL\"), and an install would not solve the deeper problem (there is no portal/package.json to install against).",
+      "status": "FAIL",
+      "status_reason": "Same BLOCKING PREMISE FAILURE as AC1 (empty portal/ gitlink in this worktree) -- see AC1's status_reason and row AMGT_RESAPP-Z-W31-S1. No TypeScript build tooling is resolvable at all, so 'no NEW errors attributable to this order's edited files' cannot be measured against a real build. Per the REFUSAL CLAUSE this criterion is recorded as measured, not repaired, widened, or satisfied by a route this order did not name.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: the order names no planted mutant, and no source code was written this session to mutate (the label/link work described in section 1 was never reached -- the portal source tree itself does not exist in this worktree).",
+      "expected": "N/A -- no code artifact was produced this session.",
+      "observed": "N/A -- no code artifact was produced this session.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Both AC1 and AC2's literal invocations were each run twice this session with no change to the worktree between runs.",
+      "observed": "AC1: byte-identical output both times ('components 0', all four label/text counts 0, rc=0). AC2: byte-identical npx banner both times, rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The label/link component edit itself (section 1's DONE WHEN: labeling a filing-sourced series and linking each point to its passage_id).",
+      "reason": "Cannot be written: the order's own <paths> grant is portal/src/pages/SecurityAnalysis/ and portal/src/api/endpoints/amgt-lead-panel.ts, and neither exists in this worktree (empty portal/ gitlink -- no directory to write into, no existing component to locate and edit). Filed as row AMGT_RESAPP-Z-W31-S1; BLOCKING, not attempted."
+    },
+    {
+      "item": "Populating portal/ in this worktree (submodule init, or cloning from the main workspace's separately-managed portal checkout).",
+      "reason": "Outside this order's <paths> (no .tools/ or top-level submodule-config path granted), and CLAUDE.md's bar forbids reconstructing the tree to make an order executable. .gitmodules also carries no URL mapping, so there is no standard git submodule update --init path available even if it were in scope."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W31-S1: this worker's linked worktree (wk-amgt-13-31-portal) carries an EMPTY portal/ git submodule checkout -- the gitlink at HEAD names commit 2453a7b4c6b7ff91ea89db499890a9486265d1a0, but the directory has zero files, no .gitmodules URL mapping exists to init it, and the sibling chain-B worktree (wk-amgt-13-batch-b) shows the identical empty state. Neither of this order's two portal/ paths exist, and AC1/AC2 cannot be measured against real source or a real build. Filed BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z (the chain-A queue holds every portal edit this round, so rk-30's and rk-26's page halves will hit the identical block unless the portal gitlink is populated in whichever worktree carries them next)."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~31/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "git rev-parse / test -d",
+      "invocation": "git rev-parse --abbrev-ref HEAD && test -d org && test -d .tools && echo TREE-OK",
+      "result": "wk-amgt-13-31-portal / TREE-OK"
+    },
+    {
+      "tool": "git ls-tree / ls -laR (portal presence check)",
+      "invocation": "git ls-tree HEAD portal; ls -laR portal",
+      "result": "git ls-tree: '160000 commit 2453a7b4c6b7ff91ea89db499890a9486265d1a0 portal' (a valid gitlink). ls -laR portal: only '.' and '..' -- zero files."
+    },
+    {
+      "tool": "git config / cat (.gitmodules check)",
+      "invocation": "cat .gitmodules (this worktree and the main workspace checkout); git submodule status",
+      "result": "0 bytes in both locations; git submodule status fails with 'no submodule mapping found in .gitmodules for path' (an unrelated path, confirming the file carries no entries at all)."
+    },
+    {
+      "tool": "git cat-file (cross-checkout object confirmation)",
+      "invocation": "cd (main workspace)/portal && git cat-file -t 2453a7b4c6b7ff91ea89db499890a9486265d1a0",
+      "result": "commit -- the gitlink's target does exist in the main workspace's independently-managed portal clone (origin https://github.com/Opal-Capital/portal.git, branch DEV), just not inside this linked worktree."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md (run against the staged edit)",
+      "result": "[surprise-row-gate] ... 1 new row(s) of 344 total checked (343 pre-existing, NOT re-graded) / OK: 1 file(s), all new rows carry their step-7/step-10 fields. RC=0"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see WORKER REPORT for the printed verdict and rc"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, to-pipeline-gate, surprise-row-gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~31 <0.9.0_WK_AMGT_RESAPP~31@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see WORKER REPORT for the commit hash"
+    }
+  ]
+}
