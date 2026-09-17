@@ -1,0 +1,1643 @@
+# PLAN -- 49financial (LGIC_LGCTFM LT-p-1, DEC-8)
+
+Generated from contract.json's 271 tension(s), R19's six-step order MAP -> CLASSIFY -> RULE -> PORT -> REPOINT -> PROVE.
+executed: False; no package is executed by this plan; the plan signs nothing.
+packages: 1626
+
+## MAP (271)
+- R-0221-MAP: Map row R-0221 (current spelling 'opal-data-bd') against its desired form "('ALIAS', 'opal-data-49financial')" so tension T-0001 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0222-MAP: Map row R-0222 (current spelling 'opal-data-cot') against its desired form "('ALIAS', 'opal-data-cottonwood')" so tension T-0002 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0223-MAP: Map row R-0223 (current spelling 'opal-data-inf') against its desired form "('ALIAS', 'opal-data-inflection')" so tension T-0003 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0002-MAP: Map row R-0002 (current spelling 'FIRMSEP-s3-direct-access-bypass') against its desired form "('OUT-OF-PATTERN', 'firmsep-s3-direct-access-bypass-{cadence}')" so tension T-0004 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0003-MAP: Map row R-0003 (current spelling 'cot-bronze-complete') against its desired form "('OUT-OF-PATTERN', '{system}-cot-bronze-complete-{cadence}')" so tension T-0005 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0004-MAP: Map row R-0004 (current spelling 'cot-silver-complete') against its desired form "('OUT-OF-PATTERN', '{system}-cot-silver-complete-{cadence}')" so tension T-0006 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0005-MAP: Map row R-0005 (current spelling 'inf-assets-trigger-bronze-complete') against its desired form "('OUT-OF-PATTERN', '{system}-inf-assets-trigger-bronze-complete-{cadence}')" so tension T-0007 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0006-MAP: Map row R-0006 (current spelling 'inf-gold-full-on-bronze-complete') against its desired form "('OUT-OF-PATTERN', '{system}-inf-gold-full-on-bronze-complete')" so tension T-0008 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0007-MAP: Map row R-0007 (current spelling 'inf-otp-state-change') against its desired form "('OUT-OF-PATTERN', '{system}-inf-otp-state-change-{cadence}')" so tension T-0009 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0008-MAP: Map row R-0008 (current spelling 'inf-silver-chain-bronze-complete') against its desired form "('OUT-OF-PATTERN', '{system}-inf-silver-chain-bronze-complete-{cadence}')" so tension T-0010 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0009-MAP: Map row R-0009 (current spelling 'mdpf-feeder-accelerator') against its desired form "('OUT-OF-PATTERN', 'mdpf-feeder-accelerator-{cadence}')" so tension T-0011 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0013-MAP: Map row R-0013 (current spelling 'opal-data-bd#policy') against its desired form "('ALIAS', 'opal-data-49financial#policy')" so tension T-0012 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0014-MAP: Map row R-0014 (current spelling 'opal-data-cot#policy') against its desired form "('ALIAS', 'opal-data-cottonwood#policy')" so tension T-0013 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0015-MAP: Map row R-0015 (current spelling 'opal-data-inf#policy') against its desired form "('ALIAS', 'opal-data-inflection#policy')" so tension T-0014 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0016-MAP: Map row R-0016 (current spelling 'blackdiamond/49f/session-trigger-mode.json') against its desired form None so tension T-0015 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0017-MAP: Map row R-0017 (current spelling 'blackdiamond/cot/session-trigger-mode.json') against its desired form None so tension T-0016 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0018-MAP: Map row R-0018 (current spelling 'bronze/orion-api-v2/*/household_rep_mapping.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api-v2/*/household_rep_mapping.json')" so tension T-0017 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0019-MAP: Map row R-0019 (current spelling 'bronze/orion-api-v2/*/representatives.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api-v2/*/representatives.json')" so tension T-0018 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0020-MAP: Map row R-0020 (current spelling 'bronze/orion-api/*/assets.csv') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/*/assets.csv')" so tension T-0019 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0021-MAP: Map row R-0021 (current spelling 'bronze/orion-api/*/transactions.csv') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/*/transactions.csv')" so tension T-0020 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0022-MAP: Map row R-0022 (current spelling 'bronze/orion-api/activity/latest.csv') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/activity/latest.csv')" so tension T-0021 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0023-MAP: Map row R-0023 (current spelling 'bronze/orion-api/household/latest.csv') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/household/latest.csv')" so tension T-0022 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0024-MAP: Map row R-0024 (current spelling 'bronze/orion-api/performance/latest.csv') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/performance/latest.csv')" so tension T-0023 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0025-MAP: Map row R-0025 (current spelling 'bronze/orion-api/{*}/_BRONZE_COMPLETE.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/_BRONZE_COMPLETE.json')" so tension T-0024 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0026-MAP: Map row R-0026 (current spelling 'bronze/orion-api/{*}/assets.csv') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/assets.csv')" so tension T-0025 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0027-MAP: Map row R-0027 (current spelling 'bronze/orion-api/{*}/transactions.csv') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/transactions.csv')" so tension T-0026 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0028-MAP: Map row R-0028 (current spelling 'code/gold/*') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/code/gold/*')" so tension T-0027 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0029-MAP: Map row R-0029 (current spelling 'config/ticker_lookup.json') against its desired form None so tension T-0028 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0030-MAP: Map row R-0030 (current spelling 'config/yahoo_safe_tickers.txt') against its desired form None so tension T-0029 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0031-MAP: Map row R-0031 (current spelling 'gold/_parity/account_gains/*/scorecard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/account_gains/*/scorecard.json')" so tension T-0030 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0032-MAP: Map row R-0032 (current spelling 'gold/_parity/account_gains/{*}/scorecard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/account_gains/{*}/scorecard.json')" so tension T-0031 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0033-MAP: Map row R-0033 (current spelling 'gold/_parity/canonical_lots/*/scorecard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/canonical_lots/*/scorecard.json')" so tension T-0032 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0034-MAP: Map row R-0034 (current spelling 'gold/_parity/canonical_lots/{*}/scorecard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/canonical_lots/{*}/scorecard.json')" so tension T-0033 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0035-MAP: Map row R-0035 (current spelling 'gold/_parity/holdings_lots/*/scorecard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/holdings_lots/*/scorecard.json')" so tension T-0034 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0036-MAP: Map row R-0036 (current spelling 'gold/_parity/holdings_lots/{*}/scorecard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/holdings_lots/{*}/scorecard.json')" so tension T-0035 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0037-MAP: Map row R-0037 (current spelling 'gold/_parity/positions_cube/*/scorecard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/positions_cube/*/scorecard.json')" so tension T-0036 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0038-MAP: Map row R-0038 (current spelling 'gold/_parity/positions_cube/{*}/scorecard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/positions_cube/{*}/scorecard.json')" so tension T-0037 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0039-MAP: Map row R-0039 (current spelling 'gold/_state/advisor_assignments/daily_state.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_state/advisor_assignments/daily_state.parquet')" so tension T-0038 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0040-MAP: Map row R-0040 (current spelling 'gold/_state/load_flows/watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_state/load_flows/watermark.json')" so tension T-0039 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0041-MAP: Map row R-0041 (current spelling 'gold/account_gains/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/account_gains/{*}.parquet')" so tension T-0040 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0042-MAP: Map row R-0042 (current spelling 'gold/accounts_dimension_latest.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/accounts_dimension_latest.parquet')" so tension T-0041 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0043-MAP: Map row R-0043 (current spelling 'gold/artifacts/49f/c1_recovered_accounts.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/49f/c1_recovered_accounts.json')" so tension T-0042 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0044-MAP: Map row R-0044 (current spelling 'gold/artifacts/49f/out_of_scope_accounts.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/49f/out_of_scope_accounts.json')" so tension T-0043 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0045-MAP: Map row R-0045 (current spelling 'gold/artifacts/advisor_fee_efficiency.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/advisor_fee_efficiency.json')" so tension T-0044 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0046-MAP: Map row R-0046 (current spelling 'gold/artifacts/client_mix_timeseries.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/client_mix_timeseries.json')" so tension T-0045 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0047-MAP: Map row R-0047 (current spelling 'gold/artifacts/client_tax_liability.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/client_tax_liability.json')" so tension T-0046 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0048-MAP: Map row R-0048 (current spelling 'gold/artifacts/clients_tab.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/clients_tab.json')" so tension T-0047 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0049-MAP: Map row R-0049 (current spelling 'gold/artifacts/cumulative_chart.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/cumulative_chart.json')" so tension T-0048 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0050-MAP: Map row R-0050 (current spelling 'gold/artifacts/employee_leaderboard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/employee_leaderboard.json')" so tension T-0049 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0051-MAP: Map row R-0051 (current spelling 'gold/artifacts/filters/dimensions.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/filters/dimensions.json')" so tension T-0050 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0052-MAP: Map row R-0052 (current spelling 'gold/artifacts/firm_mix_views.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/firm_mix_views.json')" so tension T-0051 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0053-MAP: Map row R-0053 (current spelling 'gold/artifacts/firm_mix_views_daily.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/firm_mix_views_daily.json')" so tension T-0052 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0054-MAP: Map row R-0054 (current spelling 'gold/artifacts/implementor_leaderboard.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/implementor_leaderboard.json')" so tension T-0053 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0055-MAP: Map row R-0055 (current spelling 'gold/artifacts/partner_analytics/header_metrics_{*}.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/partner_analytics/header_metrics_{*}.json')" so tension T-0054 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0056-MAP: Map row R-0056 (current spelling 'gold/artifacts/snapshots/aua_by_architect.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_architect.json')" so tension T-0055 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0057-MAP: Map row R-0057 (current spelling 'gold/artifacts/snapshots/aua_by_region.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_region.json')" so tension T-0056 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0058-MAP: Map row R-0058 (current spelling 'gold/artifacts/snapshots/aua_by_state.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_state.json')" so tension T-0057 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0059-MAP: Map row R-0059 (current spelling 'gold/artifacts/snapshots/aua_by_tax_status.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_tax_status.json')" so tension T-0058 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0060-MAP: Map row R-0060 (current spelling 'gold/artifacts/summary/header_metrics.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/summary/header_metrics.json')" so tension T-0059 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0061-MAP: Map row R-0061 (current spelling 'gold/artifacts/timeseries_chart.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/timeseries_chart.json')" so tension T-0060 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0062-MAP: Map row R-0062 (current spelling 'gold/cache/hh_timeseries_anchors_{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/cache/hh_timeseries_anchors_{*}.parquet')" so tension T-0061 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0063-MAP: Map row R-0063 (current spelling 'gold/canonical/account_gains/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/account_gains/')" so tension T-0062 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0064-MAP: Map row R-0064 (current spelling 'gold/canonical/account_gains/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/account_gains/{*}.parquet')" so tension T-0063 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0065-MAP: Map row R-0065 (current spelling 'gold/canonical/advisor_fee_detail/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/advisor_fee_detail/')" so tension T-0064 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0066-MAP: Map row R-0066 (current spelling 'gold/canonical/advisor_fee_detail/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/advisor_fee_detail/{*}.parquet')" so tension T-0065 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0067-MAP: Map row R-0067 (current spelling 'gold/canonical/canonical_nna_{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_nna_{*}.parquet')" so tension T-0066 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0068-MAP: Map row R-0068 (current spelling 'gold/canonical/canonical_performance_2026-04-20.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_performance_2026-04-20.parquet')" so tension T-0067 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0069-MAP: Map row R-0069 (current spelling 'gold/canonical/canonical_performance_{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_performance_{*}.parquet')" so tension T-0068 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0070-MAP: Map row R-0070 (current spelling 'gold/canonical/holdings/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings/')" so tension T-0069 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0071-MAP: Map row R-0071 (current spelling 'gold/canonical/holdings/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings/{*}.parquet')" so tension T-0070 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0072-MAP: Map row R-0072 (current spelling 'gold/canonical/holdings_*.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_*.parquet')" so tension T-0071 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0073-MAP: Map row R-0073 (current spelling 'gold/canonical/holdings_gaps/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_gaps/{*}.parquet')" so tension T-0072 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0074-MAP: Map row R-0074 (current spelling 'gold/canonical/holdings_{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_{*}.parquet')" so tension T-0073 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0075-MAP: Map row R-0075 (current spelling 'gold/canonical/lots_realized/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_realized/')" so tension T-0074 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0076-MAP: Map row R-0076 (current spelling 'gold/canonical/lots_realized/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_realized/{*}.parquet')" so tension T-0075 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0077-MAP: Map row R-0077 (current spelling 'gold/canonical/lots_unrealized/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_unrealized/')" so tension T-0076 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0078-MAP: Map row R-0078 (current spelling 'gold/canonical/lots_unrealized/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_unrealized/{*}.parquet')" so tension T-0077 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0079-MAP: Map row R-0079 (current spelling 'gold/canonical/nna/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna/')" so tension T-0078 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0080-MAP: Map row R-0080 (current spelling 'gold/canonical/nna/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna/{*}.parquet')" so tension T-0079 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0081-MAP: Map row R-0081 (current spelling 'gold/canonical/nna_atomic/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna_atomic/{*}.parquet')" so tension T-0080 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0082-MAP: Map row R-0082 (current spelling 'gold/canonical/nna_validation/{*}.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna_validation/{*}.json')" so tension T-0081 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0083-MAP: Map row R-0083 (current spelling 'gold/canonical/performance/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/performance/')" so tension T-0082 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0084-MAP: Map row R-0084 (current spelling 'gold/canonical/performance/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/performance/{*}.parquet')" so tension T-0083 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0085-MAP: Map row R-0085 (current spelling 'gold/canonical/role_aua/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/')" so tension T-0084 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0086-MAP: Map row R-0086 (current spelling 'gold/canonical/role_aua/*.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/*.parquet')" so tension T-0085 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0087-MAP: Map row R-0087 (current spelling 'gold/canonical/role_aua/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/{*}.parquet')" so tension T-0086 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0088-MAP: Map row R-0088 (current spelling 'gold/canonical/watermarks.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/watermarks.json')" so tension T-0087 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0089-MAP: Map row R-0089 (current spelling 'gold/classification/ticker_coverage_report.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/classification/ticker_coverage_report.json')" so tension T-0088 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0090-MAP: Map row R-0090 (current spelling 'gold/client_performance.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/client_performance.parquet')" so tension T-0089 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0091-MAP: Map row R-0091 (current spelling 'gold/clients/*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/clients/*.json')" so tension T-0090 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0092-MAP: Map row R-0092 (current spelling 'gold/dimensions/accounts_dimension_latest.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/accounts_dimension_latest.parquet')" so tension T-0091 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0093-MAP: Map row R-0093 (current spelling 'gold/dimensions/advisor_assignments.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/advisor_assignments.parquet')" so tension T-0092 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0094-MAP: Map row R-0094 (current spelling 'gold/dimensions/advisor_assignments_history.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/advisor_assignments_history.parquet')" so tension T-0093 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0095-MAP: Map row R-0095 (current spelling 'gold/dimensions/client_dimension.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/client_dimension.parquet')" so tension T-0094 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0096-MAP: Map row R-0096 (current spelling 'gold/dimensions/dim_advisor_office.csv') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/dim_advisor_office.csv')" so tension T-0095 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0097-MAP: Map row R-0097 (current spelling 'gold/dimensions/fee_rate_history.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/fee_rate_history.parquet')" so tension T-0096 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0098-MAP: Map row R-0098 (current spelling 'gold/dimensions/schwab_bd_account_mapping.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/schwab_bd_account_mapping.parquet')" so tension T-0097 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0099-MAP: Map row R-0099 (current spelling 'gold/dimensions/ticker_resolution.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/ticker_resolution.parquet')" so tension T-0098 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0100-MAP: Map row R-0100 (current spelling 'gold/eclipse/{*}/_meta/gold_complete.json') against its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/gold/{*}/_meta/gold_complete.json')" so tension T-0099 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0101-MAP: Map row R-0101 (current spelling 'gold/entities/accounts/{*}/aua_timeseries.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/accounts/{*}/aua_timeseries.json')" so tension T-0100 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0102-MAP: Map row R-0102 (current spelling 'gold/entities/advisors/{*}/book.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/book.json')" so tension T-0101 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0103-MAP: Map row R-0103 (current spelling 'gold/entities/advisors/{*}/composition.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/composition.json')" so tension T-0102 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0104-MAP: Map row R-0104 (current spelling 'gold/entities/advisors/{*}/mix.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix.json')" so tension T-0103 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0105-MAP: Map row R-0105 (current spelling 'gold/entities/advisors/{*}/mix_daily.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix_daily.json')" so tension T-0104 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0106-MAP: Map row R-0106 (current spelling 'gold/entities/advisors/{*}/mix_timeseries.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix_timeseries.json')" so tension T-0105 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0107-MAP: Map row R-0107 (current spelling 'gold/entities/advisors/{*}/timeseries.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/timeseries.json')" so tension T-0106 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0108-MAP: Map row R-0108 (current spelling 'gold/entities/clients/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/')" so tension T-0107 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0109-MAP: Map row R-0109 (current spelling 'gold/entities/clients/*_views.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/*_views.json')" so tension T-0108 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0110-MAP: Map row R-0110 (current spelling 'gold/entities/clients/{*}.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}.json')" so tension T-0109 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0111-MAP: Map row R-0111 (current spelling 'gold/entities/clients/{*}/aua_timeseries.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}/aua_timeseries.json')" so tension T-0110 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0112-MAP: Map row R-0112 (current spelling 'gold/entities/clients/{*}/detail.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}/detail.json')" so tension T-0111 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0113-MAP: Map row R-0113 (current spelling 'gold/entities/clients/{*}_composition.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}_composition.json')" so tension T-0112 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0114-MAP: Map row R-0114 (current spelling 'gold/holdings/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/holdings/{*}.parquet')" so tension T-0113 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0115-MAP: Map row R-0115 (current spelling 'gold/holdings_lots_v2_dryrun/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/holdings_lots_v2_dryrun/{*}.parquet')" so tension T-0114 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0116-MAP: Map row R-0116 (current spelling 'gold/lots/lots_latest.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/lots/lots_latest.parquet')" so tension T-0115 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0117-MAP: Map row R-0117 (current spelling 'gold/lots/lots_{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/lots/lots_{*}.parquet')" so tension T-0116 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0118-MAP: Map row R-0118 (current spelling 'gold/manifests/classify_watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/manifests/classify_watermark.json')" so tension T-0117 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0119-MAP: Map row R-0119 (current spelling 'gold/meta/account_gains_incr_watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/account_gains_incr_watermark.json')" so tension T-0118 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0120-MAP: Map row R-0120 (current spelling 'gold/meta/advisor_assignments_watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/advisor_assignments_watermark.json')" so tension T-0119 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0121-MAP: Map row R-0121 (current spelling 'gold/meta/canonical_lots_incr_watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/canonical_lots_incr_watermark.json')" so tension T-0120 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0122-MAP: Map row R-0122 (current spelling 'gold/meta/client_timeseries_watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/client_timeseries_watermark.json')" so tension T-0121 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0123-MAP: Map row R-0123 (current spelling 'gold/meta/fee_rate_history_watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/fee_rate_history_watermark.json')" so tension T-0122 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0124-MAP: Map row R-0124 (current spelling 'gold/meta/holdings_lots_incr_watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/holdings_lots_incr_watermark.json')" so tension T-0123 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0125-MAP: Map row R-0125 (current spelling 'gold/meta/pipeline-complete.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/pipeline-complete.json')" so tension T-0124 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0126-MAP: Map row R-0126 (current spelling 'gold/meta/positions_cube_incr_watermark.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/positions_cube_incr_watermark.json')" so tension T-0125 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0127-MAP: Map row R-0127 (current spelling 'gold/platinum/firm/cash_coverage_summary.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/platinum/firm/cash_coverage_summary.json')" so tension T-0126 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0128-MAP: Map row R-0128 (current spelling 'gold/platinum/firm/cohort_a_summary.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/platinum/firm/cohort_a_summary.json')" so tension T-0127 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0129-MAP: Map row R-0129 (current spelling 'gold/positions_cube/*.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/*.parquet')" so tension T-0128 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0130-MAP: Map row R-0130 (current spelling 'gold/positions_cube/2026-04-20.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/2026-04-20.parquet')" so tension T-0129 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0131-MAP: Map row R-0131 (current spelling 'gold/positions_cube/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/{*}.parquet')" so tension T-0130 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0132-MAP: Map row R-0132 (current spelling 'gold/timeseries/account_performance.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/account_performance.parquet')" so tension T-0131 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0133-MAP: Map row R-0133 (current spelling 'gold/timeseries/client_performance.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/client_performance.parquet')" so tension T-0132 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0134-MAP: Map row R-0134 (current spelling 'gold/timeseries/holdings_lots/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/')" so tension T-0133 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0135-MAP: Map row R-0135 (current spelling 'gold/timeseries/holdings_lots/2026-04-21.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/2026-04-21.parquet')" so tension T-0134 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0136-MAP: Map row R-0136 (current spelling 'gold/timeseries/holdings_lots/backfill_{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/backfill_{*}.parquet')" so tension T-0135 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0137-MAP: Map row R-0137 (current spelling 'gold/timeseries/holdings_lots/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/{*}.parquet')" so tension T-0136 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0138-MAP: Map row R-0138 (current spelling 'gold/timeseries/holdings_lots_shadow/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots_shadow/{*}.parquet')" so tension T-0137 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0139-MAP: Map row R-0139 (current spelling 'gold/timeseries/positions_cube/') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/positions_cube/')" so tension T-0138 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0140-MAP: Map row R-0140 (current spelling 'gold/timeseries/positions_cube/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/positions_cube/{*}.parquet')" so tension T-0139 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0141-MAP: Map row R-0141 (current spelling 'gold/timeseries/synthetic_positions_index.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/synthetic_positions_index.parquet')" so tension T-0140 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0142-MAP: Map row R-0142 (current spelling 'gold/validation/account_gap_buckets_*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/account_gap_buckets_*.json')" so tension T-0141 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0143-MAP: Map row R-0143 (current spelling 'gold/validation/all_non_yahoo_assets_*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/all_non_yahoo_assets_*.json')" so tension T-0142 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0144-MAP: Map row R-0144 (current spelling 'gold/validation/aua_certification/{*}.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_certification/{*}.json')" so tension T-0143 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0145-MAP: Map row R-0145 (current spelling 'gold/validation/aua_gap_decomposition_*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_gap_decomposition_*.json')" so tension T-0144 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0146-MAP: Map row R-0146 (current spelling 'gold/validation/aua_gap_top_positions_*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_gap_top_positions_*.json')" so tension T-0145 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0147-MAP: Map row R-0147 (current spelling 'gold/validation/aua_validation_{*}.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_validation_{*}.json')" so tension T-0146 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0148-MAP: Map row R-0148 (current spelling 'gold/validation/gap_by_pricing_source_*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/gap_by_pricing_source_*.json')" so tension T-0147 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0149-MAP: Map row R-0149 (current spelling 'gold/validation/tail_asset_drill_*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/tail_asset_drill_*.json')" so tension T-0148 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0150-MAP: Map row R-0150 (current spelling 'gold/validation/unmatched_asset_analysis_*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/unmatched_asset_analysis_*.json')" so tension T-0149 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0151-MAP: Map row R-0151 (current spelling 'gold/validation/yahoo_mapping_audit_*.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/yahoo_mapping_audit_*.json')" so tension T-0150 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0152-MAP: Map row R-0152 (current spelling 'gold/views/account_team.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/account_team.parquet')" so tension T-0151 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0153-MAP: Map row R-0153 (current spelling 'gold/views/client_tax_liability.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/client_tax_liability.parquet')" so tension T-0152 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0154-MAP: Map row R-0154 (current spelling 'gold/views/firm_composition.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/firm_composition.json')" so tension T-0153 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0155-MAP: Map row R-0155 (current spelling 'gold/views/mix_daily_summary.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/mix_daily_summary.json')" so tension T-0154 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0156-MAP: Map row R-0156 (current spelling 'gold/views/nna_aua_by_advisor.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_advisor.parquet')" so tension T-0155 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0157-MAP: Map row R-0157 (current spelling 'gold/views/nna_aua_by_geography.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_geography.parquet')" so tension T-0156 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0158-MAP: Map row R-0158 (current spelling 'gold/views/nna_aua_by_geography_city.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_geography_city.parquet')" so tension T-0157 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0159-MAP: Map row R-0159 (current spelling 'gold/views/rel_architect_lookup.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/rel_architect_lookup.parquet')" so tension T-0158 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0160-MAP: Map row R-0160 (current spelling 'gold/views/relationship_team.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/relationship_team.parquet')" so tension T-0159 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0161-MAP: Map row R-0161 (current spelling 'platinum/accounts/{*}/summary.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/accounts/{*}/summary.json')" so tension T-0160 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0162-MAP: Map row R-0162 (current spelling 'platinum/advisors/{*}/book.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/book.json')" so tension T-0161 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0163-MAP: Map row R-0163 (current spelling 'platinum/advisors/{*}/mix.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/mix.json')" so tension T-0162 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0164-MAP: Map row R-0164 (current spelling 'platinum/advisors/{*}/nna_clients.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/nna_clients.json')" so tension T-0163 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0165-MAP: Map row R-0165 (current spelling 'platinum/advisors/{*}/positions.json') against its desired form None so tension T-0164 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0166-MAP: Map row R-0166 (current spelling 'platinum/advisors/{*}/summary.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/summary.json')" so tension T-0165 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0167-MAP: Map row R-0167 (current spelling 'platinum/advisors/{*}/timeseries.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/timeseries.json')" so tension T-0166 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0168-MAP: Map row R-0168 (current spelling 'platinum/advisors/{*}}/composition.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}}/composition.json')" so tension T-0167 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0169-MAP: Map row R-0169 (current spelling 'platinum/clients/{*}/composition.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/composition.json')" so tension T-0168 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0170-MAP: Map row R-0170 (current spelling 'platinum/clients/{*}/concentration.json') against its desired form None so tension T-0169 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0171-MAP: Map row R-0171 (current spelling 'platinum/clients/{*}/detail.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/detail.json')" so tension T-0170 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0172-MAP: Map row R-0172 (current spelling 'platinum/clients/{*}/mix_timeseries.json') against its desired form None so tension T-0171 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0173-MAP: Map row R-0173 (current spelling 'platinum/clients/{*}/summary.json') against its desired form None so tension T-0172 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0174-MAP: Map row R-0174 (current spelling 'platinum/clients/{*}/timeseries.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/timeseries.json')" so tension T-0173 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0175-MAP: Map row R-0175 (current spelling 'platinum/clients/{*}/top_holdings.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/top_holdings.json')" so tension T-0174 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0176-MAP: Map row R-0176 (current spelling 'platinum/clients/{*}/views.json') against its desired form None so tension T-0175 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0177-MAP: Map row R-0177 (current spelling 'platinum/firm/_meta/bronze_skip_warning_{*}.json') against its desired form None so tension T-0176 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0178-MAP: Map row R-0178 (current spelling 'platinum/firm/_meta/reconciliation_summary_holdings_{*}.json') against its desired form None so tension T-0177 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0179-MAP: Map row R-0179 (current spelling 'platinum/firm/clients-tab-slim.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/clients-tab-slim.json')" so tension T-0178 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0180-MAP: Map row R-0180 (current spelling 'platinum/firm/clients_tab.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/clients-tab.json')" so tension T-0179 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0181-MAP: Map row R-0181 (current spelling 'platinum/firm/cumulative_chart.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/cumulative_chart.json')" so tension T-0180 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0182-MAP: Map row R-0182 (current spelling 'platinum/firm/dashboard.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/dashboard.json')" so tension T-0181 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0183-MAP: Map row R-0183 (current spelling 'platinum/firm/fee_efficiency.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/fee_efficiency.json')" so tension T-0182 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0184-MAP: Map row R-0184 (current spelling 'platinum/firm/filters/dimensions.json') against its desired form None so tension T-0183 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0185-MAP: Map row R-0185 (current spelling 'platinum/firm/firm_composition.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/firm-composition.json')" so tension T-0184 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0186-MAP: Map row R-0186 (current spelling 'platinum/firm/header_metrics.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/header_metrics.json')" so tension T-0185 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0187-MAP: Map row R-0187 (current spelling 'platinum/firm/leaderboard.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/leaderboard.json')" so tension T-0186 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0188-MAP: Map row R-0188 (current spelling 'platinum/firm/leaderboard.prior_week.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/leaderboard.prior-week.json')" so tension T-0187 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0189-MAP: Map row R-0189 (current spelling 'platinum/firm/mix_summary.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/mix_summary.json')" so tension T-0188 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0190-MAP: Map row R-0190 (current spelling 'platinum/firm/partner_analytics.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/partner-analytics.json')" so tension T-0189 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0191-MAP: Map row R-0191 (current spelling 'platinum/firm/partner_analytics_{*}.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/partner_analytics_{*}.json')" so tension T-0190 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0192-MAP: Map row R-0192 (current spelling 'platinum/firm/timeseries_chart.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/timeseries_chart.json')" so tension T-0191 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0193-MAP: Map row R-0193 (current spelling 'platinum/firm/timeseries_overview.json') against its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/timeseries_overview.json')" so tension T-0192 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0194-MAP: Map row R-0194 (current spelling 'platinum/firm/top_holdings.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/top-holdings.json')" so tension T-0193 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0195-MAP: Map row R-0195 (current spelling 'platinum/{*}/ownership_map.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/{*}/ownership-map.json')" so tension T-0194 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0196-MAP: Map row R-0196 (current spelling 'schwab/silver/rld/') against its desired form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/rld/')" so tension T-0195 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0197-MAP: Map row R-0197 (current spelling 'schwab/silver/uln/') against its desired form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/uln/')" so tension T-0196 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0198-MAP: Map row R-0198 (current spelling 'schwab/silver/ult/') against its desired form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/ult/')" so tension T-0197 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0199-MAP: Map row R-0199 (current spelling 'silver/accounts_dim/latest.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/accounts_dim/latest.parquet')" so tension T-0198 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0200-MAP: Map row R-0200 (current spelling 'silver/allocations/*.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/allocations/*.parquet')" so tension T-0199 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0201-MAP: Map row R-0201 (current spelling 'silver/allocations/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/allocations/{*}.parquet')" so tension T-0200 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0202-MAP: Map row R-0202 (current spelling 'silver/api_dims/accounts_v2/snapshot_date={*}/data.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/api_dims/accounts_v2/snapshot_date={*}/data.parquet')" so tension T-0201 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0203-MAP: Map row R-0203 (current spelling 'silver/api_dims/positions_mv/snapshot_date={*}/data.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/api_dims/positions_mv/snapshot_date={*}/data.parquet')" so tension T-0202 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0204-MAP: Map row R-0204 (current spelling 'silver/bd_assets_dim.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/bd_assets_dim.parquet')" so tension T-0203 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0205-MAP: Map row R-0205 (current spelling 'silver/eclipse/{*}/_meta/silver_complete.json') against its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/_meta/silver_complete.json')" so tension T-0204 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0206-MAP: Map row R-0206 (current spelling 'silver/eclipse/{*}/model_composition.parquet') against its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/model_composition.parquet')" so tension T-0205 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0207-MAP: Map row R-0207 (current spelling 'silver/eclipse/{*}/portfolios_full.parquet') against its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/portfolios_full.parquet')" so tension T-0206 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0208-MAP: Map row R-0208 (current spelling 'silver/eclipse/{*}/portfolios_simple.parquet') against its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/portfolios_simple.parquet')" so tension T-0207 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0209-MAP: Map row R-0209 (current spelling 'silver/historical_prices.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/historical_prices.parquet')" so tension T-0208 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0210-MAP: Map row R-0210 (current spelling 'silver/interpolated_prices.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/interpolated_prices.parquet')" so tension T-0209 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0211-MAP: Map row R-0211 (current spelling 'silver/meta/gap_manifest.json') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/meta/gap_manifest.json')" so tension T-0210 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0212-MAP: Map row R-0212 (current spelling 'silver/prices/canonical_prices.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/prices/canonical_prices.parquet')" so tension T-0211 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0213-MAP: Map row R-0213 (current spelling 'silver/realized/bd_realized_agg.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/realized/bd_realized_agg.parquet')" so tension T-0212 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0214-MAP: Map row R-0214 (current spelling 'silver/realized/bd_realized_compact.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/realized/bd_realized_compact.parquet')" so tension T-0213 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0215-MAP: Map row R-0215 (current spelling 'silver/transactions/*.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/transactions/*.parquet')" so tension T-0214 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0216-MAP: Map row R-0216 (current spelling 'silver/transactions/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/transactions/{*}.parquet')" so tension T-0215 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0217-MAP: Map row R-0217 (current spelling 'silver/unrealized/*.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/*.parquet')" so tension T-0216 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0218-MAP: Map row R-0218 (current spelling 'silver/unrealized/2026-04-20.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/2026-04-20.parquet')" so tension T-0217 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0219-MAP: Map row R-0219 (current spelling 'silver/unrealized/unrealized_gain_loss.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/unrealized_gain_loss.parquet')" so tension T-0218 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0220-MAP: Map row R-0220 (current spelling 'silver/unrealized/{*}.parquet') against its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/{*}.parquet')" so tension T-0219 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0224-MAP: Map row R-0224 (current spelling 'opal-data-bd') against its desired form "('ALIAS', 'opal-data-49financial')" so tension T-0220 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0225-MAP: Map row R-0225 (current spelling 'opal-data-cot') against its desired form "('ALIAS', 'opal-data-cottonwood')" so tension T-0221 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0226-MAP: Map row R-0226 (current spelling 'opal-data-inf') against its desired form "('ALIAS', 'opal-data-inflection')" so tension T-0222 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0227-MAP: Map row R-0227 (current spelling 'bd-49f-etf-ownership-scheduled-floor') against its desired form "('OUT-OF-PATTERN', 'blackdiamond-49f-etf-ownership-scheduled-floor-{cadence}')" so tension T-0223 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0228-MAP: Map row R-0228 (current spelling 'bd-49f-fees-runner-daily') against its desired form "('ALIAS', 'blackdiamond-49f-fees-runner-daily')" so tension T-0224 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0229-MAP: Map row R-0229 (current spelling 'bd-49f-fees-session-daily') against its desired form "('ALIAS', 'blackdiamond-49f-fees-session-daily')" so tension T-0225 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0230-MAP: Map row R-0230 (current spelling 'bd-49f-insurance-session-daily') against its desired form "('ALIAS', 'blackdiamond-49f-insurance-session-daily')" so tension T-0226 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0231-MAP: Map row R-0231 (current spelling 'bd-49f-keepalive-sched') against its desired form "('OUT-OF-PATTERN', 'blackdiamond-49f-keepalive-sched-{cadence}')" so tension T-0227 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0232-MAP: Map row R-0232 (current spelling 'bd-49f-runner-daily') against its desired form "('ALIAS', 'blackdiamond-49f-runner-daily')" so tension T-0228 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0233-MAP: Map row R-0233 (current spelling 'bd-49f-session-complete') against its desired form "('OUT-OF-PATTERN', 'blackdiamond-49f-session-complete-{cadence}')" so tension T-0229 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0234-MAP: Map row R-0234 (current spelling 'bd-49f-session-daily') against its desired form "('ALIAS', 'blackdiamond-49f-session-daily')" so tension T-0230 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0235-MAP: Map row R-0235 (current spelling 'bd-allocation-file-check-daily') against its desired form "('OUT-OF-PATTERN', '{system}-49f-allocation-file-check-daily')" so tension T-0231 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0236-MAP: Map row R-0236 (current spelling 'bd-allocation-pipeline-trigger') against its desired form "('OUT-OF-PATTERN', '{system}-49f-allocation-pipeline-trigger-{cadence}')" so tension T-0232 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0237-MAP: Map row R-0237 (current spelling 'bd-asset-dim-pipeline-trigger') against its desired form "('OUT-OF-PATTERN', '{system}-49f-asset-dim-pipeline-trigger-{cadence}')" so tension T-0233 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0238-MAP: Map row R-0238 (current spelling 'bd-canonical-prices-daily') against its desired form "('OUT-OF-PATTERN', '{system}-49f-canonical-prices-daily')" so tension T-0234 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0239-MAP: Map row R-0239 (current spelling 'bd-cot-keepalive-sched') against its desired form "('OUT-OF-PATTERN', 'blackdiamond-cot-keepalive-sched-{cadence}')" so tension T-0235 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0240-MAP: Map row R-0240 (current spelling 'bd-fees-pipeline-trigger') against its desired form "('OUT-OF-PATTERN', '{system}-49f-fees-pipeline-trigger-{cadence}')" so tension T-0236 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0241-MAP: Map row R-0241 (current spelling 'bd-gold-layer-monthly-trigger') against its desired form "('OUT-OF-PATTERN', '{system}-49f-gold-layer-trigger-monthly')" so tension T-0237 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0242-MAP: Map row R-0242 (current spelling 'bd-gold-nightly-fallback') against its desired form "('OUT-OF-PATTERN', '{system}-49f-gold-nightly-fallback-{cadence}')" so tension T-0238 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0243-MAP: Map row R-0243 (current spelling 'bd-realized-pipeline-trigger') against its desired form "('OUT-OF-PATTERN', '{system}-49f-realized-pipeline-trigger-{cadence}')" so tension T-0239 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0244-MAP: Map row R-0244 (current spelling 'bd-transaction-pipeline-trigger') against its desired form "('OUT-OF-PATTERN', '{system}-49f-transaction-pipeline-trigger-{cadence}')" so tension T-0240 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0245-MAP: Map row R-0245 (current spelling 'bd-unrealized-pipeline-trigger') against its desired form "('OUT-OF-PATTERN', '{system}-49f-unrealized-pipeline-trigger-{cadence}')" so tension T-0241 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0246-MAP: Map row R-0246 (current spelling 'cot-etf-ownership-daily-schedule') against its desired form "('OUT-OF-PATTERN', '{system}-cot-etf-ownership-schedule-daily')" so tension T-0242 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0247-MAP: Map row R-0247 (current spelling 'cot-rebalancer-runner-daily') against its desired form "('OUT-OF-PATTERN', '{system}-cot-rebalancer-runner-daily')" so tension T-0243 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0248-MAP: Map row R-0248 (current spelling 'cot-satellites-characteristics-producer-daily') against its desired form "('OUT-OF-PATTERN', '{system}-cot-satellites-characteristics-producer-daily')" so tension T-0244 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0249-MAP: Map row R-0249 (current spelling 'cot-satellites-registry-producer-daily') against its desired form "('OUT-OF-PATTERN', '{system}-cot-satellites-registry-producer-daily')" so tension T-0245 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0250-MAP: Map row R-0250 (current spelling 'cot-session-complete') against its desired form "('OUT-OF-PATTERN', '{system}-cot-session-complete-{cadence}')" so tension T-0246 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0251-MAP: Map row R-0251 (current spelling 'inf-accounts-v2-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-accounts-v2-daily')" so tension T-0247 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0252-MAP: Map row R-0252 (current spelling 'inf-api-assets-v2-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-api-assets-v2-daily')" so tension T-0248 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0253-MAP: Map row R-0253 (current spelling 'inf-api-eclipse-daily') against its desired form "('OUT-OF-PATTERN', 'eclipse-inf-api-daily')" so tension T-0249 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0254-MAP: Map row R-0254 (current spelling 'inf-api-positions-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-api-positions-daily')" so tension T-0250 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0255-MAP: Map row R-0255 (current spelling 'inf-api-reps-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-api-reps-daily')" so tension T-0251 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0256-MAP: Map row R-0256 (current spelling 'inf-api-txn-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-api-txn-daily')" so tension T-0252 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0257-MAP: Map row R-0257 (current spelling 'inf-billing-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-billing-daily')" so tension T-0253 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0258-MAP: Map row R-0258 (current spelling 'inf-bronze-complete-emitter-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-bronze-complete-emitter-daily')" so tension T-0254 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0259-MAP: Map row R-0259 (current spelling 'inf-canonical-prices-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-canonical-prices-daily')" so tension T-0255 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0260-MAP: Map row R-0260 (current spelling 'inf-etf-ownership-daily-schedule') against its desired form "('OUT-OF-PATTERN', '{system}-inf-etf-ownership-schedule-daily')" so tension T-0256 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0261-MAP: Map row R-0261 (current spelling 'inf-gold-dispatch-release-changed') against its desired form "('OUT-OF-PATTERN', '{system}-inf-gold-dispatch-release-changed-{cadence}')" so tension T-0257 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0262-MAP: Map row R-0262 (current spelling 'inf-gold-incremental-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-gold-incremental-daily')" so tension T-0258 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0263-MAP: Map row R-0263 (current spelling 'inf-nna-partition-check-trigger') against its desired form "('OUT-OF-PATTERN', '{system}-inf-nna-partition-check-trigger-{cadence}')" so tension T-0259 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0264-MAP: Map row R-0264 (current spelling 'inf-performance-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-performance-daily')" so tension T-0260 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0265-MAP: Map row R-0265 (current spelling 'inf-tax-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-tax-daily')" so tension T-0261 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0266-MAP: Map row R-0266 (current spelling 'inf-unified-account-dim-daily') against its desired form "('OUT-OF-PATTERN', '{system}-inf-unified-account-dim-daily')" so tension T-0262 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0267-MAP: Map row R-0267 (current spelling 'opal-assets-ingest-mirror-inf-daily') against its desired form "('OUT-OF-PATTERN', 'opal-inf-assets-ingest-mirror-daily')" so tension T-0263 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0269-MAP: Map row R-0269 (current spelling 'opal-inf-bronze-runner-cron') against its desired form "('OUT-OF-PATTERN', 'opal-inf-bronze-runner-cron-{cadence}')" so tension T-0264 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0270-MAP: Map row R-0270 (current spelling 'opal-inf-ec2-state-change-monitor') against its desired form "('OUT-OF-PATTERN', 'opal-inf-ec2-state-change-monitor-{cadence}')" so tension T-0265 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0271-MAP: Map row R-0271 (current spelling 'opal-inf-export-schedule') against its desired form "('OUT-OF-PATTERN', 'opal-inf-export-schedule-{cadence}')" so tension T-0266 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0272-MAP: Map row R-0272 (current spelling 'opal-inf-jwt-fetch') against its desired form "('OUT-OF-PATTERN', 'opal-inf-jwt-fetch-{cadence}')" so tension T-0267 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0274-MAP: Map row R-0274 (current spelling 'opal-assets-ingest-mirror-cot-daily-et') against its desired form "('OUT-OF-PATTERN', 'opal-cot-assets-ingest-mirror-et-daily')" so tension T-0268 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0275-MAP: Map row R-0275 (current spelling 'cot-bd-session-daily-et') against its desired form "('OUT-OF-PATTERN', 'blackdiamond-cot-session-et-daily')" so tension T-0269 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0276-MAP: Map row R-0276 (current spelling 'opal-data-bd-s3-notify-planted-test-queue') against its desired form "('OUT-OF-PATTERN', 'opal-49f-data-s3-notify-planted-test-queue')" so tension T-0270 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+- R-0277-MAP: Map row R-0277 (current spelling 'planted-system-without-a-row-49financial-ingest-role') against its desired form None so tension T-0271 is fully characterized before any change (R19 step 1/6, ATOM_DECOMP 'characterize').
+
+## CLASSIFY (271)
+- R-0221-CLASSIFY: Classify tension T-0001's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0221.
+- R-0222-CLASSIFY: Classify tension T-0002's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0222.
+- R-0223-CLASSIFY: Classify tension T-0003's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0223.
+- R-0002-CLASSIFY: Classify tension T-0004's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0002.
+- R-0003-CLASSIFY: Classify tension T-0005's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0003.
+- R-0004-CLASSIFY: Classify tension T-0006's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0004.
+- R-0005-CLASSIFY: Classify tension T-0007's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0005.
+- R-0006-CLASSIFY: Classify tension T-0008's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0006.
+- R-0007-CLASSIFY: Classify tension T-0009's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0007.
+- R-0008-CLASSIFY: Classify tension T-0010's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0008.
+- R-0009-CLASSIFY: Classify tension T-0011's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0009.
+- R-0013-CLASSIFY: Classify tension T-0012's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0013.
+- R-0014-CLASSIFY: Classify tension T-0013's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0014.
+- R-0015-CLASSIFY: Classify tension T-0014's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0015.
+- R-0016-CLASSIFY: Classify tension T-0015's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0016.
+- R-0017-CLASSIFY: Classify tension T-0016's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0017.
+- R-0018-CLASSIFY: Classify tension T-0017's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0018.
+- R-0019-CLASSIFY: Classify tension T-0018's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0019.
+- R-0020-CLASSIFY: Classify tension T-0019's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0020.
+- R-0021-CLASSIFY: Classify tension T-0020's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0021.
+- R-0022-CLASSIFY: Classify tension T-0021's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0022.
+- R-0023-CLASSIFY: Classify tension T-0022's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0023.
+- R-0024-CLASSIFY: Classify tension T-0023's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0024.
+- R-0025-CLASSIFY: Classify tension T-0024's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0025.
+- R-0026-CLASSIFY: Classify tension T-0025's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0026.
+- R-0027-CLASSIFY: Classify tension T-0026's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0027.
+- R-0028-CLASSIFY: Classify tension T-0027's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0028.
+- R-0029-CLASSIFY: Classify tension T-0028's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0029.
+- R-0030-CLASSIFY: Classify tension T-0029's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0030.
+- R-0031-CLASSIFY: Classify tension T-0030's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0031.
+- R-0032-CLASSIFY: Classify tension T-0031's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0032.
+- R-0033-CLASSIFY: Classify tension T-0032's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0033.
+- R-0034-CLASSIFY: Classify tension T-0033's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0034.
+- R-0035-CLASSIFY: Classify tension T-0034's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0035.
+- R-0036-CLASSIFY: Classify tension T-0035's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0036.
+- R-0037-CLASSIFY: Classify tension T-0036's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0037.
+- R-0038-CLASSIFY: Classify tension T-0037's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0038.
+- R-0039-CLASSIFY: Classify tension T-0038's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0039.
+- R-0040-CLASSIFY: Classify tension T-0039's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0040.
+- R-0041-CLASSIFY: Classify tension T-0040's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0041.
+- R-0042-CLASSIFY: Classify tension T-0041's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0042.
+- R-0043-CLASSIFY: Classify tension T-0042's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0043.
+- R-0044-CLASSIFY: Classify tension T-0043's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0044.
+- R-0045-CLASSIFY: Classify tension T-0044's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0045.
+- R-0046-CLASSIFY: Classify tension T-0045's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0046.
+- R-0047-CLASSIFY: Classify tension T-0046's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0047.
+- R-0048-CLASSIFY: Classify tension T-0047's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0048.
+- R-0049-CLASSIFY: Classify tension T-0048's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0049.
+- R-0050-CLASSIFY: Classify tension T-0049's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0050.
+- R-0051-CLASSIFY: Classify tension T-0050's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0051.
+- R-0052-CLASSIFY: Classify tension T-0051's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0052.
+- R-0053-CLASSIFY: Classify tension T-0052's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0053.
+- R-0054-CLASSIFY: Classify tension T-0053's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0054.
+- R-0055-CLASSIFY: Classify tension T-0054's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0055.
+- R-0056-CLASSIFY: Classify tension T-0055's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0056.
+- R-0057-CLASSIFY: Classify tension T-0056's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0057.
+- R-0058-CLASSIFY: Classify tension T-0057's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0058.
+- R-0059-CLASSIFY: Classify tension T-0058's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0059.
+- R-0060-CLASSIFY: Classify tension T-0059's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0060.
+- R-0061-CLASSIFY: Classify tension T-0060's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0061.
+- R-0062-CLASSIFY: Classify tension T-0061's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0062.
+- R-0063-CLASSIFY: Classify tension T-0062's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0063.
+- R-0064-CLASSIFY: Classify tension T-0063's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0064.
+- R-0065-CLASSIFY: Classify tension T-0064's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0065.
+- R-0066-CLASSIFY: Classify tension T-0065's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0066.
+- R-0067-CLASSIFY: Classify tension T-0066's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0067.
+- R-0068-CLASSIFY: Classify tension T-0067's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0068.
+- R-0069-CLASSIFY: Classify tension T-0068's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0069.
+- R-0070-CLASSIFY: Classify tension T-0069's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0070.
+- R-0071-CLASSIFY: Classify tension T-0070's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0071.
+- R-0072-CLASSIFY: Classify tension T-0071's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0072.
+- R-0073-CLASSIFY: Classify tension T-0072's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0073.
+- R-0074-CLASSIFY: Classify tension T-0073's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0074.
+- R-0075-CLASSIFY: Classify tension T-0074's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0075.
+- R-0076-CLASSIFY: Classify tension T-0075's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0076.
+- R-0077-CLASSIFY: Classify tension T-0076's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0077.
+- R-0078-CLASSIFY: Classify tension T-0077's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0078.
+- R-0079-CLASSIFY: Classify tension T-0078's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0079.
+- R-0080-CLASSIFY: Classify tension T-0079's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0080.
+- R-0081-CLASSIFY: Classify tension T-0080's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0081.
+- R-0082-CLASSIFY: Classify tension T-0081's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0082.
+- R-0083-CLASSIFY: Classify tension T-0082's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0083.
+- R-0084-CLASSIFY: Classify tension T-0083's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0084.
+- R-0085-CLASSIFY: Classify tension T-0084's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0085.
+- R-0086-CLASSIFY: Classify tension T-0085's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0086.
+- R-0087-CLASSIFY: Classify tension T-0086's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0087.
+- R-0088-CLASSIFY: Classify tension T-0087's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0088.
+- R-0089-CLASSIFY: Classify tension T-0088's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0089.
+- R-0090-CLASSIFY: Classify tension T-0089's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0090.
+- R-0091-CLASSIFY: Classify tension T-0090's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0091.
+- R-0092-CLASSIFY: Classify tension T-0091's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0092.
+- R-0093-CLASSIFY: Classify tension T-0092's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0093.
+- R-0094-CLASSIFY: Classify tension T-0093's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0094.
+- R-0095-CLASSIFY: Classify tension T-0094's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0095.
+- R-0096-CLASSIFY: Classify tension T-0095's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0096.
+- R-0097-CLASSIFY: Classify tension T-0096's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0097.
+- R-0098-CLASSIFY: Classify tension T-0097's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0098.
+- R-0099-CLASSIFY: Classify tension T-0098's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0099.
+- R-0100-CLASSIFY: Classify tension T-0099's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0100.
+- R-0101-CLASSIFY: Classify tension T-0100's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0101.
+- R-0102-CLASSIFY: Classify tension T-0101's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0102.
+- R-0103-CLASSIFY: Classify tension T-0102's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0103.
+- R-0104-CLASSIFY: Classify tension T-0103's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0104.
+- R-0105-CLASSIFY: Classify tension T-0104's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0105.
+- R-0106-CLASSIFY: Classify tension T-0105's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0106.
+- R-0107-CLASSIFY: Classify tension T-0106's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0107.
+- R-0108-CLASSIFY: Classify tension T-0107's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0108.
+- R-0109-CLASSIFY: Classify tension T-0108's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0109.
+- R-0110-CLASSIFY: Classify tension T-0109's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0110.
+- R-0111-CLASSIFY: Classify tension T-0110's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0111.
+- R-0112-CLASSIFY: Classify tension T-0111's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0112.
+- R-0113-CLASSIFY: Classify tension T-0112's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0113.
+- R-0114-CLASSIFY: Classify tension T-0113's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0114.
+- R-0115-CLASSIFY: Classify tension T-0114's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0115.
+- R-0116-CLASSIFY: Classify tension T-0115's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0116.
+- R-0117-CLASSIFY: Classify tension T-0116's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0117.
+- R-0118-CLASSIFY: Classify tension T-0117's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0118.
+- R-0119-CLASSIFY: Classify tension T-0118's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0119.
+- R-0120-CLASSIFY: Classify tension T-0119's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0120.
+- R-0121-CLASSIFY: Classify tension T-0120's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0121.
+- R-0122-CLASSIFY: Classify tension T-0121's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0122.
+- R-0123-CLASSIFY: Classify tension T-0122's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0123.
+- R-0124-CLASSIFY: Classify tension T-0123's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0124.
+- R-0125-CLASSIFY: Classify tension T-0124's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0125.
+- R-0126-CLASSIFY: Classify tension T-0125's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0126.
+- R-0127-CLASSIFY: Classify tension T-0126's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0127.
+- R-0128-CLASSIFY: Classify tension T-0127's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0128.
+- R-0129-CLASSIFY: Classify tension T-0128's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0129.
+- R-0130-CLASSIFY: Classify tension T-0129's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0130.
+- R-0131-CLASSIFY: Classify tension T-0130's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0131.
+- R-0132-CLASSIFY: Classify tension T-0131's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0132.
+- R-0133-CLASSIFY: Classify tension T-0132's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0133.
+- R-0134-CLASSIFY: Classify tension T-0133's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0134.
+- R-0135-CLASSIFY: Classify tension T-0134's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0135.
+- R-0136-CLASSIFY: Classify tension T-0135's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0136.
+- R-0137-CLASSIFY: Classify tension T-0136's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0137.
+- R-0138-CLASSIFY: Classify tension T-0137's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0138.
+- R-0139-CLASSIFY: Classify tension T-0138's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0139.
+- R-0140-CLASSIFY: Classify tension T-0139's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0140.
+- R-0141-CLASSIFY: Classify tension T-0140's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0141.
+- R-0142-CLASSIFY: Classify tension T-0141's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0142.
+- R-0143-CLASSIFY: Classify tension T-0142's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0143.
+- R-0144-CLASSIFY: Classify tension T-0143's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0144.
+- R-0145-CLASSIFY: Classify tension T-0144's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0145.
+- R-0146-CLASSIFY: Classify tension T-0145's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0146.
+- R-0147-CLASSIFY: Classify tension T-0146's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0147.
+- R-0148-CLASSIFY: Classify tension T-0147's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0148.
+- R-0149-CLASSIFY: Classify tension T-0148's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0149.
+- R-0150-CLASSIFY: Classify tension T-0149's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0150.
+- R-0151-CLASSIFY: Classify tension T-0150's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0151.
+- R-0152-CLASSIFY: Classify tension T-0151's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0152.
+- R-0153-CLASSIFY: Classify tension T-0152's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0153.
+- R-0154-CLASSIFY: Classify tension T-0153's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0154.
+- R-0155-CLASSIFY: Classify tension T-0154's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0155.
+- R-0156-CLASSIFY: Classify tension T-0155's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0156.
+- R-0157-CLASSIFY: Classify tension T-0156's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0157.
+- R-0158-CLASSIFY: Classify tension T-0157's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0158.
+- R-0159-CLASSIFY: Classify tension T-0158's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0159.
+- R-0160-CLASSIFY: Classify tension T-0159's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0160.
+- R-0161-CLASSIFY: Classify tension T-0160's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0161.
+- R-0162-CLASSIFY: Classify tension T-0161's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0162.
+- R-0163-CLASSIFY: Classify tension T-0162's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0163.
+- R-0164-CLASSIFY: Classify tension T-0163's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0164.
+- R-0165-CLASSIFY: Classify tension T-0164's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0165.
+- R-0166-CLASSIFY: Classify tension T-0165's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0166.
+- R-0167-CLASSIFY: Classify tension T-0166's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0167.
+- R-0168-CLASSIFY: Classify tension T-0167's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0168.
+- R-0169-CLASSIFY: Classify tension T-0168's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0169.
+- R-0170-CLASSIFY: Classify tension T-0169's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0170.
+- R-0171-CLASSIFY: Classify tension T-0170's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0171.
+- R-0172-CLASSIFY: Classify tension T-0171's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0172.
+- R-0173-CLASSIFY: Classify tension T-0172's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0173.
+- R-0174-CLASSIFY: Classify tension T-0173's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0174.
+- R-0175-CLASSIFY: Classify tension T-0174's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0175.
+- R-0176-CLASSIFY: Classify tension T-0175's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0176.
+- R-0177-CLASSIFY: Classify tension T-0176's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0177.
+- R-0178-CLASSIFY: Classify tension T-0177's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0178.
+- R-0179-CLASSIFY: Classify tension T-0178's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0179.
+- R-0180-CLASSIFY: Classify tension T-0179's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0180.
+- R-0181-CLASSIFY: Classify tension T-0180's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0181.
+- R-0182-CLASSIFY: Classify tension T-0181's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0182.
+- R-0183-CLASSIFY: Classify tension T-0182's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0183.
+- R-0184-CLASSIFY: Classify tension T-0183's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0184.
+- R-0185-CLASSIFY: Classify tension T-0184's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0185.
+- R-0186-CLASSIFY: Classify tension T-0185's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0186.
+- R-0187-CLASSIFY: Classify tension T-0186's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0187.
+- R-0188-CLASSIFY: Classify tension T-0187's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0188.
+- R-0189-CLASSIFY: Classify tension T-0188's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0189.
+- R-0190-CLASSIFY: Classify tension T-0189's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0190.
+- R-0191-CLASSIFY: Classify tension T-0190's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0191.
+- R-0192-CLASSIFY: Classify tension T-0191's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0192.
+- R-0193-CLASSIFY: Classify tension T-0192's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0193.
+- R-0194-CLASSIFY: Classify tension T-0193's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0194.
+- R-0195-CLASSIFY: Classify tension T-0194's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0195.
+- R-0196-CLASSIFY: Classify tension T-0195's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0196.
+- R-0197-CLASSIFY: Classify tension T-0196's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0197.
+- R-0198-CLASSIFY: Classify tension T-0197's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0198.
+- R-0199-CLASSIFY: Classify tension T-0198's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0199.
+- R-0200-CLASSIFY: Classify tension T-0199's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0200.
+- R-0201-CLASSIFY: Classify tension T-0200's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0201.
+- R-0202-CLASSIFY: Classify tension T-0201's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0202.
+- R-0203-CLASSIFY: Classify tension T-0202's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0203.
+- R-0204-CLASSIFY: Classify tension T-0203's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0204.
+- R-0205-CLASSIFY: Classify tension T-0204's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0205.
+- R-0206-CLASSIFY: Classify tension T-0205's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0206.
+- R-0207-CLASSIFY: Classify tension T-0206's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0207.
+- R-0208-CLASSIFY: Classify tension T-0207's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0208.
+- R-0209-CLASSIFY: Classify tension T-0208's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0209.
+- R-0210-CLASSIFY: Classify tension T-0209's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0210.
+- R-0211-CLASSIFY: Classify tension T-0210's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0211.
+- R-0212-CLASSIFY: Classify tension T-0211's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0212.
+- R-0213-CLASSIFY: Classify tension T-0212's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0213.
+- R-0214-CLASSIFY: Classify tension T-0213's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0214.
+- R-0215-CLASSIFY: Classify tension T-0214's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0215.
+- R-0216-CLASSIFY: Classify tension T-0215's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0216.
+- R-0217-CLASSIFY: Classify tension T-0216's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0217.
+- R-0218-CLASSIFY: Classify tension T-0217's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0218.
+- R-0219-CLASSIFY: Classify tension T-0218's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0219.
+- R-0220-CLASSIFY: Classify tension T-0219's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0220.
+- R-0224-CLASSIFY: Classify tension T-0220's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0224.
+- R-0225-CLASSIFY: Classify tension T-0221's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0225.
+- R-0226-CLASSIFY: Classify tension T-0222's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0226.
+- R-0227-CLASSIFY: Classify tension T-0223's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0227.
+- R-0228-CLASSIFY: Classify tension T-0224's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0228.
+- R-0229-CLASSIFY: Classify tension T-0225's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0229.
+- R-0230-CLASSIFY: Classify tension T-0226's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0230.
+- R-0231-CLASSIFY: Classify tension T-0227's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0231.
+- R-0232-CLASSIFY: Classify tension T-0228's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0232.
+- R-0233-CLASSIFY: Classify tension T-0229's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0233.
+- R-0234-CLASSIFY: Classify tension T-0230's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0234.
+- R-0235-CLASSIFY: Classify tension T-0231's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0235.
+- R-0236-CLASSIFY: Classify tension T-0232's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0236.
+- R-0237-CLASSIFY: Classify tension T-0233's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0237.
+- R-0238-CLASSIFY: Classify tension T-0234's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0238.
+- R-0239-CLASSIFY: Classify tension T-0235's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0239.
+- R-0240-CLASSIFY: Classify tension T-0236's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0240.
+- R-0241-CLASSIFY: Classify tension T-0237's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0241.
+- R-0242-CLASSIFY: Classify tension T-0238's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0242.
+- R-0243-CLASSIFY: Classify tension T-0239's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0243.
+- R-0244-CLASSIFY: Classify tension T-0240's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0244.
+- R-0245-CLASSIFY: Classify tension T-0241's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0245.
+- R-0246-CLASSIFY: Classify tension T-0242's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0246.
+- R-0247-CLASSIFY: Classify tension T-0243's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0247.
+- R-0248-CLASSIFY: Classify tension T-0244's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0248.
+- R-0249-CLASSIFY: Classify tension T-0245's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0249.
+- R-0250-CLASSIFY: Classify tension T-0246's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0250.
+- R-0251-CLASSIFY: Classify tension T-0247's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0251.
+- R-0252-CLASSIFY: Classify tension T-0248's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0252.
+- R-0253-CLASSIFY: Classify tension T-0249's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0253.
+- R-0254-CLASSIFY: Classify tension T-0250's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0254.
+- R-0255-CLASSIFY: Classify tension T-0251's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0255.
+- R-0256-CLASSIFY: Classify tension T-0252's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0256.
+- R-0257-CLASSIFY: Classify tension T-0253's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0257.
+- R-0258-CLASSIFY: Classify tension T-0254's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0258.
+- R-0259-CLASSIFY: Classify tension T-0255's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0259.
+- R-0260-CLASSIFY: Classify tension T-0256's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0260.
+- R-0261-CLASSIFY: Classify tension T-0257's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0261.
+- R-0262-CLASSIFY: Classify tension T-0258's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0262.
+- R-0263-CLASSIFY: Classify tension T-0259's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0263.
+- R-0264-CLASSIFY: Classify tension T-0260's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0264.
+- R-0265-CLASSIFY: Classify tension T-0261's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0265.
+- R-0266-CLASSIFY: Classify tension T-0262's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0266.
+- R-0267-CLASSIFY: Classify tension T-0263's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0267.
+- R-0269-CLASSIFY: Classify tension T-0264's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0269.
+- R-0270-CLASSIFY: Classify tension T-0265's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0270.
+- R-0271-CLASSIFY: Classify tension T-0266's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0271.
+- R-0272-CLASSIFY: Classify tension T-0267's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0272.
+- R-0274-CLASSIFY: Classify tension T-0268's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0274.
+- R-0275-CLASSIFY: Classify tension T-0269's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0275.
+- R-0276-CLASSIFY: Classify tension T-0270's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0276.
+- R-0277-CLASSIFY: Classify tension T-0271's axis A3 / kind GRAMMAR / deciding rule(s) R1 against the canon, fixing which remedy R19 step 3 (RULE) applies to row R-0277.
+
+## RULE (271)
+- R-0221-RULE: Select the remedy deciding rule(s) R1 name for row R-0221's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0222-RULE: Select the remedy deciding rule(s) R1 name for row R-0222's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0223-RULE: Select the remedy deciding rule(s) R1 name for row R-0223's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0002-RULE: Select the remedy deciding rule(s) R1 name for row R-0002's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0003-RULE: Select the remedy deciding rule(s) R1 name for row R-0003's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0004-RULE: Select the remedy deciding rule(s) R1 name for row R-0004's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0005-RULE: Select the remedy deciding rule(s) R1 name for row R-0005's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0006-RULE: Select the remedy deciding rule(s) R1 name for row R-0006's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0007-RULE: Select the remedy deciding rule(s) R1 name for row R-0007's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0008-RULE: Select the remedy deciding rule(s) R1 name for row R-0008's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0009-RULE: Select the remedy deciding rule(s) R1 name for row R-0009's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0013-RULE: Select the remedy deciding rule(s) R1 name for row R-0013's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0014-RULE: Select the remedy deciding rule(s) R1 name for row R-0014's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0015-RULE: Select the remedy deciding rule(s) R1 name for row R-0015's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0016-RULE: Select the remedy deciding rule(s) R1 name for row R-0016's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0017-RULE: Select the remedy deciding rule(s) R1 name for row R-0017's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0018-RULE: Select the remedy deciding rule(s) R1 name for row R-0018's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0019-RULE: Select the remedy deciding rule(s) R1 name for row R-0019's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0020-RULE: Select the remedy deciding rule(s) R1 name for row R-0020's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0021-RULE: Select the remedy deciding rule(s) R1 name for row R-0021's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0022-RULE: Select the remedy deciding rule(s) R1 name for row R-0022's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0023-RULE: Select the remedy deciding rule(s) R1 name for row R-0023's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0024-RULE: Select the remedy deciding rule(s) R1 name for row R-0024's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0025-RULE: Select the remedy deciding rule(s) R1 name for row R-0025's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0026-RULE: Select the remedy deciding rule(s) R1 name for row R-0026's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0027-RULE: Select the remedy deciding rule(s) R1 name for row R-0027's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0028-RULE: Select the remedy deciding rule(s) R1 name for row R-0028's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0029-RULE: Select the remedy deciding rule(s) R1 name for row R-0029's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0030-RULE: Select the remedy deciding rule(s) R1 name for row R-0030's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0031-RULE: Select the remedy deciding rule(s) R1 name for row R-0031's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0032-RULE: Select the remedy deciding rule(s) R1 name for row R-0032's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0033-RULE: Select the remedy deciding rule(s) R1 name for row R-0033's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0034-RULE: Select the remedy deciding rule(s) R1 name for row R-0034's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0035-RULE: Select the remedy deciding rule(s) R1 name for row R-0035's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0036-RULE: Select the remedy deciding rule(s) R1 name for row R-0036's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0037-RULE: Select the remedy deciding rule(s) R1 name for row R-0037's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0038-RULE: Select the remedy deciding rule(s) R1 name for row R-0038's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0039-RULE: Select the remedy deciding rule(s) R1 name for row R-0039's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0040-RULE: Select the remedy deciding rule(s) R1 name for row R-0040's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0041-RULE: Select the remedy deciding rule(s) R1 name for row R-0041's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0042-RULE: Select the remedy deciding rule(s) R1 name for row R-0042's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0043-RULE: Select the remedy deciding rule(s) R1 name for row R-0043's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0044-RULE: Select the remedy deciding rule(s) R1 name for row R-0044's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0045-RULE: Select the remedy deciding rule(s) R1 name for row R-0045's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0046-RULE: Select the remedy deciding rule(s) R1 name for row R-0046's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0047-RULE: Select the remedy deciding rule(s) R1 name for row R-0047's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0048-RULE: Select the remedy deciding rule(s) R1 name for row R-0048's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0049-RULE: Select the remedy deciding rule(s) R1 name for row R-0049's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0050-RULE: Select the remedy deciding rule(s) R1 name for row R-0050's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0051-RULE: Select the remedy deciding rule(s) R1 name for row R-0051's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0052-RULE: Select the remedy deciding rule(s) R1 name for row R-0052's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0053-RULE: Select the remedy deciding rule(s) R1 name for row R-0053's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0054-RULE: Select the remedy deciding rule(s) R1 name for row R-0054's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0055-RULE: Select the remedy deciding rule(s) R1 name for row R-0055's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0056-RULE: Select the remedy deciding rule(s) R1 name for row R-0056's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0057-RULE: Select the remedy deciding rule(s) R1 name for row R-0057's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0058-RULE: Select the remedy deciding rule(s) R1 name for row R-0058's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0059-RULE: Select the remedy deciding rule(s) R1 name for row R-0059's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0060-RULE: Select the remedy deciding rule(s) R1 name for row R-0060's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0061-RULE: Select the remedy deciding rule(s) R1 name for row R-0061's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0062-RULE: Select the remedy deciding rule(s) R1 name for row R-0062's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0063-RULE: Select the remedy deciding rule(s) R1 name for row R-0063's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0064-RULE: Select the remedy deciding rule(s) R1 name for row R-0064's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0065-RULE: Select the remedy deciding rule(s) R1 name for row R-0065's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0066-RULE: Select the remedy deciding rule(s) R1 name for row R-0066's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0067-RULE: Select the remedy deciding rule(s) R1 name for row R-0067's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0068-RULE: Select the remedy deciding rule(s) R1 name for row R-0068's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0069-RULE: Select the remedy deciding rule(s) R1 name for row R-0069's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0070-RULE: Select the remedy deciding rule(s) R1 name for row R-0070's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0071-RULE: Select the remedy deciding rule(s) R1 name for row R-0071's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0072-RULE: Select the remedy deciding rule(s) R1 name for row R-0072's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0073-RULE: Select the remedy deciding rule(s) R1 name for row R-0073's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0074-RULE: Select the remedy deciding rule(s) R1 name for row R-0074's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0075-RULE: Select the remedy deciding rule(s) R1 name for row R-0075's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0076-RULE: Select the remedy deciding rule(s) R1 name for row R-0076's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0077-RULE: Select the remedy deciding rule(s) R1 name for row R-0077's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0078-RULE: Select the remedy deciding rule(s) R1 name for row R-0078's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0079-RULE: Select the remedy deciding rule(s) R1 name for row R-0079's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0080-RULE: Select the remedy deciding rule(s) R1 name for row R-0080's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0081-RULE: Select the remedy deciding rule(s) R1 name for row R-0081's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0082-RULE: Select the remedy deciding rule(s) R1 name for row R-0082's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0083-RULE: Select the remedy deciding rule(s) R1 name for row R-0083's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0084-RULE: Select the remedy deciding rule(s) R1 name for row R-0084's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0085-RULE: Select the remedy deciding rule(s) R1 name for row R-0085's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0086-RULE: Select the remedy deciding rule(s) R1 name for row R-0086's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0087-RULE: Select the remedy deciding rule(s) R1 name for row R-0087's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0088-RULE: Select the remedy deciding rule(s) R1 name for row R-0088's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0089-RULE: Select the remedy deciding rule(s) R1 name for row R-0089's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0090-RULE: Select the remedy deciding rule(s) R1 name for row R-0090's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0091-RULE: Select the remedy deciding rule(s) R1 name for row R-0091's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0092-RULE: Select the remedy deciding rule(s) R1 name for row R-0092's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0093-RULE: Select the remedy deciding rule(s) R1 name for row R-0093's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0094-RULE: Select the remedy deciding rule(s) R1 name for row R-0094's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0095-RULE: Select the remedy deciding rule(s) R1 name for row R-0095's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0096-RULE: Select the remedy deciding rule(s) R1 name for row R-0096's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0097-RULE: Select the remedy deciding rule(s) R1 name for row R-0097's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0098-RULE: Select the remedy deciding rule(s) R1 name for row R-0098's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0099-RULE: Select the remedy deciding rule(s) R1 name for row R-0099's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0100-RULE: Select the remedy deciding rule(s) R1 name for row R-0100's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0101-RULE: Select the remedy deciding rule(s) R1 name for row R-0101's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0102-RULE: Select the remedy deciding rule(s) R1 name for row R-0102's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0103-RULE: Select the remedy deciding rule(s) R1 name for row R-0103's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0104-RULE: Select the remedy deciding rule(s) R1 name for row R-0104's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0105-RULE: Select the remedy deciding rule(s) R1 name for row R-0105's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0106-RULE: Select the remedy deciding rule(s) R1 name for row R-0106's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0107-RULE: Select the remedy deciding rule(s) R1 name for row R-0107's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0108-RULE: Select the remedy deciding rule(s) R1 name for row R-0108's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0109-RULE: Select the remedy deciding rule(s) R1 name for row R-0109's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0110-RULE: Select the remedy deciding rule(s) R1 name for row R-0110's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0111-RULE: Select the remedy deciding rule(s) R1 name for row R-0111's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0112-RULE: Select the remedy deciding rule(s) R1 name for row R-0112's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0113-RULE: Select the remedy deciding rule(s) R1 name for row R-0113's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0114-RULE: Select the remedy deciding rule(s) R1 name for row R-0114's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0115-RULE: Select the remedy deciding rule(s) R1 name for row R-0115's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0116-RULE: Select the remedy deciding rule(s) R1 name for row R-0116's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0117-RULE: Select the remedy deciding rule(s) R1 name for row R-0117's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0118-RULE: Select the remedy deciding rule(s) R1 name for row R-0118's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0119-RULE: Select the remedy deciding rule(s) R1 name for row R-0119's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0120-RULE: Select the remedy deciding rule(s) R1 name for row R-0120's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0121-RULE: Select the remedy deciding rule(s) R1 name for row R-0121's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0122-RULE: Select the remedy deciding rule(s) R1 name for row R-0122's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0123-RULE: Select the remedy deciding rule(s) R1 name for row R-0123's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0124-RULE: Select the remedy deciding rule(s) R1 name for row R-0124's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0125-RULE: Select the remedy deciding rule(s) R1 name for row R-0125's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0126-RULE: Select the remedy deciding rule(s) R1 name for row R-0126's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0127-RULE: Select the remedy deciding rule(s) R1 name for row R-0127's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0128-RULE: Select the remedy deciding rule(s) R1 name for row R-0128's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0129-RULE: Select the remedy deciding rule(s) R1 name for row R-0129's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0130-RULE: Select the remedy deciding rule(s) R1 name for row R-0130's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0131-RULE: Select the remedy deciding rule(s) R1 name for row R-0131's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0132-RULE: Select the remedy deciding rule(s) R1 name for row R-0132's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0133-RULE: Select the remedy deciding rule(s) R1 name for row R-0133's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0134-RULE: Select the remedy deciding rule(s) R1 name for row R-0134's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0135-RULE: Select the remedy deciding rule(s) R1 name for row R-0135's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0136-RULE: Select the remedy deciding rule(s) R1 name for row R-0136's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0137-RULE: Select the remedy deciding rule(s) R1 name for row R-0137's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0138-RULE: Select the remedy deciding rule(s) R1 name for row R-0138's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0139-RULE: Select the remedy deciding rule(s) R1 name for row R-0139's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0140-RULE: Select the remedy deciding rule(s) R1 name for row R-0140's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0141-RULE: Select the remedy deciding rule(s) R1 name for row R-0141's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0142-RULE: Select the remedy deciding rule(s) R1 name for row R-0142's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0143-RULE: Select the remedy deciding rule(s) R1 name for row R-0143's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0144-RULE: Select the remedy deciding rule(s) R1 name for row R-0144's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0145-RULE: Select the remedy deciding rule(s) R1 name for row R-0145's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0146-RULE: Select the remedy deciding rule(s) R1 name for row R-0146's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0147-RULE: Select the remedy deciding rule(s) R1 name for row R-0147's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0148-RULE: Select the remedy deciding rule(s) R1 name for row R-0148's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0149-RULE: Select the remedy deciding rule(s) R1 name for row R-0149's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0150-RULE: Select the remedy deciding rule(s) R1 name for row R-0150's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0151-RULE: Select the remedy deciding rule(s) R1 name for row R-0151's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0152-RULE: Select the remedy deciding rule(s) R1 name for row R-0152's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0153-RULE: Select the remedy deciding rule(s) R1 name for row R-0153's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0154-RULE: Select the remedy deciding rule(s) R1 name for row R-0154's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0155-RULE: Select the remedy deciding rule(s) R1 name for row R-0155's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0156-RULE: Select the remedy deciding rule(s) R1 name for row R-0156's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0157-RULE: Select the remedy deciding rule(s) R1 name for row R-0157's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0158-RULE: Select the remedy deciding rule(s) R1 name for row R-0158's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0159-RULE: Select the remedy deciding rule(s) R1 name for row R-0159's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0160-RULE: Select the remedy deciding rule(s) R1 name for row R-0160's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0161-RULE: Select the remedy deciding rule(s) R1 name for row R-0161's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0162-RULE: Select the remedy deciding rule(s) R1 name for row R-0162's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0163-RULE: Select the remedy deciding rule(s) R1 name for row R-0163's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0164-RULE: Select the remedy deciding rule(s) R1 name for row R-0164's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0165-RULE: Select the remedy deciding rule(s) R1 name for row R-0165's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0166-RULE: Select the remedy deciding rule(s) R1 name for row R-0166's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0167-RULE: Select the remedy deciding rule(s) R1 name for row R-0167's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0168-RULE: Select the remedy deciding rule(s) R1 name for row R-0168's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0169-RULE: Select the remedy deciding rule(s) R1 name for row R-0169's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0170-RULE: Select the remedy deciding rule(s) R1 name for row R-0170's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0171-RULE: Select the remedy deciding rule(s) R1 name for row R-0171's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0172-RULE: Select the remedy deciding rule(s) R1 name for row R-0172's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0173-RULE: Select the remedy deciding rule(s) R1 name for row R-0173's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0174-RULE: Select the remedy deciding rule(s) R1 name for row R-0174's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0175-RULE: Select the remedy deciding rule(s) R1 name for row R-0175's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0176-RULE: Select the remedy deciding rule(s) R1 name for row R-0176's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0177-RULE: Select the remedy deciding rule(s) R1 name for row R-0177's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0178-RULE: Select the remedy deciding rule(s) R1 name for row R-0178's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0179-RULE: Select the remedy deciding rule(s) R1 name for row R-0179's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0180-RULE: Select the remedy deciding rule(s) R1 name for row R-0180's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0181-RULE: Select the remedy deciding rule(s) R1 name for row R-0181's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0182-RULE: Select the remedy deciding rule(s) R1 name for row R-0182's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0183-RULE: Select the remedy deciding rule(s) R1 name for row R-0183's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0184-RULE: Select the remedy deciding rule(s) R1 name for row R-0184's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0185-RULE: Select the remedy deciding rule(s) R1 name for row R-0185's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0186-RULE: Select the remedy deciding rule(s) R1 name for row R-0186's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0187-RULE: Select the remedy deciding rule(s) R1 name for row R-0187's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0188-RULE: Select the remedy deciding rule(s) R1 name for row R-0188's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0189-RULE: Select the remedy deciding rule(s) R1 name for row R-0189's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0190-RULE: Select the remedy deciding rule(s) R1 name for row R-0190's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0191-RULE: Select the remedy deciding rule(s) R1 name for row R-0191's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0192-RULE: Select the remedy deciding rule(s) R1 name for row R-0192's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0193-RULE: Select the remedy deciding rule(s) R1 name for row R-0193's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0194-RULE: Select the remedy deciding rule(s) R1 name for row R-0194's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0195-RULE: Select the remedy deciding rule(s) R1 name for row R-0195's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0196-RULE: Select the remedy deciding rule(s) R1 name for row R-0196's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0197-RULE: Select the remedy deciding rule(s) R1 name for row R-0197's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0198-RULE: Select the remedy deciding rule(s) R1 name for row R-0198's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0199-RULE: Select the remedy deciding rule(s) R1 name for row R-0199's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0200-RULE: Select the remedy deciding rule(s) R1 name for row R-0200's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0201-RULE: Select the remedy deciding rule(s) R1 name for row R-0201's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0202-RULE: Select the remedy deciding rule(s) R1 name for row R-0202's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0203-RULE: Select the remedy deciding rule(s) R1 name for row R-0203's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0204-RULE: Select the remedy deciding rule(s) R1 name for row R-0204's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0205-RULE: Select the remedy deciding rule(s) R1 name for row R-0205's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0206-RULE: Select the remedy deciding rule(s) R1 name for row R-0206's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0207-RULE: Select the remedy deciding rule(s) R1 name for row R-0207's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0208-RULE: Select the remedy deciding rule(s) R1 name for row R-0208's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0209-RULE: Select the remedy deciding rule(s) R1 name for row R-0209's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0210-RULE: Select the remedy deciding rule(s) R1 name for row R-0210's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0211-RULE: Select the remedy deciding rule(s) R1 name for row R-0211's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0212-RULE: Select the remedy deciding rule(s) R1 name for row R-0212's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0213-RULE: Select the remedy deciding rule(s) R1 name for row R-0213's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0214-RULE: Select the remedy deciding rule(s) R1 name for row R-0214's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0215-RULE: Select the remedy deciding rule(s) R1 name for row R-0215's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0216-RULE: Select the remedy deciding rule(s) R1 name for row R-0216's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0217-RULE: Select the remedy deciding rule(s) R1 name for row R-0217's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0218-RULE: Select the remedy deciding rule(s) R1 name for row R-0218's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0219-RULE: Select the remedy deciding rule(s) R1 name for row R-0219's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0220-RULE: Select the remedy deciding rule(s) R1 name for row R-0220's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0224-RULE: Select the remedy deciding rule(s) R1 name for row R-0224's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0225-RULE: Select the remedy deciding rule(s) R1 name for row R-0225's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0226-RULE: Select the remedy deciding rule(s) R1 name for row R-0226's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0227-RULE: Select the remedy deciding rule(s) R1 name for row R-0227's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0228-RULE: Select the remedy deciding rule(s) R1 name for row R-0228's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0229-RULE: Select the remedy deciding rule(s) R1 name for row R-0229's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0230-RULE: Select the remedy deciding rule(s) R1 name for row R-0230's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0231-RULE: Select the remedy deciding rule(s) R1 name for row R-0231's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0232-RULE: Select the remedy deciding rule(s) R1 name for row R-0232's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0233-RULE: Select the remedy deciding rule(s) R1 name for row R-0233's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0234-RULE: Select the remedy deciding rule(s) R1 name for row R-0234's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0235-RULE: Select the remedy deciding rule(s) R1 name for row R-0235's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0236-RULE: Select the remedy deciding rule(s) R1 name for row R-0236's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0237-RULE: Select the remedy deciding rule(s) R1 name for row R-0237's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0238-RULE: Select the remedy deciding rule(s) R1 name for row R-0238's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0239-RULE: Select the remedy deciding rule(s) R1 name for row R-0239's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0240-RULE: Select the remedy deciding rule(s) R1 name for row R-0240's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0241-RULE: Select the remedy deciding rule(s) R1 name for row R-0241's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0242-RULE: Select the remedy deciding rule(s) R1 name for row R-0242's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0243-RULE: Select the remedy deciding rule(s) R1 name for row R-0243's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0244-RULE: Select the remedy deciding rule(s) R1 name for row R-0244's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0245-RULE: Select the remedy deciding rule(s) R1 name for row R-0245's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0246-RULE: Select the remedy deciding rule(s) R1 name for row R-0246's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0247-RULE: Select the remedy deciding rule(s) R1 name for row R-0247's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0248-RULE: Select the remedy deciding rule(s) R1 name for row R-0248's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0249-RULE: Select the remedy deciding rule(s) R1 name for row R-0249's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0250-RULE: Select the remedy deciding rule(s) R1 name for row R-0250's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0251-RULE: Select the remedy deciding rule(s) R1 name for row R-0251's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0252-RULE: Select the remedy deciding rule(s) R1 name for row R-0252's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0253-RULE: Select the remedy deciding rule(s) R1 name for row R-0253's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0254-RULE: Select the remedy deciding rule(s) R1 name for row R-0254's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0255-RULE: Select the remedy deciding rule(s) R1 name for row R-0255's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0256-RULE: Select the remedy deciding rule(s) R1 name for row R-0256's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0257-RULE: Select the remedy deciding rule(s) R1 name for row R-0257's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0258-RULE: Select the remedy deciding rule(s) R1 name for row R-0258's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0259-RULE: Select the remedy deciding rule(s) R1 name for row R-0259's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0260-RULE: Select the remedy deciding rule(s) R1 name for row R-0260's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0261-RULE: Select the remedy deciding rule(s) R1 name for row R-0261's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0262-RULE: Select the remedy deciding rule(s) R1 name for row R-0262's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0263-RULE: Select the remedy deciding rule(s) R1 name for row R-0263's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0264-RULE: Select the remedy deciding rule(s) R1 name for row R-0264's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0265-RULE: Select the remedy deciding rule(s) R1 name for row R-0265's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0266-RULE: Select the remedy deciding rule(s) R1 name for row R-0266's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0267-RULE: Select the remedy deciding rule(s) R1 name for row R-0267's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0269-RULE: Select the remedy deciding rule(s) R1 name for row R-0269's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0270-RULE: Select the remedy deciding rule(s) R1 name for row R-0270's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0271-RULE: Select the remedy deciding rule(s) R1 name for row R-0271's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0272-RULE: Select the remedy deciding rule(s) R1 name for row R-0272's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0274-RULE: Select the remedy deciding rule(s) R1 name for row R-0274's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0275-RULE: Select the remedy deciding rule(s) R1 name for row R-0275's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0276-RULE: Select the remedy deciding rule(s) R1 name for row R-0276's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+- R-0277-RULE: Select the remedy deciding rule(s) R1 name for row R-0277's disagreement (R1: RENAME -- 'renames authorized: NONE', 02_DOCTRINE.md N5 -- no live name moves at this step).
+
+## PORT (271)
+- R-0221-PORT [never-widen sign-off owed: 1.0.0_SA_CTO, 2.0.0_SA_COO]: Port row R-0221 ('opal-data-bd') to its desired form "('ALIAS', 'opal-data-49financial')" -- the step that actually touches the live spelling.
+- R-0222-PORT [never-widen sign-off owed: 1.0.0_SA_CTO, 2.0.0_SA_COO]: Port row R-0222 ('opal-data-cot') to its desired form "('ALIAS', 'opal-data-cottonwood')" -- the step that actually touches the live spelling.
+- R-0223-PORT [never-widen sign-off owed: 1.0.0_SA_CTO, 2.0.0_SA_COO]: Port row R-0223 ('opal-data-inf') to its desired form "('ALIAS', 'opal-data-inflection')" -- the step that actually touches the live spelling.
+- R-0002-PORT: Port row R-0002 ('FIRMSEP-s3-direct-access-bypass') to its desired form "('OUT-OF-PATTERN', 'firmsep-s3-direct-access-bypass-{cadence}')" -- the step that actually touches the live spelling.
+- R-0003-PORT: Port row R-0003 ('cot-bronze-complete') to its desired form "('OUT-OF-PATTERN', '{system}-cot-bronze-complete-{cadence}')" -- the step that actually touches the live spelling.
+- R-0004-PORT: Port row R-0004 ('cot-silver-complete') to its desired form "('OUT-OF-PATTERN', '{system}-cot-silver-complete-{cadence}')" -- the step that actually touches the live spelling.
+- R-0005-PORT: Port row R-0005 ('inf-assets-trigger-bronze-complete') to its desired form "('OUT-OF-PATTERN', '{system}-inf-assets-trigger-bronze-complete-{cadence}')" -- the step that actually touches the live spelling.
+- R-0006-PORT: Port row R-0006 ('inf-gold-full-on-bronze-complete') to its desired form "('OUT-OF-PATTERN', '{system}-inf-gold-full-on-bronze-complete')" -- the step that actually touches the live spelling.
+- R-0007-PORT: Port row R-0007 ('inf-otp-state-change') to its desired form "('OUT-OF-PATTERN', '{system}-inf-otp-state-change-{cadence}')" -- the step that actually touches the live spelling.
+- R-0008-PORT: Port row R-0008 ('inf-silver-chain-bronze-complete') to its desired form "('OUT-OF-PATTERN', '{system}-inf-silver-chain-bronze-complete-{cadence}')" -- the step that actually touches the live spelling.
+- R-0009-PORT: Port row R-0009 ('mdpf-feeder-accelerator') to its desired form "('OUT-OF-PATTERN', 'mdpf-feeder-accelerator-{cadence}')" -- the step that actually touches the live spelling.
+- R-0013-PORT: Port row R-0013 ('opal-data-bd#policy') to its desired form "('ALIAS', 'opal-data-49financial#policy')" -- the step that actually touches the live spelling.
+- R-0014-PORT: Port row R-0014 ('opal-data-cot#policy') to its desired form "('ALIAS', 'opal-data-cottonwood#policy')" -- the step that actually touches the live spelling.
+- R-0015-PORT: Port row R-0015 ('opal-data-inf#policy') to its desired form "('ALIAS', 'opal-data-inflection#policy')" -- the step that actually touches the live spelling.
+- R-0016-PORT: Port row R-0016 ('blackdiamond/49f/session-trigger-mode.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0017-PORT: Port row R-0017 ('blackdiamond/cot/session-trigger-mode.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0018-PORT: Port row R-0018 ('bronze/orion-api-v2/*/household_rep_mapping.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api-v2/*/household_rep_mapping.json')" -- the step that actually touches the live spelling.
+- R-0019-PORT: Port row R-0019 ('bronze/orion-api-v2/*/representatives.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api-v2/*/representatives.json')" -- the step that actually touches the live spelling.
+- R-0020-PORT: Port row R-0020 ('bronze/orion-api/*/assets.csv') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/*/assets.csv')" -- the step that actually touches the live spelling.
+- R-0021-PORT: Port row R-0021 ('bronze/orion-api/*/transactions.csv') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/*/transactions.csv')" -- the step that actually touches the live spelling.
+- R-0022-PORT: Port row R-0022 ('bronze/orion-api/activity/latest.csv') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/activity/latest.csv')" -- the step that actually touches the live spelling.
+- R-0023-PORT: Port row R-0023 ('bronze/orion-api/household/latest.csv') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/household/latest.csv')" -- the step that actually touches the live spelling.
+- R-0024-PORT: Port row R-0024 ('bronze/orion-api/performance/latest.csv') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/performance/latest.csv')" -- the step that actually touches the live spelling.
+- R-0025-PORT: Port row R-0025 ('bronze/orion-api/{*}/_BRONZE_COMPLETE.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/_BRONZE_COMPLETE.json')" -- the step that actually touches the live spelling.
+- R-0026-PORT: Port row R-0026 ('bronze/orion-api/{*}/assets.csv') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/assets.csv')" -- the step that actually touches the live spelling.
+- R-0027-PORT: Port row R-0027 ('bronze/orion-api/{*}/transactions.csv') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/transactions.csv')" -- the step that actually touches the live spelling.
+- R-0028-PORT: Port row R-0028 ('code/gold/*') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/code/gold/*')" -- the step that actually touches the live spelling.
+- R-0029-PORT: Port row R-0029 ('config/ticker_lookup.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0030-PORT: Port row R-0030 ('config/yahoo_safe_tickers.txt') to its desired form None -- the step that actually touches the live spelling.
+- R-0031-PORT: Port row R-0031 ('gold/_parity/account_gains/*/scorecard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/account_gains/*/scorecard.json')" -- the step that actually touches the live spelling.
+- R-0032-PORT: Port row R-0032 ('gold/_parity/account_gains/{*}/scorecard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/account_gains/{*}/scorecard.json')" -- the step that actually touches the live spelling.
+- R-0033-PORT: Port row R-0033 ('gold/_parity/canonical_lots/*/scorecard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/canonical_lots/*/scorecard.json')" -- the step that actually touches the live spelling.
+- R-0034-PORT: Port row R-0034 ('gold/_parity/canonical_lots/{*}/scorecard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/canonical_lots/{*}/scorecard.json')" -- the step that actually touches the live spelling.
+- R-0035-PORT: Port row R-0035 ('gold/_parity/holdings_lots/*/scorecard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/holdings_lots/*/scorecard.json')" -- the step that actually touches the live spelling.
+- R-0036-PORT: Port row R-0036 ('gold/_parity/holdings_lots/{*}/scorecard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/holdings_lots/{*}/scorecard.json')" -- the step that actually touches the live spelling.
+- R-0037-PORT: Port row R-0037 ('gold/_parity/positions_cube/*/scorecard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/positions_cube/*/scorecard.json')" -- the step that actually touches the live spelling.
+- R-0038-PORT: Port row R-0038 ('gold/_parity/positions_cube/{*}/scorecard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/positions_cube/{*}/scorecard.json')" -- the step that actually touches the live spelling.
+- R-0039-PORT: Port row R-0039 ('gold/_state/advisor_assignments/daily_state.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_state/advisor_assignments/daily_state.parquet')" -- the step that actually touches the live spelling.
+- R-0040-PORT: Port row R-0040 ('gold/_state/load_flows/watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_state/load_flows/watermark.json')" -- the step that actually touches the live spelling.
+- R-0041-PORT: Port row R-0041 ('gold/account_gains/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/account_gains/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0042-PORT: Port row R-0042 ('gold/accounts_dimension_latest.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/accounts_dimension_latest.parquet')" -- the step that actually touches the live spelling.
+- R-0043-PORT: Port row R-0043 ('gold/artifacts/49f/c1_recovered_accounts.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/49f/c1_recovered_accounts.json')" -- the step that actually touches the live spelling.
+- R-0044-PORT: Port row R-0044 ('gold/artifacts/49f/out_of_scope_accounts.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/49f/out_of_scope_accounts.json')" -- the step that actually touches the live spelling.
+- R-0045-PORT: Port row R-0045 ('gold/artifacts/advisor_fee_efficiency.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/advisor_fee_efficiency.json')" -- the step that actually touches the live spelling.
+- R-0046-PORT: Port row R-0046 ('gold/artifacts/client_mix_timeseries.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/client_mix_timeseries.json')" -- the step that actually touches the live spelling.
+- R-0047-PORT: Port row R-0047 ('gold/artifacts/client_tax_liability.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/client_tax_liability.json')" -- the step that actually touches the live spelling.
+- R-0048-PORT: Port row R-0048 ('gold/artifacts/clients_tab.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/clients_tab.json')" -- the step that actually touches the live spelling.
+- R-0049-PORT: Port row R-0049 ('gold/artifacts/cumulative_chart.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/cumulative_chart.json')" -- the step that actually touches the live spelling.
+- R-0050-PORT: Port row R-0050 ('gold/artifacts/employee_leaderboard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/employee_leaderboard.json')" -- the step that actually touches the live spelling.
+- R-0051-PORT: Port row R-0051 ('gold/artifacts/filters/dimensions.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/filters/dimensions.json')" -- the step that actually touches the live spelling.
+- R-0052-PORT: Port row R-0052 ('gold/artifacts/firm_mix_views.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/firm_mix_views.json')" -- the step that actually touches the live spelling.
+- R-0053-PORT: Port row R-0053 ('gold/artifacts/firm_mix_views_daily.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/firm_mix_views_daily.json')" -- the step that actually touches the live spelling.
+- R-0054-PORT: Port row R-0054 ('gold/artifacts/implementor_leaderboard.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/implementor_leaderboard.json')" -- the step that actually touches the live spelling.
+- R-0055-PORT: Port row R-0055 ('gold/artifacts/partner_analytics/header_metrics_{*}.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/partner_analytics/header_metrics_{*}.json')" -- the step that actually touches the live spelling.
+- R-0056-PORT: Port row R-0056 ('gold/artifacts/snapshots/aua_by_architect.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_architect.json')" -- the step that actually touches the live spelling.
+- R-0057-PORT: Port row R-0057 ('gold/artifacts/snapshots/aua_by_region.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_region.json')" -- the step that actually touches the live spelling.
+- R-0058-PORT: Port row R-0058 ('gold/artifacts/snapshots/aua_by_state.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_state.json')" -- the step that actually touches the live spelling.
+- R-0059-PORT: Port row R-0059 ('gold/artifacts/snapshots/aua_by_tax_status.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_tax_status.json')" -- the step that actually touches the live spelling.
+- R-0060-PORT: Port row R-0060 ('gold/artifacts/summary/header_metrics.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/summary/header_metrics.json')" -- the step that actually touches the live spelling.
+- R-0061-PORT: Port row R-0061 ('gold/artifacts/timeseries_chart.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/timeseries_chart.json')" -- the step that actually touches the live spelling.
+- R-0062-PORT: Port row R-0062 ('gold/cache/hh_timeseries_anchors_{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/cache/hh_timeseries_anchors_{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0063-PORT: Port row R-0063 ('gold/canonical/account_gains/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/account_gains/')" -- the step that actually touches the live spelling.
+- R-0064-PORT: Port row R-0064 ('gold/canonical/account_gains/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/account_gains/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0065-PORT: Port row R-0065 ('gold/canonical/advisor_fee_detail/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/advisor_fee_detail/')" -- the step that actually touches the live spelling.
+- R-0066-PORT: Port row R-0066 ('gold/canonical/advisor_fee_detail/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/advisor_fee_detail/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0067-PORT: Port row R-0067 ('gold/canonical/canonical_nna_{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_nna_{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0068-PORT: Port row R-0068 ('gold/canonical/canonical_performance_2026-04-20.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_performance_2026-04-20.parquet')" -- the step that actually touches the live spelling.
+- R-0069-PORT: Port row R-0069 ('gold/canonical/canonical_performance_{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_performance_{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0070-PORT: Port row R-0070 ('gold/canonical/holdings/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings/')" -- the step that actually touches the live spelling.
+- R-0071-PORT: Port row R-0071 ('gold/canonical/holdings/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0072-PORT: Port row R-0072 ('gold/canonical/holdings_*.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_*.parquet')" -- the step that actually touches the live spelling.
+- R-0073-PORT: Port row R-0073 ('gold/canonical/holdings_gaps/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_gaps/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0074-PORT: Port row R-0074 ('gold/canonical/holdings_{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0075-PORT: Port row R-0075 ('gold/canonical/lots_realized/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_realized/')" -- the step that actually touches the live spelling.
+- R-0076-PORT: Port row R-0076 ('gold/canonical/lots_realized/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_realized/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0077-PORT: Port row R-0077 ('gold/canonical/lots_unrealized/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_unrealized/')" -- the step that actually touches the live spelling.
+- R-0078-PORT: Port row R-0078 ('gold/canonical/lots_unrealized/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_unrealized/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0079-PORT: Port row R-0079 ('gold/canonical/nna/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna/')" -- the step that actually touches the live spelling.
+- R-0080-PORT: Port row R-0080 ('gold/canonical/nna/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0081-PORT: Port row R-0081 ('gold/canonical/nna_atomic/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna_atomic/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0082-PORT: Port row R-0082 ('gold/canonical/nna_validation/{*}.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna_validation/{*}.json')" -- the step that actually touches the live spelling.
+- R-0083-PORT: Port row R-0083 ('gold/canonical/performance/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/performance/')" -- the step that actually touches the live spelling.
+- R-0084-PORT: Port row R-0084 ('gold/canonical/performance/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/performance/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0085-PORT: Port row R-0085 ('gold/canonical/role_aua/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/')" -- the step that actually touches the live spelling.
+- R-0086-PORT: Port row R-0086 ('gold/canonical/role_aua/*.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/*.parquet')" -- the step that actually touches the live spelling.
+- R-0087-PORT: Port row R-0087 ('gold/canonical/role_aua/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0088-PORT: Port row R-0088 ('gold/canonical/watermarks.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/watermarks.json')" -- the step that actually touches the live spelling.
+- R-0089-PORT: Port row R-0089 ('gold/classification/ticker_coverage_report.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/classification/ticker_coverage_report.json')" -- the step that actually touches the live spelling.
+- R-0090-PORT: Port row R-0090 ('gold/client_performance.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/client_performance.parquet')" -- the step that actually touches the live spelling.
+- R-0091-PORT: Port row R-0091 ('gold/clients/*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/clients/*.json')" -- the step that actually touches the live spelling.
+- R-0092-PORT: Port row R-0092 ('gold/dimensions/accounts_dimension_latest.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/accounts_dimension_latest.parquet')" -- the step that actually touches the live spelling.
+- R-0093-PORT: Port row R-0093 ('gold/dimensions/advisor_assignments.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/advisor_assignments.parquet')" -- the step that actually touches the live spelling.
+- R-0094-PORT: Port row R-0094 ('gold/dimensions/advisor_assignments_history.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/advisor_assignments_history.parquet')" -- the step that actually touches the live spelling.
+- R-0095-PORT: Port row R-0095 ('gold/dimensions/client_dimension.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/client_dimension.parquet')" -- the step that actually touches the live spelling.
+- R-0096-PORT: Port row R-0096 ('gold/dimensions/dim_advisor_office.csv') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/dim_advisor_office.csv')" -- the step that actually touches the live spelling.
+- R-0097-PORT: Port row R-0097 ('gold/dimensions/fee_rate_history.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/fee_rate_history.parquet')" -- the step that actually touches the live spelling.
+- R-0098-PORT: Port row R-0098 ('gold/dimensions/schwab_bd_account_mapping.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/schwab_bd_account_mapping.parquet')" -- the step that actually touches the live spelling.
+- R-0099-PORT: Port row R-0099 ('gold/dimensions/ticker_resolution.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/ticker_resolution.parquet')" -- the step that actually touches the live spelling.
+- R-0100-PORT: Port row R-0100 ('gold/eclipse/{*}/_meta/gold_complete.json') to its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/gold/{*}/_meta/gold_complete.json')" -- the step that actually touches the live spelling.
+- R-0101-PORT: Port row R-0101 ('gold/entities/accounts/{*}/aua_timeseries.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/accounts/{*}/aua_timeseries.json')" -- the step that actually touches the live spelling.
+- R-0102-PORT: Port row R-0102 ('gold/entities/advisors/{*}/book.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/book.json')" -- the step that actually touches the live spelling.
+- R-0103-PORT: Port row R-0103 ('gold/entities/advisors/{*}/composition.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/composition.json')" -- the step that actually touches the live spelling.
+- R-0104-PORT: Port row R-0104 ('gold/entities/advisors/{*}/mix.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix.json')" -- the step that actually touches the live spelling.
+- R-0105-PORT: Port row R-0105 ('gold/entities/advisors/{*}/mix_daily.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix_daily.json')" -- the step that actually touches the live spelling.
+- R-0106-PORT: Port row R-0106 ('gold/entities/advisors/{*}/mix_timeseries.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix_timeseries.json')" -- the step that actually touches the live spelling.
+- R-0107-PORT: Port row R-0107 ('gold/entities/advisors/{*}/timeseries.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/timeseries.json')" -- the step that actually touches the live spelling.
+- R-0108-PORT: Port row R-0108 ('gold/entities/clients/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/')" -- the step that actually touches the live spelling.
+- R-0109-PORT: Port row R-0109 ('gold/entities/clients/*_views.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/*_views.json')" -- the step that actually touches the live spelling.
+- R-0110-PORT: Port row R-0110 ('gold/entities/clients/{*}.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}.json')" -- the step that actually touches the live spelling.
+- R-0111-PORT: Port row R-0111 ('gold/entities/clients/{*}/aua_timeseries.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}/aua_timeseries.json')" -- the step that actually touches the live spelling.
+- R-0112-PORT: Port row R-0112 ('gold/entities/clients/{*}/detail.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}/detail.json')" -- the step that actually touches the live spelling.
+- R-0113-PORT: Port row R-0113 ('gold/entities/clients/{*}_composition.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}_composition.json')" -- the step that actually touches the live spelling.
+- R-0114-PORT: Port row R-0114 ('gold/holdings/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/holdings/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0115-PORT: Port row R-0115 ('gold/holdings_lots_v2_dryrun/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/holdings_lots_v2_dryrun/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0116-PORT: Port row R-0116 ('gold/lots/lots_latest.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/lots/lots_latest.parquet')" -- the step that actually touches the live spelling.
+- R-0117-PORT: Port row R-0117 ('gold/lots/lots_{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/lots/lots_{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0118-PORT: Port row R-0118 ('gold/manifests/classify_watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/manifests/classify_watermark.json')" -- the step that actually touches the live spelling.
+- R-0119-PORT: Port row R-0119 ('gold/meta/account_gains_incr_watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/account_gains_incr_watermark.json')" -- the step that actually touches the live spelling.
+- R-0120-PORT: Port row R-0120 ('gold/meta/advisor_assignments_watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/advisor_assignments_watermark.json')" -- the step that actually touches the live spelling.
+- R-0121-PORT: Port row R-0121 ('gold/meta/canonical_lots_incr_watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/canonical_lots_incr_watermark.json')" -- the step that actually touches the live spelling.
+- R-0122-PORT: Port row R-0122 ('gold/meta/client_timeseries_watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/client_timeseries_watermark.json')" -- the step that actually touches the live spelling.
+- R-0123-PORT: Port row R-0123 ('gold/meta/fee_rate_history_watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/fee_rate_history_watermark.json')" -- the step that actually touches the live spelling.
+- R-0124-PORT: Port row R-0124 ('gold/meta/holdings_lots_incr_watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/holdings_lots_incr_watermark.json')" -- the step that actually touches the live spelling.
+- R-0125-PORT: Port row R-0125 ('gold/meta/pipeline-complete.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/pipeline-complete.json')" -- the step that actually touches the live spelling.
+- R-0126-PORT: Port row R-0126 ('gold/meta/positions_cube_incr_watermark.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/positions_cube_incr_watermark.json')" -- the step that actually touches the live spelling.
+- R-0127-PORT: Port row R-0127 ('gold/platinum/firm/cash_coverage_summary.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/platinum/firm/cash_coverage_summary.json')" -- the step that actually touches the live spelling.
+- R-0128-PORT: Port row R-0128 ('gold/platinum/firm/cohort_a_summary.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/platinum/firm/cohort_a_summary.json')" -- the step that actually touches the live spelling.
+- R-0129-PORT: Port row R-0129 ('gold/positions_cube/*.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/*.parquet')" -- the step that actually touches the live spelling.
+- R-0130-PORT: Port row R-0130 ('gold/positions_cube/2026-04-20.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/2026-04-20.parquet')" -- the step that actually touches the live spelling.
+- R-0131-PORT: Port row R-0131 ('gold/positions_cube/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0132-PORT: Port row R-0132 ('gold/timeseries/account_performance.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/account_performance.parquet')" -- the step that actually touches the live spelling.
+- R-0133-PORT: Port row R-0133 ('gold/timeseries/client_performance.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/client_performance.parquet')" -- the step that actually touches the live spelling.
+- R-0134-PORT: Port row R-0134 ('gold/timeseries/holdings_lots/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/')" -- the step that actually touches the live spelling.
+- R-0135-PORT: Port row R-0135 ('gold/timeseries/holdings_lots/2026-04-21.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/2026-04-21.parquet')" -- the step that actually touches the live spelling.
+- R-0136-PORT: Port row R-0136 ('gold/timeseries/holdings_lots/backfill_{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/backfill_{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0137-PORT: Port row R-0137 ('gold/timeseries/holdings_lots/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0138-PORT: Port row R-0138 ('gold/timeseries/holdings_lots_shadow/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots_shadow/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0139-PORT: Port row R-0139 ('gold/timeseries/positions_cube/') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/positions_cube/')" -- the step that actually touches the live spelling.
+- R-0140-PORT: Port row R-0140 ('gold/timeseries/positions_cube/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/positions_cube/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0141-PORT: Port row R-0141 ('gold/timeseries/synthetic_positions_index.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/synthetic_positions_index.parquet')" -- the step that actually touches the live spelling.
+- R-0142-PORT: Port row R-0142 ('gold/validation/account_gap_buckets_*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/account_gap_buckets_*.json')" -- the step that actually touches the live spelling.
+- R-0143-PORT: Port row R-0143 ('gold/validation/all_non_yahoo_assets_*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/all_non_yahoo_assets_*.json')" -- the step that actually touches the live spelling.
+- R-0144-PORT: Port row R-0144 ('gold/validation/aua_certification/{*}.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_certification/{*}.json')" -- the step that actually touches the live spelling.
+- R-0145-PORT: Port row R-0145 ('gold/validation/aua_gap_decomposition_*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_gap_decomposition_*.json')" -- the step that actually touches the live spelling.
+- R-0146-PORT: Port row R-0146 ('gold/validation/aua_gap_top_positions_*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_gap_top_positions_*.json')" -- the step that actually touches the live spelling.
+- R-0147-PORT: Port row R-0147 ('gold/validation/aua_validation_{*}.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_validation_{*}.json')" -- the step that actually touches the live spelling.
+- R-0148-PORT: Port row R-0148 ('gold/validation/gap_by_pricing_source_*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/gap_by_pricing_source_*.json')" -- the step that actually touches the live spelling.
+- R-0149-PORT: Port row R-0149 ('gold/validation/tail_asset_drill_*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/tail_asset_drill_*.json')" -- the step that actually touches the live spelling.
+- R-0150-PORT: Port row R-0150 ('gold/validation/unmatched_asset_analysis_*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/unmatched_asset_analysis_*.json')" -- the step that actually touches the live spelling.
+- R-0151-PORT: Port row R-0151 ('gold/validation/yahoo_mapping_audit_*.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/yahoo_mapping_audit_*.json')" -- the step that actually touches the live spelling.
+- R-0152-PORT: Port row R-0152 ('gold/views/account_team.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/account_team.parquet')" -- the step that actually touches the live spelling.
+- R-0153-PORT: Port row R-0153 ('gold/views/client_tax_liability.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/client_tax_liability.parquet')" -- the step that actually touches the live spelling.
+- R-0154-PORT: Port row R-0154 ('gold/views/firm_composition.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/firm_composition.json')" -- the step that actually touches the live spelling.
+- R-0155-PORT: Port row R-0155 ('gold/views/mix_daily_summary.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/mix_daily_summary.json')" -- the step that actually touches the live spelling.
+- R-0156-PORT: Port row R-0156 ('gold/views/nna_aua_by_advisor.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_advisor.parquet')" -- the step that actually touches the live spelling.
+- R-0157-PORT: Port row R-0157 ('gold/views/nna_aua_by_geography.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_geography.parquet')" -- the step that actually touches the live spelling.
+- R-0158-PORT: Port row R-0158 ('gold/views/nna_aua_by_geography_city.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_geography_city.parquet')" -- the step that actually touches the live spelling.
+- R-0159-PORT: Port row R-0159 ('gold/views/rel_architect_lookup.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/rel_architect_lookup.parquet')" -- the step that actually touches the live spelling.
+- R-0160-PORT: Port row R-0160 ('gold/views/relationship_team.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/relationship_team.parquet')" -- the step that actually touches the live spelling.
+- R-0161-PORT: Port row R-0161 ('platinum/accounts/{*}/summary.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/accounts/{*}/summary.json')" -- the step that actually touches the live spelling.
+- R-0162-PORT: Port row R-0162 ('platinum/advisors/{*}/book.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/book.json')" -- the step that actually touches the live spelling.
+- R-0163-PORT: Port row R-0163 ('platinum/advisors/{*}/mix.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/mix.json')" -- the step that actually touches the live spelling.
+- R-0164-PORT: Port row R-0164 ('platinum/advisors/{*}/nna_clients.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/nna_clients.json')" -- the step that actually touches the live spelling.
+- R-0165-PORT: Port row R-0165 ('platinum/advisors/{*}/positions.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0166-PORT: Port row R-0166 ('platinum/advisors/{*}/summary.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/summary.json')" -- the step that actually touches the live spelling.
+- R-0167-PORT: Port row R-0167 ('platinum/advisors/{*}/timeseries.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/timeseries.json')" -- the step that actually touches the live spelling.
+- R-0168-PORT: Port row R-0168 ('platinum/advisors/{*}}/composition.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}}/composition.json')" -- the step that actually touches the live spelling.
+- R-0169-PORT: Port row R-0169 ('platinum/clients/{*}/composition.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/composition.json')" -- the step that actually touches the live spelling.
+- R-0170-PORT: Port row R-0170 ('platinum/clients/{*}/concentration.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0171-PORT: Port row R-0171 ('platinum/clients/{*}/detail.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/detail.json')" -- the step that actually touches the live spelling.
+- R-0172-PORT: Port row R-0172 ('platinum/clients/{*}/mix_timeseries.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0173-PORT: Port row R-0173 ('platinum/clients/{*}/summary.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0174-PORT: Port row R-0174 ('platinum/clients/{*}/timeseries.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/timeseries.json')" -- the step that actually touches the live spelling.
+- R-0175-PORT: Port row R-0175 ('platinum/clients/{*}/top_holdings.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/top_holdings.json')" -- the step that actually touches the live spelling.
+- R-0176-PORT: Port row R-0176 ('platinum/clients/{*}/views.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0177-PORT: Port row R-0177 ('platinum/firm/_meta/bronze_skip_warning_{*}.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0178-PORT: Port row R-0178 ('platinum/firm/_meta/reconciliation_summary_holdings_{*}.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0179-PORT: Port row R-0179 ('platinum/firm/clients-tab-slim.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/clients-tab-slim.json')" -- the step that actually touches the live spelling.
+- R-0180-PORT: Port row R-0180 ('platinum/firm/clients_tab.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/clients-tab.json')" -- the step that actually touches the live spelling.
+- R-0181-PORT: Port row R-0181 ('platinum/firm/cumulative_chart.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/cumulative_chart.json')" -- the step that actually touches the live spelling.
+- R-0182-PORT: Port row R-0182 ('platinum/firm/dashboard.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/dashboard.json')" -- the step that actually touches the live spelling.
+- R-0183-PORT: Port row R-0183 ('platinum/firm/fee_efficiency.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/fee_efficiency.json')" -- the step that actually touches the live spelling.
+- R-0184-PORT: Port row R-0184 ('platinum/firm/filters/dimensions.json') to its desired form None -- the step that actually touches the live spelling.
+- R-0185-PORT: Port row R-0185 ('platinum/firm/firm_composition.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/firm-composition.json')" -- the step that actually touches the live spelling.
+- R-0186-PORT: Port row R-0186 ('platinum/firm/header_metrics.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/header_metrics.json')" -- the step that actually touches the live spelling.
+- R-0187-PORT: Port row R-0187 ('platinum/firm/leaderboard.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/leaderboard.json')" -- the step that actually touches the live spelling.
+- R-0188-PORT: Port row R-0188 ('platinum/firm/leaderboard.prior_week.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/leaderboard.prior-week.json')" -- the step that actually touches the live spelling.
+- R-0189-PORT: Port row R-0189 ('platinum/firm/mix_summary.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/mix_summary.json')" -- the step that actually touches the live spelling.
+- R-0190-PORT: Port row R-0190 ('platinum/firm/partner_analytics.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/partner-analytics.json')" -- the step that actually touches the live spelling.
+- R-0191-PORT: Port row R-0191 ('platinum/firm/partner_analytics_{*}.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/partner_analytics_{*}.json')" -- the step that actually touches the live spelling.
+- R-0192-PORT: Port row R-0192 ('platinum/firm/timeseries_chart.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/timeseries_chart.json')" -- the step that actually touches the live spelling.
+- R-0193-PORT: Port row R-0193 ('platinum/firm/timeseries_overview.json') to its desired form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/timeseries_overview.json')" -- the step that actually touches the live spelling.
+- R-0194-PORT: Port row R-0194 ('platinum/firm/top_holdings.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/top-holdings.json')" -- the step that actually touches the live spelling.
+- R-0195-PORT: Port row R-0195 ('platinum/{*}/ownership_map.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/{*}/ownership-map.json')" -- the step that actually touches the live spelling.
+- R-0196-PORT: Port row R-0196 ('schwab/silver/rld/') to its desired form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/rld/')" -- the step that actually touches the live spelling.
+- R-0197-PORT: Port row R-0197 ('schwab/silver/uln/') to its desired form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/uln/')" -- the step that actually touches the live spelling.
+- R-0198-PORT: Port row R-0198 ('schwab/silver/ult/') to its desired form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/ult/')" -- the step that actually touches the live spelling.
+- R-0199-PORT: Port row R-0199 ('silver/accounts_dim/latest.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/accounts_dim/latest.parquet')" -- the step that actually touches the live spelling.
+- R-0200-PORT: Port row R-0200 ('silver/allocations/*.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/allocations/*.parquet')" -- the step that actually touches the live spelling.
+- R-0201-PORT: Port row R-0201 ('silver/allocations/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/allocations/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0202-PORT: Port row R-0202 ('silver/api_dims/accounts_v2/snapshot_date={*}/data.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/api_dims/accounts_v2/snapshot_date={*}/data.parquet')" -- the step that actually touches the live spelling.
+- R-0203-PORT: Port row R-0203 ('silver/api_dims/positions_mv/snapshot_date={*}/data.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/api_dims/positions_mv/snapshot_date={*}/data.parquet')" -- the step that actually touches the live spelling.
+- R-0204-PORT: Port row R-0204 ('silver/bd_assets_dim.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/bd_assets_dim.parquet')" -- the step that actually touches the live spelling.
+- R-0205-PORT: Port row R-0205 ('silver/eclipse/{*}/_meta/silver_complete.json') to its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/_meta/silver_complete.json')" -- the step that actually touches the live spelling.
+- R-0206-PORT: Port row R-0206 ('silver/eclipse/{*}/model_composition.parquet') to its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/model_composition.parquet')" -- the step that actually touches the live spelling.
+- R-0207-PORT: Port row R-0207 ('silver/eclipse/{*}/portfolios_full.parquet') to its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/portfolios_full.parquet')" -- the step that actually touches the live spelling.
+- R-0208-PORT: Port row R-0208 ('silver/eclipse/{*}/portfolios_simple.parquet') to its desired form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/portfolios_simple.parquet')" -- the step that actually touches the live spelling.
+- R-0209-PORT: Port row R-0209 ('silver/historical_prices.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/historical_prices.parquet')" -- the step that actually touches the live spelling.
+- R-0210-PORT: Port row R-0210 ('silver/interpolated_prices.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/interpolated_prices.parquet')" -- the step that actually touches the live spelling.
+- R-0211-PORT: Port row R-0211 ('silver/meta/gap_manifest.json') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/meta/gap_manifest.json')" -- the step that actually touches the live spelling.
+- R-0212-PORT: Port row R-0212 ('silver/prices/canonical_prices.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/prices/canonical_prices.parquet')" -- the step that actually touches the live spelling.
+- R-0213-PORT: Port row R-0213 ('silver/realized/bd_realized_agg.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/realized/bd_realized_agg.parquet')" -- the step that actually touches the live spelling.
+- R-0214-PORT: Port row R-0214 ('silver/realized/bd_realized_compact.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/realized/bd_realized_compact.parquet')" -- the step that actually touches the live spelling.
+- R-0215-PORT: Port row R-0215 ('silver/transactions/*.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/transactions/*.parquet')" -- the step that actually touches the live spelling.
+- R-0216-PORT: Port row R-0216 ('silver/transactions/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/transactions/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0217-PORT: Port row R-0217 ('silver/unrealized/*.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/*.parquet')" -- the step that actually touches the live spelling.
+- R-0218-PORT: Port row R-0218 ('silver/unrealized/2026-04-20.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/2026-04-20.parquet')" -- the step that actually touches the live spelling.
+- R-0219-PORT: Port row R-0219 ('silver/unrealized/unrealized_gain_loss.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/unrealized_gain_loss.parquet')" -- the step that actually touches the live spelling.
+- R-0220-PORT: Port row R-0220 ('silver/unrealized/{*}.parquet') to its desired form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/{*}.parquet')" -- the step that actually touches the live spelling.
+- R-0224-PORT: Port row R-0224 ('opal-data-bd') to its desired form "('ALIAS', 'opal-data-49financial')" -- the step that actually touches the live spelling.
+- R-0225-PORT: Port row R-0225 ('opal-data-cot') to its desired form "('ALIAS', 'opal-data-cottonwood')" -- the step that actually touches the live spelling.
+- R-0226-PORT: Port row R-0226 ('opal-data-inf') to its desired form "('ALIAS', 'opal-data-inflection')" -- the step that actually touches the live spelling.
+- R-0227-PORT: Port row R-0227 ('bd-49f-etf-ownership-scheduled-floor') to its desired form "('OUT-OF-PATTERN', 'blackdiamond-49f-etf-ownership-scheduled-floor-{cadence}')" -- the step that actually touches the live spelling.
+- R-0228-PORT: Port row R-0228 ('bd-49f-fees-runner-daily') to its desired form "('ALIAS', 'blackdiamond-49f-fees-runner-daily')" -- the step that actually touches the live spelling.
+- R-0229-PORT: Port row R-0229 ('bd-49f-fees-session-daily') to its desired form "('ALIAS', 'blackdiamond-49f-fees-session-daily')" -- the step that actually touches the live spelling.
+- R-0230-PORT: Port row R-0230 ('bd-49f-insurance-session-daily') to its desired form "('ALIAS', 'blackdiamond-49f-insurance-session-daily')" -- the step that actually touches the live spelling.
+- R-0231-PORT: Port row R-0231 ('bd-49f-keepalive-sched') to its desired form "('OUT-OF-PATTERN', 'blackdiamond-49f-keepalive-sched-{cadence}')" -- the step that actually touches the live spelling.
+- R-0232-PORT: Port row R-0232 ('bd-49f-runner-daily') to its desired form "('ALIAS', 'blackdiamond-49f-runner-daily')" -- the step that actually touches the live spelling.
+- R-0233-PORT: Port row R-0233 ('bd-49f-session-complete') to its desired form "('OUT-OF-PATTERN', 'blackdiamond-49f-session-complete-{cadence}')" -- the step that actually touches the live spelling.
+- R-0234-PORT: Port row R-0234 ('bd-49f-session-daily') to its desired form "('ALIAS', 'blackdiamond-49f-session-daily')" -- the step that actually touches the live spelling.
+- R-0235-PORT: Port row R-0235 ('bd-allocation-file-check-daily') to its desired form "('OUT-OF-PATTERN', '{system}-49f-allocation-file-check-daily')" -- the step that actually touches the live spelling.
+- R-0236-PORT: Port row R-0236 ('bd-allocation-pipeline-trigger') to its desired form "('OUT-OF-PATTERN', '{system}-49f-allocation-pipeline-trigger-{cadence}')" -- the step that actually touches the live spelling.
+- R-0237-PORT: Port row R-0237 ('bd-asset-dim-pipeline-trigger') to its desired form "('OUT-OF-PATTERN', '{system}-49f-asset-dim-pipeline-trigger-{cadence}')" -- the step that actually touches the live spelling.
+- R-0238-PORT: Port row R-0238 ('bd-canonical-prices-daily') to its desired form "('OUT-OF-PATTERN', '{system}-49f-canonical-prices-daily')" -- the step that actually touches the live spelling.
+- R-0239-PORT: Port row R-0239 ('bd-cot-keepalive-sched') to its desired form "('OUT-OF-PATTERN', 'blackdiamond-cot-keepalive-sched-{cadence}')" -- the step that actually touches the live spelling.
+- R-0240-PORT: Port row R-0240 ('bd-fees-pipeline-trigger') to its desired form "('OUT-OF-PATTERN', '{system}-49f-fees-pipeline-trigger-{cadence}')" -- the step that actually touches the live spelling.
+- R-0241-PORT: Port row R-0241 ('bd-gold-layer-monthly-trigger') to its desired form "('OUT-OF-PATTERN', '{system}-49f-gold-layer-trigger-monthly')" -- the step that actually touches the live spelling.
+- R-0242-PORT: Port row R-0242 ('bd-gold-nightly-fallback') to its desired form "('OUT-OF-PATTERN', '{system}-49f-gold-nightly-fallback-{cadence}')" -- the step that actually touches the live spelling.
+- R-0243-PORT: Port row R-0243 ('bd-realized-pipeline-trigger') to its desired form "('OUT-OF-PATTERN', '{system}-49f-realized-pipeline-trigger-{cadence}')" -- the step that actually touches the live spelling.
+- R-0244-PORT: Port row R-0244 ('bd-transaction-pipeline-trigger') to its desired form "('OUT-OF-PATTERN', '{system}-49f-transaction-pipeline-trigger-{cadence}')" -- the step that actually touches the live spelling.
+- R-0245-PORT: Port row R-0245 ('bd-unrealized-pipeline-trigger') to its desired form "('OUT-OF-PATTERN', '{system}-49f-unrealized-pipeline-trigger-{cadence}')" -- the step that actually touches the live spelling.
+- R-0246-PORT: Port row R-0246 ('cot-etf-ownership-daily-schedule') to its desired form "('OUT-OF-PATTERN', '{system}-cot-etf-ownership-schedule-daily')" -- the step that actually touches the live spelling.
+- R-0247-PORT: Port row R-0247 ('cot-rebalancer-runner-daily') to its desired form "('OUT-OF-PATTERN', '{system}-cot-rebalancer-runner-daily')" -- the step that actually touches the live spelling.
+- R-0248-PORT: Port row R-0248 ('cot-satellites-characteristics-producer-daily') to its desired form "('OUT-OF-PATTERN', '{system}-cot-satellites-characteristics-producer-daily')" -- the step that actually touches the live spelling.
+- R-0249-PORT: Port row R-0249 ('cot-satellites-registry-producer-daily') to its desired form "('OUT-OF-PATTERN', '{system}-cot-satellites-registry-producer-daily')" -- the step that actually touches the live spelling.
+- R-0250-PORT: Port row R-0250 ('cot-session-complete') to its desired form "('OUT-OF-PATTERN', '{system}-cot-session-complete-{cadence}')" -- the step that actually touches the live spelling.
+- R-0251-PORT: Port row R-0251 ('inf-accounts-v2-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-accounts-v2-daily')" -- the step that actually touches the live spelling.
+- R-0252-PORT: Port row R-0252 ('inf-api-assets-v2-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-api-assets-v2-daily')" -- the step that actually touches the live spelling.
+- R-0253-PORT: Port row R-0253 ('inf-api-eclipse-daily') to its desired form "('OUT-OF-PATTERN', 'eclipse-inf-api-daily')" -- the step that actually touches the live spelling.
+- R-0254-PORT: Port row R-0254 ('inf-api-positions-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-api-positions-daily')" -- the step that actually touches the live spelling.
+- R-0255-PORT: Port row R-0255 ('inf-api-reps-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-api-reps-daily')" -- the step that actually touches the live spelling.
+- R-0256-PORT: Port row R-0256 ('inf-api-txn-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-api-txn-daily')" -- the step that actually touches the live spelling.
+- R-0257-PORT: Port row R-0257 ('inf-billing-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-billing-daily')" -- the step that actually touches the live spelling.
+- R-0258-PORT: Port row R-0258 ('inf-bronze-complete-emitter-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-bronze-complete-emitter-daily')" -- the step that actually touches the live spelling.
+- R-0259-PORT: Port row R-0259 ('inf-canonical-prices-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-canonical-prices-daily')" -- the step that actually touches the live spelling.
+- R-0260-PORT: Port row R-0260 ('inf-etf-ownership-daily-schedule') to its desired form "('OUT-OF-PATTERN', '{system}-inf-etf-ownership-schedule-daily')" -- the step that actually touches the live spelling.
+- R-0261-PORT: Port row R-0261 ('inf-gold-dispatch-release-changed') to its desired form "('OUT-OF-PATTERN', '{system}-inf-gold-dispatch-release-changed-{cadence}')" -- the step that actually touches the live spelling.
+- R-0262-PORT: Port row R-0262 ('inf-gold-incremental-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-gold-incremental-daily')" -- the step that actually touches the live spelling.
+- R-0263-PORT: Port row R-0263 ('inf-nna-partition-check-trigger') to its desired form "('OUT-OF-PATTERN', '{system}-inf-nna-partition-check-trigger-{cadence}')" -- the step that actually touches the live spelling.
+- R-0264-PORT: Port row R-0264 ('inf-performance-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-performance-daily')" -- the step that actually touches the live spelling.
+- R-0265-PORT: Port row R-0265 ('inf-tax-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-tax-daily')" -- the step that actually touches the live spelling.
+- R-0266-PORT: Port row R-0266 ('inf-unified-account-dim-daily') to its desired form "('OUT-OF-PATTERN', '{system}-inf-unified-account-dim-daily')" -- the step that actually touches the live spelling.
+- R-0267-PORT: Port row R-0267 ('opal-assets-ingest-mirror-inf-daily') to its desired form "('OUT-OF-PATTERN', 'opal-inf-assets-ingest-mirror-daily')" -- the step that actually touches the live spelling.
+- R-0269-PORT: Port row R-0269 ('opal-inf-bronze-runner-cron') to its desired form "('OUT-OF-PATTERN', 'opal-inf-bronze-runner-cron-{cadence}')" -- the step that actually touches the live spelling.
+- R-0270-PORT: Port row R-0270 ('opal-inf-ec2-state-change-monitor') to its desired form "('OUT-OF-PATTERN', 'opal-inf-ec2-state-change-monitor-{cadence}')" -- the step that actually touches the live spelling.
+- R-0271-PORT: Port row R-0271 ('opal-inf-export-schedule') to its desired form "('OUT-OF-PATTERN', 'opal-inf-export-schedule-{cadence}')" -- the step that actually touches the live spelling.
+- R-0272-PORT: Port row R-0272 ('opal-inf-jwt-fetch') to its desired form "('OUT-OF-PATTERN', 'opal-inf-jwt-fetch-{cadence}')" -- the step that actually touches the live spelling.
+- R-0274-PORT: Port row R-0274 ('opal-assets-ingest-mirror-cot-daily-et') to its desired form "('OUT-OF-PATTERN', 'opal-cot-assets-ingest-mirror-et-daily')" -- the step that actually touches the live spelling.
+- R-0275-PORT: Port row R-0275 ('cot-bd-session-daily-et') to its desired form "('OUT-OF-PATTERN', 'blackdiamond-cot-session-et-daily')" -- the step that actually touches the live spelling.
+- R-0276-PORT: Port row R-0276 ('opal-data-bd-s3-notify-planted-test-queue') to its desired form "('OUT-OF-PATTERN', 'opal-49f-data-s3-notify-planted-test-queue')" -- the step that actually touches the live spelling.
+- R-0277-PORT: Port row R-0277 ('planted-system-without-a-row-49financial-ingest-role') to its desired form None -- the step that actually touches the live spelling.
+
+## REPOINT (271)
+- R-0221-REPOINT [never-widen sign-off owed: 1.0.0_SA_CTO, 2.0.0_SA_COO]: Repoint every reader/consumer of row R-0221 at its ported (desired) form "('ALIAS', 'opal-data-49financial')".
+- R-0222-REPOINT [never-widen sign-off owed: 1.0.0_SA_CTO, 2.0.0_SA_COO]: Repoint every reader/consumer of row R-0222 at its ported (desired) form "('ALIAS', 'opal-data-cottonwood')".
+- R-0223-REPOINT [never-widen sign-off owed: 1.0.0_SA_CTO, 2.0.0_SA_COO]: Repoint every reader/consumer of row R-0223 at its ported (desired) form "('ALIAS', 'opal-data-inflection')".
+- R-0002-REPOINT: Repoint every reader/consumer of row R-0002 at its ported (desired) form "('OUT-OF-PATTERN', 'firmsep-s3-direct-access-bypass-{cadence}')".
+- R-0003-REPOINT: Repoint every reader/consumer of row R-0003 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-cot-bronze-complete-{cadence}')".
+- R-0004-REPOINT: Repoint every reader/consumer of row R-0004 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-cot-silver-complete-{cadence}')".
+- R-0005-REPOINT: Repoint every reader/consumer of row R-0005 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-assets-trigger-bronze-complete-{cadence}')".
+- R-0006-REPOINT: Repoint every reader/consumer of row R-0006 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-gold-full-on-bronze-complete')".
+- R-0007-REPOINT: Repoint every reader/consumer of row R-0007 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-otp-state-change-{cadence}')".
+- R-0008-REPOINT: Repoint every reader/consumer of row R-0008 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-silver-chain-bronze-complete-{cadence}')".
+- R-0009-REPOINT: Repoint every reader/consumer of row R-0009 at its ported (desired) form "('OUT-OF-PATTERN', 'mdpf-feeder-accelerator-{cadence}')".
+- R-0013-REPOINT: Repoint every reader/consumer of row R-0013 at its ported (desired) form "('ALIAS', 'opal-data-49financial#policy')".
+- R-0014-REPOINT: Repoint every reader/consumer of row R-0014 at its ported (desired) form "('ALIAS', 'opal-data-cottonwood#policy')".
+- R-0015-REPOINT: Repoint every reader/consumer of row R-0015 at its ported (desired) form "('ALIAS', 'opal-data-inflection#policy')".
+- R-0016-REPOINT: Repoint every reader/consumer of row R-0016 at its ported (desired) form None.
+- R-0017-REPOINT: Repoint every reader/consumer of row R-0017 at its ported (desired) form None.
+- R-0018-REPOINT: Repoint every reader/consumer of row R-0018 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api-v2/*/household_rep_mapping.json')".
+- R-0019-REPOINT: Repoint every reader/consumer of row R-0019 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api-v2/*/representatives.json')".
+- R-0020-REPOINT: Repoint every reader/consumer of row R-0020 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/*/assets.csv')".
+- R-0021-REPOINT: Repoint every reader/consumer of row R-0021 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/*/transactions.csv')".
+- R-0022-REPOINT: Repoint every reader/consumer of row R-0022 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/activity/latest.csv')".
+- R-0023-REPOINT: Repoint every reader/consumer of row R-0023 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/household/latest.csv')".
+- R-0024-REPOINT: Repoint every reader/consumer of row R-0024 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/performance/latest.csv')".
+- R-0025-REPOINT: Repoint every reader/consumer of row R-0025 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/_BRONZE_COMPLETE.json')".
+- R-0026-REPOINT: Repoint every reader/consumer of row R-0026 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/assets.csv')".
+- R-0027-REPOINT: Repoint every reader/consumer of row R-0027 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/bronze/orion-api/{*}/transactions.csv')".
+- R-0028-REPOINT: Repoint every reader/consumer of row R-0028 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/code/gold/*')".
+- R-0029-REPOINT: Repoint every reader/consumer of row R-0029 at its ported (desired) form None.
+- R-0030-REPOINT: Repoint every reader/consumer of row R-0030 at its ported (desired) form None.
+- R-0031-REPOINT: Repoint every reader/consumer of row R-0031 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/account_gains/*/scorecard.json')".
+- R-0032-REPOINT: Repoint every reader/consumer of row R-0032 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/account_gains/{*}/scorecard.json')".
+- R-0033-REPOINT: Repoint every reader/consumer of row R-0033 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/canonical_lots/*/scorecard.json')".
+- R-0034-REPOINT: Repoint every reader/consumer of row R-0034 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/canonical_lots/{*}/scorecard.json')".
+- R-0035-REPOINT: Repoint every reader/consumer of row R-0035 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/holdings_lots/*/scorecard.json')".
+- R-0036-REPOINT: Repoint every reader/consumer of row R-0036 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/holdings_lots/{*}/scorecard.json')".
+- R-0037-REPOINT: Repoint every reader/consumer of row R-0037 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/positions_cube/*/scorecard.json')".
+- R-0038-REPOINT: Repoint every reader/consumer of row R-0038 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_parity/positions_cube/{*}/scorecard.json')".
+- R-0039-REPOINT: Repoint every reader/consumer of row R-0039 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_state/advisor_assignments/daily_state.parquet')".
+- R-0040-REPOINT: Repoint every reader/consumer of row R-0040 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/_state/load_flows/watermark.json')".
+- R-0041-REPOINT: Repoint every reader/consumer of row R-0041 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/account_gains/{*}.parquet')".
+- R-0042-REPOINT: Repoint every reader/consumer of row R-0042 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/accounts_dimension_latest.parquet')".
+- R-0043-REPOINT: Repoint every reader/consumer of row R-0043 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/49f/c1_recovered_accounts.json')".
+- R-0044-REPOINT: Repoint every reader/consumer of row R-0044 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/49f/out_of_scope_accounts.json')".
+- R-0045-REPOINT: Repoint every reader/consumer of row R-0045 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/advisor_fee_efficiency.json')".
+- R-0046-REPOINT: Repoint every reader/consumer of row R-0046 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/client_mix_timeseries.json')".
+- R-0047-REPOINT: Repoint every reader/consumer of row R-0047 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/client_tax_liability.json')".
+- R-0048-REPOINT: Repoint every reader/consumer of row R-0048 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/clients_tab.json')".
+- R-0049-REPOINT: Repoint every reader/consumer of row R-0049 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/cumulative_chart.json')".
+- R-0050-REPOINT: Repoint every reader/consumer of row R-0050 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/employee_leaderboard.json')".
+- R-0051-REPOINT: Repoint every reader/consumer of row R-0051 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/filters/dimensions.json')".
+- R-0052-REPOINT: Repoint every reader/consumer of row R-0052 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/firm_mix_views.json')".
+- R-0053-REPOINT: Repoint every reader/consumer of row R-0053 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/firm_mix_views_daily.json')".
+- R-0054-REPOINT: Repoint every reader/consumer of row R-0054 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/implementor_leaderboard.json')".
+- R-0055-REPOINT: Repoint every reader/consumer of row R-0055 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/partner_analytics/header_metrics_{*}.json')".
+- R-0056-REPOINT: Repoint every reader/consumer of row R-0056 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_architect.json')".
+- R-0057-REPOINT: Repoint every reader/consumer of row R-0057 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_region.json')".
+- R-0058-REPOINT: Repoint every reader/consumer of row R-0058 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_state.json')".
+- R-0059-REPOINT: Repoint every reader/consumer of row R-0059 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/snapshots/aua_by_tax_status.json')".
+- R-0060-REPOINT: Repoint every reader/consumer of row R-0060 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/summary/header_metrics.json')".
+- R-0061-REPOINT: Repoint every reader/consumer of row R-0061 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/artifacts/timeseries_chart.json')".
+- R-0062-REPOINT: Repoint every reader/consumer of row R-0062 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/cache/hh_timeseries_anchors_{*}.parquet')".
+- R-0063-REPOINT: Repoint every reader/consumer of row R-0063 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/account_gains/')".
+- R-0064-REPOINT: Repoint every reader/consumer of row R-0064 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/account_gains/{*}.parquet')".
+- R-0065-REPOINT: Repoint every reader/consumer of row R-0065 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/advisor_fee_detail/')".
+- R-0066-REPOINT: Repoint every reader/consumer of row R-0066 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/advisor_fee_detail/{*}.parquet')".
+- R-0067-REPOINT: Repoint every reader/consumer of row R-0067 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_nna_{*}.parquet')".
+- R-0068-REPOINT: Repoint every reader/consumer of row R-0068 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_performance_2026-04-20.parquet')".
+- R-0069-REPOINT: Repoint every reader/consumer of row R-0069 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/canonical_performance_{*}.parquet')".
+- R-0070-REPOINT: Repoint every reader/consumer of row R-0070 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings/')".
+- R-0071-REPOINT: Repoint every reader/consumer of row R-0071 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings/{*}.parquet')".
+- R-0072-REPOINT: Repoint every reader/consumer of row R-0072 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_*.parquet')".
+- R-0073-REPOINT: Repoint every reader/consumer of row R-0073 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_gaps/{*}.parquet')".
+- R-0074-REPOINT: Repoint every reader/consumer of row R-0074 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/holdings_{*}.parquet')".
+- R-0075-REPOINT: Repoint every reader/consumer of row R-0075 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_realized/')".
+- R-0076-REPOINT: Repoint every reader/consumer of row R-0076 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_realized/{*}.parquet')".
+- R-0077-REPOINT: Repoint every reader/consumer of row R-0077 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_unrealized/')".
+- R-0078-REPOINT: Repoint every reader/consumer of row R-0078 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/lots_unrealized/{*}.parquet')".
+- R-0079-REPOINT: Repoint every reader/consumer of row R-0079 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna/')".
+- R-0080-REPOINT: Repoint every reader/consumer of row R-0080 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna/{*}.parquet')".
+- R-0081-REPOINT: Repoint every reader/consumer of row R-0081 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna_atomic/{*}.parquet')".
+- R-0082-REPOINT: Repoint every reader/consumer of row R-0082 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/nna_validation/{*}.json')".
+- R-0083-REPOINT: Repoint every reader/consumer of row R-0083 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/performance/')".
+- R-0084-REPOINT: Repoint every reader/consumer of row R-0084 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/performance/{*}.parquet')".
+- R-0085-REPOINT: Repoint every reader/consumer of row R-0085 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/')".
+- R-0086-REPOINT: Repoint every reader/consumer of row R-0086 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/*.parquet')".
+- R-0087-REPOINT: Repoint every reader/consumer of row R-0087 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/role_aua/{*}.parquet')".
+- R-0088-REPOINT: Repoint every reader/consumer of row R-0088 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/canonical/watermarks.json')".
+- R-0089-REPOINT: Repoint every reader/consumer of row R-0089 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/classification/ticker_coverage_report.json')".
+- R-0090-REPOINT: Repoint every reader/consumer of row R-0090 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/client_performance.parquet')".
+- R-0091-REPOINT: Repoint every reader/consumer of row R-0091 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/clients/*.json')".
+- R-0092-REPOINT: Repoint every reader/consumer of row R-0092 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/accounts_dimension_latest.parquet')".
+- R-0093-REPOINT: Repoint every reader/consumer of row R-0093 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/advisor_assignments.parquet')".
+- R-0094-REPOINT: Repoint every reader/consumer of row R-0094 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/advisor_assignments_history.parquet')".
+- R-0095-REPOINT: Repoint every reader/consumer of row R-0095 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/client_dimension.parquet')".
+- R-0096-REPOINT: Repoint every reader/consumer of row R-0096 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/dim_advisor_office.csv')".
+- R-0097-REPOINT: Repoint every reader/consumer of row R-0097 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/fee_rate_history.parquet')".
+- R-0098-REPOINT: Repoint every reader/consumer of row R-0098 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/schwab_bd_account_mapping.parquet')".
+- R-0099-REPOINT: Repoint every reader/consumer of row R-0099 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/dimensions/ticker_resolution.parquet')".
+- R-0100-REPOINT: Repoint every reader/consumer of row R-0100 at its ported (desired) form "('OUT-OF-PATTERN', 'eclipse/{scope}/gold/{*}/_meta/gold_complete.json')".
+- R-0101-REPOINT: Repoint every reader/consumer of row R-0101 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/accounts/{*}/aua_timeseries.json')".
+- R-0102-REPOINT: Repoint every reader/consumer of row R-0102 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/book.json')".
+- R-0103-REPOINT: Repoint every reader/consumer of row R-0103 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/composition.json')".
+- R-0104-REPOINT: Repoint every reader/consumer of row R-0104 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix.json')".
+- R-0105-REPOINT: Repoint every reader/consumer of row R-0105 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix_daily.json')".
+- R-0106-REPOINT: Repoint every reader/consumer of row R-0106 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/mix_timeseries.json')".
+- R-0107-REPOINT: Repoint every reader/consumer of row R-0107 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/advisors/{*}/timeseries.json')".
+- R-0108-REPOINT: Repoint every reader/consumer of row R-0108 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/')".
+- R-0109-REPOINT: Repoint every reader/consumer of row R-0109 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/*_views.json')".
+- R-0110-REPOINT: Repoint every reader/consumer of row R-0110 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}.json')".
+- R-0111-REPOINT: Repoint every reader/consumer of row R-0111 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}/aua_timeseries.json')".
+- R-0112-REPOINT: Repoint every reader/consumer of row R-0112 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}/detail.json')".
+- R-0113-REPOINT: Repoint every reader/consumer of row R-0113 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/entities/clients/{*}_composition.json')".
+- R-0114-REPOINT: Repoint every reader/consumer of row R-0114 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/holdings/{*}.parquet')".
+- R-0115-REPOINT: Repoint every reader/consumer of row R-0115 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/holdings_lots_v2_dryrun/{*}.parquet')".
+- R-0116-REPOINT: Repoint every reader/consumer of row R-0116 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/lots/lots_latest.parquet')".
+- R-0117-REPOINT: Repoint every reader/consumer of row R-0117 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/lots/lots_{*}.parquet')".
+- R-0118-REPOINT: Repoint every reader/consumer of row R-0118 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/manifests/classify_watermark.json')".
+- R-0119-REPOINT: Repoint every reader/consumer of row R-0119 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/account_gains_incr_watermark.json')".
+- R-0120-REPOINT: Repoint every reader/consumer of row R-0120 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/advisor_assignments_watermark.json')".
+- R-0121-REPOINT: Repoint every reader/consumer of row R-0121 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/canonical_lots_incr_watermark.json')".
+- R-0122-REPOINT: Repoint every reader/consumer of row R-0122 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/client_timeseries_watermark.json')".
+- R-0123-REPOINT: Repoint every reader/consumer of row R-0123 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/fee_rate_history_watermark.json')".
+- R-0124-REPOINT: Repoint every reader/consumer of row R-0124 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/holdings_lots_incr_watermark.json')".
+- R-0125-REPOINT: Repoint every reader/consumer of row R-0125 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/pipeline-complete.json')".
+- R-0126-REPOINT: Repoint every reader/consumer of row R-0126 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/meta/positions_cube_incr_watermark.json')".
+- R-0127-REPOINT: Repoint every reader/consumer of row R-0127 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/platinum/firm/cash_coverage_summary.json')".
+- R-0128-REPOINT: Repoint every reader/consumer of row R-0128 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/platinum/firm/cohort_a_summary.json')".
+- R-0129-REPOINT: Repoint every reader/consumer of row R-0129 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/*.parquet')".
+- R-0130-REPOINT: Repoint every reader/consumer of row R-0130 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/2026-04-20.parquet')".
+- R-0131-REPOINT: Repoint every reader/consumer of row R-0131 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/positions_cube/{*}.parquet')".
+- R-0132-REPOINT: Repoint every reader/consumer of row R-0132 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/account_performance.parquet')".
+- R-0133-REPOINT: Repoint every reader/consumer of row R-0133 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/client_performance.parquet')".
+- R-0134-REPOINT: Repoint every reader/consumer of row R-0134 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/')".
+- R-0135-REPOINT: Repoint every reader/consumer of row R-0135 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/2026-04-21.parquet')".
+- R-0136-REPOINT: Repoint every reader/consumer of row R-0136 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/backfill_{*}.parquet')".
+- R-0137-REPOINT: Repoint every reader/consumer of row R-0137 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots/{*}.parquet')".
+- R-0138-REPOINT: Repoint every reader/consumer of row R-0138 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/holdings_lots_shadow/{*}.parquet')".
+- R-0139-REPOINT: Repoint every reader/consumer of row R-0139 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/positions_cube/')".
+- R-0140-REPOINT: Repoint every reader/consumer of row R-0140 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/positions_cube/{*}.parquet')".
+- R-0141-REPOINT: Repoint every reader/consumer of row R-0141 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/timeseries/synthetic_positions_index.parquet')".
+- R-0142-REPOINT: Repoint every reader/consumer of row R-0142 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/account_gap_buckets_*.json')".
+- R-0143-REPOINT: Repoint every reader/consumer of row R-0143 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/all_non_yahoo_assets_*.json')".
+- R-0144-REPOINT: Repoint every reader/consumer of row R-0144 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_certification/{*}.json')".
+- R-0145-REPOINT: Repoint every reader/consumer of row R-0145 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_gap_decomposition_*.json')".
+- R-0146-REPOINT: Repoint every reader/consumer of row R-0146 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_gap_top_positions_*.json')".
+- R-0147-REPOINT: Repoint every reader/consumer of row R-0147 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/aua_validation_{*}.json')".
+- R-0148-REPOINT: Repoint every reader/consumer of row R-0148 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/gap_by_pricing_source_*.json')".
+- R-0149-REPOINT: Repoint every reader/consumer of row R-0149 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/tail_asset_drill_*.json')".
+- R-0150-REPOINT: Repoint every reader/consumer of row R-0150 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/unmatched_asset_analysis_*.json')".
+- R-0151-REPOINT: Repoint every reader/consumer of row R-0151 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/validation/yahoo_mapping_audit_*.json')".
+- R-0152-REPOINT: Repoint every reader/consumer of row R-0152 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/account_team.parquet')".
+- R-0153-REPOINT: Repoint every reader/consumer of row R-0153 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/client_tax_liability.parquet')".
+- R-0154-REPOINT: Repoint every reader/consumer of row R-0154 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/firm_composition.json')".
+- R-0155-REPOINT: Repoint every reader/consumer of row R-0155 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/mix_daily_summary.json')".
+- R-0156-REPOINT: Repoint every reader/consumer of row R-0156 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_advisor.parquet')".
+- R-0157-REPOINT: Repoint every reader/consumer of row R-0157 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_geography.parquet')".
+- R-0158-REPOINT: Repoint every reader/consumer of row R-0158 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/nna_aua_by_geography_city.parquet')".
+- R-0159-REPOINT: Repoint every reader/consumer of row R-0159 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/rel_architect_lookup.parquet')".
+- R-0160-REPOINT: Repoint every reader/consumer of row R-0160 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/gold/views/relationship_team.parquet')".
+- R-0161-REPOINT: Repoint every reader/consumer of row R-0161 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/accounts/{*}/summary.json')".
+- R-0162-REPOINT: Repoint every reader/consumer of row R-0162 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/book.json')".
+- R-0163-REPOINT: Repoint every reader/consumer of row R-0163 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/mix.json')".
+- R-0164-REPOINT: Repoint every reader/consumer of row R-0164 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/nna_clients.json')".
+- R-0165-REPOINT: Repoint every reader/consumer of row R-0165 at its ported (desired) form None.
+- R-0166-REPOINT: Repoint every reader/consumer of row R-0166 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/summary.json')".
+- R-0167-REPOINT: Repoint every reader/consumer of row R-0167 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}/timeseries.json')".
+- R-0168-REPOINT: Repoint every reader/consumer of row R-0168 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/advisors/{*}}/composition.json')".
+- R-0169-REPOINT: Repoint every reader/consumer of row R-0169 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/composition.json')".
+- R-0170-REPOINT: Repoint every reader/consumer of row R-0170 at its ported (desired) form None.
+- R-0171-REPOINT: Repoint every reader/consumer of row R-0171 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/detail.json')".
+- R-0172-REPOINT: Repoint every reader/consumer of row R-0172 at its ported (desired) form None.
+- R-0173-REPOINT: Repoint every reader/consumer of row R-0173 at its ported (desired) form None.
+- R-0174-REPOINT: Repoint every reader/consumer of row R-0174 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/timeseries.json')".
+- R-0175-REPOINT: Repoint every reader/consumer of row R-0175 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/clients/{*}/top_holdings.json')".
+- R-0176-REPOINT: Repoint every reader/consumer of row R-0176 at its ported (desired) form None.
+- R-0177-REPOINT: Repoint every reader/consumer of row R-0177 at its ported (desired) form None.
+- R-0178-REPOINT: Repoint every reader/consumer of row R-0178 at its ported (desired) form None.
+- R-0179-REPOINT: Repoint every reader/consumer of row R-0179 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/clients-tab-slim.json')".
+- R-0180-REPOINT: Repoint every reader/consumer of row R-0180 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/clients-tab.json')".
+- R-0181-REPOINT: Repoint every reader/consumer of row R-0181 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/cumulative_chart.json')".
+- R-0182-REPOINT: Repoint every reader/consumer of row R-0182 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/dashboard.json')".
+- R-0183-REPOINT: Repoint every reader/consumer of row R-0183 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/fee_efficiency.json')".
+- R-0184-REPOINT: Repoint every reader/consumer of row R-0184 at its ported (desired) form None.
+- R-0185-REPOINT: Repoint every reader/consumer of row R-0185 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/firm-composition.json')".
+- R-0186-REPOINT: Repoint every reader/consumer of row R-0186 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/header_metrics.json')".
+- R-0187-REPOINT: Repoint every reader/consumer of row R-0187 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/leaderboard.json')".
+- R-0188-REPOINT: Repoint every reader/consumer of row R-0188 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/leaderboard.prior-week.json')".
+- R-0189-REPOINT: Repoint every reader/consumer of row R-0189 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/mix_summary.json')".
+- R-0190-REPOINT: Repoint every reader/consumer of row R-0190 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/partner-analytics.json')".
+- R-0191-REPOINT: Repoint every reader/consumer of row R-0191 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/partner_analytics_{*}.json')".
+- R-0192-REPOINT: Repoint every reader/consumer of row R-0192 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/timeseries_chart.json')".
+- R-0193-REPOINT: Repoint every reader/consumer of row R-0193 at its ported (desired) form "('OUT-OF-PATTERN', 'advi/{scope}/platinum/firm/timeseries_overview.json')".
+- R-0194-REPOINT: Repoint every reader/consumer of row R-0194 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/firm/top-holdings.json')".
+- R-0195-REPOINT: Repoint every reader/consumer of row R-0195 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/platinum/{*}/ownership-map.json')".
+- R-0196-REPOINT: Repoint every reader/consumer of row R-0196 at its ported (desired) form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/rld/')".
+- R-0197-REPOINT: Repoint every reader/consumer of row R-0197 at its ported (desired) form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/uln/')".
+- R-0198-REPOINT: Repoint every reader/consumer of row R-0198 at its ported (desired) form "('OUT-OF-PATTERN', 'schwab/{scope}/silver/ult/')".
+- R-0199-REPOINT: Repoint every reader/consumer of row R-0199 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/accounts_dim/latest.parquet')".
+- R-0200-REPOINT: Repoint every reader/consumer of row R-0200 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/allocations/*.parquet')".
+- R-0201-REPOINT: Repoint every reader/consumer of row R-0201 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/allocations/{*}.parquet')".
+- R-0202-REPOINT: Repoint every reader/consumer of row R-0202 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/api_dims/accounts_v2/snapshot_date={*}/data.parquet')".
+- R-0203-REPOINT: Repoint every reader/consumer of row R-0203 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/api_dims/positions_mv/snapshot_date={*}/data.parquet')".
+- R-0204-REPOINT: Repoint every reader/consumer of row R-0204 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/bd_assets_dim.parquet')".
+- R-0205-REPOINT: Repoint every reader/consumer of row R-0205 at its ported (desired) form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/_meta/silver_complete.json')".
+- R-0206-REPOINT: Repoint every reader/consumer of row R-0206 at its ported (desired) form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/model_composition.parquet')".
+- R-0207-REPOINT: Repoint every reader/consumer of row R-0207 at its ported (desired) form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/portfolios_full.parquet')".
+- R-0208-REPOINT: Repoint every reader/consumer of row R-0208 at its ported (desired) form "('OUT-OF-PATTERN', 'eclipse/{scope}/silver/{*}/portfolios_simple.parquet')".
+- R-0209-REPOINT: Repoint every reader/consumer of row R-0209 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/historical_prices.parquet')".
+- R-0210-REPOINT: Repoint every reader/consumer of row R-0210 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/interpolated_prices.parquet')".
+- R-0211-REPOINT: Repoint every reader/consumer of row R-0211 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/meta/gap_manifest.json')".
+- R-0212-REPOINT: Repoint every reader/consumer of row R-0212 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/prices/canonical_prices.parquet')".
+- R-0213-REPOINT: Repoint every reader/consumer of row R-0213 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/realized/bd_realized_agg.parquet')".
+- R-0214-REPOINT: Repoint every reader/consumer of row R-0214 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/realized/bd_realized_compact.parquet')".
+- R-0215-REPOINT: Repoint every reader/consumer of row R-0215 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/transactions/*.parquet')".
+- R-0216-REPOINT: Repoint every reader/consumer of row R-0216 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/transactions/{*}.parquet')".
+- R-0217-REPOINT: Repoint every reader/consumer of row R-0217 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/*.parquet')".
+- R-0218-REPOINT: Repoint every reader/consumer of row R-0218 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/2026-04-20.parquet')".
+- R-0219-REPOINT: Repoint every reader/consumer of row R-0219 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/unrealized_gain_loss.parquet')".
+- R-0220-REPOINT: Repoint every reader/consumer of row R-0220 at its ported (desired) form "('OUT-OF-PATTERN', '{source}/{scope}/silver/unrealized/{*}.parquet')".
+- R-0224-REPOINT: Repoint every reader/consumer of row R-0224 at its ported (desired) form "('ALIAS', 'opal-data-49financial')".
+- R-0225-REPOINT: Repoint every reader/consumer of row R-0225 at its ported (desired) form "('ALIAS', 'opal-data-cottonwood')".
+- R-0226-REPOINT: Repoint every reader/consumer of row R-0226 at its ported (desired) form "('ALIAS', 'opal-data-inflection')".
+- R-0227-REPOINT: Repoint every reader/consumer of row R-0227 at its ported (desired) form "('OUT-OF-PATTERN', 'blackdiamond-49f-etf-ownership-scheduled-floor-{cadence}')".
+- R-0228-REPOINT: Repoint every reader/consumer of row R-0228 at its ported (desired) form "('ALIAS', 'blackdiamond-49f-fees-runner-daily')".
+- R-0229-REPOINT: Repoint every reader/consumer of row R-0229 at its ported (desired) form "('ALIAS', 'blackdiamond-49f-fees-session-daily')".
+- R-0230-REPOINT: Repoint every reader/consumer of row R-0230 at its ported (desired) form "('ALIAS', 'blackdiamond-49f-insurance-session-daily')".
+- R-0231-REPOINT: Repoint every reader/consumer of row R-0231 at its ported (desired) form "('OUT-OF-PATTERN', 'blackdiamond-49f-keepalive-sched-{cadence}')".
+- R-0232-REPOINT: Repoint every reader/consumer of row R-0232 at its ported (desired) form "('ALIAS', 'blackdiamond-49f-runner-daily')".
+- R-0233-REPOINT: Repoint every reader/consumer of row R-0233 at its ported (desired) form "('OUT-OF-PATTERN', 'blackdiamond-49f-session-complete-{cadence}')".
+- R-0234-REPOINT: Repoint every reader/consumer of row R-0234 at its ported (desired) form "('ALIAS', 'blackdiamond-49f-session-daily')".
+- R-0235-REPOINT: Repoint every reader/consumer of row R-0235 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-allocation-file-check-daily')".
+- R-0236-REPOINT: Repoint every reader/consumer of row R-0236 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-allocation-pipeline-trigger-{cadence}')".
+- R-0237-REPOINT: Repoint every reader/consumer of row R-0237 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-asset-dim-pipeline-trigger-{cadence}')".
+- R-0238-REPOINT: Repoint every reader/consumer of row R-0238 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-canonical-prices-daily')".
+- R-0239-REPOINT: Repoint every reader/consumer of row R-0239 at its ported (desired) form "('OUT-OF-PATTERN', 'blackdiamond-cot-keepalive-sched-{cadence}')".
+- R-0240-REPOINT: Repoint every reader/consumer of row R-0240 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-fees-pipeline-trigger-{cadence}')".
+- R-0241-REPOINT: Repoint every reader/consumer of row R-0241 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-gold-layer-trigger-monthly')".
+- R-0242-REPOINT: Repoint every reader/consumer of row R-0242 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-gold-nightly-fallback-{cadence}')".
+- R-0243-REPOINT: Repoint every reader/consumer of row R-0243 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-realized-pipeline-trigger-{cadence}')".
+- R-0244-REPOINT: Repoint every reader/consumer of row R-0244 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-transaction-pipeline-trigger-{cadence}')".
+- R-0245-REPOINT: Repoint every reader/consumer of row R-0245 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-49f-unrealized-pipeline-trigger-{cadence}')".
+- R-0246-REPOINT: Repoint every reader/consumer of row R-0246 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-cot-etf-ownership-schedule-daily')".
+- R-0247-REPOINT: Repoint every reader/consumer of row R-0247 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-cot-rebalancer-runner-daily')".
+- R-0248-REPOINT: Repoint every reader/consumer of row R-0248 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-cot-satellites-characteristics-producer-daily')".
+- R-0249-REPOINT: Repoint every reader/consumer of row R-0249 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-cot-satellites-registry-producer-daily')".
+- R-0250-REPOINT: Repoint every reader/consumer of row R-0250 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-cot-session-complete-{cadence}')".
+- R-0251-REPOINT: Repoint every reader/consumer of row R-0251 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-accounts-v2-daily')".
+- R-0252-REPOINT: Repoint every reader/consumer of row R-0252 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-api-assets-v2-daily')".
+- R-0253-REPOINT: Repoint every reader/consumer of row R-0253 at its ported (desired) form "('OUT-OF-PATTERN', 'eclipse-inf-api-daily')".
+- R-0254-REPOINT: Repoint every reader/consumer of row R-0254 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-api-positions-daily')".
+- R-0255-REPOINT: Repoint every reader/consumer of row R-0255 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-api-reps-daily')".
+- R-0256-REPOINT: Repoint every reader/consumer of row R-0256 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-api-txn-daily')".
+- R-0257-REPOINT: Repoint every reader/consumer of row R-0257 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-billing-daily')".
+- R-0258-REPOINT: Repoint every reader/consumer of row R-0258 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-bronze-complete-emitter-daily')".
+- R-0259-REPOINT: Repoint every reader/consumer of row R-0259 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-canonical-prices-daily')".
+- R-0260-REPOINT: Repoint every reader/consumer of row R-0260 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-etf-ownership-schedule-daily')".
+- R-0261-REPOINT: Repoint every reader/consumer of row R-0261 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-gold-dispatch-release-changed-{cadence}')".
+- R-0262-REPOINT: Repoint every reader/consumer of row R-0262 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-gold-incremental-daily')".
+- R-0263-REPOINT: Repoint every reader/consumer of row R-0263 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-nna-partition-check-trigger-{cadence}')".
+- R-0264-REPOINT: Repoint every reader/consumer of row R-0264 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-performance-daily')".
+- R-0265-REPOINT: Repoint every reader/consumer of row R-0265 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-tax-daily')".
+- R-0266-REPOINT: Repoint every reader/consumer of row R-0266 at its ported (desired) form "('OUT-OF-PATTERN', '{system}-inf-unified-account-dim-daily')".
+- R-0267-REPOINT: Repoint every reader/consumer of row R-0267 at its ported (desired) form "('OUT-OF-PATTERN', 'opal-inf-assets-ingest-mirror-daily')".
+- R-0269-REPOINT: Repoint every reader/consumer of row R-0269 at its ported (desired) form "('OUT-OF-PATTERN', 'opal-inf-bronze-runner-cron-{cadence}')".
+- R-0270-REPOINT: Repoint every reader/consumer of row R-0270 at its ported (desired) form "('OUT-OF-PATTERN', 'opal-inf-ec2-state-change-monitor-{cadence}')".
+- R-0271-REPOINT: Repoint every reader/consumer of row R-0271 at its ported (desired) form "('OUT-OF-PATTERN', 'opal-inf-export-schedule-{cadence}')".
+- R-0272-REPOINT: Repoint every reader/consumer of row R-0272 at its ported (desired) form "('OUT-OF-PATTERN', 'opal-inf-jwt-fetch-{cadence}')".
+- R-0274-REPOINT: Repoint every reader/consumer of row R-0274 at its ported (desired) form "('OUT-OF-PATTERN', 'opal-cot-assets-ingest-mirror-et-daily')".
+- R-0275-REPOINT: Repoint every reader/consumer of row R-0275 at its ported (desired) form "('OUT-OF-PATTERN', 'blackdiamond-cot-session-et-daily')".
+- R-0276-REPOINT: Repoint every reader/consumer of row R-0276 at its ported (desired) form "('OUT-OF-PATTERN', 'opal-49f-data-s3-notify-planted-test-queue')".
+- R-0277-REPOINT: Repoint every reader/consumer of row R-0277 at its ported (desired) form None.
+
+## PROVE (271)
+- R-0221-PROVE: Prove tension T-0001 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0222-PROVE: Prove tension T-0002 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0223-PROVE: Prove tension T-0003 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0002-PROVE: Prove tension T-0004 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0003-PROVE: Prove tension T-0005 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0004-PROVE: Prove tension T-0006 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0005-PROVE: Prove tension T-0007 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0006-PROVE: Prove tension T-0008 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0007-PROVE: Prove tension T-0009 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0008-PROVE: Prove tension T-0010 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0009-PROVE: Prove tension T-0011 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0013-PROVE: Prove tension T-0012 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0014-PROVE: Prove tension T-0013 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0015-PROVE: Prove tension T-0014 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0016-PROVE: Prove tension T-0015 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0017-PROVE: Prove tension T-0016 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0018-PROVE: Prove tension T-0017 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0019-PROVE: Prove tension T-0018 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0020-PROVE: Prove tension T-0019 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0021-PROVE: Prove tension T-0020 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0022-PROVE: Prove tension T-0021 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0023-PROVE: Prove tension T-0022 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0024-PROVE: Prove tension T-0023 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0025-PROVE: Prove tension T-0024 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0026-PROVE: Prove tension T-0025 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0027-PROVE: Prove tension T-0026 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0028-PROVE: Prove tension T-0027 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0029-PROVE: Prove tension T-0028 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0030-PROVE: Prove tension T-0029 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0031-PROVE: Prove tension T-0030 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0032-PROVE: Prove tension T-0031 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0033-PROVE: Prove tension T-0032 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0034-PROVE: Prove tension T-0033 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0035-PROVE: Prove tension T-0034 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0036-PROVE: Prove tension T-0035 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0037-PROVE: Prove tension T-0036 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0038-PROVE: Prove tension T-0037 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0039-PROVE: Prove tension T-0038 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0040-PROVE: Prove tension T-0039 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0041-PROVE: Prove tension T-0040 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0042-PROVE: Prove tension T-0041 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0043-PROVE: Prove tension T-0042 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0044-PROVE: Prove tension T-0043 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0045-PROVE: Prove tension T-0044 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0046-PROVE: Prove tension T-0045 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0047-PROVE: Prove tension T-0046 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0048-PROVE: Prove tension T-0047 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0049-PROVE: Prove tension T-0048 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0050-PROVE: Prove tension T-0049 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0051-PROVE: Prove tension T-0050 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0052-PROVE: Prove tension T-0051 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0053-PROVE: Prove tension T-0052 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0054-PROVE: Prove tension T-0053 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0055-PROVE: Prove tension T-0054 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0056-PROVE: Prove tension T-0055 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0057-PROVE: Prove tension T-0056 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0058-PROVE: Prove tension T-0057 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0059-PROVE: Prove tension T-0058 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0060-PROVE: Prove tension T-0059 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0061-PROVE: Prove tension T-0060 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0062-PROVE: Prove tension T-0061 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0063-PROVE: Prove tension T-0062 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0064-PROVE: Prove tension T-0063 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0065-PROVE: Prove tension T-0064 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0066-PROVE: Prove tension T-0065 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0067-PROVE: Prove tension T-0066 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0068-PROVE: Prove tension T-0067 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0069-PROVE: Prove tension T-0068 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0070-PROVE: Prove tension T-0069 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0071-PROVE: Prove tension T-0070 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0072-PROVE: Prove tension T-0071 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0073-PROVE: Prove tension T-0072 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0074-PROVE: Prove tension T-0073 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0075-PROVE: Prove tension T-0074 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0076-PROVE: Prove tension T-0075 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0077-PROVE: Prove tension T-0076 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0078-PROVE: Prove tension T-0077 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0079-PROVE: Prove tension T-0078 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0080-PROVE: Prove tension T-0079 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0081-PROVE: Prove tension T-0080 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0082-PROVE: Prove tension T-0081 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0083-PROVE: Prove tension T-0082 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0084-PROVE: Prove tension T-0083 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0085-PROVE: Prove tension T-0084 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0086-PROVE: Prove tension T-0085 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0087-PROVE: Prove tension T-0086 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0088-PROVE: Prove tension T-0087 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0089-PROVE: Prove tension T-0088 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0090-PROVE: Prove tension T-0089 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0091-PROVE: Prove tension T-0090 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0092-PROVE: Prove tension T-0091 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0093-PROVE: Prove tension T-0092 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0094-PROVE: Prove tension T-0093 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0095-PROVE: Prove tension T-0094 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0096-PROVE: Prove tension T-0095 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0097-PROVE: Prove tension T-0096 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0098-PROVE: Prove tension T-0097 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0099-PROVE: Prove tension T-0098 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0100-PROVE: Prove tension T-0099 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0101-PROVE: Prove tension T-0100 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0102-PROVE: Prove tension T-0101 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0103-PROVE: Prove tension T-0102 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0104-PROVE: Prove tension T-0103 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0105-PROVE: Prove tension T-0104 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0106-PROVE: Prove tension T-0105 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0107-PROVE: Prove tension T-0106 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0108-PROVE: Prove tension T-0107 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0109-PROVE: Prove tension T-0108 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0110-PROVE: Prove tension T-0109 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0111-PROVE: Prove tension T-0110 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0112-PROVE: Prove tension T-0111 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0113-PROVE: Prove tension T-0112 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0114-PROVE: Prove tension T-0113 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0115-PROVE: Prove tension T-0114 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0116-PROVE: Prove tension T-0115 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0117-PROVE: Prove tension T-0116 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0118-PROVE: Prove tension T-0117 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0119-PROVE: Prove tension T-0118 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0120-PROVE: Prove tension T-0119 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0121-PROVE: Prove tension T-0120 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0122-PROVE: Prove tension T-0121 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0123-PROVE: Prove tension T-0122 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0124-PROVE: Prove tension T-0123 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0125-PROVE: Prove tension T-0124 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0126-PROVE: Prove tension T-0125 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0127-PROVE: Prove tension T-0126 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0128-PROVE: Prove tension T-0127 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0129-PROVE: Prove tension T-0128 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0130-PROVE: Prove tension T-0129 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0131-PROVE: Prove tension T-0130 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0132-PROVE: Prove tension T-0131 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0133-PROVE: Prove tension T-0132 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0134-PROVE: Prove tension T-0133 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0135-PROVE: Prove tension T-0134 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0136-PROVE: Prove tension T-0135 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0137-PROVE: Prove tension T-0136 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0138-PROVE: Prove tension T-0137 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0139-PROVE: Prove tension T-0138 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0140-PROVE: Prove tension T-0139 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0141-PROVE: Prove tension T-0140 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0142-PROVE: Prove tension T-0141 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0143-PROVE: Prove tension T-0142 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0144-PROVE: Prove tension T-0143 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0145-PROVE: Prove tension T-0144 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0146-PROVE: Prove tension T-0145 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0147-PROVE: Prove tension T-0146 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0148-PROVE: Prove tension T-0147 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0149-PROVE: Prove tension T-0148 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0150-PROVE: Prove tension T-0149 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0151-PROVE: Prove tension T-0150 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0152-PROVE: Prove tension T-0151 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0153-PROVE: Prove tension T-0152 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0154-PROVE: Prove tension T-0153 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0155-PROVE: Prove tension T-0154 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0156-PROVE: Prove tension T-0155 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0157-PROVE: Prove tension T-0156 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0158-PROVE: Prove tension T-0157 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0159-PROVE: Prove tension T-0158 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0160-PROVE: Prove tension T-0159 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0161-PROVE: Prove tension T-0160 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0162-PROVE: Prove tension T-0161 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0163-PROVE: Prove tension T-0162 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0164-PROVE: Prove tension T-0163 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0165-PROVE: Prove tension T-0164 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0166-PROVE: Prove tension T-0165 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0167-PROVE: Prove tension T-0166 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0168-PROVE: Prove tension T-0167 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0169-PROVE: Prove tension T-0168 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0170-PROVE: Prove tension T-0169 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0171-PROVE: Prove tension T-0170 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0172-PROVE: Prove tension T-0171 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0173-PROVE: Prove tension T-0172 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0174-PROVE: Prove tension T-0173 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0175-PROVE: Prove tension T-0174 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0176-PROVE: Prove tension T-0175 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0177-PROVE: Prove tension T-0176 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0178-PROVE: Prove tension T-0177 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0179-PROVE: Prove tension T-0178 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0180-PROVE: Prove tension T-0179 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0181-PROVE: Prove tension T-0180 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0182-PROVE: Prove tension T-0181 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0183-PROVE: Prove tension T-0182 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0184-PROVE: Prove tension T-0183 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0185-PROVE: Prove tension T-0184 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0186-PROVE: Prove tension T-0185 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0187-PROVE: Prove tension T-0186 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0188-PROVE: Prove tension T-0187 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0189-PROVE: Prove tension T-0188 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0190-PROVE: Prove tension T-0189 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0191-PROVE: Prove tension T-0190 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0192-PROVE: Prove tension T-0191 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0193-PROVE: Prove tension T-0192 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0194-PROVE: Prove tension T-0193 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0195-PROVE: Prove tension T-0194 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0196-PROVE: Prove tension T-0195 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0197-PROVE: Prove tension T-0196 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0198-PROVE: Prove tension T-0197 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0199-PROVE: Prove tension T-0198 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0200-PROVE: Prove tension T-0199 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0201-PROVE: Prove tension T-0200 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0202-PROVE: Prove tension T-0201 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0203-PROVE: Prove tension T-0202 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0204-PROVE: Prove tension T-0203 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0205-PROVE: Prove tension T-0204 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0206-PROVE: Prove tension T-0205 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0207-PROVE: Prove tension T-0206 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0208-PROVE: Prove tension T-0207 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0209-PROVE: Prove tension T-0208 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0210-PROVE: Prove tension T-0209 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0211-PROVE: Prove tension T-0210 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0212-PROVE: Prove tension T-0211 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0213-PROVE: Prove tension T-0212 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0214-PROVE: Prove tension T-0213 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0215-PROVE: Prove tension T-0214 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0216-PROVE: Prove tension T-0215 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0217-PROVE: Prove tension T-0216 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0218-PROVE: Prove tension T-0217 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0219-PROVE: Prove tension T-0218 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0220-PROVE: Prove tension T-0219 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0224-PROVE: Prove tension T-0220 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0225-PROVE: Prove tension T-0221 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0226-PROVE: Prove tension T-0222 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0227-PROVE: Prove tension T-0223 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0228-PROVE: Prove tension T-0224 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0229-PROVE: Prove tension T-0225 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0230-PROVE: Prove tension T-0226 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0231-PROVE: Prove tension T-0227 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0232-PROVE: Prove tension T-0228 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0233-PROVE: Prove tension T-0229 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0234-PROVE: Prove tension T-0230 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0235-PROVE: Prove tension T-0231 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0236-PROVE: Prove tension T-0232 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0237-PROVE: Prove tension T-0233 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0238-PROVE: Prove tension T-0234 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0239-PROVE: Prove tension T-0235 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0240-PROVE: Prove tension T-0236 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0241-PROVE: Prove tension T-0237 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0242-PROVE: Prove tension T-0238 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0243-PROVE: Prove tension T-0239 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0244-PROVE: Prove tension T-0240 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0245-PROVE: Prove tension T-0241 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0246-PROVE: Prove tension T-0242 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0247-PROVE: Prove tension T-0243 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0248-PROVE: Prove tension T-0244 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0249-PROVE: Prove tension T-0245 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0250-PROVE: Prove tension T-0246 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0251-PROVE: Prove tension T-0247 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0252-PROVE: Prove tension T-0248 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0253-PROVE: Prove tension T-0249 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0254-PROVE: Prove tension T-0250 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0255-PROVE: Prove tension T-0251 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0256-PROVE: Prove tension T-0252 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0257-PROVE: Prove tension T-0253 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0258-PROVE: Prove tension T-0254 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0259-PROVE: Prove tension T-0255 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0260-PROVE: Prove tension T-0256 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0261-PROVE: Prove tension T-0257 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0262-PROVE: Prove tension T-0258 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0263-PROVE: Prove tension T-0259 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0264-PROVE: Prove tension T-0260 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0265-PROVE: Prove tension T-0261 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0266-PROVE: Prove tension T-0262 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0267-PROVE: Prove tension T-0263 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0269-PROVE: Prove tension T-0264 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0270-PROVE: Prove tension T-0265 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0271-PROVE: Prove tension T-0266 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0272-PROVE: Prove tension T-0267 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0274-PROVE: Prove tension T-0268 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0275-PROVE: Prove tension T-0269 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0276-PROVE: Prove tension T-0270 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
+- R-0277-PROVE: Prove tension T-0271 closed: the next run's workflows/legacy_transform/run_home.py diff reads its identity under CLOSED, never OPENED or UNCHANGED.
