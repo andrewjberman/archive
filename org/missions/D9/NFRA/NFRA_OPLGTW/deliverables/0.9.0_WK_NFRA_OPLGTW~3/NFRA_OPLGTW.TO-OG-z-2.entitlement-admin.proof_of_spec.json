@@ -18,7 +18,7 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/ops/schwab_entitlement_admin.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "7a5554face",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "New module, source only; nothing deploys and no real grant is activated. check_operator_identity matches an sts:GetCallerIdentity ARN's role name against the operator role (opal-gateway-access-admin), refusing the runtime role (opal-gateway-role) and every other identity. validate_candidate uses context.make_principal and data_entitlement.parse_scope, plus this command's own contract cross-check (fields, forbidden_field_classes, grant_date_modes, operations, disabled_operations). prepare()/activate() split validation+diff+strong-read from the conditional write, so activate() is refused (access_state.ConditionFailed) when the record moved since prepare() read it. revoke() writes a tombstone; access_state.operator_transact independently refuses any delete action. Never imported by app/tools.py or app/integrations/**.",
       "introduces": [
@@ -37,9 +37,9 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "7a5554face",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "test_ogz2_ac01 .. test_ogz2_ac09, offline, on tests/test_access_state.py's moto harness (fake credentials, in-process DynamoDB, a Spy client). AC9 drives a fake STS client with the operator and runtime-role ARNs directly (both the IAM role and assumed-role forms). AC8 is a static census over the source files backing every currently registered MCP tool (app/tools.py plus the three registry.available_ids() integrations), confirmed live that the five Schwab tool names are on no factory yet. Whole module: 9 passed, repeated with an empty diff except the timing line. commit-gate: 'OK: pre-commit gate clean for 2 of 2 file(s)'.",
+      "deploy_evidence": "test_ogz2_ac01 .. test_ogz2_ac09, offline, on tests/test_access_state.py's moto harness (fake credentials, in-process DynamoDB, a Spy client). AC9 drives a fake STS client with the operator and runtime-role ARNs directly (both the IAM role and assumed-role forms). AC8 is a static census over the source files backing every currently registered MCP tool (app/tools.py plus registry.available_ids(), which now returns 4 integrations including `schwab` -- OG-q-2 merged @6a7e9f6caf since this cell's first run). RE-OPENED on row NFRA_OPLGTW-S21: the AC8 tripwire assertion pinning the census to the pre-Schwab set is removed so the census's own registered_integration_ids loop scans app/integrations/schwab/**/*.py like every other registered integration; nothing else in this file changed. Whole module: 9 passed, repeated with an empty diff except the timing line. commit-gate: 'OK: pre-commit gate clean for 1 of 1 file(s)' (only this test file touched this re-open, per the order's Scope clause).",
       "introduces": [
         "def test_ogz2_ac01", "def test_ogz2_ac02", "def test_ogz2_ac03", "def test_ogz2_ac04",
         "def test_ogz2_ac05", "def test_ogz2_ac06", "def test_ogz2_ac07", "def test_ogz2_ac08", "def test_ogz2_ac09"
@@ -54,7 +54,7 @@
       "criterion_id": "OGZ2-AC1",
       "criterion_verbatim": "`OGZ2-AC1` (`test_ogz2_ac01`) -- a candidate with an empty or unknown identity is refused. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac01 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac01 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac01 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
       "output_evidence": "OGZ2-AC1: 3 of 3 empty/unknown-identity candidates refused\n1 passed in 0.71s\nrc=0",
       "denominator": "3 of 3 candidates refused: empty tid, missing oid, a non-GUID tid. Each raises CandidateRejected from context.make_principal's ValueError. Mutant control: with context.make_principal patched permissive, 0 of 3 raise (DID NOT RAISE), confirming this check is load-bearing. 1 of 1 test.",
@@ -64,7 +64,7 @@
       "criterion_id": "OGZ2-AC2",
       "criterion_verbatim": "`OGZ2-AC2` (`test_ogz2_ac02`) -- a candidate with an unapproved account or field is refused. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac02 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac02 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac02 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
       "output_evidence": "OGZ2-AC2: 2 of 2 (unapproved account, unapproved field) candidates refused\n1 passed in 0.48s\nrc=0",
       "denominator": "2 of 2 sub-cases refused: an account named for a master outside the candidate's own granted masters (data_entitlement.parse_scope's account/master shape check), and a column outside the contract's per-dataset field catalog (this command's own cross-check; error text contains 'unapproved field'). Mutant control: with parse_scope patched permissive, the account sub-case DID NOT RAISE. 1 of 1 test.",
@@ -74,7 +74,7 @@
       "criterion_id": "OGZ2-AC3",
       "criterion_verbatim": "`OGZ2-AC3` (`test_ogz2_ac03`) -- a candidate with a malformed date is refused. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac03 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac03 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac03 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
       "output_evidence": "OGZ2-AC3: 2 of 2 malformed-date candidates refused\n1 passed in 0.54s\nrc=0",
       "denominator": "2 of 2 candidates refused: an invalid calendar date (2026-13-40) and the wrong shape (09/16/2026), both via data_entitlement.parse_scope's _iso_date. Mutant control: with parse_scope patched permissive, 0 of 2 raise. 1 of 1 test.",
@@ -84,7 +84,7 @@
       "criterion_id": "OGZ2-AC4",
       "criterion_verbatim": "`OGZ2-AC4` (`test_ogz2_ac04`) -- the command prints the exact scope diff before activation. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac04 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac04 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac04 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
       "output_evidence": "OGZ2-AC4: diff printed by prepare() (6 dimension lines) precedes the activate() call\n1 passed in 1.08s\nrc=0",
       "denominator": "prepare()'s printed diff (captured via capsys) equals, dimension for dimension, an independently computed scope_diff(None, plan.scope) oracle -- 6 of 6 dimensions (masters, datasets, accounts, columns, operations, dates) present and matching. The print happens inside prepare(), a call that returns before activate() is even invoked. Mutant control: with the print statement removed from a copy of prepare(), the captured output is empty (DID NOT contain 'SCOPE DIFF:'). 1 of 1 test.",
@@ -94,7 +94,7 @@
       "criterion_id": "OGZ2-AC5",
       "criterion_verbatim": "`OGZ2-AC5` (`test_ogz2_ac05`) -- (difference) activation against a stale revision is refused, and against the current revision succeeds. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac05 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac05 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac05 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
       "output_evidence": "OGZ2-AC5: stale base (None, now superseded) refused with ConditionFailed;\ncurrent base (revision 1) activated to revision 2\n1 passed in 1.10s\nrc=0",
       "denominator": "2 of 2 arms in one differential test: activating the FIRST plan again after it already succeeded (its base is now stale -- a profile exists where the plan expected none) raises access_state.ConditionFailed; a FRESH plan read against the now-current revision 1 activates cleanly to revision 2. Mutant control: with activate() patched to re-read the current revision instead of trusting the plan's base (recreating the exact TOCTOU the two-step design exists to close), the stale arm DID NOT RAISE. 1 of 1 test.",
@@ -104,7 +104,7 @@
       "criterion_id": "OGZ2-AC6",
       "criterion_verbatim": "`OGZ2-AC6` (`test_ogz2_ac06`) -- one transaction writes the `POLICY#` record and its `operator_audit` with approver, timestamp and source authorization reference. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac06 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac06 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac06 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
       "output_evidence": "OGZ2-AC6: 1 transact_write_items call, 3 puts (profile+grant+audit), audit carries approver='andrew@opalinvest.com' source_authorization='IT-TICKET-42' at='2026-09-16T01:02:03Z'\n1 passed in 0.96s\nrc=0",
       "denominator": "Exactly 1 transact_write_items call (Spy-recorded) carrying exactly 3 Put items, all three sharing one POLICY#<tid>#<oid> partition; the decoded operator_audit item's approver/source_authorization/at match the call's own arguments exactly. Mutant control: with operator_audit_op patched to clobber approver, the assertion fails ('MUTATED' != 'andrew@opalinvest.com'). 1 of 1 test.",
@@ -114,7 +114,7 @@
       "criterion_id": "OGZ2-AC7",
       "criterion_verbatim": "`OGZ2-AC7` (`test_ogz2_ac07`) -- revocation writes a tombstone and deletes nothing. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac07 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac07 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac07 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
       "output_evidence": "OGZ2-AC7: revoke() -> 1 transact_write_items call, 0 Delete items, 0 delete_item calls; profile still readable, status=revoked revision=2; a direct delete Op is refused before any AWS call\n1 passed in 1.15s\nrc=0",
       "denominator": "1 of 1 revoke() call: 1 transact_write_items call, 0 of its items carry a Delete key, 0 delete_item calls anywhere in the recorded calls since activation. The profile is still readable (not None) with status=revoked at the expected next revision. A DIRECT attempt at a delete Op through the same operator surface is refused (AccessStateRefused) before any AWS call. Mutant control: with revoke() patched to append a Delete transaction item, access_state.operator_transact itself raises AccessStateRefused instead of succeeding. 1 of 1 test.",
@@ -124,17 +124,17 @@
       "criterion_id": "OGZ2-AC8",
       "criterion_verbatim": "`OGZ2-AC8` (`test_ogz2_ac08`) -- no registered MCP tool writes a `POLICY#` record, over all tools, denominator printed. <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac08 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac08 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac08 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
-      "output_evidence": "OGZ2-AC8: DENOMINATOR 44 registered tool(s) (35 native + 9 integration across ['globgrph', 'opal_portal', 'ycharts']) backed by 10 file(s) scanned -- 0 hit(s)\n1 passed in 0.51s\nrc=0",
-      "denominator": "44 of 44 registered MCP tools (data_entitlement.NATIVE_TOOLS | INTEGRATION_TOOLS, live-confirmed against registry.available_ids() == ['globgrph','opal_portal','ycharts'] with 'schwab' absent), backed by 10 of 10 source files (app/tools.py, app/integrations/{base,registry}.py, and every .py under the 3 registered integration packages). 0 of 10 files reference operator_transact, profile_put_op, grant_put_op, operator_audit_op, or import schwab_entitlement_admin. Census sensitivity check (not this test): widening the primitive list to the common token 'def ' flags 7 of the same 10 files, so the 0-hit result is not vacuous. 1 of 1 test.",
+      "output_evidence": "OGZ2-AC8: DENOMINATOR 44 registered tool(s) (35 native + 9 integration across ['globgrph', 'opal_portal', 'schwab', 'ycharts']) backed by 18 file(s) scanned -- 0 hit(s)\n1 passed in 1.35s\nrc=0",
+      "denominator": "44 of 44 registered MCP tools (data_entitlement.NATIVE_TOOLS | INTEGRATION_TOOLS, live-confirmed against registry.available_ids() == ['globgrph','opal_portal','schwab','ycharts']), backed by 18 of 18 source files (app/tools.py, app/integrations/{base,registry}.py, and every .py under all 4 registered integration packages, including the 8 files under app/integrations/schwab -- OG-q-2 merged and registered `schwab` on the factory since this cell's first run). 0 of 18 files reference operator_transact, profile_put_op, grant_put_op, operator_audit_op, or import schwab_entitlement_admin. RE-OPENED-ON row NFRA_OPLGTW-S21: the tripwire assertion ('schwab' not in registered_integration_ids) that pinned the prior census to 3 integrations/10 files/8-hit-if-widened is removed; the census loop itself already generalizes over registered_integration_ids so no other test code changed. Widening control (required by the re-open order): a mutant primitive ('# MUTANT-TEST-ONLY: grant_put_op') appended to app/integrations/schwab/catalog.py made this same test FAIL ('assert [(WindowsPath(.../schwab/catalog.py), 'references grant_put_op')] == []'), then the file was restored byte-identical (git diff empty) and the test re-passed. 1 of 1 test.",
       "status": "PASS"
     },
     {
       "criterion_id": "OGZ2-AC9",
       "criterion_verbatim": "`OGZ2-AC9` (`test_ogz2_ac09`) -- the command runs under an operator AWS identity and refuses to run under the runtime role (the test drives the caller-identity check with both ARNs). <invocation>cd <WS> && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac09 -q -p no:cacheprovider --color=no</invocation><expect>(?m)^1 passed(?![^\\n]*(failed|error))</expect>",
       "method": "test_suite",
-      "invocation": "cd /c/tmp/wk-oplgtw-1-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac09 -q -p no:cacheprovider --color=no",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac09 -q -p no:cacheprovider --color=no",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))",
       "output_evidence": "OGZ2-AC9: operator role ARN accepted (role+assumed-role form); runtime role ARN 'arn:aws:iam::313476888478:role/opal-gateway-role' refused (role+assumed-role form)\n1 passed in 0.47s\nrc=0",
       "denominator": "4 of 4 fake-STS-driven calls: the operator role's IAM ARN accepted, its assumed-role form accepted, the runtime role's IAM ARN refused (IdentityRefused), its assumed-role form refused. Both ARNs are OG-i-1's own (access-state-table.result.md): arn:aws:iam::313476888478:role/opal-gateway-access-admin and .../role/opal-gateway-role. Mutant control: with check_operator_identity patched to never refuse, the operator-ARN assertion itself fails ('MUTATED-NO-CHECK' != the real ARN). 1 of 1 test.",
@@ -143,14 +143,14 @@
   ],
   "controls": {
     "mutant": {
-      "description": "Seven in-process mutants via a pytest plugin (.scratch/ogz2_mutants.py, loaded with -p ogz2_mutants and PYTHONPATH=.scratch; the committed bytes untouched), each run against the criteria it targets. identity_off: check_operator_identity never refuses (AC9). permissive_identity: context.make_principal never refuses an empty/unknown tid/oid (AC1). permissive_scope: data_entitlement.parse_scope never refuses a malformed shape/date/account (AC2, AC3). stale_reread: activate() re-reads the current revision instead of trusting the plan's base, reopening the exact race the two-step prepare/activate design closes (AC5). audit_clobber: operator_audit_op always records approver='MUTATED' (AC6). no_diff_print: prepare() computes the diff but never prints it (AC4). revoke_via_delete: revoke() appends a Delete transaction item (AC7). A supplementary non-pytest check widened AC8's own primitive list to the common token 'def ' and confirmed it then flags files (census sensitivity).",
-      "expected": "Each of the 7 mutants fails exactly the test(s) it targets: identity_off -> AC9 fails; permissive_identity -> AC1 fails; permissive_scope -> AC2 and AC3 fail; stale_reread -> AC5 fails; audit_clobber -> AC6 fails; no_diff_print -> AC4 fails; revoke_via_delete -> AC7 fails (as an AccessStateRefused instead of a clean revoke). AC8's widened-primitive check: hits > 0.",
-      "observed": "identity_off: '1 failed' -- \"assert 'MUTATED-NO-CHECK' == 'arn:...access-admin'\". permissive_identity: '1 failed' -- 'Failed: DID NOT RAISE CandidateRejected'. permissive_scope: '2 failed' -- both 'DID NOT RAISE CandidateRejected' (AC2's account sub-case, AC3 both date sub-cases). stale_reread: '1 failed' -- 'Failed: DID NOT RAISE ConditionFailed'. audit_clobber: '1 failed' -- \"assert 'MUTATED' == 'andrew@opalinvest.com'\". no_diff_print: '1 failed' -- \"assert 'SCOPE DIFF:' in ''\". revoke_via_delete: '1 failed' -- 'access_state.AccessStateRefused: POLICY records are never deleted'. AC8 widened-primitive check: 7 of 10 files hit (vs 0 with the real primitive list).",
+      "description": "Carried over unchanged from this cell's first run (this re-open touches only AC8's test body; AC1-AC7/AC9 assertions are byte-identical to that run). Seven in-process mutants via a pytest plugin (.scratch/ogz2_mutants.py, loaded with -p ogz2_mutants and PYTHONPATH=.scratch; the committed bytes untouched), each run against the criteria it targets. identity_off: check_operator_identity never refuses (AC9). permissive_identity: context.make_principal never refuses an empty/unknown tid/oid (AC1). permissive_scope: data_entitlement.parse_scope never refuses a malformed shape/date/account (AC2, AC3). stale_reread: activate() re-reads the current revision instead of trusting the plan's base, reopening the exact race the two-step prepare/activate design closes (AC5). audit_clobber: operator_audit_op always records approver='MUTATED' (AC6). no_diff_print: prepare() computes the diff but never prints it (AC4). revoke_via_delete: revoke() appends a Delete transaction item (AC7). THIS RUN's own AC8 widening control (the order's required 'Control' clause, distinct from the above): a mutant primitive token ('# MUTANT-TEST-ONLY: grant_put_op') appended to app/integrations/schwab/catalog.py, run, then the file restored byte-identical (git diff empty).",
+      "expected": "Each of the 7 carried-over mutants fails exactly the test(s) it targets: identity_off -> AC9 fails; permissive_identity -> AC1 fails; permissive_scope -> AC2 and AC3 fail; stale_reread -> AC5 fails; audit_clobber -> AC6 fails; no_diff_print -> AC4 fails; revoke_via_delete -> AC7 fails (as an AccessStateRefused instead of a clean revoke). THIS RUN's AC8 mutant: test_ogz2_ac08 fails, citing the schwab file.",
+      "observed": "Carried over (unchanged code path, not re-run this session): identity_off: '1 failed' -- \"assert 'MUTATED-NO-CHECK' == 'arn:...access-admin'\". permissive_identity: '1 failed' -- 'Failed: DID NOT RAISE CandidateRejected'. permissive_scope: '2 failed' -- both 'DID NOT RAISE CandidateRejected' (AC2's account sub-case, AC3 both date sub-cases). stale_reread: '1 failed' -- 'Failed: DID NOT RAISE ConditionFailed'. audit_clobber: '1 failed' -- \"assert 'MUTATED' == 'andrew@opalinvest.com'\". no_diff_print: '1 failed' -- \"assert 'SCOPE DIFF:' in ''\". revoke_via_delete: '1 failed' -- 'access_state.AccessStateRefused: POLICY records are never deleted'. THIS RUN's AC8 mutant, live: 'AssertionError: assert [(WindowsPath('.../schwab/catalog.py'), 'references grant_put_op')] == []' -- test_ogz2_ac08 FAILED as expected; after restoring catalog.py (git diff clean), test_ogz2_ac08 PASSED again.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "The whole module (9 tests) run twice unmutated, .scratch/ogz2_det_run1.log and run2.log, diffed.",
-      "observed": "'9 passed in 1.58s' vs '9 passed in 1.47s' -- diff of the two logs is empty except that one timing line; every 'OGZ2-AC*' denominator line is byte-identical across both runs.",
+      "method": "The whole module (9 tests) run twice unmutated at this cell's new HEAD, .scratch/ogz2_det_run1.log and run2.log, diffed.",
+      "observed": "'9 passed in 2.39s' vs '9 passed in 3.60s' -- diff of the two logs is empty except that one timing line; every 'OGZ2-AC*' denominator line is byte-identical across both runs, including AC8's 44/18/0 line.",
       "status": "STABLE"
     }
   },
@@ -169,7 +169,7 @@
     },
     {
       "item": "Deploy, push, merge or rebase.",
-      "reason": "Forbidden by the order. Every commit is LOCAL on branch wk-nfra_oplgtw-1-3e."
+      "reason": "Forbidden by the order. Every commit is LOCAL on branch wk-nfra_oplgtw-3e."
     }
   ],
   "surprises": [],
@@ -177,8 +177,13 @@
   "compiler_tools": [
     {
       "tool": "pytest under .venv-og (py -3.12 venv, --system-site-packages, requirements + msal moto pytest; mcp 1.28.0, moto 5.2.3)",
-      "invocation": "the 9 pytest invocations of OGZ2-AC1 .. OGZ2-AC9, verbatim, from /c/tmp/wk-oplgtw-1-3e",
+      "invocation": "the 9 pytest invocations of OGZ2-AC1 .. OGZ2-AC9, verbatim, from /c/tmp/wk-oplgtw-3e",
       "result": "OGZ2-AC1 .. AC9: '1 passed' each, rc=0. Whole module: '9 passed', rc=0, twice, determinism-checked."
+    },
+    {
+      "tool": "pytest, tests/test_schwab_query.py as a whole module (re-run per the re-open order, must stay green)",
+      "invocation": "cd /c/tmp/wk-oplgtw-3e && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_query.py -q -p no:cacheprovider --color=no",
+      "result": "'24 passed in 12.00s', rc=0."
     },
     {
       "tool": ".scratch/ogz2_mutants.py (uncommitted pytest plugin) under .venv-og",
@@ -193,7 +198,7 @@
     {
       "tool": ".tools/safe-commit.sh",
       "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~3 <0.9.0_WK_NFRA_OPLGTW~3@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "see WORKER REPORT for the resulting hash, LOCAL on wk-nfra_oplgtw-1-3e"
+      "result": "see WORKER REPORT for the resulting hash, LOCAL on wk-nfra_oplgtw-3e"
     },
     {
       "tool": ".tools/proof-of-spec-check.py",
