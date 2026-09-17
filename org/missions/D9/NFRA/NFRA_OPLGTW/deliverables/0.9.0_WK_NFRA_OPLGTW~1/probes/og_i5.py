@@ -82,8 +82,12 @@ def ac1():
 def ac2():
     ws = _ws()
     sentinel_path = "org/critical_paths/.open_deploys/nfra-oplgtw-og-i-5-access-state-rename.json"
-    r = _run(["git", "-C", str(ws), "log", "-1", "--format=%H", "--", sentinel_path])
-    sentinel_commit = r.stdout.strip()
+    # --diff-filter=A: the commit that ADDED the sentinel, never "last touched" -- the ledger close
+    # later DELETES this same path, and a plain `git log -1` on it would return the deletion commit
+    # (memory trap: "git log path returns zero/wrong commit for add-then-delete").
+    r = _run(["git", "-C", str(ws), "log", "--diff-filter=A", "--format=%H", "--", sentinel_path])
+    commits = [c for c in r.stdout.splitlines() if c.strip()]
+    sentinel_commit = commits[-1] if commits else ""
     if not sentinel_commit:
         return _fail("AC2", "no commit found adding the ledger sentinel")
     sentinel_time = _git_commit_time(ws, sentinel_commit)
