@@ -1,0 +1,164 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-8",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ac5ff6a57",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-8.the-five-route-exercise-surface.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~23/SESSION_LOG.AMGT-rk-8.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's own session log: the bar, the four criteria with their deciding outputs and denominators, the AC3 instrument note, the mutant/determinism controls and the two surprise rows. Written as a NEW file rather than appended to SESSION_LOG.md so AMGT-rk-1's already-committed log is not overwritten.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows AMGT_RESAPP-Z-W23-S2 and AMGT_RESAPP-Z-W23-S3 appended by textual splice inside the one fenced JSON array. Two rows appended, never re-serialized and never editing an existing row: array parsed clean at 299 items, last two ids AMGT_RESAPP-Z-W23-S2 and AMGT_RESAPP-Z-W23-S3, prior last row AMGT_RESAPP-Z-S132 untouched. Non-ASCII delta measured on BOTH sides of the write with len(b)-len(b.decode('utf-8')): 122 before, 122 after -- this worker added zero non-ASCII."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "captured 5 -- all FIVE routes captured from the DEPLOYED adapter in one act, each with its printed statusCode and byte length, and each written to a named file under .scratch/rk8/. Round 11 captured 2, so any count below 5 is NOT met; the exact capture filenames are recorded in the evidence, never paraphrased. AMENDMENT 11: the fifth route is /coverage, which the adapter's own route table serves and the page's own client calls. Measured at the amendment, all five served 200 -- that is CONTEXT, NOT A BAR. The bar is CAPTURE: a route that refuses is still captured and still counted",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json,os; c=boto3.client('lambda'); routes=['/api/scoped/amgt/security/BA_US_Equity/overlay','/api/scoped/amgt/security/BA_US_Equity/peers','/api/scoped/amgt/lead-panel/rankings/trending/chatter','/api/scoped/amgt/security/BA_US_Equity/thesis','/api/scoped/amgt/security/BA_US_Equity/coverage']; os.makedirs('.scratch/rk8',exist_ok=True); n=0; [ (lambda p: (open('.scratch/rk8/'+p['f'],'wb').write(json.dumps(p['b']).encode()), print(p['r'], p['b'].get('statusCode'), len(json.dumps(p['b'])))))({'r':r,'f':r.strip(chr(47)).replace(chr(47),'_')+'.json','b':json.loads(c.invoke(FunctionName='opal-amgt-scoped-api',Payload=json.dumps({'rawPath':r,'headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}).encode())['Payload'].read())}) for r in routes]; print('captured', len(os.listdir('.scratch/rk8')))\"",
+      "output_evidence": "/api/scoped/amgt/security/BA_US_Equity/overlay 200 50630\n/api/scoped/amgt/security/BA_US_Equity/peers 200 20036\n/api/scoped/amgt/lead-panel/rankings/trending/chatter 200 7319\n/api/scoped/amgt/security/BA_US_Equity/thesis 200 221015\n/api/scoped/amgt/security/BA_US_Equity/coverage 200 1696\ncaptured 5\nrc=0\n\nEXACT CAPTURE FILENAMES, named not paraphrased (ls -la .scratch/rk8/, 5 entries):\napi_scoped_amgt_lead-panel_rankings_trending_chatter.json   7319\napi_scoped_amgt_security_BA_US_Equity_coverage.json         1696\napi_scoped_amgt_security_BA_US_Equity_overlay.json         50630\napi_scoped_amgt_security_BA_US_Equity_peers.json           20036\napi_scoped_amgt_security_BA_US_Equity_thesis.json         221015\n\nCaptured from the DEPLOYED plane, never from source: boto3 lambda invoke of FunctionName opal-amgt-scoped-api (AMGT-rk-2's redeploy, LastModified 2026-09-16T17:23:29Z), GET-only, with the /api/scoped/amgt prefix and the x-firm-id edge header per ISSUER AMENDMENT 2. All five in ONE act. AMENDMENT 11's corrected fifth route /coverage served 200 at 1696 bytes. Round 11 captured 2; this cut captured 5.\n\nBOUND: run under timeout 120; completed well inside it, no rc 124, no retry needed. The invocation recorded above is BYTE-IDENTICAL to the task order's <invocation> -- the bound was applied around it and is stated here rather than folded into the recorded command.",
+      "denominator": "5 of 5 routes named by AC1 captured and written to named files; 5 of 5 served statusCode 200 (context, not the bar); round 11's comparator was 2 of 5",
+      "status": "PASS",
+      "expect": "overlay [0-9]{3} [0-9]+[\\s\\S]*?peers [0-9]{3} [0-9]+[\\s\\S]*?chatter [0-9]{3} [0-9]+[\\s\\S]*?thesis [0-9]{3} [0-9]+[\\s\\S]*?coverage [0-9]{3} [0-9]+[\\s\\S]*?captured 5(?![0-9])[\\s\\S]*?api_scoped_amgt_security_BA_US_Equity_coverage\\.json"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "files 5, nonempty-bodies 5, overlay-has-description True, overlay-has-posture True -- the header's description and the Peers panel are now INSIDE the exercised set, which is the whole point of widening from two routes to five. peers-has-members is PRINTED not barred, because 10 of 33 peer sets carried members at the cut and that population is AMGT-rk-4's to move, not this cell's. overlay-has-posture IS barred: the posture surface has NO route of its own and rides the /overlay body, so this is where it is exercised",
+      "method": "command",
+      "invocation": "python -c \"import json,glob,os; fs=sorted(glob.glob('.scratch/rk8/*.json')); print('files', len(fs)); tot=0; [print(os.path.basename(f), len(open(f,'rb').read())) for f in fs]; import io; bods=[json.loads(json.loads(io.open(f,encoding='utf-8').read()).get('body') or '{}') for f in fs]; print('nonempty-bodies', sum(1 for b in bods if b)); print('overlay-has-description', any('description' in (b or {}) for b in bods)); print('overlay-has-posture', any('posture' in (b or {}) for b in bods)); print('peers-has-members', any((b or {}).get('members') for b in bods))\"",
+      "output_evidence": "files 5\napi_scoped_amgt_lead-panel_rankings_trending_chatter.json 7319\napi_scoped_amgt_security_BA_US_Equity_coverage.json 1696\napi_scoped_amgt_security_BA_US_Equity_overlay.json 50630\napi_scoped_amgt_security_BA_US_Equity_peers.json 20036\napi_scoped_amgt_security_BA_US_Equity_thesis.json 221015\nnonempty-bodies 5\noverlay-has-description True\noverlay-has-posture True\npeers-has-members True\nrc=0\n\nAll four barred values met. peers-has-members True is PRINTED, NOT BARRED, per the criterion's own text -- the 10 of 33 peer-set population is AMGT-rk-4's to move.\n\nThe widening is real: the /overlay body (50630 B, statusCode 200) carries keys axis_reads, bloomberg_session_state, chatter, description, feed, header_figures, identity, peers, posture, price, security_key -- so the header's description, the publisher feed and the Peers panel, all OUTSIDE round 11's two-route exercise, are inside this one. The /peers body (20036 B) carries members non-empty.\n\nDISCLOSED, and filed as row AMGT_RESAPP-Z-W23-S3: overlay-has-posture is an any() across all five bodies, and a key census over those five (denominator 5) finds posture in TWO of them -- the /overlay capture AND the /thesis capture -- so the bar would also read True from /thesis alone. It is met TRUTHFULLY here: the /overlay capture exists, served 200, and does carry posture. The sibling bar overlay-has-description is scoped in effect to /overlay (present in exactly 1 of 5 bodies) and fired False under this cell's mutant control.\n\nBOUND: run under timeout 120; completed well inside it, no rc 124, no retry needed. The invocation recorded above is BYTE-IDENTICAL to the task order's <invocation> -- the bound was applied around it and is stated here rather than folded into the recorded command.",
+      "denominator": "5 of 5 captured bodies present and non-empty; 4 of 4 barred values met (files, nonempty-bodies, overlay-has-description, overlay-has-posture); posture key present in 2 of 5 bodies, description in 1 of 5, members in 1 of 5",
+      "status": "PASS",
+      "expect": "files 5(?![0-9])[\\s\\S]*?nonempty-bodies 5(?![0-9])[\\s\\S]*?overlay-has-description True[\\s\\S]*?overlay-has-posture True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "rc=0 with every prior check still at its met value -- a harness that drops a prior check to add a new one is NOT met. The browser half now runs against the DEV-integrated branch from AMGT-rk-1 rather than a local vite serve of a drain ref, and the evidence states which branch it ran on",
+      "method": "test_suite",
+      "invocation": "cd portal && timeout 110 node src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs 2>&1 | tail -16; echo rc=$?",
+      "output_evidence": "  },\n  \"limits\": \"A frontend render boundary only. It does not say which response any browser received, and it grades nothing about the producer.\"\n}\nCHECK error_differs_from_empty = true (expected true)\nCHECK error_names_read_failure = true (expected true)\nCHECK error_claims_no_daily_row = false (expected false)\nCHECK loading_differs = true (expected true)\nCHECK populated_differs = true (expected true)\nCHECK populated_names_security = true (expected true)\nCHECK starred_error_differs_from_starred_empty = true (expected true)\nCHECK ranked_row_click_handlers_found = true (expected true)\nCHECK unresolved_row_marker_rendered = true (expected true)\nCHECK unresolved_row_navigates = false (expected false)\nCHECK resolved_row_click_sends_canonical_key = true (expected true)\nCHECK a_click_sent_a_ticker = false (expected false)\nCHECKS-OK 12 of 12\nrc=0\n\nEvery one of the 12 checks sits at its expected value -- each line prints its observed value and its (expected ...) beside it and the two agree on all 12; none was dropped to add another, and CHECKS-OK 12 of 12 is the harness's own aggregate of exactly that.\n\nBRANCH IT RAN ON, as the criterion requires the evidence to state: the DEV-INTEGRATED branch wk-amgt_resapp-12-23-portal at HEAD 2453a7b4c6b7ff91ea89db499890a9486265d1a0, in the linked portal worktree C:/tmp/wk-amgt-12-23/portal -- AMGT-rk-1's integrated branch (its 47 Security Analysis files with DEV merged in), NOT a local vite serve of drain ref 0e153399 as round 11's browser half used. Measured with git rev-parse --abbrev-ref HEAD and git rev-parse HEAD in that worktree. No install was run; node_modules was already present.\n\nINSTRUMENT NOTE: the literal invocation ends `| tail -16; echo rc=$?`, so $? is TAIL's exit code, not the harness's. The recorded rc=0 is the literal invocation's output as the order requires. Because this claim feeds a committed record, the harness's own exit code was re-derived on a SECOND instrument -- `timeout 110 node src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs >/dev/null 2>&1; echo \"node_true_rc=$?\"` -> node_true_rc=0 -- so the recorded value is the harness's state and not a pipeline artifact.\n\nBOUND: run under timeout 110 (carried inside the order's own invocation); completed well inside it, no rc 124, no retry needed. The invocation recorded above is BYTE-IDENTICAL to the task order's <invocation> -- the bound was applied around it and is stated here rather than folded into the recorded command.",
+      "denominator": "12 of 12 harness checks at their expected value; 2 of 2 exit-code readings 0 (literal invocation's rc, and the harness's own rc on a second instrument)",
+      "status": "PASS",
+      "expect": "CHECKS-OK 12 of 12[\\s\\S]*?rc=0[\\s\\S]*?wk-amgt_resapp-12-23-portal"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the JUDGMENT is whether the Security Analysis page, on the DEV-INTEGRATED branch and against the DEPLOYED adapter, is a page a person could actually use today -- header and five tabs, each serving its figures or stating a CLASSED absent. This invocation prints the captured-route denominator (5) and the branch so the grader has the evidence; the verdict is not written here. GRADED AT L9 BY 3.0.0_SA_CVO~Z, NEVER SELF-GRADED",
+      "method": "command",
+      "invocation": "python -c \"import json,glob,os; fs=sorted(glob.glob('.scratch/rk8/*.json')); print('routes_captured', len(fs), 'of 5'); [print('  ', os.path.basename(f), len(open(f,'rb').read()), 'bytes') for f in fs]; print('branch_under_judgment', open('portal/.git/HEAD').read().strip() if os.path.exists('portal/.git/HEAD') else 'see AC3 evidence')\"",
+      "output_evidence": "routes_captured 5 of 5\n   api_scoped_amgt_lead-panel_rankings_trending_chatter.json 7319 bytes\n   api_scoped_amgt_security_BA_US_Equity_coverage.json 1696 bytes\n   api_scoped_amgt_security_BA_US_Equity_overlay.json 50630 bytes\n   api_scoped_amgt_security_BA_US_Equity_peers.json 20036 bytes\n   api_scoped_amgt_security_BA_US_Equity_thesis.json 221015 bytes\nbranch_under_judgment see AC3 evidence\nrc=0\n\nNO VERDICT IS WRITTEN HERE. Evidence only, for 3.0.0_SA_CVO~Z at L9.\n\nBRANCH UNDER JUDGMENT, supplied MEASURED because the invocation could not print it (filed as row AMGT_RESAPP-Z-W23-S2): wk-amgt_resapp-12-23-portal at HEAD 2453a7b4c6b7ff91ea89db499890a9486265d1a0. The invocation guards on os.path.exists('portal/.git/HEAD'), but portal is a LINKED WORKTREE whose .git is a FILE containing 'gitdir: C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal/.git/worktrees/portal1', not a directory -- so the guard is False by construction and the invocation takes its own fallback arm. The named fallback, AC3's evidence, states the branch because this worker put it there; the invocation itself never can, in any spine-v3 worker worktree.\n\nEVIDENCE THE GRADER MAY WANT, all measured this cut and none of it a verdict: all five captured routes served statusCode 200 off the DEPLOYED adapter opal-amgt-scoped-api (LastModified 2026-09-16T17:23:29Z). /overlay 50630 B carries description, header_figures, peers, chatter, feed, posture, price, identity, axis_reads, bloomberg_session_state. /peers 20036 B carries members non-empty with member_count, rungs, denominators and a stated universe_vintage. /thesis 221015 B carries model_status, fiscal_year_figures, drafted_sections, drafting_status, check_face, held_uncited_count and posture. /coverage 1696 B carries coverage_status, complete, items, items_in_window, states, store_item_count and a reason. /rankings 7319 B carries rows, row_count, ranking_status, ranking_reason, resolution and state. The posture surface has no route of its own and rides /overlay and /thesis (row AMGT_RESAPP-Z-W23-S3).\n\nSTANDING LIMITS ON THE PAGE, carried from the round and NOT measured by this cell, so the grader does not read this evidence as wider than it is: /print returns 500 (AMGT-rk-6's remit, rows AMGT_RESAPP-Z-W23-S1 and Z-S132); the covered model-block population is 3 of 89 coverage / 256 universe; 10 of 33 peers objects carry members; the article pool is 7 bodies over 3 names with collection RESERVED off.\n\nBOUND: run under timeout 120; completed well inside it, no rc 124, no retry needed. The invocation recorded above is BYTE-IDENTICAL to the task order's <invocation> -- the bound was applied around it and is stated here rather than folded into the recorded command.",
+      "denominator": "5 of 5 routes captured and printed with byte lengths; 1 of 2 named results produced by the invocation itself (the denominator printed, the branch taken from its fallback arm and supplied measured here); 5 of 5 routes served 200",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=\"true\" in the task order). The substitute oracle is 3.0.0_SA_CVO~Z at L9, which grades it against the specification that issued it; this worker records the output and its denominator and writes NO verdict, per the order's own instruction that it is NEVER self-graded. The invocation ran clean (rc=0) and its evidence is transcribed verbatim above.",
+      "judgment": true,
+      "expect": "routes_captured 5 of 5[\\s\\S]*?wk-amgt_resapp-12-23-portal"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2's bars were mutated by REMOVING the /overlay capture from .scratch/rk8/ and re-running AC2's invocation BYTE-UNCHANGED, then restoring the file. This is the real instrument against a real deletion, not a rewritten assertion: if the bars were inert, the outputs would not move.",
+      "expected": "files 4, nonempty-bodies 4, and overlay-has-description False -- AC2's bar set should fail when the body carrying the header description is gone.",
+      "observed": "files 4; nonempty-bodies 4; overlay-has-description False; overlay-has-posture True; peers-has-members True. The bars FIRED: files, nonempty-bodies and overlay-has-description all moved off their met values, so AC2's PASS is not vacuous. The capture was then restored and AC2 re-run: files 5, nonempty-bodies 5, overlay-has-description True, overlay-has-posture True, peers-has-members True, restored_matches_baseline True (byte-for-byte against the baseline run). ONE BAR DID NOT MOVE and is disclosed rather than smoothed over: overlay-has-posture stayed True with /overlay deleted, because it is an any() over all five bodies and /thesis also carries a posture key -- filed as row AMGT_RESAPP-Z-W23-S3. AC1's own bar carries an independent negative control from the round itself: round 11 ran the same shape over two routes and printed captured 2, not 5.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2's full invocation run twice over unchanged inputs in one act, stdout compared byte-for-byte, exit codes compared. AC1 is a LIVE read of a deployed Lambda and is NOT byte-deterministic by construction; its stability is stated against the issuer's own dry run at ISSUER AMENDMENT 11 rather than claimed.",
+      "observed": "AC2: identical True, rc identical True (both 0) across the two runs; a third run after the mutant restore also matched the baseline byte-for-byte. AC1: the COUNT bar is stable -- captured 5 at both the issuer's amendment dry run and this cut -- and the rankings, thesis and coverage byte lengths were identical (7319 / 221015 / 1696); the two live bodies moved with live data, overlay 50197 -> 50630 and peers 19603 -> 20036, which is expected of a live read and is disclosed here rather than presented as instability or as stability.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any edit to portal/src/pages/SecurityAnalysis/, portal/src/api/endpoints/amgt-lead-panel.ts or portal/src/App.tsx",
+      "reason": "AMGT-rk-8 is an EXERCISE cell, not a build cell: all four criteria read. Those three surfaces are in the <paths> grant because the cell may touch them, not because it must, and nothing in the exercise required a change. No portal file was modified, so the portal branch stays at 2453a7b4 exactly as AMGT-rk-1 left it."
+    },
+    {
+      "item": "The superproject portal gitlink, and any push/merge/rebase of either repo",
+      "reason": "The order fixes the gitlink at be8cf218 (AMGT-rk-1 AC4) and forbids staging a portal entry in the superproject; the ' M portal' in git status is EXPECTED and is not this worker's to resolve. PORTAL FROZEN: COMMIT YES / PROMOTE NO. The DEV push is RESERVED to 0.0.0_AB_MSTR~Z under LD-0367/0368 and LD-0522. Work is LOCAL."
+    },
+    {
+      "item": "Repair of the two defects filed as surprise rows (AC4's branch read, AC2's any() posture bar)",
+      "reason": "THE REFUSAL CLAUSE and the frozen-spec rule: a criterion is run AS WRITTEN and a defect is a ROW, never a repair, a widening or a substituted route. Both criteria were run byte-for-byte and recorded as they came out; neither row was allowed to change an invocation, a bar or a path. Disposition is 3.0.0_SA_CVO~Z's at L9."
+    },
+    {
+      "item": "Re-measurement of AMGT-rk-1's four criteria, and of the populations this round's other cells own",
+      "reason": "AMGT-rk-1 is COMPLETE and DRAINED and its criteria are not this order's to re-run; its result is the branch this cell exercises. The peers-member population (10 of 33) is AMGT-rk-4's, /print's 500 is AMGT-rk-6's, and the model-block coverage population (3 of 89 / 256) is not this cell's -- each is PRINTED as context in the evidence and barred by nothing here."
+    },
+    {
+      "item": "The /posture route named in the cell's frozen DELIVER line",
+      "reason": "ISSUER AMENDMENT 11 corrects the OBJECT: the deployed adapter serves no /posture leaf and the page's client never calls one, so the fifth route is /security/{key}/coverage and the posture surface is exercised via overlay-has-posture where it is actually served. The cell text is FROZEN and was NOT edited; L9 grades the cell whole with both texts."
+    },
+    {
+      "item": "The five-route capture set under .scratch/rk8/ is NOT listed in artifacts_produced",
+      "reason": "AC1 writes the captures to .scratch/rk8/, and .scratch/ is the worker-local scratch surface named by the order -- outside every <paths> grant, untracked by design, and therefore not a repo artifact that can carry a commit-ish. It is declared here rather than given a synthetic etag. The set is fully reconstructible from this instance: the five exact filenames and their byte lengths are transcribed verbatim in AC1, AC2 and AC4, and the set's content hash over sorted basename+bytes is sha256:9a8171a09c241269a02eb6ef0d34a5454fb48849cbbdae10f37aa4698c7797e4. The DEPLOYED object they were captured FROM is the live Lambda opal-amgt-scoped-api (LastModified 2026-09-16T17:23:29Z), read GET-only and never written."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W23-S2: AC4's invocation reads 'portal/.git/HEAD', but in a LINKED WORKTREE portal/.git is a FILE (a gitdir pointer) not a directory, so the existence guard is False by construction and the invocation prints its fallback 'branch_under_judgment see AC3 evidence' instead of the branch -- one of the two results AC4's expect names, on the JUDGMENT criterion graded at L9; AC3's evidence names no branch either, so it reached the grader from neither named source. Supplied MEASURED in AC4's output_evidence (wk-amgt_resapp-12-23-portal @2453a7b4), which is why the hazard is INERT. OBSERVATION / INERT, UNDER_INVESTIGATION.",
+    "AMGT_RESAPP-Z-W23-S3: AC2's bar overlay-has-posture is an any() across all five captured bodies and posture rides TWO of them (/overlay AND /thesis), so the bar reads True from /thesis alone -- proven by this cell's own mutant control, where deleting the /overlay capture flipped overlay-has-description to False while overlay-has-posture stayed True. The criterion is MET truthfully at this cut (/overlay captured, 200, carries posture) and the sibling description bar does discriminate, so this is a bar-discrimination finding and the hazard is INERT. ISSUER AMENDMENT 11's own class one level down. OBSERVATION / INERT, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~23/SESSION_LOG.AMGT-rk-8.md",
+  "compiler_tools": [
+    {
+      "tool": "python + boto3 lambda invoke (AC1, the DEPLOYED-plane capture)",
+      "invocation": "timeout 120 python -c \"import boto3,json,os; c=boto3.client('lambda'); routes=[...5 routes...]; ... c.invoke(FunctionName='opal-amgt-scoped-api', Payload=...{'rawPath':r,'headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}) ...; print('captured', len(os.listdir('.scratch/rk8')))\" -- run byte-for-byte as the order writes it",
+      "result": "rc=0; five routes captured in one act, all statusCode 200 (overlay 50630, peers 20036, rankings 7319, thesis 221015, coverage 1696); 'captured 5'."
+    },
+    {
+      "tool": "python stdlib json/glob (AC2 and AC4, the body reads)",
+      "invocation": "timeout 120 python -c \"...glob('.scratch/rk8/*.json')...\" -- both criteria run byte-for-byte as the order writes them",
+      "result": "AC2 rc=0: files 5, nonempty-bodies 5, overlay-has-description True, overlay-has-posture True, peers-has-members True. AC4 rc=0: routes_captured 5 of 5, five filenames with byte counts, branch_under_judgment 'see AC3 evidence' (the fallback arm)."
+    },
+    {
+      "tool": "node 12-check render harness (AC3, the browser half) in the portal worktree",
+      "invocation": "cd portal && timeout 110 node src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs 2>&1 | tail -16; echo rc=$?",
+      "result": "CHECKS-OK 12 of 12, rc=0, on branch wk-amgt_resapp-12-23-portal @2453a7b4. No install was run."
+    },
+    {
+      "tool": "node direct exit-code read (second instrument for AC3's rc, since $? after a pipe reads tail)",
+      "invocation": "timeout 110 node src/pages/SecurityAnalysis/__harness__/errorEmpty.harness.cjs >/dev/null 2>&1; echo \"node_true_rc=$?\"",
+      "result": "node_true_rc=0 -- the harness's own exit code, confirming the recorded rc=0 is not a pipeline artifact."
+    },
+    {
+      "tool": "mutant + determinism driver (.scratch/controls.py, worker-local)",
+      "invocation": "timeout 120 python .scratch/controls.py -- two same-input AC2 runs compared, then the /overlay capture moved aside, AC2 re-run unchanged, then restored and re-run",
+      "result": "identical True; mutant fired (files 4, nonempty-bodies 4, overlay-has-description False); restored_matches_baseline True. Surfaced row AMGT_RESAPP-Z-W23-S3 (overlay-has-posture stayed True under the mutant)."
+    },
+    {
+      "tool": "python textual splice into the surprise channel (.scratch/splice_row.py, .scratch/splice_row2.py)",
+      "invocation": "timeout 120 python .scratch/splice_row.py; timeout 120 python .scratch/splice_row2.py -- append inside the one fenced JSON array by textual splice, asserting the exact tail and that the id is not already present; never re-serializing the array and never editing an existing row",
+      "result": "rows 299; last two ids AMGT_RESAPP-Z-W23-S2 and AMGT_RESAPP-Z-W23-S3; non-ASCII delta 122 before and 122 after (zero added)."
+    },
+    {
+      "tool": "proof-of-spec-check.py, THIS WORKTREE's own copy",
+      "invocation": "timeout 120 python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~23/AMGT_RESAPP.TO-AMGT-rk-8.the-five-route-exercise-surface.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "see the WORKER REPORT: rc is the verdict and only the exit code is read."
+    }
+  ]
+}

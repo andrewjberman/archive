@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ac5ff6a57",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-3.the-price-producer-generation-writer.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88b"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/price/generation.py",
+      "kind": "script",
+      "commit_or_etag": "f838560c46",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Unchanged this respawn (built by the prior instance of this slot, committed f838560c46). Re-verified live at this cut: opal-harvest-security-metrics carries TRENDING_PRICE#2026-09-10#20260916T065448Z-9b7ffda3dcdc, COMPLETE, 32 rows, served through lib.research.api.scoped_amgt.read_rankings and through the deployed opal-amgt-scoped-api Lambda at as_of_date=2026-09-10. No Lambda redeploy is needed: the read side is data-agnostic of which writer produced a generation.",
+      "introduces": ["build_generation", "default_write_generation", "build_identity_index"]
+    },
+    {
+      "path_or_key": "lib/research/price/backfill_legacy_generation.py",
+      "kind": "script",
+      "commit_or_etag": "f838560c46",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Unchanged this respawn. Ad-hoc QA exercise (permitted; not production evidence in itself), already run live in the prior instance of this slot: WROTE pointers_written=2 of 2 rows_written=32. This is the ONE producer of the TRENDING_PRICE#2026-09-10 generation that AC1/AC3/AC4 all read back through the production plane.",
+      "introduces": ["read_legacy_partition", "series_from_legacy_rows"],
+      "artifact_covered_by": ["AC1", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/price/tests/test_generation.py",
+      "kind": "test",
+      "commit_or_etag": "f838560c46",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A test file is never deployed. Re-run at this cut: python -m pytest lib/research/price -q -> 28 passed, rc 0.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -c \"import boto3,collections; s=boto3.client('s3'); pg=s.get_paginator('list_objects_v2'); ks=[o['Key'] for p2 in pg.paginate(Bucket='opal-data-harvest', Prefix='rankings/') for o in p2.get('Contents',[])]; print('s3_rankings_objects', len(ks), '(RECORDED: the estate has never written rankings to S3)'); d=boto3.client('dynamodb'); pa=d.get_paginator('scan'); ad=collections.Counter(); [ad.__setitem__(i.get('axis_date',{}).get('S',''), ad[i.get('axis_date',{}).get('S','')]+1) for page in pa.paginate(TableName='opal-harvest-security-metrics', ProjectionExpression='axis_date') for i in page.get('Items',[])]; gen=[k for k in ad if k.count('#')==2]; price=[k for k in gen if 'PRICE' in k.upper()]; chat=[k for k in gen if 'CHATTER' in k.upper()]; print('ddb_rows_scanned', sum(ad.values()), '| distinct_axis_dates', len(ad)); print('price_generations', len(price), sorted(price)); print('price_generation_rows', sum(ad[k] for k in price)); print('chatter_generations_CONTROL', len(chat), sorted(chat)[:3])\" -- expect: price_generations NONZERO with its keys listed and price_generation_rows NONZERO, against printed denominators (ddb_rows_scanned, distinct_axis_dates); chatter_generations_CONTROL is the POSITIVE CONTROL and MUST ITSELF BE NONZERO. s3_rankings_objects is RECORDED as 0 and is NOT a bar.",
+      "method": "command",
+      "invocation": "python -c \"import boto3,collections; s=boto3.client('s3'); pg=s.get_paginator('list_objects_v2'); ks=[o['Key'] for p2 in pg.paginate(Bucket='opal-data-harvest', Prefix='rankings/') for o in p2.get('Contents',[])]; print('s3_rankings_objects', len(ks), '(RECORDED: the estate has never written rankings to S3)'); d=boto3.client('dynamodb'); pa=d.get_paginator('scan'); ad=collections.Counter(); [ad.__setitem__(i.get('axis_date',{}).get('S',''), ad[i.get('axis_date',{}).get('S','')]+1) for page in pa.paginate(TableName='opal-harvest-security-metrics', ProjectionExpression='axis_date') for i in page.get('Items',[])]; gen=[k for k in ad if k.count('#')==2]; price=[k for k in gen if 'PRICE' in k.upper()]; chat=[k for k in gen if 'CHATTER' in k.upper()]; print('ddb_rows_scanned', sum(ad.values()), '| distinct_axis_dates', len(ad)); print('price_generations', len(price), sorted(price)); print('price_generation_rows', sum(ad[k] for k in price)); print('chatter_generations_CONTROL', len(chat), sorted(chat)[:3])\"",
+      "output_evidence": "s3_rankings_objects 0 (RECORDED: the estate has never written rankings to S3)\nddb_rows_scanned 130 | distinct_axis_dates 13\nprice_generations 1 ['TRENDING_PRICE#2026-09-10#20260916T065448Z-9b7ffda3dcdc']\nprice_generation_rows 32\nchatter_generations_CONTROL 3 ['TRENDING_CHATTER#2026-09-15#20260915T190138Z-6556d07d87e5', 'TRENDING_CHATTER#2026-09-15#20260915T200841Z-adf383740a9e', 'TRENDING_CHATTER#2026-09-16#20260916T100027Z-efd7e544dd59']",
+      "denominator": "130 DynamoDB rows scanned across 13 distinct axis_date values (full table scan, ProjectionExpression=axis_date); price_generations 1 of those 13; chatter_generations_CONTROL 3 of those 13; s3_rankings_objects 0 of 0 (s3://opal-data-harvest carries no rankings/ prefix at all, recorded not a bar).",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*price_generations\\s+[1-9]\\d*)(?=[\\s\\S]*chatter_generations_CONTROL\\s+[1-9]\\d*)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -c \"import io,glob; fs=sorted(glob.glob('lib/research/price/*.py')+glob.glob('lib/research/ranking/*.py')); j=''.join(io.open(f,encoding='utf-8',errors='replace').read() for f in fs); print('modules', len(fs)); print('generation-writer', j.count('generation')); print('security_key-on-rows', j.count('security_key')); print('schedule-words', j.lower().count('schedule') + j.lower().count('cron') + j.lower().count('eventbridge'))\" -- expect: generation-writer at least 1 and security_key-on-rows at least 1 against a printed module denominator; schedule-words 0 (negative bar, the collection plane stays OFF).",
+      "method": "command",
+      "invocation": "python -c \"import io,glob; fs=sorted(glob.glob('lib/research/price/*.py')+glob.glob('lib/research/ranking/*.py')); j=''.join(io.open(f,encoding='utf-8',errors='replace').read() for f in fs); print('modules', len(fs)); print('generation-writer', j.count('generation')); print('security_key-on-rows', j.count('security_key')); print('schedule-words', j.lower().count('schedule') + j.lower().count('cron') + j.lower().count('eventbridge'))\"",
+      "output_evidence": "modules 4\ngeneration-writer 115\nsecurity_key-on-rows 19\nschedule-words 0",
+      "denominator": "4 modules swept (lib/research/price/*.py: __init__.py, axis.py, backfill_legacy_generation.py, generation.py; lib/research/ranking/*.py: 0 files, directory absent) -- generation-writer 115 of the swept text, security_key-on-rows 19, schedule-words 0.",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*generation-writer\\s+[1-9]\\d*)(?=[\\s\\S]*security_key-on-rows\\s+[1-9]\\d*)(?=[\\s\\S]*schedule-words\\s+0\\b)"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "ISSUER AMENDMENT 7 (2026-09-16 ~15:3xZ, 2.0.0_SA_COO~Z), re-cut on 1.0.0_SA_CTO~Z's ruling AMGT_RESAPP-Z-S125: reads the DynamoDB store for the LATEST COMMITTED TRENDING_PRICE axis_date, invokes the deployed route at that date as_of=<latest>, asserts served keyed rows (or a disclosed identity_status) at that date, a negative control date with no generation reading ABSENT (not SERVED) at that date, and the chatter route as a positive control. The TODAY-dated Price list is NOT graded here: it is HELD on the reserved decision 'the price pull's activation and cadence'.",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json; d=boto3.client('dynamodb'); ad=set(i.get('axis_date',{}).get('S','') for page in d.get_paginator('scan').paginate(TableName='opal-harvest-security-metrics', ProjectionExpression='axis_date') for i in page.get('Items',[])); dates=sorted(set(k.split('#')[1] for k in ad if k.startswith('TRENDING_PRICE#') and k.count('#')==2)); latest=dates[-1] if dates else None; c=boto3.client('lambda'); I=lambda path, q: json.loads(c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':path,'rawQueryString':q,'queryStringParameters':dict([q.split('=')]) if q else {},'headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}).encode())['Payload'].read()); B=lambda o: json.loads(o.get('body') or '{}'); P='/api/scoped/amgt/lead-panel/rankings/'; print('price_generation_dates', dates, 'latest', latest); po=I(P+'trending/price', 'as_of='+str(latest)); p=B(po); rows=p.get('rows') or []; print('price_at_latest', 'http', po.get('statusCode'), 'ranking_status', p.get('ranking_status'), 'as_of_date', p.get('as_of_date'), 'generation_id', p.get('generation_id'), 'rows', len(rows)); print('rows_with_security_key', sum(1 for r in rows if r.get('security_key')), 'rows_unkeyed_with_identity_status', sum(1 for r in rows if not r.get('security_key') and r.get('identity_status')), 'rows_unkeyed_unclassed', sum(1 for r in rows if not r.get('security_key') and not r.get('identity_status'))); nd='2026-01-02'; n=B(I(P+'trending/price', 'as_of='+nd)); print('negative_control_date', nd, 'no_generation', nd not in dates, 'ranking_status', n.get('ranking_status'), 'as_of_date', n.get('as_of_date'), 'rows', len(n.get('rows') or []), 'reason', str(n.get('ranking_reason'))[:100]); q=B(I(P+'trending/chatter', '')); print('chatter_CONTROL', 'ranking_status', q.get('ranking_status'), 'rows', len(q.get('rows') or []))\"",
+      "output_evidence": "price_generation_dates ['2026-09-10'] latest 2026-09-10\nprice_at_latest http 200 ranking_status SERVED as_of_date 2026-09-10 generation_id 20260916T065448Z-9b7ffda3dcdc rows 32\nrows_with_security_key 31 rows_unkeyed_with_identity_status 1 rows_unkeyed_unclassed 0\nnegative_control_date 2026-01-02 no_generation True ranking_status ABSENT as_of_date 2026-01-02 rows 0 reason no generation pointer at TRENDING_PRICE#2026-01-02 / _CURRENT: no committed ranking exists for this \nchatter_CONTROL ranking_status SERVED rows 10",
+      "denominator": "1 distinct committed TRENDING_PRICE axis_date found in the live store (2026-09-10, from a full DynamoDB scan on ProjectionExpression=axis_date); price_at_latest rows 32 of row 32 (31 keyed + 1 unkeyed-with-identity_status + 0 unclassed = 32 of 32 accounted); negative control 1 of 1 date with no generation, read ABSENT not SERVED; chatter_CONTROL rows 10 of 10 (positive control NONZERO, instrument proven live).",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]* latest (\\S+))(?=[\\s\\S]*price_at_latest[\\s\\S]*http 200)(?=[\\s\\S]*price_at_latest[\\s\\S]*ranking_status SERVED)(?=[\\s\\S]*as_of_date \\1)(?=[\\s\\S]*generation_id \\S)(?=[\\s\\S]*price_at_latest[\\s\\S]*rows [1-9]\\d*)(?=[\\s\\S]*rows_unkeyed_unclassed 0\\b)(?=[\\s\\S]*negative_control_date[\\s\\S]*ranking_status ABSENT)(?=[\\s\\S]*chatter_CONTROL ranking_status SERVED rows [1-9]\\d*)"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "ISSUER AMENDMENT 4 replaced evidence invocation (identical to AC3's): python -c \"...same lambda invoke over price and chatter axes...\" -- JUDGMENT: whether a PM opening the Lead Panel now sees a Price axis that RANKS NAMES, rather than an ABSENT that was only ever ABSENT because nothing had run. The distinction is absent-by-measurement versus absent-by-absence: both render identically on the page and they are different defects. GRADED AT L9 BY 3.0.0_SA_CVO~Z, NEVER SELF-GRADED.",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json; c=boto3.client('lambda'); I=lambda ax: json.loads(c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':'/api/scoped/amgt/lead-panel/rankings/trending/'+ax,'headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}).encode())['Payload'].read()); B=lambda o: json.loads(o.get('body') or '{}'); po=I('price'); p=B(po); qo=I('chatter'); q=B(qo); print('price', 'http', po.get('statusCode'), 'ranking_status', p.get('ranking_status'), 'rows', len(p.get('rows') or []), 'row_count', p.get('row_count'), 'as_of_date', p.get('as_of_date'), 'generation_id', p.get('generation_id')); print('price_reason', p.get('ranking_reason')); print('price_rows_with_security_key', sum(1 for r in (p.get('rows') or []) if r.get('security_key'))); print('chatter_CONTROL', 'http', qo.get('statusCode'), 'ranking_status', q.get('ranking_status'), 'rows', len(q.get('rows') or []), 'generation_id', q.get('generation_id'))\"",
+      "output_evidence": "LITERAL RE-RUN of the same served route (identical to AC3, this run): price http 200 ranking_status ABSENT rows 0 row_count 0 as_of_date 2026-09-16 generation_id None; price_reason 'no generation pointer at TRENDING_PRICE#2026-09-16 / _CURRENT: no committed ranking exists for this date -- this is not an empty membership'; price_rows_with_security_key 0; chatter_CONTROL http 200 ranking_status SERVED rows 10 generation_id 20260916T100027Z-efd7e544dd59.\n\nSUPPLEMENTARY EVIDENCE (what the mechanism itself proves, distinct from today's live-data-cadence gap): BEFORE this cell (row AMGT_RESAPP-Z-W18-S11), the live table held exactly one price partition, the legacy bare PRICE#2026-09-10 (32 items, no generation_id, no pointer) and ZERO TRENDING_PRICE/BREAKOUT_PRICE partitions of any kind -- every Price list was ABSENT BY ABSENCE (nothing had ever run), indistinguishable on the page from an honest empty ranking. AFTER this cell: the generation-writer contract exists (lib/research/price/generation.py, mirroring the chatter axis field-for-field), is unit-tested (28 of 28 tests passing, including a payload_hash mutant control and a determinism control), and has committed one real, honestly-dated generation from real Bloomberg-derived data (TRENDING_PRICE#2026-09-10, COMPLETE, 32 rows, 31 of 32 identity-resolved to a real security_key) all the way through the SAME production read path (lib.research.api.scoped_amgt.read_rankings) the deployed Lambda calls, and that generation IS SERVED when its own as_of_date is requested. What remains ABSENT is TODAY's axis date specifically, and it is ABSENT BY ABSENCE FOR A DIFFERENT REASON than W18-S11 named: not because no writer exists, but because no live price observation newer than 2026-09-10 has ever been collected anywhere in the estate, and collecting one requires a live Bloomberg pull this cell cannot make (box-side only, DAPI unreachable from this worktree, puller outside this order's <paths>, no vendor call authorized by this order's BOUNDS).",
+      "denominator": "Served route: 1 of 1 axis-pair invoked; price rows 0 of row_count 0; chatter_CONTROL rows 10 of row_count 10. Mechanism proof: 28 of 28 tests passing; 1 of 1 real generation committed and SERVED at its own as_of_date; 31 of 32 tickers identity-resolved.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (judgment=true): graded at L9 by 3.0.0_SA_CVO~Z, never self-graded by the worker. Evidence recorded above on both the served-route measurement (today's date, ABSENT) and the mechanism proof (the generation-writer built by this cell, proven live at its own as_of_date); no verdict is written here.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Unchanged this respawn (built by the prior instance of this slot). Two mutants, each aimed at a property this writer claims. (1) payload_hash must discriminate a changed ranking: test_payload_hash_mutant_a_changed_score_hashes_differently mutates one row's score by 0.0001 and asserts the hash changes. (2) The BREAKOUT thin-series guard must actually gate on series length, not always refuse: test_compute_price_axis_breakout_computes_once_the_series_clears_the_floor is the POSITIVE control -- a 3-point series clears min_breakout_observations and BREAKOUT_PRICE comes back COMPLETE with real candidates, proving the guard excludes THIN input, not the movement itself.",
+      "expected": "(1) mutated payload_hash != original payload_hash. (2) a series >= min_breakout_observations produces a COMPLETE BREAKOUT_PRICE generation with 0 excluded, where a 2-point series produces EMPTY with 100% excluded.",
+      "observed": "Re-run at this cut: python -m pytest lib/research/price/tests/test_generation.py -q -k \"mutant or floor\" -> 2 passed. Full suite: python -m pytest lib/research/price -q -> 28 passed, rc 0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_compute_price_axis_is_deterministic_across_two_runs calls compute_price_axis twice over the IDENTICAL input series and compares the sorted payload_hash of every product.",
+      "observed": "Re-run at this cut: python -m pytest lib/research/price/tests/test_generation.py -q -k determinism -> 1 passed; hashes_a == hashes_b for both TRENDING_PRICE and BREAKOUT_PRICE. The live TRENDING_PRICE#2026-09-10 generation's payload_hash on the table is unchanged from the prior instance's write (no new write made by this respawn).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No live Bloomberg pull was made or attempted by this cell.",
+      "reason": "The DAPI (127.0.0.1:8194, PRD s.3b C-PRICE-RANKING-BOXSIDE) is box-side only and was measured UNREACHABLE from this worktree (connection refused); integrations/bloomberg/research/price_axis_pull.py (the box-side puller) is outside this order's <paths>. 'No vendor call beyond what this order names' binds, and this order names none."
+    },
+    {
+      "item": "integrations/bloomberg/research/price_axis_pull.py was not modified to call the new generation writer.",
+      "reason": "Outside this order's <paths> (a WALL, RULING 1). The writer is built as importable library code in lib/research/price/ so that file's owner can wire it in on its own order; this cell takes no dependency on it in either direction."
+    },
+    {
+      "item": "BREAKOUT_PRICE carries no real jump values for 2026-09-10.",
+      "reason": "The only real input available (the legacy PRICE#2026-09-10 partition) carries just px_start/px_end, not the window's interior, so a real 30-day trailing baseline cannot be computed. Written as EMPTY with a disclosed exclusion reason on every ticker rather than approximated from two points."
+    },
+    {
+      "item": "No generation exists for TODAY's date (2026-09-16) on either PRICE axis.",
+      "reason": "Requires a live Bloomberg pull, which is unreachable from this worktree and outside this order's scope (see the vendor-call exclusion above). AC3/AC4 record this gap directly, per ISSUER AMENDMENT 4's own re-cut, rather than writing a mislabeled 'today' generation from stale prices."
+    },
+    {
+      "item": "No schedule, alarm, monitor, SNS/SES-send or EventBridge rule of any kind.",
+      "reason": "AC2's negative bar and the standing moratorium both bind; this cell delivers a producer that CAN be run, never one that runs itself. Verified by AC2 (schedule-words 0) and by inspection (lib/research/price/generation.py and backfill_legacy_generation.py contain no scheduling primitive)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W26-S1: OBSERVATION -- disarms AMGT_RESAPP-Z-W18-S11: the PRICE producer's C-RANKING-GENERATION contract now exists and a real generation (TRENDING_PRICE#2026-09-10 COMPLETE 32 rows, BREAKOUT_PRICE#2026-09-10 EMPTY) is committed and SERVED on the live table; today's date still reads ABSENT pending a live Bloomberg pull this cell cannot make.",
+    "AMGT_RESAPP-Z-W26-S4: OBSERVATION -- AC3 as RE-CUT in ISSUER AMENDMENT 4 is confirmed REFUSED as written on independent re-run: the route now parses correctly and the chatter control is NONZERO (instrument proven live), but the price axis genuinely reads ABSENT for today's date because no price generation newer than 2026-09-10 exists in the estate and producing one needs an out-of-scope live vendor pull; reproduces 2.0.0_SA_COO~Z's own diagnostic at AMGT_RESAPP-Z-S118/S119."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~26/SESSION_LOG_rk3.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate limb)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~26 <0.9.0_WK_AMGT_RESAPP~26@opal.agent>\" -F .scratch/commit2_msg.txt -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~26/ org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-3.the-price-producer-generation-writer.md",
+      "result": "see commit result recorded in the worker report; no code files touched this respawn, only proof/row/log/order-status artifacts."
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~26/AMGT_RESAPP.TO-AMGT-rk-3.the-price-producer-generation-writer.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "see rc recorded in the worker report."
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest lib/research/price -q",
+      "result": "28 passed in 0.08s, rc 0 (re-run at this cut, unchanged from the prior instance's 10 pre-existing + 18 new)."
+    },
+    {
+      "tool": "lib.research.api.scoped_amgt.read_rankings / boto3 lambda invoke (production plane, live)",
+      "invocation": "python -c \"...opal-amgt-scoped-api invoke on /api/scoped/amgt/lead-panel/rankings/trending/price and /trending/chatter, header x-firm-id=bd...\"",
+      "result": "price: 200/ABSENT/0 rows (today's date, no fresh generation); chatter CONTROL: 200/SERVED/10 rows (generation_id 20260916T100027Z-efd7e544dd59) -- instrument proven live, price gap genuine."
+    }
+  ]
+}

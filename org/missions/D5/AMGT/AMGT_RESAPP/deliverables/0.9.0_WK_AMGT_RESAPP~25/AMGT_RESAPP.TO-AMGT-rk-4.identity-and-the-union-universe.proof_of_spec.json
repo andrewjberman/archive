@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-4",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ac5ff6a57",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-4.identity-and-the-union-universe.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88b"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/positioning_chain.py",
+      "kind": "script",
+      "commit_or_etag": "0a5064ded5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built and committed by this SAME slot's first spawn (0a5064ded5, drained into SITEZ at a8be8b7452) before the 07:56Z device reboot; NOT re-written this respawn. The Positioning chain's compiled CUSIP/FIGI/SEDOL/Bloomberg-security identity (450 lines), re-verified this session by re-running AC1/AC2 against it unchanged.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/build_universe.py",
+      "kind": "script",
+      "commit_or_etag": "0a5064ded5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Built and committed by this slot's first spawn, drained at a8be8b7452, NOT re-written this respawn. Re-verified this session with two fresh --dry-run invocations (see controls.determinism) producing byte-identical output (sha256 5163b6f09cb473f41a133feb13bacb18d6657838771fcee9f2e765f103335d87 both runs).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/universe/v1/2026-09-16.json",
+      "kind": "s3_object",
+      "commit_or_etag": "5d3ba4cd412ad8da3d856d2d81902dced61259f8c7b2002f3417e414077b8847",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Written by this slot's first spawn (document-sha256 5d3ba4cd412ad8da3d856d2d81902dced61259f8c7b2002f3417e414077b8847). Re-read live this session for AC1 (union=250, MEASURED 191, UNRESOLVED 59) and re-validated against universe.schema.json this session (unmutated VALIDATES True; a guessed-key mutant re-fires 'CASH_US_Equity is not of type null')."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1 new row appended by textual splice this session (275 -> 276 total): AMGT_RESAPP-Z-W25-S5 (the two absent <paths> grants, lib/research/universe/ and lib/research/scores/, filed as an OBSERVATION/INERT premise mismatch). Non-ASCII count unchanged (61, before and after). Rows W25-S1..S4 from the first spawn are already committed at a8be8b7452 and untouched this session."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~25/SESSION_LOG.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Appended a Respawn section this session recording the re-cut AC1-AC4 re-run and its all-PASS result; the first-spawn content is preserved above it."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "MET when latest_key is NEWER than the baseline key, latest MEASURED is materially ABOVE the baseline MEASURED, latest UNRESOLVED is materially BELOW the baseline UNRESOLVED, latest_unresolved_holdings is materially BELOW baseline_unresolved_holdings, source_values names holding, and measured_without_security_key is 0. Both censuses print from THIS invocation in the same units. Any UNRESOLVED row turned into a guessed identity is a hard fail, not a pass",
+      "method": "live_read",
+      "invocation": "python -c \"import json,boto3,collections; s=boto3.client('s3'); B='opal-data-harvest'; bk='universe/v1/2026-09-15.json'; bv='Z1IOpX7ng4KboYu172Hks3Gn0IqkRVgV'; ks=sorted(o['Key'] for o in s.list_objects_v2(Bucket=B,Prefix='universe/v1/').get('Contents',[])); k=ks[-1]; b=json.loads(s.get_object(Bucket=B,Key=bk,VersionId=bv)['Body'].read())['names']; c=json.loads(s.get_object(Bucket=B,Key=k)['Body'].read())['names']; R=lambda rows: dict(collections.Counter(r.get('resolution') for r in rows)); U=lambda rows: sum(1 for r in rows if r.get('resolution')=='UNRESOLVED' and r.get('source') in ('holding','both')); print('baseline_key', bk, bv); print('latest_key', k); print('baseline_rows', len(b), 'baseline_by_resolution', R(b), 'baseline_unresolved_holdings', U(b)); print('latest_rows', len(c), 'latest_by_resolution', R(c), 'latest_unresolved_holdings', U(c)); print('source_values', sorted(set(str(r.get('source')) for r in c))); print('measured_without_security_key', sum(1 for r in c if r.get('resolution')=='MEASURED' and not r.get('security_key')))\"",
+      "output_evidence": "LITERAL run, exactly as the invocation is written, under timeout 120, rc 0: baseline_key universe/v1/2026-09-15.json Z1IOpX7ng4KboYu172Hks3Gn0IqkRVgV / latest_key universe/v1/2026-09-16.json / baseline_rows 256 baseline_by_resolution {'MEASURED': 33, 'UNRESOLVED': 223} baseline_unresolved_holdings 167 / latest_rows 250 latest_by_resolution {'MEASURED': 191, 'UNRESOLVED': 59} latest_unresolved_holdings 3 / source_values ['both', 'coverage', 'holding'] / measured_without_security_key 0. Unlike the amendment-2 dry run, this re-cut invocation discriminates on its own literal output -- no field-name correction or substitute read was needed.",
+      "denominator": "baseline 256 of 256 (pre-cell world, pinned by S3 VersionId so it cannot move); latest 250 of 250 (the live store's own count at the cut). latest_key (2026-09-16) is newer than baseline_key (2026-09-15); MEASURED 191 vs baseline 33 (5.8x, materially above); UNRESOLVED 59 vs baseline 223 (0.26x, materially below); unresolved_holdings 3 vs baseline 167 (0.018x, materially below); source_values includes 'holding'; measured_without_security_key 0 of 191 MEASURED rows.",
+      "status": "PASS",
+      "expect": "baseline_key universe/v1/2026-09-15\\.json Z1IOpX7ng4KboYu172Hks3Gn0IqkRVgV.*latest_key universe/v1/2026-09-16\\.json.*baseline_rows 256 baseline_by_resolution \\{'MEASURED': 33, 'UNRESOLVED': 223\\} baseline_unresolved_holdings 167.*latest_rows 250 latest_by_resolution \\{'MEASURED': 191, 'UNRESOLVED': 59\\} latest_unresolved_holdings 3.*source_values \\['both', 'coverage', 'holding'\\].*measured_without_security_key 0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "positioning-input NONZERO (CUSIP / SEDOL / FIGI are the identifiers the Positioning chain carries), bare-ticker-join 0, and unresolved-preserved NONZERO. bare-ticker-join counts CODE only: comment lines are dropped, then it counts a string concatenation that appends a quoted US and an f-string that places US right after a closing brace. Any surviving construction that appends a country code to a bare ticker is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import io,glob,re; fs=sorted(glob.glob('lib/research/identity/*.py')); j=''.join(io.open(f,encoding='utf-8',errors='replace').read() for f in fs); code=chr(10).join(l for l in j.splitlines() if not l.lstrip().startswith(chr(35))); print('identity-modules', len(fs)); print('positioning-input', j.lower().count('cusip') + j.lower().count('sedol') + j.lower().count('figi')); print('bare-ticker-join', len(re.findall(r'[+]\\s*[\\x22\\x27] US', code)) + len(re.findall(r'[}] US\\b', code))); print('unresolved-preserved', j.count('UNRESOLVED'))\"",
+      "output_evidence": "LITERAL run, exactly as the invocation is written, under timeout 120, rc 0: identity-modules 7 / positioning-input 89 / bare-ticker-join 0 / unresolved-preserved 86. The re-cut instrument (code-only, real-construction regex) no longer collides with the doctrine comments that made the amendment-2 substring count read 23 on clean code (row AMGT_RESAPP-Z-W25-S1) -- it reads 0 directly.",
+      "denominator": "7 of 7 identity modules scanned; positioning-input 89 occurrences of cusip/sedol/figi tokens (nonzero, met); bare-ticker-join 0 of a required 0 (met exactly, on the literal count this time -- no disclosed instrument gap); unresolved-preserved 86 (nonzero, met).",
+      "status": "PASS",
+      "expect": "identity-modules 7.*positioning-input 89.*bare-ticker-join 0.*unresolved-preserved 86"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "MET when identity_defect_live is 0 and identity_defect_mutant is 1. identity_defect counts EMPTY subjects that HAVE a classification source: a landed block in the pool under derived/model_block/ (trailing slash, so model_block_fye/ is excluded) or in the peers engine's own block directory, or a US ticker root present in the scanner. Empty subjects with no classification source are HELD and are not graded here",
+      "method": "live_read",
+      "invocation": "python -c \"import io,os,json,sys,boto3; sys.path.insert(0,'.'); from lib.research.peers import universe as u; s=boto3.client('s3'); B='opal-data-harvest'; L=lambda p: [o['Key'] for pg in s.get_paginator('list_objects_v2').paginate(Bucket=B,Prefix=p) for o in pg.get('Contents',[])]; P='derived/model_block/'; pool=set(k[len(P):].rsplit('/',2)[0] for k in L(P) if k.endswith('/model_block.json')); d=u.MODEL_BLOCK_DIR_DEFAULT; eng=set(n[len('model_block_'):-len('.json')] for n in (os.listdir(d) if os.path.isdir(d) else []) if n.startswith('model_block_') and n.endswith('.json') and not n.startswith('model_block_fye_')); us=set(str(r.get('ticker')) for r in json.load(io.open(os.path.join(u.CACHE_DIR_DEFAULT,u.CACHE_NAME),encoding='utf-8'))['rows']); src=lambda k: (k in pool) or (k in eng) or (u.ticker_root(k)[1]=='US' and u.ticker_root(k)[0] in us); ks=sorted(k for k in L('peers/v1/') if k.endswith('.json')); last={k.rsplit('/',1)[0]: k for k in ks}; objs=[json.loads(s.get_object(Bucket=B,Key=k)['Body'].read()) for k in sorted(last.values())]; emp=[o.get('security_key') for o in objs if not (o.get('members') or [])]; print('peer_objects', len(objs), 'of', len(ks), 'dated objects'); print('empty', len(emp)); print('empty_by_reason', {'no_classification_source': sum(1 for k in emp if not src(k)), 'classification_source_present': sum(1 for k in emp if src(k))}); print('blocks_in_pool', len(pool), sorted(pool)); print('blocks_in_engine_dir', len(eng), sorted(eng)); print('scanner_tickers', len(us)); print('identity_defect_live', sum(1 for k in emp if src(k))); print('identity_defect_mutant', sum(1 for k in ['BA_US_Equity'] if src(k)))\"",
+      "output_evidence": "LITERAL run, exactly as the invocation is written, under timeout 120, rc 0: peer_objects 33 of 33 dated objects / empty 23 / empty_by_reason {'no_classification_source': 23, 'classification_source_present': 0} / blocks_in_pool 4 ['BABA_US_Equity', 'BA_US_Equity', 'NVDA_US_Equity', 'SAP_GY_Equity'] / blocks_in_engine_dir 4 ['BABACVOCTRL_US_Equity', 'BABA_US_Equity', 'BA_US_Equity', 'SAP_GY_Equity'] / scanner_tickers 2851 / identity_defect_live 0 / identity_defect_mutant 1.",
+      "denominator": "peer_objects 33 of 33 (unchanged from the cell's stated baseline); empty 23 of 33; empty_by_reason splits ALL 23 to no_classification_source (0 to classification_source_present) -- identity_defect_live 0 of 23 confirms none of the 23 empty subjects is a repairable identity-join defect; identity_defect_mutant 1 of 1 on the planted control (BA_US_Equity, which IS in both blocks_in_pool and blocks_in_engine_dir) confirms the classifier fires when a source genuinely exists.",
+      "status": "PASS",
+      "expect": "identity_defect_live 0.*identity_defect_mutant 1"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "W21-S3-mentions at least 2 -- the original ARMED row plus a NEW citing row that disarms it. A disarm is a NEW row citing the original, NEVER an in-place flip of the existing row, and the evidence names which row id carries the disarm",
+      "method": "command",
+      "invocation": "python -c \"import io; t=io.open('org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md',encoding='utf-8').read(); print('W21-S3-mentions', t.count('W21-S3')); print('disarm-rows', t.count('DISARMED')); print('my-rows', t.count('AMGT_RESAPP-Z-W25-'))\"",
+      "output_evidence": "LITERAL run, exactly as the invocation is written, under timeout 120, rc 0: W21-S3-mentions 20 / disarm-rows 22 / my-rows 5 (5 counts W25-S1 through W25-S5, this session's new row included). The disarm row is AMGT_RESAPP-Z-W25-S3, filed by this slot's first spawn, which cites AMGT_RESAPP-Z-W21-S3 by id in its one_line, spec_asserts, world_is and disarm_owner fields, and is a NEW row -- the original W21-S3 row's own bytes are untouched (confirmed: the splice this session only appended AFTER the array's last pre-existing element, never rewriting an earlier byte).",
+      "denominator": "W21-S3-mentions 20 of a required minimum 2 (MET, 10x the bar); my-rows 5 of 5 (S1-S5, all present, all schema-valid per this session's re-parse of the 276-row array).",
+      "status": "PASS",
+      "expect": "W21-S3-mentions 20"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutants, both re-run THIS SESSION (fresh, not cited from the prior spawn): (1) inject a GUESSED key onto an UNRESOLVED holding row of the emitted union universe (CASH -> CASH_US_Equity) and re-validate against universe.schema.json -- the exact defect the contract forbids; (2) AC3's own baked-in positive control, testing whether the identity_defect classifier fires on BA_US_Equity, a ticker known to carry a genuine classification source in both the model-block pool and the peers engine's block dir.",
+      "expected": "mutant (1): the schema REFUSES the mutated object; the unmutated object validates. mutant (2): identity_defect_mutant reads 1 (the classifier correctly flags a subject that DOES have a source).",
+      "observed": "Mutant (1), re-run this session: unmutated universe VALIDATES (jsonschema.validate OK, additionalProperties False); MUTANT FIRED-AS-EXPECTED: \"'CASH_US_Equity' is not of type 'null'\" at path ['names', <idx>, 'security_key']. Mutant (2), from AC3's own run this session: identity_defect_mutant 1 (BA_US_Equity correctly classified as source-present).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m lib.research.identity.build_universe --as-of 2026-09-16 --dry-run, run twice THIS SESSION on unchanged inputs, compared by sha256 of the raw stdout bytes.",
+      "observed": "fixed-point True: both runs sha256 5163b6f09cb473f41a133feb13bacb18d6657838771fcee9f2e765f103335d87, byte length 197555 both runs, byte-for-byte identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No code in lib/research/identity/ or lib/research/peers/ was re-written this respawn.",
+      "reason": "the cell's full DELIVER (positioning_chain.py, build_universe.py's positioning-identity wiring, the universe object) was already built and committed by this SAME slot's first spawn (0a5064ded5) and drained into SITEZ (a8be8b7452) before the 07:56Z reboot; ISSUER AMENDMENT 3 re-cut only the GRADING invocations (AC1/AC2/AC3), never the cell text or the DELIVER, so re-running the re-cut criteria against the already-landed artifact is the correct and complete act."
+    },
+    {
+      "item": "The peers batch was NOT re-run over the ~158 newly-resolved holding-source names.",
+      "reason": "the decomposition table names AMGT-rk-13 ('Re-run the similarity ranker over the names AMGT-rk-4 newly resolves ... chained after: AMGT-rk-4') as the owner of that re-run; this cell resolves identity, rk-13 re-ranks over it."
+    },
+    {
+      "item": "lib/research/peers/engine.py carries NO code change.",
+      "reason": "a token-overlap self-exclusion fix was attempted by the first spawn (addressing W21-S3's residual), found to introduce a real over-exclusion regression on generic corporate-suffix words, and reverted byte-for-byte (row AMGT_RESAPP-Z-W25-S3)."
+    },
+    {
+      "item": "The 23 empty peer subjects were NOT repaired.",
+      "reason": "AC3's re-cut this session confirms all 23 trace to a missing model_block_<key>.json with NO classification source at all (identity_defect_live 0) -- fixable only by a new Bloomberg call (forbidden, BOUNDS) or a guessed ADR-to-home-line join (explicitly ruled un-guessable). Row AMGT_RESAPP-Z-W25-S2."
+    },
+    {
+      "item": "The two absent <paths> grants (lib/research/universe/, lib/research/scores/) were not created.",
+      "reason": "no criterion in this order's proof-of-spec reads or writes either path, and this cell's DELIVER lives entirely under lib/research/identity/ and lib/research/peers/, which are both present and granted. Filed as AMGT_RESAPP-Z-W25-S5 rather than treated as a tree-integrity BLOCKING row."
+    },
+    {
+      "item": "No Bloomberg call, and no write to the ETF holdings plane or the scanner/model-block corpus.",
+      "reason": "BOUNDS: READ-ONLY on opal-data-etfs and on the DynamoDB tables (Scan only); no put/delete anywhere in positioning_chain.py."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W25-S5: this order's <paths> grant names lib/research/universe/ and lib/research/scores/, but neither directory has ever existed in this repository (git log --all confirms zero commits touching either path, at any commit) -- 2 of 8 grant lines fail the order's own pre-flight existence test; not blocking since this cell's DELIVER never needed either path."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~25/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh (no .py edits this session -- only doc/JSON files changed)",
+      "result": "N/A this session: no .py file was created or modified by this respawn. The two .py artifacts named above were gated and committed by the first spawn (0a5064ded5)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~25 <0.9.0_WK_AMGT_RESAPP~25@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see WORKER REPORT for the exact run and its rc/hash."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (via safe-commit)",
+      "invocation": "staged org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "pre-flight dry check (working-tree parse, not the gate's own staged-blob read): 276 well-formed array elements after the splice (275 -> 276), new row AMGT_RESAPP-Z-W25-S5 schema-validated individually via jsonschema.validate before the splice ran. Non-ASCII count unchanged at 61. The gate itself reads staged bytes at commit time; see WORKER REPORT for its result on the actual commit."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3,AC4",
+      "result": "see the WORKER REPORT -- the worktree's own copy is the grader; rc reported there. All 4 criteria graded PASS in this instance, so <status> flips to complete."
+    }
+  ]
+}

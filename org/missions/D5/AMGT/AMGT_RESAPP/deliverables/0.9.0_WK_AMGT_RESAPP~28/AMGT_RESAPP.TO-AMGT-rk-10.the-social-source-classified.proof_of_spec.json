@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-10",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "d658d713be",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-10.the-social-source-classified.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~28",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/ledger/SOCIAL_SOURCE_CLASSIFICATION_ROUND12.md",
+      "kind": "doc",
+      "commit_or_etag": "ee4d5bfb1f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a classification-and-report document, not a deployable artifact; committed at ee4d5bfb1f on wk-amgt_resapp-12-28 (LOCAL). Read back and counted in AC1/AC2 against the committed bytes.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "each of the four row ids appears at least once and the two classification tokens appear at least once each -- all four rows are classified as SOURCE ABSENCE or FAILED PRIMITIVE, and the report distinguishes them. A report that says only 'no items admitted' without classifying WHY is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import io; p='org/missions/D5/AMGT/AMGT_RESAPP/ledger/SOCIAL_SOURCE_CLASSIFICATION_ROUND12.md'; t=io.open(p,encoding='utf-8').read(); print('bytes', len(t)); [print(r, t.count(r)) for r in ('W22-S3','W22-S6','W22-S7','W22-S8')]; print('SOURCE-ABSENCE', t.count('SOURCE ABSENCE')); print('FAILED-PRIMITIVE', t.count('FAILED PRIMITIVE'))\"",
+      "output_evidence": "bytes 11146\nW22-S3 6\nW22-S6 5\nW22-S7 5\nW22-S8 5\nSOURCE-ABSENCE 6\nFAILED-PRIMITIVE 14",
+      "denominator": "4 of 4 named row ids present (W22-S3 6, W22-S6 5, W22-S7 5, W22-S8 5, each >=1) and 2 of 2 classification tokens present (SOURCE ABSENCE 6, FAILED PRIMITIVE 14, each >=1), over 1 committed file (11146 bytes at ee4d5bfb1f). Run twice for determinism (see controls), identical both times. Under timeout 120, rc=0.",
+      "status": "PASS",
+      "expect": "W22-S3 [1-9]\\d*\\s+W22-S6 [1-9]\\d*\\s+W22-S7 [1-9]\\d*\\s+W22-S8 [1-9]\\d*\\s+SOURCE-ABSENCE [1-9]\\d*\\s+FAILED-PRIMITIVE [1-9]\\d*"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "held at least 1 and 403 at least 1 -- the cost is carried with provenance held, never measured, and the 403 refusal is recorded as the reason the field is ABSENT. Any line presenting the pre-call ESTIMATE as a measured cost is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import io; p='org/missions/D5/AMGT/AMGT_RESAPP/ledger/SOCIAL_SOURCE_CLASSIFICATION_ROUND12.md'; t=io.open(p,encoding='utf-8').read(); print('held', t.count('held')); print('measured-claim', t.count('measured')); print('403', t.count('403')); print('absent-with-reason', t.lower().count('absent'))\"",
+      "output_evidence": "held 3\nmeasured-claim 6\n403 4\nabsent-with-reason 2",
+      "denominator": "held 3 of the document's occurrences (>=1 required), 403 4 of the document's occurrences (>=1 required); 'absent' (case-insensitive) 2; 'measured' 6, every occurrence checked by hand and each is a NEGATION ('cannot be measured', 'never promoted to measured', 'no route probed today can turn held into measured') -- none presents the estimate itself as a measured value. Over 1 committed file at ee4d5bfb1f. Under timeout 120, rc=0.",
+      "status": "PASS",
+      "expect": "held [1-9]\\d*\\s+measured-claim \\d+\\s+403 [1-9]\\d*\\s+absent-with-reason [1-9]\\d*"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "collection-enabled 0 -- a NEGATIVE bar. This cell classifies and reports; it enables no collection, touches no harvest schedule and writes no Terraform. Any nonzero count is NOT met and is a breach of a standing Andrew reservation, not a build decision",
+      "method": "diff",
+      "invocation": "python -c \"import io,glob,subprocess; out=subprocess.run(['git','diff','--name-only','HEAD~1','HEAD'],capture_output=True,text=True).stdout.split(); print('files-touched', len(out)); [print('  ', f) for f in out]; print('collection-enabled', sum(1 for f in out if 'harvest' in f.lower() or 'schedule' in f.lower() or '.tf' in f))\"",
+      "output_evidence": "files-touched 1\n   org/missions/D5/AMGT/AMGT_RESAPP/ledger/SOCIAL_SOURCE_CLASSIFICATION_ROUND12.md\ncollection-enabled 0",
+      "denominator": "1 of 1 file touched by the graded commit ee4d5bfb1f against its parent (the ledger doc itself); 0 of 1 matches 'harvest'/'schedule'/'.tf'. Run after the commit that produced HEAD, so the diff is against the true parent. Under timeout 120, rc=0.",
+      "status": "PASS",
+      "expect": "files-touched 1\\s+org/missions/D5/AMGT/AMGT_RESAPP/ledger/SOCIAL_SOURCE_CLASSIFICATION_ROUND12\\.md\\s+collection-enabled 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "not a build cell: the order names no admission rule, schema or code path for this deliverable to mutate against -- the artifact is a classification report, and its only assertions are literal-string counts over its own committed bytes (AC1/AC2) and a diff-based negative bar (AC3), each already exercised directly by the criterion itself.",
+      "expected": "N/A -- the spec names no mutant for a report-only cell",
+      "observed": "N/A -- no mutant applicable; AC1-AC3 are direct reads of the committed document and the commit's own diff, not indirect assertions over a separate producer that a mutant would test",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1's literal invocation run twice in sequence against the same committed file (no intervening edit)",
+      "observed": "run 1: bytes 11146 W22-S3 6 W22-S6 5 W22-S7 5 W22-S8 5 SOURCE-ABSENCE 6 FAILED-PRIMITIVE 14 | run 2: identical, byte-for-byte",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "cost.usd as a measured value",
+      "reason": "ruled ABSENT by ADDENDUM 3 s.3 and this cell's own bound: not measurable with brightdata-api-key on any route probed (progress and snapshots carry no cost field; /customer/balance refuses this key with 403). Carried as claim absent with the held pre-call estimate stated separately. A billing-permitted key is a credential act, deliberately not taken and not carded here."
+    },
+    {
+      "item": "recurring collection / a harvest schedule / any Terraform change",
+      "reason": "OUT OF BOUND. Recurring collection stays RESERVED to Andrew by name (9db2a36cdc); this cell classifies and reports only, per AC3's negative bar (measured 0 of 1 files touched)."
+    },
+    {
+      "item": "repairing the S-1 key (W22-S6), building author-identity attachment for Reddit (W22-S8), or upgrading the account-pass instrument (W22-S3)",
+      "reason": "this is a classification cell, not a build cell; each FAILED PRIMITIVE named above is recorded for a later feed cell to repair, not repaired here."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~28/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python (ledger byte/nonascii check)",
+      "invocation": "python -c \"import io; b=io.open('org/missions/D5/AMGT/AMGT_RESAPP/ledger/SOCIAL_SOURCE_CLASSIFICATION_ROUND12.md','rb').read(); t=b.decode('utf-8'); print('nonascii', sum(1 for ch in t if ord(ch)>127))\"",
+      "result": "nonascii 0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate + to-pipeline-gate + surprise-row-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~28 <0.9.0_WK_AMGT_RESAPP~28@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/ledger/SOCIAL_SOURCE_CLASSIFICATION_ROUND12.md",
+      "result": "ee4d5bfb1f (1 file changed, 149 insertions); to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no surprise-channel rows in this commit)"
+    }
+  ]
+}
