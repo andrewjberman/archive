@@ -1,11 +1,13 @@
 # DAILY SPRINT - Tuesday, September 15, 2026
 
-Written from daily_reports/data/DAILY_REPORT_2026-09-15.json (afternoon edition, midnight to 5:08 PM Eastern), so this
-text and the published page say the same thing. The PAGE is the deliverable (Andrew-direct 2026-08-26).
+Written from daily_reports/data/DAILY_REPORT_2026-09-15.json, regenerated 2026-09-17 after the
+CLOUD<->SITEZ merge landed, so this text and the published page now count both machines' commits
+from the merged git history instead of one side's own report. The PAGE is the deliverable
+(Andrew-direct 2026-08-26).
 
-**The new screens went live before 9 AM, and Platform Logic closed two rounds.**
+**Both machines closed real work: Investor Reporting went live, and two Positioning projects closed on the second machine.**
 
-Cottonwood's frozen views were fixed, the Tax SMA pipeline was planned to the new rules, and a Positioning project started.
+Platform Logic's naming rules finished, MFA/OTP and opal-gateway work advanced, and Cottonwood's frozen views were fixed.
 
 ## TODAY SPRINT
 
@@ -15,10 +17,10 @@ Item 3 - Research app: 11 of 13 pieces in round eleven - Nearly done, and a stan
 Item 4 - Cottonwood's frozen views are current again - The category views had been stuck on September 10. A rounding check was fixed, and all four views show the latest day.
 Item 5 - Agents can no longer go silent from one crash - One agent's check-in crashed and its messages were refused for about 50 minutes. It now recovers on its own.
 Item 6 - Tax SMA pipeline planned to Platform Logic rules - Every storage location passed 7 of 7, live accounts key off the Traded column, and the work is planned in 27 pieces.
-Item 7 - Positioning's Opal-wide book is being restored - Eight goals set and the first four orders issued on the second machine within hours. Opal staff only.
+Item 7 - Positioning's Opal-wide book is being restored - Eight goals set and the first four orders issued on the second machine within hours. Two older Positioning projects, asset-class taxonomy and an aggregation fix opened the same day, both closed this window on the second machine. Opal staff only.
 Item 8 - Every new pipeline now follows one rulebook - Approved today. Tax SMA is the first pipeline built this way; the advisor data redesign is next.
 
-Volume: 347 commits across 39 agents since midnight Eastern.
+Volume: 790 commits across 66 agents since midnight Eastern, both machines, counted from the merged history.
 
 ## DIRECTIVES (all 15, worked or not -- the absence is the signal)
 
@@ -26,17 +28,17 @@ Volume: 347 commits across 39 agents since midnight Eastern.
 - **D1 Model Portfolios**  _(no work today)_ - No work today.
 - **D2 Advisor Intelligence** - The advisor data redesign was written up as its own project, built to the new rules.
 - **D3 Portfolio Analytics**  _(no work today)_ - No work today.
-- **D4 Positioning** - The asset-class breakdown went live this morning, and a new project to restore the Opal-wide book set its goals and issued its first orders.
-- **D5 Asset Management** - Round eleven of the research application reached 11 of 13 pieces, and each tab's standard score was designed.
+- **D4 Positioning** - The asset-class breakdown went live this morning; two Positioning projects (asset-class taxonomy, an aggregation fix opened same-day) closed on the second machine, and a new project to restore the Opal-wide book set its goals.
+- **D5 Asset Management** - Round eleven of the research application reached 11 of 13 pieces, and each tab's standard score was designed. The single busiest project of the day on the second machine.
 - **D6 Opal AI**  _(no work today)_ - No work today.
 - **D7 Opal Ticketing**  _(no work today)_ - No work today.
 - **D8 Data Pipelines** - Cottonwood's frozen category views were fixed, and the Tax SMA pipeline passed the new rules and was planned in 27 pieces.
-- **D9 Opal Workflows** - Investor Reporting went live for Opal staff only, its round eight closed, and the gateway sign-in work moved forward.
+- **D9 Opal Workflows** - Investor Reporting went live for Opal staff only, its round eight closed, and the gateway sign-in work moved forward. Opal-gateway's Schwab read-access extension and the SharePoint monthly-workbook automation both moved forward.
 - **D10 Partner Implementations**  _(no work today)_ - No work today. The register lists no member projects for this one.
 - **D11 Substrate & Tooling**  _(no work today)_ - No work today.
-- **D12 Platform Operations** - Found why I am asked for a sign-in code every day: the 30-day remembered device was never built. It is queued.
+- **D12 Platform Operations** - Text-message MFA/OTP work for phone sign-in started on the second machine.
 - **D13 Design** - The redesigned pages went live in this morning's release.
-- **D14 Platform Logic** - Naming round three and enforcement round one closed, the canon build reached 9 of 12, and every new pipeline now follows these rules.
+- **D14 Platform Logic** - Naming round three and enforcement round one closed, the canon build reached 9 of 12, and every new pipeline now follows these rules. Naming is now complete; enforcement and the canon build continue.
 
 ## PROCESS
 
@@ -44,7 +46,7 @@ Volume: 347 commits across 39 agents since midnight Eastern.
 - **D1 Model Portfolios** (Parked, idle) - No movement today.
 - **D2 Advisor Intelligence** (Brief written, ok) - Advisor data redesign scoped.
 - **D3 Portfolio Analytics** (Parked, idle) - No movement today.
-- **D4 Positioning** (Two projects, act) - Asset classes live; Opal-wide book started.
+- **D4 Positioning** (Two projects, act) - Two Positioning projects closed; Opal-wide book started.
 - **D5 Asset Management** (Round eleven, act) - 11 of 13 pieces; round twelve designed.
 - **D6 Opal AI** (Parked, idle) - No movement today.
 - **D7 Opal Ticketing** (Parked, idle) - No movement today.
@@ -52,12 +54,18 @@ Volume: 347 commits across 39 agents since midnight Eastern.
 - **D9 Opal Workflows** (Live, ok) - Investor Reporting live; round eight closed.
 - **D10 Partner Implementations** (Empty, idle) - No movement today. No member projects yet.
 - **D11 Substrate & Tooling** (Parked, idle) - No movement today.
-- **D12 Platform Operations** (Queued, hold) - Remembered device queued behind Positioning.
+- **D12 Platform Operations** (Started, act) - MFA/OTP for phone sign-in under way.
 - **D13 Design** (Shipped, ok) - Redesign live in this morning's release.
 - **D14 Platform Logic** (Next rounds, act) - Two rounds closed; next rounds under way.
 
 ## BLOCKED
 
-- **The two machines merge on my word** - Each machine's work today is saved on that machine. The two merge and publish together when I give the word.
+None.
 
-SOURCE: daily-sprint packet 2026-09-15 21:06Z (comp-state self-test PASS 4/4; 496 commits / 42 authors all refs, UTC day) + commit_census and project_census 2026-09-15 --window et to 17:08 ET, 347 commits / 39 workers, both censuses agreeing on the denominator. The second machine's day is described from its bus reports to 0.0.0_AB_MSTR (origin/SITEZ 6f09a06dc9 predates today's work); its commits count at the next merge. The cloud generator did not publish today (render refused an incomplete draft), so this edition is a local run.
+SOURCE: daily-sprint packet 2026-09-15, regenerated 2026-09-17 21:19Z (comp-state self-test PASS
+4/4; 1032 commits / 71 authors, all refs, UTC day) + commit_census and project_census 2026-09-15
+--window et, 790 commits / 66 agents, both censuses agreeing on the denominator and cross-checked
+against each other (attributed-by-project + unattributed = total, per bin and overall). Both
+machines' commits are read from the merged git history (git log --all) after the CLOUD<->SITEZ
+merge (LD-0579), not from either side's own report -- the prior edition's "second machine's commits
+count at the next merge" note is resolved; this is that next count.

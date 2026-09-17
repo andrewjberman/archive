@@ -236,6 +236,23 @@ def c23_campaign_covered(path=None, root=None, serial="0.9.0_WK_LGIC_ENFORCE~1")
               % (len(minted), len(carded), len(pop)))
 
 
+def _rows_of(doc):
+    """The row list of EITHER registry file. systems.json keeps its rows under `systems`, resources.json
+    under `resources`; reading only one key made every systems.json row invisible to this arm, which is how
+    a real mint there could read as `0 rows added` (row LGIC_ENFORCE-W1-S29, found by 0.9.0_WK_LGIC_ENFORCE~1)."""
+    if isinstance(doc, dict):
+        for k in ("systems", "resources"):
+            if isinstance(doc.get(k), list):
+                return [r for r in doc[k] if isinstance(r, dict)]
+        return []
+    return [r for r in doc if isinstance(r, dict)] if isinstance(doc, list) else []
+
+
+def _rowkey(row):
+    """systems.json identifies a row by `key`, resources.json by (name, type)."""
+    return (row.get("key") or row.get("name"), row.get("type") or row.get("class"))
+
+
 def _added_rows(path, root=None, base=None):
     """(added, total) registry rows: the rows at the worktree minus the rows at the pinned base, by name+type."""
     now = read(path, root)
@@ -246,19 +263,15 @@ def _added_rows(path, root=None, base=None):
         cur = json.loads(now)
     except ValueError:
         return None, None
-    rows = cur.get("resources") if isinstance(cur, dict) and "resources" in cur else cur
-    rows = rows if isinstance(rows, list) else []
+    rows = _rows_of(cur)
     oldkeys = set()
     if old:
         try:
-            o = json.loads(old)
-            orows = o.get("resources") if isinstance(o, dict) and "resources" in o else o
-            for r in (orows if isinstance(orows, list) else []):
-                if isinstance(r, dict):
-                    oldkeys.add((r.get("name"), r.get("type")))
+            for r in _rows_of(json.loads(old)):
+                oldkeys.add(_rowkey(r))
         except ValueError:
             pass
-    added = [r for r in rows if isinstance(r, dict) and (r.get("name"), r.get("type")) not in oldkeys]
+    added = [r for r in rows if _rowkey(r) not in oldkeys]
     return added, len(rows)
 
 
@@ -291,22 +304,49 @@ def c23_mint_basis(path=None, root=None, base=None):
         say("  %s: %d row(s) at the worktree, %d added since %s" % (f, total, len(added), b[:10]))
         for r in added:
             total_added += 1
+            nm = _rowkey(r)[0]
+            if f == RESOURCES:
+                # resources.json's field set is CLOSED by lib/opal_naming.py RES_FIELDS
+                # ("name", "type", "system", "evidence") and validate() refuses anything else, so an
+                # owner_claim/owner_basis pair CANNOT be expressed on one of its rows. Its measured basis
+                # is the `system` it names resolving to a systems.json key, plus its own evidence.
+                extra = sorted(set(r) - {"name", "type", "system", "evidence"})
+                if extra:
+                    defects.append((f, nm, "fields outside the closed RES_FIELDS set: %s" % extra))
+                elif not str(r.get("system") or "").strip():
+                    defects.append((f, nm, "names no system"))
+                elif r.get("system") not in _systems_keys(root):
+                    defects.append((f, nm, "system=%r is not a key of systems.json" % r.get("system")))
+                elif not str(r.get("evidence") or "").strip():
+                    defects.append((f, nm, "carries no evidence"))
+                continue
             claim = r.get("owner_claim")
             basis = r.get("owner_basis")
             if claim not in ("measured", "inferred"):
-                defects.append((f, r.get("name"), "owner_claim=%r" % claim))
+                defects.append((f, nm, "owner_claim=%r" % claim))
             elif not _citation_resolves(basis, root):
-                defects.append((f, r.get("name"), "owner_basis=%r does not resolve" % basis))
+                defects.append((f, nm, "owner_basis=%r does not resolve" % basis))
     say("DENOMINATOR: %d added registry row(s); %d defective" % (total_added, len(defects)))
     for f, nm, why in defects[:10]:
         say("    DEFECT %s %s -- %s" % (f, nm, why))
     if defects:
         return fail("C23-MINT-BASIS", "a mint carries owner_claim and a citation that resolves, or it is a guess")
     if total_added == 0:
-        return fail("C23-MINT-BASIS", "0 rows added: the campaign cannot close its population with no mint "
-                                      "(a population entirely carded would still print its cards here)")
-    return ok("C23-MINT-BASIS", "%d of %d added rows carry a measured or inferred owner with a resolving citation"
+        # R-32 and R-29 both say MINT WHERE MEASURED, OTHERWISE CARD, and the CTO's closure bar is
+        # judged + carded == nameable, NOT "zero carded". So a fully carded population is a legal outcome
+        # and this arm must not demand a mint; whether the cards cover the population is c23-campaign-covered's
+        # question, graded there. This arm grades the BASIS OF EVERY MINT, vacuously when there are none.
+        return ok("C23-MINT-BASIS", "0 rows minted: no mint to grade -- the population's coverage is "
+                                    "c23-campaign-covered's arm, and a fully carded campaign is legal under R-32")
+    return ok("C23-MINT-BASIS", "%d of %d added rows carry their file's own measured basis"
               % (total_added, total_added))
+
+
+def _systems_keys(root=None):
+    try:
+        return {r.get("key") for r in _rows_of(json.loads(read(SYSTEMS, root) or "null"))}
+    except ValueError:
+        return set()
 
 
 def c23_fence_untouched(path=None, root=None, base=None):
@@ -716,9 +756,14 @@ def _selftest_basis():
     base = _tempfile.mkdtemp(prefix="en_r4_basis_")
     try:
         tmp = _fixture_repo(base)
-        rows0 = {"_about": "x", "resources": [{"name": "kept", "type": "T"}]}
-        _write(tmp, SYSTEMS, json.dumps({"_about": "x", "resources": []}))
-        _write(tmp, RESOURCES, json.dumps(rows0))
+        # The two registry files have DIFFERENT shapes and different field rules, and the fixtures say so:
+        # systems.json keeps rows under `systems` keyed by `key` and DOES carry owner_claim/owner_basis;
+        # resources.json keeps rows under `resources` keyed by (name, type) and its field set is CLOSED by
+        # lib/opal_naming.py RES_FIELDS, so an owner pair there is a DEFECT, not a basis (row W1-S29).
+        sys0 = {"_about": "x", "systems": [{"key": "kept", "class": "PRODUCT"}]}
+        res0 = {"_about": "x", "resources": [{"name": "kept", "type": "T", "system": "kept", "evidence": "e"}]}
+        _write(tmp, SYSTEMS, json.dumps(sys0))
+        _write(tmp, RESOURCES, json.dumps(res0))
         _write(tmp, EXEMPTIONS, json.dumps({"opal-data-49financial": []}))
         subprocess.run(["git", "add", "-A"], cwd=tmp, capture_output=True)
         subprocess.run(["git", "commit", "-q", "-m", "base"], cwd=tmp, capture_output=True)
@@ -726,32 +771,42 @@ def _selftest_basis():
         b = head.strip()
         _write(tmp, "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r4/R4_BASE.json",
                json.dumps({"base_commit": b}))
-        # RED: nothing added
-        out.append(("c23-mint-basis RED  (0 rows added)", c23_mint_basis(root=tmp, base=b) == 1))
-        # RED: added row with no owner_claim
-        rows1 = {"_about": "x", "resources": [{"name": "kept", "type": "T"}, {"name": "new1", "type": "T"}]}
-        _write(tmp, RESOURCES, json.dumps(rows1))
-        out.append(("c23-mint-basis RED  (added row, no owner_claim)", c23_mint_basis(root=tmp, base=b) == 1))
-        # RED: owner_basis that does not resolve
-        rows2 = {"_about": "x", "resources": [{"name": "kept", "type": "T"},
-                                              {"name": "new1", "type": "T", "owner_claim": "inferred",
-                                               "owner_basis": "no/such/file.tf:4"}]}
-        _write(tmp, RESOURCES, json.dumps(rows2))
-        out.append(("c23-mint-basis RED  (citation does not resolve)", c23_mint_basis(root=tmp, base=b) == 1))
-        # GREEN: citation resolves, line inside the file
         _write(tmp, "infra/aws/terraform/x/main.tf", "a\nb\nc\nd\n")
-        rows3 = {"_about": "x", "resources": [{"name": "kept", "type": "T"},
-                                              {"name": "new1", "type": "T", "owner_claim": "inferred",
-                                               "owner_basis": "infra/aws/terraform/x/main.tf:3"}]}
-        _write(tmp, RESOURCES, json.dumps(rows3))
-        out.append(("c23-mint-basis GREEN (resolving citation)", c23_mint_basis(root=tmp, base=b) == 0))
-        # RED: a line number past the end of the file
-        rows4 = json.loads(json.dumps(rows3))
-        rows4["resources"][1]["owner_basis"] = "infra/aws/terraform/x/main.tf:99"
-        _write(tmp, RESOURCES, json.dumps(rows4))
-        out.append(("c23-mint-basis RED  (line past end of file)", c23_mint_basis(root=tmp, base=b) == 1))
+
+        # GREEN: nothing minted. R-32 permits a fully carded campaign, so this arm is VACUOUS here, not FAIL.
+        out.append(("c23-mint-basis GREEN (0 rows minted, R-32 permits it)", c23_mint_basis(root=tmp, base=b) == 0))
+
+        # THE ARM CAN SEE A systems.json MINT AT ALL -- the defect row W1-S29 named. GREEN with a resolving
+        # basis, RED without the claim, RED when the citation does not resolve, RED past end of file.
+        def sysrows(extra):
+            d = json.loads(json.dumps(sys0))
+            d["systems"].append(dict({"key": "new1", "class": "PRODUCT"}, **extra))
+            return json.dumps(d)
+        _write(tmp, SYSTEMS, sysrows({"owner_claim": "inferred", "owner_basis": "infra/aws/terraform/x/main.tf:3"}))
+        out.append(("c23-mint-basis GREEN (systems mint, resolving basis)", c23_mint_basis(root=tmp, base=b) == 0))
+        _write(tmp, SYSTEMS, sysrows({}))
+        out.append(("c23-mint-basis RED  (systems mint, no owner_claim)", c23_mint_basis(root=tmp, base=b) == 1))
+        _write(tmp, SYSTEMS, sysrows({"owner_claim": "inferred", "owner_basis": "no/such/file.tf:4"}))
+        out.append(("c23-mint-basis RED  (basis does not resolve)", c23_mint_basis(root=tmp, base=b) == 1))
+        _write(tmp, SYSTEMS, sysrows({"owner_claim": "inferred", "owner_basis": "infra/aws/terraform/x/main.tf:99"}))
+        out.append(("c23-mint-basis RED  (basis line past end of file)", c23_mint_basis(root=tmp, base=b) == 1))
+        _write(tmp, SYSTEMS, json.dumps(sys0))
+
+        # resources.json: its basis is the `system` it names, and an owner pair there is REFUSED by validate().
+        def resrows(extra):
+            d = json.loads(json.dumps(res0))
+            d["resources"].append(dict({"name": "new2", "type": "T", "system": "kept", "evidence": "e"}, **extra))
+            return json.dumps(d)
+        _write(tmp, RESOURCES, resrows({}))
+        out.append(("c23-mint-basis GREEN (resources mint, system resolves)", c23_mint_basis(root=tmp, base=b) == 0))
+        _write(tmp, RESOURCES, resrows({"owner_claim": "inferred"}))
+        out.append(("c23-mint-basis RED  (resources mint outside RES_FIELDS)", c23_mint_basis(root=tmp, base=b) == 1))
+        _write(tmp, RESOURCES, json.dumps({"_about": "x", "resources": res0["resources"] + [
+            {"name": "new3", "type": "T", "system": "no-such-system", "evidence": "e"}]}))
+        out.append(("c23-mint-basis RED  (resources mint names no real system)", c23_mint_basis(root=tmp, base=b) == 1))
+        _write(tmp, RESOURCES, json.dumps(res0))
+
         # fence arm: GREEN unchanged, RED when the applied fence's source moves
-        _write(tmp, RESOURCES, json.dumps(rows3))
         out.append(("c23-fence GREEN (exemptions unchanged)", c23_fence_untouched(root=tmp, base=b) == 0))
         _write(tmp, EXEMPTIONS, json.dumps({"opal-data-49financial": ["a-role"]}))
         out.append(("c23-fence RED   (a row minted into the fence)", c23_fence_untouched(root=tmp, base=b) == 1))
