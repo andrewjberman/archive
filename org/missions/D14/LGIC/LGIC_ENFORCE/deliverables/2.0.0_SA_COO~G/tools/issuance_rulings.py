@@ -162,7 +162,7 @@ def selftest():
     led = (
         "# ledger\n"
         "## R-2 (2026) -- FIRM_FORMS_READERS.md is misplaced; fix the PLACEMENT\n"
-        "The file `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/FIRM_FORMS_READERS.md`\n"
+        "The file `org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/FIRM_FORMS_READERS.md`\n"
         "sits directly under deliverables/ with no serial folder.\n"
         "## R-9 (2026) -- the negative arm could not discriminate\n"
         "Nothing about placement here; it names `infra/logic/02_DOCTRINE.md`.\n")
@@ -171,13 +171,16 @@ def selftest():
     print("PARSE     two rulings, first is R-2: %s" % a1)
     ok = ok and a1
 
-    ff = "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/FIRM_FORMS_READERS.md"
+    ff = "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/FIRM_FORMS_READERS.md"
     a2 = touches(ff, rs[0][2]) is not None and touches(ff, rs[0][2])[0] == "EXACT"
     print("EXACT     the named file is matched: %s" % a2)
     ok = ok and a2
 
     # THE POPULATION CASE: a NEW file, never named by any ruling, in the ruled directory.
-    newf = "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/LIMB_ROOTS_CENSUS.md"
+    # (LIMB_ROOTS_CENSUS.md illustrated this at the cut, but EN-p-4-r3 placed it under a
+    # DIFFERENT author folder than FIRM_FORMS_READERS.md, so it no longer shares ff's
+    # directory; a fictional sibling of ff keeps the CONTAINS case demonstrated.)
+    newf = "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~1/NEW_SIBLING_FIXTURE.md"
     t = touches(newf, rs[0][2])
     a3 = t is not None and t[0] == "CONTAINS"
     print("CONTAINS  a NEW sibling in the ruled directory is caught: %s   <- the R-2 case" % a3)

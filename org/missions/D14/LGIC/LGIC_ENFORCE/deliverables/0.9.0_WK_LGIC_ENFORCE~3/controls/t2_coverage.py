@@ -52,7 +52,7 @@ for f in files:
         mine[(f, r["line"], r["tf_type"])] = r
 p.stdin.close()
 p.wait()
-t = open("org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/TF_LABEL_CENSUS.md", encoding="utf-8").read()
+t = open("org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~3/TF_LABEL_CENSUS.md", encoding="utf-8").read()
 d = json.loads(re.search(r"```json\n(.*?)\n```", t, re.S).group(1))
 census = {(r["file"], r["line"], r["type"]): r for r in d["name_attributes"] if r["type"] in types}
 both = set(mine) & set(census)
