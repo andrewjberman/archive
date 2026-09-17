@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "to_id": "LGIC_CANON.TO-CN-k-4-r3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/decompositions/LGIC_CANON_DECOMP.md",
+    "vintage_commit": "503160fc58fa952f10e38f369324fb0b72d6a7cd",
+    "to_ref": "org/missions/D14/LGIC/LGIC_CANON/task-orders/LGIC_CANON.TO-CN-k-4-r3.rerender-adjacency.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D14/LGIC/LGIC_CANON/prd/LGIC_CANON_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "312400d7dfb16e7f2bcaa7290c1c7cd41e812736"
+  },
+  "assignee": "0.9.0_WK_LGIC_CANON~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/render_naming_section.py",
+      "kind": "script",
+      "commit_or_etag": "68b2ca86f7dc751ae88579f518eb3bc984d30d1b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The renderer, with two edits this cell names. (1) render() gains an 'Alias adjacency' block in N4, rendered byte-for-byte from schema['alias_adjacency'] (reads_as, test, either_way, source, an examples table), and N1's legacy_served_paths bullet gains the producer note -- rendered UNCONDITIONALLY so CONTENT-DIFF stays 0 whichever way the census reads. (2) A-20: producer_consumer_census() runs a two-arm reader census over git ls-files (excluding the renderer, the schema, the canon) and content_diff() prints EXCLUSION-PREDICATE producer: <n> consumer(s) of <m> file(s) scanned, and only while n is 0, EXCLUDED: /key/legacy_served_paths/producer -- no consumer reads it; the match rule is stated in --content-diff's --help text. Nothing deploys -- this script is run by hand and by the cells that check the canon.",
+      "introduces": [
+        "alias_adjacency = schema.get(\"alias_adjacency\")",
+        "def producer_consumer_census(root, exclude_rel, value_text):",
+        "EXCLUSION-PREDICATE producer: %d consumer(s) of %d file(s) scanned",
+        "legacy served paths producer"
+      ],
+      "artifact_covered_by": ["K4R3-AC1", "K4R3-AC2", "K4R3-AC3", "K4R3-AC5"]
+    },
+    {
+      "path_or_key": "infra/logic/02_DOCTRINE.md",
+      "kind": "doc",
+      "commit_or_etag": "68b2ca86f7dc751ae88579f518eb3bc984d30d1b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The canon, re-rendered with `python infra/logic/render_naming_section.py --write`. Only bytes between the GENERATED markers moved: the stamp line now reads NAMING_SCHEMA.json v1.10, N1 gains the 'legacy served paths producer' bullet, N4 gains the 'Alias adjacency, closed list (1): `bd`' block (reads_as / test / either_way / source / a four-row examples table). `--check` reads CHECK: FRESH and `--content-diff` reads CONTENT-DIFF: 0 at this commit. No hand edit was made between the markers.",
+      "introduces": [
+        "Alias adjacency, closed list (1): `bd`",
+        "legacy served paths producer"
+      ],
+      "artifact_covered_by": ["K4R3-AC1", "K4R3-AC4", "K4R3-AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "68b2ca86f7dc751ae88579f518eb3bc984d30d1b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended inside the single fenced json array, 44 pre-existing rows untouched and not re-graded (surprise-row-gate: '1 new row(s) of 45 total checked'). OBSERVATION/INERT, left UNDER_INVESTIGATION for 3.0.0_SA_CVO.",
+      "introduces": [
+        "\"id\": \"LGIC_CANON-W1-S5\""
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~1/rerender-adjacency.r3.result.md",
+      "kind": "doc",
+      "commit_or_etag": "e09cbed52c7bb736ddaa3a0f77ef384d33acf8d9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The result file the order names beside this instance: baseline, what the edit did, the deciding output for all four mechanical criteria at commit 68b2ca86f7, and the K4R3-AC5 note for the CVO. Committed BEFORE this instance so it is pinned by commit, never PENDING-THIS-COMMIT.",
+      "introduces": [
+        "# LGIC_CANON.TO-CN-k-4-r3 -- result (cell CN-k-4, round 3)"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "K4R3-AC1",
+      "criterion_verbatim": "python infra/logic/render_naming_section.py --write, then render --check reads FRESH stamping the schema. Expect PASS-K4-RERENDERED-AT-SCHEMA.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-3-1 && timeout 300 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py k4-fresh",
+      "output_evidence": "the section stamps the schema: True ; render --check FRESH: True\nVERDICT: PASS-K4-RERENDERED-AT-SCHEMA",
+      "denominator": "N/A -- boolean check (stamped AND fresh, both True)",
+      "status": "PASS",
+      "expect": "PASS-K4-RERENDERED-AT-SCHEMA"
+    },
+    {
+      "criterion_id": "K4R3-AC2",
+      "criterion_verbatim": "k3-contentdiff: content-diff reads CONTENT-DIFF: 0 on the true tree, and REFUSES / FAILS to fire on a canon with uncommitted edits -- the checker plants a removal in the canon and restores it, requiring the count to MOVE. Expect PASS-K3-CONTENTDIFF-PLANTED.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-3-1 && timeout 300 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_canon_r3.py k3-contentdiff",
+      "output_evidence": "candidates tried before one moved the count: 2\nremoved line: - **ruled:** Andrew-direct 2026-09-13 ~03:2xZ card 1, verbatim; the five segments and their order ar\nTRUE tree   -- CONTENT-DIFF: 0  (0 required for PASS)\nDOCTORED    -- CONTENT-DIFF: 1  (must EXCEED the true tree's)\nthe control fires: True\nfile restored byte-identically: True\nVERDICT: PASS-K3-CONTENTDIFF-PLANTED",
+      "denominator": "the true-tree reading (0 of 0 dropped, CONTENT-DIFF: 0) plus the doctored negative control (1 of 217 items dropped after the plant) -- both required for PASS",
+      "status": "PASS",
+      "expect": "PASS-K3-CONTENTDIFF-PLANTED"
+    },
+    {
+      "criterion_id": "K4R3-AC3",
+      "criterion_verbatim": "k4-producer: A-20, the producer exclusion prints its no-consumer predicate mechanically and consistently (EXCLUDED present iff n==0). Expect PASS-K4-PRODUCER-PREDICATE.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-3-1 && timeout 300 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r3/check_canon_r3.py k4-producer",
+      "output_evidence": "producer consumers 4 of 36940 file(s) scanned; EXCLUDED line printed: False\nthe exclusion must hold exactly while the consumer count is zero (A-20)\nVERDICT: PASS-K4-PRODUCER-PREDICATE",
+      "denominator": "4 consumer(s) of 36940 tracked file(s) scanned (git ls-files, minus the renderer/schema/canon); EXCLUDED correctly withheld since n != 0",
+      "status": "PASS",
+      "expect": "PASS-K4-PRODUCER-PREDICATE"
+    },
+    {
+      "criterion_id": "K4R3-AC4",
+      "criterion_verbatim": "k3-note: the registry's FIRM-row note stays rendered into the canon's generated section (must still PASS after the re-render). Expect PASS-K3-FIRM-NOTE-RENDERED.",
+      "method": "command",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-3-1 && timeout 300 python org/missions/D14/LGIC/LGIC_CANON/deliverables/2.0.0_SA_COO~G/fixed_inputs/r2/check_canon_r2.py k3-note",
+      "output_evidence": "FIRM rows in the registry carrying a note, denominator 1: ['demo']\nof those, rendered into the canon's generated section: 1 -- ['demo']\nevery FIRM note reaches the section: True\nVERDICT: PASS-K3-FIRM-NOTE-RENDERED",
+      "denominator": "1 of 1 FIRM rows carrying a note reaches the section",
+      "status": "PASS",
+      "expect": "PASS-K3-FIRM-NOTE-RENDERED"
+    },
+    {
+      "criterion_id": "K4R3-AC5",
+      "criterion_verbatim": "For 3.0.0_SA_CVO at L9: the census's match rule is stated and would count a real reader of the field, and the canon's generated bd reading now agrees with the schema's alias_adjacency.",
+      "method": "manual_read_with_citation",
+      "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-canon-3-1 && timeout 60 python infra/logic/render_naming_section.py --help | sed -n '/--content-diff/,/--canon/p'  (match rule text); timeout 60 python infra/logic/render_naming_section.py --content-diff (EXCLUSION-PREDICATE line + CONTENT-DIFF: 0)",
+      "output_evidence": "--help: '... The /key/legacy_served_paths/producer exclusion's predicate: a tracked file (git ls-files, excluding this renderer, the schema and the canon) counts as a consumer of /key/legacy_served_paths/producer when EITHER: (code arm) it has a code extension (...) and carries an ACCESS CHAIN from legacy_served_paths to producer ... ; OR (document arm) it reproduces the field's own value text verbatim ...'. --content-diff: 'EXCLUSION-PREDICATE producer: 4 consumer(s) of 36940 file(s) scanned' / 'items carried by the section: 217 of 217' / 'CONTENT-DIFF: 0'. infra/logic/02_DOCTRINE.md N4 carries 'Alias adjacency, closed list (1): `bd`' with reads_as/test/either_way/source and a 4-row examples table, each string identical to org/standards/NAMING_SCHEMA.json's alias_adjacency.bd (verified: every DROPPED /alias_adjacency/ line from the pre-edit run is absent from the post-edit run).",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true per the task order; the verdict is 3.0.0_SA_CVO's at L9, never self-graded",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "K4R3-AC2's own negative control (check_canon_r3.py k3-contentdiff): it plants the removal of one generated bullet (the `- **ruled:** ...` line under N1) from the live canon, re-runs --content-diff, and asserts the dropped-item count EXCEEDS the true tree's reading, then restores the file byte-identically.",
+      "expected": "CONTENT-DIFF count on the doctored tree strictly exceeds the true tree's (0), and the file is restored byte-identical to the original",
+      "observed": "TRUE tree CONTENT-DIFF: 0 ; DOCTORED CONTENT-DIFF: 1 ; the control fires: True ; file restored byte-identically: True",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python infra/logic/render_naming_section.py --content-diff run twice back-to-back on the unchanged tree at commit 68b2ca86f7, output diffed on the EXCLUSION-PREDICATE and CONTENT-DIFF lines",
+      "observed": "both runs: 'EXCLUSION-PREDICATE producer: 4 consumer(s) of 36940 file(s) scanned' and 'CONTENT-DIFF: 0', byte-identical",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "LGIC_CANON-W1-S5: A-20's producer census does NOT read 0 -- LGIC_NAMING's own grading-exercise fixtures embed the whole NAMING_SCHEMA.json verbatim, so /key/legacy_served_paths/producer's value text is already reproduced elsewhere in the tree; the exclusion the task order's framing assumed ('absent until LN-g-1 lands it') does not hold today. Handled per the task order's own instruction (n > 0 drops the exclusion, item compared like any other) by rendering the field unconditionally."
+  ],
+  "session_log": "org/missions/D14/LGIC/LGIC_CANON/deliverables/0.9.0_WK_LGIC_CANON~1/rerender-adjacency.r3.result.md",
+  "compiler_tools": [
+    {
+      "tool": "python infra/logic/render_naming_section.py",
+      "invocation": "--write ; --check ; --content-diff",
+      "result": "--write: 'OK: section rewritten in infra/logic/02_DOCTRINE.md'. --check: 'CHECK: FRESH -- 0 failure(s)'. --content-diff: 'CONTENT-DIFF: 0' (217 of 217 items carried)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "--author \"0.9.0_WK_LGIC_CANON~1 <0.9.0_WK_LGIC_CANON~1@opal.agent>\" -F <msgfile> -- infra/logic/render_naming_section.py infra/logic/02_DOCTRINE.md org/missions/D14/LGIC/LGIC_CANON/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 68b2ca86f7dc751ae88579f518eb3bc984d30d1b, commit-gate/naming-gate/to-pipeline-gate/surprise-row-gate/surprise-corpus/missions-tree-check all OK, msg-verify MATCH"
+    }
+  ]
+}
