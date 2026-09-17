@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-19",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-19.page-label-and-link.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88be8f29903a716218a83031c468d0b88"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+      "kind": "script",
+      "commit_or_etag": "6cbd304968388ed4df38a65fd88bedfee884e9c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal is PORTAL FROZEN this round (COMMIT YES / PROMOTE NO); this commit landed in the portal nested repo's own DEV branch, LOCAL only, no push performed. DriverChartPoint gains optional period/passage_id fields (fiscal_year and value unchanged, both now optional-consistent with the model-block branch still using fiscal_year only).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/ThesisDriverChart.tsx",
+      "kind": "script",
+      "commit_or_etag": "6cbd304968388ed4df38a65fd88bedfee884e9c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Renders \"<series> -- from the filing, not the model\" when chart.source === 'filing'; renders a per-point click-through (button + expandable blockquote) for each point carrying a passage_id, resolved against the sections prop (drafted_sections) via findEvidenceById, the same evidence-id scan postureCites.ts's E: case already runs. The original exact-mnemonic (non-filing) render path is untouched.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ThesisTab.tsx",
+      "kind": "script",
+      "commit_or_etag": "6cbd304968388ed4df38a65fd88bedfee884e9c4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Passes its already-computed draftedSections through to <ThesisDriverChart> as the new sections prop -- no second fetch, the same object the drafted-prose block below already renders from.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1 new row appended by textual splice (344 -> 345 total): AMGT_RESAPP-Z-W31-S2 (OBSERVATION, ARMED, disarm_owner 0.4.0_DT_ClientPlatform) documents AC2's device-local npx/tsc decoy-package quirk on this bun-managed, npm-lockfile-less portal checkout, with the direct-binary corroborating reading."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "at least one component contains the label text (a case-insensitive match on \"from the filing\", worded as the worker actually wrote it -- if the wording differs, the worker names its exact wording and re-runs this check against that literal string) and at least one reference to rendering/handling a passage link; both read 0 before this order lands",
+      "method": "command",
+      "invocation": "cd portal && python -c \"\nimport io, glob\nfs = glob.glob('src/pages/SecurityAnalysis/**/*.tsx', recursive=True)\nj = ''.join(io.open(f, encoding='utf-8', errors='replace').read() for f in fs)\nprint('components', len(fs))\nfor t in ('from the filing', 'passage', 'source ===', \\\"source ==\\\"):\n    print(t, j.lower().count(t.lower()))\n\"",
+      "output_evidence": "components 19\nfrom the filing 6\npassage 32\nsource === 1\nsource == 1",
+      "denominator": "19 of 19 .tsx components under src/pages/SecurityAnalysis/ scanned; the worker's exact wording is \"from the filing, not the model\" (matches the case-insensitive substring the criterion names verbatim, no substitution needed)",
+      "status": "PASS",
+      "expect": "from the filing \\d+\\n(?!from the filing 0)[\\s\\S]*passage \\d+\\n(?!passage 0)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the merged tree's TypeScript build has no NEW errors attributable to this order's edited files (pre-existing unrelated errors, if any, are named and excluded, matching this project's own established practice of separating this cell's additions from inherited breakage)",
+      "method": "command",
+      "invocation": "cd portal && npx tsc -b 2>&1 | tail -30",
+      "output_evidence": "                                                                               \nThis is not the tsc command you are looking for                \n                                                                               \n\nTo get access to the TypeScript compiler, tsc, from the command line either:\n\n- Use npm install typescript to first add TypeScript to your project before using npx\n- Use yarn to avoid accidentally running code from un-installed packages",
+      "denominator": "0 of 0 -- the literal invocation performed no TypeScript compilation at all (0 files type-checked): on this device, npx cannot resolve portal's bun-installed local `typescript` binary (portal/.npmrc sets package-lock=false; `npm ls typescript` in this tree reports the package extraneous) and instead fetches an unrelated decoy npm-registry package literally named `tsc`. The pipeline's own reported exit status (via the trailing `tail -30`) reads 0; the underlying `npx` process itself exits 1 when measured directly (both readings recorded, neither substituted for the other).",
+      "status": "FAIL",
+      "status_reason": "REFUSAL CLAUSE: the literal invocation cannot be satisfied as written on this device -- it never type-checks this tree's source, so it cannot demonstrate 'no NEW errors attributable to this order's edited files' one way or the other (a discrimination failure per CLAUDE.md Rule 22: the banner output would be byte-identical whether or not this change introduced a type error). NOT repaired or routed around: the direct-binary corroborating reading (`./node_modules/.bin/tsc.exe -b`, rc=0, zero output -- a genuine clean build of the full project references, including this order's three edited files) is recorded as SEPARATE, SUPPLEMENTARY evidence about actual code health only, per this session's own resumption dispatch instructions, and is not substituted for this criterion's own literal-terms grade. Filed as row AMGT_RESAPP-Z-W31-S2 (OBSERVATION, ARMED, disarm_owner 0.4.0_DT_ClientPlatform) -- a device/tooling defect, distinct from a code defect. This order's <status> is left OPEN on AC2 alone; AC1 genuinely passes."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A deliberate type error planted in the new pointLabel() helper (changed its return type annotation from `string` to `number` while every call site and its own two return statements still produce a string) was compiled against the direct tsc binary to prove the instrument can fail before trusting its clean pass, per the portal CLAUDE.md's own typecheck-law precedent for this exact npx/tsc trap class.",
+      "expected": "The mutant build reports a type error on ThesisDriverChart.tsx (string not assignable to number); reverting the mutant restores the clean rc=0 build byte-for-byte.",
+      "observed": "Mutant run: `./node_modules/.bin/tsc.exe -b` -> rc=2, 2 errors: \"src/pages/SecurityAnalysis/components/ThesisDriverChart.tsx(61,60): error TS2322: Type 'string' is not assignable to type 'number'.\" and the same at (61,83) (the function's two return statements). Reverted the mutant via the pre-mutant snapshot; `diff` against the snapshot confirmed byte-identical; re-run: rc=0, zero output, matching this order's own committed build. This mutant exercises the DIRECT-BINARY instrument only, since AC2's own literal npx invocation cannot discriminate at all on this device (that non-discrimination is the criterion's own recorded FAIL reason, not a gap this control papers over).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's invocation run twice in succession against the same committed bytes. AC2's literal (piped) invocation run twice in succession; the same command run a further two times unpiped (to read npx's own exit code, since piping to `tail` masks it with tail's exit status) -- four runs total against the same committed bytes.",
+      "observed": "AC1: both runs byte-identical ('components 19', 'from the filing 6', 'passage 32', 'source === 1', 'source == 1'). AC2: both piped runs produced the identical decoy banner text with the pipeline's own reported exit code stably 0 (tail's exit status, per Rule 22a's RETRIEVAL trap on piped exit codes); both unpiped runs produced byte-identical output (confirmed by `diff`) with npx's own exit code stably 1 -- the two readings (0 piped / 1 unpiped) are themselves stable and reproducible, not flaky; they diverge because they measure different processes' exit status, not because the decoy behavior is nondeterministic.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No RECORD FACE / <status> flip on org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-19.page-label-and-link.md -- the file is untouched by this order's commits.",
+      "reason": "AC2 genuinely fails on its literal invocation (see acceptance[AC2]); per this order's own section 6 instruction ('flip <status> to complete ONLY if both criteria genuinely pass'), the order stays OPEN rather than complete, so there is no RECORD FACE to write."
+    },
+    {
+      "item": "No change to lib/research/api/scoped_amgt.py or any other file outside portal/ -- the adapter half that serves source/passage_id is a separate, already-drained order on chain B.",
+      "reason": "Out of this order's <paths> grant; the served shape (period/value/unit/span/passage_id per point, source: \"filing\") was read directly from the drained adapter commit (0e974a48e7, landed at ba9afc0dc4) to build this page half against the real served contract rather than a guess."
+    },
+    {
+      "item": "No new backend route, resolver, or second fetch to look up a passage_id's text -- resolution is done entirely against the already-served drafted_sections on the SAME thesis bundle.",
+      "reason": "RULED text only requires 'a click-through to the passage text'; the estate's own established pattern for id->passage resolution on this exact bundle (postureCites.ts's E: case, and ThesisTab.tsx's own EvidencePassages block) already does this with no second surface, and building a second lookup path would be exactly the kind of standing parity/duplicate mechanism CLAUDE.md's shadow-channel veto forbids for a need the existing mechanism already covers. A passage_id that does not appear among the bundle's own cited evidence records (the model-block driver id space is disjoint, e.g. no thesis_driver.points on today's live BA object even carry a passage_id yet, per row AMGT_RESAPP-Z-W27-S6's grounding) states so inline rather than silently failing."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W31-S2: AC2's literal `npx tsc -b` invocation on this device/worktree does not run the TypeScript compiler at all -- it resolves an npm-registry decoy package named `tsc` instead of portal's bun-installed local binary, a discrimination failure independent of this order's own code. OBSERVATION, ARMED, disarm_owner 0.4.0_DT_ClientPlatform."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~31/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "direct tsc binary (diagnostic; not this order's literal AC2 instrument)",
+      "invocation": "cd portal && ./node_modules/.bin/tsc.exe -b",
+      "result": "This session's own read, AFTER this order's edits and AFTER reverting the mutant control below: rc=0, zero output -- a clean build of the full project-reference set including this order's three edited files. (The dispatching seat separately reported the same rc=0/zero-output reading on the fresh checkout BEFORE any of this order's edits, as diagnostic corroboration that the checkout itself was clean; not re-verified independently by this worker.)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (run inside the portal nested repo)",
+      "invocation": "GIT_COMMITTER_NAME=\"0.9.0_WK_AMGT_RESAPP~31\" GIT_COMMITTER_EMAIL=\"0.9.0_WK_AMGT_RESAPP~31@opal.agent\" bash ../.tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~31 <0.9.0_WK_AMGT_RESAPP~31@opal.agent>\" -F ../.scratch/commit_msg_code.txt -- src/pages/SecurityAnalysis/types.ts src/pages/SecurityAnalysis/components/ThesisDriverChart.tsx src/pages/SecurityAnalysis/tabs/ThesisTab.tsx",
+      "result": "[DEV 6cbd3049] 3 files changed, 96 insertions(+), 10 deletions(-); risk-reflex WARN (filename-collision HOLD on types.ts against unrelated auth-handler exporters, read and judged not applicable -- different repo, different concern); commit-gate WARN (0 of 3 graded, .tsx not in that gate's suffix set, expected); msg-verify MATCH. This nested portal clone carried no local git identity (fresh clone, no .git/config user.* and no ~/.gitconfig) -- committer identity supplied via GIT_COMMITTER_NAME/EMAIL env vars for this invocation only, never via `git config` (no config file written, local or global), per the standing prohibition on updating git config."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the worker report -- run from THIS worktree's own copy"
+    }
+  ]
+}
