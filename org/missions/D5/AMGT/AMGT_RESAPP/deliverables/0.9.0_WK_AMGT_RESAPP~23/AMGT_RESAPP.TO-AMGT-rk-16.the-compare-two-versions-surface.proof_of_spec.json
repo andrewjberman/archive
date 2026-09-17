@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-16",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ac5ff6a57",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-16.the-compare-two-versions-surface.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~23",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/ and portal/src/api/endpoints/amgt-lead-panel.ts (portal repo commit d3962a722670e4f5dbf45d95b0f770ddc68a709f on branch wk-amgt_resapp-12-23-portal)",
+      "kind": "frontend_component",
+      "commit_or_etag": "d3962a722670e4f5dbf45d95b0f770ddc68a709f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "PORTAL FROZEN this round: COMMIT YES / PROMOTE NO. Committed LOCAL-only in the portal repo (git commit --author \"0.9.0_WK_AMGT_RESAPP~23 <...>\" -F <msgfile>, since portal carries no .tools/safe-commit.sh of its own -- already disclosed as row AMGT_RESAPP-Z-W23-S4, same substitute reused unchanged); verified with git log -1 --format='%an <%ae>' -> '0.9.0_WK_AMGT_RESAPP~23 <0.9.0_WK_AMGT_RESAPP~23@opal.agent>'. 6 files changed (5 modified, 1 new: components/VersionComparePanel.tsx). Superproject portal gitlink NOT staged, stays untouched per this order's own instruction.",
+      "introduces": [
+        "ModelBlockVersionsView",
+        "ModelBlockCompareView",
+        "getModelBlockVersions",
+        "compareModelBlockVersions",
+        "useModelBlockVersions",
+        "useModelBlockCompare",
+        "VersionComparePanel"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~23/SESSION_LOG.AMGT-rk-16.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's own session log: the bar, what this session built, both criteria with their deciding outputs and denominators, the two real mutant+determinism controls (snapshot-restore-reverify), the portal commit made this session, and chain A's completion status.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "keys_with_2plus_stamps at least 1, with the per-key stamp counts printed -- the compare surface is only exercisable on a key that HAS two versions, and at the cut BA carried four stamps. This bar reads the LIVE STORE AT THE CUT and prints its denominator rather than assuming a population",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3; s=boto3.client('s3'); p=s.get_paginator('list_objects_v2'); st={}; [st.setdefault(o['Key'].split('/')[2], set()).add(o['Key'].split('/')[3]) for pg in p.paginate(Bucket='opal-data-harvest', Prefix='derived/model_block/') for o in pg.get('Contents',[]) if len(o['Key'].split('/'))>4]; print('keys', len(st)); [print('  ', k, 'stamps', len(v)) for k,v in sorted(st.items())]; print('keys_with_2plus_stamps', sum(1 for v in st.values() if len(v)>=2))\"",
+      "output_evidence": "keys 34\n    2317_TT_Equity stamps 1\n    9433_JP_Equity stamps 1\n    992_HK_Equity stamps 1\n    ASML_NA_Equity stamps 1\n    BABA_US_Equity stamps 5\n    BA_US_Equity stamps 5\n    BBSE3_BZ_Equity stamps 1\n    BP stamps 1\n    COST_US_Equity stamps 1\n    ENEL_IM_Equity stamps 1\n    HAL_US_Equity stamps 1\n    HD_US_Equity stamps 1\n    HSBA_LN_Equity stamps 1\n    ICICIBC_IN_Equity stamps 1\n    IMB_LN_Equity stamps 1\n    INTU_US_Equity stamps 1\n    KMB_US_Equity stamps 1\n    KPN_NA_Equity stamps 1\n    NG stamps 1\n    NOVN_SW_Equity stamps 1\n    NU_US_Equity stamps 1\n    NVDA_US_Equity stamps 2\n    PBR_US_Equity stamps 1\n    RKT_LN_Equity stamps 1\n    RMS_FP_Equity stamps 1\n    ROG_SW_Equity stamps 1\n    RWE_GR_Equity stamps 1\n    SAP_GY_Equity stamps 5\n    SSE_LN_Equity stamps 1\n    ST_SP_Equity stamps 1\n    ULVR_LN_Equity stamps 1\n    VLO_US_Equity stamps 1\n    WALMEX*_MM_Equity stamps 1\n    ZURN_SW_Equity stamps 1\nkeys_with_2plus_stamps 4\nrc=0\n\nFour keys carry 2+ stamps: BA_US_Equity (5), BABA_US_Equity (5), SAP_GY_Equity (5), NVDA_US_Equity (2) -- matching the issuer's own pre-check exactly, confirming the population did not shift under this session. Measured directly against the live opal-data-harvest bucket, not a cached listing.\n\nMUTANT (fired, then restored): a scratch copy of the invocation with the threshold moved from >=2 to >=100 read keys_with_100plus_stamps 0 -- the bar discriminates (the store never mutated; mutating the population itself would be outside this order's grant). Restoring the threshold to >=2 reproduced keys_with_2plus_stamps 4 again.\n\nDETERMINISM: the literal invocation was run twice over the unchanged live store; stdout compared byte-for-byte (cmp) -- identical both times.\n\nBOUND: run under timeout 120; completed well inside it, no rc 124, no retry needed. The invocation recorded above is BYTE-IDENTICAL to the task order's <invocation>.",
+      "denominator": "34 keys total in derived/model_block/ at this vintage; 4 of 34 carry 2+ stamps",
+      "status": "PASS",
+      "expect": "keys_with_2plus_stamps [1-9]\\d*"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the counts for version, earlier and compare are each at least 1 against a printed component denominator -- all three read 0 at the cut, which is what made FWD-6 invisible to every producer census. A surface that shows two versions WITHOUT NAMING the earlier one is NOT met: FWD-6's own words are 'naming the earlier version that shows it'",
+      "method": "command",
+      "invocation": "cd portal && python -c \"import io,glob; fs=glob.glob('src/pages/SecurityAnalysis/**/*.tsx', recursive=True); j=''.join(io.open(f,encoding='utf-8',errors='replace').read() for f in fs); print('components', len(fs)); [print(t, j.lower().count(t)) for t in ('version','earlier','compare','what moved')]\"",
+      "output_evidence": "components 24\nversion 48\nearlier 22\ncompare 37\nwhat moved 1\nrc=0\n\nAll three required bars (version, earlier, compare) are well above the >=1 floor -- up from the pre-cell baseline of version 1, earlier 0, compare 1, what moved 0 across 23 components (the two pre-existing version/compare hits were incidental code comments in RankedChart.tsx and ProvenanceLine.tsx, verified by direct inspection, never a compare feature). THE EARLIER VERSION IS NAMED, not just shown: the new VersionComparePanel.tsx's picker options ARE the stamp strings themselves (e.g. 20260910T224432Z), never an index or a relative label, and the result line states both stamps by name ('Current (<stamp>) vs. earlier version (<stamp>)') plus a literal 'what moved: N of M figure(s)' summary -- satisfying FWD-6's own wording, not just its shape. Measured on the committed portal branch wk-amgt_resapp-12-23-portal @d3962a722670e4f5dbf45d95b0f770ddc68a709f (this order's own commit).\n\nMUTANT (fired, then restored): overwriting VersionComparePanel.tsx with 'export {}' (snapshot at .scratch/rk-16/VersionComparePanel.tsx.snapshot, 6951 bytes) moved the counts to version 4, earlier 0, compare 4, what moved 0 -- earlier and what-moved both hit exactly 0 (a FAILING bar under the criterion's own text); the residual 4/4 on version/compare are the same two incidental comments plus the literal string 'VersionComparePanel' inside ModelTab.tsx's import line. Restored from the snapshot; cmp matched byte-for-byte; re-run reproduced version 48, earlier 22, compare 37, what moved 1.\n\nDETERMINISM: the literal invocation was run twice over the unchanged committed source; stdout compared byte-for-byte (cmp) -- identical both times.\n\nBOUND: run under timeout 120; completed well inside it, no rc 124, no retry needed. The invocation recorded above is BYTE-IDENTICAL to the task order's <invocation>.",
+      "denominator": "24 SecurityAnalysis .tsx components scanned (up from 23 pre-cell, +1 for the new VersionComparePanel.tsx); version 48, earlier 22, compare 37, what moved 1, each against that denominator",
+      "status": "PASS",
+      "expect": "version [1-9]\\d*[\\s\\S]*?earlier [1-9]\\d*[\\s\\S]*?compare [1-9]\\d*"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two independent mutants, one per criterion, each following snapshot-mutate-rerun-restore-reverify. AC1: a scratch copy of the invocation moved the stamp-count threshold from >=2 to >=100 (the live store itself was never mutated -- writing to it is outside this order's grant and would corrupt the very population AC1 measures). AC3: VersionComparePanel.tsx was snapshotted then overwritten with 'export {}'.",
+      "expected": "AC1: keys_with_100plus_stamps drops to 0 (off the passing value 4). AC3: version/earlier/compare/what-moved drop toward their pre-cell baseline, with earlier and what-moved specifically hitting 0 (a failing bar).",
+      "observed": "AC1: keys_with_100plus_stamps 0 -- MOVED as expected; restoring the threshold reproduced keys_with_2plus_stamps 4. AC3: version 4, earlier 0, compare 4, what moved 0 -- earlier and what-moved both hit exactly 0 as expected (the residual 4/4 on version/compare are incidental substring hits unrelated to the removed feature, verified by inspection); restored from the byte snapshot (cmp matched) and re-run reproduced version 48, earlier 22, compare 37, what moved 1. Neither bar is vacuous.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of AC1 and AC3's invocations run twice over unchanged inputs, stdout compared byte-for-byte (cmp).",
+      "observed": "AC1-IDENTICAL true; AC3-IDENTICAL true. AC1 is a live S3 listing over an already-landed, non-churning store at this vintage; AC3 is a static glob+string count over committed source. Neither has a live, random or clock-dependent component, so byte-identical repetition is the expected shape and was confirmed rather than assumed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC2 (route + deploy)",
+      "reason": "ISSUER AMENDMENT 8 moved AC2 to AMGT-rk-6 AC5 (it keeps cell_refs=\"AMGT-rk-16\") and narrowed this cell's grant, removing lib/research/api/scoped_amgt.py. The versions and compare routes are adapter code plus a deploy, and both are chain B's (row AMGT_RESAPP-Z-S127 under ruling row AMGT_RESAPP-Z-S124). This instance's acceptance array carries AC1 and AC3 only, matching the checker invocation this order names in section 6."
+    },
+    {
+      "item": "Any change to lib/research/ or infra/aws/terraform/",
+      "reason": "This order's grant is portal-only (SecurityAnalysis/, amgt-lead-panel.ts, App.tsx) plus this cell's own deliverables/investigation/TO paths. The server route that will serve ModelBlockVersionsView/ModelBlockCompareView is chain B's to declare, not this cell's."
+    },
+    {
+      "item": "The superproject portal gitlink",
+      "reason": "The order does not ask this cell to move it, and no other order in this chain has either -- it stays untouched, consistent with every prior order in this queue."
+    },
+    {
+      "item": "Push, merge or rebase of either repository",
+      "reason": "PORTAL FROZEN: COMMIT YES / PROMOTE NO. The DEV push is RESERVED to 0.0.0_AB_MSTR~Z under LD-0367/0368 and LD-0522. Work is LOCAL."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~23/SESSION_LOG.AMGT-rk-16.md",
+  "compiler_tools": [
+    {
+      "tool": "boto3 s3 paginator (AC1, the live store's stamp census) in the workspace worktree",
+      "invocation": "python -c \"import boto3; s=boto3.client('s3'); p=s.get_paginator('list_objects_v2'); st={}; [st.setdefault(o['Key'].split('/')[2], set()).add(o['Key'].split('/')[3]) for pg in p.paginate(Bucket='opal-data-harvest', Prefix='derived/model_block/') for o in pg.get('Contents',[]) if len(o['Key'].split('/'))>4]; print('keys', len(st)); [print('  ', k, 'stamps', len(v)) for k,v in sorted(st.items())]; print('keys_with_2plus_stamps', sum(1 for v in st.values() if len(v)>=2))\"",
+      "result": "rc=0; keys 34, keys_with_2plus_stamps 4 (BA_US_Equity, BABA_US_Equity, SAP_GY_Equity at 5 each, NVDA_US_Equity at 2)."
+    },
+    {
+      "tool": "python stdlib glob/io (AC3, the page-surface token count) in the portal worktree",
+      "invocation": "cd portal && python -c \"import io,glob; fs=glob.glob('src/pages/SecurityAnalysis/**/*.tsx', recursive=True); j=''.join(io.open(f,encoding='utf-8',errors='replace').read() for f in fs); print('components', len(fs)); [print(t, j.lower().count(t)) for t in ('version','earlier','compare','what moved')]\"",
+      "result": "rc=0; components 24, version 48, earlier 22, compare 37, what moved 1."
+    },
+    {
+      "tool": "tsc -b --noEmit (portal typecheck)",
+      "invocation": "cd portal && npm run typecheck",
+      "result": "rc=0, no output (no type errors) across all touched/new files."
+    },
+    {
+      "tool": "eslint (portal lint)",
+      "invocation": "cd portal && npx eslint src/pages/SecurityAnalysis/types.ts src/pages/SecurityAnalysis/constants.ts src/pages/SecurityAnalysis/hooks/useLeadPanelApi.ts src/pages/SecurityAnalysis/tabs/ModelTab.tsx src/pages/SecurityAnalysis/components/VersionComparePanel.tsx src/api/endpoints/amgt-lead-panel.ts",
+      "result": "0 errors, 0 warnings on the final state (one transient react-hooks/set-state-in-effect warning was fixed during the session by switching to render-time state adjustment)."
+    },
+    {
+      "tool": "mutant + restore driver (.scratch/rk-16/*.snapshot, cp + python string edits + cmp)",
+      "invocation": "cp <file> .scratch/rk-16/<file>.snapshot; mutate; re-run the criterion's own invocation; cp .scratch/rk-16/<file>.snapshot <file>; cmp <file> .scratch/rk-16/<file>.snapshot; re-run the criterion's own invocation again",
+      "result": "Both mutants FIRED (moved off the passing values) and both restores matched their snapshots byte-for-byte (cmp exit 0) with the baseline value confirmed on re-run."
+    },
+    {
+      "tool": "git commit (portal repo, no safe-commit.sh available there -- row AMGT_RESAPP-Z-W23-S4)",
+      "invocation": "git commit --author \"0.9.0_WK_AMGT_RESAPP~23 <0.9.0_WK_AMGT_RESAPP~23@opal.agent>\" -F <msgfile written by the Write tool> -- <6 portal files>",
+      "result": "d3962a722670e4f5dbf45d95b0f770ddc68a709f on branch wk-amgt_resapp-12-23-portal; git log -1 --format='%an <%ae>' confirms the author line."
+    },
+    {
+      "tool": "proof-of-spec-check.py, THIS WORKTREE's own copy",
+      "invocation": "timeout 120 python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~23/AMGT_RESAPP.TO-AMGT-rk-16.the-compare-two-versions-surface.proof_of_spec.json AC1,AC3",
+      "result": "see the WORKER REPORT: rc is the verdict and only the exit code is read."
+    }
+  ]
+}
