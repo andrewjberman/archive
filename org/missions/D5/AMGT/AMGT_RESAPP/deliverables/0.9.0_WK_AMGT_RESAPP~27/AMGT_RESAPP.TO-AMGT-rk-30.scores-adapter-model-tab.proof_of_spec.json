@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-30.scores-adapter-model-tab",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-30.scores-adapter-model-tab.md",
+    "group": "OTHER",
+    "vintage_commit": "53b8ab5874ef75e5a86238d493699605ee92125d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-30.scores-adapter-model-tab.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CODE ONLY. Added SCORES_PREFIX and read_scores(), mirroring read_management()'s exact POOL_ABSENT/POOL_SERVED shape (identity resolve -> read_pool_object(SCORES_PREFIX, key) picks the latest ISO-dated .json under scores/v1/<key>/, matching run_scores.py's own date-partitioned write) -- ALWAYS returns all three score keys (robustness, peers_v, divergence), each a classify.py-shaped record (state/value/absent_reason): the producer's own record verbatim when served, or a synthesized classify.absent() record (ABSENT_SOURCE if nothing landed, ABSENT_PULL if the read did not complete) for all three keys when the whole scores object is missing -- never a silently-dropped key. Wired as bundle['scores'] = read_scores(resolved_key, identity=identity) immediately after the existing bundle['posture'] line, applied LAST of the four scoped_amgt.py edits in this batch. NOT DEPLOYED this session.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "See rk-23's instance for the two rows appended this session (S7, S8); same file, same splice, one commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "measured_robustness and measured_peers_v are both nonzero over the printed keyed_count denominator (round-11's built inputs support real values for most, not necessarily all, keyed names -- any non-measured name must carry an ABSENT reason code, not a missing key); absent_divergence equals keyed_count exactly (33 of 33), each with the \"house forecast does not serve\" reason -- if the worker's own status field names differ from MEASURED/ABSENT, it names the real ones used and re-runs this exact invocation against them",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\ns3 = boto3.client('s3')\nresp = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='crosswalk/v1/')\nlatest = sorted(o['Key'] for o in resp.get('Contents', []))[-1]\ndoc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=latest)['Body'].read())\nkeyed = [r['security_key'] for r in doc.get('records', doc if isinstance(doc, list) else []) if r.get('security_key')]\nprint('keyed_count', len(keyed))\nlam = boto3.client('lambda')\nmeasured_rob = measured_pv = absent_div = 0\nfor k in keyed:\n    payload = json.dumps({'rawPath': f'/api/scoped/amgt/security/{k}/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\n    resp2 = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\n    body = json.loads(resp2['Payload'].read())\n    inner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\n    scores = inner.get('scores', {})\n    if (scores.get('robustness') or {}).get('status') == 'MEASURED': measured_rob += 1\n    if (scores.get('peers_v') or {}).get('status') == 'MEASURED': measured_pv += 1\n    if (scores.get('divergence') or {}).get('status') == 'ABSENT': absent_div += 1\nprint('measured_robustness', measured_rob, 'of', len(keyed))\nprint('measured_peers_v', measured_pv, 'of', len(keyed))\nprint('absent_divergence', absent_div, 'of', len(keyed))\n\"",
+      "output_evidence": "NOT RUN THIS SESSION as the literal live invocation (dispatch forbids any live deploy/write act this session; also, run_scores.py -- the PRODUCER -- has not been executed live for round-13 as part of this order either, so scores/v1/ objects for the real 33 names may not exist yet regardless). NAMING THE REAL FIELD NAMES PER THE ORDER'S OWN CONTINGENCY CLAUSE: this adapter's records use classify.py's ACTUAL contract -- key `state` (not `status`), values `MEASURED` / `ABSENT_SOURCE` / `ABSENT_PULL` (not bare `ABSENT`) -- so the order's own literal .get('status')=='MEASURED'/'ABSENT' checks would always read 0/0/0 regardless of correctness; re-running the SAME invocation against the real field names is the substitute local check below. SUBSTITUTE LOCAL VERIFICATION against a constructed two-date scores/v1/BA_US_Equity/ fixture (AMGT_POOL_ROOT, no S3 call): read_scores('BA_US_Equity') selected the LATEST date (2026-09-16 over 2026-09-15, confirming the newest-.json-in-key-order pick), robustness.state=='MEASURED' value=0.7, peers_v.state=='ABSENT_SOURCE', divergence.state=='ABSENT_SOURCE' reason \"FWD-20's house FCF forecast has not been built yet\" -- matching run_scores.py's OWN documented, unconditional divergence behaviour exactly. Separately verified: no scores object landed at all -> scores_status ABSENT and ALL THREE of robustness/peers_v/divergence synthesized as classify.absent(ABSENT_SOURCE, 'no scores object has landed for this name') -- never a dropped key; identity UNRESOLVED -> same three-key ABSENT_SOURCE synthesis, reason 'identity UNRESOLVED -- no scores object was read'.",
+      "denominator": "3 of 3 local scenarios verified (SERVED-latest-picked, whole-object-ABSENT, identity-UNRESOLVED) against constructed pool fixtures; 0 of 33 live keyed names checked against the deployed Lambda (NOT YET EXERCISED, rides both the later co-sign/deploy AND a live run_scores.py producer run, neither of which is this session's act).",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This session is bounded to code + local verification only pending the combined CTO+COO never-widen co-sign; additionally, this criterion's real denominator (33 keyed names actually scored) depends on a LIVE run_scores.py producer execution this order does not grant and this session did not perform. Rides the later continuation for both the redeploy and, separately, a producer run.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three discriminating scenarios: (SERVED, two dated objects present -- confirms LATEST wins), (ABSENT, no object at all), (identity UNRESOLVED, no key to read by).",
+      "expected": "SERVED case returns the newest date's own per-score records verbatim; both ABSENT cases synthesize all three keys as classify.absent(ABSENT_SOURCE, <named reason>) -- never a missing key, never a MEASURED value invented.",
+      "observed": "Exactly matched in all three cases (see output_evidence above); the 'latest wins' behavior specifically confirmed by writing TWO dated fixtures (2026-09-15 and 2026-09-16) and asserting as_of=='2026-09-16' and robustness.value==0.70 (the newer object's value, not the older 0.62).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each scenario constructed and run once against a fixed local pool-root fixture directory.",
+      "observed": "Deterministic by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live 33-keyed-name scan and Lambda invokes this order's own AC1 names.",
+      "reason": "This session's dispatch forbids any live deploy or write act; separately, this order's own denominator depends on a live run_scores.py producer run this order does not authorize this worker to perform. Deferred to the continuation."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/BATCH_B_COMBINED.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/api/scoped_amgt.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/api/scoped_amgt.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "160 passed (post all four scoped_amgt.py cell edits combined)"
+    }
+  ]
+}

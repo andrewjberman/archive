@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-20.price-generation-contract",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-20.price-generation-contract.md",
+    "group": "OTHER",
+    "vintage_commit": "7acf65b08b6946f6b839a1e27f39977f6eecfac3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-20.price-generation-contract.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/price_axis_pull.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CODE ONLY. main() now routes through lib.research.price.generation.compute_price_axis() (build_identity_index() to resolve security_key/identity_status, write_fn = None if --dry-run else default_write_generation, coverage_vintage naming the live box-side pull), mirroring lib/research/metrics/chatter_axis.py's OWN main() wiring field-for-field. The OLD raw table.put_item() write loop is REMOVED from main(); build_movement_rows() itself is UNCHANGED and still defined (movement_gate.py's producer axis registry names it by string and a test calls it directly -- see row S8; NOT deleted). Dead `import boto3` (unused after the write-loop removal) also removed to keep ruff clean. This is a box-side-only script (127.0.0.1:8194 Bloomberg DAPI) that CANNOT be run end-to-end from this worktree at all (measured UNREACHABLE, per backfill_legacy_generation.py's own docstring) -- verification below exercises everything downstream of the vendor pull.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/price/backfill_legacy_generation.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CODE ONLY. Added read_crossed_partition() (generalises read_legacy_partition()'s single PRICE axis literal to any crossed axis, via lib.research.metrics.movement_gate.axes_for_subject('PRICE') rather than a hand-typed pair), _attach_identity() and republish_crossed_generation() -- a NEW function, deliberately NOT compute_price_axis()-based (that path can only reconstruct a 2-point px_start/px_end series from a landed DynamoDB item and is LOSSY for BREAKOUT_PRICE's real trailing baseline). This new path reads the ALREADY-CROSSED, ALREADY-SCORED TRENDING_PRICE#<as_of>/BREAKOUT_PRICE#<as_of> rows verbatim (rank/score/baseline_mean/pct_jump untouched), attaches identity, and calls build_generation() + default_write_generation() directly, skipping build_rows() entirely (there is nothing left for it to compute). Wired to a new --republish-crossed CLI flag on the existing main(), backward compatible with the module's original --as-of 2026-09-10 recompute path. NOT DEPLOYED/RUN LIVE this session (no real DynamoDB write, matching this session's bound).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "See rk-23's instance for the two rows appended this session (S7, S8); same file, same splice, one commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "BEFORE this order's republish runs, as_of_date reads 2026-09-10 and dated reads true (the pre-fix baseline this criterion also records); AFTER the republish, as_of_date reads 2026-09-15 and dated reads false -- the worker records BOTH runs, before and after, of this exact invocation",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom lib.research.api.scoped_amgt import read_rankings\nresult = read_rankings('BREAKOUT', 'PRICE', None, 20)\nprint('as_of_date', result.get('as_of_date'))\nprint('dated', result.get('dated'))\n\"",
+      "output_evidence": "NOT RUN THIS SESSION as a live republish or a live read: this session's dispatch is explicit -- 'Do not run price_axis_pull.py's republish for real (dry-run/local-verify only)' and 'no live act of any kind this session'. No republish was executed, so the BEFORE state is unchanged from whatever it already was (this worker did not re-measure the live table -- that is a read act this order's own text treats as part of the same bound-off DEPLOY step). SUBSTITUTE LOCAL VERIFICATION of the NEW republish_crossed_generation() logic instead (see rk-20's own AC2 evidence below for the constructed-fixture run): confirmed that, given landed TRENDING_PRICE#2026-09-15/BREAKOUT_PRICE#2026-09-15 rows, the function republishes them with as_of_date='2026-09-15' preserved verbatim (never today's run date) and a generation_id/pointer built for each axis.",
+      "denominator": "0 of 1 live read of read_rankings() attempted or reported this session (correctly out of scope per this session's own bound); 1 of 1 local construction test of the NEW republish function's as_of_date-preservation behavior (see AC2).",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This session's dispatch explicitly forbids running the republish for real and forbids any live act; the actual before/after read_rankings() comparison rides the LATER continuation, after the CTO+COO co-sign and the real republish execution.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "after the republish, a `_CURRENT` pointer exists for `BREAKOUT_PRICE#2026-09-15` with a real `generation_id` and `state == GENERATION_COMPLETE` -- the worker replaces the table name placeholder with the real one read from `generation.py`'s own default before running this, and records that substitution",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3\ntable = boto3.resource('dynamodb').Table('<the price generation table -- name it from generation.py's own default table_name at the cut>')\nresp = table.get_item(Key={'axis_date': 'BREAKOUT_PRICE#2026-09-15', 'ticker': '_CURRENT'})\nitem = resp.get('Item')\nprint('pointer_exists', item is not None)\nprint('generation_id', (item or {}).get('generation_id'))\nprint('state', (item or {}).get('state'))\n\"",
+      "output_evidence": "RECORDED VERBATIM PER THE CRITERION TEXT (this order declares <placeholders>NONE</placeholders>, so the invocation field above is NOT substituted -- the substitution is stated here instead, in output_evidence, never in the governed invocation string). TABLE NAME: lib.research.price.generation.METRICS_TABLE's own default is 'opal-harvest-security-metrics' (os.environ HARVEST_METRICS_TABLE fallback), confirmed by reading generation.py:83-84 -- that is the real table the invocation's placeholder names. NOT RUN LIVE THIS SESSION per the dispatch bound (no real DynamoDB write). SUBSTITUTE LOCAL VERIFICATION run instead, against 'opal-harvest-security-metrics' as the table_name argument to a FAKE resource (no real AWS call): republish_crossed_generation('2026-09-15', table_name='opal-harvest-security-metrics', resource=<fake DynamoDB Table returning canned TRENDING_PRICE#2026-09-15/BREAKOUT_PRICE#2026-09-15 rows>, write_fn=<capturing fake>) built a generation for BREAKOUT_PRICE with state=='COMPLETE' (this module's own GENERATION_STATES uses the literal string 'COMPLETE', which IS the state the order's own <expect> names as GENERATION_COMPLETE -- generation.py's own three-state enum is COMPLETE/EMPTY/FAILED, confirmed by reading it), a generation_id '20260917T210558Z-edfa017b96c4', and the captured pointer via build_pointer() carrying that same generation_id and state; the fake write_fn's receipt reported pointer_written=True. Row values verbatim-preserved: security_key attached as 'BA_US_Equity' (via a monkeypatched build_identity_index), baseline_mean/pct_jump left at their EXACT landed values (182.4 / 3.7), never recomputed.",
+      "denominator": "1 of 1 constructed two-axis fixture (TRENDING_PRICE + BREAKOUT_PRICE, one row each) verified end to end through republish_crossed_generation() with a fake DynamoDB resource and a fake write_fn (no real AWS call); an EMPTY-axis case (0 candidate rows) separately verified to still build a generation with state=='EMPTY', matching the generation contract's own 'a successful EMPTY product still writes its pointer' rule; the CLI wiring (--republish-crossed --dry-run) exercised once end to end with the same fixtures, rc=0. 0 of 1 real DynamoDB pointer read attempted (NOT YET EXERCISED, rides the later deploy and the real republish run).",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This session's dispatch explicitly forbids running the republish for real ('dry-run/local-verify only') and forbids any live act; the real pointer this criterion reads does not exist yet at HEAD regardless of this session's code (the crossed 2026-09-15 partitions are not republished through the generation contract until the later continuation actually runs republish_crossed_generation() live). Rides that later run.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two axes constructed (TRENDING_PRICE with 1 candidate row, BREAKOUT_PRICE with 1 candidate row carrying real baseline_mean/pct_jump) plus an EMPTY-axis variant (BREAKOUT_PRICE with 0 rows) and a dry-run variant (write_fn=None).",
+      "expected": "Non-empty axes build a COMPLETE generation and a written pointer when write_fn is provided; an empty axis still builds an EMPTY-state generation and pointer (never skipped); write_fn=None writes nothing and reports rows_written=0 for every axis.",
+      "observed": "Exactly matched in all four combinations (see output_evidence above and this session's own unit-test transcript).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The fixture-driven republish_crossed_generation() call was run twice with identical fixed inputs.",
+      "observed": "Identical rows_ranked/rows_written counts and identical row content both times (generation_id/run_id differ only by the wall-clock stamp embedded in new_run_id()/new_generation_id(), which is documented, expected non-determinism unrelated to correctness).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The literal live AC1/AC2 invocations (read_rankings() live read; the real DynamoDB _CURRENT pointer read) and the actual box-side Bloomberg pull / DynamoDB republish write.",
+      "reason": "This session's dispatch explicitly bounds this cell to 'dry-run/local-verify only' and forbids any live act of any kind. The box-side pull is additionally UNREACHABLE from this worktree by construction (127.0.0.1:8194 DAPI, terminal-box-only). Both rides the later continuation after the combined co-sign."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W27-S8: this order's phrase 'replacing build_movement_rows() and the :337-346 write loop' could be misread as deleting build_movement_rows() itself; lib/research/metrics/movement_gate.py's producer axis registry names that function BY STRING and a test (test_producer_axis_registry.py) calls it directly, so it must survive unchanged even though main() no longer calls it. Preserved; verified the full lib/research/ suite (490 tests) and a direct synthetic-series call to build_movement_rows() both still pass."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/BATCH_B_COMBINED.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile integrations/bloomberg/research/price_axis_pull.py lib/research/price/backfill_legacy_generation.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check integrations/bloomberg/research/price_axis_pull.py lib/research/price/backfill_legacy_generation.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/ -q",
+      "result": "490 passed (whole lib/research/ tree, including test_producer_axis_registry.py and lib/research/price/tests/)"
+    }
+  ]
+}

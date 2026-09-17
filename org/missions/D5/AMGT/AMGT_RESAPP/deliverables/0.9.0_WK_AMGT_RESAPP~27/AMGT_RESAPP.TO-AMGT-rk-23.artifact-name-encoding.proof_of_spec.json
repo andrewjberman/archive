@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-23.artifact-name-encoding",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-23.artifact-name-encoding.md",
+    "group": "OTHER",
+    "vintage_commit": "53b8ab5874ef75e5a86238d493699605ee92125d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-23.artifact-name-encoding.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CODE ONLY, per this session's changed procedure (batch B combined co-sign): security_key() now replaces '/' -> '-' as well as ' ' -> '_' (docstring names the exact hazard: pdf_path/txt_path are LOCAL filesystem joins, never an S3 key). NOT DEPLOYED: the served Lambda is untouched this session -- no build-and-upload, no terraform apply, no ledger entry opened. py_compile clean; ruff clean.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CODE ONLY. _read_drafting_document()'s `if root:` (AMGT_DRAFTING_ROOT offline/test) branch now builds a SEPARATE, path-safe `local_filename` for the local join; the shared `filename` variable that also builds the S3 GET key is left UNSANITIZED (S3 tolerates '/' and the producers -- analyze.py/batch.py -- write the pool object at the RAW security_key, so sanitizing the shared variable would 404 the real object). This scoping decision and its verification are recorded as row AMGT_RESAPP-Z-W27-S7. NOT DEPLOYED this session (this file is also edited by AMGT-rk-24/rk-25/rk-30 in the same combined batch; deploy is a later continuation after co-sign).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Two rows appended by textual splice this session (AMGT_RESAPP-Z-W27-S7, AMGT_RESAPP-Z-W27-S8, continuing S1-S6 from prior sessions); python .tools/surprise-row-gate.py <path> run before commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "served_ok equals the printed keyed_count (33 at this cut, re-measured live) -- both previously-failing slash-bearing keys now read statusCode 200, and failures is empty. Before the fix, failures names exactly the two slash-bearing keys and served_ok reads keyed_count minus 2 -- record both the before and after run",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json\ns3 = boto3.client('s3')\nresp = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='crosswalk/v1/')\nlatest = sorted(o['Key'] for o in resp.get('Contents', []))[-1]\ndoc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=latest)['Body'].read())\nkeyed = [r['security_key'] for r in doc.get('records', doc if isinstance(doc, list) else []) if r.get('security_key')]\nprint('keyed_count', len(keyed))\nprint('slash_bearing', [k for k in keyed if '/' in k])\nlam = boto3.client('lambda')\nresults = {}\nfor k in keyed:\n    payload = json.dumps({'rawPath': f'/api/scoped/amgt/security/{k}/print', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\n    resp2 = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\n    body = json.loads(resp2['Payload'].read())\n    results[k] = body.get('statusCode')\nok = sum(1 for v in results.values() if v == 200)\nprint('served_ok', ok, 'of', len(keyed))\nprint('failures', {k: v for k, v in results.items() if v != 200})\n\"",
+      "output_evidence": "NOT RUN THIS SESSION as the literal live Lambda invocation: this session's own dispatch supersedes the order's DEPLOY step -- 'No live act of any kind this session'. SUBSTITUTE LOCAL VERIFICATION run instead, exercising the exact code path build_pack() takes (never via Lambda, which still runs the OLD undeployed bytes): (1) unit call `security_key('BP/ LN Equity')` -> 'BP-_LN_Equity' and `security_key('NG/ LN Equity')` -> 'NG-_LN_Equity' (both slash-bearing names path-safe-encoded); (2) `build_pack('BP/ LN Equity', <constructed model_block>, out_dir='.scratch/rk23_test')` completed with NO exception, wrote a real 35552-byte PDF at '.scratch/rk23_test/pack_BP-_LN_Equity.pdf' and a companion .txt, both os.path.exists()==True; (3) NEGATIVE CONTROL reproducing the PRE-FIX bytes exactly (`pack_{0}.pdf.format('BP/_LN_Equity')` unsanitized) raised the EXACT hazard this cell names: FileNotFoundError: [Errno 2] No such file or directory: '.scratch\\\\rk23_test\\\\pack_BP\\\\_LN_Equity.pdf' -- confirming the fix addresses a REAL, reproduced failure, not a hypothetical one.",
+      "denominator": "3 of 3 local checks run (2 unit conversions + 1 constructed build_pack() call), 1 of 1 negative-control reproduction of the pre-fix crash -- against LOCAL code only, never the live crosswalk/pool/Lambda this criterion's own invocation reads. The LIVE 33-of-33 statusCode-200 count is NOT YET EXERCISED.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This session is explicitly bounded to code + local verification only (no terraform apply, no Lambda redeploy, no ledger entry) pending a combined CTO+COO never-widen co-sign covering all five batch-B acts. The literal live invocation (33-name crosswalk read + 33 Lambda invokes against the DEPLOYED function) rides that LATER continuation, after the redeploy actually lands: the deployed opal-amgt-scoped-api still runs the pre-fix bytes at HEAD, so running this exact invocation now would report the SAME 31-of-33 failure this row's own baseline already measured (row AMGT_RESAPP-Z-S141) and would not evidence this session's fix at all.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The task order's own PLANTED negative control IS the two real slash-bearing security keys (BP/_LN_Equity, NG/_LN_Equity) -- no synthetic mutant is separately constructed. This session's local verification reproduces the pre-fix crash from these exact strings and confirms the fix's negation of it.",
+      "expected": "A slash-bearing security key must resolve to a path-safe LOCAL artifact name (no directory separator surviving into a filename) while the S3 pool key path (drafting/v1/<raw key>.json) stays byte-identical to what the producer actually wrote.",
+      "observed": "render_pack.security_key('BP/ LN Equity') -> 'BP-_LN_Equity' (path-safe); build_pack() with that name writes successfully. scoped_amgt._read_drafting_document('BP/_LN_Equity') local-root branch reads a fixture file named 'BP-_LN_Equity.json' correctly, while a monkeypatched S3 client confirms the GET request still uses the UNSANITIZED key 'drafting/v1/BP/_LN_Equity.json' -- both halves of the fix verified independently, offline.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each local check (security_key() calls, build_pack() call, _read_drafting_document() unit tests) was run twice this session with identical inputs.",
+      "observed": "Identical output both times; no randomness or clock-dependence in the changed code paths.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live 33-name crosswalk read and the 33 Lambda /print invokes this order's own AC1 names.",
+      "reason": "This session's dispatch forbids any live deploy or write act; the deployed function still runs pre-fix bytes, so running this invocation now would not evidence the fix and would misreport the current (pre-fix) state as this session's result. Deferred to the continuation after the combined co-sign and redeploy."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W27-S7: a literal 'sanitize the shared filename variable identically at both sites' reading of this order's own worked example would have broken the S3 pool read in scoped_amgt.py's _read_drafting_document() (that variable also builds the S3 key, and the producer writes at the raw, unsanitized security_key). Resolved by sanitizing a NEW, locally-scoped variable used only by the local-root join."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/BATCH_B_COMBINED.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/print/render_pack.py lib/research/api/scoped_amgt.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/print/render_pack.py lib/research/api/scoped_amgt.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "160 passed (post all four scoped_amgt.py cell edits combined)"
+    }
+  ]
+}

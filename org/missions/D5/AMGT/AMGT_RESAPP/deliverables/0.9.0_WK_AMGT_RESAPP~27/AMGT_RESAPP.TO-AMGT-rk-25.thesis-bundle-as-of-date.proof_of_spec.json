@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-25.thesis-bundle-as-of-date",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-25.thesis-bundle-as-of-date.md",
+    "group": "OTHER",
+    "vintage_commit": "53b8ab5874ef75e5a86238d493699605ee92125d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-25.thesis-bundle-as-of-date.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CODE ONLY. One line added to read_thesis_bundle(), applied AFTER the rk-24 edit so it composes rather than reverts: bundle['as_of_date'] = (bundle.get('drafting_provenance') or {}).get('filing_date') -- re-exposes the SAME filing_date _drafting_block() already carries in drafting_provenance whenever a document was read (SERVED or INVALID), never re-derived or invented. A name with no filing (drafting_provenance absent, i.e. DRAFTING_ABSENT) gets as_of_date None by the same absence, never a fabricated date. NOT DEPLOYED this session.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "See rk-23's instance for the two rows appended this session (S7, S8); same file, same splice, one commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "BEFORE this order lands, as_of_date is absent from the served bundle (KeyError-equivalent / None printed, the pre-fix baseline); AFTER, as_of_date equals BA's filing_date, the same value already carried on the drafting object -- record both runs",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\nlam = boto3.client('lambda')\npayload = json.dumps({'rawPath': '/api/scoped/amgt/security/BA_US_Equity/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\nresp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\nbody = json.loads(resp['Payload'].read())\ninner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\nprint('as_of_date', inner.get('as_of_date'))\nprint('drafting_filing_date', (inner.get('drafted_sections') or {}).get('filing_date') if isinstance(inner.get('drafted_sections'), dict) else 'inspect actual shape')\n\"",
+      "output_evidence": "NOT RUN THIS SESSION as the literal live invocation (dispatch forbids any live deploy/write act this session). SUBSTITUTE LOCAL VERIFICATION: constructed read_drafted_sections() returning drafting_status SERVED with drafting_provenance.filing_date '2026-01-30' -> read_thesis_bundle('BA_US_Equity')['as_of_date'] == '2026-01-30' (exact match, not a paraphrase). A second SERVED-shaped construction with filing_date '2025-11-01' under drafting_status INVALID (provenance is still carried for an INVALID document) -> as_of_date == '2025-11-01', confirming as_of_date rides drafting_provenance regardless of the SERVED/INVALID split, matching the cell's own 'the SAME value already carried on the drafting object'.",
+      "denominator": "2 of 2 local scenarios verified (SERVED, INVALID) against constructed inputs; 0 of 1 live BA_US_Equity Lambda invoke (NOT YET EXERCISED, rides the later deploy).",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This session is bounded to code + local verification only pending the combined CTO+COO never-widen co-sign for all five batch-B acts; the deployed opal-amgt-scoped-api still runs pre-fix bytes (as_of_date absent from the served shape) at HEAD, so the literal invocation would report the pre-fix state and would not evidence this session's fix. Rides the later continuation's actual redeploy.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a name carrying no filing does NOT carry an invented or stale as_of_date -- it reads null/absent, never a fabricated date. PLANTED negative control",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\nlam = boto3.client('lambda')\npayload = json.dumps({'rawPath': '/api/scoped/amgt/security/HOLLOW_NONEXISTENT_KEY_Equity/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\nresp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\nbody = json.loads(resp['Payload'].read())\ninner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\nprint('as_of_date', inner.get('as_of_date'))\n\"",
+      "output_evidence": "NOT RUN THIS SESSION as the literal live invocation. SUBSTITUTE LOCAL VERIFICATION: constructed read_drafted_sections() returning drafting_status ABSENT with NO drafting_provenance key at all (the real shape _drafting_block() produces for an ABSENT read) -> read_thesis_bundle('NOFILE_US_Equity')['as_of_date'] is None -- asserted directly (Python identity check), never a fabricated value. This is the SAME planted-negative-control shape the order names (a name carrying no filing).",
+      "denominator": "1 of 1 local scenario verified (ABSENT/no filing -> as_of_date None); 0 of 1 live invoke of a genuinely nonexistent key (NOT YET EXERCISED, rides the later deploy -- though the code path is identical to AC1's local verification and needs no additional live evidence to be logically sound, only to be PROVEN on the served plane).",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This session is bounded to code + local verification only pending the combined CTO+COO never-widen co-sign; deferred to the later continuation's actual redeploy, same reason as AC1.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three discriminating scenarios: (SERVED, provenance present), (INVALID, provenance present), (ABSENT, no provenance) -- covering every branch _drafting_block() can produce.",
+      "expected": "as_of_date equals the provenance's filing_date in the first two cases and is None in the third -- never invented.",
+      "observed": "Exactly matched in all three cases (see output_evidence above).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each scenario constructed and run once with fixed monkeypatched inputs.",
+      "observed": "Deterministic by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live BA_US_Equity and nonexistent-key Lambda invokes this order's own AC1/AC2 name.",
+      "reason": "This session's dispatch forbids any live deploy or write act. Deferred to the continuation after the combined co-sign and redeploy."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/BATCH_B_COMBINED.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/api/scoped_amgt.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/api/scoped_amgt.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "160 passed (post all four scoped_amgt.py cell edits combined)"
+    }
+  ]
+}

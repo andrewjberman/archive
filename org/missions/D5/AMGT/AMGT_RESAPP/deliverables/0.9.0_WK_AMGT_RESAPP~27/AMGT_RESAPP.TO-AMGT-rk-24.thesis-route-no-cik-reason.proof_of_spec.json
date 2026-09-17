@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-24.thesis-route-no-cik-reason",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-24.thesis-route-no-cik-reason.md",
+    "group": "OTHER",
+    "vintage_commit": "53b8ab5874ef75e5a86238d493699605ee92125d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-24.thesis-route-no-cik-reason.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CODE ONLY. Added FILINGS_PREFIX + _read_filing_source_object() (reads filings/v1/<key>/UNRESOLVED-SOURCE.source.json at its deterministic name, never read_pool_object()'s latest-.json convention, which a RESOLVED name's <accession>.source.json could sort after and shadow); wired into read_thesis_bundle() immediately after bundle.update(read_drafted_sections(resolved_key)) -- when drafting_status is ABSENT and the filings source object's own status reads UNRESOLVED-SOURCE, its reason replaces the generic NoSuchKey drafting_reason. SERVED and INVALID drafting statuses are never touched. NOT DEPLOYED this session.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "See rk-23's instance for the two rows appended this session (S7, S8); same file, same splice, one commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "BEFORE this order lands, drafting_reason reads a generic NoSuchKey-shaped string; AFTER (and after chain FP-B's order has written the pool objects), drafting_reason for the sampled unfiled name reads the store's own no-CIK reason text (matching filing_identity.source is None: no cik and expected form to fetch by, or the equivalent corrected wording) -- the worker records both runs and names which unresolved name it sampled",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\ns3 = boto3.client('s3')\ndoc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key='universe/v1/2026-09-16.json')['Body'].read())\nunresolved = [r['security_key'] for r in doc.get('names', []) if not (r.get('filing_identity') or {}).get('cik')]\nprint('unresolved_count', len(unresolved))\nlam = boto3.client('lambda')\nname = unresolved[0]\npayload = json.dumps({'rawPath': f'/api/scoped/amgt/security/{name}/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\nresp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\nbody = json.loads(resp['Payload'].read())\ninner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\nprint('drafting_reason', inner.get('drafting_reason'))\n\"",
+      "output_evidence": "NOT RUN THIS SESSION as the literal live invocation (this session's dispatch forbids any live deploy/write act). SUBSTITUTE LOCAL VERIFICATION, exercising read_thesis_bundle() and _read_filing_source_object() directly against constructed inputs (no vendor/AWS call): (1) unit test of _read_filing_source_object() against a monkeypatched pool client returning {'security_key': 'NOCIK_US_Equity', 'status': 'UNRESOLVED-SOURCE', 'reason': \\\"the universe row carries no cik (filing_identity.source is not 'edgar')\\\"} -- function returned that exact dict; a monkeypatched miss (NoSuchKey) returned None. (2) End-to-end read_thesis_bundle('NOCIK_US_Equity') with read_drafted_sections monkeypatched to the generic-NoSuchKey ABSENT shape and the pool client above: bundle['drafting_reason'] == \\\"the universe row carries no cik (filing_identity.source is not 'edgar')\\\" -- the generic message was correctly REPLACED. (3) Three non-application controls, same call shape: SERVED drafting_status left drafting_reason untouched (None, unchanged); INVALID drafting_status kept the VALIDATOR's own reason ('schema validation failed: sentence 3 missing evidence'), never the filing source's; ABSENT drafting_status with NO filing source object landed (miss) kept the ORIGINAL generic NoSuchKey-shaped message.",
+      "denominator": "4 of 4 local scenarios verified (hit, miss, SERVED-untouched, INVALID-untouched) against constructed inputs; 0 of 1 live scan of the real 21-name unfiled set and the deployed Lambda (NOT YET EXERCISED, rides the later deploy).",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "This session is bounded to code + local verification only pending the combined CTO+COO never-widen co-sign for all five batch-B acts; the deployed opal-amgt-scoped-api still runs pre-fix bytes at HEAD, so the literal invocation would report the pre-fix generic-NoSuchKey state regardless of this session's code, and would not evidence the fix. Rides the later continuation's actual redeploy.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Four discriminating scenarios constructed by hand (see output_evidence): (drafting_status, filing_source_object) in {(ABSENT, UNRESOLVED-SOURCE hit), (ABSENT, miss), (SERVED, UNRESOLVED-SOURCE hit), (INVALID, UNRESOLVED-SOURCE hit)} -- the last two are the negative controls proving the merge is scoped to ABSENT only.",
+      "expected": "Only the (ABSENT, hit) case replaces drafting_reason; all three other cases leave the existing reason (None for SERVED, the validator's for INVALID, the original generic message for ABSENT+miss) untouched.",
+      "observed": "Exactly matched in all four cases (see output_evidence above).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of the four scenarios was constructed and run once with fixed monkeypatched inputs (no clock, no randomness in the changed code path).",
+      "observed": "Deterministic by construction -- pure function of the mocked reads.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The live scan of the real 21 in-scope unfiled names and the Lambda invoke this order's own AC1 names.",
+      "reason": "This session's dispatch forbids any live deploy or write act. Deferred to the continuation after the combined co-sign and redeploy."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/BATCH_B_COMBINED.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/api/scoped_amgt.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/api/scoped_amgt.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "160 passed (post all four scoped_amgt.py cell edits combined)"
+    }
+  ]
+}
