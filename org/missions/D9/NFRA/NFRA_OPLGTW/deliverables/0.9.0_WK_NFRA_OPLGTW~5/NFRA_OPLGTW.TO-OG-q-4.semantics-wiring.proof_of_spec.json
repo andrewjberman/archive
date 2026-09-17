@@ -18,9 +18,9 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/query.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "881b1a5445",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "An existing Gateway source file, modified on branch wk-nfra_oplgtw-5e only. The order says nothing deploys.",
+      "deploy_evidence": "An existing Gateway source file, modified on branch wk-nfra_oplgtw-5e only, unchanged since this worker's first hand-off commit 881b1a5445. The order says nothing deploys.",
       "artifact_covered_by": ["OGQ4-AC1", "OGQ4-AC2", "OGQ4-AC3", "OGQ4-AC4", "OGQ4-AC5"],
       "introduces": [
         "sem.assert_field_summable(query.dataset, agg.field)",
@@ -30,20 +30,29 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_wiring.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "881b1a5445",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "A new test file; tests are not deployed.",
+      "deploy_evidence": "A test file, unchanged since this worker's first hand-off commit 881b1a5445; tests are not deployed.",
       "artifact_covered_by": ["OGQ4-AC1", "OGQ4-AC2", "OGQ4-AC3", "OGQ4-AC4"],
       "introduces": ["def test_ogq4_ac01", "def test_ogq4_ac02", "def test_ogq4_ac03"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_query.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "R-OG-15's granted correction (msg 97648, org/tier1_exec/1.0.0_SA_CTO/deliverables/RULINGS_NFRA_OPLGTW_20260916.md @f3309bc39d, row NFRA_OPLGTW-W5-S10): exactly test_ogq2_ac07 and test_ogq2_ac15 flipped to expect the contract's quantity_sum_ungrouped refusal, each with a comment citing PRD C3 verbatim. Cut base for the correction: d91629cfd8e7693c65ac3b06d945fa584be44adf, the merge-base of this branch with CLOUD's tip at this hand-off's starting HEAD (2392d6f9fb, a merge whose two parents are 881b1a5445 -- this seat's own prior work -- and d91629cfd8 -- the CLOUD tip the issuer merged in); that commit touched only the task order's own .md file, so test_schwab_query.py there is the original, pre-correction OG-q-2 file. No other line in the file changed (OGQ4-AC6).",
+      "artifact_covered_by": ["OGQ4-AC5", "OGQ4-AC6", "OGQ4-AC7"],
+      "introduces": ["quantity_sum_ungrouped"]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py",
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "A deliverable probe script, not deployed; invoked directly by OGQ4-AC4 and OGQ4-AC5's own <invocation>.",
-      "artifact_covered_by": ["OGQ4-AC4", "OGQ4-AC5"],
-      "introduces": ["def ac4", "def ac5"]
+      "deploy_evidence": "A deliverable probe script, not deployed; invoked directly by OGQ4-AC4/AC5/AC6/AC7's own <invocation>. AC4's mutant source is rewritten this round to a content-pinned pre-wiring commit (found by walking query.py's own history) rather than HEAD, because HEAD now carries the wired call site (see the AC4 status_reason below); AC6 and AC7 are new this round.",
+      "artifact_covered_by": ["OGQ4-AC4", "OGQ4-AC5", "OGQ4-AC6", "OGQ4-AC7"],
+      "introduces": ["def ac6", "def ac7", "def _pre_wiring_query_bytes", "def _function_ranges", "def _hunks"]
     }
   ],
   "acceptance": [
@@ -52,9 +61,10 @@
       "criterion_verbatim": "OGQ4-AC1 (test_ogq4_ac01) -- through the registered schwab_query tool on OG-v-2's live-app harness, an aggregate summing a nonadditive field is refused with a contract error_codes value, and the test prints the refusal's code and the call site it travelled (query.py's call into semantics.py).",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 180 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_wiring.py::test_ogq4_ac01 -q -p no:cacheprovider --color=no",
-      "output_evidence": "OGQ4-AC1: sum(dim_asset.closing_price) through schwab_query -> HTTP 200 isError=True code=INVALID_REQUEST (call site: query.py check_against_grant -> semantics.assert_field_summable, app/integrations/schwab/query.py:check_against_grant)\n1 passed in 1.99s",
+      "output_evidence": "OGQ4-AC1: sum(dim_asset.closing_price) through schwab_query -> HTTP 200 isError=True code=UNAVAILABLE (call site: query.py check_against_grant -> semantics.assert_field_summable, app/integrations/schwab/query.py:check_against_grant)\nAssertionError: {'error': {'code': 'UNAVAILABLE', 'reason': 'schwab_integration_unavailable'}, 'tool': 'schwab_query'}\nassert 'UNAVAILABLE' == 'INVALID_REQUEST'\n1 failed in 3.27s",
       "denominator": "1 of 1 selected test (test_ogq4_ac01, one of 3 tests in the file)",
-      "status": "PASS",
+      "status": "FAIL",
+      "status_reason": "og_v2's harness (tests/acceptance/conftest.py) hardcodes pre-rename role ARNs (opal-mcp-emp-menachem-schwab-read / opal-mcp-schwab-catalog-read); the issuer's CLOUD merge brought in commit b2e4a10678 (R-OG-7), which renamed the contract's reader_role/catalog_role to gateway-schwab-read-role/gateway-schwab-catalog-read-role. aws_roles.role_config now refuses the fixture's stale ARNs at construction (RoleConfigError), integration.py swallows it as UNAVAILABLE/schwab_integration_unavailable before the wiring under test is ever exercised. tests/acceptance/conftest.py is not in this order's <paths> grant. Filed as surprise row NFRA_OPLGTW-W5-S11 (BLOCKING, INERT); reported FAIL by measurement, not repaired or routed around.",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
     },
     {
@@ -62,9 +72,10 @@
       "criterion_verbatim": "OGQ4-AC2 (test_ogq4_ac02) -- through the same tool and harness, a quantity sum whose grouping omits cusip or l_s is refused with a contract error_codes value, and the test prints the refusal's code.",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 180 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_wiring.py::test_ogq4_ac02 -q -p no:cacheprovider --color=no",
-      "output_evidence": "OGQ4-AC2: sum(dim_position.quantity_settled_unsettled) ungrouped through schwab_query -> HTTP 200 isError=True code=INVALID_REQUEST (call site: query.py check_against_grant -> semantics.assert_quantity_sum_grouped)\n1 passed in 2.15s",
+      "output_evidence": "AssertionError: {'error': {'code': 'UNAVAILABLE', 'reason': 'schwab_integration_unavailable'}, 'tool': 'schwab_query'}\nassert 'UNAVAILABLE' == 'INVALID_REQUEST'\n1 failed in 2.62s",
       "denominator": "1 of 1 selected test (test_ogq4_ac02, one of 3 tests in the file)",
-      "status": "PASS",
+      "status": "FAIL",
+      "status_reason": "Same root cause as OGQ4-AC1 (surprise row NFRA_OPLGTW-W5-S11): the og_v2 harness's stale role ARNs are refused by aws_roles.role_config against contract v1.1's renamed reader_role/catalog_role, before this cell's own wiring is reached.",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
     },
     {
@@ -72,9 +83,10 @@
       "criterion_verbatim": "OGQ4-AC3 (test_ogq4_ac03) -- through the same tool and harness, a legal sum of one named balance field across the grant's approved accounts still succeeds and returns its total in the envelope.",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 180 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_wiring.py::test_ogq4_ac03 -q -p no:cacheprovider --color=no",
-      "output_evidence": "OGQ4-AC3: sum(dim_balance.mkt_value_long) through schwab_query -> HTTP 200 isError=False total='10000000012345.68' (legal sum still succeeds; call site: query.py check_against_grant, no refusal raised)\n1 passed in 2.51s",
+      "output_evidence": "AssertionError: {'error': {'code': 'UNAVAILABLE', 'reason': 'schwab_integration_unavailable'}, 'tool': 'schwab_query'}\nassert True is not True\n1 failed in 2.48s",
       "denominator": "1 of 1 selected test (test_ogq4_ac03, one of 3 tests in the file)",
-      "status": "PASS",
+      "status": "FAIL",
+      "status_reason": "Same root cause as OGQ4-AC1/AC2 (surprise row NFRA_OPLGTW-W5-S11): og_v2's stale role ARNs are refused before any query is validated, so even this legal, unguarded sum never reaches the app.",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
     },
     {
@@ -82,9 +94,10 @@
       "criterion_verbatim": "OGQ4-AC4 -- (mutant control) the probe copies the worktree's app/ to a scratch directory, removes the call site there only, runs AC1, AC2 and AC3 against that copy, and passes only if AC1 and AC2 FAIL while AC3 still passes; it prints the three outcomes, and it never edits a tracked file (a git status --porcelain read before and after is printed and equal).",
       "method": "command",
       "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py AC4",
-      "output_evidence": "AC4: mutant query.py written ... differs from the copy's wired bytes: True\nAC4: mutant run AC1 (test_ogq4_ac01) -> rc=1 last-line='1 failed in 4.47s' outcome=FAIL\nAC4: mutant run AC2 (test_ogq4_ac02) -> rc=1 last-line='1 failed in 4.14s' outcome=FAIL\nAC4: mutant run AC3 (test_ogq4_ac03) -> rc=0 last-line='1 passed in 8.66s' outcome=PASS\nAC4: porcelain before == after: True\nVERDICT: PASS-OGQ4-AC4",
+      "output_evidence": "AC4: mutant query.py written ... content-pinned at c3728d6bdba764c034487a870e1a30632a813e3c, verified pre-wiring; differs from the copy's wired bytes: True\nAC4: mutant run AC1 (test_ogq4_ac01) -> rc=1 last-line='1 failed in 2.12s' outcome=FAIL\nAC4: mutant run AC2 (test_ogq4_ac02) -> rc=1 last-line='1 failed in 2.68s' outcome=FAIL\nAC4: mutant run AC3 (test_ogq4_ac03) -> rc=1 last-line='1 failed in 2.08s' outcome=FAIL\nAC4: porcelain before == after: True\nVERDICT: FAIL-OGQ4-AC4 outcomes={'AC1': 'FAIL', 'AC2': 'FAIL', 'AC3': 'FAIL'} porcelain_equal=True",
       "denominator": "3 of 3 mutant sub-runs (AC1, AC2, AC3) plus 1 of 1 porcelain-equality check",
-      "status": "PASS",
+      "status": "FAIL",
+      "status_reason": "The mutant control's OWN pin logic is sound this round (rewritten from HEAD to a content-verified pre-wiring commit c3728d6b..., because HEAD now carries the wired call site -- see amendment_ref): AC1/AC2 correctly FAIL against the mutant copy. But AC3, which should PASS unconditionally (a legal sum was never guarded by the call site), also FAILs, because the mutant copy carries the SAME stale tests/acceptance/conftest.py as the real worktree (surprise row NFRA_OPLGTW-W5-S11) -- the copy's og_v2 harness refuses the stale role ARNs before AC3's query is ever validated, independent of whether the call site is present. This confirms the failure is the harness fixture, not this cell's wiring: removing the call site changes AC1/AC2's outcome exactly as expected, but AC3 fails for the same reason it fails un-mutated.",
       "expect": "(?m)^VERDICT: PASS-OGQ4-AC4(?![0-9])"
     },
     {
@@ -92,23 +105,42 @@
       "criterion_verbatim": "OGQ4-AC5 -- the probe runs tests/test_schwab_query.py, tests/test_schwab_semantics.py and tests/test_schwab_export.py, ONE pytest process per module, and every module passes, each module's pass count and the denominator 3 printed.",
       "method": "command",
       "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py AC5",
-      "output_evidence": "AC5: infra/aws/ec2/opal-gateway/tests/test_schwab_query.py -> rc=1 last-line='2 failed, 23 passed in 7.41s' pass_count=0\nAC5: infra/aws/ec2/opal-gateway/tests/test_schwab_semantics.py -> rc=0 last-line='14 passed in 1.08s' pass_count=14\nAC5: infra/aws/ec2/opal-gateway/tests/test_schwab_export.py -> rc=0 last-line='27 passed in 8.20s' pass_count=27\nAC5: 2 of 3 module(s) passed\nVERDICT: FAIL-OGQ4-AC5 2 of 3 module(s) passed",
-      "denominator": "2 of 3 modules pass (test_schwab_semantics.py, test_schwab_export.py); test_schwab_query.py fails 2 of 25 tests",
-      "status": "FAIL",
-      "status_reason": "test_schwab_query.py::test_ogq2_ac07 and ::test_ogq2_ac15 each sum a quantity field (quantity_settled) with no group_by and assert success; this cell's own OGQ4-AC2 wiring correctly refuses exactly that shape (semantics.assert_quantity_sum_grouped, contract C3, quantity_sum_required_groups=[cusip,l_s]). test_schwab_query.py is outside this order's <paths> grant, so it cannot be edited here. Filed as surprise row NFRA_OPLGTW-W5-S10 (BLOCKING, INERT); AC5 is reported FAIL by measurement, not repaired or routed around.",
+      "output_evidence": "AC5: infra/aws/ec2/opal-gateway/tests/test_schwab_query.py -> rc=0 last-line='25 passed in 6.93s' pass_count=25\nAC5: infra/aws/ec2/opal-gateway/tests/test_schwab_semantics.py -> rc=0 last-line='14 passed in 1.10s' pass_count=14\nAC5: infra/aws/ec2/opal-gateway/tests/test_schwab_export.py -> rc=0 last-line='27 passed in 8.81s' pass_count=27\nAC5: 3 of 3 module(s) passed\nVERDICT: PASS-OGQ4-AC5",
+      "denominator": "3 of 3 modules pass (25 + 14 + 27 = 66 tests)",
+      "status": "PASS",
       "expect": "(?m)^VERDICT: PASS-OGQ4-AC5(?![0-9])"
+    },
+    {
+      "criterion_id": "OGQ4-AC6",
+      "criterion_verbatim": "OGQ4-AC6 -- the probe prints the diff of tests/test_schwab_query.py against your cut base with its LINE COUNT, and passes only if every changed line lies inside test_ogq2_ac07 or test_ogq2_ac15.",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 180 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py AC6",
+      "output_evidence": "AC6: diff of infra/aws/ec2/opal-gateway/tests/test_schwab_query.py against cut base d91629cfd8e7693c65ac3b06d945fa584be44adf (53 line(s))\nAC6: allowed ranges old={'test_ogq2_ac07': (470, 510), 'test_ogq2_ac15': (733, 755)} new={'test_ogq2_ac07': (470, 516), 'test_ogq2_ac15': (739, 767)}\nAC6: hunk -491,7 +491,13 -> old_ok=True new_ok=True\nAC6: hunk -745,2 +751,2 -> old_ok=True new_ok=True\nAC6: hunk -750,1 +756,7 -> old_ok=True new_ok=True\nVERDICT: PASS-OGQ4-AC6",
+      "denominator": "3 of 3 diff hunks (-U0) fall entirely inside test_ogq2_ac07's or test_ogq2_ac15's own [start,end] line range in both the cut-base and current file",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGQ4-AC6(?![0-9])"
+    },
+    {
+      "criterion_id": "OGQ4-AC7",
+      "criterion_verbatim": "OGQ4-AC7 -- the probe prints tests/test_schwab_query.py's collected test count before and after the correction, both denominators stated (25 at the cut base, 25 after: 23 untouched plus the 2 corrected), and passes only if the two corrected tests each carry a comment citing the contract clause their new expectation encodes.",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 180 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py AC7",
+      "output_evidence": "AC7: collected AFTER correction -> 25 (last line: '25 tests collected in 0.50s')\nAC7: collected BEFORE correction (cut base d91629cfd8e7693c65ac3b06d945fa584be44adf) -> 25 (last line: '25 tests collected in 1.35s')\nAC7: denominators -- before=25 after=25 (expected 25/25: 23 untouched + 2 corrected)\nAC7: test_ogq2_ac07 carries the contract-clause citation ('Quantity sums require grouping by CUSIP and long/short indicator'): True\nAC7: test_ogq2_ac15 carries the contract-clause citation ('Quantity sums require grouping by CUSIP and long/short indicator'): True\nVERDICT: PASS-OGQ4-AC7",
+      "denominator": "2 of 2 corrected tests carry the citation; 25/25 collected-test denominators both match",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGQ4-AC7(?![0-9])"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "OGQ4-AC4 IS this cell's mutant control: the probe copies the whole opal-gateway tree to a scratch directory and, in that copy only, restores query.py to its git HEAD bytes (the version before this order's wiring), removing exactly the two semantics call sites this cell adds -- semantics.py, datasets.json and every other file are untouched copies of the current worktree.",
+      "description": "OGQ4-AC4 IS this cell's mutant control. This round the probe's pin source is REWRITTEN from `git show HEAD:query.py` to a content-verified pre-wiring commit, because HEAD now carries the wired call site (it was committed in 881b1a5445 during the first hand-off, before this round's CLOUD merge): `_pre_wiring_query_bytes` walks query.py's own history oldest-to-newest and returns the last commit whose content lacks `assert_quantity_sum_grouped`, with a negative control that the pin lacks the marker while the current worktree carries it. The mutant copy carries the SAME (stale) tests/acceptance/conftest.py as the real worktree.",
       "expected": "Against the mutant copy, test_ogq4_ac01 and test_ogq4_ac02 FAIL (the refusal the call site raised no longer fires) while test_ogq4_ac03 still PASSES (a legal sum was never guarded by that call site).",
-      "observed": "mutant AC1 -> rc=1 '1 failed in 4.47s'; mutant AC2 -> rc=1 '1 failed in 4.14s'; mutant AC3 -> rc=0 '1 passed in 8.66s'; git status --porcelain identical before and after (6 lines, same content) -- the probe never wrote a tracked file.",
-      "status": "FIRED-AS-EXPECTED"
+      "observed": "mutant AC1 -> rc=1 FAIL (as expected); mutant AC2 -> rc=1 FAIL (as expected); mutant AC3 -> rc=1 FAIL (NOT as expected -- see NFRA_OPLGTW-W5-S11: the mutant copy's og_v2 harness refuses the same stale role ARNs regardless of the call site's presence, so AC3 fails for a reason unrelated to the mutation). git status --porcelain identical before and after -- the probe never wrote a tracked file. AC1/AC2 discriminate correctly on their own; AC3's failure is masked by NFRA_OPLGTW-W5-S11, not evidence the call site's removal was a no-op -- but OGQ4-AC4's own text requires all three outcomes to match ('AC1 and AC2 FAIL while AC3 still passes'), so the composite verdict is DID-NOT-FIRE as specified.",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
     },
     "determinism": {
-      "method": "test_ogq4_ac01/02/03 each run twice against the real (unmutated) worktree -- once during initial build, once as a final confirmation pass after the probe and surprise row were added -- plus og_q4.py AC4 and AC5 each run twice (AC4 once before an environment fix for the mutant copy's contract-path resolution, once after; AC5 unchanged across both runs).",
-      "observed": "AC1: '1 passed in 1.99s' then '1 passed in 1.99s' (second run identical wording, timing within normal variance). AC2: '1 passed in 2.15s' then '1 passed in 2.15s'. AC3: '1 passed in 2.51s' then '1 passed in 2.51s'. AC5: 'VERDICT: FAIL-OGQ4-AC5 2 of 3 module(s) passed' both times, same per-module pass counts (0/23 failing pattern, 14, 27). No criterion flipped status between runs.",
+      "method": "test_ogq4_ac01/02/03 and og_q4.py AC4/AC5/AC6/AC7 each run at least twice this round (once during initial diagnosis of the AC1 regression, once for the final evidence capture into .scratch/evidence/).",
+      "observed": "AC1/AC2/AC3: 'FAILED ... UNAVAILABLE/schwab_integration_unavailable' identically both times (timing varies, verdict does not). AC4: 'VERDICT: FAIL-OGQ4-AC4 outcomes={AC1:FAIL, AC2:FAIL, AC3:FAIL}' both times. AC5: 'VERDICT: PASS-OGQ4-AC5' both times, same 25/14/27 pass counts. AC6: 'VERDICT: PASS-OGQ4-AC6' both times, same 3 hunks. AC7: 'VERDICT: PASS-OGQ4-AC7' both times once the ac15 comment-wrap fix landed (before that fix, AC7 FAILed once on test_ogq2_ac15's citation being split across a line break -- a probe/formatting issue, not a re-graded criterion; fixed and re-run before this instance was written).",
       "status": "STABLE"
     }
   },
@@ -118,40 +150,43 @@
       "reason": "OG-q-3's, merged and closed; not edited by this cell (BOUNDS). Both are byte-for-byte unchanged (git status clean on both paths throughout this session)."
     },
     {
-      "item": "assert_single_balance_metric, assert_grouping_preserves_identity, and every other semantics.py check not named by this cell's THE CELL paragraph (additivity and quantity grouping only).",
-      "reason": "The order names exactly 'additivity and grouping checks'; wiring additional semantics checks not named here would widen the cell beyond its own <paths>-scoped acceptance battery and risk further collateral against untouched OG-q-2 tests beyond what OGQ4-AC5 already measures (see NFRA_OPLGTW-W5-S10)."
-    },
-    {
       "item": "app/integrations/schwab/integration.py changes.",
-      "reason": "Granted for the wiring it needs, no more -- measured that none is needed: all three of its qry.check_against_grant call sites (query, describe_dataset-adjacent, export_query) already funnel through the one function this cell edits, and its existing except qry.QueryError handler already reports the contract error code/reason/where this cell's semantics.SemanticError is translated into inside check_against_grant."
+      "reason": "Granted for the wiring it needs, no more -- measured (in the first hand-off) that none is needed."
     },
     {
-      "item": "Fixing tests/test_schwab_query.py::test_ogq2_ac07 and ::test_ogq2_ac15.",
-      "reason": "Outside this order's <paths> grant and OG-q-2's own merged, closed cell; never widened or fixed here. Filed as surprise row NFRA_OPLGTW-W5-S10 and reported as OGQ4-AC5 FAIL by measurement."
+      "item": "tests/acceptance/conftest.py (og_v2's stale role ARNs).",
+      "reason": "Not in this order's <paths> grant; it is OG-v-2's harness, not this cell's. Filed as surprise row NFRA_OPLGTW-W5-S11 (BLOCKING) and AC1/AC2/AC3/AC4 reported FAIL by measurement, never patched around by editing an ungranted file."
+    },
+    {
+      "item": "Any line of tests/test_schwab_query.py outside test_ogq2_ac07 and test_ogq2_ac15.",
+      "reason": "R-OG-15's grant is exactly those two tests; OGQ4-AC6 measures this and PASSES (all 3 diff hunks lie inside the two granted functions)."
     }
   ],
-  "surprises": ["NFRA_OPLGTW-W5-S10: OGQ4-AC5 requires tests/test_schwab_query.py, tests/test_schwab_semantics.py and tests/test_schwab_export.py to all pass unchanged, but wiring semantics.assert_quantity_sum_grouped into query.py's check_against_grant (this cell's own OGQ4-AC2) breaks two pre-existing OG-q-2 tests that treat an ungrouped quantity sum as legal; test_schwab_query.py is outside this order's <paths> grant, so it cannot be fixed here."],
+  "surprises": [
+    "NFRA_OPLGTW-W5-S10: OGQ4-AC5 requires tests/test_schwab_query.py, tests/test_schwab_semantics.py and tests/test_schwab_export.py to all pass unchanged, but wiring semantics.assert_quantity_sum_grouped into query.py's check_against_grant (this cell's own OGQ4-AC2) breaks two pre-existing OG-q-2 tests that treat an ungrouped quantity sum as legal; test_schwab_query.py is outside this order's <paths> grant, so it cannot be fixed here. RESOLVED this round by R-OG-15's grant of exactly those two tests (OGQ4-AC5 now PASSES).",
+    "NFRA_OPLGTW-W5-S11: OGQ4-AC1/AC2/AC3 (and AC4's mutant, which copies the same tree) all run through tests/acceptance/conftest.py's og_v2 fixture, which hardcodes the PRE-rename role ARNs; the issuer's CLOUD merge brought in commit b2e4a10678 (R-OG-7) which renamed the contract's reader_role/catalog_role, so aws_roles.role_config now refuses the fixture's own ARNs at construction, every og_v2-based test returns UNAVAILABLE/schwab_integration_unavailable, and tests/acceptance/conftest.py is not in this order's <paths> grant. STILL BLOCKING: AC1/AC2/AC3/AC4 remain FAIL."
+  ],
   "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/semantics-wiring.result.md",
   "compiler_tools": [
     {
       "tool": "pytest 9.0.2 (Python 3.12, venv .venv-og)",
       "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 180 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_wiring.py::test_ogq4_ac<nn> -q -p no:cacheprovider --color=no  (nn = 01..03)",
-      "result": "3 of 3: rc=0, '1 passed', run twice each"
+      "result": "3 of 3: rc=1, 'FAILED ... UNAVAILABLE/schwab_integration_unavailable', run twice each, identical verdict"
     },
     {
-      "tool": "og_q4.py probe (mutant control + surrounding-module regression)",
-      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py AC4  ; and  ... AC5",
-      "result": "AC4: rc=0, VERDICT: PASS-OGQ4-AC4. AC5: rc=1, VERDICT: FAIL-OGQ4-AC5 2 of 3 module(s) passed (test_schwab_semantics.py 14 passed, test_schwab_export.py 27 passed, test_schwab_query.py 2 failed/23 passed)"
+      "tool": "og_q4.py probe (mutant control, surrounding-module regression, AC6 diff-boundary check, AC7 collected-count + citation check)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py AC4|AC5|AC6|AC7",
+      "result": "AC4: rc=1, VERDICT: FAIL-OGQ4-AC4. AC5: rc=0, VERDICT: PASS-OGQ4-AC5 (25+14+27 passed). AC6: rc=0, VERDICT: PASS-OGQ4-AC6 (3/3 hunks bounded). AC7: rc=0, VERDICT: PASS-OGQ4-AC7 (25/25 collected, 2/2 citations)"
     },
     {
       "tool": ".tools/commit-gate.sh",
-      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/integrations/schwab/query.py infra/aws/ec2/opal-gateway/tests/test_schwab_wiring.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py",
-      "result": "rc=0, 'OK: pre-commit gate clean for 3 of 3 file(s)'"
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/tests/test_schwab_query.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q4.py",
+      "result": "rc=0, 'OK: pre-commit gate clean for 2 of 2 file(s)'"
     },
     {
-      "tool": ".tools/surprise-row-gate.py",
-      "invocation": "git add org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md && .venv-og/Scripts/python .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
-      "result": "rc=0, '1 new row(s) of 94 total checked ... all new rows carry their step-7/step-10 fields'"
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/NFRA_OPLGTW.TO-OG-q-4.semantics-wiring.proof_of_spec.json OGQ4-AC1,OGQ4-AC2,OGQ4-AC3,OGQ4-AC4,OGQ4-AC5,OGQ4-AC6,OGQ4-AC7",
+      "result": "PENDING -- run after this file is written; see WORKER REPORT"
     }
   ]
 }

@@ -109,3 +109,81 @@ FAIL-OGQ4-AC5 2 of 3 module(s) passed` -- reported as measured, not repaired or 
 - `.tools/proof-of-spec-check.py` -- see the WORKER REPORT for its exact invocation and rc; per the order's
   own text, a FAIL row on a mechanical criterion means the checker's overall rc is non-zero and the order's
   `<status>` is NOT flipped to `complete`.
+
+## AMENDMENT (R-OG-15, second hand-off) -- OGQ4-AC6/AC7 built, AC1-AC4 newly BLOCKED
+
+Re-handed after the issuer merged `CLOUD` into this branch to deliver the R-OG-15 amendment. HEAD at the
+start of this hand-off is `2392d6f9fb`, a merge commit whose two parents are `881b1a5445` (this seat's own
+prior work above) and `d91629cfd8` (the `CLOUD` tip the issuer merged in).
+
+### Cut base for AC6/AC7
+
+`_CUT_BASE = d91629cfd8e7693c65ac3b06d945fa584be44adf` in `probes/og_q4.py`, i.e. `merge-base(HEAD, CLOUD)`
+at this hand-off's starting HEAD -- which is `d91629cfd8` itself, since it is a direct parent of the merge
+commit. It is PINNED to that literal hash rather than re-derived from `git merge-base HEAD CLOUD` at probe
+run time: `CLOUD` is a shared branch that can move on independently of this worktree, and the question
+AC6/AC7 ask ("what did this hand-off change against the file it started from") is about that ONE historical
+merge, not whatever `CLOUD` happens to point to whenever the probe next runs. Verified `git show --stat
+d91629cfd8` touches exactly one path (the task order's own `.md`), so `test_schwab_query.py` at that pin is
+the original, pre-correction OG-q-2 file -- confirmed by running the two named tests against it before any
+edit (`2 failed, 23 passed`, both failures on `quantity_sum_ungrouped` where the file's own code expected
+success).
+
+### R-OG-15 correction (OGQ4-AC6, AC7)
+
+`test_ogq2_ac07` (`:470-516`) -- its final "control" case summed `quantity_settled` (a quantity field) with
+no `group_by` and asserted success; flipped to `err(...)` expecting `INVALID_REQUEST`/`quantity_sum_ungrouped`,
+with a comment citing PRD C3 verbatim (`NFRA_OPLGTW_PRD.md@f0aa50dbc0:161-163`, "Quantity sums require
+grouping by CUSIP and long/short indicator").
+
+`test_ogq2_ac15` (`:739-767`) -- its "killed" case summed `quantity_settled` ungrouped to reach the engine
+and be cut off at `engine.fail`'s simulated deadline (`LIMIT_EXCEEDED`/`aggregate_scan_incomplete`); flipped
+to expect `INVALID_REQUEST`/`quantity_sum_ungrouped` instead, with the same PRD C3 citation, noting the
+`world.engine.fail` deadline it used to exercise is now never reached (the semantic check runs before
+`build_plan`/any object read).
+
+`probes/og_q4.py AC6` diffs `test_schwab_query.py` against the pinned cut base (`git diff -U0`), computes
+each of `test_ogq2_ac07`'s and `test_ogq2_ac15`'s own `[start,end]` line range independently (via a
+`^def name(` scan, never trusting the diff's own function-context trailer alone), and checks every changed
+hunk's old and new ranges fall entirely inside one of those two ranges: 3 of 3 hunks do. `AC7` runs
+`--collect-only` on the corrected file (25 tests) and, for the "before" count, copies the whole gateway tree
+to `.scratch/` and swaps in the cut-base's `test_schwab_query.py` bytes only (same technique as AC4's mutant),
+runs `--collect-only` there too (25 tests, with `NFRA_OPLGTW_CONTRACT_PATH` set for the scratch depth), and
+checks both corrected functions' source text contains the PRD C3 citation verbatim (initially FAILED on
+`test_ogq2_ac15` because the quoted phrase was wrapped across two comment lines by this worker's own
+formatting; rewritten onto one line and re-verified). Both PASS: `VERDICT: PASS-OGQ4-AC6`,
+`VERDICT: PASS-OGQ4-AC7`.
+
+### NEW surprise: AC1/AC2/AC3/AC4 now FAIL (row `NFRA_OPLGTW-W5-S11`, BLOCKING)
+
+Re-running the unchanged `test_ogq4_ac01/02/03` (no edit to `query.py`, `integration.py` or
+`test_schwab_wiring.py` this round) now FAILs all three: every one returns `UNAVAILABLE`/
+`schwab_integration_unavailable` instead of the expected refusal/success. Traced to
+`tests/acceptance/conftest.py:88-91` (`READER_ARN`/`CATALOG_ARN`, NOT in this order's `<paths>` grant):
+these hardcode the PRE-rename role names (`opal-mcp-emp-menachem-schwab-read` /
+`opal-mcp-schwab-catalog-read`), while `org/standards/NFRA_OPLGTW_CONTRACT.json`'s `reader_role`/
+`catalog_role` were renamed to `gateway-schwab-read-role`/`gateway-schwab-catalog-read-role` by commit
+`b2e4a10678` (R-OG-7, `NFRA_OPLGTW.TO-OG-i-3`) -- landed on this branch via the issuer's `CLOUD` merge
+(`881b1a5445..d91629cfd8` contains exactly that one commit touching the contract; the same range for
+`tests/acceptance/conftest.py` is empty). `app/integrations/schwab/aws_roles.py:116-135`'s
+`role_config()` (unchanged code, verified by diff) now refuses the fixture's own ARN at construction
+(`RoleConfigError`, reproduced directly by calling `aws_roles.role_configs` with the fixture's exact env);
+`app/integrations/schwab/integration.py:917-920` swallows this as a bare `Exception` and returns the
+generic `UNAVAILABLE`/`schwab_integration_unavailable` every failing test measures. `AC4`'s mutant control
+was ALSO rewritten this round (its old `git show HEAD:query.py` pin now returns the WIRED bytes, since
+881b1a5445 committed the wiring -- see `_pre_wiring_query_bytes` in `probes/og_q4.py`, which walks
+`query.py`'s own history to a content-verified pre-wiring commit, `c3728d6b...`); with that fix the mutant
+correctly makes AC1/AC2 FAIL, but AC3 also FAILs against the mutant copy (which carries the same stale
+`conftest.py`), so `VERDICT: FAIL-OGQ4-AC4`.
+
+Filed as surprise row `NFRA_OPLGTW-W5-S11` (class `BLOCKING`, `hazard_standing: INERT`) in
+`INVESTIGATION_v1.md`. `tests/acceptance/conftest.py` is not in this order's `<paths>` grant (OG-v-2's
+harness, not this cell's), so it is not edited here -- reported FAIL by measurement on all four criteria,
+never patched around.
+
+### This round's net proof state
+
+AC1 FAIL, AC2 FAIL, AC3 FAIL, AC4 FAIL (all four blocked by `NFRA_OPLGTW-W5-S11`, a harness fixture defect
+outside this order's grant, introduced by the issuer's `CLOUD` merge and not by this cell's own wiring);
+AC5 PASS (25+14+27, R-OG-15's correction now makes the module clean); AC6 PASS; AC7 PASS. `<status>` stays
+`pending`; `proof_of_spec.json` rebuilt for all 7 ids with these results.
