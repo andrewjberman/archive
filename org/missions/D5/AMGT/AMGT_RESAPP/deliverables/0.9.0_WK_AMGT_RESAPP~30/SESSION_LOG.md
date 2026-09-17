@@ -1,56 +1,56 @@
-# SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~30 -- AMGT_RESAPP.TO-AMGT-rk-18
+# SESSION LOG -- 0.9.0_WK_AMGT_RESAPP~30 on AMGT_RESAPP.TO-AMGT-rk-28 (checker gains a data-vacuity shape)
 
-## What this order asked
+THE BAR FIRST: `git rev-parse --abbrev-ref HEAD` -> `wk-amgt-13-30-ck`; `org/` and `.tools/` both present ->
+TREE-OK.
 
-ONE run of the filings analyzer and ONE run of the drafting batch over the 33 keyed-coverage names in
-`crosswalk/v1/2026-09-15.json`, at approximately USD 36, per ANDREW-DIRECT 2026-09-16 ~19:2xZ ("Yes on all
-four, execute them.") -- never the 89-record population, never a cadence, never touching `BA_US_Equity`'s
-existing filings document (that regeneration belongs to `AMGT-rk-15`).
+READ THE ORDER. Chain CK, a single order (`AMGT-rk-28`), sibling of `AMGT-rk-9` AC4. `.tools/criteria_quality_checker.py`
+(358 ln, built by `AMGT-rk-9`) refuses five shapes; this order adds a SIXTH, `shape6_data_vacuity`, for round-12's
+`rk-15` AC3 measured instance: a criterion counting occurrences of a field-name TOKEN can PASS while every counted
+value is invented, missing or unverified -- the count proves PRESENCE, never VALUE.
 
-## What was measured before running anything
+BUILT: added `COUNT_METHOD_RE` (`.count(`, `grep -c`, `wc -l`, "occurrences of", "counts of"),
+`FIELD_COUNT_EXPECT_RE` (a token followed by a comparator and a number, e.g. `points-emitted >= 6`), and
+`VALUE_CHECK_RE` (equals/matches/matched against/compared to-against/source excerpt/specific value/expected
+value/per-item) as new module-level regexes, following the existing pattern beside `FILE_TOKEN_RE`.
+`shape6_data_vacuity(c)` flags when the invocation carries a counting method AND expect carries a bare
+token-comparator-number shape, UNLESS the combined invocation+expect+verbatim text also carries a value-check
+phrase. Wired into `evaluate()`'s per-criterion tuple alongside shape1/2/4/5 (shape3 stays a separate whole-set
+pass, unchanged). Added ONE sealed mutant (`MUT-6`) mirroring round-12's `rk-15` AC3 shape (`.count('points_emitted')`
+against raw text; expect `points-emitted >= 6`) and one clean control (`CTRL-6`, reads the field via `json.load`
+and asserts a specific value "matched against the source excerpt") to `_self_test()`.
 
-- `crosswalk/v1/2026-09-15.json`: 89 records, 33 carrying a `security_key`.
-- Of those 33, only 12 carry a usable EDGAR filing identity (`filing_identity.source == "edgar"` with a
-  `cik` and `form_expected`) via `universe/v1/2026-09-16.json`. The other 21 are non-US listings with no
-  SEC CIK and were never going to be fetchable by this producer -- `lib/research/filings/batch.py`'s own
-  `plan()` partitions them as UNRESOLVED-SOURCE with the reason `"filing_identity.source is 'none': no cik
-  and expected form to fetch by"`.
-- Of the 12 fetchable names, `BA_US_Equity` already has a document (from the 5-name pilot) and is this
-  order's one explicit exclusion.
+DEVIATION FROM shape1..shape5's INTERNAL CONVENTION, NOTED: shape1_zero_collected through shape5_no_timeout all
+index their input dict (`c["invocation"]`, assuming `_norm()` already ran). AC1's own literal invocation calls
+`cqc.shape6_data_vacuity(mutant)` DIRECTLY on a bare `{id, invocation, expect}` dict, never through `_norm()`/`_mk()`
+-- indexing would raise `KeyError` on the missing `method`/`verbatim`/etc keys. `shape6_data_vacuity` was written
+with `c.get(...)` throughout specifically so it survives being called both ways (through `evaluate()` post-`_norm()`,
+and directly on a raw dict as AC1 does); this is the one place this cell's function deliberately does NOT
+mirror shape1's exact indexing style, because shape1 is never called that way and shape6 is (by this order's own
+proof clause). The RETURN SHAPE (a formatted string or `None`) and OUTER SIGNATURE (`def shapeN_x(c):`) do match
+shape1 exactly, per the order's instruction.
 
-## The run
+SELF-TEST SUMMARY LOGIC GENERALIZED: the pre-existing `_self_test()` print/tally loop special-cased the single
+id `"CTRL-1"` to mean "this is the clean control." With a second control (`CTRL-6`) this would have silently
+mis-tallied CTRL-6 as a mutant. Changed the check to `mid.startswith("CTRL")` and made the mutant/control counts
+and the printed "N of N" denominators computed from the `results` list rather than hard-coded 5/1, so the summary
+is correct for any number of shape pairs without another hand-edit at the next shape. This IS the wiring/reporting
+work the order asks for ("Wire it into `evaluate()`'s per-criterion loop... in the same position/order style as
+the other five shapes" + "Add ONE sealed mutant + one clean control to `_self_test()`") -- no existing shape's
+OWN detection function body was touched, per the order's explicit prohibition.
 
-Built a local universe document (`.scratch/universe_32_no_ba.json`, never committed -- scratch only) as the
-33 keyed names minus `BA_US_Equity`, matching `universe/v1/2026-09-16.json`'s own per-name records. Ran:
+ITERATION NOTE: the first draft of `MUT-6`/`CTRL-6` omitted a `timeout <N>` bound in the invocation text (unlike
+the existing `CTRL-1`, which carries `timeout 90`). Running `--self-test` showed `CTRL-6 -> REFUSED (WRONG)`,
+and a direct `evaluate()` call on the raw dict showed the flag was `NO-TIMEOUT`, not `DATA-VACUITY` -- i.e. the
+pre-existing shape5 fired on my new control, not a shape6 defect. Added `timeout 30` to both `MUT-6` and `CTRL-6`
+invocations so the pair isolates shape6 specifically; MUT-6 remains REFUSED afterward (now for the intended
+DATA-VACUITY reason, confirmed by removing the timeout again and reading the flags dict directly: both
+NO-TIMEOUT and DATA-VACUITY fire, proving shape6 itself -- not just shape5 -- flags the mutant).
 
-```
-export ANTHROPIC_API_KEY="$(comp-secrets get anthropic-api-key --reveal | grep '^value:' | sed 's/^value:[[:space:]]*//')"
-python -m lib.research.filings.batch --universe .scratch/universe_32_no_ba.json --write-pool
-```
+PROOF: AC1 (direct `shape6_data_vacuity` calls on the order's own literal mutant/clean dicts) and AC2
+(`--self-test` tail) both run byte-for-byte as the order's literal invocations and both PASS; see
+`AMGT_RESAPP.TO-AMGT-rk-28.checker-data-vacuity-shape.proof_of_spec.json` in this folder for verbatim output.
 
-`lib/research/filings/batch.py`'s `run_one()` performs BOTH deliverables per name in one pass: it fetches
-the filing from SEC EDGAR, calls Anthropic to analyze it (writing `filings/v1/<key>/<accession>.{source,
-analysis}.json`), and immediately builds and writes the drafting document
-(`lib/research/filings/drafting_build.py`, `drafting/v1/<key>.json`) from that analysis -- so "one run of
-the analyzer" and "one run of the drafting batch" are the same invocation here, as the launcher
-(`run_batch.cmd`) already does weekly (disabled).
+py_compile clean throughout; non-ASCII scan: 0 bytes (`len(b) - len(b.decode('utf-8')) == 0`).
 
-Result (`.scratch/batch_run.log`, never committed): **11 of 11 analyzed, 0 UNRESOLVED-SOURCE, USD 6.2791**
--- ASML_NA_Equity, BABA_US_Equity, COST_US_Equity, HAL_US_Equity, HD_US_Equity, INTU_US_Equity,
-KMB_US_Equity, NU_US_Equity, PBR_US_Equity, SAP_GY_Equity, VLO_US_Equity. Well under the ~USD 36 authorized.
-`BA_US_Equity`'s filings and drafting objects carry their pre-existing 2026-09-15 timestamps, unchanged.
-
-## Grading
-
-AC1-AC4 PASS as measured (see the proof instance). AC5 (the scheduled-task census) reads **10**, not the
-issuer's measured **11**, though none of the three named failure shapes (a new task, a count of 12, or a
-previously-DISABLED task found ENABLED) occurred -- confirmed nothing in this order's own session called
-`schtasks` at all. Filed as row `AMGT_RESAPP-Z-W30-S1` and graded FAIL per the order's own REFUSAL CLAUSE
-(never repaired, widened, or silently passed). The order is left OPEN on AC5; `<status>` is not flipped to
-`complete`.
-
-## Commits
-
-One commit: the surprise-channel row (`INVESTIGATION_v1.md`) and this deliverables directory (proof
-instance + this log). No `lib/research/filings/` or `lib/research/drafting/` file was edited -- the run used
-the producers exactly as they stand.
+NO SURPRISE ROW FILED: nothing off-task was found. The order's own narrow scope (one function, wired in, one
+mutant/control pair) was fully satisfiable as written; no criterion was refused.
