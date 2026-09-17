@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_REBRND.TO-RB-s-12",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_REBRND/prd/DSGN_REBRND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "8ad762f7bfb1a0609d2f133934104af726dafdff"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_REBRND/decompositions/DSGN_REBRND_DECOMP.md",
+    "vintage_commit": "e616ad99ec21073c02162fe53468b5abe0c0fba3",
+    "to_ref": "org/missions/D13/DSGN/DSGN_REBRND/task-orders/DSGN_REBRND.TO-RB-s-12.surface-inventory.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_REBRND~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "design/brand/portal-surface-inventory.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A repo-committed data artifact, not a deploy target: RB-s-13 (render+keyboard coverage), RB-s-14 (boundary parity) and RB-s-15 (Andrew's side-by-side pack) consume it per the decomp's write-surface rectangle (row 11, section 2); RB-s-6's own AC5 reads it directly ('every touched interactive surface in RB-s-12's inventory'). route_count and the route list are the byte-identical regex RB12-AC2 itself runs against portal/src/App.tsx (verified live: VERDICT: AGREES); every other field is MEASURED via comp-find census or read from the 8 named cells' own task-order text, cited per row in the row's own evidence field.",
+      "artifact_covered_by": ["RB12-AC1", "RB12-AC2", "RB12-AC3", "RB12-AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "RB12-AC1",
+      "criterion_verbatim": "the inventory exists, is non-empty AND prints its route denominator -- a row count without a denominator is a sample, not an inventory. A missing file reads ABSENT rather than throwing a traceback at you.",
+      "method": "command",
+      "invocation": "cd /cygdrive/c/tmp/wk-dsgn-3 && timeout 120 python -c \"import json,io,os; p='design/brand/portal-surface-inventory.json'; d=json.load(io.open(p,encoding='utf-8')) if os.path.exists(p) else None; rows=((d.get('rows') if isinstance(d,dict) else d) or []) if d else []; dec=d.get('route_count') if isinstance(d,dict) else None; print('INVENTORY-ROWS:',len(rows),'ROUTE-DENOMINATOR:',dec); print('VERDICT:','HAS-DENOMINATOR' if (dec and len(rows)>0) else 'ABSENT-OR-UNDENOMINATED')\"",
+      "output_evidence": "INVENTORY-ROWS: 99 ROUTE-DENOMINATOR: 24\nVERDICT: HAS-DENOMINATOR",
+      "denominator": "rows=99, route_count=24 (both printed by the invocation; the verdict itself is a boolean gate, not a count)",
+      "status": "PASS",
+      "expect": "VERDICT: HAS-DENOMINATOR",
+      "judgment": false
+    },
+    {
+      "criterion_id": "RB12-AC2",
+      "criterion_verbatim": "the inventory's printed denominator EQUALS the router's own route count. A denominator that does not match its source is a number, not a denominator. At issuance the router reads 26 and the inventory does not exist.",
+      "method": "command",
+      "invocation": "cd /cygdrive/c/tmp/wk-dsgn-3 && timeout 120 python -c \"import re,io,json,os; s=io.open('portal/src/App.tsx',encoding='utf-8').read(); r=sorted(set(x for x in re.findall(r'path=.([A-Za-z0-9_/:*-]+).',s) if x not in ('*','/*'))); p='design/brand/portal-surface-inventory.json'; d=json.load(io.open(p,encoding='utf-8')) if os.path.exists(p) else {}; dec=d.get('route_count'); print('APP-ROUTES:',len(r),'INVENTORY-DENOMINATOR:',dec); print('VERDICT:','AGREES' if dec==len(r) else 'DISAGREES')\"",
+      "output_evidence": "APP-ROUTES: 24 INVENTORY-DENOMINATOR: 24\nVERDICT: AGREES",
+      "denominator": "24 of 24 -- APP-ROUTES (live regex over portal/src/App.tsx at this vintage) vs INVENTORY-DENOMINATOR (this file's route_count), identical mechanism on both sides",
+      "status": "PASS",
+      "expect": "VERDICT: AGREES",
+      "judgment": false
+    },
+    {
+      "criterion_id": "RB12-AC3",
+      "criterion_verbatim": "EVERY row carries a fixture source (NONE is a valid source) and the row set is non-empty -- an empty inventory cannot pass vacuously.",
+      "method": "command",
+      "invocation": "cd /cygdrive/c/tmp/wk-dsgn-3 && timeout 120 python -c \"import json,io,os; p='design/brand/portal-surface-inventory.json'; d=json.load(io.open(p,encoding='utf-8')) if os.path.exists(p) else {}; rows=d.get('rows',[]); miss=[r for r in rows if 'fixture' not in r]; print('ROWS:',len(rows),'WITHOUT-FIXTURE-FIELD:',len(miss)); print('VERDICT:','ALL-SOURCED' if (rows and not miss) else 'INCOMPLETE')\"",
+      "output_evidence": "ROWS: 99 WITHOUT-FIXTURE-FIELD: 0\nVERDICT: ALL-SOURCED",
+      "denominator": "99 of 99 rows carry a non-empty 'fixture' key (0 missing)",
+      "status": "PASS",
+      "expect": "VERDICT: ALL-SOURCED",
+      "judgment": false
+    },
+    {
+      "criterion_id": "RB12-AC4",
+      "criterion_verbatim": "graded at L9: the inventory names every route and every touched state with a denominator and a fixture source; the three IV.9 routes are marked as the fixed comparison set; and component reuse appears as evidence beside a row, never as a substitute for a render. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; the TO names no mechanical invocation. The artifact for the CVO's L9 read is design/brand/portal-surface-inventory.json in full (99 rows, route_count=24) plus this instance's own declared_exclusions and surprises.",
+      "output_evidence": "design/brand/portal-surface-inventory.json carries: (a) every one of the 24 routes with a printed, verified route_count; (b) every state a cell touches, per route, with render_obligation naming which of RB-s-2/3/4/5/6/9/10/11 touches it and an evidence citation; (c) fixed_comparison_set=['/market','/positioning','/portfolio-management'] and fixed_comparison_route:true stamped on those three routes' default rows; (d) a `related_fixtures` array on rows where component/fixture reuse is evidence beside the row (e.g. /advisor-intelligence, /philosophy, /macro) -- none of those rows treats the related fixture as a substitute for a render, only as a cited fixture SOURCE.",
+      "denominator": "N/A -- judgment criterion, graded by 3.0.0_SA_CVO at L9, not a count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true per the task order; graded only by 3.0.0_SA_CVO at L9 (spine v3 L9). This row records the deliverable for that grade and carries no verdict of its own.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two independent mutants of the committed inventory (never committed themselves), each targeting one acceptance check's own discriminator: (A) route_count changed 24->23 with the router and the rows left untouched, re-run against RB12-AC2's own invocation; (B) the 'fixture' key deleted from rows[0] only, re-run against RB12-AC3's own invocation.",
+      "expected": "(A) APP-ROUTES:24 INVENTORY-DENOMINATOR:23 / VERDICT: DISAGREES -- fails RB12-AC2's <expect> 'VERDICT: AGREES'. (B) ROWS:99 WITHOUT-FIXTURE-FIELD:1 / VERDICT: INCOMPLETE -- fails RB12-AC3's <expect> 'VERDICT: ALL-SOURCED'.",
+      "observed": "(A) printed 'APP-ROUTES: 24 INVENTORY-DENOMINATOR: 23' then 'VERDICT: DISAGREES', exactly as expected. (B) printed 'ROWS: 99 WITHOUT-FIXTURE-FIELD: 1' then 'VERDICT: INCOMPLETE', exactly as expected. Both mutant files deleted after the run; the real, unmutated file was re-verified clean immediately after (see determinism).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "RB12-AC1, RB12-AC2 and RB12-AC3's own invocations run twice against the committed file -- once before the mutant tests, once after -- output compared byte-for-byte.",
+      "observed": "Both runs printed identically: 'INVENTORY-ROWS: 99 ROUTE-DENOMINATOR: 24' / 'VERDICT: HAS-DENOMINATOR'; 'APP-ROUTES: 24 INVENTORY-DENOMINATOR: 24' / 'VERDICT: AGREES'; 'ROWS: 99 WITHOUT-FIXTURE-FIELD: 0' / 'VERDICT: ALL-SOURCED'.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Per-firm no-permission rows for every route firmAccess.ts's FIRM_ALLOWED_PATHS additionally denies to 49financial/inflection users",
+      "reason": "Every such denial reduces to the identical silent-redirect mechanism already characterized once (surprise DSGN_REBRND-W3-S1); a row per firm x route would multiply near-duplicate observations rather than add a distinct one. Named as a cross-cutting note in the inventory's no_permission_state_gap field instead."
+    },
+    {
+      "item": "Independent confirmation of a charting library on /attribution, /correlations and /security-scanner",
+      "reason": "Only an import-string census (recharts/apexcharts/@nivo/visx) was run; a shared chart wrapper that does not itself import a library string would not surface by this method. No RB-s-11 obligation is asserted on those three routes' rows for that reason -- stated in each row's evidence, not assumed either way."
+    },
+    {
+      "item": "Confirming sscn_divdef_001_smoke.json is a ui-smoke.mjs-shaped {substring: body} fixture",
+      "reason": "Cited as /security-scanner's fixture by filename-prefix plausibility only; opening it against the ui-smoke.mjs --fixtures contract is outside the four mechanical criteria's scope (they check the fixture key's presence, not its internal shape). Flagged in the row's own evidence."
+    },
+    {
+      "item": "design/brand/portal-routes.json",
+      "reason": "Also named on the decomp's shared write-surface row (section 2, row 11) but assigned to RB-s-14 by the decomp's own per-cell table (section 3, line 109: 'RB-s-14 | the boundary exercise: measured parity, design/brand/portal-routes.json'). This cell's own face names only design/brand/portal-surface-inventory.json."
+    }
+  ],
+  "surprises": [
+    "DSGN_REBRND-W3-S1: No route or panel in portal/src renders an observable NO-PERMISSION state today -- every access denial found (route-level requireAdmin/requireInternal/firm-allowlist, a panel-level element hide, and one transient toast) is non-rendering, so this inventory cannot cite a fixture or a render for that state anywhere; recorded on the inventory's no_permission_state_gap field and on the /ticket-center and /data-refresh no-permission rows.",
+    "DSGN_REBRND-W3-S2: This cell's own face and RB12-AC2's own prose assert 'at issuance the router reads 26'; RB12-AC2's own invocation, run at this vintage, prints APP-ROUTES: 24 -- the 26 counts raw Route elements including the two wildcard entries the same invocation's own set-comprehension excludes by name. This inventory's route_count is the mechanism's own live output, 24, which is what RB12-AC2 actually verifies."
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_REBRND/deliverables/0.9.0_WK_DSGN_REBRND~3/surface-inventory.result.md",
+  "compiler_tools": [
+    {
+      "tool": "python (bare `python` on this shell)",
+      "invocation": "python .scratch/build_inventory.py",
+      "result": "WROTE design/brand/portal-surface-inventory.json; route_count: 24; rows: 99; routes covered: 24 of 24"
+    },
+    {
+      "tool": "comp-find (the estate's graded content-search rail, CLAUDE.md Rule 21)",
+      "invocation": "13 separate census queries over portal/src[/pages]: isLoading; LoadingSpinner; error; requireAdmin|requireInternal; activeTab|setActiveTab; apexcharts|@nivo|visx|phosphor-react; from 'recharts'|from \"recharts\"; overweight|underweight|Fear.{0,10}Greed|performance.band; permission -i; hasAccess(",
+      "result": "Each printed a graded DENOMINATOR (files scanned + hit bands, e.g. 'DENOMINATOR: 178 hit(s) across 468 file(s) scanned'); results cited per-row in design/brand/portal-surface-inventory.json's evidence fields and in surprise row DSGN_REBRND-W3-S1"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D13/DSGN/DSGN_REBRND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields. (2 new row(s) of 2 total checked, 0 pre-existing)"
+    }
+  ]
+}
