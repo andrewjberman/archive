@@ -1,0 +1,20 @@
+diff --git a/data/black_diamond/scripts/gold/gold_freshness_config.yaml b/data/black_diamond/scripts/gold/gold_freshness_config.yaml
+index 4f72d6e533..2abaffaec7 100644
+--- a/data/black_diamond/scripts/gold/gold_freshness_config.yaml
++++ b/data/black_diamond/scripts/gold/gold_freshness_config.yaml
+@@ -435,3 +435,15 @@
+   severity: WARN
+   scripts: [D_00]
+   notes: "bd 49F firm header_metrics (#total headline AUA), portal-served. content-mode (data_as_of) + trading-day-frontier. The AE per-partner served-vintage PAGE alarm target: frontier_page_trading_days=2 (bd T-1 cadence +1, DS~B-grounded 2026-07-02, provisional). served_vintage_lag() emits tdb; the AE alarm pages GreaterThanOrEqualToThreshold(2)."
++
++# PLANT (LGIC_LGCTFM LT-x-2): a second, tighter watch on the same A_00 gate artifact for the E_12
++# reconciliation diagnostic, which fails hard on any staleness the main A_01..D_04 chain would
++# merely warn on. Same artifact, same s3_key_prefix as bd_gold_accounts_dimension above.
++- artifact_id: bd_gold_accounts_dimension_e12_strict
++  s3_key_prefix: s3://opal-data-bd/gold/dimensions/accounts_dimension_latest.parquet
++  cadence: daily
++  warn_age_hours: 24
++  fail_age_hours: 30
++  severity: ERROR
++  scripts: [E_12]
++  notes: E_12 reconciliation diagnostic's own tighter watch on the A_00 gate artifact.
