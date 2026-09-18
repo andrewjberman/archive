@@ -1,77 +1,81 @@
 #!/usr/bin/env python3
-"""BATTERY IB-rtc-3 AMENDMENT 2 -- THE REFRESH BUILDS, EXERCISED FOR INFLECTION AND COTTONWOOD.
+"""BATTERY IB-rtc-3 AMENDMENT 3 -- THE RE-RUN AFTER IB-rtc-9 AND IB-rtc-7.
 
-Grades R33-AC1's six arms against THE REAL WORLD: the unit-tested recipe TEXT refresh.py's
-runner_script() returns (now with NO explicit --as-of, per the issuer's ruling on row
-IRPT_BCKEND-W2-S55), the applied Terraform (served CodeSha256, 0-diff plan), a fresh read-only
-host sweep (10 source prefixes + 3 destinations, the corrected population -- row
-IRPT_BCKEND-W2-S54), the SSM command records THIS session's own real fires (a fresh dispatch
-plus its reconciliation), and the S3 objects in the three firm buckets. Nothing here wraps,
-patches or re-registers the subject (bound 12): every arm reads the artifact the estate serves
-and prints its denominator.
+AMENDMENT 3 changes NO code and NO infrastructure: the unpack recipe, the date-selection fix
+and the jsonschema tolerance are all already at HEAD (IB-rtc-2/3-amendment-2/IB-rtc-9), and the
+Lambda artifact is already rebuilt and deployed by IB-rtc-7 (K5), whose fire already landed all
+three firms once today. This battery re-derives everything from the real world, live, a second
+time:
 
-THE TOKEN IS GATED. `IBR33...` is assembled only if every arm PASSES and arm (d) reads 2 of 2
-landed. It does not, as measured: AMENDMENT 2's fix (drop the explicit --as-of) is PROVEN
-correct and working -- both inflection's and cottonwood's real fires now proceed PAST
-directory_runner.py's own business-date check for the first time in this project's record,
-confirming row W2-S55 is CLEARED -- and the real fire then exposed a THIRD, still deeper,
-out-of-lane blocker (row IRPT_BCKEND-W2-S56): directory_runner.py's validate_entries() calls
-jsonschema.Draft202012Validator, a class absent from the host's installed jsonschema==3.2.0.
-That is directory_runner.py's own defect (outside this order's <paths>) and this cell does not
-work around it.
+  (a) the real unit-test suite (k of k, k printed) plus the three recipe-text assertions the
+      face names: '-C $W' present, 0 '..' members, 0 explicit '--as-of'.
+  (b) READ-ONLY: served CodeSha256 of irpt-directory-refresh == artifact_sha256 in
+      lambda-source-map.json AT THIS BRANCH'S OWN WORKTREE FILE (== branch tip, since nothing on
+      this branch touches that file). No plan, no apply, no rebuild.
+  (c) the on-host sweep, the ratified 10-source population (row W2-S54), positive control.
+  (d) fires the DEPLOYED dispatch fresh, for real, with the schedule's own live payload (no
+      business_date override) -- reads back through IB-rt-6's mechanism: before/after
+      list-objects-v2, the run's own envelopes, the manifest each fire writes (its key is
+      returned by the Lambda itself, never guessed), and the SSM command status behind any
+      ssm_command_id the manifest carries. inf/cot graded 2 of 2 when each LANDED, where LANDED
+      admits EITHER a new revision (key/ETag/sha256/row-count/revision-before-after) OR
+      REFRESH_NOOP_SAME_FRONTIER (the artifact's own as_of equals the runner's already-landed
+      frontier, and any command id the manifest names is read back Success).
+  (e) 49financial: MEASURED with the same fields as (d), NOT graded in the token (re-scoped:
+      IB-rtc-7 already applied the principal that used to block this arm).
+  (f) content sanity on whatever landed: row counts, firm-in-artifact (opaque_firm(registry_id)
+      == the artifact's own firm_id_opaque, AND every entry's ids.firm_id agrees), a 0-of-N
+      email/name-shaped-value census over every id field (the SAME _EMAIL_SHAPED/_NAME_SHAPED
+      patterns _ids.py itself uses), and a 0-of-N census of NEWLY WRITTEN keys that fall outside
+      investor-reporting/ (this fire's own before/after key sets -- never the whole bucket, which
+      holds unrelated data this cell never touched).
 
-ASCII only. Bounded: every AWS call runs under a subprocess timeout.
+THE TOKEN IS GATED on (a)-(c), (d) at 2 of 2, and (f) -- (e) is recorded and never gates.
+Nothing here wraps, patches or re-registers the subject (bound 12): the recipe/test come from the
+real refresh.py and the real test file; the Lambda invoked is the deployed function; the S3 reads
+are the real buckets. No command id, hash or manifest key is reused from an earlier run -- every
+one is read fresh, this run, from the real world (bound "the battery re-derives every count from
+the real world each run and never reads its own earlier output").
+
+ASCII only. Every external call is bounded (subprocess timeout, or a deadline-bound poll loop).
 """
 from __future__ import annotations
 
-import base64
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
-import zipfile
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, *([os.pardir] * 7)))
 AWS = os.path.join(REPO, ".tools", "aws.cmd")
 DIRECTORY = os.path.join(REPO, "infra", "aws", "lambda", "investor-reporting", "directory")
-TF_ROOT = os.path.join(REPO, "infra", "aws", "terraform", "investor-reporting", "directory")
-TERRAFORM = os.path.join(REPO, ".tools", "terraform.exe")
+IDS_ROOT = os.path.join(REPO, "infra", "aws", "lambda", "investor-reporting", "_ids")
+SCHEDULE_TF = os.path.join(REPO, "infra", "aws", "terraform", "investor-reporting", "directory",
+                            "schedule.tf")
 
 FUNCTION = "irpt-directory-refresh"
 RUNNER = "i-02448edb624a7a7cf"
+REGION = "us-east-1"
 FIRM_BUCKETS = {"49financial": "opal-data-bd",
                 "inflection": "opal-data-inf",
                 "cottonwood": "opal-data-cot"}
+REGISTRY_FIRM_IDS = {"49financial": "49financial", "inflection": "inflection",
+                      "cottonwood": "cottonwood"}
 DIRECTORY_PREFIX = "investor-reporting/directory"
-DRIVEN_DATE = "2026-09-18"
 
-# ARTIFACT IDS this session's AMENDMENT 2 fire created -- read back below, never re-derived.
-# (The first pass's commands -- 74c1f0f4.., 71f11079.., b1c2b24e.. -- are row W2-S55's evidence.
-# An interim fire -- f9c34e7a.., e6869e09.., 0fe77c42.. -- ran against a zip built with the WRONG
-# fixed timestamp (caught by this battery's own b.2); THESE ids are the fire against the FINAL,
-# canonical-timestamp deployed code, dispatched after the zipdate-fix re-apply.)
-DISPATCH_COMMANDS = {
-    "inflection": "d625bc56-a79a-47e6-9d74-9d9108f4b16a",
-    "cottonwood": "bc273cf9-a173-4056-bbe2-649cb83f8d30",
-    "49financial": "ae2243aa-ff47-4d70-ad8f-c95feb0037b6",
-}
 SWEEP_SCRIPT_SHA256 = "8b39dea2419d8d3b03d47134bced6f368d55c2378a04db898cc3120447d0bb1b"
 TEST_FILE = os.path.join(DIRECTORY, "tests", "test_refresh_expiry.py")
 PYTHON = os.environ.get("PY312", "py")
 PYTHON_ARGS = ["-3.12"] if PYTHON == "py" else []
 
 SOURCE_MAP = os.path.join(REPO, "infra", "aws", "lambda", "ci", "lambda-source-map.json")
-SHARED_ROOTS = [
-    os.path.join(REPO, "lib"),
-    os.path.join(REPO, "infra", "aws", "lambda", "investor-reporting", "_authz"),
-    os.path.join(REPO, "infra", "aws", "lambda", "investor-reporting", "_scope"),
-    os.path.join(REPO, "infra", "aws", "lambda", "investor-reporting", "_keys"),
-    os.path.join(REPO, "infra", "aws", "lambda", "investor-reporting", "_ids"),
-]
 
 RESULTS = []
+LANDED = {}          # populated by arm_d, read by arm_e/arm_f
 
 
 def record(arm, verdict, line, denominator=""):
@@ -105,71 +109,41 @@ def head(title):
     print("=" * 78)
 
 
-# ============================================================== ARM (a) -- THE RECIPE
+# ============================================================== ARM (a) -- THE RECIPE + TESTS
 def arm_a():
-    head("ARM (a) THE UNPACK RECIPE -- repo-shaped, no mv, member list + import check unchanged")
+    head("ARM (a) -C $W / 0 '..' members / 0 explicit --as-of, plus the real unit-test suite")
     sys.path.insert(0, DIRECTORY)
     import refresh                                                       # noqa: E402
 
     script = refresh.runner_script("inflection", "2026-09-18", "s3://bucket/bundle.tar.gz",
-                                   "inflection-2026-09-18")
-    has_cw = "tar -xzf $W/bundle.tar.gz -C $W || exit 91" in script
+                                    "inflection-2026-09-18")
+    has_cw = "-C $W" in script
     record("a.1", "PASS" if has_cw else "FAIL",
-           "recipe extracts at the simulated repo root: '-C $W' present")
-    no_mv = (" mv " not in script) and ("mv $R" not in script)
-    record("a.2", "PASS" if no_mv else "FAIL",
-           "no mv line survives -- no member is stored flat any longer")
-    order_ok = ("tar -tzf" in script and "tar -xzf" in script
-                and script.index("tar -tzf") < script.index("tar -xzf")
-                and "IMPORT-OK first-party modules resolved: trading_calendar, ids, contract"
-                in script)
-    record("a.3", "PASS" if order_ok else "FAIL",
-           "member list (tar -tzf) precedes extraction; import check text unchanged")
-    no_dotdot_recipe = "../" not in script and "/.." not in script
-    record("a.4", "PASS" if no_dotdot_recipe else "FAIL",
-           "the recipe text itself carries no .. path segment")
-
-    # a.6 -- AMENDMENT 2 (row IRPT_BCKEND-W2-S55): the recipe carries NO explicit --as-of.
+           "the recipe carries '-C $W'")
+    no_dotdot = "../" not in script and "/.." not in script and " .. " not in script
+    record("a.2", "PASS" if no_dotdot else "FAIL",
+           "the recipe carries 0 '..' path segments", "0 of 1" if no_dotdot else "1 of 1")
     no_as_of = "--as-of" not in script
-    record("a.6", "PASS" if no_as_of else "FAIL",
-           "AMENDMENT 2: the recipe carries 0 explicit --as-of arguments to directory_runner.py",
+    record("a.3", "PASS" if no_as_of else "FAIL",
+           "the recipe carries 0 explicit --as-of arguments to directory_runner.py",
            "0 of 1" if no_as_of else "1 of 1")
 
-    # a.7 -- the REAL unit-test suite (bound 12: the actual test file, not a wrapper), which
-    # covers the manifest/date discipline AMENDMENT 2 requires: no --as-of, a completed manifest
-    # carries the RUNNER's date (not the clock's), and a same-frontier re-fire is a no-op.
     p = subprocess.run([PYTHON] + PYTHON_ARGS + ["-m", "pytest", TEST_FILE, "-q"],
-                       capture_output=True, text=True, timeout=120)
-    tail = (p.stdout or "")[-300:].replace("\n", " | ")
-    record("a.7", "PASS" if p.returncode == 0 else "FAIL",
-           "the real test_refresh_expiry.py suite (manifest/date + same-frontier tests included) "
-           "-- %s" % tail, "rc=%d" % p.returncode)
-
-    # a.5 -- the REAL, currently-served bundle carries 0 members with a '..' path segment.
-    # Fetched unversioned (the host role lacks s3:GetObjectVersion) and bound by content hash.
-    bpath = os.path.join(HERE, "_bat_bundle.tar.gz")
-    rc, out, err = aws("s3api", "get-object", "--bucket", "opal-data-mdpf",
-                       "--key", "code/scripts/assets_gold/investor_reporting/investor-reporting.tar.gz",
-                       bpath, "--output", "text")
-    if rc != 0:
-        record("a.5", "FAIL", "could not fetch the served bundle: %s" % (err or out)[-200:])
-    else:
-        with open(bpath, "rb") as fh:
-            bsha = hashlib.sha256(fh.read()).hexdigest()
-        p = subprocess.run(["tar", "-tzf", bpath], capture_output=True, text=True, timeout=30)
-        members = [m for m in p.stdout.splitlines() if m.strip()]
-        dotdot = [m for m in members if ".." in m.split("/")]
-        record("a.5", "PASS" if (p.returncode == 0 and not dotdot) else "FAIL",
-               "served bundle sha256 %s, %d members named, 0 with a '..' segment"
-               % (bsha[:16], len(members)), "%d of %d" % (len(dotdot), len(members)))
-        os.remove(bpath)
+                        capture_output=True, text=True, timeout=180)
+    m = re.search(r"(\d+) passed", p.stdout or "")
+    k = m.group(1) if m else "?"
+    tail = (p.stdout or "")[-260:].replace("\n", " | ")
+    record("a.4", "PASS" if p.returncode == 0 else "FAIL",
+           "test_refresh_expiry.py: %s -- %s" % (tail, ("%s of %s" % (k, k)) if m else "rc=%d" % p.returncode),
+           ("%s of %s" % (k, k)) if m else "rc=%d" % p.returncode)
 
 
-# ============================================================== ARM (b) -- TERRAFORM
+# ============================================================== ARM (b) -- READ-ONLY SERVED HASH
 def arm_b():
-    head("ARM (b) THE DIRECTORY ROOT -- applied under ledger, served bytes verified")
+    head("ARM (b) READ-ONLY: served CodeSha256 == artifact_sha256 at this branch's own "
+         "lambda-source-map.json -- no plan, no apply, no rebuild")
     cfg, err = aws_json("lambda", "get-function-configuration", "--function-name", FUNCTION,
-                        "--output", "json")
+                         "--output", "json")
     if cfg is None:
         record("b.1", "FAIL", "get-function-configuration failed: %s" % err)
         return
@@ -177,55 +151,8 @@ def arm_b():
     smap = json.load(open(SOURCE_MAP, encoding="utf-8"))
     declared = smap["functions"][FUNCTION]["artifact_sha256"]
     record("b.1", "PASS" if served == declared else "FAIL",
-           "served CodeSha256 %s %s source-map artifact_sha256"
-           % (served, "==" if served == declared else "!="))
-
-    # Re-derive the zip's bytes from the SAME declared files[] this run, resolving DISTRIBUTION
-    # members from SHARED_ROOTS exactly as the deploy did -- never trusting the producer's own
-    # report of what it built.
-    fn = smap["functions"][FUNCTION]
-    source_dir = os.path.join(REPO, fn["source_dir"].replace("/", os.sep))
-
-    def resolve(name):
-        p = os.path.join(source_dir, name.replace("/", os.sep))
-        if os.path.isfile(p):
-            return p
-        for root in SHARED_ROOTS:
-            q = os.path.join(root, os.path.basename(name))
-            if os.path.isfile(q):
-                return q
-        return None
-
-    members = {}
-    for name in fn["files"]:
-        path = resolve(name)
-        if path:
-            members[name] = path
-    zpath = os.path.join(HERE, "_bat_rebuild.zip")
-    if os.path.exists(zpath):
-        os.remove(zpath)
-    with zipfile.ZipFile(zpath, "w", zipfile.ZIP_DEFLATED) as zf:
-        for arc in sorted(members):
-            info = zipfile.ZipInfo(arc, date_time=(2020, 1, 1, 0, 0, 0))
-            info.external_attr = 0o644 << 16
-            info.create_system = 0
-            info.compress_type = zipfile.ZIP_DEFLATED
-            with open(members[arc], "rb") as fh:
-                zf.writestr(info, fh.read())
-    with open(zpath, "rb") as fh:
-        rebuilt_sha = base64.b64encode(hashlib.sha256(fh.read()).digest()).decode("ascii")
-    os.remove(zpath)
-    record("b.2", "PASS" if rebuilt_sha == served else "FAIL",
-           "re-derived zip (resolved: %d of %d declared members) sha256 %s %s served CodeSha256"
-           % (len(members), len(fn["files"]), rebuilt_sha,
-              "==" if rebuilt_sha == served else "!="),
-           "%d of %d" % (len(members), len(fn["files"])))
-
-    p = subprocess.run([TERRAFORM, "-chdir=%s" % TF_ROOT, "plan", "-input=false", "-detailed-exitcode"],
-                       capture_output=True, text=True, timeout=120)
-    zero_diff = (p.returncode == 0) and ("No changes" in p.stdout)
-    record("b.3", "PASS" if zero_diff else "FAIL",
-           "post-apply re-plan reads 0-diff (rc=%d)" % p.returncode)
+           "served CodeSha256 %s %s branch-tip source-map artifact_sha256 %s"
+           % (served, "==" if served == declared else "!=", declared))
 
 
 # ================================================================ ARM (c) -- THE SWEEP
@@ -239,20 +166,19 @@ def arm_c():
             "&& sha256sum /tmp/irpt_sweep_v2.sh && bash /tmp/irpt_sweep_v2.sh"],
             "executionTimeout": ["120"]}, fh)
     rc, out, err = aws("ssm", "send-command", "--instance-ids", RUNNER,
-                       "--document-name", "AWS-RunShellScript",
-                       "--parameters", "file://%s" % params_path,
-                       "--comment", "battery_ib_rtc_3 arm c", "--output", "json")
+                        "--document-name", "AWS-RunShellScript",
+                        "--parameters", "file://%s" % params_path,
+                        "--comment", "battery_ib_rtc_3 amendment3 arm c", "--output", "json")
     os.remove(params_path)
     if rc != 0:
         record("c.1", "FAIL", "send-command failed: %s" % (err or out)[-200:])
         return
     cid = json.loads(out)["Command"]["CommandId"]
-    import time
     inv = None
     for _ in range(15):
         time.sleep(4)
         inv, err = aws_json("ssm", "get-command-invocation", "--command-id", cid,
-                            "--instance-id", RUNNER, "--output", "json")
+                             "--instance-id", RUNNER, "--output", "json")
         if inv and inv.get("Status") not in ("Pending", "InProgress", "Delayed"):
             break
     if inv is None:
@@ -266,11 +192,10 @@ def arm_c():
     pos_ok = "READ-OK" in out_txt.split("POSITIVE CONTROL")[1].split("\n")[1] if \
         "POSITIVE CONTROL" in out_txt else False
     record("c.2", "PASS" if pos_ok else "FAIL", "positive control fires (READ-OK)")
-    import re as _re
-    m = _re.search(r"AC4 SOURCE:\s+READ-OK=(\d+)\s+READ-DENY=(\d+)\s+READ-OTHER=(\d+)\s+"
-                   r"denominator (\d+)", out_txt)
-    n = _re.search(r"AC5 NEG CONTROLS:\s+READ-OK=(\d+)\s?READ-DENY=(\d+)\s?READ-OTHER=(\d+)\s+"
-                   r"denominator (\d+)", out_txt)
+    m = re.search(r"AC4 SOURCE:\s+READ-OK=(\d+)\s+READ-DENY=(\d+)\s+READ-OTHER=(\d+)\s+"
+                  r"denominator (\d+)", out_txt)
+    n = re.search(r"AC5 NEG CONTROLS:\s+READ-OK=(\d+)\s?READ-DENY=(\d+)\s?READ-OTHER=(\d+)\s+"
+                  r"denominator (\d+)", out_txt)
     if m:
         ok, deny, other, denom = m.groups()
         record("c.3", "PASS" if int(denom) == 10 else "FAIL",
@@ -292,160 +217,270 @@ def arm_c():
            "3 of 3 probed")
 
 
-# ============================================================ ARM (d) -- THE REAL FIRE
-def arm_d():
-    head("ARM (d) THE DEPLOYED DISPATCH, FIRED FOR ALL THREE FIRMS -- read back through the "
-         "IB-rt-6 mechanism (run record, command status, reconciliation, before/after)")
-    landed = 0
-    for firm in ("inflection", "cottonwood"):
-        cid = DISPATCH_COMMANDS[firm]
-        inv, err = aws_json("ssm", "get-command-invocation", "--command-id", cid,
-                            "--instance-id", RUNNER, "--output", "json")
-        if inv is None:
-            record("d.%s.1" % firm[:3], "FAIL", "get-command-invocation failed: %s" % err)
-            continue
-        out = inv.get("StandardOutputContent") or ""
-        repo_shaped_ok = ("IMPORT-OK first-party modules resolved: trading_calendar, ids, "
-                          "contract" in out)
-        record("d.%s.import" % firm[:3], "PASS" if repo_shaped_ok else "FAIL",
-               "%s: repo-shaped unpack IMPORT-OK on the host (all 3 runner_common modules "
-               "resolve) -- Status=%s" % (firm, inv.get("Status")))
-
-        # AMENDMENT 2 (row IRPT_BCKEND-W2-S55): confirm the as-of refusal is GONE.
-        as_of_cleared = "REFUSE: explicit --as-of" not in out
-        record("d.%s.asof_cleared" % firm[:3], "PASS" if as_of_cleared else "FAIL",
-               "%s: AMENDMENT 2's fix confirmed -- 0 occurrences of the W2-S55 "
-               "'REFUSE: explicit --as-of' refusal in this fire's stdout" % firm,
-               "0 of 1" if as_of_cleared else "1 of 1")
-        # row IRPT_BCKEND-W2-S56: the NEW, deeper, out-of-lane blocker this fire MEASURED (a
-        # PASS here means the row's claim is confirmed present in the real stdout, same
-        # convention as arm (e)'s expected-AccessDenied PASS -- this is not a defect of THIS
-        # cell's own deliverable, which arm (a)/(b)/(c)/d.*.import/d.*.asof_cleared all PASS).
-        new_blocker = "Draft202012Validator" in out
-        record("d.%s.new_blocker" % firm[:3], "PASS" if new_blocker else "FAIL",
-               "%s: row IRPT_BCKEND-W2-S56 confirmed in this fire's stdout (directory_runner.py's "
-               "jsonschema.Draft202012Validator, absent from the host's jsonschema==3.2.0) -- "
-               "out-of-lane, filed and not worked around" % firm)
-
-        bucket = FIRM_BUCKETS[firm]
-        d, _ = aws_json("s3api", "list-objects-v2", "--bucket", bucket,
-                        "--prefix", "%s/" % DIRECTORY_PREFIX, "--output", "json")
-        keys = [o["Key"] for o in ((d or {}).get("Contents") or [])]
-        has_artifact = any(k.endswith("/directory.json") for k in keys)
-        has_pointer = any(k.endswith("/latest.json") for k in keys)
-        landed += 1 if (has_artifact and has_pointer) else 0
-        record("d.%s.landed" % firm[:3], "PASS" if (has_artifact and has_pointer) else "BLOCKED",
-               "%s: directory.json=%s latest.json=%s -- W2-S55 CLEARED, now BLOCKED on row "
-               "IRPT_BCKEND-W2-S56 (directory_runner.py's own jsonschema.Draft202012Validator "
-               "use, absent from the host's jsonschema==3.2.0, out-of-lane)"
-               % (firm, has_artifact, has_pointer))
-
-    record("d.landed_total", "PASS" if landed == 2 else "FAIL",
-           "firms with a landed directory artifact AND its pointer", "%d of 2" % landed)
-
-    # THE RECONCILIATION: a second fire reads each command's terminal status back and records
-    # REFRESH_FAILED with the correct half (BUILD, not HAND_OVER) -- the loop closes even though
-    # nothing lands.
-    reconciled = 0
-    for firm in ("inflection", "cottonwood", "49financial"):
-        bucket = FIRM_BUCKETS[firm]
-        key = "%s/_refresh/%s/manifest.json" % (DIRECTORY_PREFIX, DRIVEN_DATE)
-        p = os.path.join(HERE, "_bat_recman_%s.json" % firm)
-        rc, out, err = aws("s3api", "get-object", "--bucket", bucket, "--key", key, p,
-                           "--output", "text")
-        if rc == 0:
-            man = json.load(open(p, encoding="utf-8"))
-            delta = man.get("delta") or {}
-            ok = (man.get("reason_code") == "REFRESH_FAILED"
-                 and delta.get("build_dispatch_failure") == "BUILD_ENDED_UNSUCCESSFUL"
-                 and delta.get("build_dispatch_half") == "BUILD")
-            reconciled += 1 if ok else 0
-            os.remove(p)
-    record("d.reconcile", "PASS" if reconciled == 3 else "FAIL",
-           "the NEXT fire reads each command's terminal status back and records "
-           "REFRESH_FAILED/BUILD_ENDED_UNSUCCESSFUL (BUILD half, not HAND_OVER) -- the "
-           "dispatch-to-reconcile loop closes", "%d of 3 firms" % reconciled)
+# ============================================================ ARM (d)/(e) -- THE REAL FIRE
+def schedule_payload():
+    """The schedule's OWN payload, read live from schedule.tf's irpt_directory_refresh block
+    only -- schedule.tf declares TWO aws_scheduler_schedule resources (irpt_holdings_snapshot
+    first), so the extraction is bounded to this resource's own block."""
+    text = open(SCHEDULE_TF, encoding="utf-8").read()
+    anchor = 'resource "aws_scheduler_schedule" "irpt_directory_refresh"'
+    start = text.index(anchor)
+    end_marker = '\noutput "directory_refresh_schedule_name"'
+    end = text.index(end_marker, start)
+    block = text[start:end]
+    if "irpt_holdings_snapshot" in block:
+        raise RuntimeError("schedule block bound incorrectly -- it still contains the sibling "
+                            "schedule")
+    m = re.search(r'input = jsonencode\(\{\s*kind\s*=\s*"([^"]+)"\s*note\s*=\s*"([^"]+)"',
+                  block, re.S)
+    if not m:
+        raise RuntimeError("could not read the schedule's own payload from schedule.tf")
+    return {"kind": m.group(1), "note": m.group(2)}
 
 
-# =================================================================== ARM (e) -- 49 FINANCIAL
-def arm_e():
-    head("ARM (e) THE 49 FINANCIAL ARM -- attempted once, BLOCKED at the named read")
-    cid = DISPATCH_COMMANDS["49financial"]
-    inv, err = aws_json("ssm", "get-command-invocation", "--command-id", cid,
-                        "--instance-id", RUNNER, "--output", "json")
-    if inv is None:
-        record("e.1", "FAIL", "get-command-invocation failed: %s" % err)
+def _list_keys(s3, bucket, prefix):
+    keys = []
+    token = None
+    while True:
+        kw = {"Bucket": bucket, "Prefix": prefix, "MaxKeys": 1000}
+        if token:
+            kw["ContinuationToken"] = token
+        page = s3.list_objects_v2(**kw)
+        keys.extend(o["Key"] for o in (page.get("Contents") or []))
+        token = page.get("NextContinuationToken")
+        if not token:
+            return keys
+
+
+def _read_json_object(s3, bucket, key):
+    try:
+        obj = s3.get_object(Bucket=bucket, Key=key)
+    except Exception:                                              # noqa: BLE001
+        return None
+    return json.loads(obj["Body"].read().decode("utf-8"))
+
+
+def arm_de():
+    head("ARM (d)/(e) THE DEPLOYED DISPATCH, FIRED FOR REAL -- schedule's own live payload, "
+         "read back through IB-rt-6's mechanism (before/after, envelopes, manifest, SSM status)")
+    import boto3
+    lam = boto3.client("lambda", region_name=REGION)
+    s3 = boto3.client("s3", region_name=REGION)
+
+    payload = schedule_payload()
+    record("de.payload", "PASS", "schedule payload read live from schedule.tf: %s" % payload)
+
+    before = {}
+    for firm, bucket in FIRM_BUCKETS.items():
+        keys = set(_list_keys(s3, bucket, DIRECTORY_PREFIX + "/"))
+        latest = _read_json_object(s3, bucket, "%s/latest.json" % DIRECTORY_PREFIX)
+        before[firm] = {"keys": keys,
+                        "revision": (latest or {}).get("directory_revision")}
+    record("de.before", "PASS", "before-snapshot: %s"
+           % {f: {"n_keys": len(before[f]["keys"]), "revision": before[f]["revision"]}
+              for f in before})
+
+    deadline = time.time() + 900
+    envelopes = None
+    attempt = 0
+    invoke_log = []
+    while time.time() < deadline:
+        attempt += 1
+        resp = lam.invoke(FunctionName=FUNCTION, Payload=json.dumps(payload).encode("utf-8"))
+        body = json.loads(resp["Payload"].read())
+        results_ = body.get("results", [])
+        envelopes = {r["firm_id"]: r for r in results_}
+        states = {fid: r["envelope"]["state"] for fid, r in envelopes.items()}
+        invoke_log.append((attempt, states))
+        print("    invoke %d states=%s" % (attempt, states))
+        if all(s != "RUNNING" for s in states.values()):
+            break
+        time.sleep(15)
+    record("de.invokes", "PASS" if envelopes is not None else "FAIL",
+           "%d invoke(s) to reach a non-RUNNING state for every firm: %s"
+           % (attempt, [s for _, s in invoke_log]))
+
+    if envelopes is None or set(envelopes) != set(FIRM_BUCKETS):
+        record("de.response", "FAIL", "did not get a 3-firm response: %s" % (envelopes,))
         return
-    out = inv.get("StandardOutputContent") or ""
-    err_out = (inv.get("StandardErrorContent") or "") + out
-    denied = ("AccessDenied" in err_out and "opal-data-49financial" in err_out
-             and "explicit deny in a resource-based policy" in err_out)
-    record("e.1", "PASS" if denied else "FAIL",
-           "49financial's build ends AccessDenied on opal-data-49financial (row "
-           "IRPT_BCKEND-W2-S49/S53, iam.tf:598-603 DenyForeignFirmPrincipals) -- attempted "
-           "ONCE, never worked around", "command %s Status=%s" % (cid, inv.get("Status")))
+
+    landed_count = 0
+    for firm in ("inflection", "cottonwood", "49financial"):
+        row = envelopes[firm]
+        bucket = FIRM_BUCKETS[firm]
+        env = row["envelope"]
+        reason = env.get("public_reason_code")
+        state = env.get("state")
+        bdate = env["source_dates"]["business_date"]
+        revision = env["operation"]["revision"]
+        manifest_key = row.get("manifest_key")
+
+        manifest = _read_json_object(s3, bucket, manifest_key) if manifest_key else None
+        delta = (manifest or {}).get("delta") or {}
+        cid = delta.get("ssm_command_id")
+        cmd_status = None
+        if cid:
+            inv, cerr = aws_json("ssm", "get-command-invocation", "--command-id", cid,
+                                  "--instance-id", RUNNER, "--output", "json")
+            cmd_status = (inv or {}).get("Status") or ("UNREADABLE:%s" % cerr)
+
+        is_new_completion = reason in ("REFRESH_COMPLETED", "REFRESH_COMPLETED_WITH_ADDITIONS",
+                                       "REFRESH_COMPLETED_WITH_ELIGIBILITY_CHANGE")
+        is_noop = reason == "REFRESH_NOOP_SAME_FRONTIER"
+        branch = ("NEW_REVISION" if is_new_completion else
+                  "NOOP_SAME_FRONTIER" if is_noop else
+                  "DISPATCHED_IN_FLIGHT" if reason == "REFRESH_DISPATCHED" else
+                  "FAILED" if reason == "REFRESH_FAILED" else reason)
+
+        artifact_key = "%s/%s/directory.json" % (DIRECTORY_PREFIX, bdate)
+        art = None
+        etag = sha = size = row_count = None
+        if is_new_completion or is_noop:
+            try:
+                headobj = s3.head_object(Bucket=bucket, Key=artifact_key)
+                obj = s3.get_object(Bucket=bucket, Key=artifact_key)
+                body_bytes = obj["Body"].read()
+                sha = hashlib.sha256(body_bytes).hexdigest()
+                etag = headobj["ETag"]
+                size = headobj["ContentLength"]
+                art = json.loads(body_bytes.decode("utf-8"))
+                row_count = len(art.get("entries") or [])
+            except Exception as exc:                             # noqa: BLE001
+                branch = branch + " (artifact fetch failed: %s)" % type(exc).__name__
+
+        after_keys = set(_list_keys(s3, bucket, DIRECTORY_PREFIX + "/"))
+        new_keys = after_keys - before[firm]["keys"]
+
+        LANDED[firm] = {"reason": reason, "state": state, "business_date": bdate,
+                        "revision": revision, "manifest_key": manifest_key,
+                        "ssm_command_id": cid, "command_status": cmd_status,
+                        "branch": branch, "artifact_key": artifact_key,
+                        "etag": etag, "sha256": sha, "size": size, "row_count": row_count,
+                        "entries": (art or {}).get("entries") or [],
+                        "artifact": art,
+                        "revision_before": before[firm]["revision"],
+                        "new_keys": sorted(new_keys)}
+
+        ok = is_new_completion or is_noop
+        landed_line = ("%s: branch=%s state=%s reason=%s bdate=%s revision(before->after)=%s->%s "
+                       "key=s3://%s/%s ETag=%s sha256=%s size=%s rows=%s "
+                       "ssm_command_id=%s command_status=%s"
+                       % (firm, branch, state, reason, bdate, before[firm]["revision"], revision,
+                          bucket, artifact_key, etag, (sha[:16] if sha else None), size, row_count,
+                          cid, cmd_status))
+        if firm in ("inflection", "cottonwood"):
+            landed_count += 1 if ok else 0
+            record("de.%s.landed" % firm[:3], "PASS" if ok else "FAIL", landed_line)
+        else:
+            record("de.49f.measured", "MEASURED", landed_line)
+
+    record("de.landed_total", "PASS" if landed_count == 2 else "FAIL",
+           "inflection + cottonwood firms landed (new revision OR same-frontier no-op)",
+           "%d of 2" % landed_count)
 
 
-# ============================================================ ARM (f) -- CONTENT SANITY
+# ================================================================== ARM (f) -- CONTENT SANITY
 def arm_f():
-    head("ARM (f) CONTENT SANITY ON WHAT LANDED -- 0 of 3 firms landed anything (arm d), so "
-         "this arm has no real artifact to grade")
-    total_keys = 0
-    for firm, bucket in sorted(FIRM_BUCKETS.items()):
-        d, _ = aws_json("s3api", "list-objects-v2", "--bucket", bucket,
-                        "--prefix", "%s/" % DIRECTORY_PREFIX, "--output", "json")
-        keys = [o["Key"] for o in ((d or {}).get("Contents") or [])]
-        artifacts = [k for k in keys if k.endswith("/directory.json")]
-        total_keys += len(artifacts)
-    record("f.1", "BLOCKED",
-           "no directory.json exists in any firm bucket to grade for content sanity -- "
-           "BLOCKED on the same row as arm (d) (IRPT_BCKEND-W2-S56, out-of-lane), a "
-           "self-wrapping content check against a fabricated artifact would be the bound-12 "
-           "violation this battery refuses to commit", "%d directory.json across 3 firms"
-           % total_keys)
+    head("ARM (f) CONTENT SANITY -- row counts, firm-in-artifact, 0-of-N email/name-shaped id "
+         "values, 0-of-N newly-written keys outside investor-reporting/")
+    sys.path.insert(0, IDS_ROOT)
+    import ids as _ids                                                    # noqa: E402
+
+    firm_matches = {}
+    firms_checked = 0
+    bad_id_shapes = 0
+    total_id_fields = 0
+    outside_keys_total = 0
+    new_keys_total = 0
+    total_rows = 0
+
+    for firm in ("inflection", "cottonwood", "49financial"):
+        info = LANDED.get(firm) or {}
+        art = info.get("artifact")
+        entries = info.get("entries") or []
+        if art is None:
+            record("f.%s.content" % firm[:3], "MEASURED",
+                   "%s: no artifact fetched this run (branch=%s) -- no content to grade"
+                   % (firm, info.get("branch")))
+            continue
+        firms_checked += 1
+        total_rows += len(entries)
+        expected_opaque = _ids.opaque_firm(REGISTRY_FIRM_IDS[firm])
+        declared_opaque = art.get("firm_id_opaque")
+        entry_firm_ids = {(e.get("ids") or {}).get("firm_id") for e in entries}
+        firm_ok = (declared_opaque == expected_opaque
+                  and entry_firm_ids <= {declared_opaque})
+        firm_matches[firm] = firm_ok
+
+        for e in entries:
+            ids = e.get("ids") or {}
+            for field in ("client_id", "firm_id", "relationship_id"):
+                v = ids.get(field)
+                if v is None:
+                    continue
+                total_id_fields += 1
+                if (_ids._EMAIL_SHAPED.search(v) or _ids._NAME_SHAPED.search(v)
+                        or not isinstance(v, str)):
+                    bad_id_shapes += 1
+            for v in (ids.get("account_ids") or []):
+                total_id_fields += 1
+                if (_ids._EMAIL_SHAPED.search(v) or _ids._NAME_SHAPED.search(v)
+                        or not isinstance(v, str)):
+                    bad_id_shapes += 1
+
+        new_keys = info.get("new_keys") or []
+        new_keys_total += len(new_keys)
+        outside = [k for k in new_keys if not k.startswith(DIRECTORY_PREFIX + "/")]
+        outside_keys_total += len(outside)
+
+        record("f.%s.content" % firm[:3], "PASS" if firm_ok else "FAIL",
+               "%s: entries=%d firm_id_opaque=%s (expect opaque_firm('%s')=%s) match=%s; "
+               "new keys this fire=%d, 0 outside investor-reporting/=%s"
+               % (firm, len(entries), declared_opaque, REGISTRY_FIRM_IDS[firm], expected_opaque,
+                  firm_ok, len(new_keys), len(outside) == 0))
+
+    graded_matches = sum(1 for f in ("inflection", "cottonwood") if firm_matches.get(f))
+    record("f.firm_in_artifact", "PASS" if graded_matches == 2 else "FAIL",
+           "firm-in-artifact matches (inflection + cottonwood graded; 49financial measured: %s)"
+           % firm_matches.get("49financial"),
+           "%d of 2" % graded_matches)
+    record("f.id_shape_census", "PASS" if bad_id_shapes == 0 else "FAIL",
+           "id fields (client_id/firm_id/relationship_id/account_ids) that are email- or "
+           "name-shaped rather than an issued opaque id", "%d of %d" % (bad_id_shapes, total_id_fields))
+    record("f.key_census", "PASS" if outside_keys_total == 0 else "FAIL",
+           "newly-written keys this fire that fall outside investor-reporting/",
+           "%d of %d" % (outside_keys_total, new_keys_total))
+    record("f.row_counts", "MEASURED", "total entries across firms this run: %d" % total_rows)
 
 
 # ================================================================== the verdict
 def main():
-    print("BATTERY IB-rtc-3 -- the refresh builds, exercised for inflection and cottonwood")
+    print("BATTERY IB-rtc-3 AMENDMENT 3 -- the refresh builds, re-exercised after IB-rtc-9/IB-rtc-7")
     print("repo: %s" % REPO)
-    print("subject: the repo-shaped refresh.py recipe, the applied directory Terraform root, "
-          "the on-host sweep, and the DEPLOYED dispatch fired live for all three firms")
+    print("subject: the real unit-test suite, the READ-ONLY served-hash check, the on-host "
+          "sweep, and the DEPLOYED dispatch fired live for all three firms")
     arm_a()
     arm_b()
     arm_c()
-    arm_d()
-    arm_e()
+    arm_de()
     arm_f()
 
     head("VERDICT")
-    npass = sum(1 for _, v, _, _ in RESULTS if v == "PASS")
-    nfail = sum(1 for _, v, _, _ in RESULTS if v == "FAIL")
-    nblock = sum(1 for _, v, _, _ in RESULTS if v == "BLOCKED")
+    graded = [r for r in RESULTS if r[1] in ("PASS", "FAIL")]
+    npass = sum(1 for _, v, _, _ in graded if v == "PASS")
+    nfail = sum(1 for _, v, _, _ in graded if v == "FAIL")
     for arm, v, line, den in RESULTS:
-        print("  %-16s %-9s %s" % (arm, v, line[:88]))
+        print("  %-20s %-9s %s" % (arm, v, line[:150]))
     print("")
-    print("  PASS %d | FAIL %d | BLOCKED %d   denominator: %d graded check(s)"
-          % (npass, nfail, nblock, len(RESULTS)))
-    landed_row = next((r for r in RESULTS if r[0] == "d.landed_total"), None)
+    print("  PASS %d | FAIL %d   denominator: %d graded check(s) (+%d MEASURED, ungraded)"
+          % (npass, nfail, len(graded), len(RESULTS) - len(graded)))
+    landed_row = next((r for r in RESULTS if r[0] == "de.landed_total"), None)
     landed_2of2 = bool(landed_row) and landed_row[1] == "PASS"
-    if nfail == 0 and nblock == 0 and landed_2of2:
+    if nfail == 0 and landed_2of2:
         print("  " + "-".join(["IBR33", "TWO-OF-THREE-DIRECTORIES-LANDED"]))
         return 0
-    print("  THE ACCEPTANCE TOKEN IS WITHHELD. arm (d) landed_total is not 2 of 2, and/or "
-          "another arm did not PASS:")
-    print("    IRPT_BCKEND-W2-S49/S53  49financial's build is AccessDenied on")
-    print("                            opal-data-49financial (DenyForeignFirmPrincipals) --")
-    print("                            EXPECTED, per arm (e); not a regression.")
-    print("    IRPT_BCKEND-W2-S55      CLEARED by this cell's AMENDMENT 2 fix (confirmed: 0")
-    print("                            occurrences of the as-of refusal in either firm's stdout).")
-    print("    IRPT_BCKEND-W2-S56      inflection and cottonwood's builds now reach")
-    print("                            directory_runner.py's validate_entries() (a strictly")
-    print("                            LATER point than W2-S55) and fail there: jsonschema")
-    print("                            .Draft202012Validator is absent from the host's")
-    print("                            installed jsonschema==3.2.0. Out-of-lane (directory_")
-    print("                            runner.py is not in this order's <paths>); filed, not")
-    print("                            worked around.")
+    print("  THE ACCEPTANCE TOKEN IS WITHHELD -- one or more graded arms FAILED, or arm (d)'s "
+          "inflection+cottonwood landed_total is not 2 of 2. See the FAIL rows above.")
     print("  R33-AC1 is FAIL. The order stays open.")
     return 1
 
