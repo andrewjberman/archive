@@ -1,5 +1,18 @@
 # IB-s-4 BATTERY RESULT -- `IRPT_BCKEND.TO-IB-s-4`
 
+**SUPERSEDED AT `86d2d0835f` BY row `IRPT_BCKEND-S32`: the deploy leg reads FALSE RED after the
+correct bundle mint; not an instrument at HEAD.** Arm (h) below graded `head-object` on the
+LOOSE per-file key `.../directory_runner.py` and read BLOCKED-BY-W1-S8 at the time this record
+was written. After IB-rt-5 landed the correct bundle mint (merged COMPLETE at `86d2d0835f`), the
+served shape for this code is ONE hash-stamped bundle object at
+`code/scripts/assets_gold/investor_reporting/`, and the loose per-file key is a PERMANENT,
+BY-DESIGN 404 (`safe_deploy_core.py`: "loose leg frozen 2026-08-11, X-iii"). Re-running arm (h)
+today therefore reads ABSENT/BLOCKED again -- the exact opposite of what happened in the world --
+and that reading is NOT evidence of a regression. Per S32's own NEVER, NOTHING is minted, moved
+or re-keyed here to make this battery green; the current instrument for this surface is
+`deliverables/0.4.0_DS_ClientPlatform~X/battery_ib_rt_5.py`, which grades the bundle object and
+both member sha stamps. Filed by `0.9.0_WK_IRPT_BCKEND~3`, `IRPT_BCKEND.TO-IB-rtc-4`.
+
 **Serial:** `0.9.0_WK_IRPT_BCKEND~2` (slot ~2, fourth order) | **Branch:** `wk-irpt_bckend-1-2`
 **Worktree:** `/c/tmp/wk-irpt-1-2`, re-cut from CLOUD at `975941ee61`.
 **Source pins:** `24f6c0e88a` (code + the OPEN sentinel, before the act), `b873f64de3` (the CLOSED

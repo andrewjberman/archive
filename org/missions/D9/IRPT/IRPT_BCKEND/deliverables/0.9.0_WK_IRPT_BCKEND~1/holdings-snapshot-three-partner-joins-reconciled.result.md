@@ -1,5 +1,19 @@
 # IB-s-12 RESULT -- THE HOLDINGS SNAPSHOT: three partner joins, reconciled
 
+**SUPERSEDED AT `86d2d0835f` BY row `IRPT_BCKEND-S32`: the deploy leg reads FALSE RED after the
+correct bundle mint; not an instrument at HEAD.** The rule-13 code deploy section below (and its
+battery, `battery_ib_s_12.py`) graded `head-object` on the LOOSE per-file key
+`.../holdings_snapshot.py` and read BLOCKED (filed as `IRPT_BCKEND-W1-S8`) at the time this
+record was written. After IB-rt-5 landed the correct bundle mint (merged COMPLETE at
+`86d2d0835f`), the served shape for this code is ONE hash-stamped bundle object under
+`code/scripts/assets_gold/investor_reporting/`, and the loose per-file key is a PERMANENT,
+BY-DESIGN 404 (`safe_deploy_core.py`: "loose leg frozen 2026-08-11, X-iii"). Re-running that arm
+today therefore reads ABSENT/BLOCKED again -- the exact opposite of what happened in the world --
+and that reading is NOT evidence of a regression. Per S32's own NEVER, NOTHING is minted, moved
+or re-keyed here to make this battery green; the current instrument for this surface is
+`deliverables/0.4.0_DS_ClientPlatform~X/battery_ib_rt_5.py`, which grades the bundle object and
+both member sha stamps. Filed by `0.9.0_WK_IRPT_BCKEND~3`, `IRPT_BCKEND.TO-IB-rtc-4`.
+
 **TO:** `IRPT_BCKEND.TO-IB-s-12` | **worker:** `0.9.0_WK_IRPT_BCKEND~1` | **branch:** `wk-irpt_bckend-1-1`
 **base commit:** `95a34541f8` (HEAD of `CLOUD` at hand-off, carrying IB-s-1's directory runner)
 **This cell APPLIED infrastructure and landed real data.** 3 resources added on the shared
