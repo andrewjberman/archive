@@ -1,6 +1,8 @@
 # NFRA_OPLGTW.TO-OG-q-6 -- result
 
-**Worker:** `0.9.0_WK_NFRA_OPLGTW~5` **Branch:** `wk-nfra_oplgtw-5e` **Cut HEAD:** `a96788f138`
+**Worker:** `0.9.0_WK_NFRA_OPLGTW~5` **Branch:** `wk-nfra_oplgtw-5e` **Cut HEAD (first pass):** `a96788f138`
+**RE-OPEN cut HEAD:** `1529bcd13111ef71241aba68328073670c9e3c00` (query.py/integration.py already drained here via
+merged commit `bc19d9466f` @`7785d21060`)
 
 ## The four rules, by call site
 
@@ -96,8 +98,60 @@ fixed, not gating any of this cell's own criteria**:
 | OGQ6-AC5 | **PASS** | mutant (HEAD, pre-wiring) fails all four; porcelain unchanged |
 | OGQ6-AC6 | **PASS** | fresh 34/29/0-NOT-ENFORCED re-derivation; regression finding informational, filed as surprises |
 
+## RE-OPEN: AC7/AC8/AC9 -- the two defect-asserting tests corrected
+
+Rows `NFRA_OPLGTW-W5-S19` and `NFRA_OPLGTW-W5-S20` (filed above) were right: this cell's own R20/R24 wiring
+turns `test_ogq2_ac06` and `test_ogq2_ac20` RED because each asserted the PRE-WIRING shape the contract now
+forbids -- the same class `1.0.0_SA_CTO` ruled on (R-OG-15) for `test_ogq2_ac07`/`test_ogq2_ac15`. The
+re-open hands this cell EXACTLY those two tests to correct (rows W5-S19/W5-S20's grant).
+
+- **`test_ogq2_ac06`**: its `group_fields` case's `at_limit` query groups by `ALL_POSITION[:10]`, which
+  includes `business_date` (index 1). Only that one case (of four in the loop) is affected; the loop is
+  restructured to special-case `group_fields` and assert the R20 refusal
+  (`INVALID_REQUEST`/`group_removes_date_identity`) instead of success. The comment on the assertion cites
+  PRD C3 @`e09219470f`:161 verbatim ("Grouping never removes master/date identity") and names R20.
+- **`test_ogq2_ac20`**: its one-page duplicate-grain case (`one_page_dup`) asserted success once `page_size`
+  was large enough to avoid pagination -- exactly the "fits in one page, so silent deduplication is fine"
+  shape C3 R24 forbids. Flipped to expect `UNAVAILABLE`/`duplicate_source_grain`; the pre-existing
+  `duplicate` (small-page) assertion is also updated to the same code/reason since R24 now fires there too,
+  independent of and before the paging-specific `paging_refused_no_unique_grain` guard the case originally
+  exercised. The `no_grain`/`one_page` (undefined-grain-metadata, not duplicated-grain-data) pair is
+  UNCHANGED -- R24 does not apply there. The comment cites PRD C3 @`e09219470f`:161 verbatim ("Duplicate/
+  conflicting source grains produce unavailable, not silent deduplication") and names R24.
+
+No other line of `test_schwab_query.py` changed (AC7, mechanically verified: every diff hunk's old-side AND
+new-side line range falls entirely inside `test_ogq2_ac06` or `test_ogq2_ac20`, computed by an
+AST-independent top-level-`def` scan on both the cut-base and corrected text, never trusting the diff's own
+hunk trailer alone). The module still collects 25 tests before and after (AC8), both corrected tests carry
+their citation, and `test_schwab_query.py`, `test_schwab_semantics.py`, `test_schwab_c3_rules.py` and
+`test_schwab_wiring.py` all read 0 failures (AC9, denominator 4 modules, 46 total passed).
+
+**AC5's own probe needed a rewrite this round**, not just the two tests: this worktree's HEAD (`1529bcd131`)
+already carries the drained wiring commit `bc19d9466f` (merged into CLOUD @`7785d21060`) before this
+re-open's fast-forward, so `og_q6.py`'s original AC5 (`git archive HEAD` as the "pre-wiring" mutant) is now a
+no-op control -- measured directly: re-running the unchanged probe found 0 of 4 mutant sub-runs failing,
+the honest, reported finding, not worked around. Fixed the same way OG-q-4's own AC4 was fixed under
+R-OG-15: `_pre_wiring_bytes()` walks `query.py`'s and `integration.py`'s OWN history (each independently) and
+returns the content of the LAST commit lacking that file's wiring markers (`881b1a5445` for query.py,
+`0ced7baf10` for integration.py), verified against the current worktree carrying the markers. Re-run after
+the fix: all four mutant sub-runs FAIL as required, `VERDICT: PASS-OGQ6-AC5`.
+
+## Criteria (RE-OPEN, all 9, one vintage)
+
+| id | verdict | measured |
+|---|---|---|
+| OGQ6-AC1 | **PASS** | `group_by=["business_date"]` refused, `INVALID_REQUEST`/`group_removes_date_identity` |
+| OGQ6-AC2 | **PASS** | two distinct `dim_balance` SUMs refused (`combined_balance_total_refused`); one named field's SUM still succeeds |
+| OGQ6-AC3 | **PASS** | duplicate-grain date refused `UNAVAILABLE`/`duplicate_source_grain`; control date (3 rows) succeeds |
+| OGQ6-AC4 | **PASS** | all 9 `dim_balance` fields carry `sign` and `null_semantics`, denominator printed |
+| OGQ6-AC5 | **PASS** | content-pinned pre-wiring mutant fails all four; porcelain unchanged |
+| OGQ6-AC6 | **PASS** | fresh 34/29/0-NOT-ENFORCED re-derivation; regression run now clean (25/25 test_schwab_query.py) |
+| OGQ6-AC7 | **PASS** | 5 of 5 diff hunks confined to `test_ogq2_ac06`/`test_ogq2_ac20` |
+| OGQ6-AC8 | **PASS** | 25/25 collected before/after; both corrected tests carry their citation |
+| OGQ6-AC9 | **PASS** | 4 of 4 modules, 0 failures (46 passed total) |
+
 ## Proof of spec
 
 `org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/NFRA_OPLGTW.TO-OG-q-6.c3-rules-wiring.proof_of_spec.json`,
-validated with `.tools/proof-of-spec-check.py`. All six mechanical criteria PASS by measured output; the
-task order's `<status>` flips to `complete`.
+validated with `.tools/proof-of-spec-check.py` (dry-run copy, VALID rc=0; re-verified post-commit). All nine
+mechanical criteria PASS by measured output; the task order's `<status>` flips to `complete`.
