@@ -18,9 +18,9 @@
   {
    "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py",
    "kind": "script",
-   "commit_or_etag": "6c37cc6b004430a3ec7caa8e541fc98c9207276b",
+   "commit_or_etag": "1304801ca6acf9e0a3c5540857840605448720e0",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "deploy_evidence": "The probe every criterion above names, run live against AWS account 313476888478, the deployed Gateway host, and the emulated (moto) local harness for AC11. commit-gate.sh run clean before each commit (a ruff ambiguous-variable-name was caught and fixed this pass).",
+   "deploy_evidence": "The probe every criterion above names, run live against AWS account 313476888478, the deployed Gateway host, and the emulated (moto) local harness for AC11. commit-gate.sh run clean before each commit (a ruff ambiguous-variable-name was caught and fixed a prior pass; this pass added AC21 and its ac4()/ac8() derivation helpers, also clean).",
    "artifact_covered_by": [
     "OGR1-AC1",
     "OGR1-AC2",
@@ -41,7 +41,8 @@
     "OGR1-AC17",
     "OGR1-AC18",
     "OGR1-AC19",
-    "OGR1-AC20"
+    "OGR1-AC20",
+    "OGR1-AC21"
    ]
   },
   {
@@ -151,7 +152,7 @@
    "criterion_verbatim": "on the host, every deployed file's digest equals the build input's, file by file, denominator printed.",
    "method": "command",
    "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC4",
-   "output_evidence": "instrument: SSM AWS-RunShellScript sha256sum on i-07dccb1615503ac99 (/opt/opal-gateway) vs git blob sha256 at 1764e54a16b7bb12d34b36eec7866589b6ea785e (build input == AC2's deployed HEAD); ssm 8b1e0790-5adf-4bf3-8f29-50fc262005fe Success\nvintage: 2026-09-18T07:18:55.140698Z .. 2026-09-18T07:18:57.925440Z\ndenominator: 68 files (tree 68, host 68)\n  MISMATCH app/entity_resolution/SCAFFOLD.md host=848f5721e15971d6 tree=92ab3b9835924f4f\n  MISMATCH app/graphql_plumbing/DESIGN.md host=ca542591a207f281 tree=9071de3106134c2d\n  MISMATCH app/integrations/schwab/datasets.json host=004178d133882158 tree=e85da072de2adaac\n  MISMATCH app/org/mcp/agent_telemetry/0.7.0_AE_CloudOps.jsonl host=237fe0bd7f7a7ffc tree=f7116911573c47d1\n  MISMATCH app/refs/DATA_CATALOG.yaml host=29079a8fda329851 tree=f77682e9f0f2819f\n  MISMATCH app/static/schwab_download/index.html host=c0a3e16cd075f243 tree=580114f03d7f890f\n  MISMATCH deploy/opal-gateway.service host=83dfce7a16f965f6 tree=4d47e09b0e01925b\n  MISMATCH identity_tool_allowlist.txt host=379c9f98d16ca362 tree=4c3f897103e9e99f\n  MISMATCH requirements.txt host=9694d113c1e8ac35 tree=38493e14f9b00719\nVERDICT: FAIL-OGR1-AC4 digest_mismatch=9 host_only=0 tree_only=0\nrc=1",
+   "output_evidence": "instrument: SSM AWS-RunShellScript sha256sum on i-07dccb1615503ac99 (/opt/opal-gateway) vs git blob sha256 at 1764e54a16b7bb12d34b36eec7866589b6ea785e (build input == AC2's deployed HEAD); ssm ec880fdc-528c-4e66-8405-852f97ddef1a Success\nvintage: 2026-09-18T07:55:11.936955Z .. 2026-09-18T07:55:14.676532Z\ndenominator: 68 files (tree 68, host 68)\n  MISMATCH app/entity_resolution/SCAFFOLD.md host=848f5721e15971d6 tree=92ab3b9835924f4f\n  MISMATCH app/graphql_plumbing/DESIGN.md host=ca542591a207f281 tree=9071de3106134c2d\n  MISMATCH app/integrations/schwab/datasets.json host=004178d133882158 tree=e85da072de2adaac\n  MISMATCH app/org/mcp/agent_telemetry/0.7.0_AE_CloudOps.jsonl host=237fe0bd7f7a7ffc tree=f7116911573c47d1\n  MISMATCH app/refs/DATA_CATALOG.yaml host=29079a8fda329851 tree=f77682e9f0f2819f\n  MISMATCH app/static/schwab_download/index.html host=c0a3e16cd075f243 tree=580114f03d7f890f\n  MISMATCH deploy/opal-gateway.service host=83dfce7a16f965f6 tree=4d47e09b0e01925b\n  MISMATCH identity_tool_allowlist.txt host=379c9f98d16ca362 tree=4c3f897103e9e99f\n  MISMATCH requirements.txt host=9694d113c1e8ac35 tree=38493e14f9b00719\nVERDICT: FAIL-OGR1-AC4 digest_mismatch=9 host_only=0 tree_only=0\nrc=1\n\n(re-run this pass, R-58/AC21: ac4() now also persists ac4_ok/ac4_denominator/ac4_mismatch_counts to state.json -- identical 9/68 CRLF-only mismatch set as every prior run, AC4 stays FAILED-AS-WRITTEN per R-56 item 3, not repaired, not re-cut)",
    "denominator": "68 of 68 files compared (9 MISMATCH)",
    "status": "FAIL",
    "expect": "(?m)^VERDICT: PASS-OGR1-AC4(?![0-9])",
@@ -192,7 +193,7 @@
    "criterion_verbatim": "the ledger entry is closed and committed before the grading reads.",
    "method": "command",
    "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC8",
-   "output_evidence": "  OK  the sentinel no longer exists (ledger closed) -- C:/tmp/wk-oplgtw-2a\\org\\critical_paths\\.open_deploys\\nfra-oplgtw-og-r-1-first-release.json\n  OK  the rendered entry's Status reads CLOSED -- **Date opened:** 2026-09-18T05:07:24.309664+00:00\n  OK  the close commit exists -- 864aa6a9372a7137fbc20796190c530497d119f3\n  OK  close follows open -- 2026-09-18T06:12:40.793399Z >= 2026-09-18T05:09:11.674566Z\nDENOMINATOR: 4 of 4 checks OK\nVERDICT: PASS-OGR1-AC8\nrc=0",
+   "output_evidence": "  OK  the sentinel no longer exists (ledger closed) -- C:/tmp/wk-oplgtw-2a\\org\\critical_paths\\.open_deploys\\nfra-oplgtw-og-r-1-first-release.json\n  OK  the rendered entry's Status reads CLOSED -- **Date opened:** 2026-09-18T05:07:24.309664+00:00\n  OK  the close commit exists -- 864aa6a9372a7137fbc20796190c530497d119f3\n  OK  close follows open -- 2026-09-18T06:12:40.793399Z >= 2026-09-18T05:09:11.674566Z\nDENOMINATOR: 4 of 4 checks OK\nVERDICT: PASS-OGR1-AC8\nrc=0\n\n(re-run this pass, R-58/AC21: since ledger_close_commit already exists in state.json -- the ledger was closed by the AC20 pass -- ac8() takes the tail-only branch and does not re-execute the close path; the fixed derivation/pathspec code is graded directly by AC21, never re-simulated)",
    "denominator": "4 of 4 close checks",
    "status": "PASS",
    "expect": "(?m)^VERDICT: PASS-OGR1-AC8(?![0-9])"
@@ -318,6 +319,16 @@
    "denominator": "4 of 4 ledger self-agreement checks",
    "status": "PASS",
    "expect": "(?m)^VERDICT: PASS-OGR1-AC20(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC21",
+   "criterion_verbatim": "(the constant-wearing-a-measurement's-clothes fix, row `NFRA_OPLGTW-W2-S9`) `og_r1.py`'s `ac8()` DERIVES each leg's ledger-proof text from that criterion's REAL measured verdict rather than a literal, and includes the sentinel path in its commit set; the probe proves it AGAINST THE FAILING CASE -- with AC4 still FAILING, the proof text `ac8()` would write names AC4 as FAILED and not as PASS -- and prints both the derived text and AC4's measured verdict beside each other.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC21",
+   "output_evidence": "AC4 has no measured verdict recorded in state.json yet -- re-running AC4 now so this criterion grades against a REAL measured verdict, never an assumed or forced one\ninstrument: SSM AWS-RunShellScript sha256sum on i-07dccb1615503ac99 (/opt/opal-gateway) vs git blob sha256 at 1764e54a16b7bb12d34b36eec7866589b6ea785e (build input == AC2's deployed HEAD); ssm f7964af4-d492-4377-826a-1d466655b014 Success\nvintage: 2026-09-18T07:54:47.149281Z .. 2026-09-18T07:54:50.089470Z\ndenominator: 68 files (tree 68, host 68)\n  (9 MISMATCH lines, identical set to every other run this pass)\nVERDICT: FAIL-OGR1-AC4 digest_mismatch=9 host_only=0 tree_only=0\ninstrument: og_r1.py's OWN _l1_proof_text()/_ac8_close_commit_paths() helpers -- the EXACT code ac8() calls to build the ledger's L1 proof text and its close-commit pathspec -- invoked directly here, never re-implemented or re-simulated, against AC4's REAL measured verdict as recorded by AC4's own run in state.json (ac4_verdict_utc 2026-09-18T07:54:50.093513Z); nothing here forces or mocks that verdict\nAC4's REAL measured verdict (state.json ac4_ok, set only by ac4()'s own run): False\nAC4's mismatch counts (state.json ac4_mismatch_counts): {'digest_mismatch': 9, 'host_only': 0, 'tree_only': 0}\nDERIVED L1 PROOF TEXT (what ac8() would write for L1 right now): 'OGR1-AC4 FAILED (1764e54a16b7bb12d34b36eec7866589b6ea785e) 68 files (tree 68, host 68) digest_mismatch=9 host_only=0 tree_only=0'\nac8()'s close-commit pathspec: ['org/critical_paths/.open_deploys/nfra-oplgtw-og-r-1-first-release.json', 'org/critical_paths/change_management/']\n  OK  AC4's real measured verdict is FAILING -- this criterion is graded against the failing case per R-58 (a green here against a PASSING AC4 would be byte-identical to the old hardcoded bug and would prove nothing) -- False\n  OK  the derived L1 proof text names AC4 as FAILED -- OGR1-AC4 FAILED (1764e54a16b7bb12d34b36eec7866589b6ea785e) 68 files (tree 68, host 68) digest_mismatch=9 host_only=0 tree_only=0\n  OK  the derived L1 proof text does NOT name AC4 as PASS -- OGR1-AC4 FAILED (1764e54a16b7bb12d34b36eec7866589b6ea785e) 68 files (tree 68, host 68) digest_mismatch=9 host_only=0 tree_only=0\n  OK  ac8()'s close-commit pathspec includes the sentinel path (the omission that let the sentinel's real deletion go uncommitted, R-56 item 1) -- ['org/critical_paths/.open_deploys/nfra-oplgtw-og-r-1-first-release.json', 'org/critical_paths/change_management/']\nDENOMINATOR: 4 of 4 checks OK\nVERDICT: PASS-OGR1-AC21\nrc=0",
+   "denominator": "4 of 4 derivation/pathspec checks, graded against AC4's real FAILING verdict",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC21(?![0-9])"
   }
  ],
  "controls": {
@@ -352,7 +363,7 @@
   },
   {
    "item": "ac8()'s own probe code (fabricated L1 proof text + commit_paths omitting the sentinel path) -- the root cause of R-56 item 1's DRIFT-DANGEROUS finding",
-   "reason": "Not named by this order's items (a)-(d); OGR1-AC20 repairs the ledger STATE through the tool with honest evidence, but does not patch ac8()'s own code (outside what AC19/AC20 required). Filed as surprise row NFRA_OPLGTW-W2-S9 for the issuing COO's disposition."
+   "reason": "RESOLVED this pass (R-58 item 2, AC21): row NFRA_OPLGTW-W2-S9 was adopted as filed. ac8()'s L1 proof text is now DERIVED via _l1_proof_text() from ac4_ok as persisted by ac4()'s own run, never a literal, and its close-commit pathspec (_ac8_close_commit_paths()) now includes the sentinel path. AC21 grades this against the failing case (AC4 is genuinely FAILING) and both PASS. No longer excluded from grading; superseded by the OGR1-AC21 acceptance row above."
   }
  ],
  "surprises": [
@@ -360,7 +371,7 @@
   "NFRA_OPLGTW-W2-S6: the live gateway-access-state-table carries 8 leftover synthetic test fixtures from OG-i-1/OG-i-5's own probes, never a real principal -- OGR1-AC3/AC12 classify and exclude them by pattern (probe-og-<cell>-<timestamp>) to grade the real (empty) population. INERT.",
   "NFRA_OPLGTW-W2-S7: the currently-deployed-before-this-release commit has no app/data_entitlement.py, so it fails SCHWAB_PILOT_RUNBOOK.md s.7.2 step 1's own restorability precondition; OGR1-AC10 measures this truthfully as FAIL.",
   "NFRA_OPLGTW-W2-S8: the real deploy (from this Windows worktree, core.autocrlf=true) shipped 9 of 68 files with CRLF line endings differing from their LF git blobs -- only *.py carries an eol=lf .gitattributes override, and deploy-to-ec2.sh tars the live checkout rather than a normalized archive. OGR1-AC4 measures this truthfully as FAIL; R-56 item 3 refused both a .gitattributes class fix and a re-cut of AC4 for tonight (unprinted blast radius on live linked worktrees; .gitattributes is gate-adjacent). No functional break found, but PRD C6's declared/deployed parity is genuinely violated and this is NEW to this deploy.",
-  "NFRA_OPLGTW-W2-S9: root-caused R-56 item 1's DRIFT-DANGEROUS finding to og_r1.py's own ac8(): its L1 ledger-proof text was a hardcoded literal ('OGR1-AC4 PASS') regardless of AC4's actual (FAILED) verdict, and its safe-commit commit_paths omitted the sentinel path entirely, so the tool's real sentinel-deletion on close was never committed -- verified at the bytes (commit 864aa6a937 touches only the .md, 1 file changed). OGR1-AC20 (this pass) repairs the ledger's STATE through the tool with honest, non-fabricated evidence; ac8()'s own code is unchanged and remains a latent defect for any future re-entry of its close path."
+  "NFRA_OPLGTW-W2-S9: root-caused R-56 item 1's DRIFT-DANGEROUS finding to og_r1.py's own ac8(): its L1 ledger-proof text was a hardcoded literal ('OGR1-AC4 PASS') regardless of AC4's actual (FAILED) verdict, and its safe-commit commit_paths omitted the sentinel path entirely, so the tool's real sentinel-deletion on close was never committed -- verified at the bytes (commit 864aa6a937 touches only the .md, 1 file changed). OGR1-AC20 (this pass) repairs the ledger's STATE through the tool with honest, non-fabricated evidence; ac8()'s own code is unchanged and remains a latent defect for any future re-entry of its close path. RESOLVED at commit 1304801ca6 (R-58 item 2, this pass): ac8()'s L1 text now derives from ac4_ok as persisted by ac4()'s own run (_l1_proof_text()), and the close-commit pathspec now includes the sentinel path (_ac8_close_commit_paths()); AC21 grades both against AC4's real FAILING verdict."
  ],
  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/evidence/og_r1/state.json",
  "compiler_tools": [
@@ -380,8 +391,13 @@
    "result": "OGR1-AC20: 3 close-leg calls OK, close OK (sentinel removed), post-close check prints neither DRIFT-DANGEROUS nor OPEN for this slug (verified before AND after, commit 45d1e43657647f8beb4d7b1e1def6d5ffed119b6)"
   },
   {
+   "tool": ".tools/commit-gate.sh (R-58/AC21 pass)",
+   "invocation": "bash .tools/commit-gate.sh org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py",
+   "result": "run clean before the commit adding AC21 and the ac4()/ac8() derivation helpers (commit 1304801ca6acf9e0a3c5540857840605448720e0)"
+  },
+  {
    "tool": ".tools/proof-of-spec-check.py",
-   "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/NFRA_OPLGTW.TO-OG-r-1.first-release-cutover.proof_of_spec.json OGR1-AC1,OGR1-AC2,OGR1-AC3,OGR1-AC4,OGR1-AC5,OGR1-AC6,OGR1-AC7,OGR1-AC8,OGR1-AC9,OGR1-AC10,OGR1-AC11,OGR1-AC12,OGR1-AC13,OGR1-AC14,OGR1-AC15,OGR1-AC16,OGR1-AC17,OGR1-AC18,OGR1-AC19,OGR1-AC20",
+   "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/NFRA_OPLGTW.TO-OG-r-1.first-release-cutover.proof_of_spec.json OGR1-AC1,OGR1-AC2,OGR1-AC3,OGR1-AC4,OGR1-AC5,OGR1-AC6,OGR1-AC7,OGR1-AC8,OGR1-AC9,OGR1-AC10,OGR1-AC11,OGR1-AC12,OGR1-AC13,OGR1-AC14,OGR1-AC15,OGR1-AC16,OGR1-AC17,OGR1-AC18,OGR1-AC19,OGR1-AC20,OGR1-AC21",
    "result": "run after this instance was written; rc recorded in first-release-cutover.result.md"
   }
  ]

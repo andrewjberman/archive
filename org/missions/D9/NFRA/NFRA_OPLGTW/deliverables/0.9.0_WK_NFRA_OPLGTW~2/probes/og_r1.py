@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """og_r1.py -- the acceptance probe for NFRA_OPLGTW.TO-OG-r-1 (cell OG-r-1), the first release cutover.
 
-Usage:  og_r1.py AC<n>      n = 1..20
+Usage:  og_r1.py AC<n>      n = 1..21
 
 Each arm prints its measurement with vintage and denominator, then exactly one line
   VERDICT: PASS-OGR1-AC<n>  or  VERDICT: FAIL-OGR1-AC<n> <reason>.
@@ -468,6 +468,14 @@ def ac4() -> int:
     for p in tree_only:
         print("  TREE-ONLY %s" % p)
     ok = bool(tree) and bool(host) and not differ and not host_only and not tree_only
+    # R-58/AC21: AC4's REAL measured verdict is persisted here so any OTHER criterion that must cite it
+    # (ac8()'s ledger-proof text) DERIVES from this recorded fact instead of assuming or hardcoding one --
+    # a hardcoded "PASS" beside this is exactly what MANUFACTURED the DRIFT-DANGEROUS ledger (R-56 item 1).
+    st["ac4_ok"] = ok
+    st["ac4_verdict_utc"] = iso()
+    st["ac4_denominator"] = "%d files (tree %d, host %d)" % (len(union), len(tree), len(host))
+    st["ac4_mismatch_counts"] = {"digest_mismatch": len(differ), "host_only": len(host_only), "tree_only": len(tree_only)}
+    save_state(st)
     return verdict(4, ok, "" if ok else "digest_mismatch=%d host_only=%d tree_only=%d" % (len(differ), len(host_only), len(tree_only)))
 
 
@@ -584,6 +592,33 @@ def ac7() -> int:
 
 
 # --------------------------------------------------------------------------- AC8 -- close the ledger
+def _sentinel_rel() -> str:
+    return "org/critical_paths/.open_deploys/%s.json" % LEDGER_SLUG
+
+
+def _l1_proof_text(ac4_ok: bool, deployed_commit: str, denom: str = "", mismatch: dict = None) -> str:
+    """DERIVES L1's ledger-proof text from AC4's REAL measured verdict (row NFRA_OPLGTW-W2-S9, R-58 AC21).
+    NEVER a literal: the prior bug wrote the constant string 'OGR1-AC4 PASS' regardless of what AC4
+    measured, which is what MANUFACTURED the DRIFT-DANGEROUS ledger R-56 item 1 had to repair. `ac4_ok` is
+    read from state.json, set only by ac4()'s own run -- there is no branch here that can write PASS while
+    ac4_ok is False."""
+    word = "PASS" if ac4_ok else "FAILED"
+    extra = ""
+    if mismatch:
+        extra = " digest_mismatch=%d host_only=%d tree_only=%d" % (
+            mismatch.get("digest_mismatch", 0), mismatch.get("host_only", 0), mismatch.get("tree_only", 0))
+    return "OGR1-AC4 %s (%s)%s%s" % (word, deployed_commit, (" " + denom) if denom else "", extra)
+
+
+def _ac8_close_commit_paths() -> list:
+    """The close commit's pathspec. MUST include the sentinel path: `deploy_ledger.py close` unlinks the
+    sentinel from disk directly (never via `git rm`), so a commit that omits it never stages that deletion
+    -- the ledger's own record then reads CLOSED while the sentinel stays committed OPEN, exactly the
+    DRIFT-DANGEROUS state R-56 item 1 found (row NFRA_OPLGTW-W2-S9). The change_management/ directory
+    pathspec covers the rendered entry file."""
+    return [_sentinel_rel(), "org/critical_paths/change_management/"]
+
+
 def ac8() -> int:
     st = load_state()
     sentinel = os.path.join(REPO, "org", "critical_paths", ".open_deploys", LEDGER_SLUG + ".json")
@@ -599,8 +634,13 @@ def ac8() -> int:
         if not os.path.isfile(sentinel):
             return verdict(8, False, "the sentinel is already gone but state.json has no close-commit record "
                                      "(closed outside this probe?) -- refusing to fabricate one")
+        if "ac4_ok" not in st:
+            return verdict(8, False, "AC4 has not recorded a measured verdict in state.json -- run AC4 first; "
+                                     "refusing to derive L1's ledger-proof text from nothing (that fabrication "
+                                     "is exactly what R-58/AC21 exists to stop)")
         proofs = {
-            "L1": "OGR1-AC4 PASS (%s)" % st.get("deploy_manifest_deployed_commit", "<unset>"),
+            "L1": _l1_proof_text(st["ac4_ok"], st.get("deploy_manifest_deployed_commit", "<unset>"),
+                                 st.get("ac4_denominator", ""), st.get("ac4_mismatch_counts")),
             "L2": "OGR1-AC3/AC5/AC6/AC7/AC9/AC12/AC13 verdicts recorded in this run's own probe output",
             "L3": "EC2_MANIFEST.json committed at %s" % st.get("deploy_manifest_commit", "<unset>"),
         }
@@ -621,7 +661,7 @@ def ac8() -> int:
         msgfile = _write_msgfile("ac8_commit_msg.txt",
             "deploy-ledger(close, NFRA_OPLGTW.TO-OG-r-1): OG-r-1 first release -- every leg proven, closed "
             "BEFORE the grading reads\n\nCo-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n")
-        commit_paths = ["org/critical_paths/change_management/"]
+        commit_paths = _ac8_close_commit_paths()
         c = _safe_commit(commit_paths, msgfile)
         print(c.stdout)
         print(c.stderr)
@@ -1200,14 +1240,59 @@ def ac20() -> int:
     return verdict(20, ok, "" if ok else "a check is NOT OK (see NOT lines)")
 
 
+# --------------------------------------------------------------------------- AC21 -- the constant-wearing-
+# a-measurement's-clothes fix (row NFRA_OPLGTW-W2-S9, R-58 item 2). Exercises ac8()'s OWN derivation
+# helpers directly -- never a re-simulation of them -- against AC4's REAL measured verdict, GRADED AGAINST
+# THE FAILING CASE: a hardcoded "PASS" and a derived "PASS" are byte-identical on a passing case, which is
+# exactly how the original bug survived its first grading, so this criterion is meaningless unless AC4 is
+# actually FAILING when it runs.
+def ac21() -> int:
+    st = load_state()
+    if "ac4_ok" not in st:
+        print("AC4 has no measured verdict recorded in state.json yet -- re-running AC4 now so this "
+              "criterion grades against a REAL measured verdict, never an assumed or forced one")
+        ac4_rc = ac4()
+        st = load_state()
+        if "ac4_ok" not in st:
+            return verdict(21, False, "AC4 did not persist a measured verdict even after being re-run "
+                                      "(rc=%d) -- cannot grade AC21 without one" % ac4_rc)
+    ac4_ok = st["ac4_ok"]
+    deployed_commit = st.get("deploy_manifest_deployed_commit", "<unset>")
+    derived = _l1_proof_text(ac4_ok, deployed_commit, st.get("ac4_denominator", ""), st.get("ac4_mismatch_counts"))
+    commit_paths = _ac8_close_commit_paths()
+    sentinel_rel = _sentinel_rel()
+    print("instrument: og_r1.py's OWN _l1_proof_text()/_ac8_close_commit_paths() helpers -- the EXACT code "
+          "ac8() calls to build the ledger's L1 proof text and its close-commit pathspec -- invoked directly "
+          "here, never re-implemented or re-simulated, against AC4's REAL measured verdict as recorded by "
+          "AC4's own run in state.json (ac4_verdict_utc %s); nothing here forces or mocks that verdict" %
+          st.get("ac4_verdict_utc", "<unset>"))
+    print("AC4's REAL measured verdict (state.json ac4_ok, set only by ac4()'s own run): %s" % ac4_ok)
+    print("AC4's mismatch counts (state.json ac4_mismatch_counts): %s" % st.get("ac4_mismatch_counts"))
+    print("DERIVED L1 PROOF TEXT (what ac8() would write for L1 right now): %r" % derived)
+    print("ac8()'s close-commit pathspec: %s" % commit_paths)
+    names_failed = bool(re.search(r"\bFAILED\b", derived))
+    names_pass = bool(re.search(r"\bPASS\b", derived))
+    rows = [
+        ("AC4's real measured verdict is FAILING -- this criterion is graded against the failing case per "
+         "R-58 (a green here against a PASSING AC4 would be byte-identical to the old hardcoded bug and "
+         "would prove nothing)", ac4_ok is False, ac4_ok),
+        ("the derived L1 proof text names AC4 as FAILED", names_failed, derived),
+        ("the derived L1 proof text does NOT name AC4 as PASS", not names_pass, derived),
+        ("ac8()'s close-commit pathspec includes the sentinel path (the omission that let the sentinel's "
+         "real deletion go uncommitted, R-56 item 1)", sentinel_rel in commit_paths, commit_paths),
+    ]
+    ok = print_rows(rows)
+    return verdict(21, ok, "" if ok else "a check is NOT OK (see NOT lines)")
+
+
 DISPATCH = {1: ac1, 2: ac2, 3: ac3, 4: ac4, 5: ac5, 6: ac6, 7: ac7, 8: ac8, 9: ac9, 10: ac10,
            11: ac11, 12: ac12, 13: ac13, 14: ac14, 15: ac15, 16: ac16, 17: ac17, 18: ac18,
-           19: ac19, 20: ac20}
+           19: ac19, 20: ac20, 21: ac21}
 
 
 def main(argv: list) -> int:
-    if len(argv) != 2 or not re.fullmatch(r"AC(1\d|20|[1-9])", argv[1]):
-        print("usage: og_r1.py AC<1..20>", file=sys.stderr)
+    if len(argv) != 2 or not re.fullmatch(r"AC(1\d|2[01]|[1-9])", argv[1]):
+        print("usage: og_r1.py AC<1..21>", file=sys.stderr)
         return 2
     n = int(argv[1][2:])
     return DISPATCH[n]()
