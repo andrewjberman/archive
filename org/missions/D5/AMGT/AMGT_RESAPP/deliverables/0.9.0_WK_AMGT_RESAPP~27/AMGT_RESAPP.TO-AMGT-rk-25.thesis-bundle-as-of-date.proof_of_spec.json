@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-25.thesis-bundle-as-of-date",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-25.thesis-bundle-as-of-date.md",
+    "group": "OTHER",
+    "vintage_commit": "53b8ab5874ef75e5a86238d493699605ee92125d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-25.thesis-bundle-as-of-date.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~27",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "e2d89be7daeb5fb2e04ba45aa52b6320c17b3f2b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "One line added to read_thesis_bundle(), applied AFTER the rk-24 merge so it composes rather than reverts: bundle['as_of_date'] = (bundle.get('drafting_provenance') or {}).get('filing_date'). DEPLOYED LIVE this act, under the CTO+COO co-sign (533f216c74/6b7d4f2341, HALF 4), as an incrementally-constructed artifact built on top of rk-24's now-live code (this act's own one line only). Live CodeSha256 fkKLVfsAsgXk0Swo/XMAjf+OncnOe0ApEogC0WPYmeU=, matches the uploaded artifact exactly. Verified no-premature-inclusion before build: SCORES_PREFIX/read_scores/bundle[\"scores\"] all ABSENT.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260918T0031Z_amgt-rk25-thesis-bundle-as-of-date-20260917_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "15b5878817",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Change-management ledger: OPENED before the live build+apply, CLOSED with the full pre/post proof string after it."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "BEFORE this order lands, as_of_date is absent from the served bundle (KeyError-equivalent / None printed, the pre-fix baseline); AFTER, as_of_date equals BA's filing_date, the same value already carried on the drafting object -- record both runs",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\nlam = boto3.client('lambda')\npayload = json.dumps({'rawPath': '/api/scoped/amgt/security/BA_US_Equity/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\nresp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\nbody = json.loads(resp['Payload'].read())\ninner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\nprint('as_of_date', inner.get('as_of_date'))\nprint('drafting_filing_date', (inner.get('drafted_sections') or {}).get('filing_date') if isinstance(inner.get('drafted_sections'), dict) else 'inspect actual shape')\n\"",
+      "output_evidence": "LIVE, under the CTO+COO co-sign (533f216c74/6b7d4f2341), run twice for BA_US_Equity. BEFORE (pre-act, live CodeSha256 Jicv6u3NnACRmmtJbwWRtHLKXNd6WbRYePR3hUino90=): as_of_date=None. AFTER (post-act, live CodeSha256 fkKLVfsAsgXk0Swo/XMAjf+OncnOe0ApEogC0WPYmeU=): as_of_date=2026-01-30, and drafting_provenance.filing_date=2026-01-30 (read the same live response) -- exact match, never re-derived.",
+      "denominator": "2 of 2 live calls (1 BEFORE, 1 AFTER) against the deployed Lambda for BA_US_Equity.",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a name carrying no filing does NOT carry an invented or stale as_of_date -- it reads null/absent, never a fabricated date. PLANTED negative control",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\nlam = boto3.client('lambda')\npayload = json.dumps({'rawPath': '/api/scoped/amgt/security/HOLLOW_NONEXISTENT_KEY_Equity/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\nresp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\nbody = json.loads(resp['Payload'].read())\ninner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\nprint('as_of_date', inner.get('as_of_date'))\n\"",
+      "output_evidence": "LIVE, under the CTO+COO co-sign (533f216c74/6b7d4f2341), run twice for the planted negative control HOLLOW_NONEXISTENT_KEY_Equity. BEFORE (pre-act): as_of_date=None. AFTER (post-act, live CodeSha256 fkKLVfsAsgXk0Swo/XMAjf+OncnOe0ApEogC0WPYmeU=): as_of_date=None -- unchanged, never fabricated.",
+      "denominator": "2 of 2 live calls (1 BEFORE, 1 AFTER) against the deployed Lambda for the nonexistent key.",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Three discriminating scenarios: (SERVED, provenance present), (INVALID, provenance present), (ABSENT, no provenance) -- covering every branch _drafting_block() can produce.",
+      "expected": "as_of_date equals the provenance's filing_date in the first two cases and is None in the third -- never invented.",
+      "observed": "Exactly matched in all three cases (see output_evidence above).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each scenario constructed and run once with fixed monkeypatched inputs.",
+      "observed": "Deterministic by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/BATCH_B_COMBINED.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/api/scoped_amgt.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/api/scoped_amgt.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "160 passed (post all four scoped_amgt.py cell edits combined)"
+    }
+  ]
+}
