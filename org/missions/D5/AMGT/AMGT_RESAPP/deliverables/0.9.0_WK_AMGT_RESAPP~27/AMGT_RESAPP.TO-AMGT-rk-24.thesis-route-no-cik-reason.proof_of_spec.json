@@ -17,17 +17,17 @@
     {
       "path_or_key": "lib/research/api/scoped_amgt.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "CODE ONLY. Added FILINGS_PREFIX + _read_filing_source_object() (reads filings/v1/<key>/UNRESOLVED-SOURCE.source.json at its deterministic name, never read_pool_object()'s latest-.json convention, which a RESOLVED name's <accession>.source.json could sort after and shadow); wired into read_thesis_bundle() immediately after bundle.update(read_drafted_sections(resolved_key)) -- when drafting_status is ABSENT and the filings source object's own status reads UNRESOLVED-SOURCE, its reason replaces the generic NoSuchKey drafting_reason. SERVED and INVALID drafting statuses are never touched. NOT DEPLOYED this session.",
+      "commit_or_etag": "e2d89be7daeb5fb2e04ba45aa52b6320c17b3f2b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "FILINGS_PREFIX + _read_filing_source_object() (reads filings/v1/<key>/UNRESOLVED-SOURCE.source.json at its deterministic name); wired into read_thesis_bundle() immediately after bundle.update(read_drafted_sections(resolved_key)) -- when drafting_status is ABSENT and the filings source object's own status reads UNRESOLVED-SOURCE, its reason replaces the generic NoSuchKey drafting_reason. DEPLOYED LIVE this act, under the CTO+COO co-sign (533f216c74/6b7d4f2341, HALF 3), as an incrementally-constructed artifact built on top of rk-23's now-live code (this act's own change only). Live CodeSha256 Jicv6u3NnACRmmtJbwWRtHLKXNd6WbRYePR3hUino90=, matches the uploaded artifact exactly. Verified no-premature-inclusion before build: SCORES_PREFIX/read_scores/bundle[\"as_of_date\"]/bundle[\"scores\"] all ABSENT.",
       "artifact_covered_by": ["AC1"]
     },
     {
-      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "path_or_key": "org/critical_paths/change_management/20260918T0001Z_amgt-rk24-adapter-thesis-no-cik-reason-20260917_deploy_completion.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "See rk-23's instance for the two rows appended this session (S7, S8); same file, same splice, one commit."
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Change-management ledger: OPENED before the live build+apply, CLOSED with the full pre/post proof string after it."
     }
   ],
   "acceptance": [
@@ -36,10 +36,9 @@
       "criterion_verbatim": "BEFORE this order lands, drafting_reason reads a generic NoSuchKey-shaped string; AFTER (and after chain FP-B's order has written the pool objects), drafting_reason for the sampled unfiled name reads the store's own no-CIK reason text (matching filing_identity.source is None: no cik and expected form to fetch by, or the equivalent corrected wording) -- the worker records both runs and names which unresolved name it sampled",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\ns3 = boto3.client('s3')\ndoc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key='universe/v1/2026-09-16.json')['Body'].read())\nunresolved = [r['security_key'] for r in doc.get('names', []) if not (r.get('filing_identity') or {}).get('cik')]\nprint('unresolved_count', len(unresolved))\nlam = boto3.client('lambda')\nname = unresolved[0]\npayload = json.dumps({'rawPath': f'/api/scoped/amgt/security/{name}/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\nresp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\nbody = json.loads(resp['Payload'].read())\ninner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\nprint('drafting_reason', inner.get('drafting_reason'))\n\"",
-      "output_evidence": "NOT RUN THIS SESSION as the literal live invocation (this session's dispatch forbids any live deploy/write act). SUBSTITUTE LOCAL VERIFICATION, exercising read_thesis_bundle() and _read_filing_source_object() directly against constructed inputs (no vendor/AWS call): (1) unit test of _read_filing_source_object() against a monkeypatched pool client returning {'security_key': 'NOCIK_US_Equity', 'status': 'UNRESOLVED-SOURCE', 'reason': \\\"the universe row carries no cik (filing_identity.source is not 'edgar')\\\"} -- function returned that exact dict; a monkeypatched miss (NoSuchKey) returned None. (2) End-to-end read_thesis_bundle('NOCIK_US_Equity') with read_drafted_sections monkeypatched to the generic-NoSuchKey ABSENT shape and the pool client above: bundle['drafting_reason'] == \\\"the universe row carries no cik (filing_identity.source is not 'edgar')\\\" -- the generic message was correctly REPLACED. (3) Three non-application controls, same call shape: SERVED drafting_status left drafting_reason untouched (None, unchanged); INVALID drafting_status kept the VALIDATOR's own reason ('schema validation failed: sentence 3 missing evidence'), never the filing source's; ABSENT drafting_status with NO filing source object landed (miss) kept the ORIGINAL generic NoSuchKey-shaped message.",
-      "denominator": "4 of 4 local scenarios verified (hit, miss, SERVED-untouched, INVALID-untouched) against constructed inputs; 0 of 1 live scan of the real 21-name unfiled set and the deployed Lambda (NOT YET EXERCISED, rides the later deploy).",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "This session is bounded to code + local verification only pending the combined CTO+COO never-widen co-sign for all five batch-B acts; the deployed opal-amgt-scoped-api still runs pre-fix bytes at HEAD, so the literal invocation would report the pre-fix generic-NoSuchKey state regardless of this session's code, and would not evidence the fix. Rides the later continuation's actual redeploy.",
+      "output_evidence": "LIVE, under the CTO+COO co-sign (533f216c74/6b7d4f2341), run twice against the SAME sampled name, 2317_TT_Equity (first of 237 names in universe/v1/2026-09-16.json whose filing_identity carries no cik). BEFORE (pre-act, live CodeSha256 iGmDkRbA6ZenF0CHAgU7nwNZkmdUEzMKRdBEJsDlbP0=): statusCode 200, drafting_status ABSENT, drafting_reason = 'no drafted document at s3://opal-data-harvest/drafting/v1/2317_TT_Equity.json: NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.' -- the generic S3 message. AFTER (post-act, live CodeSha256 Jicv6u3NnACRmmtJbwWRtHLKXNd6WbRYePR3hUino90=): statusCode 200, drafting_status ABSENT (unchanged), drafting_reason = \\\"filing_identity.source is 'none': no cik and expected form to fetch by\\\" -- the filings store's own classed no-CIK reason, matching AC1's expectation.",
+      "denominator": "2 of 2 live calls against the deployed Lambda (1 BEFORE, 1 AFTER), same sampled name both times; 237 of 237 no-cik names read once to select the sample deterministically (first of the sorted list).",
+      "status": "PASS",
       "judgment": false
     }
   ],
@@ -56,12 +55,7 @@
       "status": "STABLE"
     }
   },
-  "declared_exclusions": [
-    {
-      "item": "The live scan of the real 21 in-scope unfiled names and the Lambda invoke this order's own AC1 names.",
-      "reason": "This session's dispatch forbids any live deploy or write act. Deferred to the continuation after the combined co-sign and redeploy."
-    }
-  ],
+  "declared_exclusions": [],
   "surprises": [],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/BATCH_B_COMBINED.SESSION_LOG.md",
   "compiler_tools": [
