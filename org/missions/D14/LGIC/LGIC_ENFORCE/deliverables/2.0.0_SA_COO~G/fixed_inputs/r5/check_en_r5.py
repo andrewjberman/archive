@@ -409,19 +409,40 @@ def c28_ac3():
 
 
 # ============================================================================ EN-h-29: S61's remedy
+# A negation marker near the ruled-out path turns "names it" into "rules it out". The list is
+# deliberately small and literal: a prose negation detector that tries to be clever is a second
+# unfalsifiable instrument, and this one only ever WIDENS what the arm admits.
+S61_NEGATION_MARKERS = ("does NOT", "does not", "no such", "carries no", "not establish",
+                        "rather than", "has not been in", "contains 0", "absent from")
+
+
 def core_s61(evidence, right_has_core, wrong_has_core, wrong_named):
     """BOTH directions, because 'corrected' must not be satisfiable by becoming vaguer.
-    (i) the evidence no longer attributes the phrase to the file that does not carry it;
-    (ii) whatever it now cites DOES carry the distinctive core -- measured, not asserted."""
+    (i) the evidence no longer ATTRIBUTES the phrase to the file that does not carry it;
+    (ii) whatever it now cites DOES carry the distinctive core -- measured, not asserted.
+
+    THE POLARITY TEST IN (i) WAS ADDED AFTER A WORKER PROVED THE ARM WRONG (row LGIC_ENFORCE-W1-S31,
+    with a pre-commit mutant). `wrong_named` was a bare substring check, so evidence naming the
+    ruled-out path INSIDE A CORRECT DISCLAIMER -- 'this does NOT establish that <wrong file> owns it'
+    -- failed identically to the original defect. The honest, plainest correction was the one the arm
+    refused, and the worker had to name the ruled-out project by TOKEN rather than by PATH to get past
+    it. An arm a correct fix cannot satisfy is worse than no arm: it does not merely fail to catch the
+    defect, it actively steers the repair away from the clearest wording.
+    """
     lines = ["the row's evidence still names %s: %s" % (S61_WRONG_FILE, wrong_named),
              "%s carries %r: %s" % (S61_RIGHT_FILE, S61_CORE, right_has_core),
              "%s carries it: %s" % (S61_WRONG_FILE, wrong_has_core)]
     if evidence is None:
         return False, ["the row named %r is not in resources.json" % S61_ROW_NAME] + lines
     if wrong_named and not wrong_has_core:
-        lines.append("STILL A WRONG-OBJECT CITATION: the evidence attributes the phrase to a file "
-                     "measured NOT to carry it")
-        return False, lines
+        hits = [k for k in S61_NEGATION_MARKERS if k in evidence]
+        lines.append("the ruled-out path is named, so a NEGATION is required near it; markers found: "
+                     "%d %s" % (len(hits), hits[:4]))
+        if not hits:
+            lines.append("STILL A WRONG-OBJECT CITATION: the evidence attributes the phrase to a file "
+                         "measured NOT to carry it, and says nothing that rules it out")
+            return False, lines
+        lines.append("ADMITTED: the ruled-out path appears inside a disclaimer, not an attribution")
     cites_right = S61_RIGHT_FILE in evidence
     lines.append("the evidence cites %s: %s" % (S61_RIGHT_FILE, cites_right))
     if not cites_right:
@@ -730,6 +751,17 @@ def selftest_arms():
     arm("h29-evidence-unfindable", core_s61("cites " + S61_RIGHT_FILE, True, False, False)[0],
         core_s61("cites " + S61_RIGHT_FILE, False, False, False)[0],
         "the newly cited file does not carry the phrase either")
+    # the polarity pair, both directions, added on row LGIC_ENFORCE-W1-S31
+    disclaimed = ("cites " + S61_RIGHT_FILE + "; this does NOT establish that " + S61_WRONG_FILE
+                  + " owns the alarm")
+    attributed = "the phrase lives in " + S61_WRONG_FILE + "'s phase field"
+    arm("h29-evidence-disclaimer", core_s61(disclaimed, True, False, True)[0],
+        core_s61(attributed, True, False, True)[0],
+        "a disclaimer naming the ruled-out path must PASS where an attribution FAILS")
+    arm("h29-evidence-polarity-both-ways",
+        core_s61(disclaimed, True, False, True)[0] and not core_s61(attributed, True, False, True)[0],
+        core_s61(attributed, True, False, True)[0] or not core_s61(disclaimed, True, False, True)[0],
+        "the arm must SEPARATE the two, not merely admit one of them")
 
     g5 = "## Card 5 -- security-sweep\nreason: TOKEN_COLLISION\n"
     g6 = "## Card 6 -- opal-data-security\nreason: TOKEN_COLLISION, owner D12 NFRA_OPSEC202609 DIRECTIVES.yaml :485\n"

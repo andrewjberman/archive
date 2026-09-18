@@ -1364,15 +1364,22 @@ def core_fwd10(rec):
 
 
 def x1_fwd10():
+    """The THIRD arm of this cell, and the one this seat MISSED when it added graded_run().
+
+    It read `subject_runs()[0]` -- the earliest run id -- so on the re-hand it graded the FIRST hand's
+    FWD10.json and not the hand's own. The worker running it said so in its report rather than letting
+    a PASS stand on the wrong object, which is the only reason this is fixed. Same position-not-identity
+    hole R-40 exists to close; repointed here so the arm grades the run the R-40 manifest names.
+    """
     tag = "X1-LIVE-PLANE-ZERO-DELTA"
-    runs = subject_runs()
-    if not runs:
-        return say("FAIL-" + tag, "no run directory under %s" % SUBJECT_DIR)
-    r, why = load_json(os.path.join(ab(SUBJECT_DIR), runs[0], "FWD10.json"))
+    rid, d, note = graded_run()
+    if rid is None:
+        return say("FAIL-" + tag, note)
+    r, why = load_json(os.path.join(d, "FWD10.json"))
     if r is None:
-        return say("FAIL-" + tag, why)
+        return say("FAIL-" + tag, note, why)
     ok, lines = core_fwd10(r)
-    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, lines)
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, [note, "graded run: %s" % rid] + lines)
 
 
 def core_footprint(paths, allowed_prefixes):
