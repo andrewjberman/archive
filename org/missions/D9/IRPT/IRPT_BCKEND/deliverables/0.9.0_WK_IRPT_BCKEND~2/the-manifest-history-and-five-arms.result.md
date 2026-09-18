@@ -2,10 +2,10 @@
 
 **TO:** `IRPT_BCKEND.TO-IB-rte-5` | **serial:** `0.9.0_WK_IRPT_BCKEND~2` |
 **branch:** `wk-irpt_bckend-5-2` | **worktree:** `/c/tmp/wk-irpt-5-2` | **base:** `391e4ad948`
-**Battery:** `battery_ib_rte_5.py` (git hash-object `947ad794e3bcaaaf0ee938494210202affec1c36`)
-**Battery output:** `IB-rte-5_R55-AC1_battery_output.txt` (git hash-object `8c3ce938841914085b2d008552a88013139769e1`)
-**Detail JSON:** `IB-rte-5_full_census_and_arms.json` (git hash-object `f3788fd8742b2ce585971f7a76c406dbdc76025f`)
-**Result:** `rc=0`, **15 of 15 graded checks PASS**, token `IBR55-MANIFESTS-CENSUSED-AND-FIVE-ARMS-DRIVEN`.
+**Battery:** `battery_ib_rte_5.py` (git hash-object `200da4f476beadaeaeeb14a27693187fed43d303`)
+**Battery output:** `IB-rte-5_R55-AC1_battery_output.txt` (git hash-object `153add6cbcc41daf7ff5ab2631110c280aeacec4`)
+**Detail JSON:** `IB-rte-5_full_census_and_arms.json` (git hash-object `7ae93f1cf2692c67fef137876d07d2d7f4b23b99`)
+**Result:** `rc=0`, **16 of 16 graded checks PASS**, token `IBR55-MANIFESTS-CENSUSED-AND-FIVE-ARMS-DRIVEN`.
 **R55-AC1 = PASS-by-output.** R55-AC2 recorded below for `3.0.0_SA_CVO`.
 
 Every count below is RE-DERIVED live against S3/Lambda/SSM on every battery run -- nothing is
@@ -52,6 +52,14 @@ the 3 firms, misstates previous state.** Every `prev=0` write is the firm's genu
 completed build, not a pre-fix-masked one -- verified by walking every version of every key back
 to this project's own genesis timestamp, not merely reasoning from what the current object shows.
 **No reconciliation is declared** because none is needed.
+
+**Mutant control on the detector itself (`battery a5`):** a k=0 real-world result is worth
+nothing if the detector cannot also return k>0 on a chain that genuinely misstates. The same
+`find_misstating()` function graded against two synthetic chains, neither touching AWS: a clean
+one (0 misstating, as expected) and one with a genuine gap planted at the second date (`prev=0`
+where the immediately preceding date's `cur=100` -- row W2-S57's exact symptom, reproduced on a
+chain that DOES have a real prior) -- 1 of 1 planted defects caught, reason text matches. FIRED
+AS EXPECTED.
 
 **A finding surfaced by the deep read that a current-object-only census could not have seen** (not
 filed as a new row -- it changes no served artifact and the design is sound, reasoned through

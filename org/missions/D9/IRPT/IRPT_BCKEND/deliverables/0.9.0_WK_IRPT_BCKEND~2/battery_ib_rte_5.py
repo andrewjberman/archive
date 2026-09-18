@@ -87,6 +87,54 @@ def now_iso():
     return dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+def find_misstating(distinct_chain):
+    """THE DETECTOR ITSELF, factored out so it can be run against BOTH the real census (part_a)
+    and a synthetic mutant (the control below) -- the same function, never a copy, so a passing
+    real-world k=0 and a passing mutant k=1 exercise the identical code path (bound 12).
+
+    `distinct_chain`: one dict per DISTINCT (firm, as_of_business_date) COMPLETED-family write,
+    already in chronological write order, each carrying previous_entry_count/current_entry_count.
+    Returns the list of (entry, reason) pairs that misstate previous state.
+    """
+    out = []
+    for i, v in enumerate(distinct_chain):
+        if i == 0:
+            if v["previous_entry_count"] != 0:
+                out.append((v, "first-ever write but prev!=0: %r" % v["previous_entry_count"]))
+            continue
+        prior = distinct_chain[i - 1]
+        if v["previous_entry_count"] != prior["current_entry_count"]:
+            out.append((v, "prev=%r != prior write's cur=%r (prior %s)"
+                        % (v["previous_entry_count"], prior["current_entry_count"],
+                           prior["date"])))
+    return out
+
+
+def part_a_mutant_control():
+    """MUTANT CONTROL for the misstatement detector (`find_misstating`): a k=0 real-world
+    result is worth nothing if the detector cannot also return k>0 on a chain that genuinely
+    misstates. Two synthetic chains, neither touching AWS: one clean (expect 0), one with a
+    genuine gap planted at the second date (expect 1) -- the SAME function graded both ways."""
+    clean = [
+        {"date": "2026-09-10", "previous_entry_count": 0, "current_entry_count": 100},
+        {"date": "2026-09-11", "previous_entry_count": 100, "current_entry_count": 105},
+    ]
+    planted_defect = [
+        {"date": "2026-09-10", "previous_entry_count": 0, "current_entry_count": 100},
+        {"date": "2026-09-11", "previous_entry_count": 0, "current_entry_count": 105},  # WRONG:
+        # should be 100 -- reproduces row W2-S57's exact symptom on a chain that HAS a real prior.
+    ]
+    clean_result = find_misstating(clean)
+    defect_result = find_misstating(planted_defect)
+    fired = (len(clean_result) == 0 and len(defect_result) == 1)
+    check("a5.mutant_control_the_detector_catches_a_planted_misstatement", fired,
+          "clean chain -> %d misstating (expect 0); planted-defect chain -> %d misstating "
+          "(expect 1, reason=%r)" % (len(clean_result), len(defect_result),
+                                     defect_result[0][1] if defect_result else None))
+    return {"clean_misstating": len(clean_result), "planted_defect_misstating": len(defect_result),
+            "fired_as_expected": fired}
+
+
 # =====================================================================================
 # (a) THE CENSUS -- every manifest VERSION, re-derived under the FIXED previous-state rule
 # =====================================================================================
@@ -195,19 +243,7 @@ def part_a():
                 continue
             distinct_chain.append(v)
 
-        firm_misstating = []
-        for i, v in enumerate(distinct_chain):
-            if i == 0:
-                # the firm's first-ever completed-family write: prev SHOULD be 0.
-                if v["previous_entry_count"] != 0:
-                    firm_misstating.append((v, "first-ever write but prev!=0: %r"
-                                            % v["previous_entry_count"]))
-                continue
-            prior = distinct_chain[i - 1]
-            if v["previous_entry_count"] != prior["current_entry_count"]:
-                firm_misstating.append((v, "prev=%r != prior write's cur=%r (prior %s)"
-                                        % (v["previous_entry_count"],
-                                           prior["current_entry_count"], prior["date"])))
+        firm_misstating = find_misstating(distinct_chain)
         misstating.extend((firm, v, why) for v, why in firm_misstating)
         per_firm_summary[firm] = {
             "manifests_censused": len(frows),
@@ -443,6 +479,7 @@ def part_c(census):
 
 def main():
     a = part_a()
+    mutant = part_a_mutant_control()
     b = part_b()
     c = part_c(a)
 
@@ -455,10 +492,11 @@ def main():
     token_ok = (
         len(FAIL) == 0
         and a["k_misstating"] == 0            # or a declared reconciliation -- k=0 here
+        and mutant["fired_as_expected"]       # the detector can catch a planted misstatement
         and len(set(b["reason_codes"])) == 5
         and c["new_command_ids_driven"] in (0, 1)  # 0 = named-and-blocked, a valid outcome
     )
-    result = {"part_a": a, "part_b": b, "part_c": c,
+    result = {"part_a": a, "part_a_mutant_control": mutant, "part_b": b, "part_c": c,
              "pass": len(PASS), "fail": len(FAIL), "measured": len(MEASURED)}
     out_json = os.path.join(_HERE, "IB-rte-5_full_census_and_arms.json")
     with open(out_json, "w", encoding="utf-8") as f:
