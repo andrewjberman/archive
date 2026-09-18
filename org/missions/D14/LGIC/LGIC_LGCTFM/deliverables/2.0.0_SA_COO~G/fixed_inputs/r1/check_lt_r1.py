@@ -149,6 +149,48 @@ def base_ref():
     return out.strip() if rc == 0 and out.strip() else None
 
 
+# The worker serials this cell's commits can carry. A cell's commits are identified by WHO AUTHORED
+# THEM, which survives a drain; a branch position does not.
+CELL_AUTHORS = ("0.9.0_WK_LGIC_LGCTFM~1", "0.9.0_WK_LGIC_LGCTFM~2", "0.9.0_WK_LGIC_LGCTFM~3")
+
+
+def cell_commits(paths=None, authors=CELL_AUTHORS, order_id=None):
+    """(shas, note) -- the commits a WORKER of this project authored, found by AUTHOR and not by branch.
+
+    `order_id` NARROWS to ONE CELL's commits by requiring that string in the message, and it is not
+    optional decoration: the FIRST repair of this function scoped only by author, so `x1-footprint`
+    then graded ALL THREE slots' work across the whole round and reported 9 paths "outside the grant"
+    that belong to OTHER cells -- the engine, the renderer, the tests. A false FAIL traded for a
+    WRONG-DOMAIN FAIL, caught by running it. A subtraction's domain must be the CLAIM's population.
+
+    WHY THIS EXISTS AT ALL, and it is the fourth defect found in this seat's arms in one night -- the
+    worst of them, because the lesson was already written down. `x1-r16` and `x1-footprint` read
+    `git merge-base HEAD CLOUD`, so they measure A BRANCH AGAINST ITS OWN BASE. That works exactly once,
+    at the worker's tip, and reads FALSE FAIL for ANY seat re-running them after the drain: on the
+    shared tree the diff is empty, so `paths changed on this branch: 0` and `commits touching the three
+    registries: 0`, and both arms refuse a cell whose work is sitting in the tree. Found by
+    `3.0.0_SA_CVO` at L9 (row `LGIC_LGCTFM-S10`) -- the seat that has to re-run them.
+
+    AUTHORSHIP IS THE IDENTITY THAT SURVIVES. `git log --author` over the whole history finds the cell's
+    own commits wherever they now sit. Two qualifiers, both real: this reads AUTHOR, which says who
+    WROTE a commit and never who pushed or merged it (that is what the override audit log is for); and
+    a merge commit carries the ISSUER's author line, so a drain is correctly not counted as the cell's
+    work.
+    """
+    argv = ["log", "--format=%H", "--all"]
+    for a in authors:
+        argv += ["--author=" + a]
+    if order_id:
+        argv += ["--grep=" + order_id]
+    if paths:
+        argv += ["--"] + list(paths)
+    rc, out = git(*argv)
+    shas = [s.strip() for s in out.splitlines() if s.strip()] if rc == 0 else []
+    return shas, "commits authored by %d worker serial(s)%s%s: %d" % (
+        len(authors), (" and naming %s" % order_id) if order_id else "",
+        (" touching %d path(s)" % len(paths)) if paths else "", len(shas))
+
+
 def is_cell(x):
     return isinstance(x, dict) and "value" in x and "status" in x and "evidence" in x
 
@@ -1389,28 +1431,42 @@ def core_footprint(paths, allowed_prefixes):
 
 
 def x1_footprint():
+    """Repaired on row LGIC_LGCTFM-S10: the cell's paths come from the commits it AUTHORED, so this
+    arm reads the same after the drain as it did at the branch tip."""
     tag = "X1-REPO-FOOTPRINT-BOUNDED"
-    b = base_ref()
-    if not b:
-        return say("FAIL-" + tag, "git merge-base HEAD CLOUD did not resolve")
-    rc, out = git("diff", "--name-only", b, "HEAD")
-    paths = [p for p in out.splitlines() if p.strip()]
+    shas, note = cell_commits(order_id="LGIC_LGCTFM.TO-LT-x-1-r1")
+    if not shas:
+        return say("FAIL-" + tag, note, "no commit of this project's workers is reachable -- this arm "
+                                        "cannot name the cell's own paths, so it refuses rather than "
+                                        "passing on an empty set")
+    paths = set()
+    for s in shas:
+        rc, out = git("show", "--name-only", "--format=", s)
+        if rc == 0:
+            paths.update(p for p in out.splitlines() if p.strip())
     allowed = ["workflows/legacy_transform/", ROOT + "/"] + list(REGISTRIES)
-    ok, lines = core_footprint(paths, allowed)
-    return verdict(ok and rc == 0, "PASS-" + tag, "FAIL-" + tag, ["base %s" % b[:10]] + lines)
+    ok, lines = core_footprint(sorted(paths), allowed)
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, [note] + lines)
 
 
 def x1_r16():
+    """Repaired on row LGIC_LGCTFM-S10, same cause: the registry-touching commits are found by AUTHOR
+    over the whole history, not by a branch range that empties after the merge."""
     tag = "X1-MARK-COMMIT-PRINTS-TARGETS"
-    b = base_ref()
-    if not b:
-        return say("FAIL-" + tag, "git merge-base HEAD CLOUD did not resolve")
-    rc, out = git("log", "--format=%H%x1f%B%x1e", "%s..HEAD" % b, "--", *REGISTRIES)
-    commits = [c for c in out.split("\x1e") if c.strip()]
-    printed = [c for c in commits if re.search(r"(?m)^\s*TARGETS:\s*\d+", c)]
-    ok = bool(commits) and len(printed) == len(commits)
-    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, ["commits touching the three registries: %d; carrying a TARGETS: line "
-                                                       "(lib/opal_naming.py targets, R-16): %d" % (len(commits), len(printed))])
+    shas, note = cell_commits(paths=REGISTRIES, order_id="LGIC_LGCTFM.TO-LT-x-1-r1")
+    bodies = []
+    for s in shas:
+        rc, out = git("log", "-1", "--format=%B", s)
+        if rc == 0:
+            bodies.append(out)
+    printed = [b for b in bodies if re.search(r"(?m)^\s*TARGETS:\s*\d+", b)]
+    ok = bool(bodies) and len(printed) == len(bodies)
+    lines = [note, "commits touching the three registries: %d; carrying a TARGETS: line "
+                   "(lib/opal_naming.py targets, R-16): %d" % (len(bodies), len(printed))]
+    if not bodies:
+        lines.append("ZERO such commits -- R-16's bar cannot be met vacuously, so this is a FAIL and "
+                     "not a pass on an empty set")
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, lines)
 
 
 # ============================================================================ the planted refusal (LT-x-2)
