@@ -1,0 +1,109 @@
+{
+ "subject": {
+  "run_id": "20260918T011619Z-8db9eb1",
+  "contract_hash": "33204e29839de89af81fb293317cce3ccdf2266d"
+ },
+ "reached": [
+  {
+   "step": 1,
+   "rule": "R2, R5, R7",
+   "builder": "the identity registry's ROWS (`infra/logic/registry/scopes.json`)",
+   "evidence": "Read infra/logic/registry/scopes.json's FIRM row for key=49financial: class FIRM, long/short=49financial/49f, tenancy FIRM, bucket=opal-data-49financial, bucket_provisioned=true, tenant{display_name,kind,enabled,email_domain,surfaces,bindings} all populated per the inputs table -- exactly the shape Step 1 describes for a fresh row, already applied. Ran `python lib/opal_naming.py validate`: 'VALIDATE: OK 25 system row(s), 9 scope row(s), 17 warning(s) at registry@4a37920201f2c395' -- 0 REFUSED lines. No new row was written (no demonstration firm invented, per the cell's own text); the existing row is read as the run's practice grounding."
+  },
+  {
+   "step": 2,
+   "rule": "R1",
+   "builder": "`org/standards/NAMING_SCHEMA.json` (`firm_forms`)",
+   "evidence": "org/standards/NAMING_SCHEMA.json is v1.10 and carries no `firm_forms` key at all (direct read: has firm_forms key = False) -- the firm list has fully moved to the registry per LGIC_ENFORCE EN-r-3. Re-ran `python lib/opal_naming.py validate` (same run as Step 1): no `WARN scopes.json[<i>].key: firm '49financial' is not in NAMING_SCHEMA.json firm_forms` line printed, matching Step 2's 'if the line is not printed' branch -- no edit needed."
+  },
+  {
+   "step": 3,
+   "rule": "R3, R7",
+   "builder": "the identity registry's ROWS",
+   "evidence": "Read scopes.json's 49financial row: masters=['08242234','08335338'] (two MASTER rows, each with its own vendor-header `label`), monolith_scopes={'blackdiamond':['49f','49financial']}, pipeline_trees=[{dir:'data/black_diamond/', vendor:'blackdiamond', separated_from:['cottonwood'], authority:'Andrew sovereign 2026-06-10 (NFRA_DTAFLP) ...'}] -- the FAMILY's directory (data/black_diamond/) is read from the existing pipeline per R22, never invented. The same `validate` run (Step 1) printed 0 REFUSED lines, confirming these rows are well-formed."
+  },
+  {
+   "step": 4,
+   "rule": "R1, R6",
+   "builder": "the generated views",
+   "evidence": "Dry-run: `python lib/opal_naming.py generate --out .scratch/gen_preview` -> 'GENERATE: 10 written, 0 skipped, into .scratch/gen_preview at registry@4a37920201f2c395'. Diffed each of the 10 against the committed file at the same repo-relative path: 8 of 10 byte-identical; 2 (data/firm_registry.json, infra/aws/lambda-edge/_shared/firm-config.mjs) differ ONLY in CRLF line endings (a worktree-checkout artifact -- content-equal True after \\r\\n -> \\n normalize on both); 2 more (opal_name/tests/vectors.json, opal_name/tests/opal_name.tftest.hcl) differ ONLY in the embedded '_generated ... registry@<hash>' header line (73f95daeb4091537 committed vs 0d621bf0771226eb now -- a registry edit unrelated to these two files' actual generated values, which are otherwise byte-identical). No file under a granted-elsewhere path was written; the scratch copy is the read/dry-run evidence that the registry currently reproduces 49financial's already-committed generated entries."
+  },
+  {
+   "step": 5,
+   "rule": "R6, R7",
+   "builder": "the fence patterns",
+   "evidence": "Read infra/logic/registry/exemptions.json: key 'opal-data-49financial' exists in `exemptions`, holding 16 already-declared principals, each carrying its own `reason` and a `signoff_ref` citation (org/critical_paths/change_management/20260915T0334Z_lgic-enforce-fence-49financial_deploy_completion.md) -- the key exists exactly as Step 5 requires; no new principal was added on this run's own reading."
+  },
+  {
+   "step": 6,
+   "rule": "R1, R5, R6",
+   "builder": "the fence patterns (the template `infra/aws/terraform/shared-infra/s3-49financial.tf`)",
+   "evidence": "Read infra/aws/terraform/shared-infra/s3-49financial.tf (the template itself, since 49financial is its origin firm): resource labels/bucket name/Name tag use '49financial'; the second comment block (THE CROSS-FIRM DENY...) is the template's own born-with text, kept verbatim by construction. Read infra/aws/terraform/shared-infra/cloudtrail-organization-trail.tf:47: 'opal-data-49financial' already present in local.org_trail_read_logged_buckets. Read infra/aws/terraform/modules/opal_name/generated_locals.tf:54: '49financial' = 'opal-data-49financial' in scope_bucket. Read scopes.json: bucket_provisioned=true. No Terraform apply was run (forbidden by this cell's bounds); the already-applied state is read as confirmation of Step 6's output."
+  },
+  {
+   "step": 7,
+   "rule": "R1, R7",
+   "builder": "`lib/opal_naming.py` (`name()`; in Terraform, the module `infra/aws/terraform/modules/opal_name/` that reproduces it)",
+   "evidence": "Called `opal_naming.name('blackdiamond', '49financial', 'gold-runner', 'runner')` directly (pure function, no apply, no write) -> 'blackdiamond-49f-gold-runner-runner' -- the SHORT form '49f' lands in the scope slot exactly as Step 7 requires, which is the token the bucket fence (Step 5) admits."
+  },
+  {
+   "step": 8,
+   "rule": "R4, R9, R10",
+   "builder": "`lib/opal_naming.py` (`key()` and `address()`)",
+   "evidence": "Called `opal_naming.address('blackdiamond', '49financial', 'bronze', 'positions', 'date=2026-09-17')` -> 's3://opal-data-assets/blackdiamond/49financial/bronze/positions/date=2026-09-17', and the same call with tier='silver' -> 's3://opal-data-assets/blackdiamond/49financial/silver/positions/date=2026-09-17' -- both land in opal-data-assets per tiers.json homes.FIRM, no bucket typed by hand, no write performed."
+  },
+  {
+   "step": 9,
+   "rule": "R5, R11, R13, R16, R21",
+   "builder": "`lib/opal_naming.py` (`address()`)",
+   "evidence": "Called `opal_naming.address('blackdiamond', '49financial', 'gold', 'positions', 'date=2026-09-17')` -> 's3://opal-data-49financial/blackdiamond/49financial/gold/positions/date=2026-09-17' and tier='state' -> '.../state/watermark/date=2026-09-17', both in opal-data-49financial per R5/R21 -- pure address() calls, no write performed."
+  },
+  {
+   "step": 11,
+   "rule": "R1, R20",
+   "builder": "the flagger's verdict line and kill switch (`.tools/naming-gate.py`, the naming stage of `.tools/safe-commit.sh`)",
+   "evidence": "Exercised the naming stage directly: `python .tools/naming-gate.py --diff .scratch/sample.diff` on a synthetic diff adding a hand-typed literal 'opal-data-49f' -> 'NAMING REFUSE sample.py:2 opal-data-49f -> opal-data-49financial ... NAMING-GATE: REFUSE 1 graded', exit code 1 -- WITHOUT even passing --enforce, because org/mcp/naming-gate.enforce exists at HEAD (confirms row LGIC_CANON-S19's finding live: the stage now refuses, not warns-and-exits-0). Step 11's text is corrected in this cell's own commit alongside this record."
+  },
+  {
+   "step": 12,
+   "rule": "R1, R18",
+   "builder": "the flagger's verdict line and kill switch (the naming stage of `.tools/safe-apply.sh`)",
+   "evidence": "Exercised the naming-stage grading function directly: `opal_naming.grade('opal-data-49financial', 'S3_BUCKET')` -> ('CONFORMANT', 'opal-data-49financial') -- the same grade() call Step 12 names ('grade the name of each new resource in the plan ... apply only when every one reads CONFORMANT'), run against an already-declared resource. No `terraform apply` or `safe-apply` was run (forbidden by this cell's bounds; no ledger entry was opened because no apply was performed)."
+  },
+  {
+   "step": 15,
+   "rule": "R6, R12",
+   "builder": "the generated views (`FIRM_CONFIG` in `infra/aws/lambda-edge/_shared/firm-config.mjs`; `bucket_for` in `infra/aws/lambda/investor-reporting/_authz/loaders.py`)",
+   "evidence": "Read infra/aws/lambda-edge/_shared/firm-config.mjs's FIRM_CONFIG: 49financial's entry exists ('49financial': {bucket: 'opal-data-bd', displayName: '49 Financial'}). The bucket-uniqueness check the step names does NOT hold cleanly today: 'opal-data-bd' is shared by 49financial and mockadv -- an ALREADY-DOCUMENTED, ALREADY-RULED exception recorded in the same file (:30-63, CTO ruling 65047, AE-lane TENANT-GRAIN ENTITLEMENT remedy pending) that predates this run, not a new finding, so no fresh surprise row was filed for it. No deploy was run: Step 4's dry-run already showed the generated content for 49financial's entry is byte-identical to what is committed, so there is nothing new to deploy; the check itself was genuinely exercised via read and its true, already-documented answer is recorded here."
+  }
+ ],
+ "carded": [
+  {
+   "step": 10,
+   "owner": "ADVI_FIRMBKTS",
+   "reason": "The checklist's own STOP (:295-304, unchanged by this run): the edge auth validator and shared advisor router both read tier-first platinum keys (`platinum/{firmId}/ownership_map.json`, `platinum/advi/{firm}/`) that address() cannot produce, until ADVI_FIRMBKTS's router repoint lands. Confirmed live for THIS subject: 49financial's own served ownership_map.json and mix_summary.json are read from opal-data-portal-v2/platinum/advi/49financial/ (the legacy tier-first tree named in scopes.json row trees.advi.serve_bucket='opal-data-portal-v2'), never from address()'s opal-data-49financial output -- the exact condition the STOP describes, true today for an existing firm and therefore true for a new one. R-34 releases the PROJECT-level wait on ADVI_FIRMBKTS, not this mechanical fact, which the checklist's own instrument still states."
+  },
+  {
+   "step": 13,
+   "owner": "LGIC_ENFORCE (Rule 30: a RAISE is fixed at its own registry row)",
+   "reason": "EN-s-1 has CLOSED (both LGIC_ENFORCE.TO-EN-s-1 and its -r2 sibling read <status>complete -- proof-of-spec VALID (rc=0); re-verified by re-running `python .tools/proof-of-spec-check.py` against the -r2 instance: VALID (rc=0)) -- Step 13's text is corrected in this cell's own commit, row LGIC_CANON-W1-S7. Because it is now available, the census mode was RUN: `python lib/opal_naming.py census --repo --live --budget 60 --report .scratch/census_c6.md` -> 'CENSUS: STOPPED on the first RAISE after 3 judged (0 carded): live API_GW sentiment-query-api', an unrelated resource never touching 49financial or 49f. The run stopped before reaching any 49financial/49f-carrying row, so 'every row whose name carries <LONG> or <SHORT> reads CONFORMANT' could not be confirmed this run; the gap is the unrelated RAISE, fixed at its own registry row per Rule 30, never inside this cell."
+  },
+  {
+   "step": 14,
+   "owner": "Andrew (SOVEREIGN portal-paths input, row LGIC_CANON-W6-S2); 1.0.0_SA_CTO (register entry X8, for a firm not already declared)",
+   "reason": "Step 14's portal-paths sub-bullet reads a SOVEREIGN input (THE INPUTS table: 'a missing SOVEREIGN input is a STOP, never a default'), and this practice run was not given one -- no demonstration firm was invented and Andrew was not asked to supply a fresh portal-paths grant for a dry run, so that sub-bullet cannot complete regardless of subject. Separately: for a genuinely NEW firm the mint sub-bullet STOPs on register entry X8 until 1.0.0_SA_CTO extends it; 49financial's own table is already one of X8's four declared names (confirmed: infra/aws/terraform/partner-firms/49financial.tf already exists), so that half does not block THIS subject specifically, but the step as a whole still needs the portal-paths input this run does not have."
+  },
+  {
+   "step": 16,
+   "owner": "ADVI_FIRMBKTS (same router repoint as Step 10); a live portal sign-in (outside this cell's NOTHING LIVE MOVES bound)",
+   "reason": "Step 16's bar requires platinum requests to return HTTP 200 from `opal-data-<LONG>` via the builder's address() -- but the content currently served for 49financial is read from the LEGACY tier-first tree in opal-data-portal-v2, not from address()'s output (same root cause as Step 10's STOP). Confirmed live, read-only: `.tools/aws s3api head-object --bucket opal-data-portal-v2 --key platinum/advi/49financial/ownership_map.json` -> 200-equivalent, ContentLength 566205; the same for .../mix_summary.json -> ContentLength 11129, matching firm-config.mjs's own 2026-08-21 hazard-note measurement exactly (11,129 B). An authenticated sign-in and an edge-routed HTTP round trip (plus its 401 negative control) is also a live act this cell's bounds forbid. FWD-5's own DONE-WHEN names this dashboard condition as the SERVED-PLANE half that does not close on this cell alone (decomposition v6 s.0f)."
+  }
+ ],
+ "rows_filed": ["LGIC_CANON-W1-S6", "LGIC_CANON-W1-S7"],
+ "served": {
+  "instrument": "git hash-object on infra/aws/lambda-edge/_shared/firm-config.mjs (the routes/FIRM_CONFIG source this cell reads and never writes) -- read-only, before this run's edits and again at commit time",
+  "before": {"routes_sha256": "07412e484cc304d5bcbb727ff11aa0296e5389d6"},
+  "after": {"routes_sha256": "07412e484cc304d5bcbb727ff11aa0296e5389d6"}
+ },
+ "live_acts": []
+}
