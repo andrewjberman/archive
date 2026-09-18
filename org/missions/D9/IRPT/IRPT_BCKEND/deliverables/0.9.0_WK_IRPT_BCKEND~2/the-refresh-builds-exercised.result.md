@@ -307,3 +307,109 @@ built closes correctly a second time, on a different failure cause.
 | id | class | one line |
 |---|---|---|
 | `IRPT_BCKEND-W2-S56` | BLOCKING | AMENDMENT 2's fix works (the `--as-of` refusal is gone) and the real fire exposed a new, out-of-lane blocker: `jsonschema.Draft202012Validator` is absent from the host's `jsonschema==3.2.0` |
+
+---
+
+## AMENDMENT 3 -- THE RE-RUN AFTER IB-rtc-9 AND IB-rtc-7, executed
+
+**Serial:** `0.9.0_WK_IRPT_BCKEND~2` (RE-HANDED to slot ~2, cold start) | **worktree:**
+`/c/tmp/wk-irpt-3-2c` on branch `wk-irpt_bckend-3-2c` | **base:** `2bfc6c1c08`
+**Invocation:** `timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rtc_3.py`
+**Result:** `rc=0`, **22 of 22 graded checks PASS** (+2 MEASURED, ungraded -- 49financial, re-scoped),
+`IBR33-TWO-OF-THREE-DIRECTORIES-LANDED`.
+**R33-AC1 = PASS-by-output.** R33-AC2 recorded below for `3.0.0_SA_CVO`.
+
+Battery content hash (`git hash-object`): `17731d2c705fd16bff897f12de520eeb1ad3e427`.
+Battery output content hash: `f316ccc8f83f811c6ef4555445b1833dbaa5627d`
+(`org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/IB-rtc-3_R33-AC1_battery_output.txt`).
+
+### The short version
+
+AMENDMENT 3 changes NO code and NO infrastructure, per its own bound. IB-rtc-9's bundle re-mint
+(`VersionId 0XLkiPt4wljdniLnF2fkPKN4qAIkjUbc`) and IB-rtc-7's rebuilt-and-redeployed Lambda
+(served `CodeSha256 JkY/lBc2Wucz/XIPzyH0zmJt22ucItxjDehbKJko6i4=`, applied under IB-rtc-7's own
+ledger and never-widen sign-off) were both already at this branch's HEAD when this cell was cut.
+This battery re-derives every arm live, a second time, against the real world:
+
+- **(a)** the real `test_refresh_expiry.py` suite: **33 of 33 PASS**. The recipe text asserts
+  `-C $W` present, `0` `..` path segments, `0` explicit `--as-of` -- all three PASS.
+- **(b) READ-ONLY**, per the amendment: served `CodeSha256` equals `lambda-source-map.json`'s
+  `artifact_sha256` at this branch's own worktree file -- **PASS**, no plan, no apply, no rebuild.
+- **(c)** the on-host sweep, the ratified 10-source population (row W2-S54): **PASS**, `5 OK / 5
+  DENY` on source, `0/8` on the 8 negative controls, `3 of 3` destinations probed, positive
+  control fires.
+- **(d)/(e)** fired the DEPLOYED dispatch fresh, for real, with the schedule's own live payload
+  (`{"kind":"irpt_directory_refresh", ...}`, read live from `schedule.tf`, no `business_date`
+  override) at `2026-09-18T~10:0xZ`. **One invoke reached a terminal, non-RUNNING state for all
+  three firms immediately** (`READY`/`READY`/`READY`) -- no new SSM command was dispatched this
+  fire for any firm (measured: `ssm_command_id=None` on every firm's fresh manifest write). Both
+  graded firms **LANDED, 2 of 2**:
+
+  | firm | key | ETag | sha256 | rows | revision before -> after |
+  |---|---|---|---|---|---|
+  | inflection | `s3://opal-data-inf/investor-reporting/directory/2026-09-17/directory.json` | `782324f961078b228a32af9316af9836` | `09e349d2886bdc5b...` | 291 | `irpt-dir/inflection/2026-09-17/1.0` -> same |
+  | cottonwood | `s3://opal-data-cot/investor-reporting/directory/2026-09-16/directory.json` | `264e0fbedc24c09bd066ee9eb278ea5f` | `af0b61da8ddc43a5...` | 259 | `irpt-dir/cottonwood/2026-09-16/1.0` -> same |
+
+  Both artifacts are **byte-identical** to IB-rtc-7's own earlier fire the same day (same ETag,
+  same sha256) -- this fire re-confirmed the real, already-landed artifact rather than building a
+  new one. The reason code both firms' fresh manifests recorded is `REFRESH_COMPLETED_WITH_ADDITIONS`
+  (not `REFRESH_NOOP_SAME_FRONTIER`), and row `IRPT_BCKEND-W2-S57` (filed below, OBSERVATION) traces
+  exactly why: `last_manifest()`'s calendar-day backward walk finds a STALE `REFRESH_DISPATCHED`
+  manifest dated TODAY (IB-rtc-7's own first dispatch, keyed by the clock date) before it ever
+  reaches the later COMPLETED manifest at the runner's own, earlier business date -- so
+  `previous_entries` reads empty and the delta reports every entry as newly "added" even though
+  nothing changed. This does not fail the acceptance (the face admits either branch as LANDED, and
+  both fields here -- presence, correct hash, correct business date -- are real and correct), but
+  it means `REFRESH_NOOP_SAME_FRONTIER`'s own branch, as built, has never yet fired against a real
+  manifest history.
+- **49financial**, re-scoped per this amendment (no longer expected BLOCKED): **MEASURED, not
+  graded** -- also landed, byte-identical to IB-rtc-7's fire (`ETag fcdf90de75f24a591c1073489ad1b21f`,
+  4562 rows, `s3://opal-data-bd/investor-reporting/directory/2026-09-16/directory.json`).
+- **(f) content sanity**, all real reads: firm-in-artifact `2 of 2` (inflection's and cottonwood's
+  `firm_id_opaque` match `_ids.opaque_firm(registry_id)` exactly, and every entry's `ids.firm_id`
+  agrees; 49financial's matches too, measured); a `0 of 24227` census of every `client_id`/
+  `firm_id`/`relationship_id`/`account_ids` value across all three landed artifacts for an
+  email- or name-shaped value (bound 13 -- 0 found, all ISSUED opaque ids); `0 of 0` newly-written
+  keys this fire that fall outside `investor-reporting/` (nothing new was written, consistent with
+  the byte-identical artifacts above).
+
+### R33-AC2 -- the facts, for `3.0.0_SA_CVO` (no verdict)
+
+1. **Are the landed artifacts the runner's real output for the business date, or a degenerate
+   first mint?** The runner's real output -- but NOT newly built by THIS fire. Both artifacts are
+   byte-identical (ETag and sha256) to IB-rtc-7's own real fire earlier the same day, which DID
+   run the real runner against real dimension/allocation data (49financial 4562 rows, cottonwood
+   259, inflection 291, matching this fire's counts exactly). This fire's own dispatch cycle never
+   actually re-ran the build (row `IRPT_BCKEND-W2-S57`: the stale `REFRESH_DISPATCHED` manifest at
+   today's calendar key caused `same_frontier` to never trigger, but also meant no NEW SSM command
+   was ever sent -- `ssm_command_id=None` on every fresh write, confirmed) -- it re-confirmed and
+   re-served the existing, genuinely-built artifact. Not a degenerate first mint: `directory_revision`
+   stayed `.../1.0` (a first mint, but IB-rtc-7's, not this fire's), never `absent -> r1` on this
+   fire.
+2. **What FWD-7's DONE WHEN still lacks:** the scheduled fire on a real business day (the standing
+   `cron(0 9 ? * MON-FRI *)` schedule is unchanged and ENABLED, per `<preflight>`; its next organic
+   fire will exercise the identical code path this cell just exercised manually). The 49 Financial
+   third is **no longer lacking** -- IB-rtc-7 applied the principal and its build landed
+   (4562 rows), and this fire re-confirms it still stands. What IB-rtc-7 itself left (per its own
+   result): the scheduled organic fire (a wait this project does not observe as an act) and D14's
+   destination move (49 Financial's directory still lands in the legacy `opal-data-bd` bucket, a
+   decision D14 makes, not this cell).
+3. **Did the dispatch-to-reconcile loop IB-rt-6 built close?** Yes, trivially this fire (the single
+   invoke returned a terminal, already-accounted-for state for all three firms with no command in
+   flight), but row `IRPT_BCKEND-W2-S57` records that the loop's `same_frontier`/no-op accounting is
+   NOT exercising the branch its own design names for this exact history shape -- worth a future
+   cell's attention, not a defect this cell introduced or may fix (bound: no code change this
+   amendment).
+4. **Did the repo-shaped unpack change anything for the two firms beyond placement?** Nothing new
+   this fire specifically (no build ran), but cumulatively across this project's full history: yes,
+   materially -- from an UNPACK failure (`FileNotFoundError`), through a business-date refusal
+   (W2-S55, cleared), through a `jsonschema` version mismatch (W2-S56, cleared by IB-rtc-9's
+   re-mint), to a real, landed, correctly-hashed, correctly-firm-scoped directory artifact for
+   every one of the three firms, confirmed present and unchanged by this fire's own independent
+   re-derivation.
+
+## Rows filed this AMENDMENT (1)
+
+| id | class | one line |
+|---|---|---|
+| `IRPT_BCKEND-W2-S57` | OBSERVATION | `REFRESH_NOOP_SAME_FRONTIER` never fires against a real manifest history: a stale `REFRESH_DISPATCHED` manifest dated today (IB-rtc-7's own first dispatch) shadows the later COMPLETED manifest at the runner's earlier business date in `last_manifest()`'s calendar-day walk, so every same-day re-fire re-reports the unchanged, already-landed artifact as `REFRESH_COMPLETED_WITH_ADDITIONS` instead |
