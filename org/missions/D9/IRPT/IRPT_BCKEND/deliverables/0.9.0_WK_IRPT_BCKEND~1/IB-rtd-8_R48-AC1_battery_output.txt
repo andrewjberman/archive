@@ -1,0 +1,149 @@
+BATTERY IB-rtd-8 -- THE FIRM CHECK RESTORED ON THE OPERATIONS-VIEWER BRANCH
+repo: C:\tmp\wk-irpt-4-1
+
+==============================================================================
+ARM (a) BOTH COPIES CARRY THE FIX, READ FRESH THIS RUN
+==============================================================================
+[PASS] a1 both files byte-identical (one canonical fix, not two drifting definitions) -- 34707 bytes vs 34707 bytes, sha256 69808e783c79d0c3 vs 69808e783c79d0c3
+    _authz/enforce.py        firm-membership guard at offset 18435, principal-class branch at offset 18885 -- guard precedes branch: True
+    holdings/enforce.py      firm-membership guard at offset 18435, principal-class branch at offset 18885 -- guard precedes branch: True
+[PASS] a2 the firm-membership guard precedes the FIRM_OPERATIONS/OPAL_GLOBAL branch on both -- both files re-checked structurally this run, never from a cached line number
+
+==============================================================================
+ARM (b) THE SIX-SWAP CENSUS, THE MUTANT, AND THE WHOLE SUITES
+==============================================================================
+    _authz/tests   : rc=0  137 of 137 passed  last line: 137 passed in 9.03s
+[PASS] b1 _authz/tests whole suite k of k -- 137 of 137
+    holdings/tests : rc=0  35 of 35 passed  last line: 35 passed in 0.34s
+[PASS] b2 holdings/tests whole suite k of k -- 35 of 35
+    six-swap nodes: _authz=6 holdings=6
+[PASS] b3 the six-swap census, 12 of 12 verdicts on both copies -- 12 of 12
+    MUTANT _authz   FIRM_OPERATIONS  other-firm-advisor -> SERVED (flip=True)  [C:\tmp\wk-irpt-4-1\infra\aws\lambda\investor-reporting\_authz\enforce.py]
+    MUTANT _authz   OPAL_GLOBAL      other-firm-advisor -> SERVED (flip=True)  [C:\tmp\wk-irpt-4-1\infra\aws\lambda\investor-reporting\_authz\enforce.py]
+    MUTANT holdings FIRM_OPERATIONS  other-firm-advisor -> SERVED (flip=True)  [C:\tmp\wk-irpt-4-1\infra\aws\lambda\investor-reporting\holdings\enforce.py]
+    MUTANT holdings OPAL_GLOBAL      other-firm-advisor -> SERVED (flip=True)  [C:\tmp\wk-irpt-4-1\infra\aws\lambda\investor-reporting\holdings\enforce.py]
+[PASS] b4 the mutant flips exactly the other-firm arms, n of n -- 4 of 4 (the pre-fix branch, spliced back in, wrongly SERVES every one of these; the real, fixed branch REFUSES all 4, as arm b3 above just measured)
+
+==============================================================================
+ARM (c) THE DEPLOY CENSUS -- N of N functions packaging enforce.py, LIVE this run
+==============================================================================
+    denominator: 7 function(s) declare enforce.py in files[] (lambda-source-map.json, this run)
+    irpt-directory-search        served==declared:True  enforce.py==fixed:True (69808e783c79d0c3)
+    irpt-export-render           served==declared:True  enforce.py==fixed:True (69808e783c79d0c3)
+    irpt-holdings                served==declared:True  enforce.py==fixed:True (69808e783c79d0c3)
+    irpt-narrative               served==declared:True  enforce.py==fixed:True (69808e783c79d0c3)
+    irpt-performance-adapter     served==declared:True  enforce.py==fixed:True (69808e783c79d0c3)
+    irpt-status                  served==declared:True  enforce.py==fixed:True (69808e783c79d0c3)
+    irpt-ycharts-generate        served==declared:True  enforce.py==fixed:True (69808e783c79d0c3)
+[PASS] c1 N of N functions deployed under ledger, served CodeSha256 == built, enforce.py == the fixed content -- 7 of 7
+
+==============================================================================
+ARM (d) THE LIVE-ROUTE CENSUS -- M of M routes reach covers(..., 'advisor', ...)
+==============================================================================
+    denominator: 12 published route(s) / 7 function(s), from routes.json this run
+    integrations.tf (this run): payload_format_version 2.0 present=True, any request template found=False
+[PASS] d1 the live API cannot inject object_kind into a raw event -- HTTP API v2 proxy integration with no request template -> event.get('object_kind') is None for every real request; only a direct (non-API-Gateway) Lambda invoke could set it, and IAM restricts invocation to the API Gateway role
+    source census: 16 `.guard(...)` call site(s) scanned across 67 .py file(s) (tests/fixtures excluded); object_kind='advisor' found at: NONE
+[PASS] d2 M of M live routes reach the advisor object_kind (measured) -- 0 of 7 -- VACUOUS (measured, not assumed): 0 `.guard(..., "advisor")` call sites exist in any real dispatcher this run, AND the API Gateway integration cannot inject object_kind into a real request (arm d1) -- so no live route can reach the branch this cell fixed. The mechanism itself is proven directly against the real Enforcer in arm (b)'s six-swap census, which IS the applicable evidence for R48-AC2's own question (does any route make an advisor id load-bearing today).
+{
+ "battery": "IB-rtd-8",
+ "arms": {
+  "a_both_fixed": true,
+  "b_tests_and_mutant": {
+   "ok": true,
+   "detail": {
+    "suite_authz": "137 of 137",
+    "suite_holdings": "35 of 35",
+    "swaps": "12 of 12",
+    "mutant_other_firm_flips": "4 of 4"
+   }
+  },
+  "c_deploy_census": {
+   "ok": true,
+   "detail": {
+    "denominator": "7",
+    "rows": [
+     {
+      "function": "irpt-directory-search",
+      "ok": true,
+      "served_sha256_b64": "4gEA2NGLmMcve9VwmI5GFuIrWRqiNFJiGOjnCpobKA4=",
+      "declared_sha256_b64": "4gEA2NGLmMcve9VwmI5GFuIrWRqiNFJiGOjnCpobKA4=",
+      "served_enforce_py_sha256_hex": "69808e783c79d0c3c6e5aef46b4ce2aaaa4c93f57dcdec1845520078ec354db8",
+      "download_error": null
+     },
+     {
+      "function": "irpt-export-render",
+      "ok": true,
+      "served_sha256_b64": "kJo+wYyD04/RFpJ5eHxajWRwEkgUZ8QzPaI1H4Hwxmg=",
+      "declared_sha256_b64": "kJo+wYyD04/RFpJ5eHxajWRwEkgUZ8QzPaI1H4Hwxmg=",
+      "served_enforce_py_sha256_hex": "69808e783c79d0c3c6e5aef46b4ce2aaaa4c93f57dcdec1845520078ec354db8",
+      "download_error": null
+     },
+     {
+      "function": "irpt-holdings",
+      "ok": true,
+      "served_sha256_b64": "UllXBBuvOzO+7SMQIUUsld1IlClqkk2cOAy8UxHx8h0=",
+      "declared_sha256_b64": "UllXBBuvOzO+7SMQIUUsld1IlClqkk2cOAy8UxHx8h0=",
+      "served_enforce_py_sha256_hex": "69808e783c79d0c3c6e5aef46b4ce2aaaa4c93f57dcdec1845520078ec354db8",
+      "download_error": null
+     },
+     {
+      "function": "irpt-narrative",
+      "ok": true,
+      "served_sha256_b64": "clE+2207w82sHln/yxB9FP+5jVrv3ka9afe5J9Bz2Vo=",
+      "declared_sha256_b64": "clE+2207w82sHln/yxB9FP+5jVrv3ka9afe5J9Bz2Vo=",
+      "served_enforce_py_sha256_hex": "69808e783c79d0c3c6e5aef46b4ce2aaaa4c93f57dcdec1845520078ec354db8",
+      "download_error": null
+     },
+     {
+      "function": "irpt-performance-adapter",
+      "ok": true,
+      "served_sha256_b64": "6MU1bNu05AfRCbufsBV/3614Mexz4zZAOO1/Kro+uuM=",
+      "declared_sha256_b64": "6MU1bNu05AfRCbufsBV/3614Mexz4zZAOO1/Kro+uuM=",
+      "served_enforce_py_sha256_hex": "69808e783c79d0c3c6e5aef46b4ce2aaaa4c93f57dcdec1845520078ec354db8",
+      "download_error": null
+     },
+     {
+      "function": "irpt-status",
+      "ok": true,
+      "served_sha256_b64": "j2IVLsWpxJKajr19li3XTQkrrl/Yp/TWs6fqStybzUI=",
+      "declared_sha256_b64": "j2IVLsWpxJKajr19li3XTQkrrl/Yp/TWs6fqStybzUI=",
+      "served_enforce_py_sha256_hex": "69808e783c79d0c3c6e5aef46b4ce2aaaa4c93f57dcdec1845520078ec354db8",
+      "download_error": null
+     },
+     {
+      "function": "irpt-ycharts-generate",
+      "ok": true,
+      "served_sha256_b64": "CJ6aBh7BWJFcT2Vv0/cJFSXHaH5cs1LvqXvJRfkXHm8=",
+      "declared_sha256_b64": "CJ6aBh7BWJFcT2Vv0/cJFSXHaH5cs1LvqXvJRfkXHm8=",
+      "served_enforce_py_sha256_hex": "69808e783c79d0c3c6e5aef46b4ce2aaaa4c93f57dcdec1845520078ec354db8",
+      "download_error": null
+     }
+    ]
+   }
+  },
+  "d_live_routes": {
+   "ok": true,
+   "detail": {
+    "m": "0 of 7",
+    "vacuous": true,
+    "advisor_call_sites": []
+   }
+  }
+ },
+ "overall_pass": true
+}
+
+=== SUMMARY ==================================================================
+  a1 both files byte-identical (one canonical fix, not two drifting definitions) PASS
+  a2 the firm-membership guard precedes the FIRM_OPERATIONS/OPAL_GLOBAL branch on both PASS
+  b1 _authz/tests whole suite k of k                                     PASS
+  b2 holdings/tests whole suite k of k                                   PASS
+  b3 the six-swap census, 12 of 12 verdicts on both copies               PASS
+  b4 the mutant flips exactly the other-firm arms, n of n                PASS
+  c1 N of N functions deployed under ledger, served CodeSha256 == built, enforce.py == the fixed content PASS
+  d1 the live API cannot inject object_kind into a raw event             PASS
+  d2 M of M live routes reach the advisor object_kind (measured)         PASS
+  overall_pass = True
+
+IBR48-FIRM-CHECK-RESTORED-ON-BOTH-ENFORCERS
