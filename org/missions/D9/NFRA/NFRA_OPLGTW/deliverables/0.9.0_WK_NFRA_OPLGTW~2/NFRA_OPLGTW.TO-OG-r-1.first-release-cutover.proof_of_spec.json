@@ -1,0 +1,343 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-r-1",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f0aa50dbc0"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "8768f46770",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-r-1.first-release-cutover.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The probe every criterion above names, run live against AWS account 313476888478, the deployed Gateway host, and the emulated (moto) local harness for AC11. commit-gate.sh run clean before each commit.",
+   "artifact_covered_by": [
+    "OGR1-AC1",
+    "OGR1-AC2",
+    "OGR1-AC3",
+    "OGR1-AC4",
+    "OGR1-AC5",
+    "OGR1-AC6",
+    "OGR1-AC7",
+    "OGR1-AC8",
+    "OGR1-AC9",
+    "OGR1-AC10",
+    "OGR1-AC11",
+    "OGR1-AC12",
+    "OGR1-AC13",
+    "OGR1-AC14",
+    "OGR1-AC15",
+    "OGR1-AC16",
+    "OGR1-AC17",
+    "OGR1-AC18"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1_ac11_pytest.py",
+   "kind": "test",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Run via og_r1.py AC11 (pytest -q -s), 1 passed. Reuses tests/acceptance/conftest.py's og_v2 harness (moto-emulated AWS); never reaches the host or the live state store.",
+   "artifact_covered_by": [
+    "OGR1-AC11"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/safe-ec2-deploy.sh",
+   "kind": "script",
+   "commit_or_etag": "1764e54a16b7bb12d34b36eec7866589b6ea785e",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "R-53's corrected halt-gate identity fix: HALT_GATE_REPO_ROOT now resolves to the calling worktree; HALT_GATE_CONTEXT_FILE/HALT_GATE_AUDIT_LOG stay pinned to the main tree. Exercised LIVE by OGR1-AC2 itself (the real deploy this commit enabled) and graded by OGR1-AC15-AC18.",
+   "artifact_covered_by": [
+    "OGR1-AC2",
+    "OGR1-AC15",
+    "OGR1-AC16",
+    "OGR1-AC17",
+    "OGR1-AC18"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/EC2_MANIFEST.json",
+   "kind": "config_data",
+   "commit_or_etag": "ef11656176533a9aebfa3049c9beddcc4f8d98d9",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "services.opal-gateway.deployed_commit updated to 1764e54a16... by safe-ec2-deploy.sh itself after a real, verified deploy (systemd active, /health ok, /mcp 401) to i-07dccb1615503ac99; committed by the wrapper under this worker's serial.",
+   "artifact_covered_by": [
+    "OGR1-AC2",
+    "OGR1-AC4"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/.open_deploys/nfra-oplgtw-og-r-1-first-release.json",
+   "kind": "config_data",
+   "commit_or_etag": "7752ea3bdb87be4ef3ad1f5b6b9d6094ba72c9e1",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "Deploy-completion ledger sentinel, opened before the deploy (OGR1-AC1) and closed with all 3 legs proven after it (OGR1-AC8); the sentinel itself no longer exists (removed on close).",
+   "artifact_covered_by": [
+    "OGR1-AC1",
+    "OGR1-AC8"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260918T0507Z_nfra-oplgtw-og-r-1-first-release_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "864aa6a9372a7137fbc20796190c530497d119f3",
+   "deployed_state": "STAGED-AWAITING-GATE",
+   "deploy_evidence": "The rendered deploy-completion entry, Status CLOSED, all 3 legs proven -- ec2-baked-asset (AC4's digest comparison, run and recorded even though it FAILS), verify (AC3/AC5/AC6/AC7/AC9/AC12/AC13's own runs), git (the EC2_MANIFEST.json commit).",
+   "artifact_covered_by": [
+    "OGR1-AC1",
+    "OGR1-AC8"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "OGR1-AC1",
+   "criterion_verbatim": "the ledger entry is opened and its sentinel committed before the deploy.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC1",
+   "output_evidence": "  OK  the ledger-open commit exists in this branch's history -- 7752ea3bdb87be4ef3ad1f5b6b9d6094ba72c9e1\n  OK  git log shows that commit (committed, not merely staged) -- 7752ea3bdb deploy-ledger(open, NFRA_OPLGTW.TO-OG-r-1): OG-r-1 first release -- opened BEFORE the deploy, per the no-half-landed-deploy discipline\n  OK  the open precedes the deploy -- 2026-09-18T05:09:11.674566Z <= 2026-09-18T05:56:52.447663Z\nDENOMINATOR: 3 of 3 checks OK\nVERDICT: PASS-OGR1-AC1\nRC=0",
+   "denominator": "3 of 3 ordering/commit checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC1(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC2",
+   "criterion_verbatim": "the deploy runs through `infra/aws/ec2/safe-ec2-deploy.sh` with the Schwab feature flag off.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC2",
+   "output_evidence": "  OK  the deploy completed (safe-ec2-deploy.sh rc=0, recorded this run) -- 2026-09-18T05:58:38.983630Z\n  OK  EC2_MANIFEST.json's recorded deployed_commit == the commit actually built and deployed (pre-deploy HEAD; the manifest-update commit that follows it is a later, separate commit) -- 1764e54a16b7bb12d34b36eec7866589b6ea785e == 1764e54a16b7bb12d34b36eec7866589b6ea785e\n  OK  the released deploy-to-ec2.sh's ENABLED_INTEGRATIONS line omits 'schwab' (the Schwab flag is off) -- ENABLED_INTEGRATIONS=ycharts opal_portal globgrph\nDENOMINATOR: 3 of 3 checks OK\nVERDICT: PASS-OGR1-AC2\nRC=0",
+   "denominator": "3 of 3 completion/identity/flag checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC2(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC3",
+   "criterion_verbatim": "no principal profile is active in the state store after the deploy.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC3",
+   "output_evidence": "instrument: dynamodb Scan(ProjectionExpression=pk,sk) on gateway-access-state-table\nvintage: 2026-09-18T06:19:47.548033Z  denominator: 8 item(s) in the table\nsample keys (up to 20, structure only): [{'pk': 'POLICY#probe-og-i1-20260916T000705463912Z-ttl', 'sk': 'AUDIT#0001'}, {'pk': 'POLICY#probe-og-i1-20260916T000705463912Z-ttl', 'sk': 'PROFILE'}, {'pk': 'POLICY#probe-og-i1-20260916T000658709747Z-race', 'sk': 'AUDIT#0001'}, {'pk': 'POLICY#probe-og-i1-20260916T000658709747Z-race', 'sk': 'PROFILE'}, {'pk': 'RUNTIME#probe-og-i5-20260917T140533Z', 'sk': 'AC9'}, {'pk': 'POLICY#probe-og-i1-20260916T000402023004Z', 'sk': 'AUDIT#0001'}, {'pk': 'POLICY#probe-og-i1-20260916T000402023004Z', 'sk': 'AUDIT#0002'}, {'pk': 'POLICY#probe-og-i1-20260916T000402023004Z', 'sk': 'PROFILE'}]\nof the 8 sampled item(s): 8 match OTHER cells' own synthetic 'probe-og-<cell>-<timestamp>' test fixtures (og_i1.py/og_i5.py, pre-existing, not this release's work and not a real principal); 0 do not\n  OK  the table is reachable (a Scan returned) -- rc n/a (no exception)\n  OK  every sampled item is a pre-existing probe fixture or otherwise non-profile-shaped, never a real principal's profile -- []\nDENOMINATOR: 2 of 2 checks OK\nVERDICT: PASS-OGR1-AC3\nRC=0",
+   "denominator": "8 items scanned (0 real-principal profiles among them)",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC3(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC4",
+   "criterion_verbatim": "on the host, every deployed file's digest equals the build input's, file by file, denominator printed.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC4",
+   "output_evidence": "instrument: SSM AWS-RunShellScript sha256sum on i-07dccb1615503ac99 (/opt/opal-gateway) vs git blob sha256 at 1764e54a16b7bb12d34b36eec7866589b6ea785e (build input == AC2's deployed HEAD); ssm 3f045b8a-8d33-47ae-b908-14b55517f2e2 Success\nvintage: 2026-09-18T06:19:53.984561Z .. 2026-09-18T06:19:56.825430Z\ndenominator: 68 files (tree 68, host 68)\n  MISMATCH app/entity_resolution/SCAFFOLD.md host=848f5721e15971d6 tree=92ab3b9835924f4f\n  MISMATCH app/graphql_plumbing/DESIGN.md host=ca542591a207f281 tree=9071de3106134c2d\n  MISMATCH app/integrations/schwab/datasets.json host=004178d133882158 tree=e85da072de2adaac\n  MISMATCH app/org/mcp/agent_telemetry/0.7.0_AE_CloudOps.jsonl host=237fe0bd7f7a7ffc tree=f7116911573c47d1\n  MISMATCH app/refs/DATA_CATALOG.yaml host=29079a8fda329851 tree=f77682e9f0f2819f\n  MISMATCH app/static/schwab_download/index.html host=c0a3e16cd075f243 tree=580114f03d7f890f\n  MISMATCH deploy/opal-gateway.service host=83dfce7a16f965f6 tree=4d47e09b0e01925b\n  MISMATCH identity_tool_allowlist.txt host=379c9f98d16ca362 tree=4c3f897103e9e99f\n  MISMATCH requirements.txt host=9694d113c1e8ac35 tree=38493e14f9b00719\nVERDICT: FAIL-OGR1-AC4 digest_mismatch=9 host_only=0 tree_only=0\nRC=1",
+   "denominator": "68 of 68 files compared (9 MISMATCH)",
+   "status": "FAIL",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC4(?![0-9])",
+   "status_reason": "9 of 68 deployed files (deploy/opal-gateway.service, requirements.txt, identity_tool_allowlist.txt and six app/ resource files) carry CRLF line endings differing byte-for-byte from their LF-stored git blobs -- this deploying worktree has core.autocrlf=true and only *.py carries an eol=lf .gitattributes override, and deploy-to-ec2.sh tars the live checkout rather than a normalized archive. Real, newly-introduced (OG-p-1's prior baseline shows these same paths matched before this deploy); no functional break found on inspection (the allowlist parses in text mode, systemd started this run). See surprise row NFRA_OPLGTW-W2-S8."
+  },
+  {
+   "criterion_id": "OGR1-AC5",
+   "criterion_verbatim": "an unauthenticated `/mcp` returns 401 with the advertised resource challenge (asserted, not printed).",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC5",
+   "output_evidence": "instrument: unauthenticated GET https://mcp.opalinvest.dev/mcp (no Authorization header)\nvintage: 2026-09-18T06:19:57.412335Z  status=401  WWW-Authenticate present=True\n  OK  status is 401 -- 401\n  OK  WWW-Authenticate advertises the resource_metadata challenge (asserted, not printed) -- True\n  OK  a missing-credential challenge carries no error= (RFC 6750 s3.1) -- True\nDENOMINATOR: 3 of 3 checks OK\nVERDICT: PASS-OGR1-AC5\nRC=0",
+   "denominator": "3 of 3 challenge checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC5(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC6",
+   "criterion_verbatim": "the discovery metadata advertises exactly the resource, issuer, endpoints, scope and S256 behaviour the running configuration enforces.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC6",
+   "output_evidence": "instrument: unauthenticated GET of both RFC 8414/9728 discovery documents\nvintage: 2026-09-18T06:19:58.387179Z  protected-resource status=200  authorization-server status=200\n  OK  both discovery documents served 200 -- (200, 200)\n  OK  issuer is this Gateway (https://mcp.opalinvest.dev) -- https://mcp.opalinvest.dev\n  OK  protected-resource.authorization_servers == [issuer] -- ['https://mcp.opalinvest.dev']\n  OK  protected-resource.resource names the /mcp resource under the issuer (RFC 8414's authorization-server metadata carries no 'resource' field, so it is never compared to one) -- https://mcp.opalinvest.dev/mcp\n  OK  every endpoint is under the issuer -- {'authorization_endpoint': 'https://mcp.opalinvest.dev/authorize', 'token_endpoint': 'https://mcp.opalinvest.dev/token', 'registration_endpoint': 'https://mcp.opalinvest.dev/register', 'jwks_uri': 'https://mcp.opalinvest.dev/.well-known/jwks.json'}\n  OK  scopes_supported is a non-empty list on both documents -- ['mcp']\n  OK  PKCE is S256-only (no plain) -- ['S256']\n  OK  bearer_methods_supported is exactly ['header'] -- ['header']\nDENOMINATOR: 8 of 8 checks OK\nVERDICT: PASS-OGR1-AC6\nRC=0",
+   "denominator": "8 of 8 discovery-metadata checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC6(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC7",
+   "criterion_verbatim": "on the host, the registry loaded with the live configuration enumerates zero Schwab tools.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC7",
+   "output_evidence": "instrument: on-host read of /opt/opal-gateway/.env's ENABLED_INTEGRATIONS (SSM 4d0916fb-04ef-48be-8184-76035ed604d4 Success) + local read of app.integrations.registry.available_ids() (registry.register_enabled only constructs+registers a factory for an id present in ENABLED_INTEGRATIONS -- an absent id adds zero tools, by construction)\nvintage: 2026-09-18T06:19:59.697798Z .. 2026-09-18T06:20:02.565992Z  live .env line: 'ENABLED_INTEGRATIONS=ycharts opal_portal globgrph'\n  OK  the on-host .env carries an ENABLED_INTEGRATIONS line -- ENABLED_INTEGRATIONS=ycharts opal_portal globgrph\n  OK  'schwab' is a KNOWN registry id (the omission below is deliberate, not a typo) -- True\n  OK  'schwab' is NOT in the live ENABLED_INTEGRATIONS list -> zero schwab_ tools registered -- ['ycharts', 'opal_portal', 'globgrph']\nDENOMINATOR: 3 of 3 checks OK\nVERDICT: PASS-OGR1-AC7\nRC=0",
+   "denominator": "3 of 3 registry checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC7(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC8",
+   "criterion_verbatim": "the ledger entry is closed and committed before the grading reads.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC8",
+   "output_evidence": "  OK  the sentinel no longer exists (ledger closed) -- C:/tmp/wk-oplgtw-2a\\org\\critical_paths\\.open_deploys\\nfra-oplgtw-og-r-1-first-release.json\n  OK  the rendered entry's Status reads CLOSED -- **Date opened:** 2026-09-18T05:07:24.309664+00:00\n  OK  the close commit exists -- 864aa6a9372a7137fbc20796190c530497d119f3\n  OK  close follows open -- 2026-09-18T06:12:40.793399Z >= 2026-09-18T05:09:11.674566Z\nDENOMINATOR: 4 of 4 checks OK\nVERDICT: PASS-OGR1-AC8\nRC=0",
+   "denominator": "4 of 4 close checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC8(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC9",
+   "criterion_verbatim": "the Gateway's error count over the first stated window after the deploy does not exceed `OG-p-1`'s baseline for the same window length.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC9",
+   "output_evidence": "SOURCE: org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/BASELINE.json -- OG-p-1's recorded baseline, keys: ['OGP1-AC1', 'OGP1-AC10', 'OGP1-AC11', 'OGP1-AC12', 'OGP1-AC13', 'OGP1-AC2', 'OGP1-AC3', 'OGP1-AC4', 'OGP1-AC5', 'OGP1-AC6', 'OGP1-AC7', 'OGP1-AC8', 'OGP1-AC9']\nMEASURED: OG-p-1's BASELINE.json records no error-count metric for any AC (only latency p95 in OGP1-AC11, digests, host facts, bucket settings, IAM, closure, notification consumers and the OAuth client inventory). There is no 'OG-p-1's baseline for the same window length' value to compare an error count against, so this criterion as written has no referent.\nVERDICT: FAIL-OGR1-AC9 no error-count baseline exists in OG-p-1's BASELINE.json to compare against (filed as surprise NFRA_OPLGTW-W2-S<k>)\nRC=1",
+   "denominator": "N/A -- no baseline value exists to divide against",
+   "status": "FAIL",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC9(?![0-9])",
+   "status_reason": "OG-p-1's BASELINE.json records no error-count metric for any window (only latency p95, digests, host facts, bucket settings, IAM, closure, notification consumers, OAuth client inventory) -- there is no referent to compare against as written."
+  },
+  {
+   "criterion_id": "OGR1-AC10",
+   "criterion_verbatim": "the previous release artifact is recorded and restorable by the runbook's rollback section, and its CONTENT HASH is recorded beside its identity at the moment the record is written (`git hash-object` for a tracked file, the packaging tool's own digest otherwise), so a later artifact at the same path FAILS this criterion instead of silently satisfying it; the probe prints the recorded hash and the hash it reads back (R-40).",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC10",
+   "output_evidence": "instrument: git rev-parse <commit>:infra/aws/ec2/opal-gateway (git TREE object hash of the deployed source directory -- the packaging tool's own digest for a whole-directory artifact; R-40)\nvintage: recorded 2026-09-18T05:08:40.318998Z; read back 2026-09-18T06:20:05.028137Z\nRECORDED HASH: 1556d6e979e68b1c47983a31506d0d96f8aacf36\nREAD-BACK HASH: 1556d6e979e68b1c47983a31506d0d96f8aacf36\n  OK  the recorded hash equals the hash read back now -- 1556d6e979e68b1c47983a31506d0d96f8aacf36 == 1556d6e979e68b1c47983a31506d0d96f8aacf36\n  OK  commit_exists -- True\n  NOT restricted_profile_denial_present -- False\n  OK  revocation_shim_present -- True\n  OK  schwab_not_enabled_in_deploy_script -- True\nDENOMINATOR: 4 of 5 checks OK\nVERDICT: FAIL-OGR1-AC10 a check is NOT OK (see NOT lines)\nRC=1",
+   "denominator": "5 restorability/hash checks",
+   "status": "FAIL",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC10(?![0-9])",
+   "status_reason": "The previous release artifact (the currently-deployed-before-this-release commit) has no app/data_entitlement.py at all, so it fails SCHWAB_PILOT_RUNBOOK.md s.7.2 step 1's own restorability precondition (must not be older than the restricted-profile denial). See surprise row NFRA_OPLGTW-W2-S7. The content-hash mechanism itself (R-40) is correct and verified: recorded == read-back."
+  },
+  {
+   "criterion_id": "OGR1-AC11",
+   "criterion_verbatim": "(difference) on the release base, locally and before the deploy, an identity carrying a predecessor's email and tier but no tid/oid grant is denied every Schwab tool, while the same request under an active tid/oid grant is allowed; the Schwab tool count is printed.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC11",
+   "output_evidence": "WARN: GATEWAY_JWT_PRIVATE_KEY unset -- generating an EPHEMERAL RSA key (dev only; tokens do NOT survive a restart).\n\nOGR1-AC11: identity email=menachem@opalinvest.com tid=7f3a9c1e-2b4d-4e6f-8a0b-1c2d3e4f5a6b oid(ungranted)=179b1399-b67b-4b8f-8d60-15e2cb1e71ab -- NO tid/oid grant -- per-tool denial:\n  schwab_describe_dataset -> http=200 isError=True code=tool 'schwab_describe_dataset' needs an active data entitlement; this principal has none DENIED=True\n  schwab_get_access -> http=200 isError=True code=tool 'schwab_get_access' needs an active data entitlement; this principal has none DENIED=True\n  schwab_list_files -> http=200 isError=True code=tool 'schwab_list_files' needs an active data entitlement; this principal has none DENIED=True\n  schwab_prepare_download -> http=200 isError=True code=tool 'schwab_prepare_download' needs an active data entitlement; this principal has none DENIED=True\n  schwab_query -> http=200 isError=True code=tool 'schwab_query' needs an active data entitlement; this principal has none DENIED=True\nDENOMINATOR: 5 of 5 Schwab tools denied (TOOL_NAMES live count 5)\nOGR1-AC11: SAME email, oid(granted)=7b398ece-cfd4-4315-994f-10dcb9a12066, AFTER og_v2.grant(tid, oid) -- schwab_get_access -> http=200 isError=False ALLOWED=True\n\u001b[32m.\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m1 passed\u001b[0m\u001b[32m in 3.53s\u001b[0m\u001b[0m\n\n[integrations] enabled: ['schwab'] -> {'schwab': {'tools': ['schwab_get_access', 'schwab_list_files', 'schwab_describe_dataset', 'schwab_query', 'schwab_prepare_download'], 'spec': {'id': 'schwab', 'display_name': 'Schwab (Opal silver)', 'auth_kind': 'assumed_role', 'tool_prefix': 'schwab_', 'read_only': True, 'min_tier': 'read_only', 'hosts': ['opal-data-assets.s3.us-east-1.amazonaws.com', 'sts.amazonaws.com'], 'secret_id': None}}}\n\nSchwab tool count (printed by the harness): 5\nVERDICT: PASS-OGR1-AC11\nRC=0",
+   "denominator": "5 of 5 Schwab tools denied ungranted, 1 of 1 allowed granted",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC11(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC12",
+   "criterion_verbatim": "at release, the set of principals holding a restricted profile is printed and, for each, whether its email can complete the ALB browser login (the Entra app's assignment); the count of principals that hold a restricted profile AND can complete that login is 0.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC12",
+   "output_evidence": "instrument: dynamodb Scan(ProjectionExpression=pk,sk) on gateway-access-state-table (same read as OGR1-AC3)\nvintage: 2026-09-18T06:20:12.484898Z  denominator: 8 item(s) in the table\nof 8 item(s): 8 are OTHER cells' pre-existing 'probe-og-<cell>-<timestamp>' test fixtures (excluded, not a real principal); 0 are not\nprincipals holding a restricted profile at release: 0 []\n  OK  the set of principals holding a restricted profile is empty -- []\n  OK  count of restricted-profile principals whose email can complete the ALB login is 0 -- 0\nDENOMINATOR: 2 of 2 checks OK\nVERDICT: PASS-OGR1-AC12\nRC=0",
+   "denominator": "8 items scanned (0 restricted-profile principals)",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC12(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC13",
+   "criterion_verbatim": "(difference, live) from the Gateway host through the released build, an assume of EACH renamed reader role (`gateway-schwab-read-role`, `gateway-schwab-catalog-read-role`) succeeds with that role's re-keyed ExternalId while the same assume with the OTHER role's ExternalId is denied, the denominator 2 of 2 roles printed and no ExternalId value in the evidence.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC13",
+   "output_evidence": "instrument: SSM AWS-RunShellScript, python3.11 from the DEPLOYED venv (/opt/opal-gateway/.venv), through the RELEASED app.integrations.schwab.aws_roles.AssumedRole.session() call site (sts.assume_role) -- the caller identity is the instance's opal-gateway-role\nvintage: 2026-09-18T06:20:14.256221Z .. 2026-09-18T06:20:19.060720Z  ssm=72b61dd6-bead-4b1a-8dc6-3d974f8ba0c9 status=Success\nHOST STDOUT:\n  | CALLER_IDENTITY arn:aws:sts::313476888478:assumed-role/opal-gateway-role/i-07dccb1615503ac99\n  | ASSUME_OK_reader rc=0 role_arn_match=True\n  | ASSUME_CROSS_reader rc=1 err=AccessDenied\n  | ASSUME_OK_catalog rc=0 role_arn_match=True\n  | ASSUME_CROSS_catalog rc=1 err=AccessDenied\n  | DONE_AC13\ndenominator: 2 of 2 roles exercised (reader, catalog)\n  OK  caller identity on the host is opal-gateway-role -- True\n  OK  reader role: assume with its own re-keyed ExternalId SUCCEEDS -- {'rc': '0', 'role_arn_match': 'True'}\n  OK  reader role: assume with the OTHER role's ExternalId is DENIED (AccessDenied) -- {'rc': '1', 'err': 'AccessDenied'}\n  OK  catalog role: assume with its own re-keyed ExternalId SUCCEEDS -- {'rc': '0', 'role_arn_match': 'True'}\n  OK  catalog role: assume with the OTHER role's ExternalId is DENIED (AccessDenied) -- {'rc': '1', 'err': 'AccessDenied'}\nDENOMINATOR: 5 of 5 checks OK\nVERDICT: PASS-OGR1-AC13\nRC=0",
+   "denominator": "2 of 2 roles exercised, 5 of 5 checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC13(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC14",
+   "criterion_verbatim": "(mutant control for AC13) with the assume call site disabled in a scratch copy of the released build, AC13's success arm FAILS, and the probe prints both outcomes and leaves no tracked file modified.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC14",
+   "output_evidence": "instrument: a scratch copy of infra/aws/ec2/opal-gateway/app/integrations/schwab/aws_roles.py with its ONE `sts.assume_role(...)` call site (AC13's own call site) replaced by an immediate raise; loaded as a distinct module under the REAL app.integrations.schwab package (relative imports resolve identically)\nmutant result: raised=True (IntegrationAuthError: cannot assume the Schwab reader role (RuntimeError); there is no fallback credential)\ngit status --porcelain -- infra/aws/ec2/opal-gateway/app/integrations/schwab/aws_roles.py : '' (empty expected -- no tracked file modified)\n  OK  the patch matched exactly one call site -- 1\n  OK  AC13's success arm FAILS under the mutant (no live AWS call ever executes) -- IntegrationAuthError: cannot assume the Schwab reader role (RuntimeError); there is no fallback credential\n  OK  the tracked source file is unmodified -- \nDENOMINATOR: 3 of 3 checks OK\nVERDICT: PASS-OGR1-AC14\nRC=0",
+   "denominator": "3 of 3 mutant-control checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC14(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC15",
+   "criterion_verbatim": "from THIS worktree, `safe-ec2-deploy.sh`'s halt-gate root resolves to the CALLING worktree (`git rev-parse --show-toplevel`) and the gate RESOLVES this worker's own session serial, printing the resolved serial path and the serial it read.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC15",
+   "output_evidence": "instrument: the CURRENT (post-fix) infra/aws/ec2/safe-ec2-deploy.sh, identity-resolution block only, SCRIPT_DIR forced to this worktree's infra/aws/ec2 (i.e. invoked as if from THIS worktree)\nREPO_ROOT resolved: C:/tmp/wk-oplgtw-2a\nSERIAL resolved: 0.9.0_WK_NFRA_OPLGTW~2 (rc=0)\n  OK  HALT_GATE_REPO_ROOT resolves to THIS worktree (git rev-parse --show-toplevel) -- C:/tmp/wk-oplgtw-2a\n  OK  the gate resolves this worker's own session serial -- 0.9.0_WK_NFRA_OPLGTW~2\nDENOMINATOR: 2 of 2 checks OK\nVERDICT: PASS-OGR1-AC15\nRC=0",
+   "denominator": "2 of 2 identity-resolution checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC15(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC16",
+   "criterion_verbatim": "(positive control for every OTHER caller) invoked from the MAIN tree, the same script resolves the main tree's own serial exactly as it does today, printing both the pre-edit and post-edit resolved paths as equal; a fix that serves only workers FAILS this criterion.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC16",
+   "output_evidence": "instrument: the SAME identity-resolution block, PRE-edit (git HEAD) and POST-edit (this worktree's worktree copy), each with SCRIPT_DIR forced to the MAIN TREE's own infra/aws/ec2 (i.e. invoked as if from the MAIN tree, the 'every other caller' case)\nPRE-edit  REPO_ROOT=/c/Users/AndrewBerman/Desktop/ajb_workspace SERIAL= rc=1\nPOST-edit REPO_ROOT=C:/Users/AndrewBerman/Desktop/ajb_workspace SERIAL= rc=1\n  OK  PRE-edit resolves REPO_ROOT to the main tree -- /c/Users/AndrewBerman/Desktop/ajb_workspace\n  OK  POST-edit resolves REPO_ROOT to the SAME main tree (unchanged for this caller) -- C:/Users/AndrewBerman/Desktop/ajb_workspace\n  OK  PRE-edit and POST-edit REPO_ROOT paths are equal -- ('/c/Users/AndrewBerman/Desktop/ajb_workspace', 'C:/Users/AndrewBerman/Desktop/ajb_workspace')\nDENOMINATOR: 3 of 3 checks OK\nVERDICT: PASS-OGR1-AC16\nRC=0",
+   "denominator": "3 of 3 positive-control checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC16(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC17",
+   "criterion_verbatim": "(mutant control) with the main-tree override restored in a scratch copy, AC15 FAILS there while AC16 still passes; the probe prints both outcomes and leaves no tracked file modified.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 420 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC17",
+   "output_evidence": "instrument: the OLD (pre-R-53, git HEAD) identity-resolution block restored in a scratch copy, exercised both ways: as if from THIS worktree (AC15's own arm) and as if from the MAIN tree (AC16's own arm)\nMUTANT from worktree: REPO_ROOT=/c/Users/AndrewBerman/Desktop/ajb_workspace SERIAL= rc=1\nMUTANT from main tree: REPO_ROOT=/c/Users/AndrewBerman/Desktop/ajb_workspace SERIAL= rc=1\nlive file byte-comparison before/after building the scratch mutant, infra/aws/ec2/safe-ec2-deploy.sh: identical\n  OK  AC15's own check FAILS under the mutant (worker serial does not resolve) -- {'REPO_ROOT': '/c/Users/AndrewBerman/Desktop/ajb_workspace', 'CONTEXT_FILE': '/c/Users/AndrewBerman/Desktop/ajb_workspace/.comp-graph/.agent_context', 'AUDIT_LOG': '/c/Users/AndrewBerman/Desktop/ajb_workspace/org/halt-gate-override-audit.log', 'SERIAL_RC': '1', 'SERIAL': '', '_stderr': '', '_rc': 0}\n  OK  AC16's own check still PASSES under the mutant (main-tree caller unaffected) -- {'REPO_ROOT': '/c/Users/AndrewBerman/Desktop/ajb_workspace', 'CONTEXT_FILE': '/c/Users/AndrewBerman/Desktop/ajb_workspace/.comp-graph/.agent_context', 'AUDIT_LOG': '/c/Users/AndrewBerman/Desktop/ajb_workspace/org/halt-gate-override-audit.log', 'SERIAL_RC': '1', 'SERIAL': '', '_stderr': '', '_rc': 0}\n  OK  the tracked source file is unmodified by this arm -- identical\nDENOMINATOR: 3 of 3 checks OK\nVERDICT: PASS-OGR1-AC17\nRC=0",
+   "denominator": "3 of 3 mutant-control checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC17(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR1-AC18",
+   "criterion_verbatim": "(the arm that protects the audit trail) from THIS worktree, `HALT_GATE_AUDIT_LOG` and `HALT_GATE_CONTEXT_FILE` still resolve UNDER THE MAIN TREE, both absolute paths echoed; a fix that moved either into a worktree deleted at drain FAILS this criterion even though AC15 and AC16 would pass.",
+   "method": "command",
+   "invocation": "cd /c/tmp/wk-oplgtw-2a && timeout 300 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py AC18",
+   "output_evidence": "instrument: the CURRENT (post-fix) infra/aws/ec2/safe-ec2-deploy.sh, identity-resolution block, invoked as if from THIS worktree (same call as OGR1-AC15)\nHALT_GATE_CONTEXT_FILE=/c/Users/AndrewBerman/Desktop/ajb_workspace/.comp-graph/.agent_context\nHALT_GATE_AUDIT_LOG=/c/Users/AndrewBerman/Desktop/ajb_workspace/org/halt-gate-override-audit.log\n  OK  HALT_GATE_CONTEXT_FILE resolves under the MAIN tree -- /c/Users/AndrewBerman/Desktop/ajb_workspace/.comp-graph/.agent_context\n  OK  HALT_GATE_AUDIT_LOG resolves under the MAIN tree -- /c/Users/AndrewBerman/Desktop/ajb_workspace/org/halt-gate-override-audit.log\n  OK  neither resolves under THIS worktree -- ('/c/Users/AndrewBerman/Desktop/ajb_workspace/.comp-graph/.agent_context', '/c/Users/AndrewBerman/Desktop/ajb_workspace/org/halt-gate-override-audit.log')\nDENOMINATOR: 3 of 3 checks OK\nVERDICT: PASS-OGR1-AC18\nRC=0",
+   "denominator": "3 of 3 audit-trail checks",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR1-AC18(?![0-9])"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "TWO discriminators fired this round, both task-order-named mutant controls: OGR1-AC14 (AC13's own sts.assume_role call-site disabled in a scratch copy) and OGR1-AC17 (AC15's halt-gate fix reverted to the pre-R-53 collapse in a scratch copy, run both as-if-from-this-worktree and as-if-from-the-main-tree).",
+   "expected": "AC14: constructing an AssumedRole from the mutant and calling .session() must raise before any AWS call executes, tracked file unmodified. AC17: the pre-R-53 mutant must FAIL AC15's own check (worker serial does not resolve) while still PASSING AC16's own check (main-tree caller unaffected), tracked file unmodified.",
+   "observed": "AC14: mutant result raised=True (IntegrationAuthError; there is no fallback credential); git status --porcelain empty. AC17: mutant-from-worktree SERIAL='' rc=1 (AC15-style check FAILS, as expected); mutant-from-main-tree REPO_ROOT=main tree, rc=1 matching the real pre-fix behaviour (AC16-style check PASSES, as expected); live file byte-identical before/after. Both DENOMINATOR 3 of 3.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "OGR1-AC10's content-hash instrument (git rev-parse <commit>:infra/aws/ec2/opal-gateway) was computed once at record time (OGR1-AC1, before the deploy) and re-computed independently at grading time (OGR1-AC10, after it); OGR1-AC3/AC12's DynamoDB scan was run twice (once per criterion) against the same live table; OGR1-AC13 was run once live (a repeat live STS assume is not idempotent-free of side effects, so it is not re-run for determinism -- its own denominator and cross-role denial arms are the discriminating evidence instead).",
+   "observed": "AC10: RECORDED HASH 1556d6e979e68b1c47983a31506d0d96f8aacf36 == READ-BACK HASH 1556d6e979e68b1c47983a31506d0d96f8aacf36 (identical, expected for an immutable git object). AC3/AC12: both scans read the same 8 items with the same classification (8 probe fixtures, 0 real principals) across two separate invocations.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "OGR1-AC4 (deployed-file digest parity)",
+   "reason": "9 of 68 files deployed with CRLF line endings differing from their LF git blobs, due to this deploying worktree's core.autocrlf=true and incomplete .gitattributes eol=lf coverage (only *.py). Reported FAIL with the true measurement; not repaired (deploy-to-ec2.sh and .gitattributes are outside this order's <paths>). See surprise row NFRA_OPLGTW-W2-S8."
+  },
+  {
+   "item": "OGR1-AC9 (error count vs OG-p-1 baseline)",
+   "reason": "OG-p-1's BASELINE.json records no error-count metric under any key -- there is no baseline value to compare a post-deploy count against."
+  },
+  {
+   "item": "OGR1-AC10 (previous-release restorability)",
+   "reason": "The recorded previous release lacks app/data_entitlement.py and so fails the runbook's own s.7.2 rollback precondition; the content-hash mechanism itself is correct and verified. See surprise row NFRA_OPLGTW-W2-S7."
+  },
+  {
+   "item": "Setting SCHWAB_ACCOUNT_REF_SECRET_ID in the release configuration (WORKER FACE narrative, not a graded criterion)",
+   "reason": "Requires editing infra/aws/ec2/opal-gateway/deploy-to-ec2.sh's env block beyond the identity-resolution lines this order's amendment grants; no AC1-AC18 criterion tests it. Leaving it unset keeps app/account_ref.py's UNAVAILABLE default, consistent with 'you do not enable anything'."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-W2-S5: safe-ec2-deploy.sh's worktree-redirect pointed HALT_GATE_REPO_ROOT at the shared main tree, so the issuer-provisioned session-serial file in this worktree was never found; the halt gate failed closed (IDENTITY UNRESOLVED) before any deploy work ran. GRANTED and CORRECTED by ruling R-53 (msg 97843): HALT_GATE_REPO_ROOT now resolves to the calling worktree; HALT_GATE_CONTEXT_FILE/HALT_GATE_AUDIT_LOG stay pinned to the main tree. Fixed this run, verified by OGR1-AC15-AC18, and the real deploy (OGR1-AC2) then completed.",
+  "NFRA_OPLGTW-W2-S6: the live gateway-access-state-table carries 8 leftover synthetic test fixtures from OG-i-1/OG-i-5's own probes, never a real principal -- OGR1-AC3/AC12 classify and exclude them by pattern (probe-og-<cell>-<timestamp>) to grade the real (empty) population. INERT.",
+  "NFRA_OPLGTW-W2-S7: the currently-deployed-before-this-release commit has no app/data_entitlement.py, so it fails SCHWAB_PILOT_RUNBOOK.md s.7.2 step 1's own restorability precondition; OGR1-AC10 measures this truthfully as FAIL.",
+  "NFRA_OPLGTW-W2-S8: the real deploy (from this Windows worktree, core.autocrlf=true) shipped 9 of 68 files with CRLF line endings differing from their LF git blobs -- only *.py carries an eol=lf .gitattributes override, and deploy-to-ec2.sh tars the live checkout rather than a normalized archive. OGR1-AC4 measures this truthfully as FAIL; no functional break found, but PRD C6's declared/deployed parity is genuinely violated and this is NEW to this deploy (OG-p-1's prior baseline shows a clean match on the same paths)."
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/evidence/og_r1/state.json",
+ "compiler_tools": [
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r1_ac11_pytest.py infra/aws/ec2/safe-ec2-deploy.sh",
+   "result": "run clean before each commit touching these files; recorded in first-release-cutover.result.md"
+  },
+  {
+   "tool": "bash -n (syntax check)",
+   "invocation": "bash -n infra/aws/ec2/safe-ec2-deploy.sh",
+   "result": "SYNTAX_OK, run before and after the R-53 edit"
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/NFRA_OPLGTW.TO-OG-r-1.first-release-cutover.proof_of_spec.json OGR1-AC1,OGR1-AC2,OGR1-AC3,OGR1-AC4,OGR1-AC5,OGR1-AC6,OGR1-AC7,OGR1-AC8,OGR1-AC9,OGR1-AC10,OGR1-AC11,OGR1-AC12,OGR1-AC13,OGR1-AC14,OGR1-AC15,OGR1-AC16,OGR1-AC17,OGR1-AC18",
+   "result": "run after this instance was written; rc recorded in first-release-cutover.result.md"
+  }
+ ]
+}
