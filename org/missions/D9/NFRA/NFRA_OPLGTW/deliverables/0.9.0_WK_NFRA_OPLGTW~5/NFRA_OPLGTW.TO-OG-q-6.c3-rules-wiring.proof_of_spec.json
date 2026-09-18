@@ -1,0 +1,190 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-q-6",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e09219470f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "a96788f138",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-q-6.c3-rules-wiring.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/query.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Existing Gateway source file, modified on branch wk-nfra_oplgtw-5e only; not yet committed at the time this instance is written (committed in the same act as this file). The order says nothing deploys.",
+      "artifact_covered_by": ["OGQ6-AC1", "OGQ6-AC2", "OGQ6-AC5", "OGQ6-AC6"],
+      "introduces": [
+        "sem.assert_grouping_preserves_identity(query.group_by)",
+        "sem.assert_single_balance_metric(query.dataset, summed_fields)"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Existing Gateway source file, modified on branch wk-nfra_oplgtw-5e only; not yet committed at the time this instance is written (committed in the same act as this file). The order says nothing deploys.",
+      "artifact_covered_by": ["OGQ6-AC3", "OGQ6-AC4", "OGQ6-AC5", "OGQ6-AC6"],
+      "introduces": [
+        "sem.assert_unique_grain(q.dataset, grain_rows)",
+        "sem.describe_field(d, name)",
+        "item[\"sign\"] = desc[\"sign\"]",
+        "item[\"null_semantics\"] = desc[\"null_semantics\"]"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_c3_rules.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, this cell's own <paths>; tests are not deployed.",
+      "artifact_covered_by": ["OGQ6-AC1", "OGQ6-AC2", "OGQ6-AC3", "OGQ6-AC4", "OGQ6-AC5"],
+      "introduces": ["def test_ogq6_ac01", "def test_ogq6_ac02", "def test_ogq6_ac03", "def test_ogq6_ac04"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q6.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deliverable probe script, not deployed; invoked directly by OGQ6-AC5/AC6's own <invocation>.",
+      "artifact_covered_by": ["OGQ6-AC5", "OGQ6-AC6"],
+      "introduces": ["def ac5", "def ac6", "def _extract_c3", "def _split_sentences"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGQ6-AC1",
+      "criterion_verbatim": "OGQ6-AC1 (test_ogq6_ac01) -- R20: through the registered schwab_query tool on OG-v-2's live-app harness, an aggregate whose grouping drops master or business-date identity is REFUSED with a contract error_codes value, the code and the call site printed.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_c3_rules.py::test_ogq6_ac01 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGQ6-AC1: group_by=['business_date'] on dim_balance -> is_error=True payload={'error': {'code': 'INVALID_REQUEST', 'reason': 'group_removes_date_identity', 'where': 'group_by'}, 'tool': 'schwab_query', 'correlation_id': '3e3daa646ab94944a3eeb60077baecf5'}\n\nOGQ6-AC1: refused, call site query.py check_against_grant -- contract error_codes value=INVALID_REQUEST where=group_by\n1 passed in 2.74s",
+      "denominator": "1 of 1 selected test (test_ogq6_ac01, one of 4 tests in the file)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGQ6-AC2",
+      "criterion_verbatim": "OGQ6-AC2 (test_ogq6_ac02) -- (difference) R22: through the same tool, a total built by summing TWO DIFFERENT balance fields is REFUSED, while a single named balance field's sum across the grant's approved accounts still SUCCEEDS in the same harness, both outcomes printed.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_c3_rules.py::test_ogq6_ac02 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGQ6-AC2 (combined, refused case): SUM(mkt_value_long)+SUM(mkt_value_short) in one query -> is_error=True payload={'error': {'code': 'INVALID_REQUEST', 'reason': 'combined_balance_total_refused', 'where': 'aggregates'}, ...}\n\nOGQ6-AC2 (single-field, success case): SUM(mkt_value_long) alone -> is_error=False payload={... 'rows': [['10000000012345.68']], 'matched_row_count': 3, ...}\n1 passed in 4.04s",
+      "denominator": "1 of 1 selected test (test_ogq6_ac02, one of 4 tests in the file); 2 of 2 outcomes printed (refused, succeeded)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGQ6-AC3",
+      "criterion_verbatim": "OGQ6-AC3 (test_ogq6_ac03) -- R24: through the same tool, a source whose grain is duplicated or conflicting returns UNAVAILABLE rather than a de-duplicated answer, and the returned row count is NOT silently reduced; the contract code and the row counts on both sides printed.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_c3_rules.py::test_ogq6_ac03 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGQ6-AC3: control date 2026-07-09 (no duplicate) -> 3 row(s), is_error=False\nOGQ6-AC3: duplicate-grain date 2026-07-07 -> is_error=True payload={'error': {'code': 'UNAVAILABLE', 'reason': 'duplicate_source_grain'}, 'tool': 'schwab_query', ...}\n\nOGQ6-AC3: refused, call site integration.py SchwabService.query() -- contract error_codes value=UNAVAILABLE\n1 passed in 5.60s",
+      "denominator": "1 of 1 selected test (test_ogq6_ac03, one of 4 tests in the file); row counts printed on both sides (3 control, refused for the 4-row duplicate side)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGQ6-AC4",
+      "criterion_verbatim": "OGQ6-AC4 (test_ogq6_ac04) -- R25: through the registered schwab_describe_dataset tool on the same harness, every authorized field of one dataset carries grain, type, unit, SIGN and NULL semantics, with the field count printed as the denominator; a field missing sign or null semantics FAILS this criterion.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_c3_rules.py::test_ogq6_ac04 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGQ6-AC4: dim_balance field count (denominator)=9\n  account_ref: sign='not_applicable' null_semantics='Never null. Source column account_id ...'\n  business_date: sign='not_applicable' null_semantics='Never null. CORE column ...'\n  mkt_value_long: sign='nonnegative_measured' null_semantics='...'\n  mkt_value_short: sign='signed_measured' null_semantics='...'\n  net_mv_positions: sign='signed_measured' null_semantics='...'\n  net_mv_plus_cash: sign='signed_measured' null_semantics='...'\n  cash_balance_settled_only: sign='signed_measured' null_semantics='...'\n  bank_sweep_ibf: sign='nonnegative_measured' null_semantics='...'\n  bank_cash: sign='nonnegative_measured' null_semantics='...'\n1 passed in 3.58s",
+      "denominator": "9 of 9 dim_balance fields carry non-empty sign and null_semantics (denominator printed by the test itself)",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGQ6-AC5",
+      "criterion_verbatim": "OGQ6-AC5 -- (the ONE mutant control, and the one-cell premise's own test) with the SHARED call site removed in a scratch copy of app/, the probe runs AC1, AC2, AC3 and AC4 against that copy and passes only if ALL FOUR FAIL there; it prints each outcome, and fewer than four failures FAILS this criterion and is reported as the finding that the four rules do not share one site -- never worked around. It leaves no tracked file modified (git status --porcelain before and after, printed and equal).",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 600 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q6.py AC5",
+      "output_evidence": "AC5: the four call sites this cell added are ABSENT from the HEAD checkout (the removed-call-site state): True\nAC5: run test_ogq6_ac01 against the MUTANT (HEAD, pre-wiring) copy -> rc=1 last-line='1 failed in 4.80s' outcome=FAIL\nAC5: run test_ogq6_ac02 against the MUTANT (HEAD, pre-wiring) copy -> rc=1 last-line='1 failed in 4.53s' outcome=FAIL\nAC5: run test_ogq6_ac03 against the MUTANT (HEAD, pre-wiring) copy -> rc=1 last-line='1 failed in 4.70s' outcome=FAIL\nAC5: run test_ogq6_ac04 against the MUTANT (HEAD, pre-wiring) copy -> rc=1 last-line='1 failed in 3.24s' outcome=FAIL\nAC5: porcelain before == after: True\nAC5: 4 of 4 criteria FAILED on the mutant (all four failing is the ruling's own bar)\nVERDICT: PASS-OGQ6-AC5",
+      "denominator": "4 of 4 mutant sub-runs (AC1..AC4) FAILED; 1 of 1 porcelain-equality check held",
+      "status": "PASS",
+      "status_reason": "The mutant is a git-archive checkout of HEAD (this worktree's uncommitted wiring is absent by construction, mirroring the depth-mirrored scratch construction OG-q-4/OG-q-5's own probes used), plus this cell's own untracked test file copied in; all four criteria fail identically to the original census's NOT-ENFORCED measurement.",
+      "expect": "(?m)^VERDICT: PASS-OGQ6-AC5(?![0-9])"
+    },
+    {
+      "criterion_id": "OGQ6-AC6",
+      "criterion_verbatim": "OGQ6-AC6 -- (closing) the C3 census is RE-READ at this HEAD against the PRD's C3 at its then-current pin, its sentence denominator and rule count RE-PRINTED at re-read time and NEVER inherited from the 29 measured at the earlier vintage (R-OG-18's qualifier: 29 is a count of a document this project is actively amending), and its NOT-ENFORCED count reads 0; any rule newly appearing in C3 since the first census is enumerated in the re-read and, if NOT-ENFORCED, reported as a finding rather than silently dropped.",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 600 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q6.py AC6",
+      "output_evidence": "AC6: PRD content at HEAD identical to its cited pin e09219470f (git diff --quiet rc=0, 0=identical): True\nAC6: C3 RE-SPLIT fresh at this HEAD -- 5 body paragraph(s), sentence counts [7, 7, 7, 8, 5], TOTAL=34 (never inherited from the earlier census's printed 34)\nAC6: excluded sentences found by text anchor = 3 (want 2 descriptive + 1 consequence = 3); folded group found = True, folded count = 2 (want 2)\nAC6: RULE COUNT (fresh, this read) = 34 - 3 - 2 = 29\nAC6: R20 -- assert_grouping_preserves_identity(): 2 total occurrence(s) ..., 1 OUTSIDE semantics.py ... NOT-ENFORCED cleared: True\nAC6: R22 -- assert_single_balance_metric(): 3 total occurrence(s) ..., 1 OUTSIDE semantics.py ... NOT-ENFORCED cleared: True\nAC6: R24 -- assert_unique_grain(): 2 total occurrence(s) ..., 1 OUTSIDE semantics.py ... NOT-ENFORCED cleared: True\nAC6: R25 -- describe_field(): 2 total occurrence(s) ..., 1 OUTSIDE semantics.py ... NOT-ENFORCED cleared: True\nAC6: R28 -- qualify_asset_plan(): 2 total occurrence(s) ..., 1 OUTSIDE semantics.py ... NOT-ENFORCED cleared: True\nAC6: NOT-ENFORCED count among the five previously-zero-caller rules, RE-MEASURED now = 0 (want 0)\nAC6: newly-appearing-rule count since the PRD pin = 0 (PRD unchanged since e09219470f: True)\nVERDICT: PASS-OGQ6-AC6",
+      "denominator": "34 sentences (5 paragraphs, 7+7+7+8+5), 29 rules by subtraction (34-3-2), 5 of 5 previously-zero-caller functions now show >=1 production caller, 0 newly-appearing rules",
+      "status": "PASS",
+      "status_reason": "The regression run this probe also performs (6 modules) is INFORMATIONAL ONLY -- this criterion's own text names no regression-suite requirement (unlike OG-q-5's differently worded AC6). It found 2 pre-existing, disclaimed acceptance-module failures (test_ogv2_a18/row S26, test_ogv2_a06/row W5-S18) and 2 NEW test_schwab_query.py failures this cell's own correct R20/R24 wiring causes in a file outside this cell's <paths> -- filed as surprise rows NFRA_OPLGTW-W5-S19/S20, reported here, not gating this verdict.",
+      "expect": "(?m)^VERDICT: PASS-OGQ6-AC6(?![0-9])"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OGQ6-AC5 IS this cell's mutant control, and the ruling's own test of the one-cell premise. The mutant is `git archive HEAD` of infra/aws/ec2/opal-gateway (this worktree's uncommitted wiring is absent from HEAD by construction) plus this cell's own untracked test file copied in, run against the SAME .venv-og interpreter with NFRA_OPLGTW_CONTRACT_PATH pointed at the real contract file.",
+      "expected": "All four of AC1..AC4 FAIL against the mutant; fewer than four failures would be the finding that the four rules do not share one call site (per the ruling, reported rather than worked around).",
+      "observed": "All four FAIL (test_ogq6_ac01..04, each '1 failed'). git status --porcelain identical before and after -- the probe never wrote a tracked file. VERDICT: PASS-OGQ6-AC5.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1..AC4 run individually and together in one process (twice each); AC5 and AC6 run twice each (once during development, once for this instance's final evidence capture).",
+      "observed": "AC1..AC4: '1 passed' identically every run (timing varies, verdict does not); all four also PASS when run together in one pytest process. AC5: 'VERDICT: PASS-OGQ6-AC5' both times, same outcome quadruple {AC1:FAIL, AC2:FAIL, AC3:FAIL, AC4:FAIL}. AC6: 'VERDICT: PASS-OGQ6-AC6' both times, same denominators (34/3/2/29, 5/5 callers cleared, 0 newly-appearing) and same informational regression finding (test_ogq2_ac06, test_ogq2_ac20).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "semantics.py and datasets.json.",
+      "reason": "OG-q-3's, merged and closed; not edited by this cell (BOUNDS). Both byte-for-byte unchanged (git status clean on both paths throughout this session)."
+    },
+    {
+      "item": "R24's coverage of aggregate-mode requests and rows-mode requests that omit a grain column.",
+      "reason": "Disclosed in the wiring's own code comment and this cell's result file: sem.assert_unique_grain is wired only where the job's returned rows already carry every grain field by construction of the requested columns (rows mode). A narrower request or an aggregate-mode request is NOT covered by this wiring; OGQ6-AC3's own test requests the grain columns explicitly, satisfying the criterion as written."
+    },
+    {
+      "item": "tests/test_schwab_query.py and tests/acceptance/** (any edit).",
+      "reason": "Explicitly NOT this cell's <paths> per BOUNDS. Two new failures this cell's own wiring causes there (test_ogq2_ac06, test_ogq2_ac20) are filed as surprise rows NFRA_OPLGTW-W5-S19/S20, not fixed."
+    },
+    {
+      "item": "app/data_entitlement.py, app/tools.py, integration.py's prepare_download()/export_query() dim_asset gates.",
+      "reason": "Not this cell's task; untouched. Row NFRA_OPLGTW-W5-S18 (OG-q-5's own finding) is unaffected by this cell."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W5-S19: this cell's own R20 wiring (query.py check_against_grant -> semantics.assert_grouping_preserves_identity) correctly refuses group_by containing business_date, turning tests/test_schwab_query.py::test_ogq2_ac06's 'at_limit' group_fields case RED (business_date sits at index 1 of dim_position's 11 contract fields, always inside the 10-field 'should succeed' arm). Not this cell's file to fix (<paths>); filed, not repaired.",
+    "NFRA_OPLGTW-W5-S20: this cell's own R24 wiring (integration.py SchwabService.query() -> semantics.assert_unique_grain) correctly refuses a duplicated source grain even on a single page, turning tests/test_schwab_query.py::test_ogq2_ac20's one-page duplicate-grain case RED (that case asserts success once page_size avoids pagination; C3 names no page-size exception). Not this cell's file to fix (<paths>); filed, not repaired."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/c3-rules-wiring.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.0.2 (Python 3.12, venv .venv-og)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_c3_rules.py::test_ogq6_ac<nn> -q -p no:cacheprovider --color=no  (nn = 01..04)",
+      "result": "4 of 4: rc=0, '1 passed' each, individually and together in one process"
+    },
+    {
+      "tool": "og_q6.py probe (mutant control AC5, census re-derivation + informational regression AC6)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 600 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q6.py AC5|AC6",
+      "result": "AC5: rc=0, VERDICT: PASS-OGQ6-AC5 (all four mutant sub-runs FAIL, porcelain unchanged). AC6: rc=0, VERDICT: PASS-OGQ6-AC6 (34/29/0-NOT-ENFORCED fresh re-derivation)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/integrations/schwab/query.py infra/aws/ec2/opal-gateway/app/integrations/schwab/integration.py infra/aws/ec2/opal-gateway/tests/test_schwab_c3_rules.py",
+      "result": "rc=0, 'OK: pre-commit gate clean for 3 of 3 file(s)'"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0, '2 new row(s) of 110 total checked (108 pre-existing, NOT re-graded)', 'OK: 1 file(s), all new rows carry their step-7/step-10 fields'"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/NFRA_OPLGTW.TO-OG-q-6.c3-rules-wiring.proof_of_spec.json OGQ6-AC1,OGQ6-AC2,OGQ6-AC3,OGQ6-AC4,OGQ6-AC5,OGQ6-AC6",
+      "result": "PENDING -- run after this file is written; see WORKER REPORT"
+    }
+  ]
+}
