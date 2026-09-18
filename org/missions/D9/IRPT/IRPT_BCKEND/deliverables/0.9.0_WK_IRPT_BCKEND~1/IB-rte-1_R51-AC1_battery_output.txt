@@ -1,0 +1,214 @@
+{
+  "arm_a_identity_plane": {
+    "authorizer": {
+      "function_name": "opal-portal-authorizer",
+      "runtime": "nodejs22.x",
+      "handler": "index.handler",
+      "code_sha256": "KHwksfO1XjL0Jg66kc7L+gFIOEsZT/7l2i8STRgBvS4=",
+      "last_modified": "2026-09-09T18:50:07.000+0000",
+      "cited": "infra/aws/terraform/partners-api/api-gateway.tf:7-10 @391e4ad948869b8972bf6d96d5cc54392b351d5e (naqxlm = opal-portal-authorizer, REQUEST/CUSTOM, RS256 via Secrets Manager opal/auth/jwt-public-key, NOT Cognito -- zero user pools)"
+    },
+    "bucket_map_env": {
+      "value": {
+        "49financial": "opal-data-bd",
+        "cottonwood": "opal-data-cot",
+        "inflection": "opal-data-inf"
+      },
+      "read_from": "irpt-directory-search Environment.Variables (live get-function-configuration this run)",
+      "cited": "infra/aws/lambda/investor-reporting/_authz/loaders.py:46-57 @391e4ad948869b8972bf6d96d5cc54392b351d5e (bucket_for; DIRECTORY_BUCKET_ENV)"
+    },
+    "dependency_triple_49financial": {
+      "directory_object_sha256_of_parsed_json": "5abc0a8a09414e6d717aeda01d901229ca4d8b562756bcfe5dd7397ed8ce372e",
+      "directory_firm_id_opaque": "fir_c9fc04650e2134d6ea033da2",
+      "directory_entry_count": 4576,
+      "ownership_object_sha256_of_parsed_json": "0864a3a716a8502edf31f110c0f409edb31fdde62172961a08947e12a8568adf",
+      "ownership_advisor_count": 179,
+      "policy": {
+        "policy_id": "irpt-scoped-v1",
+        "policy_revision": "1"
+      },
+      "entitlement_revision": "irpt-ent-49financial-1",
+      "cited": "infra/aws/lambda/investor-reporting/_authz/loaders.py:71-131 @391e4ad948869b8972bf6d96d5cc54392b351d5e (load_directory / load_ownership / load_policy -- the triple `Enforcer` re-reads on EVERY request, cached nowhere across requests)"
+    },
+    "firm_registry": {
+      "git_hash_object": "99b8eeb54fb08a7ea6e4b89b64f300ee6cab3200",
+      "cited": "data/firm_registry.json @391e4ad948869b8972bf6d96d5cc54392b351d5e"
+    },
+    "n_of_n_objects_named": "6 of 6",
+    "the_one_identity_object": "a row in DynamoDB table opal-users-v2 (PK USER#..., firmId, advisorKey/advisorId) -- cited RT2_test_principal_human_gated.md 'where a principal lives' (infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:21) and jwt.ts:167-187 for the claims the edge validator injects from it. This project (_authz/_scope) never writes this table; it only TRUSTS the nine headers the edge validator derives from it."
+  },
+  "arm_b_principal_shaped": {
+    "per_firm": {
+      "49financial": {
+        "bucket": "opal-data-bd",
+        "key": "investor-reporting/directory/2026-09-17/directory.json",
+        "as_of": "2026-09-17",
+        "s3_etag": "d001ffc38cda51bc39959ad433caa04b",
+        "sha256": "aa002cb917b1689656a8c758413cc2d43f5d719467759ffade816cb955fac742",
+        "bytes": 6464753,
+        "entries": 4576,
+        "termination_histogram": {
+          "ACTIVE": 4505,
+          "TERMINATED": 71
+        },
+        "terminated_count": 71
+      },
+      "inflection": {
+        "bucket": "opal-data-inf",
+        "key": "investor-reporting/directory/2026-09-17/directory.json",
+        "as_of": "2026-09-17",
+        "s3_etag": "782324f961078b228a32af9316af9836",
+        "sha256": "09e349d2886bdc5bfeb79069cf747e616c6bfbf9fe7bb03506b83b4aae9e57c7",
+        "bytes": 447976,
+        "entries": 291,
+        "termination_histogram": {
+          "ACTIVE": 291
+        },
+        "terminated_count": 0
+      },
+      "cottonwood": {
+        "bucket": "opal-data-cot",
+        "key": "investor-reporting/directory/2026-09-17/directory.json",
+        "as_of": "2026-09-17",
+        "s3_etag": "fd8894243fbbe9075197fd0ce63e1f10",
+        "sha256": "90b742a3764fc433e7187244a280baa5da0e2d18d18a570ad228ddfa2a809076",
+        "bytes": 418144,
+        "entries": 260,
+        "termination_histogram": {
+          "UNKNOWN": 260
+        },
+        "terminated_count": 0
+      }
+    },
+    "chosen_firm": "49financial",
+    "chosen_firm_terminated_count": 71,
+    "ownership_to_directory_join_WITH_projection": "0 of 22646",
+    "_advisor_count": 179,
+    "advisor_id": "abby_horton",
+    "advisor_id_shape_finding": "NOT an _ids.py-issued opaque id: _ids.py KINDS = {account, relationship, client, firm} -- there is no 'advisor' kind, and bound 13's own typed-id list also excludes advisor. The real advisor id is a raw string from the identity plane (the ownership map's own key, matched 1:1 to the JWT's advisorKey/advisorId/X-Advisor-Id claim). Filed IRPT_BCKEND-W1-S21.",
+    "advisor_grant_raw": {
+      "accounts": 43,
+      "relationships": 18
+    },
+    "advisor_grant_includes_a_terminated_account": false,
+    "ANY_advisor_in_firm_has_a_terminated_account_in_grant": false,
+    "LIVE_PRODUCTION_WIRING_RESULT": {
+      "served": false,
+      "code": "UNPROJECTED_GRANT",
+      "reason": "43 of 43 ownership grants carry ids in a key space this directory cannot be joined on, so the viewer HAS a grant this system cannot see; refusing rather than serving the empty result an unprojected join produces",
+      "granted_denominator": 43,
+      "gap_reason_histogram": {
+        "UNPROJECTED-ID": 43
+      }
+    },
+    "id_projection_wiring_census": {
+      "entry_points_denominator": 13,
+      "wired": [],
+      "verdict": "0 of 13 live entry/handler/dispatch modules ever set id_projection"
+    },
+    "keys_planned_never_applied": [
+      {
+        "key": "K1",
+        "object": "one DynamoDB item in opal-users-v2 (PK USER#usr_irptrte_<epoch>, firmId=49financial, advisorKey/advisorId=abby_horton (an EXISTING advisor already in the live ownership map -- zero new entitlement minted))",
+        "change": "create",
+        "rollback": "DeleteItem, verified by a consistent-read GetItem returning no Item (the precedent's own bar)"
+      },
+      {
+        "key": "K2",
+        "object": "the session access token minted by generateAccessToken() (RS256, opal/auth/jwt-private-key) on login through the normal portal auth route",
+        "change": "ephemeral, never persisted",
+        "rollback": "not a stored resource; expires on its own TTL and is never recorded (bound 6)"
+      },
+      {
+        "key": "K3 (NOT NEEDED)",
+        "object": "an ownership_map.json row",
+        "change": "NONE -- the plan reuses an EXISTING advisor grant rather than minting one, which is why K3 is listed and marked not-needed rather than omitted",
+        "rollback": "n/a"
+      },
+      {
+        "key": "K4 (NOT NEEDED)",
+        "object": "a directory annotation",
+        "change": "NONE",
+        "rollback": "n/a"
+      }
+    ]
+  },
+  "arm_c_exercise_plan": {
+    "FWD-1": {
+      "route": "GET /api/scoped/investor-reporting/directory/search?q=<query>  then  POST /api/scoped/investor-reporting/directory/resolve",
+      "request": "Authorization: Bearer <token minted for 49financial/abby_horton>, X-Contract-Version: v1",
+      "artifact": "the response body ({contract_version, operation, firm_id, data, status?})",
+      "hash_binding": "sha256 of the response body, read at the request event (R-40)",
+      "vendor_calls_expected": 0,
+      "gap_demonstration": "search for one of the 71 TERMINATED clients in 49financial's live directory: the entry must be VISIBLE, marked TERMINATED, and its accounts absent from the resolve's permitted set -- an explicit capability gap, never a silent absence (FWD-1's own CONSTRAINT). MEASURED THIS RUN: 0 of 179 advisors in 49financial's live ownership map hold ANY terminated-client account in their grant, so this gap is universal at this firm today, not an artifact of which advisor is chosen.",
+      "negative_control": "the same resolve with firm_id swapped to another firm -> expect refused FIRM_BINDING, the swapped value never echoed",
+      "BLOCKED_BY": {
+        "served": false,
+        "code": "UNPROJECTED_GRANT",
+        "reason": "43 of 43 ownership grants carry ids in a key space this directory cannot be joined on, so the viewer HAS a grant this system cannot see; refusing rather than serving the empty result an unprojected join produces",
+        "granted_denominator": 43,
+        "gap_reason_histogram": {
+          "UNPROJECTED-ID": 43
+        }
+      }
+    },
+    "FWD-2": {
+      "route": "every DECLARED route in docs/contracts/investor-reporting/v1/routes.json (11 of 12; POST /analysis and POST /export EXCLUDED per bound 1/2)",
+      "request": "the same Bearer token, one swap per route: another firm's/advisor's/account's/relationship's/report's/pdf's id",
+      "artifact": "each response body",
+      "hash_binding": "sha256 of each response body, read at the request event",
+      "negative_control": "36 of 36 swaps (6 dispatched functions x 6 identifier kinds, IB-rtb-1's own count) each refused with 0 protected bytes and the swapped value never echoed",
+      "BLOCKED_BY": {
+        "served": false,
+        "code": "UNPROJECTED_GRANT",
+        "reason": "43 of 43 ownership grants carry ids in a key space this directory cannot be joined on, so the viewer HAS a grant this system cannot see; refusing rather than serving the empty result an unprojected join produces",
+        "granted_denominator": 43,
+        "gap_reason_histogram": {
+          "UNPROJECTED-ID": 43
+        }
+      }
+    },
+    "FWD-5": {
+      "route": "GET /api/scoped/investor-reporting/holdings/{accountSetId}",
+      "request": "the same Bearer token, accountSetId from the resolved permitted set",
+      "artifact": "the holdings response (current custody holdings + model percentages)",
+      "hash_binding": "sha256 of the response body, read at the request event",
+      "negative_control": "accountSetId swapped to one outside the permitted set -> refused, 0 protected bytes",
+      "BLOCKED_BY": {
+        "served": false,
+        "code": "UNPROJECTED_GRANT",
+        "reason": "43 of 43 ownership grants carry ids in a key space this directory cannot be joined on, so the viewer HAS a grant this system cannot see; refusing rather than serving the empty result an unprojected join produces",
+        "granted_denominator": 43,
+        "gap_reason_histogram": {
+          "UNPROJECTED-ID": 43
+        }
+      }
+    },
+    "FWD-11": {
+      "route": "the OPAL_GLOBAL viewer's routes (owned by IRPT_FNTEND; this project supplies the entitlement CLASS in _scope/global.py)",
+      "request": "n/a -- OPAL_GLOBAL is minted only from an explicit server-side roster (_scope/global.py OPAL_ROSTER_PARAMETER = /opal/irpt/opal-principal-roster), never from a header",
+      "COST_OF_A_SECOND_IDENTITY": "MEASURED THIS RUN: the SSM parameter /opal/irpt/opal-principal-roster does NOT EXIST (ParameterNotFound) -- so NO identity, bounded or not, can resolve OPAL_GLOBAL today. A second identity would ALSO need this parameter created first (its own infrastructure act, its own sign-off), before either a one-identity or two-identity plan can exercise FWD-11.",
+      "one_or_two_identities": "the SAME FirmBinding-scoped Enforcer instance cannot serve both classes simultaneously (FirmBinding fixes ONE tenant per request; OPAL_GLOBAL additionally re-derives its FirmBinding per SELECTED firm in _scope/global.py). One DynamoDB principal COULD carry advisor-shaped claims for firm-scoped testing on one login and be added to the roster for a SEPARATE login exercising Global -- so ONE identity suffices ACROSS TWO SEPARATE SESSIONS, never one concurrent session serving both classes."
+    }
+  },
+  "arm_d_packet": {
+    "packet_exists": true,
+    "packet_sha256": "ff91d42b002642931eac7c526b55ca7269f9be921561b087aeca95820852b297",
+    "identity_writer_census": {
+      "writers": "6 of 263",
+      "writer_names": [
+        "opal-news-lambda-role",
+        "opalinvest-auth-lambda-role",
+        "trade-submission-lambda-role",
+        "Andrew_Berman",
+        "Andrew_Berman_Console",
+        "Opal_Terminal"
+      ],
+      "blind_spot": "an identity provider's own admin surface (the auth-handler Lambda's signup/admin path) is not IAM; this census cannot see who can reach it"
+    },
+    "lifetime_bound": "deleted at round close by IB-rte-2's own last arm, or earlier on any STOP -- never a standing account"
+  }
+}
+HEAD=391e4ad948869b8972bf6d96d5cc54392b351d5e
+overall_pass: True
+IBR51-TEST-PRINCIPAL-DECLARED-AND-PACKETED
