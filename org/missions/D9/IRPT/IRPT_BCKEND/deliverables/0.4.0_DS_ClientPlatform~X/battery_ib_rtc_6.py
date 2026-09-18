@@ -76,7 +76,11 @@ def record(arm, ok, detail):
 
 
 def sha(p):
-    return hashlib.sha256(p.read_bytes()).hexdigest()
+    """sha256 of the RECORDED bytes. An autocrlf checkout renders a committed text file with CRLF, so
+    hashing the checkout gives a different digest on every Windows box than the one the packet printed
+    (measured on this battery's first run from a fresh detached worktree: both plan texts read 'not in
+    the packet'). The identity is the content as recorded, LF."""
+    return hashlib.sha256(p.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 print("R36-AC1 battery -- IRPT_BCKEND.TO-IB-rtc-6, the 49 Financial principal declared, planned, packeted")
