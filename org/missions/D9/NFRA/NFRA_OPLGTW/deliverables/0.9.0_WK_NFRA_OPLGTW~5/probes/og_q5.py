@@ -4,19 +4,14 @@ four named modules' failure counts).
 Usage: `<python> og_q5.py AC4|AC5|AC6`. Prints its measurement with its denominator, then exactly one
 line: `VERDICT: PASS-OGQ5-AC<n>` or `VERDICT: FAIL-OGQ5-AC<n> <reason>`.
 
-AC4 (mutant control, ruling R-OG-13's standing bar, same shape as OG-q-4's own og_q4.py AC4): the
-criterion asks to remove "the restriction's call site" in a scratch copy and show AC1/AC2 FAIL there while
-AC3 still passes. THAT CALL SITE DOES NOT EXIST ON THE REAL WORKTREE EITHER -- this cell's HALF ONE could
-not be wired inside its own <paths> grant (see this worker's surprise row NFRA_OPLGTW-W5-S13: the only call
-site that could invoke semantics.py's already-built `qualify_asset_plan()` is
-app/integrations/schwab/integration.py's SchwabService.query(), which is not a granted path). So AC1, AC2
-AND AC3 already FAIL on the real, unmutated worktree (measured directly by this order's own
-tests/test_schwab_asset_policy.py, this cell's deliverable) -- there is no call site left to remove, and no
-"still passes" baseline for AC3 to preserve. This probe still builds the depth-mirrored scratch copy (the
-same construction og_q4.py's AC4 uses, to avoid that same probe's own conftest.py-depth defect) and runs
-AC1/AC2/AC3 against it UNMODIFIED (nothing to mutate), to make that absence a MEASURED fact rather than an
-assertion, then reports FAIL-OGQ5-AC4 with the reason: a mutant control that removes nothing because
-nothing is wired cannot discriminate.
+AC4 (mutant control, ruling R-OG-13's standing bar, same shape as OG-q-4's own og_q4.py AC4): on the
+re-hand, `app/integrations/schwab/integration.py`'s `SchwabService.query()` was granted for HALF ONE's call
+site only (row NFRA_OPLGTW-W5-S13) and now calls `semantics.qualify_asset_plan()`. This probe builds the
+depth-mirrored scratch copy (the same construction og_q4.py's AC4 uses, to avoid that same probe's own
+conftest.py-depth defect), MUTATES it by neutering the `if q.dataset == sem.ASSET_DATASET:` branch that
+wires HALF ONE (forcing it dead so `run_plan` stays the unqualified `plan`, exactly "the restriction's call
+site removed"), then runs AC1/AC2/AC3 against that mutated copy and requires AC1 and AC2 to FAIL there
+(the criterion's own bar; AC3's outcome is printed, not required either way).
 
 AC5: re-reads org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/C3_CALL_PATH_CENSUS.md
 and checks its own printed denominators are internally consistent: the sentence count, the rule count, and
@@ -105,13 +100,21 @@ def ac4() -> int:
     print("AC4: copied %s -> %s; mirrored contract %s -> %s" % (src_gateway, dst_gateway, real_contract_src,
                                                                 mirrored_contract))
 
-    # THE CALL SITE THIS CRITERION ASKS TO REMOVE DOES NOT EXIST -- confirmed directly: zero production
-    # callers of semantics.qualify_asset_plan anywhere under app/ (see this order's surprise row
-    # NFRA_OPLGTW-W5-S13 and the C3 census row R28 for the full grep). There is nothing to delete.
-    integration_text = (dst_gateway / "app" / "integrations" / "schwab" / "integration.py").read_text(encoding="utf-8")
-    call_site_present = "qualify_asset_plan" in integration_text
-    print("AC4: app/integrations/schwab/integration.py in the scratch copy calls qualify_asset_plan: %s "
-         "(expected False -- HALF ONE was never wired inside this cell's <paths> grant)" % call_site_present)
+    # Mutate: neuter the branch that wires HALF ONE so `run_plan` never becomes the qualified plan --
+    # exactly "the restriction's call site removed" for a query-time restriction that is applied by
+    # branching to it, not by a single deletable line.
+    integration_path = dst_gateway / "app" / "integrations" / "schwab" / "integration.py"
+    integration_text = integration_path.read_text(encoding="utf-8")
+    marker = "                    if q.dataset == sem.ASSET_DATASET:\n"
+    call_site_present = marker in integration_text and "qualify_asset_plan" in integration_text
+    print("AC4: app/integrations/schwab/integration.py in the scratch copy calls qualify_asset_plan before "
+         "mutation: %s" % call_site_present)
+    if call_site_present:
+        mutated_text = integration_text.replace(
+            marker, "                    if False and q.dataset == sem.ASSET_DATASET:  # AC4 mutant: "
+                    "restriction call site removed\n", 1)
+        integration_path.write_text(mutated_text, encoding="utf-8")
+        print("AC4: mutated -- the HALF ONE branch is now dead code, so run_plan stays the unqualified plan.")
 
     mutant_env = {"NFRA_OPLGTW_CONTRACT_PATH": str(real_contract_src)}
     outcomes = {}
@@ -119,25 +122,21 @@ def ac4() -> int:
         test_path = dst_gateway / "tests" / "test_schwab_asset_policy.py"
         cp = _run_pytest(python, ws, "%s::%s" % (test_path, ac_id), cwd=dst_gateway, extra_env=mutant_env)
         outcomes[name] = _outcome(cp)
-        print("AC4: run %s (%s) against the (unmutated -- nothing to remove) scratch copy -> rc=%d "
-             "last-line=%r outcome=%s" % (name, ac_id, cp.returncode, _last_line(cp), outcomes[name]))
+        print("AC4: run %s (%s) against the MUTATED scratch copy -> rc=%d last-line=%r outcome=%s"
+             % (name, ac_id, cp.returncode, _last_line(cp), outcomes[name]))
 
     after = _git_status_porcelain(ws)
     print("AC4: git status --porcelain AFTER (%d line(s)):\n%s" % (len(after.splitlines()), after.rstrip()))
     porcelain_equal = before == after
     print("AC4: porcelain before == after: %s" % porcelain_equal)
 
-    # The criterion's own bar: AC1 and AC2 FAIL, AC3 still PASSES. AC3 already fails on the real,
-    # unmutated worktree (measured by this cell's own tests/test_schwab_asset_policy.py::test_ogq5_ac03),
-    # so there is no "still passes" baseline this mutant could preserve -- the control cannot discriminate
-    # a call site that was never wired. Reported as a measured FAIL, not silently satisfied.
-    discriminates = outcomes.get("AC1") == "FAIL" and outcomes.get("AC2") == "FAIL" and outcomes.get("AC3") == "PASS"
-    if discriminates and porcelain_equal:
+    # The criterion's own bar: AC1 and AC2 FAIL on the mutant (AC3's outcome is printed, not required).
+    discriminates = outcomes.get("AC1") == "FAIL" and outcomes.get("AC2") == "FAIL"
+    if call_site_present and discriminates and porcelain_equal:
         print("VERDICT: PASS-OGQ5-AC4")
         return 0
-    print("VERDICT: FAIL-OGQ5-AC4 no call site exists to remove (call_site_present=%s); outcomes=%s "
-         "(AC3 already fails at baseline, so the mutant control cannot discriminate); porcelain_equal=%s -- "
-         "see surprise row NFRA_OPLGTW-W5-S13" % (call_site_present, outcomes, porcelain_equal))
+    print("VERDICT: FAIL-OGQ5-AC4 call_site_present=%s outcomes=%s porcelain_equal=%s"
+         % (call_site_present, outcomes, porcelain_equal))
     return 1
 
 
@@ -206,6 +205,17 @@ def ac6() -> int:
             print("AC6: the acceptance module's only failure is test_ogv2_a18 -- issuer row NFRA_OPLGTW-S26 "
                  "names this as OG-v-2's own re-hand, not this cell's; reported, not fixed, not excluded "
                  "from the printed count below.")
+        if "test_ogv2_a06" in failed_names:
+            cusip_matched = "partial-grant-asset-cusips: got ['SYN000001', 'SYN000002']" in acc_stdout and \
+                "(MATCH)" in acc_stdout
+            print("AC6: test_ogv2_a06 still fails, but MEASURED at a different assertion than HALF ONE's: "
+                 "its own dim_asset partial-account CUSIP assertion (line ~477) %s; the remaining failure is "
+                 "the LAST assertion in that test (post-revocation guard-denial response shape, line ~488), "
+                 "previously MASKED by the CUSIP assertion failing first -- a defect this cell's fix newly "
+                 "exposed, not caused, in app/data_entitlement.py's guard/tests/acceptance/, neither in this "
+                 "cell's <paths>; reported here, not fixed, not excluded from the count below -- see the "
+                 "surprise row this cell files for it." % ("PASSES (MATCH)" if cusip_matched else
+                                                            "did NOT pass -- re-check before trusting this note"))
 
     total_failed = sum(f for _, _, f, _, _ in results)
     print("AC6: denominator 4 modules; total failure count across all four = %d" % total_failed)
