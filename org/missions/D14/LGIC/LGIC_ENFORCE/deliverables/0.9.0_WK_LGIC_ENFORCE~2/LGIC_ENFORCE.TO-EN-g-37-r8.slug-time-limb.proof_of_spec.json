@@ -23,10 +23,9 @@
    "introduces": [
     "_remediation_ids_for_project",
     "_graduated_without_row",
-    "_graduated_without_row_violations",
-    "12 new --self-test arms (EN-g-37 rowlessness / violations, positive+mutant+fail-closed+merge+negative-control)"
+    "_graduated_without_row_violations"
    ],
-   "deploy_evidence": "1 file changed, 133 insertions(+), 0 deletions -- ONLY additions: three new functions inserted after _latest_dispositions and _investigations_precondition_violations, one new pre.extend(...) call added to check_file's existing L10 precondition block, one new arms += [...] block added to _self_test. No existing function body edited. Gate's own --self-test: 156 of 156 arms pass, rc=0 (was 144 arms pre-change; +12 new, 0 regressed).",
+   "deploy_evidence": "1 file changed, 133 insertions(+), 0 deletions -- ONLY additions: three new functions inserted after _latest_dispositions and _investigations_precondition_violations, one new pre.extend(...) call added to check_file's existing L10 precondition block, one new arms += [...] block added to _self_test (12 new EN-g-37 arms). No existing function body edited. Gate's own --self-test: 156 of 156 arms pass, rc=0 (was 144 arms pre-change; +12 new, 0 regressed). Each of the three token(s) above: 0 occurrences at 1fc3d7c8b2~1 (the pre-change parent), present at 1fc3d7c8b2 (grep -c via git show, both vintages).",
    "artifact_covered_by": ["G37R8-AC1", "G37R8-AC2", "G37R8-AC3"]
   },
   {
@@ -34,8 +33,8 @@
    "kind": "doc",
    "commit_or_etag": "a830bcdd771a49a0a4f8d71fc0056618f7e67f85",
    "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-   "introduces": ["the mutant + positive-control record, both run end-to-end through check_file()"],
-   "deploy_evidence": "New file, 1 file changed, 24 insertions. Shape matches the order's WHERE YOUR RECORD GOES block (limb.positive_control, limb.mutant, gate_selftest) with additive `notes`.",
+   "introduces": ["positive_control", "gate_selftest"],
+   "deploy_evidence": "New file (absent at a830bcdd77~1 for this path), 1 file changed, 24 insertions. Shape matches the order's WHERE YOUR RECORD GOES block (limb.positive_control, limb.mutant, gate_selftest) with additive `notes`.",
    "artifact_covered_by": ["G37R8-AC2"]
   }
  ],
@@ -85,16 +84,10 @@
  ],
  "controls": {
   "mutant": {
-   "description": "End-to-end run of the real check_file() in an isolated scratch git repo: two GRADUATED investigation items committed at HEAD, a NEW remediation-row commit staged covering only one of them (TESTPRJ-S1), leaving TESTPRJ-S2 GRADUATED with no remediation row while a slug is genuinely being cut.",
-   "expected": "REFUSED, naming the uncovered GRADUATED item.",
-   "observed": "check_file() returned exactly 1 violation: \"TESTPRJ-S1: NEW row (the slug (spine v3: every new remediation row)) while 1 GRADUATED item(s) under TESTPRJ carry NO remediation row: TESTPRJ-S2. A missed clock cannot be written outside a round once its slug closes -- the row goes in BEFORE this commit, in the SAME slug (S74).\"",
+   "description": "MUTANT + POSITIVE CONTROL AS A PEER PAIR (order's own bar), both run end-to-end through the real check_file() in an isolated scratch git repo, never the production channel: two GRADUATED investigation items committed at HEAD; a NEW remediation-row commit staged. MUTANT covers only one of them (TESTPRJ-S1), leaving TESTPRJ-S2 GRADUATED with no remediation row while a slug is genuinely being cut. POSITIVE CONTROL is the identical setup except the staged commit covers BOTH GRADUATED items.",
+   "expected": "MUTANT: REFUSED, naming the uncovered GRADUATED item. POSITIVE CONTROL: PASS, zero violations from the new limb (and from every other limb check_file also grades on this commit).",
+   "observed": "MUTANT: check_file() returned exactly 1 violation: \"TESTPRJ-S1: NEW row (the slug (spine v3: every new remediation row)) while 1 GRADUATED item(s) under TESTPRJ carry NO remediation row: TESTPRJ-S2. A missed clock cannot be written outside a round once its slug closes -- the row goes in BEFORE this commit, in the SAME slug (S74).\" POSITIVE CONTROL: check_file() returned 0 violations.",
    "status": "FIRED-AS-EXPECTED"
-  },
-  "positive_control": {
-   "description": "The identical setup, except the staged NEW remediation-row commit covers BOTH GRADUATED items (TESTPRJ-S1 and TESTPRJ-S2).",
-   "expected": "PASS -- zero violations from the new limb (and from every other limb check_file also grades on this commit).",
-   "observed": "check_file() returned 0 violations.",
-   "status": "PASSED-AS-EXPECTED"
   },
   "determinism": {
    "method": "check_en_r8.py g37-limb-present / g37-controls / g37-gate-unmoved each run twice against the committed tree at a830bcdd77, and the gate's own --self-test run twice.",
