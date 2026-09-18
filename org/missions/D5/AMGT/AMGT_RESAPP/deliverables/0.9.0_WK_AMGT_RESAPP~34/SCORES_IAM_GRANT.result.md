@@ -134,19 +134,53 @@ change to the other 12 prefixes (byte-identical, confirmed programmatically). No
 producer re-run. Applied via `.tools/safe-apply.sh` only, Terraform only. No non-ASCII introduced.
 Not pushed.
 
-## 10. Committed paths
+## 10. BLOCKING: the Terraform source change itself could NOT be committed
 
-- `infra/aws/terraform/harvest/scoped-amgt-api.tf` (the one list entry + the stale-comment fix)
-- `org/critical_paths/change_management/20260918T0141Z_amgt-scores-v1-iam-grant-20260918_deploy_completion.md`
-- `org/critical_paths/.open_deploys/amgt-scores-v1-iam-grant-20260918.json` (sentinel removal)
-- `org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md` (row
-  `AMGT_RESAPP-Z-W34-S1`)
-- `org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~34/SCORES_IAM_GRANT.result.md`
-  (this file)
+`bash .tools/safe-commit.sh -- infra/aws/terraform/harvest/scoped-amgt-api.tf ...` was **REFUSED** by
+the owned-paths lane gate (`.tools/owned-paths-validate.py`, ADHC_OWNPTH.005):
+
+```
+ERROR: owned-paths lane violation(s) detected (block mode):
+VIOLATION: infra/aws/terraform/harvest/scoped-amgt-api.tf -- lane=CLOUD_OPS_OR_ETL ...
+agent=0.9.0_WK_AMGT_RESAPP~34 not in permitted_agents -- WORKER: no NON-TERMINAL task order at HEAD
+issued_to this serial names this path in its <paths> block (ADHC_OWNPTH.005: the order is the grant;
+a missing path is a cut defect, never an override)
+```
+
+`git grep -l "WK_AMGT_RESAPP~34" -- org/missions/D5/AMGT/AMGT_RESAPP/task-orders/` returns **zero**
+matches at HEAD -- this worker was dispatched directly off the signed CTO/COO co-sign with an inline
+worker-face prompt, never backed by a task-order markdown file, and the gate reads a worker's grant
+from that file only (`.tools/owned-paths-validate.py:114-116`). No override exists for this gate and
+none was attempted. **Filed as `AMGT_RESAPP-Z-W34-S2` (BLOCKING, ARMED, disarm_owner
+`2.0.0_SA_COO~Z`).**
+
+The live infrastructure act is complete and independently verified (sections 5-8 above); only the
+one-line Terraform source diff (the co-sign's own subject) remains **modified and uncommitted** in
+this worktree, `wk-amgt-13-scores-iam`, pending either a retroactive task order naming this path to
+this serial, or a commit via a lane the gate already permits (`CLOUD_OPS_OR_ETL`, or the CTO/COO's
+own lane).
+
+## 11. Committed paths
+
+Two commits landed on `wk-amgt-13-scores-iam`:
+
+- `270641f7bf` -- `org/critical_paths/change_management/20260918T0141Z_amgt-scores-v1-iam-grant-20260918_deploy_completion.md`,
+  `org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md` (row
+  `AMGT_RESAPP-Z-W34-S1`), `org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~34/SCORES_IAM_GRANT.result.md`
+- `5cd67f62df` -- `org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md`
+  (row `AMGT_RESAPP-Z-W34-S2`, the BLOCKING finding above)
+
+**NOT committed** (blocked, see section 10): `infra/aws/terraform/harvest/scoped-amgt-api.tf` --
+modified in the worktree, matching exactly the one list entry + comment fix described in section 3.
+The ledger's own sentinel file
+(`org/critical_paths/.open_deploys/amgt-scores-v1-iam-grant-20260918.json`) was created and removed
+by `deploy_ledger.py` within this session and required no separate commit action -- its open/close
+cycle left no trace to stage.
 
 Both signed halves' own obligations (CTO half s.7-8, COO half's "THIS HALF'S OWN OBLIGATION AT
-DRAIN") are satisfied by the measured values above; the COO half's own file is left untouched here
-per this worker's `<paths>` grant (it does not include `org/missions/D5/AMGT/AMGT_RESAPP/ledger/`) --
-the issuing COO appends its own drain record to that file per its stated obligation.
+DRAIN") are satisfied on the MEASURED VALUES above; the COO half's own ledger file is left untouched
+here per this worker's `<paths>` grant (it does not include `org/missions/D5/AMGT/AMGT_RESAPP/ledger/`)
+-- the issuing COO appends its own drain record to that file per its stated obligation, and it (or the
+CTO) is also the party that can land the source diff itself per section 10.
 
 Push state: LOCAL on SITEZ, branch `wk-amgt-13-scores-iam`.
