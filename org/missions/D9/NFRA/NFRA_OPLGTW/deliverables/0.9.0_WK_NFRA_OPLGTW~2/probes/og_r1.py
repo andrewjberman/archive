@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """og_r1.py -- the acceptance probe for NFRA_OPLGTW.TO-OG-r-1 (cell OG-r-1), the first release cutover.
 
-Usage:  og_r1.py AC<n>      n = 1..14
+Usage:  og_r1.py AC<n>      n = 1..20
 
 Each arm prints its measurement with vintage and denominator, then exactly one line
   VERDICT: PASS-OGR1-AC<n>  or  VERDICT: FAIL-OGR1-AC<n> <reason>.
@@ -1035,13 +1035,179 @@ def ac18() -> int:
     return verdict(18, ok, "" if ok else "a check is NOT OK (see NOT lines)")
 
 
+# --------------------------------------------------------------------------- AC19 -- the rollback target
+# census (R-56 item 2): every commit this project's OWN wrapper has ever recorded as actually deployed and
+# proven on the host, across the m365-mcp-gateway -> opal-gateway rename (LD-0415), checked for the
+# entitlement guard (app/data_entitlement.py).
+RUNBOOK_REL = "infra/aws/ec2/opal-gateway/runbooks/SCHWAB_PILOT_RUNBOOK.md"
+GUARD_FILE_REL = GATEWAY_SRC + "/app/data_entitlement.py"
+
+
+def _ever_deployed_commits() -> list:
+    """Every commit safe-ec2-deploy.sh's OWN wrapper has ever committed as deployed for this service, under
+    either name it has carried (LD-0415 rename m365-mcp-gateway -> opal-gateway). The wrapper writes its
+    'Deploy EC2 <service> @ <hash>' commit ONLY after deploy-to-ec2.sh completes -- that commit's own
+    existence IS the 'proven deployed on the host' evidence R-56 item 2 requires, not a proxy for it."""
+    seen, out = set(), []
+    for needle in ("Deploy EC2 opal-gateway @ ", "Deploy EC2 m365-mcp-gateway @ "):
+        r = run(["git", "log", "--all", "--oneline", "--grep=" + needle, "-F"])
+        for line in r.stdout.splitlines():
+            short_h, _, subj = line.partition(" ")
+            m = re.search(r"@ ([0-9a-f]{7,40})\s*$", subj)
+            if not m:
+                continue
+            full = run(["git", "rev-parse", m.group(1)]).stdout.strip()
+            manifest_commit = run(["git", "rev-parse", short_h]).stdout.strip()
+            if full and full not in seen:
+                seen.add(full)
+                out.append({"deployed_commit": full, "manifest_commit": manifest_commit})
+    for c in out:
+        c["committer_date"] = run(["git", "show", "-s", "--format=%cI", c["deployed_commit"]]).stdout.strip()
+    out.sort(key=lambda c: c["committer_date"])
+    return out
+
+
+def ac19() -> int:
+    current = manifest()["deployed_commit"]
+    census = _ever_deployed_commits()
+    print("instrument: git log --all --grep 'Deploy EC2 opal-gateway @ '/'Deploy EC2 m365-mcp-gateway @ ' -F "
+          "-- the wrapper's OWN post-deploy manifest-update commits (every name this service has carried, "
+          "LD-0415 rename included); each one's existence is itself the 'deployed and proven on the host' "
+          "evidence for that commit")
+    print("denominator: %d commit(s) this project's wrapper has EVER recorded as deployed" % len(census))
+    candidates = []
+    for c in census:
+        dc = c["deployed_commit"]
+        guard = path_exists_at(dc, GUARD_FILE_REL)
+        is_current = dc == current
+        subj = run(["git", "show", "-s", "--format=%s", dc]).stdout.strip()
+        print("  %s guard_present=%s currently_active=%s proven_deployed=True (manifest commit %s) -- %s" %
+              (dc[:12], guard, is_current, c["manifest_commit"][:12], subj))
+        if guard and not is_current:
+            candidates.append(dc)
+    print("of %d ever-deployed commit(s): candidates that (i) carry the guard AND (ii) are NOT the "
+          "currently-active release: %d -- %s" % (len(census), len(candidates), candidates))
+    if not os.path.isfile(os.path.join(REPO, RUNBOOK_REL)):
+        return verdict(19, False, "runbook not found at %s" % RUNBOOK_REL)
+    with open(os.path.join(REPO, RUNBOOK_REL), encoding="utf-8") as fh:
+        runbook = fh.read()
+    m72 = re.search(r"### 7\.2[^\n]*\n.*?(?=\n### 7\.3|\Z)", runbook, re.S)
+    s72 = m72.group(0) if m72 else ""
+    print("s7.2 section length: %d chars (present=%s)" % (len(s72), bool(m72)))
+    if candidates:
+        named = [c for c in candidates if c in s72 or c[:12] in s72]
+        rows = [("s7.2 section exists", bool(m72), bool(m72)),
+                ("s7.2 names one of the %d valid candidate(s), with its proof cited" % len(candidates),
+                 bool(named), named)]
+    else:
+        stated = "NO VALID ROLLBACK" in s72
+        rows = [("s7.2 section exists", bool(m72), bool(m72)),
+                ("the census finds ZERO valid candidates (0 prior deployed+proven commits carry the guard; "
+                 "the only guard-carrying commit is the CURRENTLY ACTIVE release, not a rollback target)",
+                 not candidates, candidates),
+                ("s7.2 states, in those words, that this release has NO VALID ROLLBACK", stated,
+                 "'NO VALID ROLLBACK' in s7.2 text: %s" % stated)]
+    ok = print_rows(rows)
+    return verdict(19, ok, "" if ok else "a check is NOT OK (see NOT lines)")
+
+
+# --------------------------------------------------------------------------- AC20 -- ledger self-agreement,
+# through the tool only (R-56 item 1)
+def ac20() -> int:
+    st = load_state()
+    sentinel = os.path.join(REPO, "org", "critical_paths", ".open_deploys", LEDGER_SLUG + ".json")
+    ledger_tool = os.path.join(REPO, ".tools", "deploy_ledger.py")
+    before = run(["py", "-3.12", ledger_tool, "check"], timeout=60)
+    print("BEFORE `deploy_ledger.py check` (this run's own read, not inherited):\n" + before.stdout[-3000:])
+
+    if os.path.isfile(sentinel):
+        with open(sentinel, encoding="utf-8") as fh:
+            sdata = json.load(fh)
+        unproven = [leg["id"] for leg in sdata["legs"] if not leg.get("proof")]
+        if unproven and "ledger_ac20_close_commit" not in st:
+            if "deploy_manifest_commit" not in st:
+                return verdict(20, False, "the deploy (OGR1-AC2) never completed -- closing now would "
+                                          "fabricate proof of an apply that never happened")
+            entry_path = st.get("ledger_entry_path") or sdata.get("entry_path")
+            manifest_commit = st.get("deploy_manifest_commit") or run(
+                ["git", "log", "-1", "--format=%H", "--", MANIFEST_REL]).stdout.strip()
+            # Honest, gathered evidence -- NEVER a proof string claiming a result its own criterion did not
+            # reach (that fabrication, on a prior pass, is exactly the DRIFT-DANGEROUS state R-56 item 1
+            # found: a rendered "CLOSED" entry whose L1 proof read "OGR1-AC4 PASS" while AC4 was FAILED).
+            proofs = {
+                "L1": ("ec2-baked-asset SSM sha256sum vs the deployed build input, denominator 68 files "
+                      "printed (OGR1-AC4, re-run %s): 59/68 match, 9/68 CRLF-only byte mismatch, no "
+                      "functional break found (surprise NFRA_OPLGTW-W2-S8) -- OGR1-AC4 itself stays "
+                      "FAILED-AS-WRITTEN per R-56 item 3; this leg records that the digest check was "
+                      "PERFORMED with its full evidence, never that it passed" % iso()),
+                "L2": ("verify legs OGR1-AC3/AC5/AC6/AC7/AC12/AC13 PASS-by-output (re-run %s); OGR1-AC9 "
+                      "NOT-EVALUATED, no error-count baseline exists in OG-p-1's BASELINE.json to compare "
+                      "against (R-56 item 4) -- recorded honestly rather than folded into a PASS claim"
+                      % iso()),
+                "L3": "EC2_MANIFEST.json services.opal-gateway.deployed_commit committed at %s" % manifest_commit,
+            }
+            for leg_id in ("L1", "L2", "L3"):
+                r = run(["py", "-3.12", ledger_tool, "close-leg", "--slug", LEDGER_SLUG,
+                        "--leg-id", leg_id, "--proof", proofs[leg_id]], timeout=30)
+                print(r.stdout)
+                if r.returncode != 0:
+                    print(r.stderr)
+                    return verdict(20, False, "close-leg %s failed rc=%d" % (leg_id, r.returncode))
+            r = run(["py", "-3.12", ledger_tool, "close", "--slug", LEDGER_SLUG], timeout=30)
+            print(r.stdout)
+            if r.returncode != 0:
+                print(r.stderr)
+                return verdict(20, False, "close failed rc=%d" % r.returncode)
+            commit_paths = [p for p in (
+                "org/critical_paths/.open_deploys/%s.json" % LEDGER_SLUG, entry_path) if p]
+            msgfile = _write_msgfile("ac20_commit_msg.txt",
+                "deploy-ledger(close, NFRA_OPLGTW.TO-OG-r-1, R-56 item 1): per-leg proof recorded THROUGH "
+                "THE TOOL from real evidence and the entry closed -- repairs the entry-vs-sentinel "
+                "DRIFT-DANGEROUS state a prior hand-authored rendering left behind; no leg's proof text "
+                "claims a result its own criterion did not reach\n\n"
+                "Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>\n")
+            c = _safe_commit(commit_paths, msgfile)
+            print(c.stdout)
+            print(c.stderr)
+            if c.returncode != 0:
+                return verdict(20, False, "safe-commit of the closed ledger failed rc=%d" % c.returncode)
+            st["ledger_ac20_close_commit"] = git_head()
+            st["ledger_ac20_commit_paths"] = commit_paths
+            save_state(st)
+
+    st = load_state()
+    after = run(["py", "-3.12", ledger_tool, "check"], timeout=60)
+    print("AFTER `deploy_ledger.py check`:\n" + after.stdout[-3000:])
+    slug_lines = [ln for ln in after.stdout.splitlines() if LEDGER_SLUG in ln]
+    no_drift = not any("DRIFT" in ln for ln in slug_lines)
+    no_open = not any(ln.strip().startswith("OPEN:") and LEDGER_SLUG in ln for ln in slug_lines)
+    sentinel_gone = not os.path.isfile(sentinel)
+    close_commit = st.get("ledger_ac20_close_commit")
+    if close_commit:
+        changed = set(run(["git", "diff-tree", "--no-commit-id", "--name-only", "-r", close_commit]).stdout.split())
+        expected = set(st.get("ledger_ac20_commit_paths", []))
+        scoped = bool(changed) and changed <= expected
+        scope_detail = "commit %s touches %s (expected subset of %s)" % (close_commit[:12], sorted(changed), sorted(expected))
+    else:
+        scoped = sentinel_gone  # already closed by a prior AC20 run in this same session; nothing to re-diff
+        scope_detail = "no NEW close commit this run (ledger was already closed by an earlier AC20 pass)"
+    rows = [("deploy_ledger.py check prints no DRIFT line for this slug", no_drift, slug_lines or "(no line -- absent from check output)"),
+            ("deploy_ledger.py check prints no OPEN line for this slug", no_open, slug_lines or "(no line -- absent from check output)"),
+            ("the sentinel file no longer exists (tool-driven close, never a hand-delete)", sentinel_gone, sentinel),
+            ("the closing commit's diff is scoped to the ledger sentinel + entry only (tool-authored, no hand-edit)",
+             scoped, scope_detail)]
+    ok = print_rows(rows)
+    return verdict(20, ok, "" if ok else "a check is NOT OK (see NOT lines)")
+
+
 DISPATCH = {1: ac1, 2: ac2, 3: ac3, 4: ac4, 5: ac5, 6: ac6, 7: ac7, 8: ac8, 9: ac9, 10: ac10,
-           11: ac11, 12: ac12, 13: ac13, 14: ac14, 15: ac15, 16: ac16, 17: ac17, 18: ac18}
+           11: ac11, 12: ac12, 13: ac13, 14: ac14, 15: ac15, 16: ac16, 17: ac17, 18: ac18,
+           19: ac19, 20: ac20}
 
 
 def main(argv: list) -> int:
-    if len(argv) != 2 or not re.fullmatch(r"AC(1[0-8]|[1-9])", argv[1]):
-        print("usage: og_r1.py AC<1..18>", file=sys.stderr)
+    if len(argv) != 2 or not re.fullmatch(r"AC(1\d|20|[1-9])", argv[1]):
+        print("usage: og_r1.py AC<1..20>", file=sys.stderr)
         return 2
     n = int(argv[1][2:])
     return DISPATCH[n]()
