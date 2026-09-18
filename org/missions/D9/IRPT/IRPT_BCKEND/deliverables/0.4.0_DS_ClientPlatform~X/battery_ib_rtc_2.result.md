@@ -15,9 +15,9 @@ because each one runs into something the order did not expect:
 
 | missing member | what stops it | row |
 |---|---|---|
-| `data/assets/scripts/gold/runners_49f/runner_common.py` | a bundle member is routed **out of its own per-file deploy leg**; this file is served today at `s3://opal-data-49financial/_code/runner_common.py` | `IRPT_BCKEND-S57` |
-| `data/inf/scripts/gold/runners_inf/runner_common.py` | same: served at `s3://opal-data-inf/code/gold/runners_inf/runner_common.py` | `S57` |
-| `data/cot/scripts/gold/runners_cot/runner_common.py` | same: served at `s3://opal-data-cot/code/gold/runners_cot/runner_common.py` | `S57` |
+| `data/assets/scripts/gold/runners_49f/runner_common.py` | a bundle member is routed **out of its own per-file deploy leg**; this file is served today at `s3://opal-data-49financial/_code/runner_common.py` | `IRPT_BCKEND-S62` |
+| `data/inf/scripts/gold/runners_inf/runner_common.py` | same: served at `s3://opal-data-inf/code/gold/runners_inf/runner_common.py` | `S62` |
+| `data/cot/scripts/gold/runners_cot/runner_common.py` | same: served at `s3://opal-data-cot/code/gold/runners_cot/runner_common.py` | `S62` |
 | `data/firm_registry.json` | outside `data/*/scripts/gold/**` and `lib/**`, so the face itself calls it a BLOCKING row | `S58` |
 | `infra/aws/lambda/investor-reporting/_contracts/DirectoryEntry.schema.json` | same | `S58` |
 
@@ -52,7 +52,7 @@ would keep running stale code and nothing would report it.
 
 Whether that is acceptable, or whether the guard gets a "distribution member" semantic that keeps
 the loose leg, is a change to the CTO-blessed X-iii contract. It is not a `CODE_TREES` edit, so it
-is not mine to make. Row `S57` gives three possible fixes and this seat's recommendation.
+is not mine to make. Row `S62` gives three possible fixes and this seat's recommendation.
 
 With no declaration, a re-mint would have produced the same bytes as the object already served.
 So I opened no change-management entry, took no sentinel and made no mint.
@@ -124,7 +124,7 @@ distinct objects) by pushes that touched member files. The arm compares against 
 
 ---
 
-## The two disclosures (not graded; they are the evidence for rows S57 and S59)
+## The two disclosures (not graded; they are the evidence for rows S62 and S59)
 
 **(g) ROUTING.** Shown above: 3 of 3 undeclared `runner_common.py` have a live, current loose leg,
 and 3 of 3 would be routed out of it. The probe ran the guard's `bundle_for_member` against a deep
@@ -161,9 +161,9 @@ cannot be placed by any member name.
    carrying all three would widen what the mdpf host can **import**, not what it can **read**.
    Reads stay bound by the host role and by `opal-data-49financial`'s `DenyForeignFirmPrincipals`
    (the 49F arm stays BLOCKED by that control, per decomposition v0.3 s.R3.1). The cross-firm
-   effect the bound should hear about is on the **deploy plane** (row `S57`): one shared DS-lane
+   effect the bound should hear about is on the **deploy plane** (row `S62`): one shared DS-lane
    artifact would become the deploy path for three firms' own runner code and freeze their
-   per-firm legs. Of the three fixes in S57, option (2) (fetch each firm's served module at build
+   per-firm legs. Of the three fixes in S62, option (2) (fetch each firm's served module at build
    time) would make the mdpf principal read `opal-data-49financial/_code/`.
 3. **The 49 Financial import read no 49 Financial data.** Locally, `Firm49F()` instantiated
    IMPORT-OK, and the audit hook recorded **0** network events (socket connect / getaddrinfo /
@@ -181,7 +181,7 @@ cannot be placed by any member name.
 - **No `StartInstances`**, and never a stop.
 - **No edit to `refresh.py`** (outside `<paths>`), to any runner, or to the dead constant.
 - **Row ids:** the face asks for `IRPT_BCKEND-D-S<k>`, which the ratified schema refuses (row
-  `S30`, round 2). These rows use the seat form `S57`-`S60`, continuing from the channel's measured
+  `S30`, round 2). These rows use the seat form `S58`-`S60` and `S62`, continuing from the channel's measured
   maximum of `S56` on both this branch and `CLOUD` (`662d53b793`).
 - **The channel holds two json fences, not one:** the CVO's `S56` sits in a second fence. These
   rows are appended inside the **first** array, as the face instructs. The file is written LF.
@@ -190,7 +190,21 @@ cannot be placed by any member name.
 
 | id | class | one line |
 |---|---|---|
-| `IRPT_BCKEND-S57` | BLOCKING | declaring the three `runner_common.py` would freeze three live per-firm deploy legs |
+| `IRPT_BCKEND-S62` | BLOCKING | declaring the three `runner_common.py` would freeze three live per-firm deploy legs |
 | `IRPT_BCKEND-S58` | BLOCKING | the registry and the contract are outside the admitted globs (the face's own rule) |
 | `IRPT_BCKEND-S59` | BLOCKING | the deployed dispatch cannot place the closure, so IB-rtc-3 cannot land inf/cot as cut |
 | `IRPT_BCKEND-S60` | OBSERVATION | the negative control's prior is 2 members, not 3; graded against the pre-cell object |
+
+## Row id re-labelled before the drain -- read this before chasing a citation
+
+This seat's first row was written as `IRPT_BCKEND-S57`. It is now **`IRPT_BCKEND-S62`**, because
+`CLOUD` landed `2.0.0_SA_COO~B`'s own `IRPT_BCKEND-S57` (the round-3 intake row) at `e83de1a17e`
+after this branch was cut at `e9dc18f302`. The drain's row gate refuses a duplicate id across the
+merged index. The issuer asked for the change (msg 97786), and this seat confirmed the collision
+itself at `CLOUD` `d5d102aee4` before making it: `S57` is `surfaced_by: 2.0.0_SA_COO~B` there,
+`S58`-`S62` were free, and `S61` is reserved for the issuer. `S58`, `S59` and `S60` keep their ids.
+Content is unchanged; only the id and the references to it moved.
+
+The two earlier commit messages on this branch (`802cee5eab`, `39caa17744`) name the OLD id.
+Commit messages cannot be changed, so a citation of `IRPT_BCKEND-S57` taken from those messages
+now points at the ISSUER's row, not this one.
