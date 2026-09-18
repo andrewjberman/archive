@@ -1221,12 +1221,29 @@ def subject_runs():
     return sorted(x for x in os.listdir(d) if os.path.isdir(os.path.join(d, x)))
 
 
+def graded_run():
+    """The run directory LT-x-1's criteria grade, named by its OWN R-40 manifest and never by position.
+
+    This used to be `subject_runs()[0]` -- the earliest run id under the subject -- and that is precisely the
+    label-is-not-an-identity defect R-40 was issued against (LGIC_LGCTFM-S3): a later cell's commit dropped four
+    regenerated artifacts into the earliest directory and `x1-run-dir` read PASS on bytes LT-x-1's run never
+    produced, while a fresh coherent run would have sorted LAST and gone ungraded. Returns (run_id, abs_path,
+    why) and REFUSES to guess: no manifest, or more than one, is a FAIL with its denominator, never a fallback to
+    position -- a fallback would re-open the hole.
+    """
+    runs = subject_runs()
+    carrying = [r for r in runs if os.path.isfile(os.path.join(ab(SUBJECT_DIR), r, "HASHES.json"))]
+    note = "run directories under the subject: %d; carrying an R-40 HASHES.json: %d %s" % (len(runs), len(carrying), carrying)
+    if len(carrying) != 1:
+        return None, None, note + " -- exactly one run carries the manifest that names the graded run (R-40)"
+    return carrying[0], os.path.join(ab(SUBJECT_DIR), carrying[0]), note
+
+
 def x1_run_dir():
     tag = "X1-RUN-DIRECTORY-COMPLETE"
-    runs = subject_runs()
-    if not runs:
-        return say("FAIL-" + tag, "no run directory under %s" % SUBJECT_DIR)
-    first = os.path.join(ab(SUBJECT_DIR), runs[0])
+    rid, first, note = graded_run()
+    if rid is None:
+        return say("FAIL-" + tag, note)
     missing = [f for f in RUN_FILES if not os.path.isfile(os.path.join(first, f))]
     schema, why = load_json(SCHEMA)
     contract, why2 = load_json(os.path.join(first, "contract.json"))
@@ -1235,9 +1252,63 @@ def x1_run_dir():
         v, why3 = validator_for(schema)
         errs = validate(v, contract) if v is not None else [why3]
     ok = not missing and not errs
-    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, ["runs under the subject: %d; first %s" % (len(runs), runs[0]),
-                                                       "missing of the %d run files: %s" % (len(RUN_FILES), missing),
-                                                       "schema errors on its contract: %d" % len(errs)] + errs[:5])
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, [note, "graded run: %s" % rid,
+                                                      "missing of the %d run files: %s" % (len(RUN_FILES), missing),
+                                                      "schema errors on its contract: %d" % len(errs)] + errs[:5])
+
+
+HASHED_FILES = RUN_FILES + ("MARK.json", "FWD10.json")
+
+
+def core_hashes(run_id, manifest, actual):
+    """R-40 (1.0.0_SA_CTO, 2026-09-18, msg 97741): a criterion whose subject is a RUN or a PRODUCED ARTIFACT is
+    graded against that artifact's CONTENT HASH, not against the label that names it. `manifest` is the cell's own
+    HASHES.json, written at production time; `actual` is {name: git hash-object} recomputed now. A later commit that
+    replaces a file in the run home then FAILS this arm instead of silently satisfying the one that reads the
+    directory. The declared set is compared to the required set in BOTH directions (Rule 24(i) by subtraction), so a
+    manifest that simply omits the file it broke does not pass either.
+    """
+    declared = manifest.get("files") if isinstance(manifest, dict) else None
+    if not isinstance(declared, dict):
+        return False, ["HASHES.json carries no `files` map (R-40's manifest is the identity, not the path)"]
+    bad = []
+    if manifest.get("run_id") != run_id:
+        bad.append("run_id declared %r, directory is %r -- the manifest describes another run"
+                   % (manifest.get("run_id"), run_id))
+    missing = [f for f in HASHED_FILES if f not in declared]
+    undeclared = [k for k in sorted(declared) if k not in HASHED_FILES]
+    mism = []
+    for f in HASHED_FILES:
+        if f in declared and actual.get(f) != declared[f]:
+            mism.append("%s: declared %s, bytes now %s" % (f, str(declared[f])[:16], str(actual.get(f))[:16]))
+    ok = not bad and not missing and not undeclared and not mism
+    return ok, (["required %d file(s); declared %d; missing from the manifest: %s; declared but not required: %s"
+                 % (len(HASHED_FILES), len(declared), missing, undeclared),
+                 "hash mismatches: %d of %d" % (len(mism), len(HASHED_FILES))] + bad + mism[:6])
+
+
+def x1_hashes():
+    tag = "X1-RUN-ARTIFACTS-BOUND-TO-THEIR-HASHES"
+    runs = subject_runs()
+    carrying = [r for r in runs if os.path.isfile(os.path.join(ab(SUBJECT_DIR), r, "HASHES.json"))]
+    lines = ["run directories under the subject: %d; carrying an R-40 HASHES.json: %d %s"
+             % (len(runs), len(carrying), carrying)]
+    if len(carrying) != 1:
+        return say("FAIL-" + tag, *(lines + ["exactly one run directory carries the manifest, or this arm cannot "
+                                             "name the run it grades -- which is the defect R-40 exists to stop"]))
+    rid = carrying[0]
+    d = os.path.join(ab(SUBJECT_DIR), rid)
+    man, why = load_json(os.path.join(d, "HASHES.json"))
+    if man is None:
+        return say("FAIL-" + tag, *(lines + [why]))
+    actual = {}
+    for f in HASHED_FILES:
+        p = os.path.join(d, f)
+        if os.path.isfile(p):
+            rc, out = git("hash-object", p)
+            actual[f] = out.strip() if rc == 0 and out.strip() else "git rc=%d" % rc
+    ok, why2 = core_hashes(rid, man, actual)
+    return verdict(ok, "PASS-" + tag, "FAIL-" + tag, lines + why2)
 
 
 def contains(doc, needle):
@@ -1263,12 +1334,12 @@ def core_marks(marks, files):
 
 def x1_marks():
     tag = "X1-MARK-ROWS-IN-THE-THREE-REGISTRIES"
-    runs = subject_runs()
-    if not runs:
-        return say("FAIL-" + tag, "no run directory under %s" % SUBJECT_DIR)
-    m, why = load_json(os.path.join(ab(SUBJECT_DIR), runs[0], "MARK.json"))
+    rid, d, note = graded_run()
+    if rid is None:
+        return say("FAIL-" + tag, note)
+    m, why = load_json(os.path.join(d, "MARK.json"))
     if m is None:
-        return say("FAIL-" + tag, why)
+        return say("FAIL-" + tag, note, why)
     files = {}
     for f in REGISTRIES:
         j, _w = load_json(f)
@@ -1781,6 +1852,7 @@ SUBCOMMANDS = {
     "h1-headings": h1_headings, "h1-identity": h1_identity, "h1-no-overwrite": h1_no_overwrite, "h1-manifest": h1_manifest,
     "d1-pytest": d1_pytest, "d1-negative-first": d1_negative_first,
     "x1-run-dir": x1_run_dir, "x1-marks": x1_marks, "x1-fwd10": x1_fwd10, "x1-footprint": x1_footprint, "x1-r16": x1_r16,
+    "x1-hashes": x1_hashes,
     "x2-adding": x2_adding, "x2-removing": x2_removing, "x2-flag": x2_flag_untouched,
     "x3-two-runs": x3_two_runs, "x3-diff": x3_diff_reproduced, "x3-nontrivial": x3_nontrivial, "x3-filed": x3_opened_filed,
     "v1-reproduced": v1_reproduced, "v1-order": v1_order, "v1-not-author": v1_not_author, "v1-card": v1_card,
@@ -1974,6 +2046,17 @@ def selftest_arms():
     mk = {"marks": [{"file": "f.json", "project": "ADVI_FIRMBKTS", "entry": {"kind": "s3-prefix", "prefix": "p/"}}]}
     mk2 = {"marks": [{"file": "f.json", "project": "ADVI_FIRMBKTS", "entry": {"kind": "s3-prefix", "prefix": "q/"}}]}
     arm("x1-marks", core_marks(mk, files)[0], core_marks(mk2, files)[0], "an entry absent from its file")
+    hman = {"run_id": "R", "files": dict((f, "hash-of-" + f) for f in HASHED_FILES)}
+    hact = dict((f, "hash-of-" + f) for f in HASHED_FILES)
+    hact_moved = dict(hact)
+    hact_moved["MARK.json"] = "hash-of-something-else"
+    hman_short = {"run_id": "R", "files": dict((f, "hash-of-" + f) for f in HASHED_FILES if f != "MARK.json")}
+    arm("x1-hashes", core_hashes("R", hman, hact)[0], core_hashes("R", hman, hact_moved)[0],
+        "one artifact's bytes changed after production")
+    arm("x1-hashes-runid", core_hashes("R", hman, hact)[0], core_hashes("OTHER", hman, hact)[0],
+        "the manifest describes a different run")
+    arm("x1-hashes-omitted", core_hashes("R", hman, hact)[0], core_hashes("R", hman_short, hact)[0],
+        "a manifest that omits the file it would have to account for")
     fw = {"aws": {"instrument": "comp-find --corpus aws", "before": {"nodes_scanned": 10, "built": "t1"},
                   "after": {"nodes_scanned": 10, "built": "t2"}, "delta_outside_run": []},
           "served": {"before": {"routes_sha256": "s"}, "after": {"routes_sha256": "s"}}}
