@@ -254,9 +254,23 @@ def core_cov_named(contract, floor_names, named):
 
 
 def receiving_accept(path):
-    rc, txt = run([sys.executable, RECV, ab(path)], timeout=240)
-    ok = rc == 0 and re.search(r"^\s*ACCEPT\s+lgctfm-contract", txt, re.M) is not None
-    return ok, "receiving-check rc=%d %s: %s" % (rc, "ACCEPT" if ok else "NOT ACCEPT", path)
+    """ACCEPT as an lgctfm-contract.
+
+    receiving-check.py routes BY PATH (:77): the lgctfm-contract route matches only
+    `workflows/legacy_transform/<subject>/<run>/contract.json` or `*.lgctfm-contract.json`. A contract a
+    CELL writes into its deliverables folder matches neither and reads `UNCHECKED unrecognised` -- so this
+    arm could not pass for ANY correct record at the path the order mandates (row LGIC_LGCTFM-W1-S23,
+    BLOCKING, disarmed here by the issuer). A path the router does not route is graded by the ROUTE'S OWN
+    CHECKER instead, and the output says which instrument answered. The router's own gap is W1-S23's to
+    carry; the bar is unchanged -- the same checker, the same ACCEPT.
+    """
+    routed = re.search(r"workflows/legacy_transform/[^/]+/[^/]+/contract\.json$|\.lgctfm-contract\.json$",
+                       path.replace(os.sep, "/"), re.I) is not None
+    argv = [sys.executable, RECV if routed else os.path.join(REPO, ".tools", "lgctfm-contract-check.py"), ab(path)]
+    rc, txt = run(argv, timeout=240)
+    ok = rc == 0 and re.search(r"^\s*ACCEPT\s+lgctfm-contract|^ACCEPT lgctfm-contract", txt, re.M) is not None
+    return ok, "%s rc=%d %s: %s" % ("receiving-check" if routed else "lgctfm-contract-check (receiving-check "
+                                    "does not ROUTE this path -- W1-S23)", rc, "ACCEPT" if ok else "NOT ACCEPT", path)
 
 
 # ------------------------------------------------------------------ renderer cores
