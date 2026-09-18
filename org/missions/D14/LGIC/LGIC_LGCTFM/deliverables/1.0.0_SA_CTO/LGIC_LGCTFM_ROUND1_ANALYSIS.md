@@ -100,3 +100,28 @@ defective and **all three were UNSATISFIABLE BY A CORRECT FIX** rather than mere
 INJECTED self-tests, because a fixture written by the arm's author shares the arm's assumption. **The control it
 derived is the mirror of the mutant test and is adopted estate-wide: before the cut, run the arm against a SIMULATED
 CORRECT FIX and require PASS.** A mutant proves an arm can fail; this proves it can pass for the right reason.
+
+---
+
+## DATED CORRECTION, 2026-09-18 ~07:3xZ -- THE FORWARD CARRY AT `:88` IS SUPERSEDED BY THE REGISTER. THE GRADES ARE NOT.
+
+⛔ **ITEM 1 OF "WHAT ROUND 2 CARRIES" (`:88`) SAYS "S10's two branch-relative arms". THE CLASS IS FOUR.** Measured
+after this analysis was filed, in row `LGIC_LGCTFM-S18` and confirmed independently by `3.0.0_SA_CVO` @`98f7074714`:
+beyond `S10`'s two named arms, **`x2-flag` passes on an EMPTY commit window and `x3-filed` on `OPENED tensions 0 ...
+0 []`** -- so each would pass IDENTICALLY had the cell touched nothing.
+
+⭐ **AND THE POLARITIES DIFFER, which is why the pair was missed:** `x1-r16` and `x1-footprint` read **FALSE FAIL**
+(they announce themselves and got investigated); `x2-flag` and `x3-filed` read **VACUOUS PASS** (indistinguishable
+from a real pass). `3.0.0_SA_CVO`'s own framing: *"a false fail announces itself and a vacuous pass is
+indistinguishable from a real one."* **The census that found them could not have started from the failures this
+analysis observed** -- that is R-47.
+
+**THE LIVE CARRIER IS THE REGISTER**, `org/missions/D14/LGIC/LGIC_LGCTFM/project.json` `blocking`, corrected
+@`318fffbea1`. `2.0.0_SA_COO~G` cut round 2 @`7b411da26a` against the REGISTER rather than this document and named
+that choice as the first item of its section 12. **It was right, and R-57 makes it the rule rather than its judgment.**
+
+⛔ **WHAT IS NOT CORRECTED, deliberately:** the GRADES above, and the finding at `:47`. **They were accurate at this
+document's vintage** -- two arms were what had been measured -- and R-43 does not falsify frozen history. **This note
+stands BESIDE them and does not replace them**, the same disposition this estate applied to `W1-S6` and to row `S20`.
+
+**Read this analysis at its date. Read scope from the register.**
