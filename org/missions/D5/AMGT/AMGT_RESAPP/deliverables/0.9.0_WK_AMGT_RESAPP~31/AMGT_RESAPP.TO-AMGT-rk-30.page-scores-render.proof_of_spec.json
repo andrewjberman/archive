@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-30",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-30.page-scores-render.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88be8f29903a716218a83031c468d0b88"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~31",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+      "kind": "script",
+      "commit_or_etag": "d74ff760ca8a026230d00f1f167285da467c15e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal is PORTAL FROZEN this round (COMMIT YES / PROMOTE NO); this commit landed in the portal nested repo's own DEV branch (detached HEAD, LOCAL only, no push performed). Adds ScoreReading (status/value/reason, status carried as the producer's own unenumerated string) and ScoresBlock (scores_status, reason, robustness/peers_v/divergence), and ThesisBundle.scores?: ScoresBlock | null.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+      "kind": "script",
+      "commit_or_etag": "d74ff760ca8a026230d00f1f167285da467c15e5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds ScoreLine (one score's MEASURED value or its ABSENT reason -- a missing field renders a generic ABSENT reason, never nothing) and ScoresSection (Robustness / Peers V / Divergence D under a 'Scores' heading), called from both ModelBody render branches (model-ABSENT and model-SERVED) so scores foot the tab regardless of fiscal-model status. Module docstring updated to name bundle.scores and the expected divergence-D absence.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~31/SESSION_LOG.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New section appended (this order's prior rk-19 section left untouched) recording what was built, AC1/AC2 measurements and the recurring device-quirk handling."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "all three field names occur at least once in ModelTab.tsx, each nonzero, all read 0 before this order lands",
+      "method": "command",
+      "invocation": "cd portal && python -c \"\nimport io, glob\nfs = glob.glob('src/pages/SecurityAnalysis/tabs/ModelTab.tsx')\nj = ''.join(io.open(f, encoding='utf-8', errors='replace').read() for f in fs)\nfor t in ('robustness', 'peers_v', 'divergence'):\n    print(t, j.lower().count(t))\n\"",
+      "output_evidence": "robustness 4\npeers_v 1\ndivergence 6",
+      "denominator": "3 of 3 named field tokens, each counted against the one file the criterion names (ModelTab.tsx); BEFORE this order's edit the same invocation measured robustness 0 / peers_v 0 / divergence 0 (recorded separately in compiler_tools would be redundant -- stated here: the pre-edit baseline read all three at 0, matching the criterion's own stated precondition)",
+      "status": "PASS",
+      "expect": "robustness [1-9]\\d*\\npeers_v [1-9]\\d*\\ndivergence [1-9]\\d*"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "no NEW TypeScript errors attributable to this order's edited files",
+      "method": "command",
+      "invocation": "cd portal && npx tsc -b 2>&1 | tail -30",
+      "output_evidence": "                                                                               \nThis is not the tsc command you are looking for                \n                                                                               \n\nTo get access to the TypeScript compiler, tsc, from the command line either:\n\n- Use npm install typescript to first add TypeScript to your project before using npx\n- Use yarn to avoid accidentally running code from un-installed packages",
+      "denominator": "0 of 0 -- the literal invocation performed no TypeScript compilation at all (0 files type-checked): on this device, npx resolves an npm-registry decoy package literally named `tsc` instead of this bun-managed tree's locally-installed typescript (portal/.npmrc sets package-lock=false; npm ls typescript reports it extraneous). Piped (literal) exit code reads 0 (tail's own exit status); the underlying npx process itself exits 1, measured twice, both readings stable.",
+      "status": "FAIL",
+      "status_reason": "REFUSAL CLAUSE, recurrence of this worker's own prior-order finding (row AMGT_RESAPP-Z-W31-S2, no new row filed per this order's own dispatch instruction): the literal invocation cannot be satisfied as written on this device -- the banner output would be byte-identical whether or not this order's edits introduced a type error (a CLAUDE.md Rule 22 DISCRIMINATION failure), so it cannot be graded PASS on its own terms. NOT repaired or routed around: the direct-binary corroborating instrument (./node_modules/.bin/tsc.exe -b) read clean (rc=0, zero output) before this order's edit, after it, and again after a deliberate mutant was reverted (see controls.mutant) -- recorded as SEPARATE, SUPPLEMENTARY evidence about actual code health only, never substituted for this criterion's own literal-terms grade. This order's completion stays OPEN on AC2 alone; AC1 genuinely passes."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "ScoreLine's function signature return-type annotation was forced from inferred (JSX.Element) to an explicit `: number`, while its body still returns a `<p>...</p>` element and every call site still consumes a rendered node -- a deliberate, isolated type mismatch in this order's own new code, run against the direct-binary instrument to prove it can fail before trusting its clean pass (per this worktree's portal CLAUDE.md typecheck-law precedent for this exact npx/tsc trap class).",
+      "expected": "The mutant build reports a type error on ModelTab.tsx (Element not assignable to number); reverting the mutant restores the clean rc=0 build byte-for-byte identical to the pre-mutant edited file.",
+      "observed": "Mutant run: ./node_modules/.bin/tsc.exe -b -> rc=2, 1 error: \"src/pages/SecurityAnalysis/tabs/ModelTab.tsx(73,3): error TS2322: Type 'Element' is not assignable to type 'number'.\" Reverted from the pre-mutant snapshot; `diff` confirmed byte-identical; re-run: rc=0, zero output, matching this order's own committed build. This mutant exercises the DIRECT-BINARY instrument only, since AC2's own literal npx invocation cannot discriminate at all on this device (that non-discrimination is the criterion's own recorded FAIL reason, not a gap this control papers over).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's invocation run twice in succession against the same committed bytes. AC2's literal (piped) invocation run twice in succession; the same command run a further two times unpiped (to read npx's own exit code, since piping to tail masks it with tail's own exit status) -- four runs total against the same committed bytes. Direct-binary instrument run twice (once pre-mutant baseline, once post-revert) plus the mutant run in between.",
+      "observed": "AC1: both runs byte-identical (robustness 4 / peers_v 1 / divergence 6). AC2: both piped runs produced the identical decoy banner text with the pipeline's own reported exit code stably 0; both unpiped runs produced byte-identical output with npx's own exit code stably 1 -- the two readings (0 piped / 1 unpiped) diverge because they measure different processes' exit status, not because the decoy behavior is nondeterministic. Direct binary: rc=0/zero-output both times the code was unmutated, rc=2/TS2322 with the mutant in place, stable across the sequence.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No RECORD FACE / <status> flip on org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-30.page-scores-render.md -- the file is untouched by this order's commits.",
+      "reason": "AC2 genuinely fails on its literal invocation (see acceptance[AC2]); per this order's own section 6 instruction ('flip <status> to complete' is conditioned on both criteria genuinely passing per the worker's standing rule), the order stays OPEN rather than complete. The file also carries no RECORD FACE at HEAD to flip in the first place."
+    },
+    {
+      "item": "No change to any file outside portal/src/pages/SecurityAnalysis/ -- the adapter half (bundle.scores's producer) and the scores producer runner are separate, already-drained orders on chains B and SP.",
+      "reason": "Out of this order's <paths> grant. This page was built directly against this order's own inlined description of the served shape (bundle.scores.{robustness,peers_v,divergence}, scores_status: READ_FAILED, per-field ABSENT_PULL with an AccessDenied reason) rather than a captured fixture -- none of the __harness__/ fixtures (thesisBundle.*.json, tabsFixture.*.json) carry a scores key yet, checked and named here, not hidden."
+    },
+    {
+      "item": "ScoreReading.status is typed as an unenumerated string, not a closed union of the producer's known status tokens (MEASURED / READ_FAILED / ABSENT_PULL).",
+      "reason": "This page's paths grant no surface onto the adapter's own status vocabulary (Rule 24's MECE-over-a-declared-domain requires the domain be verifiable from a surface this worker can read; none is in <paths>). Typing a closed enum this page cannot observe the full membership of would be inventing a taxonomy on recall, the exact failure mode Rule 24(i) names. The render logic itself does not branch on any specific status string -- it branches only on whether `value` is present -- so this does not weaken AC1/AC2 or the render's own correctness."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~31/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "direct tsc binary (diagnostic; not this order's literal AC2 instrument)",
+      "invocation": "cd portal && ./node_modules/.bin/tsc.exe -b",
+      "result": "rc=0, zero output -- a clean build of the full project-reference set including this order's two edited files, both before and after this order's own edit, and again after reverting the deliberate mutant (see controls.mutant)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh is NOT used for the portal nested repo (a separate git repo, detached HEAD); committed directly with `git commit` inside portal/",
+      "invocation": "GIT_COMMITTER_NAME=\"0.9.0_WK_AMGT_RESAPP~31\" GIT_COMMITTER_EMAIL=\"0.9.0_WK_AMGT_RESAPP~31@opal.agent\" git commit --author \"0.9.0_WK_AMGT_RESAPP~31 <0.9.0_WK_AMGT_RESAPP~31@opal.agent>\" -F ../.scratch/commit_msg_code.txt -- src/pages/SecurityAnalysis/tabs/ModelTab.tsx src/pages/SecurityAnalysis/types.ts",
+      "result": "[detached HEAD d74ff760] 2 files changed, 74 insertions(+), 3 deletions(-). Portal's nested repo already carried a local git identity (0.0.0_AB_MSTR) from a prior session; committer identity supplied via GIT_COMMITTER_NAME/EMAIL env vars for this one invocation only, no `git config` write (local or global), per the standing prohibition."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the worker report -- run from THIS worktree's own copy"
+    }
+  ]
+}

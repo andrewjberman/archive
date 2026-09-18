@@ -68,3 +68,64 @@ disarm_owner `0.4.0_DT_ClientPlatform`) -- a device/tooling defect, not a code d
 This order's `<status>` is NOT flipped to `complete`: AC1 genuinely passes, AC2 genuinely fails
 on its own literal terms. The task-order file itself is left untouched (no RECORD FACE write).
 Per the order's own section 6, this worker does not proceed to `AMGT-rk-30` on an open predecessor.
+
+---
+
+# AMGT_RESAPP.TO-AMGT-rk-30 (page half), fresh worktree
+
+This worker's prior worktree was torn down after the above drained; this session resumes in a
+fresh worktree (branch `wk-amgt-13-31-scores-page`, HEAD `aaab1bf7c8`), portal pre-installed
+(`bun install` already run, DEV `c069db75`). Both upstream halves confirmed drained per this
+order's dispatch text: chain SP's producer (`334fd0401f`, 33 of 33 keyed names) and chain B's
+adapter (deployed live, drained `aaab1bf7c8`) -- `bundle.scores` now present on 33 of 33 served
+names, every name currently reading `scores_status: READ_FAILED` with each of
+robustness/peers_v/divergence classed `ABSENT_PULL` (a genuine, disclosed IAM gap, not this
+order's to fix).
+
+## What was built
+
+- `types.ts`: `ScoreReading` (one score's own `status`/`value`/`reason`, unenumerated status --
+  this page has no surface to verify the producer's full status vocabulary, so it carries the
+  string unchanged rather than typing an enum it cannot observe) and `ScoresBlock`
+  (`scores_status`, `reason`, `robustness`/`peers_v`/`divergence`); `ThesisBundle.scores?:
+  ScoresBlock | null`.
+- `ModelTab.tsx`: `ScoreLine` renders one score's MEASURED value or its ABSENT reason (a missing
+  field renders a generic ABSENT reason rather than nothing); `ScoresSection` renders all three
+  under a "Scores" heading, called from BOTH the model-ABSENT and model-SERVED render branches of
+  `ModelBody` so the scores foot the tab regardless of whether a fiscal model landed. Module
+  docstring updated to name the new data source and the expected divergence-D absence.
+
+No fixture in `__harness__/` carries a `scores` key yet (checked: none of `thesisBundle.*.json` /
+`tabsFixture.*.json` do), so this render was built directly against this order's own inlined
+description of the adapter's shape (the order's whole context per canon), not against a captured
+payload -- named here, not hidden.
+
+## AC1
+
+`robustness 4 / peers_v 1 / divergence 6` in `ModelTab.tsx`, all three read 0/0/0 before this
+order's edit -- PASS.
+
+## AC2 -- the same device quirk, recurring (row `AMGT_RESAPP-Z-W31-S2`, no new row filed)
+
+Identical shape to this worker's prior order: the literal `npx tsc -b` invocation hits the same
+npm-registry decoy-package resolution on this bun-managed, npm-lockfile-less checkout. Measured
+this session: piped literal form -- banner, pipeline exit code 0 (tail's, not npx's); unpiped,
+twice -- byte-identical banner, npx's own exit code 1 both times; direct binary
+(`./node_modules/.bin/tsc.exe -b`) -- clean rc=0/zero-output before this order's edit, after it,
+and again after reverting a deliberate mutant. Mutant: `ScoreLine`'s return type annotation forced
+to `number` (actual return is a JSX element) -- `./node_modules/.bin/tsc.exe -b` failed
+`TS2322: Type 'Element' is not assignable to type 'number'` at rc=2; reverted, `diff` confirmed
+byte-identical to the pre-mutant edited file, re-run clean rc=0.
+
+Per the REFUSAL CLAUSE and this order's own dispatch instructions (mirror the prior order's AC2
+handling exactly), AC2 is recorded FAIL on the literal invocation's own terms -- the banner is
+byte-identical whether or not this change introduced a type error (a DISCRIMINATION failure) --
+with the direct-binary clean reading recorded as separate, supplementary evidence about actual
+code health, never substituted for the grade.
+
+## Disposition
+
+`<status>` is NOT flipped to `complete`: AC1 genuinely passes, AC2 genuinely fails on its own
+literal terms (a device/tooling defect, not a code defect). The task-order file carries no
+RECORD FACE at HEAD and none is added, matching this worker's own prior-order precedent for the
+identical circumstance.
