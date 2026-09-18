@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtc-3.the-refresh-builds-exercised-for-inflection-and-cottonwood.md",
     "group": "OTHER",
-    "vintage_commit": "7b2f8fe9bf"
+    "vintage_commit": "af7d39d96f"
   },
   "assignee": "0.9.0_WK_IRPT_BCKEND~2",
   "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/the-refresh-builds-exercised.result.md",
@@ -19,82 +19,97 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/directory/refresh.py",
       "kind": "script",
-      "commit_or_etag": "ca2a8d5b11",
+      "commit_or_etag": "22294ad856",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "deploy_evidence": "The repo-shaped runner_script() recipe. Deployed via a rebuilt+uploaded zip (sha256(b64) 6ELkwh91ssB4nvlWE/S5InQ2amQBIZkB4zC7oP0AzkE=) and a terraform apply of module.irpt_directory_refresh.aws_lambda_function.this (0 to destroy, 0-diff re-plan). Served CodeSha256 == that sha256 (get-function-configuration, re-checked live). EXERCISED, not merely deployed: three real SSM commands dispatched by the deployed function on 2026-09-18 show the full nine-member repo-shaped tree extracted and IMPORT-OK for trading_calendar, ids AND contract (all three per-firm runner_common.py modules) on the host, for the first time in this project's record.",
-      "introduces": ["tar -xzf $W/bundle.tar.gz -C $W || exit 91"]
+      "deploy_evidence": "AMENDMENT 2 (row IRPT_BCKEND-W2-S55's ruling): runner_script() drops the explicit --as-of argument to directory_runner.py entirely (0 occurrences, arm a.6); refresh_firm() keys a COMPLETED (and disappeared-client FAILED) build's manifest by the RUNNER's own business_date, never the fire's clock date; SsmBuildDispatcher.__call__() gained a third outcome, same_frontier, returned when a succeeded command's pointer already matches the previous manifest's directory_key (no second, identical dispatch). Deployed via a rebuilt+uploaded zip (final sha256(b64) E7TMbaF9NBPm7rFIDkk7y22gNQiPRAGr9m9BqcpnkGM=, canonical 2020-01-01 fixed timestamp) and two terraform applies of module.irpt_directory_refresh.aws_lambda_function.this (both 0 to destroy, both 0-diff re-plan). Served CodeSha256 == that sha256, re-checked live AND independently re-derived by the battery itself (arm b.2). EXERCISED, not merely deployed: fired live twice more (an interim fire against a zip built with the wrong timestamp, then the final fire against the corrected code) -- both times neither inflection's nor cottonwood's build shows the W2-S55 REFUSE line any longer, proving the fix live.",
+      "introduces": ["REFRESH_NOOP_SAME_FRONTIER handling in refresh_firm()", "same_frontier outcome in SsmBuildDispatcher.__call__()"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/directory/expiry.py",
+      "kind": "script",
+      "commit_or_etag": "22294ad856",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "New closed-set reason code REFRESH_NOOP_SAME_FRONTIER (state READY, action NONE), added with a four-postulate record (MECE/SAME GRAIN/INTENT COHERENCE/STATE COHERENCE) and a word-boundary token census (0 hits, comp-find --corpus all, 35,497 files scanned) per CLAUDE.md Rule 24, following the REFRESH_DISPATCHED precedent already in this file. Deployed in the same zip as refresh.py (both are declared members of the same Lambda function).",
+      "introduces": ["REFRESH_NOOP_SAME_FRONTIER"]
     },
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/directory/tests/test_refresh_expiry.py",
       "kind": "test",
-      "commit_or_etag": "ca2a8d5b11",
+      "commit_or_etag": "22294ad856",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Four new unit tests on the recipe TEXT (the string runner_script() returns): -C $W present and -C $W/<subdir> absent, no mv line, member-list-then-import-check ordering unchanged, no ../ or /.. segment. 27 of 27 tests pass (23 pre-existing + 4 new). MUTANT: against the pre-cell (base 7b2f8fe9bf) flat-unpack recipe, the two load-bearing assertions (-C $W present; no mv line) both read False -- the tests discriminate the fix from its absence.",
-      "introduces": ["test_runner_script_extracts_at_the_simulated_repo_root", "test_runner_script_carries_no_mv_line"]
+      "deploy_evidence": "Six new unit tests (beyond the first pass's four recipe-text tests, now 10 IB-rtc-3 tests total): the recipe carries no --as-of; a completed manifest carries the runner's date when it differs from the clock date; the same fix on the disappeared-client branch; a same-frontier re-fire records REFRESH_NOOP_SAME_FRONTIER and not a new revision; the new reason code is in the closed set and maps to a state; and SsmBuildDispatcher.__call__ itself (the REAL build_fn, bound 12 -- not a fixture standing in for it) returns same_frontier and never sends a second command when a succeeded command's pointer already matches the previous manifest's directory_key. 33 of 33 tests pass (27 pre-existing + 6 new). MUTANT: git show 8eac86e417:...refresh.py's runner_script() body contains the literal string '--as-of %s' (the pre-AMENDMENT-2 recipe); the new test's assertion ('--as-of' not in script) reads False against that text and True against the current code -- the test discriminates the fix from its absence.",
+      "introduces": ["test_runner_script_carries_no_explicit_as_of", "test_a_completed_manifest_carries_the_runners_date_not_the_clocks", "test_a_disappeared_client_manifest_also_carries_the_runners_date", "test_a_same_frontier_refire_records_the_noop_outcome_not_a_new_revision", "test_refresh_noop_same_frontier_is_in_the_closed_reason_code_set_and_maps_to_a_state", "test_dispatcher_call_returns_same_frontier_when_a_succeeded_command_repeats_its_pointer"]
     },
     {
       "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
       "kind": "config_data",
-      "commit_or_etag": "315524e62d",
+      "commit_or_etag": "dacd9c958a",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "deploy_evidence": "artifact_sha256 for irpt-directory-refresh updated to 6ELkwh91ssB4nvlWE/S5InQ2amQBIZkB4zC7oP0AzkE=, the value the served Lambda's CodeSha256 equals (live get-function-configuration read). One line changed (git diff --stat: 1 insertion, 1 deletion)."
+      "deploy_evidence": "artifact_sha256 for irpt-directory-refresh updated to E7TMbaF9NBPm7rFIDkk7y22gNQiPRAGr9m9BqcpnkGM= (the FINAL, canonical-timestamp value), the value the served Lambda's CodeSha256 equals (live get-function-configuration read) AND the value the battery's own independent zip re-derivation (arm b.2, date_time=2020-01-01) equals exactly. One line changed each commit (targeted single-field edits, f329b4dee8 then dacd9c958a correcting the first)."
     },
     {
       "path_or_key": "infra/aws/terraform/investor-reporting/directory/schedule.tf",
       "kind": "terraform",
       "commit_or_etag": "3ce04d8a52",
       "deployed_state": "DEPLOYED-VERIFIED",
-      "deploy_evidence": "Declares module.irpt_directory_refresh.aws_lambda_function.this (the resource this cell's apply changed the CODE VERSION of; the .tf text itself is unchanged by this cell). safe-apply.sh rc=0: 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Saved-plan applied (.tfplan-rtc3, plan itself printed '0 to add, 1 to change, 0 to destroy'). Post-apply re-plan: 'No changes. Your infrastructure matches the configuration.' Change-management entry 20260918T0513Z_irpt-bckend-rtc3-repo-shaped-unpack_deploy_completion.md OPENED before the act (committed 661d2a9240) and CLOSED with both legs proven before the grading reads (committed 3ce04d8a52), sentinel removed."
+      "deploy_evidence": "Declares module.irpt_directory_refresh.aws_lambda_function.this (the resource this cell's TWO applies changed the CODE VERSION of; the .tf text itself is unchanged by this cell). Apply 1 (ledger irpt-bckend-rtc3-amendment2-noop): plan '0 to add, 1 to change, 0 to destroy', safe-apply.sh rc=0 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed', post-apply re-plan 'No changes'. Apply 2 (ledger irpt-bckend-rtc3-amendment2-zipdate-fix, correcting apply 1's own wrong zip timestamp): same shape, same result. Change-management entries 20260918T0636Z_irpt-bckend-rtc3-amendment2-noop (OPEN 6a77fcb41c, legs closed 25ed7c1359, CLOSED 7f2d873ac8) and 20260918T0712Z_irpt-bckend-rtc3-amendment2-zipdate-fix (OPEN 618beffb1a, CLOSED 18ccc4d28c)."
     },
     {
-      "path_or_key": "org/critical_paths/change_management/20260918T0513Z_irpt-bckend-rtc3-repo-shaped-unpack_deploy_completion.md",
+      "path_or_key": "org/critical_paths/change_management/20260918T0636Z_irpt-bckend-rtc3-amendment2-noop_deploy_completion.md",
       "kind": "doc",
-      "commit_or_etag": "3ce04d8a52",
+      "commit_or_etag": "7f2d873ac8",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "CLOSED, both legs (tf-lambda, verify) proven; org/critical_paths/.open_deploys/irpt-bckend-rtc3-repo-shaped-unpack.json removed in the same commit."
+      "deploy_evidence": "CLOSED, all 3 legs (s3-prefix, tf-lambda, verify) proven; org/critical_paths/.open_deploys/irpt-bckend-rtc3-amendment2-noop.json removed in the same commit. L3's proof text states honestly that the fix worked (as-of refusal absent) but a NEW, out-of-lane blocker (row W2-S56) prevented landing -- not a deploy defect."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260918T0712Z_irpt-bckend-rtc3-amendment2-zipdate-fix_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "18ccc4d28c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CLOSED, both legs (s3-prefix, tf-lambda) proven; org/critical_paths/.open_deploys/irpt-bckend-rtc3-amendment2-zipdate-fix.json removed in the same commit. Opened to correct apply 1's own wrong zip fixed-timestamp defect, caught by the battery's own arm b.2 before this instance was finalized."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "7d65fb7d1c",
+      "commit_or_etag": "edaf44ea29",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "IRPT_BCKEND-W2-S54 committed at fbd23a9314 (the face's stale '9 sources' count); IRPT_BCKEND-W2-S55 committed at 7d65fb7d1c (this pin) -- the business-date refusal this cell's own fire uncovered.",
-      "introduces": ["IRPT_BCKEND-W2-S55"]
+      "deploy_evidence": "IRPT_BCKEND-W2-S56 committed at edaf44ea29: AMENDMENT 2's fix is confirmed working (the W2-S55 as-of refusal is gone from both firms' real stdout) and the real fire exposed a new, deeper, out-of-lane blocker (jsonschema.Draft202012Validator absent from the host's jsonschema==3.2.0, inside directory_runner.py which is outside this order's <paths>).",
+      "introduces": ["IRPT_BCKEND-W2-S56"]
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rtc_3.py",
       "kind": "test",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The R33-AC1 instrument. Re-derives the served zip from the source map's own declared files[] (resolving DISTRIBUTED members from SHARED_ROOTS, never trusting the deploy's own report), re-runs the read-only host sweep, and reads back the SSM command ids this session's own two real fires created. rc=1, PASS 17 | FAIL 1 | BLOCKED 3 of 21, re-run twice with 0 differing verdict lines."
+      "deploy_evidence": "The R33-AC1 instrument, extended for AMENDMENT 2: arm (a) gained a.6 (0 explicit --as-of in the recipe) and a.7 (the REAL test_refresh_expiry.py suite run as a subprocess, bound 12 -- not a wrapper); arm (d) gained asof_cleared (confirms row W2-S55 is gone from the real fire's stdout) and new_blocker (confirms row W2-S56 is present) per firm. Re-derives the served zip from the source map's own declared files[] at the CANONICAL fixed timestamp (2020-01-01, matching build-and-upload.sh), re-runs the read-only host sweep, and reads back the SSM command ids the FINAL AMENDMENT-2 fire created. rc=1, PASS 23 | FAIL 1 | BLOCKED 3 of 27, re-run twice against live AWS with 0 differing verdict lines. History preserved: the first pass's original output is unchanged at IB-rtc-3_R33-AC1_battery_output.txt; this run's own full output is IB-rtc-3_AMENDMENT2_R33-AC1_battery_output.txt."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/the-refresh-builds-exercised.result.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The narrative record of all six arms, the R33-AC2 facts for the CVO, and the rows filed."
+      "deploy_evidence": "AMENDMENT 2 section appended: the fix implemented/deployed/fired, the new blocker it exposed, the R33-AC2 facts update for the CVO, and the row filed this amendment. The first pass's original narrative above it is unchanged."
     }
   ],
 
   "acceptance": [
     {
       "criterion_id": "R33-AC1",
-      "criterion_verbatim": "PASSES BY OUTPUT: (a) the recipe test passes (-C $W present, 0 .. members); (b) plan 0 to destroy, apply under ledger, served CodeSha256 == built; (c) the sweep, 9 + 3 verdicts with the control firing; (d) inf and cot 2 of 2 landed with key, ETag, sha256, revision before -> after, retained-or-first-mint, row count, and the reconciliation naming the same command ids with REFRESH_OK; (e) 49f attempted once, BLOCKED at the named read, control cited; (f) key census 0 of N, firm-in-artifact 2 of 2. The token prints only when (a)-(f) hold with (d) at 2 of 2.",
+      "criterion_verbatim": "PASSES BY OUTPUT: (a) the recipe carries -C $W, 0 .. members AND 0 explicit --as-of; the manifest/date tests pass k of k; (b) plan 0 to destroy, apply under ledger, served CodeSha256 == built; (c) the sweep, 10 + 3 verdicts with the control firing; (d) inf and cot 2 of 2 landed with key, ETag, sha256, revision before -> after, retained-or-first-mint, row count, and the reconciliation naming the same command ids with REFRESH_OK; (e) 49f attempted once, BLOCKED at the named read, control cited; (f) key census 0 of N, firm-in-artifact 2 of 2. The token prints only when (a)-(f) hold with (d) at 2 of 2.",
       "method": "command",
       "invocation": "timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rtc_3.py",
-      "output_evidence": "PASS 17 | FAIL 1 | BLOCKED 3   denominator: 21 graded check(s)\n  THE ACCEPTANCE TOKEN IS WITHHELD. arm (d) landed_total is not 2 of 2 ... d.landed_total FAIL firms with a landed directory artifact AND its pointer denominator: 0 of 2 ... R33-AC1 is FAIL. The order stays open.",
-      "denominator": "17 of 21 graded checks PASS; arm (d)'s landed_total is 0 of 2 (required 2 of 2)",
+      "output_evidence": "PASS 23 | FAIL 1 | BLOCKED 3   denominator: 27 graded check(s)\n  THE ACCEPTANCE TOKEN IS WITHHELD. arm (d) landed_total is not 2 of 2 ... d.landed_total FAIL firms with a landed directory artifact AND its pointer denominator: 0 of 2 ... IRPT_BCKEND-W2-S55 CLEARED by this cell's AMENDMENT 2 fix ... IRPT_BCKEND-W2-S56 inflection and cottonwood's builds now reach directory_runner.py's validate_entries() ... jsonschema.Draft202012Validator is absent from the host's installed jsonschema==3.2.0 ... R33-AC1 is FAIL. The order stays open.",
+      "denominator": "23 of 27 graded checks PASS; arm (d)'s landed_total is 0 of 2 (required 2 of 2)",
       "status": "FAIL",
       "expect": "IBR33-TWO-OF-THREE-DIRECTORIES-LANDED",
-      "status_reason": "Arms (a), (b), (c) and (e) all PASS in full (16 of 16 sub-checks), and arm (d)'s IMPORT half PASSES for both inflection and cottonwood -- the repo-shaped unpack this cell was cut to build is proven working on the host for the first time in this project's record. Arm (d)'s LANDED half is 0 of 2: firing the deployed dispatch for real reached a newly-surfaced, DIFFERENT blocker (row IRPT_BCKEND-W2-S55) -- directory_runner.py's own select_business_date() refuses an explicit --as-of that is not in the firm's completed-date set, which refresh.py's dispatch always types as the Lambda's own computed business date. This is outside this cell's <paths>-scoped deliverable (the unpack recipe) and is not worked around. Arm (f) is BLOCKED because 0 of 3 firms landed an artifact to grade content on."
+      "status_reason": "AMENDMENT 2's fix (drop the explicit --as-of; manifest carries the runner's date; same-frontier no-op) is IMPLEMENTED, UNIT-TESTED (6 new tests, 33 of 33 total pass) and DEPLOYED-VERIFIED (served CodeSha256 matches the battery's own independent re-derivation at the canonical zip timestamp -- a real defect in this worker's own first build attempt, caught by arm b.2 and corrected under a second ledger entry before this instance was finalized). Fired live against the final deployed code: arms (a), (b), (c) and (e) all PASS in full, and arm (d)'s import AND asof_cleared checks PASS for both inflection and cottonwood -- CONFIRMING row IRPT_BCKEND-W2-S55 is CLEARED, the first time either firm's build has proceeded past directory_runner.py's own business-date check. Arm (d)'s LANDED half is still 0 of 2: the real fire immediately reached a NEW, deeper, out-of-lane blocker (row IRPT_BCKEND-W2-S56) -- directory_runner.py's validate_entries() calls jsonschema.Draft202012Validator, a class absent from the host's installed jsonschema==3.2.0. directory_runner.py is outside this order's <paths> (lane IB-rtc-2's own); this is not worked around. Arm (f) is BLOCKED because 0 of 3 firms landed an artifact to grade content on. This is the SAME class of measured, honest FAIL as the first pass, now one level deeper: the cell's own deliverable (the dispatch's business-date semantics) is proven correct and working; what remains blocking is a third, independent, out-of-lane defect."
     },
     {
       "criterion_id": "R33-AC2",
       "criterion_verbatim": "JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO: whether the landed artifacts are the runner's real output for the business date or a degenerate first mint; what FWD-7's DONE WHEN still lacks (the scheduled fire; the 49 Financial third); whether the dispatch-to-reconcile loop closed on IB-rt-6's mechanism; and whether the repo-shaped unpack changed anything for the two firms beyond placement. No verdict.",
       "method": "manual_read_with_citation",
-      "invocation": "N/A -- judgment row; facts recorded in the-refresh-builds-exercised.result.md section 'R33-AC2 -- the facts, for 3.0.0_SA_CVO (no verdict)'",
-      "output_evidence": "(1) Neither landed nor first-mint: NOTHING landed -- 0 of 3 firms produced a directory.json this fire, on a business-date mismatch (W2-S55, inf/cot) and a cross-firm bucket Deny (W2-S49/S53, 49F), neither an unpack defect. (2) FWD-7 still lacks the scheduled fire (ENABLED, unchanged, will hit the same W2-S55 refusal at its next fire unless the dispatch's date selection changes) and the 49 Financial third (blocked on R-44's principal). (3) The dispatch-to-reconcile loop closed, 3 of 3 firms: a RUNNING manifest became a FAILED one with the correct BUILD-half token on the very next fire, measured twice today. (4) The repo-shaped unpack changed the failure point materially: before this cell the dispatch failed at an UNPACK error before any firm logic ran; after this cell it fails strictly later, inside directory_runner.py's own firm-specific business-date check -- a narrower, different-class failure.",
+      "invocation": "N/A -- judgment row; facts recorded in the-refresh-builds-exercised.result.md sections 'R33-AC2 -- the facts, for 3.0.0_SA_CVO (no verdict)' and its AMENDMENT 2 update",
+      "output_evidence": "(1) Still neither landed nor first-mint: NOTHING landed -- 0 of 3 firms produced a directory.json across either round of real fires. The repo-shaped unpack AND the business-date fix are BOTH proven working (row W2-S55 cleared, confirmed in live stdout); the reason nothing landed is now jsonschema version incompatibility inside directory_runner.py (row W2-S56), not an unpack or dispatch defect. (2) FWD-7 still lacks the scheduled fire (ENABLED, unchanged by this cell; it will hit the SAME W2-S56 refusal at its next fire unless directory_runner.py's validator selection changes) and the 49 Financial third (still blocked on R-44's principal, unchanged). (3) The dispatch-to-reconcile loop closed correctly across BOTH rounds of real fires this cell ran (the first pass's W2-S55-era fire and this AMENDMENT's W2-S56-era fire): 6 of 6 firm-fires total, each RUNNING manifest becoming a FAILED one with the correct BUILD-half token, never sitting at RUNNING forever. (4) The repo-shaped unpack AND AMENDMENT 2's fix together changed the failure point THREE times over this cell's history: flat-unpack FileNotFoundError (before this cell existed) -> unpack fixed, business-date refusal surfaces (W2-S55, first pass) -> business-date fixed, jsonschema version mismatch surfaces (W2-S56, this amendment) -- each strictly later and narrower than the last, which is the measure of this cell's real, cumulative progress even though no artifact has yet landed.",
       "denominator": "N/A -- judgment row, no verdict computed here",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "L9 judgment criterion per the task order's own <criterion id=\"R33-AC2\" judgment=\"true\"/>; the oracle is 3.0.0_SA_CVO at L9 adjudication, never self-graded by this worker.",
@@ -104,14 +119,14 @@
 
   "controls": {
     "mutant": {
-      "description": "The recipe-text unit tests, run against the PRE-CELL flat-unpack recipe (git show 7b2f8fe9bf:infra/aws/lambda/investor-reporting/directory/refresh.py, the base this cell's worktree was cut from) instead of the post-cell one.",
-      "expected": "Both load-bearing assertions (the -C $W presence check and the no-mv-line check) read False against the old recipe, proving the tests discriminate the fix from its absence rather than being constants.",
-      "observed": "OLD recipe: has_cw (mutant expects False) = False; OLD recipe: no_mv (mutant expects False) = False. Both fired exactly as expected.",
+      "description": "The AMENDMENT 2 recipe/manifest unit tests, run against the PRE-AMENDMENT-2 refresh.py (git show 8eac86e417:infra/aws/lambda/investor-reporting/directory/refresh.py -- the drain of this project's first pass, which still typed the explicit --as-of) instead of the post-amendment one.",
+      "expected": "The load-bearing assertion ('--as-of' not in script) reads False against the old recipe text (which contains the literal 'directory_runner.py --firms %s --as-of %s --upload'), proving the test discriminates the fix from its absence rather than being a constant.",
+      "observed": "OLD recipe (8eac86e417) body contains the literal string '--as-of %s' verbatim (confirmed by direct text inspection of the git-shown source); the NEW recipe (22294ad856) contains 0 occurrences of '--as-of'. The mutant fires exactly as expected.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "The whole battery (org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rtc_3.py) run twice in succession against LIVE AWS; the per-check verdict lines (arm id + PASS/FAIL/BLOCKED + verdict text, denominator stripped since arm (c)'s sweep mints a fresh SSM command id each run) diffed programmatically.",
-      "observed": "21 of 21 verdict lines identical across both runs (0 differing). Arm (c)'s sweep produces a new SSM command id each run but the same READ-OK/READ-DENY counts (5/5 source, 0/8 negative controls); arm (d) re-reads the SAME fixed command ids (this session's two real fires) and is a pure read, so it is exactly reproducible.",
+      "method": "The whole battery (org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rtc_3.py) run twice in succession against LIVE AWS and the real deployed function; the per-check verdict lines (arm id + PASS/FAIL/BLOCKED + verdict text, with volatile fresh-command-id denominators stripped) diffed programmatically.",
+      "observed": "27 of 27 verdict lines identical across both runs (0 differing). Arm (c)'s sweep mints a fresh SSM command id each run but the same READ-OK/READ-DENY counts (5/5 source, 0/8 negative controls); arm (a).7 re-runs the real pytest suite (33 of 33 pass, both times); arm (d) re-reads the SAME fixed command ids (this session's final real fire) and is a pure read, so it is exactly reproducible.",
       "status": "STABLE"
     }
   },
@@ -119,33 +134,39 @@
   "declared_exclusions": [
     {
       "item": "record-terraform-deploy.sh's CHANGELOG.json write",
-      "reason": "infra/aws/terraform/investor-reporting/CHANGELOG.json is lane CLOUD_OPS_OR_ETL, not in this order's <paths>; owned-paths-validate.py refused the commit. The tool's own JSON re-serialization also corrupted unrelated entries elsewhere in lambda-source-map.json (mojibake in two news-pipeline _note fields) as a side effect of writing the CHANGELOG row -- reverted rather than committed, per bound 7 (no served output touched except where this cell's own act changes it)."
+      "reason": "infra/aws/terraform/investor-reporting/CHANGELOG.json is lane CLOUD_OPS_OR_ETL, not in this order's <paths>; unchanged from the first pass's own exclusion. This amendment made the same choice: a single targeted field edit to lambda-source-map.json's own artifact_sha256, never the full re-serialization tool."
     },
     {
-      "item": "fixing refresh.py's business-date selection (the explicit --as-of it types)",
-      "reason": "Row IRPT_BCKEND-W2-S55: this is a change to the Lambda's dispatch semantics (which date to build), not to 'the unpack recipe becomes repo-shaped' this cell was cut for. Fixing it would be the neighbouring-defect violation bound 8/12 forbids; it is filed BLOCKING for the next cut."
+      "item": "fixing directory_runner.py's jsonschema.Draft202012Validator usage",
+      "reason": "Row IRPT_BCKEND-W2-S56: this is a change to the RUNNER's own validation code, not to the Lambda's dispatch semantics AMENDMENT 2 was cut to fix. directory_runner.py is outside this order's <paths> (lane IB-rtc-2's own). Fixing it would be the neighbouring-defect violation bound 8/12 forbids, for the second time in this cell's history; filed BLOCKING for the next cut."
     },
     {
       "item": "arm (f) content sanity on a real landed artifact",
-      "reason": "0 of 3 firms landed a directory.json this fire (row W2-S55 for inf/cot, W2-S49/S53 for 49F). Fabricating one to exercise this arm would be the bound-12 self-wrapping-harness violation this battery refuses to commit; reported BLOCKED instead."
+      "reason": "0 of 3 firms landed a directory.json across either round of this cell's real fires (row W2-S55 was the cause for the first, W2-S56 for this one). Fabricating one to exercise this arm would be the bound-12 self-wrapping-harness violation this battery refuses to commit; reported BLOCKED instead."
     }
   ],
 
   "surprises": [
     "IRPT_BCKEND-W2-S54: the face's own '9 sources + 3 destinations' sweep population is a stale count this project inherited from its own round-2 row (W2-S49, which swept only 6 of the true population); the CTO-ratified correction (MDPF_GLOBAL.TO-IAM1, surprise MDPF_GLOBAL-S1) is 10 source prefixes. This worker re-ran the corrected 10-source instrument rather than reproducing the stale count.",
-    "IRPT_BCKEND-W2-S55: the repo-shaped unpack this cell built WORKS -- proven on the host, all three per-firm runner_common.py modules now resolve -- and it uncovered a DIFFERENT, deeper blocker beneath it: directory_runner.py's own select_business_date() refuses an explicit --as-of that is not in the firm's own completed-date set (inflection's frontier is 1 trading day behind today, cottonwood's is 2), and refresh.py's dispatch always types the Lambda's own computed business date as that explicit --as-of. Both inf and cot builds end BUILD_ENDED_UNSUCCESSFUL on this, not on any unpack or IAM defect. BLOCKING, not worked around."
+    "IRPT_BCKEND-W2-S55: the repo-shaped unpack this cell built WORKS -- proven on the host, all three per-firm runner_common.py modules now resolve -- and it uncovered a DIFFERENT, deeper blocker beneath it: directory_runner.py's own select_business_date() refuses an explicit --as-of that is not in the firm's own completed-date set (inflection's frontier is 1 trading day behind today, cottonwood's is 2), and refresh.py's dispatch always types the Lambda's own computed business date as that explicit --as-of. Both inf and cot builds end BUILD_ENDED_UNSUCCESSFUL on this, not on any unpack or IAM defect. BLOCKING, not worked around.",
+    "IRPT_BCKEND-W2-S56: AMENDMENT 2's fix (drop the explicit --as-of) is CONFIRMED WORKING -- both inflection's and cottonwood's real fires now proceed PAST directory_runner.py's own business-date check for the first time in this project's record -- and the real fire then exposed a FOURTH, still deeper, out-of-lane blocker: directory_runner.py's validate_entries() calls jsonschema.Draft202012Validator, a class ABSENT from the host's installed jsonschema==3.2.0 (added upstream only in jsonschema 4.18.0). Both builds now end 'ERROR: <firm>: module jsonschema has no attribute Draft202012Validator', rc=1, BUILD_ENDED_UNSUCCESSFUL. Confirmed independently: this worker's own py -3.12 interpreter reports jsonschema 4.26.0 with Draft202012Validator present; the host's SSM stdout names jsonschema 3.2.0. BLOCKING, not worked around (directory_runner.py is outside this order's <paths>)."
   ],
 
   "compiler_tools": [
     {
       "tool": "Read/Grep (native tools)",
-      "invocation": "Read on refresh.py, directory_runner.py, schedule.tf, iam.tf, lambda-source-map.json, rt6_package.py, build-and-upload.sh, deploy_ledger.py --help, PROOF_OF_SPEC.schema.json; Grep for runner_script/READ-OK/errors.py history",
-      "result": "Located the exact member set the AMENDMENT-1 bundle now carries (battery_ib_rtc_2.result.md), the yang-lambda module's S3-object-version deploy mechanism, and the reason build-and-upload.sh's generic mechanism cannot resolve this function's two DISTRIBUTED members (it only checks source_dir, never SHARED_ROOTS)."
+      "invocation": "Read on refresh.py, expiry.py, directory_runner.py (select_business_date, validate_entries), lambda.tf, schedule.tf, yang-lambda/main.tf (source_code_hash from the S3 object's own metadata, never from lambda-source-map.json), rt6_package.py, PROOF_OF_SPEC.schema.json, INVESTIGATION_v1.md fence structure; Grep for the REFRESH_NOOP_SAME_FRONTIER token census and the existing test suite's coverage",
+      "result": "Located the exact manifest-keying design comment this amendment deliberately overrides (with a named exception), confirmed the Terraform deploy path reads source_code_hash directly from the S3 object's metadata (so lambda-source-map.json is a bookkeeping record, not a deploy dependency), and confirmed 0 pre-existing occurrences of REFRESH_NOOP_SAME_FRONTIER before adding it."
     },
     {
       "tool": "raw aws CLI (via .tools/aws)",
-      "invocation": "iam get-role-policy on mdpf-daily-runner-ec2-role; ssm send-command/get-command-invocation for the pre-build sweep, the two real dispatch fires, and the date-frontier diagnostic; s3api list-objects-v2/get-object/head-object/put-object; lambda get-function-configuration/invoke; scheduler get-schedule",
-      "result": "DECISIVE. Established the live IAM grant shape (34 statements, the two 49f-dims statements already reverted per iam.tf:592-609), fired the deployed dispatch for real and read back three terminal SSM command results showing the repo-shaped unpack's IMPORT-OK and the business-date refusal underneath it, and confirmed 0 of 3 firms landed a directory artifact before and after."
+      "invocation": "s3api put-object/head-object for two rebuilt zips; lambda get-function-configuration/invoke (x4: two real fires, two reconciliations); ssm send-command/get-command-invocation for the pre-build sweep and two rounds of real dispatch fires; s3api list-objects-v2/get-object for manifests and directory listings",
+      "result": "DECISIVE. Rebuilt and deployed the fix TWICE (once with a self-caught zip-timestamp defect, once corrected), fired the deployed dispatch for real TWICE more and read back terminal SSM results showing the W2-S55 refusal is GONE and a new blocker (W2-S56) is present in its place, confirmed 0 of 3 firms landed a directory artifact before and after both rounds."
+    },
+    {
+      "tool": "py -3.12 -m pytest (real test suite, not a wrapper)",
+      "invocation": "py -3.12 -m pytest infra/aws/lambda/investor-reporting/directory/tests/test_refresh_expiry.py -q, run standalone twice and as part of the battery's own arm a.7 twice more",
+      "result": "33 of 33 tests pass every time (27 pre-existing + 6 new for this amendment); 0 regressions in the pre-existing suite."
     },
     {
       "tool": "proof-of-spec-check.py",
