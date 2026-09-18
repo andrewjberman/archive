@@ -59,9 +59,30 @@ def load(path):
         return fh.read()
 
 
+def _scrub(text):
+    """⛔ THE EVIDENCE MUST NOT BE ABLE TO FORGE ITS OWN VERDICT.
+
+    `proof-of-spec-check` grades a criterion's `<expect>` as an UNANCHORED SEARCH over the
+    run's whole evidence. These cores echo RECORD-DERIVED values -- resource names, card
+    reasons, moved types -- and a record is written by the graded party. MEASURED at the
+    round-8 cut, before any worker started: a card row NAMED `PASS-P36-CARDS-CARRY-REASONS`
+    with an empty reason produces `VERDICT: FAIL-...` AND puts the literal expect string in
+    the output, so an unanchored search finds PASS on a FAILING run.
+
+    The L6 gate announced the shape -- "it prints a bare value it does not author ... a
+    relay: that line can be anything" -- as ANNOUNCE, not refused. This closes it: every
+    relayed line is neutralised, and the ONE unscrubbed occurrence of the vocabulary in any
+    run is the authoritative VERDICT line printed by `verdict()` itself.
+
+    This is `A_BOUNDARY_READ_FROM_A_FIELD_THE_GRADED_PARTY_WRITES` applied to the evidence
+    stream rather than to a field. COST: one substitution per printed line. NON-APPLICATION:
+    a checker whose output interpolates nothing the graded party controls."""
+    return str(text).replace("VERDICT", "VERD1CT").replace("PASS-", "PASS_").replace("FAIL-", "FAIL_")
+
+
 def verdict(ok, name, lines):
     for ln in lines:
-        print(ln)
+        print(_scrub(ln))
     print("VERDICT: %s-%s" % ("PASS" if ok else "FAIL", name))
     return 0 if ok else 1
 
