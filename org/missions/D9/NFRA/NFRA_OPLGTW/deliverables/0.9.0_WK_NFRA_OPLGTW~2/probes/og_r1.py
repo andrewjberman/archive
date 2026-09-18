@@ -852,13 +852,180 @@ def ac14() -> int:
     return verdict(14, ok, "" if ok else "a check is NOT OK (see NOT lines)")
 
 
+# --------------------------------------------------------------------------- AC15-AC18 -- R-53's halt-gate fix
+SAFE_DEPLOY_REL = "infra/aws/ec2/safe-ec2-deploy.sh"
+_NEW_BLOCK_RE = re.compile(
+    r'(WORKSPACE_ROOT="\$\(cd.*?HALT_GATE_AUDIT_LOG="\$MAIN_TREE/org/halt-gate-override-audit\.log")', re.S)
+_OLD_BLOCK_RE = re.compile(
+    r'(WORKSPACE_ROOT="\$\(cd.*?HALT_GATE_REPO_ROOT="\$MAIN_TREE")', re.S)
+
+
+def _extract_identity_block(script_text: str) -> str:
+    m = _NEW_BLOCK_RE.search(script_text)
+    if m:
+        return m.group(1)
+    m = _OLD_BLOCK_RE.search(script_text)
+    if m:
+        return m.group(1)
+    raise RuntimeError("neither the new nor the old identity-resolution block pattern matched")
+
+
+def _identity_probe(script_text: str, script_dir: str, cwd: str) -> dict:
+    """Run the identity-resolution block extracted from `script_text` (SCRIPT_DIR forced to `script_dir`,
+    matching what safe-ec2-deploy.sh's own SCRIPT_DIR would be for a dispatch from that location), then
+    source .tools/halt-gate-check.sh from `cwd` and resolve the serial. Returns the resolved variables."""
+    block = _extract_identity_block(script_text)
+    script = (
+        'set -e\n'
+        'SCRIPT_DIR="%s"\n'
+        '%s\n'
+        'cd "%s"\n'
+        '. .tools/halt-gate-check.sh\n'
+        'set +e\n'
+        'SERIAL="$(halt_gate_resolve_serial)"; RC=$?\n'
+        'printf "REPO_ROOT=%%s\\n" "$HALT_GATE_REPO_ROOT"\n'
+        'printf "CONTEXT_FILE=%%s\\n" "$HALT_GATE_CONTEXT_FILE"\n'
+        'printf "AUDIT_LOG=%%s\\n" "$HALT_GATE_AUDIT_LOG"\n'
+        'printf "SERIAL_RC=%%s\\n" "$RC"\n'
+        'printf "SERIAL=%%s\\n" "$SERIAL"\n'
+    ) % (script_dir, block, cwd)
+    r = subprocess.run([BASH, "-c", script], cwd=cwd, capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", timeout=30)
+    out = {}
+    for line in r.stdout.splitlines():
+        if "=" in line:
+            k, v = line.split("=", 1)
+            out[k] = v
+    out["_stderr"] = r.stderr
+    out["_rc"] = r.returncode
+    return out
+
+
+def ac15() -> int:
+    with open(os.path.join(REPO, SAFE_DEPLOY_REL), encoding="utf-8") as fh:
+        text = fh.read()
+    script_dir = os.path.join(REPO, "infra", "aws", "ec2")
+    res = _identity_probe(text, script_dir, REPO)
+    print("instrument: the CURRENT (post-fix) %s, identity-resolution block only, SCRIPT_DIR forced to this "
+          "worktree's infra/aws/ec2 (i.e. invoked as if from THIS worktree)" % SAFE_DEPLOY_REL)
+    print("REPO_ROOT resolved: %s" % res.get("REPO_ROOT"))
+    print("SERIAL resolved: %s (rc=%s)" % (res.get("SERIAL"), res.get("SERIAL_RC")))
+    rows = [("HALT_GATE_REPO_ROOT resolves to THIS worktree (git rev-parse --show-toplevel)",
+             _norm_p(res.get("REPO_ROOT")) == _norm_p(REPO), res.get("REPO_ROOT")),
+            ("the gate resolves this worker's own session serial",
+             res.get("SERIAL") == SERIAL and res.get("SERIAL_RC") == "0", res.get("SERIAL"))]
+    ok = print_rows(rows)
+    return verdict(15, ok, "" if ok else "a check is NOT OK (see NOT lines)")
+
+
+def _norm_p(p: str) -> str:
+    """Case-insensitive, slash-normalized, drive-letter-normalized comparison key (msys /c/... vs
+    Windows C:/... are the SAME path on this box)."""
+    p = (p or "").strip().replace("\\", "/").rstrip("/")
+    m = re.match(r"^/([A-Za-z])/(.*)$", p)
+    if m:
+        p = "%s:/%s" % (m.group(1).upper(), m.group(2))
+    m = re.match(r"^([A-Za-z]):/(.*)$", p)
+    if m:
+        p = "%s:/%s" % (m.group(1).upper(), m.group(2))
+    return p.lower()
+
+
+def _git_main_tree() -> str:
+    common = run(["git", "-C", REPO, "rev-parse", "--git-common-dir"]).stdout.strip()
+    return os.path.abspath(os.path.join(REPO, common, ".."))
+
+
+def ac16() -> int:
+    main_tree = _git_main_tree()
+    with open(os.path.join(REPO, SAFE_DEPLOY_REL), encoding="utf-8") as fh:
+        post_text = fh.read()
+    pre_text = run(["git", "show", "HEAD:" + SAFE_DEPLOY_REL]).stdout
+    script_dir_main = os.path.join(main_tree, "infra", "aws", "ec2")
+    post = _identity_probe(post_text, script_dir_main, main_tree)
+    pre = _identity_probe(pre_text, script_dir_main, main_tree)
+    print("instrument: the SAME identity-resolution block, PRE-edit (git HEAD) and POST-edit (this worktree's "
+          "worktree copy), each with SCRIPT_DIR forced to the MAIN TREE's own infra/aws/ec2 (i.e. invoked as "
+          "if from the MAIN tree, the 'every other caller' case)")
+    print("PRE-edit  REPO_ROOT=%s SERIAL=%s rc=%s" % (pre.get("REPO_ROOT"), pre.get("SERIAL"), pre.get("SERIAL_RC")))
+    print("POST-edit REPO_ROOT=%s SERIAL=%s rc=%s" % (post.get("REPO_ROOT"), post.get("SERIAL"), post.get("SERIAL_RC")))
+    rows = [("PRE-edit resolves REPO_ROOT to the main tree", _norm_p(pre.get("REPO_ROOT")) == _norm_p(main_tree),
+             pre.get("REPO_ROOT")),
+            ("POST-edit resolves REPO_ROOT to the SAME main tree (unchanged for this caller)",
+             _norm_p(post.get("REPO_ROOT")) == _norm_p(main_tree), post.get("REPO_ROOT")),
+            ("PRE-edit and POST-edit REPO_ROOT paths are equal",
+             _norm_p(pre.get("REPO_ROOT")) == _norm_p(post.get("REPO_ROOT")),
+             (pre.get("REPO_ROOT"), post.get("REPO_ROOT")))]
+    ok = print_rows(rows)
+    return verdict(16, ok, "" if ok else "a check is NOT OK (see NOT lines) -- a fix that serves only workers")
+
+
+def ac17() -> int:
+    pre_text = run(["git", "show", "HEAD:" + SAFE_DEPLOY_REL]).stdout
+    scratch = os.path.join(REPO, ".scratch", "og_r1_ac17")
+    shutil.rmtree(scratch, ignore_errors=True)
+    os.makedirs(scratch, exist_ok=True)
+    with open(os.path.join(scratch, "pre_edit_block.sh"), "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(pre_text)
+    script_dir_worktree = os.path.join(REPO, "infra", "aws", "ec2")
+    main_tree = _git_main_tree()
+    script_dir_main = os.path.join(main_tree, "infra", "aws", "ec2")
+    live_path = os.path.join(REPO, SAFE_DEPLOY_REL)
+    before_bytes = Path(live_path).read_bytes()
+    mutant_from_worktree = _identity_probe(pre_text, script_dir_worktree, REPO)
+    mutant_from_main = _identity_probe(pre_text, script_dir_main, main_tree)
+    after_bytes = Path(live_path).read_bytes()
+    ac15_fails_on_mutant = not (mutant_from_worktree.get("SERIAL") == SERIAL and
+                                mutant_from_worktree.get("SERIAL_RC") == "0")
+    ac16_passes_on_mutant = _norm_p(mutant_from_main.get("REPO_ROOT")) == _norm_p(main_tree)
+    unmodified = before_bytes == after_bytes
+    diff = "identical" if unmodified else "CHANGED (%d -> %d bytes)" % (len(before_bytes), len(after_bytes))
+    print("instrument: the OLD (pre-R-53, git HEAD) identity-resolution block restored in a scratch copy, "
+          "exercised both ways: as if from THIS worktree (AC15's own arm) and as if from the MAIN tree "
+          "(AC16's own arm)")
+    print("MUTANT from worktree: REPO_ROOT=%s SERIAL=%s rc=%s" %
+          (mutant_from_worktree.get("REPO_ROOT"), mutant_from_worktree.get("SERIAL"), mutant_from_worktree.get("SERIAL_RC")))
+    print("MUTANT from main tree: REPO_ROOT=%s SERIAL=%s rc=%s" %
+          (mutant_from_main.get("REPO_ROOT"), mutant_from_main.get("SERIAL"), mutant_from_main.get("SERIAL_RC")))
+    print("live file byte-comparison before/after building the scratch mutant, %s: %s" % (SAFE_DEPLOY_REL, diff))
+    rows = [("AC15's own check FAILS under the mutant (worker serial does not resolve)", ac15_fails_on_mutant,
+             mutant_from_worktree),
+            ("AC16's own check still PASSES under the mutant (main-tree caller unaffected)", ac16_passes_on_mutant,
+             mutant_from_main),
+            ("the tracked source file is unmodified by this arm", unmodified, diff)]
+    ok = print_rows(rows)
+    shutil.rmtree(scratch, ignore_errors=True)
+    return verdict(17, ok, "" if ok else "a check is NOT OK (see NOT lines)")
+
+
+def ac18() -> int:
+    main_tree = _git_main_tree()
+    with open(os.path.join(REPO, SAFE_DEPLOY_REL), encoding="utf-8") as fh:
+        text = fh.read()
+    script_dir = os.path.join(REPO, "infra", "aws", "ec2")
+    res = _identity_probe(text, script_dir, REPO)
+    ctx, audit = res.get("CONTEXT_FILE", ""), res.get("AUDIT_LOG", "")
+    main_tree_norm = _norm_p(main_tree)
+    repo_norm = _norm_p(REPO)
+    print("instrument: the CURRENT (post-fix) %s, identity-resolution block, invoked as if from THIS worktree "
+          "(same call as OGR1-AC15)" % SAFE_DEPLOY_REL)
+    print("HALT_GATE_CONTEXT_FILE=%s" % ctx)
+    print("HALT_GATE_AUDIT_LOG=%s" % audit)
+    rows = [("HALT_GATE_CONTEXT_FILE resolves under the MAIN tree", _norm_p(ctx).startswith(main_tree_norm), ctx),
+            ("HALT_GATE_AUDIT_LOG resolves under the MAIN tree", _norm_p(audit).startswith(main_tree_norm), audit),
+            ("neither resolves under THIS worktree",
+             not _norm_p(ctx).startswith(repo_norm) and not _norm_p(audit).startswith(repo_norm), (ctx, audit))]
+    ok = print_rows(rows)
+    return verdict(18, ok, "" if ok else "a check is NOT OK (see NOT lines)")
+
+
 DISPATCH = {1: ac1, 2: ac2, 3: ac3, 4: ac4, 5: ac5, 6: ac6, 7: ac7, 8: ac8, 9: ac9, 10: ac10,
-           11: ac11, 12: ac12, 13: ac13, 14: ac14}
+           11: ac11, 12: ac12, 13: ac13, 14: ac14, 15: ac15, 16: ac16, 17: ac17, 18: ac18}
 
 
 def main(argv: list) -> int:
-    if len(argv) != 2 or not re.fullmatch(r"AC(1[0-4]|[1-9])", argv[1]):
-        print("usage: og_r1.py AC<1..14>", file=sys.stderr)
+    if len(argv) != 2 or not re.fullmatch(r"AC(1[0-8]|[1-9])", argv[1]):
+        print("usage: og_r1.py AC<1..18>", file=sys.stderr)
         return 2
     n = int(argv[1][2:])
     return DISPATCH[n]()
