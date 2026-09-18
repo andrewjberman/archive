@@ -9,7 +9,7 @@ frontier re-fire re-reported the unchanged, already-landed artifact as
 REFRESH_COMPLETED_WITH_ADDITIONS with previous_entry_count=0.
 
   (a) THE REAL UNIT-TEST SUITE, k of k -- infra/aws/lambda/investor-reporting/directory/tests/,
-      58 tests total, INCLUDING the 11 new ones in tests/test_refresh_previous_state.py that (i)
+      59 tests total, INCLUDING the 12 new ones in tests/test_refresh_previous_state.py that (i)
       prove last_manifest() now resolves the COMPLETED manifest over a same-day DISPATCHED one
       and a FAILED one within it, on the REAL manifests both graded firms wrote; (ii) drive the
       REAL lambda_handler end to end and assert REFRESH_NOOP_SAME_FRONTIER on the exact real
@@ -17,20 +17,26 @@ REFRESH_COMPLETED_WITH_ADDITIONS with previous_entry_count=0.
       at the same date still reports additions; a SECOND real defect this battery's own first
       live drive found -- the missed-fire date must NOT be narrowed the same way "previous" was,
       or a FAILED/still-DISPATCHED day misreads as a day nothing fired at all -- is covered too
-      (cottonwood's exact real shape reaches NOOP, never TRIGGER_MISSED); (iv) reproduce the
+      (cottonwood's exact real shape reaches NOOP, never TRIGGER_MISSED); a THIRD real defect
+      this battery's own SECOND live drive found -- an unbounded _last_dispatched_cid walk can
+      reach a long-superseded, stale DISPATCHED record once a transient write overwrites the
+      genuine most-recent one -- is covered too (the `not_before` bound); (iv) reproduce the
       MUTANT (the old first-found walk) and prove it fails BOTH (i) and (ii) -- it returns the
       wrong manifest and, fed into the REAL SsmBuildDispatcher, reproduces row W2-S57's exact
       symptom (previous_entry_count=0 on unchanged bytes).
   (b) READ-ONLY, post-deploy: served CodeSha256 == the built zip == the source-map registration;
-      a fresh `terraform plan` reads "No changes"; BOTH change-management ledger entries for this
-      cell's two deploys (round 1: the previous-state fix, opened 05c0322989 / closed
-      aff243111d; round 2: the missed-fire-date fix this cell's own live drive found necessary,
-      opened b81e02d1e8 / closed 9914ccffc2) read CLOSED with all 5 legs proven. Both applies
-      (each 0 to add, 1 to change, 0 to destroy -- source_code_hash + s3_object_version only)
-      already happened under their own ledger; this arm RE-DERIVES every claim from the live
-      world at THIS run, never from those commits' own text.
-  (c) THE LIVE DRIVE, after the organic fire (IB-rtd-1, merged) and after BOTH of this cell's own
-      fixes are deployed: invokes irpt-directory-refresh with EXACTLY the schedule's own payload
+      a fresh `terraform plan` reads "No changes"; ALL THREE change-management ledger entries for
+      this cell's three deploys (round 1: the previous-state fix, opened 05c0322989 / closed
+      aff243111d; round 2: the missed-fire-date fix, opened b81e02d1e8 / closed 9914ccffc2;
+      round 3: the not_before bound, opened 53c18a4e38 / closed 4c43124a4d -- each fix landed
+      only after THIS cell's own live drive, against the REAL deployed function, showed the
+      previous round's fix was incomplete) read CLOSED with all 5 legs proven. Every apply (each
+      0 to add, 1 to change, 0 to destroy -- source_code_hash + s3_object_version only) already
+      happened under its own ledger; this arm RE-DERIVES every claim from the live world at THIS
+      run, never from those commits' own text.
+  (c) THE LIVE DRIVE, after the organic fire (IB-rtd-1, merged) and after all THREE of this
+      cell's own fixes are deployed: invokes irpt-directory-refresh with EXACTLY the schedule's
+      own payload
       (read live from schedule.tf, no business_date override). For inflection and cottonwood --
       whose frontiers are unchanged since the organic fire (IB-rtd-1's own result: both landed
       inf 2026-09-17 / cot 2026-09-16, and this arm's own before-snapshot confirms neither
@@ -82,6 +88,7 @@ FIRM_BUCKETS = {"49financial": "opal-data-bd",
 DIRECTORY_PREFIX = "investor-reporting/directory"
 LEDGER_SLUG = "irpt-bckend-ibrtd2-directory"
 LEDGER_SLUG_R2 = "irpt-bckend-ibrtd2-directory-r2"
+LEDGER_SLUG_R3 = "irpt-bckend-ibrtd2-directory-r3"
 
 PYTHON = os.environ.get("PY312", "py")
 PYTHON_ARGS = ["-3.12"] if PYTHON == "py" else []
@@ -187,7 +194,7 @@ def arm_b():
     # second defect live and this cell re-deployed under a second ledger entry) are graded: the
     # served function reflects round 2, and round 1's own ledger must ALSO read CLOSED.
     all_closed = True
-    for slug in (LEDGER_SLUG, LEDGER_SLUG_R2):
+    for slug in (LEDGER_SLUG, LEDGER_SLUG_R2, LEDGER_SLUG_R3):
         sentinel = os.path.join(OPEN_DEPLOYS, slug + ".json")
         sentinel_gone = not os.path.exists(sentinel)
         cm_path = None
@@ -332,6 +339,7 @@ def arm_c():
         return
 
     graded_ok = 0
+    n_graded = 0
     for firm in ("inflection", "cottonwood", "49financial"):
         row = envelopes[firm]
         bucket = FIRM_BUCKETS[firm]
@@ -349,26 +357,47 @@ def arm_c():
         etag_unchanged = (etag_after == before[firm]["etag"]) and etag_after is not None
         new_object_keys = sorted(k for k in new_keys
                                  if not k.startswith(DIRECTORY_PREFIX + "/_refresh/"))
+        # THE FACE'S OWN CARVE-OUT: "a firm whose frontier moved between the fires is recorded
+        # as additions and excluded from n, said so". The frontier moved iff the LANDED KEY this
+        # fire accounts for differs from the before-snapshot's -- the runner's own trading-day
+        # walk chose a NEW business date because the firm's real source data advanced during the
+        # (multi-hour, three-round) window this cell's own fixes took to land, which is real
+        # world state, not a defect in this fix.
+        frontier_moved = landed_key != before[firm]["landed_key"]
 
         LANDED[firm] = {"reason": reason, "state": state, "business_date": bdate,
                         "manifest_key": manifest_key, "etag_after": etag_after,
-                        "etag_before": before[firm]["etag"], "new_object_keys": new_object_keys}
+                        "etag_before": before[firm]["etag"], "new_object_keys": new_object_keys,
+                        "frontier_moved": frontier_moved}
 
         is_noop = reason == "REFRESH_NOOP_SAME_FRONTIER"
-        line = ("%s: reason=%s state=%s bdate=%s landed_key=%s ETag before=%s after=%s "
-               "(unchanged=%s) new non-manifest keys=%d"
-               % (firm, reason, state, bdate, landed_key, before[firm]["etag"], etag_after,
-                  etag_unchanged, len(new_object_keys)))
+        line = ("%s: reason=%s state=%s bdate=%s landed_key(before->after)=%s -> %s ETag "
+               "before=%s after=%s (unchanged=%s) new non-manifest keys=%d frontier_moved=%s"
+               % (firm, reason, state, bdate, before[firm]["landed_key"], landed_key,
+                  before[firm]["etag"], etag_after, etag_unchanged, len(new_object_keys),
+                  frontier_moved))
         if firm in ("inflection", "cottonwood"):
-            ok = is_noop and etag_unchanged and len(new_object_keys) == 0
-            graded_ok += 1 if ok else 0
-            record("c.%s.noop" % firm[:3], "PASS" if ok else "FAIL", line)
+            if frontier_moved:
+                is_additions = reason in ("REFRESH_COMPLETED_WITH_ADDITIONS",
+                                          "REFRESH_COMPLETED",
+                                          "REFRESH_COMPLETED_WITH_ELIGIBILITY_CHANGE")
+                record("c.%s.frontier_moved" % firm[:3],
+                       "MEASURED" if is_additions else "FAIL",
+                       "EXCLUDED FROM n (frontier moved, real source-data advance during this "
+                       "cell's own multi-round fix window): " + line)
+            else:
+                n_graded += 1
+                ok = is_noop and etag_unchanged and len(new_object_keys) == 0
+                graded_ok += 1 if ok else 0
+                record("c.%s.noop" % firm[:3], "PASS" if ok else "FAIL", line)
         else:
             record("c.49f.measured", "MEASURED", line)
 
-    record("c.landed_total", "PASS" if graded_ok == 2 else "FAIL",
-           "inflection + cottonwood read REFRESH_NOOP_SAME_FRONTIER, ETag unchanged, 0 new keys",
-           "%d of 2" % graded_ok)
+    record("c.landed_total", "PASS" if (n_graded > 0 and graded_ok == n_graded) else "FAIL",
+           "unchanged-frontier firm(s) among inflection+cottonwood read "
+           "REFRESH_NOOP_SAME_FRONTIER, ETag unchanged, 0 new keys (a moved-frontier firm is "
+           "recorded as additions and excluded from n, above)",
+           "%d of %d (n printed)" % (graded_ok, n_graded))
 
 
 # ================================================================== the verdict
