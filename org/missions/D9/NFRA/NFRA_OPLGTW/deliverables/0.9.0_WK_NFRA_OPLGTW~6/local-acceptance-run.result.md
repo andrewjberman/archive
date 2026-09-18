@@ -1,107 +1,103 @@
-# NFRA_OPLGTW.TO-OG-v-2 -- local integrated acceptance run: result (RE-HAND)
+# NFRA_OPLGTW.TO-OG-v-2 -- local integrated acceptance run: result (RE-HAND, LAST)
 
-**Worker:** `0.9.0_WK_NFRA_OPLGTW~6` | **Worktree:** `C:/tmp/wk-oplgtw-6f` (branch `wk-nfra_oplgtw-6f`, HEAD @5eb4945331)
+**Worker:** `0.9.0_WK_NFRA_OPLGTW~6` | **Worktree:** `C:/tmp/wk-oplgtw-6f` (branch `wk-nfra_oplgtw-6f`, HEAD @e3d6c48ffd)
 **Proof:** `NFRA_OPLGTW.TO-OG-v-2.local-acceptance-run.proof_of_spec.json` (this folder) -- validate with
-`py -3.12 .tools/proof-of-spec-check.py <instance> OGV2-AC1,OGV2-AC2,OGV2-AC3,OGV2-AC4,OGV2-AC5`.
-**Order `<status>`: left `pending`** -- OGV2-AC2 FAILS by output (two real defects in the code under test, not
-in this harness or fixture); BOUNDS: "Flip `complete` only when every MECHANICAL criterion PASSES by output."
+`py -3.12 .tools/proof-of-spec-check.py <instance> OGV2-AC1,OGV2-AC2,OGV2-AC3,OGV2-AC4,OGV2-AC5` (VALID rc=0).
+**Order `<status>`: left `pending`** -- OGV2-AC4 FAILS by output (a real defect in code outside this cell's
+`<paths>` grant); BOUNDS: "Flip `complete` only when every MECHANICAL criterion PASSES by output."
 
-## What this re-hand did
+## What this (last) re-hand did
 
-1. **Re-keyed `conftest.py`'s `READER_ARN`/`CATALOG_ARN`** (and the moto IAM role names) from
-   `org/standards/NFRA_OPLGTW_CONTRACT.json`'s `reader_role`/`catalog_role`, instead of the two hardcoded
-   pre-rename literals OG-i-3's R-OG-7 left behind (`gateway-schwab-read-role` /
-   `gateway-schwab-catalog-read-role`, matching `tests/test_schwab_catalog.py`'s own `ROLE_ENV` read of the
-   same contract, for the same reason). This alone took the harness from `5 failed, 2 passed` back to green
-   on the previously-existing 7 tests.
-2. **Built the 7 machine-and-local A-rows the prior round left unbuilt** (row `NFRA_OPLGTW-W6-S7`'s own
-   denominator): `test_ogv2_a03`, `a06`, `a09`, `a10`, `a12`, `a17`, `a18`.
-3. **Re-graded OGV2-AC2** with the full, now-whole denominator.
+Everything OGV2-AC2 was waiting on had already landed at this cell's HEAD; two items in this cell's own
+`<paths>` needed repair against the now-current app behaviour:
 
-## The harness (three disclosed seams; `conftest.py`'s own module docstring is authoritative)
-
-Unchanged from the prior round except item 1 above: the REAL `app.server` Starlette app in process, moto
-`mock_aws()` (S3 versioned/DynamoDB/STS/IAM), `ENABLED_INTEGRATIONS=schwab`, `LocalEntra` upstream issuer
-(imported from `tests/test_principal_cutover.py`), OG-v-1's fixture MANIFEST uploaded and restamped. Seam 1
-(in-process query engine), seam 2 (fixed account-reference `Keyring`) and seam 3 (`asset_policy` sentinel,
-found last round) are all still exactly as documented there.
+1. **`test_ogv2_a06`'s post-revocation assertion** (`:488` at the prior HEAD) read the query-engine's nested
+   `{"error": {"code": ...}}` shape. `OG-z-4` (this cell's own earlier order) wired the dispatch guard
+   (`app/tools.py` `_PolicyGuardedMCP.call_tool()`) to set MCP `isError=True` on a guard denial; a **full
+   revoke** now denies **at the guard** (`app/data_entitlement.py`'s flat `_denial()` dict: `{"error": "<reason
+   text>", "guard_denied": true, "code": "<snake_case>", "error_code": "<CONTRACT CODE>"}`), not inside the
+   query engine, so `payload["error"]` is a STRING there, not a dict -- `payload["error"]["code"]` raised
+   `TypeError: string indices must be integers, not 'str'`. Fixed by reading `payload["error_code"]` instead,
+   the guard's own contract-code field (confirmed by measurement: `payload={'error': "the principal's
+   restricted profile is revoked (revision 5) does not include tool 'schwab_query'", 'guard_denied': True,
+   'code': 'entitlement_denied', 'error_code': 'ENTITLEMENT_DENIED'}`).
+2. **`test_ogv2_a18`'s empty-match aggregate control** asserted an ungrouped `sum(quantity_settled_unsettled)`
+   succeeds with a null total. `OG-q-4`'s `semantics.assert_quantity_sum_grouped` wiring now refuses that
+   shape outright (`INVALID_REQUEST`/`quantity_sum_ungrouped`) before the (empty) match is ever evaluated --
+   PRD C3: "Quantity sums require grouping by CUSIP and long/short indicator." Flipped to expect the refusal,
+   citing the same clause `test_schwab_query.py::test_ogq2_ac07` (`:503`) and `::test_ogq2_ac15` (`:762`)
+   already cite for their own ungrouped-sum controls (R-OG-15, row `NFRA_OPLGTW-W5-S10`).
+3. **Re-graded OGV2-AC2 WHOLE** against all 13 machine A-rows at this HEAD, and re-ran AC1, AC3, AC4, AC5 so
+   every row in the proof instance is one vintage (`@e3d6c48ffd`).
 
 ## Criteria
 
 | id | invocation (relative to `<WS>`) | result |
 |---|---|---|
 | OGV2-AC1 | `pytest .../test_local_acceptance.py::test_ogv2_ac01` | **PASS** -- `1 passed` |
-| OGV2-AC2 | `pytest .../test_local_acceptance.py -k "test_ogv2_a"` | **FAIL** -- `2 failed, 12 passed` (see below) |
+| OGV2-AC2 | `pytest .../test_local_acceptance.py -k "test_ogv2_a"` | **PASS** -- `14 passed`, 0 failed |
 | OGV2-AC3 | `pytest .../test_local_acceptance.py::test_ogv2_ac03` | **PASS** -- `1 passed` |
-| OGV2-AC4 | per-module loop over `tests/test_*.py` (21 modules) | **PASS** (recorded run) -- `MODULES: 21 FAILED-MODULES: 0`; see the flakiness note below |
+| OGV2-AC4 | per-module loop over `tests/test_*.py` (25 modules) | **FAIL** -- `MODULES: 25 FAILED-MODULES: 1` (`test_schwab_query.py::test_ogq2_ac06`, `::test_ogq2_ac20`) |
 | OGV2-AC5 | `pytest .../test_local_acceptance.py::test_ogv2_ac05` | **PASS** -- `1 passed`, 56 S3 calls, 0 violations |
 
-### OGV2-AC2 -- the A-row census, denominator now whole
+### OGV2-AC2 -- the A-row census, now clean
 
-**Denominator: 12 of 12** OG-v-1 census rows marked `operated_by: machine` whose instrument is `OG-v-2` are
-built as tests (A2 is `OGV2-AC3`, counted separately by this order's own text). **A14 is correctly out of
-scope**: its machine half is graded_by BOTH `OG-v-2` AND `OG-r-2` (concurrent-job memory/latency, a host
-measurement `OG-v-2` alone cannot make) -- listed here, not silently dropped, per the WORKER FACE's own
-routing rule.
+**Denominator: 13 of 13** OG-v-1 census rows marked `operated_by: machine` whose instrument is `OG-v-2`
+are built as tests and pass (A2 as `OGV2-AC3`; A3,A4,A5,A6,A8,A9,A10,A11,A12,A17,A18 as `test_ogv2_a<nn>`,
+plus OGV2-AC1/AC3/AC5 swept in by the `-k "test_ogv2_a"` substring). **A14 stays correctly out of scope**:
+its machine half is graded_by BOTH `OG-v-2` AND `OG-r-2` (a host measurement `OG-v-2` alone cannot make).
 
-| row | test | result | compared against |
-|---|---|---|---|
-| A2 (machine) | `test_ogv2_ac03` | PASS | legacy refresh -> `invalid_grant`; fresh loopback refresh survives a restart |
-| A3 | `test_ogv2_a03` | PASS | unknown/revoked/null-tid/null-oid principals denied and hidden from discovery; forged headers change nothing; same email + different oid denied |
-| A4 | `test_ogv2_a04` | PASS | discovery hides ungranted tools; direct call denied, 0 new S3 calls |
-| A5 | `test_ogv2_a05` | PASS | `A5-shared-account-two-masters` (distinct aliases, cross-master refusal, no raw id) |
-| A6 | `test_ogv2_a06` | **FAIL** (partial) | `A6-account-grant-before-aggregate` (narrow grant after a broader-grant warm): **matches EXPECTED exactly**. 4 hidden-field refusals + the SQL-injection-shaped-value case + post-revocation refusal: **all pass**. `A6-partial-grant-asset-cusips`: **FAILS** -- see `NFRA_OPLGTW-W6-S8` below. |
-| A8 | `test_ogv2_a08` | **FAIL** (partial) | balance totals, position quantity-by-cusip-ls, market-value totals, date deltas: **all four match exactly**. `A8-refusals`: **FAILS** -- see `NFRA_OPLGTW-W6-S6` (carried, unchanged this round). |
-| A9 | `test_ogv2_a09` | PASS | all 12 closure variants + 2 anchor dates, under a FIXED grant naming every date, behave per `A9-closure-variants` |
-| A10 | `test_ogv2_a10` | PASS | ticket mint -> exchange once (200) -> replay refused -> cross-principal refused -> owner still redeems -> post-revocation refused; ticket only in the URL fragment. (Reduced: no fake-clock hook for the 300s expiry sub-case; no log-scan instrument -- declared exclusions.) |
-| A11 | `test_ogv2_a11` | PASS | raw silver key refused; no presigned-URL pattern |
-| A12 | `test_ogv2_a12` | PASS | prompt-like text returned verbatim, grant revision unchanged; CSV formula-escaping matches `A12-csv-formula-escaping` exactly (6 escaped cells, 1 unescaped negative numeric, correct row count) |
-| A17 | `test_ogv2_a17` | PASS | reuse revokes the family (successor also dead); wrong client_id/resource/broader-scope each rejected; survives a restart. (Reduced: a true two-thread race not separately built -- declared exclusion.) |
-| A18 | `test_ogv2_a18` | PASS | Unicode codepoint/UTF-8/JSON-escape counts match exactly; rows paging (page_size 2) covers the match with no repeat; paged (page_size 1) and un-paged aggregate group totals agree; empty match -> 0 rows, null sum |
+Both of the prior round's two open A-row defects are now closed:
 
-### The two real defects OGV2-AC2 finds (both ARMED, disarm_owner `1.0.0_SA_CTO`, neither fixed here)
+- **A6** (`test_ogv2_a06`): the partial-grant `dim_asset` CUSIP restriction now matches EXPECTED exactly
+  (`['SYN000001', 'SYN000002']`) -- `NFRA_OPLGTW-W6-S8`'s gap has been wired by an intervening cell. The
+  post-revocation sub-check (this round's own repair, above) now also passes.
+- **A8** (`test_ogv2_a08`): not separately re-verified this round beyond the full `-k "test_ogv2_a"` sweep,
+  which shows it passing with no assertion output flagged -- `NFRA_OPLGTW-W6-S6`'s refusal gap has also been
+  wired by an intervening cell (OG-q-4).
+- **A18** (`test_ogv2_a18`): this round's own repair (above) -- Unicode measure, paging, and paged/un-paged
+  aggregate agreement all still match EXPECTED; the empty-match ungrouped-sum sub-case now correctly expects
+  a refusal instead of a null-sum success.
 
-**`NFRA_OPLGTW-W6-S6` (carried from the prior round, re-confirmed at this HEAD -- see note below):**
-`schwab_query` aggregate mode does not refuse `SUM(closing_price)` (nonadditive) or an ungrouped
-`SUM(quantity_settled_unsettled)`, because `semantics.py`'s `assert_sum_allowed` family is never called
-from `query.py`/`integration.py`. **Re-grounded this round:** the issuer's hand-off said OG-q-4 had wired
-this in ("now genuinely enforced on the live path") -- at this worker's own HEAD (`5eb4945331`), that wiring
-commit (`80fba29f34`/`881b1a5445`) is **not an ancestor**: `git merge-base --is-ancestor 80fba29f34 HEAD`
-answers false, and it lives on a sibling worker's branch `wk-nfra_oplgtw-5e`, unmerged. The gap is exactly
-as `NFRA_OPLGTW-W6-S6` already described; this is a premise check, not a new finding, and no new row is
-filed for it.
+## OGV2-AC4 -- still blocked, outside this cell's grant
 
-**`NFRA_OPLGTW-W6-S8` (new this round):** a partial-account grant on `dim_asset` (accounts = `{99000002}`)
-returns all four fixture CUSIPs instead of the two that account holds. `integration.py`'s `asset_policy`
-constructor argument gates `dim_asset` on mere presence (`is None`); its VALUE is never read anywhere, and
-no CUSIP-restriction/qualified-position-snapshot code exists on the `dim_asset` path at all -- the same
-class of gap as `S6`, one level over. `query.py`/`integration.py` are outside this order's `<paths>` grant.
+`MODULES: 25 FAILED-MODULES: 1`, invariant across a same-session re-run for determinism: `test_schwab_query.py`
+fails on `test_ogq2_ac06` and `test_ogq2_ac20` both times. This is **not a new defect** -- it is the same
+class rows `NFRA_OPLGTW-W5-S19` and `NFRA_OPLGTW-W5-S20` already ground and ARMED (disarm_owner
+`2.0.0_SA_COO~O`): `TO-OG-q-6`'s R20/R24 wiring correctly refuses the pre-wiring shapes those two tests still
+assert succeed (a `group_by` including `business_date` inside the 10-field limit, and a one-page duplicate
+source grain). This worker's HEAD already carries `2.0.0_SA_COO~O`'s own `reopen+amend(NFRA_OPLGTW.TO-OG-q-6)`
+commit granting `test_schwab_query.py` back for exactly this pair (`@1529bcd131`), but that order's fix has
+not drained at this HEAD. `test_schwab_query.py` is **not** in this cell's `<paths>` grant
+(`infra/aws/ec2/opal-gateway/tests/acceptance/test_local_acceptance.py`,
+`infra/aws/ec2/opal-gateway/tests/acceptance/conftest.py`, and this cell's own investigation file only), so it
+cannot be repaired here. Recorded as a FAIL measurement; filed as row `NFRA_OPLGTW-W6-S10` (BLOCKING for
+this criterion, citing W5-S19/W5-S20 rather than re-diagnosing the same class).
 
-### OGV2-AC4's flakiness (`NFRA_OPLGTW-W6-S9`, new this round, INERT)
-
-The per-module loop was run three times this session: `FAILED-MODULES:1` (`test_schwab_engine.py`'s
-`test_ogq1_ac02`, a hardcoded 0.25s event-loop-lag threshold, measured 0.446s under box load -- a standalone
-re-run passed clean), `FAILED-MODULES:1` (`test_schwab_export.py`'s `test_ogx1_ac01`, asserting `'s3'`/
-`'amazonaws'`/`'?'` are absent from a `secrets.token_urlsafe(32)` ticket -- a rare, pure-chance substring
-collision), then `FAILED-MODULES:0` (clean). Neither failing test imports `conftest.py` or
-`test_local_acceptance.py`. **The third (clean) run is the one recorded** in the proof instance; the
-flakiness itself is disclosed so a future FAIL on this literal invocation is not misread as an OG-v-2
-regression.
+A second run this session, for determinism, reproduced the same `test_schwab_query.py` pair **plus** one
+additional, different module failing on a pre-existing, already-filed flaky cause: `test_schwab_export.py`'s
+`test_ogx1_ac01` (`NFRA_OPLGTW-W6-S9`, OBSERVATION/INERT -- a `secrets.token_urlsafe(32)` ticket occasionally
+contains the substring `s3`/`amazonaws` by pure chance). The `test_schwab_query.py` pair is the STABLE,
+reproducible failure both runs; the export flake is not, and is not re-filed here since S9 already grounds it
+exactly.
 
 ## Surprise rows filed this order
 
-- `NFRA_OPLGTW-W6-S8` -- the `dim_asset` partial-account CUSIP-restriction gap. OBSERVATION, **ARMED**,
-  disarm_owner `1.0.0_SA_CTO`.
-- `NFRA_OPLGTW-W6-S9` -- OGV2-AC4's non-determinism on two unrelated pre-existing flaky modules.
-  OBSERVATION, INERT.
-- (Carried, not re-filed: `NFRA_OPLGTW-W6-S6`, `NFRA_OPLGTW-S24`/`NFRA_OPLGTW-W5-S11` -- the pre-rename ARN
-  defect this round's conftest.py fix disarms; `NFRA_OPLGTW-W6-S7` -- this round's denominator now closes it.)
+- `NFRA_OPLGTW-W6-S10` -- OGV2-AC4's whole-glob sweep is still blocked by the already-ARMED `W5-S19`/`W5-S20`
+  defect (`test_schwab_query.py::test_ogq2_ac06`/`::test_ogq2_ac20`), re-measured at this cell's HEAD.
+  BLOCKING (for OGV2-AC4), ARMED, disarm_owner `2.0.0_SA_COO~O` (carried from W5-S19/S20, not a new hazard).
+- (Not re-filed, already grounded: `NFRA_OPLGTW-W6-S6`, `NFRA_OPLGTW-W6-S8` -- both now disarmed on the live
+  path, confirmed by this round's own green A6/A8 measurements; `NFRA_OPLGTW-W6-S9` -- reconfirmed identically
+  on this round's second AC4 run, not re-filed.)
 
 ## Mutant / determinism controls
 
-See `controls` in the proof-of-spec instance: the single-edit mutant on `test_ogv2_ac01` (carried from the
-prior round, file unchanged at that point) still fires and restores byte-identical
-(sha256 `75ce95163b592c42f3bc326be11eb1fbd0efc907764ad13590a5f83611fcb1e5`). This round's independent-fixture
-control: `test_ogv2_a06` and `test_ogv2_a08` each assert several `EXPECTED` cases per test body and each
-fails on exactly one real-gap sub-case while passing every other sub-case in the same body against the same
-`EXPECTED.json` -- the harness discriminates both ways on the same run.
+See `controls` in the proof-of-spec instance: the single-edit mutant on `test_ogv2_ac01` (carried unchanged
+from every prior round) still fires and restores byte-identical (sha256
+`75ce95163b592c42f3bc326be11eb1fbd0efc907764ad13590a5f83611fcb1e5`). This round's own two fixes are each a
+live discriminator: `test_ogv2_a06`'s `payload["error_code"]` read raises `KeyError` if that field is ever
+dropped from the guard's denial shape; `test_ogv2_a18`'s flipped assertion fails if the ungrouped-sum refusal
+is ever removed and the old null-sum success shape returns. OGV2-AC1/AC3/AC5 and the AC2 selection were each
+run standalone; OGV2-AC4's full loop was run twice -- the graded defect (`test_schwab_query.py`) is STABLE
+across both runs; the unrelated `test_schwab_export.py` flake is not, matching `W6-S9`'s prior finding on the
+same test.
