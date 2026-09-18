@@ -9,32 +9,41 @@ frontier re-fire re-reported the unchanged, already-landed artifact as
 REFRESH_COMPLETED_WITH_ADDITIONS with previous_entry_count=0.
 
   (a) THE REAL UNIT-TEST SUITE, k of k -- infra/aws/lambda/investor-reporting/directory/tests/,
-      56 tests total, INCLUDING the 9 new ones in tests/test_refresh_previous_state.py that (i)
+      58 tests total, INCLUDING the 11 new ones in tests/test_refresh_previous_state.py that (i)
       prove last_manifest() now resolves the COMPLETED manifest over a same-day DISPATCHED one
       and a FAILED one within it, on the REAL manifests both graded firms wrote; (ii) drive the
       REAL lambda_handler end to end and assert REFRESH_NOOP_SAME_FRONTIER on the exact real
       defect shape, with no second SSM command sent; (iii) confirm a genuinely CHANGED artifact
-      at the same date still reports additions; (iv) reproduce the MUTANT (the old first-found
-      walk) and prove it fails BOTH (i) and (ii) -- it returns the wrong manifest and, fed into
-      the REAL SsmBuildDispatcher, reproduces row W2-S57's exact symptom
-      (previous_entry_count=0 on unchanged bytes).
+      at the same date still reports additions; a SECOND real defect this battery's own first
+      live drive found -- the missed-fire date must NOT be narrowed the same way "previous" was,
+      or a FAILED/still-DISPATCHED day misreads as a day nothing fired at all -- is covered too
+      (cottonwood's exact real shape reaches NOOP, never TRIGGER_MISSED); (iv) reproduce the
+      MUTANT (the old first-found walk) and prove it fails BOTH (i) and (ii) -- it returns the
+      wrong manifest and, fed into the REAL SsmBuildDispatcher, reproduces row W2-S57's exact
+      symptom (previous_entry_count=0 on unchanged bytes).
   (b) READ-ONLY, post-deploy: served CodeSha256 == the built zip == the source-map registration;
-      a fresh `terraform plan` reads "No changes"; the change-management ledger entry for this
-      deploy is CLOSED with all 5 legs proven. The apply itself (0 to add, 1 to change, 0 to
-      destroy -- source_code_hash + s3_object_version only) already happened under the ledger,
-      committed at 05c0322989 (open) and aff243111d (close); this arm RE-DERIVES every claim
-      from the live world at THIS run, never from those commits' own text.
-  (c) THE LIVE DRIVE, after the organic fire (IB-rtd-1, merged): invokes irpt-directory-refresh
-      with EXACTLY the schedule's own payload (read live from schedule.tf, no business_date
-      override). For inflection and cottonwood -- whose frontiers are unchanged since the
-      organic fire (IB-rtd-1's own result: both landed inf 2026-09-17 / cot 2026-09-16, and this
-      arm's own before-snapshot confirms neither pointer has moved) -- the reconciliation must
-      read REFRESH_NOOP_SAME_FRONTIER with the landed key's ETag unchanged and 0 new keys under
-      investor-reporting/directory/. The negative control is the organic fire's OWN manifest,
-      re-fetched live and quoted: REFRESH_COMPLETED_WITH_ADDITIONS with previous_entry_count=0
-      on those same byte-identical ETags. 49financial is MEASURED, never graded (its build
-      dispatch is still blocked on the host role's grants, row IRPT_BCKEND-W2-S49, BLOCKING,
-      unrelated to this fix), matching IB-rtd-1/IB-rtc-3's own precedent for this firm.
+      a fresh `terraform plan` reads "No changes"; BOTH change-management ledger entries for this
+      cell's two deploys (round 1: the previous-state fix, opened 05c0322989 / closed
+      aff243111d; round 2: the missed-fire-date fix this cell's own live drive found necessary,
+      opened b81e02d1e8 / closed 9914ccffc2) read CLOSED with all 5 legs proven. Both applies
+      (each 0 to add, 1 to change, 0 to destroy -- source_code_hash + s3_object_version only)
+      already happened under their own ledger; this arm RE-DERIVES every claim from the live
+      world at THIS run, never from those commits' own text.
+  (c) THE LIVE DRIVE, after the organic fire (IB-rtd-1, merged) and after BOTH of this cell's own
+      fixes are deployed: invokes irpt-directory-refresh with EXACTLY the schedule's own payload
+      (read live from schedule.tf, no business_date override). For inflection and cottonwood --
+      whose frontiers are unchanged since the organic fire (IB-rtd-1's own result: both landed
+      inf 2026-09-17 / cot 2026-09-16, and this arm's own before-snapshot confirms neither
+      pointer has moved) -- the reconciliation must read REFRESH_NOOP_SAME_FRONTIER with the
+      landed key's ETag unchanged and 0 new keys under investor-reporting/directory/. The
+      negative control is the organic fire's OWN manifest, quoted from the FROZEN pre-fix
+      fixture capture (tests/fixtures/, copied verbatim from the real live objects before this
+      fix landed -- the live objects at these keys now read the FIXED behaviour, so the defect
+      can only be quoted from that frozen capture, never re-fetched live post-fix):
+      REFRESH_COMPLETED_WITH_ADDITIONS with previous_entry_count=0 on those same byte-identical
+      ETags. 49financial is MEASURED, never graded (its build dispatch is still blocked on the
+      host role's grants, row IRPT_BCKEND-W2-S49, BLOCKING, unrelated to this fix), matching
+      IB-rtd-1/IB-rtc-3's own precedent for this firm.
 
 THE TOKEN IS GATED on (a) k of k, (b) all clean, and (c)'s inf+cot 2 of 2 REFRESH_NOOP_SAME_FRONTIER
 with ETag-unchanged and 0-new-keys. Nothing here wraps, patches or re-registers the subject
@@ -72,6 +81,7 @@ FIRM_BUCKETS = {"49financial": "opal-data-bd",
                 "cottonwood": "opal-data-cot"}
 DIRECTORY_PREFIX = "investor-reporting/directory"
 LEDGER_SLUG = "irpt-bckend-ibrtd2-directory"
+LEDGER_SLUG_R2 = "irpt-bckend-ibrtd2-directory-r2"
 
 PYTHON = os.environ.get("PY312", "py")
 PYTHON_ARGS = ["-3.12"] if PYTHON == "py" else []
@@ -125,12 +135,13 @@ def arm_a():
            "pytest %s -q: %s" % (TESTS_DIR, tail),
            ("%s of %s" % (k, k)) if m else "rc=%d" % p.returncode)
 
-    # named-shape self-check: the fix's specific 9 tests are present and passed, by name.
+    # named-shape self-check: the fix's specific 12 tests are present and passed, by name.
     names_wanted = [
         "test_last_manifest_skips_a_same_day_dispatched_record_and_returns_the_completed_one",
         "test_last_manifest_skips_dispatched_and_failed_to_reach_a_completion_two_days_back",
         "test_last_dispatched_cid_finds_the_in_flight_command_last_manifest_now_excludes",
         "test_last_dispatched_cid_is_none_when_no_dispatched_record_exists",
+        "test_last_dispatched_cid_does_not_reach_past_a_stale_dispatch_the_completion_supersedes",
         "test_lambda_handler_reaches_noop_same_frontier_on_the_real_defect_shape",
         "test_lambda_handler_reports_additions_when_the_artifact_genuinely_changed",
         "test_lambda_handler_does_not_misread_a_failed_or_dispatched_day_as_missed",
@@ -139,12 +150,13 @@ def arm_a():
         "test_the_mutants_previous_manifest_reproduces_row_w2_s57s_exact_symptom",
         "test_previous_state_reason_codes_matches_the_completed_family_and_noop_only",
     ]
-    p2 = subprocess.run([PYTHON] + PYTHON_ARGS + ["-m", "pytest",
+    p2 = subprocess.run([PYTHON] + PYTHON_ARGS + ["-m", "pytest", "--color=no",
                         os.path.join(TESTS_DIR, "test_refresh_previous_state.py"), "-v"],
                         capture_output=True, text=True, timeout=180)
-    found = sum(1 for n in names_wanted if (n + " PASSED") in (p2.stdout or ""))
+    stdout2 = p2.stdout or ""
+    found = sum(1 for n in names_wanted if (n + " PASSED") in stdout2)
     record("a.2", "PASS" if found == len(names_wanted) else "FAIL",
-           "the 9 named previous-state tests all PASSED by name",
+           "the %d named previous-state tests all PASSED by name" % len(names_wanted),
            "%d of %d" % (found, len(names_wanted)))
 
 
@@ -171,19 +183,26 @@ def arm_b():
            "terraform plan (worktree-provisioned terraform.exe): %s"
            % (["No changes."] if no_changes else (p.stdout or p.stderr)[-300:]))
 
-    sentinel = os.path.join(OPEN_DEPLOYS, LEDGER_SLUG + ".json")
-    sentinel_gone = not os.path.exists(sentinel)
-    cm_path = None
-    for fn in os.listdir(os.path.join(REPO, "org", "critical_paths", "change_management")):
-        if LEDGER_SLUG in fn:
-            cm_path = os.path.join(REPO, "org", "critical_paths", "change_management", fn)
-    closed = False
-    if cm_path:
-        text = open(cm_path, encoding="utf-8").read()
-        closed = "**Status:** CLOSED" in text and "all 5 leg(s) proven" in text
-    record("b.3", "PASS" if (sentinel_gone and closed) else "FAIL",
-           "ledger '%s': sentinel removed=%s, entry text declares CLOSED/5-legs=%s (%s)"
-           % (LEDGER_SLUG, sentinel_gone, closed, cm_path))
+    # BOTH deploys (round 1's original fix, round 2's missed-date fix -- arm (c) below found the
+    # second defect live and this cell re-deployed under a second ledger entry) are graded: the
+    # served function reflects round 2, and round 1's own ledger must ALSO read CLOSED.
+    all_closed = True
+    for slug in (LEDGER_SLUG, LEDGER_SLUG_R2):
+        sentinel = os.path.join(OPEN_DEPLOYS, slug + ".json")
+        sentinel_gone = not os.path.exists(sentinel)
+        cm_path = None
+        for fn in os.listdir(os.path.join(REPO, "org", "critical_paths", "change_management")):
+            if slug in fn:
+                cm_path = os.path.join(REPO, "org", "critical_paths", "change_management", fn)
+        closed = False
+        if cm_path:
+            text = open(cm_path, encoding="utf-8").read()
+            closed = "**Status:** CLOSED" in text and "all 5 legs proven" in text
+        ok = sentinel_gone and closed
+        all_closed = all_closed and ok
+        record("b.3.%s" % slug, "PASS" if ok else "FAIL",
+               "ledger '%s': sentinel removed=%s, entry text declares CLOSED/5-legs=%s (%s)"
+               % (slug, sentinel_gone, closed, cm_path))
 
 
 # ============================================================ ARM (c) -- THE LIVE DRIVE
@@ -257,27 +276,31 @@ def arm_c():
            % {f: {"n_keys": len(before[f]["keys"]), "landed_key": before[f]["landed_key"],
                   "etag": before[f]["etag"]} for f in before})
 
-    # THE NEGATIVE CONTROL: quote the ORGANIC FIRE's own manifest at the SAME landed key/date,
-    # re-fetched live this run (row W2-S57's exact symptom -- before this fix landed).
-    neg_controls = {}
-    for firm, bucket in (("inflection", "opal-data-inf"), ("cottonwood", "opal-data-cot")):
-        as_of = (before[firm]["pointer"] or {}).get("as_of_business_date")
-        if not as_of:
-            continue
-        man_key = "%s/_refresh/%s/manifest.json" % (DIRECTORY_PREFIX, as_of)
-        man = _read_json_object(s3, bucket, man_key)
-        neg_controls[firm] = man
+    # THE NEGATIVE CONTROL: the organic fire's OWN manifests, quoted from the FROZEN fixture
+    # files this cell committed (tests/fixtures/, copied verbatim from the real live objects
+    # BEFORE this fix landed -- see the deliverable's commit 39f7a2ffe6). The LIVE objects at
+    # these same keys now read the FIXED behaviour (this fix's own point), so the pre-fix defect
+    # can only be quoted from the frozen capture, never re-fetched live post-fix -- that would be
+    # asking the world to still be broken as proof the fix works.
+    fixtures_dir = os.path.join(DIRECTORY, "tests", "fixtures")
+    neg_controls = {
+        "inflection": json.load(open(os.path.join(
+            fixtures_dir, "inf_2026-09-17_completed_with_additions.json"), encoding="utf-8")),
+        "cottonwood": json.load(open(os.path.join(
+            fixtures_dir, "cot_2026-09-16_completed_with_additions.json"), encoding="utf-8")),
+    }
     record("c.negative_control", "MEASURED",
-           "organic fire's own manifest, re-fetched live: %s"
-           % {f: {"reason_code": (m or {}).get("reason_code"),
-                  "previous_entry_count": ((m or {}).get("delta") or {}).get("previous_entry_count")}
+           "organic fire's own manifest, quoted from the frozen pre-fix fixture capture: %s"
+           % {f: {"reason_code": m.get("reason_code"),
+                  "previous_entry_count": (m.get("delta") or {}).get("previous_entry_count")}
               for f, m in neg_controls.items()})
-    pre_fix_defect = all((m or {}).get("reason_code") == "REFRESH_COMPLETED_WITH_ADDITIONS"
-                         and ((m or {}).get("delta") or {}).get("previous_entry_count") == 0
-                         for m in neg_controls.values()) and len(neg_controls) == 2
+    pre_fix_defect = all(m.get("reason_code") == "REFRESH_COMPLETED_WITH_ADDITIONS"
+                         and (m.get("delta") or {}).get("previous_entry_count") == 0
+                         for m in neg_controls.values())
     record("c.negative_control.shape", "PASS" if pre_fix_defect else "FAIL",
-           "both firms' organic-fire manifest reads REFRESH_COMPLETED_WITH_ADDITIONS with "
-           "previous_entry_count=0 on unchanged bytes -- the pre-fix defect this cell fixes",
+           "both firms' organic-fire manifest (frozen fixture) reads "
+           "REFRESH_COMPLETED_WITH_ADDITIONS with previous_entry_count=0 on unchanged bytes -- "
+           "the pre-fix defect this cell fixes, row IRPT_BCKEND-W2-S57",
            "2 of 2" if pre_fix_defect else "%d of 2" % len(neg_controls))
 
     deadline = time.time() + 900
