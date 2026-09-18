@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-30",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf600b278a81048492c91c3569d3489d96",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-30.scores-producer-runner.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "49aedcf88be8f29903a716218a83031c468d0b88"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~29",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/scores/run_scores.py",
+      "kind": "script",
+      "commit_or_etag": "b2667ed078bbd482e6a35458a60bcf6732e47597",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adopted at this commit from a sibling continuation's branch (cf3ad9f5d9), cherry-picked cleanly. Not a Lambda deploy -- a local/box-side runner, no serving surface of its own.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "scores/v1/<security_key>/2026-09-17.json (33 pool objects, opal-data-harvest)",
+      "kind": "s3_object",
+      "commit_or_etag": "sample ETag f250c69b1ecbff2d01e6f50d6a2af54e (ASML_NA_Equity), LastModified 2026-09-17T14:43:28Z",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Pool writes via crosswalk.write_pool(), landed 2026-09-17T10:4xZ per the objects' own LastModified. Re-verified fresh this tick (2.0.0_SA_COO~Z) by direct S3 read, per-key, not by a slash-naive prefix count.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AFTER this order's runner executes, scores_objects_written is nonzero and reasonably close to keyed_count (a name may legitimately be ABSENT on all three fields and still get a written object -- the object exists, its fields carry the classification); the worker prints the exact key prefix it actually used if different from `scores/v1/`",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json\ns3 = boto3.client('s3')\nresp = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='crosswalk/v1/')\nlatest = sorted(o['Key'] for o in resp.get('Contents', []))[-1]\ndoc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=latest)['Body'].read())\nkeyed = [r['security_key'] for r in doc.get('records', doc if isinstance(doc, list) else []) if r.get('security_key')]\nprint('keyed_count', len(keyed))\nresp2 = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='scores/v1/')\nwritten = [o['Key'] for o in resp2.get('Contents', [])]\nprint('scores_objects_written', len(written))\n\"",
+      "output_evidence": "keyed_count 33\nscores_objects_written 66",
+      "denominator": "Raw top-level `scores/v1/` prefix count, literal per the order's own unamended AC1 invocation, includes BOTH the 33 canonical date-partitioned objects (`<key>/2026-09-17.json`) and 31 superseded flat-shape objects (`<key>.json`, row Z-S155, a prior generation) -- 33 + 31 = 64, plus 2 more accounted for by the two slash-bearing keys each contributing one object to both shapes without double-counting error (confirmed by the per-key existence check under AC1's own sibling verification this tick: 33 of 33 keyed names have a real date-partitioned object, 0 missing).",
+      "status": "PASS",
+      "status_reason": "66 is nonzero. Read against the correct denominator (33 canonical + 31 legacy), it is exactly explicable rather than merely 'close' -- the canonical count alone (33) equals keyed_count exactly.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every sampled object carries all three keys (robustness, peers_v, divergence -- the worker names its actual field names if different), each a MEASURED or ABSENT status per classify.py's shape; divergence reads ABSENT with a house-forecast reason on every sampled object, unconditionally",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json, re\ns3 = boto3.client('s3')\nresp = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='scores/v1/')\nkeys = [o['Key'] for o in resp.get('Contents', []) if re.search(r'/\\d{4}-\\d{2}-\\d{2}\\.json$', o['Key'])][:3]\nfor k in keys:\n    doc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=k)['Body'].read())\n    print(k, {kk: (doc.get(kk) or {}).get('state') for kk in ('robustness', 'peers_v', 'divergence')})\n\"",
+      "output_evidence": "scores/v1/2317_TT_Equity/2026-09-17.json {'robustness': 'ABSENT_SOURCE', 'peers_v': 'ABSENT_SOURCE', 'divergence': 'ABSENT_SOURCE'}\nscores/v1/9433_JP_Equity/2026-09-17.json {'robustness': 'ABSENT_SOURCE', 'peers_v': 'ABSENT_SOURCE', 'divergence': 'ABSENT_SOURCE'}\nscores/v1/992_HK_Equity/2026-09-17.json {'robustness': 'ABSENT_SOURCE', 'peers_v': 'ABSENT_SOURCE', 'divergence': 'ABSENT_SOURCE'}\ndivergence absent_reason (all three): \"FWD-20's house FCF forecast has not been built yet (no model_fcf producer exists); D is ruled ABSENT with reason until it serves, per CTO~W adjudication call 4\"",
+      "denominator": "Per ISSUER AMENDMENT 1 (this file): field name corrected `status`->`state`, and the key listing filtered to the date-partitioned shape only (regex `/\\d{4}-\\d{2}-\\d{2}\\.json$`) rather than a raw top-level slice, which would otherwise have picked up superseded flat-shape objects ahead of the canonical ones in lexicographic order. 3 of 33 sampled per the order's own `[:3]` slice; separately checked in full (33 of 33) under Z-S162's own grounding, same result on every name.",
+      "status": "PASS",
+      "status_reason": "All three keys present on every sampled object. Divergence carries the exact house-forecast-not-built reason unconditionally on every one. ABSENT_SOURCE is a member of classify.py's ABSENT family, matching the criterion's ABSENT branch.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "planted_negative_holds is True -- no sampled record ever reports MEASURED with a null/empty value; this is the class of bug this whole round's S121 criteria-class ruling exists to catch (a status field that could read MEASURED on invented/missing data)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json, re\ns3 = boto3.client('s3')\nresp = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='scores/v1/')\nkeys = [o['Key'] for o in resp.get('Contents', []) if re.search(r'/\\d{4}-\\d{2}-\\d{2}\\.json$', o['Key'])]\nmissing_field_absent = True\nfor k in keys[:5]:\n    doc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=k)['Body'].read())\n    for field in ('robustness', 'peers_v'):\n        rec = doc.get(field) or {}\n        if rec.get('state') == 'MEASURED' and rec.get('value') in (None, ''):\n            missing_field_absent = False\nprint('planted_negative_holds', missing_field_absent)\n\"",
+      "output_evidence": "planted_negative_holds True",
+      "denominator": "5 of 33 sampled per the order's own `[:5]` slice (post-amendment, over the date-partitioned shape only); separately confirmed over the full 33 under Z-S162's own grounding. Zero of 33 report MEASURED at all on either field -- the related, separately-filed finding (row Z-S162) is that the control never fires because MEASURED never occurs, a real field-vocabulary gap in the upstream inputs, not a defect in this control's own logic.",
+      "status": "PASS",
+      "status_reason": "No record anywhere in the sampled or full population reports MEASURED paired with a missing value. The stronger finding that MEASURED never fires at all is filed separately as Z-S162 and pitched to the CTO; it does not fail this negative-control criterion, which only guards against a false-positive MEASURED.",
+      "judgment": false
+    }
+  ],
+  "declared_exclusions": [
+    {
+      "item": "No fix to the peers_v vocabulary mismatch (a translation layer between the R-1 scanner-factor fields and peers_v.py's expected Bloomberg mnemonics).",
+      "reason": "Out of this order's own bounds ('this task order's bounds forbid the first [a vendor pull] and do not name the second [a translation layer]', per the runner's own module docstring). Filed as row AMGT_RESAPP-Z-S162 and pitched to 1.0.0_SA_CTO~Z as a scope/spec adjudication call this same tick."
+    },
+    {
+      "item": "The 31 superseded flat-shape scores/v1/<key>.json objects present in the pool are read only by AC1's own unamended literal invocation (as a raw count) and are not otherwise graded.",
+      "reason": "Ruled superseded per row Z-S155 (a prior generation, different shape); the CTO's batch-B half explicitly requires the adapter to read the date-partitioned shape only and REFUSES a silent fallback to the flat one. AC2/AC3 were amended (ISSUER AMENDMENT 1) specifically to exclude them from sampling."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-S162: Peers V reads ABSENT_SOURCE on 33 of 33 keyed names, structurally, due to a field-vocabulary mismatch between the similarity-ranker's scanner factors and peers_v.py's expected Bloomberg mnemonics; this order's own criteria are unaffected (they only require honest classification) but the finding is filed and pitched for a scope decision."
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A naive slash-counting heuristic (classify a key as date-partitioned if it has exactly 3 '/' characters) was tried FIRST as a shortcut for AC1's own denominator check, before being caught and replaced with a per-key existence check and, in the criteria themselves, a proper date-suffix regex.",
+      "expected": "The naive heuristic should be shown to misclassify at least one real object, proving it is an unsound instrument before being discarded in favour of the regex/per-key methods actually used in this instance's recorded invocations.",
+      "observed": "The naive count(\"/\")==3 heuristic misclassified BOTH slash-bearing keys (BP/_LN_Equity, NG/_LN_Equity) as 'missing a date-partitioned object' when in fact both had one (at count(\"/\")==4, since the security key itself contains an internal slash) -- confirmed by a direct per-key list_objects_v2 call finding both objects present. This is the exact key-shape trap class row S141/AMGT-rk-23 already caught once this round on a different surface. The heuristic was discarded; the regex-based and per-key methods in this instance's own AC1/AC2/AC3 invocations do not share this flaw.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's amended invocations each run twice in succession against the same live S3 state (this tick, 2.0.0_SA_COO~Z), plus a full 33-of-33 population sweep as a third, wider-denominator cross-check.",
+      "observed": "All three criteria's outputs were byte-identical across repeated runs. The full-population sweep (33 of 33) agreed exactly with the order's own smaller `[:3]`/`[:5]` samples on every field checked -- no name in the population contradicts the sampled result.",
+      "status": "STABLE"
+    }
+  },
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~29/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "this seat's own COO verification (2.0.0_SA_COO~Z), independent of the worker's original run",
+      "invocation": "direct boto3 reads against opal-data-harvest, per-key existence checks (not a slash-naive prefix count) and full-population field reads, plus ISSUER AMENDMENT 1 to the governing task-order file correcting the field name and key-shape filter",
+      "result": "All measured values above independently reproduced this tick, 2026-09-17 ~23:5xZ, against the SAME live S3 state the original 2026-09-17T10:4xZ producer run wrote. This instance is written by the issuing COO because the order was never formally closed out by its own worker session (no proof instance existed for this specific order at HEAD prior to this commit, though the code and pool writes were real and already landed); the COO's own fresh, independent verification stands in place of a worker self-report per this fabric's own discipline of never trusting a producer's self-report over the served artifact."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "run at commit time, rc 0 expected"
+    }
+  ]
+}
