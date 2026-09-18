@@ -27,10 +27,36 @@ restated reason recorded as row `LGIC_LGCTFM-S16`.
 
 ⭐ **THE INSTRUMENT IS PART OF THE VALUE, and leaving it out is the same defect one notch finer.** A plain
 `sha1` of `contract.json`'s bytes reads `9c5cdb873f00a599bb00166831a91646fea97990` -- a DIFFERENT number
-for the same file, because `git hash-object` prefixes `blob <len>\0` before hashing. The manifest declares
-its instrument (`"instrument": "git hash-object"`) and this record repeats it. **A hash without its
-instrument is a number two readers can disagree about while both being right**, which is row
-`LGIC_LGCTFM-S11`'s class applied to a hash instead of a count.
+for the same file. The manifest declares its instrument (`"instrument": "git hash-object"`) and this
+record repeats it. **A hash without its instrument is a number two readers can disagree about while both
+being right**, which is row `LGIC_LGCTFM-S11`'s class applied to a hash instead of a count.
+
+⛔ **CORRECTED 2026-09-18 ~09:0xZ -- THIS RECORD'S ORIGINAL EXPLANATION OF *WHY* THE TWO NUMBERS DIFFER
+WAS HALF THE CAUSE, AND THE NUMBERS WERE NEVER WRONG.** It said, in this seat's own words, that the
+difference is "because `git hash-object` prefixes `blob <len>\0` before hashing". That prefix is real and
+it is not sufficient. **Measured, with the third number printed so the gap cannot be waved at:**
+
+```
+  checkout bytes                 790,871   of which CRLF pairs 24,967   (core.autocrlf=true)
+  git hash-object                33204e29839de89af81fb293317cce3ccdf2266d   <- the published pin
+  plain sha1 over the checkout   9c5cdb873f00a599bb00166831a91646fea97990
+  PREFIX ALONE, no eol filter    d07bf29d245fd358fa15859b09a35aa8a3a2d5c3   <- what the OLD sentence predicts
+  prefix AND eol-normalised      33204e29839de89af81fb293317cce3ccdf2266d   <- matches
+```
+
+**`git hash-object` RUNS THE EOL FILTER FIRST.** So the published hash is the id of the **COMMITTED**
+bytes and the plain `sha1` was taken over the **CHECKOUT** bytes, and the prefix is only half the story.
+A later seat re-deriving from the original sentence would have computed `d07bf29d...`, found it matched
+nothing in any record, and concluded the PIN was wrong -- when the pin was right and the explanation was
+short. Found by `0.9.0_WK_LGIC_LGCTFM~1` at cell `LT-c-2`'s run (row `LGIC_LGCTFM-W1-S22`) and
+re-measured independently by this seat before this correction was written.
+
+⚠ **THE SAME SENTENCE PROPAGATED TO FOUR CARRIERS**, because it was copied rather than re-derived:
+`fixed_inputs/r2/R2_BASE.json`, this record, row `LGIC_LGCTFM-S19`, and through `LT-n-2`'s order into
+`NUMBER_PINS_R2.json`'s 16 pins. **THE THREE FROZEN ONES ARE NOT REWRITTEN** -- R-43 does not falsify
+frozen history, and every NUMBER in all four is correct. This is the live-direction carrier and it takes
+the correction. **A value carrying its instrument is not the same as a value carrying a TRUE ACCOUNT of
+that instrument**, and the second is what a re-derivation actually needs.
 
 **VERIFIED, not restated:** `git hash-object <that contract.json>` returns
 `33204e29839de89af81fb293317cce3ccdf2266d`, equal to the manifest's claim.
