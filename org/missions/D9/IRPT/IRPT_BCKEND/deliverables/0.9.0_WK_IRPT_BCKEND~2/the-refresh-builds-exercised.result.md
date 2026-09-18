@@ -180,3 +180,130 @@ the bound-12 self-wrapping-harness violation this order forbids.
 |---|---|---|
 | `IRPT_BCKEND-W2-S54` | OBSERVATION | the face's "9 sources" is a stale, already-corrected count; the CTO-ratified population is 10 |
 | `IRPT_BCKEND-W2-S55` | BLOCKING | the repo-shaped unpack works and exposed a business-date mismatch beneath it: an explicit `--as-of` equal to today's real clock date is not in either inf's or cot's completed-date set |
+
+---
+
+## AMENDMENT 2 -- the issuer's ruling on row W2-S55, executed
+
+**Serial:** `0.9.0_WK_IRPT_BCKEND~2` (RE-HANDED to slot ~2, cold start) | **worktree:**
+`/c/tmp/wk-irpt-3-2b` on branch `wk-irpt_bckend-3-2b` | **base:** `af7d39d96f`
+**Invocation:** `timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~2/battery_ib_rtc_3.py`
+**Result:** `rc=1`, **23 of 27 graded checks PASS (1 FAIL, 3 BLOCKED)**, token withheld.
+**R33-AC1 = FAIL (again, as a MEASUREMENT). The order stays OPEN.**
+
+### The short version
+
+The issuer's ruling on row W2-S55 is IMPLEMENTED, TESTED and PROVEN LIVE: `refresh.py`'s
+`runner_script()` no longer types an explicit `--as-of` to `directory_runner.py` (0 occurrences,
+arm a.6), the manifest for a COMPLETED build now carries the RUNNER's chosen date rather than
+the Lambda's clock date (new unit tests, arm a.7, 33 of 33 pass including 6 new ones), and
+`SsmBuildDispatcher`/`refresh_firm` gained the `REFRESH_NOOP_SAME_FRONTIER` no-op handling the
+ruling named. The fix is DEPLOYED (rebuilt zip, `.tools/terraform.exe` apply, served
+`CodeSha256` re-verified against the battery's OWN independent re-derivation -- arm b.1/b.2 both
+PASS) and FIRED LIVE for real, twice (an interim fire against a zip built with the wrong fixed
+timestamp, caught by this battery's own b.2 and corrected; the final fire against the corrected,
+canonical-timestamp deployed code).
+
+**The fix WORKS, confirmed by the real fire's own stdout:** neither inflection's nor
+cottonwood's build shows the W2-S55 `REFUSE: explicit --as-of` line any longer (arm
+d.inf/cot.asof_cleared, PASS, 0 of 1 occurrences) -- the first time in this project's record
+either firm's build has proceeded PAST `directory_runner.py`'s own business-date check.
+
+**And the real fire immediately exposed a NEW, deeper, out-of-lane blocker (row
+IRPT_BCKEND-W2-S56, BLOCKING):** both builds now fail inside `directory_runner.py`'s own
+`validate_entries()`, which calls `jsonschema.Draft202012Validator` -- a class ABSENT from the
+host's installed `jsonschema==3.2.0` (added upstream only in 4.18.0). `directory_runner.py` is
+outside this order's `<paths>` (lane IB-rtc-2's own); this cell does not work around it. 49
+Financial's arm is unchanged and still ends exactly as designed: `AccessDenied` on
+`opal-data-49financial` (row W2-S49/S53). **0 of 2 landed, so R33-AC1's token still does not
+print -- for a THIRD distinct cause in this project's history** (flat-unpack `FileNotFoundError`
+-> W2-S55's `--as-of` refusal -> W2-S56's `jsonschema` version mismatch), each one strictly
+later than the last, which is the measure of real progress this cell made.
+
+### What changed in refresh.py / expiry.py (commit `22294ad856`)
+
+- `runner_script()`: the `--as-of %s` argument to `directory_runner.py` is dropped entirely;
+  `business_date` still flows to the diagnostic echo lines only.
+- `refresh_firm()`: a COMPLETED build's manifest is now keyed by the runner's own
+  `built["business_date"]`, never by the fire's clock date `now` -- the same fix applied to the
+  disappeared-client FAILURE branch (which already carries a real build result). The
+  REFRESH_DISPATCHED/unwired/build-raised branches are UNCHANGED (no business_date exists yet
+  there), so the prior "keyed by the fire's own date" rationale (this file's own long-standing
+  comment) still holds for them -- this is a DELIBERATE, NAMED override of that rationale for
+  the COMPLETED path only, per the issuer's explicit ruling.
+- `SsmBuildDispatcher.__call__()`: a THIRD outcome joins "new artifact landed" and "nothing has
+  landed" -- a previously-dispatched command already SUCCEEDED and its pointer names EXACTLY the
+  artifact this fire already accounted for. That returns `{"same_frontier": True, ...}` and does
+  NOT dispatch a second, identical build.
+- `expiry.py`: new closed-set reason code `REFRESH_NOOP_SAME_FRONTIER` (state `READY`, action
+  `NONE`), added with a four-postulate record and a word-boundary token census (0 hits, comp-find
+  `--corpus all`, 35,497 files) per CLAUDE.md Rule 24.
+- Six new unit tests in `test_refresh_expiry.py`: no `--as-of` in the recipe; a completed
+  manifest carries the runner's date when it differs from the clock; the same fix on the
+  disappeared-client branch; a same-frontier re-fire records `REFRESH_NOOP_SAME_FRONTIER` and not
+  a new revision; the new reason code is closed-set and maps to a state; and
+  `SsmBuildDispatcher.__call__` itself (the REAL build_fn, bound 12) returns `same_frontier` and
+  never sends a second command when a succeeded command's pointer already matches. All 33 tests
+  pass (27 pre-existing + 6 new).
+
+### The deploy (two acts, both under ledger)
+
+1. `irpt-bckend-rtc3-amendment2-noop` (commits `6a77fcb41c` open, `f329b4dee8` build/upload,
+   `25ed7c1359` legs L1/L2 closed, `7f2d873ac8` CLOSED): rebuilt zip uploaded and VERIFIED,
+   `.tools/terraform.exe` apply 0 added/1 changed/0 destroyed, post-apply re-plan 0-diff. **This
+   build used the WRONG fixed zip timestamp** (2026-09-18 instead of `build-and-upload.sh`'s own
+   canonical 2020-01-01) -- caught by this battery's OWN arm b.2 (its independent re-derivation
+   disagreed with the served bytes), not by any deploy-side check.
+2. `irpt-bckend-rtc3-amendment2-zipdate-fix` (commits `618beffb1a` open, `dacd9c958a`
+   build/upload with the corrected timestamp, `18ccc4d28c` CLOSED): rebuilt with `date_time =
+   (2020, 1, 1, 0, 0, 0)`, uploaded and VERIFIED, applied, post-apply re-plan 0-diff. Battery
+   arm b.2 now PASSES: the re-derived zip's sha256 equals the served `CodeSha256` exactly.
+
+Served `CodeSha256` on the currently-deployed function: `E7TMbaF9NBPm7rFIDkk7y22gNQiPRAGr9m9BqcpnkGM=`.
+
+### The real fire, twice more (in addition to the first pass's proof of the unpack)
+
+Fired the deployed function with the exact schedule payload (`{"kind":"irpt_directory_refresh",
+"note":"..."}`, no `business_date` override) against the FINAL, canonical-timestamp deployed
+code at `2026-09-18T07:17:24Z`. All three firms `REFRESH_DISPATCHED` with real SSM command ids:
+`inflection` `d625bc56-a79a-47e6-9d74-9d9108f4b16a`, `cottonwood`
+`bc273cf9-a173-4056-bbe2-649cb83f8d30`, `49financial` `ae2243aa-ff47-4d70-ad8f-c95feb0037b6`, on
+host `i-02448edb624a7a7cf` (already running since 04:11Z; no `StartInstances` used). All three
+ended `Status=Failed rc=1`. A second invoke (`2026-09-18T07:19:34Z`) reconciled all three to
+`REFRESH_FAILED`/`BUILD_ENDED_UNSUCCESSFUL`/`BUILD` half -- the dispatch-to-reconcile loop IB-rt-6
+built closes correctly a second time, on a different failure cause.
+
+### R33-AC2 update -- the facts, for `3.0.0_SA_CVO` (no verdict)
+
+1. **Are the landed artifacts the runner's real output for the business date, or a degenerate
+   first mint?** Still neither -- nothing landed. The repo-shaped unpack AND the business-date
+   fix are both proven working; the reason nothing landed is now `jsonschema` version
+   incompatibility inside `directory_runner.py` (row W2-S56), not an unpack or dispatch defect.
+2. **What FWD-7's DONE WHEN still lacks:** the scheduled fire (still ENABLED, unchanged; it will
+   hit the SAME W2-S56 refusal at its next fire unless `directory_runner.py`'s validator
+   selection is fixed) and the 49 Financial third (still blocked on the bucket Deny).
+3. **Did the dispatch-to-reconcile loop close?** Yes, 6 of 6 firm-fires across this cell's TWO
+   real dispatch rounds (the first pass's W2-S55 round and this AMENDMENT's W2-S56 round), never
+   sitting at RUNNING forever and never silently becoming a retry-loop.
+4. **Did AMENDMENT 2's fix change anything for the two firms beyond dropping --as-of?** Yes,
+   materially, twice over: it is now PROVEN that both firms' completed-date frontiers ARE
+   reachable by the runner's own walk (the as-of refusal is gone), and the failure point moved a
+   second time, from `directory_runner.py`'s business-date check to its own `validate_entries()`
+   -- a strictly LATER, narrower point than either prior failure.
+
+### What this cell did NOT do, and why (AMENDMENT 2)
+
+- **Did not touch `directory_runner.py`.** It is outside this order's `<paths>` (lane
+  IB-rtc-2's own); a jsonschema version pin or a validator-class fallback there is that lane's
+  fix, not this cell's -- fixing it would be the neighbouring-defect violation bound 8/12
+  forbids, for the SECOND time in this cell's history (the first was W2-S55's own remedy).
+- **No IAM change**, no bundle mint, one Terraform root, two applies (both under ledger, the
+  second correcting the first's own zip-timestamp defect), no cross-firm widening, no
+  `StartInstances`.
+- **Did not fabricate a directory artifact** to exercise arm (f); it is reported BLOCKED, again.
+
+## Rows filed this AMENDMENT (1)
+
+| id | class | one line |
+|---|---|---|
+| `IRPT_BCKEND-W2-S56` | BLOCKING | AMENDMENT 2's fix works (the `--as-of` refusal is gone) and the real fire exposed a new, out-of-lane blocker: `jsonschema.Draft202012Validator` is absent from the host's `jsonschema==3.2.0` |

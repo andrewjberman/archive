@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
-"""BATTERY IB-rtc-3 -- THE REFRESH BUILDS, EXERCISED FOR INFLECTION AND COTTONWOOD.
+"""BATTERY IB-rtc-3 AMENDMENT 2 -- THE REFRESH BUILDS, EXERCISED FOR INFLECTION AND COTTONWOOD.
 
-Grades R33-AC1's six arms against THE REAL WORLD: the recipe TEXT refresh.py's
-runner_script() returns, the applied Terraform (served CodeSha256, 0-diff plan), a fresh
-read-only host sweep (10 source prefixes + 3 destinations, the corrected population -- row
-IRPT_BCKEND-W2-S54), the SSM command records this session's own two real fires created, and
-the S3 objects in the three firm buckets. Nothing here wraps, patches or re-registers the
-subject (bound 12): every arm reads the artifact the estate serves and prints its denominator.
+Grades R33-AC1's six arms against THE REAL WORLD: the unit-tested recipe TEXT refresh.py's
+runner_script() returns (now with NO explicit --as-of, per the issuer's ruling on row
+IRPT_BCKEND-W2-S55), the applied Terraform (served CodeSha256, 0-diff plan), a fresh read-only
+host sweep (10 source prefixes + 3 destinations, the corrected population -- row
+IRPT_BCKEND-W2-S54), the SSM command records THIS session's own real fires (a fresh dispatch
+plus its reconciliation), and the S3 objects in the three firm buckets. Nothing here wraps,
+patches or re-registers the subject (bound 12): every arm reads the artifact the estate serves
+and prints its denominator.
 
 THE TOKEN IS GATED. `IBR33...` is assembled only if every arm PASSES and arm (d) reads 2 of 2
-landed. It does not, as measured: the repo-shaped unpack (this cell's own deliverable) is
-PROVEN on the host, and it uncovered a DIFFERENT, deeper blocker (row IRPT_BCKEND-W2-S55) --
-directory_runner.py's own business-date refusal -- that this cell does not work around.
+landed. It does not, as measured: AMENDMENT 2's fix (drop the explicit --as-of) is PROVEN
+correct and working -- both inflection's and cottonwood's real fires now proceed PAST
+directory_runner.py's own business-date check for the first time in this project's record,
+confirming row W2-S55 is CLEARED -- and the real fire then exposed a THIRD, still deeper,
+out-of-lane blocker (row IRPT_BCKEND-W2-S56): directory_runner.py's validate_entries() calls
+jsonschema.Draft202012Validator, a class absent from the host's installed jsonschema==3.2.0.
+That is directory_runner.py's own defect (outside this order's <paths>) and this cell does not
+work around it.
 
 ASCII only. Bounded: every AWS call runs under a subprocess timeout.
 """
@@ -40,14 +47,20 @@ FIRM_BUCKETS = {"49financial": "opal-data-bd",
 DIRECTORY_PREFIX = "investor-reporting/directory"
 DRIVEN_DATE = "2026-09-18"
 
-# ARTIFACT IDS this session's two real fires created -- read back below, never re-derived.
+# ARTIFACT IDS this session's AMENDMENT 2 fire created -- read back below, never re-derived.
+# (The first pass's commands -- 74c1f0f4.., 71f11079.., b1c2b24e.. -- are row W2-S55's evidence.
+# An interim fire -- f9c34e7a.., e6869e09.., 0fe77c42.. -- ran against a zip built with the WRONG
+# fixed timestamp (caught by this battery's own b.2); THESE ids are the fire against the FINAL,
+# canonical-timestamp deployed code, dispatched after the zipdate-fix re-apply.)
 DISPATCH_COMMANDS = {
-    "inflection": "74c1f0f4-2267-4ea1-9bf2-849f4d8f32cb",
-    "cottonwood": "71f11079-ae43-477e-b803-02fa91791c34",
-    "49financial": "b1c2b24e-5029-46c3-807f-09ed6f78a917",
+    "inflection": "d625bc56-a79a-47e6-9d74-9d9108f4b16a",
+    "cottonwood": "bc273cf9-a173-4056-bbe2-649cb83f8d30",
+    "49financial": "ae2243aa-ff47-4d70-ad8f-c95feb0037b6",
 }
-DATE_DIAGNOSTIC_COMMAND = "6a302049-bae1-4ae9-9290-17868373cae9"
 SWEEP_SCRIPT_SHA256 = "8b39dea2419d8d3b03d47134bced6f368d55c2378a04db898cc3120447d0bb1b"
+TEST_FILE = os.path.join(DIRECTORY, "tests", "test_refresh_expiry.py")
+PYTHON = os.environ.get("PY312", "py")
+PYTHON_ARGS = ["-3.12"] if PYTHON == "py" else []
 
 SOURCE_MAP = os.path.join(REPO, "infra", "aws", "lambda", "ci", "lambda-source-map.json")
 SHARED_ROOTS = [
@@ -115,6 +128,22 @@ def arm_a():
     no_dotdot_recipe = "../" not in script and "/.." not in script
     record("a.4", "PASS" if no_dotdot_recipe else "FAIL",
            "the recipe text itself carries no .. path segment")
+
+    # a.6 -- AMENDMENT 2 (row IRPT_BCKEND-W2-S55): the recipe carries NO explicit --as-of.
+    no_as_of = "--as-of" not in script
+    record("a.6", "PASS" if no_as_of else "FAIL",
+           "AMENDMENT 2: the recipe carries 0 explicit --as-of arguments to directory_runner.py",
+           "0 of 1" if no_as_of else "1 of 1")
+
+    # a.7 -- the REAL unit-test suite (bound 12: the actual test file, not a wrapper), which
+    # covers the manifest/date discipline AMENDMENT 2 requires: no --as-of, a completed manifest
+    # carries the RUNNER's date (not the clock's), and a same-frontier re-fire is a no-op.
+    p = subprocess.run([PYTHON] + PYTHON_ARGS + ["-m", "pytest", TEST_FILE, "-q"],
+                       capture_output=True, text=True, timeout=120)
+    tail = (p.stdout or "")[-300:].replace("\n", " | ")
+    record("a.7", "PASS" if p.returncode == 0 else "FAIL",
+           "the real test_refresh_expiry.py suite (manifest/date + same-frontier tests included) "
+           "-- %s" % tail, "rc=%d" % p.returncode)
 
     # a.5 -- the REAL, currently-served bundle carries 0 members with a '..' path segment.
     # Fetched unversioned (the host role lacks s3:GetObjectVersion) and bound by content hash.
@@ -281,6 +310,23 @@ def arm_d():
         record("d.%s.import" % firm[:3], "PASS" if repo_shaped_ok else "FAIL",
                "%s: repo-shaped unpack IMPORT-OK on the host (all 3 runner_common modules "
                "resolve) -- Status=%s" % (firm, inv.get("Status")))
+
+        # AMENDMENT 2 (row IRPT_BCKEND-W2-S55): confirm the as-of refusal is GONE.
+        as_of_cleared = "REFUSE: explicit --as-of" not in out
+        record("d.%s.asof_cleared" % firm[:3], "PASS" if as_of_cleared else "FAIL",
+               "%s: AMENDMENT 2's fix confirmed -- 0 occurrences of the W2-S55 "
+               "'REFUSE: explicit --as-of' refusal in this fire's stdout" % firm,
+               "0 of 1" if as_of_cleared else "1 of 1")
+        # row IRPT_BCKEND-W2-S56: the NEW, deeper, out-of-lane blocker this fire MEASURED (a
+        # PASS here means the row's claim is confirmed present in the real stdout, same
+        # convention as arm (e)'s expected-AccessDenied PASS -- this is not a defect of THIS
+        # cell's own deliverable, which arm (a)/(b)/(c)/d.*.import/d.*.asof_cleared all PASS).
+        new_blocker = "Draft202012Validator" in out
+        record("d.%s.new_blocker" % firm[:3], "PASS" if new_blocker else "FAIL",
+               "%s: row IRPT_BCKEND-W2-S56 confirmed in this fire's stdout (directory_runner.py's "
+               "jsonschema.Draft202012Validator, absent from the host's jsonschema==3.2.0) -- "
+               "out-of-lane, filed and not worked around" % firm)
+
         bucket = FIRM_BUCKETS[firm]
         d, _ = aws_json("s3api", "list-objects-v2", "--bucket", bucket,
                         "--prefix", "%s/" % DIRECTORY_PREFIX, "--output", "json")
@@ -289,10 +335,10 @@ def arm_d():
         has_pointer = any(k.endswith("/latest.json") for k in keys)
         landed += 1 if (has_artifact and has_pointer) else 0
         record("d.%s.landed" % firm[:3], "PASS" if (has_artifact and has_pointer) else "BLOCKED",
-               "%s: directory.json=%s latest.json=%s -- BLOCKED on row IRPT_BCKEND-W2-S55 "
-               "(directory_runner.py's own business-date refusal: explicit --as-of %s is not "
-               "in %s's completed-date set)"
-               % (firm, has_artifact, has_pointer, DRIVEN_DATE, firm))
+               "%s: directory.json=%s latest.json=%s -- W2-S55 CLEARED, now BLOCKED on row "
+               "IRPT_BCKEND-W2-S56 (directory_runner.py's own jsonschema.Draft202012Validator "
+               "use, absent from the host's jsonschema==3.2.0, out-of-lane)"
+               % (firm, has_artifact, has_pointer))
 
     record("d.landed_total", "PASS" if landed == 2 else "FAIL",
            "firms with a landed directory artifact AND its pointer", "%d of 2" % landed)
@@ -353,9 +399,10 @@ def arm_f():
         total_keys += len(artifacts)
     record("f.1", "BLOCKED",
            "no directory.json exists in any firm bucket to grade for content sanity -- "
-           "BLOCKED on the same row as arm (d) (IRPT_BCKEND-W2-S55), a self-wrapping content "
-           "check against a fabricated artifact would be the bound-12 violation this battery "
-           "refuses to commit", "%d directory.json across 3 firms" % total_keys)
+           "BLOCKED on the same row as arm (d) (IRPT_BCKEND-W2-S56, out-of-lane), a "
+           "self-wrapping content check against a fabricated artifact would be the bound-12 "
+           "violation this battery refuses to commit", "%d directory.json across 3 firms"
+           % total_keys)
 
 
 # ================================================================== the verdict
@@ -390,11 +437,15 @@ def main():
     print("    IRPT_BCKEND-W2-S49/S53  49financial's build is AccessDenied on")
     print("                            opal-data-49financial (DenyForeignFirmPrincipals) --")
     print("                            EXPECTED, per arm (e); not a regression.")
-    print("    IRPT_BCKEND-W2-S55      inflection and cottonwood's builds now reach")
-    print("                            directory_runner.py's own business-date logic (the")
-    print("                            repo-shaped unpack this cell built WORKS) and REFUSE")
-    print("                            there: an explicit --as-of equal to today's real clock")
-    print("                            date is not in either firm's completed-date set.")
+    print("    IRPT_BCKEND-W2-S55      CLEARED by this cell's AMENDMENT 2 fix (confirmed: 0")
+    print("                            occurrences of the as-of refusal in either firm's stdout).")
+    print("    IRPT_BCKEND-W2-S56      inflection and cottonwood's builds now reach")
+    print("                            directory_runner.py's validate_entries() (a strictly")
+    print("                            LATER point than W2-S55) and fail there: jsonschema")
+    print("                            .Draft202012Validator is absent from the host's")
+    print("                            installed jsonschema==3.2.0. Out-of-lane (directory_")
+    print("                            runner.py is not in this order's <paths>); filed, not")
+    print("                            worked around.")
     print("  R33-AC1 is FAIL. The order stays open.")
     return 1
 
