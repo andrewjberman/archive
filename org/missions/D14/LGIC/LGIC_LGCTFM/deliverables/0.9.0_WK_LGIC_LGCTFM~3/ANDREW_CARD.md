@@ -13,6 +13,28 @@ rule exactly, denominators below.
 Blackdiamond's "49financial" scope (`subject.key: 49financial`, `subject.kind: scope`), graph built
 2026-09-17 18:16 UTC.
 
+That graph is run `20260918T011619Z-8db9eb1`, and the contract this card ranks is that run's
+`contract.json` at content hash `33204e29839de89af81fb293317cce3ccdf2266d`, 179 tensions, under
+`workflows/legacy_transform/blackdiamond-49financial/`. Both the run id and the hash are given
+because four other run directories carry the same "built 2026-09-17 18:16 UTC" subject, and one of
+them holds 180 tensions rather than 179: the content hash tells them apart where the timestamp
+cannot.
+
+The instrument is part of that number. `git hash-object` is what produced it, and it reports the id
+of the COMMITTED blob -- `git rev-parse HEAD:<that path>` returns the same value. A plain `sha1` of
+the same file as checked out on Windows reads `9c5cdb873f00a599bb00166831a91646fea97990` instead, so
+a hash quoted without the tool that made it is two numbers wearing one name.
+
+## The adjudication of record
+
+In Andrew's absence and at his direction, `1.0.0_SA_CTO` adjudicated this card at commit
+`662d53b793` (2026-09-17): the ranked list is CONFIRMED as printed, and ranks 2-10 are ratified as
+TIED, so no remediation is sequenced on their relative order. That adjudication also carries one
+correction to the RECOMMENDATION above, which is left standing here as written rather than silently
+rewritten: measured over all 179 tensions, the rows touching a live, client-facing surface number
+1 of 179 (T-0001), not two. The table, the rule and the analysis below are unaffected, and any part
+of this remains Andrew's to overturn.
+
 ## The rule, verbatim from the contract
 
 > order by irreversible, then client_facing, then live, then rules_colliding; object_count as tiebreak (08_TENSION_MAP.md s.0)
