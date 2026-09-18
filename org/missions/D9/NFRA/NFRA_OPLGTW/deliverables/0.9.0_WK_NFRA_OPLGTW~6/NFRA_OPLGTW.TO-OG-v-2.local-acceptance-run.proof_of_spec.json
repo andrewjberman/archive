@@ -20,21 +20,16 @@
       "kind": "test",
       "commit_or_etag": "e3d6c48ffd",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "THIS (LAST) RE-HAND, two repairs on this cell's own <paths> grant, both named by the issuer: (1) test_ogv2_a06's post-revocation assertion at :488-495 read the query-engine's nested {'error':{'code':...}} shape; OG-z-4 (this cell's own prior order) wired the dispatch guard (app/tools.py) to set isError=True on a guard denial, and a full revoke now denies AT THE GUARD (app/data_entitlement.py's flat _denial() dict: {'error': '<reason text>', 'guard_denied': True, 'code': '<snake_case>', 'error_code': '<CONTRACT CODE>'}), not inside the query engine -- the assertion now reads payload['error_code'] instead of payload['error']['code']. (2) test_ogv2_a18's empty-match aggregate control asserted an ungrouped sum(quantity_settled_unsettled) succeeds with a null total; OG-q-4's semantics.assert_quantity_sum_grouped wiring now refuses that shape outright (INVALID_REQUEST/quantity_sum_ungrouped, PRD C3 'Quantity sums require grouping by CUSIP and long/short indicator') before the empty filter is ever evaluated, so the control is flipped to expect the refusal -- the same correction test_schwab_query.py::test_ogq2_ac07 (:503) and ::test_ogq2_ac15 (:762) already made for their own ungrouped-sum controls (R-OG-15, row NFRA_OPLGTW-W5-S10). Not deployed.",
-      "artifact_covered_by": ["OGV2-AC2"],
-      "introduces": [
-        "assert payload[\"error_code\"] == \"ENTITLEMENT_DENIED\", payload",
-        "assert e[\"code\"] == \"INVALID_REQUEST\" and e[\"reason\"] == \"quantity_sum_ungrouped\", e"
-      ]
+      "deploy_evidence": "RE-GRADE ONLY (this proof instance's rebuild): no amendment made this round and no criterion changed. The prior round's two repairs on this cell's own <paths> grant (test_ogv2_a06's payload['error_code'] read; test_ogv2_a18's flipped ungrouped-sum-refused expectation) are unchanged and carried forward -- sha256 of this file is identical to the prior round's committed bytes (verified: file untouched, git status clean on this path at this worker's HEAD). Not deployed.",
+      "artifact_covered_by": ["OGV2-AC2"]
     },
     {
       "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "config_data",
       "commit_or_etag": "e3d6c48ffd",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "One new row appended: NFRA_OPLGTW-W6-S10 (OGV2-AC4's whole-glob module sweep, re-measured fresh at this order's HEAD, still blocked by test_schwab_query.py::test_ogq2_ac06/test_ogq2_ac20 -- the same defect rows NFRA_OPLGTW-W5-S19/W5-S20 already ground and ARMED against disarm_owner 2.0.0_SA_COO~O, whose reopen+amend of TO-OG-q-6 to fix exactly this pair is already cut at this HEAD's own last commit but not yet drained). Not deployed.",
-      "artifact_covered_by": ["OGV2-AC4"],
-      "introduces": ["\"id\": \"NFRA_OPLGTW-W6-S10\""]
+      "deploy_evidence": "No new row this round. The prior round's row NFRA_OPLGTW-W6-S10 (OGV2-AC4 blocked by test_schwab_query.py::test_ogq2_ac06/::test_ogq2_ac20) is now REPAIRED at this worker's new HEAD (372b1d653d): TO-OG-q-6's re-open commit 244771637d flipped both tests to expect the contract's refusal, and its drain landed at e58d9d2b04, measured by the issuer at 25 passed for test_schwab_query.py. This worker re-measured AC4's whole-glob sweep fresh at this HEAD and confirms MODULES: 25 FAILED-MODULES: 0 -- the row's blocking condition no longer holds, though the row's own disarm (disarm_owner 2.0.0_SA_COO~O) is that seat's act, not this worker's, and no existing row was edited. Not deployed.",
+      "artifact_covered_by": ["OGV2-AC4"]
     }
   ],
   "acceptance": [
@@ -43,7 +38,7 @@
       "criterion_verbatim": "OGV2-AC1 (test_ogv2_ac01) -- the integrated application runs locally against the emulated state store and the fixture objects.",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/acceptance/test_local_acceptance.py::test_ogv2_ac01 -q -p no:cacheprovider --color=no",
-      "output_evidence": "rc=0\nOGV2-AC1: HTTP 200 isError=False revision=1 tools=['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files', 'schwab_prepare_download', 'schwab_query']\n1 passed in 2.02s",
+      "output_evidence": "rc=0\nOGV2-AC1: HTTP 200 isError=False revision=1 tools=['schwab_describe_dataset', 'schwab_get_access', 'schwab_list_files', 'schwab_prepare_download', 'schwab_query']\n1 passed in 2.39s",
       "denominator": "1 of 1 selected test",
       "status": "PASS",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
@@ -53,7 +48,7 @@
       "criterion_verbatim": "OGV2-AC2 -- each machine-operated A-row of OG-v-1's census is run against its expectation and passes; the result file prints the denominator (rows run of rows marked machine-and-local).",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/acceptance/test_local_acceptance.py -q -p no:cacheprovider --color=no -k \"test_ogv2_a\"",
-      "output_evidence": "rc=0\nOGV2-AC2/A5: account 99000001 -> account_ref distinct under SmartX/BlackDiamond; cross-master use -> ENTITLEMENT_DENIED\nOGV2-AC2/A6: narrow-grant totals match EXPECTED; 4 of 5 hidden-field requests refused, injection-shaped value -> refused (INVALID_REQUEST); partial-grant-asset-cusips MATCH; post-revocation -> ENTITLEMENT_DENIED\nOGV2-AC2/A9: 14 variant dates + 2 anchor dates match expected outcomes\nOGV2-AC3/A2(machine): legacy refresh token -> 400 invalid_grant; fresh loopback client survives a restart\nOGV2-AC2/A10: mint/exchange/replay/cross-principal/post-revocation all match expected\nOGV2-AC2/A12: prompt-like text verbatim, escaped/unescaped cells match EXPECTED\nOGV2-AC2/A17: reuse, wrong client_id, wrong resource, broader scope, restart -- all match\nOGV2-AC2/A18: Unicode measure matches EXPECTED; paging covers 6 rows no repeat; paged/un-paged aggregate totals agree; ungrouped quantity sum on empty-matching filter -> INVALID_REQUEST quantity_sum_ungrouped\nOGV2-AC5: 671 S3 call(s) recorded -- reader role 239, catalog role 432\n14 passed in 20.66s",
+      "output_evidence": "rc=0\nOGV2-AC2/A5: account 99000001 -> account_ref distinct under SmartX/BlackDiamond; cross-master use -> ENTITLEMENT_DENIED\nOGV2-AC2/A6: narrow-grant totals match EXPECTED; 4 of 5 hidden-field requests refused, injection-shaped value -> refused (INVALID_REQUEST); partial-grant-asset-cusips MATCH; post-revocation -> ENTITLEMENT_DENIED\nOGV2-AC2/A9: 14 variant dates + 2 anchor dates match expected outcomes\nOGV2-AC3/A2(machine): legacy refresh token -> 400 invalid_grant; fresh loopback client survives a restart\nOGV2-AC2/A10: mint/exchange/replay/cross-principal/post-revocation all match expected\nOGV2-AC2/A12: prompt-like text verbatim, escaped/unescaped cells match EXPECTED\nOGV2-AC2/A17: reuse, wrong client_id, wrong resource, broader scope, restart -- all match\nOGV2-AC2/A18: Unicode measure matches EXPECTED; paging covers 6 rows no repeat; paged/un-paged aggregate totals agree; ungrouped quantity sum on empty-matching filter -> INVALID_REQUEST quantity_sum_ungrouped\nOGV2-AC5: 671 S3 call(s) recorded -- reader role 239, catalog role 432\n14 passed in 21.75s",
       "denominator": "all 13 machine-operated A-rows of OG-v-1's census this cell's own harness graded_by names (A2,A3,A4,A5,A6,A8,A9,A10,A11,A12,A17,A18 as tests, plus A6's own sub-checks) are run and pass; this invocation's own -k filter additionally sweeps in OGV2-AC1/AC3/AC5 (substring match on 'test_ogv2_a'), all of which also pass -- 14 of 14 selected tests pass, 0 failed.",
       "status": "PASS",
       "expect": "(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))"
@@ -63,7 +58,7 @@
       "criterion_verbatim": "OGV2-AC3 (test_ogv2_ac03) -- (difference) a legacy refresh token returns invalid_grant, and a freshly registered loopback client connects and survives a restart (A2, machine half).",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/acceptance/test_local_acceptance.py::test_ogv2_ac03 -q -p no:cacheprovider --color=no",
-      "output_evidence": "rc=0\nOGV2-AC3/A2(machine): legacy refresh token -> 400 invalid_grant (unknown refresh token; a token issued before durable refresh cannot be upgraded -- reconnect from Claude)\nfresh loopback client registered, code flow completed, refresh survives a new TestClient instance on the same durable store -> HTTP 200\n1 passed in 1.76s",
+      "output_evidence": "rc=0\nOGV2-AC3/A2(machine): legacy refresh token -> 400 invalid_grant (unknown refresh token; a token issued before durable refresh cannot be upgraded -- reconnect from Claude)\nfresh loopback client registered, code flow completed, refresh survives a new TestClient instance on the same durable store -> HTTP 200\n1 passed in 2.11s",
       "denominator": "1 of 1 selected test",
       "status": "PASS",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
@@ -73,10 +68,10 @@
       "criterion_verbatim": "OGV2-AC4 -- every module the glob infra/aws/ec2/opal-gateway/tests/test_*.py derives passes when run in its own process, the module count printed, with the one known red test of row NFRA_OPLGTW-S1 deselected by name.",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-6f && n=0; f=0; for m in infra/aws/ec2/opal-gateway/tests/test_*.py; do n=$((n+1)); timeout 300 .venv-og/Scripts/python -m pytest \"$m\" -q -p no:cacheprovider --color=no -m \"not live\" -k \"not test_scoped_deny_by_default\" || [ $? = 5 ] || f=$((f+1)); done; echo \"MODULES: $n FAILED-MODULES: $f\"",
-      "output_evidence": "rc=1\nFAILED infra/aws/ec2/opal-gateway/tests/test_schwab_query.py::test_ogq2_ac06 - AssertionError: (payload asserting group_by=ALL_POSITION[:10] including business_date succeeds; wiring now refuses group_removes_date_identity)\nFAILED infra/aws/ec2/opal-gateway/tests/test_schwab_query.py::test_ogq2_ac20 - AssertionError: (payload asserting a one-page duplicate-grain query succeeds; wiring now refuses duplicate_source_grain)\n2 failed, 23 passed in 10.72s\nMODULES: 25 FAILED-MODULES: 1",
-      "denominator": "25 of 25 glob-derived modules ran in their own process (the S1 test deselected by name from its own module); 1 of 25 modules failed on this run (test_schwab_query.py, 2 of its own 25 tests). A second run this same session for determinism (below) reproduced the SAME 2 failures in the same module plus one ADDITIONAL, DIFFERENT module (test_schwab_export.py::test_ogx1_ac01) failing on a pre-existing, already-filed flaky random-secret substring collision (row NFRA_OPLGTW-W6-S9, class OBSERVATION/INERT) -- the test_schwab_query.py pair is the deterministic, reproducible failure both runs; the export flake is not.",
-      "status": "FAIL",
-      "status_reason": "test_schwab_query.py::test_ogq2_ac06 and ::test_ogq2_ac20 fail on both runs this session -- a real, already-diagnosed regression (rows NFRA_OPLGTW-W5-S19 and NFRA_OPLGTW-W5-S20, both ARMED, disarm_owner 2.0.0_SA_COO~O): TO-OG-q-6's R20/R24 wiring correctly refuses the pre-wiring shapes these two tests still assert succeed. This worker's HEAD (@e3d6c48ffd, on top of CLOUD @1529bcd131) already carries 2.0.0_SA_COO~O's reopen+amend commit granting test_schwab_query.py back to TO-OG-q-6 for exactly this pair, but that order has not yet drained its fix at this HEAD. test_schwab_query.py is NOT in this cell's <paths> grant (infra/aws/ec2/opal-gateway/tests/acceptance/test_local_acceptance.py, tests/acceptance/conftest.py, and this cell's own investigation file only), so this cannot be repaired here -- recorded as a FAIL measurement and filed as row NFRA_OPLGTW-W6-S10, citing the pre-existing W5-S19/W5-S20 rows rather than re-diagnosing the same class.",
+      "output_evidence": "rc=0\nMODULES: 25 FAILED-MODULES: 0",
+      "denominator": "25 of 25 glob-derived modules ran in their own process (the S1 test deselected by name from its own module); 0 of 25 modules failed. test_schwab_query.py itself printed '25 passed in 9.24s', matching the issuer's own measurement at the drain commit e58d9d2b04.",
+      "status": "PASS",
+      "status_reason": "REPAIRED since the prior round. Row NFRA_OPLGTW-W6-S10 (this file's prior version) recorded FAILED-MODULES: 1 (test_schwab_query.py::test_ogq2_ac06/::test_ogq2_ac20), the same defect W5-S19/W5-S20 named. TO-OG-q-6's re-open commit 244771637d flipped both tests to expect the contract's refusal, its drain landed at e58d9d2b04 (issuer-measured 25 passed), and this worker's own fresh HEAD @372b1d653d carries that drain. Re-measured here at this HEAD: MODULES: 25 FAILED-MODULES: 0.",
       "expect": "(?m)^MODULES: [1-9][0-9]* FAILED-MODULES: 0$"
     },
     {
@@ -84,7 +79,7 @@
       "criterion_verbatim": "OGV2-AC5 (test_ogv2_ac05) -- every S3 call the local acceptance run makes lies inside the prefixes the contract grants the role that made it, printed per role with its denominator.",
       "method": "test_suite",
       "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 120 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/acceptance/test_local_acceptance.py::test_ogv2_ac05 -q -p no:cacheprovider --color=no",
-      "output_evidence": "rc=0\nOGV2-AC5: 56 S3 call(s) recorded -- reader role 37 call(s), catalog role 19 call(s)\n1 passed in 3.28s",
+      "output_evidence": "rc=0\nOGV2-AC5: 56 S3 call(s) recorded -- reader role 37 call(s), catalog role 19 call(s)\n1 passed in 3.23s",
       "denominator": "56 of 56 recorded S3 calls checked against the contract's data_prefixes (reader) / completion_prefixes (catalog); 0 violations; 0 fact_* keys reached S3",
       "status": "PASS",
       "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
@@ -98,8 +93,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "OGV2-AC1, OGV2-AC3 and OGV2-AC5 each run standalone this round. OGV2-AC2's selection run once (14 passed). OGV2-AC4's full loop run twice this round.",
-      "observed": "AC1: '1 passed'. AC3: '1 passed'. AC5: 'reader role 37, catalog role 19'. AC2: '14 passed', 0 failed. AC4: two runs -- run 1 'MODULES: 25 FAILED-MODULES: 1' (test_schwab_query.py only); run 2 'MODULES: 25 FAILED-MODULES: 2' (the SAME test_schwab_query.py failures plus test_schwab_export.py::test_ogx1_ac01, the already-filed INERT flaky random-secret-substring row NFRA_OPLGTW-W6-S9). The test_schwab_query.py pair is STABLE across both runs (deterministic regression, not flakiness); the export failure is NOT stable (appeared once of two runs), consistent with W6-S9's prior finding of the same non-determinism on the same test. The recorded `acceptance` entry above uses run 1's output as the cleaner single-cause evidence; run 2 is corroborating, not contradicting -- both runs agree AC4 fails on the test_schwab_query.py regression.",
+      "method": "RE-GRADE ROUND (this instance): OGV2-AC1, OGV2-AC3 and OGV2-AC5 each run standalone. OGV2-AC2's selection run once (14 passed). OGV2-AC4's full loop run once this round (no repair needed, unlike the prior round which re-ran AC4 twice to distinguish a deterministic regression from an unrelated flake).",
+      "observed": "AC1: '1 passed'. AC3: '1 passed'. AC5: 'reader role 37, catalog role 19'. AC2: '14 passed', 0 failed. AC4: 'MODULES: 25 FAILED-MODULES: 0' -- the test_schwab_query.py regression the prior round's two runs both reproduced (rows W5-S19/W5-S20/W6-S10) is gone at this HEAD because TO-OG-q-6's fix (244771637d, drained e58d9d2b04) is now on this worker's branch.",
       "status": "STABLE"
     }
   },
@@ -129,9 +124,7 @@
       "reason": "BOUNDS: 'Nothing in this cell reaches AWS, the Gateway host or any user.' Every AWS call in this run is answered by moto (S3, DynamoDB, STS, IAM); no live endpoint was reached."
     }
   ],
-  "surprises": [
-    "NFRA_OPLGTW-W6-S10: OGV2-AC4's whole-glob module sweep, re-measured fresh at this cell's HEAD, is still blocked by test_schwab_query.py::test_ogq2_ac06 and ::test_ogq2_ac20 -- the same already-ARMED defect rows NFRA_OPLGTW-W5-S19/W5-S20 name (disarm_owner 2.0.0_SA_COO~O); this cell's <paths> grant does not include test_schwab_query.py so this cannot be repaired here (BLOCKING for OGV2-AC4, not a new hazard class)."
-  ],
+  "surprises": [],
   "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~6/local-acceptance-run.result.md",
   "compiler_tools": [
     {
@@ -142,7 +135,7 @@
     {
       "tool": "AC4's per-module loop (25 modules)",
       "invocation": "cd /c/tmp/wk-oplgtw-6f && n=0; f=0; for m in infra/aws/ec2/opal-gateway/tests/test_*.py; do n=$((n+1)); timeout 300 .venv-og/Scripts/python -m pytest \"$m\" -q -p no:cacheprovider --color=no -m \"not live\" -k \"not test_scoped_deny_by_default\" || [ $? = 5 ] || f=$((f+1)); done; echo \"MODULES: $n FAILED-MODULES: $f\"",
-      "result": "MODULES: 25 FAILED-MODULES: 1 (run 1, recorded); MODULES: 25 FAILED-MODULES: 2 (run 2, determinism check -- same test_schwab_query.py pair plus the already-filed W6-S9 flaky test_schwab_export.py collision)"
+      "result": "MODULES: 25 FAILED-MODULES: 0 (re-grade round, at this worker's HEAD @372b1d653d -- TO-OG-q-6's fix landed and drained since the prior round's FAILED-MODULES: 1/2)"
     }
   ]
 }
