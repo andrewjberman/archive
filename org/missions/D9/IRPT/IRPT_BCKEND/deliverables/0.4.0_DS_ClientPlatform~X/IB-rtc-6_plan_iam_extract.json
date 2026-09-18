@@ -1,0 +1,125 @@
+{
+  "_about": "IB-rtc-6: the planned IAM documents and the Lambda env delta, extracted from `terraform show -json` of the two saved plans (no state values beyond these). Re-derivable by re-planning both roots.",
+  "plans": {
+    "directory": {
+      "counts": {
+        "create": 2,
+        "update": 1,
+        "delete": 0
+      },
+      "actions": {
+        "aws_iam_role.irpt_49f_directory_read": [
+          "create"
+        ],
+        "aws_iam_role_policy.irpt_49f_directory_read": [
+          "create"
+        ],
+        "module.irpt_directory_refresh.aws_lambda_function.this": [
+          "update"
+        ]
+      }
+    },
+    "mdpf-pipeline": {
+      "counts": {
+        "create": 0,
+        "update": 2,
+        "delete": 0
+      },
+      "actions": {
+        "aws_iam_role_policy.mdpf_runner": [
+          "update"
+        ],
+        "aws_s3_object.mdpf_route_bindings": [
+          "update"
+        ]
+      }
+    }
+  },
+  "new_role": {
+    "name": "irpt-49f-directory-read-role",
+    "assume_role_policy": {
+      "Statement": [
+        {
+          "Action": "sts:AssumeRole",
+          "Effect": "Allow",
+          "Principal": {
+            "AWS": "arn:aws:iam::313476888478:role/mdpf-daily-runner-ec2-role"
+          },
+          "Sid": "AssumedOnlyByTheDailyRunnerHost"
+        }
+      ],
+      "Version": "2012-10-17"
+    }
+  },
+  "new_role_policy": {
+    "name": "irpt-49f-directory-read-policy",
+    "policy": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Action": "s3:GetObject",
+          "Effect": "Allow",
+          "Resource": [
+            "arn:aws:s3:::opal-data-49financial/gold/advi/dimensions/dim_relationship/*",
+            "arn:aws:s3:::opal-data-49financial/gold/advi/dimensions/dim_portfolio_group/*",
+            "arn:aws:s3:::opal-data-49financial/gold/advi/dimensions/dim_identity_crosswalk/*",
+            "arn:aws:s3:::opal-data-49financial/gold/advi/dimensions/dim_account/*",
+            "arn:aws:s3:::opal-data-49financial/gold/advi/dimensions/bridge_group_account/*"
+          ],
+          "Sid": "ReadTheFiveDimensionTablesOnly"
+        },
+        {
+          "Action": "s3:ListBucket",
+          "Condition": {
+            "StringLike": {
+              "s3:prefix": [
+                "gold/advi/dimensions/dim_account/*",
+                "gold/advi/dimensions/dim_relationship/*",
+                "gold/advi/dimensions/dim_identity_crosswalk/*",
+                "gold/advi/dimensions/dim_portfolio_group/*",
+                "gold/advi/dimensions/bridge_group_account/*"
+              ]
+            }
+          },
+          "Effect": "Allow",
+          "Resource": "arn:aws:s3:::opal-data-49financial",
+          "Sid": "ListExactlyThoseFivePrefixes"
+        }
+      ]
+    }
+  },
+  "host_role_policy": {
+    "name": "mdpf-runner-scoped",
+    "statements_before": 32,
+    "statements_after": 33,
+    "added": [
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Resource": "arn:aws:iam::313476888478:role/irpt-49f-directory-read-role",
+        "Sid": "IrptDirectory49fAssumeSourcePrincipal"
+      }
+    ],
+    "removed": []
+  },
+  "lambda_env": {
+    "keys_before": [
+      "IRPT_DIRECTORY_BUCKET_MAP",
+      "IRPT_DIRECTORY_BUNDLE_URI",
+      "IRPT_DIRECTORY_PREFIX",
+      "IRPT_DIRECTORY_RUNNER_INSTANCE_ID"
+    ],
+    "keys_after": [
+      "IRPT_DIRECTORY_BUCKET_MAP",
+      "IRPT_DIRECTORY_BUNDLE_URI",
+      "IRPT_DIRECTORY_PREFIX",
+      "IRPT_DIRECTORY_RUNNER_INSTANCE_ID",
+      "IRPT_DIRECTORY_SOURCE_ROLE_MAP"
+    ],
+    "added": {
+      "IRPT_DIRECTORY_SOURCE_ROLE_MAP": "{\"49financial\":\"arn:aws:iam::313476888478:role/irpt-49f-directory-read-role\"}"
+    },
+    "changed": {},
+    "removed": []
+  }
+}
