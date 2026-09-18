@@ -1,0 +1,54 @@
+
+=== (a) THE CENSUS -- every _refresh/<date>/manifest.json, all VERSIONS ===
+PASS a0.versioning_enabled_on_all_3_buckets                     {"opal-data-bd": "Enabled", "opal-data-cot": "Enabled", "opal-data-inf": "Enabled"}
+PASS a1.r1_fix_close_time_read_from_ledger                      2026-09-18T15:11:04Z @ C:\tmp\wk-irpt-5-2\org\critical_paths\change_management\20260918T1502Z_irpt-bckend-ibrtd2-directory_deploy_completion.md
+PASS a2.every_version_fetched_without_error                     84 of 84 versions fetched clean
+PASS a3b.repeated_rewrites_of_one_date_are_content_consistent   0 inconsistent same-date rewrite(s) found
+  per-firm summary:
+    49financial manifests=28 completed_family=10 misstating=0
+       ('2026-09-18T09:06:21.000Z', '2026-09-16', 'REFRESH_COMPLETED_WITH_ADDITIONS', 0, 4562)
+       ('2026-09-18T16:41:16.000Z', '2026-09-17', 'REFRESH_COMPLETED_WITH_ADDITIONS', 4562, 4576)
+    cottonwood manifests=28 completed_family=10 misstating=0
+       ('2026-09-18T09:06:22.000Z', '2026-09-16', 'REFRESH_COMPLETED_WITH_ADDITIONS', 0, 248)
+       ('2026-09-18T16:41:18.000Z', '2026-09-17', 'REFRESH_COMPLETED_WITH_ADDITIONS', 248, 249)
+    inflection manifests=28 completed_family=9 misstating=0
+       ('2026-09-18T09:06:23.000Z', '2026-09-17', 'REFRESH_COMPLETED_WITH_ADDITIONS', 0, 291)
+PASS a3.M_of_M_manifests_censused                               84 of 84 manifests censused (3 firms, versioned S3)
+PASS a4.k_of_M_misstating_previous_state                        k=0 of 5 distinct completed-family business-dates misstate previous state (29 raw completed-family writes across those dates, repeated re-landings of byte-identical content collapsed to one chain position each)
+  Q2 CLOSES: 0 of 5 distinct completed-family business-dates misstate previous state -- every prev=0 write is the firm's true first-ever completed build (no earlier COMPLETED-family write exists anywhere in the full, un-purged version history for that firm; lifecycle expiry has not yet reached any version, all <14d old), and every later date's prev correctly equals the immediately preceding date's cur.
+PASS a5.mutant_control_the_detector_catches_a_planted_misstatement clean chain -> 0 misstating (expect 0); planted-defect chain -> 1 misstating (expect 1, reason="prev=0 != prior write's cur=100 (prior 2026-09-10)")
+
+=== (b) THE FIVE ARMS -- controlled clock, current deployed CodeSha256 ===
+PASS b1.repo_bytes_unchanged_since_r3_fix_tip                   git log 91faa85f41..HEAD -- refresh.py expiry.py handler.py: 0 commit(s)
+PASS b2.served_CodeSha256_equals_registered_artifact_sha256     served=q7O3GGjK2PBHkNo6KfJOAVaJhUW4cwxtWQFZgTqSO/o= registered=q7O3GGjK2PBHkNo6KfJOAVaJhUW4cwxtWQFZgTqSO/o=
+  PLANE: the in-process harness calling the repo's refresh.py/expiry.py directly -- b1+b2 bind those bytes to the CURRENT DEPLOYED CodeSha256 q7O3GGjK2PBHkNo6KfJOAVaJhUW4cwxtWQFZgTqSO/o= (read at 2026-09-18T21:37:26Z), so the arms below exercise the SAME bytes the Lambda runs, never a copy (bound 12).
+PASS b3.five_arms_driven                                        5 of 5 arms produced a reading
+PASS b4.reason_codes_distinct                                   5 of 5 distinct reason codes: ['REFRESH_COMPLETED_WITH_ADDITIONS', 'REFRESH_COMPLETED_WITH_ELIGIBILITY_CHANGE', 'REFRESH_TRIGGER_MISSED', 'REFRESH_FAILED', 'DIRECTORY_OVER_AGE']
+PASS b5.state_code_pairs_distinct                               5 of 5 distinct (state, code) pairs
+PASS b6.no_real_calendar_wait                                   harness wall clock 1.879 s (no sleep, no network, no vendor call)
+PASS b7.calendar_is_real                                        calendar_source=NYSE/pandas_market_calendars
+  ARM (a) ADDED CLIENT         reason=REFRESH_COMPLETED_WITH_ADDITIONS           state=READY
+     the new client is in the directory the fire produced, and nobody asked: added=1, new entry present=True, age within ceiling
+  ARM (b) CHANGED ELIGIBILITY  reason=REFRESH_COMPLETED_WITH_ELIGIBILITY_CHANGE  state=READY
+     eligibility_changed=1, disappeared=0, the client is STILL VISIBLE marked TERMINATED (terminated clients stay visible under entitlement)
+  ARM (c) MISSED TRIGGER       reason=REFRESH_TRIGGER_MISSED                     state=UNCERTAIN
+     last manifest 2026-09-14, now 2026-09-18: 3 expected trading day(s) carry no manifest, so the fire did not happen and this run does not paper over it
+  ARM (d) FAILED REFRESH       reason=REFRESH_FAILED                             state=FAILED
+     the fire RAN and the build raised RuntimeError; the exception TEXT is withheld from the manifest (a manifest is a durable log)
+  ARM (e) OVER-AGE REQUEST     reason=DIRECTORY_OVER_AGE                         state=STALE
+     directory as_of 2026-09-14 is 4 trading day(s) behind a ceiling of 2; the answer carries last_good_as_of=2026-09-14 and offers ['RETRY', 'WAIT'] -- missing history is an answer, not an empty state
+
+=== (c) FRESH-DISPATCH CASE -- measured, driven only if write-free ===
+  real clock today=2026-09-18  expected_last_trading_day=2026-09-18  (read 2026-09-18T21:37:29Z)
+  49financial  accounted=2026-09-17 frontier=2026-09-18 pointer=investor-reporting/directory/2026-09-17/directory.json cid=df2054c5-de73-49f7-bee4-b96939d3f316 status=Success same_frontier=True
+  cottonwood   accounted=2026-09-17 frontier=2026-09-18 pointer=investor-reporting/directory/2026-09-17/directory.json cid=d30f42e3-1dfe-4107-b900-ed94e65a34db status=Success same_frontier=True
+  inflection   accounted=2026-09-17 frontier=2026-09-18 pointer=investor-reporting/directory/2026-09-17/directory.json cid=e0f6a54c-d43c-4276-a3e4-41923573d79d status=Success same_frontier=True
+PASS c1.no_firm_has_a_reachable_new_frontier_right_now          3 of 3 firms: the real accounting (last recorded command Success, pointer matches the accounted artifact) would land on REFRESH_NOOP_SAME_FRONTIER, never a new dispatch, if invoked for real right now
+PASS c2.dispatch_recipe_hardcodes_upload_no_dry_run_path        runner_script() always appends --upload to directory_runner.py; no --dry-run branch exists in refresh.py's dispatch recipe
+  CONCLUSION: BLOCKED, NAMED, NOT DRIVEN (a measurement). Two independent reasons: (i) no firm's real frontier is reachable for a NEW dispatch right now -- the deployed dispatcher's own accounting (an SSM GetCommandInvocation READ plus the real latest.json pointer READ, both performed above) would land on REFRESH_NOOP_SAME_FRONTIER for all 3 firms if invoked for real, exactly as every fire since IB-rtc-7 has found; (ii) even if a fresh dispatch were reachable, `SsmBuildDispatcher.dispatch()` (refresh.py:664-707) sends a REAL ssm:SendCommand whose script (`runner_script()`, refresh.py:522-593) is hard-coded to end `directory_runner.py --firms <firm> --upload` with NO --dry-run alternative -- once sent, the host's own build performs a real s3:PutObject of directory.json + latest.json to the firm's destination bucket, a write this order's READ-ONLY bound forbids and which this cell cannot decouple from the dispatch itself (past builds completed in 9-14 seconds per the SSM transcripts already on record). 0 of 1 new command ids driven -- named and stopped, not driven.
+
+=== SUMMARY ===
+  PASS 16 | FAIL 0   denominator: 16 graded check(s) (+0 MEASURED, ungraded)
+  detail written to C:\tmp\wk-irpt-5-2\org\missions\D9\IRPT\IRPT_BCKEND\deliverables\0.9.0_WK_IRPT_BCKEND~2\IB-rte-5_full_census_and_arms.json
+
+IBR55-MANIFESTS-CENSUSED-AND-FIVE-ARMS-DRIVEN
