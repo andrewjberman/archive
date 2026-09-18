@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-q-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e09219470f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "3dbdb084c7",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-q-5.asset-policy-and-c3-census.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_asset_policy.py",
+      "kind": "test",
+      "commit_or_etag": "eeb80016e3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A new test file on branch wk-nfra_oplgtw-5e only; tests are not deployed. It reuses tests/acceptance/conftest.py's og_v2 fixture (the real Starlette app, real SchwabService) to run the three OGQ5-AC1/AC2/AC3 tests through the actually-registered schwab_query tool.",
+      "artifact_covered_by": ["OGQ5-AC1", "OGQ5-AC2", "OGQ5-AC3", "OGQ5-AC4"],
+      "introduces": ["def test_ogq5_ac01", "def test_ogq5_ac02", "def test_ogq5_ac03"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/C3_CALL_PATH_CENSUS.md",
+      "kind": "doc",
+      "commit_or_etag": "eeb80016e3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A deliverable result document (this cell's HALF TWO), not deployed; graded by OGQ5-AC5's probe re-read.",
+      "artifact_covered_by": ["OGQ5-AC5"],
+      "introduces": ["RULE COUNT = 34 - 3 (excluded) - 2 (folded) = 29."]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q5.py",
+      "kind": "script",
+      "commit_or_etag": "eeb80016e3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A deliverable probe script, not deployed; invoked directly by OGQ5-AC4/AC5/AC6's own <invocation>.",
+      "artifact_covered_by": ["OGQ5-AC4", "OGQ5-AC5", "OGQ5-AC6"],
+      "introduces": ["def ac4", "def ac5", "def ac6"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "eeb80016e3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five new surprise rows appended (NFRA_OPLGTW-W5-S13..S17); the investigation file is not deployed.",
+      "artifact_covered_by": ["OGQ5-AC1", "OGQ5-AC2", "OGQ5-AC3", "OGQ5-AC4", "OGQ5-AC6"],
+      "introduces": ["NFRA_OPLGTW-W5-S13", "NFRA_OPLGTW-W5-S14", "NFRA_OPLGTW-W5-S15", "NFRA_OPLGTW-W5-S16", "NFRA_OPLGTW-W5-S17"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGQ5-AC1",
+      "criterion_verbatim": "OGQ5-AC1 (test_ogq5_ac01) -- through the registered schwab_query tool on OG-v-2's live-app harness, a partial-account grant reading dim_asset returns only the CUSIPs its authorized accounts hold on that master and date, with the returned CUSIP count and the authorized-account denominator printed, and the test names the call site it travelled.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_asset_policy.py::test_ogq5_ac01 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGQ5-AC1: authorized-account denominator=1 (('99000002',)); returned CUSIP count=4, cusips=['SYN000001', 'SYN000002', 'SYN000003', 'SYN000009']; want=['SYN000001', 'SYN000002']\nAssertionError: PRD C3's partial-account dim_asset CUSIP restriction is not observed through the registered schwab_query tool (got ['SYN000001', 'SYN000002', 'SYN000003', 'SYN000009'], want ['SYN000001', 'SYN000002']) -- app/integrations/schwab/integration.py SchwabService.query() never calls semantics.qualify_asset_plan; see surprise row NFRA_OPLGTW-W5-S13\n1 failed in 4.55s",
+      "denominator": "1 of 1 selected test (test_ogq5_ac01, one of 3 tests in the file)",
+      "status": "FAIL",
+      "status_reason": "The live schwab_query tool returns all 4 fixture CUSIPs unfiltered instead of the 2 held by the granted account. Root cause measured and filed as BLOCKING surprise row NFRA_OPLGTW-W5-S13: the only call site that could wire semantics.py's already-built qualify_asset_plan() is app/integrations/schwab/integration.py's SchwabService.query(), which is not in this task order's <paths> grant (only query.py, catalog.py and this test file are). This worker did not edit integration.py and did not widen the order.",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGQ5-AC2",
+      "criterion_verbatim": "OGQ5-AC2 (test_ogq5_ac02) -- (difference) in that same response, a CUSIP held ONLY by an account the grant does not carry is ABSENT; the same CUSIP IS present for a grant that carries that account, both denominators printed.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_asset_policy.py::test_ogq5_ac02 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGQ5-AC2: narrow grant denominator=1 accounts=('99000002',) -> cusips=['SYN000001', 'SYN000002', 'SYN000003', 'SYN000009'] (target SYN000003 present=True)\nOGQ5-AC2: wide grant denominator=2 accounts=('99000002', '99000003') -> cusips=['SYN000001', 'SYN000002', 'SYN000003', 'SYN000009'] (target SYN000003 present=True)\nAssertionError: SYN000003 must be ABSENT for the narrow grant ('99000002',) -- PRD C3's restriction is not observed (row NFRA_OPLGTW-W5-S13)\n1 failed in 3.54s",
+      "denominator": "1 of 1 selected test (test_ogq5_ac02, one of 3 tests in the file)",
+      "status": "FAIL",
+      "status_reason": "SYN000003 (held only by ungranted account 99000003) is PRESENT under BOTH the narrow and the wide grant -- no restriction is applied either way. Same root cause as OGQ5-AC1, same surprise row NFRA_OPLGTW-W5-S13.",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGQ5-AC3",
+      "criterion_verbatim": "OGQ5-AC3 (test_ogq5_ac03) -- absent a qualified position snapshot for that master and date, the dim_asset read is DENIED rather than served unfiltered, with the denial's contract error_codes value printed.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_asset_policy.py::test_ogq5_ac03 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGQ5-AC3: zero-account grant -> is_error=False payload={... 'rows': [['SYN000001'], ['SYN000002'], ['SYN000003'], ['SYN000009']], 'matched_row_count': 4, 'returned_count': 4 ...}\nAssertionError: an unqualified position snapshot (zero authorized accounts) must DENY the dim_asset read, not serve it unfiltered -- got a success payload {...} (row NFRA_OPLGTW-W5-S13)\n1 failed in 4.35s",
+      "denominator": "1 of 1 selected test (test_ogq5_ac03, one of 3 tests in the file)",
+      "status": "FAIL",
+      "status_reason": "A grant whose sole authorized account (99000004, a BlackDiamond-only account) holds nothing on SmartX still returns all 4 CUSIPs with is_error=False, instead of being denied. Same root cause and surprise row as OGQ5-AC1/AC2.",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGQ5-AC4",
+      "criterion_verbatim": "OGQ5-AC4 -- (mutant control) with the restriction's call site removed in a scratch copy of app/, the probe runs AC1, AC2 and AC3 against that copy and passes only if AC1 and AC2 FAIL there; it prints all three outcomes and leaves no tracked file modified (git status --porcelain read before and after, printed and equal).",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 420 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q5.py AC4",
+      "output_evidence": "AC4: app/integrations/schwab/integration.py in the scratch copy calls qualify_asset_plan: False (expected False -- HALF ONE was never wired inside this cell's <paths> grant)\nAC4: run AC1 (test_ogq5_ac01) against the (unmutated -- nothing to remove) scratch copy -> rc=1 last-line='1 failed in 5.06s' outcome=FAIL\nAC4: run AC2 (test_ogq5_ac02) against the (unmutated -- nothing to remove) scratch copy -> rc=1 last-line='1 failed in 4.50s' outcome=FAIL\nAC4: run AC3 (test_ogq5_ac03) against the (unmutated -- nothing to remove) scratch copy -> rc=1 last-line='1 failed in 4.20s' outcome=FAIL\nAC4: porcelain before == after: True\nVERDICT: FAIL-OGQ5-AC4 no call site exists to remove (call_site_present=False); outcomes={'AC1': 'FAIL', 'AC2': 'FAIL', 'AC3': 'FAIL'} (AC3 already fails at baseline, so the mutant control cannot discriminate); porcelain_equal=True -- see surprise row NFRA_OPLGTW-W5-S13",
+      "denominator": "3 of 3 mutant sub-runs (AC1, AC2, AC3) plus 1 of 1 porcelain-equality check",
+      "status": "FAIL",
+      "status_reason": "There is no call site to remove: HALF ONE was never wired (blocked by the <paths> grant, row NFRA_OPLGTW-W5-S13), so AC1/AC2/AC3 already all FAIL on the real, unmutated worktree before any scratch copy is made. The criterion's own bar (AC1 and AC2 FAIL while AC3 still PASSES) cannot be met because there is no 'still passing' baseline for AC3 to preserve -- a mutant control that removes nothing cannot discriminate. Reported as measured FAIL, not silently satisfied; porcelain equality (the only sub-check that CAN pass here) does hold.",
+      "expect": "(?m)^VERDICT: PASS-OGQ5-AC4(?![0-9])"
+    },
+    {
+      "criterion_id": "OGQ5-AC5",
+      "criterion_verbatim": "OGQ5-AC5 -- the C3 census exists at org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/C3_CALL_PATH_CENSUS.md, built by subtraction from the printed denominator of C3's sentences at PRD v0.9 @e09219470f, one row per rule carrying its C3 citation, its call site or none, and one of the three verdicts; the probe re-reads that file and passes only if the sentence denominator, the rule count and the three verdict counts are all printed and the verdict counts sum to the rule count.",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 420 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q5.py AC5",
+      "output_evidence": "AC5: census denominators -- sentences=34 rules=29 ENFORCED=20 NOT-ENFORCED=5 NOT-A-CALL-PATH-RULE=4\nAC5: verdict sum 20 + 5 + 4 = 29 (rule count 29)\nAC5: 29 row id(s) found in the census body: R1, R2, ..., R29\nVERDICT: PASS-OGQ5-AC5",
+      "denominator": "29 of 29 rule rows carry a verdict; 3 of 3 printed verdict counts sum to the printed rule count (34 sentences -> 29 rules by subtraction)",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGQ5-AC5(?![0-9])"
+    },
+    {
+      "criterion_id": "OGQ5-AC6",
+      "criterion_verbatim": "OGQ5-AC6 -- the probe runs tests/test_schwab_query.py, tests/test_schwab_semantics.py, tests/test_schwab_wiring.py and tests/acceptance/test_local_acceptance.py, ONE pytest process per module, and passes only if every module's failure count is 0, each module's counts and the denominator 4 printed.",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 600 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q5.py AC6",
+      "output_evidence": "AC6: infra/aws/ec2/opal-gateway/tests/test_schwab_query.py -> rc=0 last-line='25 passed in 9.53s' passed=25 failed=0\nAC6: infra/aws/ec2/opal-gateway/tests/test_schwab_semantics.py -> rc=0 last-line='14 passed in 1.09s' passed=14 failed=0\nAC6: infra/aws/ec2/opal-gateway/tests/test_schwab_wiring.py -> rc=0 last-line='3 passed in 3.52s' passed=3 failed=0\nAC6: infra/aws/ec2/opal-gateway/tests/acceptance/test_local_acceptance.py -> rc=1 last-line='2 failed, 12 passed in 21.25s' passed=12 failed=2\nAC6: acceptance module failed node(s): ['test_ogv2_a06', 'test_ogv2_a18']\nAC6: denominator 4 modules; total failure count across all four = 2\nVERDICT: FAIL-OGQ5-AC6 1 of 4 module(s) carried a failure: {'.../tests/acceptance/test_local_acceptance.py': 2}",
+      "denominator": "4 of 4 modules run; 3 of 4 carry 0 failures; the 4th (tests/acceptance/test_local_acceptance.py) carries 2",
+      "status": "FAIL",
+      "status_reason": "test_schwab_query.py, test_schwab_semantics.py and test_schwab_wiring.py are all clean (25+14+3 passed, 0 failed). tests/acceptance/test_local_acceptance.py carries 2 failures, NOT only one: test_ogv2_a18 (per this order's own issuer context, NOT this cell's -- its correction rides OG-v-2's re-hand, row NFRA_OPLGTW-S26, named and not edited here) AND test_ogv2_a06 (this cell's OWN HALF ONE arm, which stays red because HALF ONE could not be wired inside this cell's <paths> grant -- row NFRA_OPLGTW-W5-S13). Per the issuer context's own instruction, this is reported plainly as measured rather than treated as 'only A18'.",
+      "expect": "(?m)^VERDICT: PASS-OGQ5-AC6(?![0-9])"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OGQ5-AC4 is this cell's mutant control. Unlike OG-q-4's og_q4.py AC4 (which removed a real, wired call site), this control found there is NO call site to remove: semantics.py's qualify_asset_plan() has zero production callers anywhere, confirmed by reading integration.py's scratch copy directly for the marker string.",
+      "expected": "Against the mutant copy, AC1 and AC2 FAIL (the restriction's refusal/filtering no longer fires) while AC3 still PASSES (a legal read was never guarded by that call site).",
+      "observed": "AC1 FAIL, AC2 FAIL, AC3 ALSO FAIL -- because AC3 already fails on the real, UNMUTATED worktree (the same measured gap OGQ5-AC1/AC2/AC3 report directly). There is no 'still passing' baseline for the mutant to discriminate against, because the feature this order's HALF ONE was cut to build was never wired within this cell's <paths> grant (surprise row NFRA_OPLGTW-W5-S13). git status --porcelain identical before/after; the probe wrote no tracked file.",
+      "status": "DID-NOT-FIRE (deliverable INVALID)"
+    },
+    "determinism": {
+      "method": "Each of OGQ5-AC1/AC2/AC3 (pytest) and og_q5.py AC4/AC5/AC6 was run twice at this HEAD (eeb80016e3): once during this cell's build/diagnosis, once for this instance's final evidence capture.",
+      "observed": "AC1: both runs -> got_cusips=['SYN000001','SYN000002','SYN000003','SYN000009'], '1 failed', identical assertion text. AC2: both runs -> identical narrow/wide cusip lists and present=True/True. AC3: both runs -> is_error=False, matched_row_count=4, identical rows (only the per-run source_refs token and catalog_validated_at timestamp differ, neither a deciding value). AC4: both runs -> VERDICT: FAIL-OGQ5-AC4 with the identical outcome triple {AC1:FAIL, AC2:FAIL, AC3:FAIL} and porcelain_equal=True. AC5: both runs -> VERDICT: PASS-OGQ5-AC5, identical denominators (34/29/20/5/4). AC6: both runs -> VERDICT: FAIL-OGQ5-AC6, identical per-module counts (25/14/3 passed with 0 failed; acceptance module 12 passed/2 failed, same two failed node ids).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "app/integrations/schwab/integration.py -- HALF ONE's actual wiring (the orchestration that would call semantics.qualify_asset_plan from SchwabService.query()/prepare_download()/export_query()).",
+      "reason": "Not in this order's <paths> grant (only query.py, catalog.py and tests/test_schwab_asset_policy.py are). Traced and confirmed the ONLY possible call site; see surprise row NFRA_OPLGTW-W5-S13. Not edited (BOUNDS: 'a path you need that is not named is a BLOCKING surprise row on that criterion -- never an override')."
+    },
+    {
+      "item": "semantics.py, datasets.json, data_entitlement.py, tests/test_schwab_query.py.",
+      "reason": "Explicitly named NOT this cell's in BOUNDS (other cells', merged and closed). Byte-for-byte unchanged throughout this session."
+    },
+    {
+      "item": "Repair of the four further C3 census findings beyond HALF ONE (R20 grouping/date-identity, R22 multi-field balance sum, R24 duplicate-grain detection, R25 sign/null-semantics exposure).",
+      "reason": "This cell's bound: 'The census FINDS; it does not FIX ... Widening this cell to fix a second rule is exactly the re-cut this project keeps paying for.' Each filed as its own surprise row (NFRA_OPLGTW-W5-S14..S17) for the issuer to place."
+    },
+    {
+      "item": "tests/acceptance/test_local_acceptance.py::test_ogv2_a18.",
+      "reason": "Not this cell's per the issuer's own hand-off context (its correction rides OG-v-2's re-hand, row NFRA_OPLGTW-S26); tests/acceptance/ is OG-v-2's <paths>, not this cell's, and OG-v-2 is OPEN."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPLGTW-W5-S13: HALF ONE's live-path wiring requires app/integrations/schwab/integration.py, which is not in this order's <paths> grant, so OGQ5-AC1/AC2/AC3/AC4 cannot be satisfied as written and OGQ5-AC6 cannot reach a clean tests/acceptance/test_local_acceptance.py while test_ogv2_a06 stays red for this same reason. BLOCKING, UNDER_INVESTIGATION.",
+    "NFRA_OPLGTW-W5-S14: C3 census finding -- semantics.assert_grouping_preserves_identity() (grouping never removes date identity) has zero production callers; a live group_by=[\"business_date\"] aggregate is accepted, unrefused. OBSERVATION, UNDER_INVESTIGATION.",
+    "NFRA_OPLGTW-W5-S15: C3 census finding -- semantics.assert_single_balance_metric() (never sum different balance fields into a combined total), reached only via the also-uncalled assert_sum_allowed(), has zero production callers; a live aggregate can SUM two distinct dim_balance fields in one request, unrefused. OBSERVATION, UNDER_INVESTIGATION.",
+    "NFRA_OPLGTW-W5-S16: C3 census finding -- semantics.assert_unique_grain() (duplicate/conflicting source grains produce unavailable) has zero production callers and engine.py's own execution has no grain-uniqueness check either; a duplicate/conflicting grain is served or silently folded into a SUM instead of refusing the read. OBSERVATION, UNDER_INVESTIGATION.",
+    "NFRA_OPLGTW-W5-S17: C3 census finding -- semantics.describe_field()/describe_dataset() (dataset description records sign and null semantics) have zero production callers; the live schwab_describe_dataset tool builds its response from qry.DATASET_SCHEMAS instead, which never exposes sign or null_semantics to a caller even though datasets.json carries both. OBSERVATION, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/asset-policy-and-c3-census.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.0.2 (Python 3.12, venv .venv-og)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_asset_policy.py::test_ogq5_ac0<n> -q -p no:cacheprovider --color=no  (n = 1..3)",
+      "result": "3 of 3: rc=1, '1 failed', run twice each, identical deciding values both times"
+    },
+    {
+      "tool": "og_q5.py probe (mutant control, census self-check, four-module failure-count check)",
+      "invocation": "cd /c/tmp/wk-oplgtw-5e && timeout 600 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q5.py AC4|AC5|AC6",
+      "result": "AC4: rc=1, VERDICT: FAIL-OGQ5-AC4 (no call site to remove; outcomes AC1:FAIL, AC2:FAIL, AC3:FAIL). AC5: rc=0, VERDICT: PASS-OGQ5-AC5 (34/29/20/5/4). AC6: rc=1, VERDICT: FAIL-OGQ5-AC6 (acceptance module 2 of 14 failed: test_ogv2_a06, test_ogv2_a18)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/tests/test_schwab_asset_policy.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/probes/og_q5.py",
+      "result": "rc=0, 'OK: pre-commit gate clean for 2 of 2 file(s)'"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "py -3.12 .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0, '5 new row(s) of 107 total checked ... all new rows carry their step-7/step-10 fields'"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~5/NFRA_OPLGTW.TO-OG-q-5.asset-policy-and-c3-census.proof_of_spec.json OGQ5-AC1,OGQ5-AC2,OGQ5-AC3,OGQ5-AC4,OGQ5-AC5,OGQ5-AC6",
+      "result": "PENDING -- run after this file is written; see WORKER REPORT"
+    }
+  ]
+}
