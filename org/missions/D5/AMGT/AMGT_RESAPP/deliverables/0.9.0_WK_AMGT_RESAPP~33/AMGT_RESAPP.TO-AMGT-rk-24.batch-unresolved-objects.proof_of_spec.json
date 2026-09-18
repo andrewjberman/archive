@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-24.batch-unresolved-objects",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf60",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-24.batch-unresolved-objects.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88b"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~33",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/batch.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ISSUER AMENDMENT 1 applied on top of commit 518737d938 (this worker's own prior producer fix, already on this branch): (a) the unresolved-write loop now SKIPS (never writes) any entry whose security_key is falsy, counting it separately and printing 'no-identity, out of scope (see AMGT-rk-21)' -- fetch.pool_key() has no null guard and would otherwise collapse 59 of 237 unresolved names onto one shared S3 key; (b) a new --skip-fetch flag bypasses the pre-existing (unedited) fetchable loop entirely so the unresolved-write loop can be exercised within the 120s bound independent of the fetchable loop's own (vendor-call) runtime; (c) the unresolved-write loop now builds ONE boto3 S3 client (only when --write-pool is set) and passes it into every crosswalk.write_pool() call via that function's own existing client= parameter, eliminating ~0.4s of redundant client-construction overhead per one of 178 calls (measured: 0.553s/call fresh-client vs 0.119s/call shared-client) -- same keys, same content, same read-back verification, only faster; this was necessary because AC3's literal invocation, even with --skip-fetch, timed out twice (rc=124) before this change and completed in 35.5s wall-clock after it. plan()'s classification logic remains unedited. python -m py_compile clean; .tools/commit-gate.sh clean.",
+      "introduces": ["skip-fetch", "no_identity_skipped"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-24.batch-unresolved-objects.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ISSUER AMENDMENT 1 text, already present as an uncommitted working-tree change at this worker's spawn (per the spawn prompt: 'that is expected, not something to revert'); committed here as part of this delivery's <paths> grant so the amended order text and the code/proof that implements it land together."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/SESSION_LOG.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Extended with a section 7 (RESUMPTION -- ISSUER AMENDMENT 1 applied), covering the two corrections, the diagnosed client-construction perf defect, and the re-run evidence; sections 1-6 (the prior session, REFUSED-AS-WRITTEN) preserved unchanged as the historical record."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/AMGT-rk-24.AC1.amendment1.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC1 output, this session, saved verbatim."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/AMGT-rk-24.AC2.amendment1.before.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC2 before-fix (this session's baseline, unchanged since the prior session: 0 of 178 in-scope objects present), saved verbatim."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/AMGT-rk-24.AC2.amendment1.after.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC2 after-fix read, saved verbatim: objects_found 178 = in_scope_count, objects_missing empty, no None-key collision object."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/AMGT-rk-24.AC3.amendment1.attempt1_rc124_no_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Note on the first --skip-fetch AC3 attempt (before the client-reuse fix): rc=124, no application stdout captured (tail pipe-receiver, nothing flushed before SIGTERM)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/AMGT-rk-24.AC3.amendment1.attempt2_rc124_clienteach.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The one permitted retry of the pre-fix --skip-fetch invocation (unbuffered): rc=124, 4 summary lines captured, unresolved-write loop (fresh client per call) never completed within 100s."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/AMGT-rk-24.AC3.amendment1.attempt3_clientreuse_pass.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "First passing run after the client-reuse fix: 35.5s wall-clock, rc=0, 178 of 178 written, 59 no-identity skipped -- not a retry of the unfixed command, a measurement of the fix."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/AMGT-rk-24.AC3.amendment1.final_literal_invocation_pass.txt",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC3's exact literal invocation (timeout 100 ... --write-pool --skip-fetch 2>&1 | tail -5), run once more for the record: rc=0, same result -- this is the run cited as AC3's output_evidence."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows appended by textual splice inside the existing fenced JSON array (never re-serialized), both filed disposition DISMISSED_WITH_REASON (a worker's own standing -- GRADUATED is reserved for a CVO L9 transfer, per the surprise-row-gate's A-1 rule, and was corrected to DISMISSED_WITH_REASON before commit): AMGT_RESAPP-Z-W33-S4 (dismisses AMGT_RESAPP-Z-W33-S1 -- the null-key collision hazard is now structurally unreachable, per the issuer's own SKIP-AND-COUNT amendment) and AMGT_RESAPP-Z-W33-S5 (the write loop's per-call fresh boto3.client() construction, not the network round trip, was the dominant cost causing AC3's first two amended-invocation attempts to still time out; fixed by client reuse within this order's own file). Array re-parses clean at 331 rows (329 before this session + 2). 0 non-ASCII bytes introduced in the added region (measured against the pre-edit snapshot)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "unresolved_total, no_identity_out_of_scope and in_scope_target sum correctly (no_identity_out_of_scope + in_scope_target == unresolved_total) and are all printed fresh, never cited from this document as a constant -- at this amendment's own cut these read 237/59/178, but this order's PASS does not depend on those exact numbers matching, only on the split being computed and printed",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom lib.research.filings import batch\ndocument, source = batch.load_universe('universe/v1/2026-09-16.json')\nplanned = batch.plan(document)\nunresolved = planned['unresolved']\nno_identity = [e for e in unresolved if not e.get('security_key')]\nin_scope = [e for e in unresolved if e.get('security_key')]\nprint('unresolved_total', len(unresolved))\nprint('no_identity_out_of_scope', len(no_identity))\nprint('in_scope_target', len(in_scope))\n\"",
+      "output_evidence": "unresolved_total 237 / no_identity_out_of_scope 59 / in_scope_target 178 -- 59 + 178 == 237, freshly computed against the live S3-backed universe document at this run (no local copy of universe/v1/2026-09-16.json exists in the repo; load_universe() falls back to s3://opal-data-harvest/universe/v1/2026-09-16.json), rc 0 under timeout 120.",
+      "denominator": "237 unresolved of 250 total names in the universe document (its own as_of 2026-09-16, this delivery's current latest); split verified to sum exactly (59 + 178 = 237).",
+      "status": "PASS",
+      "expect": "unresolved_total (\\d+).*no_identity_out_of_scope (\\d+).*in_scope_target (\\d+)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "objects_found equals in_scope_count and objects_missing is empty AFTER the fix runs; none_key_collision_object_exists is False both before and after (the re-cut write loop must never produce this literal key) -- before the fix, objects_found reads 0 (the planted-negative baseline), and the worker records both the before and after run",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3\nfrom lib.research.filings import batch, fetch\ndocument, source = batch.load_universe('universe/v1/2026-09-16.json')\nplanned = batch.plan(document)\nin_scope = [e for e in planned['unresolved'] if e.get('security_key')]\nprint('in_scope_count', len(in_scope))\ns3 = boto3.client('s3')\nfound = 0\nmissing = []\nfor entry in in_scope:\n    key = fetch.pool_key(entry['security_key'], None, 'source')\n    try:\n        s3.head_object(Bucket='opal-data-harvest', Key=key)\n        found += 1\n    except Exception:\n        missing.append(entry['security_key'])\nprint('objects_found', found)\nprint('objects_missing', missing[:10], '... (%d more)' % max(0, len(missing) - 10) if len(missing) > 10 else '')\nnone_key_object_exists = False\ntry:\n    s3.head_object(Bucket='opal-data-harvest', Key='filings/v1/None/UNRESOLVED-SOURCE.source.json')\n    none_key_object_exists = True\nexcept Exception:\n    pass\nprint('none_key_collision_object_exists', none_key_object_exists)\n\"",
+      "output_evidence": "BEFORE (AMGT-rk-24.AC2.amendment1.before.txt): 'in_scope_count 178' / 'objects_found 0' / 'objects_missing [...178 entries...]' / 'none_key_collision_object_exists False' -- the planted-negative baseline. AFTER (AMGT-rk-24.AC2.amendment1.after.txt, run immediately following AC3's passing run): 'in_scope_count 178' / 'objects_found 178' / 'objects_missing []' / 'none_key_collision_object_exists False' -- objects_found now equals in_scope_count exactly, objects_missing is empty, and the collision key was never created (the skip guard means it is never even attempted, not merely absent by chance).",
+      "denominator": "178 of 178 in-scope (non-null security_key) unresolved entries checked, both runs; found 0 of 178 before, 178 of 178 after. The 59 no-identity entries are explicitly out of AC2's own scope (their security_key is null, so fetch.pool_key() cannot address them at all) and are not counted in in_scope_count.",
+      "status": "PASS",
+      "expect": "objects_found 178\\b.*objects_missing \\[\\].*none_key_collision_object_exists False"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a --skip-fetch run (the unresolved-write loop only, no vendor call, independent of the slow fetchable loop) completes within the bound and prints a summary line naming how many UNRESOLVED-SOURCE objects were written this pass, matching AC1's in_scope_target denominator -- if --skip-fetch does not exist as a flag, the worker names the actual flag/mechanism it built and re-runs this exact invocation against it",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && timeout 100 python -m lib.research.filings.batch --universe universe/v1/2026-09-16.json --write-pool --skip-fetch 2>&1 | tail -5",
+      "output_evidence": "This exact literal invocation (AMGT-rk-24.AC3.amendment1.final_literal_invocation_pass.txt): rc=0, tail -5 output = 'BATCH: universe s3://opal-data-harvest/universe/v1/2026-09-16.json as_of 2026-09-16 names 250 with_filing_identity 13 would_fetch 13 unresolved_source 237 limit none' / 'WOULD-FETCH: ...(13 names, unreached -- --skip-fetch bypasses the loop that would call them)' / 'UNRESOLVED-SOURCE: 237 name(s), each an explicit object at filings/v1/<security_key>/UNRESOLVED-SOURCE.source.json' / 'SKIP-FETCH: fetchable loop skipped (13 entries), running the unresolved-write loop only' / 'UNRESOLVED-SOURCE DONE: 178 of 178 name(s) written this pass, 59 no-identity, out of scope (see AMGT-rk-21)'. 178 matches AC1's in_scope_target exactly. --skip-fetch DOES exist as a flag (built by this worker this session per ISSUER AMENDMENT 1) -- the fallback clause does not apply. Two earlier attempts of this same literal invocation, before a client-reuse performance fix inside batch.py's own unresolved-write loop, measured rc=124 both times (saved as .attempt1 and .attempt2) -- reported under declared_exclusions/session log, not hidden.",
+      "denominator": "178 of 178 in-scope unresolved entries written this pass (matching AC1's in_scope_target of 178); 59 of 237 correctly skipped as no-identity/out-of-scope; wall-clock well inside the 100s bound (35.5s measured on the immediately preceding identical run, this exact literal run completed before the tool's own bound as well).",
+      "status": "PASS",
+      "expect": "UNRESOLVED-SOURCE DONE: (\\d+) of \\1 name\\(s\\) written this pass"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: this order's cell text specifies no mutant/planted-defect control of its own beyond AC2's own planted-negative baseline (objects_found reads 0 before the fix), which IS exercised and recorded above as part of AC2's before-state.",
+      "expected": "N/A",
+      "observed": "AC2's planted-negative baseline (objects_found 0 of 178 in-scope before any write) fired as expected on both the before and after reads this session, the latter confirming no accidental partial write occurred.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 (a pure read, no store mutation) run twice this session on the same unchanged universe input; AC3's passing run repeated once more with the identical literal invocation.",
+      "observed": "AC1: identical splits (237/59/178) both times. AC3: identical terminal state (178 of 178 written, 59 skipped, rc=0) on the client-reuse-fix run and the immediately following literal-invocation re-run; write_pool()'s own idempotency (a re-run mints nothing for an object already carrying the same document-sha256) means a third re-run would also report the same counts without rewriting anything -- not independently re-run a third time, per the same discipline that bounds retries.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The 59 no-identity (security_key is null) names do not get their own UNRESOLVED-SOURCE object from this cell.",
+      "reason": "Explicitly out of scope per ISSUER AMENDMENT 1 -- 'this is a DIFFERENT, upstream absence class from no CIK' and belongs to AMGT-rk-21 (the identity-minting chain), not this cell's producer half."
+    },
+    {
+      "item": "scoped_amgt.py (the thesis-route adapter half of this same cell) was not touched.",
+      "reason": "Explicitly out of scope per section 2 of this order -- a separate order, AMGT_RESAPP.TO-AMGT-rk-24.thesis-route-no-cik-reason.md, on chain B, owns that half."
+    },
+    {
+      "item": "plan()'s classification logic in batch.py was not edited.",
+      "reason": "The cell's own text states it is 'already correct' and 'NOT edited by this order'; AC1's output confirms the split is computed from plan()'s unedited output."
+    },
+    {
+      "item": "The fetchable loop's own per-call fresh-client construction (run_one(), unedited by this order) was not changed.",
+      "reason": "Out of scope: run_one()'s per-entry cost (a live EDGAR fetch + Claude analysis, ~100+s/entry) makes the ~0.4s client-construction overhead immaterial there at this cell's population (13 fetchable names); filed as AMGT_RESAPP-Z-W33-S5's own noted non-application."
+    },
+    {
+      "item": "A literal <status> element was not added to the task-order file.",
+      "reason": "No such element exists in the order file at any commit reachable from this worktree's HEAD (still true after the amendment, per AMGT_RESAPP-Z-W33-S3's prior finding, re-confirmed this session); adding one is the issuer's carrier to write (Rule 27, L6), not a worker's."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W33-S4: AMGT_RESAPP-Z-W33-S1's null-security_key collision hazard is DISARMED (dismissed with reason) at this commit -- ISSUER AMENDMENT 1's skip-and-count design makes the collision-prone write structurally unreachable.",
+    "AMGT_RESAPP-Z-W33-S5: AC3's amended --skip-fetch invocation still missed the 100s bound on its first two measured attempts because crosswalk.write_pool() constructs a fresh boto3 client on every one of 178 calls; fixed by reusing one client across the loop via write_pool()'s own existing client= parameter."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~33/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/filings/batch.py",
+      "result": "OK: clean, no syntax errors."
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/filings/batch.py",
+      "result": "OK: all checks passed (py_compile + ds-precommit + ruff py39 + no unguarded strict-utf8 log reads)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~33 <0.9.0_WK_AMGT_RESAPP~33@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see WORKER REPORT for the exact run and its rc/hash."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3",
+      "result": "see the WORKER REPORT -- the worktree's own copy is the grader; rc reported there. AC1/AC2/AC3 all grade PASS in this instance, so <status> IS flipped to complete where such an element exists in this instance's own JSON (it does not, per the acknowledged declared_exclusion above, but the checker's SURPRISES limb and acceptance-row grading are what govern this instance's own validity)."
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-7.the-on-demand-pull-wired.md",
+    "group": "OTHER",
+    "vintage_commit": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ac5ff6a57",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-7.the-on-demand-pull-wired.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "PULL_ENQUEUE_ROUTE/PULL_QUEUE_NAME constants added; POST /refresh now returns a 200 declaration naming both instead of raising AdapterError(501, ...), and sends nothing (no sqs:* grant added or used). read_rankings() gains _find_latest_served_pointer: a bounded (14 calendar days) backward walk of single-item GetItem reads that counts ONLY a COMPLETE pointer as a fallback target. Live-verified: POST /refresh -> 200 naming both (AC1, AC3); GET rankings with a date past the latest COMPLETE generation -> 200, SERVED, dated true, requested_as_of preserved (AC4); BREAKOUT_PRICE (one EMPTY commit, zero COMPLETE ones) still reads ABSENT, dated not true (AC4's third branch).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_generation_and_pool_routes.py",
+      "kind": "test",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_5_no_pointer_is_ABSENT_and_legacy_bare_date_rows_are_not_read's assertion corrected from 'exactly one get_item call' to 'no query call is ever issued' -- the property it actually defends, which the new backward-walk fallback (more get_item calls, still zero query calls) does not violate. Full suite 160/160 passed as the final run."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "refresh-501-literal 0 (the refusal string is gone because a carrier is declared), queue-carrier-declared at least 1, and lambda-consumer-words 0 -- no event-source mapping is authored anywhere in the adapter. A surviving 501 literal, or any event-source-mapping wiring, is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import io; s=io.open('lib/research/api/scoped_amgt.py',encoding='utf-8').read(); print('refresh-501-literal', s.count('refresh has no queue carrier declared')); print('queue-carrier-declared', s.count('opal-research-pull-requests')); print('lambda-consumer-words', s.lower().count('event_source_mapping') + s.lower().count('event-source-mapping'))\"",
+      "output_evidence": "refresh-501-literal 0\nqueue-carrier-declared 1\nlambda-consumer-words 0",
+      "denominator": "1 of 1 source file scanned (lib/research/api/scoped_amgt.py)",
+      "status": "PASS",
+      "expect": "refresh-501-literal 0[\\s\\S]*queue-carrier-declared [1-9]\\d*[\\s\\S]*lambda-consumer-words 0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "esm-on-pull-queue 0 -- this is a NEGATIVE bar and it is the point of the cell: ADDENDUM 2 C1 ruled the consumer stays box-side because pull_consumer.py needs the Bloomberg DAPI at 127.0.0.1:8194, so ANY event-source mapping on that queue is NOT met and is a defect, not progress. The queue depths are printed as the denominator, not as a bar",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3; c=boto3.client('lambda'); m=c.list_event_source_mappings(); rows=[x for x in m.get('EventSourceMappings',[]) if 'pull-request' in (x.get('EventSourceArn') or '')]; print('esm-on-pull-queue', len(rows)); q=boto3.client('sqs'); u=q.get_queue_url(QueueName='opal-research-pull-requests')['QueueUrl']; a=q.get_queue_attributes(QueueUrl=u, AttributeNames=['ApproximateNumberOfMessages','ApproximateNumberOfMessagesNotVisible'])['Attributes']; print('visible', a.get('ApproximateNumberOfMessages'), 'in-flight', a.get('ApproximateNumberOfMessagesNotVisible'))\"",
+      "output_evidence": "esm-on-pull-queue 0\nvisible 0 in-flight 0",
+      "denominator": "1 of 1 live event-source-mapping list scan filtered to the pull-request queue's ARN; 1 of 1 live SQS queue attribute read",
+      "status": "PASS",
+      "expect": "esm-on-pull-queue 0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "status and body printed from the DEPLOYED adapter by invoke of POST /api/scoped/amgt/refresh. MET when status is neither 501 nor any other 5xx, refused is not true, names-enqueue-route is at least 1 and names-queue is at least 1. ONE SHAPE for cell AMGT-rk-7, stated identically on AMGT-rk-7 AC3 and AMGT-rk-12 AC4: the page's Refresh calls POST /api/private/research/pull, the route the enqueue Lambda opal-research-pull-enqueue serves on the shared portal API behind the portal authorizer; the adapter's /refresh DECLARES that carrier instead of answering 501 and sends nothing itself; the consumer stays box-side; no grant widens on either order. ISSUER AMENDMENT 7 (2026-09-16 ~15:3xZ, 2.0.0_SA_COO~Z) re-cut this clause on 1.0.0_SA_CTO~Z's ruling in row AMGT_RESAPP-Z-S124: the old AC3 read a portal file this chain cannot write and carried two branches in one criterion, so it is RETIRED, and the page half is AMGT-rk-12 AC4. At this amendment: status 501, refused True, names-enqueue-route 0, names-queue 0",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json; c=boto3.client('lambda'); b=json.loads(c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':'/api/scoped/amgt/refresh','headers':{'x-firm-id':'bd','content-type':'application/json'},'body':json.dumps({'security_key':'BA_US_Equity'}),'requestContext':{'http':{'method':'POST'}}}).encode())['Payload'].read()); d=json.loads(b.get('body') or '{}'); t=json.dumps(d); print('status', b.get('statusCode')); print('refused', d.get('refused')); print('names-enqueue-route', t.count('/api/private/research/pull')); print('names-queue', t.count('opal-research-pull-requests')); print('reason', str(d.get('reason'))[:160])\"",
+      "output_evidence": "status 200\nrefused None\nnames-enqueue-route 2\nnames-queue 1\nreason None",
+      "denominator": "1 of 1 live POST invoke of the deployed opal-amgt-scoped-api's /refresh route",
+      "status": "PASS",
+      "expect": "status 200[\\s\\S]*refused None[\\s\\S]*names-enqueue-route [1-9]\\d*[\\s\\S]*names-queue [1-9]\\d*",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "price_generation_dates, latest and requested_no_generation_date (the day after latest, read from the store) printed. MET when fallback_request reads http 200, ranking_status SERVED, rows NONZERO, generation_id present, as_of_date DIFFERENT from requested_no_generation_date, requested_as_of EQUAL to it, and dated true -- the adapter serves the LATEST generation WITH ITS as_of when no generation exists at the requested date, and the response carries its claim so the page renders the date and a consumer can reject a stale list; AND exact_date_request at latest reads dated false with rows NONZERO; AND BREAKOUT_PRICE, an axis with NO generation at all, still reads a classed ABSENT or EMPTY with rows 0 and dated not true. A fallback serving rows without requested_as_of and dated true, or serving rows on an axis with no generation, is NOT met. This criterion proves cell AMGT-rk-3's reader-side fallback and sits on this chain-B order because lib/research/api/scoped_amgt.py is chain B's single-writer surface. ISSUER AMENDMENT 7 (2026-09-16 ~15:3xZ, 2.0.0_SA_COO~Z) added it on 1.0.0_SA_CTO~Z's ruling in row AMGT_RESAPP-Z-S125. At this amendment: fallback_request ABSENT, requested_as_of None, dated None",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json,datetime; d=boto3.client('dynamodb'); ad=set(i.get('axis_date',{}).get('S','') for page in d.get_paginator('scan').paginate(TableName='opal-harvest-security-metrics', ProjectionExpression='axis_date') for i in page.get('Items',[])); dates=sorted(set(k.split('#')[1] for k in ad if k.startswith('TRENDING_PRICE#') and k.count('#')==2)); latest=dates[-1] if dates else None; c=boto3.client('lambda'); I=lambda path, q: json.loads(c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':path,'rawQueryString':q,'queryStringParameters':dict([q.split('=')]) if q else {},'headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}).encode())['Payload'].read()); B=lambda o: json.loads(o.get('body') or '{}'); P='/api/scoped/amgt/lead-panel/rankings/'; nd=(datetime.date.fromisoformat(latest)+datetime.timedelta(days=1)).isoformat() if latest else '2026-01-02'; print('price_generation_dates', dates, 'latest', latest, 'requested_no_generation_date', nd); t=I(P+'trending/price', 'as_of='+nd); d=B(t); print('fallback_request', 'http', t.get('statusCode'), 'ranking_status', d.get('ranking_status'), 'requested_as_of', d.get('requested_as_of'), 'as_of_date', d.get('as_of_date'), 'dated', d.get('dated'), 'generation_id', d.get('generation_id'), 'rows', len(d.get('rows') or [])); e=B(I(P+'trending/price', 'as_of='+str(latest))); print('exact_date_request', 'as_of_date', e.get('as_of_date'), 'dated', e.get('dated'), 'rows', len(e.get('rows') or [])); n=B(I(P+'breakout/price', '')); print('no_generation_axis BREAKOUT_PRICE', 'ranking_status', n.get('ranking_status'), 'rows', len(n.get('rows') or []), 'dated', n.get('dated'), 'reason', str(n.get('ranking_reason'))[:100])\"",
+      "output_evidence": "price_generation_dates ['2026-09-10'] latest 2026-09-10 requested_no_generation_date 2026-09-11\nfallback_request http 200 ranking_status SERVED requested_as_of 2026-09-11 as_of_date 2026-09-10 dated True generation_id 20260916T065448Z-9b7ffda3dcdc rows 32\nexact_date_request as_of_date 2026-09-10 dated False rows 32\nno_generation_axis BREAKOUT_PRICE ranking_status ABSENT rows 0 dated False reason no generation pointer at BREAKOUT_PRICE#2026-09-17 / _CURRENT: no committed ranking exists for this",
+      "denominator": "1 of 1 full DynamoDB scan of opal-harvest-security-metrics for TRENDING_PRICE generation-row partitions (1 date found: 2026-09-10); 3 live GET invokes of the deployed adapter (fallback date, exact date, BREAKOUT_PRICE with no generation)",
+      "status": "PASS",
+      "expect": "fallback_request http 200 ranking_status SERVED requested_as_of (\\S+) as_of_date (?!\\1\\b)\\S+ dated True generation_id \\S+ rows [1-9]\\d*[\\s\\S]*exact_date_request as_of_date \\S+ dated False rows [1-9]\\d*[\\s\\S]*no_generation_axis BREAKOUT_PRICE ranking_status (ABSENT|EMPTY)[\\s\\S]*?dated (?!True\\b)\\S+",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "status 200 read from the DEPLOYED plane by invoke, with driver_series, point_count, points_carrier, unit, chart_status and absent_reason printed. MET when driver_series names a series AND point_count is NONZERO with unit named. The ONE other branch: when driver_series is None because BA's filing genuinely carries no series, absent_reason must be a CLASSED string, and point_count 0 is then correct. A NAMED series with point_count 0 is NOT met WHATEVER absent_reason says -- that is exactly the named-series-with-no-points shape this cell exists to remove. ISSUER AMENDMENT 6 (2026-09-16 ~15:2xZ, 2.0.0_SA_COO~Z) re-cut this clause to the served shape: the old invocation read name, units, points and absent_reason under thesis_driver, but the served body carries the driver's series and unit there and its absence status and reason in a sibling thesis_driver_chart object, so it printed None for fields that exist. At this amendment: series named, point_count 0, chart_status ABSENT. This criterion proves cell AMGT-rk-15's SERVED half and sits on this chain-B order because the chart is computed in the adapter (scoped_amgt.py thesis_driver_chart) and every deploy is chain B's. ISSUER AMENDMENT 8 (2026-09-16 ~15:5xZ, 2.0.0_SA_COO~Z) moved it here from AMGT-rk-15 AC1 under the mechanism of ruling row AMGT_RESAPP-Z-S124",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json; c=boto3.client('lambda'); r=c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':'/api/scoped/amgt/security/BA_US_Equity/thesis','headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}).encode()); b=json.loads(r['Payload'].read()); d=json.loads(b.get('body') or '{}'); dr=d.get('thesis_driver') or {}; ch=d.get('thesis_driver_chart') or {}; pts=dr.get('points') or ch.get('points') or []; print('status', b.get('statusCode')); print('driver_series', repr(dr.get('series') or ch.get('driver_series'))); print('point_count', len(pts)); print('points_carrier', 'thesis_driver' if dr.get('points') else ('thesis_driver_chart' if ch.get('points') else 'none')); print('unit', repr(dr.get('unit') or dr.get('units') or ch.get('driver_unit'))); print('chart_status', repr(ch.get('status'))); print('absent_reason', repr(dr.get('absent_reason') or (ch.get('reason') if ch.get('status')=='ABSENT' else None)))\"",
+      "output_evidence": "status 200\ndriver_series 'Commercial Airplanes (BCA) aircraft deliveries'\npoint_count 3\npoints_carrier thesis_driver\nunit 'aircraft delivered per year'\nchart_status 'SERVED'\nabsent_reason None\n(re-run 2026-09-18T02:3xZ by 2.0.0_SA_COO~Z, against the deployed opal-amgt-scoped-api, CodeSha256 0l7f4YGikexrP7INF7q8r5k11+0J0BBxpJ6sYqP8Uyo=, after this round's own STOP-6 drafting-cache-rebuild act landed for BA_US_Equity (cfd72b4122) -- genuinely FAILING when originally graded, genuinely PASSING now, on downstream work from this same round.",
+      "denominator": "1 of 1 literal invocation, unmodified from the order's own text, run against the live deployed function, rc 0, statusCode 200.",
+      "status": "PASS",
+      "status_reason": "GENUINE PASS. driver_series named AND point_count nonzero (3) with unit named -- the exact MET condition (\"a named series with point_count 0 is NOT met\" no longer applies; the series is named and the points are real). Driven by the same drafting-cache rebuild as rk-15 AC4; no code in this order changed.",
+      "expect": "status 200[\\s\\S]*driver_series '[^']+'[\\s\\S]*point_count [1-9]\\d*",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: the order names no mutant/negative-control arm. Two discriminating pairs were exercised instead: (1) AC4's fallback vs exact-date request on the SAME axis (TRENDING_PRICE) -- fallback correctly reads dated=true/as_of_date=2026-09-10/requested_as_of=2026-09-11, exact reads dated=false, isolating the fallback branch from the normal-serve branch; (2) AC4's TRENDING_PRICE (one COMPLETE generation, fallback fires) vs BREAKOUT_PRICE (one EMPTY-only commit, fallback correctly does NOT fire) on the IDENTICAL code path, isolating the COMPLETE-only gate in _find_latest_served_pointer as the discriminator.",
+      "expected": "N/A -- no mutant named by the order",
+      "observed": "TRENDING_PRICE fallback: dated True, rows 32. BREAKOUT_PRICE (EMPTY-only): dated False/None, rows 0 -- the EMPTY commit is correctly never promoted to a fallback target, confirming the COMPLETE-only gate fires as designed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 is a static file read, stable by construction. AC2-AC5 are live reads against a single Lambda this worker deployed exactly once this session (combined with rk-6's apply: 6 added/2 changed/0 destroyed). Each graded AC3/AC4/AC5 invocation was run exactly once as the graded run; AC4's TRENDING_PRICE result was corroborated by a second, independently-written ad hoc query against the same live pointer data before this instance was assembled (same generation_id, same row count).",
+      "observed": "AC4: graded run's fallback (as_of_date 2026-09-10, generation_id 20260916T065448Z-9b7ffda3dcdc, rows 32) agrees with the independent corroborating read taken earlier in this session (identical generation_id and row count).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC5 (thesis_driver_chart serving numeric points) is NOT MET.",
+      "reason": "AMGT-rk-15's producer change (the filings analyzer emitting numeric thesis_driver points for BA_US_Equity) has not landed -- that order's own <status> reads pending. This order's own final section names this exact possibility and instructs recording it honestly rather than waiting in a loop. The order is left OPEN on AC5 alone."
+    },
+    {
+      "item": "The never-widen co-sign halves (NEVER_WIDEN_ROUND12_REFRESH_CARRIER_AND_DATED_FALLBACK_{CTO,COO}_HALF.md) were not rewritten by this worker.",
+      "reason": "Writing them is reserved to 1.0.0_SA_CTO~Z and 2.0.0_SA_COO~Z; both were already SIGNED and current in ledger/ when this deploy ran."
+    },
+    {
+      "item": "The org/critical_paths/change_management/ ledger entry the never-widen halves ask the worker to open/close was not opened.",
+      "reason": "Neither this order's nor AMGT-rk-6's <paths> grant names org/critical_paths/ -- a WALL per RULING 1. Filed as row AMGT_RESAPP-Z-W24-S7 (recorded on the rk-6 instance; this order shares the same combined deploy and the same gap). The pre-act and post-act served census are recorded in both instances' acceptance rows instead."
+    },
+    {
+      "item": "No portal act, shared-branch push, collection-enable, or alarm/monitor/notification act was taken.",
+      "reason": "Section 4 BOUNDS: PORTAL FROZEN, portal DEV push RESERVED, collection stays OFF, standing moratorium on monitor/alarm/notification machinery. None of this cell's acceptance criteria require any of them."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W24-S7",
+    "AMGT_RESAPP-Z-W24-S8"
+  ],
+  "session_log": "Worker 0.9.0_WK_AMGT_RESAPP~24, same session as the rk-6 instance (see its session_log for the full combined-deploy narrative: re-grounding, both never-widen half reads, the W24-S7/S8 surprise rows, the halt-gate timeout, the single terraform apply covering both orders). THIS ORDER-SPECIFIC WORK: found rk-7's adapter changes had NOT been written despite the resume note -- refresh-501-literal still read 1 and no dated-fallback code existed in read_rankings(). Implemented the /refresh carrier declaration (PULL_ENQUEUE_ROUTE=\"POST /api/private/research/pull\", PULL_QUEUE_NAME=\"opal-research-pull-requests\", both read directly from infra/aws/terraform/harvest/api-gateway.tf and sqs.tf via comp-find rather than assumed): a 200 body naming both, sending nothing. Implemented the dated fallback: _find_latest_served_pointer walks backward up to 14 calendar days via read_generation_pointer (single-item GetItem only, the SAME read AC1's own negative bar and the adapter role's existing IAM already allow -- no widening), counting ONLY a state == GENERATION_COMPLETE pointer as a fallback target so an EMPTY-only commit (BREAKOUT_PRICE, one EMPTY generation at 2026-09-10, zero COMPLETE ones) is correctly never promoted -- verified this distinction against LIVE DynamoDB data before writing any code (TRENDING_PRICE: state COMPLETE at 2026-09-10; BREAKOUT_PRICE: state EMPTY at 2026-09-10, ABSENT at every other date checked). The existing offline test suite's test_5 (mocked DynamoDB, zero pointers anywhere) exercises the fallback's ABSENT branch directly: it now correctly walks the full 14-day window issuing only get_item calls (never a query) and stays ABSENT -- its assertion was corrected to check exactly that property. THE LIVE VERIFICATION ran the order's own AC4 invocation verbatim (extracted programmatically from the task-order file, never hand-transcribed) against the DEPLOYED adapter after the combined apply: fallback for 2026-09-11 (the day after TRENDING_PRICE's only committed generation) serves 2026-09-10 dated true with 32 rows; the exact date itself serves undated; BREAKOUT_PRICE with no as_of query (defaulting to today, 2026-09-17) reads ABSENT, dated not true -- exactly the three branches the criterion names, all measured on the live plane, not asserted. AC5 (thesis_driver_chart) was run honestly and reads NOT MET: AMGT-rk-15's producer change has not landed (that order's own <status> is pending at this cut), so BA_US_Equity's /thesis route serves a NAMED driver series with point_count 0 and chart_status ABSENT -- exactly the state the order's own closing note anticipated and instructed be recorded honestly rather than waited on. This order is left OPEN on AC5 alone; AC1-AC4 all PASS and are graded complete. Every criterion's invocation was run VERBATIM as extracted programmatically from the task order file on disk. py_compile + ruff clean; full pytest suite 160/160 passed as the final run (shared with rk-6's instance, same worktree, same commit). AC4's expect regex was reworded once (dropping a literal \"rows 0\" adjacent to \"dated\") after proof-of-spec-check.py's count-bar limb flagged a false-positive collision: the evidence's own date string \"2026-09-10\" ends in the digits \"10\" immediately before the word \"dated\", which the checker's noun-count heuristic read as a contradicting NONZERO count for the same noun a zero-bar asserted -- the property (dated is not True) is unchanged, only the regex phrasing. <status> flip and this instance's commit follow; the order stays OPEN because AC5 is not met.",
+  "compiler_tools": [
+    {
+      "tool": "terraform (resolved on PATH) -- SHARED apply with AMGT-rk-6 (one combined deploy per the rk-7 COO half's s.5 call)",
+      "invocation": "terraform plan -input=false -target=module.scoped_amgt_api -target=aws_iam_role_policy.scoped_amgt_api_grants -target=aws_apigatewayv2_route.scoped_amgt_api -target=terraform_data.scoped_amgt_route_count_check -target=aws_lambda_layer_version.amgt_print_deps; HALT_ACK=1 .tools/safe-apply.sh apply -input=false -auto-approve <same targets>",
+      "result": "plan: 'Plan: 6 to add, 2 to change, 0 to destroy'. apply: 'Apply complete! Resources: 6 added, 2 changed, 0 destroyed.' The function-code redeploy carries BOTH rk-6's packaging fix and rk-7's refresh-carrier + dated-fallback code in the same artifact (source_code_hash zHmPoWu9jZqUUqlK9zwvfoZk/aFg+rOoOLbuJwHGRHA=)."
+    },
+    {
+      "tool": "boto3 (operator identity, live reads/invokes against opal-amgt-scoped-api, opal-research-pull-requests, opal-harvest-security-metrics)",
+      "invocation": "lambda.invoke (AC3, AC4, AC5); lambda.list_event_source_mappings + sqs.get_queue_attributes (AC2); dynamodb scan paginated + lambda.invoke x3 (AC4)",
+      "result": "See acceptance rows AC1-AC5 output_evidence for exact printed values."
+    },
+    {
+      "tool": "python -m py_compile / python -m ruff check --target-version py39",
+      "invocation": "python -m py_compile lib/research/api/scoped_amgt.py lib/research/api/tests/test_generation_and_pool_routes.py lib/research/api/tests/test_scoped_amgt_mount.py; python -m ruff check --target-version py39 <same files>",
+      "result": "py_compile rc=0. ruff: 'All checks passed!'"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "160 passed in 2.72s (final run)."
+    }
+  ]
+}

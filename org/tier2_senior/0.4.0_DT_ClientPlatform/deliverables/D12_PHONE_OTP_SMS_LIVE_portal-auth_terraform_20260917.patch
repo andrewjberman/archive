@@ -1,0 +1,71 @@
+diff --git a/infra/aws/terraform/portal-auth/lambdas.tf b/infra/aws/terraform/portal-auth/lambdas.tf
+index ed8cc14ccb..4eb01d9538 100644
+--- a/infra/aws/terraform/portal-auth/lambdas.tf
++++ b/infra/aws/terraform/portal-auth/lambdas.tf
+@@ -21,6 +21,26 @@ resource "aws_lambda_function" "auth_handler" {
+   s3_object_version = data.aws_s3_object.auth_handler_artifact.version_id
+   source_code_hash  = data.aws_s3_object.auth_handler_artifact.metadata["content-sha256"]
+ 
++  # D12_PHONE_OTP_ALL_AWS -- the SMS leg's two switches (read by src/sms.ts). This
++  # function carried NO environment before 2026-09-17; these are its first variables.
++  environment {
++    variables = {
++      # The toll-free number codes originate from. Same variable that scopes the IAM
++      # grant in sms-iam.tf, so the sender and its permission cannot drift apart. Empty
++      # = sms.ts fails CLOSED (`mfa_sms_refused reason=no_origination_identity`).
++      SMS_ORIGINATION_IDENTITY = var.sms_origination_identity_arn
++
++      # sms.ts's release valve. "true" lets the handler text a number that is not on the
++      # SMS_VERIFIED_DESTINATIONS allowlist -- required for real users, because a user
++      # enrols THEIR OWN number and no allowlist can name it in advance. Set on
++      # Andrew-direct 2026-09-17 ("incorporated and live") with the sandbox exit measured
++      # (ACCOUNT_TIER = PRODUCTION). Exposure is still bounded without it: enrolment is
++      # authenticated + account-throttled, a login code goes only to a number its owner
++      # verified, and the account text-spend cap is the dollar backstop. "false" re-closes.
++      SMS_ALLOW_UNVERIFIED = "true"
++    }
++  }
++
+   tags = {
+     Name   = "opalinvest-auth-handler"
+     System = "PortalAuth"
+diff --git a/infra/aws/terraform/portal-auth/sms-iam.tf b/infra/aws/terraform/portal-auth/sms-iam.tf
+index e93a460981..564c61756f 100644
+--- a/infra/aws/terraform/portal-auth/sms-iam.tf
++++ b/infra/aws/terraform/portal-auth/sms-iam.tf
+@@ -2,20 +2,27 @@
+ # D12_PHONE_OTP_ALL_AWS SB-5 -- SMS send grant for the auth handler
+ # =============================================================================
+ #
+-# ⛔ AUTHORED, NOT APPLIED. The origination identity (SP-1: a toll-free number plus
+-# its carrier verification, ~1-3wk, Andrew-gated) DOES NOT EXIST YET. Applying an IAM
+-# grant scoped to an ARN that does not exist would either fail or -- worse -- quietly
+-# create a policy nothing can satisfy, which reads as "granted" in every review.
+-# The apply is gated on `sms_origination_identity_arn` being set to a real ARN.
++# LIVE since 2026-09-17 (Andrew-direct: "Our request for AWS Text Messaging was approved
++# ... get that incorporated and live"). SP-1 is DONE, measured that day on acct
++# 313476888478 / us-east-1: toll-free +18664067943 ACTIVE, TRANSACTIONAL, registration
++# registration-3721e9ded2cd4adaa831a42ba6d60e4c US_TOLL_FREE_REGISTRATION = COMPLETE,
++# ACCOUNT_TIER = PRODUCTION, TEXT_MESSAGE_MONTHLY_SPEND_LIMIT = 50.
++#
++# This file was authored dormant on 2026-09-01 against an identity that did not exist
++# yet: applying a grant scoped to a nonexistent ARN would either fail or -- worse --
++# quietly create a policy nothing can satisfy, which reads as "granted" in every review.
++# The `count` gate below is kept so that emptying the variable is still a clean OFF.
+ 
+ variable "sms_origination_identity_arn" {
+   description = <<-EOT
+     ARN of the AWS End User Messaging origination identity (the toll-free number) the
+-    auth handler may send MFA codes from. EMPTY until SP-1 provisions and verifies it.
+-    While empty, `aws_iam_role_policy.auth_sms` is not created at all -- see its count.
++    auth handler sends MFA codes from. Set EMPTY to switch the SMS leg off: the grant
++    `aws_iam_role_policy.auth_sms` is then not created (see its count) and the handler's
++    SMS_ORIGINATION_IDENTITY env var goes empty, so sms.ts fails CLOSED and logs
++    `mfa_sms_refused reason=no_origination_identity`.
+   EOT
+   type        = string
+-  default     = ""
++  default     = "arn:aws:sms-voice:us-east-1:313476888478:phone-number/phone-0e98f7739a16415c83d951336a7da12a"
+ }
+ 
+ # -----------------------------------------------------------------------------

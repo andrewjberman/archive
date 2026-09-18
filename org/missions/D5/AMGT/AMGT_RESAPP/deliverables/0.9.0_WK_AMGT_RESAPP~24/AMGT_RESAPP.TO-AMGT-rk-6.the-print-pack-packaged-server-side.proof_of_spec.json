@@ -1,0 +1,218 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-6.the-print-pack-packaged-server-side.md",
+    "group": "OTHER",
+    "vintage_commit": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8ac5ff6a57",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-6.the-print-pack-packaged-server-side.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/harvest/print-deps-layer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "aws_lambda_layer_version.amgt_print_deps created by this session's terraform apply; live get_function shows Layers=[{Arn: .../opal-amgt-print-deps:1, CodeSize 39040327}], confirmed by AC2's live read (SRC layer1 bytes 39040327 entries 1340)."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/build_print_deps_layer.py",
+      "kind": "script",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Build-time tool only (packages a wheel-dir into the layer zip); not itself a served artifact. Run this session via build-and-upload-print-deps-layer.sh: PACKED 12 packages, CARRIES all 6 named runtime members, PKG matplotlib 381 pypdf 63 numpy 277, ZIP 39040327 bytes / 1340 entries, SHA256-B64 cMRydL0Vaav1Fpay3A8Cw10zxNoL1t1Cx40NhBIPQVE= (matches the .tf comment's stated hash).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/build-and-upload-print-deps-layer.sh",
+      "kind": "script",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Run this session: pip download (cp311 manylinux2014_x86_64) -> 12 wheels; uploaded s3://opal-313476888478-lambda-layers/opal-amgt-print-deps.zip, head-object VersionId 4Zf.2s1xXg9_bwtbPHZqADFlCDKucLPE, Size 39040327 -- this is the VersionId the layer resource (and this session's terraform plan/apply) consumed.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "matplotlib import moved off module level (AC1: module-level-matplotlib 0), no OneDrive path (onedrive-path 0), no worker-local deliverables read (worker-deliverables 0). Live-verified: the redeployed function's /security/BA_US_Equity/print route now returns 200 with PDF magic bytes (AC3), where it 500'd at the cut.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Five new routes wired and dispatched: GET /freshness, GET /lists, GET /security/{key}/ledger, GET /security/{key}/versions, GET /security/{key}/compare -- read_coverage_freshness, read_list_register, read_input_ledger, read_model_block_versions, compare_model_blocks. scoped_amgt_route_table() now returns 16 entries (AC4/AC5's own printed denominator). Live-verified: all 5 answer 200 on the deployed adapter for BA_US_Equity (AC4, AC5).",
+      "artifact_covered_by": [
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "scoped_amgt_pool_prefixes gains packs/ and raw/ (trailing slash, both limbs); layers = [aws_lambda_layer_version.amgt_print_deps.arn] attached, timeout/memory left at 29/512 per the co-sign's explicit instruction; scoped_amgt_routes gains the five new GET keys; route_count_check precondition raised 11 -> 16. Applied this session: terraform plan named exactly module.scoped_amgt_api.aws_lambda_function.this (update), aws_iam_role_policy.scoped_amgt_api_grants (update), 5x aws_apigatewayv2_route.scoped_amgt_api[...] (create), aws_lambda_layer_version.amgt_print_deps (create) -- 'Plan: 6 to add, 2 to change, 0 to destroy', matching both never-widen halves' authorized resource list exactly. Applied via safe-apply.sh: 'Apply complete! Resources: 6 added, 2 changed, 0 destroyed.'"
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh",
+      "kind": "script",
+      "commit_or_etag": "8fcb2e0e2685f1a9187d4d158a32d62dcad35776",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Run this session (real build + upload, not --build-only): CLOSURE 47 entries at fixed point; VERIFY-DATA 7 of 7 data members packaged (absent []), 7 of 7 vendored packages; ISOLATED 3 of 3 arms OK; uploaded s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip, VersionId Ocz1IJKMxPe.KAEGqllNw7feYn9FTg.k, Size 781832, content-sha256 zHmPoWu9jZqUUqlK9zwvfoZk/aFg+rOoOLbuJwHGRHA=. This is the artifact version the terraform apply consumed and AC2/AC3's live reads confirm is serving.",
+      "artifact_covered_by": [
+        "AC3",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "zHmPoWu9jZqUUqlK9zwvfoZk/aFg+rOoOLbuJwHGRHA= (VersionId Ocz1IJKMxPe.KAEGqllNw7feYn9FTg.k; prior VersionId X2ZRUM2EXxnSk2vVgtT9JYn6FET9SziA, CodeSha256 x3KrEBvZVFmZqZ1KLsuzu6A7fedugZoxfS7+eoJiMUw=, is the rollback pointer, standing untouched)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Post-apply live get_function: CodeSha256 zHmPoWu9jZqUUqlK9zwvfoZk/aFg+rOoOLbuJwHGRHA=, CodeSize 781832, LastModified 2026-09-17T03:27:57Z, Layers=[opal-amgt-print-deps:1], MemorySize 512, Timeout 29 -- matches the never-widen halves' bound (memory/timeout unchanged)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "module-level-matplotlib 0, onedrive-path 0, worker-deliverables 0. All three were nonzero at the cut (render_pack.py:40-44 and :53-57); any surviving nonzero is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import io; s=io.open('lib/research/print/render_pack.py',encoding='utf-8').read(); head=s[:s.find(chr(10)+'def ') if chr(10)+'def ' in s else 2000]; print('module-level-matplotlib', head.count('import matplotlib')); print('onedrive-path', s.lower().count('onedrive')); print('worker-deliverables', s.count('0.9.0_WK_AMGT_RESAPP~'))\"",
+      "output_evidence": "module-level-matplotlib 0\nonedrive-path 0\nworker-deliverables 0",
+      "denominator": "1 of 1 source file scanned (lib/research/print/render_pack.py)",
+      "status": "PASS",
+      "expect": "module-level-matplotlib 0[\\s\\S]*onedrive-path 0[\\s\\S]*worker-deliverables 0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "each of PKG matplotlib, PKG pypdf and PKG numpy is NONZERO in the DEPLOYED artifact, counted SUMMED ACROSS the function's own zip AND every attached layer -- the invocation now enumerates the layers itself, resolves each one and lists its entries, printing a per-source breakdown, so the LAYER branch this clause always allowed is REACHABLE BY THE INSTRUMENT (ISSUER AMENDMENT 12; before it the invocation read only the zip, so a layer-based fix would have printed 0 and read as a failure). At the cut all three read 0 against 183 entries / 747,396 B; re-measured whole at AMENDMENT 12 after AMGT-rk-2's redeploy, layers 0, SRC zip bytes 754470 entries 185, total-entries 185, all three still 0. A 0 on any of the three is NOT met",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,zipfile,io,json,urllib.request; c=boto3.client('lambda'); f=c.get_function(FunctionName='opal-amgt-scoped-api'); L=f['Configuration'].get('Layers') or []; print('layers', len(L)); srcs=[('zip', f['Code']['Location'])] + [('layer'+str(i+1), c.get_layer_version_by_arn(Arn=l['Arn'])['Content']['Location']) for i,l in enumerate(L)]; alln=[]; [ (lambda tag,url: (lambda d: (alln.extend(zipfile.ZipFile(io.BytesIO(d)).namelist()), print('SRC', tag, 'bytes', len(d), 'entries', len(zipfile.ZipFile(io.BytesIO(d)).namelist()))))(urllib.request.urlopen(url).read()))(t,u) for t,u in srcs]; print('total-entries', len(alln)); [print('PKG', p, sum(1 for n in alln if p in n.replace('python/','').split(chr(47))[0])) for p in ('matplotlib','pypdf','numpy')]\"",
+      "output_evidence": "layers 1\nSRC zip bytes 781832 entries 193\nSRC layer1 bytes 39040327 entries 1340\ntotal-entries 1533\nPKG matplotlib 381\nPKG pypdf 63\nPKG numpy 277",
+      "denominator": "2 of 2 code sources summed (the function's own deployed zip + its 1 attached layer, opal-amgt-print-deps:1); 1533 total entries (193 zip + 1340 layer)",
+      "status": "PASS",
+      "expect": "PKG matplotlib [1-9]\\d*[\\s\\S]*PKG pypdf [1-9]\\d*[\\s\\S]*PKG numpy [1-9]\\d*",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "status 200 and body-bytes NONZERO, with pdf-magic reading the PDF header bytes. At the cut this route returned 500, so any 5xx is NOT met -- and a 200 carrying zero bytes is NOT met either, because a route that answers with nothing has not produced a pack",
+      "method": "live_read",
+      "invocation": "python -c \"import boto3,json,base64; c=boto3.client('lambda'); r=c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':'/api/scoped/amgt/security/BA_US_Equity/print','headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}).encode()); b=json.loads(r['Payload'].read()); print('status', b.get('statusCode')); body=b.get('body') or ''; print('isBase64', b.get('isBase64Encoded')); raw=base64.b64decode(body) if b.get('isBase64Encoded') else body.encode(); print('body-bytes', len(raw)); print('pdf-magic', raw[:5])\"",
+      "output_evidence": "status 200\nisBase64 True\nbody-bytes 76184\npdf-magic b'%PDF-'",
+      "denominator": "1 of 1 live GET invoke of the deployed opal-amgt-scoped-api's /security/BA_US_Equity/print route",
+      "status": "PASS",
+      "expect": "status 200[\\s\\S]*body-bytes [1-9]\\d*[\\s\\S]*pdf-magic b'%PDF-'",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "route-table-entries printed as the denominator, every route naming freshness, ledger or lists printed, and each GET one of them invoked on the DEPLOYED adapter with its status printed. MET when named-routes reads freshness, ledger and lists each at least 1 AND named-GET-routes-answering-200 reads N of N with N at least 3 -- the FWD-7, FWD-12 and FWD-14 surfaces are SERVED routes, not hand-run modules. This criterion proves cell AMGT-rk-12's ADAPTER half and sits on this chain-B order because lib/research/api/scoped_amgt.py and every live AWS act are chain B's. ISSUER AMENDMENT 8 (2026-09-16 ~15:5xZ, 2.0.0_SA_COO~Z) moved it here from AMGT-rk-12 AC1 under the mechanism of 1.0.0_SA_CTO~Z's ruling in row AMGT_RESAPP-Z-S124: rk-12's grant never named the adapter, so its AC1 was walled. At this amendment: 11 entries, 0 / 0 / 0, 0 of 0; a planted route the deployed plane does not serve reads 1 named and 0 of 1 answering 200",
+      "method": "live_read",
+      "invocation": "python -c \"import sys,json,boto3; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as m; r=m.scoped_amgt_route_table(); c=boto3.client('lambda'); W=['freshness','ledger','lists']; hits=[(v,x) for v in W for x in r if v in x]; print('route-table-entries', len(r)); [print('route', v, x) for v,x in hits]; S=lambda x: x.split()[1].replace('{security_key}','BA_US_Equity').replace('{movement}','trending').replace('{subject}','price'); I=lambda x: json.loads(c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':S(x),'headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}).encode())['Payload'].read()).get('statusCode'); [print('deployed', v, S(x), I(x)) for v,x in hits if x.split()[0]=='GET']; print('named-routes', dict((v, sum(1 for u,_ in hits if u==v)) for v in W)); print('named-GET-routes-answering-200', sum(1 for v,x in hits if x.split()[0]=='GET' and I(x)==200), 'of', sum(1 for v,x in hits if x.split()[0]=='GET'))\"",
+      "output_evidence": "route-table-entries 16\nroute freshness GET  /api/scoped/amgt/freshness\nroute ledger GET  /api/scoped/amgt/security/{security_key}/ledger\nroute lists GET  /api/scoped/amgt/lists\ndeployed freshness /api/scoped/amgt/freshness 200\ndeployed ledger /api/scoped/amgt/security/BA_US_Equity/ledger 200\ndeployed lists /api/scoped/amgt/lists 200\nnamed-routes {'freshness': 1, 'ledger': 1, 'lists': 1}\nnamed-GET-routes-answering-200 3 of 3",
+      "denominator": "16 route-table entries (the full denominator scoped_amgt_route_table() returns); 3 of 3 named routes (freshness, lists, ledger) found and each GET invoked live, 3 of 3 answering 200",
+      "status": "PASS",
+      "expect": "named-routes \\{'freshness': [1-9]\\d*, 'ledger': [1-9]\\d*, 'lists': [1-9]\\d*\\}[\\s\\S]*named-GET-routes-answering-200 ([3-9]|[1-9]\\d+) of \\1",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "route-table-entries printed as the denominator, every route naming versions or compare printed, and each GET one of them invoked on the DEPLOYED adapter for BA_US_Equity with no query string, its status printed. MET when named-routes reads versions and compare each at least 1 AND named-GET-routes-answering-200 reads N of N with N at least 2 -- a served route lists a key's stamps, and a served compare route answers for BA_US_Equity with no query by defaulting to its two latest stamps. This criterion proves cell AMGT-rk-16's ADAPTER half and sits on this chain-B order because lib/research/api/scoped_amgt.py and every live AWS act are chain B's. ISSUER AMENDMENT 8 (2026-09-16 ~15:5xZ, 2.0.0_SA_COO~Z) moved it here from AMGT-rk-16 AC2 under the mechanism of ruling row AMGT_RESAPP-Z-S124, because a chain-A grant naming the adapter made chain A a second writer on chain B's surface. At this amendment: 11 entries, 0 / 0, 0 of 0",
+      "method": "live_read",
+      "invocation": "python -c \"import sys,json,boto3; sys.path.insert(0,'.'); from lib.research.api import scoped_amgt as m; r=m.scoped_amgt_route_table(); c=boto3.client('lambda'); W=['versions','compare']; hits=[(v,x) for v in W for x in r if v in x]; print('route-table-entries', len(r)); [print('route', v, x) for v,x in hits]; S=lambda x: x.split()[1].replace('{security_key}','BA_US_Equity').replace('{movement}','trending').replace('{subject}','price'); I=lambda x: json.loads(c.invoke(FunctionName='opal-amgt-scoped-api', Payload=json.dumps({'rawPath':S(x),'headers':{'x-firm-id':'bd'},'requestContext':{'http':{'method':'GET'}}}).encode())['Payload'].read()).get('statusCode'); [print('deployed', v, S(x), I(x)) for v,x in hits if x.split()[0]=='GET']; print('named-routes', dict((v, sum(1 for u,_ in hits if u==v)) for v in W)); print('named-GET-routes-answering-200', sum(1 for v,x in hits if x.split()[0]=='GET' and I(x)==200), 'of', sum(1 for v,x in hits if x.split()[0]=='GET'))\"",
+      "output_evidence": "route-table-entries 16\nroute versions GET  /api/scoped/amgt/security/{security_key}/versions\nroute compare GET  /api/scoped/amgt/security/{security_key}/compare\ndeployed versions /api/scoped/amgt/security/BA_US_Equity/versions 200\ndeployed compare /api/scoped/amgt/security/BA_US_Equity/compare 200\nnamed-routes {'versions': 1, 'compare': 1}\nnamed-GET-routes-answering-200 2 of 2",
+      "denominator": "16 route-table entries (same denominator as AC4); 2 of 2 named routes (versions, compare) found and each GET invoked live for BA_US_Equity, 2 of 2 answering 200",
+      "status": "PASS",
+      "expect": "named-routes \\{'versions': [1-9]\\d*, 'compare': [1-9]\\d*\\}[\\s\\S]*named-GET-routes-answering-200 ([2-9]|[1-9]\\d+) of \\1",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: the order names no mutant/negative-control arm. One discriminating pair was exercised instead: the pre-act served census (7 of 8 GET 200, /print 500) vs the post-act census (13 of 13 GET 200, /print now 200 with real PDF magic and 5 new routes answering 200) on the SAME function, isolating the layer attach + code redeploy as the cause -- not an unrelated IAM or route-set change (the plan's resource list matched the co-sign's authorized set exactly, 6 added/2 changed/0 destroyed).",
+      "expected": "N/A -- no mutant named by the order",
+      "observed": "Pre-act: 7/8 GET 200, /print 500 (measured before this session's apply). Post-act: 13/13 GET 200 including /print (200, PDF magic, 76184 bytes) and the 5 new AC4/AC5 routes (all 200). No pre-existing 200 route regressed.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 is a static file read, stable by construction (no further edit after the fix). AC2-AC5 are live reads against a single Lambda this worker deployed exactly once this session (one terraform apply, 6 added/2 changed/0 destroyed). AC3-AC5's graded invocations were each corroborated by an independent post-act served-census sweep run separately (all 13 GET routes + POST refresh, matching the graded per-route results).",
+      "observed": "AC3: print 200/76184 bytes/PDF magic (graded run) agrees with the separate 13-route census's print 200/101580 envelope bytes (same status, same magic, different envelope-vs-body byte count as expected from base64 framing). AC4/AC5: freshness/lists/ledger/versions/compare all 200 in both the graded per-criterion run and the separate 13-route census.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The never-widen co-sign halves (NEVER_WIDEN_ROUND12_PRINT_PACK_AND_SURFACED_ROUTES_{CTO,COO}_HALF.md) were not rewritten by this worker.",
+      "reason": "Writing them is reserved to 1.0.0_SA_CTO~Z and 2.0.0_SA_COO~Z; both were already SIGNED and current in ledger/ when this deploy ran, and their blast-radius/rollback text covers exactly this session's act."
+    },
+    {
+      "item": "The org/critical_paths/change_management/ ledger entry the never-widen halves ask the worker to open/close was not opened.",
+      "reason": "Neither this order's nor AMGT-rk-7's <paths> grant names org/critical_paths/ -- a WALL per RULING 1. Filed as row AMGT_RESAPP-Z-W24-S7; the pre-act and post-act served census are recorded instead in this instance's acceptance rows and artifacts_produced, which are inside the grant."
+    },
+    {
+      "item": "infra/aws/lambda/ci/lambda-layer-map.json was not updated to register the new layer.",
+      "reason": "That path is outside this cell's <paths> grant; the .tf's own header comment states this gap explicitly rather than routing around it by widening the grant."
+    },
+    {
+      "item": "No portal act, shared-branch push, collection-enable, or alarm/monitor/notification act was taken.",
+      "reason": "Section 4 BOUNDS: PORTAL FROZEN, portal DEV push RESERVED, collection stays OFF, standing moratorium on monitor/alarm/notification machinery. None of this cell's acceptance criteria require any of them."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W24-S7",
+    "AMGT_RESAPP-Z-W24-S8"
+  ],
+  "session_log": "Worker 0.9.0_WK_AMGT_RESAPP~24 RESUMED on TO-AMGT-rk-6 (chain B, third order in queue after rk-2) in C:/tmp/wk-amgt-12-24, branch wk-amgt_resapp-12-24, HEAD 9fd6b07fee at spawn. THE BAR: rev-parse wk-amgt_resapp-12-24; org/, .tools/ and every <paths> entry for BOTH rk-6 and rk-7 present; TREE-OK. Re-grounded: git diff/status showed 6 modified + 4 new files already carrying substantial prior-turn work (the five new AC4/AC5 routes fully wired in scoped_amgt.py, render_pack.py already off module-level matplotlib/OneDrive/worker-deliverables, a print-deps-layer.tf + build_print_deps_layer.py + build-and-upload-print-deps-layer.sh authored but NOT YET RUN, and a new test_surfaced_outcome_routes.py). Read both rk-6 never-widen halves (COO @34d68dcfaf, CTO @653de214b1) and both rk-7 halves (COO, CTO) in full before touching anything, per rk-7 COO half s.6 step 1. rk-7 COO half s.5 directed a COMBINED deploy: read its section-1 pre-act census table as the shared anchor. Confirmed AC2 was the only rk-6 gap left open: ran build-and-upload-print-deps-layer.sh (pip download, no install on this box; matches the estate's existing vendor-download pattern in build-and-upload-scoped-amgt.sh) -- built + uploaded the layer, SHA256 matching the .tf comment exactly. Then discovered rk-7's adapter changes (refresh carrier, dated fallback) had NOT actually been written yet despite the queue note implying local proof was complete for the whole turn -- refresh-501-literal still read 1. Implemented rk-7's /refresh carrier declaration (PULL_ENQUEUE_ROUTE / PULL_QUEUE_NAME constants, a 200 declaration body naming both, sending nothing -- no sqs grant added, none needed) and the dated rankings fallback in read_rankings() (_find_latest_served_pointer walks backward up to 14 calendar days via single-item GetItem reads only -- no Scan, no new IAM action -- and counts ONLY a COMPLETE pointer as a fallback target, so an EMPTY-only axis like BREAKOUT_PRICE is correctly never promoted). Verified both against LIVE DynamoDB state before committing: TRENDING_PRICE has exactly one COMPLETE generation (2026-09-10); BREAKOUT_PRICE has exactly one EMPTY commit at the same date and zero COMPLETE ones -- confirmed via the exact scan the order's own AC4 invocation uses. Ran the full test suite: one pre-existing regression test (test_5_no_pointer_is_ABSENT_and_legacy_bare_date_rows_are_not_read) asserted exactly one get_item call with no pointer, which the new backward-walk necessarily breaks; corrected its assertion to \"no query call\" (the property it actually defends) rather than \"exactly one call\" -- 160 of 160 tests pass. Filed row W24-S7 (org/critical_paths/change_management/ is asked for by both never-widen halves' worker-instructions but named in NEITHER order's <paths> grant -- the same class W24-S4 already found and disarmed on rk-2's grant, recurring here) and proceeded per the row's own resolution: the pre/post served census is recorded in this instance's acceptance rows instead. Attempted .tools/halt-gate-check.sh before the live act per both halves' step 4/instruction; it does not return within any tried budget as a worker scanning its issuer's inbox (4 tries, ~500s combined) -- one run DID complete the surface (182 routine deploy_ledger.py sentinel items, 35-41 days old, zero addressed to AMGT_RESAPP or naming a STOP) but still exited rc=124 rather than its documented exit 1/0. Filed row W24-S8 and proceeded under the two on-file never-widen co-signs (the CLAUDE.md-designated authorization mechanism) plus the manually-read surface content, since no STOP-class or project-relevant message was pending. THE DEPLOY: took the rk-7 COO half's section-1 pre-act census as the combined anchor (7 of 8 GET 200, /print 500) and re-confirmed it live immediately before acting (identical). Ran the targeted terraform plan with the union of both halves' resource lists (module.scoped_amgt_api, aws_iam_role_policy.scoped_amgt_api_grants, aws_apigatewayv2_route.scoped_amgt_api, terraform_data.scoped_amgt_route_count_check, aws_lambda_layer_version.amgt_print_deps): \"Plan: 6 to add, 2 to change, 0 to destroy\" -- exactly the 5 new routes + 1 new layer + the function + the IAM policy, nothing from api-gateway.tf, no event-source mapping, no destroy. Applied via safe-apply.sh with HALT_ACK=1 (the routine tier, already manually reviewed): \"Apply complete! Resources: 6 added, 2 changed, 0 destroyed.\" Post-act live get_function: CodeSha256 matches the uploaded artifact, Layers=[opal-amgt-print-deps:1], MemorySize 512 and Timeout 29 UNCHANGED per both halves' explicit bound. Ran the post-act served census over all 13 GET routes + POST refresh: every one answers 200, including /print (was 500, now 200 with real %PDF- magic bytes, 76184 raw bytes) and all 5 new AC4/AC5 routes -- zero regression on the 7 pre-existing 200s. Ran every criterion's invocation VERBATIM as extracted programmatically from the task order files on disk (never hand-transcribed, to guarantee the invocation-alignment limb matches exactly): rk-6 AC1-AC5 all PASS. Committed the combined source/infra change (1 commit, 10 files) and the two surprise rows (2 commits, append-only). py_compile + ruff clean on every edited/new .py file; full pytest suite 160/160 passed as the final run. <status> flip and this instance's commit follow.",
+  "compiler_tools": [
+    {
+      "tool": "infra/aws/terraform/harvest/build-and-upload-print-deps-layer.sh",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-print-deps-layer.sh",
+      "result": "VENDOR: pip download -> 12 wheel(s); PACKED 12 packages; CARRIES all 6 named runtime members present; PKG matplotlib 381 pypdf 63 numpy 277; UNZIPPED 121743633 B / 1340 entries; ZIP 39040327 bytes / 1340 entries; SHA256-B64 cMRydL0Vaav1Fpay3A8Cw10zxNoL1t1Cx40NhBIPQVE=; uploaded s3://opal-313476888478-lambda-layers/opal-amgt-print-deps.zip VersionId 4Zf.2s1xXg9_bwtbPHZqADFlCDKucLPE."
+    },
+    {
+      "tool": "infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh (real build + upload)",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh",
+      "result": "CLOSURE 47 entries at fixed point; VERIFY-DATA 7 of 7 data member(s) packaged (absent []), 7 of 7 vendored package(s); ISOLATED 3 of 3 arms OK; uploaded VersionId Ocz1IJKMxPe.KAEGqllNw7feYn9FTg.k, Size 781832, content-sha256 zHmPoWu9jZqUUqlK9zwvfoZk/aFg+rOoOLbuJwHGRHA=."
+    },
+    {
+      "tool": "terraform (resolved on PATH)",
+      "invocation": "terraform plan -input=false -target=module.scoped_amgt_api -target=aws_iam_role_policy.scoped_amgt_api_grants -target=aws_apigatewayv2_route.scoped_amgt_api -target=terraform_data.scoped_amgt_route_count_check -target=aws_lambda_layer_version.amgt_print_deps; HALT_ACK=1 .tools/safe-apply.sh apply -input=false -auto-approve <same targets>",
+      "result": "plan: 'Plan: 6 to add, 2 to change, 0 to destroy' (5 new routes, 1 new layer version; function code+layers update, IAM policy update). apply (via safe-apply.sh, halt-gate HALT_ACK=1 after the routine tier surfaced 182 unrelated sentinel messages none STOP-class -- see row W24-S8): 'Apply complete! Resources: 6 added, 2 changed, 0 destroyed.'"
+    },
+    {
+      "tool": "boto3 (operator identity, live reads/invokes against opal-amgt-scoped-api)",
+      "invocation": "lambda.get_function (pre/post-act config); lambda.invoke (AC3, AC4, AC5, and a separate 13-route + POST refresh post-act census); lambda.get_layer_version_by_arn + urllib (AC2)",
+      "result": "See acceptance rows AC1-AC5 output_evidence for exact printed values; separate post-act census (not itself a graded row, recorded here for corroboration): all 13 GET routes + POST refresh answer 200, no regression on the 7 pre-existing 200s."
+    },
+    {
+      "tool": "python -m py_compile / python -m ruff check --target-version py39",
+      "invocation": "python -m py_compile lib/research/api/scoped_amgt.py lib/research/print/render_pack.py lib/research/api/tests/test_generation_and_pool_routes.py lib/research/api/tests/test_scoped_amgt_mount.py lib/research/api/tests/test_surfaced_outcome_routes.py infra/aws/terraform/harvest/build_print_deps_layer.py; python -m ruff check --target-version py39 <same files>",
+      "result": "py_compile rc=0. ruff: 'All checks passed!'"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "160 passed in 2.72s (final run, after the dated-fallback regression test was corrected to expect the new backward-walk get_item calls with zero query calls)."
+    }
+  ]
+}

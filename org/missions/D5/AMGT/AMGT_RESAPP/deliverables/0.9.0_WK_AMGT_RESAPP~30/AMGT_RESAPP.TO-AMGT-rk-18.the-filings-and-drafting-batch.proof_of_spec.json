@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-18",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8270e72c9e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-18.the-filings-and-drafting-batch.md"
+  },
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "49aedcf88b"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~30",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-data-harvest/filings/v1/<security_key>/<accession>.{source,analysis}.json",
+      "kind": "s3_object",
+      "commit_or_etag": "batch-write-2026-09-17T0213-0232Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "python -m lib.research.filings.batch --universe .scratch/universe_32_no_ba.json --write-pool (ANTHROPIC_API_KEY via comp-secrets): 11 of 11 fetchable names analyzed (ASML_NA_Equity, BABA_US_Equity, COST_US_Equity, HAL_US_Equity, HD_US_Equity, INTU_US_Equity, KMB_US_Equity, NU_US_Equity, PBR_US_Equity, SAP_GY_Equity, VLO_US_Equity), 0 UNRESOLVED-SOURCE, USD 6.2791 total (well under the ~USD 36 authorized). Read-back AC2: filings_objects 24, names_with_analysis 12 of 33 attempted, 21 missing each with the named reason 'filing_identity.source is none: no cik and expected form to fetch by' (no usable EDGAR CIK -- non-US listings). BA_US_Equity deliberately excluded from this run's universe and its object timestamps (2026-09-15 09:30-09:37Z) are unchanged by this order.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/drafting/v1/<security_key>.json",
+      "kind": "s3_object",
+      "commit_or_etag": "batch-write-2026-09-17T0213-0232Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Written by the SAME batch.py --write-pool run (run_one() calls drafting_build.build_drafting_document() immediately after analysis, per-name): 12 of 33 attempted drafted (same 11 names plus the pre-existing BA_US_Equity), 21 missing with the same named reasons as AC2 (a name with no landed filing analysis has no drafting document, by construction). BA_US_Equity's drafting object (2026-09-15 09:37:53Z) is unchanged.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "0c53983c8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1 new row appended by textual splice (306 -> 307 total): AMGT_RESAPP-Z-W30-S1, filing AC5's measured 10-vs-11 scheduled-task-count divergence (no new task, no new trigger, no re-enabled task found; this order made zero schtasks calls)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the crosswalk object NAMED, records 89, keyed_names 33, and all 33 names PRINTED. This is THE POPULATION and it is READ AT THE CUT, never typed -- the 56 records without a security_key are the UNRESOLVED half and are NOT authorized. Dry-run whole by the issuer: crosswalk/v1/2026-09-15.json, records 89, keyed_names 33. A keyed_names of 89 is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import boto3,json; s=boto3.client('s3'); B='opal-data-harvest'; p=s.get_paginator('list_objects_v2'); ks=sorted(o['Key'] for pg in p.paginate(Bucket=B,Prefix='crosswalk/v1/') for o in pg.get('Contents',[])); d=json.loads(s.get_object(Bucket=B,Key=ks[-1])['Body'].read()); r=d.get('records') or []; keyed=[x.get('security_key') for x in r if x.get('security_key')]; print('crosswalk', ks[-1]); print('records', len(r)); print('keyed_names', len(keyed)); print('names', sorted(keyed))\"",
+      "output_evidence": "crosswalk crosswalk/v1/2026-09-15.json\nrecords 89\nkeyed_names 33\nnames ['2317_TT_Equity', '9433_JP_Equity', '992_HK_Equity', 'ASML_NA_Equity', 'BABA_US_Equity', 'BA_US_Equity', 'BBSE3_BZ_Equity', 'BP/_LN_Equity', 'COST_US_Equity', 'ENEL_IM_Equity', 'HAL_US_Equity', 'HD_US_Equity', 'HSBA_LN_Equity', 'ICICIBC_IN_Equity', 'IMB_LN_Equity', 'INTU_US_Equity', 'KMB_US_Equity', 'KPN_NA_Equity', 'NG/_LN_Equity', 'NOVN_SW_Equity', 'NU_US_Equity', 'PBR_US_Equity', 'RKT_LN_Equity', 'RMS_FP_Equity', 'ROG_SW_Equity', 'RWE_GR_Equity', 'SAP_GY_Equity', 'SSE_LN_Equity', 'ST_SP_Equity', 'ULVR_LN_Equity', 'VLO_US_Equity', 'WALMEX*_MM_Equity', 'ZURN_SW_Equity']",
+      "denominator": "89 total crosswalk records; 33 of 89 carry a security_key (keyed_names)",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*records 89)(?=[\\s\\S]*keyed_names 33)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "filings_objects and names_with_analysis PRINTED, attempted 33, and analysed_of_attempted as N of 33 with the MISSING NAMES LISTED. MET when analysed_of_attempted reads 33 of 33, OR when every missing name carries a NAMED REASON in the evidence read from the run's own output (no filing found at EDGAR, fetch refused, analysis refused) -- a refusal is an outcome, a SILENT shortfall is not. At the cut names_with_analysis read 5 (BA, BABA, COST, HD, SAP) over 10 objects. A run that lands fewer than it attempted and cannot name the difference is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import boto3,json; s=boto3.client('s3'); B='opal-data-harvest'; p=s.get_paginator('list_objects_v2'); ks=[o['Key'] for pg in p.paginate(Bucket=B,Prefix='filings/v1/') for o in pg.get('Contents',[])]; names=sorted(set(k.split('/')[2] for k in ks if len(k.split('/'))>3)); an=sorted(set(k.split('/')[2] for k in ks if k.endswith('.analysis.json'))); cw=sorted(o['Key'] for pg in p.paginate(Bucket=B,Prefix='crosswalk/v1/') for o in pg.get('Contents',[])); d=json.loads(s.get_object(Bucket=B,Key=cw[-1])['Body'].read()); want=sorted(x.get('security_key') for x in (d.get('records') or []) if x.get('security_key')); miss=[n for n in want if n not in an]; print('filings_objects', len(ks)); print('names_present', len(names)); print('names_with_analysis', len(an)); print('attempted', len(want)); print('analysed_of_attempted', sum(1 for n in want if n in an), 'of', len(want)); print('missing_count', len(miss)); print('missing', miss)\"",
+      "output_evidence": "filings_objects 24\nnames_present 12\nnames_with_analysis 12\nattempted 33\nanalysed_of_attempted 12 of 33\nmissing_count 21\nmissing ['2317_TT_Equity', '9433_JP_Equity', '992_HK_Equity', 'BBSE3_BZ_Equity', 'BP/_LN_Equity', 'ENEL_IM_Equity', 'HSBA_LN_Equity', 'ICICIBC_IN_Equity', 'IMB_LN_Equity', 'KPN_NA_Equity', 'NG/_LN_Equity', 'NOVN_SW_Equity', 'RKT_LN_Equity', 'RMS_FP_Equity', 'ROG_SW_Equity', 'RWE_GR_Equity', 'SSE_LN_Equity', 'ST_SP_Equity', 'ULVR_LN_Equity', 'WALMEX*_MM_Equity', 'ZURN_SW_Equity']\n\nSUPPLEMENTARY, from the batch module's OWN plan() function (lib/research/filings/batch.py), run over the same 33-name universe subset: every one of the 21 missing names carries the SAME named reason -- \"filing_identity.source is 'none': no cik and expected form to fetch by\" -- i.e. no usable SEC EDGAR CIK for a non-US listing. would_fetch 12 of 33 (11 run this order + BA_US_Equity already analyzed from the prior pilot and deliberately excluded from this run, per this order's bound). BATCH DONE (this order's real run, 32-name universe excluding BA): 11 of 11 analyzed, 0 UNRESOLVED-SOURCE, USD 6.2791.",
+      "denominator": "33 attempted (all crosswalk keyed_names); 12 of 33 analysed; 21 of 33 missing, every missing name named with a reason from batch.py's own plan()",
+      "status": "PASS",
+      "status_reason": "analysed_of_attempted reads 12 of 33, not 33 of 33, but every one of the 21 missing names carries the SAME named, run-derived reason (no EDGAR CIK for a non-US listing) -- the second MET branch of this criterion, never a silent shortfall.",
+      "expect": "(?=[\\s\\S]*analysed_of_attempted 12 of 33)(?=[\\s\\S]*missing_count 21)(?=[\\s\\S]*filing_identity\\.source is 'none')"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "drafting_objects and drafted_names PRINTED, attempted 33, and drafted_of_attempted as N of 33 with the MISSING NAMES LISTED. MET when drafted_of_attempted reads 33 of 33, OR when every missing name carries a NAMED REASON -- and a name with no landed FILING ANALYSIS is an ACCEPTABLE reason here, because drafting reads the analysis, so AC2's missing list and this one may legitimately overlap and the evidence SAYS SO. At the cut drafted_names read 5 over 5 objects, one per name. A silent shortfall is NOT met",
+      "method": "command",
+      "invocation": "python -c \"import boto3,json; s=boto3.client('s3'); B='opal-data-harvest'; p=s.get_paginator('list_objects_v2'); ks=[o['Key'] for pg in p.paginate(Bucket=B,Prefix='drafting/v1/') for o in pg.get('Contents',[])]; got=sorted(set(k.split('/')[2].replace('.json','') for k in ks if k.endswith('.json') and len(k.split('/'))==3)); cw=sorted(o['Key'] for pg in p.paginate(Bucket=B,Prefix='crosswalk/v1/') for o in pg.get('Contents',[])); d=json.loads(s.get_object(Bucket=B,Key=cw[-1])['Body'].read()); want=sorted(x.get('security_key') for x in (d.get('records') or []) if x.get('security_key')); miss=[n for n in want if n not in got]; print('drafting_objects', len(ks)); print('drafted_names', len(got)); print('attempted', len(want)); print('drafted_of_attempted', sum(1 for n in want if n in got), 'of', len(want)); print('missing_count', len(miss)); print('missing', miss)\"",
+      "output_evidence": "drafting_objects 12\ndrafted_names 12\nattempted 33\ndrafted_of_attempted 12 of 33\nmissing_count 21\nmissing ['2317_TT_Equity', '9433_JP_Equity', '992_HK_Equity', 'BBSE3_BZ_Equity', 'BP/_LN_Equity', 'ENEL_IM_Equity', 'HSBA_LN_Equity', 'ICICIBC_IN_Equity', 'IMB_LN_Equity', 'KPN_NA_Equity', 'NG/_LN_Equity', 'NOVN_SW_Equity', 'RKT_LN_Equity', 'RMS_FP_Equity', 'ROG_SW_Equity', 'RWE_GR_Equity', 'SSE_LN_Equity', 'ST_SP_Equity', 'ULVR_LN_Equity', 'WALMEX*_MM_Equity', 'ZURN_SW_Equity']\n\nThis missing list is IDENTICAL to AC2's missing list, satisfying the criterion's explicit accepted overlap: every missing drafting document traces to a missing filing analysis, which itself carries the named EDGAR-identity reason.",
+      "denominator": "33 attempted; 12 of 33 drafted; 21 of 33 missing, identical set to AC2's missing names",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*drafted_of_attempted 12 of 33)(?=[\\s\\S]*missing_count 21)(?=[\\s\\S]*IDENTICAL to AC2)"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the module denominator and every vendor count PRINTED. This clause RECORDS the egress surface and does NOT gate it: Andrew authorized egress as needed on 2026-09-16, so a nonzero OTHER count is not a failure, it is a vendor your report must NAME. At the cut, measured by the issuer over these same modules: anthropic 14, edgar 12, sec.gov 2, every other listed vendor 0. MET when the counts are printed and every vendor with a nonzero count is named in the evidence",
+      "method": "command",
+      "invocation": "python -c \"import os; D=('lib/research/filings','lib/research/drafting'); AUTH=('anthropic','sec.gov','edgar'); OTHER=('lusha','clearbit','apollo','seekingalpha','ycharts','brightdata','openai','serpapi','rapidapi'); j=''.join(open(d+'/'+f,encoding='utf-8',errors='replace').read().lower() for d in D for f in sorted(os.listdir(d)) if f.endswith('.py')); mods=[d+'/'+f for d in D for f in sorted(os.listdir(d)) if f.endswith('.py')]; print('modules', len(mods)); [print('AUTHORIZED', v, j.count(v)) for v in AUTH]; [print('OTHER', v, j.count(v)) for v in OTHER]; print('other_total', sum(j.count(v) for v in OTHER))\"",
+      "output_evidence": "modules 11\nAUTHORIZED anthropic 14\nAUTHORIZED sec.gov 2\nAUTHORIZED edgar 12\nOTHER lusha 0\nOTHER clearbit 0\nOTHER apollo 0\nOTHER seekingalpha 0\nOTHER ycharts 0\nOTHER brightdata 0\nOTHER openai 0\nOTHER serpapi 0\nOTHER rapidapi 0\nother_total 0",
+      "denominator": "11 of 11 .py modules under lib/research/filings/ and lib/research/drafting/ scanned",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*modules 11)(?=[\\s\\S]*AUTHORIZED anthropic 14)(?=[\\s\\S]*AUTHORIZED edgar 12)(?=[\\s\\S]*other_total 0)"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "opal_shaped_tasks and baseline_tasks PRINTED, with added and removed dicts (empty when nothing moved). MET when names_match_baseline is True -- the TASK NAME SET is compared against the pre-cut baseline, never a bare count. ISSUER AMENDMENT 18: the bare count is a FLAKY INSTRUMENT against Windows Task Scheduler's LIST enumeration, which this order's own run measured non-atomically -- one query read 10, the issuer's independent re-read seconds later read 11 with the IDENTICAL 11 task names, and no schtasks call was made by this order's own session. A count that drifts between two reads of an UNCHANGED system is the instrument's noise floor, not evidence of a new, removed or re-enabled task; the set comparison is invariant to that noise and still catches the three named failure shapes (a new task, a re-enabled DISABLED task, or a genuinely lost task) because any of those changes added or removed would print. added={} and removed={} is NOT met on any nonzero entry",
+      "method": "command",
+      "invocation": "python -c \"import subprocess,collections; out=subprocess.run(['schtasks','/query','/fo','LIST'],capture_output=True,text=True,errors='replace').stdout; ls=sorted(l.split(':',1)[1].strip() for l in out.split(chr(10)) if 'TaskName' in l and ('opal' in l.lower() or 'bloomberg' in l.lower() or 'harvest' in l.lower())); have=collections.Counter(ls); base=collections.Counter(['\\\\Bloomberg Updater','\\\\Opal Data Harvest - Local Publications','\\\\OpalResearch-ExecManagement','\\\\OpalResearch-FilingsAnalyzer','\\\\OPAL_autolaunch_agents','\\\\OPAL_BBGTML_daily_pull','\\\\OPAL_BBGTML_freshness_check','\\\\OPAL_BLOOMBERG-FreezeTripwire','\\\\OPAL_BLOOMBERG-FreezeTripwire','\\\\OPAL_D7_ticket_intake','\\\\OPAL_vendor_watch']); added=have-base; removed=base-have; print('opal_shaped_tasks', sum(have.values())); print('baseline_tasks', sum(base.values())); print('added', dict(added)); print('removed', dict(removed)); print('names_match_baseline', added==collections.Counter() and removed==collections.Counter())\"",
+      "output_evidence": "opal_shaped_tasks 11\nbaseline_tasks 11\nadded {}\nremoved {}\nnames_match_baseline True",
+      "denominator": "11 of 11 opal-shaped task-name entries compared against the 11-entry pre-cut baseline (byte-identical name set)",
+      "status": "PASS",
+      "status_reason": "Re-cut by ISSUER AMENDMENT 18 from a bare count (which this order's own AC5-FAIL row AMGT_RESAPP-Z-W30-S1 showed drifts 10-vs-11 across two reads of an unchanged system, a Windows Task Scheduler LIST-enumeration artifact, not a real task-set change) to a name-set comparison. This run reads opal_shaped_tasks 11, baseline_tasks 11, added {}, removed {}, names_match_baseline True -- the set is byte-identical to the pre-cut baseline and none of the three named failure shapes (new task, re-enabled DISABLED task, lost task) occurred. AC5 now MET; the order is no longer blocked on it.",
+      "expect": "(?=[\\s\\S]*added \\{\\})(?=[\\s\\S]*removed \\{\\})(?=[\\s\\S]*names_match_baseline True)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This order's counting logic (AC1/AC2/AC3's crosswalk-keyed-name partition, and AC5's schtasks-line filter) is exercised against synthetic/alternate inputs to prove it is genuinely data-driven and not hardcoded to the numbers it happens to report.",
+      "expected": "Feeding a synthetic crosswalk of 3 records (1 keyed, 1 null-keyed, 1 empty) into AC1's own read/filter code should report records=3, keyed_names=1, not the live 89/33; an empty crosswalk should report 0/0.",
+      "observed": "FIRED-AS-EXPECTED. Synthetic 3-record crosswalk: records 3, keyed_names 1. Synthetic empty crosswalk: records 0, keyed_names 0. Separately, AC5's own /fo LIST /V read shows OPAL_BLOOMBERG-FreezeTripwire genuinely renders as 2 distinct LIST blocks (2 triggers) rather than 1 -- the exact reason the simple-filter count (10) diverges from a distinct-task-name count (9), confirming the instrument counts LIST blocks, not task names, precisely as AC5's own invocation is written to do.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2's full census invocation (filings_objects, names_with_analysis, analysed_of_attempted) run twice in succession against the same live S3 store, no writes between runs; AC5's schtasks census run three times in succession.",
+      "observed": "AC2: both runs read analysed_of_attempted 12 of 33, byte-identical on the deciding numbers. AC5: all three runs read opal_shaped_tasks 10, byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "BA_US_Equity was NOT re-run by this order, though it carries a usable EDGAR filing identity and would otherwise have appeared in the fetchable set.",
+      "reason": "This order's own bound explicitly forbids touching BA_US_Equity's filings document -- that regeneration belongs to AMGT-rk-15's producer change (numeric driver series). BA's existing document (from the 5-name pilot, 2026-09-15) already counts toward AC2/AC3's analysed/drafted totals, so excluding it from this order's OWN run does not reduce the measured coverage."
+    },
+    {
+      "item": "No repair made to lib/research/filings/batch.py's main() despite its module docstring claiming a name lacking filing identity becomes 'an UNRESOLVED-SOURCE OBJECT of its own when the batch runs for real' -- measured: main() only iterates planned['fetchable'] and never writes an UNRESOLVED-SOURCE object for the 21 no-identity names.",
+      "reason": "This order's bounds prefer RUNNING the producers over editing them, and this criterion (AC2/AC3) is satisfiable without that write: every missing name's reason is available from the SAME module's own plan() function, which this instance's evidence records directly. Repairing main() to also persist the reason to S3 would be a widening this order does not name; left for the order that owns lib/research/filings/ as a build surface."
+    },
+    {
+      "item": "The AC5 scheduled-task divergence (10 measured vs 11 at the issuer's cut) is recorded, not resolved.",
+      "reason": "This worker made zero schtasks calls, so its cause (most plausibly the 'One Time Only' ephemeral triggers on OPAL_D7_ticket_intake/OPAL_vendor_watch, or a FreezeTripwire trigger-count change) is outside this order's write surface and outside its authorized egress; filed as row AMGT_RESAPP-Z-W30-S1 for the CVO/COO to disposition."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W30-S1: AC5's literal bar (opal_shaped_tasks EXACTLY 11) is not met at grading (measured 10), though none of the three named failure shapes occurred and this order made zero schtasks calls; GROUNDED, INERT, UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~30/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "lib.research.filings.batch (unmodified)",
+      "invocation": "python -m lib.research.filings.batch --universe .scratch/universe_32_no_ba.json --write-pool",
+      "result": "11 of 11 analyzed, 0 UNRESOLVED-SOURCE, USD 6.2791 total; log at .scratch/batch_run.log (not committed, scratch only)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved); 1 file(s), all new rows carry their step-7/step-10 fields"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4,AC5",
+      "result": "see the worker report -- run from THIS worktree's own copy"
+    }
+  ]
+}
