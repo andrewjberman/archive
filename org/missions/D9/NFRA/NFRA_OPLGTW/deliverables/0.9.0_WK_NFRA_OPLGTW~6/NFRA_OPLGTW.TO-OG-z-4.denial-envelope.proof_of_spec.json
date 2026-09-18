@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPLGTW.TO-OG-z-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "e09219470f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+    "vintage_commit": "5f177fa6976de0663eafa559f654d8cf3368cc05",
+    "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-z-4.denial-envelope.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPLGTW~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "kind": "script",
+      "commit_or_etag": "f49ea6ce48d82b28b85304980cab0cbd38656595",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_PolicyGuardedMCP.call_tool()'s denial branch now returns mcp.types.CallToolResult(content=[TextContent(json.dumps(denial))], structuredContent=denial, isError=True) instead of the bare denial dict. data_entitlement.py's decide()/tool_denial() (WHICH calls are denied) is unedited; the audit line and list_tools() are unedited. Nothing deploys from this order (BOUNDS); committed at f49ea6ce48, worktree bytes at proof-check time match the committed bytes.",
+      "artifact_covered_by": ["OGZ4-AC1", "OGZ4-AC2", "OGZ4-AC3", "OGZ4-AC4", "OGZ4-AC5"],
+      "introduces": ["isError=True,"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_schwab_denial_envelope.py",
+      "kind": "test",
+      "commit_or_etag": "f49ea6ce48d82b28b85304980cab0cbd38656595",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New this cell. Reuses tests/acceptance/conftest.py's og_v2 fixture (the same real Starlette app / real dispatch chokepoint tests/test_schwab_asset_policy.py already reaches from tests/) to run a denied and a permitted schwab_query call through the actually-registered tool and read the MCP protocol's own isError flag via test_principal_cutover.py's _tool() helper. Tests are not deployed.",
+      "artifact_covered_by": ["OGZ4-AC1", "OGZ4-AC2", "OGZ4-AC3"],
+      "introduces": ["def test_ogz4_ac01", "def test_ogz4_ac02"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~6/probes/og_z4.py",
+      "kind": "script",
+      "commit_or_etag": "f49ea6ce48d82b28b85304980cab0cbd38656595",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New this cell. AC3: depth-mirrored scratch-copy mutant control (same shape as TO-OG-q-5's og_q5.py AC4), removes the isError=True return in the scratch copy and requires AC1 to FAIL there while AC2 still PASSES. AC5: reads app/tools.py at this HEAD via inspect.getdoc/getsource and checks the class docstring's 'terminal tool error' claim against the denial branch's isError=True. A deliverable probe script, not deployed.",
+      "artifact_covered_by": ["OGZ4-AC3", "OGZ4-AC5"],
+      "introduces": ["def ac3", "def ac5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "OGZ4-AC1",
+      "criterion_verbatim": "OGZ4-AC1 (test_ogz4_ac01) -- through the real app on OG-v-2's live-app harness, a guard-denied tool call returns the MCP error flag TRUE as the protocol result a consumer reads, and its body still carries the same contract error_codes value it carries today; the test prints the flag and the code.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_denial_envelope.py::test_ogz4_ac01 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGZ4-AC1: denied call -- HTTP 200, isError=True, code='entitlement_denied', error_code='ENTITLEMENT_DENIED', body={'error': \"tool 'schwab_query' needs an active data entitlement; this principal has none\", 'guard_denied': True, 'code': 'entitlement_denied', 'error_code': 'ENTITLEMENT_DENIED'}\nOGZ4-AC1: (contrast) permitted call in the same harness -- isError=False\n1 passed in 3.67s",
+      "denominator": "1 of 1 selected test (test_ogz4_ac01, one of 2 tests in the file), run twice (pre-commit and post-commit), identical both times",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGZ4-AC2",
+      "criterion_verbatim": "OGZ4-AC2 (test_ogz4_ac02) -- (difference) in the same harness, a PERMITTED call returns the MCP error flag FALSE, so the flag discriminates and is not set unconditionally; both flags printed side by side.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_denial_envelope.py::test_ogz4_ac02 -q -p no:cacheprovider --color=no",
+      "output_evidence": "OGZ4-AC2: permitted call -- HTTP 200, isError=False, payload_keys=['availability', 'business_date', 'columns', 'complete', 'cursor', 'dataset', 'envelope_version', 'master', 'matched_row_count', 'mode', 'returned_count', 'rows', 'scope', 'source_refs', 'tool', 'totals_basis', 'truncated']\nOGZ4-AC2: (contrast) denied call in the same harness -- isError=True, code='entitlement_denied'\n1 passed in 3.66s",
+      "denominator": "1 of 1 selected test (test_ogz4_ac02, one of 2 tests in the file), run twice (pre-commit and post-commit), identical both times",
+      "status": "PASS",
+      "expect": "(?m)^1 passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGZ4-AC3",
+      "criterion_verbatim": "OGZ4-AC3 -- (mutant control) with the flag-setting line removed in a scratch copy of app/, the probe runs AC1 and AC2 against that copy and passes only if AC1 FAILS while AC2 still passes; it prints both outcomes and leaves no tracked file modified (git status --porcelain before and after, printed and equal).",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 420 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~6/probes/og_z4.py AC3",
+      "output_evidence": "AC3: the scratch copy's app/tools.py carries the isError=True flag-setting return before mutation: True\nAC3: mutated -- the denial branch now returns the plain dict again (the pre-fix shape), so the MCP low-level server's `dict` branch renders isError=False unconditionally.\nAC3: run AC1 (test_ogz4_ac01) against the MUTATED scratch copy -> rc=1 last-line='1 failed in 5.24s' outcome=FAIL\nAC3: run AC2 (test_ogz4_ac02) against the MUTATED scratch copy -> rc=0 last-line='1 passed in 4.35s' outcome=PASS\nAC3: porcelain before == after: True\nVERDICT: PASS-OGZ4-AC3",
+      "denominator": "2 of 2 mutant sub-runs (AC1, AC2) plus 1 of 1 porcelain-equality check, run twice, identical both times",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGZ4-AC3(?![0-9])"
+    },
+    {
+      "criterion_id": "OGZ4-AC4",
+      "criterion_verbatim": "OGZ4-AC4 -- OG-z-1's own guard module still passes unchanged: every denial decision this cell did not touch behaves as before, the pass count printed.",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py -q -p no:cacheprovider --color=no -m \"not live\"",
+      "output_evidence": "OGZ1-AC1 .. OGZ1-AC12 printed, no failures\n12 passed in 12.18s",
+      "denominator": "12 of 12 tests in the module pass, 0 failed, run twice, identical both times",
+      "status": "PASS",
+      "expect": "(?m)^[1-9][0-9]* passed(?![^\\n]*(failed|error))"
+    },
+    {
+      "criterion_id": "OGZ4-AC5",
+      "criterion_verbatim": "OGZ4-AC5 -- the docstring and the code AGREE: the probe prints _PolicyGuardedMCP's docstring lines about the denial and the lines that build the returned result, and passes only if the docstring's claim is true of the code as written at this HEAD (either the code sets the error flag, or the docstring no longer claims a terminal tool error).",
+      "method": "command",
+      "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 420 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~6/probes/og_z4.py AC5",
+      "output_evidence": "AC5: docstring claims 'a terminal tool error': True\nAC5: the denial branch sets the MCP protocol's isError flag True: True\nAC5: docstring and code agree: True\nVERDICT: PASS-OGZ4-AC5",
+      "denominator": "1 of 1 docstring claim checked against 1 of 1 code branch, run twice, identical both times",
+      "status": "PASS",
+      "expect": "(?m)^VERDICT: PASS-OGZ4-AC5(?![0-9])"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OGZ4-AC3's probe removes the CallToolResult(...isError=True...) return this cell adds in a depth-mirrored scratch copy of app/, restoring the pre-fix `return denial` shape.",
+      "expected": "Against the mutant copy, AC1 (the denied-call flag assertion) FAILS; AC2 (the permitted-call flag assertion, which never asserts the denied call's flag) still PASSES.",
+      "observed": "AC1 FAIL ('1 failed in 5.24s'), AC2 PASS ('1 passed in 4.35s'), both discriminating from the real, unmutated worktree where both PASS. git status --porcelain identical before/after (only .scratch/ and .venv-og/ untracked directories present both times); the probe left no tracked file modified.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of OGZ4-AC1/AC2 (pytest) and og_z4.py AC3/AC5 was run twice: once during build/diagnosis (pre-commit), once for this instance's final evidence capture (post-commit at f49ea6ce48).",
+      "observed": "AC1: both runs -> isError=True, identical body and code. AC2: both runs -> isError=False, identical payload_keys, identical contrasting denied-call isError=True. AC3: both runs -> VERDICT: PASS-OGZ4-AC3, identical outcome pair {AC1:FAIL, AC2:PASS} on the mutant and porcelain_equal=True. AC4: both runs -> 12 passed, 0 failed, identical per-criterion prose. AC5: both runs -> VERDICT: PASS-OGZ4-AC5, identical docstring/code agreement read.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "app/data_entitlement.py",
+      "reason": "Not this cell's -- OG-z-1's, merged. WHICH calls are denied is unchanged; only how the denial is signalled changed. Byte-for-byte unchanged throughout this session."
+    },
+    {
+      "item": "tests/acceptance/** (OG-v-2's own test file and harness code)",
+      "reason": "OG-v-2 is OPEN and owns this path per this order's own BOUNDS; read only (test_ogv2_a06 and the og_v2/served_app/moto_world fixtures), never edited. This cell's own test file imports those fixtures rather than modifying them."
+    },
+    {
+      "item": "audit.log_call(...) shape",
+      "reason": "OG-o-1 owns the audit shape; the call site and its arguments are unedited by this cell."
+    },
+    {
+      "item": "list_tools() discovery filtering",
+      "reason": "Explicitly out of scope per this order's own text ('do not touch list_tools()'s discovery filtering'); unedited."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~6/denial-envelope.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.0.2 (Python 3.12, venv .venv-og)",
+      "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_schwab_denial_envelope.py::test_ogz4_ac0<n> -q -p no:cacheprovider --color=no  (n = 1..2)",
+      "result": "2 of 2: rc=0, '1 passed', run twice each, identical deciding values both times"
+    },
+    {
+      "tool": "pytest 9.0.2 (Python 3.12, venv .venv-og) -- OG-z-1's own guard module",
+      "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 300 .venv-og/Scripts/python -m pytest infra/aws/ec2/opal-gateway/tests/test_data_entitlement_guard.py -q -p no:cacheprovider --color=no -m \"not live\"",
+      "result": "rc=0, '12 passed', run twice, identical both times"
+    },
+    {
+      "tool": "og_z4.py probe (mutant control, docstring/code agreement)",
+      "invocation": "cd /c/tmp/wk-oplgtw-6f && timeout 420 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~6/probes/og_z4.py AC3|AC5",
+      "result": "AC3: rc=0, VERDICT: PASS-OGZ4-AC3 (mutant fires; AC1:FAIL, AC2:PASS; porcelain unchanged). AC5: rc=0, VERDICT: PASS-OGZ4-AC5 (docstring and code agree)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/tools.py infra/aws/ec2/opal-gateway/tests/test_schwab_denial_envelope.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~6/probes/og_z4.py",
+      "result": "rc=0, 'OK: pre-commit gate clean for 3 of 3 file(s)'"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~6/NFRA_OPLGTW.TO-OG-z-4.denial-envelope.proof_of_spec.json OGZ4-AC1,OGZ4-AC2,OGZ4-AC3,OGZ4-AC4,OGZ4-AC5",
+      "result": "rc=0, VALID -- 5 acceptance rows, 0 violations, artifact-resolution 3/3 CONTENT-resolved"
+    }
+  ]
+}
