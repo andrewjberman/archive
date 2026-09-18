@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-22",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "49aedcf88b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "62e9cfbf60",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-22.management-posture-producers.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~32",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/management/enrich.py",
+      "kind": "script",
+      "commit_or_etag": "fb8280535a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local library + CLI; exercised live against the pool in AC1/AC2 (7 new management names built and written).",
+      "introduces": [
+        "classify_roster_absence",
+        "CEO_PROFILE_CANNOT_SAY"
+      ],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/management/management.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "fb8280535a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "additionalProperties:false forced this schema change; every object written this run validated against it before its put.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/posture/judge.py",
+      "kind": "script",
+      "commit_or_etag": "fb8280535a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "local library + CLI; exercised live in AC1 (31 new posture names served, 7 real Anthropic calls).",
+      "introduces": [
+        "classify_posture_absence"
+      ],
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/posture/posture.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "fb8280535a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "additive field declared for absence_reason_class (absent-document path is not schema-validated on write, so this is a documentation/consistency addition, not a write-blocking one).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/management_posture_batch.py",
+      "kind": "script",
+      "commit_or_etag": "fb8280535a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the batch driver neither producer had -- run live three times (management --write-pool, posture --write-pool x3, report), each output captured in SESSION_LOG.md.",
+      "introduces": [
+        "keyed_population",
+        "filed_names",
+        "served_names"
+      ],
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "BEFORE this order runs, management_names and posture_names read 5 and 2 respectively (re-measured, may have moved from this document's numbers -- print whatever is actually live); AFTER, both counts increase toward the fixable ceiling (management toward the 12-name filing cap, posture toward 33), with every non-measured name carrying a source-lacks or pull-missed reason, never a silent skip",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3\ns3 = boto3.client('s3')\nmgmt = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='management/v1/')\nposture = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='posture/v1/')\nprint('management_names', len(mgmt.get('Contents', [])))\nprint('posture_names', len(posture.get('Contents', [])))\n\"",
+      "output_evidence": "BEFORE (measured at the cut, re-grounding step): management_names 5, posture_names 2. AFTER this order's runs: management_names 14, posture_names 33 (literal rc=0 output: 'management_names 14' / 'posture_names 33'). management_names is 12 real names (the full 12-of-12 filing ceiling, MEASURED live against filings/v1/ status==RESOLVED) plus 2 pool-average objects (2026-09-15 and 2026-09-18, one per run date). posture_names is the full 33 of 33 keyed names (crosswalk/v1's own MEASURED denominator), including BP/_LN_Equity and NG/_LN_Equity (served, though nested one path-segment deeper -- row AMGT_RESAPP-Z-W32-S3, AC1's flat count is unaffected). Every one of the 24 posture names that did not reach a verdict, and every one of the 5 management names whose roster did not resolve, carries absence_reason_class source-lacks or pull-missed (classify_posture_absence / classify_roster_absence), never a bare reason string with no machine field and never a name silently absent from the store.",
+      "denominator": "management: 14 objects (12 of 12 filing-ceiling names + 2 pool dates) vs a BEFORE count of 6 (5 names + 1 pool date); posture: 33 of 33 keyed names vs a BEFORE count of 2",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "a sampled absent management document carries a two-value classification (source-lacks vs pull-missed, or the worker's actual chosen field/enum names, stated in its report) rather than the free-text-only reason string that exists before this order",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json\ns3 = boto3.client('s3')\nresp = s3.list_objects_v2(Bucket='opal-data-harvest', Prefix='management/v1/')\nsample = [o['Key'] for o in resp.get('Contents', [])][:3]\nfor k in sample:\n    doc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=k)['Body'].read())\n    print(k, doc.get('absence_reason_class', 'FIELD NOT YET NAMED -- worker names its actual field'))\n\"",
+      "output_evidence": "management/v1/ASML_NA_Equity/2026-09-18.json pull-missed | management/v1/BABA_US_Equity/2026-09-15.json FIELD NOT YET NAMED -- worker names its actual field | management/v1/BA_US_Equity/2026-09-15.json FIELD NOT YET NAMED -- worker names its actual field. The field this worker names is `absence_reason_class`, enum source-lacks | pull-missed | null (management.schema.json, additionalProperties:false, this commit). The first of the three sampled keys (S3's own lexicographic order) IS an absent (UNRESOLVED-SOURCE) document and carries the two-value classification correctly (pull-missed: the persisted 20-F carries an empty officer section -- the filing exists, this module's own extraction did not read it). The other two sampled keys (BABA_US_Equity, BA_US_Equity) are RESOLVED documents that PRE-DATE this order (generated 2026-09-15, not re-run here since they already serve and re-running would spend Lusha/SERP credits on names outside this order's 7-name scope) -- they are not absent, so the classification's absence on them is correct in substance (nothing to classify) even though the field key itself is not yet present on those specific pre-existing bytes.",
+      "denominator": "1 of 3 sampled keys is a genuinely absent document (the only kind the classification applies to); 2 of 3 are RESOLVED and pre-date this order",
+      "status": "PASS",
+      "status_reason": "not used -- PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "classify_posture_absence()'s whole-phrase marker set is the ONLY thing separating source-lacks from pull-missed. POSITIVE CONTROL: five real reason strings (a source_object=None roster, a no-CIK UNRESOLVED-SOURCE roster, a parse-failure RESOLVED-filing roster, an identity-unresolved posture reason, a no-comparable posture reason) classify source-lacks/source-lacks/pull-missed/source-lacks/pull-missed. MUTANT: judge._SOURCE_LACKS_MARKERS forced to the empty tuple -- every source-lacks case must now read pull-missed.",
+      "expected": "the five positive-control cases classify as stated above; with the marker set emptied the identity-unresolved posture case flips from source-lacks to pull-missed; restoring the marker set returns it to source-lacks",
+      "observed": "CLEAN: ('source-lacks', ...) ('source-lacks', ...) ('pull-missed', ...) source-lacks pull-missed -- all five match. MUTANT (markers cleared): pull-missed (fired, was source-lacks). RESTORED: source-lacks. This is also the exact bug this cell caught pre-production (marker 'unresolved' as a bare word matched the substring inside a graded-members COUNT, '0 unresolved', misclassifying three real posture names as source-lacks via the WRONG signal though the same final value -- fixed to whole-phrase markers before the production run; documented in SESSION_LOG.md s.3).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's own invocation run twice in sequence against the live pool with no write between the two runs, stdout compared byte-for-byte.",
+      "observed": "RUN1: management_names 14 / posture_names 33. RUN2: management_names 14 / posture_names 33. IDENTICAL.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Declaring Lusha/IR domains for the 7 new management names in domains.json",
+      "reason": "domains.json's own coverage line names only 'the five QA names of AMGT-rj-8'; researching and declaring a new company's domain is new scope (a resolver cell, per that file's own header), not this cell's ruling. All 7 new names correctly read lusha_enrichment.status SKIPPED, absence_reason_class pull-missed."
+    },
+    {
+      "item": "Fixing the S3-key nesting for security keys carrying a literal '/' (BP/_LN_Equity, NG/_LN_Equity)",
+      "reason": "AMGT-rk-23 (FWD-5) is the cell that owns path-safety for a raw security key across the estate (render_pack.py, scoped_amgt.py, and now this cell's own batch driver's served_names()); it is already cut as a separate, disjoint cell in this same round and fixing it here would be scope creep. Row AMGT_RESAPP-Z-W32-S3."
+    },
+    {
+      "item": "Backfilling absence_reason_class onto the 5 pre-existing management documents (BABA/BA/COST/HD/SAP_GY) and 2 pre-existing posture documents (BABA/BA)",
+      "reason": "all 7 are RESOLVED / non-absent; the field is correctly null/absent-of-key on them (nothing to classify). Re-writing them would cost nothing schema-wise but re-running enrich.py's build_document would needlessly re-spend Lusha credits on names outside this order's 7-name scope; not done."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W32-S2: AMGT-rk-22's 7 new management names cost ZERO Lusha/SERP credits -- domains.json declares only the original 5 QA names, so lusha_enrichment.status is SKIPPED and ceo_public_profile is never queried for any of the 7.",
+    "AMGT_RESAPP-Z-W32-S3: BP/_LN_Equity and NG/_LN_Equity's literal '/' lands posture/v1/<key>/<as_of>.json one path-segment deeper than every other name -- the writes succeeded and read back clean, but the key SHAPE differs, exactly the class AMGT-rk-23 (FWD-5) is scoped to census.",
+    "AMGT_RESAPP-Z-W32-S4: running lib/research/posture/judge.py transitively rebuilt a stale cache file (org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~21/candidate_universe.json) OUTSIDE this cell's <paths> grant -- a documented, correct stale-cache rebuild in lib/research/peers/universe.py, left UNCOMMITTED by this worker."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~32/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest lib/research/management/tests/test_management.py lib/research/posture/tests/test_posture.py -q",
+      "result": "48 passed"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/management/enrich.py lib/research/posture/judge.py integrations/bloomberg/research/management_posture_batch.py",
+      "result": "PY_COMPILE_OK"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile + ruff py39 + ds-precommit + naming-gate + to-pipeline-gate + surprise-row-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~32 <...>\" -F <msgfile> -- lib/research/management/enrich.py lib/research/management/management.schema.json lib/research/posture/judge.py lib/research/posture/posture.schema.json integrations/bloomberg/research/management_posture_batch.py",
+      "result": "fb8280535a (5 files, All checks passed, naming-gate WARN on the pre-existing opal-data-harvest bucket name -- not introduced by this cell)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2",
+      "result": "see the worker report (rc is the verdict)"
+    }
+  ]
+}
