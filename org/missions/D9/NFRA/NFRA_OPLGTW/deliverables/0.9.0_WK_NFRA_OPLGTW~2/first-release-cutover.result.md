@@ -151,6 +151,30 @@ AC4/AC9/AC10 FAIL) -- no re-deploy, AC2's own code is idempotent once `deploy_ma
   "NOT-EVALUATED"): OG-p-1's baseline carries no error-count metric, so there is no referent; a PASS would
   be vacuous, a FAIL would measure the wrong thing.
 
-**Final tally: 17 of 20 PASS-by-output, 1 N/A-BY-CONSTRUCTION (AC9), 2 FAIL-as-ruled (AC4, AC10).**
-`py -3.12 .tools/proof-of-spec-check.py <instance> OGR1-AC1..AC20`: **VALID (rc=0)**. `<status>` remains
-`pending` -- AC4 and AC10 keep this order open, as expected and reported plainly.
+**Final tally (R-56 pass): 17 of 20 PASS-by-output, 1 N/A-BY-CONSTRUCTION (AC9), 2 FAIL-as-ruled (AC4, AC10).**
+`py -3.12 .tools/proof-of-spec-check.py <instance> OGR1-AC1..AC20`: **VALID (rc=0)**. `<status>` remained
+`pending` at that pass.
+
+## R-58 pass (msg 97876 @508eb695ca), answering call 21
+
+- **Item 1 (the flip bound, REFUSED as framed / GRANTED in substance).** This order's own bound text said
+  "flip `complete` only when every mechanical criterion passes" -- stricter than the spine, which reads
+  terminality FROM THE PROOF (`surprise-row-gate.py:820-824` `_proof_terminal`). `1.0.0_SA_CTO` measured
+  this instance with `--governing-order` bound: VALID (rc=0) with AC4 and AC10 FAILED and AC9
+  N/A-BY-CONSTRUCTION -- already terminal by proof. The bound text is amended (this issuer's own text,
+  this issuer's to amend); no new spine state minted. `<status>` now flips to `complete` on a VALID proof
+  read, carrying AC4/AC10 as ADJUDICATED FAILS citing R-56 and AC9 as N/A-BY-CONSTRUCTION.
+- **Item 2 (AC21, ADOPTED AS WRITTEN, row `NFRA_OPLGTW-W2-S9`).** `og_r1.py`'s `ac8()` no longer writes L1's
+  ledger-proof text as the literal `"OGR1-AC4 PASS"`: `ac4()` now persists its own measured verdict
+  (`ac4_ok`, denominator, mismatch counts) to `state.json`, and `ac8()` calls a new `_l1_proof_text()`
+  helper that DERIVES the text from that recorded fact. `ac8()`'s close-commit pathspec (a new
+  `_ac8_close_commit_paths()` helper) now includes the sentinel path, closing the second half of the same
+  root cause (the sentinel's real on-disk deletion going uncommitted). Graded AGAINST THE FAILING CASE, per
+  the ruling's own instruction: AC4 was re-run this pass (identical 9/68 CRLF mismatch, unchanged) and its
+  real measured verdict (`False`) fed the derivation live -- the derived text reads
+  `"OGR1-AC4 FAILED (1764e54a16... ) ... digest_mismatch=9 ..."`, never `PASS`. **OGR1-AC21: PASS**
+  (commit `1304801ca6acf9e0a3c5540857840605448720e0`).
+
+**Final tally (R-58 pass): 18 of 21 PASS-by-output, 1 N/A-BY-CONSTRUCTION (AC9), 2 ADJUDICATED FAIL (AC4,
+AC10, citing R-56).** `py -3.12 .tools/proof-of-spec-check.py <instance> OGR1-AC1..AC21`: **VALID (rc=0)**,
+both unbound and `--governing-order`-bound. `<status>` flips to `complete` per the amended bound.
