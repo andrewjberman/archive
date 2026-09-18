@@ -17,20 +17,20 @@
     {
       "path_or_key": "lib/research/api/scoped_amgt.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "CODE ONLY. One line added to read_thesis_bundle(), applied AFTER the rk-24 edit so it composes rather than reverts: bundle['as_of_date'] = (bundle.get('drafting_provenance') or {}).get('filing_date') -- re-exposes the SAME filing_date _drafting_block() already carries in drafting_provenance whenever a document was read (SERVED or INVALID), never re-derived or invented. A name with no filing (drafting_provenance absent, i.e. DRAFTING_ABSENT) gets as_of_date None by the same absence, never a fabricated date. NOT DEPLOYED this session.",
+      "commit_or_etag": "e2d89be7daeb5fb2e04ba45aa52b6320c17b3f2b",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "One line added to read_thesis_bundle(), applied AFTER the rk-24 merge so it composes rather than reverts: bundle['as_of_date'] = (bundle.get('drafting_provenance') or {}).get('filing_date'). DEPLOYED LIVE this act, under the CTO+COO co-sign (533f216c74/6b7d4f2341, HALF 4), as an incrementally-constructed artifact built on top of rk-24's now-live code (this act's own one line only). Live CodeSha256 fkKLVfsAsgXk0Swo/XMAjf+OncnOe0ApEogC0WPYmeU=, matches the uploaded artifact exactly. Verified no-premature-inclusion before build: SCORES_PREFIX/read_scores/bundle[\"scores\"] all ABSENT.",
       "artifact_covered_by": [
         "AC1",
         "AC2"
       ]
     },
     {
-      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "path_or_key": "org/critical_paths/change_management/20260918T0031Z_amgt-rk25-thesis-bundle-as-of-date-20260917_deploy_completion.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "See rk-23's instance for the two rows appended this session (S7, S8); same file, same splice, one commit."
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Change-management ledger: OPENED before the live build+apply, CLOSED with the full pre/post proof string after it."
     }
   ],
   "acceptance": [
@@ -39,10 +39,9 @@
       "criterion_verbatim": "BEFORE this order lands, as_of_date is absent from the served bundle (KeyError-equivalent / None printed, the pre-fix baseline); AFTER, as_of_date equals BA's filing_date, the same value already carried on the drafting object -- record both runs",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\nlam = boto3.client('lambda')\npayload = json.dumps({'rawPath': '/api/scoped/amgt/security/BA_US_Equity/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\nresp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\nbody = json.loads(resp['Payload'].read())\ninner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\nprint('as_of_date', inner.get('as_of_date'))\nprint('drafting_filing_date', (inner.get('drafted_sections') or {}).get('filing_date') if isinstance(inner.get('drafted_sections'), dict) else 'inspect actual shape')\n\"",
-      "output_evidence": "NOT RUN THIS SESSION as the literal live invocation (dispatch forbids any live deploy/write act this session). SUBSTITUTE LOCAL VERIFICATION: constructed read_drafted_sections() returning drafting_status SERVED with drafting_provenance.filing_date '2026-01-30' -> read_thesis_bundle('BA_US_Equity')['as_of_date'] == '2026-01-30' (exact match, not a paraphrase). A second SERVED-shaped construction with filing_date '2025-11-01' under drafting_status INVALID (provenance is still carried for an INVALID document) -> as_of_date == '2025-11-01', confirming as_of_date rides drafting_provenance regardless of the SERVED/INVALID split, matching the cell's own 'the SAME value already carried on the drafting object'.",
-      "denominator": "2 of 2 local scenarios verified (SERVED, INVALID) against constructed inputs; 0 of 1 live BA_US_Equity Lambda invoke (NOT YET EXERCISED, rides the later deploy).",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "This session is bounded to code + local verification only pending the combined CTO+COO never-widen co-sign for all five batch-B acts; the deployed opal-amgt-scoped-api still runs pre-fix bytes (as_of_date absent from the served shape) at HEAD, so the literal invocation would report the pre-fix state and would not evidence this session's fix. Rides the later continuation's actual redeploy.",
+      "output_evidence": "LIVE, under the CTO+COO co-sign (533f216c74/6b7d4f2341), run twice for BA_US_Equity. BEFORE (pre-act, live CodeSha256 Jicv6u3NnACRmmtJbwWRtHLKXNd6WbRYePR3hUino90=): as_of_date=None. AFTER (post-act, live CodeSha256 fkKLVfsAsgXk0Swo/XMAjf+OncnOe0ApEogC0WPYmeU=): as_of_date=2026-01-30, and drafting_provenance.filing_date=2026-01-30 (read the same live response) -- exact match, never re-derived.",
+      "denominator": "2 of 2 live calls (1 BEFORE, 1 AFTER) against the deployed Lambda for BA_US_Equity.",
+      "status": "PASS",
       "judgment": false
     },
     {
@@ -50,10 +49,9 @@
       "criterion_verbatim": "a name carrying no filing does NOT carry an invented or stale as_of_date -- it reads null/absent, never a fabricated date. PLANTED negative control",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\nlam = boto3.client('lambda')\npayload = json.dumps({'rawPath': '/api/scoped/amgt/security/HOLLOW_NONEXISTENT_KEY_Equity/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\nresp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\nbody = json.loads(resp['Payload'].read())\ninner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\nprint('as_of_date', inner.get('as_of_date'))\n\"",
-      "output_evidence": "NOT RUN THIS SESSION as the literal live invocation. SUBSTITUTE LOCAL VERIFICATION: constructed read_drafted_sections() returning drafting_status ABSENT with NO drafting_provenance key at all (the real shape _drafting_block() produces for an ABSENT read) -> read_thesis_bundle('NOFILE_US_Equity')['as_of_date'] is None -- asserted directly (Python identity check), never a fabricated value. This is the SAME planted-negative-control shape the order names (a name carrying no filing).",
-      "denominator": "1 of 1 local scenario verified (ABSENT/no filing -> as_of_date None); 0 of 1 live invoke of a genuinely nonexistent key (NOT YET EXERCISED, rides the later deploy -- though the code path is identical to AC1's local verification and needs no additional live evidence to be logically sound, only to be PROVEN on the served plane).",
-      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
-      "status_reason": "This session is bounded to code + local verification only pending the combined CTO+COO never-widen co-sign; deferred to the later continuation's actual redeploy, same reason as AC1.",
+      "output_evidence": "LIVE, under the CTO+COO co-sign (533f216c74/6b7d4f2341), run twice for the planted negative control HOLLOW_NONEXISTENT_KEY_Equity. BEFORE (pre-act): as_of_date=None. AFTER (post-act, live CodeSha256 fkKLVfsAsgXk0Swo/XMAjf+OncnOe0ApEogC0WPYmeU=): as_of_date=None -- unchanged, never fabricated.",
+      "denominator": "2 of 2 live calls (1 BEFORE, 1 AFTER) against the deployed Lambda for the nonexistent key.",
+      "status": "PASS",
       "judgment": false
     }
   ],
@@ -70,12 +68,7 @@
       "status": "STABLE"
     }
   },
-  "declared_exclusions": [
-    {
-      "item": "The live BA_US_Equity and nonexistent-key Lambda invokes this order's own AC1/AC2 name.",
-      "reason": "This session's dispatch forbids any live deploy or write act. Deferred to the continuation after the combined co-sign and redeploy."
-    }
-  ],
+  "declared_exclusions": [],
   "surprises": [],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~27/BATCH_B_COMBINED.SESSION_LOG.md",
   "compiler_tools": [
