@@ -29,6 +29,7 @@ import base64
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -76,13 +77,45 @@ _layer_dir = []
 
 
 def layer_python():
+    """The LIVE layer's `python/`, extracted once. Downloads the cache itself when absent.
+
+    ROW W1-S17 / S54: a fresh worktree's `.scratch/layer/` cache of the irpt-common layer zip is
+    gitignored and therefore absent on every fresh checkout, which made this instrument print
+    NOT VERIFIED for the four layered functions while the three-way sha256 chain (declared, S3,
+    live CodeSha256) read EQUAL on 7 of 7 in the SAME run -- a false FAIL caused by incidental
+    local state, never by the served bytes. Rather than WARN and give up, fetch the PUBLISHED
+    layer version's own zip (`get-layer-version` -> `Content.Location`, the same kind of read
+    `verify()` already performs on a function's `Code.Location`) into the cache path and proceed.
+    A fetch failure still WARNs and returns "" -- this is a repair of the cache-miss path, not a
+    new hard dependency on network reachability.
+    """
     if _layer_dir:
         return _layer_dir[0]
     if not os.path.isfile(LAYER_ZIP):
-        print("WARN: %s absent -- a layered function cannot be probed in its real layout"
-              % LAYER_ZIP)
-        _layer_dir.append("")
-        return ""
+        match = re.search(r"([A-Za-z0-9_-]+)-(\d+)\.zip$", os.path.basename(LAYER_ZIP))
+        if not match:
+            print("WARN: %s absent and no layer name/version could be parsed from its own "
+                  "filename -- a layered function cannot be probed in its real layout"
+                  % LAYER_ZIP)
+            _layer_dir.append("")
+            return ""
+        layer_name, version = match.group(1), match.group(2)
+        print("FETCHING: %s absent -- downloading %s version %s (row W1-S17/S54)"
+              % (LAYER_ZIP, layer_name, version))
+        try:
+            location = aws("lambda", "get-layer-version", "--layer-name", layer_name,
+                           "--version-number", version, "--region", "us-east-1",
+                           "--output", "text", "--query", "Content.Location")
+            os.makedirs(os.path.dirname(LAYER_ZIP), exist_ok=True)
+            with urllib.request.urlopen(location, timeout=180) as r, \
+                    open(LAYER_ZIP, "wb") as fh:
+                fh.write(r.read())
+            print("FETCHED: %s (%d bytes)" % (LAYER_ZIP, os.path.getsize(LAYER_ZIP)))
+        except Exception as exc:  # noqa: BLE001 -- a fetch failure must WARN, never crash the run
+            print("WARN: layer fetch failed (%s: %s) -- a layered function cannot be probed in "
+                  "its real layout" % (type(exc).__name__, exc))
+            _layer_dir.append("")
+            return ""
     d = tempfile.mkdtemp(prefix="rt2-verify-layer-")
     with zipfile.ZipFile(LAYER_ZIP) as zf:
         zf.extractall(d)

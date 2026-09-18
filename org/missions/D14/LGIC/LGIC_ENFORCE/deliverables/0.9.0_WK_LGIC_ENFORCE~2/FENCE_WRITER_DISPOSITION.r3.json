@@ -1,0 +1,35 @@
+{
+  "_about": {
+    "cell": "EN-w-7 (round 3, TO LGIC_ENFORCE.TO-EN-w-7-r3, DEC-4(ii), rulings R-20/R-25)",
+    "author": "0.9.0_WK_LGIC_ENFORCE~2",
+    "worktree": "wk-lgic-enforce-3-2",
+    "base_commit": "b54636545d3287d8257b34737c84271df38c1b53",
+    "measured_at": "2026-09-17T00:00Z"
+  },
+  "rows": [
+    {
+      "role": "irpt-core-firm-49financial",
+      "bucket": "opal-data-49financial",
+      "disposition": "NOT_A_PRINCIPAL",
+      "evidence": "Live role (aws iam get-role, CreateDate 2026-09-10T23:53:54Z), one attached policy irpt-core-firm-49financial-prefix, whose sole statements (infra/aws/terraform/investor-reporting/core/iam_firm_conditions.tf:26-45, Sid AllowFirmPrefixReadWrite/AllowFirmPrefixList) grant s3:GetObject/PutObject/ListBucket ONLY on aws_s3_bucket.ycharts (arn .../firms/49financial/*) -- zero statement names opal-data-49financial or any opal-data-* ARN; no inline policy (iam list-role-policies: PolicyNames []). CloudTrail lookup-events AttributeKey=ResourceName AttributeValue=irpt-core-firm-49financial, window 2026-09-01T00:00:00Z to 2026-09-17T23:59:59Z: 2 event(s) total (CreateRole, AttachRolePolicy, both by Andrew_Berman at role-mint time), 0 AssumeRole events -- the role's trust policy (ec2/lambda service assume only per roles.tf) has never been exercised, so no session under this identity could have generated any S3 data event on opal-data-49financial to begin with. aws lambda list-functions --query \"Functions[?contains(Role,'irpt-core-firm')]\": 0 of N functions, confirming no compute currently assumes it."
+    },
+    {
+      "role": "irpt-core-firm-inflection",
+      "bucket": "opal-data-inf",
+      "disposition": "NOT_A_PRINCIPAL",
+      "evidence": "Live role (aws iam get-role, CreateDate 2026-09-10T23:53:54Z), one attached policy irpt-core-firm-inflection-prefix, whose sole statements (iam_firm_conditions.tf:26-45) grant s3:GetObject/PutObject/ListBucket ONLY on aws_s3_bucket.ycharts (arn .../firms/inflection/*) -- zero statement names opal-data-inf or any opal-data-* ARN; no inline policy. CloudTrail lookup-events AttributeKey=ResourceName AttributeValue=irpt-core-firm-inflection, window 2026-09-01T00:00:00Z to 2026-09-17T23:59:59Z: 2 event(s) total (CreateRole, AttachRolePolicy, both by Andrew_Berman at role-mint time), 0 AssumeRole events -- the role has never been assumed, so it cannot have generated any S3 data event on opal-data-inf. aws lambda list-functions --query \"Functions[?contains(Role,'irpt-core-firm')]\": 0 of N functions reference it."
+    },
+    {
+      "role": "irpt-core-firm-cottonwood",
+      "bucket": "opal-data-cot",
+      "disposition": "NOT_A_PRINCIPAL",
+      "evidence": "Live role (aws iam get-role, CreateDate 2026-09-10T23:53:54Z), one attached policy irpt-core-firm-cottonwood-prefix, whose sole statements (iam_firm_conditions.tf:26-45) grant s3:GetObject/PutObject/ListBucket ONLY on aws_s3_bucket.ycharts (arn .../firms/cottonwood/*) -- zero statement names opal-data-cot or any opal-data-* ARN; no inline policy. CloudTrail lookup-events AttributeKey=ResourceName AttributeValue=irpt-core-firm-cottonwood, window 2026-09-01T00:00:00Z to 2026-09-17T23:59:59Z: 2 event(s) total (CreateRole, AttachRolePolicy, both by Andrew_Berman at role-mint time), 0 AssumeRole events -- the role has never been assumed, so it cannot have generated any S3 data event on opal-data-cot. aws lambda list-functions --query \"Functions[?contains(Role,'irpt-core-firm')]\": 0 of N functions reference it."
+    },
+    {
+      "role": "demo-transform-runner-ec2-role",
+      "bucket": "opal-data-demo",
+      "disposition": "EXEMPTED",
+      "evidence": "Real, currently-scoped principal of opal-data-demo, not a candidate for NOT_A_PRINCIPAL: infra/aws/terraform/shared-infra/demo-transform.tf:99-104 (Sid ReadWriteDestPlatinumDemo) grants s3:GetObject/s3:PutObject on arn:aws:s3:::opal-data-demo/platinum/*; :119-127 (SnapshotCleanPass2Subpaths) grants scoped s3:DeleteObject; :130-136 (ListDestPlatinumDemo) grants s3:ListBucket conditioned on the platinum/ prefix. This is the ADVI_DEMOV1 one-shot demo-bucket populator (file header :1-8): read opal-data-bd/platinum/**, write the pseudonymized clone to opal-data-demo/platinum/**. Added to infra/logic/registry/exemptions.json[opal-data-demo] with this reason; opal-data-demo carries no applied fence (round 1, EN-f-2, applied only opal-data-49financial), so this exemption changes no live Deny and needs no never-widen sign-off (order text: 'Exemptions under -inf, -cot and -demo change no applied policy ... and need no apply')."
+    }
+  ]
+}

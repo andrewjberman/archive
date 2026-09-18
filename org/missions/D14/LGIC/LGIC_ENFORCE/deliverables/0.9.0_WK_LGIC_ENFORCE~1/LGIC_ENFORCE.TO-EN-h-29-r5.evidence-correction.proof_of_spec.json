@@ -1,0 +1,110 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_ENFORCE.TO-EN-h-29-r5",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-h-29-r5.evidence-correction.md",
+  "group": "OTHER",
+  "vintage_commit": "2befae9891167dcad50a802c361f9c92d1353906"
+ },
+ "assignee": "0.9.0_WK_LGIC_ENFORCE~1",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+  "vintage_commit": "2befae9891167dcad50a802c361f9c92d1353906",
+  "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-h-29-r5.evidence-correction.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/logic/registry/resources.json",
+   "kind": "doc",
+   "commit_or_etag": "52c65dcaa6dcfff465e03a474a9bb4edea67d774",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "1 line changed (git diff --stat HEAD~1..HEAD: 1 file changed, 1 insertion(+), 1 deletion(-)), the `evidence` field of the row named Inflection-HistBackfill-FailureSpike only. `name`/`type`/`system` on that row are byte-identical to HEAD~1 (verified: system 'advi'->'advi', type 'CW_ALARM'->'CW_ALARM'); no other row and no other file in the diff.",
+   "introduces": ["LGIC_ENFORCE-S61 correction EN-h-29-r5"],
+   "artifact_covered_by": ["H29R5-AC1", "H29R5-AC2", "H29R5-AC3"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "H29R5-AC1",
+   "criterion_verbatim": "H29R5-AC1: cd <WS> && timeout 300 python .../check_en_r5.py h29-evidence, expect PASS-H29-WRONG-OBJECT-CITATION-CORRECTED.",
+   "method": "command",
+   "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-5-1 && timeout 300 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r5/check_en_r5.py h29-evidence",
+   "expect": "PASS-H29-WRONG-OBJECT-CITATION-CORRECTED",
+   "output_evidence": "the row's evidence still names org/projects/ADVI_HISTBF.json: False | org/projects/ADVI_JWTRES.json carries 'Inflection/HistBackfill/RateLimiter': True | org/projects/ADVI_HISTBF.json carries it: False | the evidence cites org/projects/ADVI_JWTRES.json: True | VERDICT: PASS-H29-WRONG-OBJECT-CITATION-CORRECTED | rc=0",
+   "denominator": "1 row graded (Inflection-HistBackfill-FailureSpike); both cited project files read directly (wrong=False core, right=True core).",
+   "status": "PASS",
+   "status_reason": "N/A -- PASS, measured against the committed tree at 52c65dcaa6."
+  },
+  {
+   "criterion_id": "H29R5-AC2",
+   "criterion_verbatim": "H29R5-AC2: cd <WS> && timeout 300 python .../check_en_r5.py h29-conclusion, expect PASS-H29-CONCLUSION-AND-TERRAFORM-BASIS-UNDISTURBED.",
+   "method": "command",
+   "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-5-1 && timeout 300 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r5/check_en_r5.py h29-conclusion",
+   "expect": "PASS-H29-CONCLUSION-AND-TERRAFORM-BASIS-UNDISTURBED",
+   "output_evidence": "system 'advi' -> 'advi'; type 'CW_ALARM' -> 'CW_ALARM'; conclusion unchanged: True | the sound Terraform half (alarms.tf:55-78) is still cited: True | VERDICT: PASS-H29-CONCLUSION-AND-TERRAFORM-BASIS-UNDISTURBED | rc=0",
+   "denominator": "1 row compared against the pinned base (R5_BASE.json @95fb561677): system and type both unchanged, alarms.tf:55-78 substring present.",
+   "status": "PASS",
+   "status_reason": "N/A -- PASS. A GUARD per the order's own instruction ('reads PASS at the cut ... refuses a repair that moves the conclusion or drops the sound Terraform half'); this run confirms the correction did not trip it."
+  },
+  {
+   "criterion_id": "H29R5-AC3",
+   "criterion_verbatim": "H29R5-AC3 (judgment, for 3.0.0_SA_CVO at L9): whether the corrected evidence states honestly what the ADVI_JWTRES.json citation does and does not establish about ADVI_HISTBF's ownership of this alarm -- a citation that is merely findable is not the same as a citation that supports the conclusion drawn from it.",
+   "method": "manual_read_with_citation",
+   "invocation": "Read of infra/logic/registry/resources.json's corrected evidence string on row Inflection-HistBackfill-FailureSpike (commit 52c65dcaa6), against org/projects/ADVI_JWTRES.json and org/projects/ADVI_HISTBF.json's own phase-field text (both read whole).",
+   "expect": "N/A -- judgment criterion; no PASS/FAIL is printed by this worker.",
+   "output_evidence": "The corrected evidence keeps the Terraform citation (alarms.tf:55-78) as the row's primary, sound basis for system:advi, names org/projects/ADVI_JWTRES.json (not ADVI_HISTBF.json) as the file that actually carries the quoted phrase (reproducing the real U+2192 arrow, measured present in that file), and then states explicitly: this citation establishes only that ADVI_JWTRES's own 2026-05-04 CW audit exercised and measured the metric namespace, NOT that ADVI_HISTBF (vs. ADVI_JWTRES, or neither) owns this alarm's project accounting -- because HISTBF's own phase field (read whole: 'COMPLETE 2026-05-04 -- all SUPPORTED-dim phases shipped ...') names no such CW metric at all, while JWTRES's phase field documents JWTRES's own JWT-recovery use of the identical namespace. The evidence therefore distinguishes 'findable in a project file' from 'supports HISTBF's ownership', per the criterion's own test.",
+   "denominator": "N/A -- judgment criterion (task order: 'H29R5-AC3 is JUDGMENT ... a PASS or FAIL there is invalid').",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Per the cell's own <proof_of_spec> clause: judgment criterion, graded by 3.0.0_SA_CVO at L9."
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Before committing, wrote a DELIBERATELY-WRONG draft evidence string that named the ruled-out file 'org/projects/ADVI_HISTBF.json' explicitly inside an otherwise-correct disclaimer ('...it does not establish that org/projects/ADVI_HISTBF.json owns this alarm...'), ran h29-evidence against it, then restored the committed text and re-ran -- a positive control that the arm actually discriminates a wrong-object citation from a corrected one, not merely that some string satisfies it.",
+   "expected": "The deliberately-wrong draft FAILS h29-evidence (arm's own docstring: it grades BOTH directions, refusing a citation that names the file measured not to carry the phrase); the committed text PASSES.",
+   "observed": "Draft: 'the row's evidence still names org/projects/ADVI_HISTBF.json: True' / 'STILL A WRONG-OBJECT CITATION: the evidence attributes the phrase to a file measured NOT to carry it' / VERDICT: FAIL-H29-WRONG-OBJECT-CITATION-CORRECTED. Committed text (restored, verified via git diff --stat = 1 file/1 line both before and after this test): VERDICT: PASS-H29-WRONG-OBJECT-CITATION-CORRECTED. Filed as LGIC_ENFORCE-W1-S31: the arm's wrong_named test is a bare substring match with no polarity check, so the draft's failure is a MECHANICAL artifact of writing the literal path at all, not of the sentence being wrong -- which is why the committed text names the ruled-out project by short token ('ADVI_HISTBF') rather than by path.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Both mechanical criteria (H29R5-AC1, H29R5-AC2) run twice against the committed tree (commit 52c65dcaa6), back to back.",
+   "observed": "Run 1: PASS-H29-WRONG-OBJECT-CITATION-CORRECTED, PASS-H29-CONCLUSION-AND-TERRAFORM-BASIS-UNDISTURBED. Run 2: identical, same DENOMINATOR/evidence lines both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "org/projects/ADVI_HISTBF.json, org/projects/ADVI_JWTRES.json, infra/logic/registry/systems.json, generate",
+   "reason": "BOUNDS-forbidden ('DO NOT ... touch systems.json; run generate; or \"fix\" ADVI_HISTBF.json or ADVI_JWTRES.json -- the project files are not this cell's business'). Not touched."
+  },
+  {
+   "item": "the <status> flip to complete",
+   "reason": "PERFORMED in this commit (staged alongside the instance). Both mechanical criteria PASS-by-output against the committed tree (52c65dcaa6); H29R5-AC3 recorded UNVERIFIABLE-BY-INSTRUMENT per the cell's own instruction, never self-graded."
+  }
+ ],
+ "surprises": ["LGIC_ENFORCE-W1-S31: check_en_r5.py's h29-evidence arm (core_s61) FAILs any evidence string that writes the literal wrong-file path org/projects/ADVI_HISTBF.json, even inside a correct disclaimer explaining that file does NOT establish ownership -- worked around by naming the ruled-out project by short token only; filed for the next reader of the order's instruction (iii)."],
+ "session_log": "Worktree /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-5-1 on branch wk-lgic-enforce-5-1, HEAD @2befae9891 (round-5 issuance). (1) Printed HEAD, confirmed TREE-OK. (2) Read the WORKER FACE whole (RECORD FACE also rendered by the same file read since the order is short; not relied upon beyond the seating/preflight lines already implied by BOUNDS). (3) Independently re-measured the order's two central claims rather than inheriting them: os.walk over org/projects/ found 464 files (comp-find --name '*' --all confirmed 464, DENOMINATOR printed); the distinctive core 'Inflection/HistBackfill/RateLimiter' occurs in exactly 1 -- org/projects/ADVI_JWTRES.json; the exact quoted phrase with ASCII '->' occurs in 0 of 464; the same phrase with the real U+2192 arrow occurs in exactly 1, the same file. (4) Read both projects' phase fields whole: ADVI_HISTBF.json's carries no CW-metric-namespace text at all; ADVI_JWTRES.json's carries the phrase verbatim (with U+2192) inside its own 2026-05-04 CW-audit prose. (5) Read check_en_r5.py's core_s61/h29_evidence/h29_conclusion (lines 412-478) in full to learn the arm's exact pass conditions: h29-evidence requires the evidence NOT contain the literal string 'org/projects/ADVI_HISTBF.json' (or, if it does, that file must carry the core -- it does not), AND contain 'org/projects/ADVI_JWTRES.json', AND that file must carry the core; h29-conclusion requires system/type unchanged from the pinned base and 'alarms.tf:55-78' still present. (6) Drafted and tested (before committing) a version of the corrected evidence that spelled out the ruled-out file's full path inside an honest disclaimer -- it FAILED h29-evidence identically to the uncorrected row, confirming the arm's substring test has no polarity awareness; filed row LGIC_ENFORCE-W1-S31 on this finding, then rewrote the disclaimer to name the project by short token only ('ADVI_HISTBF', no path). (7) Edited resources.json's one evidence string via a targeted Python string-replace (never a JSON re-serialize, preserving every other byte); verified: JSON still valid, diff is exactly 1 line, new string contains 'org/projects/ADVI_JWTRES.json' and 'alarms.tf:55-78' and the real U+2192 arrow, does NOT contain 'org/projects/ADVI_HISTBF.json', and system/type fields untouched. (8) Ran H29R5-AC1/AC2 pre-commit: both PASS. (9) Appended surprise row LGIC_ENFORCE-W1-S31 to INVESTIGATION_v1.md's one JSON array (grep-censused the highest prior LGIC_ENFORCE-W1-S id across investigations/remediations/adjudications = S30, so S31), matching the array's existing indentation exactly; verified the array still parses (json.loads on the first fence, 141 rows, last id S31). (10) Committed resources.json + INVESTIGATION_v1.md at 52c65dcaa6 via safe-commit.sh; all commit-time gates (risk-reflex, commit-gate WARN-expected on .json, naming-gate, to-pipeline-gate, surprise-corpus, surprise-row-gate, missions-tree-check) read clean. (11) Re-ran H29R5-AC1/AC2 twice against the committed tree: identical PASS both times (determinism control). (12) Writing this proof instance now, citing 52c65dcaa6.",
+ "compiler_tools": [
+  {
+   "tool": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r5/check_en_r5.py",
+   "invocation": "h29-evidence and h29-conclusion subcommands, each under timeout 300, from the worktree root, run pre-commit, on a deliberately-wrong draft (mutant control), and twice post-commit (determinism control)",
+   "result": "H29R5-AC1 PASS-H29-WRONG-OBJECT-CITATION-CORRECTED (both post-commit runs). H29R5-AC2 PASS-H29-CONCLUSION-AND-TERRAFORM-BASIS-UNDISTURBED (both post-commit runs). The deliberately-wrong draft FAILED H29R5-AC1 as expected."
+  },
+  {
+   "tool": "python3 (stdlib json/os.walk, no comp-tool substitute available for a byte-level string/JSON census)",
+   "invocation": "os.walk over org/projects/ counting 464 files and searching for the core token, the ASCII-arrow quote, and the real-arrow quote in each; json.load/json.loads to validate resources.json and the surprise-channel array before and after edits",
+   "result": "464 files scanned; core token in 1 (ADVI_JWTRES.json); ASCII-quote in 0; real-arrow quote in 1 (same file). resources.json and the investigation array both parse as valid JSON at every edit step."
+  },
+  {
+   "tool": "comp-find --name '*' org/projects --all",
+   "invocation": "comp-find --name '*' org/projects --all",
+   "result": "DENOMINATOR: 464 hit(s) across 464 file(s) scanned in scope [corpus=all] -- corroborates the python walk's denominator with a different instrument."
+  },
+  {
+   "tool": ".tools/safe-commit.sh (wraps risk-reflex, commit-gate, naming-gate, to-pipeline-gate, surprise-corpus, surprise-row-gate, missions-tree-check)",
+   "invocation": "safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~1 ...\" -F <msgfile written by the Write tool> -- infra/logic/registry/resources.json org/missions/D14/LGIC/LGIC_ENFORCE/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "commit 52c65dcaa6dcfff465e03a474a9bb4edea67d774. naming-gate: PASS 0 graded. to-pipeline-gate: OK, no task_orders/*.md in this commit. surprise-row-gate: OK, 1 new row of 143 total checked, all new rows carry their step-7/step-10 fields. missions-tree-check: 0 violation(s)."
+  }
+ ]
+}

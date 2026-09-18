@@ -1,0 +1,36 @@
+{
+  "limb": {
+    "positive_control": {
+      "what": "A FRESH OPEN, owned remediation row, legitimately in flight: run end-to-end through the real check_file() in an isolated scratch git repo (.scratch/k38_e2e_test.py, not committed) -- K38TEST-W2-S1 committed at HEAD with remediation.round=v7 and remediation.state=OPEN, then a NEW round-8 remediation row (K38TEST-W2-S2, round=v8) STAGED as the slug. The gap between the old row's round (v7) and the slug's round (v8) is 1, below the N=2 threshold.",
+      "outcome": "PASS",
+      "evidence": "check_file() returned 0 violations for the positive-control run: 'POSITIVE CONTROL (old row round=v7, slug round=v8, gap=1 < N=2): violations (0): [] ... RESULT: compliant slug admitted (zero violations) -> True'."
+    },
+    "mutant": {
+      "what": "A PLANTED STALE OPEN row: the SAME shape, but K38TEST-W2-S1 is committed at HEAD with remediation.round=v1 instead of v7 -- OPEN, owned by 1.0.0_SA_CTO, and now 7 rounds (>= N=2) behind the round-8 slug being staged. Everything else (the project, the two files, the committer, the schema, the NEW round-8 row K38TEST-W2-S2) is identical to the positive control.",
+      "outcome": "REFUSED",
+      "evidence": "check_file() returned 1 violation naming the stale row: \"K38TEST-W2-S2: NEW row (the slug (spine v3: every new remediation row)) while 1 OPEN, owned remediation row(s) under K38TEST have not moved for 2 or more round(s): K38TEST-W2-S1. A row that EXISTS, is OPEN and is OWNED still goes stale silently, and no rowlessness limb will ever see it -- the row goes in BEFORE this commit, in the SAME slug (S75).\""
+    }
+  },
+  "gate_selftest": {
+    "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-8-2b && timeout 300 python .tools/surprise-row-gate.py --self-test",
+    "rc": 0
+  },
+  "distinct_from_rowlessness": {
+    "mutant_row_exists": true,
+    "rowlessness_limb_verdict": "PASS",
+    "staleness_limb_verdict": "REFUSED"
+  },
+  "n_rounds": {
+    "value": 2,
+    "unit": "rounds",
+    "measured_against": "LGIC_ENFORCE's own round cadence at the round-8 cut (round 1 at 2026-09-15T02:20Z through round 8's cut census at 2026-09-18 ~05:42 UTC -- about 75.5 hours across 7 round-to-round gaps, roughly 10.8h per round) AND the W7-S1 incident itself (remediation.round=v1, OPEN+owned, first seen stale at the round-8 cut -- a 7-round, 67-hour gap that survived every rowlessness-shaped instrument because the row EXISTS). N=2 lets a row survive its own minting round plus one further round of normal remediation lag before it is flagged; applied to W7-S1's own numbers N=2 would have caught it at round v3 (2026-09-17T14:12Z), about 40 hours before round 8 actually did.",
+    "note_for_cvo": "K38R8-AC4 is judgment -- whether N=2 is defensible against the estate's real round cadence rather than picked to make W7-S1 fire. This record states the reasoning and the two measurements it was checked against; it does not grade itself."
+  },
+  "notes": {
+    "distinguishing_inputs": "positive_control and mutant differ in exactly one fact: the OLD remediation row's own `remediation.round` (v7 vs v1) -- i.e. how many rounds behind the round-8 slug it sits. Everything else -- the project, the GRADUATED investigation item and its remediation row's other fields, the NEW round-8 row, the committer, the schema, the other limbs exercised alongside (route precondition, investigations precondition, g-37's rowlessness limb, coordinate discipline, duplicate-id census) -- is held identical across the two runs, so the ONE difference in outcome is attributable to the new limb and nothing else check_file() also grades.",
+    "not_a_pure_function_test_only": "Both controls are run through the REAL gate entry point check_file(root, rel) in an isolated scratch git repo (org/.../REMEDIATION_v1.md staged over a committed HEAD carrying a GRADUATED investigation item and its own remediation row), not a reimplementation and not only the pure _stale_open_row/_stale_open_row_violations cores in isolation -- those pure cores are ALSO exercised directly as 15 new arms inside the gate's own --self-test (see gate_selftest above; grep-visible as the 'EN-k-38' arm names in the self-test output, 171 of 171 arms passing including the two negative controls proving neither limb's function source names the other's), so the wiring is proven at two levels: the pure predicate and the real check_file() call.",
+    "k38_distinct_measured_on_the_real_gate": "distinct_from_rowlessness above is not asserted from the pure cores alone -- k38_e2e_test.py runs g-37's rowlessness limb (_graduated_without_row_violations) through the SAME check_file() call on the SAME mutant commit and confirms it returns zero violations for K38TEST-W2-S1 (the row EXISTS, it has its own remediation row, so g-37 cannot see the staleness defect), while the staleness limb's own violation is the ONLY entry in that run's violation list. Script output: 'k38-distinct: g-37 rowlessness limb (via the SAME check_file() run on the mutant repo) refuses it? -> False (must be False -- PASS)' and 'k38-distinct: k-38 staleness limb refuses it? -> True (must be True -- REFUSED)'.",
+    "scratch_script": ".scratch/k38_e2e_test.py (worktree-local, never committed; per CLAUDE.md scratch is <worktree>/.scratch/ only)",
+    "wiring": "check_file() calls _stale_open_row_violations() only when kind==\"REMEDIATION\" and folder_kind==\"REMEDIATION\" (the REMEDIATION plane, where remediation.round is a schema-required field this limb reads) -- a DECOMP_INVALIDATING investigation row carries no round field and is not this limb's question. g-37's own limb is unchanged and still runs on both route shapes."
+  }
+}

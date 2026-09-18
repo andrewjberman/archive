@@ -1,0 +1,79 @@
+BATTERY IB-rtc-3 AMENDMENT 3 -- the refresh builds, re-exercised after IB-rtc-9/IB-rtc-7
+repo: C:\tmp\wk-irpt-3-2c
+subject: the real unit-test suite, the READ-ONLY served-hash check, the on-host sweep, and the DEPLOYED dispatch fired live for all three firms
+
+==============================================================================
+ARM (a) -C $W / 0 '..' members / 0 explicit --as-of, plus the real unit-test suite
+==============================================================================
+  [a.1] PASS      the recipe carries '-C $W'
+  [a.2] PASS      the recipe carries 0 '..' path segments   denominator: 0 of 1
+  [a.3] PASS      the recipe carries 0 explicit --as-of arguments to directory_runner.py   denominator: 0 of 1
+  [a.4] PASS      test_refresh_expiry.py: [0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m                                        [100%][0m | [32m[32m[1m33 passed[0m[32m in 0.16s[0m[0m |  -- 33 of 33   denominator: 33 of 33
+
+==============================================================================
+ARM (b) READ-ONLY: served CodeSha256 == artifact_sha256 at this branch's own lambda-source-map.json -- no plan, no apply, no rebuild
+==============================================================================
+  [b.1] PASS      served CodeSha256 JkY/lBc2Wucz/XIPzyH0zmJt22ucItxjDehbKJko6i4= == branch-tip source-map artifact_sha256 JkY/lBc2Wucz/XIPzyH0zmJt22ucItxjDehbKJko6i4=
+
+==============================================================================
+ARM (c) THE ON-HOST SWEEP -- 10 source prefixes + 3 destinations (row W2-S54: the face's inherited '9' is stale; the CTO-ratified population is 10), positive control
+==============================================================================
+  [c.1] PASS      sweep script pulled by the host, sha256 == the recorded instrument
+  [c.2] PASS      positive control fires (READ-OK)
+  [c.3] PASS      SOURCE sweep: READ-OK=5 READ-DENY=5 READ-OTHER=0 (5 OK / 5 DENY expected -- all 5 denials are opal-data-49financial/gold/advi/dimensions/*, row W2-S49/S53)   denominator: denominator 10 (corrected population, row W2-S54)
+  [c.4] PASS      8 negative controls: READ-OK=0 READ-DENY=8 (0/8 expected -- grant not wider than its enumeration)   denominator: denominator 8
+  [c.5] PASS      3 destination prefixes probed (read-plane only; DENY is the DESIGNED result -- no ListBucket was granted on any destination, per the sweep's own comment)   denominator: 3 of 3 probed
+
+==============================================================================
+ARM (d)/(e) THE DEPLOYED DISPATCH, FIRED FOR REAL -- schedule's own live payload, read back through IB-rt-6's mechanism (before/after, envelopes, manifest, SSM status)
+==============================================================================
+  [de.payload] PASS      schedule payload read live from schedule.tf: {'kind': 'irpt_directory_refresh', 'note': 'scheduled refresh; the build is dispatched to the mdpf daily-runner by SSM (cell IB-rt-6) and its outcome is read back by a later fire'}
+  [de.before] PASS      before-snapshot: {'49financial': {'n_keys': 8, 'revision': 'irpt-dir/49financial/2026-09-16/1.0'}, 'inflection': {'n_keys': 8, 'revision': 'irpt-dir/inflection/2026-09-17/1.0'}, 'cottonwood': {'n_keys': 8, 'revision': 'irpt-dir/cottonwood/2026-09-16/1.0'}}
+    invoke 1 states={'49financial': 'READY', 'cottonwood': 'READY', 'inflection': 'READY'}
+  [de.invokes] PASS      1 invoke(s) to reach a non-RUNNING state for every firm: [{'49financial': 'READY', 'cottonwood': 'READY', 'inflection': 'READY'}]
+  [de.inf.landed] PASS      inflection: branch=NEW_REVISION state=READY reason=REFRESH_COMPLETED_WITH_ADDITIONS bdate=2026-09-17 revision(before->after)=irpt-dir/inflection/2026-09-17/1.0->irpt-dir/inflection/2026-09-17/1.0 key=s3://opal-data-inf/investor-reporting/directory/2026-09-17/directory.json ETag="782324f961078b228a32af9316af9836" sha256=09e349d2886bdc5b size=447976 rows=291 ssm_command_id=None command_status=None
+  [de.cot.landed] PASS      cottonwood: branch=NEW_REVISION state=READY reason=REFRESH_COMPLETED_WITH_ADDITIONS bdate=2026-09-16 revision(before->after)=irpt-dir/cottonwood/2026-09-16/1.0->irpt-dir/cottonwood/2026-09-16/1.0 key=s3://opal-data-cot/investor-reporting/directory/2026-09-16/directory.json ETag="264e0fbedc24c09bd066ee9eb278ea5f" sha256=af0b61da8ddc43a5 size=416638 rows=259 ssm_command_id=None command_status=None
+  [de.49f.measured] MEASURED  49financial: branch=NEW_REVISION state=READY reason=REFRESH_COMPLETED_WITH_ADDITIONS bdate=2026-09-16 revision(before->after)=irpt-dir/49financial/2026-09-16/1.0->irpt-dir/49financial/2026-09-16/1.0 key=s3://opal-data-bd/investor-reporting/directory/2026-09-16/directory.json ETag="fcdf90de75f24a591c1073489ad1b21f" sha256=fd0beeca5fb4f785 size=6445354 rows=4562 ssm_command_id=None command_status=None
+  [de.landed_total] PASS      inflection + cottonwood firms landed (new revision OR same-frontier no-op)   denominator: 2 of 2
+
+==============================================================================
+ARM (f) CONTENT SANITY -- row counts, firm-in-artifact, 0-of-N email/name-shaped id values, 0-of-N newly-written keys outside investor-reporting/
+==============================================================================
+  [f.inf.content] PASS      inflection: entries=291 firm_id_opaque=fir_b6b200b4395e94aaa604d5fa (expect opaque_firm('inflection')=fir_b6b200b4395e94aaa604d5fa) match=True; new keys this fire=0, 0 outside investor-reporting/=True
+  [f.cot.content] PASS      cottonwood: entries=259 firm_id_opaque=fir_0fe2a06331f1b4a68133fcb2 (expect opaque_firm('cottonwood')=fir_0fe2a06331f1b4a68133fcb2) match=True; new keys this fire=0, 0 outside investor-reporting/=True
+  [f.49f.content] PASS      49financial: entries=4562 firm_id_opaque=fir_c9fc04650e2134d6ea033da2 (expect opaque_firm('49financial')=fir_c9fc04650e2134d6ea033da2) match=True; new keys this fire=0, 0 outside investor-reporting/=True
+  [f.firm_in_artifact] PASS      firm-in-artifact matches (inflection + cottonwood graded; 49financial measured: True)   denominator: 2 of 2
+  [f.id_shape_census] PASS      id fields (client_id/firm_id/relationship_id/account_ids) that are email- or name-shaped rather than an issued opaque id   denominator: 0 of 24227
+  [f.key_census] PASS      newly-written keys this fire that fall outside investor-reporting/   denominator: 0 of 0
+  [f.row_counts] MEASURED  total entries across firms this run: 5112
+
+==============================================================================
+VERDICT
+==============================================================================
+  a.1                  PASS      the recipe carries '-C $W'
+  a.2                  PASS      the recipe carries 0 '..' path segments
+  a.3                  PASS      the recipe carries 0 explicit --as-of arguments to directory_runner.py
+  a.4                  PASS      test_refresh_expiry.py: [0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[32m.[0m[
+  b.1                  PASS      served CodeSha256 JkY/lBc2Wucz/XIPzyH0zmJt22ucItxjDehbKJko6i4= == branch-tip source-map artifact_sha256 JkY/lBc2Wucz/XIPzyH0zmJt22ucItxjDehbKJko6i4=
+  c.1                  PASS      sweep script pulled by the host, sha256 == the recorded instrument
+  c.2                  PASS      positive control fires (READ-OK)
+  c.3                  PASS      SOURCE sweep: READ-OK=5 READ-DENY=5 READ-OTHER=0 (5 OK / 5 DENY expected -- all 5 denials are opal-data-49financial/gold/advi/dimensions/*, row W2-S49
+  c.4                  PASS      8 negative controls: READ-OK=0 READ-DENY=8 (0/8 expected -- grant not wider than its enumeration)
+  c.5                  PASS      3 destination prefixes probed (read-plane only; DENY is the DESIGNED result -- no ListBucket was granted on any destination, per the sweep's own comme
+  de.payload           PASS      schedule payload read live from schedule.tf: {'kind': 'irpt_directory_refresh', 'note': 'scheduled refresh; the build is dispatched to the mdpf daily-
+  de.before            PASS      before-snapshot: {'49financial': {'n_keys': 8, 'revision': 'irpt-dir/49financial/2026-09-16/1.0'}, 'inflection': {'n_keys': 8, 'revision': 'irpt-dir/i
+  de.invokes           PASS      1 invoke(s) to reach a non-RUNNING state for every firm: [{'49financial': 'READY', 'cottonwood': 'READY', 'inflection': 'READY'}]
+  de.inf.landed        PASS      inflection: branch=NEW_REVISION state=READY reason=REFRESH_COMPLETED_WITH_ADDITIONS bdate=2026-09-17 revision(before->after)=irpt-dir/inflection/2026-
+  de.cot.landed        PASS      cottonwood: branch=NEW_REVISION state=READY reason=REFRESH_COMPLETED_WITH_ADDITIONS bdate=2026-09-16 revision(before->after)=irpt-dir/cottonwood/2026-
+  de.49f.measured      MEASURED  49financial: branch=NEW_REVISION state=READY reason=REFRESH_COMPLETED_WITH_ADDITIONS bdate=2026-09-16 revision(before->after)=irpt-dir/49financial/202
+  de.landed_total      PASS      inflection + cottonwood firms landed (new revision OR same-frontier no-op)
+  f.inf.content        PASS      inflection: entries=291 firm_id_opaque=fir_b6b200b4395e94aaa604d5fa (expect opaque_firm('inflection')=fir_b6b200b4395e94aaa604d5fa) match=True; new ke
+  f.cot.content        PASS      cottonwood: entries=259 firm_id_opaque=fir_0fe2a06331f1b4a68133fcb2 (expect opaque_firm('cottonwood')=fir_0fe2a06331f1b4a68133fcb2) match=True; new ke
+  f.49f.content        PASS      49financial: entries=4562 firm_id_opaque=fir_c9fc04650e2134d6ea033da2 (expect opaque_firm('49financial')=fir_c9fc04650e2134d6ea033da2) match=True; new
+  f.firm_in_artifact   PASS      firm-in-artifact matches (inflection + cottonwood graded; 49financial measured: True)
+  f.id_shape_census    PASS      id fields (client_id/firm_id/relationship_id/account_ids) that are email- or name-shaped rather than an issued opaque id
+  f.key_census         PASS      newly-written keys this fire that fall outside investor-reporting/
+  f.row_counts         MEASURED  total entries across firms this run: 5112
+
+  PASS 22 | FAIL 0   denominator: 22 graded check(s) (+2 MEASURED, ungraded)
+  IBR33-TWO-OF-THREE-DIRECTORIES-LANDED

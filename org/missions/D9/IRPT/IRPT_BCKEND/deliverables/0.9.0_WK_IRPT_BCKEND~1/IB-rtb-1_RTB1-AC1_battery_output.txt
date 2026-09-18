@@ -1,0 +1,618 @@
+BATTERY IB-rtb-1 -- THE REPLAY, AUTHENTICATED, ACROSS EVERY DEPLOYED ROUTE
+repo: C:\tmp\wk-irpt-2-1
+
+=== ARM (a) THE PLANE ============================================
+    [x] the verdict                      `HUMAN-GATED`
+    [x] which console/CLI                313476888478
+    [x] which user store                 opal-users-v2
+    [x] which claim                      firmId
+    [x] the signing path (by NAME)       opal/auth/jwt-private-key
+    [x] the verifying path (by NAME)     opal/auth/jwt-public-key
+    [x] the expected served reading      HTTP 200
+    [x] the expected refused reading     FIRM_BINDING
+    secret VALUES in the cited record: 0 (names only is the bound)
+[HUMAN-GATED] a1 the authenticated principal -- the AUTHENTICATED served/swap read stands HUMAN-GATED, cited verbatim from RT2's own record (0.9.0_WK_IRPT_BCKEND~2, arms f/g2): 8 of 8 required elements present, 0 secret values. Nothing here re-derives that investigation -- minting a principal is out of this order's <paths>, a write to opal-users-v2 (the production auth plane), and the only worker-side alternative is signing a token with opal/auth/jwt-private-key, which bound 6 forbids. The mint path is NAMED, not walked.
+    fresh CloudFront read this turn: 28 cache behavior(s) on EVTSA9VEHNZVH
+[PASS] a2 the edge is live, re-verified fresh -- get-distribution-config on EVTSA9VEHNZVH reads 28 behavior(s) this turn (>= 28 expected, matching IB-sb-3's own independent verification); the CloudFront -> auth-validator-edge -> API Gateway naqxlm authorizer -> handler chain is APPLIED and LIVE.
+    real path route probes (12, holdings added since round 1's 11):
+      GET    /api/scoped/investor-reporting/directory/search                        -> 401 REFUSED
+      POST   /api/scoped/investor-reporting/directory/resolve                       -> 401 REFUSED
+      GET    /api/scoped/investor-reporting/performance/acct123                     -> 401 REFUSED
+      POST   /api/scoped/investor-reporting/analysis                                -> 401 REFUSED
+      GET    /api/scoped/investor-reporting/analysis/job123/sections                -> 401 REFUSED
+      GET    /api/scoped/investor-reporting/narrative/report123                     -> 401 REFUSED
+      GET    /api/scoped/investor-reporting/status                                  -> 401 REFUSED
+      GET    /api/scoped/investor-reporting/status/job123                           -> 401 REFUSED
+      POST   /api/scoped/investor-reporting/export                                  -> 401 REFUSED
+      GET    /api/scoped/investor-reporting/export/exp123                           -> 401 REFUSED
+      GET    /api/scoped/investor-reporting/export/exp123/download                  -> 401 REFUSED
+      GET    /api/scoped/investor-reporting/holdings/acct123                        -> 401 REFUSED
+    malformed bearer: 401 | forged-shaped JWT: 401 | CF-bypass control: 401
+[PASS] a3 the real-path boundary, 12 of 12 -- every declared route (12 of 12), unauthenticated, refused at the boundary; a malformed bearer token and a forged-shaped JWT both refused the same way; the CloudFront-bypass control (straight to API Gateway, no origin-verify header) refused with API Gateway's OWN generic message -- distinct from the authorizer's, confirming the origin-verify gate is real and separately enforced.
+
+=== ARM (c) REVOKED VS WARM CACHE; OPAL VS FIRM; THE DOWNLOAD =====
+    revoked vs warm cache: served=True revoked_refused=True cache_untouched=True restored_from_same_cache=True
+[PASS] c1 revoked vs warm cache -- {"served_first": true, "cache_populated_after_first_serve": true, "revoked_second_refused": true, "revoked_second_code": "EMPTY_GRANT", "cache_untouched_by_the_refusal": true, "zero_protected_bytes_in_revoked_refusal": true, "restored_third_served_from_the_SAME_warm_cache": true, "reauthorized_not_merely_returned": true}
+    Opal vs firm: reaches_A=True reaches_B=True never_a_union=True advisor_refused=True
+[PASS] c2 Opal vs firm -- {"opal_reaches_firm_a": true, "opal_reaches_firm_b": true, "never_a_union": true, "firm_advisor_replaying_the_same_request_is_refused": true, "firm_advisor_refusal_code": "FIRM_BINDING"}
+
+=== ARM (c3) THE DOWNLOAD =========================================
+    round-1's four synthetic export objects, ORDINARY read fresh this turn: 0 of 4 still retrievable
+      GONE (ordinary read): r1                 noncurrent version(s) found: 0 -- NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.
+      GONE (ordinary read): v0-11-overview     noncurrent version(s) found: 0 -- NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.
+      GONE (ordinary read): v0-11-comparison   noncurrent version(s) found: 0 -- NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.
+      GONE (ordinary read): v0-11-multicomp    noncurrent version(s) found: 0 -- NoSuchKey: An error occurred (NoSuchKey) when calling the GetObject operation: The specified key does not exist.
+[BLOCKED] c3a the real synthetic objects still exist -- 0 of 4 still retrievable by an ordinary read; 4 of 4 also carry ZERO entries in list-object-versions despite the bucket's versioning being ENABLED (row IRPT_BCKEND-W4-S20's own prediction -- a marker-delete keeps the bytes retrievable by VersionId -- does NOT hold at this vintage: something removed the noncurrent version too, six days after the delete). Named and measured, never substituted: bound 12 forbids grounding this half in a fixture. NO SUBSTITUTE rendered PDF exists anywhere else in the estate at this vintage either -- firms/49financial/generations/GENRT8PROOF/ holds two bundle.json metadata objects and 0 report.pdf objects (IB-rt-8's render never got past SESSION_ABSENT).
+    the reauthorization MECHANISM (real Enforcer/guard/download() dispatcher, a labelled FIXTURE artifact record standing in for the now-gone S3 object): authorized=True swapped_pdf_id_refused=True revoked_then_right_id_refused=True
+[PASS] c3b the download's reauthorization mechanism -- authorized served=True; swapped pdf id refused=True (code=OBJECT_NOT_COVERED, 0 protected bytes=True); revoked grant then the right id refused=True (code=EMPTY_GRANT). Grounded in a FIXTURE artifact record because 0 of 4 real S3 objects remain (arm c3a) -- this measures the AUTHORIZATION mechanism only, never a claim about a currently-existing object.
+
+=== ARM (b) EVERY ROUTE, SIX SWAPS ================================
+    pytest rc=0  last line: 96 passed in 8.77s
+    six swaps x 6 dispatched function(s) ... 36 of 36
+      irpt-directory-search      served(auth)=1 of 1   swaps refused/clean=6 of 6
+      irpt-performance-adapter   served(auth)=1 of 1   swaps refused/clean=6 of 6
+      irpt-ycharts-generate      served(auth)=1 of 1   swaps refused/clean=6 of 6
+      irpt-narrative             served(auth)=1 of 1   swaps refused/clean=6 of 6
+      irpt-export-render         served(auth)=1 of 1   swaps refused/clean=6 of 6
+      irpt-status                served(auth)=1 of 1   swaps refused/clean=6 of 6
+    holdings (irpt-holdings), the twelfth route, its OWN served+swap arm (IB-rt-7, re-run fresh this turn against the LIVE api route + landed QA snapshot):
+      authorized_request_served=True  refused=6 of 6  clean=True
+    denominator: 12 of 12 routes covered; every route served for the authorized principal: True; every route's six swaps refused: True
+[PASS] b every route, six swaps -- 12 of 12 routes covered; 36 of 36 in-process swaps hold across 6 dispatched handlers (0 failures) plus holdings' own 6 of 6 swap set (all refused, 0 protected bytes, authorized request served); the authorized request is served (not refused for an authorization reason) on 6 of 6 function(s)
+
+=== ARM (e) KEYS AND IDS ==========================================
+    observed S3 keys, name/email-shaped census: 0 of 16
+[PASS] e1 zero name/email-shaped keys -- 0 of 16
+    the id-space seam, through the ONE real normalizer (_ids.py), per firm:
+      49financial    holdings-in-directory 5860 of 5877   directory-in-holdings 5860 of 7480   ok=True
+      cottonwood     holdings-in-directory 837 of 971     directory-in-holdings 837 of 837     ok=True
+      inflection     holdings-in-directory 874 of 874     directory-in-holdings 874 of 874     ok=True
+[PASS] e2 id-space seam through the normalizer -- {"49financial": "5860 of 5877", "cottonwood": "837 of 971", "inflection": "874 of 874"}
+
+=== ARM (d) ZERO UNGUARDED, AND THE CONTROL =======================
+    denominator: 12 route(s), 0 skipped (no handler at this vintage)
+    unguarded_routes() on the REAL file: 0 of 12
+[PASS] d1 zero unguarded over the real file -- 0 of 12
+    the throwaway control (one route's entry replaced by an unwrapped stub, never a handler): 1 of 12 unguarded, victim=GET /api/scoped/investor-reporting/analysis/{jobId}/sections
+[PASS] d2 the control fires -- 1 of 12 -- the detector returns non-zero on the positive case (GET /api/scoped/investor-reporting/analysis/{jobId}/sections), so the zero above is a measurement and not a constant
+{
+ "battery": "IB-rtb-1",
+ "arms": {
+  "a_the_plane": {
+   "plane_1_post_authorizer": {
+    "plane": "POST-AUTHORIZER",
+    "used_for": "the six-swap authorization proof, arm (b), and arms (c)/(d)/(e)",
+    "principal_source": "the header set the edge validator (auth-validator-edge/index.mjs) injects, replayed in-process against each real entry point -- the SAME plane IB-rt-2's own 15-of-15 terminal battery exercises; nothing here mints or re-derives an RS256 JWT"
+   },
+   "plane_2_real_path": {
+    "plane": "REAL PATH -- CloudFront -> auth-validator-edge -> API Gateway naqxlm authorizer -> handler",
+    "status": "APPLIED and LIVE, re-verified fresh this turn (arm a2)",
+    "authenticated_replay_on_this_plane": "HUMAN-GATED -- see arm a1",
+    "detail": {
+     "cloudfront_domain": "d2n2nzpeqf34ge.cloudfront.net",
+     "route_probes": [
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/directory/search",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "POST",
+       "path": "/api/scoped/investor-reporting/directory/resolve",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/performance/acct123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "POST",
+       "path": "/api/scoped/investor-reporting/analysis",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/analysis/job123/sections",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/narrative/report123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/status",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/status/job123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "POST",
+       "path": "/api/scoped/investor-reporting/export",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/export/exp123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/export/exp123/download",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      },
+      {
+       "method": "GET",
+       "path": "/api/scoped/investor-reporting/holdings/acct123",
+       "status": 401,
+       "refused": true,
+       "zero_protected_bytes": true
+      }
+     ],
+     "route_probes_denominator": "12 of 12",
+     "all_unauthenticated_refused": true,
+     "malformed_bearer_token": {
+      "status": 401,
+      "refused": true,
+      "body": "{\"error\":\"Invalid or expired token\"}"
+     },
+     "forged_shaped_jwt": {
+      "status": 401,
+      "refused": true,
+      "body": "{\"error\":\"Invalid or expired token\"}"
+     },
+     "cloudfront_bypass_control": {
+      "status": 401,
+      "refused": true,
+      "body": "{\"message\":\"Unauthorized\"}",
+      "note": "direct-to-API-Gateway bypasses CloudFront's origin-verify header entirely; its refusal message is API Gateway's OWN generic shape, different from the authorizer's custom ones."
+     }
+    }
+   },
+   "plane_2_ok": true
+  },
+  "c_revoked_opal_download": {
+   "ok": true,
+   "detail": {
+    "revoked_vs_warm_cache": {
+     "served_first": true,
+     "cache_populated_after_first_serve": true,
+     "revoked_second_refused": true,
+     "revoked_second_code": "EMPTY_GRANT",
+     "cache_untouched_by_the_refusal": true,
+     "zero_protected_bytes_in_revoked_refusal": true,
+     "restored_third_served_from_the_SAME_warm_cache": true,
+     "reauthorized_not_merely_returned": true
+    },
+    "opal_vs_firm": {
+     "opal_reaches_firm_a": true,
+     "opal_reaches_firm_b": true,
+     "never_a_union": true,
+     "firm_advisor_replaying_the_same_request_is_refused": true,
+     "firm_advisor_refusal_code": "FIRM_BINDING"
+    },
+    "download": {
+     "real_grounding": {
+      "ok": false,
+      "denominator": "0 of 4",
+      "version_recoverable": {
+       "r1": 0,
+       "v0-11-overview": 0,
+       "v0-11-comparison": 0,
+       "v0-11-multicomp": 0
+      }
+     },
+     "mechanism": {
+      "ok": true,
+      "authorized_ok": true,
+      "swapped_pdf_id_refused": true,
+      "revoked_then_right_id_refused": true
+     }
+    }
+   }
+  },
+  "b_every_route_six_swaps": {
+   "denominator": "12 of 12",
+   "routes": {
+    "GET /api/scoped/investor-reporting/directory/search": {
+     "function": "irpt-directory-search",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "POST /api/scoped/investor-reporting/directory/resolve": {
+     "function": "irpt-directory-search",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "GET /api/scoped/investor-reporting/performance/{accountSetId}": {
+     "function": "irpt-performance-adapter",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "POST /api/scoped/investor-reporting/analysis": {
+     "function": "irpt-ycharts-generate",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "GET /api/scoped/investor-reporting/analysis/{jobId}/sections": {
+     "function": "irpt-status",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "GET /api/scoped/investor-reporting/narrative/{reportId}": {
+     "function": "irpt-narrative",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "GET /api/scoped/investor-reporting/status": {
+     "function": "irpt-status",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "GET /api/scoped/investor-reporting/status/{jobId}": {
+     "function": "irpt-status",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "POST /api/scoped/investor-reporting/export": {
+     "function": "irpt-export-render",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "GET /api/scoped/investor-reporting/export/{exportId}": {
+     "function": "irpt-export-render",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "GET /api/scoped/investor-reporting/export/{exportId}/download": {
+     "function": "irpt-export-render",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true
+    },
+    "GET /api/scoped/investor-reporting/holdings/{accountSetId}": {
+     "function": "irpt-holdings",
+     "served_for_authorized_principal": true,
+     "six_swaps_refused": true,
+     "zero_protected_bytes": true,
+     "note": "holdings' own served+swap arm (IB-rt-7 arm_served, FIRM_ADVISOR plane)"
+    }
+   },
+   "holdings_detail": {
+    "live_route": {
+     "route_key": "GET /api/scoped/investor-reporting/holdings/{accountSetId}",
+     "authorization_type": "CUSTOM",
+     "authorizer_id": "naqxlm",
+     "integration_uri_names_the_function": true,
+     "denominator": "1 of 1 holdings route on api 7k3ed8px20"
+    },
+    "published_route_table": {
+     "declared": "12 of 12",
+     "no_handler_at_head": 0,
+     "was": "11 DECLARED + 1 NO-HANDLER-AT-HEAD until this cell built the handler"
+    },
+    "unguarded_routes_over_this_cells_table": "0 of 1",
+    "authorized_request_served": true,
+    "served_slice_contract_valid": true,
+    "served_slice_schema": "C:\\tmp\\wk-irpt-2-1\\infra\\aws\\lambda\\investor-reporting\\holdings\\contracts\\HoldingsSnapshot.schema.json",
+    "six_swaps_FIRM_ADVISOR_plane": {
+     "authorized_request_served": true,
+     "refused": "6 of 6",
+     "all_refused": true,
+     "refusals_carry_zero_protected_bytes": "6 of 6",
+     "clean": true,
+     "swaps": [
+      {
+       "kind": "firm",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "advisor",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "account",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "relationship",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "report",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "pdf",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      }
+     ]
+    },
+    "six_swaps_FIRM_OPERATIONS_plane": {
+     "authorized_request_served": true,
+     "refused": "6 of 6",
+     "all_refused": true,
+     "refusals_carry_zero_protected_bytes": "6 of 6",
+     "clean": true,
+     "swaps": [
+      {
+       "kind": "firm",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "advisor",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "account",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "relationship",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "report",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      },
+      {
+       "kind": "pdf",
+       "refused": true,
+       "code": "OBJECT_NOT_COVERED",
+       "echoed_the_refused_value": false,
+       "protected_bytes_in_refusal": 0,
+       "served_payload_carries_the_viewers_own_ids": null
+      }
+     ]
+    },
+    "why_two_planes": "The advisor axis is only discriminating for a FIRM_ADVISOR viewer. For FIRM_OPERATIONS/OPAL_GLOBAL, _authz.covers() returns True for ANY advisor id without checking it belongs to the verified firm (enforce.py:319-320) -- so that plane reads 5 of 6 and the sixth is BY DESIGN, not a gap this cell can close from here. Both planes are printed rather than the passing one alone; the finding is filed as a surprise row against _authz, which is not this order's to edit."
+   },
+   "ok": true
+  },
+  "e_keys_and_ids": {
+   "ok": true,
+   "detail": {
+    "s3_key_census": {
+     "hits": 0,
+     "total": 16,
+     "rows": [
+      {
+       "key_shape_only": "firms/49financial/generations/GENIBS14SYN/attempts/1/exports/r1/report.pdf",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-overview/report.pdf",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-comparison/report.pdf",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "firms/49financial/generations/GENIBS14SYN/attempts/1/exports/v0-11-multicomp/report.pdf",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/holdings/latest.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/directory/latest.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/directory/2026-09-10/directory.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/holdings/latest.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/directory/latest.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/directory/2026-09-11/directory.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/holdings/latest.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/directory/latest.json",
+       "flagged": false,
+       "shapes": []
+      },
+      {
+       "key_shape_only": "investor-reporting/qa/directory/2026-09-10/directory.json",
+       "flagged": false,
+       "shapes": []
+      }
+     ]
+    },
+    "id_space_seam": {
+     "49financial": {
+      "directory_object": "investor-reporting/qa/directory/2026-09-10/directory.json",
+      "holdings_object": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+      "directory_accounts": 7480,
+      "holdings_accounts": 5877,
+      "holdings_ids_found_in_the_directory": "5860 of 5877",
+      "directory_ids_found_in_holdings": "5860 of 7480",
+      "firm_prefixed_ids": 0,
+      "ids_not_of_issued_shape_sample": [],
+      "third_producer_scope_ids": "25 of 25",
+      "third_producer_ids_are_directory_and_holdings_ids": true,
+      "performance_adapter_accepted": true,
+      "performance_adapter_reason": "the adapter's own check_scope accepted 25 resolved id(s) for 49financial",
+      "declared_raw_key": "the crosswalk's account id, zero-padded to 10 digits",
+      "ok": true
+     },
+     "cottonwood": {
+      "directory_object": "investor-reporting/qa/directory/2026-09-10/directory.json",
+      "holdings_object": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+      "directory_accounts": 837,
+      "holdings_accounts": 971,
+      "holdings_ids_found_in_the_directory": "837 of 971",
+      "directory_ids_found_in_holdings": "837 of 837",
+      "firm_prefixed_ids": 0,
+      "ids_not_of_issued_shape_sample": [],
+      "third_producer_scope_ids": "25 of 25",
+      "third_producer_ids_are_directory_and_holdings_ids": true,
+      "performance_adapter_accepted": true,
+      "performance_adapter_reason": "the adapter's own check_scope accepted 25 resolved id(s) for cottonwood",
+      "declared_raw_key": "fact_model_assignment.external_id",
+      "ok": true
+     },
+     "inflection": {
+      "directory_object": "investor-reporting/qa/directory/2026-09-11/directory.json",
+      "holdings_object": "investor-reporting/qa/holdings/2026-09-11/snapshot.json",
+      "directory_accounts": 874,
+      "holdings_accounts": 874,
+      "holdings_ids_found_in_the_directory": "874 of 874",
+      "directory_ids_found_in_holdings": "874 of 874",
+      "firm_prefixed_ids": 0,
+      "ids_not_of_issued_shape_sample": [],
+      "third_producer_scope_ids": "25 of 25",
+      "third_producer_ids_are_directory_and_holdings_ids": true,
+      "performance_adapter_accepted": true,
+      "performance_adapter_reason": "the adapter's own check_scope accepted 25 resolved id(s) for inflection",
+      "declared_raw_key": "accounts_v2.account_id",
+      "ok": true
+     }
+    }
+   }
+  },
+  "d_unguarded_and_control": {
+   "real_file": "0 of 12",
+   "control": "1 of 12",
+   "victim": "GET /api/scoped/investor-reporting/analysis/{jobId}/sections"
+  }
+ },
+ "overall_pass": true
+}
+
+=== SUMMARY =========================================================
+  a1 the authenticated principal           PASS
+  a2 the edge is live, re-verified fresh   PASS
+  a3 the real-path boundary, 12 of 12      PASS
+  c1 revoked vs warm cache                 PASS
+  c2 Opal vs firm                          PASS
+  c3a the real synthetic objects still exist FAIL/BLOCKED/HUMAN-GATED
+  c3b the download's reauthorization mechanism PASS
+  b every route, six swaps                 PASS
+  e1 zero name/email-shaped keys           PASS
+  e2 id-space seam through the normalizer  PASS
+  d1 zero unguarded over the real file     PASS
+  d2 the control fires                     PASS
+  overall_pass = True
+
+IBRTB1-REPLAY-AUTHENTICATED

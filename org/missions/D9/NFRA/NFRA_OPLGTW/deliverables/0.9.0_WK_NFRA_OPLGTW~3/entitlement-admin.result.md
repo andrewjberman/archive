@@ -116,3 +116,59 @@ match were all implementation choices within this cell's own grant, not deviatio
 `bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/ops/schwab_entitlement_admin.py
 infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py` -> `OK: pre-commit gate clean for 2 of 2
 file(s)`.
+
+## Re-open 2026-09-17 (row `NFRA_OPLGTW-S21`) -- `0.9.0_WK_NFRA_OPLGTW~3`, worktree `/c/tmp/wk-oplgtw-3e`,
+branch `wk-nfra_oplgtw-3e`, cut from `CLOUD @78b5f95695` (after `OG-q-2` merged @`6a7e9f6caf`, registering
+`schwab` on `app/integrations/registry.py`'s factory, dark by default)
+
+**Outcome: 9 of 9 mechanical criteria PASS by output, unchanged verdict, new evidence on AC8.**
+
+At this HEAD, `registry.available_ids()` returns `['globgrph', 'opal_portal', 'schwab', 'ycharts']` (4, not
+3) -- so `test_ogz2_ac08`'s tripwire assertion (`"schwab" not in registered_integration_ids`) failed at
+CLOUD HEAD before this order's act (module read `1 failed, 8 passed`), exactly as the re-open cell text
+said it would.
+
+**Change (only `tests/test_entitlement_admin.py`, per the order's Scope clause):** removed the tripwire
+assertion and its comment (3 lines) from `test_ogz2_ac08`. No other line of the test changed. The census
+loop itself already iterates `for iid in registered_integration_ids: files.extend(... (gw_root / "app" /
+"integrations" / iid).rglob("*.py"))`, so it needed no widening of its own -- once the tripwire was gone,
+`schwab`'s 8 files (`app/integrations/schwab/{__init__,engine,aws_roles,catalog,cursor,envelope,
+integration,query}.py`) were already in scope through that same generic loop. `ops/schwab_entitlement_admin.py`
+is untouched (`git diff --stat` shows only the one test file).
+
+**Re-run, this HEAD:**
+
+| id | verdict | deciding output |
+|---|---|---|
+| OGZ2-AC1 | 1 passed | "3 of 3 empty/unknown-identity candidates refused" |
+| OGZ2-AC2 | 1 passed | "2 of 2 (unapproved account, unapproved field) candidates refused" |
+| OGZ2-AC3 | 1 passed | "2 of 2 malformed-date candidates refused" |
+| OGZ2-AC4 | 1 passed | "diff printed by prepare() (6 dimension lines) precedes the activate() call" |
+| OGZ2-AC5 | 1 passed | "stale base (None, now superseded) refused with ConditionFailed; current base (revision 1) activated to revision 2" |
+| OGZ2-AC6 | 1 passed | "1 transact_write_items call, 3 puts (profile+grant+audit), approver='andrew@opalinvest.com' source_authorization='IT-TICKET-42' at='2026-09-16T01:02:03Z'" |
+| OGZ2-AC7 | 1 passed | "revoke() -> 1 transact_write_items call, 0 Delete items, 0 delete_item calls; profile still readable, status=revoked revision=2" |
+| OGZ2-AC8 | 1 passed | "DENOMINATOR 44 registered tool(s) (35 native + 9 integration across ['globgrph', 'opal_portal', 'schwab', 'ycharts']) backed by 18 file(s) scanned -- 0 hit(s)" |
+| OGZ2-AC9 | 1 passed | "operator role ARN accepted (role+assumed-role form); runtime role ARN '...opal-gateway-role' refused (role+assumed-role form)" |
+
+Whole-module run: `9 passed in 2.39s`, rc=0. Repeated: `9 passed in 3.60s`, rc=0 -- diff of the two logs is
+empty except the timing line (determinism holds at the new HEAD too, including AC8's 44/18/0 line).
+
+`tests/test_schwab_query.py` as a whole module (must stay green per the order): `24 passed in 12.00s`, rc=0.
+
+**Control (the order's own requirement): show the widened census catches a `POLICY#` write placed in a
+Schwab module.** Appended `# MUTANT-TEST-ONLY: grant_put_op` to
+`app/integrations/schwab/catalog.py`, re-ran `test_ogz2_ac08` alone:
+```
+FAILED infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py::test_ogz2_ac08
+AssertionError: assert [(WindowsPath('.../schwab/catalog.py'), 'references grant_put_op')] == []
+```
+Restored `catalog.py` to its committed bytes (`git diff --stat` empty for that file); `test_ogz2_ac08`
+re-ran green. The mutant file itself was never committed.
+
+**Rows filed this re-open.** None. The cell's premises held: the tripwire removal was exactly the act the
+re-open text named, the generic census loop needed no further widening, and no `<paths>` outside the grant
+was needed.
+
+**commit-gate, this re-open:** `bash .tools/commit-gate.sh
+infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py` -> `OK: pre-commit gate clean for 1 of 1
+file(s)`.

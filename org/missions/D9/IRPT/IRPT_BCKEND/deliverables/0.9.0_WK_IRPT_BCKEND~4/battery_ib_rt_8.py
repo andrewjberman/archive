@@ -123,6 +123,50 @@ def failed(result):
     return isinstance(result, dict) and "_error" in result
 
 
+# ROW W4-S23, THE RE-CUT BAR (round-2 ruling, IRPT_BCKEND_ROUND2_ANALYSIS.md): "0 EXTERNAL
+# CONNECTIONS" IS UNACHIEVABLE against the portal as built -- the sign-in page this render
+# reaches pulls webfonts from Google (2 of 12 requests, both foreign, 0 vendor). The number the
+# bound actually protects is VENDOR calls, so the bar becomes "0 VENDOR connections" over an
+# ENUMERATED vendor host list, with the foreign-but-not-vendor hosts printed on their own line.
+#
+# BAR TEXT, VERBATIM, BEFORE THIS EDIT (RT8-AC1(a), and this battery's own arm (a) print block):
+#   "0 external connections during the render (host guard log, denominator printed)"
+# BAR TEXT, VERBATIM, AFTER THIS EDIT:
+#   "0 VENDOR connections during the render, over an enumerated vendor host list (host guard
+#    log, denominator printed); foreign-but-not-vendor hosts (e.g. webfonts) are named, not
+#    counted against the bar."
+#
+# The vendor list is the render record's OWN denominator string (guard["denominator"]), never
+# retyped here -- a second copy of the enumeration is exactly the drift class row S32 warns about.
+def vendor_bar_report(guard):
+    """(ok, lines) for the re-cut bar. `guard` is the REAL network_guard dict from the committed
+    render record (RT8-a_render_record.json) -- never a synthetic copy. ok is True iff 0 of the
+    enumerated vendor hosts were reached and at least one request was measured."""
+    total = guard.get("requests_total", 0)
+    by_origin = guard.get("requests_by_origin") or {}
+    denom = guard.get("denominator") or ""
+    vendor_marker = "vendor hosts checked:"
+    if vendor_marker in denom:
+        vendor_hosts = tuple(h.strip() for h in
+                              denom.split(vendor_marker, 1)[1].split(";", 1)[0].split(",")
+                              if h.strip())
+    else:
+        vendor_hosts = ()
+    vendor_hits = {h: by_origin.get(h, 0) for h in vendor_hosts if by_origin.get(h, 0)}
+    foreign = list(guard.get("foreign_origins") or [])
+    foreign_non_vendor = [o for o in foreign if o not in vendor_hosts]
+    lines = [
+        "  VENDOR LIST ENUMERATED (%d)      : %s" % (len(vendor_hosts), ", ".join(vendor_hosts)),
+        "  FOREIGN, NOT VENDOR (%d)         : %s"
+        % (len(foreign_non_vendor), ", ".join(foreign_non_vendor) or "none"),
+        "  VENDOR %d of %d requests         : %s"
+        % (len(vendor_hits), total,
+           "0 VENDOR CONNECTIONS" if not vendor_hits else "VENDOR HIT: %s" % vendor_hits),
+    ]
+    ok = (not vendor_hits) and total > 0 and bool(vendor_hosts)
+    return ok, lines
+
+
 def invoke(payload, tag):
     """An invoke of the DEPLOYED function. The payload file and the response file are both
     under .scratch; the response is returned parsed, with an error surfaced rather than
@@ -295,12 +339,12 @@ def main():
             print("      %-34s %d request(s)%s"
                   % (origin, count,
                      "  <- FOREIGN" if origin in (guard.get("foreign_origins") or []) else ""))
-        print("      vendor requests              : %s  <- the number the bound is about"
-              % guard.get("vendor_requests"))
-        print("      NOT 'ZERO EXTERNAL CONNECTIONS': the sign-in page this render reached")
-        print("      pulls webfonts from fonts.googleapis.com and fonts.gstatic.com, so the")
-        print("      honest figure is 2 foreign of 12 with 0 of them vendor. Printing 'zero'")
-        print("      here would have been a claim the guard itself refutes. Row W4-S23.")
+        print("  THE RE-CUT BAR (row W4-S23): '0 external connections' is unachievable against")
+        print("      the portal as built (the sign-in page fetches Google webfonts), so the bar")
+        print("      the criterion actually protects is VENDOR calls, over an ENUMERATED list:")
+        vendor_ok, vendor_lines = vendor_bar_report(guard)
+        for line in vendor_lines:
+            print(line)
         print("  RENDER ARM                       : SESSION-GATED -- the browser opened, reached")
         print("      the REAL portal origin and found a SIGN-IN SCREEN; render_export.cjs")
         print("      refuses SESSION_ABSENT by design and never signs in. An authenticated")
@@ -343,8 +387,7 @@ def main():
                 # the amendment admits SESSION-GATED by name -- but a SILENT one would be.
                 and render["command"]["status"] in ("Success", "Failed")
                 and "SESSION_ABSENT" in render["command"]["stderr"]
-                and guard.get("vendor_requests") == 0
-                and guard.get("requests_total", 0) > 0
+                and vendor_ok  # the re-cut bar (row W4-S23): 0 VENDOR connections, enumerated
                 and render["final_instance_state"] == "stopped"
                 and live_state == "stopped")
     record("a", ok_a,

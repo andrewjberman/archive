@@ -1,0 +1,5 @@
+{
+  "commands": [
+    "cat > /tmp/og_i5_ac9.py << 'PYEOF'\nimport boto3, sys, time\nfrom botocore.exceptions import ClientError\nts = time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())\nddb = boto3.client('dynamodb', region_name='us-east-1')\nresults = {}\nfor prefix in ('RUNTIME', 'POLICY'):\n    pk = f\"{prefix}#probe-og-i5-{ts}\"\n    try:\n        ddb.put_item(TableName='gateway-access-state-table', Item={'pk': {'S': pk}, 'sk': {'S': 'AC9'}}, ConditionExpression='attribute_not_exists(pk)')\n        results[prefix] = 'SUCCESS pk=' + pk\n    except ClientError as e:\n        results[prefix] = e.response['Error']['Code'] + ' pk=' + pk\nfor k, v in results.items():\n    print(f'{k}: {v}')\nPYEOF\n/opt/opal-gateway/.venv/bin/python3.11 /tmp/og_i5_ac9.py; rm -f /tmp/og_i5_ac9.py"
+  ]
+}

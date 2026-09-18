@@ -1,0 +1,24 @@
+{
+  "limb": {
+    "positive_control": {
+      "what": "A COMPLIANT slug run end-to-end through the real check_file(): an isolated scratch git repo with two GRADUATED investigation items (TESTPRJ-S1, TESTPRJ-S2) committed at HEAD, then a NEW remediation row commit STAGED that covers BOTH of them (TESTPRJ-S1 and TESTPRJ-S2 each get a remediation row). .scratch/g37_e2e_test.py, function _build_repo('positive', [_rem_row('TESTPRJ-S1'), _rem_row('TESTPRJ-S2')]), calling gate.check_file(root, rel) on the staged REMEDIATION_v1.md.",
+      "outcome": "PASS",
+      "evidence": "check_file() returned 0 violations for the positive-control run: 'POSITIVE CONTROL: the same slug, but covering BOTH GRADUATED items ... violations (0): ... RESULT: compliant slug admitted (zero violations) -> True'."
+    },
+    "mutant": {
+      "what": "A ROWLESS GRADUATED item planted in the SAME shape: the same two GRADUATED items (TESTPRJ-S1, TESTPRJ-S2) committed at HEAD, then a NEW remediation row commit STAGED that covers TESTPRJ-S1 ONLY -- TESTPRJ-S2 is GRADUATED and carries no remediation row while a slug is being cut for a sibling item, the real S74 shape. .scratch/g37_e2e_test.py, function _build_repo('mutant', [_rem_row('TESTPRJ-S1')]), calling gate.check_file(root, rel) on the staged REMEDIATION_v1.md.",
+      "outcome": "REFUSED",
+      "evidence": "check_file() returned 1 violation naming the rowless item: \"TESTPRJ-S1: NEW row (the slug (spine v3: every new remediation row)) while 1 GRADUATED item(s) under TESTPRJ carry NO remediation row: TESTPRJ-S2. A missed clock cannot be written outside a round once its slug closes -- the row goes in BEFORE this commit, in the SAME slug (S74).\""
+    }
+  },
+  "gate_selftest": {
+    "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-8-2 && timeout 300 python .tools/surprise-row-gate.py --self-test",
+    "rc": 0
+  },
+  "notes": {
+    "distinguishing_inputs": "positive_control and mutant differ in exactly one fact: whether the NEW remediation row commit covers TESTPRJ-S2 (positive: yes, both items covered) or not (mutant: no, S2 left rowless). Everything else -- the project, the two GRADUATED investigation items, the committer, the schema, the other limbs exercised alongside (route precondition, investigations precondition, coordinate discipline, duplicate-id census) -- is held identical across the two runs, so the ONE difference in outcome is attributable to the new limb and nothing else that check_file() also grades.",
+    "not_a_pure_function_test_only": "Both controls are run through the REAL gate entry point check_file(root, rel) in an isolated scratch git repo (org/.../REMEDIATION_v1.md staged over a committed HEAD with the investigation items), not a reimplementation and not only the pure _graduated_without_row/_graduated_without_row_violations cores in isolation -- those pure cores are ALSO exercised directly as 12 new arms inside the gate's own --self-test (see gate_selftest above; grep-visible as the 'EN-g-37' arm names in the self-test output), so the wiring is proven at two levels: the pure predicate and the real check_file() call.",
+    "self_test_full_output_tail": "SELFTEST ARMS printed 156 of 156 arms passing (0 failures) including 12 new EN-g-37 arms (positive, mutant, non-GRADUATED-not-flagged, both fail-closed censuses, both merge branches, and the negative control proving this limb never reads the '_stale_open_row' token EN-k-38 owns); the live NFRA_COMPEFFICACY census at the end printed unchanged (51 items, 0 undispositioned, 1 known duplicate-id collision) confirming no existing limb's behaviour moved.",
+    "scratch_script": ".scratch/g37_e2e_test.py (worktree-local, never committed; per CLAUDE.md scratch is <worktree>/.scratch/ only)"
+  }
+}

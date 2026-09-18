@@ -16,7 +16,7 @@ import tfscan  # noqa: E402
 
 RULE = "org/missions/D14/LGIC/LGIC_NAMING/deliverables/GRADING_RULE.md"
 SCHEMA = "org/standards/NAMING_SCHEMA.json"
-OUT = "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/TF_LABEL_CENSUS.md"
+OUT = "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~3/TF_LABEL_CENSUS.md"
 
 S = json.load(open(SCHEMA, encoding="utf-8"))
 KINDS = S["kind"]["by_type"]

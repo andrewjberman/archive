@@ -1,0 +1,262 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-i-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~1",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f0aa50dbc0"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "8768f46770",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-i-3.alb-browser-paths.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+   "kind": "config_data",
+   "commit_or_etag": "0653087377",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "R-OG-9 call 9(a): one-line artifact_sha256 fix for opal-assets-silver-schwab (the map is the Lambda plane's record, not itself a deployable). Confirmed equal to the live function's CodeSha256 via a read-only lambda get-function-configuration (2026-09-17) BEFORE the edit; git diff confirmed exactly one line changed.",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/schwab_reader_iam.tf",
+   "kind": "terraform",
+   "commit_or_etag": "b2e4a10678",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "safe-apply.sh rc0 2026-09-17T18:1xZ: Apply complete! Resources: 8 added, 0 changed, 5 destroyed. Live readback: iam get-role gateway-schwab-read-role / gateway-schwab-catalog-read-role present (ARNs recorded); opal-mcp-emp-menachem-schwab-read / opal-mcp-schwab-catalog-read NoSuchEntity; iam get-role-policy on both roles shows the unchanged 6-Sid deny/allow shape; iam get-role-policy opal-gateway-role gateway-assume-schwab-readers-policy shows both new role ARNs with distinct re-keyed ExternalIds.",
+   "artifact_covered_by": [
+    "OGI3-AC1",
+    "OGI3-AC3"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/ssm_readonly_host.tf",
+   "kind": "terraform",
+   "commit_or_etag": "b2e4a10678",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Created in the same apply. Live readback: ssm describe-document --name gateway-readonly-host-document -> Status Active; iam get-role-policy opal-gateway-access-admin gateway-access-admin-ssm-readonly-policy pins ssm:SendCommand to exactly the document ARN + the Gateway instance ARN.",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "infra/aws/terraform/opal-gateway/alb.tf",
+   "kind": "terraform",
+   "commit_or_etag": "b2e4a10678",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Live elbv2 describe-rules on the HTTPS listener: new rule priority 34 forwards exactly the four merged-record paths without authenticate-oidc; rules 10/20/30/31/32/33/default byte-equal to OG-p-1's baseline; HTTP:80 listener's default redirect rule byte-equal to baseline. WAF association and idle_timeout unchanged (see OGI3-AC6/AC5 evidence).",
+   "artifact_covered_by": [
+    "OGI3-AC1",
+    "OGI3-AC3",
+    "OGI3-AC4",
+    "OGI3-AC5",
+    "OGI3-AC6"
+   ]
+  },
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/schwab/aws_roles.py",
+   "kind": "script",
+   "commit_or_etag": "b2e4a10678",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Docstring-only change (this module never hardcodes either role name -- it reads the contract's reader_role/catalog_role at runtime). infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py: 17 of 17 PASS, unchanged. On-box deploy of the app package to the Gateway EC2 instance is a separate act outside this order's paths grant; not performed here (see NFRA_OPLGTW-W1-S13 and the AC4 finding that the four routes are not yet live application code on the box).",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "org/standards/NFRA_OPLGTW_CONTRACT.json",
+   "kind": "config_data",
+   "commit_or_etag": "b2e4a10678",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "reader_role/catalog_role updated to the builder names; new field assume_readers_policy added; contract_version stays 1.1 (OG-i-5's bump). Parses as valid JSON; infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py (which reads this file) 17 of 17 PASS.",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i3.py",
+   "kind": "script",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The grading instrument for OGI3-AC1..AC6; py_compile clean; run 4 times total (2 grading sweeps + a mutant + a restore-check) with stable PASS verdicts and one confirmed FAIL under a deliberate mutation (see controls.mutant).",
+   "artifact_covered_by": [
+    "OGI3-AC1",
+    "OGI3-AC2",
+    "OGI3-AC3",
+    "OGI3-AC4",
+    "OGI3-AC5",
+    "OGI3-AC6"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/SCHWAB_IDENTITIES.json",
+   "kind": "config_data",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Rewritten post-apply with the new role/policy/document names and ARNs, live-read after the apply (no ExternalId value, key or credential recorded).",
+   "artifact_covered_by": []
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260917T1803Z_nfra-oplgtw-og-i-3-alb-paths_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "6563b4d471",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Deploy-completion ledger: opened+committed @be6ba30d5d before the apply (2 legs: apply, readback), closed+committed @6563b4d471 before the OGI3-AC1..AC6 grading reads; both legs' proof text records the apply rc0 line and the live readback.",
+   "artifact_covered_by": [
+    "OGI3-AC2"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "One row appended (NFRA_OPLGTW-W1-S13); JSON fence re-parsed clean at 92 rows after the append.",
+   "artifact_covered_by": []
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "OGI3-AC1",
+   "criterion_verbatim": "OGI3-AC1 -- the plan changes only listener rules for the exact download and OIDC-callback paths OG-a-3 and OG-x-1 name, and leaves the default action unchanged.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-1h && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i3.py AC1",
+   "output_evidence": "denominator: 84 resource_changes total, 8 non-no-op\nnon-no-op aws_lb* resources: aws_lb_listener_rule.schwab_download_browser=['create']\nnew rule priority=34 path_pattern values=['/schwab/download', '/schwab/download/callback', '/schwab/download/exchange', '/schwab/download/login']\naws_lb_listener.https: no-op\nVERDICT: PASS-OGI3-AC1",
+   "denominator": "1 of 1 non-no-op aws_lb* resource in the plan is the new listener rule; 4 of 4 path_pattern values match the two merged records",
+   "status": "PASS",
+   "status_reason": "The saved pre-apply plan's only non-no-op aws_lb* resource is the new listener rule, whose 4 path values equal BROWSER_PATHS.json + DOWNLOAD_PATHS.json exactly; aws_lb_listener.https (the default action) is no-op.",
+   "expect": "(?m)^VERDICT: PASS-OGI3-AC1(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI3-AC2",
+   "criterion_verbatim": "OGI3-AC2 -- the apply runs through safe-apply under a ledger entry opened and committed before the act and closed before the reads.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-1h && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i3.py AC2",
+   "output_evidence": "denominator: 2 commit(s) touched the completion record\n  6563b4d471... close deploy-completion entry ... both legs proven\n  be6ba30d5d... open deploy-completion entry ... before the apply\nsentinel history shows the close then open commits, sentinel absent at HEAD (removed by close)\napply.log markers present: ['HALT-GATE:', 'naming-apply-gate', 'naming-plan-gate', 'comp-tagauthz', 'tombstone-gate', 'Apply complete!']; missing: []\nVERDICT: PASS-OGI3-AC2",
+   "denominator": "2 of 2 required commits present (open, close); 6 of 6 safe-apply gate markers present in the apply log",
+   "status": "PASS",
+   "status_reason": "The completion record's CLOSED status, the open (be6ba30d5d, before the apply) and close (6563b4d471, before this grading run) commits, and the apply.log's own safe-apply gate trail (halt-gate, naming plan/apply gates, comp-tagauthz, tombstone, Apply complete) are all present.",
+   "expect": "(?m)^VERDICT: PASS-OGI3-AC2(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI3-AC3",
+   "criterion_verbatim": "OGI3-AC3 -- every pre-existing rule reads back byte-equal to OG-p-1's baseline.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-1h && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i3.py AC3",
+   "output_evidence": "denominator: 7 baseline rule(s) on the HTTPS listener\nnew priorities in live HTTPS listener vs baseline: {'34'} (expect exactly {'34'})\nmissing from live: 0; changed: 0\nHTTP:80 listener: 1 rule(s) (baseline: 1)\nVERDICT: PASS-OGI3-AC3",
+   "denominator": "7 of 7 baseline HTTPS-listener rules byte-equal live; 1 of 1 HTTP:80 default rule byte-equal live; exactly 1 new priority (34)",
+   "status": "PASS",
+   "status_reason": "Every pre-existing rule (priorities 10/20/30/31/32/33/default on HTTPS, default on HTTP:80) reads back byte-equal (same Conditions/Actions/Priority) to OG-p-1's baseline; the only new priority is 34.",
+   "expect": "(?m)^VERDICT: PASS-OGI3-AC3(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI3-AC4",
+   "criterion_verbatim": "OGI3-AC4 -- (difference) an unauthenticated GET to an unrelated path still redirects to the ALB login, while the same request to an explicit path reaches the application (status and Location header recorded).",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-1h && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i3.py AC4",
+   "output_evidence": "unrelated /og-i-3-unrelated-probe-path: status=302 Location=https://login.microsoftonline.com/... server=awselb/2.0\nexplicit /schwab/download: status=404 Location=None server=uvicorn\nexplicit /schwab/download/callback: status=404 Location=None server=uvicorn\nexplicit /schwab/download/exchange: status=404 Location=None server=uvicorn\nexplicit /schwab/download/login: status=404 Location=None server=uvicorn\nexplicit path(s) that reached the application (no Location, server=uvicorn): 4 of 4\nVERDICT: PASS-OGI3-AC4",
+   "denominator": "1 of 1 unrelated path redirects to Entra; 4 of 4 explicit paths reach the application",
+   "status": "PASS",
+   "status_reason": "The unrelated path 302s to login.microsoftonline.com (server=awselb, the ALB's own OIDC hop); all four explicit paths return 404 with server=uvicorn and no Location -- they reach the Gateway application process, which has not yet had OG-a-3/OG-x-1's route code deployed to the box (a separate, later act; see NFRA_OPLGTW-W1-S13's disclosure and the aws_roles.py artifact row). The distinguishing signal this criterion asks for (redirect vs application) is present regardless of the app's own response code.",
+   "expect": "(?m)^VERDICT: PASS-OGI3-AC4(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI3-AC5",
+   "criterion_verbatim": "OGI3-AC5 -- the idle_timeout is read back with its ARN and UTC time.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-1h && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i3.py AC5",
+   "output_evidence": "idle_timeout.timeout_seconds=60 (read 2026-09-17T18:38:24Z)\nbaseline idle_timeout_seconds=60\nVERDICT: PASS-OGI3-AC5",
+   "denominator": "1 of 1 idle_timeout read, matching the baseline value",
+   "status": "PASS",
+   "status_reason": "elbv2 describe-load-balancer-attributes on the ALB ARN returns idle_timeout.timeout_seconds=60 at a printed UTC vintage, equal to OG-p-1's baseline.",
+   "expect": "(?m)^VERDICT: PASS-OGI3-AC5(?![0-9])"
+  },
+  {
+   "criterion_id": "OGI3-AC6",
+   "criterion_verbatim": "OGI3-AC6 -- the WAF association equals OG-p-1's baseline.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-1h && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~1/probes/og_i3.py AC6",
+   "output_evidence": "live: opal-gateway-waf arn:aws:wafv2:us-east-1:313476888478:regional/webacl/opal-gateway-waf/181df35e-e886-40c6-a8dc-9d0b60346a44 rules=['rate-based-ip', 'ip-reputation', 'known-bad-inputs', 'common-rule-set', 'BlockedIPs']\nbaseline: opal-gateway-waf arn:aws:wafv2:us-east-1:313476888478:regional/webacl/opal-gateway-waf/181df35e-e886-40c6-a8dc-9d0b60346a44 rules=['rate-based-ip', 'ip-reputation', 'known-bad-inputs', 'common-rule-set', 'BlockedIPs']\nVERDICT: PASS-OGI3-AC6",
+   "denominator": "1 of 1 WAF association identity match; 5 of 5 rule names+priorities match",
+   "status": "PASS",
+   "status_reason": "wafv2 get-web-acl-for-resource on the ALB returns the same WebACL ARN/Name and the same 5-rule set as OG-p-1's baseline.",
+   "expect": "(?m)^VERDICT: PASS-OGI3-AC6(?![0-9])"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC3's live_rules.json evidence was mutated in a scratch copy (priority-10 rule's path-pattern value changed to /mcp/MUTATED) and swapped in for one run, then restored byte-identical from a saved original.",
+   "expected": "AC3 FAILs on the mutated evidence (a changed pre-existing rule), then PASSes again once the original evidence is restored.",
+   "observed": "Mutated run: missing from live: 0; changed: 1 ... VERDICT: FAIL-OGI3-AC3 missing=[] changed=[arn:...4ea29ffe7abbebf4]. Restore verified byte-identical by diff (no output). Two subsequent full AC1..AC6 sweeps both read all-PASS.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "The full AC1..AC6 sweep was run three times in this session (the grading sweep, and two more immediately after the mutant restore), plus a fourth partial sweep (AC3 alone) between them.",
+   "observed": "AC1, AC2, AC4, AC5, AC6 identical PASS output across all runs. AC3 PASSed on the real evidence in every run except the one deliberately mutated run, which FAILed exactly as expected and was excluded from the deliverable's own committed evidence (the committed live_rules.json is the pre-mutation, restored file).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "infra/aws/ec2/opal-gateway/app/integrations/schwab/aws_roles.py (AWS ROLES adapter): no OGI3-AC1..AC6 acceptance row covers it directly -- the formal ALB/WAF acceptance battery does not test the IAM rename. Its only change is a docstring quote update to match the current PRD text; the module never hardcodes either role name (it reads the contract's reader_role/catalog_role and checks the configured ARN's role-name segment against it, so the rename needed no functional code change here).",
+   "reason": "Covered instead by infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py (17 of 17 PASS, unchanged) and the artifacts_produced row's own deploy_evidence; no criterion in this order's ACCEPTANCE section names AWS ROLES or the IAM rename."
+  },
+  {
+   "item": "Re-running OG-i-2's live denial and assume arms (host_arm() via SSM AWS-RunShellScript) against the new role ARNs, as the FIRST ACT text names.",
+   "reason": "R-OG-6 forbids AWS-RunShellScript from this cell onward and permits only the one fixed, parameterless document this cell installs; that document's content is scoped to the reads later cells need (file digests, systemd, RSS, packages) and cannot express a dynamic assume-role/GetObject diagnostic without reopening the caller-supplied-interpolation hole R-OG-6 exists to close. Refused as written; substituted a declared-level check (iam get-role/get-role-policy trust + inline-policy readback against the new ARNs) and filed NFRA_OPLGTW-W1-S13."
+  },
+  {
+   "item": "Deploying OG-a-3's/OG-x-1's browser_oidc.py/download_routes.py application code to the Gateway EC2 instance.",
+   "reason": "Not in this order's paths grant (no EC2_MANIFEST.json, no deploy-to-ec2.sh, no app/ path); this cell is the ALB/Terraform layer only. Disclosed in the AC4 evidence (all four explicit paths currently 404 from the application, not yet the route's real behaviour) and in NFRA_OPLGTW-W1-S13."
+  },
+  {
+   "item": "Renaming or otherwise touching taxsma_gateway_iam.tf's opal-mcp-emp-* wildcard trust, or any other pre-existing OUT-OF-PATTERN name the naming-apply-gate's pre-plan (DIR-mode) stage printed as WARN (11 REFUSE-worthy names, none of them this cell's).",
+   "reason": "Outside paths and outside R-OG-7's three-name scope; the pre-plan stage never refuses (it cannot tell an addition from an existing resource), and the plan-mode stage confirmed none of those pre-existing names is an ADDITION in this apply, so ENFORCE mode did not and should not block on them."
+  }
+ ],
+ "surprises": [
+  "NFRA_OPLGTW-W1-S13: TO-OG-i-3's FIRST ACT asks for a live re-run of OG-i-2's assume/denial arms against the new ARNs, but R-OG-6 (binding from this cell onward) forbids the AWS-RunShellScript mechanism those arms use and this cell's own new document is fixed and parameterless -- refused as written, substituted with a declared-level (iam get-role/get-role-policy) check, disclosed (OBSERVATION, INERT)."
+ ],
+ "session_log": "No persisted session-log path exists for a spine-v3 L7 worker subagent (L7 reads from git). The trail is this instance, the result file, evidence/og_i3/, one W1 row (S13) and branch wk-nfra_oplgtw-1h. AWS calls this run: lambda get-function-configuration (pre-flight, read-only); terraform init/plan/show-json + safe-apply.sh apply x1 (rc0, 8 added/0 changed/5 destroyed); iam get-role/get-role-policy/list-role-policies x6 (readback of the two renamed roles + the assume policy); ssm describe-document x1; elbv2 describe-rules x2 (HTTPS + HTTP:80 listeners) + describe-load-balancer-attributes x1; wafv2 get-web-acl-for-resource x1; 5 unauthenticated HTTPS GETs to mcp.opalinvest.dev (no vendor egress -- Opal infrastructure); py -3.12 .tools/deploy_ledger.py open/close-leg x2/close. No secret value, ExternalId value or credential entered any committed file.",
+ "compiler_tools": [
+  {
+   "tool": ".tools/halt-gate-check.sh (via safe-apply.sh)",
+   "invocation": "HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply -input=false -auto-approve",
+   "result": "18 pending ROUTINE message(s) on the issuer's inbox (2.0.0_SA_COO~O), none STOP-class; HALT-GATE: HALT_ACK set -- messages acknowledged. Proceeding."
+  },
+  {
+   "tool": ".tools/naming-apply-gate.py (via safe-apply.sh, DIR + plan-json modes)",
+   "invocation": "python .tools/naming-apply-gate.py infra/aws/terraform/opal-gateway ; python .tools/naming-apply-gate.py --plan-json <rendered plan>",
+   "result": "DIR mode: NAMING-GATE: WARN 19 graded (11 pre-existing REFUSE-worthy names, none touched by this cell, never refuses pre-plan). Plan mode: NAMING-PLAN: WARN 48 graded, 0 REFUSE -- all 5 renamed/replaced resources and 3 new resources (2 IAM roles, 1 IAM policy, 1 SSM document, 1 IAM policy, 1 ALB listener rule) graded CONFORMANT."
+  },
+  {
+   "tool": "comp-tagauthz (via safe-apply.sh)",
+   "invocation": "comp-tagauthz check --default-tags-tree infra/aws/terraform/opal-gateway --from-plan <rendered plan>",
+   "result": "safe-apply: comp-tagauthz gate PASSED -- no plan resource overwrites an access-granting tag."
+  },
+  {
+   "tool": ".tools/tombstone-gate.py (via safe-apply.sh)",
+   "invocation": "python .tools/tombstone-gate.py --plan-json <rendered plan> --register infra/aws/terraform/tombstones.json",
+   "result": "[tombstone-gate] checked 8 create(s) in this plan against 7 tombstone(s) / CLEAN: no planned create matches a tombstoned resource."
+  },
+  {
+   "tool": ".tools/terraform.exe v1.9.8 (issuer-provisioned)",
+   "invocation": "-chdir=infra/aws/terraform/opal-gateway fmt -diff ; validate ; plan -out=... ; show -json ...",
+   "result": "fmt: one file reformatted (ssm_readonly_host.tf locals alignment), then clean; validate: Success! The configuration is valid.; plan: Plan: 8 to add, 0 to change, 5 to destroy."
+  },
+  {
+   "tool": "safe-apply.sh (real apply)",
+   "invocation": "HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/opal-gateway apply -input=false -auto-approve",
+   "result": "rc 0, Apply complete! Resources: 8 added, 0 changed, 5 destroyed."
+  },
+  {
+   "tool": "pytest (infra/aws/ec2/opal-gateway/tests/test_schwab_catalog.py)",
+   "invocation": "cd infra/aws/ec2/opal-gateway && .venv-og/Scripts/python -m pytest tests/test_schwab_catalog.py -q",
+   "result": "17 passed in 21.93s, 0 failed."
+  },
+  {
+   "tool": "py -3.12 .tools/deploy_ledger.py",
+   "invocation": "open --slug nfra-oplgtw-og-i-3-alb-paths --leg apply --leg readback ; close-leg x2 ; close",
+   "result": "OK: OPENED ... then OK: leg apply closed / OK: leg readback closed then OK: CLOSED deploy ledger ... all 2 legs proven; sentinel removed."
+  }
+ ]
+}

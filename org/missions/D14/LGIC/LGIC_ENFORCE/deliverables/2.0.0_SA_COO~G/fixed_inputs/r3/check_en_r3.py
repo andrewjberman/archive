@@ -648,14 +648,17 @@ def s6_live_complete(path=None, root=None):
         return 1
     den = d.get("denominators") or {}
     jl, ln = den.get("judged_live"), den.get("live_nameable")
+    cl = den.get("carded_live", 0)
     vint = str(d.get("vintage") or "")
     say("report: %s" % p)
-    say("DENOMINATOR: judged_live %s of live_nameable %s; live pulled %s; stopped=%s; vintage built-line: %s"
-        % (jl, ln, den.get("live"), d.get("stopped") is not None, "Built from the estate" in vint))
+    say("DENOMINATOR: judged_live %s + carded_live %s of live_nameable %s; live pulled %s; stopped=%s; vintage built-line: %s"
+        % (jl, cl, ln, den.get("live"), d.get("stopped") is not None, "Built from the estate" in vint))
     if d.get("stopped") is not None:
         say("FAIL-S6-LIVE-STOPPED-ON-RAISE")
         return 1
-    if not isinstance(ln, int) or ln <= 0 or jl != ln:
+    # R-29 (amendment 1): a name carded NOT-JUDGED with its owner card counts toward completeness.
+    if (not isinstance(ln, int) or ln <= 0 or not isinstance(jl, int) or not isinstance(cl, int)
+            or cl < 0 or jl + cl != ln):
         say("FAIL-S6-LIVE-INCOMPLETE")
         return 1
     if "Built from the estate" not in vint:
@@ -673,11 +676,14 @@ def s6_repo_complete(path=None, root=None):
         return 1
     den = d.get("denominators") or {}
     jr, rn = den.get("judged_repo"), den.get("repo")
-    say("DENOMINATOR: judged_repo %s of repo %s; stopped=%s" % (jr, rn, d.get("stopped") is not None))
+    cr = den.get("carded_repo", 0)
+    say("DENOMINATOR: judged_repo %s + carded_repo %s of repo %s; stopped=%s"
+        % (jr, cr, rn, d.get("stopped") is not None))
     if d.get("stopped") is not None:
         say("FAIL-S6-REPO-STOPPED-ON-RAISE")
         return 1
-    if not isinstance(rn, int) or rn <= 0 or jr != rn:
+    if (not isinstance(rn, int) or rn <= 0 or not isinstance(jr, int) or not isinstance(cr, int)
+            or cr < 0 or jr + cr != rn):
         say("FAIL-S6-REPO-INCOMPLETE")
         return 1
     say("PASS-S6-REPO-COMPLETE")
@@ -705,9 +711,11 @@ def s6_no_placeholder(path=None, root=None):
     return 0
 
 
-def _complete(census, judged, total):
+def _complete(census, judged, total, carded=None):
     n = census.get(total)
-    return isinstance(n, int) and n > 0 and census.get(judged) == n
+    j = census.get(judged)
+    c = census.get(carded, 0) if carded else 0
+    return isinstance(n, int) and n > 0 and isinstance(j, int) and isinstance(c, int) and c >= 0 and j + c == n
 
 
 def s6_comparison_arithmetic(path=None, root=None):
@@ -737,8 +745,8 @@ def s6_comparison_arithmetic(path=None, root=None):
             bad.append(name)
     census = d.get("census") if isinstance(d.get("census"), dict) else {}
     stopped = census.get("stopped") is not None
-    live_done = _complete(census, "judged_live", "live_nameable")
-    repo_done = _complete(census, "judged_repo", "repo")
+    live_done = _complete(census, "judged_live", "live_nameable", "carded_live")
+    repo_done = _complete(census, "judged_repo", "repo", "carded_repo")
     say("embedded census: stopped=%s; judged_live %s of %s; judged_repo %s of %s"
         % (stopped, census.get("judged_live"), census.get("live_nameable"),
            census.get("judged_repo"), census.get("repo")))
@@ -779,6 +787,12 @@ def _selftest_s6():
         incomplete = json.loads(json.dumps(gcd))
         incomplete["census"].update({"judged_live": 3, "live_nameable": 1821})
         ic = _write_fenced(os.path.join(base, "incomplete_census_comparison.md"), incomplete)
+        carded = json.loads(json.dumps(good))
+        carded["denominators"].update({"live_nameable": 3, "carded_live": 1, "repo": 2, "carded_repo": 1})
+        cg = _write_fenced(os.path.join(base, "carded_report.md"), carded)
+        overcard = json.loads(json.dumps(carded))
+        overcard["denominators"].update({"carded_live": 2, "carded_repo": 2})
+        cb = _write_fenced(os.path.join(base, "overcarded_report.md"), overcard)
 
         out.append(("s6-live-complete RED  (round 2 numbers)", s6_live_complete(r2r) == 1))
         out.append(("s6-live-complete GREEN", s6_live_complete(gr) == 0))
@@ -790,6 +804,10 @@ def _selftest_s6():
         out.append(("s6-comparison GREEN", s6_comparison_arithmetic(gc) == 0))
         out.append(("s6-comparison RED    (arithmetic open)", s6_comparison_arithmetic(oc) == 1))
         out.append(("s6-comparison RED    (closes, census incomplete)", s6_comparison_arithmetic(ic) == 1))
+        out.append(("s6-live-complete GREEN (judged + carded, R-29)", s6_live_complete(cg) == 0))
+        out.append(("s6-repo-complete GREEN (judged + carded, R-29)", s6_repo_complete(cg) == 0))
+        out.append(("s6-live-complete RED  (carded overcounts)", s6_live_complete(cb) == 1))
+        out.append(("s6-repo-complete RED  (carded overcounts)", s6_repo_complete(cb) == 1))
     finally:
         _shutil.rmtree(base, ignore_errors=True)
     return out

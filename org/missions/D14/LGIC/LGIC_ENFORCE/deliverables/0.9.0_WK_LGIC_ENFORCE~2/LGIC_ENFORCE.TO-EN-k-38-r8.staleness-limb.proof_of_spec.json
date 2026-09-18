@@ -1,0 +1,147 @@
+{
+ "schema_version": "1.0",
+ "to_id": "LGIC_ENFORCE.TO-EN-k-38-r8",
+ "phase": "BUILD-GENERAL",
+ "firm": "FABRIC",
+ "spec_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-k-38-r8.staleness-limb.md",
+  "group": "OTHER",
+  "vintage_commit": "8689484c695a4e51649a1533d5b38a6bf917de41"
+ },
+ "assignee": "0.9.0_WK_LGIC_ENFORCE~2",
+ "decomp_ref": {
+  "doc": "org/missions/D14/LGIC/LGIC_ENFORCE/decompositions/LGIC_ENFORCE_DECOMP.md",
+  "vintage_commit": "8689484c695a4e51649a1533d5b38a6bf917de41",
+  "to_ref": "org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-k-38-r8.staleness-limb.md"
+ },
+ "artifacts_produced": [
+  {
+   "path_or_key": ".tools/surprise-row-gate.py",
+   "kind": "script",
+   "commit_or_etag": "4450391b96e0589e7bba7b831350b84894207074",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "introduces": [
+    "_remediation_rows_for_project",
+    "_stale_open_row_violations",
+    "STALE_OPEN_ROW_N_ROUNDS"
+   ],
+   "deploy_evidence": "1 file changed, 200 insertions(+), 0 deletions -- ONLY additions: a module-level N-rounds constant with its justification, _remediation_rows_for_project (after _remediation_ids_for_project), _round_num/_stale_open_row/_stale_open_row_violations (after _graduated_without_row_violations), one new pre.extend(...) call added to check_file's existing L10 precondition block gated on kind==REMEDIATION, and one new arms += [...] block (15 arms) added to _self_test. No existing function body edited (EN-g-37's limb untouched). Gate's own --self-test: 171 of 171 arms pass, rc=0 (was 156 pre-change; +15 new, 0 regressed). Each of the three token(s) above: 0 occurrences at 4450391b96~1 (8689484c69, the pre-change parent), present at 4450391b96 (git show | grep -c, both vintages). NOTE: the bare token `_stale_open_row` is NOT listed here even though it is the arm's own required token (K38R8-AC1) -- it already had 2 occurrences at the parent, inside EN-g-37's own negative-control docstring text naming it as a string (`_graduated_without_row`'s comment asserting the token is absent from ITS OWN source) -- so it is not a clean 0-at-parent/N-at-child pair and listing it here would misstate the diff; K38R8-AC1 grades its occurrence count directly (0 at the R8_BASE cut over 2437 lines vs 25 now), not this field.",
+   "artifact_covered_by": ["K38R8-AC1", "K38R8-AC2", "K38R8-AC3"]
+  },
+  {
+   "path_or_key": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~2/STALENESS_LIMB_R8.json",
+   "kind": "doc",
+   "commit_or_etag": "5798b991f96bc976baf4883c2320fbcf06144720",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "introduces": ["positive_control", "distinct_from_rowlessness"],
+   "deploy_evidence": "New file (absent at 5798b991f9~1 for this path -- git show on the parent for this path errors path-does-not-exist), 1 file changed, 36 insertions. Shape matches the order's WHERE YOUR RECORD GOES block (limb.positive_control, limb.mutant, distinct_from_rowlessness) plus additive n_rounds/notes/gate_selftest.",
+   "artifact_covered_by": ["K38R8-AC2", "K38R8-AC3"]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "K38R8-AC1",
+   "criterion_verbatim": "K38R8-AC1: cd <WS> && timeout 600 python .../fixed_inputs/r8/check_en_r8.py k38-limb-present, expect PASS-K38-LIMB-PRESENT.",
+   "method": "command",
+   "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-8-2b && timeout 600 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r8/check_en_r8.py k38-limb-present",
+   "expect": "PASS-K38-LIMB-PRESENT",
+   "output_evidence": "gate source lines: 2770 | token _stale_open_row occurrences: 25 | VERDICT: PASS-K38-LIMB-PRESENT | rc=0",
+   "denominator": "1 of 1 required token (_stale_open_row) present in the gate source, 25 occurrences over 2770 lines; R8_BASE pinned 0 occurrences at the cut over 2437 lines, so this reads FAIL-at-the-cut by construction and PASS only once the limb actually landed.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "K38R8-AC2",
+   "criterion_verbatim": "K38R8-AC2: cd <WS> && timeout 600 python .../fixed_inputs/r8/check_en_r8.py k38-controls, expect PASS-K38-CONTROLS.",
+   "method": "command",
+   "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-8-2b && timeout 600 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r8/check_en_r8.py k38-controls",
+   "expect": "PASS-K38-CONTROLS",
+   "output_evidence": "positive control: A FRESH OPEN, owned remediation row, legitimately in flight ... -> PASS | mutant: A PLANTED STALE OPEN row ... -> REFUSED | VERDICT: PASS-K38-CONTROLS | rc=0",
+   "denominator": "2 of 2 required blocks present (positive_control, mutant), both with the required outcome tokens, `what` strings distinct (verified by the checker's own core_control_pair, which also asserts the strings differ). Both controls independently re-derived by this worker end-to-end through check_file() in an isolated scratch git repo (.scratch/k38_e2e_test.py) before being written into the record: mutant REFUSED naming K38TEST-W2-S1 (round v1, 7-round gap), positive control PASS with 0 violations (round v7, 1-round gap).",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "K38R8-AC3",
+   "criterion_verbatim": "K38R8-AC3: cd <WS> && timeout 600 python .../fixed_inputs/r8/check_en_r8.py k38-distinct, expect PASS-K38-DISTINCT.",
+   "method": "command",
+   "invocation": "cd /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-8-2b && timeout 600 python org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r8/check_en_r8.py k38-distinct",
+   "expect": "PASS-K38-DISTINCT",
+   "output_evidence": "mutant row EXISTS in the remediation channel: True (must be True) | rowlessness limb on that row: 'PASS' (must be PASS -- it cannot see it) | staleness limb on that row: 'REFUSED' (must be REFUSED) | VERDICT: PASS-K38-DISTINCT | rc=0",
+   "denominator": "3 of 3 required facts present and correctly directed (mutant_row_exists=True, rowlessness_limb_verdict=PASS, staleness_limb_verdict=REFUSED). Measured on the REAL gate, not the pure cores alone: .scratch/k38_e2e_test.py runs BOTH _graduated_without_row_violations and _stale_open_row_violations through the SAME check_file() call on the SAME mutant commit -- g-37's limb returns 0 violations for K38TEST-W2-S1 (the row exists, it carries its own remediation row) while k-38's limb is the ONLY entry in that run's violation list. If EN-g-37's limb had also refused this mutant, this criterion's own predicate (rowlessness_limb_verdict==PASS) would read FAIL -- it is not a criterion that can be satisfied by construction.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "K38R8-AC4",
+   "criterion_verbatim": "K38R8-AC4, for 3.0.0_SA_CVO at L9 (no verdict from you): whether the chosen N is defensible against the estate's real round cadence rather than picked to make W7-S1 fire, and whether the positive control is a genuinely fresh row.",
+   "method": "manual_read_with_citation",
+   "invocation": "Read of org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~2/STALENESS_LIMB_R8.json (n_rounds block) and .scratch/k38_e2e_test.py (worktree-local, cited for its method, not committed) at commit 5798b991f9.",
+   "expect": "N/A -- judgment criterion; no PASS/FAIL is printed by this worker.",
+   "output_evidence": "N=2 rounds, stated and measured against TWO independent facts, neither of which is W7-S1's own fire-point chosen backward from the incident: (1) LGIC_ENFORCE's own round cadence at the round-8 cut -- round 1 (2026-09-15T02:20Z) through round 8's cut census (2026-09-18 ~05:42 UTC), ~75.5 hours across 7 round-to-round gaps, ~10.8h/round; N=2 tracks roughly one full round of normal remediation lag before flagging. (2) Applied to W7-S1's own numbers as a CHECK, not a target: N=2 would have caught it at round v3 (2026-09-17T14:12Z, the round-3 census this project's own R8_BASE already cites), ~40 hours before round 8 actually surfaced it via the adjudication's own narrative -- i.e. N=2 was not tuned to hit round 8 exactly, it would have fired earlier. The positive control (K38TEST-W2-S1 at round v7, one round old against the round-8 slug) is a genuinely fresh row in the sense the order names: it is OPEN and owned, exactly like a row minted or last-touched in the immediately preceding round would be, not a row shaped to dodge the threshold by an implausible margin.",
+   "denominator": "N/A -- judgment criterion (task order: 'K38R8-AC4 is JUDGMENT: record UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming 3.0.0_SA_CVO').",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "Per THE CELL's own <proof_of_spec> clause: judgment criterion, graded by 3.0.0_SA_CVO at L9. The substitute oracle is 3.0.0_SA_CVO's adjudication of whether N=2 is defensible against the estate's real cadence and whether the positive control is genuinely fresh.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "MUTANT + POSITIVE CONTROL AS A PEER PAIR (order's own bar), both run end-to-end through the real check_file() in an isolated scratch git repo, never the production channel: a GRADUATED investigation item and its own remediation row committed at HEAD (round v7 for the positive control, round v1 for the mutant -- the ONE fact that differs), then a NEW round-8 remediation row staged as the slug. MUTANT's old row sits 7 rounds behind (>= N=2); POSITIVE CONTROL's sits 1 round behind (< N=2).",
+   "expected": "MUTANT: REFUSED, naming the stale row. POSITIVE CONTROL: PASS, zero violations from the new limb (and from every other limb check_file also grades, including EN-g-37's rowlessness limb, since the row carries its own remediation row in both runs).",
+   "observed": "MUTANT: check_file() returned exactly 1 violation: \"K38TEST-W2-S2: NEW row (the slug (spine v3: every new remediation row)) while 1 OPEN, owned remediation row(s) under K38TEST have not moved for 2 or more round(s): K38TEST-W2-S1. A row that EXISTS, is OPEN and is OWNED still goes stale silently, and no rowlessness limb will ever see it -- the row goes in BEFORE this commit, in the SAME slug (S75).\" POSITIVE CONTROL: check_file() returned 0 violations. The DISTINCTNESS control (k38-distinct) was run on the SAME mutant commit: g-37's rowlessness limb (_graduated_without_row_violations) independently returned 0 violations for K38TEST-W2-S1 on that identical check_file() call.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "check_en_r8.py k38-limb-present / k38-controls / k38-distinct each run twice against the committed tree at 5798b991f9, and the gate's own --self-test run twice.",
+   "observed": "Both runs of all three criteria: identical PASS/PASS/PASS, identical verdict tokens. Gate --self-test: 171/171 both times, rc=0 both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "the ROWLESSNESS question (a GRADUATED item with no remediation row at all)",
+   "reason": "That is EN-g-37's limb, drained and unedited by this order ('YOU DO NOT EDIT EN-g-37's LIMB'). This limb grades staleness of a row that EXISTS, is OPEN and is OWNED -- a disjoint predicate, proven disjoint by k38-distinct (K38R8-AC3)."
+  },
+  {
+   "item": "a DECOMP_INVALIDATING investigation row as a trigger for the staleness limb",
+   "reason": "That row shape carries no `round` field (investigation_item.schema.json has none), so this limb has nothing to measure a gap against; it is wired REMEDIATION-plane only (kind==REMEDIATION and folder_kind==REMEDIATION), where remediation.round is schema-required."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Worktree /c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-8-2b on branch wk-lgic-enforce-8-2b, cut from CLOUD at 8689484c69 (this worker's identity line; confirmed HEAD at spawn, org/ and .tools/ both present, TREE-OK). (1) Read THE WORKER FACE of LGIC_ENFORCE.TO-EN-k-38-r8.staleness-limb.md whole. (2) Read check_en_r8.py's k38-* handlers, R8_BASE.json, remediation_row.schema.json (state/owner/round, no timestamp field -- staleness is necessarily measured in ROUNDS via `round`, not wall-clock), W7-S1's own investigation and remediation rows, and check_file()'s existing wiring for EN-g-37's limb to match the established pattern exactly. (3) Added STALE_OPEN_ROW_N_ROUNDS=2 with its justification (this project's own round cadence + W7-S1's own numbers as a check, not a target), _remediation_rows_for_project (a standalone full-row census, parallel to _remediation_ids_for_project, kept separate for the same reason EN-g-37 kept its own census separate), _round_num, _stale_open_row (the pure core) and _stale_open_row_violations (the wrapper, same merge-carried exemption as the twin limb) after their respective siblings. (4) Wired one new pre.extend(...) call into check_file's existing L10 precondition block, gated to kind==REMEDIATION and folder_kind==REMEDIATION (the only plane carrying a `round` field to measure against). (5) Added 15 new arms to the gate's own --self-test: pure-core positive/mutant, REMEDIATED-not-flagged, unowned-not-flagged, three fail-closed arms, violations positive/mutant, census-fail, unparseable-round, both merge branches, a negative control (neither function's source names `_graduated_without_row`), and a DISCRIMINATION arm running g-37's and k-38's real violation functions on the same GRADUATED-with-its-own-row fixture. (6) Ran the gate's own --self-test: first run FAILED one arm (the k38 negative control), because my own docstring for `_stale_open_row_violations` and `_stale_open_row` each literally named `_graduated_without_row`/`_graduated_without_row_violations` in prose -- the SAME class the docstring immediately above it describes (a literal token inside a function's own source, including its docstring, is what inspect.getsource sees); reworded both to describe the sibling limb without the literal token, re-ran: 171 of 171 pass, rc=0. (7) Committed the gate change (4450391b96). (8) Built .scratch/k38_e2e_test.py: an isolated scratch git repo harness (never the production channel, schemas copied in from org/surprise_channel/schemas/ so _schema() can read them from the scratch index) exercising the REAL check_file() end-to-end for the mutant, the positive control, and the distinctness check against g-37's own violation function on the identical mutant commit. First run failed with 'schema unreadable' (the scratch repo had no schemas/ directory); added the schema copy step, re-ran: MUTANT REFUSED naming K38TEST-W2-S1, POSITIVE PASS with 0 violations, g-37's limb PASS (0 violations) on the same mutant commit -- all as expected, rc=0. (9) Wrote STALENESS_LIMB_R8.json from those real results and committed it (5798b991f9). (10) Ran K38R8-AC1/AC2/AC3 against the committed tree: PASS/PASS/PASS. (11) Re-ran check_en_r8.py selftest-arms: 31 of 31 arms, 13 of 13 positive-satisfiability, 0 failures. (12) Wrote this proof instance and the result file. Corrected mid-flight twice (the self-test negative control's own docstring leakage; the scratch repo's missing schema files), both caught by re-running the instrument rather than by inspection. No registry, fixed-input, or other-slot write of any kind; nothing live moved; no AWS, no deploy; EN-g-37's limb read but never edited.",
+ "compiler_tools": [
+  {
+   "tool": "python -m py_compile .tools/surprise-row-gate.py",
+   "invocation": "python -m py_compile .tools/surprise-row-gate.py",
+   "result": "OK -- no syntax errors."
+  },
+  {
+   "tool": ".tools/surprise-row-gate.py --self-test",
+   "invocation": "timeout 300 python .tools/surprise-row-gate.py --self-test",
+   "result": "RESULT: 0 arm(s) failed of 171 (+ live census); rc=0. Includes 15 new EN-k-38 arms, all PASS, and the unchanged live NFRA_COMPEFFICACY census (51 items, 0 undispositioned, 1 known duplicate-id collision)."
+  },
+  {
+   "tool": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r8/check_en_r8.py",
+   "invocation": "one subcommand per mechanical criterion (k38-limb-present, k38-controls, k38-distinct), each under timeout 600, from the worktree root",
+   "result": "PASS-K38-LIMB-PRESENT, PASS-K38-CONTROLS, PASS-K38-DISTINCT, all rc=0."
+  },
+  {
+   "tool": "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r8/check_en_r8.py selftest-arms",
+   "invocation": "timeout 300 python .../check_en_r8.py selftest-arms",
+   "result": "SELFTEST ARMS: 31 ; POSITIVE-SATISFIABILITY arms: 13 ; failures: 0. VERDICT: PASS-SELFTEST-31-ARMS-13-POSITIVE, rc=0."
+  },
+  {
+   "tool": ".scratch/k38_e2e_test.py (worktree-local, not committed)",
+   "invocation": "timeout 120 python .scratch/k38_e2e_test.py",
+   "result": "MUTANT: check_file() returned 1 violation naming K38TEST-W2-S1. POSITIVE CONTROL: check_file() returned 0 violations. DISTINCTNESS: g-37's rowlessness limb returned 0 violations on the same mutant commit. OVERALL: VERDICT: PASS, rc=0."
+  },
+  {
+   "tool": ".tools/safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_LGIC_ENFORCE~2 <0.9.0_WK_LGIC_ENFORCE~2@opal.agent>\" -F <msgfile> -- <path>, twice: once for .tools/surprise-row-gate.py, once for the record json",
+   "result": "OK -- commit 4450391b96 (gate) and 5798b991f9 (record); commit-gate/naming-gate/to-pipeline-gate/surprise-row-gate all OK or non-blocking WARN; msg-verify MATCH both times."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/0.9.0_WK_LGIC_ENFORCE~2/LGIC_ENFORCE.TO-EN-k-38-r8.staleness-limb.proof_of_spec.json K38R8-AC1,K38R8-AC2,K38R8-AC3,K38R8-AC4 --governing-order org/missions/D14/LGIC/LGIC_ENFORCE/task-orders/LGIC_ENFORCE.TO-EN-k-38-r8.staleness-limb.md",
+   "result": "Run after this instance's own commit; see this worker's final report for the exact rc at time of run."
+  }
+ ]
+}
