@@ -1,6 +1,33 @@
-# NFRA_OPLGTW.TO-OG-q-5 -- result (re-hand round)
+# NFRA_OPLGTW.TO-OG-q-5 -- result (re-hand round, closed)
 
-**Worker:** `0.9.0_WK_NFRA_OPLGTW~5` **Branch:** `wk-nfra_oplgtw-5e` **Base HEAD:** `35377638d7`
+**Worker:** `0.9.0_WK_NFRA_OPLGTW~5` **Branch:** `wk-nfra_oplgtw-5e` **Base HEAD (wiring round):** `35377638d7`
+**Closing re-measurement HEAD:** `1ca5067f6e2f08e8e0d225e1cdddaa7ee7f87ec3` (fast-forwarded to CLOUD)
+
+## Closing round (this pass) -- AC1..AC6 re-run fresh at ONE vintage, `<status>` flipped `complete`
+
+Neither by this worker: `test_ogv2_a06` and `test_ogv2_a18` were fixed in `OG-v-2`'s last re-hand (drained
+`@dcad7a92f1` and `@1ca5067f6e`); `test_ogq2_ac06`/`ac20` (rows W5-S19/W5-S20, both already resolved before
+this pass) ride this cell's own `OG-q-6` re-open drain `@e58d9d2b04`. Re-running all six criteria at this
+worker's current HEAD (`1ca5067f6e`, fully committed -- `git status --porcelain` shows only untracked
+`.scratch/`/`.venv-og/`) measures **all six PASS**:
+
+- `OGQ5-AC1` -- `1 passed` (unchanged).
+- `OGQ5-AC2` -- `1 passed` (unchanged).
+- `OGQ5-AC3` -- `1 passed` (unchanged).
+- `OGQ5-AC4` -- `VERDICT: PASS-OGQ5-AC4`, mutant still discriminates, porcelain unchanged (unchanged).
+- `OGQ5-AC5` -- `VERDICT: PASS-OGQ5-AC5`, census re-read not rebuilt, same denominators 34/29/20/5/4 (unchanged).
+- `OGQ5-AC6` -- **now PASS** (was FAIL in the prior round): `test_schwab_query.py` 25 passed,
+  `test_schwab_semantics.py` 14 passed, `test_schwab_wiring.py` 3 passed,
+  `tests/acceptance/test_local_acceptance.py` **14 passed, 0 failed** -- both `test_ogv2_a06` and
+  `test_ogv2_a18` are green at this HEAD. All four modules carry 0 failures; denominator 4 printed.
+
+Proof-of-spec instance rebuilt for all six ids; `py -3.12 .tools/proof-of-spec-check.py <instance>
+OGQ5-AC1,OGQ5-AC2,OGQ5-AC3,OGQ5-AC4,OGQ5-AC5,OGQ5-AC6` -> `VALID (rc=0)`. Every mechanical criterion PASSES
+by output, so `<status>` is flipped `complete` in this pass. No new surprise row filed this pass (the prior
+round's rows W5-S13..W5-S18 stand unchanged; W5-S18's own disposition is the CTO's to move, not touched
+here).
+
+## Prior round (wiring), unchanged below
 
 ## HALF ONE (the dim_asset partial-account CUSIP restriction) -- WIRED this round
 
