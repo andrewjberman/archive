@@ -113,3 +113,44 @@ fix commit landed -- re-pinned to the immutable pre-fix commit hash.
 - `bash .tools/commit-gate.sh` on every touched `.py`/`.sh`: clean.
 - `bash -n infra/aws/ec2/safe-ec2-deploy.sh`: SYNTAX_OK, before and after the R-53 edit.
 - `py -3.12 .tools/proof-of-spec-check.py <instance> OGR1-AC1..AC18`: **VALID (rc=0)**.
+
+## Addendum -- R-56 (msg 97864 @853a37edd1), items 1-4, this pass
+
+R-56 ADOPTED three items and REFUSED one (AC4's class fix, tonight). `<status>` stays `pending`: two
+mechanical criteria (AC4, AC10) are genuine FAILs, and the proof_of_spec block flips `complete` only when
+every mechanical criterion PASSES by output.
+
+**Re-ran everything this round relies on rather than trusting the prior round's report** (a fresh worker on
+a predecessor's evidence): AC1-AC18 all re-verified this pass with the SAME verdicts as before (15 PASS,
+AC4/AC9/AC10 FAIL) -- no re-deploy, AC2's own code is idempotent once `deploy_manifest_commit` is recorded.
+
+- **Item 1 (AC20, ledger self-agreement, ADOPTED).** `deploy_ledger.py check` read DRIFT-DANGEROUS before
+  this pass: the rendered entry claimed `CLOSED` with L1's proof reading `"OGR1-AC4 PASS"` while the
+  sentinel (the true object) stayed committed OPEN, all three legs unproven. ROOT-CAUSED, not just
+  patched: this worker's own prior `ac8()` hardcoded that L1 proof text as a literal regardless of AC4's
+  actual verdict, and its `safe-commit` `commit_paths` omitted the sentinel path entirely, so the tool's
+  real, correct sentinel deletion (on an earlier `close`) was performed on disk but never committed --
+  verified at the bytes (`git show --stat 864aa6a937` touches only the `.md`, 1 file). Filed as surprise
+  `NFRA_OPLGTW-W2-S9` (the code pattern itself is unchanged and latent). Repaired THIS PASS through the
+  tool only: `close-leg` for L1/L2/L3 with honest, non-fabricated evidence (L1 states AC4's true
+  9/68-mismatch result; L2 states AC9's NOT-EVALUATED alongside the real verify PASSes; L3 unchanged), then
+  `close`. `deploy_ledger.py check` now prints neither `DRIFT-DANGEROUS` nor `OPEN` for this slug; the
+  closing commit (`45d1e43657`) touches exactly the sentinel + entry, nothing hand-edited. **OGR1-AC20:
+  PASS.**
+- **Item 2 (AC19, the rollback target, ADOPTED).** Census of every commit `safe-ec2-deploy.sh`'s own
+  wrapper has EVER recorded as deployed for this service (7 commits, across the m365-mcp-gateway ->
+  opal-gateway rename): `app/data_entitlement.py` was added only at `d88cd32d0c` (2026-09-15, subject ends
+  "-- not deployed"), and the ONLY one of the 7 that carries it is `1764e54a16` -- the currently-active
+  release itself, never a prior state to roll back to. Zero valid rollback candidates. Amended
+  `SCHWAB_PILOT_RUNBOOK.md` s7.2 (scope: s7.2 only, per this order's grant) to state, in the words R-56
+  requires, that this release has **NO VALID ROLLBACK** under that section. **OGR1-AC19: PASS.**
+- **Item 3 (AC4, REFUSED as recommended, kept FAILED AS WRITTEN).** No `.gitattributes` change, no re-cut.
+  The nine CRLF files stay carded with "no functional break found" (surprise `NFRA_OPLGTW-W2-S8`,
+  unchanged). **OGR1-AC4: FAIL (by design, per ruling).**
+- **Item 4 (AC9, ADOPTED).** Graded `N/A-BY-CONSTRUCTION` in the proof instance (schema's nearest value to
+  "NOT-EVALUATED"): OG-p-1's baseline carries no error-count metric, so there is no referent; a PASS would
+  be vacuous, a FAIL would measure the wrong thing.
+
+**Final tally: 17 of 20 PASS-by-output, 1 N/A-BY-CONSTRUCTION (AC9), 2 FAIL-as-ruled (AC4, AC10).**
+`py -3.12 .tools/proof-of-spec-check.py <instance> OGR1-AC1..AC20`: **VALID (rc=0)**. `<status>` remains
+`pending` -- AC4 and AC10 keep this order open, as expected and reported plainly.
