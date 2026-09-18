@@ -94,15 +94,17 @@ rule conflict (the same effect round 3's comparison Section 4 measured on 3 of 4
 only, verdict agrees on both.
 
 **Coverage.** 91 of the 133 hand rows (34 N2 + 57 N6, with 0 names shared between the two products in this
-comparison) are graded by the census; 42 are not (11 N2 + 31 N6) -- Section 3.
+comparison) are graded by the census; 42 are not (11 N2 + 31 N6) -- Section 3. **The split of those 42 by
+reason: NOT-GRADED-TYPE 20 + AWS_FIXED-EXCLUDED 2 + CARDED 10 + HAND-SPECIMEN-ABSENT 10 = 42**, so the next
+reader can check the parts against the total without re-deriving them from the per-row table.
 
 ## 3. What the census did not reach, and every uncompared row's reason
 
 Unlike round 3 (stopped early, 124 uncompared for reasons that were uniformly "the run had not reached
 this point yet"), round 4's run is COMPLETE on both planes, so every uncompared hand row now has one of
-THREE distinct, individually-verified reasons -- none of them "the run stopped before it got there":
+FOUR distinct, individually-verified reasons -- none of them "the run stopped before it got there":
 
-- **NOT-GRADED-TYPE** (23 rows): the hand row's type is in `_vocab().not_graded`
+- **NOT-GRADED-TYPE** (20 rows): the hand row's type is in `_vocab().not_graded`
   (`API_ROUTE`, `CLOUDFRONT_DISTRIBUTION`, `EVENT_SOURCE`, `IAM_USER`, `KMS_KEY`, `ROUTE53_RECORD`,
   `SERVICE_PRINCIPAL`, `VPC_ENDPOINT`) -- the census never turns a node of this type into an item, on
   either plane, so it can carry no verdict to compare (matches round 3's report: 346 live nodes of these 8
@@ -111,9 +113,9 @@ THREE distinct, individually-verified reasons -- none of them "the run stopped b
   this exact name outside the grade's domain even though its TYPE is graded -- `default` (SECURITY_GROUP,
   by-name) and `aws-waf-logs-opal-gateway` (LOG_GROUP, by-name prefix `aws-waf-logs-`), each confirmed by a
   direct `_aws_fixed()` call against `NAMING_SCHEMA.json` at this commit.
-- **CARDED** (11 rows): the name is a member of slot ~1's `NOT_JUDGED_R4.json` (R-29) -- carded rather than
+- **CARDED** (10 rows): the name is a member of slot ~1's `NOT_JUDGED_R4.json` (R-29) -- carded rather than
   graded, so it carries no verdict by design, not by gap.
-- **HAND-SPECIMEN-ABSENT** (11 rows): the type IS graded and the name is NOT `aws_fixed`-excluded, but the
+- **HAND-SPECIMEN-ABSENT** (10 rows): the type IS graded and the name is NOT `aws_fixed`-excluded, but the
   literal string is not present among the 2188 live AWS nodes this vintage's pull scanned nor among the
   repo's tracked `.tf`/source literals -- these are worked/exercise names the hand products invented to
   demonstrate a rule (two RAISE specimens explicitly flagged `"specimen": true` in `GRADING_RULE.md`, one
@@ -189,7 +191,7 @@ Full per-row table (11 N2 + 31 N6 = 42 rows, every one individually re-derived a
   "N2": {"hand_population": 45, "compared": 34, "agree": 33, "disagree": 1, "uncompared_hand_rows": 11, "source": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/GRADING_RULE.md@7c1e9ffb26"},
   "N6": {"hand_population": 88, "compared": 57, "agree": 40, "disagree": 17, "uncompared_hand_rows": 31, "source": "org/missions/D14/LGIC/LGIC_NAMING/deliverables/exercises/n6-grader-a.tsv@388b07f486"}
  },
- "uncompared_reasons": {"NOT-GRADED-TYPE": 23, "AWS_FIXED-EXCLUDED": 2, "CARDED": 11, "HAND-SPECIMEN-ABSENT": 11, "total": 42},
+ "uncompared_reasons": {"NOT-GRADED-TYPE": 20, "AWS_FIXED-EXCLUDED": 2, "CARDED": 10, "HAND-SPECIMEN-ABSENT": 10, "total": 42},
  "disagreements": [
   {"name": "Inflection-SilverChain-DimConversionFailure", "type": "CW_ALARM", "hand_product": "N2", "axis": "canonical", "census": {"verdict": "OUT-OF-PATTERN", "canonical": "advi-inf-silver-chain-dim-conversion-failure-alarm"}, "hand": {"verdict": "OUT-OF-PATTERN", "canonical": "{system}-inf-silver-chain-dim-conversion-failure-alarm"}},
   {"name": "inf-otp-relay-api", "type": "API_GW", "hand_product": "N6", "axis": "canonical", "census": {"verdict": "OUT-OF-PATTERN", "canonical": "advi-inf-otp-relay-api"}, "hand": {"verdict": "OUT-OF-PATTERN", "canonical": "{system}-inf-otp-relay-api"}},
