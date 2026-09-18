@@ -99,15 +99,15 @@
   }
  ],
  "controls": {
-  "sample_diversity": {
-   "description": "The 20-row sample must span the desired.verdict kinds the run actually produces, not the first or easiest 20 row_ids in row order.",
-   "expected": "More than one verdict kind represented, proportional to what the 184 callable rows carry (ALIAS 8, CONFORMANT 4, NOT-GRADED 1, OUT-OF-PATTERN 162, RAISE 9 in the full population).",
-   "observed": "Sample carries ALIAS 5, CONFORMANT 4, NOT-GRADED 1, OUT-OF-PATTERN 5, RAISE 5 -- all five kinds present, including the single NOT-GRADED row (the rarest, 1 of 184) and every RAISE row family up to 5 of the 9 present.",
+  "mutant": {
+   "description": "Three doctored copies of the committed artifacts, each restored byte-identical after the check (git status/diff clean before and after): (1) REPRODUCTION.json.results truncated from 20 to 5 rows; (2) REPRODUCTION.json.order with entries [0] and [1] swapped; (3) ANDREW_CARD.md with the ranking_rule string replaced by 'REDACTED'.",
+   "expected": "Mutant 1 makes v1-reproduced FAIL (sampled < required 20); mutant 2 makes v1-order FAIL (reviewer order == rule order: False); mutant 3 makes v1-card FAIL (ranking_rule verbatim: False). The unmutated artifact passes all three before and after.",
+   "observed": "All three mutants fired FAIL-V1-SAMPLE-REPRODUCED-BY-CALL, FAIL-V1-REVIEWER-ORDER-EQUALS-RULE and FAIL-V1-ANDREW-CARD-CARRIES-RULE respectively, each restore returned PASS, and `git status --porcelain` / `git diff --stat` on the two files read clean (no diff) after every restore.",
    "status": "FIRED-AS-EXPECTED"
   },
-  "independent_order": {
-   "method": "The tension order was re-derived from the four factor cells by re-implementing the printed rule text directly (never by importing check_lt_r1.py's rank_key or lib/opal_lgctfm.py's own sort), then diffed against the contract's stored tension order.",
-   "observed": "179 of 179 match; both this worker's independent re-derivation and the checker's own re-sort agree with the contract's stored order.",
+  "determinism": {
+   "method": "V1R1-AC1..AC4 run twice in sequence against the identical committed artifact (a5cef2724f), no input changed between runs.",
+   "observed": "Both runs produced byte-identical VERDICT lines: PASS-V1-SAMPLE-REPRODUCED-BY-CALL, PASS-V1-REVIEWER-ORDER-EQUALS-RULE, PASS-V1-REVIEWER-IS-NOT-ENGINE-AUTHOR, PASS-V1-ANDREW-CARD-CARRIES-RULE.",
    "status": "STABLE"
   }
  },
