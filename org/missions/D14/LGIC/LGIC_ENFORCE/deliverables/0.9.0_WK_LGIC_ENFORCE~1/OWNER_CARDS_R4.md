@@ -158,13 +158,24 @@ already-measured finding).
 this population) "adopted under NFRA_TERRAFORM-P2". `org/projects/NFRA_TERRAFORM.json`: `"status":
 "closed"`, `"phase": "closed 2026-08-25 -- SPRING CLEAN, Andrew-direct ... a project not attached to
 org/missions/DIRECTIVES.yaml is closed rather than left floating unaddressed as live"`. Grep of
-`org/missions/DIRECTIVES.yaml` for `NFRA_TERRAFORM`: 0 hits. This is the same measured shape as
-astn/trade/news (Cards 2-4): a legacy flat project, closed, not attached to any directive, no
-mission-tree D<n> project claims the security-sweep resource family. `owner_directive` cannot be
-written.
+`org/missions/DIRECTIVES.yaml` for `NFRA_TERRAFORM`: 0 hits. Read alone, this looks like the same
+shape as astn/trade/news (Cards 2-4): a legacy flat project, closed, not attached to any directive,
+no mission-tree D<n> project claims the security-sweep resource family, and `owner_directive` cannot
+be written for it.
 
-**Missing instrument:** a DIRECTIVES.yaml line or mission-tree D<n> project claiming the
-security-sweep/anomaly-scanner tooling, or Andrew's own retirement/reassignment card.
+**Reason (R-39, `LGIC_ENFORCE-W1-S30`): `TOKEN_COLLISION`, not the Cards 2-4 no-owner class.** The
+SAME `security` token this card's resource family raises on is ALSO the token Card 6's
+`opal-data-security` / `opal-data-security-access-logs` group would need minted -- and that OTHER
+group has a genuine, citable owner: **D12 / `NFRA_OPSEC202609`, `org/missions/DIRECTIVES.yaml` :485.**
+`_slots`/`_grade_bucket` key purely on the token (`lib/opal_naming.py` `_system_of`, `:1087-1093`),
+so ONE `security` mint would resolve BOTH this closed, unregistered NFRA_TERRAFORM family and Card 6's
+D12-owned group -- misattributing whichever one the mint does not name. This card therefore stays
+CARDED because the token cannot carry two owners, not because no owner search was run.
+
+**Missing instrument:** a `scopes.json`/per-resource split that lets the two groups mint under
+different keys (not `<paths>`; LGIC_LGCTFM's file this round), or a DIRECTIVES.yaml line/mission-tree
+D<n> project claiming the security-sweep/anomaly-scanner tooling by its own name so it no longer
+shares `security` with Card 6's group, or Andrew's own retirement/reassignment card.
 
 ---
 
@@ -191,6 +202,15 @@ NFRA_TERRAFORM's is not possible (no directive). Additionally, B2's actual need 
 not necessarily a PRODUCT: `opal-data-{scope}` names a bucket's firm/scope, and the scope vocabulary
 is `scopes.json`'s domain, which LGIC_LGCTFM's `LT-x-1` writes this round (this order's own preflight,
 contention line) and which is not in this cell's `<paths>`.
+
+**Reason (R-39, `LGIC_ENFORCE-W1-S30`): `TOKEN_COLLISION`, not want-of-owner.** Say this plainly,
+because the earlier framing of this card read as though `opal-data-security[-access-logs]` lacked an
+owner, and a card whose stated reason is wrong RETIRES the question instead of holding it open: this
+group HAS a genuine, already-cited owner, **D12 / `NFRA_OPSEC202609`, `org/missions/DIRECTIVES.yaml`
+:485**. It is carded, and stays carded, ONLY because the `security` token it would need to mint is
+the SAME token Card 5's unrelated, unowned NFRA_TERRAFORM security-sweep family would also resolve on
+-- one token cannot carry two owners, so minting it here would misattribute Card 5's group to D12.
+The block is the token vocabulary's shape, not a gap in the ownership search.
 
 **Missing instrument:** a `scopes.json` row (not `<paths>`) or a per-resource `resources.json` row --
 but Card 1's general finding above shows `resources.json` cannot be reached for a B2 raise on this
