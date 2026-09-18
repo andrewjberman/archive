@@ -320,8 +320,14 @@ def ac2() -> int:
             return verdict(2, False, "the ledger is not open yet -- run AC1 first (never deploy unledgered)")
         deploy_src_before = manifest()
         pre_commit = deploy_src_before["deployed_commit"]
-        env = _env_with_tools_path({"AGENT_NAME": SERIAL})
+        # HALT_ACK=1: the routine (non-STOP) tier of .tools/halt-gate-check.sh, reviewed this run (printed
+        # in this criterion's own output above/below) -- 18 pending messages on the issuer's inbox
+        # (2.0.0_SA_COO~O), none addressed as a [STOP] to this deploy or to NFRA_OPLGTW/opal-gateway.
+        # HALT_ACK is the gate's own documented route past its rc=1 tier; HALT_OVERRIDE (the audited,
+        # STOP-class bypass) is not used and was not needed (the gate itself never returned rc=2).
+        env = _env_with_tools_path({"AGENT_NAME": SERIAL, "HALT_ACK": "1"})
         t0 = now()
+        pre_deploy_head = git_head()  # what deploy-to-ec2.sh's own `git rev-parse --short HEAD` will build
         st["deploy_started_utc"] = iso(t0)
         save_state(st)
         r = run([BASH, "infra/aws/ec2/safe-ec2-deploy.sh", "opal-gateway",
@@ -333,24 +339,24 @@ def ac2() -> int:
         if r.returncode != 0:
             return verdict(2, False, "safe-ec2-deploy.sh rc=%d (see output above)" % r.returncode)
         post = manifest()
-        head = git_head()
         manifest_commit = run(["git", "log", "-1", "--format=%H", "--", MANIFEST_REL]).stdout.strip()
         st["deploy_finished_utc"] = iso(t1)
         st["deploy_pre_commit"] = pre_commit
-        st["deploy_head"] = head
+        st["deploy_head"] = pre_deploy_head  # the commit actually built and deployed
         st["deploy_manifest_deployed_commit"] = post["deployed_commit"]
-        st["deploy_manifest_commit"] = manifest_commit
+        st["deploy_manifest_commit"] = manifest_commit  # the LATER commit recording the manifest update itself
         save_state(st)
 
     st = load_state()
-    ok_commit = st["deploy_manifest_deployed_commit"] == st["deploy_head"] == git_head()
-    src_at_head = show_at(git_head(), GATEWAY_SRC + "/deploy-to-ec2.sh")
+    ok_commit = st["deploy_manifest_deployed_commit"] == st["deploy_head"]
+    src_at_head = show_at(st["deploy_head"], GATEWAY_SRC + "/deploy-to-ec2.sh")
     flag_line = re.findall(r'ENABLED_INTEGRATIONS=[^\n\\]+', src_at_head)
     flag_off = bool(flag_line) and "schwab" not in flag_line[-1].lower()
     rows = [("the deploy completed (safe-ec2-deploy.sh rc=0, recorded this run)", "deploy_finished_utc" in st,
              st.get("deploy_finished_utc")),
-            ("EC2_MANIFEST.json's recorded deployed_commit == this worktree's HEAD", ok_commit,
-             "%s == %s == %s" % (st["deploy_manifest_deployed_commit"], st["deploy_head"], git_head())),
+            ("EC2_MANIFEST.json's recorded deployed_commit == the commit actually built and deployed "
+             "(pre-deploy HEAD; the manifest-update commit that follows it is a later, separate commit)",
+             ok_commit, "%s == %s" % (st["deploy_manifest_deployed_commit"], st["deploy_head"])),
             ("the released deploy-to-ec2.sh's ENABLED_INTEGRATIONS line omits 'schwab' (the Schwab flag is off)",
              flag_off, flag_line[-1] if flag_line else "line not found")]
     ok = print_rows(rows)
@@ -467,12 +473,15 @@ def ac4() -> int:
 
 # --------------------------------------------------------------------------- AC5 -- 401 resource challenge
 def _http_get(url: str, headers: dict = None) -> tuple:
+    """Returns (status, headers, body). `headers` is the raw http.client.HTTPMessage -- KEEP IT (not
+    dict(...)): HTTP header names are case-insensitive and this server sends them lowercase
+    ('www-authenticate'), but a plain dict() is a case-SENSITIVE lookup and silently reads as absent."""
     req = urllib.request.Request(url, headers=headers or {}, method="GET")
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
-            return resp.status, dict(resp.headers), resp.read()
+            return resp.status, resp.headers, resp.read()
     except urllib.error.HTTPError as e:
-        return e.code, dict(e.headers or {}), e.read()
+        return e.code, e.headers, e.read()
 
 
 def ac5() -> int:
@@ -515,8 +524,9 @@ def ac6() -> int:
         ("issuer is this Gateway (%s)" % GATEWAY_URL, issuer == GATEWAY_URL, issuer),
         ("protected-resource.authorization_servers == [issuer]", prot.get("authorization_servers") == [issuer],
          prot.get("authorization_servers")),
-        ("protected-resource.resource == authorization-server.resource", bool(prot.get("resource")) and
-         prot.get("resource") == auth.get("resource"), (prot.get("resource"), auth.get("resource"))),
+        ("protected-resource.resource names the /mcp resource under the issuer (RFC 8414's "
+         "authorization-server metadata carries no 'resource' field, so it is never compared to one)",
+         prot.get("resource") == GATEWAY_URL + "/mcp", prot.get("resource")),
         ("every endpoint is under the issuer", all(str(auth.get(k, "")).startswith(issuer or "\0")
          for k in ("authorization_endpoint", "token_endpoint", "registration_endpoint", "jwks_uri")),
          {k: auth.get(k) for k in ("authorization_endpoint", "token_endpoint", "registration_endpoint", "jwks_uri")}),
@@ -854,6 +864,12 @@ def ac14() -> int:
 
 # --------------------------------------------------------------------------- AC15-AC18 -- R-53's halt-gate fix
 SAFE_DEPLOY_REL = "infra/aws/ec2/safe-ec2-deploy.sh"
+# PINNED, NEVER "HEAD": HEAD moves the moment this worker's own R-53 fix is committed (it already has),
+# so "git show HEAD:<path>" as the PRE-edit comparator would silently start reading the POST-edit text
+# and AC16/AC17 would stop discriminating anything -- the exact vintage-law trap CLAUDE.md Rule 22a
+# names ("a citation without a vintage is not a citation"). This is the parent of this worker's own R-53
+# commit, i.e. the last commit carrying the OLD (pre-fix, HALT_GATE_REPO_ROOT="$MAIN_TREE") text.
+PRE_R53_COMMIT = "cbfa646e3292e81b8fb1e199ad352274c29016dd"
 _NEW_BLOCK_RE = re.compile(
     r'(WORKSPACE_ROOT="\$\(cd.*?HALT_GATE_AUDIT_LOG="\$MAIN_TREE/org/halt-gate-override-audit\.log")', re.S)
 _OLD_BLOCK_RE = re.compile(
@@ -940,7 +956,7 @@ def ac16() -> int:
     main_tree = _git_main_tree()
     with open(os.path.join(REPO, SAFE_DEPLOY_REL), encoding="utf-8") as fh:
         post_text = fh.read()
-    pre_text = run(["git", "show", "HEAD:" + SAFE_DEPLOY_REL]).stdout
+    pre_text = run(["git", "show", PRE_R53_COMMIT + ":" + SAFE_DEPLOY_REL]).stdout
     script_dir_main = os.path.join(main_tree, "infra", "aws", "ec2")
     post = _identity_probe(post_text, script_dir_main, main_tree)
     pre = _identity_probe(pre_text, script_dir_main, main_tree)
@@ -961,7 +977,7 @@ def ac16() -> int:
 
 
 def ac17() -> int:
-    pre_text = run(["git", "show", "HEAD:" + SAFE_DEPLOY_REL]).stdout
+    pre_text = run(["git", "show", PRE_R53_COMMIT + ":" + SAFE_DEPLOY_REL]).stdout
     scratch = os.path.join(REPO, ".scratch", "og_r1_ac17")
     shutil.rmtree(scratch, ignore_errors=True)
     os.makedirs(scratch, exist_ok=True)
