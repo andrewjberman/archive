@@ -1,18 +1,29 @@
-IB-rtf-10 R67-AC1 battery (first pass) -- worktree HEAD 9f21dedfd89f7d03d0d40fd8374d25d239869c80
+IB-rtf-10 R67-AC1 battery (second pass) -- worktree HEAD 285e9cf46c09ccdf12388e3a88ada9546d022ade
 
-(b) THE PACKET -- committed, its keys, the declared writers
-  packet org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~V/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-10.md: blob at HEAD 4e7ba624fa592ea74b2649d194303ca4fc6a3b43, worktree 4e7ba624fa592ea74b2649d194303ca4fc6a3b43 -> COMMITTED, UNCHANGED
-  packet keys line: K-OM 6; K-ENV 6
+(b) THE PACKET -- committed, its keys, the registry vintage and ARN lines, the declared writers
+  identity: (b) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/document claim, NOT a served behaviour
+  packet org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~V/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-10.md: blob at HEAD 609fbba9de2a50a06e9668107297f90b25f04155, worktree 609fbba9de2a50a06e9668107297f90b25f04155 -> COMMITTED, UNCHANGED
+  packet keys line: K-OM 6; K-DIR 4; K-ENV 6; K-CODE 1 (BLOCKED, row S96 -- not signable in this blob)
+  REGISTRY-VINTAGE: packet 99b8eeb54fb08a7ea6e4b89b64f300ee6cab3200, HEAD data/firm_registry.json blob 99b8eeb54fb08a7ea6e4b89b64f300ee6cab3200 -> EQUAL
+  K-OM-ARNS: packet 3 ARN(s), derived from the registry 3 -> EQUAL
+     arn:aws:s3:::opal-data-bd/platinum/49financial/ownership_map.json
+     arn:aws:s3:::opal-data-cot/platinum/cottonwood/ownership_map.json
+     arn:aws:s3:::opal-data-inf/platinum/inflection/ownership_map.json
+  K-DIR-ARNS: packet 3 ARN(s), derived from the registry 3 -> EQUAL
+     arn:aws:s3:::opal-data-bd/investor-reporting/directory/*
+     arn:aws:s3:::opal-data-cot/investor-reporting/directory/*
+     arn:aws:s3:::opal-data-inf/investor-reporting/directory/*
   W(irpt-directory-role policies) = 2 declared: ['irpt_directory', 'irpt_directory_ownership_map']
   W(irpt-status-role policies) = 2 declared: ['irpt_status', 'irpt_status_ownership_map']
   W(irpt-holdings-role policies) = 2 declared: ['holdings_logs', 'holdings_firm_read']
-  W(irpt-narrative-role policies) = 3 declared: ['narrative_logs', 'narrative_news_read', 'narrative_ownership_map']
-  W(irpt-export-render-role policies) = 4 declared: ['export_render_logs', 'export_render_evidence', 'export_render_dispatch', 'export_render_ownership_map']
-  W(irpt-performance-adapter-role policies) = 2 declared: ['performance_adapter_logs', 'performance_adapter_ownership_map']
-  W(irpt-ycharts-generate-role policies) = 2 declared: ['generate', 'generate_ownership_map']
+  W(irpt-narrative-role policies) = 4 declared: ['narrative_logs', 'narrative_news_read', 'narrative_ownership_map', 'narrative_directory_read']
+  W(irpt-export-render-role policies) = 5 declared: ['export_render_logs', 'export_render_evidence', 'export_render_dispatch', 'export_render_ownership_map', 'export_render_directory_read']
+  W(irpt-performance-adapter-role policies) = 3 declared: ['performance_adapter_logs', 'performance_adapter_ownership_map', 'performance_adapter_directory_read']
+  W(irpt-ycharts-generate-role policies) = 3 declared: ['generate', 'generate_ownership_map', 'generate_directory_read']
   W(each function's environment) = 1 declared (its yang-lambda module); console/CLI writes are the unenumerable qualifier (NEVER-9), covered by the rollback's re-read
 
 (a) CENSUS -- the 7 serving functions, measured
+  identity: (a) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/document claim, NOT a served behaviour
   irpt-directory-search     role irpt-directory-role            (declared OK) loader shared _loaders    ownership map 0 of 3 | directory 3 of 3 | bucket map present | CodeSha256 aQxATFkcdtEBvs+v/zztQBOPcbR9XH9Lzjm9kUOmhmU=
   irpt-status               role irpt-status-role               (declared OK) loader shared _loaders    ownership map 0 of 3 | directory 3 of 3 | bucket map ABSENT | CodeSha256 LHprxKSP1lM3VhoP2ijEcUVCtI+yeZt8tPRkZwpRBdY=
   irpt-holdings             role irpt-holdings-role             (declared OK) loader own (_no_grant)    ownership map 0 of 3 | directory 3 of 3 | bucket map ABSENT | CodeSha256 78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU=
@@ -23,41 +34,58 @@ IB-rtf-10 R67-AC1 battery (first pass) -- worktree HEAD 9f21dedfd89f7d03d0d40fd8
   ownership map readable: 0 of 21; directory readable: 9 of 21; bucket map present: 1 of 7; client firms 3 (registry)
   controls: positive (user Andrew_Berman) allowed; negative (opalinvest-auth-lambda-role) implicitDeny
   packet line CENSUS-OWNERSHIP-GRANTED: packet 0 of 21, this run 0 of 21 -> EQUAL
+  packet line CENSUS-DIRECTORY-READ: packet 9 of 21, this run 9 of 21 -> EQUAL
   packet line CENSUS-BUCKET-MAP-PRESENT: packet 1 of 7, this run 1 of 7 -> EQUAL
 
 (c) THE PLAN per root, re-taken with the vendored terraform -- applied to nothing
-  directory   Plan: 1 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 8046c54e3376059ab06479feaf444a4588321b57bcd5d012d3545a14dce2c90d | canonical digest 3bc2229a2ff321832f3c204e49abafe001ac93f0c771412ed5a5c92db46938aa (EQUAL to the one in the packet)
+  identity: (c) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/document claim, NOT a served behaviour
+  directory   Plan: 1 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 877efadcabe771bd5a120b037bf6ac02fc779d84bf82087484a776e584657b7c | canonical digest 3bc2229a2ff321832f3c204e49abafe001ac93f0c771412ed5a5c92db46938aa (EQUAL to the one in the packet)
      create   aws_iam_role_policy.irpt_directory_ownership_map
      update   module.irpt_directory_refresh.aws_lambda_function.this [env same; object version changes; CODE unchanged]
-  ops         Plan: 1 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 8a00c45e598b8349c6ac7ea080b09bef11145babf13856a32196f3e9cbd03faa | canonical digest be832de35d1ae4cde35a7d742032a62ce84d3d1f7907a9a6664f1c6ba2b4f2bb (EQUAL to the one in the packet)
+  ops         Plan: 1 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 d359e957b125252dca4892638f2a89584936806845f75ef0fe4a0c2e37503146 | canonical digest a9197cc1b8bb4f796fbcff7522be08bdfab3b813814bf7b5a3a8458af8ee0e19 (EQUAL to the one in the packet)
      create   aws_iam_role_policy.irpt_status_ownership_map
-     update   module.irpt_status.aws_lambda_function.this [env changes; object version changes; CODE CHANGES (LHprxKSP1lM3VhoP2ijEcUVCtI+yeZt8tPRkZwpRBdY= -> xlFoIKtAHuFbEcZi2Uiw2inBrTAHTRymAfekJjCwg9s=)]
-  holdings    Plan: 0 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 347122f76890917a679e052cc8dd971da6a41dce5854643450ab9109c25bda15 | canonical digest 450a1ab86a6981a5d1269d65dfb32dbcc3442d8801a0973ab6ff96a5f12c1654 (EQUAL to the one in the packet)
+     update   module.irpt_status.aws_lambda_function.this [env changes; object version changes; CODE unchanged]
+  holdings    Plan: 0 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 49775a9e67c55ed2cfff74d2cf6003efd6c2d08008b72ecc2f3cf964d2776701 | canonical digest 450a1ab86a6981a5d1269d65dfb32dbcc3442d8801a0973ab6ff96a5f12c1654 (EQUAL to the one in the packet)
      update   module.irpt_holdings.aws_lambda_function.this [env changes; object version changes; CODE unchanged]
-  narrative   Plan: 1 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 4342974dc7b74e68727bc3c5e6d08fba120a655f9d6a2ba126df921f44e5a3a6 | canonical digest 2c1a4f69fd13a929e4923f1daf0a4ecbb7b8e29976777f76af00d44aa139c1f7 (EQUAL to the one in the packet)
+  narrative   Plan: 2 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 860e1f3b675b2a75ae3be3c48f99e6cf32cc4810db6e4a74cabba81cdc09955c | canonical digest 5e0e1ed7317bdacdfd8b744e52f34331b7361cedd2c8bcb13ca914e4ea96973c (EQUAL to the one in the packet)
+     create   aws_iam_role_policy.narrative_directory_read
      create   aws_iam_role_policy.narrative_ownership_map
-     update   module.irpt_narrative.aws_lambda_function.this [env changes; object version changes; CODE CHANGES (sgolF/uXedgXpePoBoi5y1dIgOybQkgcokihEJFM+0I= -> UjxkAfk1HIRozryzJjk7EoncRTntc//DzxsRXxCQbDs=)]
-  export      Plan: 1 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 81f3168d115796e2dc74b7c209a11d0ddbfd7bbd5381acce530cf347d3a26847 | canonical digest 6e6e5bb7d413e823082534af4789a27f891fbb30b73b2c963789012be6236cf7 (EQUAL to the one in the packet)
+     update   module.irpt_narrative.aws_lambda_function.this [env changes; object version changes; CODE unchanged]
+  export      Plan: 2 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 b5c280f23ab70155f5814a46898204508582b27d71168f8552347efb8a060888 | canonical digest 527c2a500d1d1e32324ee6f3cc0e8d2f60b4e7357b3ae2672ae87df2f6caf80c (EQUAL to the one in the packet)
+     create   aws_iam_role_policy.export_render_directory_read
      create   aws_iam_role_policy.export_render_ownership_map
-     update   module.irpt_export_render.aws_lambda_function.this [env changes; object version changes; CODE CHANGES (4Dp6e0Vy+SfziPY+9wUSWSBS4JzS9diUtduOTxIqclQ= -> yBMiDv7tVjhzA+ESBVfqp4sdUrK8zL1te6Nbf4yTkaI=)]
-  performance Plan: 1 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 6737ff8d410db78b592016232bb8477907ea1cd49db5ca8dfeee5acac5a50fc7 | canonical digest 85e3cb8828e58a58d1c130554d97b0822e41e5da93d86ad5d5c91b7b1fcb2bdc (EQUAL to the one in the packet)
+     update   module.irpt_export_render.aws_lambda_function.this [env changes; object version changes; CODE unchanged]
+  performance Plan: 2 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 fd8ab987d8824ed51418cdf0f35ca4e50b8c0ef20b4319424493910556f20664 | canonical digest 5059fda3e68f5f5f2cd729f1d7845aaea3ee4044b5ee95cd53371d1c3ce60d37 (EQUAL to the one in the packet)
+     create   aws_iam_role_policy.performance_adapter_directory_read
      create   aws_iam_role_policy.performance_adapter_ownership_map
-     update   module.irpt_performance_adapter.aws_lambda_function.this [env changes; object version changes; CODE CHANGES (/Cn8XUZoSn1EGBax3+/UaVjJSAQiybZQ84vRVwiRcWs= -> /CB3B9irhRbHafBMdcPe6zQGxU1bkCZbGPBPpv8npSY=)]
-  ycharts     Plan: 1 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 e76b6d4521abee87ec6a64aad534c52b02929476d7c64c8b5b7bad62edc234dd | canonical digest 8277b36e4795a3d8f463a90f4e4cc74f56283871b83894bfbbcd3e5c1df43e86 (EQUAL to the one in the packet)
+     update   module.irpt_performance_adapter.aws_lambda_function.this [env changes; object version changes; CODE unchanged]
+  ycharts     Plan: 2 to add, 1 to change, 0 to destroy. destroy 0 | planfile sha256 8531e95ea759f0b80cdb2ddc3c6381b3796c7ce2ab9151f19fb75b95cae71d65 | canonical digest 063b9919d876ea86f8f4d3831d30ff8aa853070438b107e67721cfe12c212aeb (EQUAL to the one in the packet)
+     create   aws_iam_role_policy.generate_directory_read
      create   aws_iam_role_policy.generate_ownership_map
      update   module.irpt_ycharts_generate.aws_lambda_function.this [env changes; object version same; CODE unchanged]
-  roots planned without destroy: 7 of 7; total destroy 0; total changes 13; lambda updates carrying a CODE change 4 (row S95)
+  roots planned without destroy: 7 of 7; total destroy 0; total changes 17; lambda updates carrying a CODE change 0 (row S95: 0 required)
+  canonical digests equal to the packet's: 7 of 7
+  accepted plan noise -- object-version-only bumps, source_code_hash unchanged: 6: ['module.irpt_directory_refresh.aws_lambda_function.this', 'module.irpt_status.aws_lambda_function.this', 'module.irpt_holdings.aws_lambda_function.this', 'module.irpt_narrative.aws_lambda_function.this', 'module.irpt_export_render.aws_lambda_function.this', 'module.irpt_performance_adapter.aws_lambda_function.this']
+  packet line PLAN-ROOTS: packet '7 of 7 planned; destroy 0 of 7; changes 17', this run '7 of 7 planned; destroy 0 of 7; changes 17' -> EQUAL
+  packet line PLAN-CODE-CHANGES: packet '0 of 7', this run '0 of 7' -> EQUAL
+
+(c-code) K-CODE -- irpt-directory-search rebuilt from HEAD (addendum @77bd04ca41)
+  identity: (c-code) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/document claim, NOT a served behaviour
+  live CodeSha256 aQxATFkcdtEBvs+v/zztQBOPcbR9XH9Lzjm9kUOmhmU= (prior live in the packet aQxATFkcdtEBvs+v/zztQBOPcbR9XH9Lzjm9kUOmhmU= -> EQUAL)
+  build store latest version l4JK6aUnUgtrg.TFrxiKU8.XBM_6APl4 content-sha256 aQxATFkcdtEBvs+v/zztQBOPcbR9XH9Lzjm9kUOmhmU= -> the prior live bytes: NOT BUILT (row IRPT_BCKEND-S96: build-and-upload.sh refuses -- files[] declares data/custodian_key_seam.json, staged_from does not)
 
 (d) THE HALVES at HEAD naming the packet blob
-  COO half: 0 file(s) matching at HEAD, 0 naming blob 4e7ba624fa592ea74b2649d194303ca4fc6a3b43 -> ABSENT
-  CTO half: 0 file(s) matching at HEAD, 0 naming blob 4e7ba624fa592ea74b2649d194303ca4fc6a3b43 -> ABSENT
+  identity: (d) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/document claim, NOT a served behaviour
+  COO half: 0 file(s) matching at HEAD, 0 naming blob 609fbba9de2a50a06e9668107297f90b25f04155 -> ABSENT
+  CTO half: 0 file(s) matching at HEAD, 0 naming blob 609fbba9de2a50a06e9668107297f90b25f04155 -> ABSENT
   halves: 0 of 2
 
 STOP at (d): a half is ABSENT -- nothing is applied; (e) apply and (f) the live proof are NOT RUN
 ARM (a) census: PASS
 ARM (b) packet: PASS
 ARM (c) plan: PASS
+ARM (c-code) K-CODE built: FAIL
 ARM (d) halves: FAIL
 ARM (e) apply: NOT RUN
 ARM (f) live proof: NOT RUN
-RESULT: R67-AC1 FAIL -- 3 of 6 arms hold (first pass: STOP at the halves as the face expects)
+RESULT: R67-AC1 FAIL -- 3 of 7 arms hold (second pass: STOP at the halves as the face expects)
