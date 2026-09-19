@@ -114,34 +114,72 @@ def core_node_types(rec):
 
 
 def core_gate_scope(rec):
-    """A refusal with no ADMITTING control cannot tell a scoped guard from a broken one."""
+    """TWO admissible shapes, because a round-2 row may have been REMEDIED before this round was cut.
+
+    (A) THE GATE STILL REFUSES: a refused set, a predicate at file:line, a basis from the enum, and an
+        ADMITTING control -- without which a scoped guard and a gate that refuses everything read alike.
+
+    (B) THE GATE NO LONGER REFUSES: an EMPTY refused set is a RESULT, admissible when the record carries
+        `why_zero`, an EXCLUDING predicate at file:line, and a SCOPING CONTROL proving the gate still
+        refuses something in the same tree.
+
+    ⛔ THE FIRST CUT OF THIS ARM HAD ONLY (A), AND ITS RESIDUAL WAS DISCLOSED ON THE ORDER: if the gate
+    had since been widened, NO CORRECT ARTIFACT COULD SATISFY IT. It had been -- 1.0.0_SA_CTO's R-35 fix
+    landed BEFORE this round's cut -- and 0.9.0_WK_LGIC_LGCTFM~2 filed it BLOCKING rather than
+    manufacturing a refusal. This branch is that repair. The DISCRIMINATOR is preserved exactly where it
+    matters: a gate that has gone silent everywhere still fails, because branch (B) demands a control
+    showing it refuses something.
+    """
     g = ((rec or {}).get("gate_scope") or {})
     refused = list(g.get("refused") or [])
     adm = g.get("admitting_control") or {}
+    scoping = g.get("scoping_control") or {}
     pred, basis = (g.get("refusing_predicate") or "").strip(), (g.get("refusal_basis") or "").strip()
+    why_zero = (g.get("why_zero") or "").strip()
     bad, lines = [], ["refused paths: %d (denominator %s)" % (len(refused), _scrub(g.get("refused_denominator"))),
-                      "refusing predicate: %s" % _scrub(pred or "(none named)"),
-                      "refusal basis: %s" % _scrub(basis or "(none)")]
-    if not refused:
-        bad.append("no refused paths recorded: the row claims a refusal, so show it")
-    for r in refused:
-        if not (r.get("path") or "").strip() or not (r.get("verdict") or "").strip():
-            bad.append("a refused entry lacks its path or the gate's OWN output line")
-            break
+                      "predicate: %s" % _scrub(pred or "(none named)"),
+                      "branch: %s" % ("(A) the gate refuses" if refused else "(B) the gate no longer refuses")]
     if ":" not in pred:
-        bad.append("the refusing predicate is not named at a file:line site")
-    if basis not in BASIS:
-        bad.append("refusal_basis must be one of %s -- it decides whether a RENAME lapses the guard"
-                   % _scrub(BASIS))
-    if not (adm.get("path") or "").strip() or not (adm.get("verdict") or "").strip():
-        bad.append("NO ADMITTING CONTROL: a path the gate ADMITS, with its output line. Without it a "
-                   "scoped guard and a guard that refuses everything read identically")
-    elif adm.get("path") in [r.get("path") for r in refused]:
-        bad.append("the admitting control's path is ALSO in the refused list: it controls nothing")
-    else:
-        lines.append("admitting control: %s -> %s" % (_scrub(adm.get("path")), _scrub(adm.get("verdict"))))
+        bad.append("the predicate is not named at a file:line site -- whether it REFUSES or EXCLUDES")
     if not (g.get("gate_pin") or "").strip():
         bad.append("no gate_pin: the gate is another seat's live artifact and moves")
+    if g.get("refused_denominator") is None:
+        bad.append("no refused_denominator: how many paths did you put through it")
+
+    if refused:
+        for r in refused:
+            if not (r.get("path") or "").strip() or not (r.get("verdict") or "").strip():
+                bad.append("a refused entry lacks its path or the gate's OWN output line")
+                break
+        if basis not in BASIS:
+            bad.append("refusal_basis must be one of %s -- it decides whether a RENAME lapses the guard"
+                       % _scrub(BASIS))
+        if not (adm.get("path") or "").strip() or not (adm.get("verdict") or "").strip():
+            bad.append("NO ADMITTING CONTROL: a path the gate ADMITS, with its output line. Without it a "
+                       "scoped guard and a guard that refuses everything read identically")
+        elif adm.get("path") in [r.get("path") for r in refused]:
+            bad.append("the admitting control's path is ALSO in the refused list: it controls nothing")
+        else:
+            lines.append("admitting control: %s -> %s" % (_scrub(adm.get("path")),
+                                                          _scrub(adm.get("verdict"))))
+    else:
+        if not why_zero:
+            bad.append("EMPTY refused set with no why_zero: a zero is a RESULT only when the record says "
+                       "what produced it")
+        if not (scoping.get("path") or "").strip() or not (scoping.get("verdict") or "").strip():
+            bad.append("EMPTY refused set with NO SCOPING CONTROL: show a path in the SAME tree the gate "
+                       "DOES refuse. Without it, a scoped carve-out and a gate that has gone silent "
+                       "everywhere read identically -- which is the whole question")
+        elif not scoping.get("refused"):
+            bad.append("the scoping control does not record a REFUSAL: it proves nothing about the guard "
+                       "still being live")
+        else:
+            lines += ["why zero: %s" % _scrub(why_zero[:110]),
+                      "scoping control (still REFUSED, so the guard is live): %s -> %s"
+                      % (_scrub(scoping.get("path")), _scrub(str(scoping.get("verdict"))[:70]))]
+        if basis:
+            lines.append("refusal_basis carried but nothing was refused: %s (read as the EXEMPTION's "
+                         "basis, not a refusal's)" % _scrub(basis))
     return (not bad), lines + bad
 
 
@@ -312,6 +350,22 @@ def _gate_ok():
             "stale_proofs": {"proofs_re_run": []}}
 
 
+def _gate_zero_ok(**over):
+    g = {"refused": [], "refused_denominator": 5,
+         "refusing_predicate": ".tools/naming-gate.py:719-725 (EXCLUDES via RUN_ARTIFACT_RE at :96)",
+         "refusal_basis": "",
+         "why_zero": "all 5 paths match RUN_ARTIFACT_RE inside a run-id-shaped directory, so the gate "
+                     "excludes them before opening the diff",
+         "scoping_control": {"path": "workflows/legacy_transform/.../scratch-probe.json",
+                             "verdict": "NAMING REFUSE ... opal-data-bd -> opal-data-49financial",
+                             "refused": True},
+         "gate_pin": "5fd4251792"}
+    g.update(over)
+    return {"gate_scope": g,
+            "fixed_inputs_at_pin": {"a/check_lt_r7.py": "abc", "b/R7_BASE.json": "abc"},
+            "stale_proofs": {"proofs_re_run": []}}
+
+
 def _route_ok(pop=3, routed=2, retired=1, unroutable=()):
     rows = [{"id": "LGIC_LGCTFM-S%d" % i, "owner": "2.0.0_SA_COO~G",
              "next_act": "RETIRE" if i == 1 else "cut in round 8", "basis": "measured at HEAD"}
@@ -332,7 +386,19 @@ def selftest_arms():
         core_node_types(_nodes_ok(("LAMBDA",), ("LAMBDA", "S3_BUCKET")))[0],
         "if the enum has moved since round 2 the honest answer is ZERO, and it PASSES -- a bar that "
         "only passed on a violation would be an instruction to find one")
-    arm("POSITIVE-BAR-gate-correct-record", core_gate_scope(g)[0])
+    arm("POSITIVE-BAR-gate-correct-record-branch-A-still-refuses", core_gate_scope(g)[0])
+    arm("POSITIVE-BAR-gate-correct-record-branch-B-no-longer-refuses", core_gate_scope(_gate_zero_ok())[0],
+        "THE REPAIR: a row REMEDIED before the round was cut makes an EMPTY refused set the CORRECT "
+        "artifact, and the first cut of this arm could not accept one -- 0.9.0_WK_LGIC_LGCTFM~2 filed "
+        "that BLOCKING instead of manufacturing a refusal")
+    arm("MUTANT-gate-branch-B-no-scoping-control", not core_gate_scope(_gate_zero_ok(scoping_control={}))[0],
+        "without it, a scoped carve-out and a gate gone SILENT EVERYWHERE read identically -- the "
+        "discriminator the repair had to preserve")
+    arm("MUTANT-gate-branch-B-scoping-control-did-not-refuse", not core_gate_scope(
+        _gate_zero_ok(scoping_control={"path": "x", "verdict": "OK: admitted", "refused": False}))[0])
+    arm("MUTANT-gate-branch-B-no-why-zero", not core_gate_scope(_gate_zero_ok(why_zero=""))[0])
+    arm("MUTANT-gate-branch-B-predicate-not-a-site", not core_gate_scope(
+        _gate_zero_ok(refusing_predicate="the gate excludes them"))[0])
     arm("POSITIVE-BAR-route-correct-record", core_route(r)[0])
     arm("POSITIVE-BAR-route-unroutable-is-honest",
         core_route(_route_ok(3, 1, 1, ({"id": "x", "why": "owner is a retired lane"},)))[0],
