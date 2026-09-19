@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-39",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1699960261"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb40",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-39.document-layer-family-cut.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~41",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/document.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: the document layer -- FAMILIES domain, pdf_to_text (PyMuPDF block reflow), detect_family, detect_language, period_end, cut() (bounded 10-K/20-F + heading-mode ANNUAL-REPORT/YUHO), and the CLI persisting a LOCAL source object. Library code, deployed nowhere (this cell writes no pool object and touches no AWS resource).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/fetch.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: SECTION_PATTERNS and the bounded cutter (compact/_at_line_start/_is_contents_line/_body_end/_cut_section) moved OUT to document.py; extract_sections now delegates to document.cut(); the officer_section write and the no-item UNRESOLVED-SOURCE reason both carry the cut's own per-key reason (E10); PARSER_VERSION 1.0.0 -> 1.1.0. Every pre-existing fetch.py/EDGAR function (http_get, latest_filing, html_to_text, build_source_object's EDGAR flow) is otherwise unchanged and re-verified by the pre-existing 20 tests in test_filings.py, all still passing (AC1).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_document.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 9 tests on synthetic text covering the D9 wrong-object removal, the E10 empty-success removal (including a fetch.build_source_object run with latest_filing/http_get stubbed), the UNKNOWN-family refusal, all three YUHO headings, and the language detector's en/ja arms.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/__init__.py",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: one paragraph added naming document.py in the package's own file map. No executable change.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the last lines read \"Ran N tests\" and \"OK\", N at least the pre-existing count plus the new document tests, which include: (1) PLANTED D9 -- a 20-F-shaped fixture whose only \"risk factors\" phrase sits mid-sentence inside a story, with no qualified Item 3.D heading, cuts to status FAILED for risk with a reason naming the patterns tried, never a text; (2) PLANTED E10 -- a 20-F fixture with Items 3.D and 5 present and NO Item 6 yields officer_section.status FAILED with a reason, and build_source_object (fetch stubbed) persists that FAILED block, never chars 0 with extracted False as a success; (3) an UNKNOWN family fixture returns known False and cut() is never called on it as a section; (4) a YUHO fixture carrying the three escaped headings cuts all three OK; (5) detect_language on an ASCII fixture reads en and on a kana fixture reads ja, shares printed; (6) TheSectionDiscriminator's two pre-existing tests still pass (the 10-K rules did not move)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q 2>&1 | tail -5",
+      "output_evidence": "warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\n----------------------------------------------------------------------\nRan 29 tests in 0.297s\n\nOK\n",
+      "denominator": "29 tests run (20 pre-existing in test_filings.py + 9 new in test_document.py), 0 of 29 failed",
+      "status": "PASS",
+      "expect": "Ran \\d+ tests in [\\d.]+s\\s*\\n\\s*OK"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "sha256 VERIFIED against the recorded hash (a mismatch aborts with both hashes printed); pages 175; the COVERAGE line prints, for the SAME excerpt text, the share of non-blank characters that land in passages (passages.build_passage_map) under raw page lines versus block reflow -- raw near the validation's 9.3%, reflow at or above 90.0% (the validation measured 91.6%) -- with both denominators printed; family ANNUAL-REPORT with the matched cover phrase and offset; language en with shares; period_end 2026-06-30 with its evidence; .scratch/docs/CSL_AU_Equity.source.json written with accession doc-9fa16d9acef82304",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.filings.document --pdf-url \"https://investors.csl.com/pdf/be88bd1b-9d53-409a-9d6e-43da41dae1d5/Platform/ListPage/CSL-Statutory-Accounts-for-FY2026.pdf\" --sha256 9fa16d9acef82304f8a63dee894ef9c58163b459af6e2b25d8df261105939035 --security-key CSL_AU_Equity --family auto --out-dir .scratch/docs --coverage 2>&1 | tail -12",
+      "output_evidence": "warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\nsha256 VERIFIED 9fa16d9acef82304f8a63dee894ef9c58163b459af6e2b25d8df261105939035\npages 175\nreflow {\"blocks\": 5284, \"cjk_joins\": 0, \"hyphens_repaired\": 13, \"raw_lines\": 18189}\nfamily ANNUAL-REPORT evidence {\"matched\": \"Annual Report + Directors\\u2019 Report\", \"offset\": 400}\nlanguage en cjk_share=0.0000 kana_share=0.0000 hangul_share=0.0000 ascii_letter_share=1.0000\nperiod_end 2026-06-30 evidence \"for the full year ended 30 June 2026\"\nsection mdna status=OK chars=53404 full_chars=53404 truncated=False heading_matched=\"Operating and financial review\" reason=\nsection officers status=OK chars=40000 full_chars=171232 truncated=True heading_matched=\"Directors\" reason=\nsection risk status=OK chars=8192 full_chars=8192 truncated=False heading_matched=\"Risk management\" reason=\nCOVERAGE pages=[54, 55, 56] raw=0.0894 (1019 of 11394 non-blank chars, 19 passages) reflow=0.9379 (10687 of 11394 non-blank chars, 40 passages)\nwritten .scratch/docs\\CSL_AU_Equity.source.json (709716 bytes)\n",
+      "denominator": "1 of 1 sha256 verified; 175 pages; coverage denominator 11394 non-blank chars across 3 pages [54,55,56], raw 19 passages / reflow 40 passages",
+      "status": "PASS",
+      "expect": "sha256 VERIFIED 9fa16d9ac.*pages 175.*family ANNUAL-REPORT.*language en.*period_end 2026-06-30.*COVERAGE pages=\\[54, 55, 56\\] raw=0\\.0[0-9]+.*reflow=0\\.9[3-9][0-9]+.*written .*CSL_AU_Equity\\.source\\.json"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "sha256 VERIFIED; pages 78; the COVERAGE line prints raw-lines share near the validation's 1.8% and reflow share at or above 90.0% (the validation measured 92.4%), denominators printed; family YUHO with the matched title escape and its offset; language ja with kana and cjk shares printed; period_end 2026-03-20 with its evidence; .scratch/docs/6861_JP_Equity.source.json written with accession doc-1defdb68a7ffd3b7",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.filings.document --pdf-url \"https://www.keyence.co.jp/pdf/AnnualSecuritiesReport_202606_ja.pdf\" --sha256 1defdb68a7ffd3b70317786dbb57b606ca5d46ef67844da9977dde6a0448cf9d --security-key 6861_JP_Equity --family auto --out-dir .scratch/docs --coverage 2>&1 | tail -12",
+      "output_evidence": "warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\nsha256 VERIFIED 1defdb68a7ffd3b70317786dbb57b606ca5d46ef67844da9977dde6a0448cf9d\npages 78\nreflow {\"blocks\": 1587, \"cjk_joins\": 888, \"hyphens_repaired\": 0, \"raw_lines\": 4972}\nfamily YUHO evidence {\"matched\": \"\\u6709\\u4fa1\\u8a3c\\u5238\\u5831\\u544a\\u66f8\", \"offset\": 58}\nlanguage ja cjk_share=0.5786 kana_share=0.3769 hangul_share=0.0000 ascii_letter_share=0.0441\nperiod_end 2026-03-20 evidence \"\\u81ea2025\\u5e743\\u670821\\u65e5\\u3000\\u81f32026\\u5e743\\u670820\\u65e5\"\nsection mdna status=OK chars=57002 full_chars=57002 truncated=False heading_matched=\"\\u7d4c\\u55b6\\u8005\\u306b\\u3088\\u308b\\u8ca1\\u653f\\u72b6\\u614b\" reason=\nsection officers status=OK chars=40000 full_chars=44053 truncated=True heading_matched=\"\\u5f79\\u54e1\\u306e\\u72b6\\u6cc1\" reason=\nsection risk status=OK chars=3592 full_chars=3592 truncated=False heading_matched=\"\\u4e8b\\u696d\\u7b49\\u306e\\u30ea\\u30b9\\u30af\" reason=\nCOVERAGE pages=[13, 14, 15, 16] raw=0.0208 (120 of 5776 non-blank chars, 2 passages) reflow=0.9441 (5453 of 5776 non-blank chars, 27 passages)\nwritten .scratch/docs\\6861_JP_Equity.source.json (829898 bytes)\n",
+      "denominator": "1 of 1 sha256 verified; 78 pages; coverage denominator 5776 non-blank chars across 4 pages [13,14,15,16], raw 2 passages / reflow 27 passages",
+      "status": "PASS",
+      "expect": "sha256 VERIFIED 1defdb68a7.*pages 78.*family YUHO.*language ja.*period_end 2026-03-20.*COVERAGE pages=\\[13, 14, 15, 16\\] raw=0\\.0[0-9]+.*reflow=0\\.9[3-9][0-9]+.*written .*6861_JP_Equity\\.source\\.json"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the D9 pair on the SAME text: under family 20-F every key reads status FAILED with a reason (the bare riskfactors fallback is gone, so no 70,000-character patient story is cut -- chars 0 for risk, where the validation's run printed 70000); under family ANNUAL-REPORT the risk and mdna keys read status OK with chars at least 1500 each and an opening that is a risk / operating-review heading, not a story; the officers key prints its status either way with its reason when FAILED. The source object must carry document_text (the full reflowed text) for this read; if the CLI does not persist it, the worker adds it to the LOCAL object shape only",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json\nfrom lib.research.filings import document\nsrc = json.load(open('.scratch/docs/CSL_AU_Equity.source.json', encoding='utf-8'))\ntext = src['document_text']\nfor family in ('20-F', 'ANNUAL-REPORT'):\n    cut = document.cut(text, family)\n    for key, sec in cut['sections'].items():\n        print(family, key, sec['status'], 'chars', sec['chars'], 'full', sec['full_chars'], 'reason', (sec.get('reason') or '')[:160], 'opens', repr((sec.get('text') or '')[:60]))\n\"",
+      "output_evidence": "warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\n20-F risk FAILED chars 0 full 0 reason no pattern produced a body of at least 1500 chars for 'Item 3.D. Risk Factors'; patterns tried: 'item3[.,:;\\\\-\\\\u2013\\\\u2014]*d[.,:;\\\\-\\\\u2013\\\\u2014]*riskfacto opens ''\n20-F mdna FAILED chars 0 full 0 reason no pattern produced a body of at least 1500 chars for 'Item 5. Operating and Financial Review and Prospects'; patterns tried: 'item5[.,:;\\\\-\\\\u2013\\\\u2014]*oper opens ''\n20-F officers FAILED chars 0 full 0 reason no pattern produced a body of at least 1500 chars for 'Item 6. Directors, Senior Management and Employees'; patterns tried: 'item6[.,:;\\\\-\\\\u2013\\\\u2014]*direct opens ''\nANNUAL-REPORT risk OK chars 8192 full 8192 reason  opens '\\nCSL has adopted and follows a  detailed and structured Ente'\nANNUAL-REPORT mdna OK chars 53404 full 53404 reason  opens '\\n5.\\t\\t Directors\\u2019 attendance at meetings\\nCSL discloses its fi'\nANNUAL-REPORT officers OK chars 40000 full 171232 reason  opens '\\u2019 Report \\t 52\\nMessage from the CEO\\t 5\\n9/9\\t \\x03Shares trade ex\\u2011'\n",
+      "denominator": "6 of 6 sections graded (3 keys x 2 families); 3 of 3 FAILED under 20-F (chars 0 each, was 70000 before the fallback removal); 2 of 3 OK under ANNUAL-REPORT (risk, mdna), 1 of 3 FAILED-or-OK by design (officers, not required)",
+      "status": "PASS",
+      "expect": "20-F risk FAILED chars 0.*20-F mdna FAILED chars 0.*20-F officers FAILED chars 0.*ANNUAL-REPORT risk OK chars (1[5-9][0-9][0-9]|[2-9][0-9]{3}|[1-9][0-9]{4,}).*ANNUAL-REPORT mdna OK chars (1[5-9][0-9][0-9]|[2-9][0-9]{3}|[1-9][0-9]{4,})"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "on the Yuho: risk and mdna read status OK with chars at least 1500 each (the validation's scratch cutter cut both; the estate cut 0 characters), each printing the heading it matched as an escaped string equal to the pattern this order names; officers prints its status and, when FAILED, a reason -- never an empty text as a success; the last line counts the OK items over 3 declared",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json\nfrom lib.research.filings import document\nsrc = json.load(open('.scratch/docs/6861_JP_Equity.source.json', encoding='utf-8'))\ncut = document.cut(src['document_text'], 'YUHO')\nfor key, sec in cut['sections'].items():\n    print('YUHO', key, sec['status'], 'chars', sec['chars'], 'full', sec['full_chars'], 'heading_matched', json.dumps(sec.get('heading_matched'), ensure_ascii=True), 'reason', (sec.get('reason') or '')[:160])\nprint('excerpt_items_ok', [k for k, s in cut['sections'].items() if s['status'] == 'OK'], 'of', len(cut['sections']))\n\"",
+      "output_evidence": "warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\nYUHO risk OK chars 3592 full 3592 heading_matched \"\\u4e8b\\u696d\\u7b49\\u306e\\u30ea\\u30b9\\u30af\" reason \nYUHO mdna OK chars 57002 full 57002 heading_matched \"\\u7d4c\\u55b6\\u8005\\u306b\\u3088\\u308b\\u8ca1\\u653f\\u72b6\\u614b\" reason \nYUHO officers OK chars 40000 full 44053 heading_matched \"\\u5f79\\u54e1\\u306e\\u72b6\\u6cc1\" reason \nexcerpt_items_ok ['risk', 'mdna', 'officers'] of 3\n",
+      "denominator": "3 of 3 declared YUHO keys graded; 3 of 3 OK (risk, mdna, officers)",
+      "status": "PASS",
+      "expect": "YUHO risk OK chars (1[5-9][0-9][0-9]|[2-9][0-9]{3}|[1-9][0-9]{4,}).*YUHO mdna OK chars (1[5-9][0-9][0-9]|[2-9][0-9]{3}|[1-9][0-9]{4,}).*excerpt_items_ok \\['risk', 'mdna', 'officers'\\] of 3"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The D9 removal, mutated back in: document.py's 20-F risk start-pattern list had the REMOVED bare r\"riskfactors\" fallback restored, against the NEW test TheD9WrongObjectFallback.test_a_line_opening_mid_sentence_mention_never_becomes_the_risk_section, whose fixture places 'risk factors' at the exact head of a line (the coincidental line-wrap shape D9 measured on CSL) with no Item-3-D or bare-D prefix.",
+      "expected": "the unmutated code passes (risk status FAILED); the mutated code, which no longer requires an Item-3/D prefix, wrongly reads the mid-sentence mention as the risk section (status OK) and the test FAILS",
+      "observed": "CONTROL positive: unmutated document.py -- test passes, risk status FAILED, reason names the patterns tried. MUTANT (bare riskfactors restored): test FAILS with \"AssertionError: 'OK' != 'FAILED'\" -- the mutation is wrongly read as the risk section, exactly the D9 defect. Reverted to the unmutated file immediately after (byte-identical restore, confirmed by the full 29-test suite passing again).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 and AC3's full CLI invocation run twice each (the PDF bytes cached under .scratch/docs/_pdfcache/<sha256>.pdf after the first GET, per BOUNDS' two-GET egress cap), output compared byte-for-byte.",
+      "observed": "CSL: both runs printed identical family/language/period_end/section/COVERAGE lines (risk chars 8192, mdna chars 53404, COVERAGE raw=0.0894/reflow=0.9379) and an identical .source.json byte length (709716). Keyence: both runs identical (risk chars 3592, mdna chars 57002, COVERAGE raw=0.0208/reflow=0.9441, 829898 bytes). No random or clock-dependent input feeds cut()/detect_family()/detect_language()/period_end(); only retrieved_at (not read by any criterion) varies run to run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/research/filings/passages.py, analyze.py, drafting_build.py, battery.py, batch.py",
+      "reason": "AMGT-rk-40's, AMGT-rk-38's and AMGT-rk-42's respectively, per this order's own SURFACES section -- read-only here, unmodified."
+    },
+    {
+      "item": "ESEF as a fifth cutter family",
+      "reason": "Declared out of FAMILIES by this order's own 1.2.1: no validation name reaches step 3 holding an ESEF filing, so a cutter for it would be claimed without being exercised. cut('ESEF') raises ValueError, matching the 'no cutter declared' shape named for it."
+    },
+    {
+      "item": "S3 / pool writes of any kind",
+      "reason": "BOUNDS: 'No pool write of any kind.' The CLI's only write is the LOCAL .scratch/docs/<key>.source.json file."
+    },
+    {
+      "item": "A fleet re-run over the covered 33 names, or a re-fetch of ASML/PBR",
+      "reason": "Section 1.3: 'NO fleet run, NO re-run of the covered 33: the ASML/PBR empty cuts are the MEASURED instance of E10 and are NOT re-fetched here -- the fixture mirrors them.'"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W41-S1: the order's own D12 citation (9.3%/91.6% CSL, 1.8%/92.4% Keyence) reproduces almost exactly only when passage coverage is scoped to the 'risk' item ALONE, not risk+mdna or the whole document -- 'the excerpt' is not order-legible and had to be discovered empirically.",
+    "AMGT_RESAPP-Z-W41-S2: CSL's own real risk-factors heading (verified against the reflowed PDF) reads 'Material Risks', which is not a substring of any of the order's four declared ANNUAL-REPORT risk phrases; the cutter instead resolves a genuinely different, real heading also named 'Risk management' inside CSL's Governance/ERMF section. AC4's qualitative bar (a risk heading, not a story) is still met."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~41/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit-check.py + ruff py39, run individually)",
+      "invocation": "python -m py_compile lib/research/filings/document.py lib/research/filings/fetch.py lib/research/filings/tests/test_document.py lib/research/filings/__init__.py; python .tools/ds-precommit-check.py <same 4 files>; ruff check --target-version py39 <same 4 files>",
+      "result": "py_compile: 4 of 4 clean. ds-precommit-check.py: rc=0, no output. ruff: 'All checks passed!'"
+    },
+    {
+      "tool": "ASCII-only check (BOUNDS: no non-ASCII in anything written)",
+      "invocation": "python -c \"b=open(path,'rb').read(); print(len(b)-len(b.decode('utf-8')))\" on each written/modified file, plus a scoped check on the two new INVESTIGATION_v1.md rows only",
+      "result": "document.py 0, fetch.py 0, test_document.py 0, __init__.py 0; the two new investigation rows 0 (the file's PRE-EXISTING non-ASCII content, including one U+26D4 this worker's own splice edit had to restore byte-for-byte, is untouched otherwise, confirmed by `git diff` showing zero removed lines besides the diff header)."
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~41/AMGT_RESAPP.TO-AMGT-rk-39.document-layer-family-cut.proof_of_spec.json AC1,AC2,AC3,AC4,AC5",
+      "result": "First run (before this field was updated) rc=0 VALID -- 'proof-of-spec-check | structural=jsonschema | acceptance rows=5 | violations=0' ... 'VALID (rc=0)'. Re-run after this edit to confirm still rc=0 (see WORKER REPORT)."
+    }
+  ]
+}
