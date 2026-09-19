@@ -297,8 +297,11 @@ def address_census(bucket: str) -> bool:
     n_files = len(tracked.decode("utf-8", "replace").splitlines()) + len(untr.decode("utf-8", "replace").splitlines())
     p = subprocess.run(["git", "grep", "-I", "--untracked", "-n", "receipt.json", "--", "*.py"],
                        cwd=WS, capture_output=True, timeout=180)
+    # THE PATH FIELD, NEVER THE LINE. A filter that tests the whole line matches THIS FILE, whose own source
+    # carries the path fragment it filters on -- the first run of this arm counted 4 sites and the 4th was itself.
     sites = [ln for ln in p.stdout.decode("utf-8", "replace").splitlines()
-             if "infra/aws/lambda/" in ln and ("receipt_key =" in ln or '+ "receipt.json"' in ln)]
+             if ln.split(":", 1)[0].startswith("infra/aws/lambda/")
+             and ("receipt_key =" in ln or '+ "receipt.json"' in ln)]
     emit("  the WRITER census over %d files (tracked + untracked, this worktree):" % n_files)
     for ln in sites:
         emit("     %s" % ln.strip()[:150])
