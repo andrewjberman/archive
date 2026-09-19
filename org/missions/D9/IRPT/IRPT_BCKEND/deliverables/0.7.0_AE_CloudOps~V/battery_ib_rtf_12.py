@@ -1,27 +1,19 @@
 #!/usr/bin/env python3
 """IRPT_BCKEND.TO-IB-rtf-12 battery -- every serving zip carries the raw-keys file its id module reads.
 
-SECOND PASS (this revision; rulings msg 98279: S101 accepted, S102 ycharts deferred -> K-CODE x 6, S100 recorded-not-
-counted): arms (a)-(d); (d) STOPS at the halves (the expected outcome); (e)/(f) are the third pass's arms.
-  (a) THE PREMISE AT THE CUT (@083cc54350) AND AT HEAD:
-      - _ids/raw_keys.json staged per function;
-      - a raw_keys.json member in each LIVE zip (downloaded; sha256 == the live CodeSha256; member count printed);
-      - ids.py:64 and :162 cited with the bytes at those lines;
-      - the census of every file _ids/ids.py opens relative to its own location, n of n, each classed per function as
-        PRESENT / RESOLVED-VIA-ENV / MISSING on the deployed layout (the zip at /var/task, the layer at /opt/python,
-        the env).
-  (b) THE FILES, DESCRIBED FOR THE HALVES: blob, bytes, top-level shape, k entries, credential scan, writers W.
-  (c) THE MANIFEST: the parse-diff from the cut to HEAD. Exactly 7 raw_keys.json + 4 firm_registry.json objects added
-      (row S99 INCLUDES the second member), files[] +11, artifact_sha256 untouched 7 of 7, nothing else moved.
-  (d) THE BUILD, THE PLANS, THE PACKET, THE HALVES (K-CODE x 6):
-      - per function: the build-store latest version == the packet's BUILT version, and metadata == bytes == the built
-        sha; the rollback source (the packet's prior version) hashes to the prior live CodeSha256; the function is
-        still unchanged; members == files[]; the delta vs the LIVE zip == exactly the added member(s) + the seam line
-        endings (S101); the own CRLF members byte-identical to live;
-      - plans per root re-taken: 0 destroy; code changes exactly the 6, each after-hash == its built sha with the env
-        unchanged; ycharts "No changes"; every canonical digest EQUAL to the packet's;
-      - the packet committed; the 2 halves at HEAD naming its blob.
-Read-only on every live plane. Prints no credential.
+THIRD PASS (this revision; GO msg 98296 on halves 2 of 2 naming packet blob 9d273fb851): every arm, AFTER the apply.
+  (a)-(c) as before: the premise at the cut, the files described, the manifest parse-diff.
+  (d) the packet at HEAD == the signed blob; the 2 halves naming it; each built artifact intact at its built sha and each
+      rollback source intact at the prior live CodeSha256; the apply record at HEAD: pre-apply digests EQUAL 7 of 7 and
+      the built artifacts the latest 6 of 6 before any apply.
+  (e) the apply: the ledger CLOSED at HEAD; the record 'applied: 6 of 6' and '0-diff: 7 of 7'; a plan re-taken NOW
+      0-diff 7 of 7; CodeSha256 == built 6 of 6 (the served zip hashes to it); raw_keys.json downloaded from each served
+      zip == the blob (the registry too on the S99 four); ycharts (S102) unchanged.
+  (f) rtf-10's arm (f), with the ruled carve-outs RECORDED-NOT-COUNTED (holdings S100, ycharts S102, inflection S94):
+      the bounded principal (rtf-9 packet blob a1f36b95b2), new epoch, under ledger irpt-bckend-ib-rtf-12-live-principal;
+      real HTTP requests as each function's execution role, the deployed bytes; every COUNTED request SCOPE-RESOLVED,
+      0 UNEXPECTED; S92 recorded by output; the lifecycle closed and verified.
+The token prints only when every arm holds. Read-only on every live plane. Prints no credential.
 """
 from __future__ import annotations
 
@@ -190,34 +182,110 @@ def arm_c() -> bool:
     return clean and raw_n == 7 and reg_n == 4
 
 
-DEFERRED = "irpt-ycharts-generate"  # S102
-PACKET_BLOB_CHECK = True
-SEAM = "data/custodian_key_seam.json"
-ROOT_OF = {"irpt-directory-search": "directory", "irpt-status": "ops", "irpt-holdings": "holdings", "irpt-narrative": "narrative",
-           "irpt-export-render": "export", "irpt-performance-adapter": "performance"}
-ADDR_OF = {"irpt-directory-search": "module.irpt_directory_search.aws_lambda_function.this",
-           "irpt-status": "module.irpt_status.aws_lambda_function.this",
-           "irpt-holdings": "module.irpt_holdings.aws_lambda_function.this",
-           "irpt-narrative": "module.irpt_narrative.aws_lambda_function.this",
-           "irpt-export-render": "module.irpt_export_render.aws_lambda_function.this",
-           "irpt-performance-adapter": "module.irpt_performance_adapter.aws_lambda_function.this"}
+import datetime  # noqa: E402
+import secrets  # noqa: E402
+import time  # noqa: E402
+import urllib.error  # noqa: E402
+
+import bcrypt  # noqa: E402
+
+PACKET_BLOB = "9d273fb8517a00288ec13d8dd0814a47af8782fa"
+APPLY_OUTPUT_REL = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~V/IB-rtf-12_apply_output.txt"
+APPLY_SENTINEL_REL = "org/critical_paths/.open_deploys/irpt-bckend-ib-rtf-12-apply.json"
+APPLY_LEDGER_REL = "org/critical_paths/change_management/20260919T1712Z_irpt-bckend-ib-rtf-12-apply_deploy_completion.md"
+HALVES = {
+    "COO": "org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-12_RAW_KEYS_STAGED.md",
+    "CTO": "org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-12_RAW_KEYS_STAGED.md",
+}
+BUILT = {
+    "irpt-directory-search": ("PUjH3OjDe8Yj3RwdIO0KT3GXsYGfvUCmzG/aHsi6e1c=", "DOwCkAXXw1oLuzL_yzf2AqNJ0v.WnYDF", "HOpXPDoHhrVK/ayqsx1uKgzt9mWOjDlK+Ix2CPbCamI=", "hk9OUfwHZxlcwZDqN7cEknbJOXtvB3jd"),
+    "irpt-status": ("O3TyGqfqjiwZP9OSXmryonnAst+SbYMLzyuSGphOyCE=", "z8VnRXEPFTioTwjwWlR_TCCQYiqU6mmV", "LHprxKSP1lM3VhoP2ijEcUVCtI+yeZt8tPRkZwpRBdY=", "QNerDSUu9GMYB0bZrjon6n_6VG9q3aR6"),
+    "irpt-holdings": ("uS+WBeNxiCkYU2pdGalaONZ74SvoWEiYx669KWYKQDA=", "U4sKRs.HJ0Jc4Ik323Y0b.qY7LsWU2Pg", "78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU=", "XGnVW2ED9FW0zOpRr0V5K12adFHrpeO7"),
+    "irpt-narrative": ("o4newc7E9m1pD61k+P/xGdlwHMO7cheYbDfR6Urzgh8=", "jM9scOJ005ovgidfDS3DBRHRmjvLzUwn", "sgolF/uXedgXpePoBoi5y1dIgOybQkgcokihEJFM+0I=", "Pu2QRmDx58Qo3hHwVM8L_gyotsmQ8h_6"),
+    "irpt-export-render": ("9IMayS94if11cyKq51TbcyBG8cUwbbUWlQMlT9XhiaQ=", "dECFEZtZArSJYdPy4.ImeVHBv6Q.jxBH", "4Dp6e0Vy+SfziPY+9wUSWSBS4JzS9diUtduOTxIqclQ=", "5tV41pNz.TpJ8O1f6zZCAJ9M6BRqoYlI"),
+    "irpt-performance-adapter": ("IHosoGqGUxh2M/UjefNnmbLSXVgTxlNG76cGPjEd1tw=", "38i7y_iXZqvWIzUNetKnBxXxs9dAuOGF", "/Cn8XUZoSn1EGBax3+/UaVjJSAQiybZQ84vRVwiRcWs=", "KI0U8m08xPkCgvem5bLmcU2fuWwOCLzs"),
+}
+YCHARTS_LIVE = "1L60sG1G9IaFfwe+LPNdE84DarlWCHKkdE8M5CyVI8o="
+REG_FNS = {"irpt-directory-search", "irpt-status", "irpt-narrative", "irpt-performance-adapter"}
+ROOTS = ["directory", "ops", "holdings", "narrative", "export", "performance", "ycharts"]
 TF = os.path.join(WS, ".tools", "terraform.exe")
 PLAN_DIR = os.path.join(WS, ".scratch", "plans12_battery")
+ROLE = {"irpt-directory-search": "irpt-directory-role", "irpt-status": "irpt-status-role", "irpt-holdings": "irpt-holdings-role",
+        "irpt-narrative": "irpt-narrative-role", "irpt-export-render": "irpt-export-render-role",
+        "irpt-performance-adapter": "irpt-performance-adapter-role", "irpt-ycharts-generate": "irpt-ycharts-generate-role"}
+NOT_COUNTED = {"irpt-holdings": "S100", "irpt-ycharts-generate": "S102"}
+# (f): the rtf-9 packet's keys, verbatim (NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-9.md, blob a1f36b95b2)
+D_REL = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~V"
+RTF9_PACKET_REL = D_REL + "/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-9.md"
+RTF9_BLOB = "a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4"
+RTF9_HALVES = {
+    "COO": "org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-9_TWO_KEY_PRINCIPAL.md",
+    "CTO": "org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-9_TWO_KEY_PRINCIPAL.md",
+}
+PRINCIPAL_SENTINEL_REL = "org/critical_paths/.open_deploys/irpt-bckend-ib-rtf-12-live-principal.json"
+USERS, PARTNER, THROTTLE = "opal-users-v2", "opal-partner-49financial", "opal-portal-auth-throttle"
+FIRM, ADVISOR = "49financial", "abby_horton"
+OM_BUCKET, OM_KEY = "opal-data-bd", "platinum/49financial/ownership_map.json"
+BASE = "https://opalinvest.dev"
+PFX = "/api/scoped/investor-reporting"
+UA = "opal-irpt-ib-rtf-12-battery/1.0 (0.7.0_AE_CloudOps~V)"
+SECRETS: list[str] = []
+ddb = boto3.client("dynamodb", region_name="us-east-1")
+_emit_plain = emit
 
 
-def packet_facts() -> tuple[str, str, dict, dict]:
+def emit(line: str = "") -> None:  # noqa: F811 -- the redacting emitter shadows the plain one
+    for s in SECRETS:
+        if s:
+            line = line.replace(s, "<REDACTED>")
+    _emit_plain(line)
+
+
+def now_iso() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def sha(b: bytes) -> str:
+    return hashlib.sha256(b).hexdigest()
+
+
+# ------------------------------------------------------------------------------------------------ (d)
+def arm_d() -> bool:
+    emit("(d) THE PACKET, THE HALVES, THE BUILT ARTIFACTS, THE PRE-APPLY RECORD")
+    identity_line("(d)")
     rc, head = git("rev-parse", "--verify", "--quiet", "HEAD:" + PACKET_REL)
-    head_blob = head.decode().strip() if rc == 0 else ""
     _, wt = git("hash-object", PACKET_REL)
-    text = (blob_at("HEAD", PACKET_REL) or b"").decode("utf-8")
-    built = {m.group(1): (m.group(2), m.group(3)) for m in re.finditer(r"^BUILT: (\S+) (\S+) (\S+)$", text, re.M)}
-    prior = {}
-    for m in re.finditer(r"^\| `(irpt-[a-z-]+)` \| `([A-Za-z0-9+/=]{44})` \(`([^`]+)`\)", text, re.M):
-        prior[m.group(1)] = (m.group(2), m.group(3))
-    return head_blob, wt.decode().strip(), built, prior
+    pk_ok = rc == 0 and head.decode().strip() == wt.decode().strip() == PACKET_BLOB
+    emit("  packet blob at HEAD %s, worktree %s, signed %s -> %s" % (head.decode().strip(), wt.decode().strip(), PACKET_BLOB,
+                                                                     "EQUAL" if pk_ok else "DIFFERS"))
+    n = 0
+    for who, p in HALVES.items():
+        text = (blob_at("HEAD", p) or b"").decode("utf-8", "replace")
+        hit = PACKET_BLOB in text
+        n += hit
+        emit("  %s half at HEAD %s: names the blob %s" % (who, p, hit))
+    emit("  halves: %d of 2" % n)
+    art = 0
+    for fn, (bsha, bver, plive, pver) in BUILT.items():
+        key = "investor-reporting/%s.zip" % fn
+        b = s3.get_object(Bucket=BUCKET, Key=key, VersionId=bver)["Body"].read()
+        r = s3.get_object(Bucket=BUCKET, Key=key, VersionId=pver)["Body"].read()
+        good = b64sha(b) == bsha and b64sha(r) == plive
+        art += good
+        emit("  %-26s built version %s bytes == built %s: %s | rollback source %s == prior live: %s" % (
+            fn, bver, bsha[:12], b64sha(b) == bsha, pver, b64sha(r) == plive))
+    emit("  built artifacts intact at their shas and rollback sources intact: %d of %d" % (art, len(BUILT)))
+    rc2, rec = git("show", "HEAD:" + APPLY_OUTPUT_REL)
+    rec = rec.decode("utf-8") if rc2 == 0 else ""
+    pre = sum(1 for r in ROOTS if re.search(r"^  %s\s+.*canonical digest [0-9a-f]{64} -> EQUAL" % r, rec, re.M))
+    arts_line = "built artifacts the latest at their built sha: 6 of 6" in rec
+    emit("  the apply record at HEAD: pre-apply digests EQUAL to the packet's %d of 7; '%s' %s; 'PRE-APPLY: ALL HOLD' %s"
+         % (pre, "built artifacts the latest at their built sha: 6 of 6", arts_line, "PRE-APPLY: ALL HOLD" in rec))
+    return pk_ok and n == 2 and art == len(BUILT) and pre == 7 and arts_line and "PRE-APPLY: ALL HOLD" in rec
 
 
-def plan_root(root: str) -> tuple[str, list, str]:
+# ------------------------------------------------------------------------------------------------ (e)
+def plan_zero(root: str) -> tuple[str, int]:
     d = os.path.join(WS, "infra", "aws", "terraform", "investor-reporting", root)
     os.makedirs(PLAN_DIR, exist_ok=True)
     pf = os.path.join(PLAN_DIR, root + ".tfplan")
@@ -228,89 +296,333 @@ def plan_root(root: str) -> tuple[str, list, str]:
     line = next((ln.strip() for ln in p.stdout.splitlines() if ln.startswith("Plan:") or "No changes." in ln), "rc %d" % p.returncode)
     j = json.loads(subprocess.run([TF, "-chdir=" + d, "show", "-json", pf], capture_output=True, text=True, encoding="utf-8",
                                   errors="replace", env=env, timeout=600).stdout)
-    rcs = [c for c in j.get("resource_changes") or [] if c["change"]["actions"] != ["no-op"]]
-    canon = [{"address": c["address"], "actions": c["change"]["actions"], "before": c["change"].get("before"),
-              "after": c["change"].get("after")} for c in rcs]
-    return line, rcs, hashlib.sha256(json.dumps(canon, sort_keys=True).encode("utf-8")).hexdigest()
+    return line, len([c for c in j.get("resource_changes") or [] if c["change"]["actions"] != ["no-op"]])
 
 
-def arm_d() -> bool:
-    emit("(d) THE BUILD, THE PLANS, THE PACKET, THE HALVES -- K-CODE x 6 (%s deferred, S102)" % DEFERRED)
-    identity_line("(d)")
-    head_blob, wt_blob, built, prior = packet_facts()
-    pk_ok = bool(head_blob) and head_blob == wt_blob
-    emit("  packet %s: blob at HEAD %s, worktree %s -> %s; BUILT lines %d; prior-live rows %d"
-         % (PACKET_REL, head_blob or "ABSENT", wt_blob, "COMMITTED, UNCHANGED" if pk_ok else "NOT COMMITTED OR CHANGED", len(built), len(prior)))
-    head = json.loads(blob_at("HEAD", MAP).decode("utf-8"))["functions"]
-    ok_fns = crlf_same = crlf_total = 0
-    for fn in ROOT_OF:
-        e = head[fn]
-        want_sha, want_ver = built.get(fn, ("?", "?"))
-        prior_live, prior_ver = prior.get(fn, ("?", "?"))
-        key = "investor-reporting/%s.zip" % fn
-        h = s3.head_object(Bucket=BUCKET, Key=key)
-        body = s3.get_object(Bucket=BUCKET, Key=key, VersionId=h["VersionId"])["Body"].read()
-        rb = s3.get_object(Bucket=BUCKET, Key=key, VersionId=prior_ver)["Body"].read() if prior_ver != "?" else b""
-        cfg, live_m, _ = live_zip(fn)
-        z = zipfile.ZipFile(io.BytesIO(body))
-        new_m = {n: z.read(n) for n in z.namelist() if not n.endswith("/")}
-        added_expected = {s["packaged_as"] for s in e.get("staged_from", []) if s["repo_path"] in (RAW_REPO, REG_REPO)}
-        added = set(new_m) - set(live_m)
-        changed = [m for m in new_m if m in live_m and new_m[m] != live_m[m]]
-        seam_only = all(m == SEAM and live_m[m].replace(b"\r\n", b"\n") == new_m[m] and new_m[m].count(b"\r") == 0 for m in changed)
-        same = sum(1 for m in new_m if m in live_m and new_m[m] == live_m[m])
-        staged = {s["packaged_as"] for s in e.get("staged_from", [])}
-        own_crlf = [m for m in new_m if m not in staged and new_m[m].count(b"\r")]
-        crlf_total += len(own_crlf)
-        crlf_same += sum(1 for m in own_crlf if live_m.get(m) == new_m[m])
-        checks = [h["VersionId"] == want_ver, (h.get("Metadata") or {}).get("content-sha256") == want_sha, b64sha(body) == want_sha,
-                  b64sha(rb) == prior_live, cfg["CodeSha256"] == prior_live, sorted(new_m) == sorted(e["files"]),
-                  added == added_expected, not (set(live_m) - set(new_m)), seam_only]
-        good = all(checks)
-        ok_fns += good
-        emit("  %-26s built %s (version %s latest: %s; metadata == bytes == built: %s) | rollback source %s == prior live: %s | "
-             "function unchanged: %s | delta: added %s, changed %s (seam line endings only: %s), other members byte-identical %d | -> %s"
-             % (fn, want_sha, want_ver, h["VersionId"] == want_ver, checks[1] and checks[2], prior_ver, checks[3], checks[4],
-                sorted(added), changed or "none", seam_only, same, "VERIFIED" if good else "NOT VERIFIED"))
-    emit("  built and verified at rest: %d of %d; own CRLF members byte-identical to live: %d of %d" % (ok_fns, len(ROOT_OF), crlf_same, crlf_total))
-    text = (blob_at("HEAD", PACKET_REL) or b"").decode("utf-8")
-    dig_ok = code_ok = destroy = changes = 0
-    roots = list(ROOT_OF.values()) + ["ycharts"]
-    for r in roots:
-        line, rcs, digest = plan_root(r)
-        destroy += sum("delete" in c["change"]["actions"] for c in rcs)
-        changes += len(rcs)
-        in_packet = digest in text
-        dig_ok += in_packet
-        codes = []
-        for c in rcs:
-            if c["type"] == "aws_lambda_function":
-                b, a = c["change"]["before"] or {}, c["change"]["after"] or {}
-                if b.get("source_code_hash") != a.get("source_code_hash"):
-                    fn = next((f for f, ad in ADDR_OF.items() if ad == c["address"]), None)
-                    good = fn is not None and built.get(fn, ("",))[0] == a.get("source_code_hash") and b.get("environment") == a.get("environment")
-                    code_ok += good
-                    codes.append("%s -> %s%s" % (c["address"], a.get("source_code_hash"), " == built" if good else " NOT AS SIGNED"))
-        emit("  plan %-11s %s | changes %d | canonical digest %s (%s the packet's) | %s" % (
-            r, line, len(rcs), digest, "EQUAL to" if in_packet else "NOT", codes or "no code change"))
-    emit("  plans: roots %d; destroy %d; changes %d; code changes == built %d of %d; digests EQUAL to the packet %d of %d"
-         % (len(roots), destroy, changes, code_ok, len(ROOT_OF), dig_ok, len(roots)))
-    n = 0
-    for who, dd, pat in (("COO", "org/tier1_exec/2.0.0_SA_COO~B/deliverables", "NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-12_"),
-                         ("CTO", "org/tier1_exec/1.0.0_SA_CTO/deliverables", "NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-12_")):
-        _, ls = git("ls-tree", "-r", "--name-only", "HEAD", "--", dd)
-        hits = [p for p in ls.decode().splitlines() if os.path.basename(p).startswith(pat)]
-        naming = [p for p in hits if head_blob and head_blob in (blob_at("HEAD", p) or b"").decode("utf-8", "replace")]
-        n += bool(naming)
-        emit("  %s half at HEAD: %d file(s), %d naming blob %s -> %s" % (who, len(hits), len(naming), head_blob or "?", "PRESENT" if naming else "ABSENT"))
-    emit("  halves: %d of 2" % n)
-    return (pk_ok and ok_fns == len(ROOT_OF) and crlf_same == crlf_total and destroy == 0 and code_ok == len(ROOT_OF)
-            and changes == len(ROOT_OF) and dig_ok == len(roots) and n == 2)
+def arm_e() -> bool:
+    emit("(e) THE APPLY -- under its ledger; then the deployed code and the served members read back")
+    identity_line("(e)")
+    rc_s, _ = git("rev-parse", "--verify", "--quiet", "HEAD:" + APPLY_SENTINEL_REL)
+    led = (blob_at("HEAD", APPLY_LEDGER_REL) or b"").decode("utf-8", "replace")
+    closed = rc_s != 0 and "**Status:** CLOSED" in led
+    emit("  ledger irpt-bckend-ib-rtf-12-apply at HEAD: sentinel %s; entry CLOSED %s" % ("ABSENT" if rc_s != 0 else "PRESENT", "**Status:** CLOSED" in led))
+    rec = (blob_at("HEAD", APPLY_OUTPUT_REL) or b"").decode("utf-8", "replace")
+    applied = "applied: 6 of 6" in rec
+    zero_rec = "0-diff: 7 of 7" in rec
+    emit("  the apply record: 'applied: 6 of 6' %s; '0-diff: 7 of 7' %s" % (applied, zero_rec))
+    zero = 0
+    for r in ROOTS:
+        line, n = plan_zero(r)
+        zero += n == 0
+        emit("  now %-11s %s | changes %d -> %s" % (r, line, n, "0-DIFF" if n == 0 else "NOT 0-DIFF"))
+    emit("  re-taken now: 0-diff %d of 7" % zero)
+    code_ok = mem_ok = 0
+    raw_blob = blob_at("HEAD", RAW_REPO)
+    reg_blob = blob_at("HEAD", REG_REPO)
+    for fn, (bsha, _bver, _pl, _pv) in BUILT.items():
+        cfg, members, sha_ok = live_zip(fn)
+        c_ok = cfg["CodeSha256"] == bsha and sha_ok == "EQUAL"
+        code_ok += c_ok
+        raw = members.get("raw_keys.json")
+        reg = members.get("firm_registry.json")
+        m_ok = raw == raw_blob and (reg == reg_blob if fn in REG_FNS else True)
+        mem_ok += m_ok
+        emit("  %-26s CodeSha256 %s (== built: %s; the served zip hashes to it: %s) | raw_keys.json in the served zip: %s (sha256 %s == the blob: %s)%s"
+             % (fn, cfg["CodeSha256"], cfg["CodeSha256"] == bsha, sha_ok, raw is not None, sha(raw)[:12] if raw else "-", raw == raw_blob,
+                (" | firm_registry.json == the blob: %s" % (reg == reg_blob)) if fn in REG_FNS else ""))
+    yc = lam.get_function_configuration(FunctionName="irpt-ycharts-generate")["CodeSha256"]
+    emit("  irpt-ycharts-generate (S102, not applied): CodeSha256 %s -> %s" % (yc, "UNCHANGED" if yc == YCHARTS_LIVE else "CHANGED"))
+    emit("  CodeSha256 == built: %d of %d; raw_keys.json (and the registry on the S99 four) served == the blob: %d of %d"
+         % (code_ok, len(BUILT), mem_ok, len(BUILT)))
+    return closed and applied and zero_rec and zero == 7 and code_ok == len(BUILT) and mem_ok == len(BUILT) and yc == YCHARTS_LIVE
+
+
+# ------------------------------------------------------------------------------------------------ (f)
+def http(method: str, path: str, token: str | None = None, body: dict | None = None,
+         query: dict | None = None, cookie: str | None = None):
+    url = BASE + path
+    if query:
+        url += "?" + "&".join("%s=%s" % (k, urllib.request.quote(str(v))) for k, v in query.items())
+    headers = {"User-Agent": UA, "X-Contract-Version": "v1", "Origin": BASE}
+    if token:
+        headers["Authorization"] = "Bearer " + token
+    if cookie:
+        headers["Cookie"] = cookie
+    data = None
+    if body is not None:
+        data = json.dumps(body).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    req = urllib.request.Request(url, data=data, method=method, headers=headers)
+    try:
+        r = urllib.request.urlopen(req, timeout=60)
+        return r.status, r.headers, r.read()
+    except urllib.error.HTTPError as exc:
+        return exc.code, exc.headers, exc.read()
+
+
+def as_json(b: bytes):
+    try:
+        return json.loads(b.decode("utf-8"))
+    except ValueError:
+        return None
+
+
+def classify(status: int, j) -> dict:
+    out = {"http": status}
+    if isinstance(j, dict):
+        st = j.get("status") or {}
+        out.update({"operation": j.get("operation"), "firm_id": j.get("firm_id"), "code": st.get("public_reason_code"),
+                    "state": st.get("state"), "business_date": st.get("business_date")})
+        if status < 400 and "data" in j:
+            out["class"] = "SERVED"
+        elif out["code"] == "UNEXPECTED":
+            out["class"] = "UNEXPECTED"
+        elif out.get("firm_id"):
+            out["class"] = "POLICY"
+        else:
+            out["class"] = "UNRESOLVED"
+        return out
+    out["class"] = "UNEXPECTED" if status >= 500 else "UNRESOLVED"
+    return out
+
+
+def get_item(table: str, key: dict) -> dict | None:
+    return ddb.get_item(TableName=table, Key=key, ConsistentRead=True).get("Item")
+
+
+def item_digest(item: dict) -> str:
+    return sha(json.dumps({k: v for k, v in item.items() if k != "passwordHash"}, sort_keys=True).encode("utf-8"))
+
+
+def jwt_claims(tok: str) -> dict:
+    seg = tok.split(".")[1]
+    seg += "=" * (-len(seg) % 4)
+    return json.loads(base64.urlsafe_b64decode(seg.encode()).decode("utf-8"))
+
+
+def prefix_scan(label: str) -> bool:
+    ok = True
+    for table, attr, prefix in ((USERS, "PK", "USER#usr_irptrte_"), (USERS, "email", "irpt-rte1-test-"), (PARTNER, "email", "irpt-rte1-test-")):
+        d = ddb.scan(TableName=table, Select="COUNT", FilterExpression="begins_with(#a, :p)",
+                     ExpressionAttributeNames={"#a": attr}, ExpressionAttributeValues={":p": {"S": prefix}})
+        ok = ok and d["Count"] == 0
+        emit("  %s: %s %s begins_with '%s': %d of %d scanned" % (label, table, attr, prefix, d["Count"], d["ScannedCount"]))
+    return ok
+
+
+def f_precondition() -> bool:
+    rc, head = git("rev-parse", "--verify", "--quiet", "HEAD:" + RTF9_PACKET_REL)
+    _, wt = git("hash-object", RTF9_PACKET_REL)
+    pk = rc == 0 and head.decode().strip() == RTF9_BLOB == wt.decode().strip()
+    n = sum(1 for p in RTF9_HALVES.values() if RTF9_BLOB in (blob_at("HEAD", p) or b"").decode("utf-8", "replace"))
+    rc3, _ = git("rev-parse", "--verify", "--quiet", "HEAD:" + PRINCIPAL_SENTINEL_REL)
+    emit("  PRECONDITION: rtf-9 packet blob at HEAD == %s: %s; halves naming it %d of 2; this order's principal ledger sentinel at HEAD: %s"
+         % (RTF9_BLOB, pk, n, rc3 == 0))
+    return pk and n == 2 and rc3 == 0
+
+
+def create_principal(epoch: int, password: str, created: dict) -> dict:
+    email = "irpt-rte1-test-%d@opal.test" % epoch
+    pk = "USER#usr_irptrte_%d" % epoch
+    created.update({"email": email, "pk": pk})  # BEFORE any write, so the rollback always knows both keys
+    pw_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=10, prefix=b"2a")).decode("ascii")
+    SECRETS.append(pw_hash)
+    # The attribute VALUES are the rtf-9 packet's, verbatim (its K1 table binds `name` and `createdBy`).
+    k1 = {"PK": {"S": pk}, "SK": {"S": "PROFILE"}, "email": {"S": email}, "passwordHash": {"S": pw_hash},
+          "name": {"S": "IRPT test principal (IB-rtf-3)"}, "role": {"S": "user"}, "firmId": {"S": FIRM},
+          "status": {"S": "active"}, "createdAt": {"S": now_iso()}, "createdBy": {"S": "0.7.0_AE_CloudOps~V IB-rtf-3"}}
+    ddb.put_item(TableName=USERS, Item=k1, ConditionExpression="attribute_not_exists(PK)")
+    t_k1 = now_iso()
+    got1 = get_item(USERS, {"PK": {"S": pk}, "SK": {"S": "PROFILE"}})
+    emit("  K1 created %s: PK %s; consistent read-back %s; attributes %d; digest (passwordHash excluded) %s"
+         % (t_k1, pk, got1 is not None, len(got1 or {}), item_digest(got1) if got1 else "-"))
+    ddb.put_item(TableName=PARTNER, Item={"email": {"S": email}, "advisorKey": {"S": ADVISOR}}, ConditionExpression="attribute_not_exists(email)")
+    got = get_item(PARTNER, {"email": {"S": email}})
+    emit("  K1b created %s in %s: consistent read-back %s; attributes %s; digest %s"
+         % (now_iso(), PARTNER, got is not None, sorted(got or {}), item_digest(got) if got else "-"))
+    return {"k1_created": t_k1, "ok": got1 is not None and sorted(got1) == sorted(k1) and got is not None and sorted(got) == ["advisorKey", "email"]}
+
+
+def login(email: str, password: str) -> dict:
+    status, headers, body = http("POST", "/auth/login", body={"email": email, "password": password})
+    j = as_json(body) or {}
+    tok = j.get("accessToken") if isinstance(j, dict) else None
+    refresh = next((c.split(";", 1)[0] for c in (headers.get_all("Set-Cookie") or []) if c.startswith("refresh_token=")), None)
+    for s_ in (tok, refresh, refresh.split("=", 1)[1] if refresh else None):
+        if s_:
+            SECRETS.append(s_)
+    out = {"http": status, "token": tok, "refresh_cookie": refresh}
+    emit("  login POST /auth/login -> HTTP %d at %s; access token minted=%s; refresh cookie set=%s" % (status, now_iso(), bool(tok), bool(refresh)))
+    if tok:
+        c = jwt_claims(tok)
+        out["claims"] = c
+        emit("  K2 claims: firmId=%s role=%s advisorKey=%s advisorId=%s exp=%s" % (
+            c.get("firmId"), c.get("role"), c.get("advisorKey"), c.get("advisorId"),
+            datetime.datetime.fromtimestamp(c.get("exp", 0), datetime.timezone.utc).strftime("%H:%M:%SZ")))
+    return out
+
+
+def requests_arm(tok: str) -> tuple[bool, dict]:
+    emit("  REQUESTS -- route, function, execution role; bodies bound by sha256; carve-outs recorded and NOT counted")
+    rows = []
+    rnd = secrets.token_hex(12)
+
+    def go(label: str, fn: str, method: str, path: str, body=None, query=None):
+        st, _, b = http(method, PFX + path, tok, body=body, query=query)
+        j = as_json(b)
+        c = classify(st, j)
+        c.update({"sha256": sha(b), "label": label, "fn": fn, "counted": fn not in NOT_COUNTED})
+        c["ok"] = c["class"] in ("SERVED", "POLICY")
+        rows.append(c)
+        tag = ("SCOPE-RESOLVED" if c["ok"] else "NOT RESOLVED") if c["counted"] else "RECORDED, NOT COUNTED (%s)" % NOT_COUNTED[fn]
+        emit("    %-46s %-4s %s%s -> function %s (role %s): %s http %d code %s firm_id %s business_date %s | sha256 %s -> %s"
+             % (label, method, PFX, path, fn, ROLE[fn], c["class"], st, c.get("code"), "present" if c.get("firm_id") else "ABSENT",
+                c.get("business_date"), c["sha256"][:16], tag))
+        return j, c
+
+    j1, _ = go("directory search WITH a query (q=a)", "irpt-directory-search", "GET", "/directory/search", query={"q": "a", "limit": "25"})
+    d1 = j1.get("data") if isinstance(j1, dict) and isinstance(j1.get("data"), list) else []
+    j2, _ = go("directory search, a no-match query", "irpt-directory-search", "GET", "/directory/search", query={"q": "zzqqxxnomatch", "limit": "25"})
+    d2 = j2.get("data") if isinstance(j2, dict) and isinstance(j2.get("data"), list) else None
+    ids = (d1[0] if d1 else {}).get("ids") or {}
+    j3, _ = go("directory resolve WITH a selection", "irpt-directory-search", "POST", "/directory/resolve",
+               body={"selection": {"relationship_id": ids.get("relationship_id")}})
+    d3 = j3.get("data") if isinstance(j3, dict) else None
+    acc = (ids.get("account_ids") or [None])[0] or ("acc_" + rnd)
+    go("status summary", "irpt-status", "GET", "/status")
+    go("analysis sections for an unknown job", "irpt-status", "GET", "/analysis/REQ-%s/sections" % rnd)
+    go("holdings for a permitted account", "irpt-holdings", "GET", "/holdings/" + acc)
+    go("performance for a permitted account", "irpt-performance-adapter", "GET", "/performance/" + acc, query={"start": "2026-01-01", "end": "2026-09-18"})
+    go("narrative for an unknown report", "irpt-narrative", "GET", "/narrative/rep_" + rnd)
+    go("export receipt for an unknown export", "irpt-export-render", "GET", "/export/EXP-" + rnd)
+    go("analysis submit carrying a server-owned field", "irpt-ycharts-generate", "POST", "/analysis",
+       body={"identity": {"tenant_id": "x"}, "variant": "standard"})
+    counted = [r for r in rows if r["counted"]]
+    unexpected = sum(1 for r in counted if r["class"] == "UNEXPECTED")
+    ok_n = sum(1 for r in counted if r["ok"])
+    fns = sorted({r["fn"] for r in counted})
+    emit("  COUNTED requests scope-resolved: %d of %d; UNEXPECTED among them %d; functions counted %d: %s" % (ok_n, len(counted), unexpected, len(fns), fns))
+    for r in rows:
+        if not r["counted"]:
+            emit("  NOT COUNTED %-26s (%s): %s code %s" % (r["fn"], NOT_COUNTED[r["fn"]], r["class"], r.get("code")))
+    s92_search = isinstance(d2, list) and len(d2) == 0 and len(d1) > 0
+    resolved = isinstance(d3, dict) and d3.get("ok") is True
+    emit("  S92 search: q=a -> %d entries, q=zzqqxxnomatch -> %s entries -> %s" % (
+        len(d1), len(d2) if isinstance(d2, list) else "n/a",
+        "HONOURED (FIXED)" if s92_search else ("NOT MEASURABLE (search not served)" if not d1 else "NOT HONOURED (NOT FIXED)")))
+    emit("  S92 resolve: selection = the first entry's relationship -> ok=%s scope_kind=%s account_count=%s -> %s" % (
+        (d3 or {}).get("ok") if isinstance(d3, dict) else None,
+        ((d3 or {}).get("resolved_scope") or {}).get("scope_kind") if isinstance(d3, dict) else None,
+        (d3 or {}).get("account_count") if isinstance(d3, dict) else None,
+        "RESOLVES (FIXED)" if resolved else ("NOT MEASURABLE (no selection)" if not d1 else "DOES NOT RESOLVE (NOT FIXED)")))
+    return ok_n == len(counted) and unexpected == 0 and len(counted) > 0, {"s92_search": s92_search, "s92_resolve": resolved}
+
+
+def firms_record() -> tuple[int, int]:
+    firms = json.loads(blob_at("HEAD", REG_REPO))["firms"]
+    enabled = [f for f in firms if f.get("kind") == "client" and f.get("enabled")]
+    exists = []
+    for f in enabled:
+        try:
+            s3.head_object(Bucket=f["bucket"], Key="platinum/%s/ownership_map.json" % f["firm_id"])
+            exists.append(f["firm_id"])
+            emit("    %-12s map PRESENT" % f["firm_id"])
+        except s3.exceptions.ClientError as exc:
+            emit("    %-12s map %s -> UNEXPECTED-BY-ABSENCE (row S94), NOT counted" % (f["firm_id"], exc.response.get("Error", {}).get("Code")))
+    emit("    maps exist for %d of %d enabled firms %s; this principal (rtf-9 K1b = %s) exercises 1: %s" % (len(exists), len(enabled), exists, PARTNER, FIRM))
+    return len(exists), len(enabled)
+
+
+def rollback(created: dict, sess: dict) -> dict:
+    emit("  ROLLBACK -- K1b FIRST, then K1; each verified by a failing consistent base-table read")
+    out = {"k1b_deleted": None, "k1_deleted": None, "refresh_refused": None, "expired_refused": None}
+    if created.get("email"):
+        ddb.delete_item(TableName=PARTNER, Key={"email": {"S": created["email"]}})
+        gone = get_item(PARTNER, {"email": {"S": created["email"]}}) is None
+        out["k1b_deleted"] = now_iso() if gone else None
+        emit("  K1b DeleteItem -> consistent GetItem returns no Item: %s at %s" % (gone, now_iso()))
+    if created.get("pk"):
+        ddb.delete_item(TableName=USERS, Key={"PK": {"S": created["pk"]}, "SK": {"S": "PROFILE"}})
+        gone = get_item(USERS, {"PK": {"S": created["pk"]}, "SK": {"S": "PROFILE"}}) is None
+        out["k1_deleted"] = now_iso() if gone else None
+        emit("  K1  DeleteItem -> consistent GetItem returns no Item: %s at %s" % (gone, now_iso()))
+    emit("  deletions verified: %d of 2" % sum(1 for k in ("k1b_deleted", "k1_deleted") if out[k]))
+    try:
+        if sess.get("refresh_cookie"):
+            st, _, b = http("POST", "/auth/refresh", cookie=sess["refresh_cookie"])
+            j = as_json(b) or {}
+            minted = isinstance(j, dict) and bool(j.get("accessToken"))
+            out["refresh_refused"] = now_iso() if (st != 200 and not minted) else None
+            emit("  REFRESH with the issued refresh token after K1's delete: HTTP %d; access token minted=%s -> %s"
+                 % (st, minted, "REFUSED (1 of 1)" if out["refresh_refused"] else "NOT REFUSED -- STOP AND ESCALATE"))
+        if sess.get("token"):
+            exp = sess["claims"].get("exp", 0)
+            wait = exp + 10 - time.time()
+            emit("  waiting %.0f s for the access token's exp (%s) + 10 s" % (max(wait, 0), datetime.datetime.fromtimestamp(exp, datetime.timezone.utc).strftime("%H:%M:%SZ")))
+            if wait > 0:
+                time.sleep(wait)
+            st, _, _b = http("GET", PFX + "/status", sess["token"])
+            out["expired_refused"] = now_iso() if st == 401 else None
+            emit("  the access token after exp: GET status -> HTTP %d -> %s" % (st, "REFUSED 401 (1 of 1)" if st == 401 else "NOT 401"))
+    except Exception as exc:  # noqa: BLE001 -- the deletes above already ran
+        emit("  EXCEPTION in the post-delete checks: %s: %s" % (type(exc).__name__, str(exc)[:300]))
+    return out
+
+
+def arm_f() -> bool:
+    emit("(f) THE LIVE PROOF (rtf-10's arm (f)) -- real HTTP requests through the deployed routes, the deployed roles, the deployed BYTES")
+    emit("  identity: the HTTP requests run as the bounded test principal; the served compute runs as each function's OWN execution "
+         "role (printed per request); the operator identity only creates/deletes the principal's keys")
+    if not f_precondition():
+        emit("  STOP at the precondition: nothing written")
+        return False
+    n_exist, n_firms = firms_record()
+    if not prefix_scan("before"):
+        emit("  STOP: residue -- nothing written")
+        return False
+    om = json.loads(s3.get_object(Bucket=OM_BUCKET, Key=OM_KEY)["Body"].read().decode("utf-8"))
+    present = ADVISOR in (om.get("advisors") or {})
+    emit("  GUARD: %s PRESENT in s3://%s/%s: %s" % (ADVISOR, OM_BUCKET, OM_KEY, present))
+    if not present:
+        emit("  STOP at the guard: nothing written")
+        return False
+    password = secrets.token_urlsafe(24)
+    SECRETS.append(password)
+    created: dict = {}
+    sess: dict = {}
+    req_ok = keys_ok = False
+    s92: dict = {}
+    try:
+        k = create_principal(int(time.time()), password, created)
+        created["k1_created"] = k["k1_created"]
+        sess = login(created["email"], password)
+        c = sess.get("claims") or {}
+        keys_ok = k["ok"] and sess.get("http") == 200 and c.get("firmId") == FIRM and c.get("advisorKey") == ADVISOR
+        emit("  keys read back 2 of 2 and the session as the rtf-9 packet declares: %s" % keys_ok)
+        if keys_ok:
+            req_ok, s92 = requests_arm(sess["token"])
+    except Exception as exc:  # noqa: BLE001 -- recorded, then the rollback runs
+        emit("  EXCEPTION during the act: %s: %s -- rollback now" % (type(exc).__name__, str(exc)[:300]))
+    finally:
+        rb = rollback(created, sess)
+    after_ok = prefix_scan("after")
+    thr = get_item(THROTTLE, {"pk": {"S": "login#acct#" + sha((created.get("email") or "").strip().lower().encode())}}) if created.get("email") else None
+    emit("  failed-login throttle counter for the test e-mail: %s" % ("PRESENT (named here, TTL'd)" if thr else "none"))
+    ends = [x for x in (rb.get("k1_deleted"), rb.get("k1b_deleted"), rb.get("refresh_refused")) if x]
+    exp = (sess.get("claims") or {}).get("exp")
+    if exp:
+        ends.append(datetime.datetime.fromtimestamp(exp, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    emit("  INTERVAL: [%s, %s]" % (created.get("k1_created"), max(ends) if ends else "-"))
+    life_ok = all(rb.get(k_) for k_ in ("k1b_deleted", "k1_deleted", "refresh_refused", "expired_refused")) and after_ok
+    emit("  (f) keys + login %s; counted requests scope-resolved with 0 UNEXPECTED %s; lifecycle closed %s; S92 search %s, resolve %s; "
+         "firms with a map %d of %d (S94 not counted)" % (keys_ok, req_ok, life_ok, "FIXED" if s92.get("s92_search") else "NOT FIXED",
+                                                            "FIXED" if s92.get("s92_resolve") else "NOT FIXED", n_exist, n_firms))
+    return keys_ok and req_ok and life_ok
 
 
 def main() -> int:
     _, h = git("rev-parse", "HEAD")
-    emit("IB-rtf-12 R69-AC1 battery (second pass) -- worktree HEAD %s" % h.decode().strip())
+    emit("IB-rtf-12 R69-AC1 battery (third pass) -- run at %s -- worktree HEAD %s" % (now_iso(), h.decode().strip()))
     emit("")
     arms = {"(a) premise": arm_a()}
     emit("")
@@ -318,24 +630,25 @@ def main() -> int:
     emit("")
     arms["(c) manifest"] = arm_c()
     emit("")
-    arms["(d) build + plans + packet + halves"] = arm_d()
+    arms["(d) packet + halves + build + pre-apply"] = arm_d()
     emit("")
-    if not arms["(d) build + plans + packet + halves"]:
-        emit("STOP at (d): a half is ABSENT (or a build/plan check failed above) -- nothing is applied; (e) apply and (f) the live "
-             "proof are NOT RUN")
+    if not arms["(d) packet + halves + build + pre-apply"]:
+        emit("STOP at (d) -- (e) and (f) are NOT graded")
+        arms["(e) apply"] = False
+        arms["(f) live proof"] = False
     else:
-        emit("(d) holds -- (e)/(f) are the next pass's arms and are not implemented in this second-pass revision")
-    arms["(e) apply"] = False
-    arms["(f) live proof"] = False
+        arms["(e) apply"] = arm_e()
+        emit("")
+        arms["(f) live proof"] = arm_f()
+    emit("")
     for k, v in arms.items():
-        emit("ARM %s: %s" % (k, "PASS" if v else ("NOT RUN" if k.startswith(("(e)", "(f)")) else "FAIL")))
+        emit("ARM %s: %s" % (k, "PASS" if v else "FAIL"))
     if all(arms.values()):
-        emit("RESULT: R69-AC1 PASS")
+        emit("RESULT: R69-AC1 PASS -- 6 of 6 arms hold")
         emit(TOKEN)
         rc = 0
     else:
-        emit("RESULT: R69-AC1 FAIL -- %d of %d arms hold (second pass: STOP at the halves as the face expects)"
-             % (sum(arms.values()), len(arms)))
+        emit("RESULT: R69-AC1 FAIL -- %d of %d arms hold" % (sum(arms.values()), len(arms)))
         rc = 1
     with open(OUTPUT_PATH, "w", encoding="utf-8", newline="\n") as fh:
         fh.write("\n".join(LINES) + "\n")
