@@ -124,8 +124,17 @@ def arm_a() -> bool:
         ok_zip = ok_zip and sha_ok == "EQUAL"
         emit("  %-26s live zip %2d members (sha256 == live CodeSha256: %s) | layers %d | raw_keys.json %-7s | registry %-52s | seam %s"
              % (fn, len(members), sha_ok, len(cfg.get("Layers") or []), raw, reg, seam))
-    emit("  raw_keys.json in the live zips: %d of 7 (the premise)" % in_zip)
-    return staged_cut == 0 and in_zip == 0 and ok_zip and len(opens) >= 3
+    # PHASE-AWARE (the pass-3 defect): the premise is 0 of 7 BEFORE the apply. Once the apply ledger is CLOSED at HEAD
+    # the live zips carry the member BY DESIGN -- 6 of 7, ycharts deferred (S102) -- and requiring 0 there re-asserts a
+    # pre-apply fact against a post-apply world. The premise itself stays readable at the cut, printed above.
+    rc_s, _ = git("rev-parse", "--verify", "--quiet", "HEAD:org/critical_paths/.open_deploys/irpt-bckend-ib-rtf-12-apply.json")
+    led = (blob_at("HEAD", "org/critical_paths/change_management/20260919T1712Z_irpt-bckend-ib-rtf-12-apply_deploy_completion.md") or b"").decode("utf-8", "replace")
+    applied = rc_s != 0 and "**Status:** CLOSED" in led
+    want = 6 if applied else 0
+    emit("  raw_keys.json in the live zips: %d of 7 -- %s (the apply ledger at HEAD: %s)"
+         % (in_zip, "the premise, expected 0 of 7 pre-apply" if not applied else
+            "expected 6 of 7 POST-APPLY (ycharts deferred, S102); the premise 0 of 7 is the cut's, printed above", "CLOSED" if applied else "not closed"))
+    return staged_cut == 0 and in_zip == want and ok_zip and len(opens) >= 3
 
 
 def arm_b() -> bool:
@@ -222,7 +231,7 @@ RTF9_HALVES = {
     "COO": "org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-9_TWO_KEY_PRINCIPAL.md",
     "CTO": "org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-9_TWO_KEY_PRINCIPAL.md",
 }
-PRINCIPAL_SENTINEL_REL = "org/critical_paths/.open_deploys/irpt-bckend-ib-rtf-12-live-principal.json"
+PRINCIPAL_SENTINEL_REL = "org/critical_paths/.open_deploys/irpt-bckend-ib-rtf-12-live-principal-2.json"
 USERS, PARTNER, THROTTLE = "opal-users-v2", "opal-partner-49financial", "opal-portal-auth-throttle"
 FIRM, ADVISOR = "49financial", "abby_horton"
 OM_BUCKET, OM_KEY = "opal-data-bd", "platinum/49financial/ownership_map.json"
