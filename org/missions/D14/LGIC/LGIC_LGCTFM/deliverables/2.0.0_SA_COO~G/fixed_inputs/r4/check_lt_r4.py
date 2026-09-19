@@ -141,7 +141,23 @@ def core_untouched(d, want_digest, want_count):
         got[:12], want_digest[:12], n, want_count + 1)
 
 
+def design_text(t):
+    """The DESIGN half of the method note -- everything before the COMP-TOOL LEDGER.
+
+    The ledger is an Andrew-direct artifact (msg 98038, @c9e54d5c0f) whose PURPOSE is to name
+    every comp tool and say whether it was used; the three R-81-refused sources appear there and
+    ONLY there, each row reading NOT USED. A whole-file substring search cannot tell "the design
+    USES comp-estate" from "the ledger RECORDS that comp-estate is refused" -- so this arm made
+    Andrew's ledger and its own AC1 mutually unsatisfiable, and the only passing move was to
+    DELETE A TRUTHFUL RECORD. Measured when it surfaced (LGIC_LGCTFM-W1-S35,
+    0.9.0_WK_LGIC_LGCTFM~1): 3 of 3 residual hits inside the ledger, 0 of 3 in any design section.
+    """
+    m = re.search(r"^#{2,4}\s*COMP-TOOL LEDGER", t, re.M | re.I)
+    return t[:m.start()] if m else t
+
+
 def core_sources(text, refused, allowed):
+    text = design_text(text)
     hit = [r for r in refused if r in text]
     auth = [a for a in allowed if a in text]
     lines = ["R-81-refused discovery sources named in the design: %d %s" % (len(hit), _scrub(hit)),
@@ -199,8 +215,15 @@ def core_stale(commits, rec, prior):
     sp = ((rec or {}).get("stale_proofs") or {})
     named = set(sp.get("proofs_re_run") or [])
     prior = set(prior or ())
-    ok = sp.get("fixed_input_commits_since_cut") == n and named == prior
-    lines = ["fixed-input commits since the cut: %d %s" % (n, _scrub(commits[:3])),
+    # THE COUNT IS INFORMATIONAL, NEVER THE BAR. It is CHECKOUT-DEPENDENT -- a worker measures it
+    # in its own worktree and the merged tree computes a different number the moment any fixed-input
+    # commit lands, including the issuer's own repairs -- so grading equality on it makes the arm
+    # unsatisfiable by a record that was honest when written (LGIC_LGCTFM-W1-S38, measured: record 1,
+    # merged tree 3). What must match is the SET OF PROOFS AT RISK, which is a fact about the world
+    # rather than about which checkout asked.
+    ok = named == prior
+    lines = ["fixed-input commits since the cut: %d (informational, checkout-dependent) %s" % (n, _scrub(commits[:3])),
+             "record states: %s" % _scrub(sp.get("fixed_input_commits_since_cut")),
              "proofs pinned BEFORE the earliest of them: %d -- %s" % (len(prior), _scrub(sorted(prior)) or "none"),
              "record enumerates %d re-run proof(s): %s" % (len(named), _scrub(sorted(named)) or "none")]
     if named - prior:
@@ -424,7 +447,18 @@ def selftest_arms():
     arm("MUTANT-status-invented", not (_status_is_live("active") or _status_is_live("live")),
         "the values this arm used to demand: never in the file's vocabulary, intersection 0 with 127 live entries (W2-S35)")
 
+    _led = ("## Walk order\nuse comp-kuzu and comp-iam reconcile\n\n"
+            "### COMP-TOOL LEDGER\n| 3 | comp-estate | NOT USED -- refused |\n")
+    arm("POSITIVE-sources-ledger-names-refused", core_sources(_led, REFUSED, ALLOWED_AUTH)[0],
+        "the ledger MUST name every refused tool (Andrew-direct msg 98038); naming one there is not using it")
+    arm("MUTANT-sources-in-design", not core_sources(
+        "## Plan\nread the roles with comp-estate\n\n### COMP-TOOL LEDGER\n| 1 | comp-kuzu | used |\n",
+        REFUSED, ALLOWED_AUTH)[0], "a refused source in a DESIGN section still fails")
+
     arm("POSITIVE-stale-none", core_stale([], None, set())[0])
+    arm("POSITIVE-stale-count-moves", core_stale(
+        ["a x", "b y", "c z"], {"stale_proofs": {"fixed_input_commits_since_cut": 1, "proofs_re_run": []}},
+        set())[0], "an honest record whose checkout counted 1 while this one counts 3 still PASSES: the SET is the bar (W1-S38)")
     _one = {"stale_proofs": {"fixed_input_commits_since_cut": 1, "proofs_re_run": []}}
     arm("POSITIVE-stale-mint", core_stale(["abc mint"], _one, set())[0],
         "the commit that MINTS the fixed input puts NO proof at risk -- [] is the honest answer (W1-S88)")
