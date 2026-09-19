@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-55",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-55.one-issuer-per-round.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "16999602615f9643385bc571748aa7a25079baf0"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~55",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/to-pipeline-gate.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1", "AC3", "AC4"],
+      "deploy_evidence": "156 insertions, 0 deletions (git diff --stat). GATE (x) -- ONE ISSUER PER ROUND, keyed to the ROUND (row AMGT_RESAPP-Z-S154; CLAUDE.md Rule 27). Adds: ROUND_ELEMENT_RE (line-anchored ^<round>N</round>$, multiline, the same discipline as PLACEHOLDERS_TAG_RE); _HEAD_ROUNDS_CACHE + _head_rounds_for_project()/_head_rounds_census() -- {round:int -> [order path,...]} for a project's TREE task orders TRACKED AT HEAD, read with git ls-files + git show HEAD:<path> (never the worktree), cached once per (root, code) per gate run in the same shape as surprise-row-gate.py's _open_tos_census/_OPEN_TOS_CACHE; the PURE function _round_issuer_violations(rel, text, head_rounds) -- [] on a flat-root order, REFUSED naming the missing key when no line-anchored <round>N</round> element is present, REFUSED naming every colliding HEAD order in ONE message (citing round N, the project code, and row AMGT_RESAPP-Z-S154) when that round already has an order at HEAD; a new `--rounds <CODE>` read-only CLI limb (_rounds_cli) printing one line per round, the unrounded count, and the denominator \"N order(s) at HEAD\", rc 0 always; five \"round-issuer\"-named arms in _self_test()'s pure arms list; and the wiring in main() that runs the limb over the newly-added (git A/R) tree-order targets beside the coverage carrier, reading the WORKING-TREE text of each target (the same read check_file() already uses for every other structural limb) and feeding it the cached HEAD census. NOT CHANGED: GATE (iv) (who commits), the merge exemption, the single audited override token, and every other limb's newly-added-only scope. NO order at HEAD is back-filled with a <round> element. Ruff (py39 target) clean; py_compile clean; ds-precommit-check clean.",
+      "introduces": [
+        "def _round_issuer_violations(rel, text, head_rounds):",
+        "def _head_rounds_census(root, code):",
+        "def _rounds_cli(root, args):",
+        "ROUND_ELEMENT_RE = re.compile"
+      ]
+    },
+    {
+      "path_or_key": ".tools/tests/test_gate_x_round_issuer.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC2"],
+      "deploy_evidence": "NEW, in the test_gate_viii_modify.py shape: a scratch git repo per arm under <WS>/.scratch/ (removed at the end via shutil.rmtree in a finally block), the gate's own CLI invoked via subprocess with OPAL_AGENT_SERIAL=2.0.0_SA_COO~Z, real order bytes built by a local fixture (_order_text). Four arms: RED collision (a second round-13 order staged under the same author, refused naming round 13 and S154), GREEN next round (round-14 staged, admitted by this limb, other limbs' output tolerated), GREEN modify-not-graded (the committed round-13 order staged as a status-flip MODIFY, not graded by this limb), RED missing key (a new order with no <round> element, refused naming the missing key). Prints 'RESULT: %d arm(s) failed of %d' and 'BATTERY PASS'/'BATTERY FAILED'. Ruff (py39 target) clean; py_compile clean; ds-precommit-check clean."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-55.one-issuer-per-round.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "<status> flipped pending -> complete. A MODIFICATION of an existing, already-committed tree order, so GATE (x) does not grade this file in this same commit -- verified directly: the RED-collision arm covers exactly this class (a status flip on the already-committed order is NOT graded) and PASSED."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "rc=0 and the printed arm list carries at least FIVE arms whose names begin \"round-issuer\" (collision refused naming the round and S154; next round admitted; missing key refused; flat-root not graded; a prose mention of the element not read as the key), every arm PASS -- the self-test is pure and reads no repo",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .tools/to-pipeline-gate.py --self-test 2>&1 | tail -40; echo rc=${PIPESTATUS[0]}",
+      "output_evidence": "  PASS  round-issuer RED: a second order into round 13 (already at HEAD) -> refused naming round 13 and S154\n  PASS  round-issuer GREEN: the next round (14), none at HEAD yet -> admitted\n  PASS  round-issuer RED: no line-anchored <round>N</round> element -> refused naming the missing key\n  PASS  round-issuer: a flat-root order is NOT graded (the legacy population, same scope as every limb here)\n  PASS  round-issuer: a prose mention of <round> is inert -- not read as the key, still refused as missing\n[to-pipeline-gate --self-test] RESULT: 0 arm(s) failed of 80\nrc=0",
+      "denominator": "5 of 5 round-issuer-named arms PASS, out of 80 total self-test arms (0 failed of 80)",
+      "status": "PASS",
+      "expect": "round-issuer[\\s\\S]*RESULT: 0 arm\\(s\\) failed of \\d+[\\s\\S]*rc=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "rc=0, a line \"RESULT: 0 arm(s) failed of N\" with N at least 4 and \"BATTERY PASS\": in a scratch git repo under .scratch/, an order with round 13 COMMITTED under author 2.0.0_SA_COO~Z, then a SECOND round-13 file staged under the SAME author is REFUSED by the gate's own CLI at rc 1 with a message naming \"round 13\" and \"S154\" (the serial-blind case S154 measured); a round-14 file is ADMITTED by this limb; the committed order staged as MODIFIED (a status flip) is NOT graded by it; a new order with no round element is REFUSED naming the missing key; the scratch repo is removed at the end",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .tools/tests/test_gate_x_round_issuer.py 2>&1 | tail -30; echo rc=${PIPESTATUS[0]}",
+      "output_evidence": "  PASS second round-13 order staged A -> rc=1; org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-99.second-into-13.md: round 13 of AMGT_RESAPP already has an issuance at HEAD (1 order(s): A\n  PASS round-14 order staged A -> rc=1 (other limbs tolerated); round-issuer lines: 0\n  PASS round-13 order staged M (status flip) -> round-issuer lines: 0 (not graded on a modify, rc=0 tolerated)\n  PASS order with no <round> element staged A -> rc=1; ...: NO line-anchored <round>N</round> element -- ONE ISSUER PER ROUND is keyed\n\n  PASS RED: a second round-13 order staged under the same author -> REFUSED naming round 13 and S154\n  PASS GREEN: a round-14 order (none at HEAD) -> ADMITTED by this limb\n  PASS GREEN: the committed round-13 order staged as MODIFIED (status flip) -> NOT graded by this limb\n  PASS RED: a new order with NO <round> element -> REFUSED naming the missing key\nRESULT: 0 arm(s) failed of 4\nBATTERY PASS\nrc=0\nSCRATCH REMOVED: verified by directory listing after the run -- .scratch/rk-55-gate-x-round-issuer/ absent post-run (shutil.rmtree in a finally block).",
+      "denominator": "0 arm(s) failed of 4 (4 real-index arms, all PASS)",
+      "status": "PASS",
+      "expect": "RESULT: 0 arm\\(s\\) failed of [4-9]\\d*[\\s\\S]*BATTERY PASS[\\s\\S]*rc=0"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "rc=0 and a read-only census of this project's tree orders AT HEAD: one line per round with its order count (round 13 reading 12 at the cut), the unrounded count (3 at the cut) and the denominator \"97 order(s) at HEAD\" (re-measure; the numbers may have moved with round 14's issuance) -- the read the COO runs before cutting a round",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .tools/to-pipeline-gate.py --rounds AMGT_RESAPP; echo rc=$?",
+      "output_evidence": "round 1: 4 order(s)\nround 2: 15 order(s)\nround 3: 7 order(s)\nround 4: 2 order(s)\nround 5: 8 order(s)\nround 6: 1 order(s)\nround 7: 6 order(s)\nround 8: 3 order(s)\nround 9: 1 order(s)\nround 10: 4 order(s)\nround 11: 13 order(s)\nround 12: 18 order(s)\nround 13: 12 order(s)\nround 14: 31 order(s)\nunrounded: 3 order(s)\n128 order(s) at HEAD\nrc=0",
+      "denominator": "128 order(s) at HEAD -- the numbers MOVED from the cut's 97/94/3/12 because round 14's own 31-order issuance (commit 047aee5478) landed between the cut and this run at HEAD; round 13 still reads 12 and unrounded still reads 3, exactly as the cut recorded, and the new round-14 total (31) accounts for the full 97 -> 128 delta (97 + 31 = 128)",
+      "status": "PASS",
+      "expect": "round 13: 12 order\\(s\\)[\\s\\S]*unrounded: 3 order\\(s\\)[\\s\\S]*\\d+ order\\(s\\) at HEAD[\\s\\S]*rc=0"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the count line reads 1 or more -- a real round-13 order copied under a new name and STAGED (never committed) in this worktree is refused by the live gate with the round-collision message naming round 13 and its existing orders -- and probe_removed=yes with the index restored (git status shows no probe path); the other limbs' refusals on the same probe (cell_refs, sign-off) may print beside it and are recorded, not counted",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && src=$(ls org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-19.adapter-second-join.md) && probe=org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-19.zz-round-probe.md && cp \"$src\" \"$probe\" && git add \"$probe\" && python .tools/to-pipeline-gate.py \"$probe\" 2>&1 | grep -c \"already has an issuance at HEAD\"; git reset -q -- \"$probe\"; rm -f \"$probe\"; echo probe_removed=$([ -f \"$probe\" ] && echo no || echo yes)",
+      "output_evidence": "1\nprobe_removed=yes",
+      "denominator": "1 matching line (the count from grep -c) out of the gate's full REFUSED output on the probe -- the other limbs' refusals (cell_refs against a decomp cell the probe does not own, sign-off, etc.) print beside it in the full run and are not counted by this grep",
+      "status": "PASS",
+      "expect": "^1[\\s\\S]*probe_removed=yes"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The round-collision branch in _round_issuer_violations() was disabled (`if existing:` replaced with `if False:  # MUTANT_SENTINEL_RK55`) after a byte snapshot of .tools/to-pipeline-gate.py was taken to .scratch/to-pipeline-gate.py.pre_mutant (sha256 499713b19b9a59f1490e5e71025724552a71da8c6fee46dacf629164408af46b), then both --self-test and the real-index battery were re-run against the mutant, then the file was restored from the snapshot.",
+      "expected": "the self-test's round-issuer collision RED arm turns FAIL (and only that arm -- the other four round-issuer arms and every other arm stay unaffected); the real-index battery's collision RED arm turns FAIL, its overall RESULT line moves from 0 failed to 1 failed, and it prints BATTERY FAILED with rc 1; after restore the file is byte-identical to the pre-mutant snapshot",
+      "observed": "FIRED: --self-test printed 'FAIL  round-issuer RED: a second order into round 13 (already at HEAD) -> refused naming round 13 and S154' with 'RESULT: 1 arm(s) failed of 80' (every other round-issuer arm and all 75 other arms stayed PASS); the battery printed 'FAIL RED: a second round-13 order staged under the same author -> REFUSED naming round 13 and S154', 'RESULT: 1 arm(s) failed of 4', 'BATTERY FAILED', rc=1. Restore verified: sha256 of the restored file is 499713b19b9a59f1490e5e71025724552a71da8c6fee46dacf629164408af46b, identical to the pre-mutant snapshot, and `cmp -s` printed RESTORED_BYTE_IDENTICAL. Both AC1 and AC2 were then re-run clean (0 failed of 80; 0 failed of 4, BATTERY PASS) on the restored file, matching the acceptance rows above.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "--self-test run twice, the real-index battery run twice, and --rounds AMGT_RESAPP run twice, on the restored (post-mutant-control) file, each pair compared on its final summary/denominator line.",
+      "observed": "--self-test: 'RESULT: 0 arm(s) failed of 80' both times. Battery: 'RESULT: 0 arm(s) failed of 4' both times. --rounds AMGT_RESAPP: '128 order(s) at HEAD' both times, with every per-round line identical across the two runs (HEAD did not move between them).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Back-filling <round> onto the 3 unrounded orders at HEAD, or onto any of the 94 already-rounded orders.",
+      "reason": "EXPRESSLY RULED OUT by the order's BOUNDS section: 'NO back-fill: the 3 unrounded orders at HEAD are left as they are (the limb grades NEWLY-ADDED only).' The limb reads only staged-ADDED tree orders; nothing at HEAD is touched by this cell."
+    },
+    {
+      "item": "A second override token for a genuinely additional order into an open round.",
+      "reason": "The order's BOUNDS forbid a second token: 'The override stays the existing audited one.' The existing '# pipeline-override: <reason>' escape (OVERRIDE_RE, already honoured at check_file()'s top) covers this limb's refusal exactly as it covers every other limb -- no new escape was added."
+    },
+    {
+      "item": "Editing GATE (iv) (_issuer_identity_violations, the WHO-commits limb) or the merge exemption.",
+      "reason": "The order's 'What this cell does NOT change' section names both explicitly as unmoved. GATE (iv) still grades WHO commits; this cell adds the ROUND-keyed limb GATE (iv) structurally cannot express, per row AMGT_RESAPP-Z-S154."
+    },
+    {
+      "item": "AMGT-rk-56's <status> limb.",
+      "reason": "Named in the order as 'a sibling limb in the same function and is NOT built here' -- a separate cell, separate order, separate worker."
+    },
+    {
+      "item": "Editing CLAUDE.md or the canonical spine to restate ONE ISSUER PER ROUND.",
+      "reason": "The order states the law already exists there; this cell is its mechanism, not a restatement. 'nothing in the spine or CLAUDE.md is edited.'"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "to-pipeline-gate.py --self-test (AC1)",
+      "invocation": "python .tools/to-pipeline-gate.py --self-test 2>&1 | tail -40",
+      "result": "0 arm(s) failed of 80; 5 of 5 round-issuer-named arms PASS"
+    },
+    {
+      "tool": "test_gate_x_round_issuer.py real-index battery (AC2)",
+      "invocation": "python .tools/tests/test_gate_x_round_issuer.py",
+      "result": "0 arm(s) failed of 4; BATTERY PASS; rc=0; scratch removed"
+    },
+    {
+      "tool": "to-pipeline-gate.py --rounds AMGT_RESAPP (AC3)",
+      "invocation": "python .tools/to-pipeline-gate.py --rounds AMGT_RESAPP",
+      "result": "round 13: 12 order(s); unrounded: 3 order(s); 128 order(s) at HEAD; rc=0"
+    },
+    {
+      "tool": "live-gate probe on a real rk-19 order copied and staged (never committed) (AC4)",
+      "invocation": "cp + git add the probe; python .tools/to-pipeline-gate.py <probe> | grep -c \"already has an issuance at HEAD\"; git reset -q; rm the probe",
+      "result": "count=1; probe_removed=yes; index restored"
+    },
+    {
+      "tool": "mutation control -- disabled the collision branch, re-ran AC1+AC2, restored from a sha256-verified snapshot",
+      "invocation": "python - (string replace `if existing:` -> `if False:  # MUTANT_SENTINEL_RK55`); python .tools/to-pipeline-gate.py --self-test; python .tools/tests/test_gate_x_round_issuer.py; cp snapshot back; sha256sum",
+      "result": "self-test 1 failed of 80 (the collision RED arm only); battery 1 failed of 4, BATTERY FAILED, rc=1; restore sha256 499713b19b9a59f1490e5e71025724552a71da8c6fee46dacf629164408af46b matched the pre-mutant snapshot"
+    },
+    {
+      "tool": "determinism control -- --self-test, the battery, and --rounds each run twice",
+      "invocation": "python .tools/to-pipeline-gate.py --self-test (x2); python .tools/tests/test_gate_x_round_issuer.py (x2); python .tools/to-pipeline-gate.py --rounds AMGT_RESAPP (x2)",
+      "result": "identical summary lines both times in all three pairs: 0/80, 0/4, 128 order(s) at HEAD"
+    },
+    {
+      "tool": "ruff (py39 target) + py_compile + ds-precommit-check.py on both changed .py files",
+      "invocation": "python -m py_compile .tools/to-pipeline-gate.py .tools/tests/test_gate_x_round_issuer.py; ruff check --target-version py39 .tools/to-pipeline-gate.py .tools/tests/test_gate_x_round_issuer.py; python .tools/ds-precommit-check.py .tools/to-pipeline-gate.py .tools/tests/test_gate_x_round_issuer.py",
+      "result": "py_compile: no errors. ruff: 'All checks passed!' (one pre-existing unused-variable F841 on the first draft was fixed before this run). ds-precommit-check: rc=0, no output"
+    }
+  ]
+}
