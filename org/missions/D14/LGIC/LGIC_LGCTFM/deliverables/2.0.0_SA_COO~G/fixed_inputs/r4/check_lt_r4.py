@@ -241,6 +241,16 @@ def _is_this_round(path, tag):
     return b.endswith("proof_of_spec.json") and ".TO-" in b and ("-%s." % tag) in b
 
 
+class InstrumentFailure(RuntimeError):
+    """A FAILED RETRIEVAL RETURNS A VALUE, and here it returned the PASSING one.
+
+    `proofs_at_risk()` used to answer `set()` when `git ls-tree` failed -- and empty is exactly
+    what an honest MINT looks like, so an instrument failure was INDISTINGUISHABLE FROM A CLEAN
+    PASS. 1.0.0_SA_CTO's round-11 analysis residual (1) (@84b02d1573): "an exception is not an
+    empty set." It raises now, and the arm reports the failure as a FAIL that names the command.
+    """
+
+
 def proofs_at_risk(commits):
     """This round's proof instances that existed at the parent of the EARLIEST counted commit."""
     if not commits:
@@ -250,7 +260,8 @@ def proofs_at_risk(commits):
     r = subprocess.run(["git", "ls-tree", "-r", "--name-only", "%s^" % oldest, "--", ROOT],
                        cwd=REPO, capture_output=True, timeout=120)
     if r.returncode != 0:
-        return set()
+        raise InstrumentFailure("git ls-tree %s^ rc=%d: %s" % (
+            oldest, r.returncode, (r.stderr or b"").decode("utf-8", "replace").strip()[:200]))
     return set(ln for ln in (r.stdout or b"").decode("utf-8", "replace").splitlines()
                if _is_this_round(ln, tag))
 
@@ -377,15 +388,24 @@ def x4_no_registry_move():
 
 def r4_stale_proofs():
     b = base()
-    out = []
-    for p in b["stale_proof_bar"]["watched_paths"]:
-        r = subprocess.run(["git", "log", "--format=%h %s", "%s..HEAD" % b["cut_pin"], "--", p],
-                           cwd=REPO, capture_output=True, timeout=120)
-        out += [ln for ln in (r.stdout or b"").decode("utf-8", "replace").splitlines() if ln.strip()]
+    # ONE git log over ALL watched paths, so the result is GLOBALLY ordered and `commits[-1]` is
+    # genuinely the oldest. Concatenating a per-path log gave the oldest of the LAST path only --
+    # 1.0.0_SA_CTO's residual (2) @84b02d1573, latent while one path had commits and the other none.
+    args = ["git", "log", "--format=%h %s", "%s..HEAD" % b["cut_pin"], "--"]
+    args += list(b["stale_proof_bar"]["watched_paths"])
+    r = subprocess.run(args, cwd=REPO, capture_output=True, timeout=120)
+    if r.returncode != 0:
+        return say("FAIL-R4-STALE-PROOFS", "INSTRUMENT FAILURE: git log rc=%d -- %s" % (
+            r.returncode, _scrub((r.stderr or b"").decode("utf-8", "replace").strip()[:200])))
+    out = [ln for ln in (r.stdout or b"").decode("utf-8", "replace").splitlines() if ln.strip()]
     rec = None
     for p in b["record_shape"]["paths"].values():
         rec = rec or load_json(p)
-    ok, lines = core_stale(out, rec, proofs_at_risk(out))
+    try:
+        prior = proofs_at_risk(out)
+    except InstrumentFailure as exc:
+        return say("FAIL-R4-STALE-PROOFS", "INSTRUMENT FAILURE, NOT A CLEAN MINT: %s" % _scrub(exc))
+    ok, lines = core_stale(out, rec, prior)
     return verdict(ok, "PASS-R4-STALE-PROOFS", "FAIL-R4-STALE-PROOFS", lines)
 
 
@@ -454,6 +474,17 @@ def selftest_arms():
     arm("MUTANT-sources-in-design", not core_sources(
         "## Plan\nread the roles with comp-estate\n\n### COMP-TOOL LEDGER\n| 1 | comp-kuzu | used |\n",
         REFUSED, ALLOWED_AUTH)[0], "a refused source in a DESIGN section still fails")
+
+    # LIVE positive control of the FAILURE PATH: a bogus commit-ish makes the real git call fail,
+    # and the arm must RAISE rather than answer set() -- the value that passes at a mint.
+    try:
+        proofs_at_risk(["deadbeefdeadbeef no-such-commit"])
+        arm("POSITIVE-CONTROL-instrument-failure-raises", False, "it returned a value instead of raising")
+    except InstrumentFailure:
+        arm("POSITIVE-CONTROL-instrument-failure-raises", True,
+            "a failed retrieval RAISES; it no longer returns the passing value (CTO residual (1))")
+    except Exception as exc:
+        arm("POSITIVE-CONTROL-instrument-failure-raises", False, "wrong exception: %s" % _scrub(exc))
 
     arm("POSITIVE-stale-none", core_stale([], None, set())[0])
     arm("POSITIVE-stale-count-moves", core_stale(
