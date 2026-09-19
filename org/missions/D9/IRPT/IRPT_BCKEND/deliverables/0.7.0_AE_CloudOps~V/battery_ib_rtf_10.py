@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """IRPT_BCKEND.TO-IB-rtf-10 battery -- the serving roles granted the ownership map, the directory and the bucket map.
 
-SECOND PASS (this revision; the re-hand @2b67d4ff7a + the addendum @77bd04ca41): arms (a)-(d) against the RE-CUT
-packet. (e) apply and (f) the live proof run only on the third pass, after both never-widen halves are at HEAD
-naming the re-cut blob; with a half ABSENT the battery STOPS at (d) and says so.
+THIRD PASS (this revision; the S96 ruling (i) @6e027591fc, on the re-hand @2b67d4ff7a + the addendum @77bd04ca41):
+arms (a)-(d) against the THIRD-PASS RE-CUT packet. (e) apply and (f) the live proof run only on the next pass, after
+both never-widen halves are at HEAD naming this re-cut blob; with a half ABSENT the battery STOPS at (d) and says so.
   (a) CENSUS of the 7 serving functions: role; s3:GetObject on each client firm's ownership map AND on its
       directory object (simulate-principal-policy, one resource per call, a positive and a negative control);
       IRPT_DIRECTORY_BUCKET_MAP in the deployed environment; the runtime loader each entry binds; the packet's
@@ -13,15 +13,19 @@ naming the re-cut blob; with a half ABSENT the battery STOPS at (d) and says so.
       writers W per role.
   (c) THE PLAN per root, re-taken with the vendored terraform: 0 to destroy, every address with its actions, the
       planfile sha256 and the CANONICAL digest (sha256 of the sorted resource changes), each compared with the
-      packet's table; every lambda update split into env / object-version / CODE; 0 code-carrying updates required
-      (the S95 restore), the version-only bumps NAMED as noise.
-  (c-code) K-CODE: whether irpt-directory-search has a NEW build at rest (row S96: the builder refuses it).
+      packet's table; every lambda update split into env / object-version / CODE; EXACTLY ONE code-carrying update
+      allowed -- K-CODE's own (module.irpt_directory_search, after-hash == the built sha) -- any other is a FAIL (the
+      S95 restore keeps the four drifted functions at their served bytes); the version-only bumps NAMED as noise.
+  (c-code) K-CODE: the built irpt-directory-search artifact AT REST -- the latest version is the built version, its
+      metadata and re-downloaded bytes equal the built sha, the rollback-source version is still present and equal
+      to the prior live CodeSha256, and the function is still UNCHANGED (the build deployed nothing).
   (d) THE HALVES at HEAD naming the packet blob, 2 of 2 -- ABSENT is a truthful STOP.
 Every arm prints the identity it ran as; none of (a)-(d) claims a served behaviour (the identity bar binds (f)).
 Read-only on every live plane. No apply. Prints no credential.
 """
 from __future__ import annotations
 
+import base64
 import glob
 import hashlib
 import json
@@ -54,6 +58,9 @@ FUNCS = {
 KCODE_FN = "irpt-directory-search"
 KCODE_PRIOR_LIVE = "aQxATFkcdtEBvs+v/zztQBOPcbR9XH9Lzjm9kUOmhmU="
 KCODE_PRIOR_VERSION = "l4JK6aUnUgtrg.TFrxiKU8.XBM_6APl4"
+KCODE_BUILT = "HOpXPDoHhrVK/ayqsx1uKgzt9mWOjDlK+Ix2CPbCamI="
+KCODE_BUILT_VERSION = "hk9OUfwHZxlcwZDqN7cEknbJOXtvB3jd"
+KCODE_ADDRESS = "module.irpt_directory_search.aws_lambda_function.this"
 ARTIFACT_BUCKET = "opal-313476888478-lambda-artifacts"
 LINES: list[str] = []
 IDENTITY: list[str] = []
@@ -179,6 +186,7 @@ def arm_c(packet_text: str) -> bool:
     n_ok = destroy_total = changes_total = code_carrying = 0
     noise: list[str] = []
     digests_ok = planned = 0
+    kcode_in_plan = unexpected_code = 0
     for r in roots:
         d = os.path.join(TF_ROOT, r)
         pf = os.path.join(PLAN_DIR, r + ".tfplan")
@@ -214,38 +222,59 @@ def arm_c(packet_text: str) -> bool:
                 ver = b.get("s3_object_version") != a.get("s3_object_version")
                 envc = b.get("environment") != a.get("environment")
                 code_carrying += code
+                if code and c["address"] == KCODE_ADDRESS and a.get("source_code_hash") == KCODE_BUILT:
+                    kcode_in_plan += 1
+                elif code:
+                    unexpected_code += 1
                 if ver and not code:
                     noise.append(c["address"])
                 kinds = " [env %s; object version %s; CODE %s]" % ("changes" if envc else "same", "changes" if ver else "same",
                                                                   "CHANGES (%s -> %s)" % (b.get("source_code_hash"), a.get("source_code_hash")) if code else "unchanged")
             emit("     %-8s %s%s" % ("/".join(c["change"]["actions"]), c["address"], kinds))
-    emit("  roots planned without destroy: %d of %d; total destroy %d; total changes %d; lambda updates carrying a CODE change %d (row S95: 0 required)"
-         % (n_ok, len(roots), destroy_total, changes_total, code_carrying))
+    emit("  roots planned without destroy: %d of %d; total destroy %d; total changes %d; lambda updates carrying a CODE change %d "
+         "(K-CODE's own, after-hash == built: %d; any other: %d -- 0 allowed)"
+         % (n_ok, len(roots), destroy_total, changes_total, code_carrying, kcode_in_plan, unexpected_code))
     emit("  canonical digests equal to the packet's: %d of %d" % (digests_ok, len(roots)))
     emit("  accepted plan noise -- object-version-only bumps, source_code_hash unchanged: %d: %s" % (len(noise), noise))
     for k, v in (("PLAN-ROOTS", "%d of %d planned; destroy %d of %d; changes %d" % (planned, len(roots), planned - n_ok, len(roots), changes_total)),
-                 ("PLAN-CODE-CHANGES", "%d of %d" % (code_carrying, len(roots)))):
+                 ("PLAN-CODE-CHANGES", "%d of %d" % (code_carrying, len(roots))),
+                 ("PLAN-CODE-CHANGE-ADDRESS", "%s %s -> %s" % (KCODE_ADDRESS, KCODE_PRIOR_LIVE, KCODE_BUILT)
+                  if kcode_in_plan == 1 else "ABSENT FROM THE PLAN")):
         m = re.search(r"%s: (.+)" % k, packet_text)
         emit("  packet line %s: packet '%s', this run '%s' -> %s" % (k, m.group(1).strip() if m else "ABSENT", v,
                                                                    "EQUAL" if m and m.group(1).strip() == v else "DIFFERS"))
-    return n_ok == len(roots) and destroy_total == 0 and code_carrying == 0 and digests_ok == len(roots)
+    return (n_ok == len(roots) and destroy_total == 0 and kcode_in_plan == 1 and unexpected_code == 0
+            and digests_ok == len(roots))
 
 
 def arm_c_code() -> bool:
-    emit("(c-code) K-CODE -- %s rebuilt from HEAD (addendum @77bd04ca41)" % KCODE_FN)
+    emit("(c-code) K-CODE -- %s rebuilt from HEAD, AT REST (S96 ruling (i) @6e027591fc)" % KCODE_FN)
     identity_line("(c-code)")
     lam = boto3.client("lambda", region_name="us-east-1")
     s3 = boto3.client("s3", region_name="us-east-1")
+    key = "investor-reporting/%s.zip" % KCODE_FN
     live = lam.get_function_configuration(FunctionName=KCODE_FN)["CodeSha256"]
-    head = s3.head_object(Bucket=ARTIFACT_BUCKET, Key="investor-reporting/%s.zip" % KCODE_FN)
+    head = s3.head_object(Bucket=ARTIFACT_BUCKET, Key=key)
     latest, meta = head.get("VersionId"), (head.get("Metadata") or {}).get("content-sha256")
-    built = latest != KCODE_PRIOR_VERSION and meta != live
-    emit("  live CodeSha256 %s (prior live in the packet %s -> %s)" % (live, KCODE_PRIOR_LIVE,
-                                                                      "EQUAL" if live == KCODE_PRIOR_LIVE else "DIFFERS"))
-    emit("  build store latest version %s content-sha256 %s -> %s" % (
-        latest, meta, "a NEW BUILD at rest" if built else "the prior live bytes: NOT BUILT (row IRPT_BCKEND-S96: "
-        "build-and-upload.sh refuses -- files[] declares data/custodian_key_seam.json, staged_from does not)"))
-    return built
+    body = s3.get_object(Bucket=ARTIFACT_BUCKET, Key=key, VersionId=latest)["Body"].read()
+    got = base64.b64encode(hashlib.sha256(body).digest()).decode()
+    prior = s3.get_object(Bucket=ARTIFACT_BUCKET, Key=key, VersionId=KCODE_PRIOR_VERSION)["Body"].read()
+    prior_sha = base64.b64encode(hashlib.sha256(prior).digest()).decode()
+    checks = {
+        "latest version == built version": latest == KCODE_BUILT_VERSION,
+        "metadata == built sha": meta == KCODE_BUILT,
+        "re-downloaded bytes == built sha": got == KCODE_BUILT,
+        "rollback source present and == prior live": prior_sha == KCODE_PRIOR_LIVE,
+        "function unchanged (== prior live)": live == KCODE_PRIOR_LIVE,
+    }
+    emit("  build store latest version %s (built %s) content-sha256 %s; re-downloaded sha256(b64) %s; built %s"
+         % (latest, KCODE_BUILT_VERSION, meta, got, KCODE_BUILT))
+    emit("  rollback source version %s sha256(b64) %s (prior live %s)" % (KCODE_PRIOR_VERSION, prior_sha, KCODE_PRIOR_LIVE))
+    emit("  function %s CodeSha256 %s" % (KCODE_FN, live))
+    for k, v in checks.items():
+        emit("  K-CODE %s: %s" % (k, "OK" if v else "FAIL"))
+    emit("  K-CODE at rest: %d of %d checks hold" % (sum(checks.values()), len(checks)))
+    return all(checks.values())
 
 
 def arm_d(blob: str) -> bool:
@@ -265,7 +294,7 @@ def arm_d(blob: str) -> bool:
 
 
 def main() -> int:
-    emit("IB-rtf-10 R67-AC1 battery (second pass) -- worktree HEAD %s" % git("rev-parse", "HEAD")[1].strip())
+    emit("IB-rtf-10 R67-AC1 battery (third pass) -- worktree HEAD %s" % git("rev-parse", "HEAD")[1].strip())
     emit("")
     b_ok, blob, packet_text = arm_b()
     emit("")
@@ -283,7 +312,7 @@ def main() -> int:
         arms["(e) apply"] = False
         arms["(f) live proof"] = False
     else:
-        emit("(d) holds -- (e)/(f) are the third pass's arms and are not implemented in this second-pass revision")
+        emit("(d) holds -- (e)/(f) are the next pass's arms and are not implemented in this third-pass revision")
         arms["(e) apply"] = False
         arms["(f) live proof"] = False
     for k, v in arms.items():
@@ -293,7 +322,7 @@ def main() -> int:
         emit(TOKEN)
         rc = 0
     else:
-        emit("RESULT: R67-AC1 FAIL -- %d of %d arms hold (second pass: STOP at the halves as the face expects)"
+        emit("RESULT: R67-AC1 FAIL -- %d of %d arms hold (third pass: STOP at the halves as the face expects)"
              % (sum(arms.values()), len(arms)))
         rc = 1
     with open(OUTPUT_PATH, "w", encoding="utf-8", newline="\n") as fh:
