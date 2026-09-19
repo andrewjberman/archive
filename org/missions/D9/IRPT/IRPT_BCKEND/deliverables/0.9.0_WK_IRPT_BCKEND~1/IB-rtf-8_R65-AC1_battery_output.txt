@@ -1,0 +1,69 @@
+battery_ib_rtf_8.py -- IRPT_BCKEND.TO-IB-rtf-8 -- repo root: C:\tmp\wk-irpt-6-1c
+
+=== ARM (a): fork-vs-shared diff, before the delete ===
+holdings/enforce.py (pre-fold, historical) blob: 8f849457bedb42c0a8139017f7fc96e9813ec048
+_authz/enforce.py (current, HEAD) blob:          79c9d9dee1b44ce3d40466466c37a95d452c88db
+diff denominators: 21 line(s) only-in-fork, 66 line(s) only-in-shared, 143 diff line(s) total
+CLASSIFICATION (every fork-only item):
+  1. Docstring section (~9 lines): the SUPERSEDED pre-ruling refusal-order prose ('AN UNPROJECTED GRANT IS A REFUSAL, NOT AN EMPTY ANSWER') -- dead prose, superseded by the shared module's own docstring citing CTO ruling @61627f39f9.
+  2. resolve_now()'s refusal order: the fork refuses UNPROJECTED_GRANT whenever ANY gap has reason UNPROJECTED-ID, BEFORE checking whether the resulting permitted set is non-empty -- the exact pre-inversion rule @61627f39f9 superseded on every OTHER route. Not load-bearing for holdings: no holdings-specific requirement calls for the stricter refusal (checked: holdings/snapshot.py and holdings/entry.py name no such requirement, and CTO ruling S82 names this EXACT gap as the defect, not a feature).
+  3. _empty_unprojected_grant()/_unprojected_grant_of() helpers and the 'unprojected_grant' census/served-envelope key: ABSENT from the fork entirely (0 occurrences) -- a strict subset, not a divergent feature; this IS the false-negative mechanism the ruling names (the key is never filled, so served.py's own default papers over it at zero).
+VERDICT: dead/duplicated, matching the order's own expected case (IB-rtd-8's re-staged copy) -- confirmed independently: git show 28ccac62c9eed361c669dada2aa36eee5d2a65c8:infra/aws/lambda/investor-reporting/_authz/enforce.py | git hash-object --stdin == 8f849457bedb42c0a8139017f7fc96e9813ec048 (holdings/enforce.py's committed bytes were BYTE-IDENTICAL to _authz/enforce.py as it stood at commit 28ccac62c9, which PRE-DATES ruling @61627f39f9). NO STOP; proceeding with the fold.
+  re-derived this run: 8f849457bedb42c0a8139017f7fc96e9813ec048 (expect 8f849457bedb42c0a8139017f7fc96e9813ec048) -> MATCH
+
+=== ARM (b): the fold ===
+holdings/enforce.py exists: 0 (expect 0 -- deleted)
+holdings/ files importing 'enforce' (n of n cited):
+  infra\aws\lambda\investor-reporting\holdings\snapshot.py:43
+  infra\aws\lambda\investor-reporting\holdings\tests\test_entry_guarded.py:38
+  infra\aws\lambda\investor-reporting\holdings\tests\test_snapshot.py:28
+  infra\aws\lambda\investor-reporting\holdings\tests\test_w1_s16_advisor_firm_bound.py:36
+  4 import site(s) found; all unchanged (`import enforce as ...`) -- the BINDING moved (manifest staged_from), not the statement, exactly as the other six routes already do (cite: infra/aws/lambda/investor-reporting/ops/status.py:58)
+irpt-holdings.staged_from packaged_as: ['data/custodian_key_seam.json', 'ids.py', 'loaders.py', 'served.py', 'enforce.py']
+enforce.py staged_from-bound: True (expect True)
+staged_from pin 949dc88099 sha256 d1c8e7e094676526 -> declared d1c8e7e094676526 -> MATCH
+pinned blob's own git hash: 79c9d9dee1b44ce3d40466466c37a95d452c88db vs current _authz/enforce.py blob: 79c9d9dee1b44ce3d40466466c37a95d452c88db -> MATCH
+holdings/stage.py --check rc=0: OK: 4 of 4 staged member(s) are byte-equal to their pinned blob
+holdings suite: rc=0 :: [32m[32m[1m35 passed[0m[32m in 0.25s[0m[0m
+_authz suite: rc=0 :: [32m[32m[1m141 passed[0m[32m in 10.45s[0m[0m
+
+=== ARM (c): the census, the acceptance instrument ===
+os.walk census, entry points under infra/aws/lambda/investor-reporting/: 7
+  infra\aws\lambda\investor-reporting\directory\entry.py
+  infra\aws\lambda\investor-reporting\export\entry.py
+  infra\aws\lambda\investor-reporting\holdings\entry.py
+  infra\aws\lambda\investor-reporting\narrative\entry.py
+  infra\aws\lambda\investor-reporting\ops\entry.py
+  infra\aws\lambda\investor-reporting\performance\entry.py
+  infra\aws\lambda\investor-reporting\ycharts\generate\entry.py
+local enforce.py copies found by os.walk: 0 of 7 function dirs (expect 0; the only hit should be the shared _authz/enforce.py itself)
+  copies outside _authz/: []
+  infra/aws/lambda/investor-reporting/directory (irpt-directory-search) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/export (irpt-export-render) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/holdings (irpt-holdings) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/narrative (irpt-narrative) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/ops (irpt-status) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/performance (irpt-performance-adapter) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/ycharts/generate (irpt-ycharts-generate) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+bound-to-shared-blob: 7 of 7 function source dirs
+
+--- the mutant: real (shared) module vs pre-fold fork, same partial-grant fixture ---
+REAL holdings entry (shared, fixed _authz/enforce.py): unprojected_grant.count = 1
+PRE-FOLD FORK (run in memory from blob 8f849457be): unprojected_grant.count = 0
+false-negative DEMONSTRATED: YES (real > 0, fork == 0 on the SAME fixture)
+
+=== ARM (d): the never-widen halves, read at HEAD ===
+packet exists on disk: True
+worktree glob (informational only; HEAD read below is authoritative): COO=[] CTO=[]
+2 of 2 halves at HEAD: COO half committed=0 ([]), CTO half committed=0 ([])
+ABSENT -- arm (d) FAILS truthfully, as expected on this first pass.
+
+=== SUMMARY ===
+arm (a): diff printed, classified, no STOP
+arm (b): OK
+arm (c): OK
+arm (d): FAIL (EXPECTED on this pass)
+arm (e): NOT ATTEMPTED -- blocked by arm (d)
+
+NOT EVERY ARM HOLDS -- token withheld. Failing reasons:
+  - arm_d: EXPECTED-FAIL -- never-widen halves ABSENT at HEAD (first pass; packet written and committed this pass, halves owed to the COO and CTO)
