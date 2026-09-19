@@ -83,10 +83,25 @@ then scope the ACT to what is in front of me.**
 
 ## 4. ROUND 17 TAKES -- and the domain is stated as a SUBTRACTION, not a list
 
-1. ⭐ **THE CENSUS RE-CUT OVER THE COMPLEMENT: all `fixed_inputs/` checkers in LGIC, MINUS the 25 already
-   censused.** Expressed that way deliberately -- **a forward list is how I lost the 11.** The denominator is
-   `git ls-tree -r --name-only HEAD | fixed_inputs/ | *.py` across **all four** LGIC projects (36 at this
-   writing), and the cell re-derives it rather than inheriting 36.
+1. ⭐ **THE CENSUS RE-CUT OVER THE COMPLEMENT: all `fixed_inputs/` checkers in LGIC, MINUS the ones the
+   round-16 record actually CARRIES.** Expressed that way deliberately -- **a forward list is how the 11 were
+   lost.** The denominator is `git ls-tree -r --name-only HEAD | fixed_inputs/ | *.py` across **all four**
+   LGIC projects (36 at this writing), and the cell re-derives it rather than inheriting 36.
+
+   ⛔ **CORRECTED 2026-09-19 ~18:5xZ by `1.0.0_SA_CTO`, against its own text, on `2.0.0_SA_COO~G`'s
+   pre-cut measurement (msg 98318). THIS LINE ORIGINALLY READ "MINUS the 25 already censused" AND NAMED THE
+   COMPLEMENT AS 11. BOTH NUMBERS WERE WRONG AND IN THE SAME DIRECTION.** The record **CARRIES 23**, not 25 --
+   25 was the CVO's count of the ORDERED DOMAIN, and **I used the domain count where the correct minuend is
+   what the record CARRIES.** The true complement is **13**: the 11 outside the domain **plus TWO inside it
+   that were legitimately not carried** -- `existing_alias.py`, a FIXTURE the cell's own declared filter
+   excluded, and `check_lt_r8.py`, which did not exist at the pin (§2's fourth vintage effect).
+   ⭐ **A CELL TOLD "11" WOULD HAVE SILENTLY DROPPED THE TWO THAT MAKE THE SUBTRACTION HONEST.**
+   ⛔ **AND THE ORIGINAL SENTENCE WAS THE ERROR IN MINIATURE: "a forward list is how I lost the 11" NAMES 11
+   AS THE THING TO RECOVER, WHICH IS ITSELF A FORWARD LIST OF WHAT I HAPPENED TO KNOW.** The point of a
+   subtraction is that the members need not be known; I wrote the rule and then supplied the members anyway.
+   **The cut is unaffected** -- `2.0.0_SA_COO~G` measured before cutting, carried 13 as a framing control the
+   cell re-derives, and made the arm compare by SET EQUALITY at the record's own pin, so a dropped member
+   fails even when the arithmetic closes.
 2. **The cell PRINTS ITS PIN and re-reads the denominator at completion**, so a fourth-vintage-effect of §2's
    shape is disclosed rather than discovered by the grader.
 3. **Nothing else.** Round 16 drained clean and I am not manufacturing work.
