@@ -15,6 +15,8 @@ Every criterion was built against a hand-made CORRECT record, driven as a POSITI
 as readily as a large overlap -- a criterion that only passed on a big number would be an instruction
 to find one.
 """
+import contextlib
+import io
 import json
 import os
 import subprocess
@@ -230,9 +232,36 @@ def p38_grain():
     return verdict(ok, "PASS-P38-GRAIN", "FAIL-P38-GRAIN", lines)
 
 
+def _cells_present():
+    """The round-14 cells whose record EXISTS IN THIS CHECKOUT -- never the hard-coded pair.
+
+    ⛔ THIS WRAPPER USED TO GRADE BOTH CELLS AND AND THEIR RESULTS, AND THAT WAS THE DEFECT
+    (LGIC_ENFORCE-S106). The two cells run in SEPARATE WORKTREES by design -- the round's one
+    instruction was DO NOT PAIR THEM -- so neither could ever see the other's record, and NEITHER
+    COULD SATISFY THE ARM BY DOING ITS OWN WORK CORRECTLY AND COMPLETELY. I unpaired the cells, the
+    orders, the records and the worktrees, and then paired them in an arm.
+
+    ⭐ THE FIX TAKES NO ARGUMENT, DELIBERATELY: both orders' <invocation> lines are already at HEAD and
+    a worker may be reading one RIGHT NOW. Changing the invocation would be a task-order modification,
+    which no gate refuses and no worker sees. So the arm reads its population off the CHECKOUT: in a
+    worker's worktree that is exactly its own cell; in the merged tree after the drain it is both, and
+    grading both there is correct because both are present.
+
+    An EMPTY population is REFUSED, not vacuously passed -- a cell that wrote no record at all must
+    still fail this arm.
+    """
+    return [c for c in ("EN-r-7", "EN-p-38") if _rec(c) is not None]
+
+
 def r14_vintage_field():
-    ok_all, out_lines = True, []
-    for cell in ("EN-r-7", "EN-p-38"):
+    cells = _cells_present()
+    if not cells:
+        return say("FAIL-R14-VINTAGE-FIELD",
+                   "no round-14 record exists in this checkout: an empty population is REFUSED here, "
+                   "never passed vacuously")
+    ok_all, out_lines = True, ["records present in THIS checkout: %d %s (the arm grades these and "
+                               "only these -- S106)" % (len(cells), _scrub(cells))]
+    for cell in cells:
         rec = _rec(cell)
         fx = ((rec or {}).get("fixed_inputs_at_pin") or {})
         resolvable = True
@@ -373,6 +402,47 @@ def selftest_arms():
         arm("POSITIVE-CONTROL-instrument-failure-raises", False, "wrong exception: %s" % _scrub(exc))
 
     arm("MUTANT-scrub", "VERDICT: PASS-" not in _scrub("VERDICT: PASS-R7-ONE-PATH"))
+
+    # ------------------------------------------------------------------ THE WIRING, NOT THE ARMS
+    # ⛔ S106: every arm above drives a CORE with a hand-built record, ONE CELL AT A TIME -- and the
+    # defect lived in the WRAPPER, which none of them touched. An injected self-test certifies the
+    # ARMS, never the WIRING. These four drive the wrapper's own population decision.
+    global _rec
+    real_rec = _rec
+    try:
+        _rec = lambda c: _render_ok() if c == "EN-r-7" else None          # noqa: E731
+        arm("WIRING-only-one-record-present-grades-only-it", _cells_present() == ["EN-r-7"],
+            "a worker's worktree holds exactly ITS OWN record -- the population is the checkout, "
+            "not a hard-coded pair")
+        _rec = lambda c: None if c == "EN-r-7" else _grain_ok()           # noqa: E731
+        arm("WIRING-the-sibling-alone-also-grades-alone", _cells_present() == ["EN-p-38"])
+        _rec = lambda c: _render_ok() if c == "EN-r-7" else _grain_ok()   # noqa: E731
+        arm("WIRING-merged-tree-grades-both", _cells_present() == ["EN-r-7", "EN-p-38"],
+            "after the drain both records are present and grading both is correct")
+        _rec = lambda c: None                                             # noqa: E731
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            r14_vintage_field()
+        arm("WIRING-empty-population-is-REFUSED-not-vacuous",
+            "VERDICT: FAIL-R14-VINTAGE-FIELD" in buf.getvalue(),
+            "the REAL arm is run, output captured: a cell that wrote no record must still fail, "
+            "and an empty set is not a vacuous pass")
+        # THE S106 REGRESSION ARM, and it is run against the REAL arm with a REAL resolvable pin --
+        # a fixture naming a made-up commit cannot pass, because the arm resolves every pin against git.
+        here = os.path.relpath(os.path.join(HERE, "check_en_r14.py"), REPO).replace(os.sep, "/")
+        base_rel = os.path.relpath(os.path.join(HERE, "R14_BASE.json"), REPO).replace(os.sep, "/")
+        live = dict(_render_ok(), fixed_inputs_at_pin={here: "HEAD", base_rel: "HEAD"})
+        buf = io.StringIO()
+        _rec = lambda c: live if c == "EN-r-7" else None                  # noqa: E731
+        with contextlib.redirect_stdout(buf):
+            r14_vintage_field()
+        out = buf.getvalue()
+        arm("WIRING-one-correct-record-ALONE-now-PASSES-the-real-arm",
+            "VERDICT: PASS-R14-VINTAGE-FIELD" in out and "EN-p-38:" not in out,
+            "BEFORE THE REPAIR THIS RETURNED FAIL ON THE SIBLING'S ABSENT HALF, which no correct "
+            "artifact from one cell could ever fix -- and the absent cell is no longer even named")
+    finally:
+        _rec = real_rec
 
     bad = [n for n, ok, _ in _ARMS if not ok]
     pos = len([n for n, _, _ in _ARMS if n.startswith("POSITIVE")])
