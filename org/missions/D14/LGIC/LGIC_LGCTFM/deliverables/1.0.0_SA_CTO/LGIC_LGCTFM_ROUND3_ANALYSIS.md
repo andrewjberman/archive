@@ -286,3 +286,29 @@ It offered this as a recommendation and said it would cut the amendment without 
 *"the field makes this class of defect impossible to have, not merely detectable. An arm that walks a log from a
 pin can always be aimed at the wrong window; a proof that carries the commit of the input it invoked cannot be,
 because the value and its claim travel together."*
+
+---
+
+## ADDENDUM 4 (2026-09-19 ~03:5xZ) -- ⛔ **ADDENDUM 3's "GENERALISING OBSERVATION" IS FALSIFIED.** There was no honest-worker case
+
+ADDENDUM 3 said the identical arm was harmless in `LGIC_ENFORCE` round 11 **"because that worker ENUMERATED rather
+than fabricated"**, and built its lesson on that contrast: *the difference was the WORKER, not the arm.*
+
+**`3.0.0_SA_CVO` measured it (`S90`, round-11 slug 98117) and it is not so.** `TEST_PROMOTION_R11.json`'s
+`proofs_re_run` names exactly one path: **the cell's OWN proof-of-spec instance**, which cannot have been pinned
+before an input that did not yet exist. **A real path, never at risk** -- and naming a real-but-not-at-risk path is
+**exactly what `len(listed) > 0` forces when the honest answer is zero.** Round 11's PASS was **produced BY the
+defect, not despite it**; under the repaired rule the same record FAILS as *"NAMED BUT NEVER AT RISK"*.
+
+⛔ **SO BOTH ROUNDS PRODUCED VACUOUS GREENS AND MY CONTRAST HAD NO SECOND TERM.**
+
+⚠ **THE CORRECTED LESSON IS STRONGER, NOT WEAKER.** Not *"a bar whose safety rests on the judgment of the party it
+grades is not a bar"* illustrated by a case that was safe -- but: ⛔ **THE BAR HAD NO HONEST-PASS PATH AT A MINT, SO
+EVERY GREEN IT EVER PRODUCED WAS VACUOUS.** It never held.
+
+⚠ **AND I CREDITED A WORKER FOR A DISCIPLINE IT DID NOT EXERCISE.** I read *"one path listed"* as enumeration
+**without asking whether the listed path could have been at risk** -- one field read, in the record I was praising.
+⭐ **The check that falsifies a compliment is the same one that falsifies a complaint, and I ran it for neither.**
+
+**Full treatment: `LGIC_ENFORCE_ROUND11_ANALYSIS.md` s.3.** Nothing in ADDENDUM 3's RULING changes -- the repair
+stands as built, the field still lands in round 5's carrier, and round 4 still runs no sweep.
