@@ -93,3 +93,98 @@ Worktree `/c/tmp/wk-amgt-14-42`, branch `wk-amgt-14-42`, cut from SITEZ HEAD `24
 all five, row `AMGT_RESAPP-Z-W42-S1` filed). `proof-of-spec-check.py` rc=0 (structurally VALID).
 Task order `<status>` stays `pending` -- not flipped to `complete` (a FAIL row leaves the order
 open). Total live spend this order: USD 0.00 (no model call was ever reached).**
+
+---
+
+## Session 2 (`0.9.0_WK_AMGT_RESAPP~42`, fresh session, same worktree, HEAD `79faed7648`)
+
+The ISSUER (`2.0.0_SA_COO~Z`) amended the order on this branch at `43566d7839`, reading row
+`AMGT_RESAPP-Z-W42-S1` above: `<paths>` widened to `document.py`/`fetch.py`/`battery.py`, and a
+STEP 0 ruled -- build `document.sections_to_excerpt(sections, family)`, wire it into the
+`document.py` CLI and `fetch.build_battery_source_object`, re-land the Keyence pool object with
+the battery CLI, then run AC2-AC6 as written.
+
+1. Bar cleared again: `wk-amgt-14-42`, `org/`/`.tools/` present, worktree at `79faed7648` (my
+   previous rk-40 build merged with SITEZ; rk-38's battery and rk-39's document layer both
+   present). Read the amendment block in the worktree order file (governs over the face) and the
+   face file -- identical text.
+2. Read `fetch.py`'s EDGAR-path `excerpt` shape (`:360-368`) as the reference; `document.py`'s
+   `cut()`/`_cut_heading_mode` (keys risk/mdna/officers, `{status, item, text, chars, full_chars,
+   truncated, reason, heading_matched}`); `battery.py`'s `_family_test`/step 4 (the company-site
+   winner that hard-codes `"excerpt": None`).
+3. **Built STEP 0:**
+   - `document.py`: new `sections_to_excerpt(sections, family)` -- fixed order risk/mdna/officers,
+     OK-status keys only, joined text, `chars`, `excerpt_sha256` (hashlib over the joined text),
+     `truncated_items`, `item_chars`, `item_full_chars`; `None` when no key qualified; raises
+     `ValueError` on a family `cut()` itself would refuse. Wired into `build_local_source_object`
+     (the CLI writer) so `.scratch/docs/<key>.source.json` now carries `excerpt`.
+   - `battery.py`: `_family_test()` now returns the FULL `sections` dict (previously computed,
+     used for `section_status`, then discarded) on every branch (UNKNOWN, no-OK-key, and passed);
+     step 4's winner `extra` dict carries `"sections": result["family"].get("sections")` alongside
+     its existing hard `"excerpt": None`.
+   - `fetch.py`: `build_battery_source_object()` now computes `excerpt =
+     document.sections_to_excerpt(battery["sections"], battery.get("family"))` when the battery's
+     own `excerpt` is `None` and `sections` is present -- the ONE call site the amendment named;
+     the EDGAR route (steps 1-2, `_winning_edgar_extra`, which already builds its own excerpt) is
+     untouched.
+   - `test_filings.py`: new `TheExcerptContractGap` (4 tests) on the Keyence YUHO fixture
+     (reproduced locally -- `test_document.py` is not in this order's `<paths>`): excerpt present/
+     non-empty/sha-stable across two calls, fixed item order, `None` on an all-FAILED sections
+     dict, `ValueError` on an undeclared family, and `fetch.build_battery_source_object` assembling
+     the excerpt from `sections` when its own `excerpt` is `None` (the exact step-4 shape).
+4. **AC1 re-run:** filings suite 68 of 68 (48 pre-existing/modified + the 4 new excerpt tests +
+   16 already added by the prior translation build), drafting suite 18 of 18, both `OK`.
+5. **AC2 re-run, live, on the real Keyence PDF:** `document.py` CLI now prints all THREE sections
+   `OK` (`risk`, `mdna`, `officers` -- previously officers/risk only was visible under `tail -3`;
+   the full run shows `mdna` too). The AC2 python snippet now runs to completion (no more
+   `KeyError: excerpt`): `passages 356 empty 0 pct_excerpt_chars_in_passages 60.1
+   pct_passage_chars_kept 100.0 non_ascii_kept 49462 of 75359`, `language ja`. `empty 0` and
+   `pct_passage_chars_kept 100.0 >= 99.0` both hold -- **AC2 PASS.**
+6. **STEP 0(iii):** re-ran the battery CLI exactly as rk-38's AC4 (`--security-key 6861_JP_Equity
+   --bloomberg "6861 JP Equity" --exchange JP --cache-dir .scratch/battery --out-dir
+   .scratch/battery/out --write-pool`); Bloomberg terminal was signed in, the call succeeded (no
+   sign-in row needed). Printed `RESOLVED: 6861_JP_Equity winner step 4 route company-site key
+   https://www.keyence.co.jp/pdf/AnnualSecuritiesReport_202606_ja.pdf family YUHO language ja` and
+   `OK: uploaded s3://opal-data-harvest/filings/v1/6861_JP_Equity/doc-1defdb68a7ffd3b7.source.json
+   sha256=c6ab8035b7e858e2b91e70171de1b7a433b5bdb1307da7168b00511ab9f6fa5c
+   ContentLength=965303`. Read the pool object back (`boto3.get_object`, diagnostic read, no
+   further write): `status RESOLVED family YUHO`, `excerpt present True`, `item_keys ['risk',
+   'mdna', 'officers']`, `chars 100623`, `excerpt_sha256` present. STEP 0(iii) confirmed clean.
+7. **AC3 run, live, under `timeout 120` with `ANTHROPIC_API_KEY` exported:** a SECOND, DISTINCT
+   contract gap, this time in `analyze.py`'s `main()` (explicitly this order's own carve-out,
+   AMGT-rk-42's surface, not this order's `<paths>`): the `SOURCE:` print line unconditionally
+   indexes `source_object["form"]`/`["url"]`/`["filing_date"]`/`["parser_version"]`;
+   `document.py`'s local CLI object (`.scratch/docs/6861_JP_Equity.source.json`, AC2's own output,
+   the exact file AC3's own invocation names) carries NONE of those four keys (confirmed:
+   `sorted(obj.keys())` lists only `security_key, status, filing_identity, accession, family,
+   family_evidence, language, language_shares, period_end, retrieved_at, document_sha256,
+   document_bytes, pages, reflow, document_text, document_text_chars, sections, excerpt,
+   battery`). Measured: `KeyError: 'form'` at `analyze.py:1408`, raised on BOTH the `--stage pass1`
+   invocation and the full-run invocation, before `resolve_source`'s excerpt or any model call is
+   ever reached -- USD 0.00 spent, no cache/analysis object written.
+8. This gap was invisible to the issuer's own amendment measurement, which compared the
+   BATTERY-produced pool object (via `fetch.build_battery_source_object`, which always sets all
+   four keys, values `None` where unknown -- confirmed on the very pool object re-landed in step 6
+   above) against the EDGAR path -- never the `document.py`-CLI-to-`analyze.py` chain AC2/AC3
+   actually exercise.
+9. **Considered and explicitly did NOT do:** add `form`/`url`/`filing_date`/`parser_version` to
+   `build_local_source_object` (a mechanical, in-grant fix matching `fetch.py`'s general shape,
+   the same "match it field for field" principle STEP 0 already applied to `excerpt`). Declined
+   because STEP 0 named `sections_to_excerpt`/`excerpt` specifically, not the whole object's
+   shape, and the order's REFUSAL CLAUSE bars satisfying a criterion "by a route this order did
+   not name" even inside a granted file -- exactly the discipline that produced the successful
+   amendment cycle on row S1. Filed row `AMGT_RESAPP-Z-W42-S2` (BLOCKING, ARMED, disarm_owner
+   `2.0.0_SA_COO~Z`) instead, and kept working (AC1/AC2/STEP 0(iii), all completable, all done).
+10. Ran AC4, AC5, AC6 anyway, to record each one's own cascading failure rather than infer it: all
+    three raise `FileNotFoundError` on the analysis/translated-analysis objects AC3 never
+    produced (same file names as session 1 -- the accession is unchanged, same PDF sha).
+11. Committed the STEP 0 code + the new test arm + the surprise row (`b6152d6784`); this session
+    log and the updated proof-of-spec instance land in a second commit, pinned to `b6152d6784`.
+
+**Result (session 2 close): AC1 PASS-by-output (68+18 tests); AC2 PASS-by-output (excerpt now
+present, empty 0, pct_passage_chars_kept 100.0); STEP 0(iii) done and verified (pool object
+re-landed, excerpt confirmed non-empty on read-back). AC3-AC6 FAIL (REFUSED, a SECOND measured
+root cause -- `main()`'s missing form/url/filing_date/parser_version handling for a
+document-layer-local object -- row `AMGT_RESAPP-Z-W42-S2` filed). `proof-of-spec-check.py`
+re-verified rc=0. Task order `<status>` stays `pending` (a FAIL row leaves the order open). Total
+live spend this session: USD 0.00 (AC3's model call was never reached).**

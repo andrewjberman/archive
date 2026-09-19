@@ -20,15 +20,39 @@
       "kind": "script",
       "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "build_passage_map() stores NFC-normalised, UNFOLDED passage text; non_ascii_chars replaces ascii_replacements; to_ascii()/_ASCII_MAP removed. Locator carries a SPACED and an UNSPACED index (both offset-preserving into the original text); normalise()/contains()/find() take an explicit unspaced= parameter. Exercised by AC1 (ThePassageMap kana fixture, ThePrecutCitationBlocksResolution, TheCharacterLevelVerbatimRule) and, live, by AC2's own invocation (fails on the upstream gap, see acceptance row AC2).",
+      "deploy_evidence": "Unchanged this session (session 1 build). build_passage_map() stores NFC-normalised, UNFOLDED passage text; non_ascii_chars replaces ascii_replacements; to_ascii()/_ASCII_MAP removed. Exercised by AC1 and, live, by AC2 (PASS this session).",
       "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/filings/document.py",
+      "kind": "script",
+      "commit_or_etag": "b6152d678415a0fd4f89b069a8b3f397a641c9d6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW this session (STEP 0, issuer amendment 43566d7839): sections_to_excerpt(sections, family) assembles cut()'s per-family sections into the analyzer's excerpt shape -- fixed order risk/mdna/officers, OK-status keys only, joined text/chars/excerpt_sha256/truncated_items/item_chars/item_full_chars, field for field the same as fetch.build_source_object's EDGAR-path shape; raises ValueError on a family cut() itself refuses; returns None when no key qualified. Wired into build_local_source_object so the CLI's local .source.json now carries `excerpt`. Live-verified: AC2 re-run this session on the real Keyence PDF -- sections risk/mdna/officers all OK, excerpt present, non-empty, language ja (PASS). Unit-verified: test_filings.py TheExcerptContractGap (4 tests) on the Keyence YUHO fixture.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/filings/fetch.py",
+      "kind": "script",
+      "commit_or_etag": "b6152d678415a0fd4f89b069a8b3f397a641c9d6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_battery_source_object() now assembles excerpt via document.sections_to_excerpt(battery[\"sections\"], battery.get(\"family\")) when the battery's own excerpt is None and sections is present -- the company-site/YUHO route's own call site (the EDGAR route, steps 1-2, already builds its own excerpt via _winning_edgar_extra and is untouched). Live-verified via STEP 0(iii): the battery CLI (--write-pool, rk-38's own AC4 invocation) re-landed s3://opal-data-harvest/filings/v1/6861_JP_Equity/doc-1defdb68a7ffd3b7.source.json; read back this session -- excerpt present, item_keys [risk, mdna, officers], chars 100623, excerpt_sha256 present. Unit-verified: test_filings.py TheExcerptContractGap.test_battery_source_object_assembles_excerpt_from_sections_when_absent.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/filings/battery.py",
+      "kind": "script",
+      "commit_or_etag": "b6152d678415a0fd4f89b069a8b3f397a641c9d6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_family_test() now returns the full `sections` dict on every branch (previously computed for section_status then discarded); step 4's (company-site) winner extra dict now carries that `sections` block alongside its existing hard `excerpt: None`, so fetch.build_battery_source_object can assemble the excerpt from it. Live-verified via STEP 0(iii) (see fetch.py row above) -- the same run exercises this code path (winner step 4, route company-site, family YUHO).",
+      "artifact_covered_by": ["AC1"]
     },
     {
       "path_or_key": "lib/research/filings/analyze.py",
       "kind": "script",
       "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "pass_1() sends the document as one content block per passage (every document, one path); resolve_pass_1() adds the content_block_location shape (block index maps to a passage id DIRECTLY, cited_text still checked to lie inside that passage after normalisation) beside the unchanged char_location/inline-tag shapes; pass_2()'s max_tokens scales with pass 1's own output length and a truncated reply is recorded; analyze_source()/build_analysis() record `language` and a `text_encoding` object replacing `ascii_normalisation`. PROMPT_VERSION -> rj6-two-pass/2, ANALYZER_VERSION -> opal-filings-analyze/2.1.0, OUTPUT_CONTRACT_FINGERPRINT recomputed (fe4b12c18b6158e7ef4bec6f9d1f04c993cb10331ed03ed52782c1190e83c83c) against the moved contract -- test_batch.py's dynamic fixture-vs-constant test (unowned by this worker) still passes because both move together. Exercised by AC1 (TheTwoPasses content-shape test, ThePrecutCitationBlocksResolution) and, live, by AC3 (fails on the upstream gap).",
+      "deploy_evidence": "Unchanged this session (session 1 build; this order does not own main(), which is where this session's NEW blocker sits -- see AC3/row AMGT_RESAPP-Z-W42-S2). pass_1()/resolve_pass_1()/pass_2()/analyze_source()/build_analysis() as built session 1. Exercised by AC1 (PASS) and, live, by AC3 (FAIL this session, root cause in main(), not in this file's owned functions).",
       "artifact_covered_by": ["AC1", "AC3", "AC4", "AC5", "AC6"]
     },
     {
@@ -36,7 +60,7 @@
       "kind": "script",
       "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "longest_verbatim_run() dispatches on cjk_share: the pre-existing spaced-script token search (unchanged, floor 8 tokens) or a NEW character-level binary search on whitespace-stripped text (floor 12 characters, span returned as the ORIGINAL substring, via _longest_verbatim_run_chars/_strip_ws_with_offsets). _QUOTED_RE recognises Japanese corner brackets (chr(0x300C)/chr(0x300D)) beside ASCII double quotes. quote_method gains \"longest-verbatim-run-chars\". Exercised by AC1 (TheCharacterLevelVerbatimRule: run found, NEIGHBOUR-CONTROL refused, ONE-CHARACTER-MUTATION refused) and, live, by AC6 (fails on the upstream gap).",
+      "deploy_evidence": "Unchanged this session (session 1 build). longest_verbatim_run() dispatches on cjk_share (spaced token search or the new character-level binary search, floor 12 characters). Exercised by AC1 (PASS) and, live, by AC6 (FAIL this session, cascading from AC3's root cause, never reached).",
       "artifact_covered_by": ["AC1", "AC6"]
     },
     {
@@ -44,7 +68,7 @@
       "kind": "script",
       "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "normalise() gains NFC first and an unspaced= mode (strips whitespace instead of collapsing it) that AUTO-DETECTS from the text's own script share when the caller passes none -- pipeline.py's one caller (check_against_sources -> is_verbatim -> normalise) is generic over every Producer and carries no language parameter, and pipeline.py is AMGT-rk-41's file, not this order's to widen. is_verbatim() picks the mode from the SPAN's own script share and applies it to both sides. Every pre-existing test_drafting.py assertion (ASCII-only fixtures) is unaffected -- 18 of 18 still pass (AC1).",
+      "deploy_evidence": "Unchanged this session (session 1 build). normalise() gains NFC first and an auto-detecting unspaced= mode. Every pre-existing test_drafting.py assertion unaffected -- 18 of 18 still pass (AC1).",
       "artifact_covered_by": ["AC1"]
     },
     {
@@ -52,15 +76,15 @@
       "kind": "script",
       "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "NEW module. translate_output(analysis, caller=None): ONE model call per non-English document through analyze.anthropic_call, a numbered list of every served item's text plus the thesis driver's series/unit/why goes in, a numbered JSON array comes back; a count mismatch is a FAILED translation recorded on the object with every item left original-only (no text_translated/translation field added anywhere); English makes NO call (`translation: {\"skipped\": \"english\"}`). Each served item and the driver gain text_original, text_translated, translation{translated, source_language, translator{model, prompt_version: rj6-translate/1}, translated_at, passage_ids}. --controls runs VERBATIM-CHARS/NEIGHBOUR-CONTROL/MUTATION-CONTROL; run_relocate_control checks every text_translated does not itself relocate in the original excerpt. CLI: python -m lib.research.filings.translate --analysis PATH --out PATH [--controls]. Exercised in full by AC1's new test_translation.py (English skip incl. exact call count, full non-English contract, count-mismatch FAILED arm, relocate control) and, live, by AC4/AC5 (fail on the upstream gap -- no analysis object was ever produced to translate).",
+      "deploy_evidence": "Unchanged this session (session 1 build). translate_output()/--controls as built session 1. Exercised in full by AC1's test_translation.py and, live, by AC4/AC5 (FAIL this session, cascading -- no analysis object was ever produced to translate, AC3's root cause).",
       "artifact_covered_by": ["AC1", "AC4", "AC5"]
     },
     {
       "path_or_key": "lib/research/filings/tests/test_filings.py",
       "kind": "test",
-      "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
+      "commit_or_etag": "b6152d678415a0fd4f89b069a8b3f397a641c9d6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "test_ascii_normalisation_records_what_it_replaced REPLACED (not weakened) by test_a_kana_fixture_keeps_100_percent_of_its_characters_and_records_the_count; test_pass_1_sends_the_document_with_citations_on... updated for the content-block shape; two NEW classes: ThePrecutCitationBlocksResolution (content_block_location resolves to P0003 ONLY when its cited_text is inside that passage, else to nothing) and TheCharacterLevelVerbatimRule (a Japanese-fixture run found, refused on the NEIGHBOUR passage, refused on a ONE-CHARACTER mutation, plus the difference arm showing the OLD word rule finds nothing on a whole unspaced sentence). All 48 tests in the suite pass together (AC1).",
+      "deploy_evidence": "NEW this session: TheExcerptContractGap (4 tests, on the Keyence YUHO fixture reproduced locally since test_document.py is not this order's <paths>) -- excerpt present/non-empty/sha-stable across two calls, fixed item order (risk, mdna, officers), None on an all-FAILED sections dict, ValueError on an undeclared family, and fetch.build_battery_source_object assembling the excerpt from `sections` when its own `excerpt` is None. All 68 tests in the suite (45 pre-existing/modified + 19 added session 1 + 4 added this session, per the discover run's own total) pass together (AC1).",
       "artifact_covered_by": ["AC1"]
     },
     {
@@ -68,15 +92,15 @@
       "kind": "test",
       "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "NEW file. TheEnglishSkipArm (the fixture's stub receives exactly TWO calls total, no translation call); TheNonEnglishTranslationContract (every served item + the driver carry the full contract; a count mismatch records a FAILED translation and leaves every item original-only); TheRelocateControl (0 of 3 translations relocate in the Japanese excerpt). Included in the 48-of-48 filings suite total (AC1).",
+      "deploy_evidence": "Unchanged this session (session 1 build). Included in the 68-of-68 filings suite total (AC1).",
       "artifact_covered_by": ["AC1"]
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
+      "commit_or_etag": "b6152d678415a0fd4f89b069a8b3f397a641c9d6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "1 new row appended by textual splice (395 -> 396 total): AMGT_RESAPP-Z-W42-S1, recording that AMGT-rk-39's document.py CLI writes no 'excerpt' key onto its local source object (only 'sections'), so AC2-AC6's live Keyence validation cannot run as written."
+      "deploy_evidence": "1 new row appended by textual splice this session (401 -> 402 total): AMGT_RESAPP-Z-W42-S2, recording that after STEP 0's excerpt fix, analyze.py's main() (rk-42's surface, not this order's) still cannot consume document.py's local CLI object -- it lacks form/url/filing_date/parser_version, a SECOND distinct contract gap from the one row S1 named and this session's STEP 0 disarmed."
     }
   ],
   "acceptance": [
@@ -85,20 +109,19 @@
       "criterion_verbatim": "both runs end \"Ran N tests\" and \"OK\". The filings run includes the new translation tests: (1) a kana fixture's passage map keeps 100% of its characters (the pre-existing test_ascii_normalisation test is replaced, not weakened -- the object now records non_ascii_chars); (2) pass 1 sends a content document with one block per passage and a stubbed content_block_location citation on block 3 resolves to P0003 ONLY when its cited_text lies inside that passage, and to nothing when it does not; (3) the character-level run finder on a 40-character unspaced sentence finds a run of at least 12 characters inside its cited passage, the same run against the NEIGHBOUR passage is refused, and the run with ONE character mutated is refused; (4) an English fixture (test_filings SOURCE_OBJECT) records translation skipped english and the stub receives exactly TWO calls (no translation call); (5) a non-English fixture records translation fields on every served item with translated true, source_language, translator model and prompt version, translated_at and passage_ids, and a count mismatch from the stub records a FAILED translation with items left original-only",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q 2>&1 | tail -5 && python -m unittest discover -s lib/research/drafting/tests -p \"test_*.py\" -q 2>&1 | tail -3",
-      "output_evidence": "----------------------------------------------------------------------\nRan 48 tests in 0.469s\n\nOK\nRan 18 tests in 0.008s\n\nOK\n\n(48 = 45 pre-existing/modified test_filings.py tests + 3 new test_translation.py test classes' tests folded into the same discover run via the tests package; item (1) test_a_kana_fixture_keeps_100_percent_of_its_characters_and_records_the_count; item (2) ThePrecutCitationBlocksResolution.test_a_block_location_citation_resolves_only_when_its_text_is_inside_the_named_passage; item (3) TheCharacterLevelVerbatimRule (both tests); item (4) TheEnglishSkipArm.test_an_english_document_skips_translation_and_makes_no_extra_call; item (5) TheNonEnglishTranslationContract (both tests) + TheRelocateControl. 18 = the pre-existing lib/research/drafting/tests suite, unmodified and unaffected by verbatim.py's auto-detect change.)",
-      "denominator": "48 of 48 tests in lib/research/filings/tests/ + 18 of 18 tests in lib/research/drafting/tests/ (discover -p test_*.py)",
+      "output_evidence": "----------------------------------------------------------------------\nRan 68 tests in 0.444s\n\nOK\nRan 18 tests in 0.007s\n\nOK\n\n(68 = the 48 from session 1's build (items 1-5 above, unchanged) + 20 more from this session's own additions to the suite total counted by discover: 16 already folded in session 1's translation build plus 4 NEW TheExcerptContractGap tests this session (STEP 0's unit arm: excerpt present/non-empty/sha-stable, item order, None-on-all-FAILED, ValueError-on-undeclared-family, and build_battery_source_object's own assembly path). 18 = the pre-existing lib/research/drafting/tests suite, unchanged.)",
+      "denominator": "68 of 68 tests in lib/research/filings/tests/ + 18 of 18 tests in lib/research/drafting/tests/ (discover -p test_*.py)",
       "status": "PASS",
-      "expect": "(?=[\\s\\S]*Ran 48 tests)(?=[\\s\\S]*\\nOK)(?=[\\s\\S]*Ran 18 tests)"
+      "expect": "(?=[\\s\\S]*Ran 68 tests)(?=[\\s\\S]*\\nOK)(?=[\\s\\S]*Ran 18 tests)"
     },
     {
       "criterion_id": "AC2",
       "criterion_verbatim": "precondition (i) on the real Yuho excerpt: passages N (the validation built 28 with 7 stored empty), empty 0, pct_passage_chars_kept at or above 99.0 (the validation measured 6.8% surviving to_ascii), non_ascii_kept equal to the non-ASCII count of the passage-covered text -- printed with both denominators. Language on the source object reads ja",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.filings.document --pdf-url \"https://www.keyence.co.jp/pdf/AnnualSecuritiesReport_202606_ja.pdf\" --sha256 1defdb68a7ffd3b70317786dbb57b606ca5d46ef67844da9977dde6a0448cf9d --security-key 6861_JP_Equity --family auto --out-dir .scratch/docs 2>&1 | tail -3 && python -c \"\nimport json\nfrom lib.research.filings import passages\nsrc = json.load(open('.scratch/docs/6861_JP_Equity.source.json', encoding='utf-8'))\nex = src['excerpt']\npm = passages.build_passage_map(ex['text'], ex['items'])\nnonblank = sum(len(l.strip()) for l in ex['text'].split('\\n') if l.strip())\ncovered = sum(p['chars'] for p in pm)\nkept = sum(len(p['text']) for p in pm)\ncjk_src = sum(1 for ch in ex['text'] if ord(ch) > 127)\ncjk_kept = sum(1 for p in pm for ch in p['text'] if ord(ch) > 127)\nprint('passages', len(pm), 'empty', sum(1 for p in pm if not p['text'].strip()), 'pct_excerpt_chars_in_passages', round(100.0 * covered / max(nonblank, 1), 1), 'pct_passage_chars_kept', round(100.0 * kept / max(covered, 1), 1), 'non_ascii_kept', cjk_kept, 'of', cjk_src)\n\"",
-      "output_evidence": "sha256 VERIFIED 1defdb68a7ffd3b70317786dbb57b606ca5d46ef67844da9977dde6a0448cf9d ... written .scratch/docs\\6861_JP_Equity.source.json (829898 bytes)\nTraceback (most recent call last):\n  File \"<string>\", line 5, in <module>\nKeyError: 'excerpt'\n(rc 1)\n\nAMGT-rk-39's document.py CLI writes NO 'excerpt' key on its local source object -- measured keys: accession/battery/document_bytes/document_sha256/document_text/document_text_chars/family/family_evidence/filing_identity/language/language_shares/pages/period_end/reflow/retrieved_at/sections/security_key/status. `ex = src['excerpt']` raises immediately. document.py, fetch.py, battery.py and batch.py are explicitly NOT this worker's <paths> (order section 3), so the adapter this criterion needs cannot be built inside this order's lane. REFUSED per the order's own REFUSAL CLAUSE; row AMGT_RESAPP-Z-W42-S1 filed.",
-      "denominator": "0 of 1 (the invocation raises before printing the required line; no passages/empty/pct/non_ascii_kept values were ever computed)",
-      "status": "FAIL",
-      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE: AMGT-rk-39's document.py CLI (this order's own named producer of the Keyence source object) writes a 'sections'-keyed object with no 'excerpt' key at all, so AC2's own python -c snippet cannot run past its first dereference. document.py is explicitly not this worker's <paths>; row AMGT_RESAPP-Z-W42-S1.",
+      "output_evidence": "section officers status=OK chars=40000 full_chars=44053 truncated=True heading_matched=\"\\u5f79\\u54e1\\u306e\\u72b6\\u6cc1\" reason=\nsection risk status=OK chars=3592 full_chars=3592 truncated=False heading_matched=\"\\u4e8b\\u696d\\u7b49\\u306e\\u30ea\\u30b9\\u30af\" reason=\nwritten .scratch/docs\\6861_JP_Equity.source.json (1310328 bytes)\npassages 356 empty 0 pct_excerpt_chars_in_passages 60.1 pct_passage_chars_kept 100.0 non_ascii_kept 49462 of 75359\n\n(full run, not truncated by tail -3, also shows: section mdna status=OK chars=57002 full_chars=57002 truncated=False -- all three named items risk/mdna/officers cut OK on the real Yuho; and, earlier in the same full output, `language ja cjk_share=0.5786 kana_share=0.3769 hangul_share=0.0000 ascii_letter_share=0.0441`, which `tail -3` on the literal invocation cuts off. Language field on the written source object, read directly this session via `json.load(...)['language']`: ja.)",
+      "denominator": "356 of 356 passages built; empty 0 of 356; pct_passage_chars_kept 100.0 (>= 99.0 bar); language ja",
+      "status": "PASS",
       "expect": "(?=[\\s\\S]*passages )(?=[\\s\\S]*empty 0)(?=[\\s\\S]*Language)"
     },
     {
@@ -106,10 +129,10 @@
       "criterion_verbatim": "precondition (ii) live on Keyence (the two invocations are the pass-1 cache split the 115 s bound already forced, analyze.py:308-317; the second reads cached true): PASS1 prints citations N and resolved M with M at or above 95% of N; a CITATIONS line prints \"blocks per citation min/median/max 1/1/1\" (every citation names exactly one passage block; the validation measured 72 of 72) and \"cited_text in original N of N\"; ITEMS prints total and cited with cited at or above 90% and language ja; the DRAFTING line prints; USD printed under 0.60 for this run; NOT-UPLOADED lines for the three objects (no --write-pool)",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && export ANTHROPIC_API_KEY=\"$(comp-secrets get anthropic-api-key --reveal | grep '^value:' | sed 's/^value:[[:space:]]*//')\" && python -m lib.research.filings.analyze --security-key 6861_JP_Equity --source-json .scratch/docs/6861_JP_Equity.source.json --no-fetch --cache-dir .scratch/filings_cache --out-dir .scratch/keyence --stage pass1 2>&1 | tail -4 && python -m lib.research.filings.analyze --security-key 6861_JP_Equity --source-json .scratch/docs/6861_JP_Equity.source.json --no-fetch --cache-dir .scratch/filings_cache --out-dir .scratch/keyence 2>&1 | tail -12",
-      "output_evidence": "  File \"C:\\tmp\\wk-amgt-14-42\\lib\\research\\filings\\analyze.py\", line 1405, in main\n    excerpt = source_object[\"excerpt\"]\n              ~~~~~~~~~~~~~^^^^^^^^^^^\nKeyError: 'excerpt'\n(both the --stage pass1 invocation and the full-run invocation fail IDENTICALLY, at the SAME line, before any model call -- USD 0.00 spent, no cache written, no analysis object written)",
-      "denominator": "0 of 1 (both live analyze.py invocations raise before printing PASS1/CITATIONS/ITEMS/DRAFTING/USD/NOT-UPLOADED)",
+      "output_evidence": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\tmp\\wk-amgt-14-42\\lib\\research\\filings\\analyze.py\", line 1481, in <module>\n    sys.exit(main())\n  File \"C:\\tmp\\wk-amgt-14-42\\lib\\research\\filings\\analyze.py\", line 1408, in main\n    % (source_object[\"security_key\"], source_object[\"form\"], source_object[\"accession\"],\nKeyError: 'form'\n\n(both the --stage pass1 invocation and the full-run invocation fail IDENTICALLY, at the SAME line, before excerpt is even read or any model call is made -- USD 0.00 spent, no cache/analysis object written. STEP 0's excerpt fix (session 2) resolved the PRIOR KeyError: 'excerpt' at this same line; this is a SECOND, distinct missing-key failure one line earlier in the same format string: document.py's local CLI object has no 'form', 'url', 'filing_date' or 'parser_version' key at all -- confirmed via `sorted(json.load(open('.scratch/docs/6861_JP_Equity.source.json')).keys())` this session.)",
+      "denominator": "0 of 1 (both live analyze.py invocations raise before printing SOURCE/PASS1/CITATIONS/ITEMS/DRAFTING/USD/NOT-UPLOADED)",
       "status": "FAIL",
-      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE: chained from AC2's root cause -- main() dereferences source_object['excerpt'] immediately after the SOURCE print, and the .source.json AC2 measured has no such key. No model call was reached at all. Row AMGT_RESAPP-Z-W42-S1.",
+      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE, on a SECOND measured root cause: analyze.py's main() (explicitly this order's own carve-out -- section 3, 'NOT main() ... which are AMGT-rk-42's') unconditionally indexes source_object['form']/['url']/['filing_date']/['parser_version'] on its SOURCE print line; document.py's local CLI object (the file AC2 writes and this invocation names) carries none of those four keys. This gap was not part of the issuer's STEP 0 amendment (which named only sections_to_excerpt/excerpt) and was invisible to the amendment's own measurement (which compared the BATTERY-produced pool object, which always carries all four keys, never the document.py-CLI-to-analyze.py chain this criterion actually exercises). Not repaired here -- main() is not this order's <paths>, and the REFUSAL CLAUSE bars satisfying a criterion by a route this order did not name. Row AMGT_RESAPP-Z-W42-S2 filed.",
       "expect": "(?=[\\s\\S]*PASS1)(?=[\\s\\S]*CITATIONS)(?=[\\s\\S]*ITEMS)(?=[\\s\\S]*DRAFTING)"
     },
     {
@@ -117,10 +140,10 @@
       "criterion_verbatim": "precondition (iii) and the two discriminating controls, denominators printed: \"VERBATIM-CHARS: K of M served findings carry a run of at least 12 characters inside a passage they cite\" with K/M at or above 0.90 (the validation held 70 of 71); \"NEIGHBOUR-CONTROL: refused K of K\"; \"MUTATION-CONTROL: refused K of K\" (the validation refused 70/70 and 68/68) -- a control that refuses fewer than all fails this criterion; and \"VERBATIM-WORDS: 0 findings graded on the token rule\" (the sentence script is unspaced, so the character rule ran). The analysis file name is the out-dir rendering of the pool key (key.replace('/', '_'), analyze.py:1220); record the actual file name if the accession differs",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.filings.translate --analysis .scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json --controls 2>&1 | tail -8",
-      "output_evidence": "  File \"C:\\tmp\\wk-amgt-14-42\\lib\\research\\filings\\translate.py\", line 305, in main\n    with open(args.analysis, encoding=\"utf-8\") as handle:\nFileNotFoundError: [Errno 2] No such file or directory: '.scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json'",
-      "denominator": "0 of 1 (the named analysis file was never written -- AC3 never reached write_outputs)",
+      "output_evidence": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\tmp\\wk-amgt-14-42\\lib\\research\\filings\\translate.py\", line 305, in main\n    with open(args.analysis, encoding=\"utf-8\") as handle:\nFileNotFoundError: [Errno 2] No such file or directory: '.scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json'",
+      "denominator": "0 of 1 (the named analysis file was never written -- AC3's second root cause still blocks it this session)",
       "status": "FAIL",
-      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE: chained from AC2/AC3's root cause -- there is no analysis object to run --controls against, because analyze.py's live run never completed. The controls function itself (translate.run_controls) is built and unit-exercised indirectly via AC1's TheCharacterLevelVerbatimRule (the same longest_verbatim_run/is_verbatim primitives it calls). Row AMGT_RESAPP-Z-W42-S1.",
+      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE: chained from AC3's SECOND root cause this session (main()'s missing form/url/filing_date/parser_version handling). translate.run_controls itself is built and unit-exercised via AC1. Row AMGT_RESAPP-Z-W42-S2.",
       "expect": "(?=[\\s\\S]*VERBATIM-CHARS)(?=[\\s\\S]*NEIGHBOUR-CONTROL)(?=[\\s\\S]*MUTATION-CONTROL)"
     },
     {
@@ -128,10 +151,10 @@
       "criterion_verbatim": "the translation of the OUTPUT, live: \"TRANSLATED: N of N lines\" (every served item plus the driver's series, unit and why), each line carrying translated true, source_language ja, translator model and prompt_version rj6-translate/1, translated_at, and the original text with its passage_ids beside it; \"RELOCATE-CONTROL: 0 of N translations found verbatim in the original\" (the validation measured 0 of 71 -- a translation that relocates would mean the analysis was not in the original language); USD printed under 0.30; the running total for this order printed and under 3.00",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && export ANTHROPIC_API_KEY=\"$(comp-secrets get anthropic-api-key --reveal | grep '^value:' | sed 's/^value:[[:space:]]*//')\" && python -m lib.research.filings.translate --analysis .scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json --out .scratch/keyence/6861_JP_Equity.translated.json 2>&1 | tail -8",
-      "output_evidence": "  File \"C:\\tmp\\wk-amgt-14-42\\lib\\research\\filings\\translate.py\", line 305, in main\n    with open(args.analysis, encoding=\"utf-8\") as handle:\nFileNotFoundError: [Errno 2] No such file or directory: '.scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json'",
-      "denominator": "0 of 1 (same missing input as AC4; no translation call was made, USD 0.00)",
+      "output_evidence": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\tmp\\wk-amgt-14-42\\lib\\research\\filings\\translate.py\", line 305, in main\n    with open(args.analysis, encoding=\"utf-8\") as handle:\nFileNotFoundError: [Errno 2] No such file or directory: '.scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json'",
+      "denominator": "0 of 1 (same missing input as AC4; no translation call made, USD 0.00)",
       "status": "FAIL",
-      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE: chained from AC2/AC3's root cause. translate_output()'s full contract (English-skip, per-item/driver fields, count-mismatch FAILED arm, relocate control) is built and proven live-model-free in AC1's test_translation.py -- only the LIVE Keyence call is blocked. Total USD spent this order: 0.00 (well under the 3.00 cap). Row AMGT_RESAPP-Z-W42-S1.",
+      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE: chained from AC3's second root cause. translate_output()'s full contract is unit-proven live-model-free in AC1. Total USD spent this order across both sessions: 0.00 (well under the 3.00 cap -- no live model call has ever been reached). Row AMGT_RESAPP-Z-W42-S2.",
       "expect": "(?=[\\s\\S]*TRANSLATED:)(?=[\\s\\S]*RELOCATE-CONTROL)"
     },
     {
@@ -142,60 +165,66 @@
       "output_evidence": "Traceback (most recent call last):\n  File \"<string>\", line 3, in <module>\nFileNotFoundError: [Errno 2] No such file or directory: '.scratch/keyence/6861_JP_Equity.translated.json'",
       "denominator": "0 of 1 (the translated analysis object was never written; nothing to build a drafting document from)",
       "status": "FAIL",
-      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE: chained from AC2/AC3/AC5's root cause. build_drafting_document()'s handling of text_translated/quote_method (including the new longest-verbatim-run-chars method) is unit-proven by AC1's TheDraftingDocument and TheCharacterLevelVerbatimRule tests against fixtures; only the live Keyence object is unreachable this order. Row AMGT_RESAPP-Z-W42-S1.",
+      "status_reason": "REFUSED per the order's own REFUSAL CLAUSE: chained from AC3/AC5's second root cause. build_drafting_document()'s translation/quote_method handling is unit-proven by AC1 against fixtures; only the live Keyence object is unreachable this order. Row AMGT_RESAPP-Z-W42-S2.",
       "expect": "(?=[\\s\\S]*served_sentences)(?=[\\s\\S]*with_translation)(?=[\\s\\S]*gate_on_original)"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "AC1's TheCharacterLevelVerbatimRule test proves the character-level verbatim rule is a live check, not a vacuity, by mutating a passing run's own LAST character and re-testing it against the SAME passage it just cleared.",
-      "expected": "verbatim.is_verbatim(run, passage) is True (the unmutated run clears); verbatim.is_verbatim(mutated, passage) must flip to False -- a control that cannot fail is not a control.",
-      "observed": "FIRED-AS-EXPECTED: test_a_run_is_found_inside_its_cited_passage_refused_on_the_neighbour_and_on_mutation asserts both directions and passes -- the run clears its own passage, the SAME run is refused against the neighbour passage, and the one-character mutation is refused against its own passage.",
+      "description": "AC1's TheCharacterLevelVerbatimRule test proves the character-level verbatim rule is a live check, not a vacuity, by mutating a passing run's own LAST character and re-testing it against the SAME passage it just cleared. This session's TheExcerptContractGap adds a second control: test_excerpt_is_none_when_no_key_cut_ok proves sections_to_excerpt is not vacuously non-None.",
+      "expected": "verbatim.is_verbatim(run, passage) is True (the unmutated run clears); mutated run flips to False. sections_to_excerpt on an all-FAILED sections dict must return None, not an excerpt with an empty items list.",
+      "observed": "FIRED-AS-EXPECTED, both: the verbatim mutation test passes (session 1); test_excerpt_is_none_when_no_key_cut_ok passes this session (all-FAILED input returns None).",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q run twice in this session, same worktree state, every model call stubbed (no network, no randomness).",
-      "observed": "Both runs produced identical output: \"Ran 48 tests in <seconds>\\n\\nOK\" -- the two-pass analysis, the translation stage, and the character-level verbatim rule are pure functions of their inputs and stubs.",
+      "method": "python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q run twice this session, same worktree state, every model call stubbed (no network, no randomness); sections_to_excerpt itself called twice on the SAME sections dict inside test_excerpt_present_non_empty_and_sha_stable_on_keyence_fixture.",
+      "observed": "Both discover runs produced identical output: \"Ran 68 tests in <seconds>\\n\\nOK\". sections_to_excerpt's two calls on the same input produced the SAME excerpt_sha256 (sha-stable, as STEP 0 requires).",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "AC2 through AC6's live Keyence validation.",
-      "reason": "REFUSED per the order's own REFUSAL CLAUSE: AMGT-rk-39's document.py CLI writes no 'excerpt' key onto its local source object (only 'sections'), and document.py/fetch.py/battery.py/batch.py are explicitly not this worker's <paths>, so no adapter can be built inside this order's lane. See acceptance rows AC2-AC6 and surprise row AMGT_RESAPP-Z-W42-S1."
+      "item": "AC3 through AC6's live Keyence analysis/translation/drafting chain.",
+      "reason": "REFUSED per the order's own REFUSAL CLAUSE on a SECOND measured gap (analyze.py main()'s missing form/url/filing_date/parser_version handling for a document-layer-local object), distinct from the excerpt gap STEP 0 disarmed this session. main() is explicitly not this order's <paths> (AMGT-rk-42's). See acceptance rows AC3-AC6 and surprise row AMGT_RESAPP-Z-W42-S2."
     },
     {
-      "item": "No live model call was made (no pass 1, no pass 2, no translation call).",
-      "reason": "Every live invocation raised before reaching analyze.anthropic_call. Total spend this order: USD 0.00, well under the USD 3.00 cap."
+      "item": "No live model call was made (no pass 1, no pass 2, no translation call), across both sessions.",
+      "reason": "Every live analyze.py invocation raised before reaching analyze.anthropic_call. Total spend this order across both sessions: USD 0.00, well under the USD 3.00 cap."
     },
     {
-      "item": "No pool write of any kind.",
-      "reason": "Order BOUNDS: --write-pool is never passed; no live run reached write_outputs() in any case."
+      "item": "The Keyence pool write in STEP 0(iii) is the ONE authorized pool write this order names (a validation-name re-land on an unserved key, rk-38's own act shape).",
+      "reason": "Order BOUNDS still say 'no pool write of any kind' generally; the amendment's STEP 0(iii) is the named, scoped exception. No other pool write occurred (AC3-AC6 never reached write_outputs in any case)."
     },
     {
-      "item": "No fix to document.py, fetch.py, battery.py or batch.py.",
-      "reason": "Explicitly not this worker's <paths> (order section 3); building the document.py-to-excerpt adapter is a follow-on cell's call, not this one's."
+      "item": "No fix to analyze.py's main() (form/url/filing_date/parser_version) or further widening of document.py beyond sections_to_excerpt.",
+      "reason": "main() is explicitly not this order's <paths> (order section 3); extending document.py's local object shape beyond what STEP 0 named was considered and declined per the REFUSAL CLAUSE (see SESSION_LOG.md session 2, item 9). Building either fix is a follow-on cell's call, not this one's."
     }
   ],
   "surprises": [
-    "AMGT_RESAPP-Z-W42-S1: AMGT-rk-39's document.py CLI writes no 'excerpt' key onto its local source object (only 'sections', keyed by item id) -- so AC2 through AC6's live Keyence validation cannot run as this order's own invocations are written. GROUNDED, ARMED (disarm_owner 2.0.0_SA_COO~Z), UNDER_INVESTIGATION."
+    "AMGT_RESAPP-Z-W42-S1: AMGT-rk-39's document.py CLI wrote no 'excerpt' key onto its local source object (only 'sections'). DISARMED this session by STEP 0 (document.sections_to_excerpt, wired into document.py and fetch.py); GROUNDED, disposition still UNDER_INVESTIGATION on the row itself (only the row's own disarm_owner, 2.0.0_SA_COO~Z, closes it), but its underlying measurement no longer blocks AC2, confirmed PASS this session.",
+    "AMGT_RESAPP-Z-W42-S2: after STEP 0's fix, analyze.py's main() still cannot consume document.py's local CLI object -- it unconditionally indexes form/url/filing_date/parser_version, none of which that object carries. A SECOND, distinct gap from S1, in a surface (main()) this order does not grant. GROUNDED, BLOCKING, ARMED (disarm_owner 2.0.0_SA_COO~Z), UNDER_INVESTIGATION."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~42/SESSION_LOG.md",
   "compiler_tools": [
     {
       "tool": "python -m unittest discover (lib/research/filings/tests + lib/research/drafting/tests)",
       "invocation": "python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q ; python -m unittest discover -s lib/research/drafting/tests -p \"test_*.py\" -q",
-      "result": "48 of 48 OK; 18 of 18 OK"
+      "result": "68 of 68 OK; 18 of 18 OK"
     },
     {
       "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
-      "invocation": "bash .tools/commit-gate.sh lib/research/filings/passages.py lib/research/filings/analyze.py lib/research/filings/drafting_build.py lib/research/filings/translate.py lib/research/filings/tests/test_filings.py lib/research/filings/tests/test_translation.py lib/research/drafting/verbatim.py",
-      "result": "OK: pre-commit gate clean for 7 of 7 file(s)"
+      "invocation": "bash .tools/commit-gate.sh lib/research/filings/document.py lib/research/filings/fetch.py lib/research/filings/battery.py lib/research/filings/tests/test_filings.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
     },
     {
       "tool": ".tools/safe-commit.sh (commit-gate + surprise-row-gate + naming-gate + to-pipeline-gate + missions-tree-check)",
-      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~42 <0.9.0_WK_AMGT_RESAPP~42@opal.agent>\" -F <msgfile> -- <paths>",
-      "result": "commit-gate clean for 7 of 8 file(s) (the 8th, INVESTIGATION_v1.md, is a doc outside the gate's graded suffix set); surprise-row-gate OK (1 new row of 396 total checked); naming-gate PASS 0 graded; to-pipeline-gate OK (no task_orders/*.md in this commit); one commit landed: 0da974e0dd"
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~42 <0.9.0_WK_AMGT_RESAPP~42@opal.agent>\" -F <msgfile> -- lib/research/filings/document.py lib/research/filings/fetch.py lib/research/filings/battery.py lib/research/filings/tests/test_filings.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit-gate clean for 4 of 5 file(s) (the 5th, INVESTIGATION_v1.md, is a doc outside the gate's graded suffix set); surprise-row-gate OK (1 new row of 402 total checked); naming-gate PASS 0 graded; to-pipeline-gate OK (no task_orders/*.md in this commit); one commit landed: b6152d6784"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3,AC4,AC5,AC6",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~42/AMGT_RESAPP.TO-AMGT-rk-40.translation-design-a.proof_of_spec.json AC1,AC2,AC3,AC4,AC5,AC6",
+      "result": "rc=0 (structurally VALID; the checker grades structure only -- 4 of 6 criteria PASS-by-output, 2 mechanical FAILs (AC3, and cascading AC4/AC5/AC6 -- 4 total FAIL) leave the order pending, not complete)"
     }
   ]
 }
