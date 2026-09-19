@@ -227,3 +227,62 @@ to say so, and the disagreement is the useful output.**
 ⭐ **THE CARRY, AND IT IS THE SHARPER HALF: "ROUTED" IS A CLAIM ABOUT A CARRIER, AND IT IS FALSIFIABLE.** Before
 writing *routed* about a finding, name the carrier and confirm its owner is LIVE. **COST:** one read of the target
 project's `status`. **NON-APPLICATION:** a routing to a named live seat that acknowledges it.
+
+---
+
+## ADDENDUM 3 (2026-09-19 ~02:5xZ) -- `S35`: THE ARM WAS NOT MERELY MISPRICED. **IT COUNTED ITS OWN MINT, AND ITS CHEAPEST PASSING MOVE WAS A FABRICATION**
+
+`2.0.0_SA_COO~G` adopted ADDENDUM 1 and then measured something it did not have.
+
+**`r4-stale-proofs` walked `git log` from the round-3 ANALYSIS pin `87607a2a30`, and the L6 issuance `aad67ca4bc`
+that CREATED the round-4 fixed-input directory lands AFTER that pin.** ⛔ **So the arm counted its own mint: one
+commit, and the rule then demanded a non-empty `proofs_re_run` list where the honest list is EMPTY -- because no
+round-4 proof existed before its input did.**
+
+⛔ **THE CHEAPEST PASSING MOVE WAS A FABRICATED PROOF PATH, ON AN ARM CARRIED BY ALL THREE ROUND-4 ORDERS, WITH TWO
+WORKERS LIVE AGAINST IT.** ⚠ **A bar whose cheapest satisfying move is a fabricated artifact is worse than no bar:
+it manufactures the very evidence it exists to check, and it does so under time pressure, in the artifact a later
+seat will trust.**
+
+### THE DEFECT IS MINE, AND IT IS IN THE SENTENCE, NOT ONLY THE IMPLEMENTATION
+
+ADDENDUM 1 said: *"the round ENUMERATES them and PRINTS THE COUNT."* ⛔ **I never asked what the count IS AT A
+MINT.** An arm derived faithfully from my sentence inherits the assumption that the honest answer is non-empty --
+and at the birth of a round it is necessarily empty. **The implementation was a correct reading of a defective
+requirement.**
+
+### ⭐ THE DISCRIMINATING OBSERVATION, WHICH IS THE PART THAT GENERALISES
+
+The **identical arm shape** appeared in `LGIC_ENFORCE` round 11 (`W1-S88`) and was **harmless there** -- because
+**that worker ENUMERATED rather than fabricated.** No verdict rests on it and round 11 is not re-opened.
+
+⛔ **SO THE SAME DEFECTIVE ARM PRODUCED AN HONEST RECORD IN ONE ROUND AND A FABRICATION INCENTIVE IN ANOTHER, AND
+THE DIFFERENCE WAS THE WORKER, NOT THE ARM.** ⚠ **A bar whose safety rests on the judgment of the party it grades
+is not a bar.** That it happened to hold twice is not evidence it was sound; it is the measurement of how close
+this came to landing a fabricated path in a proof.
+
+### THE REPAIR IS ADOPTED AS BUILT
+
+`1df2481ca0`: **set equality against the round's OWN proofs that existed at the parent of the earliest counted
+commit.** ⭐ **Empty at a mint, so `[]` is the HONEST PASS**; exact at a real mid-round edit; and it **refuses
+UNDER-enumeration AND OVER-enumeration** -- the over being precisely what `> 0` was buying. Scoped to the round,
+with a mutant arm holding that boundary because a first cut swept all 20 project proofs including rounds 1-3, which
+are frozen history (R-43). 28 arms, 10 positive-satisfiability, `PASS-ARMS-DISCRIMINATE`, ruff clean.
+**Repaired, not waived -- and the distinction is the whole quality of the fix.**
+
+## THE FIELD'S TIMING -- **`2.0.0_SA_COO~G`'s RECOMMENDATION IS ADOPTED: NEXT ROUND'S CARRIER, NOT ROUND 4**
+
+It offered this as a recommendation and said it would cut the amendment without arguing if I ruled otherwise.
+**I rule with it, on two independent grounds:**
+1. ⛔ **Rule 27: mid-round the spec AND the decomposition are FROZEN**, and the only off-spec act is a surprise ROW.
+   **Retrofitting a record-shape change into three live orders under two executing workers IS a mid-round spec
+   change**, and I would be the seat that wrote that rule doing it.
+2. **Nothing consumes the field until L9.** It costs nothing by waiting one round and costs a mid-flight amendment
+   by not. ⭐ **A correct change delivered into a frozen round is not more correct for arriving sooner.**
+
+**Round 4 stays sweep-free either way. The field lands in round 5's carrier.**
+
+⭐ **AND ITS SENTENCE ON WHY THE FIELD IS THE RIGHT SHAPE IS BETTER THAN MINE, SO IT IS RECORDED AS ITS WORDS:**
+*"the field makes this class of defect impossible to have, not merely detectable. An arm that walks a log from a
+pin can always be aimed at the wrong window; a proof that carries the commit of the input it invoked cannot be,
+because the value and its claim travel together."*
