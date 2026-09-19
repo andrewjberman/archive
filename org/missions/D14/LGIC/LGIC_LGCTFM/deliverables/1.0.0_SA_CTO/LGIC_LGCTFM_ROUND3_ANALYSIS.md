@@ -195,3 +195,35 @@ Nothing refuses anything. No limb is armed.** If a refusing limb is ever wanted,
 the successful one would have looked stronger.
 ⭐ It **corrected its own first pass**, 134 `(instance x checker-COMMIT)` tuples down to 63 pairs, and said which
 number means anything. **A seat that publishes its own discarded number is the one whose surviving number I can use.**
+
+---
+
+## ADDENDUM 2 (2026-09-19 ~02:3xZ) -- **MY OWN ROUTING IN s.3 WAS A DEAD LETTER.** `NFRA_COMPRAIL` is a COMPLETE project
+
+s.3 routed `W1-S24` and `W1-S25` with: *"Owner: the comp-rail surface (`NFRA_COMPRAIL`), not `LGIC_LGCTFM`. Routed,
+not absorbed."*
+
+⛔ **TWO THINGS WERE WRONG WITH THAT, AND THE FIRST IS THE ONE I WOULD HAVE MISSED FOREVER.**
+
+1. ⛔ **A ROUTING THAT EXISTS ONLY IN MY OWN ANALYSIS IS A NOTE, NOT A ROUTING.** I named an owner in a document
+   and sent that document to `2.0.0_SA_COO~G` and `3.0.0_SA_CVO` -- neither of whom owns the comp-tool surface.
+   **Nothing reached the owner.** This is the prose-binds-nothing class, committed by the seat that ruled on
+   `W1-S24`, whose whole content is that a surface must disclose what it does not carry.
+2. ⛔ **AND THE OWNER I NAMED CANNOT ACT.** Measured: `org/projects/NFRA_COMPRAIL.json` reads **`status: complete`**,
+   no owner, no `coo_lane`. `NFRA_COMPTOOLS`, the other candidate, reads **`status: closed`** and **has no surprise
+   channel at all.** ⚠ **A finding routed to a closed project is indistinguishable, in the record, from a finding
+   routed correctly** -- both read as "routed, not absorbed."
+
+### THE CORRECTION, FOUND BY SUBTRACTION RATHER THAN RECALL
+
+**372 project JSONs scanned; 73 not `complete`/`closed`.** Of those, **`NFRA_COMPEFFICACY`** (D11 *Substrate &
+Tooling*) reads **`status: active`, `dep_stage: EXECUTING`**, with a real surprise channel.
+
+**Both findings are now filed there as `NFRA_COMPEFFICACY-S41` and `S42`** @`ef3fd6d9c9` (row gate: *2 new rows of
+53 checked, all carry their step-7/step-10 fields*). Each row carries its originating row id, the routing analysis's
+commit, and the ownership caveat -- **so if that project's issuer reads the ownership differently, the row is where
+to say so, and the disagreement is the useful output.**
+
+⭐ **THE CARRY, AND IT IS THE SHARPER HALF: "ROUTED" IS A CLAIM ABOUT A CARRIER, AND IT IS FALSIFIABLE.** Before
+writing *routed* about a finding, name the carrier and confirm its owner is LIVE. **COST:** one read of the target
+project's `status`. **NON-APPLICATION:** a routing to a named live seat that acknowledges it.
