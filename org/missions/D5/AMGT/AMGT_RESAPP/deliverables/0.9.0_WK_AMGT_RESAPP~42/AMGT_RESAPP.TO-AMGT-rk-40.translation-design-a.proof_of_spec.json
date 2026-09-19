@@ -21,7 +21,10 @@
       "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Unchanged this session. build_passage_map() stores NFC-normalised, UNFOLDED passage text; non_ascii_chars replaces ascii_replacements. Exercised by AC1 and, live, by AC2 (PASS this session, re-verified at HEAD).",
-      "artifact_covered_by": ["AC1", "AC2"]
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
     },
     {
       "path_or_key": "lib/research/filings/document.py",
@@ -29,7 +32,11 @@
       "commit_or_etag": "2e388452dd97cbba6c17d4c3ea41947dcedad9e5",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "NEW this session (STEP 0 (v), AMENDMENT 2, disarms row AMGT_RESAPP-Z-W42-S2): build_local_source_object now sets form (= family), filing_date (= period_end['date']), url (= None), parser_version (this module's own PARSER_VERSION = 'document-layer-local/1', never imported from fetch.py), plus the None-valued entity_name/entity_evidence/verified_site/verified_site_reason/officer_section keys -- the analyzer's identity-key superset main() indexes unconditionally. Live-verified: AC2 re-run at HEAD this session prints form YUHO filing_date 2026-03-20 url None parser_version document-layer-local/1 on the written source object; AC3's live invocation no longer raises KeyError('form'). Unit-verified: test_filings.py TheExcerptContractGap.test_local_source_object_key_set_is_a_superset_of_what_main_indexes (NEW).",
-      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
     },
     {
       "path_or_key": "lib/research/filings/fetch.py",
@@ -37,7 +44,9 @@
       "commit_or_etag": "b6152d678415a0fd4f89b069a8b3f397a641c9d6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Unchanged this session. build_battery_source_object() assembles excerpt via document.sections_to_excerpt when the battery's own excerpt is None and sections is present. Unit-verified (unchanged): test_filings.py TheExcerptContractGap.test_battery_source_object_assembles_excerpt_from_sections_when_absent.",
-      "artifact_covered_by": ["AC1"]
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "lib/research/filings/battery.py",
@@ -45,7 +54,9 @@
       "commit_or_etag": "b6152d678415a0fd4f89b069a8b3f397a641c9d6",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Unchanged this session.",
-      "artifact_covered_by": ["AC1"]
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "lib/research/filings/analyze.py",
@@ -53,15 +64,24 @@
       "commit_or_etag": "2e388452dd97cbba6c17d4c3ea41947dcedad9e5",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "THREE real bugs found live-measuring AC3 on Keyence this session, all fixed within this order's own owned functions (resolve_pass_1, pass_1/PASS_1_PROMPT/LANGUAGE_RULE_TEMPLATE, analyze_source), never main(): (1) resolve_pass_1 treated the anthropic SDK's end_block_index as INCLUSIVE (the SDK's own docstring states it is EXCLUSIVE) -- fixed to range(start_block, end_block); (2) a genuine multi-block citation was checked against ONE passage instead of the raw concatenation of every named block (the SDK's own definition of cited_text for such a citation) -- fixed, resolving to every block in range when the whole range clears; (3) PASS 1 did not reliably write findings in the filing's own language (0 of 66 items in Japanese on one live sample) -- LANGUAGE_RULE_TEMPLATE moved to the FIRST bullet of RULES and reworded to name the failure mode directly ('the WHOLE sentence, not just the words you quote'); PROMPT_VERSION bumped rj6-two-pass/2 -> /3 to invalidate any stale cache. A new _print_citations_line (owned, analyze_source's own diagnostic, never main()) prints the CITATIONS line AC3 names. Live-verified across the fix sequence: citations/resolved reached 69/69 (100%, up from a pre-fix 0/66 items in-language and a mid-fix 67/72=93% resolved); items reached 67 of 67 cited (100%), all genuinely Japanese. Unit-verified: lib/research/filings/tests/test_filings.py ThePrecutCitationBlocksResolution (corrected single-block fixture + new multi-block test); 70 of 70 filings tests OK.",
-      "artifact_covered_by": ["AC1", "AC3", "AC4", "AC5", "AC6"]
+      "artifact_covered_by": [
+        "AC1",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6"
+      ]
     },
     {
       "path_or_key": "lib/research/filings/drafting_build.py",
       "kind": "script",
-      "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
+      "commit_or_etag": "1596a47e26",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Unchanged this session. longest_verbatim_run() dispatches on cjk_share. AC6 not reached this session (see status_reason) -- exercised only by AC1's fixtures.",
-      "artifact_covered_by": ["AC1", "AC6"]
+      "deploy_evidence": "ONE real gap found live-measuring AC6 this session (first time AC6 was ever reached -- AC5 was budget-blocked every prior session), fixed within this order's own owned lines (FilingsProducer.draft(), ~281-311): the sentence dict never carried item.get('text_translated')/item.get('translation')/item.get('text_original', text), though section 1.2 item 5 named this explicitly. Fixed; live re-verified on the SAME stored translated object (no new model call): with_translation rose from 0 of 32 to 32 of 32, gate_on_original 32 of 32 unaffected (the gate itself, quote_method/spans, is computed against the ORIGINAL text before these fields are attached, and never reads them). Row AMGT_RESAPP-Z-W42-S7 filed, INERT (fixed same session). Unit-verified: NEW test_translation.py TheDraftedSentenceCarriesTranslation. lib/research/filings/tests suite: 73 of 73 OK; lib/research/drafting/tests: 18 of 18 OK (no regression).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC6"
+      ]
     },
     {
       "path_or_key": "lib/research/drafting/verbatim.py",
@@ -69,15 +89,21 @@
       "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Unchanged this session. 18 of 18 lib/research/drafting/tests pass (AC1).",
-      "artifact_covered_by": ["AC1"]
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "lib/research/filings/translate.py",
       "kind": "script",
-      "commit_or_etag": "2e388452dd97cbba6c17d4c3ea41947dcedad9e5",
+      "commit_or_etag": "1596a47e26",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "ONE real bug found live-measuring AC4 on the fixed live analysis object this session, fixed in run_controls: the NEIGHBOUR-CONTROL picked the immediately-adjacent passage without excluding the item's OWN other cited passages, so a multi-passage citation's second block (a genuine citation target, not a false positive) was picked as the 'neighbour' and the control read 56 of 57. Fixed: the neighbour must be adjacent to a cited passage but not itself any passage the item cites. Live re-verified on the SAME analysis object (no new model call, local computation only): NEIGHBOUR-CONTROL rose from 56 of 57 to 57 of 57; MUTATION-CONTROL 57 of 57 (unchanged, already correct); VERBATIM-CHARS 57 of 67 (unaffected by this fix, a separate content-driven shortfall -- see AC4 status_reason and row AMGT_RESAPP-Z-W42-S5). translate_output()'s live translation call itself was never reached this session (AC5 REFUSED for budget -- see AC5 status_reason).",
-      "artifact_covered_by": ["AC1", "AC4", "AC5"]
+      "deploy_evidence": "AMENDMENT 3 STEP 2 this session: run_controls() (translate.py --controls, this order's own owned surface) gained the TABLE-DERIVED census and NUMBER-CONTROL -- _is_table_derived() classifies a served finding as table-derived when NONE of its cited passages carry a contiguous run of >= 12 Unicode-category-L (non-numeric) characters; _extract_numbers()/_number_located() then check every number the finding transcribes against its cited passage(s). Live-verified offline (no model call) on the SAME stored Keyence analysis object: TABLE-DERIVED 4 of 67, NUMBER-CONTROL found 4 of 4, VERBATIM-CHARS-PROSE 57 of 63 = 0.9048 (clears the amended >= 0.90 floor). ALSO this session: the live translation call itself (translate_output) was finally exercised live (AC5, budget-blocked in every prior session) -- TRANSLATED 70 of 70, RELOCATE-CONTROL 0 of 68, USD 0.1263. Unit-verified: 2 new tests in test_translation.py (TheTableDerivedCensus).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC4",
+        "AC5"
+      ]
     },
     {
       "path_or_key": "lib/research/filings/tests/test_filings.py",
@@ -85,22 +111,26 @@
       "commit_or_etag": "2e388452dd97cbba6c17d4c3ea41947dcedad9e5",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "TWO new/corrected tests this session: test_local_source_object_key_set_is_a_superset_of_what_main_indexes (NEW, STEP 0(v)'s unit arm, pdf_to_text/detect_family/cut/period_end stubbed); ThePrecutCitationBlocksResolution's single-block fixture corrected from the impossible start_block_index==end_block_index shape to the real end_block_index=start_block_index+1 shape, plus a NEW test_a_genuine_multi_block_citation_resolves_to_every_block_it_names. 70 of 70 tests in the suite pass together (AC1, up from 69 last session).",
-      "artifact_covered_by": ["AC1"]
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "lib/research/filings/tests/test_translation.py",
       "kind": "test",
-      "commit_or_etag": "0da974e0dd75ce9a4d9258f7bc35a0d6b7bb0ae9",
+      "commit_or_etag": "1596a47e26",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Unchanged this session. Included in the 70-of-70 filings suite total (AC1).",
-      "artifact_covered_by": ["AC1"]
+      "deploy_evidence": "THREE new tests this session: TheTableDerivedCensus (2 tests -- a table-cited finding is classified table_derived with its numbers located; a missing number is reported by finding id, never silently dropped) and TheDraftedSentenceCarriesTranslation (1 test -- every drafted sentence carries text_translated/translation, and the gate's own text_original equals text). _jp_analysis() fixture extended with the form/filing_date/model/analyzer_version/source keys build_drafting_document() needs (additive; every pre-existing test using this fixture is unaffected). Included in the 73-of-73 filings suite total (AC1, up from 70).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "cba847661c7441ca01c860e1cffacdae670b0cb0",
+      "commit_or_etag": "e8752c9e7a",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "4 new rows appended by textual splice this session (402 -> 406 total): AMGT_RESAPP-Z-W42-S3 (the two resolve_pass_1 bugs, OBSERVATION/INERT, both fixed); AMGT_RESAPP-Z-W42-S4 (the language-rule instruction-following gap, OBSERVATION/INERT, fixed); AMGT_RESAPP-Z-W42-S5 (the residual measured deviation from AC3/AC4's literal numeric bars, OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~Z); AMGT_RESAPP-Z-W42-S6 (the budget exhaustion blocking AC5, BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~Z). git diff confirms insertions only, no existing row edited."
+      "deploy_evidence": "ONE new row appended by textual splice this session (406 -> 407 total): AMGT_RESAPP-Z-W42-S7 (the drafting_build.py translation-carrying gap found and fixed live-measuring AC6, OBSERVATION/INERT). git diff confirms 23 insertions, 0 deletions -- no existing row edited."
     }
   ],
   "acceptance": [
@@ -129,10 +159,10 @@
       "criterion_verbatim": "precondition (ii) live on Keyence (the two invocations are the pass-1 cache split the 115 s bound already forced, analyze.py:308-317; the second reads cached true): PASS1 prints citations N and resolved M with M at or above 95% of N; a CITATIONS line prints \"blocks per citation min/median/max 1/1/1\" (every citation names exactly one passage block; the validation measured 72 of 72) and \"cited_text in original N of N\"; ITEMS prints total and cited with cited at or above 90% and language ja; the DRAFTING line prints; USD printed under 0.60 for this run; NOT-UPLOADED lines for the three objects (no --write-pool)",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && export ANTHROPIC_API_KEY=\"$(comp-secrets get anthropic-api-key --reveal | grep '^value:' | sed 's/^value:[[:space:]]*//')\" && python -m lib.research.filings.analyze --security-key 6861_JP_Equity --source-json .scratch/docs/6861_JP_Equity.source.json --no-fetch --cache-dir .scratch/filings_cache --out-dir .scratch/keyence --stage pass1 2>&1 | tail -4 && python -m lib.research.filings.analyze --security-key 6861_JP_Equity --source-json .scratch/docs/6861_JP_Equity.source.json --no-fetch --cache-dir .scratch/filings_cache --out-dir .scratch/keyence 2>&1 | tail -12",
-      "output_evidence": "SOURCE: 6861_JP_Equity form YUHO accession doc-1defdb68a7ffd3b7 filed 2026-03-20 url None document_sha256 1defdb68a7ffd3b70317786dbb57b606ca5d46ef67844da9977dde6a0448cf9d excerpt_sha256 6860c0648ca878b302c19d063fa952150aa2ad3758d40b373ccb12e6c9f431ff retrieved_at 2026-09-19T09:23:14Z parser_version document-layer-local/1 excerpt_chars 100623 provenance file:.scratch/docs/6861_JP_Equity.source.json\nPASS1: model claude-opus-5 input_tokens 58684 output_tokens 5228 seconds 72.8 USD 0.4241 blocks 137 cached false cache .scratch/filings_cache\\pass1\\6861_JP_Equity.doc-1defdb68a7ffd3b7.rj6-two-pass-3.json\nPASSAGE_MAP: 356 passages from 3 item(s)\nCITATIONS: blocks per citation min/median/max 1/1/2 cited_text in original 69 of 69\nPASS1: model claude-opus-5 input_tokens 58684 output_tokens 5228 seconds 72.8 USD 0.4241 citations 69 resolved 69 cached true\nPASS2: model claude-opus-5 input_tokens 5569 output_tokens 5538 seconds 69.6 USD 0.1663 items_source pass-2\nPASSAGE_MAP: 356 passages from 3 item(s)\nITEMS: guidance 7 segments 8 risks 18 commentary 16 big_bets 9 big_challenges 9 total 67 cited 67 (100.0 percent) held_uncited 0\nTHESIS_DRIVER: series (Japanese) | unit (Japanese) | source_passage_id P0026 | resolution cited | points 1 | absent_reason None\nDRAFTING: sections 5 sentences 37 dropped 1 verbatim_PASS 32 evidence_records 47\nUSD: total 0.5904 (pass1 0.4241 + pass2 0.1663) tokens in 64253 out 10766 seconds 142.4\nNOT-UPLOADED (no --write-pool): filings/v1/6861_JP_Equity/doc-1defdb68a7ffd3b7.source.json ContentLength=1310572\nNOT-UPLOADED (no --write-pool): filings/v1/6861_JP_Equity/doc-1defdb68a7ffd3b7.analysis.json ContentLength=566373\nNOT-UPLOADED (no --write-pool): drafting/v1/6861_JP_Equity.json ContentLength=103462\n\n(language field on the analysis object, read directly this session: ja. This is the run AFTER all three bug fixes in row AMGT_RESAPP-Z-W42-S3/S4 landed; three earlier live runs this session, pre-fix and mid-fix, are recorded in full in rows S3/S4/S6 and are not repeated here.)",
+      "output_evidence": "SOURCE: 6861_JP_Equity form YUHO accession doc-1defdb68a7ffd3b7 filed 2026-03-20 url None document_sha256 1defdb68a7ffd3b70317786dbb57b606ca5d46ef67844da9977dde6a0448cf9d excerpt_sha256 6860c0648ca878b302c19d063fa952150aa2ad3758d40b373ccb12e6c9f431ff retrieved_at 2026-09-19T09:23:14Z parser_version document-layer-local/1 excerpt_chars 100623 provenance file:.scratch/docs/6861_JP_Equity.source.json\nPASS1: model claude-opus-5 input_tokens 58684 output_tokens 5228 seconds 72.8 USD 0.4241 blocks 137 cached false cache .scratch/filings_cache\\pass1\\6861_JP_Equity.doc-1defdb68a7ffd3b7.rj6-two-pass-3.json\nPASSAGE_MAP: 356 passages from 3 item(s)\nCITATIONS: blocks per citation min/median/max 1/1/2 cited_text in original 69 of 69\nPASS1: model claude-opus-5 input_tokens 58684 output_tokens 5228 seconds 72.8 USD 0.4241 citations 69 resolved 69 cached true\nPASS2: model claude-opus-5 input_tokens 5569 output_tokens 5538 seconds 69.6 USD 0.1663 items_source pass-2\nPASSAGE_MAP: 356 passages from 3 item(s)\nITEMS: guidance 7 segments 8 risks 18 commentary 16 big_bets 9 big_challenges 9 total 67 cited 67 (100.0 percent) held_uncited 0\nTHESIS_DRIVER: series (Japanese) | unit (Japanese) | source_passage_id P0026 | resolution cited | points 1 | absent_reason None\nDRAFTING: sections 5 sentences 37 dropped 1 verbatim_PASS 32 evidence_records 47\nUSD: total 0.5904 (pass1 0.4241 + pass2 0.1663) tokens in 64253 out 10766 seconds 142.4\nNOT-UPLOADED (no --write-pool): filings/v1/6861_JP_Equity/doc-1defdb68a7ffd3b7.source.json ContentLength=1310572\nNOT-UPLOADED (no --write-pool): filings/v1/6861_JP_Equity/doc-1defdb68a7ffd3b7.analysis.json ContentLength=566373\nNOT-UPLOADED (no --write-pool): drafting/v1/6861_JP_Equity.json ContentLength=103462\n\n(language field on the analysis object, read directly this session: ja. This is the run AFTER all three bug fixes in row AMGT_RESAPP-Z-W42-S3/S4 landed; three earlier live runs this session, pre-fix and mid-fix, are recorded in full in rows S3/S4/S6 and are not repeated here.)\n\n(AMENDMENT 3 re-grade, 0.9.0_WK_AMGT_RESAPP~42, computed offline from the cached analysis file's own 'citations' list, no live call: N=69, min=1, median=1, max=2, two_block_citations=1 of 69=0.0145.)",
       "denominator": "citations 69 of 69 resolved (100%, >= 95% bar); cited_text in original 69 of 69; items 67 of 67 cited (100%, >= 90% bar); USD 0.5904 (< 0.60 bar); NOT-UPLOADED 3 of 3",
       "status": "PASS",
-      "status_reason": "PASS-by-output on every named sub-condition EXCEPT one exact string: 'blocks per citation min/median/max' reads 1/1/2, not the literal '1/1/1' the order's text names (citing the validation's own 72-of-72 figure). MEASURED on three independent live post-fix samples (this run and two earlier ones during the fix sequence) that a small, reproducible share of citations (1-7%) legitimately span TWO adjacent passages (a finding continuing across a short PDF-reflow line boundary) -- every one of them now resolves CORRECTLY (100% resolved on all three samples), which is what AC3's own resolved-rate sub-bar actually grades. Root-caused and disposed of in surprise row AMGT_RESAPP-Z-W42-S5 (ARMED, disarm_owner 2.0.0_SA_COO~Z): not a code defect this order's <paths> can further fix without a design change the order does not name (merging short reflow lines, or accepting a non-1 max). Graded PASS here because every OTHER sub-condition (the resolved-rate bar, cited_text-in-original at N of N, ITEMS cited-rate, language, DRAFTING line, USD, NOT-UPLOADED) passes cleanly and the deviation is on a descriptive sub-clause whose own stated PURPOSE (one block per citation, confirmed by a high resolved rate) is met.",
+      "status_reason": "AMENDMENT 3 (2.0.0_SA_COO~Z, 2026-09-19 ~12:0xZ, disarming rows W42-S5/S6): AC3's blocks-per-citation bar is re-cut to min 1 / median 1 / max AT MOST 2, with 'two_block_citations K of N' at or below 0.10 -- the literal '1/1/1' this row previously graded against was a validation-derived figure, not this order's own re-stated bar. NOT re-run live (AMENDMENT 3 step 1: 'Do NOT re-run AC3's live pass-1'); re-graded from the SAME recorded output already on file below. Recomputed this session, offline, from the cached analysis object's own 'citations' array (.scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json): parsing each citation's 'tag' field (block:S-E, blocks = E-S) over all 69 citations gives min 1, median 1, max 2 (matching the recorded 1/1/2) and two_block_citations 1 of 69 = 0.0145, which clears the amended <= 0.10 bar. Every other named sub-condition (resolved rate, cited_text-in-original N of N, ITEMS cited-rate, language, DRAFTING line, USD, NOT-UPLOADED) already passed cleanly, as recorded. PASS-by-output under the amended bar; no further live call made for this criterion.",
       "expect": "(?=[\\s\\S]*PASS1)(?=[\\s\\S]*CITATIONS)(?=[\\s\\S]*ITEMS)(?=[\\s\\S]*DRAFTING)"
     },
     {
@@ -140,21 +170,21 @@
       "criterion_verbatim": "precondition (iii) and the two discriminating controls, denominators printed: \"VERBATIM-CHARS: K of M served findings carry a run of at least 12 characters inside a passage they cite\" with K/M at or above 0.90 (the validation held 70 of 71); \"NEIGHBOUR-CONTROL: refused K of K\"; \"MUTATION-CONTROL: refused K of K\" (the validation refused 70/70 and 68/68) -- a control that refuses fewer than all fails this criterion; and \"VERBATIM-WORDS: 0 findings graded on the token rule\" (the sentence script is unspaced, so the character rule ran). The analysis file name is the out-dir rendering of the pool key (key.replace('/', '_'), analyze.py:1220); record the actual file name if the accession differs",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.filings.translate --analysis .scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json --controls 2>&1 | tail -8",
-      "output_evidence": "VERBATIM-CHARS: 57 of 67 served findings carry a run of at least 12 characters inside a passage they cite\nNEIGHBOUR-CONTROL: refused 57 of 57\nMUTATION-CONTROL: refused 57 of 57\nVERBATIM-WORDS: 0 findings graded on the token rule",
-      "denominator": "VERBATIM-CHARS 57 of 67 = 85.1% (< 0.90 bar); NEIGHBOUR-CONTROL 57 of 57 (all refused, after this session's fix -- was 56 of 57 before it); MUTATION-CONTROL 57 of 57; VERBATIM-WORDS 0 (matches expect exactly)",
-      "status": "FAIL",
-      "status_reason": "MEASURED SHORTFALL against the criterion's own explicit numeric floor: 57 of 67 = 85.1%, below the named >= 0.90. Root-caused this session: 7 of the 10 non-matching items cite a raw FINANCIAL TABLE passage (labels and bare numbers, no connecting prose at all) while the finding sentence is a SYNTHESISED Japanese narrative built from those numbers -- there is structurally no 12+ character contiguous run possible for these, since the connecting language the finding uses is not in the source at all. This is a real, reproducible content property of this filing's MD&A section, not a further code defect within this order's <paths> (fixed instead this session: the NEIGHBOUR-CONTROL bug that had separately depressed that control to 56 of 57 -- now 57 of 57). REFUSED per the order's own REFUSAL CLAUSE rather than repaired by widening the verbatim rule to accept a number-based match (a design change section 1.2 does not name) or by discarding the table-derived items (never sanctioned). Row AMGT_RESAPP-Z-W42-S5 filed, ARMED, disarm_owner 2.0.0_SA_COO~Z.",
-      "expect": "(?=[\\s\\S]*VERBATIM-CHARS)(?=[\\s\\S]*NEIGHBOUR-CONTROL)(?=[\\s\\S]*MUTATION-CONTROL)"
+      "output_evidence": "VERBATIM-CHARS: 57 of 67 served findings carry a run of at least 12 characters inside a passage they cite\nTABLE-DERIVED: 4 of 67 findings: segments[7], commentary[9], commentary[10], big_bets[8]\nVERBATIM-CHARS-PROSE: 57 of 63 (67 - 4) = 0.9048\nNUMBER-CONTROL: found 4 of 4\nNEIGHBOUR-CONTROL: refused 57 of 57\nMUTATION-CONTROL: refused 57 of 57\nVERBATIM-WORDS: 0 findings graded on the token rule",
+      "denominator": "VERBATIM-CHARS 57 of 67 (all served); TABLE-DERIVED 4 of 67; VERBATIM-CHARS-PROSE 57 of 63 = 90.48% (>= 0.90 bar, amended); NUMBER-CONTROL 4 of 4 located; NEIGHBOUR-CONTROL 57 of 57; MUTATION-CONTROL 57 of 57; VERBATIM-WORDS 0 (matches expect exactly)",
+      "status": "PASS",
+      "status_reason": "AMENDMENT 3 disarms row W42-S5: the 0.90 verbatim floor now binds PROSE-CITED findings only, graded as K / (M - T) where T is the TABLE-DERIVED census this session implements in translate.py --controls (this order's owned surface, section 1.2 item 6). TABLE-DERIVED classification: a finding is table-derived when NONE of its cited passages carry a contiguous run of >= 12 non-numeric (Unicode category L*) characters -- the structural signature of a raw financial-table line (labels and bare numbers, no connecting prose long enough to quote). 4 of 67 served findings are table-derived (segments[7], commentary[9], commentary[10], big_bets[8]), inspected directly this session: each cites a passage whose longest non-numeric run is 10-11 characters (e.g. rows like '... 840,383 ... 538,504 ...'). NUMBER-CONTROL: every number each table-derived finding transcribes (e.g. 840,383; 538,504; 16,249; 16,270; 887,700; 970,737; 337,925; 374,978; 10,360; 41,399) is located verbatim (or comma-insensitively) in its cited table passage -- found 4 of 4, none missing. Grading the amended floor: K=57, M-T=67-4=63, 57/63=0.9048, which clears the >= 0.90 bar (previously 57/67=0.851, below it). NEIGHBOUR-CONTROL and MUTATION-CONTROL both refused 57 of 57 (unchanged from the prior session's fix). Computed OFFLINE, no model call, deterministic over the SAME stored analysis object as the prior session -- re-run twice this session, identical output both times (see controls.determinism).",
+      "expect": "(?=[\\s\\S]*VERBATIM-CHARS)(?=[\\s\\S]*TABLE-DERIVED)(?=[\\s\\S]*NUMBER-CONTROL: found 4 of 4)(?=[\\s\\S]*NEIGHBOUR-CONTROL: refused 57 of 57)(?=[\\s\\S]*MUTATION-CONTROL: refused 57 of 57)"
     },
     {
       "criterion_id": "AC5",
       "criterion_verbatim": "the translation of the OUTPUT, live: \"TRANSLATED: N of N lines\" (every served item plus the driver's series, unit and why), each line carrying translated true, source_language ja, translator model and prompt_version rj6-translate/1, translated_at, and the original text with its passage_ids beside it; \"RELOCATE-CONTROL: 0 of N translations found verbatim in the original\" (the validation measured 0 of 71 -- a translation that relocates would mean the analysis was not in the original language); USD printed under 0.30; the running total for this order printed and under 3.00",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && export ANTHROPIC_API_KEY=\"$(comp-secrets get anthropic-api-key --reveal | grep '^value:' | sed 's/^value:[[:space:]]*//')\" && python -m lib.research.filings.translate --analysis .scratch/keyence/filings_v1_6861_JP_Equity_doc-1defdb68a7ffd3b7.analysis.json --out .scratch/keyence/6861_JP_Equity.translated.json 2>&1 | tail -8",
-      "output_evidence": "NOT RUN this session. Cumulative live spend across the seven analyze.py invocations needed to find, fix and re-verify the three real bugs in rows S3/S4 reached approximately USD 2.9488 of the USD 3.00 cap (itemised in row AMGT_RESAPP-Z-W42-S6). AC5's own estimated cost (order section 1.3: 'about USD 0.11') exceeds the ~USD 0.05 remaining headroom, and pass1's own input-token cost (the dominant component, fixed by the excerpt's own character count) cannot be reduced by a retry, so a further live call was not attempted.",
+      "output_evidence": "TRANSLATED: 70 of 70 lines\nRELOCATE-CONTROL: 0 of 68 translations found verbatim in the original\nUSD: 0.1263 seconds 40.7\nwritten .scratch/keyence/6861_JP_Equity.translated.json\n\n(70 = 67 served items + 3 driver fields (series/unit/why), matching translate_output's own line count; 68 = 67 item text_translated + 1 driver combined text_translated, the denominator run_relocate_control actually iterates. Every served item's translation dict carries translated true, source_language ja, translator.model claude-opus-5, translator.prompt_version rj6-translate/1, translated_at, and passage_ids alongside text_original/text_translated -- confirmed by direct inspection of the written file this session, e.g. items.segments[0]: translation={translated: true, source_language: ja, translator: {model: claude-opus-5, prompt_version: rj6-translate/1}, translated_at: ..., passage_ids: [P0153]}.)",
       "denominator": "0 of 1 (not attempted, by choice, to avoid exceeding the named cap -- not a code failure)",
-      "status": "FAIL",
-      "status_reason": "REFUSED for budget: running AC5 risked exceeding the order's own stated USD 3.00 cap (BOUNDS: 'EGRESS, EXACTLY: the Anthropic API on the Keyence document within the USD 3.00 cap'), which this order's own text treats as a hard ceiling, not a target to approach as closely as possible. translate_output()'s full contract (numbered-list call, count-mismatch handling, per-item translation fields, English-skip) is unit-proven live-model-free in AC1's test_translation.py; only the LIVE call on the real Keyence object is unattempted. Row AMGT_RESAPP-Z-W42-S6 filed, BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+      "status": "PASS",
+      "status_reason": "AMENDMENT 3 (row W42-S6's disarm): the order's cumulative spend cap is raised to USD 5.00 specifically to fund this ONE live call. Run ONCE, live, off the cached analysis object (no re-run of AC3's pass-1). USD for this call: 0.1263. CUMULATIVE running total for this order: prior sessions' measured live spend (row W42-S6, itemised) 2.9488 + this call's 0.1263 = 3.0751, printed here and well under the amended 5.00 cap. NOTE: AC5's own <expect> text (written before AMENDMENT 3) still names the PRE-amendment sub-bar 'the running total ... under 3.00' -- 3.0751 exceeds that STALE literal number by design: AMENDMENT 3 explicitly raised the operative cap to 5.00 'for the budget for AC5/AC6', and the whole point of the amendment was to fund this call past the old 3.00 ceiling the prior session's bugfinding had already consumed. Graded PASS against the AMENDED, operative cap (5.00), which this order's issuer notes for this session state explicitly; the pre-amendment '3.00' in the frozen <expect> text is superseded, not silently reinterpreted -- named here for the record.",
       "expect": "(?=[\\s\\S]*TRANSLATED:)(?=[\\s\\S]*RELOCATE-CONTROL)"
     },
     {
@@ -162,10 +192,10 @@
       "criterion_verbatim": "the drafting document built from the translated analysis: served_sentences N greater than 0 (the estate path served 0 and dropped 40 on Keyence), with_translation N of N, gate_on_original N of N (the sentence's text is the original and the gate ran against the original passage), and quote_methods containing longest-verbatim-run-chars or model-marked and NOT none-found on any served sentence (a sentence with no span is HELD by AMGT-rk-41's gate when that cell has landed; if it has not, print the count of none-found instead and record it)",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json\ndoc = json.load(open('.scratch/keyence/6861_JP_Equity.translated.json', encoding='utf-8'))\nfrom lib.research.filings.drafting_build import build_drafting_document\nd = build_drafting_document(doc)\nsents = [s for sec in d['sections'] for s in sec['sentences']]\nwith_tr = sum(1 for s in sents if s.get('text_translated') and (s.get('translation') or {}).get('translated') is True)\norig_ok = sum(1 for s in sents if s.get('text_original', s.get('text')) == s.get('text'))\nprint('served_sentences', len(sents), 'with_translation', with_tr, 'gate_on_original', orig_ok, 'quote_methods', sorted({s.get('quote_method') for s in sents}))\n\"",
-      "output_evidence": "NOT RUN this session: .scratch/keyence/6861_JP_Equity.translated.json does not exist -- AC5 (its only producer) was REFUSED for budget, see AC5's status_reason.",
+      "output_evidence": "served_sentences 32 with_translation 32 gate_on_original 32 quote_methods ['longest-verbatim-run-chars', 'model-marked']",
       "denominator": "0 of 1 (no translated analysis object to build a drafting document from)",
-      "status": "FAIL",
-      "status_reason": "REFUSED, chained directly from AC5's budget refusal: this criterion's own invocation reads AC5's --out file, which was never written. build_drafting_document()'s translation/quote_method handling (text_translated, translation dict carried per sentence, gate running on the ORIGINAL text) is unit-proven by AC1's fixtures; only the live Keyence translated object is unreachable this order, for budget reasons stated in row AMGT_RESAPP-Z-W42-S6.",
+      "status": "PASS",
+      "status_reason": "served_sentences 32 (> 0, the estate path this order's own text warns against served 0); with_translation 32 of 32 (every served sentence carries text_translated and translation.translated == true); gate_on_original 32 of 32 (text_original == text on every sentence -- the gate ran, and always runs, against the ORIGINAL, never the translation); quote_methods = {longest-verbatim-run-chars, model-marked}, NOT containing none-found. ONE real gap found and fixed live-measuring this criterion this session (row AMGT_RESAPP-Z-W42-S7, INERT): FilingsProducer.draft() (drafting_build.py, this order's own owned lines ~281-311) never copied item.get('text_translated')/item.get('translation') onto the drafted sentence dict -- section 1.2 item 5 named this explicitly but no prior session's budget reached a live translated object to measure it against, so the gap was never built. First measurement this session: 'with_translation 0 of 32'. Fixed within this order's owned lines (no design change); re-measured on the SAME stored translated object, no new model call: 'with_translation 32 of 32'. Filings test suite re-run 73 of 73 OK (3 new tests added this session covering the TABLE-DERIVED census and this sentence-level translation carrying), drafting suite 18 of 18 OK, no regression.",
       "expect": "(?=[\\s\\S]*served_sentences)(?=[\\s\\S]*with_translation)(?=[\\s\\S]*gate_on_original)"
     }
   ],
@@ -177,41 +207,34 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q run twice this session, same worktree state, every model call stubbed (no network, no randomness). AC4's --controls invocation (local, no model call) run twice on the SAME stored analysis object.",
-      "observed": "Both discover runs produced identical output: \"Ran 70 tests in <seconds>\\n\\nOK\". AC4's --controls run twice produced IDENTICAL output both times: VERBATIM-CHARS 57 of 67, NEIGHBOUR-CONTROL 57 of 57, MUTATION-CONTROL 57 of 57, VERBATIM-WORDS 0 (a local, deterministic computation over a fixed stored object).",
+      "method": "python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q run twice this session, same worktree state, every model call stubbed (no network, no randomness). AC4's --controls invocation (local, no model call) run twice on the SAME stored analysis object. This session: python -m unittest discover (both suites) run to completion once more after the drafting_build.py fix (73 of 73 / 18 of 18 OK); AC4's --controls invocation (local, no model call, now including the TABLE-DERIVED census) run twice on the SAME stored analysis object; AC6's build_drafting_document() invocation run twice on the SAME stored translated object.",
+      "observed": "Both discover runs produced identical output: \"Ran 70 tests in <seconds>\\n\\nOK\". AC4's --controls run twice produced IDENTICAL output both times: VERBATIM-CHARS 57 of 67, NEIGHBOUR-CONTROL 57 of 57, MUTATION-CONTROL 57 of 57, VERBATIM-WORDS 0 (a local, deterministic computation over a fixed stored object). This session's AC4 --controls run twice produced IDENTICAL output both times: VERBATIM-CHARS 57 of 67, TABLE-DERIVED 4 of 67 (same 4 ids), VERBATIM-CHARS-PROSE 57 of 63, NUMBER-CONTROL found 4 of 4, NEIGHBOUR-CONTROL 57 of 57, MUTATION-CONTROL 57 of 57. AC6's python -c invocation run twice on the same translated.json produced IDENTICAL output both times: served_sentences 32, with_translation 32, gate_on_original 32, quote_methods unchanged.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "AC5's live translation call and AC6's drafting-document build over its output.",
-      "reason": "REFUSED for budget: cumulative live spend this session (~USD 2.95 of the USD 3.00 cap) left insufficient headroom for AC5's required call without risking exceeding BOUNDS' explicit egress ceiling. See row AMGT_RESAPP-Z-W42-S6."
-    },
-    {
-      "item": "A further live retry of AC3/AC4 seeking exactly 'blocks per citation min/median/max 1/1/1' or VERBATIM-CHARS >= 0.90.",
-      "reason": "Not affordable within the remaining budget after fixing the three real bugs in rows S3/S4 (which themselves required five live pass-1 calls to reproduce, diagnose and re-verify). Both residual measured deviations were root-caused to real content properties of this filing (see AC3/AC4 status_reason and row AMGT_RESAPP-Z-W42-S5), not further code defects, so a retry's marginal value against its marginal cost is an owner call, not this worker's to make unilaterally with no budget left."
-    },
-    {
-      "item": "Extending the verbatim rule to accept a number-based match for financial-table-derived findings, or coarsening passage granularity to reduce multi-block citations.",
-      "reason": "Both are design changes beyond what section 1.2 of this order names; the REFUSAL CLAUSE bars satisfying a criterion 'by a route this order did not name.' Left for a follow-on cell per row AMGT_RESAPP-Z-W42-S5's notes."
+      "item": "Extending the verbatim rule to accept a number-based match for ALL findings (rather than a separate TABLE-DERIVED census with its own NUMBER-CONTROL), or coarsening passage granularity to force every citation to exactly one block.",
+      "reason": "Both are design changes beyond what section 1.2 names; the REFUSAL CLAUSE bars satisfying a criterion 'by a route this order did not name.' AMENDMENT 3 itself re-cut the bars to the measured, real content properties instead (a TABLE-DERIVED census; a max-2-blocks-per-citation tolerance), which this session implements exactly as amended -- no further widening attempted."
     },
     {
       "item": "No pool write of any kind this session (no --write-pool passed at any point).",
-      "reason": "Order BOUNDS: 'No pool write of any kind ... every object lands in .scratch/'. Confirmed by every live analyze.py/translate.py invocation's own NOT-UPLOADED lines."
+      "reason": "Order BOUNDS: 'No pool write of any kind ... every object lands in .scratch/'. Confirmed by every live analyze.py/translate.py invocation's own NOT-UPLOADED lines (this session made no analyze.py call at all -- AC3 was re-graded from the RECORDED prior output per AMENDMENT 3 step 1)."
     }
   ],
   "surprises": [
     "AMGT_RESAPP-Z-W42-S3: two real bugs in resolve_pass_1 (end_block_index treated as inclusive; a genuine multi-block citation never resolved), found live-measuring AC3 and both fixed this session. OBSERVATION, INERT (fixed and unit-tested).",
     "AMGT_RESAPP-Z-W42-S4: PASS 1 did not reliably write findings in the filing's own language under the original rule wording/position; fixed by moving the rule first and strengthening its wording, with PROMPT_VERSION bumped. OBSERVATION, INERT (fixed and live-verified).",
     "AMGT_RESAPP-Z-W42-S5: after every fix, the one affordable live sample still measures 'blocks per citation min/median/max' at 1/1/2 (not the named 1/1/1) and VERBATIM-CHARS at 85.1% (below the named >= 0.90), both traced to real content (short reflow-line boundaries; financial-table-derived findings) rather than a further code defect. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~Z.",
-    "AMGT_RESAPP-Z-W42-S6: cumulative live spend finding/fixing the S3/S4 bugs reached ~USD 2.95 of the USD 3.00 cap, leaving AC5's required translation call unaffordable; AC5 and AC6 REFUSED for budget rather than risk exceeding BOUNDS' egress ceiling. BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z."
+    "AMGT_RESAPP-Z-W42-S6: cumulative live spend finding/fixing the S3/S4 bugs reached ~USD 2.95 of the USD 3.00 cap, leaving AC5's required translation call unaffordable; AC5 and AC6 REFUSED for budget rather than risk exceeding BOUNDS' egress ceiling. BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+    "AMGT_RESAPP-Z-W42-S7: drafting_build.py's draft() never carried an item's text_translated/translation onto its drafted sentence (section 1.2 item 5's own named requirement, unbuilt because no prior session's budget reached a live translated object to measure it against). Found live-measuring AC6 this session (with_translation 0 of 32), fixed within this order's owned lines, re-verified 32 of 32. OBSERVATION, INERT (fixed and live-verified same session)."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~42/SESSION_LOG.md",
   "compiler_tools": [
     {
       "tool": "python -m unittest discover (lib/research/filings/tests + lib/research/drafting/tests)",
       "invocation": "python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q ; python -m unittest discover -s lib/research/drafting/tests -p \"test_*.py\" -q",
-      "result": "70 of 70 OK; 18 of 18 OK"
+      "result": "73 of 73 OK (up from 70: +3 this session, TheTableDerivedCensus x2 + TheDraftedSentenceCarriesTranslation x1); 18 of 18 OK"
     },
     {
       "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
@@ -232,6 +255,21 @@
       "tool": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3,AC4,AC5,AC6",
       "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~42/AMGT_RESAPP.TO-AMGT-rk-40.translation-design-a.proof_of_spec.json AC1,AC2,AC3,AC4,AC5,AC6",
       "result": "rc=0 VALID pre-commit dry run (0 violations); re-run once more after this instance's own commit lands, per the issuer's own instruction, and pinned there"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh (this session's edits)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/filings/translate.py lib/research/filings/drafting_build.py lib/research/filings/tests/test_translation.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh (code + tests)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~42 <0.9.0_WK_AMGT_RESAPP~42@opal.agent>\" -F <msgfile> -- lib/research/filings/translate.py lib/research/filings/drafting_build.py lib/research/filings/tests/test_translation.py",
+      "result": "commit-gate clean 3 of 3; naming-gate PASS 0 graded; to-pipeline-gate OK; one commit landed: 1596a47e26"
+    },
+    {
+      "tool": "bash .tools/safe-commit.sh (surprise row)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~42 <0.9.0_WK_AMGT_RESAPP~42@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "surprise-row-gate OK (1 new row of 407 total); one commit landed: e8752c9e7a"
     }
   ]
 }
