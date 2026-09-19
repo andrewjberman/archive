@@ -57,25 +57,41 @@ read under DEC-12's actual run home.
 `GATE_SCOPE_R7.json`: `gate_scope.refused = []`, `refused_denominator = 5`, the gate's own verbatim
 aggregate output line, the R-35 exclusion predicate named at `file:line`, `refusal_basis = ""` (no
 refusal to classify), an admitting control (the same invocation's exclusion of `MARK.json`, corroborated
-by commit `3ea3fec204`), the scoping-control probe above, and `gate_pin = 5fd4251792`.
+by commit `3ea3fec204`), a `scoping_control` (canonical field: `{path, verdict, refused: true}`) proving
+the guard still refuses a hand-authored path in the same tree, and `gate_pin = 5fd4251792`.
+
+## RE-GRADE: the arm is repaired (`13bbe12343`)
+
+The first cut's `core_gate_scope` required a NON-EMPTY `refused` set, so a genuinely-empty one -- the
+true measurement above -- could not be satisfied by any correct artifact. `0.9.0_WK_LGIC_LGCTFM~2`
+measured 0 of 5 refused, filed `LGIC_LGCTFM-W2-S45` BLOCKING rather than manufacturing a refusal, and did
+not flip its order; that finding stands and its row stays open. `1.0.0_SA_CTO` repaired the arm at
+`13bbe12343` to admit a second branch: **(B) the gate no longer refuses** -- an EMPTY refused set is
+admissible when the record carries `why_zero`, the excluding predicate at `file:line`, and a
+`scoping_control` proving the gate still refuses something in the same tree. The evidence in this
+record was already exactly that shape (the scoping-control probe was produced unprompted at the first
+cut); this pass only lifted it into the arm's canonical field name (`gate_scope.scoping_control`,
+`check_lt_r7.py:136`), keeping the prior descriptive key alongside it. **No measurement was re-run or
+changed.**
 
 ## Criteria
 
 Every invocation below ran from `<WS>` =
-`/c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-lgctfm-7-2` against the checker at
+`/c/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-lgctfm-7-2b` against the checker at
 `org/missions/D14/LGIC/LGIC_LGCTFM/deliverables/2.0.0_SA_COO~G/fixed_inputs/r7/check_lt_r7.py`.
 
-- **G1R7-AC1** (`g1-scope`): **FAIL-G1-SCOPE**, rc=0. The checker's own `core_gate_scope` hard-refuses an
-  empty `refused` list and a `refusal_basis` outside its enum -- both are direct, unavoidable
-  consequences of the true zero-refusal measurement above, not a defect in the record's other fields
-  (predicate named at `file:line`, admitting control present and distinct, `gate_pin` present all read
-  clean). **This is the order's own disclosed residual firing exactly as disclosed.** Filed
-  `LGIC_LGCTFM-W2-S45`, BLOCKING, disarm_owner `2.0.0_SA_COO~G`.
-- **G1R7-AC2** (`r7-vintage-field`): PASS-R7-VINTAGE-FIELD, rc=0. 1 record present in this checkout
-  (`LT-g-1`, S106's checkout-scoped population), 2 of 2 fixed inputs named and resolvable.
-- **G1R7-AC3** (`r7-stale-proofs`): PASS-R7-STALE-PROOFS, rc=0. 1 commit since `cut_pin` touched the
-  watched path (the r7 issuance commit itself, informational); proofs-at-risk = 0, record's
-  `proofs_re_run` = 0 -- set equality holds.
+- **G1R7-AC1** (`g1-scope`): **PASS-G1-SCOPE**, rc=0 (re-run after the arm repair; was FAIL-G1-SCOPE at
+  the first cut, on the arm's own structural defect, not a record defect). Branch (B): `refused paths: 0
+  (denominator 5)`, `why zero` and `scoping control (still REFUSED, so the guard is live)` both present
+  and read clean. `LGIC_LGCTFM-W2-S45` (filed against the first cut's defect) stays open; disposition is
+  `3.0.0_SA_CVO`'s.
+- **G1R7-AC2** (`r7-vintage-field`): PASS-R7-VINTAGE-FIELD, rc=0. 3 records present in this checkout
+  (`LT-n-3`, `LT-g-1`, `LT-r-3` -- this worktree branches off `13bbe12343`, the round-7 drain, so all
+  three cells' records are present, per S106's checkout-scoped population), 6 of 6 fixed inputs named and
+  resolvable.
+- **G1R7-AC3** (`r7-stale-proofs`): PASS-R7-STALE-PROOFS, rc=0. 2 commits since `cut_pin` touched the
+  watched path (informational: the r7 issuance commit and the arm repair `13bbe12343`); proofs-at-risk =
+  0 for all three cells, each record's `proofs_re_run` = 0 -- set equality holds.
 - **G1R7-AC4**: judgment, no self-graded verdict. Recorded in the proof instance for `3.0.0_SA_CVO` at
   L9: what is checkable (the gate output is literal and re-runnable at the stated pin; the predicate is
   the line that actually short-circuits grading; the admitting control ran through the same invocation)
@@ -89,4 +105,5 @@ Every invocation below ran from `<WS>` =
 `LGIC_LGCTFM-W2-S45`, BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~G`, spliced into
 `org/missions/D14/LGIC/LGIC_LGCTFM/surprise-channel/investigations/INVESTIGATION_v1.md` (id one above the
 highest `S<k>` at write time, `S44`; coordinate `W2` matches this worker's own slot `~2`, per
-`surprise-row-gate`'s refusal on the first attempt naming `W7`).
+`surprise-row-gate`'s refusal on the first attempt naming `W7`). Unchanged by this re-grade -- its
+disposition is `3.0.0_SA_CVO`'s.
