@@ -1,60 +1,77 @@
-# IB-rtf-3 result: STOP at arm (a), no principal created, R60-AC1 FAIL
+# IB-rtf-3 result (RE-HANDED): the test principal created, exercised by real signed requests and deleted -- the served path refuses every FIRM_ADVISOR request
 
-**Order:** `org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtf-3.the-test-principal-exercised-on-the-disclosed-partial-path-and-deleted.md` @4ee8426c72
-**Seat:** `0.7.0_AE_CloudOps~V`, worktree `/c/tmp/wk-irpt-6-ae1`, branch `wk-irpt_bckend-6-ae1`
-**Signed act:** packet `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/NEVER_WIDEN_SIGNOFF_PACKET_IB-rte-1.md`, blob `3d9f57335b9893753973132ba5c4958b2622e24f`. The COO half is @a0f05dda0c and the CTO half @482b2c627e.
+**Order:** `org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtf-3.the-test-principal-exercised-on-the-disclosed-partial-path-and-deleted.md`, re-handed @0382e96047.
+**Seat:** `0.7.0_AE_CloudOps~V`, worktree `/c/tmp/wk-irpt-6-ae1`, branch `wk-irpt_bckend-6-ae1`.
+**Packet executed:** `NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-9.md`, blob `a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4`. Halves: COO @3c0bad02ee, CTO @4290315df9.
+**First pass (superseded):** STOP at arm (a) @1771b07216 / @700bc86ec2, row S86. That pass created nothing.
+**Battery:** `battery_ib_rtf_3.py`, the live version, blob committed @ca728267ef. Run 2026-09-19T10:25:53Z, rc 1. Output `IB-rtf-3_R60-AC1_battery_output.txt`, blob `55a69d9e5558c4604912a36e3ad6c9eae7733295` @e7da534cc6.
+**Ledger:** `irpt-bckend-ib-rtf-3-test-principal`. Its sentinel was committed @ca728267ef before any write, and it was CLOSED with 6 of 6 legs proven, committed @e7da534cc6 before the grading reads.
 
-## What happened
+## The principal's closed interval
 
-1. **Precondition: holds.** 2 of 2 halves are at HEAD, each names the packet blob and each names K1 and K2. The packet re-hashes equal at HEAD and in the worktree.
-2. **The premise does not hold, so I stopped before any write.** Both halves sign a session shape: *"a token minted against K1 carries exactly `abby_horton`'s already-live entitlement in 49financial ... because no new grant is minted anywhere"* (CTO half s.1). K1 and K2 cannot produce that session.
-   - **Served bytes.** I downloaded the deployed `opalinvest-auth-handler` zip and hashed it: sha256(b64) `h1tnQVRpRA52eWyfAia6CfBsJmn6xKwHa8IUC0zBSsQ=`, equal to the live `CodeSha256`.
-   - **Where the advisor claim comes from.** In those bytes the advisor claim comes from `opal-partner-<firm>` read with `GetItem Key {email}` (source: `infra/aws/lambda/lib/partner/index.ts:21-37 @4ee8426c72`, `infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:29-54 @4ee8426c72`). `mintSession` passes it to `generateAccessToken` (`auth.ts:202-216 @4ee8426c72`, `jwt.ts:179-185 @4ee8426c72`).
-   - **The user row is never read for it.** `getUser()` maps no advisor field off the `opal-users-v2` row (`db.ts:138-167 @6275297f0e`), so the packet's `advisorKey/advisorId = abby_horton` on K1 would be written and never read.
-   - **No login is bound to `abby_horton`.** `opal-partner-49financial` is keyed `HASH=email`, and a COUNT scan finds **0 of 11** rows with `advisorKey = abby_horton`. No login anywhere binds `abby_horton` today.
-   - **What K1 and K2 would actually mint.** A new `.test` e-mail would get a `firmId=49financial` session with **no** advisor claim. On the IRPT scoped routes that principal classifies `UNKNOWN`, not `FIRM_ADVISOR` (`_scope/resolve.py:193-196 @4ee8426c72`). On the older portal routes `canAccessFirm` admits it by `firmId` alone (`lib/partner/index.ts:39-47 @4ee8426c72`). Neither half signed that entitlement.
-   - **What the signed shape would need.** A partner-table row binding the test e-mail to `advisorKey=abby_horton`. The packet does not name that key. It would be the first login binding for `abby_horton` anywhere, which is an authorization write, where the halves sign "an authentication row; it adds no authorization".
-   - **The rule that applies.** CTO half s.1: a key the act discovers it needs is *"a STOP and a new packet, not a widening of this one."*
-3. **Nothing was written.** 0 of 2 keys were applied, no ledger entry was opened (there was no act), no session was minted, and there were 0 vendor calls. The principal's interval is **EMPTY**: it never existed, so there is nothing to delete.
-4. **Informational, not the guard (no K1 exists).** The live ownership map (`s3://opal-data-bd/platinum/49financial/ownership_map.json`, VersionId `nR.FkCE1frsI9R5zRp2wJWB7vyMZ04NK`, ETag `ff85ad011af1636ecdb9dc7ae6ee1398`) carries `abby_horton` with **33 accounts / 18 relationships**. The packet measured 43 / 18; the move is already row W1-S30.
+**[2026-09-19T10:25:56Z, 2026-09-19T10:41:03Z]**
 
-## R60-AC1: FAIL by output
+- **Created:** K1 `opal-users-v2` `USER#usr_irptrte_1789813553` / PROFILE at 10:25:56Z, 10 attributes, read back by a consistent GetItem. Digest with `passwordHash` excluded: `8b1123122d127db1e254ef64eef47b0a94783b101f9b0b648ab752af92a6f4f3`.
+- **Created:** K1b `opal-partner-49financial` with exactly `{advisorKey, email}` at 10:25:56Z, read back. Digest `5d891293f2b4b72684a35c164cf0313d2ed750dddd0aa58439bd9851693be88f`.
+- **Guard, immediately before those writes:** the ownership map VersionId `nR.FkCE1frsI9R5zRp2wJWB7vyMZ04NK`, with `abby_horton` PRESENT, 33 accounts and 18 relationships, equal to the packet's read.
+- **Login** (the real route, `POST https://opalinvest.dev/auth/login`): HTTP 200 at 10:25:58Z. K2 carried `firmId=49financial`, `role=user`, `tier=advisor`, `advisorKey=advisorId=abby_horton`, `advisorRole=''`, with no `userType` and no `firmRole`, **exactly as the packet declares**. Access-token `exp` 10:41:03Z. The token, cookie and password were never recorded.
+- **Deleted, K1b FIRST:** K1b at 10:26:10Z, then K1 at 10:26:10Z, each verified by a consistent base-table GetItem returning no Item. **2 of 2.**
+- **Refresh (CTO half s.1):** `POST /auth/refresh` with the issued refresh token after K1's delete returned HTTP 404 and minted no token. **REFUSED, 1 of 1.**
+- **Access token after `exp`:** `GET .../status` returned HTTP 401. **REFUSED, 1 of 1.**
+- **Residue:** prefix scans after the run read 0 of 79 (`PK`), 0 of 79 (`email`) and 0 of 11 (partner). No failed-login throttle counter exists for the test e-mail.
 
-Battery `battery_ib_rtf_3.py`, run 2026-09-19T08:29:50Z at HEAD 6275297f0e (the run in the committed `IB-rtf-3_R60-AC1_battery_output.txt`), printed:
+## R60-AC1: FAIL by output, 9 of 12 arms
 
-- *"STOP at arm (a): the signed keys K1 + K2 cannot produce the session shape both halves sign ..."*
-- *"RESULT: R60-AC1 FAIL -- STOP at arm (a); 0 of 4 outcomes exercised; principal never created"*
+| arm | result | deciding line |
+|---|---|---|
+| (a) precondition | PASS | 2 of 2 halves at HEAD naming blob `a1f36b95b2`; packet re-hashed EQUAL |
+| (b) guard | PASS | `abby_horton` PRESENT; 33 / 18 |
+| (b) keys + login | PASS | 2 of 2 read back; claims exactly as declared |
+| (d) negative controls | PASS | 4 of 4 refused (discrimination below) |
+| (c) FWD-1 | **FAIL** | search and resolve refused `UNEXPECTED`; no entries, no `unprojected_grant`, no `firm_id` |
+| (c) FWD-2 | **FAIL** | 8 of 8 swaps refused without echo; within-set tabs served 0 of 1 (status refused `UNEXPECTED`) |
+| (c) FWD-5 | **FAIL** | not runnable: no permitted account id, because the search served nothing |
+| (c) vendor calls 0 | PASS | performance transport `recorded`, no egress variable; POST /analysis and POST /export called 0 times |
+| (e) deletes verified | PASS | 2 of 2, K1b first |
+| (e) refresh refused | PASS | HTTP 404, 1 of 1 |
+| (e) expired token refused | PASS | HTTP 401, 1 of 1 |
+| (e) no residue | PASS | 0 / 0 / 0 |
 
-Arms (b), (c), (d) and (e) did not run. The order stays open.
-
-**Correction to row IRPT_BCKEND-S86's grounding, recorded here because the channel is append-only.** The row cites the output file as "run 2026-09-19T08:28:40Z". The committed file is the **08:29:50Z** run. The 08:28:40Z run read the same values: zip sha256 = CodeSha256, the partner lookup by e-mail, 0 of 11, and the STOP. It differed only in printing the `getUser` range as `db.ts:138-201`, which ran on into `createUser`'s item literal. The battery was corrected to end at `} as User;` (`db.ts:138-167`) before the committed run.
+FWD-11 is recorded as NOT REACHABLE by this principal (re-hand condition (v)); no request was made. The success token did not print.
 
 ## R60-AC2: JUDGMENT, recorded for 3.0.0_SA_CVO and not self-graded
 
-**Is each outcome now EXERCISED as its DONE WHEN reads? None of them is, this round.** No session was minted, so no arm made a request.
+**Is each outcome EXERCISED as its DONE WHEN reads?**
 
-| outcome | what the arm did | what it did not reach |
-|---|---|---|
-| FWD-1 (search, select, relationship + permitted accounts + as-of) | nothing | The disclosed-partial path IB-rtf-2 deployed is untested by a live session. IB-rtf-2's own in-process arm read `k = 21` permitted with `unprojected_grant.count = 12` of denominator 33 for `abby_horton` at its run (row W1-S30). For the DONE WHEN, a partial means "permitted accounts" is `k` of the grant set, with the rest disclosed by count. Whether that satisfies FWD-1 is the L4 ruling's three conditions @61627f39f9, graded at L9, not here. |
-| FWD-2 (every tab and the export within the permitted set, `k of k` swaps refused) | nothing | unreached |
-| FWD-5 (custody holdings + model percentages for a permitted account) | nothing | unreached |
-| FWD-11 (the global viewer across every firm) | nothing | Unreachable by this principal even with a working mint path. A `FIRM_ADVISOR` token is not `OPAL_GLOBAL`, and the roster parameter `/opal/irpt/opal-principal-roster` is a separate act that neither half authorizes. |
+- **FWD-1, FWD-2, FWD-5: attempted, and none reached the compute.** Every authenticated scoped request that passed the FIRM_BINDING check was refused BEFORE the scope resolved (row S90): 12 of 12, across search, resolve, status, holdings and the seven foreign-id swaps.
+- **The disclosed partial was never observed live.** No served response carried `unprojected_grant`, so the partial's `count` was not seen. The in-process figure from IB-rtf-2 (`k=21`, `count=12` of 33) is not a property of the deployed path. It was computed under operator credentials that can read the ownership map; the Lambda role cannot (S90).
+- **What the partial's count would mean for the DONE WHEN is therefore still open.** It is graded when a served response exists.
+- **FWD-11 is not reachable** by a FIRM_ADVISOR principal: it needs the roster plus an Opal login, a separate act.
 
-**What the attempt revealed about the served routes and the mint path (row IRPT_BCKEND-S86, BLOCKING, ARMED, disarm owner 2.0.0_SA_COO~B):**
+**What the exercise revealed about the served routes (defects filed as rows):**
 
-- The finding is on the **mint path**, not the served routes. The token's advisor identity is a partner-table binding keyed by e-mail, and the user row plays no part in it.
-- Since 0 of 11 partner rows bind `abby_horton`, no real person's login reaches the IRPT scoped routes as `abby_horton` either. The only principal that could exercise FWD-1/2/5 "as `abby_horton`" is one whose partner row is written for the purpose.
-- A second observation, **not measured here and not graded**: a 49financial principal with no partner row is a "firm member with no book". The IRPT scoped routes refuse it; the older portal routes admit it by `firmId`. Whether any such login exists today was not censused. This is named for the CTO as an exposure question, not claimed as an incident.
+1. **S90 (BLOCKING, ARMED, 2.0.0_SA_COO~B): the served IRPT path answers no FIRM_ADVISOR request.** The causes, per function:
+   - `irpt-directory-search`: its role cannot read `opal-data-bd/platinum/49financial/ownership_map.json`. Simulated `implicitDeny`, with the admin positive control allowed. `_authz/loaders.py:93-116 @9f72f4d6a4` re-raises that AccessDenied.
+   - `irpt-status` and `irpt-holdings`: their deployed environments carry no `IRPT_DIRECTORY_BUCKET_MAP`, and both bucket readers raise on an unmapped firm (`loaders.py:46-56`, `holdings/handler.py:356-370 @9f72f4d6a4`). This cause is source plus environment, not simulated.
+   - **This is the first authenticated request ever sent through the real path.** Round 1's replay was unauthenticated, and IB-rtf-2's "SERVED" ran in-process.
+2. **S91 (ARMED, 1.0.0_SA_CTO): those refusals are undiagnosable.** `served.py:628, 649, 662 @9f72f4d6a4` record the exception to a `None` sink. CloudWatch held only START/END/REPORT lines for all 12 refusals; the cause in S90 was re-derived by simulation and environment reads.
+3. **S92 (ARMED, INFERRED, 2.0.0_SA_COO~B): latent behind S90.** `search` reads `q`/`limit` and `resolve` reads `selection` from the top level of a payload-2.0 event, where they never appear (`directory/entry.py:92-93, 136`; `api/integrations.tf:57 @9f72f4d6a4`). Once S90 is fixed, search would ignore its query and resolve would always answer "selection matches nothing".
 
-**Can a future round repeat this without a standing account? Yes, but with two keys, not one.**
+**Which controls discriminated and which were vacuous:**
 
-- The create-exercise-delete lifecycle still works inside one ledger interval, as long as the packet names **both** rows: the `opal-users-v2` item (authentication) and an `opal-partner-49financial` item keyed by the test e-mail carrying `advisorKey=abby_horton` (the advisor binding).
-- Each needs its own rollback: `DeleteItem`, then a consistent-read `GetItem` returning no `Item`.
-- The partner row also needs its own writer census and reader census, because it is the key that carries the entitlement.
-- After deletion, the refresh token dies with the row (the refresh `sub` binds to PK + createdAt, `jwt.ts:220-224 @4ee8426c72`). An already-issued access token lives at most 15 minutes (`jwt.ts:17 @4ee8426c72`, `ACCESS_TOKEN_EXPIRY = '15m'`). That is the bound on the CTO half's s.5 item 3 exposure for a re-cut.
-- Neither row may outlive the interval, so no standing account is needed.
+- **Discriminated.** The three FIRM_BINDING refusals: NC1 for inflection and for cottonwood, and the resolve swap with `firm_id=inflection` in the body. They fire at `served.py:614-616`, BEFORE the failing `enforcer_for`, so they measured the binding. None echoed the swapped value.
+- **NC2** (a route outside `api/scoped/`) served no IRPT envelope: HTTP 200 without an IRPT body, which is the site's default behaviour.
+- **Vacuous.** NC3 (the terminated client's account) and the seven foreign-id swaps were refused `UNEXPECTED`, the same refusal every in-scope request got. **They show nothing about coverage or the terminated-client gap** and must not be read as evidence that the gap is enforced. They become real controls once S90 is fixed.
+
+**Can a future round repeat this without a standing account? Yes, and this run is the proof.**
+
+- The whole two-key lifecycle closed in 15 minutes 7 seconds: create, one login, exercise, K1b-first delete verified 2 of 2, the 7-day refresh credential's death EXERCISED (the CTO's condition), and the 15-minute access token proven dead by a 401.
+- It left 0 residue on both tables and no throttle counter, all under one ledger interval.
+- A re-run after S90's fix needs no new packet: same keys, same blob, new epoch.
+- The standing smoke logins the portal repo tracks (row S87) are exactly the standing account this lifecycle makes unnecessary. They must not be used for this.
 
 ## Rows filed
 
-- `IRPT_BCKEND-S86`: BLOCKING, ARMED, disarm owner `2.0.0_SA_COO~B`. The signed keys cannot produce the signed session; STOP before any write; a re-cut packet is needed.
-- The face mints `IRPT_BCKEND-A-S<k>` here too. That grammar defect is already row `IRPT_BCKEND-S83` (seat form used), so it is not re-filed.
+- `IRPT_BCKEND-S90`: BLOCKING, ARMED, `2.0.0_SA_COO~B`.
+- `IRPT_BCKEND-S91`: OBSERVATION, ARMED, `1.0.0_SA_CTO`.
+- `IRPT_BCKEND-S92`: OBSERVATION, ARMED, INFERRED, `2.0.0_SA_COO~B`.
