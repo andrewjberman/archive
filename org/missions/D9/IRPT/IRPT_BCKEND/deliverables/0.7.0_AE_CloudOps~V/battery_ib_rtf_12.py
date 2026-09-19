@@ -72,9 +72,23 @@ def identity_line(arm: str) -> None:
          % (arm, boto3.client("sts").get_caller_identity()["Arn"]))
 
 
+def _fetch(url: str, attempts: int = 4) -> bytes:
+    """The presigned artifact URL, with a bounded retry. A transport blip (WinError 10054) is an INSTRUMENT
+    failure and must not read as a world failure; a persistent one still raises."""
+    import time as _t
+    last = None
+    for i in range(attempts):
+        try:
+            return urllib.request.urlopen(url, timeout=120).read()
+        except Exception as exc:  # noqa: BLE001 -- retried, then re-raised
+            last = exc
+            _t.sleep(2 * (i + 1))
+    raise last
+
+
 def live_zip(fn: str) -> tuple[dict, dict, str]:
     cfg = lam.get_function_configuration(FunctionName=fn)
-    body = urllib.request.urlopen(lam.get_function(FunctionName=fn)["Code"]["Location"], timeout=120).read()
+    body = _fetch(lam.get_function(FunctionName=fn)["Code"]["Location"])
     z = zipfile.ZipFile(io.BytesIO(body))
     members = {n: z.read(n) for n in z.namelist() if not n.endswith("/")}
     return cfg, members, "EQUAL" if b64sha(body) == cfg["CodeSha256"] else "DIFFERS"
@@ -84,7 +98,7 @@ def layer_members(cfg: dict) -> set:
     out = set()
     for layer in cfg.get("Layers") or []:
         lv = lam.get_layer_version_by_arn(Arn=layer["Arn"])
-        z = zipfile.ZipFile(io.BytesIO(urllib.request.urlopen(lv["Content"]["Location"], timeout=120).read()))
+        z = zipfile.ZipFile(io.BytesIO(_fetch(lv["Content"]["Location"])))
         out |= {n for n in z.namelist() if not n.endswith("/")}
     return out
 
