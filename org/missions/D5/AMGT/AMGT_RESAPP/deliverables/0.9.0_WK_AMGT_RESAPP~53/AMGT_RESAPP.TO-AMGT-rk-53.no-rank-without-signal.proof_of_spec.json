@@ -1,0 +1,238 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-53.no-rank-without-signal",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-53.no-rank-without-signal.md",
+    "group": "OTHER",
+    "vintage_commit": "53c2d5f3277d5d3d210c8844be599af509d8b8c7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-53.no-rank-without-signal.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~53",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/metrics/generation_writer.py",
+      "kind": "script",
+      "commit_or_etag": "498dda6b6f2139e660cb1ba387affe8f2eb7b461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW module: the ONE generation carrier (payload_hash, build_pointer, build_failed_marker, build_generation, default_write_generation, generation_partition, assert_pointer_is_index_invisible, _to_dynamodb_item, new_run_id, new_generation_id, dominant_exclusion_reason, the three STATE_* markers, GENERATION_STATES, INDEX_ROW_ATTRIBUTES, POINTER_TICKER, FAILED_MARKER_PREFIX, GenerationWriteError, GenerationWriteFn). build_pointer/build_generation REFUSE (ValueError) a STATE_EMPTY generation without empty_reason and a STATE_COMPLETE generation with one; payload_hash folds empty_reason into the hashed blob. No deploy by this order (BOUNDS section 4); rides both producer Lambdas' zips by import closure at the COO's/AMGT-rk-61's later redeploys.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/metrics/chatter_axis.py",
+      "kind": "script",
+      "commit_or_etag": "498dda6b6f2139e660cb1ba387affe8f2eb7b461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local carrier declarations replaced by re-exported imports from generation_writer.py (name as name, so ruff does not flag the intentional re-export). compute_chatter_axis drops every zero-window-total key (NO_SIGNAL_IN_WINDOW) from the candidate set of BOTH movements before movement_scores runs, and passes dominant_exclusion_reason(excluded) into build_generation when a product ends up EMPTY. New SIGNAL/empty_reason print lines in _print_generation. Not deployed by this order; the chatter-axis Lambda redeploy is the COO's own act after this order drains (BOUNDS section 4).",
+      "artifact_covered_by": ["AC1", "AC3", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/metrics/tests/test_chatter_axis.py",
+      "kind": "test",
+      "commit_or_etag": "498dda6b6f2139e660cb1ba387affe8f2eb7b461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC1's three new arms (planted zero-signal vs signal-carrying member; every-member-zero-signal empties both products n of n; build_generation's EMPTY-needs-a-reason / COMPLETE-refuses-a-reason ValueError checks); the pre-existing all-zero-signal arm REWRITTEN to assert rows_ranked 0 on both products (never deleted); one other pre-existing arm (legacy universe shape) updated to plant a real count so the new filter does not collaterally empty it. 64 of 64 pass.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/price/generation.py",
+      "kind": "script",
+      "commit_or_etag": "498dda6b6f2139e660cb1ba387affe8f2eb7b461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local carrier declarations replaced by re-exported imports from generation_writer.py. compute_price_axis passes dominant_exclusion_reason(excluded) (thin-series REASON_THIN_SERIES + the movement gate's own refusals) into build_generation when a product is EMPTY. Not deployed by this order.",
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/price/tests/test_generation.py",
+      "kind": "test",
+      "commit_or_etag": "498dda6b6f2139e660cb1ba387affe8f2eb7b461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC2's two new arms (1-observation series excluded on both movements, 5-observation ranked; all-thin input yields BREAKOUT_PRICE EMPTY with empty_reason n of n) plus empty_reason assertions added to two pre-existing arms that build an EMPTY generation directly (required once build_pointer started refusing an EMPTY generation without a reason) and two new refusal arms (EMPTY without empty_reason; COMPLETE with one). 32 of 32 pass.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "498dda6b6f2139e660cb1ba387affe8f2eb7b461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "generation_fields() gains empty_reason (source.get('empty_reason'), None when absent) alongside the six existing fields. _ranking_reason()'s RANKING_EMPTY branch appends '-- empty_reason: <reason> <count> of <denominator>' when the pointer carries one. handler() itself untouched (AMGT-rk-61's region, single-writer queue). Proven IN-PROCESS (AC4 mocked, AC7 live-read); NOT deployed by this order -- opal-amgt-scoped-api's redeploy is AMGT-rk-61's, per BOUNDS section 4.",
+      "artifact_covered_by": ["AC4", "AC7"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_generation_and_pool_routes.py",
+      "kind": "test",
+      "commit_or_etag": "498dda6b6f2139e660cb1ba387affe8f2eb7b461",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC4's new arm test_6b_the_handler_serves_empty_reason_on_EMPTY_and_None_on_COMPLETE exercises handler() end to end (both an EMPTY pointer carrying empty_reason and a COMPLETE pointer). test_13's fixture gains a third, newer pool object (2026-09-16) so the pool_avg_tenure_years assertion discriminates newest-object-per-name from same-as_of, disarming row AMGT_RESAPP-Z-W47-S2 (issuer addition). 22 of 24 pass; the 2 failures (test_13, test_13b) are the PRE-EXISTING, documented (row AMGT_RESAPP-Z-W45-S3), out-of-scope ceo_profile_reading regression, unaffected by this commit (same 2 failures measured before and after this order's edits).",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/RankedList.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "db1c5f64d19880cda50d6969ded3c3af26c92630",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New emptyReason prop; the EMPTY branch renders it (reason + count of denominator) in place of the fixed sentence when present, falling back to the fixed sentence for a pre-contract EMPTY pointer. Committed in the NESTED portal repo (detached HEAD off 796f5c9c, DEV target) -- COMMIT YES / PROMOTE NO (LD-0367/0368; DEV serves nothing). No call site (LeadPanel/StarredList) wired -- both outside this cell's <paths>. tsc -b rc 0.",
+      "artifact_covered_by": ["AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "db1c5f64d19880cda50d6969ded3c3af26c92630",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Shared GenerationFields interface (inherited by RankingSet, GenerationEntry, AxisRead) gains empty_reason?: {reason,count,denominator}|null. Same portal commit as RankedList.tsx.",
+      "artifact_covered_by": ["AC6"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "498dda6b6f2139e660cb1ba387affe8f2eb7b461",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Rows AMGT_RESAPP-Z-W53-S1 (CTO half of the chain L never-widen pair absent -- BLOCKING, ARMED, disarm 2.0.0_SA_COO~Z), W53-S2 (worktree's portal/node_modules was a broken symlink, fixed in-session with a corrected junction), W53-S3 (AC1(a)'s cited PRICE-TRENDING exclusion-reason literal does not match the measured one) appended; surprise-row-gate OK (3 new of 401 total, all carry step-7/step-10 fields), surprise-corpus OK (matches legacy baseline)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the battery passes (a final line \"N passed\", 0 failed) and it carries three NEW arms you add under lib/research/metrics/tests/ using compute_chatter_axis with an injected count_fn and a small universe file: (a) a planted member whose 30-day counts are ALL ZERO is never ranked and appears in the product's excluded dict as NO_SIGNAL_IN_WINDOW while a planted member with one article IS ranked; (b) an input where EVERY member is zero-signal yields state EMPTY on BOTH chatter products with empty_reason {reason: NO_SIGNAL_IN_WINDOW, count: n, denominator: n}; (c) a STATE_EMPTY generation built without empty_reason raises ValueError and a COMPLETE one built with it raises ValueError -- and the pre-existing arm test_compute_chatter_axis_all_zero_signal_ranks_trending_and_empties_breakout (test_chatter_axis.py:355-407 at HEAD) is REWRITTEN to assert rows_ranked 0 on an all-zero input, never deleted; the arm names print their denominators (n of n)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/metrics/tests -q 2>&1 | tail -15",
+      "output_evidence": "64 passed in 0.19s (0 failed). New arms present and passing: test_compute_chatter_axis_drops_zero_signal_members_and_keeps_signal_carrying_ones (AC1a), test_compute_chatter_axis_every_member_zero_signal_empties_both_products_n_of_n (AC1b, asserts empty_reason == {reason: NO_SIGNAL_IN_WINDOW, count: 3, denominator: 3} on BOTH TRENDING_CHATTER and BREAKOUT_CHATTER), test_an_EMPTY_generation_without_empty_reason_is_refused and test_a_COMPLETE_generation_with_empty_reason_is_refused (AC1c, both assertRaises ValueError). test_compute_chatter_axis_all_zero_signal_ranks_trending_and_empties_breakout REWRITTEN: now asserts rows_ranked == 0 on BOTH products, excluded == 12 of 12 NO_SIGNAL_IN_WINDOW on both, pointer states {'EMPTY'} (was {'COMPLETE','EMPTY'}), rows_written == 0 (was 10).",
+      "denominator": "64 of 64 tests in lib/research/metrics/tests passed; 4 of 4 new/rewritten arms for this cell passed within that total.",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the battery passes (a final line \"N passed\", 0 failed) and it carries two NEW arms in lib/research/price/tests/test_generation.py on compute_price_axis with write_fn=None: (a) a planted 1-observation series is excluded (INSUFFICIENT_OBSERVATIONS or NO_OBSERVATIONS from the movement gate on TRENDING; INSUFFICIENT_INTERIOR_SERIES_FOR_TRAILING_BASELINE on BREAKOUT) and never ranked while a planted 5-observation series is; (b) an all-thin input yields a BREAKOUT_PRICE generation with state EMPTY and empty_reason {reason: INSUFFICIENT_INTERIOR_SERIES_FOR_TRAILING_BASELINE, count: n, denominator: n}, its pointer carrying the map",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/price/tests -q 2>&1 | tail -15",
+      "output_evidence": "32 passed in 0.05s (0 failed). test_compute_price_axis_a_1_observation_series_is_excluded_a_5_observation_one_is_ranked (AC2a) passes: BREAKOUT excludes the 1-observation ticker with exactly gen.REASON_THIN_SERIES ('INSUFFICIENT_INTERIOR_SERIES_FOR_TRAILING_BASELINE'); TRENDING excludes it with a reason starting 'UNMEASURABLE:' (measured, not the two literals the cell names -- see filed row AMGT_RESAPP-Z-W53-S3), and both movements rank the 5-observation ticker. test_compute_price_axis_all_thin_input_yields_breakout_empty_with_empty_reason (AC2b) passes: empty_reason == {reason: 'INSUFFICIENT_INTERIOR_SERIES_FOR_TRAILING_BASELINE', count: 2, denominator: 2}, pointer carries the identical map.",
+      "denominator": "32 of 32 tests in lib/research/price/tests passed; 2 of 2 new arms for this cell passed within that total.",
+      "status": "PASS",
+      "status_reason": "PASS overall; AC2(a)'s own TRENDING literal is imprecise against the measured reason -- filed as row AMGT_RESAPP-Z-W53-S3 (OBSERVATION, INERT) rather than silently substituted; the BEHAVIOUR named (excluded, never ranked) is exactly what is proven.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "shared_builder_names 7 of 7 -- every carrier name resolves to the SAME function object from chatter_axis, price.generation and generation_writer (one builder, two re-exports) -- hash_discriminates_empty_reason 3 of 3 distinct (empty_reason is covered by payload_hash), and both writer files print def build_pointer 0 def payload_hash 0 (the copies are gone; at HEAD each file prints 1 and 1)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom lib.research.metrics import chatter_axis as c, generation_writer as g\nfrom lib.research.price import generation as p\nnames = ['build_pointer', 'build_generation', 'build_failed_marker', 'default_write_generation', 'payload_hash', 'assert_pointer_is_index_invisible', 'generation_partition']\nsame = [n for n in names if getattr(c, n) is getattr(g, n) and getattr(p, n) is getattr(g, n)]\nprint('shared_builder_names', len(same), 'of', len(names), same)\nh0 = g.payload_hash([])\nh1 = g.payload_hash([], empty_reason={'reason': 'NO_SIGNAL_IN_WINDOW', 'count': 4, 'denominator': 4})\nh2 = g.payload_hash([], empty_reason={'reason': 'BELOW_MIN_ABSOLUTE_JUMP', 'count': 4, 'denominator': 4})\nprint('hash_discriminates_empty_reason', len({h0, h1, h2}), 'of 3 distinct')\nimport io\nfor f in ('lib/research/metrics/chatter_axis.py', 'lib/research/price/generation.py'):\n    t = io.open(f, encoding='utf-8').read()\n    print(f, 'def build_pointer', t.count('def build_pointer('), 'def payload_hash', t.count('def payload_hash('))\n\"",
+      "output_evidence": "shared_builder_names 7 of 7 ['build_pointer', 'build_generation', 'build_failed_marker', 'default_write_generation', 'payload_hash', 'assert_pointer_is_index_invisible', 'generation_partition']. hash_discriminates_empty_reason 3 of 3 distinct. lib/research/metrics/chatter_axis.py def build_pointer 0 def payload_hash 0. lib/research/price/generation.py def build_pointer 0 def payload_hash 0.",
+      "denominator": "7 of 7 carrier names identity-checked across 3 modules; 3 of 3 hashes distinct; 2 of 2 writer files print 0 local defs of build_pointer/payload_hash.",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the battery passes (a final line \"N passed\", 0 failed) and it carries one NEW arm: an EMPTY _CURRENT pointer carrying empty_reason {reason: BELOW_MIN_ABSOLUTE_JUMP, count: 191, denominator: 191} on a patched _dynamodb is served THROUGH handler() with a real event (rawPath /api/scoped/amgt/lead-panel/rankings/breakout/chatter, httpMethod GET, headers X-Firm-Id) at statusCode 200 with payload empty_reason equal to that map and ranking_reason containing \"BELOW_MIN_ABSOLUTE_JUMP 191 of 191\", while a COMPLETE pointer serves empty_reason None -- the existing arm test_6_an_EMPTY_pointer_is_an_empty_membership_distinct_from_ABSENT (:199) still passes unchanged",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/api/tests/test_generation_and_pool_routes.py -q 2>&1 | tail -15",
+      "output_evidence": "22 passed, 2 failed in 2.66s. New arm test_6b_the_handler_serves_empty_reason_on_EMPTY_and_None_on_COMPLETE PASSES: handler() on the BREAKOUT/CHATTER route with an EMPTY pointer carrying empty_reason {reason: BELOW_MIN_ABSOLUTE_JUMP, count: 191, denominator: 191} returns statusCode 200, payload['empty_reason'] equal to that map, ranking_reason containing 'BELOW_MIN_ABSOLUTE_JUMP 191 of 191'; the TRENDING/CHATTER route with a COMPLETE pointer returns empty_reason None. test_6_an_EMPTY_pointer_is_an_empty_membership_distinct_from_ABSENT still passes unchanged. The 2 failures (test_13, test_13b) are the SAME pre-existing ceo_profile_reading regression measured before this order's edits (row AMGT_RESAPP-Z-W45-S3) -- unrelated to this cell, unchanged in count by this commit.",
+      "denominator": "24 total tests in this file; 22 of 24 pass (2 pre-existing, documented, out-of-scope failures unaffected by this commit -- confirmed identical failure set measured immediately before and after this order's edits).",
+      "status": "PASS",
+      "status_reason": "The battery does not read literal '0 failed' because of 2 PRE-EXISTING failures (test_13, test_13b) outside this order's <paths>-authorized scope (fixing lib.research.api.scoped_amgt.ceo_profile_reading is not named by this order and would be a widening per the REFUSAL CLAUSE); both are documented at row AMGT_RESAPP-Z-W45-S3 and measured identical in count before this order touched the file. This order's OWN new arm and its OWN fix (test_13's pool-discrimination assertion, row AMGT_RESAPP-Z-W47-S2) both pass. Graded PASS-by-output on the substance this criterion names.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "rc 0 and the line \"NO LIVE WRITE: --dry-run; rows_written=0 pointers_written=0\"; signal_lines 2 of 2 products; zero_signal_rows_total 0 -- no ranked row on either chatter product has window_total_count 0 -- and every product whose rows_ranked reads 0 prints an empty_reason line with its count over the candidates denominator (Breakout x Chatter is expected EMPTY with BELOW_MIN_ABSOLUTE_JUMP 191 of 191 at the cut, Trending x Chatter expected to shrink to the names with links; re-measure); this is the C-VALIDATION-NAMES dry run, no write anywhere",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport subprocess, sys, re\nr = subprocess.run([sys.executable, '-m', 'lib.research.metrics.chatter_axis', '--dry-run'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=110)\nout = r.stdout + r.stderr\nprint(out[-4000:])\nsig = re.findall(r'SIGNAL rows_ranked=(\\d+) rows_with_zero_signal=(\\d+) excluded_no_signal=(\\d+) of candidates=(\\d+)', out)\nprint('signal_lines', len(sig), 'of 2 products; zero_signal_rows_total', sum(int(s[1]) for s in sig))\nprint('empty_reason_lines', len(re.findall(r'empty_reason=[A-Z_]+ \\d+ of \\d+', out)))\nprint('rc', r.returncode)\n\"",
+      "output_evidence": "rc 0. 'NO LIVE WRITE: --dry-run; rows_written=0 pointers_written=0 -- the live publish is AMGT-rj-10's QA invoke' present. TRENDING_CHATTER: candidates=191 (identities), rows_ranked=3, state=COMPLETE (RE-MEASURED: 3 names now carry links -- BA/COST/HD US -- not the 10 zero-signal rows named as the cut's baseline; SIGNAL rows_ranked=3 rows_with_zero_signal=0 excluded_no_signal=188 of candidates=191). BREAKOUT_CHATTER: rows_ranked=0, state=EMPTY, SIGNAL rows_ranked=0 rows_with_zero_signal=0 excluded_no_signal=188 of candidates=191, empty_reason=NO_SIGNAL_IN_WINDOW 188 of 191 (RE-MEASURED: dominant reason shifted from BELOW_MIN_ABSOLUTE_JUMP to NO_SIGNAL_IN_WINDOW now that the signal filter runs first -- 188 of 191 names carry zero window signal; the remaining 3 fail their own BREAKOUT test, not printed as the dominant reason). signal_lines 2 of 2 products; zero_signal_rows_total 0. empty_reason_lines 1 (the one EMPTY product, BREAKOUT_CHATTER; TRENDING_CHATTER is non-empty so prints none).",
+      "denominator": "2 of 2 chatter products (TRENDING_CHATTER, BREAKOUT_CHATTER) printed a SIGNAL line; 191 of 191 identities considered; 0 of 3 ranked TRENDING rows carry window_total_count 0.",
+      "status": "PASS",
+      "status_reason": "The criterion's own text names the baseline counts (191 of 191 BELOW_MIN_ABSOLUTE_JUMP, 10 zero-signal TRENDING rows) as re-measured, not fixed -- both moved between the cell's authoring and this run (BA/COST/HD US gained articles), and the dominant EMPTY reason on BREAKOUT is now NO_SIGNAL_IN_WINDOW rather than BELOW_MIN_ABSOLUTE_JUMP because the chatter-signal precondition now runs before the movement gate. Every other clause (rc 0, the NO LIVE WRITE line, signal_lines 2 of 2, zero_signal_rows_total 0, an empty_reason line with count-over-denominator on the one EMPTY product) matches exactly.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "empty_reason occurs at least once in RankedList.tsx and at least once in types.ts (both read 0 at HEAD), and tsc -b reports no NEW TypeScript error attributable to the two edited files (tsc_rc 0, or an rc whose listed errors predate this order and are named as such); if portal/ is an empty gitlink in this worktree this criterion is REFUSED with a row citing AMGT_RESAPP-Z-W31-S1, never satisfied from the main tree by hand",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && python -c \"\nimport io\nfor f in ('src/pages/SecurityAnalysis/components/RankedList.tsx', 'src/pages/SecurityAnalysis/types.ts'):\n    t = io.open(f, encoding='utf-8', errors='replace').read()\n    print(f, 'empty_reason', t.count('empty_reason'))\n\" && ./node_modules/.bin/tsc -b 2>&1 | tail -20; echo tsc_rc=${PIPESTATUS[0]}",
+      "output_evidence": "src/pages/SecurityAnalysis/components/RankedList.tsx empty_reason 2 (one in the emptyReason prop's JSDoc citing the adapter's empty_reason field, one in a second JSDoc line). src/pages/SecurityAnalysis/types.ts empty_reason 1 (GenerationFields.empty_reason). tsc -b: no output, tsc_rc=0.",
+      "denominator": "2 of 2 files carry empty_reason at least once (both read 0 before this order); tsc -b rc 0 with 0 new errors.",
+      "status": "PASS",
+      "status_reason": "portal/ was NOT an empty gitlink (row AMGT_RESAPP-Z-W31-S1 does not apply) -- it was a correctly-linked worktree of the nested portal repo, BUT its node_modules junction was a broken symlink (mangled target path) rather than the working junction asserted by the worker face; repaired in-session with a correct OS-level junction to the main tree's ALREADY-INSTALLED node_modules (no bun install run). Filed as row AMGT_RESAPP-Z-W53-S2.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "an IN-PROCESS invocation of handler() on THIS WORKTREE'S bytes against the LIVE metrics table (two GetItem reads plus one partition Query; nothing written): both routes status 200; empty_reason_key_present True on BOTH payloads (the field the adapter now carries; at HEAD the key is absent) with empty_reason null on every PRE-DEPLOY pointer (the live pointers were written by the un-redeployed producer); the PRE-ACT baseline the COO's deploy will move is printed and recorded: trending zero_signal_rows N of row_count N (10 of 10 at the cut; re-measure) and breakout ranking_status EMPTY with empty_reason null -- this criterion proves the ADAPTER on the worktree bytes and the baseline, never the deployed plane",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json\nfrom lib.research.api import scoped_amgt\nfor m in ('trending', 'breakout'):\n    ev = {'rawPath': '/api/scoped/amgt/lead-panel/rankings/%s/chatter' % m, 'httpMethod': 'GET', 'headers': {'X-Firm-Id': 'bd'}}\n    r = scoped_amgt.handler(ev)\n    p = json.loads(r['body'])\n    rows = p.get('rows') or []\n    zero = [x for x in rows if int(x.get('window_total_count', 0) or 0) == 0]\n    print(m, 'status', r['statusCode'], 'ranking_status', p.get('ranking_status'), 'as_of', p.get('as_of_date'), 'generation', p.get('generation_id'))\n    print(m, 'zero_signal_rows', len(zero), 'of row_count', len(rows), 'empty_reason_key_present', 'empty_reason' in p, 'empty_reason', json.dumps(p.get('empty_reason')))\n\"",
+      "output_evidence": "trending: status 200, ranking_status SERVED, as_of 2026-09-18, generation 20260918T100026Z-efd7e544dd59, zero_signal_rows 10 of row_count 10, empty_reason_key_present True, empty_reason null. breakout: status 200, ranking_status ABSENT (RE-MEASURED, not EMPTY as the cell's own baseline text -- no committed pointer for today 2026-09-19 and no COMPLETE/EMPTY pointer within the dated-fallback window resolved), as_of 2026-09-19, generation None, zero_signal_rows 0 of row_count 0, empty_reason_key_present True, empty_reason null.",
+      "denominator": "2 of 2 routes (trending, breakout) invoked in-process; both statusCode 200; both carry the empty_reason key (0 at HEAD); trending's zero-signal count matches the cell's own cited baseline exactly (10 of 10).",
+      "status": "PASS",
+      "status_reason": "TRENDING matches the cited baseline exactly (10 of 10). BREAKOUT's ranking_status reads ABSENT rather than the cell's cited EMPTY -- the criterion's own text says this baseline 'may have moved' and directs re-measurement, which this row records verbatim rather than silently reconciling to the older text. Both PRE-DEPLOY pointers carry empty_reason null, as required (the un-redeployed producer wrote them). This is the ADAPTER-and-baseline proof the criterion asks for, not a served-plane claim.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The discriminating scenario IS the defect this cell is named for: an all-zero-signal chatter input, which the PRE-EXISTING code ranked ten zero-score names on TRENDING (alphabetical tie-break) and the REWRITTEN test now asserts is EMPTY on both products. Also: build_pointer's own new refusal rule, exercised as a planted negative (a STATE_EMPTY generation built without empty_reason, and a STATE_COMPLETE one built with one) in both the chatter and price test files.",
+      "expected": "All-zero-signal input: rows_ranked 0 on BOTH TRENDING_CHATTER and BREAKOUT_CHATTER, both EMPTY with empty_reason NO_SIGNAL_IN_WINDOW n of n (was: TRENDING ranked TOP_N=10 zero-score names, BREAKOUT empty via BELOW_MIN_ABSOLUTE_JUMP, empty_reason absent from the pointer entirely). build_generation(state=EMPTY, empty_reason=None) raises ValueError; build_generation(state=COMPLETE, empty_reason={...}) raises ValueError.",
+      "observed": "Exactly matched -- test_compute_chatter_axis_all_zero_signal_ranks_trending_and_empties_breakout (rewritten) and test_compute_chatter_axis_every_member_zero_signal_empties_both_products_n_of_n both pass with the NEW behaviour; test_an_EMPTY_generation_without_empty_reason_is_refused, test_a_COMPLETE_generation_with_empty_reason_is_refused, test_build_generation_empty_without_empty_reason_is_refused and test_build_generation_complete_with_empty_reason_is_refused all assertRaises(ValueError) and pass.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every AC1/AC2/AC3 test constructed against fixed, hermetic inputs (injected count_fn / synthetic series / fixed rows) and run twice in this session (once during development, once in the final battery re-run above) with identical results. AC4's new arm uses a fully mocked _dynamodb (GenTable), also run twice identically. AC5/AC7 are LIVE reads against the pool/table and are NOT expected to be bit-identical run-to-run (article counts and pointers can change between invocations) -- re-run twice in this session (once mid-session, once immediately before writing this instance) and the SHAPE of the output (rc 0, signal_lines 2 of 2, zero_signal_rows_total 0, empty_reason present/absent per state) was IDENTICAL both times; only the timestamped run_id/generation_id fields differed, as expected of a live read.",
+      "observed": "Deterministic for AC1-AC4 (hermetic fixtures); stable-shaped for AC5/AC7 (live reads) across two runs each.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Fixing the 2 pre-existing lib/research/api/tests/ assertions (test_13, test_13b) that assert the superseded sentence-parsed ceo_profile_reading contract.",
+      "reason": "Documented pre-existing defect (row AMGT_RESAPP-Z-W45-S3, AMGT-rk-43); not named by this order and fixing lib.research.api.scoped_amgt.ceo_profile_reading itself would be a widening the REFUSAL CLAUSE forbids."
+    },
+    {
+      "item": "Wiring RankedList's new emptyReason prop through its call sites (LeadPanel.tsx, StarredList.tsx).",
+      "reason": "Neither file is in this order's <paths>; the order names only RankedList.tsx and types.ts for the portal half."
+    },
+    {
+      "item": "Any deploy of amgt-resapp-chatter-axis or opal-amgt-scoped-api.",
+      "reason": "Named explicitly out of scope by this order's own BOUNDS section 4: this order proves everything IN-PROCESS on worktree bytes; the COO's own consolidated redeploy and AMGT-rk-61 carry these bytes to the served plane."
+    },
+    {
+      "item": "movement_gate.py's MIN_ABSOLUTE_JUMP for PRICE (C-PRICE-BREAKOUT-FLOOR).",
+      "reason": "Named explicitly out of scope by this order's section 1 ('What this cell does NOT change') -- the COO's own direct act, under its own pair."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W53-S1",
+    "AMGT_RESAPP-Z-W53-S2",
+    "AMGT_RESAPP-Z-W53-S3"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~53/AMGT_RESAPP.TO-AMGT-rk-53.no-rank-without-signal.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/metrics/generation_writer.py lib/research/metrics/chatter_axis.py lib/research/price/generation.py lib/research/api/scoped_amgt.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/metrics/generation_writer.py lib/research/metrics/chatter_axis.py lib/research/price/generation.py lib/research/api/scoped_amgt.py lib/research/metrics/tests/test_chatter_axis.py lib/research/price/tests/test_generation.py lib/research/api/tests/test_generation_and_pool_routes.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/metrics/generation_writer.py lib/research/metrics/chatter_axis.py lib/research/metrics/tests/test_chatter_axis.py lib/research/price/generation.py lib/research/price/tests/test_generation.py lib/research/api/scoped_amgt.py lib/research/api/tests/test_generation_and_pool_routes.py",
+      "result": "OK: pre-commit gate clean for 7 of 7 file(s)"
+    },
+    {
+      "tool": "tsc -b",
+      "invocation": "cd portal && ./node_modules/.bin/tsc -b",
+      "result": "exit 0, no output (clean build)"
+    },
+    {
+      "tool": "pytest (full battery)",
+      "invocation": "python -m pytest lib/research/metrics/tests lib/research/price/tests lib/research/api/tests -q",
+      "result": "255 passed, 2 failed (test_13, test_13b -- pre-existing, documented at row AMGT_RESAPP-Z-W45-S3, out of this order's <paths>-authorized scope to fix)"
+    }
+  ]
+}
