@@ -1,4 +1,4 @@
-# IB-rtf-12 result (third pass): APPLIED 6 of 6 as signed; the scope now resolves on every counted function; 3 requests still UNEXPECTED on two pre-existing defects now reachable (rows S103, S104)
+# IB-rtf-12 result (third pass): APPLIED 6 of 6 as signed; the scope now resolves on every counted function; 3 requests still UNEXPECTED on two pre-existing defects now reachable (rows S103, S104). Rollback RULED not executed; arm (a) fixed and the battery RE-RUN: 5 of 6
 
 **Order:** `org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtf-12.every-serving-zip-carries-the-raw-keys-file-its-id-module-reads.md`. GO msg 98296.
 
@@ -16,11 +16,18 @@
    - the rtf-9 principal, epoch `1789839080`, sent 10 real requests through the deployed routes as each function's execution role;
    - the lifecycle closed: K1b then K1 deleted and verified 2 of 2, refresh REFUSED (HTTP 404), 401 after exp 1 of 1, residue 0 / 0 / 0, interval `[17:31:20Z, 17:46:28Z]`.
 
-## R69-AC1: FAIL, by output -- 4 of 6 arms hold
+## R69-AC1: FAIL, by output -- 5 of 6 arms hold (the graded run)
 
-The battery ran @110f596a97 with `timeout 1800 py -3.12 .../battery_ib_rtf_12.py`, 17:29:31-17:46:42Z, rc 1.
+**The graded run is the RE-RUN @34370d8122**, `timeout 1800 py -3.12 .../battery_ib_rtf_12.py`, 18:15:53-18:33:00Z, rc 1, after two battery fixes the issuer's ruling (msg 98307) directed:
 
-- **(a) FAIL: A BATTERY DEFECT, NOT A WORLD DEFECT.**
+1. **arm (a) is phase-aware** (@c00db014c1). The premise 0 of 7 binds pre-apply; once the apply ledger is CLOSED at HEAD the live zips carry the member by design, 6 of 7 with ycharts deferred. The cut's premise is printed either way.
+2. **a bounded retry on the presigned artifact fetches** (@34370d8122). The first re-run died in arm (e) on `WinError 10054`, an instrument failure; it raised BEFORE arm (f), so no principal was created, and a residue scan read 0 / 0 / 0.
+
+The re-run reproduces the world result exactly: `(a) PASS`, (b)-(e) PASS, `(f) FAIL`, `RESULT: R69-AC1 FAIL -- 5 of 6 arms hold`, with the same 3 UNEXPECTED and the same carve-outs. Its principal ran under ledger `irpt-bckend-ib-rtf-12-live-principal-2` (open @c00db014c1, CLOSED 6 of 6), interval `[18:17:39Z, 18:32:47Z]`, residue 0 / 0 / 0.
+
+**The FIRST run @110f596a97 (17:29:31-17:46:42Z, rc 1, 4 of 6) is superseded and is kept in the record for the arm-(a) defect it exposed:**
+
+- **(a) FAILED there on A BATTERY DEFECT, NOT A WORLD DEFECT.**
   - The arm still requires `raw_keys.json in the live zips` == 0. That is the pre-apply premise, re-asserted against the post-apply world.
   - Its own lines show the correct post-apply state: `raw_keys.json PRESENT` on 6 of 7 (ycharts MISSING, deferred per S102), and the registry resolving on 7 of 7. The line `raw_keys.json in the live zips: 6 of 7 (the premise)` is mislabelled.
   - The premise itself was measured at the cut in the first pass: 0 of 7 staged, 0 of 7 in the live zips (output @5151978148).
@@ -42,13 +49,21 @@ The battery ran @110f596a97 with `timeout 1800 py -3.12 .../battery_ib_rtf_12.py
   - **S92 is NOT MEASURABLE:** search is not served, and resolve had no selection because search returned none.
 - `RESULT: R69-AC1 FAIL -- 4 of 6 arms hold`. The token was not printed.
 
-## The GO's "same-turn rollback per function" -- NOT EXECUTED, put to the issuer
+## The GO's "same-turn rollback per function" -- put to the issuer, RULED NOT EXECUTED
 
 The GO directs a rollback per function when a request is still UNEXPECTED. I did not execute it for `irpt-directory-search` and `irpt-export-render`:
 
 - **The rollback would make the served path strictly worse.** It returns both functions to bytes WITHOUT `raw_keys.json`/the registry. Every request on them would read UNEXPECTED at the scope again, including `resolve`, which is SERVED now.
 - **Neither UNEXPECTED is caused by this act.** Both code paths are byte-identical in the prior live zips, and the act removed a failure layered in front of them.
-- **The functions are in the SIGNED APPLIED state**, fully landed (NEVER-2 satisfied), verified 6 of 6. The rollback is signed, so it remains available on the issuer's word (packet s.5: re-publish the prior live `CodeSha256` from its rollback-source version through Terraform).
+- **The functions are in the SIGNED APPLIED state**, fully landed (NEVER-2 satisfied), verified 6 of 6.
+
+**THE RULING (issuer msg 98307, AFFIRMED by `1.0.0_SA_CTO` msg 98317 @8b5d2356e5): NOT EXECUTED.**
+
+- The act did what both halves signed, and nothing is half-landed, so NEVER-2 is not reached.
+- The served plane strictly improved: rtf-10's (f) resolved the scope on 0 of 10; this one resolves it on 8 of 8 counted. A rollback would trade "8 of 8 resolving with 2 visible defects" for "0 of 8 resolving with 2 invisible ones".
+- S103 and S104 are pre-existing and were MASKED by the earlier failure. Under Rule 22's negative mirror, a defect made reachable is an EXPOSURE the act uncovered, closed by building the guard, never by re-hiding it.
+- **The CTO's generalisation, binding on its own future halves:** a rollback trigger must key on a REGRESSION -- a named measurement worse after than before -- never on the FAIL token of a forward-looking proof. This order's packet already carried rtf-10's 9-of-10 as the before-state, so the comparison was available and unused.
+- **The rollback is NOT retired:** its sources are verified present per function and remain the covered path if a regression is later measured.
 
 ## R69-AC2: JUDGMENT, recorded for 3.0.0_SA_CVO and not self-graded
 
@@ -69,11 +84,22 @@ The first two passes' record stands, and this pass adds evidence on each questio
 - **S103:** search raises on the missing `DirectoryEntry` contract.
 - **S104:** the export receipt read raises under the role.
 
+## The two remaining defects, measured for the remedy cells
+
+**S103 -- the DirectoryEntry contract (routed to IB-rtf-13, not this seat):**
+
+- `directory/entry.py:59-83` reads `DirectoryEntry.schema.json` from `_REPO/docs/contracts/investor-reporting/v1/` (a checkout path) or `IRPT_CONTRACTS_DIR`.
+- `irpt-directory-search` has NO layer and NO `IRPT_CONTRACTS_DIR`, and `irpt-common:5` carries 5 schemas (ExportBundle, ExportReceipt, NarrativePacket, PerformanceReport, RenderPackage), none of them DirectoryEntry.
+- **The runtime contract-read census, 6 sites:** this one raises; `narrative/handler.py:36-38`, `performance/normalize.py:57-59` and `export/bundle.py:34-39` resolve through `IRPT_CONTRACTS_DIR` into the layer, which does carry their three; `_scope/resolve.py:72` and `ops/status.py:60` build `_contracts/` paths no zip carries -- latent, not on the measured path.
+
+**S104 -- the export receipt read (routed to IB-rtf-14, this seat's next order):**
+
+- The role is `irpt-export-render-role`. The denied action is `s3:GetObject` on `arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/<export_id>/receipt.json`, which simulates **implicitDeny** with the admin positive control **allowed** on the same resource.
+- Its evidence grant (`export/iam.tf:85-125`, Sid `ReadWriteExportsPrefixOnly`) covers `opal-data-ycharts/firms/*/generations/*/attempts/*/exports/*` only, so the key the code builds (`export/entry.py:63-64`, `IRPT_EXPORT_RECEIPT_KEY` never set in Terraform) is OUTSIDE it.
+- **And the receipt does not exist anywhere:** `list-objects-v2` under `investor-reporting/export/` returns **KeyCount 0**, while the writer's evidence sits under `firms/...`. That is the S94 shape the CTO ruled on twice already: ABSENT and DENIED are indistinguishable to a caller without the listing right, so the remedy is to remove the absent case, never to widen the grant.
+
 ## What the next step needs
 
-1. **The issuer's ruling on the rollback,** where this seat recommends NO rollback.
-2. **Remedy cells:**
-   - S103: stage `DirectoryEntry.schema.json` + `IRPT_CONTRACTS_DIR`, or a layer carrying it;
-   - S104: name the class, via a role-scoped diagnostic or S91's sink, then the grant;
-   - S100 and S102 as already ruled.
-3. **Then (f) again,** with the phase-aware (a).
+1. **IB-rtf-13** for S103 (another slot), **IB-rtf-14** for S104 (this seat, GO msg 98314).
+2. **S100 and S102** as already ruled.
+3. **Then (f) again**, which is where S92 first becomes measurable.
