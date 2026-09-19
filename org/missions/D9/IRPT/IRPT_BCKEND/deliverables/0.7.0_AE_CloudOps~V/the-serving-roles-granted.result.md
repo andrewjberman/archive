@@ -43,7 +43,11 @@
 
 ## R67-AC1: FAIL, by output (a STOP at (d), the face's expected second-pass outcome, plus (c-code))
 
-The battery ran at worktree HEAD 80d2383a3c, rc 1. The deciding lines, verbatim from `IB-rtf-10_R67-AC1_battery_output.txt`:
+The battery ran at worktree HEAD 285e9cf46c with the criterion's exact invocation (`timeout 1800 py -3.12 .../battery_ib_rtf_10.py`), 12:46:51-12:48:22Z, rc 1.
+
+The first run, @80d2383a3c under `timeout 3000`, was re-done because the proof checker grades the recorded invocation against the criterion's, and a record naming an invocation that was not run would be false. The two outputs differ in 8 lines only: the HEAD line and the 7 raw planfile sha256s, which change on every take. Every count, verdict and canonical digest is identical.
+
+The deciding lines, verbatim from `IB-rtf-10_R67-AC1_battery_output.txt`:
 
 - **(a)**
   - `ownership map readable: 0 of 21; directory readable: 9 of 21; bucket map present: 1 of 7; client firms 3 (registry)`.
