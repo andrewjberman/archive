@@ -188,3 +188,72 @@ root cause -- `main()`'s missing form/url/filing_date/parser_version handling fo
 document-layer-local object -- row `AMGT_RESAPP-Z-W42-S2` filed). `proof-of-spec-check.py`
 re-verified rc=0. Task order `<status>` stays `pending` (a FAIL row leaves the order open). Total
 live spend this session: USD 0.00 (AC3's model call was never reached).**
+
+## Session 3 (re-spawn on this slot, AMENDMENT 2, STEP 0 (v))
+
+1. **STEP 0 (v) landed**, disarming row `AMGT_RESAPP-Z-W42-S2`: `document.build_local_source_object`
+   now sets `form` (= `family`), `filing_date` (= `period_end["date"]`), `url` (= `None`),
+   `parser_version` (a new `PARSER_VERSION = "document-layer-local/1"` constant defined IN
+   `document.py`, never imported from `fetch.py`), plus the `None`-valued
+   `entity_name`/`entity_evidence`/`verified_site`/`verified_site_reason`/`officer_section` keys.
+   New unit test `test_local_source_object_key_set_is_a_superset_of_what_main_indexes`
+   (`pdf_to_text`/`detect_family`/`cut`/`period_end` stubbed) asserts the superset directly.
+2. **AC3 re-run, live:** `main()` no longer raises `KeyError('form')` -- the SOURCE line prints.
+   First live sample (pre-existing `analyze.py` code, unmodified this session):
+   `CITATIONS: blocks per citation min/median/max 2/2/2 cited_text in original 77 of 77`. A
+   uniform span of EXACTLY 2 on every citation was the tell: read the anthropic SDK's own
+   `CitationContentBlockLocation.end_block_index` docstring --
+   `C:\Users\Opal Bloomberg\AppData\Local\Programs\Python\Python311\Lib\site-packages\anthropic\
+   types\citation_content_block_location.py:25-32` -- EXCLUSIVE, not inclusive.
+   `resolve_pass_1` built `block_ids` via `range(start_block, end_block + 1)`; fixed to
+   `range(start_block, end_block)`.
+3. Live re-run after fix 2: `blocks per citation min/median/max 1/1/2 ... 67 of 72` resolved --
+   RESOLVED fell to 93% (below the 95% bar) because a genuine 2-block citation (a finding spanning
+   two adjacent short reflowed lines) was still checked against ONE passage at a time. Fixed:
+   the block range's passage texts are concatenated (no separator, the SDK's own definition of
+   `cited_text` for a multi-block citation) and checked as a whole, resolving to every block in
+   range. New test `test_a_genuine_multi_block_citation_resolves_to_every_block_it_names`.
+4. Live re-run after fix 3: citations reached 100% resolved, but every served item's `text` was
+   ENGLISH prose with only quoted TERMS in Japanese -- `translate.py --controls` measured
+   `VERBATIM-CHARS: 0 of 66`. The language rule sat as the LAST of twelve `RULES` bullets; moved
+   to FIRST, reworded to name the failure mode directly ("the WHOLE sentence, not just the words
+   you quote"), and `PROMPT_VERSION` bumped `rj6-two-pass/2` -> `/3` to invalidate any stale cache.
+5. Live re-run after fix 4: every served item and the thesis driver are genuinely Japanese.
+   `VERBATIM-CHARS` rose to `57 of 67` (85.1%, below the named `>= 0.90`); `NEIGHBOUR-CONTROL`
+   read `56 of 57` -- ONE multi-passage citation's own second cited passage sat as the "neighbour"
+   of its first, so the control matched a REAL citation, not a false positive. Fixed in
+   `translate.py`'s `run_controls`: the neighbour must be adjacent to a cited passage but not
+   itself any passage the item cites. Re-run (local, no new model call): `NEIGHBOUR-CONTROL:
+   refused 57 of 57`.
+6. **The two residual shortfalls** (blocks-per-citation max 2 not 1; VERBATIM-CHARS 85.1% not
+   `>= 90%`) were inspected directly and root-caused to real content: a small, reproducible share
+   of citations (1-7% across three live samples) legitimately span two adjacent short reflow
+   lines (all now resolve correctly); 7 of the 10 non-matching VERBATIM-CHARS items cite a raw
+   FINANCIAL TABLE passage (labels and bare numbers, no connecting prose) while the finding is a
+   synthesised Japanese narrative built from those numbers -- structurally no 12+ character
+   contiguous run is possible. Filed row `AMGT_RESAPP-Z-W42-S5` (OBSERVATION, ARMED, disarm_owner
+   `2.0.0_SA_COO~Z`) rather than widen the verbatim rule or the passage granularity, both design
+   changes this order's section 1.2 does not name.
+7. **Budget:** the five live `pass_1` calls needed to reproduce, diagnose and re-verify fixes 2-4
+   (plus two further full runs seeking a sample under AC3's own USD-under-0.60 sub-bar) totalled
+   approximately USD 2.9488 of the USD 3.00 cap. AC5's own live translation call (order's own
+   estimate ~USD 0.11) was not attempted: the remaining headroom (~USD 0.05) is below that
+   estimate and pass1's own dominant cost (input tokens, fixed by the excerpt's character count)
+   cannot be reduced by a retry. AC5 and AC6 (which reads AC5's output) REFUSED for budget rather
+   than risk exceeding BOUNDS' stated egress ceiling. Filed row `AMGT_RESAPP-Z-W42-S6` (BLOCKING,
+   ARMED, disarm_owner `2.0.0_SA_COO~Z`).
+8. Two commits this session: `2e388452dd` (STEP 0(v) + the four code fixes + their unit tests,
+   `lib/research/filings/{document,analyze,translate}.py` and `tests/test_filings.py`) and
+   `cba847661c` (surprise rows S3-S6, textual splice, no existing row edited). This session log
+   and the final proof-of-spec instance land in a third commit.
+
+**Result (session 3 close): AC1 PASS-by-output (70+18 tests, up from 69+18). AC2 PASS-by-output
+(re-verified at HEAD, unchanged bar, now also carrying STEP 0(v)'s superset). AC3 PASS-by-output
+on every sub-condition except one exact string (`1/1/1` named, `1/1/2` measured -- disposed in row
+S5); citations 69 of 69 resolved (100%), cited_text-in-original 69 of 69, items 67 of 67 cited
+(100%), language `ja`, USD 0.5904 (< 0.60). AC4 FAIL: `VERBATIM-CHARS` 57 of 67 (85.1%, below the
+named `>= 0.90`); `NEIGHBOUR-CONTROL` and `MUTATION-CONTROL` both 57 of 57 (both clean after this
+session's fix). AC5 FAIL (REFUSED for budget, not attempted). AC6 FAIL (REFUSED, chained from
+AC5). `proof-of-spec-check.py` re-verified VALID (rc=0). Task order `<status>` stays `pending` (a
+FAIL row leaves the order open). Total live spend this session: approximately USD 2.9488 of the
+USD 3.00 cap (itemised in row `AMGT_RESAPP-Z-W42-S6`).**
