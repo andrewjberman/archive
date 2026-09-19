@@ -1,114 +1,88 @@
-# IB-rtf-10 result (third pass): K-CODE built, the packet re-cut once with all four keys signable, the STOP at the halves the face expects
+# IB-rtf-10 result (fourth pass): APPLIED 7 of 7 as signed; the live path is still UNEXPECTED on a third, non-IAM cause (row S98)
 
-**Order:** `org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtf-10.the-serving-roles-granted-the-ownership-map-and-the-bucket-map-on-every-scoped-function.md`, status line and `<paths>` @6e027591fc. That is the S96 ruling (i), msg 98251, on top of the re-hand @2b67d4ff7a and the addendum @77bd04ca41.
+**Order:** `org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtf-10.the-serving-roles-granted-the-ownership-map-and-the-bucket-map-on-every-scoped-function.md`, status line @6e027591fc. GO msg 98264.
 
-**Seat:** `0.7.0_AE_CloudOps~V`, worktree `/c/tmp/wk-irpt-6-ae1`, branch `wk-irpt_bckend-6-ae1`. CLOUD was merged in at the start of the pass, ff to 6e027591fc; the second pass had been drained @7906c853b8.
+**Seat:** `0.7.0_AE_CloudOps~V`, worktree `/c/tmp/wk-irpt-6-ae1`. CLOUD was merged in, ff to b6af01c2f4, which carries both halves.
 
-**The packet:** `NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-10.md`, **blob `c3a44074d2dabe4292bfc648d855be4b99fe48db`**, committed @94bbf091ee.
-- It supersedes `609fbba9de` (second pass) and `4e7ba624fa` (first pass). No half was signed against either.
-- The halves sign THIS blob.
+**Packet:** blob `c3a44074d2dabe4292bfc648d855be4b99fe48db`. The halves are COO @025607941e and CTO @b6af01c2f4, 2 of 2.
 
-**NOTHING APPLIED. No function was touched.**
+## What the fourth pass did
 
-## What the third pass did, in order
+1. **Arm (e), the apply**, under ledger `irpt-bckend-ib-rtf-10-apply` (sentinel @22af7ce3c7, CLOSED 8 of 8 @57d2f89411). `apply_ib_rtf_10.py` is the record, in `IB-rtf-10_apply_output.txt`, run 14:21:14Z as user/Andrew_Berman.
+   - **Pre-apply: all packet-s11 checks held before anything was applied:**
+     - halves 2 of 2;
+     - the packet blob EQUAL;
+     - registry `99b8eeb54f` EQUAL;
+     - the K-CODE artifact `hk9OUfwH`/`HOpXPDo` EQUAL;
+     - canonical digests EQUAL 7 of 7, 0 destroy, K-CODE the only code change.
+   - **Apply:** `.tools/safe-apply.sh` applied each root's SAVED planfile, the bytes digested above, with rc=0 on 7 of 7 roots between 14:22:17Z and 14:29:33Z. 0 destroyed.
+   - **Post-apply:** a fresh plan read "No changes." on **7 of 7**.
+2. **Arm (f), the live proof**, under ledger `irpt-bckend-ib-rtf-10-live-principal` (sentinel @314435ba8f, CLOSED 6 of 6):
+   - the rtf-9 principal, new epoch `1789828583`, logged in and made 10 real HTTP requests reaching 7 of 7 functions;
+   - rollback: K1b then K1 deleted and verified (2 of 2), refresh REFUSED (HTTP 404), 401 after exp (1 of 1), residue 0 of 79 / 0 of 79 / 0 of 11;
+   - interval `[14:36:23Z, 14:51:31Z]`.
 
-1. **The S96 remedy (ruling (i)), @2b1c672e1f.** `irpt-directory-search`'s `staged_from` in `infra/aws/lambda/ci/lambda-source-map.json` gained the seam object its six siblings carry, copied byte-for-byte from `irpt-status`:
-   - `_ids/data/custodian_key_seam.json` at pin `c28c728a30`, packaged as `data/custodian_key_seam.json`, sha256 `87f2f92f...`;
-   - a parse-diff asserts exactly one appended object, 6 lines added;
-   - `artifact_sha256` is untouched (S89).
-2. **The K-CODE build**, under ledger `irpt-bckend-ib-rtf-10-k-code-build-2` (sentinel @46a106b4d1, CLOSED @b1032a0ee1):
-   - Before the build, the prior live `CodeSha256` was re-read as `aQxATFkc...`, held at build-store version `l4JK6aUn...`.
-   - `build-and-upload.sh investor-reporting irpt-directory-search` ran from HEAD 46a106b4d1 and exited rc=0.
-   - Built: **sha256 `HOpXPDoHhrVK/ayqsx1uKgzt9mWOjDlK+Ix2CPbCamI=`**, version **`hk9OUfwHZxlcwZDqN7cEknbJOXtvB3jd`**, 123282 bytes.
-   - The builder also rewrote `artifact_sha256` in the manifest. That write was reverted to the committed bytes, because the grant is one object.
-3. **Verified at rest, 7 of 7 checks** (`verify_k_code_build_ib_rtf_10.py` and its output, @b1032a0ee1):
-   - the new version is the latest, and its metadata equals the re-downloaded bytes, which equal the built sha;
-   - the zip members are **10 of 10 == `files[]`, each equal to its committed blob**; the seam member is the LF blob, 191120 bytes with 0 CR;
-   - the rollback source is kept and equals the prior live hash;
-   - the function's `CodeSha256` is **unchanged**.
-   - **The served delta against the prior live zip is exactly `entry.py`** (the rtf-11 fix, 9123 -> 11539 bytes) **plus the seam member's line endings.** The other 8 members are byte-identical.
-4. **The re-plan:**
-   - 7 of 7 roots, 0 destroy, **18 changes**;
-   - **ONE code change, K-CODE's own:** `module.irpt_directory_search`, `source_code_hash aQxATFkc... -> HOpXPDo...` plus the object version, with the environment and role unchanged;
-   - 6 of 7 canonical digests are EQUAL to the second-pass packet. The directory root's moves `3bc2229a -> 0f66bef1` by exactly that one address.
-5. **The packet re-cut ONCE:**
-   - K-CODE is complete: the built sha and version, the member-level served delta, both branches, and the rollback to `aQxATFkc...` at `l4JK6aUn...` through Terraform (never `update-function-code`, never the manifest);
-   - the writers table now counts the manifest's `artifact_sha256` at 2 writers: the builder, and `record-terraform-deploy.sh:748-768 @6e027591fc` post-apply;
-   - section 11 lists the pre-apply re-verifications, where any difference is a STOP.
+## R67-AC1: FAIL, by output -- 6 of 7 arms hold; (f) fails
 
-## R67-AC1: FAIL, by output (the STOP at (d) the face expects; every arm before it holds)
+The battery ran @314435ba8f, `timeout 1800 py -3.12 .../battery_ib_rtf_10.py`, 14:34:23-14:51:44Z, rc 1.
 
-The battery ran @94bbf091ee with the criterion's exact invocation (`timeout 1800 py -3.12 .../battery_ib_rtf_10.py`), 13:16:17-13:17:39Z, rc 1. The deciding lines, verbatim from `IB-rtf-10_R67-AC1_battery_output.txt`:
+- **(a) PASS.** Post-apply, the ownership map reads **18 of 21**, the directory **21 of 21** and the bucket map **7 of 7**, each EQUAL to what the packet's keys produce. The controls hold.
+- **(b) PASS.** The packet is the signed blob; the vintage and ARN lines read EQUAL.
+- **(c) PASS.** The apply record's pre-apply digests are EQUAL 7 of 7, and a plan re-taken now reads 0-diff 7 of 7.
+- **(c-code) PASS.** `irpt-directory-search` now serves `HOpXPDo...`, the built sha. The rollback source `l4JK6aUn` is still present and equal to `aQxATFkc...`.
+- **(d) PASS.** Halves 2 of 2.
+- **(e) PASS:**
+  - the ledger is closed;
+  - K-OM is allowed **18 of 18**, and the directory **21 of 21**;
+  - the negative controls are denied **27 of 27**: the mockadv map on the shared bucket for 6 roles, another platinum object for 6 roles x 3 firms, and holdings on the 3 maps;
+  - the bucket map equals the registry value on **7 of 7**;
+  - CodeSha256 matches the signed state on **7 of 7**: 6 unchanged, plus `irpt-directory-search == HOpXPDo...`.
+- **(f) FAIL.** 9 of 10 requests read **UNEXPECTED** with no `firm_id`: directory search x2, resolve, status, analysis sections, performance, narrative, export receipt and analysis submit. Holdings read `FIRM_BINDING`, on a random account id, because the search that supplies a permitted id was itself UNEXPECTED.
+- `RESULT: R67-AC1 FAIL -- 6 of 7 arms hold`. The token was not printed.
 
-- **(a)** `ownership map readable: 0 of 21; directory readable: 9 of 21; bucket map present: 1 of 7; client firms 3 (registry)`. The controls read positive allowed and negative implicitDeny, and the three packet census lines read `EQUAL`.
-- **(b)**
-  - `blob at HEAD c3a44074d2dabe4292bfc648d855be4b99fe48db, worktree c3a44074d2dabe4292bfc648d855be4b99fe48db -> COMMITTED, UNCHANGED`.
-  - `packet keys line: K-OM 6; K-DIR 4; K-ENV 6; K-CODE 1`.
-  - `REGISTRY-VINTAGE ... -> EQUAL`.
-  - Both ARN lines read `EQUAL`.
-- **(c)**
-  - `roots planned without destroy: 7 of 7; total destroy 0; total changes 18; lambda updates carrying a CODE change 1 (K-CODE's own, after-hash == built: 1; any other: 0 -- 0 allowed)`.
-  - `canonical digests equal to the packet's: 7 of 7`.
-  - The `PLAN-ROOTS`, `PLAN-CODE-CHANGES` and `PLAN-CODE-CHANGE-ADDRESS` lines read `EQUAL`.
-- **(c-code)** `K-CODE at rest: 5 of 5 checks hold`.
-- **(d)** `halves: 0 of 2`, so `STOP at (d)`.
-- `RESULT: R67-AC1 FAIL -- 4 of 7 arms hold`.
+**The cause: row S98, BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~B. Not IAM.**
 
-**Identity.** Every arm printed that it ran as `user/Andrew_Berman`, a configuration or document claim, NOT a served behaviour. The CTO's identity bar binds (f).
+- `_ids/ids.py:162` (`raw_keys`) opens `raw_keys.json` **beside the module** (`:64 RAW_KEYS_PATH`).
+- **0 of 7 deployed zips carry it**, and **0 of 7 manifest entries declare it**, while 7 of 7 stage `_ids/ids.py`.
+- `enforcer_for` -> `id_projection` -> `raw_key_for` raises `FileNotFoundError`, which the boundary classifies UNEXPECTED into the None sink (S91).
+- **Diagnostic pair.** This is a diagnostic, not a proof: operator credentials, with the DEPLOYED zip bytes and environment run in-process and the recorder patched.
+  - Without the file: the traceback ends in that `FileNotFoundError`.
+  - With ONLY the HEAD blob of `_ids/raw_keys.json` placed beside `ids.py`: the scope **resolves** (`firm_id fir_c9fc04650e2134d6ea033da2`, a policy code) for `irpt-status` and `irpt-directory-search`.
 
-**Determinism.** The battery's plan equals the 13:0xZ script's plan, 7 of 7 digests. The raw planfile sha256 differs each take, as the packet states.
+**What S98 does NOT change about the apply:**
+- every key reads back as signed;
+- the path was UNEXPECTED before the apply (S90, 12 of 12) and after it, so the apply moved no served answer;
+- nothing is rolled back.
+
+S92 is **NOT MEASURABLE** this run, because no directory request reached the compute. The battery's line "NOT HONOURED (NOT FIXED)" is its label for "0 entries". Here the 0 is the UNEXPECTED refusal, so that label overstates and is corrected here.
 
 ## R67-AC2: JUDGMENT, recorded for 3.0.0_SA_CVO and not self-graded
 
-**1. The object-scoped read, or the map published to a directory-readable prefix?**
+**1. The design.**
+- The CTO's ruling @606e7d14ce adopted the object-scoped read. The packet met its four conditions, and the apply realised them exactly: (e) 18/21/27/7/7, and 0-diff 7 of 7.
+- K-DIR and K-CODE went beyond the ruling, as the issuer's amendments, and are stated as such in the packet.
+- S94 (inflection's map absent) stays the precondition: `404` on the inflection map at the event, recorded and not counted. The CTO's S97 records K-DIR's fence on `opal-data-bd` as the writers' convention, 9 of 9 objects with 0 foreign.
 
-- **The CTO ruled @606e7d14ce:**
-  - (a) ADOPTED: the object-scoped read.
-  - (b) BARRED as a duplicate output path.
-  - Moving the map was refused.
-- **The packet meets the four conditions:**
-  - the vintage and ARN list are printed;
-  - the ban comment was amended in the same commit as the statement (@9f21dedfd8);
-  - the plans are 0 to destroy, and every IAM key is additive;
-  - the bucket map is the one registry-derived value.
-- **Where the packet goes beyond the ruling, stated so the CVO can see it:**
-  - **K-DIR:** an EXISTING prefix extended to 4 roles (the issuer's S93 amendment).
-  - **K-CODE:** a code deploy the S95 ruling had excluded, qualified by the issuer to one function built from this project's own drained cell. Its served delta is exactly `entry.py` plus the seam member's line endings; `_authz/`, `_scope/`, `_keys/`, `_ids/` and `handler.py` are byte-identical.
-- **The precondition is unchanged:** S94. inflection's map is absent, and without ListBucket that reads AccessDenied (`_authz/loaders.py:106-114 @4ceb7f8361`). It is pitched to the CTO and carved out of the token.
+**2. Why every earlier live proof passed. This pass sharpens the answer.**
+- The first three passes named the in-process operator-credential harness: **the wrong IDENTITY**.
+- S98 shows a second, independent reason: **the wrong FILE LAYOUT**.
+  - In the repository, `_ids/raw_keys.json` sits beside `_ids/ids.py`, so an in-process import resolves `HERE` to a directory that HAS the file.
+  - Every zip flattens `ids.py` to the package root without it.
+  - The same code has two layouts, and only the deployed one is broken.
+- So the identity bar ("the function's own execution role") is necessary and **not sufficient**: a served-path proof must run the **deployed BYTES** under the deployed role. This run's arm (f) did, which is why it failed while every configuration arm passed.
+- The requirement for the acceptance instrument is therefore stronger than the identity bar: real requests through the real route, or at minimum `aws lambda invoke` of the deployed function. Never the source tree imported in-process, even under the right credentials.
 
-**2. Why every earlier live proof passed, and what the acceptance instrument must do.**
-
-- rtf-2 and rtf-8 arm (e) ran the real code IN-PROCESS, under operator credentials and the harness's environment: the right code with the wrong identity and the wrong configuration.
-- The CTO's identity bar binds this order: an arm that claims a served behaviour names its principal, and that principal is the function's own execution role.
-- Packet section 9 states the principal per arm. The battery prints its identity per arm and labels (a)-(d) and (c-code) configuration claims. (f) goes through the real route with the bounded principal.
-
-**3. S91, and S96 as the same class one layer down.**
-
-- `_authz/served.py:628, 649, 662 @4ceb7f8361` record internal errors to a `None` sink.
-- **S96 is the same class at the build layer:** the served directory-search zip carried a hand-placed CRLF member that no committed tree state reproduces.
-  - The plan read "at rest", the manifest looked complete, and the function ran. Only a rebuild from HEAD could see it, and that rebuild failed closed, which is correct.
-  - The remedy (one declared `staged_from` object) makes the served bytes reproducible from the tree: 10 of 10 members equal to committed blobs.
-- **The discriminator:** the same builder on the same function REFUSED @bbfe5aeac3, without the object, and BUILT @46a106b4d1, with it.
+**3. S91's None sink is what hid S90's third cause.**
+- The `FileNotFoundError` never reached CloudWatch.
+- Simulation cannot see a missing file, and no configuration read can either.
+- Only (a) a real request, plus (b) running the deployed bytes with the recorder patched, could name it.
 
 ## Rows
 
-- `IRPT_BCKEND-S96` is **RULED (i) and EXECUTED** this pass: the manifest line @2b1c672e1f, and the build verified @b1032a0ee1. It was filed BLOCKING/ARMED with disarm_owner `2.0.0_SA_COO~B`; its disposition is the issuer's.
-- S93, S94 and S95 are ruled as before.
-- **No new row this pass.**
+- **`IRPT_BCKEND-S98`** (new, BLOCKING, ARMED, `2.0.0_SA_COO~B`): `raw_keys.json` is absent from 7 of 7 zips.
+- **The remedy's shape** is S96's: one `staged_from` object per function, for `_ids/raw_keys.json` packaged as `raw_keys.json`. That means a rebuild of the 7, six of which change served code, so it needs a new never-widen packet.
 
-## What the next pass needs
+## What the next step needs (the issuer's)
 
-1. **Both halves at HEAD naming blob `c3a44074d2dabe4292bfc648d855be4b99fe48db`.**
-2. **(e), the apply under a ledger.** Before any `safe-apply`, re-verify:
-   - the per-root canonical digests EQUAL to packet section 6;
-   - the registry blob EQUAL to `99b8eeb54f`;
-   - the latest `irpt-directory-search.zip` is `hk9OUfwH...` with content-sha256 `HOpXPDo...`.
-
-   Then, after the apply:
-   - `simulate-principal-policy` n of N, plus the negative controls;
-   - the bucket map m of m;
-   - `CodeSha256` unchanged on 6 of 7 serving functions, and `irpt-directory-search == HOpXPDo...`.
-3. **(f), the bounded principal through the real routes** (rtf-9 packet blob `a1f36b95b2`, a new epoch, the IB-rtf-3 lifecycle):
-   - search WITH a query and resolve WITH a selection;
-   - S92 recorded FIXED or not, by output;
-   - inflection recorded as UNEXPECTED-BY-ABSENCE (S94).
+1. **A ruling on S98:** a cell that stages `_ids/raw_keys.json` into the 7 manifest entries and rebuilds the 7, under a new packet (a code deploy on 7 functions).
+2. **Then (f) re-run** with the same battery against the rebuilt functions. The apply of this order stands and needs no re-cut: its keys are in place and verified.
