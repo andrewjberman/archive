@@ -1,0 +1,20 @@
+{
+  "_about": "LGIC_ENFORCE round 14, EN-p-38, 0.9.0_WK_LGIC_ENFORCE~2. Reconciles S102's 1449-vs-1303 by MEASURING the multiplicity from the row-level artifact at its pin, not by inferring it from the difference (sum - rows = 146 undercounts the extra-token-row incidences only when no row carries three tokens; 8 rows here carry three, so the true multi-token row count is 138, not 146).",
+  "grain": {
+    "input_report_pinned_at": "c05f9f9fc9",
+    "by_token_sum": 1449,
+    "rows_with_a_placeholder": 1303,
+    "rows_carrying_more_than_one": 138,
+    "distribution": {"1": 1165, "2": 130, "3": 8},
+    "reconciliation": "1449 and 1303 are two different grains over the SAME 3264-row judged population at c05f9f9fc9, and they can never again be read as disagreeing once the grain each counts is named: 1449 is the PER-TOKEN sum (Sum of tokens.by_token[].rows, recomputed row-by-row over PLACEHOLDER_POPULATION_TABLE_R13.md's `canonical` column -- a row is counted once for EACH distinct placeholder token {system}/{scope}/{cadence}/{source}/{snap}/{dim_name}/{firm}/{d}/{dc} it carries), while 1303 is the PER-ROW population (rows_with_a_placeholder -- each row counted once, regardless of how many distinct tokens it carries). Of the 1303 rows, 1165 carry exactly 1 token, 130 carry exactly 2, and 8 carry exactly 3 (1165+130+8=1303, closing the row denominator). The per-token sum exceeds the per-row population by exactly the EXTRA token-row incidences the multi-token rows contribute beyond their first token: 130 rows contribute 1 extra each and 8 rows contribute 2 extra each, 130*1 + 8*2 = 146 = 1449-1303, which closes the arithmetic. rows_carrying_more_than_one is 138 (130+8), NOT the naive difference 146=sum-rows -- that naive figure would only equal the multi-token row count if no row carried three or more tokens, and 8 rows here do, each over-contributing by 2 instead of 1. So: 1303 rows, 1449 token-row incidences, 138 of the rows carry more than one token, and the two headline numbers were never in disagreement -- they were counting different things over the same population."
+  },
+  "fixed_inputs_at_pin": {
+    "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r14/check_en_r14.py": "a2e031e4c772737c29e328420dae9f1a17c6d2df",
+    "org/missions/D14/LGIC/LGIC_ENFORCE/deliverables/2.0.0_SA_COO~G/fixed_inputs/r14/R14_BASE.json": "a2e031e4c772737c29e328420dae9f1a17c6d2df"
+  },
+  "stale_proofs": {"fixed_input_commits_since_cut": 1, "proofs_re_run": []},
+  "instrument": {
+    "measured_by": "a script parsing PLACEHOLDER_POPULATION_TABLE_R13.md's data rows (git show c05f9f9fc9:.../PLACEHOLDER_POPULATION_TABLE_R13.md, 3264 data rows parsed after excluding header/separator lines) and counting, PER ROW, how many of the 9 known placeholder tokens occur in that row's `canonical` column -- never inferred from by_token_sum minus rows_with_a_placeholder.",
+    "cross_check": "recomputed by_token rows-containing-token counts (1119/122/108/85/7/5/1/1/1, sum 1449) and rows_with_a_placeholder (1303) independently from the table and they match PLACEHOLDER_POPULATION_R13.json's own tokens.by_token[].rows and population.rows_with_a_placeholder fields exactly, at the same pin -- corroboration, not repetition (different artifact: the row-level table vs the pre-aggregated JSON)."
+  }
+}
