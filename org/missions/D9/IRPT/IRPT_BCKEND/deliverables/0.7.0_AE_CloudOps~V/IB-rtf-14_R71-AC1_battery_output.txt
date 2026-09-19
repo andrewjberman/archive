@@ -1,0 +1,96 @@
+IB-rtf-14 R71-AC1 battery (first pass) -- worktree HEAD 07d682522c5639770a504661a33530feeffce707
+
+(a) THE CAUSE, MEASURED
+  identity: (a) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/document claim, NOT a served behaviour
+  the template: infra/aws/lambda/investor-reporting/export/entry.py:63-64 @HEAD 'investor-reporting/export/{firm}/{export_id}/receipt.json'; the deployed override IRPT_EXPORT_RECEIPT_KEY: UNSET (the default applies) -> effective 'investor-reporting/export/{firm}/{export_id}/receipt.json'
+  the CONCRETE key for rtf-12's arm (f) request (EXP-5db0796cbfcffc3c0c1d5291, firm 49financial): s3://opal-data-ycharts/investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/receipt.json
+  the role's 15 policy resource ARNs (live get_role_policy):
+     irpt-export-render-directory-read-policy     ReadFirmDirectoryPrefixOnly      ["s3:GetObject"]                               arn:aws:s3:::opal-data-bd/investor-reporting/directory/*
+     irpt-export-render-directory-read-policy     ReadFirmDirectoryPrefixOnly      ["s3:GetObject"]                               arn:aws:s3:::opal-data-inf/investor-reporting/directory/*
+     irpt-export-render-directory-read-policy     ReadFirmDirectoryPrefixOnly      ["s3:GetObject"]                               arn:aws:s3:::opal-data-cot/investor-reporting/directory/*
+     irpt-export-render-dispatch                  SendOnlyTheRenderDocumentToOnlyTheRenderHost ["ssm:SendCommand"]                            arn:aws:ssm:us-east-1:313476888478:document/irpt-export-render-run
+     irpt-export-render-dispatch                  SendOnlyTheRenderDocumentToOnlyTheRenderHost ["ssm:SendCommand"]                            arn:aws:ec2:us-east-1:313476888478:instance/i-0167fd745ad906a66
+     irpt-export-render-dispatch                  ReadTheCommandResult             ["ssm:GetCommandInvocation", "ssm:ListComman   *
+     irpt-export-render-dispatch                  ReadHostStateOnly                ["ec2:DescribeInstances"]                      *
+     irpt-export-render-evidence                  ReadWriteExportsPrefixOnly       ["s3:GetObject", "s3:PutObject"]               arn:aws:s3:::opal-data-ycharts/firms/*/generations/*/attempts/*/exports/*
+     irpt-export-render-evidence                  ListOnlyTheExportsPrefix         ["s3:ListBucket"]                              arn:aws:s3:::opal-data-ycharts
+     irpt-export-render-evidence                  UseTheEvidenceKeyThroughS3       ["kms:Decrypt", "kms:GenerateDataKey"]         *
+     irpt-export-render-logs                      WriteOwnLogStream                ["logs:CreateLogGroup", "logs:CreateLogStrea   arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/irpt-export-render
+     irpt-export-render-logs                      WriteOwnLogStream                ["logs:CreateLogGroup", "logs:CreateLogStrea   arn:aws:logs:us-east-1:313476888478:log-group:/aws/lambda/irpt-export-render:*
+     irpt-export-render-ownership-map-read-policy OwnershipMapReadOnly             ["s3:GetObject"]                               arn:aws:s3:::opal-data-bd/platinum/49financial/ownership_map.json
+     irpt-export-render-ownership-map-read-policy OwnershipMapReadOnly             ["s3:GetObject"]                               arn:aws:s3:::opal-data-inf/platinum/inflection/ownership_map.json
+     irpt-export-render-ownership-map-read-policy OwnershipMapReadOnly             ["s3:GetObject"]                               arn:aws:s3:::opal-data-cot/platinum/cottonwood/ownership_map.json
+  INSIDE/OUTSIDE: the concrete key matches NO any s3:GetObject resource ARN -> OUTSIDE
+     fnmatch(arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/receipt.json, arn:aws:s3:::opal-data-bd/investor-reporting/directory/*) = False
+     fnmatch(arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/receipt.json, arn:aws:s3:::opal-data-inf/investor-reporting/directory/*) = False
+     fnmatch(arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/receipt.json, arn:aws:s3:::opal-data-cot/investor-reporting/directory/*) = False
+     fnmatch(arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/receipt.json, arn:aws:s3:::opal-data-ycharts/firms/*/generations/*/attempts/*/exports/*) = False
+     fnmatch(arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/receipt.json, arn:aws:s3:::opal-data-bd/platinum/49financial/ownership_map.json) = False
+     fnmatch(arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/receipt.json, arn:aws:s3:::opal-data-inf/platinum/inflection/ownership_map.json) = False
+     fnmatch(arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/receipt.json, arn:aws:s3:::opal-data-cot/platinum/cottonwood/ownership_map.json) = False
+  infra/aws/terraform/investor-reporting/export/iam.tf @HEAD, Sid ReadWriteExportsPrefixOnly: arn:aws:s3:::${local.evidence_bucket}/firms/*/generations/*/attempts/*/exports/*
+
+  simulate s3:GetObject  on arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/E as the role                                       -> implicitDeny
+  simulate s3:GetObject  on arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/E as positive control (user Andrew_Berman)          -> allowed
+  simulate s3:GetObject  on arn:aws:s3:::opal-data-ycharts/investor-reporting/export/49financial/E as negative control (opalinvest-auth-lambda-role) -> implicitDeny
+  simulate s3:ListBucket on arn:aws:s3:::opal-data-ycharts                                         as the role                                       -> implicitDeny (context: s3:prefix)
+  simulate s3:ListBucket on arn:aws:s3:::opal-data-ycharts                                         as positive control (user Andrew_Berman)          -> allowed (context: s3:prefix)
+  simulate s3:ListBucket on arn:aws:s3:::opal-data-ycharts                                         as negative control (opalinvest-auth-lambda-role) -> implicitDeny (context: s3:prefix)
+  simulate kms:Decrypt   on arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963ce as the role                                       -> allowed (context: kms:ViaService)
+  simulate kms:Decrypt   on arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963ce as positive control (user Andrew_Berman)          -> allowed (context: kms:ViaService)
+  simulate kms:Decrypt   on arn:aws:kms:us-east-1:313476888478:key/7f4d3042-10d8-49a7-b55e-3c963ce as negative control (opalinvest-auth-lambda-role) -> implicitDeny (context: kms:ViaService)
+  the role denied on 2 of 3 actions; controls as expected 6 of 6
+
+  (iii) THE SWALLOWED EXCEPTION -- what can and cannot be printed:
+    the role's trust policy names lambda.amazonaws.com ONLY, so it is NOT assumable by this seat; the boundary records to a None sink (S91). The live class therefore CANNOT be printed verbatim. The two instruments that CAN run:
+  identity: (a)(iii)(A) the live invoke pair -- the INVOKE runs the deployed function AS ITS OWN ROLE (irpt-export-render-role); the operator identity arn:aws:iam::313476888478:user/Andrew_Berman only issues the invoke and reads configuration
+    the S3 receipt read (as deployed)      -> StatusCode 200 FunctionError None | code UNEXPECTED | firm_id present
+    receipt_fixture {} (the read bypassed) -> StatusCode 200 FunctionError None | code None | firm_id present
+    the pair discriminates: the failure IS the S3 read -> True
+
+    (B1) THE STUB ARMS (the deployed bytes in-process, a stub S3 client, the recorder patched). A STUB ASSERTS THE CLASS ITS AUTHOR CHOSE -- read (B2) before believing any of these:
+    stub raises AccessDenied (ClientError)                       -> _load_receipt raises entry.ExportRefused
+    stub raises NoSuchKey (ClientError subclass name NoSuchKey)  -> _load_receipt raises entry.ExportRefused
+    stub raises EndpointConnectionError (not a ClientError)      -> _load_receipt raises botocore.exceptions.EndpointConnectionError
+    the handler maps a class to ExportRefused (a POLICY refusal, NOT_FOUND) only for the names it enumerates; any other class propagates and the boundary answers UNEXPECTED
+
+    (B2) THE REAL WIRE ARMS -- the same object, real responses, the handler's own test applied:
+    UNSIGNED, the concrete key (the 403 the role gets)   -> HTTP 403 code AccessDenied  class botocore.errorfactory.AccessDenied -> NOT MAPPED -- propagates -> UNEXPECTED
+    operator, the concrete key (the 404)                 -> HTTP 404 code NoSuchKey     class botocore.errorfactory.NoSuchKey -> MAPPED to ExportRefused (NOT_FOUND)
+    UNSIGNED, a key INSIDE the grant (control)           -> HTTP 403 code AccessDenied  class botocore.errorfactory.AccessDenied -> NOT MAPPED -- propagates -> UNEXPECTED
+    operator, a key INSIDE the grant (control)           -> 200 OK, no exception
+    botocore 1.43.0 from_code mapping for the codes this route can receive: AccessDenied->AccessDenied, NoSuchKey->NoSuchKey, NoSuchBucket->NoSuchBucket, KMS.AccessDeniedException->ClientError
+    THE ASYMMETRY, MEASURED: the role's 403 raises AccessDenied (NOT in the handler's name list) while the operator's 404 raises NoSuchKey (IN it) -- one code path, two served answers
+    THE TWO INSTRUMENTS DISAGREE AND THE WIRE ONE IS TRUE: the stub's AccessDenied raised entry.ExportRefused (mapped, reads GREEN); the wire's AccessDenied is class AccessDenied (NOT mapped). A packet built on the stub alone would have signed an IAM grant to fix an exception-mapping defect.
+
+  the evidence bucket's DECLARED layout (core/layout.json @HEAD, generated by terraform):
+     generations  firms/{firm_id}/generations/{id}/attempts/{a}/
+     intake       firms/{firm_id}/intake/YYYY/MM/DD/{id}/
+     requests     firms/{firm_id}/requests/{id}/revisions/{r}/
+     the reader's prefix 'investor-reporting/export/' is a DECLARED family: False
+  the WRITER census over 38998 files (tracked + untracked, this worktree):
+     infra/aws/lambda/investor-reporting/intake/poller.py:418:    receipt_key = prefix + "receipt.json"
+     infra/aws/lambda/investor-reporting/ycharts/generate/job.py:325:                                            id=request_id, a=str(revision)) + "receipt
+     infra/aws/lambda/investor-reporting/ycharts/generate/job.py:478:                                            id=request_id, a=str(revision)) + "receipt
+     sites building a receipt.json OBJECT KEY: 3, all via the declared families (firms/{firm_id}/...); writers of the reader's address: 0
+
+  list-objects-v2 (as the operator, who holds ListBucket):
+     under the CONCRETE key's own prefix investor-reporting/export/49financial/EXP-5db0796cbfcffc3c0c1d5291/ KeyCount 0
+     under the template's root prefix    investor-reporting/export/                                 KeyCount 0
+     under the POLICY's prefix           firms/                                                     KeyCount 2 ['firms/49financial/generations/GENRT8PROOF/attempts/1/exports/rt8-a/bundle.json', 'firms/49financial/generations/GENRT8PROOF/attempts/1/exports/rt8-render/bundle.json']
+  (iv) THE RECEIPT: ABSENT -- the template's whole prefix holds 0 object(s), while the policy's prefix holds objects (the writer's evidence). The read and the write were written against DIFFERENT prefixes.
+  THE CASE THAT HOLDS: the receipt is ABSENT -- and not merely for this export id: the reader's WHOLE address space is empty, is not a declared prefix family, and has ZERO writers. So the order's second branch is the measured one: NO GRANT, and two rows (S105 the address, S106 the mapping). A grant would convert UNEXPECTED into a truthful NOT_FOUND by giving the role a 404 instead of a 403, while granting an undeclared prefix that nothing writes and leaving the mapping defect armed.
+
+(b) THE PACKET and THE HALVES
+  identity: (b) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/document claim, NOT a served behaviour
+  packet org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~V/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-14.md: blob at HEAD a50a7d0e5b38d7b7cbce3ddedffac146c6790d32, worktree a50a7d0e5b38d7b7cbce3ddedffac146c6790d32 -> COMMITTED, UNCHANGED
+  COO half at HEAD: 0 file(s), 0 naming blob a50a7d0e5b38d7b7cbce3ddedffac146c6790d32 -> ABSENT
+  CTO half at HEAD: 0 file(s), 0 naming blob a50a7d0e5b38d7b7cbce3ddedffac146c6790d32 -> ABSENT
+  halves: 0 of 2
+
+STOP at (b): a half is ABSENT -- nothing is applied; (c) apply and (d) the live proof are NOT RUN
+ARM (a) the cause measured: PASS
+ARM (b) packet + halves: FAIL
+ARM (c) apply: NOT RUN
+ARM (d) live proof: NOT RUN
+RESULT: R71-AC1 FAIL -- 1 of 4 arms hold (first pass: STOP at the halves as the face expects)
