@@ -63,20 +63,34 @@ braces render as parens the first time it is written.
 `lib/opal_naming.py` -- 0 commits by this cell since the cut, 0 elsewhere in the window (S101 already
 resolved at the source that the producer is correct at the values). This cell changes rendering only.
 
-## 7. Vintage (R7R14-AC3) -- structurally cross-cell, see row LGIC_ENFORCE-W1-S105
+## 7. Vintage (R7R14-AC3) -- RE-GRADED PASS, see row LGIC_ENFORCE-S106
 
-`r14-vintage-field` grades BOTH `EN-r-7` and `EN-p-38` together. This worker's own block is clean (2 of 2
-fixed inputs named at pin `a2e031e4c772737c29e328420dae9f1a17c6d2df`, both resolvable). `EN-p-38`'s
-record lives in a sibling worker's own worktree (`0.9.0_WK_LGIC_ENFORCE~2`), which this order forbids
-coordinating with and which is not on this branch, so the shared arm reads FAIL from here. Filed as
-`LGIC_ENFORCE-W1-S105` (BLOCKING, INERT, UNDER_INVESTIGATION) rather than hidden or worked around.
+ORIGINALLY: `r14-vintage-field` AND-combined a hard-coded pair of `EN-r-7` and `EN-p-38` records; this
+worker's own block was clean (2 of 2 fixed inputs named at pin `a2e031e4c772737c29e328420dae9f1a17c6d2df`,
+both resolvable) but `EN-p-38`'s record lived only in a sibling worker's own worktree
+(`0.9.0_WK_LGIC_ENFORCE~2`), which this order forbids coordinating with and which was not on that branch,
+so the shared arm read FAIL. Filed as `LGIC_ENFORCE-W1-S105` (BLOCKING, INERT, UNDER_INVESTIGATION)
+rather than hidden or worked around.
+
+RE-GRADE (2026-09-19, worktree `wk-lgic-enforce-14-1b`, base `3948ba37d9`, carrying the drain `dda2125b35`
+that merged both `wk-lgic-enforce-14-1` and `wk-lgic-enforce-14-2`, plus the issuer's repair `acdba45160`
+/ `LGIC_ENFORCE-S106`): the arm now grades the records PRESENT IN ITS CHECKOUT (2 found: `EN-r-7`,
+`EN-p-38`) rather than a hard-coded pair, and refuses an empty population rather than passing vacuously.
+Both records are present and clean on this branch, so `VERDICT: PASS-R14-VINTAGE-FIELD`. This cell's own
+artifact (`render_population_table_r14.py`, `PLACEHOLDER_POPULATION_TABLE_R13.md`,
+`ONE_RENDER_PATH_R14.json`) is byte-identical to commit `37865221aa` (`git diff 37865221aa -- <those
+paths>` returns 0 lines) -- the FAIL-to-PASS transition is entirely the issuer's checker repair and the
+drain landing the sibling cell's record, not a change to this cell's work.
 
 ## 8. Stale proofs (R7R14-AC4)
 
-1 fixed-input commit since the cut pin `c05f9f9fc9`: `a2e031e4c7`, the L6 issuance that minted
-`fixed_inputs/r14/` itself. No round-14 proof existed before that commit (measured: `git ls-tree -r
-a2e031e4c7^ -- org/missions/D14/LGIC/LGIC_ENFORCE` carries no `-r14.` proof_of_spec path), so the honest
-set of proofs at risk is empty for both cells and `stale_proofs.proofs_re_run` is `[]`.
+ORIGINALLY: 1 fixed-input commit since the cut pin `c05f9f9fc9`: `a2e031e4c7`, the L6 issuance that
+minted `fixed_inputs/r14/` itself. No round-14 proof existed before that commit, so the honest set of
+proofs at risk was empty for both cells and `stale_proofs.proofs_re_run` was `[]`.
+
+RE-GRADE: 2 fixed-input commits since the cut pin now (`a2e031e4c7` the mint, plus `acdba45160` the S106
+repair to `check_en_r14.py` itself). Still 0 proofs at risk for either cell -- no round-14 proof existed
+before either commit -- so `stale_proofs.proofs_re_run` remains `[]` and no re-run was required.
 
 ## 9. Criteria table
 
@@ -84,14 +98,23 @@ set of proofs at risk is empty for both cells and `stale_proofs.proofs_re_run` i
 |---|---|---|---|
 | R7R14-AC1 | PASS-R7-ONE-PATH | `check_en_r14.py r7-one-path` | 6 of 6 columns routed, 1 distinct rule, witness identical in 2 columns |
 | R7R14-AC2 | PASS-R7-NO-PRODUCER-CHANGE | `check_en_r14.py r7-no-producer-change` | 0 commits by this cell to `lib/opal_naming.py`, 0 elsewhere in window |
-| R7R14-AC3 | FAIL-R14-VINTAGE-FIELD | `check_en_r14.py r14-vintage-field` | EN-r-7 clean (2/2 named, resolvable); EN-p-38 0/2 named -- cross-worktree, see LGIC_ENFORCE-W1-S105 |
-| R7R14-AC4 | PASS-R14-STALE-PROOFS | `check_en_r14.py r14-stale-proofs` | 1 commit since cut (the mint), 0 proofs at risk, 0 enumerated, both cells |
+| R7R14-AC3 | PASS-R14-VINTAGE-FIELD (was FAIL, re-graded post-S106) | `check_en_r14.py r14-vintage-field` | 2 of 2 records present in this checkout graded (EN-r-7, EN-p-38), 2/2 fixed inputs named+resolvable each |
+| R7R14-AC4 | PASS-R14-STALE-PROOFS | `check_en_r14.py r14-stale-proofs` | 2 commits since cut (mint + S106 repair), 0 proofs at risk, 0 enumerated, both cells |
 | R7R14-AC5 | UNVERIFIABLE-BY-INSTRUMENT | judgment, CVO at L9 | N/A |
 
 ## 10. What is not claimed
 
-This record does not claim R7R14-AC3 is met -- it is not, from this worktree, and that FAIL is recorded
-verbatim rather than argued around. It claims only that EN-r-7's own half of that shared arm is correct
-and complete, and that the remaining gap is structural (drain-dependent), not a defect in this cell's
-work. Whether EN-p-38's own record will make the shared arm PASS once merged is that cell's own question,
-never read or acted on here per the order's BOUNDS.
+All four mechanical criteria now PASS on this branch. This record does not claim R7R14-AC5 is met -- that
+is a judgment call reserved for `3.0.0_SA_CVO` at L9, unchanged by this re-grade. It also does not claim
+this worker repaired the checker or regenerated the table a second time: `LGIC_ENFORCE-S106` is the
+issuer's (`2.0.0_SA_COO~G`'s) own repair, and this cell's artifact was never touched or reproduced --
+verified byte-identical to `37865221aa` above.
+
+## 11. Re-grade note (2026-09-19)
+
+This is a SHORT RE-GRADE of an already-drained cell, not new work. The original FAIL on R7R14-AC3 was
+correctly recorded rather than worked around (section 7, original text preserved above); the defect was
+the issuer's shared-arm design (filed both as `LGIC_ENFORCE-W1-S105` by this worker and independently as
+`LGIC_ENFORCE-S106`), and its repair at `acdba45160` is what turns AC3's verdict, not any change here.
+`selftest-arms` was re-run first (`VERDICT: PASS-ARMS-DISCRIMINATE`, 33 arms, 9 positive-satisfiability)
+before touching the proof instance, per the re-grade order's controls-first instruction.
