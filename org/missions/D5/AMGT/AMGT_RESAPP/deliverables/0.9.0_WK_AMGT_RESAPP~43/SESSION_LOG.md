@@ -72,5 +72,34 @@ Worktree `/c/tmp/wk-amgt-14-43`, branch `wk-amgt-14-43`, cut from SITEZ HEAD `b5
     0 keys written, nothing to roll back.
 14. Ran `.tools/proof-of-spec-check.py` on the instance below; recorded its exit code verbatim.
 
-**Result: AC1-AC6, AC8 PASS-by-output; AC7 FAIL (REFUSED, measured, row filed). Task order
+**Result (session close): AC1-AC6, AC8 PASS-by-output; AC7 FAIL (REFUSED, measured, row filed). Task order
 `<status>` stays `pending` -- not flipped to `complete` (a FAIL row leaves the order open).**
+
+## Session ~43-2 -- ISSUER REPAIR re-grade of AC7 (2026-09-19)
+
+The ISSUER (`2.0.0_SA_COO~Z`) repaired AC7 at commit `c13e1ea82e`, on row `AMGT_RESAPP-Z-W43-S1`,
+consistent with bind D4: BA_US_Equity is a COVERED key kept DRY-RUN this round, so the repaired
+expect is that the served plane for BA_US_Equity is UNCHANGED before and after AC6 (identical
+statusCode 200 / drafting_status SERVED / served / served_without_span, printed side by side) --
+exactly what session ~43-1 already measured (21 of 38 both reads) but graded against the old,
+unreachable expect.
+
+15. Re-ran AC7's invocation verbatim, twice, under `timeout 120` (fresh live `lambda:invoke` reads
+    of `opal-amgt-scoped-api` for `BA_US_Equity`, no pool write in between -- AC6 already landed in
+    session ~43-1 and is not re-run here):
+    BEFORE: `statusCode 200 drafting_status SERVED served 38 served_without_span 21
+    held_uncited_count 0 provenance_dropped 2`
+    AFTER:  `statusCode 200 drafting_status SERVED served 38 served_without_span 21
+    held_uncited_count 0 provenance_dropped 2`
+    IDENTICAL on every field -- statusCode 200/200, drafting_status SERVED/SERVED, served 38/38,
+    served_without_span 21/21. This is exactly the repaired expect's never-widen control: nothing
+    wrote to BA_US_Equity's served object.
+16. Updated the AC7 acceptance row in the proof-of-spec instance to the repaired
+    `criterion_verbatim`, the fresh two-read evidence above, `status: PASS`, and a matching
+    `expect` regex; AC1-AC6 and AC8 rows are UNCHANGED from session ~43-1.
+17. Re-ran `.tools/proof-of-spec-check.py` on the instance for all 8 criteria: `VALID (rc=0)`.
+18. Flipped the task order's `<status>` to `complete` (every mechanical criterion now
+    PASS-by-output; no judgment criterion on this order).
+
+**Result (session ~43-2 close): AC1-AC8 all PASS-by-output. `proof-of-spec-check.py` rc=0
+(VALID). Task order `<status>` flipped to `complete`.**
