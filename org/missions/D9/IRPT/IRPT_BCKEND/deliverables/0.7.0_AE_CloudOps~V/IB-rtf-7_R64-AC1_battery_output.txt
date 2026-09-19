@@ -1,0 +1,25 @@
+IB-rtf-7 R64-AC1 battery -- run at 2026-09-19T08:01:41Z -- worktree HEAD af4902cc98ab0e5cd713c869c85289cfc78af5e6
+
+(a) IDENTITIES -- the ambient default credential chain (no profile enumeration, no credential-file read, per the issuer's command set)
+  $ aws sts get-caller-identity --query Arn --output text
+    at: 2026-09-19T08:01:41Z  rc: 0
+    stdout: arn:aws:iam::313476888478:user/Andrew_Berman
+    stderr: <empty>
+  identities enumerated: N = 1 -> arn:aws:iam::313476888478:user/Andrew_Berman
+
+(b) ATTEMPTS -- delete-bucket-policy per identity per bucket
+  $ aws s3api delete-bucket-policy --bucket opal-data-inflection
+    at: 2026-09-19T08:01:43Z  rc: 255
+    stdout: <empty>
+    stderr: An error occurred (AccessDenied) when calling the DeleteBucketPolicy operation: User: arn:aws:iam::313476888478:user/Andrew_Berman is not authorized to perform: s3:DeleteBucketPolicy on resource: "arn:aws:s3:::opal-data-inflection" with an explicit deny in a resource-based policy
+  $ aws s3api delete-bucket-policy --bucket opal-data-cottonwood
+    at: 2026-09-19T08:01:44Z  rc: 255
+    stdout: <empty>
+    stderr: An error occurred (AccessDenied) when calling the DeleteBucketPolicy operation: User: arn:aws:iam::313476888478:user/Andrew_Berman is not authorized to perform: s3:DeleteBucketPolicy on resource: "arn:aws:s3:::opal-data-cottonwood" with an explicit deny in a resource-based policy
+  attempts: 2 of 2 (2N, N = 1); succeeded 0 of 2; AccessDenied 2 of 2; other failure 0 of 2
+
+(c) DISCRIMINATOR -- get-bucket-policy -> NoSuchBucketPolicy, run only on a delete success
+  SKIP: 0 of 2 deletes succeeded -- no read-back taken; NoSuchBucketPolicy 0 of 2
+
+RESULT: R64-AC1 FAIL -- NoSuchBucketPolicy 0 of 2; 2 of 2 attempts denied
+CARRY: step 4 -- Andrew at the console when next present; 1 identities tried, 2 of 2 denied
