@@ -1,0 +1,49 @@
+{
+  "_about": "LGIC_LGCTFM round 5, cell LT-m-2 -- WHICH PRODUCER writes an S3Key row whose bucket resolves to nothing, and HOW MANY producers there are. MEASUREMENT ONLY (no repair). Run measured: workflows/legacy_transform/blackdiamond-49financial/20260919T034609Z-c28c728/contract.json, re-measured at this worker's own write time (0.9.0_WK_LGIC_LGCTFM~1, 2026-09-19).",
+  "population": {
+    "s3key_rows": 154,
+    "without_a_resolvable_bucket": 24,
+    "by_shape": {"tier_prefixed": 23, "firm_prefixed": 1},
+    "row_ids": ["R-0060", "R-0257", "R-0261", "R-0269", "R-0270", "R-0290", "R-0294", "R-0296",
+                "R-0326", "R-0327", "R-0346", "R-0357", "R-0359", "R-0366", "R-0367", "R-0368",
+                "R-0369", "R-0370", "R-0371", "R-0373", "R-0374", "R-0375", "R-0376", "R-0386"]
+  },
+  "producers": {
+    "count": 2,
+    "by_producer": [
+      {
+        "producer": "lib/opal_lgctfm.py:374-380 parse_aws_walk() -- comp-find --corpus aws's own S3Key band prints no arn_or_path detail line, so the parser falls back to `name` (bare key, no bucket); reached via discover_involved()'s resolve() (lib/opal_lgctfm.py:956-964) when the (node_type,name) pair is AMBIGUOUS across more than one firm-writer node in the served graph, so by_tn's single-candidate test fails and the row is built from the comp-find-parsed node instead of a kuzu-native one",
+        "rows": ["R-0257", "R-0261", "R-0269", "R-0270", "R-0290", "R-0294", "R-0296", "R-0326",
+                 "R-0327", "R-0346", "R-0357", "R-0359", "R-0366", "R-0367", "R-0368", "R-0369",
+                 "R-0370", "R-0371", "R-0373", "R-0374", "R-0375", "R-0376", "R-0386"],
+        "how_it_was_attributed": "RAN `.tools/comp-find --corpus aws <bare-key>` for each row's key (e.g. 'advisor_fee_efficiency'): every one returns exactly THREE S3Key candidate nodes with the same name -- opal-data-bd/<key> and opal-data-inf/<key> (props.attribution='writer-firm'), plus a THIRD node keyed 's3:<key>' with empty arn. RAN `.tools/comp-kuzu` Cypher MATCH queries (`MATCH (x:CloudNode) WHERE x.node_type='S3Key' AND x.name='<key>' RETURN x.node_id, x.props`) confirming that third node's props for all 23 rows: source='portal-stitch', origin='stitch', origin_reason='ambiguous-across-firms', n.arn=''. READ lib/opal_lgctfm.py:350-406 (parse_aws_walk/run_aws_walk) -- the function's own docstring states arn_or_path is 'blank for some types, e.g. S3Key', and its code (line 374-380) falls back to `name` when the line after the entry header is blank, which is exactly what comp-find prints for an S3Key hit. READ discover_involved()/resolve() (lib/opal_lgctfm.py:908-964): with 3 same-name candidates, `by_tn.get((node_type,name))` returns len==3 so `nid` stays None and the walk mints a synthetic node from comp-find's own (blank-fallback) output instead of using any of the 3 kuzu-native nodes directly. This is a code-path trace confirmed by live re-runs of the two instruments the engine itself calls, not an inference from the path's own shape."
+      },
+      {
+        "producer": "lib/opal_lgctfm.py:929-930 (discover_involved()'s kuzu_rows() ingestion loop) -- `\"arn_or_path\": r.get(\"arn\") or nid` falls back to the kuzu-native node_id itself when the served graph's own `arn` property is empty",
+        "rows": ["R-0060"],
+        "how_it_was_attributed": "RAN `.tools/comp-kuzu` MATCH for the row's key ('blackdiamond/49f/_ops/pull_state.json'): exactly ONE candidate node, node_id 's3:blackdiamond/49f/_ops/pull_state.json', n.arn='', props.source='portal-stitch', props.origin_reason='no-canonical-s3-key' (a DIFFERENT reason than the 23 ambiguous rows above -- this key is not duplicated across firms, it simply has no canonical S3 key resolved). Because there is exactly ONE candidate (not 3), discover_involved()'s resolve() (lib/opal_lgctfm.py:956-964) matches it directly via by_tn and never falls through to the comp-find-parsed path used by producer 1 -- the row is built straight from the kuzu-native `nodes` dict entry (lib/opal_lgctfm.py:923-930), where `r.get('arn') or nid` falls back to the node_id string itself, which is why this row's value carries the 's3:' prefix (baked into the node_id by whatever upstream process minted it) while the 23 ambiguous rows above carry no prefix at all. Confirmed by a live comp-kuzu re-query, not inferred from the value's shape."
+      }
+    ]
+  },
+  "unattributed": {"rows": [], "why": ""},
+  "no_repair": {"engine_or_registry_commits_by_this_cell": 0},
+  "fixed_inputs_at_pin": {
+    "org/missions/D14/LGIC/LGIC_LGCTFM/deliverables/2.0.0_SA_COO~G/fixed_inputs/r5/check_lt_r5.py": "44fc14c183175b5522ed6476efa24fc82da68a76",
+    "org/missions/D14/LGIC/LGIC_LGCTFM/deliverables/2.0.0_SA_COO~G/fixed_inputs/r5/R5_BASE.json": "44fc14c183175b5522ed6476efa24fc82da68a76"
+  },
+  "stale_proofs": {"fixed_input_commits_since_cut": 1, "proofs_re_run": []},
+  "hunt_bare_s3_colon": {
+    "claim": "measured -- every run under this workflow's ONLY home, re-checked at this worker's own write time",
+    "runs_swept": ["20260917T202556Z-bb29248", "20260917T233115Z-a89fd61", "20260917T233143Z-a89fd61",
+                   "20260918T002711Z-caf0983", "20260918T011619Z-8db9eb1", "20260919T034609Z-c28c728"],
+    "denominator": "6 of 6 run directories under workflows/legacy_transform/blackdiamond-49financial (the ONLY workflow home in this repo)",
+    "bare_s3_colon_rows_found": 0,
+    "result": "NO bare single-colon 's3:' row (head=='' after stripping the 's3:' prefix) exists in ANY of the 6 runs. The analysis's characterisation of the 24th row as malformed-bare-s3: does not match any measured run; every bucketless row in every run is either tier-prefixed (no 's3:' prefix at all) or firm-prefixed (a genuine 's3:<key>' value with a non-empty body)."
+  },
+  "shape_distinguished_or_merely_agreeing": {
+    "claim": "held -- for M2R5-AC6 (3.0.0_SA_CVO, no verdict from this worker)",
+    "same_upstream_root": "Both classes trace to the SAME upstream input defect: the served graph's portal-stitch S3Key ingestion writes an empty `arn` property whenever it cannot resolve a key to exactly one firm-writer bucket (origin_reason 'ambiguous-across-firms' for the 23 tier-prefixed rows, 'no-canonical-s3-key' for the 1 firm-prefixed row) -- this ingestion process is OUTSIDE lib/opal_lgctfm.py and outside this cell's grant.",
+    "different_engine_code_path": "The SHAPE difference (no prefix vs 's3:'-prefixed) is fully explained by a DOWNSTREAM branch inside discover_involved()/resolve(): a name with >1 same-name candidate (ambiguous) falls through to comp-find's parsed, blank-arn_or_path-fallback path (lib/opal_lgctfm.py:374-380 + :956-964); a name with exactly 1 candidate (unique) is read straight off the kuzu-native node (lib/opal_lgctfm.py:929-930), whose node_id happens to carry the 's3:' prefix baked in upstream.",
+    "so": "these are genuinely TWO producers by the cell's own definition (two distinct code sites that WRITE the bucketless value into the row), but they are not two INDEPENDENT causes at the data layer -- a repair that fixed the upstream portal-stitch ingestion (outside this cell) could plausibly resolve both at once, which is exactly the kind of fact a premature single-remedy cell would have hidden rather than surfaced."
+  }
+}
