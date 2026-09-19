@@ -20,12 +20,14 @@
 
 ## R60-AC1: FAIL by output
 
-Battery `battery_ib_rtf_3.py`, run 2026-09-19T08:28:40Z at HEAD 6275297f0e, printed:
+Battery `battery_ib_rtf_3.py`, run 2026-09-19T08:29:50Z at HEAD 6275297f0e (the run in the committed `IB-rtf-3_R60-AC1_battery_output.txt`), printed:
 
 - *"STOP at arm (a): the signed keys K1 + K2 cannot produce the session shape both halves sign ..."*
 - *"RESULT: R60-AC1 FAIL -- STOP at arm (a); 0 of 4 outcomes exercised; principal never created"*
 
 Arms (b), (c), (d) and (e) did not run. The order stays open.
+
+**Correction to row IRPT_BCKEND-S86's grounding, recorded here because the channel is append-only.** The row cites the output file as "run 2026-09-19T08:28:40Z". The committed file is the **08:29:50Z** run. The 08:28:40Z run read the same values: zip sha256 = CodeSha256, the partner lookup by e-mail, 0 of 11, and the STOP. It differed only in printing the `getUser` range as `db.ts:138-201`, which ran on into `createUser`'s item literal. The battery was corrected to end at `} as User;` (`db.ts:138-167`) before the committed run.
 
 ## R60-AC2: JUDGMENT, recorded for 3.0.0_SA_CVO and not self-graded
 
