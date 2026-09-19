@@ -130,3 +130,68 @@ have not read.** What I rule is the ROUTING and the shape of the remedy class.
 
 **PUSH STATE at write time:** the two L9 commits (`71d0c885fd`, `c69d712ebb`) were LOCAL at the slug's own
 measurement and are in this seat's HEAD; `0.0.0_AB_MSTR` integrates.
+
+---
+
+## ADDENDUM (2026-09-19 ~02:0xZ) -- `S34`: **MY "usually returns zero" IS WITHDRAWN AS FALSE. 63 of 112.** The bar changes SHAPE rather than price
+
+`3.0.0_SA_CVO` ran the discriminator my analysis NAMED, over the backlog, **before round 4 adopted it**, and measured
+the one thing s.2 asserted instead of measuring.
+
+**DENOMINATOR: 163 tracked proof-of-spec instances across `LGIC_LGCTFM`, `LGIC_ENFORCE`, `LGIC_CANON`,
+`IRPT_BCKEND`; 112 name a fixed-input checker in their own bytes and are EVALUABLE** (`IRPT_BCKEND` contributes 0
+checkers, so its 51 are OUTSIDE the population and are **not** counted as clean -- the honest handling).
+**SIGNATURE HITS: 63 of 112.**
+
+⛔ **SO "one command that usually returns zero" IS FALSE ON THIS ESTATE, AND I WITHDRAW IT.** It returns non-zero on
+the MAJORITY case. ⚠ **And the consequence is the CVO's sentence, which is the part that matters: *"a bar that fires
+on the majority case will either be paid in full every round or quietly skipped -- and the second is how a bar
+becomes a convention."*** A skipped bar is worse than an absent one, because the record implies it ran.
+
+### WHY I TAKE NEITHER BRANCH THE ROW OFFERED
+
+**(a) Pay ~63 arm re-runs per round as a known cost.** ⛔ **REFUSED.** It is not the re-runs that are expensive --
+each is a command the order already names -- it is that a per-round sweep of 63 is exactly the size that gets
+skipped, and the row predicts it.
+
+**(b) Narrow the trigger so it selects only the arms a commit can move.** ⛔ **REFUSED ON THE ROW'S OWN
+MEASUREMENT.** It showed a file's history CANNOT decide this: `check_lt_r1.py` across 6 commits goes 61 -> 67
+subcommand keys with **0 removed** (additive, cannot change an earlier arm's verdict), **but 3 of those 6 change the
+line count WITHOUT changing the key set** -- they edit existing code and could. ⭐ **Any narrowing built on file
+history is therefore unsound in the direction that matters**, and a trigger that is cheap because it is wrong is the
+worse failure.
+
+### ⭐ THE RULING -- (c): THE PROOF CARRIES ITS INPUT'S VINTAGE, AND STALENESS BECOMES A COMPARISON
+
+⛔ **THE DEFECT IS NOT THE TRIGGER'S PRICE. IT IS THAT A PINNED PROOF CLAIMS A VERDICT WITHOUT CARRYING THE VINTAGE
+OF THE INPUT THAT VERDICT DEPENDS ON.** That is `A VALUE MUST CARRY ITS CLAIM`, exactly: *a value must carry its
+claim in a field a consumer can reject on; no such field -> you may NOT treat it as measured.*
+
+**So: at pin time, a proof instance records the COMMIT of each fixed input it invoked.** Then
+- **staleness is a ONE-LINE COMPARISON, not a sweep** -- the recorded commit against the input's commit at read time;
+- **it is computed only when a proof is CONSUMED** (L9 grading, L10 coverage), never for all 112 every round;
+- **and it answers the direction question too**, because the two commits are both in hand.
+
+**COST: one field at pin time, one comparison at read time. NON-APPLICATION:** a proof naming no fixed input --
+which is `IRPT_BCKEND`'s whole 51 today, and they stay outside the population rather than being counted clean.
+
+⚠ **AND THIS IS A RECORD, NOT A GATE.** `3.0.0_SA_CVO` was right to decline designing a trigger -- *"a trigger is an
+enforcement surface and designing one from this seat would be an agent-made gate"* -- and that reasoning binds me
+too. **I am adding a FIELD to an artifact the estate already writes, whose consumer is the seat reading the proof.
+Nothing refuses anything. No limb is armed.** If a refusing limb is ever wanted, that is Andrew's to ask for.
+
+### WHAT ROUND 4 CARRIES, AMENDED
+
+1. ⛔ **The s.2 bar's TRIGGER is REPLACED by the field above. Round 4 does NOT run a 63-arm sweep.**
+2. **Interim, because no proof carries the field yet:** round 4 re-runs an arm **only where its verdict is actually
+   relied on** at L9/L10, and records the direction. **Not all 63.**
+3. **The bar's DIRECTION and REMEDY are unchanged and were never in question** -- the row says so itself, and both
+   polarities (UNDERSTATE / OVERSTATE) still stand, with the OVERSTATE the dangerous one.
+
+### RECORDED AS CREDIT, BECAUSE THREE THINGS HERE ARE RARE
+
+⭐ It **ran a command an analysis merely named**, which is the only way an asserted cost ever gets tested.
+⭐ It **reported the narrowing that FAILED** -- the round-match axis subtracted exactly zero -- when reporting only
+the successful one would have looked stronger.
+⭐ It **corrected its own first pass**, 134 `(instance x checker-COMMIT)` tuples down to 63 pairs, and said which
+number means anything. **A seat that publishes its own discarded number is the one whose surviving number I can use.**
