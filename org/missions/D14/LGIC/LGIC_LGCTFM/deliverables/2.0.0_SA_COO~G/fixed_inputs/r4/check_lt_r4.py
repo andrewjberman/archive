@@ -97,6 +97,22 @@ def text_of(*paths):
 
 
 # ------------------------------------------------------------------ cores
+# The manifest's OWN vocabulary, from its own header (`graph-call-manifest.yaml:28`,
+# "status: canonical | deprecated | planned | retired"). This arm first demanded
+# `active|current|live` -- THREE VALUES THE FILE HAS NEVER ADMITTED. Measured when the defect
+# surfaced (LGIC_LGCTFM-W2-S35, 0.9.0_WK_LGIC_LGCTFM~2): 127 entries carry a status, 125
+# `canonical` and 2 `retired`, so the accepted set's INTERSECTION WITH THE LIVE POPULATION WAS
+# ZERO and no conforming entry could ever pass. A checker that invents a vocabulary grades its
+# author's memory, not the estate; the values come from the file, and `retired` is a RECORD and
+# never a route (CG-s-17), so it is refused HERE rather than by omission.
+MANIFEST_STATUSES = ("canonical", "deprecated", "planned", "retired")
+LIVE_STATUSES = ("canonical",)
+
+
+def _status_is_live(v):
+    return str(v or "").strip().lower() in LIVE_STATUSES
+
+
 def core_entry(d, want_keys, assigned_tool):
     inv = [e for e in (d.get("entries") or []) if str(e.get("id", "")).startswith("cloud.inventory.")]
     bad = []
@@ -108,8 +124,9 @@ def core_entry(d, want_keys, assigned_tool):
         bad.append("entry lacks required key(s): %s" % _scrub(miss))
     if assigned_tool not in str(e.get("canonical_call", "")):
         bad.append("canonical_call does not carry the R-81-assigned instrument %r" % assigned_tool)
-    if str(e.get("status", "")).lower() not in ("active", "current", "live"):
-        bad.append("status %r is not an active one" % _scrub(e.get("status")))
+    if not _status_is_live(e.get("status")):
+        bad.append("status %r is not a LIVE status in the manifest's OWN vocabulary %s"
+                   % (_scrub(e.get("status")), _scrub(sorted(MANIFEST_STATUSES))))
     if e.get("tool") not in (d.get("tools_index") or {}):
         bad.append("tool %r is not in tools_index" % _scrub(e.get("tool")))
     return (not bad), ["entry %s | tool %s | call %s" % (_scrub(e.get("id")), _scrub(e.get("tool")),
@@ -360,7 +377,7 @@ def selftest_arms():
     keys = b["manifest_baseline"]["required_entry_keys"]
     tool = b["r81_assignment"]["inventory"]
     good = {"tools_index": {"comp-find": {}}, "entries": [dict({k: "x" for k in keys}, **{
-        "id": "cloud.inventory.subject_composition", "tool": "comp-find", "status": "active",
+        "id": "cloud.inventory.subject_composition", "tool": "comp-find", "status": "canonical",
         "canonical_call": "comp-find --corpus aws '\\b<token>\\b' --all"})]}
     arm("POSITIVE-entry", core_entry(good, keys, tool)[0], "one canonical entry, assigned instrument")
     two = {"tools_index": {"comp-find": {}}, "entries": good["entries"] + [dict(good["entries"][0], id="cloud.inventory.other")]}
@@ -399,6 +416,13 @@ def selftest_arms():
     arm("POSITIVE-no-loss-named", core_no_loss({"LAMBDA": 66, "SCHEDULE": 9}, old,
                                                {"LAMBDA": {"dropped": [{"name": "x", "old_leg": "iam_grant"}]}})[0],
         "a drop NAMED with its old leg is admissible")
+
+    arm("POSITIVE-status-canonical", _status_is_live("canonical"),
+        "125 of the manifest's 127 statuses; the value its own schema and NFRA_GRAPHS AC1 require")
+    arm("MUTANT-status-retired", not _status_is_live("retired"),
+        "a retired entry is a RECORD, not a route (CG-s-17)")
+    arm("MUTANT-status-invented", not (_status_is_live("active") or _status_is_live("live")),
+        "the values this arm used to demand: never in the file's vocabulary, intersection 0 with 127 live entries (W2-S35)")
 
     arm("POSITIVE-stale-none", core_stale([], None, set())[0])
     _one = {"stale_proofs": {"fixed_input_commits_since_cut": 1, "proofs_re_run": []}}
