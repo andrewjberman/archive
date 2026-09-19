@@ -206,7 +206,7 @@ def arm_d() -> bool:
             else:
                 p = os.path.join(WS, e["source_dir"], m)
                 pred[m] = open(p, "rb").read() if os.path.exists(p) else None
-        moved = [m for m in pred if m in members and m not in added and pred[m] != members[m]]
+        moved = [m for m in pred if m in members and m not in added and pred[m] is not None and pred[m] != members[m]]
         missing = [m for m in pred if pred[m] is None]
         same = sum(1 for m in pred if m in members and m not in added and pred[m] == members[m])
         beyond_total += len(moved) + len(missing)
@@ -250,8 +250,9 @@ def main() -> int:
     emit("")
     arms["(d) build + packet + halves"] = arm_d()
     emit("")
-    emit("STOP at (d): the build is withheld (row S101: a HEAD rebuild moves the seam member on 5 functions) -- nothing is "
-         "built, no packet exists, (e) apply and (f) the live proof are NOT RUN")
+    emit("STOP at (d): the build is withheld (row S101: a HEAD rebuild moves the seam member on 5 functions; row S102: "
+         "irpt-ycharts-generate has 2 members with no source, so build-and-upload.sh refuses it) -- nothing is built, no "
+         "packet exists, (e) apply and (f) the live proof are NOT RUN")
     arms["(e) apply"] = False
     arms["(f) live proof"] = False
     for k, v in arms.items():
