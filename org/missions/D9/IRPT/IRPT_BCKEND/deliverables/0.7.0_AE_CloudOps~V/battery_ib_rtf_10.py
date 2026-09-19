@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
-"""IRPT_BCKEND.TO-IB-rtf-10 battery -- the serving roles granted the ownership map and the bucket map.
+"""IRPT_BCKEND.TO-IB-rtf-10 battery -- the serving roles granted the ownership map, the directory and the bucket map.
 
-FIRST PASS (this revision): arms (a)-(d). (e) apply and (f) the live proof run only on the re-hand, after both
-never-widen halves are at HEAD naming the packet blob; with a half ABSENT the battery STOPS at (d) and says so.
+SECOND PASS (this revision; the re-hand @2b67d4ff7a + the addendum @77bd04ca41): arms (a)-(d) against the RE-CUT
+packet. (e) apply and (f) the live proof run only on the third pass, after both never-widen halves are at HEAD
+naming the re-cut blob; with a half ABSENT the battery STOPS at (d) and says so.
   (a) CENSUS of the 7 serving functions: role; s3:GetObject on each client firm's ownership map AND on its
-      directory pointer (simulate-principal-policy, one resource per call, a positive and a negative control);
+      directory object (simulate-principal-policy, one resource per call, a positive and a negative control);
       IRPT_DIRECTORY_BUCKET_MAP in the deployed environment; the runtime loader each entry binds; the packet's
-      census lines compared with this run.
-  (b) THE PACKET: committed (blob at HEAD == worktree), its keys line, and the declared writers W per role.
+      three CENSUS lines compared with this run.
+  (b) THE PACKET: committed (blob at HEAD == worktree), its keys line, REGISTRY-VINTAGE == the HEAD blob of
+      data/firm_registry.json, the K-OM / K-DIR ARN lines == the derivation from that registry, the declared
+      writers W per role.
   (c) THE PLAN per root, re-taken with the vendored terraform: 0 to destroy, every address with its actions, the
       planfile sha256 and the CANONICAL digest (sha256 of the sorted resource changes), each compared with the
-      packet's table; every lambda update split into env-only vs code-carrying (source_code_hash / object version).
+      packet's table; every lambda update split into env / object-version / CODE; 0 code-carrying updates required
+      (the S95 restore), the version-only bumps NAMED as noise.
+  (c-code) K-CODE: whether irpt-directory-search has a NEW build at rest (row S96: the builder refuses it).
   (d) THE HALVES at HEAD naming the packet blob, 2 of 2 -- ABSENT is a truthful STOP.
+Every arm prints the identity it ran as; none of (a)-(d) claims a served behaviour (the identity bar binds (f)).
 Read-only on every live plane. No apply. Prints no credential.
 """
 from __future__ import annotations
@@ -45,7 +51,12 @@ FUNCS = {
     "irpt-performance-adapter": ("performance", "performance_adapter", "irpt-performance-adapter-role", "performance/entry.py"),
     "irpt-ycharts-generate": ("ycharts", "generate", "irpt-ycharts-generate-role", "ycharts/generate/entry.py"),
 }
+KCODE_FN = "irpt-directory-search"
+KCODE_PRIOR_LIVE = "aQxATFkcdtEBvs+v/zztQBOPcbR9XH9Lzjm9kUOmhmU="
+KCODE_PRIOR_VERSION = "l4JK6aUnUgtrg.TFrxiKU8.XBM_6APl4"
+ARTIFACT_BUCKET = "opal-313476888478-lambda-artifacts"
 LINES: list[str] = []
+IDENTITY: list[str] = []
 
 
 def emit(line: str = "") -> None:
@@ -59,6 +70,12 @@ def git(*args: str) -> tuple[int, str]:
     return out.returncode, out.stdout
 
 
+def identity_line(arm: str) -> None:
+    if not IDENTITY:
+        IDENTITY.append(boto3.client("sts").get_caller_identity()["Arn"])
+    emit("  identity: %s ran as %s -- a configuration/document claim, NOT a served behaviour" % (arm, IDENTITY[0]))
+
+
 def client_firms() -> list[dict]:
     reg = json.load(open(os.path.join(WS, "data", "firm_registry.json"), encoding="utf-8"))
     return [f for f in reg["firms"] if f.get("kind") == "client" and f.get("enabled")]
@@ -66,6 +83,7 @@ def client_firms() -> list[dict]:
 
 def arm_a(packet_text: str) -> bool:
     emit("(a) CENSUS -- the 7 serving functions, measured")
+    identity_line("(a)")
     iam = boto3.client("iam")
     lam = boto3.client("lambda", region_name="us-east-1")
     firms = client_firms()
@@ -96,7 +114,8 @@ def arm_a(packet_text: str) -> bool:
     emit("  ownership map readable: %d of %d; directory readable: %d of %d; bucket map present: %d of %d; client firms %d (registry)"
          % (om_ok, n, dir_ok, n, maps, len(FUNCS), len(firms)))
     emit("  controls: positive (user Andrew_Berman) %s; negative (opalinvest-auth-lambda-role) %s" % (pos, neg))
-    stated = {"CENSUS-OWNERSHIP-GRANTED": "%d of %d" % (om_ok, n), "CENSUS-BUCKET-MAP-PRESENT": "%d of %d" % (maps, len(FUNCS))}
+    stated = {"CENSUS-OWNERSHIP-GRANTED": "%d of %d" % (om_ok, n), "CENSUS-DIRECTORY-READ": "%d of %d" % (dir_ok, n),
+              "CENSUS-BUCKET-MAP-PRESENT": "%d of %d" % (maps, len(FUNCS))}
     for k, v in stated.items():
         m = re.search(r"%s: (\d+ of \d+)" % k, packet_text)
         emit("  packet line %s: packet %s, this run %s -> %s" % (k, m.group(1) if m else "ABSENT", v,
@@ -105,7 +124,8 @@ def arm_a(packet_text: str) -> bool:
 
 
 def arm_b() -> tuple[bool, str, str]:
-    emit("(b) THE PACKET -- committed, its keys, the declared writers")
+    emit("(b) THE PACKET -- committed, its keys, the registry vintage and ARN lines, the declared writers")
+    identity_line("(b)")
     rc, head = git("rev-parse", "--verify", "--quiet", "HEAD:" + PACKET_REL)
     head = head.strip() if rc == 0 else ""
     _, wt = git("hash-object", PACKET_REL)
@@ -115,6 +135,26 @@ def arm_b() -> tuple[bool, str, str]:
                                                               "COMMITTED, UNCHANGED" if ok else "NOT COMMITTED OR CHANGED"))
     keys = re.search(r"PACKET-KEYS: (.+)", text)
     emit("  packet keys line: %s" % (keys.group(1) if keys else "ABSENT"))
+    rc, reg_blob = git("rev-parse", "--verify", "--quiet", "HEAD:data/firm_registry.json")
+    reg_blob = reg_blob.strip() if rc == 0 else ""
+    vint = re.search(r"REGISTRY-VINTAGE: blob ([0-9a-f]{40})", text)
+    vint_ok = bool(vint) and vint.group(1) == reg_blob
+    emit("  REGISTRY-VINTAGE: packet %s, HEAD data/firm_registry.json blob %s -> %s" % (
+        vint.group(1) if vint else "ABSENT", reg_blob or "ABSENT", "EQUAL" if vint_ok else "DIFFERS (a STOP: the ARN list moved)"))
+    firms = client_firms()
+    derived = {
+        "K-OM-ARNS": ["arn:aws:s3:::%s/platinum/%s/ownership_map.json" % (f["bucket"], f["firm_id"]) for f in firms],
+        "K-DIR-ARNS": sorted({"arn:aws:s3:::%s/investor-reporting/directory/*" % f["bucket"] for f in firms}),
+    }
+    arns_ok = True
+    for k, want in derived.items():
+        m = re.search(r"%s: (.+)" % k, text)
+        got = sorted(x.strip() for x in m.group(1).split("|")) if m else []
+        eq = got == sorted(want)
+        arns_ok = arns_ok and eq
+        emit("  %s: packet %d ARN(s), derived from the registry %d -> %s" % (k, len(got), len(want), "EQUAL" if eq else "DIFFERS"))
+        for a in sorted(want):
+            emit("     %s" % a)
     for fn, (root, res, role, _entry) in FUNCS.items():
         names = []
         for f in sorted(glob.glob(os.path.join(TF_ROOT, root, "*.tf"))):
@@ -125,17 +165,20 @@ def arm_b() -> tuple[bool, str, str]:
         emit("  W(%s policies) = %d declared: %s" % (role, len(names), names))
     emit("  W(each function's environment) = 1 declared (its yang-lambda module); console/CLI writes are the unenumerable "
          "qualifier (NEVER-9), covered by the rollback's re-read")
-    return ok and bool(keys), head, text
+    return ok and bool(keys) and vint_ok and arns_ok, head, text
 
 
 def arm_c(packet_text: str) -> bool:
     emit("(c) THE PLAN per root, re-taken with the vendored terraform -- applied to nothing")
+    identity_line("(c)")
     os.makedirs(PLAN_DIR, exist_ok=True)
     env = dict(os.environ, TF_IN_AUTOMATION="1", AWS_REGION="us-east-1",
                TF_PLUGIN_CACHE_DIR=os.path.join(WS, ".scratch", "tf-plugin-cache"))
     os.makedirs(env["TF_PLUGIN_CACHE_DIR"], exist_ok=True)
     roots = sorted({v[0] for v in FUNCS.values()}, key=lambda r: list(v[0] for v in FUNCS.values()).index(r))
     n_ok = destroy_total = changes_total = code_carrying = 0
+    noise: list[str] = []
+    digests_ok = planned = 0
     for r in roots:
         d = os.path.join(TF_ROOT, r)
         pf = os.path.join(PLAN_DIR, r + ".tfplan")
@@ -155,9 +198,11 @@ def arm_c(packet_text: str) -> bool:
         digest = hashlib.sha256(json.dumps(canon, sort_keys=True).encode("utf-8")).hexdigest()
         raw = hashlib.sha256(open(pf, "rb").read()).hexdigest()
         destroys = sum("delete" in c["change"]["actions"] for c in rcs)
+        planned += 1
         destroy_total += destroys
         changes_total += len(rcs)
         in_packet = digest in packet_text
+        digests_ok += in_packet
         n_ok += destroys == 0
         emit("  %-11s %s destroy %d | planfile sha256 %s | canonical digest %s (%s in the packet)"
              % (r, line, destroys, raw, digest, "EQUAL to the one" if in_packet else "NOT"))
@@ -169,16 +214,43 @@ def arm_c(packet_text: str) -> bool:
                 ver = b.get("s3_object_version") != a.get("s3_object_version")
                 envc = b.get("environment") != a.get("environment")
                 code_carrying += code
+                if ver and not code:
+                    noise.append(c["address"])
                 kinds = " [env %s; object version %s; CODE %s]" % ("changes" if envc else "same", "changes" if ver else "same",
                                                                   "CHANGES (%s -> %s)" % (b.get("source_code_hash"), a.get("source_code_hash")) if code else "unchanged")
             emit("     %-8s %s%s" % ("/".join(c["change"]["actions"]), c["address"], kinds))
-    emit("  roots planned without destroy: %d of %d; total destroy %d; total changes %d; lambda updates carrying a CODE change %d (row S95)"
+    emit("  roots planned without destroy: %d of %d; total destroy %d; total changes %d; lambda updates carrying a CODE change %d (row S95: 0 required)"
          % (n_ok, len(roots), destroy_total, changes_total, code_carrying))
-    return n_ok == len(roots) and destroy_total == 0
+    emit("  canonical digests equal to the packet's: %d of %d" % (digests_ok, len(roots)))
+    emit("  accepted plan noise -- object-version-only bumps, source_code_hash unchanged: %d: %s" % (len(noise), noise))
+    for k, v in (("PLAN-ROOTS", "%d of %d planned; destroy %d of %d; changes %d" % (planned, len(roots), planned - n_ok, len(roots), changes_total)),
+                 ("PLAN-CODE-CHANGES", "%d of %d" % (code_carrying, len(roots)))):
+        m = re.search(r"%s: (.+)" % k, packet_text)
+        emit("  packet line %s: packet '%s', this run '%s' -> %s" % (k, m.group(1).strip() if m else "ABSENT", v,
+                                                                   "EQUAL" if m and m.group(1).strip() == v else "DIFFERS"))
+    return n_ok == len(roots) and destroy_total == 0 and code_carrying == 0 and digests_ok == len(roots)
+
+
+def arm_c_code() -> bool:
+    emit("(c-code) K-CODE -- %s rebuilt from HEAD (addendum @77bd04ca41)" % KCODE_FN)
+    identity_line("(c-code)")
+    lam = boto3.client("lambda", region_name="us-east-1")
+    s3 = boto3.client("s3", region_name="us-east-1")
+    live = lam.get_function_configuration(FunctionName=KCODE_FN)["CodeSha256"]
+    head = s3.head_object(Bucket=ARTIFACT_BUCKET, Key="investor-reporting/%s.zip" % KCODE_FN)
+    latest, meta = head.get("VersionId"), (head.get("Metadata") or {}).get("content-sha256")
+    built = latest != KCODE_PRIOR_VERSION and meta != live
+    emit("  live CodeSha256 %s (prior live in the packet %s -> %s)" % (live, KCODE_PRIOR_LIVE,
+                                                                      "EQUAL" if live == KCODE_PRIOR_LIVE else "DIFFERS"))
+    emit("  build store latest version %s content-sha256 %s -> %s" % (
+        latest, meta, "a NEW BUILD at rest" if built else "the prior live bytes: NOT BUILT (row IRPT_BCKEND-S96: "
+        "build-and-upload.sh refuses -- files[] declares data/custodian_key_seam.json, staged_from does not)"))
+    return built
 
 
 def arm_d(blob: str) -> bool:
     emit("(d) THE HALVES at HEAD naming the packet blob")
+    identity_line("(d)")
     n = 0
     for who, pattern in (("COO", "org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-10_*.md"),
                          ("CTO", "org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-10_*.md")):
@@ -193,7 +265,7 @@ def arm_d(blob: str) -> bool:
 
 
 def main() -> int:
-    emit("IB-rtf-10 R67-AC1 battery (first pass) -- worktree HEAD %s" % git("rev-parse", "HEAD")[1].strip())
+    emit("IB-rtf-10 R67-AC1 battery (second pass) -- worktree HEAD %s" % git("rev-parse", "HEAD")[1].strip())
     emit("")
     b_ok, blob, packet_text = arm_b()
     emit("")
@@ -201,15 +273,17 @@ def main() -> int:
     emit("")
     c_ok = arm_c(packet_text)
     emit("")
+    k_ok = arm_c_code()
+    emit("")
     d_ok = arm_d(blob)
     emit("")
-    arms = {"(a) census": a_ok, "(b) packet": b_ok, "(c) plan": c_ok, "(d) halves": d_ok}
+    arms = {"(a) census": a_ok, "(b) packet": b_ok, "(c) plan": c_ok, "(c-code) K-CODE built": k_ok, "(d) halves": d_ok}
     if not d_ok:
         emit("STOP at (d): a half is ABSENT -- nothing is applied; (e) apply and (f) the live proof are NOT RUN")
         arms["(e) apply"] = False
         arms["(f) live proof"] = False
     else:
-        emit("(d) holds -- (e)/(f) are the re-hand's arms and are not implemented in this first-pass revision")
+        emit("(d) holds -- (e)/(f) are the third pass's arms and are not implemented in this second-pass revision")
         arms["(e) apply"] = False
         arms["(f) live proof"] = False
     for k, v in arms.items():
@@ -219,7 +293,7 @@ def main() -> int:
         emit(TOKEN)
         rc = 0
     else:
-        emit("RESULT: R67-AC1 FAIL -- %d of %d arms hold (first pass: STOP at the halves as the face expects)"
+        emit("RESULT: R67-AC1 FAIL -- %d of %d arms hold (second pass: STOP at the halves as the face expects)"
              % (sum(arms.values()), len(arms)))
         rc = 1
     with open(OUTPUT_PATH, "w", encoding="utf-8", newline="\n") as fh:
