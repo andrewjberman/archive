@@ -1,0 +1,53 @@
+battery_ib_rtf_11.py -- IRPT_BCKEND.TO-IB-rtf-11 -- repo root: C:\tmp\wk-irpt-6-1e
+
+=== ARM (a): the event shape, measured from api/integrations.tf and routes.json ===
+api/integrations.tf declares payload_format_version = "2.0": True
+routes.json DECLARED routes targeting irpt-directory-search: 2 of 12 total DECLARED routes
+  GET /api/scoped/investor-reporting/directory/search -> operation=directory-search -- payload_format_version 2.0 (ONE integration per function, api/integrations.tf:57, for_each over route_functions)
+  POST /api/scoped/investor-reporting/directory/resolve -> operation=resolve-scope -- payload_format_version 2.0 (ONE integration per function, api/integrations.tf:57, for_each over route_functions)
+n of n routes reaching directory/entry.py: 2 of 2
+fixture infra\aws\lambda\investor-reporting\directory\tests\fixtures\payload_v2_event.json sha256 68ca0e6c28598b8510d25df0a6299a1cff8eecce7a0e10f4132d2e224a022c49
+  fixture['search'].routeKey == 'GET /api/scoped/investor-reporting/directory/search' and version == '2.0': True
+  fixture['resolve'].routeKey == 'POST /api/scoped/investor-reporting/directory/resolve' and version == '2.0': True
+fixture carries no token/e-mail-shaped value: True (banned tokens found: [])
+
+=== ARM (b): the fix, one helper, both call sites, no change to handler.py/_authz ===
+def _event_params( occurrences: 1 (expect 1)
+params = _event_params(event) call sites: 2 (expect 2 -- search() and resolve())
+no remaining TOP-LEVEL event.get('q'/'limit'/'selection') read in entry.py: True
+  infra/aws/lambda/investor-reporting/directory/handler.py unchanged since cut 4ceb7f8361: True (e46922a00379 vs e46922a00379)
+  infra/aws/lambda/investor-reporting/_authz/served.py unchanged since cut 4ceb7f8361: True (ba0cea6d4246 vs ba0cea6d4246)
+  infra/aws/lambda/investor-reporting/_authz/enforce.py unchanged since cut 4ceb7f8361: True (d1c8e7e09467 vs d1c8e7e09467)
+  infra/aws/lambda/investor-reporting/_authz/errors.py unchanged since cut 4ceb7f8361: True (784ee313ed70 vs 784ee313ed70)
+  infra/aws/lambda/investor-reporting/_authz/loaders.py unchanged since cut 4ceb7f8361: True (49c290f6ac45 vs 49c290f6ac45)
+
+=== ARM (c): the directory/ suite, the fixture honoured, the pre-fix false behaviour ===
+directory/tests suite: rc=0 :: [32m[32m[1m67 passed[0m[32m in 1.38s[0m[0m
+REAL entry search q='Desmond Achebe' (2.0 queryStringParameters) -> 1 of expected 1
+REAL entry search q='' limit='2' -> 2 of expected 2; q='' unlimited -> 6 (wider, DEFAULT_LIMIT honoured)
+REAL entry resolve selection=account_ids:[acc_S1] (2.0 body) -> ok=True account_ids=['acc_S1']
+MUTANT (pre-fix, blob 9f72f4d6a4) search q='Desmond Achebe' -> 6 document(s) (false: q ignored, DEFAULT_LIMIT unfiltered)
+MUTANT (pre-fix) resolve selection=account_ids:[acc_S1] -> ok=False partial_reason="selection matches nothing in the viewer's projection" (false: selection never reaches the compute)
+false behaviour DEMONSTRATED on the same fixture: True
+
+=== ARM (d): the staging contract, holdings/stage.py --check-style, m of m ===
+irpt-directory-search.files: ['handler.py', 'entry.py', 'served.py', 'loaders.py', 'enforce.py', 'errors.py', 'resolve.py', 'keys.py', 'ids.py', 'data/custodian_key_seam.json']
+entry.py is a declared member: True (its sha MOVES with this edit -- that is the point; this manifest field is NOT hand-edited, the build re-derives it, W1-S31/W1-S89's bar)
+  staged_from infra/aws/lambda/investor-reporting/_authz/served.py @4ee8426c72 -> served.py: declared=ba0cea6d42461caf got=ba0cea6d42461caf -> MATCH
+  staged_from infra/aws/lambda/investor-reporting/_authz/enforce.py @4ee8426c72 -> enforce.py: declared=d1c8e7e094676526 got=d1c8e7e094676526 -> MATCH
+  staged_from infra/aws/lambda/investor-reporting/_authz/errors.py @6e764ef0aa -> errors.py: declared=784ee313ed7013e6 got=784ee313ed7013e6 -> MATCH
+  staged_from infra/aws/lambda/investor-reporting/_scope/resolve.py @6e764ef0aa -> resolve.py: declared=086a55a7d9d4c017 got=086a55a7d9d4c017 -> MATCH
+  staged_from infra/aws/lambda/investor-reporting/_keys/keys.py @6e764ef0aa -> keys.py: declared=56ee3cc22e802579 got=56ee3cc22e802579 -> MATCH
+  staged_from infra/aws/lambda/investor-reporting/_ids/ids.py @c28c728a30 -> ids.py: declared=f1659861d469c25d got=f1659861d469c25d -> MATCH
+  staged_from infra/aws/lambda/investor-reporting/_authz/loaders.py @c28c728a30 -> loaders.py: declared=49c290f6ac457d46 got=49c290f6ac457d46 -> MATCH
+staging membership: 7 of 7 staged_from member(s) resolve at HEAD after the edit
+entry.py sha256 pre-fix (9f72f4d6a4) vs worktree now: 3879fcaf1b08f409 vs 495021504a7ff5a3 -> MOVED as expected (expected to MOVE)
+
+=== SUMMARY ===
+fixture sha256: 68ca0e6c28598b8510d25df0a6299a1cff8eecce7a0e10f4132d2e224a022c49
+arm (a): OK
+arm (b): OK
+arm (c): OK
+arm (d): OK
+
+IBR68-DIRECTORY-ENTRY-READS-PAYLOAD-2-0
