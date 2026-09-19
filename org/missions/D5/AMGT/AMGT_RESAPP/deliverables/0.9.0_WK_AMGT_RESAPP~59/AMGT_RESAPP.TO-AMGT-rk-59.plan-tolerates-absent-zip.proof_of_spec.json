@@ -19,8 +19,8 @@
     {
       "path_or_key": "infra/aws/terraform/harvest/chatter-axis-schedule.tf",
       "kind": "terraform",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
+      "commit_or_etag": "3dd35f43c253e00d94fd7c1f252ab401fce73bc3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "source_code_hash at :124 now fileexists(local.chatter_axis_zip) ? filebase64sha256(local.chatter_axis_zip) : null; comment block :39-42 amended in place. No apply run; terraform validate -no-color returns 'Success! The configuration is valid.'; AC2's planted negative control reproduces row W34-S1's exact evaluation error on HEAD's bytes in this same worktree, and the edited bytes clear it.",
       "artifact_covered_by": [
         "AC1",
@@ -33,8 +33,8 @@
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
+      "commit_or_etag": "3dd35f43c253e00d94fd7c1f252ab401fce73bc3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "Row AMGT_RESAPP-Z-W59-S1 appended by textual splice inside the one fenced JSON array (array re-parsed valid, 375 rows, last id AMGT_RESAPP-Z-W59-S1); records the AC1-vs-AC5 confinement contradiction this instance's surprises field cites."
     },
     {
@@ -48,14 +48,13 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "tolerant_expression 1 of 1 expected and bare_filebase64sha256_calls 0 of 0 expected (at HEAD the two figures read 0 and 1); fmt_rc 0 with no diff; validate_rc 0 printing \"Success! The configuration is valid.\" (terraform init has been run once in the harvest root before this criterion)",
+      "criterion_verbatim": "tolerant_expression 1 of 1 expected and bare_filebase64sha256_calls 0 of 0 expected (at HEAD the two figures read 0 and 1); fmt_rc 0 with no diff; validate_rc 0 printing \"Success! The configuration is valid.\" (terraform init has been run once in the harvest root before this criterion) ISSUER REPAIR (2.0.0_SA_COO~Z, on row W59-S1): fmt_rc may be non-zero ONLY when the fmt diff is confined to lines OUTSIDE this cell's hunks (33-44 and 124) AND reproduces identically on HEAD's own bytes (pre-existing drift, printed with its line range) -- that branch is PASS; a fmt diff touching this cell's hunks is FAIL; validate_rc 0 is required in every branch; fixing drift outside the hunks is forbidden by AC5",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport io, subprocess\nf = 'infra/aws/terraform/harvest/chatter-axis-schedule.tf'\nt = io.open(f, encoding='utf-8').read()\nnew = 'source_code_hash = fileexists(local.chatter_axis_zip) ? filebase64sha256(local.chatter_axis_zip) : null'\nprint('tolerant_expression', t.count(new), 'of 1 expected')\nprint('bare_filebase64sha256_calls', t.count('filebase64sha256(local.chatter_axis_zip)') - t.count(new), 'of 0 expected')\nr = subprocess.run(['terraform', 'fmt', '-check', '-diff', 'chatter-axis-schedule.tf'], cwd='infra/aws/terraform/harvest', capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60)\nprint('fmt_rc', r.returncode, (r.stdout + r.stderr).strip()[-400:])\nv = subprocess.run(['terraform', '-chdir=infra/aws/terraform/harvest', 'validate', '-no-color'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=100)\nprint('validate_rc', v.returncode, (v.stdout + v.stderr).strip()[-400:])\n\"",
-      "output_evidence": "tolerant_expression 1 of 1 expected | bare_filebase64sha256_calls 0 of 0 expected | fmt_rc 3 (diff confined to lines 104-116, an unrelated pre-existing IAM policy Sid/Effect/Action alignment inside aws_iam_role_policy.chatter_axis_lambda -- reproduced identically against git-show'd HEAD bytes in this same worktree, so it PRE-EXISTS this cell's edit and is not introduced by it) | validate_rc 0 'Success! The configuration is valid.' -- run twice back-to-back, identical both times",
-      "denominator": "2 of 2 expected substring counts match; 1 of 2 process checks (validate) matches its expectation; 1 of 2 (fmt) does not, on pre-existing unrelated drift",
-      "status": "FAIL",
-      "status_reason": "fmt_rc measures 3, not 0, because chatter-axis-schedule.tf carries PRE-EXISTING terraform-fmt drift at lines 104-116 (unrelated to this cell's own edit at :39-42/:124), present at HEAD before this worker touched the file. Fixing it would require a terraform fmt -write across the whole file, adding a third diff hunk outside lines 33-44/124 -- which directly violates this same order's explicit bound ('no line outside :33-44 and :124 moves') and would fail AC5's own mechanical hunks_confined_to_33-44_and_124 check. Per the REFUSAL CLAUSE this worker did not widen its write surface to the unrelated block; AC1 is REFUSED on this measurement and filed as row AMGT_RESAPP-Z-W59-S1 rather than repaired.",
-      "expect": "tolerant_expression 1 of 1.*bare_filebase64sha256_calls 0 of 0.*fmt_rc 0.*validate_rc 0"
+      "output_evidence": "tolerant_expression 1 of 1 expected | bare_filebase64sha256_calls 0 of 0 expected | fmt_rc 3, diff hunk '@@ -111,9 +111,9 @@' -- drift at lines 111-119 (Sid/Effect/Action alignment inside aws_iam_role_policy.chatter_axis_lambda), OUTSIDE this cell's hunks at 33-44/124 -- reproduced IDENTICALLY against git-show'd HEAD bytes in this same worktree (HEAD fmt_rc 3, byte-for-byte identical diff text; file restored to the edited bytes after, restored True) -- PASS per ISSUER REPAIR row W59-S1 | validate_rc 0 'Success! The configuration is valid.'",
+      "denominator": "4 of 4 deciding values printed (tolerant_expression, bare_filebase64sha256_calls, fmt_rc+confinement+HEAD-reproduction, validate_rc); drift line range 111-119 confirmed outside 33-44/124; HEAD-bytes reproduction confirmed identical (fmt_rc 3, same diff) -- both conditions of the ISSUER REPAIR satisfied",
+      "status": "PASS",
+      "expect": "tolerant_expression 1 of 1.*bare_filebase64sha256_calls 0 of 0.*fmt_rc 3.*OUTSIDE this cell's hunks.*reproduced IDENTICALLY.*HEAD.*validate_rc 0"
     },
     {
       "criterion_id": "AC2",
