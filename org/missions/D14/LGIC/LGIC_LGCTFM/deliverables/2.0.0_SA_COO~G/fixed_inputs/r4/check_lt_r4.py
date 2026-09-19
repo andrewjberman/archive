@@ -373,17 +373,45 @@ def x4_floor():
     return verdict(ok1 and ok2, "PASS-X4-FLOOR", "FAIL-X4-FLOOR", [note] + l1 + ["named classes:"] + l2)
 
 
+def core_registry(own, foreign, pin_ok):
+    """THE CLAIM IS ABOUT THE CELL, NOT ABOUT THE TREE.
+
+    This arm used to diff the whole registry against the cut pin, so ANY seat's registry work
+    ANYWHERE IN THE ESTATE failed this cell. Measured when it surfaced (LGIC_LGCTFM-W1-S39,
+    0.9.0_WK_LGIC_LGCTFM~1): the two changed paths were entirely `845343f925`, a
+    `4.0.0_SA_CRO` IRPT_BCKEND commit that landed AFTER the round-4 issuance and was already an
+    ancestor of the cell's worktree BEFORE IT WAS SPAWNED. No act inside the order's grant could
+    have made the arm pass, and the cheapest way out would have been to revert another project's
+    work. So the arm now grades the commits THIS CELL AUTHORED; a foreign commit is reported by
+    author and excused, because it is information a reader wants and not a verdict about this cell.
+
+    RESIDUAL, STATED: authorship comes from the commit's own author line, which the lane gate binds
+    at commit time. A cell committing under another identity would evade this -- that is the lane
+    gate's job, not this arm's, and it is named here rather than left implied.
+    """
+    lines = ["registry-touching commits since the cut: %d" % (len(own) + len(foreign)),
+             "  authored by THIS CELL: %d" % len(own),
+             "  authored elsewhere and EXCUSED: %d" % len(foreign),
+             "cut pin resolvable: %s" % pin_ok]
+    lines += ["    excused: %s" % _scrub(c) for c in foreign[:4]]
+    lines += ["    THIS CELL MOVED: %s" % _scrub(c) for c in own[:4]]
+    return (pin_ok and not own), lines
+
+
 def x4_no_registry_move():
     b = base()
     paths = ["infra/logic/registry/", "org/missions/D14/LGIC/LGIC_NAMING/deliverables/LEGACY_SERVED_PATHS.json"]
-    r = subprocess.run(["git", "diff", "--name-only", b["cut_pin"], "HEAD", "--"] + paths,
+    who = b.get("cell_author", "0.9.0_WK_LGIC_LGCTFM~")
+    r = subprocess.run(["git", "log", "--format=%h %an %s", "%s..HEAD" % b["cut_pin"], "--"] + paths,
                        cwd=REPO, capture_output=True, timeout=120)
-    changed = [ln for ln in (r.stdout or b"").decode("utf-8", "replace").splitlines() if ln.strip()]
     r2 = subprocess.run(["git", "cat-file", "-e", b["cut_pin"] + "^{commit}"], cwd=REPO, capture_output=True, timeout=60)
-    return verdict(r.returncode == 0 and r2.returncode == 0 and not changed,
-                   "PASS-X4-NO-REGISTRY-MOVE", "FAIL-X4-NO-REGISTRY-MOVE",
-                   ["registries + LEGACY_SERVED_PATHS since %s: %d path(s) changed (pin resolvable=%s)"
-                    % (b["cut_pin"][:10], len(changed), r2.returncode == 0)] + changed)
+    if r.returncode != 0:
+        return say("FAIL-X4-NO-REGISTRY-MOVE", "INSTRUMENT FAILURE: git log rc=%d" % r.returncode)
+    rows = [ln for ln in (r.stdout or b"").decode("utf-8", "replace").splitlines() if ln.strip()]
+    own = [ln for ln in rows if who in ln]
+    foreign = [ln for ln in rows if who not in ln]
+    ok, lines = core_registry(own, foreign, r2.returncode == 0)
+    return verdict(ok, "PASS-X4-NO-REGISTRY-MOVE", "FAIL-X4-NO-REGISTRY-MOVE", lines)
 
 
 def r4_stale_proofs():
@@ -485,6 +513,15 @@ def selftest_arms():
             "a failed retrieval RAISES; it no longer returns the passing value (CTO residual (1))")
     except Exception as exc:
         arm("POSITIVE-CONTROL-instrument-failure-raises", False, "wrong exception: %s" % _scrub(exc))
+
+    arm("POSITIVE-registry-foreign-excused", core_registry(
+        [], ["845343f925 4.0.0_SA_CRO registry(IRPT_BCKEND steps 2-3)"], True)[0],
+        "another project's registry commit is not this cell's act (W1-S39)")
+    arm("MUTANT-registry-own-commit", not core_registry(
+        ["abc123 0.9.0_WK_LGIC_LGCTFM~1 moved a registry row"], [], True)[0],
+        "a commit THIS CELL authored still fails")
+    arm("MUTANT-registry-pin-unresolvable", not core_registry([], [], False)[0],
+        "an unresolvable cut pin is not a clean tree")
 
     arm("POSITIVE-stale-none", core_stale([], None, set())[0])
     arm("POSITIVE-stale-count-moves", core_stale(
