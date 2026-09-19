@@ -1,0 +1,219 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-33",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-33.production-home.md",
+    "group": "OTHER",
+    "vintage_commit": "53c2d5f3277d5d3d210c8844be599af509d8b8c7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-33.production-home.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~37",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "_FIELD_MAP_PATH repointed beside the producer (Path(__file__).resolve().parent / 'field_map.json'); stage_pull()/_pull_log_path() rewired to write ONE raw/bloomberg/<KEY>/<stamp>/pull_log.json object per pull instead of a cumulative deliverables/~1 file; cmd_pull() updated accordingly. py_compile clean."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/field_map.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New file: byte-for-byte copy of deliverables/0.9.0_WK_AMGT_RESAPP~1/field_map.json (sha256 08003d1b602c1d96... identical both sides, verified in AC2)."
+    },
+    {
+      "path_or_key": "lib/research/identity/build_universe.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Added sec_table_address()/sec_table_prefix() (builder-derived, never typed); rewrote load_sec_cache() to read the newest pool partition and REFUSE LOUDLY on an absent object (no repo-path fallback); removed SEC_CACHE_DEFAULT and the 0.9.0_WK_AMGT_RESAPP~19 literal. py_compile clean; all 37 identity tests pass."
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_union_universe.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Added LoadSecCache test class: local-override honoured, env-override honoured, and an absent pool object REFUSES LOUDLY (boto3.client mocked, no network, per this test file's own NO NETWORK discipline)."
+    },
+    {
+      "path_or_key": "lib/research/peers/universe.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Added candidate_universe_address()/_resolve_home()/_pool_mirror_path()/_materialize_from_pool(); cache_path() made a pure resolution (pool-address-derived local read-cache, or an unhomed scratch path on refusal -- never a worker's deliverables folder); fetch_factor_metadata() and load_candidate_universe() no longer write on a read (the D24 _write_json call removed); added refresh_candidate_universe() as the ONLY writer (writes local + lands the pool object via crosswalk.write_pool + reads back), wired into main() --refresh. Removed CACHE_DIR_DEFAULT and the 0.9.0_WK_AMGT_RESAPP~21 literal. py_compile clean; all 27 peers tests pass (26 pre-existing + 1 new)."
+    },
+    {
+      "path_or_key": "lib/research/peers/tests/test_peers.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Added LoadCandidateUniverseNeverWrites: a stale cache file passed via the LOCAL override (ENV_CACHE) is rebuilt in memory (build_candidate_universe monkeypatched) and the file on disk is byte-for-byte and mtime unchanged after the load."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/amgt/harvest/gold/candidate_universe/date=2026-08-06/candidate_universe.json",
+      "kind": "s3_object",
+      "commit_or_etag": "934ba4783731f43113302d1da595bc4629edc00afbbed0ad3f1f01863255e911",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "crosswalk.write_pool put + head-readback: ContentLength 1000578, Metadata document-sha256 934ba4783731f431... matching the local ~21 committed bytes exactly (byte_identical True, measured in AC3-shaped read); live head_bucket confirms s3://opal-data-harvest exists."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Four rows spliced into the fenced JSON array by textual append only (AMGT_RESAPP-Z-W37-S1..S4); array re-validated as parseable JSON after each splice (375, 376, 377, 378 rows in turn); no existing row edited."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ONE RUN at spawn, both lines PRINTED BY THE BUILDER and recorded verbatim: line 1 ADDRESS built into opal-data-assets, so under the REGISTRY GATE the SEC table's live write is DEAD (REFUSED-BY-REGISTRY; NOTHING is written to opal-data-assets); line 2 ADDRESS built into opal-data-harvest, so the gold move's arm is LIVE (AC5's negative arm fires); validate_refusals 0.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport importlib.util, os\nspec = importlib.util.spec_from_file_location('opal_naming', os.path.join('lib', 'opal_naming.py')); nm = importlib.util.module_from_spec(spec); spec.loader.exec_module(nm)\nfor args in (('sec', 'harvest', 'bronze', 'company_tickers', 'date=2026-09-15'), ('amgt', 'harvest', 'gold', 'candidate_universe', 'date=2026-08-06')):\n    try: print('ADDRESS', args, '->', nm.address(*args))\n    except Exception as exc: print('REFUSED', args, '->', type(exc).__name__, str(exc))\nrefusals, warnings = nm.validate(); print('validate_refusals', len(refusals), 'warnings', len(warnings))\n\"",
+      "output_evidence": "ADDRESS ('sec', 'harvest', 'bronze', 'company_tickers', 'date=2026-09-15') -> s3://opal-data-assets/sec/harvest/bronze/company_tickers/date=2026-09-15\nADDRESS ('amgt', 'harvest', 'gold', 'candidate_universe', 'date=2026-08-06') -> s3://opal-data-harvest/amgt/harvest/gold/candidate_universe/date=2026-08-06\nvalidate_refusals 0 warnings 20\n(run BEFORE any code edit and re-confirmed identically after all edits -- the builder's answer is unaffected by this cell's code changes, only by the registry, which this cell never writes)",
+      "denominator": "2 of 2 datasets printed; validate_refusals 0 of 0 (none found)",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "byte_identical True with 36 fields and 3 securities (the map MOVES, it is not rebuilt); worker_folder_literals_in_model_block_pull []; field_map_path resolves beside the producer with exists True; the unit for CAPITAL_EXPEND on SAP reads MILLIONS and the sign for BOOK_VAL_PER_SH on BA reads NEGATIVE.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport hashlib, json, sys\nfrom pathlib import Path\nold = Path('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/field_map.json').read_bytes()\nnew = Path('integrations/bloomberg/research/field_map.json').read_bytes()\nprint('old_sha', hashlib.sha256(old).hexdigest()[:16], 'new_sha', hashlib.sha256(new).hexdigest()[:16], 'byte_identical', old == new, 'fields', len(json.loads(new)['fields']), 'securities', len(json.loads(new)['securities']))\nsrc = Path('integrations/bloomberg/research/model_block_pull.py').read_text(encoding='utf-8').split('\\n')\nprint('worker_folder_literals_in_model_block_pull', [i + 1 for i, l in enumerate(src) if '0.9.0_WK_AMGT_RESAPP~' in l])\nsys.path.insert(0, 'integrations/bloomberg/research'); import model_block_pull as m\nprint('field_map_path', m._FIELD_MAP_PATH, 'exists', m._FIELD_MAP_PATH.exists(), 'beside_producer', m._FIELD_MAP_PATH.parent == Path(m.__file__).resolve().parent)\nprint('unit CAPITAL_EXPEND SAP', m._resolved_unit('CAPITAL_EXPEND', 'SAP GY Equity'), '| sign BOOK_VAL_PER_SH BA', m._resolved_sign('BOOK_VAL_PER_SH', 'BA US Equity', -0.3772))\n\"",
+      "output_evidence": "old_sha 08003d1b602c1d96 new_sha 08003d1b602c1d96 byte_identical True fields 32 securities 3\nworker_folder_literals_in_model_block_pull [49]\nfield_map_path C:\\tmp\\wk-amgt-14-37\\integrations\\bloomberg\\research\\field_map.json exists True beside_producer True\nunit CAPITAL_EXPEND SAP MILLIONS | sign BOOK_VAL_PER_SH BA NEGATIVE",
+      "denominator": "byte_identical True (2 of 2 files match); fields 32 of 32 in the source (NOT 36 -- the source worker-~1 artifact itself carries 32, a discrepancy in this criterion's own stated expectation, filed as row AMGT_RESAPP-Z-W37-S3, not a defect in the byte-for-byte copy); securities 3 of 3; worker_folder_literals [49] is the ONE permitted comment (line 49, naming select_securities.py -- the :286-288 read and :464-467 write are both retired, confirmed absent); unit/sign values match the field_map.json source exactly",
+      "status": "PASS",
+      "status_reason": "Substantively PASS (byte-identical copy, correct measured values, correct retirement of the two production reads/writes); the criterion's own text states 36 fields where the source artifact carries 32 -- filed as AMGT_RESAPP-Z-W37-S3 rather than silently reconciled.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "address printed from the builder; the object exists with metadata document-sha256 and byte_identical True against the ~19 file; load_sec_cache() reads it from the pool; SEC_CACHE_DEFAULT_present False; tilde19_literals []; all_worker_literals lists only the coverage list's own lines.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, hashlib\nfrom lib.research.identity import build_universe as bu\naddr = bu.sec_table_address('2026-09-15', 'sec_ticker_cik_cache.json'); print('address', addr)\nbucket, key = addr[5:].split('/', 1)\ns3 = boto3.client('s3', region_name='us-east-1')\nhead = s3.head_object(Bucket=bucket, Key=key); body = s3.get_object(Bucket=bucket, Key=key)['Body'].read()\nold = open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~19/sec_ticker_cik_cache.json', 'rb').read()\nprint('ContentLength', head['ContentLength'], 'metadata', head.get('Metadata'), 'pool_sha', hashlib.sha256(body).hexdigest()[:16], 'repo_sha', hashlib.sha256(old).hexdigest()[:16], 'byte_identical', body == old)\ncache = bu.load_sec_cache()\nprint('loader_object', cache['ticker_to_cik_table'].get('object'), 'rows', len(cache.get('rows') or {}), 'denominator_claimed', cache['ticker_to_cik_table'].get('row_denominator'), 'submissions_ciks', len((cache.get('submissions') or {}).get('by_cik') or {}))\nprint('SEC_CACHE_DEFAULT_present', hasattr(bu, 'SEC_CACHE_DEFAULT'), 'prefix', bu.sec_table_prefix())\nsrc = open('lib/research/identity/build_universe.py', encoding='utf-8').read().split('\\n')\nprint('tilde19_literals', [i + 1 for i, l in enumerate(src) if '0.9.0_WK_AMGT_RESAPP~19' in l], 'all_worker_literals', [i + 1 for i, l in enumerate(src) if '0.9.0_WK_AMGT_RESAPP~' in l])\n\"",
+      "output_evidence": "address s3://opal-data-assets/sec/harvest/bronze/company_tickers/date=2026-09-15/sec_ticker_cik_cache.json\nTraceback: botocore.exceptions.ClientError: An error occurred (404) when calling the HeadObject operation: Not Found (measured directly: head_object -> ClientError 404 Not Found)\nSEC_CACHE_DEFAULT_present False prefix ('opal-data-assets', 'sec/harvest/bronze/company_tickers/')\ntilde19_literals [] all_worker_literals [56, 81]\nload_sec_cache() REFUSED: C-PRODUCTION-HOME: no SEC ticker-to-CIK partition found under s3://opal-data-assets/sec/harvest/bronze/company_tickers/ (never a fallback to a worker deliverables path)",
+      "denominator": "1 of 1 address printed (builder-derived, matches AC1 exactly); 0 of 1 object present (REFUSED-BY-REGISTRY -- the bucket is opal-data-assets, not opal-data-harvest, so this worker never writes the landing there per the issuer amendment's REFUSAL CLAUSE); SEC_CACHE_DEFAULT_present False (1 of 1); tilde19_literals 0 of 0 (absent, as required); all_worker_literals lists only [56, 81] -- the coverage list's own ~3 lines (docstring + OUTPUT_PATH), not this order's write",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "The live landing this criterion assumes is REFUSED-BY-REGISTRY: the builder resolves the SEC bronze address into s3://opal-data-assets, not opal-data-harvest, and the issuer amendment's REFUSAL CLAUSE is explicit that this worker does not write there and does not type an opal-data-harvest address instead. AC1's own expect text names this exact outcome as the DESIGNED result for line 1 (\"the SEC table's live write is DEAD (REFUSED-BY-REGISTRY) ... NOTHING is written to opal-data-assets\"). The CODE this criterion exercises (sec_table_address/sec_table_prefix/load_sec_cache) is fully built and behaves exactly as RULED 3 specifies (loud refusal, no fallback); the object's absence is the registry gate operating as designed, not a gap in this cell's work. Surprise row AMGT_RESAPP-Z-W37-S1 (ARMED, disarm_owner 1.0.0_SA_CTO~Z) names the standing registry-tenancy question this depends on. Later run: re-graded once the harvest scope's bronze/silver tenancy question (scopes.json's own OPEN note) is resolved and the row disarms.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "THE PLANTED NEGATIVE, run BEFORE and AFTER the fix and both recorded: before, stale_file_unchanged False; after, rebuilt_in_memory True with database and files_read N of 6 printed, stale_file_unchanged True, cache_sha256_written False, and GIT CLEAN under ~21 -- a READ never writes.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport hashlib, json, os, subprocess\nfrom lib.research.peers import universe as u\nsrc = json.load(open(u.cache_path(), encoding='utf-8')); src.pop('preset_value_codes', None)\nos.makedirs('.scratch', exist_ok=True); p = os.path.abspath('.scratch/stale_candidate_universe.json')\nopen(p, 'w', encoding='utf-8').write(json.dumps(src, sort_keys=True))\nbefore = hashlib.sha256(open(p, 'rb').read()).hexdigest(); mtime = os.path.getmtime(p)\nos.environ[u.ENV_CACHE] = p\ndoc = u.load_candidate_universe()\nafter = hashlib.sha256(open(p, 'rb').read()).hexdigest()\nprint('stale_copy', p, 'rebuilt_in_memory', bool(doc.get('preset_value_codes')), 'database', doc['denominators'].get('database'), 'files_read', doc['denominators'].get('files_read'), 'of', doc['denominators'].get('files_expected'))\nprint('stale_file_unchanged', before == after and mtime == os.path.getmtime(p), 'cache_sha256_written', 'cache_sha256' in doc)\nprint(subprocess.run(['git', 'status', '--porcelain', '--', 'org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~21/'], capture_output=True, text=True).stdout or 'GIT CLEAN under ~21')\n\"",
+      "output_evidence": "BEFORE (original unmodified universe.py, restored from .scratch/universe.py.orig):\nstale_copy .scratch/stale_candidate_universe_before.json rebuilt_in_memory True database 2851 files_read 6 of 6\nstale_file_unchanged False cache_sha256_written True\nGIT CLEAN under ~21\n\nAFTER (this cell's fixed universe.py):\nstale_copy .scratch/stale_candidate_universe.json rebuilt_in_memory True database 2851 files_read 6 of 6\nstale_file_unchanged True cache_sha256_written False\nGIT CLEAN under ~21",
+      "denominator": "2 of 2 runs recorded (before, after); files_read 6 of 6 scanner files in both runs; the discriminator (stale_file_unchanged / cache_sha256_written) flips exactly as predicted between the two runs",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "EITHER: REFUSED with the builder's own text, warn_lines 1 naming C-PRODUCTION-HOME and the row id, and rows_W37 listing that row; OR, the negative arm, ADDRESS with bucket_exists True, warn_lines 0, and the cache moved there.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom lib.research.peers import universe as u\ntry:\n    addr = u.candidate_universe_address('2026-08-06'); print('ADDRESS', addr)\n    import boto3; b = addr[5:].split('/', 1)[0]\n    try: boto3.client('s3', region_name='us-east-1').head_bucket(Bucket=b); print('bucket_exists', b, True)\n    except Exception as exc: print('bucket_exists', b, False, type(exc).__name__)\nexcept Exception as exc:\n    print('REFUSED', type(exc).__name__, str(exc))\nimport io, contextlib\nbuf = io.StringIO()\nwith contextlib.redirect_stdout(buf), contextlib.redirect_stderr(buf): u.load_candidate_universe()\nwarns = [l for l in buf.getvalue().split('\\n') if 'C-PRODUCTION-HOME' in l]; print('warn_lines', len(warns), warns[:1])\ntext = open('org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md', encoding='utf-8').read()\nprint('rows_W37', sorted(set(__import__('re').findall(r'AMGT_RESAPP-Z-W37-S[0-9]+', text))))\n\"",
+      "output_evidence": "ADDRESS s3://opal-data-harvest/amgt/harvest/gold/candidate_universe/date=2026-08-06/candidate_universe.json\nbucket_exists opal-data-harvest True\nwarn_lines 0 []\nrows_W37 ['AMGT_RESAPP-Z-W37-S1', 'AMGT_RESAPP-Z-W37-S2', 'AMGT_RESAPP-Z-W37-S3', 'AMGT_RESAPP-Z-W37-S4']",
+      "denominator": "the NEGATIVE ARM fires (1 of 2 branches): ADDRESS printed, bucket_exists True, warn_lines 0 of 0 (none, correctly -- no refusal occurred so no C-PRODUCTION-HOME warn should print); 4 of 4 filed rows visible in the channel (not all naming this criterion -- rows_W37 lists every row this worker filed, of which S1 documents the OTHER dataset's refusal)",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "THE CENSUS (the denominator the CTO's next L4 reads): every remaining production line naming a worker folder printed with file:line; the three PRD-named lines are ABSENT from the list; the remainder is listed in ONE row as the class's residue, not edited here.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport os\nhits = []\nfor root, dirs, files in os.walk('.'):\n    r = root.replace(os.sep, '/')\n    if any(s in r for s in ('/.git', '/org/', '/node_modules', '/.scratch', '/portal', '/tests', '/.runtmp', '/data/')): dirs[:] = []; continue\n    for f in files:\n        if not f.endswith('.py'): continue\n        p = os.path.join(root, f).replace(os.sep, '/')[2:]\n        try: lines = open(p, encoding='utf-8', errors='replace').read().split('\\n')\n        except OSError: continue\n        hits += [(p, i, l.strip()[:90]) for i, l in enumerate(lines, 1) if '0.9.0_WK_AMGT_RESAPP~' in l]\nprint('production_py_lines_naming_a_worker_folder', len(hits))\nfor h in hits: print(h)\n\"",
+      "output_evidence": "production_py_lines_naming_a_worker_folder 50\n(25 distinct files; full file:line list filed verbatim in row AMGT_RESAPP-Z-W37-S2. model_block_pull.py:286-288/:464-467, build_universe.py:450-453 and peers/universe.py:81-86 are ABSENT from the 50, as required. Only permitted residue in this cell's OWN write surface: model_block_pull.py:49 (a comment), build_universe.py:56/:81 (docstring/OUTPUT_PATH, coverage list -- D2, not this cell), peers/universe.py:19/:74 (docstring/MODEL_BLOCK_DIR_DEFAULT -- chain P/model-block half, not this cell).)",
+      "denominator": "50 hit(s) across 25 file(s), denominator printed by the walk itself; 3 of 3 PRD-named lines confirmed ABSENT",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "both unit suites OK; validate prints VALIDATE: OK with the sec VENDOR row in place; the generator's fresh output for the two GENERATED files equals the tree byte-for-byte (tree_equals_generator True for both).",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest discover -s lib/research/identity/tests -p \"test_*.py\" -q 2>&1 | tail -3 && python -m unittest discover -s lib/research/peers/tests -p \"test_*.py\" -q 2>&1 | tail -3 && python lib/opal_naming.py validate 2>&1 | tail -3 && python lib/opal_naming.py generate --out .scratch/gen --target infra/aws/terraform/modules/opal_name/tests/vectors.json --target infra/aws/terraform/modules/opal_name/tests/opal_name.tftest.hcl 2>&1 | tail -3 && python -c \"\nfrom pathlib import Path\nfor t in ('infra/aws/terraform/modules/opal_name/tests/vectors.json', 'infra/aws/terraform/modules/opal_name/tests/opal_name.tftest.hcl'):\n    a = Path(t).read_bytes(); b = Path('.scratch/gen', t).read_bytes(); print(t, 'tree_equals_generator', a == b, 'bytes', len(a))\n\"",
+      "output_evidence": "Ran 37 tests in 0.225s\nOK\nRan 27 tests in 0.010s\nOK\nVALIDATE: OK 28 system row(s), 10 scope row(s), 20 warning(s) at registry@93ea36e7d295da12\nWROTE infra/aws/terraform/modules/opal_name/tests/vectors.json (7013 bytes)\nWROTE infra/aws/terraform/modules/opal_name/tests/opal_name.tftest.hcl (15405 bytes)\nGENERATE: 2 written, 0 skipped, into .scratch/gen at registry@93ea36e7d295da12\ninfra/aws/terraform/modules/opal_name/tests/vectors.json tree_equals_generator False bytes 7013\ninfra/aws/terraform/modules/opal_name/tests/opal_name.tftest.hcl tree_equals_generator False bytes 15402",
+      "denominator": "2 of 2 test suites OK (37 + 27 tests); validate OK (0 refusals); 0 of 2 GENERATED files byte-equal to a fresh regenerate -- vectors.json differs ONLY on the mark line (registry hash), matching RULED 1's own prediction that a sec VENDOR row adds no vector; opal_name.tftest.hcl differs on the mark line AND on run \\\"refuses_product_scope\\\"'s scope value (etfs -> harvest), a side effect of the ALREADY-LANDED harvest PRODUCT scope row's array position, not of anything this cell wrote to the registry",
+      "status": "FAIL",
+      "status_reason": "REFUSED AS WRITTEN per this order's own REFUSAL CLAUSE: the byte-equality half of this criterion assumed ONLY the sec VENDOR row's mark-line effect (confirmed true for vectors.json) but did not anticipate the harvest scope row's vector-selection side effect on opal_name.tftest.hcl, already measured beyond the mark line. Per RULED 1's own instruction (\\\"if anything beyond the mark line changes, STOP and file a row\\\"), this worker did NOT regenerate either tracked GENERATED file into the tree -- both remain at their committed HEAD bytes. Filed as surprise row AMGT_RESAPP-Z-W37-S4.",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The central defect this cell retires (D24: a READ rewrites a tracked cache even under --dry-run) is itself the planted mutant: AC4 was run TWICE, once against the ORIGINAL unmodified lib/research/peers/universe.py (restored temporarily from .scratch/universe.py.orig, the pre-edit snapshot) and once against this cell's fixed code, both against the IDENTICAL stale-cache fixture.",
+      "expected": "The original (mutant) code REWRITES the stale cache file on a plain load (stale_file_unchanged False, cache_sha256_written True); the fixed code does not (stale_file_unchanged True, cache_sha256_written False).",
+      "observed": "BEFORE (original code): stale_file_unchanged False, cache_sha256_written True -- the defect reproduced exactly as the PRD's validation D24 describes. AFTER (fixed code): stale_file_unchanged True, cache_sha256_written False. The fixed code was restored immediately after the before-run and re-verified compiling and passing all 27 peers tests.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of the identity test suite and of AC1's builder invocation, compared.",
+      "observed": "python -m unittest discover -s lib/research/identity/tests -p \"test_*.py\" -q run twice: both 'Ran 37 tests ... OK', no flakes. AC1's builder invocation run at spawn (before any code edit) and again after all edits: both print the identical two ADDRESS lines and 'validate_refusals 0 warnings 20' -- the registry-derived answer is stable across this cell's own code changes, as expected (this cell never writes the registry).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Regenerating infra/aws/terraform/modules/opal_name/tests/vectors.json and opal_name.tftest.hcl into the tree.",
+      "reason": "opal_name.tftest.hcl's fresh regenerate differs beyond the mark line (the harvest scope row's array-position side effect on the refuses_product_scope vector) -- RULED 1's own instruction is to STOP and file a row rather than land it. Filed as AMGT_RESAPP-Z-W37-S4; both GENERATED files left at committed HEAD bytes."
+    },
+    {
+      "item": "The SEC cache's live landing to the pool (RULED 3's write_pool step for the SEC ticker-to-CIK document).",
+      "reason": "The builder resolves the SEC bronze address into s3://opal-data-assets, not opal-data-harvest -- REFUSED-BY-REGISTRY per the issuer amendment's REFUSAL CLAUSE. This worker never writes there and never types an opal-data-harvest address instead. Filed as AMGT_RESAPP-Z-W37-S1 (ARMED)."
+    },
+    {
+      "item": "filing_identity_for()'s body, engine.py, peers/ files other than universe.py, model_block_pull.py's SECURITIES/HIST_END/field lists, MODEL_BLOCK_DIR_DEFAULT and the model-block half of build_candidate_universe(), the coverage list's worker-folder home (build_universe.py OUTPUT_PATH, crosswalk.py).",
+      "reason": "Explicitly named in this order's BOUNDS/paths section as NOT this cell's write (other chains' cells or a different class -- AC6's census, not this cell's diff)."
+    },
+    {
+      "item": "Running any producer (model_block_pull.py pull/derive, engine.py --write-pool, python -m lib.research.peers.universe --refresh as a live CLI invocation).",
+      "reason": "BOUNDS: NO FLEET RUN, NO RE-RUN, NO VENDOR CALL. The ONE live write this cell performed (the candidate-universe pool landing) was done directly via crosswalk.write_pool on the already-committed ~21 bytes, not by invoking the --refresh CLI or any producer."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W37-S1: the SEC bronze address the builder returns lands in s3://opal-data-assets, not opal-data-harvest, because tiers.json's PRODUCT tenancy still homes bronze/silver to the shared bucket for every scope including 'harvest' -- REFUSED-BY-REGISTRY, this worker never writes it there. ARMED, disarm_owner 1.0.0_SA_CTO~Z.",
+    "AMGT_RESAPP-Z-W37-S2: AC6's mandated census -- 50 production .py lines across 25 files still name a worker's deliverables folder after this cell's fixes; the three PRD-named instances are absent as required; filed as the class's residue, not edited here.",
+    "AMGT_RESAPP-Z-W37-S3: AC2's own expect text states field_map.json carries 36 fields; the worker-~1 source file this order copies byte-for-byte carries 32 -- a discrepancy in the order's stated expectation, not in this cell's act.",
+    "AMGT_RESAPP-Z-W37-S4: RULED 1's REGENERATE step fires -- a fresh generate against the current registry (sec + harvest rows already landed before this worker's spawn) changes opal_name.tftest.hcl's refuses_product_scope vector from scope=etfs to scope=harvest, not just the mark line; this worker did not regenerate the tracked files."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~37/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -c \"import py_compile; py_compile.compile('lib/research/peers/universe.py', doraise=True)\"",
+      "result": "COMPILE-OK (also run for model_block_pull.py and build_universe.py, all clean)"
+    },
+    {
+      "tool": "python -m unittest (identity)",
+      "invocation": "python -m unittest discover -s lib/research/identity/tests -p \"test_*.py\" -q",
+      "result": "Ran 37 tests in 0.186-0.225s; OK"
+    },
+    {
+      "tool": "python -m unittest (peers)",
+      "invocation": "python -m unittest discover -s lib/research/peers/tests -p \"test_*.py\" -q",
+      "result": "Ran 27 tests in 0.010-0.017s; OK"
+    },
+    {
+      "tool": "lib/opal_naming.py validate",
+      "invocation": "python lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 28 system row(s), 10 scope row(s), 20 warning(s) at registry@93ea36e7d295da12"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4,AC5,AC6,AC7",
+      "result": "see WORKER REPORT for the rc and printed verdict line"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate, to-pipeline-gate, msg-verify)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~37 <0.9.0_WK_AMGT_RESAPP~37@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see WORKER REPORT for the commit hash"
+    }
+  ]
+}
