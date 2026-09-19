@@ -64,3 +64,68 @@
 17. Wrote the proof_of_spec instance: AC1/AC2/AC3 FAIL (measured, with full reasoning and status_reason),
     AC4 PASS. `<status>` NOT flipped to `complete` -- a FAIL row leaves the order open per the harness
     contract; this is the final report on it.
+
+## SESSION 2 (`0.9.0_WK_AMGT_RESAPP~38`, fresh session, ISSUER-REPAIRED order @361c3aaa90)
+
+18. Bar check + re-grounding: `wk-amgt-14-38`, HEAD `361c3aaa90` (the ISSUER's acceptance-repair commit,
+    on top of session 1's work), TREE-OK, working tree clean at HEAD. Read the repaired WORKER FACE and
+    the repaired worktree task order (AC1/AC2/AC3 ISSUER REPAIR notes; both govern identically here).
+19. Diagnosed the root collision named at row S2: item 3(b)'s literal UNRESOLVED-ON-<security> unit text
+    embedded `_NOT_YET_BUILT_SUFFIX` ("SEE field_map.json ... not yet built"), and
+    `lib/research/checkface/run_checks.py:unit_status_for` (READ-ONLY, out of `<paths>`) classifies ANY
+    unit text carrying those substrings as NOT-YET-BUILT with no other bucket for "attempted, did not
+    discriminate". `unit_status_for`'s only OTHER REFUSE path is SIGN-UNRESOLVED (a substring match on the
+    SIGN text), so the fix routes through that path instead, entirely within `build_unit_map.py`:
+    - `unresolved_unit_text()` no longer appends the suffix (asserts it can't leak via the reason string);
+    - `build_entries()` forces `sign_status` to UNRESOLVED whenever `unit_status` is UNRESOLVED but sign
+      alone would read MEASURED (e.g. a non-text value landed for a TEXT_FIELDS mnemonic), so the figure
+      is never allowed to read check-face MEASURED on an unmeasured unit by coincidence of sign's cruder
+      positive/negative/zero test.
+20. New tests `integrations/bloomberg/research/tests/test_build_unit_map_classification_split.py` (3
+    passed, exercising the REAL consumer `run_checks.unit_status_for`/`check_one`, never a
+    reimplementation): the text-format assertion; branch 1 (entry exists, unit unmeasured, sign
+    would-be-clean -> forced SIGN-UNRESOLVED, REFUSE_OTHER); branch 2 (no entry at all -> unaffected,
+    still NOT-YET-BUILT via the producer's own unchanged fallback, the planted negative).
+21. Re-ran `build_unit_map.py --population crosswalk` for real: diffed the resulting field_map.json
+    against the pre-repair snapshot -- 0 MEASURED/UNRESOLVED flips, 0 `value_sampled` changes; only the
+    unit/sign TEXT format changed for the 74 already-unresolved (mnemonic, security) pairs. Spot-verified
+    one real case (SHORT_INT_RATIO on SAP GY Equity) through the actual `unit_status_for` -> `SIGN-UNRESOLVED`.
+22. Writer census re-run at spawn (206 `.py` files walked under `lib/` and `integrations/` for the
+    literals `derived/model_block` / `derived/{ENGINE}`): ONE writer (`model_block_pull.py`,
+    `derive_fye_fixed.py` confirmed to write the SEPARATE `derived/model_block_fye/` prefix only); readers
+    a superset of the order's named 4 (`scoped_amgt.py`, `run_scores.py`, `universe.py`, `render_pack.py`,
+    `render_print.py`, `robustness.py`, `crosswalk.py`, plus tests/fixtures).
+23. Committed `162435481b` (build_unit_map.py fix + test, the re-derived field_map.json, the NEW
+    change-management sentinel `amgt-rk34-unit-map-rederive2-20260919`, `pre_act_stamps_repair2.json`)
+    BEFORE the second derive's first write, per section 3. Both never-widen halves re-verified SIGNED for
+    `AMGT-rk-34` (sha256 `594ba746e3...` COO / `db0e1bbaff...` CTO).
+24. AC1 PRE-ACT this session (S3 blocks still un-repaired from session 1's derive): `names_with_block 33
+    of 36`, `REFUSE_NOT_YET_BUILT 38` (residual from session 1), `REFUSE_OTHER 0`.
+25. Ran `model_block_pull.py derive` in 11 batches of <=3 over the exact 33 (sec_key, security-string)
+    pairs -- every batch `DERIVE DONE: 3 of 3`, every `fiscal_year_row_count > 0`. Recorded
+    `post_act_stamps_repair2.json`.
+26. AC1 POST-ACT: `names_with_block 33 of 36`, `REFUSE_NOT_YET_BUILT 0`, `REFUSE_OTHER 38` -- every OTHER
+    row independently confirmed to read `"...unit/sign convention is 'SIGN-UNRESOLVED', not MEASURED"`,
+    never `NOT-YET-BUILT`. All 33 `newest_stamps` values strictly newer than `pre_act_stamps_repair2.json`'s
+    (measured, all True). PASS.
+27. AC2 (repaired denominator: keyed names WITH raw only, `no_raw` printed separately): `producer_mnemonics
+    32`, `securities_with_entry_for_every_mnemonic 33 of 33`, `missing_pairs 0`, `unresolved_pairs 74`
+    (matches AC1's per-pair residue), `entries_carry_raw_stamp True`, `entries_carry_derived_by True`,
+    PLANTED_NO_ENTRY unchanged (`SEE field_map.json ... not yet built`, status `NOT-YET-BUILT`). PASS.
+28. AC3 (repaired invocation, top-level `model_status`): all 3 names `statusCode 200`, `model_status
+    SERVED`, `REFUSE_NOT_YET_BUILT 0`, `REFUSE_OTHER` 10/0/10 (printed, not required 0). CodeSha256
+    unchanged before/after this session's act, and equal to the value recorded at session 1's very first
+    read (`baiKT5I+k7ciCX/rtQzYy7bTSWgApSeAXYtSZhe4fUE=`) -- the Lambda was never redeployed across either
+    session. PASS.
+29. AC4 re-run (map now the repaired bytes): rc 0, 3 explicit UNRESOLVED terminal states (raw still absent
+    on all 3 validation names), `s3_unchanged True`, `map_bytes_unchanged True`, porcelain line count
+    identical (1, the lone untracked `post_act_stamps_repair2.json`) before and after. PASS.
+30. Closed change-management entry `amgt-rk34-unit-map-rederive2-20260919` (3 legs proven), sentinel
+    removed. Updated the proof_of_spec instance (all 4 criteria PASS, `artifacts_produced` pinned to the
+    commit that carries them, `declared_exclusions`/`surprises` updated to record S2/S3/S4 RESOLVED BY
+    ISSUER REPAIR without editing the immutable investigation rows). No new surprise rows filed this
+    session -- nothing off-task encountered.
+31. Flipped `<status>` to `complete`. Ran `proof-of-spec-check.py` pre-commit (caught: a stale AC4 `expect`
+    porcelain-count literal, three `artifacts_produced` rows needing `PENDING-THIS-COMMIT`/an exact pin
+    instead of prose, one artifact-coverage gap for the new test file closed via `artifact_covered_by`);
+    fixed and committed; ran the checker ONCE MORE post-commit.
