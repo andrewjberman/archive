@@ -164,14 +164,55 @@ def core_no_loss(new_inv, old_inv, named_drops):
     return (not bad), lines + bad
 
 
-def core_stale(commits, rec):
+def core_stale(commits, rec, prior):
+    """The bar is SET EQUALITY against the proofs that COULD be stale, never `> 0`.
+
+    REPAIRED mid-round by the issuer on LGIC_ENFORCE-W1-S88, which measured the same arm one
+    project over: the window opens at the ANALYSIS pin, and the commit that MINTS the fixed
+    input lands after it -- so the arm counts its own creation, and the old `> 0` rule then
+    demanded a re-run list where the honest list is EMPTY (nothing was pinned before the input
+    existed). `> 0` made the only passing move an INVENTED proof name. `prior` is the set of
+    proof instances that existed at the parent of the earliest counted commit: it is empty at a
+    mint, so a mint passes with `[]`, and a real mid-round edit still refuses both an
+    under-enumeration and a name that was never there to go stale.
+    """
     n = len(commits)
     if n == 0:
         return True, ["fixed-input commits since the cut: 0 -- no proof can be stale against them"]
     sp = ((rec or {}).get("stale_proofs") or {})
-    ok = sp.get("fixed_input_commits_since_cut") == n and len(sp.get("proofs_re_run") or []) > 0
-    return ok, ["fixed-input commits since the cut: %d %s" % (n, _scrub(commits[:3])),
-                "record enumerates %d re-run proof(s)" % len(sp.get("proofs_re_run") or [])]
+    named = set(sp.get("proofs_re_run") or [])
+    prior = set(prior or ())
+    ok = sp.get("fixed_input_commits_since_cut") == n and named == prior
+    lines = ["fixed-input commits since the cut: %d %s" % (n, _scrub(commits[:3])),
+             "proofs pinned BEFORE the earliest of them: %d -- %s" % (len(prior), _scrub(sorted(prior)) or "none"),
+             "record enumerates %d re-run proof(s): %s" % (len(named), _scrub(sorted(named)) or "none")]
+    if named - prior:
+        lines.append("NAMED BUT NEVER AT RISK: %s" % _scrub(sorted(named - prior)))
+    if prior - named:
+        lines.append("AT RISK AND NOT RE-RUN: %s" % _scrub(sorted(prior - named)))
+    return ok, lines
+
+
+def _is_this_round(path, tag):
+    """THIS round's proofs only. An earlier round's proof was graded against ITS OWN fixed input
+    and is FROZEN HISTORY (R-43) -- an r4 edit cannot make an r1 proof stale, and sweeping the
+    whole project makes the bar unsatisfiable in the other direction."""
+    b = os.path.basename(path)
+    return b.endswith("proof_of_spec.json") and ".TO-" in b and ("-%s." % tag) in b
+
+
+def proofs_at_risk(commits):
+    """This round's proof instances that existed at the parent of the EARLIEST counted commit."""
+    if not commits:
+        return set()
+    oldest = commits[-1].split()[0]
+    tag = os.path.basename(HERE)
+    r = subprocess.run(["git", "ls-tree", "-r", "--name-only", "%s^" % oldest, "--", ROOT],
+                       cwd=REPO, capture_output=True, timeout=120)
+    if r.returncode != 0:
+        return set()
+    return set(ln for ln in (r.stdout or b"").decode("utf-8", "replace").splitlines()
+               if _is_this_round(ln, tag))
 
 
 # ------------------------------------------------------------------ arms
@@ -304,7 +345,7 @@ def r4_stale_proofs():
     rec = None
     for p in b["record_shape"]["paths"].values():
         rec = rec or load_json(p)
-    ok, lines = core_stale(out, rec)
+    ok, lines = core_stale(out, rec, proofs_at_risk(out))
     return verdict(ok, "PASS-R4-STALE-PROOFS", "FAIL-R4-STALE-PROOFS", lines)
 
 
@@ -359,8 +400,19 @@ def selftest_arms():
                                                {"LAMBDA": {"dropped": [{"name": "x", "old_leg": "iam_grant"}]}})[0],
         "a drop NAMED with its old leg is admissible")
 
-    arm("POSITIVE-stale-none", core_stale([], None)[0])
-    arm("MUTANT-stale-unenumerated", not core_stale(["abc x"], None)[0])
+    arm("POSITIVE-stale-none", core_stale([], None, set())[0])
+    _one = {"stale_proofs": {"fixed_input_commits_since_cut": 1, "proofs_re_run": []}}
+    arm("POSITIVE-stale-mint", core_stale(["abc mint"], _one, set())[0],
+        "the commit that MINTS the fixed input puts NO proof at risk -- [] is the honest answer (W1-S88)")
+    arm("MUTANT-stale-unenumerated", not core_stale(["abc x"], _one, {"a/p.proof_of_spec.json"})[0])
+    arm("MUTANT-stale-invented", not core_stale(
+        ["abc x"], {"stale_proofs": {"fixed_input_commits_since_cut": 1,
+                                     "proofs_re_run": ["never/existed.proof_of_spec.json"]}}, set())[0],
+        "a name that was never at risk cannot buy a PASS -- the repair's own back door")
+    arm("POSITIVE-stale-this-round", _is_this_round("d/LGIC_LGCTFM.TO-LT-m-1-r4.x.proof_of_spec.json", "r4"))
+    arm("MUTANT-stale-frozen-round", not _is_this_round(
+        "d/LGIC_LGCTFM.TO-LT-e-1-r1.walk.proof_of_spec.json", "r4"),
+        "an r1 proof is frozen history (R-43): an r4 edit cannot make it stale")
     arm("MUTANT-scrub", "VERDICT: PASS-" not in _scrub("VERDICT: PASS-M1-ENTRY"))
 
     try:
