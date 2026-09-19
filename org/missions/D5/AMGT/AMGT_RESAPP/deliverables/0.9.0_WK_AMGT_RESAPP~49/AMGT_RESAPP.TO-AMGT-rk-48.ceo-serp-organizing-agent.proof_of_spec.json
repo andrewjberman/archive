@@ -1,0 +1,213 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-48.ceo-serp-organizing-agent",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1699960261"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-48.ceo-serp-organizing-agent.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~49",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/find/dualbiz/scripts/serp.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: added classify_serp_attempt(http_status, headers, body) -> (status, failure) -- FAILED/EMPTY/OK per the four MEASURED shapes (captcha=200/0-byte/x-brd-error-code, bad zone=400, original_empty rewrite, well-formed OK); added serp_brightdata_records(query, max_pages=1, gl='us', hl='en', retries=2, transport=None) -> dict with an injectable transport (offline-testable), retry ONLY on captcha/5xx up to `retries`, never on 4xx; added local _scrub_body (general.mobile exempt) and _resolve_wrapper (one un-followed GET on a google.com/goto?url= link); serp_brightdata is now a thin wrapper over serp_brightdata_records (list[str] unchanged, one WARN: line on FAILED). Verified via enrich._serp_module() (AC2): both new functions present, wrapper delegates, all 4 measured shapes classify correctly.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/research/management/ceo_search.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW module: ceo_profile(ceo, company, verified_domain, serp=None, model=None, fetcher=None, max_pages=3, roster_source=None, gl='us', hl='en', require_verified_domain=True) -> dict, the full pipeline (query construction with company_short_name(), serp_brightdata_records call, broker-host drop, Call A identity triage, LinkedIn link-only, direct fetch, contact_scrub_text, the 500-character identity_anchor, Call B extraction over a 7000-character window, passages.Locator verification, dedupe_facts, status/reason_code assignment across the five states, a final scrub() pass). Also: classify_source_kind (official_bio ONLY on the verified domain or a subdomain), verify_quote, project_ceo_public_profile (the legacy-shape projection). Exercised offline in AC1 (19 tests) with stubbed serp/model/fetcher; no network call.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/management/management.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: ceo_profile added to top-level required (new closed definitions.ceo_profile_block: the five-state status enum, reason_code enum incl. NO_VERIFIED_SITE, search/triage/items/found_not_read/counts/cost sub-objects, contact-field 'not' clauses); ceo_public_profile kept required, its definition renamed ceo_profile -> ceo_public_profile_block with the stale 'opaque redirect' claim corrected/removed; new definitions.ceo_fact (topic enum of 6, no 'other'; quote+char_range; contact 'not' clause), ceo_search_item, ceo_search_found_not_read. Verified via AC3: required has ceo_profile True, keeps ceo_public_profile True, 5-state enum, 6 topics, stale claim False, 8 definitions.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "lib/research/management/enrich.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: added company_display_name(security_key, source_object, table=None) (prefers the filings battery's entity_name, falls back to domains.json's declared entity, then the Bloomberg yellow-key form) and verified_domain_for(source_object) (reads ONLY source_object.verified_site.host, never domains.json -- issuer bind msg 23833). build_document now resolves the CEO SERP module on the same officers+verified_domain+key-present condition Lusha's dependency-resolution guard already used (row W22-S2's discipline extended), builds document['ceo_profile'] via ceo_search.ceo_profile(find_ceo(officers), company_display_name(...), verified_domain, serp=ceo_serp_fn, roster_source=...), and sets ceo_public_profile = ceo_search.project_ceo_public_profile(ceo_profile). The old ceo_public_profile() function is retired from this call site (left defined -- test_management.py's CeoProfileTest calls it directly and is out of this order's rewrite scope). The SERP: print line now reports ceo_profile's status/reason_code/name_source/query/counts/cost. Not exercised live (AC4-AC6 refused, row S2); exercised indirectly via AC1's ceo_search tests and AC3's schema check, and the full test_management.py (47 tests) + test_bloomberg_fallback.py (7 tests) suites re-verified green.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_ceo_search.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 19 tests, fully offline (stubbed transport/model/fetcher, no network): the four classify_serp_attempt shapes; captcha retried exactly twice (3 attempts) then FAILED; bad zone never retried (1 attempt); original_empty keeps 9 records flagged answers_detected_query; OK body carries title+snippet on every record; old serp_brightdata wrapper returns the same links as the records call; the MUTANT classifier (captcha->EMPTY) refused by its own discriminating assertion; namesake page fails the 500-char anchor, positive control passes; official_bio assigned only on the verified host (incl. a lookalike-domain negative and a model-label-demoted case); every kept quote of a fixture profile re-locates and every drop/swap/splice mutant of it is refused (\"mutants refused 9 of 9\" printed); a planted contact string never reaches the serialised block; NO_VERIFIED_SITE gate (search never runs without a verified domain, enforced by an unreachable-serp stub that raises if called). Ran 19 tests in 5.4s, OK.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_management.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: test_the_schema_forbids_a_contact_field's fixture now sets document['ceo_profile'] = ceo_search.ceo_profile(None, ...) and the projected ceo_public_profile, a direct consequence of ceo_profile becoming schema-required. All 47 tests re-verified passing (Ran 47 tests, OK) -- 1 was broken by the schema change before this fix, now clean.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_bloomberg_fallback.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: test_validate_passes_on_bloomberg_fallback_and_filing_objects_with_no_contact_field's two fixtures (FILING and BLOOMBERG_FALLBACK branches) now set ceo_profile/ceo_public_profile the same way, for the same reason. All 7 tests re-verified passing (Ran 7 tests, OK) -- 1 was broken by the schema change before this fix, now clean.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "3 rows appended by textual splice inside the one fenced JSON array (419 rows total, parses clean, pure LF): AMGT_RESAPP-Z-W49-S2 (AC4-AC6 refused, no Bright Data per-use word on file, no vendor call made), AMGT_RESAPP-Z-W49-S3 (2 pre-existing failing tests in the WALL lib/research/api/tests/test_generation_and_pool_routes.py, unrelated to this order), AMGT_RESAPP-Z-W49-S4 (the order's step-7 text and the issuer bind read differently on whether the search runs without a verified_site; this worker built to the issuer bind as the general rule). Each row validated schema-clean via jsonschema.Draft7Validator against org/surprise_channel/schemas/investigation_item.schema.json before splicing."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-48.ceo-serp-organizing-agent.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "RECORD FACE <status> flipped pending -> complete: the order's own bound authorizes a terminal state on AC1-AC3 PASS plus the AC4-AC6 refusal when the spawn prompt does not state the Bright Data per-use word, which is this session's exact case."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the module ends \"OK\" with its \"Ran N tests\" denominator and the run lists, by name, at least these tests passing: captcha (HTTP 200, 0-byte body, x-brd-error-code captcha) classifies FAILED kind VENDOR and is retried exactly 2 times (attempts 3); HTTP 400 \"zone not found\" classifies FAILED kind CONFIG with attempts 1 (never retried); a body with spelling.original_empty true and 9 organic entries classifies EMPTY with 9 records kept and flagged; a well-formed body classifies OK with title and snippet on every record; the old wrapper serp_brightdata returns the same list of links the records call holds; the MUTANT classifier that maps captcha to EMPTY is REFUSED (the test passes only because the assertion fired against the mutant); the namesake page fails the 500-character anchor and the positive-control page passes it; every kept quote of the fixture profile re-locates and drop/swap/splice mutants are refused with printed counts of the form \"mutants refused N of N\"; a planted contact string in a fetched page never reaches the serialised block",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest lib.research.management.tests.test_ceo_search -v 2>&1 | tail -n 40",
+      "output_evidence": "test_bad_zone_is_failed_config ... ok\ntest_captcha_is_failed_vendor ... ok\ntest_mutant_classifier_that_maps_captcha_to_empty_is_refused ... ok\ntest_original_empty_is_empty ... ok\ntest_well_formed_body_is_ok ... ok\ntest_planted_contact_string_never_reaches_serialised_block ... ok\ntest_namesake_page_fails_the_anchor ... ok\ntest_positive_control_page_passes_the_anchor ... ok\ntest_no_verified_domain_is_not_searched ... ok\ntest_bad_zone_never_retried ... ok\ntest_captcha_retried_exactly_twice_then_failed ... ok\ntest_ok_body_carries_title_and_snippet_on_every_record ... ok\ntest_old_wrapper_returns_same_links_as_records_call ... ok\ntest_original_empty_keeps_nine_records_flagged ... ok\ntest_lookalike_domain_is_not_official ... ok\ntest_model_label_official_bio_demoted_on_unverified_host ... ok\ntest_official_bio_only_on_verified_host ... ok\ntest_every_kept_quote_relocates_and_mutants_are_refused ... ok\ntest_identity_quote_need_not_itself_carry_surname_and_company ... ok\n\n----------------------------------------------------------------------\nRan 19 tests in 5.442s\n\nOK\nQUOTES RELOCATED: 3 of 3\nmutants refused 9 of 9",
+      "denominator": "19 of 19 tests passed (>= the 9 named cases; each named case has its own dedicated test)",
+      "status": "PASS",
+      "expect": "Ran \\d+ tests? in [\\d.]+s\\s*\\n\\s*OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "both hasattr lines read True; the wrapper delegates True; the four measured shapes from the design's s.1.5 print FAILED VENDOR, FAILED CONFIG, EMPTY, OK in that order, each PASS, denominator 4 of 4 -- this is the same classifier AC1 tests, exercised through the path enrich.py actually loads the module by (a different instrument from the unittest import)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom lib.research.management import enrich\nserp = enrich._serp_module()\nimport inspect\nprint('has serp_brightdata_records', hasattr(serp, 'serp_brightdata_records'))\nprint('has classify_serp_attempt', hasattr(serp, 'classify_serp_attempt'))\nsrc = inspect.getsource(serp.serp_brightdata)\nprint('wrapper delegates', 'serp_brightdata_records' in src, 'lines', len(src.splitlines()))\nfor hs, hdr, body, want in [(200, {'x-brd-status-code': '502', 'x-brd-error-code': 'captcha'}, b'', 'FAILED'), (400, {}, b'zone \\\"x\\\" not found', 'FAILED'), (200, {'x-brd-status-code': '200'}, b'{\\\"organic\\\": [], \\\"spelling\\\": {\\\"original_empty\\\": true}}', 'EMPTY'), (200, {'x-brd-status-code': '200'}, b'{\\\"organic\\\": [{\\\"link\\\": \\\"https://example.com/a\\\", \\\"title\\\": \\\"t\\\", \\\"description\\\": \\\"d\\\"}], \\\"general\\\": {\\\"query\\\": \\\"q\\\", \\\"detected_query\\\": \\\"q\\\"}}', 'OK')]:\n    status, failure = serp.classify_serp_attempt(hs, hdr, body)\n    print(hs, dict(hdr), want, '->', status, (failure or {}).get('kind'), 'PASS' if status == want else 'FAIL')\nprint('DENOMINATOR: 4 measured shapes classified')\n\"",
+      "output_evidence": "has serp_brightdata_records True\nhas classify_serp_attempt True\nwrapper delegates True lines 15\n200 {'x-brd-status-code': '502', 'x-brd-error-code': 'captcha'} FAILED -> FAILED VENDOR PASS\n400 {} FAILED -> FAILED CONFIG PASS\n200 {'x-brd-status-code': '200'} EMPTY -> EMPTY None PASS\n200 {'x-brd-status-code': '200'} OK -> OK None PASS\nDENOMINATOR: 4 measured shapes classified",
+      "denominator": "4 of 4 measured shapes classified correctly",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "required has ceo_profile True and keeps ceo_public_profile True; the status enum reads exactly CURATED, NOTHING_FOUND, UNREADABLE, SEARCH_FAILED, NOT_SEARCHED (if the worker named the definitions differently it prints the actual names and the same enums); the topic enum is the six topics with NO \"other\"; the stale \"opaque redirect\" claim is ABSENT (False); the fact definition carries a not clause against contact keys; the definitions count is printed",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json\nfrom lib.research.management import enrich\nschema = json.load(open(enrich.SCHEMA_PATH, encoding='utf-8'))\nreq = schema['required']\nprint('required has ceo_profile', 'ceo_profile' in req, 'keeps ceo_public_profile', 'ceo_public_profile' in req)\ndefs = schema['definitions']\nprint('ceo_profile statuses', defs['ceo_profile_block']['properties']['status']['enum'] if 'ceo_profile_block' in defs else 'DEFINITION NAME DIFFERS -- print the actual one')\nprint('fact topics', defs.get('ceo_fact', {}).get('properties', {}).get('topic', {}).get('enum'))\ntext = json.dumps(schema)\nprint('stale redirect claim present', 'opaque redirect' in text)\nprint('contact keys forbidden at fact level', 'not' in defs.get('ceo_fact', {}))\nprint('DENOMINATOR: 1 schema file, %d definitions' % len(defs))\n\"",
+      "output_evidence": "required has ceo_profile True keeps ceo_public_profile True\nceo_profile statuses ['CURATED', 'NOTHING_FOUND', 'UNREADABLE', 'SEARCH_FAILED', 'NOT_SEARCHED']\nfact topics ['current_role', 'prior_role', 'tenure_or_appointment', 'education', 'board_or_outside_role', 'stated_view_or_priority']\nstale redirect claim present False\ncontact keys forbidden at fact level True\nDENOMINATOR: 1 schema file, 8 definitions",
+      "denominator": "1 schema file, 8 definitions",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "PRE-ACT prints the live sha and version of the CAT object AMGT-rk-47 wrote (the rollback baseline); RC 0; POST-ACT status is ONE of the five states with a reason_code, name_source printed (expected BLOOMBERG_FALLBACK unless a RESOLVED filing landed), the query in the form \"<name>\" Caterpillar CEO; counts carry facts_verified equal to facts_proposed minus facts_dropped_unverified; attempts at most 3; cost.model_usd printed and under 2.00; the projection carries status/absence_class/basis consistent with the block; the secret values never appear in the output (the exports are outside the printed program)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && export BRIGHT_DATA_API_KEY=\"$(comp-secrets get find-insure/bright-data/api-key --reveal)\" && export BD_SERP_ZONE=\"serp_opal\" && export ANTHROPIC_API_KEY=\"$(comp-secrets get anthropic-api-key --reveal)\" && python -c \"\nimport boto3, datetime, json\ns3 = boto3.client('s3', region_name='us-east-1'); B = 'opal-data-harvest'\nas_of = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d')\nkey = 'management/v1/CAT_US_Equity/%s.json' % as_of\nh = s3.head_object(Bucket=B, Key=key); print('PRE-ACT', key, 'sha', h['Metadata'].get('document-sha256'), 'version', h.get('VersionId'))\nfrom lib.research.management import enrich\nrc = enrich.main(['--security-key', 'CAT_US_Equity', '--as-of', as_of, '--write-pool', '--skip-pool', '--json'])\nprint('RC', rc)\ndoc = json.loads(s3.get_object(Bucket=B, Key=key)['Body'].read())\ncp = doc.get('ceo_profile') or {}\nprint('POST-ACT status', cp.get('status'), 'reason_code', cp.get('reason_code'), 'name_source', cp.get('name_source'), 'ceo', cp.get('ceo_name'), 'query', (cp.get('search') or {}).get('query'))\nprint('counts', json.dumps(cp.get('counts')), 'cost', json.dumps(cp.get('cost')), 'attempts', len((cp.get('search') or {}).get('attempts') or []))\nprint('items', len(cp.get('items') or []), 'found_not_read', len(cp.get('found_not_read') or []), 'projection', json.dumps(doc.get('ceo_public_profile')))\nprint('DENOMINATOR: 1 of 3 validation names (CAT); facts_verified %s of facts_proposed %s' % ((cp.get('counts') or {}).get('facts_verified'), (cp.get('counts') or {}).get('facts_proposed')))\n\"",
+      "output_evidence": "NOT RUN -- REFUSED before invocation. Issuer notes on this spawn, verbatim: \"Andrew's per-use word for Bright Data is NOT on file for this order. Any criterion whose invocation needs a Bright Data (or any other external vendor) call is REFUSED: record the criterion as refused with reason 'vendor per-use word not on file' ... Never call an external vendor API.\" No Bright Data or Anthropic call was made for this criterion.",
+      "denominator": "0 of 1 validation name attempted (refused before any vendor call)",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "REFUSED: vendor per-use word not on file (row AMGT_RESAPP-Z-W49-S2). The order's own bound: \"if the spawn prompt does not state the per-use word for the validation run's Bright Data calls, AC4-AC6 are REFUSED with a row and the order is terminal on AC1-AC3 plus that refusal.\" The later run that will exercise this criterion is whichever order the COO issues once Andrew's per-use word is on file.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "both PRE-ACT baselines printed; both RC 0; CSL reads one of the five states with its reason_code (its CEO comes from the roster AMGT-rk-47 wrote); Keyence reads either a searched state or NOT_SEARCHED with NO_CEO_ON_ROSTER when its roster carries no chief-executive title (the honest outcome, recorded as a row for the L4 -- not repaired by widening _CEO_RE); every counts block carries facts_verified consistent with facts_proposed minus facts_dropped_unverified; the running total of SERP requests over AC4 and AC5 is at most 9 and of model_usd at most 2.00, both stated in the report; denominator 2 of 2",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && export BRIGHT_DATA_API_KEY=\"$(comp-secrets get find-insure/bright-data/api-key --reveal)\" && export BD_SERP_ZONE=\"serp_opal\" && export ANTHROPIC_API_KEY=\"$(comp-secrets get anthropic-api-key --reveal)\" && python -c \"\nimport boto3, datetime, json\ns3 = boto3.client('s3', region_name='us-east-1'); B = 'opal-data-harvest'\nas_of = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d')\nfrom lib.research.management import enrich\ndone = 0\nfor k in ['CSL_AU_Equity', '6861_JP_Equity']:\n    key = 'management/v1/%s/%s.json' % (k, as_of)\n    h = s3.head_object(Bucket=B, Key=key); print('PRE-ACT', key, 'sha', h['Metadata'].get('document-sha256'), 'version', h.get('VersionId'))\n    rc = enrich.main(['--security-key', k, '--as-of', as_of, '--write-pool', '--skip-pool'])\n    doc = json.loads(s3.get_object(Bucket=B, Key=key)['Body'].read()); cp = doc.get('ceo_profile') or {}\n    done += 1 if rc == 0 else 0\n    print('POST-ACT', k, 'RC', rc, 'status', cp.get('status'), 'reason_code', cp.get('reason_code'), 'name_source', cp.get('name_source'), 'ceo', cp.get('ceo_name'), 'items', len(cp.get('items') or []), 'counts', json.dumps(cp.get('counts')), 'cost', json.dumps(cp.get('cost')))\nprint('DENOMINATOR: %d of 2 remaining validation names written' % done)\n\"",
+      "output_evidence": "NOT RUN -- REFUSED before invocation, same reason as AC4 (row AMGT_RESAPP-Z-W49-S2). No Bright Data or Anthropic call was made for either of the two remaining validation names.",
+      "denominator": "0 of 2 remaining validation names attempted (refused before any vendor call)",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "REFUSED: vendor per-use word not on file (row AMGT_RESAPP-Z-W49-S2), same order-level bound as AC4.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "3 objects read back from the pool, each schema-valid True with no errors; every fact carries a quote and a char_range (relocated equals total; if total is 0 across all three the line says so and the report states the vacuous case explicitly rather than reading it as a pass); contact fields stored 0 of 3 objects -- a read-back through get_object and validate(), a different instrument from the writer's own print",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, datetime, json\nfrom lib.research.management import enrich\nfrom lib.research.filings.passages import Locator\ns3 = boto3.client('s3', region_name='us-east-1'); B = 'opal-data-harvest'\nas_of = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d')\ntotal = relocated = contact = 0; objects = 0\nfor k in ['CAT_US_Equity', 'CSL_AU_Equity', '6861_JP_Equity']:\n    key = 'management/v1/%s/%s.json' % (k, as_of)\n    doc = json.loads(s3.get_object(Bucket=B, Key=key)['Body'].read()); objects += 1\n    ok, errors = enrich.validate(doc)\n    contact += len(enrich.contact_fields_present(doc))\n    cp = doc.get('ceo_profile') or {}\n    for item in cp.get('items') or []:\n        page = (item.get('read') or {}).get('text_sha256_16')\n        for fact in item.get('facts') or []:\n            total += 1\n            relocated += 1 if fact.get('char_range') and fact.get('quote') else 0\n    print(k, 'schema-valid', ok, 'errors', errors[:2], 'status', cp.get('status'), 'facts', sum(len(i.get('facts') or []) for i in cp.get('items') or []))\nprint('DENOMINATOR: %d objects read back; facts with a verbatim quote and char_range %d of %d; contact fields stored %d' % (objects, relocated, total, contact))\n\"",
+      "output_evidence": "NOT RUN -- REFUSED. AC6 reads the S3 objects AC4/AC5 would have written; since AC4/AC5 never ran (row AMGT_RESAPP-Z-W49-S2), there is nothing for AC6 to read back that this order's own AC4/AC5 wrote. No vendor call was made for this criterion either (it makes none itself, but its precondition -- AC4/AC5 having written -- was never met).",
+      "denominator": "0 of 3 objects read back (the writes AC6 depends on never happened)",
+      "status": "N/A-BY-CONSTRUCTION",
+      "status_reason": "REFUSED as a direct consequence of AC4/AC5's refusal (row AMGT_RESAPP-Z-W49-S2): the order's own text ties AC4-AC6 together (\"AC4-AC6 are REFUSED with a row and the order is terminal on AC1-AC3 plus that refusal\").",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This order's own planted discriminator: a MUTANT classify_serp_attempt that maps a captcha shape to EMPTY instead of FAILED. AC1's test_mutant_classifier_that_maps_captcha_to_empty_is_refused applies the SAME assertion helper to both the real classifier and the mutant, inside self.assertRaises(AssertionError) for the mutant. A second, independent mutant control lives in test_every_kept_quote_relocates_and_mutants_are_refused: drop/swap/splice one-word mutants of every kept verbatim quote must ALL fail passages.Locator.find().",
+      "expected": "The real classifier passes the assertion silently; the mutant classifier's mislabelling is caught by the SAME assertion, raising AssertionError. Every drop/swap/splice mutant of a kept quote must fail Locator.find (mutants refused == mutants total).",
+      "observed": "Both controls fired as expected: test_mutant_classifier_that_maps_captcha_to_empty_is_refused passed (the mutant raised AssertionError as required); test_every_kept_quote_relocates_and_mutants_are_refused printed \"mutants refused 9 of 9\" (all 9 drop/swap/splice mutants of the 3 kept quotes were refused, 0 false positives).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 (19 unit tests, fully stubbed/offline) run twice in this session with identical results both times (Ran 19 tests, OK, both runs; 'mutants refused 9 of 9' both times). AC2/AC3 (command invocations over static code/schema, no randomness) run twice with byte-identical output. AC4-AC6 were never run (refused) so determinism does not apply to them.",
+      "observed": "AC1 stable across 2 runs (19/19 identical, including the printed mutant-refusal count). AC2 stable across 2 runs (identical PASS/PASS/PASS/PASS line). AC3 stable across 2 runs (identical enum/definition-count output).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4, AC5, AC6 (the live Bright Data SERP run on the three validation names and the S3 read-back)",
+      "reason": "REFUSED per the issuer's own spawn notes: Andrew's per-use word for Bright Data is not on file for this order. No Bright Data or other external vendor API call was made. Row AMGT_RESAPP-Z-W49-S2."
+    },
+    {
+      "item": "A change-management ledger entry",
+      "reason": "Not opened: the order's live/write arm (which would rewrite the three served management keys) never ran, so no --write-pool act occurred and NEVER-2's duty to open an entry before the first write act never became live."
+    },
+    {
+      "item": "lib/research/api/scoped_amgt.py and its adapter reading of ceo_profile (serving the new block itself, replacing the basis-string parse)",
+      "reason": "Design doc CEO_STEP_IMPLEMENTATION_DESIGN_20260918.md s.3.6 names this as the ADAPTER cell's own act, not this order's; lib/research/api/ is a named WALL under this order's <paths>."
+    },
+    {
+      "item": "The portal tab (CeoProfile component, types.ts, the harness fixtures)",
+      "reason": "PORTAL FROZEN (BOUNDS); design s.3.7 names this as a separate served-output-moving change needing its own never-widen pair and /frontend-dev screenshot verification, not this order's."
+    },
+    {
+      "item": "A fleet run or a re-run of any name beyond the three validation names",
+      "reason": "Explicitly out of BOUNDS (\"NO FLEET RUN, NO RE-RUN: the three keys are the only targets; the batch is never run\") -- moot in any case since AC4-AC6 never ran."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W49-S2",
+    "AMGT_RESAPP-Z-W49-S3",
+    "AMGT_RESAPP-Z-W49-S4"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~49/AMGT_RESAPP.TO-AMGT-rk-48.ceo-serp-organizing-agent.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile data/find/dualbiz/scripts/serp.py lib/research/management/ceo_search.py lib/research/management/enrich.py lib/research/management/tests/test_ceo_search.py lib/research/management/tests/test_management.py lib/research/management/tests/test_bloomberg_fallback.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh data/find/dualbiz/scripts/serp.py lib/research/management/ceo_search.py lib/research/management/enrich.py lib/research/management/tests/test_ceo_search.py lib/research/management/tests/test_management.py lib/research/management/tests/test_bloomberg_fallback.py",
+      "result": "OK: pre-commit gate clean for 6 of 6 file(s)"
+    },
+    {
+      "tool": "unittest",
+      "invocation": "python -m unittest lib.research.management.tests.test_ceo_search lib.research.management.tests.test_management lib.research.management.tests.test_bloomberg_fallback -v",
+      "result": "19 + 47 + 7 = 73 tests, all OK (verified run separately per module: 19/19, 47/47, 7/7, all passing)"
+    }
+  ]
+}
