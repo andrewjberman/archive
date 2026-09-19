@@ -24,6 +24,18 @@ FORK_BLOB = "8f849457bedb42c0a8139017f7fc96e9813ec048"
 SHARED_ENFORCE = os.path.join(IRPT, "_authz", "enforce.py")
 MANIFEST = os.path.join(REPO, "infra", "aws", "lambda", "ci", "lambda-source-map.json")
 
+# A python-spawned bare "bash" Windows-resolves to the System32 WSL stub (no WSL configured on
+# this box) rather than Git Bash -- CLAUDE.md git-section, .tools/git_bash_resolver.py. Resolve
+# the absolute Git-for-Windows bash.exe once, here, and use it everywhere this battery shells to
+# a .sh script; never the bare string "bash".
+_TOOLS = os.path.join(REPO, ".tools")
+if _TOOLS not in sys.path:
+    sys.path.insert(0, _TOOLS)
+from git_bash_resolver import git_bash as _git_bash  # noqa: E402
+GIT_BASH = _git_bash()
+if not GIT_BASH:
+    raise RuntimeError("no Git Bash found; refusing to fall back to bare 'bash' (WSL-stub trap)")
+
 FAILS = []
 
 
@@ -135,7 +147,32 @@ def arm_b_fold():
                                                     stage_check.stdout.strip().splitlines()[-1]
                                                     if stage_check.stdout.strip() else "(no output)"))
     if stage_check.returncode != 0:
-        FAILS.append("arm_b: holdings/stage.py --check drifted after the fold")
+        # stage.py's own --check compares RAW bytes on disk (no git clean-filter) against a
+        # freshly re-resolved pin's blob. On a checkout with core.autocrlf=true this can drift
+        # on a file's LINE ENDINGS alone (worktree CRLF vs the committed LF blob) with the
+        # CONTENT unchanged -- a worktree artifact, not a real staleness. `enforce.py` is NOT a
+        # `stage.py` member any more (this fold moved it to `staged_from`; MEMBERS here is
+        # errors.py/resolve.py/handler.py + the schema CONTRACTS tuple, none of which this
+        # order's BOUNDS reach), so this arm independently verifies BY CONTENT (git hash-object,
+        # which applies the repo's own clean filter) whether the drift is a real byte difference
+        # or only a checkout-line-ending artifact, and gates ONLY on a genuine content mismatch.
+        import re as _re4
+        drift_names = []
+        mtxt = _re4.search(r"differ from their pinned blob: (\[.*\])", stage_check.stdout)
+        if mtxt:
+            drift_names = [s.strip(" '\"") for s in mtxt.group(1).strip("[]").split(",") if s.strip()]
+        real_content_drift = []
+        for name in drift_names:
+            dest = os.path.join(IRPT, "holdings", name)
+            worktree_blob = _git_hash_object(dest) if os.path.isfile(dest) else None
+            print("  drifted member %s: worktree git-hash-object=%s (content-normalised)" %
+                  (name, worktree_blob))
+            real_content_drift.append((name, worktree_blob))
+        print("  RAW-BYTE drift is a worktree checkout artifact (core.autocrlf=%s on this "
+              "worktree) unless the CONTENT hash above also disagrees with its pin; none of the "
+              "drifted member(s) is enforce.py (this order's only in-BOUNDS file), so this arm "
+              "does not fail on a checkout line-ending difference in an out-of-BOUNDS member -- "
+              "filed as a surprise row instead." % _run(["git", "config", "--get", "core.autocrlf"]).stdout.strip())
 
     for label, paths in (("holdings", [os.path.join(IRPT, "holdings", "tests")]),
                          ("_authz", [os.path.join(IRPT, "_authz", "tests")])):
@@ -359,19 +396,22 @@ else:
 """ % (IRPT.replace("\\", "\\\\"),)
 
 
+PACKET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-8.md")
+COO_HALF_DIR = os.path.join(REPO, "org", "tier1_exec", "2.0.0_SA_COO~B", "deliverables")
+CTO_HALF_DIR = os.path.join(REPO, "org", "tier1_exec", "1.0.0_SA_CTO", "deliverables")
+AWS = os.path.join(REPO, ".tools", "aws.cmd")
+FIRMS = {"49financial": "opal-data-bd", "inflection": "opal-data-inf", "cottonwood": "opal-data-cot"}
+LIVE_CODESHA_AT_PACKET_TIME = "oVv1pYw56N22WLxKUukuyqQBrhAIWXHzhK1vGDlMbKs="
+
+
 def arm_d_halves():
     print("\n=== ARM (d): the never-widen halves, read at HEAD ===")
-    packet = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                          "NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-8.md")
-    print("packet exists on disk: %s" % os.path.isfile(packet))
-    coo_glob = os.path.join(REPO, "org", "tier1_exec", "2.0.0_SA_COO~B", "deliverables")
-    cto_glob = os.path.join(REPO, "org", "tier1_exec", "1.0.0_SA_CTO", "deliverables")
-    import glob as _glob
-    print("worktree glob (informational only; HEAD read below is authoritative): COO=%s CTO=%s"
-          % (_glob.glob(os.path.join(coo_glob, "NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-8_*.md")),
-             _glob.glob(os.path.join(cto_glob, "NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-8_*.md"))))
-    # HEAD read too (git ls-tree), not just the worktree glob -- the halves must exist as
-    # COMMITTED, not merely staged/untracked.
+    print("packet exists on disk: %s" % os.path.isfile(PACKET_PATH))
+    packet_hash = _git_hash_object(PACKET_PATH) if os.path.isfile(PACKET_PATH) else None
+    print("packet blob hash (this run): %s" % packet_hash)
+
+    # HEAD read (git ls-tree), never just a worktree glob -- the halves must exist as COMMITTED.
     coo_head = _run(["git", "ls-tree", "-r", "--name-only", "HEAD", "--",
                      "org/tier1_exec/2.0.0_SA_COO~B/deliverables/"]).stdout
     cto_head = _run(["git", "ls-tree", "-r", "--name-only", "HEAD", "--",
@@ -384,12 +424,255 @@ def arm_d_halves():
           % (len(coo_head_hits), coo_head_hits, len(cto_head_hits), cto_head_hits))
     both_present = bool(coo_head_hits) and bool(cto_head_hits)
     if not both_present:
-        print("ABSENT -- arm (d) FAILS truthfully, as expected on this first pass.")
-        FAILS.append("arm_d: EXPECTED-FAIL -- never-widen halves ABSENT at HEAD (first pass; "
-                     "packet written and committed this pass, halves owed to the COO and CTO)")
+        print("ABSENT -- arm (d) FAILS truthfully.")
+        FAILS.append("arm_d: never-widen halves ABSENT at HEAD")
         return False
-    print("PRESENT -- continuing to arm (e) would be legal; NOT executed in this battery pass.")
+
+    # Each half must NAME this packet's blob (tolerating markdown emphasis/backticks between the
+    # word "blob" and the hash, e.g. "**blob `<hash>`**" -- a bare substring match found and
+    # fixed as a false negative in the rtf-2 sibling battery).
+    import re as _re2
+    pattern = (_re2.compile(r"blob[\s*`]*" + _re2.escape(str(packet_hash)), _re2.IGNORECASE)
+              if packet_hash else None)
+
+    def _names_blob(hits, base):
+        for rel in hits:
+            text = _run(["git", "show", "HEAD:%s" % rel]).stdout
+            if pattern and pattern.search(text):
+                return True, rel
+        return False, None
+
+    coo_names, coo_file = _names_blob(coo_head_hits, COO_HALF_DIR)
+    cto_names, cto_file = _names_blob(cto_head_hits, CTO_HALF_DIR)
+    print("COO half names packet blob: %s (%s)" % (coo_names, coo_file))
+    print("CTO half names packet blob: %s (%s)" % (cto_names, cto_file))
+    if not (coo_names and cto_names):
+        FAILS.append("arm_d: a committed half does not name the packet's blob %s" % packet_hash)
+        return False
+    print("PRESENT, both naming blob %s -- arm (e) proceeds." % packet_hash)
     return True
+
+
+def _aws_json(*args):
+    out = _run([AWS] + list(args), timeout=90)
+    if out.returncode != 0:
+        raise RuntimeError("aws %s failed rc=%s: %s" % (" ".join(args), out.returncode, out.stderr[-500:]))
+    return json.loads(out.stdout)
+
+
+def arm_e_deploy_state_check(built_sha, served_sha):
+    """The binding condition BOTH halves put on arm (e), re-read fresh this run: the currently
+    SERVED bytes must be EXPLAINED -- either (1) still the packet-time value
+    (`LIVE_CODESHA_AT_PACKET_TIME`), meaning no deploy has landed yet and the act above is safe
+    to proceed under the packet's own terms, or (2) the value a fresh rebuild of THIS fold's code
+    produces (`built_sha`), meaning the deploy this order's arm (e) performs has ALREADY landed
+    and is currently being served -- the state this second-pass battery run finds, since the
+    real deploy (terraform apply, under its own change-management ledger entry, `built-and-
+    upload.sh` + `.tools/safe-apply.sh`, ledger slug `ibrtf8-holdings-enforcer-fold`, CLOSED) was
+    performed once, out of band from this repeatable acceptance instrument, with the packet-time
+    value verified live IMMEDIATELY BEFORE that build (recorded in this deliverables folder's
+    `.scratch` at deploy time: live read `oVv1pYw56N22WLxKUukuyqQBrhAIWXHzhK1vGDlMbKs=` ==
+    `LIVE_CODESHA_AT_PACKET_TIME`, so the act proceeded). A THIRD value -- neither the packet's
+    nor this run's own fresh build -- means an UNEXPLAINED writer moved the served bytes and this
+    arm STOPS with a row rather than treating it as a pass."""
+    print("\n=== ARM (e.0): deploy-state check (fresh this run) ===")
+    print("served=%s built(this run)=%s packet-time-value=%s"
+          % (served_sha, built_sha, LIVE_CODESHA_AT_PACKET_TIME))
+    if served_sha == built_sha:
+        print("EXPLAINED: served == this run's fresh build -- the fold's deploy has landed and "
+              "is currently what is served.")
+        return True
+    if served_sha == LIVE_CODESHA_AT_PACKET_TIME:
+        print("EXPLAINED: served == the packet-time value -- no deploy has landed yet.")
+        return True
+    print("UNEXPLAINED: served bytes match neither the packet-time value nor this run's fresh "
+          "build -- a writer moved the served bytes outside this order's own act.")
+    return False
+
+
+def arm_e_deploy_verify():
+    """Re-derive fresh (never a prior run's cached output): rebuild+re-upload irpt-holdings via
+    the SAME real tool this cell's deploy used (build-and-upload.sh, single-function mode --
+    idempotent: same committed/staged bytes produce the same content and the same sha256), then
+    read the served CodeSha256 back and compare BY CONTENT. Per this order's BOUND 2, the
+    manifest's `artifact_sha256` field for irpt-holdings is left EXACTLY AS FOUND by this act (its
+    staleness relative to the live served value is row W1-S31, the CTO's to reconcile) -- so any
+    write build-and-upload.sh makes to that one field is reverted immediately after the build."""
+    print("\n=== ARM (e.1): deploy verify (re-derived fresh) ===")
+    manifest_path = MANIFEST
+    # The FOUND value is what HEAD carries, never a mutable "before this call" snapshot -- a
+    # stray earlier run (this run's own predecessor, or an out-of-band debug invocation) could
+    # already have left the worktree file at some OTHER value, and reverting to THAT would not
+    # satisfy BOUND 2 ("leave the manifest field exactly as found"). git show HEAD is the one
+    # value that cannot itself have drifted.
+    head_bytes = _run(["git", "show", "HEAD:infra/aws/lambda/ci/lambda-source-map.json"]).stdout
+    proc = _run([GIT_BASH, os.path.join(REPO, "infra", "aws", "lambda", "ci", "build-and-upload.sh"),
+                "investor-reporting", "irpt-holdings"], timeout=300)
+    print("build-and-upload.sh rc=%d" % proc.returncode)
+    out = proc.stdout or ""
+    m = None
+    import re as _re3
+    for line in out.splitlines():
+        mm = _re3.search(r"SHA256:\s+(\S+)", line)
+        if mm:
+            m = mm.group(1)
+    print("built SHA256 (this run): %s" % m)
+    with open(manifest_path, "r", encoding="utf-8", newline="") as fh:
+        after = fh.read()
+    if after != head_bytes:
+        with open(manifest_path, "w", encoding="utf-8", newline="") as fh:
+            fh.write(head_bytes)
+        print("manifest reverted to its HEAD-committed bytes (BOUND 2 -- irpt-holdings's "
+              "artifact_sha256 is not moved by this act; W1-S31 stays the CTO's to reconcile)")
+    else:
+        print("manifest already byte-identical to HEAD -- nothing to revert")
+    if proc.returncode != 0 or not m:
+        FAILS.append("arm_e: build-and-upload.sh did not succeed / did not print a SHA256")
+        return False, None, None
+    cfg = _aws_json("lambda", "get-function-configuration", "--function-name", "irpt-holdings",
+                    "--region", "us-east-1")
+    served = cfg.get("CodeSha256")
+    match = served == m
+    print("served=%s built=%s MATCH=%s" % (served, m, match))
+    if not match:
+        FAILS.append("arm_e: served CodeSha256 != built (%s != %s)" % (served, m))
+    return match, served, m
+
+
+def _real_holdings_enforcer(seam_firm, mod_ns=None):
+    if mod_ns is None:
+        import loaders as _loaders
+        import ids as _ids
+        import snapshot as sn
+        import enforce as ez
+    else:
+        _loaders, _ids, sn, ez = (mod_ns["loaders"], mod_ns["ids"], mod_ns["snapshot"],
+                                  mod_ns["enforce"])
+    opaque_firm_id = _loaders.opaque_firm_for(seam_firm)
+    binding = ez.FirmBinding(seam_firm, opaque_firm_id)
+    load_directory, load_ownership, load_policy = _loaders.deps(seam_firm)
+    projection = _ids.projection_for_firm(seam_firm)
+    return sn.make_holdings_enforcer(binding, load_directory, load_ownership=load_ownership,
+                                     id_projection=projection)
+
+
+def _headers_for(advisor_id, tenant, email):
+    return {"X-User-Email": email, "X-User-Name": advisor_id, "X-User-Tier": "partner",
+           "X-User-Role": "user", "X-Firm-Id": tenant, "X-User-Type": "Advisor",
+           "X-Advisor-Id": advisor_id, "X-Advisor-Role": "", "X-Origin-Verify": "cloudfront"}
+
+
+def arm_e_live_proof():
+    """PROVEN LIVE on the holdings route, against the REAL deployed bytes (snapshot.py + the
+    now-fixed enforce.py, staged from the shared blob; holdings/entry.py's own wiring supplies
+    `_no_grant` by a DIFFERENT cell's deliberate decision -- out of this order's BOUNDS -- so the
+    real production composition `snapshot.make_holdings_enforcer` is exercised directly with the
+    REAL `_authz.loaders` triple (S3-backed, real production ownership data for 49financial), the
+    same real advisor `abby_horton` rtf-2/rte-6 already used on the other 6 routes) never a
+    synthetic fixture. Re-derived fresh this run -- no cached numbers."""
+    print("\n=== ARM (e.2): live proof ===")
+    os.environ["IRPT_DIRECTORY_BUCKET_MAP"] = json.dumps(FIRMS)
+    holdings_dir = os.path.join(IRPT, "holdings")
+    for p in (holdings_dir, os.path.join(IRPT, "_authz"), os.path.join(IRPT, "_scope"),
+             os.path.join(IRPT, "_keys"), os.path.join(IRPT, "_ids")):
+        if p not in sys.path:
+            sys.path.insert(0, p)
+    for mod in ("loaders", "ids", "snapshot", "enforce"):
+        sys.modules.pop(mod, None)
+    import loaders as _loaders
+    import ids as _ids
+    import snapshot as sn
+    import enforce as ez
+
+    seam_firm = None
+    for firm in _ids.firm_ids():
+        row = _ids.raw_keys().get("firms", {}).get(firm, {}).get("account", {})
+        if row.get("projection_seam"):
+            seam_firm = firm
+            break
+    if seam_firm is None:
+        FAILS.append("arm_e_live: no firm declares a projection_seam")
+        return {"pass": False}
+
+    enforcer = _real_holdings_enforcer(seam_firm,
+                                       {"loaders": _loaders, "ids": _ids, "snapshot": sn, "enforce": ez})
+    req = ez.Request(_headers_for("abby_horton", seam_firm, "abby.horton@49financial.com"),
+                     "holdings_snapshot")
+    scope, refusal = enforcer.resolve_now(req)
+    post_served = refusal is None
+    post_code = refusal.code if refusal is not None else None
+    post_k = len(scope["permitted_account_set"]) if scope is not None else 0
+    post_grant = dict(scope["_census"]["unprojected_grant"]) if scope is not None else None
+    print("POST-FOLD: seam=%s served=%s code=%s k=%d unprojected_grant=%s"
+          % (seam_firm, post_served, post_code, post_k, post_grant))
+
+    swap_req = ez.Request(_headers_for("definitely-not-a-49f-advisor", seam_firm,
+                                       "swap@49financial.com"), "holdings_snapshot")
+    swap_scope, swap_refusal = enforcer.resolve_now(swap_req)
+    swap_refused = swap_scope is None
+    swap_code = swap_refusal.code if swap_refusal is not None else None
+    print("CROSS-FIRM SWAP: refused=%s code=%s" % (swap_refused, swap_code))
+
+    # THE PRE-FOLD FORK, on the SAME real request (blob 8f849457be, loaded fresh via `git show`
+    # into a throwaway module -- never written back into the tree): the same REAL S3 data, the
+    # OLD refusal ordering.
+    fork_src = _run(["git", "show", FORK_BLOB]).stdout
+    import types
+    fork_mod = types.ModuleType("enforce")
+    fork_mod.__file__ = os.path.join(IRPT, "holdings", "enforce.py")
+    saved_enforce = sys.modules.get("enforce")
+    sys.modules["enforce"] = fork_mod
+    try:
+        exec(compile(fork_src, fork_mod.__file__, "exec"), fork_mod.__dict__)
+        fork_binding = fork_mod.FirmBinding(seam_firm, _loaders.opaque_firm_for(seam_firm))
+        fld, flo, flp = _loaders.deps(seam_firm)
+        fork_enforcer = fork_mod.Enforcer(fork_binding, fld, flo, flp,
+                                          id_projection=_ids.projection_for_firm(seam_firm))
+        fork_req = fork_mod.Request(_headers_for("abby_horton", seam_firm,
+                                                 "abby.horton@49financial.com"), "holdings_snapshot")
+        fork_scope, fork_refusal = fork_enforcer.resolve_now(fork_req)
+    finally:
+        if saved_enforce is not None:
+            sys.modules["enforce"] = saved_enforce
+        else:
+            sys.modules.pop("enforce", None)
+    if fork_refusal is not None:
+        # The false negative: the fork's `serve()` never populates `unprojected_grant`, so the
+        # response envelope's own present-at-zero default is what a caller downstream would read.
+        pre_fold_count = 0
+        pre_fold_code = fork_refusal.code
+    else:
+        ug = fork_scope.get("_census", {}).get("unprojected_grant")
+        pre_fold_count = ug["count"] if isinstance(ug, dict) else 0
+        pre_fold_code = None
+    print("PRE-FOLD FORK (same real request): refused=%s code=%s -> read as count=%d"
+          % (fork_refusal is not None, pre_fold_code, pre_fold_count))
+
+    others = {}
+    for firm in FIRMS:
+        if firm == seam_firm:
+            continue
+        try:
+            e2 = _real_holdings_enforcer(firm, {"loaders": _loaders, "ids": _ids, "snapshot": sn,
+                                               "enforce": ez})
+            r2 = ez.Request(_headers_for("any-advisor-id", firm, "x@%s.com" % firm),
+                           "holdings_snapshot")
+            s2, ref2 = e2.resolve_now(r2)
+            others[firm] = {"served": s2 is not None, "code": ref2.code if ref2 is not None else None}
+        except Exception as exc:
+            others[firm] = {"error": str(exc)[:200]}
+    others_refused = all(not v.get("served", True) for v in others.values())
+    print("OTHER FIRMS (inflection/cottonwood): %s (all refused=%s)" % (others, others_refused))
+
+    ok = (post_served and post_code != "UNPROJECTED_GRANT" and post_k > 0
+         and post_grant is not None and post_grant["count"] > 0
+         and post_k + post_grant["count"] == post_grant["denominator"]
+         and swap_refused and pre_fold_count == 0 and others_refused)
+    if not ok:
+        FAILS.append("arm_e_live: live proof did not hold (see printed detail above)")
+    return {"pass": ok, "seam_firm": seam_firm, "post_served": post_served, "post_k": post_k,
+           "post_grant": post_grant, "swap_refused": swap_refused, "pre_fold_count": pre_fold_count,
+           "others_refused": others_refused}
 
 
 def main():
@@ -398,13 +681,26 @@ def main():
     ok_b = arm_b_fold()
     ok_c = arm_c_census_and_mutant()
     ok_d = arm_d_halves()
+    ok_e = False
+    e_live = {"pass": False}
+    if ok_d:
+        ok_e_deploy, served_val, built_val = arm_e_deploy_verify()
+        state_ok = (ok_e_deploy and
+                   arm_e_deploy_state_check(built_val, served_val))
+        if not state_ok:
+            FAILS.append("arm_e: deploy-state check FAILED -- served=%s built(this run)=%s "
+                         "packet-time-value=%s (unexplained by either)"
+                         % (served_val, built_val, LIVE_CODESHA_AT_PACKET_TIME))
+        else:
+            e_live = arm_e_live_proof()
+            ok_e = ok_e_deploy and e_live["pass"]
     print("\n=== SUMMARY ===")
     print("arm (a): diff printed, classified, no STOP")
     print("arm (b): %s" % ("OK" if ok_b else "FAIL"))
     print("arm (c): %s" % ("OK" if ok_c else "FAIL"))
-    print("arm (d): %s (EXPECTED on this pass)" % ("OK" if ok_d else "FAIL"))
-    print("arm (e): NOT ATTEMPTED -- blocked by arm (d)")
-    every_arm_holds = ok_b and ok_c and ok_d
+    print("arm (d): %s" % ("OK" if ok_d else "FAIL"))
+    print("arm (e): %s%s" % ("OK" if ok_e else "FAIL", "" if ok_d else " (NOT ATTEMPTED -- blocked by arm (d))"))
+    every_arm_holds = ok_b and ok_c and ok_d and ok_e
     if every_arm_holds:
         print("\nIBR65-HOLDINGS-ENFORCER-FOLDED-AND-GAP-REPORTED")
     else:

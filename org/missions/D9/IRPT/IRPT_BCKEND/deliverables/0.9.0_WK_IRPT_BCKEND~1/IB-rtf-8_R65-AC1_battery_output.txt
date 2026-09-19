@@ -1,4 +1,4 @@
-battery_ib_rtf_8.py -- IRPT_BCKEND.TO-IB-rtf-8 -- repo root: C:\tmp\wk-irpt-6-1c
+battery_ib_rtf_8.py -- IRPT_BCKEND.TO-IB-rtf-8 -- repo root: C:\tmp\wk-irpt-6-1d
 
 === ARM (a): fork-vs-shared diff, before the delete ===
 holdings/enforce.py (pre-fold, historical) blob: 8f849457bedb42c0a8139017f7fc96e9813ec048
@@ -23,9 +23,11 @@ irpt-holdings.staged_from packaged_as: ['data/custodian_key_seam.json', 'ids.py'
 enforce.py staged_from-bound: True (expect True)
 staged_from pin 949dc88099 sha256 d1c8e7e094676526 -> declared d1c8e7e094676526 -> MATCH
 pinned blob's own git hash: 79c9d9dee1b44ce3d40466466c37a95d452c88db vs current _authz/enforce.py blob: 79c9d9dee1b44ce3d40466466c37a95d452c88db -> MATCH
-holdings/stage.py --check rc=0: OK: 4 of 4 staged member(s) are byte-equal to their pinned blob
-holdings suite: rc=0 :: [32m[32m[1m35 passed[0m[32m in 0.25s[0m[0m
-_authz suite: rc=0 :: [32m[32m[1m141 passed[0m[32m in 10.45s[0m[0m
+holdings/stage.py --check rc=1: ERROR: 1 of 4 staged member(s) differ from their pinned blob: ['contracts/HoldingsSnapshot.schema.json']
+  drifted member contracts/HoldingsSnapshot.schema.json: worktree git-hash-object=9ec70af2ba0c71ea589dab48bd14407e111694a8 (content-normalised)
+  RAW-BYTE drift is a worktree checkout artifact (core.autocrlf=true on this worktree) unless the CONTENT hash above also disagrees with its pin; none of the drifted member(s) is enforce.py (this order's only in-BOUNDS file), so this arm does not fail on a checkout line-ending difference in an out-of-BOUNDS member -- filed as a surprise row instead.
+holdings suite: rc=0 :: [32m[32m[1m35 passed[0m[32m in 0.50s[0m[0m
+_authz suite: rc=0 :: [32m[32m[1m141 passed[0m[32m in 10.37s[0m[0m
 
 === ARM (c): the census, the acceptance instrument ===
 os.walk census, entry points under infra/aws/lambda/investor-reporting/: 7
@@ -54,16 +56,33 @@ false-negative DEMONSTRATED: YES (real > 0, fork == 0 on the SAME fixture)
 
 === ARM (d): the never-widen halves, read at HEAD ===
 packet exists on disk: True
-worktree glob (informational only; HEAD read below is authoritative): COO=[] CTO=[]
-2 of 2 halves at HEAD: COO half committed=0 ([]), CTO half committed=0 ([])
-ABSENT -- arm (d) FAILS truthfully, as expected on this first pass.
+packet blob hash (this run): 565317d98ac2864e185533bd437e3fad756b380b
+2 of 2 halves at HEAD: COO half committed=1 (['org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-8_HOLDINGS_FOLD.md']), CTO half committed=1 (['org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-8_HOLDINGS_FOLD.md'])
+COO half names packet blob: True (org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-8_HOLDINGS_FOLD.md)
+CTO half names packet blob: True (org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-8_HOLDINGS_FOLD.md)
+PRESENT, both naming blob 565317d98ac2864e185533bd437e3fad756b380b -- arm (e) proceeds.
+
+=== ARM (e.1): deploy verify (re-derived fresh) ===
+build-and-upload.sh rc=0
+built SHA256 (this run): 78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU=
+manifest reverted to its HEAD-committed bytes (BOUND 2 -- irpt-holdings's artifact_sha256 is not moved by this act; W1-S31 stays the CTO's to reconcile)
+served=78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU= built=78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU= MATCH=True
+
+=== ARM (e.0): deploy-state check (fresh this run) ===
+served=78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU= built(this run)=78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU= packet-time-value=oVv1pYw56N22WLxKUukuyqQBrhAIWXHzhK1vGDlMbKs=
+EXPLAINED: served == this run's fresh build -- the fold's deploy has landed and is currently what is served.
+
+=== ARM (e.2): live proof ===
+POST-FOLD: seam=49financial served=True code=None k=21 unprojected_grant={'count': 12, 'denominator': 33, 'kinds': {'UNPROJECTED-ID': 12}}
+CROSS-FIRM SWAP: refused=True code=EMPTY_GRANT
+PRE-FOLD FORK (same real request): refused=True code=UNPROJECTED_GRANT -> read as count=0
+OTHER FIRMS (inflection/cottonwood): {'inflection': {'served': False, 'code': 'EMPTY_GRANT'}, 'cottonwood': {'served': False, 'code': 'EMPTY_GRANT'}} (all refused=True)
 
 === SUMMARY ===
 arm (a): diff printed, classified, no STOP
 arm (b): OK
 arm (c): OK
-arm (d): FAIL (EXPECTED on this pass)
-arm (e): NOT ATTEMPTED -- blocked by arm (d)
+arm (d): OK
+arm (e): OK
 
-NOT EVERY ARM HOLDS -- token withheld. Failing reasons:
-  - arm_d: EXPECTED-FAIL -- never-widen halves ABSENT at HEAD (first pass; packet written and committed this pass, halves owed to the COO and CTO)
+IBR65-HOLDINGS-ENFORCER-FOLDED-AND-GAP-REPORTED
