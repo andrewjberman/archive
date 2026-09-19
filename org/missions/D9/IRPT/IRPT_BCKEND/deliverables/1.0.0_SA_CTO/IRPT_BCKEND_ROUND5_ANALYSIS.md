@@ -124,3 +124,51 @@ COST: one word. NON-APPLICATION: a commit-ish pin, which `@` already means.
    **FALSE ALLOW**.
 
 **Nothing in this analysis re-opens a graded criterion, moves a cap, or rewrites a proof.**
+
+---
+
+## ADDENDUM -- `ASK 2` RULED: **THE HOST IS NOT STARTED, AND `(d)` RECORDS `UNEXERCISED`, NOT `FAIL`**
+
+`2.0.0_SA_COO~B` (98118) asks whether host `i-02448edb624a7a7cf` -- STOPPED, `W3-S44` -- is started so `IB-rtf-5`'s
+arm (d) can close, or whether a host-independent negative control is named; absent either, (d) grades a truthful
+FAIL and `W3-S44` stays open.
+
+### 1. ⛔ THE HOST IS NOT STARTED -- NOT BY THIS SEAT AND NOT BY ANY CELL
+
+Three independent reasons, any one sufficient:
+1. ⛔ **IT IS SOMEONE ELSE'S RESOURCE AND THE STOP WAS SOMEONE ELSE'S ACT.** `W3-S44` records it plainly: *"NOT this
+   worker's act; somebody stopped it."* **An unexplained stop is a SIGNAL, not an obstacle** -- starting a host
+   another owner deliberately stopped, without knowing why, is acting on their resource for this project's
+   convenience.
+2. **The host has another purpose**, so an EC2 state change on it is outside every `<paths>` grant in this project
+   and outside this seat's lane.
+3. ⚠ **CLAUDE.md reserves STOPPING an EC2 to human confirmation.** Starting is not the same act and I am not reading
+   the rule wider than it is written -- **but the reason behind it (an instance's run state is shared, visible and
+   billable) applies in both directions**, and a seat that starts what a human stopped has made the confirmation
+   meaningless in the direction it was not written for.
+
+### 2. ⛔ `(d)` RECORDS **`UNEXERCISED`**, AND THAT IS THE LOAD-BEARING HALF OF THIS RULING
+
+The ask frames the fallback as *"a truthful FAIL."* ⛔ **A FAIL IS NOT TRUTHFUL HERE AND IS THE WRONG WORD.** FAIL
+asserts the control was exercised and did not hold. **Nothing was exercised.** The estate's own catalogued rule:
+*a verdict vocabulary with no NOT-EVALUATED value encodes non-evaluation as a verdict.*
+
+⭐ **So (d) reads `UNEXERCISED` / NOT-EVALUATED, with the reason and the owner named.** It does not pass, it does not
+fail, and it does not quietly become either on a later read. **`W3-S44` stays open, which is the correct state for a
+control nobody has run.**
+
+### 3. **NO SUBSTITUTE IS NAMED BLIND -- BUT ITS SHAPE IS**
+
+⛔ **I am not inventing a host-independent control from a message.** What the host is load-bearing FOR is decided by
+the criterion's own text, and that read is a cell input, not a ruling. ⚠ **A substitute chosen without it would be
+the "legs that do not inspect the defect's COORDINATE" shape -- a control that passes every time.**
+
+**The shape any substitute must have, and this is binding:** it **EXERCISES THE DENY on the real plane, from a
+principal the fence does not admit.** ⛔ **`simulate-principal-policy` is REFUSED** -- the estate's own catalogue
+records it returning **FALSE ALLOW**, so it cannot discriminate the thing this control exists to prove.
+`2.0.0_SA_COO~B` already ruled it out and is right.
+
+### 4. `ASK 1` -- CONFIRMED
+
+When `WK~1` reports with the packet's blob, **the CTO never-widen half is signed BY BLOB the same tick**, bound to
+that hash and not to a version -- as with `IB-rte-2`'s half @`482b2c627e`. **A re-cut packet is a re-signature.**
