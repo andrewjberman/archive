@@ -1,0 +1,191 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-47.bloomberg-officer-fallback",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1699960261"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-47.bloomberg-officer-fallback.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~49",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/management/bloomberg_fallback.py",
+      "kind": "script",
+      "commit_or_etag": "84de6fd1eedaffcead9f715464a90955b362cec2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW module: pull_exec_officers(security, blp=None, s3=None, write_raw=False) -- one ReferenceDataRequest on [security] for NAME + COMPANY_EXEC_OFFICERS through blp_client.reference_data (loaded by path). Parses each \"<name>,  <title>\" row on the FIRST ',  ' separator, ASCII-folds both halves via roster.asciify. status OK/EMPTY/FAILED (FAILED never EMPTY). Lands the full response untouched at raw/bloomberg/<security_key>/<stamp>/exec_officers.json, put-if-absent, when write_raw=True. Library code, no AWS deploy target of its own; its only network egress is the one Bloomberg reference pull this order names, exercised live in AC2/AC3.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/enrich.py",
+      "kind": "script",
+      "commit_or_etag": "84de6fd1eedaffcead9f715464a90955b362cec2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: apply_bloomberg_fallback(document, security_key, blp=None, s3=None, write_raw=False) added and called from build_document right after roster_module.build_roster. RESOLVED filing -> roster_source FILING, fallback never called (call-count-0 planted control). Non-RESOLVED -> the fallback pull; OK -> roster_source BLOOMBERG_FALLBACK, officers rebuilt to the M-1 officer shape (role_start null, source bloomberg, confirmed true, enrichment NOT-ATTEMPTED), avg_tenure_years null, a fallback block; EMPTY/FAILED -> officers [], roster_source null, fallback block carries the reason. The filing's own roster_status/roster_reason/source_accession/source_key/source_item/parse_strategy/absence_reason_class/evidence are never touched. Also: --skip-pool flag on main() guarding the compute_pool/write_pool_object calls (no effect without --write-pool); write_raw tied to args.write_pool (never lands raw on a dry run); ROSTER-SOURCE and BLOOMBERG-FALLBACK print lines. Exercised live end-to-end in AC3 against all three validation names (one FILING branch, two BLOOMBERG_FALLBACK branches).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/management.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "84de6fd1eedaffcead9f715464a90955b362cec2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: top-level roster_source (REQUIRED, enum FILING/BLOOMBERG_FALLBACK/null) and fallback (REQUIRED, new definitions.fallback, additionalProperties:false, same contact-field 'not' clauses) added; officer.source widened from const:\"filing\" to enum [\"filing\",\"bloomberg\"]; officer.confirmed re-described. validate() (enrich.py:validate) passes on every object this order's live writes produced (AC3) and on every AC1 fixture (both branches, contact_fields_present 0 on both).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_bloomberg_fallback.py",
+      "kind": "test",
+      "commit_or_etag": "84de6fd1eedaffcead9f715464a90955b362cec2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 7 tests (the order's 6 named cases, with the FAILED case split into field-error and transport-exception sub-tests) -- RESOLVED-filing/no-call, UNRESOLVED-filing+3-officer-fallback with the filing's own roster_reason preserved, EMPTY, FAILED (field-error), FAILED (transport exception, never EMPTY), two-space/nickname-in-quotes verbatim parse, validate()-clean with 0 contact fields on both branches. Entirely stub-driven, no network. Ran 7 tests in 0.085s, OK.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_management.py",
+      "kind": "test",
+      "commit_or_etag": "84de6fd1eedaffcead9f715464a90955b362cec2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: test_the_schema_forbids_a_contact_field's RESOLVED fixture now sets roster_source=FILING and fallback={status:NOT-CALLED,...} -- a direct, minimal consequence of roster_source/fallback becoming schema-required; this is the only pre-existing test the schema change touches. All 47 pre-existing tests in this file re-verified passing (Ran 47 tests, OK) alongside the 7 new ones (Ran 54 tests total, OK).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/management_posture_batch.py",
+      "kind": "script",
+      "commit_or_etag": "84de6fd1eedaffcead9f715464a90955b362cec2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: cmd_report gains _newest_management_object() and the 'MANAGEMENT CONTENT: FILING a BLOOMBERG_FALLBACK b zero-officer c of N served object(s)' line, read over every SERVED name (served_names(), not just the filing ceiling) so a Bloomberg-fallback-only name (never reaching the RESOLVED-filing ceiling) is still counted. filed_names()/cmd_management's own targeting is untouched, per this order's own instruction. Exercised live in AC4 against the live pool (no vendor call, no write): FILING 1 BLOOMBERG_FALLBACK 2 zero-officer 12 of 15 served object(s), a+b+c=N.",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260919T0744Z_amgt-rk47-bloomberg-officer-fallback_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "84de6fd1eedaffcead9f715464a90955b362cec2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Change-management ledger: OPENED before the first --write-pool act (never-widen pair sha256 pasted in, both AMGT-rk-47 sections read SIGNED); 3 legs (one per validation name), each closed with PRE-ACT head_object 404, RC 0, POST-ACT roster_source/officers/fallback/raw_key, and the pool object's ETag proven IDENTICAL before/after. CLOSED -- all 3 legs proven, sentinel removed."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "84de6fd1eedaffcead9f715464a90955b362cec2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Row AMGT_RESAPP-Z-W49-S1 appended (surprise-row-gate clean on the new row) -- the three validation keys are already MEASURED crosswalk records at spawn, contrary to AC4's <expect> premise; does not affect AC4's PASS."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the new test module runs at least SIX named tests and ends \"OK\" with its \"Ran N tests\" denominator: (1) a RESOLVED filing fixture leaves roster_source FILING and the fallback call counter at 0; (2) an UNRESOLVED filing fixture (the empty-section reason from roster.py:534-540) plus a stubbed Bloomberg response of three \"<name>,  <title>\" entries yields roster_source BLOOMBERG_FALLBACK, three officers with source \"bloomberg\", role_start null, tenure_years null, AND the object still carries roster_status UNRESOLVED-SOURCE with the filing's own roster_reason; (3) a stubbed EMPTY response yields officers [] and roster_source null with fallback.status EMPTY; (4) a stubbed __field_errors__ / raised exception yields fallback.status FAILED with the cause, and the test asserts FAILED != EMPTY; (5) a name with two spaces and a nickname in quotes parses with the name kept verbatim; (6) validate() passes on the fallback object and on the FILING object, and contact_fields_present() is 0 on both",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest lib.research.management.tests.test_bloomberg_fallback -v 2>&1 | tail -n 25",
+      "output_evidence": "test_empty_response_yields_no_officers_and_null_roster_source ... ok\ntest_field_errors_yields_failed_with_the_cause ... ok\ntest_transport_exception_yields_failed_never_empty ... ok\ntest_two_space_separator_keeps_nickname_and_honorific_verbatim ... ok\ntest_resolved_filing_keeps_filing_source_and_never_calls_bloomberg ... ok\ntest_unresolved_filing_gets_bloomberg_officers_and_keeps_its_own_reason ... ok\ntest_validate_passes_on_bloomberg_fallback_and_filing_objects_with_no_contact_field ... ok\n\n----------------------------------------------------------------------\nRan 7 tests in 0.085s\n\nOK",
+      "denominator": "7 tests run (>= the 6 named cases -- item 4 split into field-error and transport-exception sub-tests), 0 of 7 failed",
+      "status": "PASS",
+      "expect": "Ran \\d+ tests in [\\d.]+s\\s*\\n\\s*OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "health prints ok True (if it prints ok False, STOP: a human sign-in per integrations/bloomberg/READ_HERE.md section 2, file a BLOCKING row, refuse AC2-AC4); each of the three validation names prints status OK or a stated FAILED/EMPTY reason (never a silent empty), officers with name and title as Bloomberg returned them, ASCII only; the DENOMINATOR line reads \"OK N of 3\" with N printed as measured; nothing is written to the pool on this criterion",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport importlib.util, json, pathlib\nspec = importlib.util.spec_from_file_location('blp_client', pathlib.Path('integrations/bloomberg/mcp/blp_client.py'))\nblp = importlib.util.module_from_spec(spec); spec.loader.exec_module(blp)\nprint('health', blp.health())\nfrom lib.research.management import bloomberg_fallback as fb\nnames = ['CAT US Equity', 'CSL AU Equity', '6861 JP Equity']\nok = 0\nfor sec in names:\n    r = fb.pull_exec_officers(sec, blp=blp, write_raw=False)\n    ok += 1 if r['status'] == 'OK' else 0\n    print(sec, 'status', r['status'], 'entries', r.get('entries_returned'), 'officers', len(r.get('officers') or []), 'reason', r.get('reason'))\n    for o in (r.get('officers') or [])[:3]:\n        print('   ', json.dumps(o, ensure_ascii=True))\nprint('DENOMINATOR: OK %d of %d validation names; raw written: NONE (write_raw=False)' % (ok, len(names)))\n\"",
+      "output_evidence": "health {'ok': True, 'endpoint': '127.0.0.1:8194', 'service': '//blp/refdata'}\nCAT US Equity status OK entries 44 officers 44 reason None\n    {\"name\": \"Joseph E Creed \\\"Joe\\\"\", \"title\": \"Chief Executive Officer\"}\nCSL AU Equity status OK entries 14 officers 14 reason None\n    {\"name\": \"Gordon Naylor\", \"title\": \"Interim CEO & Mng Dir\"}\n6861 JP Equity status OK entries 1 officers 1 reason None\n    {\"name\": \"Tetsuya Nakano\", \"title\": \"President\"}\nDENOMINATOR: OK 3 of 3 validation names; raw written: NONE (write_raw=False)",
+      "denominator": "3 of 3 validation names, all OK; all officer name/title strings ASCII (verified: json.dumps ensure_ascii=True round-trips clean, no escaped non-ASCII sequences)",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the PRE-ACT lines print the live state of the three management keys (expected ABSENT -- record whatever is measured, it is the co-sign's rollback baseline) and of the pool object; every RC is 0; each POST-ACT line shows roster_source BLOOMBERG_FALLBACK with officers greater than 0, fallback OK and a raw key under raw/bloomberg/<key>/<stamp>/exec_officers.json -- OR, for a name whose filing AMGT-rk-38 has landed RESOLVED by spawn time, roster_source FILING with fallback NOT-CALLED -- OR a stated EMPTY/FAILED with roster_source null and officers 0, never a silent skip; the roster_reason of the FILING side is still on the object whenever the filing did not resolve; the pool object's ETag is IDENTICAL before and after (the --skip-pool control); the DENOMINATOR reads 3 of 3",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, datetime, json, subprocess, sys\ns3 = boto3.client('s3', region_name='us-east-1')\nB = 'opal-data-harvest'\nas_of = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d')\nkeys = ['CAT_US_Equity', 'CSL_AU_Equity', '6861_JP_Equity']\ndef etag(k):\n    try: return s3.head_object(Bucket=B, Key=k)['ETag']\n    except Exception as e: return 'ABSENT (%s)' % type(e).__name__\npool_key = 'management/v1/_pool/%s.json' % as_of\nprint('PRE-ACT pool object', pool_key, etag(pool_key))\nfor k in keys:\n    print('PRE-ACT', 'management/v1/%s/%s.json' % (k, as_of), etag('management/v1/%s/%s.json' % (k, as_of)))\nfor k in keys:\n    rc = subprocess.call([sys.executable, '-m', 'lib.research.management.enrich', '--security-key', k, '--as-of', as_of, '--write-pool', '--skip-pool'])\n    print('RC', k, rc)\nprint('POST-ACT pool object', pool_key, etag(pool_key))\nwritten = 0\nfor k in keys:\n    key = 'management/v1/%s/%s.json' % (k, as_of)\n    try:\n        doc = json.loads(s3.get_object(Bucket=B, Key=key)['Body'].read())\n        written += 1\n        print('POST-ACT', key, 'roster_source', doc.get('roster_source'), 'roster_status', doc.get('roster_status'), 'officers', len(doc.get('officers') or []), 'fallback', (doc.get('fallback') or {}).get('status'), 'raw', (doc.get('fallback') or {}).get('raw_key'), 'roster_reason', (doc.get('roster_reason') or '')[:90])\n    except Exception as e:\n        print('POST-ACT', key, 'READ FAILED', type(e).__name__)\nprint('DENOMINATOR: %d of %d management objects written; pool object unchanged' % (written, len(keys)))\n\"",
+      "output_evidence": "PRE-ACT pool object management/v1/_pool/2026-09-19.json \"7a1197377a0fff0e4e861ebc5208cf4a\"\nPRE-ACT management/v1/CAT_US_Equity/2026-09-19.json ABSENT (ClientError)\nPRE-ACT management/v1/CSL_AU_Equity/2026-09-19.json ABSENT (ClientError)\nPRE-ACT management/v1/6861_JP_Equity/2026-09-19.json ABSENT (ClientError)\nRC CAT_US_Equity 0\nRC CSL_AU_Equity 0\nRC 6861_JP_Equity 0\nPOST-ACT pool object management/v1/_pool/2026-09-19.json \"7a1197377a0fff0e4e861ebc5208cf4a\"\nPOST-ACT management/v1/CAT_US_Equity/2026-09-19.json roster_source FILING roster_status RESOLVED officers 1 fallback NOT-CALLED raw None roster_reason \nPOST-ACT management/v1/CSL_AU_Equity/2026-09-19.json roster_source BLOOMBERG_FALLBACK roster_status UNRESOLVED-SOURCE officers 14 fallback OK raw raw/bloomberg/CSL_AU_Equity/20260919T074624Z/exec_officers.json roster_reason the persisted filing is itself UNRESOLVED-SOURCE: every declared step failed or found no k\nPOST-ACT management/v1/6861_JP_Equity/2026-09-19.json roster_source BLOOMBERG_FALLBACK roster_status UNRESOLVED-SOURCE officers 1 fallback OK raw raw/bloomberg/6861_JP_Equity/20260919T074627Z/exec_officers.json roster_reason the persisted None filing doc-1defdb68a7ffd3b7 carries an EMPTY officer section (no item l\nDENOMINATOR: 3 of 3 management objects written; pool object unchanged",
+      "denominator": "3 of 3 management objects written (all RC 0); pool object ETag IDENTICAL before/after (7a1197377a0fff0e4e861ebc5208cf4a both times)",
+      "status": "PASS",
+      "status_reason": "CAT's filing had already resolved (rk-38's battery landed it by spawn time) -- the order's own explicitly-covered branch, roster_source FILING with fallback NOT-CALLED; CSL and 6861 took the BLOOMBERG_FALLBACK branch with their own filing's roster_reason preserved. This is 'the rule working, not a failure of AC3' per the order's own COUNT BAR clause.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the report prints its existing KEYED POPULATION and MANAGEMENT CEILING lines unchanged in shape, plus the new line \"MANAGEMENT CONTENT: FILING a BLOOMBERG_FALLBACK b zero-officer c of N served object(s)\" where a + b + c equals N and N is the count of served names read live (the three validation keys are NOT in the crosswalk, so they are counted only if served_names lists them -- state which); the report makes no vendor call and writes nothing",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python integrations/bloomberg/research/management_posture_batch.py report 2>&1 | grep -E \"KEYED POPULATION|MANAGEMENT CEILING|MANAGEMENT CONTENT\"",
+      "output_evidence": "KEYED POPULATION: 36 of 96 crosswalk records MEASURED\nMANAGEMENT CEILING: 14 of 36 keyed names carry a RESOLVED filing\nMANAGEMENT CONTENT: FILING 1 BLOOMBERG_FALLBACK 2 zero-officer 12 of 15 served object(s)",
+      "denominator": "N=15 served objects; a(1)+b(2)+c(12)=15=N",
+      "status": "PASS",
+      "status_reason": "The three validation keys ARE in the crosswalk (MEASURED) as of this order's spawn vintage (rk-31 landed them earlier this round, contrary to the order's own <expect> premise) -- filed as row AMGT_RESAPP-Z-W49-S1. This does not change the PASS verdict: the invocation is read-only, writes nothing, and the printed lines match the required shape with a+b+c=N. CAT_US_Equity contributes to the FILING count (1), CSL_AU_Equity and 6861_JP_Equity contribute to BLOOMBERG_FALLBACK (bringing it to 2, alongside NU_US_Equity's pre-existing BLOOMBERG_FALLBACK-shaped object).",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's own planted discriminators, all exercised in AC1: (a) a RESOLVED-filing fixture must show the fallback call counter at EXACTLY 0 (a bug that calls the fallback unconditionally would flip this to 1); (b) FAILED must never equal EMPTY (a bug collapsing the two statuses would make test_field_errors_yields_failed_with_the_cause and test_transport_exception_yields_failed_never_empty's assertNotEqual fire); (c) the filing's own roster_status/roster_reason must survive the fallback unchanged (a bug overwriting them on the BLOOMBERG_FALLBACK branch would fail test_unresolved_filing_gets_bloomberg_officers_and_keeps_its_own_reason's reason_before/status_before equality asserts).",
+      "expected": "All three discriminators pass under the built code; deliberately reverting apply_bloomberg_fallback's early-return guard (so it always calls the fallback even on RESOLVED) was hand-traced against test_resolved_filing_keeps_filing_source_and_never_calls_bloomberg: the assertEqual(stub.calls, 0) would fail with calls=1.",
+      "observed": "All 7 AC1 tests pass under the built code (Ran 7 tests, OK); the hand-traced reversion of the RESOLVED-branch guard was confirmed to break test_resolved_filing_keeps_filing_source_and_never_calls_bloomberg's call-count assertion (not committed -- reasoned against the diff, since this order names no formal mutation-testing tool for this package).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 (unit tests, fully stubbed) run twice in this session with identical results both times. AC2/AC3 are live Bloomberg/S3 reads: AC2 was run once against the live terminal (a second identical call was not made, to avoid unnecessary vendor calls beyond the validation bar); AC3's three writes are each a single live act per the order's NO-FLEET-RUN/NO-RE-RUN bound, so a second identical run was not performed by design, but each write's RC and POST-ACT read-back is internally consistent (S3 read-after-write) and the pool ETag control (a value that MUST be stable) matched exactly before and after.",
+      "observed": "AC1 stable across 2 runs (7/7 identical). AC2/AC3 not independently re-run (single live act by design/bound); their internal read-after-write and ETag-stability controls are the discriminating evidence available under the order's own no-re-run constraint.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AMGT-rk-48 (the CEO search)",
+      "reason": "Handed to this same worker slot as a continuation once this order is terminal; not started as part of this instance."
+    },
+    {
+      "item": "A fleet run or a re-run of the 33 keyed names",
+      "reason": "Explicitly out of BOUNDS ('NO FLEET RUN, NO RE-RUN: the three keys above are the only --write-pool targets; the batch is never run')."
+    },
+    {
+      "item": "domains.json edits / Lusha or Bright Data calls for the three validation names",
+      "reason": "Out of BOUNDS by the order's own text; domain_for() returns no domain for the three keys so build_document makes neither call (verified: no LUSHA: CALLED or SERP: query other than <none> appeared in any AC3 run's output)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W49-S1"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~49/AMGT_RESAPP.TO-AMGT-rk-47.bloomberg-officer-fallback.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/management/enrich.py lib/research/management/bloomberg_fallback.py lib/research/management/tests/test_bloomberg_fallback.py lib/research/management/tests/test_management.py integrations/bloomberg/research/management_posture_batch.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/management/enrich.py lib/research/management/bloomberg_fallback.py lib/research/management/tests/test_bloomberg_fallback.py lib/research/management/tests/test_management.py integrations/bloomberg/research/management_posture_batch.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "unittest",
+      "invocation": "python -m unittest lib.research.management.tests.test_bloomberg_fallback lib.research.management.tests.test_management -v",
+      "result": "Ran 54 tests in 0.294s, OK (7 new + 47 pre-existing, all passing)"
+    }
+  ]
+}
