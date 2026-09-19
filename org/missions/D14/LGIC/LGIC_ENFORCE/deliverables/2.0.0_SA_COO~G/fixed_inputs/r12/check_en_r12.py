@@ -76,7 +76,15 @@ def core_binding(text):
     names = re.findall(r"^def (test_\w+)\(", text, re.M)
     by_path, consumer = [], []
     for n in names:
-        m = re.search(r"^def %s\(.*?(?=^def |\Z)" % re.escape(n), text, re.S | re.M)
+        # THE SPAN INCLUDES THE DECORATORS, and that is the repair. Classifying from the `def`
+        # body alone made a library call inside `@pytest.mark.parametrize(...)` INVISIBLE IN BOTH
+        # DIRECTIONS -- and a parametrize argument is evaluated at COLLECTION time, so it binds
+        # exactly like the calls this arm exists to find. Measured by the cell being graded
+        # (LGIC_ENFORCE-W1-S91): `test_builders_refuse_what_they_cannot_build` carried NINE such
+        # calls and was classified "neither" both before and after its own repair. It fixed the
+        # instance; this fixes the instrument, so a later round does not inherit the blind spot.
+        m = re.search(r"(?:^@[^\n]*\n(?:[ \t][^\n]*\n)*)*^def %s\(.*?(?=^@|^def |\Z)"
+                      % re.escape(n), text, re.S | re.M)
         body = m.group(0) if m else ""
         if re.search(r"\bon\.\w+\s*\(", body):
             by_path.append(n)
@@ -331,6 +339,19 @@ def selftest_arms():
     names, by_path, consumer = core_binding(text_bad)
     arm("POSITIVE-binding-splits-the-two-shapes", names == ["test_a", "test_b"] and by_path == ["test_a"]
         and consumer == ["test_b"], "one of each, measured from the bodies")
+    dec = "\n".join(["@pytest.mark.parametrize('n', [on.key('x')])",
+                     "def test_c():",
+                     "    pass",
+                     "",
+                     "def test_d():",
+                     "    _shipped_lib().key('x')",
+                     ""])
+    _n, _bp, _c = core_binding(dec)
+    arm("POSITIVE-binding-sees-a-decorator", _bp == ["test_c"],
+        "a by-path call in a parametrize decorator binds at collection time and is NOT invisible (W1-S91)")
+    arm("MUTANT-binding-decorator-not-miscounted", _c == ["test_d"],
+        "and the consumer-resolved test is still classified from its own span")
+
     arm("POSITIVE-binding-clean", core_binding_ok(["t"], [], {})[0], "nothing by-path is the passing state")
     arm("POSITIVE-binding-residual-named", core_binding_ok(
         ["t"], ["t"], {"binding": {"reached_the_by_path_copy_after": 1,
