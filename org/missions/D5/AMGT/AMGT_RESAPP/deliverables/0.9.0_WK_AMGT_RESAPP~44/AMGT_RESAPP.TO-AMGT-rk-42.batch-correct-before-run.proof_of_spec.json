@@ -1,0 +1,187 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-42",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb40",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-42.batch-correct-before-run.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1699960261"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~44",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/analyze.py",
+      "kind": "script",
+      "commit_or_etag": "24ae8d3440eca5213441384ca5132161ae8eb929",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ANALYZER_VERSION bumped to opal-filings-analyze/2.0.0 beside a new OUTPUT_CONTRACT_FINGERPRINT + output_contract_fingerprint(); write_outputs() is now the ONLY function naming the drafting pool prefix, exercised by AC1's unit tests and by main()'s own writer block; DEFAULT_UNIVERSE_PATH removed, --universe defaults to \"newest\" resolved via lazy-imported batch.load_universe(). Library code, exercised live under AC1/AC2/AC6/AC7; no separate deploy step for this cell.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/batch.py",
+      "kind": "script",
+      "commit_or_etag": "24ae8d3440eca5213441384ca5132161ae8eb929",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "plan() gains dedupe-by-CIK (fetch_groups/distinct_cik/duplicate_keys) and the with/without-key UNRESOLVED-SOURCE partition; resolve_universe()/load_universe() resolve \"newest\" by listing (never a typed date); run_group() replaces run_one() (one fetch, one analysis, write_outputs per key); plan_only_check()/--plan-only implement the READ-ONLY skip rule; task_definition() escapes the launcher's inner quotes and gains a self-built .xml template; register_task_xml()/--register-task-xml reads and rewrites the LIVE task's own exported XML. Exercised live under AC3/AC4/AC5/AC7 and by the CLI's own --dry-run/--plan-only/--register-task-xml paths.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC7"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/run_batch.cmd",
+      "kind": "config_data",
+      "commit_or_etag": "24ae8d3440eca5213441384ca5132161ae8eb929",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Line 9 now reads `--universe newest` (was the typed `universe/v1/2026-09-15.json`). The launcher script itself was not executed by this worker (the scheduled task stays DISABLED throughout, per this order's bound); the single-line change is a textual diff, verified by reading the committed file back."
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_batch.py",
+      "kind": "test",
+      "commit_or_etag": "24ae8d3440eca5213441384ca5132161ae8eb929",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "11 new tests (fingerprint x2, skip-rule x4, dedupe-by-CIK x2, task_definition x2, D27 partitions x1); all pass together with the pre-existing 20 in test_filings.py (31 of 31, AC1's own invocation).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "24ae8d3440eca5213441384ca5132161ae8eb929",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1 new row appended by textual splice (374 -> 375 total): AMGT_RESAPP-Z-W44-S1, recording the measured schtasks /XML encoding mismatch that required adapting AC5's literal read (never the task)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "ends \"Ran N tests\" and \"OK\", including: (1) the fingerprint test -- output_contract_fingerprint(fixture analysis) equals OUTPUT_CONTRACT_FINGERPRINT, and a PLANTED extra top-level key on a copy of the analysis changes the fingerprint (the test that makes the version unable to stand still); (2) skip rule, three arms with a stubbed pool: an analysis at the latest accession carrying ANALYZER_VERSION reads SKIP-UNCHANGED; the same at analyzer_version opal-filings-analyze/1.0.0 reads WOULD-RUN stale version; an analysis at an OLDER accession reads WOULD-RUN new accession; (3) dedupe: a two-row universe sharing one CIK plans distinct_cik 1, duplicate_keys 1, the stubbed model receives exactly TWO calls (one two-pass analysis) and write_outputs is invoked for BOTH keys; (4) task_definition().create carries the escaped inner quotes around the launcher path and the xml's Command element equals the quoted full path with Enabled false; (5) the D27 plan line prints both unresolved partitions and their sum equals unresolved_source",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q 2>&1 | tail -5",
+      "output_evidence": "----------------------------------------------------------------------\nRan 31 tests in 0.228s\n\nOK\n\n(31 = 20 pre-existing test_filings.py tests, unmodified, + 11 new test_batch.py tests covering all 5 named items: TheOutputContractFingerprint.test_the_fixture_matches_the_pinned_fingerprint and test_a_planted_top_level_key_moves_the_fingerprint; TheSkipRule's 4 arms including test_current_version_at_the_latest_accession_reads_skip_unchanged, test_a_stale_version_at_the_latest_accession_reads_would_run, test_an_older_stored_accession_reads_would_run_new_accession; TheDedupeByCik's test_two_rows_sharing_one_cik_plan_into_one_group (distinct_cik 1, duplicate_keys 1) and test_the_group_runs_one_fetch_one_analysis_and_writes_both_keys (stub.calls == 2, write_outputs call_count == 2); TheTaskDefinition's 2 tests; TheUnresolvedSourcePartitions.test_the_plan_partitions_with_and_without_a_key_agree_with_the_total)",
+      "denominator": "31 of 31 tests in lib/research/filings/tests/ (discover -p test_*.py)",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*Ran 31 tests)(?=[\\s\\S]*\\nOK)"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the ONE-WRITER census over every .py in lib/research/filings (file denominator printed): the literal drafting/v1/ occurs in exactly 1 code line, in analyze.py inside write_outputs, and 0 in batch.py (today: batch.py:150 and analyze.py:1215, N = 2); writers 1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport glob, io, os, re\nfiles = sorted(glob.glob('lib/research/filings/*.py'))\nhits = {}\nfor f in files:\n    n = 0\n    for line in io.open(f, encoding='utf-8'):\n        if 'drafting/v1/' in line and not line.lstrip().startswith('#'):\n            n += 1\n    hits[f] = n\nprint('files', len(files), 'literal drafting/v1/ in code lines:', hits)\nprint('writers', sum(hits.values()))\n\"",
+      "output_evidence": "files 6 literal drafting/v1/ in code lines: {'lib/research/filings\\\\__init__.py': 0, 'lib/research/filings\\\\analyze.py': 1, 'lib/research/filings\\\\batch.py': 0, 'lib/research/filings\\\\drafting_build.py': 0, 'lib/research/filings\\\\fetch.py': 0, 'lib/research/filings\\\\passages.py': 0}\nwriters 1",
+      "denominator": "6 of 6 .py files under lib/research/filings/ scanned",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*writers 1)"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the DRY RUN on the validation names under INVALID AWS credentials (the control: any S3 call would fail loudly): rc=0; BATCH prints names 3, with_filing_identity 1, would_fetch 1, distinct_cik 1, duplicate_keys 0, unresolved_source 2 split as 2 with a key / 0 without; DRY-RUN prints \"nothing fetched, no model call, no pool write, no task run\"; git status --porcelain shows no tracked file changed by the run (the scratch file is untracked and under .scratch/) -- a dry run writes nothing, anywhere",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, os\nos.makedirs('.scratch/batch', exist_ok=True)\ndoc = {'as_of': '2026-09-18', 'schema_version': 1, 'names': [\n  {'security_key': 'CAT_US_Equity', 'filing_identity': {'source': 'edgar', 'cik': 18230, 'form_expected': '10-K'}},\n  {'security_key': 'CSL_AU_Equity', 'filing_identity': {'source': 'none', 'cik': None, 'form_expected': 'none'}},\n  {'security_key': '6861_JP_Equity', 'filing_identity': {'source': 'none', 'cik': None, 'form_expected': 'none'}}]}\njson.dump(doc, open('.scratch/batch/validation_universe.json', 'w'))\n\" && AWS_ACCESS_KEY_ID=DRYRUN-INVALID AWS_SECRET_ACCESS_KEY=DRYRUN-INVALID AWS_PROFILE= AWS_EC2_METADATA_DISABLED=true python -m lib.research.filings.batch --universe .scratch/batch/validation_universe.json --dry-run; echo \"rc=$?\"; git status --porcelain | head -5; echo \"tracked-changes-end\"",
+      "output_evidence": "BATCH: universe file:.scratch/batch/validation_universe.json as_of 2026-09-18 names 3 with_filing_identity 1 would_fetch 1 distinct_cik 1 duplicate_keys 0 unresolved_source 2 split as 2 with a key / 0 without limit none\nWOULD-FETCH: CAT_US_Equity(10-K cik 18230)\nUNRESOLVED-SOURCE: 2 name(s) total -- 2 with a security_key (written this pass as an explicit object at filings/v1/<security_key>/UNRESOLVED-SOURCE.source.json each) and 0 without (skipped, out of scope, see AMGT-rk-21); 2 + 0 = 2\nDRY-RUN: nothing fetched, no model call, no pool write, no task run. 1 of 3 name(s) would be analyzed.\nrc=0\n M lib/research/filings/analyze.py\n M lib/research/filings/batch.py\n M lib/research/filings/run_batch.cmd\n?? .scratch/\n?? lib/research/filings/tests/test_batch.py\ntracked-changes-end\n\n(the ' M' lines are this order's OWN pre-existing edits to its granted paths, not writes made BY the dry run; the dry run itself wrote nothing -- .scratch/ is untracked, and rerunning the identical dry-run command after the code commit landed produces the identical BATCH/WOULD-FETCH/UNRESOLVED-SOURCE/DRY-RUN lines with no new tracked change)",
+      "denominator": "3 of 3 validation names read; 1 of 3 fetchable, 2 of 3 unresolved",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*rc=0)(?=[\\s\\S]*names 3)(?=[\\s\\S]*would_fetch 1)(?=[\\s\\S]*distinct_cik 1)(?=[\\s\\S]*duplicate_keys 0)(?=[\\s\\S]*unresolved_source 2 split as 2 with a key / 0 without)"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a read-only listing of universe/v1/ in the pool: the newest vintage by date order (2026-09-16 at the cut -- print whatever is live) with the vintage count as its denominator; never a typed date",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom lib.research.filings import batch\nkey, n = batch.resolve_universe('newest')\nprint('UNIVERSE: newest', key, 'of', n, 'vintages')\n\"",
+      "output_evidence": "UNIVERSE: newest universe/v1/2026-09-16.json of 2 vintages",
+      "denominator": "2 vintages listed under universe/v1/ in s3://opal-data-harvest",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*UNIVERSE: newest universe/v1/2026-09-16\\.json of 2 vintages)"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the LIVE registered task read back on both sides of the one act: before -- Command 'C:\\Users\\Opal', Arguments 'Bloomberg\\Desktop\\ajb_workspace\\lib\\research\\filings\\run_batch.cmd', Enabled false (the measured defect); after -- Command is the FULL launcher path ending run_batch.cmd (quoted), Arguments empty or absent, and EVERY Enabled element reads false. If schtasks emits UTF-16 with a BOM the read above handles it; if it emits another encoding, print the raw bytes' first 4 and adapt the read, recording what was measured. An Enabled true at any point is a FAIL of this criterion and is reverted immediately with schtasks /Change /TN OpalResearch-FilingsAnalyzer /DISABLE",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && schtasks /Query /TN OpalResearch-FilingsAnalyzer /XML > .scratch/batch/task_before.xml && python -m lib.research.filings.batch --register-task-xml .scratch/batch/task_fixed.xml && schtasks /Create /TN OpalResearch-FilingsAnalyzer /XML .scratch/batch/task_fixed.xml /F && schtasks /Query /TN OpalResearch-FilingsAnalyzer /XML > .scratch/batch/task_after.xml && python -c \"\nimport re\nfor name in ('before', 'after'):\n    xml = open('.scratch/batch/task_%s.xml' % name, encoding='utf-16').read()\n    cmd = re.search(r'<Command>(.*?)</Command>', xml, re.S); arg = re.search(r'<Arguments>(.*?)</Arguments>', xml, re.S); en = re.findall(r'<Enabled>(.*?)</Enabled>', xml)\n    print(name, 'Command', repr(cmd.group(1) if cmd else None), 'Arguments', repr(arg.group(1) if arg else None), 'Enabled', en)\n\"",
+      "output_evidence": "MEASURED (2026-09-18): schtasks' /XML export declares encoding=\"UTF-16\" in its prolog but the actual bytes carry NO byte-order-mark and are single-byte/ASCII-compatible on both task_before.xml (first 4 bytes b'<?xm') and task_after.xml (first 4 bytes b'<?xm') -- confirmed via subprocess.run capture independent of the bash pipe. The literal invocation's encoding='utf-16' read RAISED UnicodeError: 'UTF-16 stream does not start with BOM'; the read was ADAPTED to encoding='ascii', errors='replace' (exactly what AC5's own text authorizes: 'print the raw bytes' first 4 and adapt the read'), recording the measurement as surprise row AMGT_RESAPP-Z-W44-S1.\nAdapted read-back:\nbefore Command 'C:\\\\Users\\\\Opal' Arguments 'Bloomberg\\\\Desktop\\\\ajb_workspace\\\\lib\\\\research\\\\filings\\\\run_batch.cmd' Enabled ['false']\nafter Command '\"C:\\\\Users\\\\Opal Bloomberg\\\\Desktop\\\\ajb_workspace\\\\lib\\\\research\\\\filings\\\\run_batch.cmd\"' Arguments None Enabled ['false']\nIndependent live re-query after the act (schtasks /Query /TN OpalResearch-FilingsAnalyzer /FO LIST /V): Status Disabled, Task To Run \"C:\\Users\\Opal Bloomberg\\Desktop\\ajb_workspace\\lib\\research\\filings\\run_batch.cmd\" (quoted, one token), Scheduled Task State Disabled -- Enabled reads false BEFORE and AFTER; no revert was needed.",
+      "denominator": "N/A -- the ONE live task, read back twice (before/after) plus one independent third re-query",
+      "status": "PASS",
+      "status_reason": "The literal invocation's read step (encoding='utf-16') raised on both captures because schtasks' actual bytes are ASCII-compatible with no BOM despite the XML prolog's own encoding=\"UTF-16\" declaration -- measured, not assumed (raw bytes' first 4 printed: b'<?xm' on both). Per this criterion's own text ('if it emits another encoding, print the raw bytes' first 4 and adapt the read, recording what was measured') and section 5's preamble ('if /XML output redirection produces an encoding your read cannot parse, record the bytes and adapt the read -- never the task'), the read was adapted to encoding='ascii', errors='replace'; the schtasks calls themselves (/Query, /Create /XML .../F) ran exactly as written. The adapted read shows the measured defect before, the corrected quoted Command after, and Enabled false on both sides plus an independent third re-query -- MET on the adapted read, which this criterion's own text authorizes as the deciding one.",
+      "expect": "(?=[\\s\\S]*Enabled \\['false'\\])(?=[\\s\\S]*run_batch\\.cmd)"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "the READ-ONLY census that proves the order of operations: every stored analysis object in the pool (the intake read 12; print the live count) carries analyzer_version opal-filings-analyze/1.0.0 and 0 of them carry the new ANALYZER_VERSION -- so the skip rule, built AFTER the bump, would skip NONE of the stale analyses. Nothing is written",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json\nfrom lib.research.filings import analyze\ns3 = boto3.client('s3', region_name='us-east-1')\nkeys = []\ntoken = None\nwhile True:\n    kw = {'Bucket': 'opal-data-harvest', 'Prefix': 'filings/v1/'}\n    if token: kw['ContinuationToken'] = token\n    page = s3.list_objects_v2(**kw)\n    keys += [o['Key'] for o in page.get('Contents', []) if o['Key'].endswith('.analysis.json')]\n    token = page.get('NextContinuationToken')\n    if not token: break\nversions = {}\nfor k in keys:\n    doc = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=k)['Body'].read())\n    versions[doc.get('analyzer_version')] = versions.get(doc.get('analyzer_version'), 0) + 1\nprint('analysis_objects', len(keys), 'by_version', versions, 'current', analyze.ANALYZER_VERSION, 'would_skip_on_version_alone', versions.get(analyze.ANALYZER_VERSION, 0))\n\"",
+      "output_evidence": "analysis_objects 12 by_version {'opal-filings-analyze/1.0.0': 12} current opal-filings-analyze/2.0.0 would_skip_on_version_alone 0",
+      "denominator": "12 of 12 .analysis.json objects under filings/v1/ in s3://opal-data-harvest",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*analysis_objects 12)(?=[\\s\\S]*would_skip_on_version_alone 0)"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "the READ-ONLY plan on the validation names: for CAT_US_Equity the EDGAR submissions index is read (its latest 10-K accession printed), the pool is checked for filings/v1/CAT_US_Equity/<accession>.analysis.json and the line reads WOULD-RUN with its reason (no analysis, or stale version if AMGT-rk-38's battery wrote a source object but no analysis exists -- print what is found); the two source-none names print UNRESOLVED-SOURCE; \"PLAN-ONLY: no document fetched, no model call, no pool write, no task run\" is printed; the batch is not run",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.filings.batch --universe .scratch/batch/validation_universe.json --plan-only 2>&1 | tail -8",
+      "output_evidence": "BATCH: universe file:.scratch/batch/validation_universe.json as_of 2026-09-18 names 3 with_filing_identity 1 would_fetch 1 distinct_cik 1 duplicate_keys 0 unresolved_source 2 split as 2 with a key / 0 without limit none\nWOULD-FETCH: CAT_US_Equity(10-K cik 18230)\nUNRESOLVED-SOURCE: 2 name(s) total -- 2 with a security_key (written this pass as an explicit object at filings/v1/<security_key>/UNRESOLVED-SOURCE.source.json each) and 0 without (skipped, out of scope, see AMGT-rk-21); 2 + 0 = 2\nWOULD-RUN: CAT_US_Equity accession 000001823026000008 -- no analysis\nUNRESOLVED-SOURCE: CSL_AU_Equity -- filing_identity.source is 'none': no cik and expected form to fetch by\nUNRESOLVED-SOURCE: 6861_JP_Equity -- filing_identity.source is 'none': no cik and expected form to fetch by\nPLAN-ONLY: no document fetched, no model call, no pool write, no task run. 0 SKIP-UNCHANGED, 1 WOULD-RUN, 2 UNRESOLVED-SOURCE.",
+      "denominator": "3 of 3 validation names: 1 checked against the EDGAR submissions index (CAT_US_Equity), 2 UNRESOLVED-SOURCE (no CIK)",
+      "status": "PASS",
+      "expect": "(?=[\\s\\S]*WOULD-RUN: CAT_US_Equity accession)(?=[\\s\\S]*UNRESOLVED-SOURCE: CSL_AU_Equity)(?=[\\s\\S]*UNRESOLVED-SOURCE: 6861_JP_Equity)(?=[\\s\\S]*PLAN-ONLY: no document fetched, no model call, no pool write, no task run)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The fingerprint and skip-rule logic (the two mechanisms this cell exists to order correctly) are exercised against synthetic mutations to prove they are genuinely shape-driven and version-driven, not hardcoded to the fixture's own numbers.",
+      "expected": "A planted extra top-level key on a copy of the fixture analysis should move output_contract_fingerprint() away from the pinned OUTPUT_CONTRACT_FINGERPRINT; an analysis object at the CURRENT ANALYZER_VERSION but an OLDER accession than the submissions index's latest should read WOULD-RUN \"new accession\", never SKIP-UNCHANGED.",
+      "observed": "FIRED-AS-EXPECTED. test_batch.TheOutputContractFingerprint.test_a_planted_top_level_key_moves_the_fingerprint: mutated fingerprint != pinned constant. test_batch.TheSkipRule.test_an_older_stored_accession_reads_would_run_new_accession: status WOULD-RUN, reason contains \"new accession\" (never SKIP-UNCHANGED on a mismatched accession even though the stored analyzer_version is current).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full test_batch.py + test_filings.py suite (31 tests) run twice in succession, no writes between runs; AC4's resolve_universe(\"newest\") read twice in succession against the same live pool; AC6's version census read twice in succession.",
+      "observed": "Both test runs: Ran 31 tests, OK, byte-identical. AC4: both reads returned universe/v1/2026-09-16.json of 2 vintages. AC6: both reads returned analysis_objects 12, by_version {'opal-filings-analyze/1.0.0': 12}, would_skip_on_version_alone 0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The batch was never run for real over the 33-name universe, no analysis was written, and the task was never enabled.",
+      "reason": "This order's own validation bar (C-VALIDATION-NAMES) and bounds forbid it explicitly: proof is by TESTS plus a DRY RUN/PLAN over a 3-row validation universe, read-only pool reads, and the ONE live act (AC5's task re-registration, which leaves the task DISABLED). --write-pool is not passed anywhere in this order's own commands."
+    },
+    {
+      "item": "The genuinely stale 12 pool analysis objects (all analyzer_version opal-filings-analyze/1.0.0) are not reprocessed or version-stamped by this order.",
+      "reason": "Out of scope: AMGT-rk-42 orders the MECHANISM (version-then-skip, dedupe, one writer, newest vintage, quoted launcher) correct before the batch can ever run for real; re-running the batch over the pool is the explicitly-forbidden NOT-NOW act (Andrew's word, Thesis T11 intake s.2.1) that a future, separately-authorized run performs."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W44-S1: schtasks' own /XML export declares encoding=\"UTF-16\" in its prolog but measures (via both bash redirection and Python subprocess.run) as an ASCII-compatible stream with NO byte-order mark on this build, so AC5's literal python -c read (encoding='utf-16') raises UnicodeError on both the before and after captures; GROUNDED, INERT, UNDER_INVESTIGATION. AC5's own <expect> text anticipates and authorizes exactly this read adaptation."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~44/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m unittest discover (lib/research/filings/tests)",
+      "invocation": "python -m unittest discover -s lib/research/filings/tests -p \"test_*.py\" -q",
+      "result": "Ran 31 tests in ~0.23s, OK -- 20 pre-existing (test_filings.py, unmodified by this order) + 11 new (test_batch.py)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (run as part of safe-commit.sh's commit-gate)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~44 <0.9.0_WK_AMGT_RESAPP~44@opal.agent>\" -F <msgfile> -- lib/research/filings/analyze.py lib/research/filings/batch.py lib/research/filings/run_batch.cmd lib/research/filings/tests/test_batch.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit-gate all-clear (py_compile, ds-precommit, ruff); surprise-row-gate OK: 1 file(s), all new rows carry their step-7/step-10 fields; naming-gate PASS 0 graded; committed 24ae8d3440eca5213441384ca5132161ae8eb929"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4,AC5,AC6,AC7",
+      "result": "see the worker report -- run from THIS worktree's own copy"
+    }
+  ]
+}
