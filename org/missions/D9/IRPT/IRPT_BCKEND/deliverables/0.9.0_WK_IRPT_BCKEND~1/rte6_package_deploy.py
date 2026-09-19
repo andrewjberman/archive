@@ -145,7 +145,7 @@ def cmd_upload():
     rc, recs = cmd_build()
     if rc != 0:
         return rc
-    aws = os.path.join(REPO, ".tools", "aws")
+    aws = os.path.join(REPO, ".tools", "aws.cmd")
     for rec in recs:
         fn = rec["function"]
         key = "investor-reporting/%s.zip" % fn
@@ -179,7 +179,7 @@ def cmd_upload():
 
 
 def cmd_verify():
-    aws = os.path.join(REPO, ".tools", "aws")
+    aws = os.path.join(REPO, ".tools", "aws.cmd")
     _rc, recs = cmd_build()
     by_fn = {r["function"]: r for r in recs}
     all_ok = True
