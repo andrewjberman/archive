@@ -1,29 +1,79 @@
-IB-rtf-3 R60-AC1 battery -- run at 2026-09-19T08:29:50Z -- worktree HEAD 6275297f0e13d9c16fd75d12e470642bc3b19e12
+IB-rtf-3 R60-AC1 LIVE battery -- run at 2026-09-19T10:25:53Z -- worktree HEAD ca728267efc1b7ce9cb19da3c58f701dd45f74c3
 
-(a) PRECONDITION -- halves at HEAD naming the packet blob; packet re-hashed; same keys
-  packet blob at HEAD 3d9f57335b9893753973132ba5c4958b2622e24f, worktree 3d9f57335b9893753973132ba5c4958b2622e24f, expected 3d9f57335b9893753973132ba5c4958b2622e24f -> EQUAL
-  COO half at HEAD: present=True names_packet_blob=True keys_named=K1,K2 -> OK
-  CTO half at HEAD: present=True names_packet_blob=True keys_named=K1,K2 -> OK
-  halves: 2 of 2 at HEAD naming the packet blob and K1+K2
+(a) PRECONDITION -- 2 of 2 halves at HEAD naming the packet blob; the packet re-hashed
+  packet blob at HEAD a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4, worktree a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4 -> EQUAL
+  COO half at HEAD: present=True names blob=True names K1/K1b/K2=True -> OK
+  CTO half at HEAD: present=True names blob=True names K1/K1b/K2=True -> OK
+  halves: 2 of 2
 
-(a) PREMISE GATE -- can K1 + K2 mint the SESSION SHAPE the halves sign?
-  1. opalinvest-auth-handler live CodeSha256 = h1tnQVRpRA52eWyfAia6CfBsJmn6xKwHa8IUC0zBSsQ= (rc 0)
-     downloaded deployed zip: 41022 bytes, sha256(b64) h1tnQVRpRA52eWyfAia6CfBsJmn6xKwHa8IUC0zBSsQ= -> EQUALS live CodeSha256
-     dist/index.mjs: partner-table name builder present=True, GetItem Key {email:..} present=True
-     deployed advisor-claim source = opal-partner-<firm> GetItem by e-mail: YES
-  2. infra/aws/opalinvest_dev/lambda/auth-handler/src/db.ts:138-167 @6275297f0e getUser() return mapping: carries NO advisor field
-  3. opal-partner-49financial key schema [{"AttributeName": "email", "KeyType": "HASH"}] -> hash key is e-mail: True
-     rows binding a login to advisorKey=abby_horton: 0 of 11 scanned (rc 0)
-  PREMISE: K1 (a new e-mail in opal-users-v2) + K2 mint a 49financial session carrying NO advisor claim
+  before: opal-users-v2 PK begins_with 'USER#usr_irptrte_': 0 of 79 scanned
+  before: opal-users-v2 email begins_with 'irpt-rte1-test-': 0 of 79 scanned
+  before: opal-partner-49financial email begins_with 'irpt-rte1-test-': 0 of 11 scanned
+(b) GUARD -- the live ownership map, immediately before any write
+  s3://opal-data-bd/platinum/49financial/ownership_map.json VersionId nR.FkCE1frsI9R5zRp2wJWB7vyMZ04NK ETag ff85ad011af1636ecdb9dc7ae6ee1398 at 2026-09-19T10:25:55Z
+  abby_horton PRESENT=True; accounts 33, relationships 18 (packet's read 33 / 18)
+  directory investor-reporting/directory/2026-09-17/directory.json: firm_id_opaque fir_c9fc04650e2134d6ea033da2, as_of 2026-09-17, TERMINATED entries 71
 
-(info) the live ownership map, read for the re-cut packet's magnitude -- NOT the guard (no K1 is created)
-  s3://opal-data-bd/platinum/49financial/ownership_map.json VersionId nR.FkCE1frsI9R5zRp2wJWB7vyMZ04NK ETag "ff85ad011af1636ecdb9dc7ae6ee1398" LastModified Sat, 19 Sep 2026 05:10:38 GMT
-  abby_horton present: True; accounts 33, relationships 18 (packet's run: 43 / 18); advisors in map 174
+(b) CREATE -- K1, then K1b immediately before the login
+  K1 created 2026-09-19T10:25:56Z: PK USER#usr_irptrte_1789813553; read back (consistent GetItem): True; attributes 10; digest (passwordHash excluded) 8b1123122d127db1e254ef64eef47b0a94783b101f9b0b648ab752af92a6f4f3
+  K1b created 2026-09-19T10:25:56Z: read back (consistent GetItem): True; attributes ['advisorKey', 'email']; digest 5d891293f2b4b72684a35c164cf0313d2ed750dddd0aa58439bd9851693be88f
+  login POST /auth/login -> HTTP 200 at 2026-09-19T10:25:58Z; access token minted=True; refresh cookie set=True; body keys ['accessToken', 'user']
+  K2 claims: firmId=49financial role=user tier=advisor advisorKey=abby_horton advisorId=abby_horton advisorRole='' userType present=False firmRole present=False iat=1789813563 exp=1789814463 (exp 10:41:03Z)
+  keys created and read back 2 of 2=True; login + claims as the packet declares=True
 
-STOP at arm (a): the signed keys K1 + K2 cannot produce the session shape both halves sign; reaching it needs a partner-table row (e-mail -> advisorKey=abby_horton) the packet does not name -- the CTO half s.1: a STOP and a new packet, not a widening
-(b) CREATE: NOT RUN -- 0 of 2 keys applied; nothing written to opal-users-v2
-(c) EXERCISE: NOT RUN -- 0 of 4 outcome arms; no session minted, vendor calls 0
-(d) NEGATIVE CONTROLS: NOT RUN -- no principal to present them
-(e) DELETE: NOTHING TO DELETE -- the principal's interval is EMPTY (never created)
+(d) NEGATIVE CONTROLS -- before any outcome arm
+  NC1 search with firm_id=inflection: HTTP 200, public_reason_code FIRM_BINDING; code FIRM_BINDING; swapped value echoed=False; sha256 d01c52ebdfd0df588439c2ffbd95e3ca1cde58b588661fff90a1ad19b963e5fe -> PASS
+  NC1 search with firm_id=cottonwood: HTTP 200, public_reason_code FIRM_BINDING; code FIRM_BINDING; swapped value echoed=False; sha256 ce6f14c10c4b32f8b2687350e7bc94b7af8da3d9830923095cef10778bf2add9 -> PASS
+  NC2 GET /api/investor-reporting/directory/search (outside api/scoped/): HTTP 200; IRPT envelope served=False; sha256 25fc79ac38299173736f77c7194f367366b2d18464c8d20b42ba5e10359ff752 -> PASS
+  NC3 holdings for a TERMINATED client's account (one of 71 terminated entries; id sha256 99c1626e5298fffa): HTTP 200, public_reason_code UNEXPECTED; echoed=False -> PASS
+  negative controls: 4 of 4 refused
 
-RESULT: R60-AC1 FAIL -- STOP at arm (a); 0 of 4 outcomes exercised; principal never created
+(c) OUTCOME ARMS -- real signed requests; every body bound by sha256 at the event; bodies not written
+  FWD-1 search ?q=a&limit=25: {"business_date": null, "bytes": 458, "data_kind": "ABSENT", "firm_id": null, "http": 200, "operation": "directory-search", "reason": "UNEXPECTED", "sha256": "19847420a08921336316ce04b97f10029c91c2b2214a0bdf103a0f461e683dc0", "state": "UNAVAILABLE", "unprojected_grant": null}
+    entries 0; unprojected_grant count=None denominator=None kinds=None -> k=None; k+count=None vs the map's 33 accounts at the event; TERMINATED visible 0
+    q honoured? a no-match query returned None entries (HTTP 200, sha256 beb50699c1a130657090360b77d0507f31776e8c13b322c12cd6e7676bfe722a) against 0 for q=a
+  FWD-1 resolve (selection = the first entry's relationship): {"business_date": null, "bytes": 452, "data_kind": "ABSENT", "firm_id": null, "http": 200, "operation": "resolve-scope", "reason": "UNEXPECTED", "sha256": "56af08a5c56342d6f48a25f3c5bc7634c65dc4d77060e0dc384401709b144001", "state": "UNAVAILABLE", "unprojected_grant": null}
+    firm binding by the enforcer's own read: envelope firm_id None == directory firm_id_opaque fir_c9fc04650e2134d6ea033da2 -> False
+  FWD-1 FAIL: search served=False, k+count==denominator==map=False, resolve served=False, binding=False, as-of=False, terminated visible=False
+  FWD-5: no permitted account id available from the search -> FAIL (not runnable)
+  FWD-5 FAIL
+  FWD-2 within the permitted set -- status (summary): {"business_date": null, "bytes": 454, "data_kind": "ABSENT", "firm_id": null, "http": 200, "operation": "status-summary", "reason": "UNEXPECTED", "sha256": "a3ed00630212bf7c0af6a2ac0b364b87416c51d4531385e4ec10bc954d4b7ad8", "state": "UNAVAILABLE", "unprojected_grant": null}
+  FWD-2 swap holdings/<foreign account>                   -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 7a73cec6a00a76471643ea21d5582b1906a6a3ebb182f6721e2181c25d04d6bd -> REFUSED
+  FWD-2 swap performance/<foreign account>                -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 492f94ae3795d8514df20a09c307adf92213f58fc07cec5a79dd643da29517af -> REFUSED
+  FWD-2 swap narrative/<foreign report>                   -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 d55107ef4982cd82261f7a9a8a9a6e8889579601abee920b457e6f24bd65b9d6 -> REFUSED
+  FWD-2 swap status/<foreign job>                         -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 edb66619f38c3633a598dcd8507cc5dd30ea4df8d5fe72302c4639783e810c52 -> REFUSED
+  FWD-2 swap analysis/<foreign job>/sections              -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 5ed9d0f78c4cff46192fe211627fb214770d7ebfd5c647c4adf281c35eef2456 -> REFUSED
+  FWD-2 swap export/<foreign export>                      -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 6c7331b7d6335426218cc5642c8e77204fed409a4004381e29d8576a79708a5e -> REFUSED
+  FWD-2 swap export/<foreign export>/download             -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 a29f7412b9fa6b32bafbcedbea341a046e0a399963a326673eb249e3abd59f61 -> REFUSED
+  FWD-2 swap resolve with firm_id=inflection in the body  -> HTTP 200, public_reason_code FIRM_BINDING; echoed=False; sha256 e15c97d0e910b0bab8e17d2ce27da7f7a1f6654292d72251da469d40659ee928 -> REFUSED
+  FWD-2 FAIL: swaps refused without echo 8 of 8; within-set tabs served 0 of 1; the export within the set is not exercisable (no export exists for this firm -- row W1-S18 -- and POST /export is excluded)
+  FWD-11 NOT REACHABLE by this principal (a FIRM_ADVISOR token carries one firmId; OPAL_GLOBAL is the SSM roster + an opal-capital login, a separate act) -- recorded, no request made
+  VENDOR CALLS: 0 -- irpt-performance-adapter transport mode recorded, egress authorization variable present=False; POST /analysis and POST /export (the two routes that enqueue vendor work) called 0 times; directory/holdings compute is provider_calls 0 by construction
+
+(e) ROLLBACK -- K1b FIRST, then K1; each verified by a failing consistent base-table read
+  K1b DeleteItem -> consistent GetItem returns no Item: True at 2026-09-19T10:26:10Z
+  K1  DeleteItem -> consistent GetItem returns no Item: True at 2026-09-19T10:26:10Z
+  deletions verified: 2 of 2
+  REFRESH with the issued refresh token after K1's delete: HTTP 404; access token minted=False -> REFUSED (1 of 1)
+  waiting 902 s for the access token's exp (10:41:03Z) + 10 s
+  the access token after exp: GET status -> HTTP 401 -> REFUSED 401 (1 of 1)
+  after: opal-users-v2 PK begins_with 'USER#usr_irptrte_': 0 of 79 scanned
+  after: opal-users-v2 email begins_with 'irpt-rte1-test-': 0 of 79 scanned
+  after: opal-partner-49financial email begins_with 'irpt-rte1-test-': 0 of 11 scanned
+  failed-login throttle counter for the test e-mail: none
+  INTERVAL: [2026-09-19T10:25:56Z, 2026-09-19T10:41:03Z] (K1 create, max of the deletes verified, the last access-token exp, the refresh refused)
+
+ARM (a): PASS
+ARM (b) guard: PASS
+ARM (b) keys + login: PASS
+ARM (d) negative controls: PASS
+ARM (c) FWD-1: FAIL
+ARM (c) FWD-2: FAIL
+ARM (c) FWD-5: FAIL
+ARM (c) vendor calls 0: PASS
+ARM (e) deletes verified: PASS
+ARM (e) refresh refused: PASS
+ARM (e) expired token refused: PASS
+ARM (e) no residue: PASS
+FWD-11: NOT-REACHABLE by this principal, recorded (re-hand condition (v))
+RESULT: R60-AC1 FAIL -- 9 of 12 arms hold
