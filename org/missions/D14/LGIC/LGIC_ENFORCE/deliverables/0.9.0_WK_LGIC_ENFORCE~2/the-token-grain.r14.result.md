@@ -4,6 +4,17 @@
 `C:/Users/AndrewBerman/Desktop/ajb_workspace/.worktrees/wk-lgic-enforce-14-2`, branch
 `wk-lgic-enforce-14-2`, created from `a2e031e4c7`.
 
+**RE-GRADE (this section added 2026-09-19, worktree `.worktrees/wk-lgic-enforce-14-2b`, branch
+`wk-lgic-enforce-14-2b`, from `dc11dc6a3a`):** at the first cut, `P38R14-AC2` FAILED because the
+checker's vintage arm graded BOTH round-14 cells' records in one ANDed pass, so the sibling cell
+`EN-r-7`'s absent record (worked in a separate, unmerged worktree) failed this cell's criterion even
+though this cell's own half was clean. That diagnosis was correct and is filed as
+`LGIC_ENFORCE-S106`; the order was right not to flip `complete` on it. The checker is now REPAIRED
+(@`acdba45160`): the vintage arm grades the records PRESENT IN ITS CHECKOUT and refuses only a
+genuinely empty population. Re-run against the same committed `TOKEN_GRAIN_R14.json` (`a87eb27fbf`,
+unchanged) now reads `PASS-R14-VINTAGE-FIELD`. See "Criteria run" below for all three re-run
+invocations and outputs.
+
 ## What landed
 
 `TOKEN_GRAIN_R14.json` (committed `a87eb27fbf`) reconciles S102's 1449-vs-1303 by naming the two
@@ -32,31 +43,33 @@ from `sum - rows`.
   `a2e031e4c772737c29e328420dae9f1a17c6d2df` (the L6 issuance commit that minted them), each
   resolved by `git cat-file -e <commit>:<path>`.
 
-## Criteria run (this worktree, this commit)
+## Criteria run (re-grade, this worktree, this commit)
 
-- `P38R14-AC1` (`p38-grain`): **PASS-P38-GRAIN**, rc=0.
-- `P38R14-AC2` (`r14-vintage-field`): **FAIL-R14-VINTAGE-FIELD**, rc=0. The checker grades BOTH
-  round-14 cells in one arm. `EN-p-38`'s half is clean (`fixed inputs named at pin: 2 ['R14_BASE.json',
-  'check_en_r14.py']`, `each commit resolvable: True`). `EN-r-7`'s half fails because
-  `ONE_RENDER_PATH_R14.json` does not exist in this worktree -- `0.9.0_WK_LGIC_ENFORCE~1` works that
-  cell in its OWN worktree/branch, unmerged here. The order's own "WIRING AT THE CUT" line names this:
-  "`AC1` and `AC2` **FAIL** (no record exists yet)." This is the expected cross-cell state at the cut,
-  not a defect in this cell's work, and not something this cell's grant permits fixing (`EN-r-7`'s
-  question and its deliverables/~1/ tree are out of bounds).
-- `P38R14-AC3` (`r14-stale-proofs`): **PASS-R14-STALE-PROOFS**, rc=0. 1 fixed-input commit since the
-  cut for each cell (the mint itself), 0 proofs at risk, 0 named re-run, set equality holds.
+- `P38R14-AC1` (`p38-grain`): **PASS-P38-GRAIN**, rc=0. `by-token sum 1449 vs rows 1303 (difference
+  146)`, `rows carrying MORE THAN ONE token: 138`, `distribution: {'1': 1165, '2': 130, '3': 8}`,
+  `input pinned at: c05f9f9fc9`. Unchanged from the first cut.
+- `P38R14-AC2` (`r14-vintage-field`): **PASS-R14-VINTAGE-FIELD**, rc=0 (was FAIL at the first cut --
+  see RE-GRADE note above). Output: `records present in THIS checkout: 1 ['EN-p-38'] (the arm grades
+  these and only these -- S106)`; `EN-p-38: fixed inputs named at pin: 2 ['R14_BASE.json',
+  'check_en_r14.py'], each commit resolvable: True`.
+- `P38R14-AC3` (`r14-stale-proofs`): **PASS-R14-STALE-PROOFS**, rc=0. Re-run output: `EN-r-7: 2
+  fixed-input commits since the cut (informational), 0 proofs at risk, 0 record enumerates` /
+  `EN-p-38: 2 fixed-input commits since the cut (informational), 0 proofs at risk, 0 record
+  enumerates`. Set equality holds; no refusal (the commit count rose from 1 to 2 across the S106
+  repair, purely informational, 0 proofs at risk either time).
 - `P38R14-AC4`: judgment, recorded for `3.0.0_SA_CVO` at L9, no verdict from this seat.
 
 ## Not claimed
 
-- AC2 does not pass in this worktree; it cannot, by construction, until `EN-r-7`'s record exists and
-  the two cells' work is merged. This cell's own half of AC2 is clean.
 - No re-opening of round 13; no touching `EN-r-7`'s question, record, or render field; no producer
-  change.
+  change; no re-measurement of the grain figures (AC1's figures stand from the first cut, input still
+  pinned at `c05f9f9fc9`).
+- This cell did not repair the checker -- that repair is `2.0.0_SA_COO~G`'s, filed and merged as
+  `LGIC_ENFORCE-S106` @`acdba45160`, before this re-grade order issued.
 
 ## Surprises
 
-None filed by this cell. No criterion was found unsatisfiable by a correct artifact: AC1's arm
-explicitly admits `rows_carrying_more_than_one: 0` (proven in `selftest-arms`,
-`POSITIVE-BAR-grain-zero-overlap-is-admissible`), and the honest measured answer here (138, non-zero)
-satisfied it on the first try. AC2's FAIL is the order's own stated cut-time wiring, not a new finding.
+None newly filed by this cell on the re-grade: `LGIC_ENFORCE-S106` (the checker defect this re-grade
+answers) was filed and repaired by others before this order issued; the instrument self-test
+(`selftest-arms`, 33 arms including 4 new WIRING arms) was re-run and read
+`VERDICT: PASS-ARMS-DISCRIMINATE` before any criterion was re-run.
