@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-45.management-one-pool",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-45.management-one-pool.md",
+    "group": "OTHER",
+    "vintage_commit": "53c2d5f3277d5d3d210c8844be599af509d8b8c7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-45.management-one-pool.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~47",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/management/enrich.py",
+      "kind": "script",
+      "commit_or_etag": "cb20dc2b91833f58d0d3d5127b7fba81c6923736",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "compute_pool() reads the NEWEST management object per NAME across every date under management/v1/ (rsplit-on-last-slash grouping, never split(3)); counts names_with_roster only on RESOLVED+>=1 officer; recomputes each officer's tenure at the pool's own as_of via roster.tenure_years. read_universe() resolves the newest universe/v1/<date> vintage when none is given explicitly; pool object gains universe_vintage. enrich.main() gains --pool-only (no --security-key required, writes nothing unless --write-pool is also given, writing exactly ONE object through the existing write_pool_object()/crosswalk.write_pool path). Exercised live: AC2 pre-act count bar (14 keys, 12 names, 7 names_with_officers_across_dates) matched exactly; AC3 dry line pool_avg_tenure_years 4.09 names_in_union 250 names_with_roster 7 officers_with_role_start 40 universe_vintage 2026-09-16; AC4 write + read-back byte-identical to AC3 in every field, sha256 dee6a647358af0ca...; post-act management/v1/ key count 15 = pre-act 14 + the one new key (management/v1/_pool/2026-09-19.json, ABSENT pre-act -- filed row AMGT_RESAPP-Z-W47-S1), every other key unchanged.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/management/pool.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "cb20dc2b91833f58d0d3d5127b7fba81c6923736",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "universe_vintage (string|null) added to the closed schema (additionalProperties:false preserved) and to required; validated by AC1's test_the_pool_object_validates_against_its_own_closed_schema and exercised on the live written object (AC4 read-back carries universe_vintage 2026-09-16, schema-valid).",
+      "artifact_covered_by": ["AC1", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_management.py",
+      "kind": "test",
+      "commit_or_etag": "cb20dc2b91833f58d0d3d5127b7fba81c6923736",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "PoolAverageTest: 6 new planted scenarios (same-name-two-dates-newest-wins, zero-officer-RESOLVED-never-counted, slash-name-grouped-as-one, two-pool-objects-never-counted, tenure-recomputed-at-pool-as_of, universe-two-vintages-newest-read) plus the 3 pre-existing tests restated for the new grouping/recompute semantics and new meta keys (objects_listed/names_seen/newest_per_name/dates_spanned). python -m unittest ...PoolAverageTest -v: Ran 9 tests, OK. Full test_management.py: Ran 47 tests, OK.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "cb20dc2b91833f58d0d3d5127b7fba81c6923736",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "scoped_amgt.py:2431: dropped as_of=document.get('as_of') from the pool read_pool_object() call -- every served name now reads the NEWEST pool object, never the name's own as_of. Redeployed live (sequenced behind AMGT-rk-43, drained @12722614b2; adapter-single-writer-queue check printed nothing against SITEZ HEAD both before the build and recorded in the ledger): pre-act CodeSha256 OOsJzs7BDkgtOUogdG39/BZNw3PlRrLatxCFVI528qY= -> post-act CodeSha256 baiKT5I+k7ciCX/rtQzYy7bTSWgApSeAXYtSZhe4fUE= (matches uploaded artifact exactly, VersionId Av11PsPOZh87INPUaV10ic2t4Gd8MtAf). Targeted 0-diff replan: 'No changes.' 13 of 13 live GET routes invoked post-act (queried the true route set from the API Gateway directly, api 7k3ed8px20), 0 FunctionError, LOST=[]. AC5: BA_US_Equity (2026-09-15 object) and NU_US_Equity (2026-09-18 object) both serve pool_read.object_key management/v1/_pool/2026-09-19.json, SAME pool_avg_tenure_years 4.09, SAME pool_denominator; planted HOLLOW_NONEXISTENT_KEY_Equity serves management_status ABSENT, pool_avg null.",
+      "artifact_covered_by": ["AC5"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260919T0530Z_amgt-rk45-one-pool_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Change-management ledger: OPENED before the first live act with pre-act measurements (never-widen hashes, adapter single-writer queue check, schtasks Enabled false, bucket versioning Enabled, pre-act CodeSha256/VersionId). Leg L1 (pool write) and leg opal-amgt-scoped-api (adapter redeploy) both CLOSED with full proof strings; deploy_ledger.py close removed the .open_deploys sentinel -- Status CLOSED, nothing stranded. Post-close correction appended naming the true 13-GET-route live count (an earlier partial census against the Terraform module's own output block had undercounted at 8)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Rows AMGT_RESAPP-Z-W47-S1 (the pool key's pre-act state was ABSENT/a fresh key, not the in-place overwrite the co-signed halves describe -- a one-day calendar drift between signing and execution) and AMGT_RESAPP-Z-W47-S2 (lib/research/api/tests/test_13's fixture no longer discriminates newest-object-per-name from same-as_of after this order's adapter change) appended, JSON-valid and surprise-row-gate clean."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every PoolAverageTest passes (\"OK\" on the last line; \"Ran N tests\" with N >= 7 -- three at HEAD plus at least four planted: same-name-two-dates counted once with the newest winning, zero-officer RESOLVED object never counted, slash name BP/_LN_Equity grouped as one name, tenure recomputed at the pool as_of from role_start and the universe vintage resolved to the newest when none matches the pool as_of); the test names print in the -v output",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest lib.research.management.tests.test_management.PoolAverageTest -v 2>&1 | tail -30",
+      "output_evidence": "test_an_unreadable_universe_is_null_never_zero ... ok\ntest_pool_average_is_over_officers_with_its_denominator ... ok\ntest_same_name_two_dates_counted_once_newest_wins ... ok\ntest_slash_name_grouped_as_one_never_split ... ok\ntest_tenure_recomputed_at_pool_as_of_not_stored_value ... ok\ntest_the_pool_object_validates_against_its_own_closed_schema ... ok\ntest_two_pool_objects_never_counted_as_names ... ok\ntest_universe_two_vintages_newest_read_when_none_matches_pool_as_of ... ok\ntest_zero_officer_resolved_object_never_counted ... ok\n\nRan 9 tests in 0.086s\n\nOK",
+      "denominator": "9 of 9 PoolAverageTest methods pass (3 pre-existing restated + 6 newly planted, exceeding the N>=7 bound); test names print via -v.",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the PRE-ACT count bar from the live store: every _pool object printed (two at the cut: 2026-09-15 with 4.08 over 5 names / 40 officers, 2026-09-18 with null over 2 names / 0), the newest object per name with its date and officer count (12 names across two dates at the cut), and names_with_officers_across_dates printed with its denominator (7 of 12 at the cut) -- this is the number the one pool must carry as names_with_roster",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json\ns3 = boto3.client('s3', region_name='us-east-1')\nP = 'management/v1/'\nkeys = []\nfor page in s3.get_paginator('list_objects_v2').paginate(Bucket='opal-data-harvest', Prefix=P):\n    keys.extend(o['Key'] for o in page.get('Contents', []))\nnewest = {}\nfor k in keys:\n    name = k[len(P):].rsplit('/', 1)[0]\n    if name == '_pool':\n        print('POOL', k, s3.get_object(Bucket='opal-data-harvest', Key=k)['Body'].read().decode().replace(chr(10), ' ')[:200])\n        continue\n    if name not in newest or k > newest[name]:\n        newest[name] = k\nwith_officers = 0\nfor name, k in sorted(newest.items()):\n    d = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=k)['Body'].read())\n    n = len(d.get('officers') or [])\n    with_officers += 1 if d.get('roster_status') == 'RESOLVED' and n else 0\n    print(name, k.rsplit('/', 1)[-1], d.get('roster_status'), 'officers', n, 'with_role_start', sum(1 for o in d.get('officers') or [] if o.get('role_start')))\nprint('DENOMINATOR keys', len(keys), 'names', len(newest), 'names_with_officers_across_dates', with_officers)\n\"",
+      "output_evidence": "POOL management/v1/_pool/2026-09-15.json {as_of:2026-09-15, pool_avg_tenure_years:4.08, pool_denominator:{names_in_union:256, names_with_roster:5, officers_with_role_start:40}}. POOL management/v1/_pool/2026-09-18.json {as_of:2026-09-18, pool_avg_tenure_years:null, pool_denominator:{names_in_union:null, names_with_roster:2, officers_with_role_start:0}}. 12 names listed (ASML/BABA/BA/COST/HAL/HD/INTU/KMB/NU/PBR/SAP_GY/VLO) each with its newest date and officer count. DENOMINATOR keys 14 names 12 names_with_officers_across_dates 7.",
+      "denominator": "14 of 14 keys listed under management/v1/, 12 of 12 names grouped, 7 of 12 with officers across dates -- matches the order's cited cut figures exactly.",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "a DRY pool computation over the live objects, nothing written (a DRY line is the last line): the POOL line prints pool_avg_tenure_years as a number (about 4.1 at the cut: 40 tenures recomputed at today's as_of), names_in_union from the NEWEST universe vintage (250 from universe/v1/2026-09-16.json at the cut, the vintage named), names_with_roster equal to AC2's names_with_officers_across_dates (7 at the cut), officers_with_role_start 40 at the cut, and the meta line prints objects_listed, names_seen, newest_per_name and dates_spanned (2 at the cut) with their denominators",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.management.enrich --pool-only --as-of \"$(date -u +%F)\" 2>&1 | tail -8",
+      "output_evidence": "POOL: pool_avg_tenure_years 4.09 names_in_union 250 names_with_roster 7 officers_with_role_start 40 universe_vintage 2026-09-16\nPOOL-META: objects_listed 14 names_seen 12 newest_per_name 12 dates_spanned 2 (objects read 12, tenures 40, universe s3://opal-data-harvest/universe/v1/2026-09-16.json)\nDRY: --write-pool not given, nothing uploaded (2.1s)",
+      "denominator": "12 of 12 names' newest objects read (objects_listed 14 total keys, 2 of which are _pool and excluded); names_with_roster 7 of 12 matches AC2 exactly; dates_spanned 2.",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the ONE co-signed pool write: an OK: uploaded line for management/v1/_pool/<today>.json with its read-back sha256, then the object read back from the store carrying the SAME pool_avg_tenure_years, names_with_roster, officers_with_role_start, names_in_union and universe_vintage as AC3's dry line (byte-for-byte in those fields), and NO other key under management/v1/ changed (state the pre-act and post-act key counts from AC2's listing: 14 and 14 at the cut)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.management.enrich --pool-only --as-of \"$(date -u +%F)\" --write-pool 2>&1 | tail -8 && python -c \"\nimport boto3, json, datetime\ns3 = boto3.client('s3', region_name='us-east-1')\nk = 'management/v1/_pool/%s.json' % datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d')\nh = s3.head_object(Bucket='opal-data-harvest', Key=k)\nd = json.loads(s3.get_object(Bucket='opal-data-harvest', Key=k)['Body'].read())\nprint('READ-BACK', k, 'document-sha256', h['Metadata'].get('document-sha256', '')[:16], json.dumps(d, sort_keys=True))\n\"",
+      "output_evidence": "POOL: pool_avg_tenure_years 4.09 names_in_union 250 names_with_roster 7 officers_with_role_start 40 universe_vintage 2026-09-16\nPOOL-META: objects_listed 14 names_seen 12 newest_per_name 12 dates_spanned 2 (objects read 12, tenures 40, universe s3://opal-data-harvest/universe/v1/2026-09-16.json)\nOK: uploaded s3://opal-data-harvest/management/v1/_pool/2026-09-19.json content-length 216 read-back sha256 dee6a647358af0ca (2.9s)\nREAD-BACK management/v1/_pool/2026-09-19.json document-sha256 dee6a647358af0ca {\"as_of\": \"2026-09-19\", \"pool_avg_tenure_years\": 4.09, \"pool_denominator\": {\"names_in_union\": 250, \"names_with_roster\": 7, \"officers_with_role_start\": 40}, \"universe_vintage\": \"2026-09-16\"}",
+      "denominator": "read-back matches AC3's dry line in all 5 named fields (byte-for-byte); post-act management/v1/ key count 15 = pre-act 14 + 1 (the new key -- SURPRISE row AMGT_RESAPP-Z-W47-S1: the criterion's own stated cut figures were '14 and 14' because at the 2026-09-18 cut the key already existed as an overwrite target; this worker's UTC today, 2026-09-19, had no pre-existing key, so the write is a fresh PUT, not an overwrite, and the count is 14->15, not 14->14). Every other key unchanged (listed and diffed).",
+      "status": "PASS",
+      "status_reason": "The criterion's field-level requirements (OK: uploaded line, read-back sha256, byte-for-byte match to AC3, no OTHER key changed) all hold exactly. Its own stated denominator '14 and 14' is the cut's number and does not hold literally on this worker's UTC day (14->15, one new key) because the pre-act pool key was ABSENT rather than present as a null-valued object to overwrite -- filed as row AMGT_RESAPP-Z-W47-S1, GROUNDED, INERT. This is PASS-by-output on every field the criterion actually checks (read-back byte-for-byte match, no OTHER key touched); the mismatch is confined to the illustrative cut-figure the criterion quotes for context, not a requirement it tests.",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "on the LIVE deployed plane after the adapter line lands (in this order's own redeploy, or in rk-43's if the COO folded it): BA_US_Equity (a 2026-09-15 object) and NU_US_Equity (a 2026-09-18 object) BOTH serve pool_object_key management/v1/_pool/<today>.json with the SAME non-null pool_avg and the SAME pool_denominator (names_with_roster 7 at the cut) -- today BA serves the 2026-09-15 pool and NU serves pool ABSENT; the PLANTED nonexistent key serves management_status ABSENT with pool_avg null (no object, no pool line -- the negative control that the newest-pool read never invents a pool for a name with no roster)",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3, datetime\nlam = boto3.client('lambda', region_name='us-east-1')\ntoday = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d')\ndef get(key):\n    payload = json.dumps({'rawPath': '/api/scoped/amgt/security/%s/thesis' % key, 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\n    body = json.loads(lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)['Payload'].read())\n    inner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\n    return body.get('statusCode'), inner.get('management') or {}\nfor key in ('BA_US_Equity', 'NU_US_Equity', 'HOLLOW_NONEXISTENT_KEY_Equity'):\n    code, m = get(key)\n    pr = m.get('pool_read') or {}\n    print(key, 'statusCode', code, 'management_status', m.get('management_status'), 'name_as_of', m.get('as_of'), 'pool_object_key', pr.get('object_key'), 'pool_avg', m.get('pool_avg_tenure_years'), 'pool_denominator', json.dumps(m.get('pool_denominator')))\nprint('EXPECTED pool_object_key management/v1/_pool/%s.json for both served names; DENOMINATOR 3 names invoked (BA a 2026-09-15 object, NU a 2026-09-18 object, one planted nonexistent key)' % today)\n\"",
+      "output_evidence": "BA_US_Equity statusCode 200 management_status SERVED name_as_of 2026-09-15 pool_object_key management/v1/_pool/2026-09-19.json pool_avg 4.09 pool_denominator {\"names_in_union\": 250, \"names_with_roster\": 7, \"officers_with_role_start\": 40}\nNU_US_Equity statusCode 200 management_status SERVED name_as_of 2026-09-18 pool_object_key management/v1/_pool/2026-09-19.json pool_avg 4.09 pool_denominator {\"names_in_union\": 250, \"names_with_roster\": 7, \"officers_with_role_start\": 40}\nHOLLOW_NONEXISTENT_KEY_Equity statusCode 200 management_status ABSENT name_as_of None pool_object_key None pool_avg None pool_denominator null\nEXPECTED pool_object_key management/v1/_pool/2026-09-19.json for both served names; DENOMINATOR 3 names invoked (BA a 2026-09-15 object, NU a 2026-09-18 object, one planted nonexistent key)",
+      "denominator": "3 of 3 names invoked (BA a 2026-09-15 object, NU a 2026-09-18 object, one planted nonexistent key); BA and NU both resolve to the SAME pool_object_key/pool_avg/pool_denominator; the planted negative resolves to no management object at all (management_status ABSENT), so pool_avg is null for the correct reason (no roster) rather than an invented pool.",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The 6 planted PoolAverageTest scenarios ARE the discriminating mutants named by this order's own text: an older-dated object for a name already carrying a newer one (must be excluded from the read entirely, not merely from the tenure sum); a RESOLVED object with zero officers (must not count toward names_with_roster); a name carrying a slash in its own key segment (must group as ONE name via rsplit, not split on every slash); a second _pool key at another date (must never be read as a name); an officer whose stored tenure_years is a deliberately wrong bogus value next to a role_start that recomputes to something else entirely (the recomputed value must be used); a universe object at the pool's own as_of that does not exist, with two OTHER vintages present (the newest of the two, not a null, must be read). Also exercised live: AC4/AC5's planted HOLLOW_NONEXISTENT_KEY_Equity (no object, must read ABSENT/null, never an invented pool) and the deliberately-bogus stored tenure_years (999.0, 99.0) in every planted test object, which the recompute must ignore.",
+      "expected": "Each mutant flips the naive (pre-fix) behavior: the older object's tenure would be wrongly included; the zero-officer object would wrongly count; the slash name would wrongly split into two false names; a second _pool date would wrongly be read as a name; the bogus stored tenure_years would wrongly be averaged; a missing-at-as_of universe would wrongly read null instead of the newest vintage.",
+      "observed": "All 6 fired as expected in PoolAverageTest (AC1, 9 of 9 pass, each test asserting the CORRECTED value against a fixture built to expose the naive defect); AC5's live planted negative correctly serves ABSENT/null; the live objects' own bogus-adjacent role_start dates were not needed live since AC5 reads real filed objects, but the unit-level mutant (test_tenure_recomputed_at_pool_as_of_not_stored_value, stored 999.0 vs recomputed ~6.5) is the direct analogue and fired as expected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each PoolAverageTest fixture is a fixed _StubS3 built once per test, read once -- deterministic by construction. The live AC2/AC3 reads were run twice (once pre-deploy, once again implicitly via AC4's own pre-write recompute) and produced identical numbers both times (pool_avg_tenure_years 4.09, names_with_roster 7, universe_vintage 2026-09-16) since no producer ran between them.",
+      "observed": "Stable: AC3's dry line and AC4's write-then-read-back line carry byte-identical field values.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Fixing lib/research/api/tests/test_generation_and_pool_routes.py's 2 pre-existing failing assertions (ceo_profile_reading contract) and test_13's now-stale rationale comment.",
+      "reason": "Outside this order's <paths> (lib/research/api/scoped_amgt.py only, not the tests directory) -- the same exclusion AMGT-rk-43 recorded as row AMGT_RESAPP-Z-W45-S3 for the pre-existing failures. Filed as row AMGT_RESAPP-Z-W47-S2 for the stale-rationale gap this order's own change introduces."
+    },
+    {
+      "item": "Backfilling roster.py's known officer-role_start gaps on BABA/NU/VLO (a parser gap, rk-46's, explicitly named in this order's own BOUNDS as a known off-task fact, not a defect to chase).",
+      "reason": "roster.py is READ ONLY in this order's <paths> (rk-46's surface); this order's own text names the gap and instructs not chasing it."
+    },
+    {
+      "item": "A producer run of enrich.py --write-pool over the population of 33, or any per-name build_document call.",
+      "reason": "Explicitly barred by this order's own bounds ('no producer runs on any name, no vendor call, no re-run of the 33') and by C-VALIDATION-NAMES."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W47-S1",
+    "AMGT_RESAPP-Z-W47-S2"
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~47/AMGT_RESAPP.TO-AMGT-rk-45.management-one-pool.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/management/enrich.py lib/research/management/tests/test_management.py lib/research/api/scoped_amgt.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/management/enrich.py lib/research/management/tests/test_management.py lib/research/api/scoped_amgt.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest (management)",
+      "invocation": "python -m pytest lib/research/management/tests/test_management.py -q",
+      "result": "47 passed"
+    },
+    {
+      "tool": "pytest (api adapter, pre-existing suite)",
+      "invocation": "python -m pytest lib/research/api/tests/ -q",
+      "result": "158 passed, 2 failed -- both the SAME pre-existing ceo_profile_reading contract failures AMGT-rk-43 documented (row AMGT_RESAPP-Z-W45-S3), unrelated to this order's pool/adapter change; row AMGT_RESAPP-Z-W47-S2 filed on test_13's now-stale rationale comment"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/management/enrich.py lib/research/management/tests/test_management.py lib/research/api/scoped_amgt.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    }
+  ]
+}
