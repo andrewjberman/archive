@@ -18,7 +18,7 @@
     {
       "path_or_key": "data/find/dualbiz/scripts/serp.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "MODIFIED: added classify_serp_attempt(http_status, headers, body) -> (status, failure) -- FAILED/EMPTY/OK per the four MEASURED shapes (captcha=200/0-byte/x-brd-error-code, bad zone=400, original_empty rewrite, well-formed OK); added serp_brightdata_records(query, max_pages=1, gl='us', hl='en', retries=2, transport=None) -> dict with an injectable transport (offline-testable), retry ONLY on captcha/5xx up to `retries`, never on 4xx; added local _scrub_body (general.mobile exempt) and _resolve_wrapper (one un-followed GET on a google.com/goto?url= link); serp_brightdata is now a thin wrapper over serp_brightdata_records (list[str] unchanged, one WARN: line on FAILED). Verified via enrich._serp_module() (AC2): both new functions present, wrapper delegates, all 4 measured shapes classify correctly.",
       "artifact_covered_by": ["AC1", "AC2"]
@@ -26,7 +26,7 @@
     {
       "path_or_key": "lib/research/management/ceo_search.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "NEW module: ceo_profile(ceo, company, verified_domain, serp=None, model=None, fetcher=None, max_pages=3, roster_source=None, gl='us', hl='en', require_verified_domain=True) -> dict, the full pipeline (query construction with company_short_name(), serp_brightdata_records call, broker-host drop, Call A identity triage, LinkedIn link-only, direct fetch, contact_scrub_text, the 500-character identity_anchor, Call B extraction over a 7000-character window, passages.Locator verification, dedupe_facts, status/reason_code assignment across the five states, a final scrub() pass). Also: classify_source_kind (official_bio ONLY on the verified domain or a subdomain), verify_quote, project_ceo_public_profile (the legacy-shape projection). Exercised offline in AC1 (19 tests) with stubbed serp/model/fetcher; no network call.",
       "artifact_covered_by": ["AC1"]
@@ -34,7 +34,7 @@
     {
       "path_or_key": "lib/research/management/management.schema.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "MODIFIED: ceo_profile added to top-level required (new closed definitions.ceo_profile_block: the five-state status enum, reason_code enum incl. NO_VERIFIED_SITE, search/triage/items/found_not_read/counts/cost sub-objects, contact-field 'not' clauses); ceo_public_profile kept required, its definition renamed ceo_profile -> ceo_public_profile_block with the stale 'opaque redirect' claim corrected/removed; new definitions.ceo_fact (topic enum of 6, no 'other'; quote+char_range; contact 'not' clause), ceo_search_item, ceo_search_found_not_read. Verified via AC3: required has ceo_profile True, keeps ceo_public_profile True, 5-state enum, 6 topics, stale claim False, 8 definitions.",
       "artifact_covered_by": ["AC3"]
@@ -42,7 +42,7 @@
     {
       "path_or_key": "lib/research/management/enrich.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "MODIFIED: added company_display_name(security_key, source_object, table=None) (prefers the filings battery's entity_name, falls back to domains.json's declared entity, then the Bloomberg yellow-key form) and verified_domain_for(source_object) (reads ONLY source_object.verified_site.host, never domains.json -- issuer bind msg 23833). build_document now resolves the CEO SERP module on the same officers+verified_domain+key-present condition Lusha's dependency-resolution guard already used (row W22-S2's discipline extended), builds document['ceo_profile'] via ceo_search.ceo_profile(find_ceo(officers), company_display_name(...), verified_domain, serp=ceo_serp_fn, roster_source=...), and sets ceo_public_profile = ceo_search.project_ceo_public_profile(ceo_profile). The old ceo_public_profile() function is retired from this call site (left defined -- test_management.py's CeoProfileTest calls it directly and is out of this order's rewrite scope). The SERP: print line now reports ceo_profile's status/reason_code/name_source/query/counts/cost. Not exercised live (AC4-AC6 refused, row S2); exercised indirectly via AC1's ceo_search tests and AC3's schema check, and the full test_management.py (47 tests) + test_bloomberg_fallback.py (7 tests) suites re-verified green.",
       "artifact_covered_by": ["AC1", "AC3"]
@@ -50,7 +50,7 @@
     {
       "path_or_key": "lib/research/management/tests/test_ceo_search.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "NEW: 19 tests, fully offline (stubbed transport/model/fetcher, no network): the four classify_serp_attempt shapes; captcha retried exactly twice (3 attempts) then FAILED; bad zone never retried (1 attempt); original_empty keeps 9 records flagged answers_detected_query; OK body carries title+snippet on every record; old serp_brightdata wrapper returns the same links as the records call; the MUTANT classifier (captcha->EMPTY) refused by its own discriminating assertion; namesake page fails the 500-char anchor, positive control passes; official_bio assigned only on the verified host (incl. a lookalike-domain negative and a model-label-demoted case); every kept quote of a fixture profile re-locates and every drop/swap/splice mutant of it is refused (\"mutants refused 9 of 9\" printed); a planted contact string never reaches the serialised block; NO_VERIFIED_SITE gate (search never runs without a verified domain, enforced by an unreachable-serp stub that raises if called). Ran 19 tests in 5.4s, OK.",
       "artifact_covered_by": ["AC1"]
@@ -58,7 +58,7 @@
     {
       "path_or_key": "lib/research/management/tests/test_management.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "MODIFIED: test_the_schema_forbids_a_contact_field's fixture now sets document['ceo_profile'] = ceo_search.ceo_profile(None, ...) and the projected ceo_public_profile, a direct consequence of ceo_profile becoming schema-required. All 47 tests re-verified passing (Ran 47 tests, OK) -- 1 was broken by the schema change before this fix, now clean.",
       "artifact_covered_by": ["AC1"]
@@ -66,7 +66,7 @@
     {
       "path_or_key": "lib/research/management/tests/test_bloomberg_fallback.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "MODIFIED: test_validate_passes_on_bloomberg_fallback_and_filing_objects_with_no_contact_field's two fixtures (FILING and BLOOMBERG_FALLBACK branches) now set ceo_profile/ceo_public_profile the same way, for the same reason. All 7 tests re-verified passing (Ran 7 tests, OK) -- 1 was broken by the schema change before this fix, now clean.",
       "artifact_covered_by": ["AC1"]
@@ -74,14 +74,14 @@
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "DEPLOYED-VERIFIED",
       "deploy_evidence": "3 rows appended by textual splice inside the one fenced JSON array (419 rows total, parses clean, pure LF): AMGT_RESAPP-Z-W49-S2 (AC4-AC6 refused, no Bright Data per-use word on file, no vendor call made), AMGT_RESAPP-Z-W49-S3 (2 pre-existing failing tests in the WALL lib/research/api/tests/test_generation_and_pool_routes.py, unrelated to this order), AMGT_RESAPP-Z-W49-S4 (the order's step-7 text and the issuer bind read differently on whether the search runs without a verified_site; this worker built to the issuer bind as the general rule). Each row validated schema-clean via jsonschema.Draft7Validator against org/surprise_channel/schemas/investigation_item.schema.json before splicing."
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-48.ceo-serp-organizing-agent.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "83da68c00a75da15d4959f50b7e51f25f2f69504",
       "deployed_state": "DEPLOYED-VERIFIED",
       "deploy_evidence": "RECORD FACE <status> flipped pending -> complete: the order's own bound authorizes a terminal state on AC1-AC3 PASS plus the AC4-AC6 refusal when the spawn prompt does not state the Bright Data per-use word, which is this session's exact case."
     }
