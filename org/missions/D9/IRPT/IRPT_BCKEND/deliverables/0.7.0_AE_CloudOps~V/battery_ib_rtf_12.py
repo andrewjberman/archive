@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """IRPT_BCKEND.TO-IB-rtf-12 battery -- every serving zip carries the raw-keys file its id module reads.
 
-FIRST PASS (this revision): arms (a)-(d). The build is WITHHELD (row S101), so (d) fails truthfully, and (e)/(f) are
-the re-hand's arms.
+SECOND PASS (this revision; rulings msg 98279: S101 accepted, S102 ycharts deferred -> K-CODE x 6, S100 recorded-not-
+counted): arms (a)-(d); (d) STOPS at the halves (the expected outcome); (e)/(f) are the third pass's arms.
   (a) THE PREMISE AT THE CUT (@083cc54350) AND AT HEAD:
       - _ids/raw_keys.json staged per function;
       - a raw_keys.json member in each LIVE zip (downloaded; sha256 == the live CodeSha256; member count printed);
@@ -13,12 +13,14 @@ the re-hand's arms.
   (b) THE FILES, DESCRIBED FOR THE HALVES: blob, bytes, top-level shape, k entries, credential scan, writers W.
   (c) THE MANIFEST: the parse-diff from the cut to HEAD. Exactly 7 raw_keys.json + 4 firm_registry.json objects added
       (row S99 INCLUDES the second member), files[] +11, artifact_sha256 untouched 7 of 7, nothing else moved.
-  (d) THE BUILD AND THE PACKET:
-      - per function, what build-and-upload.sh WOULD package (own members from DISK, staged members from their pins)
-        against the live zip, member by member;
-      - the delta beyond the added members is printed; a non-empty one is the face's STOP (row S101);
-      - built artifacts (the build-store latest version is NEW) n of 7;
-      - the packet and the 2 halves at HEAD.
+  (d) THE BUILD, THE PLANS, THE PACKET, THE HALVES (K-CODE x 6):
+      - per function: the build-store latest version == the packet's BUILT version, and metadata == bytes == the built
+        sha; the rollback source (the packet's prior version) hashes to the prior live CodeSha256; the function is
+        still unchanged; members == files[]; the delta vs the LIVE zip == exactly the added member(s) + the seam line
+        endings (S101); the own CRLF members byte-identical to live;
+      - plans per root re-taken: 0 destroy; code changes exactly the 6, each after-hash == its built sha with the env
+        unchanged; ycharts "No changes"; every canonical digest EQUAL to the packet's;
+      - the packet committed; the 2 halves at HEAD naming its blob.
 Read-only on every live plane. Prints no credential.
 """
 from __future__ import annotations
@@ -188,59 +190,127 @@ def arm_c() -> bool:
     return clean and raw_n == 7 and reg_n == 4
 
 
+DEFERRED = "irpt-ycharts-generate"  # S102
+PACKET_BLOB_CHECK = True
+SEAM = "data/custodian_key_seam.json"
+ROOT_OF = {"irpt-directory-search": "directory", "irpt-status": "ops", "irpt-holdings": "holdings", "irpt-narrative": "narrative",
+           "irpt-export-render": "export", "irpt-performance-adapter": "performance"}
+ADDR_OF = {"irpt-directory-search": "module.irpt_directory_search.aws_lambda_function.this",
+           "irpt-status": "module.irpt_status.aws_lambda_function.this",
+           "irpt-holdings": "module.irpt_holdings.aws_lambda_function.this",
+           "irpt-narrative": "module.irpt_narrative.aws_lambda_function.this",
+           "irpt-export-render": "module.irpt_export_render.aws_lambda_function.this",
+           "irpt-performance-adapter": "module.irpt_performance_adapter.aws_lambda_function.this"}
+TF = os.path.join(WS, ".tools", "terraform.exe")
+PLAN_DIR = os.path.join(WS, ".scratch", "plans12_battery")
+
+
+def packet_facts() -> tuple[str, str, dict, dict]:
+    rc, head = git("rev-parse", "--verify", "--quiet", "HEAD:" + PACKET_REL)
+    head_blob = head.decode().strip() if rc == 0 else ""
+    _, wt = git("hash-object", PACKET_REL)
+    text = (blob_at("HEAD", PACKET_REL) or b"").decode("utf-8")
+    built = {m.group(1): (m.group(2), m.group(3)) for m in re.finditer(r"^BUILT: (\S+) (\S+) (\S+)$", text, re.M)}
+    prior = {}
+    for m in re.finditer(r"^\| `(irpt-[a-z-]+)` \| `([A-Za-z0-9+/=]{44})` \(`([^`]+)`\)", text, re.M):
+        prior[m.group(1)] = (m.group(2), m.group(3))
+    return head_blob, wt.decode().strip(), built, prior
+
+
+def plan_root(root: str) -> tuple[str, list, str]:
+    d = os.path.join(WS, "infra", "aws", "terraform", "investor-reporting", root)
+    os.makedirs(PLAN_DIR, exist_ok=True)
+    pf = os.path.join(PLAN_DIR, root + ".tfplan")
+    env = dict(os.environ, TF_IN_AUTOMATION="1", AWS_REGION="us-east-1", TF_PLUGIN_CACHE_DIR=os.path.join(WS, ".scratch", "tf-plugin-cache"))
+    subprocess.run([TF, "-chdir=" + d, "init", "-input=false", "-no-color"], capture_output=True, env=env, timeout=900)
+    p = subprocess.run([TF, "-chdir=" + d, "plan", "-input=false", "-no-color", "-out=" + pf], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace", env=env, timeout=1200)
+    line = next((ln.strip() for ln in p.stdout.splitlines() if ln.startswith("Plan:") or "No changes." in ln), "rc %d" % p.returncode)
+    j = json.loads(subprocess.run([TF, "-chdir=" + d, "show", "-json", pf], capture_output=True, text=True, encoding="utf-8",
+                                  errors="replace", env=env, timeout=600).stdout)
+    rcs = [c for c in j.get("resource_changes") or [] if c["change"]["actions"] != ["no-op"]]
+    canon = [{"address": c["address"], "actions": c["change"]["actions"], "before": c["change"].get("before"),
+              "after": c["change"].get("after")} for c in rcs]
+    return line, rcs, hashlib.sha256(json.dumps(canon, sort_keys=True).encode("utf-8")).hexdigest()
+
+
 def arm_d() -> bool:
-    emit("(d) THE BUILD AND THE PACKET -- the predicted served-byte delta per function, then the build, then the halves")
+    emit("(d) THE BUILD, THE PLANS, THE PACKET, THE HALVES -- K-CODE x 6 (%s deferred, S102)" % DEFERRED)
     identity_line("(d)")
+    head_blob, wt_blob, built, prior = packet_facts()
+    pk_ok = bool(head_blob) and head_blob == wt_blob
+    emit("  packet %s: blob at HEAD %s, worktree %s -> %s; BUILT lines %d; prior-live rows %d"
+         % (PACKET_REL, head_blob or "ABSENT", wt_blob, "COMMITTED, UNCHANGED" if pk_ok else "NOT COMMITTED OR CHANGED", len(built), len(prior)))
     head = json.loads(blob_at("HEAD", MAP).decode("utf-8"))["functions"]
-    beyond_total = 0
-    built = 0
-    for fn in FNS:
+    ok_fns = crlf_same = crlf_total = 0
+    for fn in ROOT_OF:
         e = head[fn]
-        cfg, members, _ = live_zip(fn)
-        staged = {s["packaged_as"]: s for s in e.get("staged_from", [])}
-        added = {s["packaged_as"] for s in e.get("staged_from", []) if s["repo_path"] in (RAW_REPO, REG_REPO)}
-        pred = {}
-        for m in e["files"]:
-            if m in staged:
-                pred[m] = blob_at(staged[m]["pin"], staged[m]["repo_path"])
-            else:
-                p = os.path.join(WS, e["source_dir"], m)
-                pred[m] = open(p, "rb").read() if os.path.exists(p) else None
-        moved = [m for m in pred if m in members and m not in added and pred[m] is not None and pred[m] != members[m]]
-        missing = [m for m in pred if pred[m] is None]
-        same = sum(1 for m in pred if m in members and m not in added and pred[m] == members[m])
-        beyond_total += len(moved) + len(missing)
-        head_obj = s3.head_object(Bucket=BUCKET, Key="investor-reporting/%s.zip" % fn)
-        is_new = (head_obj.get("Metadata") or {}).get("content-sha256") != cfg["CodeSha256"]
-        built += is_new
-        emit("  %-26s added %s | other members byte-identical to live %d of %d | MOVED beyond the added: %s%s | build-store "
-             "latest %s (content-sha256 %s the live CodeSha256)" % (
-                 fn, sorted(added), same, len(pred) - len(added), moved or "none",
-                 (" | unresolvable " + str(missing)) if missing else "", head_obj.get("VersionId"),
-                 "DIFFERS FROM" if is_new else "==",))
-        for m in moved:
-            a, b = members[m], pred[m]
-            emit("      %-32s live %d bytes CR %d -> build %d bytes CR %d" % (m, len(a), a.count(b"\r"), len(b), b.count(b"\r")))
-    emit("  functions whose rebuild moves a member beyond the added ones: %s of 7 -> %s" % (
-        "0" if beyond_total == 0 else "see above",
-        "no STOP" if beyond_total == 0 else "the face's STOP: the build is WITHHELD (row IRPT_BCKEND-S101)"))
-    emit("  built and verified at rest: %d of 7" % built)
-    rc, _ = git("rev-parse", "--verify", "--quiet", "HEAD:" + PACKET_REL)
-    emit("  packet %s at HEAD: %s" % (PACKET_REL, "PRESENT" if rc == 0 else "ABSENT (no built sha to sign: the build is withheld)"))
+        want_sha, want_ver = built.get(fn, ("?", "?"))
+        prior_live, prior_ver = prior.get(fn, ("?", "?"))
+        key = "investor-reporting/%s.zip" % fn
+        h = s3.head_object(Bucket=BUCKET, Key=key)
+        body = s3.get_object(Bucket=BUCKET, Key=key, VersionId=h["VersionId"])["Body"].read()
+        rb = s3.get_object(Bucket=BUCKET, Key=key, VersionId=prior_ver)["Body"].read() if prior_ver != "?" else b""
+        cfg, live_m, _ = live_zip(fn)
+        z = zipfile.ZipFile(io.BytesIO(body))
+        new_m = {n: z.read(n) for n in z.namelist() if not n.endswith("/")}
+        added_expected = {s["packaged_as"] for s in e.get("staged_from", []) if s["repo_path"] in (RAW_REPO, REG_REPO)}
+        added = set(new_m) - set(live_m)
+        changed = [m for m in new_m if m in live_m and new_m[m] != live_m[m]]
+        seam_only = all(m == SEAM and live_m[m].replace(b"\r\n", b"\n") == new_m[m] and new_m[m].count(b"\r") == 0 for m in changed)
+        same = sum(1 for m in new_m if m in live_m and new_m[m] == live_m[m])
+        staged = {s["packaged_as"] for s in e.get("staged_from", [])}
+        own_crlf = [m for m in new_m if m not in staged and new_m[m].count(b"\r")]
+        crlf_total += len(own_crlf)
+        crlf_same += sum(1 for m in own_crlf if live_m.get(m) == new_m[m])
+        checks = [h["VersionId"] == want_ver, (h.get("Metadata") or {}).get("content-sha256") == want_sha, b64sha(body) == want_sha,
+                  b64sha(rb) == prior_live, cfg["CodeSha256"] == prior_live, sorted(new_m) == sorted(e["files"]),
+                  added == added_expected, not (set(live_m) - set(new_m)), seam_only]
+        good = all(checks)
+        ok_fns += good
+        emit("  %-26s built %s (version %s latest: %s; metadata == bytes == built: %s) | rollback source %s == prior live: %s | "
+             "function unchanged: %s | delta: added %s, changed %s (seam line endings only: %s), other members byte-identical %d | -> %s"
+             % (fn, want_sha, want_ver, h["VersionId"] == want_ver, checks[1] and checks[2], prior_ver, checks[3], checks[4],
+                sorted(added), changed or "none", seam_only, same, "VERIFIED" if good else "NOT VERIFIED"))
+    emit("  built and verified at rest: %d of %d; own CRLF members byte-identical to live: %d of %d" % (ok_fns, len(ROOT_OF), crlf_same, crlf_total))
+    text = (blob_at("HEAD", PACKET_REL) or b"").decode("utf-8")
+    dig_ok = code_ok = destroy = changes = 0
+    roots = list(ROOT_OF.values()) + ["ycharts"]
+    for r in roots:
+        line, rcs, digest = plan_root(r)
+        destroy += sum("delete" in c["change"]["actions"] for c in rcs)
+        changes += len(rcs)
+        in_packet = digest in text
+        dig_ok += in_packet
+        codes = []
+        for c in rcs:
+            if c["type"] == "aws_lambda_function":
+                b, a = c["change"]["before"] or {}, c["change"]["after"] or {}
+                if b.get("source_code_hash") != a.get("source_code_hash"):
+                    fn = next((f for f, ad in ADDR_OF.items() if ad == c["address"]), None)
+                    good = fn is not None and built.get(fn, ("",))[0] == a.get("source_code_hash") and b.get("environment") == a.get("environment")
+                    code_ok += good
+                    codes.append("%s -> %s%s" % (c["address"], a.get("source_code_hash"), " == built" if good else " NOT AS SIGNED"))
+        emit("  plan %-11s %s | changes %d | canonical digest %s (%s the packet's) | %s" % (
+            r, line, len(rcs), digest, "EQUAL to" if in_packet else "NOT", codes or "no code change"))
+    emit("  plans: roots %d; destroy %d; changes %d; code changes == built %d of %d; digests EQUAL to the packet %d of %d"
+         % (len(roots), destroy, changes, code_ok, len(ROOT_OF), dig_ok, len(roots)))
     n = 0
-    for who, d, pat in (("COO", "org/tier1_exec/2.0.0_SA_COO~B/deliverables", "NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-12_"),
-                        ("CTO", "org/tier1_exec/1.0.0_SA_CTO/deliverables", "NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-12_")):
-        _, ls = git("ls-tree", "-r", "--name-only", "HEAD", "--", d)
+    for who, dd, pat in (("COO", "org/tier1_exec/2.0.0_SA_COO~B/deliverables", "NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-12_"),
+                         ("CTO", "org/tier1_exec/1.0.0_SA_CTO/deliverables", "NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-12_")):
+        _, ls = git("ls-tree", "-r", "--name-only", "HEAD", "--", dd)
         hits = [p for p in ls.decode().splitlines() if os.path.basename(p).startswith(pat)]
-        n += bool(hits)
-        emit("  %s half at HEAD: %d file(s) -> %s" % (who, len(hits), "PRESENT" if hits else "ABSENT"))
+        naming = [p for p in hits if head_blob and head_blob in (blob_at("HEAD", p) or b"").decode("utf-8", "replace")]
+        n += bool(naming)
+        emit("  %s half at HEAD: %d file(s), %d naming blob %s -> %s" % (who, len(hits), len(naming), head_blob or "?", "PRESENT" if naming else "ABSENT"))
     emit("  halves: %d of 2" % n)
-    return beyond_total == 0 and built == 7 and rc == 0 and n == 2
+    return (pk_ok and ok_fns == len(ROOT_OF) and crlf_same == crlf_total and destroy == 0 and code_ok == len(ROOT_OF)
+            and changes == len(ROOT_OF) and dig_ok == len(roots) and n == 2)
 
 
 def main() -> int:
     _, h = git("rev-parse", "HEAD")
-    emit("IB-rtf-12 R69-AC1 battery (first pass) -- worktree HEAD %s" % h.decode().strip())
+    emit("IB-rtf-12 R69-AC1 battery (second pass) -- worktree HEAD %s" % h.decode().strip())
     emit("")
     arms = {"(a) premise": arm_a()}
     emit("")
@@ -248,11 +318,13 @@ def main() -> int:
     emit("")
     arms["(c) manifest"] = arm_c()
     emit("")
-    arms["(d) build + packet + halves"] = arm_d()
+    arms["(d) build + plans + packet + halves"] = arm_d()
     emit("")
-    emit("STOP at (d): the build is withheld (row S101: a HEAD rebuild moves the seam member on 5 functions; row S102: "
-         "irpt-ycharts-generate has 2 members with no source, so build-and-upload.sh refuses it) -- nothing is built, no "
-         "packet exists, (e) apply and (f) the live proof are NOT RUN")
+    if not arms["(d) build + plans + packet + halves"]:
+        emit("STOP at (d): a half is ABSENT (or a build/plan check failed above) -- nothing is applied; (e) apply and (f) the live "
+             "proof are NOT RUN")
+    else:
+        emit("(d) holds -- (e)/(f) are the next pass's arms and are not implemented in this second-pass revision")
     arms["(e) apply"] = False
     arms["(f) live proof"] = False
     for k, v in arms.items():
@@ -262,7 +334,7 @@ def main() -> int:
         emit(TOKEN)
         rc = 0
     else:
-        emit("RESULT: R69-AC1 FAIL -- %d of %d arms hold (first pass: STOP at (d), the build withheld on row S101)"
+        emit("RESULT: R69-AC1 FAIL -- %d of %d arms hold (second pass: STOP at the halves as the face expects)"
              % (sum(arms.values()), len(arms)))
         rc = 1
     with open(OUTPUT_PATH, "w", encoding="utf-8", newline="\n") as fh:
