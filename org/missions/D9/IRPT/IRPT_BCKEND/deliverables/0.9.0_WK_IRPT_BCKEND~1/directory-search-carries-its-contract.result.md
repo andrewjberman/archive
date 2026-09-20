@@ -1,8 +1,9 @@
-# RESULT -- IRPT_BCKEND.TO-IB-rtf-13 (the directory-search zip carries its contract, first pass)
+# RESULT -- IRPT_BCKEND.TO-IB-rtf-13 (the directory-search zip carries its contract)
 
 Worker `0.9.0_WK_IRPT_BCKEND~1`. Full verbatim run: `IB-rtf-13_R70-AC1_battery_output.txt` (this
-commit). Summary below; every count is re-derived by the battery on each run, never carried by
-hand. **THIS IS THE FIRST PASS: arms (a)-(c) only, no apply.**
+commit, now the APPLY PASS's final clean run -- arms (a)-(e), all PASS). Summary below; every
+count is re-derived by the battery on each run, never carried by hand. Sections below marked
+"(first pass)" describe the earlier census/packet pass; the APPLY PASS section covers arms (d)/(e).
 
 ## Arm (a) -- the runtime-open census that ends the class (attempted)
 
@@ -98,12 +99,55 @@ prior 12-member set: exactly `['contracts/DirectoryEntry.schema.json']` (`m=1` o
 the SAME root's `irpt_directory_refresh` resource plans `no-op` (untouched). **The other six roots
 re-taken**: `export`/`holdings`/`intake`/`narrative`/`ops`/`performance` each read `No changes.`
 
-**THE HALVES, READ AT HEAD:** `org/tier1_exec/2.0.0_SA_COO~B/deliverables/` and
-`org/tier1_exec/1.0.0_SA_CTO/deliverables/` carry NO file naming `rtf-13` -- **0 of 2 halves
-present.** Per this order's own text, this is the EXPECTED first-pass outcome (the halves cannot
-exist before the packet does). **STOP HERE**: arm (d) does not run this pass. `R70-AC1` FAILS
-TRUTHFULLY at (c) in a VALID instance. The order stays open, pending the issuer's and the CTO's
-sign-off against this packet's `blob <hash>`.
+**THE HALVES, READ AT HEAD (first pass):** `org/tier1_exec/2.0.0_SA_COO~B/deliverables/` and
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/` carried NO file naming `rtf-13` -- **0 of 2 halves
+present.** Per this order's own text, that was the EXPECTED first-pass outcome (the halves cannot
+exist before the packet does). Arm (d) did not run that pass; `R70-AC1` FAILED TRUTHFULLY at (c) in
+a VALID instance.
+
+## THE APPLY PASS -- arms (d) and (e)
+
+Both halves are now SIGNED at HEAD against the **v2** never-widen packet
+(`org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-13_v2.md`, blob
+`0e06953ecc21b51307d0c707ff1c57c4ca725ae2`), which supersedes the v1 packet's arm-(d) gate only (v1's
+whole-planfile digest STOP was proven UNSATISFIABLE across five cold-started runs). Arm (d) is
+re-cut BY SUBTRACTION per `1.0.0_SA_CTO`'s ruling @`ac63a41207`: compare `resource_changes`, PER
+ROOT, minus a closed subtraction set applied WITHIN it -- never the whole `show -json` document.
+
+**Arm (d) result: PASS.** Fresh plans taken across all 7 investor-reporting roots this pass:
+`58` `resource_changes` entries compared, `0` paths subtracted (observed -- the signed subtraction
+set, a `data.aws_s3_object` read entry's `version_id`/`last_modified`, is INERT on every one of
+these plans: `0` of `58` entries carry `mode=="data"`, confirmed by direct inspection of the JSON).
+The directory root's ONE substantive entry after subtraction matched the signed shape exactly on
+the FIRST apply (`module.irpt_directory_search.aws_lambda_function.this`, `actions: ["update"]`,
+`before.source_code_hash = PUjH3OjDe8Yj3RwdIO0KT3GXsYGfvUCmzG/aHsi6e1c=`,
+`after.source_code_hash = 76LeVyYNfhdyDnQNXR3LzrqSv7k7Vr3POSjpcBzww6E=`); the other 6 roots each
+showed 0 substantive entries. Applied via `.tools/safe-apply.sh` under change-management ledger
+`irpt-bckend-ib-rtf-13-apply` (opened and committed before the act, closed and committed after
+verification): `Apply complete! Resources: 0 added, 1 changed, 0 destroyed.`, post-apply re-plan
+`0-diff`, live `CodeSha256 == 76LeVyYN...`, `IRPT_CONTRACTS_DIR = /var/task/contracts` read from
+configuration, the served zip downloaded and re-hashed to the same sha with the contract member
+present. Two later idempotent re-runs of this battery hit a REAL premise gap, filed as row
+`IRPT_BCKEND-W1-S40`: `build-and-upload.sh`'s S3 PutObject mints a new `VersionId` on every call
+even with byte-identical content, and `version_id`/`last_modified` surface on THIS module as
+attributes of `aws_lambda_function.this` itself (never as a separate `data.aws_s3_object`
+resource_changes entry) -- so an unconditional re-upload on a re-run manufactures a phantom
+non-substantive "update" the gate correctly STOPPED on (evidence, not an obstacle; the subtraction
+set was never widened). Fixed by skipping the rebuild/upload in both arm (c) and arm (d) once the
+function already serves the manifest's declared sha -- a precondition fix, not a gate change.
+
+**Arm (e) result: PASS.** Live proof under the DEPLOYED ROLE AND BYTES, reusing the rtf-10/rtf-9
+bounded-test-principal mechanism (rtf-9 packet blob `a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4`,
+both halves at HEAD, NEW epoch), narrowed to the directory route. Route
+`https://opalinvest.dev/api/scoped/investor-reporting/directory/*` -> function
+`irpt-directory-search` -> execution role `irpt-directory-role`. `4` of `4` requests scope-resolved
+as required, `0` UNEXPECTED: search `q=a` -> `7` entries SERVED; the no-match query -> `0` entries
+(S92 search FIXED); resolve WITH a selection -> `ok=True`, resolves (S92 resolve FIXED); the
+NEGATIVE CONTROL (a foreign firm id, `inflection`, claimed via the `firm_id` field) -> refused
+`FIRM_BINDING`, the claimed value never echoed in the response body. Full lifecycle closed: K1/K1b
+created and read back, login `200` with the declared claims, both keys deleted and verified absent,
+refresh token refused post-delete, access token refused `401` after its `exp`. No credential, token
+or password logged (redacted throughout).
 
 ## R70-AC2 (judgment, for the CVO)
 
