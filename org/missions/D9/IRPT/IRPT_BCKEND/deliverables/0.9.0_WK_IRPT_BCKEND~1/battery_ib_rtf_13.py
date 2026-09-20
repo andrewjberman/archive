@@ -1,23 +1,40 @@
 #!/usr/bin/env python3
 """IB-rtf-13 -- the directory-search zip carries its contract, and every runtime open across
-the seven serving functions is a staged member. Cell IB-rtf-13. FIRST PASS: arms (a)-(c) only.
+the seven serving functions is a staged member. Cell IB-rtf-13.
+
+APPLY PASS (this revision): arms (a)-(c) re-derive the census/member/packet as before; arm (d)
+is the v2 SUBTRACTION GATE (CTO compared-object term @ac63a41207 -- compares `resource_changes`
+PER ROOT and nothing else, never the whole `show -json` document) over all 7 investor-reporting
+roots, then applies the directory root through `.tools/safe-apply.sh` IFF the gate passes and the
+directory root is not already applied (idempotent re-run: if the built sha is already served and
+the 7-root gate already reads empty/matching, arm (d) reports ALREADY-APPLIED-AND-VERIFIED rather
+than re-applying a 0-diff plan); arm (e) is the LIVE PROOF under the DEPLOYED ROLE AND BYTES,
+reusing the rtf-10/rtf-9 bounded-test-principal mechanism, narrowed to the directory route.
 
 Re-derives, every run, from git blobs / the committed manifest / the committed layer build
 manifest / the committed terraform env lines -- never from a hand-typed verdict table with no
 premise check. Where a classification cannot be MECHANICALLY confirmed against those sources it
-prints UNVERIFIED rather than asserting it. This is a CENSUS + PACKET pass: no `terraform apply`,
-no `aws lambda update-function-code`. Every AWS/terraform read runs read-only or `plan` only.
+prints UNVERIFIED rather than asserting it.
 
 Usage: py -3.12 battery_ib_rtf_13.py
 """
 from __future__ import annotations
 
 import base64
+import datetime
 import hashlib
 import json
 import os
+import re
+import secrets
 import subprocess
 import sys
+import time
+import urllib.error
+import urllib.request
+
+import bcrypt
+import boto3
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = subprocess.run(["git", "rev-parse", "--show-toplevel"], cwd=HERE,
@@ -54,6 +71,43 @@ TF_ENV_FILES = {
     "irpt-holdings": "infra/aws/terraform/investor-reporting/holdings/lambda.tf",
     "irpt-status": "infra/aws/terraform/investor-reporting/ops/lambda.tf",
 }
+
+# ---------------------------------------------------------------------------------------------
+# ARM (d)/(e) CONSTANTS -- the v2 packet's signed shape and the rtf-9 bounded-principal precedent.
+# ---------------------------------------------------------------------------------------------
+V2_PACKET_REL = "org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-13_v2.md"
+V2_BLOB = "0e06953ecc21b51307d0c707ff1c57c4ca725ae2"
+COO_HALF_REL = ("org/tier1_exec/2.0.0_SA_COO~B/deliverables/"
+                "NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-13_DIRECTORY_CONTRACT_STAGED.md")
+CTO_HALF_REL = ("org/tier1_exec/1.0.0_SA_CTO/deliverables/"
+                "NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-13_DIRECTORY_CONTRACT_STAGED.md")
+PRIOR_LIVE_CODESHA = "PUjH3OjDe8Yj3RwdIO0KT3GXsYGfvUCmzG/aHsi6e1c="
+BUILT_CODESHA = "76LeVyYNfhdyDnQNXR3LzrqSv7k7Vr3POSjpcBzww6E="
+ROLLBACK_VERSION = "elK9Z3qtolvKrVJhSuMrmlFJZT.77_Dk"
+LEDGER_SLUG = "irpt-bckend-ib-rtf-13-apply"
+LEDGER_SENTINEL_REL = "org/critical_paths/.open_deploys/%s.json" % LEDGER_SLUG
+LEDGER_ENTRY_REL = "org/critical_paths/change_management/20260920T0928Z_%s_deploy_completion.md" % LEDGER_SLUG
+PLAN_DIR = os.path.join(REPO, ".scratch", "plans_rtf13")
+ARTIFACT_BUCKET = "opal-313476888478-lambda-artifacts"
+ARTIFACT_KEY = "investor-reporting/irpt-directory-search.zip"
+
+# arm (e): the rtf-9 bounded test principal, reused per this order's own text.
+RTF9_PACKET_REL = "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.7.0_AE_CloudOps~V/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-9.md"
+RTF9_BLOB = "a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4"
+RTF9_HALVES = {
+    "COO": "org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-9_TWO_KEY_PRINCIPAL.md",
+    "CTO": "org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-9_TWO_KEY_PRINCIPAL.md",
+}
+PRINCIPAL_SENTINEL_REL = "org/critical_paths/.open_deploys/irpt-bckend-ib-rtf-13-live-principal.json"
+USERS, PARTNER, THROTTLE = "opal-users-v2", "opal-partner-49financial", "opal-portal-auth-throttle"
+FIRM, ADVISOR = "49financial", "abby_horton"
+FOREIGN_FIRM = "inflection"
+OM_BUCKET, OM_KEY = "opal-data-bd", "platinum/49financial/ownership_map.json"
+BASE = "https://opalinvest.dev"
+PFX = "/api/scoped/investor-reporting"
+UA = "opal-irpt-ib-rtf-13-battery/1.0 (0.9.0_WK_IRPT_BCKEND~1)"
+
+SECRETS_SEEN: list[str] = []
 
 
 def run(cmd, cwd=None, timeout=120):
@@ -136,7 +190,6 @@ def read_tf_env(path):
                 break
     block = text[brace:end]
     env = {}
-    import re
     for m in re.finditer(r'([A-Z0-9_]+)\s*=\s*"([^"]*)"', block):
         env[m.group(1)] = m.group(2)
     has_layer = "aws_lambda_layer_version.irpt_common" in text or \
@@ -468,7 +521,15 @@ def arm_b():
     old_fns, new_fns = old_map["functions"], new_map["functions"]
     changed_fns = sorted(k for k in new_fns if old_fns.get(k) != new_fns.get(k))
     print("functions with ANY change: %s" % changed_fns)
-    if changed_fns != ["irpt-directory-search"]:
+    if changed_fns == []:
+        # THE ALREADY-LANDED SHAPE: the manifest edit is already committed at HEAD (a re-run in
+        # the same worktree after this pass's own earlier commit landed it), so HEAD-vs-working
+        # is trivially empty -- that is NOT a failure, it is this run recognising its own prior
+        # commit. The mechanical checks above (declared sha == measured sha, member in files[]
+        # and staged_from) already hold; nothing further to parse-diff.
+        print("OK: the manifest edit is ALREADY LANDED at HEAD (this worktree's own prior commit) "
+              "-- 0 functions changed vs HEAD is the correct reading here, not a FAIL")
+    elif changed_fns != ["irpt-directory-search"]:
         print("ERROR: parse-diff expected exactly ['irpt-directory-search'] changed; got %s"
               % changed_fns)
         ok = False
@@ -530,6 +591,13 @@ def aws_json(args, timeout=60):
         return rc, out, err
 
 
+def s3_get_and_hash(bucket, key, version_id):
+    """boto3, not aws.cmd -- avoids a second temp-file round trip for a bytes read."""
+    s3 = boto3.client("s3", region_name="us-east-1")
+    body = s3.get_object(Bucket=bucket, Key=key, VersionId=version_id)["Body"].read()
+    return base64.b64encode(hashlib.sha256(body).digest()).decode("ascii")
+
+
 def arm_c():
     print()
     print("=" * 100)
@@ -571,25 +639,51 @@ def arm_c():
         print("WARN: could not read the current build-store version (rc=%d): %s" % (rc, str(err)[:300]))
         result["rollback_build_store_version"] = None
 
-    # 2. rebuild irpt-directory-search ONLY, under this ledger
+    # 2. rebuild irpt-directory-search ONLY, under this ledger.
+    #
+    # SKIP THE UPLOAD when the function ALREADY SERVES the manifest's declared artifact_sha256
+    # (a re-run of this battery in the SAME worktree after a prior pass's build/apply already
+    # landed it): build-and-upload.sh's S3 PutObject mints a NEW version_id on every call even
+    # with byte-identical content, and that per-run version churn manufactures a phantom
+    # `aws_lambda_function.this` "update" (source_code_hash UNCHANGED, only s3_object_version/
+    # last_modified moving) on arm (d)'s later plan -- measured this pass: those two fields
+    # surface as ATTRIBUTES of the lambda resource itself, never as a separately-listed
+    # `data.aws_s3_object` resource_changes entry (0 of N mode=="data" entries, every root, every
+    # run), which is outside the LITERAL scope of the CTO's compared-object term (row filed).
+    # Re-uploading unconditionally on every re-run would keep re-creating exactly that class.
     print()
-    print("-- rebuilding irpt-directory-search (build-and-upload.sh, single-function mode) --")
-    bash = git_bash()
-    if not bash:
-        raise SystemExit("ERROR: no Git Bash found (git_bash_resolver) -- refusing bare 'bash' "
-                         "(WSL-stub trap)")
-    build_cmd = [bash, os.path.join(REPO, "infra", "aws", "lambda", "ci", "build-and-upload.sh"),
-                "investor-reporting", "irpt-directory-search"]
-    rc, out, err = run(build_cmd, timeout=180)
-    print(out[-4000:])
-    if err.strip():
-        print("STDERR (tail):", err[-2000:])
-    result["build_rc"] = rc
-    if rc != 0:
-        print("ERROR: build-and-upload.sh rc=%d -- STOPPING arm (c) here" % rc)
-        return False, result
+    sm_pre = load_source_map()
+    pre_declared_sha = sm_pre["functions"]["irpt-directory-search"].get("artifact_sha256")
+    live_rc0, live_cfg0, _ = aws_json(["lambda", "get-function-configuration",
+                                      "--function-name", "irpt-directory-search",
+                                      "--query", "{CodeSha256:CodeSha256}"])
+    already_built = (live_rc0 == 0 and pre_declared_sha and live_cfg0.get("CodeSha256") == pre_declared_sha)
+    print("pre-rebuild check: live CodeSha256=%s manifest artifact_sha256=%s -> already_built=%s"
+        % (live_cfg0.get("CodeSha256") if live_rc0 == 0 else "?", pre_declared_sha, already_built))
+    if already_built:
+        print("-- SKIPPING the rebuild/upload: the function already serves the manifest's declared "
+              "sha -- re-uploading would mint a needless new S3 version and manufacture a phantom "
+              "volatile diff at arm (d). Reading the current build-store state instead (no write). --")
+        result["build_rc"] = 0
+        sm2 = sm_pre
+    else:
+        print("-- rebuilding irpt-directory-search (build-and-upload.sh, single-function mode) --")
+        bash = git_bash()
+        if not bash:
+            raise SystemExit("ERROR: no Git Bash found (git_bash_resolver) -- refusing bare 'bash' "
+                             "(WSL-stub trap)")
+        build_cmd = [bash, os.path.join(REPO, "infra", "aws", "lambda", "ci", "build-and-upload.sh"),
+                    "investor-reporting", "irpt-directory-search"]
+        rc, out, err = run(build_cmd, timeout=180)
+        print(out[-4000:])
+        if err.strip():
+            print("STDERR (tail):", err[-2000:])
+        result["build_rc"] = rc
+        if rc != 0:
+            print("ERROR: build-and-upload.sh rc=%d -- STOPPING arm (c) here" % rc)
+            return False, result
+        sm2 = load_source_map()
 
-    sm2 = load_source_map()
     built_sha = sm2["functions"]["irpt-directory-search"]["artifact_sha256"]
     built_key = sm2["functions"]["irpt-directory-search"]["artifact_s3_key"]
     print("built artifact_sha256 (base64, this run): %s" % built_sha)
@@ -706,10 +800,642 @@ def arm_c():
     return True, result
 
 
+# ---------------------------------------------------------------------------------------------
+# ARM (d): THE SUBTRACTION GATE (CTO compared-object term @ac63a41207) + APPLY
+# ---------------------------------------------------------------------------------------------
+def tf_show_json(root, plan_file):
+    root_dir = os.path.join(REPO, "infra", "aws", "terraform", "investor-reporting", root)
+    p = subprocess.run([TERRAFORM, "show", "-json", plan_file], cwd=root_dir,
+                       capture_output=True, timeout=180)
+    if p.returncode != 0:
+        raise SystemExit("ERROR: terraform show -json failed for %s: %s"
+                         % (root, p.stderr.decode("utf-8", "replace")[:500]))
+    return json.loads(p.stdout.decode("utf-8"))
+
+
+def subtract_within_entry(entry):
+    """Deep-walk ONE resource_changes entry, removing version_id/last_modified wherever they
+    appear WITHIN it, but only when the entry itself is a data.aws_s3_object read (the signed
+    subtraction set). Returns (paths_removed, entry_after)."""
+    is_s3_data_read = (entry.get("mode") == "data" and entry.get("type") == "aws_s3_object")
+    if not is_s3_data_read:
+        return 0, entry
+    removed = [0]
+
+    def walk(node):
+        if isinstance(node, dict):
+            out = {}
+            for k, v in node.items():
+                if k in ("version_id", "last_modified"):
+                    removed[0] += 1
+                    continue
+                out[k] = walk(v)
+            return out
+        if isinstance(node, list):
+            return [walk(x) for x in node]
+        return node
+
+    return removed[0], walk(entry)
+
+
+def is_noop(entry):
+    actions = (entry.get("change") or {}).get("actions") or []
+    return actions in ([], ["no-op"])
+
+
+def subtraction_gate(plans):
+    """PER ROOT: compare `resource_changes`, WHOLE, minus the subtraction set applied WITHIN
+    each entry -- never the whole show-json document. Returns (ok, per_root_substantive,
+    total_compared, total_subtracted)."""
+    total_compared = 0
+    total_subtracted = 0
+    per_root_substantive = {}
+    for root in TF_ROOTS:
+        doc = tf_show_json(root, plans[root])
+        rcs = doc.get("resource_changes") or []
+        compared = len(rcs)
+        subtracted_here = 0
+        substantive = []
+        for e in rcs:
+            n, e2 = subtract_within_entry(e)
+            subtracted_here += n
+            if not is_noop(e2):
+                substantive.append(e2)
+        total_compared += compared
+        total_subtracted += subtracted_here
+        per_root_substantive[root] = substantive
+        print("root=%-12s resource_changes entries compared=%d  paths subtracted (observed)=%d  "
+              "substantive after subtraction=%d" % (root, compared, subtracted_here, len(substantive)))
+        for e in substantive:
+            ch = e.get("change") or {}
+            before = ch.get("before") if isinstance(ch.get("before"), dict) else {}
+            after = ch.get("after") if isinstance(ch.get("after"), dict) else {}
+            print("    address=%s actions=%s before.source_code_hash=%s after.source_code_hash=%s"
+                  % (e.get("address"), ch.get("actions"), (before or {}).get("source_code_hash"),
+                     (after or {}).get("source_code_hash")))
+    print()
+    print("TOTAL DENOMINATOR: %d resource_changes entries compared across %d roots; "
+          "%d paths subtracted (observed)" % (total_compared, len(TF_ROOTS), total_subtracted))
+
+    ok = True
+    directory_state = None  # "ALREADY-APPLIED" | "PENDING-APPLY" | "STOP"
+    dir_sub = per_root_substantive["directory"]
+    if len(dir_sub) == 0:
+        directory_state = "ALREADY-APPLIED"
+        print("directory root: 0 substantive entries after subtraction -- the desired code change "
+              "is ALREADY REFLECTED (idempotent re-run reading).")
+    elif len(dir_sub) == 1:
+        e = dir_sub[0]
+        ch = e.get("change") or {}
+        before = ch.get("before") or {}
+        after = ch.get("after") or {}
+        cond = (e.get("address") == "module.irpt_directory_search.aws_lambda_function.this"
+               and ch.get("actions") == ["update"]
+               and before.get("source_code_hash") == PRIOR_LIVE_CODESHA
+               and after.get("source_code_hash") == BUILT_CODESHA)
+        if cond:
+            directory_state = "PENDING-APPLY"
+            print("directory substantive entry MATCHES THE SIGNED SHAPE (update, %s -> %s) -- "
+                  "PENDING-APPLY" % (before.get("source_code_hash"), after.get("source_code_hash")))
+        else:
+            directory_state = "STOP"
+            ok = False
+            print("STOP: directory's ONE substantive entry does NOT match the signed shape: "
+                  "address=%s actions=%s before=%s after=%s"
+                  % (e.get("address"), ch.get("actions"), before.get("source_code_hash"),
+                     after.get("source_code_hash")))
+    else:
+        directory_state = "STOP"
+        ok = False
+        print("STOP: directory root has %d substantive entries after subtraction (expected 0 or 1)"
+              % len(dir_sub))
+
+    for root in TF_ROOTS:
+        if root == "directory":
+            continue
+        n = len(per_root_substantive[root])
+        good = (n == 0)
+        ok = ok and good
+        print("root=%-12s substantive-after-subtraction=%d -> %s"
+              % (root, n, "EMPTY (OK)" if good else "NOT EMPTY -- STOP (content outside the "
+                                                     "subtraction set)"))
+    return ok, directory_state, total_compared, total_subtracted
+
+
+def arm_d():
+    print()
+    print("=" * 100)
+    print("ARM (d) -- THE SUBTRACTION GATE + APPLY")
+    print("=" * 100)
+
+    # 1. PRE-VERIFY: v2 packet blob at HEAD, both halves naming it.
+    rc, head_blob, _ = run(["git", "rev-parse", "HEAD:%s" % V2_PACKET_REL])
+    head_blob = head_blob.strip()
+    print("v2 packet %s at HEAD: blob %s (expected %s) -> %s"
+          % (V2_PACKET_REL, head_blob or "ABSENT", V2_BLOB,
+             "MATCH" if head_blob == V2_BLOB else "MISMATCH"))
+    if head_blob != V2_BLOB:
+        print("ARM (d): STOP -- the packet blob at HEAD does not match. Arm (d) does not run.")
+        return False, {}
+
+    halves_ok = 0
+    for who, path in (("COO", COO_HALF_REL), ("CTO", CTO_HALF_REL)):
+        rc2, text, _ = run(["git", "show", "HEAD:%s" % path])
+        present = rc2 == 0
+        naming = present and (V2_BLOB in text)
+        halves_ok += int(naming)
+        print("  %s half %s at HEAD: present=%s naming-the-blob=%s" % (who, path, present, naming))
+    print("halves naming the v2 blob: %d of 2" % halves_ok)
+    if halves_ok != 2:
+        print("ARM (d): STOP -- a half is absent or does not name the blob. Arm (d) does not run.")
+        return False, {}
+
+    # 2. Rebuild (idempotent) and verify at rest; confirm latest S3 version == BUILT_CODESHA.
+    #
+    # SKIP THE UPLOAD when the function is ALREADY SERVING the built sha (a re-run of this
+    # battery after a prior pass's apply already landed): build-and-upload.sh's S3 PutObject
+    # mints a NEW version_id on every call even when the CONTENT is byte-identical, and Terraform
+    # renders that as a fresh "update" action on aws_lambda_function.this whose ONLY drift is
+    # `s3_object_version`/`last_modified` -- a volatile field the signed subtraction set was
+    # written to cover, but which surfaces HERE as an attribute of the lambda resource itself,
+    # never as a separately-listed `data.aws_s3_object` entry (measured: 0 mode=="data" entries
+    # in resource_changes on this module, every run). Re-uploading on an already-applied re-run
+    # would manufacture exactly the volatility class this order exists to eliminate. So: rebuild
+    # only when the desired transition has not yet landed.
+    print()
+    live_before_rc, live_before_cfg, _ = aws_json(["lambda", "get-function-configuration",
+                                                   "--function-name", "irpt-directory-search",
+                                                   "--query", "{CodeSha256:CodeSha256,ContractsDir:Environment.Variables.IRPT_CONTRACTS_DIR}"])
+    already_served = (live_before_rc == 0 and live_before_cfg.get("CodeSha256") == BUILT_CODESHA
+                      and live_before_cfg.get("ContractsDir") == "/var/task/contracts")
+    print("pre-rebuild check: live CodeSha256=%s ContractsDir=%s -> already_served=%s"
+          % (live_before_cfg.get("CodeSha256") if live_before_rc == 0 else "?",
+             live_before_cfg.get("ContractsDir") if live_before_rc == 0 else "?", already_served))
+    if already_served:
+        print("-- SKIPPING the rebuild/upload: the function already SERVES the built sha and the "
+              "env -- re-uploading here would mint a needless new S3 version and manufacture a "
+              "phantom volatile diff. Verifying against the CURRENT build-store state instead. --")
+        sm = load_source_map()
+        built_sha = sm["functions"]["irpt-directory-search"]["artifact_sha256"]
+    else:
+        print("-- rebuild (idempotent) + verify at rest --")
+        bash = git_bash()
+        if not bash:
+            raise SystemExit("ERROR: no Git Bash found (git_bash_resolver)")
+        rc, out, err = run([bash, os.path.join(REPO, "infra", "aws", "lambda", "ci", "build-and-upload.sh"),
+                           "investor-reporting", "irpt-directory-search"], timeout=180)
+        print(out[-2000:])
+        if rc != 0:
+            print("ARM (d): STOP -- rebuild rc=%d" % rc)
+            return False, {}
+        sm = load_source_map()
+        built_sha = sm["functions"]["irpt-directory-search"]["artifact_sha256"]
+    print("built artifact_sha256 this run: %s (expected %s) -> %s"
+          % (built_sha, BUILT_CODESHA, "MATCH" if built_sha == BUILT_CODESHA else "MISMATCH -- STOP"))
+    if built_sha != BUILT_CODESHA:
+        print("ARM (d): STOP -- rebuild produced a different sha than the signed packet names.")
+        return False, {}
+
+    rc, versions, err = aws_json(["s3api", "list-object-versions", "--bucket", ARTIFACT_BUCKET,
+                                  "--prefix", ARTIFACT_KEY,
+                                  "--query", "Versions[?Key=='%s'].{VersionId:VersionId,LastModified:LastModified,IsLatest:IsLatest}" % ARTIFACT_KEY])
+    latest = next((v for v in (versions or []) if v.get("IsLatest")), None) if rc == 0 else None
+    rollback_present = any(v.get("VersionId") == ROLLBACK_VERSION for v in (versions or [])) if rc == 0 else False
+    print("build-store latest version: %s (this run's rebuild); rollback source %s present: %s"
+          % (latest.get("VersionId") if latest else "?", ROLLBACK_VERSION, rollback_present))
+    if latest:
+        got = s3_get_and_hash(ARTIFACT_BUCKET, ARTIFACT_KEY, latest.get("VersionId"))
+        print("latest version content sha256(b64): %s -> %s"
+              % (got, "MATCHES BUILT" if got == BUILT_CODESHA else "DOES NOT MATCH -- STOP"))
+        if got != BUILT_CODESHA:
+            return False, {}
+    if not rollback_present:
+        print("ARM (d): STOP -- the rollback source version is no longer present in the build store.")
+        return False, {}
+
+    # 3. Fresh plan, all 7 roots.
+    print()
+    print("-- terraform plan, 7 roots (vendored binary) --")
+    os.makedirs(PLAN_DIR, exist_ok=True)
+    plans = {}
+    for root in TF_ROOTS:
+        root_dir = os.path.join(REPO, "infra", "aws", "terraform", "investor-reporting", root)
+        run([TERRAFORM, "init", "-input=false"], cwd=root_dir, timeout=180)
+        plan_file = os.path.join(PLAN_DIR, "%s.tfplan" % root)
+        rc_plan, out_plan, err_plan = run([TERRAFORM, "plan", "-input=false", "-no-color",
+                                          "-out=%s" % plan_file], cwd=root_dir, timeout=180)
+        tail = "\n".join(out_plan.splitlines()[-5:])
+        print("root=%-12s plan_rc=%d\n  %s" % (root, rc_plan, tail.replace("\n", "\n  ")))
+        plans[root] = plan_file
+
+    # 4. THE SUBTRACTION GATE.
+    print()
+    print("-- the subtraction gate --")
+    gate_ok, directory_state, compared, subtracted = subtraction_gate(plans)
+    result = {"gate_ok": gate_ok, "directory_state": directory_state,
+             "compared": compared, "subtracted": subtracted}
+    if not gate_ok:
+        print()
+        print("ARM (d): GATE REFUSES -- a root carries content outside the subtraction set. "
+              "Nothing is applied. This is EVIDENCE, not an obstacle (row this run).")
+        return False, result
+
+    # 5. APPLY (only if pending); otherwise re-verify the already-applied state.
+    print()
+    if directory_state == "PENDING-APPLY":
+        print("-- APPLYING the directory root (ledger already open+closed by this pass's operator "
+              "act, or opened fresh here if not) --")
+        rc_sentinel, _, _ = run(["git", "rev-parse", "--verify", "--quiet", "HEAD:%s" % LEDGER_SENTINEL_REL])
+        if rc_sentinel == 0:
+            print("STOP: a prior OPEN ledger sentinel is still committed at HEAD -- refusing a "
+                  "second concurrent apply. Close it first.")
+            return False, result
+        rc_open, out_open, err_open = run(["python", os.path.join(REPO, ".tools", "deploy_ledger.py"),
+                                          "open", "--slug", LEDGER_SLUG,
+                                          "--title", "IB-rtf-13 apply -- directory-search contract member + IRPT_CONTRACTS_DIR env, subtraction gate PASS",
+                                          "--author", "0.9.0_WK_IRPT_BCKEND~1",
+                                          "--lambda", "irpt-directory-search", "--window-hours", "2"])
+        print(out_open)
+        if rc_open != 0:
+            print("STOP: could not open the deploy ledger: %s" % err_open[:500])
+            return False, result
+        apply_rc, apply_out, apply_err = run(["bash", os.path.join(REPO, ".tools", "safe-apply.sh"),
+                                             "-chdir=infra/aws/terraform/investor-reporting/directory",
+                                             "apply", "-input=false", "-no-color",
+                                             plans["directory"]], timeout=300)
+        print(apply_out[-3000:])
+        if apply_err.strip():
+            print("STDERR (tail):", apply_err[-1500:])
+        result["apply_rc"] = apply_rc
+        if apply_rc != 0:
+            print("ARM (d): STOP -- safe-apply rc=%d" % apply_rc)
+            return False, result
+        result["applied_this_run"] = True
+    else:
+        print("directory root already reflects the signed change (ALREADY-APPLIED-AND-VERIFIED) -- "
+              "no apply needed this run.")
+        result["applied_this_run"] = False
+
+    # 6. POST-CONDITION VERIFICATION (read at the event, R-40).
+    print()
+    print("-- post-condition verification --")
+    rc_plan2, out_plan2, _ = run([TERRAFORM, "plan", "-input=false", "-no-color"],
+                                 cwd=os.path.join(REPO, "infra", "aws", "terraform",
+                                                 "investor-reporting", "directory"), timeout=180)
+    zero_diff = "No changes." in out_plan2
+    print("post-apply re-plan, directory root: %s" % ("0-DIFF" if zero_diff else "DIFF REMAINS -- STOP"))
+    result["post_apply_zero_diff"] = zero_diff
+
+    rc, cfg, err = aws_json(["lambda", "get-function-configuration",
+                            "--function-name", "irpt-directory-search",
+                            "--query", "{CodeSha256:CodeSha256,ContractsDir:Environment.Variables.IRPT_CONTRACTS_DIR,LastModified:LastModified}"])
+    live_sha = cfg.get("CodeSha256") if rc == 0 else None
+    contracts_dir = cfg.get("ContractsDir") if rc == 0 else None
+    print("live CodeSha256 NOW: %s (expected %s) -> %s" % (live_sha, BUILT_CODESHA,
+          "MATCH" if live_sha == BUILT_CODESHA else "MISMATCH -- STOP"))
+    print("live IRPT_CONTRACTS_DIR: %s" % contracts_dir)
+    result["live_codesha256"] = live_sha
+    result["contracts_dir"] = contracts_dir
+
+    rc, loc, err = aws_json(["lambda", "get-function", "--function-name", "irpt-directory-search",
+                            "--query", "Code.Location"])
+    member_present = False
+    served_sha = None
+    if rc == 0 and loc:
+        scratch = os.path.join(REPO, ".scratch")
+        os.makedirs(scratch, exist_ok=True)
+        zip_path = os.path.join(scratch, "irpt-directory-search-served.zip")
+        try:
+            urllib.request.urlretrieve(loc, zip_path)
+            with open(zip_path, "rb") as fh:
+                zb = fh.read()
+            served_sha = base64.b64encode(hashlib.sha256(zb).digest()).decode("ascii")
+            import zipfile
+            zf = zipfile.ZipFile(zip_path)
+            names = zf.namelist()
+            member_present = "contracts/DirectoryEntry.schema.json" in names
+            print("served zip downloaded and re-hashed: %s (expected %s) -> %s; member present: %s"
+                  % (served_sha, BUILT_CODESHA, "MATCH" if served_sha == BUILT_CODESHA else "MISMATCH",
+                     member_present))
+        except Exception as exc:  # noqa: BLE001
+            print("ERROR downloading/verifying served zip: %s: %s" % (type(exc).__name__, exc))
+    result["served_sha_match"] = (served_sha == BUILT_CODESHA)
+    result["member_present"] = member_present
+
+    ok = (zero_diff and live_sha == BUILT_CODESHA and contracts_dir == "/var/task/contracts"
+         and result["served_sha_match"] and member_present)
+    print()
+    print("ARM (d): %s" % ("PASS" if ok else "FAIL"))
+    return ok, result
+
+
+# ---------------------------------------------------------------------------------------------
+# ARM (e): THE LIVE PROOF, UNDER THE DEPLOYED ROLE AND BYTES -- the directory route only
+# ---------------------------------------------------------------------------------------------
+def emit(line=""):
+    for s in SECRETS_SEEN:
+        if s:
+            line = line.replace(s, "<REDACTED>")
+    print(line, flush=True)
+
+
+def now_iso():
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def sha256_hex(b):
+    return hashlib.sha256(b).hexdigest()
+
+
+def http(method, path, token=None, body=None, query=None, cookie=None):
+    url = BASE + path
+    if query:
+        url += "?" + "&".join("%s=%s" % (k, urllib.request.quote(str(v))) for k, v in query.items())
+    headers = {"User-Agent": UA, "X-Contract-Version": "v1", "Origin": BASE}
+    if token:
+        headers["Authorization"] = "Bearer " + token
+    if cookie:
+        headers["Cookie"] = cookie
+    data = None
+    if body is not None:
+        data = json.dumps(body).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    req = urllib.request.Request(url, data=data, method=method, headers=headers)
+    try:
+        r = urllib.request.urlopen(req, timeout=60)
+        return r.status, r.headers, r.read()
+    except urllib.error.HTTPError as e:
+        return e.code, e.headers, e.read()
+
+
+def as_json(b):
+    try:
+        return json.loads(b.decode("utf-8"))
+    except ValueError:
+        return None
+
+
+def classify(status, j):
+    out = {"http": status}
+    if isinstance(j, dict):
+        st = j.get("status") or {}
+        out.update({"operation": j.get("operation"), "firm_id": j.get("firm_id"),
+                   "code": st.get("public_reason_code"), "state": st.get("state")})
+        if status < 400 and "data" in j:
+            out["class"] = "SERVED"
+            return out
+        if out["code"] == "UNEXPECTED":
+            out["class"] = "UNEXPECTED"
+        elif out.get("firm_id") or out["code"] == "FIRM_BINDING":
+            out["class"] = "POLICY"
+        else:
+            out["class"] = "UNRESOLVED"
+        return out
+    out["class"] = "UNEXPECTED" if status >= 500 else "UNRESOLVED"
+    return out
+
+
+def jwt_claims(tok):
+    seg = tok.split(".")[1]
+    seg += "=" * (-len(seg) % 4)
+    return json.loads(base64.urlsafe_b64decode(seg.encode()).decode("utf-8"))
+
+
+def f_precondition():
+    emit("  PRECONDITION: the rtf-9 packet's 2 of 2 halves at HEAD")
+    rc, head, _ = run(["git", "rev-parse", "--verify", "--quiet", "HEAD:%s" % RTF9_PACKET_REL])
+    rc2, wt, _ = run(["git", "hash-object", os.path.join(REPO, RTF9_PACKET_REL)])
+    pk = (rc == 0 and head.strip() == RTF9_BLOB == wt.strip())
+    n = 0
+    for who, path in RTF9_HALVES.items():
+        rc3, text, _ = run(["git", "show", "HEAD:%s" % path])
+        n += int(rc3 == 0 and RTF9_BLOB in text)
+    emit("  rtf-9 packet blob at HEAD %s (== %s: %s); halves naming it %d of 2"
+        % (head.strip(), RTF9_BLOB, pk, n))
+    return pk and n == 2
+
+
+def prefix_scan(ddb, label):
+    ok = True
+    for table, attr, prefix in ((USERS, "PK", "USER#usr_irptrtf13_"), (USERS, "email", "irpt-rtf13-test-"),
+                                (PARTNER, "email", "irpt-rtf13-test-")):
+        d = ddb.scan(TableName=table, Select="COUNT", FilterExpression="begins_with(#a, :p)",
+                    ExpressionAttributeNames={"#a": attr}, ExpressionAttributeValues={":p": {"S": prefix}})
+        ok = ok and d["Count"] == 0
+        emit("  %s: %s %s begins_with '%s': %d of %d scanned" % (label, table, attr, prefix,
+                                                                  d["Count"], d["ScannedCount"]))
+    return ok
+
+
+def create_principal(ddb, epoch, password, created):
+    email = "irpt-rtf13-test-%d@opal.test" % epoch
+    pk = "USER#usr_irptrtf13_%d" % epoch
+    created.update({"email": email, "pk": pk})
+    created_at = now_iso()
+    pw_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(rounds=10, prefix=b"2a")).decode("ascii")
+    SECRETS_SEEN.append(pw_hash)
+    k1 = {"PK": {"S": pk}, "SK": {"S": "PROFILE"}, "email": {"S": email}, "passwordHash": {"S": pw_hash},
+         "name": {"S": "IRPT test principal (IB-rtf-13)"}, "role": {"S": "user"}, "firmId": {"S": FIRM},
+         "status": {"S": "active"}, "createdAt": {"S": created_at}, "createdBy": {"S": "0.9.0_WK_IRPT_BCKEND~1 IB-rtf-13"}}
+    ddb.put_item(TableName=USERS, Item=k1, ConditionExpression="attribute_not_exists(PK)")
+    got1 = ddb.get_item(TableName=USERS, Key={"PK": {"S": pk}, "SK": {"S": "PROFILE"}}, ConsistentRead=True).get("Item")
+    emit("  K1 created: PK %s; consistent read-back present: %s" % (pk, got1 is not None))
+    k1b = {"email": {"S": email}, "advisorKey": {"S": ADVISOR}}
+    ddb.put_item(TableName=PARTNER, Item=k1b, ConditionExpression="attribute_not_exists(email)")
+    got = ddb.get_item(TableName=PARTNER, Key={"email": {"S": email}}, ConsistentRead=True).get("Item")
+    emit("  K1b created in %s: consistent read-back present: %s; attributes %s" % (PARTNER, got is not None, sorted(got or {})))
+    ok = (got1 is not None and sorted(got1) == sorted(k1) and got is not None and sorted(got) == ["advisorKey", "email"])
+    return {"email": email, "pk": pk, "ok": ok, "k1_created": created_at}
+
+
+def login(email, password):
+    status, headers, body = http("POST", "/auth/login", body={"email": email, "password": password})
+    j = as_json(body) or {}
+    tok = j.get("accessToken") if isinstance(j, dict) else None
+    cookies = headers.get_all("Set-Cookie") or []
+    refresh = next((c.split(";", 1)[0] for c in cookies if c.startswith("refresh_token=")), None)
+    for s in (tok, refresh, refresh.split("=", 1)[1] if refresh else None):
+        if s:
+            SECRETS_SEEN.append(s)
+    out = {"http": status, "token": tok, "refresh_cookie": refresh}
+    emit("  login POST /auth/login -> HTTP %d; access token minted=%s; refresh cookie set=%s"
+        % (status, bool(tok), bool(refresh)))
+    if tok:
+        c = jwt_claims(tok)
+        out["claims"] = c
+        emit("  K2 claims: firmId=%s role=%s advisorKey=%s" % (c.get("firmId"), c.get("role"), c.get("advisorKey")))
+    return out
+
+
+def rollback(ddb, created, sess):
+    emit("  ROLLBACK -- K1b then K1, each verified by a failing consistent read; refresh refused; 401 after exp")
+    out = {"k1b_deleted": None, "k1_deleted": None, "refresh_refused": None, "expired_refused": None}
+    if created.get("email"):
+        ddb.delete_item(TableName=PARTNER, Key={"email": {"S": created["email"]}})
+        gone = ddb.get_item(TableName=PARTNER, Key={"email": {"S": created["email"]}}, ConsistentRead=True).get("Item") is None
+        out["k1b_deleted"] = now_iso() if gone else None
+        emit("  K1b DeleteItem -> gone: %s" % gone)
+    if created.get("pk"):
+        ddb.delete_item(TableName=USERS, Key={"PK": {"S": created["pk"]}, "SK": {"S": "PROFILE"}})
+        gone = ddb.get_item(TableName=USERS, Key={"PK": {"S": created["pk"]}, "SK": {"S": "PROFILE"}}, ConsistentRead=True).get("Item") is None
+        out["k1_deleted"] = now_iso() if gone else None
+        emit("  K1 DeleteItem -> gone: %s" % gone)
+    try:
+        if sess.get("refresh_cookie"):
+            st, _, b = http("POST", "/auth/refresh", cookie=sess["refresh_cookie"])
+            j = as_json(b) or {}
+            minted = isinstance(j, dict) and bool(j.get("accessToken"))
+            refused = st != 200 and not minted
+            out["refresh_refused"] = now_iso() if refused else None
+            emit("  REFRESH after K1's delete: HTTP %d, minted=%s -> %s" % (st, minted, "REFUSED" if refused else "NOT REFUSED"))
+        if sess.get("token"):
+            exp = sess["claims"].get("exp", 0)
+            wait = exp + 10 - time.time()
+            emit("  waiting %.0f s for exp+10s" % max(wait, 0))
+            if wait > 0:
+                time.sleep(wait)
+            st, _, _b = http("GET", PFX + "/status", sess["token"])
+            out["expired_refused"] = now_iso() if st == 401 else None
+            emit("  access token after exp: GET /status -> HTTP %d -> %s" % (st, "REFUSED 401" if st == 401 else "NOT 401"))
+    except Exception as exc:  # noqa: BLE001
+        emit("  EXCEPTION in post-delete checks: %s: %s" % (type(exc).__name__, str(exc)[:300]))
+    return out
+
+
+def arm_e():
+    print()
+    print("=" * 100)
+    print("ARM (e) -- THE LIVE PROOF, UNDER THE DEPLOYED ROLE AND BYTES (directory route)")
+    print("=" * 100)
+    sts = boto3.client("sts")
+    identity = sts.get_caller_identity()["Arn"]
+    emit("  operator identity: %s (creates/deletes the test principal's keys only; the SERVED "
+        "compute runs as irpt-directory-search's OWN execution role, printed per request)" % identity)
+
+    if not f_precondition():
+        emit("  STOP at the precondition: nothing written")
+        return False, {}
+
+    ddb = boto3.client("dynamodb", region_name="us-east-1")
+    s3 = boto3.client("s3", region_name="us-east-1")
+    lam = boto3.client("lambda", region_name="us-east-1")
+
+    cfg = lam.get_function_configuration(FunctionName="irpt-directory-search")
+    role = cfg["Role"].split("/")[-1]
+    emit("  route %s%s/directory/* -> function irpt-directory-search -> execution role %s (CodeSha256 %s)"
+        % (BASE, PFX, role, cfg["CodeSha256"]))
+
+    try:
+        om = json.loads(s3.get_object(Bucket=OM_BUCKET, Key=OM_KEY)["Body"].read().decode("utf-8"))
+        present = ADVISOR in (om.get("advisors") or {})
+    except Exception as exc:  # noqa: BLE001
+        emit("  GUARD ERROR reading s3://%s/%s: %s" % (OM_BUCKET, OM_KEY, exc))
+        return False, {}
+    emit("  GUARD: %s present in s3://%s/%s: %s" % (ADVISOR, OM_BUCKET, OM_KEY, present))
+    if not present:
+        emit("  STOP at the guard: nothing written")
+        return False, {}
+
+    if not prefix_scan(ddb, "before"):
+        emit("  STOP: a principal key already exists (residue) -- nothing written")
+        return False, {}
+
+    password = secrets.token_urlsafe(24)
+    SECRETS_SEEN.append(password)
+    created, sess = {}, {}
+    req_ok = keys_ok = False
+    rows = []
+    s92 = {}
+    try:
+        k = create_principal(ddb, int(time.time()), password, created)
+        sess = login(k["email"], password)
+        c = sess.get("claims") or {}
+        keys_ok = k["ok"] and sess.get("http") == 200 and c.get("firmId") == FIRM and c.get("advisorKey") == ADVISOR
+        emit("  keys read back and the session as the rtf-9 packet declares: %s" % keys_ok)
+        if keys_ok:
+            tok = sess["token"]
+
+            def go(label, method, path, body=None, query=None, want="SCOPE"):
+                st, _, b = http(method, PFX + path, tok, body=body, query=query)
+                j = as_json(b)
+                c2 = classify(st, j)
+                c2["sha256"] = sha256_hex(b)
+                c2["label"] = label
+                ok2 = c2["class"] in ("SERVED", "POLICY") and (want == "SCOPE" or c2.get("code") == want or c2["class"] == want)
+                c2["ok"] = ok2
+                rows.append(c2)
+                emit("    %-52s %-6s -> %s http %d code %s firm_id %s | sha256 %s -> %s"
+                    % (label, method, c2["class"], st, c2.get("code"), "present" if c2.get("firm_id") else "ABSENT",
+                       c2["sha256"][:16], "AS REQUIRED" if ok2 else "NOT AS REQUIRED"))
+                return j, c2
+
+            j1, _ = go("directory search WITH a query (q=a)", "GET", "/directory/search",
+                       query={"q": "a", "limit": "25"}, want="SERVED")
+            d1 = j1.get("data") if isinstance(j1, dict) and isinstance(j1.get("data"), list) else []
+            j2, _ = go("directory search, a no-match query", "GET", "/directory/search",
+                       query={"q": "zzqqxxnomatch13", "limit": "25"})
+            d2 = j2.get("data") if isinstance(j2, dict) and isinstance(j2.get("data"), list) else None
+            first = d1[0] if d1 else {}
+            ids = first.get("ids") or {}
+            j3, _ = go("directory resolve WITH a selection", "POST", "/directory/resolve",
+                       body={"selection": {"relationship_id": ids.get("relationship_id")}})
+            d3 = j3.get("data") if isinstance(j3, dict) else None
+            resolved = isinstance(d3, dict) and d3.get("ok") is True
+
+            # NEGATIVE CONTROL: a foreign firm's id, smuggled as a claimed-firm field -- expect
+            # FIRM_BINDING, and the swapped value never echoed back in the response body.
+            st_neg, _, b_neg = http("GET", PFX + "/directory/search", tok,
+                                    query={"q": "a", "limit": "5", "firm_id": FOREIGN_FIRM})
+            j_neg = as_json(b_neg)
+            c_neg = classify(st_neg, j_neg)
+            echoed = FOREIGN_FIRM.encode("utf-8") in b_neg
+            neg_ok = (c_neg.get("code") == "FIRM_BINDING") and not echoed
+            rows.append({"label": "NEGATIVE: foreign firm_id=%s claimed" % FOREIGN_FIRM,
+                        "class": c_neg["class"], "ok": neg_ok})
+            emit("    NEGATIVE: firm_id=%s claimed on /directory/search -> http %d code %s echoed=%s -> %s"
+                % (FOREIGN_FIRM, st_neg, c_neg.get("code"), echoed, "REFUSED WITHOUT ECHO" if neg_ok else "NOT AS REQUIRED"))
+
+            unexpected = sum(1 for r in rows if r["class"] == "UNEXPECTED")
+            ok_n = sum(1 for r in rows if r.get("ok"))
+            emit("  requests scope-resolved as required: %d of %d; UNEXPECTED %d" % (ok_n, len(rows), unexpected))
+            s92_search = isinstance(d2, list) and len(d2) == 0 and len(d1) > 0
+            emit("  S92 search: q=a -> %d entries, no-match -> %s entries -> %s"
+                % (len(d1), len(d2) if isinstance(d2, list) else "n/a",
+                   "HONOURED (FIXED)" if s92_search else "NOT HONOURED"))
+            emit("  S92 resolve: ok=%s -> %s" % ((d3 or {}).get("ok") if isinstance(d3, dict) else None,
+                 "RESOLVES (FIXED)" if resolved else "DOES NOT RESOLVE"))
+            req_ok = (ok_n == len(rows) and unexpected == 0)
+            s92 = {"search": s92_search, "resolve": resolved}
+    except Exception as exc:  # noqa: BLE001
+        emit("  EXCEPTION during the act: %s: %s -- rollback now" % (type(exc).__name__, str(exc)[:300]))
+    finally:
+        rb = rollback(ddb, created, sess)
+
+    after_ok = prefix_scan(ddb, "after")
+    life_ok = (bool(rb.get("k1b_deleted")) and bool(rb.get("k1_deleted")) and bool(rb.get("refresh_refused"))
+              and bool(rb.get("expired_refused")) and after_ok)
+    emit("  (e) keys+login %s; requests scope-resolved with 0 UNEXPECTED %s; lifecycle closed %s; "
+        "S92 search %s, resolve %s" % (keys_ok, req_ok, life_ok,
+        "FIXED" if s92.get("search") else "NOT FIXED", "FIXED" if s92.get("resolve") else "NOT FIXED"))
+    ok = keys_ok and req_ok and life_ok
+    print("ARM (e): %s" % ("PASS" if ok else "FAIL"))
+    return ok, {"rows": rows, "life_ok": life_ok, "s92": s92, "role": role}
+
+
 def main():
     ok_a, rows = arm_a()
     ok_b = arm_b()
     ok_c, result_c = arm_c()
+
+    ok_d, result_d = (False, {})
+    ok_e, result_e = (False, {})
+    if ok_a and ok_b and ok_c:
+        ok_d, result_d = arm_d()
+        if ok_d:
+            ok_e, result_e = arm_e()
+        else:
+            print()
+            print("ARM (e): NOT RUN -- arm (d) did not PASS.")
 
     print()
     print("=" * 100)
@@ -719,13 +1445,20 @@ def main():
     print("arm (b) member+env:         %s" % ("PASS" if ok_b else "FAIL"))
     print("arm (c) packet+halves:      %s (halves_present=%s)" % (
           "PASS" if ok_c else "STOP (expected this pass)", result_c.get("halves_present")))
+    print("arm (d) subtraction gate+apply: %s (directory_state=%s)" % (
+          "PASS" if ok_d else "FAIL/NOT-RUN", result_d.get("directory_state")))
+    print("arm (e) live proof:         %s" % ("PASS" if ok_e else "FAIL/NOT-RUN"))
     print()
+    if ok_a and ok_b and ok_c and not (ok_d and ok_e):
+        print("ARM (d)/(e) did not both PASS -- R70-AC1 is not satisfied this run. See output above "
+              "for which arm stopped and why.")
+        return 1
     if ok_a and ok_b and not ok_c and result_c.get("halves_present", 0) < 2:
         print("THIS IS THE EXPECTED FIRST-PASS OUTCOME: (a) and (b) hold, (c) stops truthfully "
               "on ABSENT halves. Token WITHHELD (not printed) -- the criterion is not satisfied "
               "this pass and the order stays open.")
         return 0
-    if ok_a and ok_b and ok_c:
+    if ok_a and ok_b and ok_c and ok_d and ok_e:
         print("IBR70-CONTRACT-STAGED-SERVED-AND-SEARCH-ANSWERS")
         return 0
     print("ARM FAILURE OUTSIDE THE EXPECTED SHAPE -- see output above.")
