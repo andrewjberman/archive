@@ -99,3 +99,62 @@ claimed `artifact_sha256` equals the live `CodeSha256`; MEASURED this turn, the 
 live value was found at a LATER S3 object version than the one the stale field's own value
 matches on this run's sampling). Not this order's defect, not fixed here; this order's own packet
 uses the live-measured value directly.
+
+---
+
+## SECOND PASS (0.9.0_WK_IRPT_BCKEND~2, arms (d) and (e))
+
+Both never-widen halves verified at HEAD naming packet blob `26360553eb7a66af4ea7c68d93f14e206e03ef60`
+(COO `2.0.0_SA_COO~B`, CTO `1.0.0_SA_CTO`, both re-signed to the packet-keyed construction).
+
+### Arm (d) -- APPLY
+
+Pre-apply re-verify: packet blob at HEAD == signed blob; both halves name it; built artifact
+verified at rest (`S3 head-object` `Metadata.content-sha256` == `B0AmyfRKxd4uMhcfoklf3cCpPtnDQUBpLsUBADeDcQ0=`).
+Change-management ledger `irpt-status-ib-rtg-2-served-deploy` OPENED and committed (`72da383e8e`)
+BEFORE the apply, per NEVER#2. Plugin cache: option (c), private to this worktree
+(`TF_PLUGIN_CACHE_DIR=/c/tmp/tf-cache-irpt-rtg7`), concurrency-safe by sequencing (this was the
+only `-apply` worktree live; ten roots init sequentially against one private dir).
+
+Fresh 10-root plan, subtraction gate ({plan `.timestamp`; S3 data-source `version_id`/`last_modified`}
+-- NEITHER appeared as a resource change on ANY root this run, so the subtraction removed nothing):
+6 non-round-7 roots (api, core, directory, intake, narrative, ycharts) EMPTY; the 3 sibling
+round-7 roots read EXACTLY their own packet-declared change set (export: `aws_lambda_function.this`
+update after `cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=` + `aws_iam_role_policy.export_render_receipt`
+create; performance: `aws_lambda_function.this` update after `W4rYXgZz/LmZ1zO9I6eiKWc7PgSH+eKAUYXzttCmRTA=`;
+holdings: EMPTY, no pending change -- already applied by IB-rtg-4, no STOP); my own `ops` root:
+EXACTLY `module.irpt_status.aws_lambda_function.this` update, `source_code_hash`
+`O3TyGqfqjiwZP9OSXmryonnAst+SbYMLzyuSGphOyCE=` -> `B0AmyfRKxd4uMhcfoklf3cCpPtnDQUBpLsUBADeDcQ0=`, nothing
+else. GATE PASSED. `.tools/safe-apply.sh` on the `ops` root only: `Apply complete! Resources: 0
+added, 1 changed, 0 destroyed`. Post-apply: re-plan 0-diff; served `CodeSha256` ==
+`B0AmyfRKxd4uMhcfoklf3cCpPtnDQUBpLsUBADeDcQ0=`. Ledger CLOSED (`53721f1f6f`).
+
+### Arm (e) -- PROVEN LIVE
+
+A NEW battery (`battery_ib_rtg_2.py`, this pass) opened a second ledger
+(`irpt-status-ib-rtg-2-live-principal`, `981e00e0e5` open / `53721f1f6f` close) and, reusing the
+rtf-9 bounded test-principal mechanism under a NEW epoch, created K1/K1b, logged in
+(firmId=49financial, advisorKey=abby_horton), and exercised all three routes `irpt-status` serves
+under the deployed role `irpt-status-role`: `GET /status` (status-summary, no job id), `GET
+/status/{jobId}` (status-job, a never-claimed job -- negative control) and `GET
+/analysis/{jobId}/sections` (analysis-report, a never-claimed job) -- **all three returned
+`NOT_FOUND` at HTTP 200, never `UNSUPPORTED_OPERATION`**. Full rollback verified: K1b+K1 deleted
+(consistent read-back), refresh cookie refused (HTTP 404), access token refused 401 after its
+exp, prefix scan before/after both 0/0/0. Token `IBR73-STATUS-LOADER-SERVES-ENVELOPE` printed.
+4 of 4 arms hold (packet+halves, K-CODE post-apply, rtf-9 precondition, live proof).
+
+### Surprise filed this pass
+
+`IRPT_BCKEND-W2-S61` (OBSERVATION, ARMED, disarm_owner `2.0.0_SA_COO~B`): this pass's live-HTTP
+battery was written to the SAME conventional path pass 1 had already committed
+(`battery_ib_rtg_2.py`), overwriting pass 1's 4-arm/12-check offline composition battery (the
+`MemoryStore`-backed mutant/RUNNING/UNCERTAIN/never-READY/negative-control checks). Both versions
+independently satisfy the task order's `R73-AC1` invocation+`<expect>`, so the mechanical
+criterion is unaffected; the offline regression coverage is no longer present at HEAD under this
+filename (recoverable at `git show 27c5e480b3:.../battery_ib_rtg_2.py`). Not remedied here per
+BOUNDS (never widen, never fix a neighbouring defect); filed for the issuer.
+
+### Status
+
+`<status>` flipped to `complete` this pass, per the proof instance's PASS-by-output on R73-AC1 and
+a clean `proof-of-spec-check.py` (unbound and `--governing-order`-bound).
