@@ -1,0 +1,87 @@
+====================================================================================================
+ARM (a) -- MEASURE FIRST, printed with denominators
+====================================================================================================
+S105 -- aligned RECEIPT_KEY_TEMPLATE assignment present: True
+S105 -- a writer of the aligned address exists in finalize_export(): True
+S106 -- OLD class-name forward-list test removed: True
+S106 -- NEW code-based (isinstance + Error.Code) test present: True
+
+-- reader/writer address alignment (computed this run, not assumed) --
+writer (handler.receipt_key)      = firms/49financial/generations/EXP-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/receipt.json
+reader (entry.RECEIPT_KEY_TEMPLATE) = firms/49financial/generations/EXP-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/receipt.json
+ALIGNED: True
+RECEIPT_KEY_TEMPLATE's RUNTIME VALUE still the OLD out-of-layout default: False (expect False)
+aligned address matches the PRE-EXISTING GetObject grant (firms/*/generations/*/attempts/*/exports/*): False (expect False -- a new grant is required and added, see the packet)
+
+ARM (a): PASS
+
+====================================================================================================
+ARM (b) -- THE SOURCE EDIT + BUILD
+====================================================================================================
+keys.py registered in files[] and staged_from[]: True
+
+-- rebuilding irpt-export-render (build-and-upload.sh, single-function mode) --
+
+Lambda Build-and-Upload
+  Pipeline:  investor-reporting
+  Bucket:    s3://opal-313476888478-lambda-artifacts/investor-reporting/
+  JSON tool: node
+  Function:  irpt-export-render (single-function mode)
+
+Found 1 function(s) to build
+
+-> irpt-export-render
+  Source:  infra/aws/lambda/investor-reporting/export
+  Files:   assets.py bundle.py dispatch.py download.py enforce.py errors.py exclusion.py handler.py identity.py ids.py keys.py package.py receipt.py render.py resolve.py entry.py served.py loaders.py data/custodian_key_seam.json raw_keys.json
+  OK: staged enforce.py <- infra/aws/lambda/investor-reporting/_authz/enforce.py@4ee8426c72 (38096 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged keys.py <- infra/aws/lambda/investor-reporting/_keys/keys.py@6e764ef0aa (29894 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged errors.py <- infra/aws/lambda/investor-reporting/_authz/errors.py@6e764ef0aa (10652 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged resolve.py <- infra/aws/lambda/investor-reporting/_scope/resolve.py@6e764ef0aa (30966 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged data/custodian_key_seam.json <- infra/aws/lambda/investor-reporting/_ids/data/custodian_key_seam.json@c28c728a30 (191120 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged ids.py <- infra/aws/lambda/investor-reporting/_ids/ids.py@c28c728a30 (19296 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged raw_keys.json <- infra/aws/lambda/investor-reporting/_ids/raw_keys.json@47f21dab95 (6492 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged loaders.py <- infra/aws/lambda/investor-reporting/_authz/loaders.py@c28c728a30 (6934 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged served.py <- infra/aws/lambda/investor-reporting/_authz/served.py@4ee8426c72 (41902 bytes, sha256 verified, not committed at the packaged path)
+  OK: import-closure -- 18 packaged .py file(s), every top-level import satisfied by package/stdlib/runtime/layer. (Nested lazy imports exempt by design.)
+  SHA256:  cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=
+  Size:    156K
+  ✓ s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-export-render.zip (write VERIFIED: size=157997, sha256 metadata match)
+
+================================================
+Complete — 1 function(s) built and uploaded
+
+Source map updated with artifact_s3_key + artifact_sha256.
+
+Next steps:
+  git add infra/aws/lambda/ci/lambda-source-map.json
+  git commit -m 'ci: upload artifacts for investor-reporting'
+  cd infra/aws/terraform/investor-reporting
+  .tools/terraform.exe plan    # should show Lambda updates
+  .tools/terraform.exe apply
+  .tools/terraform.exe plan    # must show No changes
+  bash infra/aws/lambda/ci/record-terraform-deploy.sh investor-reporting --version investor-reporting-vX.Y.Z \
+       --author "{your-serial} <{your-serial}@opal.agent>"
+  # --author is REQUIRED for correct attribution: record-terraform-deploy
+  # commits, and its commit must be authored by a permitted agent serial.
+  # Omitting it derives the serial from .comp-graph/.agent_context (shared,
+  # best-effort) -- pass it explicitly to be sure.
+
+built artifact_sha256 (base64, this run): cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=
+ARM (b): PASS
+
+====================================================================================================
+ARM (c) -- THE PACKET, AND THE HALVES
+====================================================================================================
+LIVE CodeSha256 (read live, this run): 9IMayS94if11cyKq51TbcyBG8cUwbbUWlQMlT9XhiaQ=  LastModified=2026-09-19T17:20:04.000+0000
+MANIFEST-DECLARED artifact_sha256 (this worktree's last build): cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=
+(these two DIFFER until arm (d) applies -- that is the expected pre-apply state)
+packet at C:\tmp\wk-irpt-7-1\org\missions\D9\IRPT\IRPT_BCKEND\deliverables\0.9.0_WK_IRPT_BCKEND~1\NEVER_WIDEN_SIGNOFF_PACKET_IB-rtg-1.md -- blob 74a1004fde6e649c321f43d62cfbda5b61489b98 (measured this run; the COMMITTED blob may differ until the commit lands)
+COO half candidates: ABSENT
+CTO half candidates: ABSENT
+halves present: 0 of 2
+
+ARM (c): STOP HERE -- halves ABSENT (0 of 2). R72-AC1 FAILS TRUTHFULLY AT (c). Arm (d)/(e) are NOT run this pass. The order stays open. THIS IS THE ORDER'S OWN STATED EXPECTED FIRST-PASS OUTCOME.
+
+====================================================================================================
+SUMMARY: arm(a)=True arm(b)=True arm(c)=False
+NOT PASSED THIS RUN -- see the STOP line above for the reason (expected on a first pass whose never-widen halves are ABSENT).
