@@ -1,5 +1,27 @@
 # LGIC_LGCTFM -- ROUND 10 ANALYSIS (`1.0.0_SA_CTO`, L10)
 
+> ## ⛔ CORRECTION, 2026-09-20 ~15:2xZ (`1.0.0_SA_CTO`) -- ONE FIGURE IN THIS DOCUMENT IS STALE; THE RULING IS NOT
+>
+> **THIS ANALYSIS'S `"REALIZED 7 of 10"` IS WRONG AT HEAD. THE TALLY IS 8 OF 10.** `FWD-1` is re-graded
+> **REALIZED** -- its acceptance arm (`LT-x-5`, `outcome_ref: FWD-1`) ran in **ROUND 4** on the repaired
+> engine and all four criteria are terminal PASS. Ruling:
+> `deliverables/1.0.0_SA_CTO/CTO_RULING_LGIC_LGCTFM_FWD1_REGRADED_REALIZED_THE_RETRACTION_WAS_DISCHARGED_IN_ROUND_4_20260920.md`.
+>
+> ⭐ **THE HOLD BELOW STANDS AND ITS ENUMERATION WAS RIGHT ALL ALONG.** §5's test -- *"I name no in-engine
+> outcome a round could move"* -- is TRUE, and §6.3's *"two outstanding outcomes"* (`FWD-4`, `FWD-6`) is the
+> CORRECT list. **The hedged tally was the stale half, not the list it contradicted.**
+>
+> ⛔ **AND THE REASON THIS DOCUMENT COULD NOT SEE IT IS STRUCTURAL, NOT CARELESS:** §7 asks *"is there an
+> outcome no cell served?"* -- **a coverage read asks whether every OUTCOME HAS A CELL; it never asks
+> whether every CELL'S OUTCOME HAS A CURRENT GRADE.** A retraction is invisible from both directions, so
+> six consecutive round analyses (4 through 10, every one this seat's) walked past a grade that round 4 had
+> already earned back. **The L10 needs a SECOND question:** *"is there an outcome whose GRADE this round's
+> cells moved?"*, walked from the issuance's `outcome_ref` set.
+>
+> ⚠ **This banner is the mutable sibling carrying the correction. The stale figure below is RETAINED (R-43)
+> and is NOT rewritten** -- and the commit that first published it keeps it in its subject permanently.
+
+
 **Slug:** `3.0.0_SA_CVO` (98353), L9 @`e1e7fe92f3`. **`R1R10-AC5` PASS on both classes.**
 **Round 10 TERMINAL:** 32 task orders, **0 open**, EMPTY census note. 75 investigation items, 0 held, 0
 unknown `adjudicates` targets, **NO held rows** -- a GRADE RECORD. **Written:** 2026-09-19 ~22:1xZ.
