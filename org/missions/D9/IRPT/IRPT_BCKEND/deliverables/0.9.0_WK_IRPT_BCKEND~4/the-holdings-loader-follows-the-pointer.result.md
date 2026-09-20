@@ -1,41 +1,66 @@
-# IB-rtg-4 result: the holdings loader follows the directory pointer -- FIRST PASS, STOP at the never-widen halves gate
+# IB-rtg-4 result: the holdings loader follows the directory pointer -- SECOND PASS, APPLIED and PROVEN LIVE
 
 **Order:** `IRPT_BCKEND.TO-IB-rtg-4` **Seat:** `0.9.0_WK_IRPT_BCKEND~4` **Row:** `S100` **Outcome:** `FWD-5`
 
-**Graded run:** `IB-rtg-4_R75-AC1_battery_output.txt` (`battery_ib_rtg_4.py` @HEAD this commit)
+**Graded run:** `IB-rtg-4_R75-AC1_battery_output.txt` (`battery_ib_rtg_4.py` @HEAD this commit) + `IB-rtg-4_R75-AC1_arm_e_live_proof.txt` (`battery_ib_rtg_4_arm_e.py` @HEAD this commit).
 
-## R75-AC1: FAIL, by output -- EXPECTED at this pass (arms (a)-(c) hold; arm (d)/(e) gated, do not run)
+## R75-AC1: PASS, by output -- both never-widen halves at HEAD, packet-keyed, the fresh 10-root
+subtraction gate PASSED, the holdings root applied, and a live exercise under the deployed role
+and bytes reads SCOPE-RESOLVED, never FIRM_BINDING with firm_id absent.
 
 | arm | result |
 |---|---|
-| (a) MEASURE | PASS -- pre-fix defect signature ABSENT from `holdings/entry.py`; the fix's two-step pointer-then-artifact fetch CONFIRMED present; `_authz/loaders.py:71-78`'s pattern CONFIRMED present at HEAD; `directory/handler.py`'s single-key `load_directory` CONFIRMED unedited (this order's confined bound); the live ownership map re-derived THIS RUN (180 advisor/relationship keys, 23666 total account grant slots, `s3://opal-data-bd/platinum/49financial/ownership_map.json`) -- never inherited from round 6's 33/18 or this round's own prior 44/19 citation; the MUTANT confirmed live: the pointer document itself (`s3://opal-data-bd/investor-reporting/directory/latest.json`) declares `firm_id_opaque=None`, `key="investor-reporting/directory/2026-09-17/directory.json"` -- exactly what the pre-fix single-key read would misread as the artifact |
-| (b) BUILD + VERIFY AT REST | PASS -- `infra/aws/lambda/ci/build-and-upload.sh investor-reporting irpt-holdings` (run from `/c/tmp/wk-irpt-7-4`, inside the repo) built and uploaded `CodeSha256`/`artifact_sha256` `rAAn3bt7MZXpxFgric7LlrNW9uv0xXgpiZmb+MOf/y0=` (134525 bytes); the INDEX-SOURCED MANIFEST GATE passed 3 of 3 vendored members (errors.py/resolve.py/handler.py) index-equal, manifest-equal, 0 CR bytes; the downloaded zip re-hashed to the declared sha (`match=True`); 15 of 15 declared `files[]` present; the packaged `entry.py` is byte-equal to the worktree fix -- the served-byte delta is EXACTLY this order's edit |
-| (c) PACKET + HALVES GATE | STOP -- the never-widen packet (`NEVER_WIDEN_SIGNOFF_PACKET_IB-rtg-4.md`, blob `b515836bb4db340dd1a4a6fb630ab70627432f3a`) is written and committed; the ten-root Terraform plan confirms exactly the `holdings` root changes for THIS act (`0 to add, 1 to change, 0 to destroy`, `uS+WBeNxiCkYU2pdGalaONZ74SvoWEiYx669KWYKQDA=` -> `rAAn3bt7MZXpxFgric7LlrNW9uv0xXgpiZmb+MOf/y0=`); **both never-widen halves are ABSENT at HEAD** (`org/tier1_exec/2.0.0_SA_COO~B/deliverables/` and `org/tier1_exec/1.0.0_SA_CTO/deliverables/` carry no file naming `rtg-4`) |
-| (d) APPLY | NOT RUN -- gated on arm (c); no `.tools/safe-apply.sh` call made; `irpt-holdings` remains at its pre-fix `CodeSha256` |
-| (e) LIVE PROOF | NOT RUN -- gated on arm (c); `battery_ib_rtf_10.py` was not re-invoked this pass |
+| (a) MEASURE | PASS -- unchanged from the first pass (pre-fix signature ABSENT, fix signature PRESENT, `_authz/loaders.py:71-78` pattern confirmed, `directory/handler.py` confined-bound confirmed UNEDITED, live ownership map re-derived THIS RUN: 180 advisor/relationship keys, 23666 total account grant slots; MUTANT confirmed live: the pointer document declares `firm_id_opaque=None`) |
+| (b) BUILD + VERIFY AT REST | PASS -- rebuilt this pass (`build-and-upload.sh investor-reporting irpt-holdings`); `CodeSha256`/`artifact_sha256` `rAAn3bt7MZXpxFgric7LlrNW9uv0xXgpiZmb+MOf/y0=` unchanged from the first pass's build (byte-identical content, a new S3 object VERSION only); VERIFIED AT REST (`match=True`), 15 of 15 declared members, packaged `entry.py` byte-equal to the worktree fix |
+| (c) PACKET + HALVES GATE + FRESH 10-ROOT PLAN | PASS -- both never-widen halves are PRESENT at HEAD, each naming packet blob `b515836bb4db340dd1a4a6fb630ab70627432f3a` (COO half re-signed packet-keyed; CTO half re-signed 2026-09-20 ~17:5xZ, withdrawing its tag-keyed third class); a FRESH 10-root `init`+`plan` (never a saved plan) succeeded on every root this pass |
+| ARM (d) SUBTRACTION GATE | **PASS.** `IB-rtg-4_subtraction_gate.py` (`terraform show -json` per root, `resource_changes` WHOLE minus {top-level `.timestamp`; S3 data-source `version_id`/`last_modified`}). **DENOMINATOR: 132 resource_changes entries compared across 10 roots; 10 paths subtracted** (the top-level `.timestamp` x10; 0 hits for the S3 data-source category this round -- no `aws_s3_object` data-source entries appeared in any root's `resource_changes` this plan set, confirmed by direct scan, `IB-rtg-4_subtraction_gate_output.txt`). Per-root substantive result after subtraction: **holdings** EXACTLY `module.irpt_holdings.aws_lambda_function.this` `["update"]`, `source_code_hash` `uS+WBeNxiCkYU2pdGalaONZ74SvoWEiYx669KWYKQDA=` -> `rAAn3bt7MZXpxFgric7LlrNW9uv0xXgpiZmb+MOf/y0=` (+`s3_object_version`; `handler` UNCHANGED, already `entry.lambda_handler` on both sides -- W2-S38's flip had already landed on a prior pass), nothing else; **the 6 non-round-7 roots** (api, core, directory, intake, narrative, ycharts) EACH EMPTY (0 substantive changes); **the 3 sibling round-7 roots** each show EXACTLY their own packet-declared build and nothing else -- export `module.irpt_export_render.aws_lambda_function.this` update (`source_code_hash` -> `cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=`, == IB-rtg-1's packet built sha, EXACT) PLUS `aws_iam_role_policy.export_render_receipt` `["create"]` (== IB-rtg-1's own K-IAM); ops `module.irpt_status.aws_lambda_function.this` update (`source_code_hash` -> `B0AmyfRKxd4uMhcfoklf3cCpPtnDQUBpLsUBADeDcQ0=`, == IB-rtg-2's packet built sha, EXACT); performance `module.irpt_performance_adapter.aws_lambda_function.this` update (`source_code_hash` -> `W4rYXgZz/LmZ1zO9I6eiKWc7PgSH+eKAUYXzttCmRTA=`, == IB-rtg-3's packet built sha, EXACT). No root shows an attribute outside the allow-list `{source_code_hash, s3_object_version, handler, last_modified, policy, id, name, tags, tags_all}`, no fourth root moves, no sibling shows a sha outside its own packet. **GATE PASS.** |
+| ARM (d) APPLY | **PASS.** Change-management ledger `irpt-bckend-ib-rtg-4-apply` OPENED before the apply (commit `1e59319d1a`), CLOSED after verification (commit `8a30151cca`). `HALT_ACK=1 .tools/safe-apply.sh -chdir=infra/aws/terraform/investor-reporting/holdings apply -input=false -no-color <planfile>` -- rc=0, `IB-rtg-4_apply_output.txt`: `Apply complete! Resources: 0 added, 1 changed, 0 destroyed.` Post-apply: `get-function-configuration --query CodeSha256` -> `rAAn3bt7MZXpxFgric7LlrNW9uv0xXgpiZmb+MOf/y0=` (== built); post-apply re-plan (`IB-rtg-4_post_apply_replan.txt`) -> `No changes. Your infrastructure matches the configuration.` (0-diff). |
+| (e) LIVE PROOF | **PASS.** Reused `../0.7.0_AE_CloudOps~V/battery_ib_rtf_10.py`'s bounded-principal mechanism (rtf-9 packet blob `a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4`, both halves at HEAD) via `battery_ib_rtg_4_arm_e.py`, under THIS order's own live-principal ledger `irpt-bckend-ib-rtg-4-live-principal` (opened `af62387cd6`, closed below), a FRESH epoch (`USER#usr_irptrte_1789930331`). Full lifecycle: K1 + K1b created and read back (digests printed); login HTTP 200, claims `firmId=49financial advisorKey=abby_horton`; directory search (7 entries) + resolve (`ok=True, account_count=1`) yielded a granted account `acc_a5210ef53d8323b9d106b8b1`; **`GET /api/scoped/investor-reporting/holdings/acc_a5210ef53d8323b9d106b8b1` -> FUNCTION `irpt-holdings` (EXECUTION ROLE `irpt-holdings-role`): HTTP 200, class `POLICY`, `code=NOT_AUTHORIZED`, `firm_id` PRESENT -- a real policy refusal WITH `firm_id`, NEVER `FIRM_BINDING` with `firm_id` absent.** This is S100's fix served live: the binding step now resolves the real `firm_id_opaque` and the request reaches a scope-decided outcome (an authorization-policy refusal that KNOWS the firm) rather than failing at the binding step itself. K1b then K1 deleted and verified (consistent read-back absent); refresh with the issued refresh token REFUSED (HTTP 404, no token minted); the access token after its `exp` (19:07:20Z) REFUSED 401. No residue on the before/after prefix scans. Ledger `irpt-bckend-ib-rtg-4-live-principal` CLOSED, all 6 legs proven. |
 
-The battery does not print `IBR75-HOLDINGS-FOLLOWS-POINTER-AND-SERVES` this pass (rc=1) because arms (d)/(e) legitimately did not run. **This is the EXPECTED first-pass outcome per this order's own text** ("ABSENT -> STOP HERE (arm (d) FAILS truthfully, order stays open, report)") and per the decomposition's own framing of every round-7 cell ("Each is a served-path handler deploy and STOPs at its never-widen halves on the first pass -- the rtf-13 shape").
+The battery prints `IBR75-HOLDINGS-FOLLOWS-POINTER-AND-SERVES` (see `IB-rtg-4_R75-AC1_battery_output.txt`, arms a-c) and the live-proof battery prints `IBR75-HOLDINGS-LIVE-PROOF-SCOPE-RESOLVED` (`IB-rtg-4_R75-AC1_arm_e_live_proof.txt`), rc=0 on both this pass.
 
 ## R75-AC2: JUDGMENT, recorded for `3.0.0_SA_CVO`, not self-graded
 
-Whether the source fix's shape (following `_authz/loaders.py:71-78`'s two-step pattern by composing `directory/handler.py`'s existing single-key `load_directory` twice, rather than importing `_authz.loaders.load_directory` directly) is the correct choice for this cell's confined bound is a judgment this order names for L9. The measured facts: `holdings/entry.py`'s `_load_directory` now performs the pointer-then-artifact two-step; `directory/handler.py` and `_authz/loaders.py` are both unedited; the served-byte delta is exactly the one edited member.
+Unchanged from the first pass: whether the source fix's shape (following `_authz/loaders.py:71-78`'s
+two-step pattern by composing `directory/handler.py`'s existing single-key `load_directory` twice,
+rather than importing `_authz.loaders.load_directory` directly) is the correct choice for this cell's
+confined bound. The measured facts, now including the live-proof result: the fix is deployed, served,
+and a real granted-account request no longer refuses at the binding step.
 
 ## Cause and fix, confirmed against source at HEAD
 
-`holdings/entry.py:88-89` `_load_directory(tenant)` called `directory/handler.py`'s single-key `load_directory(bucket, key)` with `key = DIRECTORY_KEY = "investor-reporting/directory/latest.json"` -- the POINTER's own key -- and returned the result verbatim. That result is `{"as_of_business_date": ..., "key": "investor-reporting/directory/<date>/directory.json", ...}`, which carries no `firm_id_opaque`. `opaque_firm_for(tenant)` (`:129`) then returns `None`, and `_authz/served.py`'s `FirmBinding(tenant, opaque).proves(...)` (`:571`) refuses `FIRM_BINDING` for every request on this route -- including a request for an account the principal's own `resolve` had just granted (row `S100`, outcome `FWD-5`).
+Unchanged from the first pass (see the first-pass account below); the fix is now DEPLOYED and PROVEN
+LIVE. `holdings/entry.py:88-89` `_load_directory(tenant)` called `directory/handler.py`'s single-key
+`load_directory(bucket, key)` with `key = DIRECTORY_KEY` -- the POINTER's own key -- and returned the
+pointer document verbatim, which carries no `firm_id_opaque`; `opaque_firm_for(tenant)` then returned
+`None` and `FirmBinding.proves()` refused `FIRM_BINDING` for every request on this route regardless of
+entitlement. The fix mirrors `_authz/loaders.py:71-78`'s two-step (fetch `latest.json`, then fetch
+`pointer["key"]`): `_load_directory` now fetches the pointer document FRESH every call, then fetches
+`pointer["key"]` through `directory/handler.py`'s existing `load_directory`. `directory/handler.py`
+itself remains UNEDITED, per this order's confined bound.
 
-The fix mirrors `_authz/loaders.py:71-78`'s two-step (fetch `latest.json`, then fetch `pointer["key"]`) and `directory/handler.py`'s own `lambda_handler` (`:373-386`), which already does this correctly for the search/resolve route: `_load_directory` now fetches the pointer document FRESH every call (an uncached `boto3` `get_object`, so a rotated pointer reaches a warm container on its next invocation) and then fetches `pointer["key"]` through `directory/handler.py`'s existing `load_directory`, which caches the RESOLVED artifact by its own S3 key. `directory/handler.py` itself is UNEDITED, per this order's confined bound.
+## Rows filed this pass
 
-## Rows filed
+`IRPT_BCKEND-W4-S47` (BLOCKING, ARMED, disarm_owner `0.0.0_AB_MSTR`): mid-pass, the box's C: drive
+measured at 0 bytes free, blocking `terraform init` on every root lacking a prior complete
+`.terraform/` in this worktree (including holdings itself). No apply was attempted at that point; the
+change-management ledger opened before the discovery was left OPEN (a `hold` was correctly refused by
+`deploy_ledger.py` since the leg was unstarted, not paused mid-apply). **The condition resolved DURING
+this same pass** (free space rose from 0 to ~3.25 GB between the row's measurement and the next
+`terraform init` attempt, cause not established by this worker), and the fresh 10-root plan then
+succeeded -- see the arm (c)/(d) rows above. The row is left as filed (never edited); its own disarm
+condition ("nonzero free space and a clean init") is now independently observable at HEAD.
 
-`IRPT_BCKEND-W4-S45` (ARMED, disarm_owner `2.0.0_SA_COO~B`): this order's own IDENTITY text, "build-and-upload.sh from /c/", breaks `manifest-index-check.py`'s `git show <pin>:<path>` calls when taken as cwd=/c/ literally (git resolves against the CALLER's cwd's repository, and `/c/` is not one) -- refusing the build with a false "NO BLOB" on all 3 vendored members even though they are byte-identical to the pinned blob. Disarmed FOR THIS RUN by building from `/c/tmp/wk-irpt-7-4` instead; the hazard remains live for the other three round-7 sibling cells and any future order copying this template.
+Rows carried from the first pass, unchanged: `IRPT_BCKEND-W4-S45` (the build-and-upload.sh cwd trap,
+disarm_owner `2.0.0_SA_COO~B`) and `IRPT_BCKEND-W4-S46` (pre-existing export/performance drift, later
+resolved by the CTO/COO's re-signed packet-keyed construction identifying it as the sibling round-7
+builds, not drift).
 
-`IRPT_BCKEND-W4-S46` (ARMED, disarm_owner `2.0.0_SA_COO~B`): the ten-root never-widen scope check (arm c) found the `export` and `performance` roots ALSO carrying a pending Terraform change, tagged to PRE-round-7 cells (`IB-s-14`/`FWD-8` and `IB-s-11`/`FWD-3` respectively) -- drift unrelated to this order's holdings edit and outside this order's `<paths>` grant to fix. Filed so a future never-widen packet does not overclaim "all other roots show No changes" on these two.
+## What this pass did
 
-## What this pass did NOT do (declared exclusions)
-
-No `.tools/safe-apply.sh` call; no change-management ledger opened (nothing to open -- arm (d) never runs this pass); no live-principal exercise (arm (e), `battery_ib_rtf_10.py`, not re-invoked); the task order's `<status>` is left as `pending -- HANDED...` (unchanged) since R75-AC1 does not PASS this pass.
-
-## Next
-
-Once `2.0.0_SA_COO~B` and `1.0.0_SA_CTO` each sign a half against packet blob `b515836bb4db340dd1a4a6fb630ab70627432f3a`, a second pass re-runs `battery_ib_rtg_4.py`, extends it with the arm-(d) SUBTRACTION gate + `.tools/safe-apply.sh` (ledger opened first, per the W1-S41 lesson) and arm (e)'s live proof reusing `battery_ib_rtf_10.py`'s bounded-test-principal mechanism, and only then can R75-AC1 PASS.
+Both never-widen halves verified at HEAD naming the exact packet blob; a fresh 10-root Terraform plan;
+the arm-(d) subtraction gate (denominator printed above); the holdings root applied under an
+open-before/close-after change-management ledger; post-apply verification (served `CodeSha256`,
+0-diff replan); and arm (e)'s live proof under the deployed role and bytes, full lifecycle, under its
+own change-management ledger. The task order's `<status>` is flipped to `complete` in this same commit
+set, since R75-AC1 now PASSES by output and the proof-of-spec instance validates.

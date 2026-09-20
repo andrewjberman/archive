@@ -276,20 +276,40 @@ def arm_c(built_info):
     print("ARM (c) -- THE PACKET: TEN-ROOT PLAN + THE HALVES GATE")
     print("=" * 100)
     plans = {}
+    plan_failures = []
     for root in TF_ROOTS:
         root_dir = os.path.join(REPO, "infra", "aws", "terraform", "investor-reporting", root)
-        rc_init, _o, e_init = run([TERRAFORM, "init", "-input=false"], cwd=root_dir, timeout=180)
+        try:
+            rc_init, _o, e_init = run([TERRAFORM, "init", "-input=false"], cwd=root_dir, timeout=180)
+        except subprocess.TimeoutExpired:
+            rc_init, e_init = 124, "TIMEOUT"
         plan_file = os.path.join(SCRATCH, "ib_rtg_4_%s.tfplan" % root)
-        rc_plan, out_plan, e_plan = run([TERRAFORM, "plan", "-input=false", "-no-color",
-                                         "-out=%s" % plan_file], cwd=root_dir, timeout=180)
-        tail = "\n".join(out_plan.splitlines()[-8:])
-        print("root=%-12s init_rc=%d plan_rc=%d" % (root, rc_init, rc_plan))
-        print("  " + tail.replace("\n", "\n  "))
+        if rc_init == 0:
+            try:
+                rc_plan, out_plan, e_plan = run([TERRAFORM, "plan", "-input=false", "-no-color",
+                                                 "-out=%s" % plan_file], cwd=root_dir, timeout=180)
+            except subprocess.TimeoutExpired:
+                rc_plan, out_plan, e_plan = 124, "", "TIMEOUT"
+        else:
+            rc_plan, out_plan, e_plan = None, "", ""
+        tail = "\n".join(out_plan.splitlines()[-8:]) if out_plan else (e_init if rc_init != 0 else "")
+        print("root=%-12s init_rc=%s plan_rc=%s" % (root, rc_init, rc_plan))
+        print("  " + str(tail).replace("\n", "\n  ")[:1200])
         plans[root] = plan_file
+        if rc_init != 0 or (rc_plan is not None and rc_plan != 0):
+            plan_failures.append((root, rc_init, rc_plan, (e_init or "")[:300] or (e_plan or "")[:300]))
 
     print()
     print("-- ten-root plan summary: the ONLY root expected to show a change is 'holdings' "
           "(1 to change), every other root expected 'No changes' (never-widen scope check) --")
+    plan_ok = (len(plan_failures) == 0)
+    if not plan_ok:
+        print()
+        print("FRESH 10-ROOT PLAN FAILED on %d of %d root(s): %s"
+              % (len(plan_failures), len(TF_ROOTS),
+                 ["%s(init_rc=%s,plan_rc=%s)" % (r, ri, rp) for r, ri, rp, _ in plan_failures]))
+        for r, ri, rp, msg in plan_failures:
+            print("  %-12s: %s" % (r, msg))
 
     print()
     print("-- packet blob --")
@@ -321,7 +341,19 @@ def arm_c(built_info):
               "Arm (d) [apply] and arm (e) [live proof under deployed role+bytes] are NOT run "
               "this pass. The order stays open." % halves_present)
         return False
-    print("ARM (c): both halves present -- proceeding to (d)/(e) is a LATER pass, not this one.")
+
+    if not plan_ok:
+        print()
+        print("ARM (c): STOP HERE -- both halves are PRESENT (2 of 2), but the FRESH 10-ROOT PLAN "
+              "this arm requires COULD NOT BE TAKEN (%d of %d root(s) failed init/plan; see the "
+              "per-root output above). Per this order's own arm (d) discipline, a subtraction gate "
+              "cannot be evaluated over a plan that was never produced -- STOP HERE, do NOT apply. "
+              "Arm (d) [apply] and arm (e) [live proof] are NOT run this pass. The order stays open."
+              % (len(plan_failures), len(TF_ROOTS)))
+        return False
+
+    print("ARM (c): both halves present AND all ten roots plan cleanly -- proceeding to (d)/(e) "
+          "is a LATER pass, not this one.")
     return True
 
 
