@@ -67,6 +67,7 @@ LINES: list[str] = []
 SECRETS: list[str] = []
 ddb = boto3.client("dynamodb", region_name="us-east-1")
 s3 = boto3.client("s3", region_name="us-east-1")
+NC3_CODE: dict = {}   # the refusal code NC3 actually received, so the outcome arms can test its DISCRIMINATION
 
 
 def emit(line: str = "") -> None:
@@ -199,20 +200,33 @@ def guard() -> tuple[bool, dict]:
     om = json.loads(obj["Body"].read().decode("utf-8"))
     adv = (om.get("advisors") or {}).get(ADVISOR)
     info = {"version": head["VersionId"], "etag": head["ETag"].strip('"'),
-            "accounts": len((adv or {}).get("accounts") or []), "relationships": len((adv or {}).get("relationships") or [])}
+            "accounts": len((adv or {}).get("accounts") or []), "relationships": len((adv or {}).get("relationships") or []),
+            "permitted": set(str(a) for a in ((adv or {}).get("accounts") or []))}
     emit("  s3://%s/%s VersionId %s ETag %s at %s" % (OM_BUCKET, OM_KEY, info["version"], info["etag"], now_iso()))
     emit("  %s PRESENT=%s; accounts %d, relationships %d (packet's read 33 / 18)" % (
         ADVISOR, adv is not None, info["accounts"], info["relationships"]))
     return adv is not None, info
 
 
-def directory_facts() -> dict:
+def directory_facts(permitted: set | None = None) -> dict:
     ptr = json.loads(s3.get_object(Bucket=DIR_BUCKET, Key=DIR_POINTER)["Body"].read().decode("utf-8"))
     d = json.loads(s3.get_object(Bucket=DIR_BUCKET, Key=ptr["key"])["Body"].read().decode("utf-8"))
-    term = [e for e in d.get("entries") or [] if (e.get("termination") or {}).get("indicator") == "TERMINATED"]
+    entries = d.get("entries") or []
+    term = [e for e in entries if (e.get("termination") or {}).get("indicator") == "TERMINATED"]
     acc = next((a for e in term for a in (e.get("ids") or {}).get("account_ids") or []), None)
+    # IS A TERMINATED CLIENT ENTITLED UNDER *THIS* GRANT? handler.py:25-27 and :126 make directory
+    # visibility follow the PERMITTED ACCOUNT SET and never the termination indicator, so
+    # "terminated visible" is a property of the GRANT, not of the route. Grading the route on it when
+    # the grant entitles none would fail the world for a fact the cell does not control -- and it is
+    # the SAME fact NC3 depends on, so the two conditions are jointly unsatisfiable when it is 0.
+    ent = 0
+    if permitted is not None:
+        for e in term:
+            if set(str(a) for a in ((e.get("ids") or {}).get("account_ids") or [])) & permitted:
+                ent += 1
     return {"firm_id_opaque": d.get("firm_id_opaque"), "key": ptr["key"], "terminated": len(term),
-            "terminated_account": acc, "as_of": d.get("as_of_business_date")}
+            "terminated_account": acc, "as_of": d.get("as_of_business_date"),
+            "entries": len(entries), "entitled_terminated": ent, "grant_measured": permitted is not None}
 
 
 def create_keys(epoch: int, password: str) -> dict:
@@ -296,6 +310,7 @@ def negative_controls(tok: str, facts: dict) -> tuple[bool, list]:
         rows.append(("NC3 terminated client's account", ok))
         emit("  NC3 holdings for a TERMINATED client's account (one of %d terminated entries; id sha256 %s): %s; "
              "echoed=%s -> %s" % (facts["terminated"], sha(acc.encode())[:16], why, echo, "PASS" if ok else "FAIL"))
+        NC3_CODE["code"] = why
     else:
         rows.append(("NC3 terminated client's account", False))
         emit("  NC3: no TERMINATED entry with an account id in the live directory -> FAIL (control not runnable)")
@@ -345,13 +360,27 @@ def outcome_arms(tok: str, guard_info: dict, facts: dict) -> dict:
     emit("    firm binding by the enforcer's own read: envelope firm_id %s == directory firm_id_opaque %s -> %s"
          % (s1.get("firm_id"), facts.get("firm_id_opaque"), binding_ok))
     as_of = bool(s1.get("business_date"))
+    # GRANT-AWARE, not deleted: the route IS graded on terminated visibility whenever the grant entitles a
+    # terminated client, and is NOT graded on it when the grant entitles none -- with the denominator printed
+    # either way so the reader sees which branch was taken and why.
+    ent_term = facts.get("entitled_terminated", 0)
+    term_gradable = bool(facts.get("grant_measured")) and ent_term > 0
+    term_ok = (term_visible > 0) if term_gradable else True
+    emit("    TERMINATED: %d of %d directory entries; entitled under THIS grant %d -> %s"
+         % (facts.get("terminated", 0), facts.get("entries", 0), ent_term,
+            ("GRADABLE, require visible > 0" if term_gradable else
+             "NOT GRADABLE by this principal -- visibility follows the PERMITTED ACCOUNT SET "
+             "(directory/handler.py:25-27, :126), so 0 visible is CORRECT here and is NOT a route defect. "
+             "It is also the fact NC3 depends on: if any were entitled, NC3's refusal would need a "
+             "different account")))
     fwd1 = (st == 200 and s1.get("operation") == "directory-search" and len(data) > 0 and k is not None
-            and k + cnt == den == guard_info["accounts"] and resolved and binding_ok and as_of and term_visible > 0)
+            and k + cnt == den == guard_info["accounts"] and resolved and binding_ok and as_of and term_ok)
     res["FWD-1"] = fwd1
     emit("  FWD-1 %s: search served=%s, k+count==denominator==map=%s, resolve served=%s, binding=%s, as-of=%s, "
-         "terminated visible=%s" % ("PASS" if fwd1 else "FAIL", len(data) > 0,
-                                     k is not None and k + cnt == den == guard_info["accounts"], resolved,
-                                     binding_ok, as_of, term_visible > 0))
+         "terminated visible=%d (%s)" % ("PASS" if fwd1 else "FAIL", len(data) > 0,
+                                          k is not None and k + cnt == den == guard_info["accounts"], resolved,
+                                          binding_ok, as_of, term_visible,
+                                          "graded" if term_gradable else "not graded, grant entitles none"))
 
     # FWD-5: holdings for a permitted account (an issued account id from a WHOLE entry)
     acc = (ids.get("account_ids") or [None])[0]
@@ -378,6 +407,16 @@ def outcome_arms(tok: str, guard_info: dict, facts: dict) -> dict:
         emit("  FWD-5: no permitted account id available from the search -> FAIL (not runnable)")
     res["FWD-5"] = fwd5
     emit("  FWD-5 %s" % ("PASS" if fwd5 else "FAIL"))
+    # NC3'S DISCRIMINATION, CHECKED AGAINST THE ARM THAT CAN FALSIFY IT. NC3 claims "the terminated
+    # client's entitlement gap is ENFORCED" from a refusal. If the PERMITTED account is refused with the
+    # SAME code, that refusal shows only that the route refuses everything -- NC3 would read PASS whether or
+    # not any gap is enforced, which is a control that cannot fail. Stated here rather than left implicit.
+    nc3 = (NC3_CODE.get("code") or "")
+    p_code = s5.get("reason")
+    if acc and nc3 and p_code and nc3.split()[-1].strip("()") == str(p_code):
+        emit("  WARN: NC3 IS VACUOUS THIS RUN -- it refused with %s and the PERMITTED account was refused with the "
+             "SAME code (%s), so it cannot distinguish an enforced entitlement gap from a route that refuses "
+             "every account (row S100). Its PASS above stands as REPORTED, not as EVIDENCE." % (nc3, p_code))
 
     # FWD-2: every tab within the permitted set + k of k swaps refused without echo
     served_rows = []
@@ -491,7 +530,7 @@ def main() -> int:
     epoch = int(time.time())
     before_ok = prefix_scan("before", "USER#usr_irptrte_", "irpt-rte1-test-")
     g_ok, g_info = guard()
-    facts = directory_facts()
+    facts = directory_facts(g_info.get("permitted"))
     emit("  directory %s: firm_id_opaque %s, as_of %s, TERMINATED entries %d" % (facts["key"], facts["firm_id_opaque"], facts["as_of"], facts["terminated"]))
     if not (g_ok and before_ok):
         emit("STOP at the guard: nothing written")
