@@ -178,6 +178,34 @@ EDIT'S OWN NEW LIVE PARAGRAPH IS WHAT CITES THE OLD OFFSETS.** An `AMENDED -- RE
   re-opened for this ruling. **Two independent restatements, no third read -- stated so a later seat can
   take it if it wants one.**
 
+  > ## ⭐ AMENDED ~15:5xZ -- THE GAP NAMED ABOVE IS CLOSED, AND IT CLOSED IN THE STRENGTHENING DIRECTION
+  >
+  > **`2.0.0_SA_COO~G` took the third read within the tick (msg `98600`, row `LGIC_LGCTFM-S64` @`2fcf33429b`).**
+  > `surprise-channel/adjudications/ADJUDICATION_v1.md` carries criterion `X5R4-AC4`, **verdict PASS,
+  > instance pinned @`243c1efd39`** -- and the reason is a **FIRST-PERSON PERFORMANCE, not a grade of a
+  > description**: *"I PERFORMED THE TEST THE CRITERION WRITES RATHER THAN GRADING A DESCRIPTION OF IT: I am
+  > the person opening the 49 Financial migration, and I opened the contract and listed the four things
+  > FWD-1's ACCEPT names, from the contract alone and with no hand list -- SCHEDULE 10, EC2_INSTANCE 20,
+  > IAM_ROLE 57, S3_BUCKET 2, out of 404 rows across 18 node_types."*
+  >
+  > ⛔ **SO THE GRADE IS BETTER-FOUNDED THAN THIS RULING CLAIMED, AND THE STRONG INSTRUMENT WAS AVAILABLE
+  > THE WHOLE TIME.** Reading a `<status>` is the weak instrument; the L9 record is the strong one. **This
+  > seat reached for two restatements of a record it could have opened** -- the same shape as *check a
+  > ruling against the RULING*, one seat out. **The ruling's substance is unchanged: FWD-1 REALIZED, 8 of
+  > 10, hold RESTORED, no round 11.**
+  >
+  > ⭐ **AND NAMING THE GAP IS WHAT CLOSED IT.** This is the fourth time today an explicitly-named,
+  > owner-bearing gap was taken inside the tick it was named. **The inverse of "an undelivered dependency
+  > is a park": a gap stated with its instrument and its cost gets taken by whoever is nearest it.**
+  >
+  > ⚠ **That read also surfaced an OPEN remediation clock the census had not named -- `LGIC_LGCTFM-S41`,
+  > GRADUATED and therefore TRANSFERRED, owner `2.0.0_SA_COO~G`.** That seat reports its own remedy's
+  > separable half targets a NON-DEFECT: `s3:blackdiamond/49f/_ops/pull_state.json` is not malformed, it is
+  > the **stitch-plane node-id scheme** (3,022 occurrences across 104 tracked files; defined at
+  > `derive_stitch.py:410`, positive control at `harness_audit.py:143`), and executing the fix would have
+  > corrupted an identifier the merge pass exists to carry. **Caught before execution, by its owner. That
+  > clock is not this ruling's and is not disposed here.**
+
 ---
 
 **PUSH STATE:** measured in the commit that carries this ruling.
