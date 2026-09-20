@@ -1,77 +1,106 @@
-# IB-rtf-3 result (RE-HANDED): the test principal created, exercised by real signed requests and deleted -- the served path refuses every FIRM_ADVISOR request
+# IB-rtf-3 result (THIRD HAND): the route serves, the DISCLOSED PARTIAL is exercised and exact (k+count=44=denominator=map), the principal deleted and verified. R60-AC1 FAIL 10 of 12 -- the two remaining arms are pre-existing world defects with carriers, and one of my own controls was found VACUOUS
 
-**Order:** `org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtf-3.the-test-principal-exercised-on-the-disclosed-partial-path-and-deleted.md`, re-handed @0382e96047.
-**Seat:** `0.7.0_AE_CloudOps~V`, worktree `/c/tmp/wk-irpt-6-ae1`, branch `wk-irpt_bckend-6-ae1`.
-**Packet executed:** `NEVER_WIDEN_SIGNOFF_PACKET_IB-rtf-9.md`, blob `a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4`. Halves: COO @3c0bad02ee, CTO @4290315df9.
-**First pass (superseded):** STOP at arm (a) @1771b07216 / @700bc86ec2, row S86. That pass created nothing.
-**Battery:** `battery_ib_rtf_3.py`, the live version, blob committed @ca728267ef. Run 2026-09-19T10:25:53Z, rc 1. Output `IB-rtf-3_R60-AC1_battery_output.txt`, blob `55a69d9e5558c4604912a36e3ad6c9eae7733295` @e7da534cc6.
-**Ledger:** `irpt-bckend-ib-rtf-3-test-principal`. Its sentinel was committed @ca728267ef before any write, and it was CLOSED with 6 of 6 legs proven, committed @e7da534cc6 before the grading reads.
+**Order:** `org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtf-3.the-test-principal-exercised-on-the-disclosed-partial-path-and-deleted.md`. GO msg 98485.
 
-## The principal's closed interval
+**Seat:** `0.7.0_AE_CloudOps~V`, worktree `/c/tmp/wk-irpt-6-ae1`. Base: CLOUD merged, carrying rtf-13's apply drain `0d45a81053`.
 
-**[2026-09-19T10:25:56Z, 2026-09-19T10:41:03Z]**
+**Graded run:** `timeout 1800 py -3.12 .../battery_ib_rtf_3.py` @`5d2f3a942f`, **2026-09-20T11:43:00-11:58:24Z, rc 1**.
 
-- **Created:** K1 `opal-users-v2` `USER#usr_irptrte_1789813553` / PROFILE at 10:25:56Z, 10 attributes, read back by a consistent GetItem. Digest with `passwordHash` excluded: `8b1123122d127db1e254ef64eef47b0a94783b101f9b0b648ab752af92a6f4f3`.
-- **Created:** K1b `opal-partner-49financial` with exactly `{advisorKey, email}` at 10:25:56Z, read back. Digest `5d891293f2b4b72684a35c164cf0313d2ed750dddd0aa58439bd9851693be88f`.
-- **Guard, immediately before those writes:** the ownership map VersionId `nR.FkCE1frsI9R5zRp2wJWB7vyMZ04NK`, with `abby_horton` PRESENT, 33 accounts and 18 relationships, equal to the packet's read.
-- **Login** (the real route, `POST https://opalinvest.dev/auth/login`): HTTP 200 at 10:25:58Z. K2 carried `firmId=49financial`, `role=user`, `tier=advisor`, `advisorKey=advisorId=abby_horton`, `advisorRole=''`, with no `userType` and no `firmRole`, **exactly as the packet declares**. Access-token `exp` 10:41:03Z. The token, cookie and password were never recorded.
-- **Deleted, K1b FIRST:** K1b at 10:26:10Z, then K1 at 10:26:10Z, each verified by a consistent base-table GetItem returning no Item. **2 of 2.**
-- **Refresh (CTO half s.1):** `POST /auth/refresh` with the issued refresh token after K1's delete returned HTTP 404 and minted no token. **REFUSED, 1 of 1.**
-- **Access token after `exp`:** `GET .../status` returned HTTP 401. **REFUSED, 1 of 1.**
-- **Residue:** prefix scans after the run read 0 of 79 (`PK`), 0 of 79 (`email`) and 0 of 11 (partner). No failed-login throttle counter exists for the test e-mail.
+---
 
-## R60-AC1: FAIL by output, 9 of 12 arms
+## R60-AC1: FAIL, by output -- 10 of 12 arms hold (was 9 of 12 on the second hand)
 
-| arm | result | deciding line |
+| arm | verdict | note |
 |---|---|---|
-| (a) precondition | PASS | 2 of 2 halves at HEAD naming blob `a1f36b95b2`; packet re-hashed EQUAL |
-| (b) guard | PASS | `abby_horton` PRESENT; 33 / 18 |
-| (b) keys + login | PASS | 2 of 2 read back; claims exactly as declared |
-| (d) negative controls | PASS | 4 of 4 refused (discrimination below) |
-| (c) FWD-1 | **FAIL** | search and resolve refused `UNEXPECTED`; no entries, no `unprojected_grant`, no `firm_id` |
-| (c) FWD-2 | **FAIL** | 8 of 8 swaps refused without echo; within-set tabs served 0 of 1 (status refused `UNEXPECTED`) |
-| (c) FWD-5 | **FAIL** | not runnable: no permitted account id, because the search served nothing |
-| (c) vendor calls 0 | PASS | performance transport `recorded`, no egress variable; POST /analysis and POST /export called 0 times |
-| (e) deletes verified | PASS | 2 of 2, K1b first |
-| (e) refresh refused | PASS | HTTP 404, 1 of 1 |
-| (e) expired token refused | PASS | HTTP 401, 1 of 1 |
-| (e) no residue | PASS | 0 / 0 / 0 |
+| (a) halves at HEAD | **PASS** | 2 of 2 naming the packet blob |
+| (b) guard | **PASS** | live ownership map read immediately before any write |
+| (b) keys + login | **PASS** | 2 of 2 created and read back; claims as the packet declares |
+| (d) negative controls | **PASS** | 4 of 4 refused -- **but see s.3: NC3 is VACUOUS this run** |
+| (c) FWD-1 | **PASS** (was FAIL) | the disclosed partial, exact |
+| (c) FWD-2 | **FAIL** | within-set tabs served 0 of 2 -- `W2-S27`, `W1-S18` |
+| (c) FWD-5 | **FAIL** | permitted account refused `FIRM_BINDING` -- `S100` |
+| (c) vendor calls 0 | **PASS** | |
+| (e) deletes / refresh / expired token / residue | **PASS** x4 | lifecycle closed |
 
-FWD-11 is recorded as NOT REACHABLE by this principal (re-hand condition (v)); no request was made. The success token did not print.
+`FWD-11` remains NOT-REACHABLE by this principal (a `FIRM_ADVISOR` token carries one `firmId`; `OPAL_GLOBAL` is the SSM roster plus an opal-capital login, a separate act) -- recorded, no request made, per re-hand condition (v).
 
-## R60-AC2: JUDGMENT, recorded for 3.0.0_SA_CVO and not self-graded
+---
 
-**Is each outcome EXERCISED as its DONE WHEN reads?**
+## 1. WHAT THE THIRD HAND SETTLED: the disclosed-partial path is EXERCISED and EXACT
 
-- **FWD-1, FWD-2, FWD-5: attempted, and none reached the compute.** Every authenticated scoped request that passed the FIRM_BINDING check was refused BEFORE the scope resolved (row S90): 12 of 12, across search, resolve, status, holdings and the seven foreign-id swaps.
-- **The disclosed partial was never observed live.** No served response carried `unprojected_grant`, so the partial's `count` was not seen. The in-process figure from IB-rtf-2 (`k=21`, `count=12` of 33) is not a property of the deployed path. It was computed under operator credentials that can read the ownership map; the Lambda role cannot (S90).
-- **What the partial's count would mean for the DONE WHEN is therefore still open.** It is graded when a served response exists.
-- **FWD-11 is not reachable** by a FIRM_ADVISOR principal: it needs the roster plus an Opal login, a separate act.
+The second hand failed FWD-1/2/5 for one reason: `irpt-directory-search` raised on its missing contract and the boundary answered `UNEXPECTED`, so there were no entries, no permitted account and nothing to exercise. rtf-13's apply fixed that route. This run:
 
-**What the exercise revealed about the served routes (defects filed as rows):**
+- **search SERVED**: `HTTP 200`, `operation directory-search`, `state PARTIAL`, `reason OBJECT_NOT_COVERED`, **7 entries**, `sha256 5bba231c…`;
+- **the disclosed partial is EXACT**: `unprojected_grant count=23`, `denominator=44`, `kinds {UNPROJECTED-ID: 23}`, whole entries `k=21` -> **k + count = 44 = denominator = the ownership map's 44 accounts at the event**;
+- **resolve SERVED**: `scope_kind=RELATIONSHIP`, `account_count=1`, `ok=True`, `sha256 7a048b15…`;
+- **firm binding by the enforcer's own read**: envelope `firm_id fir_c9fc04650e2134d6ea033da2` == the directory's `firm_id_opaque`;
+- **as-of** present (`business_date 2026-09-17`);
+- **`q` is honoured**: a no-match query returned **0** entries against **7** for `q=a` -- the control that separates "search works" from "search returns everything".
 
-1. **S90 (BLOCKING, ARMED, 2.0.0_SA_COO~B): the served IRPT path answers no FIRM_ADVISOR request.** The causes, per function:
-   - `irpt-directory-search`: its role cannot read `opal-data-bd/platinum/49financial/ownership_map.json`. Simulated `implicitDeny`, with the admin positive control allowed. `_authz/loaders.py:93-116 @9f72f4d6a4` re-raises that AccessDenied.
-   - `irpt-status` and `irpt-holdings`: their deployed environments carry no `IRPT_DIRECTORY_BUCKET_MAP`, and both bucket readers raise on an unmapped firm (`loaders.py:46-56`, `holdings/handler.py:356-370 @9f72f4d6a4`). This cause is source plus environment, not simulated.
-   - **This is the first authenticated request ever sent through the real path.** Round 1's replay was unauthenticated, and IB-rtf-2's "SERVED" ran in-process.
-2. **S91 (ARMED, 1.0.0_SA_CTO): those refusals are undiagnosable.** `served.py:628, 649, 662 @9f72f4d6a4` record the exception to a `None` sink. CloudWatch held only START/END/REPORT lines for all 12 refusals; the cause in S90 was re-derived by simulation and environment reads.
-3. **S92 (ARMED, INFERRED, 2.0.0_SA_COO~B): latent behind S90.** `search` reads `q`/`limit` and `resolve` reads `selection` from the top level of a payload-2.0 event, where they never appear (`directory/entry.py:92-93, 136`; `api/integrations.tf:57 @9f72f4d6a4`). Once S90 is fixed, search would ignore its query and resolve would always answer "selection matches nothing".
+**The grant moved under the packet and the battery re-derived rather than inheriting:** the live map reads **44 accounts / 19 relationships** where the packet recorded **33 / 18**. Every count above is the live one at the event, which is why `k+count` reconciles at 44 and not at 33.
 
-**Which controls discriminated and which were vacuous:**
+---
 
-- **Discriminated.** The three FIRM_BINDING refusals: NC1 for inflection and for cottonwood, and the resolve swap with `firm_id=inflection` in the body. They fire at `served.py:614-616`, BEFORE the failing `enforcer_for`, so they measured the binding. None echoed the swapped value.
-- **NC2** (a route outside `api/scoped/`) served no IRPT envelope: HTTP 200 without an IRPT body, which is the site's default behaviour.
-- **Vacuous.** NC3 (the terminated client's account) and the seven foreign-id swaps were refused `UNEXPECTED`, the same refusal every in-scope request got. **They show nothing about coverage or the terminated-client gap** and must not be read as evidence that the gap is enforced. They become real controls once S90 is fixed.
+## 2. THE TWO REMAINING FAILURES ARE PRE-EXISTING WORLD DEFECTS, EACH WITH A CARRIER
 
-**Can a future round repeat this without a standing account? Yes, and this run is the proof.**
+**FWD-5 -- `S100`.** `GET holdings/<permitted account>` (an account this principal's OWN resolve had just granted) returned `HTTP 200`, `public_reason_code FIRM_BINDING`, `state UNAVAILABLE`, `sha256 754aa8b2…`. `S100` (ARMED) already has the mechanism: `holdings/entry.py:70-71,88-89,109-112` reads `IRPT_DIRECTORY_KEY=investor-reporting/directory/latest.json` -- the **POINTER** -- as the directory artifact, so `FirmBinding` raises and the boundary refuses with no `firm_id`. **No new row: the row exists and this is its live confirmation on the permitted path**, which is stronger evidence than the forbidden-path observations that produced it.
 
-- The whole two-key lifecycle closed in 15 minutes 7 seconds: create, one login, exercise, K1b-first delete verified 2 of 2, the 7-day refresh credential's death EXERCISED (the CTO's condition), and the 15-minute access token proven dead by a 401.
-- It left 0 residue on both tables and no throttle counter, all under one ledger interval.
-- A re-run after S90's fix needs no new packet: same keys, same blob, new epoch.
-- The standing smoke logins the portal repo tracks (row S87) are exactly the standing account this lifecycle makes unnecessary. They must not be used for this.
+**FWD-2 -- within-set tabs served 0 of 2.**
+- `performance/<permitted>` -> `DEPENDENCY_UNAVAILABLE` (`business_date 2026-09-17`, `sha256 3f805b4f…`). Carrier: **`W2-S23`/`W2-S27`** -- the adapter's tenant routing is a third id space, and `DEPENDENCY_UNAVAILABLE` is the honest code for "this function has no route for that firm", not an authorization failure.
+- `status (summary)` -> `UNSUPPORTED_OPERATION` (`sha256 b43add8d…`), a declared member of the closed `PUBLIC_REASONS` tuple.
+- the export within the set **is not exercisable**: no export exists for this firm (**`W1-S18`**) and `POST /export` is excluded from this cell.
 
-## Rows filed
+**The swap half of FWD-2 is now materially better and is recorded as such:** 8 of 8 foreign-id swaps refused **without echo**, and they now carry SPECIFIC codes (`FIRM_BINDING`, `NOT_AUTHORIZED`, `INVALID_INPUT`, `UNSUPPORTED_OPERATION`) where the second hand saw `UNEXPECTED` on all of them. The two that remain `UNEXPECTED` are both export routes -- **`S104`/`S106`**, the defects this seat measured on IB-rtf-14.
 
-- `IRPT_BCKEND-S90`: BLOCKING, ARMED, `2.0.0_SA_COO~B`.
-- `IRPT_BCKEND-S91`: OBSERVATION, ARMED, `1.0.0_SA_CTO`.
-- `IRPT_BCKEND-S92`: OBSERVATION, ARMED, INFERRED, `2.0.0_SA_COO~B`.
+---
+
+## 3. A CONTROL OF MINE THAT COULD NOT FAIL -- found by the arm that can falsify it (row `S110`)
+
+**NC3 passed and proves nothing this run.** It asks whether a TERMINATED client's entitlement gap is enforced, and reads a refusal as proof. It got `FIRM_BINDING`. **FWD-5's PERMITTED account got `FIRM_BINDING` too.** So the control's evidence is identical whether or not any gap is enforced -- it would read PASS against a route with no entitlement checking at all. Under Rule 22's DISCRIMINATION axis it is not evidence, and its PASS above stands as **REPORTED**, not as evidence.
+
+It is not a battery-only problem, which is why it is filed as **`S110`** rather than only fixed here: **while `S100` is armed, ANY negative control on `irpt-holdings` that asserts "refused" is vacuous**, including the rtf-10 and rtf-12 arm-(f) observations that recorded holdings `FIRM_BINDING` as an expected refusal. The remedy is not a better control -- it is `S100`. The battery now prints the vacuity itself whenever the two codes match, so the finding travels with the evidence.
+
+**What `S110` does NOT claim:** that any entitlement gap is UNenforced. It claims the estate holds **no evidence either way** on this route -- weaker, and the honest statement.
+
+---
+
+## 4. THE BATTERY DEFECT THIS PASS FOUND IN ITSELF (fixed @`5d2f3a942f`, before the graded run)
+
+The first third-hand run (11:16:34-11:32:00Z, 9 of 12) failed FWD-1 on **`terminated visible > 0`**. That clause was **mine, not the face's** -- R60-AC1 (c) requires the `k + count` recording and names no terminated condition -- and it grades the ROUTE on a property of the GRANT:
+
+- `directory/handler.py:25-27` and `:126`: **"A TERMINATED CLIENT STAYS VISIBLE (Andrew's fixed constraint)"**, and the visibility filter reads the **permitted account set**, never the termination indicator. So visible <=> entitled.
+- **Measured, denominator printed:** the 2026-09-17 directory carries **4,576 entries, 71 TERMINATED**; the live grant is **44 accounts**; TERMINATED entries intersecting that grant: **0 of 71**. With this grant, 0 terminated visible is CORRECT.
+- **And my two conditions were jointly unsatisfiable.** NC3 needs a terminated client OUTSIDE the grant (so its account is refused); FWD-1 needed one INSIDE it (so it is visible). Both drew on the same 71 entries. At 0 of 71 entitled, only NC3 is satisfiable.
+
+**Fixed grant-aware rather than deleted:** the route is still graded on terminated visibility whenever the grant entitles at least one terminated client, and is explicitly NOT graded when it entitles none -- with the branch, the counts and the reason printed either way. The check survives for a future principal; it simply cannot be graded by this one. **This is the rtf-12 arm-(a) class repeated by the same seat**, and it is recorded as such.
+
+---
+
+## 5. THE LIFECYCLE, CLOSED AND VERIFIED (arm (e))
+
+- **K1b then K1 deleted**, each verified by a failing consistent BASE-TABLE read: **2 of 2**.
+- **REFRESH with the issued refresh token after the delete: HTTP 404, no access token minted -> REFUSED (1 of 1).**
+- **The access token after its `exp`: `GET status` -> HTTP 401 -> REFUSED (1 of 1)**, after the battery waited out the full token lifetime.
+- **Residue: 0 of 79 / 0 of 79 / 0 of 11** (users by PK prefix, users by e-mail prefix, partner table by e-mail prefix). No failed-login throttle counter exists for the test e-mail.
+- **INTERVAL: `[2026-09-20T11:43:03Z, 2026-09-20T11:58:12Z]`.**
+- Never printed or written: password, access token, refresh token, Authorization header, or any response body (real client data) -- every response is bound by its `sha256` and summarised by counts and codes only.
+
+---
+
+## 6. R60-AC2: JUDGMENT, recorded for `3.0.0_SA_CVO`, not self-graded
+
+1. **Is each FWD now EXERCISED as its DONE WHEN reads?**
+   - **FWD-1: YES, and this is the first pass in which it could be.** Search + resolve served under a real signed request as a real advisor principal, and the partial's `count` is not decorative: `k=21` whole entries + `count=23` unprojected = `denominator=44` = the live map's account total at the event. **What the `count` means for the DONE WHEN:** the route discloses the SIZE of what it withheld and the KIND (`UNPROJECTED-ID`) without disclosing the ids, so an advisor can tell "I am seeing part of my book" from "my book is small" -- which is the disclosure the DONE WHEN asks for. It did NOT reach the terminated-but-entitled case (0 of 71 entitled under this grant).
+   - **FWD-2: NO, and it is now precisely bounded.** The refusal half is fully exercised (8 of 8 swaps refused without echo, specific codes, no echo of the refused value). The SERVING half reached 0 of 2 tabs, for two separately-carried reasons (`W2-S27`, `W1-S18`) and neither is an authorization defect.
+   - **FWD-5: NO, and the cause is `S100`** -- not an entitlement decision at all. This run supplies what earlier observations could not: the refusal occurs on an account the principal's own resolve GRANTED, so `S100` is now confirmed on the permitted path.
+   - **FWD-11: NOT REACHABLE by this principal by construction**, unchanged.
+2. **What the exercise revealed about the served routes.** The scope plane and the data plane have diverged: an advisor can be correctly identified, firm-bound, scope-resolved and told exactly how much of the book is withheld -- and then served no data on any tab. Every failure is an honest declared refusal code rather than `UNEXPECTED`, except the two export routes (`S104`/`S106`). **The estate's refusal vocabulary is working; its data paths are not.**
+3. **Can a future round repeat this without a standing account?** **Yes, and this pass is the evidence.** The principal was minted, exercised and deleted inside one battery run with the lifecycle verified 4 ways and residue 0/0/0, twice in one morning. **The bound worth stating:** it costs ~15 minutes of wall clock per run, almost all of it waiting out the access token's `exp` to prove the expired-token refusal, and it requires the two DynamoDB writes the packet signs. Nothing about it needs a standing account -- **but it does need the grant re-read at the event, not inherited from the packet** (33/18 -> 44/19 between signing and this run).
+4. **A judgment on my own controls, offered because the CVO grades this and I cannot.** Two of the twelve arms in this battery have now been found to grade something other than what they claim -- FWD-1's terminated clause (fixed here) and NC3's discrimination (`S110`). Both were found by an arm INSIDE the same battery, not by re-reading it. **A battery that exercises the positive and negative case on the same instrument in the same run can catch its own vacuous controls; one that only asserts refusals cannot.**
+
+---
+
+## 7. ROWS
+
+- **Filed this pass: `S110`** (a negative control on holdings cannot fail while `S100` is armed) -- OBSERVATION, ARMED, `disarm_owner 2.0.0_SA_COO~B`.
+- **Confirmed, not re-filed:** `S100` (FWD-5, now on the permitted path), `W2-S27` (performance), `W1-S18` (no export exists), `S104`/`S106` (the two export swaps still `UNEXPECTED`).
