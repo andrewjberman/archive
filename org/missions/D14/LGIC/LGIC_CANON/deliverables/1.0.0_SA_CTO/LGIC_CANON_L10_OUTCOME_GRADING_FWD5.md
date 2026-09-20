@@ -1,4 +1,9 @@
-# `LGIC_CANON` L10 -- OUTCOME GRADING: **FWD-5 is NOT REALIZED**, and one of its four carded steps is an act THIS SEAT OWNS
+# `LGIC_CANON` L10 -- OUTCOME GRADING: **FWD-5 is NOT REALIZED** -- two uncovered CAUSES, neither of them mine
+
+⚠ **THIS TITLE WAS AMENDED.** It read *"and one of its four carded steps is an act THIS SEAT OWNS"* until
+§6 was corrected one tick later -- **that finding is WITHDRAWN (§6, §6a, §6b).** The GRADE never moved.
+⛔ **A headline is the most-read line in a corrected document and the one most likely to outlive its own
+retraction** -- so it is fixed here rather than only in the section that retracts it.
 
 **Seat:** `1.0.0_SA_CTO` (L10 is the CTO's, always) · **UTC:** 2026-09-20 ~11:2xZ
 **Activated by:** `3.0.0_SA_CVO`'s terminality verdict (`98466` @`e026bce9fd`, amended @`63a1ef9ef0`), recorded
@@ -43,7 +48,7 @@ flagged.
 | **10** tier-first served keys | the `ADVI_FIRMBKTS` router repoint -- **a firm bucket** | ⭐ **YES** |
 | **16** (same root) | the same repoint | ⭐ **YES** |
 | **13** the conformance check | a **naming RAISE** -- an unresolved token needing a registry row | ⛔ **NO** |
-| **14** portal paths + partner table | a **missing SOVEREIGN input**, and one act of this seat's | ⛔ **NO** |
+| **14** portal paths + partner table | a **missing SOVEREIGN input** — ⚠ **and this row SPLITS; see §6a** | ⛔ **NO** (14a only) |
 
 ⛔ **THE CARVE-OUT REACHES 2 OF 4. `reached + carded == steps` IS SATISFIED NUMERICALLY AND DOES NOT CARRY
 THE OTHER TWO.**
@@ -76,43 +81,58 @@ cannot be REALIZED if the surface delivering it mis-grades a real key shape.** T
 defect is enrichment beyond every ACCEPT -- `3.0.0_SA_CVO`'s own S6 test. **Named, unresolved, and deliberately
 not used to disturb five grades on a suspicion.**
 
-## 6. ⛔⭐ THE FINDING THAT IS AGAINST THIS SEAT: PART OF "BLOCKED AT ANDREW" IS MY OWN UNEXECUTED ACT
+## 6. ⛔ **AMENDED ONE TICK LATER -- §6's ORIGINAL FINDING WAS WRONG, AND IT WAS WRONG IN THE FLATTERING DIRECTION**
 
-I have carried `FWD-5` as blocked on Andrew for days. **The checklist's own stop-point block names step 14's
-owners, and there are TWO:**
+**WHAT §6 SAID:** that step 14 has two owners, that *"the partner table's name -- `1.0.0_SA_CTO`, register
+entry X8's owner"* is **an act this seat owns and has not performed**, and therefore that part of what I had
+been calling "blocked at Andrew" was my own unexecuted work. **I recorded it as OWED BY THIS SEAT.**
 
-> *"- the portal paths (Step 14) -- **Andrew**, a sovereign input with no registry carrier yet;*
-> *- the partner table's name (Step 14) -- **`1.0.0_SA_CTO`**, register entry X8's owner, who extends the entry
-> to the new firm's table;"*
+⛔ **IT IS NOT OWED. I READ THE OWNER LINE AND NEVER READ X8.** The register entry, at
+`infra/logic/06_CONFORMANCE_LEDGER.md:142`, covers **FOUR** partner identity tables --
+`opal-partner-{demo,49financial,cottonwood,inflection}` -- minted per firm by
+`infra/aws/terraform/modules/partner-firm-table/main.tf:22`. And the checklist's own phrasing names the act's
+OBJECT: *"who extends the entry **to the new firm's table**."*
 
-⛔ **ONE OF STEP 14'S TWO OWNERS IS ME, AND I HAVE NOT DONE IT.** ⭐ **A carded step with two owners reads, at a
-glance, as blocked on the more sovereign one** -- the eye stops at "Andrew" and the second line never gets
-counted. **So an act I own has been sitting inside an outcome I have been describing as waiting on somebody
-else.**
+> ⭐ **NO NEW FIRM MEANS NO TABLE MEANS NOTHING TO EXTEND.** C6 ran as a PRACTICE WAVE over an **EXISTING**
+> firm's subject, by Andrew's own word (*"we don't have a new firm to test and I don't feel like messing around
+> making demo cruft"*). ⛔ **So step 14b is not an unperformed act -- it is an act that CANNOT be performed
+> until a firm exists that does not exist**, which is precisely the ACCEPT's carve-out: *"a step that cannot
+> complete because a live firm bucket does not exist yet."*
 
-> ⭐ **KEEPABLE: A STEP CARDED WITH TWO OWNERS IS NOT ONE BLOCKER. Count the owners on every carded step before
-> attributing the step to any of them** -- and where one of them is the reader, that half is not blocked at all.
-> **COST:** one read of the owner list you are already looking at. **NON-APPLICATION:** a step whose owner list
-> has one member.
+## 6a. ⭐ THE GRADE STANDS, AND THE REASON NARROWS -- WHICH IS WHY THE CORRECTION MATTERS
 
-**ACTION, this seat's, NOT deferred to another tick:** extend register entry **X8** to the new firm's table.
-⚠ **Not executed in this analysis** -- X8 is a register entry with its own lane and writer, and I am recording
-the act as **OWED BY `1.0.0_SA_CTO`** rather than claiming it. ⛔ **Naming it here is not doing it, which is
-exactly the defect I convicted myself of on `S97` at tick 114 -- so it carries to my next tick as an ACT, not
-as a line.**
+| cause | inside the carve-out? |
+|---|---|
+| step **10**, **16** -- the `ADVI_FIRMBKTS` router repoint | ⭐ **YES** |
+| step **14b** -- extend X8 to a new firm's table | ⭐ **YES** (corrected; §6 originally said NO) |
+| step **14a** -- the portal paths, a sovereign input | ⛔ **NO** |
+| step **13** -- the naming RAISE | ⛔ **NO** |
 
-## 7. WHAT `FWD-5` NEEDS, ENUMERATED BY SUBTRACTION FROM ITS FOUR CARDED STEPS
+⛔ **`FWD-5` REMAINS NOT REALIZED.** Two causes sit outside the carve-out and neither is excused. ⭐ **But the
+reason narrows from "two uncovered steps, one carrying work I owe" to "two uncovered CAUSES, NEITHER OF WHICH
+IS MINE TO PERFORM"** -- and a seat reading the original §6 would have gone looking for an act that does not
+exist.
 
-| step | remedy | owner |
-|---|---|---|
-| 10, 16 | the `ADVI_FIRMBKTS` router repoint | **card 1 at Andrew** (seating) -- and the carve-out means these NEVER hold FWD-5 |
-| 13 | a registry row for the naming RAISE -- ⛔ **and the backlog is UNMEASURED, at least two (`sentiment`, `trade`)** | **DECIDER `1.0.0_SA_CTO`, WRITER `4.0.0_SA_CRO`** (row `S22`) |
-| 14a portal paths | a sovereign input | **Andrew** |
-| 14b partner table | extend register entry X8 | ⛔ **`1.0.0_SA_CTO` -- THIS SEAT, unblocked** |
+> ⭐⭐ **THE KEEPABLE, AND IT IS BETTER THAN THE ONE I GOT WRONG: A CARDED STEP IS NOT ATOMIC. Step 14 carries
+> TWO OWNERS *AND* TWO CAUSES -- one inside the carve-out, one outside.** Grading at STEP grain cannot see
+> that; only grading at CAUSE grain can. `3.0.0_SA_CVO`'s "the carve-out reaches 2 of 4" counted STEPS and was
+> right at that grain; at CAUSE grain step 14 SPLITS. ⛔ **My own §6 keepable -- "count the owners" -- was
+> right in direction and stopped one level short: COUNTING OWNERS TELLS YOU WHO; COUNTING CAUSES TELLS YOU
+> WHICH ARE EXCUSED.**
+> **COST:** read the carrier the owner line POINTS AT, not just the owner line. **NON-APPLICATION:** a carded
+> step whose reason and owner are one sentence.
 
-⭐ **So of the four, ONE is unblocked and mine, ONE is mine to decide with a live writer, and only TWO are
-genuinely sovereign.** ⛔ **I have been reporting this outcome as though all four were at Andrew.**
+## 6b. ⚠ AND THE SHAPE OF MY OWN ERROR IS WORTH MORE THAN THE FACT
+
+⛔ **I WROTE A FINDING AGAINST MYSELF, IT FELT LIKE RIGOUR, AND IT WAS WRONG IN THE DIRECTION THAT FLATTERS
+THE WRITER.** "Part of what I called blocked at Andrew is my own unexecuted act" reads as scrupulous -- and
+**that is exactly when a claim gets the least scrutiny, including from the seat making it.** I applied a
+one-line read (the owner field) to reach it, having spent the morning convicting other seats for precisely
+that. ⭐ **A self-accusation is a CLAIM and owes the same evidence as any other.** This estate already carries
+the rule one level up: *the correcting seat gets the least scrutiny exactly when it has just earned some.*
+
+**NOTHING IS OWED BY THIS SEAT ON STEP 14.** The prior §6's `OWED BY 1.0.0_SA_CTO` is **WITHDRAWN**.
 
 ---
 
-**PUSH STATE:** measured in the send that carries this analysis.
+**PUSH STATE:** measured in the send that carries this amendment.
