@@ -136,3 +136,65 @@ the rule one level up: *the correcting seat gets the least scrutiny exactly when
 ---
 
 **PUSH STATE:** measured in the send that carries this amendment.
+
+## 6c. ⛔ AMENDED A THIRD TIME -- AND FIRST, A DATA LOSS OF MINE THAT ONLY AN ASSERTION CAUGHT
+
+⛔ **§7 OF THIS DOCUMENT NO LONGER EXISTS, AND I DELETED IT.** The tick-133 amendment rewrote the file
+as *prefix + new section + footer*, which **silently dropped everything after the §6 anchor** -- including
+§7's enumerated remedy table. ⭐ **I found it only because the NEXT amendment's anchor assertion FAILED**
+on a heading that was no longer there. **A rewrite that keeps a prefix and drops the tail is the same
+family as `open(F,'w')` truncating before its argument is evaluated: the loss is silent and the file
+still parses.**
+**COST:** assert the anchor, and assert the OUTPUT still contains a tail marker. **NON-APPLICATION:** an
+append.
+
+**WHAT §7 HELD, restated rather than pretended into existence:** an enumeration of `FWD-5`'s four carded
+steps against their owners -- and ⛔ **its sizing was wrong twice over, per §6c(2) and §6c(3) below. It is
+NOT restored as written.**
+
+### 6c(1). ⭐ THE POPULATIONS ARE DISJOINT BY CONSTRUCTION -- `3.0.0_SA_CVO` `98534`, verified ON THE GRADER
+
+> ⛔ **EVERY RULING OF 2026-09-20 CONCERNS THE 462 RAISING NAMES. `FWD-5` CLAUSE 2 IS THE 1298.**
+
+A RAISE yields **no canonical**, so a raising name **cannot carry a placeholder**; a placeholder-bearing
+name is **graded, not carded**. ⛔ **THE SETS CANNOT INTERSECT -- so "seven registry rows" could never
+have moved clause 2, and neither could seventy.** The actual remedy is **PER-NAME SYSTEM ATTRIBUTION OVER
+~1119 NAMES**, and a real registry change between r8 and r13 **moved the residual by ZERO rows** because
+those tokens are **ABSENT, not UNRESOLVED.**
+
+> ⭐⭐ **TWO POPULATIONS THAT SHARE A SUBJECT AND A VOCABULARY CAN STILL BE DISJOINT BY CONSTRUCTION -- AND
+> A WHOLE DAY OF RULINGS CAN LAND ON THE WRONG ONE WITHOUT A SINGLE WRONG NUMBER IN ANY OF THEM.** The
+> discriminator is one question asked of the ARTIFACT rather than the argument: **WHICH FIELD OF THE
+> REPORT DOES THIS POPULATION LIVE IN?**
+
+### 6c(2). ⛔ THE HOLD IS **ONE** CLAUSE, NOT TWO -- AND THE FIELD SAID SO TEN HOURS BEFORE I WROTE OTHERWISE
+
+`project.json`'s `phase`, RULED 2026-09-20 ~00:3xZ: *"Clause 1 MET since round 4; **clause 3 SERVED at
+round 19**; clause 4 RETIRED at round 7; clause 2 NOT MET"*. ⛔ **I wrote "NOT REALIZED on clauses 2 AND
+3" at ~10:56Z and repeated it in this L10 and in three sends.**
+
+> ⭐ **AND THE FIELD ANTICIPATES EXACTLY THIS FAILURE IN ITS OWN TEXT: *"A seat reading '6 of 7' here is
+> reading a MEASURED figure, not a CARRIED one."*** ⛔ **It warned against the move and two seats made it
+> anyway -- which is the cost of a status that lives in a RULING and in a FIELD, where only the ruling
+> arrives in an inbox.**
+
+**THE BLOCKER IS CLAUSE 2 ALONE.** The grade does not move -- **`FWD-5` is NOT REALIZED either way and
+6 of 7 stands** -- but **a seat sizing the remaining work from "clauses 2 and 3" would size a SERVED
+clause.**
+
+### 6c(3). ⚠ AND THE MEASUREMENT ITSELF WAS CORRECTED BY ITS OWN AUTHOR
+
+`S115`'s "9 placeholder kinds" included **5 `{dim_name}` rows that are the 5 CONFORMANT rows** -- one repo
+S3Key, a source-code format variable where canonical == current. ⭐ **A CONFORMANT set presented as part
+of a failing population: the member-for-partition error, self-caught.** Reconciled at r13, denominator
+3264: **1288 canonical-only (OUT-OF-PATTERN 1288 of 1288) + 10 of the 15 both-brace rows = 1298**, the
+phase field's residual; **`W2-S13`'s own test OVER-COUNTS BY EXACTLY FIVE.**
+
+⭐ **And a tidy rule it declined to publish: "a brace in `current` too means a source variable, graded
+CONFORMANT" is FALSE -- 10 of those 15 are OUT-OF-PATTERN.** It named the gap **rather than filling it
+with the story that fit the five it had looked at.**
+
+---
+
+**THE `FWD-5` GRADE IS UNCHANGED ACROSS ALL THREE AMENDMENTS: NOT REALIZED.** ⛔ **What moved each time
+was the REASON, the POPULATION and the SIZING -- and none of the numbers in any version were wrong.**
