@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_TAXSMA.TO-TX-g-2",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/prd/MDPF_TAXSMA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "671925aecc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/decompositions/MDPF_TAXSMA_DECOMP.md",
+    "vintage_commit": "7f65001ab3",
+    "to_ref": "org/missions/D8/MDPF/MDPF_TAXSMA/task-orders/MDPF_TAXSMA.TO-TX-g-2.gateway-package.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_TAXSMA~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_2.py",
+      "kind": "script",
+      "commit_or_etag": "e80da5ad66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The criterion instrument, not a deployable artifact. It never calls the AWS API (verified by TXG2-AC4's command-log scan) and makes no Gateway deploy.",
+      "introduces": [
+        "def ac1",
+        "def ac2",
+        "def ac3",
+        "def ac4",
+        "def _extract_build_fragment",
+        "def _extract_tar_invocation"
+      ],
+      "artifact_covered_by": ["TXG2-AC1", "TXG2-AC2", "TXG2-AC3", "TXG2-AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/command_log.jsonl",
+      "kind": "doc",
+      "commit_or_etag": "e80da5ad66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Evidentiary log of every command TXG2-AC1..AC3 issued (git/bash/tar/sha256sum, 0 aws calls); the record TXG2-AC4 grades.",
+      "artifact_covered_by": ["TXG2-AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "e80da5ad66",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Append-only surprise channel; one new row added, MDPF_TAXSMA-W1-S4, validated by surprise-row-gate at commit ('1 new row(s) of 13 total checked ... all new rows carry their step-7/step-10 fields')."
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/gateway-package.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The result record itself, committed in the same act as this proof-of-spec instance and the order's status flip."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TXG2-AC1",
+      "criterion_verbatim": "`TXG2-AC1` -- the package the registered deploy path builds at the cell's HEAD contains `app/taxsma_workbook.py` with SHA-256 equal to the source, member list printed",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1g2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_2.py AC1",
+      "expect": "(?m)^VERDICT: PASS-TXG2-AC1(?![0-9])",
+      "output_evidence": "registered deploy_script (EC2_MANIFEST.json services.opal-gateway): infra/aws/ec2/opal-gateway/deploy-to-ec2.sh\nbuild fragment rc=0\nINFO: target instance = i-07dccb1615503ac99\nINFO: built artifact opal-gateway-2aa1e26cbf.tar.gz (288K)\narchived member list (84 members): ... app/taxsma_workbook.py ... (84 of 84 printed)\nSHA-256 in built package : 8d63bc5685a156922225b08d45df3aae67a22df4a5054be3aa02a34ea08740b5\nSHA-256 of source (bash) : 8d63bc5685a156922225b08d45df3aae67a22df4a5054be3aa02a34ea08740b5\nSHA-256 of source (py)   : 8d63bc5685a156922225b08d45df3aae67a22df4a5054be3aa02a34ea08740b5\nVERDICT: PASS-TXG2-AC1",
+      "denominator": "84 of 84 archived members printed; app/taxsma_workbook.py present among them; 3 of 3 independent SHA-256 reads agree (built tarball member, bash sha256sum of the source, Python hashlib of the source); the build fragment issued 0 AWS calls (belt-and-suspenders scan of its own text for ssm send-command/s3 cp/s3api put-object before execution: 0 matches)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG2-AC2",
+      "criterion_verbatim": "`TXG2-AC2` -- when the builder already bundles the app directory whole, the cell records VERIFY-REUSE and changes no file",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1g2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_2.py AC2",
+      "expect": "(?m)^VERDICT: PASS-TXG2-AC2(?![0-9])",
+      "output_evidence": "tar invocation as registered: tar -czf \"$TMP/$ART\" -C \"$SRC\" --exclude=... app deploy requirements.txt identity_tool_allowlist.txt\nexcludes (8): ['.env', 'audit.jsonl', '*.log', '__pycache__', '.token_cache', 'infra', 'dev_smoke.py', 'make_diagram.py']\narchived members (4): ['app', 'deploy', 'requirements.txt', 'identity_tool_allowlist.txt']\nbundles 'app' as a whole directory member: True\nan --exclude targets the app dir or the module (checked against 'taxsma_workbook.py'): False\nVERIFY-REUSE: the builder already bundles the app directory whole; module app/taxsma_workbook.py is covered with no addition needed.\ngit status --porcelain -- infra/aws/ec2/opal-gateway/deploy-to-ec2.sh : ''\ngit diff --stat HEAD -- infra/aws/ec2/opal-gateway/deploy-to-ec2.sh : ''\nVERDICT: PASS-TXG2-AC2",
+      "denominator": "8 of 8 --exclude patterns checked against the module's basename and the app-dir forms; 4 of 4 archived members checked for 'app'; git status and git diff --stat both empty (0 lines) on deploy-to-ec2.sh",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG2-AC3",
+      "criterion_verbatim": "`TXG2-AC3` -- `infra/aws/ec2/EC2_MANIFEST.json`'s Gateway row is read and its deploy path stated; the cell does not edit `deployed_commit`",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1g2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_2.py AC3",
+      "expect": "(?m)^VERDICT: PASS-TXG2-AC3(?![0-9])",
+      "output_evidence": "services.opal-gateway.deploy_script : infra/aws/ec2/opal-gateway/deploy-to-ec2.sh\nservices.opal-gateway.deployed_commit : 1764e54a16b7bb12d34b36eec7866589b6ea785e\nservices.opal-gateway.deployed_at : 2026-09-18T05:58:16Z\ngit status --porcelain -- infra/aws/ec2/EC2_MANIFEST.json : ''\nEC2_MANIFEST.json unchanged vs HEAD (diff empty); deployed_commit not edited by this cell.\nVERDICT: PASS-TXG2-AC3",
+      "denominator": "1 of 1 Gateway row read; git status (0 lines) and git diff HEAD (0 lines) both empty on EC2_MANIFEST.json",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG2-AC4",
+      "criterion_verbatim": "`TXG2-AC4` -- the command log contains no SSM send-command and no S3 put",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1g2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_2.py AC4",
+      "expect": "(?m)^VERDICT: PASS-TXG2-AC4(?![0-9])",
+      "output_evidence": "command_log.jsonl entries: 5 (denominator)\nentries scanned: 5; offending entries: 0\n0 of 5 command_log.jsonl entries name ssm send-command, s3 cp or s3api put-object.\nVERDICT: PASS-TXG2-AC4",
+      "denominator": "5 of 5 command_log.jsonl entries scanned (2 git status, 2 git diff, 1 bash build-fragment run), 0 offenders; re-run standalone (log absent) self-populates via AC1..AC3 and scans 8 of 8 entries, also 0 offenders",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2's static bundling check was exercised against its own first draft, which flagged an --exclude ending in '.py' as targeting the module -- that draft FAILED AC2 on the real (correct-behavior) script, because dev_smoke.py and make_diagram.py are top-level excludes unrelated to app/taxsma_workbook.py. The check was narrowed to match only the module's exact basename or the app-dir forms ('app', 'app/*', 'app/**') or the substring 'taxsma_workbook', and re-run.",
+      "expected": "The over-broad check fails AC2 on a script that in fact already bundles the module cleanly (a false FAIL); the corrected check passes it.",
+      "observed": "First draft: 'VERDICT: FAIL-TXG2-AC2 the builder does NOT already bundle app/ whole as read' (false negative, since 'dev_smoke.py' and 'make_diagram.py' end in .py and matched the over-broad clause). Corrected: 'an --exclude targets the app dir or the module (checked against 'taxsma_workbook.py'): False' -> 'VERDICT: PASS-TXG2-AC2'. No file under infra/aws/ec2/opal-gateway changed between the two runs (git diff empty throughout) -- only the probe's own check logic changed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "TXG2-AC1..AC4 run twice at the same HEAD (2aa1e26cbf), once with a cleared command_log.jsonl and once inheriting the prior run's log, in AC1/AC2/AC3/AC4 order both times.",
+      "observed": "AC1, AC2, AC3 verdicts and deciding measurements (member list, SHA-256 values, manifest fields, git-diff emptiness) identical byte-for-byte across both runs. AC4's denominator differs by construction (5 vs 8 entries, since one run's log carries a prior run's entries too) but the VERDICT is PASS both times and the offender count is 0 in both.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any Gateway deploy, safe-ec2-deploy.sh invocation, SSM send-command or S3 put.",
+      "reason": "Forbidden by the order and out of scope by design ('No deploy'); TXG2-AC4 confirms 0 of the cell's logged commands are any of the three, and the executed build fragment stops before the script's S3/SSM sections by construction."
+    },
+    {
+      "item": "Editing deploy-to-ec2.sh.",
+      "reason": "TXG2-AC2 measures that the builder already bundles app/taxsma_workbook.py whole (VERIFY-REUSE); the order writes GW/deploy-to-ec2.sh only if it does NOT already bundle the module, which is not this case."
+    },
+    {
+      "item": "Editing EC2_MANIFEST.json's deployed_commit or any other field.",
+      "reason": "No deploy occurred in this cell, so there is nothing new to record; TXG2-AC3 confirms the file is diff-empty vs HEAD."
+    },
+    {
+      "item": "Reading or characterizing the content of app/org/mcp/agent_telemetry/0.7.0_AE_CloudOps.jsonl (the file named in surprise row W1-S4).",
+      "reason": "Out of this cell's mandate (a pre-existing, unrelated tracked file); the row states only its inclusion path and size, not its bytes, consistent with the no-private-data bound."
+    }
+  ],
+  "surprises": [
+    "MDPF_TAXSMA-W1-S4: the registered build already bundles a tracked runtime telemetry file, app/org/mcp/agent_telemetry/0.7.0_AE_CloudOps.jsonl (9 lines, 1863 bytes, commit 2781aac326, 2026-08-14), into every Gateway deploy artifact through the same whole-directory `app` tar member that carries taxsma_workbook.py. Pre-existing, orthogonal to this cell. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/gateway-package.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the TX-g-2 probe (probes/tx_g_2.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-taxsma-1g2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_2.py AC<1..4>",
+      "result": "4 of 4 'VERDICT: PASS-TXG2-AC<n>', rc=0 each, at HEAD 2aa1e26cbf with deploy-to-ec2.sh and EC2_MANIFEST.json 0 of 2 dirty throughout. Re-run clean (command_log.jsonl cleared) immediately before this instance was written: same 4 of 4 PASS."
+    },
+    {
+      "tool": "bash (Git Bash, resolved to its full path -- a bare 'bash' argv[0] under this Windows Python resolved to the WSL relay stub and failed with 'execvpe(/bin/bash) failed', a distinct instrument trap from the shutil.which result)",
+      "invocation": "subprocess.run([<resolved bash.exe path>, <extracted build fragment>.sh])",
+      "result": "rc=0; the fragment (the registered script's own instance-id..built-artifact bytes plus a verification appendix) built opal-gateway-2aa1e26cbf.tar.gz and printed the member list and the three SHA-256 values used by TXG2-AC1."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_2.py",
+      "result": "First run: 'BLOCKED: ruff check failed' (F401, `os` imported but unused). Fixed (import removed); second run: 'All checks passed!' / 'OK: pre-commit gate clean for 1 of 1 file(s)'."
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_TAXSMA~1 <0.9.0_WK_MDPF_TAXSMA~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "e80da5ad66 (3 files: probes/tx_g_2.py, command_log.jsonl, INVESTIGATION_v1.md; surprise-row-gate '1 new row(s) of 13 total checked'; msg-verify MATCH len=2077), LOCAL on wk-mdpf_taxsma-1-1g2."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> TXG2-AC1,TXG2-AC2,TXG2-AC3,TXG2-AC4",
+      "result": "see the result record -- only the exit code is the verdict"
+    }
+  ]
+}
