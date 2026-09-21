@@ -1,0 +1,46 @@
+
+Lambda Build-and-Upload
+  Pipeline:  investor-reporting
+  Bucket:    s3://opal-313476888478-lambda-artifacts/investor-reporting/
+  JSON tool: node
+  Function:  irpt-directory-search (single-function mode)
+
+Found 1 function(s) to build
+
+-> irpt-directory-search
+  Source:  infra/aws/lambda/investor-reporting/directory
+  Files:   handler.py entry.py served.py loaders.py enforce.py errors.py resolve.py keys.py ids.py data/custodian_key_seam.json raw_keys.json firm_registry.json contracts/DirectoryEntry.schema.json
+  OK: staged contracts/DirectoryEntry.schema.json <- docs/contracts/investor-reporting/v1/DirectoryEntry.schema.json@6e764ef0aa (12967 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged served.py <- infra/aws/lambda/investor-reporting/_authz/served.py@4ee8426c72 (41902 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged enforce.py <- infra/aws/lambda/investor-reporting/_authz/enforce.py@4ee8426c72 (38096 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged errors.py <- infra/aws/lambda/investor-reporting/_authz/errors.py@6e764ef0aa (10652 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged resolve.py <- infra/aws/lambda/investor-reporting/_scope/resolve.py@6e764ef0aa (30966 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged keys.py <- infra/aws/lambda/investor-reporting/_keys/keys.py@6e764ef0aa (29894 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged ids.py <- infra/aws/lambda/investor-reporting/_ids/ids.py@c28c728a30 (19296 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged raw_keys.json <- infra/aws/lambda/investor-reporting/_ids/raw_keys.json@47f21dab95 (6492 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged firm_registry.json <- data/firm_registry.json@39cbad4214 (5326 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged loaders.py <- infra/aws/lambda/investor-reporting/_authz/loaders.py@c28c728a30 (6934 bytes, sha256 verified, not committed at the packaged path)
+  OK: staged data/custodian_key_seam.json <- infra/aws/lambda/investor-reporting/_ids/data/custodian_key_seam.json@c28c728a30 (191120 bytes, sha256 verified, not committed at the packaged path)
+  OK: import-closure -- 9 packaged .py file(s), every top-level import satisfied by package/stdlib/runtime/layer. (Nested lazy imports exempt by design.)
+  SHA256:  76LeVyYNfhdyDnQNXR3LzrqSv7k7Vr3POSjpcBzww6E=
+  Size:    128K
+  ✓ s3://opal-313476888478-lambda-artifacts/investor-reporting/irpt-directory-search.zip (write VERIFIED: size=130471, sha256 metadata match)
+
+================================================
+Complete — 1 function(s) built and uploaded
+
+Source map updated with artifact_s3_key + artifact_sha256.
+
+Next steps:
+  git add infra/aws/lambda/ci/lambda-source-map.json
+  git commit -m 'ci: upload artifacts for investor-reporting'
+  cd infra/aws/terraform/investor-reporting
+  .tools/terraform.exe plan    # should show Lambda updates
+  .tools/terraform.exe apply
+  .tools/terraform.exe plan    # must show No changes
+  bash infra/aws/lambda/ci/record-terraform-deploy.sh investor-reporting --version investor-reporting-vX.Y.Z \
+       --author "{your-serial} <{your-serial}@opal.agent>"
+  # --author is REQUIRED for correct attribution: record-terraform-deploy
+  # commits, and its commit must be authored by a permitted agent serial.
+  # Omitting it derives the serial from .comp-graph/.agent_context (shared,
+  # best-effort) -- pass it explicitly to be sure.
