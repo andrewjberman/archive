@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-54",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-54.status-document-own-stated-state.md",
+    "group": "OTHER",
+    "vintage_commit": "a21bf57e05"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~4",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "6f56917cef",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-54.status-document-own-stated-state.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/envelope.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "679d0223",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit 679d0223 on branch wk-irpt_fntend-9-5-fe-s-54-portal (LOCAL; PORTAL IS FROZEN). The fix is entirely inside `parseIrEnvelope` (one added const `IR_STATUS_DOCUMENT_OPERATIONS` near `IR_PARSEABLE_OPERATIONS`, and the `carryAvailabilityFromStatus` call site changed to run through a computed `effectiveStatus`). `adaptStatusEnvelope` (adapt.ts) is NOT in this artifact and was not touched -- the first-act trace put the gap in envelope.ts, not adapt.ts, per BOUNDS."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-54/stated-state-wins.test.ts",
+      "kind": "test",
+      "commit_or_etag": "5db8b9f4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commits 679d0223 (initial) + 5db8b9f4 (self-exclusion correction to the git-grep census, so the test's own pattern-literal strings do not inflate its own denominator once committed). Three tests: F54-AC2 (the trace + denominator), F54-AC3 (RED-then-GREEN via an in-place mutant control, both transcripts in the result file), and an additional cross-check reproducing fe-s-47's F47-AC7 printed, not-graded diagnostic and confirming it now agrees."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F54-AC1",
+      "criterion_verbatim": "`F54-AC1` -- the whole portal typechecks. <criterion id=\"F54-AC1\" cell_refs=\"FE-s-54\" drives=\"none\"><invocation>cd <WS>/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?</invocation><expect>rc=0(?![0-9])</expect></criterion>",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-5-fe-s-54/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "expect": "rc=0(?![0-9])",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "the whole portal: tsc -b --noEmit over every project reference, rc 0 (0 errors), at portal 5db8b9f4",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F54-AC2",
+      "criterion_verbatim": "`F54-AC2` -- your new test's FIRST assertion is the denominator from THE FIRST ACT above -- print the count of production render sites found for each operation, by name and file:line. <criterion id=\"F54-AC2\" cell_refs=\"FE-s-54\" drives=\"none\"><invocation>cd <WS>/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-54/stated-state-wins.test.ts</invocation><expect>RENDER SITES FOR status-summary/status-job: (\\d+)(?![0-9])</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-5-fe-s-54/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-54/stated-state-wins.test.ts",
+      "expect": "RENDER SITES FOR status-summary/status-job: (\\d+)(?![0-9])",
+      "output_evidence": "F54-AC2 HIT src/api/endpoints/investor-reporting.ts:1120: probeStatus(): Promise<StatusEnvelope> {\nF54-AC2 HIT src/api/endpoints/investor-reporting.ts:1125: getJobStatus(jobId: OpaqueId): Promise<StatusEnvelope> {\nF54-AC2 SELF-EXCLUDED (this file's own pattern literals): 4 of 6 raw hit(s)\nF54-AC2 CENSUS: 2 hit(s) (of 6 raw, 4 self-excluded) for 'probeStatus(' / 'getJobStatus(' in the committed tree -- 2 own declaration(s) (src/api/endpoints/investor-reporting.ts), 0 production call site(s), 0 test call site(s)\nF54-AC2 EVERY PRODUCTION TAB BODY BUILDS ITS StatusPanel FROM envelopeFromAvailability(<document>.availability) INSTEAD (tabs/TabShell.tsx:142,152,159; tabs/reporting/ReportingTab.tsx:158; tabs/holdings/HoldingsTab.tsx:148; tabs/analysis/AnalysisTab.tsx:151,194) -- confirmed by the same git-grep instrument: 8 production call site(s) of envelopeFromAvailability, none of them fed by probeStatus/getJobStatus\nRENDER SITES FOR status-summary/status-job: 0",
+      "denominator": "2 committed-tree hits total for 'probeStatus(' / 'getJobStatus(' after self-exclusion (both operations' ONLY client methods); 0 of those are production call sites, 0 are test call sites -- both operations' render-site count is 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F54-AC3",
+      "criterion_verbatim": "`F54-AC3` -- feed a fixture (or a constructed wire object) whose `status.state` is `PARTIAL` through the whole adapt-then-render path your first act traced, and assert the rendered state is `PARTIAL` -- not `READY`, not `LOADING`, not the explicit unknown. <criterion id=\"F54-AC3\" cell_refs=\"FE-s-54\" drives=\"none\"><invocation>cd <WS>/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-54/stated-state-wins.test.ts</invocation><expect>A status-summary RESPONSE STATING PARTIAL RENDERS PARTIAL, NOT A DEFAULT: yes</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-5-fe-s-54/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-54/stated-state-wins.test.ts",
+      "expect": "A status-summary RESPONSE STATING PARTIAL RENDERS PARTIAL, NOT A DEFAULT: yes",
+      "output_evidence": "F54-AC3 status-summary PARTIAL: data.state=PARTIAL data.availability.state=PARTIAL data.availability.publicReasonCode=\"SOURCE_PARTITION_INCOMPLETE\"\nF54-AC3 status-summary PARTIAL rendered through envelopeFromAvailability: state=PARTIAL\nF54-AC3 status-job PARTIAL: data.state=PARTIAL data.availability.state=PARTIAL data.availability.publicReasonCode=\"SOURCE_PARTITION_INCOMPLETE\"\nF54-AC3 status-job PARTIAL rendered through envelopeFromAvailability: state=PARTIAL\nF54-AC3 CONTROL status-summary UNCERTAIN, no reason: data.state=UNCERTAIN data.availability.state=UNCERTAIN data.availability.partialReason=\"The response carried no status stating its state, so its state is unknown.\"\nA status-summary RESPONSE STATING PARTIAL RENDERS PARTIAL, NOT A DEFAULT: yes\n\n3 pass\n0 fail\n20 expect() calls\nRan 3 tests across 1 file.\n\n--- MUTANT (RED) transcript, same file, effectiveStatus reverted to bare `status` (pasted in full in the result file): 'F54-AC3 status-summary PARTIAL: data.state=PARTIAL data.availability.state=UNCERTAIN ...', expect(parsed.data?.availability.state).toBe('PARTIAL') -- Expected PARTIAL, Received UNCERTAIN; F54-AC-CROSS also fails the same way (AGREE: no). 1 pass / 2 fail.",
+      "denominator": "both operations (status-summary, status-job) tested with a PARTIAL fixture: 2 of 2 agree data.state===data.availability.state===PARTIAL, rendered through envelopeFromAvailability===PARTIAL; 1 control (UNCERTAIN, no reason) unaffected: still UNCERTAIN + NO_STATUS_REASON",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F54-AC4",
+      "criterion_verbatim": "`F54-AC4` -- the existing envelope/status suites are unaffected. <criterion id=\"F54-AC4\" cell_refs=\"FE-s-54\" drives=\"none\"><invocation>cd <WS>/portal && timeout 300 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-14 src/pages/InvestorReporting/__tests__/fe-s-47</invocation><expect>(?<![0-9])0 fail</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-5-fe-s-54/portal && timeout 300 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-14 src/pages/InvestorReporting/__tests__/fe-s-47",
+      "expect": "(?<![0-9])0 fail",
+      "output_evidence": "F47-AC6 REACH status-summary, no status: state PARTIAL, partialReason null (expected NO_STATUS_REASON) -> MISSING\nF47-AC6 REACH status-job, no status: state PARTIAL, partialReason null (expected NO_STATUS_REASON) -> MISSING\nexpect(carries).toBe(arms) -- Expected: 18, Received: 16\n(FAIL) FE-s-47 ... F47-AC6 -- the reach, by subtraction over the committed tree\nF47-AC7 POPULATION: 11 status-optional - 2 without an availability = 9; control refused when stripped: 7 of 9\nexpect(controlRefused).toBe(population) -- Expected: 9, Received: 7\n(FAIL) FE-s-47 ... F47-AC7 -- no status-optional operation is refused for a reasonless UNCERTAIN\n\n26 pass\n2 fail\n77 expect() calls\nRan 28 tests across 6 files.",
+      "denominator": "28 tests across 6 files (fe-s-14: 5 files; fe-s-47: 1 file); 26 pass, 2 fail",
+      "status": "FAIL",
+      "status_reason": "MECHANICAL GRADE, decided by the printed bar against the raw output, not by this worker. Before this cell's edit (same invocation, same worktree, this session's first measurement) this read 28 pass / 0 fail. Both new failures (F47-AC6, F47-AC7) are the DIRECT, PREDICTED, mechanical consequence of correctly implementing FE-s-54 (round-8 analysis item 3: 'a stated state wins, wherever the response states it') -- F47-AC6's own RULES table (fe-s-47/no-status-reason.test.ts:348-350, unedited by this cell) already names the exact mechanism this fix changes ('OVERWRITTEN on every in-contract response ... regardless of what this line set'), and F47-AC7's control assumed every status-optional operation defaults to UNCERTAIN with no status, which this cell falsifies for status-summary/status-job specifically. fe-s-47/no-status-reason.test.ts is NOT in this order's <paths>, so this worker cannot update its RULES table or F47-AC7's per-operation assumption. Filed as IRPT_FNTEND-W4-S77 -- the same class as the already-filed IRPT_FNTEND-W4-S22 (FE-s-53 breaking F47-AC6 one level down), resolved there only via an AMENDMENT widening <paths>. This row is graded FAIL by its own printed bar and reported as such rather than forced to PASS; <status> is left for the COO to resolve at drain (e.g. by widening <paths> to fe-s-47/no-status-reason.test.ts for the two now-stale assertions)."
+    },
+    {
+      "criterion_id": "F54-AC5",
+      "criterion_verbatim": "`F54-AC5` -- the whole IRPT_FNTEND suite. Your worktree is FRESH off the current merged tree, so this should read genuinely clean (0 fail) if your own fix is correct -- unlike earlier sibling cells, there is no known stale residual to explain away here. <criterion id=\"F54-AC5\" cell_refs=\"FE-s-54\" drives=\"none\"><invocation>cd <WS>/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting</invocation><expect>(?<![0-9])0 fail</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-5-fe-s-54/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "expect": "(?<![0-9])0 fail",
+      "output_evidence": "597 pass\n21 skip\n2 fail\n2542 expect() calls\nRan 620 tests across 110 files.\nThe two failures are FE-s-47's F47-AC6 and F47-AC7 (identical to F54-AC4's finding, IRPT_FNTEND-W4-S77) and nothing else -- a second, separately-run whole-suite measurement earlier this session read 3 fail (the same 2, plus one intermittent fe-s-45/residuals.test.ts F45-AC9 failure that passes 6/6 standalone in 31.89s and does not import anything this cell touches, matching the already-filed load-sensitivity pattern IRPT_FNTEND-W1-S67/W1-S69) -- this deciding run has it clean.",
+      "denominator": "620 tests across 110 files; 597 pass, 21 skip, 2 fail -- both named, out-of-grant, and filed (IRPT_FNTEND-W4-S77); the order's own text anticipates 'this should read genuinely clean... if your own fix is correct', which this cell's fix IS -- the 2 failures are in a file the fix correctly falsifies, not a defect in the fix",
+      "status": "FAIL",
+      "status_reason": "MECHANICAL GRADE, decided by the printed bar against the raw output. The order's own prose expectation ('genuinely clean... if your own fix is correct') and F54-AC5's literal <expect> ('0 fail') diverge given IRPT_FNTEND-W4-S77's finding: the fix IS correct (confirmed by F54-AC1/AC2/AC3 and the mutant control) and the 2 failures are the predicted consequence of fe-s-47's own stale assumption, not a defect this cell introduced elsewhere. Graded FAIL by the printed bar, honestly, rather than reinterpreting the order's prose to force PASS. <status> left for the COO to resolve at drain, same as F54-AC4."
+    },
+    {
+      "criterion_id": "F54-AC6",
+      "criterion_verbatim": "`F54-AC6` -- graded at L9: the first-act trace is real (cites actual render sites or honestly reports zero), and any fix made is grounded in what that trace found rather than a guess at `adapt.ts`. RECORD; NO VERDICT. <criterion id=\"F54-AC6\" cell_refs=\"FE-s-54\" judgment=\"true\" drives=\"none\"/>",
+      "method": "manual_read_with_citation",
+      "invocation": "none -- judgment criterion, graded at L9",
+      "output_evidence": "RECORDED, NO VERDICT. Material for the grader: the trace ran `git grep -n -F -e 'probeStatus(' -e 'getJobStatus(' HEAD -- src` over the whole committed portal tree and found exactly 2 hits (both the methods' own declarations, investor-reporting.ts:1120,1125); zero production or test call sites anywhere, confirmed by the same instrument the client's own comments already claim ('no screen reads it [yet]'). Every production tab body was traced to `envelopeFromAvailability(<document>.availability)` instead (tabs/TabShell.tsx:142,152,159; ReportingTab.tsx:158; HoldingsTab.tsx:148; AnalysisTab.tsx:151,194), never fed by these two operations. Rather than stopping at 'zero render sites, nothing to fix' (the order's own named alternative), the trace continued one level up per the order's own instruction ('does the render site... read something that defaults past it... a caller that wraps the result through [an adapter] a second time') and found the gap in `parseIrEnvelope` (contracts/envelope.ts): `carryAvailabilityFromStatus(adapt(body.data), status)` runs for EVERY operation including status-summary/status-job, and for these two `status` (the separate response-level member) is always null, so the document's own already-correct availability (from `adaptStatusEnvelope`) was unconditionally clobbered by the generic 'no status' default. `adaptStatusEnvelope` itself was re-read and confirmed already correct (STATE_FOR_WIRE is an identity map for PARTIAL, adapt.ts:356-365) and left untouched -- the ENTIRE fix is in envelope.ts, exactly where the trace put it, never adapt.ts. Independent corroboration: this exact mechanism was ALREADY NAMED, unprompted, in fe-s-47/no-status-reason.test.ts's own RULES table comment (:348-350, unedited, written at FE-s-53 time) and its F47-AC7 battery already printed the symptom (row IRPT_FNTEND-W3-S38) without grading it -- the fix closes precisely what that comment and that printed line both independently pointed at. A mutant control (reverting the fix to bare `status`) reproduces the RED state exactly (F54-AC3, F54-AC-CROSS both fail, data.availability.state=UNCERTAIN instead of PARTIAL), and reverting the mutant restores byte-identical committed content (`git status --short` clean).",
+      "denominator": "judgment -- 1 added const + 1 changed line in 1 function (parseIrEnvelope), 0 lines changed in adaptStatusEnvelope or any other adapter; graded by 3.0.0_SA_CVO at L9",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\": graded at L9 by 3.0.0_SA_CVO, never self-graded (Rule 27 L9). This worker records the material and no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The fix is `effectiveStatus = status ?? (IR_STATUS_DOCUMENT_OPERATIONS.includes(operation) ? adaptedData : null)`. The mutant reverts `effectiveStatus` to bare `status` (the pre-fix behaviour) in place, in the committed worktree, then restores it -- confirmed byte-identical to the committed fix afterward (`git status --short` clean, `git diff` empty).",
+      "expected": "With the mutant, a status-summary/status-job response stating PARTIAL with no separate outer status must again read `data.availability.state === 'UNCERTAIN'` (the generic default), diverging from `data.state === 'PARTIAL'` (untouched) -- reproducing IRPT_FNTEND-W3-S38's printed symptom exactly.",
+      "observed": "F54-AC3 status-summary PARTIAL: data.state=PARTIAL data.availability.state=UNCERTAIN ...; expect(parsed.data?.availability.state).toBe('PARTIAL') -- Expected: \"PARTIAL\", Received: \"UNCERTAIN\". F54-AC-CROSS (the committed StatusEnvelope fixture) likewise: data.state=PARTIAL data.availability.state=UNCERTAIN -- AGREE: no. 1 pass / 2 fail (F54-AC2's own assertions, which do not touch this code path, were unaffected and stayed green). Mutant reverted; `git status --short` on portal reads clean, matching committed HEAD 5db8b9f4 exactly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two consecutive runs of `bun test src/pages/InvestorReporting/__tests__/fe-s-54/stated-state-wins.test.ts` on byte-identical committed bytes (portal 5db8b9f4), and two separate whole-suite runs (F54-AC5) on the same commit, minutes apart.",
+      "observed": "Both fe-s-54 runs: '3 pass', '0 fail', '20 expect() calls', 'A status-summary RESPONSE STATING PARTIAL RENDERS PARTIAL, NOT A DEFAULT: yes'. Both whole-suite runs: F47-AC6 and F47-AC7 fail identically each time ('Expected: 18, Received: 16' / 'Expected: 9, Received: 7'); the ONLY variation across whole-suite runs was the pre-existing, already-filed, unrelated fe-s-45/residuals.test.ts F45-AC9 flake (2 fail one run, 3 fail another, load-sensitive per IRPT_FNTEND-W1-S67/W1-S69) -- nothing this cell's own artifacts touch varied.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal/src/pages/InvestorReporting/__tests__/fe-s-47/no-status-reason.test.ts -- its RULES table, F47-AC6 and F47-AC7's own per-operation assumptions",
+      "reason": "NOT in this order's <paths>. Both assertions are now stale for status-summary/status-job specifically (IRPT_FNTEND-W4-S77) as a direct consequence of this cell's required fix; left unedited, filed, and reported as FAIL on F54-AC4/AC5 rather than worked around."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/contracts/adapt.ts's adaptStatusEnvelope",
+      "reason": "BOUNDS: 'contracts/adapt.ts IS YOURS FOR adaptStatusEnvelope ONLY, AND ONLY IF YOUR TRACE PUTS THE GAP THERE.' The trace put the gap in envelope.ts's parseIrEnvelope, not here; adaptStatusEnvelope was re-read and confirmed already correct, and is untouched. Confirmed: `git show 679d0223 -- .../contracts/adapt.ts` and `git show 5db8b9f4 -- .../contracts/adapt.ts` both show no hunk in that file (the whole diff, both commits, is envelope.ts + the new test)."
+    },
+    {
+      "item": "IrParsedEnvelope.state (envelope.ts line 233, `status?.state ?? EXPLICIT_UNKNOWN_STATE`) and its one production reader (investor-reporting.ts:925, LiveClient.send's telemetry/query-cache envelope)",
+      "reason": "A DIFFERENT field from StatusEnvelope.state/.availability.state, which is what F54-AC3 and the cell's own text name. Fixing it too would touch a telemetry/cache path shared by all 12 operations, well beyond this cell's grant and named symptom; left as-is and not separately filed (it is a lower-severity, non-rendering variant of the same class, not yet exercised by anything this order's criteria grade)."
+    }
+  ],
+  "surprises": [
+    "IRPT_FNTEND-W4-S77: F54-AC4's and F54-AC5's '0 fail' cannot pass because this cell's required fix (contracts/envelope.ts's parseIrEnvelope, not adaptStatusEnvelope) correctly falsifies two stale assumptions in fe-s-47/no-status-reason.test.ts (F47-AC6, F47-AC7), out of this order's <paths> to fix (BLOCKING, INERT). Left exactly as filed; the same class and remedy as the already-filed IRPT_FNTEND-W4-S22."
+  ],
+  "session_log": "0.9.0_WK_IRPT_FNTEND~4 on IRPT_FNTEND.TO-FE-s-54, worktree pair C:/tmp/wk-irpt_fntend-9-5-fe-s-54 (workspace branch wk-irpt_fntend-9-5-fe-s-54) + portal (branch wk-irpt_fntend-9-5-fe-s-54-portal, from DEV ce53801c, which includes FE-s-53's NO_STATUS_REASON fix -- confirmed present before touching adaptStatusEnvelope). First act: traced IR_DATA_ADAPTER['status-summary']/['status-job'] (envelope.ts:147-148) forward through investor-reporting.ts's probeStatus()/getJobStatus() (the ONLY client methods for these operations) via git grep over the committed tree -- found exactly 2 hits, both the methods' own declarations, and confirmed (by the same instrument) that every production tab body instead builds its panel from envelopeFromAvailability() of a DIFFERENT document's own availability. Read adaptStatusEnvelope (adapt.ts:536-569) and STATE_FOR_WIRE (:356-365) and confirmed it already carries wire.state correctly (identity for PARTIAL) -- the gap is NOT there. Per the order's own instruction, continued the trace one level up (parseIrEnvelope, envelope.ts) and found carryAvailabilityFromStatus always runs on the adapted document with the response-level `status`, which is always null for status-summary/status-job (no separate status sibling in a real response for these two) -- so the document's own already-correct availability was unconditionally overwritten by the generic no-status default. This exact mechanism was independently named, unprompted, in fe-s-47's own RULES table comment and its F47-AC7 diagnostic (row IRPT_FNTEND-W3-S38, this cell's own origin). Wrote the fix in parseIrEnvelope (an added IR_STATUS_DOCUMENT_OPERATIONS const + an effectiveStatus fallback), confirmed typecheck clean, wrote and ran fe-s-54/stated-state-wins.test.ts (RED via an in-place mutant revert, then GREEN with the fix restored, both transcripts captured), committed (679d0223). Ran F54-AC4 (fe-s-14+fe-s-47): 2 new fails (F47-AC6, F47-AC7), both the direct predicted consequence, traced to fe-s-47's own now-stale assumptions and its own unedited RULES-table comment explaining the exact mechanism; filed IRPT_FNTEND-W4-S77. Noticed the committed test file's own git-grep pattern literals self-matched its own census once committed (4 of 6 raw hits); fixed with an explicit self-exclusion and a printed exclusion count, re-verified F54-AC2/AC3 clean, committed the correction (5db8b9f4). Re-ran the mutant control against the corrected file (fired as expected), reverted it, confirmed `git status --short` clean against 5db8b9f4. Ran F54-AC5 (whole suite) twice: 2 fail (the same fe-s-47 pair) on both deciding runs, plus one non-deterministic, unrelated, already-filed fe-s-45 flake on one of two runs (excluded from the deciding evidence per evidence hygiene -- the cleaner, reproduced-twice run is quoted). Did not touch adapt.ts, envelope.ts's IrParsedEnvelope.state field, or fe-s-47/no-status-reason.test.ts (out of grant). Filed the surprise row (read both investigation files first; INVESTIGATION_v2.md's max prior id was W4-S76, minted W4-S77) and wrote this result file before assembling this proof.",
+  "compiler_tools": [
+    {
+      "tool": "bun 1.3.9",
+      "invocation": "/c/Users/AndrewBerman/.bun/bin/bun test ...",
+      "result": "the test runner for F54-AC2, F54-AC3, F54-AC4, F54-AC5, plus fe-s-14/fe-s-47's own existing batteries"
+    },
+    {
+      "tool": "tsc (via `bun run typecheck` = tsc -b --noEmit)",
+      "invocation": "/c/Users/AndrewBerman/.bun/bin/bun run typecheck",
+      "result": "rc=0 at portal 5db8b9f4"
+    },
+    {
+      "tool": "git (git grep, git cat-file, git show, git status)",
+      "invocation": "git -C <portal> grep -n -F -e 'probeStatus(' -e 'getJobStatus(' HEAD -- src ; git show <commit> -- <path> ; git status --short",
+      "result": "the first-act census, the committed-blob reads and the mutant-revert confirmation"
+    },
+    {
+      "tool": "Python 3.x",
+      "invocation": "python .tools/proof-of-spec-check.py ... --governing-order ...",
+      "result": "the proof instance check"
+    }
+  ]
+}
