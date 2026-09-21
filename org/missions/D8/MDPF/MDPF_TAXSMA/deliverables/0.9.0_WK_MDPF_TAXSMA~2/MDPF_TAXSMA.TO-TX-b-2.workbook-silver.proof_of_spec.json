@@ -1,0 +1,246 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_TAXSMA.TO-TX-b-2",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/prd/MDPF_TAXSMA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "671925aecc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/decompositions/MDPF_TAXSMA_DECOMP.md",
+    "vintage_commit": "7f65001ab3",
+    "to_ref": "org/missions/D8/MDPF/MDPF_TAXSMA/task-orders/MDPF_TAXSMA.TO-TX-b-2.workbook-silver.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_TAXSMA~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/silver/taxsma_workbook.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only; no deploy is in this cell's scope. S19: reads a Bronze envelope through an injected bronze_reader(), types every business cell per business_scalar_schema, serializes a typed parquet table (BUSINESS_COLUMNS + ROW_METADATA_FIELDS, 10 columns), stamps every envelope field except rows plus Bronze address/response_sha256/snapshot_id lineage as file metadata, and persists through a SilverStore at the ONE address()-computed key (_silver_key).",
+      "introduces": [
+        "def build_silver",
+        "def _silver_key",
+        "def _typed_scalar",
+        "class LocalSilverStore",
+        "class UnrepresentableScalarError"
+      ],
+      "artifact_covered_by": [
+        "TXB2-AC1", "TXB2-AC2", "TXB2-AC3", "TXB2-AC4", "TXB2-AC5", "TXB2-AC6", "TXB2-AC7", "TXB2-AC8",
+        "TXB2-AC9", "TXB2-AC10", "TXB2-AC11"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/tests/taxsma/test_taxsma_workbook_silver.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "17 tests (test_ac1_ .. test_ac11_, one or more per criterion), synthetic Bronze envelopes and LocalSilverStore only -- no live route, no Graph, no S3SilverStore construction (checked by test_no_live_route_or_s3_call_site_is_executed_in_this_test_module). py -3.12 -m pytest ... -q: 17 passed in 0.5s.",
+      "introduces": [
+        "def test_ac1_address_resolves_and_is_the_only_key_construction",
+        "def test_ac8_conflicting_bytes_at_one_key_raise_and_never_overwrite"
+      ],
+      "artifact_covered_by": [
+        "TXB2-AC1", "TXB2-AC2", "TXB2-AC3", "TXB2-AC4", "TXB2-AC5", "TXB2-AC6", "TXB2-AC7", "TXB2-AC8",
+        "TXB2-AC9", "TXB2-AC10", "TXB2-AC11"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The probe for all 11 criteria: each AC runs its named pytest subset in a fresh subprocess (never in-process), requires rc 0 AND at least one test collected (a 0-of-0 run is a refused vacuous pass), and prints exactly one VERDICT line. Mirrors the TX-b-1 probe's structure (same repo, same pattern).",
+      "artifact_covered_by": [
+        "TXB2-AC1", "TXB2-AC2", "TXB2-AC3", "TXB2-AC4", "TXB2-AC5", "TXB2-AC6", "TXB2-AC7", "TXB2-AC8",
+        "TXB2-AC9", "TXB2-AC10", "TXB2-AC11"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/workbook-silver.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's result record: every value with its instrument, UTC time and denominator; it rides the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TXB2-AC1",
+      "criterion_verbatim": "`TXB2-AC1` -- `address(\"gateway\",\"49financial\",\"silver\",\"taxsma_workbook\",\"date=<YYYY-MM-DD>\",\"<snapshot_id>-<response_sha256>.parquet\")` resolves at the cell's HEAD, and the module computes its Silver key only through that call",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC1",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC1(?![0-9])",
+      "output_evidence": "test_ac1_address_resolves_and_is_the_only_key_construction PASSED; test_ac1_unregistered_source_is_refused PASSED\nmeasurement: collected=17 selected(by -k 'test_ac1_')=2 passed=2 failed=0\nVERDICT: PASS-TXB2-AC1",
+      "denominator": "2 of 2 sub-tests passed: address() resolves to an s3:// string (registry row 'gateway' registered, re-measured independently at result.md s.0), and exactly 1 address()/lib.opal_naming.address call site in the whole module, AST-located inside the _silver_key function; an unregistered source raises ValueError.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC2",
+      "criterion_verbatim": "`TXB2-AC2` -- a fixture snapshot with ACCOUNT_SLOT, BLANK, TOTAL and UNRECOGNIZED rows yields a parquet with the same row count and every `row_number` present",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC2",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC2(?![0-9])",
+      "output_evidence": "test_ac2_all_four_row_kinds_yield_same_row_count_and_every_row_number_present PASSED\nmeasurement: collected=17 selected(by -k 'test_ac2_')=1 passed=1 failed=0\nVERDICT: PASS-TXB2-AC2",
+      "denominator": "4 input rows (one of each ROW_KINDS member) yield parquet row count 4 (== input row count); row_numbers read back sorted == [1,2,3,4], all 4 of 4 present; row_kinds observed as a set == the full ROW_KINDS enum, 4 of 4.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC3",
+      "criterion_verbatim": "`TXB2-AC3` -- all seven business columns follow `workbook.silver.business_scalar_schema`, and every non-NULL value populates exactly its matching field (checked over every row)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC3",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC3(?![0-9])",
+      "output_evidence": "test_ac3_business_scalar_schema_populates_exactly_the_matching_field_over_every_row PASSED\nmeasurement: collected=17 selected(by -k 'test_ac3_')=1 passed=1 failed=0\nVERDICT: PASS-TXB2-AC3",
+      "denominator": "2 rows x 7 business columns = 14 cells checked, covering int/str/bool/float/None inputs: every cell's struct carries exactly the 5 schema keys (kind, string_value, integer_value, float_value, boolean_value); kind in SCALAR_KINDS for 14 of 14; for a non-NULL kind exactly its matching value field is populated and the other 3 are null, for 14 of 14; for NULL all 4 value fields are null.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC4",
+      "criterion_verbatim": "`TXB2-AC4` -- every envelope field except `rows` is present in the parquet file metadata, including for a zero-row snapshot",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC4",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC4(?![0-9])",
+      "output_evidence": "test_ac4_every_envelope_field_except_rows_present_in_file_metadata_for_zero_row_snapshot PASSED\nmeasurement: collected=17 selected(by -k 'test_ac4_')=1 passed=1 failed=0\nVERDICT: PASS-TXB2-AC4",
+      "denominator": "A zero-row envelope (rows=[]) yields a parquet with 0 rows and a non-null file metadata dict carrying 12 of 12 ENVELOPE_FIELDS (every capability.response_fields member except rows); 'rows' itself is absent from the metadata keys, 0 of however many keys.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC5",
+      "criterion_verbatim": "`TXB2-AC5` -- the Bronze address, `response_sha256` and `snapshot_id` lineage are present in the parquet file metadata",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC5",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC5(?![0-9])",
+      "output_evidence": "test_ac5_bronze_lineage_present_in_file_metadata PASSED\nmeasurement: collected=17 selected(by -k 'test_ac5_')=1 passed=1 failed=0\nVERDICT: PASS-TXB2-AC5",
+      "denominator": "3 of 3 lineage fields present in file metadata and equal to the values supplied to build_silver: bronze_address equals the injected Bronze address string, response_sha256 equals 'sha-ac5-xyz', snapshot_id equals the envelope's own 'snap-1'.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC6",
+      "criterion_verbatim": "`TXB2-AC6` -- two source rows sharing one account identity remain two rows",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC6",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC6(?![0-9])",
+      "output_evidence": "test_ac6_duplicate_account_identity_rows_remain_distinct PASSED\nmeasurement: collected=17 selected(by -k 'test_ac6_')=1 passed=1 failed=0\nVERDICT: PASS-TXB2-AC6",
+      "denominator": "2 input rows sharing Account Number '00012345' (one Traded=YES, one Traded=NO) yield row_count 2 and parquet row_numbers sorted == [1,2]: 2 of 2 rows retained distinct, no identity-based dedup.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC7",
+      "criterion_verbatim": "`TXB2-AC7` -- (difference) replaying identical Bronze bytes produces no second leaf, while a response with changed bytes produces a second leaf in the same harness",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC7",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC7(?![0-9])",
+      "output_evidence": "test_ac7_identical_replay_no_second_leaf_changed_bytes_second_leaf PASSED\nAC7 difference: identical replay leaves=1 (no second leaf); after changed bytes leaves=2\nmeasurement: collected=17 selected(by -k 'test_ac7_')=1 passed=1 failed=0\nVERDICT: PASS-TXB2-AC7",
+      "denominator": "One harness (one LocalSilverStore): first build -> PERSIST_COMPLETE, 1 leaf. Engaged arm (identical response_sha256/body replayed) -> PERSIST_NO_CHANGE, same silver_address, store still 1 leaf. Disengaged arm (different response_sha256/body) -> PERSIST_COMPLETE, different silver_address, store now 2 leaves. Differed: only the changed-bytes arm added a leaf.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC8",
+      "criterion_verbatim": "`TXB2-AC8` -- conflicting replay bytes for one key raise and never overwrite",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC8",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC8(?![0-9])",
+      "output_evidence": "test_ac8_conflicting_bytes_at_one_key_raise_and_never_overwrite PASSED\nmeasurement: collected=17 selected(by -k 'test_ac8_')=1 passed=1 failed=0\nVERDICT: PASS-TXB2-AC8\n\nMUTANT CONTROL (reverted): with the conflict check removed from LocalSilverStore.put_if_absent, the SAME test FAILED: 'Failed: DID NOT RAISE <class ValueError>', probe printed 'VERDICT: FAIL-TXB2-AC8'. Reverted; re-run above is the clean PASS.",
+      "denominator": "1 of 1 test: a first put_if_absent at a key succeeds (PERSIST_COMPLETE); a second put_if_absent at the SAME key with DIFFERENT body bytes raises ValueError (1 of 1 raised); get_body(key) after the raise still returns the ORIGINAL bytes, 1 of 1 (never overwritten). Mutant control (see below) confirms the assertion is load-bearing: removing the check flips this exact test to FAIL.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC9",
+      "criterion_verbatim": "`TXB2-AC9` -- an unrepresentable scalar is refused, never coerced or omitted",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC9",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC9(?![0-9])",
+      "output_evidence": "test_ac9_unrepresentable_scalar_is_refused_never_coerced_or_omitted PASSED; test_ac9_every_other_json_scalar_type_is_representable PASSED\nmeasurement: collected=17 selected(by -k 'test_ac9_')=2 passed=2 failed=0\nVERDICT: PASS-TXB2-AC9",
+      "denominator": "3 of 3 unrepresentable arms raise UnrepresentableScalarError and leave the store untouched (0 objects each): a nested dict business value, a list business value, a NaN float business value. Positive control: 5 of 5 every-other-JSON-scalar-type inputs (None, str, int, float, bool True, bool False) classify without raising.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC10",
+      "criterion_verbatim": "`TXB2-AC10` -- a missing or corrupt Bronze input yields SOURCE_UNAVAILABLE or SOURCE_SCHEMA_INVALID, never an empty parquet",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC10",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC10(?![0-9])",
+      "output_evidence": "test_ac10_missing_bronze_input_yields_source_unavailable_never_an_empty_parquet PASSED; test_ac10_corrupt_bronze_body_yields_source_schema_invalid_never_an_empty_parquet PASSED; test_ac10_incomplete_envelope_yields_source_schema_invalid_never_an_empty_parquet PASSED\nmeasurement: collected=17 selected(by -k 'test_ac10_')=3 passed=3 failed=0\nVERDICT: PASS-TXB2-AC10",
+      "denominator": "3 of 3 arms raise SilverBuildError with the store left at 0 objects (never an empty parquet persisted): a bronze_reader raising KeyError (missing) -> code SOURCE_UNAVAILABLE; a non-JSON body (corrupt) -> code SOURCE_SCHEMA_INVALID; a well-formed body with complete:false (incomplete envelope) -> code SOURCE_SCHEMA_INVALID.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB2-AC11",
+      "criterion_verbatim": "`TXB2-AC11` -- the output column set equals the contract's `business_columns` plus `row_metadata`, with no business filtering or column slimming",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC11",
+      "expect": "(?m)^VERDICT: PASS-TXB2-AC11(?![0-9])",
+      "output_evidence": "test_ac11_output_column_set_equals_contract_business_columns_plus_row_metadata PASSED; test_ac11_column_set_matches_the_contract_file_directly PASSED\nmeasurement: collected=17 selected(by -k 'test_ac11_')=2 passed=2 failed=0\nVERDICT: PASS-TXB2-AC11",
+      "denominator": "Parquet schema.names read back as a set == BUSINESS_COLUMNS (7) union ROW_METADATA_FIELDS (3) == 10 members, exactly. Directly against org/standards/MDPF_TAXSMA_DATA_CONTRACT.json: 3 of 3 tuples equal (workbook.silver.business_columns == BUSINESS_COLUMNS, workbook.row_metadata == ROW_METADATA_FIELDS, workbook.row_kind == ROW_KINDS).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removed the conflict-detection branch from LocalSilverStore.put_if_absent (AC8's own logic): a call naming an EXISTING key with DIFFERENT body bytes fell through to `return PERSIST_NO_CHANGE` instead of raising ValueError.",
+      "expected": "test_ac8_conflicting_bytes_at_one_key_raise_and_never_overwrite fails (pytest.raises(ValueError) block does not see a raise)",
+      "observed": "FAILED: 'Failed: DID NOT RAISE <class ValueError>' (1 failed, 16 deselected); probe printed VERDICT: FAIL-TXB2-AC8. Reverted immediately; re-run: 1 passed, VERDICT: PASS-TXB2-AC8.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invoked twice back to back via the probe; outputs diffed with the vintage/UTC-time line and the elapsed: line stripped from each side.",
+      "observed": "diff of the two stripped outputs is empty -- byte-identical apart from the timestamp and elapsed-time lines.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Calling the live /ms/taxsma-workbook route, Microsoft Graph or SharePoint.",
+      "reason": "Forbidden by the worker bound and this cell's own scope (S19 is triggered by a successful S02 Bronze acquisition, never a live source read itself). Synthetic Bronze envelopes only, throughout."
+    },
+    {
+      "item": "Constructing or calling S3SilverStore.",
+      "reason": "No real S3 write is this cell's to make (worker bound); checked by test_no_live_route_or_s3_call_site_is_executed_in_this_test_module. S3SilverStore is exercised live only by a later release cell's read-back proof."
+    },
+    {
+      "item": "Wiring S19 to fire automatically on TX-b-1's SuccessResult (the pipeline trigger itself).",
+      "reason": "Contract workbook.silver.trigger describes the wiring, but no criterion here names building that invocation glue; this cell builds the S19 function build_silver() that such wiring would call, and proves it against an injected bronze_reader."
+    },
+    {
+      "item": "TX-m-1's consumption of this cell's row shape.",
+      "reason": "TX-m-1 is a separate cell (S03) in the decomposition's engine chain; this cell documents its own row shape in the module docstring for that later reader, but does not build or test the reader itself."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order. The commit is LOCAL on branch wk-mdpf_taxsma-1-2b; the COO drains it."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/workbook-silver.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the TX-b-2 probe (probes/tx_b_2.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-taxsma-2b && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py AC<1..11>",
+      "result": "11 of 11 'VERDICT: PASS-TXB2-AC<n>', rc=0 each, at HEAD 3dfb7e08de with the 2 new files (module + test) dirty pre-commit."
+    },
+    {
+      "tool": "pytest (py -3.12), the Silver test module direct",
+      "invocation": "py -3.12 -m pytest data/mdpf/tests/taxsma/test_taxsma_workbook_silver.py -q -p no:cacheprovider --color=no",
+      "result": "17 passed in 0.5s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh data/mdpf/scripts/silver/taxsma_workbook.py data/mdpf/tests/taxsma/test_taxsma_workbook_silver.py org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_2.py",
+      "result": "'OK: pre-commit gate clean for 3 of 3 file(s)', rc=0. One ruff F401 unused-import (hashlib) caught and fixed before the clean run."
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_TAXSMA~2 <0.9.0_WK_MDPF_TAXSMA~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-mdpf_taxsma-1-2b"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> TXB2-AC1,TXB2-AC2,TXB2-AC3,TXB2-AC4,TXB2-AC5,TXB2-AC6,TXB2-AC7,TXB2-AC8,TXB2-AC9,TXB2-AC10,TXB2-AC11",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}
