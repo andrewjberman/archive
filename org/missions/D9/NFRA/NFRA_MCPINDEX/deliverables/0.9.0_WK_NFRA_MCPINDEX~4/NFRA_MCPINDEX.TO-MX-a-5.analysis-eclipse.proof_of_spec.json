@@ -1,0 +1,212 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-a-5",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f506f63a8b",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-a-5.analysis-eclipse.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The probe for all 9 mechanical criteria (AC1-AC9); AC10 is judgment, no probe. Each handler prints its instrument (boto3 ListObjectsV2/GetObject/HeadBucket, pyarrow read_metadata, live), UTC vintage and denominator before its one VERDICT line. All 9 ran PASS this session (see acceptance rows).",
+      "artifact_covered_by": [
+        "MXA5-AC1",
+        "MXA5-AC2",
+        "MXA5-AC3",
+        "MXA5-AC4",
+        "MXA5-AC5",
+        "MXA5-AC6",
+        "MXA5-AC7",
+        "MXA5-AC8",
+        "MXA5-AC9"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/_mutant_control.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "controls.mutant harness only (not an acceptance criterion): imports classify() from mx_a_5.py, plants a synthetic key under silver/eclipse/ matching neither a CANON_TABLES filename nor an EXCLUDED_SUFFIXES entry, confirms it is flagged unclassified (engaged), then confirms a clean list flags nothing (disengaged). Overwrites the prior cell's (MX-a-4's) copy of this shared-probes-folder file, the established per-cell reuse pattern in this slot (MX-a-3 and MX-a-4 each did the same). No live AWS call; offline.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/analysis-eclipse.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's result record: every value with its instrument, UTC time and denominator; it rides the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MXA5-AC1",
+      "criterion_verbatim": "the property's silver (or, for MX-a-1, served) prefixes are listed live at the cell's run time, with object count, total bytes and newest partition date per table, and the read verb in the command log",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC1",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC1(?![0-9])",
+      "output_evidence": "denominator: 570 objects under silver/eclipse/ (read verb: ListObjectsV2, paginated, live at run time). 4 TABLE rows printed with filename/objects/bytes/newest_partition_date (e.g. portfolios_simple objects=114 bytes=7331276 newest=2026-09-20). EXCLUDED (named, s.AC8): 114 objects, 51870 bytes. 0 unclassified keys.\nVERDICT: PASS-MXA5-AC1",
+      "denominator": "570 objects scanned live under s3://opal-data-inf/silver/eclipse/ (ListObjectsV2, paginated); 4 of 4 canon tables matched exactly 114 objects each; 0 of 570 objects unclassified.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC2",
+      "criterion_verbatim": "each table's grain, freshness field and latest value are read from the objects or their producer's code at the cell's HEAD, the source printed per field",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC2",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC2(?![0-9])",
+      "output_evidence": "4 of 4 tables print grain (source: producer code, file:line + live pyarrow read_metadata cross-check), freshness field (source: producer code, the {date} folder name) and latest value (source: live object keys, 2026-09-20 for all 4). portfolios_simple/portfolios_full rows additionally print a measured docstring-vs-live row-count discrepancy (844 vs declared 835; 858 vs declared 842); models/model_composition rows match their docstring counts exactly (18, 9).\nVERDICT: PASS-MXA5-AC2",
+      "denominator": "4 of 4 tables carry grain+freshness+latest value, each with its source printed; all 4 read a live pyarrow read_metadata row/col count at the latest (2026-09-20) partition.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC3",
+      "criterion_verbatim": "each table's firm or master scope rule is stated with the key-prefix segment that carries it, and a table whose scope cannot be read from its key is named",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC3",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC3(?![0-9])",
+      "output_evidence": "scopes.json[inflection].monolith_scopes printed live ({'orion': ['inflection'], 'eclipse': ['inflection']}); eclipse named as a monolith-vendor key under inflection, not its own scopes.json row. 4 of 4 tables named as scope=inflection with NO firm-prefix segment in the key (filename or {date} folder). Row-level scope mechanism measured and printed: 0 calls to filter_to_inflection() found in convert_eclipse_portfolios_to_silver.py (vs coerce_silver_ids, dtype-only, which IS called); named as an open verification gap, not resolved.\nVERDICT: PASS-MXA5-AC3",
+      "denominator": "4 of 4 tables named scope-unreadable-from-key; 1 scopes.json read (monolith_scopes); 1 producer-code grep for filter_to_inflection() call sites (0 found).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC4",
+      "criterion_verbatim": "every never-sum rule is stated with its reason (cross-master, cross-firm, cross-date, non-additive field)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC4",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC4(?![0-9])",
+      "output_evidence": "7 rules printed, each with a REASON line naming cross-date, non-additive field, wrong-layer, cross-vendor, or cross-firm; rule 4 cites this cell's own live measurement (844 rows: 567 Opal-model / 95 non-Opal-model / 182 null); rule 3 cites the gold script's own aum_variance computation.\nVERDICT: PASS-MXA5-AC4",
+      "denominator": "7 of 7 rules carry a stated reason; reason classes used: cross-date x2, non-additive-field/wrong-layer x3, cross-vendor x1, cross-firm x1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC5",
+      "criterion_verbatim": "the property's common questions are written down as a numbered list, each with the table and the fields that answer it; the list's source is stated (producer code, portal page, prior art, or reasoning) and nothing on it is presented as measured user demand",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC5",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC5(?![0-9])",
+      "output_evidence": "10 questions printed, numbered 1-10, each with table, fields and source; every row's source line explicitly states 'NOT measured user demand (no query log / usage telemetry read this cell)'.\nVERDICT: PASS-MXA5-AC5",
+      "denominator": "10 of 10 questions carry table+fields+source; 0 of 10 claim measured user demand.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC6",
+      "criterion_verbatim": "each common question is assigned to a proposed purpose-built tool or to the typed query, with the reason",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC6",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC6(?![0-9])",
+      "output_evidence": "10 of 10 questions assigned: 9 -> TYPED QUERY (C6) with a stated reason each; 1 (Q2) -> TOOL `eclipse_summarize_aum_variance` with a stated reason (Opal-model filter + is_deleted exclusion + sum + cross-table read + variance disclosure, beyond C6's filter/group-by/aggregate scope).\nVERDICT: PASS-MXA5-AC6",
+      "denominator": "10 of 10 questions assigned, 0 unassigned; 9 typed_query, 1 tool.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC7",
+      "criterion_verbatim": "the proposed tool names pass `MX-n-1`'s rule as stated in C3 (the validator may not exist yet; the rule's text is the input)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC7",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC7(?![0-9])",
+      "output_evidence": "systems.json read live (25 keys; 'eclipse' present=True); scopes.json read live (9 keys checked for folding). 1 proposed tool name (eclipse_summarize_aum_variance) validated: system='eclipse' in registry, function='summarize' a recognized base-form verb, no scope token folded into the name.\nVERDICT: PASS-MXA5-AC7\nDeterminism control (separate run, not part of the VERDICT line above): AC7 invoked twice back to back, outputs byte-identical after stripping the vintage timestamp line.",
+      "denominator": "1 of 1 proposed tool names pass all three C3 sub-checks (shape regex, system-in-registry, function-is-base-verb) and the scope-folding check (0 of 9 scope tokens found folded into the name).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC8",
+      "criterion_verbatim": "the proposed read fence is stated as exact prefixes, and any table outside it is named as excluded with the reason",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC8",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC8(?![0-9])",
+      "output_evidence": "1 exact s3:// prefix printed as the proposed read fence (silver/eclipse/, covering all 4 canon tables -- MEASURED: they are sibling filenames under one date folder, not separate sub-prefixes, unlike MX-a-4/Orion). 1 EXCLUDED entry within the prefix printed with reason (_meta/silver_complete.json sentinels). Every other top-level/sibling bucket prefix (including Orion's own tables) named with a reason.\nVERDICT: PASS-MXA5-AC8",
+      "denominator": "4 of 4 canon tables fenced under 1 prefix; 1 of 1 within-prefix exclusion named with reason; 1 other-top-level-prefixes line naming the remainder.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC9",
+      "criterion_verbatim": "a property with no silver or served data at the cell's run time says so, and proposes no tool",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC9",
+      "expect": "(?m)^VERDICT: PASS-MXA5-AC9(?![0-9])",
+      "output_evidence": "live check: 570 objects, 26950756 bytes under s3://opal-data-inf/silver/eclipse/ at run time; has_data=True; antecedent FALSE for this property (data present), so the 'says so, proposes no tool' branch does not bind, and 10 questions were correctly proposed.\nVERDICT: PASS-MXA5-AC9",
+      "denominator": "1 of 1 antecedent check performed; has_data=True matches len(QUESTIONS)=10 > 0 (the TRUE-antecedent branch).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA5-AC10",
+      "criterion_verbatim": "JUDGMENT (graded by 3.0.0_SA_CVO at L9; record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming the CVO; never PASS or FAIL) -- the question list is what a staff member would plausibly ask of this property, and no common question is left to the typed query without a stated reason",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no <invocation> in the task order's ACCEPTANCE block for AC10 (self-closing tag)",
+      "output_evidence": "MXA5-AC10 is a JUDGMENT criterion (cell_refs='MX-a-5', judgment=\"true\", no <invocation>); it is graded by 3.0.0_SA_CVO at L9, never self-graded here. No PASS/FAIL verdict line follows. Record for the CVO: the 10-question list (AC5), each question's table/fields/source; the 9-typed-query/1-tool assignment with reasons (AC6); and that every typed-query assignment names WHY it needs no purpose-built tool (single-table filter/group-by/aggregate, or an explicit AC4-rule citation for the ones with a never-sum caveat).",
+      "denominator": "N/A -- judgment criterion, no invocation",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order (judgment=\"true\", no <invocation>); graded by 3.0.0_SA_CVO at L9 per PROOF_OF_SPEC.schema.json's `judgment` field description. The worker records evidence and takes no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two observations. (1) OFFLINE: probes/_mutant_control.py imports classify() from mx_a_5.py, plants a synthetic key under silver/eclipse/ matching neither a CANON_TABLES filename nor an EXCLUDED_SUFFIXES entry, and confirms it is flagged unclassified (engaged), then confirms a clean list flags nothing (disengaged). (2) LIVE, NATURALLY OCCURRING: this cell's own first AC1 run against the real 570 objects already returned 0 unclassified with no FAIL-then-fix cycle (unlike MX-a-4's), so the offline synthetic plant is this cell's primary discriminator for the UNCLASSIFIED path.",
+      "expected": "engaged (synthetic key present) -> unclassified list non-empty / would read FAIL-MXA5-AC1; disengaged (synthetic key absent) -> unclassified list empty / matches the real PASS-MXA5-AC1 state",
+      "observed": "OFFLINE control run 2026-09-21T09:1xZ: engaged_ok=True disengaged_ok=True (probes/_mutant_control.py, rc=0). LIVE: this cell's real AC1 run against 570 live objects returned 0 unclassified on the first attempt (no iteration was needed to reach PASS).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "MXA5-AC7 invoked twice back to back via the probe; outputs diffed with the vintage (UTC) line stripped from each side.",
+      "observed": "diff of the two stripped outputs is empty -- byte-identical apart from the vintage timestamp line.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Whether the Eclipse vendor connection itself is already Inflection-exclusive (a single-tenant integration, so no in-pipeline rep_id/firm filter is needed) -- AC3 finding.",
+      "reason": "Not verified by this cell -- named as an open verification gap in AC3's output and in the result.md, not resolved or asserted either way. Indirect evidence (the bronze puller's 'all firm portfolios' docstring language, and scopes.json's single-scope monolith_scopes.eclipse entry) points toward single-tenant but is not conclusive."
+    },
+    {
+      "item": "The module docstring's stated row counts for portfolios_simple (835) and portfolios_full (842) are stale against this cell's live measurement (844, 858) -- AC2 finding; not repaired (out of this cell's <paths> grant).",
+      "reason": "Repairing data/inf/scripts/silver/convert_eclipse_portfolios_to_silver.py is outside this cell's write grant (deliverables + the investigation file only); named as a finding for a later cell/project, not fixed here."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/analysis-eclipse.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the MX-a-5 probe (probes/mx_a_5.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py AC<1..9>",
+      "result": "AC1-AC9: VERDICT: PASS-MXA5-AC<n>, rc=0 each. AC10: descriptive output only, no verdict line."
+    },
+    {
+      "tool": "probes/_mutant_control.py",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && timeout 60 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/_mutant_control.py",
+      "result": "engaged_ok=True disengaged_ok=True, RESULT: FIRED-AS-EXPECTED, rc=0"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "cd C:/tmp/wk-mcpindex-4c && py -3.12 .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "no new row filed by this cell; the investigation file is unmodified by this worker's MX-a-5 work (see surprises: [] above)"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_5.py org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/_mutant_control.py",
+      "result": "see COMMITS in the worker report"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~4 <0.9.0_WK_NFRA_MCPINDEX~4@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-nfra_mcpindex-1-4c"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> MXA5-AC1,MXA5-AC2,MXA5-AC3,MXA5-AC4,MXA5-AC5,MXA5-AC6,MXA5-AC7,MXA5-AC8,MXA5-AC9,MXA5-AC10",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}
