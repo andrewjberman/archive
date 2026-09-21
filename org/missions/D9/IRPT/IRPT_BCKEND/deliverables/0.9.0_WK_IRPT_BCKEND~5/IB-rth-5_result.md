@@ -1,6 +1,50 @@
 # IB-rth-5 result -- session-establishment tooling for the export render host
 
 **Cell:** `IB-rth-5`, `IRPT_BCKEND.TO-IB-rth-5`. **Worker:** `0.9.0_WK_IRPT_BCKEND~5`.
+
+## UPDATE 2026-09-21 (this pass, resumed on a successor worktree): arm (e) DEPLOYED AND PROVEN, `<status>` flipped to `complete`
+
+Everything below this line, up to "What was built", is the FIRST pass's own record and is
+**SUPERSEDED on the deploy question only** -- both never-widen halves have SINCE SIGNED (after
+two corrections to the packet's own hash table, see `NEVER_WIDEN_SIGNOFF_PACKET_IB-rth-5.md`
+history), and this pass performed arm (e):
+
+- **Deployed** the 4 touched files (`render_export.cjs`, `capture-session.cjs`,
+  `capture-session.sh`, `package.json`) to
+  `s3://opal-313476888478-lambda-artifacts/ec2/investor-reporting-export/` via **git-blob
+  extraction** (`git show HEAD:<path>`, never a raw disk `aws s3 cp` -- this box's
+  `core.autocrlf=true` would have shipped different bytes for 3 of these 4 files).
+  `run-export-render.sh` correctly skipped (unchanged, per the packet's own note).
+- **Verified** the deployed bytes two ways: `get-object` + sha256 against the S3 objects, and
+  (the stronger check) `sha256sum` of the RUNNING path `/opt/investor-reporting-export/` on
+  `i-0167fd745ad906a66` via SSM -- both match the packet's section 2 table exactly, all 5 files.
+- **Change-management ledger**
+  `org/critical_paths/change_management/20260921T1606Z_irpt-bckend-ib-rth-5-session-tooling-deploy_deploy_completion.md`
+  opened BEFORE the deploy, all 3 legs proven, CLOSED.
+- **Arm (e)'s synthetic-storageState proof, against the DEPLOYED bytes**: wrote a well-formed,
+  clearly-fake `storageState.json` to the host via SSM, then sent `irpt-export-render-run` (whose
+  own sync step pulled this pass's freshly-uploaded bytes first) against a replayed
+  already-captured `ExportBundle` (`GENRT8PROOF/rt8-render`, the same one row `W3-S52` used).
+  Result: the NEW, distinguishing log line `OK: session state loaded from
+  /opt/investor-reporting-export/session/storageState.json (1 cookies, 0 origins) -- attempting
+  session reuse` printed, and the script STILL correctly refused `SESSION_ABSENT` -- no PDF
+  written, no false success claimed. The synthetic file was then removed from the host, restoring
+  the exact pre-test baseline (confirmed absent).
+- **Host confirmed RUNNING throughout and NOT stopped** (per this pass's explicit instruction;
+  its disposition remains COO/CTO's call, unchanged from the prior pass's own finding).
+- `<status>` flipped to `complete`. `R80-AC1` PASS-by-output (fresh re-run this session, rc=0).
+  `R80-AC2` stays a judgment criterion, `UNVERIFIABLE-BY-INSTRUMENT`, graded at L9 by
+  `3.0.0_SA_CVO` -- this does not block the flip, per this order's own `<proof_of_spec>` section.
+  `proof-of-spec-check` rc=0 (VALID).
+- **What still is NOT done, and cannot be done by any worker**: a real session capture. No MFA
+  login was attempted, scripted, or synthesized anywhere in this pass either. The named human
+  operator (Andrew, or a delegated operator holding valid Opal portal credentials) is still the
+  only one who can run the capture runbook in `README.md`'s "Session establishment" section.
+
+---
+
+## FIRST PASS RECORD (superseded on the deploy question above; the build itself is unchanged)
+
 **Outcome this pass:** honest STOP, exactly as the task order's arm (d) names it. `<status>`
 stays open (not touched by this worker, per this project's own precedent on `IB-rth-1`).
 
