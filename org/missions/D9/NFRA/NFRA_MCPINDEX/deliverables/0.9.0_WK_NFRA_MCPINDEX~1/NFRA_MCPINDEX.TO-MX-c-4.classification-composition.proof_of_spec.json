@@ -1,0 +1,265 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-4",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f506f63a8b",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-4.classification-composition.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/base.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "IntegrationSpec gains `tools` (the declared manifest), `tool_classifications` and `tool_catalog_refs` (both defaulting empty -- no existing construction call anywhere in the tree passes them, confirmed by every real integration still registering its unchanged tool set, MXC4-AC5). validate_integration_spec gains the MX-c-4 axis: for every name in spec.tools, both dicts must cover it or the spec is refused. No deploy in scope -- a local Gateway app module, not a served artifact (bound 6).",
+      "artifact_covered_by": ["MXC4-AC1", "MXC4-AC3", "MXC4-AC4", "MXC4-AC12"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/integrations/registry.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds _ACTIVE_BY_TOOL (tool name -> owning spec, populated by register_enabled) plus classification_for_tool/catalog_ref_for_tool readers. register_enabled gains the composed-registration-path net (MXC4-AC12): a tool register() actually adds that resolves through NEITHER the owning spec's own tool_classifications NOR app/data_entitlement.py's classify() is stripped from the report and named in composed_path_refused, never silently shipped.",
+      "artifact_covered_by": ["MXC4-AC2", "MXC4-AC3", "MXC4-AC4", "MXC4-AC5", "MXC4-AC9", "MXC4-AC12"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/destructive_ops.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "classify() composes: native tags unchanged, then a lazy lookup through the currently-active integration spec (registry.classification_for_tool -- local import, no load-time cycle), then the unchanged fail-closed default. read_teams_attachment added to SAFE_TOOLS (AC7/AC8): the one native tool absent from both SAFE_TOOLS and DESTRUCTIVE_OPS before this cell, so classify() fail-closed-denied it; now SAFE, matching the sibling read_* tools already there. The stale 'The 20 read-only tools' comment (decomp finding 12) corrected to state its own count is measured at each edit rather than carried forward.",
+      "artifact_covered_by": ["MXC4-AC2", "MXC4-AC6", "MXC4-AC7", "MXC4-AC11"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_entitlement_admin.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Only the :332 pin touched, per the cell's own writes line: the bare `assert len(registered_tool_names) == 44` becomes a derived, BY-NAME assertion (diff_against_pin from the new test module, replayed against the real registry) that still asserts the same 44 as a sanity check but now fails when a tool ships unpinned. Cannot be exercised in THIS pytest run (the whole file fails to collect -- `ModuleNotFoundError: No module named 'moto'`, MEASURED pre-existing environment gap, bound 14 forbids installing it); the identical composition is replayed standalone by probes/mx_c_4.py AC9 and verified there (registered_len=44, derived_len=44, mismatches=[]), and py_compile confirms the edited file is syntactically valid.",
+      "artifact_covered_by": ["MXC4-AC9"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_tool_classification_composition.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, 7 pytest tests (MXC4-AC1/AC2/AC3/AC4/AC7/AC9-diff/AC12) plus the reusable builders (make_spec, PlantedIntegration, FakeMCP, planted_factory, diff_against_pin) both this file's own tests and probes/mx_c_4.py import -- one source of truth. Self-contained and offline: no file under app/integrations/{ycharts,opal_portal,globgrph,schwab}/ is read or imported. Run standalone: 7 passed in 0.46s.",
+      "artifact_covered_by": ["MXC4-AC1", "MXC4-AC2", "MXC4-AC3", "MXC4-AC4", "MXC4-AC7", "MXC4-AC9", "MXC4-AC12"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Appends row NFRA_MCPINDEX-W1-S5 (OBSERVATION, ARMED) -- MXC4-AC11 measured unsatisfiable as written within this cell's <paths> (DATA_CATALOG.yaml carries 0 tool-reference fields for any of the 49 registered tools; adding one needs either hand-editing CAT, forbidden by bound 10, or editing the 4 real integrations' own directories, outside <paths>). REFUSED and reported per bound 9, never grandfathered.",
+      "artifact_covered_by": ["MXC4-AC11"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The probe for all 12 criteria (AC1-AC7, AC9-AC12 mechanical; AC8 judgment-only, no probe call). AC1-AC4/AC9-diff/AC12 run the real pytest nodes in tests/test_tool_classification_composition.py directly (one source of truth, no duplicated logic). AC5/AC6 build a faithful BEFORE snapshot (this cell's HEAD, 60464dd3f8, with exactly the 4 touched files reverted via `git show`) and compare against the live worktree in isolated subprocesses. AC9's real half and AC10's SCOPE_NOTE are printed in full. AC11 measures the real 49-tool population directly.",
+      "artifact_covered_by": ["MXC4-AC1", "MXC4-AC2", "MXC4-AC3", "MXC4-AC4", "MXC4-AC5", "MXC4-AC6", "MXC4-AC7", "MXC4-AC9", "MXC4-AC10", "MXC4-AC11", "MXC4-AC12"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/classification-composition.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's result record: every value with its instrument, UTC time and denominator; it rides the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MXC4-AC1",
+      "criterion_verbatim": "`IntegrationSpec` (`INT/base.py`) carries a per-tool classification and a per-tool catalog-entry reference, and `validate_integration_spec` refuses a spec with either missing",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC1",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC1(?![0-9])",
+      "output_evidence": "complete spec errs=[]\nmissing-classification errs=[\"tool 'mxac1_x' has no classification declared on the integration spec (C2)\"]\nmissing-catalog-ref errs=[\"tool 'mxac1_x' has no catalog-entry reference declared on the integration spec (C2)\"]\nmissing-both errs=[both messages]\n1 passed in 0.56s\nVERDICT: PASS-MXC4-AC1",
+      "denominator": "1 planted spec, 4 validate_integration_spec() calls (complete / missing-class / missing-catalog / missing-both), 4 of 4 as expected.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC2",
+      "criterion_verbatim": "`destructive_ops.classify(tool)` returns the declared class for an integration tool, read through the registered spec, and still returns `_UNKNOWN_TAG` (fail-closed) for any tool with no declaration",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC2",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC2(?![0-9])",
+      "output_evidence": "declared tool -> class=<OpClass.SAFE: 'safe'> unclassified=None\nundeclared tool -> class=<OpClass.IRREVERSIBLE_SEND: 'irreversible_send'> unclassified=True\n1 passed in 0.56s\nVERDICT: PASS-MXC4-AC2",
+      "denominator": "2 of 2 lookups match expectation (1 declared, 1 undeclared).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC3",
+      "criterion_verbatim": "(difference) a planted integration whose one tool has no classification is refused at `register_enabled` and adds zero tools, while the same integration with the classification declared registers that tool, in one test module (FWD-10 PROOF, the refusal half)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC3",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC3(?![0-9])",
+      "output_evidence": "missing classification: report={'error': 'invalid integration spec (not registered)', ...} mcp.names=[]\nwith classification: report={'tools': ['mxac3_a'], ...} mcp.names=['mxac3_a']\n1 passed in 0.56s\nVERDICT: PASS-MXC4-AC3",
+      "denominator": "2 arms (missing / present), both as expected; mcp.names==[] confirms register() never ran in the refused arm (zero tools added anywhere, not merely unreported).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC4",
+      "criterion_verbatim": "(difference) a planted tool with a classification but no catalog-entry reference is refused at registration, while the same tool with the reference registers",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC4",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC4(?![0-9])",
+      "output_evidence": "missing catalog ref: report={'error': 'invalid integration spec (not registered)', ...} mcp.names=[]\nwith catalog ref: report={'tools': ['mxac4_a'], ...} mcp.names=['mxac4_a']\n1 passed in 0.55s\nVERDICT: PASS-MXC4-AC4",
+      "denominator": "2 arms (missing / present), both as expected.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC5",
+      "criterion_verbatim": "`INT/registry.py` discovers integrations from their own directories, and the four existing ids (`ycharts`, `opal_portal`, `globgrph`, `schwab`) register exactly as before, names printed before and after",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC5",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC5(?![0-9])",
+      "output_evidence": "BEFORE (HEAD 60464dd3f8, pre-edit): {globgrph: 2, opal_portal: 1, schwab: 5, ycharts: 6}\nAFTER (this worktree): identical name sets for all 4 ids\nVERDICT: PASS-MXC4-AC5",
+      "denominator": "4 of 4 ids, before-name-set == after-name-set for all 4 (byte-identical JSON), via a snapshot that reverts only the 4 files this cell touches to their pre-edit HEAD bytes.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC6",
+      "criterion_verbatim": "every one of the 49 existing tool names resolves through `destructive_ops.classify` and `data_entitlement` to the class it had before the change, compared by name, denominator 49, zero differences",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC6",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC6(?![0-9])",
+      "output_evidence": "DENOMINATOR 49 tool name(s). all differences (1): read_teams_attachment (dop_class irreversible_send->safe, dop_unclassified true->false; de_class unchanged). differences EXCLUDING AC7's own change (0): []\nVERDICT: PASS-MXC4-AC6",
+      "denominator": "49 (union of before/after NATIVE_TOOLS|INTEGRATION_TOOLS|SCHWAB_TOOLS); 1 difference total, all 1 attributable to AC7's own deliberate change; 0 collateral differences among the other 48.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC7",
+      "criterion_verbatim": "`read_teams_attachment` is classified, and it is no longer denied by the fail-closed branch; the classification it receives is stated with its reason (`J` below)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC7",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC7(?![0-9])",
+      "output_evidence": "destructive_ops.classify('read_teams_attachment') = {'class': SAFE, 'reversible': True, 'irreversible': False, 'native_undo': None, 'blast_dimensions': []}\ndata_entitlement.classify('read_teams_attachment') = 'legacy'\n'read_teams_attachment' in destructive_ops.SAFE_TOOLS = True\nVERDICT: PASS-MXC4-AC7",
+      "denominator": "1 of 1 tool, both registries queried, both resolve.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC8",
+      "criterion_verbatim": "JUDGMENT (graded by 3.0.0_SA_CVO at L9; record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming the CVO; never PASS or FAIL) -- `read_teams_attachment`'s classification is correct for a tool that reads the content of a Teams attachment by URL, and it neither widens what any tier can reach nor reads as a write",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no <invocation> in the task order's ACCEPTANCE block for AC8 (self-closing tag)",
+      "output_evidence": "read_teams_attachment classified SAFE, alongside read_document/read_site_file/read_workbook (destructive_ops.py). Reasoning: resolves a contentUrl already exposed by the already-SAFE read_chat_messages/read_channel_messages; reads bounded text or returns a structured hint for binary files; no write-class tag in TOOL_WRITE_CLASS; no mutation. Full reasoning in classification-composition.result.md AC8 section.",
+      "denominator": "N/A -- judgment criterion",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order (judgment=\"true\", no <invocation>); graded by 3.0.0_SA_CVO at L9. The worker records evidence and takes no verdict.",
+      "judgment": true
+    },
+    {
+      "criterion_id": "MXC4-AC9",
+      "criterion_verbatim": "the pinned count at `TST/test_entitlement_admin.py:332` becomes a derived count that asserts, by name, every registered tool against its integration's own pinned list, and it still fails when a tool is registered without being pinned (difference: one planted unpinned tool fails it; removing the plant passes)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC9",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC9(?![0-9])",
+      "output_evidence": "planted: with unpinned plant -> [('mxac9plant', ['mxac9_b'], [])]; plant removed -> []\nreal: mismatches=[] registered_len=44 derived_len=44\nVERDICT: PASS-MXC4-AC9",
+      "denominator": "planted: 2 arms (unpinned / clean), both as expected. real: 4 registered integration ids checked by name against their pins, 0 mismatches; registered_len==derived_len==44.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC10",
+      "criterion_verbatim": "the Gateway suite's collected, passed and failed counts are printed before and after the edit, and no test that passed before fails after",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC10",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC10(?![0-9])",
+      "output_evidence": "SCOPE_NOTE printed in full (see result.md). BEFORE: 1 failed, 130 passed (10 pre-existing files). AFTER: 1 failed, 137 passed (same 10 files + this cell's new test file). newly-failing: []. still-failing (same pre-existing test_identity_scope.py::test_scoped_deny_by_default, unrelated module, bound 17): 1.\nVERDICT: PASS-MXC4-AC10",
+      "denominator": "10 pre-existing files + 1 new file = 11 of 163 tracked Gateway test files exercised (SCOPE_NOTE names the exact, measured reason for the other 152: 14 collection units need moto, missing on this box (bound 14); 1 file (test_schwab_engine.py) does not terminate within budget (bound 11)); 0 of 137 after-passes were a before-fail; 1 of 1 before-fail is the same test after.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC4-AC11",
+      "criterion_verbatim": "C2's bar, EXERCISED (CTO 98944): for every registered tool, denominator printed, a lookup by name through `destructive_ops.classify` returns its declared class and a lookup by name through `data_entitlement` returns its tool class, and the tool's catalog-entry reference resolves to an entry in `CAT` -- zero tools fail any of the three",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC11",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC11(?![0-9])",
+      "output_evidence": "CAT tool-reference fields found across the whole catalog: 0. fails destructive_ops.classify: 14 of 49. fails data_entitlement.classify: 0 of 49. fails catalog-entry-reference resolution: 49 of 49.\nVERDICT: FAIL-MXC4-AC11 49 of 49 tool(s) fail >=1 of the three axes (dop=14 de=0 catalog=49); DATA_CATALOG.yaml carries 0 tool-reference fields today (MX-c-2/other cells' scope, not this cell's <paths>) so the catalog axis fails for every registered tool -- REFUSED per bound 9, measured above",
+      "denominator": "49 registered tool names (NATIVE_TOOLS | INTEGRATION_TOOLS | SCHWAB_TOOLS); 49 of 49 fail the catalog axis, 14 of 49 additionally fail the destructive_ops axis, 0 of 49 fail the data_entitlement axis.",
+      "status": "FAIL",
+      "status_reason": "MEASURED and REFUSED per bound 9 ('a criterion that cannot be satisfied as written is REFUSED and reported with its measurement, never repaired, widened or met by another route'): DATA_CATALOG.yaml has no tool-reference field for any of the 49 real registered tools, and this cell has no legal route to add one -- bound 10 forbids hand-editing CAT (generated-only, MX-c-2/other cells' scope), and the 4 real integrations' own directories (the other place a per-tool catalog reference could be declared) are outside this cell's <paths> grant. Every OTHER mechanical criterion (AC1-AC7, AC9, AC10, AC12) measures PASS at this same commit -- the composition mechanism itself is not the defect. Filed: NFRA_MCPINDEX-W1-S5 (OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~M)."
+    },
+    {
+      "criterion_id": "MXC4-AC12",
+      "criterion_verbatim": "(difference) a planted tool reachable by the composed registration path but resolving through neither registry is REFUSED at registration, while the same tool with both declarations registers (a composed path that could ship it FAILS C2)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC12",
+      "expect": "(?m)^VERDICT: PASS-MXC4-AC12(?![0-9])",
+      "output_evidence": "neither registry: report['tools']=[] composed_path_refused=['mxac12_orphan'] mcp.names=['mxac12_orphan']\nresolves via data_entitlement: report['tools']=['mxac12_orphan'] (no composed_path_refused)\n1 passed in 0.60s\nVERDICT: PASS-MXC4-AC12",
+      "denominator": "2 arms (neither registry / one registry), both as expected; mcp.names confirms register() DID run in both arms (the tool was reachable), so the refusal is the report-level composed-path net, not a pre-registration skip.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "MXC4-AC12's planted spec declares an EMPTY manifest (spec.tools=()), so validate_integration_spec's pre-check has nothing to catch, yet register_names=['mxac12_orphan'] forces register() to add a tool anyway -- the composed-registration-path bypass the criterion names. Engaged (the tool resolves through neither destructive_ops-composed nor data_entitlement) vs disengaged (data_entitlement.TOOL_CLASSES temporarily carries the name, restored in a finally block).",
+      "expected": "engaged -> composed_path_refused=['mxac12_orphan'], report['tools'] excludes it; disengaged -> report['tools']==['mxac12_orphan'].",
+      "observed": "Both arms matched expectation exactly (see MXC4-AC12's output_evidence).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "MXC4-AC5 invoked twice back to back via the probe (a faithful BEFORE snapshot rebuilt from `git show` each time, plus a fresh AFTER read of the live worktree); the two full stdout captures diffed byte-for-byte (register() output carries no timestamp to strip).",
+      "observed": "diff of the two runs' full stdout is empty -- byte-identical across two independent snapshot rebuilds and subprocess registrations.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "infra/aws/ec2/opal-gateway/app/data_entitlement.py is named in this cell's writes line ('tool-class composition only') but carries NO edit in this commit -- it is left byte-identical to the cut.",
+      "reason": "Deriving NATIVE_TOOLS/INTEGRATION_TOOLS/SCHWAB_TOOLS/TOOL_CLASSES from a live register() call at module-import time would require data_entitlement.py to import registry.py at module level; registry.py already imports data_entitlement.py at ITS module level (`from ..data_entitlement import classify as classify_tool`), so the reverse at module level would be a genuine load-time import cycle. No acceptance criterion needs this file's structural sets to change -- AC6/AC9/AC11 all measure data_entitlement.classify() correct and unaffected for all 49 real tools with the file exactly as it stood at the cut. The writes-line scope is a CEILING on what this cell may touch, not a floor requiring an edit; touching it only to satisfy the letter of the writes line, with no criterion needing it, would be exactly the kind of unneeded change Rule 22's speed governor names."
+    },
+    {
+      "item": "Adding a catalog-entry-reference field to DATA_CATALOG.yaml, or a per-tool manifest to the 4 real integrations' own IntegrationSpec constructions, to make MXC4-AC11 pass.",
+      "reason": "CAT is generated-only (bound 10: 'never hand-edited or hand-merged'; MX-c-1/MX-c-2 own the emitter and schema, not this cell). The 4 real integrations' own directories (app/integrations/{ycharts,opal_portal,globgrph,schwab}/) are outside this cell's <paths> grant. Bound 9 instructs REFUSAL and measurement, never repair by another route -- see MXC4-AC11's status_reason and row NFRA_MCPINDEX-W1-S5."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-W1-S5: MXC4-AC11 is unsatisfiable as written within this cell's <paths> -- DATA_CATALOG.yaml carries 0 tool-reference fields for any of the 49 registered tools today, and this cell has no legal route to add one (bound 10 forbids hand-editing CAT; the 4 real integrations' own directories are outside <paths>). Measured, refused per bound 9, never grandfathered or widened. OBSERVATION, hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~M, disposition UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/classification-composition.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the MX-c-4 probe (probes/mx_c_4.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-mcpindex-1d && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_4.py AC<1,2,3,4,5,6,7,9,10,11,12>",
+      "result": "AC1-AC7, AC9, AC10, AC12: VERDICT: PASS-MXC4-AC<n>, rc=0 each. AC11: VERDICT: FAIL-MXC4-AC11 (measured, refused per bound 9), rc=0 (the probe itself runs to completion and prints the FAIL verdict; the criterion's own <expect> regex will not match a FAIL line, which is the mechanism by which proof-of-spec-check.py grades this row FAIL)."
+    },
+    {
+      "tool": "pytest (tests/test_tool_classification_composition.py, standalone)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && py -3.12 -m pytest -q -s tests/test_tool_classification_composition.py",
+      "result": "7 passed in 0.46s"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "py -3.12 .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "see worker report -- run after staging, before commit"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh <every .py file this cell touches>",
+      "result": "see worker report"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~1 <0.9.0_WK_NFRA_MCPINDEX~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-nfra_mcpindex-1-1d"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> MXC4-AC1,MXC4-AC2,MXC4-AC3,MXC4-AC4,MXC4-AC5,MXC4-AC6,MXC4-AC7,MXC4-AC8,MXC4-AC9,MXC4-AC10,MXC4-AC11,MXC4-AC12",
+      "result": "see the worker report -- only the exit code is the verdict; MXC4-AC11 is FAIL by output, so this order's <status> stays open per the face's own instruction"
+    }
+  ]
+}
