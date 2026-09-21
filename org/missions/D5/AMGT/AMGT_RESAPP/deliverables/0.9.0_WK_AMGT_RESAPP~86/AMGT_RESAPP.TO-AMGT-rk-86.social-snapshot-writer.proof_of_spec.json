@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-86",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-86.social-snapshot-writer.md",
+    "group": "W",
+    "vintage_commit": "6fb0f4d0bf7a6fb7991f4e73d87b6c603cbc5cfb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "6fb0f4d0bf7a6fb7991f4e73d87b6c603cbc5cfb",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-86.social-snapshot-writer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~86",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-86, cell AMGT-rk-86 (H6, round 21 wave 2). Worker 0.9.0_WK_AMGT_RESAPP~86, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-21-86 in worktree C:/tmp/wk-amgt-21-86, based at HEAD 0731c87fca (carries rk-81's lib/research/harvest/store.py). THE BAR FIRST: branch wk-amgt-21-86, org/ and .tools/ present, TREE-OK. Order read WORKER FACE only, top to the RECORD FACE marker (line 167). AC0 run FIRST, before any edit: refusals 0, both builder addresses printed opal-data-harvest, store_names_present 8 of 8 -- H0-store had already drained onto this worktree's HEAD, so the build proceeded. Re-measured the social suite baseline: 33 passed, matching the order's stated spawn count. Snapshotted lib/research/social/collect.py to .scratch/r86/collect.py.orig before editing (mutation discipline). Built: a write_harvest: bool = False parameter and --write-harvest CLI flag on run() (default OFF; the entire new code path is gated under `if write_harvest:` / `if harvest_bucket_hit:` branches, so the pre-existing trigger/poll/retrieve/ledger code executes completely unchanged when it is False -- AC5 measures 9 of 9 pinned names byte-identical AST, put_object_calls 1, write_harvest_default False); the bucket-as-fetch-key-authority check (store.fetch_key_exists on request_sha256, before client.trigger -- a hit skips the trigger entirely and reads the stored snapshot bytes from bronze via a plain s3_client.get_object, never re-serialised); bronze_put right after the vendor snapshot call carrying the raw bytes unmodified; and silver_append with one row per delivered record (platform/post_id/bronze_key/fetched_at plus every vendor field flattened one level via a new _flatten_one_level helper), keyed (platform, post_id). New offline test file lib/research/social/tests/test_collect_harvest.py, 7 arms matching the order's named list exactly, against a StubClient (imported from test_collect.py) and a new in-process StubS3Client (list_objects_v2 paginator, put_object with IfNoneMatch precondition, head_object, get_object) -- no network, no AWS credential ever consulted. One self-correction before commit: safe-commit's naming-gate (LGIC_ENFORCE DEC-6) refused the first commit attempt at collect.py:1195 -- result[\"harvest\"] was a NEW hand-kept carrier of the registered scope token 'harvest' (matched both firm_whole and firm_seg, so even an underscore-joined variant would still have been caught) outside every permitted context (key()/address()/name()/lookup() call arguments only); fixed by renaming the result key to result[\"store_write\"], which shares no segment with the registered token, and updating the 13 test-file references (test files are outside the naming-gate's graded set per its own docstring, but the production file is not). Re-ran the full social suite (still 40 passed) and the commit then passed commit-gate, naming-gate, to-pipeline-gate and surprise-row-gate cleanly at 7ea1ec6af7. Re-ran every criterion (AC0-AC6) against the committed HEAD; every number was identical pre- and post-commit (determinism control below). No BLOCKING row was needed. No off-task surprise encountered beyond the self-corrected naming-gate refusal, caught and fixed within this order's own mandate before commit (not filed as a surprise row -- it never left the order's own surface, lib/research/social/collect.py, and was resolved before any commit landed). Collection stayed OFF throughout: no collector run, no schedule/cron/Lambda/trigger wired or touched (AC4: infra_or_schedule_touched [], schedule_refs_to_collector [] across 8616 tracked files), no S3 write outside the stub, no vendor call, no secret read (read_api_key is never called by any test -- the stub client replaces BrightDataClient entirely), no push.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/social/collect.py",
+      "kind": "script",
+      "commit_or_etag": "7ea1ec6af7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "write_harvest mode added, default OFF; no live act in this order's scope (section 4 BOUNDS: NO live job, NO vendor call, NO S3 write, NO AWS call at all). AC3 proves no live call is reachable: 7 passed with no resolvable AWS credentials.",
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3", "AC4", "AC5", "AC6"]
+    },
+    {
+      "path_or_key": "lib/research/social/tests/test_collect_harvest.py",
+      "kind": "test",
+      "commit_or_etag": "7ea1ec6af7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline test file, 7 tests / 7 passed against a stub BrightDataClient and an in-process stub S3 client; not packaged into any Lambda artifact."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-86.social-snapshot-writer.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "record-face <status> flipped pending -> complete."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~86/AMGT_RESAPP.TO-AMGT-rk-86.social-snapshot-writer.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "\"refusals 0\", then 2 lines each ending \"opal-data-harvest\" (measured so at the cut @dbfcfc0817), then \"store_names_present 8 of 8\" (AMGT-rk-81 merged). At the cut the store module was ABSENT (ModuleNotFoundError: No module named 'lib.research.harvest') because rk-81 had not drained -- a ModuleNotFoundError, a line printing opal-data-assets, or fewer than 8 of 8 is a STOP: file a BLOCKING row and edit nothing",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import sys, importlib; sys.path.insert(0, \".\"); import lib.opal_naming as n; r = n.validate(); print(\"refusals\", len(r[0]) if isinstance(r, tuple) else r); [print(t, q, n.address(\"bright-data\", \"harvest\", t, q, p, o).split(\"/\")[2]) for t, q, p, o in ((\"bronze\", \"social_snapshot\", \"date=2026-09-15\", \"0\" * 64 + \".json\"), (\"silver\", \"social_post\", \"date=2026-09-15\", \"part-x.parquet\"))]; st = importlib.import_module(\"lib.research.harvest.store\"); need = (\"bronze_put\", \"fetch_key_exists\", \"silver_append\", \"silver_latest\", \"date_partition\", \"form_c_object\", \"stamp\", \"record_hash\"); print(\"store_names_present\", sum(hasattr(st, x) for x in need), \"of\", len(need))'",
+      "output_evidence": "refusals 0 ; bronze social_snapshot opal-data-harvest ; silver social_post opal-data-harvest ; store_names_present 8 of 8",
+      "denominator": "0 registry refusals; 2 of 2 builder addresses print opal-data-harvest; 8 of 8 store names present -- run before any edit and again post-commit, identical both times",
+      "status": "PASS",
+      "expect": "refusals 0[\\s\\S]*opal-data-harvest[\\s\\S]*opal-data-harvest[\\s\\S]*store_names_present 8 of 8"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "0 failed, and PASSED lines naming test_harvest_off_by_default_writes_nothing, test_snapshot_bronze_is_bytes_as_received, test_known_request_skips_the_trigger, test_silver_row_per_post_keyed_platform_post_id, test_unchanged_post_is_skipped_on_second_run, test_address_is_builder_output and test_pinned_base_has_no_harvest_path -- 7 of 7 named arms (more arms are allowed; print the total)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/social/tests/test_collect_harvest.py -v -p no:cacheprovider 2>&1 | tail -15",
+      "output_evidence": "TestHarvestOffByDefault::test_harvest_off_by_default_writes_nothing PASSED [ 14%] ; TestBronzeAsReceived::test_snapshot_bronze_is_bytes_as_received PASSED [ 28%] ; TestKnownRequestSkipsTrigger::test_known_request_skips_the_trigger PASSED [ 42%] ; TestSilverRowPerPost::test_silver_row_per_post_keyed_platform_post_id PASSED [ 57%] ; TestUnchangedPostSkipped::test_unchanged_post_is_skipped_on_second_run PASSED [ 71%] ; TestAddressIsBuilderOutput::test_address_is_builder_output PASSED [ 85%] ; TestPinnedBaseHasNoHarvestPath::test_pinned_base_has_no_harvest_path PASSED [100%] ; 7 passed in 0.56s",
+      "denominator": "7 of 7 named arms passed, 0 failed, 0 unnamed extra arms",
+      "status": "PASS",
+      "expect": "7 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"N passed\" with 0 failed, N = the spawn baseline (33 at the cut) plus this cell's new arms",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/social/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "40 passed in 0.72s",
+      "denominator": "40 of 40 passed (33 baseline + 7 new), 0 failed",
+      "status": "PASS",
+      "expect": "40 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the same pass count as AC1 with 0 failed -- with no credentials resolvable any real AWS call would raise, so a green run proves only the stubs were touched; zero S3 writes and zero vendor calls by this cell (the Z-S192 census of the act's own write set)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN AWS_PROFILE=nonexistent-rk86 AWS_CONFIG_FILE=/dev/null AWS_SHARED_CREDENTIALS_FILE=/dev/null python -m pytest lib/research/social/tests/test_collect_harvest.py -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "7 passed in 0.59s",
+      "denominator": "7 of 7 (same as AC1), 0 failed, under AWS_PROFILE=nonexistent-rk86 with AWS_CONFIG_FILE/AWS_SHARED_CREDENTIALS_FILE both /dev/null",
+      "status": "PASS",
+      "expect": "7 passed"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"files_touched_by_this_cell\" lists only paths in section 3; \"infra_or_schedule_touched []\"; \"tracked_files_scanned\" with its denominator and \"schedule_refs_to_collector []\" (0 at the cut) -- collection stays off, the collector is wired to nothing",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import subprocess, io; pin = \"dbfcfc0817bdd8694796165e3e4489d03973fb0a\"; mine = subprocess.run([\"git\", \"log\", \"--format=%H\", pin + \"..HEAD\", \"--author=0.9.0_WK_AMGT_RESAPP~86 <\"], capture_output=True, text=True).stdout.split(); touched = sorted({p for c in mine for p in subprocess.run([\"git\", \"show\", \"--name-only\", \"--format=\", c], capture_output=True, text=True).stdout.split()}); print(\"files_touched_by_this_cell\", touched); print(\"infra_or_schedule_touched\", [p for p in touched if p.startswith((\"infra/\", \".github/\")) or p.endswith(\".ps1\")]); tracked = subprocess.run([\"git\", \"ls-files\", \"infra\", \".github\", \"org/mcp\", \"lib/opal_data_harvest/install-schedule.ps1\"], capture_output=True, text=True).stdout.split(); hits = [f for f in tracked if f.endswith((\".tf\", \".yml\", \".yaml\", \".ps1\", \".json\", \".py\", \".sh\")) and (\"social.collect\" in io.open(f, encoding=\"utf-8\", errors=\"replace\").read() or \"social/collect\" in io.open(f, encoding=\"utf-8\", errors=\"replace\").read())]; print(\"tracked_files_scanned\", len(tracked)); print(\"schedule_refs_to_collector\", hits)'",
+      "output_evidence": "files_touched_by_this_cell ['lib/research/social/collect.py', 'lib/research/social/tests/test_collect_harvest.py'] ; infra_or_schedule_touched [] ; tracked_files_scanned 8616 ; schedule_refs_to_collector []",
+      "denominator": "2 of 2 files touched by this cell's own commit(s), both within <paths>; 0 infra/schedule paths touched; 0 of 8616 tracked infra/.github/org-mcp/install-schedule files reference the collector",
+      "status": "PASS",
+      "expect": "infra_or_schedule_touched \\[\\][\\s\\S]*schedule_refs_to_collector \\[\\]"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"unchanged 9 of 9\" (the measurement writer, the vendor client, the request hash, the item rule and every vendor-surface constant are byte-identical to the pin), \"put_object_calls 1\" (the legacy measurement write only -- 1 at the cut; the harvest path writes only through the store), \"write_harvest_default False\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import ast, subprocess; pin = \"dbfcfc0817bdd8694796165e3e4489d03973fb0a\"; now = open(\"lib/research/social/collect.py\", encoding=\"utf-8\").read(); old = subprocess.run([\"git\", \"show\", pin + \":lib/research/social/collect.py\"], capture_output=True, text=True).stdout; node = lambda s, name: next((ast.dump(n) for n in ast.walk(ast.parse(s)) if isinstance(n, (ast.FunctionDef, ast.ClassDef, ast.Assign)) and (getattr(n, \"name\", None) == name or (isinstance(n, ast.Assign) and any(getattr(t, \"id\", None) == name for t in n.targets)))), None); names = (\"write_pool_object\", \"BrightDataClient\", \"request_sha256\", \"to_item\", \"DATASET_ID\", \"TRIGGER_TYPE\", \"DISCOVER_BY\", \"TRIGGER_ROUTE\", \"SNAPSHOT_ROUTE\"); print(\"unchanged\", sum(node(now, x) == node(old, x) and node(old, x) is not None for x in names), \"of\", len(names)); print(\"put_object_calls\", sum(1 for n in ast.walk(ast.parse(now)) if isinstance(n, ast.Call) and getattr(n.func, \"attr\", \"\") == \"put_object\")); run = next(n for n in ast.walk(ast.parse(now)) if isinstance(n, ast.FunctionDef) and n.name == \"run\"); kw = {a.arg: d for a, d in zip(run.args.args[-len(run.args.defaults):], run.args.defaults)}; print(\"write_harvest_default\", ast.literal_eval(kw[\"write_harvest\"]) if \"write_harvest\" in kw else \"ABSENT\")'",
+      "output_evidence": "unchanged 9 of 9 ; put_object_calls 1 ; write_harvest_default False",
+      "denominator": "9 of 9 pinned names byte-identical AST; 1 of 1 put_object call site (the legacy measurement writer); write_harvest defaults False",
+      "status": "PASS",
+      "expect": "unchanged 9 of 9[\\s\\S]*put_object_calls 1[\\s\\S]*write_harvest_default False"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "2 lines, each \"compiles True crlf 0 non_ascii_bytes 0\" (collect.py is ASCII/LF at the cut)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import io; [print(f.split(\"/\")[-1], \"compiles\", bool(compile(io.open(f, \"rb\").read().decode(\"utf-8\"), f, \"exec\")), \"crlf\", io.open(f, \"rb\").read().count(b\"\\r\\n\"), \"non_ascii_bytes\", len(io.open(f, \"rb\").read()) - len(io.open(f, \"rb\").read().decode(\"utf-8\"))) for f in (\"lib/research/social/collect.py\", \"lib/research/social/tests/test_collect_harvest.py\")]'",
+      "output_evidence": "collect.py compiles True crlf 0 non_ascii_bytes 0 ; test_collect_harvest.py compiles True crlf 0 non_ascii_bytes 0",
+      "denominator": "2 of 2 files: compiles True, crlf 0, non_ascii_bytes 0",
+      "status": "PASS",
+      "expect": "compiles True crlf 0 non_ascii_bytes 0[\\s\\S]*compiles True crlf 0 non_ascii_bytes 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This order's proof_of_spec battery (section 5) names no mutant arm -- AC0-AC6 are all direct measurements (registry reads, pytest runs, AST comparisons, byte counts), not a discriminating-test requirement. No mutant was constructed.",
+      "expected": "N/A -- the governing spec (this TO's <proof_of_spec>) names no mutant criterion.",
+      "observed": "N/A -- confirmed by reading all 7 criteria (AC0-AC6) in section 5; none names a mutant.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Every criterion is a pure offline read: a registry lookup against the committed lib/opal_naming.py scopes/tiers, an offline pytest run against a stub BrightDataClient and an in-process stub S3 client, or an AST/byte comparison against the pinned and committed file bytes. Each criterion (AC0-AC6) was run once pre-commit (working tree, after the build) and once post-commit (committed bytes at 7ea1ec6af7).",
+      "observed": "AC0-AC6 identical pre- and post-commit: AC0 refusals 0 / both builder lines opal-data-harvest / store_names_present 8 of 8 both times; AC1 7 passed both times, same 7 names; AC2 40 passed both times; AC3 7 passed both times under no-credential env; AC4 was necessarily first computable post-commit (it censuses this worker's own commit log) and was run twice post-commit, identical both times; AC5 unchanged 9 of 9 / put_object_calls 1 / write_harvest_default False, run 3 times (pre-commit, post-commit, and once more for this record) with identical output; AC6 both files compiles True/crlf 0/non_ascii_bytes 0, run twice, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any live vendor job, live poll/snapshot retrieval, or a real python -m lib.research.social.collect invocation",
+      "reason": "section 0 and BOUNDS: 'Never run python -m lib.research.social.collect for real: it triggers a billed vendor job.' Only functions, under stubs. Confirmed by AC3 (0 AWS calls reachable, no resolvable credentials) and by every test using StubClient/StubS3Client, never BrightDataClient or a real boto3 client."
+    },
+    {
+      "item": "any edit to lib/research/social/{schema.json,measurement.schema.json,validator.py,measure.py}, lib/research/harvest/**, lib/opal_naming.py, or infra/**",
+      "reason": "section 3: these are WALLS, no grant. Not touched -- confirmed by the commit diff (git show --name-only 7ea1ec6af7) containing only lib/research/social/collect.py and lib/research/social/tests/test_collect_harvest.py, and by AC4's file census."
+    },
+    {
+      "item": "any schedule, cron, Lambda, EventBridge rule, alarm, monitor, SNS/SES-send, notification, freshness checker, or secret read",
+      "reason": "section 4 BOUNDS forbid all of these; none created or touched (AC4: infra_or_schedule_touched [], schedule_refs_to_collector [] across 8616 tracked files). read_api_key is never called by any test -- every test replaces BrightDataClient with a stub."
+    },
+    {
+      "item": "branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50, and any worktree of round 20's AMGT-rk-79",
+      "reason": "never read, shown, diffed or checked out, per the order's own instruction and the spawn note (exposed credential)."
+    },
+    {
+      "item": "any push, merge, rebase, checkout --, stash, or clean",
+      "reason": "section 3 COMMITTING and BOUNDS: 'PUSH: never'. Two commits made on branch wk-amgt-21-86 only (7ea1ec6af7 build; this instance's own commit next), never pushed or merged."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/social/tests/test_collect_harvest.py -v -p no:cacheprovider",
+      "result": "7 passed in 0.56s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/social/tests -q -p no:cacheprovider",
+      "result": "40 passed in 0.72s"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -c \"import py_compile; py_compile.compile('lib/research/social/collect.py', doraise=True); py_compile.compile('lib/research/social/tests/test_collect_harvest.py', doraise=True)\"",
+      "result": "OK (no output, rc 0)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~86 <0.9.0_WK_AMGT_RESAPP~86@opal.agent>\" -F .scratch/r86/commit_msg_build.txt -- lib/research/social/collect.py lib/research/social/tests/test_collect_harvest.py",
+      "result": "[wk-amgt-21-86 7ea1ec6af7] build(...); 2 files changed, 548 insertions(+), 124 deletions(-); commit-gate/naming-gate/to-pipeline-gate/surprise-row-gate all OK (naming-gate REFUSED once first, on result[\"harvest\"] as a hand-kept carrier of the registered scope token; fixed by renaming to result[\"store_write\"], then PASS)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~86/AMGT_RESAPP.TO-AMGT-rk-86.social-snapshot-writer.proof_of_spec.json AC0,AC1,AC2,AC3,AC4,AC5,AC6",
+      "result": "PENDING -- run after this instance is written"
+    }
+  ]
+}
