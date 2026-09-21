@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-57",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5fd2dc9ab5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "6f56917cef",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-57.unprojected-grant-parse-and-carry.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/index.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "b92448f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New exported UnprojectedGrant interface and Availability.unprojectedGrant?: UnprojectedGrant | null member (OPTIONAL -- see row IRPT_FNTEND-W7-S1 on why the order's literal non-optional text could not land). LOCAL on portal branch wk-irpt_fntend-9-8-fe-s-57-portal; PORTAL FROZEN, not pushed, not deployed.",
+      "artifact_covered_by": ["F57-AC1", "F57-AC2", "F57-AC8"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "b92448f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EnvelopeParts.unprojectedGrant added; wireEnvelope()'s availability object gains `unprojectedGrant: parts.unprojectedGrant ?? null` (every existing call site unchanged); new carryUnprojectedGrant() mirroring carryAvailabilityFromStatus's recursion/null-safety exactly; carryAvailabilityFromStatus itself now carries `unprojectedGrant: current.unprojectedGrant` forward unchanged (required once the Availability member exists). LOCAL on the portal branch.",
+      "artifact_covered_by": ["F57-AC1", "F57-AC2", "F57-AC8"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/envelope.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "b92448f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "IrEnvelopeField gains 'unprojected_grant'; parseIrEnvelope's non-refused branch reads body.unprojected_grant, shape-checks it (isUnprojectedGrantShaped), throws EnvelopeMismatch('unprojected_grant', operation) on absence/misshape (unconditional -- holdings not special-cased, per BOUNDS), else calls carryUnprojectedGrant before returning. LOCAL on the portal branch.",
+      "artifact_covered_by": ["F57-AC1", "F57-AC3", "F57-AC4", "F57-AC5", "F57-AC6", "F57-AC7", "F57-AC8"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+      "kind": "test",
+      "commit_or_etag": "b92448f3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F57-AC2..AC5's printed lines, built from the same route/schema/fixture harness as fe-s-14/envelope.test.ts (never typed from memory). LOCAL on the portal branch.",
+      "artifact_covered_by": ["F57-AC2", "F57-AC3", "F57-AC4", "F57-AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F57-AC1",
+      "criterion_verbatim": "F57-AC1 -- the whole portal typechecks.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "1 of 1 typecheck invocation over the whole portal program (tsc -b --noEmit, tsconfig include src) at portal HEAD b92448f3, which holds index.ts, adapt.ts, envelope.ts and the new fe-s-57 test file",
+      "expect": "rc=0(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F57-AC2",
+      "criterion_verbatim": "F57-AC2 -- for EACH of the 12 RESPONSE_OPERATIONS (contracts/wire/responses.ts:217-230), construct a minimal well-formed non-refused response body carrying unprojected_grant: {count: 0, denominator: <n>, kinds: []} and confirm parseIrEnvelope(...)'s returned data.availability.unprojectedGrant equals it exactly. Print 12 of 12, never a subset.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+      "output_evidence": "  directory-search     shape=array of DirectoryEntry        members=1 carried=yes denominator=1\n  resolve-scope        shape=document ResolvedScope         members=1 carried=yes denominator=2\n  performance-report   shape=document PerformanceReport     members=1 carried=yes denominator=3\n  analysis-requests    shape=slice {identity, stage}        members=0 carried=yes denominator=4\n  analysis-report      shape=slice {request_ref, sections, extraction_validation} members=0 carried=yes denominator=5\n  narrative-packet     shape=document NarrativePacket       members=1 carried=yes denominator=6\n  status-summary       shape=document StatusEnvelope        members=1 carried=yes denominator=7\n  status-job           shape=document StatusEnvelope        members=1 carried=yes denominator=8\n  submit-export        shape=document ExportReceipt         members=1 carried=yes denominator=9\n  export-receipt       shape=document ExportReceipt         members=1 carried=yes denominator=10\n  export-download      shape=slice {export_ref, download_route, timestamps, vendor_signed_url_exposed} members=0 carried=yes denominator=11\n  holdings-snapshot    shape=document HoldingsSnapshot      members=1 carried=yes denominator=12\nUNPROJECTED_GRANT PRESENT-AT-ZERO CARRIED ON 12 of 12 OPERATIONS\n 4 pass\n 0 fail",
+      "denominator": "12 of 12 declared routes (routes.json filtered to response_schema != null, matching RESPONSE_OPERATIONS' 12 entries). 3 of the 12 (analysis-requests, analysis-report, export-download) answer with a declared SLICE that carries no .availability member at all (adapt.ts's pre-existing, unchanged design -- carryAvailabilityFromStatus already no-ops on the same 3); for those, 0 members found IS the correct carry, distinguished by dataFor's own shape string ('slice {...}') rather than assumed. The other 9 each carry exactly the constructed grant on their one availability-bearing member.",
+      "expect": "UNPROJECTED_GRANT PRESENT-AT-ZERO CARRIED ON 12 of 12 OPERATIONS(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F57-AC3",
+      "criterion_verbatim": "F57-AC3 -- the holdings-snapshot operation specifically, with unprojected_grant: {count: 0, ...} present, parses cleanly with no exception (the v0.9 carve-out, confirmed rather than assumed).",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+      "output_evidence": "HOLDINGS: threw=false count=0\nHOLDINGS ROUTE, count:0, NO THROW: yes",
+      "denominator": "1 of 1 holdings-snapshot body constructed with unprojected_grant: {count: 0, denominator: 3, kinds: []} present; parsed without exception; result.data.availability.unprojectedGrant.count === 0",
+      "expect": "HOLDINGS ROUTE, count:0, NO THROW: yes(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F57-AC4",
+      "criterion_verbatim": "F57-AC4 -- a non-refused response body with NO unprojected_grant key at all throws EnvelopeMismatch('unprojected_grant', operation).",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+      "output_evidence": "MISSING KEY: threw=true field=unprojected_grant\nMISSING KEY ON A NON-REFUSED RESPONSE THROWS EnvelopeMismatch('unprojected_grant'): yes",
+      "denominator": "1 of 1 resolve-scope body with no unprojected_grant key at all; threw EnvelopeMismatch with .field === 'unprojected_grant'",
+      "expect": "MISSING KEY ON A NON-REFUSED RESPONSE THROWS EnvelopeMismatch\\('unprojected_grant'\\): yes(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F57-AC5",
+      "criterion_verbatim": "F57-AC5 -- a refused response (a dispatcher refusal code, or public_reason_code: 'UNPROJECTED_GRANT' specifically) carries no unprojected_grant key at all and does NOT throw -- absence there is by design, per the PRD.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+      "output_evidence": "REFUSED: threw=false refused=true state=UNAVAILABLE data=NULL\nREFUSED RESPONSE: unprojectedGrant KEY ABSENT, NO THROW: yes",
+      "denominator": "1 of 1 refused response (status.public_reason_code = CONTRACT_VERSION, the dispatcher's own refusal code) with no unprojected_grant key; did not throw; refused=true, data=null",
+      "expect": "REFUSED RESPONSE: unprojectedGrant KEY ABSENT, NO THROW: yes(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F57-AC6",
+      "criterion_verbatim": "F57-AC6 -- every existing adapter/envelope test is UNCHANGED (the new part is optional, defaulted to null, and no existing call site passes it).",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 300 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-1 src/pages/InvestorReporting/__tests__/fe-s-14",
+      "output_evidence": " 263 pass\n 2 skip\n 11 fail\n 1237 expect() calls\nRan 276 tests across 38 files. [1.53s]\nrc=1\n11 of 11 failures throw EnvelopeMismatch('unprojected_grant', operation) at envelope.ts:249, e.g. 'F14-AC13 -- every declared route parses through the one parser > ENVELOPES PARSED -- 11 of 11, each built from its own response contract', 'F19-AC2 -- nine wire states, nine states at the view > every StatusEnvelope state a producer can send arrives at both tab documents'.",
+      "denominator": "276 tests across 38 files (bun's substring path-matching on 'fe-s-1' and 'fe-s-14' pulls in every fe-s-1X folder, not only fe-s-1 and fe-s-14): 263 pass, 2 skip, 11 fail. FAILED as measured: 11 fail != 0.",
+      "expect": "(?<![0-9])0 fail",
+      "status": "FAIL",
+      "status_reason": "The Availability-level addition (index.ts/adapt.ts) is backward-compatible exactly as this criterion states, but the ENVELOPE-level strict throw the order's own BOUNDS mandates ('THE THROW ON A MISSING KEY BINDS EVERY NON-REFUSED RESPONSE ... Do not special-case') is a DIFFERENT change with a much larger blast radius: every pre-existing fixture that builds a non-refused response body without unprojected_grant now throws. That is 11 of 11 failures here, all outside this cell's <paths> (fe-s-1/adapter.test.ts; fe-s-14/envelope.test.ts, header.test.ts, one-firm.test.ts; fe-s-19/network-state.test.ts, pre-envelope.test.ts). Filed as row IRPT_FNTEND-W7-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~F). Not fixable inside this cell's grant without either editing files this order does not authorize or contradicting BOUNDS' explicit no-special-case instruction."
+    },
+    {
+      "criterion_id": "F57-AC7",
+      "criterion_verbatim": "F57-AC7 -- the whole IRPT_FNTEND suite is green.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": " 532 pass\n 21 skip\n 52 fail\n 1 error\n 2336 expect() calls\nRan 605 tests across 107 files. [93.13s]\nrc=1\n106 EnvelopeMismatch citations at envelope.ts:249; 51 distinct failing test titles plus one 'Unhandled error between tests' (directory-search), spanning fe-s-1, fe-s-14, fe-s-19, fe-s-25, fe-s-26, fe-s-30, fe-s-31, fe-s-33, fe-s-34, fe-s-35, fe-s-39, fe-s-41, fe-s-42, fe-s-48 and fe-s-49.",
+      "denominator": "605 tests across 107 files under src/pages/InvestorReporting at portal HEAD b92448f3: 532 pass, 21 skip, 52 fail, 1 error. FAILED as measured: 52 fail + 1 error != 0.",
+      "expect": "(?<![0-9])0 fail",
+      "status": "FAIL",
+      "status_reason": "Same root cause as F57-AC6, at whole-suite scope: the unconditional envelope-level throw BOUNDS mandates breaks every pre-existing test file whose fixtures build a non-refused response body without unprojected_grant, none of which sit inside this cell's <paths>. Filed as row IRPT_FNTEND-W7-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~F). The order stays open; <status> is not flipped to complete."
+    },
+    {
+      "criterion_id": "F57-AC8",
+      "criterion_verbatim": "F57-AC8 -- graded at L9: carryUnprojectedGrant genuinely mirrors carryAvailabilityFromStatus's shape (no divergent null-handling), and this cell renders nothing -- confirm no .tsx file changed in this commit. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; recorded for 3.0.0_SA_CVO at L9",
+      "output_evidence": "RECORDED (no verdict): (1) carryUnprojectedGrant (adapt.ts, added directly after carryAvailabilityFromStatus) uses the IDENTICAL recursion shape: `if (Array.isArray(view)) return view.map((member) => carryX(member, ...)) as unknown as T`, then `if (view === null || typeof view !== 'object') return view`, then reads `current = (view as {availability?: Availability}).availability` and returns view unchanged when current is undefined -- same three guards, same order, as carryAvailabilityFromStatus. No divergent null-handling: both treat a view with no availability member as a pass-through. (2) carryAvailabilityFromStatus itself was touched to add `unprojectedGrant: current.unprojectedGrant` (carry forward unchanged, required once the Availability member exists) -- this is a CARRY of the pre-existing value, never a derivation, consistent with the file's own 'IT CARRIES; IT DOES NOT DERIVE' rule. (3) git diff --stat b92448f3~1..b92448f3 (portal): 4 files changed (index.ts, adapt.ts, envelope.ts, __tests__/fe-s-57/carry.test.ts), 0 of them .tsx -- confirmed by `git show b92448f3 --stat` and `git show b92448f3 --name-only`.",
+      "denominator": "N/A -- judgment criterion; graded by 3.0.0_SA_CVO at L9",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "judgment": true,
+      "status_reason": "Judgment criterion (judgment=\"true\"): graded only by 3.0.0_SA_CVO at L9 against the order's clause; the worker records the output and no verdict."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Removed the isUnprojectedGrantShaped shape check's condition (forced the throw branch to never fire, i.e. treat every body as satisfying the contract) and re-ran F57-AC4's case: a non-refused body with no unprojected_grant key at all.",
+      "expected": "F57-AC4's positive assertion (threw=true, field=unprojected_grant) flips to false -- the mutant must be caught by the test, or the test is vacuous.",
+      "observed": "With the mutant applied, carry.test.ts's F57-AC4 case measured threw=false, so `expect(ok).toBe(true)` failed (ok computed from name==='EnvelopeMismatch' -- false). Reverted immediately after observation; the committed code is the pre-mutant, correct version.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "carry.test.ts run twice in separate invocations at the same portal HEAD (b92448f3).",
+      "observed": "Both runs: '4 pass', '0 fail', identical printed lines including 'UNPROJECTED_GRANT PRESENT-AT-ZERO CARRIED ON 12 of 12 OPERATIONS', 'HOLDINGS ROUTE, count:0, NO THROW: yes', the AC4 and AC5 lines -- byte-identical deciding lines both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Rendering the unprojected_grant indicator (a visible partial affordance)",
+      "reason": "Explicitly out of scope per the cell text: 'it renders NOTHING (FE-s-58/59/60, wave B, render it once this cell lands)' and BOUNDS: 'THIS CELL RENDERS NOTHING. No .tsx file changes.'"
+    },
+    {
+      "item": "Updating the ~20 pre-existing test files across fe-s-1, fe-s-14, fe-s-19, fe-s-25, fe-s-26, fe-s-30, fe-s-31, fe-s-33, fe-s-34, fe-s-35, fe-s-39, fe-s-41, fe-s-42, fe-s-48 and fe-s-49 so their fixtures carry unprojected_grant",
+      "reason": "Outside this cell's <paths> grant (three contracts files, this cell's own __tests__/fe-s-57/, and the surprise-channel file only). Filed as BLOCKING row IRPT_FNTEND-W7-S1 rather than edited."
+    },
+    {
+      "item": "The order's literal 'unprojectedGrant: UnprojectedGrant | null' (non-optional) on Availability",
+      "reason": "Built OPTIONAL instead ('unprojectedGrant?: UnprojectedGrant | null'), matching producerState/sourceDate's own established pattern -- the literal non-optional shape fails typecheck against Availability-typed fixtures outside this cell's <paths> (fe-s-9/receipt.test.ts, fe-s-42/every-site.test.ts and others). Filed as part of row IRPT_FNTEND-W7-S1."
+    }
+  ],
+  "surprises": [
+    "IRPT_FNTEND-W7-S1: BOUNDS' unconditional parseIrEnvelope throw (mandated, holdings not special-cased) and F57-AC6/AC7's '0 fail' cannot both hold inside this cell's <paths> -- ~52 pre-existing tests across ~20 files outside the grant build non-refused bodies with no unprojected_grant key. Also: the order's literal non-optional Availability.unprojectedGrant type fails typecheck against out-of-grant fixtures, so it was built OPTIONAL. BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~F."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~7/unprojected-grant-parse-and-carry.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit), bun 1.3.9",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0"
+    },
+    {
+      "tool": "bun test 1.3.9 (fe-s-57)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+      "result": "4 pass / 0 fail / 9 expect() calls / Ran 4 tests across 1 file. [80.00ms]"
+    },
+    {
+      "tool": "bun test 1.3.9 (fe-s-1 + fe-s-14, substring-matched)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 300 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-1 src/pages/InvestorReporting/__tests__/fe-s-14",
+      "result": "263 pass / 2 skip / 11 fail / 1237 expect() calls / Ran 276 tests across 38 files. [1.53s]"
+    },
+    {
+      "tool": "bun test 1.3.9 (whole InvestorReporting suite)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-8-fe-s-57/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "result": "532 pass / 21 skip / 52 fail / 1 error / 2336 expect() calls / Ran 605 tests across 107 files. [93.13s]"
+    }
+  ]
+}
