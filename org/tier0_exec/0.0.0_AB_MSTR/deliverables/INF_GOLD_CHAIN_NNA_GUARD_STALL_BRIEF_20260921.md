@@ -55,6 +55,25 @@ rows for that date, so every rebuild would silently delete them. The guard exist
   advisor_nna_canonical. `header_metrics.json` says `"generated_at": "2026-09-05T12:49:01Z"` and
   `"data_as_of": "2026-09-04"`. Per-advisor `platinum/advisors/*/summary.json` were also last written
   2026-09-05.
+- **SCOPE CORRECTION, 2026-09-21 ~19:00Z.** The bullet above swept only `platinum/firm/` top-level files and
+  the advisor `summary.json` files. The phrase "every file the portal serves" claimed more than that. Full
+  census of **`s3://opal-data-inf/platinum/`: 8,682 objects** (list-objects-v2, auto-paginated, ~18:58Z):
+
+  | group | written after 09-05 | on 09-05 | older |
+  |---|---|---|---|
+  | `platinum/firm/` (top-level) | 0 | 29 | 3 |
+  | `platinum/firm/filters/` | 0 | 1 | 0 |
+  | `platinum/firm/snapshots/` | 0 | 3 | 1 |
+  | `platinum/advisors/` (all files, not just summary.json) | 0 | 32 | 0 |
+  | `platinum/clients/` | 0 | 2,025 | 2,146 |
+  | `platinum/firm/_meta/` | **2,310** | 0 | 28 |
+  | `_rebuild/`, `firm/_quarantine_scope_bug_20260424/`, `firm/_rollback/` | 0 | 0 | 2,104 |
+
+  **The only objects written after 09-05 are 2,310 files in `platinum/firm/_meta/`**
+  (`reconciliation_summary_holdings_<date>.json`, rewritten daily at ~12:14Z by a step that runs before
+  INF_C_01). A grep of `portal/src` finds no reference to `_meta/` or `reconciliation_summary`. So on
+  that instrument, none of the objects written after 09-05 is portal-facing. The server-side router was
+  not read. Everything else, served or not, is at 09-05 or older.
 - **Publishers idle.** `inf-portal-publisher` and `inf-portal-advisor-publisher` fire only on the
   `pipeline-complete.json` write. Their last log events were 2026-09-05 12:52Z and 12:53Z.
 - **No alternate feed found.** The portal reads Inflection from `opal-data-inf` (router suffix `inf`,
