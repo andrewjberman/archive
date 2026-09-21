@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-70",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "87ce2e597126c8ae08dfd2d7307f2d303f6a9aa2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-70.latest-stamp-requires-raw-pair.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "16999602615f9643385bc571748aa7a25079baf0"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~70",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"],
+      "deploy_evidence": "34 insertions, 1 deletion (git diff --stat). Adds `class NoRawStampError(RuntimeError)` and `_stamps_with_raw_pair(s3, prefix) -> list[str]` (mirrors build_unit_map._stamps_with_refdata's rule exactly: newest-first CommonPrefixes listing, per-stamp Contents listing, keep iff refdata.json and histdata.json both present as exact basenames). `_latest_stamp` keeps its 'no stamp folder at all' RuntimeError message unchanged, then calls the new helper and raises NoRawStampError naming the prefix and '<k> stamp(s) rejected (no refdata.json+histdata.json pair)' when stamp folders exist but none qualifies; otherwise returns the newest qualifying stamp. Signature and str return type unchanged. stage_derive (:899-906, byte-identical) and every other caller/function untouched. No import of build_unit_map (would be circular -- build_unit_map.py:46 already imports model_block_pull). py_compile clean; ruff (py39 target) clean; ds-precommit-check.py rc=0.",
+      "introduces": [
+        "class NoRawStampError(RuntimeError):",
+        "def _stamps_with_raw_pair(s3, prefix: str) -> list[str]:",
+        "qualifying = _stamps_with_raw_pair(s3, prefix)"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1"],
+      "deploy_evidence": "NEW FILE. Own minimal in-memory _StubS3 (list_objects_v2 answering CommonPrefixes for Delimiter='/' and Contents otherwise, per the order's spec). sys.path wiring follows test_pull_consumer_arity.py's pattern (research dir inserted, then `import model_block_pull as mbp` / `import build_unit_map as bum`). Six arms named exactly as required: test_incomplete_newest_is_skipped, test_head_copy_returns_the_incomplete_stamp (loads HEAD/SITEZ bytes via `git show <merge-base>:...` into a temp module, proves the discriminating arm reproduces the live bug), test_all_incomplete_raises_named, test_single_complete_unchanged, test_named_error_is_runtimeerror, test_mirror_agrees_with_build_unit_map (four stub layouts: all-complete, newest-incomplete, all-incomplete, refdata-only -- asserts model_block_pull._stamps_with_raw_pair == build_unit_map._stamps_with_refdata element for element on each). py_compile clean; ruff (py39 target) clean; ds-precommit-check.py rc=0."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-70.latest-stamp-requires-raw-pair.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "<status> flipped pending -> complete, per section 6. No other line in the RECORD FACE or WORKER FACE touched."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"6 passed\" (or N passed with N at least 6 if you added helper-free arms -- name them) and 0 failed, the PASSED lines naming test_incomplete_newest_is_skipped, test_head_copy_returns_the_incomplete_stamp, test_all_incomplete_raises_named, test_single_complete_unchanged, test_named_error_is_runtimeerror and test_mirror_agrees_with_build_unit_map -- the second of which proves the first discriminates (HEAD's copy returns the identity-only stamp 20260919T011821Z on the same stub), and the last of which proves the mirrored rule agrees with build_unit_map's on every layout",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py -v -p no:cacheprovider 2>&1 | tail -12",
+      "output_evidence": "integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py::test_incomplete_newest_is_skipped PASSED [ 16%]\nintegrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py::test_head_copy_returns_the_incomplete_stamp PASSED [ 33%]\nintegrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py::test_all_incomplete_raises_named PASSED [ 50%]\nintegrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py::test_single_complete_unchanged PASSED [ 66%]\nintegrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py::test_named_error_is_runtimeerror PASSED [ 83%]\nintegrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py::test_mirror_agrees_with_build_unit_map PASSED [100%]\n\n6 passed in 0.23s",
+      "denominator": "6 of 6 named arms PASSED, 0 failed -- no helper-free arms added beyond the six named",
+      "status": "PASS",
+      "expect": "6 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"3 failed, 36 passed\" -- the spawn-time baseline (3 failed, 30 passed at the cut, the two uncollectable modules ignored because they fail to COLLECT at HEAD on a pre-existing render_pack ImportError) plus exactly this cell's 6 new arms passed; the 3 failures are EXACTLY the three pre-existing live-S3-coupled test_fye_join.py tests named in section 1 and no other -- print the FAILED lines. Re-measure the baseline before you edit; the bar is \"baseline plus your new arms, failures unchanged in identity and count\"",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests -q -p no:cacheprovider --ignore=integrations/bloomberg/research/tests/test_consumer_wiring.py --ignore=integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py 2>&1 | tail -6",
+      "output_evidence": "FAILED integrations/bloomberg/research/tests/test_fye_join.py::test_calendar_year_grouping_fails_same_period_alignment - botocore.errorfactory.NoSuchBucket: An error occurred (NoSuchBucket) when c...\nFAILED integrations/bloomberg/research/tests/test_fye_join.py::test_fiscal_period_grouping_passes_same_period_alignment - botocore.errorfactory.NoSuchBucket: An error occurred (NoSuchBucket) when c...\nFAILED integrations/bloomberg/research/tests/test_fye_join.py::test_fiscal_period_join_direction_assertion_all_landed_securities - botocore.errorfactory.NoSuchBucket: An error occurred (NoSuchBucket) when c...\n3 failed, 36 passed in 2.15s",
+      "denominator": "36 passed, 3 failed of 39 collected (spawn-time baseline re-measured identically before editing: 3 failed, 30 passed; plus this cell's 6 new arms; the 3 failures are the same three test_fye_join.py names, unchanged)",
+      "status": "PASS",
+      "expect": "3 failed, 36 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "bare_sorted_last_in_latest_stamp 0; named_error_class True; helper_defined True; stage_derive_fallback_unchanged True; imports_build_unit_map False (the rule is mirrored in the lower module, never imported upward -- a circular import at HEAD). This invocation is single-quoted: no regex here contains a dollar sign exposed to the shell",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import io, re; s = io.open(\"integrations/bloomberg/research/model_block_pull.py\", encoding=\"utf-8\").read(); body = s.split(\"def _latest_stamp(\", 1)[1].split(\"\\ndef \", 1)[0]; print(\"bare_sorted_last_in_latest_stamp\", body.count(\"sorted(stamps)[-1]\")); print(\"named_error_class\", bool(re.search(r\"class NoRawStampError\\(RuntimeError\\)\", s))); print(\"helper_defined\", \"def _stamps_with_raw_pair(\" in s); print(\"stage_derive_fallback_unchanged\", \"raw_stamp = _latest_stamp(s3, f\\\"raw/{VENDOR}/{sec_key}/\\\")\" in s); print(\"imports_build_unit_map\", bool(re.search(r\"^\\s*(import build_unit_map|from build_unit_map|import .*build_unit_map)\", s, re.M)))'",
+      "output_evidence": "bare_sorted_last_in_latest_stamp 0\nnamed_error_class True\nhelper_defined True\nstage_derive_fallback_unchanged True\nimports_build_unit_map False",
+      "denominator": "5 of 5 printed lines match expect exactly",
+      "status": "PASS",
+      "expect": "bare_sorted_last_in_latest_stamp 0[\\s\\S]*named_error_class True[\\s\\S]*helper_defined True[\\s\\S]*stage_derive_fallback_unchanged True[\\s\\S]*imports_build_unit_map False"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "both files print compiles True and crlf 0; model_block_pull.py's non_ascii_bytes EQUALS its base figure printed beside it (0 at the cut -- read from the merge-base, never assumed), and the new test file prints NEW-FILE with non_ascii_bytes 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import io, subprocess; base = subprocess.run([\"git\", \"merge-base\", \"HEAD\", \"SITEZ\"], capture_output=True, text=True).stdout.strip(); [print(f, \"compiles\", bool(compile(io.open(f, \"rb\").read().decode(\"utf-8\"), f, \"exec\")), \"crlf\", io.open(f, \"rb\").read().count(b\"\\r\\n\"), \"non_ascii_bytes\", len(io.open(f, \"rb\").read()) - len(io.open(f, \"rb\").read().decode(\"utf-8\")), \"| base\", (lambda b: len(b) - len(b.decode(\"utf-8\")))(subprocess.run([\"git\", \"show\", base + \":\" + f], capture_output=True).stdout) if f.endswith(\"model_block_pull.py\") else \"NEW-FILE\") for f in (\"integrations/bloomberg/research/model_block_pull.py\", \"integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py\")]'",
+      "output_evidence": "integrations/bloomberg/research/model_block_pull.py compiles True crlf 0 non_ascii_bytes 0 | base 0\nintegrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py compiles True crlf 0 non_ascii_bytes 0 | base NEW-FILE",
+      "denominator": "2 of 2 files: compiles True, crlf 0, non_ascii_bytes 0 == base 0 for model_block_pull.py; new test file NEW-FILE with non_ascii_bytes 0 (merge-base HEAD SITEZ == HEAD itself, 87ce2e597126c8ae08dfd2d7307f2d303f6a9aa2, since this worktree branches directly off SITEZ)",
+      "status": "PASS",
+      "expect": "compiles True[\\s\\S]*crlf 0[\\s\\S]*non_ascii_bytes 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Snapshotted the edited model_block_pull.py (sha256 7ea9aeb233a9f31aec7cbb5797e6aced7c434f0cdb7f5b27c9ddd82d432aebb6) to .scratch/model_block_pull.py.pre_mutant, then reverted the whole file to the pre-cut snapshot taken before editing (.scratch/model_block_pull.py.orig, the exact bare-sorted-last defect this cell closes -- no NoRawStampError, no _stamps_with_raw_pair helper), and re-ran the new test file against it.",
+      "expected": "test_incomplete_newest_is_skipped FAILS (bare sort returns the incomplete newest stamp instead of skipping it); test_all_incomplete_raises_named and test_named_error_is_runtimeerror FAIL (NoRawStampError does not exist on the module); test_mirror_agrees_with_build_unit_map FAILS (_stamps_with_raw_pair does not exist); test_head_copy_returns_the_incomplete_stamp and test_single_complete_unchanged still PASS (they either exercise HEAD's own bytes directly or exercise a single-complete-stamp case that a bare sort also gets right by coincidence). After restore, the file is byte-identical to the pre-mutant snapshot.",
+      "observed": "FIRED: '4 failed, 2 passed in 0.33s' -- FAILED test_incomplete_newest_is_skipped (AssertionError: assert '20260919T011821Z' == '20260915T000000Z'), FAILED test_all_incomplete_raises_named (AttributeError: module 'model_block_pull' has no attribute 'NoRawStampError'), FAILED test_named_error_is_runtimeerror (same AttributeError), FAILED test_mirror_agrees_with_build_unit_map (AttributeError: module 'model_block_pull' has no attribute '_stamps_with_raw_pair'); test_head_copy_returns_the_incomplete_stamp and test_single_complete_unchanged both PASSED under the mutant, exactly as expected. Restore verified: sha256 of the restored file is 7ea9aeb233a9f31aec7cbb5797e6aced7c434f0cdb7f5b27c9ddd82d432aebb6, identical to the pre-mutant snapshot, and `cmp -s` printed RESTORED_BYTE_IDENTICAL. AC1, AC2, AC3 and AC4 were then re-run clean on the restored file (6 passed; 3 failed, 36 passed identical FAILED lines; AC3/AC4 printed values unchanged), matching the acceptance rows above.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py run twice in immediate succession on the restored (post-mutant-control) file, compared on the final summary line and the per-test PASSED lines.",
+      "observed": "Run 1: '6 passed in 0.23s', all six PASSED lines identical in name and order. Run 2: '6 passed in 0.23s', same six PASSED lines, same order. Pass/fail counts and per-test outcomes identical both runs (duration coincidentally equal).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "stage_derive, stage_pull, _read_json_from_s3, main().",
+      "reason": "The order names these UNCHANGED explicitly. Verified: stage_derive's fallback call site (:899-906 at the cut) is byte-identical; grep for their definitions shows no diff outside the two new symbols added to _latest_stamp's neighborhood."
+    },
+    {
+      "item": "build_unit_map.py.",
+      "reason": "WALL per the order (circular-import reasoning: build_unit_map.py:46 already imports model_block_pull, so the reverse import is impossible without a cycle). Not edited. The rule is mirrored, proven equal on four layouts by test_mirror_agrees_with_build_unit_map (AC1)."
+    },
+    {
+      "item": "pull_consumer.py.",
+      "reason": "WALL per the order (rk-64's -- the consumer path passes raw_stamp explicitly and never hits the fallback). Not read for editing purposes beyond the order's own citation; not touched."
+    },
+    {
+      "item": "The two uncollectable test modules (test_consumer_wiring.py, test_unresolved_overlay_renders_marked.py) and the three live-coupled test_fye_join.py failures.",
+      "reason": "Named pre-existing, disjoint from this diff, not fixed here per the REFUSAL CLAUSE ('never by fixing a pre-existing test failure'). AC2 confirms the three test_fye_join.py failures are the exact same three names, unchanged in identity and count; no row filed since nothing in this diff was found to cause them (they fail on NoSuchBucket, an unrelated live-S3-coupled fixture gap)."
+    },
+    {
+      "item": "_latest_stamp's signature or return type.",
+      "reason": "The order requires both unchanged. Verified: `_latest_stamp(s3, prefix: str) -> str` is byte-identical in signature; it still returns a str (the newest qualifying stamp, or the pre-existing 'no stamp found' RuntimeError message when no stamp folder exists at all)."
+    },
+    {
+      "item": "Any live AWS call, pool read or write, Bloomberg call.",
+      "reason": "Preflight declares comp-iam DECLARED-NOT-APPLICABLE -- every criterion and the mutant/determinism controls ran against an in-memory stub S3 client built in the test file itself. No boto3 client was constructed; no blp import touched at test-collection time."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py (AC1)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py -v -p no:cacheprovider",
+      "result": "6 passed, 0 failed"
+    },
+    {
+      "tool": "pytest integrations/bloomberg/research/tests full suite minus two uncollectable modules (AC2)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests -q -p no:cacheprovider --ignore=...test_consumer_wiring.py --ignore=...test_unresolved_overlay_renders_marked.py",
+      "result": "3 failed, 36 passed (same 3 test_fye_join.py names as the re-measured spawn-time baseline of 3 failed, 30 passed)"
+    },
+    {
+      "tool": "direct source-shape inspection of model_block_pull.py (AC3)",
+      "invocation": "python -c \"...\" (inline script per the order's literal AC3 invocation)",
+      "result": "bare_sorted_last_in_latest_stamp 0; named_error_class True; helper_defined True; stage_derive_fallback_unchanged True; imports_build_unit_map False"
+    },
+    {
+      "tool": "compile + CRLF + non-ASCII delta vs merge-base(HEAD, SITEZ) (AC4)",
+      "invocation": "python -c \"...\" (inline script per the order's literal AC4 invocation)",
+      "result": "both files compile True, crlf 0; model_block_pull.py non_ascii_bytes 0 == base 0; new test file NEW-FILE, non_ascii_bytes 0"
+    },
+    {
+      "tool": "mutation control -- reverted model_block_pull.py to its pre-cut snapshot (bare sorted(stamps)[-1], no NoRawStampError, no helper), re-ran the new test file, restored from a sha256-verified snapshot",
+      "invocation": "cp .scratch/model_block_pull.py.orig over the edited file; pytest integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py -v; cp .scratch/model_block_pull.py.pre_mutant back; sha256sum; cmp -s",
+      "result": "4 failed, 2 passed under the mutant (test_incomplete_newest_is_skipped, test_all_incomplete_raises_named, test_named_error_is_runtimeerror, test_mirror_agrees_with_build_unit_map all FAILED; test_head_copy_returns_the_incomplete_stamp and test_single_complete_unchanged PASSED); restore sha256 7ea9aeb233a9f31aec7cbb5797e6aced7c434f0cdb7f5b27c9ddd82d432aebb6 matched, cmp -s RESTORED_BYTE_IDENTICAL"
+    },
+    {
+      "tool": "determinism control -- test_latest_stamp_raw_pair.py run twice on the restored file",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py -v -p no:cacheprovider (x2)",
+      "result": "identical: 6 passed / 6 passed, same PASSED lines both times"
+    },
+    {
+      "tool": "py_compile + ruff (py39 target) + ds-precommit-check.py on both changed/new .py files",
+      "invocation": "python -m py_compile <2 files>; ruff check --target-version py39 <2 files>; python .tools/ds-precommit-check.py <2 files>",
+      "result": "py_compile: no errors. ruff: 'All checks passed!'. ds-precommit-check: rc=0"
+    }
+  ]
+}
