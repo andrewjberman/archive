@@ -340,13 +340,23 @@ def find_never_widen_halves():
     print(f"CTO half candidates at HEAD ({len(cto_candidates)}): {cto_candidates}")
     print(f"COO half candidates at HEAD ({len(coo_candidates)}): {coo_candidates}")
 
+    # The packet's blob at HEAD: a half only counts if it names THIS exact blob.
+    brc, bout, _berr = git(["rev-parse", f"HEAD:{PACKET_REL}"])
+    packet_blob = bout.strip() if brc == 0 else ""
+    print(f"packet blob at HEAD: {packet_blob or 'UNREADABLE'}")
+
     def is_signed(path):
         rc, out, err = git(["show", f"HEAD:{path}"])
-        if rc != 0:
+        if rc != 0 or not packet_blob:
             return False, ""
-        # A SIGNED verdict names "SIGNED" and does not name "REFUSED" as the verdict.
-        signed = bool(re.search(r"\bSIGNED\b", out)) and not re.search(r"VERDICT.{0,40}REFUSED", out, re.DOTALL)
-        return signed, out
+        # A SIGNED verdict: names the packet blob, carries a sign word (case-insensitive:
+        # the real halves read "SIGNS" / "Signed:", not the literal upper-case "SIGNED" the
+        # first cut of this regex demanded -- row IRPT_BCKEND-W8-S1), and does not name
+        # "REFUSED" as the verdict.
+        names_blob = packet_blob in out
+        sign_word = bool(re.search(r"\bsign(?:ed|s)\b", out, re.IGNORECASE))
+        refused = bool(re.search(r"VERDICT.{0,40}REFUSED", out, re.DOTALL | re.IGNORECASE))
+        return (names_blob and sign_word and not refused), out
 
     cto_path = cto_signed = None
     for p in cto_candidates:
@@ -385,9 +395,13 @@ def arm_apply():
     non_noop = [r for r in resource_changes if tuple(r["change"]["actions"]) != ("no-op",)]
     non_target = [r for r in non_noop if r["address"] not in TARGET_ADDRS]
     print(f"Pre-apply plan: {len(non_noop)} non-no-op resources, {len(non_target)} outside the 4 named.")
-    if len(non_noop) != 4 or non_target:
-        print("FAIL/STOP: pre-apply plan does not show EXACTLY the four named resources changing "
-              "and nothing else. No apply runs.")
+    # Two legitimate states: PRE-apply (exactly the 4 named changing) and POST-apply (0
+    # changing -- converged). Anything else, or any resource outside the 4, is a STOP
+    # (row IRPT_BCKEND-W8-S3: the first cut only admitted the PRE state, so the post-hoc
+    # verification path below was unreachable).
+    if non_target or len(non_noop) not in (0, 4):
+        print("FAIL/STOP: plan is neither EXACTLY the four named resources changing (pre-apply) "
+              "nor 0 changing (converged) -- or something outside the four moves. No apply runs.")
         for r in non_target:
             print(f"  unexpected: {r['address']} -> {r['change']['actions']}")
         return 1
@@ -400,12 +414,10 @@ def arm_apply():
         print("FAIL/STOP: demo/49financial resource appears as changing in the plan. No apply runs.")
         return 1
 
-    print("Pre-apply plan bound satisfied: exactly the 4 named resources, nothing else.")
-    print("safe-apply.sh execution, post-apply verification and ledger-leg closure are performed "
-          "by the worker's own shell session (never a self-wrapping harness inside this battery) "
-          "once this gate opens -- this arm's own job is to REFUSE the apply until the gate is "
-          "met, which it has now confirmed is NOT the case for this invocation unless a prior "
-          "shell session already ran the apply and this script is being re-run to verify.")
+    print("Plan bound satisfied: only the 4 named resources (or none) are in play, nothing else.")
+    print("safe-apply.sh execution is performed by the worker's own shell session (never a "
+          "self-wrapping harness inside this battery); this arm REFUSES until the gate is met "
+          "and, once the apply has landed, VERIFIES the converged state below.")
 
     # Post-hoc verification path: if a prior session already applied (state converged and
     # ledger legs closed), confirm that and print the completion token instead of re-applying.
@@ -414,10 +426,38 @@ def arm_apply():
         for found_r in resource_changes if found_r["address"] in TARGET_ADDRS
     )
     if not still_tainted and len(non_noop) == 0:
-        print("Fresh plan reads 0 non-no-op resources and no taint remains -- checking ledger legs.")
+        print("Fresh plan reads 0 non-no-op resources and no taint remains -- verifying live reads "
+              "and ledger legs.")
+        # Live re-reads (never carried): policy sha256 pinned to the CRO's already-live policy
+        # (same values the pre-apply arm measured), 0 keys, versioning Enabled, both buckets.
+        pinned = {
+            INFLECTION_BUCKET: "2d90b2f1a01bada3186fe64fd1b8ebefff6c6a82052f8edfe70ce8f15a7333cc",
+            COTTONWOOD_BUCKET: "b095cbbfe6572ae6e065b46d11ef521d65ce009331466234d3f7acad4274ffd4",
+        }
+        reads_ok = True
+        for bucket, want in pinned.items():
+            rc, out, err = run([AWS_BIN, "s3api", "get-bucket-policy", "--bucket", bucket], timeout=60)
+            got = sha(norm_policy(json.loads(out)["Policy"])) if rc == 0 else None
+            rc2, out2, err2 = run([AWS_BIN, "s3api", "list-objects-v2", "--bucket", bucket,
+                                   "--output", "json"], timeout=60)
+            keys = len((json.loads(out2).get("Contents") or [])) if rc2 == 0 else None
+            rc3, out3, err3 = run([AWS_BIN, "s3api", "get-bucket-versioning", "--bucket", bucket,
+                                   "--output", "json"], timeout=60)
+            ver = json.loads(out3).get("Status") if rc3 == 0 else None
+            ok = (got == want and keys == 0 and ver == "Enabled")
+            print(f"  {bucket}: policy_sha_match={got == want} keys={keys} versioning={ver} ok={ok}")
+            reads_ok = reads_ok and ok
+        rc, out, err = run([TF_BIN, "show", "-no-color"], cwd=TF_ROOT, timeout=300)
+        tainted_n = out.count("(tainted)") if rc == 0 else None
+        print(f"terraform show: rc={rc} '(tainted)' markers={tainted_n} over {len(out.splitlines())} lines")
+        if not reads_ok or tainted_n != 0:
+            print("FAIL: a post-apply live read or the taint census is not clean. No token.")
+            return 1
         ledger_text = LEDGER_MD.read_text(encoding="utf-8") if LEDGER_MD.is_file() else ""
-        l1_closed = bool(re.search(r"\|\s*L1\s*\|.*\|\s*CLOSED\s*\|", ledger_text))
-        l3_closed = bool(re.search(r"\|\s*L3\s*\|.*\|\s*CLOSED\s*\|", ledger_text))
+        # The real state cell reads "CLOSED <timestamp>" (row IRPT_BCKEND-W8-S3), so the
+        # closing pipe is not adjacent to the word CLOSED.
+        l1_closed = bool(re.search(r"^\|\s*L1\s*\|.*\|\s*CLOSED\b[^|]*\|\s*$", ledger_text, re.M))
+        l3_closed = bool(re.search(r"^\|\s*L3\s*\|.*\|\s*CLOSED\b[^|]*\|\s*$", ledger_text, re.M))
         print(f"Ledger legs from {LEDGER_MD.name}: L1 closed={l1_closed} L3 closed={l3_closed}")
         if l1_closed and l3_closed:
             print("IBR85-FOUR-RESOURCES-CLEARED-LEGS-L1-L3-CLOSED")
