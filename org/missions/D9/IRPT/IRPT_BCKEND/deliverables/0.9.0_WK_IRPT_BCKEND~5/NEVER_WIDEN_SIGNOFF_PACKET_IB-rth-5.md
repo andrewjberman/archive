@@ -86,10 +86,10 @@ resolved from the host's own `NODE_PATH`, never installed).
 
 | file | sha256 | bytes | change |
 |---|---|---|---|
-| `render_export.cjs` | `7df36a961598cce9725bfd963a6e1c3c78ce05bde52c7ff8c8b13017ac41f1df` | 13169 | edited (additive) |
+| `render_export.cjs` | `fe2af007f31235f3f971ef6f75340a738b014bf1e262b0b94b2d8286a9cf635d` | 12929 | edited (additive) -- CORRECTED to the git-blob hash 2026-09-21 (was the local-disk/CRLF hash; row S113/CTO finding @f5b8c0ac2e) |
 | `capture-session.cjs` | `edf76b2dc151d18ca5278e93634bf834042063ba6029d489a6a550a05d1458aa` | 5544 | NEW |
 | `capture-session.sh` | `21555558becd383f3a78908461611718fd87afe8f60e51cace07b9dd6a997ef7` | 1724 | NEW |
-| `package.json` | `9c7ca836f2c37bd985b15fc234bca42944b82f2b7f052255abccb94ba38c0c7f` | 1124 | edited (one script alias) |
+| `package.json` | `2016e7b88a82650f05892b2583b2c9491a02812dc1a9b52059a063b3552536cd` | 1109 | edited (one script alias) -- CORRECTED to the git-blob hash 2026-09-21 (was the local-disk/CRLF hash; row S113/CTO finding @f5b8c0ac2e) |
 | `run-export-render.sh` | `e52661229c1583223b72f6f2a7b01dbf28729ff1d501c0bee83b543bbb5b3797` | 1330 | UNCHANGED (byte-identical to what is already live) |
 
 `README.md` also gained a documentation section (not part of the S3-synced deploy set -- confirmed
