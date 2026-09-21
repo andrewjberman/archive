@@ -84,13 +84,52 @@ file, and prints `IBR85-REPLACE-SEMANTICS-MEASURED-PACKET-WRITTEN` (rc=0).
 touched, `--arm apply` exits 0 with "GATE NOT MET" and no token. **Obtaining the signatures is the
 issuing COO's and the CTO's job after this packet lands** -- not attempted by this worker.
 
-## Arm (c) -- NOT RUN (gate not met)
+## Arm (c) -- NOT RUN IN THE PRIOR PASS (gate not met then); SUPERSEDED by 'Arm (c) -- LANDED' below
 
 Per BOUNDS ("Both halves at HEAD BEFORE the apply, or the apply does not run"): no `safe-apply.sh` run,
 no ledger leg closed, no state read beyond the plan/refresh above (which is itself a read, not a
 mutation), no disarm row for `IRPT_BCKEND-W7-S2` filed by this cell (that row's own disarm depends on
 the apply actually landing, per the order's arm (c) text: "Disarm row `IRPT_BCKEND-W7-S2` by citation
 ... " is listed under arm (c), which did not run).
+
+## Arm (c) -- LANDED (this pass, wk-irpt_bckend-8-8c)
+
+Both never-widen halves were at HEAD `50f5520156`, each naming packet blob
+`0ca08bdf9ca6833ec79cbd3a30f10224b624e03c` (`git rev-parse HEAD:<packet>` = the same, 3 of 3 agree):
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rth-8_TAINT_CLEAR.md`
+(reads "SIGNS") and
+`org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rth-8_TAINT_CLEAR.md`
+(reads "Signed:"). The battery's own detector rejected both (it demanded the literal `SIGNED`); it was
+corrected before the apply (row `IRPT_BCKEND-W8-S1`), after the halves had been read by hand.
+
+- **Pre-apply plan (fresh, saved to a plan file):** `Plan: 4 to add, 0 to change, 4 to destroy.`; structured
+  JSON: 242 resource_changes, 4 non-no-op (exactly the four named, `["delete","create"]`,
+  `replace_because_tainted`), 0 `demo`/`49financial` moving. `IB-rth-8_preapply_plan.txt`.
+- **Apply:** `HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/shared-infra apply <saved plan>`,
+  rc=0, `Apply complete! Resources: 4 added, 0 changed, 4 destroyed.` The first invocation was blocked by the
+  routine HALT-GATE inbox surface (30 pending messages, none `[STOP]`, none about this act); nothing ran; the
+  documented `HALT_ACK=1` re-run applied. tag-authz gate PASSED, tombstone gate CLEAN (4 creates vs 7
+  tombstones). `IB-rth-8_apply_output.txt`.
+- **Observed window (for R85-AC3):** each policy destroy and create completed in 0s; versioning destroy 0-1s,
+  create 1-2s; the four ran concurrently (no `depends_on`). Whether the versioning destroy is a state-only
+  no-op or a Suspend call was still NOT observed and stays unresolved.
+- **Post-apply reads (fresh, 2 buckets x 3 reads):** get-bucket-policy sha256 equal to the pre-apply values
+  (inflection `2d90b2f1a01bada3...`, cottonwood `b095cbbfe6572ae6...`, also equal to the plan's `after`);
+  list-objects-v2 0 keys both (no `Contents` key); get-bucket-versioning `Enabled` both.
+  `IB-rth-8_postapply_reads.txt`.
+- **Fresh re-plan:** `No changes. Your infrastructure matches the configuration.` (0/0/0);
+  `terraform show`: 0 `(tainted)` markers over 8952 lines; `terraform state list` 251 entries, the 10
+  `lgic_firm` addresses present. `IB-rth-8_postapply_replan.txt`, `IB-rth-8_postapply_state_list.txt`.
+- **Ledger:** legs L1 and L3 closed via `.tools/deploy_ledger.py close-leg` with that proof; L4 untouched
+  (UNEXERCISED, host stopped). Row `IRPT_BCKEND-W7-S2` disarmed by citation via new row
+  `IRPT_BCKEND-W8-S2` (W7-S2 not edited; its disposition stays for `3.0.0_SA_CVO`).
+- **Battery:** `--arm apply` first run this pass printed GATE NOT MET on the two real halves (W8-S1); after
+  that fix it hit FAIL/STOP on the converged state and could not reach its own token path (W8-S3, output kept
+  as `IB-rth-8_R85-AC2_battery_output_first_cut_defect.txt`); after that fix it prints
+  `IBR85-FOUR-RESOURCES-CLEARED-LEGS-L1-L3-CLOSED` rc=0 after live policy-sha/0-keys/versioning reads, a
+  0-tainted census and both ledger legs CLOSED. Mutant (L3 reopened): no token, rc=1.
+- **R85-AC1 cannot be re-run post-apply** (the plan it measures no longer has 4 changes); its recorded
+  pre-apply output stands as the evidence of the state it graded.
 
 ## R85-AC3 -- the judgment question (for `3.0.0_SA_CVO`, no verdict from this worker)
 
