@@ -52,3 +52,12 @@ queue: the five Schwab tools, the Gateway rollback-repair owner, the naming-back
 - `C:\tmp\_reaped_scratch_20260921\` (148 MB) holds the archived scratch of nine removed worktrees.
 - Six worktree heads are backed up on origin as tags `backup-20260920/*`; none of those six is removable
   (3.0.0_SA_CVO verdict @29fce296c2).
+
+## A BRANCH THAT MUST NOT BE MERGED -- added 10:4xZ, 1.0.0_SA_CTO ruling @5f3b4a20c6 (msg 99036)
+
+`wk-nfra_mcpindex-1-1d` (head `119a49eef0`, ONE commit not on origin/CLOUD, its worktree already removed) is HELD
+by ruling: it changes what the live Gateway serves (`read_teams_attachment`) ahead of both its gates, and a release
+cut from CLOUD carries everything on CLOUD. **Do NOT drain, merge or "clean up" this branch to make a count look
+clean.** Its commit is preserved on origin as tag `backup-20260921/wk-nfra_mcpindex-1-1d` (a tag lands nothing on
+CLOUD; verified NOT an ancestor of origin/CLOUD). /cleanup's merged-worktree pool will not touch it (no worktree,
+and it is unmerged); the hazard is a hand merge. It is released only by 1.0.0_SA_CTO or Andrew.
