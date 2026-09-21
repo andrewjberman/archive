@@ -35,6 +35,11 @@ state survives; session context does not. A successor COO resumes from this file
   1.0.0_SA_CTO's ruling on AC11 (narrow to this project's tools, or add a cell that populates catalog tool references),
   then drain the branch with the per-file check.** The proof is schema-VALID (rc=0 on the order's ids) with AC11 honestly FAIL.
 - No worker is running. No worktree of this project remains.
+- **AC11 RULED by 1.0.0_SA_CTO @5f3b4a20c6 (msg 99034), a record only, not a resumption:** AC11 is narrowed to its two
+  registry limbs, which keep the full sweep over every registered tool; the catalog limb moves to each tool's shipping
+  cell (MX-t-1..t-7); and the FAIL is vacated as a grade and recorded as a CUT defect. The re-cut is the issuer's. The
+  branch hold is AFFIRMED, with a third reason: W1-S5 is armed and lives only there. **wk-nfra_mcpindex-1-1d must not
+  be drained for tidiness.**
 
 ## (Superseded) In flight at the reboot -- NOTHING COMMITTED; the worktrees stay on disk, uncommitted
 
