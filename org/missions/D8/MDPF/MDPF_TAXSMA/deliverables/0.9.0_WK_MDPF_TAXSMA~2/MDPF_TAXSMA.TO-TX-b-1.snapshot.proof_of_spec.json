@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_TAXSMA.TO-TX-b-1",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/prd/MDPF_TAXSMA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "671925aecc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/decompositions/MDPF_TAXSMA_DECOMP.md",
+    "vintage_commit": "7f65001ab3",
+    "to_ref": "org/missions/D8/MDPF/MDPF_TAXSMA/task-orders/MDPF_TAXSMA.TO-TX-b-1.snapshot.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_TAXSMA~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/taxsma_snapshot.py",
+      "kind": "script",
+      "commit_or_etag": "4cf47f5b21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only; this cell is the snapshot acquirer, not a deploy/packaging cell (no criterion here names a schedule, Lambda package or IAM role). acquire() bounds an injected gateway_call to gateway_total_seconds (180) over source_read_attempts (3) with source_backoff_seconds (1, 3), verified against org/standards/MDPF_TAXSMA_DATA_CONTRACT.json operations.runtime_budget by a live read of the contract file inside the test suite (test_ac9_runtime_budget_matches_the_contract), not a copied literal. The one Bronze-key call site is address(...) inside _bronze_key, AST-verified as the sole address( Call node in the module (test_ac1_address_resolves_and_is_the_only_key_construction).",
+      "introduces": [
+        "def acquire",
+        "def _bronze_key",
+        "class LocalBronzeStore",
+        "class FailureResult"
+      ],
+      "artifact_covered_by": ["TXB1-AC1", "TXB1-AC2", "TXB1-AC3", "TXB1-AC4", "TXB1-AC5", "TXB1-AC6", "TXB1-AC7", "TXB1-AC8", "TXB1-AC9"]
+    },
+    {
+      "path_or_key": "data/mdpf/tests/taxsma/test_taxsma_snapshot.py",
+      "kind": "test",
+      "commit_or_etag": "4cf47f5b21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New, 21 tests (test_ac1_.. test_ac9_, one or more per criterion), synthetic Gateway responses and the LocalBronzeStore harness only -- no live route, Graph, SharePoint or real S3 call site is ever executed (test_no_live_route_or_s3_call_site_is_executed_in_this_test_module, an AST census of this file's own Call nodes). py -3.12 -m pytest data/mdpf/tests/taxsma/test_taxsma_snapshot.py -q: 21 passed in 0.06-0.08s, rc=0.",
+      "introduces": [
+        "def test_ac1_address_resolves_and_is_the_only_key_construction",
+        "def test_ac9_stalling_stub_proves_3_attempts_backoff_1_and_3_bounded_by_180"
+      ],
+      "artifact_covered_by": ["TXB1-AC1", "TXB1-AC2", "TXB1-AC3", "TXB1-AC4", "TXB1-AC5", "TXB1-AC6", "TXB1-AC7", "TXB1-AC8", "TXB1-AC9"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py",
+      "kind": "test",
+      "commit_or_etag": "4cf47f5b21",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The criterion probe named by the order's <invocation> lines: one fresh pytest subprocess per AC, filtered to that criterion's own test_ac<n>_* names, refusing a 0-selected match as a vacuous pass before printing the VERDICT line. Re-run at HEAD 4cf47f5b21 (0 of 2 files under test dirty), 9 of 9 AC1..AC9 PASS.",
+      "artifact_covered_by": ["TXB1-AC1", "TXB1-AC2", "TXB1-AC3", "TXB1-AC4", "TXB1-AC5", "TXB1-AC6", "TXB1-AC7", "TXB1-AC8", "TXB1-AC9"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TXB1-AC1",
+      "criterion_verbatim": "`address(\"gateway\",\"49financial\",\"bronze\",\"taxsma_workbook\",\"date=<YYYYMMDD>\",\"<snapshot_id>-<response_sha256>.json\")` resolves at the cell's HEAD, and the module computes its Bronze key only through that call",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC1",
+      "output_evidence": "vintage: HEAD 4cf47f5b21, 2026-09-21T03:22:36Z UTC, files under test 2, dirty vs HEAD 0\ncollected 21 items / 19 deselected / 2 selected\ntest_ac1_address_resolves_and_is_the_only_key_construction PASSED\ntest_ac1_unregistered_source_is_refused PASSED\n2 passed, 19 deselected in 0.05s\nmeasurement: collected=21 selected(by -k 'test_ac1_')=2 passed=2 failed=0\nVERDICT: PASS-TXB1-AC1",
+      "denominator": "2 of 2 tests passed: address() resolves to an s3:// key (positive) and an unregistered source is refused with ValueError (negative control, discriminates a real resolution from a vacuous one); 1 of 1 address( Call node in the module (AST census), inside _bronze_key.",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC1(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB1-AC2",
+      "criterion_verbatim": "a synthetic complete capability response is persisted byte for byte: the stored object's SHA-256 equals the SHA-256 of the response body as received",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC2",
+      "output_evidence": "test_ac2_persisted_object_is_byte_identical_to_the_received_response PASSED\n1 passed, 20 deselected in 0.05s\nmeasurement: collected=21 selected(by -k 'test_ac2_')=1 passed=1 failed=0\nVERDICT: PASS-TXB1-AC2",
+      "denominator": "1 of 1 test passed: stored_bytes == body (the exact synthetic response bytes) and sha256(stored_bytes).hexdigest() == result.response_sha256.",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC2(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB1-AC3",
+      "criterion_verbatim": "ETag, acquisition time and SHA-256 are stored outside the body bytes",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC3",
+      "output_evidence": "test_ac3_etag_acquisition_time_and_sha256_are_sidecar_metadata PASSED\n1 passed, 20 deselected in 0.03s\nmeasurement: collected=21 selected(by -k 'test_ac3_')=1 passed=1 failed=0\nVERDICT: PASS-TXB1-AC3",
+      "denominator": "1 of 1 test passed: 3 of 3 sidecar keys (etag, acquired_at, response_sha256) present and correct in store.get_metadata(); 0 of 3 of those keys present in the parsed stored body.",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC3(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB1-AC4",
+      "criterion_verbatim": "(difference) a second persist of the same response is NO_CHANGE by conditional create, while a response with different body bytes creates a new object in the same harness",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC4",
+      "output_evidence": "test_ac4_replay_is_no_change_changed_bytes_creates_new_object PASSED\n1 passed, 20 deselected in 0.04s\nmeasurement: collected=21 selected(by -k 'test_ac4_')=1 passed=1 failed=0\nVERDICT: PASS-TXB1-AC4",
+      "denominator": "1 of 1 test passed, both arms in the same LocalBronzeStore instance: first persist COMPLETE (1 object), replay NO_CHANGE at the same bronze_address (still 1 object), changed-bytes persist COMPLETE at a different bronze_address (2 objects).",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC4(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB1-AC5",
+      "criterion_verbatim": "each of the contract's 8 capability error codes maps to a typed failure result carrying the last successful snapshot's date when one exists",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC5",
+      "output_evidence": "9 passed, 12 deselected in 0.05s (8 parametrized arms, one per capability.errors code, + 1 contract cross-check)\nmeasurement: collected=21 selected(by -k 'test_ac5_')=9 passed=9 failed=0\nVERDICT: PASS-TXB1-AC5",
+      "denominator": "8 of 8 contract capability.errors codes mapped 1:1 to FailureResult.code, each with last_snapshot_date == '20260910' from a pre-populated store; CAPABILITY_ERRORS tuple equals the contract's capability.errors read live from the file, length 8.",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC5(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB1-AC6",
+      "criterion_verbatim": "no failure path returns an empty rows list or an empty membership",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC6",
+      "output_evidence": "test_ac6_failure_result_carries_no_rows_or_membership_field PASSED\n1 passed, 20 deselected in 0.04s\nmeasurement: collected=21 selected(by -k 'test_ac6_')=1 passed=1 failed=0\nVERDICT: PASS-TXB1-AC6",
+      "denominator": "0 of 4 forbidden field names (rows, membership, business_active_accounts, expected_accounts) present on FailureResult's dataclass fields -- the type structurally cannot carry an empty rows/membership value because it carries no such field.",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC6(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB1-AC7",
+      "criterion_verbatim": "with no prior snapshot, a failure yields an UNKNOWN denominator, never zero",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC7",
+      "output_evidence": "test_ac7_no_prior_snapshot_yields_none_not_a_zero_like_value PASSED\n1 passed, 20 deselected in 0.03s\nmeasurement: collected=21 selected(by -k 'test_ac7_')=1 passed=1 failed=0\nVERDICT: PASS-TXB1-AC7",
+      "denominator": "1 of 1 test passed: last_snapshot_date is None on an empty LocalBronzeStore, and is checked not-equal to 5 zero-like values ('', '0', '1970-01-01', 0, '19700101').",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC7(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB1-AC8",
+      "criterion_verbatim": "the module reads only the capability bearer and holds no delegated token (call-site census)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC8",
+      "output_evidence": "test_ac8_call_site_census_holds_no_delegated_identity_concept PASSED\n1 passed, 20 deselected in 0.03s\nmeasurement: collected=21 selected(by -k 'test_ac8_')=1 passed=1 failed=0\nVERDICT: PASS-TXB1-AC8",
+      "denominator": "0 of 9 forbidden substrings found (case-insensitive: delegated_token, 'delegated token', access_token, refresh_token, msal, entra, graph, token_broker, tid/oid) in the module source; 'capability_bearer' present (the one credential concept this module holds).",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC8(?![0-9])",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXB1-AC9",
+      "criterion_verbatim": "a stalling stub proves the call is bounded by `gateway_total_seconds` 180, with 3 attempts and backoff 1 and 3 seconds",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC9",
+      "output_evidence": "3 passed, 18 deselected in 0.05s\nmeasurement: collected=21 selected(by -k 'test_ac9_')=3 passed=3 failed=0\nVERDICT: PASS-TXB1-AC9",
+      "denominator": "3 of 3 tests passed: (1) a stalling stub under the nominal 180/3/[1,3] budget makes exactly 3 attempts with sleep calls [1, 3] on a fake clock; (2) the same stub under a 2-second total_seconds makes fewer than 3 attempts, proving the deadline is a real bound and not decorative; (3) GATEWAY_TOTAL_SECONDS==180, SOURCE_READ_ATTEMPTS==3, SOURCE_BACKOFF_SECONDS==(1,3) read live from org/standards/MDPF_TAXSMA_DATA_CONTRACT.json operations.runtime_budget, 3 of 3 values matched.",
+      "expect": "(?m)^VERDICT: PASS-TXB1-AC9(?![0-9])",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In the worktree (reverted before commit; sha256sum identical before/after, e9f98c40ca4984a5d636030277c7ceec665677e731ead913361b2130db37b206), _persist_success's store.put_if_absent call was changed to persist json.dumps(parsed).encode('utf-8') instead of the raw body bytes -- the conditional-create key and metadata unchanged, only the persisted bytes rewritten.",
+      "expected": "TXB1-AC2's byte-identity assertion (stored_bytes == body) fails; TXB1-AC3, which checks the metadata sidecar and body-key-absence rather than full-body byte equality, is not expected to fire on this specific mutant.",
+      "observed": "py -3.12 -m pytest data/mdpf/tests/taxsma/test_taxsma_snapshot.py -k \"test_ac2_ or test_ac3_\" -v: 1 failed, 1 passed -- test_ac2_persisted_object_is_byte_identical_to_the_received_response FAILED (AssertionError: stored_bytes != body, whitespace-serialization diff at index 22), test_ac3_etag_acquisition_time_and_sha256_are_sidecar_metadata PASSED, exactly as expected. Reverted; sha256sum matched the pre-mutant hash; full suite after revert: 21 passed in 0.06s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two criterion invocations (AC9, the retry/backoff arithmetic; AC4, the conditional-create difference arm) each re-run verbatim via the probe, twice.",
+      "observed": "AC9 run1 == run2 (measurement: collected=21 selected=3 passed=3 failed=0, VERDICT: PASS-TXB1-AC9, both times); AC4 run1 == run2 (measurement: collected=21 selected=1 passed=1 failed=0, VERDICT: PASS-TXB1-AC4, both times). 2 of 2 byte-identical after normalising only the vintage timestamp line. No real clock, network, or randomness sits inside acquire() under test -- monotonic/sleep/now are all injected.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any call to the live /ms/taxsma-workbook route, Microsoft Graph, SharePoint or a real workbook read.",
+      "reason": "Forbidden by the order's bounds. Every test supplies a synthetic gateway_call stub; make_default_gateway_call is written (the production path) but never constructed or invoked anywhere in the test module (AST-verified, test_no_live_route_or_s3_call_site_is_executed_in_this_test_module). The first controlled live read is TX-r-3's, after G-A."
+    },
+    {
+      "item": "A real S3 PutObject/HeadObject/GetObject.",
+      "reason": "Forbidden by the order's bounds. LocalBronzeStore (pure Python, in-process, no network or disk I/O) is the harness every test and this proof use; S3BronzeStore is written but never constructed by any test (AST-verified)."
+    },
+    {
+      "item": "S3BronzeStore.latest_snapshot_date().",
+      "reason": "Raises NotImplementedError by design -- a live S3 listing proof of 'the last successful snapshot's date' against real objects belongs to a release/activation cell, not this acquirer. No TXB1 criterion requires it; LocalBronzeStore.latest_snapshot_date() (the actual AC5/AC7 instrument) is fully implemented and tested."
+    },
+    {
+      "item": "TX-b-2 (Silver) and any downstream membership/reconciliation logic.",
+      "reason": "Decomp s.3: TX-b-1 writes source evidence and moves no membership; not this cell's writes or criteria."
+    },
+    {
+      "item": "Packaging/deploy of this module into a Lambda, container or schedule.",
+      "reason": "No criterion here names it; this cell is source-only (matching the TX-g-1 precedent, which excludes its own packaging cell TX-g-2)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/snapshot.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the TX-b-1 probe (probes/tx_b_1.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-taxsma-2 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py AC<1..9>",
+      "result": "9 of 9 'VERDICT: PASS-TXB1-AC<n>', rc=0 each, at HEAD 4cf47f5b21 with 0 of 2 files under test dirty, 2026-09-21T03:22:36Z-03:22:56Z."
+    },
+    {
+      "tool": "pytest (py -3.12), the full new suite",
+      "invocation": "py -3.12 -m pytest data/mdpf/tests/taxsma/test_taxsma_snapshot.py -q -p no:cacheprovider --color=no",
+      "result": "21 passed in 0.06-0.08s, rc=0."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, AST undefined-name scan, ruff py39, ds-precommit, comp-constants, manifest-check, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh data/mdpf/scripts/gold/taxsma_snapshot.py data/mdpf/tests/taxsma/test_taxsma_snapshot.py org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_b_1.py",
+      "result": "'OK: pre-commit gate clean for 3 of 3 file(s)', rc=0, and again inside safe-commit ('clean for 3 of 4 file(s)', the 4th staged path being the .md result record)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_TAXSMA~2 <0.9.0_WK_MDPF_TAXSMA~2@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "4cf47f5b21 (4 files, 733 insertions; naming-gate PASS 0 graded; to-pipeline-gate: no task_orders/*.md; surprise-row-gate: no rows in this commit; msg-verify MATCH len=2775), LOCAL on wk-mdpf_taxsma-1-2."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> TXB1-AC1,TXB1-AC2,TXB1-AC3,TXB1-AC4,TXB1-AC5,TXB1-AC6,TXB1-AC7,TXB1-AC8,TXB1-AC9",
+      "result": "see the final worker report -- only the exit code is the verdict"
+    }
+  ]
+}
