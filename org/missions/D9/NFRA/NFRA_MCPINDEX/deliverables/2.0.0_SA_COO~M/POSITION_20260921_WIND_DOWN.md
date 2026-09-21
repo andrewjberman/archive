@@ -22,7 +22,21 @@ state survives; session context does not. A successor COO resumes from this file
 | MX-c-1 catalog writer | 41da358d45 + 60464dd3f8 | AC4 re-run under amended grant 8fd757cca8 |
 | MX-c-2 catalog silver schema | db73359967 | catalog-gate exercise 16/16 on the regenerated catalog |
 
-## In flight at the reboot -- NOTHING COMMITTED; the worktrees stay on disk, uncommitted
+## FINAL STATE (updated after Andrew allowed the in-flight workers to finish)
+
+- **MX-a-6 (SmartX) COMPLETE**, drained 0c28325876 (9 PASS + 1 J, proof VALID on the order's ids, every file by blob).
+  **9 of 38 complete.**
+- **MX-c-4 FINISHED BUT NOT MERGED -- held on its branch `wk-nfra_mcpindex-1-1d` @119a49eef0 (9 files, committed; worktree
+  removed, branch kept).** 11 of 12 criteria PASS by output; **MXC4-AC11 FAIL, REFUSED** (0 of 49 tools carry a catalog
+  reference and filling them is outside the grant) -- the expected cut tension. Row **NFRA_MCPINDEX-W1-S5** (ARMED,
+  disarm_owner 2.0.0_SA_COO~M) lives ON THAT BRANCH ONLY, not at CLOUD. NOT merged because: the order is not complete, and
+  it changes a live Gateway behaviour (read_teams_attachment becomes SAFE; AC8 is the CVO's judgment, ungraded) that the next
+  Gateway release cut from CLOUD (e.g. MDPF_TAXSMA TX-r-2) would ship ahead of its own gates. **Successor: obtain
+  1.0.0_SA_CTO's ruling on AC11 (narrow to this project's tools, or add a cell that populates catalog tool references),
+  then drain the branch with the per-file check.** The proof is schema-VALID (rc=0 on the order's ids) with AC11 honestly FAIL.
+- No worker is running. No worktree of this project remains.
+
+## (Superseded) In flight at the reboot -- NOTHING COMMITTED; the worktrees stay on disk, uncommitted
 
 - **MX-c-4** (slot ~1), `C:/tmp/wk-mcpindex-1d`, branch `wk-nfra_mcpindex-1-1d`, base 60464dd3f8, 0 commits. Uncommitted:
   destructive_ops.py, integrations/base.py, integrations/registry.py, tests/test_entitlement_admin.py (modified);
