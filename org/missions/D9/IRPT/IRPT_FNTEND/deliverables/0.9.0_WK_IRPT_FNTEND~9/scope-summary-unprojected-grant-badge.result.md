@@ -1,14 +1,16 @@
 # IRPT_FNTEND.TO-FE-s-59 -- result (0.9.0_WK_IRPT_FNTEND~9)
 
-Portal commit, LOCAL on branch `wk-irpt_fntend-9-59-fe-s-59-portal` (portal frozen, not pushed):
+Portal commits, in order, LOCAL on branch `wk-irpt_fntend-9-59-fe-s-59-portal` (portal frozen, not pushed):
 - `61dbe93cda24aa9d49aa0fdd73f32ecf87731ff4` -- `header/ScopeSummary.tsx`'s `PartialDisclosureFact`
-  node, the new test `__tests__/fe-s-59/scope-summary-badge.test.ts`, and the screenshot fixture
-  `__tests__/fe-s-59/smoke-fixtures.json`.
+  node and the new test `__tests__/fe-s-59/scope-summary-badge.test.ts`.
+- `67f7973245039f7c99f67576565cd6f93190f497` -- the missed `__tests__/fe-s-59/smoke-fixtures.json`
+  (F59-AC6's screenshot fixture; no change to ScopeSummary.tsx or the test file).
 
-Workspace commit, LOCAL on branch `wk-irpt_fntend-9-59-fe-s-59`:
+Workspace commits, LOCAL on branch `wk-irpt_fntend-9-59-fe-s-59`:
 - `0c302d1b77` -- surprise row `IRPT_FNTEND-W9-S1` in `INVESTIGATION_v2.md`.
+- `af1546e922` / `0bb7a1d4f0` -- this proof-of-spec instance, result and screenshot.
 
-**Final HEAD for wave B to seat against: `61dbe93c` (portal).**
+**Final HEAD for wave B to seat against: `67f79732` (portal).**
 
 ## Final measured state (this worktree)
 - F59-AC1 (typecheck): `rc=0` -- **PASS**
