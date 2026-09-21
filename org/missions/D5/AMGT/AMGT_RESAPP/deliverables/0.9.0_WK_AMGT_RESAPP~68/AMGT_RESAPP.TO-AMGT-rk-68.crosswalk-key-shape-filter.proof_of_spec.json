@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-68",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-68.crosswalk-key-shape-filter.md",
+    "group": "W",
+    "vintage_commit": "ce51efce2156af6d5705d804d564dd0bc4dac02c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "ce51efce2156af6d5705d804d564dd0bc4dac02c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-68.crosswalk-key-shape-filter.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~68",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-68, cell AMGT-rk-68 (R1-filter, row AMGT_RESAPP-Z-W54-S2). Worker 0.9.0_WK_AMGT_RESAPP~68, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-16-68 in worktree C:/tmp/wk-amgt-16-68, based at HEAD 006dd1e344 (which contains the round-16 issuance ce51efce21). THE BAR FIRST: branch read wk-amgt-16-68, org/ and .tools/ present, TREE-OK. Ran AC6 (the read-only live listing) FIRST, before any edit, per section 4/5 instruction: live_crosswalk_keys 2 matching 2 non_matching 0 [] newest crosswalk/v1/2026-09-19.json -- clean, so the build proceeded (a non_matching key would have been a BLOCKING row and a STOP before any edit). Re-measured the four pytest baselines at spawn before editing: lib/research/identity/tests/test_crosswalk.py 19 passed, lib/research/identity/tests 44 passed, lib/research/api/tests 179 passed, lib/research/api/tests/test_route_boundary_identity.py 13 passed -- all four matched the order's own measured-state citations exactly, no drift. Snapshotted working-tree bytes of both target files to .scratch/ before editing (crosswalk.py.orig, test_crosswalk.py.orig); no git checkout/stash/show used at any point. BUILT exactly what section 1 RULED: (1) crosswalk.py -- added CROSSWALK_KEY_RE = re.compile(r'^crosswalk/v1/\\d{4}-\\d{2}-\\d{2}\\.json$') and class CrosswalkKeyShapeError(LookupError) beside CROSSWALK_PREFIX; changed _read_pool_latest() to _read_pool_latest(client=None) (default boto3 client unchanged), now returning (document, key); it raises CrosswalkKeyShapeError naming every offending key plus the bucket when ANY listed key fails the shape regex, checked AFTER the listing and BEFORE any get_object call (so a bad listing costs zero object reads); the empty-listing LookupError message is byte-unchanged; newest-wins (sorted(keys)[-1]) is unchanged for a clean listing. (2) added module-level _RESOLVED_FROM = {} beside _CACHE, keyed by the same cache_key load_crosswalk() uses; load_crosswalk() now sets _RESOLVED_FROM[cache_key] to 's3://<POOL_BUCKET>/<key>' on a pool load or 'file:<source>' on a local-path load, on every uncached load; added loaded_from(path=None) -> str, loading via load_crosswalk if not yet cached; load_crosswalk()'s signature and its 3-tuple (document, index, ambiguous) return are UNCHANGED, and the returned document is exactly what _read_json/_read_pool_latest returned (no key injected); updated load_crosswalk's docstring with one sentence naming loaded_from(). (3) test_crosswalk.py -- added one import (from unittest import mock) and one new append-only unittest class PoolVintageRead with a module-level S3 stub (_StubBody/_StubPaginator/_StubS3Client: one-page paginate + get_object by Key) and a recording write-stub (_RecordingWriteClient: head_object 404s once then serves back what was put, matching write_pool's first-mint discipline) plus five arms: (a) a non-dated key (latest.json) alongside a dated key raises CrosswalkKeyShapeError naming latest.json, with zero get_object calls (refusal happens at the listing); (b) two dated keys resolve the 2026-09-15 vintage only, with get_object called for that key alone (newest-wins held); (c) load_crosswalk(refresh=True) with _read_pool_latest patched via mock.patch.object and AMGT_CROSSWALK_PATH removed via mock.patch.dict(os.environ, ...) -> loaded_from() returns 's3://opal-data-harvest/crosswalk/v1/2026-09-15.json' and the returned document equals the stub's document object exactly; (d) the non-persistence guard -- the document from (c), serialised and passed through write_pool() against the recording stub, produces a put body containing neither loaded_from()'s value nor the substring 'resolved'; (e) a local-path load reports loaded_from(path=fixture) == 'file:<fixture>'. Every new test clears/restores _CACHE and _RESOLVED_FROM for the key(s) it touches (setUp/tearDown clear the '<pool>' key; test (e) clears its own tempfile-path key in a try/finally) so other test classes, which use local paths, see no stale pool entries. NOTHING ELSE was touched: no change to newest-wins, load_crosswalk's return shape, build_crosswalk, serialise, resolve, aliases, record_for, add_security.py, build_universe.py, scoped_amgt.py, or any of the four named WALL readers (run_scores.py, management_posture_batch.py, build_unit_map.py, model_block_pull.py) -- confirmed by inspection and by the fact only the two granted paths appear in git diff --stat. AC1 measured 24 passed (19 pre-existing + exactly the 5 new PoolVintageRead arms), 0 failed. AC2 measured 13 passed, 0 failed (page-route identity boundary unchanged). AC3 measured identity suite 49 passed (44 baseline + 5 new) and api suite 179 passed (unchanged baseline), both 0 failed. AC4 measured both edited files: compiles True, non_ascii_bytes 0, crlf 0, matching the merge-base(HEAD,SITEZ) parent bytes' own non_ascii_bytes 0 and crlf 0 exactly (both pure ASCII at the cut and after). AC5, a direct offline probe on the module import (different instrument from AC1's pytest arms): bad_listing RAISED CrosswalkKeyShapeError names_latest True objects_read 0; good_listing key crosswalk/v1/2026-09-15.json as_of 2026-09-15 objects_read ['crosswalk/v1/2026-09-15.json']; is_lookuperror_subclass True -- exact match to the order's <expect>. AC6 re-run after the edit (the module import path is unaffected by the code change since _read_pool_latest's default client is unchanged boto3.client(...)): live_crosswalk_keys 2 matching 2 non_matching 0 [] newest crosswalk/v1/2026-09-19.json -- identical to the pre-edit run, confirming the filter would not fire on today's real pool population either before or after the change. py_compile and ruff both clean on both files (checked ahead of the commit gate as a sanity read, not as a criterion). No BLOCKING row was needed (AC6 clean both times). No surprise encountered outside mandate; surprises left empty. Every value in this instance is copied verbatim from this session's own command output.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "CROSSWALK_KEY_RE + CrosswalkKeyShapeError added beside CROSSWALK_PREFIX; _read_pool_latest(client=None) now shape-filters the listing and returns (document, key); _RESOLVED_FROM + loaded_from() added; load_crosswalk()'s signature/3-tuple return unchanged. This cell deploys nothing (no push); the change reaches the served plane only on the NEXT opal-amgt-scoped-api redeploy, named in section 4's blast-radius note for whoever cuts that redeploy's never-widen pair.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "append-only class PoolVintageRead with five arms (a)-(e) added; no existing test edited. Full-file battery: python -m pytest lib/research/identity/tests/test_crosswalk.py -q -> 24 passed, rc 0.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-68.crosswalk-key-shape-filter.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "record-face <status> flipped pending -> complete."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~68/AMGT_RESAPP.TO-AMGT-rk-68.crosswalk-key-shape-filter.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"N passed\" with 0 failed and N at least 24 (the 19 pre-existing tests, re-measured at spawn, plus the at least 5 new PoolVintageRead arms (a)-(e))",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests/test_crosswalk.py -q 2>&1 | tail -5",
+      "output_evidence": "24 passed in 0.19s (24 dot markers, no F markers, rc 0)",
+      "denominator": "24 of 24 tests in the file passed (19 pre-existing baseline + 5 new PoolVintageRead arms, N=24 >= required 24)",
+      "status": "PASS",
+      "expect": "\\d+ passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"13 passed\" (the count re-measured at spawn) with 0 failed -- the page route's identity boundary, which calls load_crosswalk() and unpacks its 3-tuple, is unchanged by this cell",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/api/tests/test_route_boundary_identity.py -q 2>&1 | tail -5",
+      "output_evidence": "13 passed in 0.23s (13 dot markers, no F markers, rc 0)",
+      "denominator": "13 of 13 tests passed, matching the spawn-time baseline of 13",
+      "status": "PASS",
+      "expect": "13 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the identity suite reads \"M passed\" with 0 failed, M equal to its spawn-time baseline (44) plus exactly the number of new arms AC1 counted (5); the api suite reads the SAME \"K passed\" as its spawn-time baseline (179) with 0 failed",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests -q 2>&1 | tail -3 && python -m pytest lib/research/api/tests -q 2>&1 | tail -3",
+      "output_evidence": "identity suite: 49 passed in 0.54s (baseline 44 + 5 new arms) ; api suite: 179 passed in 2.17s (baseline 179 unchanged)",
+      "denominator": "identity: 49 of 49 (baseline 44 + 5 new); api: 179 of 179 (baseline 179, unchanged)",
+      "status": "PASS",
+      "expect": "\\d+ passed"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "both files print compiles True, crlf 0, and a non_ascii_bytes figure EQUAL to its base figure printed beside it (both 0 at the cut)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport io, subprocess\nfor f in ('lib/research/identity/crosswalk.py', 'lib/research/identity/tests/test_crosswalk.py'):\n    b = io.open(f, 'rb').read()\n    base = subprocess.run(['git', 'merge-base', 'HEAD', 'SITEZ'], capture_output=True, text=True).stdout.strip()\n    h = subprocess.run(['git', 'show', base + ':' + f], capture_output=True).stdout\n    try:\n        compile(b.decode('utf-8'), f, 'exec'); ok = True\n    except SyntaxError as exc:\n        ok = False; print(f, 'SYNTAX ERROR', exc)\n    print(f, 'compiles', ok, 'non_ascii_bytes', len(b) - len(b.decode('utf-8')), 'crlf', b.count(b'\\r\\n'), '| parent non_ascii_bytes', len(h) - len(h.decode('utf-8')), 'parent crlf', h.count(b'\\r\\n'))\n\"",
+      "output_evidence": "lib/research/identity/crosswalk.py compiles True non_ascii_bytes 0 crlf 0 | parent non_ascii_bytes 0 parent crlf 0 ; lib/research/identity/tests/test_crosswalk.py compiles True non_ascii_bytes 0 crlf 0 | parent non_ascii_bytes 0 parent crlf 0",
+      "denominator": "2 of 2 files checked, both compiles True, both non_ascii_bytes matching parent (0==0), both crlf 0",
+      "status": "PASS",
+      "expect": "compiles True non_ascii_bytes 0 crlf 0"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "bad_listing RAISED CrosswalkKeyShapeError names_latest True objects_read 0; good_listing key crosswalk/v1/2026-09-15.json as_of 2026-09-15 objects_read ['crosswalk/v1/2026-09-15.json']; is_lookuperror_subclass True",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport sys\nsys.path.insert(0, '.')\nfrom lib.research.identity import crosswalk as cw\nclass _Body:\n    def __init__(self, data): self.data = data\n    def read(self): return self.data\nclass _Pages:\n    def __init__(self, keys): self.keys = keys\n    def paginate(self, **kw): return [{'Contents': [{'Key': k} for k in self.keys]}]\nclass _Stub:\n    def __init__(self, keys): self.keys = keys; self.read_keys = []\n    def get_paginator(self, name): return _Pages(self.keys)\n    def get_object(self, Bucket, Key):\n        self.read_keys.append(Key)\n        return {'Body': _Body(('{\\\"as_of\\\": \\\"' + Key.rsplit('/', 1)[-1][:-5] + '\\\", \\\"records\\\": []}').encode('utf-8'))}\nbad = _Stub(['crosswalk/v1/2026-09-15.json', 'crosswalk/v1/latest.json'])\ntry:\n    cw._read_pool_latest(client=bad)\n    print('bad_listing NOT RAISED')\nexcept cw.CrosswalkKeyShapeError as exc:\n    print('bad_listing RAISED CrosswalkKeyShapeError names_latest', 'crosswalk/v1/latest.json' in str(exc), 'objects_read', len(bad.read_keys))\ngood = _Stub(['crosswalk/v1/2026-09-14.json', 'crosswalk/v1/2026-09-15.json'])\ndoc, key = cw._read_pool_latest(client=good)\nprint('good_listing key', key, 'as_of', doc.get('as_of'), 'objects_read', good.read_keys)\nprint('is_lookuperror_subclass', issubclass(cw.CrosswalkKeyShapeError, LookupError))\n\"",
+      "output_evidence": "bad_listing RAISED CrosswalkKeyShapeError names_latest True objects_read 0 ; good_listing key crosswalk/v1/2026-09-15.json as_of 2026-09-15 objects_read ['crosswalk/v1/2026-09-15.json'] ; is_lookuperror_subclass True",
+      "denominator": "N/A -- boolean/value checks on 2 fixtures (bad listing, good listing) plus 1 subclass check, all 3 matched expected",
+      "status": "PASS",
+      "expect": "objects_read 0"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "live_crosswalk_keys N (N at least 1) with matching N and non_matching 0 [] -- the ONE read-only live act of this order",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport re, boto3\nrx = re.compile(r'^crosswalk/v1/\\d{4}-\\d{2}-\\d{2}\\.json$')\nkeys = []\nfor page in boto3.client('s3', region_name='us-east-1').get_paginator('list_objects_v2').paginate(Bucket='opal-data-harvest', Prefix='crosswalk/v1/'):\n    keys.extend(o['Key'] for o in page.get('Contents', []))\nbad = [k for k in keys if not rx.match(k)]\nprint('live_crosswalk_keys', len(keys), 'matching', len(keys) - len(bad), 'non_matching', len(bad), bad, 'newest', sorted(keys)[-1] if keys else None)\n\"",
+      "output_evidence": "live_crosswalk_keys 2 matching 2 non_matching 0 [] newest crosswalk/v1/2026-09-19.json (run twice: once BEFORE any edit per section 4/5's instruction, once AFTER, identical both times)",
+      "denominator": "2 of 2 live keys under crosswalk/v1/ matched the shape filter, 0 non-matching, both pre-edit and post-edit reads",
+      "status": "PASS",
+      "expect": "non_matching 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: this order's proof_of_spec names no mutant arm as such. AC5's paired bad-listing/good-listing fixtures and PoolVintageRead's arm (a)/(b) pair serve an equivalent discriminating role: the SAME instrument (_read_pool_latest) is run against a listing that SHOULD raise (a non-dated key present) and a listing that SHOULD NOT (all keys dated), and the two diverge exactly as expected -- a passing assertion that was never exercised against its negative counterpart would not have this pair.",
+      "expected": "N/A -- no mutant arm named",
+      "observed": "N/A -- no mutant arm exists in this order's proof_of_spec; the bad/good listing pair (AC5, PoolVintageRead arms a/b) is the discriminating design actually present",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1-AC5 are pure offline reads (pytest against fixture/stub bytes with no I/O, and two direct python probes against pure-function/stub-client code) -- deterministic by construction, no external state, no clock/randomness dependency named anywhere in this cell. AC6 is the order's ONE live act (a read-only list_objects_v2 over s3://opal-data-harvest/crosswalk/v1/); it was run twice in this session (before and after the edit) and returned the identical count both times.",
+      "observed": "AC1-AC5 each run once under timeout 120 per the order's own bar, rc 0 on first run, no retry needed. AC6 run twice, both times: live_crosswalk_keys 2 matching 2 non_matching 0 [] newest crosswalk/v1/2026-09-19.json.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "newest-wins policy change",
+      "reason": "the ruling and section 4's REFUSAL CLAUSE both hold newest-wins as policy; not touched, confirmed unchanged by AC1(b)/AC5's good_listing arm."
+    },
+    {
+      "item": "load_crosswalk()'s signature or 3-tuple return shape",
+      "reason": "five callers unpack the 3-tuple (crosswalk.py resolve/aliases/record_for, build_universe.py, scoped_amgt.py); the order forbids changing it; AC2/AC3 confirm the page-route boundary and identity suite are unaffected."
+    },
+    {
+      "item": "the four WALL readers (run_scores.py, management_posture_batch.py, build_unit_map.py, model_block_pull.py)",
+      "reason": "named as WALLS in section 1; not this cell's surface; not read for edit, only cited by the order's own text."
+    },
+    {
+      "item": "any deploy, vendor call, pool write, alarm/monitor/notification",
+      "reason": "section 4's BOUNDS forbid all of these explicitly for this cell; none performed."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests/test_crosswalk.py -q",
+      "result": "24 passed in 0.19s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests -q",
+      "result": "49 passed in 0.54s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests -q",
+      "result": "179 passed in 2.17s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/test_route_boundary_identity.py -q",
+      "result": "13 passed in 0.23s"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/identity/crosswalk.py lib/research/identity/tests/test_crosswalk.py",
+      "result": "rc 0, no output (PYCOMPILE-OK)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/identity/crosswalk.py lib/research/identity/tests/test_crosswalk.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~68/AMGT_RESAPP.TO-AMGT-rk-68.crosswalk-key-shape-filter.proof_of_spec.json AC1,AC2,AC3,AC4,AC5,AC6",
+      "result": "PENDING -- run after this instance is written"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~68 <0.9.0_WK_AMGT_RESAPP~68@opal.agent>\" -F <msgfile> -- lib/research/identity/crosswalk.py lib/research/identity/tests/test_crosswalk.py org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-68.crosswalk-key-shape-filter.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~68/AMGT_RESAPP.TO-AMGT-rk-68.crosswalk-key-shape-filter.proof_of_spec.json",
+      "result": "PENDING-THIS-COMMIT"
+    }
+  ]
+}
