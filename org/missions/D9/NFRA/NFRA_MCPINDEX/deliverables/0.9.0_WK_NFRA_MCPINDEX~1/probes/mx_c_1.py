@@ -180,28 +180,207 @@ def ac3():
     print("VERDICT: PASS-MXC1-AC3")
 
 
+RECT_REL = os.path.join("workflows", "atom_decomposition", "runs", "portal-page-macro",
+                         "20260811T1940Z", "rectangle.final.certified.json")
+RECT = os.path.join(REPO, RECT_REL)
+MARKER = " [MXC1-AC4-EXERCISE]"
+
+
+def _read_bytes(path):
+    with io.open(path, "rb") as f:
+        return f.read()
+
+
+def _write_bytes(path, data):
+    # explicit byte-for-byte restore -- NEVER `git checkout --` / `git clean` (bound; row
+    # NFRA_MCPINDEX-W1-S3 crossed this once already).
+    with io.open(path, "wb") as f:
+        f.write(data)
+
+
+def _sha256(data):
+    import hashlib
+    return hashlib.sha256(data).hexdigest()
+
+
+def _git_diff_stat(rel):
+    r = subprocess.run(["git", "-C", REPO, "diff", "--stat", "--", rel], capture_output=True, text=True)
+    return r.stdout.strip()
+
+
+def _run_emitter():
+    r = subprocess.run([sys.executable, EMIT], cwd=REPO, capture_output=True, text=True, timeout=90)
+    return r.returncode, r.stdout, r.stderr
+
+
+def _find_value_span(text, entity_id, field):
+    """Byte-exact span of a JSON string VALUE for cells[field].value under the given entity_id,
+    found by substring scan (never a full re-serialize, so every OTHER byte in the file is
+    provably untouched by construction -- not just by re-diffing)."""
+    i = text.find('"%s"' % entity_id)
+    if i < 0:
+        raise ValueError("entity_id %r not found" % entity_id)
+    j = text.find('"%s"' % field, i)
+    if j < 0:
+        raise ValueError("field %r not found under entity %r" % (field, entity_id))
+    prefix = '"value": "'
+    k = text.find(prefix, j)
+    if k < 0:
+        raise ValueError("no \"value\": \" after field %r" % field)
+    k += len(prefix)
+    end = k
+    bslash = chr(92)
+    while True:
+        end = text.find('"', end)
+        if end < 0:
+            raise ValueError("unterminated JSON string value")
+        if text[end - 1] != bslash:
+            break
+        end += 1
+    return k, end
+
+
 def ac4():
-    print("INSTRUMENT: grant-boundary read of this cell's <paths> block against what AC4 requires to exercise.")
+    print("INSTRUMENT: exercise the named writer (AC3's resolved write-call, reached via "
+          "emit_catalog_v02.py's main()) once at the cell's HEAD with one reversible change to an "
+          "emitter input (RECT), diffing the served file (CAT) before/after by SHA-256 and by "
+          "`git diff`, then reverting RECT to its saved original bytes and re-running to confirm the "
+          "served file's SHA-256 returns to the pre-change value. Grant: AMENDMENT (issuer, "
+          "2026-09-21, CTO ruling @f1c469829c/@de8bf648cd) adds CAT and RECT to this cell's <paths>.")
     print("VINTAGE (UTC): %s" % utcnow())
-    print("<paths> GRANTED to 0.9.0_WK_NFRA_MCPINDEX~1 for MX-c-1 (task order NFRA_MCPINDEX.TO-MX-c-1):")
-    print("  workflows/atom_decomposition/emit_catalog_v02.py")
-    print("  org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md")
-    print("  (plus this worker's own deliverables folder, per the worker face)")
-    print("AC4 REQUIRES writing, at minimum:")
-    print("  %s (the served/live catalog AC4 calls 'the served file' -- CAT)" % CAT_REL)
-    print("  an emitter INPUT under workflows/atom_decomposition/runs/<unit>/<stamp>/rectangle.final.certified.json"
-          " (a resolved-substrate source; see lift_catalog_v02.py resolve_substrates()/scan_unit()) to make the "
-          "'one reversible change to an emitter input' the criterion names")
-    print("Neither path is in the <paths> grant. Bound (worker face BOUNDS): 'A path you need that is not named "
-          "is a BLOCKING surprise row on that criterion -- never an override.' Bound 9: a criterion that cannot "
-          "be satisfied as written is REFUSED and reported with its measurement, never repaired, widened or met "
-          "by another route (redirecting OUT to a scratch path would not exercise the NAMED writer against the "
-          "NAMED live path, which is what AC3/AC4 both require).")
-    print("Filed: NFRA_MCPINDEX-W1-S1 (class BLOCKING) in "
-          "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md")
-    print("VERDICT: FAIL-MXC1-AC4 REFUSED -- exercising the named writer against the live path requires writing "
-          "%s and a workflows/atom_decomposition/runs/ input file, neither granted by this cell's <paths>; "
-          "filed as BLOCKING row NFRA_MCPINDEX-W1-S1, not overridden" % CAT_REL)
+    print("RECT (emitter input): %s" % RECT_REL)
+    print("CAT  (served file):   %s" % CAT_REL)
+
+    pre_stat_cat = _git_diff_stat(CAT_REL)
+    pre_stat_rect = _git_diff_stat(RECT_REL)
+    print("PRE-EXERCISE git diff --stat (expect empty, both at HEAD): CAT=%r RECT=%r" % (pre_stat_cat, pre_stat_rect))
+    if pre_stat_cat or pre_stat_rect:
+        print("VERDICT: FAIL-MXC1-AC4 worktree not clean at HEAD before the exercise starts -- "
+              "CAT stat=%r RECT stat=%r" % (pre_stat_cat, pre_stat_rect))
+        return
+
+    cat_orig = _read_bytes(CAT)
+    rect_orig = _read_bytes(RECT)
+    sha_cat_orig = _sha256(cat_orig)
+    print("SAVED original bytes (in-process, never committed): CAT sha256=%s (%d bytes); "
+          "RECT sha256=%s (%d bytes)" % (sha_cat_orig, len(cat_orig), _sha256(rect_orig), len(rect_orig)))
+
+    # Run A -- baseline: writer run once, input UNCHANGED (this establishes the pre-change served
+    # bytes at this exact HEAD; the committed CAT already carries this same content per AC5/AC6,
+    # modulo the built_at_git_head vintage stamp, which does not move again below since no commit
+    # happens between runs A/B/C).
+    rc_a, out_a, err_a = _run_emitter()
+    print("RUN A (baseline, input unchanged) rc=%d" % rc_a)
+    print(out_a.strip().splitlines()[-1] if out_a.strip() else "(no stdout)")
+    if rc_a != 0:
+        print("VERDICT: FAIL-MXC1-AC4 baseline run A failed rc=%d stderr=%s" % (rc_a, err_a.strip()[:2000]))
+        _write_bytes(CAT, cat_orig)
+        return
+    cat_a = _read_bytes(CAT)
+    sha_a = _sha256(cat_a)
+    print("RUN A served-file sha256=%s" % sha_a)
+
+    # One reversible change to the emitter input: append MARKER inside the JSON string value of
+    # mac.01.macro-data.cells.business_meaning.value -- a byte-exact substring insert, nothing else
+    # in RECT touched.
+    rect_text = rect_orig.decode("utf-8")
+    k, end = _find_value_span(rect_text, "mac.01.macro-data", "business_meaning")
+    rect_changed_text = rect_text[:end] + MARKER + rect_text[end:]
+    rect_changed = rect_changed_text.encode("utf-8")
+    _write_bytes(RECT, rect_changed)
+    rect_diff_stat = _git_diff_stat(RECT_REL)
+    print("APPLIED reversible input change: inserted %r at byte offset %d of RECT's "
+          "mac.01.macro-data.business_meaning.value. git diff --stat RECT: %r" % (MARKER, end, rect_diff_stat))
+
+    # Run B -- the named writer run once, WITH the change.
+    rc_b, out_b, err_b = _run_emitter()
+    print("RUN B (writer run, RECT changed) rc=%d" % rc_b)
+    if rc_b != 0:
+        print("VERDICT: FAIL-MXC1-AC4 run B failed rc=%d stderr=%s" % (rc_b, err_b.strip()[:2000]))
+        _write_bytes(RECT, rect_orig)
+        _write_bytes(CAT, cat_orig)
+        return
+    cat_b = _read_bytes(CAT)
+    sha_b = _sha256(cat_b)
+    print("RUN B served-file sha256=%s" % sha_b)
+    # Diff run A's served bytes against run B's DIRECTLY (never against git HEAD -- run A's own
+    # built_at_git_head vintage-stamp lines already differ from the committed HEAD bytes whenever
+    # this worktree's HEAD has advanced since CAT was last committed, which is noise unrelated to
+    # this exercise's ONE input change; see NFRA_MCPINDEX-W1-S4).
+    import difflib
+    lines_a = cat_a.decode("ascii").splitlines(keepends=True)
+    lines_b = cat_b.decode("ascii").splitlines(keepends=True)
+    udiff = list(difflib.unified_diff(lines_a, lines_b, fromfile="run_A_CAT", tofile="run_B_CAT", n=0))
+    added_lines = [ln for ln in udiff if ln.startswith("+") and not ln.startswith("+++")]
+    removed_lines = [ln for ln in udiff if ln.startswith("-") and not ln.startswith("---")]
+    hunk_headers = [ln for ln in udiff if ln.startswith("@@")]
+    print("DIRECT diff run_A_CAT vs run_B_CAT: %d hunk(s), %d added line(s), %d removed line(s)"
+          % (len(hunk_headers), len(added_lines), len(removed_lines)))
+    for ln in udiff:
+        print("  " + ln.rstrip("\n"))
+    # the changed line is the YAML literal-block CONTENT line under `business_meaning: |-` (the
+    # field name itself is not repeated per-line); confirmed against the row instead by locating
+    # the nearest preceding `entity: mac.01.macro-data` and `business_meaning:` key lines in run B.
+    entity_idx = next((i for i, ln in enumerate(lines_b) if "entity: mac.01.macro-data" in ln), None)
+    key_idx = None
+    if entity_idx is not None:
+        key_idx = next((entity_idx + off for off in range(0, 20)
+                         if entity_idx + off < len(lines_b)
+                         and lines_b[entity_idx + off].strip().startswith("business_meaning:")), None)
+    changed_line_idx = next((i for i, ln in enumerate(lines_b) if MARKER.strip() in ln), None)
+    row_touched = (len(hunk_headers) == 1 and len(added_lines) == 1 and len(removed_lines) == 1
+                   and MARKER.strip() in added_lines[0]
+                   and key_idx is not None and entity_idx is not None and changed_line_idx is not None
+                   and entity_idx < key_idx < changed_line_idx <= key_idx + 5)
+    print("ROW LOCATOR: entity line #%s ('entity: mac.01.macro-data'), business_meaning: key line #%s, "
+          "changed content line #%s (0-indexed, run B)" % (entity_idx, key_idx, changed_line_idx))
+    if sha_a == sha_b:
+        print("VERDICT: FAIL-MXC1-AC4 served file SHA-256 did not change after the input change "
+              "(run A %s == run B %s)" % (sha_a, sha_b))
+        _write_bytes(RECT, rect_orig)
+        _write_bytes(CAT, cat_orig)
+        return
+    if not row_touched:
+        print("VERDICT: FAIL-MXC1-AC4 served file changed by more (or other) than exactly the "
+              "mac.01.macro-data business_meaning row -- %d hunk(s), %d added line(s)"
+              % (len(hunk_headers), len(added_lines)))
+        _write_bytes(RECT, rect_orig)
+        _write_bytes(CAT, cat_orig)
+        return
+
+    # Revert the emitter input to its EXACT saved original bytes (never `git checkout --`).
+    _write_bytes(RECT, rect_orig)
+    rect_diff_after_revert = _git_diff_stat(RECT_REL)
+    print("REVERTED RECT to saved original bytes. git diff --stat RECT (expect empty): %r" % rect_diff_after_revert)
+
+    # Run C -- the same writer, input unchanged (reverted). Its served-file SHA-256 must equal
+    # run A's (same input -> same output; the run and its revert are both in this command log).
+    rc_c, out_c, err_c = _run_emitter()
+    print("RUN C (writer run, RECT reverted / unchanged) rc=%d" % rc_c)
+    if rc_c != 0:
+        print("VERDICT: FAIL-MXC1-AC4 run C failed rc=%d stderr=%s" % (rc_c, err_c.strip()[:2000]))
+        _write_bytes(CAT, cat_orig)
+        return
+    cat_c = _read_bytes(CAT)
+    sha_c = _sha256(cat_c)
+    print("RUN C served-file sha256=%s" % sha_c)
+
+    # Restore CAT to its exact saved original bytes (the amendment's bound: both granted paths
+    # REVERTED and NEVER COMMITTED).
+    _write_bytes(CAT, cat_orig)
+    final_stat_cat = _git_diff_stat(CAT_REL)
+    final_stat_rect = _git_diff_stat(RECT_REL)
+    print("POST-REVERT git diff --stat (expect empty, both): CAT=%r RECT=%r" % (final_stat_cat, final_stat_rect))
+
+    if sha_c != sha_a:
+        print("VERDICT: FAIL-MXC1-AC4 served file SHA-256 with input reverted (%s) != baseline run A (%s)"
+              % (sha_c, sha_a))
+        return
+    if final_stat_cat or final_stat_rect:
+        print("VERDICT: FAIL-MXC1-AC4 post-revert diff is NOT empty -- CAT=%r RECT=%r"
+              % (final_stat_cat, final_stat_rect))
+        return
+    print("VERDICT: PASS-MXC1-AC4")
 
 
 def ac5():
