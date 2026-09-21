@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-66",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "ce51efce2156af6d5705d804d564dd0bc4dac02c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-66.wk-provision-self-test-scoped-cleanup.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "16999602615f9643385bc571748aa7a25079baf0"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~66",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/wk-provision.sh",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "deploy_evidence": "git diff --stat: 1 file changed, 55 insertions(+), 8 deletions(-) (429 -> 476 lines). cmd_self_test(): (1) deleted the superproject-wide `git worktree prune` at old :388 outright, relying on ARM7's own tmp_base/branch leftovers check to catch a failed explicit removal; (2) replaced the nested `git -C \"$nested\" worktree prune` at old :397 with a SCOPED removal of exactly ARM6's own manufactured orphan admin entry -- located by reading every \"$(git -C \"$nested\" rev-parse --absolute-git-dir)/worktrees/*/gitdir\" file, comparing each entry's target against $orphan_portal with both sides normalized through `cygpath -m` (gitdir files on this box already read \"C:/...\"; $orphan_portal may carry the MSYS \"/c/...\" form), removing (`rm -rf`) only the ONE matching admin directory, and FAILING ARM7 with a message naming the count when the match is not exactly 1 -- never a prune fallback; (3) rewrote the comment block explaining why a repo-wide prune is forbidden there (it would erase other seats' prunable registrations); (4) added an 8th arm (`ARM 8: cmd_self_test's own body invokes no git worktree prune`), a static assertion using the line-anchored invocation-only pattern `grep -cE '^[[:space:]]*git( -C [^ ]+)? worktree prune'` (never the plain-phrase form, which ARM6 measured at 5 false-positive hits on its own banner/grep-pattern/error-echo lines) against cmd_self_test's own body with comments stripped, and bumped `local total=7` to `local total=8`. cmd_remove (:200-248, read only), ARM1-ARM6's logic, and the provision verb are untouched. Ruff/py_compile/ds-precommit-check are not applicable (this is bash, not Python); `bash -n` parses clean (AC3).",
+      "introduces": [
+        "local total=8",
+        "ORPHAN_ADMIN_MATCH:",
+        "== ARM 8: cmd_self_test's own body invokes no git worktree prune =="
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-66.wk-provision-self-test-scoped-cleanup.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "<status> flipped pending -> complete in the RECORD FACE; WORKER FACE untouched."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "self_test_body_prune_invocations: 0 (the working file, after your edit); head_self_test_body_prune_invocations: 2 printed beside it as the baseline (measured by the issuer at the cut with this ANCHORED form -- exactly :388 and :397, not the plain-phrase grep's 5); whole_file_prune_invocations: 0 -- no git worktree prune invocation survives anywhere in the file. Run BEFORE AC2; this criterion never executes the self-test",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && echo \"self_test_body_prune_invocations: $(sed -n '/^cmd_self_test()/,/^}/p' .tools/wk-provision.sh | grep -v '^[[:space:]]*#' | grep -cE '^[[:space:]]*git( -C [^ ]+)? worktree prune')\" && echo \"head_self_test_body_prune_invocations: $(git show HEAD:.tools/wk-provision.sh | sed -n '/^cmd_self_test()/,/^}/p' | grep -v '^[[:space:]]*#' | grep -cE '^[[:space:]]*git( -C [^ ]+)? worktree prune')\" && echo \"whole_file_prune_invocations: $(grep -v '^[[:space:]]*#' .tools/wk-provision.sh | grep -cE '^[[:space:]]*git( -C [^ ]+)? worktree prune')\"",
+      "output_evidence": "self_test_body_prune_invocations: 0\nhead_self_test_body_prune_invocations: 2\nwhole_file_prune_invocations: 0",
+      "denominator": "0 of the self-test body's lines matched (post-edit) vs 2 of HEAD's (pre-edit, :388 and :397); 0 of the whole working file",
+      "status": "PASS",
+      "expect": "self_test_body_prune_invocations: 0[\\s\\S]*head_self_test_body_prune_invocations: 2[\\s\\S]*whole_file_prune_invocations: 0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the self-test's final line reads \"RESULT: 0 arm(s) failed of 8\" with ARM1..ARM8 each printing PASS (ARM8 is the new static no-prune arm), and the output shows the scoped removal matched exactly ONE admin entry for the orphan (print the matched gitdir path); the AFTER census equals the BEFORE census on all four figures -- in particular nested_prunable AFTER == nested_prunable BEFORE (3 at the cut; re-measured here) and super_entries AFTER == super_entries BEFORE; leftover_selftest_branches super 0 nested 0. This is the ONE self-test run this order permits. CONCURRENCY QUALIFIER: three sibling round-16 workers run in their own worktrees during this run; their worktrees exist at BEFORE and AFTER -- observed: all four census figures matched exactly BEFORE==AFTER (31/0/12/3 both times), so no attribution analysis was needed.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && M=\"$(git worktree list --porcelain | sed -n '1s/^worktree //p')\" && census() { echo \"$1 super_entries $(git -C \"$M\" worktree list --porcelain | grep -c '^worktree ') super_prunable $(git -C \"$M\" worktree list --porcelain | grep -c '^prunable') nested_entries $(git -C \"$M/portal\" worktree list --porcelain | grep -c '^worktree ') nested_prunable $(git -C \"$M/portal\" worktree list --porcelain | grep -c '^prunable')\"; } && census BEFORE && bash .tools/wk-provision.sh --self-test 2>&1 | tail -30 && census AFTER && echo \"leftover_selftest_branches super $(git -C \"$M\" branch --list 'wk-selftest-rk60-*' | wc -l) nested $(git -C \"$M/portal\" branch --list 'wk-selftest-rk60-*' | wc -l)\"",
+      "output_evidence": "BEFORE super_entries 31 super_prunable 0 nested_entries 12 nested_prunable 3\nHEAD is now at db1c5f64 page(AMGT_RESAPP rk-53, 0.9.0_WK_AMGT_RESAPP~53): RankedList/types carry empty_reason on an EMPTY generation\nPORTAL: C:/tmp/wk-amgt-16-66/.scratch/wkprov-selftest.vOtgF8/wt1/portal branch=wk-selftest-rk60-1-portal\nNODE_MODULES: link -> C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal/node_modules\nTSC: Version 5.9.3\nARM1: PASS\n== ARM 2: a bad --portal-ref refuses rc 2, creates nothing ==\nREFUSED: --portal-ref no-such-ref-rk60 does not resolve in C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal\nARM2: PASS\n== ARM 3: a non-empty portal/ refuses rc 2 ==\nPORTAL_REF: DEV -> db1c5f64d19880cda50d6969ded3c3af26c92630\nGITLINK: 2453a7b4c6b7ff91ea89db499890a9486265d1a0 behind_ref=8\nREFUSED: C:/tmp/wk-amgt-16-66/.scratch/wkprov-selftest.vOtgF8/wt3/portal is not empty; refusing to overwrite\nARM3: PASS\n== ARM 4: link mode resolves ./node_modules/.bin/tsc --version ==\nVersion 5.9.3\nARM4: PASS\n== ARM 5: remove --portal-only leaves the nested worktree list without the path, and recreates the empty placeholder ==\nREMOVED: C:/tmp/wk-amgt-16-66/.scratch/wkprov-selftest.vOtgF8/wt1/portal\nPORTAL_WORKTREES_LISTING_PATH: 0 of 12\nARM5: PASS\n== ARM 6: no worktree prune runs -- an unrelated pre-existing prunable entry survives ==\nREMOVED: C:/tmp/wk-amgt-16-66/.scratch/wkprov-selftest.vOtgF8/wt4/portal\nPORTAL_WORKTREES_LISTING_PATH: 0 of 13\nARM6: PASS\n== ARM 7: full cleanup -- every branch and worktree the self-test created is gone ==\nORPHAN_ADMIN_MATCH: count=1 dir=C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal/.git/worktrees/orphan-portal orphan_norm=C:/tmp/wk-amgt-16-66/.scratch/wkprov-selftest.vOtgF8/orphan-portal\nARM7: PASS\n== ARM 8: cmd_self_test's own body invokes no git worktree prune ==\nARM8: PASS\nRESULT: 0 arm(s) failed of 8\nAFTER super_entries 31 super_prunable 0 nested_entries 12 nested_prunable 3\nleftover_selftest_branches super 0 nested 0",
+      "denominator": "0 arm(s) failed of 8; 4 of 4 census figures unchanged BEFORE->AFTER (31/0/12/3 -> 31/0/12/3); 1 of 1 orphan admin entry matched; 0/0 leftover selftest branches",
+      "status": "PASS",
+      "expect": "ORPHAN_ADMIN_MATCH: count=1[\\s\\S]*RESULT: 0 arm\\(s\\) failed of 8"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "bash_n_rc 0 (the script parses); working crlf 0 (LF only); working non_ascii_bytes EQUAL to head non_ascii_bytes, both printed side by side (measure, do not assume -- the bar is \"this cell added none\", never a literal zero)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash -n .tools/wk-provision.sh; echo \"bash_n_rc $?\" && python -c \"\nimport io, subprocess\nb = io.open('.tools/wk-provision.sh', 'rb').read()\nh = subprocess.run(['git', 'show', 'HEAD:.tools/wk-provision.sh'], capture_output=True).stdout\nprint('working non_ascii_bytes', len(b) - len(b.decode('utf-8')), 'crlf', b.count(b'\\r\\n'))\nprint('head    non_ascii_bytes', len(h) - len(h.decode('utf-8')), 'crlf', h.count(b'\\r\\n'))\n\"",
+      "output_evidence": "bash_n_rc 0\nworking non_ascii_bytes 0 crlf 0\nhead    non_ascii_bytes 0 crlf 0",
+      "denominator": "0 non-ASCII bytes in the working file vs 0 in HEAD (0 added); 0 CRLF sequences in either",
+      "status": "PASS",
+      "expect": "bash_n_rc 0[\\s\\S]*working non_ascii_bytes 0 crlf 0[\\s\\S]*head    non_ascii_bytes 0 crlf 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2's dynamic behavior could not be mutant-tested by reverting cmd_self_test and re-running --self-test: the order's BOUNDS forbid a second self-test run ('This is the ONE self-test run this order permits') and forbid any repo-wide worktree prune ('not in the file, not by hand, not \"to clean up\" after a failed run') -- re-running the unpatched prune against the REAL nested repo would itself commit the exact hazard this cell exists to close (it would erase every other seat's prunable registration). So the mutation control targets AC1's STATIC anchored-grep discriminator instead, which never invokes the self-test and is safe to mutate and restore: a byte snapshot of the post-edit file was taken to .scratch/wk-provision.sh.post_edit (sha256 63764ae809cd407b2703d1c0d377ee48022a7e6d125c509f17adea6c9fcf04da), then a stray invocation-shaped line `git worktree prune  # MUTANT_SENTINEL_RK66` was reintroduced into cmd_self_test's body (after ARM7's tmp_base cleanup), AC1's literal invocation was re-run against the mutated file, then the file was restored from the snapshot and the restoration verified byte-identical. ARM8 inside cmd_self_test uses the identical regex construction against the identical body text (same sed range, same grep -v comment-strip, same anchored pattern), so a proven kill on AC1's copy of that mechanism is evidence for ARM8's mechanism too, though ARM8 itself was only ever exercised live, unmutated, inside the single permitted AC2 run (where it printed PASS).",
+      "expected": "self_test_body_prune_invocations and whole_file_prune_invocations both move from 0 to a non-zero count once a `git ... worktree prune` invocation is reintroduced; AC1's expect pattern (which pins the value at 0) would then FAIL; restoring the file returns both counts to 0 and the file to its pre-mutant sha256.",
+      "observed": "FIRED: with the sentinel line present, AC1's invocation printed 'self_test_body_prune_invocations: 1' and 'whole_file_prune_invocations: 1' (both non-zero, would FAIL against the expect pattern pinning 0). After restore, `sha256sum .tools/wk-provision.sh` matched the pre-mutant snapshot exactly (63764ae809cd407b2703d1c0d377ee48022a7e6d125c509f17adea6c9fcf04da) and `cmp -s` printed RESTORED_BYTE_IDENTICAL; AC1 and AC3 were re-run clean afterward (see acceptance rows above, both re-run twice under determinism).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC3 (both side-effect-free static reads) were each run twice in succession on the restored, final file. AC2 was NOT repeated -- the order permits exactly one self-test run and it is already recorded above.",
+      "observed": "AC1 run 1 and run 2: identical ('self_test_body_prune_invocations: 0', 'head_self_test_body_prune_invocations: 2', 'whole_file_prune_invocations: 0' both times). AC3 run 1 and run 2: identical ('bash_n_rc 0', 'working non_ascii_bytes 0 crlf 0', 'head    non_ascii_bytes 0 crlf 0' both times).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "cmd_remove (:200-248)",
+      "reason": "Already fixed at HEAD by commit 3795d4f487 (W60-S3's repair); the order names it read-only. Not touched."
+    },
+    {
+      "item": "ARM1-ARM6's logic",
+      "reason": "The order's 'What this cell does NOT change' section names them explicitly as unmoved. Only ARM7's cleanup and the new ARM8 were edited."
+    },
+    {
+      "item": "The provision verb and any other .tools/ file",
+      "reason": "Named out of scope by the order; <paths> grants only .tools/wk-provision.sh among script files."
+    },
+    {
+      "item": "The round-14 L9 adjudication's stale 'W60-S3 unrepaired' sentence",
+      "reason": "The order states this cell does not touch that record -- it is a separate document this order does not grant a write on."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "bash -n (AC3)",
+      "invocation": "bash -n .tools/wk-provision.sh",
+      "result": "rc=0, parses clean"
+    },
+    {
+      "tool": "anchored prune-invocation census (AC1)",
+      "invocation": "sed -n '/^cmd_self_test()/,/^}/p' .tools/wk-provision.sh | grep -v '^[[:space:]]*#' | grep -cE '^[[:space:]]*git( -C [^ ]+)? worktree prune'",
+      "result": "0 (working, post-edit); 2 (HEAD, pre-edit)"
+    },
+    {
+      "tool": "live self-test, single permitted run (AC2)",
+      "invocation": "bash .tools/wk-provision.sh --self-test",
+      "result": "RESULT: 0 arm(s) failed of 8; ORPHAN_ADMIN_MATCH: count=1; census BEFORE==AFTER on all 4 figures; leftover_selftest_branches 0/0"
+    },
+    {
+      "tool": "mutation control on AC1's discriminator, then byte-identical restore",
+      "invocation": "insert `git worktree prune  # MUTANT_SENTINEL_RK66` into cmd_self_test body; re-run AC1's invocation; restore from .scratch snapshot; sha256sum + cmp -s",
+      "result": "counts moved 0 -> 1 (would FAIL); restore verified RESTORED_BYTE_IDENTICAL, sha256 63764ae809cd407b2703d1c0d377ee48022a7e6d125c509f17adea6c9fcf04da"
+    },
+    {
+      "tool": "determinism control -- AC1 and AC3 each run twice",
+      "invocation": "AC1 invocation x2; AC3 invocation x2",
+      "result": "identical output both times for each"
+    }
+  ]
+}
