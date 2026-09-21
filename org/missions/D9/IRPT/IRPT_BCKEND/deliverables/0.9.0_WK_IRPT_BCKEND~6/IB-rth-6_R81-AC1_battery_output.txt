@@ -1,0 +1,18 @@
+== arm (a): measured registry state (should be UNCHANGED from CLOUD HEAD) ==
+  inflection: bucket=opal-data-inflection bucket_provisioned=True
+  cottonwood: bucket=opal-data-cottonwood bucket_provisioned=True
+  registry unchanged from pre-cell baseline: True
+== arm (b): python lib/opal_naming.py validate on the UNCHANGED registry (must be OK) ==
+  VALIDATE: OK 25 system row(s), 9 scope row(s), 17 warning(s) at registry@9f4a569d7a54b53c over all 6 registry file(s)
+== arm (c): head-bucket on the two WOULD-BE new buckets (expect NOT FOUND -- never created) ==
+  opal-data-inflectionwealth -> rc=255 err=An error occurred (404) when calling the HeadBucket operation: Not Found
+  opal-data-cottonwoodcapital -> rc=255 err=An error occurred (404) when calling the HeadBucket operation: Not Found
+== arm (d): head-bucket on the two OLD buckets as Andrew_Berman (expect AccessDenied -- unchanged lockout) ==
+  identity: {     "UserId": "AIDAUR7FNW6PEXHN2JIOH",     "Account": "313476888478",     "Arn": "arn:aws:iam::313476888478:user/Andrew_Berman" }
+  opal-data-inflection -> rc=255 err=An error occurred (403) when calling the HeadBucket operation: Forbidden denied=True
+  opal-data-cottonwood -> rc=255 err=An error occurred (403) when calling the HeadBucket operation: Forbidden denied=True
+
+== VERDICT ==
+registry unchanged: True | validate OK on unchanged registry: True | new buckets absent: True | old buckets still denied (no regression): True
+IBR81-STOP-NEW-BUCKETS-NOT-CREATED-REGISTRY-REFUSED-OLD-BUCKETS-UNCHANGED
+This is NOT the criterion's expected token. The criterion's <expect> (IBR81-NEW-BUCKETS-EXEMPT-IDENTITIES-SUCCEED-OLD-BUCKETS-STILL-DENY) requires the two new buckets to exist and be exempt-identity-accessible; per row IRPT_BCKEND-W6-S1, the registry edit that would let them be created is REFUSED by lib/opal_naming.py validate as written, so this cell is STOPPED short of that state.

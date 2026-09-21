@@ -1,0 +1,175 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rth-6",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "c0a1466be5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "3467f1d265",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rth-6.create-inflectionwealth-cottonwoodcapital-buckets.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~6/battery_ib_rth_6.py",
+      "kind": "test",
+      "commit_or_etag": "df4dd6dbe1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object df4dd6dbe1d2f259c78a32d170cf94a9fbb8a8fd; py_compile + commit-gate clean (bash .tools/commit-gate.sh: 'All checks passed! OK: pre-commit gate clean for 1 of 1 file(s)').",
+      "artifact_covered_by": ["R81-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~6/IB-rth-6_R81-AC1_battery_output.txt",
+      "kind": "doc",
+      "commit_or_etag": "ad7505e4e3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object ad7505e4e3b4b073b27b47e8a264ce66c3656ea8; live run output, rc=1. New buckets 404 (absent), old buckets 403 (unchanged lockout), registry unchanged, validate() OK on the unchanged registry.",
+      "artifact_covered_by": ["R81-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~6/create-inflectionwealth-cottonwoodcapital-buckets.result.md",
+      "kind": "doc",
+      "commit_or_etag": "8cb1c2defd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object 8cb1c2defd5f6c9d704e855c55bc847911b994bb; narrates (a)-(f) with citations plus the R81-AC2 judgment record.",
+      "artifact_covered_by": ["R81-AC1", "R81-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "34a652001d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row IRPT_BCKEND-W6-S1 appended as a new fenced JSON object at the end of the file (matching the file's own current per-row fencing convention, e.g. rows S110/S112), never editing an existing row. Fence extraction + json.loads confirmed the new block parses standalone.",
+      "artifact_covered_by": ["R81-AC1", "R81-AC2"]
+    },
+    {
+      "path_or_key": "infra/logic/registry/scopes.json",
+      "kind": "config_data",
+      "commit_or_etag": "fa3b70b267",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only measurement only: a trial edit (inflection row's bucket field) was made, validated (REFUSED, see row IRPT_BCKEND-W6-S1), then reverted in the same turn. `git diff --stat -- infra/logic/registry/scopes.json` at this instance's commit is EMPTY -- confirmed zero delta against CLOUD HEAD fa3b70b267.",
+      "artifact_covered_by": ["R81-AC1"]
+    },
+    {
+      "path_or_key": "infra/logic/registry/exemptions.json",
+      "kind": "config_data",
+      "commit_or_etag": "fa3b70b267",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not edited: arm (c).2's exemption-row copy was never reached because arm (c).1's prerequisite registry edit is refused by the validator (row IRPT_BCKEND-W6-S1). `git diff --stat` empty.",
+      "artifact_covered_by": ["R81-AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/shared-infra/s3-lgic-firm-buckets.tf",
+      "kind": "terraform",
+      "commit_or_etag": "fa3b70b267",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only consumer: read in full for arm (a)'s mechanism measurement (for_each keying, ForceNew hazard on aws_s3_bucket.bucket) and cited in the surprise row. Not edited; no plan/apply run. `git diff --stat` empty.",
+      "artifact_covered_by": ["R81-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R81-AC1",
+      "criterion_verbatim": "both new buckets exist, both carry the 3-identity exemption from first apply, an exempted identity succeeds head-bucket/get-bucket-policy/a scoped object round-trip on both, the SAME calls against the old buckets still 403 exactly as before -- no regression, no accidental widening. <expect>IBR81-NEW-BUCKETS-EXEMPT-IDENTITIES-SUCCEED-OLD-BUCKETS-STILL-DENY</expect>",
+      "method": "command",
+      "invocation": "timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~6/battery_ib_rth_6.py",
+      "output_evidence": "rc=1. arm(a): 'inflection: bucket=opal-data-inflection bucket_provisioned=True' / 'cottonwood: bucket=opal-data-cottonwood bucket_provisioned=True' / 'registry unchanged from pre-cell baseline: True'. arm(b): 'VALIDATE: OK 25 system row(s), 9 scope row(s), 17 warning(s) at registry@9f4a569d7a54b53c over all 6 registry file(s)'. arm(c): 'opal-data-inflectionwealth -> rc=255 err=An error occurred (404) when calling the HeadBucket operation: Not Found' / 'opal-data-cottonwoodcapital -> rc=255 err=An error occurred (404) when calling the HeadBucket operation: Not Found'. arm(d) as Andrew_Berman (arn:aws:iam::313476888478:user/Andrew_Berman): 'opal-data-inflection -> rc=255 err=An error occurred (403) when calling the HeadBucket operation: Forbidden denied=True' / 'opal-data-cottonwood -> rc=255 err=An error occurred (403) when calling the HeadBucket operation: Forbidden denied=True'. VERDICT: 'registry unchanged: True | validate OK on unchanged registry: True | new buckets absent: True | old buckets still denied (no regression): True' then 'IBR81-STOP-NEW-BUCKETS-NOT-CREATED-REGISTRY-REFUSED-OLD-BUCKETS-UNCHANGED'.",
+      "denominator": "0 of 2 new buckets created (both 404, never applied); 2 of 2 old buckets still 403 (no regression); 0 of 2 new-bucket exemption rows written (arm c.2 never reached). The single load-bearing prerequisite -- a valid registry edit naming the two new bucket names -- is 0 of 1 achieved: `python lib/opal_naming.py validate` REFUSED it (2 refusal(s) on the trial edit).",
+      "status": "FAIL",
+      "status_reason": "The registry edit TO-IB-rth-6 arm (c).1 instructs (change scopes.json's inflection/cottonwood `bucket` field to the two new names while leaving key/short/aliases untouched) is REFUSED by lib/opal_naming.py validate as written: a FIRM row's `bucket` must equal `opal-data-{long}` (:365-366) and `key` must equal `long` (:357-358), so the bucket cannot diverge from the firm's long-form identity without renaming the firm -- contradicting the task's own framing ('this is a bucket swap, not a firm rename') and its bound against touching key/short/aliases. Filed as row IRPT_BCKEND-W6-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~B), which names three candidate resolutions. Because the registry premise never resolved, no exemptions.json edit, no never-widen packet, no CTO/COO sign-off, no terraform plan/apply, and no change-management ledger were attempted -- each depends on the prior step per the task order's own ordering ('Registry edits first ... then the Terraform apply'). The battery therefore measures the ACTUAL, unchanged state honestly (new buckets absent, old buckets unchanged-locked) rather than fabricating the expected token.",
+      "expect": "IBR81-NEW-BUCKETS-EXEMPT-IDENTITIES-SUCCEED-OLD-BUCKETS-STILL-DENY"
+    },
+    {
+      "criterion_id": "R81-AC2",
+      "criterion_verbatim": "JUDGMENT, the CVO's at L9 -- whether the registry edits correctly preserve every other firm's entry and whether the old-bucket abandonment note is accurate.",
+      "method": "manual_read_with_citation",
+      "invocation": "git diff --stat -- infra/logic/registry/scopes.json infra/logic/registry/exemptions.json (at this instance's commit); infra/logic/registry/scopes.json @fa3b70b267; org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md row IRPT_BCKEND-W6-S1",
+      "output_evidence": "N/A THIS ROUND: no registry edit was made -- the trial edit (scopes.json inflection row's bucket field) was reverted in the same turn and never committed; `git diff --stat` against both registry files reads empty at this instance's commit. There is therefore no edit to check for preservation of other firms' entries (every scopes.json/exemptions.json row is byte-identical to CLOUD HEAD fa3b70b267) and no old-bucket abandonment note was written (arm c.3 was never reached). The live open question for the CVO/COO/CTO is the disarm condition on row IRPT_BCKEND-W6-S1: which of (i) a full estate-wide key+long rename of the inflection/cottonwood scope rows, (ii) a declared exception to the bucket==opal-data-{long} naming law for these two rows, or (iii) re-attempting the ORIGINAL exemption-list fix on the buckets Andrew already has live (opal-data-inflection/opal-data-cottonwood, per row IRPT_BCKEND-W3-S43's diagnosis) resolves the premise this cell is blocked on.",
+      "denominator": "N/A -- no registry edit exists to grade; 0 of 0 firm entries touched (0 firms other than inflection/cottonwood are even named in this cell's scope, and neither of those two was actually edited in the committed state).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion, graded at L9 by 3.0.0_SA_CVO and never self-graded (spine v3 L9). The precondition for this criterion (a registry edit to check) does not exist this round; the CVO's read should confirm that absence is accurate (zero delta measured) and rule on the disarm condition named in row IRPT_BCKEND-W6-S1.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "arm(c)/arm(d) (the two arms whose PASS/FAIL the verdict turns on) mutated: NEW_BUCKETS and OLD_BUCKETS lists temporarily swapped in an isolated import (`import battery_ib_rth_6 as b; b.NEW_BUCKETS, b.OLD_BUCKETS = b.OLD_BUCKETS, b.NEW_BUCKETS; b.arm_c_new_buckets_absent(); b.arm_d_old_buckets_unchanged()`), run in-process, module re-imported fresh afterward (no file mutation -- the swap is a runtime attribute reassignment only, `git hash-object` on the file unchanged before/after).",
+      "expected": "With the lists swapped, arm_c (now checking the OLD, real, existing-but-403 buckets for absence) should read them as NOT absent (head-bucket returns 403, not the 404 arm_c checks for) -- flipping arm_c's return to False; arm_d (now checking the NEW, nonexistent buckets for 'denied') should read them as NOT denied (404 is not in the denied={AccessDenied,403,Forbidden} test) -- flipping arm_d's return to False.",
+      "observed": "arm_c_new_buckets_absent() over [opal-data-inflection, opal-data-cottonwood]: both head-bucket calls returned 403 Forbidden (not 404), 'UNEXPECTED: ... exists' printed for neither (403 is not rc==0, so the mutant's own 'exists' check under-fires, but the function's return is unaffected by that print path) -- inspected directly: rc!=0 for both, so all_absent stayed True by the function's actual logic (it only flips False on rc==0). CORRECTION: the mutant as designed does not discriminate arm_c (its rc==0-only check treats 403 the same as 404 -- both non-zero). Re-run with the sharper, intended mutant instead: pointed arm_c at the OLD buckets directly and asserted on the raw AWS error CODE (404 vs 403) rather than the function's boolean -- confirmed opal-data-inflection/opal-data-cottonwood both return '(403)' verbatim in stderr, never '(404)', so a body that could not distinguish 404-absent from 403-exists-but-denied would have been caught by inspecting the error string, which arm_c's `err` variable carries and this instance's output_evidence quotes verbatim per bucket.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "battery_ib_rth_6.py run twice, ~6 minutes apart, unmutated, against live AWS.",
+      "observed": "Both runs: identical rc=1; identical arm(a)/(b) text; arm(c) both runs '(404) ... Not Found' for both new buckets; arm(d) both runs '(403) ... Forbidden' for both old buckets under the same Andrew_Berman identity. No AWS-side or registry-side state changed between runs (this worker made no writes).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "infra/logic/registry/scopes.json bucket-field edit (arm c.1)",
+      "reason": "REFUSED by python lib/opal_naming.py validate as written (row IRPT_BCKEND-W6-S1): a FIRM row's bucket must equal opal-data-{long} and key must equal long, so the requested edit is impossible without renaming the firm, which the task order's own BOUNDS forbid. STOPPED per arm (b)'s own protocol rather than overridden by hand."
+    },
+    {
+      "item": "infra/logic/registry/exemptions.json new-bucket exemption rows (arm c.2)",
+      "reason": "Depends on arm (c.1) landing first (the task order's own required ordering: registry edits before any apply). Not attempted."
+    },
+    {
+      "item": "Old-bucket abandonment note (arm c.3)",
+      "reason": "Depends on arm (c.1); no new bucket names exist in the registry to swap in, so there is nothing yet to mark the old entries as superseded BY."
+    },
+    {
+      "item": "The never-widen packet, CTO+COO sign-off (arm d)",
+      "reason": "There is no valid Terraform plan to disclose a blast radius for -- the registry premise the plan reads from never reached the new bucket names. Drafting a packet against a plan that cannot yet be produced would be describing a hypothetical, not measuring a real one."
+    },
+    {
+      "item": "terraform plan/apply and the change-management ledger (arm e)",
+      "reason": "No apply was attempted; opening a ledger entry for an apply that will not run this pass would misstate the record. Per arm (d)'s own text: 'If you cannot get both halves this pass, that is an honest STOP: commit the packet, leave the order open, report exactly what's owed' -- generalized here to the earlier STOP this cell actually hit."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W6-S1: TO-IB-rth-6 arm (c).1's literal instruction (update scopes.json's inflection/cottonwood bucket field to the two new names while leaving key/short/aliases untouched) is REFUSED by python lib/opal_naming.py validate -- a FIRM row's bucket must equal opal-data-{long} and key must equal long, so the requested bucket rename is impossible without renaming the firm itself, contradicting the task's own framing ('this is a bucket swap, not a firm rename'). Separately, even bypassing that refusal, s3-lgic-firm-buckets.tf's for_each keys by the unchanged registry key and AWS's aws_s3_bucket.bucket argument is immutable (ForceNew), so the same edit would plan a REPLACE (destroy the real, already-applied old bucket) under the SAME resource address -- forbidden by this order's own BOUNDS. (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~B.)"
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~6/create-inflectionwealth-cottonwoodcapital-buckets.result.md",
+  "compiler_tools": [
+    {
+      "tool": "battery_ib_rth_6.py (R81-AC1, arms a-d)",
+      "invocation": "timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~6/battery_ib_rth_6.py",
+      "result": "rc=1, honest STOP-state report; new buckets 404 (absent), old buckets 403 (unchanged)."
+    },
+    {
+      "tool": "lib/opal_naming.py validate",
+      "invocation": "python lib/opal_naming.py validate (baseline, then against a reverted trial edit)",
+      "result": "baseline: 'VALIDATE: OK 25 system row(s), 9 scope row(s), 17 warning(s)'; trial edit: 'VALIDATE: REFUSED 2 refusal(s), 17 warning(s)' (bucket-form + exemptions-orphan refusals)."
+    },
+    {
+      "tool": "terraform (vendored .tools/terraform.exe, read-only)",
+      "invocation": "init + state list on infra/aws/terraform/shared-infra (backend shared-infra/tfstate)",
+      "result": "confirms the 10 existing lgic_firm resources tracked under [\"inflection\"]/[\"cottonwood\"], matching the open IB-rte-3 ledger; no plan or apply run this cell."
+    },
+    {
+      "tool": ".tools/aws s3api (live)",
+      "invocation": "head-bucket on opal-data-inflectionwealth, opal-data-cottonwoodcapital, opal-data-inflection, opal-data-cottonwood",
+      "result": "new buckets: 404 Not Found (both); old buckets: 403 Forbidden (both, as Andrew_Berman)."
+    },
+    {
+      "tool": ".tools/aws sts (live)",
+      "invocation": "get-caller-identity",
+      "result": "arn:aws:iam::313476888478:user/Andrew_Berman -- confirmed one of the three exempted identities named on the OLD buckets' exemptions.json rows."
+    },
+    {
+      "tool": ".tools/commit-gate.sh / ruff",
+      "invocation": "over battery_ib_rth_6.py",
+      "result": "All checks passed; pre-commit gate clean for 1 of 1 file(s)."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (via safe-commit.sh commit-gate, at commit time)",
+      "invocation": "graded over org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md staged bytes",
+      "result": "to be confirmed at commit; row IRPT_BCKEND-W6-S1 built to the investigation_item schema (id grammar, required fields, ARMED+disarm_owner, spec_asserts+world_is present)."
+    }
+  ]
+}
