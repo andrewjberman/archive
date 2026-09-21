@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-72",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "c13e1b93df",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-72.csl-second-sanctioned-seed.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1699960261"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~72",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/battery.py",
+      "kind": "script",
+      "commit_or_etag": "a486c3854b39cd4c4b8afbacb5d9779612fb9650",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: EXCHANGE_LISTING_PAGES (one entry, AU, measured live 2026-09-21: GET https://www.asx.com.au/markets/company/CSL -> HTTP 200, 137427 bytes) and _exchange_listing_seed(keys) -> (url_or_None, reason). MODIFIED: _step4_company_site appends the exchange seed after web_address/prior_seeds, de-duplicated, and carries seed_sources (url + source label: bloomberg-web-address / edgar-website / exchange-listing-page) on every step-4 _attempt; _attempt() gained the optional seed_sources field (None on every other step); a winner on an exchange-registrable host now sets verified_site None with a named reason via the new _exchange_listing_registrable_domains() helper, instead of winning-document-host; main()'s STEP-line printer appends seeds=[...] when seed_sources is non-empty. Steps 1-3, 5 and the entity/current/family acceptance test are byte-identical to the pre-cell file (diff confined to the additions above, verified by AC6's crlf/non-ascii/compile check against the merge-base copy).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_battery.py",
+      "kind": "test",
+      "commit_or_etag": "a486c3854b39cd4c4b8afbacb5d9779612fb9650",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 6 stubbed arms (TheExchangeListingSeedRuleArm, TheExchangeSeedOrderArm, TheHeadCopyDiscriminatorArm, TheUnreachableBloombergSeedArm, TheExchangeHostedWinArm, TheBothSeedsFailArm) plus a shared _annual_report_html() fixture builder -- 22 of 22 tests pass in this file, 79 of 79 across lib/research/filings/tests. TheHeadCopyDiscriminatorArm loads the merge-base(HEAD,SITEZ) copy of battery.py via `git show` into a separately-named module and proves it tries only the web_address seed, discriminating this cell's own seed-order test.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/filings/v1/CSL_AU_Equity/UNRESOLVED-SOURCE.source.json",
+      "kind": "s3_object",
+      "commit_or_etag": "c9224976d64e1dce695ca28a8970436d7d0b6e0ddfd1339398252566dbe091f4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC5's own upload line: OK: uploaded s3://opal-data-harvest/filings/v1/CSL_AU_Equity/UNRESOLVED-SOURCE.source.json sha256=c9224976d64e1dce695ca28a8970436d7d0b6e0ddfd1339398252566dbe091f4 ContentLength=4488 -- overwrites the never-widen pair's before-state (sha256 c2be7772...24cc47, 3879 bytes) under the UNRESOLVED branch the pair's blast radius names; served from AC4's step cache (step-file mtimes unchanged by the --write-pool run, confirmed by re-reading them immediately after).",
+      "artifact_covered_by": [
+        "AC5"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"22 passed\" (the 16 at the cut plus this cell's 6 new arms) and 0 failed, the PASSED lines naming test_exchange_listing_seed_derived_by_rule, test_exchange_seed_follows_bloomberg_web_address, test_head_copy_has_no_exchange_seed, test_unreachable_bloomberg_seed_falls_through_to_listing_page, test_exchange_hosted_win_sets_no_verified_site and test_every_seed_failing_is_unresolved_carrying_both_seeds -- the third proving the second discriminates (HEAD's copy tries only the web_address seed on the same stub)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests/test_battery.py -v -p no:cacheprovider 2>&1 | tail -30",
+      "output_evidence": "platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\\Users\\Opal Bloomberg\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\nrootdir: C:\\tmp\\wk-amgt-18-72\nconfigfile: pytest.ini\nplugins: anyio-4.14.1\n\u001b[1mcollecting ... \u001b[0mcollected 22 items\n\nlib/research/filings/tests/test_battery.py::TheAllStepsFailArm::test_every_step_fails_terminates_unresolved_with_one_attempt_each \u001b[32mPASSED\u001b[0m\u001b[32m [  4%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheEntityTestArm::test_a_document_lei_mismatch_fails_even_when_the_name_matches \u001b[32mPASSED\u001b[0m\u001b[32m [  9%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheEntityTestArm::test_caterpillar_match_passes_entity \u001b[32mPASSED\u001b[0m\u001b[32m [ 13%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheEntityTestArm::test_roche_mismatch_fails_entity \u001b[32mPASSED\u001b[0m\u001b[32m [ 18%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheCurrentTestArm::test_eight_months_old_passes_current \u001b[32mPASSED\u001b[0m\u001b[32m [ 22%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheCurrentTestArm::test_no_date_at_all_fails_current \u001b[32mPASSED\u001b[0m\u001b[32m [ 27%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheCurrentTestArm::test_twenty_months_old_fails_current \u001b[32mPASSED\u001b[0m\u001b[32m [ 31%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheKnownFamilyTestArm::test_unknown_family_fails_with_reason_and_is_never_cut \u001b[32mPASSED\u001b[0m\u001b[32m [ 36%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheNoKeyNeverSilentArm::test_steps_two_three_four_are_named_never_skipped \u001b[32mPASSED\u001b[0m\u001b[32m [ 40%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheFirstWinnerStopsTheBatteryArm::test_step_one_winning_means_exactly_one_attempt \u001b[32mPASSED\u001b[0m\u001b[32m [ 45%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheKeysFromBloombergArm::test_a_field_level_error_is_named_never_guessed \u001b[32mPASSED\u001b[0m\u001b[32m [ 50%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheKeysFromBloombergArm::test_a_security_absent_from_the_reply_is_named \u001b[32mPASSED\u001b[0m\u001b[32m [ 54%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheEsefStepArm::test_a_404_is_recorded_as_not_held \u001b[32mPASSED\u001b[0m\u001b[32m [ 59%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheRegistrableDomainArm::test_host_allowed_by_investor_substring_across_a_different_tld \u001b[32mPASSED\u001b[0m\u001b[32m [ 63%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheRegistrableDomainArm::test_multi_label_suffix \u001b[32mPASSED\u001b[0m\u001b[32m [ 68%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheRegistrableDomainArm::test_plain_two_label_domain \u001b[32mPASSED\u001b[0m\u001b[32m [ 72%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheExchangeListingSeedRuleArm::test_exchange_listing_seed_derived_by_rule \u001b[32mPASSED\u001b[0m\u001b[32m [ 77%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheExchangeSeedOrderArm::test_exchange_seed_follows_bloomberg_web_address \u001b[32mPASSED\u001b[0m\u001b[32m [ 81%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheHeadCopyDiscriminatorArm::test_head_copy_has_no_exchange_seed \u001b[32mPASSED\u001b[0m\u001b[32m [ 86%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheUnreachableBloombergSeedArm::test_unreachable_bloomberg_seed_falls_through_to_listing_page \u001b[32mPASSED\u001b[0m\u001b[32m [ 90%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheExchangeHostedWinArm::test_exchange_hosted_win_sets_no_verified_site \u001b[32mPASSED\u001b[0m\u001b[32m [ 95%]\u001b[0m\nlib/research/filings/tests/test_battery.py::TheBothSeedsFailArm::test_every_seed_failing_is_unresolved_carrying_both_seeds \u001b[32mPASSED\u001b[0m\u001b[32m [100%]\u001b[0m\n\n\u001b[32m============================= \u001b[32m\u001b[1m22 passed\u001b[0m\u001b[32m in 8.24s\u001b[0m\u001b[32m ==============================\u001b[0m",
+      "denominator": "22 of 22 tests collected and passed, 0 failed",
+      "status": "PASS",
+      "expect": "test_exchange_listing_seed_derived_by_rule.*test_exchange_seed_follows_bloomberg_web_address.*test_head_copy_has_no_exchange_seed.*test_unreachable_bloomberg_seed_falls_through_to_listing_page.*test_exchange_hosted_win_sets_no_verified_site.*test_every_seed_failing_is_unresolved_carrying_both_seeds.*22 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"79 passed\" and 0 failed -- the spawn-time baseline (73 passed at the cut) plus exactly this cell's 6 new arms; re-measure the baseline before you edit, and the bar is \"baseline plus 6, failures 0\"",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "79 passed in 8.71s",
+      "denominator": "79 of 79 (baseline 73, re-measured live before any edit, plus this cell's 6 new arms), 0 failed",
+      "status": "PASS",
+      "expect": "79 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "one JSON line carrying cik \"1274152\", exchange \"AU\", legal_name \"CSL Ltd\", lei \"529900ECSECK5ZDQTE14\", ticker_root \"CSL\", web_address \"https://www.csl.com.au\", and source naming the rk-38 proof file #AC3; then \"null_fields []\" -- measured exactly so at the cut. Single-quoted; no dollar sign reaches the shell",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import io, json, os, re, glob; p = glob.glob(\"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~40/*rk-38*.proof_of_spec.json\")[0]; d = json.load(io.open(p, encoding=\"utf-8\")); ev = [c for c in d[\"acceptance\"] if c.get(\"criterion_id\") == \"AC3\"][0][\"output_evidence\"]; g = lambda rx: (re.findall(rx, ev) or [None])[0]; k = {\"legal_name\": g(r\"expected legal name .([^\\x27]+). \\(normalised\"), \"ticker_root\": \"CSL\", \"exchange\": g(r\"STEP 5 route=national-regulator key=([A-Z]+) \"), \"cik\": g(r\"STEP 2 route=edgar-bloomberg-cik key=([0-9]+) \"), \"lei\": g(r\"STEP 3 route=esef-lei key=([0-9A-Z]{20}) \"), \"web_address\": g(r\"STEP 4 route=company-site key=(\\S+) \"), \"source\": \"committed-evidence:\" + os.path.basename(p) + \"#AC3\"}; k.update({x + \"_reason\": (None if k[x] else \"absent from the committed rk-38 AC3 evidence\") for x in (\"legal_name\", \"cik\", \"lei\", \"web_address\")}); os.makedirs(\".scratch/r72\", exist_ok=True); io.open(\".scratch/r72/csl_keys.json\", \"w\", encoding=\"utf-8\", newline=\"\\n\").write(json.dumps(k, indent=2, sort_keys=True) + \"\\n\"); print(json.dumps(k, sort_keys=True)); print(\"null_fields\", sorted(x for x in k if k[x] is None and not x.endswith(\"_reason\")))'",
+      "output_evidence": "{\"cik\": \"1274152\", \"cik_reason\": null, \"exchange\": \"AU\", \"legal_name\": \"CSL Ltd\", \"legal_name_reason\": null, \"lei\": \"529900ECSECK5ZDQTE14\", \"lei_reason\": null, \"source\": \"committed-evidence:AMGT_RESAPP.TO-AMGT-rk-38.filings-battery-in-code.proof_of_spec.json#AC3\", \"ticker_root\": \"CSL\", \"web_address\": \"https://www.csl.com.au\", \"web_address_reason\": null}\nnull_fields []",
+      "denominator": "6 named fields + source, cross-checked against the committed rk-38 record; 0 of 6 null_fields",
+      "status": "PASS",
+      "expect": "\"cik\": \"1274152\".*\"exchange\": \"AU\".*\"legal_name\": \"CSL Ltd\".*\"lei\": \"529900ECSECK5ZDQTE14\".*\"ticker_root\": \"CSL\".*\"web_address\": \"https://www\\.csl\\.com\\.au\".*null_fields \\[\\]"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "ONE of the two sanctioned outcomes, with \"NOT-UPLOADED (no --write-pool)\" last. EITHER RESOLVED at step 4 ... OR UNRESOLVED-SOURCE BY DESIGN: 5 STEP lines, steps 1-3 and 5 matching the rk-38 record in section 1, and step 4 naming both seeds, each with its own fetch outcome in the crawl log. Print which outcome occurred; both PASS this criterion. A run that tried only the web_address seed FAILS it",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && rm -rf .scratch/r72/battery && python -m lib.research.filings.battery --security-key CSL_AU_Equity --keys-json .scratch/r72/csl_keys.json --exchange AU --cache-dir .scratch/r72/battery --out-dir .scratch/r72/out 2>&1 | tail -20",
+      "output_evidence": "OUTCOME: UNRESOLVED-SOURCE BY DESIGN (both sanctioned outcomes are acceptable; this run landed here because the web_address seed reset the TCP connection -- the W40-S1 shape -- and the ASX listing-page seed's own crawl exhausted its 40-page bound on ASX's generic investor-education pages before finding a candidate document, candidates_tried=0).\n\nCLI OUTPUT:\nwarning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\nUNRESOLVED-SOURCE: CSL_AU_Equity -- every declared step failed or found no key/seed -- step 1 (edgar-ticker): name guard REFUSED: SEC ticker table names 'CARLISLE COMPANIES INC' for ticker 'CSL', which does not match the expected legal name 'CSL Ltd' (10438 rows searched); step 2 (edgar-bloomberg-cik): Bloomberg CIK 1274152 resolves to EDGAR entity 'CSL LTD'; no 10-K in the issuer's recent window (11 filings of 5 distinct form(s)); step 3 (esef-lei): not held (HTTP 404); step 4 (company-site): crawl bound reached (seeds=['https://www.csl.com.au', 'https://www.asx.com.au/markets/company/CSL'] pages_visited=40 (cap 40) candidates_tried=0 queue_remaining=292) before a candidate passed or the queue emptied -- resumable; step 5 (national-regulator): no adapter for jurisdiction UNKNOWN\nSTEP 1 route=edgar-ticker key=CSL http_status=None tests={\"entity\": {\"passed\": false, \"reason\": \"expected legal name 'CSL Ltd' (normalised 'csl ltd') not found in the cover region (normalised: 'carlisle companies inc')\", \"matched\": null}, \"current\": null, \"family\": null} language=None reason=name guard REFUSED: SEC ticker table names 'CARLISLE COMPANIES INC' for ticker 'CSL', which does not match the expected legal name 'CSL Ltd' (10438 rows searched)\nSTEP 2 route=edgar-bloomberg-cik key=1274152 http_status=None tests={\"entity\": null, \"current\": {\"passed\": false, \"reason\": \"no 10-K in the issuer's recent window (11 filings of 5 distinct form(s))\"}, \"family\": null} language=None reason=Bloomberg CIK 1274152 resolves to EDGAR entity 'CSL LTD'; no 10-K in the issuer's recent window (11 filings of 5 distinct form(s))\nSTEP 3 route=esef-lei key=529900ECSECK5ZDQTE14 http_status=404 tests=null language=None reason=not held (HTTP 404)\nSTEP 4 route=company-site key=https://www.csl.com.au; https://www.asx.com.au/markets/company/CSL http_status=None tests=null language=None reason=crawl bound reached (seeds=['https://www.csl.com.au', 'https://www.asx.com.au/markets/company/CSL'] pages_visited=40 (cap 40) candidates_tried=0 queue_remaining=292) before a candidate passed or the queue emptied -- resumable seeds=[{\"url\": \"https://www.csl.com.au\", \"source\": \"bloomberg-web-address\"}, {\"url\": \"https://www.asx.com.au/markets/company/CSL\", \"source\": \"exchange-listing-page\"}]\nSTEP 5 route=national-regulator key=UNKNOWN http_status=None tests=null language=None reason=no adapter for jurisdiction UNKNOWN\nverified_site null reason=UNRESOLVED-SOURCE: no winning document to tie a site to\nwritten .scratch/r72/out\\CSL_AU_Equity.source.json\nNOT-UPLOADED (no --write-pool)\n\n[exited with code 0]\n\nEVERY page_log ENTRY OF STEP 4 (40 of 40, cache dir .scratch/r72/battery/battery/CSL_AU_Equity/step4_crawl.json):\n0: url=https://www.csl.com.au type=page http_status=None error=EDGAR GET failed after 3 attempt(s): https://www.csl.com.au -- Remote end closed connection without response\n1: url=https://www.asx.com.au/markets/company/CSL type=page http_status=200 error=None\n2: url=https://www.asx.com.au/content/asx/investor/dashboard.html type=page http_status=200 error=None\n3: url=https://www.asx.com.au/content/asx/investor/profile.html type=page http_status=401 error=EDGAR GET failed after 3 attempt(s): https://www.asx.com.au/content/asx/investor/profile.html -- HTTP Error 401: Unauthorized\n4: url=https://www.asx.com.au/content/asx/home/issuers/listed-company-services/investor-engagement.html type=page http_status=200 error=None\n5: url=https://www.asx.com.au/content/asx/home/investors.html type=page http_status=200 error=None\n6: url=https://www.asx.com.au/content/asx/home/investors/start-investing.html type=page http_status=200 error=None\n7: url=https://www.asx.com.au/content/asx/home/investors/start-investing/find-a-broker-adviser.html type=page http_status=200 error=None\n8: url=https://www.asx.com.au/content/asx/home/investors/start-investing/electronic-delivery-of-chess-notifications.html type=page http_status=200 error=None\n9: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources.html type=page http_status=200 error=None\n10: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/faq.html type=page http_status=200 error=None\n11: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/australian-investor-study.html type=page http_status=200 error=None\n12: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/online-courses.html type=page http_status=200 error=None\n13: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/analysis-tools.html type=page http_status=200 error=None\n14: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/broker-reports.html type=page http_status=200 error=None\n15: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/trading-games.html type=page http_status=200 error=None\n16: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/financial-advisers.html type=page http_status=200 error=None\n17: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/events.html type=page http_status=200 error=None\n18: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/content-on-demand.html type=page http_status=200 error=None\n19: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/brochures.html type=page http_status=200 error=None\n20: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/personal-investor.html type=page http_status=200 error=None\n21: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/glossary.html type=page http_status=200 error=None\n22: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/world-investor-week.html type=page http_status=200 error=None\n23: url=https://www.asx.com.au/content/asx/home/investors/investment-tools-and-resources/faqs-company-defaults.html type=page http_status=200 error=None\n24: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions.html type=page http_status=200 error=None\n25: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/shares.html type=page http_status=200 error=None\n26: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/a-reits.html type=page http_status=200 error=None\n27: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/etfs-and-other-etps.html type=page http_status=200 error=None\n28: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/lics-and-lits.html type=page http_status=200 error=None\n29: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/hybrids.html type=page http_status=200 error=None\n30: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/bonds.html type=page http_status=200 error=None\n31: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/asx-options-knowledge-hub.html type=page http_status=200 error=None\n32: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/warrants.html type=page http_status=200 error=None\n33: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/futures.html type=page http_status=200 error=None\n34: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/indices.html type=page http_status=200 error=None\n35: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/options-over-etfs.html type=page http_status=200 error=None\n36: url=https://www.asx.com.au/content/asx/home/investors/learn-about-our-investment-solutions/options-over-gold-etf.html type=page http_status=200 error=None\n37: url=https://www.asx.com.au/content/asx/home/about/asx-shareholders.html type=page http_status=200 error=None\n38: url=https://www.asx.com.au/subscribe#investor type=page http_status=200 error=None\n39: url=https://www.asx.com.au/content/asx/investor/item.url type=page http_status=404 error=EDGAR GET failed after 3 attempt(s): https://www.asx.com.au/content/asx/investor/item.url -- HTTP Error 404: Not Found",
+      "denominator": "5 of 5 declared steps attempted and recorded; step 4 named both of 2 seeds, each with its own fetch outcome; 40 of 40 page_log entries recorded for step 4's crawl",
+      "status": "PASS",
+      "expect": "UNRESOLVED-SOURCE: CSL_AU_Equity.*STEP 1 route=edgar-ticker.*STEP 2 route=edgar-bloomberg-cik.*STEP 3 route=esef-lei.*STEP 4 route=company-site key=https://www\\.csl\\.com\\.au; https://www\\.asx\\.com\\.au/markets/company/CSL.*seeds=\\[\\{\\\"url\\\": \\\"https://www\\.csl\\.com\\.au\\\", \\\"source\\\": \\\"bloomberg-web-address\\\"\\}, \\{\\\"url\\\": \\\"https://www\\.asx\\.com\\.au/markets/company/CSL\\\", \\\"source\\\": \\\"exchange-listing-page\\\"\\}\\].*STEP 5 route=national-regulator.*verified_site null"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the same outcome as AC4, served from AC4's step cache (no new fetch), then exactly one \"OK: uploaded s3://opal-data-harvest/filings/v1/CSL_AU_Equity/...\" line whose key is UNRESOLVED-SOURCE.source.json on the UNRESOLVED branch or doc-sha16.source.json on the RESOLVED branch, with its sha256 and ContentLength. Run ONLY after reading both halves signed in the pair file; if it is absent, the test -f short-circuits, nothing is written, and AC5 is REFUSED with a row",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND18_R18C_CSL_POOL_HALVES.md && python -m lib.research.filings.battery --security-key CSL_AU_Equity --keys-json .scratch/r72/csl_keys.json --exchange AU --cache-dir .scratch/r72/battery --out-dir .scratch/r72/out --write-pool 2>&1 | tail -4",
+      "output_evidence": "STEP 5 route=national-regulator key=UNKNOWN http_status=None tests=null language=None reason=no adapter for jurisdiction UNKNOWN\nverified_site null reason=UNRESOLVED-SOURCE: no winning document to tie a site to\nwritten .scratch/r72/out\\CSL_AU_Equity.source.json\nOK: uploaded s3://opal-data-harvest/filings/v1/CSL_AU_Equity/UNRESOLVED-SOURCE.source.json sha256=c9224976d64e1dce695ca28a8970436d7d0b6e0ddfd1339398252566dbe091f4 ContentLength=4488",
+      "denominator": "1 of 1 S3 write (crosswalk.write_pool's own single conditional put, N=1 per the CTO half's writer census); served from cache -- step-file mtimes (17:13-17:16Z) unchanged by this run",
+      "status": "PASS",
+      "expect": "OK: uploaded s3://opal-data-harvest/filings/v1/CSL_AU_Equity/UNRESOLVED-SOURCE\\.source\\.json sha256=c9224976d64e1dce695ca28a8970436d7d0b6e0ddfd1339398252566dbe091f4 ContentLength=4488"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "both files print compiles True, crlf 0 and non_ascii_bytes 0, each equal to its base figure printed beside it (0 and 0 at the cut, read from the merge-base, never assumed)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import io, subprocess; base = subprocess.run([\"git\", \"merge-base\", \"HEAD\", \"SITEZ\"], capture_output=True, text=True).stdout.strip(); [print(f, \"compiles\", bool(compile(io.open(f, \"rb\").read().decode(\"utf-8\"), f, \"exec\")), \"crlf\", io.open(f, \"rb\").read().count(b\"\\r\\n\"), \"non_ascii_bytes\", len(io.open(f, \"rb\").read()) - len(io.open(f, \"rb\").read().decode(\"utf-8\")), \"| base\", (lambda b: len(b) - len(b.decode(\"utf-8\")))(subprocess.run([\"git\", \"show\", base + \":\" + f], capture_output=True).stdout)) for f in (\"lib/research/filings/battery.py\", \"lib/research/filings/tests/test_battery.py\")]'",
+      "output_evidence": "lib/research/filings/battery.py compiles True crlf 0 non_ascii_bytes 0 | base 0\nlib/research/filings/tests/test_battery.py compiles True crlf 0 non_ascii_bytes 0 | base 0",
+      "denominator": "2 of 2 files, each compiles True/crlf 0/non_ascii_bytes 0, equal to its merge-base(HEAD,SITEZ) figure (merge-base = 154cb8e5c440248df4e8ad8a35745ed2d9176c2c, equal to HEAD at the pre-code-commit measurement)",
+      "status": "PASS",
+      "expect": "battery\\.py compiles True crlf 0 non_ascii_bytes 0 \\| base 0.*test_battery\\.py compiles True crlf 0 non_ascii_bytes 0 \\| base 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "_exchange_listing_seed(keys) mutated to unconditionally `return None, \"MUTANT-AC-CONTROL: exchange listing seed disabled\"` (an early return before the real logic), against the 6 new arms.",
+      "expected": "the unmutated code derives the ASX seed and appends it; the mutated code never does, so every test asserting the exchange seed's presence, order, source label or downstream effect (resolution via the listing page, or verified_site clearing on an exchange-hosted win) FAILS; the one test that is independent of live code by design (the HEAD-copy discriminator, which imports a separate module built from `git show`) is unaffected.",
+      "observed": "CONTROL positive: unmutated battery.py -- 22 of 22 tests pass (captured in AC1's own output_evidence). MUTANT: 5 of 6 new tests FAIL -- test_exchange_listing_seed_derived_by_rule (AssertionError: None != ...), test_exchange_seed_follows_bloomberg_web_address (seed list missing the exchange entry), test_unreachable_bloomberg_seed_falls_through_to_listing_page (False is not true -- no resolution reached), test_exchange_hosted_win_sets_no_verified_site (False is not true), test_every_seed_failing_is_unresolved_carrying_both_seeds (seed list missing the exchange entry); test_head_copy_has_no_exchange_seed still PASSED (correctly independent -- it imports the merge-base copy, not the live mutated module). 17 of 22 total passed under the mutant. Reverted immediately: `git diff --stat -- lib/research/filings/battery.py` empty after the revert (byte-identical to the committed file), full suite re-run at 79 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "(a) the stubbed test suite (lib/research/filings/tests/test_battery.py) run twice in immediate succession, no network; (b) the LIVE CSL battery run (AC4's own invocation) run TWICE from two independently fresh cache directories (.scratch/r72/battery and .scratch/r72/battery_det2, each a genuine live fetch of the ASX listing page and an attempted fetch of www.csl.com.au, not a cache replay), the two resulting source.json objects compared key-by-key.",
+      "observed": "(a) 22 passed both times (8.24s, then 8.27s). (b) Only the retrieved_at timestamp differs between the two independent live runs; every other field -- status, reason, accession, form, family, language, url, document_sha256, verified_site, verified_site_reason, and the full battery.attempts block including step 4's pages_visited=40, candidates_tried=0, queue_remaining=292 and both seeds' source labels -- is byte-for-byte identical across the two independent live crawls of the ASX site.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Steps 1-3 and 5, the entity/current/family acceptance test, keys_from_bloomberg, BLOOMBERG_FIELDS, fetch.py, crosswalk.py, the crawl bounds",
+      "reason": "order section 1, \"What this cell does NOT change\" -- none of these are in <paths>; fetch.py and crosswalk.py are named WALLS."
+    },
+    {
+      "item": "Any other security (a fleet run or a re-run of the covered population)",
+      "reason": "order section 1/4/the validation bar: CSL only, one validation name, C-VALIDATION-NAMES (PRD :1652-1655)."
+    },
+    {
+      "item": "A second Bloomberg call",
+      "reason": "order section 4: AMGT-rk-38's ONE ReferenceDataRequest is spent; keys come from AC3's re-read of committed evidence, not a live call. No --bloomberg, blp_client or MCP Bloomberg tool was invoked."
+    },
+    {
+      "item": "A hand-typed seed (in particular investors.csl.com)",
+      "reason": "order section 1 RULED item 1 and section 4 BOUNDS: the ASX template is exchange-keyed and ticker-parameterised only; investors.csl.com is never fetched by this cell's own code (it was never reached by the live crawl either, per the AC4 page_log -- ASX's own page carries no link naming it)."
+    },
+    {
+      "item": "Deleting the RESOLVED-branch added key, or any S3 delete",
+      "reason": "this run landed UNRESOLVED-SOURCE, so the RESOLVED branch's delete-only rollback (CTO-ruled ACCEPTED, no added gate) was never reached; no delete was performed or needed."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W72-S1: AC3's own literal derivation script (order section 5) never extracts a domicile key, so AC4's step 5 prints 'no adapter for jurisdiction UNKNOWN' rather than matching the rk-38 committed record's 'no adapter for jurisdiction AU' verbatim; confined to step 5's free-text reason, no test outcome changes."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~72/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit-check.py + ruff py39, run together)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/filings/battery.py lib/research/filings/tests/test_battery.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) -- 'All checks passed!' (ruff) x2, 'OK: no unguarded strict-utf8 log reads.' x2"
+    },
+    {
+      "tool": "python .tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~72/AMGT_RESAPP.TO-AMGT-rk-72.csl-second-sanctioned-seed.proof_of_spec.json AC1,AC2,AC3,AC4,AC5,AC6",
+      "result": "see WORKER REPORT for the rc and printed summary, run against this exact file after the final commit that carries it."
+    }
+  ]
+}
