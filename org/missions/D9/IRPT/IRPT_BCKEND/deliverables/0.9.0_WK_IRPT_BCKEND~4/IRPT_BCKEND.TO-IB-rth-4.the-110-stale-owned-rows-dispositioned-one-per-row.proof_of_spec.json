@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rth-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rth-4.the-110-stale-owned-rows-dispositioned-one-per-row.md",
+    "group": "OTHER",
+    "vintage_commit": "07faf174d2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "07faf174d2",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rth-4.the-110-stale-owned-rows-dispositioned-one-per-row.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/build_disposition_r8.py",
+      "kind": "script",
+      "commit_or_etag": "b30017444a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "records-only cell (order bound: no source, build, deploy, or served change); builds DISPOSITION_R8.json by calling the gate's own resolver, never edits .tools/surprise-row-gate.py",
+      "artifact_covered_by": ["R79-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_rth_4.py",
+      "kind": "test",
+      "commit_or_etag": "b30017444a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the R79-AC1 invocation named on the task order face; re-derives the stale set live on every run and cross-checks the committed record",
+      "artifact_covered_by": ["R79-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/DISPOSITION_R8.json",
+      "kind": "config_data",
+      "commit_or_etag": "b30017444a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the disposition record: 150-row denominator (re-measured at round 8, not the inherited 110), per-row disposition table, coverage assertion",
+      "artifact_covered_by": ["R79-AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/the-110-stale-owned-rows-dispositioned-one-per-row.r8.result.md",
+      "kind": "doc",
+      "commit_or_etag": "b30017444a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the cell's own result narrative: enumeration method, disposition method, per-row rule, report, controls",
+      "artifact_covered_by": ["R79-AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R79-AC1",
+      "criterion_verbatim": "every row in the denominator has exactly one disposition with its own evidence/reason/owner, and the printed counts sum to the denominator",
+      "method": "command",
+      "invocation": "timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_rth_4.py",
+      "output_evidence": "LIVE denominator: 150 | RECORDED denominator: 150 | DETERMINISM: live == recorded, denominator=150 | ... | DENOMINATOR: 150 | DISARMED: 0 of 150 | STAYS-ARMED: 0 of 150 | CARRIED: 150 of 150 | SUM CHECK: 0 + 0 + 150 == 150 -> True | VERDICT: PASS | IBR79-EVERY-ROW-DISPOSITIONED-COUNTS-SUM-TO-DENOMINATOR (rc=0, re-run post-commit at b30017444a, byte-identical to the pre-commit run)",
+      "denominator": "150 of 150 (re-measured live at write time via srg._stale_open_row at current_round=8, NOT the round-7 gate's disclosed 110 -- confirmed the same instrument reproduces 110 exactly when current_round=7)",
+      "status": "PASS",
+      "expect": "IBR79-EVERY-ROW-DISPOSITIONED-COUNTS-SUM-TO-DENOMINATOR"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "3 arms against a temporary copy of DISPOSITION_R8.json, each restored byte-identical afterward: (1) blank one row's `reason`; (2) replace one row's `reason` with a bare age statement ('stale 2 rounds'); (3) drop one row's disposition entry entirely.",
+      "expected": "each arm makes the battery FAIL for a DIFFERENT, specific reason: (1) empty evidence/reason; (2) AGE-ONLY reason refused (NO ROW CLOSED BY AGE); (3) missing disposition entry for a live-denominator id",
+      "observed": "(1) rc=1 'FAIL: row IRPT_BCKEND-C-S72 carries an empty evidence/reason'; (2) rc=1 \"FAIL: row IRPT_BCKEND-C-S77: reason reads as AGE-ONLY ('stale 2 rounds...') -- NO ROW CLOSED BY AGE\"; (3) rc=1 \"FAIL: 1 id(s) in the live denominator carry NO disposition entry: ['IRPT_BCKEND-S104']\"; clean re-run after each restore reproduced the original PASS output",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "two consecutive clean runs of battery_ib_rth_4.py, stdout diffed",
+      "observed": "165 lines each run, diff empty (byte-identical)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "DISARM disposition on any of the 150 rows",
+      "reason": "no reliable resolving evidence was found for any row: (a) each of the 150 ids is its own id's LATEST remediation row and still carries remediation.state=OPEN, i.e. structurally no closing row exists in the channel; (b) an automated file-citation existence probe was run and found UNRELIABLE (only 19 of 150 rows cite a path that resolves to a real repo file -- most citations are lambda-relative shorthand, not full repo paths -- so a 'missing' result reflects the probe's wrong grain, not resolution) and is explicitly not acted on. Per the order's own bound, DISARM requires evidence; none was found, so none is asserted."
+    },
+    {
+      "item": "STAYS-ARMED disposition on any of the 150 rows",
+      "reason": "every one of the 150 rows carries, in its own schema fields (disarm.owner for the 125 ARMED rows, remediation.owner for the 25 INERT rows), a named, addressable seat serial that is never this cell's own (always 2.0.0_SA_COO~B or 1.0.0_SA_CTO) -- the schema's own graduation-protocol discipline (stated verbatim on 40 of 150 rows: 'its DISARM stays <owner>'s own act ... disarming is not disposing') establishes that disarming/remediating each row is structurally that named owner's act, matching the order's own CARRY test ('a row whose disposition needs another seat's authority ... recorded as CARRY with the owner named') rather than the STAYS-ARMED default (reserved for a row with no such named authority-holder)."
+    },
+    {
+      "item": "writing any new row to org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/remediations/",
+      "reason": "the <paths> grant covers this directory for the DISARM case only ('the disarm rows written to the channel where evidence supports'); since 0 of 150 rows were disposed DISARMED, no new channel row was warranted and none was written"
+    }
+  ],
+  "surprises": [],
+  "session_log": "Worktree /c/tmp/wk-irpt-8-4 on branch wk-irpt_bckend-8-4, cut from CLOUD at 4009c22cf5 (this worker's identity/worktree confirmed by the order's own IDENTITY AND WORKTREE block). Read the order face in full; read the round-7 CTO analysis (org/missions/D9/IRPT/IRPT_BCKEND/deliverables/1.0.0_SA_CTO/IRPT_BCKEND_ROUND7_ANALYSIS.md s.6) naming the 110-row disclosure; traced the disclosure to its source (.tools/surprise-row-gate.py:1005-1030, _stale_open_row_violations / _stale_open_row / _remediation_rows_for_project) via comp-find (never a raw grep). Found the analogous LGIC_ENFORCE.TO-EN-b-42-r9 cell (same class of task, same instrument -- srg._stale_open_row -- called directly rather than re-derived) and confirmed its stated growth-by-round-number shape reproduces here exactly (110 at round 7, 150 at round 8). Ran comp-surprise --project IRPT_BCKEND --json for context (603 items, denominators printed) before settling on the gate's own resolver as the authoritative instrument, per the order's own preference (RE-MEASURE, do not inherit). Built build_disposition_r8.py (imports .tools/surprise-row-gate.py by path, read-only -- never edited, per the order's implicit bound and the sibling cell's explicit one) and battery_ib_rth_4.py; ran a file-citation live-evidence probe across all 150 rows and found it unreliable (19/150 resolve), so declined to assert any DISARM on it; verified every row's disarm.owner/remediation.owner extracts a real seat serial (0 unextractable); ran 3-arm mutant control and a 2-run determinism control before committing (b30017444a). Re-ran the R79-AC1 invocation post-commit to confirm it still passes at the committed bytes.",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "py -3.12 -m py_compile org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/build_disposition_r8.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_rth_4.py",
+      "result": "OK, no output"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~4 <0.9.0_WK_IRPT_BCKEND~4@opal.agent>\" -F .scratch/commit1_msg.txt -- <4 deliverable paths>",
+      "result": "commit-gate clean after removing an unused `sys` import (ruff F401) flagged on the first attempt; second attempt committed b30017444a; msg-verify MATCH len=1676"
+    },
+    {
+      "tool": "battery_ib_rth_4.py",
+      "invocation": "timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~4/battery_ib_rth_4.py",
+      "result": "rc=0; IBR79-EVERY-ROW-DISPOSITIONED-COUNTS-SUM-TO-DENOMINATOR; run pre-commit and post-commit (b30017444a), byte-identical stdout both times"
+    }
+  ]
+}
