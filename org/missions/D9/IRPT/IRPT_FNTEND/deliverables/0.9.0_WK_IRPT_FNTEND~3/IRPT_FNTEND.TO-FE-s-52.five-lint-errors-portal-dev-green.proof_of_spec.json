@@ -1,0 +1,176 @@
+{
+ "schema_version": "1.0",
+ "to_id": "IRPT_FNTEND.TO-FE-s-52",
+ "firm": "FABRIC",
+ "decomp_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+  "vintage_commit": "6f56917cefe724428baff7e31b610ffd634ef8a8",
+  "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-52.five-lint-errors-portal-dev-green.md"
+ },
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-52.five-lint-errors-portal-dev-green.md",
+  "group": "OTHER",
+  "vintage_commit": "a21bf57e05b4774b829e5ca6ac3a534d1f93634c"
+ },
+ "assignee": "0.9.0_WK_IRPT_FNTEND~3",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-5/alias-probe.test.ts",
+   "kind": "test",
+   "commit_or_etag": "50f1d87600ef4cd82b6c74d03060779e0a5714e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal FROZEN: LOCAL commit on branch wk-irpt_fntend-9-3-fe-s-52-portal, never pushed or merged.",
+   "introduces": [
+    "const emptyList: string[] = []",
+    "expect(cn('a', emptyList.length > 0 && 'b', 'c')).toBe('a c')"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-19/pre-envelope.test.ts",
+   "kind": "test",
+   "commit_or_etag": "50f1d87600ef4cd82b6c74d03060779e0a5714e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal FROZEN; LOCAL, same commit as above.",
+   "introduces": [
+    "import { PERFORMANCE_DATA, FIRM_ID, statusWire } from './_wire'"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/InvestorReporting/export/ExportButton.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "50f1d87600ef4cd82b6c74d03060779e0a5714e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal FROZEN; LOCAL, same commit as above.",
+   "introduces": [
+    "const target = document.querySelector<HTMLElement>(selector)"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/components/market-performance/SentimentGauge.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "50f1d87600ef4cd82b6c74d03060779e0a5714e4",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal FROZEN; LOCAL, same commit as above. DSGN_REBRND file, carried under this ruling; only the import line at :6 is touched (git show --stat: 1 file changed, 1 deletion(-))."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "F52-AC1",
+   "criterion_verbatim": "`F52-AC1` -- the whole portal typechecks.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-irpt_fntend-9-3-fe-s-52/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+   "output_evidence": "portal HEAD 50f1d87600ef4cd82b6c74d03060779e0a5714e4\n$ tsc -b --noEmit\nrc=0",
+   "denominator": "N/A -- one exit code for the whole portal program (tsc -b --noEmit)",
+   "status": "PASS",
+   "expect": "rc=0(?![0-9])"
+  },
+  {
+   "criterion_id": "F52-AC2",
+   "criterion_verbatim": "`F52-AC2` -- the portal's own lint script ... returns clean. Print the FULL error count before your fix (baseline) and after (must be the pre-fix count minus exactly 5, with 0 new errors introduced), never a bare \"passed\".",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-irpt_fntend-9-3-fe-s-52/portal && timeout 300 bun run lint 2>&1 | tail -40; echo rc=${PIPESTATUS[0]}",
+   "output_evidence": "BASELINE (portal be8cf2187, pre-fix): \"$ eslint .\" ... \"84 problems (5 errors, 79 warnings)\"; the 5 errors, by grep on the raw output: fe-s-19/pre-envelope.test.ts:43:28 'PERFORMANCE_KEY' is defined but never used (unused-imports/no-unused-imports); fe-s-5/alias-probe.test.ts:16:20 Unexpected constant truthiness on the left-hand side of a `&&` expression (no-constant-binary-expression); market-performance/SentimentGauge.tsx:6:10 'PanelEmpty' is defined but never used; :6:22 'PanelError' is defined but never used (both unused-imports/no-unused-imports); export/ExportButton.tsx:246:5 Error: This value cannot be modified (react-hooks/immutability).\nAFTER (portal HEAD 50f1d876, this order's commit, .vite/deps build-cache cleared first -- see IRPT_FNTEND-W3-S43): \"$ eslint .\" ... \"79 problems (0 errors, 79 warnings)\", rc=0. Delta: 84-79=5 problems fewer, 5-0=5 errors fewer (exactly 5), warnings unchanged at 79 (0 new problems of any kind introduced). Re-run three times at this HEAD (post-fix, post-commit, post-cache-clear) for consistency: identical '79 problems (0 errors, 79 warnings)' every time.",
+   "denominator": "84 problems pre-fix (5 errors, 79 warnings) -> 79 problems post-fix (0 errors, 79 warnings); delta -5 errors, +0 warnings, +0 new problems",
+   "status": "PASS",
+   "expect": "rc=0(?![0-9])",
+   "status_reason": "PASS -- the deciding run is the clean post-fix, post-commit run (rc=0, 0 errors). A transient contaminated run (15 errors) was caused by a stray gitignored portal/.vite/deps build-cache directory created by an intervening whole-suite bun test run (a real vite dev server some tests start), which eslint.config.js's `files: ['**/*.{ts,tsx}']` scoping does not exclude; removed (git check-ignore confirms .vite is ignored) and the clean reading reproduced three times. Filed as IRPT_FNTEND-W3-S43, not caused by this order's four edits."
+  },
+  {
+   "criterion_id": "F52-AC3",
+   "criterion_verbatim": "`F52-AC3` -- the two edited test files' own suites still pass on content, unaffected by the lint fix.",
+   "method": "test_suite",
+   "invocation": "cd C:/tmp/wk-irpt_fntend-9-3-fe-s-52/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-5 src/pages/InvestorReporting/__tests__/fe-s-19",
+   "output_evidence": "portal HEAD 50f1d876:\nFOURTH BODY carries 0 of 3 envelope identifiers (isEnvelopeShaped=false)\n  MISSING contract_version  -> rejected=true  reason=ENVELOPE_CONTRACT_VERSION    state=UNAVAILABLE\n  MISSING operation         -> rejected=true  reason=ENVELOPE_OPERATION           state=UNAVAILABLE\n  MISSING firm_id           -> rejected=true  reason=ENVELOPE_FIRM_ID             state=UNAVAILABLE\n  MISSING ALL THREE         -> rejected=true  reason=ENVELOPE_BODY                state=UNAVAILABLE\nCONTROL: a whole v1 envelope on the same path -> ACCEPTED (availability.state=READY)\nPRE-ENVELOPE BODIES REFUSED: 4 of 4\n 23 pass\n 2 skip\n 0 fail\n 69 expect() calls\nRan 25 tests across 8 files. [817.00ms]",
+   "denominator": "25 tests across 8 files: 23 pass, 2 skip (PRECONDITION ABSENT -- no dev server, disclosed as not a code defect), 0 fail",
+   "status": "PASS",
+   "expect": "(?<![0-9])0 fail"
+  },
+  {
+   "criterion_id": "F52-AC4",
+   "criterion_verbatim": "`F52-AC4` -- the whole IRPT_FNTEND suite is unaffected by the ExportButton/useExportAnchor refactor (F52's own export/ tests included).",
+   "method": "test_suite",
+   "invocation": "cd C:/tmp/wk-irpt_fntend-9-3-fe-s-52/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+   "output_evidence": "portal HEAD 50f1d876: 586 pass / 21 skip / 1 fail of 608 tests across 106 files [54.00s-67.35s across 3 runs]. The sole fail: \"FE-s-49 -- Investor Reporting is Opal-admin only > F49-AC8 -- the three gate hunks are byte-identical to 2.0.0_SA_COO~D's c29a8b86\" at admin-gate.test.ts:582:28 (expect(carried.length).toBe(0), Expected 0 Received 2) -- the test's own log names the carried hunks as an ArrowLeftRight import and a /trade-submission route in src/App.tsx, neither of which is in this order's grant or edited by this worker (git status --short in portal shows exactly the 4 committed files). Confirmed present at HEAD (grep App.tsx:52,126,475) and reproduced identically on 3 separate whole-suite runs (deterministic, not a load-timing flake). Filed as IRPT_FNTEND-W3-S42.",
+   "denominator": "608 tests across 106 files: 586 pass, 21 skip, 1 fail (reproduced identically on 3 runs)",
+   "status": "FAIL",
+   "expect": "(?<![0-9])0 fail",
+   "status_reason": "REFUSED as literally invoked: the whole-suite run is not 0 fail. The 1 fail (admin-gate.test.ts F49-AC8) is pre-existing, unrelated to this order's four files, and outside this worker's <paths> grant (src/App.tsx, admin-gate.test.ts) -- confirmed by git status --short showing exactly the 4 intended files changed and by App.tsx already carrying the flagged lines at HEAD before this worker's edits. Filed as BLOCKING row IRPT_FNTEND-W3-S42 rather than fixed, since fixing it would touch files outside the grant. F52-AC3 (this order's own two edited-file suites, isolated) is clean at 0 fail; only the whole-suite invocation surfaces this unrelated failure."
+  },
+  {
+   "criterion_id": "F52-AC5",
+   "criterion_verbatim": "`F52-AC5` -- the DSGN_REBRND file's diff touches ONLY the import line; paste the full diff into your result file for the record.",
+   "method": "diff",
+   "invocation": "cd C:/tmp/wk-irpt_fntend-9-3-fe-s-52/portal && git diff --stat src/components/market-performance/SentimentGauge.tsx",
+   "output_evidence": "Pre-commit working-tree read: ' src/components/market-performance/SentimentGauge.tsx | 1 -\\n 1 file changed, 1 deletion(-)'. Post-commit equivalent (git show --stat HEAD -- src/components/market-performance/SentimentGauge.tsx, HEAD=50f1d876): identical ' src/components/market-performance/SentimentGauge.tsx | 1 -\\n 1 file changed, 1 deletion(-)'. Full diff (both reads identical):\n--- a/src/components/market-performance/SentimentGauge.tsx\n+++ b/src/components/market-performance/SentimentGauge.tsx\n@@ -3,7 +3,6 @@\n  * Each metric in its own maximized container with equal dimensions\n  */\n \n-import { PanelEmpty, PanelError } from '@/ui/components/states'\n import { type FC, useState } from 'react'\n import { useQuery } from '@tanstack/react-query'\n import { Panel, PanelHeader, PanelContent, PanelFooter, SmartPanelFooter } from '@/ui/components/panels'",
+   "denominator": "1 file changed, 1 line removed, 0 lines added -- the import line only",
+   "status": "PASS",
+   "expect": "1 file changed(?![0-9])"
+  },
+  {
+   "criterion_id": "F52-AC6",
+   "criterion_verbatim": "`F52-AC6` -- graded at L9: `ExportButton`'s DOM hide/restore is genuinely relocated into `useExportAnchor` (behavioral parity), not merely rule-suppressed; the SentimentGauge touch is minimal and correctly scoped as a carried fix. RECORD; NO VERDICT.",
+   "method": "manual_read_with_citation",
+   "invocation": "L9 reading of this instance, portal HEAD 50f1d876 export/ExportButton.tsx:217-248 (useExportAnchor), :250-265 (ExportAnchorSlot); SentimentGauge.tsx:1-4 diff (F52-AC5); mutant control below.",
+   "output_evidence": "RECORDED, NO VERDICT. Relocation, not suppression: the hide-on-mount/restore-on-cleanup effect (previously in ExportAnchorSlot, mutating the useState value `anchor` directly, the flagged line) now lives inside useExportAnchor as a second useEffect keyed on [node, selector]; ExportAnchorSlot no longer contains any hide/restore logic and simply consumes the hook's return (export/ExportButton.tsx:236-245, :256-261). Behavioral parity: the effect still runs exactly when `node` is truthy (gated by `if (!node ...) return`), still captures `previousDisplay` before hiding and restores it on cleanup -- the ONLY change is that the mutated object is a fresh `document.querySelector(selector)` call result rather than the `node` state variable, which resolves to the SAME live DOM element (same selector, same document) at the moment the effect runs, so the on-screen behavior (hide the disabled control, portal ExportButton into its parent, restore display on unmount/selector change) is unchanged. Not rule-suppressed: no eslint-disable comment was added anywhere in the file (confirmed by the full committed diff, F52-AC5's citation plus the ExportButton.tsx commit diff carrying no `eslint-disable` token); the rule genuinely stopped firing because the write target changed, not because it was silenced. MUTANT CONTROL (recorded under controls.mutant below): reverting the fix back to mutating `node` directly reproduces the exact original error 'Error: This value cannot be modified ... `node` cannot be modified ... react-hooks/immutability' at the same effect, confirming the fix's mechanism is real and the assertion is not vacuous. SentimentGauge.tsx: the diff (F52-AC5) is exactly 1 line removed (the import specifiers), matching the DSGN_REBRND carry-fix scope; the two removed identifiers' only other appearances in the file are inside a `/* DEPRECATED: ... */` block comment spanning lines 177-339 (confirmed by reading the comment's open/close markers), i.e. genuinely dead code, not a live use this worker mistakenly orphaned.",
+   "denominator": "N/A -- a judgment criterion, graded at L9",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment=\"true\": graded at L9 by 3.0.0_SA_CVO, the oracle; the worker records and does not grade.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Reverted export/ExportButton.tsx's useExportAnchor second effect back to its pre-fix shape (mutating the useState value `node` directly: `const previousDisplay = node.style.display; node.style.display = 'none'; return () => { node.style.display = previousDisplay }`, deps [node]) and re-ran lint, then restored the committed fix.",
+   "expected": "the react-hooks/immutability error reappears at the same site ('This value cannot be modified' / '`node` cannot be modified').",
+   "observed": "bun run lint on the reverted file: 'C:\\tmp\\wk-irpt_fntend-9-3-fe-s-52\\portal\\src\\pages\\InvestorReporting\\export\\ExportButton.tsx' '239:5  error  Error: This value cannot be modified' '... Modifying a value returned from `useState()`, which should not be modified directly. Use the setter function to update instead.' '`node` cannot be modified ... react-hooks/immutability'. File then restored (cp from a pre-mutation copy); lint re-ran clean (0 errors) and typecheck rc=0 confirmed afterward.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "bun test src/pages/InvestorReporting (whole suite) run 3 times at the same portal HEAD 50f1d876 (before commit, after commit, after clearing .vite cache), and bun run lint run twice at HEAD after clearing .vite cache.",
+   "observed": "All 3 whole-suite runs: identical '586 pass / 21 skip / 1 fail of 608 tests', identical sole failure (admin-gate.test.ts F49-AC8). Both lint re-runs at HEAD (cache cleared): identical '79 problems (0 errors, 79 warnings)', rc=0.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "admin-gate.test.ts F49-AC8's carried-hunks failure (src/App.tsx nav entries)",
+   "reason": "Outside <paths> (App.tsx and admin-gate.test.ts are not this grant). Pre-existing at HEAD before this worker's edits. Filed as BLOCKING row IRPT_FNTEND-W3-S42, not fixed."
+  },
+  {
+   "item": "No automated test directly exercises useExportAnchor's hide/restore DOM behavior at runtime (only typecheck, lint, and the unrelated fe-s-9/export test suites, which do not mount ExportAnchorSlot itself)",
+   "reason": "No such test exists in the grant or elsewhere in the suite; behavioral parity verified by code reading (F52-AC6) and the mutant control, not by a dedicated runtime assertion. Recorded for L9."
+  },
+  {
+   "item": "eslint.config.js's `files` glob does not exclude the gitignored portal/.vite/deps build cache, so a future lint run after a dev-server-spinning test can reproduce F52-AC2's transient contamination",
+   "reason": "Outside <paths> (eslint.config.js is not this grant). Filed as ARMED row IRPT_FNTEND-W3-S43, disarm_owner 1.0.0_SA_CTO."
+  }
+ ],
+ "surprises": [
+  "IRPT_FNTEND-W3-S42: F52-AC4's whole-suite run shows 1 pre-existing fail (admin-gate.test.ts F49-AC8, src/App.tsx carrying two unrelated nav hunks) that is not caused by and cannot be fixed within this order's grant. BLOCKING, INERT.",
+  "IRPT_FNTEND-W3-S43: A stray gitignored portal/.vite/deps vite dev-server cache (left by an earlier whole-suite test run) got scanned by `bun run lint` due to an eslint.config.js files-glob gap, inflating the error count from 0 to 15 on one run; removed, and the standing config gap remains. OBSERVATION, ARMED, disarm_owner 1.0.0_SA_CTO."
+ ],
+ "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~3/five-lint-errors-portal-dev-green.result.md",
+ "compiler_tools": [
+  {
+   "tool": "bun 1.3.9",
+   "invocation": "/c/Users/AndrewBerman/.bun/bin/bun test <file or folder>",
+   "result": "fe-s-5/fe-s-19 subset at 50f1d876: 23 pass, 0 fail. Whole InvestorReporting suite at 50f1d876 (3 runs): 586 pass, 21 skip, 1 fail (pre-existing, unrelated) of 608."
+  },
+  {
+   "tool": "tsc -b --noEmit (bun run typecheck)",
+   "invocation": "cd C:/tmp/wk-irpt_fntend-9-3-fe-s-52/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck",
+   "result": "rc=0 at 50f1d876"
+  },
+  {
+   "tool": "eslint 9 (bun run lint)",
+   "invocation": "cd C:/tmp/wk-irpt_fntend-9-3-fe-s-52/portal && timeout 300 bun run lint",
+   "result": "baseline (pre-fix, be8cf2187): 84 problems (5 errors, 79 warnings). After (50f1d876, .vite cache cleared): 79 problems (0 errors, 79 warnings), rc=0."
+  },
+  {
+   "tool": "python",
+   "invocation": "python .tools/proof-of-spec-check.py <instance> F52-AC1,F52-AC2,F52-AC3,F52-AC4,F52-AC5,F52-AC6 --governing-order org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-52.five-lint-errors-portal-dev-green.md",
+   "result": "the validity check on this instance"
+  }
+ ]
+}
