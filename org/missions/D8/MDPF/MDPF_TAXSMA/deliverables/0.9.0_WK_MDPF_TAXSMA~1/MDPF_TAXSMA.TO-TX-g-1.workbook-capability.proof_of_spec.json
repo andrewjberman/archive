@@ -1,0 +1,435 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_TAXSMA.TO-TX-g-1",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/prd/MDPF_TAXSMA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "671925aecc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/decompositions/MDPF_TAXSMA_DECOMP.md",
+    "vintage_commit": "7f65001ab3",
+    "to_ref": "org/missions/D8/MDPF/MDPF_TAXSMA/task-orders/MDPF_TAXSMA.TO-TX-g-1.workbook-capability.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_TAXSMA~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/taxsma_workbook.py",
+      "kind": "script",
+      "commit_or_etag": "6abf60e5d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only; no deploy is in this cell's scope (the Gateway release is TX-r-2's, behind gate G-O, and activation is TX-r-3's behind G-A/G-W). The module carries the contract's values as constants (compared field by field with org/standards/MDPF_TAXSMA_DATA_CONTRACT.json in TXG1-AC1, 17 of 17 checks), the route's own guard (method, route-only bearer refused when shared with another route, no caller-supplied identity or selector, the configured tid/oid bound to the token broker's principal-keyed cache of a validated sign-in, current revocation) before any token fetch or Graph call, GET-only reads of the fixed item with before/after ETag and etag_change_retries, extent/byte limits, strict headers, the four row kinds, and one audit record per call carrying exactly capability.audit_fields.",
+      "introduces": [
+        "async def endpoint",
+        "async def guard",
+        "def _broker_delegate",
+        "def _check_revocation",
+        "def _classify"
+      ],
+      "artifact_covered_by": [
+        "TXG1-AC1", "TXG1-AC2", "TXG1-AC3", "TXG1-AC4", "TXG1-AC5", "TXG1-AC6", "TXG1-AC7", "TXG1-AC8", "TXG1-AC9",
+        "TXG1-AC10", "TXG1-AC11", "TXG1-AC12", "TXG1-AC13", "TXG1-AC14", "TXG1-AC15", "TXG1-AC16", "TXG1-AC17",
+        "TXG1-AC18", "TXG1-AC19", "TXG1-AC20", "TXG1-AC21"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "6abf60e5d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only, and route registration only: one import line and one Route(...) entry placed BEFORE every generic /ms/* route (5 added lines, 0 removed, git show --stat 6abf60e5d5). TXG1-AC12 measures the dispatch position (route 16 of 30, the first generic /ms/* at 17) and that no generic /ms/* step runs for this route.",
+      "introduces": [
+        "from . import taxsma_workbook",
+        "taxsma_workbook.ROUTE"
+      ],
+      "artifact_covered_by": ["TXG1-AC6", "TXG1-AC12", "TXG1-AC22"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/config.py",
+      "kind": "script",
+      "commit_or_etag": "6abf60e5d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only: the two configuration keys the order names and nothing else (10 added lines, 0 removed). Neither is added to validate(), so the gateway boots without them; unset, the bearer refuses every caller and the identity yields AUTH_REQUIRED with no Graph call (TXG1-AC3, TXG1-AC7).",
+      "introduces": [
+        "TAXSMA_WORKBOOK_BEARER",
+        "TAXSMA_WORKBOOK_IDENTITY"
+      ],
+      "artifact_covered_by": ["TXG1-AC3", "TXG1-AC7", "TXG1-AC10"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_taxsma_workbook.py",
+      "kind": "test",
+      "commit_or_etag": "8dce9aeb0b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New at 6abf60e5d5 (test_txg1_ac01 .. test_txg1_ac21, one per criterion); amended at 8dce9aeb0b for two instrument defects the first probe run measured (the corpus writer sorted keys, losing the wire order the probe grades; the egress line shared pytest's progress-dot line). Offline: Graph is a synthetic worksheet over app.graph.call, the broker's get_token is a recorder, the delegated identity is a principal-keyed cache written through the broker's own writer, msal is stubbed in sys.modules only while the fixture is up and removed with every app module it imported, and a socket guard refuses every non-loopback connection and lookup (EGRESS-ATTEMPTS: 0 in 21 of 21).",
+      "introduces": [
+        "Key ORDER as the wire and the audit file carried it"
+      ],
+      "artifact_covered_by": [
+        "TXG1-AC1", "TXG1-AC2", "TXG1-AC3", "TXG1-AC4", "TXG1-AC5", "TXG1-AC6", "TXG1-AC7", "TXG1-AC8", "TXG1-AC9",
+        "TXG1-AC10", "TXG1-AC11", "TXG1-AC12", "TXG1-AC13", "TXG1-AC14", "TXG1-AC15", "TXG1-AC16", "TXG1-AC17",
+        "TXG1-AC18", "TXG1-AC19", "TXG1-AC20", "TXG1-AC21", "TXG1-AC23"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_principal_cutover.py",
+      "kind": "test",
+      "commit_or_etag": "6abf60e5d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Exactly ONE line added (1 insertion, 0 deletions), the ROUTE_CLASS entry the amended grant admits, carrying the guard class this code enforces: a capability route answers 401 to an access token (TXG1-AC6 measures 401 for an MCP access token of the designated principal itself; TXG1-AC11 for five generic credentials). The module imports moto at :35 and is NOT-EVALUATED on this box (rows MDPF_TAXSMA-S2, MDPF_TAXSMA-W1-S1); TXG1-AC22's disclosure reads its ROUTE_CLASS statically instead: 30 of 30 served routes named, none missing, none extra.",
+      "introduces": [
+        "\"/ms/taxsma-workbook\": \"capability\""
+      ],
+      "artifact_covered_by": ["TXG1-AC22"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py",
+      "kind": "script",
+      "commit_or_etag": "8dce9aeb0b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The probe for all 23 criteria: AC1 .. AC19 run the one test carrying the criterion and forward its measurement and egress lines; AC20/AC21 run the whole module with TXG1_CORPUS set and scan the resulting corpus of every call of every test case HERE, an instrument separate from the tests' own assertions; AC22 reads the committed before-record and runs the after arm live, one process per module; AC23 reads the two new files' imports against the Gateway's own import set at the cut base and re-runs the module with moto and msal refused. Amended at 8dce9aeb0b so that an EMPTY blob counts as a real read (app/__init__.py is 0 bytes at the base), with the census denominator, its empty-blob count and a positive control printed.",
+      "introduces": [
+        "an EMPTY blob is a real read"
+      ],
+      "artifact_covered_by": [
+        "TXG1-AC1", "TXG1-AC20", "TXG1-AC21", "TXG1-AC22", "TXG1-AC23"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/ac22_before.json",
+      "kind": "doc",
+      "commit_or_etag": "6abf60e5d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TXG1-AC22's BEFORE arm, measured at the cut base fd2f1e4b31 at 2026-09-15T22:35:23Z with the Gateway tree content-equal to HEAD (git diff --quiet HEAD rc=0, 0 untracked), one process per module and test_schwab_engine.py run alone: 14 modules, per-test outcomes and each failure's message.",
+      "introduces": [
+        "\"gateway_tree_equal_to_head\": true"
+      ],
+      "artifact_covered_by": ["TXG1-AC22"]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "6abf60e5d5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows MDPF_TAXSMA-W1-S1, W1-S2 and W1-S3 appended at 6abf60e5d5: '[surprise-row-gate] ... 3 new row(s) of 6 total checked (3 pre-existing, NOT re-graded)' and '[surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields.'",
+      "introduces": [
+        "MDPF_TAXSMA-W1-S1",
+        "MDPF_TAXSMA-W1-S2",
+        "MDPF_TAXSMA-W1-S3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/workbook-capability.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's result record: every value with its instrument, UTC time and denominator; it rides the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TXG1-AC1",
+      "criterion_verbatim": "`TXG1-AC1` -- a GET with the configured capability bearer against a synthetic Graph worksheet returns exactly the contract's `capability.response_fields`",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC1",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC1(?![0-9])",
+      "output_evidence": "TXG1-AC1: GET /ms/taxsma-workbook with the configured capability bearer -> 200; response fields 13 of 13 capability.response_fields (extra 0, missing 0, same order: True); site_id/item_id/sheet equal the contract's workbook; schema_version 0.5.0; complete=True used_rows=8 account_slot_count=3; a second call returns the same snapshot_id; module constants equal the contract on 17 of 17 checks; per call 4 Graph requests (GET only, on the 2 fixed paths) and 1 delegated-token fetch (principal <tid>/<oid> of the configuration)\npytest: 1 passed in 0.98s | rc=0\nVERDICT: PASS-TXG1-AC1",
+      "denominator": "13 of 13 contract capability.response_fields present, 0 extra and 0 missing, in the contract's order; the module's constants equal the contract on 17 of 17 checks (route, method, response_fields, errors, audit_fields, both configuration names, input_selectors, site_id, item_id, sheet, the 14 expected headers, the 7 projected columns, the 3 row_metadata fields, the 4 row kinds, the 4 resource limits, the contract version); 4 Graph requests per call, 4 of 4 GET on the 2 fixed paths, 0 unexpected paths; 1 delegated-token fetch per call, for the configured principal; 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC2",
+      "criterion_verbatim": "`TXG1-AC2` -- every returned row carries exactly the seven `projected_columns` plus the three `row_metadata` fields",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC2",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC2(?![0-9])",
+      "output_evidence": "TXG1-AC2: 7 of 7 rows carry exactly the 7 projected_columns + 3 row_metadata fields, in the contract's order; rows 7 = used_rows 8 - 1 header; projected values passed through unchanged 49 of 49 cells; row kinds ACCOUNT_SLOT 3, BLANK 3, TOTAL 1; not-shipped columns (Name, Advisor Contact, Leverage, AUM (Mn), Divest Securities, Instruction, Comment) present in 0 rows; a used range starting at B3 keeps the same 10 fields on 7 of 7 rows and numbers them from worksheet row 4\npytest: 1 passed in 0.82s | rc=0\nVERDICT: PASS-TXG1-AC2",
+      "denominator": "7 of 7 returned rows carry exactly 10 fields (7 projected + 3 metadata) in the contract's order; rows 7 = used_rows 8 minus the header; 49 of 49 projected cells equal the synthetic source cell; 7 of 7 not-shipped columns appear in 0 of 7 rows; a second worksheet whose used range starts at B3 gives 7 of 7 rows the same 10 fields and worksheet row numbers 4..10; 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC3",
+      "criterion_verbatim": "`TXG1-AC3` -- (difference) the same request with the bearer absent, wrong, or valid only for another route returns UNAUTHORIZED_CAPABILITY, while the correct bearer on the same test client returns 200",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC3",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC3(?![0-9])",
+      "output_evidence": "TXG1-AC3 engaged: 10 arms on one test client -> 401 UNAUTHORIZED_CAPABILITY with 'WWW-Authenticate: Bearer', 0 delegated-token fetches and 0 Graph requests each: absent 401; empty bearer 401; wrong 401; one character short 401; Basic scheme 401; ms-ingest static 401; ms-ingest capability 401; otp static 401; otp capability 401; graph-read static 401\nTXG1-AC3 disengaged: the configured bearer on the same client -> 200, 1 delegated-token fetch, 4 Graph requests; the 5 other-route credentials are each accepted by their own gate (5 of 5)\nTXG1-AC3: differed: only the configured bearer reached the delegated token and Graph\nVERDICT: PASS-TXG1-AC3",
+      "denominator": "10 of 10 engaged arms on ONE test client answer 401 with the body {\"error\": \"UNAUTHORIZED_CAPABILITY\", \"complete\": false} and the Bearer challenge, each with 0 token fetches and 0 Graph requests: absent, an empty bearer, a wrong value, a value one character short, a Basic scheme, and the 5 credentials valid only elsewhere (ms-ingest static and gw:ms capability, OTP static and gw:otp capability, graph-read static). Positive control: those 5 are accepted by their own gates, 5 of 5. Disengaged arm: the configured bearer on the same client -> 200 with 1 fetch and 4 Graph requests. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC4",
+      "criterion_verbatim": "`TXG1-AC4` -- a non-GET method on the route is refused",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC4",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC4(?![0-9])",
+      "output_evidence": "TXG1-AC4: 7 non-GET methods, each with the configured bearer -> 405 'Allow: GET' UNAUTHORIZED_CAPABILITY from the route's own guard (one audit record each), 0 token fetches and 0 Graph requests: HEAD 405; POST 405; PUT 405; PATCH 405; DELETE 405; OPTIONS 405; TRACE 405; control GET -> 200\npytest: 1 passed in 1.24s | rc=0\nVERDICT: PASS-TXG1-AC4",
+      "denominator": "7 of 7 non-GET methods (HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE), each presented WITH the configured bearer, answer 405 with 'Allow: GET' and the UNAUTHORIZED_CAPABILITY body, write exactly 1 audit record each, and make 0 token fetches and 0 Graph requests. Control: GET -> 200. The 7 are the route's declared methods, so each refusal is the module's own and is audited; a method outside that list is refused by Starlette's router before the module and is a declared exclusion. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC5",
+      "criterion_verbatim": "`TXG1-AC5` -- a caller-supplied site, item, sheet, range, URL, identity or query parameter is refused and never forwarded to Graph (each selector enumerated)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC5",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC5(?![0-9])",
+      "output_evidence": "TXG1-AC5: selectors enumerated 31 (query 17, identity query 4, body 4, header 6) covering URL, identity, item, query parameter, range, sheet, site: refused 31 of 31 (AUTH_REQUIRED 6, UNAUTHORIZED_CAPABILITY 25); Graph requests 0 and delegated-token fetches 0 across all of them; control without a selector -> 200 with 4 Graph requests, all on the 2 fixed paths, whose only parameter is $select; selector values found in any Graph request 0\nTXG1-AC5 arms: query site (site); query site_id (site); query siteId (site); query item (item); query item_id (item); query driveItemId (item); query sheet (sheet); query worksheet (sheet); query range (range); query address (range); query url (URL); query graph_url (URL); query $select (query parameter); query $filter (query parameter); query q (query parameter); query foo (query parameter); query empty (query parameter); query tid (identity); query oid (identity); query email (identity); query principal (identity); body range; body URL; body identity; body raw text; header X-Site-Id (site); header X-Item-Id (item); header X-Sheet (sheet); header X-Range (range); header X-Graph-Url (URL); header X-Tenant-Id (identity)\nVERDICT: PASS-TXG1-AC5",
+      "denominator": "31 of 31 enumerated selectors refused, each arm printed by name: 17 query parameters, 4 identity query parameters, 4 bodies and 6 headers, covering all 7 kinds the criterion names (site, item, sheet, range, URL, identity, arbitrary query parameter). 6 identity-bearing arms answer 503 AUTH_REQUIRED and the other 25 answer 400 UNAUTHORIZED_CAPABILITY; 0 delegated-token fetches and 0 Graph requests across all 31. Control: the same request with no selector -> 200 with 4 Graph requests, all on the 2 fixed paths, whose only parameter is $select; the selector sentinel appears in 0 of the Graph requests recorded. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC6",
+      "criterion_verbatim": "`TXG1-AC6` -- the capability bearer is refused on every other Gateway route in the same test client",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC6",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC6(?![0-9])",
+      "output_evidence": "TXG1-AC6: the capability bearer on the 29 other routes of app.server (of 30): refused 401/403 on 18 of 18 routes that refuse a missing credential; on the 11 open routes it changes no status (11 of 11); delegated-token fetches 0 and Graph requests 0 across them; control on the same client: /ms/taxsma-workbook -> 200\nTXG1-AC6 uniqueness: with the same value ALSO configured as an ms-ingest bearer, /ms/taxsma-workbook refuses it -> 401 UNAUTHORIZED_CAPABILITY, audit caller_capability_label shared_with_other_route\nVERDICT: PASS-TXG1-AC6",
+      "denominator": "29 of 29 other routes of app.server (30 routes in all), each probed twice on the same client, with the capability bearer and without any credential: the 18 that refuse a missing credential refuse the capability bearer too, 18 of 18 (401/403), and on the 11 open routes the bearer changes no status, 11 of 11. 0 delegated-token fetches and 0 Graph requests across the 58 requests. Control: the same client's /ms/taxsma-workbook -> 200. Uniqueness arm: with the same value also configured as an ms-ingest bearer, this route refuses it (401, audit label shared_with_other_route), so the bearer authorizes this route alone. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC7",
+      "criterion_verbatim": "`TXG1-AC7` -- with `TAXSMA_WORKBOOK_IDENTITY` unset, the route returns AUTH_REQUIRED and makes no Graph call",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC7",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC7(?![0-9])",
+      "output_evidence": "TXG1-AC7: TAXSMA_WORKBOOK_IDENTITY unset: '' -> 503 AUTH_REQUIRED; '   ' -> 503 AUTH_REQUIRED; Graph requests 0 and delegated-token fetches 0 in 2 of 2; audit delegated_identity_ref null, operation capability_guard; control with the pair configured -> 200\npytest: 1 passed in 1.06s | rc=0\nVERDICT: PASS-TXG1-AC7",
+      "denominator": "2 of 2 unset forms (empty and whitespace-only) answer 503 with {\"error\": \"AUTH_REQUIRED\", \"complete\": false}, make 0 Graph calls and 0 delegated-token fetches, and audit delegated_identity_ref null at operation capability_guard. Control: the configured pair -> 200. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC8",
+      "criterion_verbatim": "`TXG1-AC8` -- (difference) with the same email and otherwise identical valid inputs, a principal whose tid alone differs from the configured pair yields AUTH_REQUIRED with zero token fetches and zero Graph requests, while the configured pair returns 200",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC8",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC8(?![0-9])",
+      "output_evidence": "TXG1-AC8 engaged: email designated.reader@example.invalid in every arm; 3 of 3 arms -> 503 AUTH_REQUIRED with 0 delegated-token fetches and 0 Graph requests: the broker holds a validated principal whose tid alone differs; the configured pair's cache names a principal whose tid alone differs; the configured pair's tid alone differs from the validated principal\nTXG1-AC8 disengaged: the configured pair held by the broker, same email -> 200, 1 delegated-token fetch for principal 5a1e0c3d-7b2f-4c8e-9d1a-0f2e3d4c5b6a/0b1d2c3e-4f5a-4b6c-8d7e-9f0a1b2c3d4e, 4 Graph requests\nTXG1-AC8: differed: only the tid; the email never selected or admitted a principal\nVERDICT: PASS-TXG1-AC8",
+      "denominator": "3 of 3 engaged arms, each differing from the disengaged arm ONLY in the tid and carrying the same display email, the same bearer and the same worksheet: the broker holds a validated principal whose tid alone differs; the configured pair's cache names a principal whose tid alone differs; the configured pair's tid alone differs from the validated principal. All 3 answer 503 AUTH_REQUIRED with 0 token fetches and 0 Graph requests. Disengaged arm: the configured pair, same email -> 200 with exactly 1 fetch, made for principal <tid>/<oid>, and 4 Graph requests. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC9",
+      "criterion_verbatim": "`TXG1-AC9` -- (difference) with the same email and otherwise identical valid inputs, a principal whose oid alone differs from the configured pair yields AUTH_REQUIRED with zero token fetches and zero Graph requests, while the configured pair returns 200",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC9",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC9(?![0-9])",
+      "output_evidence": "TXG1-AC9 engaged: email designated.reader@example.invalid in every arm; 3 of 3 arms -> 503 AUTH_REQUIRED with 0 delegated-token fetches and 0 Graph requests: the broker holds a validated principal whose oid alone differs; the configured pair's cache names a principal whose oid alone differs; the configured pair's oid alone differs from the validated principal\nTXG1-AC9 disengaged: the configured pair held by the broker, same email -> 200, 1 delegated-token fetch for principal 5a1e0c3d-7b2f-4c8e-9d1a-0f2e3d4c5b6a/0b1d2c3e-4f5a-4b6c-8d7e-9f0a1b2c3d4e, 4 Graph requests\nTXG1-AC9: differed: only the oid; the email never selected or admitted a principal\nVERDICT: PASS-TXG1-AC9",
+      "denominator": "3 of 3 engaged arms, each differing from the disengaged arm ONLY in the oid and carrying the same display email, bearer and worksheet, answer 503 AUTH_REQUIRED with 0 token fetches and 0 Graph requests. Disengaged arm: the configured pair -> 200 with exactly 1 fetch for principal <tid>/<oid> and 4 Graph requests. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC10",
+      "criterion_verbatim": "`TXG1-AC10` -- a missing, unvalidated or caller-supplied tid/oid pair yields AUTH_REQUIRED before any token fetch",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC10",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC10(?![0-9])",
+      "output_evidence": "TXG1-AC10: 14 of 14 arms -> 503 AUTH_REQUIRED with 0 delegated-token fetches and 0 Graph requests; missing or malformed 5 (unset, not GUIDs, tid only, an email, three parts); unvalidated 4 (no validated sign-in for the pair, a cache the broker did not write (foreign key), a cache with no account record, a tenant this gateway does not authorize); caller-supplied 5 (query tid/oid, header X-Tenant-Id/X-Object-Id, header X-Opal-Principal, header X-Ms-Client-Principal-Id, body tid/oid); control (the configured pair, validated, nothing caller-supplied) -> 200 with 1 fetch\nVERDICT: PASS-TXG1-AC10",
+      "denominator": "14 of 14 arms answer 503 AUTH_REQUIRED with 0 token fetches and 0 Graph requests, covering all three classes the criterion names: 5 missing or malformed pairs, 4 unvalidated pairs (no validated sign-in; a cache the broker did not write; a cache with no account record; an unauthorized tenant) and 5 caller-supplied pairs (query, three header shapes, body). Control: the configured, validated pair with nothing caller-supplied -> 200 with exactly 1 fetch. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC11",
+      "criterion_verbatim": "`TXG1-AC11` -- a generic MCP, ms-ingest or OTP credential presented to the route yields UNAUTHORIZED_CAPABILITY",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC11",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC11(?![0-9])",
+      "output_evidence": "TXG1-AC11: 5 generic credentials -> 401 UNAUTHORIZED_CAPABILITY (audit label 'unrecognized', no identity bound), 0 token fetches, 0 Graph requests: MCP access token of the designated principal itself 401; ms-ingest static bearer 401; ms-ingest capability token (gw:ms) 401; OTP static bearer 401; OTP capability token (gw:otp) 401; control with the route's bearer -> 200\npytest: 1 passed in 1.50s | rc=0\nVERDICT: PASS-TXG1-AC11",
+      "denominator": "5 of 5 generic credentials answer 401 UNAUTHORIZED_CAPABILITY with the audit label 'unrecognized' and no identity bound, making 0 token fetches and 0 Graph requests: a gateway-signed MCP access token minted for the DESIGNATED principal itself, the ms-ingest static bearer and its gw:ms capability token, the OTP static bearer and its gw:otp capability token. Control: the route's own bearer -> 200. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC12",
+      "criterion_verbatim": "`TXG1-AC12` -- a request to `/ms/taxsma-workbook` passes the route's own guard before any generic `/ms/*` handler runs (call-order assertion in the test client)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC12",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC12(?![0-9])",
+      "output_evidence": "TXG1-AC12: call order on /ms/taxsma-workbook -- configured bearer 200: taxsma_workbook.guard > token > graph > graph > graph > graph; ms-ingest static bearer 401: taxsma_workbook.guard; ms-ingest capability token 401: taxsma_workbook.guard; no credential 401: taxsma_workbook.guard; generic /ms/* steps (audit.log_credential, ms_ingest.authorize, ms_ingest.configured, server._ms_guard, server._ms_run) called 0 times across the 4 requests\nTXG1-AC12 control: GET /ms/health with the ms-ingest bearer -> 200: server._ms_guard > ms_ingest.configured > ms_ingest.authorize > audit.log_credential > token (the recorders are live); dispatch: /ms/taxsma-workbook is route 16 of 30, before every generic /ms/* route (the first at 17)\nVERDICT: PASS-TXG1-AC12",
+      "denominator": "4 of 4 requests to the route begin with taxsma_workbook.guard, recorded in the test client: with the configured bearer the order is guard > token > 4 Graph reads, and with the ms-ingest static bearer, its capability token, or no credential the order is exactly [guard] and the answer is 401. The 5 generic /ms/* steps (server._ms_guard, server._ms_run, ms_ingest.configured, ms_ingest.authorize, audit.log_credential) are called 0 times across those 4 requests. Positive control that the recorders are live: GET /ms/health with the ms-ingest bearer -> 200 through server._ms_guard > ms_ingest.configured > ms_ingest.authorize > audit.log_credential > token, with taxsma_workbook.guard absent. Dispatch: the route is 16 of 30 in app.routes, before the first generic /ms/* at 17. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC13",
+      "criterion_verbatim": "`TXG1-AC13` -- the audit record carries the principal's tid/oid reference, with the email as display metadata only",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC13",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC13(?![0-9])",
+      "output_evidence": "TXG1-AC13: audit delegated_identity_ref {\"principal\": \"5a1e0c3d-7b2f-4c8e-9d1a-0f2e3d4c5b6a/0b1d2c3e-4f5a-4b6c-8d7e-9f0a1b2c3d4e\", \"display_email\": \"designated.reader@example.invalid\"} (principal = <tid>/<oid>, no '@'); the email appears in 0 other audit fields; the same tid/oid renamed to another email -> 200, the same principal, display_email renamed.reader@example.invalid; the same email on a different oid -> 503, principal still the configured pair, display_email null (nothing bound)\nVERDICT: PASS-TXG1-AC13",
+      "denominator": "1 successful call's audit record carries delegated_identity_ref = {principal: '<tid>/<oid>', display_email: <email>}, with no '@' in the principal, and the email appears in 0 of the record's other 10 fields. Two difference arms: the SAME tid/oid whose display email is renamed still answers 200 under the same principal (the email follows, it never keys), and the SAME email on a different oid answers 503 with nothing bound (display_email null). 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC14",
+      "criterion_verbatim": "`TXG1-AC14` -- a NeedsLogin or revoked result from the token broker yields AUTH_REQUIRED, never an empty 200",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC14",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC14(?![0-9])",
+      "output_evidence": "TXG1-AC14: 10 of 10 refusal arms -> 503 {\"error\": \"AUTH_REQUIRED\", \"complete\": false}, no rows, never a 200: broker NeedsLogin -> 503, fetches 1, Graph 0; broker returns an empty token -> 503, fetches 1, Graph 0; broker returns no token -> 503, fetches 1, Graph 0; broker raises (refresh revoked upstream) -> 503, fetches 1, Graph 0; Graph 401 on the delegated token (revoked at Graph) -> 503, fetches 1, Graph 1; principal revoked by a cutoff after the grant -> 503, fetches 0, Graph 0; display email revoked by a cutoff after the grant -> 503, fetches 0, Graph 0; principal key blocklisted -> 503, fetches 0, Graph 0; kill switch -> 503, fetches 0, Graph 0; revocation list unreadable -> 503, fetches 0, Graph 0\nTXG1-AC14 difference: a principal cutoff BEFORE the grant (re-consented since) -> 200 with 7 rows\nVERDICT: PASS-TXG1-AC14",
+      "denominator": "10 of 10 refusal arms answer 503 with exactly {\"error\": \"AUTH_REQUIRED\", \"complete\": false} and no rows: NeedsLogin, an empty token, no token, a raising broker, a Graph 401 on the delegated token, a principal cutoff after the grant, a display-email cutoff, a blocklisted principal key, the kill switch, and an unreadable revocation list (fail closed). The four revocation arms and the kill switch refuse with 0 token fetches. Difference arm: a principal cutoff BEFORE the grant -> 200 with 7 rows, so the refusal tracks the grant's time rather than the mere presence of a cutoff line. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC15",
+      "criterion_verbatim": "`TXG1-AC15` -- a synthetic Graph permission denial on the item maps to one contract error code, recorded in the audit record as distinct from a Gateway guard refusal",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC15",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC15(?![0-9])",
+      "output_evidence": "TXG1-AC15: Graph 403 on the item and on the used range -> 502 SOURCE_UNAVAILABLE (one code, 2 of 2), no Graph message in the body; audit (result, operation) [('SOURCE_UNAVAILABLE', 'source_read')] vs the Gateway guard refusals [('AUTH_REQUIRED', 'capability_guard'), ('UNAUTHORIZED_CAPABILITY', 'capability_guard')] -- distinct in operation and result; the Graph error map: 401->AUTH_REQUIRED, 404->SOURCE_NOT_FOUND, 429->SOURCE_THROTTLED, 500->SOURCE_UNAVAILABLE, 503->SOURCE_UNAVAILABLE, transport timeout->SOURCE_UNAVAILABLE\nVERDICT: PASS-TXG1-AC15",
+      "denominator": "2 of 2 permission denials (Graph 403 on the item read and on the used-range read) map to ONE contract code, SOURCE_UNAVAILABLE, at HTTP 502, and the Graph message appears nowhere in the response. In the audit the pair (result, operation) is ('SOURCE_UNAVAILABLE', 'source_read') for both, disjoint from the 2 Gateway guard refusals measured beside them, ('UNAUTHORIZED_CAPABILITY', 'capability_guard') and ('AUTH_REQUIRED', 'capability_guard'): distinct on both fields. The rest of the map is printed for its denominator: 401, 404, 429, 500, 503 and a transport timeout. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC16",
+      "criterion_verbatim": "`TXG1-AC16` -- an ETag change between the before and after reads beyond `etag_change_retries` yields SOURCE_CHANGED",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC16",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC16(?![0-9])",
+      "output_evidence": "TXG1-AC16 engaged: the ETag changes on every read -> 502 SOURCE_CHANGED after 3 attempts (1 + etag_change_retries 2), 6 ETag reads and 3 value reads, no rows, no snapshot_id in the audit\nTXG1-AC16 disengaged: a change on the first 2 attempts then stable -> 200 on attempt 3 (ETag reads 6); a change once -> 200 on attempt 2 (ETag reads 4)\nTXG1-AC16: differed: only a change persisting beyond 2 retries is SOURCE_CHANGED\nVERDICT: PASS-TXG1-AC16",
+      "denominator": "1 engaged arm whose ETag changes on every read answers 502 SOURCE_CHANGED after exactly 3 attempts = 1 + the contract's etag_change_retries (2, read from the contract file at run time), with 6 ETag reads, 3 value reads, no rows and no snapshot_id in its audit record. 2 disengaged arms: a change on the first 2 attempts then stability -> 200 on attempt 3, and a single change -> 200 on attempt 2. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC17",
+      "criterion_verbatim": "`TXG1-AC17` -- a used range over `max_used_rows_including_header` yields SOURCE_TOO_LARGE with the observed extent, never a truncated `complete: true`",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC17",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC17(?![0-9])",
+      "output_evidence": "TXG1-AC17: rows 10001 x 14 -> SOURCE_TOO_LARGE {\"used_rows\": 10001, \"columns\": 14}, value reads 0; columns 15 -> SOURCE_TOO_LARGE {\"used_rows\": 8, \"columns\": 15}; exactly 10000 rows -> 200, 9999 rows returned, complete true; projected bytes 7937576 > 5242880 -> SOURCE_TOO_LARGE; none of the 3 over-limit responses carries rows or complete=true\npytest: 1 passed in 1.50s | rc=0\nVERDICT: PASS-TXG1-AC17",
+      "denominator": "3 over-limit arms answer 502 SOURCE_TOO_LARGE carrying the OBSERVED extent and the limit, and 0 of the 3 carry a rows array or complete=true: a used range of 10001 rows (one over the contract's max_used_rows_including_header, refused with 0 value reads, before any cell is fetched), 15 columns (one over max_columns), and a projection of 7,937,576 bytes against max_projected_bytes 5,242,880. Boundary control: exactly 10000 used rows -> 200 with 9999 rows and complete true. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC18",
+      "criterion_verbatim": "`TXG1-AC18` -- a duplicate or ambiguous expected header yields SOURCE_SCHEMA_INVALID",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC18",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC18(?![0-9])",
+      "output_evidence": "TXG1-AC18: 7 of 7 header defects -> 502 SOURCE_SCHEMA_INVALID, no rows: duplicate 'Traded' in place of 'Comment' -> SOURCE_SCHEMA_INVALID {\"missing\": [\"Comment\"], \"duplicated\": [\"Traded\"], \"unexpected_count\": 0, \"columns\": 14}; case variant 'traded' -> SOURCE_SCHEMA_INVALID {\"missing\": [\"Traded\"], \"duplicated\": [], \"unexpected_count\": 1, \"columns\": 14}; inner-space variant 'Account  Number' -> ...; blank header in place of 'Leverage' -> ...; a number in place of 'Ready' -> ...; unknown 'Notes' in place of 'Comment' -> ...; 13 columns ('Comment' absent) -> ...; control: the 14 headers with outer whitespace -> 200\nVERDICT: PASS-TXG1-AC18",
+      "denominator": "7 of 7 header defects answer 502 SOURCE_SCHEMA_INVALID with no rows and a detail naming only contract header names: a DUPLICATE expected header, and six ambiguity shapes (a case variant, an inner-space variant, a blank header, a non-text header, an unknown header in an expected column's place, and a 13-column row). Control: the 14 expected headers wrapped in outer whitespace -> 200, since the contract trims outer whitespace only. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC19",
+      "criterion_verbatim": "`TXG1-AC19` -- a nonempty unrecognized row is returned with `row_kind` UNRECOGNIZED, never dropped",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC19",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC19(?![0-9])",
+      "output_evidence": "TXG1-AC19: 4 nonempty unrecognized rows (no Index with an account and Traded; 'Subtotal'; Index 'abc'; Index 0) -> 4 of 4 returned with row_kind UNRECOGNIZED and their projected values, rows 11 = used_rows - 1 (dropped 0); two 'Total' rows -> both UNRECOGNIZED, TOTAL 0, rows 8 of 8\npytest: 1 passed in 0.96s | rc=0\nVERDICT: PASS-TXG1-AC19",
+      "denominator": "4 of 4 nonempty unrecognized rows come back with row_kind UNRECOGNIZED and their projected values intact: a row with no Index but an account number and a Traded value, a 'Subtotal' summary row, a non-numeric Index and an Index of 0. The response carries 11 rows = used_rows - 1, so 0 rows were dropped, and the 7 base rows keep their kinds. Uniqueness arm: with TWO 'Total' rows neither is TOTAL (TOTAL 0) and both are UNRECOGNIZED, with 8 of 8 rows returned. 1 of 1 test; EGRESS-ATTEMPTS 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC20",
+      "criterion_verbatim": "`TXG1-AC20` -- across every test case, no response or audit record contains a prohibited field (Name, Advisor Contact, AUM (Mn), Divest Securities, Instruction, Comment, or any token), each enumerated",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC20",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC20(?![0-9])",
+      "output_evidence": "corpus: 21 test case(s), 210 call(s) (151 to /ms/taxsma-workbook, 59 to other routes), 210 response body(ies), 153 audit record(s); synthetic secrets 19 distinct\n  Name               key in responses 0, in audit 0 | its 3 synthetic value(s) (2 scanned) in responses 0, in audit 0\n  Advisor Contact    key in responses 0, in audit 0 | its 4 synthetic value(s) (3 scanned) in responses 0, in audit 0\n  AUM (Mn)           key in responses 0, in audit 0 | its 7 synthetic value(s) (6 scanned) in responses 0, in audit 0\n  Divest Securities  key in responses 0, in audit 0 | its 3 synthetic value(s) (2 scanned) in responses 0, in audit 0\n  Instruction        key in responses 0, in audit 0 | its 3 synthetic value(s) (2 scanned) in responses 0, in audit 0\n  Comment            key in responses 0, in audit 0 | its 3 synthetic value(s) (2 scanned) in responses 0, in audit 0\n  access_token       key in responses 0, in audit 0\n  refresh_token      key in responses 0, in audit 0\n  bearer             key in responses 0, in audit 0\n  any token (value)  19 synthetic token/bearer/credential value(s): in responses 0, in audit 0\n  arbitrary Graph fields 200 bodies whose keys != capability.response_fields 0 of 25; rows whose keys != the 7 projected + 3 metadata 0 of 10172; error bodies outside the envelope or without complete=false 0 of 125; non-JSON bodies 0\nprohibited-field occurrences in total: 0 (fields enumerated 10 of 10 contract prohibited_response_fields)\nVERDICT: PASS-TXG1-AC20",
+      "denominator": "The corpus of EVERY call of every test case: 21 test cases, 210 calls (151 to the route, 59 to other routes), 210 response bodies and 153 audit records, scanned by the probe rather than by the tests. All 10 of the contract's prohibited_response_fields enumerated and each read 0: the 6 prohibited workbook columns as keys and as values (their 23 distinct synthetic values, 17 long enough to scan by substring, the rest by the AC21 domain check), access_token/refresh_token/bearer as keys, and 19 distinct synthetic tokens, bearers and credentials as values. 'Arbitrary Graph fields': 25 of 25 success bodies carry exactly capability.response_fields in order, 10172 of 10172 rows exactly the 7 projected + 3 metadata fields, 125 of 125 error bodies stay inside the error envelope with complete=false. Module run 21 passed, rc=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC21",
+      "criterion_verbatim": "`TXG1-AC21` -- every call writes one audit record carrying exactly `capability.audit_fields` and none of `capability.audit_exclusions`",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC21",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC21(?![0-9])",
+      "output_evidence": "other writers' lines in the audit stream during those calls: 1 (_revocation_control)\ncalls to /ms/taxsma-workbook across every test case: 151; exactly one audit record 151 of 151; records 151\nrecords carrying exactly capability.audit_fields (11, in order) 151 of 151; every field in its declared domain 151 of 151\naudit_exclusions: account numbers 0 (+0 numeric), account names 0, row values 0 (32 of 10040 distinct synthetic values long enough to scan; the rest are held by the domain check), tokens 0 (19 synthetic), authorization headers 0\nresults seen: AUTH_REQUIRED 44, OK 25, SOURCE_CHANGED 2, SOURCE_NOT_FOUND 2, SOURCE_SCHEMA_INVALID 8, SOURCE_THROTTLED 2, SOURCE_TOO_LARGE 4, SOURCE_UNAVAILABLE 7, UNAUTHORIZED_CAPABILITY 57; operations seen: capability_guard 93, delegated_token 6, source_read 52; contract outcome classes not exercised: none\nVERDICT: PASS-TXG1-AC21",
+      "denominator": "151 of 151 calls to the route, across all 21 test cases, wrote exactly ONE audit record of the capability's own; 151 of 151 carry exactly the 11 capability.audit_fields in the contract's order; 151 of 151 have every field inside its declared domain (request_id 32 hex, the label enum, the {principal, display_email} reference, the operation enum, the contract's item_id and sheet, a 64-hex or null snapshot_id, a string or null etag, an RFC3339 observed_at, a result in the contract's errors plus OK, a non-negative integer latency_ms). All 5 audit_exclusions read 0: account numbers, account names, row values (32 of 10040 distinct synthetic values long enough to scan by substring, the rest held by the domain check), tokens (19 synthetic) and authorization headers. 9 of 9 outcome classes exercised: every one of the contract's 8 error codes plus OK. Disclosed and not counted as the capability's: 1 line from another writer in the same stream, revocation's _revocation_control alarm from the unreadable-list arm.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC22",
+      "criterion_verbatim": "`TXG1-AC22` -- the Gateway test modules that collected and passed before the edit still do, count printed before and after (the two `moto`-dependent modules named as NOT-EVALUATED on this box)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC22",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC22(?![0-9])",
+      "output_evidence": "BEFORE: ac22_before.json, recorded 2026-09-15T22:35:23Z at HEAD fd2f1e4b31 (Gateway tree equal to HEAD: True), 14 module(s)\nAFTER: live, 15 module(s), wall 58.1s\n  test_taxsma_workbook.py      before: (new module)                             after: passed 21\nmodules that collected before: 10 of 14; still collect after: 10 of 10\ntests that passed before: 87; still pass after: 87 of 87; newly failing or erroring after: 0\nNOT-EVALUATED on this box (collection error before, moto absent): 4 -- test_access_state.py, test_browser_oidc.py, test_oauth_durable.py, test_principal_cutover.py\nfailing or erroring BEFORE the edit (not graded, after shown above): test_control_valid_token_accepted error before (failed on setup with \"ModuleNotFoundError: No module named 'moto'\"), error after; test_ogq1_ac02 failed before (assert 0.48001869998755864 < 0.25), failed after; test_scoped_deny_by_default failed before (AssertionError: opal_data_refresh_upload assert None is not None), failed after\nDISCLOSURE (not graded by AC22): tests/test_principal_cutover.py ROUTE_CLASS names 30 of 30 routes app.server serves; missing none; extra none; '/ms/taxsma-workbook' -> 'capability'\nVERDICT: PASS-TXG1-AC22",
+      "denominator": "14 Gateway test modules before the edit and 15 after (the new module). 10 of 14 collected before; 10 of 10 still collect after. 87 tests passed before; 87 of 87 still pass after; 0 newly failing or erroring. The new module adds 21 passed. NOT-EVALUATED on this box: 4 modules, not 2 -- test_principal_cutover.py and test_browser_oidc.py landed with NFRA_OPLGTW after row MDPF_TAXSMA-S2's measurement, and all four fail collection on the same absent moto (row MDPF_TAXSMA-W1-S1). 3 tests were already failing or erroring BEFORE the edit and are shown before and after, not graded: test_scoped_deny_by_default, test_control_valid_token_accepted (a moto fixture) and test_ogq1_ac02 (the load-sensitive lag bar, row MDPF_TAXSMA-W1-S3). The BEFORE arm was recorded at the cut base fd2f1e4b31 with the Gateway tree content-equal to HEAD; the AFTER arm is live at this commit, one process per module. Disclosure, not graded here: ROUTE_CLASS names 30 of 30 served routes, 0 missing and 0 extra, with the new route classed 'capability'.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXG1-AC23",
+      "criterion_verbatim": "`TXG1-AC23` -- the tests add no dependency (no `moto`; the token broker and Graph are stubbed)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC23",
+      "expect": "(?m)^VERDICT: PASS-TXG1-AC23(?![0-9])",
+      "output_evidence": "base import census: 65 .py files read at fd2f1e4b31, 1 empty blob(s); positive control: 'starlette' imported by the base Gateway (app/server.py)\nimports: test module 13, capability module 15 (top-level names); third-party ['cryptography', 'pytest', 'starlette']; the Gateway's own import set at fd2f1e4b31: 63 names over 65 .py files; requirements.txt at fd2f1e4b31 names 11: boto3, cryptography, duckdb, httpx, mcp, msal, pyarrow, pyjwt, python-dotenv, starlette, uvicorn\nthird-party names new to the Gateway: none; moto/msal imported by the new files: none; requirements.txt unchanged vs fd2f1e4b31: True (diff rc=0, worktree status '')\nstubs in the test module: monkeypatch.setattr(token_broker, 'get_token', ...) x1, monkeypatch.setattr(graph, 'call', ...) x1\nmodule re-run with 'moto' and 'msal' imports refused by a meta-path finder: 21 passed in 7.70s | rc=0\nVERDICT: PASS-TXG1-AC23",
+      "denominator": "0 of the 3 third-party names the two new files import (cryptography, pytest, starlette) are new to the Gateway, measured against the 63 top-level names its own 65 .py files import at the cut base (1 of the 65 blobs is empty, app/__init__.py; the positive control 'starlette' is present) and its requirements.txt of 11 names. 0 imports of moto or msal in the new files. requirements.txt is unchanged vs the base (git diff rc=0, empty worktree status). Both stubs are present: the token broker's get_token and Graph's call. Discriminating arm: the whole module re-run with moto and msal imports REFUSED by a meta-path finder -- 21 passed, rc=0 -- so the tests need neither.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In the worktree, untouched: a scratch pytest plugin (.scratch/mutant_plugin.py, never committed) replaces app.taxsma_workbook._broker_delegate AFTER the module fixture imports it, so the guard's step 5 stops reading the token broker's principal-keyed cache and accepts whatever tid/oid pair the configuration names -- the binding check removed, everything else identical.",
+      "expected": "The identity-binding criteria fail: a configured pair with no validated sign-in, and a cache naming another principal, would be admitted (TXG1-AC8, AC9, AC10 at least), while criteria that do not depend on the binding keep passing.",
+      "observed": "5 failed, 16 passed in 3.80s, rc=1: FAILED test_txg1_ac08, test_txg1_ac09 (the tid/oid difference arms answered 200 where AUTH_REQUIRED was asserted), test_txg1_ac10 ('no validated sign-in for the pair' admitted), test_txg1_ac13 (a different oid no longer denied) and test_txg1_ac14 (the grant-time arm, granted_at forced to 0). 'git status --porcelain' over app/ and tests/ printed nothing afterwards: the mutant changed no file.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Three criterion invocations re-run verbatim at the same commit (8dce9aeb0b) and compared with only the vintage line, the durations and the corpus pid normalised: AC1 (a single test), AC13 (a single test with difference arms) and AC21 (a whole-module corpus scan, 151 calls).",
+      "observed": "AC1 run1 == run2; AC13 run1 == run2; AC21 run1 == run2 (3 of 3 byte-identical after normalisation), each PASS both times. The AC22 arms are separately stable in their own way: the two before-records taken at fd2f1e4b31 agreed on every module except the load-sensitive test_ogq1_ac02 (row MDPF_TAXSMA-W1-S3).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deploy, live Graph, SharePoint or live-route call, and any read of the real workbook.",
+      "reason": "Forbidden by the order's bounds; Graph and the token broker are synthetic here, and the tests' own socket guard recorded EGRESS-ATTEMPTS 0 in 21 of 21. The first controlled live read is TX-r-3's, after G-A; the Gateway release is TX-r-2's, after G-O."
+    },
+    {
+      "item": "tests/test_principal_cutover.py's ROUTE_CLASS assertion executed.",
+      "reason": "The module imports moto at :35 and moto is absent on this box, so it is NOT-EVALUATED here (rows MDPF_TAXSMA-S2 and MDPF_TAXSMA-W1-S1). The entry was added as the amended grant allows, and TXG1-AC22's disclosure reads the dict statically instead: 30 of 30 served routes named, 0 missing, 0 extra."
+    },
+    {
+      "item": "An HTTP method outside the route's declared ROUTE_METHODS (the 7 non-GET methods plus GET).",
+      "reason": "Starlette's router answers 405 before the module runs, so such a call writes no audit record. Every method a caller can reach the capability with is declared and audited (TXG1-AC4, TXG1-AC21); widening the list further would not change the refusal, only the audit."
+    },
+    {
+      "item": "Packaging the module into the Gateway bundle, the deploy script and EC2_MANIFEST.json.",
+      "reason": "That is cell TX-g-2's, not this order's; no criterion here names it."
+    },
+    {
+      "item": "A second writer of the audit stream during a call (revocation's _revocation_control alarm).",
+      "reason": "Disclosed in TXG1-AC21's output (1 line, from the unreadable-revocation-list arm). It is another module's control alarm, not the capability's record; the capability still wrote exactly one record for that call."
+    },
+    {
+      "item": "Deploy, push, merge or rebase.",
+      "reason": "Forbidden by the order. Both commits are LOCAL on branch wk-mdpf_taxsma-1-1; the COO drains them."
+    }
+  ],
+  "surprises": [
+    "MDPF_TAXSMA-W1-S1: TXG1-AC22 names two moto-dependent modules as NOT-EVALUATED; at the cut base fd2f1e4b31 FOUR fail collection on moto (test_principal_cutover.py and test_browser_oidc.py landed after row S2's measurement), and two collected modules already carry a failure or an error. The criterion is graded per TEST against the recorded before arm. OBSERVATION, INERT.",
+    "MDPF_TAXSMA-W1-S2: running the Gateway test modules from the Gateway directory, as TXG1-AC22 requires, appends to the TRACKED infra/aws/ec2/opal-gateway/audit.jsonl through the default AUDIT_PATH (test_ratelimit.py's alarm arms). The file was restored to its HEAD blob (3c69355bcd, git diff --quiet HEAD rc=0), nothing is committed under that path, and the probe now points every pytest it starts at a scratch AUDIT_PATH. OBSERVATION, INERT.",
+    "MDPF_TAXSMA-W1-S3: the AC22 before-record reads test_schwab_engine.py::test_ogq1_ac02 as FAILED in both probe records (child lag 1.006 s beside other modules, 0.480 s alone; bar 0.25 s) although the first shell run passed it, so row W1-S1's 'the other modules pass' holds for one fewer. It is shown before and after and is not graded. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/workbook-capability.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the TX-g-1 probe (probes/tx_g_1.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-taxsma-1 && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~1/probes/tx_g_1.py AC<1..23>",
+      "result": "23 of 23 'VERDICT: PASS-TXG1-AC<n>', rc=0 each, at HEAD 8dce9aeb0b with 0 of 5 files under test dirty. The FIRST run of all 23, at 6abf60e5d5, refused 22 of 22 attempted on three instrument defects (the corpus writer's sorted keys, the egress line sharing pytest's progress-dot line, and an empty blob read as a failed read); the defects were fixed at 8dce9aeb0b and nothing in the capability changed."
+    },
+    {
+      "tool": "pytest (py -3.12), the Gateway suite module by module",
+      "invocation": "py -3.12 -m pytest tests/test_taxsma_workbook.py -q -p no:cacheprovider --color=no (and, inside TXG1-AC22, each Gateway test module in its own process)",
+      "result": "tests/test_taxsma_workbook.py: 21 passed, EGRESS-ATTEMPTS 0 in each. TXG1-AC22: 87 of 87 previously passing tests still pass, 0 new failures, 4 modules NOT-EVALUATED (moto absent)."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, AST undefined-name scan, ruff py39, ds-precommit, comp-constants, manifest-check, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh <the 5 Gateway .py files + the probe>; then <the 2 amended files>",
+      "result": "'OK: pre-commit gate clean for 6 of 6 file(s)' and 'OK: pre-commit gate clean for 2 of 2 file(s)', rc=0 each, and again inside safe-commit ('clean for 6 of 8 file(s)', the other 2 staged paths being .json and .md). One pre-existing MANIFEST-ADVISORY on tests/test_principal_cutover.py:528, a line this order did not touch."
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_MDPF_TAXSMA~1 <0.9.0_WK_MDPF_TAXSMA~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "6abf60e5d5 (8 files; surprise-row-gate '3 new row(s) of 6 total checked'; msg-verify MATCH len=1703) and 8dce9aeb0b (2 files; msg-verify MATCH len=1176), both LOCAL on wk-mdpf_taxsma-1-1."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> TXG1-AC1,...,TXG1-AC23",
+      "result": "see the result record -- only the exit code is the verdict"
+    }
+  ]
+}
