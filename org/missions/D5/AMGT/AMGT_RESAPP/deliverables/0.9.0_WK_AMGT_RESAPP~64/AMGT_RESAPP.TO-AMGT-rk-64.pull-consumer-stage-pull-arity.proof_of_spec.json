@@ -1,0 +1,115 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-64.pull-consumer-stage-pull-arity",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-64.pull-consumer-stage-pull-arity.md",
+    "group": "OTHER",
+    "vintage_commit": "0777e942ffcd1b17ff984c92c4508b37b13569c6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "1f98fccd7ef10f6d80a2e99e00c310cf83a33a89",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-64.pull-consumer-stage-pull-arity.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~64",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/pull_consumer.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Box-side consumer script, run by a human operator (--once / default loop), never a deployed Lambda/service; no deploy surface exists for this file. The call site at lines 97-99 changed from `pull_result = mbp.stage_pull(blp, s3, ticker, pull_log)` (4 positional args, with a now-deleted dead `pull_log` local) to `pull_result = mbp.stage_pull(blp, s3, ticker)` (3 positional args, matching model_block_pull.stage_pull's 3-parameter signature). AC2's independent AST re-derivation and AC3's live SQS/S3 round trip both confirm the corrected bytes behave as intended.",
+      "introduces": [
+        "pull_result = mbp.stage_pull(blp, s3, ticker)"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_pull_consumer_arity.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New, permanent, fully offline regression file (no real AWS, no real Bloomberg, no network -- module docstring states this). Two tests: test_ast_call_arity_matches_signature (the CVO's own static AST check, re-run as a standing regression) and test_process_one_reaches_stage_pull_without_arity_typeerror (dynamic, fully in-memory fake s3/sqs + monkeypatched blp/stage_pull/stage_derive). 2 of 2 pass, stable across two consecutive runs (determinism control).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~64/AMGT_RESAPP.TO-AMGT-rk-64.SESSION_LOG.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log recording the re-measurement, the build, the three criteria's runs and the controls."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "both test_ast_call_arity_matches_signature and test_process_one_reaches_stage_pull_without_arity_typeerror print PASSED, final line \"2 passed\" (or more if you added helper-only functions pytest does not collect as tests -- name any such addition explicitly), 0 failed",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests/test_pull_consumer_arity.py -v 2>&1 | tail -20",
+      "output_evidence": "integrations/bloomberg/research/tests/test_pull_consumer_arity.py::test_ast_call_arity_matches_signature PASSED [ 50%] -- integrations/bloomberg/research/tests/test_pull_consumer_arity.py::test_process_one_reaches_stage_pull_without_arity_typeerror PASSED [100%] -- final line: '2 passed in 0.95s'. No helper-only functions were added beyond the two named tests and two small fixture classes (_FakeS3, _FakeSqs) which pytest does not collect as tests (no test_ prefix).",
+      "denominator": "2 of 2 tests PASSED, 0 failed",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "call_positional_args 3, def_positional_params 3, match True -- re-derived independently of AC1's own pytest run, by this worker, on its own branch HEAD, as the analysis's own instruction requires (\"re-run by the cutting worker on its own branch HEAD, not inherited from the adjudication\")",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport ast\nconsumer = ast.parse(open('integrations/bloomberg/research/pull_consumer.py', encoding='utf-8').read())\npull = ast.parse(open('integrations/bloomberg/research/model_block_pull.py', encoding='utf-8').read())\ncall_args = None\nfor node in ast.walk(consumer):\n    if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == 'stage_pull' and isinstance(node.func.value, ast.Name) and node.func.value.id == 'mbp':\n        call_args = len(node.args)\ndef_params = None\nfor node in ast.walk(pull):\n    if isinstance(node, ast.FunctionDef) and node.name == 'stage_pull':\n        def_params = len(node.args.args)\nprint('call_positional_args', call_args, 'def_positional_params', def_params, 'match', call_args == def_params)\n\"",
+      "output_evidence": "call_positional_args 3 def_positional_params 3 match True",
+      "denominator": "N/A -- boolean/count check, both values printed",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pre_queue_visible \"0\" (the queue is normally empty, per AMGT-rk-7's own measurement -- re-confirm it here); received 1 of 1 expected; state \"LANDED\" (not \"FAILED\" -- the patched stage_pull was reached and returned normally, no positional-argument TypeError); status_state \"LANDED\" and reason_has_positional_argument False; synthetic_key_cleaned True (the S3 key does not survive this criterion); post_queue_visible \"0\" (SQS ApproximateNumberOfMessages is eventually-consistent -- if it prints a nonzero transient value, re-read once after a few seconds and record both reads; the message MUST already be deleted by process_one's own DeleteMessage call at :120, which AC3's state=\"LANDED\" already implies ran)",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json, sys, time\nsys.path.insert(0, 'integrations/bloomberg/research')\nimport pull_consumer\nimport model_block_pull as mbp\n\ndef fake_stage_pull(blp, s3, security):\n    return {'raw_stamp': '20260921T000000Z', 'ref_key': 'raw/zzz/ref.json', 'hist_key': 'raw/zzz/hist.json'}\n\ndef fake_stage_derive(s3, security, raw_stamp=None):\n    return {'derived_stamp': '20260921T000100Z', 'derived_key': 'derived/zzz/model_block.json'}\n\nclass FakeBlp:\n    def health(self):\n        return {'ok': True}\n\nmbp._load_blp_client = lambda: FakeBlp()\nmbp.stage_pull = fake_stage_pull\nmbp.stage_derive = fake_stage_derive\npull_consumer.mbp = mbp\n\nsqs = boto3.client('sqs')\ns3 = boto3.client('s3')\nqueue_url = pull_consumer._queue_url(sqs)\npre = sqs.get_queue_attributes(QueueUrl=queue_url, AttributeNames=['ApproximateNumberOfMessages'])['Attributes']\nprint('pre_queue_visible', pre.get('ApproximateNumberOfMessages'))\n\nsqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps({'ticker': 'ZZZTEST US Equity', 'security_key': 'ZZZTEST_US_Equity', 'requested_at': '2026-09-21T00:00:00Z'}))\nresp = sqs.receive_message(QueueUrl=queue_url, MaxNumberOfMessages=1, WaitTimeSeconds=10)\nmsgs = resp.get('Messages', [])\nprint('received', len(msgs), 'of 1 expected')\nstate = pull_consumer.process_one(msgs[0], s3, sqs, queue_url) if msgs else 'NO_MESSAGE_RECEIVED'\nprint('state', state)\n\nho = s3.get_object(Bucket=mbp.BUCKET, Key='packs/ZZZTEST_US_Equity/status.json')\nstatus = json.loads(ho['Body'].read())\nprint('status_state', status.get('state'), 'reason_has_positional_argument', 'positional argument' in (status.get('reason') or ''))\n\ns3.delete_object(Bucket=mbp.BUCKET, Key='packs/ZZZTEST_US_Equity/status.json')\ntry:\n    s3.head_object(Bucket=mbp.BUCKET, Key='packs/ZZZTEST_US_Equity/status.json')\n    cleaned = False\nexcept Exception:\n    cleaned = True\nprint('synthetic_key_cleaned', cleaned)\n\npost = sqs.get_queue_attributes(QueueUrl=queue_url, AttributeNames=['ApproximateNumberOfMessages'])['Attributes']\nprint('post_queue_visible', post.get('ApproximateNumberOfMessages'))\n\"",
+      "output_evidence": "pre_queue_visible 0 -- received 1 of 1 expected -- STATUS: ZZZTEST_US_Equity -> FETCHING -- STATUS: ZZZTEST_US_Equity -> LANDED -- LANDED: ZZZTEST US Equity -> raw 20260921T000000Z, derived 20260921T000100Z -- state LANDED -- status_state LANDED reason_has_positional_argument False -- synthetic_key_cleaned True -- post_queue_visible 0",
+      "denominator": "1 of 1 SQS round trip (send+receive+delete); 1 of 1 synthetic S3 key put+get+delete, deletion confirmed via head_object raising in the same invocation; run exactly once (the order's ONE live act)",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Re-derived AC2's AST check against the OLD pre-fix bytes (git show HEAD:integrations/bloomberg/research/pull_consumer.py -- still carrying the 4-argument call because the fix in this worktree is uncommitted at measurement time) versus the NEW committed-this-cell bytes, to prove the AST checker discriminates the defect from the fix.",
+      "expected": "OLD bytes: call_args=4, def_params=3, match False. NEW bytes: call_args=3, def_params=3, match True.",
+      "observed": "OLD(pre-fix,HEAD) call_args 4 def_params 3 match False -- NEW(committed-this-cell) call_args 3 def_params 3 match True -- MUTANT-FIRED (the pre-fix bytes fail the check the fix passes)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_pull_consumer_arity.py run twice in succession (no clock/randomness in the changed code path beyond fixed literal stamps in the stub).",
+      "observed": "Run 1: '2 passed in 0.15s'. Run 2: '2 passed in 0.14s'. AC3's live act was run exactly once, per the order's own instruction that it is the ONE live act -- a repeat would be an unauthorized second live act, not a determinism check.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~64/AMGT_RESAPP.TO-AMGT-rk-64.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile integrations/bloomberg/research/pull_consumer.py integrations/bloomberg/research/tests/test_pull_consumer_arity.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check integrations/bloomberg/research/pull_consumer.py integrations/bloomberg/research/tests/test_pull_consumer_arity.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_pull_consumer_arity.py -v",
+      "result": "2 passed"
+    }
+  ]
+}
