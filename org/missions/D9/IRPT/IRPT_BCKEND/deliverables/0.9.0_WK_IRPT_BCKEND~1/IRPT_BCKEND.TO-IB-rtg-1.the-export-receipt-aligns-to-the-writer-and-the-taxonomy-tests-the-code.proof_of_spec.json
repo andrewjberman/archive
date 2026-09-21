@@ -19,63 +19,70 @@
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/export/entry.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "S106: the except clause now decides refusal off isinstance(exc, botocore.exceptions.ClientError) + exc.response['Error']['Code'] in (NoSuchKey, AccessDenied, NoSuchBucket), never the class NAME. S105: RECEIPT_KEY_TEMPLATE realigned to firms/{firm}/generations/{export_id}/receipt.json. Built into irpt-export-render this run (CodeSha256 cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=) but NOT applied -- both never-widen halves are ABSENT this pass, so the built artifact sits in the S3 build store only; the LIVE function still serves the pre-fix bytes (CodeSha256 9IMayS94if11cyKq51TbcyBG8cUwbbUWlQMlT9XhiaQ=)."
+      "commit_or_etag": "79054fb85d49ffa0c2aba1f6139207d91513b921",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "SECOND PASS (this record): S106/S105 as first-pass, UNCHANGED bytes since 79054fb85 (blob confirmed at HEAD this pass). Both never-widen halves verified PRESENT at HEAD naming packet blob 74a1004fde6e649c321f43d62cfbda5b61489b98; arm (d) applied the export root -- Apply complete: 1 added, 1 changed, 0 destroyed; served CodeSha256 read back == cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4= (get-function-configuration, this run). The function NOW serves this fix."
     },
     {
       "path_or_key": "infra/aws/lambda/investor-reporting/export/handler.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "New receipt_key()/persist_receipt(), wired into finalize_export(persist=True) -- writes the receipt beside the bundle at the address entry.py's aligned template reads (proved byte-identical this run). Same not-yet-deployed state as entry.py above."
+      "commit_or_etag": "79054fb85d49ffa0c2aba1f6139207d91513b921",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "SECOND PASS: unchanged bytes since 79054fb85. persist_receipt() exercised for real this pass (arm (e), part 2) -- write+readback equal=True at the aligned address, standing in for the deployed submit path per the disclosed partial W1-S43. Deployed as part of the same served irpt-export-render bytes as entry.py above."
     },
     {
       "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "irpt-export-render's files[]/staged_from[] gains keys.py (row IRPT_BCKEND-W1-S44 -- the pre-existing bundle_key()/artifact_key() and this cell's new receipt_key() all call 'import keys as _keys', and keys.py was never packaged for this function). Same pin/sha256 the 4 sibling functions already stage; verified byte-identical to the current _keys/keys.py before adding. Build re-run this session: 'OK: staged keys.py ... sha256 verified' and 'OK: import-closure -- 18 packaged .py file(s), every top-level import satisfied'. artifact_s3_key/artifact_sha256 fields updated by the build script itself, not hand-edited."
+      "commit_or_etag": "79054fb85d49ffa0c2aba1f6139207d91513b921",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "SECOND PASS: unchanged since 79054fb85. The keys.py staging this manifest declares is confirmed present in the deployed zip (head-object content-sha256 cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=, 157997 bytes, verified at rest before and after the apply -- the same build the manifest fix produced)."
     },
     {
       "path_or_key": "infra/aws/terraform/investor-reporting/export/iam.tf",
       "kind": "terraform",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "New aws_iam_role_policy.export_render_receipt: GetObject+PutObject+conditioned ListBucket on firms/*/generations/EXP-*/receipt.json, the ONE new grant the aligned address needs (measured via fnmatch: does NOT match the existing export_render_evidence grant). Tightened from a bare */*/ wildcard to the EXP- namespace after this run's own measurement showed the bare wildcard would ALSO reach ycharts/generate/job.py's different receipt shape under the same generations family (over-grant caught before it was ever applied). terraform fmt -check clean; terraform validate Success (local, -backend=false); a real plan (backend-attached, this run) shows Plan: 1 to add, 1 to change, 0 to destroy, resource_changes 11 compared / 9 no-op / 2 substantive. NOT applied this pass -- halves ABSENT."
+      "commit_or_etag": "79054fb85d49ffa0c2aba1f6139207d91513b921",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "SECOND PASS: unchanged since 79054fb85. Applied this pass under ledger irpt-bckend-ib-rtg-1-export-apply: aws_iam_role_policy.export_render_receipt Creating -> Creation complete. Read back via get-role-policy: exactly ReadWriteExportReceiptOnly (GetObject+PutObject) + ListOnlyTheReceiptAddresses (ListBucket, prefix-conditioned), both pinned to firms/*/generations/EXP-*/receipt.json -- the packet's declared set, nothing else. Post-apply re-plan on the export root: 0 changes."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtg-1.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The K-CODE + new-grant packet: prior live CodeSha256 read live (rollback anchor, verified at rest against its S3 build-store version), built sha verified at rest, the served-byte delta (entry.py+handler.py changed, keys.py added, m=3 of 20), the new grant's derivation/tightening, the export-root plan's resource_changes subtraction (11/9/2), the other 9 roots re-taken, blast radius both branches, rollback. Read for both halves at HEAD this run: ABSENT (0 of 2) -- committed so the halves have something to sign against, per this order's own arm (c) STOP instruction."
+      "commit_or_etag": "e02df882ef",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "SECOND PASS: both halves verified PRESENT at HEAD this run, each naming this exact blob (COO half re-signed @3143723f66, CTO half re-signed @2d19f1ef68, both packet-keyed per the withdrawn-third-class correction). Arm (d) applied under this packet's authorization; arm (e) exercised the live route per the packet's disclosed partial."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_rtg_1.py",
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The R72-AC1 battery: arm (a) measures the S105/S106 defect and the reader/writer alignment live (not assumed); arm (b) verifies the manifest fix and rebuilds; arm (c) reads the packet's blob and both halves and STOPs when they are ABSENT. rc=1 this run (correctly -- the order's own expected first-pass shape), full transcript committed as IB-rtg-1_R72-AC1_battery_output.txt."
+      "deploy_evidence": "SECOND PASS, REWRITTEN for arm (e): reuses the bounded-principal mechanism of battery_ib_rtf_10.py (K1/K1b, real login, full delete lifecycle). Arms: (0) packet+halves at HEAD naming the blob; (1) key alignment via identity.py/handler.py/entry.py imported as real production code (a module-name-collision guard added: handler.py's own sys.path.insert(0,.../directory) shadows entry.py with directory/entry.py for an import issued after handler -- fixed by importing entry before handler and asserting __file__); (2) a real receipt persisted at the aligned address via handler.persist_receipt(); (3) bounded principal + login; (4) real HTTP round trip under the deployed route+role, SERVED with the just-written receipt; (5) taxonomy on two REAL wire errors (403 AccessDenied -> NOT_FOUND; 404 NoSuchKey -> NOT_FOUND); (6) full rollback verified. rc=0, 8 of 8 arms PASS, 0 UNEXPECTED, token printed."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/IB-rtg-1_R72-AC1_battery_output.txt",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The battery's full transcript this run: arm(a)=True arm(b)=True arm(c)=False; STOP line naming the 0-of-2 halves; no success token printed; rc=1."
+      "deploy_evidence": "SECOND PASS transcript, sha256 7f9d663331f8bbc41b30ea76c142b964f3562599c78952f8acd1eef303200868. 8 of 8 arms PASS, 0 UNEXPECTED, token IBR72-EXPORT-RECEIPT-ALIGNED-AND-TAXONOMY-BY-CODE printed."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260921T0129Z_irpt-bckend-ib-rtg-1-export-apply_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "0330c5b79cd7d762f04dd7c0f55cb7ddc91b23c7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "OPENED before the apply (commit b2b2912e91), CLOSED with verification proof after (commit 0330c5b79c) -- NEVER-2 (no confirmed deploy left half-landed): both legs closed, sentinel removed."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/the-export-receipt-aligns-to-the-writer.result.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "What was done per arm, the surprises filed, and the proof-of-spec outcome (R72-AC1 FAIL, order stays open)."
+      "deploy_evidence": "SECOND PASS: what arm (d)/(e) did, the plugin-cache choice (private, option c), the module-collision guard, and the proof-of-spec outcome (R72-AC1 PASS, order flips complete)."
     },
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "e02df882ef57e62dd5028afdc379028cf4930fff",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "FOUR appended rows: IRPT_BCKEND-W1-S42, S43, S44, S45 -- each its own fenced JSON object, matching this file's own established many-fences convention (not the first-fence array shape, which this file does not use throughout). Every fence in the file re-parsed as valid JSON after the append (22 of 22 fences parse; the 4 new ids confirmed present, none duplicated).",
       "introduces": [
@@ -92,11 +99,11 @@
       "criterion_verbatim": "The export route serves the receipt round-trip AND the taxonomy decides off the CODE on a real wire error.",
       "method": "command",
       "invocation": "timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_rtg_1.py",
-      "output_evidence": "rc=1. Arm (a) MEASURE: PASS -- S105/S106 defects confirmed at HEAD, the new template/except-clause confirmed present, and the reader's computed key proved byte-identical to the writer's computed key this run (firms/49financial/generations/EXP-a...a/receipt.json on both sides); the aligned address confirmed NOT covered by the pre-existing IAM grant (a new grant is required, and was added -- see the packet). Arm (b) SOURCE EDIT + BUILD: PASS -- the lambda-source-map.json keys.py fix confirmed, irpt-export-render rebuilt (CodeSha256 cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=, import-closure 18 of 18 satisfied). Arm (c) PACKET: FAIL -- 'COO half candidates: ABSENT', 'CTO half candidates: ABSENT', 'halves present: 0 of 2', 'ARM (c): STOP HERE -- halves ABSENT (0 of 2). R72-AC1 FAILS TRUTHFULLY AT (c). Arm (d)/(e) are NOT run this pass. The order stays open. THIS IS THE ORDER'S OWN STATED EXPECTED FIRST-PASS OUTCOME.' The battery's final SUMMARY line reads 'arm(a)=True arm(b)=True arm(c)=False' and the run does not reach the branch that prints this criterion's success token at all -- that branch is gated behind arm (c) returning True, which it did not.",
-      "denominator": "2 of 2 never-widen halves absent (0 present); 3 of 20 packaged zip members touched (2 changed, 1 added); 11 resource_changes compared on the export root's plan, 9 no-op, 2 substantive",
+      "output_evidence": "SECOND PASS, rc=0. Both never-widen halves confirmed PRESENT at HEAD naming packet blob 74a1004fde6e649c321f43d62cfbda5b61489b98 (arm 0: 2 of 2). Arm (1) KEY ALIGNMENT: writer key (handler.receipt_key, real function) 'firms/49financial/generations/EXP-564ce23c4339db71cddcc2fbee39f453/receipt.json' == reader key (entry.RECEIPT_KEY_TEMPLATE, real deployed default) -- EQUAL. Arm (2): handler.persist_receipt() real write+readback at that address, bucket opal-data-ycharts, bytes 804, equal(readback==written)=True. Arm (3): bounded principal (epoch 1789957994) created, K1/K1b read back 2 of 2, login HTTP 200, claims firmId=49financial advisorKey=abby_horton. Arm (4) ROUND TRIP: 'GET /export/EXP-564ce23c4339db71cddcc2fbee39f453 -> function irpt-export-render (role irpt-export-render-role): SERVED http 200 code None firm_id present' -- content (export_id + artifact.sha256) matched what arm (2) persisted; no NOT_FOUND. Arm (5a) TAXONOMY, real 403: 'GET /export/plainid-fcf83b9f1fb2da6b (key outside the EXP-* grant -> real S3 403 AccessDenied) -> POLICY http 200 code NOT_FOUND' -- the S106 fix (not UNEXPECTED). Arm (5b) TAXONOMY, real 404: 'GET /export/EXP-8dc6fb6af82b2a478c5e77b24bf185b4 (real EXP-* id, IAM allows, object absent -> real S3 404 NoSuchKey) -> POLICY http 200 code NOT_FOUND'. Disclosed, not graded: 'POST /export -> POLICY http 200 code NOT_READY' (row W1-S43, the submit controller is not wired to this entry on the deployed path -- EXPECTED, excluded from the UNEXPECTED tally per this order's own arm (e) note). Arm (6) ROLLBACK: 'lifecycle closed (3 of 3 deleted, refresh refused, 401 after exp, no residue): True'. Final lines: 'ARM (0) packet+halves: PASS' through 'ARM (6) rollback, full lifecycle: PASS' (8 of 8), 'UNEXPECTED count on the exercised firm (49financial): 0', 'RESULT: R72-AC1 PASS -- 8 of 8 arms hold, 0 UNEXPECTED', 'IBR72-EXPORT-RECEIPT-ALIGNED-AND-TAXONOMY-BY-CODE'.",
+      "denominator": "8 of 8 arms PASS; 2 of 2 never-widen halves present; 0 UNEXPECTED across 4 exercised requests (round trip + 2 taxonomy + 1 disclosed submit probe, the last excluded from the tally by name); arm (d) gate: 132 resource_changes entries compared across 10 roots, 0 paths subtracted, export root exactly 2 substantive changes, other 9 roots empty",
       "expect": "IBR72-EXPORT-RECEIPT-ALIGNED-AND-TAXONOMY-BY-CODE",
-      "status": "FAIL",
-      "status_reason": "Both never-widen halves (COO, CTO) are ABSENT at HEAD this run, so this order's own BOUNDS forbid any apply, and arm (e)'s live, deployed-role round trip was never attempted. The battery's success-token branch is reached only when arm (c) returns True (both halves present); it returned False, so the token is never printed and never appears in this row's own output_evidence -- the FAIL is the order's own stated expected first-pass outcome, not an unexplained shortfall."
+      "status": "PASS",
+      "status_reason": "PASS-by-output on the exercisable substance the disclosed partial (row IRPT_BCKEND-W1-S43) permits: the reader's key equals the writer's key for a real production-code-minted export_id; a receipt persisted by the real writer function at that address is served back (not NOT_FOUND) by the real deployed route under the real deployed role; and the S106 taxonomy fix is proven on two REAL wire errors (a genuine 403 AccessDenied and a genuine 404 NoSuchKey), never a constructed ClientError stub. The submit->receipt round trip through POST /export remains NOT_READY on the deployed path (disclosed, not this cell's defect, a named round-8/round-7-analysis follow-on) and is excluded from the PASS by name, per this order's arm (e) note and the COO half's DISCLOSED-PARTIAL ruling."
     },
     {
       "criterion_id": "R72-AC2",
@@ -126,12 +133,8 @@
   },
   "declared_exclusions": [
     {
-      "item": "Applying the built artifact or the new IAM grant (arm d), and exercising the live route (arm e).",
-      "reason": "This order's own bound: NO APPLY before both never-widen halves are present at HEAD naming the packet's blob. Both halves are ABSENT this run (checked live: org/tier1_exec/2.0.0_SA_COO~B/deliverables/ and org/tier1_exec/1.0.0_SA_CTO/deliverables/ carry no file naming rtg-1). This is the order's own stated expected first-pass outcome, not a scope reduction."
-    },
-    {
       "item": "Wiring export/entry.py's submit_export to export/handler.py's submit_export/finalize_export.",
-      "reason": "Row IRPT_BCKEND-W1-S43 (BLOCKING): this would be a THIRD source change beyond this order's two named edits (S105, S106), and BOUNDS states the served-byte delta is exactly those two edits or STOP. Routed to 2.0.0_SA_COO~B (Rule 27, decomposition) as a further cell, not fixed here as a neighbouring defect."
+      "reason": "Row IRPT_BCKEND-W1-S43 (BLOCKING, disarm_owner 2.0.0_SA_COO~B): this would be a THIRD source change beyond this order's two named edits (S105, S106), and BOUNDS states the served-byte delta is exactly those two edits or STOP. The COO half's own ruling: deploy S105+S106+K-IAM anyway as a correct, reversible prerequisite; grade arm (e) DISCLOSED-PARTIAL; the submit-wiring is a named FOLLOW-ON cell (round-8 or the round-7 analysis), never a rider on this order. Consequence: FWD-2's export leg does not fully realize round 7, surfaced to 1.0.0_SA_CTO (L10 endpoint coverage) per both halves."
     }
   ],
   "surprises": [
@@ -180,6 +183,31 @@
       "tool": "JSON re-parse of every fence in the surprise-channel file after the append",
       "invocation": "python -c \"re.findall(...); json.loads(...)\" over INVESTIGATION_v1.md",
       "result": "22 of 22 fences parse (2 are arrays, 20 are single objects, consistent with the file's existing many-fences shape); the 4 new ids present, none duplicated."
+    },
+    {
+      "tool": "SECOND PASS -- pre-apply re-verify (packet blob, both halves, built-artifact-at-rest)",
+      "invocation": ".tools/aws s3api head-object --bucket opal-313476888478-lambda-artifacts --key investor-reporting/irpt-export-render.zip; .tools/aws lambda get-function-configuration --function-name irpt-export-render; .tools/aws s3api list-object-versions",
+      "result": "packet blob 74a1004fde6e649c321f43d62cfbda5b61489b98 at HEAD == both halves' named blob; built artifact content-sha256 cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4= confirmed at rest across the 4 most recent object versions; live CodeSha256 (pre-apply) 9IMayS94if11cyKq51TbcyBG8cUwbbUWlQMlT9XhiaQ=, matching the packet's rollback target; rollback build-store version dECFEZtZArSJYdPy4.ImeVHBv6Q.jxBH verified to carry that exact sha."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py open/close-leg/close",
+      "invocation": "py -3.12 .tools/deploy_ledger.py open --slug irpt-bckend-ib-rtg-1-export-apply ...; close-leg L1; close-leg L2; close",
+      "result": "Ledger OPENED before the apply (commit b2b2912e91), both legs closed with verification proof, CLOSED after (commit 0330c5b79c) -- NEVER-2 satisfied."
+    },
+    {
+      "tool": "fresh 10-root terraform plan + arm-(d) subtraction gate (private plugin cache /c/tmp/tf-cache-irpt-rtg7)",
+      "invocation": "terraform init/plan/show -json per root (api,core,directory,export,holdings,intake,narrative,ops,performance,ycharts); py -3.12 .scratch/subtraction_gate.py",
+      "result": "DENOMINATOR: 132 entries compared, 0 paths subtracted. export: exactly 2 real changes (aws_iam_role_policy.export_render_receipt create + aws_lambda_function.this update, matching the packet exactly). All 3 sibling round-7 roots (holdings, ops, performance) and all 6 non-round-7 roots: 0 real changes (EMPTY). Gate PASSED."
+    },
+    {
+      "tool": ".tools/safe-apply.sh (HALT_ACK=1, 25 unrelated general-fabric messages reviewed, none naming this act)",
+      "invocation": "HALT_ACK=1 bash .tools/safe-apply.sh apply -input=false -auto-approve -no-color <export.tfplan>",
+      "result": "comp-tagauthz gate PASSED (0 of 0 candidates); tombstone-gate CLEAN; 'Apply complete! Resources: 1 added, 1 changed, 0 destroyed.' Post-apply re-plan: rc=0, 'No changes.' Served CodeSha256 read back == cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=. IAM policy read back via get-role-policy: exactly the packet's declared 2 statements."
+    },
+    {
+      "tool": "battery_ib_rtg_1.py, second run after fixing a module-name collision (entry vs directory/entry.py)",
+      "invocation": "timeout 1800 py -3.12 org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/battery_ib_rtg_1.py",
+      "result": "Run 1: AttributeError -- 'entry' resolved to infra/aws/lambda/investor-reporting/directory/entry.py (handler.py's own sys.path.insert(0,.../directory) shadowed it for an import issued after handler). Fixed by importing entry/identity before handler at module load and asserting __file__. Run 2: rc=0, 8 of 8 arms PASS, 0 UNEXPECTED, token printed. Output sha256 7f9d663331f8bbc41b30ea76c142b964f3562599c78952f8acd1eef303200868."
     }
   ]
 }

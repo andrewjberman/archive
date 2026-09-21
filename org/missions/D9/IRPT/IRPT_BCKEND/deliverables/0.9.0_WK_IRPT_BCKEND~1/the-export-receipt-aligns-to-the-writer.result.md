@@ -1,64 +1,90 @@
-# RESULT -- IRPT_BCKEND.TO-IB-rtg-1 (the export receipt aligns to the writer and the taxonomy tests the code)
+# RESULT -- IRPT_BCKEND.TO-IB-rtg-1, second pass (arms (d) + (e))
 
-**Worker:** `0.9.0_WK_IRPT_BCKEND~1`. **Pass:** first. **Outcome:** STOPPED at arm (c), per the
-order's own stated expected first-pass outcome -- both never-widen halves are ABSENT.
+**Worker:** `0.9.0_WK_IRPT_BCKEND~1` · **Branch:** `wk-irpt_bckend-7-1-apply` · **Run:** 2026-09-20/21
 
-## What was done
+## PLUGIN CACHE
 
-- **Arm (a) MEASURE**, printed with denominators: confirmed S105 (the OLD `RECEIPT_KEY_TEMPLATE`,
-  `investor-reporting/export/{firm}/{export_id}/receipt.json`, is outside every declared prefix
-  family and matches none of the role's GetObject ARNs) and S106 (the OLD except clause tests the
-  exception CLASS NAME, so a modeled `AccessDenied` propagates as `UNEXPECTED`) against the live
-  source at HEAD. The `44/19` ownership/relationship re-derive constraint (s.R7.3) does NOT apply
-  to this cell -- S105/S106 read no account/relationship count; confirmed nothing inherited.
-- **Arm (b) SOURCE EDIT**: `export/entry.py` -- S106's except clause now decides off the modeled S3
-  error CODE (`isinstance(..., botocore.exceptions.ClientError)` + `Error.Code`), and
-  `RECEIPT_KEY_TEMPLATE` is realigned to `firms/{firm}/generations/{export_id}/receipt.json`, the
-  DECLARED "generations" family. `export/handler.py` gains `receipt_key()` + `persist_receipt()`,
-  wired into `finalize_export(persist=True)` -- the write beside the bundle S105 requires.
-  **Proved this run, not assumed: the reader's computed key and the writer's computed key are
-  byte-identical.** Built via `infra/aws/lambda/ci/build-and-upload.sh investor-reporting
-  irpt-export-render`; served-byte delta verified EXACTLY `{entry.py, handler.py}` changed plus
-  `keys.py` added (a necessary, previously-missing packaging dependency, row `W1-S44`, already
-  fixed and disarmed this commit).
-- **New IAM grant** (`aws_iam_role_policy.export_render_receipt`) for the aligned address, since it
-  does not fall under the role's existing exports-prefix grant -- MEASURED via `fnmatch`, and
-  TIGHTENED to the `EXP-`-namespace shape after that same measurement showed a bare wildcard would
-  also have reached a DIFFERENT cell's (ycharts generation, B9/IB-s-9) receipt objects under the
-  same "generations" family. `terraform validate`/`fmt` clean; a real (backend-attached) `plan`
-  shows exactly 1 IAM policy create + 1 Lambda function update, 9 other resources `no-op`, 0
-  destroy.
-- **Arm (c) PACKET**: `NEVER_WIDEN_SIGNOFF_PACKET_IB-rtg-1.md` written, with the prior live
-  `CodeSha256` read live (rollback anchor, its S3 build-store version verified at rest), the built
-  sha verified at rest, the served-byte delta, the new grant's derivation and tightening, a real
-  plan on the export root (`resource_changes` subtraction: 11 compared, 9 no-op, 2 substantive),
-  the other 9 Terraform roots re-taken (6 clean, 3 showing UNRELATED sibling-worker build drift --
-  row `W1-S45`), the blast radius both branches, and the rollback. **Read for both halves at
-  HEAD: ABSENT (0 of 2).** Per the order: arm (d)/(e) do NOT run this pass.
+Option (c), PRIVATE: `TF_PLUGIN_CACHE_DIR=/c/tmp/tf-cache-irpt-rtg7` (pre-existing, ~704 MB,
+populated). Set before every `terraform init` across all 10 roots. No re-download observed;
+`df -h /c` moved from ~31 GB free (start) to ~22-23 GB free after the 10-root init+plan sweep
+(the plan-time per-root `.terraform/providers` copy on this box, consistent with the task
+order's ~686 MB/root estimate), stabilizing at 22 GB after the export apply. The fallback
+(deleting non-applied roots' `.terraform/providers` after saving their plan) was NOT needed --
+free space stayed above the ~8 GB threshold throughout.
 
-## Surprises filed (channel: `../surprise-channel/investigations/INVESTIGATION_v1.md`)
+## ARM (d) -- APPLY
 
-- `IRPT_BCKEND-W1-S42` (OBSERVATION, ARMED, disarm_owner `1.0.0_SA_CTO`) -- the order's literal
-  wording for S105's alignment names path segments (`generations/<gen>/attempts/<a>/exports/<rev>/`)
-  the reader's request never carries; the implemented address is the nearest workable substitute
-  and the signers should read this row before signing either half.
-- `IRPT_BCKEND-W1-S43` (BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~B`) -- even after this order's
-  fix deploys, `entry.py`'s OWN wired `submit_export` unconditionally raises `_ExportNotWiredHere`
-  and never calls `handler.py` at all, so arm (e)'s live round trip cannot pass on the deployed
-  path until a further, out-of-scope cell wires the two together.
-- `IRPT_BCKEND-W1-S44` (BLOCKING, INERT -- already fixed this commit) -- `keys.py` was never
-  packaged for `irpt-export-render`, so the pre-existing `bundle_key()`/`artifact_key()` (and this
-  cell's new `receipt_key()`) would `ImportError` at runtime; fixed in the manifest this commit.
-- `IRPT_BCKEND-W1-S45` (OBSERVATION, ARMED, disarm_owner `2.0.0_SA_COO~B`) -- a sibling worker's
-  `build-and-upload.sh` run is visible in every OTHER worker's `terraform plan` immediately,
-  before any commit/merge/apply, because the artifact bucket is shared AWS state; a packet's
-  "other roots re-taken" section can show drift that is a sibling's legitimate in-flight work.
+Pre-apply re-verify: packet blob `74a1004fde6e649c321f43d62cfbda5b61489b98` at HEAD == both
+halves' named blob == the packet's own worktree hash-object; built artifact `head-object`
+confirmed `cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=` at rest (and consistent across the four
+most recent object versions in the bucket, since a sibling process re-uploaded the same bytes
+after the packet was written -- content hash unchanged). Live `CodeSha256` read
+`9IMayS94if11cyKq51TbcyBG8cUwbbUWlQMlT9XhiaQ=`, matching the packet's rollback target; the
+build-store rollback version `dECFEZtZArSJYdPy4.ImeVHBv6Q.jxBH` verified at rest to carry that
+exact sha.
 
-## Proof of spec
+Change-management ledger `irpt-bckend-ib-rtg-1-export-apply` OPENED before the apply (commit
+`b2b2912e91`), CLOSED after verification (commit `0330c5b79c`).
 
-`R72-AC1` -- **FAIL** (truthfully, per the order's own expected first-pass shape): the battery
-does not print the success token this run, because arm (c) STOPs at the absent halves and arm
-(e)'s live, deployed-role round trip was never attempted. `R72-AC2` (judgment) -- CVO's, not
-graded here.
+Fresh 10-root plan (private plugin cache), subtraction gate: **132 entries compared, 0 paths
+subtracted** (no `data.aws_s3_object` version drift this run). Export root: exactly 2 real
+changes after subtraction -- `aws_iam_role_policy.export_render_receipt` `["create"]` and
+`module.irpt_export_render.aws_lambda_function.this` `["update"]`
+(`9IMayS94if11cyKq51TbcyBG8cUwbbUWlQMlT9XhiaQ=` -> `cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=`)
+-- matching the packet's declared set exactly. The 3 sibling round-7 roots (holdings, ops,
+performance) and the 6 non-round-7 roots (api, core, directory, intake, narrative, ycharts) all
+read EMPTY after subtraction -- already applied+drained; no pending sibling round-7 roots
+remain; this was round 7's last apply.
 
-The order's `<status>` stays open. This is the report on it.
+`safe-apply.sh` on the export root's saved plan required `HALT_ACK=1` (25 pending general-fabric
+messages, none naming this act/export/irpt-export-render/IB-rtg-1 -- reviewed individually).
+`Apply complete! Resources: 1 added, 1 changed, 0 destroyed.` Post-apply re-plan: `rc=0`,
+`No changes.` Served `CodeSha256` read back == `cn8YKEP2oQdfvAjdpa32Wfp9oJqhAIMGkECv+H4vUg4=`.
+IAM policy `irpt-export-render-receipt-policy` read back via `get-role-policy`: exactly the two
+statements the packet declares (`ReadWriteExportReceiptOnly` GetObject+PutObject,
+`ListOnlyTheReceiptAddresses` ListBucket, both pinned to `firms/*/generations/EXP-*/receipt.json`).
+
+## ARM (e) -- PROVEN LIVE
+
+`battery_ib_rtg_1.py` written to reuse the bounded-principal mechanism of
+`battery_ib_rtf_10.py` (K1/K1b DynamoDB, real login, real HTTP, full delete lifecycle incl.
+refresh-refusal and post-exp 401), graded on the EXERCISABLE SUBSTANCE per the disclosed
+partial (row `IRPT_BCKEND-W1-S43`): the deployed `submit_export` still raises
+`NOT_READY` unconditionally, so the served `submit -> receipt` round trip through `POST /export`
+cannot be exercised end-to-end -- confirmed live in this run (`POST /export -> POLICY http 200
+code NOT_READY`, disclosed, not counted).
+
+Graded instead: (1) KEY ALIGNMENT -- `export/identity.py`, `export/handler.py` and
+`export/entry.py` imported as real production code (a module-name collision guard added: the
+sibling `export/handler.py`'s own `sys.path.insert(0, .../directory)` shadows `export/entry.py`
+with `directory/entry.py` for any `import entry` issued AFTER `handler` -- both dirs carry an
+`entry.py` -- so `entry`/`identity`/`handler`/`receipt` are imported in a fixed, asserted order
+at module load, before any function can trigger the shadow); a real `export_id` was minted via
+`identity.identity_for()`, and the writer's key (`handler.receipt_key()`) equaled the reader's
+key (`entry.RECEIPT_KEY_TEMPLATE.format(...)`) -- both EXACT to
+`firms/49financial/generations/EXP-.../receipt.json`. (2) A receipt built via the real
+`receipt.build()` was persisted at that exact address via the real `handler.persist_receipt()`
+(this worker's own S3 credentials, standing in for the deployed submit path per the disclosed
+partial). (3) A fresh bounded test principal (epoch `1789957994`) logged in for real. (4) A real
+HTTP `GET /api/scoped/investor-reporting/export/{exportId}` through the deployed route, under
+`irpt-export-render`'s own execution role `irpt-export-render-role`, returned `SERVED` with the
+just-written receipt (`export_id` and `artifact.sha256` matched what was persisted) -- no
+`NOT_FOUND`. (5) Taxonomy on two REAL wire errors, never a constructed `ClientError` stub: (a)
+an export id outside the new IAM grant's `EXP-*` resource pattern produced a real S3 403
+`AccessDenied` from the deployed role, and the route answered `NOT_FOUND` (not `UNEXPECTED` --
+this is the exact S106 fix); (b) a real `EXP-*` id the grant allows but that was never written
+produced a real S3 404 `NoSuchKey`, and the route again answered `NOT_FOUND` (the
+pre-existing-correct case, proven still correct). (6) Rollback: the test receipt object, K1b
+and K1 all deleted and verified gone; the issued refresh token refused; the access token refused
+(401) after its `exp`; a post-rollback prefix scan found 0 residue in all three tables.
+
+`IB-rtg-1_R72-AC1_battery_output.txt` sha256
+`7f9d663331f8bbc41b30ea76c142b964f3562599c78952f8acd1eef303200868`. 8 of 8 arms PASS, 0
+UNEXPECTED. Token `IBR72-EXPORT-RECEIPT-ALIGNED-AND-TAXONOMY-BY-CODE` printed -> R72-AC1
+PASS-by-output.
+
+## ENDPOINT CONSEQUENCE (carried, not resolved here)
+
+Per both never-widen halves: FWD-2's export leg does NOT fully realize this round -- the
+submit-wiring (`entry.py`'s `submit_export` -> `handler.py`) is a named follow-on cell for
+round 8 or the round-7 analysis, out of this order's BOUNDS. Not a rider on this order.
