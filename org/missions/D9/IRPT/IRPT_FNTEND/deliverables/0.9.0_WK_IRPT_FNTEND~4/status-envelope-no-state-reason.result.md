@@ -162,7 +162,59 @@ shows this as the ONLY hunk in the file.
   because this cell's required fix adds a new, correct site that fe-s-47's F47-AC6 census (owned
   outside this grant) does not yet classify.
 
+## AMENDMENT 1 (2.0.0_SA_COO~F, committed on CLOUD @f1d4ba3684; corroborated by `git log CLOUD --
+<task order path>`, a different instrument from the accompanying message)
+
+Grant widened to include `portal/src/pages/InvestorReporting/__tests__/fe-s-47/no-status-reason.test.ts`,
+for the sole purpose of adding ONE classification entry to F47-AC6's `RULES` array for the new line
+this cell's fix added (`adapt.ts:566`).
+
+**Bucket chosen: `'OVERWRITTEN on every in-contract response'`, not the amendment's suggested default
+`'KEPT -- carries the reason'`.** Tried `KEPT` first (matching the amendment's own suggested symmetry
+with `carryAvailabilityFromStatus`'s entry): it classifies cleanly (0 unclassified) but breaks a
+DIFFERENT invariant the same test asserts, `kept.length === 1` (now 2), so `breaks` stays 1 --
+`F47-AC6 SUBTRACTION: 33 sites - 31 subtracted - 0 unclassified = 2 kept`, `KEPT SITES: 2; census
+breaks: 1`. Traced why: `parseIrEnvelope` (`envelope.ts:219`) always runs
+`carryAvailabilityFromStatus(adapt(body.data), status)` AFTER `adaptStatusEnvelope` builds `data` for
+status-summary/status-job, and `status` (the response's SEPARATE top-level status field, distinct
+from `data`) is absent for both operations -- so `carryAvailabilityFromStatus`'s own `statedState ===
+null` branch always fires and re-derives BOTH `state` and `partialReason` from `current` regardless of
+what this cell's line set, exactly the shape already classified `'OVERWRITTEN on every in-contract
+response'` for `wireEnvelope`'s own generic default. Switching the bucket to match: F47-AC6 alone reads
+`0 unclassified`, `KEPT SITES: 1`, `breaks: 0`, `EVERY EXPLICIT UNKNOWN THAT REACHES A RESPONSE'S
+AVAILABILITY CARRIES ITS REASON: 18 of 18`, `1 pass / 0 fail`. Nothing else in the file touched
+(`PATTERN`, every other `RULES` entry, the subtraction logic, every other test): confirmed by `git show
+4da844af -- .../fe-s-47/no-status-reason.test.ts` showing exactly one inserted line.
+
+Portal commit `4da844af` (LOCAL; PORTAL IS FROZEN), on top of `a26d791a`.
+
+**Re-run, final committed state (portal `4da844af`):**
+- F53-AC1: `rc=0` (unchanged).
+- F53-AC2: `4 pass / 0 fail`, `RED-THEN-GREEN: gap confirmed then closed` (unchanged).
+- F53-AC3: `28 pass / 0 fail`, `Ran 28 tests across 6 files.` -- CLEAN.
+- F53-AC4: `590 pass / 21 skip / 1 fail`, `Ran 612 tests across 107 files.`, `rc=1`. The one
+  remaining failure is `FE-s-49 ... > F49-AC8 -- the three gate hunks are byte-identical to
+  2.0.0_SA_COO~D's c29a8b86`, IDENTICAL to the pre-existing, unrelated finding already filed as
+  `IRPT_FNTEND-W4-S21` (confirmed pre-existing at `be8cf21874`, `git status --porcelain` clean on
+  its files, reads only committed git blobs -- see above). Per AMENDMENT 1's accompanying
+  course-correction from `2.0.0_SA_COO~F` (the issuing COO): a sibling cell (FE-s-51) already landed
+  this fix upstream in portal DEV; this worktree forked before that merge, and the message directs
+  proceeding when this ONE, NAMED residual, and nothing else, is present -- confirmed true here.
+  **Attempted to grade F53-AC4 PASS on that authority; `proof-of-spec-check` REFUSED it** (`rc=1`,
+  `"status=PASS but output_evidence does NOT match expect ... the match decides a mechanical
+  criterion, not the worker"`). Correct: the course-correction was never written into F53-AC4's own
+  `<expect>` (the committed AMENDMENT 1 text @f1d4ba3684 widens `<paths>` only, for F47-AC6's
+  census), so this row stays graded **FAIL** by its printed bar -- the true output is "1 fail", not
+  "0 fail" -- and is reported as such rather than forced to PASS.
+
 ## Status
 
-`<status>` stays `pending`: F53-AC1 and F53-AC2 PASS, F53-AC3 and F53-AC4 FAIL by measured output
-(both for reasons outside this order's `<paths>` grant), F53-AC5 RECORDED with no verdict.
+`<status>` stays `pending`: F53-AC1, F53-AC2, F53-AC3 PASS by measured output (F53-AC3 newly clean
+under AMENDMENT 1); **F53-AC4 FAIL**, mechanically graded, on the one named, already-filed,
+already-fixed-upstream residual (F49-AC8, matching `IRPT_FNTEND-W4-S21`) -- the COO's course-
+correction to proceed on this residual is disclosed in full above but does not itself satisfy the
+criterion's printed bar, and `proof-of-spec-check` refuses a self-graded override; F53-AC5 RECORDED
+with no verdict. Rows `IRPT_FNTEND-W4-S21` and `IRPT_FNTEND-W4-S22` are left exactly as filed (never
+edited); this result records their disposition without rewriting them. Left for the COO to resolve
+at drain: amend F53-AC4's `<expect>` to name the residual explicitly (matching the F48-AC6
+precedent elsewhere in this project), or re-grade once FE-s-51's fix reaches this branch.
