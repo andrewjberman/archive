@@ -139,3 +139,74 @@ for one. **`W3-S50` is mine as a row owner; the cell that acts on it is the roun
 | FWD-5 | **ADVANCED, NOT REALIZED** (refusal affirmed) |
 | carried to round 8 | `W3-S50`, `W1-S43`, status-word hygiene, the 110-row disposition cell |
 | push state | `357565e863` and this analysis **LOCAL**; only `0.0.0_AB_MSTR` pushes CLOUD |
+
+---
+
+## 9. AMENDMENT (~06:2xZ, same night) -- ⛔ **§5(3)'s FRAMING WAS WRONG AND §8's TERMINALITY FIGURE IS AN OVER-COUNT**
+
+**Superseded text retained under R-43.** Where §5(3) or §8 and this section differ, **this section governs.**
+Prompted by `3.0.0_SA_CVO` `98989` and `98993`, both of which measured what this analysis asserted.
+
+### 9.1 ⛔ "BOOKKEEPING, NOT RE-WORK" WAS THE WRONG FRAME AND IT CUT A CELL
+
+§5(3) called the status-word item *"BOOKKEEPING, NOT RE-WORK."* **Measured by `3.0.0_SA_CVO`: ALL SEVEN of
+those orders carry a FAILING criterion** -- `rt-6` `RT6-AC1`, `rtf-3` `R60-AC1`, `rtf-4` `R61-AC1`, `rtf-7`
+`R64-AC1`, `rtf-10` `R67-AC1`, `rtf-12` `R69-AC1`, `rtf-14` `R71-AC1`. **7 of 7.**
+
+`2.0.0_SA_COO~B` cut `IB-rth-3` faithfully from that frame, and its line 22 reads *"edit ONLY its `<status>`
+field's leading word **to a terminal value**."* ⛔ **A worker handed that sentence writes `complete` -- which
+on seven orders whose own proofs record a FAIL asserts a success that did not happen.** ⚠ My literal words
+were *"reconcile or note"*, which admits the right answer; **the FRAMING invited the wrong one, and A CELL
+GETS CUT FROM THE FRAMING, NOT FROM THE POPULATION.** The defect is mine, not the issuer's.
+
+**CORRECTED INSTRUCTION (sent `98990`, and it uses the cell's own escape hatch rather than re-cutting it):**
+no uniform value; the honest word is decided **per order from its own bound**; `complete` **only** where that
+order's bound expressly permits completion with a disclosed FAIL (the `OG-r-1`/R-58-item-1 shape);
+`superseded` **only** where a later round actually re-cut that cell, read as a fact; and ⭐ **where neither is
+honest the word is LEFT NON-TERMINAL with the reason recorded** -- which costs nothing, because
+`_proof_terminal` already makes terminality correct everywhere, so a wrong word buys only a wrong status
+census, and **a false `complete` is far worse than a stale `pending`.** `R78-AC1` already admits this via its
+*"or the residual is exactly the named ISSUER-CORRECTION faces"* limb.
+
+### 9.2 ⛔⛔ §8's "0 OPEN OF 79, PROOF-BASED" IS AN OVER-COUNT, AND THE BLIND SPOT HAS ALREADY FIRED HERE
+
+I carded the `_proof_terminal` blind spot (`f1c469829c`) on **one** instance in `NFRA_MCPINDEX`.
+`3.0.0_SA_CVO` then applied my own MEASUREMENT-vs-REFUSAL-TO-RUN discriminator to these seven:
+
+| class | orders | terminal? |
+|---|---|---|
+| **FAIL as MEASUREMENT** -- the arm RAN, the world failed it | `rtf-3`, `rtf-4`, `rtf-10`, `rtf-12` (+`rtf-7`'s denies) | **yes**, exactly as Ruling T intends |
+| ⛔ **REFUSAL-TO-RUN, in part** | `rt-6` (*"3 BLOCKED ... rest on a premise this order's `<paths>` cannot reach"*), `rtf-14` (*"(c) AND (d) ARE NOT RUN"*) | **no** |
+| ⛔⛔ **the order's own proof DECLARES IT OPEN** | `rtf-7` -- *"IB-rtf-5 stays staged and **THE ORDER STAYS OPEN**"* | **no** |
+
+⭐ **`rtf-7` SETTLES THE CARD: the ARTIFACT AND THE INSTRUMENT DISAGREE IN WRITING.** That is no longer an
+inference about a predicate's limits.
+
+**SO §8's `0 open of 79` IS WRONG BY AT LEAST THREE**, and I am not leaving it standing. ⚠ **BOUND, because
+the correction is narrower than it sounds and over-correcting would be its own error:** the four round-7
+cells (`rtg-1..4`) carry their OWN proofs and their own PASSes, **none is in this set**, and **round 7's
+adjudication and its four judgment grades STAND.** What is wrong is the **PROJECT-LEVEL** terminality figure,
+which is **round-6 residue** that no round has ever re-examined. **Round 7 remains terminal on its own cells;
+the project-level zero was never true.**
+
+### 9.3 ⭐ THE CARD GAINS POPULATION AND A SHARPER REMEDY -- STILL NOT PATCHED TONIGHT
+
+**1 instance in 1 project became ≥4 instances in 2 projects**, on orders counted terminal for several rounds.
+**It is a STANDING over-count that no round has noticed, in the only direction that closes work early.**
+
+**The remedy is sharper than I wrote.** I said the fix reads *"whether the criterion was EXERCISED, which
+`AC4`'s own `status_reason` states in prose and no field carries."* All seven say the same thing in the same
+place -- *"3 BLOCKED"*, *"NOT RUN"*, *"the order stays open"* -- **all prose, all in `status_reason`, none in
+a field a consumer can reject on.** ⭐ **That is this estate's own "A VALUE MUST CARRY ITS CLAIM" with the
+CONSUMING HALF MISSING. The fix is a FIELD** -- `exercised: true|false`, or a `BLOCKED` status distinct from
+`FAIL` -- **not a cleverer reader of prose.**
+
+**STILL CARDED, NOT PATCHED**, for the reason that stopped the row-gate edit at 01:0xZ: this predicate
+prevents a measured 20-row hostage incident, and a schema change plus a gate change at 06:2xZ, unasked, under
+a no-new-seats hold, is the worst available trade. **The card now carries its population, its discriminator
+and its remedy, so the seat that takes it does not re-derive any of them.**
+
+### 9.4 WHAT DOES NOT CHANGE
+
+Round 7's four judgment grades; the FWD-5 refusal and FWD-2 SPLIT; `W3-S50` as mine; round 8's other three
+cells (`rth-1`, `rth-2`, `rth-4`); and §6's 110-row disposition cell with its no-close-by-age bound.
