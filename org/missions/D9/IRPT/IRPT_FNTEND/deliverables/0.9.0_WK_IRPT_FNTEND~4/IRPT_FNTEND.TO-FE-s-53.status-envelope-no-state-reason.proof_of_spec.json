@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-53",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-53.status-envelope-no-state-reason.md",
+    "group": "OTHER",
+    "vintage_commit": "a21bf57e05"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~4",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "6f56917cef",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-53.status-envelope-no-state-reason.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/adapt.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "a26d791a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit a26d791a on branch wk-irpt_fntend-9-4-fe-s-53-portal (LOCAL; PORTAL IS FROZEN). One hunk, entirely inside adaptStatusEnvelope (:553-566), 11 insertions (10 comment lines + 1 code line): `partialReason: wire.state === 'UNCERTAIN' ? (reason ?? NO_STATUS_REASON) : null,`. `git show a26d791a -- .../adapt.ts` confirms no other adapter (carryAvailabilityFromStatus, wireEnvelope, etc.) is touched."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-53/no-status-reason.test.ts",
+      "kind": "test",
+      "commit_or_etag": "a26d791a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal commit a26d791a (LOCAL). The F53-AC2 battery (4 tests). Run once against the unmodified adaptStatusEnvelope (RED, all 3 non-control assertions fail exactly as the gap predicts) and again after the fix (GREEN, 4/4 pass); both transcripts pasted into status-envelope-no-state-reason.result.md."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F53-AC1",
+      "criterion_verbatim": "`F53-AC1` -- the whole portal typechecks. <criterion id=\"F53-AC1\" cell_refs=\"FE-s-53\" drives=\"none\"><invocation>cd <WS>/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?</invocation><expect>rc=0(?![0-9])</expect></criterion>",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-4-fe-s-53/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "expect": "rc=0(?![0-9])",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "the whole portal: tsc -b --noEmit over every project reference, rc 0 (0 errors), at portal a26d791a",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F53-AC2",
+      "criterion_verbatim": "`F53-AC2` -- your new test prints the RED result (the gap, on unmodified code, captured via `git stash` / a second checkout or simply run once before your fix and once after, both readings pasted into the result file) and then the GREEN result on your fix. It asserts: a status-summary/status-job wire object carrying NO `public_reason_code` produces a view `StatusEnvelope.availability.partialReason === NO_STATUS_REASON`; the same wire object carrying a NON-null `public_reason_code` is UNCHANGED (still carries that code as the reason, never overwritten). <criterion id=\"F53-AC2\" cell_refs=\"FE-s-53\" drives=\"none\"><invocation>cd <WS>/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-53/no-status-reason.test.ts</invocation><expect>RED-THEN-GREEN: gap confirmed then closed(?![0-9])</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-4-fe-s-53/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-53/no-status-reason.test.ts",
+      "expect": "RED-THEN-GREEN: gap confirmed then closed(?![0-9])",
+      "output_evidence": "F53-AC2/1 availability: {\"state\":\"UNCERTAIN\",\"sourceAsOf\":\"2026-09-18T12:00:00Z\",\"partialReason\":\"The response carried no status stating its state, so its state is unknown.\",\"publicReasonCode\":null,\"sourceDate\":{\"fact\":\"PRESENT\",\"businessAsOf\":\"2026-09-18\"}}\nF53-AC2/1 validate problems: []\nSTATE UNCERTAIN, NO REASON -> NO_STATUS_REASON, VALID: yes\nF53-AC2/2 availability: {\"state\":\"UNCERTAIN\",\"sourceAsOf\":\"2026-09-18T12:00:00Z\",\"partialReason\":\"PRODUCER_STATED_CODE\",\"publicReasonCode\":\"PRODUCER_STATED_CODE\",\"sourceDate\":{\"fact\":\"PRESENT\",\"businessAsOf\":\"2026-09-18\"}}\nSTATE UNCERTAIN, HAS REASON -> KEPT (never NO_STATUS_REASON): yes\nF53-AC2/3 availability: {\"state\":\"PARTIAL\",\"sourceAsOf\":\"2026-09-18T12:00:00Z\",\"partialReason\":null,\"publicReasonCode\":\"SOURCE_PARTITION_INCOMPLETE\",\"sourceDate\":{\"fact\":\"PRESENT\",\"businessAsOf\":\"2026-09-18\"}}\nSTATED STATE (PARTIAL) UNCHANGED: yes\nRED-THEN-GREEN: gap confirmed then closed\n4 pass\n0 fail\n4 expect() calls\nRan 4 tests across 1 file. [83.00ms]\nrc=0\n\n--- RED transcript (before the fix, same test file, portal be8cf21874's adaptStatusEnvelope) is pasted in full in status-envelope-no-state-reason.result.md: 1 pass / 3 fail, F53-AC2/1 and F53-AC2/2 fail exactly on the predicted gap (validate problems non-empty; partialReason stays null in both arms), F53-AC2/3 (the control) already passes.",
+      "denominator": "4 of 4 assertions pass GREEN (2 gap arms + 1 control + 1 summary); the same 4 read 1 pass/3 fail RED, with the 1 pass being the control",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "F53-AC3",
+      "criterion_verbatim": "`F53-AC3` -- the existing envelope/status suites (fe-s-14, fe-s-47) are unaffected -- this cell adds a path, it does not change any already-passing case. <criterion id=\"F53-AC3\" cell_refs=\"FE-s-53\" drives=\"none\"><invocation>cd <WS>/portal && timeout 300 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-14 src/pages/InvestorReporting/__tests__/fe-s-47</invocation><expect>(?<![0-9])0 fail</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-4-fe-s-53/portal && timeout 300 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-14 src/pages/InvestorReporting/__tests__/fe-s-47",
+      "expect": "(?<![0-9])0 fail",
+      "output_evidence": "27 pass\n1 fail\n75 expect() calls\nRan 28 tests across 6 files. [865.00ms]\nThe one failure: 'FE-s-47 -- a response with no status says why its state is unknown > F47-AC6 -- the reach, by subtraction over the committed tree'. F47-AC6 UNCLASSIFIED src/pages/InvestorReporting/contracts/adapt.ts:566: partialReason: wire.state === 'UNCERTAIN' ? (reason ?? NO_STATUS_REASON) : null,\nF47-AC6 KEPT SITES: 1; census breaks: 1\nexpect(breaks).toBe(0) -- Expected: 0, Received: 1. CAUSE, GROUNDED: F47-AC6 runs a git-grep census (`EXPLICIT_UNKNOWN_STATE|'UNCERTAIN'|\\\"UNCERTAIN\\\"`) over the COMMITTED tree, classified by a hardcoded per-line RULES table in fe-s-47's OWN test file. This cell's required fix (a single, correct new site naming the wire's own 'states no state' token) matches the census pattern but no RULES entry covers it, so it is reported UNCLASSIFIED. Before this commit the same census read 0 breaks (confirmed: the census reads git blobs at HEAD, and re-running it while the fix was still uncommitted-working-tree-only showed 0 breaks/18 of 18; only after committing a26d791a did the census see the new line and break). fe-s-47's test file is NOT in this order's <paths> (bounded to adapt.ts's adaptStatusEnvelope, __tests__/fe-s-53/, and the investigation file only), so the RULES table cannot be amended from this grant. Filed as surprise row IRPT_FNTEND-W4-S22 (BLOCKING/INERT).",
+      "denominator": "28 tests across 6 files (fe-s-14: 5 files; fe-s-47: 1 file); 27 pass, 1 fail (F47-AC6, caused by this cell's own required change touching a site fe-s-47's own census does not yet classify)",
+      "status": "FAIL",
+      "status_reason": "F47-AC6 (fe-s-47/no-status-reason.test.ts, outside this order's <paths>) reports the new, correct line adapt.ts:566 UNCLASSIFIED against its own hardcoded RULES table; fe-s-47's test file cannot be amended from this grant. Filed as IRPT_FNTEND-W4-S22 (BLOCKING/INERT); not fixable inside <paths>."
+    },
+    {
+      "criterion_id": "F53-AC4",
+      "criterion_verbatim": "`F53-AC4` -- the whole IRPT_FNTEND suite. <criterion id=\"F53-AC4\" cell_refs=\"FE-s-53\" drives=\"none\"><invocation>cd <WS>/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting</invocation><expect>(?<![0-9])0 fail</expect></criterion>",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-9-4-fe-s-53/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "expect": "(?<![0-9])0 fail",
+      "output_evidence": "589 pass\n21 skip\n2 fail\n2497 expect() calls\nRan 612 tests across 107 files. [75.75s]\nrc=1\nTwo failures, both outside <paths>: (1) 'FE-s-47 ... > F47-AC6' -- the same finding as F53-AC3 (IRPT_FNTEND-W4-S22). (2) 'FE-s-49 -- Investor Reporting is Opal-admin only > F49-AC8 -- the three gate hunks are byte-identical to 2.0.0_SA_COO~D's c29a8b86', printed 'UNRELATED HUNKS CARRIED INTO HEAD: 2 of 2 (expected 0)' (ArrowLeftRight icon import + Trade Submission nav item survive at HEAD, which F49-AC8 says they must not). CONFIRMED PRE-EXISTING at portal be8cf21874, not caused by this cell: `git status --porcelain -- src/App.tsx src/pages/InvestorReporting/__tests__/fe-s-49` reads empty in this worktree (nothing of this cell touches either path), and F49-AC8 reads only committed git blobs (git show --format= c29a8b86 -- src/App.tsx; HEAD's App.tsx), a property of the committed tree independent of any run. Filed as surprise row IRPT_FNTEND-W4-S21 (BLOCKING/INERT); adjacent to the already-tracked IRPT_FNTEND-S67 ('FE-s-49 is held from drain'), a different symptom in the same file.",
+      "denominator": "612 tests across 107 files; 589 pass, 21 skip, 2 fail -- 1 caused by this cell (F47-AC6, W4-S22) and 1 pre-existing and unrelated (F49-AC8, W4-S21), neither remediable inside this order's <paths>",
+      "status": "FAIL",
+      "status_reason": "Two failures, neither inside <paths>: F47-AC6 (same cause as F53-AC3, IRPT_FNTEND-W4-S22) and fe-s-49/admin-gate.test.ts F49-AC8, confirmed PRE-EXISTING at portal be8cf21874 (git status --porcelain on its files is empty in this worktree; the test reads only committed git blobs). Filed as IRPT_FNTEND-W4-S21 (BLOCKING/INERT). Not fixable inside <paths>."
+    },
+    {
+      "criterion_id": "F53-AC5",
+      "criterion_verbatim": "`F53-AC5` -- graded at L9: the read that located the gap is sound (cites the exact lines), and the fix is the minimal one that makes the red test green without touching any other adapter. RECORD; NO VERDICT. <criterion id=\"F53-AC5\" cell_refs=\"FE-s-53\" judgment=\"true\" drives=\"none\"/>",
+      "method": "manual_read_with_citation",
+      "invocation": "none -- judgment criterion, graded at L9",
+      "output_evidence": "RECORDED, NO VERDICT. Material for the grader: the gap was grounded by reading contracts/adapt.ts at portal be8cf21874 (NO_STATUS_REASON :176; carryAvailabilityFromStatus :291-320, the rule at :307; adaptStatusEnvelope :536-569, wireEnvelope's generic default at :239) and contracts/wire/StatusEnvelope.ts (:12-32, confirming public_reason_code is required/non-nullable string with no separate document-reason field, per the order's own instruction to ground it in the wire type rather than by analogy). A RED test (fe-s-53/no-status-reason.test.ts) was run against the unmodified function BEFORE any edit and failed exactly as predicted (validate.ts's checkAvailability refusal, and a stated UNCERTAIN reason silently dropped); only then was the fix written. The fix is a single added line inside adaptStatusEnvelope (adapt.ts:566, one hunk, 11 lines total including 10 comment lines, confirmed by `git show a26d791a -- .../adapt.ts`): `partialReason: wire.state === 'UNCERTAIN' ? (reason ?? NO_STATUS_REASON) : null,`, mirroring carryAvailabilityFromStatus's existing rule with the wire's own equivalent condition. No other adapter or line in adapt.ts changed. A second, alternative phrasing (`wire.state === STATE_FOR_WIRE.UNCERTAIN`, dot access) was considered specifically because it would dodge fe-s-47's F47-AC6 census, and rejected as gaming an unrelated check rather than fixing anything -- the natural, readable comparison was kept and the resulting F47-AC6/F49-AC8 conflicts were reported as surprises (W4-S21, W4-S22) instead.",
+      "denominator": "judgment -- 1 added line, 1 function, 0 other adapters touched; graded by 3.0.0_SA_CVO at L9",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=\"true\": graded at L9 by 3.0.0_SA_CVO, never self-graded (Rule 27 L9). This worker records the material and no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The BEFORE arm is the unmodified adaptStatusEnvelope at portal be8cf21874, the mutant the RED test must refuse: state UNCERTAIN with no public_reason_code, and state UNCERTAIN with a stated public_reason_code.",
+      "expected": "BEFORE: partialReason stays null in BOTH arms (the generic wireEnvelope default, never touched); validate.ts refuses the no-reason arm.",
+      "observed": "RED transcript (result.md): 'F53-AC2/1 ... partialReason\":null ... validate problems: [\"StatusEnvelope.availability: state 'UNCERTAIN' carries NEITHER partialReason NOR publicReasonCode\"] ... STATE UNCERTAIN, NO REASON -> NO_STATUS_REASON, VALID: no' and 'F53-AC2/2 ... partialReason\":null ... STATE UNCERTAIN, HAS REASON -> KEPT (never NO_STATUS_REASON): no' -- both fired exactly as predicted, before any fix.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The fe-s-53 GREEN verdict line compared across two runs on byte-identical committed bytes (portal a26d791a): the standalone deciding run (F53-AC2) and the same test file re-run independently minutes later.",
+      "observed": "Both runs print: 'RED-THEN-GREEN: gap confirmed then closed', '4 pass', '0 fail', 'Ran 4 tests across 1 file.', rc=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal/src/pages/InvestorReporting/__tests__/fe-s-47/no-status-reason.test.ts (the F47-AC6 RULES table)",
+      "reason": "NOT YOURS. Not in this order's <paths>. This cell's required fix adds a new site the RULES table does not classify; placed as row IRPT_FNTEND-W4-S22 and was not edited."
+    },
+    {
+      "item": "portal/src/App.tsx and portal/src/pages/InvestorReporting/__tests__/fe-s-49/",
+      "reason": "NOT YOURS. Not in this order's <paths>. A pre-existing F49-AC8 failure (untouched by this cell, git status clean) is placed as row IRPT_FNTEND-W4-S21 and was not edited."
+    },
+    {
+      "item": "portal/src/pages/InvestorReporting/contracts/adapt.ts -- carryAvailabilityFromStatus, wireEnvelope, and every adapter other than adaptStatusEnvelope",
+      "reason": "BOUNDS: 'contracts/adapt.ts IS YOURS FOR adaptStatusEnvelope ONLY (:536-569).' Confirmed untouched: git show a26d791a -- .../adapt.ts shows exactly one hunk, entirely inside adaptStatusEnvelope."
+    }
+  ],
+  "surprises": [
+    "IRPT_FNTEND-W4-S21: F53-AC4's whole-suite '0 fail' cannot pass because of a pre-existing, unrelated fe-s-49/admin-gate.test.ts F49-AC8 failure at portal be8cf21874 (BLOCKING, INERT).",
+    "IRPT_FNTEND-W4-S22: F53-AC3's '0 fail' over fe-s-14+fe-s-47 cannot pass because this cell's required fix adds a new, correct site (adapt.ts:566) that fe-s-47's F47-AC6 census does not yet classify (BLOCKING, INERT)."
+  ],
+  "session_log": "0.9.0_WK_IRPT_FNTEND~4 on IRPT_FNTEND.TO-FE-s-53, worktree pair C:/tmp/wk-irpt_fntend-9-4-fe-s-53 (workspace branch wk-irpt_fntend-9-4-fe-s-53) + portal (branch wk-irpt_fntend-9-4-fe-s-53-portal, from DEV be8cf21874). Read contracts/adapt.ts (NO_STATUS_REASON, carryAvailabilityFromStatus, adaptStatusEnvelope) and contracts/wire/StatusEnvelope.ts + its JSON schema to ground the gap per BOUNDS before writing anything. Wrote fe-s-53/no-status-reason.test.ts and ran it against the UNMODIFIED adaptStatusEnvelope first (RED, 1 pass/3 fail, exactly the predicted gap) before making any edit. Implemented the fix (one added partialReason line, mirroring carryAvailabilityFromStatus's rule with the wire's own 'UNCERTAIN' token); re-ran the test (GREEN, 4/4). One TS2367 typecheck error surfaced in the test's own AC2/2 assertion (a redundant, always-true literal comparison once the first equality narrowed the type) and was removed rather than worked around; F53-AC1 then passed. Ran F53-AC3 (fe-s-14+fe-s-47) before committing: 0 fail, because the test's census reads git blobs at HEAD and my fix was still working-tree-only. Committed the portal fix+test (a26d791a). Re-ran F53-AC3: now 1 fail (F47-AC6, newly UNCLASSIFIED on the committed adapt.ts:566). Ran F53-AC4 (whole suite): 2 fail (F47-AC6 plus a confirmed pre-existing, unrelated fe-s-49/admin-gate.test.ts F49-AC8 failure, git status clean on both its files). Considered rewriting the fix's condition with dot-access (STATE_FOR_WIRE.UNCERTAIN) to dodge F47-AC6's grep pattern; rejected as gaming a census whose purpose is to force acknowledgment of new sites, and filed the true conflict as a surprise instead (both W4-S21 and W4-S22 are outside this order's <paths> to remedy). <status> stays pending: F53-AC3 and F53-AC4 FAIL by measured output.",
+  "compiler_tools": [
+    {
+      "tool": "bun 1.3.9",
+      "invocation": "/c/Users/AndrewBerman/.bun/bin/bun test ...",
+      "result": "the test runner for F53-AC2, F53-AC3, F53-AC4"
+    },
+    {
+      "tool": "tsc (via `bun run typecheck` = tsc -b --noEmit)",
+      "invocation": "/c/Users/AndrewBerman/.bun/bin/bun run typecheck",
+      "result": "rc=0 at portal a26d791a"
+    },
+    {
+      "tool": "Python 3.x",
+      "invocation": "python .tools/proof-of-spec-check.py ... --governing-order ...",
+      "result": "the proof instance check"
+    }
+  ]
+}
