@@ -1,0 +1,33 @@
+IB-rtg-4 R75-AC1 arm (e) -- live proof under the deployed role and bytes -- run at 2026-09-20T19:03:42Z -- worktree HEAD af62387cd6e9fc08ed664e12e474b7a7d328d65c
+
+  PRECONDITION: the rtf-9 packet's 2 of 2 halves at HEAD; THIS order's own live-principal ledger (irpt-bckend-ib-rtg-4-live-principal) committed OPEN
+  rtf-9 packet blob at HEAD a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4 (== a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4: True); halves naming it 2 of 2; THIS order's principal ledger sentinel (org/critical_paths/.open_deploys/irpt-bckend-ib-rtg-4-live-principal.json) at HEAD: True
+  before: opal-users-v2 PK begins_with 'USER#usr_irptrte_': 0 of 79 scanned
+  before: opal-users-v2 email begins_with 'irpt-rte1-test-': 0 of 79 scanned
+  before: opal-partner-49financial email begins_with 'irpt-rte1-test-': 0 of 11 scanned
+GUARD: abby_horton PRESENT in s3://opal-data-bd/platinum/49financial/ownership_map.json: True
+  K1 created 2026-09-20T19:03:44Z: PK USER#usr_irptrte_1789931024; consistent read-back True; attributes 10; digest (passwordHash excluded) 3086722a95ccaa29c92c1b3eac010878d50ae5896a4cbea8b85c1a8be76ac707
+  K1b created 2026-09-20T19:03:44Z in opal-partner-49financial: consistent read-back True; attributes ['advisorKey', 'email']; digest ab3cb5891c92d9e4c6c05a88738b353be83d288a6e786af6daea2db205978d22
+  login POST /auth/login -> HTTP 200 at 2026-09-20T19:03:47Z; access token minted=True; refresh cookie set=True
+  K2 claims: firmId=49financial role=user advisorKey=abby_horton advisorId=abby_horton exp=19:18:54Z
+keys read back 2 of 2 and the session as the rtf-9 packet declares: True
+directory search WITH a query (q=a) -> HTTP 200, 7 entries
+directory resolve WITH a selection -> HTTP 200, ok=True, account_count=1
+account resolved for the granted request: acc_a5210ef53d8323b9d106b8b1 (fallback synthetic if resolve carried none: False)
+ROUTE https://opalinvest.dev/api/scoped/investor-reporting/holdings/acc_a5210ef53d8323b9d106b8b1 -> FUNCTION irpt-holdings (EXECUTION ROLE irpt-holdings-role): class=POLICY http=200 code=NOT_AUTHORIZED firm_id=present business_date=None -> SCOPE-RESOLVED
+  ROLLBACK -- K1b FIRST, then K1; each verified by a failing consistent base-table read
+  K1b DeleteItem -> consistent GetItem returns no Item: True at 2026-09-20T19:03:56Z
+  K1  DeleteItem -> consistent GetItem returns no Item: True at 2026-09-20T19:03:56Z
+  deletions verified: 2 of 2
+  REFRESH with the issued refresh token after K1's delete: HTTP 404; access token minted=False -> REFUSED (1 of 1)
+  waiting 908 s for the access token's exp (19:18:54Z) + 10 s
+  the access token after exp: GET status -> HTTP 401 -> REFUSED 401 (1 of 1)
+  after: opal-users-v2 PK begins_with 'USER#usr_irptrte_': 0 of 79 scanned
+  after: opal-users-v2 email begins_with 'irpt-rte1-test-': 0 of 79 scanned
+  after: opal-partner-49financial email begins_with 'irpt-rte1-test-': 0 of 11 scanned
+
+lifecycle closed (2 of 2 deleted, refresh refused, 401 after exp, no residue): True
+holdings result: {'http': 200, 'operation': 'holdings-snapshot', 'firm_id': 'fir_c9fc04650e2134d6ea033da2', 'code': 'NOT_AUTHORIZED', 'state': 'UNAVAILABLE', 'business_date': None, 'class': 'POLICY'}
+
+RESULT: R75-AC1 arm (e) PASS
+IBR75-HOLDINGS-LIVE-PROOF-SCOPE-RESOLVED

@@ -148,7 +148,7 @@ CVO is right that this is a gap in the CRITERION, not in the grading of it, so `
 
 1. ⛔ **`W7-S4` -- THE N2/N6/IV7 COMPARISON. IT IS FWD-5's ONLY REMAINING STRUCTURAL CLAUSE** and it has been servable
    since round 4. Owner **`2.0.0_SA_COO~G`** per `S81`. Instruments located and read by this seat:
-   `org/missions/D14/LGIC/LGIC_NAMING/deliverables/GRADING_RULE.md` (510 lines, §9 = 43 worked cases),
+   `org/missions/D14/LGIC/LGIC_NAMING/deliverables/GRADING_RULE.md` (510 lines, §9 = **45** worked cases -- CORRECTED 2026-09-20 from 43, which was stale at this analysis's own vintage; found by `3.0.0_SA_CVO` at round 19 because the round-19 cell RE-DERIVED its denominator at write time instead of inheriting it),
    `.../exercises/n6-grader-a.tsv` (89 lines), `.../TENSION_RANKING.md` (149 lines).
 2. **THE 1298** -- the unfillable-form residual, counted correctly for the first time here. ⛔ **Its owner is still a
    CATEGORY ("the clean-up projects"), which is the decay shape round 7 named and section 5 just measured the cost of.**

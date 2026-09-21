@@ -1,0 +1,76 @@
+IB-rtg-1 R72-AC1 battery -- run at 2026-09-21T02:33:11Z -- worktree HEAD 0330c5b79cd7d762f04dd7c0f55cb7ddc91b23c7
+route: GET /api/scoped/investor-reporting/export/{exportId}  |  function: irpt-export-render  |  role: irpt-export-render-role
+
+(0) THE PACKET AND BOTH HALVES -- at HEAD, naming this blob
+  identity: (0) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/code claim, NOT a served behaviour
+  packet org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~1/NEVER_WIDEN_SIGNOFF_PACKET_IB-rtg-1.md: blob at HEAD 74a1004fde6e649c321f43d62cfbda5b61489b98, worktree 74a1004fde6e649c321f43d62cfbda5b61489b98, signed 74a1004fde6e649c321f43d62cfbda5b61489b98 -> COMMITTED, UNCHANGED
+  COO half org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtg-1_EXPORT_RECEIPT.md: PRESENT, naming blob
+  CTO half org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtg-1_20260920.md: PRESENT, naming blob
+  halves: 2 of 2
+
+(1) KEY ALIGNMENT -- S105, real production code, both sides
+  identity: (1) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/code claim, NOT a served behaviour
+  real identity.identity_for(bundle_sha256=a76e620a73274af3..., contract_version=1.0.0) -> export_id EXP-564ce23c4339db71cddcc2fbee39f453
+  writer key (handler.receipt_key, real function):  firms/49financial/generations/EXP-564ce23c4339db71cddcc2fbee39f453/receipt.json
+  reader key (entry.RECEIPT_KEY_TEMPLATE, real deployed default): firms/49financial/generations/EXP-564ce23c4339db71cddcc2fbee39f453/receipt.json
+  KEY ALIGNMENT: EQUAL
+  no local IRPT_EXPORT_RECEIPT_KEY override in this run's environment: True (the ruling REFUSES using the Terraform override to mask a wrong default; unset here confirms this run reads entry.py's own real default, the same one the deployed function reads)
+
+(2) PERSIST A RECEIPT AT THE ALIGNED ADDRESS -- handler.persist_receipt() + receipt.build(), real functions
+  identity: (2) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/code claim, NOT a served behaviour
+  receipt.build() real output: export_id EXP-564ce23c4339db71cddcc2fbee39f453, job_state READY, vendor_signed_url_exposed False
+  handler.persist_receipt() real write+readback: bucket opal-data-ycharts key firms/49financial/generations/EXP-564ce23c4339db71cddcc2fbee39f453/receipt.json bytes 804 equal(readback==written) True
+  persist_receipt is 1 of 1 corpus writers of this address (the packet's own W=1 census); this run's write stands in for the deployed submit path per the disclosed partial (row W1-S43)
+
+(3) BOUNDED PRINCIPAL -- fresh epoch, K1 + K1b, real login
+  identity: (3) ran as arn:aws:iam::313476888478:user/Andrew_Berman -- a configuration/code claim, NOT a served behaviour
+  before: opal-users-v2 PK begins_with 'USER#usr_irptrtg1_': 0 of 79 scanned
+  before: opal-users-v2 email begins_with 'irpt-rtg1-test-': 0 of 79 scanned
+  before: opal-partner-49financial email begins_with 'irpt-rtg1-test-': 0 of 11 scanned
+  K1 created 2026-09-21T02:33:14Z: PK USER#usr_irptrtg1_1789957994; consistent read-back True; attributes 10; digest (passwordHash excluded) a2ebabae830453025876b5fb9894f97754b1f7483709d14c75a6e1bd5170a5b6
+  K1b created 2026-09-21T02:33:15Z in opal-partner-49financial: consistent read-back True; attributes ['advisorKey', 'email']
+  login POST /auth/login -> HTTP 200 at 2026-09-21T02:33:17Z; access token minted=True; refresh cookie set=True
+  K2 claims: firmId=49financial role=user advisorKey=abby_horton exp=02:48:25Z
+  keys read back 2 of 2 and session claims as declared: True
+
+(4) ROUND TRIP -- GET /api/scoped/investor-reporting/export/EXP-564ce23c4339db71cddcc2fbee39f453 under the deployed route+role
+  identity: (4) -- HTTP requests run as the bounded test principal; the served compute runs as irpt-export-render's OWN execution role irpt-export-render-role (printed per request); the operator identity arn:aws:iam::313476888478:user/Andrew_Berman only writes the test receipt object, creates/deletes the principal's keys, and reads configuration
+  GET /export/EXP-564ce23c4339db71cddcc2fbee39f453 -> function irpt-export-render (role irpt-export-render-role): SERVED http 200 code None firm_id present
+  SERVED with the just-written receipt (export_id + artifact sha256 match what arm (2) persisted): True
+  round trip (no NOT_FOUND, content matches the write): True
+
+(5) TAXONOMY BY CODE -- REAL wire errors, never a constructed ClientError stub
+  identity: (5) -- HTTP requests run as the bounded test principal; the served compute runs as irpt-export-render's OWN execution role irpt-export-render-role (printed per request); the operator identity arn:aws:iam::313476888478:user/Andrew_Berman only writes the test receipt object, creates/deletes the principal's keys, and reads configuration
+  GET /export/plainid-fcf83b9f1fb2da6b (key outside the EXP-* grant -> real S3 403 AccessDenied) -> POLICY http 200 code NOT_FOUND
+  S106 (AccessDenied -> NOT_FOUND, not UNEXPECTED): True
+  GET /export/EXP-8dc6fb6af82b2a478c5e77b24bf185b4 (real EXP-* id, IAM allows, object absent -> real S3 404 NoSuchKey) -> POLICY http 200 code NOT_FOUND
+  NoSuchKey -> NOT_FOUND (unchanged correct behaviour): True
+
+(disclosed, not graded) POST /api/scoped/investor-reporting/export -- the submit-wiring gap, W1-S43
+  POST /export -> POLICY http 200 code NOT_READY -- EXPECTED NOT_READY (row W1-S43, the submit controller is not wired to this entry on the deployed path; NOT counted toward the 0-UNEXPECTED tally below, disclosed per this order's arm (e) note)
+
+(6) ROLLBACK
+  ROLLBACK -- test receipt object, K1b, then K1; each verified
+  test receipt DeleteObject firms/49financial/generations/EXP-564ce23c4339db71cddcc2fbee39f453/receipt.json -> head-object confirms gone: True at 2026-09-21T02:33:24Z
+  K1b DeleteItem -> consistent GetItem returns no Item: True at 2026-09-21T02:33:24Z
+  K1  DeleteItem -> consistent GetItem returns no Item: True at 2026-09-21T02:33:24Z
+  deletions verified: 3 of 3
+  REFRESH with the issued refresh token after K1's delete: HTTP 404; access token minted=False -> REFUSED (1 of 1)
+  waiting 910 s for the access token's exp (02:48:25Z) + 10 s
+  the access token after exp: GET status -> HTTP 401 -> REFUSED 401 (1 of 1)
+  after: opal-users-v2 PK begins_with 'USER#usr_irptrtg1_': 0 of 79 scanned
+  after: opal-users-v2 email begins_with 'irpt-rtg1-test-': 0 of 79 scanned
+  after: opal-partner-49financial email begins_with 'irpt-rtg1-test-': 0 of 11 scanned
+  lifecycle closed (3 of 3 deleted, refresh refused, 401 after exp, no residue): True
+
+ARM (0) packet+halves: PASS
+ARM (1) key alignment (S105): PASS
+ARM (2) persist at the aligned address: PASS
+ARM (3) bounded principal + login: PASS
+ARM (4) round trip (no NOT_FOUND): PASS
+ARM (5a) taxonomy: AccessDenied -> NOT_FOUND (S106): PASS
+ARM (5b) taxonomy: NoSuchKey -> NOT_FOUND: PASS
+ARM (6) rollback, full lifecycle: PASS
+UNEXPECTED count on the exercised firm (49financial): 0
+RESULT: R72-AC1 PASS -- 8 of 8 arms hold, 0 UNEXPECTED
+IBR72-EXPORT-RECEIPT-ALIGNED-AND-TAXONOMY-BY-CODE

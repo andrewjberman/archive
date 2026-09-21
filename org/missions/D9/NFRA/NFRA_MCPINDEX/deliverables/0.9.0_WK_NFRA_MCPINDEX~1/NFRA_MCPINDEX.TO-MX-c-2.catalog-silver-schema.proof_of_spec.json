@@ -1,0 +1,235 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-c-2",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f506f63a8b",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-c-2.catalog-silver-schema.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "workflows/atom_decomposition/emit_catalog_v02.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Added CATALOG_ENTRIES_DIR, ENTRY_REQUIRED_FIELDS (the C1 schema, exactly 8 fields), ENTRY_GRAIN_VALUES, ENTRY_FIRM_SCOPE_RULES, validate_entry(), load_catalog_entries(); main() now reads catalog_entries/*.yaml once, refuses the whole emit (nothing written) on any schema-invalid entry file, and otherwise writes an additive top-level silver_datasets: section (silver_datasets: [] at this vintage -- zero source files ship in this round). Local repository script, not a served artifact (bound 6); no deploy in scope.",
+      "artifact_covered_by": ["MXC2-AC1", "MXC2-AC2", "MXC2-AC3", "MXC2-AC4", "MXC2-AC6", "MXC2-AC7", "MXC2-AC8"]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/validate_catalog_v02.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Added validate_silver_entries() (imports validate_entry/load_catalog_entries from the emitter -- one schema definition), run first in main() and REFUSING (rc 2) before any live S3 call if a catalog_entries/*.yaml file is invalid. Fixed a pre-existing bare-`aws` subprocess call (FileNotFoundError under a native, non-bash Python process on this device) by resolving .tools/aws.cmd by path per CLAUDE.md's shim rule, falling back to bare aws only if the shim is absent -- the only reason AC5's live run was exercisable here at all. No deploy in scope.",
+      "artifact_covered_by": ["MXC2-AC3", "MXC2-AC5"]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/battery_catalog_v02.py",
+      "kind": "script",
+      "commit_or_etag": "96dcb4a66a6dbf1a2a71ce785b0671c822eb2a8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "0-line diff. Reads only channels:, is structurally unaffected by the new sibling silver_datasets: key, and already passed 41/41 before this cell's edits (measured baseline) and after (MXC2-AC5). Nothing in this cell's criteria requires a battery case for a dataset that does not exist yet at this vintage.",
+      "artifact_covered_by": ["MXC2-AC5"]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/catalog_entries/README.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New directory + README documenting the one-file-per-dataset schema, the C1 field table, and the firm_scope_rule Rule 24 record summary. Zero *.yaml source files ship in this round (mechanism only); the directory is otherwise empty (the README is the sole tracked file, since git cannot commit an empty directory).",
+      "artifact_covered_by": ["MXC2-AC2", "MXC2-AC7"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Emitter output only (bound 10 -- generated, never hand-edited). Diff vs the cut-head baseline (git show 41da358d45): 4 lines changed, all header/build-head vintage stamps, plus one 2-line addition (`silver_datasets: []` + its comment) after finding_no_servable_market_returns_source:. The 36 EMISSION_MAP rows across 15 channels are byte-identical field-by-field (MXC2-AC4). Local repository file per bound 6; catalog_gate.py never reads the new key (its load_catalog() only ever does cat.get('channels'), read this session).",
+      "artifact_covered_by": ["MXC2-AC3", "MXC2-AC4", "MXC2-AC6", "MXC2-AC7"]
+    },
+    {
+      "path_or_key": "workflows/atom_decomposition/tests/test_catalog_silver_entries.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New unittest module, 18 cases (ValidateEntryTests: schema shape, per-field type enforcement, each of the 8 C1 fields, extra-field rejection; LoadCatalogEntriesTests: directory read against a tempfile.TemporaryDirectory(), never the real catalog_entries/ tree). Run 2026-09-21T06:31Z via `py -3.12 -m unittest workflows.atom_decomposition.tests.test_catalog_silver_entries -v`: 18/18 OK.",
+      "artifact_covered_by": ["MXC2-AC1", "MXC2-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The probe for all 8 criteria. AC1 exercises validate_entry() in-process (8 fields individually dropped + extra-field + fully-valid). AC2 exercises load_catalog_entries() against a temp-dir override of CATALOG_ENTRIES_DIR (never the tracked directory). AC3 plants a real file into the tracked catalog_entries/, runs the real emitter subprocess, diffs CAT, exercises validate_silver_entries() engaged and disengaged, then restores CAT byte-for-byte in a finally block (verified). AC4 diffs the current CAT against `git show 41da358d45:...` field-by-field. AC5 runs the two real scripts and restores their out-of-grant side-effect file (catalog_v02/validation_report.json) via git checkout afterward. AC6 measures the ascii-delta + a strict decode. AC7 walks the filesystem vs `git ls-tree` at the cut head. AC8 checks the deliverable's Rule 24 record structure and independently re-runs the word-boundary census.",
+      "artifact_covered_by": ["MXC2-AC1", "MXC2-AC2", "MXC2-AC3", "MXC2-AC4", "MXC2-AC5", "MXC2-AC6", "MXC2-AC7", "MXC2-AC8"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/catalog-silver-schema.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's result record (every value with instrument, UTC time, denominator) and the Rule 24 four-postulate record for firm_scope_rule / never_sum_rules / freshness_field, with the word-boundary census MXC2-AC8 re-checks independently.",
+      "artifact_covered_by": ["MXC2-AC8"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Appends row NFRA_MCPINDEX-W1-S3 (class OBSERVATION, hazard_standing INERT): validate_catalog_v02.py's designed side-effect write (catalog_v02/validation_report.json) sits outside this cell's <paths> grant; the worker reverts it via git checkout after every exercise rather than committing it. Denominator line updated 2 -> 3 rows.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MXC2-AC1",
+      "criterion_verbatim": "the entry schema carries exactly the C1 fields -- business meaning, example questions, grain, freshness field, firm-scope rule, never-sum rules, producer, tools -- each with a type the validator enforces",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC1",
+      "expect": "(?m)^VERDICT: PASS-MXC2-AC1(?![0-9])",
+      "output_evidence": "ENTRY_REQUIRED_FIELDS (8): ('business_meaning', 'example_questions', 'grain', 'freshness_field', 'firm_scope_rule', 'never_sum_rules', 'producer', 'tools')\nmatches C1's 8 named fields exactly: True\nfully valid synthetic entry -> errors=[] (expect [])\nper-field type enforcement, denominator 8 of 8 C1 fields, each individually dropped: [('business_meaning', True), ('example_questions', True), ('grain', True), ('freshness_field', True), ('firm_scope_rule', True), ('never_sum_rules', True), ('producer', True), ('tools', True)]\nan extra (9th) field is refused, keeping the schema at EXACTLY 8: True\nVERDICT: PASS-MXC2-AC1",
+      "denominator": "8 of 8 C1 fields individually type/presence-enforced; 1 of 1 extra-field case refused; 1 of 1 fully-valid case accepted.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC2-AC2",
+      "criterion_verbatim": "a dataset entry is ONE source file under `EMIT/catalog_entries/`, and the emitter reads that directory",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC2",
+      "expect": "(?m)^VERDICT: PASS-MXC2-AC2(?![0-9])",
+      "output_evidence": "emit_catalog_v02.CATALOG_ENTRIES_DIR resolves to: C:\\tmp\\wk-mcpindex-1b\\workflows\\atom_decomposition\\catalog_entries\nexpected (workflows/atom_decomposition/catalog_entries): C:\\tmp\\wk-mcpindex-1b\\workflows\\atom_decomposition\\catalog_entries\ndirectory exists on disk: True\ntemp dir, zero files -> entries={} errors={}\nONE file planted -> entries=['probe_dataset'] errors={}\nVERDICT: PASS-MXC2-AC2",
+      "denominator": "1 of 1 path resolution match; 1 file planted -> 1 entity read (before: 0 of 0).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC2-AC3",
+      "criterion_verbatim": "(difference) with one planted entry file added, the emitter's output gains exactly that entry and the validator passes; with the same file missing one C1 field, the validator REFUSES and names the field",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC3",
+      "expect": "(?m)^VERDICT: PASS-MXC2-AC3(?![0-9])",
+      "output_evidence": "EMITTER RUN (valid plant) rc=0 ... SILVER DATASET ENTRIES (MX-c-2, catalog_entries/*.yaml): 1 emitted, 0 refused (denominator 1 source files)\nchannels: unchanged=True | silver_datasets before=[] after=[{'entity': '_probe_ac3_plant', ... all 8 C1 fields matching VALID_ENTRY}]\nvalidator (schema pass) on the valid plant -> errors={}\nSILVER ENTRY SCHEMA VALIDATION -- 1 source file(s) under catalog_entries/ (the denominator)\n  REFUSED  _probe_ac3_plant: producer -- required, non-empty string\nvalidator (schema pass) on the SAME file missing 'producer' -> errors={'_probe_ac3_plant': ['_probe_ac3_plant: producer -- required, non-empty string']}\nRESTORE: plant removed, emitter re-run rc=0, CAT restored to its pre-probe bytes: True\nVERDICT: PASS-MXC2-AC3",
+      "denominator": "engaged arm: 1 planted entry -> 1 emitted silver_datasets row, channels: (36 rows) unchanged; disengaged arm: 1 of 1 dropped field (producer) named in the refusal. Cleanup: CAT restored byte-for-byte (verified).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC2-AC4",
+      "criterion_verbatim": "the 36 existing rows across 15 channels re-emit with every existing field unchanged, compared field by field and denominator printed (version and build-head fields excepted and named)",
+      "method": "diff",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC4",
+      "expect": "(?m)^VERDICT: PASS-MXC2-AC4(?![0-9])",
+      "output_evidence": "BASELINE (git show @41da358d45) denominator: 15 channels, 36 artifact rows\nCHECKED: 36 of 36 rows across 15 of 15 channels; field-level diffs: 0\nTOP-LEVEL fields EXCEPTED (version and build-head): orig={'version': 0.3, 'built_at_git_head': 'a4f1686a28'} cur={'version': 0.3, 'built_at_git_head': '41da358d45'}\nTOP-LEVEL fields that differ OUTSIDE the exception + the new silver_datasets addition: []\nVERDICT: PASS-MXC2-AC4",
+      "denominator": "36 of 36 rows checked, 15 of 15 channels, 0 field-level diffs; 2 top-level fields (version, built_at_git_head) named and excepted.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC2-AC5",
+      "criterion_verbatim": "`validate_catalog_v02.py` and `battery_catalog_v02.py` pass at the cell's HEAD, run output printed",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC5",
+      "expect": "(?m)^VERDICT: PASS-MXC2-AC5(?![0-9])",
+      "output_evidence": "SILVER ENTRY SCHEMA VALIDATION -- 0 source file(s) under catalog_entries/ (the denominator)\nSTAGE-C LIVE VALIDATION -- bucket opal-data-portal-v2, 36 catalog rows (the denominator)\n... SUMMARY: {\"rows\": 36, \"concrete_ok\": 26, \"concrete_missing\": 0, \"family_ok\": 9, \"family_mismatch_or_error\": 1}\nVALIDATE rc=0\nrestored out-of-grant side effect (git checkout rc=0)\nBATTERY DENOMINATOR: 34 asks (26 positive, 2 verdict-gate, 6 negative)\n... RESULT: 41/41 cases pass, 0 failure(s)\nBATTERY rc=0\nVERDICT: PASS-MXC2-AC5",
+      "denominator": "validate: 36 of 36 catalog rows (26 concrete-ok, 9 family-ok, 1 family-empty -- pre-existing/unrelated, see notes), rc=0; battery: 41 of 41 cases pass, rc=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC2-AC6",
+      "criterion_verbatim": "the emitted file stays ASCII-clean (`len(b) - len(b.decode('utf-8')) == 0` printed)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC6",
+      "expect": "(?m)^VERDICT: PASS-MXC2-AC6(?![0-9])",
+      "output_evidence": "len(bytes)=129962 len(decoded utf-8 chars)=129962 delta=0 (0 == ascii-clean)\nstrict ascii decode of the emitted file: True\nVERDICT: PASS-MXC2-AC6",
+      "denominator": "delta 0 of 129,962 bytes.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC2-AC7",
+      "criterion_verbatim": "no second catalog file is created (a census of `*DATA_CATALOG*` and `*catalog*.yaml` under `infra/aws/ec2/opal-gateway` and `workflows/atom_decomposition`, before and after, denominators printed, identical except the new `catalog_entries/` source files)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC7",
+      "expect": "(?m)^VERDICT: PASS-MXC2-AC7(?![0-9])",
+      "output_evidence": "AFTER (current worktree walk) denominator: 1 hit(s): ['infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml']\nBEFORE (git ls-tree @41da358d45) denominator: 1 hit(s): ['infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml']\nADDED since the cut: []\nREMOVED since the cut: []\nVERDICT: PASS-MXC2-AC7",
+      "denominator": "1 of 1 hit before, 1 of 1 hit after (both the one live CAT); 0 added, 0 removed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXC2-AC8",
+      "criterion_verbatim": "the Rule 24 four-postulate record for the entry schema's value sets (firm-scope rule, never-sum rules, freshness field kinds) is written in the cell's deliverable with a word-boundary token census",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC8",
+      "expect": "(?m)^VERDICT: PASS-MXC2-AC8(?![0-9])",
+      "output_evidence": "deliverable exists: True\n  (i) MECE section present: True\n  (ii) SAME GRAIN section present: True\n  (iii) INTENT COHERENCE section present: True\n  (iv) STATE COHERENCE section present: True\n  word-boundary census language present: True\nfirm_scope_rule word-boundary census over emit_catalog_v02.py (denominator = 3 declared values): {'opal-internal-only': 2, 'firm-scoped': 2, 'all-firms-aggregate': 5}\nVERDICT: PASS-MXC2-AC8",
+      "denominator": "4 of 4 postulate sections present; 3 of 3 declared firm_scope_rule values found word-boundary in the schema's own definition.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutant exercises. (1) AC1: each of the 8 C1 fields is individually dropped from a fully-valid synthetic entry and validate_entry() is re-run, confirming the refusal names THAT field and only that field (8 of 8). (2) AC3: a real file is planted into the tracked catalog_entries/ directory, engaged (fully valid) then mutated (the 'producer' field removed) between two live re-runs of validate_silver_entries().",
+      "expected": "(1) each single-field drop produces a non-empty error list naming the dropped field; the fully-valid entry produces []. (2) engaged plant -> emitter gains exactly 1 silver_datasets row, validate_silver_entries() returns {} (no refusal); disengaged/mutated plant (producer missing) -> validate_silver_entries() returns {'_probe_ac3_plant': [...'producer'...]}, naming the field.",
+      "observed": "(1) probes/mx_c_2.py AC1, 2026-09-21T06:33Z: per-field results all True, denominator 8 of 8. (2) probes/mx_c_2.py AC3, 2026-09-21T06:35Z: engaged errors={}, disengaged errors={'_probe_ac3_plant': ['_probe_ac3_plant: producer -- required, non-empty string']}; plant file removed and CAT restored to its pre-probe bytes in a finally block (verified byte-identical).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "All 8 criteria (AC1-AC8) invoked twice, in two separate full passes minutes apart (first pass during development, second pass as the final settle run before this instance was written), outputs compared for the same VERDICT lines and the same structural counts (denominators, field lists) with only the UTC-derived built_at_git_head/vintage text varying where the underlying git HEAD itself was unchanged (identical both times, since no commit occurred between passes).",
+      "observed": "Both passes: VERDICT: PASS-MXC2-AC1 .. PASS-MXC2-AC8, 8 of 8, identical denominators and structural content each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Shipping any concrete silver dataset entry under catalog_entries/ at this vintage.",
+      "reason": "Decomp s.10.2/s.5: 'the catalog's per-entry source is one file per dataset (MX-c-2)' names this cell as the MECHANISM; a concrete dataset is a later tool cell's act (after MX-c-4/MX-g-1 in the dependency chain). This cell proves the mechanism live via plant-then-restore (MXC2-AC3), never leaves a permanent entry."
+    },
+    {
+      "item": "Adding a battery_catalog_v02.py routing case for a silver dataset.",
+      "reason": "No criterion in this cell requires one, and zero real silver datasets exist to route to at this vintage; the file is left at 0-line diff (still passes 41/41, MXC2-AC5)."
+    },
+    {
+      "item": "Committing the modified workflows/atom_decomposition/catalog_v02/validation_report.json that validate_catalog_v02.py writes as a designed side effect.",
+      "reason": "That path is not in this cell's <paths> grant. Reverted via `git checkout --` after every exercise (see MXC2-AC5's invocation and surprise row NFRA_MCPINDEX-W1-S3)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-W1-S3: validate_catalog_v02.py writes workflows/atom_decomposition/catalog_v02/validation_report.json as a designed side effect of running it, but this cell's <paths> grant does not name that path; the worker reverts the file via git checkout after every exercise rather than committing outside the grant. OBSERVATION, INERT, disposition UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/catalog-silver-schema.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the MX-c-2 probe (probes/mx_c_2.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~1/probes/mx_c_2.py AC<1..8>",
+      "result": "AC1-AC8: VERDICT: PASS-MXC2-AC<n>, rc=0 each, run repeatedly (individually and in a full fresh sequence) with identical structural results."
+    },
+    {
+      "tool": "py -3.12 -m unittest workflows.atom_decomposition.tests.test_catalog_silver_entries -v",
+      "invocation": "cd C:/tmp/wk-mcpindex-1b && py -3.12 -m unittest workflows.atom_decomposition.tests.test_catalog_silver_entries -v",
+      "result": "Ran 18 tests in 0.031s -- OK (18/18)."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "git add org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md && py -3.12 .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "run as part of the commit below (staged-blob read); see the worker report for its output."
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh workflows/atom_decomposition/emit_catalog_v02.py workflows/atom_decomposition/validate_catalog_v02.py workflows/atom_decomposition/battery_catalog_v02.py workflows/atom_decomposition/tests/test_catalog_silver_entries.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s), rc=0."
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~1 <0.9.0_WK_NFRA_MCPINDEX~1@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-nfra_mcpindex-1-1b"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> MXC2-AC1,MXC2-AC2,MXC2-AC3,MXC2-AC4,MXC2-AC5,MXC2-AC6,MXC2-AC7,MXC2-AC8",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}

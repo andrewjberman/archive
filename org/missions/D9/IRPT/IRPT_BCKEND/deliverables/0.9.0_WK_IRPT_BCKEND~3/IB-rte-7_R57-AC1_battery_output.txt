@@ -1,0 +1,63 @@
+==== (0) WORKTREE / TREE-OK ====
+REPO: C:\tmp\wk-irpt-5-3b
+TREE-OK
+
+==== (1) TERRAFORM INIT ====
+init rc=0
+
+==== (2) THE FIELD-CLOSURE MEASUREMENT (ruling amendment: run FIRST) ====
+VALIDATE: OK 25 system row(s), 9 scope row(s), 17 warning(s) at registry@845efe12caf40fe8
+registry restored, git status EMPTY: OK
+
+==== (3) PLAN-1: new selector vs OLD selector, HEAD's registry ====
+---- terraform plan [PLAN-1 OLD selector (refresh=false)] refresh=False rc=0 ----
+---- terraform plan [PLAN-1 NEW selector (refresh=false)] refresh=False rc=0 ----
+OLD: Plan: 4 to add, 0 to change, 4 to destroy. tainted: ['aws_s3_bucket_policy.lgic_firm["cottonwood"]', 'aws_s3_bucket_policy.lgic_firm["inflection"]', 'aws_s3_bucket_versioning.lgic_firm["cottonwood"]', 'aws_s3_bucket_versioning.lgic_firm["inflection"]']
+NEW: Plan: 4 to add, 0 to change, 4 to destroy. tainted: ['aws_s3_bucket_policy.lgic_firm["cottonwood"]', 'aws_s3_bucket_policy.lgic_firm["inflection"]', 'aws_s3_bucket_versioning.lgic_firm["cottonwood"]', 'aws_s3_bucket_versioning.lgic_firm["inflection"]']
+PLAN-1 identical (0 differences): True
+---- terraform plan [PLAN-1 NEW selector (live refresh, informational)] refresh=True rc=1 ----
+
+==== (4) PLAN-2: new selector + registry delta, local/uncommitted ====
+---- terraform plan [PLAN-2 (refresh=false)] refresh=False rc=0 ----
+PLAN-2: Plan: 4 to add, 0 to change, 4 to destroy. tainted: ['aws_s3_bucket_policy.lgic_firm["cottonwood"]', 'aws_s3_bucket_policy.lgic_firm["inflection"]', 'aws_s3_bucket_versioning.lgic_firm["cottonwood"]', 'aws_s3_bucket_versioning.lgic_firm["inflection"]'] arn adds: {'inflection': ['arn:aws:iam::313476888478:user/Andrew_Berman', 'arn:aws:iam::313476888478:user/Andrew_Berman_Console', 'arn:aws:iam::313476888478:user/Opal_Terminal'], 'cottonwood': ['arn:aws:iam::313476888478:user/Andrew_Berman', 'arn:aws:iam::313476888478:user/Andrew_Berman_Console', 'arn:aws:iam::313476888478:user/Opal_Terminal']}
+---- terraform plan [PLAN-2 (live refresh, informational)] refresh=True rc=1 ----
+registry restored, git status EMPTY: OK
+PLAN-2 literal 0/0 bound holds: False
+PLAN-2 isolated semantic diff is exactly the 3 exemption ARNs per firm, nothing else: True
+
+==== (5) PLAN-3: OLD selector (mutant) + same registry delta ====
+---- terraform plan [PLAN-3 mutant (refresh=false)] refresh=False rc=0 ----
+PLAN-3: Plan: 0 to add, 0 to change, 10 to destroy. destroys: 10
+---- terraform plan [PLAN-3 mutant (live refresh, informational)] refresh=True rc=1 ----
+registry restored, git status EMPTY: OK
+tf file restored to the new selector: OK
+PLAN-3 destroy >= 8: True (k=10)
+demo/49financial absent from every plan's resource list: True
+
+==== (6) THE DELTA FILE APPLIES CLEANLY ====
+git apply --check rc=0  
+
+==== (7) fmt/validate on the final .tf ====
+fmt -check rc=0
+validate rc=0: Success! The configuration is valid.
+
+==== FINAL HASHES (R-40) ====
+s3-lgic-firm-buckets.tf git hash-object --no-filters: 9ccbe87c0106ebe2573effbb9dc5d1a034d7ed6c
+
+==== VERDICT ====
+  validate_accepts_field: HOLD
+  plan1_zero_diff: HOLD
+  plan2_literal_zero_add_zero_destroy: FAIL
+  plan2_semantic_isolated_diff_is_exactly_the_exemptions: HOLD
+  plan3_mutant_destroy_ge_8: HOLD
+  demo_and_49financial_absent_from_every_plan: HOLD
+  delta_diff_applies_cleanly: HOLD
+  fmt_clean: HOLD
+  validate_clean: HOLD
+NOT EVERY ARM HOLDS -- token withheld.
+Known unmet arm: plan2_literal_zero_add_zero_destroy (a pre-existing, already-ARMED lockout
+(row IRPT_BCKEND-W3-S43) blocks a live plan from completing at all, and the state carries a
+pre-existing taint on 4 resources identical with/without this order's registry delta -- see
+row IRPT_BCKEND-W3-S45. The isolated semantic diff attributable to this order's own edit IS
+exactly the intended exemption-arn addition, proven by arm
+plan2_semantic_isolated_diff_is_exactly_the_exemptions.

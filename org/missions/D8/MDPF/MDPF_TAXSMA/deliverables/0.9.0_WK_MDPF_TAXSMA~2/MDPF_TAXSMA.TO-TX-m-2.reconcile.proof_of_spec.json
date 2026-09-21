@@ -1,0 +1,306 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_TAXSMA.TO-TX-m-2",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/prd/MDPF_TAXSMA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "671925aecc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/decompositions/MDPF_TAXSMA_DECOMP.md",
+    "vintage_commit": "7f65001ab3",
+    "to_ref": "org/missions/D8/MDPF/MDPF_TAXSMA/task-orders/MDPF_TAXSMA.TO-TX-m-2.reconcile.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_TAXSMA~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/taxsma_reconcile.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Source only; no deploy is in this cell's scope. S04: normalizes/dedupes full account identities (AC1-AC4), reconciles the expected population against synthetic 0833 custodian records (EXACT_MATCH/MASTER_CONFLICT/STRATEGY_CONFLICT/MISSING_CUSTODIAN, AC5-AC8, AC10), discovers UNCONFIRMED Tax-labelled candidates outside the expected set (AC9), checks the 0824 base-population overlap (BASE_OVERLAP/BASE_OVERLAP_UNVERIFIED, AC11-AC12), annotates BD technical enrollment on its own axis (AC13), and never returns or logs a full account key from its reconciliation-reporting surface (AC14).",
+      "introduces": [
+        "def normalize_account_key",
+        "def normalize_and_dedupe",
+        "def mask_account_key",
+        "def is_reporting_master",
+        "def reconcile_expected_population",
+        "def discover_unconfirmed_candidates",
+        "def base_overlap_check",
+        "def annotate_technical_enrollment"
+      ],
+      "artifact_covered_by": [
+        "TXM2-AC1",
+        "TXM2-AC2",
+        "TXM2-AC3",
+        "TXM2-AC4",
+        "TXM2-AC5",
+        "TXM2-AC6",
+        "TXM2-AC7",
+        "TXM2-AC8",
+        "TXM2-AC9",
+        "TXM2-AC10",
+        "TXM2-AC11",
+        "TXM2-AC12",
+        "TXM2-AC13",
+        "TXM2-AC14"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "15 tests (test_ac1_ .. test_ac14_, one per criterion, plus one structural forbidden-call-site test); synthetic account keys only (minted through _key(), recorded into ALL_RAW_KEYS for the AC14 leak scan). No live route, Microsoft Graph, SharePoint or BD roster call in this suite. py -3.12 -m pytest ... -q: 15 passed in 0.10s.",
+      "introduces": [
+        "def test_ac9_difference_unconfirmed_candidate_becomes_expected_once_traded_claim_added",
+        "def test_ac14_no_full_account_key_in_log_line_or_return_value_across_every_test_case"
+      ],
+      "artifact_covered_by": [
+        "TXM2-AC1",
+        "TXM2-AC2",
+        "TXM2-AC3",
+        "TXM2-AC4",
+        "TXM2-AC5",
+        "TXM2-AC6",
+        "TXM2-AC7",
+        "TXM2-AC8",
+        "TXM2-AC9",
+        "TXM2-AC10",
+        "TXM2-AC11",
+        "TXM2-AC12",
+        "TXM2-AC13",
+        "TXM2-AC14"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The probe for all 14 criteria: each AC runs its named pytest subset in a fresh subprocess (never in-process), requires rc 0 AND at least one test collected (a 0-of-0 run is a refused vacuous pass), and prints exactly one VERDICT line. Mirrors the TX-m-1 probe's structure (same repo, same pattern).",
+      "artifact_covered_by": [
+        "TXM2-AC1",
+        "TXM2-AC2",
+        "TXM2-AC3",
+        "TXM2-AC4",
+        "TXM2-AC5",
+        "TXM2-AC6",
+        "TXM2-AC7",
+        "TXM2-AC8",
+        "TXM2-AC9",
+        "TXM2-AC10",
+        "TXM2-AC11",
+        "TXM2-AC12",
+        "TXM2-AC13",
+        "TXM2-AC14"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/reconcile.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's result record: every value with its instrument, UTC time and denominator; it rides the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TXM2-AC1",
+      "criterion_verbatim": "`TXM2-AC1` -- each accepted form (eight digits, ten digits beginning 00, four-hyphen-four) normalizes to the ten-digit key",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC1",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC1(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac1_each_accepted_form_normalizes_to_the_ten_digit_key PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.02s =======================\nelapsed: 1.12s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac1_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC1",
+      "denominator": "5 of 5 accepted-form fixtures (eight-digit str, ten-digit-00 str, hyphen str, Excel int, Excel float) normalized to the expected ten-digit key.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC2",
+      "criterion_verbatim": "`TXM2-AC2` -- each of the contract's 9 `rejected_forms` is refused with INVALID_ACCOUNT, each enumerated",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC2",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC2(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac2_each_of_the_9_rejected_forms_is_refused_with_invalid_account PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.03s =======================\nelapsed: 1.11s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac2_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC2",
+      "denominator": "9 of 9 rejected_forms (masked, last-four, nine-digit, other-length, scientific-notation string, fractional, non-ASCII digits, blank, multiple/misplaced separators) refused with INVALID_ACCOUNT.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC3",
+      "criterion_verbatim": "`TXM2-AC3` -- an Excel numeric that lost precision, a scientific-notation string and non-ASCII digits are refused",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC3",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC3(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac3_excel_precision_loss_scientific_notation_and_non_ascii_digits_refused PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.03s =======================\nelapsed: 1.07s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac3_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC3",
+      "denominator": "3 of 3 arms (Excel-precision-loss float, scientific-notation string, non-ASCII full-width digits) refused with INVALID_ACCOUNT.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC4",
+      "criterion_verbatim": "`TXM2-AC4` -- duplicate full keys raise DUPLICATE_ACCOUNT on both rows and neither is selected",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC4",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC4(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac4_duplicate_full_keys_raise_duplicate_account_on_both_rows_neither_selected PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.05s =======================\nelapsed: 2.18s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac4_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC4",
+      "denominator": "2 of 2 duplicate-key rows returned key=None with DUPLICATE_ACCOUNT; 1 of 1 non-duplicate row normalized cleanly.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC5",
+      "criterion_verbatim": "`TXM2-AC5` -- an expected claim matching 0833 fact_acc on full key under reporting master 0008335338 is EXACT_MATCH",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC5",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC5(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac5_expected_claim_matching_0833_under_reporting_master_is_exact_match PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.04s =======================\nelapsed: 1.47s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac5_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC5",
+      "denominator": "1 of 1 claim: EXACT_MATCH, no reason_codes.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC6",
+      "criterion_verbatim": "`TXM2-AC6` -- the same key under another master is MASTER_CONFLICT",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC6",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC6(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac6_same_key_under_another_master_is_master_conflict PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.04s =======================\nelapsed: 1.68s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac6_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC6",
+      "denominator": "1 of 1 claim: MASTER_CONFLICT, reason MASTER_CONFLICT present, claim retained in the returned population.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC7",
+      "criterion_verbatim": "`TXM2-AC7` -- a workbook and custodian strategy disagreement is STRATEGY_CONFLICT even when the account number matches",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC7",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC7(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac7_strategy_disagreement_is_strategy_conflict_even_when_account_matches PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.02s =======================\nelapsed: 1.08s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac7_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC7",
+      "denominator": "1 of 1 claim (matching account, mismatched strategy): STRATEGY_CONFLICT.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC8",
+      "criterion_verbatim": "`TXM2-AC8` -- 0804-4932 is never treated as a reporting master",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC8",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC8(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac8_trading_master_role_never_treated_as_reporting_master PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.02s =======================\nelapsed: 1.01s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac8_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC8",
+      "denominator": "3 of 3 is_reporting_master() arms (trading-master role=False, reporting master=True, base master control=False) plus 1 of 1 reconciliation arm (trading-master-role custodian -> MASTER_CONFLICT, never EXACT_MATCH).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC9",
+      "criterion_verbatim": "`TXM2-AC9` -- (difference) a Tax-labelled custodian account absent from the workbook stays UNCONFIRMED and outside the expected set, while adding its TRADED_CLAIM row makes it expected in the same harness",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC9",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC9(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac9_difference_unconfirmed_candidate_becomes_expected_once_traded_claim_added PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.03s =======================\nelapsed: 1.39s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac9_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC9",
+      "denominator": "before(no workbook row)=1 UNCONFIRMED candidate; after(TRADED_CLAIM added to expected_keys)=0 candidates (same custodian population both arms).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC10",
+      "criterion_verbatim": "`TXM2-AC10` -- (difference) an expected claim with no matching 0833 record stays in the expected population with MISSING_CUSTODIAN, while the same claim with its record present is EXACT_MATCH",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC10",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC10(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac10_difference_missing_custodian_record_stays_expected_vs_exact_match_when_present PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.03s =======================\nelapsed: 1.34s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac10_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC10",
+      "denominator": "no-record arm: 1 of 1 claim retained, MISSING_CUSTODIAN; record-present arm (same claim): EXACT_MATCH.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC11",
+      "criterion_verbatim": "`TXM2-AC11` -- a full-ID overlap against the 0824 base population for the same date yields BASE_OVERLAP",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC11",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC11(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac11_full_id_overlap_against_0824_base_population_yields_base_overlap PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.02s =======================\nelapsed: 1.41s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac11_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC11",
+      "denominator": "2 keys checked: the overlapping key -> BASE_OVERLAP, the non-overlapping key -> no reason (empty tuple).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC12",
+      "criterion_verbatim": "`TXM2-AC12` -- an unavailable base source yields BASE_OVERLAP_UNVERIFIED and never passes by absence",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC12",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC12(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac12_unavailable_base_source_yields_base_overlap_unverified_never_passes_by_absence PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.02s =======================\nelapsed: 1.35s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac12_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC12",
+      "denominator": "2 of 2 checked keys -> BASE_OVERLAP_UNVERIFIED when base_population=None; 0 of 2 empty-tuple (never a silent pass by absence).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC13",
+      "criterion_verbatim": "`TXM2-AC13` -- BD technical enrollment is carried on its own axis and never removes a claim from the denominator",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC13",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC13(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac13_bd_technical_enrollment_never_removes_a_claim_from_the_denominator PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.03s =======================\nelapsed: 1.47s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac13_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC13",
+      "denominator": "denominator held at 5 of 5 claims across ACTIVE/PENDING_RESOLUTION/ABSENT/INACTIVE/UNAVAILABLE (the last a default for a roster-absent key).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXM2-AC14",
+      "criterion_verbatim": "`TXM2-AC14` -- no captured log line or ordinary return value contains a full account key (scan over every test case)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC14",
+      "expect": "(?m)^VERDICT: PASS-TXM2-AC14(?![0-9])",
+      "output_evidence": "data/mdpf/tests/taxsma/test_taxsma_reconcile.py::test_ac14_no_full_account_key_in_log_line_or_return_value_across_every_test_case PASSED [100%]\n\n====================== 1 passed, 14 deselected in 0.03s =======================\nelapsed: 1.41s, rc=0\nmeasurement: collected=15 selected(by -k 'test_ac14_')=1 passed=1 failed=0\nVERDICT: PASS-TXM2-AC14",
+      "denominator": "6 full keys x 2 surfaces (captured INFO log text + repr() of every returned reconciliation-reporting object) scanned; 0 leaked; >=1 real log line captured (non-vacuous).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Changed is_reporting_master's final comparison from `candidate_master == REPORTING_MASTER` to `return True` (after the trading-master-role guard) -- any candidate master, including BASE_MASTER_CONTROL, would then satisfy the reporting-master check.",
+      "expected": "test_ac6_same_key_under_another_master_is_master_conflict and test_ac8_trading_master_role_never_treated_as_reporting_master both fail (MASTER_CONFLICT no longer reachable via a non-trading-master mismatched master).",
+      "observed": "FAILED (2): test_ac6 -- \"assert 'EXACT_MATCH' == 'MASTER_CONFLICT'\"; test_ac8 -- \"assert True is False\" on is_reporting_master(BASE_MASTER_CONTROL). Reverted immediately; re-run: 15 passed in 0.38s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invoked twice back to back via the probe; outputs diffed with the vintage/UTC-time line and the elapsed:/pytest summary-line timing stripped from each side.",
+      "observed": "diff of the two stripped outputs is empty -- byte-identical apart from the stripped timing lines.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Calling a live route, Microsoft Graph, SharePoint or the BD roster.",
+      "reason": "Forbidden by the worker bound and this cell's own scope (S04 is a pure classification/join library over caller-supplied typed records). Synthetic CustodianRecord/WorkbookExpectedClaim/enrollment fixtures only, throughout."
+    },
+    {
+      "item": "Constructing or calling any S3/live-source client.",
+      "reason": "No real S3 write or read is this cell's to make (worker bound); test_module_has_no_source_mutation_or_forbidden_call_site checks the module source for boto3/s3_client/put_object/roster-write/workbook-write tokens."
+    },
+    {
+      "item": "A real address()/name() call for a new S3 key or resource name.",
+      "reason": "This cell's own artifacts table (decomp s.3) names no new S3 artifact for TX-m-2 -- it writes code files only; the live 0833/0824/BD joins and any address()-computed destination are a later release cell's (S05/TX-m-4) to wire."
+    },
+    {
+      "item": "Duplicate custodian (0833) records sharing one account key.",
+      "reason": "Out of this cell's acceptance list (only AC4's input-side duplicate raise is graded); reconcile_expected_population documents resolving such a case to its first-seen CustodianRecord at the call site, declared in the module docstring, not exercised by any AC."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/reconcile.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the TX-m-2 probe (probes/tx_m_2.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py AC<1..14>",
+      "result": "14 of 14 'VERDICT: PASS-TXM2-AC<n>', rc=0 each, at HEAD c1555c428a with the 3 new files (module, test, probe) dirty pre-commit."
+    },
+    {
+      "tool": "pytest (py -3.12), the reconcile test module direct",
+      "invocation": "py -3.12 -m pytest data/mdpf/tests/taxsma/test_taxsma_reconcile.py -q -p no:cacheprovider --color=no",
+      "result": "15 passed in 0.10s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh data/mdpf/scripts/gold/taxsma_reconcile.py data/mdpf/tests/taxsma/test_taxsma_reconcile.py org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_m_2.py",
+      "result": "'OK: pre-commit gate clean for 3 of 3 file(s)'"
+    },
+    {
+      "tool": "pytest (py -3.12), the MDPF Gold suite baseline (bound 17)",
+      "invocation": "py -3.12 -m pytest data/mdpf/scripts/gold/tests data/mdpf/tests -q -p no:cacheprovider --color=no",
+      "result": "171 passed, 3 failed -- the same 3 pre-existing test_global_fold_flag2.py failures named in decomp s.7 (test_carry_within_window_carries_and_labels, test_carry_beyond_window_absent_for_real, test_carry_source_is_measured_never_interpolated); no new failure."
+    }
+  ]
+}

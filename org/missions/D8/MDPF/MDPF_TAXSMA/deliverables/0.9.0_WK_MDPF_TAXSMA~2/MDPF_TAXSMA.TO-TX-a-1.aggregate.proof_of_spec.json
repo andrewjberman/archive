@@ -1,0 +1,247 @@
+{
+  "schema_version": "1.0",
+  "to_id": "MDPF_TAXSMA.TO-TX-a-1",
+  "firm": "MDPF",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/prd/MDPF_TAXSMA_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "671925aecc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D8/MDPF/MDPF_TAXSMA/decompositions/MDPF_TAXSMA_DECOMP.md",
+    "vintage_commit": "7f65001ab3",
+    "to_ref": "org/missions/D8/MDPF/MDPF_TAXSMA/task-orders/MDPF_TAXSMA.TO-TX-a-1.aggregate.md"
+  },
+  "assignee": "0.9.0_WK_MDPF_TAXSMA~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Existing production Gold script, edited by APPENDING new functions only (0 removed/changed existing lines, verified by git diff -- TXA1-AC4). Adds tax_additive_overlay() (the TX-a-1 overlay, contract categories.timeseries_extension_fields + a derived aua_including_tax), tax_coverage_entry(), tax_additive_for_global()/apply_tax_to_global() (Global's fixed-key date join preserving source_basis), tax_arithmetic_control() (before/after control with input hashes), and _tax_source_basis_or_raise() (independent basis re-check). Two new same-directory imports (mdpf_category_registry, taxsma_assets) and import hashlib were added at the top; no other line moved.",
+      "introduces": [
+        "TAX_MEMBER_ID",
+        "TAX_AGGREGATE_BASIS",
+        "TAX_SOURCE_BASIS",
+        "TAX_REASON_BASE_OVERLAP",
+        "def _tax_source_basis_or_raise",
+        "def tax_coverage_entry",
+        "def tax_additive_overlay",
+        "def tax_additive_for_global",
+        "def apply_tax_to_global",
+        "def tax_arithmetic_control"
+      ],
+      "artifact_covered_by": [
+        "TXA1-AC1", "TXA1-AC2", "TXA1-AC3", "TXA1-AC4", "TXA1-AC5",
+        "TXA1-AC6", "TXA1-AC7", "TXA1-AC8", "TXA1-AC9", "TXA1-AC10"
+      ]
+    },
+    {
+      "path_or_key": "data/mdpf/tests/taxsma/test_taxsma_aggregate.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 tests (test_ac1_ .. test_ac10_, one per criterion; AC6/AC7 are the (difference) criteria, each asserting both arms in one test body). Synthetic dates and round-dollar fixtures only; no real account, no live route, no Microsoft Graph, no SharePoint, no BD roster, no b00, no real S3/boto3 call anywhere in this suite. py -3.12 -m pytest data/mdpf/tests/taxsma/test_taxsma_aggregate.py -q: 10 passed in 1.30s.",
+      "introduces": [
+        "def test_ac1_49financial_and_global_carry_the_four_contract_fields_aligned_to_dates",
+        "def test_ac2_known_tax_cents_added_exactly_once_along_the_single_registered_path",
+        "def test_ac3_globals_tax_is_the_sum_of_firm_tax_leaves_added_once",
+        "def test_ac4_no_existing_line_in_the_production_module_was_changed",
+        "def test_ac5_source_basis_survives_global_fixed_key_and_reconstruction_path",
+        "def test_ac6_difference_missing_aggregate_basis_is_a_schema_failure_declared_path_succeeds",
+        "def test_ac7_difference_overlap_blocks_the_affected_total_same_fixture_without_it_completes",
+        "def test_ac8_unknown_or_stale_tax_nulls_dependent_totals_unaffected_dates_keep_values",
+        "def test_ac9_tax_coverage_carries_business_active_accounts_and_dated_counts_separately",
+        "def test_ac10_same_vintage_before_after_arithmetic_control_recorded_with_input_hashes"
+      ],
+      "artifact_covered_by": [
+        "TXA1-AC1", "TXA1-AC2", "TXA1-AC3", "TXA1-AC4", "TXA1-AC5",
+        "TXA1-AC6", "TXA1-AC7", "TXA1-AC8", "TXA1-AC9", "TXA1-AC10"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The probe for all 10 criteria: each AC runs its named pytest subset in a fresh subprocess (never in-process), requires rc 0 AND at least one test collected (a 0-of-0 run is a refused vacuous pass), and prints exactly one VERDICT line. Mirrors the TX-m-4 probe's structure (same repo, same pattern).",
+      "artifact_covered_by": [
+        "TXA1-AC1", "TXA1-AC2", "TXA1-AC3", "TXA1-AC4", "TXA1-AC5",
+        "TXA1-AC6", "TXA1-AC7", "TXA1-AC8", "TXA1-AC9", "TXA1-AC10"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/aggregate.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's result record: every value with its instrument, UTC time and denominator, including the Gold-suite before/after regression check; it rides the commit that carries this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "TXA1-AC1",
+      "criterion_verbatim": "`TXA1-AC1` -- changed 49financial and Global series carry `aggregate_basis` INCLUDES_ADDITIVE, `base_excluding_tax_aua`, `tax_additive_aua` and `tax_coverage`, each aligned to `dates`",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC1",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC1(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac1_49financial_and_global_carry_the_four_contract_fields_aligned_to_dates PASSED [100%]\n======================= 1 passed, 9 deselected in 0.89s =======================\nmeasurement: collected=10 selected(by -k 'test_ac1_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC1",
+      "denominator": "4 of 4 contract fields (aggregate_basis, base_excluding_tax_aua, tax_additive_aua, tax_coverage) present on both the 49financial overlay and the Global overlay, each list-length equal to 3 of 3 dates.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC2",
+      "criterion_verbatim": "`TXA1-AC2` -- with a fixed synthetic baseline and known Tax cents, Tax is added exactly once at Tax, SMA, ALT Strategies and 49financial",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC2",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC2(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac2_known_tax_cents_added_exactly_once_along_the_single_registered_path PASSED [100%]\n======================= 1 passed, 9 deselected in 1.40s =======================\nmeasurement: collected=10 selected(by -k 'test_ac2_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC2",
+      "denominator": "1 of 1 registered path verified (mdpf_category_registry.resolve('tax').view_path == 'SMA > ALT Strategies', unbranched); known Tax $123,456.78 added exactly once (aua_including_tax == base + tax, not base, not base + 2x); doubling the input doubles the output (1 of 1 negative-arm check). Scoping recorded as surprise row MDPF_TAXSMA-W2-S1 (this file's write surface carries no separate SMA/ALT Strategies series -- see result record s.1).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC3",
+      "criterion_verbatim": "`TXA1-AC3` -- Global's Tax equals the sum of firm Tax leaves, and Global's total adds Tax exactly once",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC3",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC3(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac3_globals_tax_is_the_sum_of_firm_tax_leaves_added_once PASSED [100%]\n======================= 1 passed, 9 deselected in 0.81s =======================\nmeasurement: collected=10 selected(by -k 'test_ac3_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC3",
+      "denominator": "3 of 3 dates: Global tax_additive_aua == the one 49financial Tax leaf (today's sole leaf, contract identity.firm scope); Global aua_including_tax == opal_aggregate_aua + tax, added once at each of 3 dates.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC4",
+      "criterion_verbatim": "`TXA1-AC4` -- Client and every other firm's series are byte-equal to the same inputs' run without the change",
+      "method": "diff",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC4",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC4(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac4_no_existing_line_in_the_production_module_was_changed PASSED [100%]\n======================= 1 passed, 9 deselected in 0.86s =======================\nmeasurement: collected=10 selected(by -k 'test_ac4_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC4",
+      "denominator": "git diff --unified=0 HEAD on the production module: 0 of 0 removed/changed lines -- every existing firm/leg (Client, inflection, cottonwood, and 49financial's/Global's own pre-existing fields) is untouched by construction, and apply_tax_to_global's own opal_aggregate_aua input is asserted unchanged as a second, independent check.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC5",
+      "criterion_verbatim": "`TXA1-AC5` -- `source_basis` survives the Global fixed-key and reconstruction path for `tax`",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC5",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC5(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac5_source_basis_survives_global_fixed_key_and_reconstruction_path PASSED [100%]\n======================= 1 passed, 9 deselected in 0.80s =======================\nmeasurement: collected=10 selected(by -k 'test_ac5_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC5",
+      "denominator": "3 of 3 Global dates carry source_basis=='ADDITIVE', including the 1 date outside 49financial's own (narrower) 2-date axis, reached only via the fixed-key reconstruction-path lookup; that same date's tax value is honest-None (never a fabricated zero).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC6",
+      "criterion_verbatim": "`TXA1-AC6` -- (difference) a TAXSMA path missing the `aggregate_basis` declaration is a schema failure, while the declared path in the same harness succeeds",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC6",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC6(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac6_difference_missing_aggregate_basis_is_a_schema_failure_declared_path_succeeds PASSED [100%]\n======================= 1 passed, 9 deselected in 0.81s =======================\nmeasurement: collected=10 selected(by -k 'test_ac6_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC6",
+      "denominator": "(difference) 3 of 3 missing/wrong-basis arms raise (omitted -> TypeError; None -> ValueError; 'WRONG_BASIS' -> ValueError); the declared path (aggregate_basis='INCLUDES_ADDITIVE') in the SAME harness succeeds, 1 of 1.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC7",
+      "criterion_verbatim": "`TXA1-AC7` -- (difference) an overlapping full ID blocks the affected total, while the same fixture without the overlap completes",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC7",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC7(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac7_difference_overlap_blocks_the_affected_total_same_fixture_without_it_completes PASSED [100%]\n======================= 1 passed, 9 deselected in 0.80s =======================\nmeasurement: collected=10 selected(by -k 'test_ac7_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC7",
+      "denominator": "(difference) 1 of 1 overlap-flagged date: tax_additive_aua=None, aua_including_tax=None, BASE_OVERLAP present, value_status=UNAVAILABLE; the identical fixture with overlap_dates empty completes at the same date (tax_additive_aua=20000.00, aua_including_tax=base+20000.00).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC8",
+      "criterion_verbatim": "`TXA1-AC8` -- unknown or stale Tax makes the SMA, ALT Strategies, 49financial and dependent Global complete totals null with coverage, while unaffected firms keep their values",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC8",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC8(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac8_unknown_or_stale_tax_nulls_dependent_totals_unaffected_dates_keep_values PASSED [100%]\n======================= 1 passed, 9 deselected in 0.80s =======================\nmeasurement: collected=10 selected(by -k 'test_ac8_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC8",
+      "denominator": "2 of 3 dates (1 unknown -- no source entry, 1 stale -- SOURCE_STALE) null both 49financial and Global dependent totals WITH tax_coverage populated at both; 1 of 3 (the good date) and the base_excluding_tax_aua/opal_aggregate_aua series at all 3 dates keep their values, unaffected.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC9",
+      "criterion_verbatim": "`TXA1-AC9` -- Tax coverage carries `business_active_accounts` and the dated expected, covered and unresolved counts as separate fields, each with its own date",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC9",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC9(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac9_tax_coverage_carries_business_active_accounts_and_dated_counts_separately PASSED [100%]\n======================= 1 passed, 9 deselected in 0.90s =======================\nmeasurement: collected=10 selected(by -k 'test_ac9_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC9",
+      "denominator": "4 of 4 separately-named+dated fields present (business_active_accounts=7/_as_of, expected_accounts=8/_as_of, covered_accounts=7/_as_of, unresolved_accounts=1/_as_of); covered+unresolved==expected (7+1==8), 1 of 1 identity check.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "TXA1-AC10",
+      "criterion_verbatim": "`TXA1-AC10` -- the same-vintage before and after arithmetic control is recorded with its input hashes",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC10",
+      "expect": "(?m)^VERDICT: PASS-TXA1-AC10(?![0-9])",
+      "output_evidence": "============================= test session starts =============================\ndata/mdpf/tests/taxsma/test_taxsma_aggregate.py::test_ac10_same_vintage_before_after_arithmetic_control_recorded_with_input_hashes PASSED [100%]\n======================= 1 passed, 9 deselected in 0.80s =======================\nmeasurement: collected=10 selected(by -k 'test_ac10_')=1 passed=1 failed=0\nVERDICT: PASS-TXA1-AC10",
+      "denominator": "1 of 1 control record carries base_input_hash + tax_input_hash + before + after; 2 of 2 same-input calls produce identical hashes (determinism); 1 of 1 changed-tax-vintage call moves tax_input_hash while base_input_hash stays fixed.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Changed `aua_including_tax.append(round(base + tax_additive[-1], 2))` to `aua_including_tax.append(round(base + 2 * tax_additive[-1], 2))` in tax_additive_overlay -- doubling the Tax addition instead of adding it once.",
+      "expected": "Every criterion whose fixture asserts the exact arithmetic identity (AC2's known-cents identity, AC7's unblocked-completion arm, AC8's good-date arm) should fail.",
+      "observed": "FAILED (3): test_ac2_known_tax_cents_added_exactly_once_along_the_single_registered_path, test_ac7_difference_overlap_blocks_the_affected_total_same_fixture_without_it_completes, test_ac8_unknown_or_stale_tax_nulls_dependent_totals_unaffected_dates_keep_values -- each expecting base+tax got base+2*tax instead. Reverted immediately (byte-for-byte restore verified via git diff --unified=0 HEAD showing 0 removed/changed lines); re-run: 10 passed in 1.34s.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 invoked twice back to back via the probe; both outputs stripped of their vintage:/elapsed: lines and the pytest timing suffix ('in N.NNs' -> 'in Xs'), then diffed.",
+      "observed": "diff of the two normalized outputs is empty -- byte-identical apart from timing.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Calling a live route, Microsoft Graph, SharePoint, the BD roster, b00 or a real S3/boto3 client.",
+      "reason": "Forbidden by the worker bound and this cell's own scope: every new function is a PURE function over caller-supplied dates/DatedAssetsResult/base dicts. No S3 client is constructed anywhere in the new code or its tests."
+    },
+    {
+      "item": "Modifying or calling build_firm_timeseries / build_49f_artifact / build_inflection_artifact / build_global_artifact / main().",
+      "reason": "Those functions are untouched by design (TXA1-AC4; also see surprise row MDPF_TAXSMA-W2-S1) -- integration into the live build path is TX-a-2's sequencing job (decomp s.3 S07), not this cell's."
+    },
+    {
+      "item": "Minting a separate SMA-node or ALT-Strategies-node series inside this file.",
+      "reason": "This cell's <paths> grant is the firm/Global aggregate grain only; the category-node grain belongs to mdpf_aggregate_aua.py/category_views, a sibling file this order does not name. Recorded as surprise row MDPF_TAXSMA-W2-S1."
+    },
+    {
+      "item": "Detecting a BASE_OVERLAP condition from live account-level membership.",
+      "reason": "This cell APPLIES the overlap_rule (blocks a caller-flagged date); detecting the overlap requires account-level base membership this Gold-aggregate file does not carry (it holds aggregated custody dollar totals only). overlap_dates is accepted as a caller-supplied input."
+    }
+  ],
+  "surprises": [
+    "MDPF_TAXSMA-W2-S1: TXA1-AC2 names four rollup levels (Tax, SMA, ALT Strategies, 49financial) but dim_mdpf_aggregate_aua_timeseries.py has no SMA/ALT Strategies series of its own, so this cell reads the four as one arithmetic identity on the single registered path and adds one field beyond the contract's four to make it checkable."
+  ],
+  "session_log": "org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/aggregate.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the TX-a-1 probe (probes/tx_a_1.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-taxsma-2c && timeout 120 py -3.12 org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py AC<1..10>",
+      "result": "10 of 10 'VERDICT: PASS-TXA1-AC<n>', rc=0 each, at HEAD f8d419c9f0 with the new/edited files dirty pre-commit."
+    },
+    {
+      "tool": "pytest (py -3.12), the aggregate test module direct",
+      "invocation": "py -3.12 -m pytest data/mdpf/tests/taxsma/test_taxsma_aggregate.py -q -p no:cacheprovider --color=no",
+      "result": "10 passed in 1.30s"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39, log-open-lint)",
+      "invocation": "bash .tools/commit-gate.sh data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py data/mdpf/tests/taxsma/test_taxsma_aggregate.py org/missions/D8/MDPF/MDPF_TAXSMA/deliverables/0.9.0_WK_MDPF_TAXSMA~2/probes/tx_a_1.py",
+      "result": "'OK: pre-commit gate clean' on each of the 3 files (run individually; each rc=0)"
+    },
+    {
+      "tool": "pytest (py -3.12), the MDPF Gold suite regression check (worker face instruction; bound 17)",
+      "invocation": "py -3.12 -m pytest data/mdpf/scripts/gold/tests -q -p no:cacheprovider --color=no (BEFORE first edit and AFTER last edit, both at cell HEAD f8d419c9f0)",
+      "result": "BEFORE: 92 collected, 89 passed, 3 failed. AFTER: 92 collected, 89 passed, 3 failed. Identical -- same 3 pre-existing test_global_fold_flag2.py ids, no new failure. Full data/mdpf scope: 196->206 collected, 193->203 passed (+10 = this cell's own test file), 3->3 failed (unchanged)."
+    },
+    {
+      "tool": "git diff (mutation-free-edit control)",
+      "invocation": "git diff --unified=0 HEAD -- data/mdpf/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py",
+      "result": "0 removed/changed lines -- pure addition, confirmed after the mutant control's revert as well."
+    }
+  ]
+}

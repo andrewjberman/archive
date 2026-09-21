@@ -1,0 +1,84 @@
+IB-rtf-3 R60-AC1 LIVE battery -- run at 2026-09-20T11:43:01Z -- worktree HEAD 5d2f3a942f3a96255d60297c4b94484520c43067
+
+(a) PRECONDITION -- 2 of 2 halves at HEAD naming the packet blob; the packet re-hashed
+  packet blob at HEAD a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4, worktree a1f36b95b26c8fefd6ff0d47489f9884f87dd2c4 -> EQUAL
+  COO half at HEAD: present=True names blob=True names K1/K1b/K2=True -> OK
+  CTO half at HEAD: present=True names blob=True names K1/K1b/K2=True -> OK
+  halves: 2 of 2
+
+  before: opal-users-v2 PK begins_with 'USER#usr_irptrte_': 0 of 79 scanned
+  before: opal-users-v2 email begins_with 'irpt-rte1-test-': 0 of 79 scanned
+  before: opal-partner-49financial email begins_with 'irpt-rte1-test-': 0 of 11 scanned
+(b) GUARD -- the live ownership map, immediately before any write
+  s3://opal-data-bd/platinum/49financial/ownership_map.json VersionId Y7H9PsdJRTDin_j3l7l4_AOlazITy4p7 ETag cda8cf29fd8179ab78b6651154f6c7a3 at 2026-09-20T11:43:02Z
+  abby_horton PRESENT=True; accounts 44, relationships 19 (packet's read 33 / 18)
+  directory investor-reporting/directory/2026-09-17/directory.json: firm_id_opaque fir_c9fc04650e2134d6ea033da2, as_of 2026-09-17, TERMINATED entries 71
+
+(b) CREATE -- K1, then K1b immediately before the login
+  K1 created 2026-09-20T11:43:03Z: PK USER#usr_irptrte_1789904581; read back (consistent GetItem): True; attributes 10; digest (passwordHash excluded) a0e075754d1645629a36d2c97ca6c8f66626486623b82999f44325a917178834
+  K1b created 2026-09-20T11:43:03Z: read back (consistent GetItem): True; attributes ['advisorKey', 'email']; digest 38128b5af38684f1b279e9f2f0d47380085a8cbb2b7102b06947c824338e0977
+  login POST /auth/login -> HTTP 200 at 2026-09-20T11:43:06Z; access token minted=True; refresh cookie set=True; body keys ['accessToken', 'user']
+  K2 claims: firmId=49financial role=user tier=advisor advisorKey=abby_horton advisorId=abby_horton advisorRole='' userType present=False firmRole present=False iat=1789904592 exp=1789905492 (exp 11:58:12Z)
+  keys created and read back 2 of 2=True; login + claims as the packet declares=True
+
+(d) NEGATIVE CONTROLS -- before any outcome arm
+  NC1 search with firm_id=inflection: HTTP 200, public_reason_code FIRM_BINDING; code FIRM_BINDING; swapped value echoed=False; sha256 a7da1c61e7ac74cb6123803cb572e295029c567fe9a6b4c89eb8f2fcbb7f7482 -> PASS
+  NC1 search with firm_id=cottonwood: HTTP 200, public_reason_code FIRM_BINDING; code FIRM_BINDING; swapped value echoed=False; sha256 9d6f7921c91efcf23c540e2439c5cd63f8fd2a35de9fe3340210cd26f8753c0b -> PASS
+  NC2 GET /api/investor-reporting/directory/search (outside api/scoped/): HTTP 200; IRPT envelope served=False; sha256 25fc79ac38299173736f77c7194f367366b2d18464c8d20b42ba5e10359ff752 -> PASS
+  NC3 holdings for a TERMINATED client's account (one of 71 terminated entries; id sha256 99c1626e5298fffa): HTTP 200, public_reason_code FIRM_BINDING; echoed=False -> PASS
+  negative controls: 4 of 4 refused
+
+(c) OUTCOME ARMS -- real signed requests; every body bound by sha256 at the event; bodies not written
+  FWD-1 search ?q=a&limit=25: {"business_date": "2026-09-17", "bytes": 9244, "data_kind": "list", "data_len": 7, "firm_id": "fir_c9fc04650e2134d6ea033da2", "http": 200, "operation": "directory-search", "reason": "OBJECT_NOT_COVERED", "sha256": "eddb1416a41a9b835c1c2fd31849ee613d162d7eb0f9758716b17930b97ec843", "state": "PARTIAL", "unprojected_grant": {"count": 23, "denominator": 44, "kinds": {"UNPROJECTED-ID": 23}}}
+    entries 7; unprojected_grant count=23 denominator=44 kinds={'UNPROJECTED-ID': 23} -> k=21; k+count=44 vs the map's 44 accounts at the event; TERMINATED visible 0
+    q honoured? a no-match query returned 0 entries (HTTP 200, sha256 e5938b5e35192cd1a1e621e4fc0a0345b5b8c67029cf6131960dfc4854bd14c9) against 7 for q=a
+  FWD-1 resolve (selection = the first entry's relationship): {"business_date": null, "bytes": 728, "data_kind": "dict", "firm_id": "fir_c9fc04650e2134d6ea033da2", "http": 200, "operation": "resolve-scope", "reason": null, "sha256": "7a048b15e282df8468ff78b571d44f416105435622be0ecb388fab86152d7a83", "state": null, "unprojected_grant": {"count": 23, "denominator": 44, "kinds": {"UNPROJECTED-ID": 23}}}
+    resolve data: ok=True scope_kind=RELATIONSHIP account_count=1 partial_reason= principal_class=None
+    firm binding by the enforcer's own read: envelope firm_id fir_c9fc04650e2134d6ea033da2 == directory firm_id_opaque fir_c9fc04650e2134d6ea033da2 -> True
+    TERMINATED: 71 of 4576 directory entries; entitled under THIS grant 0 -> NOT GRADABLE by this principal -- visibility follows the PERMITTED ACCOUNT SET (directory/handler.py:25-27, :126), so 0 visible is CORRECT here and is NOT a route defect. It is also the fact NC3 depends on: if any were entitled, NC3's refusal would need a different account
+  FWD-1 PASS: search served=True, k+count==denominator==map=True, resolve served=True, binding=True, as-of=True, terminated visible=0 (not graded, grant entitles none)
+  FWD-5 holdings/<permitted account> (id sha256 1d9c1129ae2dfd3f): {"business_date": null, "bytes": 462, "data_kind": "ABSENT", "firm_id": null, "http": 200, "operation": "holdings-snapshot", "reason": "FIRM_BINDING", "sha256": "754aa8b237d8f3f9366a4fe4d967fd6708e349ea1db4ee5d16e04bedd9a1d090", "state": "UNAVAILABLE", "unprojected_grant": null}
+    nodes 0; units on 0 of 0; of_total percentages on 0; model nodes 0; node_kind {}; custody positions None
+  FWD-5 FAIL
+  WARN: NC3 IS VACUOUS THIS RUN -- it refused with HTTP 200, public_reason_code FIRM_BINDING and the PERMITTED account was refused with the SAME code (FIRM_BINDING), so it cannot distinguish an enforced entitlement gap from a route that refuses every account (row S100). Its PASS above stands as REPORTED, not as EVIDENCE.
+  FWD-2 within the permitted set -- performance/<permitted>: {"business_date": "2026-09-17", "bytes": 548, "data_kind": "ABSENT", "firm_id": "fir_c9fc04650e2134d6ea033da2", "http": 200, "operation": "performance-report", "reason": "DEPENDENCY_UNAVAILABLE", "sha256": "79f83bf8d51e09c2857e1ce8d2bdaa20687391d0c31dfce27272f5c22d31bc5c", "state": "UNAVAILABLE", "unprojected_grant": null}
+  FWD-2 within the permitted set -- status (summary): {"business_date": "2026-09-17", "bytes": 539, "data_kind": "ABSENT", "firm_id": "fir_c9fc04650e2134d6ea033da2", "http": 200, "operation": "status-summary", "reason": "UNSUPPORTED_OPERATION", "sha256": "101d3bdac8cdbed143b3e25c74751817981c7d573123b83876b9eaa60eb2ecd9", "state": "UNAVAILABLE", "unprojected_grant": null}
+  FWD-2 swap holdings/<foreign account>                   -> HTTP 200, public_reason_code FIRM_BINDING; echoed=False; sha256 6a95f595b503f78c90ce423aa3613017c36b484f3d2501f8426ccef1a3d639b7 -> REFUSED
+  FWD-2 swap performance/<foreign account>                -> HTTP 200, public_reason_code NOT_AUTHORIZED; echoed=False; sha256 08957326822177af683b01a9325095125e62bfa4a35e99006b4baec7b17a41ce -> REFUSED
+  FWD-2 swap narrative/<foreign report>                   -> HTTP 200, public_reason_code INVALID_INPUT; echoed=False; sha256 e590a0de16fb2a6ad4e7ead4a794ba8f9c28925900b8f0aef188a08a0ddf67a7 -> REFUSED
+  FWD-2 swap status/<foreign job>                         -> HTTP 200, public_reason_code UNSUPPORTED_OPERATION; echoed=False; sha256 29ae99675ea451cc60ee1781a5fcb8c6bb40bbc531fad0a2dddaa5209818d9d1 -> REFUSED
+  FWD-2 swap analysis/<foreign job>/sections              -> HTTP 200, public_reason_code UNSUPPORTED_OPERATION; echoed=False; sha256 31783be1c589101384bbf3f7b714cde17a85e27d3505c3b7f6ca77781a9bd3e4 -> REFUSED
+  FWD-2 swap export/<foreign export>                      -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 2afab1b6781ea0df793df96c17614d918c34dd2f0e1fd949be69e27ff5e67eab -> REFUSED
+  FWD-2 swap export/<foreign export>/download             -> HTTP 200, public_reason_code UNEXPECTED; echoed=False; sha256 87579ef8c6d0a8480cd5683277c6ca4707588af40ca4cb3bea10063cd56412ab -> REFUSED
+  FWD-2 swap resolve with firm_id=inflection in the body  -> HTTP 200, public_reason_code FIRM_BINDING; echoed=False; sha256 8ba38b0e323ee48077338ffdc1a2477401f5421f6bcfd1f21ada5f4978b722c4 -> REFUSED
+  FWD-2 FAIL: swaps refused without echo 8 of 8; within-set tabs served 0 of 2; the export within the set is not exercisable (no export exists for this firm -- row W1-S18 -- and POST /export is excluded)
+  FWD-11 NOT REACHABLE by this principal (a FIRM_ADVISOR token carries one firmId; OPAL_GLOBAL is the SSM roster + an opal-capital login, a separate act) -- recorded, no request made
+  VENDOR CALLS: 0 -- irpt-performance-adapter transport mode recorded, egress authorization variable present=False; POST /analysis and POST /export (the two routes that enqueue vendor work) called 0 times; directory/holdings compute is provider_calls 0 by construction
+
+(e) ROLLBACK -- K1b FIRST, then K1; each verified by a failing consistent base-table read
+  K1b DeleteItem -> consistent GetItem returns no Item: True at 2026-09-20T11:43:28Z
+  K1  DeleteItem -> consistent GetItem returns no Item: True at 2026-09-20T11:43:29Z
+  deletions verified: 2 of 2
+  REFRESH with the issued refresh token after K1's delete: HTTP 404; access token minted=False -> REFUSED (1 of 1)
+  waiting 893 s for the access token's exp (11:58:12Z) + 10 s
+  the access token after exp: GET status -> HTTP 401 -> REFUSED 401 (1 of 1)
+  after: opal-users-v2 PK begins_with 'USER#usr_irptrte_': 0 of 79 scanned
+  after: opal-users-v2 email begins_with 'irpt-rte1-test-': 0 of 79 scanned
+  after: opal-partner-49financial email begins_with 'irpt-rte1-test-': 0 of 11 scanned
+  failed-login throttle counter for the test e-mail: none
+  INTERVAL: [2026-09-20T11:43:03Z, 2026-09-20T11:58:12Z] (K1 create, max of the deletes verified, the last access-token exp, the refresh refused)
+
+ARM (a): PASS
+ARM (b) guard: PASS
+ARM (b) keys + login: PASS
+ARM (d) negative controls: PASS
+ARM (c) FWD-1: PASS
+ARM (c) FWD-2: FAIL
+ARM (c) FWD-5: FAIL
+ARM (c) vendor calls 0: PASS
+ARM (e) deletes verified: PASS
+ARM (e) refresh refused: PASS
+ARM (e) expired token refused: PASS
+ARM (e) no residue: PASS
+FWD-11: NOT-REACHABLE by this principal, recorded (re-hand condition (v))
+RESULT: R60-AC1 FAIL -- 10 of 12 arms hold

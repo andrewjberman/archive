@@ -1,0 +1,203 @@
+{
+ "schema_version": "1.0",
+ "to_id": "NFRA_OPLGTW.TO-OG-r-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/prd/NFRA_OPLGTW_PRD.md",
+  "group": "OTHER",
+  "vintage_commit": "f0aa50dbc0"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D9/NFRA/NFRA_OPLGTW/decompositions/NFRA_OPLGTW_DECOMP.md",
+  "vintage_commit": "8768f46770",
+  "to_ref": "org/missions/D9/NFRA/NFRA_OPLGTW/task-orders/NFRA_OPLGTW.TO-OG-r-2.onhost-capacity.md"
+ },
+ "assignee": "0.9.0_WK_NFRA_OPLGTW~2",
+ "artifacts_produced": [
+  {
+   "path_or_key": "infra/aws/ec2/opal-gateway/tests/acceptance/onhost_bench.py",
+   "kind": "script",
+   "commit_or_etag": "9e4074c33a",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "Uploaded to s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/bench/onhost_bench-ogr2.py and run on i-07dccb1615503ac99 via SSM (ssm:3ea24d8c-7fed-4672-99b3-f0f9eff40082, Status=Success, RC=0, elapsed 19s) against the host's own /opt/opal-gateway install (released build OG-r-1, python3.11 venv with pyarrow 18.1.0/duckdb 1.2.2). It never restarts opal-gateway, never touches its .env or config, and left no scratch directory behind (pre-check ssm:ab6a8e71-352a-46d1-b748-83faf6b82b51 found NONE_FOUND before this run; onhost_bench.py's own finally-block cleans its tempfile.mkdtemp scratch dir on every exit path).",
+   "artifact_covered_by": [
+    "OGR2-AC1",
+    "OGR2-AC2",
+    "OGR2-AC3",
+    "OGR2-AC4",
+    "OGR2-AC5",
+    "OGR2-AC8"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py",
+   "kind": "script",
+   "commit_or_etag": "9e4074c33a",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The probe every criterion above names, run against CAPACITY.json; commit-gate.sh run clean before commit. Mutant/determinism controls run against it directly (see controls block).",
+   "artifact_covered_by": [
+    "OGR2-AC1",
+    "OGR2-AC2",
+    "OGR2-AC3",
+    "OGR2-AC4",
+    "OGR2-AC5",
+    "OGR2-AC6",
+    "OGR2-AC7",
+    "OGR2-AC8"
+   ]
+  },
+  {
+   "path_or_key": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/CAPACITY.json",
+   "kind": "config_data",
+   "commit_or_etag": "b11e4955f7",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Assembled from the on-host full-scale run's own StandardOutputContent (ssm:e04355a6-d612-4b6e-a8b7-52a0daf90404 cat of /tmp/CAPACITY.full.json, produced by ssm:3ea24d8c-7fed-4672-99b3-f0f9eff40082) plus live AWS reads (.tools/aws elbv2 describe-load-balancer-attributes; cloudwatch get-metric-statistics) -- assembled_from block inside the file cites every source command.",
+   "artifact_covered_by": [
+    "OGR2-AC1",
+    "OGR2-AC2",
+    "OGR2-AC3",
+    "OGR2-AC4",
+    "OGR2-AC5",
+    "OGR2-AC6",
+    "OGR2-AC7",
+    "OGR2-AC8"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "OGR2-AC1",
+   "criterion_verbatim": "the benchmark runs on the candidate host (after OG-i-4) against the released build, with synthetic principal contexts in process and no bearer token minted.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-2r2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py AC1",
+   "output_evidence": "vintage: 2026-09-18T19:50:35Z .. 2026-09-18T19:50:52Z (host wall clock)\ndenominator: 1 on-host run (scale=full)\napp_root_used: /opt/opal-gateway ran_against_host_install: True\nplatform: linux python_version: 3.11.15\nbearer_token_minted: False schwab_tool_enabled: False app_server_imported: False\nsynthetic_principals: ['bench-principal-og-r-2-A', 'bench-principal-og-r-2-B']\nenvironment_token_like_var_NAMES_present (values never read/printed): ['OTP_BEARER', 'OTP_BEARER_LABELS', 'MS_INGEST_BEARER', 'MS_INGEST_BEARER_LABELS', 'GRAPH_READ_BEARER']\nVERDICT: PASS-OGR2-AC1\nrc=0",
+   "denominator": "1 on-host full-scale run (scale=full), 5 checks graded (ran_against_host_install, platform, bearer_token_minted, schwab_tool_enabled, app_server_imported)",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR2-AC1(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR2-AC2",
+   "criterion_verbatim": "the maximal and concurrent Unicode query fixtures each stay within 256 MiB resident memory per job.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-2r2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py AC2",
+   "output_evidence": "vintage: 2026-09-18T19:50:52Z\njob_memory_cap_bytes: 268435456\ndenominator: 3 job(s) graded (1 maximal + 2 concurrent)\nmaximal: peak_child_rss_bytes=282021888 cap_respected=True (ok=False code=LIMIT_EXCEEDED)\nconcurrent[bench-principal-og-r-2-A]: peak_child_rss_bytes=221220864 cap_respected=True (ok=True code=None)\nconcurrent[bench-principal-og-r-2-B]: peak_child_rss_bytes=221687808 cap_respected=True (ok=True code=None)\nVERDICT: PASS-OGR2-AC2\nrc=0",
+   "denominator": "3 of 3 jobs cap-respected (1 maximal + 2 concurrent)",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR2-AC2(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR2-AC3",
+   "criterion_verbatim": "the maximal and concurrent Unicode query fixtures each finish within 30 seconds or return BUSY or LIMIT_EXCEEDED as designed.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-2r2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py AC3",
+   "output_evidence": "vintage: 2026-09-18T19:50:52Z\nquery_deadline_seconds: 30.0\ndenominator: 3 job(s) graded (1 maximal + 2 concurrent)\nmaximal: elapsed_seconds=1.206 deadline_respected=True (ok=False code=LIMIT_EXCEEDED)\nconcurrent[bench-principal-og-r-2-A]: elapsed_seconds=1.248 deadline_respected=True (ok=True code=None)\nconcurrent[bench-principal-og-r-2-B]: elapsed_seconds=1.279 deadline_respected=True (ok=True code=None)\nVERDICT: PASS-OGR2-AC3\nrc=0",
+   "denominator": "3 of 3 jobs deadline-respected (1 maximal + 2 concurrent)",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR2-AC3(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR2-AC4",
+   "criterion_verbatim": "a 50 MiB CSV fixture is generated within the export deadline and its temporary files are gone afterwards.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-2r2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py AC4",
+   "output_evidence": "vintage: 2026-09-18T19:50:52Z\ntarget_rows: 250000 target_csv_bytes: 52428800 export_deadline_seconds: 30.0\ndenominator: 1 export job at contract scale\nok: False code: LIMIT_EXCEEDED elapsed_seconds: 1.427 peak_child_rss_bytes: 270581760 csv_bytes: None\njob_dirs_leaked: [] engine_temp_root_entries_after_run: []\nlargest_successful_probe (supporting, never substituted for the contract-scale measurement): {'csv_bytes': 9468970, 'elapsed_seconds': 1.298, 'peak_child_rss_bytes': 214065152, 'rows': 62500, 'source_compressed_bytes': 4192202, 'source_objects': 10}\nVERDICT: FAIL-OGR2-AC4 export did not generate the target CSV at contract scale (ok=False code=LIMIT_EXCEEDED peak_child_rss_bytes=270581760 vs cap 268435456); temp cleanup no_leak=True; measured evidence recorded in ac8.for_prd_revision_if_insufficient (largest_successful_probe reached 62500 rows)\nrc=1",
+   "denominator": "1 export job at contract scale (250,000 rows / 50 MiB target)",
+   "status": "FAIL",
+   "expect": "(?m)^VERDICT: PASS-OGR2-AC4(?![0-9])",
+   "status_reason": "Measured, disclosed FAIL: the export at the contract's own design ceiling (250,000 rows / 50 MiB) did not generate the CSV on this t4g.small host -- it hit LIMIT_EXCEEDED at peak_child_rss_bytes=270581760 against the 268435456-byte job cap (elapsed 1.427s, well inside the 30s deadline). Temp-file cleanup DID work (job_dirs_leaked=[], engine_temp_root_entries_after_run=[]). This is the same underlying fact AC8 records as INSUFFICIENT with for_prd_revision_if_insufficient measurements (largest successful export probe: 62,500 rows / 9.47 MB at 214065152 bytes peak) -- AC4 grades the narrower 'was the 50 MiB CSV actually generated' question and that did not happen, so it is graded FAIL rather than folded into AC8's designed SUFFICIENT/INSUFFICIENT outcome."
+  },
+  {
+   "criterion_id": "OGR2-AC5",
+   "criterion_verbatim": "the existing peak RSS on the new host and the admission reserve computed from it are recorded.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-2r2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py AC5",
+   "output_evidence": "vintage: 2026-09-18T19:50:52Z\ndenominator: 1 on-host peak-RSS read + 1 admission-reserve computation\nmeasured_current_peak_rss_bytes: 174702592 error: None\nexisting_peak_rss_bytes_used_for_admission: 193228800 floor_note: measured peak RSS unavailable or below OG-p-1's documented floor (193228800 bytes); the engine's own EngineLimits floor is used for admission so this benchmark never UNDER-reserves\nadmission_multiplier: 1.25 admission_os_reserve_bytes: 134217728\nadmission_reserve_bytes: 375753728 host_memory_bytes: 1936322560\nrequired_bytes_for_1_job: 644189184 required_bytes_for_2_jobs: 912624640\nhost_can_admit_1_job: True host_can_admit_2_jobs_global_cap: True\nVERDICT: PASS-OGR2-AC5\nrc=0",
+   "denominator": "1 peak-RSS read + 1 admission-reserve computation",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR2-AC5(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR2-AC6",
+   "criterion_verbatim": "(difference) the existing-workflow p95 after, against OG-p-1's before, regresses by no more than 20 percent with zero failures, workload, sample counts and windows printed.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-2r2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py AC6",
+   "output_evidence": "instrument: cloudwatch GetMetricStatistics AWS/ApplicationELB TargetResponseTime (Statistics SampleCount, ExtendedStatistics p95) and HTTPCode_Target_5XX_Count (Statistics Sum), one CloudWatch period spanning the whole window, via .tools/aws -- same instrument/window-rule as OG-p-1 OGP1-AC11 and OG-i-4 OGI4-AC6\nload_balancer_arn: arn:aws:elasticloadbalancing:us-east-1:313476888478:loadbalancer/app/opal-gateway/89166a68f337e5a4 target_group_arn: arn:aws:elasticloadbalancing:us-east-1:313476888478:targetgroup/opal-gateway-tg/00997fc81f087cb8\nBEFORE window: 2026-09-02T19:15:00Z .. 2026-09-16T19:15:00Z  sample_count=43745.0 p95_seconds=0.5535024102704742 http_5xx_sum=19.0 (source: OG-p-1 BASELINE.json OGP1-AC11 (org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/BASELINE.json:117-153))\nAFTER (14-day, same window rule) window: 2026-09-04T20:01:41Z .. 2026-09-18T20:01:41Z  sample_count=38903.0 p95_seconds=0.5516718987799433 http_5xx_sum=18.0 (measured_utc=2026-09-18T20:05:00Z)\nAFTER (post-resize-only, supporting) window: 2026-09-18T14:53:00Z .. 2026-09-18T20:02:00Z  sample_count=119.0 p95_seconds=0.4687358309578063 http_5xx_sum=2.0 (measured_utc=2026-09-18T20:15:00Z)\ndenominator: 2 windows measured (14-day trailing + post-resize-only supporting), 1 before-window reference\np95_regression_fraction: -0.003307142763184051 cap: 0.2\nzero_failures_literal_14d_after: False zero_failures_literal_post_resize_only: False\nfailure_rate_before: 0.00043433535261172703 failure_rate_after_14d: 0.0004626892527568568\nNOTE: The 14-day trailing 'before' window (2026-09-02..2026-09-16, predating OG-i-4's resize and OG-r-1's release by construction) already carries 19 HTTPCode_Target_5XX_Count on this same target group -- an ambient background rate that exists independent of anything this project changed. Every window this cell can construct (14-day-after or the narrow post-resize-only window) also carries a non-zero 5xx count (18 and 2 respectively), so the criterion's literal 'zero failures' text is not measured TRUE in any window available to this cell. Filed as a surprise row; graded here on the LITERAL text, not a regression-only substitute, per this order's bound against weakening a written bar.\nVERDICT: FAIL-OGR2-AC6 p95_regression_within_cap=True (fraction=-0.003307142763184051); zero_failures_literal=False (14d-after 5xx=18.0, post-resize-only 5xx=2.0) -- ambient background 5xx rate present in the BEFORE window too (5xx=19.0), unrelated to this cell's changes; filed as a surprise row rather than weakened to pass\nrc=1",
+   "denominator": "2 after-windows measured (14-day trailing + post-resize-only) against 1 before-window reference; 1 p95 comparison + 2 failure-count comparisons",
+   "status": "FAIL",
+   "expect": "(?m)^VERDICT: PASS-OGR2-AC6(?![0-9])",
+   "status_reason": "Measured, disclosed FAIL on the criterion's literal text: the p95-regression half is comfortably met (fraction=-0.0033, i.e. an improvement, against a 0.2 cap), but the 'zero failures' half is measured FALSE in both after-windows available to this cell (14-day trailing: 18 of 38903 TargetResponseTime samples' target group also logged 18 HTTPCode_Target_5XX_Count; narrow post-resize-only window: 2 of 119). The identical BEFORE window (OG-p-1's own OGP1-AC11 window, predating every change this project made) already carries 19 such failures on the same target group -- an ambient background rate this cell did not cause and cannot make literally zero. Filed as surprise row NFRA_OPLGTW-W2-S10 rather than silently substituting a regression-only reading for the written 'zero failures' bar."
+  },
+  {
+   "criterion_id": "OGR2-AC7",
+   "criterion_verbatim": "the ALB idle_timeout is read immediately before the test, with ARN and UTC time, and exceeds the 30-second preparation deadline.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-2r2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py AC7",
+   "output_evidence": "instrument: elbv2 DescribeLoadBalancerAttributes idle_timeout.timeout_seconds, read immediately before the test, via .tools/aws\nload_balancer_arn: arn:aws:elasticloadbalancing:us-east-1:313476888478:loadbalancer/app/opal-gateway/89166a68f337e5a4 read_utc: 2026-09-18T20:01:41Z\ndenominator: 1 ALB attribute read\nidle_timeout_seconds: 60 query_export_prep_deadline_seconds: 30\nVERDICT: PASS-OGR2-AC7\nrc=0",
+   "denominator": "1 ALB attribute read (idle_timeout.timeout_seconds)",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR2-AC7(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR2-AC8",
+   "criterion_verbatim": "the record carries a capacity verdict, SUFFICIENT or INSUFFICIENT, and an INSUFFICIENT one carries its measurements for a PRD revision.",
+   "method": "command",
+   "invocation": "cd C:/tmp/wk-oplgtw-2r2 && timeout 120 .venv-og/Scripts/python org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py AC8",
+   "output_evidence": "vintage: 2026-09-18T19:50:52Z\ndenominator: 1 capacity verdict\nverdict: INSUFFICIENT\nchecks: {'concurrent_ok_or_graceful_refusal': True, 'deadline_respected_every_job': True, 'export_ok_clean_and_on_time': False, 'host_structurally_admits_global_cap_jobs': True, 'maximal_ok_or_graceful_refusal': True, 'memory_cap_respected_every_job': True}\nfor_prd_revision_if_insufficient: {'admission_reserve_bytes': 375753728, 'export_at_contract_scale': {'code': 'LIMIT_EXCEEDED', 'ok': False, 'peak_child_rss_bytes': 270581760, 'target_csv_bytes': 52428800, 'target_rows': 250000}, 'host_memory_bytes': 1936322560, 'job_memory_cap_bytes': 268435456, 'largest_successful_export_probe': {'csv_bytes': 9468970, 'elapsed_seconds': 1.298, 'peak_child_rss_bytes': 214065152, 'rows': 62500, 'source_compressed_bytes': 4192202, 'source_objects': 10}, 'required_bytes_for_2_jobs': 912624640}\nVERDICT: PASS-OGR2-AC8\nrc=0",
+   "denominator": "1 capacity verdict",
+   "status": "PASS",
+   "expect": "(?m)^VERDICT: PASS-OGR2-AC8(?![0-9])"
+  },
+  {
+   "criterion_id": "OGR2-J1",
+   "criterion_verbatim": "graded at L9 by 3.0.0_SA_CVO: the benchmark's workload is representative of the pilot's declared use. RECORD; NO VERDICT.",
+   "method": "manual_read_with_citation",
+   "invocation": "N/A -- judgment criterion, no invocation this worker runs",
+   "output_evidence": "RECORDED for L9: the benchmark's fixtures are synthetic-but-realistic-shaped rows over the same 9 allowed columns OG-v-1 established (account_ref, business_date, cusip, ticker_symbol, l_s, quantity_settled_unsettled, closing_price, market_value_settled_unsettled, security_description_line_1), sized at the contract's own declared design ceilings (12 source objects / 64 MiB compressed for the 'maximal' query, two concurrent realistic-sized queries at the per_principal/global job caps, a 250,000-row / 50 MiB CSV export at the export limits) plus a deliberately Unicode-heavy per-row-unique text column (Latin diacritics, CJK, Arabic RTL, emoji, combining marks) to stress the memory/deadline story under non-ASCII width the way the pilot's actual holdings/balance questions and CSV downloads would. It is a bench-only synthetic workload, never real Schwab data, and never a bearer-token-driven end-to-end MCP call (AC1). Whether this counts as 'representative of the pilot's declared use' -- e.g. whether Menachem's actual questions ever approach the 12-object/64-MiB ceiling, or stay far below it -- is a judgment this worker cannot instrument and is left to L9.",
+   "denominator": "N/A -- judgment criterion",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment=\"true\" in the task order; graded at L9 by 3.0.0_SA_CVO per this order's own proof_of_spec block.",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "This order names no mutant criterion explicitly, so the probe's own grading logic is the mutant target (Rule 22a: an injected self-test certifies the arms, never the wiring -- run the real reader with a live positive control). Three mutants against the real CAPACITY.json, read via OGR2_CAPACITY_PATH (a test-only env override the graded invocation never sets): (A) AC4's export forced ok=True/csv_bytes set -- expect FAIL->PASS; (B) AC6's after-window 5xx counts forced to 0 -- expect FAIL->PASS; (C) AC7's idle_timeout_seconds forced to 10 (below the 30s deadline) on an otherwise-PASSING criterion -- expect PASS->FAIL.",
+   "expected": "A: PASS-OGR2-AC4. B: PASS-OGR2-AC6. C: FAIL-OGR2-AC7.",
+   "observed": "A: VERDICT: PASS-OGR2-AC4. B: VERDICT: PASS-OGR2-AC6. C: VERDICT: FAIL-OGR2-AC7 idle_timeout_seconds does not exceed the 30s prep deadline. All three fired exactly as expected; the unmutated baseline re-run alongside them still read FAIL-OGR2-AC4, FAIL-OGR2-AC6, PASS-OGR2-AC7.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Two consecutive full runs of og_r2.py AC1..AC8 (same CAPACITY.json, same interpreter, no --record or write path in this probe) captured to two files and diffed.",
+   "observed": "diff of the two 8-criterion runs: byte-identical (0 differences).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [],
+ "surprises": [
+  "NFRA_OPLGTW-W2-S10: OGR2-AC6's written 'zero failures' bar is measured unsatisfiable in every window this cell can construct on the live ALB target group opal-gateway-tg, because the BEFORE window (OG-p-1's own OGP1-AC11 window, predating every change this project has made) already carries a non-zero HTTPCode_Target_5XX_Count -- so 'zero failures' was never true of this system's baseline, not something OG-r-2 caused or can restore. Graded FAIL on the literal text; ARMED for the issuing COO/CVO."
+ ],
+ "session_log": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/command_log.jsonl",
+ "compiler_tools": [
+  {
+   "tool": ".tools/commit-gate.sh",
+   "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/tests/acceptance/onhost_bench.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/probes/og_r2.py",
+   "result": "run clean before commit 9e4074c33a (one ruff unused-import caught and fixed on onhost_bench.py, `import uuid` removed; non-ASCII WARN-only on the deliberate Unicode fixture literal, lines 79-81)."
+  },
+  {
+   "tool": "py -3.12 .tools/surprise-row-gate.py",
+   "invocation": "py -3.12 .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_OPLGTW/surprise-channel/investigations/INVESTIGATION_v1.md",
+   "result": "rc=0; 1 new row (NFRA_OPLGTW-W2-S10) of 138 total checked, step-7/step-10 fields present."
+  },
+  {
+   "tool": "og_r2.py mutant/determinism controls (this run)",
+   "invocation": "OGR2_CAPACITY_PATH=<mutant>.json .venv-og/Scripts/python og_r2.py AC4|AC6|AC7 (x2 runs each, plus 2x full AC1..AC8 for determinism)",
+   "result": "3 of 3 mutants fired as expected; determinism diff empty (see controls block)."
+  },
+  {
+   "tool": ".tools/proof-of-spec-check.py",
+   "invocation": "py -3.12 .tools/proof-of-spec-check.py org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/0.9.0_WK_NFRA_OPLGTW~2/NFRA_OPLGTW.TO-OG-r-2.onhost-capacity.proof_of_spec.json OGR2-AC1,OGR2-AC2,OGR2-AC3,OGR2-AC4,OGR2-AC5,OGR2-AC6,OGR2-AC7,OGR2-AC8,OGR2-J1",
+   "result": "run after this instance was written; rc recorded in onhost-capacity.result.md."
+  }
+ ]
+}

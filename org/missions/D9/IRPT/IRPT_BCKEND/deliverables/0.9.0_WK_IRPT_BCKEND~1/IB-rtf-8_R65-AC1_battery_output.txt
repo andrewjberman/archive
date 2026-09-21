@@ -1,0 +1,88 @@
+battery_ib_rtf_8.py -- IRPT_BCKEND.TO-IB-rtf-8 -- repo root: C:\tmp\wk-irpt-6-1d
+
+=== ARM (a): fork-vs-shared diff, before the delete ===
+holdings/enforce.py (pre-fold, historical) blob: 8f849457bedb42c0a8139017f7fc96e9813ec048
+_authz/enforce.py (current, HEAD) blob:          79c9d9dee1b44ce3d40466466c37a95d452c88db
+diff denominators: 21 line(s) only-in-fork, 66 line(s) only-in-shared, 143 diff line(s) total
+CLASSIFICATION (every fork-only item):
+  1. Docstring section (~9 lines): the SUPERSEDED pre-ruling refusal-order prose ('AN UNPROJECTED GRANT IS A REFUSAL, NOT AN EMPTY ANSWER') -- dead prose, superseded by the shared module's own docstring citing CTO ruling @61627f39f9.
+  2. resolve_now()'s refusal order: the fork refuses UNPROJECTED_GRANT whenever ANY gap has reason UNPROJECTED-ID, BEFORE checking whether the resulting permitted set is non-empty -- the exact pre-inversion rule @61627f39f9 superseded on every OTHER route. Not load-bearing for holdings: no holdings-specific requirement calls for the stricter refusal (checked: holdings/snapshot.py and holdings/entry.py name no such requirement, and CTO ruling S82 names this EXACT gap as the defect, not a feature).
+  3. _empty_unprojected_grant()/_unprojected_grant_of() helpers and the 'unprojected_grant' census/served-envelope key: ABSENT from the fork entirely (0 occurrences) -- a strict subset, not a divergent feature; this IS the false-negative mechanism the ruling names (the key is never filled, so served.py's own default papers over it at zero).
+VERDICT: dead/duplicated, matching the order's own expected case (IB-rtd-8's re-staged copy) -- confirmed independently: git show 28ccac62c9eed361c669dada2aa36eee5d2a65c8:infra/aws/lambda/investor-reporting/_authz/enforce.py | git hash-object --stdin == 8f849457bedb42c0a8139017f7fc96e9813ec048 (holdings/enforce.py's committed bytes were BYTE-IDENTICAL to _authz/enforce.py as it stood at commit 28ccac62c9, which PRE-DATES ruling @61627f39f9). NO STOP; proceeding with the fold.
+  re-derived this run: 8f849457bedb42c0a8139017f7fc96e9813ec048 (expect 8f849457bedb42c0a8139017f7fc96e9813ec048) -> MATCH
+
+=== ARM (b): the fold ===
+holdings/enforce.py exists: 0 (expect 0 -- deleted)
+holdings/ files importing 'enforce' (n of n cited):
+  infra\aws\lambda\investor-reporting\holdings\snapshot.py:43
+  infra\aws\lambda\investor-reporting\holdings\tests\test_entry_guarded.py:38
+  infra\aws\lambda\investor-reporting\holdings\tests\test_snapshot.py:28
+  infra\aws\lambda\investor-reporting\holdings\tests\test_w1_s16_advisor_firm_bound.py:36
+  4 import site(s) found; all unchanged (`import enforce as ...`) -- the BINDING moved (manifest staged_from), not the statement, exactly as the other six routes already do (cite: infra/aws/lambda/investor-reporting/ops/status.py:58)
+irpt-holdings.staged_from packaged_as: ['data/custodian_key_seam.json', 'ids.py', 'loaders.py', 'served.py', 'enforce.py']
+enforce.py staged_from-bound: True (expect True)
+staged_from pin 949dc88099 sha256 d1c8e7e094676526 -> declared d1c8e7e094676526 -> MATCH
+pinned blob's own git hash: 79c9d9dee1b44ce3d40466466c37a95d452c88db vs current _authz/enforce.py blob: 79c9d9dee1b44ce3d40466466c37a95d452c88db -> MATCH
+holdings/stage.py --check rc=1: ERROR: 1 of 4 staged member(s) differ from their pinned blob: ['contracts/HoldingsSnapshot.schema.json']
+  drifted member contracts/HoldingsSnapshot.schema.json: worktree git-hash-object=9ec70af2ba0c71ea589dab48bd14407e111694a8 (content-normalised)
+  RAW-BYTE drift is a worktree checkout artifact (core.autocrlf=true on this worktree) unless the CONTENT hash above also disagrees with its pin; none of the drifted member(s) is enforce.py (this order's only in-BOUNDS file), so this arm does not fail on a checkout line-ending difference in an out-of-BOUNDS member -- filed as a surprise row instead.
+holdings suite: rc=0 :: [32m[32m[1m35 passed[0m[32m in 0.50s[0m[0m
+_authz suite: rc=0 :: [32m[32m[1m141 passed[0m[32m in 10.37s[0m[0m
+
+=== ARM (c): the census, the acceptance instrument ===
+os.walk census, entry points under infra/aws/lambda/investor-reporting/: 7
+  infra\aws\lambda\investor-reporting\directory\entry.py
+  infra\aws\lambda\investor-reporting\export\entry.py
+  infra\aws\lambda\investor-reporting\holdings\entry.py
+  infra\aws\lambda\investor-reporting\narrative\entry.py
+  infra\aws\lambda\investor-reporting\ops\entry.py
+  infra\aws\lambda\investor-reporting\performance\entry.py
+  infra\aws\lambda\investor-reporting\ycharts\generate\entry.py
+local enforce.py copies found by os.walk: 0 of 7 function dirs (expect 0; the only hit should be the shared _authz/enforce.py itself)
+  copies outside _authz/: []
+  infra/aws/lambda/investor-reporting/directory (irpt-directory-search) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/export (irpt-export-render) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/holdings (irpt-holdings) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/narrative (irpt-narrative) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/ops (irpt-status) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/performance (irpt-performance-adapter) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+  infra/aws/lambda/investor-reporting/ycharts/generate (irpt-ycharts-generate) -> enforce.py blob 79c9d9dee1 -> == shared HEAD
+bound-to-shared-blob: 7 of 7 function source dirs
+
+--- the mutant: real (shared) module vs pre-fold fork, same partial-grant fixture ---
+REAL holdings entry (shared, fixed _authz/enforce.py): unprojected_grant.count = 1
+PRE-FOLD FORK (run in memory from blob 8f849457be): unprojected_grant.count = 0
+false-negative DEMONSTRATED: YES (real > 0, fork == 0 on the SAME fixture)
+
+=== ARM (d): the never-widen halves, read at HEAD ===
+packet exists on disk: True
+packet blob hash (this run): 565317d98ac2864e185533bd437e3fad756b380b
+2 of 2 halves at HEAD: COO half committed=1 (['org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-8_HOLDINGS_FOLD.md']), CTO half committed=1 (['org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-8_HOLDINGS_FOLD.md'])
+COO half names packet blob: True (org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtf-8_HOLDINGS_FOLD.md)
+CTO half names packet blob: True (org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtf-8_HOLDINGS_FOLD.md)
+PRESENT, both naming blob 565317d98ac2864e185533bd437e3fad756b380b -- arm (e) proceeds.
+
+=== ARM (e.1): deploy verify (re-derived fresh) ===
+build-and-upload.sh rc=0
+built SHA256 (this run): 78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU=
+manifest reverted to its HEAD-committed bytes (BOUND 2 -- irpt-holdings's artifact_sha256 is not moved by this act; W1-S31 stays the CTO's to reconcile)
+served=78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU= built=78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU= MATCH=True
+
+=== ARM (e.0): deploy-state check (fresh this run) ===
+served=78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU= built(this run)=78XvypHOpeybejwKd5KLCwNcgat2jbQr6O3PhdwaFSU= packet-time-value=oVv1pYw56N22WLxKUukuyqQBrhAIWXHzhK1vGDlMbKs=
+EXPLAINED: served == this run's fresh build -- the fold's deploy has landed and is currently what is served.
+
+=== ARM (e.2): live proof ===
+POST-FOLD: seam=49financial served=True code=None k=21 unprojected_grant={'count': 12, 'denominator': 33, 'kinds': {'UNPROJECTED-ID': 12}}
+CROSS-FIRM SWAP: refused=True code=EMPTY_GRANT
+PRE-FOLD FORK (same real request): refused=True code=UNPROJECTED_GRANT -> read as count=0
+OTHER FIRMS (inflection/cottonwood): {'inflection': {'served': False, 'code': 'EMPTY_GRANT'}, 'cottonwood': {'served': False, 'code': 'EMPTY_GRANT'}} (all refused=True)
+
+=== SUMMARY ===
+arm (a): diff printed, classified, no STOP
+arm (b): OK
+arm (c): OK
+arm (d): OK
+arm (e): OK
+
+IBR65-HOLDINGS-ENFORCER-FOLDED-AND-GAP-REPORTED

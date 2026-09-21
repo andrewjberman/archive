@@ -1,0 +1,161 @@
+"""LGIC_LGCTFM round 6, cell LT-e-7 -- discriminating experiment.
+
+SCRATCH COPY OUTSIDE THE REPO. Never edits lib/opal_lgctfm.py.
+
+Copies VERBATIM (byte-for-byte, no paraphrase) the two consuming code sites round 5 named, read at
+lib/opal_lgctfm.py @21ca7eb0802b14ff7194553a526078bc4ce36b7d (worktree HEAD c05f9f9fc9e6b0dc4cf01ecabddb4b798ee6b11d):
+
+  (A) the kuzu-native node-ingestion loop inside discover_involved(), lines 923-933:
+        nodes[nid] = {"node_type": r.get("t"), "name": r.get("name") or nid, "drift": r.get("d") or "unset",
+                      "arn_or_path": r.get("arn") or nid, "src": "comp-kuzu"}
+        if r.get("arn"):
+            by_arn[r["arn"]] = nid
+        by_tn.setdefault((r.get("t"), r.get("name")), []).append(nid)
+
+  (B) discover_involved()'s resolve(), lines 956-964:
+        def resolve(cf_node):
+            nid = by_arn.get(cf_node.get("arn_or_path"))
+            if nid is None:
+                cands = by_tn.get((cf_node["node_type"], cf_node["name"])) or []
+                nid = cands[0] if len(cands) == 1 else None
+            if nid is None:
+                nid = "comp-find:%s:%s" % (cf_node["node_type"], cf_node.get("arn_or_path") or cf_node["name"])
+                nodes[nid] = dict(cf_node)
+            return nid
+
+  (C) parse_aws_walk()'s own fallback, lines 372-380 (why a comp-find-derived cf_node's arn_or_path is
+      ALWAYS the bare name for an S3Key hit, independent of what arn value kuzu holds for any candidate --
+      the docstring at :360 states it directly: "blank for some types, e.g. S3Key"):
+        arn_or_path = ""
+        if i + 1 < len(lines):
+            nxt = lines[i + 1]
+            if not _TYPE_RE.match(nxt) and not _ENTRY_RE.match(nxt):
+                arn_or_path = nxt.strip()
+        nodes.append({..., "arn_or_path": arn_or_path or name})
+
+Fixture data mirrors round 5's own measured shapes exactly (BUCKETLESS_S3KEY_R5.json,
+org/missions/D14/LGIC/LGIC_LGCTFM/deliverables/0.9.0_WK_LGIC_LGCTFM~1/, @c05f9f9fc9):
+  - 23 "tier-prefixed" keys: 3 same-name S3Key candidates each in the served graph -- two real
+    firm-writer nodes (opal-data-bd/<key>, opal-data-inf/<key>, non-empty arn, a DIFFERENT producer's
+    ingestion) plus ONE portal-stitch node with empty arn (origin_reason=ambiguous-across-firms).
+  - 1 "firm-prefixed" key (R-0060): exactly 1 candidate, a portal-stitch node with empty arn
+    (origin_reason=no-canonical-s3-key), read straight off the kuzu-native `nodes` dict (not via a
+    comp-find cf_node at all -- round 5's own attribution says so).
+
+BEFORE run: reproduces round 5's measured population as a POSITIVE CONTROL on fixture fidelity
+(23 tier-prefixed + 1 firm-prefixed bucketless, denominator 154).
+
+THE SINGLE CANDIDATE REPAIR under test (R6_BASE.json's H, narrowly and literally applied at the ONE
+site portal-stitch owns -- its OWN node, since it does not control the other producer's bd/inf nodes):
+portal-stitch's ingestion RECORDS a firm-writer bucket ARN on its own node instead of leaving `arn`
+empty. Applied to BOTH classes' portal-stitch node in the AFTER fixture. Nothing else in the fixture
+changes -- same node COUNT, same by_tn population, same comp-find rendering behaviour (C, which round 5
+established is type-level and unconditional on arn state).
+"""
+import json
+
+DENOMINATOR_S3KEY = 154
+N_TIER = 23
+N_FIRM = 1
+
+
+def ingest(nodes_raw):
+    """Verbatim copy of site (A)."""
+    nodes, by_arn, by_tn = {}, {}, {}
+    for r in nodes_raw:
+        nid = r.get("id")
+        if not nid:
+            continue
+        nodes[nid] = {"node_type": r.get("t"), "name": r.get("name") or nid, "drift": r.get("d") or "unset",
+                      "arn_or_path": r.get("arn") or nid, "src": "comp-kuzu"}
+        if r.get("arn"):
+            by_arn[r["arn"]] = nid
+        by_tn.setdefault((r.get("t"), r.get("name")), []).append(nid)
+    return nodes, by_arn, by_tn
+
+
+def make_resolve(nodes, by_arn, by_tn):
+    """Verbatim copy of site (B), closing over the same nodes/by_arn/by_tn ingest() built."""
+    def resolve(cf_node):
+        nid = by_arn.get(cf_node.get("arn_or_path"))
+        if nid is None:
+            cands = by_tn.get((cf_node["node_type"], cf_node["name"])) or []
+            nid = cands[0] if len(cands) == 1 else None
+        if nid is None:
+            nid = "comp-find:%s:%s" % (cf_node["node_type"], cf_node.get("arn_or_path") or cf_node["name"])
+            nodes[nid] = dict(cf_node)
+        return nid
+    return resolve
+
+
+def has_bucket(arn_or_path):
+    """A resolved value carries a bucket iff it names a real opal-data-* writer bucket."""
+    return isinstance(arn_or_path, str) and "opal-data-" in arn_or_path
+
+
+def cf_node_for(key):
+    """Site (C): comp-find's own S3Key band prints no detail line -> arn_or_path falls back to bare
+    name, REGARDLESS of what any candidate's arn value is in kuzu."""
+    return {"node_type": "S3Key", "name": key, "arn_or_path": key, "drift": "unset", "src": "comp-find"}
+
+
+def tier_nodes_raw(key, portal_arn=""):
+    return [
+        {"id": "arn:aws:s3:::opal-data-bd/%s" % key, "arn": "arn:aws:s3:::opal-data-bd/%s" % key,
+         "name": key, "t": "S3Key", "d": "unset"},
+        {"id": "arn:aws:s3:::opal-data-inf/%s" % key, "arn": "arn:aws:s3:::opal-data-inf/%s" % key,
+         "name": key, "t": "S3Key", "d": "unset"},
+        {"id": "s3:%s" % key, "arn": portal_arn, "name": key, "t": "S3Key", "d": "unset"},
+    ]
+
+
+def firm_nodes_raw(key, portal_arn=""):
+    return [{"id": "s3:%s" % key, "arn": portal_arn, "name": key, "t": "S3Key", "d": "unset"}]
+
+
+def run(tag, portal_arn_tier, portal_arn_firm):
+    tier_bucketless = 0
+    for i in range(N_TIER):
+        key = "TIER_KEY_%02d" % i
+        nodes, by_arn, by_tn = ingest(tier_nodes_raw(key, portal_arn_tier))
+        resolve = make_resolve(nodes, by_arn, by_tn)
+        nid = resolve(cf_node_for(key))
+        if not has_bucket(nodes[nid]["arn_or_path"]):
+            tier_bucketless += 1
+
+    firm_bucketless = 0
+    key = "blackdiamond/49f/_ops/pull_state.json"
+    nodes, by_arn, by_tn = ingest(firm_nodes_raw(key, portal_arn_firm))
+    # round 5: this row is read straight off the kuzu-native `nodes` dict, no cf_node/resolve() call.
+    nid = "s3:%s" % key
+    if not has_bucket(nodes[nid]["arn_or_path"]):
+        firm_bucketless += 1
+
+    print("%s: tier_prefixed bucketless=%d/%d  firm_prefixed bucketless=%d/%d" %
+          (tag, tier_bucketless, N_TIER, firm_bucketless, N_FIRM))
+    return tier_bucketless, firm_bucketless
+
+
+if __name__ == "__main__":
+    print("instrument: python experiment.py (scratch copy of lib/opal_lgctfm.py sites A/B/C @21ca7eb0802b14ff7194553a526078bc4ce36b7d, run standalone, no live AWS/kuzu call)")
+    print("denominator_s3key: %d (unchanged before/after -- no row is added or removed, only resolved differently)" % DENOMINATOR_S3KEY)
+    print()
+    before_tier, before_firm = run("BEFORE", portal_arn_tier="", portal_arn_firm="")
+    print("  -> BEFORE matches round 5's measured population (23, 1) -- POSITIVE CONTROL on fixture fidelity: %s"
+          % (before_tier == 23 and before_firm == 1))
+    print()
+    after_tier, after_firm = run(
+        "AFTER (single repair: portal-stitch records a firm-writer bucket on ITS OWN node instead of empty arn)",
+        portal_arn_tier="arn:aws:s3:::opal-data-bd/TIER_KEY_XX", portal_arn_firm="arn:aws:s3:::opal-data-bd/blackdiamond/49f/_ops/pull_state.json")
+    print()
+    print("RESULT: tier_prefixed %d -> %d | firm_prefixed %d -> %d" % (before_tier, after_tier, before_firm, after_firm))
+    if after_tier == before_tier and after_firm == 0:
+        print("VERDICT: TWO_REPAIRS -- the single repair resolves firm_prefixed but leaves tier_prefixed untouched,"
+              " because resolve()'s by_tn ambiguity gate keys on CANDIDATE COUNT (unchanged: still 3), and"
+              " comp-find's own S3Key rendering (site C) never carries an arn/path detail line regardless of"
+              " what arn value the third node holds -- so the by_arn lookup at the top of resolve() can never"
+              " succeed for a comp-find-derived cf_node on this node_type.")
+    elif after_tier == 0 and after_firm == 0:
+        print("VERDICT: ONE_REPAIR")
+    else:
+        print("VERDICT: UNDETERMINED")
