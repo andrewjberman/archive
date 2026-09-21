@@ -1,0 +1,42 @@
+IB-rth-2 R77-AC1 battery (MEASUREMENT-ONLY PASS) -- run at 2026-09-21T13:11:38Z -- worktree HEAD 7df516b46e36da96b7ea446742bc0d0d08021739
+row: IRPT_BCKEND-W2-S62 (surprise-channel/investigations/INVESTIGATION_v1.md)
+
+(1) entry.py's submit_export -- STILL the unconditional stub (row W1-S43 unchanged)
+  submit_export body contains an unconditional 'raise _ExportNotWiredHere': True
+  ENTRY binds OPERATION_SUBMIT to this same local function: True
+  no source edit was made by this worker this pass: TRUE by construction (no diff staged against export/entry.py)
+
+(2) handler.py's finalize_export -- callers within export/, and the dead-code dispatcher
+  files scanned under export/: 13; call sites to finalize_export(...) OTHER than its own def: 0
+  Terraform handler = entry.lambda_handler: True; handler = handler.lambda_handler: False -- handler.py's own action dispatcher (which branches on action=='submit' but never 'finalize') is UNREACHABLE at runtime
+
+(3) The render host -- live state, and the IAM that deliberately withholds a start
+  ec2:DescribeInstances (read-only) on tag:Name=irpt-ycharts-runner: [{'Id': 'i-0167fd745ad906a66', 'State': 'stopped'}] -> STOPPED
+  iam.tf declares 'STILL NOT GRANTED: ec2:StartInstances / ec2:StopInstances': True
+  dispatch.py's own text names starting the host 'an OPERATOR ACT, not a retry': True
+
+(4) The three configured timeouts -- Lambda, the render script, and API Gateway
+  Lambda irpt-export-render timeout (lambda.tf): 120 s
+  SSM render document script budget (ssm.tf mainSteps[0].inputs.timeoutSeconds): 900 s
+  API Gateway HTTP API integration timeout_milliseconds (integrations.tf, export route): 29000 ms = 29.0 s
+  the client-visible request is capped at the API Gateway figure regardless of the Lambda's own longer timeout: True
+
+(5) The published v1 submit-export response contract -- no legal partial shape
+  additionalProperties: false: True
+  'data' in required: True
+  data.$ref: ../ExportReceipt.schema.json (-> ExportReceipt.schema.json: True)
+  ExportReceipt.schema.json's own top-level 'required': ['export_ref', 'artifact', 'facts', 'timestamps', 'job_state', 'download_route', 'vendor_signed_url_exposed']
+
+(6) The controller functions this cell would wire TO -- offline correctness
+  py -m pytest infra\aws\lambda\investor-reporting\export\tests -q -> rc 0; last line: [32m[32m[1m68 passed[0m[32m in 0.70s[0m[0m
+
+ARM (1) stub unchanged (row W1-S43 confirmed live): CONFIRMED
+ARM (2) finalize_export unwired anywhere in the deployed system: CONFIRMED
+ARM (3) render host stopped; start withheld by IAM, named an operator act: CONFIRMED
+ARM (4) API Gateway 29000ms hard ceiling below the render's own budget: CONFIRMED
+ARM (5) response contract admits no partial/pending submit-export success: CONFIRMED
+ARM (6) controller functions correct offline (68 of 68): CONFIRMED
+
+RESULT: every arm measures the BLOCKING premise-failure this row files: True
+This battery does NOT exercise a real submit -> receipt round trip (no source edit was made; none is honest under arms (2)-(5) above) and therefore NEVER emits R77-AC1's PASS token. R77-AC1: FAIL-by-measurement, not FAIL-by-defect -- the premise this order's arm (a) asked this worker to confirm does not hold; see row IRPT_BCKEND-W2-S62 for the full grounding and the disarm condition.
+RESULT: R77-AC1 FAIL -- 6 of 6 premise-confirmation arms hold (all should, for the blocking finding to be GROUNDED)
