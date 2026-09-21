@@ -51,7 +51,7 @@ MATCH: resolved target == live path
 
 Exactly one writer, targeting the live path. `VERDICT: PASS-MXC1-AC3`.
 
-## MXC1-AC4 -- REFUSED (grant conflict), filed as BLOCKING row `NFRA_MCPINDEX-W1-S1`
+## MXC1-AC4 -- originally REFUSED (grant conflict), filed as BLOCKING row `NFRA_MCPINDEX-W1-S1`; SUPERSEDED below
 
 **UTC:** 2026-09-21T05:12:59Z. This criterion requires running the named writer once, with one reversible change
 to an emitter input, observing the **served file** (`infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml`)
@@ -75,6 +75,49 @@ route" -- redirecting `OUT` to a scratch path would not exercise the NAMED write
 `VERDICT: FAIL-MXC1-AC4 REFUSED -- exercising the named writer against the live path requires writing
 infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml and a workflows/atom_decomposition/runs/ input file,
 neither granted by this cell's <paths>; filed as BLOCKING row NFRA_MCPINDEX-W1-S1, not overridden.`
+
+## MXC1-AC4 (re-run 2026-09-21T08:02:41Z) -- PASS, under the AMENDMENT
+
+The issuer's AMENDMENT (2026-09-21, CTO ruling @f1c469829c/@de8bf648cd) added `infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml`
+(CAT) and `workflows/atom_decomposition/runs/portal-page-macro/20260811T1940Z/rectangle.final.certified.json`
+(RECT) to this cell's `<paths>`, exactly the two targets the REFUSAL above named. Re-run in the amended
+worktree `wk-mcpindex-1c`, `probes/mx_c_1.py AC4` rewritten to actually exercise the writer.
+
+**Instrument:** 3 writer runs against the module's own `main()` (the write call AC3 resolved), diffed by
+SHA-256 and by a direct line-level diff (never `git diff` against HEAD, whose own `built_at_git_head`
+vintage-stamp lines move on every run at a fresh HEAD and are unrelated noise).
+
+```
+PRE-EXERCISE git diff --stat (expect empty, both at HEAD): CAT='' RECT=''
+SAVED original bytes: CAT sha256=deefae3e00f507b9d6641fb239e780b02aad2fcf0f4e568ea1e357be7cafe073 (129962 bytes);
+  RECT sha256=58957d6e0a659de8d153ba7ffb23360d00f5f8cca9b66af998f26f9869ca80b9 (36461 bytes)
+RUN A (baseline, input unchanged) rc=0, CAT sha256=918e20eaa854edcb65df3de4a4fec9ca21abac085f5bfeeab71fa3c9ed677b83
+APPLIED reversible input change: inserted ' [MXC1-AC4-EXERCISE]' at byte offset 2354 of RECT's
+  mac.01.macro-data.cells.business_meaning.value (byte-exact substring insert; git diff --stat RECT:
+  1 file changed, 1 insertion(+), 1 deletion(-))
+RUN B (writer run, RECT changed) rc=0, CAT sha256=eea66fef3d930eb3478a0704fd380b0185bd9c73f926b679af9166daf5754740
+DIRECT diff run_A_CAT vs run_B_CAT: 1 hunk, 1 added line, 1 removed line -- the changed content line sits
+  between 'entity: mac.01.macro-data' (line #413) and its 'business_meaning:' key (line #428), at content
+  line #429 (0-indexed, run B)
+REVERTED RECT to saved original bytes (explicit byte-for-byte write, never `git checkout --` -- see row
+  NFRA_MCPINDEX-W1-S3's bound); git diff --stat RECT after revert: '' (empty)
+RUN C (writer run, RECT reverted / unchanged) rc=0, CAT sha256=918e20eaa854edcb65df3de4a4fec9ca21abac085f5bfeeab71fa3c9ed677b83
+  -- equal to RUN A's
+Restored CAT to its saved original bytes; POST-REVERT git diff --stat: CAT='' RECT='' (both empty)
+```
+
+**Environmental dependency:** exercising the writer requires `emit_catalog_v02.py`'s `main()` to complete,
+which requires `portal/src/api` readable (a static read of `.ts` endpoint files); `portal/` is an empty
+gitlink in this fresh worktree and is not in `<paths>`. Resolved with a read-only
+`git -C portal worktree add <WS>/portal 2453a7b4c6b7ff91ea89db499890a9486265d1a0` (the workspace's own
+already-recorded gitlink pin, detached, no branch, no commit) -- `git status --porcelain -- portal` in the
+workspace worktree reads empty both before and after; no tracked byte of the workspace repo is touched.
+Filed `NFRA_MCPINDEX-W1-S4` (OBSERVATION, INERT).
+
+**Denominator:** 3 writer runs; 1 of 1 served-file hunks between run A and run B matches exactly the one
+input row changed; SHA-256 equal between run A and run C (2 of 2 unchanged-input runs agree); post-revert
+`git diff --stat` empty on both granted paths (2 of 2). Reproducible on a second back-to-back invocation.
+`VERDICT: PASS-MXC1-AC4`.
 
 ## MXC1-AC5 -- docstring disclaimer corrected, single-hunk diff
 
@@ -119,7 +162,7 @@ in the proof-of-spec instance as `UNVERIFIABLE-BY-INSTRUMENT`, status_reason nam
 | MXC1-AC1 | PASS | 39,054 tracked files; 5 candidates; 1 write-call |
 | MXC1-AC2 | PASS | 1 writer's bytes printed; 0 catalog-scoped disclaim lines remain |
 | MXC1-AC3 | PASS | 1 of 1 writers targets the live path |
-| MXC1-AC4 | FAIL (REFUSED, grant conflict) | filed `NFRA_MCPINDEX-W1-S1` |
+| MXC1-AC4 | PASS (re-run under the AMENDMENT; was FAIL/REFUSED originally) | 3 runs; 1 hunk on change; SHA-256 equal on revert; empty post-revert diff (2/2) |
 | MXC1-AC5 | PASS | 1 file, 1 hunk, line 5 only |
 | MXC1-AC6 | PASS | header line 3, unchanged |
 | MXC1-AC7 | judgment | no verdict; record left for the CVO |
