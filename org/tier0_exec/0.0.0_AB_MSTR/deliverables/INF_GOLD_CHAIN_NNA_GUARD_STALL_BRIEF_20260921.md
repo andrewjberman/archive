@@ -62,6 +62,12 @@ rows for that date, so every rebuild would silently delete them. The guard exist
   `opal-data-inflection`, the LGIC full-name bucket. That bucket's own policy explicitly denies the
   Andrew IAM users, so its contents were not inspected (see also msg 99087 from `0.7.0_AE_CloudOps~V`).
   `opal-data-portal-v2/platinum/advi/` holds only 49financial.
+  **ADDENDUM 2026-09-21 ~17:45Z -- the bucket gap is closed.** `4.0.0_SA_CRO` recovered the policies on
+  `opal-data-inflection` and `opal-data-cottonwood` (msg 99126, @a0097b1ef4). Re-listed by
+  0.0.0_AB_MSTR as `user/Andrew_Berman` with `list-objects-v2`: `opal-data-inflection` **KeyCount 0**,
+  `opal-data-cottonwood` KeyCount 0. Positive control: `opal-data-49financial` returned 5 keys on the
+  same call. **The full-name bucket is empty, so it serves nothing, and no second Inflection pathway
+  lives there.** `opal-data-inf` is the only feed found.
   ⚠ Andrew believes Inflection ADVI still updates daily. That is **not reconciled**. Section 6 has the
   open question.
 
