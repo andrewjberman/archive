@@ -17,7 +17,9 @@ they hold.
       NOT graded, matching every prior never-widen battery in this project (rtf-10's own arm d).
   (d) DEPLOYED-BYTES CHECK (only if (c) holds): for each of the 7 functions that stage
       `_authz/loaders.py` (measured, `infra/aws/lambda/ci/lambda-source-map.json`), download the
-      LIVE zip's `loaders.py` member and hash it; 7 of 7 must equal the committed fix's sha256.
+      LIVE zip's `loaders.py` member and hash it; every GRADED function must equal the committed fix's sha256.
+      RULING 99069 re-scopes the graded set to 6 of 7: irpt-ycharts-generate is carried to row S102 (its build
+      is refused on two sourceless members) -- still read and printed, never counted.
       This is the discriminator for "built and deployed" that does not require knowing a build
       version in advance -- it reads the bytes actually served.
   (e) THE LIVE PROOF (only if (d) holds): reuses the bounded-principal, FIRM_OPERATIONS-class
@@ -58,6 +60,13 @@ LIVE_PROOF_SCRIPT = os.path.join(
     WS, "org", "missions", "D9", "IRPT", "IRPT_BCKEND", "deliverables",
     "0.9.0_WK_IRPT_BCKEND~3", "IB-rtg-3_arm_e_live_proof.py")
 ACCT = "313476888478"
+# RULING 99069 (2.0.0_SA_COO~B, 2026-09-21T15:19:10Z, on row IRPT_BCKEND-S111, option ii of its disarm menu): arm
+# (d)'s denominator is RE-SCOPED to the buildable-and-applied functions. irpt-ycharts-generate is CARRIED to row
+# IRPT_BCKEND-S102 -- its files[] declares firm_registry.json and settings.json with no source anywhere in git, so
+# build-and-upload.sh refuses it before upload -- and stays at its current live bytes (both signed halves' no-change
+# branch; it has no route, schedule or event source). Its live loaders.py is still READ AND PRINTED below: carried,
+# never hidden, and never counted as deployed. Applied by 0.7.0_AE_CloudOps~V on the ruling; nothing else changed.
+CARRIED_TO_S102 = {"irpt-ycharts-generate"}
 
 LINES: list[str] = []
 s3 = boto3.client("s3", region_name="us-east-1")
@@ -155,6 +164,10 @@ def arm_d() -> bool:
     emit("(d) DEPLOYED-BYTES CHECK -- each function that stages loaders.py, live zip vs the committed fix")
     fns = _staged_functions()
     emit("  functions staging loaders.py (lambda-source-map.json): %d: %s" % (len(fns), fns))
+    graded = [f for f in fns if f not in CARRIED_TO_S102]
+    carried = [f for f in fns if f in CARRIED_TO_S102]
+    emit("  graded denominator per RULING 99069: %d of %d (carried to row S102, read but not graded: %s)" % (
+        len(graded), len(fns), carried))
     ok_n = 0
     for fn in fns:
         cfg = lam.get_function(FunctionName=fn)
@@ -177,11 +190,15 @@ def arm_d() -> bool:
             live_bytes = zf.read(member)
         live_sha = sha256_bytes(live_bytes)
         good = live_sha == SOURCE_BLOB_SHA256
+        if fn in CARRIED_TO_S102:
+            emit("  %-28s live %s sha256 %s -> %s; CARRIED to row S102 per RULING 99069, NOT GRADED" % (
+                fn, member, live_sha, "fix present" if good else "pre-fix bytes, as carried"))
+            continue
         ok_n += good
         emit("  %-28s live %s sha256 %s, expected %s -> %s" % (
             fn, member, live_sha, SOURCE_BLOB_SHA256, "DEPLOYED" if good else "NOT YET DEPLOYED"))
-    emit("  deployed-bytes match: %d of %d" % (ok_n, len(fns)))
-    return len(fns) > 0 and ok_n == len(fns)
+    emit("  deployed-bytes match: %d of %d graded (%d carried to S102)" % (ok_n, len(graded), len(carried)))
+    return len(graded) > 0 and ok_n == len(graded)
 
 
 def arm_e() -> bool:
@@ -189,7 +206,10 @@ def arm_e() -> bool:
     if not os.path.isfile(LIVE_PROOF_SCRIPT):
         emit("  live-proof script ABSENT at %s -> FAIL" % LIVE_PROOF_SCRIPT)
         return False
-    p = subprocess.run([sys.executable, LIVE_PROOF_SCRIPT], cwd=WS, capture_output=True, text=True, timeout=1200)
+    # RULING 99070 ASK1 (2.0.0_SA_COO~B, 2026-09-21T15:39:47Z, row IRPT_BCKEND-S112): 1200 -> 3300. The live proof
+    # sleeps ~910 s per firm for the deleted principal's token to expire, 3 firms in sequence (~46 min); the face's
+    # invocation bound moves 1800 -> 3600 in the same ruling.
+    p = subprocess.run([sys.executable, LIVE_PROOF_SCRIPT], cwd=WS, capture_output=True, text=True, timeout=3300)
     for ln in p.stdout.splitlines():
         emit("  | " + ln)
     if p.stderr:
@@ -226,7 +246,7 @@ def main() -> int:
         d_ok = arm_d()
         emit("")
         if not d_ok:
-            emit("STOP at (d): the fix is not yet built/deployed to all 7 functions -- (e) is NOT graded.")
+            emit("STOP at (d): the fix is not yet built/deployed to every graded function -- (e) is NOT graded.")
             arms["(d) deployed-bytes"] = d_ok
             arms["(e) live proof"] = False
         else:
