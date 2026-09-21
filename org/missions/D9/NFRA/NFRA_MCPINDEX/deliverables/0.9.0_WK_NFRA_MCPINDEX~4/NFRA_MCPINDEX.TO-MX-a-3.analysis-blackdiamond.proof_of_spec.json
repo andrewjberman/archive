@@ -1,0 +1,221 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-a-3",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "f506f63a8b",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-a-3.analysis-blackdiamond.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The probe for all 10 criteria (AC1-AC9 mechanical, AC10 judgment-only, no verdict line). Read-only boto3 (ListObjectsV2/GetObject/HeadObject) against s3://opal-data-bd; no write call anywhere in the module.",
+      "artifact_covered_by": [
+        "MXA3-AC1",
+        "MXA3-AC2",
+        "MXA3-AC3",
+        "MXA3-AC4",
+        "MXA3-AC5",
+        "MXA3-AC6",
+        "MXA3-AC7",
+        "MXA3-AC8",
+        "MXA3-AC9",
+        "MXA3-AC10"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/_mutant_control.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "controls.mutant harness only (not an acceptance criterion): removes the 'silver/prices/' EXCLUDED entry (a real prior state hit during this cell's own development), confirms the unclassified-key count goes non-zero, then restores it and confirms it returns to zero. In-memory dict mutation only; no S3 writes.",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/analysis-blackdiamond.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This order's result record: every value with its instrument, UTC time and denominator; rides the commit that carries this instance."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "edf584f64a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opens the project's channel with row NFRA_MCPINDEX-W4-S1 (class OBSERVATION, hazard_standing INERT): opal-data-bd also hosts live Schwab/SmartX/platinum/canonical data outside this property's fence. Validated: .tools/surprise-row-gate.py against the staged blob."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "MXA3-AC1",
+      "criterion_verbatim": "the property's silver (or, for MX-a-1, served) prefixes are listed live at the cell's run time, with object count, total bytes and newest partition date per table, and the read verb in the command log",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC1",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC1(?![0-9])",
+      "output_evidence": "[2026-09-21T06:11:56Z] AC1 -- live listing, instrument boto3 s3:ListObjectsV2 (paginated), bucket=opal-data-bd, prefix=silver/\n  denominator: 8022 objects under silver/ (read verb: ListObjectsV2, paginated, live at run time)\n  TABLE transactions           prefix=silver/transactions/                   objects=  1905 bytes=   590513428 newest_partition_date=2026-09-20\n  TABLE allocations            prefix=silver/allocations/                    objects=   132 bytes=   144756493 newest_partition_date=2026-09-18\n  TABLE realized               prefix=silver/realized/                       objects=  1335 bytes=    79178454 newest_partition_date=2026-09-20\n  TABLE unrealized             prefix=silver/unrealized/                     objects=    74 bytes=   156429806 newest_partition_date=2026-09-18\n  TABLE fees                   prefix=silver/fees/                           objects=  1981 bytes=   207196778 newest_partition_date=2026-09-17\n  TABLE bd_assets_dim          prefix=silver/bd_assets_dim.parquet           objects=     1 bytes=      884599 newest_partition_date=None\n  TABLE canonical_prices       prefix=silver/prices/canonical_prices.parquet objects=     1 bytes=   107502523 newest_partition_date=None\n  TABLE historical_prices      prefix=silver/historical_prices.parquet       objects=     1 bytes=    39454305 newest_partition_date=None\n  TABLE interpolated_prices    prefix=silver/interpolated_prices.parquet     objects=     1 bytes=    37752750 newest_partition_date=None\n  EXCLUDED (named, s.AC8): 2591 objects, 1483511857 bytes\nVERDICT: PASS-MXA3-AC1",
+      "denominator": "9 canonical tables identified out of 8,022 objects live under s3://opal-data-bd/silver/ (ListObjectsV2, paginated); 2,591 of those objects fall into 28 named EXCLUDED entries; 0 unclassified after the fix (see controls.mutant for the engaged/disengaged check on this count).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC2",
+      "criterion_verbatim": "each table's grain, freshness field and latest value are read from the objects or their producer's code at the cell's HEAD, the source printed per field",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC2",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC2(?![0-9])",
+      "output_evidence": "[2026-09-21T06:12:03Z] AC2 -- grain/freshness/latest value per table, read from producer code (cited) and from the live objects (pyarrow read_metadata / read_table, column-projected)\n  TABLE transactions\n    grain (source: producer code, merge-daily-incremental.py:403-522 process_xlsx_to_parquet): one row per transaction line on the BD export/data date; NOT deduped across dates in the daily parquet -- dedup key transaction_id is applied at query/compaction time (merge-daily-incremental.py:479-507, :642-643)\n    freshness field (source: producer code, merge-daily-incremental.py:403-522 process_xlsx_to_parquet): trade_date (per-row column) / the partition filename date, read from the BD 'Timestamps' sheet End Date, fallback to the filename (merge-daily-incremental.py:337-362, :464-472)\n    latest value (source: live object keys, 1905 objects scanned): 2026-09-20\n  TABLE allocations\n    grain (source: producer code, merge-daily-incremental.py:767-865 process_alloc_xlsx_to_parquet): one row per account per as_of_date point-in-time snapshot; dedup (account_id, as_of_date) keep-first (merge-daily-incremental.py:832-837)\n    freshness field (source: producer code, merge-daily-incremental.py:767-865 process_alloc_xlsx_to_parquet): as_of_date (column) / partition filename date\n    latest value (source: live object keys, 132 objects scanned): 2026-09-18\n  TABLE realized\n    grain (source: producer code, merge-daily-incremental.py:962-1040 process_realized_xlsx_to_parquet): one row per realized sale event per trade_date; INCREMENTAL (each day's export adds that day's sells, README.md:934-936); dedup (account_id, asset_name, trade_date, unit_cost) keep-first (merge-daily-incremental.py:1019-1023)\n    freshness field (source: producer code, merge-daily-incremental.py:962-1040 process_realized_xlsx_to_parquet): trade_date (column) / partition filename date\n    latest value (source: live object keys, 1335 objects scanned): 2026-09-20\n  TABLE unrealized\n    grain (source: producer code, merge-daily-incremental.py:1133-1218 process_unrealized_xlsx_to_parquet): one row per open holding per account per as_of_date; a FULL SNAPSHOT -- each file is the complete open-position picture for that date (merge-daily-incremental.py:1104-1107); dedup (account_id, asset_name) keep-first\n    freshness field (source: producer code, merge-daily-incremental.py:1133-1218 process_unrealized_xlsx_to_parquet): partition filename date (as_of_date); a 0-row export is SKIPPED, not written (merge-daily-incremental.py:1162-1171)\n    latest value (source: live object keys, 74 objects scanned): 2026-09-18\n  TABLE fees\n    grain (source: producer code, convert_fees_to_silver.py:1-80): one row per fee/billing transaction per trade_date (per-account billing events: transaction_fee, account_fee, flat_fee, basis_points)\n    freshness field (source: producer code, convert_fees_to_silver.py:1-80): trade_date (column) / partition filename date\n    latest value (source: live object keys, 1981 objects scanned): 2026-09-17\n  TABLE bd_assets_dim\n    grain (source: producer code, build_bd_assets_dim.py:1-53): one row per distinct asset_id, latest-trade-date-wins dedup, with per-asset txn aggregates (build_bd_assets_dim.py:85-120)\n    freshness field (source: producer code, build_bd_assets_dim.py:1-53): built_at column (ISO timestamp of the build) and the object's S3 LastModified -- NOT rebuilt on any daily cadence found in this cell's read (no scheduler reference in the silver scripts read); see AC2 finding on staleness\n    latest value (source: live object, column 'built_at' max, 10937 rows scanned): 2026-04-14T20:44:13.581849+00:00\n  TABLE canonical_prices\n    grain (source: producer code, merge-daily-incremental.py:675-708 invoke_price_update docstring (bd-price-update Lambda); README.md:276 build_canonical_prices_v2.py named as the '3-tier canonical price engine'): one row per (asset_name/ticker, date) -- 3-tier canonical price blend\n    freshness field (source: producer code, merge-daily-incremental.py:675-708 invoke_price_update docstring (bd-price-update Lambda); README.md:276 build_canonical_prices_v2.py named as the '3-tier canonical price engine'): date column (max)\n    latest value (source: live object, column 'date' max, 12404573 rows scanned): 2026-09-21 00:00:00\n  TABLE historical_prices\n    grain (source: producer code, fetch_historical_prices_yfinance.py (present, not opened in full this cell); referenced merge-daily-incremental.py:683): one row per (ticker, date) -- T2 yfinance close\n    freshness field (source: producer code, fetch_historical_prices_yfinance.py (present, not opened in full this cell); referenced merge-daily-incremental.py:683): date column (max)\n    latest value (source: live object, column 'date' max, 5834050 rows scanned): 2026-09-18 00:00:00\n  TABLE interpolated_prices\n    grain (source: producer code, build_interpolated_prices.py (present, not opened in full this cell)): one row per (asset_name, date) -- gap-filled interpolation with data_quality/num_observations\n    freshness field (source: producer code, build_interpolated_prices.py (present, not opened in full this cell)): date column (max)\n    latest value (source: live object, column 'date' max, 4577431 rows scanned): 2026-09-18 00:00:00\nVERDICT: PASS-MXA3-AC2",
+      "denominator": "9 of 9 canonical tables carry a grain, freshness field and a live-read latest value.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC3",
+      "criterion_verbatim": "each table's firm or master scope rule is stated with the key-prefix segment that carries it, and a table whose scope cannot be read from its key is named",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC3",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC3(?![0-9])",
+      "output_evidence": "[2026-09-21T06:13:27Z] AC3 -- firm/master scope rule per table, read from infra/logic/registry/scopes.json (live file read at HEAD)\n  scopes.json[49financial].pipeline_trees: dir=data/black_diamond/ vendor=blackdiamond separated_from=['cottonwood']\n  scopes.json[49financial].monolith_scopes.blackdiamond = ['49f', '49financial']\n  scopes.json[49financial].bucket (CANONICAL, per Rule 30) = opal-data-49financial\n  LIVE bucket this property's scripts actually write (per producer code, merge-daily-incremental.py:53) = opal-data-bd (env override BD_S3_BUCKET) -- these DIFFER; the canonical LGIC address is UNOCCUPIED at run time (see AC8 note)\n  TABLE transactions: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/transactions/' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  TABLE allocations: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/allocations/' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  TABLE realized: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/realized/' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  TABLE unrealized: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/unrealized/' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  TABLE fees: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/fees/' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  TABLE bd_assets_dim: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/bd_assets_dim.parquet' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  TABLE canonical_prices: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/prices/canonical_prices.parquet' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  TABLE historical_prices: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/historical_prices.parquet' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  TABLE interpolated_prices: scope=49financial (FIRM, single tenant of data/black_diamond/ per scopes.json); the key 'silver/interpolated_prices.parquet' carries NO firm-prefix segment -- scope CANNOT be read from the key, only from the registry's pipeline_trees row\n  cottonwood's own Black-Diamond-flavored tree lives separately at data/cot/ (scopes.json[cottonwood].pipeline_trees, vendor=blackdiamond, separated_from=['49financial', 'inflection']) -- a DIFFERENT tree/bucket, out of this cell's scope\nVERDICT: PASS-MXA3-AC3",
+      "denominator": "9 of 9 canonical tables carry a stated scope (49financial, FIRM); 9 of 9 keys carry no firm-prefix segment, so 9 of 9 are the 'cannot be read from the key' case; scope read from 1 live registry file (infra/logic/registry/scopes.json).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC4",
+      "criterion_verbatim": "every never-sum rule is stated with its reason (cross-master, cross-firm, cross-date, non-additive field)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC4",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC4(?![0-9])",
+      "output_evidence": "[2026-09-21T06:13:28Z] AC4 -- every never-sum rule with its reason (cross-master/cross-firm/cross-date/non-additive field)\n  1. AUA (market value) is never derived by summing transaction flows across a date range\n     REASON: non-additive field / wrong basis -- README.md:10-27 states flow-based AUA omits market gains/losses; use allocations.account_market_value at a single as_of_date instead\n  2. allocations.account_market_value (or unrealized.market_value) is never summed across more than one as_of_date\n     REASON: cross-date -- each partition is a point-in-time snapshot; summing snapshots from different dates conflates distinct points in time\n  3. realized gain/loss and unrealized gain/loss are never summed into one figure without labeling which is which\n     REASON: non-additive field -- different measurement basis (realized = already-closed positions; unrealized = still-open mark-to-market, README.md:1103-1107)\n  4. transactions.market_value is never summed across silver/transactions/ daily partitions without first deduping by transaction_id\n     REASON: cross-date -- BD re-sends prior transaction_ids in later exports (merge-daily-incremental.py:474-507 cross-date dedup logic; a 30-day lookback dedup exists precisely because this happens)\n  5. canonical_prices/historical_prices/interpolated_prices.price (or .close) is never summed across asset_id/ticker/asset_name\n     REASON: non-additive field -- a price is a per-unit value, not a quantity; summing prices of different securities has no meaning without units held\n  6. Black Diamond (49financial, data/black_diamond/) figures are never summed with Cottonwood's separately-tracked Black-Diamond-flavored data (data/cot/)\n     REASON: cross-firm -- scopes.json marks the two pipeline_trees separated_from each other\n  7. fees.transaction_fee/account_fee/flat_fee is never summed across billing periods without checking billing_start_date/billing_end_date for overlap\n     REASON: cross-date -- adjacent billing periods can overlap or re-bill; the schema carries explicit start/end date columns for this reason (convert_fees_to_silver.py:41)\nVERDICT: PASS-MXA3-AC4",
+      "denominator": "7 of 7 never-sum rules carry a reason drawn from one of the four named classes (cross-master/cross-firm/cross-date/non-additive field); 0 cross-master rules apply (single-master property, see AC3).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC5",
+      "criterion_verbatim": "the property's common questions are written down as a numbered list, each with the table and the fields that answer it; the list's source is stated (producer code, portal page, prior art, or reasoning) and nothing on it is presented as measured user demand",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC5",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC5(?![0-9])",
+      "output_evidence": "[2026-09-21T06:13:29Z] AC5 -- common questions, numbered, table+fields+source; nothing presented as measured user demand\n  1. What is [relationship/account]'s current AUA (market value)?\n     table: allocations\n     fields: account_market_value, relationship_id/account_id, as_of_date (latest partition)\n     source: producer code (README.md:14-17 'AUA | Allocations | Account Market Value') + portal page (README.md:249-251 opal-data-portal-v2/json/advisor-intelligence/aua_chart.json) -- NOT measured user demand (no query log / usage telemetry read this cell)\n  2. What are [relationship/account]'s net cash flows (deposits/withdrawals) for a date range?\n     table: transactions\n     fields: external_flow, market_value, transaction_type, relationship_id/account_id, trade_date\n     source: producer code (README.md:14-19; transaction_type/external_flow columns measured live) -- NOT measured user demand (no query log / usage telemetry read this cell)\n  3. What is [relationship]'s NNA (Net New Asset) category breakdown (new client / new account / same account / outflow) for a date range?\n     table: transactions\n     fields: transaction_type, relationship_id, account_id, trade_date, market_value\n     source: prior art (README.md:371-431, the NNA Classification System section) -- the live silver/transactions/ table carries NO is_nna/nna_category columns (measured: 74 live columns, none named is_nna*); those fields exist only in the STALE gold-layer bd_nna_daily.parquet (last modified 2026-01-20, EXCLUDED table) -- NOT measured user demand (no query log / usage telemetry read this cell)\n  4. What is [asset]'s unrealized gain/loss as of the latest snapshot?\n     table: unrealized\n     fields: market_value, unit_cost, asset_id/asset_name, account_id, partition date\n     source: reasoning (direct column read: market_value - unit_cost*units is the standard unrealized gain/loss definition; unrealized table columns measured live) -- NOT measured user demand (no query log / usage telemetry read this cell)\n  5. What realized gains/losses did [relationship/account] recognize in [period]?\n     table: realized\n     fields: trade_date, unit_cost, account_id, asset_name, symbol/ticker/cusip\n     source: producer code (merge-daily-incremental.py:932-936 'Realized is INCREMENTAL -- each day adds that day's sells') -- NOT measured user demand (no query log / usage telemetry read this cell)\n  6. What is [ticker/asset]'s canonical price on [date]?\n     table: canonical_prices\n     fields: date, asset_name, ticker, price, source\n     source: producer code (merge-daily-incremental.py:675-708 invoke_price_update docstring; README.md:276) -- NOT measured user demand (no query log / usage telemetry read this cell)\n  7. Which architects/implementors have the highest AUA or NNA (advisor leaderboard)?\n     table: allocations (AUA) or transactions (NNA/flows)\n     fields: architect, implementor, account_market_value or external_flow, grouped\n     source: portal page (README.md:249-253 architect_leaderboard.json, implementor_leaderboard.json) + producer code (architect/implementor/consultant/local_ops split-pct columns measured live in both tables) -- NOT measured user demand (no query log / usage telemetry read this cell)\n  8. What fees did [relationship/account] pay in [period], broken out by fee type?\n     table: fees\n     fields: transaction_fee, account_fee, flat_fee, basis_points, trade_date, account_id\n     source: producer code (convert_fees_to_silver.py:34-80, the COL_RENAME/FLOAT_COLS map) -- NOT measured user demand (no query log / usage telemetry read this cell)\n  9. What is [asset]'s classification (asset class / super class / sector) for allocation reporting?\n     table: bd_assets_dim\n     fields: asset_super_class_blend, opal_asset_class, asset_class, asset_segment, asset_id\n     source: producer code (build_bd_assets_dim.py:16-32 dim schema docstring) -- NOT measured user demand (no query log / usage telemetry read this cell)\n  10. How stale is Black Diamond's silver data right now, and which tables are not being refreshed?\n     table: all nine canon tables (partition/file dates) + bd_assets_dim specifically\n     fields: operational/freshness metadata: newest partition date (transactions/allocations/realized/unrealized/fees) or date-column max / LastModified (prices/dim tables)\n     source: reasoning (this is a meta-question about the property's own freshness, raised by measuring bd_assets_dim's staleness at AC2/AC9 time, not from a portal page or producer code) -- NOT measured user demand (no query log / usage telemetry read this cell)\nVERDICT: PASS-MXA3-AC5",
+      "denominator": "10 of 10 questions carry a table, a field list and a stated source; 0 of 10 cite measured user demand (no query-log/telemetry instrument exists for this pre-launch property).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC6",
+      "criterion_verbatim": "each common question is assigned to a proposed purpose-built tool or to the typed query, with the reason",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC6",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC6(?![0-9])",
+      "output_evidence": "[2026-09-21T06:13:29Z] AC6 -- each common question assigned to a proposed tool or the typed query, with reason\n  1. -> TYPED QUERY (C6). reason: a single-table filter+read on the latest as_of_date partition; C6's typed query covers it with no cross-table logic\n  2. -> TYPED QUERY (C6). reason: a filter+group-by+sum over one table's additive external_flow field; no sequential state needed\n  3. -> TOOL `blackdiamond_classify_nna`. reason: requires PER-CLIENT SEQUENTIAL STATE (first-ever transaction detection, chronological order) that C6's typed query (filters/group-bys/aggregates, no cross-row state machine) cannot express; the classification logic is documented (prior art) and re-implementable directly against silver/transactions, so a purpose-built tool is proposed rather than depending on the stale gold table\n  4. -> TYPED QUERY (C6). reason: single-table filter+arithmetic on additive per-row fields at one snapshot date\n  5. -> TYPED QUERY (C6). reason: a filter+group-by over one incremental table; additive within a period once deduped, which the producer's own dedup key already guarantees at partition-write time\n  6. -> TYPED QUERY (C6). reason: a single point-lookup filter on one table\n  7. -> TYPED QUERY (C6). reason: a group-by+sum+rank over one table's additive field per C6's grouping rules; no cross-table join required since architect/implementor are carried directly on both allocations and transactions rows\n  8. -> TYPED QUERY (C6). reason: a filter+group-by over one table's fields; the never-sum billing-period-overlap caution (AC4 item 7) is enforced by C6's date-range filter, not a special tool\n  9. -> TYPED QUERY (C6). reason: a single-table point lookup by asset_id/cusip/ticker\n  10. -> TYPED QUERY (C6). reason: a MAX(date)/LastModified read per table is a single-table aggregate C6 already supports; no purpose-built tool needed for a freshness check\nVERDICT: PASS-MXA3-AC6",
+      "denominator": "10 of 10 questions carry an assignment (9 typed_query, 1 tool) and a reason; 0 unassigned.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC7",
+      "criterion_verbatim": "the proposed tool names pass MX-n-1's rule as stated in C3 (the validator may not exist yet; the rule's text is the input)",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC7",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC7(?![0-9])",
+      "output_evidence": "[2026-09-21T06:13:30Z] AC7 -- proposed tool names pass MX-n-1's C3 rule ({system}_{function}[_{qualifier}], system a systems.json key, function a base-form verb, scope an EXPLICIT ARGUMENT never folded into the name)\n  systems.json read live: 25 keys; 'blackdiamond' present: True\n  proposed tool names (1): ['blackdiamond_classify_nna']\n  blackdiamond_classify_nna: system='blackdiamond' (in registry) function='classify' (base-form) scope=49financial passed as an explicit call argument, not in the name -- OK\nVERDICT: PASS-MXA3-AC7",
+      "denominator": "1 of 1 proposed tool name validated against 3 sub-checks (system-in-registry, base-form-verb, scope-not-folded-in); systems.json carries 25 keys, 1 match (blackdiamond).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC8",
+      "criterion_verbatim": "the proposed read fence is stated as exact prefixes, and any table outside it is named as excluded with the reason",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC8",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC8(?![0-9])",
+      "output_evidence": "[2026-09-21T06:13:30Z] AC8 -- proposed read fence as exact prefixes; tables outside it named with reason\n  PROPOSED READ FENCE (bucket=opal-data-bd):\n    s3://opal-data-bd/silver/transactions/\n    s3://opal-data-bd/silver/allocations/\n    s3://opal-data-bd/silver/realized/\n    s3://opal-data-bd/silver/unrealized/\n    s3://opal-data-bd/silver/fees/\n    s3://opal-data-bd/silver/bd_assets_dim.parquet\n    s3://opal-data-bd/silver/prices/canonical_prices.parquet\n    s3://opal-data-bd/silver/historical_prices.parquet\n    s3://opal-data-bd/silver/interpolated_prices.parquet\n  EXCLUDED WITHIN silver/ (named, s.EXCLUDED dict, 28 entries):\n    s3://opal-data-bd/silver/assets/ -- partitioned raw asset export; latest partition measured 2026-06-18, ~3 months stale against this cell's run date; superseded as the asset dimension source by bd_assets.parquet -> bd_assets_dim.parquet (build_bd_assets_dim.py:9-14)\n    s3://opal-data-bd/silver/transactions_enriched/ -- partitioned cusip-enriched transactions; latest partition measured date=2026-04-20, days after CP-AE1 (2026-04-17, merge-daily-incremental.py:509-511) moved cusip enrichment INLINE via enrich_with_cusip() -- INFERRED supersession from timing, not a doc statement\n    s3://opal-data-bd/silver/bd_assets.parquet -- compacted transaction-level asset export, an INPUT to bd_assets_dim (build_bd_assets_dim.py:9-11), not itself a distinct analytic table\n    s3://opal-data-bd/silver/bd_allocations.parquet -- monolithic legacy file, stale (measured last-modified, ~7 months old against this cell's run date), superseded by the daily-partitioned silver/allocations/\n    s3://opal-data-bd/silver/bd_aua_timeseries.parquet -- monolithic legacy file, stale (measured last-modified), described only in the stale (2026-01-19 'Last Updated') README\n    s3://opal-data-bd/silver/bd_nna_daily.parquet -- monolithic legacy file, stale (measured last-modified)\n    s3://opal-data-bd/silver/bd_nna_by_architect.parquet -- monolithic legacy file, stale (measured last-modified)\n    s3://opal-data-bd/silver/bd_canonical_timeline.parquet -- monolithic legacy file, stale (measured last-modified)\n    s3://opal-data-bd/silver/aua_validation_log.parquet -- monolithic legacy validation log, stale (measured last-modified)\n    s3://opal-data-bd/silver/daily_aua.parquet -- monolithic legacy file, stale (measured last-modified)\n    s3://opal-data-bd/silver/daily_aua_firm.parquet -- monolithic legacy file, stale (measured last-modified)\n    s3://opal-data-bd/silver/daily_flows.parquet -- monolithic legacy file, stale (measured last-modified)\n    s3://opal-data-bd/silver/daily_positions.parquet -- monolithic legacy file (682MB), stale (measured last-modified)\n    s3://opal-data-bd/silver/nna_timeseries.parquet -- monolithic legacy file, stale (measured last-modified)\n    s3://opal-data-bd/silver/historical_dividends.parquet -- monolithic legacy file, stale (measured last-modified)\n    s3://opal-data-bd/silver/historical_prices_20260213.parquet -- dated legacy snapshot, superseded by the actively-updated silver/historical_prices.parquet\n    s3://opal-data-bd/silver/historical_prices_final.parquet -- legacy 'final' snapshot, superseded by the actively-updated silver/historical_prices.parquet\n    s3://opal-data-bd/silver/bd_transactions_backup_2026-01-20.parquet -- explicitly named backup\n    s3://opal-data-bd/silver/bd_transactions_backup_2026-01-28.parquet -- explicitly named backup\n    s3://opal-data-bd/silver/incremental_manifest.json -- control-plane manifest (etag-skip state), not a data table\n    s3://opal-data-bd/silver/incremental_allocation_manifest.json -- control-plane manifest, not a data table\n    s3://opal-data-bd/silver/incremental_allocation_manifest.json.bak-20260630T1900Z -- control-plane manifest backup\n    s3://opal-data-bd/silver/incremental_allocation_manifest.json.bak-20260630T1916Z -- control-plane manifest backup\n    s3://opal-data-bd/silver/incremental_realized_manifest.json -- control-plane manifest, not a data table\n    s3://opal-data-bd/silver/incremental_unrealized_manifest.json -- control-plane manifest, not a data table\n    s3://opal-data-bd/silver/bd_transactions_metadata.json -- control-plane metadata sidecar, not a data table\n    s3://opal-data-bd/silver/interpolated_prices_summary.json -- control-plane summary sidecar, not a data table\n    s3://opal-data-bd/silver/prices/ -- silver/prices/{date}.parquet (measured 150 dated objects through 2026-09-20, actively maintained) is a GOLD-LAYER TRIGGER artifact, not a distinct query table -- bd_price_update.py:617-623 states in its own docstring 'Writing canonical_prices.parquet does NOT trigger gold' and the S3 event filter matches prefix silver/prices/20 specifically to fire the gold runner off this dated file; its price ROWS are already upserted into silver/prices/canonical_prices.parquet (bd_price_update.py:587-611), which is the table fenced above. silver/prices/backfill_telemetry.json is a control-plane telemetry sidecar, not a data table.\n  EXCLUDED: other top-level prefixes in the same bucket -- a different top-level prefix in the same bucket, not silver/ and not this property: blackdiamond/ (session-trigger control, not data), schwab/ (MX-a-2's vendor), smartx/ (MX-a-6's vendor), platinum/ (served tier), canonical/ (a differently-named tier), plus bronze/ (raw input), forwardfill_v2/ (landing zone), gold/ (downstream product), code/ (synced scripts), logs/, and ops/scratch/deploy prefixes (GOOD_RUN_*, _rollback/, ajb_workspace/, backfill_v2/, config/, debug/, diagnostics/, gldrst/, investor-reporting/, lambda-*, qa-scratch/, runs/, scripts/, ssm-output/, status/, temp/, tmp/, v4_output/)\n  NOTE (finding, not a fence line): the Rule-30 canonical LGIC address for this property resolves (lib/opal_naming.py address('blackdiamond','49financial','silver','transactions',partition=...)) to s3://opal-data-assets/blackdiamond/49financial/silver/transactions/date=... -- a DIFFERENT bucket/key-shape than the live data above. This cell fences to the LIVE location (Rule 30's own non-application: 'existing pipelines reach conformance through their own migration project, never as a rider on unrelated work'); the migration gap is reported, not fixed, here.\nVERDICT: PASS-MXA3-AC8",
+      "denominator": "9 exact-prefix fence lines proposed; 28 of 28 EXCLUDED-within-silver/ entries named with a reason; all non-silver/ top-level bucket prefixes named as a class with reasons (blackdiamond/, schwab/, smartx/, platinum/, canonical/, bronze/, forwardfill_v2/, gold/, code/, logs/, and 17 ops/scratch prefixes).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC9",
+      "criterion_verbatim": "a property with no silver or served data at the cell's run time says so, and proposes no tool",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC9",
+      "expect": "(?m)^VERDICT: PASS-MXA3-AC9(?![0-9])",
+      "output_evidence": "[2026-09-21T06:13:31Z] AC9 -- a property with no silver/served data says so and proposes no tool (antecedent check)\n  live check: 8022 objects, 2847180993 bytes under s3://opal-data-bd/silver/ at run time (ListObjectsV2, paginated)\n  Black Diamond HAS live silver data (has_data=True); the antecedent of this criterion ('no silver or served data') is FALSE for this property, so the criterion's obligation ('says so, proposes no tool') does not bind -- 10 questions ARE proposed against real tables (AC5/AC6), which is the correct behavior under a TRUE antecedent\nVERDICT: PASS-MXA3-AC9",
+      "denominator": "1 of 1 antecedent check: 8,022 objects present (has_data=True), so the 'no data, no tool' branch does not bind; 10 questions / 1 tool proposed instead.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "MXA3-AC10",
+      "criterion_verbatim": "JUDGMENT (graded by 3.0.0_SA_CVO at L9; record it UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming the CVO; never PASS or FAIL) -- the question list is what a staff member would plausibly ask of this property, and no common question is left to the typed query without a stated reason",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no <invocation> in the task order's ACCEPTANCE block for AC10 (self-closing tag, judgment=\"true\")",
+      "output_evidence": "MXA3-AC10 is a JUDGMENT criterion (cell_refs='MX-a-3', no <invocation> in the task order); graded by 3.0.0_SA_CVO at L9, never self-graded here. No PASS/FAIL verdict line follows.\nRecord for the CVO: the 10-question list (analysis-blackdiamond.result.md AC5/AC6 section; probes/mx_a_3.py QUESTIONS) covers AUA, cash flows, NNA categorization, unrealized gains, realized gains, canonical pricing, advisor (architect/implementor) attribution, fees, asset classification, and the property's own freshness -- the plausible ask-surface of a 49 Financial-facing Opal staff member (advisor/ops/compliance) against this book. Each of the 9 typed-query assignments states why (single-table, additive, no cross-row state); the 1 tool assignment (blackdiamond_classify_nna) states why the typed query cannot do it (per-client sequential state; no is_nna*/nna_category columns live in silver). No question is left unassigned or unreasoned.",
+      "denominator": "N/A -- judgment criterion, no invocation named in the task order's ACCEPTANCE block for AC10 (self-closing tag)",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Judgment criterion per the task order (judgment=\"true\", no <invocation>); graded by 3.0.0_SA_CVO at L9 per PROOF_OF_SPEC.schema.json's `judgment` field description. The worker records evidence and takes no verdict.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "MXA3-AC1's unclassified-key REFUSAL is re-run with the 'silver/prices/' EXCLUDED entry removed (a real prior state this probe was in during development, before that entry was added to fix a genuine FAIL) via probes/_mutant_control.py, engaged then disengaged.",
+      "expected": "engaged (entry missing) -> unclassified count > 0 (VERDICT: FAIL-MXA3-AC1 class); disengaged (entry restored) -> unclassified count == 0 (VERDICT: PASS-MXA3-AC1 class)",
+      "observed": "MUTANT CONTROL -- MXA3-AC1 unclassified-key detection\n  [ENGAGED (silver/prices/ exclusion removed)] objects=8022 unclassified=157 sample=['silver/prices/2026-02-22.parquet', 'silver/prices/2026-02-23.parquet', 'silver/prices/2026-02-24.parquet']\n  [DISENGAGED (exclusion restored)] objects=8022 unclassified=0 sample=[]\nengaged_ok=True (unclassified count 157 > 0) disengaged_ok=True (unclassified count 0 == 0)\nVERDICT: FIRED-AS-EXPECTED",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "MXA3-AC1 invoked twice back to back via the probe; both outputs' timestamp line (the '[<UTC>] AC1 --' header) stripped, remainders diffed.",
+      "observed": "diff of the two stripped outputs is empty -- byte-identical apart from the timestamp line.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reading the full contents of fetch_historical_prices_yfinance.py and build_interpolated_prices.py end to end.",
+      "reason": "Their live output schemas were read directly from the parquet objects (pyarrow read_metadata), which grounds grain/freshness without opening the full script; cited as 'present, not opened in full this cell' in AC2's grain/freshness source lines rather than overclaiming a full code read."
+    },
+    {
+      "item": "Investigating build_canonical_prices_v2.py and inject_scoped_overrides.py in full.",
+      "reason": "Out of this criterion set's need; canonical_prices.parquet's grain/freshness was grounded from bd_price_update.py's invoke_price_update docstring plus a live column-max read, which is sufficient for AC2/AC5/AC6 without a second full-script read."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-W4-S1: opal-data-bd (MX-a-3's own live bucket) also hosts substantial live data for MX-a-2 (schwab/, ~12.1GB) and MX-a-6 (smartx/, ~64.7MB), plus platinum/ and canonical/ prefixes, none named in the PRD or the decomposition's S8 per-property notes; filed OBSERVATION, disposition UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/analysis-blackdiamond.result.md",
+  "compiler_tools": [
+    {
+      "tool": "the MX-a-3 probe (probes/mx_a_3.py), the criterion instrument",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py AC<1..9>",
+      "result": "AC1-AC9: VERDICT: PASS-MXA3-AC<n>, rc=0 each."
+    },
+    {
+      "tool": "probes/_mutant_control.py",
+      "invocation": "cd C:/tmp/wk-mcpindex-4 && timeout 120 py -3.12 org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/_mutant_control.py",
+      "result": "engaged_ok=True disengaged_ok=True, VERDICT: FIRED-AS-EXPECTED, rc=0"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "git add org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md && py -3.12 .tools/surprise-row-gate.py org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "see WORKER REPORT for the printed rc and OK/violation lines"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile, ds-precommit, ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_a_3.py org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/_mutant_control.py",
+      "result": "see WORKER REPORT"
+    },
+    {
+      "tool": ".tools/safe-commit.sh under the worker serial",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~4 <0.9.0_WK_NFRA_MCPINDEX~4@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "see COMMITS in the worker report; LOCAL on wk-nfra_mcpindex-1-4"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "py -3.12 .tools/proof-of-spec-check.py <this instance> MXA3-AC1,MXA3-AC2,MXA3-AC3,MXA3-AC4,MXA3-AC5,MXA3-AC6,MXA3-AC7,MXA3-AC8,MXA3-AC9,MXA3-AC10",
+      "result": "see the worker report -- only the exit code is the verdict"
+    }
+  ]
+}
