@@ -346,8 +346,8 @@ def arm_publish():
             dn = os.path.join(td, "dn")
             open(up, "wb").write(data)
             key = S3_PREFIX + os.path.basename(path)
-            r1 = subprocess.run([os.path.join(REPO, ".tools/aws"), "s3", "cp", up, key], capture_output=True, text=True)
-            r2 = subprocess.run([os.path.join(REPO, ".tools/aws"), "s3", "cp", key, dn], capture_output=True, text=True)
+            r1 = subprocess.run([os.path.join(REPO, ".tools/aws.cmd"), "s3", "cp", up, key], capture_output=True, text=True)
+            r2 = subprocess.run([os.path.join(REPO, ".tools/aws.cmd"), "s3", "cp", key, dn], capture_output=True, text=True)
             got = hashlib.sha256(open(dn, "rb").read()).hexdigest() if r2.returncode == 0 and os.path.isfile(dn) else None
             ok &= check("S3 %s readback sha256 == packet" % key, r1.returncode == 0 and got == s256, "(%s)" % got)
     print("  NOTE: the host is STOPPED and was not started; there is NO on-host byte readback here.")
