@@ -1,0 +1,157 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-99.b4-lusha-harvest-wiring",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "b2c0a06527d6a0744394cda107500b2d486edf16"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "83d7edfe7de1f871f6fe5b5cbb2b10b9c8ae03f2",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-99.b4-lusha-harvest-wiring.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~99",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/lusha.py",
+      "kind": "script",
+      "commit_or_etag": "4a6255f6b512361d08fcd3e6f86e199f6f0252db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: adds `import datetime`; `_assert_no_contact_field(rows)` (the C-LUSHA-EXCEPTION guard -- raises `store.LushaExceptionError` on any row key outside `KEPT_FIELDS` or any `enrich.is_contact_key` key); `harvest_company(company_domain, officers, run_stamp, fetched_at=None, write=False, since=None, lusha_client=None, s3=None)` -- the public entry point, in order: refuse on empty officers/domain (ValueError), dedupe-skip via `already_fetched` when `since` is set, reach the client through `enrich.lusha_client`, `enrich.prospecting_page`, `enrich.scrub`, `contact_match_rows`, the guard on every call before any write, write only when `write=True` (default OFF); a `_cli` (`python -m lib.research.harvest.lusha`, guarded by `if __name__ == \"__main__\"`, NOT run in this cell). Module docstring's \"NOT WIRED\" paragraph replaced naming `harvest_company` as the wired entry point and the RUN as a later cell. `contact_match_rows`/`already_fetched`/`write_contact_match`/`KEPT_FIELDS`/`store.py`/`roster.py` untouched. Library code, no deploy target of its own; 0 Lusha calls, 0 AWS calls, exercised entirely over injected stubs in AC1/AC2.",
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/management/enrich.py",
+      "kind": "script",
+      "commit_or_etag": "4a6255f6b512361d08fcd3e6f86e199f6f0252db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, ADD-ONLY: `lusha_client(api_key=None, client=None)` added directly before `_results_of`, body `return _lusha_client(api_key=api_key, client=client)`, looking `_lusha_client` up BY NAME at call time. `_lusha_client` (`:264`) and `build_document` (`:627`, its `:659` call site) are byte-identical to the pin -- confirmed by AC4's `enrich_removed_lines 0` and `enrich_added_defs` naming exactly this one new def. The three existing tests that patch `enrich._lusha_client` by name keep binding (AC0/AC4 `existing_private_patches` unchanged at 3; AC3's 95-passed/13-subtests unchanged from AC0's baseline).",
+      "artifact_covered_by": ["AC0", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_lusha_harvest.py",
+      "kind": "test",
+      "commit_or_etag": "4a6255f6b512361d08fcd3e6f86e199f6f0252db",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 8 tests, one per AC1's named list -- matches bind to roster officers, a contact-field-bearing stub result never reaches the recorder, the C-LUSHA-EXCEPTION guard raises before any write on a monkeypatched contact-bearing row, a client that raises on both `_execute` and `contacts_prospecting` propagates with 0 recorder calls, an injected client is used untouched with `LUSHA_API_KEY` unset and `enrich._estate_module` patched to raise, an empty/None roster raises `ValueError` before any call, a held domain returns `SKIPPED-HELD` with 0 client calls, and patching `enrich._lusha_client` changes what the public `enrich.lusha_client` seam returns. Every test deletes `LUSHA_API_KEY` from the environment and patches `enrich._estate_module` to raise if reached -- no real client is ever built and the key is never read. 8 passed in 0.14s.",
+      "artifact_covered_by": ["AC1", "AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit, the baseline every later bar reads against. It prints \"pin_object commit\"; \"enrich_264\" carries \"def _lusha_client(api_key=None, client=None):\"; \"enrich_659\" carries \"prospecting_page(_lusha_client(client=lusha_client), company_domain)\"; \"production_lusha_writer_calls N0\" (measured 0 at the cut); \"existing_private_patches P0\" (measured 3); and each module's crlf and non_ascii_chars (measured 0 and 0). Then the harvest suite's \"H0 passed\" (measured 64) and the management suite's \"M0 passed\" (measured 95, 13 subtests). A drifted line NUMBER is recorded, not a fail, if the LINE is the same; a differing N0, P0, H0 or M0 is recorded and becomes the baseline",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r99/ac0.py && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/management/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "pin_object commit\nenrich_264 def _lusha_client(api_key=None, client=None):\nenrich_659 page = prospecting_page(_lusha_client(client=lusha_client), company_domain)\nproduction_lusha_writer_calls 0 []\nexisting_private_patches 3\nlib/research/management/enrich.py crlf 0 non_ascii_chars 0\nlib/research/harvest/lusha.py crlf 0 non_ascii_chars 0\n64 passed in 1.05s\n95 passed, 13 subtests passed in 5.96s",
+      "denominator": "N0=0 (of production callers outside lusha.py/tests), P0=3 (existing private patches), H0=64 (harvest tests), M0=95 passed/13 subtests (management tests) -- run BEFORE any edit, at the worktree's branch HEAD prior to this order's commit",
+      "status": "PASS",
+      "expect": "pin_object commit.*enrich_264 def _lusha_client\\(api_key=None, client=None\\):.*enrich_659 page = prospecting_page\\(_lusha_client\\(client=lusha_client\\), company_domain\\).*production_lusha_writer_calls 0 \\[\\].*existing_private_patches 3.*64 passed.*95 passed, 13 subtests passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"8 passed\" and 0 failed, with the PASSED lines naming test_matches_bind_to_roster_officers, test_contact_field_never_reaches_the_writer, test_guard_refuses_a_contact_bearing_row_before_any_write, test_client_that_raises_propagates_and_nothing_is_written, test_key_is_never_read_with_an_injected_client, test_empty_roster_refused_before_any_call, test_held_domain_skips_the_call and test_public_seam_wraps_the_private_name",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_lusha_harvest.py -v -p no:cacheprovider 2>&1 | tail -12",
+      "output_evidence": "test_matches_bind_to_roster_officers PASSED\ntest_contact_field_never_reaches_the_writer PASSED\ntest_guard_refuses_a_contact_bearing_row_before_any_write PASSED\ntest_client_that_raises_propagates_and_nothing_is_written PASSED\ntest_key_is_never_read_with_an_injected_client PASSED\ntest_empty_roster_refused_before_any_call PASSED\ntest_held_domain_skips_the_call PASSED\ntest_public_seam_wraps_the_private_name PASSED\n\n8 passed in 0.14s",
+      "denominator": "8 of 8 named tests PASSED, 0 failed",
+      "status": "PASS",
+      "expect": "test_matches_bind_to_roster_officers PASSED.*test_contact_field_never_reaches_the_writer PASSED.*test_guard_refuses_a_contact_bearing_row_before_any_write PASSED.*test_client_that_raises_propagates_and_nothing_is_written PASSED.*test_key_is_never_read_with_an_injected_client PASSED.*test_empty_roster_refused_before_any_call PASSED.*test_held_domain_skips_the_call PASSED.*test_public_seam_wraps_the_private_name PASSED.*8 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"(H0 + 8) passed\" and 0 failed, where H0 is AC0's harvest count (measured 64, so 72): test_lusha.py's two guard tests (no bronze_put call, no client/network import) stay green unedited, with the entry point in the module",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "72 passed in 0.87s",
+      "denominator": "72 of 72 passed (AC0's H0=64 plus the 8 new tests), 0 failed",
+      "status": "PASS",
+      "expect": "72 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"M0 passed\" and 0 failed, where M0 is AC0's management count (measured 95, with 13 subtests passed): the three existing patches of enrich._lusha_client still bind, and build_document is unchanged",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/management/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "95 passed, 13 subtests passed in 5.82s",
+      "denominator": "95 of 95 passed, 13 of 13 subtests passed (AC0's M0, unchanged), 0 failed",
+      "status": "PASS",
+      "expect": "95 passed, 13 subtests passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"changed_code_files\" lists EXACTLY lib/research/harvest/lusha.py, lib/research/harvest/tests/test_lusha_harvest.py and lib/research/management/enrich.py; \"enrich_removed_lines 0\" (the wrap only ADDS to enrich.py; no existing line changes) with \"enrich_added_defs\" exactly ['+def lusha_client(api_key=None, client=None):']; \"existing_private_patches\" equal to AC0's P0 (measured 3)",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r99/ac4.py",
+      "output_evidence": "changed_code_files ['lib/research/harvest/lusha.py', 'lib/research/harvest/tests/test_lusha_harvest.py', 'lib/research/management/enrich.py']\nenrich_removed_lines 0 enrich_added_defs ['+def lusha_client(api_key=None, client=None):']\nexisting_private_patches 3",
+      "denominator": "3 of 3 changed files exactly as named; enrich_removed_lines 0 of 0 expected; existing_private_patches 3 == AC0's P0 (3)",
+      "status": "PASS",
+      "expect": "changed_code_files \\['lib/research/harvest/lusha\\.py', 'lib/research/harvest/tests/test_lusha_harvest\\.py', 'lib/research/management/enrich\\.py'\\].*enrich_removed_lines 0 enrich_added_defs \\['\\+def lusha_client\\(api_key=None, client=None\\):'\\].*existing_private_patches 3",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "all three files print \"compiles True\", crlf 0, and non_ascii_chars EQUAL to AC0's measured value for each existing file (measured 0 for both) and 0 for the new test file",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r99/ac5.py",
+      "output_evidence": "lib/research/management/enrich.py compiles True crlf 0 non_ascii_chars 0\nlib/research/harvest/lusha.py compiles True crlf 0 non_ascii_chars 0\nlib/research/harvest/tests/test_lusha_harvest.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "3 of 3 files compile True, crlf 0/0/0, non_ascii_chars 0/0/0 (equal to AC0's 0/0 for the two existing files)",
+      "status": "PASS",
+      "expect": "lib/research/management/enrich\\.py compiles True crlf 0 non_ascii_chars 0.*lib/research/harvest/lusha\\.py compiles True crlf 0 non_ascii_chars 0.*lib/research/harvest/tests/test_lusha_harvest\\.py compiles True crlf 0 non_ascii_chars 0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's own planted discriminator: the C-LUSHA-EXCEPTION guard (`_assert_no_contact_field`) must raise `store.LushaExceptionError` on a row carrying a key outside `KEPT_FIELDS`, BEFORE any write, exercised in AC1's test_guard_refuses_a_contact_bearing_row_before_any_write (contact_match_rows monkeypatched to return a row carrying `emails`).",
+      "expected": "A build that omits the guard call, or calls it AFTER the write, would let test_guard_refuses_a_contact_bearing_row_before_any_write's pytest.raises(store.LushaExceptionError) fail to fire, and would leave the recorder with >0 calls (its assert calls == [] would fail).",
+      "observed": "Hand-verified against the built code: `harvest_company` calls `_assert_no_contact_field(rows)` immediately after `contact_match_rows` and strictly before the `if write:` branch (lib/research/harvest/lusha.py, `harvest_company`), so a mutant that deleted or moved the guard call after the write was traced against the test and would fail it (the guard-bearing row would either reach `write_contact_match` unfiltered, giving the recorder 1 call, or the raise would not fire at all). test_guard_refuses_a_contact_bearing_row_before_any_write passed under the built code (AC1, 8/8) with the guard call physically preceding the write branch in the source.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 (fully stubbed, 0 Lusha/AWS calls) run twice in this session -- once pre-commit, once post-commit -- with identical PASSED lines both times (differing only in wall-clock timing, 0.17s vs 0.14s). AC2/AC3 (the harvest and management suites) each run twice in this session (pre- and post-edit / pre- and post-commit) with identical pass counts both times.",
+      "observed": "AC1 stable across 2 runs (8/8 identical PASSED names both times). AC2 stable at 72 passed across its 2 post-edit runs (0.89s then 0.87s, timing only). AC3 stable at 95 passed/13 subtests across its 2 post-edit runs (5.80s then 5.82s, timing only).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The CLI's execution (python -m lib.research.harvest.lusha)",
+      "reason": "Out of BOUNDS by the order's own text ('It is NOT run in this cell'; 'Never run the new CLI'). The CLI is written verbatim per item 3 but never invoked."
+    },
+    {
+      "item": "The B4 RUN (a live harvest_company call against a real domain, any Lusha call, reading LUSHA_API_KEY)",
+      "reason": "Out of BOUNDS by rule and by the order's own text: 'CODE ONLY -- 0 Lusha calls, the key never read'. The RUN is a later cell under its own pair and Andrew's word (record face, issuer note 5)."
+    },
+    {
+      "item": "store.py, roster.py, and every existing test file",
+      "reason": "Named WALLS by the order ('What this cell does NOT change'; 'A SURFACE NOT NAMED IN <paths> IS A WALL'). Not edited; every existing test in both suites re-verified green unedited (AC2/AC3)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~99/AMGT_RESAPP.TO-AMGT-rk-99.b4-lusha-harvest-wiring.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/harvest/lusha.py lib/research/management/enrich.py lib/research/harvest/tests/test_lusha_harvest.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/harvest/lusha.py lib/research/management/enrich.py lib/research/harvest/tests/test_lusha_harvest.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, code commit 4a6255f6b5)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~99 <0.9.0_WK_AMGT_RESAPP~99@opal.agent>\" -F <msgfile> -- lib/research/harvest/lusha.py lib/research/management/enrich.py lib/research/harvest/tests/test_lusha_harvest.py",
+      "result": "[commit-gate] OK: pre-commit gate clean for 3 of 3 file(s); [naming-gate] PASS 0 graded; [to-pipeline-gate] OK; [surprise-row-gate] OK; commit 4a6255f6b512361d08fcd3e6f86e199f6f0252db"
+    }
+  ]
+}
