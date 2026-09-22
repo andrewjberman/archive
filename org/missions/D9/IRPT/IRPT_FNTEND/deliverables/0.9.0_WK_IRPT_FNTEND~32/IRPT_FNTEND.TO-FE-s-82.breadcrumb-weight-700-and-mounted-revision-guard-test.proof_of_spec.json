@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-82",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5fd2dc9ab5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "e01db98917577cf3f1751ac624e6a686d2706763",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-82.breadcrumb-weight-700-and-mounted-revision-guard-test.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~32",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "346c7307a0d3bd387ecc51ddda133b70d19be68c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "C-S164: the current breadcrumb segment's className changed from font-semibold (weight 600) to font-bold (weight 700) at DrillTree.tsx:188, the ONLY line changed in this file (grant: breadcrumb weight class only). Committed at portal 346c7307a0d3bd387ecc51ddda133b70d19be68c, LOCAL on portal branch wk-irpt_fntend-13-82-fe-s-82-portal (portal frozen); not pushed, not deployed.",
+      "introduces": ["font-bold"],
+      "artifact_covered_by": ["F82-AC2", "F82-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-76/revision-mismatch-guard.test.ts",
+      "kind": "test",
+      "commit_or_etag": "346c7307a0d3bd387ecc51ddda133b70d19be68c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "W17-S1: upgraded in place (four pre-existing direct-construction tests unchanged) -- added mountDrillTree()/findElementsCarrying() helpers and three new tests that call DrillTree's exported function directly from inside a react-dom/server-rendered harness, extract the real onRowClick (handleDrill) closure structurally from DrillTree's own returned element tree, and invoke it with one of DrillTree's own SliceRow objects, relying on React's real render-phase-update mechanism to obtain DrillTree's genuine post-click markup. Committed at portal 346c7307a0d3bd387ecc51ddda133b70d19be68c, LOCAL on portal branch wk-irpt_fntend-13-82-fe-s-82-portal (portal frozen); not pushed, not deployed.",
+      "introduces": ["mountDrillTree", "findElementsCarrying"],
+      "artifact_covered_by": ["F82-AC4", "F82-AC6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F82-AC1",
+      "criterion_verbatim": "the whole portal typechecks.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "N/A -- boolean rc check",
+      "status": "PASS",
+      "expect": "rc=0(?![0-9])"
+    },
+    {
+      "criterion_id": "F82-AC2",
+      "criterion_verbatim": "the CURRENT (last) breadcrumb segment measures computed weight 700; a LINK (non-current) segment does not -- both assertions on the same capture, positive and negative together.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-13-82-fe-s-82/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~32/f82_breadcrumb_weights.png --port 5970 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings --expect-style '[data-slot=\"holdings-breadcrumb\"]:last-of-type::font-weight=700' --expect-style '[data-slot=\"holdings-breadcrumb\"]:first-of-type::font-weight!=700'",
+      "output_evidence": "CLICKED: Holdings\nEXPECT-STYLE[[data-slot=\"holdings-breadcrumb\"]:last-of-type::font-weight]: PASS 700\nEXPECT-STYLE[[data-slot=\"holdings-breadcrumb\"]:first-of-type::font-weight]: FAIL 700\nASSERT-STYLE: 1 of 2 met",
+      "denominator": "1 of 2 met (does not match the required 2 of 2)",
+      "status": "FAIL",
+      "expect": "ASSERT-STYLE: 2 of 2 met",
+      "status_reason": "REFUSED, order defect (filed as surprise row IRPT_FNTEND-W32-S1, class BLOCKING). Run EXACTLY as this order's own <invocation> (only <WS>/<PORT> substituted, no other change): the Holdings tab's default view is the ROOT node, whose breadcrumb has exactly ONE segment (measured separately: EXPECT[[data-slot=\"holdings-breadcrumb\"]]: PASS (1 visible)), so :last-of-type and :first-of-type both resolve to that SAME single span -- the genuine output is ASSERT-STYLE: 1 of 2 met, not 2 of 2, so this criterion FAILS by its own <expect> exactly as ordered. BOUNDS' \"selectors are illustrative\" clause permits adjusting the selector STRINGS, but the fix this state actually needs is a real drill step (--clicktext 'Models#3', confirmed by a throwaway Playwright probe to be the SliceTable row and not the CategoryViewTree card or the recharts Legend, both of which also carry the exact text \"Models\") plus TAG-qualified selectors (span[data-slot=...] for the current segment vs button[data-slot=...] for a link, since :last-of-type/:first-of-type are per-parent-wrapper and never select the global first/last segment) -- and that adapted invocation genuinely reads ASSERT-STYLE: 2 of 2 met (f82_breadcrumb_weights_adapted_supplementary.png, PASS 700 / PASS 400), proving Fix 1's weight change is correct once the instrument reaches a discriminating state. But recording that adapted invocation in this proof instance was tried and REFUSED by python .tools/proof-of-spec-check.py: VIOLATION: invocation-alignment[F82-AC2]: the RECORDED invocation is NOT the criterion's invocation modulo the placeholder(s) ['PORT', 'WS'] -- INVALID (rc=1); this worker's <paths> grant does not include the task-orders/ directory, so the TO file's <invocation> text cannot be amended by this worker to match. Per this order's own instruction (REFUSE what cannot be satisfied as written; do not self-grade past a failure; an order defect is reported and the issuer amends it), this row records the LITERAL invocation and its TRUE output. This does not affect F82-AC1/AC3/AC4/AC5, and does not change Fix 1 itself (font-semibold -> font-bold, unchanged, correct)."
+    },
+    {
+      "criterion_id": "F82-AC3",
+      "criterion_verbatim": "ABSENT-SELECTOR CONTROL: against a fixture with no breadcrumb rendered at all, the same inequality reads UNMEASURABLE, never a vacuous PASS.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-13-82-fe-s-82/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~32/f82_breadcrumb_absent_control.png --port 5970 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-frozen.json --expect-style '[data-slot=\"holdings-breadcrumb\"]::font-weight!=700'",
+      "output_evidence": "EXPECT-STYLE[[data-slot=\"holdings-breadcrumb\"]::font-weight]: UNMEASURABLE (selector matched nothing)\nASSERT-STYLE: 0 of 1 met",
+      "denominator": "1 of 1 assertion, UNMEASURABLE (not PASS/FAIL)",
+      "status": "PASS",
+      "expect": "UNMEASURABLE",
+      "status_reason": "Matches <expect> verbatim, run exactly as the order's literal invocation (no adjustment needed -- the generic selector genuinely resolves to nothing on this fixture). PNG read (f82_breadcrumb_absent_control.png) confirms the Reporting tab's default view renders -- no Holdings drill tree, no breadcrumb slot at all."
+    },
+    {
+      "criterion_id": "F82-AC4",
+      "criterion_verbatim": "the upgraded test file passes: the NEW mounted-DrillTree case asserts PanelError's named content appears in DrillTree's own rendered output for a real provenance mismatch, alongside whatever of the existing direct-construction assertions still hold.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-76",
+      "output_evidence": "MOUNTED baseline (no click): passes=1, refused slot present=false\nMOUNTED after clicking nd-stale: passes=2, refused slot present=true\nMOUNTED after clicking nd-model (fresh): passes=2, refused slot present=false, breadcrumb includes \"Long Term\"=true\nMOUNTED baseline UNMEASURABLE check: passes=1, markup bytes=8843\n7 pass\n0 fail\n37 expect() calls\nRan 7 tests across 1 file.",
+      "denominator": "0 fail of 7 tests (37 expect() calls)",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail",
+      "status_reason": "Matches <expect> verbatim. Row IRPT_FNTEND-W32-S2 records the mounting mechanism in full: no DOM/jsdom/happy-dom/testing-library/react-test-renderer is installed or permitted (bun install forbidden), so DrillTree's exported function is called directly inside a react-dom/server-rendered harness (hooks attach to the harness's own fiber, exactly like a custom hook), the real onRowClick (handleDrill) closure is read structurally off DrillTree's own returned element tree (never hand-built), and calling it is a genuine React render-phase update -- verified empirically before landing (a deleted throwaway harness printed TOTAL Harness invocations: 2 and a genuine post-click markup). Three new tests: (1) positive + wrong-state baseline together (a mount with no click shows nothing; a click on the stale node shows PanelError's real content in DrillTree's own markup); (2) WRONG-STATE CONTROL, a different real click (a fresh sibling) navigates instead of refusing; (3) ABSENT-SELECTOR CONTROL (mounted), the initial render carries no refusal slot at all."
+    },
+    {
+      "criterion_id": "F82-AC5",
+      "criterion_verbatim": "the whole IRPT_FNTEND suite is green.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": "646 pass\n 24 skip\n  0 fail\n2695 expect() calls\nRan 670 tests across 124 files. [57.24s]",
+      "denominator": "0 fail of 670 tests (646 pass, 24 skip)",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail",
+      "status_reason": "Dev server (port 5970) stopped and confirmed closed (curl returned 000) before this run; IRPT_FE_DEV_PORT unset."
+    },
+    {
+      "criterion_id": "F82-AC6",
+      "criterion_verbatim": "graded at L9 by the CVO: the breadcrumb weight is genuinely 700 (measured, not assumed from the class name); the upgraded test genuinely mounts DrillTree and exercises its own conditional branch, not PanelError in isolation. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; read DrillTree.tsx's one-line diff, F82-AC2's graded (literal, FAIL) output plus the adapted (non-graded, supplementary) tag-qualified EXPECT-STYLE lines and both PNGs, the revision-mismatch-guard.test.ts file header's full mechanism account, and F82-AC4's passes=1/passes=2 + refused-slot-present transitions across the positive/wrong-state/absent-selector trio",
+      "output_evidence": "See result file 'F82-AC6 -- JUDGMENT, recorded, no verdict' for the full citation-backed record: (1) breadcrumb weight -- the single-line font-semibold->font-bold diff; the GRADED F82-AC2 invocation reads ASSERT-STYLE: 1 of 2 met and is FAIL (order defect, row IRPT_FNTEND-W32-S1, the literal selectors cannot discriminate at the state --click Holdings alone reaches); the ADAPTED, non-graded invocation (f82_breadcrumb_weights_adapted_supplementary.png) reads EXPECT-STYLE[span[data-slot=\"holdings-breadcrumb\"]::font-weight]: PASS 700 against the CURRENT segment specifically (tag-qualified, not the class name) and EXPECT-STYLE[button[data-slot=\"holdings-breadcrumb\"]::font-weight]: PASS 400 against the LINK segment, demonstrating the weight fix is genuinely correct once the instrument reaches a discriminating state; (2) mounted guard -- the empirically-verified TOTAL Harness invocations: 2 / genuine post-click markup (measured before landing with a deleted throwaway harness, not assumed), the WRONG-STATE control (clicking nd-model navigates, passes=2, no refusal) and the ABSENT-SELECTOR control (no click, passes=1, no refusal/no role=alert) -- all three built from the SAME mounting instrument as the positive case (clicking nd-stale, passes=2, refusal present with PanelError's real content), so they genuinely discriminate against one another.",
+      "denominator": "N/A -- judgment criterion, no verdict computed here",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true; graded by 3.0.0_SA_CVO at L9 per spine v3 L9. No self-grade taken.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "F82-AC3 is a dedicated absent-selector control against a fixture with no breadcrumb at all. F82-AC2 itself is CONFOUNDED as ordered (row IRPT_FNTEND-W32-S1) -- its two assertions resolve to the same single element at the state the literal invocation reaches, so it cannot be offered as a firing wrong-state control; the genuinely discriminating pair (current PASS 700 / link PASS 400, on the SAME capture) is demonstrated only via the adapted, non-graded invocation (f82_breadcrumb_weights_adapted_supplementary.png). F82-AC4's new mounted tests carry their own two REAL controls: a WRONG-STATE control (a real click on a fresh, non-mismatched sibling navigates instead of refusing) and an ABSENT-SELECTOR control (mounted) (the initial render, no click, carries no refusal slot).",
+      "expected": "The absent-fixture read is UNMEASURABLE, never a false PASS; the adapted (non-graded) link-segment read differs from the current-segment read; the mounted wrong-state click shows no refusal and the mounted absent-selector baseline shows no refusal either.",
+      "observed": "EXPECT-STYLE[[data-slot=\"holdings-breadcrumb\"]::font-weight]: UNMEASURABLE (selector matched nothing) on the frozen/no-breadcrumb fixture (F82-AC3, graded PASS). Adapted, NON-GRADED invocation: EXPECT-STYLE[button[data-slot=\"holdings-breadcrumb\"]::font-weight]: PASS 400 (link segment, != 700, discriminated from the current segment's PASS 700) -- supplementary evidence only, per row IRPT_FNTEND-W32-S1. Mounted WRONG-STATE (nd-model click): refused slot present=false, breadcrumb includes \"Long Term\"=true. Mounted ABSENT-SELECTOR (no click): refused slot present=false, passes=1.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "F82-AC2's literal invocation (dev server on port 5970) run twice (once during development, once for the final graded record) and F82-AC4's bun test suite run twice (once during development, once for the final proof) -- the deciding lines diffed.",
+      "observed": "Both F82-AC2 literal runs printed identical EXPECT-STYLE[[data-slot=\"holdings-breadcrumb\"]:last-of-type::font-weight]: PASS 700 / EXPECT-STYLE[[data-slot=\"holdings-breadcrumb\"]:first-of-type::font-weight]: FAIL 700 / ASSERT-STYLE: 1 of 2 met. Both F82-AC4 runs printed identical passes=1/passes=2 transitions and 7 pass / 0 fail / 37 expect() calls. No difference.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_FNTEND-W32-S1: F82-AC2's literal invocation (--click Holdings only, :last-of-type/:first-of-type) cannot discriminate current-vs-link at the Holdings tab's default (root) view, and BOUNDS' selector-string-adjustment permission alone is not enough to fix it; and proof-of-spec-check.py's invocation-alignment limb refuses a recorded invocation that diverges from the TO file's literal text, which this worker's <paths> grant cannot amend -- so F82-AC2 is graded FAIL, genuinely, as ordered. class BLOCKING, hazard_standing INERT.",
+    "IRPT_FNTEND-W32-S2: F82-AC4/W17-S1's 'mount the actual DrillTree component' instruction names no mechanism, and this worktree has no DOM test environment and no react-test-renderer; satisfied via a direct-function-call + React render-phase-update technique, verified empirically before landing and documented in full in the landed test file's own header comment. hazard_standing INERT."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~32/breadcrumb-weight-700-and-mounted-revision-guard-test.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit), bun 1.3.9",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0"
+    },
+    {
+      "tool": "bun test 1.3.9 (fe-s-76 upgraded test file -- F82-AC4)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-76",
+      "result": "7 pass / 0 fail / 37 expect() calls / Ran 7 tests across 1 file."
+    },
+    {
+      "tool": "bun test 1.3.9 (whole InvestorReporting suite -- F82-AC5, dev server stopped, IRPT_FE_DEV_PORT unset)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "result": "646 pass / 24 skip / 0 fail / 2695 expect() calls / Ran 670 tests across 124 files. [57.24s]"
+    },
+    {
+      "tool": "scripts/ui-smoke.mjs (Playwright-core + system Edge, headless), vite dev server, worktree port 5970",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && IRPT_FE_DEV_PORT=5970 bun run dev --port 5970 (background), then node scripts/ui-smoke.mjs investor-reporting <out.png> --port 5970 --width 1440 --fixtures <fixture.json> [flags per row]",
+      "result": "rc=0 on both F82-AC2 and F82-AC3 runs; every EXPECT-STYLE/ASSERT-STYLE/FIXTURES-MATCH/KEY-VALIDITY line quoted in the acceptance rows and result file is this tool's own printed output"
+    },
+    {
+      "tool": "throwaway Playwright probe (.scratch/probe.mjs, this worker's own diagnostic, NOT committed, deleted before commit) -- used only to determine the correct occurrence index for --clicktext 'Models#N'",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-82-fe-s-82/portal && node .scratch/probe.mjs",
+      "result": "MATCH COUNT for exact text=\"Models\": 4 -- [0]/[1] CategoryViewTree card <p>, [2] recharts Legend <span>, [3] SliceTable <td> (parent <tr data-slot=\"slice-row\">) -- confirming occurrence index 3 is the real drillable row"
+    }
+  ]
+}
