@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-h-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-2.silver-from-bronze.md",
+    "group": "OTHER",
+    "vintage_commit": "26cfa29d590c91544cebf81fd66bb42dbaf0408a"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "9fbf337a74c1c8ef6b598a0a9f1cab75328747e1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-2.silver-from-bronze.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/silver_from_bronze.py",
+      "kind": "script",
+      "commit_or_etag": "0f7fd296f4af4329b97bf0b14c5c9e510221ca91",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New pure module (no I/O, no client=). article_rows(publisher_code, body_bytes, received_form, bronze_key, fetched_at, retrieval_mode, run_stamp, discovery=None) extracts the vendor object per publisher (SA data.attributes/relationships/included, Bloomberg story, Barron's articleData+body, WSJ's whole pageProps, FT's JSON-LD articleBody object, or the record itself for received_form=normalised_record), keeps every field, retypes only TIMESTAMP_FIELDS-named top-level fields, derives the published_utc/published_offset_min/published_date_utc/published_precision clock, and adds article_key/publisher/article_id/title/text_blocks/bronze_key/fetched_at/retrieval_mode/run_stamp plus the optional discovery columns. listing_hit_rows(...) does the same per listing/search bronze body, one row per hit with 1-based search_rank, carrying query_sha256/fetch_date_utc/search_page/source for the record key. retrieval_mode is refused via ValueError outside {backfill, live}.",
+      "introduces": ["article_rows", "listing_hit_rows", "TIMESTAMP_FIELDS", "RETRIEVAL_MODES"],
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_silver_from_bronze.py",
+      "kind": "test",
+      "commit_or_etag": "0f7fd296f4af4329b97bf0b14c5c9e510221ca91",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, exactly the 14 arms section 1 item 4 names, over an in-process STUB S3 client (same shape as lib/research/harvest/tests/test_store.py). Each 'every field' arm flattens the fixture's own vendor object (a *_vendor() helper mirroring the module's own extraction) and the produced row, and asserts the missing/mismatched leaf list is empty. test_partition_is_fetch_date_not_published_date and test_uploader_silver_reads_bronze_not_record exercise the REAL lib/research/harvest/store.py functions (silver_append, silver_latest) against the stub client, never a re-implementation. No network, no vendor call, no live bucket.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "0f7fd296f4af4329b97bf0b14c5c9e510221ca91",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "HarvestUploader.run gains retrieval_mode='live' (default), threaded into _run_articles and _run_listings. _run_articles builds its silver row via silver_from_bronze.article_rows(publisher, payload, \"as_received\", bronze_key, fetched_at, retrieval_mode, run_stamp) from the SAME bytes just put as bronze -- never harvest_grammar.article_silver_row(record, bronze_key) (removed from this path; the function itself is left in place for other callers). received_form is hardcoded \"as_received\" here (no per-row column exists yet in harvest_raw_outbox; HVST-h-9 adds normalised_record rows later). _run_listings now also puts bronze via put_listing_bronze THEN appends listing_hit rows via silver_from_bronze.listing_hit_rows with record key (query_sha256, fetch_date_utc, search_page, search_rank, source).",
+      "introduces": ["silver_from_bronze.article_rows", "retrieval_mode"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit, six baseline lines recorded; test_bronze_capture.py reads \"12 passed\" (the predecessor's bar)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py lib/research/harvest/tests/test_store.py; do echo \"$t :: $(python -m pytest $t -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "Run BEFORE any edit (branch base 271490a237, worktree HEAD unmodified): lib/opal_data_harvest/test_bronze_capture.py :: 12 passed in 0.45s | lib/opal_data_harvest/test_harvest_grammar.py :: 7 passed in 0.67s | lib/opal_data_harvest/test_worker.py :: 2 failed, 18 passed, 2 subtests passed in 0.64s | lib/opal_data_harvest/test_catalog.py :: 5 passed in 0.59s | lib/opal_data_harvest/test_verification.py :: 1 failed, 3 passed, 2 subtests passed in 0.30s | lib/research/harvest/tests/test_store.py :: 11 passed in 0.43s",
+      "denominator": "6 of 6 baseline files run before any edit; test_bronze_capture.py line reads exactly \"12 passed\" as named",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"14 passed\" and no \"failed\" -- the fourteen arms named in section 1 item 4",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_silver_from_bronze.py -v --color=no -p no:cacheprovider 2>&1 | tail -18",
+      "output_evidence": "test_article_rows_keep_every_field_sa PASSED | test_article_rows_keep_every_field_bbg PASSED | test_article_rows_keep_every_field_barrons PASSED | test_article_rows_keep_every_field_wsj PASSED | test_article_rows_keep_every_field_ft PASSED | test_article_rows_from_normalised_record PASSED | test_published_clock_offset_kept PASSED | test_published_clock_date_only_and_naive PASSED | test_listing_hit_rows_each_publisher PASSED | test_lineage_and_mode_columns_present PASSED | test_retrieval_mode_refuses_unknown PASSED | test_partition_is_fetch_date_not_published_date PASSED | test_replay_is_identical PASSED | test_uploader_silver_reads_bronze_not_record PASSED | ============================= 14 passed in 0.68s ==============================",
+      "denominator": "14 of 14 arms passed, 0 failed; run twice for determinism (0.69s and 0.68s wall time, identical pass/fail outcome both times)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "each line's passed and failed counts EQUAL its AC0 line: no new failure",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py lib/research/harvest/tests/test_store.py; do echo \"$t :: $(python -m pytest $t -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "Run AFTER every edit, at HEAD 0f7fd296f4: lib/opal_data_harvest/test_bronze_capture.py :: 12 passed in 0.32s | lib/opal_data_harvest/test_harvest_grammar.py :: 7 passed in 0.69s | lib/opal_data_harvest/test_worker.py :: 2 failed, 18 passed, 2 subtests passed in 0.77s | lib/opal_data_harvest/test_catalog.py :: 5 passed in 0.55s | lib/opal_data_harvest/test_verification.py :: 1 failed, 3 passed, 2 subtests passed in 0.30s | lib/research/harvest/tests/test_store.py :: 11 passed in 0.43s -- every passed/failed count equals the AC0 line for that file (only the timing suffix differs)",
+      "denominator": "6 of 6 baseline files re-run; 6 of 6 lines' passed/failed counts equal their AC0 line exactly; 0 new failures, 0 pre-existing failures removed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"outside_allowed []\"; each of this cell's changed files prints \"compiles True crlf 0 non_ascii_chars 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/hv2/ac3.py",
+      "output_evidence": "rc=0. fork_base 271490a237b85b08e396558147df345e54ef36a5. changed_code_files ['lib/opal_data_harvest/silver_from_bronze.py', 'lib/opal_data_harvest/test_silver_from_bronze.py', 'lib/opal_data_harvest/uploads.py']. outside_allowed []. lib/opal_data_harvest/silver_from_bronze.py compiles True crlf 0 non_ascii_chars 0. lib/opal_data_harvest/test_silver_from_bronze.py compiles True crlf 0 non_ascii_chars 0. lib/opal_data_harvest/uploads.py compiles True crlf 0 non_ascii_chars 0.",
+      "denominator": "3 of 3 changed files inside `mine` (all 3 of the changed files) compile clean, pure ASCII, 0 CRLF; 0 of 3 outside_allowed; fork_base equals this worktree's recorded base (271490a237, the merged HVST-h-1 drain)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/hv2/mutant_control.py (not committed) reconstructs the PRE-FIX HarvestUploader._run_articles silver-row shape (harvest_grammar.article_silver_row(record, bronze_key), i.e. from the queued/normalised record) against the exact scenario AC1's test_uploader_silver_reads_bronze_not_record uses (a bronze body carrying headline 'BRONZE HEADLINE, NEVER THE RECORD'S' and a queued record carrying a DIFFERENT title), alongside the fix's own silver_from_bronze.article_rows path on the identical inputs.",
+      "expected": "OLD (mutant, article_silver_row(record, ...)): row title == the RECORD's title (the bronze headline never reaches it, and no 'headline' field is even present). NEW (the fix): row title == the BRONZE headline exactly.",
+      "observed": "OLD title field == 'RECORD TITLE, MUST NOT APPEAR IN SILVER'; OLD headline field present == False; OLD row title == bronze headline ? False. NEW title field == 'BRONZE HEADLINE, NEVER THE RECORD'S'; NEW headline field == same value; NEW row title == bronze headline ? True. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's full test file (test_silver_from_bronze.py) run twice back to back; the mutant control script run twice back to back.",
+      "observed": "pytest: '14 passed' both runs (0.69s and 0.68s wall time, identical pass/fail outcome). Mutant script: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live vendor call, AWS call, or real harvester CLI run",
+      "reason": "BOUNDS: 'NEVER RUN AN INSTALL. NEVER CALL A PUBLISHER, NEVER CALL AWS, NEVER RUN THE HARVESTER CLI.' Every S3 client in this cell's tests is the STUB pattern from lib/research/harvest/tests/test_store.py; publishers.py/transport.py/worker.py/config.json are unchanged (verified: git diff base..HEAD -- those paths is empty)."
+    },
+    {
+      "item": "store.py, worker.py, transport.py, publishers.py (read), the legacy Uploader class, the CLI, config.json",
+      "reason": "Section 1 'What this cell does NOT change' names all of these explicitly; verified unchanged: git diff 271490a237..HEAD -- lib/research/harvest/store.py lib/opal_data_harvest/worker.py lib/opal_data_harvest/transport.py lib/opal_data_harvest/config.json is empty, and publishers.py is imported read-only (json_fields/typed_blocks/typed_text) with no edits to the file itself."
+    },
+    {
+      "item": "received_form discrimination in HarvestUploader (normalised_record path through this uploader)",
+      "reason": "Section 1 item 2 names HVST-h-9 (a later cell) as the one that writes normalised_record rows through this builder. harvest_raw_outbox carries no per-row received_form column yet (out of this cell's <paths>: worker.py), so _run_articles hardcodes \"as_received\", matching put_article_bronze's own default on this path. silver_from_bronze.article_rows itself already accepts and correctly handles received_form=\"normalised_record\" (AC1's test_article_rows_from_normalised_record), ready for HVST-h-9 to pass it through once the schema carries it."
+    },
+    {
+      "item": "harvest_grammar.article_silver_row and search_result_row removal",
+      "reason": "Section 1 item 3: KEPT (other callers may exist); only removed from the HarvestUploader path. Verified: both functions remain in harvest_grammar.py unchanged, and grep of uploads.py shows no remaining call to either."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC0, baseline sweep, before any edit)",
+      "invocation": "for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py lib/research/harvest/tests/test_store.py; do python -m pytest $t -q --color=no -p no:cacheprovider; done",
+      "result": "12 passed | 7 passed | 2 failed, 18 passed, 2 subtests passed | 5 passed | 1 failed, 3 passed, 2 subtests passed | 11 passed"
+    },
+    {
+      "tool": "pytest (AC1, new test file)",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_silver_from_bronze.py -v --color=no -p no:cacheprovider",
+      "result": "rc 0; 14 passed, 0 failed (run twice, identical outcome)"
+    },
+    {
+      "tool": "pytest (AC2, baseline sweep, after every edit)",
+      "invocation": "for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py lib/research/harvest/tests/test_store.py; do python -m pytest $t -q --color=no -p no:cacheprovider; done",
+      "result": "12 passed | 7 passed | 2 failed, 18 passed, 2 subtests passed | 5 passed | 1 failed, 3 passed, 2 subtests passed | 11 passed -- every line equal to its AC0 line"
+    },
+    {
+      "tool": ".scratch/hv2/ac3.py (AC3, given verbatim by section 5)",
+      "invocation": "timeout 120 python .scratch/hv2/ac3.py",
+      "result": "rc 0; fork_base 271490a237 (this worktree's true fork off SITEZ); 3 of 3 changed files compile clean/ASCII/no-CRLF; outside_allowed []"
+    },
+    {
+      "tool": ".scratch/hv2/mutant_control.py (not committed -- scratch control harness)",
+      "invocation": "PYTHONPATH=\"$(pwd);$PYTHONPATH\" python .scratch/hv2/mutant_control.py",
+      "result": "rc 0; OLD (article_silver_row from record) row title != bronze headline; NEW (silver_from_bronze.article_rows from bronze) row title == bronze headline; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~2 <0.9.0_WK_AMGT_HARVST~2@opal.agent>\" -F <msgfile> -- lib/opal_data_harvest/silver_from_bronze.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/uploads.py",
+      "result": "commit 0f7fd296f4: risk-reflex REFLEX CLEAN (3 of 3 files checked, 0 hits against 1662 danger nodes); commit-gate OK 3 of 3 files; naming-gate PASS 24 graded (S3 key literals in the test fixtures, all CONFORMANT); to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}
