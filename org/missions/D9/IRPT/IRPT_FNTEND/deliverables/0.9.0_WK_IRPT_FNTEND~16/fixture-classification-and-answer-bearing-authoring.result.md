@@ -91,50 +91,83 @@ Both captured against the real `/investor-reporting` route at 1440px, dev server
 Both runs printed the OLD line `FIXTURES: 3 declared; 3 matched >=1 URL` -- every declared key matched a
 live request, both times.
 
-## 3. F66-AC6 / F66-AC7: REFUSED as literally invoked -- the instrument is not on this base
+## 3. F66-AC6 / F66-AC7: PASS -- FE-s-65's instrument has now landed (REPLACEMENT INSTANCE, same serial)
 
-`scripts/ui-smoke.mjs` in this worktree (375 lines, portal HEAD `243089eb`) carries **zero** occurrences
-of `FIXTURES-MATCH`, `--expect`, `--expect-text`, `--expect-style`, `--expect-ground`, `--inject-css`, or
-`--delay` -- grep-verified before authoring anything. `IRPT_FNTEND.TO-FE-s-65...md:8` reads
-`<status>pending</status>`: FE-s-65, the cell that builds these (per this order's own "THE INSTRUMENT"
-clause), has not landed in this worktree's base.
+**Addendum, replacement instance, same serial, 2026-09-21.** The original instance above correctly
+REFUSED F66-AC6/F66-AC7 because FE-s-65 (the cell that builds `FIXTURES-MATCH` and the `--expect`
+family) was still `<status>pending</status>` in that worktree's base. This is a freshly created
+worktree pair on the current HEADs, which the COO confirms include FE-s-65 genuinely landed
+(workspace CLOUD `b42c38cc6c`, portal DEV `0054b81d`). Verified myself before re-running anything:
+`grep -n "FIXTURES-MATCH" portal/scripts/ui-smoke.mjs` -> line 510
+(`` console.log(`FIXTURES-MATCH: matched ${fixturesMatched} of ${fixtureKeys.length}`) ``), and lines
+142-146 wire `--expect`/`--expect-text`/`--expect-style`/`--expect-ground`/`--inject-css` as real,
+read arguments (not silently ignored). The instrument is real on this base.
 
-Measured directly: I ran the literal ui-smoke invocation with `--expect` against an existing fixture
-before authoring anything -- no `EXPECT` line printed (the flag is silently ignored, not refused; the
-script does not validate unknown args), and the run printed `FIXTURES: 9 declared; 3 matched >=1 URL`,
-never a `FIXTURES-MATCH:` line in any form. This order's own "THE INSTRUMENT" clause anticipates exactly
-this condition ("if `ui-smoke.mjs` refuses `--expect` as an unknown flag, STOP: your base is wrong,
-report it") -- the observed behavior (silent no-op) differs from the literal wording (a loud refusal)
-but is the same substantive base-is-wrong condition, since it has the same consequence: the
-`FIXTURES-MATCH: matched N of N` string F66-AC6/AC7's `<expect>` requires cannot be produced by this
-build under any input.
+Re-ran both invocations exactly as the order specifies, against my own dev server on port 5910
+(block 5910-5919), started `IRPT_FE_DEV_PORT=5910 bun run dev --port 5910` in the background, curl
+200 confirmed before either capture:
 
-Both F66-AC6 and F66-AC7 were run exactly as the order specifies (after authoring the two fixtures) and
-measured **FAIL**, per BOUNDS' REFUSE clause -- the criterion's expectation is not edited or weakened.
-Filed as surprise row `IRPT_FNTEND-W16-S1`
-(`org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md`). The
-dispatching message to this worker additionally asserted "your criteria only use existing
-FIXTURES-MATCH/FIXTURES output" -- that assertion does not hold either: the existing output is
-`FIXTURES: N declared; M matched >=1 URL`, a different line with different count semantics, never
-`FIXTURES-MATCH: matched N of N`.
+```
+F66-AC6 (fixtures/smoke/reporting-answer-bearing.json):
+FIXTURES: 3 declared; 3 matched >=1 URL
+FIXTURES-MATCH: matched 3 of 3
+rc=0
 
-The fixtures themselves are correctly authored regardless of this gap (Section 2 above; both criteria's
-*substance* -- every declared key matches a live request -- is true and independently confirmed by the
-OLD line's own count and by the rendered content difference between the two captures).
+F66-AC7 (fixtures/smoke/reporting-answer-bearing-partial.json):
+FIXTURES: 3 declared; 3 matched >=1 URL
+FIXTURES-MATCH: matched 3 of 3
+rc=0
+```
+
+Both satisfy `<expect>FIXTURES-MATCH: matched (\d+) of \1(?![0-9])</expect>` literally: **PASS**.
+
+I read both PNGs (`f66_ac6.png`, `f66_ac7.png`) myself before recording this. `f66_ac6.png` (full
+fixture): a `Ready` performance report renders in full (cumulative-return chart, period returns,
+account detail, methods/sources, source attribution); header strip reads `PERMITTED ACCOUNTS 3 of 3
+in scope (3 permitted)`, no "not fully projected" fact box. `f66_ac7.png` (partial fixture): an
+otherwise IDENTICAL body render, but the header strip additionally shows **`NOT FULLY PROJECTED -- 2
+of 5 accounts not projected`**, absent from `f66_ac6.png` -- direct visual confirmation that
+`header/ScopeSummary.tsx`'s `scope.availability.unprojectedGrant.count > 0` partial-disclosure fact
+reads the partial fixture's edit correctly and does not fire on the full one. This is the exact
+content FE-s-68 needs from these two fixtures.
+
+Dev server stopped before F66-AC8 (`Get-NetTCPConnection -LocalPort 5910 -State Listen` piped to
+`Stop-Process -Force`; port re-checked, `curl --max-time 2` returned `000`, exit 28) and
+`IRPT_FE_DEV_PORT` unset in the shell that ran the suite.
+
+`IRPT_FNTEND-W16-S1` (the original REFUSAL row, class OBSERVATION, hazard_standing INERT) is not
+edited -- it stood correctly for the base it was measured against. This addendum is not a second
+surprise row: nothing here is off-spec or unexpected relative to what the dispatching message said
+(FE-s-65 landed, per the COO's own confirmation) -- it is the ordinary re-run the row's own
+consequence pointed to.
+
+The fixtures themselves were correctly authored in the prior instance regardless of the instrument
+gap (Section 2 above; both criteria's *substance* -- every declared key matches a live request -- was
+already true and confirmed by the OLD line's own count and by the rendered content difference between
+the two captures; this re-run adds the literal `FIXTURES-MATCH` line the `<expect>` requires, on top
+of that same substance).
 
 ## 4. Other criteria
 
-- **F66-AC1** (whole-portal typecheck): `rc=0`.
-- **F66-AC2/AC3/AC4**: see Section 1.
-- **F66-AC5** (fe-s-34, fe-s-39, fe-s-4 suites): 98 pass / 6 skip / 0 fail of 104 tests across 18 files --
-  unaffected by the 16 deletions.
-- **F66-AC8** (whole suite): dev server on port 5910 stopped (`Stop-Process` on the PID
-  `Get-NetTCPConnection -LocalPort 5910 -State Listen` named) and port verified closed (`curl --max-time
-  2` returned `000`, exit 28) immediately before the run; `IRPT_FE_DEV_PORT` unset in that shell. Result:
-  615 pass / 22 skip / 0 fail of 637 tests across 115 files.
+- **F66-AC1** (whole-portal typecheck): re-confirmed on this base, `rc=0`.
+- **F66-AC2/AC3/AC4**: re-confirmed on this base, unchanged (`SMOKE FILES: 23; WIRE-KEYED: 19;
+  ADAPTER-PLANE: 4; UNCLASSIFIED: 0`, `SEEDED-UNCLASSIFIED: correctly flagged`, 3 pass / 0 fail).
+- **F66-AC5** (fe-s-34, fe-s-39, fe-s-4 suites): re-confirmed on this base, 98 pass / 6 skip / 0 fail of
+  104 tests across 18 files -- unaffected by the 16 deletions.
+- **F66-AC6/AC7**: PASS -- see Section 3 (this addendum).
+- **F66-AC8** (whole suite): dev server on port 5910 stopped and port verified closed (`curl --max-time
+  2` returned `000`, exit 28) before the run; `IRPT_FE_DEV_PORT` unset in that shell. Re-confirmed on
+  this base: 619 pass / 22 skip / 0 fail of 641 tests across 116 files (0 fail, satisfying the
+  criterion; the total moved from 637/115 to 641/116 because FE-s-65's own instrument/tests landed in
+  this base between the two instances -- not a regression, and not filed as a row: it is the expected
+  consequence of the base change this order's dispatch already named).
 - **F66-AC9** (judgment): recorded in the proof instance, no verdict given.
 
 ## Surprises filed
 
-- `IRPT_FNTEND-W16-S1` (OBSERVATION, INERT) -- Section 3 above: the `FIXTURES-MATCH` instrument FE-s-65
-  builds has not landed in this worktree; F66-AC6/AC7 REFUSED as literally invoked.
+- `IRPT_FNTEND-W16-S1` (OBSERVATION, INERT) -- Section 3 (original instance): the `FIXTURES-MATCH`
+  instrument FE-s-65 builds had not landed in that worktree; F66-AC6/AC7 REFUSED as literally invoked
+  at that base. Row left as filed (not edited): it was correct for its own vintage. This replacement
+  instance's base carries FE-s-65 landed, so F66-AC6/AC7 now PASS (Section 3 addendum) -- no new row
+  filed, since re-running a criterion once its named precondition lands is the ordinary consequence the
+  original row already pointed to, not a further surprise.
