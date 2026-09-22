@@ -79,8 +79,13 @@ for the hash substitution) and this worker or a successor re-runs and flips this
 
 - **F85-AC1** (typecheck): PASS. `tsc -b --noEmit` rc=0.
 - **F85-AC2** (generator denominators): PASS. `SMOKE KEYS: 9`, `PRINT MAP KEYS: 2` as required.
-- **F85-AC3** (committed git object): FAIL as literally written (order defect, above). Substance proven
-  supplementarily at the grant-consistent path: `9 of 9`, `2 of 2`, `12 of 12`.
+- **F85-AC3** (committed git object): originally FAIL as literally written (order defect, filed
+  `IRPT_FNTEND-W35-S1`; substance proven supplementarily at the grant-consistent path: `9 of 9`, `2 of 2`,
+  `12 of 12`). The issuing COO (2.0.0_SA_COO~F) amended F85-AC3's `<invocation>` in the task order (correct
+  path, `$(git rev-parse HEAD)` substitution) and independently re-verified live against this worker's own
+  commit before amending. Re-run here against the corrected invocation exactly as it now reads in the TO:
+  PASS -- `fe-s-13-wire.json: 9 of 9`, `fe-s-14-print-v1.json: 2 of 2`, `default.json: 12 of 12`, rc=0.
+  `IRPT_FNTEND-W35-S1` disarmed by the amendment per its own disarm_owner clause.
 - **F85-AC4** (whole IRPT_FNTEND suite): PASS. `650 pass`, `0 fail`, `27 skip`, 2706 expect() calls, 677
   tests across 127 files.
 - **F85-AC5** (judgment, CVO at L9): RECORDED, no verdict self-given. The committed fixture content is the
