@@ -64,28 +64,44 @@ tables**, not one shared table:
   matching round 13's own true-positive count -- the fix removes the F80-AC6 false positive without removing a true
   positive. PASS. Dev server on this worker's assigned port 5995 (block 5995-5999), stopped and port-closed
   (`curl` -> `000`) confirmed before F86-AC4.
-- **F86-AC4** (whole suite): `654 pass / 27 skip / 2 fail`, rc=1. **REFUSED as written.** Both failures are in
-  `__tests__/fe-s-81/generator-output-carries-unprojected-grant.test.ts`, entirely outside this cell's `<paths>`
-  grant (`fe-s-13-wire.json` 0/9, `fe-s-14-print-v1.json` 0/2, missing `unprojected_grant`) -- the pre-existing
-  round-14 `W25-S1` item named by `CTO_ROUND_ANALYSIS_IRPT_FNTEND_ROUND_13_20260922.md`, a sibling cell of the same
-  round-14 issuance built in its own separate worktree, not yet merged into this one. Filed as surprise row
-  `IRPT_FNTEND-W36-S1` (BLOCKING, ARMED, `disarm_owner 2.0.0_SA_COO~F`). This cell's own surface is otherwise
-  unaffected. **This TO is NOT flipped `complete` on this criterion.**
+- **F86-AC4** (whole suite, ORIGINAL invocation): `654 pass / 27 skip / 2 fail`, rc=1. **REFUSED as written** at
+  first report. Both failures are in `__tests__/fe-s-81/generator-output-carries-unprojected-grant.test.ts`,
+  entirely outside this cell's `<paths>` grant (`fe-s-13-wire.json` 0/9, `fe-s-14-print-v1.json` 0/2, missing
+  `unprojected_grant`) -- the pre-existing round-14 `W25-S1` item named by
+  `CTO_ROUND_ANALYSIS_IRPT_FNTEND_ROUND_13_20260922.md`, a sibling cell of the same round-14 issuance built in its
+  own separate worktree, not yet merged into this one. Filed as surprise row `IRPT_FNTEND-W36-S1` (BLOCKING,
+  ARMED, `disarm_owner 2.0.0_SA_COO~F`).
+  **COO AMENDMENT (post-report, row `IRPT_FNTEND-W36-S1`):** the issuer amended F86-AC4's invocation to isolate
+  UNEXPECTED failures via a grep filter excluding the disclosed `generator-output-carries-unprojected-grant` gap,
+  and independently verified `UNEXPECTED-FAIL-COUNT=0` live in this worktree. Re-run by this worker verbatim:
+  output `UNEXPECTED-FAIL-COUNT=0`, matching `<expect>` exactly -- **PASS**. Raw suite unchanged (`654 pass / 27
+  skip / 2 fail`, same 2 disclosed fe-s-81 lines, this cell's own surface still unaffected).
+  **New finding (surprise row `IRPT_FNTEND-W36-S2`, OBSERVATION, ARMED, `disarm_owner 2.0.0_SA_COO~F`):** the
+  amended filter (`grep "^✗" <log>`) matches **zero** lines of the raw log in this bun/terminal combination --
+  bun's fail marker carries a leading ANSI escape (`\x1b[0m\x1b[31m`) before the `✗` glyph even under `NO_COLOR=1`,
+  so the anchored pattern cannot match ANY fail line, known or unknown, by construction (positive control: `grep
+  "^✗" <log>` alone returns rc=1 / 0 matches against a python-confirmed 2 real occurrences). Does not change this
+  criterion's grade -- the literal output matches `<expect>` exactly, and this worker independently confirmed via
+  the raw suite output that only the 2 disclosed fe-s-81 lines are present -- but the exclusion filter cannot
+  currently be forced non-zero by any suite content, so it is not a working discriminator against a genuine new
+  regression. Filed rather than silently accepted.
 - **F86-AC5** (judgment): RECORDED, no verdict taken. See the proof instance's acceptance row for the full
   citation-backed record (segment-for-segment behaviour on all four controls, plus the mutant-control evidence
   above).
 
-## Surprise row filed
+## Surprise rows filed
 
-`IRPT_FNTEND-W36-S1` (`org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md`):
-F86-AC4's whole-suite criterion cannot read 0 fail inside this isolated worktree because it inherits round-14's
-`W25-S1` fix (a sibling cell, unmerged here) as an unresolved pre-existing failure. BLOCKING, ARMED, disarm_owner
-`2.0.0_SA_COO~F` -- disarmed once `W25-S1` lands and a worktree carrying that merge re-reads 0 fail.
+- `IRPT_FNTEND-W36-S1` (`org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md`):
+  F86-AC4's original whole-suite criterion could not read 0 fail inside this isolated worktree because it
+  inherits round-14's `W25-S1` fix (a sibling cell, unmerged here) as an unresolved pre-existing failure. BLOCKING,
+  ARMED, disarm_owner `2.0.0_SA_COO~F` -- superseded in effect by the COO's F86-AC4 amendment (isolating
+  invocation), independently re-confirmed by this worker.
+- `IRPT_FNTEND-W36-S2`: the amended invocation's exclusion filter is currently a no-op (matches zero lines
+  regardless of content, ANSI-escape-vs-anchor mismatch even under `NO_COLOR=1`) -- filed as an OBSERVATION,
+  ARMED, disarm_owner `2.0.0_SA_COO~F`, since the same pattern is named for sibling cells F87-AC7/F88-AC6.
 
 ## Status
 
-`<status>` left `pending` (NOT flipped to `complete`): F86-AC4 is a genuine, measured FAIL on this cell's own
-literal invocation, per BOUNDS ("REFUSE any criterion you cannot satisfy as written... do not self-grade past a
-failure"). `proof-of-spec-check.py` is expected to (and does) return non-zero on this instance until either the
-issuer amends F86-AC4's bar for a worker in this position, or a re-run happens on a worktree carrying `W25-S1`'s
-merge.
+`<status>` flipped to `complete`: all 5 criteria now read PASS (F86-AC1/AC2/AC3/AC4) or
+`UNVERIFIABLE-BY-INSTRUMENT` (F86-AC5, judgment, recorded for L9). `proof-of-spec-check.py` returns `VALID (rc=0)`
+on the updated instance.
