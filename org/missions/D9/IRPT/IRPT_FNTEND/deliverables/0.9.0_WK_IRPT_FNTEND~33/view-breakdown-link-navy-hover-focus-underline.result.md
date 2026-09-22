@@ -153,10 +153,41 @@ adaptation given the TO's `<placeholders>WS, PORT</placeholders>` declaration. S
 grounding (citations at HEAD, both the mechanically-refused adapted run and the literal run's true
 output).
 
-## Proof instance
+## Proof instance (first pass)
 
 Recording the LITERAL invocations (satisfying `invocation-alignment`) with honest FAIL statuses where
 the literal run does not meet `<expect>` produces a STRUCTURALLY VALID instance:
 `python .tools/proof-of-spec-check.py <instance> F83-AC1,...,F83-AC6 --governing-order <TO>` ->
 `VALID (rc=0)`. This is NOT a met order -- F83-AC2/AC3/AC4 are genuinely FAIL on this instance, so
 `<status>` stays `pending`, per the standing rule that a valid instance is not a met order.
+
+## ADDENDUM (second pass, 0.9.0_WK_IRPT_FNTEND~33, 2026-09-22, post-COO-amendment)
+
+`2.0.0_SA_COO~F` independently confirmed all three findings above (App.tsx's routes, `ModelPortfolios.tsx`'s
+wrong-ground mount, `DrillTree.tsx:244` as the sole `ground="light"` caller) and amended the governing TO in
+the shared tree (CLOUD commit `6d3b2e4d92`): F83-AC2 and F83-AC4's `<invocation>` text now names route
+`investor-reporting`, fixture `fe-s-18-holdings-observed.json` (AC2 with `--click Holdings`, AC4 without --
+matching this worker's own supplementary runs exactly), and F83-AC3's `<invocation>` now runs
+`hover-underline.test.ts` directly instead of a raw `ui-smoke.mjs` call. No criterion's bar changed. Cherry-picked
+`6d3b2e4d92` into this worktree branch (commit `953f6745ab`), read the amended criteria directly, and re-ran
+each amended invocation VERBATIM (dev server on port 5975, stopped and port-closed-confirmed afterward):
+
+- **F83-AC2**: `ASSERT-STYLE: 2 of 2 met` against `<expect>ASSERT-STYLE: 2 of 2 met</expect>`. **PASS.**
+  `LOC : /investor-reporting`, `CLICKED: Holdings`, both the positive (navy) and negative (not-indigo)
+  assertions read `PASS rgb(22, 51, 114)`.
+- **F83-AC3**: `bun test .../hover-underline.test.ts` -> `1 pass`, `0 fail`, `ASSERT-STYLE: 3 of 3 met`
+  (rest=none -> hover=underline -> release=none) against `<expect>(?<![0-9])0 fail</expect>`. **PASS.**
+- **F83-AC4**: `EXPECT-STYLE[...color]: UNMEASURABLE (selector matched nothing)` against
+  `<expect>UNMEASURABLE</expect>`, and this time GENUINELY so, not vacuously: `LOC : /investor-reporting`
+  (the run actually landed on the real page, 3 of 9 fixtures matched real URL calls) with Holdings never
+  clicked, so the category tiles never mount for the right reason. **PASS.**
+
+Updated the proof-of-spec instance's F83-AC2/AC3/AC4 acceptance rows to PASS with these new invocations and
+outputs (F83-AC1/AC5/AC6 left as they already stood, per instruction). Re-ran
+`python .tools/proof-of-spec-check.py <instance> F83-AC1,...,F83-AC6 --governing-order <TO>` (amended TO) ->
+`VALID (rc=0)`, `violations=0`, `invocation-alignment: 5/5 comparable rows match`. Every non-judgment
+criterion now genuinely PASSES; `<status>` flipped to `complete`.
+
+Row `IRPT_FNTEND-W33-S1` stays on file in `INVESTIGATION_v2.md` as the historical record of the order
+defect this worker correctly surfaced rather than self-graded past (per this rule's own "never edit an
+existing row" -- the row is not retracted, only its underlying cause is now fixed by the amendment).
