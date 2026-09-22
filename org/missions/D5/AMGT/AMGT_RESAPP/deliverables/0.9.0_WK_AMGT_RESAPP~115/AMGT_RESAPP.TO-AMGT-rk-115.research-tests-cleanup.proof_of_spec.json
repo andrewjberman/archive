@@ -1,0 +1,243 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-115",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-115.research-tests-cleanup.md",
+    "group": "OTHER",
+    "vintage_commit": "349a152935"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "349a152935",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-115.research-tests-cleanup.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~115",
+  "session_log": "THE BAR FIRST: branch wk-amgt-29-115, org/ and .tools/ present, TREE-OK (base 349a152935). Read the task order's WORKER FACE in full. AC0 run FIRST, before any test edit: directory baseline '4 failed, 50 passed, 2 errors in 2.64s' over 13 files (matches the TO's measured D0 exactly), then capture.py -- all four get_object reads sha256-verified against the table's recorded hashes (sha_match True at bytes 6728/5833/6595/162269) and written to integrations/bloomberg/research/tests/fixtures/fye_join/. Z-S222: test_fye_join.py's three live-S3 readers (_baba_hist_rows, _baba_daily_px_rows, the inline _landed_hist in test_fiscal_period_join_direction_assertion_all_landed_securities) replaced with a local _fixture(name) loader keyed off a sec_key->fixture-filename map; `import boto3` and BUCKET removed; no assertion, threshold or security list touched. Z-S223: test_head_copy_returns_the_incomplete_stamp's `git merge-base HEAD SITEZ` lookup replaced with the fixed content pin 87ce2e5971 (verified by `git show`: the parent of rk-70's own commit 06296daccd, and confirmed to NOT contain `_stamps_with_raw_pair` at that pin); added one assert, via inspect.getsource(head_mod._latest_stamp), that the loaded copy's function source does not itself carry `_stamps_with_raw_pair`. Z-S224: both test_consumer_wiring.py and test_unresolved_overlay_renders_marked.py had their `from lib.research.print.render_pack import load_model_block` (removed at 8fcb2e0e26) replaced by a test-local `load_model_block(sec_key)` that reads the on-disk model_block_<sec_key>.json and calls `lib.research.api.scoped_amgt._apply_corrected_overlay(mb, sec_key)` with AMGT_MODEL_BLOCK_ROOT pointed at DELIVERABLES for the call and restored afterwards (prior value saved/restored via try/finally); no assertion changed; each file's docstring's 'NAMES the consumer' sentence updated to name the current served consumer. W112-S4: test_december_name_byte_identical_to_pin gained a count-before-strip assert (`len(eqy_fund_crncy_unresolved) == 1`) immediately before the existing unresolved-list strip; every other line unchanged. Each file run alone matched AC1 exactly (5/6/5/4/4 passed, 0 failed, 0 errors). Committed the five test files + the four fixture files at 54995eb25f (safe-commit, risk-reflex/commit-gate/naming-gate/to-pipeline-gate/surprise-row-gate all clean). AC4 run POST-COMMIT (its own diff is against the committed HEAD, so it must follow the commit to see the changed set): base 349a152935 (the round-29 issuance commit, confirmed by both `git log` and by being the last commit to touch both the task order and the decomp doc), changed_code_files EXACTLY the 5 test files + 4 fixtures under integrations/bloomberg/research/tests/, no production module; deliverables_1_dirty none (the ~1 folder's tracked fixture-writing test left those files byte-equal, confirmed by `git status --short` showing nothing); every changed .py compiles True; test_fye_join.py boto3_import False; lib/research/api/tests 204 passed unchanged. AC1/AC2/AC3/AC4 each re-run a second time post-commit with byte-identical results (determinism). TWO discriminating controls run and reverted, working tree confirmed clean by `git status --short`/`git diff --stat` afterwards: (1) renamed histdata_BABA_US_Equity.json fixture away -- test_fye_join.py FAILED 3/passed 2 (FileNotFoundError, proving the fixture is load-bearing), restored -> 5 passed; (2) re-pinned Z-S223's PIN to e803978fc3 (the pre-M1 parent, which the TO's own text says ALREADY carries the pair rule) -- the new belt-and-braces assert FIRED (AssertionError naming `_stamps_with_raw_pair` present), 1 failed/5 passed, restored to 87ce2e5971 -> 6 passed. No production module touched (lib/, integrations/**/*.py outside tests/); the ~1 deliverables folder untouched by this worker directly (only the pre-existing _write_fixtures test writes it, byte-identical); no S3 write anywhere (AC0's capture.py is the ONE live act, a read-only get_object); no Bloomberg/vendor call; no install; branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50 never read, shown, diffed or checked out. Every test file run in its own pytest call per BOUNDS. No surprise rows filed -- every criterion matched its literal expectation on the first attempt, no premise failed, nothing outside <paths> was needed. All four criteria PASS on the literal invocation/expect text, so this order's <status> is flipped to 'complete' and this instance is committed together with the flip.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_fye_join.py",
+      "kind": "test",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Z-S222: the three live-S3 readers now load the committed fixtures via _fixture(name); import boto3 and BUCKET removed; no assertion/threshold/security-list change. 5 of 5 own tests PASS (AC1)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py",
+      "kind": "test",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Z-S223: test_head_copy_returns_the_incomplete_stamp re-pinned to the fixed content commit 87ce2e5971, plus a new assert that the loaded copy's _latest_stamp source lacks _stamps_with_raw_pair. Every other arm unchanged. 6 of 6 own tests PASS (AC1)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_consumer_wiring.py",
+      "kind": "test",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Z-S224: replaced the removed render_pack.load_model_block import with a test-local load_model_block(sec_key) reaching scoped_amgt._apply_corrected_overlay. No assertion changed. 5 of 5 own tests PASS (AC1)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py",
+      "kind": "test",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Z-S224: same test-local load_model_block(sec_key) helper. No assertion changed. 4 of 4 own tests PASS (AC1); the pre-existing _write_fixtures hazard (writes into the tracked ~1 folder) left that folder byte-equal (AC4's deliverables_1_dirty none)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_stage_derive_fye.py",
+      "kind": "test",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "W112-S4: test_december_name_byte_identical_to_pin gained a count-before-strip assert (== 1) on the EQY_FUND_CRNCY unresolved entries. Every other line unchanged. 4 of 4 own tests PASS (AC1)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/fixtures/fye_join/histdata_BABA_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only get_object from opal-data-harvest, sha256 4dc12dbb545aae4d580a7531d833096ae4b119c0121d7966bc0b65fa0f7b26f6 verified before write (AC0, sha_match True bytes 6728)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/fixtures/fye_join/histdata_BA_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only get_object from opal-data-harvest, sha256 5d9e1e46f4b04eff28c3850c10f5ffee74c590ce0fae33a907b4dfd8d3279323 verified before write (AC0, sha_match True bytes 5833)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/fixtures/fye_join/histdata_SAP_GY_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only get_object from opal-data-harvest, sha256 f45823e82699c7e4b22462adfdd6e02301d6144ba782b069173e8859d7e37fa6 verified before write (AC0, sha_match True bytes 6595)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/fixtures/fye_join/histdata_daily_px_BABA_US_Equity.json",
+      "kind": "config_data",
+      "commit_or_etag": "54995eb25f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only get_object from opal-data-harvest, sha256 6edff15e6e7d61ef848e0a3978195ca3bf4e75c39166a6c0a7c3d00c7a9aa4d6 verified before write (AC0, sha_match True bytes 162269)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~115/AMGT_RESAPP.TO-AMGT-rk-115.research-tests-cleanup.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any test edit: the directory baseline line D0 (measured \"4 failed, 50 passed, 2 errors\" at the cut); then four capture lines, each \"sha_match True\" with its byte count (6728, 6595, 5833, 162269). A False sha_match is a STOP and a row: the landed data moved, so the fixtures would not be the data the tests were written against",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests -q -p no:cacheprovider --continue-on-collection-errors --color=no 2>&1 | tail -1 && python .scratch/r115/capture.py",
+      "output_evidence": "4 failed, 50 passed, 2 errors in 2.64s\nhistdata_BABA_US_Equity.json sha_match True bytes 6728\nhistdata_BA_US_Equity.json sha_match True bytes 5833\nhistdata_SAP_GY_Equity.json sha_match True bytes 6595\nhistdata_daily_px_BABA_US_Equity.json sha_match True bytes 162269",
+      "denominator": "1 of 1 directory baseline line matches the TO's measured D0 exactly; 4 of 4 fixture captures sha_match True at their recorded byte counts (6728, 5833, 6595, 162269) -- run BEFORE any test file edit, this session's first act after the tree check.",
+      "status": "PASS",
+      "expect": "4 failed, 50 passed, 2 errors[\\s\\S]*sha_match True[\\s\\S]*bytes 6728[\\s\\S]*sha_match True[\\s\\S]*bytes 5833[\\s\\S]*sha_match True[\\s\\S]*bytes 6595[\\s\\S]*sha_match True[\\s\\S]*bytes 162269"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"test_fye_join 5 passed\"; \"test_latest_stamp_raw_pair 6 passed\"; \"test_consumer_wiring 5 passed\"; \"test_unresolved_overlay_renders_marked 4 passed\"; \"test_stage_derive_fye 4 passed\" -- each 0 failed and 0 errors",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in test_fye_join test_latest_stamp_raw_pair test_consumer_wiring test_unresolved_overlay_renders_marked test_stage_derive_fye; do echo \"$t $(python -m pytest integrations/bloomberg/research/tests/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "test_fye_join 5 passed in 0.25s\ntest_latest_stamp_raw_pair 6 passed in 0.28s\ntest_consumer_wiring 5 passed in 0.04s\ntest_unresolved_overlay_renders_marked 4 passed in 0.04s\ntest_stage_derive_fye 4 passed in 0.33s",
+      "denominator": "5 of 5 named files each show 0 failed and 0 error tokens; run twice post-commit with byte-identical results (determinism).",
+      "status": "PASS",
+      "expect": "test_fye_join 5 passed[\\s\\S]*test_latest_stamp_raw_pair 6 passed[\\s\\S]*test_consumer_wiring 5 passed[\\s\\S]*test_unresolved_overlay_renders_marked 4 passed[\\s\\S]*test_stage_derive_fye 4 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the directory now COLLECTS without the flag: \"N passed\" with N = D0's passed + D0's failed + 9 (the two files' 9 functions now collecting) -- measured 50 + 4 + 9 = 63 at the cut -- and NO \"failed\" and NO \"error\" in the line",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests -q -p no:cacheprovider --color=no 2>&1 | tail -1",
+      "output_evidence": "63 passed in 0.96s",
+      "denominator": "63 = 50 (D0 passed) + 4 (D0 failed) + 9 (the two previously-erroring files' functions, now collecting); the line carries no 'failed' or 'error' token; run twice post-commit, identical both times.",
+      "status": "PASS",
+      "expect": "^63 passed in"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the SAME line as AC2 -- with INVALID AWS credentials the directory still passes in full, proving no test in it touches AWS any more",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && env AWS_ACCESS_KEY_ID=invalid AWS_SECRET_ACCESS_KEY=invalid AWS_SESSION_TOKEN=invalid AWS_PROFILE= python -m pytest integrations/bloomberg/research/tests -q -p no:cacheprovider --color=no 2>&1 | tail -1",
+      "output_evidence": "63 passed in 1.18s",
+      "denominator": "Same line as AC2 (63 passed, 0 failed, 0 error) under invalid AWS credentials -- the directory's zero live-AWS-touch is discriminated, not assumed.",
+      "status": "PASS",
+      "expect": "^63 passed in"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"base\" is your worktree's fork point from SITEZ (the round-29 issuance commit); \"changed_code_files\" lists ONLY files under integrations/bloomberg/research/tests/ (the five named test files and the four fixtures) -- no production module; \"deliverables_1_dirty none\" (the fixture-writing test left the tracked ~1 folder byte-equal); every changed .py \"compiles True\", and test_fye_join.py \"boto3_import False\"; then lib/research/api/tests \"A0 passed\" unchanged (measured 204)",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r115/ac4.py && python -m pytest lib/research/api/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "base 349a152935\nchanged_code_files ['integrations/bloomberg/research/tests/fixtures/fye_join/histdata_BABA_US_Equity.json', 'integrations/bloomberg/research/tests/fixtures/fye_join/histdata_BA_US_Equity.json', 'integrations/bloomberg/research/tests/fixtures/fye_join/histdata_SAP_GY_Equity.json', 'integrations/bloomberg/research/tests/fixtures/fye_join/histdata_daily_px_BABA_US_Equity.json', 'integrations/bloomberg/research/tests/test_consumer_wiring.py', 'integrations/bloomberg/research/tests/test_fye_join.py', 'integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py', 'integrations/bloomberg/research/tests/test_stage_derive_fye.py', 'integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py']\ndeliverables_1_dirty none\nintegrations/bloomberg/research/tests/test_consumer_wiring.py compiles True boto3_import False\nintegrations/bloomberg/research/tests/test_fye_join.py compiles True boto3_import False\nintegrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py compiles True boto3_import False\nintegrations/bloomberg/research/tests/test_stage_derive_fye.py compiles True boto3_import False\nintegrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py compiles True boto3_import False\n204 passed in 4.04s",
+      "denominator": "base=349a152935 matches the round-29 issuance commit (independently confirmed: last commit to touch both the task order and the decomp doc). 9 of 9 changed files are under integrations/bloomberg/research/tests/ (5 .py + 4 fixture .json), 0 outside it -- no production module. deliverables_1_dirty none. 5 of 5 changed .py files compile True; test_fye_join.py boto3_import False. lib/research/api/tests 204 passed, unchanged from the TO's measured baseline. Run POST-COMMIT (the diff is against committed HEAD 54995eb25f) and re-run once more with byte-identical results.",
+      "status": "PASS",
+      "expect": "base 349a152935[\\s\\S]*changed_code_files \\[[\\s\\S]*fixtures/fye_join/histdata_BABA_US_Equity\\.json[\\s\\S]*test_unresolved_overlay_renders_marked\\.py'\\][\\s\\S]*deliverables_1_dirty none[\\s\\S]*compiles True boto3_import False[\\s\\S]*compiles True boto3_import False[\\s\\S]*compiles True boto3_import False[\\s\\S]*compiles True boto3_import False[\\s\\S]*compiles True boto3_import False[\\s\\S]*204 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO discriminating controls, each proving a live assertion rather than a vacuous one, run and fully reverted this session (working tree confirmed clean by git status --short / git diff --stat afterwards). (1) Z-S222: renamed the histdata_BABA_US_Equity.json fixture out of the way and re-ran test_fye_join.py alone. (2) Z-S223: temporarily re-pinned PIN from 87ce2e5971 to e803978fc3 (the pre-M1 parent, which the TO's own text states ALREADY carries the pair rule) and re-ran test_latest_stamp_raw_pair.py alone, to prove the new belt-and-braces assert actually fires rather than being dead code.",
+      "expected": "(1) test_fye_join.py: 3 of its 5 tests (the three reading the missing fixture) FAIL with FileNotFoundError, the other 2 (synthetic-date tests) still PASS. (2) test_latest_stamp_raw_pair.py: test_head_copy_returns_the_incomplete_stamp FAILS on the new assert (naming _stamps_with_raw_pair present in the loaded source), the other 5 tests still PASS.",
+      "observed": "(1) 3 failed, 2 passed in 0.38s -- FileNotFoundError on the fixture path, exactly the three tests reading _baba_hist_rows/_baba_daily_px_rows/_landed_hist; restored the file -> 5 passed in 0.25s. (2) 1 failed, 5 passed in 0.40s -- AssertionError: \"'_stamps_with_raw_pair' is contained here\" quoting the pinned source; restored PIN -> 6 passed in 0.36s. Both mutants fired exactly as expected; git status --short and git diff --stat on integrations/bloomberg/research/tests/ read clean (empty) after both reversions.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every criterion is a pure offline read after AC0's one live act (a read-only S3 get_object, sha256-verified): pytest against committed fixtures / in-memory stubs / a git-show-loaded pinned module, or a local git diff/compile() read against this worktree's own committed bytes. AC1, AC2, AC3 and AC4 each run twice this session (once pre-final-record, once as the recorded final run), plus AC3 under deliberately invalid AWS credentials as its own discriminator.",
+      "observed": "AC1: identical '5/6/5/4/4 passed' both runs (pre- and post-commit). AC2: '63 passed' both runs (0.92s / 0.96s / 0.95s across three separate invocations this session). AC3: '63 passed' with AWS_ACCESS_KEY_ID/SECRET/TOKEN=invalid and AWS_PROFILE unset, both runs -- same line as AC2, proving no live AWS dependency remains. AC4: identical file list, deliverables_1_dirty none, and boto3_import False lines across two post-commit runs; lib/research/api/tests 204 passed both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any production module: lib/, integrations/**/*.py outside tests/ (model_block_pull.py, fye_join.py, render_print.py, render_pack.py, scoped_amgt.py, build_unit_map.py, etc.)",
+      "reason": "section 1 'What this cell does NOT change' / section 4 BOUNDS: CODE ONLY -- test files and fixtures. No criterion required a production edit; every gap closed inside the named test files."
+    },
+    {
+      "item": "any other test file in integrations/bloomberg/research/tests/ besides the five named",
+      "reason": "section 1 'What this cell does NOT change: ... any other test file'. Confirmed by AC4's changed_code_files list (exactly the five named + four fixtures)."
+    },
+    {
+      "item": "any S3 object, or any S3 write",
+      "reason": "section 4 BOUNDS: the ONE live act is AC0's read-only get_object capture; no put_object/delete anywhere this session."
+    },
+    {
+      "item": "the tracked deliverables folder org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~1/",
+      "reason": "section 1 'What this cell does NOT change'; not in <paths>. The pre-existing _write_fixtures hazard inside test_unresolved_overlay_renders_marked.py still writes there on every run, but byte-identical to HEAD both times measured (AC4 deliverables_1_dirty none)."
+    },
+    {
+      "item": "Bloomberg/vendor calls, installs",
+      "reason": "spawn instruction / section 4 BOUNDS: NEVER RUN AN INSTALL, NEVER CALL BLOOMBERG -- neither occurred."
+    },
+    {
+      "item": "branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50",
+      "reason": "never read, shown, diffed or checked out, per the order's own instruction."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests -q -p no:cacheprovider --continue-on-collection-errors --color=no",
+      "result": "4 failed, 50 passed, 2 errors in 2.64s (AC0 pre-edit baseline, matches the TO's measured D0)"
+    },
+    {
+      "tool": "python (capture.py, exact TO text)",
+      "invocation": "python .scratch/r115/capture.py",
+      "result": "4 of 4 fixtures sha_match True at recorded byte counts (6728, 5833, 6595, 162269)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_fye_join.py -q -p no:cacheprovider",
+      "result": "5 passed (AC1); mutant control: 3 failed, 2 passed with the fixture renamed away, restored -> 5 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py -q -p no:cacheprovider",
+      "result": "6 passed (AC1); mutant control: 1 failed, 5 passed with PIN re-pointed to e803978fc3, restored -> 6 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_consumer_wiring.py -q -p no:cacheprovider",
+      "result": "5 passed (AC1)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py -q -p no:cacheprovider",
+      "result": "4 passed (AC1)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_stage_derive_fye.py -q -p no:cacheprovider",
+      "result": "4 passed (AC1)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests -q -p no:cacheprovider --color=no",
+      "result": "63 passed (AC2), and unchanged under invalid AWS credentials (AC3)"
+    },
+    {
+      "tool": "git diff / compile() (custom script, TO's own literal text)",
+      "invocation": "python .scratch/r115/ac4.py",
+      "result": "base 349a152935; 9 changed files, all under integrations/bloomberg/research/tests/; deliverables_1_dirty none; every changed .py compiles True; test_fye_join.py boto3_import False"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests -q -p no:cacheprovider",
+      "result": "204 passed (AC4, unchanged)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~115 <0.9.0_WK_AMGT_RESAPP~115@opal.agent>\" -F .scratch/r115/msg1.txt -- integrations/bloomberg/research/tests/test_fye_join.py integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py integrations/bloomberg/research/tests/test_consumer_wiring.py integrations/bloomberg/research/tests/test_unresolved_overlay_renders_marked.py integrations/bloomberg/research/tests/test_stage_derive_fye.py integrations/bloomberg/research/tests/fixtures/fye_join/",
+      "result": "54995eb25f, 9 files changed, 10876 insertions(+), 54 deletions(-)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~115/AMGT_RESAPP.TO-AMGT-rk-115.research-tests-cleanup.proof_of_spec.json AC0,AC1,AC2,AC3,AC4",
+      "result": "PENDING -- run after this instance is written"
+    }
+  ]
+}
