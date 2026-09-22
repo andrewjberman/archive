@@ -123,6 +123,44 @@ untouched) while the new prose subsection describes repo code BEHAVIOR (true tod
 the remedy is a one-line revert of the prose subsection to a later, publish-bundled commit, with no change
 to `capture-session.cjs` or the battery's own logic.
 
+## Arm (f) ADDENDUM -- sixth invocation, publish-continuation pass (2026-09-22)
+
+Both never-widen halves landed at HEAD naming this exact packet blob (`3676e2a26e8018c3ba91627f3df8fdd0b4a96cc7`)
+-- `2.0.0_SA_COO~B`'s (`NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtl-1_CAPTURE_TOOL_FOURTH_PUBLISH.md`) and
+`1.0.0_SA_CTO`'s (`NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtl-1_CAPTURE_TOOL_FOURTH_PUBLISH.md`). Both
+re-derived independently this pass, before doing anything else: `git rev-parse HEAD:<packet path>` =
+`3676e2a26e8018c3ba91627f3df8fdd0b4a96cc7`; `git rev-parse HEAD:<cjs path>` = `82abe68499ab1d5422f6f73979c3f5b72ed4c583`;
+sha256 via both `git cat-file -p <blob> | sha256sum` and `git show cb6429dc9e:<path> | sha256sum` =
+`b6f75a20150c170687ef2c1974b0a219a4ba56fc11a457b03b1fa688c68f353c`. All four values match both half files
+exactly.
+
+Arm (f) then executed in full:
+1. **Ledger opened BEFORE the act** (`d31ff772b4`): `deploy_ledger.py open --slug irpt-rtl-1-capture-tool-publish`,
+   1 leg (`L1`, s3-prefix), sentinel + `change_management` entry committed together.
+2. **Publish**: extracted the git-blob bytes via `git cat-file -p HEAD:<path>` to a scratch file (never a raw
+   working-tree read, per row `W13-S3`'s lesson), independently re-hashed BEFORE upload (matched the signed
+   value, 28586 bytes), published via `s3api put-object` to
+   `s3://opal-313476888478-lambda-artifacts/ec2/investor-reporting-export/capture-session.cjs` (new VersionId
+   `vLUlxFLiMvDtNnY5rH4Z6pGl4Slp9Man`).
+3. **Readback**: `s3api get-object` to a SEPARATE scratch file, independently re-hashed the RETRIEVED bytes
+   (not the CLI's own reported ETag/checksum, though those also happened to agree) -- sha256
+   `b6f75a20150c170687ef2c1974b0a219a4ba56fc11a457b03b1fa688c68f353c`, exactly equal to both signed halves'
+   value; `cmp` confirms the readback is byte-for-byte identical to the pre-upload payload.
+   `capture-session.sh` confirmed unchanged (`head-object` VersionId `Z3NJuuiIxczhtYxGEsXW8ZqBpqYi1gs7`,
+   `LastModified` predating this publish), correctly not republished.
+4. **README updated in the SAME commit as the publish** (`acd048314f`): the step-2 "Expected output" hash
+   line for `capture-session.cjs` now reads `b6f75a20150c170687ef2c1974b0a219a4ba56fc11a457b03b1fa688c68f353c`
+   with its commit/cell citation changed to `cb6429dc9e` / `IB-rtl-1`.
+5. **Ledger closed** (`acd048314f`): leg `L1` closed with the readback proof, entry `CLOSED`, sentinel removed.
+
+The host (`i-0167fd745ad906a66`) stayed **STOPPED** throughout; this act did not start it and claims **NO
+on-host byte verification** -- that remains the operator's own runbook step-2 re-read, unchanged from every
+prior pass in this chain.
+
+`R112-AC3` (judgment) is unaffected by this addendum and remains `3.0.0_SA_CVO~B`'s to grade; nothing in
+arms (a)-(e)'s evidence above changed. The task order's `<status>` is flipped to `complete` in this same
+pass, per the order's own `<proof_of_spec>` instruction, now that arm (f) has actually run.
+
 ## Surprises
 
 Two rows filed this pass. `IRPT_BCKEND-W13-S4` (the README-timing reading above), class OBSERVATION,
