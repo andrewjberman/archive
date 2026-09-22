@@ -60,8 +60,9 @@ post-repair baselines -- no drift, no STOP row needed. Saved as `IB-rtm-1_baseli
 Neither change touches any existing S125/S126/S127/C-S153/C-S158/C-S159/C-S170/C-S171 check.
 README.md updated (commit `1473f3ec4a`) to name the new exit code, the required manual step, and
 the typed-classification behavior -- prose describing repo code BEHAVIOR (true today), the same
-reasoning `IB-rtl-1`'s row `W13-S4` established; the step-2 expected-hash line is left untouched
-(arm (g), STOPPED this pass).
+reasoning `IB-rtl-1`'s row `W13-S4` established; the step-2 expected-hash line was left untouched
+at that commit, deliberately (arm (g)'s own design: the line must not assert bytes S3 does not yet
+hold). **It was updated in the SAME commit as the publish once arm (g) completed** -- see below.
 
 ## Arm (d) -- acceptance: all five diagnostics post-repair, both single-difference pairs
 
@@ -143,22 +144,41 @@ no criterion verdict changed.
 `battery_ib_rtm_1.py --arm metadata` (R113-AC2, token `IBR113-METADATA-C174-C187-CORRECTED`),
 rc=0, output committed as `R113-AC2_final_output.txt`.
 
-## Arm (g) -- the packet, then the publish: STOPPED this pass
+## Arm (g) -- the packet, then the publish: COMPLETED this pass (continuation)
 
-`IB-rtm-1_NEVER_WIDEN_PACKET.md` written and committed, documenting the exact blast radius (ONE
-file, `capture-session.cjs`), every hash git-object-derived (`git cat-file -p <blob> | sha256sum`,
-cross-checked with `git show HEAD:<path> | sha256sum`, agreeing), and the rollback path.
+`IB-rtm-1_NEVER_WIDEN_PACKET.md` written and committed (blob `db092cbd5124d61e1fc633d75e0ce07f6a4c9aae`),
+documenting the exact blast radius (ONE file, `capture-session.cjs`), every hash git-object-derived
+(`git cat-file -p <blob> | sha256sum`, cross-checked with `git show HEAD:<path> | sha256sum`, agreeing),
+and the rollback path. A prior pass STOPPED here because both never-widen halves were absent (censused
+via `Glob`, 0 of 0 found).
 
-**Censused this session, both halves absent:** `Glob` over
-`org/tier1_exec/{1.0.0_SA_CTO,2.0.0_SA_COO~B}/deliverables/` for any filename containing
-`IB-rtm-1` -- 0 of 0 found. Per the order's own arm (g): **"STOP here unless BOTH halves
-(`2.0.0_SA_COO~B` and `1.0.0_SA_CTO`) are at HEAD naming this NEW packet's blob."** This worker
-therefore does NOT open the deploy-ledger entry, does NOT publish to S3, does NOT update the
-README's expected-hash line, and does NOT claim host-side or S3-side verification. **The host is
-STOPPED and this cell does NOT start it -- no on-host readback exists here.**
+**This continuation pass:** both halves confirmed at HEAD naming this exact packet blob
+(`org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtm-1_CAPTURE_TOOL_FIFTH_PUBLISH.md`,
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtm-1_CAPTURE_TOOL_FIFTH_PUBLISH.md`),
+both independently re-derived by this worker this pass (`git rev-parse`/`cat-file`/`show`, matching each
+half's own quoted values and each other exactly: packet `db092cbd5124d61e1fc633d75e0ce07f6a4c9aae`; cjs
+blob `058ba2f8f86328d73f2aca140b8a6c81fe0ad3ae`, sha256
+`3352ff52739e87b8f29bb41fa337b84c35046db9a39373efd283edcb68f1f9f2`).
 
-`<status>` stays `pending`, this blocking state stated, per the order's own `<proof_of_spec>`
-instruction.
+Deploy ledger `irpt-rtm-1-capture-tool-publish` opened BEFORE the S3 act (commit `65e015dd8a`), single
+leg L1 (`s3-prefix`). Payload extracted via `git cat-file -p HEAD:<path>` to a scratch file and hashed
+BEFORE upload (34785 bytes, sha256 matched the packet's table). Published via `s3api put-object` (new
+VersionId `urBPlR5pfitAb30A8jGT_k4ivtjSAnFN`; prior IB-rtl-1 VersionId `vLUlxFLiMvDtNnY5rH4Z6pGl4Slp9Man`
+retained, versioned bucket). Read back via `s3api get-object` to a SEPARATE scratch file and independently
+re-hashed (NOT the CLI's own reported ETag/checksum, per the order's hash-instrument discipline) -- readback
+sha256 `3352ff52739e87b8f29bb41fa337b84c35046db9a39373efd283edcb68f1f9f2` equals both signed halves' table
+exactly and is byte-for-byte identical (`cmp`) to the pre-upload payload. `capture-session.sh` confirmed
+unchanged via `head-object` (VersionId `Z3NJuuiIxczhtYxGEsXW8ZqBpqYi1gs7`, unmoved since `IB-rti-1`), not
+republished. README.md's step-2 "Expected output" hash line updated to the new sha256 (and its commit/cell
+citation to `b809df14d5` / `IB-rtm-1`) in the SAME commit as the publish (`14a8b2ab58`). Ledger leg closed
+with the readback proof and the entry closed (`org/critical_paths/change_management/20260922T0811Z_irpt-rtm-1-capture-tool-publish_deploy_completion.md`
+now reads CLOSED, all 1 leg proven). **The host (`i-0167fd745ad906a66`) is STOPPED throughout -- this act
+does not start it and claims NO on-host byte verification**, exactly as the order's arm (g) anticipates;
+that remains the operator's own runbook step-2 re-read.
+
+`<status>` flipped to `complete` (commit `a442c9dc16`), per the order's own `<proof_of_spec>` instruction
+(rc 0 AND R113-AC1 AND R113-AC2 PASS-by-output, in the same pass that completes the publish). `R113-AC3`
+remains a JUDGMENT row, `UNVERIFIABLE-BY-INSTRUMENT`, left for `3.0.0_SA_CVO~B` -- not self-graded.
 
 ## Surprises
 
