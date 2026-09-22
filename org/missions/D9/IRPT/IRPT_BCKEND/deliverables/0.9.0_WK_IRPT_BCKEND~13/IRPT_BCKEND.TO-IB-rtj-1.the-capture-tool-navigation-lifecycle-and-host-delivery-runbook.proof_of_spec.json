@@ -19,8 +19,8 @@
       "path_or_key": "infra/aws/ec2/investor-reporting-export/capture-session.cjs",
       "kind": "script",
       "commit_or_etag": "c5a18898985158abc1679241b95e822a1b75799d",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git blob c5a18898985158abc1679241b95e822a1b75799d at commit bfe67b1eab (git rev-parse HEAD:<path>); sha256 of blob bytes defcb58572276f36036d610d296f53df32f86477ffb3e6b17aab00c6f6c2d95a. NOT published this session: no signed halves exist for this NEW blob (censused, see IB-rtj-1_NEVER_WIDEN_PACKET.md sec 5). Host stopped throughout, never started.",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "git blob c5a18898985158abc1679241b95e822a1b75799d at commit bfe67b1eab (git rev-parse HEAD:<path>); sha256 of blob bytes defcb58572276f36036d610d296f53df32f86477ffb3e6b17aab00c6f6c2d95a. SECOND PASS (0.9.0_WK_IRPT_BCKEND~13, 2026-09-22 ~01:3xZ): both never-widen halves confirmed at HEAD naming this packet's blob 2450320a688a4740af81d3a72f281b2a06f05b23 (2.0.0_SA_COO~B @5b67db0397, 1.0.0_SA_CTO @088669b331; packet blob re-derived independently at my own HEAD 5b82db7a31, unchanged). Ledger opened BEFORE the act (commit 8ff0ffc1af, org/critical_paths/change_management/20260922T0137Z_irpt-rtj-1-capture-tool-publish_deploy_completion.md), published via aws s3 cp of the materialized git-blob bytes to s3://opal-313476888478-lambda-artifacts/ec2/investor-reporting-export/capture-session.cjs (VersionId llAMqS_QPopRTb3T9KWyHLX8jJvoQWS4), read back via s3api get-object, readback sha256 defcb58572276f36036d610d296f53df32f86477ffb3e6b17aab00c6f6c2d95a == table above, ledger leg L1 closed and entry closed (commit ef15e1bd45). Host stopped throughout, never started; NO on-host byte verification claimed.",
       "introduces": [
         "walkRedirectHops",
         "assertNoForeignHop"
@@ -187,7 +187,17 @@
       "kind": "doc",
       "commit_or_etag": "2450320a688a4740af81d3a72f281b2a06f05b23",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git blob 2450320a688a4740af81d3a72f281b2a06f05b23 at commit 7f5c2dad5a; names capture-session.cjs's new blob only; NOT signed by either half at the time of this instance; no publish attempted",
+      "deploy_evidence": "git blob 2450320a688a4740af81d3a72f281b2a06f05b23 at commit 7f5c2dad5a; names capture-session.cjs's new blob only. SECOND PASS: both halves now at HEAD naming this exact blob (org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtj-1_CAPTURE_TOOL_SECOND_PUBLISH.md @5b67db0397, org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtj-1_CAPTURE_TOOL_SECOND_PUBLISH.md @088669b331); arm (f) publish completed, see capture-session.cjs artifact row above",
+      "artifact_covered_by": [
+        "R101-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260922T0137Z_irpt-rtj-1-capture-tool-publish_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "ef15e1bd45",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "opened BEFORE the act at commit 8ff0ffc1af (sentinel org/critical_paths/.open_deploys/irpt-rtj-1-capture-tool-publish.json committed alongside), leg L1 closed and entry closed at commit ef15e1bd45 with S3 readback sha256 proof",
       "artifact_covered_by": [
         "R101-AC3"
       ]
@@ -231,7 +241,7 @@
       "criterion_verbatim": "JUDGMENT, RECORDED AND NOT SELF-GRADED. State for 3.0.0_SA_CVO~B. PASS iff ALL of: (i) the navigation-lifecycle fix genuinely closes C-S153 -- every response in every navigation is checked, not only final URLs, cited path:line @ <commit-ish>; (ii) the runbook fix genuinely closes C-S156 -- delivery and verification are unconditional and precede every capture, not a one-time or optional step; (iii) nothing else regressed -- R91-AC1..AC6's arms (command, readiness, origin, diagnostic, packet) still hold under the SAME battery shape re-run against the repaired source. FAIL if any of (i)-(iii) rests on the absence of a negative. NOT_EVALUATED only if the repair did not occur.",
       "method": "manual_read_with_citation",
       "invocation": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~13/the-capture-tool-navigation-lifecycle-and-host-delivery-runbook.result.md",
-      "output_evidence": "(i) capture-session.cjs: walkRedirectHops + assertNoForeignHop defined and called from main() on the INITIAL navigation's response, immediately after the first page.goto and before the port-forward command is printed, at commit bfe67b1eab (git blob c5a18898985158abc1679241b95e822a1b75799d) -- exercised by --arm redirect, which shows the exact hop is now caught (BAD case refuses naming the foreign URL; GOOD case, identical except the hop, succeeds) and by the negative control against the pre-fix blob (does NOT match post-repair intent, i.e. the absence-of-negative trap is closed: a genuine counterexample was run, not merely omitted). (ii) README.md session-establishment section, step 2 (lines 130-146 @ commit 7f5c2dad5a): delivery (2 aws s3 cp lines) + sha256sum + expected-hash lines + STOP instruction, ALL textually before step 3's wrapper invocation (line 149); the preceding paragraph states the step is NOT optional/one-time and runs EVERY time (verified: --arm runbook's 'EVERY time' check). Non-vacuity of the runbook check verified interactively this session against a simulated pre-fix README (delivery/hash block removed): correctly reported as missing the required lines (recorded in result.md 'Controls' section; not committed as a battery arm, run against a scratch-only temp file). (iii) IB-rti-1's own unchanged battery_ib_rti_1.py arms command/readiness/origin/diagnostic all re-run against the repaired source: rc=0 with their original tokens (IB-rtj-1_R91_arm_{command,readiness,origin,diagnostic}_post_repair.txt, blob-pinned above) -- matches R91-AC1/AC2/AC3/AC4 verbatim. R91-AC5's packet arm necessarily differs (a new blob needs a new packet, which this cell wrote as IB-rtj-1_NEVER_WIDEN_PACKET.md) -- not run as a literal FAIL/PASS against the stale IB-rti-1 packet text, since that would test the WRONG packet, not a regression. R91-AC6 (publish) did not run: neither half exists yet for the new packet (censused this session, packet sec 5), matching this order's own arm (f) STOP condition and its DELIVERABLE section's explicit 'IF both halves land' conditionality -- this is the anticipated STOP, not an unexamined gap.",
+      "output_evidence": "(i) capture-session.cjs: walkRedirectHops + assertNoForeignHop defined and called from main() on the INITIAL navigation's response, immediately after the first page.goto and before the port-forward command is printed, at commit bfe67b1eab (git blob c5a18898985158abc1679241b95e822a1b75799d) -- exercised by --arm redirect, which shows the exact hop is now caught (BAD case refuses naming the foreign URL; GOOD case, identical except the hop, succeeds) and by the negative control against the pre-fix blob (does NOT match post-repair intent, i.e. the absence-of-negative trap is closed: a genuine counterexample was run, not merely omitted). (ii) README.md session-establishment section, step 2 (lines 130-146 @ commit 7f5c2dad5a): delivery (2 aws s3 cp lines) + sha256sum + expected-hash lines + STOP instruction, ALL textually before step 3's wrapper invocation (line 149); the preceding paragraph states the step is NOT optional/one-time and runs EVERY time (verified: --arm runbook's 'EVERY time' check). Non-vacuity of the runbook check verified interactively this session against a simulated pre-fix README (delivery/hash block removed): correctly reported as missing the required lines (recorded in result.md 'Controls' section; not committed as a battery arm, run against a scratch-only temp file). (iii) IB-rti-1's own unchanged battery_ib_rti_1.py arms command/readiness/origin/diagnostic all re-run against the repaired source: rc=0 with their original tokens (IB-rtj-1_R91_arm_{command,readiness,origin,diagnostic}_post_repair.txt, blob-pinned above) -- matches R91-AC1/AC2/AC3/AC4 verbatim. R91-AC5's packet arm necessarily differs (a new blob needs a new packet, which this cell wrote as IB-rtj-1_NEVER_WIDEN_PACKET.md) -- not run as a literal FAIL/PASS against the stale IB-rti-1 packet text, since that would test the WRONG packet, not a regression. R91-AC6-equivalent (publish) NOW RAN, SECOND PASS: both halves confirmed at HEAD naming this packet's blob, ledger opened before the act, git-blob bytes published to S3, readback sha256 defcb58572276f36036d610d296f53df32f86477ffb3e6b17aab00c6f6c2d95a matched the packet's table exactly, ledger closed. capture-session.sh remains correctly unpublished (byte-identical, per packet reasoning). Host remains STOPPED; no on-host byte verification claimed or exists.",
       "denominator": "N/A -- judgment row, no self-grade",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
       "status_reason": "JUDGMENT criterion, graded at L9 by 3.0.0_SA_CVO~B and never self-graded; worker records citations and re-run evidence only.",
@@ -252,10 +262,6 @@
     }
   },
   "declared_exclusions": [
-    {
-      "item": "arm (f) S3 publish, ledger entry, S3 readback",
-      "reason": "GATED on both halves (2.0.0_SA_COO~B, 1.0.0_SA_CTO) at HEAD naming THIS packet's blob; censused this session, neither present. No host-side byte verification exists or is claimed. Host stopped throughout, never started. Matches the order's own arm (f) STOP condition and DELIVERABLE section's explicit conditionality."
-    },
     {
       "item": "republishing capture-session.sh",
       "reason": "unchanged by this cell (byte-identical to the blob IB-rti-1's packet already published); republishing it would claim an act this cell did not perform, so the new packet names only capture-session.cjs"
