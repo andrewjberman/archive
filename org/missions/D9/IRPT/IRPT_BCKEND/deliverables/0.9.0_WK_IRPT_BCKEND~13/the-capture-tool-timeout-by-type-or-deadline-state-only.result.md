@@ -123,21 +123,52 @@ verdict changed.
 `battery_ib_rtn_1.py --arm metadata` (R114-AC2, token `IBR114-METADATA-C174-C194-CORRECTED`),
 rc=0, output committed as `R114-AC2_final_output.txt`.
 
-## Arm (f) -- the packet, STOPPED (both never-widen halves absent)
+## Arm (f) -- the packet, then the publish (both never-widen halves landed, this continuation pass)
 
 `IB-rtn-1_NEVER_WIDEN_PACKET.md` written and committed at `115f053837` (blob
 `7e3d70b90d67fc50d1cb7f73fb383fb5e662107a`),
 documenting the exact blast radius (ONE file, `capture-session.cjs`, blob
 `17aff45ed837a3a6e62fb2ce0410075b62a499dd`), every hash git-object-derived (`git cat-file -p
 <blob> | sha256sum`, cross-checked with `git show HEAD:<path> | sha256sum`, agreeing), and the
-rollback path. Censused this session (`Glob` over
+rollback path. On the FIRST pass, censused via `Glob` over
 `org/tier1_exec/{1.0.0_SA_CTO,2.0.0_SA_COO~B}/deliverables/` for any filename containing
-`IB-rtn-1`): 0 of 0 found. Per the order's own arm (f) ("STOP here unless BOTH halves ... are at
-HEAD naming this NEW packet's blob"), this worker does NOT open the ledger entry, does NOT publish
-to S3, does NOT update the README's hash line, and does NOT claim host-side or S3-side
-verification. **`<status>` stays `pending`, with this blocking state stated**, per the order's own
-`<proof_of_spec>` instruction. The publish, and the README hash-line update, remain available to a
-later pass once both halves land.
+`IB-rtn-1`: 0 of 0 found, so that pass STOPPED per the order's own arm (f) text and left `<status>`
+`pending`.
+
+**This continuation pass (same serial):** both halves now exist at CLOUD HEAD (`91f14e1e03`) --
+`org/tier1_exec/2.0.0_SA_COO~B/deliverables/NEVER_WIDEN_SIGNOFF_COO_HALF_IRPT_BCKEND_IB-rtn-1_CAPTURE_TOOL_SIXTH_PUBLISH.md`
+and
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/NEVER_WIDEN_SIGNOFF_CTO_HALF_IRPT_BCKEND_IB-rtn-1_CAPTURE_TOOL_SIXTH_PUBLISH.md`
+-- both independently re-derived by this worker (not trusted from prose): packet blob
+`7e3d70b90d67fc50d1cb7f73fb383fb5e662107a` (`git rev-parse HEAD:<packet path>`), cjs blob
+`17aff45ed837a3a6e62fb2ce0410075b62a499dd`, sha256
+`ea437510ee96fdf7fd106ff36dff3dead1aaf8ada94458a62556bae210cdc25a` (`git cat-file -p` and `git show
+HEAD:<path>`, agreeing) -- both halves name exactly these values.
+
+Deploy ledger opened BEFORE the S3 act (`.tools/deploy_ledger.py open`, slug
+`irpt-rtn-1-capture-tool-publish`, committed at `986917e89a`, one leg L1). Pre-publish live S3
+object confirmed via `head-object`: VersionId `urBPlR5pfitAb30A8jGT_k4ivtjSAnFN`, matching
+`IB-rtm-1`'s close. Publish payload extracted via `git cat-file -p HEAD:<path>` to a scratch file
+and re-hashed (`ea437510...`, 36612 bytes, matching the packet table and both halves) BEFORE
+uploading. Published via `s3api put-object` (new VersionId
+`5MYhL5vH4buCoIB.ea8XknTKNve8ZgG2`). Read back via `s3api get-object` to a SEPARATE scratch file and
+independently re-hashed the RETRIEVED bytes: sha256 `ea437510ee96fdf7fd106ff36dff3dead1aaf8ada94458a62556bae210cdc25a`
+-- EQUAL to the signed value, and `cmp` confirms the readback file is byte-for-byte identical to the
+pre-upload payload file. Verdict token `IBR114-PUBLISHED-S3-BYTES-EQUAL-PACKET-BLOB` holds. This is
+a fresh re-hash of the retrieved bytes, never the CLI's own reported ETag (which also happened to
+agree: `c46c6dfba9887d0dae2c09d4ace9593f`, not the instrument relied on).
+`capture-session.sh` confirmed unchanged via `head-object` (VersionId
+`Z3NJuuiIxczhtYxGEsXW8ZqBpqYi1gs7`, unmoved since `IB-rti-1`) and NOT republished.
+
+README.md's step-2 "Expected output" hash line for `capture-session.cjs` updated in the SAME commit
+as the publish to `ea437510ee96fdf7fd106ff36dff3dead1aaf8ada94458a62556bae210cdc25a` (commit/cell
+citation to `b99067c3bc` / `IB-rtn-1`). Ledger leg L1 closed with the readback proof, entry closed
+(sentinel `org/critical_paths/.open_deploys/irpt-rtn-1-capture-tool-publish.json` deleted; the
+change-management `.md` now reads CLOSED, all 1 leg proven). All committed together at `f18eef4c5b`.
+
+**The host (`i-0167fd745ad906a66`) is STOPPED throughout; this act did NOT start it and claims NO
+on-host byte verification** -- that remains the operator's own runbook step-2 re-read, per the
+packet's own §3 and the order's own arm (f) text.
 
 ## Surprises
 
