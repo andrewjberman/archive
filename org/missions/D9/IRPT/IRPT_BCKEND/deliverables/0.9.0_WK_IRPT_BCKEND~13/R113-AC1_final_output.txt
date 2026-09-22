@@ -1,0 +1,42 @@
+=== ARM classify (R113-AC1): typed error classification (C-S179) + truthful cleanup (C-S180) ===
+current committed capture-session.cjs blob (git rev-parse HEAD:<path>): 058ba2f8f86328d73f2aca140b8a6c81fe0ad3ae
+--- R12 diagnostic (CVO~B, UNMODIFIED) against the CURRENT COMMITTED blob -- all 7 cases ---
+  blob echoed by diagnostic: 058ba2f8f86328d73f2aca140b8a6c81fe0ad3ae  sourceSha256: 3352ff52739e87b8
+  [ok] R12 diagnostic ran (blob passed matches) 
+  case A 'non-timeout certificate error, ordinary URL text': writes=0 success=False exitCode=1
+  [ok] case A terminal (writes=0, success=False) 
+  case B (C-S179 counterexample) 'timeout substring in URL text': writes=0 success=False verificationCalls=1
+  [ok] case B (C-S179) now TERMINAL (writes=0, success=False, verificationCalls=1) -- closes C-S179 
+  case C 'actual timeout positive control': writes=1 success=True verificationCalls=2
+  [ok] case C actual-timeout positive STILL RECOVERS (writes=1, success=True, verificationCalls=2) 
+  case D 'HTTP404 terminal control': writes=0 success=False
+  [ok] case D HTTP 404 stays terminal 
+  cleanup 1 'clean rename positive control': writes=1 unlinks=0 success=True
+  [ok] cleanup 1 clean positive control unaffected 
+  cleanup 2 'latched rename, deletion succeeds': deleted=True diskFinal=False exitCode=1
+  [ok] cleanup 2 (deletion succeeds) unaffected: deleted=True, diskFinal=False, exitCode=1 (old message) 
+  cleanup 3 (C-S180 counterexample) 'deletion fails EPERM': deleted=False diskFinal=True exitCode=4
+    errors: ERROR: session file could NOT be removed: /opt/investor-reporting-export/session/storageState.json (EPERM) -- delete it manually before any use
+  [ok] cleanup 3 (C-S180) now TRUTHFUL: deleted=False, diskFinal=True, exitCode=4, message names removal failure not deletion -- closes C-S180 
+--- R11/R10/R9/R8 diagnostics (CVO, UNMODIFIED) against the SAME blob -- no regression ---
+  [ok] baseline files present (r11, r10, r9, r8, captured at arm (c) before any edit) 
+  R11: 11 of 11 cases externally-visible-verdict UNCHANGED; 10 of 11 byte-identical (incl. error text)
+  [ok] R11: ALL cases' externally-visible verdict unchanged (success/writes/exitCode/verificationCalls/prompts/storageCalls) -- zero behavioral regression 
+  NOTE: the byte-level diff is COSMETIC ONLY -- an added '(error.name=...)' annotation
+        on an already-terminal case's error message, per module docstring NOTE.
+  R10: results array BYTE-IDENTICAL to pre-repair baseline: True
+  [ok] R10: zero drift (byte-identical results array) 
+  R9: results array BYTE-IDENTICAL to pre-repair baseline: True
+  [ok] R9: zero drift (byte-identical results array) 
+  R8: results array BYTE-IDENTICAL to pre-repair baseline: True
+  [ok] R8: zero drift (byte-identical results array) 
+--- this worker's own single-difference pairs (harness_ib_rtm_1.cjs) ---
+  pair (i) typed classification -- discriminating property: error TYPE (Playwright errors.TimeoutError by name, or an exact match against this tool's own configured deadline message) vs an unrelated error whose message merely contains the word "timeout" as a substring
+    GOOD (genuine TimeoutError):  writes=1 success=True exitCode=None verificationCalls=2
+    BAD  (message-text twin):     writes=0 success=False exitCode=1 verificationCalls=1
+  [ok] pair (i): GOOD retries+recovers, BAD (same substring, wrong TYPE) terminally refuses 
+  pair (ii) truthful cleanup -- discriminating property: whether the unlinkSync delete call itself succeeded
+    GOOD (unlink succeeds): deleted=True diskFinal=False exitCode=1
+    BAD  (unlink throws):   deleted=False diskFinal=True exitCode=4
+  [ok] pair (ii): GOOD deletes+old message, BAD retains file+truthful message+distinct exit code 
+IBR113-TYPED-CLASSIFICATION-BOTH-DEFECTS-REFUSE-TWINS-SUCCEED
