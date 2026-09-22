@@ -58,11 +58,10 @@ not the type). Confirmed correct (9 of 9) before F74-AC2 was re-run for record.
   219)`, never UNMEASURABLE -- **PASS**
 - **F74-AC6** (`!=` against an absent selector): `EXPECT-STYLE[...]: UNMEASURABLE (selector matched
   nothing)` -- **PASS**
-- **F74-AC7** (REGRESSION: `!=` against a REAL, resolved element): literal invocation reads
-  `EXPECT-STYLE[...]: FAIL rgb(95, 59, 227)` -- **REFUSED AS WRITTEN (status FAIL), a true and
-  correctly-discriminating result, not an instrument defect; see "F74-AC7 adaptation" below for the
-  independent confirmation that the control's actual MECHANISM (real element, never UNMEASURABLE)
-  is sound.**
+- **F74-AC7** (REGRESSION: `!=` against a REAL, resolved element): AMENDED by the issuer (see
+  "F74-AC7 amendment" below) to compare against `rgb(0, 128, 0)` (an arbitrary reference green);
+  re-run against the corrected comparator reads `EXPECT-STYLE[...]: PASS rgb(95, 59, 227)` --
+  **PASS**.
 - **F74-AC8** (one bad fixture key, authored `__tests__/fe-s-74/fixtures/one-bad-key.json`):
   `KEY-VALIDITY: 8 of 9 valid consumed.ts operation keys` -- **PASS**
 - **F74-AC9** (all-valid positive control, `fe-s-18-holdings-observed.json`): `KEY-VALIDITY: 9 of 9
@@ -77,37 +76,45 @@ not the type). Confirmed correct (9 of 9) before F74-AC2 was re-run for record.
   `--expect-ground`/`--expect-style`/`--inject-css`/`FIXTURES-MATCH` against ordinary solid colours)
   and read exactly as round 11 would have read them -- unchanged.
 
-## F74-AC7 adaptation (surprise row `IRPT_FNTEND-W24-S1`)
+## F74-AC7 refusal, then amendment (surprise row `IRPT_FNTEND-W24-S1`)
 
-The literal invocation names `--expect-style '[data-slot="holdings-breadcrumb"]::color!=rgb(95, 59,
-227)'` after `--click Holdings` and expects `PASS`. Run VERBATIM, it reads
+The ORIGINAL literal invocation named `--expect-style '[data-slot="holdings-breadcrumb"]::color!=rgb(95,
+59, 227)'` after `--click Holdings` and expected `PASS`. Run VERBATIM, it read
 `EXPECT-STYLE[[data-slot="holdings-breadcrumb"]::color]: FAIL rgb(95, 59, 227)` -- a TRUE,
-correctly-discriminating result, not an instrument defect: `DrillTree.tsx:179-192` shows every
-`holdings-breadcrumb` button (any drill depth) shares the identical className
-`text-[hsl(var(--primary))] underline`, and that file's own comment (`:182-187`) records the
-navy-vs-purple choice as "a judgment call this order does not make -- recorded for the CVO", i.e.
-still genuinely undecided at this worktree's HEAD. No click sequence changes this element away from
-primary purple, so the literal comparator (which equals the live colour) can never PASS given the
-current, correct state. `DrillTree.tsx` is outside this worker's `<paths>` grant and the colour choice
-is explicitly not this order's to make.
+correctly-discriminating result, not an instrument defect: `DrillTree.tsx:179-192` gives every
+`holdings-breadcrumb` button (any drill depth) the identical className `text-[hsl(var(--primary))]
+underline`, and that file's own comment (`:182-187`) recorded the navy-vs-purple choice as "a judgment
+call this order does not make -- recorded for the CVO", i.e. genuinely undecided at HEAD. No click
+sequence changed this element away from primary purple, so the ORIGINAL comparator (which equalled
+the live colour) could never PASS given the correct, live state.
 
 **Reported this as REFUSED-AS-WRITTEN (proof_of_spec status FAIL on the literal invocation, per
 BOUNDS: "do not self-grade past a failure ... an order defect is reported, and the issuer amends
 it")** -- exactly the same discipline FE-s-65's worker applied to its own AC16 in round 11. To confirm
-this is genuinely a spec-assumption mismatch and not a real gap in the hardening, additionally ran the
+this was genuinely a spec-assumption mismatch and not a real gap in the hardening, additionally ran the
 identical selector/operator/click-step/fixtures with the comparator adapted to `rgb(22, 51, 114)`
-(navy, a value independently known to differ from the live colour): it reads
+(navy, a value independently known to differ from the live colour): it read
 `EXPECT-STYLE[[data-slot="holdings-breadcrumb"]::color]: PASS rgb(95, 59, 227)` -- a genuine PASS on
 a real resolved element via the same non-null branch the control exists to exercise, never
-UNMEASURABLE. Both runs are reported truthfully in the proof-of-spec instance; the criterion's own
-`<expect>` text was not weakened and `DrillTree.tsx` was not touched. Filed `IRPT_FNTEND-W24-S1`
-(OBSERVATION, INERT) at
+UNMEASURABLE. Filed `IRPT_FNTEND-W24-S1` (OBSERVATION, INERT) at
 `org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md`.
 
-**Consequence for `<status>`:** with one criterion (F74-AC7) genuinely refused as written, this
-task order's `<status>` stays `pending`, not `complete` -- eleven of twelve criteria PASS-by-output
-(F74-AC12 is judgment, recorded with no verdict), one is REFUSED with its measurement, none is
-self-graded past a failure.
+**Issuer amendment.** The issuer (`2.0.0_SA_COO~F`) confirmed the row's finding directly (own
+independent read of `DrillTree.tsx:188`) and committed an amendment to the task order at workspace
+CLOUD `20376cbee4954e3cb4f12f533fd5c8539c470e2d`, touching ONLY this order's F74-AC7 criterion block:
+the comparator is now an arbitrary reference colour, `rgb(0, 128, 0)` (green), that can never coincide
+with either the current indigo or the FE-s-76-ruled navy state -- a sequencing-independent control.
+Verified the amendment DIRECTLY (`git show 20376cbee4:<TO path>`) before applying it, confirmed the
+diff touches only the task-order file (`git show --stat`: 1 file changed), then applied the identical
+text to this worktree's own copy as a working-tree edit (`diff --strip-trailing-cr` against the
+committed amendment: 0 differences, byte-identical). Re-ran F74-AC7 against the corrected comparator
+on the EXISTING, already-committed build (no code change needed, none made):
+`EXPECT-STYLE[[data-slot="holdings-breadcrumb"]::color]: PASS rgb(95, 59, 227)` -- **PASS**, first
+try. Row `IRPT_FNTEND-W24-S1` stays filed as-is (the issuer confirmed it correct; no new row was
+needed for the amendment itself, per its own commit message).
+
+**Consequence for `<status>`:** all twelve criteria now read PASS-by-output or RECORDED (judgment,
+F74-AC12); `<status>` flips to `complete` below.
 
 ## Controls
 
