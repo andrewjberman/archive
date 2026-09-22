@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-h-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-4.gold-article-security-mention.md",
+    "group": "OTHER",
+    "vintage_commit": "df910bd910c2d3bdf62d48627d3ee149b03b5246"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "9fbf337a74c1c8ef6b598a0a9f1cab75328747e1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-4.gold-article-security-mention.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "f7bf47887ead2307c5b49ce3422b1b6aa7a57663",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New pure module. mention_rows(article_row, securities, weights=WEIGHTS, share_b=0.3, roundup_at=5) returns one row per covered security named at least once (word-bounded per-block match, same shape as publishers.py normalize()'s floor), carrying mention_count/mention_in_title/mention_in_lead/first_mention_block, blocks_hit/blocks_total, match_forms, vendor_tagged_primary/secondary (VENDOR_TAG_FIELDS, documented working shape), co_mentioned_securities/co_mention_count/is_roundup, signal_tier/signal_weight (assign_tier: A/B/C/D, first-match partition), the three clocks + lag_hours, and lineage (article_key, bronze_key, record_hash). security_key/composite_figi are read straight off the caller-supplied `securities` entries, never resolved inside this pure function. write_gold(table, rows, as_of_date, run_stamp, client=None) writes ONE parquet snapshot via store.address_of + form_c_object under IfNoneMatch=\"*\", against an explicit GOLD_MENTION_SCHEMA, then HEADs it back and checks ContentLength. The `build-mention` CLI reads every source's silver `article` via store.silver_latest, builds rows, writes the snapshot, prints the summary JSON.",
+      "introduces": ["mention_rows", "assign_tier", "write_gold", "build_mention", "VENDOR_TAG_FIELDS", "GOLD_MENTION_SCHEMA"],
+      "artifact_covered_by": ["AC1", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_publication_gold_mention.py",
+      "kind": "test",
+      "commit_or_etag": "f7bf47887ead2307c5b49ce3422b1b6aa7a57663",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, exactly the twelve arms section 1 item 2 names: test_tier_a_title_and_lead, test_tier_b_title_only, test_tier_b_lead_only, test_tier_b_share_at_threshold, test_tier_c_two_mentions_outside_title_and_lead, test_tier_d_single_passing_mention, test_partition_assigns_every_case (48-combo grid, tally asserted exactly {A:12,B:30,C:4,D:2}), test_share_never_stored, test_co_mention_and_roundup, test_vendor_tags_mapped_or_none, test_same_match_as_harvester_floor, test_write_gold_key_is_builder_output (stub S3 client, same shape as lib/research/harvest/tests/test_store.py's _StubS3). Pure fixtures throughout; no network, no live bucket except the one stubbed arm.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json",
+      "kind": "config_data",
+      "commit_or_etag": "c3aefbd1a9228ecdd9b06861cf6d3b7581a40d98",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The five pilot_securities from lib/opal_data_harvest/config.json plus Lenovo from org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/lenovo.security.json, each verbatim, with security_key/composite_figi added from a LOCAL, network-free `crosswalk.build_crosswalk('2026-09-22')` dry-run measured this session (BA/COST/HD/HAL/VLO -> {ROOT}_US_Equity, composite_figi None; Lenovo -> 992_HK_Equity, composite_figi BBG000BG4QC6) -- never guessed by appending 'US Equity' (crosswalk.py's own rule). Byte-identical to .scratch/hv4/securities.json (cmp confirmed).",
+      "artifact_covered_by": ["AC4", "AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit, the baseline recorded (measured at the cut: 11 passed)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_store.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "11 passed in 0.69s",
+      "denominator": "1 of 1 baseline file run before any edit; matches the task order's own stated baseline of 11 passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"12 passed\" and no \"failed\" -- the twelve arms named in section 1 item 2",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_publication_gold_mention.py -v --color=no -p no:cacheprovider 2>&1 | tail -16",
+      "output_evidence": "test_tier_a_title_and_lead PASSED | test_tier_b_title_only PASSED | test_tier_b_lead_only PASSED | test_tier_b_share_at_threshold PASSED | test_tier_c_two_mentions_outside_title_and_lead PASSED | test_tier_d_single_passing_mention PASSED | test_partition_assigns_every_case PASSED | test_share_never_stored PASSED | test_co_mention_and_roundup PASSED | test_vendor_tags_mapped_or_none PASSED | test_same_match_as_harvester_floor PASSED | test_write_gold_key_is_builder_output PASSED | ============================= 12 passed in 0.44s ==============================",
+      "denominator": "12 of 12 arms passed, 0 failed; re-run twice back to back for determinism (0.43s and 0.40s, identical outcome both times)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "equal to AC0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_store.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "11 passed in 0.42s",
+      "denominator": "1 of 1 baseline file re-run after every edit; passed count equals AC0's 11 passed exactly (only the timing suffix differs)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "before \"--- end\", ONLY lib/research/harvest/publication_gold.py and lib/research/harvest/tests/test_publication_gold_mention.py (each file once or twice across the two listings), and nothing else under lib",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- lib && git status --porcelain -- lib && echo \"--- end\"",
+      "output_evidence": "lib/research/harvest/publication_gold.py\\nlib/research/harvest/tests/test_publication_gold_mention.py\\n--- end (run post-commit f7bf47887e against merge-base 256546ecb0; git status -- lib prints nothing further since both files are now committed, so each of the two allowed files appears exactly once, from the diff listing alone)",
+      "denominator": "2 of 2 lines before \"--- end\" are exactly the two allowed files; 0 other paths under lib appear in either listing",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a JSON line with articles_read at least 1, pairs at least 1, securities_with_rows including 992_HK_Equity when the Lenovo run accepted any article (else the RUN_REPORT's zero is cited in the instance), and a key beginning \"amgt/harvest/gold/article_security_mention/date=\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.harvest.publication_gold build-mention --securities-json .scratch/hv4/securities.json --as-of \"$(date -u +%Y-%m-%d)\"",
+      "output_evidence": "{\"articles_read\": 83, \"key\": \"amgt/harvest/gold/article_security_mention/date=2026-09-22/part-20260922T210931Z.parquet\", \"pairs\": 86, \"securities_with_rows\": [\"BA_US_Equity\", \"COST_US_Equity\", \"HD_US_Equity\"], \"tier_counts\": {\"A\": 45, \"B\": 16, \"C\": 9, \"D\": 16}}",
+      "denominator": "articles_read=83 (>=1), pairs=86 (>=1); securities_with_rows omits 992_HK_Equity because HVST-h-10's Lenovo run accepted ZERO articles into silver (RUN_REPORT.md: sa fetched 21 articles but harvest_grammar mode was structurally unreachable, bronze 0 silver 0; bbg/ft/wsj/barrons never attempted) -- the RUN_REPORT's zero is the reason, per the criterion's own 'else' clause; key starts with the required literal prefix",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"symmetric_difference 0\" with rows_written equal to rows_rederived -- the grade re-derived from the stored text matches (FWD-4)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/hv4/rederive.py",
+      "output_evidence": "rows_written 86 rows_rederived 86 symmetric_difference 0",
+      "denominator": "86 written rows vs 86 rederived rows, 0 of 86 in symmetric difference; rederive.py reads the AC4-printed key from .scratch/hv4/ac4_output.json (AC4's own captured stdout, no second live run) and recomputes mention_rows fresh from silver_latest over the same securities.json",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/hv4/mutant_control.py (not committed) reconstructs assign_tier with a plausible bug -- tier A assigned on 'title OR lead' instead of the RULED 'title AND lead' -- and runs both the real and mutant rule on test_tier_b_title_only's exact scenario (mention_in_title=True, mention_in_lead=False, mention_count=1, share=0.0).",
+      "expected": "REAL (assign_tier, title-AND-lead for A): tier B, weight 0.6 (title alone reaches B, not A). MUTANT (title-OR-lead for A): tier A, weight 1.0 -- wrongly promoted.",
+      "observed": "REAL tier=B weight=0.6; MUTANT tier=A weight=1.0; CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_publication_gold_mention.py run twice back to back; mutant_control.py run twice back to back.",
+      "observed": "pytest: '12 passed' both runs (0.43s and 0.40s wall time, identical pass/fail outcome). Mutant script: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live vendor call or harvester CLI run",
+      "reason": "BOUNDS + the issuer note: HVST-h-10's Lenovo run is DONE and must not be re-attempted; this cell reads only already-landed silver via store.silver_latest and writes only to amgt/harvest/gold/ under a conditional PUT. No publisher session is opened."
+    },
+    {
+      "item": "silver, store.py, the harvester package, the chatter axis, any served object",
+      "reason": "Section 1 'What this cell does NOT change' names all of these; verified unchanged by AC3's own diff (only publication_gold.py and its test file appear)."
+    },
+    {
+      "item": "Live-data validation of VENDOR_TAG_FIELDS against SA's real JSON:API compound-document shape for primaryTickers/secondaryTickers",
+      "reason": "The task order names this as 'a documented per-publisher VENDOR_TAG_FIELDS table (for example...)' -- a working default for this round, not a live-data-verified contract. Documented in the module as a working default shape (a flat list of ticker strings); AC4's live run against real pilot silver returned None for every row (the field is genuinely absent from the flattened vendor dict), which is the legal 'sends none -> None' branch, not a defect."
+    },
+    {
+      "item": "Resolving security_key/composite_figi INSIDE mention_rows or the CLI via a live crosswalk pool read",
+      "reason": "C-HV-KEY requires security_key/composite_figi on every row, but crosswalk.resolve() with no explicit path defaults to an S3 pool read, which would make mention_rows impure (an explicit spec requirement: 'mention_rows(...) is PURE'). Instead these two fields are read straight off the caller-supplied `securities` entries; the CLI's caller (this worker, building securities.json) resolved them ONCE via a local, network-free crosswalk.build_crosswalk() dry-run, cited in the securities.json artifact row above and reproducible by anyone re-running the same dry-run against the same coverage/config/registrations inputs."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC0, baseline, before any edit)",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_store.py -q --color=no -p no:cacheprovider",
+      "result": "11 passed in 0.69s"
+    },
+    {
+      "tool": "pytest (AC1, new test file)",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_publication_gold_mention.py -v --color=no -p no:cacheprovider",
+      "result": "rc 0; 12 passed, 0 failed (run twice, identical outcome: 0.43s then 0.40s)"
+    },
+    {
+      "tool": "pytest (AC2, baseline, after every edit)",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_store.py -q --color=no -p no:cacheprovider",
+      "result": "11 passed in 0.42s -- equal to AC0"
+    },
+    {
+      "tool": "git diff + git status (AC3, given verbatim by section 5)",
+      "invocation": "git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- lib && git status --porcelain -- lib && echo \"--- end\"",
+      "result": "rc 0; exactly lib/research/harvest/publication_gold.py and lib/research/harvest/tests/test_publication_gold_mention.py before \"--- end\""
+    },
+    {
+      "tool": "lib.research.harvest.publication_gold build-mention CLI (AC4, live S3 read+write against opal-data-harvest)",
+      "invocation": "python -m lib.research.harvest.publication_gold build-mention --securities-json .scratch/hv4/securities.json --as-of 2026-09-22",
+      "result": "rc 0; articles_read=83 pairs=86 securities_with_rows=[BA_US_Equity, COST_US_Equity, HD_US_Equity] tier_counts={A:45,B:16,C:9,D:16}; key=amgt/harvest/gold/article_security_mention/date=2026-09-22/part-20260922T210931Z.parquet"
+    },
+    {
+      "tool": ".scratch/hv4/rederive.py (AC5, given verbatim by section 5; not committed)",
+      "invocation": "python .scratch/hv4/rederive.py",
+      "result": "rc 0; rows_written 86 rows_rederived 86 symmetric_difference 0"
+    },
+    {
+      "tool": ".scratch/hv4/mutant_control.py (controls.mutant; not committed)",
+      "invocation": "python .scratch/hv4/mutant_control.py",
+      "result": "rc 0; REAL tier=B weight=0.6; MUTANT tier=A weight=1.0; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "crosswalk dry-run (identity resolution for securities.json, network-free)",
+      "invocation": "python -m lib.research.identity.crosswalk --as-of 2026-09-22 --dry-run",
+      "result": "rc 0; BA/COST/HAL/HD/VLO all MEASURED -> {ROOT}_US_Equity, composite_figi None; 992_HK_Equity MEASURED, composite_figi BBG000BG4QC6"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~4 <0.9.0_WK_AMGT_HARVST~4@opal.agent>\" -F <msgfile> -- lib/research/harvest/publication_gold.py lib/research/harvest/tests/test_publication_gold_mention.py",
+      "result": "commit f7bf47887e: risk-reflex REFLEX CLEAN (2 of 2 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 2 files; naming-gate PASS 0 graded; to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}
