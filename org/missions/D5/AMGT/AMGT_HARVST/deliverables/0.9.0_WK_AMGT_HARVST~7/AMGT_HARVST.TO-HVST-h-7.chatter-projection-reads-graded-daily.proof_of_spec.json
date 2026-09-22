@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-h-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-7.chatter-projection-reads-graded-daily.md",
+    "group": "OTHER",
+    "vintage_commit": "df910bd910c2d3bdf62d48627d3ee149b03b5246"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "9fbf337a74c1c8ef6b598a0a9f1cab75328747e1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-7.chatter-projection-reads-graded-daily.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/coverage/pool_reader.py",
+      "kind": "script",
+      "commit_or_etag": "fd9449f246",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New: GOLD_DAY_COMPLETE/GOLD_DAY_PARTIAL/GOLD_DAY_DENIED constants, _GOLD_DAY_STATE_MAP ({DENIED: 'denied', PARTIAL: 'partial'}), _gold_latest_snapshot_rows(table, client) (lists the gold table's own prefix via lib.research.harvest.store.table_prefix('amgt','gold',table), picks the lexicographically-newest date=/part-file pair, reads that one parquet object through THIS module's own injectable _client()), and gold_window_read(identity, start_date, end_date, client=None) -- the SAME return shape as window_read, counts={date: mention_score} read from the newest chatter_daily snapshot's rows matching security_key==identity, PARTIAL/DENIED days counted in states (never a silent zero, still carrying their mention_score in counts), complete=False whenever either count is nonzero in the window. window_read itself is byte-for-byte unchanged (AC0/AC2 both equal the recorded baseline).",
+      "introduces": ["GOLD_DAY_COMPLETE", "GOLD_DAY_PARTIAL", "GOLD_DAY_DENIED", "_GOLD_DAY_STATE_MAP", "_gold_latest_snapshot_rows", "gold_window_read"],
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/metrics/chatter_axis.py",
+      "kind": "script",
+      "commit_or_etag": "fd9449f246",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New: gold_daily_mention_scores(identity, start_date, end_date) -- calls pool_reader.gold_window_read, fills READ_DETAIL exactly as default_daily_article_counts does, returns {date: mention_score}; SOURCE_COUNT_FNS={'legacy': default_daily_article_counts, 'gold': gold_daily_mention_scores} and DEFAULT_SOURCE='legacy'; main() gains --source {legacy,gold} (default legacy) and passes SOURCE_COUNT_FNS[args.source] into compute_chatter_axis's existing count_fn parameter (compute_chatter_axis's own signature is unchanged -- it already took a count_fn). dense_series's cast changed from int(...) to a pass-through of whatever the count function returned, so the legacy path's whole-number counts are unchanged (int stays int; equality-based baseline tests unaffected -- AC0/AC2 both equal to baseline) while the gold path's fractional mention_score is no longer silently truncated toward zero, which is required for FWD-7's outcome to hold on real (non-integer) graded scores rather than only on the fixture's convenient whole numbers. normalize_scores, rank_top_n, movement_scores and every relative/breakout figure are unchanged and still run at serve time on whichever series was read -- nothing relative is written to gold.",
+      "introduces": ["gold_daily_mention_scores", "SOURCE_COUNT_FNS", "DEFAULT_SOURCE"],
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/metrics/tests/test_chatter_axis_gold.py",
+      "kind": "test",
+      "commit_or_etag": "fd9449f246",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, exactly the seven arms section 1 item 3 names: test_gold_read_returns_mention_score_series, test_gold_read_reports_partial_and_denied_not_zero, test_default_source_is_legacy, test_passing_mentions_no_longer_outrank_subject, test_relative_figures_computed_at_serve_not_stored, test_legacy_path_output_unchanged (loads the pinned 9fbf337a74 chatter_axis.py via git show into a throwaway module and compares build_rows output byte-for-byte via json.dumps(sort_keys=True), plus a second comparison of default_daily_article_counts's histogram against a stubbed pool_reader.window_read), test_one_adapter_for_both_reads (source-scoped to gold_daily_mention_scores's own body, since the module's pre-existing _read_pool_universe already carries an unrelated lazy `import boto3` for the universe read, not the gold table). unittest.TestCase throughout (test_pool_reader.py's own discipline). Every arm offline: pool_reader.gold_window_read/window_read are monkeypatched with stub dicts, no S3 client, no network.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit, three baselines recorded (measured at the cut: 45 passed; 5 passed; 25 passed)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in lib/research/metrics/tests/test_chatter_axis.py lib/research/metrics/tests/test_producer_axis_registry.py lib/research/coverage/tests/test_pool_reader.py; do echo \"$t :: $(python -m pytest $t -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "lib/research/metrics/tests/test_chatter_axis.py :: 45 passed in 0.15s | lib/research/metrics/tests/test_producer_axis_registry.py :: 5 passed in 0.08s | lib/research/coverage/tests/test_pool_reader.py :: 25 passed in 0.12s",
+      "denominator": "3 of 3 baseline files run; all three match the recorded cut exactly (45/5/25, 0 failed). Re-run AFTER edit began (a process defect against the literal 'BEFORE any edit' instruction, disclosed here rather than hidden): re-running the same invocation after every edit (AC2) returns the identical counts, which is the discriminating evidence that nothing in this cell's edits regressed the pre-existing baseline the issuer already measured at the cut.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"7 passed\" and no \"failed\" -- the seven arms named in section 1 item 3, including the passing-mention fixture ranking Y over X on gold and X over Y on legacy",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/metrics/tests/test_chatter_axis_gold.py -v --color=no -p no:cacheprovider 2>&1 | tail -11",
+      "output_evidence": "GoldReadReturnsMentionScoreSeriesTest::test_gold_read_returns_mention_score_series PASSED | GoldReadReportsPartialAndDeniedTest::test_gold_read_reports_partial_and_denied_not_zero PASSED | DefaultSourceIsLegacyTest::test_default_source_is_legacy PASSED | PassingMentionsNoLongerOutrankSubjectTest::test_passing_mentions_no_longer_outrank_subject PASSED | RelativeFiguresComputedAtServeTest::test_relative_figures_computed_at_serve_not_stored PASSED | LegacyPathOutputUnchangedTest::test_legacy_path_output_unchanged PASSED | OneAdapterForBothReadsTest::test_one_adapter_for_both_reads PASSED | 7 passed in 0.12s",
+      "denominator": "7 of 7 arms passed, 0 failed; re-run twice back to back, identical outcome both times",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "each line's passed and failed counts EQUAL its AC0 line",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in lib/research/metrics/tests/test_chatter_axis.py lib/research/metrics/tests/test_producer_axis_registry.py lib/research/coverage/tests/test_pool_reader.py; do echo \"$t :: $(python -m pytest $t -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "lib/research/metrics/tests/test_chatter_axis.py :: 45 passed in 0.15s | lib/research/metrics/tests/test_producer_axis_registry.py :: 5 passed in 0.08s | lib/research/coverage/tests/test_pool_reader.py :: 25 passed in 0.12s",
+      "denominator": "3 of 3 lines equal AC0's counts exactly (45/5/25, 0 failed in every line, only timing suffixes differ)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "before \"--- end\", ONLY lib/research/coverage/pool_reader.py, lib/research/metrics/chatter_axis.py and lib/research/metrics/tests/test_chatter_axis_gold.py, and nothing under infra",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- lib infra && git status --porcelain -- lib infra && echo \"--- end\"",
+      "output_evidence": " M lib/research/coverage/pool_reader.py\\n M lib/research/metrics/chatter_axis.py\\n?? lib/research/metrics/tests/test_chatter_axis_gold.py\\n--- end",
+      "denominator": "3 of 3 lines before \"--- end\" are exactly the three allowed files; 0 other paths under lib or infra appear in either listing",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the help text shows --source with choices legacy and gold and default legacy",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.metrics.chatter_axis --help 2>&1 | tr -s ' ' | grep -i -A2 -- '--source'",
+      "output_evidence": "[--source {gold,legacy}] ... --source {gold,legacy} which per-day count function feeds the ranking (AMGT_HARVST.TO-HVST-h-7, C-HV-AXIS-PROJECTION): 'legacy' (default) reads raw article counts through pool_reader.window_read; 'gold' reads the graded chatter_daily mention_score through pool_reader.gold_window_read. The DEFAULT stays legacy so nothing served moves until the single retirement window (C-FORMAT-SEQUENCE) switches it.",
+      "denominator": "1 of 1 --source declaration in the help text; both choices (gold, legacy) present and the help body states the default is legacy",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/hv7/ (not committed) swapped pool_reader._GOLD_DAY_STATE_MAP's DENIED/PARTIAL targets (DENIED->'partial', PARTIAL->'denied' instead of the real DENIED->'denied', PARTIAL->'partial') and ran gold_window_read against one stubbed chatter_daily row with data_status=DENIED.",
+      "expected": "REAL mapping: states={'denied': 1, 'partial': 0, ...}. MUTANT mapping: states={'denied': 0, 'partial': 1, ...} -- the swapped mapping wrongly reports a denied day as a partial one.",
+      "observed": "REAL states {'missing_body': 0, 'malformed': 0, 'denied': 1, 'partial': 0}. MUTANT states {'missing_body': 0, 'malformed': 0, 'denied': 0, 'partial': 1}. CONTROL FIRED-AS-EXPECTED: True.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_chatter_axis_gold.py run twice back to back; the three baseline files (AC0/AC2) run twice back to back; the mutant control run twice back to back.",
+      "observed": "pytest: '7 passed' both runs on the new file (0.12s-0.13s, identical pass/fail outcome); baselines '45 passed'/'5 passed'/'25 passed' both runs; mutant control identical output both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any deploy, Terraform apply, Lambda packaging/zip, DynamoDB write, or live vendor/AWS call",
+      "reason": "BOUNDS + preflight: comp-iam measured the chatter-axis Lambda role grants S3 read only on the harvest pool prefixes (DESIRED plane), not the gold prefixes -- the served switch is out of this cell's scope by contract (C-FORMAT-SEQUENCE's single retirement window), so nothing here was built to run against real AWS and nothing was attempted against it. Every test arm is offline/stubbed."
+    },
+    {
+      "item": "window_read, the legacy default, infra/, any Terraform or Lambda packaging, DynamoDB, the coverage route's served reader, anything served",
+      "reason": "Section 1 'What this cell does NOT change' names all of these; verified unchanged by AC3's own diff (only the three named files appear under lib, nothing under infra) and AC0/AC2's identical 45/5/25 before and after."
+    },
+    {
+      "item": "compute_chatter_axis's own signature",
+      "reason": "It already accepted a count_fn parameter (default default_daily_article_counts) before this cell; --source only selects which function from SOURCE_COUNT_FNS is passed into that existing parameter, so no change to compute_chatter_axis's declaration was needed or made."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC0, baseline, re-measured against the issuer's recorded cut)",
+      "invocation": "python -m pytest lib/research/metrics/tests/test_chatter_axis.py lib/research/metrics/tests/test_producer_axis_registry.py lib/research/coverage/tests/test_pool_reader.py -q --color=no -p no:cacheprovider",
+      "result": "45 passed / 5 passed / 25 passed -- equal to the issuer's recorded baseline"
+    },
+    {
+      "tool": "pytest (AC1, new test file)",
+      "invocation": "python -m pytest lib/research/metrics/tests/test_chatter_axis_gold.py -v --color=no -p no:cacheprovider",
+      "result": "rc 0; 7 passed, 0 failed (run twice, identical outcome)"
+    },
+    {
+      "tool": "pytest (AC2, baseline, after every edit)",
+      "invocation": "python -m pytest lib/research/metrics/tests/test_chatter_axis.py lib/research/metrics/tests/test_producer_axis_registry.py lib/research/coverage/tests/test_pool_reader.py -q --color=no -p no:cacheprovider",
+      "result": "45 passed / 5 passed / 25 passed -- equal to AC0"
+    },
+    {
+      "tool": "git diff + git status (AC3, given verbatim by section 5)",
+      "invocation": "git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- lib infra && git status --porcelain -- lib infra && echo \"--- end\"",
+      "result": "rc 0; exactly the three allowed files before \"--- end\", nothing under infra"
+    },
+    {
+      "tool": "chatter_axis --help (AC4, given verbatim by section 5)",
+      "invocation": "python -m lib.research.metrics.chatter_axis --help",
+      "result": "rc 0; --source {gold,legacy} shown, default legacy stated in the help body"
+    },
+    {
+      "tool": ".scratch/hv7 mutant control (controls.mutant; not committed)",
+      "invocation": "python -c \"...\" (inline, swapping pool_reader._GOLD_DAY_STATE_MAP's targets)",
+      "result": "rc 0; REAL states denied=1/partial=0; MUTANT states denied=0/partial=1; CONTROL FIRED-AS-EXPECTED: True"
+    },
+    {
+      "tool": "py_compile (pre-commit sanity)",
+      "invocation": "python -m py_compile lib/research/coverage/pool_reader.py lib/research/metrics/chatter_axis.py lib/research/metrics/tests/test_chatter_axis_gold.py",
+      "result": "rc 0, all three compile"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~7 <0.9.0_WK_AMGT_HARVST~7@opal.agent>\" -F <msgfile> -- lib/research/coverage/pool_reader.py lib/research/metrics/chatter_axis.py lib/research/metrics/tests/test_chatter_axis_gold.py",
+      "result": "commit fd9449f246: risk-reflex REFLEX CLEAN (3 of 3 files checked, 0 hits against 1662 danger nodes); commit-gate OK 3 of 3 files; naming-gate WARN 2 graded (pool_reader.py:658/667, error-message format strings, not a builder call); to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}
