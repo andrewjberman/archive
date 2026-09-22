@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rtr-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "4f942b7657"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~17",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7a55a7327d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtr-a.v3-origin-marker-and-the-real-asset-allowlist.md"
+  },
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/render_auth.mjs",
+      "kind": "script",
+      "commit_or_etag": "9715f8371f82b75bfe09a1c70f0dccc8d8423b97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Modified, git blob 9715f8371f82b75bfe09a1c70f0dccc8d8423b97 at commit 5efd6b36e8. BOUNDS: no Lambda deploy this round -- offline code+test only. applyRenderHeaders now injects x-origin-verify; isRenderStaticAssetUri now requires RENDER_STATIC_ASSET_PREFIX ('/assets/') instead of '/investor-reporting/'.",
+      "introduces": [
+        "RENDER_STATIC_ASSET_PREFIX",
+        "x-origin-verify"
+      ],
+      "artifact_covered_by": [
+        "R118-AC1"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "de217098c6e5e9d1bb7223e7ad28bbb0a1c37732",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Modified, git blob de217098c6e5e9d1bb7223e7ad28bbb0a1c37732 at commit 5efd6b36e8. BOUNDS: no Lambda deploy this round. evaluateRenderBranch now takes request.method and refuses any non-GET render-branch request after URI admission; call site passes request.method through. No line below the render-branch block is touched (git diff confirmed, mutation-control restore diff confirmed clean).",
+      "introduces": [
+        "Render token only admits GET",
+        "method_not_allowed"
+      ],
+      "artifact_covered_by": [
+        "R118-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~17/test_v3_origin_marker_and_assets.mjs",
+      "kind": "test",
+      "commit_or_etag": "b809fab2ed28254f62fd63f8c79970b08935cb8d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob b809fab2ed28254f62fd63f8c79970b08935cb8d at commit 5efd6b36e8. Criterion R118-AC1's own first invocation file -- 14 tests, node's built-in test runner, no AWS call (SecretsManager intercepted via node:module registerHooks; render key via render_auth.mjs's own __setRenderKeySlotsForTest seam).",
+      "artifact_covered_by": [
+        "R118-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~17/v3-origin-marker-and-the-real-asset-allowlist.result.md",
+      "kind": "doc",
+      "commit_or_etag": "4a50d05440fcb04f6c9aa317714b71aad2269618",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 4a50d05440fcb04f6c9aa317714b71aad2269618 at commit 5efd6b36e8 -- full test output for both invocations, the exact vite.config.ts source quoted, the mutation control, and the R118-AC1 conflict explained.",
+      "artifact_covered_by": [
+        "R118-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b903066e0b73bd478af2cfbd942b2d197d02d315",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob b903066e0b73bd478af2cfbd942b2d197d02d315 at commit 5efd6b36e8 (rows W17-S1/W17-S2 appended). surprise-row-gate confirmed: '2 new row(s) of 356 total checked (354 pre-existing, NOT re-graded)'; all fences re-validated to parse.",
+      "artifact_covered_by": [
+        "R118-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R118-AC1",
+      "criterion_verbatim": "the origin-marker fix (with its missing/spoofed controls), the GET-only check (with its POST control), and the re-derived asset allowlist (with its config-sourced controls) all pass, and the pre-existing 19-test suite shows zero regression. The result.md prints the full test output and quotes the exact config source used for the asset allowlist.",
+      "method": "test_suite",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~17 &amp;&amp; node --test test_v3_origin_marker_and_assets.mjs &amp;&amp; node --test ../0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs",
+      "output_evidence": "{\"event\":\"render_accepted\",\"jti\":\"rnd_marker_001\",\"path\":\"/investor-reporting/print\"}\nAuth OK (render): render_id=rnd_marker_001 path=/investor-reporting/print\n{\"event\":\"render_denied\",\"reason\":\"method_not_allowed\",\"jti\":\"rnd_marker_001\",\"path\":\"/investor-reporting/print\",\"method\":\"POST\"}\n{\"event\":\"render_denied\",\"reason\":\"method_not_allowed\",\"jti\":\"rnd_marker_001\",\"path\":\"/api/scoped/investor-reporting/performance/acctset123\",\"method\":\"POST\"}\n{\"event\":\"render_accepted\",\"jti\":\"rnd_marker_001\",\"path\":\"/assets/index-49a2f1c8.js\"}\nAuth OK (render): render_id=rnd_marker_001 path=/assets/index-49a2f1c8.js\n{\"event\":\"render_denied\",\"reason\":\"uri_not_admitted\",\"jti\":\"rnd_marker_001\",\"path\":\"/investor-reporting/assets/app-9f3c1a.js\"}\nOK MISSING-marker control: the PRE-FIX render_auth.mjs (parent commit 7a55a7327d) never injects X-Origin-Verify -- reproduces the ORIGINAL bug (66.1056ms)\nOK MISSING-marker control, live code: the FIXED applyRenderHeaders DOES inject X-Origin-Verify=cloudfront (1.5733ms)\nOK MISSING-marker control, full handler: a genuine render-admit request now carries X-Origin-Verify on the forwarded request (6.3231ms)\nOK SPOOFED-marker control: a client-supplied X-Origin-Verify (wrong value) is OVERWRITTEN by the verified constant (1.5085ms)\nOK SPOOFED-marker control, unit-level: applyRenderHeaders overwrites a pre-existing x-origin-verify key (0.1575ms)\nOK GET-only: a GET to the print route with a valid render token is admitted (positive control) (1.3149ms)\nOK GET-only: a POST to an otherwise-admissible render URI is refused BY THE BRANCH (1.337ms)\nOK GET-only: a POST to one of the three admissible render API URIs is also refused (1.4016ms)\nOK real asset allowlist: the print route itself is still admitted (1.318ms)\nOK real asset allowlist: the DERIVED real asset path shape (/assets/<hash>.<ext>) is admitted (1.51ms)\nOK real asset allowlist: a non-JS/CSS/etc file directly under /assets/ (wrong extension) is still refused (1.4103ms)\nOK real asset allowlist: an UNRELATED URI outside the assets prefix entirely is refused (1.4186ms)\nOK real asset allowlist: the OLD guessed shape (/investor-reporting/assets/*) is now correctly REFUSED (1.3114ms)\nOK RENDER_STATIC_ASSET_PREFIX exports the exact derived value (0.1015ms)\ni tests 14\ni suites 0\ni pass 14\ni fail 0\ni cancelled 0\ni skipped 0\ni todo 0\n(rc=0, measured via echo $? immediately after the run)\n\n---SECOND COMMAND (../0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs, UNMODIFIED)---\n\nOK three-path admission: /investor-reporting/print is admitted (8.6398ms)\nFAIL three-path admission: a static asset under /investor-reporting/ is admitted (2.973ms)\n  AssertionError [ERR_ASSERTION]: SPA static asset must be admitted, not refused\n  true !== false\n    actual: true, expected: false, operator: 'strictEqual'\nOK three-path admission: GET performance API is admitted (1.7591ms)\nOK three-path admission: GET analysis sections API is admitted (1.4704ms)\nOK three-path admission: GET narrative API is admitted (1.5022ms)\nOK any other URI is refused BY THE BRANCH itself (1.2838ms)\nOK header injection OVERWRITES client-supplied values of the same names (1.3478ms)\nOK X-Advisor-Id / X-Advisor-Role / X-User-Type are ABSENT on every render-token admit path (1.2753ms)\nOK a render token carrying tier=internal is refused BY THIS BRANCH (1.9108ms)\nOK a render token carrying role=admin is refused BY THIS BRANCH (3.6775ms)\nOK a render token carrying firmRole=admin is refused BY THIS BRANCH (1.4836ms)\nOK a render token carrying userType=Dev is refused BY THIS BRANCH (1.1525ms)\nOK a render token past its exp is refused (2.9444ms)\nOK a token for the wrong aud falls through to the EXISTING human-path evaluation (2.5192ms)\nOK regression: missing Authorization header is still refused exactly as before (0.1254ms)\nOK regression: a token signed by neither key is still refused via the existing catch-all (1.3668ms)\nOK regression: an expired HUMAN token is still refused exactly as before (1.2882ms)\nOK regression: the pre-existing admin bypass still injects the pre-existing header set (1.311ms)\nOK V1 refusal confirmation: a render-signed token fails V1's own verify() parameters with a SIGNATURE error (1.8689ms)\ni tests 19\ni suites 0\ni pass 18\ni fail 1\ni cancelled 0\ni skipped 0\ni todo 0\n(rc=1, measured via echo $? immediately after the run -- the ONE failure is the /investor-reporting/-prefixed\nasset test built on W16-S2's now-superseded guess; see row IRPT_BCKEND-W17-S2)",
+      "denominator": "14 of 14 NEW tests PASS (rc=0); 18 of 19 pre-existing IB-rtq-3 tests PASS (rc=1) -- the one failure is 'three-path admission: a static asset under /investor-reporting/ is admitted', built on IB-rtq-3's own disclosed guess (W16-S2) of the asset-path prefix, which this cell's real-config-derived fix (CELL (d), matching the issuer's own decomp text) necessarily supersedes",
+      "status": "FAIL",
+      "status_reason": "The combined invocation's true rc is 1 (second command fails), not rc=0 on both as <expect> literally requires. This is NOT a defect in this cell's own fix: the new 14-test suite (this cell's own criterion coverage of CELL (a)-(d)) is 14 of 14 PASS, rc=0, including an explicit control proving the OLD /investor-reporting/-prefixed guess is now correctly refused. The single failure is IB-rtq-3's pre-existing, UNEDITED test asserting that same now-superseded guess as an admitted path -- BOUNDS forbids editing any existing test's expected value in that file, and this cell's own <paths> grant does not include deliverables/0.9.0_WK_IRPT_BCKEND~16/ at all, so this worker has no lawful way to reconcile it. CELL (d) (derive the real, narrowest, config-sourced allowlist -- this cell's entire reason for existing, CVO C-S200/C-S203-V3/W16-S2) and BOUNDS/R118-AC1's literal 'passes unmodified, rc=0 on both' cannot both be satisfied once the real portal/vite.config.ts is read; the real fix was chosen. Filed IRPT_BCKEND-W17-S2 (full grounding, evidence and proposed remedy) rather than forcing a false PASS. Status stays pending, not flipped to complete.",
+      "expect": "all new tests PASS, and the pre-existing 19-test suite passes unmodified in expectation, rc=0 on both"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "index.mjs's GET-only check (`if (method !== \"GET\") { ... }`) mutated to a dead condition (`if (false && method !== \"GET\")`, never fires) -- nothing else changed -- and the own 14-test suite re-run.",
+      "expected": "exactly the two GET-only tests fail ('a POST to an otherwise-admissible render URI... is refused BY THE BRANCH' and '...one of the three admissible render API URIs is also refused'); every other test (origin-marker controls, real-asset-allowlist tests) still passes, since none of them depends on the GET-only check.",
+      "observed": "run against the mutant: exactly those two tests failed with 'AssertionError: Expected values to be strictly equal: false !== true' (isRefusal(result) read false, a POST was forwarded). File restored from .scratch/index.mjs.bak (byte-identical to pre-mutant, confirmed by `git diff` showing only the intended two edits); re-run: 14 of 14 PASS again, twice (determinism, below).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the own 14-test suite (test_v3_origin_marker_and_assets.mjs) run 3 times this session: once before the mutation control, once immediately after restoring from the mutant, once as the final run cited in this instance's acceptance row.",
+      "observed": "identical summary every time -- 'tests 14 / suites 0 / pass 14 / fail 0 / cancelled 0 / skipped 0 / todo 0', rc=0. No flakiness: every fixture is an in-process RSA keypair (crypto.generateKeyPairSync) or a synthetic CloudFront event object; no network, no filesystem race (the one test reading a temp fixture file writes/deletes it within its own try/finally, confirmed absent afterward via a directory listing).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "editing deliverables/0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs to reconcile its one now-superseded assertion with the real asset-path fix",
+      "reason": "BOUNDS: 'NO edit to any EXISTING test's expected value in IB-rtq-3's 19-test suite -- only NEW test functions are added'; also outside this cell's <paths> grant, which names only deliverables/0.9.0_WK_IRPT_BCKEND~17/, never ~16/. Filed IRPT_BCKEND-W17-S2 naming the remedy for a follow-on cell."
+    },
+    {
+      "item": "a live Lambda deploy, CloudFront distribution change, Secrets Manager entry, or SSM parameter",
+      "reason": "BOUNDS: 'NO Secrets Manager entry, NO SSM parameter, NO AWS API call, NO Lambda deploy, NO CloudFront distribution change. Code + tests only.' Offline code+test only this round."
+    },
+    {
+      "item": "re-running the CVO's own IRPT_BCKEND_R17_PROBE.mjs reference probe against the fixed code",
+      "reason": "READ-ONLY reference this cell never edits (task order header note); its own hardcoded pre-fix assertions (freshClass classifies UNKNOWN, /assets/ path refused) describe the BEFORE state deliberately and are not this cell's invocation -- CVO's own file to maintain across rounds, not this worker's <paths>."
+    },
+    {
+      "item": "touching .tools/naming-gate.py or lib/opal_naming.py even though this cell's own new literal (RENDER_STATIC_ASSET_PREFIX) is an X-prefixed-looking constant name",
+      "reason": "BOUNDS: 'W16-S4 stays PARKED to its external owner'; measured this session the naming-gate ran WARN-only (0 graded, PASS) on this commit's diff, so no workaround was even needed, but the prohibition was honored regardless."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W17-S1: this order's suggested `git submodule update --init portal` fails in this worktree (.gitmodules is a tracked, 0-byte file with no mapping for path 'portal', rc=128); worked around read-only via `git -C <main-workspace>/portal show <pin>:vite.config.ts`, since that independent checkout already holds the gitlink's pinned commit object. Not self-graduated.",
+    "IRPT_BCKEND-W17-S2: CELL (d)'s real-config-derived allowlist and BOUNDS/R118-AC1's 'pre-existing 19-test suite passes unmodified, rc=0' cannot both hold once portal/vite.config.ts is actually read -- the real shape (/assets/) is a different URI than IB-rtq-3's own guessed-and-tested shape (/investor-reporting/assets/), and fixing this cell's own named defect (C-S200/C-S203-V3/W16-S2) necessarily flips that one guessed assertion from PASS to FAIL. The real fix was implemented (matching the issuer's own decomp text) and R118-AC1 is graded FAIL honestly rather than forced green. Not self-graduated; remedy is a follow-on cell with write access to deliverables/0.9.0_WK_IRPT_BCKEND~16/."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~17/v3-origin-marker-and-the-real-asset-allowlist.result.md",
+  "compiler_tools": [
+    {
+      "tool": "node --test",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~17 && node --test test_v3_origin_marker_and_assets.mjs",
+      "result": "rc=0, 14 of 14 tests PASS (final run cited in the acceptance row above)"
+    },
+    {
+      "tool": "node --test",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~17 && node --test ../0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs",
+      "result": "rc=1, 18 of 19 tests PASS -- the one failure is the now-superseded /investor-reporting/-prefixed asset-path assertion (row IRPT_BCKEND-W17-S2)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~17 <0.9.0_WK_IRPT_BCKEND~17@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "rc=0, committed 5efd6b36e8 -- surprise-row-gate: '2 new row(s) of 356 total checked (354 pre-existing, NOT re-graded)', all new rows carry step-7/step-10 fields; naming-gate PASS (0 graded); to-pipeline-gate OK (no task_orders/*.md in this commit); missions-tree-check 0 violations"
+    },
+    {
+      "tool": "git -C <main-workspace>/portal show",
+      "invocation": "git -C C:/Users/AndrewBerman/Desktop/ajb_workspace/portal show 15ceef793bda03c102539c209dde25cb18ab2eba:vite.config.ts",
+      "result": "the real, pinned config quoted in the result.md and in row IRPT_BCKEND-W17-S2's grounding -- neither `base` nor `build.assetsDir` set"
+    }
+  ]
+}
