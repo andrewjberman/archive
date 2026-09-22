@@ -229,6 +229,20 @@ criteria: "an order defect is reported, and the issuer amends it"). So: **F67-AC
 met (PASS-by-output, `DRIVER OK`), but the proof-of-spec-check instance as a WHOLE is `INVALID (rc=1)` on
 this one mechanical ground, and `<status>` is NOT flipped to `complete`.**
 
+**SECOND AMENDMENT (COO commit `b570ecf546`, verified by this worker the same way: `git cat-file -t`
+resolves, `git show --name-only` touches ONLY the TO file, diff read directly against its parent).**
+`<invocation>` corrected again -- this time to point at this worker's own already-authored, already-
+committed `f67_overflow_scenarios.json` (using only the declared `WS`/`PORT` placeholders, no prose
+bracket). This is now EXACTLY the command already run and recorded above. Applied to this worker's own
+worktree copy of the TO (working-tree edit; `diff --strip-trailing-cr` against `git show
+b570ecf546:<path>` afterward: 0 lines, content-identical). Re-ran `python .tools/proof-of-spec-check.py
+<instance> F67-AC1..AC12 --governing-order <TO>` from inside this worktree:
+`invocation-alignment (recorded invocation -> criterion text): 11/11 comparable row(s) match modulo
+placeholder expansion; 0 diverge`, `violations=0`, **`VALID (rc=0)`.** No new capture was needed -- this
+closed against evidence already produced and already committed. Row `IRPT_FNTEND-W17-S5` is now RESOLVED
+(the mechanical defect it named is fixed); the row itself stays filed as the record, per the surprise
+channel's append-only, never-edit-an-existing-row discipline.
+
 **F67-AC11 -- whole suite green, pinning tests unchanged.** Dev server stopped and port verified closed
 (`curl` -> `000`) BEFORE this run; run in a shell with `IRPT_FE_DEV_PORT` unset.
 ```
@@ -266,7 +280,9 @@ flagged. `__tests__/fe-s-67/panel-error-reuse.test.ts` (this cell's own guard): 
 - Also disclosed for the CVO, not self-graded: F67-AC3 (row `IRPT_FNTEND-W17-S3`, a `default.json` fixture
   defect unrelated to this cell's markup) and F67-AC10 (row `IRPT_FNTEND-W17-S2`, the reused driver's
   output vocabulary never matches `<expect>SAVED|scrollLeft</expect>` under any invocation) both measured
-  FAIL as literally written; substance verified by an alternate route in both cases, recorded above.
+  FAIL as literally written against the ORIGINAL criteria text; both were subsequently amended by the
+  issuer (commits `5cad85da0b`, `b570ecf546`) and both now read PASS -- see the criteria section above
+  and rows `IRPT_FNTEND-W17-S3`/`S2`/`S5`.
 - The cell text's literal "PanelError is imported by all of them [four files]" -- a judgment call, row
   `IRPT_FNTEND-W17-S4`: StatusPanel.tsx never carried a `text-red-800` block, so this worker's own test
   asserts PanelError-import on the three files that needed it and `buttonClass`-import on StatusPanel.tsx
@@ -284,23 +300,34 @@ flagged. `__tests__/fe-s-67/panel-error-reuse.test.ts` (this cell's own guard): 
 - `IRPT_FNTEND-W17-S4` -- the cell text's literal "PanelError imported by all four files" would add an
   unused import to StatusPanel.tsx; resolved by judgment, recorded rather than silently narrowed.
   OBSERVATION / INERT.
-- `IRPT_FNTEND-W17-S5` -- filed AFTER the COO's amendment (`5cad85da0b`) landed and was applied to this
-  worktree: the amendment's corrected F67-AC10 `<invocation>` text contains a non-declared,
+- `IRPT_FNTEND-W17-S5` -- filed AFTER the COO's first amendment (`5cad85da0b`) landed and was applied to
+  this worktree: that amendment's corrected F67-AC10 `<invocation>` text contained a non-declared,
   non-executable bracketed span, so `proof-of-spec-check.py`'s ENFORCE-mode invocation-alignment limb
-  refuses any real command recorded against it (1 violation, `INVALID` rc=1) even though the criterion's
-  substantive `<expect>DRIVER OK</expect>` is independently re-verified PASS. OBSERVATION / INERT.
+  refused any real command recorded against it (1 violation, `INVALID` rc=1) even though the criterion's
+  substantive `<expect>DRIVER OK</expect>` was independently re-verified PASS. RESOLVED by a SECOND
+  amendment (`b570ecf546`, see below): `<invocation>` now points at this worker's own already-authored,
+  already-committed scenario-map file, a real literal command. OBSERVATION / INERT (row stays filed as the
+  record; not edited).
 
-## Amendment applied mid-task (COO commit `5cad85da0b`)
+## Amendments applied mid-task (COO commits `5cad85da0b`, `b570ecf546`)
 
-Verified independently before use: `git cat-file -t 5cad85da0b` -> `commit`; `git show --name-only
-5cad85da0b` -> exactly one path, the governing task-order file; the diff against its parent read directly
-and matched, word for word, what the coordinator's message described (two `COO AMENDMENT` blocks, after
-F67-AC3 and after F67-AC10). Applied as a working-tree edit to this worktree's own copy of the TO (this
-worker's branch does not track CLOUD); `diff --strip-trailing-cr` against `git show 5cad85da0b:<path>`
-afterward returned 0 lines -- content-identical. F67-AC3 re-verified PASS (fixture swap). F67-AC10's
-`<expect>` re-verified PASS (`DRIVER OK`); its `<invocation>` text itself carries a residual defect (row
-`IRPT_FNTEND-W17-S5`) that keeps the whole proof-of-spec-check instance `INVALID (rc=1)`. `<status>` is
-NOT flipped to `complete` -- see `IRPT_FNTEND-W17-S5` and the PROOF section of this worker's report.
+**First amendment (`5cad85da0b`).** Verified independently before use: `git cat-file -t 5cad85da0b` ->
+`commit`; `git show --name-only 5cad85da0b` -> exactly one path, the governing task-order file; the diff
+against its parent read directly and matched, word for word, what the coordinator's message described (two
+`COO AMENDMENT` blocks, after F67-AC3 and after F67-AC10). Applied as a working-tree edit to this worker's
+own copy of the TO (this worker's branch does not track CLOUD); `diff --strip-trailing-cr` against `git
+show 5cad85da0b:<path>` afterward returned 0 lines -- content-identical. F67-AC3 re-verified PASS (fixture
+swap). F67-AC10's `<expect>` re-verified PASS (`DRIVER OK`); its `<invocation>` text itself carried a
+residual defect (row `IRPT_FNTEND-W17-S5`) that kept the whole proof-of-spec-check instance `INVALID
+(rc=1)`.
+
+**Second amendment (`b570ecf546`).** Verified the same way: `git cat-file -t` resolves, `git show
+--name-only` touches ONLY the TO file, diff read directly confirming the `<invocation>` now points at this
+worker's own already-committed `f67_overflow_scenarios.json` using only the declared `WS`/`PORT`
+placeholders. Applied to this worker's own worktree copy; `diff --strip-trailing-cr` against `git show
+b570ecf546:<path>` afterward: 0 lines. Re-ran `proof-of-spec-check.py`: `invocation-alignment 11/11 match,
+0 diverge`, `violations=0`, **`VALID (rc=0)`**, all 12 criteria PASS or RECORDED (judgment). **`<status>`
+FLIPPED TO `complete`, this tick.**
 
 ## Push state
 
