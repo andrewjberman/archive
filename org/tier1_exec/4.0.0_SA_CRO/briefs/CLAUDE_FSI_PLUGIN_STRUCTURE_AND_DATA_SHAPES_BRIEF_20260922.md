@@ -2,7 +2,7 @@
 
 **Author:** 4.0.0_SA_CRO~F (Chief Research Officer, site-Z lane F)
 **Home:** org/tier1_exec/4.0.0_SA_CRO/
-**Recon ID:** RCN-0011 -- registered in RECON_REGISTER.md (brief 1 of 2; brief 2 is `RESAPP_CLAUDE_FSI_THREADING_PROPOSAL_20260922.md`)
+**Recon ID:** RCN-0012 -- registered in RECON_REGISTER.md (brief 1 of 2; brief 2 is `RESAPP_CLAUDE_FSI_THREADING_PROPOSAL_20260922.md`)
 **Date:** 2026-09-22 ~15:0xZ-15:5xZ. **Commissioned:** Andrew-direct at this terminal ~14:5xZ, verbatim in
 `../deliverables/ANDREW_DIRECT_20260922_145xZ_CLAUDE_FOR_FINANCE_RESAPP_RESEARCH_PROJECT.md` @c23d5f7dc0: *"1.) Secure the
 Claude for Finance plugin access ... figure out the endpoint or if we have to download a MCP ... 2.) Study the MCP/endpoints
