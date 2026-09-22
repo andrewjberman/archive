@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-100.filings-no-analyze",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "b2c0a06527d6a0744394cda107500b2d486edf16"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "9ed9e5232c18c0e984c5e84cd950adc2f556b6f6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-100.filings-no-analyze.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~100",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/batch.py",
+      "kind": "script",
+      "commit_or_etag": "a3a7cadd50d0d838f78309df5930c86f0a2d56ba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: run_group(group, write_pool, client=None, caller=None, bronze_sink=None, no_analyze=False) -- with no_analyze=True and a RESOLVED source, returns one {\"security_key\", \"status\": \"FETCHED\", \"cik\", \"accession\", \"analyzed\": False, \"shared_cik_with\"} result per key without calling analyze.analyze_source/build_drafting_document/write_outputs; the fetch call and the UNRESOLVED branch are byte-for-byte unchanged either way (default no_analyze=False path re-verified unchanged by AC0/AC2/AC3). main() gains --no-analyze (store_true, default False), passed as run_group(..., no_analyze=args.no_analyze); with the flag the fetch loop prints \"BATCH DONE (--no-analyze): %d of %d fetched, 0 analyzed, 0 model calls, %d UNRESOLVED-SOURCE (%d distinct CIK fetched, %d duplicate key(s) served from the same fetch)\" over the FETCHED results / all results / non-FETCHED results / planned[\"distinct_cik\"] / planned[\"duplicate_keys\"]; without it, today's BATCH DONE line is unchanged. --dry-run/--plan-only/--skip-fetch and the unresolved-write loop untouched. Library code, no deploy target; 0 network/model/AWS calls made anywhere in this order, exercised entirely over injected stubs.",
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_no_analyze.py",
+      "kind": "test",
+      "commit_or_etag": "a3a7cadd50d0d838f78309df5930c86f0a2d56ba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 6 tests per the order's AC1 list. test_default_run_group_calls_analyze_once_per_resolved_group -- default path over a 2-key RESOLVED group: analyze_source 1 call, build_drafting_document 1 call, write_outputs 2 calls, statuses OK. test_no_analyze_run_group_makes_zero_model_calls -- same group with no_analyze=True: 0/0/0 calls, 2 FETCHED results with analyzed False and the accession carried. test_no_analyze_unresolved_branch_unchanged -- an UNRESOLVED source returns the identical result list with and without the flag, 0 analyze calls either way. test_main_no_analyze_defaults_off -- captures main's own argparse Namespace via a parse_args wrapper over a --dry-run call against a stubbed empty universe: no_analyze False by default, True with the flag. test_main_no_analyze_prints_zero_model_calls -- batch.main over a stubbed one-group universe (batch.load_universe monkeypatched) with fetch.build_source_object and the analyze functions stubbed: with --no-analyze, stdout carries \"BATCH DONE (--no-analyze):\" and \"0 model calls\", analyze_source stub reads 0; without it, stdout carries \"BATCH DONE: \" (and never the --no-analyze line), analyze_source stub reads the group count (1). test_battery_import_reaches_no_analyze_module -- a fresh-interpreter subprocess imports lib.research.filings.battery alone and prints whether lib.research.filings.analyze is in sys.modules: prints False (the battery negative, held as a test). No network, no boto3 client, no model anywhere in the file; only lib.research.filings.batch is imported directly (qualified, W85-S1) -- analyze/fetch are reached via batch.analyze/batch.fetch, so no separate unused import.",
+      "artifact_covered_by": ["AC1", "AC4", "AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit. It prints \"pin_object commit\". THE BATTERY NEGATIVE: \"battery_path_files 6 model_imports I0 model_calls C0\", with no MODEL_IMPORT or MODEL_CALL line (measured I0 = 0 and C0 = 0 at the cut); if either is non-zero, STOP with a BLOCKING row quoting the lines and edit nothing. Then the three batch lines: batch_377 carries \"def run_group(\", batch_413 carries \"analyze.analyze_source(source_object\", and batch_598 carries \"run_group(group, args.write_pool\". Then batch.py's crlf and non_ascii_chars (measured 0 and 0), the filings suite's \"F0 passed\" (measured 86) and test_batch.py's \"B0 passed\" (measured 11). A drifted line NUMBER is recorded, not a fail, if the SITE is the same; a differing F0 or B0 is recorded and becomes the baseline",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r100/ac0.py && python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/filings/tests/test_batch.py -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "pin_object commit\nbattery_path_files 6 model_imports 0 model_calls 0\nbatch_377 def run_group(group, write_pool, client=None, caller=None, bronze_sink=None):\nbatch_413 analysis = analyze.analyze_source(source_object, caller=caller)\nbatch_598 group_results = run_group(group, args.write_pool, bronze_sink=bronze_sink)\nbatch.py crlf 0 non_ascii_chars 0\n86 passed in 9.38s\n11 passed in 0.23s",
+      "denominator": "I0=0, C0=0 (0 of 6 battery-path files carry a model import/call); F0=86 (filings suite), B0=11 (test_batch.py) -- run BEFORE any edit at branch HEAD 9ed9e5232c",
+      "status": "PASS",
+      "expect": "pin_object commit.*battery_path_files 6 model_imports 0 model_calls 0.*batch_377 def run_group\\(.*batch_413 analysis = analyze\\.analyze_source\\(source_object.*batch_598 group_results = run_group\\(group, args\\.write_pool.*batch\\.py crlf 0 non_ascii_chars 0.*86 passed.*11 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"6 passed\" and 0 failed, with the PASSED lines naming test_default_run_group_calls_analyze_once_per_resolved_group, test_no_analyze_run_group_makes_zero_model_calls, test_no_analyze_unresolved_branch_unchanged, test_main_no_analyze_defaults_off, test_main_no_analyze_prints_zero_model_calls and test_battery_import_reaches_no_analyze_module",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests/test_no_analyze.py -v -p no:cacheprovider 2>&1 | tail -10",
+      "output_evidence": "collecting ... collected 6 items\n\nlib/research/filings/tests/test_no_analyze.py::test_default_run_group_calls_analyze_once_per_resolved_group PASSED [ 16%]\nlib/research/filings/tests/test_no_analyze.py::test_no_analyze_run_group_makes_zero_model_calls PASSED [ 33%]\nlib/research/filings/tests/test_no_analyze.py::test_no_analyze_unresolved_branch_unchanged PASSED [ 50%]\nlib/research/filings/tests/test_no_analyze.py::test_main_no_analyze_defaults_off PASSED [ 66%]\nlib/research/filings/tests/test_no_analyze.py::test_main_no_analyze_prints_zero_model_calls PASSED [ 83%]\nlib/research/filings/tests/test_no_analyze.py::test_battery_import_reaches_no_analyze_module PASSED [100%]\n\n6 passed in 0.29s",
+      "denominator": "6 of 6 named tests PASSED, 0 failed",
+      "status": "PASS",
+      "expect": "test_default_run_group_calls_analyze_once_per_resolved_group PASSED.*test_no_analyze_run_group_makes_zero_model_calls PASSED.*test_no_analyze_unresolved_branch_unchanged PASSED.*test_main_no_analyze_defaults_off PASSED.*test_main_no_analyze_prints_zero_model_calls PASSED.*test_battery_import_reaches_no_analyze_module PASSED.*6 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"(F0 + 6) passed\" and 0 failed, where F0 is AC0's printed filings count (measured 86, so 92): every pre-existing filings test stays green unedited",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "92 passed in 9.40s",
+      "denominator": "92 of 92 passed (AC0's F0=86 plus the 6 new tests), 0 failed",
+      "status": "PASS",
+      "expect": "92 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"B0 passed\" and 0 failed, where B0 is AC0's printed test_batch.py count (measured 11): the default run_group signature and path are unchanged for their existing callers",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests/test_batch.py -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "11 passed in 0.22s",
+      "denominator": "11 of 11 passed (AC0's B0, unchanged), 0 failed",
+      "status": "PASS",
+      "expect": "11 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"changed_code_files\" lists EXACTLY lib/research/filings/batch.py and lib/research/filings/tests/test_no_analyze.py -- no other code file, in particular no battery.py; then the re-run of ac0.py at HEAD prints \"battery_path_files 6 model_imports I0 model_calls C0\" with the SAME I0 and C0 as AC0 (the battery half stayed a negative)",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r100/ac4.py && python .scratch/r100/ac0.py",
+      "output_evidence": "changed_code_files ['lib/research/filings/batch.py', 'lib/research/filings/tests/test_no_analyze.py']\npin_object commit\nbattery_path_files 6 model_imports 0 model_calls 0\nbatch_377 def run_group(group, write_pool, client=None, caller=None, bronze_sink=None, no_analyze=False):\nbatch_413 key, crosswalk.serialise(dict(source_object, security_key=key)), client=client\nbatch_598 skip_count += 1\nbatch.py crlf 0 non_ascii_chars 0",
+      "denominator": "2 of 2 changed files exactly as named (no battery.py, no other code file); model_imports 0 and model_calls 0 at HEAD, equal to AC0's I0=0/C0=0",
+      "status": "PASS",
+      "expect": "changed_code_files \\['lib/research/filings/batch\\.py', 'lib/research/filings/tests/test_no_analyze\\.py'\\].*battery_path_files 6 model_imports 0 model_calls 0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "both files print \"compiles True\" and crlf 0; batch.py's non_ascii_chars EQUALS AC0's measured value (measured 0), and the new test file's is 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r100/ac5.py",
+      "output_evidence": "lib/research/filings/batch.py compiles True crlf 0 non_ascii_chars 0\nlib/research/filings/tests/test_no_analyze.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "2 of 2 files compile True, crlf 0/0, non_ascii_chars 0/0 (batch.py equal to AC0's 0)",
+      "status": "PASS",
+      "expect": "lib/research/filings/batch\\.py compiles True crlf 0 non_ascii_chars 0.*lib/research/filings/tests/test_no_analyze\\.py compiles True crlf 0 non_ascii_chars 0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's own planted discriminator: under no_analyze=True, a RESOLVED group must make 0 calls to analyze_source/build_drafting_document/write_outputs and return FETCHED results, exercised in AC1's test_no_analyze_run_group_makes_zero_model_calls (all three functions replaced by call-counting stubs, asserted at 0).",
+      "expected": "A build that left the analyze_source/build_drafting_document/write_outputs calls unconditional (ignoring no_analyze) would make test_no_analyze_run_group_makes_zero_model_calls's assertions of 0 calls fail, and its status/accession/analyzed assertions would also fail since results would carry status OK instead of FETCHED.",
+      "observed": "Hand-verified against the built code: run_group's `if no_analyze:` branch returns before analysis = analyze.analyze_source(...) is ever reached, physically preceding that call in source order (lib/research/filings/batch.py, run_group). test_no_analyze_run_group_makes_zero_model_calls passed (AC1, 6/6) with the stubs reading exactly 0 calls each.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 (fully stubbed, 0 network/model/AWS calls) run twice in this session -- once pre-commit, once post-commit -- with identical PASSED lines both times (0.33s vs 0.29s, timing only). AC0/AC2/AC3 (filings and test_batch suites) each run twice in this session (pre-edit baseline and post-edit) with identical pass counts (86/11 before, 92/11 after, both runs of each stable).",
+      "observed": "AC1 stable across 2 runs (6/6 identical PASSED names both times). AC2 stable at 92 passed across its 2 post-edit runs (9.38s then 9.40s, timing only). AC3 stable at 11 passed across its 3 runs total (0.23s, 0.22s, 0.22s, timing only).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A battery.py flag (--no-analyze on the battery CLI)",
+      "reason": "Ruled OUT by msg 24207 and confirmed at AC0: the AST census over the 6 modules run_battery reaches found 0 model imports and 0 model calls, so the battery half is a MEASURED NEGATIVE and gets NO flag. AC4 re-measured the same negative unchanged after the edit."
+    },
+    {
+      "item": "battery.py, fetch.py, analyze.py, document.py, lib/research/harvest/**, every existing test file, the DISABLED Windows task, and any S3 object",
+      "reason": "Named WALLS by the order ('What this cell does NOT change'; 'A SURFACE NOT NAMED IN <paths> IS A WALL'). Not read for edit and not edited; battery.py's own AST census (AC0/AC4) is a read-only measurement, not an edit."
+    },
+    {
+      "item": "Any network call, EDGAR fetch, model call, or AWS call, and running batch.main/battery.main against the live network",
+      "reason": "Out of BOUNDS by rule ('CODE ONLY') and by the order's own text. Every test in test_no_analyze.py stubs fetch.build_source_object and the analyze functions; 0 network/model/AWS calls made anywhere in this order."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~100/AMGT_RESAPP.TO-AMGT-rk-100.filings-no-analyze.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/filings/batch.py lib/research/filings/tests/test_no_analyze.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/filings/batch.py lib/research/filings/tests/test_no_analyze.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, code commit a3a7cadd50)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~100 <0.9.0_WK_AMGT_RESAPP~100@opal.agent>\" -F <msgfile> -- lib/research/filings/batch.py lib/research/filings/tests/test_no_analyze.py",
+      "result": "[commit-gate] OK: pre-commit gate clean for 2 of 2 file(s); [naming-gate] PASS 0 graded; [to-pipeline-gate] OK; [surprise-row-gate] OK; commit a3a7cadd50d0d838f78309df5930c86f0a2d56ba"
+    }
+  ]
+}
