@@ -1,0 +1,63 @@
+=== ARM invariant (R112-AC1): write-boundary guard (C-S170) + observer scope (C-S171) ===
+--- baseline (unrepaired source, captured at arm (a) before any edit) ---
+  [ok] baseline files present (r10, r9, r8) 
+--- R11 lifecycle diagnostic (CVO~B, UNMODIFIED) against the REPAIRED source -- all 11 cases ---
+  source sha256: b6f266432e9c9400
+  reproduced flag (must now be false): False (rc=1)
+  [ok] R11 diagnostic's own 'reproduced' flag is FALSE (both defects no longer reproduce) 
+  [ok] R11 case storage wait same-origin positive                     success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R11 case storage wait foreign hop then portal                  success=False writes=0 (intent: success=False writes=0) 
+  [ok] R11 case non-navigation same-origin response positive          success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R11 case non-navigation foreign response                       success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R11 case interactive foreign navigation refusal control        success=False writes=0 (intent: success=False writes=0) 
+  [ok] R11 case same-origin HTTP 500 then clean                       success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R11 case same-origin timeout then clean                        success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R11 case same-origin missing marker then clean                 success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R11 case same-origin HTTP 404 then clean                       success=False writes=0 (intent: success=False writes=0) 
+  [ok] R11 case same-origin non-timeout navigation error then clean   success=False writes=0 (intent: success=False writes=0) 
+  [ok] R11 case same-origin password screen then clean                success=True  writes=1 (intent: success=True writes=1) 
+  denominator: 11 of 11 R11 cases match post-repair intent
+  [ok] R11 diagnostic covered all 11 named cases (no case added/removed/renamed) 
+--- R10 lifecycle diagnostic (CVO~B, UNMODIFIED) against the REPAIRED source -- no regression ---
+  reproduced flag (must be false, C-S158/C-S159 stay fixed): False
+  [ok] R10 diagnostic's own 'reproduced' flag is FALSE 
+  [ok] R10 case same-origin interval positive                 success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R10 case interactive foreign hop returns to portal     success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10 case initial foreign hop control                   success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10 case verification foreign every attempt control    success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10 case verification foreign first attempt then clean success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10 case HTTP 500 control                              success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10's 6 cases BYTE-IDENTICAL to this round's own pre-repair baseline is FALSE (repair changed shape as intended) 
+--- R9 redirect diagnostic (CVO~B, UNMODIFIED) against the REPAIRED source ---
+  R9 case same-origin positive                          success=True  writes=1 exit=None
+  R9 case initial foreign hop returns to portal         success=False writes=0 exit=1
+  R9 case initial final URL foreign control             success=False writes=0 exit=1
+  R9 case verification foreign hop returns control      success=False writes=0 exit=1
+  R9 case HTTP 500 refusal control                      success=False writes=0 exit=1
+  R9 case marker absent refusal control                 success=False writes=0 exit=1
+  [ok] R9's 6 cases: externally-visible verdict (success, writes) UNCHANGED from baseline for every case 
+  5 of 6 R9 cases byte-identical to baseline; the rest differ only in HOW a case that
+  already refused (writes=0, success=false) now refuses -- see module docstring NOTE.
+--- R8 diagnostic (CVO, UNMODIFIED) against the REPAIRED source -- no regression ---
+  R8 case negative: sign-in page                                  writes=0 captureSuccessPrinted=False
+  R8 case counterexample: HTTP 500 without password input         writes=0 captureSuccessPrinted=False
+  R8 case counterexample: arbitrary non-portal origin accepted    writes=0 captureSuccessPrinted=False
+  [ok] R8's 3 cases are BYTE-IDENTICAL to this round's own pre-repair baseline (untouched) 
+--- single-difference pair (i): the INVARIANT-TIMING pair ---
+  GOOD (clean, hop during storageState await is same-origin): writes=1 success=True
+  BAD  (foreign hop DURING the storageState() await):          writes=0 success=False
+  discriminating property: the ONE difference is whether the hop during storageState() leaves the configured origin
+  [ok] pair (i-a) GOOD still writes 1 / BAD now refuses (0 writes) 
+  -- this worker's own harness_ib_rtl_1.cjs: the SAME pair's post-rename timing variant --
+  harness rc=0
+  GOOD (clean rename, no hop):                     writes=1 renames=1 unlinks=0 success=True
+  BAD  (foreign hop the instant after the rename):  writes=1 renames=1 unlinks=1 success=False
+  discriminating property: a foreign-origin main-frame navigation landing immediately after the atomic rename, vs none
+  [ok] pair (i-b) GOOD still succeeds (write+rename land) / BAD refuses AND the written file is deleted (unlinks==1) 
+--- single-difference pair (ii): the SUBRESOURCE-SCOPE pair ---
+  GOOD (foreign-origin NON-navigation resource, must succeed):     writes=1 success=True
+  same-origin non-navigation control (sanity):                    writes=1 success=True
+  BAD  (foreign-origin MAIN-FRAME navigation, must still refuse):  writes=0 success=False
+  discriminating property: the ONE difference is whether the foreign-origin event IS a main-frame navigation (isNavigationRequest)
+  [ok] pair (ii) GOOD (foreign subresource) now succeeds / BAD (foreign navigation) still refuses, unaffected by arm (c) 
+IBR112-INVARIANT-GUARD-BOTH-DEFECTS-REFUSE-TWINS-SUCCEED
