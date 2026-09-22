@@ -1,0 +1,46 @@
+=== ARM lifecycle (R107-AC1): session-lifetime observer + sticky refusal latch, C-S158/C-S159 ===
+--- baseline (unrepaired source, captured at arm (b) before any edit) ---
+  [ok] baseline files present (r10, r9, r8) 
+  BASE R10  same-origin interval positive                 success=True writes=1
+  BASE R10  interactive foreign hop returns to portal     success=True writes=1
+  BASE R10  initial foreign hop control                   success=False writes=0
+  BASE R10  verification foreign every attempt control    success=False writes=0
+  BASE R10  verification foreign first attempt then clean success=True writes=1
+  BASE R10  HTTP 500 control                              success=False writes=0
+  [ok] baseline reproduces BOTH residuals (interval hop AND foreign-then-clean both write=1,success=true) (interval=1/True, retry=1/True)
+--- R10 lifecycle diagnostic (CVO~B, UNMODIFIED) against the REPAIRED source ---
+  source sha256: fffef738e90cf03b
+  reproduced flag (exit-0 means defects STILL reproduce -- must now be false): False (rc=1)
+  [ok] R10 diagnostic's own 'reproduced' flag is FALSE (residuals no longer reproduce) 
+  [ok] R10 case same-origin interval positive                 success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R10 case interactive foreign hop returns to portal     success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10 case initial foreign hop control                   success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10 case verification foreign every attempt control    success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10 case verification foreign first attempt then clean success=False writes=0 (intent: success=False writes=0) 
+  [ok] R10 case HTTP 500 control                              success=False writes=0 (intent: success=False writes=0) 
+  denominator: 6 of 6 R10 cases match intent
+  [ok] R10 diagnostic covered all 6 named cases (no case added/removed/renamed) 
+--- R9 redirect diagnostic (CVO~B, UNMODIFIED) against the REPAIRED source -- no regression ---
+  [ok] R9 case same-origin positive                     success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R9 case initial foreign hop returns to portal    success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9 case initial final URL foreign control        success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9 case verification foreign hop returns control success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9 case HTTP 500 refusal control                 success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9 case marker absent refusal control            success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9's 6 cases are BYTE-IDENTICAL to the pre-repair baseline (results array) 
+--- R8 diagnostic (CVO, UNMODIFIED) against the REPAIRED source -- no regression ---
+  R8 case negative: sign-in page                                  writes=0 captureSuccessPrinted=False
+  R8 case counterexample: HTTP 500 without password input         writes=0 captureSuccessPrinted=False
+  R8 case counterexample: arbitrary non-portal origin accepted    writes=0 captureSuccessPrinted=False
+  [ok] R8's 3 cases are BYTE-IDENTICAL to the pre-repair baseline (results array) 
+--- single-difference pair (i): the INTERVAL pair (already inherent in R10's own cases 0/1) ---
+  GOOD (same-origin interval positive):     writes=1 success=True
+  BAD  (foreign hop during interactive wait): writes=0 success=False
+  discriminating property: the ONE difference between these two cases is the interval array's middle hop (origin vs foreign)
+  [ok] pair (i) GOOD still writes 1 / BAD now refuses (0 writes) 
+--- single-difference pair (ii): the RETRY pair (this battery's own harness_ib_rtk_1.cjs) ---
+  GOOD (same-origin HTTP 500 then clean retry): writes=1 success=True
+  BAD  (foreign hop then clean retry):           writes=0 success=False
+  discriminating property: first-attempt failure cause: same-origin HTTP 500 (transient, retryable) vs foreign-origin hop (never retryable)
+  [ok] pair (ii) GOOD still succeeds (transient retry preserved) / BAD now refuses (foreign hop never retryable) 
+IBR107-LIFECYCLE-DIAGNOSTIC-BOTH-RESIDUALS-REFUSE
