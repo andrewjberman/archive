@@ -215,7 +215,18 @@ def _bundle_loader(pinned_account_ids):
     return _load
 
 
-def _render_request(delegator, revision="rev-1", operation="performance",
+# RE-PINNED (round 18, 2.0.0_SA_COO~B, COO ruling on row IRPT_BCKEND-W19-S1): the default
+# operation name here was the PLACEHOLDER trio IB-rtq-2 built against ("performance",
+# "analysis_sections", "narrative"), never a real published operation id. Round 18's
+# IB-rtr-3 replaced `enforce.py`'s RENDER_DELEGATE_OPERATIONS with the REAL, `key_operation`-
+# transformed served vocabulary ("performance_report", "analysis_report", "narrative_packet"),
+# per the CVO's own C-S203/W15-S5 finding -- every render-delegate request built with the old
+# placeholder now refuses OBJECT_NOT_COVERED, not because the ALGEBRA regressed (the
+# revocation control and the three-arm scope test are unchanged and re-confirmed passing) but
+# because this file's own hardcoded default named an operation that never existed in the real
+# vocabulary. Re-pinned to the real value; every call site that does not override `operation=`
+# now exercises the real, correct request shape.
+def _render_request(delegator, revision="rev-1", operation="performance_report",
                     object_kind=None, object_id=None, bundle="bundle-1"):
     headers = {"X-Origin-Verify": "cloudfront", "X-User-Email": "render:r-1",
               "X-User-Role": "renderer", "X-Firm-Id": afx.TENANT}
@@ -242,8 +253,10 @@ def test_arm1_entitled_delegator_and_pinned_object_the_three_reads_succeed():
     """(1) delegator currently entitled + object inside the pinned/bundle scope -> the three
     read operations succeed."""
     e, _ = _render_enforcer(pinned_accounts=[afx.A1, afx.A2])
-    for operation, object_id in (("performance", afx.A1), ("analysis_sections", afx.A2),
-                                 ("narrative", afx.A1)):
+    # RE-PINNED (round 18, COO ruling, row IRPT_BCKEND-W19-S1) -- see _render_request's own
+    # docstring above for why: these three were the placeholder trio, never real operation ids.
+    for operation, object_id in (("performance_report", afx.A1), ("analysis_report", afx.A2),
+                                 ("narrative_packet", afx.A1)):
         req = _render_request(afx.ADVISOR_A, operation=operation, object_kind="account",
                               object_id=object_id)
         out = e.serve(req, _ok_payload)
