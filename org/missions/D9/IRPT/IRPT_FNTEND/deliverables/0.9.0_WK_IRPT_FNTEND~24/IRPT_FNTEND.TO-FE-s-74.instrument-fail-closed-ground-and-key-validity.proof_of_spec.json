@@ -1,0 +1,217 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-74",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5fd2dc9ab5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "6ca306a7ed",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-74.instrument-fail-closed-ground-and-key-validity.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~24",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/scripts/ui-smoke.mjs",
+      "kind": "script",
+      "commit_or_etag": "b762ac14f47b90e531fac53b7f023e25c3ad1570",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Additive fixes only: groundColor() now stops the walk and returns {state:'unmeasurable'|'absent'} instead of silently climbing past a composited/unparseable paint (W20-S2); --expect-style's != branch now prints UNMEASURABLE on a null actual instead of a false PASS (C-S146); a new additive KEY-VALIDITY line checks --fixtures keys against contracts/wire/consumed.ts's live WIRE_CONSUMED_ROUTE_KEYS (C-S147). Old flags/lines and every round-11 invocation SHAPE are unchanged, confirmed by F74-AC5/AC7(adapted)/AC9/AC10. Committed at portal b762ac14, LOCAL on branch wk-irpt_fntend-12-74-fe-s-74-portal (portal frozen); not pushed, not deployed.",
+      "artifact_covered_by": ["F74-AC2", "F74-AC3", "F74-AC4", "F74-AC5", "F74-AC6", "F74-AC7", "F74-AC8", "F74-AC9", "F74-AC10", "F74-AC11"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-74/fixtures/one-bad-key.json",
+      "kind": "config_data",
+      "commit_or_etag": "b762ac14f47b90e531fac53b7f023e25c3ad1570",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, this cell's own <paths> grant. Byte-copy of fe-s-18-holdings-observed.json (fixtures/smoke/) with exactly one key renamed from /api/scoped/investor-reporting/holdings/ to /api/scoped/investor-reporting/not-a-real-route (the example the cell text itself names) -- the F74-AC8 negative control for KEY-VALIDITY. Committed at portal b762ac14, LOCAL; not deployed.",
+      "artifact_covered_by": ["F74-AC8"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended: IRPT_FNTEND-W24-S1 (F74-AC7's literal invocation reads a true FAIL given the live, currently-undecided breadcrumb colour; adapted the comparator to get a genuine PASS on the same code path). Append-only channel; no existing row edited. LOCAL, not deployed.",
+      "artifact_covered_by": ["F74-AC7"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/instrument-fail-closed-ground-and-key-validity.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Result file: the fix, the self-caught route-key-regex defect and its correction, all twelve acceptance results, the F74-AC7 adaptation, and both controls (mutant + determinism).",
+      "artifact_covered_by": ["F74-AC12"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F74-AC1",
+      "criterion_verbatim": "the whole portal typechecks.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "N/A -- boolean rc check",
+      "status": "PASS",
+      "expect": "rc=0(?![0-9])"
+    },
+    {
+      "criterion_id": "F74-AC2",
+      "criterion_verbatim": "a real CSS gradient injected onto a container prints UNMEASURABLE, never a silently-climbed-past white. This is the exact W20-S2 shape, now caught.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_gradient.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings --inject-css '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2){background-image:linear-gradient(180deg,#0A1733,#163372) !important; background-color:transparent !important}' --expect-ground '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2)=rgb(255, 255, 255)'",
+      "output_evidence": "INJECT-CSS: [data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2){background-image:linear-gradient(180deg,#0A1733,#163372) !important; background-color:transparent !important}\nEXPECT-GROUND[[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2)]: UNMEASURABLE linear-gradient(rgb(10, 23, 51), rgb(22, 51, 114))\nASSERT-GROUND: 0 of 1 met",
+      "denominator": "N/A -- boolean presence of UNMEASURABLE",
+      "status": "PASS",
+      "expect": "UNMEASURABLE"
+    },
+    {
+      "criterion_id": "F74-AC3",
+      "criterion_verbatim": "an opaque OKLCH background prints UNMEASURABLE, never a silently-climbed-past white. This is C-S146/the CVO's own reproduced defect, now caught. If your browser's computed-style serialization does not report oklch(...) literally for this property, measure and record its ACTUAL serialization first, then adjust the injected value so the parse genuinely fails as intended.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_oklch.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings --inject-css '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2){background-color:oklch(0.5 0.15 250) !important; background-image:none !important}' --expect-ground '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2)=rgb(255, 255, 255)'",
+      "output_evidence": "INJECT-CSS: [data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2){background-color:oklch(0.5 0.15 250) !important; background-image:none !important}\nEXPECT-GROUND[[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2)]: UNMEASURABLE oklch(0.5 0.15 250)\nASSERT-GROUND: 0 of 1 met",
+      "denominator": "N/A -- boolean presence of UNMEASURABLE",
+      "status": "PASS",
+      "expect": "UNMEASURABLE",
+      "status_reason": "Measured the browser's own computed-style serialization directly before trusting this run: getComputedStyle reports the literal string oklch(0.5 0.15 250) for this property (not converted to rgb), so the rgba?(...) parse genuinely fails as intended, per the criterion's own instruction to verify rather than assume."
+    },
+    {
+      "criterion_id": "F74-AC4",
+      "criterion_verbatim": "a genuinely absent ground selector prints UNMEASURABLE, never a silent PASS or a misleading FAIL against some other element's colour.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_absent_ground.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --expect-ground '[data-slot=\"this-selector-matches-nothing-f74\"]=rgb(255, 255, 255)'",
+      "output_evidence": "EXPECT-GROUND[[data-slot=\"this-selector-matches-nothing-f74\"]]: UNMEASURABLE (selector matched nothing)\nASSERT-GROUND: 0 of 1 met",
+      "denominator": "N/A -- boolean presence of UNMEASURABLE",
+      "status": "PASS",
+      "expect": "UNMEASURABLE"
+    },
+    {
+      "criterion_id": "F74-AC5",
+      "criterion_verbatim": "REGRESSION CONTROL: an ordinary solid wrong-colour paint still reads a normal FAIL <actual>, never UNMEASURABLE -- the hardening only catches genuinely unmeasurable paints, it does not turn every wrong colour into UNMEASURABLE.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_wrong_ground_control.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings --inject-css '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div{background:#c4cbdb !important}' --expect-ground '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div=rgb(255, 255, 255)'",
+      "output_evidence": "INJECT-CSS: [data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div{background:#c4cbdb !important}\nEXPECT-GROUND[[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div]: FAIL rgb(196, 203, 219)\nASSERT-GROUND: 0 of 1 met",
+      "denominator": "N/A -- exact-string comparison",
+      "status": "PASS",
+      "expect": "FAIL rgb\\(196, 203, 219\\)"
+    },
+    {
+      "criterion_id": "F74-AC6",
+      "criterion_verbatim": "the != inequality branch against an absent selector prints UNMEASURABLE, never PASS null -- the exact C-S146 defect, now caught.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_ineq_absent.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --expect-style '[data-slot=\"this-selector-matches-nothing-f74\"]::background-color!=rgb(95, 59, 227)'",
+      "output_evidence": "EXPECT-STYLE[[data-slot=\"this-selector-matches-nothing-f74\"]::background-color]: UNMEASURABLE (selector matched nothing)\nASSERT-STYLE: 0 of 1 met",
+      "denominator": "N/A -- boolean presence of UNMEASURABLE",
+      "status": "PASS",
+      "expect": "UNMEASURABLE"
+    },
+    {
+      "criterion_id": "F74-AC7",
+      "criterion_verbatim": "REGRESSION CONTROL: an inequality check against a REAL, resolved element still PASSes/FAILs normally on its actual computed value, never UNMEASURABLE.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_ineq_control.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings --expect-style '[data-slot=\"holdings-breadcrumb\"]::color!=rgb(95, 59, 227)'",
+      "output_evidence": "CLICKED: Holdings\nEXPECT-STYLE[[data-slot=\"holdings-breadcrumb\"]::color]: FAIL rgb(95, 59, 227)\nASSERT-STYLE: 0 of 1 met",
+      "denominator": "N/A -- exact-string comparison; measured actual EQUALS the comparator, so the != inequality correctly fails",
+      "status": "FAIL",
+      "expect": "PASS",
+      "status_reason": "REFUSED AS WRITTEN, measured, filed as surprise row IRPT_FNTEND-W24-S1. The breadcrumb's live computed `color` genuinely IS rgb(95, 59, 227): DrillTree.tsx:179-192 gives every `data-slot=\"holdings-breadcrumb\"` button the identical className `text-[hsl(var(--primary))] underline` regardless of drill depth or breadcrumb index, and that file's own comment (:182-187) records the navy-vs-purple choice for this element as 'a judgment call this order does not make -- recorded for the CVO', i.e. genuinely undecided at this worktree's HEAD -- not yet landed as navy by any sibling round-12 cell. So no click sequence can make this comparator's inequality read PASS; this is a TRUE, correctly-discriminating FAIL, not an instrument defect. The control's own INTENT (a real, resolved element still PASSes/FAILs normally, never UNMEASURABLE) is independently confirmed: the identical selector/operator/click-step, with the comparator adapted to rgb(22, 51, 114) (navy, a value known to differ from the live colour), reads EXPECT-STYLE[[data-slot=\"holdings-breadcrumb\"]::color]: PASS rgb(95, 59, 227) -- a genuine PASS on a real resolved element via the same non-null branch, never UNMEASURABLE (see result file 'F74-AC7 adaptation'). Per BOUNDS this criterion is reported as a refusal with its measurement rather than self-graded past, and the invocation is not altered; DrillTree.tsx is outside this worker's <paths> grant and the colour choice is explicitly not this order's to make."
+    },
+    {
+      "criterion_id": "F74-AC8",
+      "criterion_verbatim": "author __tests__/fe-s-74/fixtures/one-bad-key.json: a byte-copy of any existing smoke fixture with ONE key changed to a string that is NOT a consumed.ts operation key. KEY-VALIDITY reads k of N with k < N (strictly fewer valid than declared).",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_keyvalid_bad.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/__tests__/fe-s-74/fixtures/one-bad-key.json",
+      "output_evidence": "FIXTURES: 9 declared; 2 matched >=1 URL\nFIXTURES-MATCH: matched 2 of 9\nKEY-VALIDITY: 8 of 9 valid consumed.ts operation keys",
+      "denominator": "8 of 9 (one key, /api/scoped/investor-reporting/not-a-real-route, deliberately invalid)",
+      "status": "PASS",
+      "expect": "KEY-VALIDITY: [0-9]+ of [0-9]+ valid"
+    },
+    {
+      "criterion_id": "F74-AC9",
+      "criterion_verbatim": "POSITIVE CONTROL: an all-valid, already-established fixture (fe-s-18-holdings-observed.json, 9 declared keys) reads 9 of 9 valid -- confirm the count against the fixture's own declared key count, do not hardcode 9 if the file's actual count differs.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_keyvalid_good.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json",
+      "output_evidence": "FIXTURES-MATCH: matched 3 of 9\nKEY-VALIDITY: 9 of 9 valid consumed.ts operation keys",
+      "denominator": "9 of 9 -- independently counted Object.keys() of the fixture file itself before this run (9), matches the printed N",
+      "status": "PASS",
+      "expect": "KEY-VALIDITY: 9 of 9 valid"
+    },
+    {
+      "criterion_id": "F74-AC10",
+      "criterion_verbatim": "REGRESSION CONTROL: the existing FIXTURES-MATCH (fulfilment) line still prints in its old shape, unreplaced -- validity is additive, not a rewrite.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-12-74-fe-s-74/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/f74_fulfilment_unchanged.png --port 5904 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings",
+      "output_evidence": "FIXTURES-MATCH: matched 3 of 9\nKEY-VALIDITY: 9 of 9 valid consumed.ts operation keys",
+      "denominator": "3 of 9",
+      "status": "PASS",
+      "expect": "FIXTURES-MATCH: matched [0-9]+ of [0-9]+"
+    },
+    {
+      "criterion_id": "F74-AC11",
+      "criterion_verbatim": "the whole IRPT_FNTEND suite is green (dev server stopped; IRPT_FE_DEV_PORT unset).",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": "627 pass\n 22 skip\n 0 fail\n 2642 expect() calls\nRan 649 tests across 119 files. [58.14s]",
+      "denominator": "0 fail of 649 tests (627 pass, 22 skip)",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail",
+      "status_reason": "Dev server was stopped and its port verified closed (curl returned 000) before this run; IRPT_FE_DEV_PORT was unset in this shell."
+    },
+    {
+      "criterion_id": "F74-AC12",
+      "criterion_verbatim": "graded at L9 by the CVO: the hardening is genuinely ADDITIVE -- every round-11 order's invocation shape (plain --expect/--expect-text/--expect-ground/--inject-css against ordinary solid colours) behaves identically to before; only the two named false-pass classes and the validity/fulfilment split are new. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; read scripts/ui-smoke.mjs's diff against HEAD~1 and this instance's own regression rows",
+      "output_evidence": "The diff against HEAD~1 (git -C portal diff HEAD~1 HEAD -- scripts/ui-smoke.mjs) touches only: (a) groundColor()'s internal walk logic and its callers' handling of the new {state} shape, (b) the --expect-style loop's null-actual branch, (c) one new helper pair (routeKeyCandidates/checkKeyValidity) plus its call site inside the existing 'if (fixtureKeys.length)' block, and (d) the new unconditional-exit block. Every OTHER line (arg parsing, fixture routing, --click/--fill/--clicktext/--pick steps, --delay/--fail, --netlog, CANVAS/TEXT/REFAREAS, FIXTURES-MATCH's own computation, --strict) is byte-identical. F74-AC5 (plain --inject-css + --expect-ground on an ordinary wrong colour) reads the same FAIL <actual> shape round 11 produced; F74-AC7's ADAPTED run (plain --expect-style != on a real element) reads a plain PASS <actual>, the same shape; F74-AC10 (plain fixtures + --click, no new flags) reads FIXTURES-MATCH in its old, unreplaced shape, with KEY-VALIDITY printed as an ADDITIONAL line beside it, never in place of it. The mutant control (this instance's controls.mutant) independently confirms the pre-fix code on these exact invocations produced silent false PASSes where the fixed code now reports UNMEASURABLE.",
+      "denominator": "N/A -- judgment criterion, no verdict computed here",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true; graded by 3.0.0_SA_CVO at L9 per spine v3 L9. No self-grade taken.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Extracted the pre-fix instrument verbatim (git -C portal show HEAD~1:scripts/ui-smoke.mjs), placed as a temporary sibling file inside portal/scripts/ (node_modules resolution requires it, per FE-s-65's own precedent), and re-ran F74-AC2's exact gradient invocation and F74-AC6's exact absent-selector-inequality invocation against it; deleted the temporary file immediately after both runs (git status confirmed clean).",
+      "expected": "The pre-fix code reproduces the two named false-pass classes exactly (a silent PASS with the wrong, climbed-past colour for the gradient case; PASS null for the absent-selector inequality case), while the fixed code (already confirmed above) reports UNMEASURABLE on the identical invocations.",
+      "observed": "Mutant AC2: EXPECT-GROUND[...]: PASS rgb(255, 255, 255) (silently climbed past the gradient container to a same-coloured ambient ancestor -- the exact W20-S2 shape). Mutant AC6: EXPECT-STYLE[...]: PASS null (the exact C-S146 shape). Fixed instrument on the same two invocations: UNMEASURABLE both times (F74-AC2, F74-AC6 rows above).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "F74-AC2's own invocation run twice in immediate succession against the same live dev server; the deciding EXPECT-GROUND/FIXTURES-MATCH/KEY-VALIDITY lines extracted and diffed.",
+      "observed": "Run A: EXPECT-GROUND[...]: UNMEASURABLE linear-gradient(rgb(10, 23, 51), rgb(22, 51, 114)) / FIXTURES-MATCH: matched 3 of 9 / KEY-VALIDITY: 9 of 9 valid consumed.ts operation keys. Run B: byte-identical. diff rc=0 (no difference).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_FNTEND-W24-S1: F74-AC7's literal invocation (--expect-style '[data-slot=\"holdings-breadcrumb\"]::color!=rgb(95, 59, 227)' after --click Holdings) expects PASS, but the breadcrumb's live computed colour genuinely IS rgb(95, 59, 227) at this worktree's HEAD (DrillTree.tsx's own comment records the navy-vs-purple choice as still undecided, 'recorded for the CVO'), so the literal run correctly, truthfully reads FAIL -- not an instrument defect. Adapted the comparator to rgb(22, 51, 114) (navy) to exercise the identical code path and get a genuine PASS; reported both runs. Filed at org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md; class OBSERVATION, hazard_standing INERT."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~24/instrument-fail-closed-ground-and-key-validity.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit), bun 1.3.9",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0"
+    },
+    {
+      "tool": "bun test 1.3.9 (whole InvestorReporting suite -- F74-AC11, dev server stopped, IRPT_FE_DEV_PORT unset)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "result": "627 pass / 22 skip / 0 fail / 2642 expect() calls / Ran 649 tests across 119 files. [58.14s]"
+    },
+    {
+      "tool": "scripts/ui-smoke.mjs (Playwright-core + system Edge, headless), vite 7.3.5 dev server, worktree port 5904",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-12-74-fe-s-74/portal && IRPT_FE_DEV_PORT=5904 bun run dev --port 5904 (background), then node scripts/ui-smoke.mjs investor-reporting <out.png> --port 5904 --width 1440 --fixtures <fixture.json> [flags per row]",
+      "result": "rc reflects the unconditional non-zero exit on any UNMEASURABLE expectation (F74-AC2/AC3/AC4/AC6), rc=0 on the regression/positive-control rows (F74-AC5/AC7-adapted/AC8/AC9/AC10); every EXPECT*/ASSERT-*/FIXTURES-MATCH/KEY-VALIDITY line quoted in the acceptance rows above is this tool's own printed output"
+    },
+    {
+      "tool": "node --check (syntax) and a temporary mutant copy of the pre-fix instrument, node 26.9.0",
+      "invocation": "node --check scripts/ui-smoke.mjs; git -C portal show HEAD~1:scripts/ui-smoke.mjs > scripts/ui-smoke-mutant-fe-s-74.mjs (temporary, deleted after use), then run against F74-AC2/F74-AC6's exact invocations",
+      "result": "syntax OK; mutant run reproduced both named false-pass classes verbatim (see controls.mutant)"
+    }
+  ]
+}
