@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-125.live-render-read",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "9102ccfe81e71eb20e91db780781171756c8bda1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "f441a2ea764d1507b2ef916af53ac80dd48ed835",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-125.live-render-read.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~125",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~125/RENDER_READ.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only findings record over 13 committed-nowhere PNGs (.scratch/r125/**, not deploy-scope): 10 target captures (2 names x 5 tabs) plus 3 supplementary diagnostics, all opened and read with the Read tool this session; no code change.",
+      "artifact_covered_by": ["AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one new row spliced textually into the append-only fenced JSON array (552 total, 551 pre-existing not re-graded): AMGT_RESAPP-Z-W125-S1; array re-parsed valid after the splice (552 rows, last id confirmed)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "node resolves and prints its version; portal/node_modules/playwright-core EXISTS; ui-smoke.mjs exists. If playwright-core is ABSENT, STOP with a BLOCKING row -- you may not install it, and the cell cannot run",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; command -v node &amp;&amp; node --version &amp;&amp; ls -d portal/node_modules/playwright-core &amp;&amp; ls -l portal/scripts/ui-smoke.mjs",
+      "output_evidence": "/c/Program Files/nodejs/node\nv26.9.0\nportal/node_modules/playwright-core/\n-rw-r--r-- 1 Opal Bloomberg 197121 21909 Sep 15 21:04 portal/scripts/ui-smoke.mjs",
+      "denominator": "N/A -- boolean existence check, 3 of 3 items resolved (node binary, playwright-core dir, ui-smoke.mjs file)",
+      "status": "PASS",
+      "expect": "portal/node_modules/playwright-core",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the capture succeeds and prints IDENTITY, VIEWPORT, LOC, CANVAS and SAVED. CANVAS reads rgb(244, 246, 250). Record LOC verbatim. This reproduces the issuer's cut-time capture and is your control that the instrument works before you vary anything",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node scripts/ui-smoke.mjs \"security-analysis\" \"$(git rev-parse --show-toplevel)/.scratch/r125/base_live.png\" --origin https://opalinvest.dev 2&gt;&amp;1 | tail -8",
+      "output_evidence": "IDENTITY: firmId=opal-capital userType=Dev role=admin firmRole=null\nVIEWPORT: 1440x900\nLOC   : /security-analysis \nCANVAS: rgb(244, 246, 250) (the page field; contract portal/DESIGN.md C3 = #F4F6FA = rgb(244, 246, 250) -- light fg on this is the footgun)\nTEXT  : INSIGHTS Market Overview Model Portfolios Advisor Intelligence Investor Reporting ANALYSIS Philosophy Security Analysis Positioning Attribution Factor Tilts Val\nREFAREAS: 0 per-chart: \nSAVED : C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal/.scratch/r125/base_live.png",
+      "denominator": "N/A -- single capture; matches the issuer's committed cut-time evidence line-for-line (IDENTITY, VIEWPORT, LOC, CANVAS all identical)",
+      "status": "PASS",
+      "status_reason": "SURPRISE NOTED (row AMGT_RESAPP-Z-W125-S1): this literal invocation, run exactly as written, saves its output INSIDE portal/ (a nested gitlink repo -- the second $(git rev-parse --show-toplevel), evaluated after the cd into portal/, resolves to portal's own root, not the outer repo). The worker moved the resulting file into its own worktree's .scratch/r125/ and removed portal/.scratch/ immediately after this run, confirmed clean by AC5 below (re-verified after every subsequent capture, which all used an explicit absolute path instead). The capture ITSELF is a full PASS against the <expect>; the side effect is the surprise.",
+      "expect": "CANVAS: rgb\\(244, 246, 250\\)",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the MEASURED way a security is selected: print the route/param form the page actually honours, evidenced from portal/src/pages/SecurityAnalysis/SecurityAnalysis.tsx and its router registration -- file:line for each. State plainly whether a URL form CAN select a name, or whether selection is only reachable by CLICKING the Lead Panel. If it is click-only, say so; that is a finding about the instrument's reach, not a failure",
+      "method": "manual_read_with_citation",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python .scratch/r125/ac2.py",
+      "output_evidence": "FINDING: selection is a ROUTE PATH SEGMENT, NOT a query string.\nVERDICT: a URL form CAN select a name (path-segment form). Selection is NOT click-only.\n(full citations: App.tsx:447-448, SecurityAnalysis.tsx:43+47, useSecurityAnalysisState.ts:22+29-31; confirmed live by direct capture -- LOC : /security-analysis/BA_US_Equity , ba_probe.png)",
+      "denominator": "N/A -- a single selection-form finding, evidenced by 5 file:line citations and one live confirming capture",
+      "status": "PASS",
+      "expect": "URL form CAN select a name",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the capture set you actually produced, listed. TARGET is 10 (2 names x 5 tabs); FEWER IS ACCEPTABLE ONLY WITH A NAMED REASON PER MISSING CAPTURE -- e.g. selection proved click-only and a click could not be driven. A short list with reasons is a result; a short list without them is not",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; ls -1 .scratch/r125/*.png | wc -l &amp;&amp; ls -1 .scratch/r125/*.png",
+      "output_evidence": "13\n.scratch/r125/992_HK_Equity__exec_management.png\n.scratch/r125/992_HK_Equity__model.png\n.scratch/r125/992_HK_Equity__peers.png\n.scratch/r125/992_HK_Equity__posture.png\n.scratch/r125/992_HK_Equity__thesis.png\n.scratch/r125/BA_US_Equity__exec_management.png\n.scratch/r125/BA_US_Equity__model.png\n.scratch/r125/BA_US_Equity__peers.png\n.scratch/r125/BA_US_Equity__posture.png\n.scratch/r125/BA_US_Equity__thesis.png\n.scratch/r125/_diag_exec_longwait.png\n.scratch/r125/ba_probe.png\n.scratch/r125/base_live.png",
+      "denominator": "10 of 10 target captures produced (2 names x 5 tabs, 0 missing, no reasons needed); 3 additional supplementary captures kept for cited evidence (AC1 control, AC2 selection probe, and a long-wait settle-time diagnostic), listed in RENDER_READ.md 'The capture set' section with each one's purpose named",
+      "status": "PASS",
+      "expect": "^1[03]\\n",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "one row per capture: name, tab, what rendered (CONTENT / ABSENCE-WITH-REASON / EMPTY-NO-EXPLANATION), and the QUOTED on-screen text. Plus the verdict this cell exists for, stated per tab: COULD A VIEWER TELL A FAILED READ FROM AN ABSENT OBJECT? Plus the Lead Panel's own behaviour as the positive control, quoted. You must have READ each PNG -- say so",
+      "method": "manual_read_with_citation",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; cat org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~125/RENDER_READ.md",
+      "output_evidence": "RENDER_READ.md heading 'THE DISCRIMINATOR -- per-tab verdict: COULD A VIEWER TELL A FAILED READ FROM AN ABSENT OBJECT?' answered 'NO, on all 5 tabs' -- confirmed at source, {isLoading&&Loading}{!isLoading&&data&&content} with no third branch in ThesisTab.tsx/ExecManagementTab.tsx/PeersTab.tsx/ModelTab.tsx/PostureTab.tsx. 10-row per-capture table (name/tab/render-class/quoted text) precedes it. The Lead Panel's positive control quoted verbatim (RankedList.tsx 401 read-failure text: 'Read failure -- the ranked names could not be read ... API request failed: 401'). 'Read confirmation' section names all 13 PNGs opened with the Read tool.",
+      "denominator": "10 of 10 required rows present (one per target capture); 5 of 5 tabs carry a stated discriminator verdict; 13 of 13 produced PNGs named in the read-confirmation list",
+      "status": "PASS",
+      "expect": "COULD A VIEWER TELL",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "BOTH are EMPTY. This cell wrote no portal file, tracked or untracked. A non-empty result is a BLOCKING row against yourself",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; git status --short -- portal &amp;&amp; git -C portal status --short",
+      "output_evidence": "BOTH EMPTY (both commands printed zero lines of stdout -- verified with an explicit echo SHARED-CLEAN sentinel appended after each check, which printed, confirming the preceding commands emitted nothing)",
+      "denominator": "2 of 2 checks empty (outer-repo pathspec status on portal, and portal's own repo status), re-verified after EVERY capture in this order, not only once at the end",
+      "status": "PASS",
+      "expect": "BOTH EMPTY",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: this task order is READ-ONLY by its own bounds section (comp-adversary DECLARED-NOT-APPLICABLE in the preflight; no code is written, no portal file is edited -- AC5 proves it). There is no decision logic of this worker's own authorship to plant a mutant against; the deliverable is a measurement (screenshots + source citations), not a producer.",
+      "expected": "N/A -- no code artifact exists for this order to mutate.",
+      "observed": "Confirmed by AC5 (portal untouched, both status reads empty on every re-check) and by the fact that every artifact this worker produced is either a screenshot (`.scratch/r125/*.png`, gitignored, not committed) or a findings doc (RENDER_READ.md) citing pre-existing source lines it does not modify.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The AC1 control capture (base_live.png) was run twice in this session -- once with the literal invocation's own output path (which landed inside portal/, the AC1 surprise) and once more identically after the file was moved -- and both runs produced byte-identical IDENTITY/VIEWPORT/LOC/CANVAS lines. Each per-tab capture for BA_US_Equity and 992_HK_Equity was independently sha256-compared and found byte-for-byte identical across the two names (same tab), which is itself a determinism finding about the underlying render, not just about the instrument.",
+      "observed": "base_live.png's printed lines identical across both runs (same IDENTITY/VIEWPORT/LOC/CANVAS/TEXT/REFAREAS). Per-tab sha256 pairs identical across BA_US_Equity vs 992_HK_Equity for all 5 tabs (thesis, exec_management, peers, model, posture) -- 5 of 5 matching pairs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The fully authenticated read (a real RS256 portal bearer via --token)",
+      "reason": "BOUNDS: no in-repo route mints a portal RS256 token (issuer's own census, cited in the order); minting or seeking one is explicitly forbidden. All 13 captures run against the inert stub session (IDENTITY: firmId=opal-capital userType=Dev role=admin), which the live API refuses -- that refusal, and how legibly the page shows it, is the measurement."
+    },
+    {
+      "item": "An independent long-wait (10s+) settle-time re-probe of Peers/Model/Posture and of 992_HK_Equity's Exec Management, matching the one done for BA_US_Equity/Exec Management",
+      "reason": "The long-wait diagnostic was run once (BA_US_Equity/Exec Management) to answer whether the transient 'Loading...' seen at the standard capture window ever resolves to something else; it does, to a blank panel with no text. The other four tab components share the byte-identical render gate (`{isLoading&&Loading}{!isLoading&&data&&content}`, confirmed by direct source read, file:line cited in RENDER_READ.md) and the same react-query hook shape (`retry: 2`), so the settle behavior is judged to generalize rather than independently reproduced four more times; RENDER_READ.md states this caveat explicitly per row rather than presenting it as separately measured."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W125-S1: AC1's literal invocation, run exactly as written, writes its output PNG INSIDE portal/ (a real nested git repo) because the second $(git rev-parse --show-toplevel) evaluates AFTER the cd into portal/ and resolves to portal's own root -- confirmed by running it verbatim and then reading `git -C portal status --short`, which printed `?? .scratch/`. Disarmed same-turn: file moved into the worker's own worktree, portal/.scratch removed, cleanliness re-confirmed; every subsequent capture used an explicit absolute output path to avoid recurrence."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~125/RENDER_READ.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile + ruff py39 + ds-precommit + naming-gate + to-pipeline-gate + surprise-row-gate + surprise-corpus)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~125 <0.9.0_WK_AMGT_RESAPP~125@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~125/RENDER_READ.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~125/AMGT_RESAPP.TO-AMGT-rk-125.live-render-read.proof_of_spec.json org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-125.live-render-read.md",
+      "result": "see the worker report (rc / commit hash is the record)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python .tools/proof-of-spec-check.py <this instance> AC0,AC1,AC2,AC3,AC4,AC5",
+      "result": "see the worker report (rc is the verdict)"
+    }
+  ]
+}
