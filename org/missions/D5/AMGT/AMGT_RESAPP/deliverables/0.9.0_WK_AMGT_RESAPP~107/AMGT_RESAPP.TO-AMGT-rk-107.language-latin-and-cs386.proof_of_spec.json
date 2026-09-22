@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-107.language-latin-and-cs386",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "d0597e7e0a98ec0010c23fea15eec58a3d1a452f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "0ed364cff014697720af7bcd9931f254cf83d827",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-107.language-latin-and-cs386.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~107",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/document.py",
+      "kind": "script",
+      "commit_or_etag": "0de2c26e825f14821f51c0dd18a43f9439423c8c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED: `detect_language`'s ascii-majority branch (was `ascii_share > 0.5` -> unconditional \"en\") now runs a stopword test over the lower-cased ascii word tokens of the sample against nine module-constant stopword sets (`_STOPWORDS`: en/de/fr/it/es/nl/pt/sv/da, `_STOPWORD_LANGS`, `_MIN_STOPWORD_HITS`, `_STOPWORD_TOKEN_RE`); the language with the most hits wins, \"en\" wins ties (first in `_STOPWORD_LANGS` order), and \"en\" is the fallback when no language reaches `_MIN_STOPWORD_HITS` (a stated known limit for a language outside the table). The returned dict gains `\"stopword_hits\"`. The kana/cjk/hangul branches, the letter-share computation, and the four callers are unchanged. Library code, no deploy target of its own.",
+      "artifact_covered_by": ["AC0", "AC1", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/filings.py",
+      "kind": "script",
+      "commit_or_etag": "0de2c26e825f14821f51c0dd18a43f9439423c8c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, ONE-LINE-EQUIVALENT: `_first_differing_outcome_field`'s length branch (previously `\"battery.attempts length: %d -> %d\" % (len(old_fields), len(new_fields))`, the flattened outcome-field pair counts) now reads `len((existing.get(\"battery\") or {}).get(\"attempts\") or [])` against the same for `new` and reports those attempts counts under the same label (CTO round-27 analysis, msg 24239, `ledger/ROUND_ANALYSIS.round27.md` @0a57690e2e -- C-S386, graduated). Nothing else in the function changed. Library code, no deploy target of its own.",
+      "artifact_covered_by": ["AC0", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_language_latin.py",
+      "kind": "test",
+      "commit_or_etag": "0de2c26e825f14821f51c0dd18a43f9439423c8c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 6 tests. German/French/Italian fixtures (~60-90 words each, ASCII-transliterated function words plus one literal accented word each -- \u00fcber/\u00e9t\u00e9/citt\u00e0) are detected as de/fr/it with each language's stopword_hits count >= _MIN_STOPWORD_HITS and greater than en's; an English fixture stays en; a kana fixture (reused shape from test_document.py) stays ja unchanged with stopword_hits == {}; stopword_hits is confirmed present with all nine _STOPWORD_LANGS keys and de as the argmax on the German fixture. 6 passed in 0.10-0.18s across repeated runs.",
+      "artifact_covered_by": ["AC1", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_changed_held_length_text.py",
+      "kind": "test",
+      "commit_or_etag": "0de2c26e825f14821f51c0dd18a43f9439423c8c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 1 test, test_length_branch_reports_attempt_counts -- two minimal filing_attempt-shaped documents with an equal top-level and battery.order/winner prefix, 2 attempts vs 3 (the first two byte-identical), asserts `_first_differing_outcome_field` returns exactly \"battery.attempts length: 2 -> 3\". 1 passed in 0.12-0.16s across repeated runs.",
+      "artifact_covered_by": ["AC2", "AC3", "AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: the detector body with its `ascii_share > 0.5` \"en\" branch, and the length branch printing len(old_fields)/len(new_fields); then F0 (100) and H0 (79). Record both counts; they are the baselines",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && sed -n '330,365p' lib/research/filings/document.py && sed -n '297,312p' lib/research/harvest/filings.py && python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "def detect_language(text):\n    ...\n    elif ascii_share > 0.5:\n        language = \"en\"\n    else:\n        language = \"unknown\"\n    ...\ndef _first_differing_outcome_field(existing, new):\n    ...\n    if len(old_fields) != len(new_fields):\n        return \"battery.attempts length: %d -> %d\" % (len(old_fields), len(new_fields))\n    return \"no differing field found\"\n100 passed in 9.92s\n79 passed in 1.83s",
+      "denominator": "F0=100 filings tests (of 100), H0=79 harvest tests (of 79), both run BEFORE any edit at branch HEAD 96cc4dae9d (worktree base ancestor)",
+      "status": "PASS",
+      "expect": "elif ascii_share > 0.5:\\s*\\n\\s*language = \"en\".*if len\\(old_fields\\) != len\\(new_fields\\):.*return \"battery\\.attempts length: %d -> %d\" % \\(len\\(old_fields\\), len\\(new_fields\\)\\).*100 passed.*79 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"6 passed\" and 0 failed, with the six named arms PASSED -- de, fr and it are detected, English stays en, Japanese stays ja, and stopword_hits is reported",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests/test_language_latin.py -v -p no:cacheprovider 2>&1 | tail -9",
+      "output_evidence": "test_english_text_still_en PASSED\ntest_french_text_is_fr PASSED\ntest_german_text_is_de PASSED\ntest_italian_text_is_it PASSED\ntest_japanese_text_unchanged_ja PASSED\ntest_stopword_hits_reported PASSED\n\n6 passed in 0.10s",
+      "denominator": "6 of 6 named arms PASSED, 0 failed",
+      "status": "PASS",
+      "expect": "test_english_text_still_en PASSED.*test_french_text_is_fr PASSED.*test_german_text_is_de PASSED.*test_italian_text_is_it PASSED.*test_japanese_text_unchanged_ja PASSED.*test_stopword_hits_reported PASSED.*6 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"1 passed\", test_length_branch_reports_attempt_counts PASSED (the text reads \"battery.attempts length: 2 -> 3\")",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_changed_held_length_text.py -v -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "test_length_branch_reports_attempt_counts PASSED\n\n1 passed in 0.12s",
+      "denominator": "1 of 1 arm PASSED, 0 failed",
+      "status": "PASS",
+      "expect": "test_length_branch_reports_attempt_counts PASSED.*1 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "filings \"N passed\" with N = F0 + 6, and harvest \"M passed\" with M = H0 + 1; 0 failed in both. Every existing detector arm (test_document.py) still passes inside F0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "106 passed in 9.53s\n80 passed in 1.08s",
+      "denominator": "filings 106 of 106 passed (F0=100 + 6 new), harvest 80 of 80 passed (H0=79 + 1 new), 0 failed in both; test_document.py's two pre-existing TheLanguageDetector arms (test_ascii_text_reads_en, test_kana_bearing_text_reads_ja) are part of the 100/106 and collected in this same run",
+      "status": "PASS",
+      "expect": "106 passed.*80 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"changed_code_files\" lists EXACTLY the four paths in section 3's code lines; each \"compiles True crlf 0\"; non_ascii_chars 0 for document.py and harvest/filings.py (production), and the recorded count for the new test fixtures",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r107/ac4.py",
+      "output_evidence": "changed_code_files ['lib/research/filings/document.py', 'lib/research/filings/tests/test_language_latin.py', 'lib/research/harvest/filings.py', 'lib/research/harvest/tests/test_changed_held_length_text.py']\nlib/research/filings/document.py compiles True crlf 0 non_ascii_chars 0\nlib/research/filings/tests/test_language_latin.py compiles True crlf 0 non_ascii_chars 20\nlib/research/harvest/filings.py compiles True crlf 0 non_ascii_chars 0\nlib/research/harvest/tests/test_changed_held_length_text.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "4 of 4 changed code files exactly as named; 4 of 4 compile True crlf 0; non_ascii_chars 0/0 for the two production files; test_language_latin.py carries 20 non-ascii characters in its SOURCE (4 literal accented Latin letters -- \u00fc, \u00e9\u00e9, \u00e0 -- plus the 16-character kana sentence literal, counted once each since the kana fixture is built by repeating one literal string with `* 30` rather than writing it 30 times in source); test_changed_held_length_text.py carries 0",
+      "status": "PASS",
+      "expect": "changed_code_files \\['lib/research/filings/document\\.py', 'lib/research/filings/tests/test_language_latin\\.py', 'lib/research/harvest/filings\\.py', 'lib/research/harvest/tests/test_changed_held_length_text\\.py'\\].*document\\.py compiles True crlf 0 non_ascii_chars 0.*test_language_latin\\.py compiles True crlf 0 non_ascii_chars 20.*harvest/filings\\.py compiles True crlf 0 non_ascii_chars 0.*test_changed_held_length_text\\.py compiles True crlf 0 non_ascii_chars 0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's own planted discriminator: the stopword test must actually decide the language, not just exist unreachable code. Mutant: reverted the ascii-majority branch of `detect_language` to the pre-fix unconditional `language = \"en\"` (bypassing the stopword test entirely), leaving everything else -- including `_STOPWORDS`, `_STOPWORD_LANGS`, `_MIN_STOPWORD_HITS` -- untouched, then re-ran `test_language_latin.py`.",
+      "expected": "test_german_text_is_de, test_french_text_is_fr, test_italian_text_is_it and test_stopword_hits_reported should FAIL (the returned language is always \"en\" and stopword_hits is never populated); test_english_text_still_en should FAIL on the stopword_hits assertions (KeyError, since stopword_hits stays {}); test_japanese_text_unchanged_ja should still PASS (the kana branch is untouched by this mutant).",
+      "observed": "5 of 6 arms FAILED as expected: test_german_text_is_de (AssertionError: 'en' != 'de'), test_french_text_is_fr (AssertionError: 'en' != 'fr'), test_italian_text_is_it (AssertionError: 'en' != 'it'), test_stopword_hits_reported (AssertionError: 'de' not found in {}), test_english_text_still_en (KeyError: 'en'). test_japanese_text_unchanged_ja PASSED, unaffected. `5 failed, 1 passed in 0.18s`. The fixed file was then restored byte-for-byte from the `.scratch/r107/document.py.fixed` snapshot (taken immediately after the real edit, before the mutant); a post-restore diff against that snapshot showed 0 differences and `git status --short` showed the working tree clean against the committed HEAD 0de2c26e82.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_language_latin.py and test_changed_held_length_text.py each run twice in this session against the identical committed source (once immediately post-commit, once after the mutant-and-restore cycle).",
+      "observed": "test_language_latin.py: 6 passed both times (0.10s and 0.10s in the final pair; 0.13-0.18s across all runs in the session), identical PASSED test names both times. test_changed_held_length_text.py: 1 passed both times (0.12s and 0.16s), identical PASSED test name both times. The filings suite (106 passed) and harvest suite (80 passed) were each also run twice post-commit with identical counts (9.63s/9.53s and 1.18s/1.08s, timing only).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The four production callers (analyze.py:1327, document.py:866, battery.py:412, fetch.py:417)",
+      "reason": "Named WALLS by the order ('What this cell does NOT change: the four callers'). Not edited; each still reads result[\"language\"] unchanged, and the filings/harvest suites (which exercise these callers indirectly via test_document.py, test_filings.py etc.) pass unedited inside F0/H0."
+    },
+    {
+      "item": "analyze.py, any translation code, the API's text_translated drop (gap G-6), store.py",
+      "reason": "Named WALLS by the order ('What this cell does NOT change'; 'A SURFACE NOT NAMED IN <paths> IS A WALL'). Not edited. gap G-6 stays recorded for the trial report per the order's own text."
+    },
+    {
+      "item": "Any language outside the nine-language stopword table",
+      "reason": "RULED as a stated known limit, not a defect: 'A language outside the table falls through to \"en\" only by the minimum-hit rule. Say so in the docstring as a known limit.' -- done in the detect_language docstring; no further language added, per the order's own bound (issuer note 1: 'the MINIMUM that meets the ruling', 'no new dependency: no langdetect, and no install')."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~107/AMGT_RESAPP.TO-AMGT-rk-107.language-latin-and-cs386.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/filings/document.py lib/research/harvest/filings.py lib/research/filings/tests/test_language_latin.py lib/research/harvest/tests/test_changed_held_length_text.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check lib/research/filings/document.py lib/research/harvest/filings.py lib/research/filings/tests/test_language_latin.py lib/research/harvest/tests/test_changed_held_length_text.py --target-version py39",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (via safe-commit.sh, code commit 0de2c26e82)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~107 <0.9.0_WK_AMGT_RESAPP~107@opal.agent>\" -F <msgfile> -- lib/research/filings/document.py lib/research/harvest/filings.py lib/research/filings/tests/test_language_latin.py lib/research/harvest/tests/test_changed_held_length_text.py",
+      "result": "[commit-gate] OK: pre-commit gate clean for 4 of 4 file(s); [naming-gate] PASS 0 graded; [to-pipeline-gate] OK; [surprise-row-gate] OK; commit 0de2c26e825f14821f51c0dd18a43f9439423c8c"
+    }
+  ]
+}
