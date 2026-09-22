@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-96",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "788846596a5f971c878881dae3acb487e89ac0aa"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "b0984799335a0ce87c05a7e0f3e8e5483e03398e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-96.bloomberg-nan-to-null.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~96",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "b31b25b2aacd522bacfa000018a74e1051722f86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY order, no deploy in scope. `_nan_to_null` added; `_canonical_json` gains `allow_nan=False`; `client_json` maps then serialises. Exercised by AC1 (14 passed), AC2 (64 passed harvest-wide), AC3 (110 live bronze objects: old_equals_new 110, probe shows old emits bare NaN/Infinity tokens and new emits null), AC5 (compiles, 0 CRLF, 0 non-ASCII).",
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/filings.py",
+      "kind": "script",
+      "commit_or_etag": "b31b25b2aacd522bacfa000018a74e1051722f86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY order, no deploy in scope. `object_json` (line 183) gains `allow_nan=False` -- refuse, no mapping (lossless copy). Exercised by AC2 (test_filings.py 9 passed, including the new arm), AC3 (194 live filings-source objects, 0 non-finite), AC5.",
+      "artifact_covered_by": ["AC2", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_bloomberg.py",
+      "kind": "test",
+      "commit_or_etag": "b31b25b2aacd522bacfa000018a74e1051722f86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "5 new arms appended: test_client_json_maps_nan_to_null, test_client_json_maps_infinities_to_null, test_client_json_maps_nested_non_finite, test_backstop_raises_and_nothing_is_written, test_patched_client_json_is_the_one_production_reaches. Suite 9 -> 14 passed, 0 failed (AC1).",
+      "artifact_covered_by": ["AC1", "AC2", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_filings.py",
+      "kind": "test",
+      "commit_or_etag": "b31b25b2aacd522bacfa000018a74e1051722f86",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "1 new arm appended: test_filing_source_row_refuses_non_finite. Suite 8 -> 9 passed, 0 failed (AC2).",
+      "artifact_covered_by": ["AC2", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-96.bloomberg-nan-to-null.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "RECORD FACE <status> flipped pending -> complete; the WORKER FACE above it is unmodified."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: \"bloomberg_line47\" prints the json.dumps line of _canonical_json with NO allow_nan argument; \"serialisation_sites 7\" listing bloomberg.py:47, bloomberg.py:395, bright_data_serp.py:52, filings.py:182, filings.py:183, filings.py:470, store.py:290 (line numbers as measured at 1229b10b83 -- a drifted number is recorded, not a fail, if the SITE is the same); \"pin_object commit\". Record the output; this is the baseline the other criteria compare against",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r96/ac0.py",
+      "output_evidence": "bloomberg_line47 return json.dumps(obj, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=True)\nserialisation_sites 7 ['bloomberg.py:47', 'bloomberg.py:395', 'bright_data_serp.py:52', 'filings.py:182', 'filings.py:183', 'filings.py:470', 'store.py:290']\npin_object commit",
+      "denominator": "7 of 7 serialisation sites listed, exactly as measured at the pin; run BEFORE any edit in this session",
+      "status": "PASS",
+      "expect": "bloomberg_line47 return json\\.dumps\\(obj, sort_keys=True, separators=.*?serialisation_sites 7.*?bloomberg\\.py:47.*?bloomberg\\.py:395.*?bright_data_serp\\.py:52.*?filings\\.py:182.*?filings\\.py:183.*?filings\\.py:470.*?store\\.py:290.*?pin_object commit"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"14 passed\" and 0 failed (the 9 at the cut plus 5), the PASSED lines naming test_client_json_maps_nan_to_null, test_client_json_maps_infinities_to_null, test_client_json_maps_nested_non_finite, test_backstop_raises_and_nothing_is_written and test_patched_client_json_is_the_one_production_reaches -- the fourth proving allow_nan=False raises and 0 puts reach the store when the mapping is removed",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_bloomberg.py -v -p no:cacheprovider 2>&1 | tail -18",
+      "output_evidence": "lib/research/harvest/tests/test_bloomberg.py::test_bronze_addresses_are_builder_output PASSED [  7%]\nlib/research/harvest/tests/test_bloomberg.py::test_bronze_bytes_as_received PASSED [ 14%]\nlib/research/harvest/tests/test_bloomberg.py::test_bronze_refuses_state_and_retired_requests PASSED [ 21%]\nlib/research/harvest/tests/test_bloomberg.py::test_bronze_fetched_reports_prior_fetch PASSED [ 28%]\nlib/research/harvest/tests/test_bloomberg.py::test_client_json_deterministic_and_form_recorded PASSED [ 35%]\nlib/research/harvest/tests/test_bloomberg.py::test_model_block_rows_typed_and_keyed PASSED [ 42%]\nlib/research/harvest/tests/test_bloomberg.py::test_model_block_round_trip_every_variant PASSED [ 50%]\nlib/research/harvest/tests/test_bloomberg.py::test_model_block_silver_write_then_skip_unchanged PASSED [ 57%]\nlib/research/harvest/tests/test_bloomberg.py::test_module_writes_only_through_store PASSED [ 64%]\nlib/research/harvest/tests/test_bloomberg.py::test_client_json_maps_nan_to_null PASSED [ 71%]\nlib/research/harvest/tests/test_bloomberg.py::test_client_json_maps_infinities_to_null PASSED [ 78%]\nlib/research/harvest/tests/test_bloomberg.py::test_client_json_maps_nested_non_finite PASSED [ 85%]\nlib/research/harvest/tests/test_bloomberg.py::test_backstop_raises_and_nothing_is_written PASSED [ 92%]\nlib/research/harvest/tests/test_bloomberg.py::test_patched_client_json_is_the_one_production_reaches PASSED [100%]\n\n============================= 14 passed in 0.53s ==============================",
+      "denominator": "14 of 14 tests passed, 0 failed (baseline 9 measured at spawn, plus 5 new arms)",
+      "status": "PASS",
+      "expect": "test_client_json_maps_nan_to_null PASSED.*?test_client_json_maps_infinities_to_null PASSED.*?test_client_json_maps_nested_non_finite PASSED.*?test_backstop_raises_and_nothing_is_written PASSED.*?test_patched_client_json_is_the_one_production_reaches PASSED.*?14 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "first \"64 passed\" and 0 failed (58 at the cut plus this cell's 6: five in test_bloomberg.py, one in test_filings.py); then the test_filings.py run ends \"9 passed\" (8 plus 1) with test_filing_source_row_refuses_non_finite PASSED. The bar is \"baseline plus 6, failures 0\" against the baselines re-measured at spawn",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/harvest/tests/test_filings.py -v -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "64 passed in 1.05s\nlib/research/harvest/tests/test_filings.py::test_filing_source_row_refuses_non_finite PASSED [ 88%]\nlib/research/harvest/tests/test_filings.py::test_module_writes_only_through_store PASSED [100%]\n\n============================== 9 passed in 0.48s ==============================",
+      "denominator": "64 of 64 harvest suite tests passed, 0 failed (baseline 58 re-measured at spawn plus 6 new: 5 in test_bloomberg.py + 1 in test_filings.py); test_filings.py 9 of 9 passed, 0 failed (baseline 8 plus 1)",
+      "status": "PASS",
+      "expect": "64 passed.*?test_filing_source_row_refuses_non_finite PASSED.*?9 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "READ-ONLY. \"bronze_objects 110 old_equals_new 110 nonfinite 0\" -- the new client_json is byte-identical to the PINNED old one on every live bronze object (the deterministic contract is unchanged for NaN-free data); \"model_block_json 122 nonfinite 0\"; \"filings_source_json 194 nonfinite 0\" (so neither silver refusal fires on today's data); then the discriminating probe: \"old_on_probe\" contains the bare tokens NaN and Infinity, \"new_on_probe\" is b'{\"hi\":null,\"px\":null,\"v\":[1.5,null]}'. If any live count differs from the measured cut, record it with its denominator and file a row -- a changed population is not a failure of this cell",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r96/ac3.py",
+      "output_evidence": "bronze_objects 110 old_equals_new 110 nonfinite 0\nmodel_block_json 122 nonfinite 0\nfilings_source_json 194 nonfinite 0\nold_on_probe b'{\"hi\":Infinity,\"px\":NaN,\"v\":[1.5,-Infinity]}'\nnew_on_probe b'{\"hi\":null,\"px\":null,\"v\":[1.5,null]}'",
+      "denominator": "110 of 110 bronze objects byte-identical old vs new, 0 non-finite; 122 of 122 model_block objects 0 non-finite; 194 of 194 filings-source objects 0 non-finite -- all counts match the cut exactly, no drift to record",
+      "status": "PASS",
+      "expect": "bronze_objects 110 old_equals_new 110 nonfinite 0.*?model_block_json 122 nonfinite 0.*?filings_source_json 194 nonfinite 0.*?old_on_probe b'\\{\"hi\":Infinity,\"px\":NaN,\"v\":\\[1\\.5,-Infinity\\]\\}'.*?new_on_probe b'\\{\"hi\":null,\"px\":null,\"v\":\\[1\\.5,null\\]\\}'"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"changed_code_files\" lists EXACTLY lib/research/harvest/bloomberg.py, lib/research/harvest/filings.py, lib/research/harvest/tests/test_bloomberg.py and lib/research/harvest/tests/test_filings.py -- no other code file; \"integrations_client_json_calls 5\" (measured at 1229b10b83: model_block_pull.py:436 is a DOCSTRING mention, :487, :488, :489 are calls, pull_baba_daily_px.py:87 is a call -- 4 calls plus 1 mention) -- the callers are unchanged and inherit the rule",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r96/ac4.py",
+      "output_evidence": "changed_code_files ['lib/research/harvest/bloomberg.py', 'lib/research/harvest/filings.py', 'lib/research/harvest/tests/test_bloomberg.py', 'lib/research/harvest/tests/test_filings.py']\nintegrations_client_json_calls 5",
+      "denominator": "4 of 4 changed code files listed, exactly the order's named set (no other code file); 5 of 5 integrations client_json references counted (4 calls + 1 docstring mention)",
+      "status": "PASS",
+      "expect": "changed_code_files \\['lib/research/harvest/bloomberg\\.py', 'lib/research/harvest/filings\\.py', 'lib/research/harvest/tests/test_bloomberg\\.py', 'lib/research/harvest/tests/test_filings\\.py'\\].*?integrations_client_json_calls 5"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "all four files print \"compiles True crlf 0 non_ascii_bytes 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r96/ac5.py",
+      "output_evidence": "lib/research/harvest/bloomberg.py compiles True crlf 0 non_ascii_bytes 0\nlib/research/harvest/filings.py compiles True crlf 0 non_ascii_bytes 0\nlib/research/harvest/tests/test_bloomberg.py compiles True crlf 0 non_ascii_bytes 0\nlib/research/harvest/tests/test_filings.py compiles True crlf 0 non_ascii_bytes 0",
+      "denominator": "4 of 4 files compile True, crlf 0, non_ascii_bytes 0",
+      "status": "PASS",
+      "expect": "bloomberg\\.py compiles True crlf 0 non_ascii_bytes 0.*?filings\\.py compiles True crlf 0 non_ascii_bytes 0.*?test_bloomberg\\.py compiles True crlf 0 non_ascii_bytes 0.*?test_filings\\.py compiles True crlf 0 non_ascii_bytes 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reverted lib/research/harvest/bloomberg.py's client_json/_canonical_json to the PINNED (1229b10b83) pre-fix bytes in a scratch copy loaded under a distinct module name (the same technique AC3 already uses for the old/new comparison), then ran the new test_client_json_maps_nan_to_null assertion against it.",
+      "expected": "The pinned (pre-fix) client_json has allow_nan at its default True and no _nan_to_null mapping, so client_json({'a': float('nan')}) does NOT equal b'{\"a\":null}' -- it instead raises no error and serialises the bare token NaN, so the new arm's assertion fails against the mutant.",
+      "observed": "old.client_json({'a': float('nan')}) == b'{\"a\":NaN}' (bare token, not null) -- b'{\"a\":NaN}' != b'{\"a\":null}', so the new assertion (`hb.client_json({\"a\": float(\"nan\")}) == b'{\"a\":null}'`) FAILS against the pinned/mutant module and PASSES only against the fixed module. Verified directly by running .scratch/r96/mutant_check.py (loads 1229b10b83's bloomberg.py via git show + importlib.util under a distinct module name, sys.path.insert(0,'.') for the lib.research.harvest.store import, then prints old.client_json({'a': float('nan')})): output b'{\"a\":NaN}'.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest lib/research/harvest/tests/test_bloomberg.py -v -p no:cacheprovider run twice in immediate succession (pure in-process, no network/AWS in this suite), full verbose output captured to .scratch/r96/run1.txt and .scratch/r96/run2.txt.",
+      "observed": "run1: 14 passed in 0.56s; run2: 14 passed in 0.50s. `diff run1.txt run2.txt` shows exactly one differing line, the wall-clock timing suffix ('in 0.56s' vs 'in 0.50s'); with timing text normalised (regex 'in [0-9.]+s' -> 'in Xs'), the two outputs are byte-identical (sha256 c521bd05c9cfcd6c8e78e5fd64afe6088661873ad929c6e7c9fe25de501fab1b for both) -- same PASSED-line ordering, same 14 test names, same verdict.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~96/AMGT_RESAPP.TO-AMGT-rk-96.bloomberg-nan-to-null.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_bloomberg.py -v -p no:cacheprovider && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider && python -m pytest lib/research/harvest/tests/test_filings.py -v -p no:cacheprovider",
+      "result": "14 passed / 64 passed / 9 passed, 0 failed in all three runs"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/research/harvest/bloomberg.py lib/research/harvest/filings.py lib/research/harvest/tests/test_bloomberg.py lib/research/harvest/tests/test_filings.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": "ac0.py / ac3.py / ac4.py / ac5.py (order-literal scripts written verbatim to .scratch/r96/)",
+      "invocation": "python .scratch/r96/ac0.py ; python .scratch/r96/ac3.py ; python .scratch/r96/ac4.py ; python .scratch/r96/ac5.py",
+      "result": "see AC0/AC3/AC4/AC5 output_evidence above"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC0,AC1,AC2,AC3,AC4,AC5",
+      "result": "see the worker report (rc is the verdict)"
+    }
+  ]
+}
