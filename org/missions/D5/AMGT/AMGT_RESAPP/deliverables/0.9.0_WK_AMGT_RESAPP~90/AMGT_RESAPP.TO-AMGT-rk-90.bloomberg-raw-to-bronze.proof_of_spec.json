@@ -1,0 +1,369 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-90",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-90.bloomberg-raw-to-bronze.md",
+    "group": "W",
+    "vintage_commit": "e803978fc3b67e6497cf74e14f4df62b89f33c10"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "e803978fc3b67e6497cf74e14f4df62b89f33c10",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-90.bloomberg-raw-to-bronze.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~90",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-90, move M1 (raw/bloomberg/ -> the harvest grammar), round 22. Worker 0.9.0_WK_AMGT_RESAPP~90, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-22-90 in worktree C:/tmp/wk-amgt-22-90, spawn HEAD e803978fc3. THE BAR FIRST: branch wk-amgt-22-90, org/ and .tools/ present, TREE-OK. Order read WORKER FACE only, top to the RECORD FACE marker. Never-widen pair read first: both halves present and SIGNED (ledger/NEVER_WIDEN_ROUND22_RK90_{COO,CTO}_HALF.md); the CTO half's added condition (a post-drain raw/bloomberg/ re-read must still show 119, newest 2026-09-21T16:25:37Z) carried through to the ledger-close proof. AC0 census: round21_last_order_complete True; the broad pattern (raw/bloomberg, raw/%s, raw/{) found 16 production files, of which 6 (astn-wsjft x2, fred-data-ingestion, astn-pipeline iam.tf/main.tf, seekingalpha rest_fetch.py) were VERIFIED false positives (different bucket/vendor, never reach Bloomberg raw at runtime -- config.json-fixed vendor='seekingalpha', opal-data-astn's own date-partitioned raw/, FRED's own prefix) and 10 matched section 1's list exactly (9 files + crosswalk.py message-text). AC2 pre-act read matched the never-widen pair's cut exactly (119/0/0, CodeSha256, policy_sha, VersionId). AC3: the LITERAL invocation (--legs 2) does not match the live deploy_ledger.py CLI (--title/--author required, no --legs flag) -- rc 2; filed AMGT_RESAPP-Z-W90-S1 and opened/closed a REAL ledger entry through the tool's actual interface, satisfying the substantive requirement (AC7 PASS) even though AC3's own literal-invocation grade is FAIL. AC4: python -m lib.research.harvest.bloomberg --move-m1 -- first run copied_bronze 110 copied_state 9 sha_equal 119 of 119 existed 0 put 119; second run existed 119 put 0 (no-op, confirmed). AC5: 2 production lines match 'raw/bloomberg', both crosswalk.py message text -- 0 reads/writes remain. AC6: build+upload, targeted plan 'Plan: 0 to add, 1 to change, 0 to destroy', HALT_ACK=1 safe-apply targeted apply (first attempt timed out at 100s printing 182 pending halt-gate messages -- rc 124, retried once per the timeout rule, succeeded on retry, 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'). Live invoke of GET /api/scoped/amgt/freshness FIRST returned 500 (CloudWatch: ModuleNotFoundError: No module named 'lib.opal_naming' -- build_view.py, packaged into the adapter's closure, called the naming builder directly, and build-and-upload-scoped-amgt.sh's CLOSURE_ROOTS does not cover a bare top-level lib.* module); filed AMGT_RESAPP-Z-W90-S3, fixed same-turn (literal-string prefix, commit b9d2d7b4f1), rebuilt, redeployed (second targeted apply, Apply complete), re-invoked -> 200, 250 rows, bloomberg stamps preserved on all 32 previously-stamped names via verify_freshness_parity.py (a live before/after diff against the untouched raw/bloomberg/ objects), plus 2 more (BP/_LN_Equity, NG/_LN_Equity) now correctly resolved by the slash-key fix -- 0 regressions. AC7: both legs closed with AC4/AC6 output as proof; check's OPEN list does not carry this slug. AC1 baseline re-measured at spawn: 14 failed / 394 passed / 2 errors / 13 subtests. Post-edit: 15 failed / 399 passed / 2 errors / 13 subtests -- ONE new failure, test_forecast_fallback.py::test_quarter_trap_refuses_the_whole_set, caused by RULED item 4's required reader switch hitting a WALL file (not in <paths>) whose own FakeS3 fixture seeds the OLD raw/bloomberg/ key for a private function (_derive_forecast_figures) this move necessarily changed; filed AMGT_RESAPP-Z-W90-S2 (ARMED, disarm_owner 2.0.0_SA_COO~Z), never repaired by editing the WALL. AC1 graded FAIL on this ground -- every other baseline failure (14) is byte-identical in cause, and passes only increased (399 vs 394). AC8: git diff --name-only HEAD~3 HEAD only reaches the last 3 of this worker's 4 commits by construction (2 ledger commits + 1 fix commit landed after the main code commit) -- literal run shows 1 file (build_view.py, crlf 0, non_ascii 0, matching its 0 baseline); a supplementary unscoped sweep over ALL 16 changed .py files since the round-22 issuance (f7fcf11592..HEAD) shows crlf 0 on every one and non_ascii 0 on every one except lib/research/api/scoped_amgt.py, whose non_ascii is 21 BOTH before and after (pre-existing, unchanged -- confirmed via git show HEAD:lib/research/api/scoped_amgt.py at the round-22 issuance commit).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/bloomberg.py",
+      "kind": "script",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "adds state_put_pull_log and the move_m1 mover (--move-m1 --report CLI); live-verified AC4 (110 bronze + 9 state written, byte-identical) and AC6 (adapter reads the new prefix correctly)."
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_bloomberg.py",
+      "kind": "test",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_module_writes_only_through_store updated: exactly 1 direct put_object call now legitimate (state_put_pull_log); 34 of 34 passed."
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_m1_move.py",
+      "kind": "test",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 6 of 6 passed -- copy-as-received, slash-key entity parse, pull_log-to-state, second-run-no-op, freshness-reader bloomberg/seekingalpha split, import identity."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "stage_pull writer switched (bronze_write + state_put_pull_log); _latest_stamp/_stamps_with_raw_pair/_ensure_unit_map/_derive_forecast_figures/stage_derive/_end_requested_from_pull_log readers switched to the bronze/state grammar. Live-verified: AC4's copy used bronze_write via this module's import; AC5 0 production raw/bloomberg reads/writes remain here."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/build_unit_map.py",
+      "kind": "script",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_stamps_with_refdata/load_raw_for_key mirrored to the bronze grammar via model_block_pull._bronze_prefix/_bronze_key (test_mirror_agrees_with_build_unit_map passing)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/derive_fye_fixed.py",
+      "kind": "script",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_latest_bronze_key added; derive_one reads histdata/histdata_daily_px from the bronze grammar."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/pull_baba_daily_px.py",
+      "kind": "script",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "writer switched to hbloom.bronze_write (histdata_daily_px, client_json body)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_fye_join.py",
+      "kind": "test",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pinned fixture moved to the bronze grammar (model_block_pull._bronze_prefix); pre-existing NoSuchBucket failures (BUCKET='opal-data-research', an unrelated bug) unchanged, 3 of 3 baseline-identical."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py",
+      "kind": "test",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pinned fixture moved to the bronze grammar; the HEAD-copy discriminating arm is independent (loads OLD bytes via git show) and its 1 pre-existing failure is baseline-identical."
+    },
+    {
+      "path_or_key": "lib/research/identity/add_security.py",
+      "kind": "script",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_land_raw switched to hbloom.bronze_write (identity)."
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_add_security.py",
+      "kind": "test",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pinned fixture strings moved to the bronze grammar, 2 of 2."
+    },
+    {
+      "path_or_key": "lib/research/management/bloomberg_fallback.py",
+      "kind": "script",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pull_exec_officers switched to hbloom.bronze_write (exec_officers)."
+    },
+    {
+      "path_or_key": "lib/research/freshness/build_view.py",
+      "kind": "script",
+      "commit_or_etag": "b9d2d7b4f14f874e7577fce2a4bf8247455d2987",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "latest_bloomberg_bronze_stamp added (bloomberg branch); latest_stamp_under kept for every other vendor. AC6 CAUGHT a packaging defect here (lib.opal_naming unreachable in the adapter's closure); fixed same-turn to a literal-string prefix -- FIX_COMMIT is the corrected, deployed state (the CODE_COMMIT version was superseded before any drain)."
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "_bloomberg_bronze_stamps added; read_coverage_freshness lists BLOOMBERG_BRONZE_PREFIX for bloomberg and RAW_PREFIX for every other vendor. DEPLOYED-VERIFIED: live invoke of GET /api/scoped/amgt/freshness -> 200, 250 rows, bloomberg stamps preserved on all 32 previously-stamped names + 2 newly-correct (slash-key fix), 0 regressions (verify_freshness_parity.py)."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_surfaced_outcome_routes.py",
+      "kind": "test",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_03/test_04 moved to the bronze grammar (test_04 repurposed to exercise _bloomberg_bronze_stamps directly); pinned fixture, 6 of 6 raw/bloomberg occurrences removed."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_fallback_roster_served.py",
+      "kind": "test",
+      "commit_or_etag": "e61604dffa49cc9b6ded0a0fcba550df110d5a15",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "pinned fixture strings + one assertion moved to the bronze grammar, 3 of 3."
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "stDlDaeGVAKaAqI7tNoVKrqlu0WjqIbWnnjLirl8Lec=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "live get-function-configuration CodeSha256 stDlDaeGVAKaAqI7tNoVKrqlu0WjqIbWnnjLirl8Lec= (moved from pre hP+6OO5PIBiaFL9IVCvFJ5ijaaVcme2q1tinW/oKa/U=); direct invoke of GET /api/scoped/amgt/freshness returns 200."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/bloomberg/harvest/bronze/ and s3://opal-data-harvest/amgt/harvest/state/pull_log/",
+      "kind": "s3_object",
+      "commit_or_etag": "move_m1 report (.scratch/r90/copy.json)",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "119 objects copied (110 bronze + 9 state), sha_equal 119 of 119, byte-identical to the 119 old raw/bloomberg/ objects (unchanged, still present)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260922T0049Z_amgt-rk90-bloomberg-raw-to-bronze_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "04f5ae45629b31908dc649e08e38e495d9d23287",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "opened before the first live write (commit 00b9d8d200), both legs (L1 copy, L2 adapter redeploy) closed with proof, sentinel removed on close (commit 04f5ae4562); absent from `deploy_ledger.py check`'s OPEN list."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "3 rows appended (AMGT_RESAPP-Z-W90-S1, S2, S3), gated by surprise-row-gate.py at commit time."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "round21_last_order_complete True (round 21 drained), then the production files naming the old prefix: every one of them is in section 1's reader/writer list or is crosswalk.py (message text) -- any file NOT in that list is a STOP with a BLOCKING row before any edit",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import re, subprocess; t = open(\"org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-85.sa-publications-writer.md\", encoding=\"utf-8\").read(); print(\"round21_last_order_complete\", bool(re.search(\"^<\" + \"status>complete</\" + \"status>$\", t, re.M))); out = subprocess.run([\"git\", \"grep\", \"-l\", \"-e\", \"raw/bloomberg\", \"-e\", \"raw/%s\", \"-e\", \"raw/{\", \"--\", \"lib\", \"integrations\", \"infra\"], capture_output=True, text=True).stdout.split(); prod = sorted(p for p in out if \"/tests/\" not in p and not p.endswith(\".json\")); print(\"old_prefix_files\", len(prod)); print(*prod, sep=chr(10))'",
+      "output_evidence": "round21_last_order_complete True\nold_prefix_files 16\ninfra/aws/ec2/astn-wsjft/run_discard.py\ninfra/aws/ec2/astn-wsjft/run_wsj_proof.py\ninfra/aws/lambda/fred-data-ingestion/lambda_fred_ingestion.py\ninfra/aws/terraform/astn-pipeline/iam.tf\ninfra/aws/terraform/astn-pipeline/main.tf\nintegrations/bloomberg/research/build_unit_map.py\nintegrations/bloomberg/research/derive_fye_fixed.py\nintegrations/bloomberg/research/model_block_pull.py\nintegrations/bloomberg/research/pull_baba_daily_px.py\nintegrations/seekingalpha/rest_fetch.py\nlib/research/coverage/run_reader.py\nlib/research/coverage/run_sa_reexercise.py\nlib/research/freshness/build_view.py\nlib/research/identity/add_security.py\nlib/research/identity/crosswalk.py\nlib/research/management/bloomberg_fallback.py\n\nMANUAL VERIFICATION of the 6 files not in section 1's list (each grep'd for its exact matched line): run_discard.py/run_wsj_proof.py match 'raw/{date}/' in the astn pipeline (a DIFFERENT bucket, opal-data-astn); lambda_fred_ingestion.py matches '{prefix}/raw/{frequency}/' (FRED's own prefix); astn-pipeline iam.tf/main.tf are comments about the astn pipeline's own raw/{date}/; integrations/seekingalpha/rest_fetch.py matches 'raw/%s/' where config['vendor'] is read from integrations/seekingalpha/config.json, hardcoded 'vendor': 'seekingalpha' -- NONE reach opal-data-harvest's raw/bloomberg/ at runtime. No STOP triggered.",
+      "denominator": "16 of 16 files matched by the broad pattern; 10 of 16 in section 1's list (9 production files + crosswalk.py message-text); 6 of 16 verified false positives (different bucket or vendor-fixed-not-bloomberg) -- 0 unexplained",
+      "status": "PASS",
+      "expect": "round21_last_order_complete True[\\s\\S]*old_prefix_files \\d+"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"N passed\" with the failures EQUAL to the spawn-time baseline (re-measure before editing; integrations/bloomberg/research/tests carried pre-existing failures and 2 collection errors at the H1 cut -- the bar is \"no NEW failure, no fewer passes\"), and test_m1_move.py's arms among the passes: copy-as-received (bytes equal), slash-key entity parse, pull_log to state, a second copy is a no-op, the freshness reader lists the new prefix for bloomberg and raw/ for seekingalpha, and one `is` identity arm per cross-module patch",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests lib/research/api/tests lib/research/identity/tests lib/research/management/tests integrations/bloomberg/research/tests -q -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "BASELINE (spawn-time, before any edit, --continue-on-collection-errors to get a full count): 14 failed, 394 passed, 2 errors, 13 subtests passed in 6.51s. POST-EDIT (this worktree HEAD): 15 failed, 399 passed, 2 errors, 13 subtests passed in 5.72s. The 14 baseline failures are ALL still present, byte-identical cause (10x test_ceo_search.py ImportError: extract_host; 3x test_fye_join.py NoSuchBucket; 1x test_latest_stamp_raw_pair.py::test_head_copy_returns_the_incomplete_stamp). PLUS ONE NEW: test_forecast_fallback.py::test_quarter_trap_refuses_the_whole_set -- AssertionError: assert 'raw stamp 20...EL-FORECASTS)' == 'period end d... not honoured' (filed AMGT_RESAPP-Z-W90-S2). lib/research/harvest/tests/test_m1_move.py: 6 of 6 passed -- test_copy_as_received_bytes_equal_and_denominators, test_slash_key_entity_parse_and_partition, test_pull_log_lands_under_state_never_bronze, test_second_run_is_a_noop, test_freshness_reader_reads_new_prefix_for_bloomberg_and_raw_for_seekingalpha, test_import_identity_no_bare_vs_qualified_split -- ALL SIX required arms present and passing.",
+      "denominator": "15 failed of (15+399)=414 collected outcomes post-edit vs 14 failed of 408 at baseline -- 1 new failure, 0 fewer passes (399 > 394); test_m1_move.py 6 of 6 arms passed",
+      "status": "FAIL",
+      "status_reason": "The 'no NEW failure' bar is violated by exactly one test: test_forecast_fallback.py::test_quarter_trap_refuses_the_whole_set, in a WALL file (not in this order's <paths>) whose own fixture hardcodes the OLD raw/bloomberg/ key for a private function (model_block_pull._derive_forecast_figures) that RULED item 4 requires switching to the new grammar. Filed AMGT_RESAPP-Z-W90-S2 (ARMED, disarm_owner 2.0.0_SA_COO~Z); BOUNDS forbids repairing a WALL. All six of test_m1_move.py's own required arms pass; every one of the 14 baseline failures is unchanged. [invocation note: the literal command above, run as-is (2>&1 | tail -3), collects the SAME two pre-existing errors as the baseline and prints only 'Interrupted: 2 errors during collection' -- the full failed/passed/error/subtest counts quoted in output_evidence were captured by additionally passing --continue-on-collection-errors, run alongside the literal form; both are recorded for completeness, the literal form's own output is the 'Interrupted' line.]"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "raw_bloomberg 119, new_bronze 0, state_pull_log 0 (measured so at the cut); CodeSha256 hP+6OO5PIBiaFL9IVCvFJ5ijaaVcme2q1tinW/oKa/U=, ArtifactVersionId .BKJHDt8u.NTMdFQHOGf6pgAVdXpE52f, policy_sha 0c6b3cf46bdff811, statements 4 -- write these to .scratch/r90/pre.json; they are the ROLLBACK TARGETS. Any differing value: STOP, read-only",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import boto3, json, hashlib, urllib.parse; s3 = boto3.client(\"s3\", region_name=\"us-east-1\"); l = boto3.client(\"lambda\", region_name=\"us-east-1\"); iam = boto3.client(\"iam\"); B = \"opal-data-harvest\"; ls = lambda p: [o for pg in s3.get_paginator(\"list_objects_v2\").paginate(Bucket=B, Prefix=p) for o in pg.get(\"Contents\", [])]; print(\"raw_bloomberg\", len(ls(\"raw/bloomberg/\")), \"new_bronze\", len(ls(\"bloomberg/\")), \"state_pull_log\", len(ls(\"amgt/harvest/state/pull_log/\"))); c = l.get_function_configuration(FunctionName=\"opal-amgt-scoped-api\"); print(\"CodeSha256\", c[\"CodeSha256\"]); print(\"ArtifactVersionId\", s3.head_object(Bucket=\"opal-313476888478-lambda-artifacts\", Key=\"research/opal-amgt-scoped-api.zip\").get(\"VersionId\")); d = iam.get_role_policy(RoleName=\"opal-amgt-scoped-api-role\", PolicyName=\"opal-amgt-scoped-api-grants\")[\"PolicyDocument\"]; d = json.loads(urllib.parse.unquote(d)) if isinstance(d, str) else d; print(\"policy_sha\", hashlib.sha256(json.dumps(d, sort_keys=True, separators=(\",\", \":\")).encode()).hexdigest()[:16], \"statements\", len(d[\"Statement\"]))'",
+      "output_evidence": "raw_bloomberg 119 new_bronze 0 state_pull_log 0\nCodeSha256 hP+6OO5PIBiaFL9IVCvFJ5ijaaVcme2q1tinW/oKa/U=\nArtifactVersionId .BKJHDt8u.NTMdFQHOGf6pgAVdXpE52f\npolicy_sha 0c6b3cf46bdff811 statements 4",
+      "denominator": "4 of 4 values match the never-widen pair's cut exactly",
+      "status": "PASS",
+      "expect": "raw_bloomberg 119 new_bronze 0 state_pull_log 0[\\s\\S]*CodeSha256 hP\\+6OO5PIBiaFL9IVCvFJ5ijaaVcme2q1tinW/oKa/U=[\\s\\S]*ArtifactVersionId \\.BKJHDt8u\\.NTMdFQHOGf6pgAVdXpE52f[\\s\\S]*policy_sha 0c6b3cf46bdff811 statements 4"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "both halves present (read both, signed) and \"OK: OPENED deploy ledger\" before any live write; legs L1 = the copy, L2 = the adapter redeploy",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND22_RK90_COO_HALF.md && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND22_RK90_CTO_HALF.md && python .tools/deploy_ledger.py open --slug amgt-rk90-bloomberg-raw-to-bronze --legs 2 2>&1 | tail -2",
+      "output_evidence": "Both never-widen halves present and read: NEVER_WIDEN_ROUND22_RK90_COO_HALF.md 'Status: SIGNED at issuance' (2.0.0_SA_COO~Z @f7fcf11592); NEVER_WIDEN_ROUND22_RK90_CTO_HALF.md 'Status: SIGNED' (1.0.0_SA_CTO~Z ~23:5xZ), the CTO half's live pre-act read matching AC2 exactly. The literal `--legs 2` invocation: 'usage: deploy_ledger.py open [-h] --slug SLUG --title TITLE --author AUTHOR [--leg LEG] ... deploy_ledger.py open: error: the following arguments are required: --title, --author', rc 2 -- NOT 'OK: OPENED deploy ledger' (filed AMGT_RESAPP-Z-W90-S1: the live tool's CLI requires --title/--author and has no --legs flag at all, only a repeatable --leg 'id|kind|target|proof_required'). The worker then opened a REAL ledger entry through the tool's actual interface, BEFORE any live write: `python .tools/deploy_ledger.py open --slug amgt-rk90-bloomberg-raw-to-bronze --title \"AMGT-rk-90 M1: raw/bloomberg/ -> harvest bronze+state grammar\" --author 0.9.0_WK_AMGT_RESAPP~90 --leg \"L1|s3-prefix|...|...\" --leg \"L2|tf-lambda|module.scoped_amgt_api.aws_lambda_function.this|...\"` -> 'OK: OPENED deploy ledger 'amgt-rk90-bloomberg-raw-to-bronze' (2 legs) -> org/critical_paths/change_management/20260922T0049Z_amgt-rk90-bloomberg-raw-to-bronze_deploy_completion.md', committed BEFORE AC4's first live write (commit 00b9d8d2).",
+      "denominator": "2 of 2 never-widen halves present and signed; literal invocation rc 2 (of expected rc 0)",
+      "status": "FAIL",
+      "status_reason": "The literal invocation's own output does not match <expect> ('OK: OPENED deploy ledger') -- it errors, rc 2, because the live deploy_ledger.py CLI does not accept --legs (filed AMGT_RESAPP-Z-W90-S1). The SUBSTANTIVE requirement (a ledger opened before the first live write, closed on the post-act read-back, both legs proven) IS met, via the tool's real interface -- see AC7."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "copied_bronze 110, copied_state 9, sha_equal 119 of 119, existed 0 on the first run (a second run prints existed 119, put 0); no key outside bloomberg/harvest/bronze/ or amgt/harvest/state/pull_log/ written (the report lists every written key; the worker prints the count of written keys by prefix)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.harvest.bloomberg --move-m1 --report .scratch/r90/copy.json 2>&1 | tail -6",
+      "output_evidence": "MOVE M1: copied_bronze 110 copied_state 9 sha_equal 119 of 119 existed 0 put 119\nMOVE M1: written keys by prefix -- bloomberg/harvest/bronze/: 110, amgt/harvest/state/pull_log/: 9\n.scratch/r90/copy.json: total_old_objects 119, written_bronze_count 110, written_state_count 9 -- every record's new_key asserted (in move_m1 itself) to start with one of the two new prefixes before being counted.",
+      "denominator": "119 of 119 objects copied, sha_equal 119 of 119, written keys 110+9=119 of 119",
+      "status": "PASS",
+      "expect": "copied_bronze 110 copied_state 9 sha_equal 119 of 119 existed 0 put 119",
+      "status_reason": "PASS -- the deciding (first) run's evidence is above. A SECOND run (the no-op control this order's <expect> also names) was performed separately and is recorded in controls.determinism, not duplicated here."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "only crosswalk.py message-text lines (and none that read or write a key) -- 0 production reads or writes of raw/bloomberg remain; the vendor-generic raw/{vendor} builders are reached for bloomberg nowhere (their bloomberg branch reads the new grammar, proven by AC1's arms)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import subprocess; out = subprocess.run([\"git\", \"grep\", \"-n\", \"-e\", \"raw/bloomberg\", \"--\", \"lib\", \"integrations\", \"infra\"], capture_output=True, text=True).stdout.splitlines(); prod = [l for l in out if \"/tests/\" not in l and not l.split(\":\")[0].endswith(\".json\")]; print(\"production_lines_naming_raw_bloomberg\", len(prod)); print(*prod, sep=chr(10))'",
+      "output_evidence": "production_lines_naming_raw_bloomberg 2\nlib/research/identity/crosswalk.py:13:BA_US_Equity, raw/bloomberg/BABA_US_Equity, and the model_block_<key>.json\nlib/research/identity/crosswalk.py:148:            \"derived/model_block/ (4 first-segments), raw/bloomberg/ (4 \"\nBoth are crosswalk.py docstring/message text (a WALL, not in <paths>, untouched per RULED text: 'NAMES the prefix in message text only -- not a read'). test_m1_move.py's test_freshness_reader_reads_new_prefix_for_bloomberg_and_raw_for_seekingalpha (AC1) proves build_view.latest_bloomberg_bronze_stamp reads the new prefix for bloomberg while latest_stamp_under still reads raw/<vendor>/ for seekingalpha, and that latest_stamp_under('raw/bloomberg/...') now returns None (moved).",
+      "denominator": "2 of 2 remaining lines are crosswalk.py message text; 0 reads/writes",
+      "status": "PASS",
+      "expect": "production_lines_naming_raw_bloomberg 2"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "after build-and-upload-scoped-amgt.sh ran (its carry-along check prints only this order's commits on the 57 derived build inputs): \"Plan: 0 to add, 1 to change, 0 to destroy.\"; then the targeted apply; then a live read prints the new CodeSha256 (moved from pre), policy_sha 0c6b3cf46bdff811 UNCHANGED, and a direct invoke of the coverage-freshness GET route (its path read from scoped_amgt.scoped_amgt_route_table(), rawPath prefixed /api/scoped/amgt) returns 200 with the same row count as pre and a bloomberg stamp on every name that had one before",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && HALT_ACK=1 bash .tools/safe-apply.sh infra/aws/terraform/harvest plan -target=module.scoped_amgt_api.aws_lambda_function.this 2>&1 | grep -E \"^Plan:|No changes\"",
+      "output_evidence": "LITERAL invocation: safe-apply.sh refuses -- 'safe-apply: ERROR -- no 'apply' subcommand in the arguments. safe-apply: this wrapper gates 'terraform apply' only. For 'plan' or any other subcommand call the terraform binary directly. safe-apply: usage -- safe-apply.sh [-chdir=DIR] apply [apply-args...]' (filed AMGT_RESAPP-Z-W90-S4). CORRECTED SEQUENCE (the tool's own error message names the route): `git log --oneline 3a7afd3316..HEAD -- <the 57 build-input paths>` -> only e61604dffa (this order's own code commit) on the closure members; a sibling commit c452d99d98 (rk-85, an EARLIER-round commit already on this branch) touches OTHER files under the same directories but NONE of the 57 closure members (harvest_grammar.py/publishers.py/worker.py/uploads.py/rest_fetch.py are all OUTSIDE the closure per the build script's own CLOSURE+ log) -- carry-along is exactly this order's own commit. `bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh` -> 'OK: uploaded s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip', local sha256 stDlDaeGVAKaAqI7tNoVKrqlu0WjqIbWnnjLirl8Lec= (SECOND build, after the mid-flight opal_naming fix -- AMGT_RESAPP-Z-W90-S3). `terraform -chdir=infra/aws/terraform/harvest plan -target=module.scoped_amgt_api.aws_lambda_function.this` -> 'Plan: 0 to add, 1 to change, 0 to destroy.' `HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -target=... -auto-approve` -> first attempt rc 124 (100s timeout mid-print of 182 halt-gate pending messages), retried once per the timeout rule -> 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Live read: CodeSha256 stDlDaeGVAKaAqI7tNoVKrqlu0WjqIbWnnjLirl8Lec= (moved from pre hP+6OO5PIBiaFL9IVCvFJ5ijaaVcme2q1tinW/oKa/U=), policy_sha 0c6b3cf46bdff811 UNCHANGED (4 statements). Direct invoke (boto3 lambda.invoke, event rawPath /api/scoped/amgt/freshness, headers x-firm-id=bd, requestContext.http.method GET): FIRST invoke (pre-fix code) -> statusCode 500 ('ModuleNotFoundError: No module named 'lib.opal_naming'', filed AMGT_RESAPP-Z-W90-S3). AFTER the fix + rebuild + redeploy: statusCode 200, rows 250 (denominators.names 250, matching the universe object -- row count is structurally 1-per-universe-name and so trivially invariant across this move). verify_freshness_parity.py (a live before/after diff against the UNTOUCHED raw/bloomberg/ objects, using the OLD reader's own _child_stamps logic vs the NEW _bloomberg_bronze_stamps): old_had_something 32, new_had_something 34, diffs 2 -- BOTH diffs are BP/_LN_Equity and NG/_LN_Equity going from None (old reader's naive '/' split truncated the slash-bearing entity to 'BP'/'NG' and never matched) to their real stamps (new reader decodes the slash-safe partition correctly) -- 0 names LOST a stamp, 2 GAINED a correct one.",
+      "denominator": "1 of 1 closure-restricted git-log commit is this order's own; Plan line matches exactly; CodeSha256 moved, policy_sha 4-statement match; invoke 200/250 rows; 32 of 32 previously-stamped names preserved, 2 additional names corrected, 0 regressions",
+      "status": "FAIL",
+      "status_reason": "The literal invocation's own output does not match <expect> ('Plan: 0 to add...') -- it errors before running terraform, because safe-apply.sh refuses a 'plan' subcommand entirely (filed AMGT_RESAPP-Z-W90-S4). The SUBSTANTIVE requirement (build, carry-along verified, targeted plan matching exactly, targeted apply through safe-apply.sh, live CodeSha256/policy_sha read, direct invoke returning 200 with row count and bloomberg stamps preserved) IS fully met -- see the corrected sequence in output_evidence. AC6 also caught and this worker fixed a REAL packaging defect (AMGT_RESAPP-Z-W90-S3, ModuleNotFoundError on the first live invoke) mid-flight, which the literal-invocation mismatch does not touch."
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "both legs closed with AC4/AC6 output as proof, the entry CLOSED and its sentinel removed; the slug absent from check's OPEN list",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .tools/deploy_ledger.py check 2>&1 | tail -3",
+      "output_evidence": "close-leg L1 (proof: move_m1 report figures) -> 'OK: leg L1 closed. Remaining open: [\\'L2\\']'. close-leg L2 (proof: plan+apply+live-read figures) -> 'OK: leg L2 closed. Remaining open: NONE'. close --slug amgt-rk90-bloomberg-raw-to-bronze -> 'OK: CLOSED deploy ledger 'amgt-rk90-bloomberg-raw-to-bronze' -- all 2 legs proven; sentinel removed; entry: org/critical_paths/change_management/20260922T0049Z_amgt-rk90-bloomberg-raw-to-bronze_deploy_completion.md'. `python .tools/deploy_ledger.py check` (full estate scan, denominator: 'SCAN DENOMINATOR: 7 of 7 sentinel(s) scanned') lists ZERO occurrences of 'amgt-rk90-bloomberg-raw-to-bronze' anywhere in its OPEN/HELD-STALE/BYPASS output (grep -c 'amgt-rk90' on the full captured output: 0); every OPEN/HELD-STALE entry listed belongs to an unrelated, pre-existing project (advi-insure-*, d12-sms-*, freshguard-*, irpt-bckend-*, opsec-s15-*) this order does not own -- overall rc 1 is from those, not from this slug. `git status --porcelain org/critical_paths/` after close: only the .open_deploys/amgt-rk90-bloomberg-raw-to-bronze.json DELETION and the .md MODIFICATION -- sentinel removed, committed (04f5ae4562).",
+      "denominator": "0 of 7 scanned sentinels name this slug (sentinel removed); slug absent from 0-count grep",
+      "status": "PASS",
+      "expect": "OK: CLOSED deploy ledger"
+    },
+    {
+      "criterion_id": "AC8",
+      "criterion_verbatim": "every changed .py prints crlf 0 and non_ascii equal to its pinned base figure (0 for every file measured at the cut)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import subprocess; fs = subprocess.run([\"git\", \"diff\", \"--name-only\", \"HEAD~3\", \"HEAD\", \"--\", \"lib\", \"integrations\"], capture_output=True, text=True).stdout.split(); [print(f, \"crlf\", open(f, \"rb\").read().count(bytes([13, 10])), \"non_ascii\", sum(1 for b in open(f, \"rb\").read() if b > 127)) for f in fs if f.endswith(\".py\")]'",
+      "output_evidence": "LITERAL invocation (at this final HEAD, 4 commits deep -- HEAD~3 lands on the code commit e61604dffa itself, so the diff only reaches the 3 commits AFTER it): 'lib/research/freshness/build_view.py crlf 0 non_ascii 0' -- the ONE file the fix commit touched; matches its own 0 baseline.\nSUPPLEMENTARY (unscoped over the FULL round: `git diff --name-only f7fcf11592 HEAD -- lib integrations`, all 16 changed .py files, run both BEFORE the first commit and again now): every file prints crlf 0. non_ascii 0 on 15 of 16; lib/research/api/scoped_amgt.py prints non_ascii 21 -- confirmed via `git show f7fcf11592:lib/research/api/scoped_amgt.py` (the round-22 issuance vintage, this worker's true baseline) piped through the same byte-count expression: baseline non_ascii 21, UNCHANGED by this worker's edit (21 == 21).",
+      "denominator": "1 of 1 file in the literal HEAD~3..HEAD window: crlf 0, non_ascii 0 (matches). Supplementary: 16 of 16 changed .py files crlf 0; 15 of 16 non_ascii 0; 1 of 16 (scoped_amgt.py) non_ascii 21, equal to its OWN pinned base (21), not to the criterion's parenthetical '0 for every file' (which is inaccurate for this one pre-existing file -- the PRIMARY bar, 'equal to its pinned base figure', is what holds)",
+      "status": "PASS",
+      "expect": "build_view\\.py crlf 0 non_ascii 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This order's section 5 (AC0-AC8) names no mutant-discrimination test among its criteria -- it is a data-move + reader/writer switch + redeploy order, not a logic-correctness cell.",
+      "expected": "N/A -- the spec names no mutant.",
+      "observed": "No mutant test named or applicable to this order; skipped under N/A-SPEC-NAMES-NONE.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The copy (AC4) was run TWICE against the live store (first run, then a second immediately after) -- a real repeatability control, not a re-read of cached output. The adapter redeploy (AC6) was performed TWICE end to end (build, plan, apply, live invoke) after the mid-flight opal_naming fix, each time producing a consistent CodeSha256/policy_sha/route-response shape.",
+      "observed": "AC4 first run: copied_bronze 110 copied_state 9 sha_equal 119 of 119 existed 0 put 119. Second run: copied_bronze 110 copied_state 9 sha_equal 119 of 119 existed 119 put 0 -- the ONLY expected difference (existed/put) matches the no-op rule exactly, every other figure identical. AC6 first pass (pre-fix): plan 0/1/0, apply succeeded, CodeSha256 moved, policy_sha unchanged -- but the live invoke differed (500, ModuleNotFoundError) from the second pass's live invoke (200, 250 rows) BECAUSE the code itself changed between the two passes (the opal_naming fix), not because of nondeterminism -- the SAME code (second pass) was verified stable across plan, apply and two separate invokes (initial + verify_freshness_parity.py's own re-read).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "derived/model_block/, derived/model_block_fye/ -- every reader and writer",
+      "reason": "issuer Q1 / section 1: the served adapter's model_block reader is JSON-only (no pyarrow reader vendored) and the silver home is parquet; switching that reader needs a pyarrow-capable artifact or a served gold projection, held for 1.0.0_SA_CTO~Z. Untouched by this move (confirmed: no diff touches derived/model_block anywhere)."
+    },
+    {
+      "item": "the adapter's raw/* IAM grant, and any IAM change at all",
+      "reason": "BOUNDS: 'No grant removed, no S3 delete'. The raw/* grant is SHARED with raw/seekingalpha/ (M3) and retires only in M3's window. AC2/AC6 both measured policy_sha 0c6b3cf46bdff811 UNCHANGED, 4 statements, before and after."
+    },
+    {
+      "item": "any S3 delete of the 119 old raw/bloomberg/ objects",
+      "reason": "BOUNDS + PRD C-FORMAT-SEQUENCE: 'retire' never deletes; deletion is Andrew's one batched word. Post-act read: raw/bloomberg/ still 119 objects, newest LastModified unchanged (2026-09-21T16:25:37Z)."
+    },
+    {
+      "item": "lib/research/coverage/run_reader.py and run_sa_reexercise.py -- no code change",
+      "reason": "AC0's census matched them on the BROAD pattern (raw/%s/) but their vendor is read from integrations/seekingalpha/config.json (hardcoded 'seekingalpha') and their bucket is opal-data-research, not opal-data-harvest -- verified they never construct a raw/bloomberg/ key at runtime. Left untouched; AC5's own bar ('the vendor-generic raw/{vendor} builders are reached for bloomberg nowhere') is satisfied by construction, not by editing files that were never reachers."
+    },
+    {
+      "item": "the chatter Lambda (18 build inputs)",
+      "reason": "section 1: measured to hold no reader of raw/bloomberg/; untouched, not part of this move's redeploy (AC6 targets only module.scoped_amgt_api.aws_lambda_function.this)."
+    },
+    {
+      "item": "test_forecast_fallback.py's stale FakeS3 fixture (the AC1 new-failure cause)",
+      "reason": "a WALL, not in <paths>. Filed AMGT_RESAPP-Z-W90-S2; the fix is a one-line key-construction change in that file, for its disarm_owner to grant."
+    },
+    {
+      "item": "branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50",
+      "reason": "never read, shown, diffed or checked out, per the order's own instruction."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W90-S1: AC3's literal deploy_ledger.py invocation (--legs 2) does not match the live tool's CLI (--title/--author required, no --legs flag, legs are repeatable --leg 'id|kind|target|proof_required') -- rc 2. Opened/closed a real ledger entry through the tool's actual interface instead (AC7 PASS on the substance). OBSERVATION, INERT.",
+    "AMGT_RESAPP-Z-W90-S2: switching model_block_pull.py's forecast reader to the bronze grammar (RULED item 4, required) breaks integrations/bloomberg/research/tests/test_forecast_fallback.py::test_quarter_trap_refuses_the_whole_set, a WALL file NOT in this order's <paths> -- one NEW AC1 failure the worker cannot repair without editing a WALL. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+    "AMGT_RESAPP-Z-W90-S3: build-and-upload-scoped-amgt.sh's closure walk (CLOSURE_ROOTS = (\"lib.research\", \"lib.opal_data_harvest\")) does not cover a bare top-level lib.opal_naming import -- a packaged module (build_view.py) importing it silently packages nothing for that name and the adapter cold-starts to ModuleNotFoundError on the first live request that path. Measured live (500, then CloudWatch traceback); disarmed same-turn by this worker (literal-string prefix instead of the naming builder), rebuilt, redeployed, re-verified 200/250 rows. OBSERVATION, DISMISSED_WITH_REASON (repo-wide trap in a WALL script remains, for a future occupant).",
+    "AMGT_RESAPP-Z-W90-S4: AC6's literal invocation pipes safe-apply.sh through a 'plan' subcommand; the live tool gates 'apply' ONLY and refuses any other subcommand with a usage error before touching terraform. Ran plan via bare terraform (per the tool's own error message) and the apply via safe-apply.sh correctly; both completed and were live-verified. OBSERVATION, INERT."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/harvest/tests lib/research/api/tests lib/research/identity/tests lib/research/management/tests integrations/bloomberg/research/tests -q -p no:cacheprovider --continue-on-collection-errors",
+      "result": "15 failed, 399 passed, 2 errors, 13 subtests passed (baseline: 14/394/2/13)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_m1_move.py -v -p no:cacheprovider",
+      "result": "6 passed"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile <all 15 touched .py files under lib/ and integrations/>",
+      "result": "OK (no output, rc 0) on every file"
+    },
+    {
+      "tool": "commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh <each touched .py file, one call per file>",
+      "result": "All checks passed! / pre-commit gate clean, for all 16 files (after one ruff unused-import fix)"
+    },
+    {
+      "tool": "lib.research.harvest.bloomberg --move-m1",
+      "invocation": "python -m lib.research.harvest.bloomberg --move-m1 --report .scratch/r90/copy.json",
+      "result": "copied_bronze 110 copied_state 9 sha_equal 119 of 119 existed 0 put 119 (first run); existed 119 put 0 (second run)"
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh",
+      "result": "OK: uploaded (run twice -- second run after the AMGT_RESAPP-Z-W90-S3 fix; both ISOLATED verification arms passed 3 of 3)"
+    },
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest plan -target=module.scoped_amgt_api.aws_lambda_function.this",
+      "result": "Plan: 0 to add, 1 to change, 0 to destroy. (run twice, same shape both times)"
+    },
+    {
+      "tool": "safe-apply.sh",
+      "invocation": "HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -target=module.scoped_amgt_api.aws_lambda_function.this -auto-approve",
+      "result": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed. (run twice; first run's retry needed once per the rc-124 timeout rule)"
+    },
+    {
+      "tool": "boto3 lambda.invoke (direct, live)",
+      "invocation": "boto3 lambda.invoke(FunctionName='opal-amgt-scoped-api', Payload={rawPath: '/api/scoped/amgt/freshness', headers: {x-firm-id: bd}, requestContext.http.method: GET})",
+      "result": "500 ModuleNotFoundError (pre-fix) -> 200, 250 rows (post-fix)"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open/close-leg x2/close/check --slug amgt-rk90-bloomberg-raw-to-bronze",
+      "result": "OPENED (2 legs) -> both legs CLOSED with proof -> CLOSED, sentinel removed; absent from check's OPEN list"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~90 <0.9.0_WK_AMGT_RESAPP~90@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "4 commits: e61604dffa (code), 00b9d8d200 (ledger open), b9d2d7b4f1 (fix), 04f5ae4562 (ledger close) -- all rc 0"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "invoked automatically by safe-commit.sh's pre-commit hook on the surprise-channel commit",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (2 new rows on the first pass)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~90/AMGT_RESAPP.TO-AMGT-rk-90.bloomberg-raw-to-bronze.proof_of_spec.json AC0,AC1,AC2,AC3,AC4,AC5,AC6,AC7,AC8",
+      "result": "PENDING -- run after this instance is written"
+    }
+  ]
+}
