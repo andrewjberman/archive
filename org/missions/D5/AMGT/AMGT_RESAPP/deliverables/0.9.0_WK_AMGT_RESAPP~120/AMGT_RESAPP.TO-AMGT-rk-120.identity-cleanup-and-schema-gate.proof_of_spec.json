@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-120",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.md",
+    "group": "OTHER",
+    "vintage_commit": "bf5c280e48"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "bf5c280e48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~120",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "c2a76629e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY per BOUNDS; no S3 write, no crosswalk publish. LIMB (b): write_pool() gains an OPTIONAL `document` kwarg; when supplied it is validated (jsonschema.validate, the same validator test_add_security.py already uses) against crosswalk.schema.json BEFORE anything is put, and RAISES ValueError naming the first violation's path and message. main()'s --write-pool CLI now passes document=document, the one call site inside this file's <paths>. `document` defaults to None so write_pool's own S3 put/read-back discipline (test_crosswalk.py's PoolVintageRead, a WALL test with a deliberately non-conforming minimal document) and build_universe.py's DIFFERENT union-document write (also a WALL) are unaffected -- a conforming document is still written byte-identical to today (proven in AC2/ConformingDocumentWritesUnchanged)."
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk_enrich_coverage.py",
+      "kind": "test",
+      "commit_or_etag": "c2a76629e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "LIMB (a), Z-S225: test_no_enrich_rows_byte_identical rewritten to build BOTH the pinned and current sides from the SAME ENRICH-free registrations set (the live registrations.json with every ENRICH row filtered out), proving the PROPERTY rather than the repo's current state. New class EnrichRowPresentDoesNotBreakTheProperty::test_enrich_row_present_does_not_break_the_property pins the failure mode: with the LIVE registrations (ENRICH row and all) the CURRENT module builds successfully and the PINNED module explicitly refuses the resulting security_key collision, asserted by message. 7 pre-existing arms + 1 new = 8, 0 removed.",
+      "artifact_covered_by": ["AC0", "AC1", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk_write_validates.py",
+      "kind": "test",
+      "commit_or_etag": "c2a76629e2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file, 4 arms per RULED item (b): test_conforming_document_writes_unchanged (byte-equal put body with and without document= passed, stubbed S3 client), test_nonconforming_document_raises_before_put (a document carrying an unknown denominators key -- the exact class rk-114's amendment 1 fixed -- raises and 0 puts land on the stub), test_refusal_names_the_first_violation (message carries 'denominators' and the offending key), test_live_served_document_validates (READ-ONLY: reads the real pool object via crosswalk.load_crosswalk() and validates it; would skip with a named reason if S3 were unreachable -- it was reachable this session, so it ran, not skipped).",
+      "artifact_covered_by": ["AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: registrations 8 with the ENRICH row for 992_HK_Equity; the HEAD build reading 96 records with denominators carrying enriched 1, and 992's identity present -- production is healthy; then the suite line reading \"1 failed, 66 passed\" (I0 = 67 collected), which is Z-S225. Record every value; a drifted count is RECORDED, not a fail",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r120/ac0.py &amp;&amp; python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2&gt;&amp;1 | tail -1",
+      "output_evidence": "registrations 8 enrich_rows ['992_HK_Equity']\nHEAD build records 96 denominators {\"input_names\": 89, \"records\": 96, \"MEASURED\": 36, \"UNRESOLVED\": 60, \"with_association_keys\": 96, \"association_conventions\": [\"bare-root-pilot-key\", \"security-hash-key\", \"pack-key\", \"model-key\", \"bloomberg-identifier\", \"bloomberg-identifier-with-equity-suffix\"], \"registered\": 7, \"enriched\": 1}\n992 identity present True\nvalidator_used_by_tests jsonschema\n1 failed, 66 passed in 1.56s",
+      "denominator": "5 of 5 named values recorded (registrations count+enrich_rows, records count, denominators.enriched, 992 identity present, suite line); run BEFORE any edit, on the branch base bf5c280e48",
+      "status": "PASS",
+      "expect": "registrations 8[\\s\\S]*992_HK_Equity[\\s\\S]*records 96[\\s\\S]*enriched.: 1[\\s\\S]*identity present True[\\s\\S]*1 failed, 66 passed"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "LIMB (a): \"8 passed\" and 0 failed -- the 7 existing arms plus test_enrich_row_present_does_not_break_the_property -- with test_no_enrich_rows_byte_identical now PASSING against the LIVE registrations, because the pinned side is built from an ENRICH-free set",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -v -p no:cacheprovider 2&gt;&amp;1 | tail -12",
+      "output_evidence": "EnrichAttachesIdentityNoNewRecord::test_enrich_attaches_identity_no_new_record PASSED [ 12%]\nEnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses PASSED [ 25%]\nDuplicateEnrichRefuses::test_duplicate_enrich_refuses PASSED [ 37%]\nNoEnrichRowsByteIdentical::test_no_enrich_rows_byte_identical PASSED [ 50%]\nEnrichRowPresentDoesNotBreakTheProperty::test_enrich_row_present_does_not_break_the_property PASSED [ 62%]\nAddSecurityEnrichRowOneCall::test_add_security_enrich_row_one_call PASSED [ 75%]\nBuildFailureLeavesRegistrationsUnchanged::test_build_failure_leaves_registrations_unchanged PASSED [ 87%]\nEnrichedDocumentValidatesAgainstSchema::test_enriched_document_validates_against_schema PASSED [100%]\n\n8 passed in 0.68s",
+      "denominator": "8 of 8 arms PASSED, 0 failed (7 pre-existing + 1 new)",
+      "status": "PASS",
+      "expect": "test_no_enrich_rows_byte_identical PASSED[\\s\\S]*test_enrich_row_present_does_not_break_the_property PASSED[\\s\\S]*8 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "LIMB (b): \"4 passed\" and 0 failed, with the four named arms PASSED -- including test_nonconforming_document_raises_before_put asserting 0 puts on the stub, and test_live_served_document_validates (or a NAMED skip, never a silent pass)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest lib/research/identity/tests/test_crosswalk_write_validates.py -v -p no:cacheprovider 2&gt;&amp;1 | tail -10",
+      "output_evidence": "ConformingDocumentWritesUnchanged::test_conforming_document_writes_unchanged PASSED [ 25%]\nNonconformingDocumentRaisesBeforePut::test_nonconforming_document_raises_before_put PASSED [ 50%]\nRefusalNamesTheFirstViolation::test_refusal_names_the_first_violation PASSED [ 75%]\nLiveServedDocumentValidates::test_live_served_document_validates PASSED [100%]\n\n4 passed in 1.12s",
+      "denominator": "4 of 4 named arms PASSED, 0 failed. LiveServedDocumentValidates ran (not skipped): the live pool was reachable this session (crosswalk.load_crosswalk(refresh=True) returned 96 records, as_of 2026-09-22); a skip would print 'SKIP: live crosswalk pool unreachable (...)' via self.skipTest, never a silent pass.",
+      "status": "PASS",
+      "expect": "test_conforming_document_writes_unchanged PASSED[\\s\\S]*test_nonconforming_document_raises_before_put PASSED[\\s\\S]*test_refusal_names_the_first_violation PASSED[\\s\\S]*test_live_served_document_validates PASSED[\\s\\S]*4 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the identity suite reads \"N passed\" with 0 FAILED, N = 67 (AC0's collected count) + 1 new enrich arm + 4 new validator arms = 72 at the cut's baseline -- state the arithmetic from AC0's own measured numbers, not from this sentence; and the filings suite is UNCHANGED from its own pre-edit count",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2&gt;&amp;1 | tail -1 &amp;&amp; python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2&gt;&amp;1 | tail -1",
+      "output_evidence": "72 passed in 1.89s\n106 passed in 9.49s",
+      "denominator": "identity suite: 72 of 72 passed, 0 failed (arithmetic: AC0's collected count 67 [1 failed + 66 passed] + 1 new enrich arm + 4 new validator arms = 72). filings suite: 106 passed, measured UNCHANGED against the pre-edit baseline run this same session (106 passed, 10.06s) before any file in <paths> was touched.",
+      "status": "PASS",
+      "expect": "72 passed[\\s\\S]*106 passed"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the changed code files are EXACTLY lib/research/identity/crosswalk.py, lib/research/identity/tests/test_crosswalk_enrich_coverage.py and lib/research/identity/tests/test_crosswalk_write_validates.py; and the second diff is EMPTY -- neither the schema nor registrations.json was touched",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; git diff --name-only HEAD~1 HEAD -- lib integrations infra .tools portal &amp;&amp; git diff --stat HEAD~1 HEAD -- lib/research/identity/crosswalk.schema.json lib/research/identity/registrations.json",
+      "output_evidence": "lib/research/identity/crosswalk.py\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py\nlib/research/identity/tests/test_crosswalk_write_validates.py\n(second command: no output -- empty)",
+      "denominator": "3 of 3 changed code files, EXACTLY the three named; second diff 0 of 2 named files touched (empty output, rc 0)",
+      "status": "PASS",
+      "expect": "^lib/research/identity/crosswalk\\.py\\nlib/research/identity/tests/test_crosswalk_enrich_coverage\\.py\\nlib/research/identity/tests/test_crosswalk_write_validates\\.py\\n?$"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutated write_pool()'s guard from `if document is not None:` to `if False and document is not None:`, disabling the write-time schema validation call while leaving everything else (the S3 put/read-back discipline) untouched. Ran test_crosswalk_write_validates.py; reverted with a second Edit, confirmed byte-identical to the pre-mutant copy via `diff` before any further evidence was recorded.",
+      "expected": "test_nonconforming_document_raises_before_put and test_refusal_names_the_first_violation both fail (ValueError not raised); test_conforming_document_writes_unchanged and test_live_served_document_validates unaffected (they do not depend on the guard firing).",
+      "observed": "2 failed, 2 passed -- NonconformingDocumentRaisesBeforePut::test_nonconforming_document_raises_before_put failed with 'AssertionError: ValueError not raised'; RefusalNamesTheFirstViolation::test_refusal_names_the_first_violation failed the same way; ConformingDocumentWritesUnchanged and LiveServedDocumentValidates stayed PASSED, exactly as predicted. Reverted; `diff .scratch/r120/crosswalk_before_mutant.py lib/research/identity/crosswalk.py` returned IDENTICAL and the full write-validates file returned to 4 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input back-to-back runs of `python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py lib/research/identity/tests/test_crosswalk_write_validates.py -q -p no:cacheprovider`, post-commit HEAD c2a76629e2.",
+      "observed": "Run 1: '12 passed in 1.85s'. Run 2: '12 passed in 1.93s'. Identical pass/fail outcome both runs (timing differs only in the trailing decimal, not a value any criterion or test asserts on).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "registrations.json, crosswalk.schema.json, add_security.py, battery.py, every S3 object, the served crosswalk (write)",
+      "reason": "section 1 'What this cell does NOT change'. registrations.json is read-only (live and via load_registrations()); crosswalk.schema.json is read-only (the validator's schema source); add_security.py is a WALL, not in <paths>; no publish/--write-pool was ever invoked."
+    },
+    {
+      "item": "add_security.py's and build_universe.py's write_pool call sites (making them pass document=)",
+      "reason": "both files are WALLs outside this cell's <paths>; wiring them is outside this cell's write grant. Filed as AMGT_RESAPP-Z-W120-S1 (ARMED, disarm_owner 2.0.0_SA_COO~Z)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W120-S1: the write-time schema check only fires from crosswalk.py's own main() (the one call site inside <paths>); add_security.py's _persist_registration_and_pool and build_universe.py's union_main still call write_pool() without document=, since those files are WALLs, so their pool writes remain unvalidated at this cut. An unconditional (always-validate) design inside write_pool() was tried and rejected because it breaks two files this cell cannot touch: test_crosswalk.py's PoolVintageRead.test_the_resolved_key_is_never_persisted_into_a_later_vintage (a WALL test that puts a deliberately non-conforming minimal document to exercise write_pool's own S3 mechanics) and build_universe.py's union write (a different document shape entirely). hazard_standing ARMED; disarm_owner 2.0.0_SA_COO~Z."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~120/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests -q -p no:cacheprovider",
+      "result": "1 failed, 66 passed in 1.56s BEFORE any edit (AC0); 72 passed in 1.89-2.65s AFTER (AC3), 0 failed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -v -p no:cacheprovider",
+      "result": "8 passed in 0.68-0.72s (7 pre-existing + 1 new arm)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests/test_crosswalk_write_validates.py -v -p no:cacheprovider",
+      "result": "4 passed in 1.11-1.44s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/filings/tests -q -p no:cacheprovider",
+      "result": "106 passed in 9.49-10.12s, unchanged before/after this cell's edits"
+    },
+    {
+      "tool": "python (ac0.py)",
+      "invocation": "python .scratch/r120/ac0.py",
+      "result": "registrations 8 enrich_rows ['992_HK_Equity']; HEAD build records 96 denominators (enriched: 1, registered: 7, ...); 992 identity present True; validator_used_by_tests jsonschema"
+    },
+    {
+      "tool": "python + jsonschema (mutant + live checks)",
+      "invocation": "write_pool(key, payload, client=stub, document=doc) with a conforming and a nonconforming (extra denominators key) document; crosswalk.load_crosswalk(refresh=True) + jsonschema.validate against crosswalk.schema.json for the live served document",
+      "result": "conforming document put byte-identical to the undecorated call; nonconforming document raised ValueError naming 'denominators'/'totally_unknown_key', 0 puts; live served document (96 records, as_of 2026-09-22) validates PASS"
+    },
+    {
+      "tool": "git",
+      "invocation": "git diff --name-only HEAD~1 HEAD -- lib integrations infra .tools portal; git diff --stat HEAD~1 HEAD -- lib/research/identity/crosswalk.schema.json lib/research/identity/registrations.json; git rev-parse HEAD",
+      "result": "3 files exactly (crosswalk.py, test_crosswalk_enrich_coverage.py, test_crosswalk_write_validates.py); second diff empty; HEAD c2a76629e2d3c5032f7bf4af06b1478a3914a63b on branch wk-amgt-30-120"
+    },
+    {
+      "tool": ".tools/commit-gate.sh + .tools/surprise-row-gate.py (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/r120/commit_msg.txt -- lib/research/identity/crosswalk.py lib/research/identity/tests/test_crosswalk_enrich_coverage.py lib/research/identity/tests/test_crosswalk_write_validates.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit-gate clean for 3 of 4 files (the investigation .md is not py-gated); naming-gate PASS 0 graded; surprise-row-gate OK, 1 new row of 529 total, carries spec_asserts and world_is; surprise-corpus OK (4 known, 0 new, 0 resolved); committed c2a76629e2 on wk-amgt-30-120"
+    }
+  ]
+}
