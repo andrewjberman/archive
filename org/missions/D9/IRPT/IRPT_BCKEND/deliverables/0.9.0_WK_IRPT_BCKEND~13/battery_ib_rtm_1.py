@@ -29,21 +29,40 @@ a regular expression nor a substring search over free text (C-S179's actual defe
 closes both C-S179's counterexample AND avoids the regression. Filed as row IRPT_BCKEND-W13-S6,
 left to 3.0.0_SA_CVO~B's adjudication, not self-graduated.
 
-`metadata` (R113-AC2): reads C-S174's corrected controls.mutant.observed text (IB-rtk-1's proof
-instance) and confirms it names fffef738... as the CRLF/checkout-grain value and f03666ef... as
-the git-object sha256, with no "typo"/"transcription error" language; reads C-S187's corrected
-result.md artifact row (IB-rtl-1's proof instance) and confirms it is re-pinned to the
-post-publish HEAD blob/commit and that the "no real S3 action" exclusion is scoped to the pass it
-actually applies to (never blanket-claiming the sixth-pass publish, which DID perform a real S3
-put-object/get-object, never happened).
+`metadata` (R113-AC2, widened by IB-rto-1/R115-AC1): reads C-S174's corrected
+controls.mutant.observed text (IB-rtk-1's proof instance) and confirms it names the
+CRLF/checkout-grain value and the git-object sha256, with no "typo"/"transcription error"
+language; reads C-S187's corrected result.md artifact row (IB-rtl-1's proof instance) and
+confirms it is re-pinned to the post-publish HEAD blob/commit and that the "no real S3 action"
+exclusion is scoped to the pass it actually applies to (never blanket-claiming the sixth-pass
+publish, which DID perform a real S3 put-object/get-object, never happened).
+
+IB-rto-1 (C-S196) widening: this chain's own round-13/14 C-S174 metadata fix itself carried a
+TRANSPOSED CRLF hash value and a MISATTRIBUTED LF hash (crediting a worktree-mode diagnostic read
+for producing the git-object/LF value -- backwards; a worktree read on this CRLF-checkout box
+produces the CRLF value, never the LF value). Never again compares stored text against a
+hardcoded constant copied from the proof: `recompute_lf_value()` and `recompute_crlf_value()`
+independently re-derive BOTH values from `capture-session.cjs`'s ACTUAL bytes at the historical
+commit the citation is about (`HISTORICAL_COMMIT`), fresh, EVERY time this arm runs -- the LF/
+git-object value via `git cat-file -p`, cross-checked against `git show` (both must agree); the
+CRLF/checkout-grain value via an ACTUAL raw checkout-index read on this box (`git read-tree` +
+`git checkout-index` into a throwaway scratch work-tree via a redirected GIT_WORK_TREE/
+GIT_INDEX_FILE -- this REPO's own index and working tree are never touched), never a hardcoded
+string and never a simulated substitution. The arm then FAILS if the stored proof text disagrees
+with either freshly-recomputed value, FAILS if the known-wrong transposed substring
+(`WRONG_TRANSPOSED_SUBSTRING`) is found ANYWHERE in this worker's own deliverables directory
+(enumerated, denominator printed), and FAILS if the stored text still carries the specific wrong
+misattribution phrasing this cell corrected.
 
 Everything is exercised under stubs / VM mocks / static reads: no browser, network, credential,
 host action or real file write. ASCII only.
 """
+import hashlib
 import json
 import os
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = subprocess.run(["git", "-C", HERE, "rev-parse", "--show-toplevel"], capture_output=True, text=True).stdout.strip()
@@ -66,8 +85,18 @@ IB_RTK_1_PROOF = os.path.join(HERE, "IRPT_BCKEND.TO-IB-rtk-1.the-capture-tool-co
 IB_RTL_1_PROOF = os.path.join(HERE, "IRPT_BCKEND.TO-IB-rtl-1.the-capture-tool-invariant-guard-at-the-write-boundary.proof_of_spec.json")
 IB_RTL_1_RESULT = os.path.join(HERE, "the-capture-tool-invariant-guard-at-the-write-boundary.result.md")
 
-CRLF_VALUE = "fffef738e90cf03fbb20cdfbeb8cbb310e3a44c6eee657974f8a3eeb92e8e35b"
-BLOB_VALUE = "f03666ef827e7c6a169214c83b2a4fe593d7f1cbf181f728f1febb0235eacd0d"
+# IB-rto-1 (C-S196): the commit at which the IB-rtk-1 fourth-pass repair introduced the
+# capture-session.cjs bytes C-S174's citation is about -- NEVER HEAD (the file has moved on
+# since). Recomputation always targets THIS commit's blob, never a hardcoded hash VALUE.
+HISTORICAL_COMMIT = "0d0c8cdc4d"
+
+# The exact wrong (two-hex-character-transposed) substring this chain's own C-S174 fix wrote
+# into the CRLF value. Built by concatenation, never as one contiguous literal in this file's own
+# source text, so this detector's OWN presence never itself trips the zero-occurrences check it
+# implements below. A DETECTOR for the defect class, never a correctness comparison target -- the
+# correct value is never hardcoded anywhere in this file; it is recomputed fresh every run by
+# recompute_crlf_value()/recompute_lf_value().
+WRONG_TRANSPOSED_SUBSTRING = "03f" + "bb20"
 
 
 def run_node(path, timeout=60, arg=None):
@@ -90,6 +119,73 @@ def git_blob(path):
     if p.returncode != 0:
         raise RuntimeError("git rev-parse failed for %s: %s" % (path, p.stderr))
     return p.stdout.strip()
+
+
+def recompute_lf_value(commit=HISTORICAL_COMMIT, rel_path=CAP):
+    """IB-rto-1 (R115-AC1) run-time recomputation, LF/git-object side. Reads the blob TWICE by
+    two different git plumbing commands (never a raw fs read, never a hardcoded value) and
+    requires them to agree byte-for-byte before trusting either. Returns (sha256_hex, raw_bytes)."""
+    p1 = subprocess.run(["git", "-C", REPO, "cat-file", "-p", "%s:%s" % (commit, rel_path)], capture_output=True)
+    if p1.returncode != 0:
+        raise RuntimeError("git cat-file -p failed for %s:%s -- %s" % (commit, rel_path, p1.stderr.decode("utf-8", "replace")))
+    p2 = subprocess.run(["git", "-C", REPO, "show", "%s:%s" % (commit, rel_path)], capture_output=True)
+    if p2.returncode != 0:
+        raise RuntimeError("git show failed for %s:%s -- %s" % (commit, rel_path, p2.stderr.decode("utf-8", "replace")))
+    if p1.stdout != p2.stdout:
+        raise RuntimeError("git cat-file -p and git show DISAGREE on blob bytes for %s:%s -- instrument fault" % (commit, rel_path))
+    return hashlib.sha256(p1.stdout).hexdigest(), p1.stdout
+
+
+def recompute_crlf_value(lf_bytes, commit=HISTORICAL_COMMIT, rel_path=CAP):
+    """IB-rto-1 (R115-AC1) run-time recomputation, CRLF/checkout-grain side. An ACTUAL raw
+    working-tree read on THIS box (never a hardcoded value, never a canned \\n->\\r\\n
+    substitution passed off as a read): `git read-tree` + `git checkout-index` populate a
+    throwaway scratch work-tree via a redirected GIT_WORK_TREE/GIT_INDEX_FILE, applying this
+    box's real core.autocrlf filter on actual checkout -- this REPO's own index and working tree
+    are never touched. Returns sha256_hex."""
+    if b"\r" in lf_bytes:
+        raise RuntimeError("blob at %s:%s already carries CR bytes -- this instrument assumes pure-LF git storage" % (commit, rel_path))
+    with tempfile.TemporaryDirectory() as td:
+        env = dict(os.environ)
+        env["GIT_DIR"] = os.path.join(REPO, ".git")
+        env["GIT_WORK_TREE"] = td
+        env["GIT_INDEX_FILE"] = os.path.join(td, ".ib-rto-1-scratch-index")
+        p1 = subprocess.run(["git", "read-tree", commit], env=env, cwd=REPO, capture_output=True, text=True)
+        if p1.returncode != 0:
+            raise RuntimeError("git read-tree %s failed: %s" % (commit, p1.stderr))
+        p2 = subprocess.run(["git", "checkout-index", "-f", "--", rel_path], env=env, cwd=REPO, capture_output=True, text=True)
+        if p2.returncode != 0:
+            raise RuntimeError("git checkout-index for %s failed: %s" % (rel_path, p2.stderr))
+        checked_out = os.path.join(td, rel_path.replace("/", os.sep))
+        with open(checked_out, "rb") as f:
+            raw = f.read()
+    return hashlib.sha256(raw).hexdigest()
+
+
+def scan_deliverables_for_substring(substring):
+    """Enumerate EVERY file in this worker's own deliverables directory (HERE) and return
+    (hit_count, files_scanned, hit_paths) for a literal substring search -- the denominator IS
+    the file count, printed by the caller. Skips this battery script's own bytes (which must be
+    free of transposed 8-char-run 'ARMED string' matches too; verified separately by construction
+    -- WRONG_TRANSPOSED_SUBSTRING is never a contiguous literal in this file's own source)."""
+    hit_paths = []
+    files_scanned = 0
+    for root, dirs, files in os.walk(HERE):
+        # __pycache__ is a gitignored build byproduct of running/compiling THIS script, never a
+        # deliverable -- a stale .pyc from an earlier (pre-fix) version of this same file would
+        # otherwise self-trigger a false residual hit that has nothing to do with the correction.
+        dirs[:] = [d for d in dirs if d != "__pycache__"]
+        for name in files:
+            path = os.path.join(root, name)
+            files_scanned += 1
+            try:
+                with open(path, "rb") as f:
+                    data = f.read()
+            except OSError:
+                continue
+            if substring.encode("ascii") in data:
+                hit_paths.append(os.path.relpath(path, HERE))
+    return len(hit_paths), files_scanned, hit_paths
 
 
 def run_diag(diag_rel_path, blob):
@@ -205,10 +301,21 @@ def arm_classify():
 
 
 def arm_metadata():
-    print("=== ARM metadata (R113-AC2): C-S174 + C-S187 corrected metadata ===")
+    print("=== ARM metadata (R113-AC2 + IB-rto-1/R115-AC1): C-S174 + C-S187 corrected metadata, recomputed not copied ===")
     ok = True
 
-    print("--- C-S174: controls.mutant.observed (IB-rtk-1's proof instance) ---")
+    print("--- IB-rto-1 (R115-AC1) run-time recomputation control: FRESH, from actual bytes, at commit %s ---" % HISTORICAL_COMMIT)
+    print("  cmd: git -C <repo> cat-file -p %s:%s | sha256sum" % (HISTORICAL_COMMIT, CAP))
+    print("  cmd: git -C <repo> show %s:%s | sha256sum   (cross-check, must agree)" % (HISTORICAL_COMMIT, CAP))
+    fresh_lf_hash, lf_bytes = recompute_lf_value()
+    print("  freshly recomputed LF/git-object sha256:       %s" % fresh_lf_hash)
+    print("  cmd: git read-tree %s ; git checkout-index -- %s   (into a throwaway scratch work-tree, this REPO's own index untouched)" % (HISTORICAL_COMMIT, CAP))
+    fresh_crlf_hash = recompute_crlf_value(lf_bytes)
+    print("  freshly recomputed CRLF/checkout-grain sha256: %s" % fresh_crlf_hash)
+    print("  byte lengths: LF=%d CRLF=%d (delta=%d, one CR inserted per LF newline converted)" % (len(lf_bytes), len(lf_bytes) + lf_bytes.count(b"\n"), lf_bytes.count(b"\n")))
+    ok &= check("LF and CRLF recomputed values DIFFER (two different byte sequences of the same logical file, not a duplicate)", fresh_lf_hash != fresh_crlf_hash)
+
+    print("--- C-S174: controls.mutant.observed (IB-rtk-1's proof instance) -- checked against the FRESH recomputation above, never a hardcoded constant ---")
     rtk1 = load(IB_RTK_1_PROOF)
     observed = rtk1["controls"]["mutant"]["observed"]
     print("  observed text (first 200 chars): %s..." % observed[:200])
@@ -216,21 +323,43 @@ def arm_metadata():
     # comparison to the FULL 64-hex-char hash string -- a 12-char prefix collision is not
     # cryptographically implausible enough to certify "this exact hash is present"; the full
     # string is the only comparison that actually does.
-    has_crlf = CRLF_VALUE in observed
-    has_blob = BLOB_VALUE in observed
+    # IB-rto-1 (C-S196): the comparison target is the value JUST recomputed above, fresh, this
+    # run -- never a module-level constant copied from a prior reading of the proof text (that
+    # exact pattern is how the transposition and misattribution survived undetected).
+    has_crlf = fresh_crlf_hash in observed
+    has_blob = fresh_lf_hash in observed
     # Never AFFIRMS either value is a typo/transcription-error -- a NEGATION of that claim
     # ("is NOT a transcription error", "neither is a typo") is exactly the required correction,
     # so this checks for the AFFIRMATIVE phrasing only, not bare substring presence.
     lower = observed.lower()
     affirms_typo = ("packet-only typo" in lower) or ("is a transcription error" in lower) or \
         ("was a transcription error" in lower) or ("an arbitrary typo" in lower and "not an arbitrary typo" not in lower)
-    ok &= check("names the FULL hash %s as a value present in the text" % CRLF_VALUE, has_crlf)
-    ok &= check("names the FULL hash %s as a value present in the text" % BLOB_VALUE, has_blob)
+    ok &= check("names the FRESHLY-RECOMPUTED CRLF hash %s as a value present in the text" % fresh_crlf_hash, has_crlf)
+    ok &= check("names the FRESHLY-RECOMPUTED LF/git-object hash %s as a value present in the text" % fresh_lf_hash, has_blob)
     ok &= check("never AFFIRMS either value is a 'typo' or 'transcription error' (a negation of that claim is the required correction)", not affirms_typo)
     names_crlf_correctly = "CRLF" in observed and "checkout-grain" in observed
     names_blob_correctly = "git-object" in observed or "git blob" in observed.lower()
     ok &= check("text names the CRLF value as the CRLF/checkout-grain value", names_crlf_correctly)
     ok &= check("text names the corrected value as the git-object sha256", names_blob_correctly)
+
+    print("--- IB-rto-1 (R115-AC1) arm (b): zero residual occurrences of the wrong transposed substring ---")
+    hit_count, files_scanned, hit_paths = scan_deliverables_for_substring(WRONG_TRANSPOSED_SUBSTRING)
+    print("  scanned %d files under this worker's own deliverables directory; %d hit(s)" % (files_scanned, hit_count))
+    if hit_paths:
+        for hp in hit_paths:
+            print("    RESIDUAL HIT: %s" % hp)
+    ok &= check("zero remaining occurrences of the wrong transposed substring, denominator=%d files scanned" % files_scanned, hit_count == 0)
+
+    print("--- IB-rto-1 (R115-AC1) arm (c): LF/git-object attribution corrected -- names git cat-file -p / git show, never a worktree diagnostic ---")
+    # The SPECIFIC wrong causal claim this cell corrected: crediting a worktree-mode diagnostic
+    # read's "computed value on the repaired bytes" directly with "the git-object sha256 -- the
+    # git BLOB's own LF bytes", with no git cat-file/git show mention at all. Checked for absence
+    # by exact phrase (the literal wrong continuation), not by a keyword that could false-positive
+    # on legitimate CRLF-side prose that also mentions "worktree" and "bytes".
+    wrong_attribution_phrase = "and the git-object sha256 -- the git BLOB's own LF bytes)"
+    ok &= check("observed text no longer carries the specific wrong LF-attribution phrasing", wrong_attribution_phrase not in observed)
+    names_correct_lf_source = ("git cat-file" in observed) or ("git show" in observed)
+    ok &= check("observed text names git cat-file -p / git show as an LF/git-object value's actual source", names_correct_lf_source)
 
     print("--- C-S187: result.md artifact row + declared_exclusions scoping (IB-rtl-1's proof instance) ---")
     rtl1 = load(IB_RTL_1_PROOF)
@@ -262,6 +391,7 @@ def arm_metadata():
 
     if ok:
         print("IBR113-METADATA-C174-C187-CORRECTED")
+        print("IBR115-C174-RECOMPUTED-NO-TRANSPOSITION-NO-MISATTRIBUTION")
         return 0
     print("FAIL: metadata arm")
     return 1
