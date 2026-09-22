@@ -226,9 +226,20 @@ test("three-path admission: /investor-reporting/print is admitted", async () => 
   assert.equal(headerValue(result, "x-user-role"), "renderer");
 });
 
-test("three-path admission: a static asset under /investor-reporting/ is admitted", async () => {
+// RE-PINNED (round 18, 2.0.0_SA_COO~B, COO ruling on a genuine conflict between IB-rtr-1's
+// BOUNDS and IB-rtr-4's "durable baseline, unedited" instruction -- neither cell's own
+// <paths> granted this file, so neither could fix it itself under its own BOUNDS). This
+// assertion originally asserted a DISCLOSED GUESS (row IRPT_BCKEND-W16-S2, filed because
+// `portal/` was not checked out in that worker's worktree): a static asset path prefixed
+// `/investor-reporting/`. Round 18's IB-rtr-1 read the SPA's real, pinned `vite.config.ts`
+// (neither `base` nor `build.assetsDir` overridden -- confirmed independently by the COO,
+// not just cited) and found the real Vite-default public asset path is root `/assets/`,
+// never `/investor-reporting/assets/`. Re-pinning this ONE assertion to the real, verified
+// path -- this is a correction of a labeled guess with the now-known real answer, never a
+// weakening of what the test checks (a static asset must still be admitted, not refused).
+test("three-path admission: a static asset under the real /assets/ prefix is admitted", async () => {
   const token = signRenderToken();
-  const uri = "/investor-reporting/assets/app-9f3c1a.js";
+  const uri = "/assets/app-9f3c1a.js";
   const result = await handler(makeEvent({ uri, token }));
   assert.equal(isRefusal(result), false, "SPA static asset must be admitted, not refused");
   assert.equal(headerValue(result, "x-user-role"), "renderer");
