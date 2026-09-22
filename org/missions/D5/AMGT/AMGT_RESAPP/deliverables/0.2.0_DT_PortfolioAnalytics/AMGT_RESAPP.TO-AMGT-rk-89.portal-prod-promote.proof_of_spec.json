@@ -1,0 +1,175 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-rk-89",
+ "firm": "FABRIC",
+ "phase": "NON-BUILD-OTHER",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-89.portal-prod-promote.md",
+  "group": "OTHER",
+  "vintage_commit": "f7fcf11592f4af08f6850b85cf516b85bac375eb"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "f7fcf11592f4af08f6850b85cf516b85bac375eb",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-89.portal-prod-promote.md"
+ },
+ "assignee": "0.2.0_DT_PortfolioAnalytics",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal repo (Opal-Capital/portal) branch PROD merge 6dfc3390: 8 files under src/pages/SecurityAnalysis/",
+   "kind": "frontend_component",
+   "commit_or_etag": "6dfc33909ed08a0bdaca0c40f2700e511e68ad10",
+   "deployed_state": "DEPLOYED-VERIFIED",
+   "deploy_evidence": "origin/PROD = 6dfc3390 (AC4 fetch + ls-remote); tag portal-v2.1.182 peeled = 6dfc3390; CI run 35669878684 Deploy to Production completed success (AC5); served opalinvest.dev index Last-Modified 23:59:39Z with 3 of 3 new literals in the served chunks (AC6). The pin lives in the portal repo, not the workspace object store. Workspace gitlink `portal` 95d96edb -> f22e369c committed LOCALLY by this serial at 75de778a8a9db308b0b7b1db7c1caf92ea6f80bf (not pushed); it is proven in AC7 rather than as its own row, because the checker resolves a row as <pin>:<path> in the workspace store and a gitlink points at a portal-repo commit that store does not hold.",
+   "artifact_covered_by": [
+    "AC3",
+    "AC4",
+    "AC5",
+    "AC6",
+    "AC7"
+   ]
+  },
+  {
+   "path_or_key": "org/critical_paths/change_management/20260921T2353Z_amgt-rk89-portal-prod-promote_deploy_completion.md",
+   "kind": "doc",
+   "commit_or_etag": "PENDING-THIS-COMMIT",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "deploy ledger: OPENED and committed at 058d62973d before the push (AC2); legs closed and entry CLOSED by AC7; the closed state rides this commit with the sentinel's removal.",
+   "artifact_covered_by": [
+    "AC2",
+    "AC7"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "DEV a sha containing f22e369c (measured f22e369c at the cut), PROD 07d5af72; dev_has_f22e369c True; prod_has_f22e369c False; gate_commit_on_prod True; the log lists ONLY AMGT page commits by 0.9.0_WK_AMGT_RESAPP~* (2 at the cut: f22e369c, 95d96edb) and integrator merges; files 8 or more with outside_security_analysis 0; app_tsx_diff_lines 0. ANY outside_security_analysis above 0, any App.tsx diff, or any author outside the AMGT workers and the integrator: STOP, promote nothing (section 4)",
+   "method": "command",
+   "invocation": "git -C portal fetch origin && echo \"DEV $(git -C portal rev-parse origin/DEV) PROD $(git -C portal rev-parse origin/PROD)\" && (git -C portal merge-base --is-ancestor f22e369c origin/DEV && echo dev_has_f22e369c True) && (git -C portal merge-base --is-ancestor f22e369c origin/PROD && echo prod_has_f22e369c True || echo prod_has_f22e369c False) && (git -C portal merge-base --is-ancestor d8135e0a origin/PROD && echo gate_commit_on_prod True) && git -C portal log --format='%h %an | %s' origin/PROD..origin/DEV && echo \"files $(git -C portal diff --name-only origin/PROD origin/DEV | wc -l) outside_security_analysis $(git -C portal diff --name-only origin/PROD origin/DEV | grep -vc '^src/pages/SecurityAnalysis/')\" && echo \"app_tsx_diff_lines $(git -C portal diff origin/PROD origin/DEV -- src/App.tsx | wc -l)\"",
+   "output_evidence": "DEV f22e369cedc974dc056643b37da33676ce19f74d PROD 07d5af72ef65082fbfdd92197fb814d733e58d92\ndev_has_f22e369c True\nprod_has_f22e369c False\ngate_commit_on_prod True\nf22e369c 0.9.0_WK_AMGT_RESAPP~80 | fix(ExecManagementTab, AMGT-rk-80): one period on the CEO line, subtitle names the Bloomberg fallback\n95d96edb 0.9.0_WK_AMGT_RESAPP~78 | feat(AMGT_RESAPP AMGT-rk-78, 0.9.0_WK_AMGT_RESAPP~78): Exec Management tab renders the Bloomberg fallback roster's source, status and reason, and never claims a Bloomberg officer was confirmed from the filing\nfiles 8 outside_security_analysis 0\napp_tsx_diff_lines 0",
+   "denominator": "2 of 2 commits in origin/PROD..origin/DEV authored by AMGT workers (~80, ~78), 0 other authors; 8 of 8 changed files under src/pages/SecurityAnalysis/ (0 outside); src/App.tsx 0 diff lines. Run at 2026-09-21T23:52:36Z (second of two identical runs; the first at 23:51:44Z)",
+   "status": "PASS",
+   "expect": "DEV f22e369c[0-9a-f]* PROD 07d5af72[0-9a-f]*\\s+dev_has_f22e369c True\\s+prod_has_f22e369c False\\s+gate_commit_on_prod True[\\s\\S]*files 8 outside_security_analysis 0\\s+app_tsx_diff_lines 0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "\"OK: OPENED deploy ledger\" naming amgt-rk89-portal-prod-promote with legs L1 and L2, and the list shows it OPEN -- run BEFORE AC3's push and record the time; an AC3 push timestamp earlier than this entry's open time FAILS this criterion (the v2.1.181 promote's after-the-push ledger is the defect this bars)",
+   "method": "command",
+   "invocation": "python .tools/deploy_ledger.py open --slug amgt-rk89-portal-prod-promote --title \"AMGT_RESAPP rk-89: portal DEV to PROD promote (rk-78 + rk-80)\" --author 0.2.0_DT_PortfolioAnalytics --leg \"L1|git|portal PROD|merge sha + peeled tag\" --leg \"L2|verify|served opalinvest.dev|index Last-Modified + 3 of 3 literals + App.tsx identical\" && python .tools/deploy_ledger.py list",
+   "output_evidence": "OK: OPENED deploy ledger 'amgt-rk89-portal-prod-promote' (2 legs) -> org/critical_paths/change_management/20260921T2353Z_amgt-rk89-portal-prod-promote_deploy_completion.md\n  OPEN L1 [git] portal PROD\n  OPEN L2 [verify] served opalinvest.dev\n  REQUIRED COMMIT PATHSPEC (both, in the same commit -- the sentinel is the gate's only input and\n  a worktree removed without it destroys the OPEN state, leaving the .md as an unindexed open ledger):\n    org/critical_paths/.open_deploys/amgt-rk89-portal-prod-promote.json\n    org/critical_paths/change_management/20260921T2353Z_amgt-rk89-portal-prod-promote_deploy_completion.md\n  (both are STAGED, so an UNFORCED `git worktree remove` refuses; a FORCED one still deletes them --\n   committing them is what survives the drain)\nOPEN: advi-insure-gold-chain-membership age=442.9h window=12.0h [PAST-WINDOW] stranded=['L4'] author=0.7.0_AE_CloudOps~R\nOPEN: advi-insure-iam-insurance-silver-read age=487.7h window=36.0h [PAST-WINDOW] stranded=['L4'] author=0.7.0_AE_CloudOps\nOPEN: amgt-rk89-portal-prod-promote age=0.0h window=4.0h [in-window] stranded=['L1', 'L2'] author=0.2.0_DT_PortfolioAnalytics\nHELD-STALE: d12-sms-origination-identity-activation held=19.4d (>4.0d) gate=external/AWS toll-free provisioning + carrier verification (SP-1), ~1-3wk from filing, Andrew-gated. Then SP-2 (SMS_ORIGINATION_IDENTITY) on Andrew's explicit GO. Source of record: sms.ts:22-59. re-read=event=AWS approves the toll-free origination identity AND/OR the account leaves the SMS sandbox. WARN: BOTH ARE OUT-OF-BAND, ACCOUNT-LEVEL EVENTS WITH NO DEPLOY AND NO CODE REVIEW ATTACHED -- sms.ts:38-44 states that the day sandbox exit happens, every guard that lived only in the sandbox evaporates at once and this Lambda would begin texting arbitrary enrolled numbers WITH NOTHING IN THE REPO HAVING CHANGED. Nothing in this estate can observe that transition; it must be checked against AWS deliberately. That is why this entry exists rather than a note in a project blocking field, which comp-schedule classes NOT-DECIDABLE and never counts. open-verify=['SP-1', 'SP-3'] author=1.0.0_SA_CTO~Z -- nudge the gate or reconsider\nOPEN: d12-sms-tfn-registration-and-production-access age=296.2h window=504.0h [in-window] stranded=['A', 'V1', 'V2', 'V3'] author=0.0.0_AB_MSTR\nHELD-STALE: freshguard-leg4-writer-wiring-finish held=74.4d (>4.0d) gate=external/FAIL-BY-DESIGN standing state (declared 2026-08-20, 0.7.0_AE_CloudOps per MSTR 63015): L4's recorded FAIL IS the designed verdict; close path = CAS merge fix d27000a68 (dormant, GLOBGRPH_MARKER_CAS=off) behind CTO GO-conditions incl. the 8c0b67afd runtime probe (UNRUN) and a MARKER_CAS_* metric-filter alarm -- alarm-building sits under the Andrew 2026-07-28 moratorium, so this gate needs Andrew's word, then a fresh T_d' cycle. Re-dated deliberately; staleness on this entry is NOT drift. re-read=event=Andrew's word on the MARKER_CAS_* metric-filter alarm (blocked by the 2026-07-28 alarm moratorium), then a fresh T_d' cycle -- quoted from this hold's own gate.ref open-verify=['L4'] author=0.7.0_AE_CloudOps -- nudge the gate or reconsider\nOPEN: irpt-bckend-ib-rte-3-lgic-firm-buckets age=76.1h window=4.0h [PAST-WINDOW] stranded=['L4'] author=0.9.0_WK_IRPT_BCKEND~3\nOPEN: opsec-s15-reconciler-function age=428.8h window=4.0h [PAST-WINDOW] stranded=['L6'] author=0.7.0_AE_CloudOps~T\nBYPASS: UNINDEXED OPEN LEDGER org\\critical_paths\\change_management\\20260916T010633Z_posn-aggfix-portal-v2.1.179-prod-promote_deploy_completion.md age=142.6h -- no **Status:** and no close-date marker (open or malformed)\nBYPASS: UNINDEXED OPEN LEDGER org\\critical_paths\\change_management\\20260921T172305Z_amgt-resapp-portal-v2.1.181-prod-promote_deploy_completion.md age=6.3h -- no **Status:** and no close-date marker (open or malformed)\nSCAN DENOMINATOR: 8 of 8 sentinel(s) scanned",
+   "denominator": "1 of 1 ledger opened, 2 of 2 legs OPEN, listed OPEN in-window; list scanned 8 of 8 sentinels. Opened 2026-09-21T23:53:48Z, committed 058d62973d at 2026-09-21T23:54:44Z; AC3 push accepted 2026-09-21T23:57:32Z (after the open). Chain rc=1 comes from `deploy_ledger.py list`, which exits non-zero on OTHER seats' PAST-WINDOW / BYPASS entries shown in the output; the open printed OK",
+   "status": "PASS",
+   "expect": "OK: OPENED deploy ledger 'amgt-rk89-portal-prod-promote' \\(2 legs\\)[\\s\\S]*OPEN L1 \\[git\\] portal PROD[\\s\\S]*OPEN L2 \\[verify\\] served opalinvest\\.dev[\\s\\S]*OPEN: amgt-rk89-portal-prod-promote age=0\\.0h window=4\\.0h \\[in-window\\]"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the merge is a --no-ff merge of origin/DEV onto origin/PROD; HEAD^2 EQUALS the origin/DEV sha AC1 printed (else STOP -- DEV moved); the parity diff is 0 lines; the push is accepted (no GATE-5 or VALGATE refusal) at a time AFTER AC2's open",
+   "method": "command",
+   "invocation": "your /prod-deploy Steps 0-5 exactly as the skill writes them, recording: the Step-4 merge command and its output, `git -C \"$WORKTREE\" rev-parse HEAD HEAD^2`, the parity check `git -C \"$WORKTREE\" diff origin/DEV HEAD | wc -l`, and the `git push origin PROD` output with its UTC time",
+   "output_evidence": "commands run: Step 3: git -C \"$WS/portal\" update-ref refs/heads/PROD refs/remotes/origin/PROD ; Step 4: git -C \"$WS/portal\" worktree add \"$WS/.runtmp/portal-promote-20260921T235549Z\" PROD ; (cd \"$WORKTREE\" && bun install) ; git -C \"$WORKTREE\" -c user.name=0.2.0_DT_PortfolioAnalytics -c user.email=0.2.0_DT_PortfolioAnalytics@opal.agent merge --no-ff origin/DEV -m \"<message in output>\" ; git -C \"$WORKTREE\" rev-parse HEAD HEAD^2 ; git -C \"$WORKTREE\" diff origin/DEV HEAD | wc -l ; git -C .runtmp/portal-promote-20260921T235549Z push origin PROD ; date -u\nMERGE CMD: git -C \"$WORKTREE\" -c user.name=0.2.0_DT_PortfolioAnalytics -c user.email=0.2.0_DT_PortfolioAnalytics@opal.agent merge --no-ff origin/DEV -m \"merge DEV->PROD: v2.1.182 -- AMGT_RESAPP Exec Management tab renders the Bloomberg fallback roster's source, status and reason (rk-78) + CEO-line and subtitle text fixes (rk-80); access gate unchanged, Dev+admin only (AMGT_RESAPP.TO-AMGT-rk-89; standing adjudication @c7bbb53f2a item 1, Andrew-direct 2026-09-21 ~17:2xZ) @ DEV f22e369cedc974dc056643b37da33676ce19f74d. Base 07d5af72ef65082fbfdd92197fb814d733e58d92. Rollback: 07d5af72ef65082fbfdd92197fb814d733e58d92. Authored 0.2.0_DT_PortfolioAnalytics.\"\nMerge made by the 'ort' strategy.\n .../__harness__/execFallback.harness.cjs           | 261 ++++++++++++++++++++\n .../__harness__/execFixture.6861_JP_Equity.json    |  98 ++++++++\n .../__harness__/execFixture.ASML_NA_Equity.json    |  33 +++\n .../__harness__/execFixture.CAT_US_Equity.json     |  92 +++++++\n .../__harness__/execFixture.CSL_AU_Equity.json     | 267 +++++++++++++++++++++\n .../__harness__/execText.harness.cjs               | 232 ++++++++++++++++++\n .../SecurityAnalysis/tabs/ExecManagementTab.tsx    |  39 ++-\n src/pages/SecurityAnalysis/types.ts                |  31 ++-\n 8 files changed, 1044 insertions(+), 9 deletions(-)\n create mode 100644 src/pages/SecurityAnalysis/__harness__/execFallback.harness.cjs\n create mode 100644 src/pages/SecurityAnalysis/__harness__/execFixture.6861_JP_Equity.json\n create mode 100644 src/pages/SecurityAnalysis/__harness__/execFixture.ASML_NA_Equity.json\n create mode 100644 src/pages/SecurityAnalysis/__harness__/execFixture.CAT_US_Equity.json\n create mode 100644 src/pages/SecurityAnalysis/__harness__/execFixture.CSL_AU_Equity.json\n create mode 100644 src/pages/SecurityAnalysis/__harness__/execText.harness.cjs\nmerge rc=0\n$ git -C \"$WORKTREE\" rev-parse HEAD HEAD^2\n6dfc33909ed08a0bdaca0c40f2700e511e68ad10\nf22e369cedc974dc056643b37da33676ce19f74d\n$ git -C \"$WORKTREE\" diff origin/DEV HEAD | wc -l\n0\n$ git log -1 --format='%an | %cn | %P'\n0.2.0_DT_PortfolioAnalytics | 0.2.0_DT_PortfolioAnalytics | 07d5af72ef65082fbfdd92197fb814d733e58d92 f22e369cedc974dc056643b37da33676ce19f74d\nTo https://github.com/Opal-Capital/portal.git\n   07d5af72..6dfc3390  PROD -> PROD\npush rc=0\npush completed at (date -u): 2026-09-21T23:57:32Z",
+   "denominator": "1 --no-ff merge; 2 of 2 parents as required (base 07d5af72 = origin/PROD, HEAD^2 f22e369c = AC1's origin/DEV); parity 0 lines; 1 push accepted, no GATE-5 or VALGATE refusal, at 23:57:32Z vs ledger open 23:53:48Z",
+   "status": "PASS",
+   "expect": "merge --no-ff origin/DEV[\\s\\S]*Merge made by the 'ort' strategy\\.[\\s\\S]*8 files changed, 1044 insertions\\(\\+\\), 9 deletions\\(-\\)[\\s\\S]*merge rc=0[\\s\\S]*rev-parse HEAD HEAD\\^2\\s+6dfc33909ed08a0bdaca0c40f2700e511e68ad10\\s+f22e369cedc974dc056643b37da33676ce19f74d[\\s\\S]*diff origin/DEV HEAD \\| wc -l\\s+0\\s[\\s\\S]*07d5af72\\.\\.6dfc3390\\s+PROD -> PROD\\s+push rc=0\\s+push completed at \\(date -u\\): 2026-09-21T23:57:32Z"
+  },
+  {
+   "criterion_id": "AC4",
+   "criterion_verbatim": "PROD equals AC3's merge sha; prod_has_f22e369c True; gate_commit_on_prod True; a tag portal-v2.1.* (portal-v2.1.182 expected) whose peeled commit EQUALS the PROD sha; app_tsx_diff_vs_pre_act_prod 0",
+   "method": "command",
+   "invocation": "git -C portal fetch origin --tags && echo \"PROD $(git -C portal rev-parse origin/PROD)\" && (git -C portal merge-base --is-ancestor f22e369c origin/PROD && echo prod_has_f22e369c True) && (git -C portal merge-base --is-ancestor d8135e0a origin/PROD && echo gate_commit_on_prod True) && T=$(git -C portal describe --tags --exact-match origin/PROD) && echo \"tag $T peeled $(git -C portal rev-parse \"$T^{commit}\")\" && echo \"app_tsx_diff_vs_pre_act_prod $(git -C portal diff 07d5af72 origin/PROD -- src/App.tsx | wc -l)\"",
+   "output_evidence": "From https://github.com/Opal-Capital/portal\n * [new tag]           portal-v2.1.182 -> portal-v2.1.182\nPROD 6dfc33909ed08a0bdaca0c40f2700e511e68ad10\nprod_has_f22e369c True\ngate_commit_on_prod True\ntag portal-v2.1.182 peeled 6dfc33909ed08a0bdaca0c40f2700e511e68ad10\napp_tsx_diff_vs_pre_act_prod 0",
+   "denominator": "5 of 5 checks: PROD = AC3 merge sha, f22e369c ancestor of PROD, gate commit d8135e0a ancestor of PROD, tag portal-v2.1.182 peeled = PROD sha, App.tsx 0 diff lines vs pre-act PROD 07d5af72",
+   "status": "PASS",
+   "expect": "PROD 6dfc33909ed08a0bdaca0c40f2700e511e68ad10\\s+prod_has_f22e369c True\\s+gate_commit_on_prod True\\s+tag portal-v2\\.1\\.182 peeled 6dfc33909ed08a0bdaca0c40f2700e511e68ad10\\s+app_tsx_diff_vs_pre_act_prod 0"
+  },
+  {
+   "criterion_id": "AC5",
+   "criterion_verbatim": "EVERY run whose headSha equals the PROD merge sha is listed by workflowName with status completed and conclusion success (at least 1; the Deploy to Production workflow among them); nameWithOwner Opal-Capital/portal (the -R positive control, so an empty list can never read as a pass)",
+   "method": "live_read",
+   "invocation": "gh -R Opal-Capital/portal run list --json databaseId,headSha,workflowName,status,conclusion --limit 30 && gh repo view Opal-Capital/portal --json nameWithOwner",
+   "output_evidence": "runs listed 30 at 6dfc3390 1\n35669878684 Deploy to Production completed success\n{\"nameWithOwner\":\"Opal-Capital/portal\"}\n-- verbatim run object at the PROD sha, from the 30-run list:\n{\"conclusion\":\"success\",\"databaseId\":35669878684,\"headSha\":\"6dfc33909ed08a0bdaca0c40f2700e511e68ad10\",\"status\":\"completed\",\"workflowName\":\"Deploy to Production\"}\n{\"nameWithOwner\":\"Opal-Capital/portal\"}",
+   "denominator": "1 of 1 runs whose headSha = 6dfc3390 (in a 30-run listing) completed/success, Deploy to Production among them; -R positive control nameWithOwner Opal-Capital/portal",
+   "status": "PASS",
+   "expect": "runs listed 30 at 6dfc3390 1\\s+35669878684 Deploy to Production completed success[\\s\\S]*\\\"conclusion\\\":\\\"success\\\",\\\"databaseId\\\":35669878684,\\\"headSha\\\":\\\"6dfc33909ed08a0bdaca0c40f2700e511e68ad10\\\",\\\"status\\\":\\\"completed\\\",\\\"workflowName\\\":\\\"Deploy to Production\\\"[\\s\\S]*\\\"nameWithOwner\\\":\\\"Opal-Capital/portal\\\""
+  },
+  {
+   "criterion_id": "AC6",
+   "criterion_verbatim": "index 200 with a Last-Modified LATER than AC3's push time (it read Mon, 21 Sep 2026 17:29:27 GMT before the act); chunks 50 or more; each of the first three literals found at least once (0 of 3 before the act -- the negative control); the fourth, the RESOLVED-roster subtitle, still found at least once (the positive control that the walk reaches the tab chunk). NOTE the invocation is multi-line on purpose (a python -c with no backslash escapes and chr(34) for the quote character, per rows Z-S207/W84-S1: an escape-bearing inline criterion does not survive this device's tool transport)",
+   "method": "live_read",
+   "invocation": "python -c 'import urllib.request as u; b = \"https://opalinvest.dev\"; r = u.urlopen(b + \"/\", timeout=30); h = r.read().decode(\"utf-8\", \"replace\"); print(\"index\", r.status, \"Last-Modified\", r.headers.get(\"Last-Modified\")); todo = sorted({p.split(chr(34))[0] for p in h.split(\"/assets/\")[1:] if p.split(chr(34))[0].endswith(\".js\")}); done = set(); lits = [\"Officers from the Bloomberg fallback list\", \"This table is the Bloomberg fallback\", \"per Bloomberg, not the filing\", \"Officers from the filing, with tenure against the pool\"]; hits = {l: 0 for l in lits}\nwhile todo:\n    a = todo.pop()\n    if a in done: continue\n    done.add(a)\n    try: body = u.urlopen(b + \"/assets/\" + a, timeout=30).read().decode(\"utf-8\", \"replace\")\n    except Exception: continue\n    for l in lits: hits[l] += l in body\n    todo += [n for n in (q.split(\"/\")[-1] for q in body.split(chr(34))) if n.endswith(\".js\") and \"-\" in n and \" \" not in n and len(n) < 80 and n not in done]\nprint(\"chunks\", len(done)); [print(repr(l), hits[l]) for l in lits]'",
+   "output_evidence": "index 200 Last-Modified Mon, 21 Sep 2026 23:59:39 GMT\nchunks 53\n'Officers from the Bloomberg fallback list' 1\n'This table is the Bloomberg fallback' 1\n'per Bloomberg, not the filing' 1\n'Officers from the filing, with tenure against the pool' 1",
+   "denominator": "53 chunks walked (>= 50); 3 of 3 new literals found once each (0 of 3 before the act, issuer's pre-act measurement); 1 of 1 positive control found; index Last-Modified 23:59:39Z vs push 23:57:32Z. Run at 2026-09-22T00:02:22Z",
+   "status": "PASS",
+   "expect": "index 200 Last-Modified Mon, 21 Sep 2026 23:59:39 GMT\\s+chunks 53\\s+'Officers from the Bloomberg fallback list' 1\\s+'This table is the Bloomberg fallback' 1\\s+'per Bloomberg, not the filing' 1\\s+'Officers from the filing, with tenure against the pool' 1"
+  },
+  {
+   "criterion_id": "AC7",
+   "criterion_verbatim": "both legs closed with their proofs and the entry CLOSED (sentinel removed); the main-tree portal branch prints DEV with 0 porcelain lines (your Step 7 -- the main tree never left DEV); the SITEZ gitlink `portal` is either the promoted DEV head committed LOCALLY by you (its commit authored 0.2.0_DT_PortfolioAnalytics, NOT pushed) or unchanged because it already matched -- print which; `.runtmp/portal-promote-*` may persist physically (Filename too long) and is left for a human's word",
+   "method": "command",
+   "invocation": "python .tools/deploy_ledger.py close-leg --slug amgt-rk89-portal-prod-promote --leg-id L1 --proof \"<AC4 PROD sha + tag>\" && python .tools/deploy_ledger.py close-leg --slug amgt-rk89-portal-prod-promote --leg-id L2 --proof \"<AC6 Last-Modified + literal counts>\" && python .tools/deploy_ledger.py close --slug amgt-rk89-portal-prod-promote && git -C portal branch --show-current && git -C portal status --porcelain | wc -l && git ls-tree HEAD portal && git log --oneline -1 -- portal",
+   "output_evidence": "OK: leg L1 closed. Remaining open: ['L2']\nOK: leg L2 closed. Remaining open: NONE\nOK: CLOSED deploy ledger 'amgt-rk89-portal-prod-promote' -- all 2 legs proven; sentinel removed; entry: org/critical_paths/change_management/20260921T2353Z_amgt-rk89-portal-prod-promote_deploy_completion.md\nDEV\n0\n160000 commit f22e369cedc974dc056643b37da33676ce19f74d\tportal\n75de778a8a deploy(portal v2.1.182, 0.2.0_DT_PortfolioAnalytics): portal gitlink 95d96edb -> f22e369c (DEV head promoted to PROD by AMGT_RESAPP.TO-AMGT-rk-89)",
+   "denominator": "2 of 2 legs closed with proofs; 1 of 1 entry CLOSED, sentinel removed; main-tree portal branch DEV with 0 porcelain lines; SITEZ gitlink = promoted DEV head f22e369c, committed LOCALLY by 0.2.0_DT_PortfolioAnalytics at 75de778a8a (not pushed)",
+   "status": "PASS",
+   "expect": "OK: leg L1 closed\\. Remaining open: \\['L2'\\]\\s+OK: leg L2 closed\\. Remaining open: NONE\\s+OK: CLOSED deploy ledger 'amgt-rk89-portal-prod-promote' -- all 2 legs proven; sentinel removed;[\\s\\S]*\\nDEV\\n0\\n160000 commit f22e369cedc974dc056643b37da33676ce19f74d\\tportal\\n75de778a8a deploy\\(portal v2\\.1\\.182, 0\\.2\\.0_DT_PortfolioAnalytics\\)"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Pre/post discrimination on the same instruments: the pre-act PROD (07d5af72) is the state the served-bytes and ancestry checks must reject. AC1 at 23:52:36Z read prod_has_f22e369c False on 07d5af72; the issuer's pre-act walk of the served bundle read 0 of 3 new literals with the positive control present.",
+   "expected": "before the act: prod_has_f22e369c False and 0 of 3 literals; after: True and 3 of 3, positive control unchanged",
+   "observed": "AC1 prod_has_f22e369c False (pre) -> AC4 prod_has_f22e369c True (post); AC6 new literals 1/1/1 (post) vs 0 of 3 (issuer, pre); positive control 1 in both",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 run twice on the same fetched state (23:51:44Z and 23:52:36Z) and the outputs compared line by line",
+   "observed": "identical: DEV f22e369c PROD 07d5af72, same 2 commits, files 8 outside 0, app_tsx_diff_lines 0 in both runs",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "a signed-in render of the Security Analysis Exec Management tab on PROD",
+   "reason": "the page is Dev+admin gated and cannot be rendered headlessly; the order's record face replaces it with AC6's served-bytes check, and Andrew's own look is the managers'-review acceptance"
+  },
+  {
+   "item": "pushing the workspace SITEZ branch (gitlink commit 75de778a8a and this drain)",
+   "reason": "order section 3 and LD-0522: the workspace push is 0.0.0_AB_MSTR~Z's"
+  },
+  {
+   "item": "deleting .runtmp/portal-promote-20260921T235549Z",
+   "reason": "worktree remove failed Filename too long; git tracking pruned (0 entries); the physical dir is gitignored and inert; a recursive delete waits for a human's word"
+  },
+  {
+   "item": "the UNINDEXED OPEN reading of another seat's v2.1.179 ledger (20260916T010633Z_posn-aggfix-...)",
+   "reason": "not this order's record and not this seat's file; noted in the session log only"
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-Z-S208: rk-89 section 3 licenses the Step-1 DEV sync as a pull, but GATE 5 admits a DT for push only; the sync was done as fetch + merge --ff-only instead (inert).",
+  "AMGT_RESAPP-Z-S209: GATE 5 truncates a quoted `git -C`/`cd` path at a space, so on this box a DT's PROD push from an absolute worktree path is judged against the wrong repo and denied; the space-free relative form is admitted (inert, fail-closed).",
+  "AMGT_RESAPP-Z-S210: the order's row-id family `-Z-DT89-S<k>` is unparseable by both the row gate (:104) and this checker (:1127); rows filed in the seat form Z-S<n> instead (inert)."
+ ],
+ "session_log": "org/tier2_senior/0.2.0_DT_PortfolioAnalytics/logs/2026-09-21/amgt_resapp_rk89_prod_promote_v2_1_182_2350-0010Z.md",
+ "compiler_tools": [
+  {
+   "tool": "comp-to",
+   "invocation": "comp-to AMGT_RESAPP.TO-AMGT-rk-89.portal-prod-promote",
+   "result": "OK: session TO_ID set"
+  },
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read .tools/deploy_ledger.py --enumerate 'Status:|close-date|UNINDEXED'",
+   "result": "35 hits; the 3 accepted status-marker forms located; my v2.1.181 entry fixed to the canonical form"
+  },
+  {
+   "tool": "comp-read",
+   "invocation": "comp-read .tools/proof-of-spec-check.py --enumerate 'commit_or_etag|PENDING|cat-file|submodule|portal'",
+   "result": "49 hits; a pin absent from the workspace object store counts unresolved, not refused"
+  },
+  {
+   "tool": "deploy_ledger.py",
+   "invocation": "open / list / close-leg L1 / close-leg L2 / close --slug amgt-rk89-portal-prod-promote",
+   "result": "OPENED 23:53:48Z, CLOSED 00:04:22Z, all 2 legs proven"
+  }
+ ]
+}
