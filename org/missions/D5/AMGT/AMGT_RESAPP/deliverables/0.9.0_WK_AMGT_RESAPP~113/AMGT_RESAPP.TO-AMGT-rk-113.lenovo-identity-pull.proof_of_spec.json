@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-113.lenovo-identity-pull.md",
     "group": "OTHER",
-    "vintage_commit": "85dabdc6c2"
+    "vintage_commit": "3ee7a7de9f"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
@@ -93,14 +93,13 @@
     },
     {
       "criterion_id": "AC4",
-      "criterion_verbatim": "\"post_from s3://opal-data-harvest/crosswalk/v1/<today>.json\"; \"resolve '992 HK' 992_HK_Equity MEASURED equal_to_pre True\" and the same for '992 HK Equity' -- resolve() does not return identity, so the adapter's resolution for Lenovo is unchanged; the three controls CAT US, CSL AU and 6861 JP each \"equal_to_pre True\". Close the verify leg and the ledger entry on this read",
+      "criterion_verbatim": "\"post_from s3://opal-data-harvest/crosswalk/v1/<today>.json\"; AMENDMENT 3: \"resolve '992 HK' 992_HK_Equity MEASURED equal_to_pre True raw_differing_keys ['provenance']\" and the same for '992 HK Equity' -- the adapter's RESOLUTION for Lenovo is unchanged, and the only raw difference is the provenance identity line both signed halves name. raw_differing_keys listing anything besides 'provenance' for 992, or anything at all for a control, is a ROLLBACK trigger; the three controls CAT US, CSL AU and 6861 JP each \"equal_to_pre True\". Close the verify leg and the ledger entry on this read",
       "method": "diff",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r113/ac4.py",
-      "output_evidence": "post_from s3://opal-data-harvest/crosswalk/v1/2026-09-22.json\nresolve '6861 JP' 6861_JP_Equity MEASURED equal_to_pre True\nresolve '992 HK' 992_HK_Equity MEASURED equal_to_pre False\nresolve '992 HK Equity' 992_HK_Equity MEASURED equal_to_pre False\nresolve 'CAT US' CAT_US_Equity MEASURED equal_to_pre True\nresolve 'CSL AU' CSL_AU_Equity MEASURED equal_to_pre True",
-      "denominator": "5 of 5 queries checked; 3 of 5 (CAT US, CSL AU, 6861 JP -- the controls) read equal_to_pre True as expected; 2 of 5 (992 HK, 992 HK Equity -- the cell's own security) read equal_to_pre False against the literal <expect> of True for both. Isolated cause (.scratch/r113/ac4_debug.py, not committed): every top-level resolve() key for '992 HK' (security_key, resolution, bloomberg, display_ticker, exchange, model_key, share_class, raw_identifier, source_row, association_keys, matched_as, query) is IDENTICAL pre/post; the sole difference is one new key inside the nested `provenance` dict, `provenance.identity`, which the order's own signed pair halves (COO half B1, CTO half item 1) already name as part of the blast radius ('...and one provenance.identity line'). AC3, in the same order, strips `provenance['identity']` before its own comparison; AC4's script does not, so this whole-dict equality reads False even though no identity VALUE (FIGI/ISIN/SEDOL/LEI/website) is exposed by resolve() for either query -- the part of the <expect> prose that IS testable ('resolve() does not return identity') holds; the part asserting bit-for-bit equal_to_pre True does not, because the order's own AC4 script was not given AC3's strip. Filed as surprise row AMGT_RESAPP-Z-W113-S1.",
-      "status": "FAIL",
-      "status_reason": "Literal invocation, run verbatim per the order: resolve('992 HK') and resolve('992 HK Equity') both read equal_to_pre False, against an <expect> of True for both. The divergence is the anticipated, disclosed provenance.identity line (order's own B1/CTO-item-1 blast radius), which AC4's whole-dict comparison was not given the strip AC3 uses for the same line -- a criterion-authoring inconsistency inside the order, not a defect in the act. No rollback trigger fired (AC3's own criteria, which govern rollback, are unaffected and PASS). Recorded verbatim per the grading order; filed as surprise row AMGT_RESAPP-Z-W113-S1 (INERT, disarm_owner 2.0.0_SA_COO~Z). This criterion is FAIL-by-output on its literal text; the task order stays open.",
-      "expect": "resolve '6861 JP' 6861_JP_Equity MEASURED equal_to_pre True[\\s\\S]*resolve '992 HK' 992_HK_Equity MEASURED equal_to_pre True[\\s\\S]*resolve '992 HK Equity' 992_HK_Equity MEASURED equal_to_pre True[\\s\\S]*resolve 'CAT US' CAT_US_Equity MEASURED equal_to_pre True[\\s\\S]*resolve 'CSL AU' CSL_AU_Equity MEASURED equal_to_pre True"
+      "output_evidence": "post_from s3://opal-data-harvest/crosswalk/v1/2026-09-22.json\nresolve '6861 JP' 6861_JP_Equity MEASURED equal_to_pre True raw_differing_keys []\nresolve '992 HK' 992_HK_Equity MEASURED equal_to_pre True raw_differing_keys ['provenance']\nresolve '992 HK Equity' 992_HK_Equity MEASURED equal_to_pre True raw_differing_keys ['provenance']\nresolve 'CAT US' CAT_US_Equity MEASURED equal_to_pre True raw_differing_keys []\nresolve 'CSL AU' CSL_AU_Equity MEASURED equal_to_pre True raw_differing_keys []",
+      "denominator": "5 of 5 queries checked under ISSUER AMENDMENT 3's rewritten script (.scratch/r113/ac4.py overwritten verbatim to the amended text, re-run READ-ONLY against the SAME already-published crosswalk/v1/2026-09-22.json AC2/AC3 produced -- no live act repeated): all 5 read equal_to_pre True; the two 992 queries carry raw_differing_keys ['provenance'] (the anticipated, signed-pair-named provenance.identity line, already stripped by AC3's own comparison), and all 3 controls (CAT US, CSL AU, 6861 JP) carry raw_differing_keys [] -- no control differs at all, and 992's only raw difference is the one key both signed halves name. No rollback trigger fired.",
+      "status": "PASS",
+      "expect": "resolve '6861 JP' 6861_JP_Equity MEASURED equal_to_pre True raw_differing_keys \\[\\][\\s\\S]*resolve '992 HK' 992_HK_Equity MEASURED equal_to_pre True raw_differing_keys \\['provenance'\\][\\s\\S]*resolve '992 HK Equity' 992_HK_Equity MEASURED equal_to_pre True raw_differing_keys \\['provenance'\\][\\s\\S]*resolve 'CAT US' CAT_US_Equity MEASURED equal_to_pre True raw_differing_keys \\[\\][\\s\\S]*resolve 'CSL AU' CSL_AU_Equity MEASURED equal_to_pre True raw_differing_keys \\[\\]"
     },
     {
       "criterion_id": "AC5",
@@ -145,7 +144,8 @@
     }
   ],
   "surprises": [
-    "AMGT_RESAPP-Z-W113-S1: AC4's <expect> ('resolve() does not return identity, so the adapter's resolution for Lenovo is unchanged' -- equal_to_pre True for '992 HK' and '992 HK Equity') is contradicted by the literal AC4 script, which compares resolve()'s full dict including `provenance`: the pull adds exactly the `provenance.identity` line the order's own signed pair halves (COO half B1 / CTO half item 1) already name as part of the blast radius, so the literal equal_to_pre reads False for the two 992 queries while the three controls (CAT US, CSL AU, 6861 JP) read True. AC3, in the same order, already strips provenance.identity before its own comparison; AC4 was not given the same strip. hazard_standing INERT."
+    "AMGT_RESAPP-Z-W113-S1: AC4's <expect> ('resolve() does not return identity, so the adapter's resolution for Lenovo is unchanged' -- equal_to_pre True for '992 HK' and '992 HK Equity') is contradicted by the literal AC4 script, which compares resolve()'s full dict including `provenance`: the pull adds exactly the `provenance.identity` line the order's own signed pair halves (COO half B1 / CTO half item 1) already name as part of the blast radius, so the literal equal_to_pre reads False for the two 992 queries while the three controls (CAT US, CSL AU, 6861 JP) read True. AC3, in the same order, already strips provenance.identity before its own comparison; AC4 was not given the same strip. hazard_standing INERT.",
+    "AMGT_RESAPP-Z-W113-S2: records that ISSUER AMENDMENT 3 (@3ee7a7de9f) resolves row W113-S1 -- AC4's script now strips provenance.identity the same way AC3 does and prints raw_differing_keys per query; re-run READ-ONLY against the same already-published crosswalk/v1/2026-09-22.json (no live act repeated), AC4 now reads equal_to_pre True for all 5 queries with raw_differing_keys ['provenance'] for the two 992 queries and [] for the three controls, matching the amended <expect> exactly."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~113/AMGT_RESAPP.TO-AMGT-rk-113.lenovo-identity-pull.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
   "compiler_tools": [
@@ -170,9 +170,9 @@
       "result": "latest_key crosswalk/v1/2026-09-22.json is_today True; records=96=pre; others_byte_equal 95 of 95; all 6 identity fields present; 992_non_identity_equal True; denominators.enriched=1; identity_bronze=4 (D0+1); registrations=8 (G0+1, ENRICH/MEASURED) -- no rollback trigger"
     },
     {
-      "tool": "python (ac4.py + ac4_debug.py, scratch-only)",
+      "tool": "python (ac4.py, re-written verbatim to ISSUER AMENDMENT 3 @3ee7a7de9f; ac4_debug.py from the prior session, scratch-only, not re-run)",
       "invocation": "python .scratch/r113/ac4.py",
-      "result": "resolve() unchanged at the top level for every query; provenance gains one documentary key for 992 (provenance.identity), causing the literal whole-dict equal_to_pre to read False for the two 992 queries and True for the 3 controls -- filed as surprise row W113-S1, AC4 graded FAIL-by-output"
+      "result": "READ-ONLY re-grade under Amendment 3, no live act repeated: equal_to_pre True for all 5 queries; raw_differing_keys ['provenance'] for the two 992 queries (the anticipated provenance.identity line, both signed halves' blast radius) and [] for the three controls -- surprise row W113-S1 resolved, recorded as W113-S2; AC4 graded PASS"
     },
     {
       "tool": "python (ac5.py) + git",
