@@ -1,0 +1,322 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-92",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-92.sa-raw-move.md",
+    "group": "W",
+    "vintage_commit": "a74268ba4d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "a74268ba4d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-92.sa-raw-move.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~92",
+  "session_log": "Worker 0.9.0_WK_AMGT_RESAPP~92, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-22-92 in worktree C:/tmp/wk-amgt-22-92, spawn HEAD a74268ba4d. THE BAR FIRST: branch wk-amgt-22-92, org/ and .tools/ present, TREE-OK. Order read WORKER FACE only, top to the RECORD FACE marker. Never-widen pair read first: both halves present and SIGNED (ledger/NEVER_WIDEN_ROUND22_RK92_{COO,CTO}_HALF.md). RULED item 0: wrote infra/aws/terraform/harvest/gen_harvest_prefixes.py (box-side generator, imports lib.opal_naming ONLY there; naming-gate REFUSED the first cut for hand-typing the 'harvest' scope literal 4 times -- fixed to naming.lookup('harvest')[\"long\"] once, same pattern as lib/research/harvest/store.py:34, output byte-identical before and after); --write produced lib/research/api/_harvest_prefixes.py (4 constants + REGISTRY_HASH 3ea1e46b06a8aa14e1afff8605ca17617b30ccfb9a87bfe8a742ade10b7a51a6, 0 Import nodes); --check confirmed byte-for-byte. scoped_amgt.py: FILING_ATTEMPT_STATE_PREFIX and BLOOMBERG_BRONZE_PREFIX now alias the generated constants (same names/values); RAW_PREFIX retired entirely (bloomberg/seekingalpha/serp all read builder-grammar prefixes now; AC0 confirmed no raw/bloomberg reader remains); new _seeking_alpha_bronze_stamps/_bright_data_serp_stamps helpers; read_coverage_freshness switched. build_view.py: _BLOOMBERG_BRONZE_ROOT aliases the generated constant; new latest_seeking_alpha_bronze_stamp/latest_bright_data_serp_stamp wired into build(). run_reader.py: _sa_raw_items reads the 4 SA bronze tables via the generated prefix. rest_fetch.py: land_raw RETIRED (raises LandRawRetiredError unconditionally); run_ticker's harvest_grammar_mode parameter removed -- land_harvest is the only landing path. sa_forecast_fallback.py: rf.land_raw -> rf.land_harvest for symbol/metrics (receipt dict, not a tuple). scoped-amgt-api.tf: scoped_amgt_pool_prefixes source-edit -- drops \"raw/\", adds \"bright-data/harvest/bronze/\" (seeking-alpha/harvest/bronze/ already present from rk-82, unchanged). New tests: test_harvest_prefixes.py (5 arms: drift, registry hash, generated header, W85-S1 identity, 0-imports AST check) and test_freshness_harvest_stamps.py (3 arms incl. a DISCRIMINATING arm that loads scoped_amgt.py PINNED at 739eb5f288 via git archive and proves it reads 0 new-grammar seekingalpha stamps against the SAME fixture -- never a tautology). Updated test_rest_harvest.py (replaced the now-false 'default mode reproduces land_raw' test with a land_raw-raises test; removed harvest_grammar_mode=True kwargs from the two other call sites, since it is now the only path), test_forecast_fallback.py (FakeRF.land_raw -> land_harvest, receipt-shaped, key assertions updated to seeking-alpha/harvest/bronze/...), test_m1_move.py (its M1 arm asserting seekingalpha is still read from raw/ updated: both bloomberg and seekingalpha now read new bronze prefixes, raw/ reads NOTHING for either). AC1 (post-code): gen_harvest_prefixes.py --check OK; test_harvest_prefixes.py + test_freshness_harvest_stamps.py: 8 of 8 passed. AC2 (post-code, re-measured at spawn, every directory 0 failed): lib/research/api/tests 199 passed (191 pre-existing + 8 new); integrations/seekingalpha/tests 9 passed; integrations/bloomberg/research/tests/test_forecast_fallback.py 13 passed; lib/research/coverage/tests 30 passed; lib/research/harvest/tests 58 passed (this directory's own count was not separately stated in the order's baseline text beyond 'harvest 52'; re-measured here at 58, 0 failed, and re-confirmed identical after every later commit). ruff/py_compile clean on every touched/new .py file; naming-gate REFUSE on gen_harvest_prefixes.py's 4 hand-typed 'harvest' literals, fixed as above, then CONFORMANT/PASS. Committed the code (2acd199e5d) BEFORE any live act. AC0 (precondition, read via git show HEAD: rather than the working tree, since this cell's OWN source edit to scoped-amgt-api.tf already ran by the time the criterion is graded): rk91_order True rk91_complete True; refusals 0; sa_symbol s3://opal-data-harvest/seeking-alpha/harvest/bronze/symbol/security_key=BA_US_Equity; raw_entry_present True sa_bronze_entry_present True -- exact match to <expect>. AC3 (live read-only baseline / rollback target): source_objects 18 bytes 209361; resolve 3 of 3 (BABA_US->BABA_US_Equity, BA_US->BA_US_Equity, COST_US->COST_US_Equity, all MEASURED); target_objects 0; CodeSha256 vsWWFL9jRKHbQb9WP7x2Ob1Qv02nQpAOJkPcQk8/nkA=; ArtifactVersionId uiegBMbpQeruyGtakA88KEZTXMQ2mFtT; policy_sha256 39372755f1ad65ce0c48c1ee714679879e067ef9c57c45206a7f71b3d0c76e0e statements 4; bloomberg landed 34 of 250; seekingalpha 0 of 250; serp 0 of 250 -- exact match to the CTO half's cut. Deploy ledger opened BEFORE the first live write: 'OK: OPENED deploy ledger amgt-rk92-m3-sa-copy (1 legs)' -> org/critical_paths/change_management/20260922T0454Z_amgt-rk92-m3-sa-copy_deploy_completion.md, leg L1 s3-prefix seeking-alpha/harvest/bronze/. AC4 (live COPY): 18 of 18 objects copied (12 endpoint objects via store.bronze_put across symbol/report/analysis/news, 6 article bodies via harvest_grammar.put_article_bronze), 18 of 18 read back sha256-equal, 0 missing; every new key printed (builder output, e.g. seeking-alpha/harvest/bronze/symbol/security_key=BABA_US_Equity/20260911T040211Z.json ... seeking-alpha/harvest/bronze/article/article_hash=<sha256('sa:<id>')>/<stamp>.json for the 6 articles); raw_bloomberg_objects 119 unchanged, raw_seekingalpha_objects 18 unchanged (no delete). Ledger leg L1 closed with this proof; entry closed, sentinel removed. AC7 (CLOSURE CHECK, run BEFORE AC5 per msg 24137): build-and-upload-scoped-amgt.sh --build-only .scratch/r92/m3_build.zip -- the NEW gen_harvest_prefixes.py --check ran first and passed ('OK: ... matches fresh lib.opal_naming output byte for byte'), closure walk found 0 missing at either scope, 'BUILD-ONLY: copied to .scratch/r92/m3_build.zip -- NOT uploaded'. ac7.py unzipped the build-only zip into a scratch root, overlaid the win_amd64 rpds extension for THIS interpreter (scratch root only, not the zip), then ran ac7_inner.py in a fresh -I venv: 'control: boto3 NOT importable (isolated)' printed correctly, but the VERY NEXT top-level import in the order's own verbatim inner-script text -- 'from lib.research.freshness import build_view as bv' -- raised ModuleNotFoundError: No module named 'boto3', because build_view.py imports boto3 at MODULE SCOPE (confirmed present already at the pin 739eb5f288, git show, predating this cell) and scoped_amgt.read_coverage_freshness's (also pre-existing, unchanged by this cell) function-scope import of build_view pulls that module-scope import along with it. rc=1; NO arm() ever ran; RESULT line never printed. This is an ImportError inside the isolated harness -- 'ANY ImportError is a STOP before deploy' (msg 24137), so nothing was uploaded and no apply was attempted. Filed AMGT_RESAPP-Z-W92-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z, per msg 24137's own pre-named owner for exactly this class) rather than repairing build_view.py's import shape myself, since the REFUSAL CLAUSE and the pre-named disarm owner both point to escalation, not worker self-remedy, and moving the boto3 import (or carving a harness exception for a runtime-provided package) is a call this cell's own text does not make. AC5: ran ONLY the safe, read-only precondition half (new_grant_present_both_limbs True -- seeking-alpha/harvest/bronze/ present in both the GetObject Resource and the ListBucket s3:prefix condition, matching CTO msg 24112's grant-order rule; policy_sha256_pre_apply UNCHANGED at 39372755f1ad65ce...; statements 4), then REFUSED to plan or apply given AC7's STOP -- 'nothing is uploaded or applied' exactly as ruled. AC6: NOT REACHED as specified (no deploy occurred, so there is no post-deploy shape to read); instead re-read the live plane and confirmed it is BYTE-IDENTICAL to AC3's baseline -- CodeSha256/ArtifactVersionId unchanged, freshness route unchanged (bloomberg 34, seekingalpha 0, serp 0, all of 250), proving the copy alone left the served plane untouched (never half-landed) and that NO rollback is needed (nothing was ever applied to roll back). WINDOW CONDITION: final raw/seekingalpha/ read 18 objects, newest LastModified 2026-09-11T19:18:57Z -- UNCHANGED from the pre-act baseline; one new hand-run object would have been a finding, none appeared. Committed the live-act artifacts (build script's drift-check wiring, the closed ledger entry, and the BLOCKING row) as f57205b5a7, after the code commit 2acd199e5d. STATUS: this task order is NOT flipped to complete -- AC7 genuinely FAILED and AC5/AC6 could not run as a direct, honest consequence; per the governing instructions a FAIL row leaves the order open. AC0-AC4 are PASS-by-output; AC7 is FAIL (STOP, filed); AC5/AC6 are FAIL/REFUSED (blocked by AC7, not independently exercised).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/harvest/gen_harvest_prefixes.py",
+      "kind": "script",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW box-side generator; --write and --check both run clean this session, registry hash 3ea1e46b06a8aa14e1afff8605ca17617b30ccfb9a87bfe8a742ade10b7a51a6; naming-gate CONFORMANT after the lookup('harvest') fix."
+    },
+    {
+      "path_or_key": "lib/research/api/_harvest_prefixes.py",
+      "kind": "config_data",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "GENERATED module (4 constants + REGISTRY_HASH); test_harvest_prefixes.py's 5 arms all passed; packaged automatically into the build (CLOSURE walk under lib/research/api/ seed dir, confirmed in the AC7 build log). Not itself deployed -- it is part of the adapter artifact that was BUILT but never uploaded this session."
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read_coverage_freshness switched off RAW_PREFIX entirely (retired) to _bloomberg_bronze_stamps/_seeking_alpha_bronze_stamps/_bright_data_serp_stamps; FILING_ATTEMPT_STATE_PREFIX/BLOOMBERG_BRONZE_PREFIX now import from the generated module. NOT deployed this session -- AC7 stopped before any upload/apply; the served Lambda still runs M2's code (CodeSha256 vsWWFL9j..., re-verified unchanged at AC6)."
+    },
+    {
+      "path_or_key": "lib/research/freshness/build_view.py",
+      "kind": "script",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New latest_seeking_alpha_bronze_stamp/latest_bright_data_serp_stamp; _BLOOMBERG_BRONZE_ROOT aliases the generated constant. This file's PRE-EXISTING module-scope `import boto3` (present at the pin 739eb5f288, unchanged by this cell) is what AC7's isolated-venv closure check tripped on -- see the AMGT_RESAPP-Z-W92-S1 row. Not deployed this session."
+    },
+    {
+      "path_or_key": "lib/research/coverage/run_reader.py",
+      "kind": "script",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_sa_raw_items (READER of the run) reads the 4 SA bronze tables (symbol/report/analysis/news) under the generated prefix, never raw/seekingalpha/. Box-side script, not part of the Lambda artifact -- no deploy applies to it; no dedicated pytest suite exists for this script (AC2's lib/research/coverage/tests directory covers reader.py/pool_reader.py, not run_reader.py itself), so coverage is by direct inspection (AC0's diff) and py_compile/ruff, not by a RUN of the module.",
+      "artifact_covered_by": ["AC0", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/seekingalpha/rest_fetch.py",
+      "kind": "script",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "land_raw retired (raises LandRawRetiredError); run_ticker's harvest_grammar_mode parameter removed, land_harvest is the only landing FETCH path. Box-side ETL script, not part of the Lambda artifact. Covered by AC2's integrations/seekingalpha/tests run (9 of 9 passed, exercising land_harvest/land_raw/run_ticker directly).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/sa_forecast_fallback.py",
+      "kind": "script",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rf.land_raw -> rf.land_harvest for symbol and metrics (receipt dict) in run_fallback, the FORECAST FALLBACK entry point. 13 of 13 test_forecast_fallback.py arms passed against the updated FakeRF.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SOURCE ONLY this session: scoped_amgt_pool_prefixes drops \"raw/\", adds \"bright-data/harvest/bronze/\". AC5's read-only precondition confirms the LIVE policy is still M2's (new_grant_present_both_limbs True, policy_sha256 UNCHANGED at 39372755f1ad65ce...) -- the targeted apply that would move this to the live plane was refused by AC7's STOP."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh",
+      "kind": "script",
+      "commit_or_etag": "f57205b5a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Runs gen_harvest_prefixes.py --check before packaging. Exercised live this session: 'OK: lib/research/api/_harvest_prefixes.py matches fresh lib.opal_naming output byte for byte', build succeeded end to end (--build-only), 197 entries zipped, VERIFY missing [] both scopes, ISOLATED 3 of 3 arms OK."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_harvest_prefixes.py",
+      "kind": "test",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 5 of 5 passed (drift, registry hash, generated header, W85-S1 identity, 0-imports AST check)."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_freshness_harvest_stamps.py",
+      "kind": "test",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW: 3 of 3 passed, including the discriminating arm pinned at 739eb5f288 (reads 0 new-grammar seekingalpha stamps against the identical fixture the live-code arm reads 2 real stamps from)."
+    },
+    {
+      "path_or_key": "integrations/seekingalpha/tests/test_rest_harvest.py",
+      "kind": "test",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_harvest_mode_is_off_by_default replaced with test_land_raw_is_retired_and_raises (the pinned assertion this cell's switch made false); harvest_grammar_mode=True kwargs removed from the other 2 call sites. 9 of 9 passed."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_forecast_fallback.py",
+      "kind": "test",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "FakeRF.land_raw -> land_harvest (receipt-shaped); the 2 pinned raw/seekingalpha/... key assertions updated to seeking-alpha/harvest/bronze/.... 13 of 13 passed."
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_m1_move.py",
+      "kind": "test",
+      "commit_or_etag": "2acd199e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_freshness_reader_reads_new_prefix_for_bloomberg_and_raw_for_seekingalpha renamed/updated: seekingalpha now also reads its own bronze prefix (M3), so raw/ reads NOTHING for either vendor. 58 of 58 in the directory passed."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/seeking-alpha/harvest/bronze/",
+      "kind": "s3_object",
+      "commit_or_etag": "live-write-20260922",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC4: 18 of 18 objects copied (12 via store.bronze_put across symbol/report/analysis/news, 6 article bodies via harvest_grammar.put_article_bronze), 18 of 18 read back sha256-equal, 0 missing. Additive only -- the 18 raw/seekingalpha/ source objects and the 119 raw/bloomberg/ objects are unchanged (no delete)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260922T0454Z_amgt-rk92-m3-sa-copy_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "f57205b5a7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened before the first live write (leg L1, s3-prefix), closed with the copy's own output as proof; sentinel removed on close."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac0.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac0.py",
+      "output_evidence": "rk91_order True rk91_complete True / refusals 0 / sa_symbol s3://opal-data-harvest/seeking-alpha/harvest/bronze/symbol/security_key=BA_US_Equity / raw_entry_present True sa_bronze_entry_present True (read via `git show HEAD:infra/aws/terraform/harvest/scoped-amgt-api.tf`, the precondition state before this cell's own source edit -- the working-tree file was already edited by the time this criterion was graded, since AC0 is graded after the code commit in the stated grading order).",
+      "denominator": "4 of 4 named values matched <expect> exactly",
+      "status": "PASS",
+      "status_reason": "Every value equals <expect>. The precondition is read from git HEAD rather than the working tree so the reading is unaffected by this session's own execution order (noted, not a defect in the order)."
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python infra/aws/terraform/harvest/gen_harvest_prefixes.py --check && python -m pytest lib/research/api/tests/test_freshness_harvest_stamps.py lib/research/api/tests/test_harvest_prefixes.py -v -p no:cacheprovider",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python infra/aws/terraform/harvest/gen_harvest_prefixes.py --check && python -m pytest lib/research/api/tests/test_freshness_harvest_stamps.py lib/research/api/tests/test_harvest_prefixes.py -v -p no:cacheprovider",
+      "output_evidence": "'OK: lib/research/api/_harvest_prefixes.py matches fresh lib.opal_naming output byte for byte (registry hash 3ea1e46b06a8aa14e1afff8605ca17617b30ccfb9a87bfe8a742ade10b7a51a6)'; 8 passed, 0 failed (test_seekingalpha_reads_new_grammar_key_names_never_article_never_getobject, test_serp_stays_never_on_an_empty_listing, test_discriminating_arm_pinned_base_reads_zero_new_grammar_stamps, and test_harvest_prefixes.py's 5 arms).",
+      "denominator": "8 of 8 new arms passed; --check exit 0",
+      "status": "PASS",
+      "status_reason": "Matches <expect>: generator --check exits 0; all new arms PASSED; seekingalpha stamps read from the 4 SA bronze tables' key names; serp NEVER on an empty listing; 0 GetObject calls beyond the universe document; one `is` arm proving the patched lister is the object read_coverage_freshness reaches; the discriminating arm pinned at 739eb5f288 reads 0 new-grammar stamps."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/api/tests -q -p no:cacheprovider ; python -m pytest integrations/seekingalpha/tests -q -p no:cacheprovider ; python -m pytest integrations/bloomberg/research/tests/test_forecast_fallback.py -q -p no:cacheprovider ; python -m pytest lib/research/coverage/tests -q -p no:cacheprovider ; python -m pytest lib/research/harvest/tests -q -p no:cacheprovider",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/api/tests -q -p no:cacheprovider ; python -m pytest integrations/seekingalpha/tests -q -p no:cacheprovider ; python -m pytest integrations/bloomberg/research/tests/test_forecast_fallback.py -q -p no:cacheprovider ; python -m pytest lib/research/coverage/tests -q -p no:cacheprovider ; python -m pytest lib/research/harvest/tests -q -p no:cacheprovider",
+      "output_evidence": "lib/research/api/tests: 199 passed (0 failed). integrations/seekingalpha/tests: 9 passed. test_forecast_fallback.py: 13 passed. lib/research/coverage/tests: 30 passed. lib/research/harvest/tests: 58 passed. Re-measured at spawn per directory; the api-tests gain (191 -> 199) is exactly the 8 new arms; every other directory's count is unchanged by this cell except the 3 files whose assertions this cell's switch made false (test_rest_harvest.py, test_forecast_fallback.py, test_m1_move.py), all listed by name.",
+      "denominator": "5 of 5 directories at 0 failed",
+      "status": "PASS",
+      "status_reason": "One pytest call per directory (W85-S1 rule observed); 0 failed everywhere; the only changed pre-existing assertions are the ones this cell's switch made false, each named in artifacts_produced."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac3.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac3.py",
+      "output_evidence": "source_objects 18 bytes 209361; resolve [('BABA_US','BABA_US_Equity','MEASURED'),('BA_US','BA_US_Equity','MEASURED'),('COST_US','COST_US_Equity','MEASURED')]; target_objects 0; CodeSha256 vsWWFL9jRKHbQb9WP7x2Ob1Qv02nQpAOJkPcQk8/nkA= ArtifactVersionId uiegBMbpQeruyGtakA88KEZTXMQ2mFtT; policy_sha256 39372755f1ad65ce0c48c1ee714679879e067ef9c57c45206a7f71b3d0c76e0e statements 4; bloomberg landed 34 of 250; seekingalpha landed 0 of 250; serp landed 0 of 250.",
+      "denominator": "9 of 9 named values matched <expect> exactly",
+      "status": "PASS",
+      "status_reason": "source_objects 18, resolve 3 of 3 MEASURED, target_objects 0 -- exactly the <expect> bar; recorded to .scratch/r92/pre_fresh.json as the rollback target (unused: no deploy occurred, so no rollback was needed)."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "written from section 1 RULED item 2 as a file: after reading both signed halves, copies the 18 objects (12 endpoint objects via store.bronze_put + 6 article bodies via harvest_grammar.put_article_bronze) and reads each back",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac4.py",
+      "output_evidence": "pre_copy_source_objects 18; resolved {'BABA_US':'BABA_US_Equity','BA_US':'BA_US_Equity','COST_US':'COST_US_Equity'}; 18 COPY lines, each sha_equal True (12 endpoint keys under seeking-alpha/harvest/bronze/{symbol,report,analysis,news}/security_key=<canonical>/<stamp>.json and 6 article keys under seeking-alpha/harvest/bronze/article/article_hash=<sha256('sa:<id>')>/<stamp>.json); 'copied 18 read_back_equal 18 missing 0'; 'raw_bloomberg_objects 119 unchanged'; 'raw_seekingalpha_objects 18 unchanged'.",
+      "denominator": "18 of 18 copied, 18 of 18 read-back-equal, 0 missing",
+      "status": "PASS",
+      "status_reason": "Exactly matches <expect>: copied 18 read_back_equal 18 missing 0, every new key is builder output, both old prefixes unchanged (no delete). Ledger leg L1 opened before this act and closed with this output as proof."
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only .scratch/r92/m3_build.zip 2>&1 | tail -3 && python .scratch/r92/ac7.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only .scratch/r92/m3_build.zip 2>&1 | tail -3 && python .scratch/r92/ac7.py",
+      "output_evidence": "Build half PASSED: 'BUILD-ONLY: copied to .scratch/r92/m3_build.zip -- NOT uploaded' after gen_harvest_prefixes.py --check OK and 'ISOLATED: OK -- ... 3 of 3 arms'. ac7.py: 'control: boto3 NOT importable (isolated)' printed correctly, then Traceback at .scratch/r92/ac7_inner.py:32 'from lib.research.freshness import build_view as bv' -> build_view.py:53 'import boto3' -> ModuleNotFoundError: No module named 'boto3'. rc=1. NO arm() ever ran (the crash precedes every arm() call); 'RESULT arms ...' never printed.",
+      "denominator": "0 of 4 arms ran (read_coverage_freshness, filing_attempt_reader, build_view_seekingalpha, handler_freshness_route) -- the crash is before arm 1",
+      "status": "FAIL",
+      "status_reason": "<expect> requires every ARM line OK and RESULT ... import_fail 0, exit 0, THEN the deploy proceeds. Instead: ModuleNotFoundError (a real ImportError) at the inner script's own top-level import of build_view, rc=1. Per msg 24137 'ANY IMPORT-FAIL = STOP before deploy with a BLOCKING row (disarm_owner 2.0.0_SA_COO~Z); nothing is uploaded or applied.' Filed AMGT_RESAPP-Z-W92-S1. Root cause: lib/research/freshness/build_view.py's PRE-EXISTING (confirmed via `git show 739eb5f288:...`, predating this cell) module-scope `import boto3`, reached transitively through scoped_amgt.read_coverage_freshness's (also pre-existing) function-scope import of build_view -- never introduced by this cell's own diff, but never exercisable before this cell's brand-new isolated-closure methodology (rk-90/rk-91 predate it)."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac5.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac5.py",
+      "output_evidence": "new_grant_present_both_limbs True; policy_sha256_pre_apply 39372755f1ad65ce0c48c1ee714679879e067ef9c57c45206a7f71b3d0c76e0e statements 4; then 'STOP: AC7 (the closure check) did not pass this session -- refusing to plan or apply.' / 'nothing is uploaded or applied (msg 24137).' rc=3. No `terraform plan` and no `safe-apply.sh apply` were run.",
+      "denominator": "0 of 1 targeted plan run; 0 of 1 targeted apply run (both refused by AC7's STOP)",
+      "status": "FAIL",
+      "status_reason": "The read-only precondition half PASSES on its own terms (new_grant_present_both_limbs True, per CTO msg 24112), but the plan+apply half of <expect> ('Plan: 0 to add, 2 to change, 0 to destroy' then 'raw_entry_live False bright_data_bronze_entry_live True') is NOT REACHED -- correctly refused given AC7's STOP, per msg 24137's own rule that nothing is uploaded or applied on an ImportError. Recorded FAIL because the criterion's full bar was not met, not because the refusal itself was wrong."
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac6.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r92/ac6.py",
+      "output_evidence": "CodeSha256 vsWWFL9jRKHbQb9WP7x2Ob1Qv02nQpAOJkPcQk8/nkA= ArtifactVersionId uiegBMbpQeruyGtakA88KEZTXMQ2mFtT; unchanged_from_AC3 True; bloomberg landed 34 of 250; seekingalpha landed 0 of 250; serp landed 0 of 250; 'STOP: AC6's post-deploy shape (seekingalpha landed 3 of 250) is NOT REACHED -- the deploy that would produce it was refused by AC7 this session.' rc=3.",
+      "denominator": "0 of 3 (seekingalpha 3-of-250, 13-of-13 route status parity, closed ledger with the DEPLOY's proof) reached; 1 of 1 no-drift check (served plane byte-identical to AC3) confirmed instead",
+      "status": "FAIL",
+      "status_reason": "<expect>'s served-plane shape (seekingalpha landed 3 of 250) requires the deploy AC7 stopped. What WAS verified and is recorded here: the served plane is UNCHANGED from AC3 (no half-landing, no rollback needed) and the copy's own deploy-ledger entry (a separate, narrower slug covering only the copy leg) is closed with proof."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This order names no mutant-discrimination test among AC0-AC7 -- a data-move + reader/writer switch + generated-module + redeploy order, not a logic-correctness cell. The closest analogue is the DISCRIMINATING ARM in test_freshness_harvest_stamps.py.",
+      "expected": "N/A -- the spec names no mutant, except the discriminating-arm requirement on the new freshness test (see determinism below).",
+      "observed": "test_discriminating_arm_pinned_base_reads_zero_new_grammar_stamps: the SAME fixture run through scoped_amgt.py pinned at 739eb5f288 (pre-M3) reads seekingalpha NEVER for every row, proving the new arms are discriminating and not a tautology.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "gen_harvest_prefixes.py --write then --check run twice (once before, once after the naming-gate fix) -- byte-identical output both times. build-and-upload-scoped-amgt.sh --build-only run twice (once during exploration, once for the recorded AC7 invocation) -- identical CLOSURE/VERIFY/ISOLATED lines both times. AC4's copy is idempotent by construction (store.bronze_put's IfNoneMatch=\"*\" conditional put; a second run would read existed=True, sha-equal, put_performed=False) -- not exercised twice this session since the first run already succeeded 18 of 18.",
+      "observed": "REGISTRY_HASH 3ea1e46b06a8aa14e1afff8605ca17617b30ccfb9a87bfe8a742ade10b7a51a6 identical across all --check runs; AC7's ImportError reproduced identically across 2 runs (both times crashing at the same line with the same traceback) -- a real, stable defect, not a flake.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the terraform plan and apply over module.scoped_amgt_api.aws_lambda_function.this and aws_iam_role_policy.scoped_amgt_api_grants",
+      "reason": "AC7's closure check FAILED with a real ImportError (row AMGT_RESAPP-Z-W92-S1). Per CTO msg 24137, ANY ImportError is a STOP before deploy -- nothing is uploaded or applied. Deferred to the disarm owner (2.0.0_SA_COO~Z)."
+    },
+    {
+      "item": "any S3 delete of the 18 raw/seekingalpha/ source objects or the 119 raw/bloomberg/ objects",
+      "reason": "BOUNDS + PRD C-FORMAT-SEQUENCE: 'retire' never deletes; deletion is Andrew's one batched word. Post-act read: raw/seekingalpha/ still 18 objects, newest LastModified UNCHANGED at 2026-09-11T19:18:57Z."
+    },
+    {
+      "item": "Seeking Alpha silver (symbol_profile/news_item)",
+      "reason": "BOUNDS + RULED: 'What this cell does NOT do' -- filled by the backfill run's writer, never re-derived here (C-FORMAT-SEQUENCE 'never re-derivation')."
+    },
+    {
+      "item": "lib/research/freshness/build_view.py's module-scope `import boto3` -- no repair attempted",
+      "reason": "Pre-existing (confirmed at the pin 739eb5f288, predating this cell's own diff), unrelated to this cell's own changes, and the task order names a disarm owner (2.0.0_SA_COO~Z) for exactly this class of finding rather than instructing a worker self-repair. Left as-is pending that seat's ruling."
+    },
+    {
+      "item": "lib/research/harvest/store.py, lib/opal_data_harvest/harvest_grammar.py, lib/research/identity/crosswalk.py, infra/aws/terraform/harvest/chatter-axis-schedule.tf -- no edit",
+      "reason": "WALLs, not in <paths>. Read (imported) freely by ac4.py and the generator; never written."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W92-S1: AC7's closure check IMPORT-FAILs on lib/research/freshness/build_view.py's pre-existing module-scope `import boto3`, reached transitively through scoped_amgt.read_coverage_freshness's pre-existing function-scope import of build_view -- a defect that predates this cell (present at the pin 739eb5f288) and was never exercisable before this cell's brand-new isolated-closure methodology. STOP before deploy per msg 24137; nothing was uploaded or applied. Filed BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "gen_harvest_prefixes.py",
+      "invocation": "python infra/aws/terraform/harvest/gen_harvest_prefixes.py --write, then --check",
+      "result": "--write: 'OK: wrote lib/research/api/_harvest_prefixes.py (4 constant(s), registry hash 3ea1e46b06a8aa14e1afff8605ca17617b30ccfb9a87bfe8a742ade10b7a51a6)'. --check (both before and after the naming-gate fix): 'OK: ... matches fresh lib.opal_naming output byte for byte' both times."
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/test_harvest_prefixes.py lib/research/api/tests/test_freshness_harvest_stamps.py -v -p no:cacheprovider",
+      "result": "8 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests -q -p no:cacheprovider",
+      "result": "199 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/seekingalpha/tests -q -p no:cacheprovider",
+      "result": "9 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_forecast_fallback.py -q -p no:cacheprovider",
+      "result": "13 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/coverage/tests -q -p no:cacheprovider",
+      "result": "30 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/harvest/tests -q -p no:cacheprovider",
+      "result": "58 passed"
+    },
+    {
+      "tool": "py_compile + ruff",
+      "invocation": "python -m py_compile <all touched/new .py files>; python -m ruff check <same set>",
+      "result": "py_compile OK (rc 0) on every file; ruff found 1 unused import (test_freshness_harvest_stamps.py's `sys`), fixed, then 'All checks passed!'"
+    },
+    {
+      "tool": "commit-gate.sh + naming-gate (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~92 <...>\" -F <msgfile> -- <paths>, 2 commits (2acd199e5d code, f57205b5a7 live-act artifacts)",
+      "result": "First attempt: naming-gate REFUSED 4 hand-typed 'harvest' scope literals in gen_harvest_prefixes.py (context rule) -- fixed to naming.lookup('harvest')[\"long\"]. Second attempt: naming-gate CONFORMANT/PASS 5 graded; commit-gate clean for 13 of 13 files; committed 2acd199e5d. Second commit: risk-reflex/commit-gate/to-pipeline-gate/surprise-corpus/surprise-row-gate all clean; committed f57205b5a7."
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only .scratch/r92/m3_build.zip",
+      "result": "gen_harvest_prefixes.py --check OK; CLOSURE 51 entries at the fixed point (26 added), 0 missing at either scope; VERIFY-DATA 7 of 7 data members packaged, 7 of 7 vendored packages packaged; ISOLATED 3 of 3 arms OK; 'BUILD-ONLY: copied to .scratch/r92/m3_build.zip -- NOT uploaded'."
+    },
+    {
+      "tool": "AC7 closure check (ac7.py + ac7_inner.py, verbatim from the task order)",
+      "invocation": "python .scratch/r92/ac7.py",
+      "result": "FAILED, rc=1. 'control: boto3 NOT importable (isolated)' then ModuleNotFoundError at 'from lib.research.freshness import build_view as bv' (build_view.py's own module-scope `import boto3`). Reproduced identically on 2 runs."
+    },
+    {
+      "tool": "boto3 (live S3/Lambda/IAM reads and writes)",
+      "invocation": "python .scratch/r92/{ac0,ac3,ac4,ac5,ac6}.py",
+      "result": "AC0/AC3/AC5/AC6: read-only, all values recorded above. AC4: 18 conditional puts (IfNoneMatch=\"*\"), 18 of 18 read back equal. No Lambda code deploy, no IAM apply this session."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-rk92-m3-sa-copy --title ... --author 0.9.0_WK_AMGT_RESAPP~92 --leg \"L1|s3-prefix|seeking-alpha/harvest/bronze/|...\"; close-leg --leg-id L1 --proof ...; close --slug amgt-rk92-m3-sa-copy",
+      "result": "'OK: OPENED deploy ledger' before the first live write; 'OK: leg L1 closed. Remaining open: NONE'; 'OK: CLOSED deploy ledger ... all 1 legs proven; sentinel removed'."
+    }
+  ]
+}
