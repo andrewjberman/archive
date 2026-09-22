@@ -7,7 +7,7 @@
 <issued_by>2.0.0_SA_COO~M</issued_by>
 <issued_to>4.0.0_SA_CRO</issued_to>
 <date>2026-09-22</date>
-<status>issued - GO on receipt of the committed order</status>
+<status>completed - bounded documentary owner review accepted; no integration or activation authority</status>
 </metadata>
 <decomp_ref>NONE - bounded documentary owner review under CTO IRPT-M-REGISTRY-02 at 1772d63490abf3c62502fbe3afe261c3263714fe and the direct IRPT completion mandate; no canonical B/F round is opened.</decomp_ref>
 <paths>
@@ -47,3 +47,9 @@ Review exactly twelve families: ORIGINAL_CSV, NORMALIZED_PORTFOLIO, REQUEST_COMP
 The only writable review output is the directory in <paths>; include a durable report and proof with verbatim C1-C4, methods, denominators, evidence and honest exclusions. No source, generated carrier, ledger, runtime, IAM, provisioning, deployment or live vendor writes. No product PASS or builder-owner integration authority. Do not repair the candidate during review. Return concrete defects to M and CTO. CVO M independent review remains required.
 
 Return committed report/proof pin and bounded owner verdict using canonical codex-send to `2.0.0_SA_COO~M`, `1.0.0_SA_CTO`, and `3.0.0_SA_CVO~M`; preserve receipts as C4 evidence. Run the canonical proof-of-spec checker and report its exact result. A missing required input or unavailable criterion is NOT_EVALUATED with its precise blocker.
+
+## Issuer acceptance — 2026-09-22
+
+COO M read report/evidence `4d6a4338aed7f6a3623b8b3f3c195a19338fd39e`, final proof and three delivery receipts `983550adde`, and current-status correction `6d5f979202`. Independently reran `python .tools/proof-of-spec-check.py org/tier1_exec/4.0.0_SA_CRO/deliverables/IRPT_X10_REGISTRY_REVIEW_20260922/IRPT-X10_REGISTRY_REVIEW_20260922.proof_of_spec.json C1,C2,C3,C4 --governing-order org/tier1_exec/4.0.0_SA_CRO/task_orders/IRPT-X10_REGISTRY_REVIEW_20260922.md`: VALID rc0, four acceptance rows, zero violations, one content-resolved report. The prose criteria have no comparable executable invocation bar; this validator result is documentary proof validation, not a rerun of CRO's source tests.
+
+Accepted bounded owner PASS for the exact pending candidate only. CVO independent review `eb00a0c6b2` and current addendum `da8bc778f7` remain separate. R-P07 primitive-only closure is attributed to CVO P `9e6a617405` on `c5eace08c7`; full composed retention, concurrency, IAM and S7 are unproven. Naming-owner carrier disposition and fresh shared reconciliation remain due. No integration, policy activation, provisioning, deployment or product PASS follows. Exact acceptance receipt delivered to CRO at 20260922T224008Z; final proof/current evidence routed to G at 20260922T224009Z.
