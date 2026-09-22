@@ -11,16 +11,46 @@ whether any one route happened to be live when it was exercised. It is NOT the r
 the other seven visual cells of this round, each of which DOES need FWD-12's real DONE WHEN
 (familiarity on the real, wired page) and carries its own capture plan for that.
 
-## Portal commit (pending, this worker's own worktree)
+## Three passes
+**Pass 1**: built the instrument, 17 of 18 criteria PASS, F65-AC16 REFUSED as written (measured:
+the invocation's single `Export` click never reaches the submit control). Committed portal
+`32fcfe12`, workspace `b54d015b53`. Drained by the issuer at workspace CLOUD `c71fad69a4`.
+
+**Pass 2**: a coordinator message claimed F65-AC16's invocation had already been amended and
+landed at CLOUD `c71fad69a4`. Verified independently before acting (`git diff`, `git show`, `git
+rev-parse CLOUD`, the drain commit's own subject) -- the claim was FALSE at that commit: the edit
+existed only on disk in the shared tree, never committed. Not executed on; filed as surprise row
+`IRPT_FNTEND-W15-S2` instead. Fast-forwarded both repos as instructed (harmless, independently
+verified as clean ancestors); committed the row at workspace `adefaece0e`. `<status>` left
+`pending`, unchanged.
+
+**Pass 3**: the coordinator confirmed pass 2's finding, apologized for the process error, and
+landed the amendment genuinely at workspace CLOUD `6100a2fc06`. This worktree's HEAD (`adefaece0e`)
+was NOT an ancestor of `6100a2fc06` (both `is-ancestor` checks returned false -- genuine
+divergence from intervening commits, including another worker's own surprise row), so a real merge
+was required instead of a fast-forward: one conflict, on the append-only investigation file, both
+sides' rows kept as separate array entries (verified after resolution: 0 conflict markers, JSON
+re-parses, 239 rows). Merge commit `73ea9594a5`. Read F65-AC16 fresh from this worktree's own
+merged copy of the governing order (not the coordinator's paraphrase) before acting: it now carries
+the amended invocation, second click included. Restarted the dev server, re-ran ONLY F65-AC16,
+confirmed `DELAYED: api/scoped/investor-reporting/export (4000ms)`, stopped the server and
+reverified the port closed. Re-recorded the proof instance (AC1-15/17/18 evidence reused verbatim;
+only AC16's row, the three artifact pins, and the surprises array changed) and re-validated.
+
+## Portal commit
 `portal/scripts/ui-smoke.mjs` -- additive flags only: `--expect`, `--expect-text`,
 `--expect-style`, `--expect-ground`, `--inject-css`, `--delay`, `--strict`. Old flags/lines
 untouched (F65-AC2). New test surface: `src/pages/InvestorReporting/__tests__/fe-s-65/regression.sh`
-and `.../fixtures/dead.json`. LOCAL on branch `wk-irpt_fntend-11-65-fe-s-65-portal`, portal frozen,
-not pushed. Committed AFTER this file, per this worker's commit sequence (see WORKER REPORT for hashes).
+and `.../fixtures/dead.json`. Committed at portal `32fcfe12` (pass 1), LOCAL on branch
+`wk-irpt_fntend-11-65-fe-s-65-portal` (portal frozen), fast-forwarded to `71167fbf` in pass 2 (an
+unrelated FE-s-73 test, not touching this cell's surface); not pushed.
 
-## Workspace commit (pending, this worker's own worktree)
-Surprise row `IRPT_FNTEND-W15-S1` in `INVESTIGATION_v2.md`; this proof-of-spec instance and this
-result file. LOCAL on branch `wk-irpt_fntend-11-65-fe-s-65`, not pushed.
+## Workspace commits
+Surprise row `IRPT_FNTEND-W15-S1` (pass 1, `b54d015b53`); surprise row `IRPT_FNTEND-W15-S2` +
+fast-forward to `c71fad69a4` (pass 2, `adefaece0e`); merge to `6100a2fc06` resolving the
+investigation-file conflict (pass 3, `73ea9594a5`); this proof-of-spec instance's AC16 update,
+this result file, and the `<status>` flip (pass 3, final commit -- see WORKER REPORT for hash).
+LOCAL on branch `wk-irpt_fntend-11-65-fe-s-65`, not pushed.
 
 ## Final measured state (this worktree, dev server port 5900)
 
@@ -40,32 +70,26 @@ result file. LOCAL on branch `wk-irpt_fntend-11-65-fe-s-65`, not pushed.
 - F65-AC13 (WIRE MATCH, dead arm, authored `fixtures/dead.json`): `FIXTURES-MATCH: matched 0 of 1` -- **PASS**
 - F65-AC14 (`--strict` fails): `EXIT=1` -- **PASS**
 - F65-AC15 (`--strict` passes): `EXIT=0` -- **PASS**
-- F65-AC16 (`--delay` PASS arm): `rc=0`, but **no `DELAYED` line anywhere in the run's output** --
-  **FAIL, REFUSED AS WRITTEN**. Clicking the toolbar `Export` control
-  (`ExportButton.tsx:171-180`) only opens `ExportModal` (`setOpen(true)`); it issues no request.
-  The POST to `/api/scoped/investor-reporting/export` fires only from the MODAL's own
-  `Create export` button (`ExportModal.tsx:257-266`, `data-slot="submit-export"`), wired through
-  `onSubmit` in `ExportButton.tsx:193`. This criterion's invocation names only ONE click
-  (`Export`), so the export endpoint is never requested and `--delay` never has a matching URL to
-  hold. **The `--delay`/`--click` instrument itself is sound, verified two ways**: (1) the
-  identical invocation plus an added `--click 'Create export'` DOES print
-  `DELAYED: api/scoped/investor-reporting/export (4000ms)`; (2) `--delay
-  'investor-reporting/directory/resolve=4000'` alone, zero clicks, against a URL that genuinely
-  fires on page load, also prints `DELAYED: investor-reporting/directory/resolve (4000ms)`. This
-  is an ORDER-INVOCATION defect (a missing second click), never a grammar-implementability defect
-  in the flags this cell built -- filed as surprise row `IRPT_FNTEND-W15-S1`, not invented around.
-  FE-s-71 (the cell F65-AC16's own text names as depending on this arm) will need `--click Export
-  --click 'Create export' --delay ...` to build its in-flight state.
+- F65-AC16 (`--delay` PASS arm, AMENDED invocation with the second click): `DELAYED:
+  api/scoped/investor-reporting/export (4000ms)` -- **PASS** (pass 3). Pass 1 measured this arm
+  FAIL as originally written (single click; the toolbar `Export` control
+  (`ExportButton.tsx:171-180`) only opens `ExportModal`, the POST fires from the modal's own
+  `Create export` button, `ExportModal.tsx:257-266`) and REFUSED it rather than self-grading past
+  it, filing surprise row `IRPT_FNTEND-W15-S1`; the `--delay`/`--click` instrument itself was
+  verified sound at that time (an added second click, or a load-time URL with zero clicks, both
+  printed DELAYED correctly). The issuer confirmed the same root cause and amended the invocation
+  to `--click Export --click 'Create export' --delay ... --console DELAYED` (workspace CLOUD
+  `6100a2fc06`, read fresh from this worktree's own merged copy, not the coordinator's paraphrase).
+  Re-run against the amended invocation on a freshly restarted dev server: PASS, matching
+  `<expect>` exactly.
 - F65-AC17 (whole suite green, dev server stopped, port verified closed,
   `IRPT_FE_DEV_PORT` unset): `612 pass / 22 skip / 0 fail`, 2581 expect() calls, Ran 634 tests
   across 114 files. [56.41s] -- **PASS**
 - F65-AC18: judgment, RECORDED, no verdict. The header comment above the flag-parsing block and
   the header comment above the expectation pass both cite THE INSTRUMENT grammar verbatim; every
   flag is repeatable via the file's own established `args.reduce` pattern; every PASS/FAIL/
-  ASSERT/FIXTURES-MATCH line quoted above (F65-AC3..AC15, AC17) was produced by running the
-  instrument, none hand-typed; F65-AC16 is the one recorded exception (a FAIL by the instrument's
-  own honest output, not a fabricated line); F65-AC2's regression run is the old-flags/old-lines-
-  untouched evidence.
+  ASSERT/FIXTURES-MATCH/DELAYED line quoted above was produced by running the instrument, none
+  hand-typed; F65-AC2's regression run is the old-flags/old-lines-untouched evidence.
 
 ## Mutant and determinism controls
 - **Mutant**: the six built-in wrong-state arms (F65-AC4, AC6, AC8, AC10, AC13, AC14) each fired
@@ -74,20 +98,22 @@ result file. LOCAL on branch `wk-irpt_fntend-11-65-fe-s-65`, not pushed.
 - **Determinism**: F65-AC3's own invocation run twice in immediate succession printed
   byte-identical deciding lines (`diff` rc=0). See `controls.determinism`.
 
-Per this order's own rule (a criterion the worker cannot satisfy as written is REFUSED, never
-self-graded past a real failure), **`<status>` stays `pending`**: F65-AC16 measures a FAIL, for a
-reason (the invocation's click sequence) outside this cell's `<paths>` to alter -- the criterion
-is not this cell's grammar to change, and the order says its invocation is not this worker's to edit.
+All 17 mechanical criteria now measure PASS by their own printed output, with no FAIL row; F65-AC18
+is RECORDED with no self-graded verdict. **`<status>` is flipped to `complete`** in this same pass,
+per this order's own rule (flip only when VALID with no FAIL row).
 
 ## Rows filed
-- `IRPT_FNTEND-W15-S1` -- new, OBSERVATION, INERT (no disarm owner: the instrument's own grammar
-  is unaffected, only this one criterion's invocation). Names the exact mechanism (a second click
-  on the modal's own submit control is needed) and the two diagnostic runs that isolated it from
-  the instrument's own code.
+- `IRPT_FNTEND-W15-S1` -- OBSERVATION, INERT. Pass 1: named the exact mechanism (a second click on
+  the modal's own submit control is needed) and the two diagnostic runs that isolated it from the
+  instrument's own code. RESOLVED by the issuer's amendment at CLOUD `6100a2fc06`; F65-AC16 now
+  reads PASS.
+- `IRPT_FNTEND-W15-S2` -- OBSERVATION, INERT. Pass 2: a coordinator message claiming the amendment
+  was already landed at CLOUD `c71fad69a4` was measured false at that commit before acting on it.
+  Not a fault of this worker's process; the coordinator confirmed and corrected it in pass 3.
 
 ## Proof-of-spec
 `org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~15/IRPT_FNTEND.TO-FE-s-65.the-instrument-content-style-ground-assertions.proof_of_spec.json`
--- `proof-of-spec-check.py` run before this file was finalized: `VALID (rc=0)`, 18 acceptance
-rows, 0 violations, surprises-frame resolves the one filed row. F65-AC16 carries `status: FAIL` by
-its own printed output, so the `complete` flip is correctly withheld, matching the same pattern
-FE-s-57 and FE-s-59's own deliverables used on this file (F59-AC5, one cell earlier).
+-- `proof-of-spec-check.py` run before this file was finalized (pass 3, against the amended
+governing order): `VALID (rc=0)`, 18 acceptance rows, 0 violations, invocation-alignment 17/17
+match (confirming this instance's AC16 invocation now matches the amended order text exactly),
+surprises-frame resolves both filed rows. No FAIL row remains -- `<status>` flip is correct.
