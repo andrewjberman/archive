@@ -159,14 +159,19 @@ instance whose acceptance row records the adapted invocation instead of the
 task order's literal text (measured directly; see row S4's grounding) --
 the round-11 precedent for exactly this situation (commit `61a3203648`) was
 the ISSUER amending the TO file, after which the worker's re-run against
-the corrected selector was legitimately recorded as PASS. No such amendment
-exists here, so F77-AC5's acceptance row is the literal, measured FAIL
-above; the adapted run and its control are disclosed in that row's
-`status_reason` and in surprise row S4 as evidence the fix itself is
-correct, not as a substitute grade. Saved `f77_received_one_primary.png`
-(identical pixels either way -- only the console assertions differ); read
-directly: `Download` is filled purple, `Create export` is now an outlined
-navy/white secondary button.
+the corrected selector was legitimately recorded as PASS. Saved
+`f77_received_one_primary.png` (identical pixels either way -- only the
+console assertions differ); read directly: `Download` is filled purple,
+`Create export` is now an outlined navy/white secondary button.
+
+**POST-AMENDMENT UPDATE (2.0.0_SA_COO~F, commit `80d84514dc`, disarming row
+S4):** the COO independently verified the above and amended F77-AC5's own
+`<invocation>` in the task order to the adapted pair
+(`class*="hsl(var(--primary))"`), exactly what this worker had already
+measured and disclosed. Re-run verbatim against the amended text:
+`ASSERT-CONTENT: 1 of 2 met` -- **now PASS-by-output on the criterion's own
+literal terms**, no code change needed. This worker's acceptance row was
+updated accordingly.
 
 **F77-AC6** -- whole-suite bar. Dev server (port 5937) stopped and verified
 closed (`curl` returned `000`) before this run; `IRPT_FE_DEV_PORT` unset.
@@ -193,6 +198,14 @@ FAIL, not weakened, and the fix is not reverted to dodge it -- reverting
 would mean re-delivering round 11's own undelivered C5 inversion a second
 time.
 
+**POST-AMENDMENT UPDATE (2.0.0_SA_COO~F, commit `80d84514dc`, disarming row
+S1):** the COO widened this task order's `<paths>` by exactly the one file
+named above, authorizing ONLY updating `reasonLineBefore()`'s hard-coded
+string to `text-[#6B7280]`. Made that one-line edit (portal commit
+`0911377f`), re-ran the whole-suite invocation with the dev server stopped
+and the port confirmed closed: `627 pass, 22 skip, 0 fail` -- **matches
+`<expect>` verbatim, now PASS.**
+
 **F77-AC7** -- JUDGMENT, recorded, no verdict. Evidence: the two fixes
 above, the BEFORE/AFTER pair for C5 (`f77_idle_before.png` /
 `f77_idle_after.png`, both the literal container check AND the
@@ -205,23 +218,25 @@ export` alone, filled; received: `Download` filled, `Create export` demoted
 to secondary, `f77_received_one_primary.png`, plus the adapted-selector run
 that reads the genuine 1-of-2 count).
 
-## PROOF INSTANCE: TWO GENUINE FAILS, ORDER STAYS OPEN
+## PROOF INSTANCE: ORIGINALLY TWO GENUINE FAILS; NOW RESOLVED BY ISSUER AMENDMENT
 
-`python .tools/proof-of-spec-check.py <instance> F77-AC1..F77-AC7
---governing-order <TO>` returns **VALID (rc=0)** -- the instance itself is
-schema-valid and every recorded invocation matches the task order's literal
-text. But two acceptance rows are honestly **FAIL** (F77-AC5, F77-AC6), each
-for a reason outside this cell's own write surface (a literal selector this
-build's class names never match, and a byte-pinned test outside this
-cell's `<paths>` grant). Per BOUNDS ("REFUSE any criterion you cannot
-satisfy as written... do not weaken a criterion") and the task order's own
-proof_of_spec instruction, **a VALID instance is not a MET order**: `<status>`
-is NOT flipped to `complete`. The C5 inversion and the one-primary-action
-fix are both genuinely delivered (F77-AC1/AC2/AC3/AC4 PASS, plus the
-descendant-level and adapted-selector evidence above); what remains open is
-a task-order amendment (F77-AC5's literal selectors) and a wider-grant fix
-(F77-AC6's collision), both named in the surprise rows below for the
-issuer.
+The original submission of this instance returned **VALID (rc=0)** with two
+honestly **FAIL** acceptance rows (F77-AC5, F77-AC6), each for a reason
+outside this cell's own write surface (a literal selector this build's
+class names never match, and a byte-pinned test outside this cell's
+`<paths>` grant). Per BOUNDS ("REFUSE any criterion you cannot satisfy as
+written... do not weaken a criterion"), `<status>` was NOT flipped to
+`complete` at that point, and rows S1/S4 were filed for the issuer.
+
+The issuing COO (`2.0.0_SA_COO~F`) independently verified both rows and
+amended the task order (commit `80d84514dc`): F77-AC5's `<invocation>` now
+uses the adapted selector pair this worker had already measured and
+disclosed; F77-AC6's `<paths>` now includes exactly the one file needed for
+the one-line `reasonLineBefore()` fix. Re-running both amended criteria
+(no further code change needed for AC5; one authorized line changed for
+AC6) now reads PASS on both. All seven criteria are now genuinely met
+(F77-AC1..AC6 PASS-by-output, F77-AC7 judgment RECORDED) and `<status>` is
+flipped to `complete`.
 
 ## SURPRISE ROWS FILED
 
