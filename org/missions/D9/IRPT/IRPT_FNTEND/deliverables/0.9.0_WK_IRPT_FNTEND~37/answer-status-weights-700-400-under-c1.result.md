@@ -54,51 +54,62 @@ the two co-located labels are visually and measurably distinct, not accidentally
   `EXPECT-STYLE[[data-slot="answer-state"]::font-weight]: PASS 700`, `ASSERT-CONTENT: 1 of 1 met`,
   `ASSERT-STYLE: 2 of 2 met` -- **PASS**. PNG read confirms the visible weight contrast on the same
   capture.
-- **F87-AC5** (GROUND ON THE ACTUAL CONTAINER, control d) -- **FAIL, order defect, reported not
-  self-graded past.** The literal invocation pairs `--expect-ground` with `--inject-css` in ONE call.
-  `scripts/ui-smoke.mjs:437-442` applies every `--inject-css` unconditionally BEFORE the
-  `--expect-ground` measurement loop at `:557-574` (confirmed by reading the source; flag order on the
-  command line does not matter -- both arg lists are extracted by an order-independent `reduce()` over
-  the whole `args` array, `:145-146`). So this exact invocation can only ever print the POST-inject
-  ground reading, never a pre-inject one, and its single `EXPECT-GROUND` line reads
-  `EXPECT-GROUND[[data-slot="answer-status"]]: FAIL rgb(196, 203, 219)`, `ASSERT-GROUND: 0 of 1 met`,
-  rc=0 -- no `PASS rgb(255, 255, 255)` substring anywhere in the output, so the criterion's own
-  `<expect>EXPECT-GROUND.*PASS rgb\(255, 255, 255\)</expect>` does not match. The cell text itself
-  assumes a "SECOND EXPECT-GROUND line (post-inject)" exists in this capture, implying a first,
-  pre-inject PASS line -- the tool does not produce one when both flags are given together. Filed as
-  row `IRPT_FNTEND-W37-S1` (BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~F`). Ran a SEPARATE diagnostic
-  (same fixture/selector/expect-ground value, `--inject-css` omitted, NOT the graded invocation, not
-  self-substituted into the graded row per row `IRPT_FNTEND-W34-S1`'s own precedent) to confirm the
-  underlying claim is true: `EXPECT-GROUND[[data-slot="answer-status"]]: PASS rgb(255, 255, 255)` --
-  the container genuinely grounds white (C3's panel role) absent injection; only this criterion's
-  literal single-invocation cannot demonstrate both the true-ground read and the wrong-ground control in
-  one capture.
+- **F87-AC5** (GROUND ON THE ACTUAL CONTAINER, control d) -- **PASS, on the COO's amended invocation.**
+  The original single invocation paired `--expect-ground` with `--inject-css` in ONE call, which was
+  structurally impossible: `scripts/ui-smoke.mjs:437-442` applies every `--inject-css` unconditionally
+  BEFORE the `--expect-ground` measurement loop at `:557-574` (flag order on the command line does not
+  matter -- both arg lists are extracted by an order-independent `reduce()` over the whole `args` array,
+  `:145-146`), so a single capture could never print both a pre-inject PASS and a post-inject FAIL. This
+  was filed as row `IRPT_FNTEND-W37-S1` (BLOCKING, disarm_owner `2.0.0_SA_COO~F`) and reported, not
+  self-graded past. **COO AMENDMENT** split the criterion into two separate `node scripts/ui-smoke.mjs`
+  calls in one shell command: first capture (`f87_ground_positive.png`, no injection) --
+  `EXPECT-GROUND[[data-slot="answer-status"]]: PASS rgb(255, 255, 255)`, `ASSERT-GROUND: 1 of 1 met`;
+  second capture (`f87_ground_wrong.png`, injected `#c4cbdb`) --
+  `EXPECT-GROUND[[data-slot="answer-status"]]: FAIL rgb(196, 203, 219)`, `ASSERT-GROUND: 0 of 1 met`.
+  Both match the amended `<expect>` exactly: the container genuinely grounds white (C3's panel role)
+  absent injection, and the wrong-ground control genuinely discriminates (FAIL, never a vacuous PASS).
+  Re-run live by this worker on the amended text (2026-09-22, port 6003) -- matches the issuing COO's own
+  independent pre-amendment re-run exactly. Row `IRPT_FNTEND-W37-S1` DISARMED per the amendment's own
+  stated condition.
 - **F87-AC6** (ABSENT-SELECTOR CONTROL, control e: qualifier badge genuinely absent on the
   answer-BEARING/complete=true fixture): `EXPECT-STYLE[[data-slot="answer-qualifier"]::font-weight]:
   UNMEASURABLE (selector matched nothing)`, `ASSERT-STYLE: 0 of 1 met` -- **PASS** (matches
   `<expect>UNMEASURABLE</expect>`; rc=1 per the script's own FE-s-74 fail-closed-on-unmeasurable design,
   unrelated to the text match). PNG read confirms the qualifier badge does not render on the complete
   state.
-- **F87-AC7** (whole suite green) -- **FAIL, pre-existing, out-of-grant, already disclosed by the
-  issuer.** Dev server stopped first (`curl` confirmed port 6003 closed, `000`), `IRPT_FE_DEV_PORT`
-  unset: `648 pass`, `27 skip`, `2 fail`, `2704 expect() calls`, `Ran 677 tests across 127 files` --
-  exactly the residual `REMEDIATION_v10.md:5` names at cut time ("648 pass / 27 skip / 2 fail. The two
-  failures are committed sibling fixtures missing unprojected_grant"). Both failures are in
-  `__tests__/fe-s-81/generator-output-carries-unprojected-grant.test.ts`, against
-  `fixtures/smoke/fe-s-13-wire.json` (0 of 9 entries carry `unprojected_grant`) and
-  `fixtures/smoke/fe-s-14-print-v1.json` (0 of 2) -- confirmed by reading the failing assertions
-  directly. `git diff --stat` confirms this worker's ONLY change is `AnswerStatus.tsx`, 2 lines; neither
-  failing file is touched by, or reachable from, a font-weight class change. Not in this cell's `<paths>`
-  grant (`AnswerStatus.tsx` + `__tests__/fe-s-87/` only), and already a known residual the issuer
-  disclosed before this order was cut -- not a new finding, so no new surprise row minted for it (see
-  `IRPT_FNTEND-W37-S1` above for the one genuinely new finding this cell surfaced).
+- **F87-AC7** (whole suite green, excluding the disclosed cross-cell fixture gap) -- **PASS, on the
+  COO's amendment-2 corrected invocation.** The literal `bun test src/pages/InvestorReporting` invocation
+  genuinely reads 2 fail in every round-14 worker's isolated worktree, because none of the four cells'
+  worktrees can see the others' fixes until the drain: `648 pass`, `27 skip`, `2 fail`,
+  `2704 expect() calls`, `Ran 677 tests across 127 files` -- exactly the residual `REMEDIATION_v10.md:5`
+  names at cut time. Both failures are in
+  `__tests__/fe-s-81/generator-output-carries-unprojected-grant.test.ts`, exercising `FE-s-85`'s own cell
+  (row `W25-S1`), whose regenerated fixtures are committed on ITS OWN branch only -- not a regression on
+  this cell's surface (`git diff --stat` confirms this worker's ONLY change is `AnswerStatus.tsx`, 2
+  lines). This worker's own first-pass filter (`grep "^✗" .suite_check_87.log | grep -vc
+  "generator-output-carries-unprojected-grant"`, amendment 1) was itself reported and later found broken
+  by the issuing COO in two independent ways: (a) `NO_COLOR=1` does not suppress bun's ANSI codes here,
+  so a bare `grep "^✗"` matched ZERO lines regardless of real failures -- `UNEXPECTED-FAIL-COUNT=0`
+  printed UNCONDITIONALLY, a vacuous pass (first caught by worker `~36`'s row `W36-S2`); (b) the exclusion
+  pattern used the hyphenated test-FILE name, which never matched the actual printed line text (spaced,
+  the `describe`/`test` block's own wording), so even post-ANSI-strip the exclusion matched nothing.
+  **COO AMENDMENT 2** corrects the filter: strip ANSI first (`sed -r 's/\x1b\[[0-9;]*m//g'`), then exclude
+  on the stable criterion-id token `F81-AC3/AC4` (present in both known lines, absent from every other
+  line). Re-run live by this worker on the amended text (2026-09-22, dev server stopped first -- `curl`
+  confirmed port 6003 closed `000`, `IRPT_FE_DEV_PORT` unset): the cleaned log's raw `grep "^✗"` count is
+  exactly **2** (positive control -- the filter genuinely finds failures now, unlike amendment 1's silent
+  zero), both lines are `✗ F81-AC3/AC4 -- generator output carries unprojected_grant on every entry,
+  every file > fe-s-13-wire.json` and `... > fe-s-14-print-v1.json`, both excluded by the `F81-AC3/AC4`
+  token, `UNEXPECTED-FAIL-COUNT=0`. Matches the issuing COO's own independently re-verified corrected
+  invocation exactly, and matches worker `~36`'s own row `W36-S2` disclosure. Row `IRPT_FNTEND-W37-S1`
+  (and `W36-S2` where filed) DISARM per amendment 2's own stated condition; the true
+  whole-suite-including-FE-s-85 bar is verified separately by the COO at drain time in the merged tree.
 - **F87-AC8** (judgment, graded by the CVO at L9): RECORDED, no verdict taken. State-label weight
   measured 700, qualifier weight measured 400 on the same co-located capture (F87-AC4); the wrong-state
   control (F87-AC3) and absent-selector control (F87-AC6) both genuinely discriminate, confirmed above;
   the ground measurement targets `[data-slot="answer-status"]`, the actual panel container (C3's role),
-  not the page canvas -- confirmed true by the supplementary diagnostic under F87-AC5, though the
-  criterion's own literal invocation cannot demonstrate it in one capture (order defect, row
-  `IRPT_FNTEND-W37-S1`).
+  not the page canvas -- confirmed white pre-inject and genuinely discriminating post-inject (F87-AC5, on
+  the COO's amended two-capture invocation).
 
 ## Controls (THE CRITERION RULE / C-S176, five controls)
 
@@ -106,29 +117,35 @@ the two co-located labels are visually and measurably distinct, not accidentally
 - (b) NAMED CONTENT -- F87-AC2 ("Ready", weight 700) and F87-AC4 (qualifier text + weight 400,
   co-located state weight 700).
 - (c) WRONG-STATE NEGATIVE CONTROL -- F87-AC3, discriminates (0 of 1 met).
-- (d) GROUND ON THE ACTUAL CONTAINER -- F87-AC5's literal invocation cannot demonstrate this in one
-  capture (order defect, reported above); the underlying claim is confirmed TRUE by a separate
-  diagnostic run, kept supplementary, never substituted into the graded row.
+- (d) GROUND ON THE ACTUAL CONTAINER -- F87-AC5, on the COO's amended two-capture invocation: first
+  capture PASS white (no injection), second capture FAIL on injection -- genuinely discriminates.
 - (e) ABSENT-SELECTOR CONTROL -- F87-AC6, discriminates (UNMEASURABLE, not a vacuous PASS).
 
 **DECLARED-KEY VALIDITY vs EXERCISED FULFILMENT, stated separately per C-S176 step 6:** all 8
 `<expected_criteria>` keys parse in this instance (DECLARED-KEY VALIDITY: 8 of 8). EXERCISED
-FULFILMENT: 6 of 8 criteria genuinely PASS by their own literal `<expect>` (F87-AC1/AC2/AC3/AC4/AC6,
-plus the judgment row F87-AC8 recorded with no verdict); 2 of 8 genuinely FAIL as literally cut
-(F87-AC5 -- order defect, control (d) unreachable by this exact invocation though the underlying claim
-is true; F87-AC7 -- pre-existing 2-fail residual, out of grant, already disclosed at cut time). Neither
-FAIL is self-graded past; both are reported with their measurement.
+FULFILMENT: 8 of 8 criteria genuinely PASS-by-output or RECORDED (judgment) as literally cut
+(F87-AC1/AC2/AC3/AC4/AC5/AC6/AC7 PASS; F87-AC8 judgment recorded with no verdict). F87-AC5 and F87-AC7
+initially FAILed on this worker's first pass (order defects, reported not self-graded past, row
+`IRPT_FNTEND-W37-S1`); the issuing COO amended both criteria's invocations, independently re-verified
+them live, and this worker re-ran both amended invocations itself with matching results before this
+flip.
 
 ## Rows filed
 
-- **`IRPT_FNTEND-W37-S1`** (BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~F`). F87-AC5's literal invocation
-  pairs `--inject-css` with `--expect-ground` in one call; `scripts/ui-smoke.mjs` applies inject-css
-  unconditionally before any ground measurement, so the invocation can only ever print the post-inject
-  (wrong-ground) reading, never the pre-inject `PASS rgb(255, 255, 255)` the criterion's own `<expect>`
-  requires. The underlying ground claim is confirmed true by a separate, non-graded diagnostic run.
-  Disarms when the issuing COO amends F87-AC5's invocation/expect (e.g. two separate captures, or an
-  `<expect>` matching the single post-inject FAIL line this tool actually produces) and the cell is
-  re-run against the amended text.
+- **`IRPT_FNTEND-W37-S1`** (BLOCKING, disarm_owner `2.0.0_SA_COO~F`) -- **DISARMED.** F87-AC5's original
+  literal invocation paired `--inject-css` with `--expect-ground` in one call; `scripts/ui-smoke.mjs`
+  applies inject-css unconditionally before any ground measurement, so the invocation could only ever
+  print the post-inject (wrong-ground) reading, never the pre-inject `PASS rgb(255, 255, 255)` the
+  criterion's own `<expect>` required; F87-AC7's literal whole-suite invocation could not distinguish a
+  real regression on this cell's surface from the sibling-cell FE-s-85 fixture gap every round-14 worker
+  reads in isolation. The issuing COO amended F87-AC5's invocation (task-order file, this worker's own
+  worktree copy) and independently re-verified it live; this worker re-ran it itself with a matching
+  result (F87-AC5 above). F87-AC7's amendment-1 filter was itself found broken by the issuing COO
+  (ANSI codes not suppressed by `NO_COLOR=1` here, plus a hyphen/space mismatch in the exclusion pattern)
+  and corrected under **amendment 2** (ANSI-strip via `sed`, exclude on token `F81-AC3/AC4`); this worker
+  re-ran the amendment-2 text itself with a matching result, positive-controlled (raw `✗` count = 2 post-
+  strip, both excluded) (F87-AC7 above) -- row DISARMED per the amendments' own stated condition (order
+  re-run and flipped complete).
 
 ## Portal commits
 
@@ -138,17 +155,23 @@ branch `wk-irpt_fntend-14-87-fe-s-87-portal` (portal frozen); not pushed.
 ## Workspace commits
 
 Surprise row `IRPT_FNTEND-W37-S1` (INVESTIGATION_v2.md), this proof-of-spec instance, this result file,
-five committed PNG captures under this worker's deliverables folder (`f87_ready_state_700.png`,
+seven committed PNG captures under this worker's deliverables folder (`f87_ready_state_700.png`,
 `f87_wrong_state_negative_control.png`, `f87_qualifier_400_and_state_700.png`,
-`f87_ground_and_wrong_ground.png`, `f87_absent_qualifier_control.png`). LOCAL on branch
+`f87_ground_positive.png`, `f87_ground_wrong.png`, `f87_absent_qualifier_control.png`, plus the two
+now-superseded diagnostic captures `f87_ground_and_wrong_ground.png` and
+`f87_ground_diagnostic_no_inject.png` kept for the record). LOCAL on branch
 `wk-irpt_fntend-14-87-fe-s-87`, not pushed.
 
 ## `<status>`
 
-**Stays `pending`.** F87-AC1/AC2/AC3/AC4/AC6 genuinely PASS by output; F87-AC8 (judgment) RECORDED with
-no self-graded verdict; F87-AC5 and F87-AC7 genuinely FAIL by their own `<expect>` as literally cut,
-neither weakened nor self-graded past, both reported here and in the proof-of-spec instance with their
-measurement. Per the standing bar, `<status>` flips to `complete` only when every mechanical criterion is
-PASS-by-output -- two are not, so this order stays open pending the issuer's amendment of F87-AC5 (a tool-
-mechanics mismatch, row `IRPT_FNTEND-W37-S1`) and F87-AC7's pre-existing, out-of-grant residual
-(`REMEDIATION_v10.md`'s own disclosed 2-fail baseline, FE-s-81's surface).
+**Flips to `complete`.** F87-AC1/AC2/AC3/AC4/AC5/AC6/AC7 genuinely PASS by output; F87-AC8 (judgment)
+RECORDED with no self-graded verdict. F87-AC5 and F87-AC7 originally genuinely FAILed by their own
+`<expect>` as literally first cut (order defects, reported not self-graded past, row
+`IRPT_FNTEND-W37-S1`); the issuing COO amended F87-AC5's invocation once and F87-AC7's invocation TWICE
+(amendment 1's own filter was itself broken -- ANSI codes not suppressed, exclusion-pattern hyphen/space
+mismatch -- caught and corrected under amendment 2) in the task-order file (and this worker's own
+worktree copy), independently re-verifying each corrected invocation live, and this worker re-ran every
+amended invocation itself with matching results (see F87-AC5/AC7 above and the updated proof-of-spec
+instance). Per the standing bar, `<status>` flips to `complete` when every mechanical criterion is
+PASS-by-output and the judgment criterion is RECORDED -- confirmed by `proof-of-spec-check.py` on the
+updated instance.
