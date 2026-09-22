@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-101",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-101.battery-multi-name-ticker-memo.md",
+    "group": "W",
+    "vintage_commit": "9ed9e5232c18c0e984c5e84cd950adc2f556b6f6"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "9ed9e5232c18c0e984c5e84cd950adc2f556b6f6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-101.battery-multi-name-ticker-memo.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~101",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-101, cell AMGT-rk-101 (round 26, ahead of the B2 run; ruling 1.0.0_SA_CTO~Z msg 24204 (b) as amended by msg 24207 'RULING, cell (b): (i)'). Worker 0.9.0_WK_AMGT_RESAPP~101, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-26-101 in worktree C:/tmp/wk-amgt-26-101, base 9ed9e5232c. THE BAR FIRST: branch wk-amgt-26-101, org/ and .tools/ present, TREE-OK. Order read WORKER FACE only, top to the RECORD FACE marker. AC0 run FIRST (before any edit): pin_object commit; the five battery site lines matched section 1's measured text exactly (566 def _sec_ticker_table, 657 def _step1_edgar_ticker, 665 the call, 1213 def run_battery, 1280 --security-key); ticker_table_call_sites 2 at :566/:665 (measured); crlf 0 non_ascii_chars 0; filings suite 86 passed (F0); test_battery.py 22 passed (B0); AC3's CONTROL run (new IS the pin) printed single_identical True, 1119/1119 bytes, pin_fetches 1 new_fetches 1 same_urls True -- matches section 1 exactly, cell proceeds. Snapshotted working-tree bytes of battery.py to .scratch/r101/battery.py.orig before editing (MUTATION DISCIPLINE; never git checkout --/git stash used). Built TickerTableMemo (fetches counter; first .table() call runs _sec_ticker_table once, caches the parsed table on success, caches and re-raises a RuntimeError/ValueError, and does NOT cache/re-raise any other exception -- a sink/writer error propagates untouched through every layer since only (RuntimeError, ValueError) is ever caught, matching the rk-98 narrowing). Threaded ticker_memo=None (default OFF) through run_battery -> _step1_edgar_ticker's step-1 lambda, and through _step1_edgar_ticker's own try/except (RuntimeError, ValueError), which now calls ticker_memo.table(...) when given, else today's direct _sec_ticker_table(...) call -- unchanged for every existing caller. Rewrote main(): --security-key is now action='append', required=True; extracted the per-name print block (UNRESOLVED-SOURCE/RESOLVED, STEP lines, verified_site, written/OK-uploaded) into _print_battery_result(obj, args), called identically for N==1 (today's exact path, unchanged keys resolution branching: --keys-json / --bloomberg+--exchange / keys_from_crosswalk, --exchange/--legal-name-override applied after) and, once per name, for N>1. N>1: --keys-json/--bloomberg/--legal-name-override/--exchange are each refused via parser.error before any fetch (checked before keys resolution); every name's keys are resolved up front via keys_from_crosswalk(key) (Bloomberg lookup never used for N>1); one TickerTableMemo and at most one fetch.BronzeSink() (if --write-bronze) built for the whole process; 'BATTERY NAME %d of %d: %s' printed before each name's unchanged block; any exception (e.g. a sink write error) propagates and stops the run; after the last name, 'BATTERY DONE: %d name(s), %d RESOLVED, %d UNRESOLVED-SOURCE, ticker_table_fetches %d' (memo.fetches) is printed and main returns 0. Wrote lib/research/filings/tests/test_battery_multi.py (new, 8 tests, W85-S1 qualified imports lib.research.filings.battery/lib.research.filings.fetch, pytest style with monkeypatch/capsys; fetch.http_get, battery.keys_from_crosswalk and fetch.BronzeSink stubbed throughout; no network, no boto3, no Bloomberg). Committed the two code/test files first (963eea467d) so AC5's `git diff 04f518851d HEAD` invocation reads the landed change; AC0-AC5 then all re-run in order against that HEAD, byte-identical to the numbers recorded below. Ran a MUTANT CONTROL after landing: reverted the run_battery step-1 lambda to call _step1_edgar_ticker WITHOUT ticker_memo (working tree only), re-ran test_three_names_fetch_the_ticker_table_once alone -- FAILED ('assert 3 == 1', the memo threading bypassed so each name refetched) -- restored the lambda immediately and confirmed `git diff --stat lib/research/filings/battery.py` was empty (byte-identical to the committed fix) and the full test_battery_multi.py suite re-ran 8 passed. No surprise encountered: every criterion ran as literally written, every premise in section 1's MEASURED STATE held exactly (the five battery lines, the two ticker_table_call_sites, the 0/0 encoding, the 86/22 suite counts, the controlled AC3 comparator). Nothing outside <paths> touched; batch.py, fetch.py, document.py and every existing test file are WALLS, never edited. Branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50 never read, shown, diffed or checked out. No network, no EDGAR/issuer-site fetch, no Bloomberg call, no model call, no AWS call anywhere in this change.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/filings/battery.py",
+      "kind": "script",
+      "commit_or_etag": "963eea467d3a0574684be7dd6b9d9917f565a01c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TickerTableMemo class added; run_battery/_step1_edgar_ticker gained ticker_memo=None (default off, unchanged behaviour for every existing caller, AC2 86/22 unchanged); main() --security-key is now repeatable, N==1 byte-identical to the pinned commit (AC3), N>1 shares one ticker fetch (AC4). Code-only, no network/AWS/model call reachable (every test stubs fetch.http_get / keys_from_crosswalk / BronzeSink)."
+    },
+    {
+      "path_or_key": "lib/research/filings/tests/test_battery_multi.py",
+      "kind": "test",
+      "commit_or_etag": "963eea467d3a0574684be7dd6b9d9917f565a01c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline test file, 8 of 8 named AC1 arms passing against stub http_get/keys_from_crosswalk/BronzeSink -- no network, no boto3 client, no Bloomberg call anywhere in the file."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-101.battery-multi-name-ticker-memo.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "record-face <status> flipped pending -> complete."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~101/AMGT_RESAPP.TO-AMGT-rk-101.battery-multi-name-ticker-memo.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit. It prints \"pin_object commit\". The five battery lines: battery_566 carries \"def _sec_ticker_table(\", battery_657 carries \"def _step1_edgar_ticker(\", battery_665 carries \"_sec_ticker_table(http_get\", battery_1213 carries \"def run_battery(\", and battery_1280 carries \"--security-key\". Then \"ticker_table_call_sites T0\" (measured 2 at the cut: the def at :566 and the call at :665), battery.py's crlf and non_ascii_chars (measured 0 and 0), the filings suite's \"F0 passed\" (measured 86) and test_battery.py's \"B0 passed\" (measured 22). Then the comparator's CONTROL, run while new IS the pin: \"single_identical True\" with equal stdout byte counts (measured 1119) and \"pin_fetches 1 new_fetches 1 same_urls True\". A control that does not read True means the instrument is broken: STOP with a BLOCKING row. A drifted line NUMBER is recorded, not a fail, if the SITE is the same",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r101/ac0.py && python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/filings/tests/test_battery.py -q -p no:cacheprovider 2>&1 | tail -1 && python .scratch/r101/ac3.py",
+      "output_evidence": "pin_object commit\nbattery_566 def _sec_ticker_table(http_get, timeout=60, bronze_sink=None):\nbattery_657 def _step1_edgar_ticker(security_key, keys, run_date, http_get, timeout=60, bronze_sink=None):\nbattery_665 table = _sec_ticker_table(http_get, timeout=timeout, bronze_sink=bronze_sink)\nbattery_1213 def run_battery(security_key, keys, run_date=None, http_get=None, search_fn=None, cache_dir=None,\nbattery_1280 parser.add_argument(\"--security-key\", required=True)\nticker_table_call_sites 2 ['lib/research/filings/battery.py:566', 'lib/research/filings/battery.py:665']\nbattery.py crlf 0 non_ascii_chars 0\n86 passed in 9.32s\n22 passed in 8.18s\npin_rc 0 new_rc 0\npin_stdout_bytes 1119 new_stdout_bytes 1119\nsingle_identical True\npin_fetches 1 new_fetches 1 same_urls True",
+      "denominator": "T0 = 2 ticker_table_call_sites; F0 = 86 filings tests passed; B0 = 22 test_battery.py tests passed -- all measured BEFORE any edit, on the untouched worktree; AC3 control: single_identical True, 1119/1119 bytes, 1/1 fetches",
+      "status": "PASS",
+      "expect": "pin_object commit[\\s\\S]*ticker_table_call_sites 2[\\s\\S]*battery\\.py crlf 0 non_ascii_chars 0[\\s\\S]*86 passed[\\s\\S]*22 passed[\\s\\S]*single_identical True[\\s\\S]*pin_fetches 1 new_fetches 1 same_urls True"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"8 passed\" and 0 failed, with the PASSED lines naming test_single_key_main_prints_no_multi_header, test_three_names_fetch_the_ticker_table_once, test_three_names_hand_the_ticker_table_to_the_sink_once, test_names_run_in_order_and_unresolved_does_not_stop_the_others, test_ticker_fetch_failure_is_memoized_not_refetched, test_sink_error_propagates_in_a_multi_name_run, test_run_battery_without_memo_is_todays_path and test_multi_name_refuses_single_name_options",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests/test_battery_multi.py -v -p no:cacheprovider 2>&1 | tail -12",
+      "output_evidence": "collected 8 items\n\nlib/research/filings/tests/test_battery_multi.py::test_single_key_main_prints_no_multi_header PASSED [ 12%]\nlib/research/filings/tests/test_battery_multi.py::test_three_names_fetch_the_ticker_table_once PASSED [ 25%]\nlib/research/filings/tests/test_battery_multi.py::test_three_names_hand_the_ticker_table_to_the_sink_once PASSED [ 37%]\nlib/research/filings/tests/test_battery_multi.py::test_names_run_in_order_and_unresolved_does_not_stop_the_others PASSED [ 50%]\nlib/research/filings/tests/test_battery_multi.py::test_ticker_fetch_failure_is_memoized_not_refetched PASSED [ 62%]\nlib/research/filings/tests/test_battery_multi.py::test_sink_error_propagates_in_a_multi_name_run PASSED [ 75%]\nlib/research/filings/tests/test_battery_multi.py::test_run_battery_without_memo_is_todays_path PASSED [ 87%]\nlib/research/filings/tests/test_battery_multi.py::test_multi_name_refuses_single_name_options PASSED [100%]\n\n============================== 8 passed in 0.11s ==============================",
+      "denominator": "8 of 8 named arms PASSED, 0 failed",
+      "status": "PASS",
+      "expect": "test_single_key_main_prints_no_multi_header PASSED[\\s\\S]*test_three_names_fetch_the_ticker_table_once PASSED[\\s\\S]*test_three_names_hand_the_ticker_table_to_the_sink_once PASSED[\\s\\S]*test_names_run_in_order_and_unresolved_does_not_stop_the_others PASSED[\\s\\S]*test_ticker_fetch_failure_is_memoized_not_refetched PASSED[\\s\\S]*test_sink_error_propagates_in_a_multi_name_run PASSED[\\s\\S]*test_run_battery_without_memo_is_todays_path PASSED[\\s\\S]*test_multi_name_refuses_single_name_options PASSED[\\s\\S]*8 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "first \"(F0 + 8) passed\" and 0 failed, where F0 is AC0's printed filings count (measured 86, so 94); then \"B0 passed\" and 0 failed for test_battery.py, where B0 is AC0's value (measured 22). Every pre-existing test stays green unedited, including test_bronze_wiring.py's single-name battery.main call",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/filings/tests/test_battery.py -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "94 passed in 9.20s\n22 passed in 8.17s",
+      "denominator": "94 of 94 passed (86 baseline + 8 new), 0 failed; 22 of 22 test_battery.py passed (B0 unchanged), 0 failed",
+      "status": "PASS",
+      "expect": "94 passed[\\s\\S]*22 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AFTER the edit, pinned module vs new module on the same single-name argv and stub: \"pin_rc 0 new_rc 0\", equal pin_stdout_bytes and new_stdout_bytes, \"single_identical True\", and \"pin_fetches 1 new_fetches 1 same_urls True\" -- a single --security-key run is byte-identical to today, as ruled",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r101/ac3.py",
+      "output_evidence": "pin_rc 0 new_rc 0\npin_stdout_bytes 1119 new_stdout_bytes 1119\nsingle_identical True\npin_fetches 1 new_fetches 1 same_urls True\npin_first_line UNRESOLVED-SOURCE: ZETA_US_Equity -- every declared step failed or found no key/seed -- step 1 (edgar-ticker): ticker 'ZETA' not found in the live SEC company_tickers table (1 rows); step 2 (edgar-bloomberg-cik): no key -- absent; step 3 (esef-lei): no key -- absent; step 4 (company-site): site crawl disabled (--no-site-crawl); step 5 (national-regulator): no adapter for jurisdiction UNKNOWN",
+      "denominator": "1 of 1 single-name run: byte-identical stdout (1119 == 1119), equal rc (0 == 0), equal fetch count (1 == 1) and identical URLs",
+      "status": "PASS",
+      "expect": "pin_rc 0 new_rc 0[\\s\\S]*pin_stdout_bytes 1119 new_stdout_bytes 1119[\\s\\S]*single_identical True[\\s\\S]*pin_fetches 1 new_fetches 1 same_urls True"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the ruled criterion on a DIFFERENT instrument from AC1, main end to end on the stub: \"multi_rc 0\"; \"ticker_fetches 1 of_http_calls 1\"; \"sink_ticker_calls 1 of_sink_calls 1\"; \"unresolved_names_in_order ['AAA_US_Equity', 'BBB_US_Equity', 'CCC_US_Equity']\"; name_headers of exactly \"BATTERY NAME 1 of 3: AAA_US_Equity\", \"BATTERY NAME 2 of 3: BBB_US_Equity\" and \"BATTERY NAME 3 of 3: CCC_US_Equity\"; and done_line exactly ['BATTERY DONE: 3 name(s), 0 RESOLVED, 3 UNRESOLVED-SOURCE, ticker_table_fetches 1']",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r101/ac4.py",
+      "output_evidence": "multi_rc 0\nticker_fetches 1 of_http_calls 1\nsink_ticker_calls 1 of_sink_calls 1\nunresolved_names_in_order ['AAA_US_Equity', 'BBB_US_Equity', 'CCC_US_Equity']\nname_headers ['BATTERY NAME 1 of 3: AAA_US_Equity', 'BATTERY NAME 2 of 3: BBB_US_Equity', 'BATTERY NAME 3 of 3: CCC_US_Equity']\ndone_line ['BATTERY DONE: 3 name(s), 0 RESOLVED, 3 UNRESOLVED-SOURCE, ticker_table_fetches 1']",
+      "denominator": "1 of 1 three-name run: 1 ticker fetch of 1 http call, 1 sink ticker_table call of 1 sink call, 3 of 3 names in order (headers and UNRESOLVED lines), 1 of 1 DONE line exactly as specified",
+      "status": "PASS",
+      "expect": "multi_rc 0[\\s\\S]*ticker_fetches 1 of_http_calls 1[\\s\\S]*sink_ticker_calls 1 of_sink_calls 1[\\s\\S]*unresolved_names_in_order \\['AAA_US_Equity', 'BBB_US_Equity', 'CCC_US_Equity'\\][\\s\\S]*name_headers \\['BATTERY NAME 1 of 3: AAA_US_Equity', 'BATTERY NAME 2 of 3: BBB_US_Equity', 'BATTERY NAME 3 of 3: CCC_US_Equity'\\][\\s\\S]*done_line \\['BATTERY DONE: 3 name\\(s\\), 0 RESOLVED, 3 UNRESOLVED-SOURCE, ticker_table_fetches 1'\\]"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"changed_code_files\" lists EXACTLY lib/research/filings/battery.py and lib/research/filings/tests/test_battery_multi.py, with no other code file (in particular no batch.py or fetch.py); both files print \"compiles True\" and crlf 0; battery.py's non_ascii_chars EQUALS AC0's measured value (measured 0), and the new test file's is 0",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r101/ac5.py",
+      "output_evidence": "changed_code_files ['lib/research/filings/battery.py', 'lib/research/filings/tests/test_battery_multi.py']\nlib/research/filings/battery.py compiles True crlf 0 non_ascii_chars 0\nlib/research/filings/tests/test_battery_multi.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "2 of 2 changed files are exactly the named set (0 batch.py, 0 fetch.py, 0 other code files); 2 of 2 files compile True, crlf 0; battery.py non_ascii_chars 0 (equals AC0's 0), test file non_ascii_chars 0",
+      "status": "PASS",
+      "expect": "changed_code_files \\['lib/research/filings/battery\\.py', 'lib/research/filings/tests/test_battery_multi\\.py'\\][\\s\\S]*battery\\.py compiles True crlf 0 non_ascii_chars 0[\\s\\S]*test_battery_multi\\.py compiles True crlf 0 non_ascii_chars 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "run_battery's step-1 lambda threads ticker_memo into _step1_edgar_ticker so a multi-name process shares ONE ticker fetch. MUTANT: reverted the lambda in the working tree only to call _step1_edgar_ticker(security_key, keys, run_date, http_get, bronze_sink=bronze_sink) WITHOUT ticker_memo=ticker_memo (battery.py otherwise untouched), re-ran test_three_names_fetch_the_ticker_table_once alone.",
+      "expected": "the mutant makes test_three_names_fetch_the_ticker_table_once FAIL (each of the 3 names falls back to _step1_edgar_ticker's default ticker_memo=None and calls _sec_ticker_table directly, so the ticker URL is requested 3 times instead of 1)",
+      "observed": "FAILED -- 'assert 3 == 1' (1 failed in 0.17s). Reverted the mutant immediately after; git diff --stat lib/research/filings/battery.py then showed no output (byte-identical to the committed fix), and the full test_battery_multi.py suite re-ran 8 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every criterion is a pure offline read: pytest against stubbed fetch.http_get / battery.keys_from_crosswalk / fetch.BronzeSink (in-process, no network/AWS/Bloomberg/model call), or a local git diff/git show/py_compile read against this worktree's own committed bytes. AC0-AC5 were run once before any edit (AC0 only), then the full battery re-run after the commit that lands the code, then AC3/AC4/the two suites re-run once more, and AC1 re-run again after the mutant control's revert-and-restore.",
+      "observed": "AC1 [8 passed] stable across four separate runs in this session (pre-commit x2, post-commit, post-mutant-restore), all '8 passed in ~0.11-0.12s'; AC3's single_identical True / 1119==1119 / 1==1 stable across three runs (pre-edit control, post-commit, determinism re-run); AC4's exact multi-run lines (ticker_fetches 1, sink_ticker_calls 1, ordered names, DONE line) stable across two post-commit runs; the filings suite read 86 passed pre-edit and 94 passed post-edit twice; test_battery.py read 22 passed three times (pre-edit, post-commit, determinism re-run).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any network call, EDGAR or issuer-site fetch, model call, or AWS call of any kind; battery.main run against the live network",
+      "reason": "section 4 BOUNDS: CODE ONLY. Every test and every AC script stubs fetch.http_get, battery.keys_from_crosswalk and fetch.BronzeSink; nothing in this change is reachable without those stubs."
+    },
+    {
+      "item": "any edit to batch.py, fetch.py, document.py, lib/research/harvest/**, steps 2-5 of the battery, the step cache, or any existing test file",
+      "reason": "section 3: WALLS, and section 1: 'What this cell does NOT change'. AC5's changed_code_files lists exactly battery.py and the new test file; no existing test needed to change to stay green (AC2 holds at F0+8 / B0 unedited, including test_bronze_wiring.py's single-name battery.main call)."
+    },
+    {
+      "item": "the B2 RUN cell (a real multi-name run over the validation names)",
+      "reason": "section 2 + RECORD FACE: held on Andrew's word, out of scope for this code-only memo/CLI cell -- this cell makes the multi-name run POSSIBLE, not RUN."
+    },
+    {
+      "item": "branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50",
+      "reason": "never read, shown, diffed or checked out, per the order's own instruction (it holds an exposed credential)."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/filings/tests/test_battery_multi.py -v -p no:cacheprovider",
+      "result": "8 passed in 0.11s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/filings/tests -q -p no:cacheprovider",
+      "result": "94 passed in 9.20s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/filings/tests/test_battery.py -q -p no:cacheprovider",
+      "result": "22 passed in 8.17s"
+    },
+    {
+      "tool": "py_compile (via compile())",
+      "invocation": "python .scratch/r101/ac5.py",
+      "result": "2 of 2 files compiles True, crlf 0, non_ascii_chars 0"
+    },
+    {
+      "tool": "git diff / git show (custom script)",
+      "invocation": "python .scratch/r101/ac5.py",
+      "result": "changed_code_files exactly the 2 named files"
+    },
+    {
+      "tool": "importlib (pinned-module comparator, custom script)",
+      "invocation": "python .scratch/r101/ac3.py",
+      "result": "single_identical True, 1119==1119 bytes, 1==1 ticker fetches, same_urls True"
+    },
+    {
+      "tool": "in-process battery.main() (custom script)",
+      "invocation": "python .scratch/r101/ac4.py",
+      "result": "multi_rc 0, ticker_fetches 1 of 1 http calls, sink_ticker_calls 1 of 1, 3 names in order, DONE line exact"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~101 <0.9.0_WK_AMGT_RESAPP~101@opal.agent>\" -F .scratch/r101/commit-msg-code.txt -- lib/research/filings/battery.py lib/research/filings/tests/test_battery_multi.py",
+      "result": "963eea467d, 2 files changed, 336 insertions(+), 45 deletions(-)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~101/AMGT_RESAPP.TO-AMGT-rk-101.battery-multi-name-ticker-memo.proof_of_spec.json AC0,AC1,AC2,AC3,AC4,AC5",
+      "result": "PENDING -- run after this instance is written"
+    }
+  ]
+}
