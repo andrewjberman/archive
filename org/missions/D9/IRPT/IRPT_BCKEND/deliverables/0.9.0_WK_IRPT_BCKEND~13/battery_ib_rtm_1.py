@@ -212,16 +212,20 @@ def arm_metadata():
     rtk1 = load(IB_RTK_1_PROOF)
     observed = rtk1["controls"]["mutant"]["observed"]
     print("  observed text (first 200 chars): %s..." % observed[:200])
-    has_crlf = CRLF_VALUE[:12] in observed
-    has_blob = BLOB_VALUE[:12] in observed
+    # IB-rtn-1 (C-S194 -> arm (g)'s own C-S174 metadata correction): widened from a [:12] PREFIX
+    # comparison to the FULL 64-hex-char hash string -- a 12-char prefix collision is not
+    # cryptographically implausible enough to certify "this exact hash is present"; the full
+    # string is the only comparison that actually does.
+    has_crlf = CRLF_VALUE in observed
+    has_blob = BLOB_VALUE in observed
     # Never AFFIRMS either value is a typo/transcription-error -- a NEGATION of that claim
     # ("is NOT a transcription error", "neither is a typo") is exactly the required correction,
     # so this checks for the AFFIRMATIVE phrasing only, not bare substring presence.
     lower = observed.lower()
     affirms_typo = ("packet-only typo" in lower) or ("is a transcription error" in lower) or \
         ("was a transcription error" in lower) or ("an arbitrary typo" in lower and "not an arbitrary typo" not in lower)
-    ok &= check("names %s... as a value present in the text" % CRLF_VALUE[:12], has_crlf)
-    ok &= check("names %s... as a value present in the text" % BLOB_VALUE[:12], has_blob)
+    ok &= check("names the FULL hash %s as a value present in the text" % CRLF_VALUE, has_crlf)
+    ok &= check("names the FULL hash %s as a value present in the text" % BLOB_VALUE, has_blob)
     ok &= check("never AFFIRMS either value is a 'typo' or 'transcription error' (a negation of that claim is the required correction)", not affirms_typo)
     names_crlf_correctly = "CRLF" in observed and "checkout-grain" in observed
     names_blob_correctly = "git-object" in observed or "git blob" in observed.lower()
