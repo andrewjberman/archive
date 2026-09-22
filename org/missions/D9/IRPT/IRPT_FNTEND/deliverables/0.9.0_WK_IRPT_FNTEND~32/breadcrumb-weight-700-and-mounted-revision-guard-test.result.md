@@ -183,13 +183,40 @@ PASS-by-output, matching `<expect>` `(?<![0-9])0 fail` verbatim.
 
 Both filed in `org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md`.
 
-## STATUS
+## STATUS (as first reported)
 
-`<status>` on the task order stays **pending** (NOT flipped to `complete`): F82-AC2 is a genuine FAIL.
+`<status>` on the task order stayed **pending** (NOT flipped to `complete`): F82-AC2 was a genuine FAIL.
 `python .tools/proof-of-spec-check.py <instance> F82-AC1,F82-AC2,F82-AC3,F82-AC4,F82-AC5,F82-AC6
---governing-order <TO>` returns structurally `VALID (rc=0)` (the instance itself is schema-valid and
+--governing-order <TO>` returned structurally `VALID (rc=0)` (the instance itself is schema-valid and
 every recorded invocation matches the TO file verbatim) -- but a VALID instance is not a met order: one
-mechanical criterion (F82-AC2) is FAIL by its own `<expect>`, genuinely, as ordered. The order defect
-(row `IRPT_FNTEND-W32-S1`) needs the issuer's amendment -- either the `<invocation>` (adding the drill
-step) or the selector text (tag-qualified) -- in the TO FILE itself before this criterion can pass as
+mechanical criterion (F82-AC2) was FAIL by its own `<expect>`, genuinely, as ordered. The order defect
+(row `IRPT_FNTEND-W32-S1`) needed the issuer's amendment -- either the `<invocation>` (adding the drill
+step) or the selector text (tag-qualified) -- in the TO FILE itself before this criterion could pass as
 recorded.
+
+## ADDENDUM -- F82-AC2 resolved by issuer amendment (workspace commit `6e3d50ab44`)
+
+`2.0.0_SA_COO~F` independently re-ran the adapted invocation live, confirmed `ASSERT-STYLE: 2 of 2 met`,
+and amended the governing order's F82-AC2 `<invocation>` in the shared tree to add `--clicktext
+'Models#3'` (a real drill step reaching a two-segment breadcrumb) and tag-qualify the selectors
+(`span[data-slot="holdings-breadcrumb"]` for the current segment, `button[data-slot="holdings-breadcrumb"]`
+for a link) -- exactly the adapted invocation this worker's own throwaway probe had already found and
+recorded as supplementary evidence above. Commit `6e3d50ab44` cherry-picked into this worktree's copy of
+the task-order file (FE-s-84's unrelated amendment in the same commit excluded -- outside this worker's
+grant). Re-ran in this worktree EXACTLY as the amended order's own `<invocation>` (only `<WS>`/`<PORT>`
+substituted, dev server on port 5970):
+```
+CLICKED: Holdings
+CLICKED-TEXT: Models (occurrence #3)
+EXPECT-STYLE[span[data-slot="holdings-breadcrumb"]::font-weight]: PASS 700
+EXPECT-STYLE[button[data-slot="holdings-breadcrumb"]::font-weight]: PASS 400
+ASSERT-STYLE: 2 of 2 met
+```
+Matches `<expect>` `ASSERT-STYLE: 2 of 2 met` verbatim -- PASS-by-output. Proof-of-spec instance updated
+(F82-AC2 row only; F82-AC1/AC3/AC4/AC5 left as they already stood). Dev server (port 5970, PID 30468)
+stopped and confirmed closed (`curl` returned `000`) after the re-run.
+`python .tools/proof-of-spec-check.py <instance> F82-AC1,F82-AC2,F82-AC3,F82-AC4,F82-AC5,F82-AC6
+--governing-order <TO>` (against the now-amended order) returns `VALID (rc=0)`, `violations=0`. Every
+non-judgment criterion (F82-AC1, F82-AC2, F82-AC3, F82-AC4, F82-AC5) now genuinely PASSes by output;
+F82-AC6 stays `RECORDED`/`UNVERIFIABLE-BY-INSTRUMENT`, no verdict, per its own `judgment="true"`. `<status>`
+on the task order is now flipped to **complete**.
