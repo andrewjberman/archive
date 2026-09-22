@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rtr-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "4f942b7657"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7a55a7327d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtr-c.the-enforcer-real-operation-names-and-the-item-8-identity-adapter.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~19",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_authz/enforce.py",
+      "kind": "script",
+      "commit_or_etag": "e9311289b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob b0fed34092ab27c3e219dcfef588a926ddedf935 at commit e9311289b1 (git rev-parse HEAD:<path>) -- RENDER_DELEGATE_OPERATIONS replaced with the real served vocabulary (item a); _resolve_render_delegate rewritten for the delegator-identity loader with fallback (item b), the bundle-id mismatch refusal (item c), and the revision-folded fingerprint (item d); Enforcer.__init__ gained the optional load_delegator_identity dependency. BOUNDS honoured: no edit to _scope/resolve.py, render_auth.mjs, index.mjs or portal-authorizer/index.mjs; no edit to any pre-existing test's expected value.",
+      "artifact_covered_by": ["R118-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~19/test_enforcer_real_operations_and_identity_adapter.py",
+      "kind": "test",
+      "commit_or_etag": "e9311289b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 14e9ff151b42be1ccd89cd6771f7d4135ce21526 at commit e9311289b1 -- 14 new test cases: real-operation-name derivation + admission (3, parametrized) + fourth-operation refusal, differing-subject-advisor-id resolution + its no-loader fallback control, bundle-id mismatch refusal + its match/no-declared-id controls, cache-key revision separation, and the revocation control reproduced fresh against the corrected operation names.",
+      "artifact_covered_by": ["R118-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~19/result.md",
+      "kind": "doc",
+      "commit_or_etag": "e9311289b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob a89a28e166a0bd863908945d369ee305fa385ae2 at commit e9311289b1 -- prints the full verbatim test output for R118-AC3's own invocation, the mutant control, and the supplementary pre-existing-suite/commit-gate runs.",
+      "artifact_covered_by": ["R118-AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "e9311289b1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 79e78a21d63c7d50c1cb772e583438e6bf4ad059 at commit e9311289b1 -- one new row appended (IRPT_BCKEND-W19-S1), surprise-row-gate OK at commit (1 new row of 355 total checked)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R118-AC3",
+      "criterion_verbatim": "all tests PASS rc=0: real-operation-name admission (3) + fourth-operation refusal (1), differing-subject-advisor-id resolution (1), bundle-mismatch refusal (1), cache-key revision-separation (1), and the unmodified revocation control still passing",
+      "method": "test_suite",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~19 &amp;&amp; py -3.12 -m pytest test_enforcer_real_operations_and_identity_adapter.py -v",
+      "output_evidence": "14 passed in 0.11s, rc=0. Full verbatim output in org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~19/result.md. Re-run at committed HEAD e9311289b1 reproduced identically (14 passed, rc=0). Supplementary (not part of this criterion's own invocation): the pre-existing _authz/tests/ suite re-run after this cell's edits -- 141 passed, rc=0 (no regression).",
+      "denominator": "14 of 14 new cases PASSED (3 real-operation admissions + 1 fourth-operation refusal + 1 differing-identity resolution + 1 no-loader fallback control + 1 bundle-mismatch refusal + 2 bundle positive/no-check controls + 1 cache-key revision-separation + 1 revocation control + 1 no-protected-bytes control + 2 derivation sanity checks = 14). Supplementary: 141 of 141 pre-existing _authz tests PASSED.",
+      "status": "PASS",
+      "expect": "14 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reverting RENDER_DELEGATE_OPERATIONS to the pre-cell placeholder tuple (\"performance\", \"analysis_sections\", \"narrative\") and re-running this deliverable's own test_render_delegate_operations_matches_the_real_served_vocabulary.",
+      "expected": "the reverted (placeholder) tuple FAILS the equality assertion against the real served vocabulary derived from routes.json + served.key_operation(); the fixed tuple PASSES.",
+      "observed": "Reverted: AssertionError, tuple mismatch at index 0 ('performance' != 'performance_report'), 1 failed. Restored: 14 passed (full suite), rc=0. Full transcript excerpt in result.md.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full criterion invocation was run three times: once during development, once as the committed-HEAD capture embedded in result.md, and once more immediately before this instance was written (post-commit, at HEAD e9311289b1) to confirm the committed bytes reproduce the same result.",
+      "observed": "All three runs: 14 passed, rc=0, identical PASS/FAIL outcomes and counts.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "_scope/resolve.py, render_auth.mjs, index.mjs, portal-authorizer/index.mjs",
+      "reason": "BOUNDS: 'NO edit to _scope/resolve.py, render_auth.mjs, index.mjs, or portal-authorizer/index.mjs -- those are IB-rtr-1's, IB-rtr-2's and IB-rtr-4's surfaces.' The cache-key fix (item d) folds the RENDER_DELEGATE class marker and bundle revision into the entitlement_revision slot _scope.fingerprint already accepts, rather than editing that function's signature."
+    },
+    {
+      "item": "no AWS credential, IAM grant, Secrets Manager entry, SSM parameter, Lambda deploy or Terraform change",
+      "reason": "BOUNDS: 'NO Secrets Manager entry, NO SSM parameter, NO AWS API call, NO Lambda deploy, NO Terraform change. Code + tests only.' preflight: comp-iam/comp-schedule/comp-adversary all DECLARED-NOT-APPLICABLE. Honoured -- offline pytest only."
+    },
+    {
+      "item": "production wiring of load_delegator_identity to a real subject->advisor-id directory",
+      "reason": "This round is fixture-only, matching the SAME pattern load_render_bundle already established (class docstring, IB-rtq-2): the loader is OPTIONAL and fixture-shaped, proving the ALGEBRA; real wiring is a later round's integration, per BOUNDS' no-sibling-blocking discipline this order inherits."
+    },
+    {
+      "item": "running/editing the IB-rtq-2 deliverable's own pre-existing test file (test_render_delegate_resolver_enforcer.py) as part of this criterion's acceptance",
+      "reason": "Outside this order's <paths> grant and BOUNDS forbids editing an existing test's expected value regardless. Its literal, unmodified run now shows 4 new operation-name failures after this cell's required rename (item a) -- disclosed and grounded at IRPT_BCKEND-W19-S1, not treated as this criterion's evidence. This cell's own deliverable reproduces the SAME algebra (including the revocation control) fresh, against the corrected operation names, and that is what R118-AC3 is graded on."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W19-S1: BOUNDS (e) asks the IB-rtq-2 revocation control/three-arm test to 'still pass, unmodified in expectation' while cell (a) requires the operation-name rename that file's own hardcoded 'performance' default cannot survive -- the two clauses are jointly unsatisfiable against that literal, out-of-lane file; resolved by reproducing the algebra (revocation control included) fresh in this cell's own deliverable against the corrected names, leaving the old file exactly as committed.",
+    "IRPT_BCKEND-W19-S2: the order's own IDENTITY AND WORKTREE first-act existence check, and its <proof_of_spec> section's literal instance-path instruction, both name the task order by its internal numeric cell name (...TO-IB-rtr-3....md) rather than its REAL filename (...TO-IB-rtr-c....md, the decomp's letter-suffix cell name) -- the same document, addressed two ways. Mechanically load-bearing, not merely cosmetic: .tools/to-pipeline-gate.py's complete-flip limb globs deliverables/*/<TO's OWN FILE BASENAME>.proof_of_spec.json, so an instance named exactly per the <proof_of_spec> section's literal 'rtr-3' text is REFUSED (measured: 'NO proof-of-spec instance was found beside it'), and only an instance named after the real 'rtr-c' basename is found and validated. This instance is written at the 'rtr-c' path the gate requires; to_id inside it is left at 'IRPT_BCKEND.TO-IB-rtr-3' (the order's own <to_id> tag value), which the checker's cross-check accepts as a slug-tolerant match to the governing order regardless of filename."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~19/result.md",
+  "compiler_tools": [
+    {
+      "tool": "py -3.12 -m pytest",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~19 &amp;&amp; py -3.12 -m pytest test_enforcer_real_operations_and_identity_adapter.py -v",
+      "result": "R118-AC3's own invocation, run verbatim: 14 passed, rc=0"
+    },
+    {
+      "tool": "py -3.12 -m pytest (supplementary)",
+      "invocation": "py -3.12 -m pytest infra/aws/lambda/investor-reporting/_authz/tests -q",
+      "result": "141 passed, rc=0 -- no regression in the pre-existing _authz suite"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/lambda/investor-reporting/_authz/enforce.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~19/test_enforcer_real_operations_and_identity_adapter.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (naming-gate, surprise-row-gate, to-pipeline-gate, missions-tree-check, surprise-corpus)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~19 <...>\" -F <msgfile> -- <4 paths>",
+      "result": "commit-gate: OK 2 of 4 files graded (script/test); naming-gate: PASS 0 graded; to-pipeline-gate: OK, no task-order in this commit; surprise-row-gate: OK, 1 new row carries step-7/step-10 fields; missions-tree-check: OK, 0 violations. Committed e9311289b1."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (standalone, pre-commit check on the row)",
+      "invocation": "py -3.12 .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields (disarm_owner corrected from 3.0.0_SA_CVO to 1.0.0_SA_CTO after the gate's own R-15/R-19 refusal: a disarm owner is never the writer of the disarm clock)"
+    },
+    {
+      "tool": ".tools/to-pipeline-gate.py (via safe-commit.sh, on the status-flip commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~19 <...>\" -F <msgfile> -- <TO face> <proof instance> <investigation file>",
+      "result": "first attempt REFUSED: the instance named per <proof_of_spec>'s literal 'rtr-3' stem was not beside the TO under its REAL 'rtr-c' stem, so the gate's glob found nothing (row IRPT_BCKEND-W19-S2). Fixed by writing the instance at the 'rtr-c' stem path the gate's own lookup requires; re-run PASSED."
+    }
+  ]
+}
