@@ -86,15 +86,15 @@ primary action), C9 (contrast), C11 (radius/elevation/focus).
 
 | file | viewport | FIXTURES-MATCH | EXPECT*/ASSERT-* (verbatim) | clauses | verdict |
 |---|---|---|---|---|---|
-| f71_idle_1440.png | 1440 | matched 3 of 3 | `EXPECT[[data-slot="receipt-panel"][data-flow-state="idle"]]: PASS (1 visible)` / `EXPECT[[data-slot="submit-export"]:not([disabled])]: PASS (1 visible)` / `EXPECT-TEXT[[data-slot="submit-export"]::Create export]: PASS` / `EXPECT-STYLE[[data-slot="submit-export"]::border-radius]: PASS 3px` / `EXPECT-STYLE[[data-slot="submit-export"]::font-weight]: PASS 700` / `EXPECT-GROUND[[data-slot="export-modal"] [role="dialog"]]: FAIL null` / `ASSERT-CONTENT: 3 of 3 met` / `ASSERT-STYLE: 2 of 2 met` / `ASSERT-GROUND: 0 of 1 met` | C3, C5, C8, C11 | **F71-AC2 FAIL** (ground selector defect, row IRPT_FNTEND-W21-S1 -- content+style halves both hold) |
-| f71_idle_390.png | 390 | matched 3 of 3 | `EXPECT[...idle]: PASS (1 visible)` / `EXPECT-GROUND[...]: FAIL null` / `ASSERT-CONTENT: 1 of 1 met` / `ASSERT-GROUND: 0 of 1 met` | C3 | **F71-AC3 FAIL** (same defect) |
-| f71_idle_control.png | 1440 | matched 3 of 3 | `EXPECT[[data-slot="submit-export"]]: FAIL (0 visible)` (no `--click Export`) / `ASSERT-CONTENT: 0 of 1 met` (ground line not graded by this criterion's `<expect>`) | -- | **F71-AC4 PASS** |
-| f71_ground_control.png | 1440 | matched 3 of 3 | `INJECT-CSS: ...` / `EXPECT-GROUND[...]: FAIL null` / `ASSERT-GROUND: 0 of 1 met` | -- | **F71-AC5 PASS-by-literal-match, VACUOUS** (row IRPT_FNTEND-W21-S1: the selector matches nothing before OR after the paint, so this control cannot discriminate the wrong-ground state it claims to test) |
+| f71_idle_1440.png | 1440 | matched 3 of 3 | POST-AMENDMENT re-run: `EXPECT[[data-slot="receipt-panel"][data-flow-state="idle"]]: PASS (1 visible)` / `EXPECT[[data-slot="submit-export"]:not([disabled])]: PASS (1 visible)` / `EXPECT-TEXT[[data-slot="submit-export"]::Create export]: PASS` / `EXPECT-STYLE[[data-slot="submit-export"]::border-radius]: PASS 3px` / `EXPECT-STYLE[[data-slot="submit-export"]::font-weight]: PASS 700` / `EXPECT-GROUND[[role="dialog"]]: PASS rgb(244, 246, 250)` / `ASSERT-CONTENT: 3 of 3 met` / `ASSERT-STYLE: 2 of 2 met` / `ASSERT-GROUND: 1 of 1 met` | C3, C5, C8, C11 | **F71-AC2 PASS** (amended selector `[role="dialog"]`; see AMENDMENT RE-RUN section above) |
+| f71_idle_390.png | 390 | matched 3 of 3 | POST-AMENDMENT re-run: `EXPECT[...idle]: PASS (1 visible)` / `EXPECT-GROUND[[role="dialog"]]: PASS rgb(244, 246, 250)` / `ASSERT-CONTENT: 1 of 1 met` / `ASSERT-GROUND: 1 of 1 met` | C3 | **F71-AC3 PASS** (amended selector) |
+| f71_idle_control.png | 1440 | matched 3 of 3 | `EXPECT[[data-slot="submit-export"]]: FAIL (0 visible)` (no `--click Export`) / `ASSERT-CONTENT: 0 of 1 met` (ground line not graded by this criterion's `<expect>`) | -- | **F71-AC4 PASS** (unaffected by the ground selector amendment -- this criterion never graded that line) |
+| f71_ground_control.png | 1440 | matched 3 of 3 | POST-AMENDMENT re-run: `INJECT-CSS: [role="dialog"]{background-color:#c4cbdb !important}` / `EXPECT-GROUND[[role="dialog"]]: FAIL rgb(196, 203, 219)` / `ASSERT-GROUND: 0 of 1 met` | -- | **F71-AC5 PASS, GENUINE CONTROL** (amended selector -- now discriminates: reports the actual painted colour, not a vacuous null) |
 | f71_submitting_1440.png | 1440 | matched 3 of 4 (4th key `DELAYED` but not yet fulfilled at capture time -- see note) | `DELAYED: api/scoped/investor-reporting/export (4000ms)` / `EXPECT[...submitting]: PASS (1 visible)` / `EXPECT[[data-slot="submit-export"][disabled]]: PASS (1 visible)` / `EXPECT-TEXT[...::Creating export...]: PASS` / `ASSERT-CONTENT: 3 of 3 met` | C3, C8 | **F71-AC6 PASS** |
 | f71_submitting_control.png | 1440 | matched 3 of 3 | `EXPECT[...submitting]: FAIL (0 visible)` / `EXPECT[...disabled]: FAIL (0 visible)` / `ASSERT-CONTENT: 0 of 2 met` | -- | **F71-AC7 PASS** |
 | f71_received_1440.png | 1440 | matched 4 of 4 | `EXPECT[...receipt"][data-job-state="ready"]]: PASS (1 visible)` / `EXPECT[[data-slot="download-link"]]: PASS (1 visible)` / `EXPECT-TEXT[...::Download]: PASS` / `ASSERT-CONTENT: 3 of 3 met` | C3, C8 | **F71-AC8 PASS** |
 | f71_received_control.png | 1440 | matched 3 of 3 | `EXPECT[[data-slot="download-link"]]: FAIL (0 visible)` / `ASSERT-CONTENT: 0 of 1 met` | -- | **F71-AC9 PASS** |
-| f71_chrome_1440.png | 1440 | matched 3 of 3 | `EXPECT-STYLE[...aria-pressed="true"]::border-radius]: PASS 3px` / `EXPECT-STYLE[[data-slot="submit-export"]::border-radius]: PASS 3px` / `EXPECT-STYLE[...close"]::background-color]: PASS null` (!= primary, holds) / `EXPECT-GROUND[[data-slot="branding-options"]]: PASS rgb(255, 255, 255)` / `ASSERT-STYLE: 3 of 3 met` / `ASSERT-GROUND: 1 of 1 met` | C3, C5, C8, C11 | **F71-AC10 FAIL** (both assertion families hold; the `<expect>` regex orders GROUND before STYLE, the instrument's fixed print order is CONTENT/STYLE/GROUND -- row IRPT_FNTEND-W21-S1) |
+| f71_chrome_1440.png | 1440 | matched 3 of 3 | POST-AMENDMENT re-run (same invocation, only the `<expect>` regex order changed): `EXPECT-STYLE[...aria-pressed="true"]::border-radius]: PASS 3px` / `EXPECT-STYLE[[data-slot="submit-export"]::border-radius]: PASS 3px` / `EXPECT-STYLE[...close"]::background-color]: PASS null` (!= primary, holds) / `EXPECT-GROUND[[data-slot="branding-options"]]: PASS rgb(255, 255, 255)` / `ASSERT-STYLE: 3 of 3 met` / `ASSERT-GROUND: 1 of 1 met` | C3, C5, C8, C11 | **F71-AC10 PASS** (amended `<expect>` regex reads STYLE-then-GROUND, matching the instrument's real fixed print order; both assertion families hold, unchanged values) |
 | f71_chrome_390.png | 390 | matched 3 of 3 | `EXPECT-GROUND[[data-slot="branding-options"]]: PASS rgb(255, 255, 255)` / `ASSERT-GROUND: 1 of 1 met` | C3 | **F71-AC11 PASS** |
 | f71_chrome_control.png | 1440 | matched 3 of 3 | `INJECT-CSS: ...#0a1733...` / `EXPECT-GROUND[...]: FAIL rgb(10, 23, 51)` / `ASSERT-GROUND: 0 of 1 met` | -- | **F71-AC12 PASS** (genuine control -- the actual computed value changed) |
 | f71_preview_scroll.png | 390 | matched 3 of 3 | `EXPECT[[data-slot="preview-scroll"]]: PASS (1 visible)` / `ASSERT-CONTENT: 1 of 1 met` | -- | **F71-AC13 PASS**; own probe (`portal/.scratch/probe-scroll.mjs`, not committed) measured `scrollWidth=1056`, `clientWidth=264`, `overflowX=auto` -- matches the cell text's own research numbers exactly; a genuine horizontal-scroll affordance, not permanent clipping |
@@ -105,6 +105,33 @@ shorter than the `4000ms` hold, so the route handler is still awaiting the delay
 reached the `matchFixture`/fulfill branch that records a hit) at the moment the script reads its
 assertions. `f71_received_1440.png` (no artificial delay, `--clickwait 3000` > the real resolve time)
 shows the same fourth key cleanly matched, `4 of 4`.
+
+## AMENDMENT RE-RUN (post-COO-amendment @61a3203648, both fixes verified independently before re-run)
+
+The COO (`2.0.0_SA_COO~F`) confirmed both defects filed below as real task-order defects, not product
+defects, and amended `IRPT_FNTEND.TO-FE-s-71...md` at commit `61a3203648` (CLOUD): (1) F71-AC2/AC3/AC4/
+AC5's `--expect-ground`/`--inject-css` selector `[data-slot="export-modal"] [role="dialog"]` -> plain
+`[role="dialog"]`; (2) F71-AC10's `<expect>` regex order `ASSERT-GROUND...ASSERT-STYLE` ->
+`ASSERT-STYLE...ASSERT-GROUND` (matching `ui-smoke.mjs`'s fixed print order, verified at `:466`/`:469`/
+`:472`). Neither fix changes the substantive bar -- both correct the assertion mechanism to match
+reality. This worker verified the amended commit object directly (`git show 61a3203648:...` returns the
+file with both "COO AMENDMENT" blocks present, after F71-AC2 and after F71-AC10), applied the identical
+two corrections as a working-tree edit to this worktree's own copy of the task order (branch does not
+track CLOUD), and re-ran the five affected criteria against the SAME build (no code changes) on a
+freshly started worktree dev server, port 5963:
+
+| criterion | corrected invocation change | new output (verbatim, deciding lines) | new status |
+|---|---|---|---|
+| F71-AC2 | ground selector -> `[role="dialog"]` | `EXPECT-GROUND[[role="dialog"]]: PASS rgb(244, 246, 250)` / `ASSERT-CONTENT: 3 of 3 met` / `ASSERT-STYLE: 2 of 2 met` / `ASSERT-GROUND: 1 of 1 met` | **PASS** |
+| F71-AC3 | ground selector -> `[role="dialog"]` | `EXPECT-GROUND[[role="dialog"]]: PASS rgb(244, 246, 250)` / `ASSERT-CONTENT: 1 of 1 met` / `ASSERT-GROUND: 1 of 1 met` | **PASS** |
+| F71-AC4 | ground selector -> `[role="dialog"]` (criterion's own `<expect>` reads only ASSERT-CONTENT, unaffected) | `EXPECT[[data-slot="submit-export"]]: FAIL (0 visible)` / `ASSERT-CONTENT: 0 of 1 met` | **PASS** (unchanged from before -- this criterion never graded the ground line) |
+| F71-AC5 | ground selector -> `[role="dialog"]`, inject-css selector -> `[role="dialog"]` | `INJECT-CSS: [role="dialog"]{background-color:#c4cbdb !important}` / `EXPECT-GROUND[[role="dialog"]]: FAIL rgb(196, 203, 219)` / `ASSERT-GROUND: 0 of 1 met` | **PASS, AND NO LONGER VACUOUS**: the control now genuinely discriminates -- `FAIL rgb(196, 203, 219)` is the actual painted colour reported back, not a `FAIL null` non-match |
+| F71-AC10 | `<expect>` regex order swapped to STYLE-then-GROUND | `ASSERT-STYLE: 3 of 3 met` / `ASSERT-GROUND: 1 of 1 met` (same values as before; `re.search` against the corrected pattern confirms MATCH) | **PASS** |
+
+All five re-runs used the identical existing build (`ExportModal.tsx`/`ReceiptPanel.tsx` unchanged since
+the original commit `fb55eeb4f3`) -- these are assertion-only corrections, exactly as the amendment
+states. Row `IRPT_FNTEND-W21-S1` stays filed as the correct record of the original defect; this section
+records the remedy and the now-passing re-measurement, per the amendment's own instruction.
 
 ## THE TWO TASK-ORDER DEFECTS (filed as IRPT_FNTEND-W21-S1)
 
@@ -134,6 +161,10 @@ shows the same fourth key cleanly matched, `4 of 4`.
 
 Full detail, evidence and vintages: surprise row `IRPT_FNTEND-W21-S1`,
 `org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md`.
+
+**Both defects above are now RESOLVED by the COO's amendment (@61a3203648) and the re-run in the
+AMENDMENT RE-RUN section above -- F71-AC2, AC3, AC5, AC10 now read PASS; F71-AC4 was always PASS.** This
+section is retained verbatim as the record of the original measurement and refusal.
 
 ## NON-BROWSER GUARD (F71-AC14)
 
