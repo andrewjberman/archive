@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-110",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-110.lusha-domain-verified-fallback.md",
+    "group": "W",
+    "vintage_commit": "0ed364cff014697720af7bcd9931f254cf83d827"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "0ed364cff014697720af7bcd9931f254cf83d827",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-110.lusha-domain-verified-fallback.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~110",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-110, cell AMGT-rk-110 (round 28, the Lenovo trial's wave 0, ahead of L-MGMT). Worker 0.9.0_WK_AMGT_RESAPP~110, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-28-110 in worktree C:/tmp/wk-amgt-28-110, base 0ed364cff0. THE BAR FIRST: branch wk-amgt-28-110, org/ and .tools/ present, TREE-OK; lib/research/management and lib/research/harvest present. Order read WORKER FACE only, top to the RECORD FACE marker. AC0 (BEFORE any edit) captured the pre-edit signature of domain_for (no source_object parameter) and lusha._cli's call `enrich.domain_for(args.security_key)`, plus baselines M0=95 passed/13 subtests, H0=79 passed. Built exactly as ruled: domain_for(security_key, table=None, source_object=None) -- a domains.json row wins with its return value unchanged; with no row and a non-empty verified_domain_for(source_object), returns (host, host, None); with no row and no verified host, returns today's exact (None, None, reason) with byte-identical reason text; never reads ceo_public_profile, a battery seed or an attempt URL. Added the sibling pure function domain_source_for(security_key, table=None, source_object=None) returning \"domains.json\" / \"verified_site\" / None. Both call sites updated to pass source_object=source_object: enrich.py:662 (build_document, which already holds source_object from roster_module.load_source_object at :657) and lusha.py's _cli (which already holds source_object from roster.load_source_object). enrich.py's lusha_meta dict gained a new \"domain_source\" key (every existing key's value unchanged); lusha._cli's printed dict gained domain_source by setting result[\"domain_source\"] before the existing filtered print. New test file lib/research/management/tests/test_domain_verified_fallback.py with the five named arms: test_declared_row_wins_unchanged (a source_object carrying a DIFFERENT verified host present too, to prove the row wins regardless), test_no_row_verified_host_is_used (verified_site.host=\"www.example.co.jp\" -> that host, domain_source_for -> \"verified_site\"), test_no_row_no_host_is_todays_refusal (reason asserted byte-equal to the pre-fallback formatted string), test_never_reads_other_url_fields (a source_object carrying ceo_public_profile.url, a battery_seed url and an attempt url but NO verified_site -> the refusal), and test_lusha_cli_passes_source_object (roster.load_source_object/build_roster and lusha.harvest_company monkeypatched via pytest.MonkeyPatch.context() -- unittest carries no native fixture -- LUSHA_API_KEY deleted from the environment, no client passed; asserts harvest_company was called with the verified host and the printed dict under redirected stdout contains 'domain_source': 'verified_site''). Snapshotted the fixed enrich.py/lusha.py bytes to .scratch/r110/*.fixed (md5-confirmed identical to the committed HEAD blobs) before running the MUTANT CONTROL: added a fallback read of source_object.ceo_public_profile.url to domain_for's working-tree copy only (between the verified-host branch and the final refusal), re-ran test_never_reads_other_url_fields alone -- FAILED as expected (AssertionError: 'https://ceo-public-profile.example.com/bio' is not None) -- then restored enrich.py from the snapshot, confirmed md5-identical to the committed blob, and re-ran the full test file (5 passed), both suites (management 100 passed/13 subtests, harvest 79 passed) and AC3's script once more, all unchanged. Committed the three code/test files first (c787ab5e5e) so AC3's 'git diff 96cc4dae9d HEAD' invocation reads the landed change; AC0-AC3 then all confirmed against that HEAD. No surprise encountered: the order's premises, paths and invocations all held exactly as written. Nothing outside <paths> touched; domains.json, the officer roster, battery.py and any served object are WALLS, never opened. Branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50 never read, shown, diffed or checked out. No AWS call, no S3 write, no vendor call, 0 Lusha calls, and the Lusha key was never read (deleted from the environment in the one test that touches the CLI path, and harvest_company fully monkeypatched so the real client path is never reached).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/management/enrich.py",
+      "kind": "script",
+      "commit_or_etag": "c787ab5e5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "domain_for gains an optional source_object param and the verified-site fallback; domain_source_for added; the build_document call site passes source_object and lusha_meta gains the domain_source key -- AC0-AC3 confirm the signature change, the byte-identical refusal text, and 0 non-ASCII/CRLF bytes."
+    },
+    {
+      "path_or_key": "lib/research/harvest/lusha.py",
+      "kind": "script",
+      "commit_or_etag": "c787ab5e5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_cli passes source_object into enrich.domain_for/domain_source_for and adds domain_source to the printed dict -- AC1's test_lusha_cli_passes_source_object exercises this end to end over a fully monkeypatched harvest_company, no client, no key."
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_domain_verified_fallback.py",
+      "kind": "test",
+      "commit_or_etag": "c787ab5e5e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline test file, 5 of 5 named arms passing -- no network, no live bucket, no Lusha call, key never read."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-110.lusha-domain-verified-fallback.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "record-face <status> flipped pending -> complete."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~110/AMGT_RESAPP.TO-AMGT-rk-110.lusha-domain-verified-fallback.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: domain_for with no source_object parameter; lusha._cli calling enrich.domain_for(args.security_key); then M0 (95, 13 subtests) and H0 (79). Record both",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && sed -n '140,148p' lib/research/management/enrich.py && sed -n '236,240p' lib/research/harvest/lusha.py && python -m pytest lib/research/management/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "def domain_for(security_key, table=None):\n    \"\"\"(company_domain, ir_domain, reason). A name absent from the table has NONE.\"\"\"\n    table = table if table is not None else load_domains()\n    row = (table.get(\"domains\") or {}).get(security_key)\n    if not row:\n        return None, None, (\"no declared domain for %s in domains.json (%d name(s) declared): Lusha \"\n                            \"is scoped by company domain and a guessed domain enriches the wrong \"\n                            \"company\" % (security_key, len(table.get(\"domains\") or {})))\n    return row.get(\"company_domain\"), row.get(\"ir_domain\") or row.get(\"company_domain\"), None\n---\n        source_object, datetime.datetime.now(datetime.timezone.utc).strftime(\"%Y-%m-%d\"), label)\n    officers = document.get(\"officers\") or []\n    company_domain, _ir_domain, _reason = enrich.domain_for(args.security_key)\n---M0---\n95 passed, 13 subtests passed in 7.46s\n---H0---\n79 passed in 1.26s",
+      "denominator": "domain_for's signature confirmed WITHOUT a source_object parameter (sed lines 140-148 of the pre-edit file); lusha._cli's call confirmed as enrich.domain_for(args.security_key) (sed lines 236-240 of the pre-edit file); M0 = 95 of 95 passed with 13 subtests passed, 0 failed; H0 = 79 of 79 passed, 0 failed",
+      "status": "PASS",
+      "expect": "def domain_for\\(security_key, table=None\\)[\\s\\S]*enrich\\.domain_for\\(args\\.security_key\\)[\\s\\S]*95 passed, 13 subtests passed[\\s\\S]*79 passed"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"5 passed\" and 0 failed, with the five named arms PASSED",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/management/tests/test_domain_verified_fallback.py -v -p no:cacheprovider 2>&1 | tail -8",
+      "output_evidence": "lib/research/management/tests/test_domain_verified_fallback.py::TestDomainVerifiedFallback::test_declared_row_wins_unchanged PASSED [ 20%]\nlib/research/management/tests/test_domain_verified_fallback.py::TestDomainVerifiedFallback::test_lusha_cli_passes_source_object PASSED [ 40%]\nlib/research/management/tests/test_domain_verified_fallback.py::TestDomainVerifiedFallback::test_never_reads_other_url_fields PASSED [ 60%]\nlib/research/management/tests/test_domain_verified_fallback.py::TestDomainVerifiedFallback::test_no_row_no_host_is_todays_refusal PASSED [ 80%]\nlib/research/management/tests/test_domain_verified_fallback.py::TestDomainVerifiedFallback::test_no_row_verified_host_is_used PASSED [100%]\n\n5 passed in 0.16s",
+      "denominator": "5 of 5 named arms PASSED, 0 failed",
+      "status": "PASS",
+      "expect": "test_declared_row_wins_unchanged PASSED[\\s\\S]*test_lusha_cli_passes_source_object PASSED[\\s\\S]*test_never_reads_other_url_fields PASSED[\\s\\S]*test_no_row_no_host_is_todays_refusal PASSED[\\s\\S]*test_no_row_verified_host_is_used PASSED[\\s\\S]*5 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "management \"N passed\" with N = M0 + 5 (subtests unchanged) and harvest \"H0 passed\", 0 failed in both",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/management/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "100 passed, 13 subtests passed in 7.37s\n79 passed in 1.18s",
+      "denominator": "management 100 of 100 passed (M0=95 + 5 new), 13 subtests passed (unchanged), 0 failed; harvest 79 of 79 passed (H0, unchanged), 0 failed",
+      "status": "PASS",
+      "expect": "100 passed, 13 subtests passed[\\s\\S]*79 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"changed_code_files\" lists EXACTLY lib/research/harvest/lusha.py, lib/research/management/enrich.py and lib/research/management/tests/test_domain_verified_fallback.py; each \"compiles True crlf 0 non_ascii_chars 0\"",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r110/ac4.py",
+      "output_evidence": "changed_code_files ['lib/research/harvest/lusha.py', 'lib/research/management/enrich.py', 'lib/research/management/tests/test_domain_verified_fallback.py']\nlib/research/harvest/lusha.py compiles True crlf 0 non_ascii_chars 0\nlib/research/management/enrich.py compiles True crlf 0 non_ascii_chars 0\nlib/research/management/tests/test_domain_verified_fallback.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "3 of 3 changed files are exactly the named set (git diff 96cc4dae9d HEAD over lib/integrations/infra/.tools/portal); 3 of 3 files compile True, crlf 0, non_ascii_chars 0",
+      "status": "PASS",
+      "expect": "changed_code_files \\['lib/research/harvest/lusha\\.py', 'lib/research/management/enrich\\.py', 'lib/research/management/tests/test_domain_verified_fallback\\.py'\\][\\s\\S]*compiles True crlf 0 non_ascii_chars 0[\\s\\S]*compiles True crlf 0 non_ascii_chars 0[\\s\\S]*compiles True crlf 0 non_ascii_chars 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "domain_for's verified-site fallback must be the ONLY fallback consulted when domains.json has no row -- never ceo_public_profile, a battery seed or an attempt URL. MUTANT: added a fallback read of ((source_object or {}).get(\"ceo_public_profile\") or {}).get(\"url\") to domain_for's working-tree copy only (inserted between the verified-host branch and the final refusal; enrich.py otherwise untouched), re-ran test_never_reads_other_url_fields alone.",
+      "expected": "the mutant makes test_never_reads_other_url_fields FAIL: the source_object in that arm carries ceo_public_profile.url with NO verified_site, so the mutated function now returns that URL as company_domain instead of the refusal the test asserts",
+      "observed": "FAILED -- AssertionError: 'https://ceo-public-profile.example.com/bio' is not None (1 failed in 0.27s). Restored enrich.py from .scratch/r110/enrich.py.fixed (a plain binary file copy of the post-fix, pre-mutant bytes, taken before mutating; never git checkout --/git show/git stash) immediately after, confirmed md5sum-identical to the committed blob (git cat-file -p HEAD:lib/research/management/enrich.py | md5sum), and re-ran the full test file (5 passed) plus both suites and AC3 once more, all unchanged.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every criterion is a pure offline read: pytest against in-process code (no network, no AWS, no Lusha client -- LUSHA_API_KEY deleted from the environment and harvest_company fully monkeypatched in the one test that touches the CLI path), or a local git diff/compile() read against this worktree's own committed bytes. AC1/AC2 (5 passed / 100 passed,13 subtests / 79 passed) and AC3 (the exact 3-file list, all crlf 0 non_ascii_chars 0) were each run three times across this session -- pre-commit, post-commit, and again after the mutant-restore -- with byte-identical output evidence every time.",
+      "observed": "AC1 [5 passed] stable across 3 runs (pre-commit, post-commit, post-mutant-restore); AC2 [100 passed,13 subtests / 79 passed] stable across 3 runs; AC3's exact file list and crlf/non_ascii lines stable across 3 post-commit runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "domains.json, the officer roster, battery.py and any served object",
+      "reason": "section 1 'What this cell does NOT change' and section 3 WALLS -- no edit was made to any of these."
+    },
+    {
+      "item": "any live run that causes a management build to call Lusha where today it skips",
+      "reason": "RECORD FACE note 1: nothing runs here; the behavioural consequence is deferred to a later, worded cell (L-MGMT for Lenovo only, cap 10 credits). 0 Lusha calls, the Lusha key never read."
+    },
+    {
+      "item": "any AWS call, S3 write, S3 delete, deploy, install, or vendor call",
+      "reason": "section 4 BOUNDS: CODE ONLY. Every test uses stubbed/monkeypatched module functions, no network reachable."
+    },
+    {
+      "item": "branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50",
+      "reason": "never read, shown, diffed or checked out, per the order's own instruction (it holds an exposed credential)."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/management/tests/test_domain_verified_fallback.py -v -p no:cacheprovider",
+      "result": "5 passed in 0.16s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/management/tests -q -p no:cacheprovider",
+      "result": "100 passed, 13 subtests passed in 7.37s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/harvest/tests -q -p no:cacheprovider",
+      "result": "79 passed in 1.18s"
+    },
+    {
+      "tool": "git diff / compile() (custom script)",
+      "invocation": "python .scratch/r110/ac4.py",
+      "result": "changed_code_files exactly the 3 named files; all 3 compile True crlf 0 non_ascii_chars 0"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~110 <0.9.0_WK_AMGT_RESAPP~110@opal.agent>\" -F <msgfile> -- lib/research/management/enrich.py lib/research/harvest/lusha.py lib/research/management/tests/test_domain_verified_fallback.py",
+      "result": "c787ab5e5e, 3 files changed, 163 insertions(+), 12 deletions(-)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~110/AMGT_RESAPP.TO-AMGT-rk-110.lusha-domain-verified-fallback.proof_of_spec.json AC0,AC1,AC2,AC3",
+      "result": "PENDING -- run after this instance is written"
+    }
+  ]
+}
