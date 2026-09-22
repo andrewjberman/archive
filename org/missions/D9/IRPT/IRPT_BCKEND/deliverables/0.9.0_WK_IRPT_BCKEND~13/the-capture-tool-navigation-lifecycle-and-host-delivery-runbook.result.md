@@ -1,9 +1,12 @@
 # IRPT_BCKEND.TO-IB-rtj-1 -- result, by `0.9.0_WK_IRPT_BCKEND~13`
 
 **State: TERMINAL on the mechanical criteria (R101-AC1, R101-AC2); AC3 recorded for `3.0.0_SA_CVO~B`
-(not self-graded); arm (f)'s S3 publish/ledger sub-step did NOT run -- STOPPED there exactly as the
-order's arm (f) and DELIVERABLE section anticipate (neither half is at HEAD naming this packet's blob).**
-That stop covers only the publish sub-step; nothing else in the cell depends on it.
+(not self-graded).** First pass STOPPED arm (f)'s S3 publish/ledger sub-step because neither half was
+at HEAD naming this packet's blob, exactly as the order and DELIVERABLE section anticipate. **SECOND
+PASS (2026-09-22 ~01:3xZ):** both halves are now at HEAD naming the same packet blob
+(`2450320a688a4740af81d3a72f281b2a06f05b23` -- `2.0.0_SA_COO~B` @`5b67db0397`, `1.0.0_SA_CTO`
+@`088669b331`), re-verified unchanged from when originally re-derived. Arm (f) executed in full: see
+the updated "Arm (f)" section below.
 
 ## Arm (a) -- baseline reproduction (BEFORE any edit, at pre-repair HEAD)
 Ran `IRPT_BCKEND_R9_CAPTURE_REDIRECT_DIAGNOSTIC.cjs` and `IRPT_BCKEND_R8_CAPTURE_DIAGNOSTIC.cjs`
@@ -68,17 +71,34 @@ time before the wrapper is invoked -- and explains why the render document's own
 relied on instead (it is a side effect of a *render* being dispatched, unscheduled, and not this
 wrapper's own path). Output: `arm_runbook` in `battery_ib_rtj_1.py --arm runbook`.
 
-## Arm (f) -- the packet, then the (non-)publish
+## Arm (f) -- the packet, then the publish (SECOND PASS)
 Wrote `IB-rtj-1_NEVER_WIDEN_PACKET.md` naming the ONE changed file's git blob and sha256 (`capture-
 session.cjs` only; `capture-session.sh` is unchanged and is NOT republished, since its bytes were
 already published by `IB-rti-1` and republishing byte-identical content would claim an act this cell
-did not perform). Committed it. **Censused this session: no file under
-`org/tier1_exec/1.0.0_SA_CTO/deliverables/` or `org/tier1_exec/2.0.0_SA_COO~B/deliverables/` names
-`IB-rtj-1` together with `CTO_HALF`/`COO_HALF` -- neither half exists yet.** Per the order's own arm
-(f), STOPPED: no ledger entry opened, no S3 write, no readback, no host-side verification claimed.
-This is the SAME shape `IB-rti-1`'s own first pass took (see that cell's ISSUER ADDENDUM) and is
-explicitly anticipated by this order's DELIVERABLE section ("the ledger entry and S3 readback IF both
-halves land").
+did not perform). Committed it. First pass STOPPED: censused, no half existed yet.
+
+**Second pass (2026-09-22 ~01:3xZ):** both halves confirmed present at HEAD, both literally naming
+this packet's blob (`2450320a688a4740af81d3a72f281b2a06f05b23`). Re-derived
+`git rev-parse HEAD:.../IB-rtj-1_NEVER_WIDEN_PACKET.md` at my own HEAD (`5b82db7a31`) myself and
+confirmed it still equals that value -- the packet had not drifted since signing. Then:
+1. Opened the deploy-completion ledger `irpt-rtj-1-capture-tool-publish` BEFORE the act (one leg L1,
+   `s3-prefix`), sentinel + entry committed at `8ff0ffc1af`.
+2. Materialized the git-blob bytes (`git cat-file -p HEAD:<path>`), independently re-hashed them
+   (sha256 `defcb58572276f36036d610d296f53df32f86477ffb3e6b17aab00c6f6c2d95a`, matching the packet's
+   table) BEFORE upload.
+3. `aws s3 cp` published those exact bytes to
+   `s3://opal-313476888478-lambda-artifacts/ec2/investor-reporting-export/capture-session.cjs`
+   (VersionId `llAMqS_QPopRTb3T9KWyHLX8jJvoQWS4`).
+4. Read the object back via `s3api get-object` and independently re-hashed the retrieved bytes: sha256
+   `defcb58572276f36036d610d296f53df32f86477ffb3e6b17aab00c6f6c2d95a` -- equals the packet's
+   blob-derived table exactly.
+5. Closed leg L1 with that readback proof, closed the ledger entry (sentinel removed), committed at
+   `ef15e1bd45`.
+
+`capture-session.sh` was NOT republished (byte-identical since `IB-rti-1`, per the packet's own
+reasoning, unchanged). **The host remains STOPPED throughout; this cell does not start it, and no
+on-host byte verification is claimed or exists** -- the S3 readback above is the only verification
+this act performs or can perform.
 
 ## Nothing else regressed (feeding AC3(iii))
 Re-ran `IB-rti-1`'s own `battery_ib_rti_1.py` arms `command`, `readiness`, `origin`, `diagnostic`
@@ -92,10 +112,11 @@ the verdict tokens/exit codes are quoted in the WORKER REPORT).
 ## Not done / not claimed
 No host start/stop, no live login, no credential, no MFA automation, no real session file, no network
 call to the portal -- everything exercised under stubs (VM-sandboxed real source, or static text
-reads). No on-host byte readback exists anywhere in this cell (arm f's own text says so). No S3
-write occurred (halves absent). The allowlist was NOT changed to a DEV/localhost value, and none of
-S125/S126/S127's existing checks were weakened to make a new case pass (re-verified: `IB-rti-1`'s own
-battery still passes in full against this repaired source).
+reads). **No on-host byte readback exists anywhere in this cell** (arm f's own text says so, both
+passes) -- the second pass's S3 readback verifies the PUBLISHED OBJECT, never the host. The allowlist
+was NOT changed to a DEV/localhost value, and none of S125/S126/S127's existing checks were weakened
+to make a new case pass (re-verified: `IB-rti-1`'s own battery still passes in full against this
+repaired source).
 
 ## Controls
 Negative control on arm (d)'s exact regression case, run against the pre-fix blob (`git show
