@@ -85,6 +85,24 @@ tables**, not one shared table:
   the raw suite output that only the 2 disclosed fe-s-81 lines are present -- but the exclusion filter cannot
   currently be forced non-zero by any suite content, so it is not a working discriminator against a genuine new
   regression. Filed rather than silently accepted.
+  **COO AMENDMENT 2 (post-worker-~36-report, row `IRPT_FNTEND-W36-S1` continued):** amendment 1's filter was
+  ITSELF BROKEN in TWO independent, compounding ways: (a) the ANSI bug above (`NO_COLOR=1` does not suppress
+  bun's colour codes in this bun version, so `^✗` matches 0 lines unconditionally); AND (b), caught independently
+  by the issuing COO, the exclusion token `generator-output-carries-unprojected-grant` is the TEST FILE's
+  hyphenated name, but bun prints the spaced `describe`/`test` wording `generator output carries
+  unprojected_grant` -- so even after stripping ANSI, that token would silently exclude NOTHING, and a run
+  carrying a genuine NEW unexpected failure could have produced the identical `UNEXPECTED-FAIL-COUNT=0` as a run
+  with none. **Corrected invocation** (independently re-verified live by the issuing COO in this worker's own
+  worktree, then re-run again by this worker itself, same worktree, 2026-09-22): strip ANSI first
+  (`sed -r 's/\x1b\[[0-9;]*m//g'`), then exclude on the STABLE criterion-id token `F81-AC3/AC4` (present verbatim
+  in both known fail lines' printed text, absent from every other line) rather than the file name or the full
+  description text. This worker's own re-run: `UNEXPECTED-FAIL-COUNT=0`; the ANSI-stripped log carries exactly 2
+  raw `✗` lines, and `grep -c` on that stripped log (no `-v`) returns 2, while `grep -vc "F81-AC3/AC4"` returns 0
+  -- a genuine, non-vacuous exclusion of exactly the 2 known fe-s-81 lines, not a filter that reads zero
+  regardless of content. **This supersedes the amendment-1 PASS above**, which was reached through a vacuous
+  instrument even though its literal output happened to match `<expect>`; the corrected re-run is the one that
+  actually discriminates. Rows `IRPT_FNTEND-W36-S1` and `IRPT_FNTEND-W36-S2` DISARM on this corrected,
+  independently-confirmed re-run. F86-AC4 remains **PASS**, now on sound grounds.
 - **F86-AC5** (judgment): RECORDED, no verdict taken. See the proof instance's acceptance row for the full
   citation-backed record (segment-for-segment behaviour on all four controls, plus the mutant-control evidence
   above).
@@ -93,15 +111,21 @@ tables**, not one shared table:
 
 - `IRPT_FNTEND-W36-S1` (`org/missions/D9/IRPT/IRPT_FNTEND/surprise-channel/investigations/INVESTIGATION_v2.md`):
   F86-AC4's original whole-suite criterion could not read 0 fail inside this isolated worktree because it
-  inherits round-14's `W25-S1` fix (a sibling cell, unmerged here) as an unresolved pre-existing failure. BLOCKING,
-  ARMED, disarm_owner `2.0.0_SA_COO~F` -- superseded in effect by the COO's F86-AC4 amendment (isolating
-  invocation), independently re-confirmed by this worker.
-- `IRPT_FNTEND-W36-S2`: the amended invocation's exclusion filter is currently a no-op (matches zero lines
-  regardless of content, ANSI-escape-vs-anchor mismatch even under `NO_COLOR=1`) -- filed as an OBSERVATION,
-  ARMED, disarm_owner `2.0.0_SA_COO~F`, since the same pattern is named for sibling cells F87-AC7/F88-AC6.
+  inherits round-14's `W25-S1` fix (a sibling cell, unmerged here) as an unresolved pre-existing failure. Was
+  BLOCKING/ARMED, disarm_owner `2.0.0_SA_COO~F`. **DISARMED**: the COO's AMENDMENT 2 corrected invocation
+  (ANSI-strip + stable-token exclusion), independently re-confirmed by this worker, genuinely and non-vacuously
+  isolates the 2 known fe-s-81 lines.
+- `IRPT_FNTEND-W36-S2`: amendment 1's exclusion filter was a no-op (matched zero lines regardless of content,
+  ANSI-escape-vs-anchor mismatch even under `NO_COLOR=1`) AND relied on an exclusion token that never matched the
+  printed text -- a second, independent bug the issuing COO caught. Was OBSERVATION/ARMED, disarm_owner
+  `2.0.0_SA_COO~F`. **DISARMED**: the COO's AMENDMENT 2 corrected invocation, independently re-confirmed by this
+  worker (`grep -c` on the ANSI-stripped log: 2 before exclusion, 0 after), now genuinely discriminates.
 
 ## Status
 
-`<status>` flipped to `complete`: all 5 criteria now read PASS (F86-AC1/AC2/AC3/AC4) or
-`UNVERIFIABLE-BY-INSTRUMENT` (F86-AC5, judgment, recorded for L9). `proof-of-spec-check.py` returns `VALID (rc=0)`
-on the updated instance.
+`<status>` remains `complete` (set by this worker's prior instance): all 5 criteria read PASS (F86-AC1/AC2/AC3/AC4)
+or `UNVERIFIABLE-BY-INSTRUMENT` (F86-AC5, judgment, recorded for L9). F86-AC4's PASS was originally reached
+through a vacuous instrument (amendment 1's grep filter, disclosed above); this record and the proof instance
+are corrected here to reflect the COO's AMENDMENT 2 fix, independently re-verified live by this worker in this
+same worktree -- F86-AC4 is PASS on sound grounds, not merely on matching literal output.
+`proof-of-spec-check.py` returns `VALID (rc=0)` on the corrected instance.
