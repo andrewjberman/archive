@@ -1,61 +1,101 @@
-# HVST-h-10 RUN REPORT -- the ONE Lenovo harvester trial run
+# AMGT_HARVST HVST-h-10 -- RUN_REPORT (Phase 1, 2026-09-22)
 
-**Security:** `992_HK_Equity` (Lenovo Group; sa_symbol `LNVGY`, the US ADR line -- fallback file, since
-`org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~3/universe.json` carries a Lenovo record
-keyed by folder `"Lenovo 992 HK"` / `bloomberg_ticker.value "992 HK"` with `sa_symbol.status UNRESOLVED`, not
-a `992_HK_Equity`-keyed record with a usable flat `sa_symbol` in the `--security-json` shape).
+Issuer: `2.0.0_SA_COO~Y`. Assignee: `0.9.0_WK_AMGT_HARVST~10`. Grant: `1.0.0_SA_CTO~Z` msg 24390
+(records @`c5f33fe8a3`), "one further publications run for `992_HK_Equity` covering Bloomberg.com,
+FT, WSJ, Barron's, plus a Seeking Alpha pass that persists the received bytes", conditioned on the
+CLI harvest wiring being fixed and verified first (done at checkpoint commit `b48efb29c6`).
 
-**Bottom line, stated first:** this cell's live run was interrupted by this worker's own error (an
-erroneous `timeout 590` applied to item 4, which the task order's section 5 preamble explicitly names as
-NOT a bounded criterion invocation), after real vendor calls to Seeking Alpha had already begun. Separately
-and independently, **harvest_grammar mode -- the mechanism item 5's bronze/silver write depends on -- is
-structurally unreachable from this cell's CLI** regardless of how the run is invoked or bounded: see row
-`AMGT_HARVST-Z-W10-S2`. So even a correctly-bounded run of item 4 could never have produced a non-empty
-`upload-harvest` receipt. No second live vendor-call invocation was made (the ONE-RUN RULE: real vendor
-calls having occurred, re-spending the word is the issuer's/Andrew's call, not this worker's).
+## Sizing (printed before the run, item 3)
 
-## Per-publisher
+`plan.json` (S3-watermark read only, zero vendor calls): 5 publishers x 25 planned listing pages
+each = **125 total planned listing pages**. Saved at `plan.json`, timestamped before item 4.
 
-| publisher | status | planned_listing_pages | actual pages | stop reason | articles accepted | articles rejected (mention floor) | bronze/silver counts |
-|---|---|---|---|---|---|---|---|
-| sa | interrupted, job status `running` (never finalized) | 25 | >=2 listing pages fetched (27 HTTP calls: 2x account/info, 2x symbols/lnvgy/news, 23x article GETs) | killed mid-job by this worker's own `timeout 590` (row -S2) | 21 (locally captured: `.runtime/opal-data-harvest/runs/20260922T195934Z-sa-592d7d85bf.json` and per-article files under `publications/v1/sa/`) | 6 | bronze 0, silver 0 -- harvest_grammar mode never engaged (row -S2), so nothing reached `harvest_raw_outbox`/`harvest_listing_outbox` for `upload-harvest` to find, live run or not |
-| bbg | UNRESOLVED, never started | 25 | 0 | live run invocation terminated before reaching this publisher (0 http events for bbg in the event ledger) | 0 | 0 | bronze 0, silver 0 |
-| ft | UNRESOLVED, never started | 25 | 0 | live run invocation terminated before reaching this publisher (0 http events for ft) | 0 | 0 | bronze 0, silver 0 |
-| wsj | UNRESOLVED, never started | 25 | 0 | live run invocation terminated before reaching this publisher (0 http events for wsj) | 0 | 0 | bronze 0, silver 0 |
-| barrons | UNRESOLVED, never started | 25 | 0 | live run invocation terminated before reaching this publisher (0 http events for barrons) | 0 | 0 | bronze 0, silver 0 |
+## The ONE live run (item 4)
 
-**Auth verdicts** (recorded in `first_run.summary.json.auth_verdicts`, before any listing/article call each
-publisher would have made): sa AUTHENTICATED (confirmed live, 27 real 200 responses); bbg/ft/wsj/barrons
-UNTESTED (the interrupted run never reached them, so their ~7.6-day-old sessions were never exercised).
+Invocation:
+```
+python -m lib.opal_data_harvest run --runtime-root <main-worktree>/.runtime/opal-data-harvest \
+  --publishers sa bbg ft wsj barrons --retrieval-mode backfill --floor 2026-01-01 \
+  --security-json lenovo.security.json --bbg-symbol-probe --harvest-grammar --max-jobs 5
+```
+Run once, at 2026-09-22T23:13:55Z, NOT wrapped in `timeout`. rc=1.
 
-## Bloomberg's per-symbol probe
+**Outcome: the bbg symbol probe made a real vendor call and received a real verification
+challenge from bloomberg.com (`VerificationRequired`), and that exception is UNCAUGHT in
+`__main__.py`'s run handler -- it crashed the whole CLI process before `Worker.run()` was ever
+reached.** Filed as row `AMGT_HARVST-Z-W10-S4` (ARMED, disarm_owner `2.0.0_SA_COO~Y`): this cell's
+Phase-0 fix makes the probe run *inside* the five-publisher fetch on the probe's SUCCESS path, but
+a probe FAILURE still prevents the fetch from starting at all -- a narrower echo of the original
+`-S1` defect. This is the ONE authorized live vendor-call invocation (the ONE-RUN RULE); it is not
+repeated. No second live vendor-call invocation was made.
 
-**Verdict: UNRESOLVED.** `--bbg-symbol-probe` cannot be combined with a full five-publisher `run` in one
-invocation: the built CLI's `run` handler branches on the flag BEFORE `Worker.run()` and, when set, probes
-bbg only for every named security while ignoring `--publishers` entirely and never running the other four
-publishers' fetch at all (`__main__.py:139-150`; HVST-h-3's own proof-of-spec artifact description says the
-same thing verbatim: "in place of the normal fetch"). Trying it as a genuine live attempt would need a
-SECOND live vendor-call invocation, exceeding the ONE-RUN RULE and the trial's "1 run for Lenovo" cap. Not
-attempted. Row `AMGT_HARVST-Z-W10-S1`.
+Per-publisher table:
+
+| publisher | status | planned pages | actual pages | accepted | rejected | stop reason |
+|---|---|---|---|---|---|---|
+| bbg | UNRESOLVED-CHALLENGED | 25 | 0 | 0 | 0 | Real vendor call (`news()` against bloomberg.com) returned a verification challenge (`transport.VerificationRequired`); the saved session is ~186h old. Consistent with the order's own SESSION STATE note. NOT retried per the ONE-RUN RULE. |
+| sa | UNRESOLVED-NEVER-STARTED | 25 | 0 | 0 | 0 | The invocation crashed on the bbg probe before `Worker.run()` was reached; sa's own fetch never began. Zero http events for sa (events.jsonl unchanged, 233 before/after). |
+| ft | UNRESOLVED-NEVER-STARTED | 25 | 0 | 0 | 0 | Same as sa: crashed on the bbg probe before `Worker.run()`. |
+| wsj | UNRESOLVED-NEVER-STARTED | 25 | 0 | 0 | 0 | Same as sa: crashed on the bbg probe before `Worker.run()`. |
+| barrons | UNRESOLVED-NEVER-STARTED | 25 | 0 | 0 | 0 | Same as sa: crashed on the bbg probe before `Worker.run()`. |
+
+**Bloomberg symbol-probe verdict: UNRESOLVED** -- real vendor call made, real verification
+challenge received, not adopted. Reason: stale (~186h) parked session, per the order's own
+measured SESSION STATE note; the probe tried once, per the trial word's own cap ("Bloomberg's
+per-symbol `news()` is tried once in the validation run").
+
+`--harvest-grammar` was passed (the row `-S2` fix); the harvest_client-gated write path inside
+`Worker.run()` was never reached this invocation either, because the crash happened before
+`Worker` was constructed at all. This run cannot demonstrate the fix's positive case (a real
+bronze/silver write) -- only that the wiring itself is present and correct in isolation, already
+proven at the checkpoint by AC7/AC8 and their mutant control.
+
+## Upload (item 5)
+
+`upload-harvest --retrieval-mode backfill --max-objects 1000`: `{"results": [], "remaining_pending": 0}`.
+Trivially satisfied -- nothing was captured to upload.
+
+## Verify (item 6)
+
+`bronze_reread 0 of 0 mismatch 0` -- zero bronze keys were put by this run (Worker never
+constructed, harvest_raw_outbox/harvest_listing_outbox both measured 0 rows in the
+2026-09-22T23:00Z+ window). `silver_article_rows 0 bronze_articles 0` (equal, trivially -- nothing
+to compare). Planned-vs-actual listing pages: 25 planned / 0 actual for every one of the five
+publishers (table above).
+
+## The second same-day run, network refused (item 7)
+
+Same command repeated with `HARVEST_REFUSE_NETWORK=1`, same UTC date (2026-09-22, both
+23:13:55Z and 23:18:16Z). rc=1. The bbg probe's own `PacedSession.__init__` raised
+`RuntimeError('network refused')` immediately, before any I/O -- the refuser fired correctly with
+zero real network activity -- but that exception is likewise uncaught and crashed the process
+before `Worker.run()` was reached, so sa/ft/wsj/barrons never got their own replay attempt either.
+`http_events 0`, `network_refused_hits 1` (the probe's own refusal; not 0, because a refusal
+genuinely occurred, just not from a publisher's own job). Because item 4 wrote nothing to bronze,
+there was nothing for any publisher to replay from regardless -- this run confirms the refuser
+itself works cleanly (zero real network I/O) but cannot demonstrate FWD-3's replay-without-network
+positive case for any publisher, since none of the five ever reached their own fetch attempt in
+either invocation.
 
 ## Silver prefixes written
 
-**None.** `upload-harvest --retrieval-mode backfill` (item 5) returned `{"results": [], "remaining_pending":
-0}` -- nothing was pending, because nothing reached `harvest_raw_outbox`/`harvest_listing_outbox` (row
-`AMGT_HARVST-Z-W10-S2`).
+**None.** Nothing reached bronze, so nothing reached silver either.
 
-## Second same-day, network-refused run (item 7)
+## Stage-9 line (verbatim, for `AMGT_RESAPP`'s driver)
 
-Run at `2026-09-22T20:27:02Z` (same UTC date as item 4's `2026-09-22T19:58:10Z` start). Result: all five
-publishers raised `RuntimeError("network refused")` before any I/O (`http_events 0`, confirmed via the
-event ledger: 0 new `"event": "http"` lines since the pre-run baseline) -- because nothing is held locally
-in bronze/listing form for ANY of the five publishers (sa's 21 articles were captured to a local per-job
-JSON cache and per-article files, never to bronze). `network_refused_hits 5` (not 0). This is the honest,
-correctly-measured consequence of item 4's interruption plus the harvest_grammar wiring gap -- not a defect
-in the network refuser or the paging/dedupe logic itself.
+**stage 9 publications for 992_HK_Equity: 0 articles in silver, run 2026-09-22T23:13:55Z**
 
-## The stage-9 line
+## Bottom line
 
-`AMGT_RESAPP` stage 9 publications for 992_HK_Equity: **0** articles in silver, run 2026-09-22T19:58:10Z
-(interrupted; see rows AMGT_HARVST-Z-W10-S1 and AMGT_HARVST-Z-W10-S2 for why, and for the 21 Seeking Alpha
-articles genuinely fetched but not yet reachable by the bronze/silver write path).
+Two defects, both filed:
+- `AMGT_HARVST-Z-W10-S1`/`-S2` (predecessor's, this cell's Phase-0 fix): the CLI could not wire a
+  `harvest_client` and could not combine `--bbg-symbol-probe` with a live five-publisher run.
+  **Fixed and verified** (checkpoint commit `b48efb29c6`, AC7/AC8 PASS, mutant control fires).
+- `AMGT_HARVST-Z-W10-S4` (this run): the fixed probe branch still crashes the whole invocation on
+  a probe FAILURE (as opposed to a probe replacement, the original defect), because the exception
+  is uncaught. This cell's one live-run grant was spent entirely on demonstrating that gap: a real
+  vendor call to bloomberg.com was made, received a genuine verification challenge, and the
+  uncaught exception prevented sa/ft/wsj/barrons from ever starting their own fetch in this
+  invocation.
+
+No second live vendor-call invocation was made. The ONE-RUN RULE was honored.

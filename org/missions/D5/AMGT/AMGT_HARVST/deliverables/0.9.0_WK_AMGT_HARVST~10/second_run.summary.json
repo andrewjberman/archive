@@ -1,19 +1,23 @@
 {
+  "invocation": "HARVEST_REFUSE_NETWORK=1 python -m lib.opal_data_harvest run --runtime-root <main-worktree>/.runtime/opal-data-harvest --publishers sa bbg ft wsj barrons --retrieval-mode backfill --floor 2026-01-01 --security-json lenovo.security.json --bbg-symbol-probe --harvest-grammar --max-jobs 5",
+  "invocation_at": "2026-09-22T23:18:16Z",
+  "first_run_invocation_at": "2026-09-22T23:13:55Z",
   "same_utc_date": true,
+  "rc": 1,
   "http_events": 0,
-  "network_refused_hits": 5,
-  "status": "5_of_5_publishers_network_refused (RuntimeError 'network refused' for sa, bbg, ft, wsj, barrons -- nothing was held locally in bronze/listing form for any of them to replay from, because harvest_grammar mode never engaged in item 4; see row AMGT_HARVST-Z-W10-S2)",
-  "run_command": "HARVEST_REFUSE_NETWORK=1 python -m lib.opal_data_harvest run --runtime-root <main-worktree>/.runtime/opal-data-harvest --publishers sa bbg ft wsj barrons --retrieval-mode backfill --floor 2026-01-01 --security-json lenovo.security.json --max-jobs 5",
-  "run_started_at_utc": "2026-09-22T20:27:02Z",
-  "run_finished_at_utc": "2026-09-22T20:27:14Z",
-  "item4_date_utc": "2026-09-22",
-  "item7_date_utc": "2026-09-22",
-  "per_publisher_error_type": {
-    "sa": "RuntimeError",
-    "bbg": "RuntimeError",
-    "ft": "RuntimeError",
-    "wsj": "RuntimeError",
-    "barrons": "RuntimeError"
-  },
-  "note": "AC3's zero-network-refused expectation presupposes item 4 already captured every page/article this run needs (C-HV-EGRESS/the ONE-RUN RULE's design intent). Item 4 was interrupted after real vendor calls for sa only (21 accepted articles, captured locally but NOT written to bronze -- harvest_grammar mode is structurally unreachable via this cell's CLI, row AMGT_HARVST-Z-W10-S2), and bbg/ft/wsj/barrons were never attempted at all. So this second run correctly, honestly hits the network refuser for all five publishers: nothing is held for any of them in the form get_listing_bronze/article_known can see."
+  "events_jsonl_lines_before": 233,
+  "events_jsonl_lines_after": 233,
+  "network_refused_hits": 1,
+  "status": "probe_crashed_before_any_publisher_job_started_network_refused_local_raise",
+  "status_reason": "Item 7 repeated item 4's exact command with HARVEST_REFUSE_NETWORK=1. The bbg probe (which runs first, before Worker.run(), per this cell's Phase-0 fix) tried to build a session and PacedSession.__init__ raised RuntimeError('network refused') immediately (transport.py:71, before any I/O -- this IS the network refuser working correctly, not a real network call). That exception is UNCAUGHT in __main__.py's run handler and crashed the whole process (rc=1) before Worker.run() was ever reached, so sa/ft/wsj/barrons never got their own replay-from-bronze attempt in this invocation either. Because item 4 also crashed before writing anything to bronze/listing (row -S4), there was nothing for any publisher to replay from regardless -- this run cannot demonstrate FWD-3's positive case (replay-without-network) for any publisher; it can only confirm the refuser itself fires with zero real network I/O, which it did.",
+  "publisher_outcomes": {
+    "bbg": {
+      "status": "REFUSED-AT-PROBE",
+      "reason": "PacedSession.__init__ raised RuntimeError('network refused') on the probe's first attempt to build a session, before any I/O -- counted as this run's one network_refused_hit."
+    },
+    "sa": {"status": "NEVER-STARTED", "reason": "process crashed on the bbg probe before Worker.run() was reached"},
+    "ft": {"status": "NEVER-STARTED", "reason": "process crashed on the bbg probe before Worker.run() was reached"},
+    "wsj": {"status": "NEVER-STARTED", "reason": "process crashed on the bbg probe before Worker.run() was reached"},
+    "barrons": {"status": "NEVER-STARTED", "reason": "process crashed on the bbg probe before Worker.run() was reached"}
+  }
 }
