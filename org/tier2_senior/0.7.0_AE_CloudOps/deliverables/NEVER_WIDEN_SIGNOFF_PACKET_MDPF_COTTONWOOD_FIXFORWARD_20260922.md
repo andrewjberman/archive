@@ -16,6 +16,13 @@ first, then push"*). The CTO's stated requirements for its half: msg 99490 items
 
 A half signs the BLAST RADIUS and the rollback per key, BOTH branches of every named outcome -- never an intention.
 
+**AMENDED ~15:2xZ on `4.0.0_SA_CRO`'s refusal of s.6 (@`3a9e95a335`, s.1/s.3/s.7 sign-ready):** s.6 now carries the
+THREE in-process Cottonwood staging writers the real invoke runs before any portal key (C-stage rows, with the
+`adate` the invoke writes and the current VersionId of every key they rewrite, all read at ~15:1xZ); the reachability
+sentence is corrected to FOUR prefixes; s.3 names the CRO's third reachable branch (cottonwood `category-views`
+ABSENT); s.7 step 4 reports per-scope ABSENTs by name. No other section changed. Both halves are asked against the
+NEW blob.
+
 ---
 
 ## 0. THE THREE LEGS, EXACTLY
@@ -126,6 +133,13 @@ TWO reachable outcomes and the halves cover both: **16 of 16** if the pair's `--
 cottonwood's 3-trading-day window (its holdings value_date is 09-18 = 2 trading days behind 09-22), or **15 of 16** with
 `global/account-distribution` ABSENT if it does not -- the gate refusing as designed, a wider window never the fix.
 
+**THIRD REACHABLE BRANCH (CRO NOTE, adopted):** reader (1)'s guard WITHHOLDS a scope's `category-views` when its LATEST
+cell is null. On production vintage cottonwood's values can lag its axis (09-18 vs 09-21 was the measured shape), and
+reader (2)'s roll-forward fills the GLOBAL fold, not the scope's own cross-section read. So **cottonwood
+`category-views` ABSENT (withheld, never zero-filled) is reachable** -- inside the blast radius (an ABSENT writes
+nothing), and Andrew's smoke is told so in advance rather than meeting it as a surprise. The three outcomes are
+therefore 16/16, 15/16 (global account-distribution absent), or 14/16 (both); the step-4 ping names every ABSENT.
+
 ---
 
 ## 4. LEG B -- THE FIVE SYNCED KEYS BY NAME, CURRENT AND TARGET BYTES (CTO item 1)
@@ -173,13 +187,28 @@ pre-09-21 versions: the fix-forward direction keeps Phase A+B on the EC2 path an
 | B | `s3://opal-data-mdpf/code/scripts/gold/dim_mdpf_aggregate_aua_timeseries.py` | VersionId **`FjrdsfCycvPskUPoDXPsBdDggc1WMsy.`** (194,495 B) | `copy-object` that version onto the key; the next runner boot syncs it |
 | C-gold | `s3://opal-data-assets/portal/gold/mdpf/{49financial,inflection,cottonwood,global}/{aum-metrics,account-distribution,category-views,aggregate-aua-timeseries}/<date>.json` + `_manifests/` | bucket versioning **Enabled** (read this turn): each key's prior version | per-key `copy-object` of the prior VersionId; the 13:30Z fire tomorrow rewrites them regardless |
 | C-serve | `s3://opal-data-portal-v2/platinum/mdpf/*` (publisher `SERVE_BUCKET`/`SERVE_ROOT`, read from the applied plane) | bucket versioning **Enabled** (read this turn): each key's prior version | per-key `copy-object`; or re-run the publisher after a C-gold rollback |
+| **C-stage 1** (bdmp) | `s3://opal-data-assets/blackdiamond/cottonwood/gold/dim_model_portfolio/date=2026-09-22/data.parquet` -- `bdmp.main(["--date", adate, "--upload"])` @`:1206`, `GOLD_PREFIX` `build_dim_model_portfolio.py:72`, put `:535`. **adate = 2026-09-22** (newest `fact_model_assignment` partition, read 15:1xZ; newest three 09-20/21/22). The partition ALREADY EXISTS: written 13:30:40Z today by the running pin's own bdmp call (1 version) | VersionId **`Ck8Yka0YkB5T8YS_VWOGChjbmzAYNfLD`** (8,783 B) | `copy-object` that version onto the key (idempotent writer keyed by assignment date; same silver partitions -> same content expected) |
+| **C-stage 2** (slice) | `s3://opal-data-assets/gold/mdpf_revamp/cottonwood/aggregate_aua_timeseries.json` -- `slice_mod.main(["--upload"])` @`:1212`, `SLICE_KEY` `build_cottonwood_mdpf_slice.py:123`, put `:1153` | VersionId **`T7zvya5jX28HzwQNsupKRgWrc84ibPkL`** (99,652 B, 2026-09-16 13:30:50Z) | `copy-object` that version onto the key |
+| **C-stage 3** (pair) | `s3://opal-data-assets/gold/mdpf_revamp/cottonwood/{account_distribution,aum_metrics,account_units}.json` -- `pair_mod.main(["--date", adate, "--upload"])` @`:1216`, `STAGING_PREFIX` `build_cottonwood_mdpf_pair.py:134`, `_stage_upload` `:738-755` (put + listing verify) | VersionIds **`5PdffIm_dfJnwagwlzd9.OxEqjWPG63j`** (9,291 B) / **`6X6tPnaxWcQ9c.ow3cuqJAU6DpVmYcm1`** (5,087 B) / **`JAYwgtMDl5HRUwwDAVGxgw91RFaQjy0v`** (8,268 B), all 2026-09-16 13:30:51Z | `copy-object` each version onto its key |
 
-Blast radius of LEG C, both branches: the gold invoke writes only what `build_all` builds (per-scope, per-type keys
+The three staging writers run IN-PROCESS on the production branch before any portal key (`run_cottonwood_family`
+@`5991626d4f:1206-1218`), same three calls as the running pin (a completeness row, not new exposure). What is new is
+the code producing them: slice and pair are Phase A+B bytes. **The staged cottonwood keys were last written
+2026-09-16 13:30Z** -- the family has not completed on any fire since, which is the 8-of-16 the estate has served
+daily; only the dim partition (bdmp runs first) has kept landing. The invoke therefore REWRITES 5 staged keys and the
+dim partition; consumers of the staged keys are this same run's `spine.load_cottonwood_slice` and the global fold's
+sidecar read (both in-process) and the EC2 Stage 6 path (dead at import today, s.5). A staging rollback is the FULL
+rollback: restoring the portal keys while leaving fix-forward content in these six keys is a half rollback.
+
+Blast radius of LEG C, all branches: the gold invoke writes only what `build_all` builds (per-scope, per-type keys
 dated by the scope's data_as_of; a scope that fails is ABSENT, never zero-filled -- the 13:30Z fire today already wrote
-8 of these 16 keys on the old pin, so the invoke REWRITES 8 and ADDS up to 8). The publisher projects changed gold to
-`platinum/mdpf/*` on the EGRESS role, its declared read/write prefixes only. Worst reachable branch: a crash mid-build on
-the real vintage -> partial gold writes -> rollback per key by version, and tomorrow's scheduled fire supersedes. No
-key outside these two prefixes is reachable by either function's role.
+8 of these 16 keys on the old pin, so the invoke REWRITES 8 and ADDS up to 8) plus the six staged keys above. The
+publisher projects changed gold to `platinum/mdpf/*` on the EGRESS role, its declared read/write prefixes only. Worst
+reachable branch: a crash mid-build on the real vintage -> partial gold writes and/or partially rewritten staged keys
+-> rollback per key by version (every key above is on a versioning-Enabled bucket), and tomorrow's scheduled fire
+supersedes. **No key outside these FOUR prefixes -- `opal-data-assets/portal/gold/mdpf/`,
+`opal-data-assets/gold/mdpf_revamp/cottonwood/`, `opal-data-assets/blackdiamond/cottonwood/gold/dim_model_portfolio/`,
+`opal-data-portal-v2/platinum/mdpf/` -- is reachable by either function's role.**
 
 ---
 
@@ -195,7 +224,8 @@ key outside these two prefixes is reachable by either function's role.
 3. LEG C: `aws lambda invoke mdpf-gold-lambda` with `{}` (production path, `kind=manual`; NOT qa_local), read the run
    manifest (`a4_objects_built`, `data_as_of`, per-scope errors); then `aws lambda invoke opal-assets-mdpf-portal-publisher`
    with `{}`; read its publish manifest; head the served keys.
-4. Ping Andrew with the numbers (which scopes, which dates, 15 or 16, and which branch of s.3 landed) for his visual smoke.
+4. Ping Andrew with the numbers (which scopes, which dates, 16/15/14, and EVERY per-scope ABSENT by name -- the three
+   branches of s.3) for his visual smoke.
 5. LEG B closes when MSTR's push lands and the key's ETag reads `a2b5f5980e9f66c9b1cfc2f67c8586dd`; the ledger stays
    OPEN on that leg until then (it is not this seat's push).
 
