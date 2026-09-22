@@ -1,0 +1,130 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-85",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "3b18ab31c8",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-85.commit-generated-fixtures-with-unprojected-grant.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4bc62712f2"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~35",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/fixtures/smoke/fe-s-13-wire.json",
+      "kind": "config_data",
+      "commit_or_etag": "34174c39",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal is FROZEN this round (BOUNDS: 'local commits only'); committed to branch wk-irpt_fntend-14-85-fe-s-85-portal, LOCAL, not pushed/merged/deployed.",
+      "introduces": [
+        "unprojected_grant"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/fixtures/smoke/fe-s-14-print-v1.json",
+      "kind": "config_data",
+      "commit_or_etag": "34174c39",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal is FROZEN this round (BOUNDS: 'local commits only'); committed to branch wk-irpt_fntend-14-85-fe-s-85-portal, LOCAL, not pushed/merged/deployed.",
+      "introduces": [
+        "unprojected_grant"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-85/verify-git-object.mjs",
+      "kind": "test",
+      "commit_or_etag": "b8c0a3fd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "portal is FROZEN this round; committed to branch wk-irpt_fntend-14-85-fe-s-85-portal, LOCAL, not pushed/merged/deployed. Plain node/bun checker, no framework, no deploy surface."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F85-AC1",
+      "criterion_verbatim": "the whole portal typechecks.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-85-fe-s-85/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "N/A -- boolean check (tsc exit code)",
+      "status": "PASS",
+      "expect": "rc=0(?![0-9])"
+    },
+    {
+      "criterion_id": "F85-AC2",
+      "criterion_verbatim": "the generator's own run confirms the two sibling files' key counts (9 smoke keys, 2 print-map keys) -- the DENOMINATOR, printed by the generator itself, matching what the working-tree files must now carry.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-85-fe-s-85/portal && /c/Users/AndrewBerman/.bun/bin/bun run src/pages/InvestorReporting/__tests__/fe-s-13/gen-corpus.ts",
+      "output_evidence": "REQUEST RECORDS: 12 of 12; SMOKE KEYS: 9; PUBLISHED MAP KEYS: 12 of 12 DECLARED; PRINT MAP KEYS: 2",
+      "denominator": "9 smoke keys of 9 declared; 2 print-map keys of 2 declared (generator's own printed denominator)",
+      "status": "PASS",
+      "expect": "SMOKE KEYS: 9.*PRINT MAP KEYS: 2"
+    },
+    {
+      "criterion_id": "F85-AC3",
+      "criterion_verbatim": "at the COMMITTED git object (not the worktree): fe-s-13-wire.json 9/9, fe-s-14-print-v1.json 2/2, default.json 12/12 -- all carrying unprojected_grant. This is the criterion the round-13 defect failed.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-85-fe-s-85/portal && /c/Users/AndrewBerman/.bun/bin/bun __tests__/fe-s-85/verify-git-object.mjs <your-commit-hash>",
+      "output_evidence": "error: Module not found \"__tests__/fe-s-85/verify-git-object.mjs\"\nrc=1",
+      "denominator": "0 of 3 files read (module never resolved at the literal path)",
+      "status": "FAIL",
+      "status_reason": "Order defect, filed as surprise row IRPT_FNTEND-W35-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~F): the criterion's literal <invocation> names a bare `__tests__/fe-s-85/verify-git-object.mjs` path from cwd <WS>/portal, but this cell's <paths> grant places the checker at `portal/src/pages/InvestorReporting/__tests__/fe-s-85/` (matching all 220+ sibling __tests__/fe-s-N/ dirs already in the repo; no top-level portal/__tests__/ exists or is in-grant) -- the literal path resolves nowhere, confirmed identically whether the hash argument is the literal bracket text or a real hash. Separately, <your-commit-hash> is not a member of this order's declared <placeholders>WS, PORT</placeholders>, so it is neither ENFORCE-expanded by the alignment limb nor valid literal bash (unquoted, it is stdin redirection; confirmed live as a bash syntax error before bun even runs). Per IRPT_FNTEND-S31's ruling (a corrected invocation belongs in the TO file, never only a worker's self-substituted record -- the same standard IRPT_FNTEND-W34-S1 applied one round earlier to FE-s-84's F84-AC5), graded FAIL on the literal invocation, self-grade not taken past the refusal. SUPPLEMENTARY EVIDENCE ONLY (never the graded row): running the identical checker at the grant-consistent path (`bun src/pages/InvestorReporting/__tests__/fe-s-85/verify-git-object.mjs 34174c39`) produces exactly the required string -- `GIT-OBJECT src/pages/InvestorReporting/fixtures/smoke/fe-s-13-wire.json: 9 of 9 carry unprojected_grant`, `... fe-s-14-print-v1.json: 2 of 2 ...`, `... default.json: 12 of 12 ...`, rc=0 -- and a negative control against the pre-fix commit 467354c9 correctly reports 0 of 9 / 0 of 2 / 12 of 12, confirming the checker genuinely discriminates. Disarmed when the issuing COO amends F85-AC3's <invocation> (grant-consistent path, and a resolution for the hash substitution) and this worker or a successor re-runs and flips this TO complete.",
+      "expect": "fe-s-13-wire\\.json: 9 of 9.*fe-s-14-print-v1\\.json: 2 of 2.*default\\.json: 12 of 12"
+    },
+    {
+      "criterion_id": "F85-AC4",
+      "criterion_verbatim": "the whole IRPT_FNTEND suite is green.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-85-fe-s-85/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": " 650 pass\n 27 skip\n 0 fail\n 2706 expect() calls\nRan 677 tests across 127 files. [72.18s]\nrc=0",
+      "denominator": "650 pass + 27 skip + 0 fail = 677 tests across 127 files",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail"
+    },
+    {
+      "criterion_id": "F85-AC5",
+      "criterion_verbatim": "graded at L9 by the CVO: the committed fixture content is genuinely the generator's real output (not hand-edited to pass), and default.json's content (if touched) remains data-equivalent to round 12's repair -- same entries and values, not merely the same field count. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; read this result file and the diffs it cites",
+      "output_evidence": "fe-s-13-wire.json (47 insertions) and fe-s-14-print-v1.json (10 insertions) diffed against portal HEAD 467354c9 before committing: PURELY ADDITIVE unprojected_grant blocks ({\"count\":0,\"denominator\":1,\"kinds\":[]}) at each of 9 and 2 request-record keys respectively -- no other key, value or structure touched; full diffs read by hand. Both files are byte-for-byte the generator's own stdout (bun run .../gen-corpus.ts), never hand-edited: re-running the generator after committing (git diff --stat) shows ZERO further changes to either file. default.json shows as modified in git status alongside twelve fixtures/wire/requests/*.request.json files, but git diff --stat carries ZERO lines for every one of them -- CRLF-normalization touch only (core.autocrlf=true), not content drift; confirmed unprojected_grant count unchanged at 12 of 12 both before and after the generator run. default.json is therefore NOT re-committed here, per the order's own instruction, and remains exactly round 12's hand repair -- data-equivalence is trivially preserved since the committed bytes never changed.",
+      "denominator": "N/A -- judgment criterion, no verdict computed here",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true; graded by 3.0.0_SA_CVO at L9 per spine v3 L9. No self-grade taken.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The checker's discrimination was mutant-tested: run against the round-14 base commit 467354c9 (this cell's own PRE-FIX state -- the exact defect the order describes) it must report 0 of 9 / 0 of 2, not the required 9 of 9 / 2 of 2.",
+      "expected": "GIT-OBJECT fe-s-13-wire.json: 0 of 9 carry unprojected_grant; fe-s-14-print-v1.json: 0 of 2; default.json: 12 of 12 (unchanged)",
+      "observed": "GIT-OBJECT src/pages/InvestorReporting/fixtures/smoke/fe-s-13-wire.json: 0 of 9 carry unprojected_grant; ... fe-s-14-print-v1.json: 0 of 2 ...; ... default.json: 12 of 12 ... -- matches expectation exactly",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran the generator (F85-AC2's invocation) twice in sequence; compared the regenerated working-tree fixtures against the already-committed bytes both times via git diff --stat.",
+      "observed": "Both runs: zero diff lines against the committed fe-s-13-wire.json / fe-s-14-print-v1.json -- the generator is deterministic given the same source inputs, and re-running it after commit reproduces byte-identical output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_FNTEND-W35-S1: F85-AC3's literal <invocation> is unsatisfiable as written -- wrong checker path relative to this cell's <paths> grant, and <your-commit-hash> is not a declared placeholder (not even valid literal bash). Graded FAIL on the literal invocation; substance proven supplementarily at the grant-consistent path. BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~F."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~35/commit-generated-fixtures-with-unprojected-grant.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-85-fe-s-85/portal && /c/Users/AndrewBerman/.bun/bin/bun --version",
+      "result": "1.3.9"
+    },
+    {
+      "tool": "tsc (via bun run typecheck)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-85-fe-s-85/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck",
+      "result": "rc=0, no diagnostics"
+    }
+  ]
+}
