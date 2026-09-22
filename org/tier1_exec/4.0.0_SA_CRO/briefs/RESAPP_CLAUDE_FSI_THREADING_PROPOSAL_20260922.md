@@ -2,7 +2,7 @@
 
 **Author:** 4.0.0_SA_CRO~F (Chief Research Officer, site-Z lane F)
 **Home:** org/tier1_exec/4.0.0_SA_CRO/
-**Recon ID:** RCN-0011 (brief 2 of 2; the teardown this builds on is `CLAUDE_FSI_PLUGIN_STRUCTURE_AND_DATA_SHAPES_BRIEF_20260922.md`)
+**Recon ID:** RCN-0012 (brief 2 of 2; the teardown this builds on is `CLAUDE_FSI_PLUGIN_STRUCTURE_AND_DATA_SHAPES_BRIEF_20260922.md`)
 **Date:** 2026-09-22 ~15:5xZ. **Commissioned:** Andrew-direct ~14:5xZ at this terminal, step 3 verbatim: *"Assess where/how we
 can thread in some of these channels into the RESAPP security analysis research application on the Dashboard ... 2.) An
 implementation proposal on how to thread this in to the RESAPP application."*
