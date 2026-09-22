@@ -1,6 +1,10 @@
 # IRPT_BCKEND.TO-IB-rtr-4 -- RE-PIN CITATIONS + THE V1 HARNESS -- result
 
 **Assignee:** `0.9.0_WK_IRPT_BCKEND~20` | **Round:** 18, cell `IB-rtr-4` | **PRD:** v0.17 @`4f942b7657` | **Base commit:** `7a55a7327d`.
+**Governing task order (the real saved filename -- see row `IRPT_BCKEND-W20-S3`):**
+`org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtr-d.re-pin-citations-to-one-merged-vintage-and-the-v1-harness.md`
+(the file's own `<to_id>`, `<paths>` and `<proof_of_spec>` sections all self-cite "rtr-4"; the file is
+actually saved as "rtr-d" -- row `IRPT_BCKEND-W20-S3`).
 
 ## (a) Every `resolve.py` citation re-pinned, confirmed at the CURRENT merged tree
 
@@ -122,29 +126,42 @@ All four artifacts (`node_modules` x2, `src/lib/`, `dist/`) are `git status --po
   session, against the CURRENT merged tree at branch tip** (see COMMITS in the worker report) --
   the only evidence this result treats as authoritative going forward.
 
-## Criterion R118-AC4
+## Criterion R118-AC4 -- GRADES FAIL ON ITS OWN LITERAL TEXT (deliverable itself verified sound)
 
-**Invocation as named in the task order** (six `../` segments in the first leg):
+**Invocation exactly as named in the task order** (six `../` segments in the first leg -- this is
+what the proof_of_spec instance's acceptance row records verbatim, per
+`proof-of-spec-check.py`'s `invocation-alignment` limb, which REFUSES an instance whose recorded
+invocation diverges from the criterion's own text):
 ```
 cd deliverables/0.9.0_WK_IRPT_BCKEND~20 && py -3.12 -m pytest ../../../../../../infra/aws/lambda/investor-reporting/_scope/tests/test_resolve.py -v && node --test ../0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs && node --test test_v1_actual_module_harness.mjs
 ```
-**Measured this session: that literal 6-dot path does not resolve** (`org/` has no `infra/`
-child) -- `ERROR: file or directory not found`, pytest rc=4, collected 0 items. Filed as row
-`IRPT_BCKEND-W20-S1` (non-blocking): the directory `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/
-0.9.0_WK_IRPT_BCKEND~20/` is measured 7 levels below the worktree root (confirmed by seven
-sequential `cd ..`), not 6, so the invocation's first leg needs a SEVENTH `../`. The other two
-legs (relative to the same starting directory, shallower) are unaffected.
+**Run VERBATIM, from `org/missions/D9/IRPT/IRPT_BCKEND/` (this order's own directory, same
+convention `IB-rtq-3`'s own result.md states for the identical structural invocation): that
+literal 6-dot path does not resolve** (`org/` has no `infra/` child) -- `ERROR: file or directory
+not found`, pytest rc=4, collected 0 items, `no tests ran`. The `&&` chain short-circuits on leg
+1's non-zero exit, so legs 2 and 3 never run under this literal invocation.
 
-**Corrected invocation, run from `org/missions/D9/IRPT/IRPT_BCKEND/` (this order's own directory,
-same convention `IB-rtq-3`'s own result.md states for the same starting point):**
+**Root cause (row `IRPT_BCKEND-W20-S1`, GROUNDED, non-blocking to this cell's own work): the
+directory `org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~20/` is measured 7
+levels below the worktree root** (confirmed by seven sequential `cd ..`), not 6, so the
+invocation's first leg is one `../` short. This is a defect in the criterion's own text, and this
+cell's BOUNDS forbid editing the task order's face to fix it -- so the proof_of_spec instance's
+acceptance row for R118-AC4 is honestly recorded **`status: FAIL`**, with `status_reason` naming
+this row and pointing at the supplementary evidence below. **The task order is therefore NOT
+flipped to `complete`** and stays open for the CTO/COO to re-cut the criterion's invocation text
+(a face this worker cannot touch).
+
+**Supplementary evidence only (NOT the graded invocation) -- proves the underlying deliverable
+(the citation re-pin, the durable-baseline confirmation, and the new V1 harness) is sound, and
+that the ONLY defect is the criterion's own text:** the identical three-leg chain with a SEVENTH
+`../` prepended to leg 1's path, otherwise byte-identical, run from the same starting directory:
 ```
 cd deliverables/0.9.0_WK_IRPT_BCKEND~20 && py -3.12 -m pytest ../../../../../../../infra/aws/lambda/investor-reporting/_scope/tests/test_resolve.py -v && node --test ../0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs && node --test test_v1_actual_module_harness.mjs
 ```
-
 **rc=0. Output (verbatim excerpt, each leg's summary line):**
 ```
 Leg 1 (pytest, the real pre-existing _scope suite, citation-drift test included):
-============================= 29 passed in 0.55s ==============================
+============================= 29 passed in 0.23s ==============================
 
 Leg 2 (node --test, the 19-test durable baseline, IB-rtq-3's file, unmodified):
 tests 19
@@ -158,8 +175,9 @@ fail 0
 ```
 **Denominator: 29 of 29 (pytest, including the re-pinned-citation test) + 19 of 19 (durable
 baseline, unmodified) + 4 of 4 (new V1 harness) = 52 of 52 tests PASS across all three legs, rc=0
-on the corrected chained invocation.** Re-run twice more this session (determinism control below)
--- stable both times.
+on the corrected chained invocation.** Re-run 3 times total this session (determinism control
+below) -- stable every time. This is offered so the CVO/CTO can see the deliverable works and the
+ONLY open item is the criterion's own invocation text, not a re-cut of this cell's work.
 
 ## Controls (proof-of-spec `controls` object)
 
@@ -184,8 +202,14 @@ on the corrected chained invocation.** Re-run twice more this session (determini
   gitignored, uncommitted, out-of-`<paths>` build prerequisites (the `src/lib/` mirror and the
   `tsc` `dist/` build); neither exists in a fresh worktree; both were built locally, offline, and
   are not committed. class OBSERVATION, hazard_standing INERT.
+- **`IRPT_BCKEND-W20-S3`** -- this task order's own `<paths>`/`<to_id>`/`<proof_of_spec>` sections
+  self-cite `task-orders/IRPT_BCKEND.TO-IB-rtr-4...md` as its own filename, but the file carrying
+  that exact content is actually saved as `task-orders/IRPT_BCKEND.TO-IB-rtr-d...md` (letter,
+  matching sibling cells a/b/c/d/e); this instance's `decomp_ref.to_ref` and every
+  `--governing-order` invocation this cell ran use the real saved (`rtr-d`) path. class
+  OBSERVATION, hazard_standing INERT.
 
-Both are left for `3.0.0_SA_CVO`'s L9 adjudication, not self-graduated, per this order's own
+All three are left for `3.0.0_SA_CVO`'s L9 adjudication, not self-graduated, per this order's own
 BOUNDS instruction ("Do NOT self-graduate your own filed row").
 
 ## BOUNDS discipline

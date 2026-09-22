@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rtr-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "4f942b7657"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7a55a7327d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtr-d.re-pin-citations-to-one-merged-vintage-and-the-v1-harness.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~20",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/_scope/resolve.py",
+      "kind": "script",
+      "commit_or_etag": "c96c4ae5f2c8927e386fb3497f2565bd6180918c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Modified, git blob c96c4ae5f2c8927e386fb3497f2565bd6180918c at commit a0967bb920. Every numbered line-citation into index.mjs/render_auth.mjs re-pinned to the current merged HEAD: TRUSTED_HEADERS all nine (400-408 -> 510-518), RENDER_TRUSTED_HEADERS all three (PRD-paragraph fallback -> render_auth.mjs:210/211/212, since IB-rtq-3 has now landed), plus every other stale docstring/reason-string citation (index.mjs:135-136/153-154/162-163 -> 155/180/419; :186-187/:205 -> 204-205/225; :188 -> 226; :161-171 -> 180-191). No function's control flow, return type, or return class changed -- confirmed by the full 29-test pre-existing suite passing unmodified in expectation, and by the mutant control below.",
+      "introduces": [
+        "510"
+      ],
+      "artifact_covered_by": [
+        "R118-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~20/test_v1_actual_module_harness.mjs",
+      "kind": "test",
+      "commit_or_etag": "e95bf338afe0041a62efaf274cb80924338e8d4a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob e95bf338afe0041a62efaf274cb80924338e8d4a at commit a0967bb920. Criterion R118-AC4's third leg -- the new V1 harness. Imports and calls V1's ACTUAL compiled verifyAccessToken (auth-handler's own tsc-built dist/jwt.js), key-retrieval faked via node:module registerHooks (no AWS call). 4 tests: positive control (valid human token accepted), negative control on that fixture (wrong-key token refused), render-key-signed token refused by V1's own function (signature stage), render-shaped-but-wrong-iss/aud token refused independently.",
+      "artifact_covered_by": [
+        "R118-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~20/re-pin-citations-to-one-merged-vintage-and-the-v1-harness.result.md",
+      "kind": "doc",
+      "commit_or_etag": "2db8066c55e3b24ae12e4b2a3e51a281ddf5c9c6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 2db8066c55e3b24ae12e4b2a3e51a281ddf5c9c6 at commit a0967bb920 -- the session narrative for cell arms (a)-(d), criterion output (both the order's literal invocation and the corrected one), controls, surprise summary and BOUNDS discipline check, isolated-vs-merged evidence separated explicitly per arm (d).",
+      "artifact_covered_by": [
+        "R118-AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "ceaee7c8a1c0f86639ff5d6a3bcc5a68ddca82f5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob ceaee7c8a1c0f86639ff5d6a3bcc5a68ddca82f5 at commit a0967bb920 (rows W20-S1/S2 landed). surprise-row-gate confirmed: '2 new row(s) of 356 total checked (354 pre-existing, NOT re-graded)'; all fences re-validated to parse (python json.loads over every fenced block, 70 of 70, 0 bad) and both new rows independently schema-validated against org/surprise_channel/schemas/investigation_item.schema.json (0 errors each).",
+      "artifact_covered_by": [
+        "R118-AC4"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R118-AC4",
+      "criterion_verbatim": "the real pre-existing _scope suite passes IN FULL (the citation-drift test included), the 19-test durable baseline passes unmodified, and the new V1 harness passes both its refusal and positive-control arms -- rc=0 on all three legs",
+      "method": "test_suite",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~20 &amp;&amp; py -3.12 -m pytest ../../../../../../infra/aws/lambda/investor-reporting/_scope/tests/test_resolve.py -v &amp;&amp; node --test ../0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs &amp;&amp; node --test test_v1_actual_module_harness.mjs",
+      "output_evidence": "Run VERBATIM as the criterion names it, from org/missions/D9/IRPT/IRPT_BCKEND/ (the convention this order's own directory establishes, per IB-rtq-3's identical-shape criterion): leg 1's six '../' segments resolve to org/infra/aws/lambda/investor-reporting/_scope/tests/test_resolve.py, which does not exist (org/ has no infra/ child) -- pytest: 'ERROR: file or directory not found: ../../../../../../infra/aws/lambda/investor-reporting/_scope/tests/test_resolve.py', 'collected 0 items', 'no tests ran in 0.01s', rc=4. The && chain short-circuits on leg 1's non-zero exit, so legs 2 and 3 never run under this literal invocation. ROOT CAUSE (row IRPT_BCKEND-W20-S1, GROUNDED, non-blocking): the directory org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~20/ is measured SEVEN levels below the worktree root (confirmed by seven sequential 'cd ..'), not six -- the invocation's first leg is one '../' short of repo root, a defect in the criterion's own text, not in this cell's deliverable. SUPPLEMENTARY EVIDENCE (same session, same committed HEAD a0967bb920, NOT the graded invocation -- offered only to show the underlying deliverable is sound): the identical three-leg chain with a SEVENTH '../' prepended to leg 1's path (and otherwise byte-identical) returns rc=0 with '29 passed in 0.23s' (leg 1, includes the citation-drift test test_every_trusted_header_is_actually_injected_at_the_line_it_claims), 'tests 19 / pass 19 / fail 0' (leg 2, IB-rtq-3's durable baseline, byte-unmodified by this cell), and 'tests 4 / pass 4 / fail 0' (leg 3, this cell's new V1 harness, both refusal-arm and positive-control-arm tests PASS) -- 52 of 52 tests, stable across 3 runs this session (determinism control below).",
+      "denominator": "0 of 3 legs executed under the criterion's literal invocation (leg 1 failed at rc=4 before leg 2/3 could run); 52 of 52 tests PASS under the corrected (seven-dot) invocation, offered as supplementary evidence only, not as the graded result",
+      "status": "FAIL",
+      "status_reason": "The criterion's own <invocation> text is not re-runnable as written: its first leg's relative path is one '../' short of repo root from the directory this order's own convention starts in (org/missions/D9/IRPT/IRPT_BCKEND/), so pytest exits rc=4 ('file or directory not found') before collecting any test, and the && chain never reaches legs 2 or 3. This is a defect in the task order's own criterion text (filed as row IRPT_BCKEND-W20-S1, class OBSERVATION, GROUNDED, non-blocking to this cell's own work -- this cell kept working and built the full deliverable regardless), not a defect in the citations, the durable baseline, or the new V1 harness: the identical three-leg chain, corrected by exactly the one missing '../', passes all 52 tests (see output_evidence's supplementary-evidence paragraph). Per this order's own <paths>/BOUNDS instruction, this face is never edited to fix the invocation string; the task order therefore cannot be flipped to complete on this criterion's literal text and is left open for the CTO/COO to re-cut the criterion's invocation.",
+      "expect": "29 passed.*tests 19.*pass 19.*fail 0.*tests 4.*pass 4.*fail 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "resolve.py TRUSTED_HEADERS['x-user-email']'s re-pinned citation temporarily reverted from the correct 510 back to the stale 400 (nothing else in the file changed), targeting this cell's own primary fix (cell (a)).",
+      "expected": "test_every_trusted_header_is_actually_injected_at_the_line_it_claims fails with an AssertionError naming 'x-user-email', 400, and the actual (wrong) line-400 content; every other test in the 29-test suite is unaffected (they do not read TRUSTED_HEADERS['x-user-email']'s line number).",
+      "observed": "run against the mutant, targeted: \"AssertionError: ('x-user-email', 400, '        console.warn(JSON.stringify({'))\" -- FAILED, the exact same failure this cell reproduced BEFORE its own fix. Reverted (python string-replace back to 510, confirmed applied); re-run of the same targeted test: PASSED. Full 29-test suite re-run after revert: '29 passed in 0.19s' -- clean, matching the pre-mutant state.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the corrected full three-leg criterion invocation run 3 times total this session at the committed HEAD (a0967bb920): once to establish the fix pre-commit, once immediately post-commit, once as an explicit final determinism re-run.",
+      "observed": "every run: rc=0, '29 passed' (pytest) + 'tests 19 / pass 19 / fail 0' (durable baseline) + 'tests 4 / pass 4 / fail 0' (V1 harness), identical every time. No flakiness: pytest suite is pure in-memory Python; both node suites use in-process RSA keypairs (crypto.generateKeyPairSync) and synthetic events/tokens, no network, no filesystem race, no timing dependency beyond fixed exp offsets from Date.now().",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "editing render_auth.mjs, index.mjs, _authz/enforce.py, or portal-authorizer/index.mjs",
+      "reason": "BOUNDS: those are IB-rtr-1's, IB-rtr-2's and IB-rtr-3's surfaces. This cell's only code-adjacent edit is resolve.py's citation comments/reason strings plus the new, separate V1-harness test file -- confirmed: neither render_auth.mjs nor index.mjs is in this commit's diff, only cited by line number."
+    },
+    {
+      "item": "any AWS API call, Secrets Manager entry, SSM parameter, or Lambda deploy",
+      "reason": "BOUNDS: code + tests only, offline. The V1 harness's key-retrieval dependency is faked (node:module registerHooks, same technique test_edge_render_delegate.mjs already uses); the two local build prerequisites (lib mirror, tsc compile) are offline-only, no AWS surface touched (row IRPT_BCKEND-W20-S2)."
+    },
+    {
+      "item": "committing the build-time lib mirror (auth-handler/src/lib/), node_modules (x2), or the tsc dist/ output that make V1's source importable",
+      "reason": "all four are gitignored by their own repos' .gitignore entries and none is named in this cell's <paths> grant (auth-handler/ is outside it, jwt.ts is READ-ONLY reference only); building them locally was necessary to satisfy CELL (c)'s 'import and call the real function' and none is a committed artifact -- row IRPT_BCKEND-W20-S2, same class as the already-established ephemeral-node_modules precedent IRPT_BCKEND-W15-S4."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W20-S1: R118-AC4's own <invocation> first leg is one '../' short of repo root from the stated starting directory (org/missions/D9/IRPT/IRPT_BCKEND/) -- the literal 6-dot path resolves to org/infra/... (does not exist), pytest rc=4, 0 items collected under the criterion's OWN literal text (which is what this instance's acceptance row records and grades, status FAIL); a 7-dot correction, run as SUPPLEMENTARY evidence only, passes all 52 tests. Not self-graduated; CVO/CTO to adjudicate at L9/L10 whether the criterion's invocation is re-cut.",
+    "IRPT_BCKEND-W20-S2: V1's verifyAccessToken cannot be imported at all -- neither via Node's native --experimental-strip-types (jwt.ts's type-only './types' import, written without 'import type', throws once stripped) nor via a plain require -- without two gitignored, uncommitted, out-of-<paths> build prerequisites (auth-handler's own build-time src/lib/ mirror of infra/aws/lambda/lib/, and its tsc dist/ compile output, plus the mirrored .mjs copied into dist/lib/authkeys/ since tsc's own include does not copy non-.ts files). Both built locally, offline, this session; neither committed. Not self-graduated; CVO to adjudicate at L9.",
+    "IRPT_BCKEND-W20-S3: this TO's own <paths>/<to_id>/<proof_of_spec> sections self-cite 'task-orders/IRPT_BCKEND.TO-IB-rtr-4...md' as this order's own filename, but the file carrying that exact content is actually saved as 'task-orders/IRPT_BCKEND.TO-IB-rtr-d...md' (letter, matching sibling cells a/b/c/d/e) -- this instance's decomp_ref.to_ref and every --governing-order invocation this cell ran use the real saved (rtr-d) path; the order's own self-citations are left uncorrected per BOUNDS. Not self-graduated; CVO to adjudicate at L9."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~20/re-pin-citations-to-one-merged-vintage-and-the-v1-harness.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~20 && py -3.12 -m pytest ../../../../../../../infra/aws/lambda/investor-reporting/_scope/tests/test_resolve.py -v",
+      "result": "rc=0, 29 of 29 tests PASS (final run cited in the acceptance row above, at committed HEAD a0967bb920)"
+    },
+    {
+      "tool": "node --test",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~20 && node --test ../0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs",
+      "result": "rc=0, 19 of 19 tests PASS, file byte-unmodified by this cell (final run cited in the acceptance row above)"
+    },
+    {
+      "tool": "node --test",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~20 && node --test test_v1_actual_module_harness.mjs",
+      "result": "rc=0, 4 of 4 tests PASS -- V1's ACTUAL compiled verifyAccessToken, imported and called directly (final run cited in the acceptance row above)"
+    },
+    {
+      "tool": "bun install (x2, local-only, offline, ephemeral, gitignored)",
+      "invocation": "cd infra/aws/lambda-edge/auth-validator-edge && bun install; cd infra/aws/opalinvest_dev/lambda/auth-handler && bun install",
+      "result": "115 packages / 131 packages installed respectively; neither node_modules/ is committed (both gitignored)"
+    },
+    {
+      "tool": "tsc (auth-handler's own, unmodified tsconfig.json)",
+      "invocation": "cd infra/aws/opalinvest_dev/lambda/auth-handler && ./node_modules/.bin/tsc.exe",
+      "result": "rc=0, no errors; dist/jwt.js confirmed to elide the type-only './types' import entirely (grep -c types dist/jwt.js == 0); dist/ not committed (gitignored)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py (via safe-commit.sh chain)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~20 <0.9.0_WK_IRPT_BCKEND~20@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "rc=0, committed a0967bb920. surprise-row-gate: '2 new row(s) of 356 total checked (354 pre-existing, NOT re-graded)', OK all new rows carry step-7/step-10 fields. naming-gate: WARN 2 graded (existing, touched, out-of-pattern IAM_ROLE false-positive on x-user-role/x-advisor-role HTTP header-name literals -- non-blocking, same class as row W16-S4)."
+    }
+  ]
+}
