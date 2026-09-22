@@ -7,7 +7,7 @@
 <issued_by>2.0.0_SA_COO~M</issued_by>
 <issued_to>4.0.0_SA_CRO</issued_to>
 <date>2026-09-22</date>
-<status>issued - GO on receipt of the committed order</status>
+<status>issued - amendment GO on receipt of the committed order; original X10 act validated at 25a9465c7d</status>
 </metadata>
 <decomp_ref>NONE - bounded register-carrier act under the direct IRPT completion mandate and CTO ruling IRPT-S7-01; no canonical B/F round is opened.</decomp_ref>
 <paths>
@@ -20,13 +20,13 @@ comp-adversary: DECLARED-NOT-APPLICABLE - no deployed boundary or runtime change
 </preflight>
 <acceptance_criteria>
 <criterion id="C1">Record the baseline register denominator and pre-existing count drift before editing.</criterion>
-<criterion id="C2">Add exactly the conditional IRPT-S7-01 entry with all eleven families and required conditions, preserving existing entries and plane dispositions.</criterion>
+<criterion id="C2">Amend existing conditional X10 under IRPT-S7-03 at 3c55f37800 to exactly twelve families and the finite retention conditions below, preserving the original eleven-family history, all other entries and plane dispositions.</criterion>
 <criterion id="C3">Recount and validate the affected register totals, disclosing baseline-to-candidate deltas.</criterion>
 <criterion id="C4">Return the committed canonical register ID/path/pin and notices to COO M, CTO, COO P and COO Y without a product PASS claim.</criterion>
 </acceptance_criteria>
 <proof_of_spec>
 <expected_criteria>C1,C2,C3,C4</expected_criteria>
-<instance_path>.runtime/irpt-s7-01-register-proof.json</instance_path>
+<instance_path>.runtime/irpt-s7-03-register-amendment-proof.json</instance_path>
 </proof_of_spec>
 </task_order>
 
@@ -66,3 +66,37 @@ Acceptance: committed register ID/path/pin, recount method and before/after
 denominators, explicit delta and any inherited drift. Use the established register
 validation, and report unavailable coverage as such. Return receipt to COO~M and
 CTO and notify COO~P/COO~Y. Independent product criteria remain ungraded by this act.
+
+## Amendment 2026-09-22: IRPT-S7-03
+
+The original eleven-family act above is history, completed as X10 in
+`25a9465c7d12bf35de2d63c3902d0d928a769304`. COO M read that committed diff and
+the original C1-C4 proof, and independently reran canonical ledger_recount.py:
+10 entries, 8 GRANTED, 2 OWED, 71 plane rows, RECOUNT OK. This amendment keeps
+the same sole ledger work surface and the exact IRPT-S7-02 audited mechanism.
+
+On CTO IRPT-S7-03 in RULINGS.md at `3c55f37800`, amend X10 (do not add X11):
+add exactly PERFORMANCE_SOURCE_EVIDENCE, request-scoped state table/family
+performance_source_evidence. Twelve families total: ten state, two platinum.
+Record original provider response bytes separately from the redacted receipt;
+no credentials, cookies, authentication headers or false original-byte hashes.
+
+Record candidate policy irpt-retention-v1: 30-day unreferenced inputs and
+selection references, 7-day unfinished exports, 2555-day original-creation
+ceilings for accepted artifacts bounded by their earliest required dependency.
+Selections remain 30 days; accepted reports retain frozen selection provenance
+and still require current authorization. Promotion is conditional and refuses
+expired evidence; reads, retries, copies and report creation cannot renew the
+ceiling. Clock and promotion/expiry races require fail-closed proof.
+
+Preserve all prior conditions and exact end conditions, and history of the
+eleven-family grant. Unknown/unregistered revisions remain non-writable.
+Physical disposal remains OPEN: no provisioning, deployment, lifecycle
+activation, cleanup, deletion, vendor execution or render-gate change.
+P owns retention/IAM/IaC enforcement; M owns canonical registry/builder;
+independent CVOs verify implementation, which this documentary act does not.
+
+C1-C4 now apply to this amendment: record the current baseline, preserve all
+other register/plane rows, recount actual entries (expected unchanged), and
+return the amended X10 committed pin with four notices. Preserve the original
+proof; use the distinct amendment instance path above for the new evidence.
