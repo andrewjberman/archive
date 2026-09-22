@@ -194,3 +194,27 @@ amend F81-AC2's `<expect>`).
 literal `<expect>`, so per the governing discipline this order is NOT flipped to `complete`. The
 substance the cell exists to fix (the generator repair surviving regeneration on all three files,
 data-equivalent to round 12's hand repair) is fully proven PASS by AC1, AC3, AC4 and AC5.
+
+## Addendum -- COO amendment, F81-AC2 re-graded PASS
+
+`2.0.0_SA_COO~F` independently confirmed the order defect above (same command, same worktree) and
+amended `F81-AC2` in the shared tree (CLOUD `1edf2d446e`, cherry-picked into this worktree
+`843b8851eb`): the criterion now reads `<invocation>... ; echo rc=$?</invocation><expect>rc=0(?![0-9])
+</expect>` -- grading on the generator's genuine completion signal instead of the guessed wording. Bar
+unchanged (the generator runs cleanly); only the detection mechanism was corrected.
+
+Re-run against the amended invocation, this same worktree, same generator source, same output
+vocabulary as originally measured:
+```
+$ cd portal && timeout 120 bun run src/pages/InvestorReporting/__tests__/fe-s-13/gen-corpus.ts; echo rc=$?
+REQUEST RECORDS: 12 of 12; SMOKE KEYS: 9; PUBLISHED MAP KEYS: 12 of 12 DECLARED; PRINT MAP KEYS: 2
+rc=0
+```
+Matches `<expect>rc=0(?![0-9])</expect>`. **F81-AC2: PASS.**
+
+All five criteria (F81-AC1..AC5) now read PASS. `proof_of_spec.json` updated (F81-AC2's acceptance row
+only; AC1/AC3/AC4/AC5 unchanged, still valid) and re-validated:
+`python .tools/proof-of-spec-check.py <instance> F81-AC1,F81-AC2,F81-AC3,F81-AC4,F81-AC5
+--governing-order <TO>` -> `VALID (rc=0)`. `<status>` flipped to `complete`. Row `IRPT_FNTEND-W31-S1`
+stands as filed (disposition is `disarm_owner` `2.0.0_SA_COO~F`'s to write in the channel; the amendment
+commit is the disarming act it names, this worker did not edit the investigation file).
