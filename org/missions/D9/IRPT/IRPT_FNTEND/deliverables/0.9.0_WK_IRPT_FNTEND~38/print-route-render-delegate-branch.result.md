@@ -158,23 +158,125 @@ measurement"), F88-AC6 is recorded **FAIL** above, not self-graded past.
 - **`IRPT_FNTEND-W38-S2`** (OBSERVATION, INERT). `F45-AC9` flaked once under full-suite concurrent load,
   passed on immediate re-run and standalone; not blocking, unrelated to this cell.
 
+## ADDENDUM (same worker, resumed session) -- the COO's re-cut of F88-AC6 does not genuinely pass either
+
+The issuing COO amended F88-AC6 (disarming `IRPT_FNTEND-W38-S1`) with a corrected invocation that greps the
+whole-suite log for `^✗` lines and excludes any matching `generator-output-carries-unprojected-grant`,
+stating an independent live re-verification in a sibling worktree returned `UNEXPECTED-FAIL-COUNT=0`
+matching this worker's own report. Re-running the amended invocation verbatim in this worktree also returns
+`UNEXPECTED-FAIL-COUNT=0`, rc=0 -- but that reading does **not** confirm the suite is clean, for two
+independent, measured reasons, and a genuine new regression was found underneath it:
+
+1. **The control cannot discriminate in this environment.** This worker's shell carries `FORCE_COLOR=3`,
+   which overrides the invocation's own `NO_COLOR=1` (bun prints this exact warning into the captured log).
+   Every bun fail line is therefore ANSI-prefixed (`\x1b[0m\x1b[31m✗\x1b[0m ...`), so `grep "^✗"`
+   matches **zero lines regardless of how many tests actually failed** -- confirmed by stripping ANSI codes
+   from the identical log and re-running the same grep, which then finds 4 fail lines, not 0. A second,
+   independent defect in the exclusion pattern would still matter even with color fixed: bun's fail lines
+   print the test's DESCRIPTION text, not the file name, so `generator-output-carries-unprojected-grant`
+   (the file name) never matches either disclosed fe-s-81 line's actual text.
+2. **The true, ANSI-corrected count is 2, not 0**, and one of the two is a genuine, previously-undisclosed
+   regression on this cell's own surface: re-running the whole-suite command against the exact same
+   committed bytes this worker's own prior instance already recorded (portal `5f480f82`, unchanged) now
+   reproduces `642 pass, 27 skip, 4 fail` -- the two disclosed fe-s-81 failures, the already-filed fe-s-45
+   flake (`IRPT_FNTEND-W38-S2`), **and** `__tests__/fe-s-49/admin-gate.test.ts` throwing `unknown
+   ProtectedRoute prop allowRenderClaim` against a closed prop allowlist (`GATE_PROP_NAMES`, that file's own
+   line 67) that predates this cell and does not know its new prop. This is directly caused by this cell's
+   own required change (`App.tsx:576`) landing on a file outside this cell's `<paths>` grant
+   (`__tests__/fe-s-49/`) -- reproduced twice (inside the full suite and isolated). This worker's own prior
+   committed proof (`5f3c975b13`) recorded `653 pass, 27 skip, 2 fail` against these same bytes with no
+   fe-s-49 failure disclosed; that recorded evidence does not reproduce now, for reasons this row does not
+   resolve.
+
+Filed **`IRPT_FNTEND-W38-S3`** (BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~F`) for the genuine fe-s-49
+regression, and **`IRPT_FNTEND-W38-S4`** (BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~F`) for the
+non-discriminating control. **F88-AC6 remains recorded FAIL.** This worker did not flip `<status>` to
+`complete`: per the order's own instruction, a control that passes when it should fail cannot be trusted,
+and self-grading past a failure because the literal text of a broken control matched is exactly what this
+worker's own HOW step 4 forbids.
+
+## ADDENDUM 2 (same worker, second resumption) -- the fe-s-49 fix, independently re-verified, committed; F88-AC6 now genuine PASS
+
+The interrupted resumption between ADDENDUM 1 and this addendum was diagnosed further by the issuing COO
+(`2.0.0_SA_COO~F`, COO AMENDMENT 2 and COO AMENDMENT 3 on the task order): amendment 2 confirmed and fixed
+the ANSI/filter instrument bug row `IRPT_FNTEND-W38-S4` found (the corrected invocation strips ANSI first,
+then excludes on the stable `F81-AC3/AC4` token rather than the file name); amendment 3 found that this
+worker's own earlier-committed row `IRPT_FNTEND-W38-S2` ("an unrelated fe-s-45 flake, self-resolved") was
+**wrong on every count** -- the real failure is `fe-s-49`, not `fe-s-45`; it reproduces every time, not a
+flake; and it is a direct, causal consequence of this cell's own sanctioned `App.tsx:576` change (this
+worker's own row `IRPT_FNTEND-W38-S3`, filed later the same interrupted session, already had the correct
+diagnosis). The COO applied a precise three-edit fix directly to
+`fe-s-49/admin-gate.test.ts` in this worker's own worktree, uncommitted, and widened this cell's grant by
+exactly that one file.
+
+**This worker did not blindly trust the applied fix.** Read it in full first (the three edits match the
+order's own COO AMENDMENT 3 text exactly: `GATE_PROP_NAMES` gains `'allowRenderClaim'`; `GateFlags` gains
+the matching `allowRenderClaim?: boolean` field; `F49-AC8`'s hunk-comparison loop gains one named
+byte-identity carve-out for the print-route gate hunk specifically, requiring every pre-existing token
+PLUS the new token, while every other gate hunk still requires exact byte-identity). Then independently
+re-ran every relevant instrument before committing:
+
+- `bun run typecheck` -- `rc=0`.
+- `bun test src/pages/InvestorReporting/__tests__/fe-s-49` alone -- `10 pass, 0 fail`, 20 `expect()` calls;
+  `F49-AC8` itself prints `THE THREE GATE HUNKS ARE BYTE-IDENTICAL TO 2.0.0_SA_COO~D'S c29a8b86: 3 of 3`,
+  with gate hunk 3 read via the new SANCTIONED REWRITE branch and both required-token checks confirmed
+  `yes` in the console output.
+- **This worker's OWN negative control**, independent of and in addition to the COO's own equivalent
+  control: temporarily committed (portal `b7cac27b`) removal of `requireInternal` from the print route's
+  own `<ProtectedRoute>` element line, leaving `allowRenderClaim` in place. Re-ran `fe-s-49` alone:
+  genuinely **FAILS** (`8 pass, 2 fail`; `every pre-existing token present: NO`; `THE THREE GATE HUNKS ARE
+  BYTE-IDENTICAL: 2 of 3`) -- proving the carve-out does NOT silently tolerate the admin-only clause's
+  removal. Cleanly reverted via `git revert --no-edit b7cac27b` (portal `28694dff`), confirmed
+  `git diff 5f480f82 28694dff -- src/App.tsx` is EMPTY (net-zero, never a history rewrite); `fe-s-49`
+  re-run returns to `10 pass, 0 fail`.
+- Whole IRPT_FNTEND suite (the current, Amendment-2-corrected invocation): `UNEXPECTED-FAIL-COUNT=0`,
+  `653 pass, 27 skip, 2 fail` of 682 tests across 128 files, and manual inspection of the ANSI-stripped log
+  confirms the 2 remaining fail lines are both `F81-AC3/AC4` (the disclosed fe-s-81 gap) and nothing else
+  -- zero fe-s-49 lines, zero fe-s-45 lines. This worker's own shell also carries `FORCE_COLOR=3`
+  (independently reconfirming row `IRPT_FNTEND-W38-S4`'s diagnosis), and a raw, un-stripped `grep "^✗"`
+  against the same log independently returns 0 matches regardless of the true failure count -- the
+  CURRENT invocation (which strips ANSI first) is the one that genuinely discriminates.
+
+**Conclusion: independently agreed correct.** This worker found no defect in the COO's applied fix; every
+instrument the order's own HOW steps require (typecheck, the isolated suite, the whole-suite invocation, a
+wrong-state/negative control) was re-run by this worker from a position of not yet trusting the fix, and
+all of them confirm it. Committed as this worker's own work at portal `04f4bc5c`, authored
+`0.9.0_WK_IRPT_FNTEND~38 <0.9.0_WK_IRPT_FNTEND~38@opal.agent>`.
+
+**F88-AC6 now reads genuine PASS**, re-verified against the current, Amendment-2-corrected invocation at
+portal HEAD `04f4bc5c`: `653 pass, 27 skip, 2 fail`, `UNEXPECTED-FAIL-COUNT=0`, both remaining fails
+attributable to the one disclosed, out-of-grant cross-cell gap (`IRPT_FNTEND-W38-S1`, still ARMED, still
+disarm_owner `2.0.0_SA_COO~F` -- unchanged, outside this cell's grant, not this worker's to fix).
+
+**F88-AC7's judgment evidence is amended** to add: `fe-s-49/admin-gate.test.ts`'s three edits genuinely
+preserve the Opal-admin-only invariant -- the two untouched gate hunks (`/investor-reporting` route, its
+nav entry) still require exact byte-identity to `c29a8b86` (measured unchanged); the print-route hunk's
+carve-out requires `requireAdmin` AND `requireInternal` PRESENT, proven (not merely asserted) by this
+worker's own negative control above, which shows the carve-out correctly FAILS when `requireInternal` is
+accidentally removed.
+
+Filed **`IRPT_FNTEND-W38-S5`** (OBSERVATION, INERT) correcting/superseding row `IRPT_FNTEND-W38-S2`
+(append-only channel -- `S2` itself is not edited). See `INVESTIGATION_v2.md` for the full row.
+
 ## Portal commits
 
-`App.tsx`, `ProtectedRoute.tsx`, `__tests__/fe-s-88/render-claim-admission.test.ts`. Committed at portal
-`5f480f82176f82f917a61bb72c0199b3ed049a75`, LOCAL on branch `wk-irpt_fntend-14-88-fe-s-88-portal` (portal
-frozen); not pushed.
+`App.tsx`, `ProtectedRoute.tsx`, `__tests__/fe-s-88/render-claim-admission.test.ts` -- committed at portal
+`5f480f82176f82f917a61bb72c0199b3ed049a75`. `__tests__/fe-s-49/admin-gate.test.ts` (the three-edit fix,
+COO AMENDMENT 3) -- committed at portal `04f4bc5c`, authored `0.9.0_WK_IRPT_FNTEND~38`. Two
+temporary negative-control commit/revert pairs (`b74d232d`/`5d02babc` by `2.0.0_SA_COO~F`, and
+`b7cac27b`/`28694dff` by this worker) sit in between, both net-zero, neither a history rewrite. All LOCAL
+on branch `wk-irpt_fntend-14-88-fe-s-88-portal` (portal frozen); not pushed.
 
 ## Workspace commits
 
 Surprise rows `IRPT_FNTEND-W38-S1`/`IRPT_FNTEND-W38-S2` (`INVESTIGATION_v2.md`), committed at workspace
-`f357ad26c5` on branch `wk-irpt_fntend-14-88-fe-s-88`. This proof-of-spec instance and this result file
-committed in the same branch, not pushed.
+`f357ad26c5` on branch `wk-irpt_fntend-14-88-fe-s-88`. Rows `IRPT_FNTEND-W38-S3`/`S4`/`S5`, this updated
+proof-of-spec instance and this result file, and the task order's `<status>` flip, committed together in
+this same branch in this worker's final commit; not pushed.
 
 ## `<status>`
 
-**Left `pending`.** F88-AC1..AC5 PASS-by-output; F88-AC6 is a genuine, reproducible FAIL, caused by a
-pre-existing defect entirely outside this cell's `<paths>` grant; F88-AC7 (judgment) RECORDED with no
-self-graded verdict. Per the standing bar, a FAIL row leaves the order open -- a schema-VALID proof
-instance is not a met order. `python .tools/proof-of-spec-check.py <instance>
+**Flipped to `complete`.** F88-AC1..AC6 PASS-by-output; F88-AC7 (judgment) RECORDED with no self-graded
+verdict, evidence amended per COO AMENDMENT 3. `python .tools/proof-of-spec-check.py <instance>
 F88-AC1,F88-AC2,F88-AC3,F88-AC4,F88-AC5,F88-AC6,F88-AC7 --governing-order <this TO>` result is reported in
 this worker's final message, not summarized here.
