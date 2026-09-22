@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-108",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-108.identity-figi-fields.md",
+    "group": "W",
+    "vintage_commit": "96cc4dae9d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "0ed364cff0",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-108.identity-figi-fields.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~108",
+  "session_log": "Worker 0.9.0_WK_AMGT_RESAPP~108, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-28-108 in worktree C:/tmp/wk-amgt-28-108, spawn HEAD 0ed364cff0. THE BAR FIRST: branch wk-amgt-28-108, org/ and .tools/ present, TREE-OK; lib/research/identity/add_security.py and lib/research/identity/tests/ present. Order read WORKER FACE only, top to the RECORD FACE marker. AC0 (pre-edit baseline, read BEFORE any edit): IDENTITY_FIELDS was the four-field list (NAME, EXCH_CODE, LEGAL_ENTITY_IDENTIFIER, CENTRAL_INDEX_KEY_NUMBER), matching the cell's MEASURED STATE text; full suite 55 passed -- I0 = 55. RULED item 1: IDENTITY_FIELDS extended with COMPOSITE_ID_BB_GLOBAL, ID_BB_GLOBAL, ID_ISIN, ID_SEDOL1, COMPANY_WEB_ADDRESS appended in that order after the unchanged existing four. RULED item 3: a module comment above IDENTITY_FIELDS states the composite FIGI is RECORDED as the working-key attribute, security_key is unchanged, and no code keys on the FIGI yet, citing @6f1a72e4be. RULED item 2: factored a new _build_identity(sec_data, security_full, raw_key, registered_at) helper out of main() -- it reads name/exchange/lei/cik/sec_id (unchanged) plus composite_figi/figi/isin/sedol/website via sec_data.get(...), None when absent, and carries field_errors from sec_data['__field_errors__'] through unraised; main() now calls this helper to build `identity` instead of inlining the dict. RULED item 4: the MEASURED: print line gained exactly one new value, 'composite_figi %r', and no other new value (isin/sedol/website/figi are never printed). crosswalk.py, registrations.json and the adapter were NOT touched (WALLs per section 1's 'what this cell does NOT change') -- crosswalk._record_for_registration (:560/:629, read not edited) copies reg['identity'] wholesale into the crosswalk record, so the five new keys reach the crosswalk record with zero crosswalk-side code change; proved by a new test (CrosswalkCarriesIdentityWholesale) rather than an edit. New test lib/research/identity/tests/test_identity_figi_fields.py, 5 arms as named in the order: test_identity_fields_extended_in_order (list equality against the literal 9-item list); test_stub_reply_lands_every_new_field (a mock.Mock blp stub returning all nine fields is monkeypatched over add_security._load_blp_client, main() is run with --dry-run and --as-of given, no --write-pool, rc 0, reference_data called once with IDENTITY_FIELDS; since the dry run's printed MEASURED line exposes only composite_figi per rule 4 and main() returns only an int rc -- it exposes no row -- the same stub sec_data is also run directly through the factored _build_identity helper and all five new keys plus the three pre-existing ones (name/lei/cik) are asserted, per the order's own fallback clause 'If the dry run exposes no row, test the dict-builder helper you factor out'); test_field_error_recorded_not_fatal (stub sec_data carries __field_errors__ for ID_SEDOL1 with NAME still present; main() dry-run returns rc 0 -- not fatal -- and _build_identity on the same row shows name MEASURED, sedol None, field_errors['ID_SEDOL1'] carrying the vendor text); test_security_key_unchanged (crosswalk._parse_bloomberg('992 HK') -> security_key '992_HK_Equity', the unchanged '<ROOT>_<CC>_Equity' grammar at add_security.py:342 (pre-cell :342, now the corresponding line) -- the pin's own security_key grammar, untouched by this cell); test_crosswalk_carries_identity_wholesale (a registration row carrying identity['composite_figi']='BBG000BLNNH6' plus the other 4 new keys is run through crosswalk._record_for_registration directly -- no S3, no file write -- and the returned record['identity'] carries all five new keys unchanged). Qualified import used for the shared _fixture_files helper (from lib.research.identity.tests.test_add_security import _fixture_files) per W85-S1 -- a bare relative import ('from .test_add_security import _fixture_files') failed collection first try (ImportError: attempted relative import with no known parent package, no __init__.py in the tests dir) and was corrected to the qualified form. commit-gate's first run BLOCKED on 2 ruff F841 (unused `reg_path` from `with _fixture_files() as reg_path:` in two arms that never read the registrations path) -- fixed to `with _fixture_files():` in both arms, re-ran clean. Committed the code and the new test together (fc4086129d) -- CODE ONLY, no Bloomberg/vendor/AWS call, no write to registrations.json; every reference-data reply in the new test is a stub mock.Mock. AC1 (post-commit): pytest lib/research/identity/tests/test_identity_figi_fields.py -v -p no:cacheprovider -- 5 passed, 0 failed, all five named arms PASSED. AC2 (post-commit): pytest lib/research/identity/tests -q -p no:cacheprovider -- 60 passed, 0 failed = I0(55) + 5; test_add_security.py's 7 arms re-run individually and confirmed still passing inside the full-directory run. AC3 (post-commit): .scratch/r108/ac4.py (the verbatim script from section 5) -- changed_code_files lists exactly the two files named in <expect> (lib/research/identity/add_security.py, lib/research/identity/tests/test_identity_figi_fields.py); both compile True crlf 0 non_ascii_chars 0. STATUS: flipping <status> to complete -- AC0-AC3 all PASS-by-output; no criterion refused; no surprise row filed (no premise failure, no missing capability, no invocation mismatch encountered).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/add_security.py",
+      "kind": "script",
+      "commit_or_etag": "fc4086129d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY cell, no deploy in scope. IDENTITY_FIELDS extended (5 new fields appended, order preserved); new module comment citing @6f1a72e4be; new _build_identity(...) helper factored out of main() populating composite_figi/figi/isin/sedol/website via sec_data.get(...), None when absent, field_errors passed through unraised; MEASURED: print line gains exactly 'composite_figi %r' and no other new value. Verified by AC0 (pre-edit list), AC1/AC2 (60 of 60 passed) and AC3 (compiles clean, 0 CRLF, 0 non-ASCII)."
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_identity_figi_fields.py",
+      "kind": "test",
+      "commit_or_etag": "fc4086129d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW test file, 5 of 5 arms passed standalone and inside the full directory run (AC1/AC2). Every Bloomberg reply is a mock.Mock stub over add_security._load_blp_client; no network, no S3, no vendor call.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && sed -n '54,59p' lib/research/identity/add_security.py && python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && sed -n '54,59p' lib/research/identity/add_security.py && python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "IDENTITY_FIELDS = [ \"NAME\", \"EXCH_CODE\", \"LEGAL_ENTITY_IDENTIFIER\", \"CENTRAL_INDEX_KEY_NUMBER\", ] (read BEFORE any edit, matching the cell's MEASURED STATE text exactly); '55 passed'.",
+      "denominator": "I0 = 55 passed, 0 failed",
+      "status": "PASS",
+      "status_reason": "Matches <expect> exactly: the pre-edit four-field list, then I0 = 55 passed. Recorded I0=55."
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests/test_identity_figi_fields.py -v -p no:cacheprovider 2>&1 | tail -8",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests/test_identity_figi_fields.py -v -p no:cacheprovider 2>&1 | tail -8",
+      "output_evidence": "IdentityFieldsExtendedInOrder::test_identity_fields_extended_in_order PASSED; StubReplyLandsEveryNewField::test_stub_reply_lands_every_new_field PASSED; FieldErrorRecordedNotFatal::test_field_error_recorded_not_fatal PASSED; SecurityKeyUnchanged::test_security_key_unchanged PASSED; CrosswalkCarriesIdentityWholesale::test_crosswalk_carries_identity_wholesale PASSED; '5 passed in 0.35s'.",
+      "denominator": "5 of 5 named arms PASSED, 0 failed",
+      "status": "PASS",
+      "status_reason": "Matches <expect> exactly: '5 passed', 0 failed, all five named arms PASSED."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "'60 passed in 0.73s'. test_add_security.py re-run individually inside the same directory: 7 passed, 0 failed (RegistrationRecordShape x3, VendorErrorIsUnresolved, CollisionRefused, IdempotentReregistration, SchemaValidation).",
+      "denominator": "N = 60 = I0(55) + 5, 0 failed",
+      "status": "PASS",
+      "status_reason": "Matches <expect> exactly: N=60=55+5, 0 failed; test_add_security.py's 7 arms still pass inside the directory run."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r108/ac4.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r108/ac4.py",
+      "output_evidence": "changed_code_files ['lib/research/identity/add_security.py', 'lib/research/identity/tests/test_identity_figi_fields.py']; lib/research/identity/add_security.py compiles True crlf 0 non_ascii_chars 0; lib/research/identity/tests/test_identity_figi_fields.py compiles True crlf 0 non_ascii_chars 0.",
+      "denominator": "2 of 2 changed_code_files exactly the two named paths; 2 of 2 compile True crlf 0 non_ascii_chars 0",
+      "status": "PASS",
+      "status_reason": "Matches <expect> exactly: changed_code_files lists EXACTLY the two named paths, each compiles True crlf 0 non_ascii_chars 0."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This order names no explicit mutant-discrimination arm among AC0-AC3 -- a field-extension + dict-builder-factoring cell, not a standalone logic-correctness cell with its own named mutant. The discriminating check is test_field_error_recorded_not_fatal: it plants a real __field_errors__['ID_SEDOL1'] and asserts sedol is None while name still MEASURES -- a test that would FAIL if the field-error path were wired to raise, or if _build_identity silently dropped field_errors.",
+      "expected": "N/A -- the spec names no mutant explicitly.",
+      "observed": "test_field_error_recorded_not_fatal passes on the real implementation (sedol None, field_errors carries 'ID_SEDOL1', name still 'CATERPILLAR INC', rc 0) and would fail against a mutant that raised on a field error or dropped field_errors from the identity dict.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "pytest lib/research/identity/tests -q -p no:cacheprovider run twice in this session (once pre-commit, once post-commit for the recorded AC2 output) and pytest lib/research/identity/tests/test_identity_figi_fields.py run three times across the session (initial write, post-lint-fix, post-commit for the recorded AC1 output).",
+      "observed": "Identical pass counts every run: 55 (pre-edit baseline), 5 (new file, all three runs), 60 (post-edit full directory, both runs) -- no flake.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "crosswalk.py, registrations.json, any S3 object, the key grammar, the adapter",
+      "reason": "Section 1 'What this cell does NOT change' -- WALLs, not in <paths>. crosswalk._record_for_registration was read (to confirm the wholesale-copy behavior) but not edited; proved by the new test_crosswalk_carries_identity_wholesale arm instead of a source change."
+    },
+    {
+      "item": "any Bloomberg/vendor/AWS call",
+      "reason": "BOUNDS: CODE ONLY. Every reference_data reply in the new test is a mock.Mock stub; no --write-pool path is exercised (no S3 put, no registrations.json write)."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests -q -p no:cacheprovider (pre-edit)",
+      "result": "55 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests/test_identity_figi_fields.py -v -p no:cacheprovider",
+      "result": "5 passed"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests -q -p no:cacheprovider (post-edit)",
+      "result": "60 passed"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~108 <0.9.0_WK_AMGT_RESAPP~108@opal.agent>\" -F .scratch/r108/commit_msg.txt -- lib/research/identity/add_security.py lib/research/identity/tests/test_identity_figi_fields.py",
+      "result": "First run BLOCKED (2x ruff F841 unused `reg_path`); fixed; second run: all checks passed, committed fc4086129d."
+    }
+  ]
+}
