@@ -1,0 +1,79 @@
+{
+  "blob": "17aff45ed837a3a6e62fb2ce0410075b62a499dd",
+  "sourceSha256": "ea437510ee96fdf7fd106ff36dff3dead1aaf8ada94458a62556bae210cdc25a",
+  "scope": "mocked counterexamples; no real error occurrence or host execution claimed",
+  "taxonomyCounterexample": false,
+  "cleanupCounterexample": false,
+  "retries": [
+    {
+      "name": "non-timeout certificate error, ordinary URL text",
+      "writes": 0,
+      "success": false,
+      "exitCode": 1,
+      "verificationCalls": 1,
+      "errors": "REFUSED: NAVIGATION_ERROR -- a non-timeout navigation error (error.name=Error) is not one of the three retryable causes (timeout, HTTP 5xx, marker-absent-after-load): page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://opalinvest.dev/investor-reporting/print\n"
+    },
+    {
+      "name": "same non-timeout certificate error, timeout substring in URL text",
+      "writes": 0,
+      "success": false,
+      "exitCode": 1,
+      "verificationCalls": 1,
+      "errors": "REFUSED: NAVIGATION_ERROR -- a non-timeout navigation error (error.name=Error) is not one of the three retryable causes (timeout, HTTP 5xx, marker-absent-after-load): page.goto: net::ERR_CERT_AUTHORITY_INVALID at https://opalinvest.dev/investor-reporting/print?timeout=1\n"
+    },
+    {
+      "name": "actual timeout positive control",
+      "writes": 0,
+      "success": false,
+      "exitCode": 1,
+      "verificationCalls": 1,
+      "errors": "REFUSED: NAVIGATION_ERROR -- a non-timeout navigation error (error.name=Error) is not one of the three retryable causes (timeout, HTTP 5xx, marker-absent-after-load): Timeout 60000ms exceeded\n"
+    },
+    {
+      "name": "HTTP404 terminal control",
+      "writes": 0,
+      "success": false,
+      "exitCode": 1,
+      "verificationCalls": 1,
+      "errors": "REFUSED: HTTP 404 on the check route -- not one of the three retryable causes (timeout, HTTP 5xx, marker-absent-after-load)\n"
+    }
+  ],
+  "cleanups": [
+    {
+      "name": "clean rename positive control",
+      "writes": 1,
+      "success": true,
+      "exitCode": null,
+      "verificationCalls": 1,
+      "renames": 1,
+      "unlinks": 0,
+      "deleted": false,
+      "diskFinal": true,
+      "errors": ""
+    },
+    {
+      "name": "latched rename, deletion succeeds",
+      "writes": 1,
+      "success": false,
+      "exitCode": 1,
+      "verificationCalls": 1,
+      "renames": 1,
+      "unlinks": 1,
+      "deleted": true,
+      "diskFinal": false,
+      "errors": "REFUSED: ORIGIN_HOP (observed via request) -- the session-lifetime observer saw a main-frame hop to https://example.invalid/post-rename-hop, outside https://opalinvest.dev; this refusal is terminal for the rest of this run. Nothing was, or will be, printed or written after this point. (observed after the write; the file at /opt/investor-reporting-export/session/storageState.json was deleted so a raced write is never left on disk)\n"
+    },
+    {
+      "name": "same latched rename, deletion fails EPERM",
+      "writes": 1,
+      "success": false,
+      "exitCode": 4,
+      "verificationCalls": 1,
+      "renames": 1,
+      "unlinks": 1,
+      "deleted": false,
+      "diskFinal": true,
+      "errors": "ERROR: session file could NOT be removed: /opt/investor-reporting-export/session/storageState.json (EPERM) -- delete it manually before any use\n"
+    }
+  ]
+}
