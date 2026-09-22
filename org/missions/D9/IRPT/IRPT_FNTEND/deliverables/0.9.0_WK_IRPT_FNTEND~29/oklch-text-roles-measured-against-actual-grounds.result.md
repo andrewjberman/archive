@@ -2,10 +2,12 @@
 
 **FIXTURE-FED DISCLOSURE.** Every capture below is fed by `--fixtures` JSON served through the
 smoke harness's stub transport (`scripts/ui-smoke.mjs`), never a live backend: F79-AC2 uses
-`fe-s-18-frozen.json`; F79-AC3 and F79-AC4 use `fe-s-18-holdings-observed.json` (as the task
-order names); one diagnostic-only run (not an acceptance criterion, reported for context) uses
-the sibling fixture `fe-s-18-holdings-missing-attribution.json`, already present in the repo and
-outside this cell's `<paths>` grant (read-only reference). No live API, no network egress.
+`fe-s-18-frozen.json`; F79-AC4 uses `fe-s-18-holdings-observed.json` (as the task order names).
+F79-AC3 originally named `fe-s-18-holdings-observed.json` too, but the issuing COO amended the
+task order (`7310707142`, `353cb80d21`) to point F79-AC3 at the sibling fixture
+`fe-s-18-holdings-missing-attribution.json` after independently confirming the original fixture
+can never mount the selector (see F79-AC3 below); this result reflects the amended criterion. No
+live API, no network egress.
 
 ## The fix
 
@@ -36,22 +38,28 @@ data-family component).
 `EXPECT-GROUND[[data-slot="requests-unavailable"]]: PASS rgb(255, 255, 255)` /
 `ASSERT-GROUND: 1 of 1 met`. Capture: `f79_analysis.png`. **PASS.**
 
-**F79-AC3** -- `HoldingsTab.tsx:99`'s ground, `fe-s-18-holdings-observed.json`, click Holdings:
+**F79-AC3** -- ORIGINAL RUN (named fixture `fe-s-18-holdings-observed.json`, click Holdings):
 `EXPECT-GROUND[[data-slot="holdings-qualification"]]: UNMEASURABLE (selector matched nothing)` /
-`ASSERT-GROUND: 0 of 1 met`. **REFUSED -- order defect, not a code or instrument defect.**
+`ASSERT-GROUND: 0 of 1 met`. **REFUSED as an order defect, not a code or instrument defect** --
 `HoldingsTab.tsx`'s own `HoldingsQualification` only mounts when
-`gap.unknownNodes > 0 || showsTargetWeights(snapshot)` -- every node in this named fixture is
+`gap.unknownNodes > 0 || showsTargetWeights(snapshot)`, and every node in that fixture is
 `authoritative: true` on basis `OBSERVED`, so the panel legitimately never renders for this data
 (confirmed by direct PNG read, `f79_holdings.png`: a plain READY holdings view, no qualification
-banner). Diagnostic run (same selector/flags, fixture swapped to the sibling
-`fe-s-18-holdings-missing-attribution.json`, which DOES carry a classification gap) reads
-`EXPECT-GROUND[[data-slot="holdings-qualification"]]: PASS rgb(255, 255, 255)` /
-`ASSERT-GROUND: 1 of 1 met`, and a further diagnostic `--expect-style` color check against that
-same fixture reads `EXPECT-STYLE[...::color]: PASS rgb(22, 51, 114)` -- the fix itself is
-independently confirmed correct and measurable; the named fixture in F79-AC3 is simply the wrong
-one to exercise the `holdings-qualification` selector. Filed as row `IRPT_FNTEND-W29-S1`
-(OBSERVATION, INERT) rather than substituted, per BOUNDS ("REFUSE any criterion you cannot
-satisfy as written ... do not weaken a criterion").
+banner). Filed as row `IRPT_FNTEND-W29-S1` (OBSERVATION, INERT) rather than substituted, per
+BOUNDS ("REFUSE any criterion you cannot satisfy as written ... do not weaken a criterion").
+
+**AMENDMENT (`2.0.0_SA_COO~F`, `7310707142` + `353cb80d21`).** The issuing COO independently
+confirmed the diagnosis above (read `classificationGapOf`/`showsTargetWeights` in `slices.ts`
+directly against the fixture's raw JSON, then re-ran the exact invocation live) and swapped
+F79-AC3's fixture to the sibling `fe-s-18-holdings-missing-attribution.json` (whose nodes carry
+no `classification` block, which the app treats as non-authoritative -- that fixture's whole
+documented purpose). The fix itself (`HoldingsTab.tsx:99`) was confirmed correct throughout;
+only the criterion's fixture reference was wrong.
+
+**RE-RUN (this session, amended fixture `fe-s-18-holdings-missing-attribution.json`, click
+Holdings):** `EXPECT-GROUND[[data-slot="holdings-qualification"]]: PASS rgb(255, 255, 255)` /
+`ASSERT-GROUND: 1 of 1 met`. Capture: `f79_holdings.png` (re-saved over the original capture at
+the same path, now showing the qualification banner rendered on its white ground). **PASS.**
 
 **F79-AC4** -- `SliceTable.tsx:143`'s ground, `fe-s-18-holdings-observed.json`, click Holdings:
 `EXPECT-GROUND[[data-slot="slice-supervision"]]: PASS rgb(255, 255, 255)` /
@@ -87,10 +95,11 @@ fixture, since the observed fixture never mounts the element) -> `PASS rgb(22, 5
 
 ## Status
 
-`<status>` NOT flipped to `complete`: F79-AC3 is a genuine FAIL (order defect), so per the
-worker-face proof-of-spec law a FAIL row leaves the order open. This is my final report on this
-task order pending the issuer's amendment of F79-AC3's named fixture.
+`<status>` flipped to `complete`: all 6 of 6 criteria now stand PASS-by-output or RECORDED
+(judgment), following the issuer's amendment of F79-AC3's named fixture and this session's
+re-run confirming `ASSERT-GROUND: 1 of 1 met` on the amended fixture.
 
 ## Surprises filed
 
-`IRPT_FNTEND-W29-S1` (OBSERVATION, INERT) -- F79-AC3's fixture mismatch, detailed above.
+`IRPT_FNTEND-W29-S1` (OBSERVATION, INERT) -- F79-AC3's original fixture mismatch, detailed
+above; resolved by the issuer's amendment (`7310707142`, `353cb80d21`).
