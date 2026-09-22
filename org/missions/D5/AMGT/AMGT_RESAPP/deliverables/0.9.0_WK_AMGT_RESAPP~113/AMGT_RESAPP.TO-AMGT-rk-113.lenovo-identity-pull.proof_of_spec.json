@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-113",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-113.lenovo-identity-pull.md",
+    "group": "OTHER",
+    "vintage_commit": "85dabdc6c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "349a152935",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-113.lenovo-identity-pull.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~113",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/registrations.json",
+      "kind": "config_data",
+      "commit_or_etag": "a83de76e7a",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC2's add_security --write-pool run wrote the +1 ENRICH row for 992_HK_Equity directly to the repo file; this worker committed the identical bytes at a83de76e7a. AC3's live read confirms 8 registrations (G0+1 from AC1's 7) with the 992 row (mode ENRICH, resolution MEASURED); AC5's git log confirms the commit carries this path."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/bloomberg/harvest/bronze/identity/security_key=992_HK_Equity/20260922T172126Z.json",
+      "kind": "s3_object",
+      "commit_or_etag": "e382f9e76b0d587c312ea0de0269e7a4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC2's RAW LANDED line; head_object confirms ETag e382f9e76b0d587c312ea0de0269e7a4, ContentLength=370, LastModified 2026-09-22T17:21:28Z. AC3 re-read: identity_bronze 4 objects total (D0+1 from AC1's 3), exactly one 992 key, this one. Immutable, 0 production readers, left in place per the pair's blast radius."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/crosswalk/v1/2026-09-22.json",
+      "kind": "s3_object",
+      "commit_or_etag": "6c668127ff4ef0a87b689937e1685cde",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC2's OK: uploaded line (records=96, document-sha256=da53b89cce05ea0b3bb3c0ac524c18f385186a7a18efd91a36f2aaee06a1cf7a); head_object confirms ETag 6c668127ff4ef0a87b689937e1685cde, ContentLength=203327. AC3 confirms this is the served latest key (latest_key crosswalk/v1/2026-09-22.json is_today True), 96 records (=pre 96), 95 of 95 other records byte-equal to AC1's snapshot, denominators.enriched=1."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260922T1721Z_amgt-rk113-lenovo-identity_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "114f103e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger entry: opened before AC2 (4 legs: w1 identity bronze, w3 crosswalk pool, w2 registrations.json, v verify), all 4 legs closed on the AC3/AC4 reads, entry CLOSED (sentinel removed) -- python .tools/deploy_ledger.py close --slug amgt-rk113-lenovo-identity returned 'OK: CLOSED ... all 4 legs proven; sentinel removed'."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "114f103e5d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_RESAPP-Z-W113-S1 appended inside the existing fenced JSON array; validated by .tools/surprise-row-gate.py (0 new violations, 1 new row of 522 total checked, all step-7/step-10 fields present)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any write: \"pair_coo True pair_cto True\"; \"precursor_rk114 True\"; \"identity_fields 9\" with the nine names; the SIZED line \"total 2 requests, 10 points, 1 Lenovo security\"; the credential check's fingerprint line (never a value); then dapi_check prints an UP line and exits 0. A DOWN line is a STOP with a BLOCKING row naming the surface -- no sign-in is attempted by the worker",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r113/ac0.py && python integrations/bloomberg/auth/dapi_check.py",
+      "output_evidence": "pair_coo True pair_cto True\nprecursor_rk114 True\nidentity_fields 9 ['NAME', 'EXCH_CODE', 'LEGAL_ENTITY_IDENTIFIER', 'CENTRAL_INDEX_KEY_NUMBER', 'COMPOSITE_ID_BB_GLOBAL', 'ID_BB_GLOBAL', 'ID_ISIN', 'ID_SEDOL1', 'COMPANY_WEB_ADDRESS']\nSIZED: probe 1 request (SPX Index x PX_LAST); pull 1 request (992 HK Equity x 9 fields); total 2 requests, 10 points, 1 Lenovo security\nCREDENTIAL: OK  secret=bloomberg/terminal/login  user='alyssaakeith' user_len=12 pw_len=9 pw_sha256=b52a0db305ea\n(fingerprint only -- no credential value is ever printed by this tool)\nDAPI: UP (session + SPX Index/PX_LAST returned -- entitled session live)\nrc=0",
+      "denominator": "6 of 6 named checks matched (pair_coo, pair_cto, precursor_rk114, identity_fields=9 with all 9 names, SIZED total 2 requests/10 points/1 security, credential fingerprint) plus DAPI UP with rc 0 -- no sign-in was attempted",
+      "status": "PASS",
+      "expect": "pair_coo True pair_cto True[\\s\\S]*precursor_rk114 True[\\s\\S]*identity_fields 9[\\s\\S]*total 2 requests, 10 points, 1 Lenovo security[\\s\\S]*CREDENTIAL: OK[\\s\\S]*DAPI: UP"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "READ-ONLY, the pre-act snapshot: \"served_key\" (measured crosswalk/v1/2026-09-19.json at the cut) with \"records\" R0 and \"distinct_labels\" equal to R0 (measured 96); \"r992_has_identity False\"; \"registrations\" G0 with \"for_992 0\"; \"identity_bronze\" D0 with \"for_992 0\"; \"local_rebuild_byte_equal True\". pre.json and pre_crosswalk.json written. A False rebuild-equality is a STOP and a row",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r113/ac1.py",
+      "output_evidence": "served_key crosswalk/v1/2026-09-19.json records 96 distinct_labels 96\nr992_has_identity False\nregistrations 7 for_992 0\nidentity_bronze 3 for_992 0\nlocal_rebuild_byte_equal True",
+      "denominator": "5 of 5 named values matched at the cut: R0=96 (records=distinct_labels), r992_has_identity False, G0=7 registrations (for_992 0), D0=3 identity_bronze (for_992 0), local_rebuild_byte_equal True; pre.json and pre_crosswalk.json written to .scratch/r113/",
+      "status": "PASS",
+      "expect": "served_key crosswalk/v1/2026-09-19\\.json records 96 distinct_labels 96[\\s\\S]*r992_has_identity False[\\s\\S]*registrations 7 for_992 0[\\s\\S]*identity_bronze 3 for_992 0[\\s\\S]*local_rebuild_byte_equal True"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "LIVE, the ONE pull, ledger OPEN before it: \"RAW LANDED: s3://opal-data-harvest/bloomberg/harvest/bronze/identity/security_key=992_HK_Equity/...\"; a \"MEASURED: security_key 992_HK_Equity ... composite_figi ...\" line (field_errors printed if any); \"bloomberg_calls 1\"; then \"OK: uploaded s3://opal-data-harvest/crosswalk/v1/<today>.json ... records=R0 ...\". An UNRESOLVED line is recorded and graded by AC3's rollback rule, never re-run",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.identity.add_security --folder \"Lenovo 992 HK\" --bloomberg \"992 HK\" --as-of \"$(date -u +%Y-%m-%d)\" --write-pool 2>&1 | tee .scratch/r113/ac2_out.txt",
+      "output_evidence": "RAW LANDED: s3://opal-data-harvest/bloomberg/harvest/bronze/identity/security_key=992_HK_Equity/20260922T172126Z.json ContentLength=370\nMEASURED: security_key 992_HK_Equity bloomberg '992 HK' name 'LENOVO GROUP LTD' lei '254900VUZRGD5U73RE46' cik 932477 sec_id '0000932477' composite_figi 'BBG000BG4QC6' AGREES: id token 'HK' == Bloomberg EXCH_CODE 'HK'\nbloomberg_calls 1\nmode ENRICH\nOK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-22.json ContentLength=203327 document-sha256=da53b89cce05ea0b3bb3c0ac524c18f385186a7a18efd91a36f2aaee06a1cf7a schema-version=1 records=96 MEASURED=36 UNRESOLVED=60 registered=7\nrc=0",
+      "denominator": "5 of 5 named lines present: RAW LANDED, MEASURED with composite_figi, bloomberg_calls 1 (no field_errors -- none occurred), mode ENRICH, OK: uploaded with records=96=R0; no UNRESOLVED line; ONE pull, not retried",
+      "status": "PASS",
+      "expect": "RAW LANDED: s3://opal-data-harvest/bloomberg/harvest/bronze/identity/security_key=992_HK_Equity/[\\s\\S]*MEASURED: security_key 992_HK_Equity[\\s\\S]*composite_figi[\\s\\S]*bloomberg_calls 1[\\s\\S]*OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-22\\.json[\\s\\S]*records=96"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"latest_key crosswalk/v1/<today>.json is_today True\"; \"records\" equal to R0 and pre; \"others_byte_equal\" R0-1 \"of\" R0-1 (95 of 95); for 992 each of composite_figi, figi, isin, sedol, lei and website reads \"present\" or \"field_error\" (never \"ABSENT\" with no field_errors); \"992_non_identity_equal True security_key 992_HK_Equity\"; denominators carry \"enriched\": 1 and \"registered\" unchanged from AC1; \"identity_bronze\" D0+1 with exactly one 992 key; \"registrations\" G0+1 with the 992 row (\"ENRICH\", \"MEASURED\"). ANY other record differing, or a changed record count, is a ROLLBACK. Close the w1/w2/w3 legs on this read",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r113/ac3.py",
+      "output_evidence": "latest_key crosswalk/v1/2026-09-22.json is_today True\nrecords 96 pre 96\nothers_byte_equal 95 of 95\n992 composite_figi present\n992 figi present\n992 isin present\n992 sedol present\n992 lei present\n992 website present\n992_non_identity_equal True security_key 992_HK_Equity\ndenominators {'input_names': 89, 'records': 96, 'MEASURED': 36, 'UNRESOLVED': 60, 'with_association_keys': 96, 'association_conventions': ['bare-root-pilot-key', 'security-hash-key', 'pack-key', 'model-key', 'bloomberg-identifier', 'bloomberg-identifier-with-equity-suffix'], 'registered': 7, 'enriched': 1}\nidentity_bronze 4 for_992 ['bloomberg/harvest/bronze/identity/security_key=992_HK_Equity/20260922T172126Z.json']\nregistrations 8 992_rows [('ENRICH', 'MEASURED')]",
+      "denominator": "records 96 of pre 96 (unchanged); others_byte_equal 95 of 95; 6 of 6 identity fields present (none ABSENT, none field_error); 992_non_identity_equal True; denominators.enriched=1, registered=7 unchanged from AC1's G0; identity_bronze=4=D0+1 with exactly one 992 key; registrations=8=G0+1 with the (ENRICH, MEASURED) 992 row. No rollback trigger fired -- KEEP branch. w1/w2/w3 ledger legs closed on this read.",
+      "status": "PASS",
+      "expect": "latest_key crosswalk/v1/2026-09-22\\.json is_today True[\\s\\S]*records 96 pre 96[\\s\\S]*others_byte_equal 95 of 95[\\s\\S]*992 composite_figi present[\\s\\S]*992 figi present[\\s\\S]*992 isin present[\\s\\S]*992 sedol present[\\s\\S]*992 lei present[\\s\\S]*992 website present[\\s\\S]*992_non_identity_equal True security_key 992_HK_Equity[\\s\\S]*'enriched': 1[\\s\\S]*identity_bronze 4[\\s\\S]*registrations 8 992_rows \\[\\('ENRICH', 'MEASURED'\\)\\]"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"post_from s3://opal-data-harvest/crosswalk/v1/<today>.json\"; \"resolve '992 HK' 992_HK_Equity MEASURED equal_to_pre True\" and the same for '992 HK Equity' -- resolve() does not return identity, so the adapter's resolution for Lenovo is unchanged; the three controls CAT US, CSL AU and 6861 JP each \"equal_to_pre True\". Close the verify leg and the ledger entry on this read",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r113/ac4.py",
+      "output_evidence": "post_from s3://opal-data-harvest/crosswalk/v1/2026-09-22.json\nresolve '6861 JP' 6861_JP_Equity MEASURED equal_to_pre True\nresolve '992 HK' 992_HK_Equity MEASURED equal_to_pre False\nresolve '992 HK Equity' 992_HK_Equity MEASURED equal_to_pre False\nresolve 'CAT US' CAT_US_Equity MEASURED equal_to_pre True\nresolve 'CSL AU' CSL_AU_Equity MEASURED equal_to_pre True",
+      "denominator": "5 of 5 queries checked; 3 of 5 (CAT US, CSL AU, 6861 JP -- the controls) read equal_to_pre True as expected; 2 of 5 (992 HK, 992 HK Equity -- the cell's own security) read equal_to_pre False against the literal <expect> of True for both. Isolated cause (.scratch/r113/ac4_debug.py, not committed): every top-level resolve() key for '992 HK' (security_key, resolution, bloomberg, display_ticker, exchange, model_key, share_class, raw_identifier, source_row, association_keys, matched_as, query) is IDENTICAL pre/post; the sole difference is one new key inside the nested `provenance` dict, `provenance.identity`, which the order's own signed pair halves (COO half B1, CTO half item 1) already name as part of the blast radius ('...and one provenance.identity line'). AC3, in the same order, strips `provenance['identity']` before its own comparison; AC4's script does not, so this whole-dict equality reads False even though no identity VALUE (FIGI/ISIN/SEDOL/LEI/website) is exposed by resolve() for either query -- the part of the <expect> prose that IS testable ('resolve() does not return identity') holds; the part asserting bit-for-bit equal_to_pre True does not, because the order's own AC4 script was not given AC3's strip. Filed as surprise row AMGT_RESAPP-Z-W113-S1.",
+      "status": "FAIL",
+      "status_reason": "Literal invocation, run verbatim per the order: resolve('992 HK') and resolve('992 HK Equity') both read equal_to_pre False, against an <expect> of True for both. The divergence is the anticipated, disclosed provenance.identity line (order's own B1/CTO-item-1 blast radius), which AC4's whole-dict comparison was not given the strip AC3 uses for the same line -- a criterion-authoring inconsistency inside the order, not a defect in the act. No rollback trigger fired (AC3's own criteria, which govern rollback, are unaffected and PASS). Recorded verbatim per the grading order; filed as surprise row AMGT_RESAPP-Z-W113-S1 (INERT, disarm_owner 2.0.0_SA_COO~Z). This criterion is FAIL-by-output on its literal text; the task order stays open.",
+      "expect": "resolve '6861 JP' 6861_JP_Equity MEASURED equal_to_pre True[\\s\\S]*resolve '992 HK' 992_HK_Equity MEASURED equal_to_pre True[\\s\\S]*resolve '992 HK Equity' 992_HK_Equity MEASURED equal_to_pre True[\\s\\S]*resolve 'CAT US' CAT_US_Equity MEASURED equal_to_pre True[\\s\\S]*resolve 'CSL AU' CSL_AU_Equity MEASURED equal_to_pre True"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"pull_calls 1 probe_calls 1 spent_total 2 sized_total 2\"; then the commit carrying the registrations.json ENRICH row (committed by you after AC3)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r113/ac5.py && git log --oneline -1 -- lib/research/identity/registrations.json",
+      "output_evidence": "pull_calls 1 probe_calls 1 spent_total 2 sized_total 2\na83de76e7a feat(AMGT_RESAPP.TO-AMGT-rk-113, 0.9.0_WK_AMGT_RESAPP~113): Lenovo 992 HK Equity identity pull -- registrations.json ENRICH row",
+      "denominator": "1 of 1 Bloomberg pull call + 1 of 1 probe call = spent_total 2 of sized_total 2 (budget exactly matched, not exceeded); 1 of 1 commit found touching registrations.json, authored by this worker after AC3",
+      "status": "PASS",
+      "expect": "pull_calls 1 probe_calls 1 spent_total 2 sized_total 2[\\s\\S]*registrations\\.json ENRICH row"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A -- this cell is a single sized Bloomberg pull executed via an existing, already-tested add_security.py; the order's <paths> grants no code file to edit, and the pair (both signed halves) governs the act, not a new assertion this worker wrote. No new test code was authored to mutate.",
+      "expected": "N/A-SPEC-NAMES-NONE",
+      "observed": "The order names no assertion of this worker's own authorship to mutate; the rollback-trigger logic (AC3's byte-equal comparison) is pre-existing in the crosswalk/add_security modules and was exercised as a genuine control by AC3 itself (95 of 95 others compared, not assumed).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A -- AC2 is the ONE Bloomberg pull, never retried (hard limit; a second run would exceed the sized 2-request budget). Determinism is evidenced instead by AC1's local_rebuild_byte_equal True (crosswalk.build_crosswalk is deterministic over the same registrations.json + coverage inputs) and by AC3's 95-of-95 byte-equal read against AC1's snapshot for every record this act did not touch.",
+      "observed": "local_rebuild_byte_equal True (AC1); others_byte_equal 95 of 95 (AC3) -- both consistent with a deterministic build function over unchanged inputs.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a second Bloomberg pull, a --dry-run call, or any sign-in submit",
+      "reason": "hard limit: ONE pull never retried; the sign-in submit is an attended act for the issuer, not the worker; --dry-run would double the Bloomberg spend (add_security's own dry run makes the same live call)."
+    },
+    {
+      "item": "any other name's registration, a crosswalk rebuild on any other date, a model-block derive, or any adapter/IAM/Lambda/portal change",
+      "reason": "hard limits and the pair's NOT COVERED section; this cell's blast radius is Lenovo's record plus the served-wide vintage stamp move, nothing else."
+    },
+    {
+      "item": "branch wk-amgt-14-50 or C:/tmp/wk-amgt-14-50",
+      "reason": "explicitly never read, shown, diffed or checked out per the order and spawn prompt."
+    },
+    {
+      "item": "rollback execution",
+      "reason": "AC3 found no rollback trigger (95 of 95 others byte-equal, count unchanged, 992 non-identity fields unchanged) -- the KEEP branch fired, so section 4's rollback steps were never run."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W113-S1: AC4's <expect> ('resolve() does not return identity, so the adapter's resolution for Lenovo is unchanged' -- equal_to_pre True for '992 HK' and '992 HK Equity') is contradicted by the literal AC4 script, which compares resolve()'s full dict including `provenance`: the pull adds exactly the `provenance.identity` line the order's own signed pair halves (COO half B1 / CTO half item 1) already name as part of the blast radius, so the literal equal_to_pre reads False for the two 992 queries while the three controls (CAT US, CSL AU, 6861 JP) read True. AC3, in the same order, already strips provenance.identity before its own comparison; AC4 was not given the same strip. hazard_standing INERT."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~113/AMGT_RESAPP.TO-AMGT-rk-113.lenovo-identity-pull.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
+  "compiler_tools": [
+    {
+      "tool": "python (ac0.py + dapi_check.py)",
+      "invocation": "python .scratch/r113/ac0.py && python integrations/bloomberg/auth/dapi_check.py",
+      "result": "pair_coo True pair_cto True; precursor_rk114 True; identity_fields 9 (all 9 named); SIZED total 2 requests, 10 points, 1 Lenovo security; CREDENTIAL: OK (fingerprint only); DAPI: UP, rc=0"
+    },
+    {
+      "tool": "python + boto3 (ac1.py)",
+      "invocation": "python .scratch/r113/ac1.py",
+      "result": "served_key crosswalk/v1/2026-09-19.json, records=96=distinct_labels, r992_has_identity False, registrations=7 (for_992 0), identity_bronze=3 (for_992 0), local_rebuild_byte_equal True; pre.json/pre_crosswalk.json written"
+    },
+    {
+      "tool": "python -m lib.research.identity.add_security (AC2, the ONE Bloomberg pull)",
+      "invocation": "python -m lib.research.identity.add_security --folder \"Lenovo 992 HK\" --bloomberg \"992 HK\" --as-of 2026-09-22 --write-pool",
+      "result": "RAW LANDED identity bronze (ContentLength=370); MEASURED composite_figi BBG000BG4QC6, lei 254900VUZRGD5U73RE46, cik 932477; bloomberg_calls 1; mode ENRICH; OK: uploaded crosswalk/v1/2026-09-22.json records=96"
+    },
+    {
+      "tool": "python + boto3 (ac3.py)",
+      "invocation": "python .scratch/r113/ac3.py",
+      "result": "latest_key crosswalk/v1/2026-09-22.json is_today True; records=96=pre; others_byte_equal 95 of 95; all 6 identity fields present; 992_non_identity_equal True; denominators.enriched=1; identity_bronze=4 (D0+1); registrations=8 (G0+1, ENRICH/MEASURED) -- no rollback trigger"
+    },
+    {
+      "tool": "python (ac4.py + ac4_debug.py, scratch-only)",
+      "invocation": "python .scratch/r113/ac4.py",
+      "result": "resolve() unchanged at the top level for every query; provenance gains one documentary key for 992 (provenance.identity), causing the literal whole-dict equal_to_pre to read False for the two 992 queries and True for the 3 controls -- filed as surprise row W113-S1, AC4 graded FAIL-by-output"
+    },
+    {
+      "tool": "python (ac5.py) + git",
+      "invocation": "python .scratch/r113/ac5.py && git log --oneline -1 -- lib/research/identity/registrations.json",
+      "result": "pull_calls 1 probe_calls 1 spent_total 2 sized_total 2; commit a83de76e7a carries the registrations.json ENRICH row"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-rk113-lenovo-identity ... ; close-leg w1/w2/w3/v ...; close --slug amgt-rk113-lenovo-identity",
+      "result": "OPENED 4 legs before AC2; each leg closed on its AC3/AC4 read with a proof note; CLOSED (all 4 legs proven, sentinel removed) after AC4"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "0 violations; 1 new row (AMGT_RESAPP-Z-W113-S1) of 522 total checked, all step-7/step-10 fields present"
+    }
+  ]
+}
