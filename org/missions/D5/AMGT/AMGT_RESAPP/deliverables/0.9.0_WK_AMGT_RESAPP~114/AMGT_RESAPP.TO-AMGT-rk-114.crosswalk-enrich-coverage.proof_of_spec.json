@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-114.crosswalk-enrich-coverage.md",
     "group": "OTHER",
-    "vintage_commit": "349a152935"
+    "vintage_commit": "bc0d60375f"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
@@ -19,22 +19,33 @@
       "kind": "script",
       "commit_or_etag": "dc14b3f152",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "CODE ONLY per BOUNDS; no S3 write, no deploy scope. build_crosswalk() gains ENRICH-row handling (RULED item 1): a registrations row with mode=ENRICH attaches its identity to the matching COVERAGE record's security_key instead of appending a second record; denominators[\"enriched\"] added only when n>0."
+      "deploy_evidence": "CODE ONLY per BOUNDS; no S3 write, no deploy scope. build_crosswalk() gains ENRICH-row handling (RULED item 1): a registrations row with mode=ENRICH attaches its identity to the matching COVERAGE record's security_key instead of appending a second record; denominators[\"enriched\"] added only when n>0. Unchanged by ISSUER AMENDMENT 1."
     },
     {
       "path_or_key": "lib/research/identity/add_security.py",
       "kind": "script",
       "commit_or_etag": "dc14b3f152",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "CODE ONLY per BOUNDS; no Bloomberg call, no S3 write in this session. The pre-check writes mode=ENRICH on a same-folder coverage collision (RULED item 2); _persist_registration_and_pool builds the crosswalk in memory FIRST and writes registrations.json only after that build succeeds."
+      "deploy_evidence": "CODE ONLY per BOUNDS; no Bloomberg call, no S3 write in this session. The pre-check writes mode=ENRICH on a same-folder coverage collision (RULED item 2); _persist_registration_and_pool builds the crosswalk in memory FIRST and writes registrations.json only after that build succeeds. Unchanged by ISSUER AMENDMENT 1."
+    },
+    {
+      "path_or_key": "lib/research/identity/crosswalk.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "c8fa83592e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ISSUER AMENDMENT 1: denominators.properties gains \"enriched\": {\"type\": \"integer\", \"minimum\": 0}, NOT added to denominators.required. Nothing else in the schema changed (confirmed: only this one property block added, no other line touched). Disarms row AMGT_RESAPP-Z-W114-S2 (ARMED)."
     },
     {
       "path_or_key": "lib/research/identity/tests/test_crosswalk_enrich_coverage.py",
       "kind": "test",
-      "commit_or_etag": "dc14b3f152",
+      "commit_or_etag": "c8fa83592e",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "New test file, 6 arms per RULED item 3, all local fixtures/stubs; pytest -q -p no:cacheprovider: 6 passed in 0.39-0.53s across three runs this session.",
-      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+      "deploy_evidence": "6 arms per RULED item 3 (dc14b3f152) plus ISSUER AMENDMENT 1's 7th arm, test_enriched_document_validates_against_schema (c8fa83592e): builds an ENRICH document, validates it against the amended crosswalk.schema.json (PASS) and against the pre-amendment schema loaded by content at PIN 0972b8631c (FAILS with an 'enriched' message, control). Uses a stub identity carrying only the schema's nine declared identity keys rather than the file's ENRICH_IDENTITY constant, whose five AMGT-rk-108 fields (composite_figi, figi, isin, sedol, website) the identity sub-schema's additionalProperties:false does not admit either -- filed as row W114-S4, unrelated to this cell's ruled scope.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
     }
   ],
   "acceptance": [
@@ -43,52 +54,52 @@
       "criterion_verbatim": "BEFORE any edit: \"served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\"; \"local_rebuild_byte_equal True\"; the identity suite \"I0 passed\" (measured 60 at the cut). Record every value",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r114/ac0.py && python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2>&1 | tail -1",
-      "output_evidence": "TRUE PRE-EDIT BASELINE (reconstructed -- see AMGT_RESAPP-Z-W114-S1: this worker ran the invocation AFTER editing, so the true before-edit values were recovered via `git archive HEAD | tar -x` of the unedited base 349a152935 and running the identical script/pytest command inside that archived tree): \"served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\" / \"local_rebuild_byte_equal True\" / \"60 passed in 0.73s\" -- matches the task order's own MEASURED STATE paragraph verbatim. RE-RUN THIS SESSION, literal invocation, post-edit/post-commit (dc14b3f152): \"served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\" / \"local_rebuild_byte_equal True\" / \"66 passed in 0.80s\" (66 = 60 pre-edit + 6 new arms, consistent with AC1/AC2).",
-      "denominator": "3 of 3 named values recorded (served_records/992_records/992_has_identity/992_folder as one line, local_rebuild_byte_equal, suite count) at BOTH the reconstructed pre-edit baseline and the literal post-commit re-run; both match the task order's stated measured state.",
+      "output_evidence": "BASELINE STANDS AS RECORDED (per this order's instruction 3: \"AC0's baseline stands as recorded: 60 passed at base 349a152935\"), grounded originally by row AMGT_RESAPP-Z-W114-S1's reconstruction (git archive HEAD=349a152935 | tar -x, then running the identical script/pytest command inside that unedited tree): \"served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\" / \"local_rebuild_byte_equal True\" / \"60 passed in 0.73s\". RE-RUN THIS SESSION at HEAD c8fa83592e (post-amendment): \"served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\" / \"local_rebuild_byte_equal True\" / \"67 passed in 0.79s\" (67 = 60 pre-edit + 7 arms under the amendment, consistent with AC1/AC2).",
+      "denominator": "3 of 3 named values recorded (served_records/992_records/992_has_identity/992_folder as one line, local_rebuild_byte_equal, suite count) at both the recorded pre-edit baseline and the literal post-amendment re-run; both match the task order's stated measured state.",
       "status": "PASS",
       "expect": "served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK[\\s\\S]*local_rebuild_byte_equal True[\\s\\S]*passed"
     },
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "\"6 passed\" and 0 failed, the six named arms PASSED",
+      "criterion_verbatim": "AMENDMENT 1: \"7 passed\" and 0 failed -- the six named arms plus test_enriched_document_validates_against_schema PASSED",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -v -p no:cacheprovider 2>&1 | tail -9",
-      "output_evidence": "lib/research/identity/tests/test_crosswalk_enrich_coverage.py::EnrichAttachesIdentityNoNewRecord::test_enrich_attaches_identity_no_new_record PASSED [ 16%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses PASSED [ 33%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::DuplicateEnrichRefuses::test_duplicate_enrich_refuses PASSED [ 50%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::NoEnrichRowsByteIdentical::test_no_enrich_rows_byte_identical PASSED [ 66%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::AddSecurityEnrichRowOneCall::test_add_security_enrich_row_one_call PASSED [ 83%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::BuildFailureLeavesRegistrationsUnchanged::test_build_failure_leaves_registrations_unchanged PASSED [100%]\n\n============================== 6 passed in 0.41s ==============================",
-      "denominator": "6 of 6 named arms PASSED, 0 failed",
+      "output_evidence": "lib/research/identity/tests/test_crosswalk_enrich_coverage.py::EnrichAttachesIdentityNoNewRecord::test_enrich_attaches_identity_no_new_record PASSED [ 14%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses PASSED [ 28%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::DuplicateEnrichRefuses::test_duplicate_enrich_refuses PASSED [ 42%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::NoEnrichRowsByteIdentical::test_no_enrich_rows_byte_identical PASSED [ 57%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::AddSecurityEnrichRowOneCall::test_add_security_enrich_row_one_call PASSED [ 71%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::BuildFailureLeavesRegistrationsUnchanged::test_build_failure_leaves_registrations_unchanged PASSED [ 85%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::EnrichedDocumentValidatesAgainstSchema::test_enriched_document_validates_against_schema PASSED [100%]\n\n============================== 7 passed in 0.52s ==============================\n\nCONTROL (this arm): the same enriched document validated against the PRE-AMENDMENT schema (loaded by content at PIN 0972b8631c via git show) raises jsonschema.ValidationError naming 'enriched' as an unexpected additionalProperty on denominators -- reproduced both inside the pytest arm and as a standalone script this session.",
+      "denominator": "7 of 7 named arms PASSED, 0 failed",
       "status": "PASS",
-      "expect": "EnrichAttachesIdentityNoNewRecord::test_enrich_attaches_identity_no_new_record PASSED[\\s\\S]*EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses PASSED[\\s\\S]*DuplicateEnrichRefuses::test_duplicate_enrich_refuses PASSED[\\s\\S]*NoEnrichRowsByteIdentical::test_no_enrich_rows_byte_identical PASSED[\\s\\S]*AddSecurityEnrichRowOneCall::test_add_security_enrich_row_one_call PASSED[\\s\\S]*BuildFailureLeavesRegistrationsUnchanged::test_build_failure_leaves_registrations_unchanged PASSED[\\s\\S]*6 passed"
+      "expect": "EnrichAttachesIdentityNoNewRecord::test_enrich_attaches_identity_no_new_record PASSED[\\s\\S]*EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses PASSED[\\s\\S]*DuplicateEnrichRefuses::test_duplicate_enrich_refuses PASSED[\\s\\S]*NoEnrichRowsByteIdentical::test_no_enrich_rows_byte_identical PASSED[\\s\\S]*AddSecurityEnrichRowOneCall::test_add_security_enrich_row_one_call PASSED[\\s\\S]*BuildFailureLeavesRegistrationsUnchanged::test_build_failure_leaves_registrations_unchanged PASSED[\\s\\S]*EnrichedDocumentValidatesAgainstSchema::test_enriched_document_validates_against_schema PASSED[\\s\\S]*7 passed"
     },
     {
       "criterion_id": "AC2",
-      "criterion_verbatim": "\"N passed\" with N = I0 + 6 and 0 failed; then \"local_rebuild_byte_equal True\" again (no ENRICH row exists in the real registrations.json, so the served-shape build is unchanged)",
+      "criterion_verbatim": "AMENDMENT 1: \"N passed\" with N = I0 + 7 and 0 failed; then \"local_rebuild_byte_equal True\" again (no ENRICH row exists in the real registrations.json, so the served-shape build is unchanged)",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2>&1 | tail -1 && python .scratch/r114/ac0.py",
-      "output_evidence": "66 passed in 1.29s\nserved_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\nlocal_rebuild_byte_equal True",
-      "denominator": "66 of 66 passed (I0=60 + 6 new arms), 0 failed; local_rebuild_byte_equal True re-confirmed post-commit.",
+      "output_evidence": "67 passed in 0.79s\nserved_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\nlocal_rebuild_byte_equal True",
+      "denominator": "67 of 67 passed (I0=60 + 7 new arms under the amendment), 0 failed; local_rebuild_byte_equal True re-confirmed post-commit.",
       "status": "PASS",
-      "expect": "66 passed[\\s\\S]*local_rebuild_byte_equal True"
+      "expect": "67 passed[\\s\\S]*local_rebuild_byte_equal True"
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "\"changed_code_files\" EXACTLY lib/research/identity/add_security.py, lib/research/identity/crosswalk.py and lib/research/identity/tests/test_crosswalk_enrich_coverage.py; each \"compiles True crlf 0\" with non_ascii_chars equal to its value at the pin",
+      "criterion_verbatim": "AMENDMENT 1: \"changed_code_files\" EXACTLY lib/research/identity/add_security.py, lib/research/identity/crosswalk.py, lib/research/identity/crosswalk.schema.json and lib/research/identity/tests/test_crosswalk_enrich_coverage.py; each .py \"compiles True crlf 0\" and the .json parses with non_ascii_chars equal to its value at the pin",
       "method": "diff",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r114/ac4.py",
-      "output_evidence": "changed_code_files ['lib/research/identity/add_security.py', 'lib/research/identity/crosswalk.py', 'lib/research/identity/tests/test_crosswalk_enrich_coverage.py']\nlib/research/identity/add_security.py compiles True crlf 0 non_ascii_chars 0\nlib/research/identity/crosswalk.py compiles True crlf 0 non_ascii_chars 0\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py compiles True crlf 0 non_ascii_chars 0",
-      "denominator": "3 of 3 changed files listed, EXACTLY the three named; non_ascii_chars at the pin (0972b8631c) for crosswalk.py=0 and add_security.py=0 (git show 0972b8631c:<path>), both equal to the post-edit value 0; test file is new at the pin (no prior value), also 0.",
+      "output_evidence": "changed_code_files ['lib/research/identity/add_security.py', 'lib/research/identity/crosswalk.py', 'lib/research/identity/crosswalk.schema.json', 'lib/research/identity/tests/test_crosswalk_enrich_coverage.py']\nlib/research/identity/add_security.py compiles True crlf 0 non_ascii_chars 0\nlib/research/identity/crosswalk.py compiles True crlf 0 non_ascii_chars 0\nlib/research/identity/crosswalk.schema.json parses True crlf 0\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "4 of 4 changed files listed, EXACTLY the four named; the two .py files pre-existing at the pin compile clean with non_ascii_chars 0 == their pin value 0 (git show 0972b8631c:<path>); crosswalk.schema.json parses clean, and its own non_ascii_chars (computed separately -- the amended ac4.py script prints crlf only for .json, not non_ascii_chars) is 0 both at the pin and now (git show 0972b8631c:lib/research/identity/crosswalk.schema.json vs the current bytes), unchanged; the test file is new at the pin (no prior value), also 0.",
       "status": "PASS",
-      "expect": "changed_code_files \\['lib/research/identity/add_security.py', 'lib/research/identity/crosswalk.py', 'lib/research/identity/tests/test_crosswalk_enrich_coverage.py'\\][\\s\\S]*compiles True crlf 0[\\s\\S]*compiles True crlf 0[\\s\\S]*compiles True crlf 0"
+      "expect": "changed_code_files \\['lib/research/identity/add_security.py', 'lib/research/identity/crosswalk.py', 'lib/research/identity/crosswalk.schema.json', 'lib/research/identity/tests/test_crosswalk_enrich_coverage.py'\\][\\s\\S]*compiles True crlf 0[\\s\\S]*compiles True crlf 0[\\s\\S]*parses True crlf 0[\\s\\S]*compiles True crlf 0"
     }
   ],
   "controls": {
     "mutant": {
-      "description": "Mutated crosswalk.py's ENRICH-unmatched-key guard (`if key not in by_key: raise ValueError(...)`) to `if False:` -- an ENRICH row naming a security_key absent from the coverage records would no longer be refused. Ran the new test file; reverted with a second Edit (confirmed by `git diff` returning empty against the committed dc14b3f152 bytes) before any further evidence was recorded.",
+      "description": "Mutated crosswalk.py's ENRICH-unmatched-key guard (`if key not in by_key: raise ValueError(...)`) to `if False:` -- an ENRICH row naming a security_key absent from the coverage records would no longer be refused. Ran the new test file; reverted with a second Edit (confirmed by `git diff` returning empty against the committed dc14b3f152 bytes) before any further evidence was recorded. Not re-run this session (crosswalk.py untouched by ISSUER AMENDMENT 1); the prior result stands.",
       "expected": "test_enrich_without_coverage_record_refuses fails (the row is no longer refused cleanly)",
-      "observed": "1 failed, 5 passed -- EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses failed with KeyError: 'ZZZ_ZZ_Equity' (the guard no longer intercepts the unmatched key, so the next line's dict lookup raises instead -- still a failure, proving the guard is load-bearing). Reverted; `git diff -- lib/research/identity/crosswalk.py` returned empty and the full identity suite returned to 66 passed.",
+      "observed": "1 failed, 5 passed -- EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses failed with KeyError: 'ZZZ_ZZ_Equity' (the guard no longer intercepts the unmatched key, so the next line's dict lookup raises instead -- still a failure, proving the guard is load-bearing). Reverted; `git diff -- lib/research/identity/crosswalk.py` returned empty and the full identity suite returned to passing.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "Two same-input runs of `python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -q -p no:cacheprovider`, back to back, post-commit.",
-      "observed": "Run 1: \"6 passed in 0.39s\". Run 2: \"6 passed in 0.39s\". Identical pass/fail outcome both runs (timing line differs only in the trailing decimal, not a value any criterion or test asserts on).",
+      "method": "Two same-input runs of `python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -q -p no:cacheprovider`, back to back, post-amendment-commit.",
+      "observed": "Run 1: \"7 passed in 0.52s\" (recorded above, via -v). Run 2 (this session, -q): \"7 passed\" with 0 failed, same pass/fail outcome. Identical pass/fail outcome both runs (timing differs only in the trailing decimal, not a value any criterion or test asserts on).",
       "status": "STABLE"
     }
   },
@@ -98,8 +109,8 @@
       "reason": "section 1 'What this cell does NOT change' -- read-only or untouched; tests use temp copies of registrations.json, never the real file."
     },
     {
-      "item": "crosswalk.schema.json (denominators.enriched key)",
-      "reason": "outside this task order's <paths> (a WALL); filed as AMGT_RESAPP-Z-W114-S2, ARMED, disarm_owner 2.0.0_SA_COO~Z."
+      "item": "crosswalk.schema.json's identity sub-schema (additionalProperties: false, missing composite_figi/figi/isin/sedol/website)",
+      "reason": "AMGT-rk-108's fields on _build_identity's real output are not declared on the schema's identity object; outside this task order's ruled scope (only denominators.enriched was ruled) and outside <paths> intent (the amendment names denominators only); filed as row AMGT_RESAPP-Z-W114-S4, ARMED, disarm_owner 2.0.0_SA_COO~Z."
     },
     {
       "item": "Bloomberg reference_data call, S3 write, --write-pool",
@@ -108,34 +119,41 @@
   ],
   "surprises": [
     "AMGT_RESAPP-Z-W114-S1: AC0 was not run before editing crosswalk.py/add_security.py -- reconstructed via a git archive of HEAD (349a152935) rather than executed pre-edit; the reconstruction matches the task order's own MEASURED STATE text exactly.",
-    "AMGT_RESAPP-Z-W114-S2: crosswalk.schema.json's denominators object (additionalProperties: false) does not admit the new \"enriched\" key this cell adds, ARMED against the first real ENRICH registration's crosswalk build being schema-validated; the schema file is outside this task order's <paths>."
+    "AMGT_RESAPP-Z-W114-S2: crosswalk.schema.json's denominators object (additionalProperties: false) did not admit the new \"enriched\" key this cell adds -- RESOLVED by ISSUER AMENDMENT 1 (@bc0d60375f) adding crosswalk.schema.json to <paths>; disarmed this session.",
+    "AMGT_RESAPP-Z-W114-S3: records that AMENDMENT 1 (@bc0d60375f) resolves row W114-S2, on the amendment's own commit.",
+    "AMGT_RESAPP-Z-W114-S4: crosswalk.schema.json's identity sub-schema (additionalProperties: false, nine declared keys) does not admit AMGT-rk-108's five later identity keys (composite_figi, figi, isin, sedol, website) that _build_identity actually emits, and that the file's own ENRICH_IDENTITY test constant carries -- discovered building the amendment's required schema-validation arm; worked around in that arm with a schema-conformant stub identity rather than fixed (outside this cell's ruled scope and outside <paths> intent)."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~114/AMGT_RESAPP.TO-AMGT-rk-114.crosswalk-enrich-coverage.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
   "compiler_tools": [
     {
       "tool": "pytest",
       "invocation": "python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -v -p no:cacheprovider",
-      "result": "6 passed in 0.41s (also re-run twice more this session: 0.39s, 0.53s -- all 6 passed, 0 failed)"
+      "result": "7 passed in 0.52s (post-amendment; was 6 passed pre-amendment)"
     },
     {
       "tool": "pytest",
       "invocation": "python -m pytest lib/research/identity/tests -q -p no:cacheprovider",
-      "result": "66 passed (0.73s pre-commit run, 0.80s and 1.29s/1.35s post-commit re-runs; 60 pre-existing + 6 new)"
+      "result": "67 passed in 0.79s (60 pre-existing + 7 new, post-amendment; was 66 pre-amendment)"
     },
     {
       "tool": "python (ac0.py)",
       "invocation": "python .scratch/r114/ac0.py",
-      "result": "served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK; local_rebuild_byte_equal True (both pre-edit reconstruction and post-commit re-run)"
+      "result": "served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK; local_rebuild_byte_equal True (post-amendment re-run)"
     },
     {
-      "tool": "python (ac4.py)",
+      "tool": "python (ac4.py, amended)",
       "invocation": "python .scratch/r114/ac4.py",
-      "result": "changed_code_files exactly the 3 named files; each compiles True crlf 0 non_ascii_chars 0, matching the pin's 0/0 for the two pre-existing files"
+      "result": "changed_code_files exactly the 4 named files (crosswalk.schema.json newly included); the two pre-existing .py files compile True crlf 0 non_ascii_chars 0 matching the pin's 0/0; crosswalk.schema.json parses True crlf 0 with non_ascii_chars 0 == its pin value 0 (checked separately, git show); the test file compiles True crlf 0 non_ascii_chars 0"
+    },
+    {
+      "tool": "python + jsonschema",
+      "invocation": "direct check: jsonschema.validate(enriched_doc, amended_schema) then jsonschema.validate(enriched_doc, pre_amendment_schema via git show PIN)",
+      "result": "amended schema PASSES; pre-amendment schema FAILS with 'enriched' named as an unexpected additionalProperty -- both reproduced inside the pytest arm and as a standalone script this session"
     },
     {
       "tool": "git",
       "invocation": "git archive HEAD | tar -x -C .scratch/r114/before_tree; git show 0972b8631c:<path>",
-      "result": "reconstructed the pre-edit tree (AC0 baseline) and confirmed non_ascii_chars at the pin for both edited files (0, 0)"
+      "result": "reconstructed the pre-edit tree (AC0 baseline, prior session) and confirmed non_ascii_chars at the pin for all four edited/added files (0, 0, 0, 0)"
     }
   ]
 }
