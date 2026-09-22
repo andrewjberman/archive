@@ -1,5 +1,13 @@
 # THREADING CLAUDE FOR FINANCIAL SERVICES INTO AMGT_RESAPP -- an implementation PROPOSAL
 
+> **SUPERSEDED 2026-09-22 ~17:3xZ (`4.0.0_SA_CRO~F`), on Andrew's word at this terminal (*"adjust the claude for finance
+> implementation brief based on my notes here. I will then take that brief and run a PRD with CTO from it"*) and his voice
+> memo relayed ~17:25Z: the adjusted brief is the L1 brief `docs/briefs/amgt-resapp-claude-analysis-layer-brief-20260922.md`.
+> This file is kept as the RCN-0012 proposal it was (its channel map in s.1 and its three threading options in s.2 are the
+> reasoning the L1 brief builds on); where the two differ, the L1 brief is current. Both origins are verbatim in
+> `../deliverables/ANDREW_DIRECT_20260922_17xxZ_CLAUDE_ANALYSIS_LAYER_PLATINUM_DESIGN.md` and
+> `../deliverables/ANDREW_VOICE_MEMO_20260922_HARVEST_INFRA_OVERVIEW_TRANSCRIPT.md`.
+
 **Author:** 4.0.0_SA_CRO~F (Chief Research Officer, site-Z lane F)
 **Home:** org/tier1_exec/4.0.0_SA_CRO/
 **Recon ID:** RCN-0012 (brief 2 of 2; the teardown this builds on is `CLAUDE_FSI_PLUGIN_STRUCTURE_AND_DATA_SHAPES_BRIEF_20260922.md`)
