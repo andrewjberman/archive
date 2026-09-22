@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-80",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5fd2dc9ab5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "e01db98917577cf3f1751ac624e6a686d2706763",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-80.instrument-round-13-classifier-colour-scroll.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~30",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/scripts/ui-smoke.mjs",
+      "kind": "frontend_component",
+      "commit_or_etag": "1b6687e1d6bb9e375247258d0ecbd639200844c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "C-S166/C-S147: routeKeyCandidates/checkKeyValidity split into disjoint exact/prefixes sets -- a key is valid on exact equality for a no-{param} route OR startsWith for a {param} route's static prefix. Committed at portal 1b6687e1d6bb9e375247258d0ecbd639200844c5, LOCAL on portal branch wk-irpt_fntend-13-80-fe-s-80-portal (portal frozen); not pushed, not deployed.",
+      "introduces": ["exact.has(k) || [...prefixes].some(p => k.startsWith(p))"],
+      "artifact_covered_by": ["F80-AC2", "F80-AC3", "F80-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-80/scroll-exercise.mjs",
+      "kind": "test",
+      "commit_or_etag": "1b6687e1d6bb9e375247258d0ecbd639200844c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row W27-S3: new, reusable, selector-parameterised scroll-exercise driver (adapts ui-smoke.mjs's browser/route/auth-stub mechanism + FE-s-77's scroll-driver.mjs's scrollLeft pattern), geometric far-edge content check (every descendant's own bounding-rect .right vs the container's own rect). Same commit as ui-smoke.mjs. New file, this cell's own <paths> grant.",
+      "artifact_covered_by": ["F80-AC4", "F80-AC6"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-80/key-classifier.test.ts",
+      "kind": "test",
+      "commit_or_etag": "1b6687e1d6bb9e375247258d0ecbd639200844c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F80-AC2: extracts the real routeKeyCandidates/checkKeyValidity source from ui-smoke.mjs by balanced-brace count (string- and regex-literal-aware) and exercises it with POSITIVE/NEGATIVE/WRONG-SHAPE/BOUND controls. Same commit as ui-smoke.mjs. New file, this cell's own <paths> grant.",
+      "artifact_covered_by": ["F80-AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-80/scroll-instrument.test.ts",
+      "kind": "test",
+      "commit_or_etag": "1b6687e1d6bb9e375247258d0ecbd639200844c5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F80-AC4: spawns scroll-exercise.mjs against the export modal's own preview container and asserts a real displacement plus differing before/after content assertions. Same commit as ui-smoke.mjs. New file, this cell's own <paths> grant.",
+      "artifact_covered_by": ["F80-AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F80-AC1",
+      "criterion_verbatim": "the whole portal typechecks.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "N/A -- boolean rc check",
+      "status": "PASS",
+      "expect": "rc=0(?![0-9])"
+    },
+    {
+      "criterion_id": "F80-AC2",
+      "criterion_verbatim": "a unit-level test (built by you) directly exercises the corrected classifier with THREE named controls, each printed: a POSITIVE (a concrete key that satisfies a real parameterised template, e.g. a holdings/account-id key against the holdings template), a NEGATIVE (a key matching NO template at all), and a WRONG-SHAPE key (resembles a route but matches none) -- and a printed denominator (N of N controls correct).",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-80/key-classifier.test.ts",
+      "output_evidence": "POSITIVE [/api/scoped/investor-reporting/holdings/A-0001] -> {\"valid\":1,\"total\":1}\nNEGATIVE [/api/scoped/investor-reporting/nonexistent-operation] -> {\"valid\":0,\"total\":1}\nWRONG-SHAPE [/api/scoped/investor-reporting/statuses/REQ-1] -> {\"valid\":0,\"total\":1}\nBOUND [/api/scoped/investor-reporting/status/extra-junk] -> {\"valid\":0,\"total\":1}\nN of N controls correct: 3 of 3 controls correct\n6 pass\n0 fail\n6 expect() calls\nRan 6 tests across 1 file.",
+      "denominator": "3 of 3 controls correct (plus a 4th BOUND control and an UNMEASURABLE-path control, 6 tests total, 0 fail)",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail"
+    },
+    {
+      "criterion_id": "F80-AC3",
+      "criterion_verbatim": "END-TO-END proof the classifier fix applies in the real instrument: the round-12-repaired default.json fixture (12/12 entries, concrete parameterised keys) now reads KEY-VALIDITY: 12 of 12, not 5 of 12.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-13-80-fe-s-80/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~30/f80_holdings_key_validity.png --port 5960 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/default.json --click Holdings",
+      "output_evidence": "CLICKED: Holdings\nFIXTURES: 12 declared; 3 matched >=1 URL\nFIXTURES-MATCH: matched 3 of 12\nKEY-VALIDITY: 12 of 12 valid consumed.ts operation keys",
+      "denominator": "12 of 12",
+      "status": "PASS",
+      "expect": "KEY-VALIDITY: 12 of 12 valid consumed\\.ts operation keys",
+      "status_reason": "Matches <expect> verbatim. CONTROL (this worker, measured directly): scripts/ui-smoke.mjs temporarily swapped for its pre-fix HEAD~1 bytes (git show HEAD~1:scripts/ui-smoke.mjs), dev server restarted, same invocation re-run -- reads KEY-VALIDITY: 5 of 12 valid consumed.ts operation keys, exactly the count the task order's own cell text names -- then restored to the committed fix (git diff scripts/ui-smoke.mjs clean afterward, confirmed). FIXTURES-MATCH: matched 3 of 12 is expected and unrelated: KEY-VALIDITY grades the fixture's declared keys against the contract, never fulfilment, and clicking only the Holdings tab exercises 3 of the fixture's 12 declared operations."
+    },
+    {
+      "criterion_id": "F80-AC4",
+      "criterion_verbatim": "a test (built by you) proves your new reusable scroll-exercise script performs a REAL displacement (captured before/after scrollLeft values, non-equal) against the export modal's preview container, and that before/after content assertions differ (previously off-screen content becomes visible) -- printed verbatim.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-80/scroll-instrument.test.ts",
+      "output_evidence": "PRECONDITION: dev server on http://localhost:5960 -- MET (HTTP 200 ... byte-identical to this worktree's package.json)\nSCROLL-EXERCISED: {\"before\":0,\"after\":792,\"target\":792}\nFAR-EDGE-BEFORE: {\"left\":63,\"right\":1119} CLIPPED\nFAR-EDGE-AFTER: {\"left\":-729,\"right\":327} NOT CLIPPED\nASSERT-CONTENT: 2 of 2 met\n2 pass\n0 fail\n11 expect() calls\nRan 2 tests across 1 file.",
+      "denominator": "2 of 2 (displacement + content-revealed)",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail"
+    },
+    {
+      "criterion_id": "F80-AC5",
+      "criterion_verbatim": "the whole IRPT_FNTEND suite is green (dev server stopped; IRPT_FE_DEV_PORT unset).",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": "643 pass\n24 skip\n0 fail\n2678 expect() calls\nRan 667 tests across 124 files. [53.59s]",
+      "denominator": "0 fail of 667 tests (643 pass, 24 skip)",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail",
+      "status_reason": "Dev server (port 5960) stopped and confirmed closed (curl returned 000) before this run; IRPT_FE_DEV_PORT unset. F80-AC4's own two tests correctly SKIP inside this run (declared by name: 'SKIPPED: F80-AC4 -- ... PRECONDITION ABSENT'), not a silent pass -- F80-AC4 was already run and PASSED separately with the server live."
+    },
+    {
+      "criterion_id": "F80-AC6",
+      "criterion_verbatim": "graded at L9 by the CVO: the classifier's parameterised-template widening is correct and does not also widen static-route matching; the parent-colour command's discrimination (wrong-colour control genuinely FAILs) is real, not asserted; the scroll instrument is genuinely reusable (selector-parameterised, not hard-coded) and its displacement is real. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; read scripts/ui-smoke.mjs's diff, F80-AC2's BOUND control output, export/ReceiptPanel.tsx, the four-run colour-discrimination sequence (positive/wrong-colour-control/absent-selector/old-command-still-confounded), scroll-exercise.mjs's fully-parameterised CLI, and the export-preview before/after-scroll evidence",
+      "output_evidence": "See result file 'F80-AC6 -- JUDGMENT, recorded, no verdict' for the full citation-backed record: (1) classifier -- disjoint exact/prefixes sets, F80-AC3's 12-of-12 (was 5-of-12, CONTROL-verified), F80-AC2's POSITIVE/NEGATIVE/WRONG-SHAPE/BOUND controls, the BOUND control directly proving no static-route widening; (2) colour -- EXPECT-STYLE[[data-slot=\"flow-placeholder\"]::color]: PASS rgb(107, 114, 128) (real build), FAIL rgb(0, 255, 0) (--inject-css wrong-colour control), UNMEASURABLE (absent-selector control, modal not opened), and the OLD [data-slot=\"receipt-panel\"]::color command still PASS rgb(22, 51, 114) under the SAME wrong-colour injection (proving it confounded); (3) scroll -- scroll-exercise.mjs's CLI (route/fixtures/click/selector/width all arguments, no export-modal-specific code), F80-AC4's real scrollLeft 0->792 displacement, and the geometric far-edge read (CLIPPED before, NOT CLIPPED after) reproduced identically via direct invocation and via the bun test driver.",
+      "denominator": "N/A -- judgment criterion, no verdict computed here",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true; graded by 3.0.0_SA_CVO at L9 per spine v3 L9. No self-grade taken.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "F80-AC3 was re-run against scripts/ui-smoke.mjs's own pre-fix HEAD~1 bytes (a real mutant: the fix reverted, nothing else changed) as a direct control on the classifier fix; the colour discrimination (Fix 2) carries its own wrong-colour --inject-css control and an absent-selector control; the scroll driver (Fix 3) carries its own absent-selector control (a wrong --selector).",
+      "expected": "The pre-fix classifier reads a LOWER KEY-VALIDITY count on the same fixture/invocation (the task order names 5 of 12); the wrong-colour control reads FAIL where the real build reads PASS; the absent-selector controls read UNMEASURABLE/FAIL (0 visible), never a false PASS.",
+      "observed": "Pre-fix classifier (HEAD~1 bytes, restored after): KEY-VALIDITY: 5 of 12 valid consumed.ts operation keys -- exactly the count named. Wrong-colour control: EXPECT-STYLE[[data-slot=\"flow-placeholder\"]::color]: FAIL rgb(0, 255, 0), against PASS rgb(107, 114, 128) on the real build -- and the OLD container-level command stayed PASS rgb(22, 51, 114) under the identical injection, proving IT does not discriminate. Absent-selector (colour): EXPECT-STYLE[[data-slot=\"flow-placeholder\"]::color]: UNMEASURABLE (selector matched nothing). Absent-selector (scroll): EXPECT[[data-slot=\"does-not-exist\"]]: FAIL (0 visible), ASSERT-CONTENT: 0 of 2 met.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "F80-AC4's own invocation (spawns scroll-exercise.mjs against the same fixture/port/selector) run twice: once as a direct manual probe, once through the bun test driver; the deciding SCROLL-EXERCISED/FAR-EDGE-BEFORE/FAR-EDGE-AFTER lines diffed.",
+      "observed": "Both runs printed SCROLL-EXERCISED: {\"before\":0,\"after\":792,\"target\":792}, FAR-EDGE-BEFORE: {\"left\":63,\"right\":1119} CLIPPED, FAR-EDGE-AFTER: {\"left\":-729,\"right\":327} NOT CLIPPED, byte-identical. No difference.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~30/instrument-round-13-classifier-colour-scroll.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit), bun 1.3.9",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0"
+    },
+    {
+      "tool": "bun test 1.3.9 (whole InvestorReporting suite -- F80-AC5, dev server stopped, IRPT_FE_DEV_PORT unset)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "result": "643 pass / 24 skip / 0 fail / 2678 expect() calls / Ran 667 tests across 124 files. [53.59s]"
+    },
+    {
+      "tool": "scripts/ui-smoke.mjs (Playwright-core + system Edge, headless), vite dev server, worktree port 5960",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && IRPT_FE_DEV_PORT=5960 bun run dev --port 5960 (background), then node scripts/ui-smoke.mjs investor-reporting <out.png> --port 5960 --width <w> --fixtures <fixture.json> [flags per row]",
+      "result": "rc=0 on every run (F80-AC3 and every colour-discrimination probe); every EXPECT*/ASSERT-*/FIXTURES-MATCH/KEY-VALIDITY line quoted in the acceptance rows and result file is this tool's own printed output"
+    },
+    {
+      "tool": "__tests__/fe-s-80/scroll-exercise.mjs (this worker's own reusable Playwright-core driver, committed at portal 1b6687e1d6bb9e375247258d0ecbd639200844c5)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-13-80-fe-s-80/portal && timeout 90 node src/pages/InvestorReporting/__tests__/fe-s-80/scroll-exercise.mjs investor-reporting <before.png> <after.png> --port 5960 --width 390 --selector '[data-slot=\"preview-scroll\"]' --fixtures src/pages/InvestorReporting/__tests__/fe-s-63/fixtures/export-ready.json --click Export",
+      "result": "rc=0; CAPACITY {\"scrollWidth\":1056,\"clientWidth\":264,\"scrollLeft\":0,\"containerRight\":327}; SCROLL-EXERCISED {\"before\":0,\"after\":792,\"target\":792}; FAR-EDGE-BEFORE CLIPPED, FAR-EDGE-AFTER NOT CLIPPED; ASSERT-CONTENT: 2 of 2 met; both PNGs saved and reproduced identically via F80-AC4's bun test driver"
+    }
+  ]
+}
