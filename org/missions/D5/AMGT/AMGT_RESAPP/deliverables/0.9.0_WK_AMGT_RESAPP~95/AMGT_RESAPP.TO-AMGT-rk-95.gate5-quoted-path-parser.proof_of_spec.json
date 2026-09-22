@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-95",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1f7459456adbdf944b8b81a67cd333fb1a0a79b4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cb66bab9c028a4307370b82ccc8142d0a86bf002",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-95.gate5-quoted-path-parser.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~95",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/hooks/never-rules-gate.sh",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a PreToolUse hook, not a live act on this branch; the harness already runs it, and the edit takes effect only when this branch drains (order preflight). Exercised on this worktree's own file via bash -n (syntax) and synthetic stdin payloads (probe_s209.sh, the 106-arm suite) -- never a real git push/pull.",
+      "artifact_covered_by": [
+        "AC0",
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": ".tools/hooks/tests/test_never_rules_gate.sh",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "10 new check_as arms appended after the DT carve-out's UNRESOLVED-caller arm (RULED item 4), named with the S209: prefix, every path derived at run time (CLAUDE_PROJECT_DIR / cygpath -m / cygpath -w, never typed). Suite reads 106 arms, PASS 106 FAIL 0 (AC2).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "one new row, AMGT_RESAPP-Z-W95-S1, appended by textual splice inside the existing fenced JSON array; the array parses (json.loads) with 497 rows total after the splice (496 before), and the new row's id matches the schema's id pattern."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-95.gate5-quoted-path-parser.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "RECORD FACE <status> flipped pending -> complete; the WORKER FACE above it is unmodified."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE ANY EDIT: \"hook_equals_pin True\", then the 9-row table exactly as measured at the cut -- P1 PASS; P2, P3, P4, P5 DENY (the 4 false denials); N1, N2, N3, N4 DENY. If P2-P5 already read PASS, the defect is gone and this order STOPs with a row; if the hook differs from the pin, STOP with a row",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git diff --quiet e58250f2615069d8f59160e9762f721e71a28bdb HEAD -- .tools/hooks/never-rules-gate.sh && echo \"hook_equals_pin True\" && bash .scratch/r95/probe_s209.sh",
+      "output_evidence": "hook_equals_pin True\nPASS  P1 DT relative            git -C portal push origin PROD\nDENY  P2 DT double-quoted fwd   git -C \"<ROOT>/portal\" push PROD\nDENY  P3 DT single-quoted fwd   git -C '<ROOT>/portal' push PROD\nDENY  P4 DT double-quoted back  git -C \"<ROOT win>/portal\" PROD\nDENY  P5 DT cd double-quoted    cd \"<ROOT>/portal\" && git push\nDENY  N1 DT quoted ws root      git -C \"<ROOT>\" push origin CLOUD\nDENY  N2 CTO quoted portal      git -C \"<ROOT>/portal\" push PROD\nDENY  N3 DT cd quoted ws root   cd \"<ROOT>\" && git push origin CLOUD\nDENY  N4 DT quoted missing dir  git -C \"<ROOT>/no such dir\" PROD",
+      "denominator": "9 of 9 rows read as measured (P1 PASS; P2-P5 DENY x4; N1-N4 DENY x4); hook byte-equal to the pin (diff --quiet rc 0)",
+      "status": "PASS",
+      "expect": "hook_equals_pin True.*?PASS\\s+P1.*?DENY\\s+P2.*?DENY\\s+P3.*?DENY\\s+P4.*?DENY\\s+P5.*?DENY\\s+N1.*?DENY\\s+N2.*?DENY\\s+N3.*?DENY\\s+N4"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"syntax OK\"; the hook's diff against the pin is confined to the SITE A / SITE B block -- every hunk header's pre-image range lies within :286-303 of the pinned file (a hunk outside it is a FAIL: nothing else in the hook changes, RULED item 3)",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash -n .tools/hooks/never-rules-gate.sh && bash -n .tools/hooks/tests/test_never_rules_gate.sh && echo \"syntax OK\" && git diff --stat e58250f2615069d8f59160e9762f721e71a28bdb -- .tools/hooks/never-rules-gate.sh && git diff -U0 e58250f2615069d8f59160e9762f721e71a28bdb -- .tools/hooks/never-rules-gate.sh | grep -E \"^@@\"",
+      "output_evidence": "syntax OK\n .tools/hooks/never-rules-gate.sh | 49 +++++++++++++++++++++++++++++++++++++---\n 1 file changed, 46 insertions(+), 3 deletions(-)\n@@ -287 +287,20 @@ if printf '%s' \"$CMD\" | grep -qE '(^|[[:space:];|&(])git[[:space:]]+-C[[:space:]\n@@ -289,0 +309,3 @@ if printf '%s' \"$CMD\" | grep -qE '(^|[[:space:];|&(])git[[:space:]]+-C[[:space:]\n@@ -297,2 +319,21 @@ if printf '%s' \"$CMD\" | grep -qE '(^|[[:space:];|&(])git[[:space:]]+-C[[:space:]\n@@ -300,0 +342,2 @@ elif printf '%s' \"$CMD\" | grep -qE '(^|[[:space:];|&(])cd[[:space:]]+[^[:space:]",
+      "denominator": "4 of 4 hunks confined: pre-image start lines 287, 289, 297, 300 all lie within 286-303",
+      "status": "PASS",
+      "expect": "syntax OK.*?@@ -287.*?@@ -289,0.*?@@ -297,2.*?@@ -300,0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"PASS: 106   FAIL: 0\" and \"ALL CHECKS PASS\" (the spawn baseline of 96 plus exactly the 10 S209 arms); all 10 lines named \"S209:\" read PASS against their stated expectations (5 quoted positives PASS, 4 negatives DENY, the integrator PASS); 0 FAIL lines. The baseline is read at spawn: the bar is \"spawn baseline + 10, FAIL 0\"",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash .scratch/r95/suite_as_main.sh .tools/hooks/tests/test_never_rules_gate.sh 2>&1 | grep -E \"^PASS: |ALL CHECKS|FAILURES|  FAIL |S209:\"",
+      "output_evidence": "  PASS  S209: DT git -C dquoted fwd portal PROD                    -> PASS\n  PASS  S209: DT git -C squoted fwd portal PROD                    -> PASS\n  PASS  S209: DT git -C dquoted backslash portal PROD              -> PASS\n  PASS  S209: DT cd dquoted portal && push PROD                    -> PASS\n  PASS  S209: DT cd squoted portal && push PROD                    -> PASS\n  PASS  S209: neg: DT git -C dquoted ws root push CLOUD            -> DENY\n  PASS  S209: neg: DT cd dquoted ws root && push CLOUD             -> DENY\n  PASS  S209: neg: non-DT (CTO) dquoted portal PROD                -> DENY\n  PASS  S209: neg: DT dquoted missing dir fails closed             -> DENY\n  PASS  S209: integrator unaffected dquoted ws CLOUD               -> PASS\nPASS: 106   FAIL: 0\nALL CHECKS PASS -- denies the command, never the mention.",
+      "denominator": "106 of 106 arms PASS (spawn baseline 96 + 10 new S209 arms), 0 FAIL; 10 of 10 S209 arms individually PASS",
+      "status": "PASS",
+      "expect": "S209:.*?-> PASS.*?S209:.*?-> PASS.*?S209:.*?-> PASS.*?S209:.*?-> PASS.*?S209:.*?-> PASS.*?S209:.*?-> DENY.*?S209:.*?-> DENY.*?S209:.*?-> DENY.*?S209:.*?-> DENY.*?S209:.*?-> PASS.*?PASS: 106\\s+FAIL: 0.*?ALL CHECKS PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AFTER the edit: P1, P2, P3, P4, P5 all PASS (the relative form unchanged and the 4 false denials removed); N1, N2, N3, N4 all still DENY -- in particular N1 and N3, a shared-branch push from the WORKSPACE repo through a quoted absolute path, are still DENIED (the ruled negative control)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash .scratch/r95/probe_s209.sh",
+      "output_evidence": "PASS  P1 DT relative            git -C portal push origin PROD\nPASS  P2 DT double-quoted fwd   git -C \"<ROOT>/portal\" push PROD\nPASS  P3 DT single-quoted fwd   git -C '<ROOT>/portal' push PROD\nPASS  P4 DT double-quoted back  git -C \"<ROOT win>/portal\" PROD\nPASS  P5 DT cd double-quoted    cd \"<ROOT>/portal\" && git push\nDENY  N1 DT quoted ws root      git -C \"<ROOT>\" push origin CLOUD\nDENY  N2 CTO quoted portal      git -C \"<ROOT>/portal\" push PROD\nDENY  N3 DT cd quoted ws root   cd \"<ROOT>\" && git push origin CLOUD\nDENY  N4 DT quoted missing dir  git -C \"<ROOT>/no such dir\" PROD",
+      "denominator": "9 of 9 rows: 5 of 5 positives (P1-P5) PASS, 4 of 4 negatives (N1-N4) DENY",
+      "status": "PASS",
+      "expect": "PASS\\s+P1.*?PASS\\s+P2.*?PASS\\s+P3.*?PASS\\s+P4.*?PASS\\s+P5.*?DENY\\s+N1.*?DENY\\s+N2.*?DENY\\s+N3.*?DENY\\s+N4"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"arms old 106 new 106\"; \"flips 5 DENY->PASS 5 PASS->DENY 0\" -- the ONLY verdicts that differ between the pinned hook and yours are the 5 S209 quoted positives (each \"FLIP DENY -> PASS\"), and \"new_refusals 0\": every arm the pinned hook admitted, yours still admits, over all 106 arms. Any PASS->DENY flip is a FAIL (this cell adds no refusal)",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash .scratch/r95/no_new_refusal.sh",
+      "output_evidence": "arms old 100 new 100\nflips 5 DENY->PASS 5 PASS->DENY 0\n  FLIP DENY -> PASS | S209: DT git -C dquoted fwd portal PROD\n  FLIP DENY -> PASS | S209: DT git -C squoted fwd portal PROD\n  FLIP DENY -> PASS | S209: DT git -C dquoted backslash portal PROD\n  FLIP DENY -> PASS | S209: DT cd dquoted portal && push PROD\n  FLIP DENY -> PASS | S209: DT cd squoted portal && push PROD\nnew_refusals 0\n\nNOTE (measured, not the order's literal '106'): the comparator's own python regex counts 100 of the suite's 106 printed arms on BOTH sides identically -- 6 pre-existing arms (N5/N6 rebase-remedy checks, four F-XXX/audit-log checks; unrelated to this cell, unchanged by this diff) print a non-PASS/DENY verdict word ('ALLOW', 'in sync', 'coherent', '4 record(s)', 'clean') the comparator's regex does not capture. grep -c on '^  PASS|^  FAIL' over suite_old.txt and suite_new.txt both read 106. Filed as AMGT_RESAPP-Z-W95-S1. Per BOUNDS: 'a moved baseline is recorded, not a failure, as long as the delta rules in AC2 and AC4 hold' -- they hold exactly (5 flips, all DENY->PASS, 0 PASS->DENY, new_refusals 0).",
+      "denominator": "5 of 5 S209 quoted-positive arms flip DENY->PASS; 0 of 106 suite arms flip PASS->DENY (new_refusals 0); the comparator's own arm count reads 100 (not the order's a-priori 106) for the reason stated above, identically on both the old-hook and new-hook runs",
+      "status": "PASS",
+      "expect": "arms old 100 new 100.*?flips 5 DENY->PASS 5 PASS->DENY 0.*?FLIP DENY -> PASS.*?FLIP DENY -> PASS.*?FLIP DENY -> PASS.*?FLIP DENY -> PASS.*?FLIP DENY -> PASS.*?new_refusals 0"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "never-rules-gate.sh crlf 0 non_ascii_bytes 0; test_never_rules_gate.sh crlf 0 non_ascii_bytes 1 (the one pre-existing byte, unchanged from the cut)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c 'import io; [print(f, \"crlf\", io.open(f, \"rb\").read().count(bytes([13, 10])), \"non_ascii_bytes\", len(io.open(f, \"rb\").read()) - len(io.open(f, \"rb\").read().decode(\"utf-8\"))) for f in (\".tools/hooks/never-rules-gate.sh\", \".tools/hooks/tests/test_never_rules_gate.sh\")]'",
+      "output_evidence": ".tools/hooks/never-rules-gate.sh crlf 0 non_ascii_bytes 0\n.tools/hooks/tests/test_never_rules_gate.sh crlf 0 non_ascii_bytes 1",
+      "denominator": "2 of 2 files: hook crlf 0 non_ascii_bytes 0; suite crlf 0 non_ascii_bytes 1 (pre-existing, unchanged)",
+      "status": "PASS",
+      "expect": "\\.tools/hooks/never-rules-gate\\.sh crlf 0 non_ascii_bytes 0.*?\\.tools/hooks/tests/test_never_rules_gate\\.sh crlf 0 non_ascii_bytes 1"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Snapshotted the fixed hook (.scratch/r95/never-rules-gate.sh.AFTER, sha256 0ef5c4cc...), then overwrote .tools/hooks/never-rules-gate.sh with the exact pre-fix pinned bytes (.scratch/r95/never-rules-gate.sh.BEFORE, sha256 5ce389c3...) and re-ran the FIXED suite (which carries the 10 new S209 arms) against this reverted hook.",
+      "expected": "The 5 S209 quoted-positive arms (which only the fix makes PASS) read DENY instead (want PASS); the suite reports 5 FAILURES and refuses with 'FAILURES PRESENT -- do NOT wire this hook.'",
+      "observed": "PASS: 101   FAIL: 5\nFAIL  S209: DT git -C dquoted fwd portal PROD                    -> DENY (want PASS)\nFAIL  S209: DT git -C squoted fwd portal PROD                    -> DENY (want PASS)\nFAIL  S209: DT git -C dquoted backslash portal PROD              -> DENY (want PASS)\nFAIL  S209: DT cd dquoted portal && push PROD                    -> DENY (want PASS)\nFAIL  S209: DT cd squoted portal && push PROD                    -> DENY (want PASS)\nFAILURES PRESENT -- do NOT wire this hook.\nRestored the AFTER snapshot immediately after; sha256 of .tools/hooks/never-rules-gate.sh verified byte-identical (0ef5c4ccf4309121ccd18d82964bd0bb11a9328b32fcefcd4f1422030d4bac98) to the pre-mutant fixed state; re-ran probe_s209.sh post-restore: P1-P5 PASS, N1-N4 DENY (unchanged from AC3).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "bash .scratch/r95/suite_as_main.sh .tools/hooks/tests/test_never_rules_gate.sh (the full 106-arm suite against the fixed hook) executed twice in immediate succession (no AWS/network access, pure synthetic stdin payloads), stdout captured to two files and compared by sha256.",
+      "observed": "run1 85e7edf66066b04881c61c914bf02b4a820998419b345cc792a73d7cd6f607c6; run2 85e7edf66066b04881c61c914bf02b4a820998419b345cc792a73d7cd6f607c6; diff empty; IDENTICAL.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "AMGT_RESAPP-Z-W95-S1: AC4's order-verbatim no_new_refusal.sh reads 'arms old 100 new 100', not the order's stated 'arms old 106 new 106'; the flip/new_refusals lines match the order exactly (5 DENY->PASS, 0 PASS->DENY, new_refusals 0). Caused by 6 pre-existing, unrelated suite arms using a non-PASS/DENY verdict word the comparator's own regex does not capture, identically on both sides of the comparison."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~95/AMGT_RESAPP.TO-AMGT-rk-95.gate5-quoted-path-parser.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bash -n",
+      "invocation": "bash -n .tools/hooks/never-rules-gate.sh && bash -n .tools/hooks/tests/test_never_rules_gate.sh",
+      "result": "syntax OK for both files"
+    },
+    {
+      "tool": ".tools/hooks/tests/test_never_rules_gate.sh (via suite_as_main.sh, CLAUDE_PROJECT_DIR = main checkout, read-only)",
+      "invocation": "bash .scratch/r95/suite_as_main.sh .tools/hooks/tests/test_never_rules_gate.sh",
+      "result": "PASS: 106 FAIL: 0, ALL CHECKS PASS"
+    },
+    {
+      "tool": "probe_s209.sh (synthetic stdin payloads, NEVER_GATE_AUDIT=/dev/null)",
+      "invocation": "bash .scratch/r95/probe_s209.sh",
+      "result": "post-edit: P1-P5 PASS, N1-N4 DENY"
+    },
+    {
+      "tool": "no_new_refusal.sh (pinned-hook vs fixed-hook comparator)",
+      "invocation": "bash .scratch/r95/no_new_refusal.sh",
+      "result": "flips 5 DENY->PASS 5 PASS->DENY 0, new_refusals 0 (arm-count note: see AC4 output_evidence and surprise row S1)"
+    },
+    {
+      "tool": "jsonschema Draft7Validator (manual json.loads + pattern check, jsonschema package not required)",
+      "invocation": "validate the new investigation row's id against org/surprise_channel/schemas/investigation_item.schema.json's id pattern; validate the fenced array parses",
+      "result": "AMGT_RESAPP-Z-W95-S1 id pattern OK; array parses, 497 rows total"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC0,AC1,AC2,AC3,AC4,AC5",
+      "result": "see the worker report (rc is the verdict)"
+    }
+  ]
+}
