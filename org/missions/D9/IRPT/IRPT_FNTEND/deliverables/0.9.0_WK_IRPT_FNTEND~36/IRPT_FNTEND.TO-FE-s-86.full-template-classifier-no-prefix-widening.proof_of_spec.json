@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-86",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "4bc62712f20aaad130088dd20d166b453ef8ed2c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "3b18ab31c82028a8ef606aa1912b7d54eacf7be4",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-86.full-template-classifier-no-prefix-widening.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~36",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/scripts/ui-smoke.mjs",
+      "kind": "frontend_component",
+      "commit_or_etag": "33040944373f7d46aa4b8c00c954014857c1c491",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "C-S147, CTO round-13 analysis item 2: routeKeyCandidates now splits a parameterised route into path SEGMENTS (a template array), not a bare static prefix; checkKeyValidity's inline matchesTemplate requires identical segment count, every literal segment byte-equal, every {param} segment matched against exactly one non-empty concrete segment. The static (no-{param}) exact set is unchanged. Committed at portal 33040944373f7d46aa4b8c00c954014857c1c491, LOCAL on portal branch wk-irpt_fntend-14-86-fe-s-86-portal (portal frozen); not pushed, not deployed.",
+      "introduces": ["const matchesTemplate = (keySegments, templateSegments) => {"],
+      "artifact_covered_by": ["F86-AC2", "F86-AC3", "F86-AC5"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-80/key-classifier.test.ts",
+      "kind": "test",
+      "commit_or_etag": "33040944373f7d46aa4b8c00c954014857c1c491",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "F86-AC2: upgraded in place with a new describe block adding the four CTO-named controls (holdings/A-0001 valid; the same id plus an undeclared trailing segment INVALID -- the F80-AC6 regression control; a static-only suffix on a no-{param} route invalid; status/{jobId} concrete valid) plus a printed 4-of-4 denominator and a wrong-state control proving the old-vs-new behaviour genuinely differs. All pre-existing round-13 tests (POSITIVE/NEGATIVE/WRONG-SHAPE/BOUND/3-of-3-denominator/UNMEASURABLE) kept unchanged and still pass. Same commit as ui-smoke.mjs.",
+      "artifact_covered_by": ["F86-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F86-AC1",
+      "criterion_verbatim": "the whole portal typechecks.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-86-fe-s-86/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "N/A -- boolean rc check",
+      "status": "PASS",
+      "expect": "rc=0(?![0-9])"
+    },
+    {
+      "criterion_id": "F86-AC2",
+      "criterion_verbatim": "the upgraded unit test is green: all four CTO-named controls (holdings/A-0001 valid; holdings/A-0001/not-a-declared-operation INVALID; a static-only suffix invalid; status/{jobId} concrete valid) plus every pre-existing round-13 assertion, with the printed denominator (N of N controls correct) reading 4 of 4 on the new control set.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-86-fe-s-86/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-80/key-classifier.test.ts",
+      "output_evidence": "CONTROL-1 [/api/scoped/investor-reporting/holdings/A-0001] -> {\"valid\":1,\"total\":1}\nCONTROL-2 [/api/scoped/investor-reporting/holdings/A-0001/not-a-declared-operation] -> {\"valid\":0,\"total\":1} (must be invalid -- F80-AC6 regression control)\nCONTROL-3 [/api/scoped/investor-reporting/status/extra-junk] -> {\"valid\":0,\"total\":1} (must stay invalid -- confirms the exact set was not also loosened)\nCONTROL-4 [/api/scoped/investor-reporting/status/REQ-1] -> {\"valid\":1,\"total\":1}\nCONTROL[CONTROL-1] key=/api/scoped/investor-reporting/holdings/A-0001 expect-valid=true got-valid=true -- MATCH\nCONTROL[CONTROL-2] key=/api/scoped/investor-reporting/holdings/A-0001/not-a-declared-operation expect-valid=false got-valid=false -- MATCH\nCONTROL[CONTROL-3] key=/api/scoped/investor-reporting/status/extra-junk expect-valid=false got-valid=false -- MATCH\nCONTROL[CONTROL-4] key=/api/scoped/investor-reporting/status/REQ-1 expect-valid=true got-valid=true -- MATCH\nN of N controls correct: 4 of 4 controls correct\nOLD-WIDENING [/api/scoped/investor-reporting/holdings/A-0001/not-a-declared-operation] -> accepts=true (must be true -- proves this is a real regression control, not a vacuous one)\n12 pass\n0 fail\n12 expect() calls\nRan 12 tests across 1 file.",
+      "denominator": "4 of 4 (new F86 controls); 12 pass / 0 fail across 12 tests total, including the pre-existing round-13 3-of-3 controls",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail"
+    },
+    {
+      "criterion_id": "F86-AC3",
+      "criterion_verbatim": "REGRESSION CONTROL, end-to-end: the real default.json fixture (12/12 entries, every key genuinely declared) still reads 12 of 12 under your stricter matcher -- the fix removes the false positive without also removing a true positive.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-86-fe-s-86/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-14-86-fe-s-86/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~36/f86_holdings_key_validity_regression.png --port 5995 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/default.json --click Holdings",
+      "output_evidence": "CLICKED: Holdings\nFIXTURES: 12 declared; 3 matched >=1 URL\nFIXTURES-MATCH: matched 3 of 12\nKEY-VALIDITY: 12 of 12 valid consumed.ts operation keys",
+      "denominator": "12 of 12",
+      "status": "PASS",
+      "expect": "KEY-VALIDITY: 12 of 12 valid consumed\\.ts operation keys",
+      "status_reason": "Matches <expect> verbatim. Dev server on this worker's assigned port 5995 (block 5995-5999), stopped and confirmed closed (curl returned 000) before F86-AC4. PNG saved and read against portal/DESIGN.md per C-S176's cut-time N/A declaration (this cell is pure-logic + one e2e regression read, no rendered visual state) -- the panel renders the ordinary no-client-selected state, light canvas #F4F6FA, white panel, navy ink, one band, consistent with round-13's own reads of the same fixture."
+    },
+    {
+      "criterion_id": "F86-AC4",
+      "criterion_verbatim": "the whole IRPT_FNTEND suite is green.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-86-fe-s-86/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": "fe-s-13-wire.json: unprojected_grant present 0 of 9\nfe-s-14-print-v1.json: unprojected_grant present 0 of 2\n654 pass\n27 skip\n2 fail\n2710 expect() calls\nRan 683 tests across 127 files. [108.14s]",
+      "denominator": "654 pass / 27 skip / 2 fail of 683 tests across 127 files",
+      "status": "FAIL",
+      "expect": "(?<![0-9])0 fail",
+      "status_reason": "REFUSED as written -- genuinely FAILS its own <expect>. Both failures are in src/pages/InvestorReporting/__tests__/fe-s-81/generator-output-carries-unprojected-grant.test.ts, on files entirely outside this cell's <paths> grant (portal/scripts/ui-smoke.mjs's two named functions, fe-s-80/key-classifier.test.ts, fe-s-86/): fe-s-13-wire.json and fe-s-14-print-v1.json still lack unprojected_grant. This is the PRE-EXISTING, already-named round-14 W25-S1 item (CTO_ROUND_ANALYSIS_IRPT_FNTEND_ROUND_13_20260922.md, 'W25-S1: commit the generated outputs' -- 'The generator source landed; its outputs did not'), a SIBLING cell of the same round-14 issuance built in its own separate worktree; its fix is not visible here until the drain merges it. Filed as surprise row IRPT_FNTEND-W36-S1 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~F) per BOUNDS ('a defect needing another cell's file is ONE surprise row, never a wider grant'). This worker's own surface (F86-AC1/AC2/AC3) is unaffected and PASSES cleanly; this TO is NOT flipped complete on this criterion."
+    },
+    {
+      "criterion_id": "F86-AC5",
+      "criterion_verbatim": "graded at L9 by the CVO: the segment-for-segment matcher genuinely rejects an undeclared trailing segment (control 2) while genuinely accepting a concrete parameterised instantiation (controls 1 and 4), and the static/exact set's behaviour is unchanged (control 3). RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; read scripts/ui-smoke.mjs's diff (routeKeyCandidates/checkKeyValidity), F86-AC2's four control outputs and printed denominator, the embedded wrong-state control, and a direct mutant-control measurement swapping ui-smoke.mjs back to its pre-fix (round-13, HEAD) bytes.",
+      "output_evidence": "Segment-for-segment: routeKeyCandidates now returns { exact, templates } where templates are the path-split arrays of every {param} route (not a bare prefix string); checkKeyValidity's matchesTemplate requires (a) keySegments.length === templateSegments.length, (b) every literal segment byte-equal, (c) every {param} segment non-empty. CONTROL 1 (holdings/A-0001, one-param template) -> valid:1 -- genuinely accepted. CONTROL 2 (holdings/A-0001/not-a-declared-operation, SAME id plus one extra segment) -> valid:0 -- genuinely rejected on segment-count mismatch (6 segments vs the template's 5); under the pre-fix (round-13) k.startsWith(p) bytes, measured directly by this worker (swap to `git show HEAD:scripts/ui-smoke.mjs`, re-run, restore), the identical key reads valid:1 -- confirming the rejection is a REAL behaviour change, not an artifact of the test. CONTROL 3 (status/extra-junk against a bare status-only template table) -> valid:0 -- the exact/static set is untouched (separate synthetic route table from control 4's, per the CTO's own item 2 wording 'a static-only suffix'; using ONE shared table with both status and status/{jobId} declared would make status/extra-junk a genuinely correct match against status/{jobId}, which is a DIFFERENT claim from control 3's -- kept apart deliberately, documented in the test file's own header comment). CONTROL 4 (status/REQ-1 against a table declaring status/{jobId}) -> valid:1 -- genuinely accepted, a declared route, not conflated with control 2's undeclared-tail case. F86-AC3 independently confirms end-to-end against the REAL, generated consumed.ts (which declares both status and status/{jobId} together): the real default.json fixture reads 12 of 12, unchanged from round 13's own true-positive count -- so no true positive was lost by the stricter match.",
+      "denominator": "N/A -- judgment criterion, no verdict computed here",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true; graded by 3.0.0_SA_CVO at L9 per spine v3 L9. No self-grade taken.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "scripts/ui-smoke.mjs was temporarily swapped to its pre-fix HEAD bytes (git show HEAD:scripts/ui-smoke.mjs -- the round-13 k.startsWith(p) widening, since this fix was uncommitted at measurement time) and the new F86-AC2 CONTROL-2 test re-run against those bytes, then restored (diff against the committed fix confirmed byte-identical afterward).",
+      "expected": "The pre-fix (round-13) classifier wrongly reads valid=1 on the F80-AC6 regression key (holdings/A-0001/not-a-declared-operation); the fixed classifier reads valid=0 on the same key.",
+      "observed": "Pre-fix bytes: CONTROL-2 [/api/scoped/investor-reporting/holdings/A-0001/not-a-declared-operation] -> {\"valid\":1,\"total\":1} -- test FAILS (expected {valid:0,total:1}), exactly reproducing the F80-AC6 defect. Restored fixed bytes: diff scripts/ui-smoke.mjs against the pre-swap backup returned no output (byte-identical restore); re-ran the full key-classifier.test.ts suite immediately after -- 12 pass / 0 fail, unchanged.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "F86-AC2's own invocation (bun test src/pages/InvestorReporting/__tests__/fe-s-80/key-classifier.test.ts) run twice on the fixed bytes: once before the mutant-control swap, once immediately after the restore.",
+      "observed": "Both runs printed identical CONTROL-1..4 lines, identical 'N of N controls correct: 4 of 4 controls correct', identical '12 pass / 0 fail / 12 expect() calls / Ran 12 tests across 1 file'. No difference.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "IRPT_FNTEND-W36-S1: F86-AC4's literal invocation, run verbatim in this isolated worktree, reads 654 pass / 27 skip / 2 fail (rc=1), not 0 fail -- both failures are the pre-existing round-14 W25-S1 defect (fe-s-13-wire.json 0/9, fe-s-14-print-v1.json 0/2, missing unprojected_grant), on a sibling cell's files entirely outside this cell's <paths> grant. BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~F."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~36/full-template-classifier-no-prefix-widening.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit), bun 1.3.9",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-86-fe-s-86/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0"
+    },
+    {
+      "tool": "bun test 1.3.9 (fe-s-80/key-classifier.test.ts, F86-AC2)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-86-fe-s-86/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-80/key-classifier.test.ts",
+      "result": "12 pass / 0 fail / 12 expect() calls / Ran 12 tests across 1 file"
+    },
+    {
+      "tool": "bun test 1.3.9 (whole InvestorReporting suite -- F86-AC4, dev server stopped, IRPT_FE_DEV_PORT unset)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-86-fe-s-86/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "result": "654 pass / 27 skip / 2 fail / 2710 expect() calls / Ran 683 tests across 127 files. [108.14s] -- see F86-AC4 for the two failures, out of this cell's grant"
+    },
+    {
+      "tool": "scripts/ui-smoke.mjs (Playwright-core + system Edge, headless), vite dev server, worktree port 5995",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-14-86-fe-s-86/portal && IRPT_FE_DEV_PORT=5995 bun run dev --port 5995 (background), then node scripts/ui-smoke.mjs investor-reporting <out.png> --port 5995 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/default.json --click Holdings",
+      "result": "rc=0; KEY-VALIDITY: 12 of 12 valid consumed.ts operation keys; PNG saved"
+    }
+  ]
+}
