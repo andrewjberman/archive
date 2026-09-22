@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-114",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-114.crosswalk-enrich-coverage.md",
+    "group": "OTHER",
+    "vintage_commit": "349a152935"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "349a152935",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-114.crosswalk-enrich-coverage.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~114",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "dc14b3f152",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY per BOUNDS; no S3 write, no deploy scope. build_crosswalk() gains ENRICH-row handling (RULED item 1): a registrations row with mode=ENRICH attaches its identity to the matching COVERAGE record's security_key instead of appending a second record; denominators[\"enriched\"] added only when n>0."
+    },
+    {
+      "path_or_key": "lib/research/identity/add_security.py",
+      "kind": "script",
+      "commit_or_etag": "dc14b3f152",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY per BOUNDS; no Bloomberg call, no S3 write in this session. The pre-check writes mode=ENRICH on a same-folder coverage collision (RULED item 2); _persist_registration_and_pool builds the crosswalk in memory FIRST and writes registrations.json only after that build succeeds."
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk_enrich_coverage.py",
+      "kind": "test",
+      "commit_or_etag": "dc14b3f152",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, 6 arms per RULED item 3, all local fixtures/stubs; pytest -q -p no:cacheprovider: 6 passed in 0.39-0.53s across three runs this session.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: \"served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\"; \"local_rebuild_byte_equal True\"; the identity suite \"I0 passed\" (measured 60 at the cut). Record every value",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r114/ac0.py && python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "TRUE PRE-EDIT BASELINE (reconstructed -- see AMGT_RESAPP-Z-W114-S1: this worker ran the invocation AFTER editing, so the true before-edit values were recovered via `git archive HEAD | tar -x` of the unedited base 349a152935 and running the identical script/pytest command inside that archived tree): \"served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\" / \"local_rebuild_byte_equal True\" / \"60 passed in 0.73s\" -- matches the task order's own MEASURED STATE paragraph verbatim. RE-RUN THIS SESSION, literal invocation, post-edit/post-commit (dc14b3f152): \"served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\" / \"local_rebuild_byte_equal True\" / \"66 passed in 0.80s\" (66 = 60 pre-edit + 6 new arms, consistent with AC1/AC2).",
+      "denominator": "3 of 3 named values recorded (served_records/992_records/992_has_identity/992_folder as one line, local_rebuild_byte_equal, suite count) at BOTH the reconstructed pre-edit baseline and the literal post-commit re-run; both match the task order's stated measured state.",
+      "status": "PASS",
+      "expect": "served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK[\\s\\S]*local_rebuild_byte_equal True[\\s\\S]*passed"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"6 passed\" and 0 failed, the six named arms PASSED",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -v -p no:cacheprovider 2>&1 | tail -9",
+      "output_evidence": "lib/research/identity/tests/test_crosswalk_enrich_coverage.py::EnrichAttachesIdentityNoNewRecord::test_enrich_attaches_identity_no_new_record PASSED [ 16%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses PASSED [ 33%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::DuplicateEnrichRefuses::test_duplicate_enrich_refuses PASSED [ 50%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::NoEnrichRowsByteIdentical::test_no_enrich_rows_byte_identical PASSED [ 66%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::AddSecurityEnrichRowOneCall::test_add_security_enrich_row_one_call PASSED [ 83%]\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py::BuildFailureLeavesRegistrationsUnchanged::test_build_failure_leaves_registrations_unchanged PASSED [100%]\n\n============================== 6 passed in 0.41s ==============================",
+      "denominator": "6 of 6 named arms PASSED, 0 failed",
+      "status": "PASS",
+      "expect": "EnrichAttachesIdentityNoNewRecord::test_enrich_attaches_identity_no_new_record PASSED[\\s\\S]*EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses PASSED[\\s\\S]*DuplicateEnrichRefuses::test_duplicate_enrich_refuses PASSED[\\s\\S]*NoEnrichRowsByteIdentical::test_no_enrich_rows_byte_identical PASSED[\\s\\S]*AddSecurityEnrichRowOneCall::test_add_security_enrich_row_one_call PASSED[\\s\\S]*BuildFailureLeavesRegistrationsUnchanged::test_build_failure_leaves_registrations_unchanged PASSED[\\s\\S]*6 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"N passed\" with N = I0 + 6 and 0 failed; then \"local_rebuild_byte_equal True\" again (no ENRICH row exists in the real registrations.json, so the served-shape build is unchanged)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2>&1 | tail -1 && python .scratch/r114/ac0.py",
+      "output_evidence": "66 passed in 1.29s\nserved_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK\nlocal_rebuild_byte_equal True",
+      "denominator": "66 of 66 passed (I0=60 + 6 new arms), 0 failed; local_rebuild_byte_equal True re-confirmed post-commit.",
+      "status": "PASS",
+      "expect": "66 passed[\\s\\S]*local_rebuild_byte_equal True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"changed_code_files\" EXACTLY lib/research/identity/add_security.py, lib/research/identity/crosswalk.py and lib/research/identity/tests/test_crosswalk_enrich_coverage.py; each \"compiles True crlf 0\" with non_ascii_chars equal to its value at the pin",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r114/ac4.py",
+      "output_evidence": "changed_code_files ['lib/research/identity/add_security.py', 'lib/research/identity/crosswalk.py', 'lib/research/identity/tests/test_crosswalk_enrich_coverage.py']\nlib/research/identity/add_security.py compiles True crlf 0 non_ascii_chars 0\nlib/research/identity/crosswalk.py compiles True crlf 0 non_ascii_chars 0\nlib/research/identity/tests/test_crosswalk_enrich_coverage.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "3 of 3 changed files listed, EXACTLY the three named; non_ascii_chars at the pin (0972b8631c) for crosswalk.py=0 and add_security.py=0 (git show 0972b8631c:<path>), both equal to the post-edit value 0; test file is new at the pin (no prior value), also 0.",
+      "status": "PASS",
+      "expect": "changed_code_files \\['lib/research/identity/add_security.py', 'lib/research/identity/crosswalk.py', 'lib/research/identity/tests/test_crosswalk_enrich_coverage.py'\\][\\s\\S]*compiles True crlf 0[\\s\\S]*compiles True crlf 0[\\s\\S]*compiles True crlf 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutated crosswalk.py's ENRICH-unmatched-key guard (`if key not in by_key: raise ValueError(...)`) to `if False:` -- an ENRICH row naming a security_key absent from the coverage records would no longer be refused. Ran the new test file; reverted with a second Edit (confirmed by `git diff` returning empty against the committed dc14b3f152 bytes) before any further evidence was recorded.",
+      "expected": "test_enrich_without_coverage_record_refuses fails (the row is no longer refused cleanly)",
+      "observed": "1 failed, 5 passed -- EnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses failed with KeyError: 'ZZZ_ZZ_Equity' (the guard no longer intercepts the unmatched key, so the next line's dict lookup raises instead -- still a failure, proving the guard is load-bearing). Reverted; `git diff -- lib/research/identity/crosswalk.py` returned empty and the full identity suite returned to 66 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input runs of `python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -q -p no:cacheprovider`, back to back, post-commit.",
+      "observed": "Run 1: \"6 passed in 0.39s\". Run 2: \"6 passed in 0.39s\". Identical pass/fail outcome both runs (timing line differs only in the trailing decimal, not a value any criterion or test asserts on).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "resolve(), write_pool, the key grammar, the coverage file, registrations.json itself, any S3 object",
+      "reason": "section 1 'What this cell does NOT change' -- read-only or untouched; tests use temp copies of registrations.json, never the real file."
+    },
+    {
+      "item": "crosswalk.schema.json (denominators.enriched key)",
+      "reason": "outside this task order's <paths> (a WALL); filed as AMGT_RESAPP-Z-W114-S2, ARMED, disarm_owner 2.0.0_SA_COO~Z."
+    },
+    {
+      "item": "Bloomberg reference_data call, S3 write, --write-pool",
+      "reason": "hard limits: CODE ONLY, no vendor/AWS call, no S3 write; every reference-data call is stubbed and --write-pool is never passed to add_security.main in this session's tests."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W114-S1: AC0 was not run before editing crosswalk.py/add_security.py -- reconstructed via a git archive of HEAD (349a152935) rather than executed pre-edit; the reconstruction matches the task order's own MEASURED STATE text exactly.",
+    "AMGT_RESAPP-Z-W114-S2: crosswalk.schema.json's denominators object (additionalProperties: false) does not admit the new \"enriched\" key this cell adds, ARMED against the first real ENRICH registration's crosswalk build being schema-validated; the schema file is outside this task order's <paths>."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~114/AMGT_RESAPP.TO-AMGT-rk-114.crosswalk-enrich-coverage.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -v -p no:cacheprovider",
+      "result": "6 passed in 0.41s (also re-run twice more this session: 0.39s, 0.53s -- all 6 passed, 0 failed)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests -q -p no:cacheprovider",
+      "result": "66 passed (0.73s pre-commit run, 0.80s and 1.29s/1.35s post-commit re-runs; 60 pre-existing + 6 new)"
+    },
+    {
+      "tool": "python (ac0.py)",
+      "invocation": "python .scratch/r114/ac0.py",
+      "result": "served_records 96 992_records 1 992_has_identity False 992_folder Lenovo 992 HK; local_rebuild_byte_equal True (both pre-edit reconstruction and post-commit re-run)"
+    },
+    {
+      "tool": "python (ac4.py)",
+      "invocation": "python .scratch/r114/ac4.py",
+      "result": "changed_code_files exactly the 3 named files; each compiles True crlf 0 non_ascii_chars 0, matching the pin's 0/0 for the two pre-existing files"
+    },
+    {
+      "tool": "git",
+      "invocation": "git archive HEAD | tar -x -C .scratch/r114/before_tree; git show 0972b8631c:<path>",
+      "result": "reconstructed the pre-edit tree (AC0 baseline) and confirmed non_ascii_chars at the pin for both edited files (0, 0)"
+    }
+  ]
+}
