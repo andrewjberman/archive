@@ -88,12 +88,9 @@ ASSERT-STYLE: 2 of 2 met
 ```
 PASS (matches `ASSERT-CONTENT: 2 of 2 met[\s\S]*ASSERT-STYLE: 2 of 2 met`).
 
-**F67-AC3 -- THE CONTENT CONTROL (no `--fail`).** Expected `ASSERT-CONTENT: 0 of 2 met`. Measured:
-```
-EXPECT[[data-slot="scope-error"]]: PASS (1 visible)
-EXPECT-TEXT[[data-slot="scope-error"]::Scope could not be resolved]: PASS
-ASSERT-CONTENT: 2 of 2 met
-```
+**F67-AC3 -- THE CONTENT CONTROL (no `--fail`).** Expected `ASSERT-CONTENT: 0 of 2 met`.
+
+FIRST pass (fixture `default.json`, as originally written): `ASSERT-CONTENT: 2 of 2 met` --
 **FAIL, measured, REFUSED as written.** Root cause (row `IRPT_FNTEND-W17-S3`, GROUNDED, positive-control
 confirmed): `fixtures/smoke/default.json` omits `unprojected_grant` on ALL 12 of its declared route
 entries; `contracts/envelope.ts:278-280` throws `EnvelopeMismatch` on ANY response missing that field,
@@ -103,6 +100,18 @@ of `default.json` (not committed, outside grant) adding the field to `directory/
 identical invocation against the patch: `ASSERT-CONTENT: 0 of 2 met` -- confirms the fixture, not this
 cell's markup, is the cause. `fixtures/smoke/default.json` is outside `<paths>`; not edited. Reported per
 BOUNDS, not weakened, not self-graded past the failure.
+
+**AMENDED (COO commit `5cad85da0b`, verified by this worker: `git cat-file -t` resolves, `git show
+--name-only` touches ONLY the TO file, both AMENDMENT blocks read directly).** The fixture is swapped to
+`fixtures/smoke/fe-s-18-frozen.json` (independently re-verified clean by this worker: 0 of 9 entries
+missing `unprojected_grant`). Re-ran the corrected invocation against the same dev server:
+```
+EXPECT[[data-slot="scope-error"]]: FAIL (0 visible)
+EXPECT-TEXT[[data-slot="scope-error"]::Scope could not be resolved]: FAIL
+ASSERT-CONTENT: 0 of 2 met
+```
+**PASS**, matching `<expect>ASSERT-CONTENT: 0 of 2 met</expect>` exactly. Row `IRPT_FNTEND-W17-S3` stays
+filed as the record of the original defect; this amendment is its remedy.
 
 **F67-AC4 -- the StatusPanel safe-action button.** `fe-s-14-global.json` (its performance-report response
 carries no `status` wrapper, so `EXPLICIT_UNKNOWN_STATE` = `UNCERTAIN` -> not answer-bearing ->
@@ -195,6 +204,31 @@ BOTH invocations** -- row `IRPT_FNTEND-W17-S2` (GROUNDED): the driver's ONLY `co
 literal source cannot emit `SAVED` or `scrollLeft` under any invocation shape. `grep -c 'SAVED\|scrollLeft'`
 over the full adapted-run log: 0. Reported per BOUNDS, not weakened, not self-graded past the failure.
 
+**AMENDED (COO commit `5cad85da0b`, verified as above).** `<invocation>` corrected to the real positional
+shape and `<expect>` corrected to `DRIVER OK` (the driver's own success sentinel). Re-ran with a fresh
+scenario-map file (`f67_overflow_scenarios.json`, this worker's own deliverables folder) and a fresh
+capture directory: `rc=0`, last stdout line `DRIVER OK` -- **matches `<expect>DRIVER OK</expect>`
+exactly, PASS.** Both PNGs re-read, confirming the same scroll-reachability finding as the original run.
+
+**NEW FINDING, row `IRPT_FNTEND-W17-S5` (filed this tick):** the amendment's corrected `<invocation>` text
+is itself not a real executable command -- it carries a bracketed span
+(`<scenario-map.json, one entry wrapping fixtures/smoke/fe-s-18-holdings-observed.json>`) that is not a
+declared placeholder (the TO declares only `WS`, `PORT`) and does not match
+`proof-of-spec-check.py`'s `PLACEHOLDER_TOKEN_RE` (`[A-Z][A-Z0-9_]*`, all-caps only). Under this TO's
+declared `<placeholders>` (ENFORCE mode), the checker's invocation-alignment limb therefore requires this
+row's recorded `invocation` to match that bracketed text LITERALLY -- which no real, re-runnable command
+can do. MEASURED: recording this worker's own actual command (the one that produced the passing `DRIVER
+OK` result above) makes `python .tools/proof-of-spec-check.py <instance> ... --governing-order <TO>`
+(run from inside this worktree) report exactly ONE violation --
+`VIOLATION: invocation-alignment[F67-AC10]: the RECORDED invocation is NOT the criterion's invocation
+modulo the placeholder(s) ['PORT', 'WS']` -- and `INVALID (rc=1)`. This worker did NOT write the
+unexecutable bracket text as its own `invocation` (that would misrepresent what was actually run), and did
+NOT further edit the criterion's `<invocation>`/`<expect>` substance (out of this worker's authority per
+BOUNDS -- the task-order file is this worker's grant for the `<status>` flip only, not for rewriting
+criteria: "an order defect is reported, and the issuer amends it"). So: **F67-AC10's own substantive bar is
+met (PASS-by-output, `DRIVER OK`), but the proof-of-spec-check instance as a WHOLE is `INVALID (rc=1)` on
+this one mechanical ground, and `<status>` is NOT flipped to `complete`.**
+
 **F67-AC11 -- whole suite green, pinning tests unchanged.** Dev server stopped and port verified closed
 (`curl` -> `000`) BEFORE this run; run in a shell with `IRPT_FE_DEV_PORT` unset.
 ```
@@ -250,6 +284,23 @@ flagged. `__tests__/fe-s-67/panel-error-reuse.test.ts` (this cell's own guard): 
 - `IRPT_FNTEND-W17-S4` -- the cell text's literal "PanelError imported by all four files" would add an
   unused import to StatusPanel.tsx; resolved by judgment, recorded rather than silently narrowed.
   OBSERVATION / INERT.
+- `IRPT_FNTEND-W17-S5` -- filed AFTER the COO's amendment (`5cad85da0b`) landed and was applied to this
+  worktree: the amendment's corrected F67-AC10 `<invocation>` text contains a non-declared,
+  non-executable bracketed span, so `proof-of-spec-check.py`'s ENFORCE-mode invocation-alignment limb
+  refuses any real command recorded against it (1 violation, `INVALID` rc=1) even though the criterion's
+  substantive `<expect>DRIVER OK</expect>` is independently re-verified PASS. OBSERVATION / INERT.
+
+## Amendment applied mid-task (COO commit `5cad85da0b`)
+
+Verified independently before use: `git cat-file -t 5cad85da0b` -> `commit`; `git show --name-only
+5cad85da0b` -> exactly one path, the governing task-order file; the diff against its parent read directly
+and matched, word for word, what the coordinator's message described (two `COO AMENDMENT` blocks, after
+F67-AC3 and after F67-AC10). Applied as a working-tree edit to this worktree's own copy of the TO (this
+worker's branch does not track CLOUD); `diff --strip-trailing-cr` against `git show 5cad85da0b:<path>`
+afterward returned 0 lines -- content-identical. F67-AC3 re-verified PASS (fixture swap). F67-AC10's
+`<expect>` re-verified PASS (`DRIVER OK`); its `<invocation>` text itself carries a residual defect (row
+`IRPT_FNTEND-W17-S5`) that keeps the whole proof-of-spec-check instance `INVALID (rc=1)`. `<status>` is
+NOT flipped to `complete` -- see `IRPT_FNTEND-W17-S5` and the PROOF section of this worker's report.
 
 ## Push state
 
