@@ -1,0 +1,797 @@
+/**
+ * FE-s-49 -- INVESTOR REPORTING IS OPAL-ADMIN ONLY: role admin AND firmId opal-capital, on
+ * `/investor-reporting`, on `/investor-reporting/print` and on its sidebar item (1.0.0_SA_CTO's
+ * ruling, msg 96924; the rendering is 2.0.0_SA_COO~D's portal c29a8b86).
+ *
+ *   F49-AC2  an Opal internal admin reaches both routes.
+ *   F49-AC3  an admin of every firm whose allowlist listed the page at DEV 1f3ce9f0 is refused.
+ *   F49-AC4  a non-admin (opal-capital, and each of those firms) is refused.
+ *   F49-AC5  the nav shows the item to the Opal internal admin only.
+ *   F49-AC6  the arm that can say no: DEV 1f3ce9f0's own blobs admit a partner-firm user.
+ *   F49-AC7  every route element and nav entry under /investor-reporting carries the predicate.
+ *   F49-AC8  the three gate hunks are byte-identical to c29a8b86's.
+ *   F49-AC9  the partner allowlist entries granting the page, before and after: 0 of 3 remain.
+ *   F49-AC10 the backend census: every endpoint the page calls, and whether its backend is admin-only.
+ *   F49-AC13 F49-AC10's test carries an explicit timeout, 3 times its highest cost in the committed
+ *            record `recorded-costs.json` beside this file (row S67; FE-s-46's rule).
+ *
+ * WHAT IS READ, AND FROM WHERE (RULING AC)
+ *  - App.tsx, firmAccess.ts, ProtectedRoute.tsx, AuthContext.tsx and investor-reporting.ts are read
+ *    as COMMITTED BLOBS (`git cat-file blob <rev>:<path>`), at HEAD and at DEV 1f3ce9f0. A file in the
+ *    checkout that an uncommitted edit changed is never the object graded.
+ *  - THE ROUTE GATE IS RENDERED FROM THOSE BLOBS. ProtectedRoute.tsx and firmAccess.ts at <rev> are
+ *    written into `.materialized/<run>/<rev>/` beside this file and imported from there; the folder is
+ *    removed after. Two import specifiers of ProtectedRoute.tsx are re-pointed, and ONLY two, each
+ *    counted exactly once: `../hooks/useAuth` and `./LoadingSpinner`, to the checkout's own modules.
+ *    WHY THE CHECKOUT FOR THOSE TWO: they carry the auth context this test provides and are not the
+ *    object under test, and ONE AuthContext module instance must serve both the provider here and the
+ *    hook ProtectedRoute calls. The test refuses to run if either, or AuthContext.context.ts, differs
+ *    from HEAD in the checkout. `../lib/firmAccess` is NOT re-pointed: it resolves to the materialized
+ *    blob of the SAME revision, which is what lets the BEFORE arm run DEV 1f3ce9f0's allowlist.
+ *    Why inside the portal tree and not a temp directory: a module outside it cannot resolve react,
+ *    react-router-dom or the JSX runtime.
+ *  - THE OUTCOME IS READ FROM THE ELEMENT ProtectedRoute RETURNS. `renderToStaticMarkup` runs no
+ *    effects, so a `<Navigate>` renders nothing; the probe therefore calls the real ProtectedRoute
+ *    inside a component's render, keeps the element it returns, and renders that element. REDIRECT
+ *    means the element IS react-router's `Navigate` (its `to` printed); CHILDREN means the markup holds
+ *    the probe child. Anything else is NOTHING and fails every arm.
+ *  - THE NAV FILTER is a closure inside DashboardLayout: it cannot be imported without mounting the
+ *    whole app, and the real `hasAccess` lives only inside AuthProvider's state. So both are LIFTED OUT
+ *    OF THE COMMITTED BLOBS BY THE TYPESCRIPT PARSER -- App.tsx's `section.items.filter(...)` callback
+ *    and the `useCallback` body bound to `hasAccess` in AuthContext.tsx -- transpiled to strip types,
+ *    and evaluated UNCHANGED, with their free variables bound to the real `isPathAllowedForFirm` (the
+ *    materialized firmAccess blob) and to the identity under test. The logic is never re-typed, and
+ *    the lifted source is printed.
+ *  - THE BACKEND CENSUS (F49-AC10) reads the WORKSPACE repository's committed blobs (the portal's
+ *    parent directory). It makes no network call and writes nothing.
+ */
+
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { spawnSync } from 'node:child_process'
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { createElement, type ReactElement, type ReactNode } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom'
+import ts from 'typescript'
+import { AuthContext, type AuthContextType } from '../../../../contexts/AuthContext.context'
+
+// --- constants ---------------------------------------------------------------------------------
+const ROUTE = '/investor-reporting'
+/** Portal DEV when this order was cut: the ungated state, and the firms whose sets listed the page. */
+const BEFORE = '1f3ce9f0'
+/** 2.0.0_SA_COO~D's rendering on feature/d13-visual-elevation (msg 96928). */
+const RENDERING = 'c29a8b86'
+const OPAL = 'opal-capital'
+const CHILD_MARK = 'FE49-CHILDREN-RENDERED'
+const GATE_PROP_NAMES = ['requireAdmin', 'requireInternal', 'requireDev', 'allowRenderClaim'] as const
+
+// --- roots -------------------------------------------------------------------------------------
+/** Five levels up from this file is `portal/`, the repository every portal blob is read from. */
+const PORTAL = fileURLToPath(new URL('../../../../../', import.meta.url))
+/** Six levels up is the workspace worktree, the repository the backend census reads. */
+const WS = fileURLToPath(new URL('../../../../../../', import.meta.url))
+const SRC_URL = new URL('../../../../', import.meta.url)
+const MAT_PARENT = new URL('./.materialized/', import.meta.url)
+const MAT_URL = new URL(`./.materialized/run-${Date.now().toString(36)}/`, import.meta.url)
+
+// --- git ---------------------------------------------------------------------------------------
+function run(cwd: string, args: readonly string[]): { status: number | null; stdout: string; stderr: string } {
+  const r = spawnSync('git', args, { encoding: 'utf8', cwd, timeout: 60000 })
+  return { status: r.status, stdout: r.stdout ?? '', stderr: `${r.stderr ?? ''}${r.error ? r.error.message : ''}` }
+}
+function git(cwd: string, args: readonly string[]): string {
+  const r = run(cwd, args)
+  if (r.status !== 0) throw new Error(`git ${args.join(' ')} (cwd ${cwd}) rc=${r.status}: ${r.stderr}`)
+  return r.stdout
+}
+const portalBlob = (rev: string, path: string): string => git(PORTAL, ['cat-file', 'blob', `${rev}:${path}`])
+const wsBlob = (path: string): string => git(WS, ['cat-file', 'blob', `HEAD:${path}`])
+
+// --- the gate, materialized from a revision's committed blobs ------------------------------------
+type GateFlags = { requireAdmin?: boolean; requireInternal?: boolean; requireDev?: boolean; allowRenderClaim?: boolean }
+type GateProps = GateFlags & { children: ReactNode }
+interface Gate {
+  rev: string
+  ProtectedRoute: (props: GateProps) => ReactElement
+  isPathAllowedForFirm: (firmId: string | null | undefined, path: string) => boolean
+  FIRM_ALLOWED_PATHS: Record<string, ReadonlySet<string>>
+  rewrites: string[]
+}
+
+/** The checkout modules the materialized ProtectedRoute imports; each must equal HEAD. */
+const CARRIERS = ['src/hooks/useAuth.ts', 'src/components/LoadingSpinner.tsx', 'src/contexts/AuthContext.context.ts']
+
+async function materialize(rev: string): Promise<Gate> {
+  const dir = new URL(`${rev}/`, MAT_URL)
+  const comps = new URL('components/', dir)
+  const lib = new URL('lib/', dir)
+  mkdirSync(fileURLToPath(comps), { recursive: true })
+  mkdirSync(fileURLToPath(lib), { recursive: true })
+  // From .materialized/<run>/<rev>/components/ to src/ is eight levels; checked, never assumed.
+  const up = '../'.repeat(8)
+  if (new URL(up, comps).href !== SRC_URL.href) {
+    throw new Error(`materialized depth is wrong: ${new URL(up, comps).href} is not ${SRC_URL.href}`)
+  }
+  let pr = portalBlob(rev, 'src/components/ProtectedRoute.tsx')
+  const rewrites: string[] = []
+  const swaps: readonly (readonly [string, string])[] = [
+    [`from '../hooks/useAuth'`, `from '${up}hooks/useAuth'`],
+    [`from './LoadingSpinner'`, `from '${up}components/LoadingSpinner'`],
+  ]
+  for (const [from, to] of swaps) {
+    const n = pr.split(from).length - 1
+    if (n !== 1) throw new Error(`ProtectedRoute.tsx@${rev}: ${from} occurs ${n} times, expected exactly 1`)
+    pr = pr.replace(from, to)
+    rewrites.push(`${from}  ->  ${to}`)
+  }
+  const fa = portalBlob(rev, 'src/lib/firmAccess.ts')
+  if (/^\s*import\s/m.test(fa)) throw new Error(`firmAccess.ts@${rev} has an import; the materialization would have to re-point it`)
+  writeFileSync(fileURLToPath(new URL('ProtectedRoute.tsx', comps)), pr, 'utf8')
+  writeFileSync(fileURLToPath(new URL('firmAccess.ts', lib)), fa, 'utf8')
+  const prMod = (await import(new URL('ProtectedRoute.tsx', comps).href)) as { ProtectedRoute: Gate['ProtectedRoute'] }
+  const faMod = (await import(new URL('firmAccess.ts', lib).href)) as {
+    isPathAllowedForFirm: Gate['isPathAllowedForFirm']
+    FIRM_ALLOWED_PATHS: Gate['FIRM_ALLOWED_PATHS']
+  }
+  return {
+    rev,
+    ProtectedRoute: prMod.ProtectedRoute,
+    isPathAllowedForFirm: faMod.isPathAllowedForFirm,
+    FIRM_ALLOWED_PATHS: faMod.FIRM_ALLOWED_PATHS,
+    rewrites,
+  }
+}
+
+// --- identities and the render -----------------------------------------------------------------
+interface Identity {
+  label: string
+  role: 'admin' | 'user'
+  firmId: string
+}
+function claimsOf(id: Identity) {
+  return { firmId: id.firmId, userType: null, advisorId: null, firmRole: null, advisorRole: null }
+}
+function userOf(id: Identity) {
+  return { email: `fe49-probe@${id.firmId}.invalid`, name: 'FE-s-49 probe', role: id.role, mustChangePassword: false }
+}
+function authValue(id: Identity): AuthContextType {
+  const value = { user: userOf(id), claims: claimsOf(id), accessToken: null, isLoading: false, isAuthenticated: true }
+  return value as unknown as AuthContextType
+}
+
+type Outcome = { kind: 'CHILDREN' | 'REDIRECT' | 'NOTHING'; to: string }
+function render(gate: Gate, path: string, flags: GateFlags, id: Identity): Outcome {
+  const seen: { el: unknown } = { el: undefined }
+  function Probe(): ReactElement {
+    const el = gate.ProtectedRoute({ ...flags, children: createElement('span', null, CHILD_MARK) })
+    seen.el = el
+    return el
+  }
+  const markup = renderToStaticMarkup(
+    createElement(
+      AuthContext.Provider,
+      { value: authValue(id) },
+      createElement(
+        MemoryRouter,
+        { initialEntries: [path] },
+        createElement(Routes, null, createElement(Route, { path, element: createElement(Probe) })),
+      ),
+    ),
+  )
+  const el = seen.el as { type?: unknown; props?: { to?: unknown } } | undefined
+  if (el !== undefined && el.type === Navigate) return { kind: 'REDIRECT', to: String(el.props?.to) }
+  if (markup.includes(CHILD_MARK)) return { kind: 'CHILDREN', to: '' }
+  return { kind: 'NOTHING', to: '' }
+}
+const show = (o: Outcome): string => (o.kind === 'REDIRECT' ? `REDIRECT -> ${o.to}` : o.kind)
+const flagText = (f: GateFlags | null): string =>
+  f === null ? '(no ProtectedRoute)' : `<ProtectedRoute${GATE_PROP_NAMES.filter((k) => f[k] === true).map((k) => ` ${k}`).join('')}>`
+
+// --- the TypeScript parser over a committed blob ------------------------------------------------
+const parse = (text: string, name: string): ts.SourceFile =>
+  ts.createSourceFile(name, text, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TSX)
+const lineOf = (sf: ts.SourceFile, n: ts.Node): number => sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1
+
+interface RouteEl {
+  path: string
+  line: number
+  gate: GateFlags | null
+}
+function isTag(n: ts.Node, sf: ts.SourceFile, tag: string): n is ts.JsxOpeningElement | ts.JsxSelfClosingElement {
+  return (ts.isJsxOpeningElement(n) || ts.isJsxSelfClosingElement(n)) && n.tagName.getText(sf) === tag
+}
+function gateFlagsIn(node: ts.Node, sf: ts.SourceFile): GateFlags | null {
+  const hit: { flags?: GateFlags } = {}
+  const visit = (n: ts.Node): void => {
+    if (hit.flags !== undefined) return
+    if (isTag(n, sf, 'ProtectedRoute')) {
+      const flags: GateFlags = {}
+      for (const a of n.attributes.properties) {
+        if (!ts.isJsxAttribute(a)) throw new Error(`${sf.fileName}:${lineOf(sf, n)} spreads props into ProtectedRoute; not readable`)
+        const name = a.name.getText(sf)
+        if (!(GATE_PROP_NAMES as readonly string[]).includes(name)) throw new Error(`unknown ProtectedRoute prop ${name}`)
+        let value: boolean
+        if (a.initializer === undefined) value = true
+        else if (ts.isJsxExpression(a.initializer) && a.initializer.expression?.kind === ts.SyntaxKind.TrueKeyword) value = true
+        else if (ts.isJsxExpression(a.initializer) && a.initializer.expression?.kind === ts.SyntaxKind.FalseKeyword) value = false
+        else throw new Error(`${sf.fileName}:${lineOf(sf, n)} ProtectedRoute ${name} is not a boolean literal`)
+        flags[name as keyof GateFlags] = value
+      }
+      hit.flags = flags
+      return
+    }
+    ts.forEachChild(n, visit)
+  }
+  visit(node)
+  return hit.flags ?? null
+}
+function routesOf(src: string): RouteEl[] {
+  const sf = parse(src, 'App.tsx')
+  const out: RouteEl[] = []
+  const visit = (n: ts.Node): void => {
+    if (isTag(n, sf, 'Route')) {
+      let path = '(no path)'
+      let element: ts.Node | undefined
+      for (const a of n.attributes.properties) {
+        if (!ts.isJsxAttribute(a)) continue
+        const name = a.name.getText(sf)
+        if (name === 'path' && a.initializer !== undefined && ts.isStringLiteral(a.initializer)) path = a.initializer.text
+        if (name === 'element' && a.initializer !== undefined && ts.isJsxExpression(a.initializer)) element = a.initializer.expression
+      }
+      out.push({ path, line: lineOf(sf, n), gate: element === undefined ? null : gateFlagsIn(element, sf) })
+    }
+    ts.forEachChild(n, visit)
+  }
+  visit(sf)
+  return out
+}
+function varInit(sf: ts.SourceFile, name: string): ts.Expression {
+  const hits: ts.Expression[] = []
+  const visit = (n: ts.Node): void => {
+    if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && n.name.text === name && n.initializer !== undefined) hits.push(n.initializer)
+    ts.forEachChild(n, visit)
+  }
+  visit(sf)
+  if (hits.length !== 1) throw new Error(`${sf.fileName}: ${hits.length} declarations of ${name}, expected 1`)
+  return hits[0]
+}
+/** Evaluate an expression's committed source text UNCHANGED, types stripped, free variables bound. */
+function lift(text: string, params: readonly string[], args: readonly unknown[]): unknown {
+  const js = ts
+    .transpileModule(`const __lifted = (${text});`, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } })
+    .outputText.replace(/^export \{\};?\s*$/m, '')
+  const fn = new Function(...params, `${js}\nreturn __lifted;`) as (...a: unknown[]) => unknown
+  return fn(...args)
+}
+
+interface NavItemLike {
+  path: string
+  label: string
+  requiresDev?: boolean
+  requiresAdmin?: boolean
+  requiresTier?: string
+}
+interface NavSectionLike {
+  id: string
+  requiresDev?: boolean
+  items: NavItemLike[]
+}
+interface Nav {
+  sections: NavSectionLike[]
+  filterText: string
+  filterLine: number
+}
+function navOf(src: string): Nav {
+  const sf = parse(src, 'App.tsx')
+  const icons: string[] = []
+  for (const st of sf.statements) {
+    if (ts.isImportDeclaration(st) && ts.isStringLiteral(st.moduleSpecifier) && st.moduleSpecifier.text === 'lucide-react') {
+      const nb = st.importClause?.namedBindings
+      if (nb !== undefined && ts.isNamedImports(nb)) for (const el of nb.elements) if (!el.isTypeOnly) icons.push(el.name.text)
+    }
+  }
+  const sections = lift(varInit(sf, 'NAV_SECTIONS').getText(sf), icons, icons.map((n) => `icon:${n}`)) as NavSectionLike[]
+  const filters: ts.Node[] = []
+  const visit = (n: ts.Node): void => {
+    if (
+      ts.isCallExpression(n) &&
+      ts.isPropertyAccessExpression(n.expression) &&
+      n.expression.name.text === 'filter' &&
+      n.expression.expression.getText(sf) === 'section.items'
+    ) {
+      filters.push(n.arguments[0])
+    }
+    ts.forEachChild(n, visit)
+  }
+  visit(sf)
+  if (filters.length !== 1) throw new Error(`App.tsx: ${filters.length} section.items.filter(...) calls, expected 1`)
+  return { sections, filterText: filters[0].getText(sf), filterLine: lineOf(sf, filters[0]) }
+}
+function hasAccessOf(src: string): { text: string; line: number } {
+  const sf = parse(src, 'AuthContext.tsx')
+  const init = varInit(sf, 'hasAccess')
+  if (!ts.isCallExpression(init) || init.expression.getText(sf) !== 'useCallback') throw new Error('hasAccess is not a useCallback')
+  return { text: init.arguments[0].getText(sf), line: lineOf(sf, init.arguments[0]) }
+}
+function navShows(nav: Nav, hasAccessText: string, gate: Gate, id: Identity): { shown: boolean; items: number } {
+  const claims = claimsOf(id)
+  const user = userOf(id)
+  const hasAccess = lift(hasAccessText, ['state'], [{ claims, user }]) as (tier: string) => boolean
+  const filter = lift(nav.filterText, ['isPathAllowedForFirm', 'claims', 'user', 'hasAccess'], [gate.isPathAllowedForFirm, claims, user, hasAccess]) as (
+    item: NavItemLike,
+  ) => boolean
+  let items = 0
+  let shown = false
+  for (const section of nav.sections) {
+    const ir = section.items.filter((i) => i.path.startsWith(ROUTE))
+    if (ir.length === 0) continue
+    items += ir.length
+    // The section-level skip (App.tsx: `section.requiresDev && claims?.userType !== 'Dev'`) is a
+    // statement, not a function; it is honoured here only as its data, and printed.
+    if (section.requiresDev === true && claims.userType !== 'Dev') continue
+    if (section.items.filter(filter).some((i) => i.path.startsWith(ROUTE))) shown = true
+  }
+  return { shown, items }
+}
+
+// --- state built once ----------------------------------------------------------------------------
+const S: {
+  head?: Gate
+  before?: Gate
+  headApp?: string
+  beforeApp?: string
+  headRoutes?: RouteEl[]
+  beforeRoutes?: RouteEl[]
+  partners?: string[]
+} = {}
+const need = <T,>(v: T | undefined, what: string): T => {
+  if (v === undefined) throw new Error(`setup did not produce ${what}`)
+  return v
+}
+
+beforeAll(async () => {
+  const dirty = git(PORTAL, ['status', '--porcelain', '--', ...CARRIERS]).trim()
+  if (dirty.length > 0) throw new Error(`a carrier module differs from HEAD in the checkout; refusing:\n${dirty}`)
+  git(PORTAL, ['cat-file', '-e', `${BEFORE}^{commit}`])
+  git(PORTAL, ['cat-file', '-e', `${RENDERING}^{commit}`])
+  S.head = await materialize('HEAD')
+  S.before = await materialize(BEFORE)
+  S.headApp = portalBlob('HEAD', 'src/App.tsx')
+  S.beforeApp = portalBlob(BEFORE, 'src/App.tsx')
+  S.headRoutes = routesOf(S.headApp)
+  S.beforeRoutes = routesOf(S.beforeApp)
+  S.partners = Object.keys(S.before.FIRM_ALLOWED_PATHS).filter((f) => S.before?.FIRM_ALLOWED_PATHS[f]?.has(ROUTE) === true)
+  console.log(`MATERIALIZED: HEAD and ${BEFORE} ProtectedRoute.tsx + firmAccess.ts from committed blobs; re-pointed specifiers (each counted once):`)
+  for (const r of S.head.rewrites) console.log(`  ${r}`)
+}, 120000)
+
+afterAll(() => {
+  rmSync(fileURLToPath(MAT_URL), { recursive: true, force: true })
+  // The parent is removed only when this run left it empty; a concurrent run's folder is never touched.
+  const r = spawnSync('git', ['status', '--porcelain', '--untracked-files=all', '--', fileURLToPath(MAT_PARENT)], {
+    encoding: 'utf8',
+    cwd: PORTAL,
+    timeout: 60000,
+  })
+  if (r.status === 0 && (r.stdout ?? '').trim().length === 0) rmSync(fileURLToPath(MAT_PARENT), { recursive: true, force: true })
+})
+
+const irRoutes = (routes: RouteEl[]): RouteEl[] => routes.filter((r) => r.path.startsWith(ROUTE))
+const OPAL_ADMIN: Identity = { label: 'opal-capital admin', role: 'admin', firmId: OPAL }
+
+describe('FE-s-49 -- Investor Reporting is Opal-admin only', () => {
+  test('F49-AC2 -- an Opal internal admin reaches both routes', () => {
+    const gate = need(S.head, 'HEAD gate')
+    const routes = irRoutes(need(S.headRoutes, 'HEAD routes'))
+    let reached = 0
+    for (const r of routes) {
+      const o = render(gate, r.path, r.gate ?? {}, OPAL_ADMIN)
+      console.log(`  HEAD App.tsx:${r.line} ${r.path} ${flagText(r.gate)} as ${OPAL_ADMIN.label}: ${show(o)}`)
+      if (o.kind === 'CHILDREN') reached += 1
+    }
+    console.log(`AN OPAL INTERNAL ADMIN REACHES BOTH ROUTES: ${reached} of ${routes.length}`)
+    expect(routes.length).toBe(2)
+    expect(reached).toBe(routes.length)
+  })
+
+  test('F49-AC3 -- a partner-firm admin is refused on both routes', () => {
+    const gate = need(S.head, 'HEAD gate')
+    const partners = need(S.partners, 'partner firms')
+    const routes = irRoutes(need(S.headRoutes, 'HEAD routes'))
+    console.log(`FIRMS WHOSE ALLOWLIST LISTED ${ROUTE} AT DEV ${BEFORE} (firmAccess.ts blob): ${partners.length} -- ${partners.join(', ')}`)
+    let refused = 0
+    let total = 0
+    for (const firm of partners) {
+      for (const r of routes) {
+        const id: Identity = { label: `${firm} admin`, role: 'admin', firmId: firm }
+        const o = render(gate, r.path, r.gate ?? {}, id)
+        total += 1
+        if (o.kind === 'REDIRECT') refused += 1
+        console.log(`  HEAD App.tsx:${r.line} ${r.path} ${flagText(r.gate)} as ${id.label}: ${show(o)}`)
+      }
+    }
+    console.log(`A PARTNER-FIRM ADMIN IS REFUSED ON BOTH ROUTES: ${refused} of ${total}`)
+    expect(partners.length).toBe(3)
+    expect(total).toBe(partners.length * routes.length)
+    expect(refused).toBe(total)
+  })
+
+  test('F49-AC4 -- a non-admin is refused on both routes', () => {
+    const gate = need(S.head, 'HEAD gate')
+    const partners = need(S.partners, 'partner firms')
+    const routes = irRoutes(need(S.headRoutes, 'HEAD routes'))
+    const ids: Identity[] = [
+      { label: 'opal-capital user (role user)', role: 'user', firmId: OPAL },
+      ...partners.map((f): Identity => ({ label: `${f} user (role user)`, role: 'user', firmId: f })),
+    ]
+    let refused = 0
+    let total = 0
+    for (const id of ids) {
+      for (const r of routes) {
+        const o = render(gate, r.path, r.gate ?? {}, id)
+        total += 1
+        if (o.kind === 'REDIRECT') refused += 1
+        console.log(`  HEAD App.tsx:${r.line} ${r.path} ${flagText(r.gate)} as ${id.label}: ${show(o)}`)
+      }
+    }
+    console.log(`A NON-ADMIN IS REFUSED ON BOTH ROUTES: ${refused} of ${total} (${ids.length} identities x ${routes.length} routes)`)
+    expect(total).toBe(ids.length * routes.length)
+    expect(refused).toBe(total)
+  })
+
+  test('F49-AC5 -- the nav shows Investor Reporting only to the Opal internal admin', () => {
+    const gate = need(S.head, 'HEAD gate')
+    const before = need(S.before, 'BEFORE gate')
+    const partners = need(S.partners, 'partner firms')
+    const nav = navOf(need(S.headApp, 'HEAD App.tsx'))
+    const beforeNav = navOf(need(S.beforeApp, 'BEFORE App.tsx'))
+    const hasAccess = hasAccessOf(portalBlob('HEAD', 'src/contexts/AuthContext.tsx'))
+    console.log(`LIFTED FROM HEAD App.tsx:${nav.filterLine} (the nav filter, evaluated unchanged):\n${nav.filterText}`)
+    console.log(`LIFTED FROM HEAD AuthContext.tsx:${hasAccess.line} (hasAccess, evaluated unchanged):\n${hasAccess.text}`)
+    for (const s of nav.sections) {
+      for (const i of s.items.filter((x) => x.path.startsWith(ROUTE))) {
+        console.log(`  HEAD nav item in section '${s.id}' (section requiresDev=${String(s.requiresDev ?? false)}): ${JSON.stringify(i)}`)
+      }
+    }
+    const ids: Identity[] = [
+      OPAL_ADMIN,
+      ...partners.map((f): Identity => ({ label: `${f} admin`, role: 'admin', firmId: f })),
+      { label: 'opal-capital user (role user)', role: 'user', firmId: OPAL },
+      ...partners.map((f): Identity => ({ label: `${f} user (role user)`, role: 'user', firmId: f })),
+    ]
+    const shownTo: string[] = []
+    for (const id of ids) {
+      const r = navShows(nav, hasAccess.text, gate, id)
+      console.log(`  NAV (HEAD) for ${id.label}: ${r.shown ? 'SHOWN' : 'HIDDEN'} (${r.items} investor-reporting nav item(s))`)
+      if (r.shown) shownTo.push(id.label)
+    }
+    // CONTROL -- the same lifted filter over DEV 1f3ce9f0's nav item and allowlist must be able to say
+    // SHOWN to a partner firm, or the HIDDEN verdicts above prove nothing about the filter.
+    const controlShown = partners.filter((f) => navShows(beforeNav, hasAccess.text, before, { label: f, role: 'user', firmId: f }).shown)
+    console.log(`  CONTROL (DEV ${BEFORE} nav item + allowlist, same lifted filter): shown to ${controlShown.length} of ${partners.length} partner users (${controlShown.join(', ')})`)
+    const only = shownTo.length === 1 && shownTo[0] === OPAL_ADMIN.label
+    console.log(`THE NAV SHOWS INVESTOR REPORTING ONLY TO THE OPAL INTERNAL ADMIN: ${only ? 'yes' : 'no'} (shown to ${shownTo.length} of ${ids.length} identities)`)
+    expect(controlShown.length).toBeGreaterThan(0)
+    expect(only).toBe(true)
+  })
+
+  test('F49-AC6 -- BEFORE (DEV 1f3ce9f0) a partner-firm user reached the page', () => {
+    const before = need(S.before, 'BEFORE gate')
+    const partners = need(S.partners, 'partner firms')
+    const routes = irRoutes(need(S.beforeRoutes, 'BEFORE routes'))
+    const reached: string[] = []
+    let total = 0
+    for (const firm of partners) {
+      for (const role of ['user', 'admin'] as const) {
+        for (const r of routes) {
+          const id: Identity = { label: `${firm} ${role}`, role, firmId: firm }
+          const o = render(before, r.path, r.gate ?? {}, id)
+          total += 1
+          console.log(`  ${BEFORE} App.tsx:${r.line} ${r.path} ${flagText(r.gate)} as ${id.label}: ${show(o)}`)
+          if (o.kind === 'CHILDREN') reached.push(`${id.label} @ ${r.path}`)
+        }
+      }
+    }
+    console.log(`BEFORE (DEV ${BEFORE}): A PARTNER-FIRM USER REACHED THE PAGE: ${reached.length > 0 ? 'yes' : 'no'} (${reached.length} of ${total} renders: ${reached.join('; ')})`)
+    expect(reached.length).toBeGreaterThan(0)
+  })
+
+  test('F49-AC7 -- every Investor Reporting route and nav entry carries the Opal-admin predicate', () => {
+    const app = need(S.headApp, 'HEAD App.tsx')
+    const routes = need(S.headRoutes, 'HEAD routes')
+    const nav = navOf(app)
+    const allItems = nav.sections.flatMap((s) => s.items)
+    const irR = irRoutes(routes)
+    const irN = allItems.filter((i) => i.path.startsWith(ROUTE))
+    console.log(`HEAD App.tsx: ${routes.length} <Route> elements, ${allItems.length} nav entries; minus those not under ${ROUTE}: ${irR.length} route(s) + ${irN.length} nav entr(ies)`)
+    let carry = 0
+    for (const r of irR) {
+      const ok = r.gate !== null && r.gate.requireAdmin === true && r.gate.requireInternal === true
+      if (ok) carry += 1
+      console.log(`  ROUTE App.tsx:${r.line} ${r.path} ${flagText(r.gate)}: ${ok ? 'CARRIES' : 'MISSING'} requireAdmin + requireInternal`)
+    }
+    for (const i of irN) {
+      const ok = i.requiresAdmin === true && i.requiresTier === 'internal'
+      if (ok) carry += 1
+      console.log(`  NAV ${i.path} requiresAdmin=${String(i.requiresAdmin)} requiresTier=${String(i.requiresTier)}: ${ok ? 'CARRIES' : 'MISSING'} the predicate`)
+    }
+    const wrapper = routes.find((r) => r.path === '/*')
+    if (wrapper !== undefined) console.log(`  ENCLOSING ROUTE App.tsx:${wrapper.line} /* ${flagText(wrapper.gate)} (wraps DashboardLayout, where /investor-reporting lives)`)
+    // Other entry points: every committed non-test source line under src/ quoting the page path, each
+    // CLASSIFIED -- an allowlist entry and a comment are printed as what they are, never as a link.
+    const grep = run(PORTAL, ['grep', '-n', '-I', '-e', "['\"`]/investor-reporting", 'HEAD', '--', 'src'])
+    if (grep.status !== 0 && grep.status !== 1) throw new Error(`git grep rc=${grep.status}: ${grep.stderr}`)
+    const hits = grep.stdout.split('\n').filter((l) => l.length > 0)
+    const outside = hits.filter((l) => !l.includes('/__tests__/') && !l.startsWith('HEAD:src/App.tsx:'))
+    let links = 0
+    console.log(`OTHER ENTRY POINTS: ${hits.length} committed src/ line(s) quote the path; ${hits.length - outside.length} are App.tsx or tests; ${outside.length} other, each classified:`)
+    for (const l of outside) {
+      const m = /^HEAD:(.+?):(\d+):(.*)$/.exec(l)
+      const file = m?.[1] ?? ''
+      const text = (m?.[3] ?? '').trim()
+      let kind: string
+      if (file === 'src/lib/firmAccess.ts') kind = 'ALLOWLIST ENTRY -- not a link; it grants nothing the route gate refuses to pass (see F49-AC9)'
+      else if (/^(\*|\/\/|\/\*)/.test(text)) kind = 'COMMENT -- not an entry point'
+      else {
+        links += 1
+        const target = l.includes(`${ROUTE}/print`) ? irR.find((r) => r.path === `${ROUTE}/print`) : irR.find((r) => r.path === ROUTE)
+        kind = `LINK/NAVIGATION -- lands on route ${target?.path ?? '(unmatched)'} (App.tsx:${target?.line ?? '?'}), gated by its ${flagText(target?.gate ?? null)}`
+      }
+      console.log(`  ${file}:${m?.[2] ?? '?'}: ${text.slice(0, 160)}\n    -> ${kind}`)
+    }
+    console.log(`  LINKS/NAVIGATIONS INTO THE PAGE OUTSIDE App.tsx: ${links} (each lands on a route element enumerated above)`)
+    const total = irR.length + irN.length
+    console.log(`EVERY INVESTOR REPORTING ROUTE AND NAV ENTRY CARRIES THE OPAL-ADMIN PREDICATE: ${carry} of ${total}`)
+    expect(total).toBe(3)
+    expect(carry).toBe(total)
+  })
+
+  test("F49-AC8 -- the three gate hunks are byte-identical to 2.0.0_SA_COO~D's c29a8b86", () => {
+    const headLines = need(S.headApp, 'HEAD App.tsx').split('\n')
+    const diff = git(PORTAL, ['show', '--format=', RENDERING, '--', 'src/App.tsx']).split('\n')
+    const hunks: { plus: string[]; minus: string[] }[] = []
+    for (const l of diff) {
+      if (l.startsWith('@@')) hunks.push({ plus: [], minus: [] })
+      else if (hunks.length > 0 && l.startsWith('+') && !l.startsWith('+++')) hunks[hunks.length - 1].plus.push(l.slice(1))
+      else if (hunks.length > 0 && l.startsWith('-') && !l.startsWith('---')) hunks[hunks.length - 1].minus.push(l.slice(1))
+    }
+    const gateHunks = hunks.filter((h) => h.plus.some((p) => p.includes(ROUTE)))
+    const unrelated = hunks.filter((h) => !gateHunks.includes(h))
+    console.log(`${RENDERING} src/App.tsx: ${hunks.length} hunks; ${gateHunks.length} gate hunk(s) (a + line names ${ROUTE}), ${unrelated.length} unrelated`)
+    // FE-s-88 (round 14, PRD v0.10 F9 CONTRACTS): the print-route gate hunk is EXPECTED to differ from
+    // RENDERING now, by exactly one ADDITIVE change -- `allowRenderClaim` on the print route's own
+    // <ProtectedRoute> element ONLY (App.tsx:576). This is not drift: it is the sanctioned effect of
+    // PRD v0.10's F9 clause, admitted and cut in round 14. Byte-identity is still REQUIRED and
+    // MEASURED for every hunk that is not the print-route hunk -- nothing else is exempted, and the
+    // admin-only clauses (`requireAdmin`, `requireInternal`) must still be present, unchanged, on the
+    // print route -- so an accidental REMOVAL of either still fails this test exactly as before.
+    const SANCTIONED_ADDITIONS: Record<string, readonly string[]> = { [`${ROUTE}/print`]: ['allowRenderClaim'] }
+    let identical = 0
+    gateHunks.forEach((h, k) => {
+      let at = -1
+      for (let i = 0; i + h.plus.length <= headLines.length && at < 0; i += 1) {
+        if (h.plus.every((p, j) => headLines[i + j] === p)) at = i
+      }
+      const removedGone = h.minus.every((m) => !headLines.includes(m))
+      const sanctionedFor = Object.keys(SANCTIONED_ADDITIONS).find((route) => h.plus.some((p) => p.includes(route)))
+      let sanctionedMatch = false
+      let sanctionedHeadLine: string | null = null
+      if (at < 0 && sanctionedFor !== undefined && h.plus.length === 1) {
+        const additions = SANCTIONED_ADDITIONS[sanctionedFor]
+        const oldLine = h.plus[0]
+        const requiredSubstrings = oldLine
+          .split(/(<ProtectedRoute|\/>|>)/)
+          .flatMap((seg) => seg.trim().split(/\s+/))
+          .filter((tok) => tok.length > 0 && tok !== '<ProtectedRoute')
+        sanctionedHeadLine = headLines.find((hl) => hl.includes(sanctionedFor) && hl.includes('<ProtectedRoute')) ?? null
+        sanctionedMatch =
+          sanctionedHeadLine !== null &&
+          requiredSubstrings.every((tok) => sanctionedHeadLine!.includes(tok)) &&
+          additions.every((add) => sanctionedHeadLine!.includes(add))
+      }
+      if ((at >= 0 && removedGone) || sanctionedMatch) identical += 1
+      if (sanctionedFor !== undefined && at < 0) {
+        console.log(
+          `  GATE HUNK ${k + 1}: SANCTIONED REWRITE for ${sanctionedFor} (PRD v0.10 F9) -- exact match: NO; ` +
+            `every pre-existing token present: ${sanctionedMatch ? 'yes' : 'NO'}; new token(s) [${SANCTIONED_ADDITIONS[sanctionedFor].join(', ')}] present: ${sanctionedMatch ? 'yes' : 'NO'}`,
+        )
+        console.log(`    ${RENDERING} +|${h.plus[0]}`)
+        console.log(`    HEAD    |${sanctionedHeadLine ?? '(no matching print-route <ProtectedRoute> line found)'}`)
+        return
+      }
+      console.log(`  GATE HUNK ${k + 1}: ${at >= 0 ? `found at HEAD App.tsx:${at + 1}` : 'NOT FOUND in HEAD'}; its removed line(s) absent from HEAD: ${removedGone ? 'yes' : 'NO'}`)
+      h.plus.forEach((p, j) => {
+        console.log(`    ${RENDERING} +|${p}`)
+        console.log(`    HEAD:${at >= 0 ? at + j + 1 : '-'}${' '.repeat(Math.max(0, 7 - String(at >= 0 ? at + j + 1 : '-').length))}|${at >= 0 ? headLines[at + j] : '(absent)'}`)
+      })
+    })
+    const carried = unrelated.filter((h) => h.plus.length > 0 && h.plus.every((p) => headLines.includes(p)))
+    console.log(`  UNRELATED HUNKS CARRIED INTO HEAD: ${carried.length} of ${unrelated.length} (expected 0: they are not this order's)`)
+    for (const h of unrelated) console.log(`    not ours: +|${h.plus.join(' / ')}`)
+    console.log(`THE THREE GATE HUNKS ARE BYTE-IDENTICAL TO 2.0.0_SA_COO~D'S ${RENDERING}: ${identical} of ${gateHunks.length}`)
+    expect(gateHunks.length).toBe(3)
+    expect(identical).toBe(3)
+    // FE-s-51 (round-8 analysis item 9): on a checkout descended from RENDERING (c29a8b86, e.g. the
+    // d13-visual-elevation branch), that commit's merge legitimately carries 2 unrelated hunks into
+    // App.tsx (visual-elevation changes near the same lines) -- EXPECTED there. On a checkout NOT
+    // descended from it, 0 unrelated hunks remain the correct expectation. Ancestry is measured, never
+    // assumed, via the same spawnSync git helper this file already uses for its other git reads.
+    const ancestryCheck = run(PORTAL, ['merge-base', '--is-ancestor', RENDERING, 'HEAD'])
+    if (ancestryCheck.status !== 0 && ancestryCheck.status !== 1) {
+      throw new Error(`git merge-base --is-ancestor ${RENDERING} HEAD rc=${ancestryCheck.status}: ${ancestryCheck.stderr}`)
+    }
+    const c29a8b86IsAncestor = ancestryCheck.status === 0
+    const expectedCarried = c29a8b86IsAncestor ? 2 : 0
+    console.log(`${RENDERING} ${c29a8b86IsAncestor ? 'IS' : 'IS NOT'} an ancestor of HEAD; expecting ${expectedCarried} unrelated hunk(s)`)
+    expect(carried.length).toBe(expectedCarried)
+  })
+
+  // Amendment 1 (1.0.0_SA_CTO's ruling 96961): the removal LANDS and fe-s-14's allowlist test is
+  // re-pointed to assert the refusal, so this case asserts 0 remaining, beside the 3 that listed it.
+  test('F49-AC9 -- partner allowlist entries granting /investor-reporting, before and after', () => {
+    const head = need(S.head, 'HEAD gate')
+    const before = need(S.before, 'BEFORE gate')
+    const partners = need(S.partners, 'partner firms')
+    const remain: string[] = []
+    for (const firm of partners) {
+      const b = before.FIRM_ALLOWED_PATHS[firm]?.has(ROUTE) === true
+      const a = head.FIRM_ALLOWED_PATHS[firm]?.has(ROUTE) === true
+      if (a) remain.push(firm)
+      console.log(`  ${firm}: DEV ${BEFORE} ${b ? 'LISTS' : 'does not list'} ${ROUTE}; HEAD ${a ? 'LISTS' : 'does not list'} it`)
+    }
+    const headFirms = Object.keys(head.FIRM_ALLOWED_PATHS)
+    const headGrant = headFirms.filter((f) => head.FIRM_ALLOWED_PATHS[f]?.has(ROUTE) === true)
+    console.log(`  HEAD, every firm in FIRM_ALLOWED_PATHS: ${headGrant.length} of ${headFirms.length} list ${ROUTE} (${headFirms.join(', ')})`)
+    console.log(`PARTNER ALLOWLIST ENTRIES GRANTING ${ROUTE}: ${remain.length} of ${partners.length} REMAIN${remain.length > 0 ? ` (${remain.join(', ')})` : ''}`)
+    expect(partners.length).toBe(3)
+    expect(remain.length).toBe(0)
+  })
+
+  test('F49-AC10 -- every endpoint Investor Reporting calls has a printed admin-only answer (READ-ONLY census)', () => {
+    // 1. THE ENDPOINTS, from the committed client's own route table.
+    const clientSrc = portalBlob('HEAD', 'src/api/endpoints/investor-reporting.ts')
+    const sf = parse(clientSrc, 'investor-reporting.ts')
+    const baseInit = varInit(sf, 'IR_ROUTE_BASE')
+    if (!ts.isStringLiteral(baseInit)) throw new Error('IR_ROUTE_BASE is not a string literal')
+    const table = varInit(sf, 'IR_ROUTE_TABLE')
+    if (!ts.isArrayLiteralExpression(table)) throw new Error('IR_ROUTE_TABLE is not an array literal')
+    const endpoints: { op: string; key: string; line: number }[] = []
+    for (const el of table.elements) {
+      if (!ts.isObjectLiteralExpression(el)) throw new Error('IR_ROUTE_TABLE element is not an object literal')
+      const f: Record<string, string> = {}
+      for (const p of el.properties) {
+        if (!ts.isPropertyAssignment(p)) continue
+        const k = p.name.getText(sf)
+        const v = p.initializer
+        if (ts.isStringLiteral(v) || ts.isNoSubstitutionTemplateLiteral(v)) f[k] = v.text
+        else if (ts.isTemplateExpression(v)) {
+          let s = v.head.text
+          for (const span of v.templateSpans) {
+            if (span.expression.getText(sf) !== 'IR_ROUTE_BASE') throw new Error(`unexpected template expression ${span.expression.getText(sf)}`)
+            s += baseInit.text + span.literal.text
+          }
+          f[k] = s
+        }
+      }
+      endpoints.push({ op: f.operation, key: `${f.method} ${f.pathTemplate}`, line: lineOf(sf, el) })
+    }
+    console.log(`ENDPOINTS (committed src/api/endpoints/investor-reporting.ts IR_ROUTE_TABLE, the LiveClient's only table): ${endpoints.length}`)
+
+    // 2. THE BACKEND, from the workspace repository's committed blobs.
+    const top = git(WS, ['rev-parse', '--show-toplevel']).trim().replace(/\\/g, '/').replace(/\/$/, '').toLowerCase()
+    const wsNorm = WS.replace(/\\/g, '/').replace(/\/$/, '').toLowerCase()
+    if (top !== wsNorm) throw new Error(`the portal's parent ${wsNorm} is not a workspace toplevel (${top})`)
+    const ROUTES_JSON = 'docs/contracts/investor-reporting/v1/routes.json'
+    const SERVED = 'infra/aws/lambda/investor-reporting/_authz/served.py'
+    const ENFORCE = 'infra/aws/lambda/investor-reporting/_authz/enforce.py'
+    const RESOLVE = 'infra/aws/lambda/investor-reporting/_scope/resolve.py'
+    const EDGE = ['infra/aws/lambda-edge/auth-validator-edge/index.mjs', 'infra/aws/lambda-edge/auth-validator-edge/tier_policy.mjs', 'infra/aws/users/lambda/portal-authorizer/index.mjs']
+    const routesText = wsBlob(ROUTES_JSON)
+    const routesDoc = JSON.parse(routesText) as { routes: { route_key: string; handler: string }[] }
+    const routesLines = routesText.split('\n')
+    const find = (lines: string[], re: RegExp, from = 0): number => {
+      for (let i = from; i < lines.length; i += 1) if (re.test(lines[i])) return i + 1
+      return 0
+    }
+    const served = wsBlob(SERVED).split('\n')
+    const enforce = wsBlob(ENFORCE).split('\n')
+    const resolve = wsBlob(RESOLVE).split('\n')
+    const servedRefuse = find(served, /^\s+if not verified:\s*$/)
+    const servedRefuseOk = servedRefuse > 0 && /NOT_AUTHORIZED/.test(served[servedRefuse] ?? '')
+    const servedRoleLines = served.filter((l) => /x-user-role|["']admin["']|opal-capital/.test(l)).length
+    const enforceUnknown = find(enforce, /if scope\["principal_class"\] == "UNKNOWN":/)
+    const opsLine = find(resolve, /^\s+if \(role == "admin" or advisor_role == "admin"\) and firm:\s*$/)
+    const opsOk = opsLine > 0 && /return "FIRM_OPERATIONS"/.test(resolve[opsLine] ?? '')
+    const advLine = find(resolve, /^\s+if advisor_id:\s*$/)
+    const advOk = advLine > 0 && /return "FIRM_ADVISOR"/.test(resolve[advLine] ?? '')
+    const popLine = find(resolve, /^\s+if principal_class in \("FIRM_OPERATIONS", "OPAL_GLOBAL"\):\s*$/)
+    const opsNamesOpal = opsLine > 0 && /opal/i.test(resolve[opsLine - 1])
+    const edgeHits = EDGE.map((p) => ({ p, n: wsBlob(p).split('\n').filter((l) => l.includes('investor-reporting')).length }))
+    console.log('SHARED BOUNDARY (every entry below runs it):')
+    console.log(`  ${SERVED}:${servedRefuse} -- the ONLY principal refusal before the guard is an absent verified firm (NOT_AUTHORIZED): ${servedRefuseOk ? 'found' : 'NOT FOUND'}; lines naming x-user-role / 'admin' / opal-capital: ${servedRoleLines}`)
+    console.log(`  ${ENFORCE}:${enforceUnknown} -- resolve_now refuses principal_class UNKNOWN (NO_PRINCIPAL): ${enforceUnknown > 0 ? 'found' : 'NOT FOUND'}`)
+    console.log(`  ${RESOLVE}:${opsLine} -- a role=admin caller with ANY verified firm is FIRM_OPERATIONS: ${opsOk ? 'found' : 'NOT FOUND'}; the condition names opal: ${opsNamesOpal ? 'yes' : 'no'}`)
+    console.log(`  ${RESOLVE}:${advLine} -- an advisorId caller (not admin) is FIRM_ADVISOR: ${advOk ? 'found' : 'NOT FOUND'}`)
+    console.log(`  ${RESOLVE}:${popLine} -- FIRM_OPERATIONS is served its verified firm's population: ${popLine > 0 ? 'found' : 'NOT FOUND'}`)
+    for (const e of edgeHits) console.log(`  EDGE ${e.p}: ${e.n} line(s) name investor-reporting (no path rule of its own when 0)`)
+
+    const searchedBase = [ROUTES_JSON, SERVED, ENFORCE, RESOLVE, ...EDGE]
+    const answers: Record<string, number> = { yes: 0, no: 0, UNKNOWN: 0 }
+    for (const ep of endpoints) {
+      const route = routesDoc.routes.find((r) => r.route_key === ep.key)
+      const rjLine = find(routesLines, new RegExp(`"route_key": "${ep.key.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}"`))
+      const handler = route?.handler ?? ''
+      let entry = ''
+      let entryLine = 0
+      let wired = false
+      if (handler) {
+        const g = run(WS, ['grep', '-n', '-F', `function_name="${handler}"`, 'HEAD', '--', 'infra/aws/lambda/investor-reporting'])
+        const hits = g.stdout.split('\n').filter((l) => /\/entry\.py:\d+:/.test(l) && !l.includes('/tests/'))
+        if (hits.length === 1) {
+          const m = /^HEAD:(.+?):(\d+):/.exec(hits[0])
+          if (m !== null) {
+            entry = m[1]
+            entryLine = Number(m[2])
+            const body = wsBlob(entry)
+            wired = /^import served as _entry\b/m.test(body) && /^lambda_handler = _entry\.lambda_entry\(ENTRY\)\s*$/m.test(body)
+          }
+        }
+      }
+      const chain = route !== undefined && entry !== '' && wired && servedRefuseOk && enforceUnknown > 0 && opsOk && advOk && popLine > 0
+      let answer: 'yes' | 'no' | 'UNKNOWN' = 'UNKNOWN'
+      let rests = `files searched: ${[...searchedBase, entry || 'infra/aws/lambda/investor-reporting/**/entry.py'].join(', ')}`
+      if (chain && !opsNamesOpal) {
+        answer = 'no'
+        rests = `${entry}:${entryLine} (served.Entry) -> ${RESOLVE}:${opsLine} (partner-firm admin = FIRM_OPERATIONS) + ${RESOLVE}:${advLine} (partner advisor = FIRM_ADVISOR) -> ${RESOLVE}:${popLine} (served its firm) ; refusals only at ${SERVED}:${servedRefuse} and ${ENFORCE}:${enforceUnknown}`
+      } else if (chain && opsNamesOpal && !advOk) {
+        answer = 'yes'
+        rests = `${RESOLVE}:${opsLine}`
+      }
+      answers[answer] += 1
+      console.log(`  ${ep.key} [${ep.op}, investor-reporting.ts:${ep.line}] -> ${ROUTES_JSON}:${rjLine} handler ${handler || '(none)'} -> admin-only: ${answer} -- ${rests}`)
+    }
+    const answered = answers.yes + answers.no + answers.UNKNOWN
+    console.log(`ADMIN-ONLY ANSWERS: yes ${answers.yes}, no ${answers.no}, UNKNOWN ${answers.UNKNOWN} of ${endpoints.length}${answers.no === endpoints.length ? ' -- THE PORTAL GATE IS THE ONLY ADMIN WALL; the backend is a FIRM wall' : ''}`)
+    console.log(`EVERY ENDPOINT INVESTOR REPORTING CALLS HAS A PRINTED ADMIN-ONLY ANSWER: ${answered} of ${endpoints.length}`)
+    expect(endpoints.length).toBeGreaterThan(0)
+    expect(answered).toBe(endpoints.length)
+    // The timeout below is 3 times the highest cost in the committed recorded-costs.json beside this
+    // file (FE-s-46's rule; row S67 found this test over bun's 5000 ms default). F49-AC13 reads it.
+  }, 20109)
+
+  // F49-AC13 reads COMMITTED BLOBS ONLY: this file at HEAD (the third argument of F49-AC10's test call)
+  // and HEAD:recorded-costs.json. It times nothing, loads nothing and records nothing (W1-S74).
+  test("F49-AC13 -- the census test's timeout is 3 times its highest recorded cost", () => {
+    const SELF = 'src/pages/InvestorReporting/__tests__/fe-s-49/admin-gate.test.ts'
+    const LEDGER = 'src/pages/InvestorReporting/__tests__/fe-s-49/recorded-costs.json'
+    const FACTOR = 3
+    const CAP_MS = 60000
+    const sf = parse(portalBlob('HEAD', SELF), 'admin-gate.test.ts')
+    const calls: { name: string; line: number; third: ts.Expression | undefined }[] = []
+    const visit = (n: ts.Node): void => {
+      if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === 'test' && n.arguments.length >= 2) {
+        const a0 = n.arguments[0]
+        if (ts.isStringLiteralLike(a0) && a0.text.startsWith('F49-AC10 ')) calls.push({ name: a0.text, line: lineOf(sf, n), third: n.arguments[2] })
+      }
+      ts.forEachChild(n, visit)
+    }
+    visit(sf)
+    if (calls.length !== 1) throw new Error(`HEAD ${SELF}: ${calls.length} test calls named F49-AC10, expected 1`)
+    const call = calls[0]
+    const timeout = call.third !== undefined && ts.isNumericLiteral(call.third) ? Number(call.third.text) : null
+    console.log(`HEAD ${SELF}:${call.line} "${call.name}" third argument: ${call.third === undefined ? 'NONE (bun default 5000)' : call.third.getText(sf)}`)
+    const ledger = JSON.parse(portalBlob('HEAD', LEDGER)) as { costs: { ms: number; run: string; source: string }[] }
+    const costs = ledger.costs.filter((c) => Number.isFinite(c.ms) && c.ms > 0)
+    console.log(`HEAD ${LEDGER}: ${ledger.costs.length} recorded cost(s), ${costs.length} usable`)
+    for (const c of ledger.costs) console.log(`  ${c.ms} ms -- ${c.run} [${c.source}]`)
+    const issuer = [6703, 5938].filter((ms) => ledger.costs.some((c) => c.ms === ms && c.source.includes('S67')))
+    console.log(`  the issuer's two costs from row S67 (6703, 5938) in the record: ${issuer.length} of 2`)
+    const highest = costs.reduce((m, c) => (c.ms > m ? c.ms : m), 0)
+    const ratio = timeout === null || highest === 0 ? NaN : timeout / highest
+    console.log(`  TIMEOUT ${timeout ?? 'NONE'} ms / HIGHEST RECORDED COST ${highest} ms = ${Number.isNaN(ratio) ? 'n/a' : ratio.toFixed(4)} (rule: ${FACTOR} x, at most ${CAP_MS} ms)`)
+    const yes = timeout !== null && costs.length === ledger.costs.length && issuer.length === 2 && highest > 0 && timeout === FACTOR * highest && timeout <= CAP_MS
+    console.log(`THE CENSUS TEST'S TIMEOUT IS 3 TIMES ITS HIGHEST RECORDED COST: ${yes ? 'yes' : 'no'}`)
+    expect(yes).toBe(true)
+  })
+})
