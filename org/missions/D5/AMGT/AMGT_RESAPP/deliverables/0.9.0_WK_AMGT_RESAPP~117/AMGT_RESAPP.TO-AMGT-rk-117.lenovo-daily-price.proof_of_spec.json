@@ -1,0 +1,210 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-117",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-117.lenovo-daily-price.md",
+    "group": "OTHER",
+    "vintage_commit": "d411a0c827"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "bf5c280e48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-117.lenovo-daily-price.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~117",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/pull_baba_daily_px.py",
+      "kind": "script",
+      "commit_or_etag": "630c3b1e14",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Limb 1, unchanged this session (predecessor's commit): argparse --security/--sec-key/--start/--end, defaults preserved. Exercised live this session with --security \"992 HK Equity\" (AC3)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_daily_px_args.py",
+      "kind": "test",
+      "commit_or_etag": "630c3b1e14",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unchanged this session; re-run this session at AC2, 3 passed."
+    },
+    {
+      "path_or_key": "bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/20260922T212739Z.json",
+      "kind": "s3_object",
+      "commit_or_etag": "s3://opal-data-harvest/bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/20260922T212739Z.json",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC3 live pull landed this object (2459 rows, PX_LAST DAILY, 2016-01-04..2025-12-31 -- the 2016-01-01 request start moved to the first trading day). AC4 verified: total pre 1 post 2 added 1, for_992 pre 0 post 1, added_all_under_992 True, content read back directly from S3 (securities_in_object=['992 HK Equity'], rows=2459, first={'PX_LAST': 7.46,'date':'2016-01-04'}, last={'PX_LAST': 9.26,'date':'2025-12-31'})."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260922T2126Z_amgt-rk117-lenovo-daily-px_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger opened before AC3 (leg w1, s3-prefix), closed on AC4's read with the AC4 proof line quoted in the leg and the entry; sentinel org/critical_paths/.open_deploys/amgt-rk117-lenovo-daily-px.json removed on close."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~117/pull_log.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Script's own local pull-log (W2), written to this worker's own deliverables slot per _pull_log_path()'s OPAL_AGENT_SERIAL-following rule; carries one HistoricalDataRequest entry naming '992 HK Equity', stamp 20260922T212739Z."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows AMGT_RESAPP-Z-W117-S3 (sys.path defect reaches AC3's literal invocation, worked around with PYTHONPATH for one call), -S4 (AC5's HEAD~1..HEAD grain mismatch across the amended, multi-session commit lineage), -S5 (AC0's literal re-probe would double-spend the sized SPX probe; not re-run, predecessor's same-session DAPI:UP cited instead) appended inside the existing fenced JSON array. surprise-row-gate.py: '3 new row(s) of 533 total checked (530 pre-existing, NOT re-graded)', 0 violations."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any call: the module defaults printed (SECURITY \"BABA US Equity\", SEC_KEY \"BABA_US_Equity\", start 2016-01-01, end 2025-12-31 at the cut); the SIZED line \"2 requests, 2 points, 1 unique security\"; the credential fingerprint line, never a value; then dapi_check prints an UP line and exits 0. A DOWN line is a STOP with a BLOCKING row naming the surface",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r117/ac0.py &amp;&amp; python integrations/bloomberg/auth/dapi_check.py",
+      "output_evidence": "DEVIATION NOTE (not part of the literal invocation; see output_evidence): dapi_check.py was NOT re-invoked live this session -- see row W117-S5.\n\nmodule_defaults SECURITY BABA US Equity SEC_KEY BABA_US_Equity start 2016-01-01 end 2025-12-31\nSIZED: 1 HistoricalDataRequest (992 HK Equity x PX_LAST, 2016-01-01..2025-12-31, DAILY) + 1 SPX login probe = 2 requests, 2 points, 1 unique security\nCREDENTIAL: OK  secret=bloomberg/terminal/login  user=<redacted> user_len=12 pw_len=9 pw_sha256=b52a0db305ea\n(fingerprint only -- no credential value is ever printed by this tool)\nrc=0\n\nBOTH HALVES: ledger/NEVER_WIDEN_ROUND30_RK117_COO_HALF.md status SIGNED (2.0.0_SA_COO~Z, 2026-09-22, rk-117 amendment) and ledger/NEVER_WIDEN_ROUND30_RK117_CTO_HALF.md status SIGNED (1.0.0_SA_CTO~Z, 2026-09-22 ~21:2xZ) -- both present, both read before any live act.\n\nREAD_HERE sign-in check (dapi_check.py): NOT re-run live this session. Cited instead: this same worktree's predecessor-session output, .scratch/r117/ac0_out.txt (file mtime 2026-09-22 16:23 local, ~1h2m before this session's AC3), verbatim 'DAPI: UP (session + SPX Index/PX_LAST returned -- entitled session live)'. Reason: dapi_check.py issues a REAL live SPX Index/PX_LAST ReferenceDataRequest every call (confirmed by reading the script), and the cell's own sized budget is 2 requests TOTAL (1 probe + 1 pull); the COO half states '1 of the 2 is already spent (the probe)', and this worker's own spawn instructions direct: 'print what you spend THIS session and the running total' rather than re-spend. Re-running it would have made the cell's total live spend 3 (predecessor's probe + a second probe + the pull), one over the sized cap and over both never-widen halves' explicit 'quota above the 2 stated requests' rollback trigger. Filed as row AMGT_RESAPP-Z-W117-S5.\n\nSPEND THIS SESSION: 0 probes, 1 pull (at AC3) = 1 request. RUNNING TOTAL for the cell: 1 (predecessor's probe) + 1 (this session's pull) = 2 of 2 sized. No overage.",
+      "denominator": "Module defaults, SIZED line, credential fingerprint, both-halves-signed check: 4 of 4 matched, rc 0. dapi_check UP requirement satisfied by citation of same-worktree same-day prior evidence rather than a fresh live call, a deliberate deviation (row W117-S5) to avoid exceeding the sized 2-request budget.",
+      "status": "PASS",
+      "expect": "module_defaults SECURITY BABA US Equity SEC_KEY BABA_US_Equity start 2016-01-01 end 2025-12-31[\\s\\S]*SIZED: 1 HistoricalDataRequest \\(992 HK Equity[\\s\\S]*CREDENTIAL: OK[\\s\\S]*DAPI: UP"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "READ-ONLY baseline: \"histdata_daily_px total 1 for_992 0\" at the cut (a drifted count is RECORDED, not a fail); pre.json written; and \"served_readers_of_histdata_daily_px_under_lib 0\" -- if that count is NOT 0, STOP with a BLOCKING row, because the cell's no-pair premise would be false",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r117/ac1.py",
+      "output_evidence": "histdata_daily_px total 1 for_992 0\nserved_readers_of_histdata_daily_px_under_lib 3 ['lib\\\\research\\\\api\\\\scoped_amgt.py', 'lib\\\\research\\\\freshness\\\\build_view.py', 'lib\\\\research\\\\harvest\\\\bloomberg.py']",
+      "denominator": "1 of 1 bronze-count line matched (total 1, for_992 0, pre.json written). Served-reader count is 3, not 0 -- per ISSUER AMENDMENT 1 (bounds section, task order) this finding is EXPECTED and is NO LONGER a stop: recorded and continued, not treated as a mechanical FAIL.",
+      "status": "PASS",
+      "status_reason": "Under the amended cell (ISSUER AMENDMENT 1): 'AC1's served-reader finding is EXPECTED and is NO LONGER a STOP: record the count and the call site and continue.' The call site is lib/research/api/scoped_amgt.py's read_coverage_freshness() (GET /freshness), which is exactly the surface the pair (ledger/NEVER_WIDEN_ROUND30_RK117_{COO,CTO}_HALF.md) covers. Continued to the deploy ledger, AC3, AC4."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "LIMB 1, code only, NO Bloomberg call: \"3 passed\" and 0 failed, with test_defaults_are_baba_unchanged, test_security_and_sec_key_override and test_no_blp_import_at_parse PASSED",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest integrations/bloomberg/research/tests/test_daily_px_args.py -v -p no:cacheprovider 2&gt;&amp;1 | tail -8",
+      "output_evidence": "integrations/bloomberg/research/tests/test_daily_px_args.py::test_defaults_are_baba_unchanged PASSED [ 33%]\nintegrations/bloomberg/research/tests/test_daily_px_args.py::test_security_and_sec_key_override PASSED [ 66%]\nintegrations/bloomberg/research/tests/test_daily_px_args.py::test_no_blp_import_at_parse PASSED [100%]\n3 passed in 0.26s",
+      "denominator": "3 of 3 named tests PASSED, 0 failed.",
+      "status": "PASS",
+      "expect": "test_defaults_are_baba_unchanged[\\s\\S]*PASSED[\\s\\S]*test_security_and_sec_key_override[\\s\\S]*PASSED[\\s\\S]*test_no_blp_import_at_parse[\\s\\S]*PASSED[\\s\\S]*3 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "LIVE, ledger OPEN before it, the ONE pull: a \"PULL DAILY PX: 992 HK Equity -> N rows landed at s3://opal-data-harvest/bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/<stamp>.json\" line with N > 0, then the RAW KEY and STAMP lines. The security named MUST be 992 HK Equity and never BABA. A BLOCKED line (health not ok) is a STOP with a row, never a retry",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python integrations/bloomberg/research/pull_baba_daily_px.py --security \"992 HK Equity\" 2&gt;&amp;1 | tee .scratch/r117/ac3_out.txt",
+      "output_evidence": "DEVIATION NOTE (not part of the literal invocation; see output_evidence/status_reason): PYTHONPATH=\"$(pwd)\" was set for this one call because the bare invocation raises ModuleNotFoundError on this box -- see row W117-S3. Deploy ledger was opened before this call.\n\nPULL DAILY PX: 992 HK Equity -> 2459 rows landed at s3://opal-data-harvest/bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/20260922T212739Z.json\nRAW KEY: bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/20260922T212739Z.json\nSTAMP: 20260922T212739Z",
+      "denominator": "1 of 1 named pull performed. Security named: '992 HK Equity' (never BABA), N=2459 > 0. Deploy ledger 'amgt-rk117-lenovo-daily-px' OPENED before this call (leg w1, s3-prefix, proof=AC4).",
+      "status": "PASS",
+      "status_reason": "PYTHONPATH set to the repo root for this one invocation because the literal bare invocation (cwd at repo root, no PYTHONPATH) raises ModuleNotFoundError on this box -- the same CPython sys.path[0]-is-script-directory defect row W117-S1 already grounded for AC0's probe, now confirmed against this named script itself and filed as row AMGT_RESAPP-Z-W117-S3. No code or path was changed; only an environment variable for one call."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"total pre 1 post 2 added 1\" with the added key under security_key=992_HK_Equity; \"for_992 pre 0 post 1\"; \"added_all_under_992 True\"; and the object itself carrying exactly the one security \"992 HK Equity\" with its DAILY row count and first/last dates printed. An object under any other security_key is a ROLLBACK trigger. Close the w1 leg and the entry on this read",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r117/ac4.py",
+      "output_evidence": "total pre 1 post 2 added 1 ['bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/20260922T212739Z.json']\nfor_992 pre 0 post 1\nadded_all_under_992 True\nsecurities_in_object ['992 HK Equity'] rows 2459 first [{'PX_LAST': 7.46, 'date': '2016-01-04'}] last [{'PX_LAST': 9.26, 'date': '2025-12-31'}]\n\nSUPPLEMENTARY (CTO half's mitigation precondition -- verify CONTENT, not merely presence, before acceptance): row count 2459; date range 2016-01-04..2025-12-31 (10 years, matches the 2016-01-01..2025-12-31 request window with the first row landing on the first trading day of 2016); first observation PX_LAST=7.46 on 2016-01-04; last observation PX_LAST=9.26 on 2025-12-31. Object accepted on this content.\n\nSUPPLEMENTARY (AC4's control-arm addition, ISSUER AMENDMENT 1/2): served /freshness stamp for 992_HK_Equity: PRE 20260922T201211Z (independently reconstructed this session, matching the CTO half's own pre-act measurement exactly), POST 20260922T212739Z (the new object's own stamp) -- moved FORWARD only, per the MAX rule (scoped_amgt.py:3189-3215), never reversible by addition. distinct_security_partitions: 37 pre and post (unchanged). OTHER NAMES control: 36 of 36 non-992 security partitions byte-equal pre vs post (0 diffs) -- computed via .scratch/r117/ac4_freshness.py, reconstructing the pre-act full bloomberg-bronze listing as (post-act listing MINUS the one known-added key), then replicating _bloomberg_bronze_stamps' own per-security MAX-over-six-tables logic read from lib/research/api/scoped_amgt.py:3189-3215.",
+      "denominator": "3 of 3 named post-pull values matched exactly (total pre 1 post 2 added 1; for_992 pre 0 post 1; added_all_under_992 True); content verified (row count + date range + first/last, per the CTO half's precondition); control arm 36 of 36 other names byte-equal. No rollback trigger fired: added_all_under_992 is True, no object under any other security_key. w1 leg closed on this read; entry closed after (all legs proven).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the changed code files are EXACTLY integrations/bloomberg/research/pull_baba_daily_px.py and integrations/bloomberg/research/tests/test_daily_px_args.py (no price_axis_pull.py, no model_block_pull.py); and the run output names 992 HK Equity at least once. Record the spend: 1 pull + 1 probe = 2 of 2 sized",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; git diff --name-only HEAD~1 HEAD -- integrations lib infra .tools portal &amp;&amp; grep -c \"992 HK Equity\" .scratch/r117/ac3_out.txt",
+      "output_evidence": "DEVIATION NOTE (not part of the literal invocation; see output_evidence/status_reason): the literal HEAD~1..HEAD range cannot span limb 1's commit across this cell's amended, two-session lineage -- see row W117-S4; a supplementary wider-range read is included in output_evidence.\n\nLiteral HEAD~1..HEAD (HEAD~1 = 3ceddad0be, an amendment .md commit): 0 files under integrations/lib/infra/.tools/portal -- does not span the code commit, per row W117-S4.\n\nSupplementary, over the full task-order lineage from the round-30 issuance (bf5c280e48, limb-1 commit 630c3b1e14's own parent) to this worker's current HEAD:\nintegrations/bloomberg/research/pull_baba_daily_px.py\nintegrations/bloomberg/research/tests/test_daily_px_args.py\n-- EXACTLY the two expected files; no price_axis_pull.py, no model_block_pull.py.\n\ngrep -c \"992 HK Equity\" .scratch/r117/ac3_out.txt -> 1\n\nSPEND RECORD: 1 pull (this session, AC3) + 1 probe (predecessor's session, AC0 of the earlier attempt) = 2 of 2 sized requests. 0 retries, 1 unique security (992 HK Equity).",
+      "denominator": "File-scope half: 2 of 2 expected files matched, 0 unexpected files, over the range that actually spans the code commit (bf5c280e48..HEAD) rather than the literal HEAD~1..HEAD (which cannot span it across this cell's amended, multi-session commit lineage -- row W117-S4). Output-naming half: 992 HK Equity named 1 time (>=1 required). Spend: 2 of 2, exact.",
+      "status": "PASS",
+      "status_reason": "The literal HEAD~1..HEAD form returns empty because this cell's execution crosses two worker sessions with issuer amendments landing as their own commits in between (row W117-S4). The supplementary range bf5c280e48..HEAD (the round-30 issuance commit, i.e. limb 1's own commit's parent) spans the cell's entire code-change history and confirms the substance of the criterion: exactly the two named files, nothing else, under the scoped directories."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "test_security_and_sec_key_override asserts security_key('992 HK Equity') == '992_HK_Equity' (spaces->underscores); removing the .replace(' ', '_') call in security_key() would make that assertion fail.",
+      "expected": "test_security_and_sec_key_override fails if security_key() stops replacing spaces with underscores",
+      "observed": "Verified by inspection (security_key(s) is `s.strip().replace(' ', '_')`, unchanged this session); the live AC3 run itself is an end-to-end exercise of this exact function (--security \"992 HK Equity\" produced key security_key=992_HK_Equity in the landed S3 path), which is a live positive control beyond the unit test alone.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 (pytest) run once this session; argument parsing is pure (test_no_blp_import_at_parse proves no Bloomberg call at parse time). AC1's read-only S3 census and AC4's read-only freshness reconstruction were each run once; both are pure reads.",
+      "observed": "AC3, the one live pull, is NOT idempotent by design (bronze is write-once, conditional put) and was correctly run exactly once, never retried, per the order's 'ONE pull, never retried' bound.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a second dapi_check.py live probe this session",
+      "reason": "would exceed the cell's sized 2-request budget (1 already spent by the predecessor); this worker's own spawn instructions direct citing the prior spend rather than re-spending. See row AMGT_RESAPP-Z-W117-S5."
+    },
+    {
+      "item": "price_axis_pull.py, model_block_pull.py, any DynamoDB write, any rank row, any _CURRENT pointer, any cohort-wide run, any S3 delete, any IAM/Lambda/portal/infra change, any install",
+      "reason": "explicit WALL / hard limits per <paths> and the spawn prompt; never touched."
+    },
+    {
+      "item": "branch wk-amgt-14-50 or C:/tmp/wk-amgt-14-50",
+      "reason": "explicitly never read, shown, diffed or checked out per the order and spawn prompt."
+    },
+    {
+      "item": "a second security or a retry of the pull",
+      "reason": "explicit bound: 'ONE pull, never retried', 'never a second security'; the single AC3 run succeeded on the first attempt (N=2459 rows > 0), so no retry question arose."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W117-S3: AC3's literal invocation (bare `python integrations/bloomberg/research/pull_baba_daily_px.py --security \"992 HK Equity\"`) raises ModuleNotFoundError on this box -- same sys.path[0]-is-script-directory defect as row S1, now confirmed against the named LIMB 2 script itself. Worked around with PYTHONPATH for one call, no code/path change. hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+    "AMGT_RESAPP-Z-W117-S4: AC5's literal `git diff --name-only HEAD~1 HEAD` cannot see limb 1's commit once amendment/ledger/surprise-row commits land between it and grading, across this cell's two-session lineage. Supplementary range (bf5c280e48..HEAD) used and confirms the substance. hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z.",
+    "AMGT_RESAPP-Z-W117-S5: AC0's literal re-invocation of dapi_check.py would spend a second live SPX probe against a cell sized for exactly 2 total requests, 1 already spent by the predecessor. Not re-run; predecessor's same-session DAPI:UP output cited instead, per this worker's own spawn instructions. hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~117/AMGT_RESAPP.TO-AMGT-rk-117.lenovo-daily-price.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
+  "compiler_tools": [
+    {
+      "tool": "python (ac0.py) -- non-consuming half of AC0",
+      "invocation": "python .scratch/r117/ac0.py",
+      "result": "module defaults exact; SIZED 2 requests/2 points/1 security; CREDENTIAL OK (fingerprint only, redacted here); rc=0"
+    },
+    {
+      "tool": "python + boto3 + lib/ walk (ac1.py)",
+      "invocation": "python .scratch/r117/ac1.py",
+      "result": "histdata_daily_px total 1 for_992 0; served_readers_of_histdata_daily_px_under_lib 3 (EXPECTED per Issuer Amendment 1, not a stop)"
+    },
+    {
+      "tool": "python -m pytest (AC2)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_daily_px_args.py -v -p no:cacheprovider",
+      "result": "3 passed, 0 failed"
+    },
+    {
+      "tool": "deploy_ledger.py open",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-rk117-lenovo-daily-px --title \"AMGT-rk-117 Lenovo dense daily PX_LAST bronze pull\" --author \"0.9.0_WK_AMGT_RESAPP~117\" --leg \"w1|s3-prefix|opal-data-harvest/bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/|AC4\"",
+      "result": "OPENED, 1 leg, entry org/critical_paths/change_management/20260922T2126Z_amgt-rk117-lenovo-daily-px_deploy_completion.md"
+    },
+    {
+      "tool": "python (pull_baba_daily_px.py) -- the ONE live pull, PYTHONPATH set for the one call (row W117-S3)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python integrations/bloomberg/research/pull_baba_daily_px.py --security \"992 HK Equity\"",
+      "result": "PULL DAILY PX: 992 HK Equity -> 2459 rows landed at s3://opal-data-harvest/bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/20260922T212739Z.json"
+    },
+    {
+      "tool": "python + boto3 (ac4.py)",
+      "invocation": "python .scratch/r117/ac4.py",
+      "result": "total pre 1 post 2 added 1; for_992 pre 0 post 1; added_all_under_992 True; content 2459 rows, 2016-01-04..2025-12-31, first PX_LAST=7.46 last PX_LAST=9.26"
+    },
+    {
+      "tool": "python + boto3 (ac4_freshness.py, self-authored, reconstructs _bloomberg_bronze_stamps against lib/research/api/scoped_amgt.py:3189-3215)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python .scratch/r117/ac4_freshness.py",
+      "result": "992_HK_Equity pre 20260922T201211Z post 20260922T212739Z, moved_forward True; other_names_denominator 36, byte_equal_count 36, diffs []"
+    },
+    {
+      "tool": "deploy_ledger.py close-leg / close",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug amgt-rk117-lenovo-daily-px --leg-id w1 --proof \"...\"  &&  python .tools/deploy_ledger.py close --slug amgt-rk117-lenovo-daily-px",
+      "result": "leg w1 closed; entry CLOSED -- all 1 legs proven; sentinel removed"
+    },
+    {
+      "tool": "git diff",
+      "invocation": "git diff --name-only bf5c280e48 HEAD -- integrations lib infra .tools portal",
+      "result": "exactly integrations/bloomberg/research/pull_baba_daily_px.py and integrations/bloomberg/research/tests/test_daily_px_args.py"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "3 new row(s) of 533 total checked (530 pre-existing, NOT re-graded), 0 violations"
+    }
+  ]
+}
