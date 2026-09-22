@@ -122,13 +122,32 @@ the cleanup path now tracks and reports the true deletion outcome.
 
 **C-S174** (`IRPT_BCKEND.TO-IB-rtk-1`'s proof instance, `controls.mutant.observed`): the text
 called the packet's original stated value `fffef738...` "a transcription error in the packet
-only", which understated what actually happened. Corrected: `fffef738e90cf03fbb20cdfbeb8cbb310e3a44c6eee657974f8a3eeb92e8e35b`
+only", which understated what actually happened. Corrected: `fffef738e90cf03bfb20cdfbeb8cbb310e3a44c6eee657974f8a3eeb92e8e35b`
 is the EXACT, correctly-computed sha256 of `capture-session.cjs`'s CRLF/checkout-grain
 WORKING-TREE bytes on this box (row `W13-S3`); `f03666ef827e7c6a169214c83b2a4fe593d7f1cbf181f728f1febb0235eacd0d`
 is the git-object's own LF-bytes sha256, the PUBLISHED value. Both are real, correctly-computed
 sha256 values of two DIFFERENT byte sequences of the same logical file; neither is a typo.
 Committed at `1914e80595` then `f9c83f851f` (battery check refinement). `proof-of-spec-check`
 re-run: VALID rc=0, no criterion verdict changed.
+
+**IB-rto-1 correction (C-S196):** the CRLF value stated just above had two adjacent hex
+characters transposed relative to its true value (now corrected in place above), and a sibling
+field in the same `controls.mutant.observed` text misattributed the LF/git-object value to a
+worktree-mode diagnostic read -- backwards: a raw worktree read on this CRLF-checkout box
+produces the CRLF value, never the LF value; the LF/git-object value's actual source is
+`git cat-file -p` / `git show`, never a worktree diagnostic. Both freshly recomputed, never
+copied, from commit `0d0c8cdc4d`'s `capture-session.cjs` blob: LF/git-object sha256 via
+`git cat-file -p 0d0c8cdc4d:infra/aws/ec2/investor-reporting-export/capture-session.cjs |
+sha256sum`, cross-checked via `git show 0d0c8cdc4d:infra/aws/ec2/investor-reporting-export/capture-session.cjs
+| sha256sum` (agreeing) -- `f03666ef827e7c6a169214c83b2a4fe593d7f1cbf181f728f1febb0235eacd0d`;
+CRLF/checkout-grain sha256 via an actual raw checkout-index read on this box (`git read-tree
+0d0c8cdc4d` + `git checkout-index -- infra/aws/ec2/investor-reporting-export/capture-session.cjs`
+into a throwaway scratch work-tree, this REPO's own index untouched) -- `fffef738e90cf03bfb20cdfbeb8cbb310e3a44c6eee657974f8a3eeb92e8e35b`,
+independently corroborated by the value this chain's own `IB-rtk-1_repaired_r10_lifecycle_diagnostic.json`
+artifact already recorded in its `sourceSha256` field at the time. `battery_ib_rtm_1.py --arm
+metadata` widened with a run-time recomputation control (never a hardcoded comparison constant)
+that re-derives both values the same way, fresh, on every run. `proof-of-spec-check` re-run on
+both `IB-rtk-1` and `IB-rtm-1` proof instances: VALID rc=0, no criterion verdict changed.
 
 **C-S187** (`IRPT_BCKEND.TO-IB-rtl-1`'s proof instance): the `result.md` artifact row was still
 pinned to commit `c33e9f3d38` (blob `0d19277bfd64bf63fbd79d1be1b5a41867c3d435`) -- the PRE-PUBLISH
