@@ -16,7 +16,9 @@ of the same name, with the operator identity only:
 
 | file | git blob (`git rev-parse HEAD:<path>`) | sha256 of the blob bytes | changed at |
 |---|---|---|---|
-| `infra/aws/ec2/investor-reporting-export/capture-session.cjs` | `ded605028b2210b589735927868aacf92ceb852d` | `fffef738e90cf03bfb20cdfbeb8cbb310e3a44c6eee657974f8a3eeb92e8e35b` | `0d0c8cdc4d` |
+| `infra/aws/ec2/investor-reporting-export/capture-session.cjs` | `ded605028b2210b589735927868aacf92ceb852d` | `f03666ef827e7c6a169214c83b2a4fe593d7f1cbf181f728f1febb0235eacd0d` | `0d0c8cdc4d` |
+
+**ISSUER CORRECTION (2.0.0_SA_COO~B, 2026-09-22, before any sign-off): the sha256 in this row was WRONG in the worker's original packet** (`fffef738e90cf03bfb20cdfbeb8cbb310e3a44c6eee657974f8a3eeb92e8e35b`, now replaced with the correct value above). Caught by independently re-deriving it myself, twice, with two different commands (`git cat-file -p <blob> | sha256sum` and `git show <commit>:<path> | sha256sum`), both agreeing and disagreeing with the packet's original claim. **The git blob id itself was correct and is unchanged.** Nothing was ever signed against the wrong value -- this is exactly what independent sign-off verification exists to catch, and it worked. Every other occurrence of the wrong hash in this file (the README's future value, arm (g)'s planned edit) is corrected below to match.
 
 **`capture-session.sh` is UNCHANGED by this cell** (git blob `d704adfb7b6a3ee904c3ba7173eb81533679c97b` at
 HEAD, byte-identical to what `IB-rti-1`'s packet already published and re-verified by every later cell in
@@ -34,7 +36,7 @@ runbook's own instruction ("this is a publish problem, not an operator problem -
 continue"), would incorrectly escalate. **The README edit belongs in the SAME commit as the publish, when
 both become true together**, not in this packet's commit. This packet documents the value the README's
 `capture-session.cjs` line will need to become once that publish runs:
-`fffef738e90cf03bfb20cdfbeb8cbb310e3a44c6eee657974f8a3eeb92e8e35b` (the `capture-session.sh` line is
+`f03666ef827e7c6a169214c83b2a4fe593d7f1cbf181f728f1febb0235eacd0d` (the `capture-session.sh` line is
 unaffected, since that file does not change).
 
 **Nothing else moves:** `render_export.cjs`, `run-export-render.sh` and `package.json` are untouched by
@@ -77,7 +79,7 @@ own acts.
 
 Arm (g) of `IRPT_BCKEND.TO-IB-rtk-1` publishes ONLY when BOTH halves are at HEAD naming THIS packet's blob;
 it would then, in one act: update the README's expected-hash line for `capture-session.cjs` to
-`fffef738e90cf03bfb20cdfbeb8cbb310e3a44c6eee657974f8a3eeb92e8e35b`, open a NEW deploy-ledger entry
+`f03666ef827e7c6a169214c83b2a4fe593d7f1cbf181f728f1febb0235eacd0d`, open a NEW deploy-ledger entry
 (`org/critical_paths/.open_deploys/irpt-rtk-1-capture-tool-publish.json`) and commit its sentinel BEFORE the
 act, publish, read the object back from S3, compare its sha256 to the table above, and close the entry.
 Verdict token (not yet reached this pass): `IBR107-PUBLISHED-S3-BYTES-EQUAL-PACKET-BLOB`.
