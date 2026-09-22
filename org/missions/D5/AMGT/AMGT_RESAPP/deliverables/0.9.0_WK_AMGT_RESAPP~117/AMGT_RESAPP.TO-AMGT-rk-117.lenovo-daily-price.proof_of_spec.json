@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-117",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-117.lenovo-daily-price.md",
+    "group": "OTHER",
+    "vintage_commit": "bf5c280e48"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "bf5c280e48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-117.lenovo-daily-price.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~117",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/pull_baba_daily_px.py",
+      "kind": "script",
+      "commit_or_etag": "630c3b1e14",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Limb 1: main() generalised with --security/--sec-key/--start/--end (argparse); SECURITY/SEC_KEY/HIST_START/HIST_END kept as defaults; new security_key() derivation; pull-log now records the security actually pulled; _pull_log_path() follows OPAL_AGENT_SERIAL. Not a scheduled-task script (preflight: comp-schedule DECLARED-NOT-APPLICABLE) so no live deploy surface; AC0/AC2 exercised it directly."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_daily_px_args.py",
+      "kind": "test",
+      "commit_or_etag": "630c3b1e14",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AC2: python -m pytest ... -> 3 passed (test_defaults_are_baba_unchanged, test_security_and_sec_key_override, test_no_blp_import_at_parse), 0 failed."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7af2589885",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows AMGT_RESAPP-Z-W117-S1 (OBSERVATION, the AC0 sys.path finding) and AMGT_RESAPP-Z-W117-S2 (BLOCKING, the AC1 served-reader finding) appended inside the existing fenced JSON array; .tools/surprise-row-gate.py: '2 new row(s) of 530 total checked (528 pre-existing, NOT re-graded)', 0 violations."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any call: the module defaults printed (SECURITY \"BABA US Equity\", SEC_KEY \"BABA_US_Equity\", start 2016-01-01, end 2025-12-31 at the cut); the SIZED line \"2 requests, 2 points, 1 unique security\"; the credential fingerprint line, never a value; then dapi_check prints an UP line and exits 0. A DOWN line is a STOP with a BLOCKING row naming the surface",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r117/ac0.py &amp;&amp; python integrations/bloomberg/auth/dapi_check.py",
+      "output_evidence": "module_defaults SECURITY BABA US Equity SEC_KEY BABA_US_Equity start 2016-01-01 end 2025-12-31\nSIZED: 1 HistoricalDataRequest (992 HK Equity x PX_LAST, 2016-01-01..2025-12-31, DAILY) + 1 SPX login probe = 2 requests, 2 points, 1 unique security\nCREDENTIAL: OK  secret=bloomberg/terminal/login  user='<redacted per task-order hard limit; row W116-S2>' user_len=12 pw_len=9 pw_sha256=b52a0db305ea\n(fingerprint only -- no credential value is ever printed by this tool)\nDAPI: UP (session + SPX Index/PX_LAST returned -- entitled session live)\nrc=0",
+      "denominator": "4 of 4 named checks matched (module defaults exact, SIZED line exact, credential fingerprint present, DAPI UP) with rc 0. NOTE: .scratch/r117/ac0.py itself needed one self-authored fix (sys.path.insert(0, os.getcwd()) before the spec exec) to import pull_baba_daily_px.py at all -- see surprise row AMGT_RESAPP-Z-W117-S1; without it the literal script as the task order writes it raises ModuleNotFoundError on this box regardless of author.",
+      "status": "PASS",
+      "expect": "module_defaults SECURITY BABA US Equity SEC_KEY BABA_US_Equity start 2016-01-01 end 2025-12-31[\\s\\S]*SIZED: 1 HistoricalDataRequest \\(992 HK Equity[\\s\\S]*CREDENTIAL: OK[\\s\\S]*DAPI: UP"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "READ-ONLY baseline: \"histdata_daily_px total 1 for_992 0\" at the cut (a drifted count is RECORDED, not a fail); pre.json written; and \"served_readers_of_histdata_daily_px_under_lib 0\" -- if that count is NOT 0, STOP with a BLOCKING row, because the cell's no-pair premise would be false",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r117/ac1.py",
+      "output_evidence": "histdata_daily_px total 1 for_992 0\nserved_readers_of_histdata_daily_px_under_lib 3 ['lib\\\\research\\\\api\\\\scoped_amgt.py', 'lib\\\\research\\\\freshness\\\\build_view.py', 'lib\\\\research\\\\harvest\\\\bloomberg.py']",
+      "denominator": "1 of 1 bronze-count line matched (total 1, for_992 0, pre.json written). Served-reader count is 3 of an expected 0 -- the mechanical bar FAILED. Grounded: 2 of the 3 hits (bloomberg.py, build_view.py) are only the shared BRONZE_REQUESTS constant declaration; the 3rd, lib/research/api/scoped_amgt.py, is read_coverage_freshness() -- GET /freshness, FWD-7's served surface, which pools the latest stamp across every Bloomberg bronze table (including histdata_daily_px) per security (scoped_amgt.py:3189-3208, :3335-3358, :3909-3910). See BLOCKING row AMGT_RESAPP-Z-W117-S2.",
+      "status": "FAIL",
+      "status_reason": "The cell's own stated premise ('bronze has no served reader, so NO never-widen pair') is false: GET /freshness (scoped_amgt.py's read_coverage_freshness) is a served reader of histdata_daily_px stamps. Per this criterion's own <expect> and the task order's BOUNDS clause ('If your own AC1 finds a served reader ... STOP with a BLOCKING row: the premise of \"no pair\" would be false and the issuer must cut a pair first'), this worker STOPPED here: limb 2's live pull (AC3), the deploy ledger open, and AC4 were withheld. Filed as AMGT_RESAPP-Z-W117-S2 (class BLOCKING, hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z). AC2 (limb 1, code-only) still ran and passed since it touches neither S3 nor the served surface.",
+      "expect": "histdata_daily_px total 1 for_992 0[\\s\\S]*served_readers_of_histdata_daily_px_under_lib 0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "LIMB 1, code only, NO Bloomberg call: \"3 passed\" and 0 failed, with test_defaults_are_baba_unchanged, test_security_and_sec_key_override and test_no_blp_import_at_parse PASSED",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest integrations/bloomberg/research/tests/test_daily_px_args.py -v -p no:cacheprovider 2&gt;&amp;1 | tail -8",
+      "output_evidence": "integrations/bloomberg/research/tests/test_daily_px_args.py::test_defaults_are_baba_unchanged PASSED [ 33%]\nintegrations/bloomberg/research/tests/test_daily_px_args.py::test_security_and_sec_key_override PASSED [ 66%]\nintegrations/bloomberg/research/tests/test_daily_px_args.py::test_no_blp_import_at_parse PASSED [100%]\n3 passed in 0.29s",
+      "denominator": "3 of 3 named tests PASSED, 0 failed.",
+      "status": "PASS",
+      "expect": "test_defaults_are_baba_unchanged[\\s\\S]*PASSED[\\s\\S]*test_security_and_sec_key_override[\\s\\S]*PASSED[\\s\\S]*test_no_blp_import_at_parse[\\s\\S]*PASSED[\\s\\S]*3 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "LIVE, ledger OPEN before it, the ONE pull: a \"PULL DAILY PX: 992 HK Equity -> N rows landed at s3://opal-data-harvest/bloomberg/harvest/bronze/histdata_daily_px/security_key=992_HK_Equity/<stamp>.json\" line with N > 0, then the RAW KEY and STAMP lines. The security named MUST be 992 HK Equity and never BABA. A BLOCKED line (health not ok) is a STOP with a row, never a retry",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python integrations/bloomberg/research/pull_baba_daily_px.py --security \"992 HK Equity\" 2&gt;&amp;1 | tee .scratch/r117/ac3_out.txt",
+      "output_evidence": "NOT RUN. AC1 found the cell's no-pair premise false (served reader present) and its own <expect>/the task order's BOUNDS clause commands a STOP with a BLOCKING row before this live pull. No sign-in attempt, no HistoricalDataRequest, no deploy-ledger open, no S3 write was made. The sized 992 HK Equity request (1 of 2 in the budget) was NOT spent.",
+      "denominator": "0 of 1 named pull performed -- deliberately withheld, not a runtime failure.",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Rides the later run authorised once 2.0.0_SA_COO~Z (row AMGT_RESAPP-Z-W117-S2's disarm_owner) resolves whether the served /freshness surface needs a never-widen pair before Lenovo's histdata_daily_px is landed. Not attempted this turn per the task order's own STOP instruction."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"total pre 1 post 2 added 1\" with the added key under security_key=992_HK_Equity; \"for_992 pre 0 post 1\"; \"added_all_under_992 True\"; and the object itself carrying exactly the one security \"992 HK Equity\" with its DAILY row count and first/last dates printed. An object under any other security_key is a ROLLBACK trigger. Close the w1 leg and the entry on this read",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r117/ac4.py",
+      "output_evidence": "total pre 1 post 1 added 0 []\nfor_992 pre 0 post 0\nadded_all_under_992 True",
+      "denominator": "0 of 3 named post-pull values matched (post was expected 2/1/992-object; actual post equals pre exactly, confirming NO drift occurred while AC3 was withheld -- the correct, deliberate outcome of the STOP, not a defect). No ledger leg existed to close (ledger was never opened, per AC3's status).",
+      "status": "UNCOMPUTABLE-BY-CONSTRUCTION",
+      "status_reason": "Depends on AC3, which did not run (see AC3). Run anyway as a read-only confirmation that the STOP left the bronze prefix untouched (total/for_992 unchanged from AC1's baseline) -- no rollback trigger fired because nothing was written."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the changed code files are EXACTLY integrations/bloomberg/research/pull_baba_daily_px.py and integrations/bloomberg/research/tests/test_daily_px_args.py (no price_axis_pull.py, no model_block_pull.py); and the run output names 992 HK Equity at least once. Record the spend: 1 pull + 1 probe = 2 of 2 sized",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; git diff --name-only HEAD~1 HEAD -- integrations lib infra .tools portal &amp;&amp; grep -c \"992 HK Equity\" .scratch/r117/ac3_out.txt",
+      "output_evidence": "(git diff --name-only HEAD~1 HEAD printed 0 lines -- HEAD~1..HEAD is only the surprise-row commit 7af2589885, which touches org/missions/... not integrations/lib/infra/.tools/portal)\ngrep: .scratch/r117/ac3_out.txt: No such file or directory\nrc=2\n\nSupplementary read over the FULL task-order range (bf5c280e48..HEAD, both of this worker's commits): git diff --name-only bf5c280e48 HEAD -- integrations lib infra .tools portal ->\nintegrations/bloomberg/research/pull_baba_daily_px.py\nintegrations/bloomberg/research/tests/test_daily_px_args.py",
+      "denominator": "Literal invocation: 0 of 2 legs succeeded (HEAD~1..HEAD range does not span the code commit because this worker split limb 1 code and the surprise-row filing into two commits; ac3_out.txt absent because AC3 never ran) -- FAIL by the literal command. Supplementary evidence over the whole task-order range (bf5c280e48..HEAD) confirms the file-scope half is true in substance: EXACTLY the two expected files changed, no price_axis_pull.py/model_block_pull.py. The '992 HK Equity' output-naming half and the spend record (1 pull + 1 probe = 2 of 2 sized) cannot be satisfied: spend is 0 pulls + 1 probe = 1 of 2 sized, because AC3 was withheld.",
+      "status": "FAIL",
+      "status_reason": "The literal invocation fails for two independent reasons: (1) this worker's two commits (630c3b1e14 code+tests, 7af2589885 surprise rows) mean HEAD~1..HEAD is not the range that contains the code diff -- a grain mismatch between the criterion's assumed one-commit workflow and this worker's actual commit sequence; (2) .scratch/r117/ac3_out.txt does not exist because AC3 was correctly withheld per the AC1 STOP. Spend recorded: 1 of 2 sized requests used (the AC0/dapi_check SPX probe only); the 992 HK Equity HistoricalDataRequest was never issued."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Limb 1's own tests carry a real mutation check: test_security_and_sec_key_override asserts security_key('992 HK Equity') == '992_HK_Equity' (spaces->underscores) -- flipping the replacement (e.g. dropping .replace) makes that assertion fail, and running the modified security_key() by hand against the test confirms the test catches it.",
+      "expected": "test_security_and_sec_key_override fails if security_key() stops replacing spaces with underscores",
+      "observed": "Manually verified by inspection: security_key(s) is `s.strip().replace(' ', '_')`; removing the .replace call would make pdx.security_key('992 HK Equity') return '992 HK Equity' (with spaces), which the test's `== \"992_HK_Equity\"` assertion would catch. Not executed as a live mutant run this turn (no code file to safely mutate-and-revert was in scope beyond the two committed files, and the live pull that would exercise the mutated path was withheld).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC2 (the pytest suite) was run once; argument parsing is pure and side-effect-free (test_no_blp_import_at_parse explicitly proves no Bloomberg call happens at parse time), so a second run is expected byte-identical. Not re-run a second time this turn -- no live/network state to compare across runs since limb 2 was withheld.",
+      "observed": "AC0's module-defaults read and AC1's read-only S3 census were each run once; both are pure reads (no write) and are expected stable. Not independently re-run to compare.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "limb 2, the live HistoricalDataRequest for 992 HK Equity (AC3), the deploy ledger open/close, and AC4's post-pull verification",
+      "reason": "AC1's own STOP instruction: a served reader of bloomberg/harvest/bronze/histdata_daily_px/ was found (lib/research/api/scoped_amgt.py's GET /freshness), falsifying the cell's stated no-pair premise. Filed as BLOCKING row AMGT_RESAPP-Z-W117-S2, disarm_owner 2.0.0_SA_COO~Z."
+    },
+    {
+      "item": "the sized 992 HK Equity HistoricalDataRequest (1 of the 2-request budget)",
+      "reason": "not spent -- only the AC0/dapi_check SPX login probe (1 request) was issued, per the STOP above; the ONLY vendor egress permitted is this order's sized budget, never a retry, and never spent once the STOP fired."
+    },
+    {
+      "item": "price_axis_pull.py, model_block_pull.py, any DynamoDB table, the crosswalk, any IAM/Lambda/portal/infra change",
+      "reason": "explicit WALL per <paths>/BOUNDS; never touched."
+    },
+    {
+      "item": "branch wk-amgt-14-50 or C:/tmp/wk-amgt-14-50",
+      "reason": "explicitly never read, shown, diffed or checked out per the order and spawn prompt."
+    },
+    {
+      "item": "rollback execution",
+      "reason": "no write occurred (AC3 withheld), so no rollback trigger could fire; AC4's read-only re-check confirms zero drift (total/for_992 unchanged from AC1's baseline)."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W117-S1: AC0's literal .scratch/r117/ac0.py raises ModuleNotFoundError on this box (python sets sys.path[0] to the script's own directory, not cwd, so pull_baba_daily_px.py's `from lib.research.harvest import bloomberg` cannot resolve repo-root `lib`) -- worked around in my own scratch copy only (sys.path.insert(0, os.getcwd())), never a graded/committed surface. hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z (future AC0-style probe scripts need the same insert).",
+    "AMGT_RESAPP-Z-W117-S2 (BLOCKING): AC1's served-reader census found 3 hits under lib/ for histdata_daily_px, not 0 -- lib/research/api/scoped_amgt.py's read_coverage_freshness() (GET /freshness, FWD-7's served surface) pools the latest stamp across every Bloomberg bronze table including histdata_daily_px, per security. The task order's own 'bronze has no served reader, so NO never-widen pair' premise is therefore false. Per AC1's <expect> and BOUNDS, this worker STOPPED before the live pull: AC3/AC4/the deploy ledger were withheld, and the sized 992 HK Equity request was not spent. hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~117/AMGT_RESAPP.TO-AMGT-rk-117.lenovo-daily-price.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
+  "compiler_tools": [
+    {
+      "tool": "python (ac0.py, self-fixed for sys.path) + dapi_check.py",
+      "invocation": "python .scratch/r117/ac0.py && python integrations/bloomberg/auth/dapi_check.py",
+      "result": "module defaults exact; SIZED 2 requests/2 points/1 security; CREDENTIAL OK (fingerprint only); DAPI: UP, rc=0"
+    },
+    {
+      "tool": "python + boto3 + lib/ walk (ac1.py)",
+      "invocation": "python .scratch/r117/ac1.py",
+      "result": "histdata_daily_px total 1 for_992 0; served_readers_of_histdata_daily_px_under_lib 3 (triggers the AC1 STOP -- see AMGT_RESAPP-Z-W117-S2)"
+    },
+    {
+      "tool": "python -m pytest (AC2)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_daily_px_args.py -v -p no:cacheprovider",
+      "result": "3 passed, 0 failed"
+    },
+    {
+      "tool": "python + boto3 (ac4.py, read-only confirmation of zero drift)",
+      "invocation": "python .scratch/r117/ac4.py",
+      "result": "total pre 1 post 1 added 0; for_992 pre 0 post 0 -- no drift, consistent with AC3 having been withheld"
+    },
+    {
+      "tool": "git diff",
+      "invocation": "git diff --name-only bf5c280e48 HEAD -- integrations lib infra .tools portal",
+      "result": "exactly integrations/bloomberg/research/pull_baba_daily_px.py and integrations/bloomberg/research/tests/test_daily_px_args.py -- the literal HEAD~1 HEAD form of AC5 does not span this range (two-commit split), see AC5's own record"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "0 violations; 2 new rows (AMGT_RESAPP-Z-W117-S1, AMGT_RESAPP-Z-W117-S2) of 530 total checked, all step-7/step-10 fields present"
+    }
+  ]
+}
