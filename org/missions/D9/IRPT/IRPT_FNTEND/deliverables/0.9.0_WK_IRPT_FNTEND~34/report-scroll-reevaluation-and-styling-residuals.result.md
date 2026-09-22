@@ -96,7 +96,32 @@ code) -- no amber-950 warm text, no amber-50 tinted fill. No summary card value 
 capture: `Beginning value (USD)` / `Ending value (USD)` / `Period return` still print `UNAVAILABLE` with
 their real `unavailableReason` in both states, unchanged from the wire.
 
-## F84-AC5 REFUSED as literally cut (row `IRPT_FNTEND-W34-S1`, BLOCKING, ARMED)
+## F84-AC5 AMENDED and RE-GRADED PASS (resumption pass, same worker line, post-amendment)
+
+**The issuing COO (`2.0.0_SA_COO~F`) amended the order** (shared-tree commit `6e3d50ab44`), independently re-verifying the
+fixture-substitution finding below and repointing F84-AC5's `<invocation>` fixture path from the nonexistent
+`fixtures/smoke/fe-s-32/qualified.json` to this cell's own already-committed substitute,
+`src/pages/InvestorReporting/__tests__/fe-s-84/fixtures/reporting-qualified.json` -- the SAME file this worker
+authored and measured below as supplementary evidence, now the graded invocation itself. The amendment was pulled
+into this worktree (cherry-pick of `6e3d50ab44`, FE-s-84's task-order file only -- the amendment's other file,
+FE-s-82's task order, is outside this cell's grant and was left untouched). Confirmed by reading the amended
+`<invocation>` line at `:107` of the task-order file: it now names the substitute path.
+
+Re-ran the amended invocation verbatim (WS/PORT substituted only) against a live dev server (port 5983, fresh
+start, this cell's own wave-2 block, port confirmed closed afterward): `EXPECT-STYLE[[data-slot="answer-status"]
+::background-color]: PASS rgb(255, 255, 255)`, `ASSERT-STYLE: 1 of 1 met`, `FIXTURES-MATCH: matched 3 of 3`,
+`KEY-VALIDITY: 3 of 3`, `rc=0` -- identical to both this worker's own original supplementary measurement and the
+COO's independent re-verification. `python .tools/proof-of-spec-check.py` on the updated instance against the
+amended governing order: `VALID (rc=0)`, 0 violations, `invocation-alignment: 6/6 comparable row(s) match modulo
+placeholder expansion; 0 diverge`.
+
+Row `IRPT_FNTEND-W34-S1` is DISARMED per its own stated disarm condition ("disarmed when the issuing COO amends
+the order's `<invocation>` fixture path... and this worker (or a successor) re-runs and flips the TO complete") --
+both halves of that condition are now met by this pass. The row's top label is left as originally filed
+(never edited in place, per the channel's append-only rule); this section and the commit that carries it are the
+disarming record, per the order's own instructions from the resuming COO.
+
+## Original entry, for the record (row `IRPT_FNTEND-W34-S1`, BLOCKING, ARMED at filing time, now DISARMED above)
 
 AC5's literal `<invocation>` names `fixtures/smoke/fe-s-32/qualified.json`; the order's own BOUNDS text
 flags fixture names in AC2/AC4/AC5 as illustrative and says "if fe-s-32/qualified.json is not the right
@@ -154,13 +179,11 @@ committed) and the TO is re-run and flipped complete.
   `EXPECT-STYLE[[data-slot="answer-status"]::border-color]: PASS rgb(196, 203, 219)`,
   `ASSERT-STYLE: 2 of 2 met`, `FIXTURES-MATCH: matched 3 of 3`, `KEY-VALIDITY: 3 of 3` -- **PASS**.
   Controls (below) discriminate.
-- **F84-AC5** (qualified state's background no longer amber-50): run LITERALLY (fixture path unchanged
-  beyond `<WS>`/`<PORT>`): `Error: ENOENT: no such file or directory, open '...\fixtures\smoke\fe-s-32\
-  qualified.json'`, rc=1, no `EXPECT-STYLE`/`ASSERT-STYLE` line -- **FAIL, genuinely measured, NOT
-  self-graded past**. See "F84-AC5 REFUSED as literally cut" above: the styling fix is confirmed correct
-  via a supplementary run against a substitute fixture, but the graded row records the literal crash per
-  row `IRPT_FNTEND-S31`'s own ruling against self-substituting a proof's recorded invocation. Row
-  `IRPT_FNTEND-W34-S1` filed, BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~F`.
+- **F84-AC5** (qualified state's background no longer amber-50): AMENDED by the issuing COO to the
+  substitute fixture (`__tests__/fe-s-84/fixtures/reporting-qualified.json`); re-run against the amended
+  `<invocation>` verbatim: `EXPECT-STYLE[[data-slot="answer-status"]::background-color]: PASS
+  rgb(255, 255, 255)`, `ASSERT-STYLE: 1 of 1 met`, `FIXTURES-MATCH: matched 3 of 3`, `KEY-VALIDITY: 3 of 3`,
+  `rc=0` -- **PASS**. See "F84-AC5 AMENDED and RE-GRADED PASS" above. Row `IRPT_FNTEND-W34-S1` DISARMED.
 - **F84-AC6** (whole suite green): dev server stopped first (`curl` confirmed port 5983 closed, `000`),
   `IRPT_FE_DEV_PORT` unset: `643 pass`, `26 skip`, `0 fail`, `2678 expect() calls`, `Ran 669 tests
   across 125 files` -- **PASS, genuine**. This cell's own AC3 test SKIPPED by name (precondition
@@ -221,13 +244,11 @@ five committed PNG captures under this worker's deliverables folder
 
 ## `<status>`
 
-**NOT flipped to `complete` -- left `pending`.** F84-AC1/AC2/AC3/AC4/AC6 genuinely PASS and F84-AC7
-(judgment) is RECORDED with no self-graded verdict, but **F84-AC5 genuinely FAILs as literally cut**
-(row `IRPT_FNTEND-W34-S1`, BLOCKING, ARMED, disarm_owner `2.0.0_SA_COO~F`). The proof-of-spec instance
-is structurally `VALID (rc=0)` -- `python .tools/proof-of-spec-check.py <instance> F84-AC1,...,F84-AC7
---governing-order <TO>` -- but per this order's own bound ("REFUSE any criterion you cannot satisfy as
-written... an order defect is reported, and the issuer amends it") and the standing bar ("rc 0 AND every
-mechanical criterion PASS-by-output, then flip... A FAIL row leaves the order open -- a VALID instance is
-not a met order"), a VALID instance with one genuine FAIL row does not meet the order. The fix itself
-(Fix 2) is proven correct by supplementary evidence; only F84-AC5's literal fixture path needs a
-task-order text amendment before this TO can be re-run and flipped complete.
+**Flipped to `complete`.** The issuing COO amended F84-AC5's `<invocation>` fixture path (shared-tree
+commit `6e3d50ab44`, pulled into this worktree); re-run against the amended invocation, F84-AC5 now
+genuinely PASSes (`ASSERT-STYLE: 1 of 1 met`, rc=0). F84-AC1/AC2/AC3/AC4/AC6 stand as originally measured
+(PASS), F84-AC7 (judgment) RECORDED with no self-graded verdict. `python
+.tools/proof-of-spec-check.py <instance> F84-AC1,...,F84-AC7 --governing-order <amended TO>` ->
+`VALID (rc=0)`, 0 violations. Every non-judgment criterion is PASS-by-output against the amended order, so
+per the standing bar this TO now meets its order. Row `IRPT_FNTEND-W34-S1` DISARMED (see "F84-AC5 AMENDED
+and RE-GRADED PASS" above).
