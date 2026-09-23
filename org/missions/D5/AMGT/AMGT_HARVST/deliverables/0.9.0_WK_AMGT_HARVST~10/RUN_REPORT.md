@@ -73,13 +73,34 @@ as row `AMGT_HARVST-Z-W10-S8` (ARMED). **The 11 bronze objects are safe and alre
 present** (see Verify below); only their silver rows are missing, recoverable by a future code fix
 re-running upload-harvest against the same pending outbox rows, no further vendor call needed.
 
-## Verify (item 6)
+## Phase 0c -- the silver rebuild (row `AMGT_HARVST-Z-W10-S8`, NO vendor call)
 
-- (a) **bronze_reread 14 of 14, mismatch 0** -- every bronze key this run put (3 sa + 11 wsj
-  articles; the wsj re-read succeeds even though their silver step failed) was re-read from S3 and
-  its sha256 matched the locally-recorded hash exactly.
-- (b) **silver_article_rows 3, bronze_articles 14** -- NOT equal, honestly, because of row -S8
-  (wsj's 11 silver rows never landed).
+Fixed `lib/opal_data_harvest/silver_from_bronze.py`'s `_extract_wsj`, per the issuer's
+`C-HV-SILVER-FROM-BRONZE` contract reading: the article-bearing field (`articleData`) stays a
+single nested struct, typed exactly as before; every OTHER `pageProps` key (the frontend config --
+ads config, feature flags, optimizely/statsig config, etc. -- the actual source of the mixed-type
+conflict) is now kept VERBATIM in one JSON TEXT column (`page_config_json`) instead of being
+spread across unstable top-level columns. Nothing dropped, nothing summarised; bronze was, and
+remains, the untouched original either way. Two new arms added to `test_silver_from_bronze.py`
+(14 -> 16): `test_page_config_mixed_type_key_still_writes` (reproduces the exact
+string-where-sibling-holds-boolean conflict across a grouped `pa.Table.from_pylist([...])` batch;
+now writes) and `test_no_key_loss_from_bronze_to_silver` (every top-level bronze `pageProps` key is
+recoverable from the silver row; `no_key_loss_recovered 7 of 7 missing []`).
+
+**Rebuild, no vendor call:** `python -m lib.opal_data_harvest upload-harvest --retrieval-mode
+backfill --max-objects 1000` against the SAME main runtime (the already-held bronze raw files and
+the already-existing bronze objects -- `put_article_bronze` found every key already present and
+skipped the write; only the now-fixed `silver_from_bronze` extraction and the S3 silver write ran).
+Result: `remaining_pending 11 -> 0`, all 11 previously-stuck `wsj:<article_id>` rows now
+`status=uploaded`.
+
+## Verify (item 6, RE-MEASURED after the Phase 0c rebuild)
+
+- (a) **bronze_reread 14 of 14, mismatch 0** -- unchanged; bronze was always safe. Every bronze key
+  this run put (3 sa + 11 wsj articles) re-reads from S3 and matches its locally-recorded sha256
+  exactly.
+- (b) **silver_article_rows 14, bronze_articles 14 -- EQUAL**, after the Phase 0c fix and rebuild
+  (was 3 vs 14 before the fix).
 - (c) Planned vs actual listing pages: 25 planned for every publisher; actual pages are not
   separately counted by `run_job` (it counts accepted/rejected articles, not raw page fetches) --
   sa fetched enough pages to yield 24 accepted + 6 rejected before its 502; wsj fetched enough for
@@ -100,14 +121,15 @@ before reaching any session/network code at all.
 
 `seeking-alpha/harvest/silver/article/date=2026-09-23/` (3 rows, sa's new articles).
 `wsj/harvest/silver/listing_hit/date=2026-09-23/` (2 rows, wsj's listing pages).
-**`wsj/harvest/silver/article/` was NOT written this run** -- see row `AMGT_HARVST-Z-W10-S8`.
+`wsj/harvest/silver/article/date=2026-09-23/` (11 rows, written by the Phase 0c rebuild -- 0 before
+the fix, per the issuer's own live-bucket measurement).
 
 ## Stage-9 line (verbatim, for `AMGT_RESAPP`'s driver)
 
-**stage 9 publications for 992_HK_Equity: 3 articles in silver, run 2026-09-23T00:23:01Z**
+**stage 9 publications for 992_HK_Equity: 14 articles in silver, run 2026-09-23T00:23:01Z**
 
-(3, not 14 -- bronze holds all 14 new articles this run captured, but only sa's 3 reached silver;
-wsj's 11 are bronze-safe and pending a code fix for row `AMGT_HARVST-Z-W10-S8`.)
+(14, matching bronze_articles exactly -- Phase 0c's fix and no-vendor-call rebuild landed the 11
+WSJ articles that row `AMGT_HARVST-Z-W10-S8` had blocked.)
 
 ## Bottom line
 
@@ -115,8 +137,11 @@ The Phase 0b fix is proven correct under real, adversarial conditions: a real ve
 the probe, a real verification-repair attempt on bbg, two real re-authentications, and three
 different terminal per-publisher outcomes (error, request_rejected x2) all occurred in ONE
 invocation, and **every publisher still reached its own recorded outcome and the run never
-crashed.** The residual gap is NOT in the handler this order fixed -- it is a separate, newly
-discovered defect in WSJ's silver extraction (row `AMGT_HARVST-Z-W10-S8`), surfaced for the first
-time by this run's real WSJ content, with the affected data safely held in bronze.
+crashed.** The residual gap was NOT in the handler this order fixed -- it was a separate defect in
+WSJ's silver extraction (row `AMGT_HARVST-Z-W10-S8`), surfaced for the first time by this run's
+real WSJ content, fixed entirely offline in Phase 0c (bronze was always safe), and closed by a
+no-vendor-call rebuild through the same uploader path: silver now holds all 14 of this run's new
+articles, matching bronze exactly.
 
-No second live vendor-call invocation was made. The ONE-RUN RULE was honored.
+No second live vendor-call invocation was made, in Phase 1 or in Phase 0c. The ONE-RUN RULE was
+honored throughout.
