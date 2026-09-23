@@ -111,7 +111,43 @@ precedes any cutover and CVO boundary review follows it.
   prefix to paginate (it lists with `Prefix=` the table prefix, so it should not -- UNVERIFIED
   against a live call, and no live call was made).
 
-## 5. PROVENANCE
+## 5. ADDENDUM -- option (d), the runtime census, and one item closed
+
+Added after ruling records 24896 / 24902. `1.0.0_SA_CTO~Z` ruled the egress ask NOT CARDED,
+because the options list was missing a fourth: **(d) measure a permitted artifact this estate
+already owns**, which needs no sovereign word. The estate-wide search for that artifact belongs
+to `4.0.0_SA_CRO~Z`. Only the half inside THIS lane's own directory is recorded here.
+
+RUNTIME CENSUS, `comp-find 'runtime\s*=|compatible_runtimes' infra/aws/terraform/harvest/`
+-- DENOMINATOR 5 hits across 19 files scanned:
+
+    chatter-axis-schedule.tf:138   runtime = "python3.12"          <- the H03 target
+    print-deps-layer.tf:59         compatible_runtimes = ["python3.11"]
+    api-gateway.tf:73              runtime = "python3.11"
+    scoped-amgt-api.tf:261         runtime = "python3.11"
+    build_zip.py:97                _RUNTIME_PYTHON = "3.12"
+
+1. THE HARVEST PRINT LAYER IS ELIMINATED as a source of target bytes, on TWO independent
+   grounds: `compatible_runtimes = ["python3.11"]` cannot attach to a 3.12 function, and
+   `build_print_deps_layer.py` carries ZERO pyarrow hits while stating at its line 36 that it
+   "Targets python3.11 / manylinux2014_x86_64". Of the two precedents named, NEWS-TRENDING-DEPS
+   3.12 plus versioned S3 code is the only live candidate, and it is outside this tree.
+2. THE TOPOLOGY QUESTION IS SETTLED WITHOUT THE BYTE COUNT. A layer ships in this very
+   terraform root today, so `build_zip.py:36`'s "never a layer" is CONFIRMED local policy for
+   this function, not a platform limit.
+3. INPUT TO THE FORK, proposed by nobody: chatter-axis is the ONLY python3.12 function in this
+   root (1 of 4 declared runtimes). A layer built for H03 would be single-consumer with no
+   sibling to amortise it and could not be shared with the three 3.11 functions beside it.
+
+ITEM CLOSED from section 4 -- the paginator does NOT need a wider `s3:ListBucket` prefix.
+`pool_reader.py:652-653` paginates with `Prefix=store.table_prefix(...)`, byte-for-byte the
+call shape the LEGACY path uses at `:346-347`, and `pool_reader.POOL_BUCKET ==
+store.HARVEST_BUCKET == opal-data-harvest` (both resolved by import). The gold prefix rides the
+EXISTING bucket ARN with no new `Resource`.
+⚠ STATE, precisely: this is a STRUCTURAL identity with a call shape already in the grant list.
+It is NOT EXERCISED -- no live S3 call was made or authorized. Exercise it at build time.
+
+## 6. PROVENANCE
 
 `measured` at HEAD `f234d4122d` on SITEZ unless a line says PROXY or UNMEASURED. Instruments:
 `git show` at the candidate pin `ac4316c447`, `comp-read --enumerate` with printed denominators,
