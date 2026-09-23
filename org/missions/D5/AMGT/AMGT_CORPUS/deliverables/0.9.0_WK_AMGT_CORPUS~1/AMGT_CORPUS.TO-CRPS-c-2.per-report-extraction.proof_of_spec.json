@@ -1,0 +1,183 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-2.per-report-extraction.md",
+    "group": "OTHER",
+    "vintage_commit": "40107c6f48fb9ba60b94b936646674699d244ae7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "40107c6f48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-2.per-report-extraction.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/extract.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "extract(bronze_uri, body, ext): one JSON-serialisable document per bronze object, naming bronze_key/bronze_sha256/method_version/type/extractable(/reason). DOCX via zipfile+lxml over word/document.xml + word/styles.xml (paragraphs with resolved style name + bold flag; headings by Heading*/Title style OR an all-bold <=8-word paragraph; tables as rows of cell text). PDF via PyMuPDF get_text('dict') (pages; headings by per-page median-size ratio 1.15x or bold, <=8 words; NEVER find_tables()). XLSX via openpyxl read_only, loaded twice (values, formulas); vendor cache sheets (_CIQHiddenCacheSheet, __FDSCACHE__) never indexed into the workbook at all; mnemonics/factset_codes/calls_seen from quoted upper-case tokens inside formula calls, reading BOTH plain-str formulas and ArrayFormula-typed cells (a real corpus shape -- see the artifact_covered_by AC2 evidence and surprise row AMGT_CORPUS-Z-W1-S1). --write measured live against the 123 bronze research-report objects: objects 123 extracted 120 not_extracted 3 crash 0 stored 123. --census measured live: bronze_objects 123 extractions 123 missing 0; k3 pdf 52 text_extractable 52 zero_text 0 median_chars 15642 skeleton_heading_hits 33 of 52; k4 xlsx 43 opened 43 failed 0 with_mnemonics 37 factset_coded 0.",
+      "introduces": ["extract", "classify", "_extract_docx", "_extract_pdf", "_extract_xlsx", "_formula_text", "_run_write", "_run_census"],
+      "artifact_covered_by": ["AC1", "AC2", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_extract.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "4 tests under the package poison, each building its own fixture in code (zipfile for DOCX, PyMuPDF for PDF, openpyxl for XLSX) -- no boto3/network call anywhere, extract() takes bytes directly: (1) DOCX headings found both routes -- a Heading1-style paragraph and a separate bold short paragraph both land in headings, a long plain paragraph does not; (2) PDF heading found by size (24pt vs 10pt body, page median ratio) and the long body line is excluded (negative arm); (3) XLSX: PX_LAST found in mnemonics (from a real =BDP(...) quoted arg), FF_SALES lands in factset_codes (from a real =FDS(...) quoted arg), and __FDSCACHE__ is listed in `sheets` but has no `sheet_data` entry and its cell text is absent from the whole serialised document (proving it was never opened); (4) PNG gives extractable False with reason 'not-extracted: png'.",
+      "artifact_covered_by": ["AC1", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/cards/K3_K4_pdf_and_workbook_extractability.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Answers K3 (yes -- 52 of 52 PDF-only reports produced extractable text, 33 of 52 surfaced a skeleton-name heading) and the first half of K4 (yes -- 43 of 43 workbooks opened without Excel; 37 of 43 carry real quoted-token mnemonics; factset_coded reads 0 of 43 under the ruled literal-quoted-token method because the corpus's FactSet-coded variant references its mnemonic by CELL REFERENCE rather than a literal quoted string -- documented with direct cell-level evidence and handed off via AMGT_CORPUS-Z-W1-S1) with the printed --census lines quoted verbatim as evidence, and names what it could not measure (why 19 of 52 PDFs show no skeleton heading; whether cell-reference resolution would raise the FactSet count).",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Row AMGT_CORPUS-Z-W1-S1 appended (append-only channel, validated by .tools/surprise-row-gate.py: 1 new row of 4 total checked, all step-7/step-10 fields present) recording the cell-reference-vs-literal-quoted-token gap and the ArrayFormula bug this worker caught and fixed in the same pass before the wrong extraction objects were left standing.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_extract.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_extract.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "....                                                                     [100%]\n4 passed in 0.33s",
+      "denominator": "4 of 4 tests passed, 0 failed (DOCX both-routes, PDF size-heading+negative-arm, XLSX mnemonic+factset_code+cache-sheet-not-opened, PNG not-extracted)",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.extract --census -- expect bronze_objects N extractions N missing 0 ... k3 pdf N text_extractable N zero_text N median_chars N skeleton_heading_hits N of N ... k4 xlsx N opened N failed N with_mnemonics N factset_coded N",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.extract --census 2>&1 | tail -4",
+      "output_evidence": "bronze_objects 123 extractions 123 missing 0\nk3 pdf 52 text_extractable 52 zero_text 0 median_chars 15642 skeleton_heading_hits 33 of 52\nk4 xlsx 43 opened 43 failed 0 with_mnemonics 37 factset_coded 0",
+      "denominator": "123 of 123 bronze research-report objects each carry an extraction object (missing 0), landed by a live --write run beforehand; 52 pdf + 43 xlsx + 25 docx + 3 png = 123 total, matching the store",
+      "expect": "(?s)bronze_objects (\\d+) extractions \\1 missing 0\\b.*k3 pdf \\d+ text_extractable \\d+ zero_text \\d+ median_chars \\d+ skeleton_heading_hits \\d+ of \\d+.*k4 xlsx \\d+ opened \\d+ failed \\d+ with_mnemonics \\d+ factset_coded \\d+",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "JUDGMENT (the CVO's): the K3/K4 card answers both PRD questions from your printed lines. Record its path and text, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no invocation; the card is read at the path cited in output_evidence",
+      "output_evidence": "org/missions/D5/AMGT/AMGT_CORPUS/cards/K3_K4_pdf_and_workbook_extractability.md -- answers K3 (yes, extractable, 52/52 non-empty text, 33/52 skeleton-name headings) and the first half of K4 (yes, opens without Excel 43/43; factset_coded reads 0/43 under the ruled quoted-token method because the corpus's FactSet mnemonic argument is a cell reference, not a literal -- documented with direct evidence, handed off via surprise row AMGT_CORPUS-Z-W1-S1) using the --census lines quoted verbatim, and names what it could not measure (the 19-of-52 heading gap; whether cell-reference resolution would raise with_mnemonics/factset_coded).",
+      "denominator": "N/A -- judgment",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (task order AC3 carries judgment=\"true\", no <invocation>/<expect>): the substitute oracle is 3.0.0_SA_CVO~Z at L9, who reads the cited card against the PRD's K3/K4 questions. This row records the card's path and content and carries no PASS/FAIL verdict, per the order's own instruction."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "..........................                                               [100%]\n26 passed in 0.40s",
+      "denominator": "26 of 26 tests passed (22 from CRPS-c-1/c-4's suites + 4 from this cell's test_extract.py), 0 failed",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "python .scratch/c2/hyg.py -- expect outside_allowed [] ... changed_files N ... bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c2/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 6\nlib/research/corpus/extract.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_extract.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "6 of 6 changed paths inside this order's <paths>/deliverables grant (0 outside_allowed) -- extract.py, test_extract.py, the K3/K4 card, INVESTIGATION_v1.md, the task order (status flip) and the proof_of_spec.json itself; 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, bad 0 of 2. Base: this order's starting commit 49082f918c",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/c2/mutant.py (not committed) compares the DOCX bold-heading selection rule (ALL text-bearing runs bold, word_count <= 8) against a plausible bug (ANY run bold, no word cap) over a small in-code paragraph fixture set.",
+      "expected": "FIX selects only the short all-bold paragraph. MUTANT (the plausible bug) additionally selects a long paragraph with just one bold run among several plain ones, so FIX != MUTANT.",
+      "observed": "FIX (all-bold, <=8 words): ['Segment Highlights']. MUTANT (any-bold, no cap): ['Segment Highlights', 'This is a long paragraph with only one bold run among many plain runs and it still gets flagged by the buggy rule.']. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_extract.py's full file run twice back to back; --write run against the live store (once, after deleting the 122 stale objects the first buggy run had left, since bronze's never-overwrite precondition means a second content-differing write cannot land at the same key -- see AC2 evidence and the surprise row); --census run twice back to back after --write; .scratch/c2/mutant.py run twice back to back.",
+      "observed": "pytest: '4 passed in 0.33s' / '4 passed in ~0.3s' -- same pass count both runs. --census run twice: identical lines both times (bronze_objects 123 extractions 123 missing 0; k3/k4 lines byte-identical), confirming the store reads are stable once --write has landed. mutant.py: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical selections.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Typing found mnemonics onto standard Bloomberg mnemonics, or resolving a cell-referenced FactSet mnemonic to its label text",
+      "reason": "Section 1: 'Typing the typing onto mnemonics is CRPS-c-9's.' This cell only finds and reports quoted tokens inside formula calls, exactly as ruled; it does not resolve a cell reference to the label text it points at (that would be a different, larger extraction task -- named in the K3/K4 card and surprise row AMGT_CORPUS-Z-W1-S1, not attempted here)."
+    },
+    {
+      "item": "OCR of any PDF or any classification/period/typing work on extracted documents",
+      "reason": "Section 1 'What this cell does NOT do': 'no typing, classing or period work (that is CRPS-c-3), no OCR, no library read, no Claude call.' Every PDF in this population already carries a text layer (zero_text 0 of 52), so OCR absence does not affect K3's answer."
+    },
+    {
+      "item": "Any read of the OneDrive research library, or any vendor/Claude API call",
+      "reason": "BOUNDS: 'THIS CELL NEVER TOUCHES THE LIBRARY: it reads bronze from the store' and 'NEVER CALL A VENDOR API OR THE CLAUDE API.' extract.py's only imports beyond stdlib/lxml/fitz/openpyxl are lib.research.harvest.store (used only in the CLI's --write/--census, both S3-only); no library.py/backlog.py import exists in this module. test_extract.py never calls _run_write/_run_census, so it never touches boto3 either -- proven by all 4 tests passing under the package poison (which raises on boto3.client/resource/Session.client/subprocess.run/Popen/socket.create_connection)."
+    },
+    {
+      "item": "Using PyMuPDF's find_tables() for PDF heading detection",
+      "reason": "BOUNDS, ISSUER NOTES: 'the find_tables prohibition is an estate lesson (PyMuPDF reports a wrapped Word heading as a 2x2 table).' _extract_pdf never calls find_tables(); PDF headings come only from get_text('dict') span size/bold heuristics."
+    },
+    {
+      "item": "Opening or reading any cell of a sheet named _CIQHiddenCacheSheet or __FDSCACHE__",
+      "reason": "Section 1: 'Per sheet NOT named _CIQHiddenCacheSheet or __FDSCACHE__, emit labels ... and mnemonics.' _extract_xlsx skips these two sheet names BEFORE ever indexing into the workbook object for them (values_wb[name]/formulas_wb[name] are never called) -- proven offline by test_xlsx_mnemonic_and_factset_code_and_cache_sheet_not_opened, which asserts the cache sheet's own cell text is absent from the ENTIRE serialised document, not merely from its own sheet_data entry."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W1-S1"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_extract.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 4 passed, 0 failed"
+    },
+    {
+      "tool": "extract CLI --census (AC2)",
+      "invocation": "python -m lib.research.corpus.extract --census",
+      "result": "rc 0; bronze_objects 123 extractions 123 missing 0; k3 pdf 52 text_extractable 52 zero_text 0 median_chars 15642 skeleton_heading_hits 33 of 52; k4 xlsx 43 opened 43 failed 0 with_mnemonics 37 factset_coded 0"
+    },
+    {
+      "tool": "pytest full package (AC4)",
+      "invocation": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 26 passed, 0 failed"
+    },
+    {
+      "tool": ".scratch/c2/hyg.py (AC5, this order's own hygiene shape)",
+      "invocation": "python .scratch/c2/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 6; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    },
+    {
+      "tool": "extract CLI --write (build step, run against the live store after clearing 122 stale objects from a first buggy run)",
+      "invocation": "python -m lib.research.corpus.extract --write",
+      "result": "rc 0; objects 123 extracted 120 not_extracted 3 crash 0 stored 123"
+    },
+    {
+      "tool": "boto3 s3 delete_objects (one-time remediation of the first buggy --write's 122 wrongly-shaped extraction objects)",
+      "invocation": "client.delete_objects(Bucket='opal-data-harvest', Delete={'Objects': [...122 keys under research-report-extract...]})",
+      "result": "rc 0; deleted batch 122, errors 0 -- necessary because bronze_put's never-overwrite precondition would otherwise pin the wrong-content documents at those keys forever"
+    },
+    {
+      "tool": ".scratch/c2/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/c2/mutant.py",
+      "result": "rc 0; FIX ['Segment Highlights']; MUTANT ['Segment Highlights', '...long one-bold-run paragraph...']; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/extract.py lib/research/corpus/tests/test_extract.py org/missions/D5/AMGT/AMGT_CORPUS/cards/K3_K4_pdf_and_workbook_extractability.md org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-2.per-report-extraction.md",
+      "result": "PENDING -- run after this instance is validated"
+    }
+  ]
+}
