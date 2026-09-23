@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-r-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-4.conftest-poison-for-the-harvest-test-package.md",
+    "group": "OTHER",
+    "vintage_commit": "004f6621c78f4e686a9c0a842b7ceb3d935150b4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "04a235adb7e399b6c1e10d90164f4de9f45b40e6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-4.conftest-poison-for-the-harvest-test-package.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/conftest.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New package-level conftest.py: autouse fixture poisoning SessionManager.refresh and subprocess.run (module/class object attributes, relative-imported to match the package's own import convention -- see row AMGT_HARVST-Z-W14-S2), honouring @pytest.mark.allow_real_session; pre-warms platform.uname()'s cache to avoid poisoning an incidental, harvester-unrelated subprocess call made once by pandas' import machinery.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_poison_control.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New positive control: 3 arms -- SessionManager.refresh raises, subprocess.run raises, and the allow_real_session opt-out is honoured (proven by qualname identity and a real, harmless subprocess call).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_retrieval_provenance.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Only change: @pytest.mark.allow_real_session + docstring added to test_plan_prints_counts_with_zero_network, the one existing test that legitimately spawns a real subprocess.run (to drive the CLI's own zero-network 'plan' command in a separate interpreter) and would otherwise be broken by the new package poison. No assertion, no behaviour, changed. AC0/AC2 confirm its outcome (part of the 18 passed) is identical before and after.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/auth.py",
+      "kind": "script",
+      "commit_or_etag": "edbea6bf9319156527c89b7feb58bcaf0f841794",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only per BOUNDS: consulted only to find SessionManager.refresh's real signature/location. AC3's diff confirms it is absent from the changed-file set.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "cell_refs=\"HVST-r-4\": BEFORE any edit, eight baseline lines recorded; measured at the cut: 18 passed; 12 passed; 16 passed; 6 passed; 7 passed; 2 failed 18 passed; 5 passed; 1 failed 3 passed",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in test_retrieval_provenance test_bronze_capture test_silver_from_bronze test_legacy_upload test_harvest_grammar test_worker test_catalog test_verification; do echo \"$t :: $(python -m pytest lib/opal_data_harvest/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "test_retrieval_provenance :: 18 passed in 1.02s\ntest_bronze_capture :: 12 passed in 0.17s\ntest_silver_from_bronze :: 16 passed in 0.56s\ntest_legacy_upload :: 6 passed in 0.63s\ntest_harvest_grammar :: 1 failed, 6 passed in 0.38s\ntest_worker :: 2 failed, 18 passed, 2 subtests passed in 0.56s\ntest_catalog :: 5 passed in 0.44s\ntest_verification :: 1 failed, 3 passed, 2 subtests passed in 0.15s",
+      "denominator": "8 of 8 baseline lines recorded, run BEFORE any HVST-r-4 edit. 7 of 8 lines match the order's stated preflight EXACTLY (18/12/16/6/[2f 18p]/5/[1f 3p]); the test_harvest_grammar line measured '1 failed, 6 passed' where the order's preflight states '7' (implying 0 failed) -- filed as row AMGT_HARVST-Z-W14-S1 (premise discrepancy, not caused by this cell -- AC3 shows no file outside conftest.py/test_poison_control.py/test_retrieval_provenance.py changed). AC2 re-measures this exact invocation after the edit and both are IDENTICAL, so this discrepancy does not affect AC0/AC2's own PASS/FAIL, only the order's stale preflight text.",
+      "status": "PASS",
+      "status_reason": "All 8 lines recorded; PASS is warranted because AC0's own purpose (record a baseline before any edit) is satisfied in full -- the one divergence from the order's TEXT is a pre-existing environment fact (rest_fetch not importable), not a measurement failure, and is filed as a surprise row rather than silently absorbed.",
+      "expect": "(?s)test_retrieval_provenance ::.*test_bronze_capture ::.*test_silver_from_bronze ::.*test_legacy_upload ::.*test_harvest_grammar ::.*test_worker ::.*test_catalog ::.*test_verification ::"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cell_refs=\"HVST-r-4\": every arm passes and no \"failed\" -- including one arm per poisoned attribute that DELIBERATELY calls it and asserts it RAISES, and one arm proving the opt-out marker restores the real attribute",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_poison_control.py -v --color=no -p no:cacheprovider 2>&1 | tail -12",
+      "output_evidence": "lib/opal_data_harvest/test_poison_control.py::test_poisoned_session_manager_refresh_raises PASSED [ 33%]\nlib/opal_data_harvest/test_poison_control.py::test_poisoned_subprocess_run_raises PASSED [ 66%]\nlib/opal_data_harvest/test_poison_control.py::test_allow_real_session_marker_restores_the_real_attributes PASSED [100%]\n\n============================== 3 passed in 0.10s ==============================",
+      "denominator": "3 of 3 arms PASS: test_poisoned_session_manager_refresh_raises, test_poisoned_subprocess_run_raises (each deliberately calls the poisoned attribute and asserts HarvestPoisonError), and test_allow_real_session_marker_restores_the_real_attributes (proves the opt-out is honoured, not merely declared, via qualname identity + a real successful subprocess call). Re-run 3 times for determinism (see controls.determinism): 3 passed each time.",
+      "status": "PASS",
+      "expect": "3 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cell_refs=\"HVST-r-4\": each line's passed and failed counts EQUAL its AC0 line: the poison changed no existing test's outcome, and neither pre-existing failure grew",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in test_retrieval_provenance test_bronze_capture test_silver_from_bronze test_legacy_upload test_harvest_grammar test_worker test_catalog test_verification; do echo \"$t :: $(python -m pytest lib/opal_data_harvest/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "test_retrieval_provenance :: 18 passed in 0.90s\ntest_bronze_capture :: 12 passed in 0.17s\ntest_silver_from_bronze :: 16 passed in 0.53s\ntest_legacy_upload :: 6 passed in 0.61s\ntest_harvest_grammar :: 1 failed, 6 passed in 0.34s\ntest_worker :: 2 failed, 18 passed, 2 subtests passed in 0.51s\ntest_catalog :: 5 passed in 0.49s\ntest_verification :: 1 failed, 3 passed, 2 subtests passed in 0.15s",
+      "denominator": "8 of 8 lines compared to AC0: 18=18, 12=12, 16=16, 6=6, '1 failed 6 passed'='1 failed 6 passed', '2 failed 18 passed'='2 failed 18 passed', 5=5, '1 failed 3 passed'='1 failed 3 passed' -- every count EQUAL, 0 of 8 changed, 0 of 2 pre-existing failures grew. Also verified: running the whole package in one invocation (python -m pytest lib/opal_data_harvest/ -q) gives 4 failed, 87 passed (84 base + 3 new test_poison_control.py arms), consistent with the per-file counts and showing no cross-test interference from the new autouse fixture.",
+      "status": "PASS",
+      "expect": "(?s)test_retrieval_provenance :: 18 passed.*test_bronze_capture :: 12 passed.*test_silver_from_bronze :: 16 passed.*test_legacy_upload :: 6 passed.*test_harvest_grammar :: 1 failed, 6 passed.*test_worker :: 2 failed, 18 passed.*test_catalog :: 5 passed.*test_verification :: 1 failed, 3 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cell_refs=\"HVST-r-4\": \"outside_allowed []\" -- only conftest.py, test_poison_control.py and any test file that needed an opt-out marker changed; NO production module changed (not auth.py, not worker.py, not publishers.py, not __main__.py, not silver_from_bronze.py, not uploads.py, not transport.py, not harvest_grammar.py); and every changed file prints \"compiles True crlf 0 non_ascii 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r4/ac3.py",
+      "output_evidence": "base 8aaaacd26379f0b555c24196932da96c0c80d81b\nchanged ['lib/opal_data_harvest/conftest.py', 'lib/opal_data_harvest/test_poison_control.py', 'lib/opal_data_harvest/test_retrieval_provenance.py']\noutside_allowed []\nfile lib/opal_data_harvest/conftest.py compiles True crlf 0 non_ascii 0\nfile lib/opal_data_harvest/test_poison_control.py compiles True crlf 0 non_ascii 0\nfile lib/opal_data_harvest/test_retrieval_provenance.py compiles True crlf 0 non_ascii 0",
+      "denominator": "3 of 3 changed files under lib (git diff --name-only + git status --porcelain for untracked, unioned, against merge-base(HEAD,SITEZ)=8aaaacd26379) are inside the allowed set; 0 outside_allowed; 3 of 3 changed files compile, 0 CRLF bytes, 0 non-ASCII bytes each. None of the 8 named production modules (auth.py, worker.py, publishers.py, __main__.py, silver_from_bronze.py, uploads.py, transport.py, harvest_grammar.py) appear in the changed set.",
+      "status": "PASS",
+      "expect": "outside_allowed \\[\\]"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cell_refs=\"HVST-r-4\": \"collected_conftest <path>\" naming the conftest pytest actually loads for this package (measured, not assumed), and \"autouse True\" for the poison fixture",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r4/ac4.py",
+      "output_evidence": "collected_conftest lib/opal_data_harvest/conftest.py\nfixture_occurrences_in_output 3 declared_as_explicit_arg_in_test_file False\nautouse True",
+      "denominator": "Measured via pytest's own --fixtures-per-test -v output on test_poison_control.py (never assumed from the file's on-disk location): the fixture line 'lib/opal_data_harvest/conftest.py:88' is the ONE conftest.py collected for this package, and it appears once per test (3 of 3 tests) despite NOT being declared as an explicit argument in any test -- which is exactly what autouse means. autouse True.",
+      "status": "PASS",
+      "expect": "collected_conftest lib/opal_data_harvest/conftest\\.py"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutated conftest.py's fixture decorator from @pytest.fixture(autouse=True) to @pytest.fixture(autouse=False) (the poison installer no longer runs unless a test explicitly requests it), then re-ran test_poison_control.py, then restored the original file byte-for-byte (diff confirmed IDENTICAL) before any commit.",
+      "expected": "With autouse disabled, the two poison-raising arms should FAIL differently (reaching the REAL SessionManager.refresh / subprocess.run instead of the poison), proving the positive control actually discriminates poisoned-vs-real rather than passing regardless.",
+      "observed": "MUTANT run: test_poisoned_session_manager_refresh_raises FAILED with AttributeError: 'SessionManager' object has no attribute 'root' (the REAL refresh() ran); test_poisoned_subprocess_run_raises FAILED with 'DID NOT RAISE HarvestPoisonError' (the REAL subprocess.run ran, silently, with no visible I/O since the args were harmless). 2 of 3 arms failed as expected; the opt-out arm still passed (it does not depend on autouse). REAL run (restored file): 3 of 3 PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest lib/opal_data_harvest/test_poison_control.py -q --color=no -p no:cacheprovider, run 3 times consecutively with no code change between runs.",
+      "observed": "3 passed / 3 passed / 3 passed -- identical every time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Explaining or root-causing row AMGT_HARVST-Z-W10-S3's dotted-string monkeypatch mechanism",
+      "reason": "Explicitly out of this cell's scope per the order's own text: the poison CONTAINS the hazard (a missed per-test patch can no longer reach a real process at all), it does not explain the mechanism. Row -Z-W10-S3 stays ARMED."
+    },
+    {
+      "item": "Any change to lib/opal_data_harvest/auth.py or any other production module",
+      "reason": "auth.py is READ-ONLY per BOUNDS; consulted only to find SessionManager.refresh's real location. AC3 confirms no production module changed."
+    },
+    {
+      "item": "A registered pytest marker for allow_real_session in pytest.ini",
+      "reason": "pytest.ini is outside this cell's <paths> grant. The marker is registered programmatically in conftest.py's pytest_configure hook instead (config.addinivalue_line), which is sufficient to silence the unregistered-marker warning and has identical effect; pytest.ini carries no strict-markers/filterwarnings=error setting that would otherwise fail on it."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W14-S1: the order's own preflight/AC0 text states test_harvest_grammar measured '7 [passed]' at this cut; re-measured in this worktree it is '1 failed, 6 passed' (ModuleNotFoundError: No module named 'rest_fetch'), a third pre-existing failure the order does not name. Not caused by, and not fixed by, this cell -- AC0/AC2 grade identically either way since both sides of that comparison are this cell's own measurements.",
+    "AMGT_HARVST-Z-W14-S2: while building the poison, an ABSOLUTE 'from lib.opal_data_harvest.X import Y' import in conftest.py/test_poison_control.py reached a namespace-package DUPLICATE module (this site's pytest loads this package as the bare opal_data_harvest, not lib.opal_data_harvest, absent a lib/__init__.py) -- a new manifestation of the same dual-module-object class row AMGT_HARVST-Z-W10-S3 names, this time via import style rather than a dotted monkeypatch string. Fixed here by using relative imports throughout (matching the package's own convention); the general condition stays ARMED for the rest of the estate."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (baseline, AC0/AC2)",
+      "invocation": "python -m pytest lib/opal_data_harvest/<file>.py -q --color=no -p no:cacheprovider",
+      "result": "8 of 8 files: identical pass/fail counts before and after the poison was added"
+    },
+    {
+      "tool": "pytest (positive control, AC1)",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_poison_control.py -v --color=no -p no:cacheprovider",
+      "result": "3 passed, stable across 3 repeated runs"
+    },
+    {
+      "tool": ".scratch/r4/ac3.py (diff + compile/CRLF/non-ASCII check)",
+      "invocation": "python .scratch/r4/ac3.py",
+      "result": "outside_allowed []; 3 of 3 changed files compile, 0 CRLF, 0 non-ASCII"
+    },
+    {
+      "tool": ".scratch/r4/ac4.py (conftest collection + autouse proof via pytest --fixtures-per-test)",
+      "invocation": "python .scratch/r4/ac4.py",
+      "result": "collected_conftest lib/opal_data_harvest/conftest.py; autouse True"
+    },
+    {
+      "tool": "pytest lib/opal_data_harvest/ (whole-package cross-check, not itself a graded criterion)",
+      "invocation": "python -m pytest lib/opal_data_harvest/ -q --color=no -p no:cacheprovider",
+      "result": "4 failed, 87 passed -- consistent with the 8 per-file baselines plus test_poison_control.py's 3 new arms; no cross-test interference"
+    }
+  ]
+}
