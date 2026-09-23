@@ -1,5 +1,15 @@
 # Review handoff, 2026-09-23
 
+H's 17:48:27Z re-review confirms the original three controls fixed but FAILS
+`f28faad15b` for comprehension, loop and unpacking rebinding. The next candidate
+collects binding contexts conservatively, isolates comprehension targets,
+tracks enclosing walrus assignments and invalidates cross-scope rebindings.
+Related with/except/pattern/import/definition/augmented/delete forms are tested;
+ambiguous import aliases retain known write candidates. Unpacked open keywords
+cannot assume read mode. Twenty-nine more controls pass; full corpus 178 PASS.
+This remains producer evidence awaiting independent H re-review. See
+`evidence/SCANNER_BINDING_FIX.json`; earlier failures remain in the record.
+
 H review `b04336c4d8` FAILS the original static census in `d382f2a30e` for
 lambda/class-body omissions and safe-global inheritance over parameters.
 That static zero-write claim is withdrawn. Corrected scanner candidate covers
