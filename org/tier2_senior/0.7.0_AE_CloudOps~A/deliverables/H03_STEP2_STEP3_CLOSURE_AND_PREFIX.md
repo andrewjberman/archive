@@ -235,8 +235,12 @@ writer/settings tuple, invalidating on either change with the initial tuple NOT_
 the correct response -- and it makes unaccepted-writer detection load-bearing rather than
 belt-and-braces.
 
-⭐ THE UNPRICED ALTERNATIVE: MATCH THE WRITER INSTEAD OF DETECTING DIVERGENCE FROM IT. The
-whole tuple-binding apparatus exists BECAUSE the reader is nine majors behind. 15.0.2 was
+⭐ THE UNPRICED ALTERNATIVE: MATCH THE WRITER INSTEAD OF DETECTING DIVERGENCE FROM IT.
+⚠ CORRECTED BY `4.0.0_SA_CRO~Z` AND THE CORRECTION IS ACCEPTED: this paragraph first said
+version equality would "collapse the whole tuple-binding apparatus to nothing". IT WOULD NOT.
+Runtime, package identity, writer SETTINGS and future changes all remain in the compatibility
+matrix regardless of version equality, so the controls recorded in `0cfebbdb09` are NOT
+retired by matching versions -- ONE AXIS of the matrix closes, not the harness. 15.0.2 was
 selected because `pyiceberg-nessie-deps:3` is what the estate was found to own -- an
 AVAILABILITY fact, not a design preference -- and three layers is not necessarily the whole
 estate. Whether a newer owned cp312 artifact exists is the same question as option (d), which
@@ -244,18 +248,26 @@ paid off once already.
 
 ⛔ CONSTRAINT FROM THIS LANE, WHICH DECIDES THE ORDER OF OPERATIONS: the 15.0.2 + NumPy 1.26.4
 closure is 206,249,766 of 209,715,200 bytes -- **98.35% of the ceiling, 3,465,434 bytes left**.
-PyArrow has not shrunk across nine majors, so a matching-version reader may not fit the 200 MiB
-candidate ceiling at all, forcing either a stated ceiling departure or a different topology.
-⚠ THIS IS A NAMED RISK, NOT A MEASUREMENT -- no cp312 manylinux PyArrow 24 bytes are held here
-and none were fetched. The implied order is: find whether a newer owned artifact exists,
-MEASURE ITS CLOSURE AGAINST THE CEILING FIRST, then compare designs. Sizing after choosing is
-the expensive order.
+A different-version reader's closure must therefore be measured against the ceiling BEFORE the
+design is compared, because 1.65% is not enough room to absorb an unexamined difference.
+⛔ CORRECTED BY `4.0.0_SA_CRO~Z`, ACCEPTED, AND IT IS THE SAME DEFECT TWICE: this paragraph
+first argued "PyArrow has not shrunk across nine majors, so a matching-version reader may not
+fit". THAT IS AN UNMEASURED TREND ASSERTED AS A CONSTRAINT. Major-version growth is not a
+measured size trend, and dependency differences also move the total -- the direction is simply
+NOT KNOWN here. A 24.x closure could be larger, smaller, or comparable.
+⚠ WHAT SURVIVES IS ONLY THE ORDER OF OPERATIONS, which needs no trend at all: find whether a
+newer owned artifact exists, MEASURE ITS CLOSURE AGAINST THE CEILING FIRST, then compare
+designs. Sizing after choosing is the expensive order, whichever way the bytes fall.
+⛔ PATTERN NOTED AGAINST THIS SEAT: this is the SECOND unmeasured "the number will be bigger"
+claim in one hour (the first was the build-inflation grounds corrected at `763e089850`). Both
+were asserted with real measurements sitting beside them, which is what made them look sound.
 
 THE FORK, owned by `4.0.0_SA_CRO~Z`:
   (i)  reader 15.0.2 + tuple-binding harness -- fits with 1.65%, accepts a live inversion,
        carries the harness permanently.
-  (ii) reader matching the writer -- removes inversion and harness, closure UNMEASURED and
-       possibly over the ceiling, depends on an artifact nobody has looked for.
+  (ii) reader matching the writer -- closes ONE axis of the matrix (not the harness; runtime,
+       package identity and writer settings remain), closure UNMEASURED in EITHER direction,
+       depends on an artifact nobody has looked for.
   ⛔ (ii) is NOT known to be available and may be infeasible on size. This is not a
   recommendation of (ii) over (i) -- it is that (i) is being chosen against an alternative
   that was never on the table.
