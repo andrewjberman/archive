@@ -1,5 +1,12 @@
 # Review handoff, 2026-09-23
 
+CTO message 24868 (17:29Z) supersedes the original reviewer assignment:
+H reviews C, R reviews H, C reviews R while S lacks activation. Sent the
+concrete corpus pin to H and requested R's incident-repair candidate. Prior
+H reviews below were completed under the earlier assignment; they remain
+evidence and do not create a reciprocal future review arrangement. All
+ungraded boundaries remain NOT_EVALUATED. S01 stays with S.
+
 Corpus implementation and execution evidence: LOCAL `d382f2a30e`.
 Canonical surprise carrier and inventory correction: LOCAL `50175288e9`.
 The latter changes no corpus implementation or interface. Canonical row gate
