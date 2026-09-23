@@ -212,7 +212,55 @@ would have hurt. Three independent reasons it could not have been trusted (wrong
 wrong interpreter, and nine major versions apart), where only two were known when it was
 labelled.
 
-## 7. PROVENANCE
+## 7. THE VERSION COUPLING IS ALREADY INVERTED, AND THE ALTERNATIVE IS UNPRICED
+
+Added after footer screen `0adb42da22` and compatibility design `0cfebbdb09`.
+
+MEASURED BY `4.0.0_SA_CRO~Z`: all three screened gold objects declare **Arrow 24.0.0**,
+Parquet 2.6, SNAPPY, PLAIN / RLE / RLE_DICTIONARY, no exposed column or offset indexes; host
+Arrow 24 full reads 3 of 3. No 15.0.2 execution, no compatibility PASS, bloom and data-page
+fields not inspected.
+
+ADOPTED, correcting a loose implication in this seat's own earlier message: a numeric
+writer > reader comparison is NOT a compatibility test. Parquet 2.6 with SNAPPY and
+PLAIN/RLE/RLE_DICTIONARY sits well inside what 15.0.2 reads, so the nine-major gap is not by
+itself evidence of a problem. The DECLARED FEATURE SET is the test.
+
+⛔ BUT THE COUPLING NAMED EARLIER IS NOT PROSPECTIVE -- IT IS ALREADY INVERTED. This seat
+wrote that pinning the reader at 15.0.2 creates a standing coupling because a FUTURE writer
+upgrade could emit newer encodings. The writer is ALREADY 24.0.0. So the design is not
+guarding against future divergence; it ACCEPTS A LIVE NINE-MAJOR INVERSION and builds
+change-detection around it. `4.0.0_SA_CRO~Z`'s binding of the reader digest to an exact
+writer/settings tuple, invalidating on either change with the initial tuple NOT_ACCEPTED, is
+the correct response -- and it makes unaccepted-writer detection load-bearing rather than
+belt-and-braces.
+
+⭐ THE UNPRICED ALTERNATIVE: MATCH THE WRITER INSTEAD OF DETECTING DIVERGENCE FROM IT. The
+whole tuple-binding apparatus exists BECAUSE the reader is nine majors behind. 15.0.2 was
+selected because `pyiceberg-nessie-deps:3` is what the estate was found to own -- an
+AVAILABILITY fact, not a design preference -- and three layers is not necessarily the whole
+estate. Whether a newer owned cp312 artifact exists is the same question as option (d), which
+paid off once already.
+
+⛔ CONSTRAINT FROM THIS LANE, WHICH DECIDES THE ORDER OF OPERATIONS: the 15.0.2 + NumPy 1.26.4
+closure is 206,249,766 of 209,715,200 bytes -- **98.35% of the ceiling, 3,465,434 bytes left**.
+PyArrow has not shrunk across nine majors, so a matching-version reader may not fit the 200 MiB
+candidate ceiling at all, forcing either a stated ceiling departure or a different topology.
+⚠ THIS IS A NAMED RISK, NOT A MEASUREMENT -- no cp312 manylinux PyArrow 24 bytes are held here
+and none were fetched. The implied order is: find whether a newer owned artifact exists,
+MEASURE ITS CLOSURE AGAINST THE CEILING FIRST, then compare designs. Sizing after choosing is
+the expensive order.
+
+THE FORK, owned by `4.0.0_SA_CRO~Z`:
+  (i)  reader 15.0.2 + tuple-binding harness -- fits with 1.65%, accepts a live inversion,
+       carries the harness permanently.
+  (ii) reader matching the writer -- removes inversion and harness, closure UNMEASURED and
+       possibly over the ceiling, depends on an artifact nobody has looked for.
+  ⛔ (ii) is NOT known to be available and may be infeasible on size. This is not a
+  recommendation of (ii) over (i) -- it is that (i) is being chosen against an alternative
+  that was never on the table.
+
+## 8. PROVENANCE
 
 `measured` at HEAD `f234d4122d` on SITEZ unless a line says PROXY or UNMEASURED. Instruments:
 `git show` at the candidate pin `ac4316c447`, `comp-read --enumerate` with printed denominators,
