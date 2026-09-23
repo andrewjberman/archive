@@ -272,7 +272,53 @@ THE FORK, owned by `4.0.0_SA_CRO~Z`:
   recommendation of (ii) over (i) -- it is that (i) is being chosen against an alternative
   that was never on the table.
 
-## 8. PROVENANCE
+## 8. BUILD-INPUT HAZARD -- THE REPO PATH AND THE DEPLOYED LAYER DIVERGE ON PLATFORM
+
+Added after owned-layer census `e0530f9674`. That census priced the alternative in section 7
+and CLOSED IT ON A MEASUREMENT: 17 regions, 18 layer names, 20 versions, 20 hash-verified
+reads, zero errors, and NO matching-writer v24 cp312 Linux artifact. Fork (ii) is unavailable
+in that denominator, so (i) stands on evidence rather than by default. Scoping accepted as
+stated: S3-only packages, containers, other accounts, deleted versions and caches sit outside
+it, and v24 size remains UNKNOWN rather than infeasible.
+
+⛔ THE HAZARD. `infra/aws/lambda/layers/pyiceberg-nessie-deps/python/pyarrow/` -- 125 entries:
+
+    WINDOWS .pyd   19     (_acero, _compute, _csv, _dataset ... all `.cp312-win_amd64.pyd`)
+    WINDOWS .dll   10     (arrow.dll, arrow_acero.dll, arrow_dataset.dll, arrow_flight.dll ...)
+    LINUX   .so     0
+    pyarrow-*.dist-info/WHEEL  ->  Tag: cp312-cp312-win_amd64
+    git ls-files --error-unmatch -> TRACKED | test -e -> PRESENT | git check-ignore -> NOT IGNORED
+
+The DEPLOYED `pyiceberg-nessie-deps:3` carries cp312-cp312-manylinux2014_x86_64. SO THE REPO
+PATH AND THE AWS ARTIFACT SHARE A NAME, A MAJOR VERSION AND THE cp312 TAG, AND DIVERGE ON THE
+ONE ATTRIBUTE THAT DECIDES WHETHER IT RUNS.
+
+⛔ WHY NO GATE DOCUMENTED IN THIS FILE WOULD CATCH IT: a builder resolving the candidate BY
+REPOSITORY PATH packs 29 Windows binaries, and the closure is still satisfied, `verify()`
+still finds every in-scope import packaged, the member set is still present and the byte total
+is still plausible. PLATFORM IS NOT AMONG THE THINGS ANY OF THOSE TEST. It surfaces as an
+import error in the Lambda runtime -- after build, after deploy.
+
+RESOLVED BY `4.0.0_SA_CRO~Z`: candidate identity IS the AWS artifact sha256
+`0e329096eae2bf6c126fc7b71f9ebc832947ac3d0477e7f6b01943f6c085596c`, never the repository
+directory, and expected implementation acceptance includes SOURCE HASH and TARGET WHEEL-TAG
+checks before packaging plus Linux runtime verification -- import-name and byte-size checks
+alone cannot establish platform compatibility. That mechanism makes the counts above
+non-load-bearing, which is the right place for the guarantee to sit.
+
+⚠ INSTRUMENT NOTE, AND IT NEARLY INVERTED THIS SECTION. The first count used
+`ls "$d" | grep -cE '\.pyd$'` and returned 0 WINDOWS / 0 LINUX -- a FALSE ALL-CLEAR. `ls`
+classifies on this box, so lines read `_acero.cp312-win_amd64.pyd*` and a `$`-anchored pattern
+cannot match; stderr had also been suppressed on a read whose EMPTINESS carried the verdict.
+The figures above come from `os.listdir`, corroborated by `comp-find --name` (which located the
+`.pyd` independently), `git ls-files`, and the WHEEL metadata itself -- four reads, three of
+them independent of the broken one. ⚠ They are CloudOps-reported and NOT independently
+recounted by `4.0.0_SA_CRO~Z`, which is stated rather than glossed.
+
+NOT CHASED: why 29 Windows binaries are tracked in a Lambda layer source path is not this
+lane's question and no cleanup is proposed.
+
+## 9. PROVENANCE
 
 `measured` at HEAD `f234d4122d` on SITEZ unless a line says PROXY or UNMEASURED. Instruments:
 `git show` at the candidate pin `ac4316c447`, `comp-read --enumerate` with printed denominators,
