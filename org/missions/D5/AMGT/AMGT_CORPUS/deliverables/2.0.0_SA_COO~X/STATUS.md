@@ -1,10 +1,10 @@
 # AMGT_CORPUS current state
 
 Owner `2.0.0_SA_COO~X`; 2026-09-23. CONTRACT v1.0 / mandate `0e33cea24b`, B08.
-**Corpus report-input adapter built; owner integration blocked by its session authorization.**
+**Corpus report-input adapter built; owner active, pinned consumer integration still awaited.**
 `C1-C3: NOT_EVALUATED` until B00/E0 and independent live acceptance.
 Worktree `C:/tmp/closer-amgt-corpus-x-20260923`; product candidate `4599b05795`, LOCAL.
-Remote SITEZ measured after the MSTR merge: `0e9ed7b1d83c8c0a9e86782446ce5e2802c57aa0`.
+Remote SITEZ last measured: `a762d3508858cca9287e431837ae8ad9480aa5e7`.
 
 Journey: analyst opens one resolved security at localhost:5174, sees retained
 prior reports and reusable corpus context with lineage and honest state, and
@@ -12,7 +12,7 @@ changed inputs invalidate only affected context without losing accepted output.
 
 | Connector | Current state and evidence |
 |---|---|
-| Browser -> auth/scope/bootstrap | NOT_EVALUATED; CTO msg25050 relays operator-reported Boeing render, without retained trace, identity or package digest. B00/E0 remains ungraded; sole owner COO~Z. |
+| Browser -> auth/scope/bootstrap | NOT_EVALUATED; R-9/msg25063 records identity prerequisite exercised by operator MFA/Boeing render. E0 still needs a captured trace and pinned package evidence; sole owner COO~Z. |
 | Scoped API -> corpus consumer | Missing in inspected base; `I4_RUNTIME_JOIN.patch` proposes one additive call in pinned `read_thesis_bundle@1b1244cecf`. Shared source untouched. |
 | Corpus adapter -> substrate | BUILT: `lib/research/corpus/report_input.py`; real retained read plus six isolated pinned-consumer fixture cases. No API/browser grade. |
 | Source/bronze/extract/typed lineage | Prior full census 123 admitted/351 files, 228 excluded; 93 folders, 33 resolved/60 unresolved. Source/bronze/extraction mappings verified for admitted set. |
@@ -46,28 +46,28 @@ overwrite denied, 123 retained byte matches, zero actual S3 PUTs. Scanner remain
 a bounded named-operation instrument, not arbitrary-Python proof. Historical
 order status is untouched; no new order or duplicate implementer is created.
 
-Next, after its session authorization is resolved: COO~Z reviews and integrates
-the pinned Runtime patch, target dependency/permission
+Next: active COO~Z reviews and integrates the pinned Runtime patch,
+target dependency/permission
 closure and explicit client/render mapping, then C traces the same admitted
 security through it. The new library depends on corpus/harvest/naming/PyArrow;
 the API's old deployed closure excludes part of this, so applying the patch is
-not deployment readiness. No additional read reruns are needed to call this live.
+not deployment readiness. Additional backend reads alone would not prove the live connector.
 
-Blockers: shared integration and first hop `2.0.0_SA_COO~Z`; that seat's own
-session restriction goes through CTO to Andrew. An operator-reported authenticated
-render now exists, but the required pinned first-hop evidence is still absent.
-At 20:45:34Z COO~Z reported it read only the interface notice: the pinned
-handoff and patch remain unread there; no rebase, integration or review has
-started and no consumer integration pin exists. CTO already has the requested
-operator wording and has accepted this blocker. This session cannot lift that
-separate restriction. Interface published at 20:44:59Z; candidate review handoff
-sent to CVO at 20:45:19Z. Neither delivery is acceptance.
+Dependencies: shared integration and captured first-hop evidence `2.0.0_SA_COO~Z`.
+The session restriction is RESOLVED: R-9 at `3c7fa06601` and the owner's
+`AMGT_EXPERIENCE/AUTHORITY.md@568f2f0c88` record direct operator authorization.
+That record was read; no deployment or served-write authority is inferred.
+COO~Z's 20:45:34Z report (patch unread, no integration started) is historical;
+no newer consumer integration pin has been handed to C. Interface publication
+at 20:44:59Z and CVO review handoff at 20:45:19Z are not acceptance.
+R-9 returns Price ownership to COO~Z after Y handback; C's surface is unchanged.
 S01/induction `2.0.0_SA_COO~Z`; final acceptance `3.0.0_SA_CVO~Z`.
 MSTR lifted the shared-tree commit hold at 20:47:01Z after merging/pushing
 `0e9ed7b1d8`. This isolated worktree remains in use. Measured diff from
 `1b1244cecf` to that pin is empty for corpus and scoped_amgt.py; the API blob
 is identical (`f38ee60c9ecf26ac4a8c2c54ed2931c51478b020`). This is a bounded
-comparison, not whole-tree compatibility or integration. The pinned patch is
+comparison, not whole-tree compatibility or integration. The pre-merge candidate
+must be carried onto the merged base before integration. The pinned patch is
 still unapplied. CTO reports the dev server is ephemeral and uses the live
 backend; its reported Thesis content incident is not a corpus acceptance pass.
 No repair deployment or production-write authorization is inferred.
