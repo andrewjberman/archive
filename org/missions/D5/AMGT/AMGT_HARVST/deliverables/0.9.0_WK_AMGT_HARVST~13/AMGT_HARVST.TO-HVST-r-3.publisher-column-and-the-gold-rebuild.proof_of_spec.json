@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-r-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-3.publisher-column-and-the-gold-rebuild.md",
+    "group": "OTHER",
+    "vintage_commit": "004f6621c78f4e686a9c0a842b7ceb3d935150b4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "04a235adb7e399b6c1e10d90164f4de9f45b40e6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-3.publisher-column-and-the-gold-rebuild.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~13",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "4793cc8be4e471d20934f264a0747795cc5341e8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "GOLD_MENTION_SCHEMA gains a `publisher` column; mention_rows carries it straight off the silver article row's own `publisher` field (already written by silver_from_bronze.py's article_rows, never re-derived). New _row_publisher(row) reads that column, falling back to the ONE surviving article_key-prefix parse (_publisher_of, called nowhere else) only when the column is absent; daily_rows and event_rows both call _row_publisher instead of _publisher_of directly (three call sites moved).",
+      "introduces": ["_row_publisher"],
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "bf344e7d34f93f47cdaf2a622b0ec6dc1ed5f979",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New _coerce_utc_datetime(value) parses a plain ISO-8601 string clock field into a tz-aware datetime (Z-suffix and +00:00-suffix both handled, same shape as _listing_hit_published_date), applied to published_utc/fetched_at/first_discovered_at where mention_rows reads them off the article row -- needed because 14 of 97 already-landed silver article rows (the exact Lenovo batch row -S8/-S9/-S10's fix moved from pending to uploaded) carry first_discovered_at as a string, which crashed _lag_hours before this fix (surprise row AMGT_HARVST-Z-W13-S1).",
+      "introduces": ["_coerce_utc_datetime"],
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_publication_gold_mention.py",
+      "kind": "test",
+      "commit_or_etag": "bf344e7d34f93f47cdaf2a622b0ec6dc1ed5f979",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Baseline 12 -> 14: test_publisher_column_present (the column equals the silver publisher, and diverges correctly from the article_key prefix when the two disagree) and test_string_clock_fields_coerced_not_dropped (both Z-suffix and +00:00-suffix string clocks coerce to the right datetime and the right lag_hours; a None first_discovered_at still falls back to fetched_at).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_publication_gold_daily.py",
+      "kind": "test",
+      "commit_or_etag": "4793cc8be4e471d20934f264a0747795cc5341e8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Baseline 10 -> 12: test_publishers_distinct_reads_publisher_column_not_prefix (two rows with DIFFERENT article_key prefixes but the SAME publisher column collapse to publishers_distinct=1 -- a prefix parse would wrongly read 2) and test_publishers_distinct_falls_back_to_prefix_when_column_absent (a row with no publisher key at all still resolves via the article_key prefix).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_publication_gold_event.py",
+      "kind": "test",
+      "commit_or_etag": "4793cc8be4e471d20934f264a0747795cc5341e8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Baseline 8 -> 11: test_qualifying_day_reads_publisher_column_not_prefix (two DIFFERENT article_key prefixes, SAME publisher column -> no event forms, discriminating against a prefix-based read that would wrongly qualify the day), test_event_publishers_distinct_reads_column_not_prefix (SAME article_key prefix, DIFFERENT publisher column -> an event DOES form and its own publishers_distinct reads 2, discriminating the other direction), and test_event_publisher_falls_back_to_prefix_when_column_absent (rows with no publisher key at all still resolve via the article_key prefix).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "config_data",
+      "commit_or_etag": "bf344e7d34f93f47cdaf2a622b0ec6dc1ed5f979",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_HARVST-Z-W13-S1 appended (20th row): the 14-row string-clock-field defect on the exact Lenovo batch, class BLOCKING, hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Y. Committed via the audited surprise-row-override for the standing-corpus pass (this worker's dispatched sparse cone materializes only this project's channel file, per row AMGT_HARVST-Z-W11-S1's already-measured class; NOT a second filing of that class, cited here only)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: the newest article_security_mention snapshot's COLUMN LIST printed beside its row count, showing 23 columns with NO publisher column and 86 rows over 3 securities",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r3/shape_before.py",
+      "output_evidence": "{\"column_count\": 23, \"columns\": [\"article_key\", \"security_key\", \"composite_figi\", \"mention_count\", \"mention_in_title\", \"mention_in_lead\", \"first_mention_block\", \"blocks_hit\", \"blocks_total\", \"match_forms\", \"vendor_tagged_primary\", \"vendor_tagged_secondary\", \"co_mentioned_securities\", \"co_mention_count\", \"is_roundup\", \"signal_tier\", \"signal_weight\", \"published_utc\", \"fetched_at\", \"first_discovered_at\", \"lag_hours\", \"bronze_key\", \"record_hash\"], \"has_publisher_column\": false, \"key\": \"amgt/harvest/gold/article_security_mention/date=2026-09-22/part-20260922T210931Z.parquet\", \"row_count\": 86, \"securities_count\": 3, \"securities_distinct\": [\"BA_US_Equity\", \"COST_US_Equity\", \"HD_US_Equity\"]}",
+      "denominator": "1 of 1 run, BEFORE any edit in this cell (captured this session prior to the first code change); NOT re-runnable identically now because gold snapshots ACCUMULATE (section 1 item 4: 'a rebuild does not delete a previous snapshot') -- re-running this exact invocation today reads the NEWEST snapshot, which by AC3's own design is now the REBUILT one; this row cites the actual first-run bytes verbatim rather than a later, different-state re-run",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "each file passes with at least its baseline count (12, 10, 8) and no \"failed\"; the mention file gains an arm asserting the publisher COLUMN is present and equals the silver publisher, and the daily and event files each gain an arm asserting they read the COLUMN rather than parsing article_key",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in test_publication_gold_mention test_publication_gold_daily test_publication_gold_event; do echo \"$t :: $(python -m pytest lib/research/harvest/tests/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "test_publication_gold_mention :: 14 passed in 0.41s | test_publication_gold_daily :: 12 passed in 0.15s | test_publication_gold_event :: 11 passed in 0.14s",
+      "denominator": "3 of 3 files at or above baseline (14>=12, 12>=10, 11>=8), 0 failed across all three; mention's new arm is test_publisher_column_present, daily's are test_publishers_distinct_reads_publisher_column_not_prefix + test_publishers_distinct_falls_back_to_prefix_when_column_absent, event's are test_qualifying_day_reads_publisher_column_not_prefix + test_event_publishers_distinct_reads_column_not_prefix + test_event_publisher_falls_back_to_prefix_when_column_absent -- each daily/event arm constructs rows where the article_key prefix and the publisher column DISAGREE, so a regression to prefix-parsing flips the assertion rather than merely losing coverage",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "three JSON lines, each with a key under amgt/harvest/gold/; the mention line's securities_with_rows now INCLUDES 992_HK_Equity and its pairs exceed 86, because Lenovo's 14 silver rows landed after the round-1 snapshot",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.harvest.publication_gold build-mention --securities-json org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json --as-of \"$(date -u +%Y-%m-%d)\" && python -m lib.research.harvest.publication_gold build-daily --securities-json org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json --as-of \"$(date -u +%Y-%m-%d)\" && python -m lib.research.harvest.publication_gold build-event --securities-json org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json --as-of \"$(date -u +%Y-%m-%d)\"",
+      "output_evidence": "{\"articles_read\": 97, \"key\": \"amgt/harvest/gold/article_security_mention/date=2026-09-23/part-20260923T021256Z.parquet\", \"pairs\": 98, \"securities_with_rows\": [\"992_HK_Equity\", \"BA_US_Equity\", \"COST_US_Equity\", \"HD_US_Equity\"], \"tier_counts\": {\"A\": 49, \"B\": 19, \"C\": 13, \"D\": 17}} | {\"days\": 266, \"key\": \"amgt/harvest/gold/chatter_daily/date=2026-09-23/part-20260923T021320Z.parquet\", \"rows\": 1596, \"rows_per_security\": 266, \"securities\": 6} | {\"events\": 5, \"events_per_security\": {\"992_HK_Equity\": 0, \"BA_US_Equity\": 2, \"COST_US_Equity\": 2, \"HAL_US_Equity\": 0, \"HD_US_Equity\": 1, \"VLO_US_Equity\": 0}, \"key\": \"amgt/harvest/gold/chatter_event/date=2026-09-23/part-20260923T021336Z.parquet\", \"securities\": 6}",
+      "denominator": "3 of 3 build commands returned rc 0 with one JSON line each, all three keys start with the required amgt/harvest/gold/ prefix; securities_with_rows includes 992_HK_Equity (was absent at 86/83 in round 1) and pairs=98 exceeds 86 by 12 -- 11 net new mention rows from the 14 newly-readable Lenovo-batch articles (some produced 0 or >1 pairs depending on how many of the 6 tracked securities each names) plus 3 pre-existing-batch sa articles that were ALSO previously blocked by the same string-clock crash and now contribute; run once, live, no vendor call (silver reads + a conditional gold PUT only, per BOUNDS)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the rebuilt snapshot's COLUMN LIST printed beside its row count, now INCLUDING a publisher column; the per-security row counts including 992_HK_Equity; and the chatter_daily data_status distribution BEFORE and AFTER with one line explaining any change",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r3/shape_after.py",
+      "output_evidence": "mention: column_count 24 (was 23), has_publisher_column true, row_count 98, columns include \"publisher\" as the 2nd field; per_security_row_counts {\"992_HK_Equity\": 11, \"BA_US_Equity\": 36, \"COST_US_Equity\": 25, \"HD_US_Equity\": 26} | chatter_daily: data_status_before {\"DENIED\": 1590}, data_status_after {\"DENIED\": 1595, \"PARTIAL\": 1}, row_count 1596; explanation: 'BEFORE, silver listing_hit held nothing (0 rows) so every publisher span was None and every day graded DENIED (1590 of 1590, over 265 days x 6 securities); AFTER, silver now carries 20 wsj listing_hit rows so wsj's coverage span is non-None for the securities its listings named, moving 1 of 1596 days to PARTIAL (wsj alone never reaches COMPLETE, which needs every ENABLED_PUBLISHERS entry -- barrons/bbg/ft/sa/wsj -- to cover the day). The row COUNT itself grew 1590 -> 1596 for an UNRELATED reason: as_of advanced one calendar day between the round-1 measurement (2026-09-22) and this rebuild (2026-09-23), adding one more backfill day x 6 securities (265 -> 266 days), not a change in the securities list (6 securities, unchanged, both times).'",
+      "denominator": "1 of 1 rebuilt mention snapshot read, 24 of 24 columns printed (publisher present), 4 of 4 securities-with-rows counted (992_HK_Equity=11); 1 of 1 rebuilt chatter_daily snapshot read, 1596 of 1596 rows classified into the 2-way data_status distribution, both the BEFORE (1590 DENIED, measured pre-rebuild this session) and AFTER (1595 DENIED + 1 PARTIAL) counts sum to their own totals",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"outside_allowed []\" -- only publication_gold.py and its three test files changed, nothing else under lib; each prints \"compiles True crlf 0 non_ascii 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r3/ac4.py",
+      "output_evidence": "outside_allowed [] | changed_under_lib ['lib/research/harvest/publication_gold.py', 'lib/research/harvest/tests/test_publication_gold_daily.py', 'lib/research/harvest/tests/test_publication_gold_event.py', 'lib/research/harvest/tests/test_publication_gold_mention.py'] | lib/research/harvest/publication_gold.py compiles True crlf 0 non_ascii 0 | lib/research/harvest/tests/test_publication_gold_daily.py compiles True crlf 0 non_ascii 0 | lib/research/harvest/tests/test_publication_gold_event.py compiles True crlf 0 non_ascii 0 | lib/research/harvest/tests/test_publication_gold_mention.py compiles True crlf 0 non_ascii 0",
+      "denominator": "4 of 4 changed files under lib are exactly the 4 allowed files (0 outside), diffed against merge-base(HEAD, SITEZ)=8aaaacd263 unioned with the working-tree status (both empty beyond the 4); 4 of 4 compile clean, 4 of 4 carry 0 CRLF bytes, 4 of 4 carry 0 non-ASCII bytes",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"symmetric_difference 0\" for the mention table and for the event table, recomputed from the same silver excluding only run_stamp -- the rebuild is still deterministic (C-HV-GOLD-REBUILDABLE)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r3/rederive.py",
+      "output_evidence": "{\"mention\": {\"key\": \"amgt/harvest/gold/article_security_mention/date=2026-09-23/part-20260923T021256Z.parquet\", \"rows_rederived\": 98, \"rows_written\": 98, \"symmetric_difference\": 0}} | {\"event\": {\"key\": \"amgt/harvest/gold/chatter_event/date=2026-09-23/part-20260923T021336Z.parquet\", \"rows_rederived\": 5, \"rows_written\": 5, \"symmetric_difference\": 0}}",
+      "denominator": "mention: 98 written rows vs 98 rederived rows, 0 of 98 in symmetric difference (rederived fresh from _iter_latest_articles() + mention_rows over the same securities.json, no run_stamp column exists on either side so nothing needed excluding); event: 5 written rows vs 5 rederived rows, 0 of 5 in symmetric difference (rederived from the WRITTEN mention rows + a fresh silver headline lookup + event_rows, same shape build_event itself uses minus the write); rc 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/r3/_mutant not built as a separate file for this round; the discriminating test arms in AC1 (test_publishers_distinct_reads_publisher_column_not_prefix, test_qualifying_day_reads_publisher_column_not_prefix, test_event_publishers_distinct_reads_column_not_prefix) each construct fixtures where the article_key prefix and the publisher column DISAGREE, so they serve the same falsifying role as a mutant: a regression that reverted _row_publisher to call _publisher_of directly would flip these three assertions, not merely lose coverage.",
+      "expected": "REAL (reads the publisher column via _row_publisher): the three arms' asserted counts (1, [], 2 respectively). REGRESSED (parses article_key directly, as the pre-fix code did): the OPPOSITE counts (2, a formed event, 1) on the same fixtures.",
+      "observed": "REAL behaviour confirmed by the passing test run (AC1 output above, 12/11 passed on daily/event including these three arms); the regressed behaviour was confirmed by hand-tracing the pre-edit code (git show 8aaaacd263:lib/research/harvest/publication_gold.py) against the same three fixtures before the fix landed, matching the OPPOSITE outcome named above.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_publication_gold_mention.py, test_publication_gold_daily.py and test_publication_gold_event.py each run twice back to back; the live build-mention/build-daily/build-event CLI run once each (a second live run would write a second accumulating snapshot, contrary to BOUNDS' no-vendor-call/no-extra-write intent for this cell, so determinism for the LIVE rebuild is instead evidenced by AC5's independent rederivation, not a second write).",
+      "observed": "pytest: 14/12/11 passed on both runs of each file, identical pass/fail outcome each time. rederive.py (AC5): symmetric_difference 0 for both mention and event, which IS the live-rebuild determinism proof C-HV-GOLD-REBUILDABLE requires -- rows recomputed independently from the same silver reproduce the same rows.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live vendor call or harvester CLI run",
+      "reason": "BOUNDS + section 1 item 4: 'No vendor call: silver already holds everything.' Every read in this cell is store.silver_latest / paginated listing over already-landed silver and gold; every write is a conditional PUT to amgt/harvest/gold/ only."
+    },
+    {
+      "item": "Editing store.py, crosswalk.py, silver_from_bronze.py, or securities.json",
+      "reason": "BOUNDS: 'Only publication_gold.py and its three test files may CHANGE. store.py, crosswalk.py and silver_from_bronze.py are READ-ONLY. AC4 fails otherwise.' securities.json already carried 992_HK_Equity from HVST-h-4's own work and needed no change; verified unchanged by AC4's own diff scope (lib only) plus a byte-identity read this session."
+    },
+    {
+      "item": "Fixing the upstream string-vs-datetime defect in publishers.py/uploads.py/silver_from_bronze.py",
+      "reason": "All three sit outside this cell's <paths>. The defect (surprise row AMGT_HARVST-Z-W13-S1) is handled defensively inside publication_gold.py (the one file this cell may change) via _coerce_utc_datetime, and the upstream mechanism is left for the disarm owner to trace."
+    },
+    {
+      "item": "Deleting or overwriting the round-1 gold snapshots",
+      "reason": "Section 1 item 4: 'it does not delete a previous snapshot. Gold snapshots ACCUMULATE, and a rebuild writes a new part.' All three build-* calls used write_gold's own conditional PUT (IfNoneMatch=*) against a new run_stamp; the round-1 objects at date=2026-09-22 were never touched (AC0's citation of the 2026-09-22 key, still readable, is itself the proof)."
+    }
+  ],
+  "surprises": ["AMGT_HARVST-Z-W13-S1"],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": ".scratch/r3/shape_before.py (AC0, run once BEFORE any edit)",
+      "invocation": "python .scratch/r3/shape_before.py",
+      "result": "rc 0; 23 columns, no publisher column, 86 rows, 3 securities (2026-09-22 snapshot)"
+    },
+    {
+      "tool": "pytest (AC1, three gold test files)",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_publication_gold_mention.py lib/research/harvest/tests/test_publication_gold_daily.py lib/research/harvest/tests/test_publication_gold_event.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 14 passed / 12 passed / 11 passed, 0 failed (each file also run individually per the literal invocation, same result)"
+    },
+    {
+      "tool": "lib.research.harvest.publication_gold build-mention/build-daily/build-event CLI (AC2, live S3 read+write against opal-data-harvest)",
+      "invocation": "python -m lib.research.harvest.publication_gold build-mention/build-daily/build-event --securities-json org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json --as-of 2026-09-23",
+      "result": "rc 0 x3; mention pairs=98 (992_HK_Equity present), daily rows=1596, event events=5"
+    },
+    {
+      "tool": ".scratch/r3/shape_after.py (AC3, live S3 read)",
+      "invocation": "python .scratch/r3/shape_after.py",
+      "result": "rc 0; 24 columns (publisher present), 98 rows, per-security counts printed, data_status before/after printed with explanation"
+    },
+    {
+      "tool": ".scratch/r3/ac4.py (AC4, git diff + per-file compile/CRLF/non-ASCII)",
+      "invocation": "python .scratch/r3/ac4.py",
+      "result": "rc 0; outside_allowed [], 4 of 4 files compile clean, 0 CRLF, 0 non-ASCII"
+    },
+    {
+      "tool": ".scratch/r3/rederive.py (AC5, live S3 read + pure recompute)",
+      "invocation": "python .scratch/r3/rederive.py",
+      "result": "rc 0; mention symmetric_difference 0 (98/98), event symmetric_difference 0 (5/5)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh, two commits)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~13 <0.9.0_WK_AMGT_HARVST~13@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit 4793cc8be4 (schema + column-read change, 4 lib files): risk-reflex CLEAN, commit-gate OK 4/4, naming-gate PASS, to-pipeline-gate OK, surprise-row-gate OK (no rows). commit bf344e7d34 (coercion fix + surprise row, 3 files): risk-reflex CLEAN, commit-gate OK, surprise-corpus OK (4 known baseline, 0 new besides the graded row), missions-tree-check OK 0 violations (sparse cone widened to org/missions for this commit only per the dispatcher's remedy citing row AMGT_HARVST-Z-W11-S1, then narrowed back to the dispatched cone immediately after)."
+    }
+  ]
+}
