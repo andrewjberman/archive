@@ -171,6 +171,19 @@ a computed score.
 `first_day` because `C-HV-EVENT-SPINE` does not name a stored `event_id`; whether the build cell
 mints a stable synthetic id instead is an open call (section 7).
 
+**The error envelope.** Any of the three routes above, on failure (a non-200 status, a timeout, or
+an exception in the route), returns ONE shape rather than a partial or malformed version of its
+normal body: `{"error": true, "error_code": <string>, "message": <string>}` -- `error_code` a
+stable machine token (for example `TIMELINE_FETCH_FAILED`, `TIMELINE_TIMEOUT`,
+`TIMELINE_DAY_NOT_FOUND`), `message` a short human-readable reason. A response carrying
+`error: true` is NEVER rendered as data: it is never merged into `series`, `events` or `articles`
+as if it were a data row, and never rendered as a zero-length or otherwise empty version of those
+arrays -- an empty
+`series`/`events`/`articles` array means "the call succeeded and there is nothing in range," which
+is a different, honest state (section 6) from a call that did not succeed at all. The client's only
+correct action on `error: true` is the section-6 failed-call state; no fallback quiet or zero
+render.
+
 ## 6. States
 
 - **Loading** -- the line and its events render a skeleton/placeholder while the range call is
@@ -189,6 +202,20 @@ mints a stable synthetic id instead is an open call (section 7).
   `security_key` at all (it is outside the project's covered set, not merely quiet): the timeline
   area shows a page-level "publication history not collected for this security" state instead of
   an empty chart -- the same discipline S1 uses for a security AMGT-s-1 has not yet pulled.
+- **The timeline request itself failed** -- any of section 5's routes returns a non-200 status,
+  times out, or comes back with a malformed or unparseable body; the client has NO trustworthy
+  response, which is decided by the transport/envelope outcome, never by any row `chatter_daily`
+  or `chatter_event` holds. Never a blank chart, an empty series, or a zero-height line is drawn for
+  this state -- each of those reads as "we hold nothing for this range," the same encoding a
+  quiet security or a PARTIAL/DENIED day already claims, and this state means something different:
+  "we do not know what we hold." It renders its own distinct, page-level error state (for example a
+  banner in the timeline's area, visually apart from the chart canvas and from any bar/marker
+  language used above) stating plainly that the timeline could not be loaded, never that coverage
+  is quiet or the security is uncollected, and offers a retry action. If the day/event dissection
+  call fails while the line itself loaded, only the dissection panel shows this state
+  independently -- it does not force the whole line into it. This state and the error envelope in
+  section 5 exist so a build against this spec cannot omit the call-failure case the way the page's
+  other panels once did (section 7).
 
 ## 7. What this spec does not decide
 
@@ -211,6 +238,9 @@ mints a stable synthetic id instead is an open call (section 7).
 - Where the shared charting component (if any) between this timeline and the top panel's
   Security-mode chatter overlay lives -- section 1 notes they read the same table but does not
   require or forbid a shared component.
+- The failed-call state (section 6) and error envelope (section 5) were added because the same
+  omission -- no state for the call itself failing -- was a real, graduated defect on this page's
+  other panels (`Z-S227`/`C-S400`); this section does not restate that history further.
 
 ## 8. Acceptance
 
