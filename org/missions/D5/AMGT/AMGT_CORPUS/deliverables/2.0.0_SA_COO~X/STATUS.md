@@ -1,10 +1,10 @@
 # AMGT_CORPUS current state
 
 Owner `2.0.0_SA_COO~X`; 2026-09-23. CONTRACT v1.0 / mandate `0e33cea24b`, B08.
-**Corpus report-input adapter built; owner active, pinned consumer integration still awaited.**
+**Corpus producer built; owner reviewing runtime/client/display integration in a separate package.**
 `C1-C3: NOT_EVALUATED` until B00/E0 and independent live acceptance.
 Worktree `C:/tmp/closer-amgt-corpus-x-20260923`; product candidate `4599b05795`, LOCAL.
-Remote SITEZ last measured: `a762d3508858cca9287e431837ae8ad9480aa5e7`.
+Remote SITEZ last measured: `66203f6c0dba4dd2379f38dd7b968aefe3e8d3fa`.
 
 Journey: analyst opens one resolved security at localhost:5174, sees retained
 prior reports and reusable corpus context with lineage and honest state, and
@@ -57,9 +57,13 @@ Dependencies: shared integration and captured first-hop evidence `2.0.0_SA_COO~Z
 The session restriction is RESOLVED: R-9 at `3c7fa06601` and the owner's
 `AMGT_EXPERIENCE/AUTHORITY.md@568f2f0c88` record direct operator authorization.
 That record was read; no deployment or served-write authority is inferred.
-COO~Z's 20:45:34Z report (patch unread, no integration started) is historical;
-no newer consumer integration pin has been handed to C. Interface publication
-at 20:44:59Z and CVO review handoff at 20:45:19Z are not acceptance.
+At 21:11:34Z COO~Z reports it read `4599b05795` code/tests, handoff and patch;
+runtime/typed-client/display integration review is underway. The corpus join
+will be a separate package from the strict two-function Lambda repair, with
+142 GET/9 LIST fanout and full dependency closure explicit. No consumer pin
+has been handed to C. At 21:12:32Z C confirmed `4599b05795` remains current:
+only STATUS/manifest changed since it. CVO handoff at 20:45:19Z remains pending;
+publication and integration review are not acceptance.
 R-9 returns Price ownership to COO~Z after Y handback; C's surface is unchanged.
 S01/induction `2.0.0_SA_COO~Z`; final acceptance `3.0.0_SA_CVO~Z`.
 MSTR lifted the shared-tree commit hold at 20:47:01Z after merging/pushing
