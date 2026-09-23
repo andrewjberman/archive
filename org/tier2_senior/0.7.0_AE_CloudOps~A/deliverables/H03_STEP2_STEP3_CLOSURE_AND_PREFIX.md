@@ -147,7 +147,58 @@ EXISTING bucket ARN with no new `Resource`.
 ⚠ STATE, precisely: this is a STRUCTURAL identity with a call shape already in the grant list.
 It is NOT EXERCISED -- no live S3 call was made or authorized. Exercise it at build time.
 
-## 6. PROVENANCE
+## 6. THE REPOSITORY SIZE GATE -- R's CANDIDATE CLEARS IT BY 1.65%
+
+Added after design record `4cf1e42b7b`, which names "exact combined function-plus-layer size
+against the repository's size gate" as a remaining CloudOps item. THE GATE EXISTS and is in
+this lane's own directory. `infra/aws/terraform/harvest/build_print_deps_layer.py:73`:
+
+    UNZIPPED_CEILING_BYTES = 200 * 1024 * 1024        # 209,715,200 bytes
+
+It REFUSES rather than warns (`:173-175`, `BLOCKED: unzipped {0} B exceeds this build's
+ceiling {1} B`). Rationale at `:71-72`: the layer is one half of Lambda's 250 MB unzipped
+quota, the function's archive the other -- so the 200 MiB bar is deliberately BELOW the
+platform limit.
+
+    repo precedent ceiling                209,715,200 bytes  (200.0 MiB)
+    R candidate closure (2,058 members)   206,249,766 bytes  (196.7 MiB)
+    HEADROOM                               +3,465,434 bytes  (+3.30 MiB)  = 1.65%
+    VERDICT                                    PASSES -- barely
+
+⚠ SCOPE: that constant is the PRINT builder's OWN ceiling, not a repo-wide gate mechanically
+applied elsewhere. It binds H03 only because the design selects "the existing estate pattern".
+It is the precedent bar this design opted into, not a law it is already subject to.
+
+⛔ WHY 1.65% IS THE FINDING, NOT A REASSURANCE. The 206,249,766 figure is a METADATA closure
+over an EXISTING zip's members. A newly BUILT layer need not be that size: packaging adds its
+own dist-info, RECORD, directory entries, and the design retains licenses and bundled
+libraries. A 3.3 MiB cushion is thin enough that a build retaining slightly more than the
+measurement assumed lands on BLOCKED -- surfacing at BUILD time, after the work is done.
+THE CORRECT READ IS "it fits with 1.65%, and that margin must be measured on the BUILT
+artifact before anyone relies on it."
+
+SCALE, all measured: PyArrow's own members are 131,402,620 bytes (125.3 MiB) of the candidate;
+the existing print layer that set this precedent is 116.1 MiB unzipped / 39,040,327 B zipped
+across 1,340 members (`print-deps-layer.tf:21`), so the candidate is ~1.7x the largest layer
+this tree has shipped. That file's `:23` records its function archive at ~2.7 MB unzipped -- a
+real datapoint for the half the ceiling reserves.
+
+AGAINST THE FULL LAYER: 250,975,829 bytes is 41,260,629 bytes OVER this 200 MiB bar and would
+be REFUSED outright -- so declining to attach the whole pyiceberg layer is not merely tidier.
+Separately, against the PLATFORM ceiling the full layer STRADDLES THE UNIT BOUNDARY: it fits
+250 MiB (262,144,000) with +11,168,171 but EXCEEDS 250 decimal MB (250,000,000) by 975,829
+bytes -- under one megabyte, on a figure nobody would think to interrogate. The trimmed
+closure clears BOTH readings (+55,894,234 / +43,750,234), so R's selection is robust to an
+ambiguity it never has to resolve.
+
+CORRECTION TO THIS SEAT'S OWN PROXY, now that the real figure exists: the Windows/3.11
+PyArrow 24.0.0 probe read 84.3 MB; the real cp312 manylinux2014_x86_64 PyArrow 15.0.2 is
+131,402,620 bytes (125.3 MiB) -- the proxy UNDERSTATED by ~47 MB (~36%), in the direction that
+would have hurt. Three independent reasons it could not have been trusted (wrong platform,
+wrong interpreter, and nine major versions apart), where only two were known when it was
+labelled.
+
+## 7. PROVENANCE
 
 `measured` at HEAD `f234d4122d` on SITEZ unless a line says PROXY or UNMEASURED. Instruments:
 `git show` at the candidate pin `ac4316c447`, `comp-read --enumerate` with printed denominators,
