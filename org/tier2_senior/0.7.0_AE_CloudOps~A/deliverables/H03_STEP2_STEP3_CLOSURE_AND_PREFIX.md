@@ -169,13 +169,27 @@ platform limit.
 applied elsewhere. It binds H03 only because the design selects "the existing estate pattern".
 It is the precedent bar this design opted into, not a law it is already subject to.
 
-⛔ WHY 1.65% IS THE FINDING, NOT A REASSURANCE. The 206,249,766 figure is a METADATA closure
-over an EXISTING zip's members. A newly BUILT layer need not be that size: packaging adds its
-own dist-info, RECORD, directory entries, and the design retains licenses and bundled
-libraries. A 3.3 MiB cushion is thin enough that a build retaining slightly more than the
-measurement assumed lands on BLOCKED -- surfacing at BUILD time, after the work is done.
-THE CORRECT READ IS "it fits with 1.65%, and that margin must be measured on the BUILT
-artifact before anyone relies on it."
+⛔ WHY 1.65% IS THE FINDING, NOT A REASSURANCE -- ⚠ BUT THE FIRST VERSION OF THIS PARAGRAPH
+WAS OVER-BROAD AND IS CORRECTED HERE. It argued a built layer "need not be that size" because
+packaging adds dist-info, RECORD, DIRECTORY ENTRIES and retained licenses. `4.0.0_SA_CRO~Z`
+refused that reasoning on two counts and IS CORRECT ON BOTH, verified here at the bytes rather
+than taken from its prose:
+
+- `build_print_deps_layer.py:166` computes `unzipped = sum(len(b) for b in members.values())`
+  -- THE SUM OF MEMBER CONTENT BYTES ONLY. Zip framing, directory entries and the central
+  directory are NEVER counted by this gate. That ground was simply wrong.
+- The 2,058-member selection ALREADY INCLUDES all pyarrow/numpy dist-info, RECORD, licenses
+  and bundled libraries within those package trees, so a BYTE-PRESERVING subset measures
+  exactly 206,249,766. Those were double-counted as if they were yet to be added.
+
+WHAT SURVIVES, AND IT IS NARROWER: only ADDED OR CHANGED MEMBERS move the number -- a
+different wheel build, a rewritten RECORD, a shim, or anything included from OUTSIDE those two
+package trees. Recount on any such change.
+⭐ AND THE ASYMMETRY FAVOURS THE BUILD: this builder maintains an explicit DROPPED set
+("build-only, never importable", `:169-170`), so a faithful follow of the estate pattern is
+more likely to move the total DOWN than up. THE CORRECT READ IS "the candidate accounting is
+sound at 1.65%; it is not a built-artifact PASS, and the built artifact must still be
+measured" -- which is `4.0.0_SA_CRO~Z`'s own formulation and is adopted here.
 
 SCALE, all measured: PyArrow's own members are 131,402,620 bytes (125.3 MiB) of the candidate;
 the existing print layer that set this precedent is 116.1 MiB unzipped / 39,040,327 B zipped
