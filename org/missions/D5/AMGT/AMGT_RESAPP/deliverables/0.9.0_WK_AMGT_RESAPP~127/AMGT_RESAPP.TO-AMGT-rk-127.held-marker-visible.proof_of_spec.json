@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-127.held-marker-visible",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-127.held-marker-visible.md",
+    "group": "OTHER",
+    "vintage_commit": "cfb24cdf412151069cb06430854d0241fc9672ce"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cfb24cdf412151069cb06430854d0241fc9672ce",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-127.held-marker-visible.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~127",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/filings.py",
+      "kind": "script",
+      "commit_or_etag": "fb93265e0ea2e8189f614317c4e3d697c67b6eb3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY cell (task order BOUNDS): no deploy, no terraform, no Lambda update, no S3 write from this cell. Adds _put_filing_attempt_held_marker, _FILING_ATTEMPT_HELD_MARKER_OBJECT and _now_iso_utc; state_put_filing_attempt's existing CHANGED branch (rk-105, unchanged) now also calls the new helper before raising. Verified hermetically (AC3) and against the projection-untouched grep (AC5).",
+      "introduces": [
+        "_put_filing_attempt_held_marker",
+        "_FILING_ATTEMPT_HELD_MARKER_OBJECT",
+        "UNRESOLVED-SOURCE.HELD.json"
+      ],
+      "artifact_covered_by": [
+        "AC0",
+        "AC3",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "fb93265e0ea2e8189f614317c4e3d697c67b6eb3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY cell: no deploy of the scoped-amgt Lambda in this cell's scope. Adds FILING_ATTEMPT_HELD_MARKER_OBJECT, _read_filing_attempt_held_marker and _apply_filing_attempt_held_state; wired into read_thesis_bundle right after the existing served-reason assignment (AMGT-rk-24's fence, unchanged). Verified hermetically (AC4) and against the projection-untouched grep (AC5, which only greps filings.py per the literal invocation).",
+      "introduces": [
+        "_apply_filing_attempt_held_state",
+        "_read_filing_attempt_held_marker",
+        "FILING_ATTEMPT_HELD_MARKER_OBJECT"
+      ],
+      "artifact_covered_by": [
+        "AC0",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_filing_attempt_skip_held.py",
+      "kind": "test",
+      "commit_or_etag": "fb93265e0ea2e8189f614317c4e3d697c67b6eb3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test-only file; no deploy applicable. Two new arms added (test_skip_held_writes_no_held_marker, test_second_changed_event_overwrites_the_marker_with_the_latest_outcome); two pre-existing arms updated (test_changed_outcome_still_raises, test_battery_changed_outcome_is_changed_held_nonzero_exit) because a CHANGED event now legitimately writes one additional put_object call (the held marker, a DIFFERENT key) that those assertions previously counted as zero.",
+      "introduces": [
+        "test_skip_held_writes_no_held_marker",
+        "test_second_changed_event_overwrites_the_marker_with_the_latest_outcome"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_filings.py",
+      "kind": "test",
+      "commit_or_etag": "fb93265e0ea2e8189f614317c4e3d697c67b6eb3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Test-only file; no deploy applicable. test_module_writes_only_through_store's assertion updated from count('put_object')==1 to ==2, reflecting the new additive held-marker write.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_filing_attempt_held_marker.py",
+      "kind": "test",
+      "commit_or_etag": "fb93265e0ea2e8189f614317c4e3d697c67b6eb3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file; test-only, no deploy applicable. Six arms covering _read_filing_attempt_held_marker (present/absent/unreadable) and _apply_filing_attempt_held_state (no-marker regression control byte-identical; marker-present states HELD and surfaces the newer reason without swapping; the helper's own contract independent of drafting_status gating at the call site).",
+      "introduces": [
+        "test_apply_with_marker_states_held_and_surfaces_newer_reason_without_swapping",
+        "test_apply_with_no_marker_leaves_bundle_byte_identical"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~127/SESSION_LOG.md",
+      "kind": "doc",
+      "commit_or_etag": "fb93265e0ea2e8189f614317c4e3d697c67b6eb3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log; no deploy applicable."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit, printed with denominators: the seven outcome-field labels from _filing_attempt_outcome_fields in order, with filing_identity present and reason ABSENT; and the live served reason for 992_HK_Equity read through the adapter's own key construction, quoted verbatim -- it must read \"filing_identity.source is 'none': no cik and expected form to fetch by\". Record both. This is the pre-state the cell exists to make legible",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python .scratch/r127/ac0.py",
+      "output_evidence": "denominator: 7 label(s): [0] status [1] security_key [2] accession [3] filing_identity [4] verified_site [5] battery.order [6] battery.winner -- filing_identity present: True; reason absent: True. Live read (bucket opal-data-harvest, key amgt/harvest/state/filing_attempt/security_key=992_HK_Equity/UNRESOLVED-SOURCE.json): served status: 'UNRESOLVED-SOURCE'; served reason (verbatim): \"filing_identity.source is 'none': no cik and expected form to fetch by\"; matches task-order-quoted reason: True. Exercised UNCHANGED code paths (_filing_attempt_outcome_fields and _read_filing_source_object are neither touched by this cell, AC5's own pin), so this result is the true pre-edit shape whether run before or after the cell's additive edits.",
+      "denominator": "2 of 2 measurements taken: the 7-label enumeration (7 of 7 labels printed) and 1 of 1 live served-reason read",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the BASELINE for both suites before your edit -- record passed/failed as A0. A measurement, not a bar",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/harvest/tests lib/research/api/tests -q -p no:cacheprovider 2&gt;&amp;1 | tail -3",
+      "output_evidence": "A0 = 323 passed, 0 failed (19.69s). git stash is BLOCKED on this box as a shared-worktree hazard (never-rules-gate.sh), so the baseline was measured in a throwaway `git worktree add C:/tmp/wk-amgt-33-127-baseline cfb24cdf412151069cb06430854d0241fc9672ce` (this worktree's own HEAD, byte-identical pre-edit source), then removed with `git worktree remove --force` after the run. Literal output: '323 passed in 19.69s'.",
+      "denominator": "323 of 323 collected tests (baseline, pre-edit)",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "passed = A0.passed + (arms you added), failed = 0. Pre-existing failures, if any, must be the SAME ones by name -- print them rather than reporting a clean number",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/harvest/tests lib/research/api/tests -q -p no:cacheprovider 2&gt;&amp;1 | tail -3",
+      "output_evidence": "331 passed in 21.46s, 0 failed. 331 = A0(323) + 8 new arms (2 in test_filing_attempt_skip_held.py: test_skip_held_writes_no_held_marker, test_second_changed_event_overwrites_the_marker_with_the_latest_outcome; 6 in the new test_filing_attempt_held_marker.py). No pre-existing failures existed in A0 (323 passed, 0 failed), so there are none to name here.",
+      "denominator": "331 of 331 collected tests (post-edit); 331 = 323 (A0) + 8 (new arms)",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the held-marker path exercised HERMETICALLY (a stub/fake client, no live S3): given an existing served object and a CHANGED new outcome, (a) FilingAttemptChangedError is still raised -- the guard is UNCHANGED; (b) the served object's bytes are UNTOUCHED, proven by a before/after hash; (c) a held-marker is produced carrying the new status, reason, filing_identity, the differing field name, and its own retrieved_at; (d) the marker's address comes from the builder, NOT a hand-typed literal -- print it",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python .scratch/r127/ac3.py",
+      "output_evidence": "(a) raised: True, differing_field mentions filing_identity change 'source': 'none' -> 'source': 'battery'. (b) (pre) served bytes sha256: 3922b649cdca70d3ac6e90780c9b87db9cf8c10e25ac7bb52feba03705006a6e; (post) served bytes sha256: 3922b649cdca70d3ac6e90780c9b87db9cf8c10e25ac7bb52feba03705006a6e; served bytes hash unchanged: True. (c) marker present at builder-derived key: True; marker document carries status='UNRESOLVED-SOURCE', reason=\"filing_identity.source is 'battery': resolved via edgar-ticker to CIK 932477\", filing_identity={'source':'battery','cik':932477,'form_expected':'10-K'}, differing_field matching the raised exception's own, retrieved_at='2026-09-23T01:13:59Z'. (d) builder-derived marker uri: s3://opal-data-harvest/amgt/harvest/state/filing_attempt/security_key=992_HK_Equity/UNRESOLVED-SOURCE.HELD.json -- built via store.address_of, printed, sibling key distinct from the served key. 'AC3: ALL ASSERTIONS PASSED' with rc=0 (hermetic in-process stub S3 client, no live S3, no network).",
+      "denominator": "4 of 4 sub-checks asserted True: (a) raise, (b) hash-unchanged, (c) marker fields, (d) builder-derived address",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the ADAPTER half, hermetic: with a held-marker present the payload STATES the served outcome is HELD and a newer one exists, and surfaces the newer reason as the NEWER one -- not swapped in as the served text. With NO held-marker present the payload is byte-identical to today's, proven by a dump comparison. Print BOTH branches; the no-marker branch is the regression control",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python .scratch/r127/ac4.py",
+      "output_evidence": "Branch B (no marker, regression control): bundle before = {\"drafting_reason\": \"filing_identity.source is 'none': no cik and expected form to fetch by\", \"drafting_status\": \"ABSENT\", \"security_key\": \"992_HK_Equity\"}; bundle after (no marker) = IDENTICAL string; byte-identical to today's (dump comparison): True. Branch A (marker present): bundle after carries drafting_reason UNCHANGED (\"filing_identity.source is 'none': no cik and expected form to fetch by\"), drafting_reason_held=true, drafting_reason_newer=\"filing_identity.source is 'battery': resolved via edgar-ticker to CIK 932477\" (a DIFFERENT string from drafting_reason, never swapped in), drafting_reason_newer_status='UNRESOLVED-SOURCE', drafting_reason_newer_filing_identity={'cik':932477,'form_expected':'10-K','source':'battery'}. 'AC4: ALL ASSERTIONS PASSED -- both branches printed above', rc=0 (hermetic _pool_client() stub, no live S3).",
+      "denominator": "2 of 2 branches printed and asserted: marker-present (4 sub-assertions) and no-marker (byte-identical dump comparison)",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the file list is exactly lib/research/harvest/filings.py, lib/research/api/scoped_amgt.py and your new/edited test files -- NOTHING under portal/, infra/ or .tools/. And the grep returns 0: the outcome PROJECTION is untouched by your diff. A non-zero count is a BLOCKING row against yourself",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; git diff --name-only $(git rev-parse HEAD) -- lib integrations infra .tools portal &amp;&amp; git diff -- lib/research/harvest/filings.py | grep -c \"_filing_attempt_outcome_fields\\|def _filing_attempt_outcome\" ; echo \"PROJECTION-UNTOUCHED-CHECK-DONE\"",
+      "output_evidence": "File list (tracked modifications only, git diff's default scope): lib/research/api/scoped_amgt.py, lib/research/harvest/filings.py, lib/research/harvest/tests/test_filing_attempt_skip_held.py, lib/research/harvest/tests/test_filings.py -- exactly the two production files plus my two edited test files; nothing under portal/, infra/, .tools/. grep -c result: 0. PROJECTION-UNTOUCHED-CHECK-DONE printed. (The new untracked test file lib/research/api/tests/test_filing_attempt_held_marker.py does not appear in `git diff --name-only`, which only reports tracked modifications by construction -- consistent with the criterion's own invocation.)",
+      "denominator": "4 of 4 files in the printed list match the expected set exactly (0 unexpected); grep count 0 of the projection symbols in the filings.py diff",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC3's test data IS the discriminating mutant: a CHANGED outcome (filing_identity source flips none->battery, a genuine outcome difference per _filing_attempt_outcome_fields) must still raise FilingAttemptChangedError with 0 puts to the served key, while producing exactly one new put at the sibling marker key. A SKIP-HELD (unchanged-outcome, different timestamp/reason-counter) scenario is the negative control, exercised by the new test test_skip_held_writes_no_held_marker: it must NOT write a marker at all.",
+      "expected": "CHANGED scenario: raise fires, served bytes unchanged, marker written with builder-derived address and full new-outcome fields. SKIP-HELD scenario: no raise, no marker key present at all.",
+      "observed": "Exactly matched: AC3's script asserts all four CHANGED-branch sub-checks True (rc=0); test_skip_held_writes_no_held_marker asserts (bucket, marker_key) not in client._objects after a SKIP-HELD run, and passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC3 and AC4 were each run twice (once during construction, once again against the literal invocation string for this instance) with fixed synthetic inputs -- no clock read in the assertions themselves (retrieved_at is printed but not asserted against a fixed value); AC0's live read and the full pytest suite (AC1/AC2) were each run twice across the session (construction + final literal-invocation confirmation) with matching pass counts both times.",
+      "observed": "Stable: AC3/AC4 assertion outcomes identical across both runs (only the printed retrieved_at timestamp differed, as expected of a live clock read); AC1/AC2 pass counts (323, then 331) identical across both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": ".scratch/r127/ac0.py, .scratch/r127/ac3.py, .scratch/r127/ac4.py -- the three grading scripts named by AC0/AC3/AC4's literal invocations",
+      "reason": "row Z-W126-S3: .scratch/** carries NO static lane entry, so owned-paths-validate.py refused these three files at commit time (VIOLATION: '.scratch/r127/ac{0,3,4}.py -- UNDEFINED (no matching path rule; agent=0.9.0_WK_AMGT_RESAPP~127)'), even though the task order's own <paths> grants .scratch/r127/**. Per the task order's explicit instruction (worker face, row Z-W126-S3 disclosure): kept in the worktree uncommitted, NOT fought/worked around, and cited by their printed output (quoted verbatim in AC0/AC3/AC4's output_evidence above, each independently re-run against the exact literal invocation before this instance was written). This is the disclosed estate gap, not a defect of this cell."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~127/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile lib/research/harvest/filings.py lib/research/api/scoped_amgt.py lib/research/harvest/tests/test_filing_attempt_skip_held.py lib/research/harvest/tests/test_filings.py lib/research/api/tests/test_filing_attempt_held_marker.py",
+      "result": "COMPILE-OK (all five files)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/harvest/tests lib/research/api/tests -q -p no:cacheprovider",
+      "result": "331 passed, 0 failed"
+    }
+  ]
+}
