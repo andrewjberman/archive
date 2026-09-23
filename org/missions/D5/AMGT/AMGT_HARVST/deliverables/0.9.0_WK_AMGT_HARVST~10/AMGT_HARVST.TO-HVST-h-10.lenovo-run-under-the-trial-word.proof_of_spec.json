@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-10.lenovo-run-under-the-trial-word.md",
     "group": "OTHER",
-    "vintage_commit": "0616d687ee3432fc5830a76a413df3917427c2f4"
+    "vintage_commit": "cbee65f1279f6352bc6ad63e220e89594b0d6893"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
@@ -17,44 +17,184 @@
     {
       "path_or_key": "lib/opal_data_harvest/__main__.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "59c83cce61e85b97e6f9ce81d71141c3aa4d3e4b",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "PHASE 0b fix for row AMGT_HARVST-Z-W10-S4: the probe loop body is now wrapped in try/except Exception, recording UNRESOLVED-CHALLENGED with the exception's type and message, and never re-raising -- the run falls through into the harvest_client wiring and Worker.run() call regardless of whether the probe succeeded or failed. No network call added or made by this file's own code (the try/except only changes control flow around an existing call).",
-      "artifact_covered_by": ["AC9", "AC10"]
-    },
-    {
-      "path_or_key": "lib/opal_data_harvest/test_retrieval_provenance.py",
-      "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "Three new offline arms per AC9: test_probe_failure_is_recorded_not_raised, test_run_continues_to_every_publisher_after_a_probe_failure (both object-attribute-patched, including SessionVault.load after a first draft omitted it and hit a real canonical-harvester subprocess -- row AMGT_HARVST-Z-W10-S5), and test_a_challenged_publisher_is_recorded_and_the_run_continues (a REAL Worker/run_job arm proving worker.py's existing per-job exception handling already isolates a challenged publisher, made explicit rather than left to inference). Full file: 18 of 18 passed, 1.03-1.17s, zero subprocess/network events across three post-fix runs.",
-      "artifact_covered_by": ["AC9"]
+      "deploy_evidence": "Phase 0b fix (committed at the second checkpoint). Unchanged this Phase 1 round -- AC6/AC7/AC8/AC9 confirm.",
+      "artifact_covered_by": ["AC6", "AC7", "AC8", "AC9"]
     },
     {
       "path_or_key": "lib/opal_data_harvest/rehearse_run.py",
       "kind": "script",
+      "commit_or_etag": "59c83cce61e85b97e6f9ce81d71141c3aa4d3e4b",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Committed at the second checkpoint. Unchanged this round -- AC10/AC11 confirm.",
+      "artifact_covered_by": ["AC10", "AC11"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_retrieval_provenance.py",
+      "kind": "test",
+      "commit_or_etag": "59c83cce61e85b97e6f9ce81d71141c3aa4d3e4b",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "18 arms, committed at the second checkpoint. Unchanged this round -- AC9 confirms.",
+      "artifact_covered_by": ["AC9"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/lenovo.security.json",
+      "kind": "config_data",
+      "commit_or_etag": "6a2fbfcb15a59b5865a8a5ffbe69f34bb55c00a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unchanged since the predecessor's commit; reused for the third act (992_HK_Equity, sa_symbol LNVGY).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/plan.json",
+      "kind": "config_data",
+      "commit_or_etag": "6a2fbfcb15a59b5865a8a5ffbe69f34bb55c00a2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Re-run at 2026-09-23T00:22:5xZ BEFORE item 4 (S3-watermark read only, zero vendor calls) -- byte-identical to the predecessor's committed plan.json (the watermark bound has not moved), so it rides that commit, not this one. 6 lines: 5 publishers (25 planned pages each) + 1 total (125).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/first_run.summary.json",
+      "kind": "config_data",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "New rehearsal harness driving the whole CLI handler (cli_main.main() for the run command) with all five publishers, harvest mode ON, an injected transport.VerificationRequired on the bbg probe (the exact class the live run raised), the network poisoned at PacedSession.get/SessionManager.refresh/subprocess.run (each raising and counted, never merely asserted absent), a fake Publisher.articles() producing one schema-valid article per publisher through the REAL harvest write path, and a REAL HarvestUploader pass against an in-memory stub S3 client. --positive-control deliberately calls each poisoned site and prints whether it RAISED (AC11).",
-      "artifact_covered_by": ["AC10", "AC11"]
+      "deploy_evidence": "live_run_invocations 1; bbg_symbol_probe_verdict UNRESOLVED-CHALLENGED (real challenge, caught cleanly); auth_verdicts per publisher recorded BEFORE the run; per-publisher outcomes for all five (sa upstream_unavailable/24 accepted, bbg error, ft request_rejected, wsj complete_candidates/11 accepted, barrons request_rejected) -- every publisher reached job_finished, proving the Phase 0b fix under real conditions; THREE unplanned/unexpected calls named explicitly (bbg verification-repair, wsj reauth, barrons reauth), per the CTO's residual.",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/first_run.events_delta.jsonl",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The 48 events.jsonl lines this run wrote (baseline 233 -> 281), the source for the unplanned/unexpected-call accounting.",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/upload_harvest_1.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "python -m lib.opal_data_harvest upload-harvest --retrieval-mode backfill --max-objects 1000, run TWICE (determinism check): remaining_pending 11 both times -- sa's 3 new articles and wsj's 2 listing pages uploaded cleanly; all 11 of wsj's new articles' bronze objects wrote successfully but their grouped silver_append step failed with SilverRowError both times, identically (row AMGT_HARVST-Z-W10-S8).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/second_run.summary.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The item-7 network-refused run's real, measured outcome: same_utc_date true, http_events 0, network_refused_hits 4 (bbg probe + sa/bbg/ft jobs, each honestly refused because nothing was held to replay; wsj replayed cleanly with zero network; barrons short-circuited on its own cooldown state).",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/second_run.events_delta.jsonl",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The 5 events.jsonl lines item 7 wrote (281 -> 286), all job_finished, zero http events -- the source for AC3's http_events 0 figure.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/RUN_REPORT.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Per-publisher status/planned/accepted/rejected/stop-reason table, the bbg probe verdict, the three unplanned/unexpected calls, upload/verify results, the item-7 outcome, silver prefixes written, and the stage-9 line (3 articles in silver, honestly short of bronze's 14 because of row -S8).",
+      "artifact_covered_by": ["AC5"]
     },
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "STAGED-AWAITING-GATE",
-      "deploy_evidence": "Appended rows -S5 (ARMED: a fourth instance of the SessionVault.load omission class, self-caught and fixed), -S6 (ARMED: the CLI's upload-harvest command never wires a client=, always reaching for a real boto3 S3 client -- this cell's rehearsal calls HarvestUploader directly instead, never through the CLI), and -S7 (ARMED: AC6's <expect> text was not updated when this same amendment authorized a fourth editable file, rehearse_run.py).",
+      "deploy_evidence": "Appended row AMGT_HARVST-Z-W10-S8 (ARMED, disarm_owner 2.0.0_SA_COO~Y): silver_from_bronze's WSJ extractor pulls WSJ's entire __NEXT_DATA__ config blob wholesale, and one real page's config held a string where sibling pages held a boolean, breaking pyarrow's grouped-batch schema inference -- failed all 11 of this run's real, new WSJ articles' silver rows, deterministically, though their bronze objects are safe (bronze_reread 14 of 14 mismatch 0).",
       "artifact_covered_by": []
     }
   ],
   "acceptance": [
     {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"plan_lines 6\", and a sorted list naming barrons, bbg, ft, sa and wsj plus the total line -- the plan was saved (section 1 item 3 requires it BEFORE the run; AC5's reviewer reads its timestamp against the run's first http event)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"import json;d=[json.loads(l) for l in open('org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/plan.json',encoding='utf-8') if l.strip()];print('plan_lines',len(d));print(sorted(x.get('publisher','TOTAL') for x in d))\"",
+      "output_evidence": "plan_lines 6\n['TOTAL', 'barrons', 'bbg', 'ft', 'sa', 'wsj']",
+      "denominator": "6 of 6 plan lines present (5 publishers + 1 total), matching the sorted name list exactly; rc=0; plan.json's write (2026-09-23T00:22:5xZ) precedes the run's first http event (00:23:01.751316Z) by seconds",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"bronze_reread N of N mismatch 0\" with N at least 1; \"silver_article_rows\" EQUAL to \"bronze_articles\"; five publisher lines, each with a status and a stop reason",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/hv10/verify.py",
+      "output_evidence": "bronze_reread 14 of 14 mismatch 0\nsilver_article_rows 3 bronze_articles 14\npublisher sa status upstream_unavailable planned 25 actual unknown-exact ... stop HTTP 502 from seekingalpha.com ...\npublisher bbg status error planned 25 actual 0 stop HTTPError (verification challenge, real verification-repair attempted) ...\npublisher ft status request_rejected planned 25 actual 0 stop HTTP 403 from www.ft.com/search ...\npublisher wsj status complete_candidates planned 25 actual unknown-exact ... stop 11 accepted, 0 rejected ...\npublisher barrons status request_rejected planned 25 actual 0 stop session expired, real reauth succeeded, then challenged ...",
+      "denominator": "N=14 bronze keys this run put (3 sa + 11 wsj articles), all 14 of 14 re-read matching sha256, 0 mismatch -- that sub-clause PASSES (N>=1). silver_article_rows (3) does NOT equal bronze_articles (14) -- wsj's 11 articles' bronze succeeded but their grouped silver_append failed deterministically with SilverRowError (row AMGT_HARVST-Z-W10-S8, a real WSJ-extraction type-conflict defect, not a code change made by this cell). 5 of 5 publisher lines present with status and stop reason.",
+      "status": "FAIL",
+      "status_reason": "silver_article_rows (3) != bronze_articles (14) because row AMGT_HARVST-Z-W10-S8 (silver_from_bronze's WSJ extractor pulling an unstable, oversized config blob) deterministically fails WSJ's grouped silver write -- confirmed by running upload-harvest twice with identical results, and by an offline reproduction (.scratch/hv10/debug_wsj_group.py) isolating the exact pyarrow ArrowInvalid cause. This is a genuine production defect outside this order's named scope (Phase 1 is execution-only); the order stays open on this basis."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"same_utc_date True http_events 0 network_refused_hits 0\" -- the second same-day run fetched nothing we hold (FWD-3), proven with the network refused",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"import json;r=json.load(open('org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/second_run.summary.json',encoding='utf-8'));print('same_utc_date',r['same_utc_date'],'http_events',r['http_events'],'network_refused_hits',r['network_refused_hits'],'status',r['status'])\"",
+      "output_evidence": "same_utc_date True http_events 0 network_refused_hits 4 status 4_of_5_publisher_paths_refused_wsj_replayed_barrons_cooldown_short_circuit",
+      "denominator": "2 of 3 literal expect terms match (same_utc_date True, http_events 0); network_refused_hits is 4, not 0 -- measured directly from events.jsonl (0 new http events in the 5-line delta) and each job result's error_type=RuntimeError (sa, bbg, ft) plus the probe's own RuntimeError. wsj correctly replayed all 11 accepted articles with zero network (complete_candidates); barrons short-circuited on its own pre-existing cooldown, not a refusal.",
+      "status": "FAIL",
+      "status_reason": "network_refused_hits is 4, not 0, because item 4 only captured a replayable path for wsj (its 11 articles landed in the legacy catalog, which Publisher.reuse() replays without network) -- sa, bbg, ft and the probe each needed a live session-check or fresh session build that item 4 did not leave anything to replay. This is an honest, correctly-measured consequence of the real, adversarial session states this run encountered (three publishers ended in error/request_rejected on item 4), not a defect in the network refuser itself, which fired correctly with zero real network I/O in every case. The order stays open on this basis."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"live_run_invocations 1\" and bbg_symbol_probe either ADOPTED or UNRESOLVED -- the word spent exactly once and the probe tried once",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"import json;r=json.load(open('org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~10/first_run.summary.json',encoding='utf-8'));print('live_run_invocations',r['live_run_invocations'],'bbg_symbol_probe',r['bbg_symbol_probe_verdict'])\"",
+      "output_evidence": "live_run_invocations 1 bbg_symbol_probe UNRESOLVED-CHALLENGED",
+      "denominator": "1 of 1 live vendor-call invocation made this cell (confirmed: events.jsonl 233->281, all attributable to this one run; item 7 made 0 http events). bbg_symbol_probe_verdict is UNRESOLVED-CHALLENGED -- the Phase 0b fix's own status vocabulary for a caught probe failure, read as satisfying the expect's 'UNRESOLVED' (a challenge is a form of not-adopted/not-resolved, and CHALLENGED names the specific reason, matching the order's own item-4 language 'recorded UNRESOLVED with its reason'). No second live invocation was made.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "does RUN_REPORT.md show that every article from each publisher, and the listing page that found it, is re-openable from the store and matches what was received, with every UNRESOLVED publisher carrying its reason?",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "N/A -- judgment criterion, graded by 3.0.0_SA_CVO~Z at L9",
+      "output_evidence": "RUN_REPORT.md names each publisher's status, accepted/rejected counts, and stop reason; states plainly that sa's 3 new + wsj's 11 new articles' bronze objects are all re-openable and byte-matched (14 of 14, 0 mismatch), that wsj's 11 are NOT yet re-openable from SILVER (row -S8, bronze-safe), and that bbg/ft/barrons carry 0 accepted with their real stop reasons (verification challenge/repair, 403, expired-session-then-challenged). All three unplanned/unexpected calls are named with their artifacts.",
+      "denominator": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Graded by 3.0.0_SA_CVO~Z at L9, never self-graded by this worker.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "before \"--- end\", ONLY the four files this order's phases authorise (lib/opal_data_harvest/__main__.py, lib/opal_data_harvest/worker.py, lib/opal_data_harvest/rehearse_run.py, lib/opal_data_harvest/test_retrieval_provenance.py), nothing else under lib, and nothing at all under org/tier1_exec -- corrected from \"the three Phase 0 files\", which Phase 0b's own amendment had already outgrown (row AMGT_HARVST-Z-W10-S7)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- lib org/tier1_exec && git status --porcelain -- lib org/tier1_exec && echo \"--- end\"",
+      "output_evidence": "lib/opal_data_harvest/__main__.py\nlib/opal_data_harvest/rehearse_run.py\nlib/opal_data_harvest/test_retrieval_provenance.py\n--- end",
+      "denominator": "3 of the 4 authorised files touched (worker.py investigated and correctly left unchanged), 0 unauthorised files under lib, 0 files under org/tier1_exec; rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "\"15 passed\" and no \"failed\" -- the thirteen arms already present plus test_cli_run_wires_harvest_client (the CLI run path supplies a non-None harvest_client when --harvest-grammar is passed, and None when it is not) and test_bbg_symbol_probe_runs_inside_a_five_publisher_run",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_retrieval_provenance.py -v --color=no -p no:cacheprovider 2>&1 | tail -20",
+      "output_evidence": "============================= 18 passed in 1.12s ==============================",
+      "denominator": "the 15 arms this criterion names are a SUBSET of the current 18, all passing; 0 failed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC8",
+      "criterion_verbatim": "\"main_harvest_client\" at least 1 (it was 0 at the first attempt), \"worker_harvest_client\" at least 9, and \"probe_returns_before_worker_run False\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/hv10/ac8.py",
+      "output_evidence": "main_harvest_client 7\nworker_harvest_client 11\nprobe_returns_before_worker_run False",
+      "denominator": "main_harvest_client 7 (>=1), worker_harvest_client 11 (>=9), probe_returns_before_worker_run False (exact match); unchanged from the checkpoint",
+      "status": "PASS"
+    },
+    {
       "criterion_id": "AC9",
       "criterion_verbatim": "\"18 passed\" and no \"failed\" -- the fifteen arms already present plus test_probe_failure_is_recorded_not_raised, test_run_continues_to_every_publisher_after_a_probe_failure, and test_a_challenged_publisher_is_recorded_and_the_run_continues",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_retrieval_provenance.py -v --color=no -p no:cacheprovider 2>&1 | tail -24",
-      "output_evidence": "lib/opal_data_harvest/test_retrieval_provenance.py::test_probe_failure_is_recorded_not_raised PASSED [ 88%]\nlib/opal_data_harvest/test_retrieval_provenance.py::test_run_continues_to_every_publisher_after_a_probe_failure PASSED [ 94%]\nlib/opal_data_harvest/test_retrieval_provenance.py::test_a_challenged_publisher_is_recorded_and_the_run_continues PASSED [100%]\n============================= 18 passed in 1.03s ==============================",
-      "denominator": "18 of 18 arms passed, 0 failed; run three times across this session (1.17s, 1.03s, and once more during the -S5 fix verification), identical pass count every time; the 15 pre-existing arms (AC7's own set) are unchanged and still pass",
+      "output_evidence": "============================= 18 passed in 1.12s ==============================",
+      "denominator": "18 of 18 arms passed, 0 failed; unchanged from the checkpoint",
       "status": "PASS"
     },
     {
@@ -62,8 +202,8 @@
       "criterion_verbatim": "\"handler_reached_worker_run True\", \"publisher_jobs_started 5 of 5\", \"bronze_rows\" at least 1, \"silver_rows\" at least 1, and \"vendor_calls 0\" -- the whole handler driven with an injected transport.VerificationRequired and the network poisoned at PacedSession.get, SessionManager.refresh and subprocess.run",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.opal_data_harvest.rehearse_run",
-      "output_evidence": "handler_reached_worker_run True\npublisher_jobs_started 5 of 5\nbronze_rows 5\nsilver_rows 4\nvendor_calls 0\ncli_rc 0\njob_statuses [('barrons', 'complete_candidates'), ('bbg', 'complete_candidates'), ('ft', 'complete_candidates'), ('sa', 'complete_candidates'), ('wsj', 'complete_candidates')]\nupload_remaining_pending 1\npoison_hits {'PacedSession.get': 0, 'SessionManager.refresh': 0, 'subprocess.run': 0}",
-      "denominator": "handler_reached_worker_run True (exact match); publisher_jobs_started 5 of 5 (exact); bronze_rows 5 (>=1 required); silver_rows 4 (>=1 required, one publisher -- wsj -- fell short of the FULL 5 because silver_from_bronze's real WSJ extractor correctly rejects this rehearsal's generic, publisher-agnostic fake raw_bytes as not WSJ-shaped, a genuine content-shape check firing as designed rather than a rubber stamp; AC10's own bar of 'at least 1' is met regardless); vendor_calls 0, measured directly via a hit-counter on the three poison functions themselves (poison_hits all zero), not merely asserted; run twice across this session, byte-for-byte identical bronze_rows/silver_rows/vendor_calls both times",
+      "output_evidence": "handler_reached_worker_run True\npublisher_jobs_started 5 of 5\nbronze_rows 5\nsilver_rows 4\nvendor_calls 0\npoison_hits {'PacedSession.get': 0, 'SessionManager.refresh': 0, 'subprocess.run': 0}",
+      "denominator": "all thresholds met; measured via an actual poison-hit counter, not asserted; unchanged from the checkpoint, and now independently CORROBORATED by this same round's real Phase 1 run, which reached job_finished for all five publishers exactly as the rehearsal predicted",
       "status": "PASS"
     },
     {
@@ -71,68 +211,77 @@
       "criterion_verbatim": "\"poison_positive_control RAISED\" on every one of the three poisoned call sites (PacedSession.get, SessionManager.refresh, subprocess.run) -- the rehearsal's PASS means the run could not have reached the network, not merely that it did not",
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.opal_data_harvest.rehearse_run --positive-control",
-      "output_evidence": "poison_positive_control RAISED site=PacedSession.get detail=RAISED:POISON: PacedSession.get called -- a real network/vendor call was attempted\npoison_positive_control RAISED site=SessionManager.refresh detail=RAISED:POISON: SessionManager.refresh called -- a real network/vendor call was attempted\npoison_positive_control RAISED site=subprocess.run detail=RAISED:POISON: subprocess.run called -- a real network/vendor call was attempted",
-      "denominator": "3 of 3 poisoned sites RAISED on deliberate call; run twice across this session, identical output both times",
+      "output_evidence": "poison_positive_control RAISED site=PacedSession.get ...\npoison_positive_control RAISED site=SessionManager.refresh ...\npoison_positive_control RAISED site=subprocess.run ...",
+      "denominator": "3 of 3 poisoned sites RAISED; unchanged from the checkpoint",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": ".scratch/hv10/mutant_control_ac9.py (not committed) reads __main__.py's AST at the PRE-Phase-0b checkpoint commit b48efb29c6 (MUTANT -- the exact defect row AMGT_HARVST-Z-W10-S4 names, a probe call NOT wrapped in a broad try/except) and at the current working tree (REAL -- the Phase 0b fix), and checks whether the call to bbg_symbol_news_probe sits inside a Try node with an Exception/bare handler.",
-      "expected": "MUTANT: probe_call_is_try_protected False. REAL: probe_call_is_try_protected True.",
-      "observed": "MUTANT (checkpoint b48efb29c6): probe_call_is_try_protected False. REAL (working tree): probe_call_is_try_protected True. CONTROL FIRED-AS-EXPECTED: True. A second, real-world mutant/real pair: the ACTUAL Phase 1 live run (real bytes, real network, pre-fix code) crashed before Worker.run() on this exact exception class; this rehearsal (real bytes, poisoned network, POST-fix code) reaches Worker.run() cleanly on the SAME injected exception class -- the strongest available contrast, grounded in a genuine prior failure rather than only a synthetic one.",
+      "description": "The real world itself is this round's mutant/real pair: the SECOND granted act (pre-Phase-0b-fix code, real vendor call) crashed on the bbg probe's VerificationRequired before Worker.run() ever ran. This THIRD act (POST-Phase-0b-fix code, a real vendor call that hit the SAME exception class on the SAME probe) reached job_finished for all five publishers. Same real-world trigger, opposite outcome, attributable only to the code change between the two acts.",
+      "expected": "MUTANT (second act): 0 of 5 publishers reach job_finished. REAL (this act): 5 of 5 publishers reach job_finished.",
+      "observed": "Second act (drain commit 76cc1bfc6a): sa/ft/wsj/barrons never attempted (0 http events for any of them), process crashed on the bbg probe. This act: sa, bbg, ft, wsj, barrons ALL reached job_finished (events.jsonl delta, 5 job_finished lines). CONTROL FIRED-AS-EXPECTED: True.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "The full 18-arm pytest suite was run three times this session (1.17s, 1.03s, plus once during the -S5 incident fix verification). python -m lib.opal_data_harvest.rehearse_run was run twice. python -m lib.opal_data_harvest.rehearse_run --positive-control was run twice.",
-      "observed": "pytest: 18 passed / 0 failed all three times. rehearse_run: handler_reached_worker_run True, publisher_jobs_started 5 of 5, bronze_rows 5, silver_rows 4, vendor_calls 0, poison_hits all zero -- identical both runs. --positive-control: all three sites RAISED, identical both runs.",
+      "method": "upload-harvest was run twice against the same pending outbox rows. The pytest suite, ac8.py, and rehearse_run.py (both modes) were re-run this round and compared against the checkpoint's own recorded values.",
+      "observed": "upload-harvest: remaining_pending 11 both times, identical SilverRowError on the same 11 article_keys both times -- proves the wsj silver failure (row -S8) is a stable content defect, not a transient/retriable one. pytest: 18 passed both times. ac8.py: identical values. rehearse_run.py: identical bronze_rows/silver_rows/vendor_calls/poison_hits both times.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
-      "item": "Editing worker.py",
-      "reason": "The order allowed it ('and worker.py only if the handler needs it'). Investigated: Worker.run_job() already wraps every per-job attempt in a comprehensive try/except (VerificationRequired/AuthExpired/Throttled/AccountUnavailable/UpstreamUnavailable/ContractUnavailable/RequestRejected/generic Exception), none of which propagates out of run_job, so Worker.run()'s per-job loop already continues to every publisher after a challenged one -- confirmed directly by the new test_a_challenged_publisher_is_recorded_and_the_run_continues arm (a REAL Worker/run_job exercise, not a stub). No edit was needed; AC6's own diff confirms worker.py is untouched."
+      "item": "A second live vendor-call invocation, in any configuration",
+      "reason": "The ONE-RUN RULE: item 4 made real vendor calls and reached a terminal outcome for every publisher (no uncaught crash). Item 7 is the network-refused replay the order itself requires, not a second live attempt. Re-spending the word for bbg/ft's zero-content outcomes is Andrew's/the issuer's call, not this worker's."
     },
     {
-      "item": "Firing Phase 1 (the third granted live act)",
-      "reason": "Spawn instructions: 'Do NOT fire the run: I verify your rehearsal on my own instruments and show its evidence to the CTO before the third act fires.' AC1-AC6, AC8 (Phase 1's own criteria plus AC6's diff check at the final grading) are not recorded in THIS checkpoint instance; they will be added in a later instance after the issuer's continuation, per this order's own two-stage WHEN YOU ARE DONE section."
+      "item": "Fixing silver_from_bronze's WSJ extractor (row AMGT_HARVST-Z-W10-S8)",
+      "reason": "Phase 1 is execution-only (no code edits) per this order's own two-phase structure. Recorded as a row for the issuer/CVO; the affected bronze objects are safe and the fix can be applied and upload-harvest re-run later with no further vendor call."
     },
     {
-      "item": "Any real vendor-call invocation",
-      "reason": "Phase 0b is CODE, NO NETWORK. All AC9/AC10/AC11 verification is offline: AC9 is a pytest suite with every session/publisher/subprocess surface stubbed or poisoned; AC10/AC11 are the rehearsal harness, which poisons the three real call sites and measures zero hits; the one place this cell's OWN test-authoring process slipped (rows -S3, -S5) was caught and fixed within the same turn, before this checkpoint."
-    },
-    {
-      "item": "Fixing the CLI's upload-harvest command to accept a client= override, or adding an --harvest-grammar-equivalent flag to it",
-      "reason": "Out of Phase 0b's named scope (the probe/publisher-continuation fix and the rehearsal harness only). Recorded as row AMGT_HARVST-Z-W10-S6 for the issuer/CVO; this cell's rehearsal works around it by calling HarvestUploader directly."
+      "item": "Attempting to resolve bbg's, ft's or barrons's session/verification failures (a browser sign-in, a session repair, or a credential entry)",
+      "reason": "Explicit order text: 'Do NOT attempt a browser sign-in, a session repair or a credential entry. That is an operator act, not yours.' The real verification-repair and reauth events that occurred were the harvester's OWN existing retry logic firing automatically, not an act this worker initiated."
     }
   ],
   "surprises": [
-    "AMGT_HARVST-Z-W10-S5: a fourth instance of the row -S3 class -- this cell's first draft of test_probe_failure_is_recorded_not_raised omitted the SessionVault.load patch, so it ran the real canonical-local-harvester subprocess for real (HarvestFailed after ~346s) before being caught and fixed with the same pattern already proven safe elsewhere in the file.",
-    "AMGT_HARVST-Z-W10-S6: the CLI's upload-harvest command never wires a client= into HarvestUploader, so it always reaches for a real boto3 S3 client regardless of --harvest-grammar on a prior run -- correct for the real Phase 1 upload step, but meaning upload-harvest is never offline-safe through the CLI; this cell's rehearsal calls HarvestUploader directly instead.",
-    "AMGT_HARVST-Z-W10-S7: AC6's <expect> text still names only the original three Phase 0 files as the sole legal diff, even though the SAME amendment that added Phase 0b also authorizes a fourth editable file (rehearse_run.py) -- graded by intent (nothing outside the union of both phases' named files touched) rather than by AC6's stale literal list, with that reasoning stated on AC6's own acceptance row at the final grading."
+    "AMGT_HARVST-Z-W10-S8: silver_from_bronze's WSJ extractor pulls WSJ's entire __NEXT_DATA__ frontend config blob wholesale into the silver row (100+ keys, none of them article-content fields) rather than a fixed schema, so a real page whose config held a string where sibling pages held a boolean broke pyarrow's grouped-batch schema inference, deterministically failing all 11 of this run's real, new WSJ Lenovo articles' silver rows (their bronze objects are safe and confirmed byte-for-byte). Surfaced for the first time by this run's real WSJ content -- no prior wsj harvest-mode row had ever existed to catch it earlier."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
-      "tool": "pytest (AC9)",
-      "invocation": "python -m pytest lib/opal_data_harvest/test_retrieval_provenance.py -v --color=no -p no:cacheprovider",
-      "result": "18 passed, 0 failed, 1.03-1.17s across three runs, zero subprocess/network events"
+      "tool": "python -m lib.opal_data_harvest plan (item 3)",
+      "invocation": "python -m lib.opal_data_harvest plan --publishers sa bbg ft wsj barrons --security-json lenovo.security.json --floor 2026-01-01 --retrieval-mode backfill --with-watermark --runtime-root <main-worktree>/.runtime/opal-data-harvest",
+      "result": "rc 0; 125 total planned listing pages across 5 publishers"
     },
     {
-      "tool": "lib.opal_data_harvest.rehearse_run (AC10)",
-      "invocation": "python -m lib.opal_data_harvest.rehearse_run",
-      "result": "handler_reached_worker_run True; publisher_jobs_started 5 of 5; bronze_rows 5; silver_rows 4; vendor_calls 0; poison_hits all zero; run twice, identical"
+      "tool": "python -m lib.opal_data_harvest run (item 4, THE ONE live invocation)",
+      "invocation": "python -m lib.opal_data_harvest run --runtime-root <main-worktree>/.runtime/opal-data-harvest --publishers sa bbg ft wsj barrons --retrieval-mode backfill --floor 2026-01-01 --security-json lenovo.security.json --bbg-symbol-probe --harvest-grammar --max-jobs 5",
+      "result": "rc 2; all 5 publishers + the probe reached a terminal recorded outcome (sa 24 accepted/upstream_unavailable, bbg error, ft request_rejected, wsj 11 accepted/complete_candidates, barrons request_rejected); 3 unplanned/unexpected real vendor-touching events (bbg verification-repair, wsj reauth, barrons reauth)"
     },
     {
-      "tool": "lib.opal_data_harvest.rehearse_run --positive-control (AC11)",
-      "invocation": "python -m lib.opal_data_harvest.rehearse_run --positive-control",
-      "result": "all three poisoned sites RAISED; run twice, identical"
+      "tool": "python -m lib.opal_data_harvest upload-harvest (item 5, run twice)",
+      "invocation": "python -m lib.opal_data_harvest upload-harvest --retrieval-mode backfill --runtime-root <main-worktree>/.runtime/opal-data-harvest --max-objects 1000",
+      "result": "rc 2 both times; remaining_pending 11 both times (wsj's 11 articles, SilverRowError, deterministic); sa's 3 articles + wsj's 2 listing pages uploaded cleanly"
     },
     {
-      "tool": ".scratch/hv10/mutant_control_ac9.py (not committed -- scratch control harness)",
-      "invocation": "python .scratch/hv10/mutant_control_ac9.py",
-      "result": "MUTANT (checkpoint b48efb29c6) probe_call_is_try_protected False; REAL (working tree) probe_call_is_try_protected True; CONTROL FIRED-AS-EXPECTED True"
+      "tool": "python -m lib.opal_data_harvest run, HARVEST_REFUSE_NETWORK=1 (item 7)",
+      "invocation": "HARVEST_REFUSE_NETWORK=1 python -m lib.opal_data_harvest run --runtime-root <main-worktree>/.runtime/opal-data-harvest --publishers sa bbg ft wsj barrons --retrieval-mode backfill --floor 2026-01-01 --security-json lenovo.security.json --bbg-symbol-probe --harvest-grammar --max-jobs 5",
+      "result": "rc 2; 0 http events; 4 network_refused_hits (probe + sa/bbg/ft); wsj replayed 11 accepted with zero network; barrons hit its own cooldown; same UTC date as item 4"
+    },
+    {
+      "tool": ".scratch/hv10/verify.py (AC2)",
+      "invocation": "python .scratch/hv10/verify.py",
+      "result": "rc 0; bronze_reread 14 of 14 mismatch 0; silver_article_rows 3 bronze_articles 14; 5 of 5 publisher lines printed"
+    },
+    {
+      "tool": ".scratch/hv10/debug_wsj_group.py (not committed -- root-cause reproduction for row -S8)",
+      "invocation": "python .scratch/hv10/debug_wsj_group.py",
+      "result": "pyarrow.lib.ArrowInvalid: Could not convert 'async' with type str: tried to convert to boolean -- reproduced offline against the same 11 real raw files"
+    },
+    {
+      "tool": "pytest / ac8.py / rehearse_run.py (AC7/AC8/AC9/AC10/AC11, unchanged from checkpoint)",
+      "invocation": "see checkpoint instance",
+      "result": "unchanged; re-verified this round"
     }
   ]
 }
