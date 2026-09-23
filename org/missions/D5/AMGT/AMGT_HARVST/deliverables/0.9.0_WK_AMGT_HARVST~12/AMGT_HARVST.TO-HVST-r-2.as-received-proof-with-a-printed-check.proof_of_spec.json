@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-r-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-2.as-received-proof-with-a-printed-check.md",
+    "group": "OTHER",
+    "vintage_commit": "004f6621c78f4e686a9c0a842b7ceb3d935150b4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "04a235adb7e399b6c1e10d90164f4de9f45b40e6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-2.as-received-proof-with-a-printed-check.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~12",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/check_as_received.py",
+      "kind": "script",
+      "commit_or_etag": "1ff1b718e6b64da5187a6767829ab5981bb6427c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read-only checker: rebuilds each harvest_raw_outbox row's bronze key through the SAME grammar put_article_bronze uses (harvest_grammar.article_partition + store.form_a_object), GETs the live object, and compares its sha256 against the sha256 recorded at capture time -- never the S3 metadata's self-referential document-sha256. Per-publisher JSON/HTML shape checks; prints objects/hash_match/mismatch/received_form per publisher, a DENOMINATOR line, the BOUND sentence, and the as_received_proof verdict line. Makes only S3 GET/LIST calls; no put_object anywhere in the module.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_check_as_received.py",
+      "kind": "test",
+      "commit_or_etag": "1ff1b718e6b64da5187a6767829ab5981bb6427c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "16 offline arms over a stub S3 client (GET-only) and an in-memory harvest_raw_outbox table -- no network, no live bucket. Includes AC1's two required arms: test_json_shape_negative_control_rejects_canonical_reserialisation (the shape test REJECTS a deliberately re-serialised body) and test_check_publisher_reports_mismatch_when_stored_bytes_are_altered (the checker reports a mismatch when the stored bytes differ from the local capture record).",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every arm passes and no \"failed\" -- including a NEGATIVE CONTROL arm proving the shape test REJECTS a deliberately re-serialised body, and an arm proving the checker reports a mismatch when the stored bytes are altered",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_check_as_received.py -v --color=no -p no:cacheprovider 2>&1 | tail -14",
+      "output_evidence": "lib/opal_data_harvest/test_check_as_received.py::test_check_publisher_skips_unfetchable_object_with_reason PASSED [ 50%]\nlib/opal_data_harvest/test_check_as_received.py::test_check_publisher_zero_rows_is_zero_objects_not_an_error PASSED [ 56%]\nlib/opal_data_harvest/test_check_as_received.py::test_path_verdict_proven_requires_objects_hash_match_and_shape PASSED [ 62%]\nlib/opal_data_harvest/test_check_as_received.py::test_path_verdict_unproven_with_zero_objects PASSED [ 68%]\nlib/opal_data_harvest/test_check_as_received.py::test_path_verdict_unproven_on_mismatch PASSED [ 75%]\nlib/opal_data_harvest/test_check_as_received.py::test_path_verdict_unproven_by_shape_on_canonical_body PASSED [ 81%]\nlib/opal_data_harvest/test_check_as_received.py::test_run_and_format_report_across_all_five_publishers PASSED [ 87%]\nlib/opal_data_harvest/test_check_as_received.py::test_run_proven_when_every_path_has_a_clean_object PASSED [ 93%]\nlib/opal_data_harvest/test_check_as_received.py::test_bronze_uri_matches_put_article_bronze_grammar PASSED [100%]\n\n============================= 16 passed in 0.22s ==============================",
+      "denominator": "16 of 16 arms passed, 0 failed, 0 skipped, 0 errors. The negative control (test_json_shape_negative_control_rejects_canonical_reserialisation) and the mismatch arm (test_check_publisher_reports_mismatch_when_stored_bytes_are_altered) are both present in the 16 and both PASSED, confirmed by name in the full -v log (both ran at 12% and 37% respectively in the untailed run).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "one line per publisher carrying objects, hash_match, mismatch and received_form; a printed DENOMINATOR of objects examined and objects skipped with reasons; the verdict line \"as_received_proof ... paths_proven n of 5\"; \"mismatch 0\" for every publisher that has objects from the live act; and the BOUND sentence stating that a session-layer hash proves what the TRANSPORT received, not what the SERVER sent",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.opal_data_harvest.check_as_received",
+      "output_evidence": "publisher sa objects 3 hash_match 3 mismatch 0 received_form {'as_received': 3}\npublisher bbg objects 0 hash_match 0 mismatch 0 received_form {}\npublisher barrons objects 0 hash_match 0 mismatch 0 received_form {}\npublisher wsj objects 11 hash_match 11 mismatch 0 received_form {'as_received': 11}\npublisher ft objects 0 hash_match 0 mismatch 0 received_form {}\nDENOMINATOR: examined 14 of 14 local capture rows; could_not 0 (reasons: {})\nBOUND: a session-layer hash proves the stored bytes equal what the TRANSPORT received (PacedSession.get's own response.content). It does NOT prove those bytes equal what the SERVER SENT, because nothing upstream of PacedSession is recorded.\nas_received_proof PARTIAL paths_proven 2 of 5\n  bbg: UNPROVEN -- no as_received bronze objects captured yet by the live act\n  barrons: UNPROVEN -- no as_received bronze objects captured yet by the live act\n  ft: UNPROVEN -- no as_received bronze objects captured yet by the live act",
+      "denominator": "5 of 5 publisher lines printed. DENOMINATOR line: 14 of 14 local harvest_raw_outbox rows examined (all status='uploaded'), 0 could not be examined. mismatch is 0 for BOTH publishers that carry objects from the live act (sa: 3/3, wsj: 11/11) -- independently corroborated by a live S3 metadata census (probe run this session) showing exactly 3 as_received objects under seeking-alpha/harvest/bronze/article/ and exactly 11 under wsj/harvest/bronze/article/, and ZERO as_received objects (only normalised_record, the pre-remediation LegacyUploader form) under bloomberg/, barrons/ and ft/'s bronze/article/ prefixes -- so bbg/barrons/ft are honestly UNPROVEN for lack of any live-act object to examine, not asserted proven. paths_proven 2 of 5. BOUND sentence present verbatim.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"outside_allowed []\" -- only check_as_received.py and test_check_as_received.py changed, nothing else under lib; each prints \"compiles True crlf 0 non_ascii 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r2/ac3.py",
+      "output_evidence": "outside_allowed []\npath lib/opal_data_harvest/check_as_received.py compiles True crlf 0 non_ascii 0\npath lib/opal_data_harvest/test_check_as_received.py compiles True crlf 0 non_ascii 0",
+      "denominator": "2 of 2 changed files under lib (git diff --name-only over the merge-base(HEAD,SITEZ)..HEAD range), both in the allowed set of exactly {check_as_received.py, test_check_as_received.py}; 0 files outside the allowed set; 2 of 2 changed files compile clean with 0 CRLF bytes and 0 non-ASCII bytes.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The shape-check negative control IS the mutant/real pair this cell turns on: MUTANT is a deliberately canonically-re-serialised body (json.dumps(json.loads(x))) fed to json_shape_is_as_received; REAL is a genuine, deliberately non-canonical transport body (extra whitespace, unsorted keys) from the SA/BBG/FT/WSJ/Barrons stub fixtures already established in test_bronze_capture.py's own canned bodies. A second pair: MUTANT is a stored object whose bytes were altered after capture (test_check_publisher_reports_mismatch_when_stored_bytes_are_altered); REAL is the unaltered capture (test_check_publisher_reports_hash_match_for_unaltered_bytes).",
+      "expected": "MUTANT (re-serialised body): json_shape_is_as_received returns False (UNPROVEN-BY-SHAPE), never a claimed PROVEN. MUTANT (altered stored bytes): check_publisher reports mismatch=1, hash_match=0. REAL (genuine non-canonical body / unaltered bytes): json_shape_is_as_received returns True; check_publisher reports hash_match=1, mismatch=0.",
+      "observed": "test_json_shape_negative_control_rejects_canonical_reserialisation: PASSED (False on the re-serialised body). test_json_shape_accepts_non_canonical_transport_body: PASSED (True on the non-canonical body). test_check_publisher_reports_mismatch_when_stored_bytes_are_altered: PASSED (mismatch=1, hash_match=0). test_check_publisher_reports_hash_match_for_unaltered_bytes: PASSED (hash_match=1, mismatch=0). CONTROL FIRED-AS-EXPECTED: True for both pairs.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m lib.opal_data_harvest.check_as_received was run three times this session against the live main-worktree runtime and the live opal-data-harvest bucket (read-only, no state-changing calls in between); the pytest suite was run twice.",
+      "observed": "All three live runs produced byte-identical output (same object counts, same hashes, same verdict PARTIAL paths_proven 2 of 5). Both pytest runs: 16 passed, 0 failed, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, vendor call, or use of harvest-run/upload-* commands",
+      "reason": "Explicitly barred by the task order's bounds (section 4: NO S3 WRITE, NO VENDOR CALL, NO RE-FETCH). This cell is read-only: S3 GET and LIST on opal-data-harvest are the only AWS calls it makes, confirmed by reading the committed module (no put_object call appears anywhere in check_as_received.py)."
+    },
+    {
+      "item": "Proving the bbg/barrons/ft paths PROVEN",
+      "reason": "A live S3 metadata census (this session's own probe, corroborated independently of the checker) found ZERO as_received bronze article objects for bbg, barrons or ft -- every object under their bronze/article/ prefixes carries received-form=normalised_record (the pre-remediation LegacyUploader path), never as_received. Section 1's own rule (\"a path you cannot prove is UNPROVEN, not assumed\") is honoured: those three paths are reported UNPROVEN for lack of a live-act object, not inferred proven from the sa/wsj evidence."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest lib/opal_data_harvest/test_check_as_received.py (AC1)",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_check_as_received.py -v --color=no -p no:cacheprovider",
+      "result": "16 passed, 0 failed, run twice, identical"
+    },
+    {
+      "tool": "python -m lib.opal_data_harvest.check_as_received (AC2, live read-only run against the main worktree's progress.sqlite3 and the live opal-data-harvest bucket)",
+      "invocation": "python -m lib.opal_data_harvest.check_as_received",
+      "result": "rc 0; as_received_proof PARTIAL paths_proven 2 of 5; mismatch 0 for sa (3/3) and wsj (11/11); run three times, byte-identical each time"
+    },
+    {
+      "tool": "ad-hoc S3 metadata census (this session, not committed -- corroborating instrument for AC2's denominator, independent of check_as_received.py's own code path)",
+      "invocation": "boto3 list_objects_v2 + head_object over each of the five bronze/article/ prefixes, tallying the received-form metadata value per object",
+      "result": "sa: 29 total (3 as_received, 20 normalised_record, 6 MISSING); bbg: 19 total (0 as_received, 19 normalised_record); barrons: 15 total (0 as_received, 15 normalised_record); wsj: 26 total (11 as_received, 15 normalised_record); ft: 14 total (0 as_received, 14 normalised_record) -- confirms independently that only sa and wsj have ever had a live as_received capture land in bronze"
+    },
+    {
+      "tool": ".scratch/r2/ac3.py (AC3)",
+      "invocation": "python .scratch/r2/ac3.py",
+      "result": "rc 0; outside_allowed []; both changed files compile True crlf 0 non_ascii 0"
+    }
+  ]
+}
