@@ -6,7 +6,7 @@ code review and CVO I4/final acceptance remain pending.
 
 | Scope | Result | Evidence level / limits |
 |---|---|---|
-| C01 source census | d382f2a30e and f28faad15b FAIL per H; latest producer check 28 files / 27 write-like / zero library-directed, pending H re-review | Original scope defects repaired, then comprehension/loop/unpacking and related rebinding fixed. 42 added controls since original candidate. Bounded named-operation AST census, not arbitrary dynamic Python verification |
+| C01 source census | d382f2a30e, f28faad15b and 5812bd0dea FAIL per H; latest producer check pending H re-review | Definition-time evaluation scopes and class outer-name fallback now covered after prior binding repairs. 66 added controls since original candidate. Bounded named-operation AST census, not arbitrary dynamic Python verification |
 | C01 original ACL instrument | Instrument failed; dependent ingestion NOT_EVALUATED | Original mixed W,D mask returned 5 and blocked traversal; preserved negative_control.log |
 | C01 corrected ACL instrument | PASS: specific DE,DC,WD,AD,WEA,WA supports read-only ingestion | negative_control_root_bound.log: resolved copy root and env source printed and asserted, read OK, create/append/overwrite denied, ingest 123/read_failed 0; ACL removal 0 |
 | C01 S3 boundary | No actual PUT delegated; existing bytes read and compared before emulated conflict | Retained-data read with disclosed transport seam; not a live conditional-PUT acceptance claim |
@@ -16,11 +16,11 @@ code review and CVO I4/final acceptance remain pending.
 | C03 producer examples | PASS: positive/absent/stale/changed-hash/failed-read controls | Offline exercise plus one retained-data example; no report consumer or browser acceptance claimed |
 | C03 R integration | NOT_EVALUATED | R owns consumption; independent I4 review remains CVO's |
 
-S was assigned routine review but explicitly reports it has **not started**
-because its own session authorization is unresolved. A named reviewer is not
-a completed or in-progress review. CVO retains the named boundary reviews.
+CTO reassigned C routine review from S to H. H's latest independent verdict
+is scanner FAIL at 5812bd0dea; the definition-time repair awaits re-review.
+S01 activation remains unresolved. CVO retains the named boundary reviews.
 
-Offline corpus suite after binding repair: 178 passed. H routine review at 8534a66eca: 39 candidate
+Offline corpus suite after evaluation-scope repair: 202 passed. H routine review at 8534a66eca: 39 candidate
 and legacy tests plus 10 independent boundary assertions passed; see the
 separate H_GOLD_REVIEW evidence. These grades do not grant C self-acceptance.
 

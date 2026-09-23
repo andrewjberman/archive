@@ -1,5 +1,15 @@
 # Review handoff, 2026-09-23
 
+H review `ce57bef1c2` confirms eight earlier independent controls fixed at
+`5812bd0dea`, but reproduces function-default and class-read-before-assignment
+false-safe rows with recording fake open (no filesystem writes). Scanner FAIL
+remains the latest independent verdict. This candidate separates definition
+headers from body evaluation scopes, including nested default lambdas and the
+outermost comprehension iterable; class bindings conservatively retain outer
+origins. Twenty-four new controls pass, focused suite 91 and full corpus 202.
+`evidence/SCANNER_EVALUATION_FIX.json` records the two executed fixtures and
+unchanged runtime exercise ASTs. H re-review of this repair is NOT_EVALUATED.
+
 H's 17:48:27Z re-review confirms the original three controls fixed but FAILS
 `f28faad15b` for comprehension, loop and unpacking rebinding. The next candidate
 collects binding contexts conservatively, isolates comprehension targets,
