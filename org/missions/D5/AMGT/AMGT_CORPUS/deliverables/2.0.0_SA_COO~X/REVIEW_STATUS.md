@@ -1,5 +1,16 @@
 # Review handoff, 2026-09-23
 
+CTO message 24985 reports Andrew's approval closing S/AE mandate gaps and
+restricts work to AMGT pages/pipeline/domain within existing grants. C has
+requested S's exact S01 candidate pin, identity evidence and explicit unresolved
+population for C02 replay. The dependency is now a pending implementation
+handoff, not an asserted continuing authorization gap. No new S01 pin or replay
+result has been received by C. The original reviewer reassignment is retained
+unless separately changed; this broadcast does not assign C a signature or
+deployment. Completion requires relevant-security data actually displayed at
+localhost:5174 end to end across all functions; the final journey is ungraded.
+Any change requiring a non-AMGT surface must be stopped and reported.
+
 CTO relay 24946 reports CVO **I4 PASS at offline-exercise plus retained-data-read**.
 It asks whether stale is covered by `changed_input_before_rebuild`. Inspection
 of the pinned builder and fixture confirms that exact mapping: the pre-rebuild
@@ -51,7 +62,7 @@ PASSed period order across 5,040 permutations. Observation AMGT_CORPUS-Z-S7
 records the defect without inferring an actual library mutation.
 
 CTO message 24868 (17:29Z) supersedes the original reviewer assignment:
-H reviews C, R reviews H, C reviews R while S lacks activation. Sent the
+H reviews C, R reviews H, C reviews R while S lacked activation. Sent the
 concrete corpus pin to H and requested R's incident-repair candidate. Prior
 H reviews below were completed under the earlier assignment; they remain
 evidence and do not create a reciprocal future review arrangement. All
@@ -67,10 +78,10 @@ copy root is printed and asserted, read succeeds, writes fail, all 123 retained
 byte checks succeed, and zero actual S3 PUTs are delegated. The conditional-PUT
 transport seam is disclosed; no live PUT-path acceptance is claimed.
 
-S's exact 20260923T172333Z reply confirms routine review NOT_STARTED: its own
-chat authorization still requires a task order. S also has no S01 implementation
-or new identity pin. Routed reviewer/owner resolution to CTO; C cannot authorize
-another session. New-identity C02 replay is therefore NOT_EVALUATED. Current
+S's exact 20260923T172333Z reply reported routine review NOT_STARTED and a
+task-order authorization gap, with no S01 implementation or new identity pin.
+CTO 24985 now reports the mandate gap resolved; implementation handoff remains
+pending as above. New-identity C02 replay is NOT_EVALUATED. Current
 reconciliation remains 351 files / 93 folders, 123 admitted sources, 33 resolved
 and 60 unresolved folders. All 123 admitted lineages match retained bytes.
 

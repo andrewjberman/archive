@@ -21,7 +21,11 @@ remains NOT_EVALUATED.
 
 CTO reassigned C routine review from S to H. H's latest independent verdict
 is routine source/offline PASS at dc2c0193ef, superseding the prior pin's FAIL.
-S01 activation remains unresolved. CVO retains the named boundary reviews.
+CTO 24985 reports S01 mandate resolved. Exact implementation/identity evidence
+handoff has been requested from S; C02 replay remains NOT_EVALUATED. CVO
+retains the named boundary reviews. Work stays within AMGT surfaces and existing
+grants. Completion requires relevant-security data displayed at localhost:5174
+end to end across all functions, not a register status alone.
 
 Offline corpus suite after evaluation-scope repair: 202 passed. H routine review at 8534a66eca: 39 candidate
 and legacy tests plus 10 independent boundary assertions passed; see the
