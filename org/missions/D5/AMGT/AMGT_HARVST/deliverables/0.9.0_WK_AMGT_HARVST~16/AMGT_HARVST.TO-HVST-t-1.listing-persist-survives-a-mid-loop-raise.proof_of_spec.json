@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-t-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-t-1.listing-persist-survives-a-mid-loop-raise.md",
+    "group": "OTHER",
+    "vintage_commit": "7eb7ca10f10760d995997f0cd5d59d7111c07e31"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "04329b6a4cec728b9565d50033f6bbdb2bdbe7da",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-t-1.listing-persist-survives-a-mid-loop-raise.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/worker.py",
+      "kind": "script",
+      "commit_or_etag": "ba568c887e673b0663e9f61a6792c5c06b143d8d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Moved the harvest-mode listing persist call (`_write_harvest_listings(client.listings)`) out of a post-loop position and into a `finally` wrapping the per-article `for article in client.articles(...)` loop, so it always runs with whatever `client.listings` holds the moment the loop stops -- normal exhaustion, the accepted-target break, or an exception raised from anywhere inside client.articles(). AMENDMENT 1 (row AMGT_HARVST-Z-S10): the persist call inside that `finally` is now itself wrapped in try/except -- `sys.exc_info()[0]` is read BEFORE the persist is attempted (reflecting the loop's own exit state), a failure is recorded as its own visible `harvest_listing_persist_failed` event, and the failure is re-raised only when nothing else was already propagating, so it can never displace an in-flight upstream exception. No other line in the loop body changed.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC5"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_listing_persist_durability.py",
+      "kind": "test",
+      "commit_or_etag": "ba568c887e673b0663e9f61a6792c5c06b143d8d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "4 arms: a DRIVEN MID-LOOP RAISE (a fake harvest client captures 3 listing pages, raises UpstreamUnavailable(502) after 2 accepted articles) asserting all 3 pages landed in harvest_listing_outbox; a NEGATIVE CONTROL (load-bearing) reproducing the OLD post-loop-only placement with the SAME real _write_harvest_listings and the SAME real fake client on the SAME raise, proving the pages are LOST under that placement; and AC5's two arms -- the same mid-loop 502 driven with _write_harvest_listings itself made to raise sqlite3.OperationalError, asserting the ORIGINAL upstream exception still determines result[\"status\"] with the persist failure surfaced as its own event; and the mirror arm (no propagating exception) asserting the SAME persist failure DOES surface as result[\"status\"]==\"error\" when there is nothing to be subordinate to.",
+      "artifact_covered_by": ["AC1", "AC3", "AC4", "AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit, eleven baseline lines recorded; each should equal the section-4 count measured in the full shared tree, and ANY divergence is recorded as an environment finding with a row rather than treated as a repository failure",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in test_retrieval_provenance test_bronze_capture test_silver_from_bronze test_legacy_upload test_harvest_grammar test_worker test_catalog test_verification test_poison_control test_check_as_received test_listing_capture_census; do echo \"$t :: $(python -m pytest lib/opal_data_harvest/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "test_retrieval_provenance :: 18 passed in 0.91s\ntest_bronze_capture :: 12 passed in 0.18s\ntest_silver_from_bronze :: 16 passed in 0.63s\ntest_legacy_upload :: 6 passed in 0.62s\ntest_harvest_grammar :: 7 passed in 0.51s\ntest_worker :: 2 failed, 18 passed, 2 subtests passed in 0.54s\ntest_catalog :: 5 passed in 0.41s\ntest_verification :: 1 failed, 3 passed, 2 subtests passed in 0.14s\ntest_poison_control :: 3 passed in 0.05s\ntest_check_as_received :: 16 passed in 0.14s\ntest_listing_capture_census :: 18 passed in 0.14s",
+      "denominator": "11 of 11 named suites measured BEFORE any edit to worker.py, in this sparse worktree; every line equals the section-4 baseline measured by the issuer in the full shared worktree (18/12/16/6/7/2f+18p/5/1f+3p/3/16/18) -- 0 divergences, so no environment-finding row was filed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every arm passes and no \"failed\" -- including the DRIVEN MID-LOOP RAISE arm asserting the earlier listing pages DID land, and the NEGATIVE CONTROL arm proving that with the persist at its old post-loop position the same driven raise LOSES them",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_listing_persist_durability.py -v --color=no -p no:cacheprovider 2>&1 | tail -16",
+      "output_evidence": "lib/opal_data_harvest/test_listing_persist_durability.py::Tests::test_ac5_persist_failure_during_a_propagating_raise_stays_subordinate PASSED [ 25%]\nlib/opal_data_harvest/test_listing_persist_durability.py::Tests::test_ac5_persist_failure_with_nothing_propagating_still_surfaces PASSED [ 50%]\nlib/opal_data_harvest/test_listing_persist_durability.py::Tests::test_mid_loop_raise_still_persists_the_listing_pages_already_captured PASSED [ 75%]\nlib/opal_data_harvest/test_listing_persist_durability.py::Tests::test_negative_control_old_post_loop_placement_loses_the_same_pages PASSED [100%]\n============================== 4 passed in 0.26s ==============================",
+      "denominator": "4 of 4 arms passed, 0 failed (grew from 2 to 4 under AMENDMENT 1): the positive arm asserts _stored_listing_pages(worker) == [1, 2, 3] after a mid-loop UpstreamUnavailable(502); the negative-control arm drives the identical 3-page-capturing client through a faithful miniature of the OLD post-loop-only placement (same real Worker._write_harvest_listings, same real fake client) and asserts _stored_listing_pages(worker) == [] while client.listings still holds all 3 in memory -- proving the test CAN fail; the two AC5 arms are detailed under AC5 below",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "each line's passed and failed counts EQUAL its AC0 line: the placement change altered no existing test's outcome and neither pre-existing failure grew",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in test_retrieval_provenance test_bronze_capture test_silver_from_bronze test_legacy_upload test_harvest_grammar test_worker test_catalog test_verification test_poison_control test_check_as_received test_listing_capture_census; do echo \"$t :: $(python -m pytest lib/opal_data_harvest/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "test_retrieval_provenance :: 18 passed in 0.86s\ntest_bronze_capture :: 12 passed in 0.19s\ntest_silver_from_bronze :: 16 passed in 0.50s\ntest_legacy_upload :: 6 passed in 0.58s\ntest_harvest_grammar :: 7 passed in 0.49s\ntest_worker :: 2 failed, 18 passed, 2 subtests passed in 0.58s\ntest_catalog :: 5 passed in 0.41s\ntest_verification :: 1 failed, 3 passed, 2 subtests passed in 0.14s\ntest_poison_control :: 3 passed in 0.05s\ntest_check_as_received :: 16 passed in 0.13s\ntest_listing_capture_census :: 18 passed in 0.13s",
+      "denominator": "11 of 11 lines compared to their AC0 counterpart, run AFTER the worker.py edit and the commit (ba568c887e673b0663e9f61a6792c5c06b143d8d): all 11 identical (18/12/16/6/7/2f+18p/5/1f+3p/3/16/18) -- 0 outcomes changed, the 2 pre-existing failures (test_worker, test_verification) did not grow",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"outside_allowed []\" -- only worker.py and the two named test files changed, nothing else under lib; each changed file prints \"compiles True crlf 0 non_ascii 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/t1/ac3.py",
+      "output_evidence": "changed ['lib/opal_data_harvest/test_listing_persist_durability.py', 'lib/opal_data_harvest/worker.py']\noutside_allowed []\nlib/opal_data_harvest/test_listing_persist_durability.py compiles True crlf 0 non_ascii 0\nlib/opal_data_harvest/worker.py compiles True crlf 0 non_ascii 0",
+      "denominator": "2 of 2 changed files under lib (diffed against merge-base HEAD SITEZ = 68f353361b6f15aa77526254306f2485b34f383f, unioned with untracked-then-committed additions via git ls-files --others before the commit); both are inside the allowed set {worker.py, test_listing_persist_durability.py, test_worker.py} (test_worker.py was not touched); outside_allowed [] (0 unauthorised files); each of the 2 changed files compiles cleanly with 0 CRLF and 0 non-ASCII bytes; re-run AFTER AMENDMENT 1's commit, unchanged; rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"vendor_calls 0\" read from a counter, and a POSITIVE CONTROL showing each of PacedSession.get, SessionManager.refresh and subprocess.run RAISES when deliberately tripped; the script states which of the three the package conftest already covers rather than duplicating it",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/t1/ac4.py",
+      "output_evidence": "conftest_already_covers ['SessionManager.refresh', 'subprocess.run']\nthis_script_adds ['PacedSession.get'] (not covered by the package conftest)\n4 passed in 0.36s\npytest_rc 0\npoison_hits PacedSession.get 0\npoison_hits SessionManager.refresh 0\npoison_hits subprocess.run 0\nvendor_calls 0\npoison_positive_control RAISED site=PacedSession.get detail=RAISED:POISON: PacedSession.get called -- a real network/vendor call was attempted\npoison_positive_control RAISED site=SessionManager.refresh detail=RAISED:POISON: SessionManager.refresh called -- a real network/vendor call was attempted\npoison_positive_control RAISED site=subprocess.run detail=RAISED:POISON: subprocess.run called -- a real network/vendor call was attempted\npositive_control_all_raised True",
+      "denominator": "vendor_calls 0 (sum of 3 per-site counters, each incremented only inside its own poison closure, never a literal), measured while running the full 4-arm test_listing_persist_durability.py suite (grew from 2 to 4 under AMENDMENT 1) under this script's own poison on all 3 sites; 3 of 3 poisoned sites RAISED on the positive control; conftest.py's package-level autouse fixture already covers 2 of the 3 (SessionManager.refresh, subprocess.run) for every pytest-collected test in this package -- this script's own poison is additive, covering PacedSession.get (which conftest.py does not touch) and giving the script a counter it can read after pytest.main() returns; rc=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "an arm proving the finally block CANNOT MASK the propagating exception: with the persist made to raise (its own write or db call failing) WHILE a mid-loop UpstreamUnavailable is propagating, the exception that escapes run_job is STILL the original upstream one, and the persist failure is visible but subordinate; and every other arm in the file still passes",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_listing_persist_durability.py -v --color=no -p no:cacheprovider 2>&1 | tail -20",
+      "output_evidence": "lib/opal_data_harvest/test_listing_persist_durability.py::Tests::test_ac5_persist_failure_during_a_propagating_raise_stays_subordinate PASSED [ 25%]\nlib/opal_data_harvest/test_listing_persist_durability.py::Tests::test_ac5_persist_failure_with_nothing_propagating_still_surfaces PASSED [ 50%]\nlib/opal_data_harvest/test_listing_persist_durability.py::Tests::test_mid_loop_raise_still_persists_the_listing_pages_already_captured PASSED [ 75%]\nlib/opal_data_harvest/test_listing_persist_durability.py::Tests::test_negative_control_old_post_loop_placement_loses_the_same_pages PASSED [100%]\n============================== 4 passed in 0.17s ==============================",
+      "denominator": "4 of 4 arms passed, 0 failed. THE ASSERTION THIS CRITERION EXISTS FOR (test_ac5_persist_failure_during_a_propagating_raise_stays_subordinate): with worker._write_harvest_listings replaced by a function that raises sqlite3.OperationalError('disk I/O error (simulated)') while the SAME mid-loop UpstreamUnavailable(502) drive is in flight, result['status']=='upstream_unavailable' and result['http_status']==502 -- the persist failure did NOT displace the propagating exception -- while exactly 1 'harvest_listing_persist_failed' event was recorded with error_type=='OperationalError' and detail containing 'disk I/O error' -- VISIBLE, not swallowed. The mirror arm (test_ac5_persist_failure_with_nothing_propagating_still_surfaces) drives a clean 2-article job with no propagating exception through the SAME failing persist and asserts result['status']=='error' and result['error_type']=='OperationalError' -- the failure surfaces exactly as the OLD post-loop call site would have let it when there is nothing to be subordinate to.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two mutant pairs, both load-bearing. AC1's: the same 3-listing-page-capturing drive and the same real Worker._write_harvest_listings method, run through the OLD post-loop-only call placement instead of the fix. AC5's (AMENDMENT 1): the same mid-loop-502 drive with _write_harvest_listings itself made to fail, checked against BOTH branches of the guard -- an upstream exception already propagating (must stay subordinate) and none propagating (must surface).",
+      "expected": "AC1 -- FIXED placement: all 3 pages land. OLD placement: pages captured in memory but NONE land (call site unreachable on a mid-loop raise). AC5 -- persist fails WHILE an upstream exception propagates: result['status'] stays 'upstream_unavailable'/502, persist failure recorded as its own event. Persist fails with NOTHING propagating: result['status'] becomes 'error'/'OperationalError' (unguarded fall-through, matching the OLD post-loop site's own behaviour for the same failure).",
+      "observed": "Measured directly, all 4: test_mid_loop_raise_still_persists_the_listing_pages_already_captured -> [1, 2, 3]. test_negative_control_old_post_loop_placement_loses_the_same_pages -> [] with client.listings length 3. test_ac5_persist_failure_during_a_propagating_raise_stays_subordinate -> status 'upstream_unavailable', http_status 502, exactly 1 'harvest_listing_persist_failed' event. test_ac5_persist_failure_with_nothing_propagating_still_surfaces -> status 'error', error_type 'OperationalError'. CONTROL FIRED-AS-EXPECTED: True on all 4.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m pytest lib/opal_data_harvest/test_listing_persist_durability.py run four times across this session (pre-AMENDMENT-1 x2, post-AMENDMENT-1 commit, and inside the AC4 poisoned run via pytest.main()).",
+      "observed": "Identical result every time: 4 passed, 0 failed (2 passed, 0 failed before AMENDMENT 1); identical stored-page lists and identical result['status']/error_type values on every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Recovering the listing pages round 1's live seeking-alpha run already discarded",
+      "reason": "Explicitly out of scope (task order section 1, 'What this cell does NOT do'): those pages are lost; this cell only stops a FUTURE mid-loop raise from discarding future pages."
+    },
+    {
+      "item": "Touching sessions, credentials, any publisher, or the bronze key grammar",
+      "reason": "Explicitly excluded by the task order; only worker.py's persist-call placement changed, and harvest_grammar.py / publishers.py stayed read-only reference material."
+    },
+    {
+      "item": "Per-page-as-captured persist inside Publisher._record_listing",
+      "reason": "publishers.py is a READ-ONLY reference under this cell's <paths>, not a writable surface; a checkpoint wrapping the existing loop in worker.py achieves the same durability guarantee without touching it, and the task order names this as one of the two legal choices."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest lib/opal_data_harvest/test_listing_persist_durability.py (AC1, AC5)",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_listing_persist_durability.py -v --color=no -p no:cacheprovider",
+      "result": "rc 0; 4 passed, 0 failed (grew from 2 to 4 under AMENDMENT 1)"
+    },
+    {
+      "tool": "eleven-suite baseline loop (AC0/AC2)",
+      "invocation": "for t in test_retrieval_provenance test_bronze_capture test_silver_from_bronze test_legacy_upload test_harvest_grammar test_worker test_catalog test_verification test_poison_control test_check_as_received test_listing_capture_census; do python -m pytest lib/opal_data_harvest/$t.py -q --color=no -p no:cacheprovider; done",
+      "result": "identical before and after both the original edit and AMENDMENT 1's guard: 18/12/16/6/7/(2f+18p)/5/(1f+3p)/3/16/18 -- 0 divergence"
+    },
+    {
+      "tool": ".scratch/t1/ac3.py (AC3, allowed-set diff + compile/CRLF/non-ASCII)",
+      "invocation": "python .scratch/t1/ac3.py",
+      "result": "rc 0; outside_allowed []; 2 of 2 changed files compile clean, 0 crlf, 0 non_ascii; unchanged after AMENDMENT 1's commit"
+    },
+    {
+      "tool": ".scratch/t1/ac4.py (AC4, three-site poison + counter + positive control)",
+      "invocation": "python .scratch/t1/ac4.py",
+      "result": "rc 0; vendor_calls 0; pytest_rc 0 (4 of 4 arms under poison); 3 of 3 poison sites RAISED on positive control"
+    }
+  ]
+}
