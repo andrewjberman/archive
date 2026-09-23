@@ -2,8 +2,9 @@
 
 CTO message 24841 restores C01 PASS at ACTUAL EXERCISE ON RETAINED BYTES,
 conditioned on the candidate pin and four observable controls below. H grants
-routine source/offline PASS for dc2c0193ef at review 1c877a8c87. CVO I4/final
-acceptance remains pending.
+routine source/offline PASS for dc2c0193ef at review 1c877a8c87. CTO relay 24946
+reports CVO I4 PASS at offline-exercise plus retained-data-read; final journey
+remains NOT_EVALUATED.
 
 | Scope | Result | Evidence level / limits |
 |---|---|---|
@@ -15,7 +16,8 @@ acceptance remains pending.
 | C02 period presence | 103 present, 20 absent with reasons, of 123 | Retained-data read; structured period fix implements CTO message 24824, with independent all-pairs validator and explicit renderer tie evidence |
 | C02 full population/replay | NOT_EVALUATED beyond the admitted set | 60 unresolved folders / 228 excluded files remain S01 dependent; no guessed identities or induction |
 | C03 producer examples | PASS: positive/absent/stale/changed-hash/failed-read controls | Offline exercise plus one retained-data example; no report consumer or browser acceptance claimed |
-| C03 R integration | NOT_EVALUATED | R owns consumption; independent I4 review remains CVO's |
+| C03 I4 interface | CVO PASS per CTO relay 24946 at offline-exercise plus retained-data-read | Stale coverage clarified as changed_input_before_rebuild with continuation.current false; explicit mapping in INTERFACES.md |
+| C03 R integration | NOT_EVALUATED | R owns consumption; final journey remains CVO's |
 
 CTO reassigned C routine review from S to H. H's latest independent verdict
 is routine source/offline PASS at dc2c0193ef, superseding the prior pin's FAIL.

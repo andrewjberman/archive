@@ -31,6 +31,20 @@ makes continuation stale. After rebuilding continuation, exactly those two
 members' hashes change; sector, fund and global typecast stay unchanged.
 Absent security does not imply absent global typecast.
 
+The `stale` fixture is **`changed_input_before_rebuild`** in
+`I4_EXAMPLES_v1.json`: after adding a synthetic report, the builder reads the
+substrate before rebuilding continuation and asserts `continuation.current`
+is `false`. The after-rebuild fixture asserts it is `true`. This exercises
+input-change staleness, not elapsed-time expiry. The fixture keys map as follows:
+
+| Required state | Fixture key / assertion |
+|---|---|
+| positive | `positive`, `positive_referenced_documents` |
+| absent | `absent_security` |
+| stale | `changed_input_before_rebuild.continuation.current == false` |
+| changed | `changed_input_after_rebuild`, `changed_members`, `after_rebuild_referenced_documents` |
+| failed-read | `failed_read.state == FAILED`; missing extraction raises rather than becoming absence |
+
 - `evidence/I4_EXAMPLES_v1.json`: poisoned offline exercise with present,
   absent, stale, rebuilt and failed-read controls. Uses the actual corpus
   writers over synthetic inputs; no claim about real report quality.
@@ -57,4 +71,8 @@ cannot establish this property.
 
 R owns the consuming report, common API and shared page. S owns identity
 resolution and induction. C owns corpus parsing/substrate and makes no
-vendor or model calls. Independent interface acceptance remains CVO's.
+vendor or model calls. CTO relay 24946 reports CVO I4 PASS at offline-exercise
+plus retained-data-read level. The stale-name mapping above answers its last
+fixture-coverage question; final journey remains NOT_EVALUATED pending R's
+consumer and S01 full-population replay. This mapping is producer clarification,
+not a new independent review or live execution.

@@ -1,5 +1,13 @@
 # Review handoff, 2026-09-23
 
+CTO relay 24946 reports CVO **I4 PASS at offline-exercise plus retained-data-read**.
+It asks whether stale is covered by `changed_input_before_rebuild`. Inspection
+of the pinned builder and fixture confirms that exact mapping: the pre-rebuild
+continuation has `current=false`, the rebuilt continuation has `current=true`,
+and the builder asserts both. Explicit mapping is now in `INTERFACES.md` and
+was returned through CTO for CVO. This is input-change staleness, not TTL expiry.
+R consumer and S01 replay remain open; final journey remains NOT_EVALUATED.
+
 H independent review `1c877a8c87` grants **routine source/offline PASS** for
 exact implementation pin `dc2c0193ef`, superseding `ce57bef1c2` at that pin.
 All ten independent scanner controls, 110 supplied scanner/typed tests and
@@ -7,8 +15,8 @@ All ten independent scanner controls, 110 supplied scanner/typed tests and
 reproduced 27 named write-like calls with zero library flags. The bounded
 named-operation/origin model does not establish arbitrary-Python mutation
 absence. H checked runtime exercise AST equality but did not rerun the live
-exercise. CVO interfaces/live integrity/final journey and R integration remain
-separate; S01-dependent full-population replay remains NOT_EVALUATED.
+exercise. CVO's I4 grade is recorded above; live integrity/final journey and
+R integration remain separate. S01 full-population replay is NOT_EVALUATED.
 Pinned evidence references and byte hashes are recorded in
 `evidence/H_C_ROUTINE_PASS_dc2c0193ef.json`. Earlier failures below are history,
 not the current verdict for `dc2c0193ef`; their original evidence is retained.
