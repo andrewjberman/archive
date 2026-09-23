@@ -1,9 +1,9 @@
 # AMGT_CORPUS current state
 
 Owner `2.0.0_SA_COO~X`; 2026-09-23. CONTRACT v1.0 / mandate `0e33cea24b`, B08.
-**Corpus report-input adapter built; proposed consumer patch awaiting owner integration.**
+**Corpus report-input adapter built; owner integration blocked by its session authorization.**
 `C1-C3: NOT_EVALUATED` until B00/E0 and independent live acceptance.
-Worktree `C:/tmp/closer-amgt-corpus-x-20260923`; predecessor `c4a9c1460d`, LOCAL.
+Worktree `C:/tmp/closer-amgt-corpus-x-20260923`; product candidate `4599b05795`, LOCAL.
 Remote SITEZ last measured `1b1244cecf39d51b3f7b3ac365218a07a2956b48`.
 
 Journey: analyst opens one resolved security at localhost:5174, sees retained
@@ -46,7 +46,8 @@ overwrite denied, 123 retained byte matches, zero actual S3 PUTs. Scanner remain
 a bounded named-operation instrument, not arbitrary-Python proof. Historical
 order status is untouched; no new order or duplicate implementer is created.
 
-Next: COO~Z integrates the pinned Runtime patch, target dependency/permission
+Next, after its session authorization is resolved: COO~Z reviews and integrates
+the pinned Runtime patch, target dependency/permission
 closure and explicit client/render mapping, then C traces the same admitted
 security through it. The new library depends on corpus/harvest/naming/PyArrow;
 the API's old deployed closure excludes part of this, so applying the patch is
@@ -54,6 +55,12 @@ not deployment readiness. No additional read reruns are needed to call this live
 
 Blockers: shared integration and first hop `2.0.0_SA_COO~Z`; that seat's own
 session restriction and actual admin+Dev identity go through CTO to Andrew.
+At 20:45:34Z COO~Z reported it read only the interface notice: the pinned
+handoff and patch remain unread there; no rebase, integration or review has
+started and no consumer integration pin exists. CTO already has the requested
+operator wording and has accepted this blocker. This session cannot lift that
+separate restriction. Interface published at 20:44:59Z; candidate review handoff
+sent to CVO at 20:45:19Z. Neither delivery is acceptance.
 S01/induction `2.0.0_SA_COO~Z`; final acceptance `3.0.0_SA_CVO~Z`.
 Shared-tree commit hold belongs to MSTR; linked-worktree commits remain allowed.
 
