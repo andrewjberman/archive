@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-r-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-1.timeline-spec-failed-call-state-and-error-envelope.md",
+    "group": "OTHER",
+    "vintage_commit": "004f6621c78f4e686a9c0a842b7ceb3d935150b4"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "04a235adb7e399b6c1e10d90164f4de9f45b40e6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-1.timeline-spec-failed-call-state-and-error-envelope.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~11",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~8/SPEC_SECTION_timeline.md",
+      "kind": "doc",
+      "commit_or_etag": "7d92646ac4f55e438ca62f3cbe11ac05c542d7ec",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the required amendment: one new failed-call state added to section 6, one new error envelope added to section 5, one pointer line added to section 7, nothing else touched -- verified by AC1's own read (eight sections intact, pure ASCII, LF-only) and by the diff (30 insertions, 0 deletions).",
+      "introduces": ["The timeline request itself failed", "The error envelope", "Z-S227"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"sections 12345678\", \"non_ascii 0\", \"crlf 0\" -- the eight sections intact, pure ASCII, LF only",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"import re;p='org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~8/SPEC_SECTION_timeline.md';t=open(p,encoding='utf-8').read();h=re.findall(r'^## (\\d)\\. ',t,re.M);print('sections',''.join(h));print('non_ascii',sum(1 for c in t if ord(c)>127));b=open(p,'rb').read();print('crlf',b.count(bytes([13,10])))\"",
+      "output_evidence": "sections 12345678 non_ascii 0 crlf 0 (three print lines concatenated for the expect match; run twice against HEAD 7d92646ac4, byte-identical both times)",
+      "denominator": "8 of 8 expected `##` sections present in order (1 through 8); 0 of the file's characters are non-ASCII; 0 CRLF byte-pairs found in a raw ('rb') read of the file (this invocation, unlike HVST-h-8's own AC1 per row AMGT_HARVST-Z-W8-S1, reads the file in BINARY mode for the crlf count, so this clause IS a live CRLF check, not a vacuous one -- confirmed live by the mutant control below)",
+      "status": "PASS",
+      "expect": "sections 12345678 non_ascii 0 crlf 0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"s6_mentions_request_failure True\", \"s5_names_envelope True\" and \"never_blank_rule True\" -- the failing-call state is in section 6, the error envelope is in section 5, and the never-render-a-failure-as-data rule is stated in one of them",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"import re;p='org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~8/SPEC_SECTION_timeline.md';t=open(p,encoding='utf-8').read();s6=t.split('## 6.')[1].split('## 7.')[0];s5=t.split('## 5.')[1].split('## 6.')[0];print('s6_chars',len(s6),'s5_chars',len(s5));print('s6_mentions_request_failure',any(k in s6.lower() for k in ('request fail','call fail','failed call','route fail','timeout','non-200','error state')));print('s5_names_envelope',any(k in s5.lower() for k in ('error envelope','envelope','error field')));print('never_blank_rule',any(k in s6.lower() for k in ('never a blank','not a blank','never blank','never rendered as data')) or any(k in s5.lower() for k in ('never rendered as data','never as data')))\"",
+      "output_evidence": "s6_chars 2683 s5_chars 3548; s6_mentions_request_failure True, s5_names_envelope True and never_blank_rule True (four print lines concatenated for the expect match; run twice against HEAD 7d92646ac4, byte-identical both times)",
+      "denominator": "3 of 3 keyword probes True (request-failure mention in section 6, envelope naming in section 5, never-rendered-as-data rule present in section 5 or 6); this is the task order's own weak keyword probe (section 5 note: 'it is deliberately weak ... do not write to satisfy the keywords') -- AC4 (judgment) is what grades whether the state and envelope are well drawn, not this clause",
+      "status": "PASS",
+      "expect": "s6_mentions_request_failure True, s5_names_envelope True and never_blank_rule True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "NOTHING printed before \"--- end\" -- no code, no .tsx, no infra, nothing under lib",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- portal infra lib && git status --porcelain -- portal infra lib && echo \"--- end\"",
+      "output_evidence": "AC3 invocation deciding output, verbatim: --- end (git diff --name-only against the merge-base with SITEZ over portal/infra/lib printed no path; git status --porcelain over the same three trees printed no dirty path; only the sentinel line reached stdout; run twice, identical)",
+      "denominator": "0 of 0 -- no file under portal/, infra/ or lib/ appears in the diff against the merge-base with SITEZ, and none is staged/unstaged dirty there; the only line printed is the sentinel",
+      "status": "PASS",
+      "expect": "verbatim: --- end"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "does the amended spec now draw EVERY state, including the timeline call's own failure, such that a build cannot reproduce the Z-S227/C-S400 defect on this new surface?",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "invocation": "read SPEC_SECTION_timeline.md@7d92646ac4 in full, focused on the three amended passages (section 5's error envelope, section 6's new failed-call state, section 7's pointer), against the round-1 analysis's own finding @f869aa705c and the Z-S227/C-S400 precedent it cites",
+      "output_evidence": "Section 6 now names five DATA states (Loading, no-articles-but-covered, floor date, PARTIAL/DENIED, never-collected) plus the new sixth state 'The timeline request itself failed', which covers a non-200 status, a timeout, or a malformed/unparseable body -- i.e. the call itself, not any row chatter_daily/chatter_event holds. It states what the panel draws (never a blank chart, an empty series, or a zero-height line -- the same three failure-shaped renders the analysis flagged as indistinguishable from a quiet/PARTIAL/DENIED state), that it is a distinct page-level error banner separate from the chart canvas and from any bar/marker language, what the reader is told ('the timeline could not be loaded', never quiet/uncollected language), and what they can do next (a retry action); it also states the day/event dissection panel shows the same state independently rather than forcing the whole line into it. Section 5 now carries the error envelope immediately after the three routes: {\"error\": true, \"error_code\": <string>, \"message\": <string>}, names three example error_code tokens, and states the rule twice in different words -- 'NEVER rendered as data: it is never merged into series, events or articles as if it were a data row, and never rendered as a zero-length or otherwise empty version of those arrays' -- distinguishing a real empty array (call succeeded, nothing in range) from error:true (call did not succeed). Section 7 adds one line naming the Z-S227/C-S400 precedent as the reason these two additions exist, without restating its history. No other section's text changed (verified structurally by AC1: still exactly eight `##` sections in the original order, and by diff: only insertions, zero deletions across the whole file). Read against the round-1 analysis's own quoted defect ('NO state for the timeline call itself FAILED, and section 5 names no error envelope'), both named gaps are now closed by name, and the state's own text repeats the analysis's own vocabulary ('we hold nothing for this day' vs 'we do not know what we hold') rather than inventing a different framing.",
+      "denominator": "N/A -- judgment criterion, read against the two things the cell was ruled to add (one section-6 state, one section-5 envelope) plus the section-7 pointer, no invocation output to count",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3 L6/L9: a judgment row carries its output and NO verdict; the grade is 3.0.0_SA_CVO~Z's at L9 adjudication, not self-graded here."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two scratch mutants (not committed, .scratch/hv11/ only) of the amended deliverable were graded against AC1's exact invocation, plus a third live mutant against AC2 (a planted untracked file under lib/, not committed, removed immediately after).",
+      "expected": "AC1's invocation on mutant 1 (heading '## 6. States' renamed to '## Six. States') should print a sections string missing the digit 6; on mutant 2 (one em dash inserted into section 2's 'mention_score' text) should print a non_ascii count greater than 0. AC2/AC3's invocation, run while a planted file sits untracked under lib/, should print that file's path before the '--- end' sentinel.",
+      "observed": "Mutant 1: printed 'sections 1234578 non_ascii 0' (digit 6 missing) -- FAILS the real expect, confirming the sections clause is load-bearing. Mutant 2: printed 'sections 12345678 non_ascii 1' -- the injected em dash was counted, confirming the non_ascii clause is load-bearing. AC2/AC3 planted-file control: with lib/QA_MUTANT_DELETE_ME.txt present (untracked), the invocation printed '?? lib/QA_MUTANT_DELETE_ME.txt' before '--- end' -- FAILS the real expect (NOTHING before '--- end'), confirming the clause discriminates a real write under lib/. The file was removed immediately after the control run (git status --porcelain -- portal infra lib confirmed clean before this instance's own AC3 run above).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's invocations were each run twice against the unchanged, committed deliverable (7d92646ac4), with no intervening edit.",
+      "observed": "AC1: both runs printed 'sections 12345678 / non_ascii 0 / crlf 0', byte-identical. AC2: both runs printed 's6_chars 2683 s5_chars 3548 / s6_mentions_request_failure True / s5_names_envelope True / never_blank_rule True', byte-identical. AC3: both runs printed only '--- end', byte-identical -- no timestamp, random element or environment-dependent value in any invocation's output.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any `.tsx` file, API route implementation, or edit under portal/ or infra/",
+      "reason": "C-HV-DESIGN-SPEC-FIRST / this cell's own spawn bound (SPEC ONLY, no .tsx/route/infra): the build cell against this amended spec is cut only after Andrew approves it, per the round-1 analysis. AC3 verifies nothing under portal/infra/lib changed."
+    },
+    {
+      "item": "Restructuring, renumbering or re-wording sections 1-4 and 8, or adding a ninth top-level section",
+      "reason": "The task order rules exactly three additions (one section-6 state, one section-5 envelope, one section-7 pointer) and states 'NOTHING ELSE CHANGES ... Do not restructure, renumber or re-word them.' AC1 verifies the section count and order are unchanged (still 1-8)."
+    },
+    {
+      "item": "Restating the Z-S227/C-S400 incident history inside this spec, or naming an implementation file for the failed-call route",
+      "reason": "Section 7's pointer is bound to 'One line, no history lecture'; section 5 continues the existing convention of naming no implementation file, leaving the route to the build cell."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W11-S1: the missions-tree-check pre-commit hook reads the WORKTREE by a physical filesystem walk of org/missions, so this worker's dispatched sparse cone (only org/missions/D5/AMGT/AMGT_HARVST materialized) made every OTHER org/projects/*.json's home register INDEX-ORPHAN (24 false violations), BLOCKING this cell's own correct, in-scope commit until the cone was temporarily widened to the full org/missions tree (0 violations), the commit made, and the cone narrowed back to the dispatched set."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python (AC1 invocation)",
+      "invocation": "python -c \"import re;p='org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~8/SPEC_SECTION_timeline.md';t=open(p,encoding='utf-8').read();h=re.findall(r'^## (\\d)\\. ',t,re.M);print('sections',''.join(h));print('non_ascii',sum(1 for c in t if ord(c)>127));b=open(p,'rb').read();print('crlf',b.count(bytes([13,10])))\"",
+      "result": "sections 12345678 / non_ascii 0 / crlf 0 (run twice, identical)"
+    },
+    {
+      "tool": "python (AC2 invocation)",
+      "invocation": "python -c \"import re;p='org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~8/SPEC_SECTION_timeline.md';t=open(p,encoding='utf-8').read();s6=t.split('## 6.')[1].split('## 7.')[0];s5=t.split('## 5.')[1].split('## 6.')[0];print('s6_chars',len(s6),'s5_chars',len(s5));print('s6_mentions_request_failure',any(k in s6.lower() for k in ('request fail','call fail','failed call','route fail','timeout','non-200','error state')));print('s5_names_envelope',any(k in s5.lower() for k in ('error envelope','envelope','error field')));print('never_blank_rule',any(k in s6.lower() for k in ('never a blank','not a blank','never blank','never rendered as data')) or any(k in s5.lower() for k in ('never rendered as data','never as data')))\"",
+      "result": "s6_chars 2683 s5_chars 3548 / s6_mentions_request_failure True / s5_names_envelope True / never_blank_rule True (run twice, identical)"
+    },
+    {
+      "tool": "git diff / git status (AC3 invocation)",
+      "invocation": "git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- portal infra lib && git status --porcelain -- portal infra lib && echo \"--- end\"",
+      "result": "--- end (only line printed, run twice, identical)"
+    },
+    {
+      "tool": "missions-tree-index.py (diagnostic, off-criterion, resolving surprise row Z-W11-S1)",
+      "invocation": "git sparse-checkout add org/missions && python .tools/missions-tree-index.py check ; git sparse-checkout set .tools docs/doctrine infra/logic lib org/missions/D5/AMGT/AMGT_HARVST org/modules org/projects org/ref org/standards org/surprise_channel",
+      "result": "before: 'tree=1 project(s) ... RESULT: 24 violation(s)' (sparse cone narrow). after widening: 'tree=25 project(s) ... RESULT: 0 violation(s)'. Cone restored after both commits; git status --porcelain clean."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~11/AMGT_HARVST.TO-HVST-r-1.timeline-spec-failed-call-state-and-error-envelope.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "run per section 5 step 2 of this task order, full id set including the judgment row AC4 (per the coverage-frame lesson recorded at AMGT_HARVST-Z-W8-S2: the checker requires the ids argument to equal the full set of rows carried in acceptance)."
+    },
+    {
+      "tool": "safe-commit.sh (commit-gate + to-pipeline-gate + surprise-row-gate + missions-tree-check pre-commit chain)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~11 <0.9.0_WK_AMGT_HARVST~11@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "commit 1 (7d92646ac4): SPEC_SECTION_timeline.md, 30 insertions, 0 deletions. commit-gate WARN (0 of 1 checked, doc suffix falls through, expected); to-pipeline-gate OK (no task_orders/*.md); missions-tree-check OK (0 violations, cone temporarily widened for this commit); surprise-row-gate OK (no rows in that commit). commit 2 (171c212feb): INVESTIGATION_v1.md, 1 new row of 20 total, surprise-corpus OK, missions-tree-check OK (cone widened again for this commit, then restored)."
+    }
+  ]
+}
