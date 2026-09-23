@@ -4,7 +4,7 @@ Owner `2.0.0_SA_COO~X`; 2026-09-23. CONTRACT v1.0 / mandate `0e33cea24b`, B08.
 **Corpus report-input adapter built; owner integration blocked by its session authorization.**
 `C1-C3: NOT_EVALUATED` until B00/E0 and independent live acceptance.
 Worktree `C:/tmp/closer-amgt-corpus-x-20260923`; product candidate `4599b05795`, LOCAL.
-Remote SITEZ last measured `1b1244cecf39d51b3f7b3ac365218a07a2956b48`.
+Remote SITEZ measured after the MSTR merge: `0e9ed7b1d83c8c0a9e86782446ce5e2802c57aa0`.
 
 Journey: analyst opens one resolved security at localhost:5174, sees retained
 prior reports and reusable corpus context with lineage and honest state, and
@@ -12,7 +12,7 @@ changed inputs invalidate only affected context without losing accepted output.
 
 | Connector | Current state and evidence |
 |---|---|
-| Browser -> auth/scope/bootstrap | NOT_EVALUATED by C; sole owner COO~Z. B00 requires actual admin+Dev identity reaching security-analysis, not a /market redirect. |
+| Browser -> auth/scope/bootstrap | NOT_EVALUATED; CTO msg25050 relays operator-reported Boeing render, without retained trace, identity or package digest. B00/E0 remains ungraded; sole owner COO~Z. |
 | Scoped API -> corpus consumer | Missing in inspected base; `I4_RUNTIME_JOIN.patch` proposes one additive call in pinned `read_thesis_bundle@1b1244cecf`. Shared source untouched. |
 | Corpus adapter -> substrate | BUILT: `lib/research/corpus/report_input.py`; real retained read plus six isolated pinned-consumer fixture cases. No API/browser grade. |
 | Source/bronze/extract/typed lineage | Prior full census 123 admitted/351 files, 228 excluded; 93 folders, 33 resolved/60 unresolved. Source/bronze/extraction mappings verified for admitted set. |
@@ -54,7 +54,8 @@ the API's old deployed closure excludes part of this, so applying the patch is
 not deployment readiness. No additional read reruns are needed to call this live.
 
 Blockers: shared integration and first hop `2.0.0_SA_COO~Z`; that seat's own
-session restriction and actual admin+Dev identity go through CTO to Andrew.
+session restriction goes through CTO to Andrew. An operator-reported authenticated
+render now exists, but the required pinned first-hop evidence is still absent.
 At 20:45:34Z COO~Z reported it read only the interface notice: the pinned
 handoff and patch remain unread there; no rebase, integration or review has
 started and no consumer integration pin exists. CTO already has the requested
@@ -62,7 +63,14 @@ operator wording and has accepted this blocker. This session cannot lift that
 separate restriction. Interface published at 20:44:59Z; candidate review handoff
 sent to CVO at 20:45:19Z. Neither delivery is acceptance.
 S01/induction `2.0.0_SA_COO~Z`; final acceptance `3.0.0_SA_CVO~Z`.
-Shared-tree commit hold belongs to MSTR; linked-worktree commits remain allowed.
+MSTR lifted the shared-tree commit hold at 20:47:01Z after merging/pushing
+`0e9ed7b1d8`. This isolated worktree remains in use. Measured diff from
+`1b1244cecf` to that pin is empty for corpus and scoped_amgt.py; the API blob
+is identical (`f38ee60c9ecf26ac4a8c2c54ed2931c51478b020`). This is a bounded
+comparison, not whole-tree compatibility or integration. The pinned patch is
+still unapplied. CTO reports the dev server is ephemeral and uses the live
+backend; its reported Thesis content incident is not a corpus acceptance pass.
+No repair deployment or production-write authorization is inferred.
 
 This session directly authorizes brief-based work. R1-R9 and AMGT-only grants
 remain: no source-library mutation, vendor/model call, S3 delete, fleet/notifier,
