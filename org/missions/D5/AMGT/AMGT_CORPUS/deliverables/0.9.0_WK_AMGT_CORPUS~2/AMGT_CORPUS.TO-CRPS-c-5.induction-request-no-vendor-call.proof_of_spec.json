@@ -1,0 +1,168 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-5.induction-request-no-vendor-call.md",
+    "group": "OTHER",
+    "vintage_commit": "021c77406a8982ef9a79e9188eca4acd9e23eea1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "021c77406a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-5.induction-request-no-vendor-call.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/induction_request.py",
+      "kind": "script",
+      "commit_or_etag": "8fb35b6c7dd9aff779371f3fe652618e0fcaf60c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "measure_population()/choose_population() print both denominators from backlog.build()/crosswalk.record_for() before any poison is installed; install_poison() patches add_security._load_blp_client, boto3.client, subprocess.run and socket.create_connection to raise-and-count, then a positive control calls all four and resets both counters; gather_evidence()/classify_folder() read only .docx/.pdf via open('rb') + extract.extract() and classify each population folder NO_EVIDENCE/AMBIGUOUS/UNPARSEABLE/EVIDENCED; pick_row()/print_pick()/print_no_pick() emit WILL ADD then REQUEST, or picked NONE. Measured on the real 93-folder library: resolved_absent 0 of 93, unresolved_in_universe 60 of 93, picked America Movil AXMB MM (--bloomberg \"AMXB MM\"), vendor_calls 0, s3_writes 0, registrations_json_changed False, poison_positive_control raised 4 of 4 -- reproduced across 3 separate runs, identical.",
+      "introduces": ["install_poison", "measure_population", "classify_folder", "gather_evidence", "print_pick", "print_no_pick"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_request.py",
+      "kind": "test",
+      "commit_or_etag": "8fb35b6c7dd9aff779371f3fe652618e0fcaf60c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 tests, offline, under tests/conftest.py's poison: two AMBIGUOUS-REFUSED forms (two different stated tickers; a resolve() reason beginning 'AMBIGUOUS:'), COLLISION-REFUSED (resolve() returns an existing security_key), NO-EVIDENCE-NO-REQUEST (a folder with no stated ticker never names a REQUEST line), WILL-ADD-PRECEDES-REQUEST (string index comparison on captured output), and THE-TRANSPORT-REFUSES (install_poison()'s patched add_security._load_blp_client raises and increments its counter twice, then the positive control proves and resets).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_request.json",
+      "kind": "config_data",
+      "commit_or_etag": "8fb35b6c7dd9aff779371f3fe652618e0fcaf60c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The request document written by the module's own --pick run: both denominators, one candidate record per population folder (folder/state/ticker/root/cc/evidence/reason), and the picked folder's full WILL-ADD sub-document (bloomberg, evidence, identity_fields, registration_row_fields, pool, security_key, as_of).",
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "8fb35b6c7dd9aff779371f3fe652618e0fcaf60c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended (AMGT_CORPUS-Z-W2-S1/S2/S3), never editing an existing row: the two-header-convention interpretation, the tail-40 restated-denominators fix, and the deliverables-directory-outside-<paths> pattern.",
+      "artifact_covered_by": ["AC1", "AC2", "AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_request.py -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_request.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "......                                                                   [100%]\n6 passed in 0.47s",
+      "denominator": "6 of 6 tests passed, 0 failed; run 3 times across this session (0.72s/0.46s/0.47s), identical pass count every time",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_request --pick 2>&1 | tail -40 -- expect resolved_absent N of (M) ... unresolved_in_universe N of M ... (WILL ADD...REQUEST python -m lib.research.identity.add_security --folder ... --bloomberg ... --write-pool | picked NONE ) ... vendor_calls 0 ... s3_writes 0 ... registrations_json_changed False ... poison_positive_control raised 4 of 4",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_request --pick 2>&1 | tail -40",
+      "output_evidence": "resolved_absent 0 of 93\nunresolved_in_universe 60 of 93\nWILL ADD\n  folder America Movil AXMB MM\n  bloomberg AMXB MM | evidence America Movil AXMB MM/America Movil Q2 2026 Earnings Update.pdf pdf page 0: AMERICA MOVIL SAB DE C-SER B (Ticker: AMXB MM Equity)\n  identity_fields NAME,EXCH_CODE,LEGAL_ENTITY_IDENTIFIER,CENTRAL_INDEX_KEY_NUMBER,COMPOSITE_ID_BB_GLOBAL,ID_BB_GLOBAL,ID_ISIN,ID_SEDOL1,COMPANY_WEB_ADDRESS\n  registration_row_fields folder,bloomberg,resolution,security_key,identity,exchange_finding,registered_at,raw_source pool s3://opal-data-harvest/crosswalk/v1/2026-09-23.json\n  security_key AMXB_MM_Equity\nREQUEST python -m lib.research.identity.add_security --folder \"America Movil AXMB MM\" --bloomberg \"AMXB MM\" --as-of 2026-09-23 --write-pool\nEXECUTING_SEAT AMGT_RESAPP (the induction act and its vendor word are that project's)\nvendor_calls 0\ns3_writes 0\nregistrations_json_changed False\npoison_positive_control raised 4 of 4",
+      "denominator": "93 of 93 backlog folders measured; 0 of 93 resolved-absent (empty by construction); 60 of 93 unresolved (same denominator on both lines, matching the regex's \\1 back-reference); 60 of 60 population folders classified and printed as one candidate line each; the FIRST folder in sorted order carrying an EVIDENCED state was picked (22 of 60 folders carried a colon-bearing candidate at all); re-run 3 times this session, byte-identical resolved_absent/unresolved_in_universe/picked-folder/counters every time; the exact <expect> regex was checked against this captured tail-40 output with Python re.search and matched",
+      "expect": "(?s)resolved_absent \\d+ of (\\d+).*unresolved_in_universe \\d+ of \\1\\b.*(WILL ADD.*REQUEST python -m lib\\.research\\.identity\\.add_security --folder .* --bloomberg .* --write-pool|picked NONE ).*vendor_calls 0\\b.*s3_writes 0\\b.*registrations_json_changed False.*poison_positive_control raised 4 of 4",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC3 (JUDGMENT, the CVO's): induction_request.json and AC2's output. Is the request complete and executable as written, is the candidate's evidence a passage in the team's own report, and is every refusal justified? Record them, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, graded by 3.0.0_SA_CVO~Z at L9, never self-graded",
+      "output_evidence": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_request.json (the full request document) and AC2's output above (the captured run). The picked candidate's evidence passage is a verbatim citation from the folder's own report: 'AMERICA MOVIL SAB DE C-SER B (Ticker: AMXB MM Equity)', America Movil AXMB MM/America Movil Q2 2026 Earnings Update.pdf, pdf page 0 (locator recorded in both the candidate row and the request JSON's picked.evidence). The REQUEST line is directly executable as written (folder, --bloomberg, --as-of, --write-pool all present and quoted). Every NO_EVIDENCE row's reason states plainly that no report carried a '(Ticker: ...)' citation; AMGT_CORPUS-Z-W2-S1 records that a SECOND header convention exists in the corpus (the Class-A one-pager's colonless 'Ticker'/'Name' pair) that this implementation deliberately does not treat as evidence, because it is not the colon-bearing form the order's own text quotes and, on the one folder measured (Adobe ADBE US), does not yield a Bloomberg-parseable value ('ADBE-US' has no space-separated exchange code).",
+      "denominator": "N/A -- judgment row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L9: a judgment criterion is graded by 3.0.0_SA_CVO~Z at adjudication, never self-graded by the worker that produced it."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && git status --porcelain -- lib/research/identity/ && echo identity_tree_clean_check_done -- expect ^identity_tree_clean_check_done\\s*$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git status --porcelain -- lib/research/identity/ && echo identity_tree_clean_check_done",
+      "output_evidence": "identity_tree_clean_check_done",
+      "denominator": "0 of 0 changes under lib/research/identity/ -- git status printed nothing for that path before the echo, both before and after this cell's commit",
+      "expect": "^identity_tree_clean_check_done\\s*$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c5/hyg.py -- expect outside_allowed [] ... changed_files N ... bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c5/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 4\nlib/research/corpus/induction_request.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_induction_request.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "4 of 4 changed paths under lib/org vs merge-base HEAD SITEZ inside the ALLOWED set (the order's own <paths> plus the deliverables directory section 6 directs writing to -- see row AMGT_CORPUS-Z-W2-S3); 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, so bad 0 of 2; run twice back to back, identical",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/c5/mutant.py (not committed) runs two synthetic scenarios -- two different stated tickers, and one candidate colliding with an existing crosswalk security_key -- through the real classify_folder() (the FIX) and through a MUTANT that takes the first candidate ticker found without checking for a second, different one and WITHOUT ever calling resolve_fn (the collision check dropped entirely).",
+      "expected": "FIX: both scenarios classify AMBIGUOUS (refused, never picked). MUTANT: both scenarios wrongly classify EVIDENCED (would be picked).",
+      "observed": "FIX two_different_tickers -> AMBIGUOUS; MUTANT two_different_tickers -> EVIDENCED. FIX collision -> AMBIGUOUS; MUTANT collision -> EVIDENCED. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file run 3 times back to back; AC2's real --pick invocation run 3 times back to back (once pre-commit, twice post-commit); AC5's hyg.py run twice back to back; .scratch/c5/mutant.py run twice back to back.",
+      "observed": "pytest: 6 passed every run (0.72s/0.46s/0.47s). --pick: resolved_absent 0 of 93, unresolved_in_universe 60 of 93, picked America Movil AXMB MM / AMXB MM / AMXB_MM_Equity, vendor_calls 0, s3_writes 0, registrations_json_changed False, poison_positive_control raised 4 of 4 -- byte-identical population/candidate/pick lines across all 3 runs (tail-40 captures verified identical with `diff`). hyg.py: outside_allowed [] / bad 0 both runs. mutant.py: CONTROL FIRED-AS-EXPECTED True both runs, identical states.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Running add_security (including --dry-run) or calling Bloomberg",
+      "reason": "BOUNDARY: 'THIS PROJECT'S HALF ENDS AT THE EXECUTABLE REQUEST.' add_security.py is imported read-only (for IDENTITY_FIELDS and to patch _load_blp_client); its main()/_discover()/reference_data path is never called. Proven by vendor_calls 0 and poison_positive_control raised 4 of 4 across every real run."
+    },
+    {
+      "item": "Writing registrations.json, the crosswalk pool, or any S3 object",
+      "reason": "BOUNDARY, same clause. Proven by registrations_json_changed False (sha256 before/after) and s3_writes 0 across every real run; AC4's clean lib/research/identity/ tree confirms no file under that path moved."
+    },
+    {
+      "item": "Treating the Class-A one-pager's colonless 'Ticker'/'Name' header field pair as candidate evidence",
+      "reason": "Row AMGT_CORPUS-Z-W2-S1: this convention's values are not Bloomberg-shaped without a transformation (hyphen-for-space) this project's own C-rule and add_security.py's contract both forbid ('NEVER guessed', 'nothing appended, nothing stripped'). Only the colon-bearing '(Ticker: ...)' citation, which the order's own quoted text matches verbatim, is used."
+    },
+    {
+      "item": "Opening, moving, renaming or deleting any research-library file, or any .xlsx workbook",
+      "reason": "Section 3 READ-ONLY bound and the RULED text ('.docx and .pdf only'): gather_evidence() filters to REPORT_EXTS = ('.docx', '.pdf') and opens every file 'rb' only; no write/move/rename/delete call exists anywhere in the module."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W2-S1: the corpus carries two different report header conventions where the order's text names one ('Ticker:'); only the colon-bearing earnings-update citation both matches the order's literal text and yields a Bloomberg-parseable candidate.",
+    "AMGT_CORPUS-Z-W2-S2: AC2's own 'tail -40' invocation needed the population denominators restated a second time, near the end of the run's output, to stay inside the tail window on the real 93-folder library.",
+    "AMGT_CORPUS-Z-W2-S3: the deliverables directory this order's own section 6 directs writing to sits outside section 3's <paths> list; treated as a standing grant consistent with every prior AMGT_CORPUS worker order's own committed pattern."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_induction_request.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 6 passed, 0 failed (run 3 times, identical outcome)"
+    },
+    {
+      "tool": "induction_request CLI --pick (AC2)",
+      "invocation": "python -m lib.research.corpus.induction_request --pick",
+      "result": "rc 0; resolved_absent 0 of 93; unresolved_in_universe 60 of 93; picked America Movil AXMB MM (--bloomberg \"AMXB MM\"); vendor_calls 0; s3_writes 0; registrations_json_changed False; poison_positive_control raised 4 of 4 (run 3 times, identical)"
+    },
+    {
+      "tool": ".scratch/c5/hyg.py (AC5, per the task order's own criterion)",
+      "invocation": "python .scratch/c5/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 4; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    },
+    {
+      "tool": ".scratch/c5/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/c5/mutant.py",
+      "result": "rc 0; FIX both scenarios AMBIGUOUS; MUTANT both scenarios wrongly EVIDENCED; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~2 <0.9.0_WK_AMGT_CORPUS~2@opal.agent>\" -F <msgfile> -- lib/research/corpus/induction_request.py lib/research/corpus/tests/test_induction_request.py org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_request.json",
+      "result": "commit 8fb35b6c7d: risk-reflex REFLEX CLEAN (4 of 4 files, 0 hits against 1662 danger nodes); commit-gate OK 2 of 4 files (json/md are not code); naming-gate WARN 1 graded (0 REFUSE, a display-only s3:// format string in a print line, not a registry address) 1 not-seen 0; to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (3 new rows of 8 total, all carry step-7/step-10 fields); surprise-corpus OK (matches legacy baseline, 0 new failures)"
+    }
+  ]
+}
