@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-u-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-u-1.classify-the-eighteen-unlabelled-bronze-objects.md",
+    "group": "OTHER",
+    "vintage_commit": "d384fc3fe53be4fcaf8023a6bcdb59c7c87cb2c1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "8cef65cc0057c222e71489d28d7ad0178110d108",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-u-1.classify-the-eighteen-unlabelled-bronze-objects.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~18",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/classify_unlabelled_bronze.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Read-only classifier over the 18 unlabelled bronze objects (no 'received-form' metadata key at all) across seeking-alpha's five bronze subtrees (article/analysis/news/report/symbol). unlabelled_objects() DERIVES the population by paginated list_objects_v2 + head_object over store.table_prefix per subtree -- never a hard-coded key list, proven by test_unlabelled_objects_finds_a_freshly_added_object_never_named_in_code. classify_body() reads stored bytes and returns a 2-tuple (class, evidence) -- canonical_json / transport_json / html / indeterminate -- and carries NO third 'proposed label' element (AMENDMENT 1, task order section 7: received-form is a PROVENANCE claim a byte-shape read cannot answer). Every S3 client this module builds or is handed is wrapped in WriteGuardedS3Client, whose put_object/copy_object/delete_object/delete_objects/upload_file RAISE before reaching AWS and increment a write_calls counter -- structural, not disciplinary. Live run against the real bucket found 18 of 18 objects (6/3/3/3/3 by subtree, matching the issuer's row Z-S12), all classified transport_json, undetermined 0, write_calls 0.",
+      "artifact_covered_by": ["AC2", "AC4"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_classify_unlabelled_bronze.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "21 offline pytest arms over classify_unlabelled_bronze.py -- no network, no live bucket, an in-memory _StubS3 double throughout. Covers per-class classification (canonical_json/transport_json/html/indeterminate), the negative-control arm proving discrimination (canonical vs deliberately non-canonical vs unparseable, all asserted together so one class cannot silently swallow another), that classify_body never returns a proposed label (2-tuple only, amendment 1), population derivation from metadata rather than a hard-coded key list (including a freshly-invented key never named in the module), a GET-failure arm reported indeterminate rather than crashing, format_report's denominator/subtree/undetermined lines and its 'NO PROPOSED received-form VALUE' line, the write guard blocking and counting all five write methods, reads passing through the guard to the inner client, the positive control raising on all five sites, and main() printing the report with write_calls 0.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every arm passes and no \"failed\" -- including the NEGATIVE CONTROL arms proving the classifier discriminates (a canonically re-serialised body classifies canonical, a deliberately non-canonical one does NOT, an unparseable body reports INDETERMINATE rather than falling into a class)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_classify_unlabelled_bronze.py -v --color=no -p no:cacheprovider 2>&1 | tail -16",
+      "output_evidence": "lib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_unlabelled_objects_filters_by_metadata_not_by_key_list PASSED [ 38%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_unlabelled_objects_finds_a_freshly_added_object_never_named_in_code PASSED [ 42%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_unlabelled_objects_ignores_labelled_objects_in_every_subtree PASSED [ 47%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_head_bronze_object_lowercases_metadata_keys PASSED [ 52%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_classify_all_covers_every_subtree_with_correct_classes PASSED [ 57%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_classify_all_reports_get_failure_as_indeterminate_not_a_crash PASSED [ 61%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_format_report_prints_denominator_subtree_counts_and_undetermined PASSED [ 66%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_format_report_undetermined_is_zero_when_every_object_classifies PASSED [ 71%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_run_returns_write_calls_zero_after_full_pipeline PASSED [ 76%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_build_guarded_client_does_not_double_wrap PASSED [ 80%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_write_guard_blocks_all_five_methods_and_counts_them PASSED [ 85%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_write_guard_reads_pass_through_to_inner PASSED [ 90%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_positive_control_all_five_sites_raise PASSED [ 95%]\nlib/opal_data_harvest/test_classify_unlabelled_bronze.py::test_main_prints_report_and_write_calls_zero PASSED [100%]\n\n============================== 21 passed in 0.15s ==============================",
+      "denominator": "21 of 21 arms passed, 0 failed, 0 skipped, 0 errors. test_negative_control_discriminates_canonical_noncanonical_and_unparseable IS the required negative-control arm (all three sub-assertions in one test, PASSED) and test_classify_body_never_returns_a_proposed_label IS the amendment-1 no-proposal arm (PASSED).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "one line per object carrying key, subtree, bytes, class and evidence, and NO proposed received-form value for any object; \"objects 18 of 18\" with the five per-subtree counts printed (article, analysis, news, report, symbol); an explicit \"undetermined n\"; and the population DERIVED by reading metadata rather than from a hard-coded key list",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.opal_data_harvest.classify_unlabelled_bronze",
+      "output_evidence": "18 lines of the form 'key <key> subtree <s> bytes <n> class transport_json evidence body differs byte-for-byte from json.dumps(json.loads(body)) (key order, separators or escaping a re-serialisation could not reproduce)' (6 article, 3 analysis, 3 news, 3 report, 3 symbol keys under seeking-alpha/harvest/bronze/*), followed by:\nobjects 18 of 18\npopulation by subtree: article 6 analysis 3 news 3 report 3 symbol 3\nundetermined 0\nNO PROPOSED received-form VALUE FOR ANY OBJECT (amendment 1): shape does not determine provenance, and the enum has no value for \"never observed\"\nwrite_calls 0",
+      "denominator": "objects 18 of 18; population by subtree article 6 analysis 3 news 3 report 3 symbol 3 (6+3+3+3+3=18, matching issuer row Z-S12 exactly); undetermined 0 of 18; every one of the 18 lines carries key/subtree/bytes/class/evidence and NO 'proposed' token anywhere in the output; write_calls 0 confirms zero writes during the live run. Population derived via unlabelled_objects()'s own paginated list_objects_v2 + head_object over store.table_prefix, never a literal key list (confirmed by AC1's test_unlabelled_objects_finds_a_freshly_added_object_never_named_in_code).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"outside_allowed []\" -- only classify_unlabelled_bronze.py and test_classify_unlabelled_bronze.py changed, nothing else under lib; each changed file prints \"compiles True crlf 0 non_ascii 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/u1/ac3.py",
+      "output_evidence": "merge_base eec53bf76f90e50efeb34aa8272ef558ded8d5f2\nchanged_under_lib ['lib/opal_data_harvest/classify_unlabelled_bronze.py', 'lib/opal_data_harvest/test_classify_unlabelled_bronze.py']\noutside_allowed []\npath lib/opal_data_harvest/classify_unlabelled_bronze.py compiles True crlf 0 non_ascii 0\npath lib/opal_data_harvest/test_classify_unlabelled_bronze.py compiles True crlf 0 non_ascii 0",
+      "denominator": "2 of 2 new files under lib (union of committed diff since merge-base(HEAD,SITEZ), tracked working diff, and untracked-file list -- both files are untracked at proof-write time, so a plain `git diff --name-only <base> HEAD` alone would show 0 and be silently wrong; the union catches them), both in the allowed set of exactly {classify_unlabelled_bronze.py, test_classify_unlabelled_bronze.py}; 0 files outside the allowed set; 2 of 2 changed files compile clean with 0 CRLF bytes and 0 non-ASCII bytes.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"write_calls 0\" read from a counter, and a POSITIVE CONTROL showing each of put_object, copy_object, delete_object, delete_objects and upload_file RAISES when deliberately tripped -- proof that the classification wrote nothing and could not have",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/u1/ac4.py",
+      "output_evidence": "classified_objects 18\nwrite_calls 0\nwrite_guard_positive_control RAISED site=put_object detail=RAISED:WriteGuard: put_object is blocked -- HVST-u-1 is READ-ONLY, no write of any kind (task order section 0)\nwrite_guard_positive_control RAISED site=copy_object detail=RAISED:WriteGuard: copy_object is blocked -- HVST-u-1 is READ-ONLY, no write of any kind (task order section 0)\nwrite_guard_positive_control RAISED site=delete_object detail=RAISED:WriteGuard: delete_object is blocked -- HVST-u-1 is READ-ONLY, no write of any kind (task order section 0)\nwrite_guard_positive_control RAISED site=delete_objects detail=RAISED:WriteGuard: delete_objects is blocked -- HVST-u-1 is READ-ONLY, no write of any kind (task order section 0)\nwrite_guard_positive_control RAISED site=upload_file detail=RAISED:WriteGuard: upload_file is blocked -- HVST-u-1 is READ-ONLY, no write of any kind (task order section 0)\nwrite_calls_after_positive_control 5\nall_five_sites_raised True",
+      "denominator": "write_calls 0 (from the counter) after the REAL 18-object classification pipeline ran to completion (LIST + HEAD + GET only); write_calls_after_positive_control 5 of 5 -- every one of the five deliberately-tripped write methods raised (RAISED site=<name> for all five), never a DID-NOT-RAISE. rc 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "proof that the 18 are ALREADY disclosed at OBJECT GRAIN with zero writes: check_as_received.py's own tally puts every one of them in its MISSING bucket, derived per article_key from the object's metadata, 18 of 18, and MISSING is distinguishable from every value the store actually holds; plus the value census showing which received-form values exist in the store and which of them RECEIVED_FORMS would accept today",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/u1/ac5.py",
+      "output_evidence": "18 lines 'article_key <key> subtree <s> received_form_bucket MISSING' (one per HVST-u-1 object, using check_as_received.py:177's own expression metadata.get(\"received-form\", \"MISSING\") verbatim), then:\nmissing_bucket 18 of 18\ncensus_sources barrons bloomberg ft seeking-alpha wsj\nvalue MISSING count 18 accepted_by_RECEIVED_FORMS False\nvalue as_received count 16 accepted_by_RECEIVED_FORMS True\nvalue bbg-client-json count 115 accepted_by_RECEIVED_FORMS False\nvalue normalised_record count 83 accepted_by_RECEIVED_FORMS True\ncensus_total 232\nmissing_is_synthetic_default_never_a_literal_stored_value True\npopulation_equals_missing_bucket True (hvst_u1_population=18 whole_store_missing=18)\nwrite_calls 0",
+      "denominator": "missing_bucket 18 of 18 -- every one of HVST-u-1's own 18 objects buckets as MISSING under check_as_received.py's own expression. Whole-store census over all five sources harvest_grammar.SOURCE_FOR_PUBLISHER recognises (barrons, bloomberg, ft, seeking-alpha, wsj), every bronze table, no table hard-coded: census_total 232 = 18 MISSING + 16 as_received + 115 bbg-client-json + 83 normalised_record, matching the issuer's row exactly (16/115/83/18) and confirming population_equals_missing_bucket True -- HVST-u-1's 18-object population IS the store's entire MISSING bucket, nothing more, nothing less. MISSING is confirmed synthetic (no object anywhere carries the literal stored string \"MISSING\"). RECEIVED_FORMS accepts as_received and normalised_record, refuses bbg-client-json (and MISSING is not even a candidate value, being a Python-side default). write_calls 0 -- read-only throughout.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The negative control IS the mutant/real pair for shape classification: MUTANT is a deliberately non-canonical JSON body with compact separators (no spaces) that a real vendor REST response typically carries; REAL is a canonical JSON body produced by plain json.dumps with default (spaced) separators, which self-round-trips. A second pair: MUTANT is opaque non-JSON, non-HTML bytes (garbage); REAL is a valid HTML document root. A third pair, added for AC4/section-0's write law: MUTANT is a deliberate call to each of the five blocked write methods on WriteGuardedS3Client (positive_control()); REAL is the actual classification run, which never calls any of them.",
+      "expected": "MUTANT (non-canonical JSON): classify_body reports transport_json, never canonical_json. MUTANT (garbage bytes): classify_body reports indeterminate, never canonical_json/transport_json/html. MUTANT (deliberate write calls): each RAISES and increments write_calls. REAL (canonical JSON): classify_body reports canonical_json. REAL (HTML document): classify_body reports html. REAL (the classification run): write_calls stays 0.",
+      "observed": "test_negative_control_discriminates_canonical_noncanonical_and_unparseable: canonical_cls=canonical_json, noncanonical_cls=transport_json (!=canonical_json), garbage_cls=indeterminate (not in canonical_json/transport_json/html) -- all PASSED. Live AC4 run: write_calls 0 after the real 18-object classification, then write_calls_after_positive_control 5 with all five sites RAISED. CONTROL FIRED-AS-EXPECTED: True for all three pairs.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m lib.opal_data_harvest.classify_unlabelled_bronze (AC2), .scratch/u1/ac4.py (AC4) and .scratch/u1/ac5.py (AC5) were each run twice this session against the live bucket (once while drafting, once for this record); python -m pytest was run twice.",
+      "observed": "Both live AC2 runs produced byte-identical output (same 18 keys, same classes, same denominators, write_calls 0 both times -- the store was not written to between runs, consistent with section 0). Both pytest runs: 21 passed, 0 failed, identical. AC5's whole-store census (232 total, 16/115/83/18) matched between runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Labelling any of the 18 objects, or proposing a received-form value for any of them",
+      "reason": "Explicitly barred by section 0 (no write of any kind) and, after AMENDMENT 1 (section 7), also barred as a matter of correctness: received-form is a PROVENANCE claim (whose bytes these are) that a byte-shape read cannot answer, and harvest_grammar.RECEIVED_FORMS has no value for 'never observed'. classify_body() and classify_all() return only (class, evidence) -- confirmed by test_classify_body_never_returns_a_proposed_label and by AC2's live output carrying no 'proposed' token anywhere."
+    },
+    {
+      "item": "Any S3 write, delete, or vendor call",
+      "reason": "Section 0 and section 4 bar this outright. Every S3 client the module builds or is handed is wrapped in WriteGuardedS3Client (put_object/copy_object/delete_object/delete_objects/upload_file all RAISE before reaching AWS). AC4's live run shows write_calls 0 after the real classification and all five sites RAISED under deliberate positive-control tripping. No vendor call: the module never imports curl_cffi, PacedSession, or any publisher module."
+    },
+    {
+      "item": "Editing harvest_grammar.py, check_as_received.py, exercise_as_received.py or store.py",
+      "reason": "These are READ-ONLY references per section 3. AC3 confirms only classify_unlabelled_bronze.py and test_classify_unlabelled_bronze.py changed under lib; check_as_received.py's own canonical_reserialisation and html_shape_is_document are imported (not copied or edited) for the shape check, and its metadata.get('received-form', 'MISSING') expression is reused verbatim (not modified) in .scratch/u1/ac5.py."
+    },
+    {
+      "item": "Closing FWD-1",
+      "reason": "Section 1 states plainly this cell does not close FWD-1: three of five publishers remain unmeasured live and the round-1-discarded listing pages are gone. This report says so explicitly (see below) and does not imply otherwise."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest lib/opal_data_harvest/test_classify_unlabelled_bronze.py (AC1)",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_classify_unlabelled_bronze.py -v --color=no -p no:cacheprovider",
+      "result": "21 passed, 0 failed, run twice, identical"
+    },
+    {
+      "tool": "python -m lib.opal_data_harvest.classify_unlabelled_bronze (AC2, live read-only run against opal-data-harvest)",
+      "invocation": "python -m lib.opal_data_harvest.classify_unlabelled_bronze",
+      "result": "rc 0; objects 18 of 18; article 6 analysis 3 news 3 report 3 symbol 3; undetermined 0; write_calls 0; run twice, byte-identical"
+    },
+    {
+      "tool": ".scratch/u1/ac3.py (AC3, allowed-set diff over lib since merge-base(HEAD,SITEZ), unioning committed diff + working diff + untracked list)",
+      "invocation": "python .scratch/u1/ac3.py",
+      "result": "rc 0; outside_allowed []; 2 of 2 changed files compile True crlf 0 non_ascii 0"
+    },
+    {
+      "tool": ".scratch/u1/ac4.py (AC4, real classification run through WriteGuardedS3Client then deliberate positive control)",
+      "invocation": "python .scratch/u1/ac4.py",
+      "result": "rc 0; write_calls 0 after the real run; write_calls_after_positive_control 5; all_five_sites_raised True"
+    },
+    {
+      "tool": ".scratch/u1/ac5.py (AC5, object-grain MISSING-bucket proof over the 18 plus a whole-store received-form value census)",
+      "invocation": "python .scratch/u1/ac5.py",
+      "result": "rc 0; missing_bucket 18 of 18; census_total 232 (MISSING 18, as_received 16, bbg-client-json 115, normalised_record 83); population_equals_missing_bucket True"
+    },
+    {
+      "tool": "full-tree baseline re-run of the seven read-only suites named in section 4's bounds",
+      "invocation": "for t in test_check_as_received test_exercise_as_received test_listing_persist_durability test_bronze_capture test_retrieval_provenance test_poison_control test_harvest_grammar; do python -m pytest lib/opal_data_harvest/$t.py -q --color=no -p no:cacheprovider; done",
+      "result": "16, 9, 4, 12, 18, 3, 7 passed respectively -- exact match to the issuer's stated full-shared-worktree baseline; no environment-finding row required"
+    },
+    {
+      "tool": "python -m py_compile + ruff on both new files",
+      "invocation": "python -m py_compile lib/opal_data_harvest/classify_unlabelled_bronze.py lib/opal_data_harvest/test_classify_unlabelled_bronze.py; python -m ruff check <same>",
+      "result": "py_compile clean; ruff: All checks passed!"
+    }
+  ]
+}
