@@ -14,7 +14,11 @@ join controls at merged runtime `30102a6905addfcfec3b866a2e268f5a8bc01ba9`:
 3.11.9. `0e9ed7b1d8` is an ancestor, corpus bytes match `4599b05795`, and the
 detached checkout's HEAD and clean status were unchanged after execution.
 See `evidence/MERGED_30102a6905_VALIDATION.json`, matching JUnit and stdout.
-This addresses the requested stale-base test population; no new retained-data,
+CTO msg25094 (22:05:02Z; amendment batch `3659741074`) relays CVO
+DISCHARGE of the stale-base qualifier: verified merged ancestry, byte identity
+of report_input.py/test_report_input.py and the recorded tree object. The
+source-boundary PASS stands without that qualifier. CVO did not rerun or grade
+the 216 suite count; the execution remains C evidence. No new retained-data,
 Linux package, revision-store or browser result is claimed. C1-C3 remain
 NOT_EVALUATED until B00/E0 and independent live acceptance.
 

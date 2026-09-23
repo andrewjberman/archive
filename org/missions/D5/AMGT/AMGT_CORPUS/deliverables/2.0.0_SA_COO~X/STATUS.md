@@ -73,8 +73,10 @@ client, preserving the existing local/live seam. No deployed execution is proved
 Separate package closure, typed portal/display, revision-store boundary and
 live latency/E0 remain unfinished. The strict two-function repair artifact and
 its never-widen signature are unchanged by this join. CTO msg25086 relays CVO PASS for the stated source boundary of `4599b05795`
-at review record `94a817c8a8`, with the stale-base qualification addressed by
-this rerun. No C1-C3/live, retained-read, failure-envelope, semantic-hash,
+at review record `94a817c8a8`. CTO msg25094 (22:05:02Z) relays CVO acceptance
+of the remedy: stale-base qualifier LIFTED after checking ancestry, producer/test
+byte identity and the recorded tree object. CVO did not rerun or grade the 216
+suite count; this remains C-executed test evidence. No C1-C3/live, retained-read, failure-envelope, semantic-hash,
 PyArrow-package or mounted-render grade is inferred. Independent offline tests
 and the bounded source PASS are not live acceptance.
 R-9 returns Price ownership to COO~Z after Y handback; C's surface is unchanged.
