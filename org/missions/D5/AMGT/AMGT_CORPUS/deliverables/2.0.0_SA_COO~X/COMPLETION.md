@@ -1,12 +1,13 @@
 # Completion evidence and remaining boundaries
 
 CTO message 24841 restores C01 PASS at ACTUAL EXERCISE ON RETAINED BYTES,
-conditioned on the candidate pin and four observable controls below. Routine
-code review and CVO I4/final acceptance remain pending.
+conditioned on the candidate pin and four observable controls below. H grants
+routine source/offline PASS for dc2c0193ef at review 1c877a8c87. CVO I4/final
+acceptance remains pending.
 
 | Scope | Result | Evidence level / limits |
 |---|---|---|
-| C01 source census | d382f2a30e, f28faad15b and 5812bd0dea FAIL per H; latest producer check pending H re-review | Definition-time evaluation scopes and class outer-name fallback now covered after prior binding repairs. 66 added controls since original candidate. Bounded named-operation AST census, not arbitrary dynamic Python verification |
+| C01 source census | H routine source/offline PASS at dc2c0193ef, review 1c877a8c87 | Exact 28 files matched pin; 27 named write-like calls, zero library flags; ten independent controls PASS. Earlier pin failures preserved. Bounded named-operation/origin model, not arbitrary Python no-mutation proof |
 | C01 original ACL instrument | Instrument failed; dependent ingestion NOT_EVALUATED | Original mixed W,D mask returned 5 and blocked traversal; preserved negative_control.log |
 | C01 corrected ACL instrument | PASS: specific DE,DC,WD,AD,WEA,WA supports read-only ingestion | negative_control_root_bound.log: resolved copy root and env source printed and asserted, read OK, create/append/overwrite denied, ingest 123/read_failed 0; ACL removal 0 |
 | C01 S3 boundary | No actual PUT delegated; existing bytes read and compared before emulated conflict | Retained-data read with disclosed transport seam; not a live conditional-PUT acceptance claim |
@@ -17,7 +18,7 @@ code review and CVO I4/final acceptance remain pending.
 | C03 R integration | NOT_EVALUATED | R owns consumption; independent I4 review remains CVO's |
 
 CTO reassigned C routine review from S to H. H's latest independent verdict
-is scanner FAIL at 5812bd0dea; the definition-time repair awaits re-review.
+is routine source/offline PASS at dc2c0193ef, superseding the prior pin's FAIL.
 S01 activation remains unresolved. CVO retains the named boundary reviews.
 
 Offline corpus suite after evaluation-scope repair: 202 passed. H routine review at 8534a66eca: 39 candidate
