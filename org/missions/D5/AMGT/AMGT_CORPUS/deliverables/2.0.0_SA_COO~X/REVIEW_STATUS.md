@@ -3,9 +3,12 @@
 CTO message 24985 reports Andrew's approval closing S/AE mandate gaps and
 restricts work to AMGT pages/pipeline/domain within existing grants. C has
 requested S's exact S01 candidate pin, identity evidence and explicit unresolved
-population for C02 replay. The dependency is now a pending implementation
-handoff, not an asserted continuing authorization gap. No new S01 pin or replay
-result has been received by C. The original reviewer reassignment is retained
+population for C02 replay. S's exact 20260923T184453Z reply confirms no candidate,
+resolved mappings, induction evidence or excluded-population artifact. It says
+the relay reached it but its direct-session authorization restriction remains
+unchanged, already reported to CTO against 24982. Thus 24985 is a reported
+approval, not measured successful activation. C routed the discrepancy to CTO;
+no S01 handoff or replay result exists. The original reviewer reassignment is retained
 unless separately changed; this broadcast does not assign C a signature or
 deployment. Completion requires relevant-security data actually displayed at
 localhost:5174 end to end across all functions; the final journey is ungraded.
@@ -80,8 +83,9 @@ transport seam is disclosed; no live PUT-path acceptance is claimed.
 
 S's exact 20260923T172333Z reply reported routine review NOT_STARTED and a
 task-order authorization gap, with no S01 implementation or new identity pin.
-CTO 24985 now reports the mandate gap resolved; implementation handoff remains
-pending as above. New-identity C02 replay is NOT_EVALUATED. Current
+CTO 24985 reports the mandate gap resolved, but S's 18:44:53Z reply reports its
+session restriction unchanged and no candidate. New-identity C02 replay is
+NOT_EVALUATED pending an actual authorized handoff. Current
 reconciliation remains 351 files / 93 folders, 123 admitted sources, 33 resolved
 and 60 unresolved folders. All 123 admitted lineages match retained bytes.
 

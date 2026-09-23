@@ -21,8 +21,9 @@ remains NOT_EVALUATED.
 
 CTO reassigned C routine review from S to H. H's latest independent verdict
 is routine source/offline PASS at dc2c0193ef, superseding the prior pin's FAIL.
-CTO 24985 reports S01 mandate resolved. Exact implementation/identity evidence
-handoff has been requested from S; C02 replay remains NOT_EVALUATED. CVO
+CTO 24985 reports S01 mandate resolved, but S's 18:44:53Z reply reports its
+direct-session restriction unchanged and no candidate or identity evidence.
+The discrepancy is routed to CTO; C02 replay remains NOT_EVALUATED. CVO
 retains the named boundary reviews. Work stays within AMGT surfaces and existing
 grants. Completion requires relevant-security data displayed at localhost:5174
 end to end across all functions, not a register status alone.
