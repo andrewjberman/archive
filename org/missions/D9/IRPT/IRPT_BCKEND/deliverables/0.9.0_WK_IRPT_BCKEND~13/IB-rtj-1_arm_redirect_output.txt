@@ -1,0 +1,38 @@
+=== ARM redirect (R101-AC1): navigation-lifecycle fix, C-S153 ===
+--- baseline (unrepaired source, captured at arm (a) before any edit) ---
+  BASE R9  same-origin positive                     success=True writes=1
+  BASE R9  initial foreign hop returns to portal    success=True writes=1
+  BASE R9  initial final URL foreign control        success=False writes=0
+  BASE R9  verification foreign hop returns control success=False writes=0
+  BASE R9  HTTP 500 refusal control                 success=False writes=0
+  BASE R9  marker absent refusal control            success=False writes=0
+  BASE R8  negative: sign-in page                   writes=0 captureSuccessPrinted=False
+  BASE R8  counterexample: HTTP 500 without password input writes=0 captureSuccessPrinted=False
+  BASE R8  counterexample: arbitrary non-portal origin accepted writes=0 captureSuccessPrinted=False
+  [ok] baseline reproduces C-S153 (case 'initial foreign hop returns to portal': writes=1, success=true) 
+  [ok] baseline verification-hop control already refuses (unaffected by this cell) 
+--- R9 redirect diagnostic (CVO~B, UNMODIFIED) against the REPAIRED source ---
+  source sha256: 72c796968cd8ea7d
+  [ok] R9 case same-origin positive                     success=True  writes=1 (intent: success=True writes=1) 
+  [ok] R9 case initial foreign hop returns to portal    success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9 case initial final URL foreign control        success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9 case verification foreign hop returns control success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9 case HTTP 500 refusal control                 success=False writes=0 (intent: success=False writes=0) 
+  [ok] R9 case marker absent refusal control            success=False writes=0 (intent: success=False writes=0) 
+  denominator: 6 of 6 R9 cases match intent
+  [ok] R9 diagnostic covered all 6 named cases (no case added/removed/renamed) 
+--- R8 diagnostic (CVO, UNMODIFIED) against the REPAIRED source -- must still match baseline ---
+  R8 case negative: sign-in page                                  writes=0 captureSuccessPrinted=False
+  R8 case counterexample: HTTP 500 without password input         writes=0 captureSuccessPrinted=False
+  R8 case counterexample: arbitrary non-portal origin accepted    writes=0 captureSuccessPrinted=False
+  [ok] R8's 3 cases are BYTE-IDENTICAL to the pre-repair baseline (writes/navigations/errors) 
+  denominator: 3 of 3 R8 cases printed
+--- single-difference regression pair (this battery's own harness; C-S153's exact discriminating power) ---
+  BAD  (foreign hop present):  writes=0 success=False errors=REFUSED: ORIGIN_HOP -- the initial navigation's redirect chain left https://opalinvest.dev at https://example.invalid/hop; nothing was printed or written.
+  GOOD (foreign hop absent):   writes=1 success=True
+  [ok] BAD refuses: 0 writes, no success, ORIGIN_HOP error naming the foreign URL 
+  [ok] GOOD (single difference: no foreign hop) succeeds: exactly 1 write 
+--- fresh authenticated positive control (this battery's own harness) ---
+  POSITIVE: writes=1 success=True
+  [ok] fresh positive control (2xx, same origin throughout, no password, marker present): exactly 1 write + success 
+IBR101-REDIRECT-DIAGNOSTIC-ALL-SIX-CASES-MATCH-INTENT

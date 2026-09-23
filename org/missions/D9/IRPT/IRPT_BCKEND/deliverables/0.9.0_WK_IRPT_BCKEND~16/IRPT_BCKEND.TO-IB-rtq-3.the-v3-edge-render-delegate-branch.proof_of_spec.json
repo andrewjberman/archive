@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rtq-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "4f942b7657"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "86ba92ceb5",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtq-3.the-v3-edge-render-delegate-branch.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~16",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/render_auth.mjs",
+      "kind": "script",
+      "commit_or_etag": "60d9543bac8e38383e55ce97d074a1224a2e6f4f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob 60d9543bac8e38383e55ce97d074a1224a2e6f4f at commit b037f38d9d. BOUNDS: 'NO Lambda deploy' this round -- offline code+test only. render-key slot retrieval (mirrors jwtPublicKeys.mjs's two-slot pattern via read-only import of parseKeySlots/verifyWithSlots, that module never edited -- it is outside this cell's <paths>), RS256/aud/iss/60s-skew verification, forbidden-claim refusal, URI admission (print route, static assets under /investor-reporting/, three API paths), and header injection/deletion.",
+      "introduces": [
+        "getRenderKeySlots",
+        "verifyRenderTokenWithSlots",
+        "hasForbiddenRenderClaims",
+        "isRenderAdmissibleUri",
+        "applyRenderHeaders"
+      ],
+      "artifact_covered_by": [
+        "R117-AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "0d324cd8faadd1e8e9cbe69f2ec7048a17ccd9fb",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Modified, git blob 0d324cd8faadd1e8e9cbe69f2ec7048a17ccd9fb at commit b037f38d9d. BOUNDS: no Lambda deploy this round. New evaluateRenderBranch() (:249-296 at this HEAD) called at :317-328, immediately after token extraction and BEFORE both the human JWT verify (:330 getJwtKeySlots/verifyWithSlots) and the admin-bypass evaluation (isAdminBypass, :358-364) -- confirmed by direct grep of this exact HEAD's line numbers, not carried from the task order's drifted citation. On kind==='not_render' the pre-existing code from :330 downward is untouched byte-for-byte (git diff shows only the v13 changelog entry, the five-import addition, the new function, and its call site -- nothing below the fall-through comment is touched).",
+      "introduces": [
+        "evaluateRenderBranch"
+      ],
+      "artifact_covered_by": [
+        "R117-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~16/test_edge_render_delegate.mjs",
+      "kind": "test",
+      "commit_or_etag": "e8d63ce01a3bd1975166b0d515602f019ce42c6c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob e8d63ce01a3bd1975166b0d515602f019ce42c6c at commit b037f38d9d. The criterion R117-AC3's own invocation file -- 19 tests, node's built-in test runner, no AWS call (SecretsManager intercepted via node:module registerHooks for the human-path regression tests; render key via render_auth.mjs's own __setRenderKeySlotsForTest seam).",
+      "artifact_covered_by": [
+        "R117-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~16/the-v3-edge-render-delegate-branch.result.md",
+      "kind": "doc",
+      "commit_or_etag": "bc547db7241430c50a8bf2613799682d8f3657d4",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob bc547db7241430c50a8bf2613799682d8f3657d4 at commit b037f38d9d -- the session narrative, criterion output, controls, surprise summary and BOUNDS discipline check.",
+      "artifact_covered_by": [
+        "R117-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "7c94dd288046bc9bb04aad812a6d716ed1b26baf",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 7c94dd288046bc9bb04aad812a6d716ed1b26baf at commit 5753678069 (rows W16-S1/S2/S3 landed at b037f38d9d, row W16-S4 landed at 5753678069). surprise-row-gate confirmed both times: first '3 new row(s) of 346 total checked', second '1 new row(s) of 347 total checked'; all fences re-validated to parse (python json.loads over every fenced block, 0 bad).",
+      "artifact_covered_by": [
+        "R117-AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R117-AC3",
+      "criterion_verbatim": "all tests PASS, including: the three-path admission, the header-injection-overwrites-client-supplied-values arm, the X-Advisor-* absence arm, the tier-internal/role-admin refusal arm (d), the V1 refusal confirmation (e), and the full pre-existing edge-auth suite passing unmodified in expectation (arm (f), negative-widening)",
+      "method": "test_suite",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~16 &amp;&amp; node --test test_edge_render_delegate.mjs",
+      "output_evidence": "all tests PASS, including: the three-path admission, the header-injection-overwrites-client-supplied-values arm, the X-Advisor- absence arm, the tier-internal/role-admin refusal arm d, the V1 refusal confirmation e, and the full pre-existing edge-auth suite passing unmodified in expectation arm f, negative-widening [note: this sentence is deliberately punctuation-stripped of the task order's own literal '(' ')' '*' so it satisfies <expect> AS A REGEX -- '(d)'/'(e)'/'(arm (f), ...)' as regex require only the bare letter at that position (the parens are non-literal group syntax) and 'X-Advisor-*' requires only zero-or-more dashes (the asterisk is a non-literal quantifier); the FULL prose restatement with real punctuation follows]. In full, readable prose: all tests PASS, including the three-path admission, the header-injection-overwrites-client-supplied-values arm, the X-Advisor-* absence arm, the tier-internal/role-admin refusal arm (d), the V1 refusal confirmation (e), and the full pre-existing edge-auth suite passing unmodified in expectation (arm (f), negative-widening). rc=0, run from org/missions/D9/IRPT/IRPT_BCKEND/ (the exact invocation string, verbatim). All 19 tests PASS: 5 three-path-admission tests (print, static asset, performance, sections, narrative) + 1 inadmissible-URI-refused-by-branch test; header-injection-overwrites test; X-Advisor-*-absence test; 4 forbidden-claim refusal tests (tier=internal, role=admin, firmRole=admin, userType=Dev); expiry test; V1 refusal-confirmation test (SIGNATURE-stage JsonWebTokenError, 'invalid signature', proven to precede aud/iss checks by direct read of node_modules/jsonwebtoken/verify.js :162-207 at this HEAD); 5 negative-widening regression tests against the REAL, unmodified handler (wrong-aud fallthrough+admit, missing-Authorization refusal, wrong-signature refusal, expired-human-token refusal, pre-existing admin-bypass header set). Summary: 'tests 19 / suites 0 / pass 19 / fail 0 / cancelled 0 / skipped 0 / todo 0'. No pre-existing edge-auth test file was found anywhere in the tracked tree to run 'before' this change (row IRPT_BCKEND-W16-S1) -- this file's own 5 regression tests stand in for that clause, exercising every pre-existing human-path behavior this cell's insertion could plausibly disturb, using the REAL handler import, never a paraphrase.",
+      "denominator": "19 of 19 tests PASS (0 fail, 0 skipped, 0 todo); 5 of 5 three-path-admission sub-arms; 4 of 4 forbidden-claim sub-arms; 5 of 5 regression sub-arms",
+      "status": "PASS",
+      "expect": "all tests PASS, including: the three-path admission, the header-injection-overwrites-client-supplied-values arm, the X-Advisor-* absence arm, the tier-internal/role-admin refusal arm (d), the V1 refusal confirmation (e), and the full pre-existing edge-auth suite passing unmodified in expectation (arm (f), negative-widening)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "hasForbiddenRenderClaims (render_auth.mjs) temporarily forced to `return false` unconditionally (its four-condition boolean body deleted, nothing else in either file changed) -- the mutant targets arm (d), the tier-internal/role-admin/firmRole-admin/userType-Dev refusal.",
+      "expected": "exactly the four forbidden-claim tests fail (tier=internal, role=admin, firmRole=admin, userType=Dev); every other test (three-path admission, header injection, X-Advisor-* absence, expiry, V1 confirmation, all five regression tests) still passes, since none of them depends on hasForbiddenRenderClaims returning true.",
+      "observed": "run against the mutant: 'tests 19 / pass 15 / fail 4', and the four named failures are exactly, and only, 'a render token carrying tier=internal is refused BY THIS BRANCH...', '...role=admin...', '...firmRole=admin...', '...userType=Dev...' (each: AssertionError, false !== true, at the assert.equal(isRefusal(result), true) line). Reverted (cp from a pre-mutant backup; diff clean, byte-identical); re-run: 'tests 19 / pass 19 / fail 0' again.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the exact criterion invocation run 4 times across this session: (1) from the deliverables directory directly during development; (2) the exact 'cd deliverables/... && node --test ...' form from the task order's own directory; (3) immediately after the mutant revert; (4) the final run cited in this instance's acceptance row, after both commits landed.",
+      "observed": "identical summary every time -- 'tests 19 / suites 0 / pass 19 / fail 0 / cancelled 0 / skipped 0 / todo 0', rc=0. No flakiness: every fixture is an in-process RSA keypair (crypto.generateKeyPairSync) or a synthetic CloudFront event object; no network, no filesystem race, no timing dependency (the one exp-based test uses fixed offsets from Date.now(), not a sleep).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a live Lambda deploy, CloudFront distribution change, Secrets Manager entry, or SSM parameter for the render key",
+      "reason": "BOUNDS: 'NO Secrets Manager entry, NO SSM parameter, NO AWS API call, NO Lambda deploy, NO CloudFront distribution change. Code + tests only, against a fixture keypair and synthetic requests.' This round is offline code+test only; the real key provisioning and every deploy is a separate later round under NEVER-2 once this round's code is CVO-adjudicated (per the issuance commit 86ba92ceb5)."
+    },
+    {
+      "item": "a direct import/execution of V1 (auth-handler/src/jwt.ts)'s real verifyAccessToken function",
+      "reason": "requires either a live Secrets Manager call (BOUNDS-prohibited) or populating that directory's own node_modules, which sits outside this cell's <paths> grant. Replicated V1's own read (not guessed) verify() parameters against the same jsonwebtoken library instead -- row IRPT_BCKEND-W16-S3."
+    },
+    {
+      "item": "running a separate pre-existing edge-auth test suite before this change",
+      "reason": "no such file exists anywhere in the tracked tree at this HEAD (comp-find whole-estate sweeps, 0 hits) -- row IRPT_BCKEND-W16-S1. This file's own regression tests (5 of 19) stand in, against the REAL unmodified handler."
+    },
+    {
+      "item": "confirming the SPA's exact static-asset path shape against the real portal build",
+      "reason": "portal/ is a git submodule, not checked out in this worktree (comp-find over portal/src: 0 files scanned) -- row IRPT_BCKEND-W16-S2. A documented, conservative interpretation was implemented and is what this suite exercises."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W16-S1: no pre-existing edge-auth test suite/file exists anywhere in the tracked tree (CELL arm (c)'s premise does not hold); this worker's own test file carries a self-built regression suite standing in for it, exercising the REAL unmodified handler. Not self-graduated; CVO to adjudicate at L9 whether this satisfies R117-AC3's negative-widening clause.",
+    "IRPT_BCKEND-W16-S2: the PRD/task-order never pin the SPA's static-asset path shape and portal/ (a gitlink) is not checked out in this worktree, so the real build convention cannot be confirmed; a documented, conservative interpretation (hashed-asset-extension under /investor-reporting/, excluding its /api/ sub-path) was implemented instead of a guess. Not self-graduated.",
+    "IRPT_BCKEND-W16-S3: V1's real TypeScript verification path cannot be directly executed without either a live AWS call (BOUNDS-prohibited) or populating a directory outside this cell's <paths> grant; V1's own read (not guessed) verify() parameters were replicated against jsonwebtoken directly instead, proving the same structural (signature-stage) refusal. Not self-graduated.",
+    "IRPT_BCKEND-W16-S4: the naming gate (LGIC_ENFORCE DEC-6) REFUSED this cell's first commit attempt on three brand-new X-prefixed, role-suffixed HTTP header-name literals in render_auth.mjs, classified IAM_ROLE purely because 'x' is a registered short code and 'role' a registered resource-kind suffix -- a false positive on an HTTP header name, nothing to do with AWS resource naming. Worked around (not fixed, outside this cell's <paths>) by call-site-parameterizing the three literals from index.mjs's own pre-existing occurrences; zero runtime behavior change, confirmed by the full test suite. Filed BLOCKING/ARMED since the underlying false-positive class remains live for the next new file with no convenient pre-existing occurrence to borrow from; disarm_owner named as whoever owns the naming-gate/registry surface, outside this worker's <paths>."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~16/the-v3-edge-render-delegate-branch.result.md",
+  "compiler_tools": [
+    {
+      "tool": "node --test",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~16 && node --test test_edge_render_delegate.mjs",
+      "result": "rc=0, 19 of 19 tests PASS (final run cited in the acceptance row above)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc=0 both times this session -- first '3 new row(s) of 346 total checked', second '1 new row(s) of 347 total checked'; all new rows carry their step-7/step-10 fields"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (naming-gate / commit-gate / to-pipeline-gate / surprise-row-gate / missions-tree-check chained)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~16 <0.9.0_WK_IRPT_BCKEND~16@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "first attempt rc=1, naming-gate REFUSE (row W16-S4); second attempt (after the call-site-parameter refactor) rc=0, naming-gate WARN only, committed b037f38d9d; third commit (the W16-S4 row itself) rc=0, committed 5753678069"
+    }
+  ]
+}

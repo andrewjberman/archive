@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rtj-4",
+  "firm": "FABRIC",
+  "phase": "NON-BUILD-OTHER",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "c0a1466be52de3af8d7350f42af41a5caa0e3449"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "6b4951fdcbc38d6f94002792240d01c98534c21e",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtj-4.the-source-map-note-corrected.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "471893b9a0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "blob 125cfb0c82c8996dd17cf42127ea55848e78ec66 @471893b9a0; only the irpt-ycharts-generate entry's _staged_from_note field text changed (git diff HEAD~1 -- 1 file changed, 1 insertion(+), 1 deletion(-)); nothing deployed, nothing uploaded, staged_from/files[]/every other field byte-identical.",
+      "artifact_covered_by": [
+        "R104-AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~14/the-source-map-note-corrected.result.md",
+      "kind": "doc",
+      "commit_or_etag": "471893b9a0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "blob 8cd3a8af2c490868198c166029c75656edb82f80 @471893b9a0; before/after note text, the diff and the denominator.",
+      "artifact_covered_by": [
+        "R104-AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R104-AC1",
+      "criterion_verbatim": "PASSES BY OUTPUT: the diff touches exactly one field (`_staged_from_note`) in exactly one entry (`irpt-ycharts-generate`); the new text names both members' true sources and does not claim byte-identity; every other line in the file is unchanged (denominator: 1 of 1 files changed, 1 of N lines in that file changed, N printed).",
+      "method": "diff",
+      "invocation": "git diff HEAD~1 -- infra/aws/lambda/ci/lambda-source-map.json",
+      "output_evidence": "diff --git a/infra/aws/lambda/ci/lambda-source-map.json b/infra/aws/lambda/ci/lambda-source-map.json\nindex 7739bbd996..125cfb0c82 100644\n--- a/infra/aws/lambda/ci/lambda-source-map.json\n+++ b/infra/aws/lambda/ci/lambda-source-map.json\n@@ -3493,7 +3493,7 @@\n           \"sha256\": \"c493ea6edd6ee7c38c0044feda1440865532e0fbc86d30b2dfe2c0e34ec1eefd\"\n         }\n       ],\n-      \"_staged_from_note\": \"...firm_registry.json is ALSO declared in files[] above and genuinely served, but its exact content does NOT exist as a git blob anywhere in this repository's reachable history (content-addressed blob lookup, row IRPT_BCKEND-W4-S34) -- no true source is declared for it and none is invented here; this function's build still fails on that one member.\",\n+      \"_staged_from_note\": \"...firm_registry.json and settings.json are ALSO declared in files[] above and genuinely served; both now have declared staged_from pins (firm_registry.json -> data/firm_registry.json @1f54e16dfd; settings.json -> infra/aws/lambda/investor-reporting/intake/settings.json @dc5d119b84), resolving row IRPT_BCKEND-W10-S1: each pin resolves to a tracked git blob with a CRLF-only difference from the live zip member, never claimed byte-identical to a HEAD-generated view.\",\n       \"runtime\": \"python3.12\",\n       \"memory_size\": 512,\n       \"timeout\": 900,\ngit diff --stat HEAD~1 -- infra/aws/lambda/ci/lambda-source-map.json: ' infra/aws/lambda/ci/lambda-source-map.json | 2 +-\\n 1 file changed, 1 insertion(+), 1 deletion(-)'. File re-parses as valid JSON (json.load succeeded) after the edit; staged_from array, files[], runtime, note and artifact_sha256 byte-identical to the parent. The new text names both members' true sources (firm_registry.json -> data/firm_registry.json @1f54e16dfd; settings.json -> infra/aws/lambda/investor-reporting/intake/settings.json @dc5d119b84) and states a CRLF-only difference from the live zip member, never claiming byte-identity to a HEAD-generated view. IBR104-NOTE-CORRECTED-NOTHING-ELSE-CHANGED",
+      "denominator": "1 of 1 files changed (infra/aws/lambda/ci/lambda-source-map.json); 1 of 3789 lines in that file changed (git diff --stat: 1 insertion(+), 1 deletion(-)); 1 of 1 JSON entries touched (functions[\"irpt-ycharts-generate\"]); 1 of that entry's fields touched (_staged_from_note).",
+      "status": "PASS",
+      "expect": "IBR104-NOTE-CORRECTED-NOTHING-ELSE-CHANGED"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: the spec is a single-field text correction verified by a literal diff, not an assertion or a computed predicate a mutant could flip; discriminating power is shown instead by a negative control -- the UNCORRECTED (parent, HEAD~1) note text does not satisfy the criterion's own bar ('does NOT exist as a git blob' / 'no true source is declared', contradicting the now-declared staged_from pins), while the corrected text does.",
+      "expected": "the parent commit's note text fails the criterion's bar (still claims no source exists); the corrected text passes it (names both pins, states CRLF-only, never claims byte-identity).",
+      "observed": "git show HEAD~1:infra/aws/lambda/ci/lambda-source-map.json | grep-equivalent read of _staged_from_note at the parent confirms the old text is unchanged from THE CELL's (a) verbatim capture -- it still asserts firm_registry.json's content 'does NOT exist as a git blob anywhere in this repository's reachable history', which is false given staged_from already carries data/firm_registry.json@1f54e16dfd (added by IB-rti-2, commit 63b5a913a2, prior to this order). The corrected text at HEAD removes that false claim and names both pins.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "git diff HEAD~1 -- infra/aws/lambda/ci/lambda-source-map.json run twice against the same committed HEAD.",
+      "observed": "Both runs byte-identical (same diff, same --stat line): the commit is immutable so a re-run of a git-history read is deterministic by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "staged_from, files[] and every other field/entry in lambda-source-map.json",
+      "reason": "order clause (b): correct the note only; untouched by design and verified untouched by the diff (denominator above)."
+    },
+    {
+      "item": "the note's pre-existing 'firm_registry.json ALSO declared... 8 of this function's members' count and any other pre-existing claim in the note unrelated to firm_registry.json/settings.json's declared sources",
+      "reason": "order names one correction (the firm_registry.json/settings.json staged_from claim); this cell makes exactly that one, nothing wider."
+    },
+    {
+      "item": "copying any served bytes into the repo, or any rebuild/deploy",
+      "reason": "order clause (b) forbids it; not in this cell's bound."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~14/the-source-map-note-corrected.result.md",
+  "compiler_tools": [
+    {
+      "tool": "git diff",
+      "invocation": "git diff HEAD~1 -- infra/aws/lambda/ci/lambda-source-map.json",
+      "result": "1 file changed, 1 insertion(+), 1 deletion(-); only _staged_from_note's value line differs"
+    },
+    {
+      "tool": "python json.load",
+      "invocation": "py -3.12 -c \"import json; json.load(open('infra/aws/lambda/ci/lambda-source-map.json', encoding='utf-8'))\"",
+      "result": "file re-parses as valid JSON after the edit"
+    }
+  ]
+}

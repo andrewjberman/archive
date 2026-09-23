@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rtr-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "4f942b7657"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7a55a7327d",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtr-e.the-one-offline-actual-module-chain.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~21",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~21/chain_bridge.mjs",
+      "kind": "test",
+      "commit_or_etag": "24f255c1dc8b7b87de8a25fb173d789b6eec07f2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob 24f255c1dc8b7b87de8a25fb173d789b6eec07f2, committed in this cell's own commit (see WORKER REPORT COMMITS for the final commit hash). The Node half of the offline chain bridge: a `node:module` `registerHooks` intercept (same pattern as the CVO's own read-only reference probe, org/tier1_exec/3.0.0_SA_CVO/deliverables/IRPT_BCKEND_R17_PROBE.mjs) that blocks only the AWS-SDK network edge (SecretsManagerClient/DynamoDBClient/S3Client .send all throw NETWORK FORBIDDEN) and resolves 'jsonwebtoken' to a real, locally bun-installed copy; imports the REAL auth-validator-edge/index.mjs handler() and portal-authorizer/index.mjs's REAL exported authorizeRenderToken(), calls each with a real CloudFront event / route object, and returns their real outputs as JSON to the Python driver -- never re-implementing either verifier's logic."
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~21/test_actual_module_chain.py",
+      "kind": "test",
+      "commit_or_etag": "cc11e0908dc2dcd65017ca19974efb137312080c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob cc11e0908dc2dcd65017ca19974efb137312080c, committed in this cell's own commit. The entry point THE CELL's <invocation> runs. Imports and calls the REAL mint.py mint_render_token(), resolve.py trusted_only()/classify_principal(), enforce.py Enforcer.resolve_now()/_resolve_render_delegate()/covers()/cache_key_for(), and served.py key_operation() directly in-process; bridges to the REAL V3/V2 modules via chain_bridge.mjs subprocess. 3 fully independent fixture worlds (49financial/performance-report, cottonwood/analysis-report, inflection/narrative-packet -- the three ENABLED CLIENT firms in data/firm_registry.json, per _keys.load_firm_ids()) plus 6 CELL-mandated negative arms plus 3 additional item-7 checks (PRD arms f, b pt 3, i). Mutant-controlled: see controls.mutant below.",
+      "introduces": [
+        "RENDER_DELEGATE_OPERATIONS"
+      ],
+      "artifact_covered_by": [
+        "R118-AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~21/result.md",
+      "kind": "doc",
+      "commit_or_etag": "9b2f851153bc89aa5b4b27beda467af9a8b534f8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob 9b2f851153bc89aa5b4b27beda467af9a8b534f8, committed in this cell's own commit. The explicit PRD item-7 (a)-(k) [except g] arm-by-arm mapping the CVO's L9 read is built on, naming the specific test function/assertion label proving each arm, and an honest declaration of arm (e)'s out-of-<paths> scope and arm (f)'s partial/structural proof.",
+      "artifact_covered_by": [
+        "R118-AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "228fccae20f1b4fd4d66c281f6751b074b3bca1d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 228fccae20f1b4fd4d66c281f6751b074b3bca1d (row IRPT_BCKEND-W21-S1 appended). All 78 fenced JSON blocks re-validated to parse (python json.loads over every fenced block, 78 of 78, 0 bad) after the append; CRLF line-ending consistency confirmed (8903 CRLF, 0 bare LF) before commit.",
+      "artifact_covered_by": [
+        "R118-AC5"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R118-AC5",
+      "criterion_verbatim": "the full chain test PASSES: 3 positive fixture objects all correctly resolved, all 6 negative arms correctly refused/UNKNOWN, rc=0, with an explicit arm-by-arm item-7 mapping printed",
+      "method": "test_suite",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~21 &amp;&amp; py -3.12 test_actual_module_chain.py",
+      "output_evidence": "rc=0. Full verbatim tail: 'SUMMARY: 12 of 12 top-level checks passed; 0 individual FAIL label(s): []' followed by the RESULTS json (3 worlds, each with a non-null, non-overlapping permitted_account_set: W1 49financial [acc_ffffffffd190f00320a84a7a, acc_ffffffffee08b8b9831c747c] op=performance_report; W2 cottonwood [acc_0000000020499882d196d5ae, acc_000000003cc16139340affb0] op=analysis_report; W3 inflection [acc_00000000174fdaddc6c020cc, acc_fffffffffad81227644bf6ca] op=narrative_packet) and the closing line 'PASS: the full chain test passed -- 3/3 positive fixtures resolved, 6/6 negative arms refused/UNKNOWN, plus 3 additional item-7 checks.' Every individual assertion line printed as [PASS], including all 6 mandatory negative arms (N1 forbidden claim refused at both V3 and V2; N2 expired token refused at V3; N3 swapped path id refused at V2 with V3 admission control unaffected; N4 wrong bundle id refused EMPTY_GRANT; N5 fourth operation refused both at Enforcer OBJECT_NOT_COVERED and at V2's route table; N6 missing render marker resolves UNKNOWN) and the 3 additional item-7 checks (Ef human-token non-interference, Eb non-admissible-uri refusal, Ei post-mint revocation refusal). 41 of 41 individual [PASS]/[FAIL]-labelled assertions PASS, 0 FAIL, this run.",
+      "denominator": "3 of 3 positive fixture objects correctly resolved (non-overlapping); 6 of 6 CELL-mandated negative arms correctly refused/UNKNOWN; 3 of 3 additional item-7 checks PASS; 41 of 41 individual assertion labels PASS, 0 FAIL",
+      "status": "PASS",
+      "status_reason": "This order's own <criterion id=\"R118-AC5\"> XML tag carries an <invocation> and an <expect> (no judgment=\"true\" XML attribute) -- the MECHANICAL bar (rc=0, the expect pattern matched) is what this row's PASS certifies, matching .tools/proof-of-spec-check.py's own self-consistency rule (judgment=true forbids a PASS/FAIL verdict; this row carries no judgment field since the order's own criterion element is not so marked). The SURROUNDING PROSE (this order's own text immediately after the <criterion> tag, and this order's <expected_criteria> section) frames R118-AC5 as JUDGMENT-graded by 3.0.0_SA_CVO at L9 for whether the suite's COVERAGE genuinely satisfies the full item-7 table -- that wider read is NOT asserted by this PASS and is NOT this row's claim; result.md's explicit arm-by-arm mapping is the evidence the CVO's L9 read is built on.",
+      "expect": "SUMMARY: \\d+ of \\d+ top-level checks passed; 0 individual FAIL label\\(s\\): \\[\\].*PASS: the full chain test passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "enforce.py's Enforcer.RENDER_DELEGATE_OPERATIONS tuple temporarily changed from (\"performance_report\", \"analysis_report\", \"narrative_packet\") to (\"analysis_report\", \"narrative_packet\") -- removing performance_report, the exact operation World1's own positive fixture exercises -- targeting THIS cell's own primary claim (that the chain test genuinely exercises the real enforce.py vocabulary rather than passing vacuously).",
+      "expected": "World1's chain (49financial/performance-report) fails at 'Enforcer.resolve_now admits (no refusal)' with OBJECT_NOT_COVERED naming the now-two-member tuple and the excluded operation; every downstream World1 check (covers, cache_key_for, item-k-pt-1) reports UNREACHABLE rather than crashing; World2 and World3 (analysis_report/narrative_packet, untouched by the mutation) continue to PASS; negatives N4 and Ei (which reuse World1's real chain/Enforcer) also fail, since they depend on World1's own successful admission; overall rc=1.",
+      "observed": "Mutant applied (confirmed via `git diff` showing exactly the one-tuple-member change). Re-run: rc=1. 8 individual FAIL labels, exactly as predicted: \"W1: served.key_operation('performance-report') is in RENDER_DELEGATE_OPERATIONS\", 'W1: Enforcer.resolve_now admits (no refusal)' (Refusal OBJECT_NOT_COVERED naming ('analysis_report', 'narrative_packet') and 'performance_report' as excluded), 'W1: scope principal_class RENDER_DELEGATE', 'W1: covers() the pinned account' (UNREACHABLE: scope is None), 'W1: cache_key_for succeeds (no KEY_REFUSED)' (UNREACHABLE), \"W1: account outside the bundle's PINNED scope is NOT covered (item k, pt 1)\" (UNREACHABLE), 'N4: Enforcer refuses a wrong-bundle-id loader mismatch', 'Ei: first read (before revocation) is admitted'. World2 and World3's own checks all still PASS, exactly as predicted (their operations were never in the mutated set's removed member). Reverted: `git hash-object infra/aws/lambda/investor-reporting/_authz/enforce.py` returns b0fed34092ab27c3e219dcfef588a926ddedf935, identical to the pre-mutant blob hash (confirmed BEFORE mutation was applied) -- a byte-clean revert, `git diff --stat` empty. Re-run post-revert: rc=0, 41 of 41 PASS, identical to the pre-mutant baseline run.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the full criterion invocation run 3 times total this session at the same (post-revert) enforce.py state: once establishing the baseline before the mutant control, once as the mutant's own revert-confirmation run, once as a final independent determinism re-run.",
+      "observed": "All 3 post-revert runs: rc=0, identical PASS/FAIL label SET (41 PASS, 0 FAIL each time; `diff` of the extracted [PASS]/[FAIL] label lines between two of the runs is EMPTY). The underlying account ids and RSA keypair bytes differ run-to-run (fresh `rsa.generate_private_key()` each process, and this cell's synthetic-id helper folds Python's per-process-randomized `hash()` into its fixture ids) -- this is EXPECTED and does not affect the PASS/FAIL outcome, since no assertion depends on a specific id or key VALUE, only on relationships the chain itself computes (non-overlap between worlds, membership in a resolved set, refusal codes). No network call, no filesystem race, no wall-clock dependency beyond the deliberate ~1000s-in-the-past `now=` injection for the expiry arm (mint.py's own documented test seam).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "editing any of the five real modules' own logic (mint.py, render_auth.mjs, index.mjs x2, portal-authorizer/index.mjs, resolve.py, enforce.py, served.py)",
+      "reason": "BOUNDS: this cell is a TEST that calls them, never a further fix. The one temporary edit made this session (enforce.py's RENDER_DELEGATE_OPERATIONS, for the mutant control above) was reverted before commit and confirmed byte-identical via git hash-object (b0fed34092ab27c3e219dcfef588a926ddedf935, matching the pre-mutant hash) -- git diff --stat on that file is empty at commit time."
+    },
+    {
+      "item": "any AWS API call, Secrets Manager entry, SSM parameter, Lambda deploy, or Terraform/CloudFront change",
+      "reason": "BOUNDS: offline function-call wiring only. chain_bridge.mjs's registerHooks intercept makes any AWS-SDK network call throw NETWORK FORBIDDEN rather than succeed -- confirmed exercised (not merely present but unreached) by the extra_f_human_token_unaffected() check, whose PASS depends on that exact throw appearing in stderr."
+    },
+    {
+      "item": "PRD item 7 arm (e) (a render token presented to V1) as a chain-level test",
+      "reason": "V1 (infra/aws/opalinvest_dev/lambda/auth-handler/index.ts) is outside this cell's <paths> grant and outside the five real modules THE CELL names to wire. Documented in result.md as covered by V1's own pre-existing unit tests (structural refusal on wrong key + wrong aud), not re-proven here."
+    },
+    {
+      "item": "PRD item 7 arm (f) as a full end-to-end human-path success",
+      "reason": "The human JWT path's own verification (getJwtKeySlots) makes a live Secrets Manager call with no documented test seam to bypass it (unlike the render path's __setRenderKeySlotsForTest / env-var seams) -- BOUNDS forbids any AWS call, even for a human-path regression. This cell instead demonstrates the STRUCTURAL non-interference (a non-render token is not admitted by the render branch, and control reaches the human path's own network call unmutated) -- documented as a partial/structural proof in result.md, not a full round-trip."
+    },
+    {
+      "item": "node_modules provisioning (auth-validator-edge/node_modules/, bun-installed this session)",
+      "reason": "gitignored (infra/.gitignore:116, confirmed via git check-ignore -v) and not named in this cell's <paths> grant as a write target; needed only to make the REAL 'jsonwebtoken' import resolvable for chain_bridge.mjs, same class as the precedent rows IRPT_BCKEND-W15-S4/W18-S1 already recorded on this project (ephemeral, local-only node_modules provisioning for an offline test)."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W21-S1: this order's own <to_id>/title/<proof_of_spec> prose self-cites 'IB-rtr-5' as this order's own filename, but the file actually saved on disk (and the one this cell was spawned against) is 'IRPT_BCKEND.TO-IB-rtr-e.the-one-offline-actual-module-chain.md' -- the third independent instance of the identical class within this round-18 batch of five sibling cells (after IRPT_BCKEND-W18-S2 and IRPT_BCKEND-W20-S3, this same file). This cell's proof instance is named using the real, gate-satisfying 'IB-rtr-e' basename from the first commit (anticipated per the spawning agent's own prior notice of this exact class), with the JSON's internal to_id field left matching the order's own <to_id> tag for consistency with the order's own text. Not self-graduated; filed for the CVO/CTO to consider reconciling decomp-cell-id vs file-slug naming estate-wide for this round's task-order batches."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~21/result.md",
+  "compiler_tools": [
+    {
+      "tool": "py -3.12 (test_actual_module_chain.py, the criterion's own invocation)",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~21 &amp;&amp; py -3.12 test_actual_module_chain.py",
+      "result": "rc=0, 41 of 41 individual [PASS]/[FAIL]-labelled assertions PASS, 0 FAIL (final run cited in the acceptance row above)"
+    },
+    {
+      "tool": "node (chain_bridge.mjs, subprocessed per world/negative arm)",
+      "invocation": "node chain_bridge.mjs <worktree-root> (stdin: JSON {token, uri, method, route, renderPublicKeyPem}, one call per positive world / negative arm -- 12 total this run)",
+      "result": "rc=0 on every call this session; real V3 edge.handler() and real V2 authorizeRenderToken() outputs returned as JSON, consumed directly by the Python driver"
+    },
+    {
+      "tool": "bun install (local-only, offline, ephemeral, gitignored)",
+      "invocation": "cd infra/aws/lambda-edge/auth-validator-edge && bun install --frozen-lockfile",
+      "result": "115 packages installed (from local bun cache, ~13s, no network fetch required); node_modules/ not committed (infra/.gitignore:116)"
+    },
+    {
+      "tool": "git hash-object (mutant control, pre/post revert verification)",
+      "invocation": "git hash-object infra/aws/lambda/investor-reporting/_authz/enforce.py",
+      "result": "b0fed34092ab27c3e219dcfef588a926ddedf935 both before the mutant was applied and after it was reverted -- byte-identical, confirming a clean revert"
+    },
+    {
+      "tool": "python json.loads (surprise-channel fence validation)",
+      "invocation": "py -3.12 -c \"import re,json; [json.loads(b) for b in re.findall(r'```json\\r?\\n(.*?)\\r?\\n```', open('org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md',encoding='utf-8').read(), re.S)]\"",
+      "result": "78 of 78 fenced JSON blocks parse cleanly, 0 bad, including the new IRPT_BCKEND-W21-S1 row"
+    }
+  ]
+}
