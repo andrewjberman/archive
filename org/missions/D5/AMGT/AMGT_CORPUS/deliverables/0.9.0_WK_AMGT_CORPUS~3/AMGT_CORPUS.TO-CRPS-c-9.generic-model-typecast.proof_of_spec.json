@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-9",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-9.generic-model-typecast.md",
+    "group": "OTHER",
+    "vintage_commit": "1d86c01347e04848ddc3fc53798fb6300ef7bc0c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "1d86c01347e04848ddc3fc53798fb6300ef7bc0c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-9.generic-model-typecast.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/typecast.py",
+      "kind": "script",
+      "commit_or_etag": "1d86c01347e04848ddc3fc53798fb6300ef7bc0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "compute_fields()/build_document()/write()/read_latest() and the --write/--read-latest CLI. Reads ONLY CRPS-c-2's XLSX extraction documents (lib.research.harvest.store, paginated list_objects_v2/get_object); mnemonic population is `labels` values shaped ^[A-Z][A-Z0-9]*(_[A-Z0-9]+)+$ per the ISSUER AMENDMENT (row AMGT_CORPUS-Z-W1-S1), never the extraction's own mnemonics/factset_codes fields. Measured on the live 43-xlsx corpus: workbooks_read 43, with_mnemonics 37, mnemonic_core 94 members (>=90% of 37), extended_ratio_set 5 members (25%-90%), opal_case_assumptions 37 of 43, factset mapped 4 of 28 unmapped 24. Written through gold.gold_put, never overwriting: s3://opal-data-harvest/amgt/harvest/gold/research-model-typecast/scope=all-workbooks/32a7b3fd295ba39f.json put_performed True. No S3 delete of any kind, anywhere in this cell.",
+      "introduces": ["read_xlsx_extractions", "current_inputs", "compute_fields", "build_document", "write", "read_latest"],
+      "artifact_covered_by": ["AC1", "AC2", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_typecast.py",
+      "kind": "test",
+      "commit_or_etag": "1d86c01347e04848ddc3fc53798fb6300ef7bc0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "7 tests, offline under tests/conftest.py's poison: core/extended thresholds (9 of 10 core, 3 of 10 extended, THE DENOMINATOR IS PRINTED on every core line), NO HAND MAPPING (a FactSet code with no shared row label stays unmapped), MAPPING BY LABEL (a shared label maps the code and is recorded as evidence), an ambiguous label is never used, the printed summary carries every denominator, Opal Case Assumptions needs all three label groups (case-insensitive), and a gold write/read-latest round trip over a FakeS3Client proving never-overwrite (same inputs -> same object_name -> put_performed False on the second write).",
+      "artifact_covered_by": ["AC1", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1d86c01347e04848ddc3fc53798fb6300ef7bc0c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new rows appended: AMGT_CORPUS-Z-W3-S1 (the RULED per-member CLI print collides with AC2's own tail -60 given the real 94-member mnemonic_core; resolved with a durable end-of-output recap, nothing removed or reordered from the RULED sequence) and AMGT_CORPUS-Z-W3-S2 (the FactSet-to-Bloomberg 'same row label' rule cannot be grounded from this cell's coordinate-free input; the closest non-hand-picked proxy -- both-sides-unambiguous immediate adjacency -- still yields some semantically implausible pairs on the real corpus, e.g. FG_FACTSET_SECTOR -> SHORT_INT_RATIO via 'Sector:').",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_typecast.py -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_typecast.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": ".......                                                                  [100%]\n7 passed in 0.15s",
+      "denominator": "7 of 7 tests passed, 0 failed; run three times across this session (pre-commit, post-commit, and inside the mutant control's FIX arm), identical outcome every time",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.typecast --read-latest 2>&1 | tail -60 -- expect (?s)workbooks_read (\\d+).*with_mnemonics (\\d+).*core PX_LAST \\d+ of \\2\\b.*extended \\d+ members.*opal_case_assumptions \\d+ of \\1\\b.*factset mapped \\d+ unmapped \\d+",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.typecast --read-latest 2>&1 | tail -60",
+      "output_evidence": "core RETURN_COM_EQY 34 of 37\ncore RETURN_ON_ASSET 34 of 37\ncore RETURN_ON_CAP 34 of 37\ncore RETURN_ON_INV_CAPITAL 34 of 37\ncore RETURN_ON_TANGIBLE_ASSETS 37 of 37\ncore SALES_REV_TURN 37 of 37\ncore SHORT_AND_LONG_TERM_DEBT 36 of 37\ncore SHORT_INT_RATIO 37 of 37\ncore SHORT_NAME 37 of 37\ncore TANG_BOOK_VAL_PER_SH 37 of 37\ncore TOTAL_EQUITY 37 of 37\nextended 5 members\nopal_case_assumptions 37 of 43\nfactset mapped 4 unmapped 24\nworkbooks_read 43\nwith_mnemonics 37\ncore PX_LAST 37 of 37\nextended 5 members\nopal_case_assumptions 37 of 43\nfactset mapped 4 unmapped 24",
+      "denominator": "the stored artifact whose inputs equal current_inputs() (43 of 43 live XLSX extractions matched by key+sha256); workbooks_read 43, with_mnemonics 37 of 43, mnemonic_core 94 members (all printed, only the tail-60 window shown here), extended_ratio_set 5, opal_case_assumptions 37 of 43, factset mapped 4 of 28 unmapped 24; re.search of AC2's exact expect pattern against this tail-60 output returned a match (verified separately with python re.search)",
+      "expect": "(?s)workbooks_read (\\d+).*with_mnemonics (\\d+).*core PX_LAST \\d+ of \\2\\b.*extended \\d+ members.*opal_case_assumptions \\d+ of \\1\\b.*factset mapped \\d+ unmapped \\d+",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AC2's printed typecast set beside the scan's section 2 (58 of 60 core, 35 extended, 23 FactSet, 58 Opal Case Assumptions). Does the measurement agree, and where it differs, is the difference explained? Record AC2's output and one paragraph naming each difference, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, graded by 3.0.0_SA_CVO~Z at L9, never self-graded",
+      "output_evidence": "AC2's measured set: workbooks_read 43, with_mnemonics 37, mnemonic_core 94 members (incl. PX_LAST 37 of 37), extended_ratio_set 5 members, opal_case_assumptions 37 of 43, factset mapped 4 of 28 unmapped 24. THE SCAN'S BAR (RESEARCH_CORPUS_SCAN_20260922.md s.2): 58 of 60 workbooks carry the core, 35 carry the extended set, 23 are FactSet-coded, 58 carry Opal Case Assumptions.\n\nDIFFERENCE 1 (denominator): the scan's bar is stated over 60 workbooks WITH MODEL CONTENT read across the full library; this cell's denominator is the 43 XLSX extractions CRPS-c-2 actually produced (opal_case_assumptions 37 of 43 vs the scan's 58 of 60 -- both close to the same ~86% incidence once put on the same footing: 37/43=86%, 58/60=97%; the gap could be the 17 missing workbooks or a stricter block-detection rule here, not measured further by this cell).\n\nDIFFERENCE 2 (core set size): this cell's mnemonic_core has 94 members, not a small named list like the scan's example ('PX_LAST, EQY_SH_OUT_TOT_MULT_SH, NET_DEBT, BEST_EPS, BEST_DPS, ...'). PX_LAST and NET_DEBT are both present (37 of 37 each); the scan's list was illustrative ('...') and never stated a count, so 94 is not necessarily a disagreement -- the generic one-pager template genuinely references that many distinct Bloomberg fields once every labels-shaped string cell is counted (row AMGT_CORPUS-Z-W3-S1).\n\nDIFFERENCE 3 (FactSet mapping): the scan reports 23 of 60 workbooks as a FactSet-based variant; this cell's factset-shaped-LABEL count is 28 distinct codes across the 43 read, of which only 4 could be mapped onto a Bloomberg counterpart under the RULED 'same row label, no hand mapping' method -- because this cell's only input (CRPS-c-2's flat, coordinate-free `labels` list) does not reliably ground 'the same row' (row AMGT_CORPUS-Z-W3-S2). The 24 unmapped codes are correctly detected as FactSet-shaped; they are simply not confidently TYPED onto a Bloomberg mnemonic by this cell's method, which is a narrower claim than the scan's K4 question asks.",
+      "denominator": "N/A -- judgment row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L9: a judgment criterion is graded by 3.0.0_SA_CVO~Z at adjudication, never self-graded by the worker that produced it."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": ".................................                                        [100%]\n33 passed in 1.09s",
+      "denominator": "33 of 33 tests passed across the whole lib/research/corpus/tests package (7 of them this cell's), 0 failed; run twice (pre- and post-commit), identical pass count both times",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": ".scratch/c9/hyg.py -- diff the worktree against git merge-base HEAD SITEZ over lib and org; print outside_allowed [...] (every changed path NOT in <paths>), changed_files <n>, per changed .py compiles <bool> crlf <n> non_ascii <n>, then bad <n> -- expect (?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c9/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 3\nlib/research/corpus/tests/test_typecast.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/typecast.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "3 of 3 changed paths under lib/org are inside the <paths> grant (0 outside_allowed: the two new lib/research/corpus/* files plus the modified INVESTIGATION_v1.md, all four <paths> entries accounted for -- the task-order file itself has not been touched yet at this point in the run); 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, so bad 0 of 2",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/c9/mutant.py (not committed) runs test_typecast.py twice: FIX with the real MNEMONIC_RE (^[A-Z][A-Z0-9]*(_[A-Z0-9]+)+$), MUTANT with MNEMONIC_RE monkeypatched to match ANY non-empty string (so plain prose labels start counting as mnemonics too), against the identical fixtures both times.",
+      "expected": "FIX: all 7 tests pass. MUTANT: at least one assertion that depends on the mnemonic shape (test_mapping_by_label_records_evidence's exactly-one-Bloomberg-mnemonic / exactly-one-FactSet-code unambiguity check) fails, because now every plain label also counts as a 'mnemonic' candidate on both sides.",
+      "observed": "FIX: rc 0, '7 passed in 0.15s'. MUTANT: rc 1, '1 failed, 6 passed in 0.14s' -- test_mapping_by_label_records_evidence failed with 'assert 0 == 1' (mapped became empty because 'Net Sales' itself now also counts as a spurious extra mnemonic candidate, breaking the both-sides-unambiguous condition). CONTROL FIRED-AS-EXPECTED: True.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC4's full pytest runs executed three and two times respectively across this session (before commit, after commit, and inside mutant.py's FIX arm); AC2's --read-latest command run twice; AC5's hyg.py run three times (before, after adding the investigation rows, and post-commit); mutant.py itself run once (both its FIX and MUTANT sub-runs are single executions by construction, compared against each other rather than repeated).",
+      "observed": "pytest AC1: '7 passed in 0.15s' every run. pytest AC4: '33 passed in ...s' every run (0.40-1.09s, timing varies, pass/fail outcome identical). --read-latest: byte-identical summary lines both runs (same stored artifact, same current_inputs() match). hyg.py: outside_allowed [] and bad 0 every run; changed_files tracked the real working-tree state each time (0 anomaly, expected to change as files were added).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A sector split of the mnemonic core",
+      "reason": "Section 1, 'What this cell does NOT do': 'no sector split (the scan found the model sheet sector-agnostic, and the sector lives in CRPS-c-7's templates)'. compute_fields() measures over all-workbooks scope only; no sector dimension appears anywhere in the artifact."
+    },
+    {
+      "item": "Re-reading any workbook from the OneDrive research library, or from raw bronze XLSX bytes",
+      "reason": "BOUNDS: 'NEVER TOUCH THE RESEARCH LIBRARY'; Section 1 'no workbook re-read from the library'. read_xlsx_extractions() reads ONLY lib.research.harvest.store's research-report-extract prefix (CRPS-c-2's own output); nothing in typecast.py imports openpyxl, fitz, or touches the harvest bronze research-report prefix or any OneDrive path."
+    },
+    {
+      "item": "Using CRPS-c-2's own `mnemonics`/`factset_codes` extraction fields",
+      "reason": "ISSUER AMENDMENT (row AMGT_CORPUS-Z-W1-S1): those fields hold quoted OVERRIDE PARAMETERS (e.g. EQY_CONSOLIDATED, PER) and are 0-of-43 for FactSet, for the structural reason that this corpus's BDP/FDS calls reference a LABEL CELL rather than a quoted literal. typecast.py never reads document['mnemonics'] or document['factset_codes']; it derives its own mnemonic population from sheet_data.labels."
+    },
+    {
+      "item": "Any S3 delete",
+      "reason": "BOUNDS: 'No S3 delete of any kind, ever' (row AMGT_CORPUS-Z-S4). typecast.py imports no delete_object call anywhere; gold.gold_put is the only write path and it is never-overwrite (conditional put with IfNoneMatch=*)."
+    },
+    {
+      "item": "Hand-picking or overriding any specific FactSet-to-Bloomberg pair",
+      "reason": "RULED: 'No hand mapping.' The mapping rule in compute_fields() is a single, uniform, printed criterion (both-sides-unambiguous immediate adjacency) applied identically to every label; no pair is special-cased. Row AMGT_CORPUS-Z-W3-S2 records that this honest, uniform rule still yields some semantically loose real-corpus pairs -- that is a property of the input's missing coordinate data, not of hand-picking."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W3-S1: The RULED per-member CLI print list collides with AC2's own tail -60 once the real corpus's mnemonic_core reaches 94 members -- resolved with a durable end-of-output restatement of workbooks_read/with_mnemonics/core PX_LAST, adding to but never removing or reordering the RULED sequence.",
+    "AMGT_CORPUS-Z-W3-S2: CRPS-c-2's extraction shape (flat sheet_data.labels, no cell coordinate) cannot ground 'the same row' for FactSet-to-Bloomberg typing with certainty; the closest non-hand-picked proxy available (both-sides-unambiguous immediate adjacency) still measures some semantically implausible pairs on the real corpus (e.g. FG_FACTSET_SECTOR -> SHORT_INT_RATIO via 'Sector:')."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_typecast.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 7 passed, 0 failed"
+    },
+    {
+      "tool": "typecast CLI --write (build step)",
+      "invocation": "python -m lib.research.corpus.typecast --write",
+      "result": "rc 0; workbooks_read 43; with_mnemonics 37; mnemonic_core 94 members; extended 5 members; opal_case_assumptions 37 of 43; factset mapped 4 unmapped 24; written s3://opal-data-harvest/amgt/harvest/gold/research-model-typecast/scope=all-workbooks/32a7b3fd295ba39f.json put_performed True"
+    },
+    {
+      "tool": "typecast CLI --read-latest (AC2)",
+      "invocation": "python -m lib.research.corpus.typecast --read-latest",
+      "result": "rc 0; reads the object --write just wrote back (inputs match current_inputs()); reprints the identical summary; tail -60 matches AC2's exact expect regex (python re.search verified separately)"
+    },
+    {
+      "tool": "pytest (AC4)",
+      "invocation": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 33 passed, 0 failed"
+    },
+    {
+      "tool": ".scratch/c9/hyg.py (AC5, given verbatim by the task order)",
+      "invocation": "python .scratch/c9/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 3; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    },
+    {
+      "tool": ".scratch/c9/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/c9/mutant.py",
+      "result": "rc n/a (script prints its own summary); FIX 7 passed; MUTANT 1 failed/6 passed; CONTROL FIRED-AS-EXPECTED: True"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~3 <0.9.0_WK_AMGT_CORPUS~3@opal.agent>\" -F <msgfile> -- lib/research/corpus/typecast.py lib/research/corpus/tests/test_typecast.py org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit 1d86c01347: risk-reflex REFLEX CLEAN (3 of 3 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 3 files (INVESTIGATION_v1.md is not code) after removing an unused `gold` import ruff flagged on the first attempt; naming-gate WARN 1 graded (0 REFUSE, an s3:// format-string literal inside a LookupError message, not a real address builder call); to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (2 new rows, both carrying step-7/step-10 fields) after removing an invalid disarm_owner naming the CVO as its own disarm clock on the first attempt"
+    }
+  ]
+}
