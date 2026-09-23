@@ -1,7 +1,34 @@
 # Review handoff, 2026-09-23
 
+## Current B08 boundary and merged-base rerun, 21:54Z
+
+CTO msg25086 relays CVO PASS for `4599b05795` on its stated source boundary,
+review records at `94a817c8a8`. The structural read-only wrapper was confirmed
+by source review. The grade explicitly excludes C1-C3/live, retained IMB read,
+six poisoned cases, failure-envelope claim, carried semantic hashes, PyArrow
+packaging and mounted rendering. Historical green tests had a stale base.
+
+C independently reran the complete corpus suite plus the four actual thesis
+join controls at merged runtime `30102a6905addfcfec3b866a2e268f5a8bc01ba9`:
+**216 PASS = 212 corpus + 4 join**, zero failures/errors/skips, Windows Python
+3.11.9. `0e9ed7b1d8` is an ancestor, corpus bytes match `4599b05795`, and the
+detached checkout's HEAD and clean status were unchanged after execution.
+See `evidence/MERGED_30102a6905_VALIDATION.json`, matching JUnit and stdout.
+This addresses the requested stale-base test population; no new retained-data,
+Linux package, revision-store or browser result is claimed. C1-C3 remain
+NOT_EVALUATED until B00/E0 and independent live acceptance.
+
+Runtime join `ab43417aee` is implemented by COO~Z using the resolved identity
+and `_pool_client()` seam. Its direct authorization gap was resolved at
+`568f2f0c88`, per R-9. Client/display, package and revision boundary remain open.
+The signed no-span ZIP is a separate owner artifact: this rerun neither calls
+the builder nor rebuilds, uploads, or deploys it.
+
+## Historical review record (superseded current-state assertions marked below)
+
 B08 mandate `0e33cea24b`: new `report_input.py` adapter and proposed Runtime
-patch are ready for independent review/integration; prior H review does not
+patch were ready for independent review/integration at that vintage
+(SUPERSEDED as current state by source PASS and runtime join above); prior H review does not
 grade this new module. 212 corpus tests pass; six cases exercise the actual
 pinned `read_thesis_bundle` AST plus proposed insertion over corpus fixtures.
 New retained read through the adapter returns 15 IMB reports and 33 references,
@@ -11,7 +38,8 @@ NOT_EVALUATED until B00/E0 and independent live review. Completed c-11 evidence
 is folded into B08/FWD-9; original task-order status is not modified.
 
 CTO 25019 / RULINGS `06e9f1b4e4` assigns EXPERIENCE and SERVED RUNTIME to
-`2.0.0_SA_COO~Z`; its direct-session restriction remains valid. C completed
+`2.0.0_SA_COO~Z`; its direct-session restriction remained valid then
+(SUPERSEDED by direct authorization `568f2f0c88` and R-9). C completed
 the independent retained-data check for already resolved `IMB_LN_Equity`:
 15 prior reports match extraction/bronze hashes; continuation/fund/typecast
 current; sector template absent with explicit conflicting-sector reason.
@@ -26,7 +54,8 @@ requested S's exact S01 candidate pin, identity evidence and explicit unresolved
 population for C02 replay. S's exact 20260923T184453Z reply confirms no candidate,
 resolved mappings, induction evidence or excluded-population artifact. It says
 the relay reached it but its direct-session authorization restriction remains
-unchanged, already reported to CTO against 24982. Thus 24985 is a reported
+unchanged at that time (SUPERSEDED by `568f2f0c88`), already reported to CTO
+against 24982. Thus 24985 was a reported
 approval, not measured successful activation. C routed the discrepancy to CTO;
 no S01 handoff or replay result exists. The original reviewer reassignment is retained
 unless separately changed; this broadcast does not assign C a signature or

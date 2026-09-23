@@ -4,7 +4,7 @@ Owner `2.0.0_SA_COO~X`; 2026-09-23. CONTRACT v1.0 / mandate `0e33cea24b`, B08.
 **Producer integrated into LOCAL thesis backend at `ab43417aee`; client/display and live proof remain.**
 `C1-C3: NOT_EVALUATED` until B00/E0 and independent live acceptance.
 Worktree `C:/tmp/closer-amgt-corpus-x-20260923`; product candidate `4599b05795`, LOCAL.
-Remote SITEZ last measured: `c7e5b150139aae8750431b60e78add44a188b2c4`.
+Remote SITEZ last measured: `031fee04bc018318b348208822ab6716157655de`.
 
 Journey: analyst opens one resolved security at localhost:5174, sees retained
 prior reports and reusable corpus context with lineage and honest state, and
@@ -61,14 +61,22 @@ At 21:20:06Z COO~Z published backend integration `ab43417aee`, with producer
 that corpus bytes are identical to the producer candidate and `0e9ed7b1d8`
 is an ancestor of the integration base. C read the actual join, current
 AMGT_EXPERIENCE/INTERFACES.md and four real-producer/real-thesis fixture tests.
-Owner reports combined suite 443 PASS; C did not rerun it. The accepted/refused
+Owner reports combined suite 443 PASS; C did not rerun that full suite.
+C independently reran 212 corpus plus four thesis-join tests on clean detached
+`30102a6905`: **216 PASS**, zero failed/skipped; HEAD and worktree unchanged.
+`evidence/MERGED_30102a6905_VALIDATION.json` pins command, tree and result
+hashes; JUnit and stdout sit beside it. This closes the stale-base corpus-test
+gap; six old AST cases, retained reads and Ruff remain their original vintages. The accepted/refused
 examples retain CURRENT/STALE/FAILED/ABSENT and unresolved identity refusal.
 The runtime uses `_pool_client()` rather than the original proposed raw S3
 client, preserving the existing local/live seam. No deployed execution is proved.
 Separate package closure, typed portal/display, revision-store boundary and
 live latency/E0 remain unfinished. The strict two-function repair artifact and
-its never-widen signature are unchanged by this join. CVO handoff remains
-pending; source inspection and owner-reported tests are not live acceptance.
+its never-widen signature are unchanged by this join. CTO msg25086 relays CVO PASS for the stated source boundary of `4599b05795`
+at review record `94a817c8a8`, with the stale-base qualification addressed by
+this rerun. No C1-C3/live, retained-read, failure-envelope, semantic-hash,
+PyArrow-package or mounted-render grade is inferred. Independent offline tests
+and the bounded source PASS are not live acceptance.
 R-9 returns Price ownership to COO~Z after Y handback; C's surface is unchanged.
 S01/induction `2.0.0_SA_COO~Z`; final acceptance `3.0.0_SA_CVO~Z`.
 MSTR lifted the shared-tree commit hold at 20:47:01Z after merging/pushing
