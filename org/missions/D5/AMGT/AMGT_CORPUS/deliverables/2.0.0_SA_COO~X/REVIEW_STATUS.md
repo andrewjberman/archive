@@ -1,5 +1,15 @@
 # Review handoff, 2026-09-23
 
+B08 mandate `0e33cea24b`: new `report_input.py` adapter and proposed Runtime
+patch are ready for independent review/integration; prior H review does not
+grade this new module. 212 corpus tests pass; six cases exercise the actual
+pinned `read_thesis_bundle` AST plus proposed insertion over corpus fixtures.
+New retained read through the adapter returns 15 IMB reports and 33 references,
+with three current derived members and explicit sector-template absence.
+Source, fixture, retained and live levels remain separate. C1-C3 stay
+NOT_EVALUATED until B00/E0 and independent live review. Completed c-11 evidence
+is folded into B08/FWD-9; original task-order status is not modified.
+
 CTO 25019 / RULINGS `06e9f1b4e4` assigns EXPERIENCE and SERVED RUNTIME to
 `2.0.0_SA_COO~Z`; its direct-session restriction remains valid. C completed
 the independent retained-data check for already resolved `IMB_LN_Equity`:

@@ -1,5 +1,10 @@
 # I4 corpus substrate: version 1 examples
 
+New B08 consumer-side publication: `I4_REPORT_INPUT_HANDOFF.md` describes the
+additive `read_report_input()` envelope and prints its proposed Runtime mapping.
+`I4_RUNTIME_JOIN.patch` is pinned to Runtime base `1b1244cecf` and has not been
+applied to the shared API. Existing substrate schema below is unchanged.
+
 Existing callable: `lib.research.corpus.substrate.substrate(security_key, client=None)`.
 This packet documents the existing interface; it does not amend its schema.
 

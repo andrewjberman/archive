@@ -1,5 +1,12 @@
 # Completion evidence and remaining boundaries
 
+Under mandate `0e33cea24b`, B08 C1-C3 are NOT_EVALUATED until B00/E0 and
+independent live acceptance. The new corpus report-input adapter is implemented
+and checked through fixtures and a real retained IMB read; the owner patch for
+the actual Runtime consumer is proposed, not integrated/deployed. See
+`I4_REPORT_INPUT_HANDOFF.md`. Prior grades below retain their original scope.
+The completed c-11 evidence is folded into B08/FWD-9; no task order is recut.
+
 CTO message 24841 restores C01 PASS at ACTUAL EXERCISE ON RETAINED BYTES,
 conditioned on the candidate pin and four observable controls below. H grants
 routine source/offline PASS for dc2c0193ef at review 1c877a8c87. CTO relay 24946
