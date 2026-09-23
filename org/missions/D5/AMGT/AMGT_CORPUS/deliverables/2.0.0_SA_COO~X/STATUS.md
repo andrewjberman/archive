@@ -1,10 +1,10 @@
 # AMGT_CORPUS current state
 
 Owner `2.0.0_SA_COO~X`; 2026-09-23. CONTRACT v1.0 / mandate `0e33cea24b`, B08.
-**Corpus producer built; owner reviewing runtime/client/display integration in a separate package.**
+**Producer integrated into LOCAL thesis backend at `ab43417aee`; client/display and live proof remain.**
 `C1-C3: NOT_EVALUATED` until B00/E0 and independent live acceptance.
 Worktree `C:/tmp/closer-amgt-corpus-x-20260923`; product candidate `4599b05795`, LOCAL.
-Remote SITEZ last measured: `66203f6c0dba4dd2379f38dd7b968aefe3e8d3fa`.
+Remote SITEZ last measured: `c7e5b150139aae8750431b60e78add44a188b2c4`.
 
 Journey: analyst opens one resolved security at localhost:5174, sees retained
 prior reports and reusable corpus context with lineage and honest state, and
@@ -13,7 +13,7 @@ changed inputs invalidate only affected context without losing accepted output.
 | Connector | Current state and evidence |
 |---|---|
 | Browser -> auth/scope/bootstrap | NOT_EVALUATED; R-9/msg25063 records identity prerequisite exercised by operator MFA/Boeing render. E0 still needs a captured trace and pinned package evidence; sole owner COO~Z. |
-| Scoped API -> corpus consumer | Missing in inspected base; `I4_RUNTIME_JOIN.patch` proposes one additive call in pinned `read_thesis_bundle@1b1244cecf`. Shared source untouched. |
+| Scoped API -> corpus consumer | LOCAL source connected at `ab43417aee`: `read_thesis_bundle` carries the whole producer result under corpus using resolved identity and `_pool_client()`. C inspected the pinned source/tests; deployed connector unproven. |
 | Corpus adapter -> substrate | BUILT: `lib/research/corpus/report_input.py`; real retained read plus six isolated pinned-consumer fixture cases. No API/browser grade. |
 | Source/bronze/extract/typed lineage | Prior full census 123 admitted/351 files, 228 excluded; 93 folders, 33 resolved/60 unresolved. Source/bronze/extraction mappings verified for admitted set. |
 | Retained IMB -> adapter payload | Real read CURRENT; 15 reports/33 input references; continuation/fund/typecast current; sector template absent with conflicting-sector reason. 142 GET/9 LIST/zero writes. |
@@ -46,9 +46,8 @@ overwrite denied, 123 retained byte matches, zero actual S3 PUTs. Scanner remain
 a bounded named-operation instrument, not arbitrary-Python proof. Historical
 order status is untouched; no new order or duplicate implementer is created.
 
-Next: active COO~Z reviews and integrates the pinned Runtime patch,
-target dependency/permission
-closure and explicit client/render mapping, then C traces the same admitted
+Next: COO~Z completes target dependency/permission closure and explicit
+client/render mapping, then C traces the same admitted
 security through it. The new library depends on corpus/harvest/naming/PyArrow;
 the API's old deployed closure excludes part of this, so applying the patch is
 not deployment readiness. Additional backend reads alone would not prove the live connector.
@@ -57,22 +56,27 @@ Dependencies: shared integration and captured first-hop evidence `2.0.0_SA_COO~Z
 The session restriction is RESOLVED: R-9 at `3c7fa06601` and the owner's
 `AMGT_EXPERIENCE/AUTHORITY.md@568f2f0c88` record direct operator authorization.
 That record was read; no deployment or served-write authority is inferred.
-At 21:11:34Z COO~Z reports it read `4599b05795` code/tests, handoff and patch;
-runtime/typed-client/display integration review is underway. The corpus join
-will be a separate package from the strict two-function Lambda repair, with
-142 GET/9 LIST fanout and full dependency closure explicit. No consumer pin
-has been handed to C. At 21:12:32Z C confirmed `4599b05795` remains current:
-only STATUS/manifest changed since it. CVO handoff at 20:45:19Z remains pending;
-publication and integration review are not acceptance.
+At 21:20:06Z COO~Z published backend integration `ab43417aee`, with producer
+`4599b05795` carried onto merged base at `94f186168d`. C independently checked
+that corpus bytes are identical to the producer candidate and `0e9ed7b1d8`
+is an ancestor of the integration base. C read the actual join, current
+AMGT_EXPERIENCE/INTERFACES.md and four real-producer/real-thesis fixture tests.
+Owner reports combined suite 443 PASS; C did not rerun it. The accepted/refused
+examples retain CURRENT/STALE/FAILED/ABSENT and unresolved identity refusal.
+The runtime uses `_pool_client()` rather than the original proposed raw S3
+client, preserving the existing local/live seam. No deployed execution is proved.
+Separate package closure, typed portal/display, revision-store boundary and
+live latency/E0 remain unfinished. The strict two-function repair artifact and
+its never-widen signature are unchanged by this join. CVO handoff remains
+pending; source inspection and owner-reported tests are not live acceptance.
 R-9 returns Price ownership to COO~Z after Y handback; C's surface is unchanged.
 S01/induction `2.0.0_SA_COO~Z`; final acceptance `3.0.0_SA_CVO~Z`.
 MSTR lifted the shared-tree commit hold at 20:47:01Z after merging/pushing
 `0e9ed7b1d8`. This isolated worktree remains in use. Measured diff from
 `1b1244cecf` to that pin is empty for corpus and scoped_amgt.py; the API blob
 is identical (`f38ee60c9ecf26ac4a8c2c54ed2931c51478b020`). This is a bounded
-comparison, not whole-tree compatibility or integration. The pre-merge candidate
-must be carried onto the merged base before integration. The pinned patch is
-still unapplied. CTO reports the dev server is ephemeral and uses the live
+comparison, not whole-tree compatibility or integration. The owner has now carried the producer forward and implemented the
+consumer join at the pins above; this C worktree itself is still on its prior base. CTO reports the dev server is ephemeral and uses the live
 backend; its reported Thesis content incident is not a corpus acceptance pass.
 No repair deployment or production-write authorization is inferred.
 
