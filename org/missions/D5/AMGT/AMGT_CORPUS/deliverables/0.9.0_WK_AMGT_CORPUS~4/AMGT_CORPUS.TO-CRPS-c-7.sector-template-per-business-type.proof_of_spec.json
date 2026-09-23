@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-7",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-7.sector-template-per-business-type.md",
+    "group": "OTHER",
+    "vintage_commit": "74f25cbb6bc7a980b5fac744bcf25a9aa9fa70ee"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "40107c6f48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-7.sector-template-per-business-type.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/sector_template.py",
+      "kind": "script",
+      "commit_or_etag": "871b13e1e383e0ecaa635da54850bc42b3becde7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "business_type_of(record) bridges sector_as_written through lib.research.peers.taxonomy.scanner_sectors_for (GICS11_TO_SCANNER13_v1), unmapped when absent/uncovered/ambiguous (never guessed). build(business_type, records, total, fetch_extraction, kpi_terms, kpi_census_entry) computes reports/total, sections (case+whitespace normalised, count>=2), kpi_set (lexicon = union of research_docx_kpi_census.json's kpi keys, word-bounded case-insensitive over each report's extraction text Word+PDF, up to 3 cited passages), chart_pages (the corpus's own all-caps chart-title convention, CHART_PAGE_KEYWORDS). --write puts one gold artifact per business type (including unmapped) via gold.gold_put (never overwrites); current_inputs(business_type) recomputes the CURRENT inputs list without writing; --show-first-graded reads the first (sorted, non-unmapped) business type with >=3 reports from the STORED gold artifacts. MEASURED on the real 123-object corpus: total 123, other_excluded 72, non-OTHER 51, of which 45 carry no 'Sector:' field in their own extracted text and the 6 that do use FactSet/RBICS-shaped strings the bridge does not cover -- types 0, reports_typed 0, unmapped_reports 51 (business_type unmapped reports 51 of 123 sections 664 kpis 16 charts 12). See AMGT_CORPUS-Z-W4-S1.",
+      "introduces": ["business_type_of", "build", "current_inputs", "_run_write", "_run_show_first_graded", "_summarise_rows"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_sector_template.py",
+      "kind": "test",
+      "commit_or_etag": "871b13e1e383e0ecaa635da54850bc42b3becde7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "16 offline tests under the poison: the bridge used (a GICS-worded 'Information Technology' and a scanner-vocabulary-worded 'Technology' land in one business type via business_type_of/taxonomy.scanner_sectors_for; a second pair for Consumer Staples/Consumer Non-Cyclicals); no hand mapping (an unknown string, an absent sector, and a GICS value ambiguous under the bridge -- Consumer Discretionary -- all land in unmapped with the raw text); the denominator (OTHER-class rows excluded from every business type's reports and counted in other_excluded, via _summarise_rows, two cases); a KPI term absent from the text is never listed (never a designed 0 member); sections normalised and listed only at count>=2 (two cases); chart_pages detected on the corpus's all-caps convention, a mixed-case section is not one; KPI passages capped at 3 across 4 matching reports; inputs include the census entry plus one sorted entry per report; _kebab formatting; the real KPI lexicon file loads (EBITDA, NIM present, sha256 64 hex chars, sorted); a poison positive control.",
+      "artifact_covered_by": ["AC1", "AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_sector_template.py -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_sector_template.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "................                                                          [100%]\n16 passed in 0.13s",
+      "denominator": "16 of 16 tests passed, 0 failed; run twice back to back, identical (0.13s / 0.18s)",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.sector_template --show-first-graded 2>&1 | tail -60 -- expect (?s)business_type \\S+ reports (\\d+) of \\d+.*kpi \\S.* count \\d+ of \\1\\b.*section \\S.* count \\d+",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.sector_template --show-first-graded 2>&1 | tail -60",
+      "output_evidence": "no business_type with >= 3 reports at the current inputs",
+      "denominator": "0 of 13 scanner13 business types reach even 1 report through the GICS11_TO_SCANNER13_v1 bridge on the real 123-object corpus (types 0, reports_typed 0); the one bucket that DOES clear the >=3 threshold is 'unmapped' (51 reports), which this cell excludes from --show-first-graded's candidate pool because 'unmapped' is a residual bucket, never one of FWD-6's business types -- and grading it anyway was tried and separately fails AC2's own tail -60 budget (681 total lines, 664 distinct 'section ...' lines at count>=2, since 'unmapped' aggregates every business type's headings at once, dropping the leading business_type/kpi lines). REFUSED as written per BOUNDS ('REFUSE a criterion you cannot satisfy as written ... never repair or widen it'); measurement filed at AMGT_CORPUS-Z-W4-S1.",
+      "expect": "(?s)business_type \\S+ reports (\\d+) of \\d+.*kpi \\S.* count \\d+ of \\1\\b.*section \\S.* count \\d+",
+      "status": "FAIL",
+      "status_reason": "The literal invocation's own output does not match <expect>: no business type reaches the required >=3-report threshold through the bridge on the real corpus (see AMGT_CORPUS-Z-W4-S1 for the full measurement). Not a bridge defect or an implementation bug -- 45 of 51 non-OTHER reports carry no 'Sector:' field at all in their own text, and the 6 that do use FactSet/RBICS-shaped strings this GICS<->scanner-13 bridge does not cover; no term was mapped by hand to force a pass."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "JUDGMENT (the CVO's): your --write run's full per-type summary and the types ... unmapped_reports ... line, plus AC2's template. Is the template the team's own shape, and is the unmapped residue small enough to trust the types? Record them verbatim, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, graded by 3.0.0_SA_CVO~Z at L9, never self-graded",
+      "output_evidence": "python -m lib.research.corpus.sector_template --write printed:\nbusiness_type unmapped reports 51 of 123 sections 664 kpis 16 charts 12 put_performed True\ntypes 0 reports_typed 0 unmapped_reports 51 other_excluded 72\n\n(re-run this session, after the artifact already existed: put_performed False, same numbers otherwise -- gold_put's never-overwrite idempotence.)\n\nAC2's template (python -m lib.research.corpus.sector_template --show-first-graded 2>&1 | tail -60), verbatim:\nno business_type with >= 3 reports at the current inputs\n\nSupporting measurement (this worker's own direct read of store.silver_latest, same worktree): of the 51 non-OTHER (class A-D) silver rows, 45 carry sector_absent_reason \"no 'Sector:' label found in extracted text\"; the remaining 6 carry sector_as_written 'Energy Minerals' (x2), 'Consumer Discretionary', 'Consumer Non-Durables', 'Technology Services', 'Communications' -- none resolves to exactly one member of lib.research.peers.taxonomy.SCANNER_SECTORS/GICS_TO_SCANNER.",
+      "denominator": "N/A -- judgment row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L9: a judgment criterion is graded by 3.0.0_SA_CVO~Z at adjudication, never self-graded by the worker that produced it."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": ".....................................................................    [100%]\n69 passed in 0.53s",
+      "denominator": "69 of 69 tests passed across the whole lib/research/corpus/tests package (16 new in test_sector_template.py plus 53 from earlier cells), 0 failed; run twice back to back, identical outcome",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c7/hyg.py -- expect (?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c7/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 3\nlib/research/corpus/sector_template.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_sector_template.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "3 of 3 changed paths (against git merge-base HEAD SITEZ, over lib and org) are inside this cell's <paths> grant (0 outside_allowed; the investigation .md is the third changed path and is not diffed for compile/CRLF/ASCII); 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, so bad 0 of 2; run twice back to back, identical",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/c7/mutant.py (not committed) exec's a MUTANT copy of sector_template.py's source with the sections threshold changed from 'v >= 2' to 'v >= 1' (test_sections_listed_only_at_count_two_or_more's assertion), and runs build() with the same 3-report fixture (two reports carrying 'Investment Thesis', one carrying 'Risks') against both the FIX (real module) and the MUTANT.",
+      "expected": "FIX: sections == {'investment thesis': 2} (Risks at count 1 excluded). MUTANT (threshold >= 1): sections also includes 'risks': 1, a designed-list member the FIX correctly omits.",
+      "observed": "FIX sections {'investment thesis': 2}; MUTANT sections {'investment thesis': 2, 'risks': 1}. FIX correct (risks excluded at count 1) True; MUTANT misfires (risks included at count 1) True. CONTROL FIRED-AS-EXPECTED True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file, AC2's --show-first-graded, AC4's full test suite, AC5's hyg.py, the --write build step, and .scratch/c7/mutant.py each run twice back to back.",
+      "observed": "pytest (AC1): '16 passed' both runs. --show-first-graded (AC2): byte-identical 'no business_type with >= 3 reports at the current inputs' both runs. pytest (AC4): '69 passed' both runs. hyg.py (AC5): 'bad 0' both runs. --write: identical per-type/summary lines both runs (put_performed True then False, the expected never-overwrite idempotence). mutant.py: 'CONTROL FIRED-AS-EXPECTED True' both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any read of the OneDrive research library",
+      "reason": "BOUNDS: 'NEVER TOUCH THE RESEARCH LIBRARY. Every input is a stored object in S3.' sector_template.py imports only gold, typed (for SOURCE/TABLE/RECORD_KEY_FIELDS), store and taxonomy from this estate's own libraries, plus stdlib; lib.research.corpus.library is never imported."
+    },
+    {
+      "item": "Any vendor API or Claude API call",
+      "reason": "BOUNDS: 'NEVER CALL A VENDOR API OR THE CLAUDE API.' every test runs under tests/conftest.py's poison (boto3.client/resource/Session.client, subprocess.run/Popen, socket.create_connection all raise), proven live by test_poison_still_fires; the module's pure/injected paths (business_type_of, build, _kebab, _load_kpi_lexicon) never touch the network."
+    },
+    {
+      "item": "Any S3 delete of any kind",
+      "reason": "BOUNDS (issuer amendment on row AMGT_CORPUS-Z-S4): 'NO S3 DELETE OF ANY KIND ... a wrong object you wrote is superseded by a NEW key (bump method_version), never deleted.' sector_template.py writes ONLY through gold.gold_put, which is never-overwrite by construction (IfNoneMatch='*'); no delete_object/delete_objects call appears anywhere in this cell or its tests."
+    },
+    {
+      "item": "A new taxonomy map, or hand-mapping an unmapped sector string",
+      "reason": "Section 1, 'What this cell does NOT do': 'no new taxonomy map, no change to lib/research/peers/.' business_type_of() calls lib.research.peers.taxonomy.scanner_sectors_for as-is and reports 'unmapped' with the raw string for anything the bridge does not resolve to exactly one scanner sector -- proven offline (test_business_type_of_unmapped_for_unknown_string, test_business_type_of_unmapped_when_sector_absent, test_business_type_of_unmapped_when_bridge_is_ambiguous) and on the real corpus, where this produced 51 of 51 non-OTHER reports unmapped (AMGT_CORPUS-Z-W4-S1) rather than a forced mapping."
+    },
+    {
+      "item": "Fund forms, model typecast (cells c-8, c-9), or a change to any earlier module",
+      "reason": "Section 1: 'no fund forms (that is CRPS-c-8), no model typecast (that is CRPS-c-9)'. Confirmed by AC5's own outside_allowed [] and changed_files 3 -- nothing outside this cell's own <paths> changed."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W4-S1: AC2's literal --show-first-graded finds ZERO business types with any report through the GICS11_TO_SCANNER13_v1 bridge on the real corpus (45 of 51 non-OTHER reports carry no Sector: field at all; the other 6 use FactSet/RBICS-shaped strings the bridge does not cover), and even grading the 51-report unmapped bucket blows AC2's own tail -60 budget -- AC2 is reported FAIL with this measurement, never repaired or widened."],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, AC4)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_sector_template.py -q --color=no -p no:cacheprovider ; python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0 both; 16 passed (test_sector_template.py alone), 69 passed (whole package); run twice each, identical outcomes"
+    },
+    {
+      "tool": "sector_template CLI --write (build step, feeds AC3)",
+      "invocation": "python -m lib.research.corpus.sector_template --write",
+      "result": "rc 0; business_type unmapped reports 51 of 123 sections 664 kpis 16 charts 12 put_performed True (first run) / False (idempotent re-run); types 0 reports_typed 0 unmapped_reports 51 other_excluded 72"
+    },
+    {
+      "tool": "sector_template CLI --show-first-graded (AC2)",
+      "invocation": "python -m lib.research.corpus.sector_template --show-first-graded",
+      "result": "rc 1; 'no business_type with >= 3 reports at the current inputs'; run twice, byte-identical"
+    },
+    {
+      "tool": ".scratch/c7/hyg.py (AC5, written this cell per the criterion's own invocation)",
+      "invocation": "python .scratch/c7/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 3; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    },
+    {
+      "tool": ".scratch/c7/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/c7/mutant.py",
+      "result": "rc 0; FIX sections {'investment thesis': 2}; MUTANT sections {'investment thesis': 2, 'risks': 1}; CONTROL FIRED-AS-EXPECTED True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~4 <0.9.0_WK_AMGT_CORPUS~4@opal.agent>\" -F <msgfile> -- lib/research/corpus/sector_template.py lib/research/corpus/tests/test_sector_template.py",
+      "result": "commit 871b13e1e3: risk-reflex REFLEX CLEAN (2 of 2 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 2 files; naming-gate WARN 1 graded (0 REFUSE -- an s3://%s/%s format-string literal inside _run_show_first_graded's uri builder, not a naming.address()/key() call, flagged informationally); to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}
