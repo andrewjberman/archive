@@ -1,5 +1,15 @@
 # Review handoff, 2026-09-23
 
+CTO 25019 / RULINGS `06e9f1b4e4` assigns EXPERIENCE and SERVED RUNTIME to
+`2.0.0_SA_COO~Z`; its direct-session restriction remains valid. C completed
+the independent retained-data check for already resolved `IMB_LN_Equity`:
+15 prior reports match extraction/bronze hashes; continuation/fund/typecast
+current; sector template absent with explicit conflicting-sector reason.
+142 GETs and 9 LISTs, zero writes, unchanged response from prior observation.
+See `evidence/I4_IMB_PAYLOAD_CHECK_20260923.json` and `check_i4_retained.py`.
+Per R-4, this retained-data result awards no live acceptance ID. The next
+unproved connector is the owned API/browser path; S01 is separate population work.
+
 CTO message 24985 reports Andrew's approval closing S/AE mandate gaps and
 restricts work to AMGT pages/pipeline/domain within existing grants. C has
 requested S's exact S01 candidate pin, identity evidence and explicit unresolved
