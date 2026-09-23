@@ -1,5 +1,14 @@
 # Review handoff, 2026-09-23
 
+H review `b04336c4d8` FAILS the original static census in `d382f2a30e` for
+lambda/class-body omissions and safe-global inheritance over parameters.
+That static zero-write claim is withdrawn. Corrected scanner candidate covers
+those lexical scopes, closures and argument kinds, with 13 new controls and
+149 corpus tests passing; H re-review remains NOT_EVALUATED. The copied-library
+exercise is not invalidated by the static instrument defect. H independently
+PASSed period order across 5,040 permutations. Observation AMGT_CORPUS-Z-S7
+records the defect without inferring an actual library mutation.
+
 CTO message 24868 (17:29Z) supersedes the original reviewer assignment:
 H reviews C, R reviews H, C reviews R while S lacks activation. Sent the
 concrete corpus pin to H and requested R's incident-repair candidate. Prior

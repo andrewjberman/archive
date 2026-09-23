@@ -6,7 +6,7 @@ code review and CVO I4/final acceptance remain pending.
 
 | Scope | Result | Evidence level / limits |
 |---|---|---|
-| C01 source census | PASS: 28 Python files, zero library-directed write calls; planted write detected | Source + offline exercise; bounded AST def/use, not arbitrary dynamic Python verification |
+| C01 source census | Original d382f2a30e FAIL per H b04336c4d8; corrected candidate producer check 28 files / 27 write-like / zero library-directed, pending H re-review | Lambda/class scope and parameter-shadowing false negatives repaired; 13 additional controls. Bounded AST def/use, not arbitrary dynamic Python verification |
 | C01 original ACL instrument | Instrument failed; dependent ingestion NOT_EVALUATED | Original mixed W,D mask returned 5 and blocked traversal; preserved negative_control.log |
 | C01 corrected ACL instrument | PASS: specific DE,DC,WD,AD,WEA,WA supports read-only ingestion | negative_control_root_bound.log: resolved copy root and env source printed and asserted, read OK, create/append/overwrite denied, ingest 123/read_failed 0; ACL removal 0 |
 | C01 S3 boundary | No actual PUT delegated; existing bytes read and compared before emulated conflict | Retained-data read with disclosed transport seam; not a live conditional-PUT acceptance claim |
@@ -20,7 +20,7 @@ S was assigned routine review but explicitly reports it has **not started**
 because its own session authorization is unresolved. A named reviewer is not
 a completed or in-progress review. CVO retains the named boundary reviews.
 
-Offline corpus suite: 136 passed. H routine review at 8534a66eca: 39 candidate
+Offline corpus suite after scanner repair: 149 passed. H routine review at 8534a66eca: 39 candidate
 and legacy tests plus 10 independent boundary assertions passed; see the
 separate H_GOLD_REVIEW evidence. These grades do not grant C self-acceptance.
 
