@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-t-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-t-2.exercise-as-received-on-the-three-silent-paths.md",
+    "group": "OTHER",
+    "vintage_commit": "68f353361b6f15aa77526254306f2485b34f383f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "04329b6a4cec728b9565d50033f6bbdb2bdbe7da",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-t-2.exercise-as-received-on-the-three-silent-paths.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~17",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/exercise_as_received.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Offline, stub-driven exercise of the article-level as-received capture on all five publisher paths (sa, bbg, ft, wsj, barrons). Drives each path's own real article-fetch code (Publisher.module.article for sa/bbg, session.get directly for ft, DowJones.article for wsj/barrons) with a fixed, known stub response through a stub inner transport; runs the REAL, unpoisoned PacedSession.get and the REAL harvest_grammar.put_article_bronze against a fresh in-memory stub S3 client; asserts stored bytes are byte-for-byte the stub response bytes. Carries negative_control() (json.dumps re-serialisation of bbg's own body must NOT read as byte-equal), an UNEXERCISED arm (exercise_publisher('wsj', break_structure=True) drives a response the real DowJones.article parser cannot use and reports exercised=False with its real ContractUnavailable reason, never assumed to preserve bytes), and its own _install_poisons/_restore_poisons/positive_control on curl_cffi.requests.Session.get (PacedSession.get's own real transport -- unlike census_listing_capture.py this module runs PacedSession.get for real, so PacedSession.get itself cannot be poisoned here), SessionManager.refresh and subprocess.run, for the direct `python -m` run path where no pytest conftest applies. Makes no S3 write against a live bucket, no vendor call (vendor_calls 0, from a counter) -- confirmed by reading the committed module: the only S3 client it ever touches is its own in-memory _StubS3.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_exercise_as_received.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "9 offline pytest arms over exercise_as_received.py -- no network, no live bucket. Covers: all five paths exercised and byte_equal (test_all_five_paths_exercised_and_byte_equal); the negative control reports failure (test_negative_control_reports_failure) and its own fixture is genuinely non-canonical (test_negative_control_fixture_is_genuinely_non_canonical); every JSON-shaped fixture (sa/bbg/barrons) is deliberately non-canonical (test_json_fixtures_are_deliberately_non_canonical); an undrivable path is reported UNEXERCISED, never assumed (test_undrivable_path_is_reported_unexercised_not_assumed) plus an unknown-publisher-code arm (test_unknown_publisher_is_reported_unexercised); the vendor-call counter reads 0 after driving every path (test_vendor_calls_counter_is_zero_after_driving_every_path); the poison positive control raises on all three sites, reusing this package's conftest.py poison for SessionManager.refresh/subprocess.run and this module's own installer for curl_cffi.requests.Session.get, never duplicating either (test_poison_positive_control_all_three_sites_raise); and the full run_exercise() prints the BOUND sentence and both denominators (test_run_exercise_prints_bound_sentence_and_returns_ok).",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every arm passes and no \"failed\" -- including the NEGATIVE CONTROL arm where a json.dumps re-serialisation is substituted for the stub body and the check REPORTS FAILURE, and an arm proving a path that cannot be driven is reported UNEXERCISED rather than assumed",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_exercise_as_received.py -v --color=no -p no:cacheprovider 2>&1 | tail -16",
+      "output_evidence": "lib/opal_data_harvest/test_exercise_as_received.py::test_all_five_paths_exercised_and_byte_equal PASSED [ 11%]\nlib/opal_data_harvest/test_exercise_as_received.py::test_negative_control_reports_failure PASSED [ 22%]\nlib/opal_data_harvest/test_exercise_as_received.py::test_negative_control_fixture_is_genuinely_non_canonical PASSED [ 33%]\nlib/opal_data_harvest/test_exercise_as_received.py::test_json_fixtures_are_deliberately_non_canonical PASSED [ 44%]\nlib/opal_data_harvest/test_exercise_as_received.py::test_undrivable_path_is_reported_unexercised_not_assumed PASSED [ 55%]\nlib/opal_data_harvest/test_exercise_as_received.py::test_unknown_publisher_is_reported_unexercised PASSED [ 66%]\nlib/opal_data_harvest/test_exercise_as_received.py::test_vendor_calls_counter_is_zero_after_driving_every_path PASSED [ 77%]\nlib/opal_data_harvest/test_exercise_as_received.py::test_poison_positive_control_all_three_sites_raise PASSED [ 88%]\nlib/opal_data_harvest/test_exercise_as_received.py::test_run_exercise_prints_bound_sentence_and_returns_ok PASSED [100%]\n\n============================== 9 passed in 0.14s ==============================",
+      "denominator": "9 of 9 arms passed, 0 failed, 0 skipped, 0 errors. test_negative_control_reports_failure IS the required negative-control arm (PASSED, 22%) and test_undrivable_path_is_reported_unexercised_not_assumed IS the required cannot-be-driven arm (PASSED, 55%), both present and both green in the same run.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "five publisher lines each carrying exercised, byte_equal, received_form and reason; \"paths_exercised n of 5\"; \"byte_equal n of n\"; \"vendor_calls 0\" from a counter; the poison's POSITIVE CONTROL showing all three sites RAISE when tripped; and the BOUND sentence stating that this proves the CODE PATH preserves bytes for a stub response, not what a live server sends, and that it relabels no object already in bronze",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.opal_data_harvest.exercise_as_received",
+      "output_evidence": "publisher sa exercised True byte_equal True received_form as_received reason sa's article fetch drove PacedSession.get for real; put_article_bronze wrote the captured bytes to a stub bronze object; stored bytes equal the captured bytes\npublisher bbg exercised True byte_equal True received_form as_received reason bbg's article fetch drove PacedSession.get for real; put_article_bronze wrote the captured bytes to a stub bronze object; stored bytes equal the captured bytes\npublisher ft exercised True byte_equal True received_form as_received reason ft's article fetch drove PacedSession.get for real; put_article_bronze wrote the captured bytes to a stub bronze object; stored bytes equal the captured bytes\npublisher wsj exercised True byte_equal True received_form as_received reason wsj's article fetch drove PacedSession.get for real; put_article_bronze wrote the captured bytes to a stub bronze object; stored bytes equal the captured bytes\npublisher barrons exercised True byte_equal True received_form as_received reason barrons's article fetch drove PacedSession.get for real; put_article_bronze wrote the captured bytes to a stub bronze object; stored bytes equal the captured bytes\npaths_exercised 5 of 5\nbyte_equal 5 of 5\nnegative_control publisher=bbg reserialised_differs_from_original=True stored_matches_original=False reports_failure=True\ncannot_be_driven_arm publisher=wsj exercised=False byte_equal=False reason=ContractUnavailable: WSJ response lacks structured article JSON\nvendor_calls 0\npoison_positive_control RAISED site=curl_cffi.requests.Session.get detail=RAISED:POISON: curl_cffi.requests.Session.get called -- a real network/vendor call was attempted\npoison_positive_control RAISED site=SessionManager.refresh detail=RAISED:POISON: SessionManager.refresh called -- a real network/vendor call was attempted\npoison_positive_control RAISED site=subprocess.run detail=RAISED:POISON: subprocess.run called -- a real network/vendor call was attempted\nBOUND: this exercise proves the CODE PATH -- PacedSession.get through harvest_grammar.put_article_bronze -- preserves bytes for a STUB response, byte for byte. It does NOT prove anything about what these publishers' live servers send, and it does NOT relabel the 83 normalised_record objects or the 6 objects carrying no received-form key already held in bronze.",
+      "denominator": "paths_exercised 5 of 5; byte_equal 5 of 5 -- ALL FIVE paths, not only the three silent ones, exercised clean (an exercise that skipped the two proven-live paths, sa and wsj, could not be compared against HVST-r-2's own live result for them; both matched here too). vendor_calls 0, read from the poison hit counter, printed BEFORE positive_control() deliberately trips all three sites. All 3 of 3 poison sites RAISED under positive_control(). Run twice (once ahead of this proof, once for this record) with byte-identical output both times. Honest outcome, not assumed: byte_equal 5 of 5 is what this run found; a lower count would have been an equally valid, equally reportable outcome per the task order's own instruction.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"outside_allowed []\" -- only exercise_as_received.py and test_exercise_as_received.py changed, nothing else under lib, and check_as_received.py explicitly UNCHANGED; each changed file prints \"compiles True crlf 0 non_ascii 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/t2/ac3.py",
+      "output_evidence": "outside_allowed []\ncheck_as_received.py UNCHANGED confirmed (not in committed diff, working diff, or untracked list)\npath lib/opal_data_harvest/exercise_as_received.py compiles True crlf 0 non_ascii 0\npath lib/opal_data_harvest/test_exercise_as_received.py compiles True crlf 0 non_ascii 0",
+      "denominator": "2 of 2 new files under lib (union of committed diff since merge-base(HEAD,SITEZ), tracked working-tree diff, and git ls-files --others --exclude-standard for untracked files -- both new files are untracked at proof-write time, so the plain `git diff --name-only <merge-base> HEAD` alone would have shown 0 and been silently wrong; the union catches them), both in the allowed set of exactly {exercise_as_received.py, test_exercise_as_received.py}; 0 files outside the allowed set; check_as_received.py confirmed absent from all three change sources; 2 of 2 changed files compile clean with 0 CRLF bytes and 0 non-ASCII bytes.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "16 passed, 12 passed, 18 passed, 18 passed, 3 passed and 7 passed -- the suites this cell reads are untouched by it; any divergence from these full-tree counts is recorded as an environment finding with a row",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in test_check_as_received test_bronze_capture test_retrieval_provenance test_listing_capture_census test_poison_control test_harvest_grammar; do echo \"$t :: $(python -m pytest lib/opal_data_harvest/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "test_check_as_received :: 16 passed in 0.15s\ntest_bronze_capture :: 12 passed in 0.22s\ntest_retrieval_provenance :: 18 passed in 0.93s\ntest_listing_capture_census :: 18 passed in 0.17s\ntest_poison_control :: 3 passed in 0.05s\ntest_harvest_grammar :: 7 passed in 0.50s",
+      "denominator": "6 of 6 suites match the issuer's own full-shared-worktree baseline exactly (16, 12, 18, 18, 3, 7 -- 74 of 74 total arms across the six suites, 0 failed, 0 skipped, 0 errors). No divergence in this worktree; no environment-finding row required for this criterion.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The negative control IS the mutant/real pair this cell turns on: MUTANT is bbg's own stub body deliberately re-serialised with json.dumps(json.loads(x)) before being written to a fresh stub bronze object (negative_control()); REAL is the genuine, deliberately non-canonical body each of the five paths is actually exercised with (SA_ARTICLE_BODY/BBG_ARTICLE_BODY/FT_ARTICLE_BODY/WSJ_ARTICLE_BODY/BARRONS_ARTICLE_BODY -- odd key order, unusual separators, an escape, each asserted non-canonical at import time by _assert_non_canonical). A second pair on the SAME mechanism: MUTANT is a response WSJ's real DowJones.article parser cannot use (WSJ_BROKEN_BODY, no __NEXT_DATA__ script); REAL is the WSJ_ARTICLE_BODY the same code path is normally exercised with.",
+      "expected": "MUTANT (re-serialised body): the byte-equality check reports FAILURE (stored bytes != original stub bytes) -- reports_failure=True, never a silent PASS. MUTANT (undrivable response): exercise_publisher reports exercised=False/byte_equal=False with the real ContractUnavailable reason, never assumed to preserve bytes. REAL (genuine non-canonical body on all five paths): exercised=True, byte_equal=True.",
+      "observed": "negative_control(): reserialised_differs_from_original=True, stored_matches_original=False, reports_failure=True -- MUTANT correctly flagged. exercise_publisher('wsj', break_structure=True): exercised=False, byte_equal=False, reason contains 'ContractUnavailable: WSJ response lacks structured article JSON' -- MUTANT correctly reported UNEXERCISED. exercise_publisher(pub) for all five REAL paths: exercised=True, byte_equal=True for every one. CONTROL FIRED-AS-EXPECTED: True for both pairs.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m lib.opal_data_harvest.exercise_as_received was run twice this session (once while drafting, once for this record); python -m pytest lib/opal_data_harvest/test_exercise_as_received.py was run twice.",
+      "observed": "Both direct runs produced byte-identical output (same five publisher lines, same denominators, same poison detail strings, same BOUND sentence). Both pytest runs: 9 passed, 0 failed, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write, vendor call, network access, or use of harvest run/upload-* commands",
+      "reason": "Explicitly barred by the task order's bounds (section 4: NO S3 WRITE, NO VENDOR CALL, OFFLINE ONLY). Every S3 call this module makes is against its own fresh, in-memory _StubS3 (confirmed by reading the committed module: no boto3 import, no live client construction anywhere in exercise_as_received.py). Every session used is a real PacedSession wrapping a _StubInner that returns queued canned responses -- the real transport underneath (curl_cffi.requests.Session.get) is poisoned for the whole run and vendor_calls reads 0."
+    },
+    {
+      "item": "Editing check_as_received.py or re-labelling any bronze object",
+      "reason": "check_as_received.py is a READ-ONLY reference per section 3 of the task order; AC3 confirms it is untouched. This module writes nothing outside its own in-memory stub S3 client -- it cannot and does not relabel any of the 83 normalised_record objects or the 6 objects carrying no received-form key the issuer's own census found already in bronze; the BOUND sentence states this in every run's output."
+    },
+    {
+      "item": "Proving what these publishers' live servers actually send",
+      "reason": "Section 1's own bound: this cell exercises the CODE PATH against a STUB response, and nothing upstream of PacedSession.get is recorded in production either (no wire capture, no proxy log) -- the same bound check_as_received.py already states for the two live paths it could examine. A stub-driven byte-equality PASS is evidence about the code, never about a live vendor response."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m pytest lib/opal_data_harvest/test_exercise_as_received.py (AC1)",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_exercise_as_received.py -v --color=no -p no:cacheprovider",
+      "result": "9 passed, 0 failed, run twice, identical"
+    },
+    {
+      "tool": "python -m lib.opal_data_harvest.exercise_as_received (AC2, offline stub-driven run)",
+      "invocation": "python -m lib.opal_data_harvest.exercise_as_received",
+      "result": "rc 0; paths_exercised 5 of 5; byte_equal 5 of 5; vendor_calls 0; all 3 poison sites RAISED; run twice, byte-identical each time"
+    },
+    {
+      "tool": ".scratch/t2/ac3.py (AC3, allowed-set diff over lib since merge-base(HEAD,SITEZ), unioning committed diff + working diff + untracked list)",
+      "invocation": "python .scratch/t2/ac3.py",
+      "result": "rc 0; outside_allowed []; check_as_received.py confirmed unchanged; both new files compile True crlf 0 non_ascii 0"
+    },
+    {
+      "tool": "full-tree baseline re-run of the six read-only suites (AC4)",
+      "invocation": "for t in test_check_as_received test_bronze_capture test_retrieval_provenance test_listing_capture_census test_poison_control test_harvest_grammar; do python -m pytest lib/opal_data_harvest/$t.py -q --color=no -p no:cacheprovider; done",
+      "result": "16, 12, 18, 18, 3, 7 passed respectively -- exact match to the issuer's stated full-shared-worktree baseline; no environment-finding row needed in this worktree"
+    },
+    {
+      "tool": "python -m py_compile + ruff + .tools/commit-gate.sh on both new files",
+      "invocation": "python -m py_compile lib/opal_data_harvest/exercise_as_received.py lib/opal_data_harvest/test_exercise_as_received.py; ruff check <same>; bash .tools/commit-gate.sh <same>",
+      "result": "py_compile clean; ruff: All checks passed!; commit-gate: OK: pre-commit gate clean for 2 of 2 file(s)"
+    }
+  ]
+}
