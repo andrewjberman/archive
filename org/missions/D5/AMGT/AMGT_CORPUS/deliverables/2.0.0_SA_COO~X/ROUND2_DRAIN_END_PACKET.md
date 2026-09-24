@@ -84,6 +84,13 @@ channel conflicts resolved by union, one abort-and-reopen of this seat's own mer
    with a title, a name-token comparator -- the reverse index does not, 0 occurrences; `3.0.0_SA_CVO~Z`'s Z-S20 measured the code
    plane). Placement: this seat's, at the round-3 cut, as a measurement cell cut BEFORE any index cell, beside the FWD-12 V3 cell
    and Z-S17's remedy. Both directions stay open until it runs.
+   **RUN 17:03Z on Andrew's word ("go look right now and make a call", record @090ffea):** `UNRESOLVED40_CALLS_20260924.md`
+   -- **40 of 40 callable**: 12 stated by the folder's own documents (FactSet `Ticker:` lines, `(Ticker: ...)` labels,
+   `NYSE:`/`NASDAQ:` forms), 9 by the folder ticker plus the primary listing (this seat's call), 19 by the folder's own
+   `ROOT CC` (GB->LN, NL->NA, CA->CN); 3 collide with keys the pool already carries (CPA, UBER, SLB) and route to folder
+   association. Reader trap named: the FactSet ONE PAGER template's peer block (KPN/VOD/BT/ORA) and its `AAPL US` placeholder
+   read as tickers to a naive search. So the round-3 induction cell consumes this table under R-16 V2's remaining word (one
+   call each for the 40, once), with no reverse index needed.
    Unreachable by pipeline work alone: 10 workbook-only (the 9 shells + Quanta) and 1 empty folder (Air Liquide) -- a scope
    question surfaced to Andrew once by the CTO, not narrowed here. This seat adopts the content axis for every later "N of 93".
 
