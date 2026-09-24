@@ -12,7 +12,7 @@ tracked, genuinely EMPTY blob at HEAD (no submodule URL recorded for `portal` at
 `git rev-parse HEAD:.gitmodules` returning git's well-known empty-blob hash and `git cat-file -s` on it
 returning `0`), and `portal/` is an empty directory with no cached submodule objects anywhere in the shared
 git-common-dir. **The `ThesisBundle` column below is built entirely from this task order's OWN inlined
-quotation** of the file (section 1, verbatim: `portal/src/pages/SecurityAnalysis/types.ts:955` --
+quotation** of the file (section 1, verbatim: `portal/src/pages/SecurityAnalysis/types.ts:973` --
 `drafted_sections` ids `company_description`, `investment_thesis`, `risks`, `ceo_bio`, `recommendation` with
 `generated: true|false` per sentence; `management`; `model_cases`; `model_status`/`fiscal_year_figures`;
 `posture`) -- not from an independent live read. `3.0.0_SA_CVO~X` should re-verify this sheet against the file

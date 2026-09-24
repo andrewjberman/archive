@@ -1,9 +1,41 @@
 # AMGT_CORPUS current state
 
-Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:2xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
+Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~21:1xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
-## HOLD -- ALL AMGT OPS ON THIS FABRIC (Andrew-direct ~17:2xZ at the CTO terminal, relayed msg 25665, verbatim: *"Yes, tell
+## ROUND 3 -- ALL 5 CELLS DRAINED (~20:4xZ); the 40-name FIRE held on ONE limb
+
+Drains, each re-graded at the worker's tip on this seat's run: e-2 @`bb6b1f2f25` (22 mnemonics), e-3 @`1266b834ec` (sector
+template re-mints once, 218 reports), e-4 @`5637be19e9` (production-sequence runner), e-1 @`21e624a003` (curated evidence
+table), e-5 @`dae976b3b0` (served-as-empty-shell: 94 folders = 44 + 9 + 41). All five instances VALID. Worktrees
+`/c/tmp/wk-crps3-{1..4}` removed and branches deleted. Eight ARMED rows owed by this seat disarmed by carrier Z-S22
+@`2b3c2761e8`.
+
+THE FIRE: pre-flight VERDICT PASS on `2.0.0_SA_COO~Z`'s builder fix @`9ec1226a01` (UNRESOLVED 40 -> 0, twins 0,
+multi-claimed 0, 214 of 214 prior keys; `evidence/preflight_40_fire_20260924T210247Z.log`). Pair: COO half
+`NEVER_WIDEN_ROUND3_FIRE40_HALVES.md` @`8bd8ba7e2b`, corrected @`498c9aeb01`; CTO half
+`ledger/NEVER_WIDEN_ROUND3_FIRE40_CTO_HALF.md` @`af08f78a9b` signs every limb but the VENDOR limb. Asked of
+`1.0.0_SA_CTO~Z` (21:05Z): does Andrew-direct R-21 @`b390c36444` release it; the CTO is also asking Andrew. `2.0.0_SA_COO~Y`
+agreed the run is this producer's (msg 25747); its 94-folder proposal agrees on 37 of the 40, and the 3 differences sit on its
+own not-document-confirmed list with no US-line record in the pool, so the home listings stand. Bloomberg terminal signed in
+20:4xZ (one ledger attempt), health OK. After the fire: the production sequence through the runner, then the FWD-12 pull.
+
+## ROUND 3 (history) -- EXECUTING (~19:1xZ)
+
+Decomposition v3.0 @`d63cdd71ca` (five cells cut by write set, 15 checks as files dry-run at the base: 12 build checks FAIL,
+3 bounds PASS); ONE issuance @`6108b0d804`; e-1 amended before its spawn @`c1437f9864` (the evidence table read against the
+served pool: Bunzl -> BZLFY US and UMG -> UNVGY US attach to existing universe records; QXO associates; SLB registers; 35
+register + 5 associate; Shopify SHOP CN agreed with `2.0.0_SA_COO~Y`). `2.0.0_SA_COO~Z`'s folder-onto-no-folder ENRICH landed
+@`e640337205` first, so e-1 calls all 40. Workers spawned: `~1` e-4 (then e-5), `~2` e-1, `~3` e-3 (worker-light), `~4` e-2;
+worktrees `/c/tmp/wk-crps3-{1..4}` at `c1437f9864`. Drain acts owed by this seat: the 40-name fire under a fresh pair; the
+22-field pull under Andrew's V3 word (WORLD: change-management entry, batches of 3); the production sequence through e-4's runner.
+
+## HOLD LIFTED ~18:10Z (CTO msg 25696: the pull landed at de839386bb / a1f085f2ef, every laptop-fabric add on origin). Round 2's
+L10 is cut @`e05085196c` (FWD-19 NOT_REALIZED and moved; the 9 empty shells are NOT dossier-served; s.7 is round 3's list).
+ROUND 3 IS BEING CUT from s.7 plus this seat's reconciled draft @`18f7a03a63`; two one-line asks out (CTO: the FWD-12 cell;
+COO~Y: one registration run for the 40). Superseded hold text kept below for the record.
+
+## (superseded) HOLD -- ALL AMGT OPS ON THIS FABRIC (Andrew-direct ~17:2xZ at the CTO terminal, relayed msg 25665, verbatim: *"Yes, tell
 MSTR to ping you when ready, they need to coordinate with MSTR Base to know when all of the laptop fabric adds have made it to
 the CLOUD so you can properly pull and only then continue with ops on this fabric as it petains to AMGT"*). This seat cuts,
 drains, fires and analyses NOTHING on AMGT_CORPUS until `0.0.0_AB_MSTR~Z` pings the CTO that the laptop fabric is on
