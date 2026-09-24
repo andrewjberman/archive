@@ -17,7 +17,7 @@ DRAFT written at the wave-1/wave-2 boundary (10:2xZ); the wave-2 rows are filled
 | rl-7 posture | AMGT-rl-7 | ~136 | 6d2c73459b | b1d42fb62b | 3 of 3 PASS, VALID | W136-S1 (INERT) |
 | rl-8 lead panel | AMGT-rl-8 | ~137 | 6b1f1d838d | ca52fa60c1 | 3 of 3 PASS, VALID | W137-S1 (ARMED -> resolved at the drain), W137-S2 (INERT) |
 | rl-9 designed states + re-assert | AMGT-rl-9 | ~138 | (wave 2) | (wave 2) | AC1-AC3 mechanical, **AC4 JUDGMENT** | (wave 2) |
-| rl-10 the export | AMGT-rl-10 | ~139 | (wave 2) | (wave 2) | 3 of 3 mechanical | (wave 2) |
+| rl-10 the export | AMGT-rl-10 | ~139 | fa3b0152d2 | 096a06ca6b | 3 of 3 PASS, VALID | none |
 
 Proof instances: `deliverables/0.9.0_WK_AMGT_RESAPP~<n>/*.proof_of_spec.json`, each re-validated by the issuer inside the worker's
 worktree before its drain (the main tree's checker refuses an out-of-tree instance by design).
@@ -35,7 +35,7 @@ ARMED, disarm owner the issuer, fix routed to rl-9), W137-S1, W137-S2, plus any 
 
 ## 4. Drain-time instrument reads (repo-wide hygiene at the drain)
 
-`deliverables/2.0.0_SA_COO~Z/round37/contract-check-after-rl-<n>/` (n = 2..8), six states each, json + png. Movement through the
+`deliverables/2.0.0_SA_COO~Z/round37/contract-check-after-rl-<n>/` (n = 2..8, 10), six states each, json + png. Movement through the
 wave: thesis lowContrast 185 -> PASS (rl-3), peers band -> PASS (rl-5), posture lowContrast 7 -> PASS (rl-7), model lowContrast
 PASS -> 37 (rl-6, row Z-S247), list purpleFills 4 -> 3 (rl-8). Wave-wide residue at rl-8: weights [300,500,600], sizes [10],
 radii ["8px"], shadows 1 on every state; band list 3 / peers 1 / others 2 -- rl-9's cell. Final read: `contract-check-final/`
@@ -50,6 +50,6 @@ radii ["8px"], shadows 1 on every state; band list 3 / peers 1 / others 2 -- rl-
 
 ## 6. What the round does NOT close (for the CTO's round-37 analysis)
 
-- FWD-30's route change (serving the rich-text export) returns to the CTO before it is built: rl-10 writes the ROUTE ASK, edits no route.
+- FWD-30's route change (serving the rich-text export) returned to the CTO on rl-10's ROUTE_ASK_export_rich_text.md (existing /print leaf, `?format=rich`, text/markdown); no route was edited. rl-10 also measured the landed pack: 8 pages vs the 2-page cap, model-block only, 11 of 11 DESIGN_BIBLE items NOT MET -- branch (a) is NOT met and branch (b) is built on the producer, not yet served.
 - The PRD's F2/F3 corrections ride the post-drain edit (CTO).
-- Portal DEV carries this round's commits at 1267a67e (+ wave 2); the deploy is the integrator's on Andrew's word.
+- Portal DEV carries this round's commits at c6ecc9ba after rl-10 (+ rl-9); the deploy is the integrator's on Andrew's word.
