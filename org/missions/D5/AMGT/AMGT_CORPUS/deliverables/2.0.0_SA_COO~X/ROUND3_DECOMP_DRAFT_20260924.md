@@ -35,6 +35,21 @@ the runner is what the drain runs). Fan-out 4 of 4 chains, cap 8.
 | the 11 folders unreachable by pipeline work (10 workbook-only, 1 empty) | Andrew, via `1.0.0_SA_CTO~Z` (R-75) | his word on scope; until then they read never-prose with their reason |
 | FWD-18 | `1.0.0_SA_CTO~Z` (the analysis) | re-listed or not |
 
+## 2b. Reconciliation against the CTO's round-2 analysis s.7 (@`e05085196c`, read 18:1xZ)
+
+| s.7 item | this draft | resolution |
+|---|---|---|
+| 1. the 40 unresolved folders (Andrew's instruction with `2.0.0_SA_COO~Y`; the residual list is the artifact he fills) | e-0 + e-1 | `2.0.0_SA_COO~Y` confirmed (msg 25688) this seat's call table is ITS input; the registration act stays one `--batch` run under R-16 V2's remaining word. Which seat cuts e-1 is settled with the CTO at the cut (COO~Y holds the instruction; this project holds the producer) |
+| 2. Z-S17 | e-3 | as drafted |
+| 3. Z-S20's measurement (R-77) | -- | ANSWERED by option 2 today (40 of 40 callable, `UNRESOLVED40_CALLS_20260924.md`); no cell; the analysis's "roughly half the goal denominator" reads 40 of 93 |
+| 4. the empty-shell reclassification (one enum row + census re-run) | NEW `e-5` | `backlog --coverage` gains the fourth disposition `served-as-empty-shell` (identity resolved, dossier all-fields-absent, folder workbook-only/empty) so the partition is honest: 44 / 9 / 40 today; census re-run; FWD-19's ACCEPT read from the row |
+| 5. stale `types.ts:955` citation in `DOSSIER_INTERFACE.md` | NEW, folded into e-5 or e-4 | one-line coordinate fix against the live file |
+| 6. per-cell FWD declaration in the round-3 packet | packet rule | every cell names the FWD it serves; the packet's table carries the column |
+| 7. round 1's unfolded residue (33 ids UNDER_INVESTIGATION at the resolver) | not a cell | a named owner's deliberate act (the CVO's `adjudicates` fold); this seat carries nothing on it |
+| 8. the universe builder stale against the 93 (now 94 with AMD, per COO~Y) | not this project's surface | `build_universe.py` is the identity lane's; noted for the packet, no cell here |
+| (absent from s.7) FWD-12 figures pull | e-2 | Andrew's V3 word is given (R-70); the analysis graded FWD-19 only, so e-2's inclusion is raised with the CTO at the cut rather than assumed |
+| (absent from s.7) Z-S15 / Z-S18 hygiene | e-4 | kept as drain-time hygiene; dropped from the cell list if the analysis's list is read as exhaustive |
+
 ## 3. What this draft REFUSES to assume
 
 That the CTO's analysis carries these five and no others; that e-2's surface grant is this project's (it is named at the cut);
