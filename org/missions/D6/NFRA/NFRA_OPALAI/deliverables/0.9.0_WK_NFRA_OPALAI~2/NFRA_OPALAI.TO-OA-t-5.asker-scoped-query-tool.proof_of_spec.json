@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-t-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "C",
+    "vintage_commit": "f06341327e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "fee6c9f89c",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-t-5.asker-scoped-query-tool.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/asker_scope.py",
+      "kind": "script",
+      "commit_or_etag": "cc22fdfb9d",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module, not deployed by this order (bound 2.1: the deploy is OA-t-6, after this merges). git show cc22fdfb9d:infra/aws/ec2/opal-gateway/app/asker_scope.py resolves; py_compile clean (commit-gate ran it at commit time)."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_asker_scope.py",
+      "kind": "test",
+      "commit_or_etag": "cc22fdfb9d",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The four named tests, fakes/stubs only (no moto): test_asker_resolved_from_message_sender, test_unprofiled_asker_refused, test_scope_is_intersection, test_agent_supplied_identity_ignored -- all PASSED, 0 failed/error, at cc22fdfb9d (AC1's own run)."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/tools.py",
+      "kind": "script",
+      "commit_or_etag": "cc22fdfb9d",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Registers opal_asker_query as an MCP tool via _run(), the same chokepoint every existing tool uses; nothing existing in this file was rewritten (diff is one import-line change and one appended function). Not deployed by this order."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "kind": "script",
+      "commit_or_etag": "cc22fdfb9d",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ONE classification line added to NATIVE_TOOLS ('opal_asker_query'), nothing else touched in this file; de.classify('opal_asker_query') == 'legacy', read back at cc22fdfb9d. Not deployed by this order."
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "cc22fdfb9d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new rows appended (NFRA_OPALAI-Z-W2-S1, NFRA_OPALAI-Z-W2-S2); surprise-row-gate.py at staging time reported '2 new row(s) of 3 total checked (1 pre-existing, NOT re-graded)' and 'OK: all new rows carry their step-7/step-10 fields', and the same gate ran clean inside safe-commit.sh's pre-commit chain for this commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/t5.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests PASSED (test_asker_resolved_from_message_sender, test_unprofiled_asker_refused, test_scope_is_intersection, test_agent_supplied_identity_ignored); 0 FAILED/ERROR lines in the whole -v run.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "live store: NO-PROFILE; bogus table: STORE-UNAVAILABLE -- RESULT: PASS -- exit=0",
+      "method": "live_read",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/t5.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "live store: NO-PROFILE; bogus table: STORE-UNAVAILABLE\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 probe_store() calls against the live gateway-access-state-table (one on a random never-profiled principal, one against a table name that does not exist) -- the two failure shapes distinguishable, exactly as the check requires.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "passed>=5; failing=[test_scoped_deny_by_default] or none; failures not present at the cut=0 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/t5.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "passed=5; failing=[test_scoped_deny_by_default]; failures not present at the cut=0\nRESULT: PASS\nexit=0",
+      "denominator": "5 of 5 tests other than test_scoped_deny_by_default PASSED in tests/test_identity_scope.py; 1 pre-existing failure (test_scoped_deny_by_default, red before this cell per the cell's own bound 3); 0 new failures introduced by this cell's edits to app/tools.py and app/data_entitlement.py.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC3's own bound criterion IS the mutant: app/identity_scope.py is untouched by this cell (outside its <paths>, read-only), so test_scoped_deny_by_default's pre-existing failure is the world this cell inherited, not one it could silence -- the check's own regex would FAIL the whole criterion if that exact test's name appeared as a NEW failure alongside any other, or if the passed count dropped below 5. Exercised directly: AC3 was run once before any edit landed (implicit -- the same 5-passed/1-failed shape is asserted by the check's own bound-3 text) and once after this commit; both reads agree on the identical single failing name.",
+      "expected": "AC3 would FAIL if this cell's edits (adding opal_asker_query to tools.py and NATIVE_TOOLS) introduced ANY new identity_scope test failure, or dropped the passed count below 5",
+      "observed": "passed=5, failing=[test_scoped_deny_by_default] only, failures-not-present-at-the-cut=0 -- identical before and after this cell's commit",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 were each run twice: once before the commit (working-tree bytes) and once after (cc22fdfb9d, git-tracked bytes), per section 4's instruction to run 'after your commit'.",
+      "observed": "Identical results both times for all three: AC1 4/4 passed 0 failed; AC2 NO-PROFILE / STORE-UNAVAILABLE; AC3 passed=5 failing=[test_scoped_deny_by_default] new=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Per-dataset narrowing of a query_v0 catalog key by the asker's grant.scope.datasets",
+      "reason": "No field on any W5 catalog row (app/refs/DATA_CATALOG.yaml) or in catalog_gate.gate()'s inputs (principal_class/principal_firm) maps onto data_entitlement's DATASETS ('dim_position','dim_balance','dim_asset') -- a disjoint data domain from the Schwab custodial grant. Inventing that mapping is refused per the cell's own instruction ('Never invent a dimension'); row NFRA_OPALAI-Z-W2-S1 (ARMED, disarm_owner 2.0.0_SA_COO~O)."
+    },
+    {
+      "item": "Deploying opal_asker_query to the live gateway",
+      "reason": "Bound 2.1: 'Nothing is deployed by this order. The deploy is OA-t-6, the next order in your queue, after this one merges.'"
+    },
+    {
+      "item": "Widening app/identity_scope.py to add opal_asker_query to the concierge's (opalbloomberg@opalinvest.com) allowlist",
+      "reason": "app/identity_scope.py is outside this order's <paths> (Read never write) and its own docstring names widening as 'an Andrew ruling -- route via 0.0.0_AB_MSTR~Z'. Until that widening lands, the concierge identity itself will be denied at tools._run's identity_scope.check() before ever reaching this tool -- a real gap for the deploy order or an operator act to close, not this cell's to invent."
+    },
+    {
+      "item": "Adding 'opal_asker_query' to app/audit._ARGS_ALLOWLIST",
+      "reason": "app/audit.py is outside this order's <paths> (neither the write list nor the named Read-only list). The tool still audits every branch via audit.log_call (never raises), but the fail-closed default omits the declared args until that entry exists -- row NFRA_OPALAI-Z-W2-S2 (INERT)."
+    },
+    {
+      "item": "Modifying tests/test_identity_scope.py, tests/test_data_entitlement_guard.py, tests/test_access_state.py",
+      "reason": "Bound 3/4: the first is graded as-is (red before this cell, unchanged by design); the latter two do not collect on this box (no moto) and are outside this order's write surface regardless."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPALAI-Z-W2-S1: a query_v0 catalog key has no field mapping it onto data_entitlement's datasets/operations scope dimensions -- the two models are disjoint data domains, so opal_asker_query cannot narrow a catalog fetch by the asker's own dataset scope without inventing a dimension. Filed this pass. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~O.",
+    "NFRA_OPALAI-Z-W2-S2: app/audit.py's _ARGS_ALLOWLIST does not declare 'opal_asker_query', so its fail-closed default omits every arg (asker oid/key/verdict included) rather than carrying them -- adding the row is outside this order's <paths>. Filed this pass. OBSERVATION, INERT."
+  ],
+  "session_log": "2026-09-24, worktree C:/tmp/oa-2, branch wk-NFRA_OPALAI-2, based on CLOUD @fee6c9f89c. Order of acts: (1) grounded the tree (branch + org/ + .tools/ present). (2) read the existing work named in the cell -- app/access_state.py, app/data_entitlement.py, app/identity_scope.py, app/query_v0.py, app/graphql_plumbing/catalog_gate.py, app/refs/DATA_CATALOG.yaml, app/context.py, app/tools.py's _run chokepoint. (3) measured the catalog-key-to-grant-dimension mapping directly against catalog_gate.py's inputs and DATA_CATALOG.yaml's row fields: no shared field exists; refused inventing one, honouring only the grant's 'operations' dimension (the asker must hold 'query'). (4) built app/asker_scope.py (resolve_asker, probe_store, EffectiveScope/effective_scope, handle_asker_query), registered opal_asker_query in app/tools.py via the existing _run() chokepoint, classified it CLASS_LEGACY with one line in data_entitlement.NATIVE_TOOLS. (5) wrote tests/test_asker_scope.py, fakes/stubs only (no moto): a bare _FakeStore, injected graph_call stubs, no network/AWS in any of the 4 tests. (6) ran AC1/AC2/AC3 pre-commit, all PASS; fixed an unused-import ruff finding (`app.access_state` in the test file) that commit-gate caught. (7) filed rows NFRA_OPALAI-Z-W2-S1 and NFRA_OPALAI-Z-W2-S2 in INVESTIGATION_v1.Z.md; surprise-row-gate.py validated 2 new rows. (8) committed cc22fdfb9d (safe-commit.sh, this seat's author line); re-ran AC1/AC2/AC3 post-commit, all PASS, identical output. PUSH STATE: LOCAL @cc22fdfb9d (no push attempted; this seat never pushes). WHAT I DID NOT DO: touch app/identity_scope.py, app/audit.py, app/access_state.py, app/query_v0.py, app/context.py or app/refs/DATA_CATALOG.yaml (all Read-only or outside <paths>); deploy anything; write a policy record; call a vendor API; install moto.",
+  "compiler_tools": [
+    {
+      "tool": "comp-read --for",
+      "invocation": "grep -n directly on app/graphql_plumbing/catalog_gate.py and app/data_entitlement.py (Read tool, not comp-tool -- these are the two named Read-surfaces cited verbatim in the cell; navigating to a named path is exempt from the comp-find router)",
+      "result": "catalog_gate.gate(loaded, key, principal_class, principal_firm) branches only on principal_class/principal_firm against W5 catalog row fields (verdict_class, allowlist, firm, firm_resolution); data_entitlement.Scope carries masters/datasets/accounts/dates/columns/operations. Zero shared field name between the two -- the measurement the cell asked for, cited in row NFRA_OPALAI-Z-W2-S1."
+    },
+    {
+      "tool": "python -c (import smoke test)",
+      "invocation": "python -c \"from app import tools; print(tools.opal_asker_query)\" with TENANT_ID/CLIENT_ID/CLIENT_SECRET stubbed",
+      "result": "tools OK <function opal_asker_query at ...>; de.classify('opal_asker_query') == 'legacy' -- no circular import, the tool registers cleanly."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md (run after `git add` to exercise the staged-diff read the gate itself uses)",
+      "result": "[surprise-row-gate] org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md: 2 new row(s) of 3 total checked (1 pre-existing, NOT re-graded) -- OK: 1 file(s), all new rows carry their step-7/step-10 fields."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "see the run recorded in the worker report; only the exit code is the verdict."
+    }
+  ]
+}
