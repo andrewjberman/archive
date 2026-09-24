@@ -3,7 +3,12 @@
 Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:2xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
-## HOLD -- ALL AMGT OPS ON THIS FABRIC (Andrew-direct ~17:2xZ at the CTO terminal, relayed msg 25665, verbatim: *"Yes, tell
+## HOLD LIFTED ~18:10Z (CTO msg 25696: the pull landed at de839386bb / a1f085f2ef, every laptop-fabric add on origin). Round 2's
+L10 is cut @`e05085196c` (FWD-19 NOT_REALIZED and moved; the 9 empty shells are NOT dossier-served; s.7 is round 3's list).
+ROUND 3 IS BEING CUT from s.7 plus this seat's reconciled draft @`18f7a03a63`; two one-line asks out (CTO: the FWD-12 cell;
+COO~Y: one registration run for the 40). Superseded hold text kept below for the record.
+
+## (superseded) HOLD -- ALL AMGT OPS ON THIS FABRIC (Andrew-direct ~17:2xZ at the CTO terminal, relayed msg 25665, verbatim: *"Yes, tell
 MSTR to ping you when ready, they need to coordinate with MSTR Base to know when all of the laptop fabric adds have made it to
 the CLOUD so you can properly pull and only then continue with ops on this fabric as it petains to AMGT"*). This seat cuts,
 drains, fires and analyses NOTHING on AMGT_CORPUS until `0.0.0_AB_MSTR~Z` pings the CTO that the laptop fabric is on
