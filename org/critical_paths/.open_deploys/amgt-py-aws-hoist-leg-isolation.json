@@ -1,0 +1,38 @@
+{
+  "slug": "amgt-py-aws-hoist-leg-isolation",
+  "title": "Hoist the ONLY PY_AWS assignment (scheduled_daily_pull.cmd:166, inside the SEND leg) above the :145 DAPI_OK goto, so the pull-failed/DAPI-up path stops invoking an EMPTY interpreter at :234 and :285. Disarms AMGT_RESAPP-Z-S248. MEASURED: the task OPAL_BBGTML_daily_pull (State=Ready) runs this WORKING-TREE path directly, so the edit IS the deployment; next fire 2026-09-25 07:00 local (~11:00Z), window uncontended. One line moved; three paths enumerated; no path goes from working to different.",
+  "author": "1.0.0_SA_CTO~Z",
+  "status": "OPEN",
+  "opened_at": "2026-09-24T14:33:38.246456+00:00",
+  "window_hours": 1.0,
+  "entry_path": "org/critical_paths/change_management/20260924T1433Z_amgt-py-aws-hoist-leg-isolation_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "git",
+      "target": "scheduled_daily_pull.cmd: move the set \"PY_AWS=...\" line from inside the SEND leg to above the `if \"%DAPI_OK%\"==\"1\" goto :etf_leg` branch",
+      "proof_required": "commit hash + the three-path table re-read at the new line numbers",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "verification",
+      "target": "exercise cmd's ACTUAL expansion on the DAPI-up path with a negative control (reading cmd is not running it)",
+      "proof_required": "a temp .cmd reproducing the control flow: PRE-fix arm prints EMPTY, POST-fix arm prints the interpreter path",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "verification",
+      "target": "the interpreter path the hoisted line names exists and is executable on this box",
+      "proof_required": "existence + version read on that exact path",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "disarms": "AMGT_RESAPP-Z-S248",
+  "rollback": "git revert the single commit, or move the set line back below the `if not \"%RC%\"==\"0\"` block. The file IS the deployment, so the revert is the rollback: no artifact to re-push, no task to re-point.",
+  "never_widen": "NOT APPLICABLE and stated so deliberately: this act adds no key, moves no key and changes no producer's rule. It restores an intended write on a failure path, so NEVER-1's never-widen pair is not the instrument. Recorded here so a reader does not have to infer the omission."
+}
