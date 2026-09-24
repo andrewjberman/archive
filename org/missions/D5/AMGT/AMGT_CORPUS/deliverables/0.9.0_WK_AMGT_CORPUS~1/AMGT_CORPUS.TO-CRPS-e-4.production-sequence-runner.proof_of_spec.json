@@ -1,0 +1,169 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-e-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-4.production-sequence-runner.md",
+    "group": "OTHER",
+    "vintage_commit": "c1437f9864cf3e1d343e0cf5809bf739c08fbd54"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "2d802970a157474a03039dff79202dbb4c3a80f0",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-4.production-sequence-runner.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/production_sequence.py",
+      "kind": "script",
+      "commit_or_etag": "463ab76416f3b96d96a2e2d26b26559ae0ac6b97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module: STEPS is the RULED 10-step order (extract --write, extract --run-v2, typed --write, backlog --write, continuation --write, sector_template --write, fund_form --write, typecast --write, dossier --write, backlog --coverage), literally as a tuple of (module, flag) pairs. format_list() renders `--list`'s byte-stable text. run_all(steps, start, runner, out) executes 1-indexed from `start`, prints one '=== STEP <n> <module> <flag> rc=<rc> <seconds>s' line per attempted step, prints '... SKIPPED' for every step after the first non-zero rc without ever calling the runner on it, and ends with 'production_sequence steps_run R steps_ok K stopped_at <step|none>'. `runner` is injectable (default _default_runner, which calls subprocess.run and is never exercised under this package's poison -- only proven with a fake in tests). main() wires --list/--run/--from to format_list()/run_all(). No write of any kind: every gold/harvest write belongs to the producer module it shells out to, never to this module. Committed at 463ab76416f3b96d96a2e2d26b26559ae0ac6b97 (this worker, prior commit on this branch); this refresh commit only touches the proof instance and the TO's <status> flip.",
+      "introduces": [
+        "STEPS",
+        "format_list",
+        "_default_runner",
+        "run_all",
+        "main"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_production_sequence.py",
+      "kind": "test",
+      "commit_or_etag": "463ab76416f3b96d96a2e2d26b26559ae0ac6b97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 tests, offline under tests/conftest.py's poison (subprocess.run/Popen included -- no test here ever calls the real runner). test_steps_order_literal pins STEPS to the exact 10-tuple. test_backlog_write_precedes_the_two_name_enumerating_producers_and_coverage_is_last asserts the index relationships the RULED order exists to enforce (backlog --write before continuation --write and dossier --write; backlog --coverage last). test_format_list_byte_stable and test_main_list_prints_the_ruled_order_and_returns_0 pin --list's exact text and rc. test_run_all_calls_every_step_in_order_when_every_rc_is_0 proves every step reaches a fake runner in STEPS order with nothing skipped. test_stop_on_refusal_skips_every_remaining_step and test_main_run_returns_nonzero_on_a_refusal prove a fake runner returning 1 at step 4 stops the run: only steps 1-4 ever reach the runner (calls == STEPS[:4]), steps 5-10 print SKIPPED and are never called, steps_run 4 steps_ok 3 stopped_at 4. test_run_all_from_resumes_without_calling_earlier_steps and test_main_run_from_flag_is_wired_to_run_all prove --from N skips steps before N entirely (never calls the runner on them) rather than running and discarding them. Committed at 463ab76416f3b96d96a2e2d26b26559ae0ac6b97 (this worker, prior commit on this branch); this refresh commit only touches the proof instance and the TO's <status> flip.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DOSSIER_INTERFACE.md",
+      "kind": "doc",
+      "commit_or_etag": "463ab76416f3b96d96a2e2d26b26559ae0ac6b97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The sheet's one `types.ts:<n>` citation (in the READ CAVEAT paragraph, describing the order's own inlined ThesisBundle quotation) changed from `:955` to `:973` -- the live coordinate of `export interface ThesisBundle {` in the shared tree's portal/src/pages/SecurityAnalysis/types.ts, read directly (not assumed from the task order's own stated `:969`, which this worker's own live read shows is ALSO now stale; total file length is 1041 lines, not the order's stated 1,037). Nothing else in the sheet moved -- confirmed exactly one `types.ts:\\d+` occurrence in the file both before and after the edit. Committed at 463ab76416f3b96d96a2e2d26b26559ae0ac6b97 (this worker, prior commit on this branch); this refresh commit only touches the proof instance and the TO's <status> flip.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "463ab76416f3b96d96a2e2d26b26559ae0ac6b97",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_CORPUS-Z-W1-S5 appended (append-only channel, validated by .tools/surprise-row-gate.py): AC3's own check (e4_AC3.sh) resolves `portal/src/pages/SecurityAnalysis/types.ts` relative to `git rev-parse --show-toplevel`, which in THIS worker's worktree is the worktree's own (empty) portal/ -- same root cause as row S3 (.gitmodules carries no submodule URL). The literal check FAILS with FileNotFoundError in this worktree by construction, regardless of the cited coordinate's correctness; the row records both the worktree's negative run and the shared-tree substitute-oracle run (which matches AC3's <expect>), per the task order's own section-5 parenthetical instruction. Committed at 463ab76416f3b96d96a2e2d26b26559ae0ac6b97 (this worker, prior commit on this branch); this refresh commit only touches the proof instance and the TO's <status> flip.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_production_sequence.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e4_AC1.sh",
+      "output_evidence": ".........                                                                [100%]\n9 passed in 0.04s",
+      "denominator": "9 of 9 tests passed, 0 failed (run twice back to back for determinism: '9 passed in 0.04s' both times).",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.production_sequence --list -- expect the 10-step ruled order verbatim, 1 extract --write ... 10 backlog --coverage",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e4_AC2.sh",
+      "output_evidence": "1 extract --write\n2 extract --run-v2\n3 typed --write\n4 backlog --write\n5 continuation --write\n6 sector_template --write\n7 fund_form --write\n8 typecast --write\n9 dossier --write\n10 backlog --coverage",
+      "denominator": "10 of 10 steps printed, in the ruled order and no other (re-run twice, byte-identical both times). Re-checked against AC2's own regex with Python re.search (DOTALL): MATCH.",
+      "expect": "(?s)1 extract --write.*2 extract --run-v2.*3 typed --write.*4 backlog --write.*5 continuation --write.*6 sector_template --write.*7 fund_form --write.*8 typecast --write.*9 dossier --write.*10 backlog --coverage",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python - <<'EOF' (reads DOSSIER_INTERFACE.md's types.ts:<n> citations against the live portal/src/pages/SecurityAnalysis/types.ts) -- expect citation types.ts:<n> live: export interface ThesisBundle { ... citations 1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e4_AC3.sh",
+      "output_evidence": "citation types.ts:973 live: export interface ThesisBundle {\ncitations 1",
+      "denominator": "1 of 1 citation in DOSSIER_INTERFACE.md (types.ts:973), resolved and matching. Re-run twice back to back in this worktree, byte-identical both times. The issuer fixed e4_AC3.sh (CLOUD @beaf092dc3, per row S5) to resolve the MAIN worktree via `git rev-parse --git-common-dir` before reading portal/src/pages/SecurityAnalysis/types.ts, so the check now reads the same live file from this linked worktree directly -- no substitute oracle needed. Re-checked against AC3's own regex with Python re.search (DOTALL): MATCH.",
+      "expect": "(?s)citation types\\.ts:\\d+ live: export interface ThesisBundle \\{.*citations 1",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/e4/mutant.py (not committed): the order-assertion logic (the same index relationships test_backlog_write_precedes_the_two_name_enumerating_producers_and_coverage_is_last checks) run against the FIX (the real ps.STEPS) and against a MUTANT copy with backlog --write and continuation --write swapped -- the exact bug round 2's hand-run drain hit.",
+      "expected": "FIX (real STEPS, backlog --write before continuation --write) passes the order check clean. MUTANT (backlog --write and continuation --write swapped) fails the order check with an AssertionError.",
+      "observed": "FIX: 'order check PASSED (expected)'. MUTANT: 'order check FAILED AS EXPECTED:'. Run twice back to back, identical both times.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "e4_AC1.sh, e4_AC2.sh and .scratch/e4/mutant.py each run twice back to back.",
+      "observed": "e4_AC1.sh: '9 passed in 0.04s' both runs (0 failed both times). e4_AC2.sh: byte-identical 10-line output both runs. mutant.py: identical FIX-PASS / MUTANT-FAIL result both runs. The full package (lib/research/corpus) also re-run once: '269 passed' (260 pre-existing + 9 new), 0 failed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Never actually running `--run` for real against the live store",
+      "reason": "Section 4 BOUNDS: '--run for real would run every producer against the live store', forbidden in this cell. --run/--from are proven entirely through run_all()'s injectable `runner` parameter with a fake in tests; the real default runner (_default_runner, which calls subprocess.run) is written but deliberately never exercised here -- it would also be poisoned by tests/conftest.py's autouse fixture if it were."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W1-S5: AC3's check originally resolved portal/src/pages/SecurityAnalysis/types.ts relative to `git rev-parse --show-toplevel`, empty portal/ in a linked worktree -- FileNotFoundError, in every worker slot on this project. Row LEFT AS FILED per the issuer's instruction (disarm carrier at the drain); the issuer fixed e4_AC3.sh (CLOUD @beaf092dc3) to resolve the MAIN worktree via --git-common-dir, and AC3 now reads PASS directly in this worktree -- re-run and recorded above.",
+    "AMGT_CORPUS-Z-W1-S6: `.tools/proof-of-spec-check.py --governing-order`'s alignment limb originally read 0 distinct cell ids in the live round-3 decomposition doc (bare `e-1`..`e-5`, not the TOs' `CRPS-e-<n>` form), refusing every cell_ref citing it -- reproduced on the already-delivered CRPS-d-4 instance too, so it predated and was external to this cell. Row LEFT AS FILED per the issuer's instruction (disarm carrier at the drain); the issuer fixed the decomposition's rectangle (CLOUD @03baefb8af) to cite CRPS-e-1..e-5, and proof-of-spec-check.py now returns rc=0 -- re-run and recorded below."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, via e4_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e4_AC1.sh",
+      "result": "rc 0; 9 passed, 0 failed (run twice)"
+    },
+    {
+      "tool": "production_sequence CLI --list (AC2, via e4_AC2.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e4_AC2.sh",
+      "result": "rc 0; the 10-step ruled order, byte-identical across two runs"
+    },
+    {
+      "tool": "DOSSIER_INTERFACE citation check (AC3, via e4_AC3.sh, this worktree)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e4_AC3.sh",
+      "result": "rc 0; citation types.ts:973 live: export interface ThesisBundle {\ncitations 1 -- issuer fixed e4_AC3.sh (CLOUD @beaf092dc3) to resolve the MAIN worktree via --git-common-dir; PASSES directly in this linked worktree now, run twice, byte-identical both times"
+    },
+    {
+      "tool": "DOSSIER_INTERFACE citation check (AC3, substitute-oracle shared-tree run -- HISTORICAL, superseded by the issuer's e4_AC3.sh fix above)",
+      "invocation": "python - <<'EOF' (same logic as e4_AC3.sh, ts path pointed at the shared tree)",
+      "result": "rc 0; citation types.ts:973 live: export interface ThesisBundle {\ncitations 1"
+    },
+    {
+      "tool": "grep for the live ThesisBundle coordinate (shared tree, read-only)",
+      "invocation": "grep -n \"export interface ThesisBundle\" \"C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal/src/pages/SecurityAnalysis/types.ts\"",
+      "result": "rc 0; 973:export interface ThesisBundle {"
+    },
+    {
+      "tool": "pytest full package (broader safety check, not a proof criterion)",
+      "invocation": "python -m pytest lib/research/corpus -q -p no:cacheprovider",
+      "result": "rc 0; 269 passed, 0 failed"
+    },
+    {
+      "tool": ".scratch/e4/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/e4/mutant.py",
+      "result": "rc 0; FIX order check PASSED (expected); MUTANT order check FAILED AS EXPECTED (run twice, identical)"
+    },
+    {
+      "tool": "proof-of-spec-check.py (close-out gate, re-run after both issuer fixes)",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-4.production-sequence-runner.md",
+      "result": "rc 0; VALID -- alignment-frame: decomp id space = 5 distinct cell id(s) (issuer's CLOUD @03baefb8af fix), cell_ref CRPS-e-4 resolves 1/1; acceptance rows=3 violations=0. See rows S5/S6, left as filed."
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/production_sequence.py lib/research/corpus/tests/test_production_sequence.py org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DOSSIER_INTERFACE.md org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-e-4.production-sequence-runner.proof_of_spec.json",
+      "result": "PENDING -- run after this instance is validated"
+    }
+  ]
+}
