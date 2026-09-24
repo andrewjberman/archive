@@ -1,0 +1,142 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-d-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-6.scanner-exempting-branch-control.md",
+    "group": "OTHER",
+    "vintage_commit": "7f48b997a904cf51cc3ed7116d994e367f96a7d3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "df6798aebf56ea7e78ca679f4c837d1840ce4e43",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-6.scanner-exempting-branch-control.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/readonly_proof.py",
+      "kind": "script",
+      "commit_or_etag": "06aca143e337b0e86b132269163585b9e1cba8dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A new TMP_FIXTURE origin class ('tmp-fixture') is assigned to a pytest tmp_path/tmpdir/tmp_path_factory parameter (or the bare free name, when not shadowed) instead of the generic UNKNOWN a normal caller-supplied parameter gets; _join now dominates a joined UNKNOWN with TMP_FIXTURE the same way it dominates one with LIBRARY, so a def-use-walked path rooted in a measured fixture (e.g. `folder = tmp_path / name` where `name` is an unresolved loop variable) still resolves to ['tmp-fixture'] rather than degrading to ['unknown']. census_source's reach formula drops the blanket `not is_test` gate that erased EVERY unknown in a test file by default and replaces it with an explicit exemption for `origins == {TMP_FIXTURE}` only, so a genuinely-unresolved origin in a test file is now counted exactly like one in a non-test file (LIBRARY still dominates everything, unchanged). Each row now also carries `is_test`. code_census() adds test_sites/tmp_fixture_sites/test_unknown_sites counters over that field. main()'s --code-census arm gains a second positive control (a LIBRARY-origin plant inside a temp tests/ directory, proving the exempting branch's own LIBRARY-precedes-exemption path is exercised, not merely read) and, under a new --plant-unknown-in-test flag, a difference control (an opaque-origin write planted in a test module) that must flip test_unknown_sites from 0 to 1; without the flag the census is unchanged. All totals print both before and after the per-site lines.",
+      "introduces": ["TMP_FIXTURE", "TMP_FIXTURE_NAMES", "_print_row", "--plant-unknown-in-test"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_readonly_proof.py",
+      "kind": "test",
+      "commit_or_etag": "06aca143e337b0e86b132269163585b9e1cba8dd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 new tests added beside the 91 pre-existing: a LIBRARY-origin write in a file named test_plant_control.py is flagged (mirrors the CLI's new positive_control_test_file plant); a tmp_path/tmpdir/tmp_path_factory PARAMETER write resolves to origins == ['tmp-fixture'] and is not counted, parametrized over all three fixture names (3 cases); a tmp_path-rooted path joined with an unresolved for-loop variable (the real corpus's own `folder = tmp_path / name` shape) stays fixture-rooted rather than degrading to unknown; a write whose origin resolves through a bare, unrecognized call (`open(compute(), \"w\")`) inside a test module is COUNTED (reaches_library True, origins == ['unknown']). 97 of 97 tests pass.",
+      "introduces": ["test_test_file_library_plant_is_flagged", "test_tmp_fixture_parameter_write_resolves_to_measured_fixture_root", "test_tmp_path_joined_with_unresolved_loop_variable_stays_fixture_rooted", "test_genuinely_unknown_origin_write_in_test_module_is_counted"],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_readonly_proof.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_readonly_proof.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "........................................................................ [ 74%]\n.........................                                                [100%]\n97 passed in 0.24s",
+      "denominator": "97 of 97 tests passed, 0 failed (91 pre-existing + 6 new: test_test_file_library_plant_is_flagged, 3 parametrized cases of test_tmp_fixture_parameter_write_resolves_to_measured_fixture_root, test_tmp_path_joined_with_unresolved_loop_variable_stays_fixture_rooted, test_genuinely_unknown_origin_write_in_test_module_is_counted); run against committed HEAD 06aca143e3, re-run once more, identical outcome both times",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.readonly_proof --code-census -- expect files_scanned [1-9]\\d* ... library_write_calls 0 ... positive_control flagged 1 ... positive_control_test_file flagged 1 ... test_sites [1-9]\\d* tmp_fixture_sites [1-9]\\d* test_unknown_sites 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.readonly_proof --code-census 2>&1 | tail -60",
+      "output_evidence": "files_scanned 30\nwrite_like_calls 30\nlibrary_write_calls 0\npositive_control flagged 1\npositive_control_test_file flagged 1\ntest_sites 17 tmp_fixture_sites 17 test_unknown_sites 0\n... [27 per-site lines: 10 non-test SAFE 'outside-library', 17 test-file 'tmp-fixture'] ...\n<tmpdir>\\positive_control.py:1 open library_root() / 'x' reaches_library True origins ['library']\n<tmpdir>\\tests\\test_plant_control.py:1 open library_root() / 'x' reaches_library True origins ['library']\npositive_control_path <tmpdir>\\positive_control.py left_for_operator_cleanup True\npositive_control_test_file_path <tmpdir>\\tests\\test_plant_control.py left_for_operator_cleanup True\nfiles_scanned 30\nwrite_like_calls 30\nlibrary_write_calls 0\npositive_control flagged 1\npositive_control_test_file flagged 1\ntest_sites 17 tmp_fixture_sites 17 test_unknown_sites 0",
+      "denominator": "30 of 30 files scanned (lib/research/corpus package incl. its own tests/); 30 write-like calls total, 0 reaching the library; both positive controls fire (the non-test LIBRARY plant and the NEW test-file LIBRARY plant, in a temp tests/ dir); of 17 test-site write-like calls (all in the real corpus's own tests/), 17 resolve to a MEASURED tmp-fixture root and 0 are genuinely unknown; totals block printed identically at both the start and the end of the 46-line output (tail -60 captures the whole run, so both copies are visible); run twice back to back against HEAD 06aca143e3, only the per-run tempdir names differ (e.g. amgt_corpus_census_n2e34ipp vs a fresh mkdtemp), every counted value identical",
+      "expect": "(?s)files_scanned [1-9]\\d*.*library_write_calls 0\\b.*positive_control flagged 1\\b.*positive_control_test_file flagged 1\\b.*test_sites [1-9]\\d* tmp_fixture_sites [1-9]\\d* test_unknown_sites 0\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.readonly_proof --code-census --plant-unknown-in-test -- expect test_unknown_sites 1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.readonly_proof --code-census --plant-unknown-in-test 2>&1 | tail -60",
+      "output_evidence": "...\ntest_sites 18 tmp_fixture_sites 17 test_unknown_sites 1\n... [same 27 package rows plus the two existing plants] ...\n<tmpdir>\\tests\\test_plant_unknown.py:3 open compute() reaches_library True origins ['unknown']\n...\nplant_unknown_in_test_path <tmpdir>\\tests\\test_plant_unknown.py left_for_operator_cleanup True\nfiles_scanned 30\nwrite_like_calls 30\nlibrary_write_calls 0\npositive_control flagged 1\npositive_control_test_file flagged 1\ntest_sites 18 tmp_fixture_sites 17 test_unknown_sites 1",
+      "denominator": "the ONE planted unknown-origin write (def compute(): return object() ; def test_x(): open(compute(), \"w\") inside a temp test_plant_unknown.py) is the sole contributor moving test_unknown_sites from 0 (AC2, flag absent) to 1 (this run, flag present); test_sites moves from 17 to 18 by the same one site; tmp_fixture_sites and library_write_calls are UNCHANGED (17 and 0) -- the difference control moves exactly the one counter it targets; run twice back to back against HEAD 06aca143e3, identical counted values both times; without the flag (AC2) test_plant_unknown.py is never written and the census is unchanged",
+      "expect": "(?s)test_unknown_sites 1\\b",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/d6/mutant.py (not committed) runs the module's own real dominance rule in _join against an inverted copy: FIX uses the shipped `if TMP_FIXTURE in values: return TMP_FIXTURE` clause; MUTANT deletes that clause so a joined TMP_FIXTURE/UNKNOWN pair falls through to the final `SAFE if values == {SAFE} else UNKNOWN` line -- the ONE branch this cell's finding says had no control.",
+      "expected": "FIX resolves every one of the real corpus's 17 tmp-fixture-rooted test-site writes (e.g. tests/test_backlog.py:17-18's `folder = tmp_path / name`) to origins ['tmp-fixture'] and reaches_library False; MUTANT, with the TMP_FIXTURE-dominates-UNKNOWN clause deleted from _join, resolves the SAME 17 sites to origins ['unknown'] and reaches_library True -- moving both test_unknown_sites AND the package-wide library_write_calls from 0 to 17 (library_write_calls sums reaches_library over every row in the package, test files included, so the same 17 sites that stop being measured as fixture-rooted also stop being exempt from that total).",
+      "observed": "FIX (committed 06aca143e3, code_census() against the real package): test_sites 17 tmp_fixture_sites 17 test_unknown_sites 0 library_write_calls 0. MUTANT (.scratch/d6/readonly_proof_mutant.py, the shipped module with the 2-line `if TMP_FIXTURE in values: return TMP_FIXTURE` clause deleted from _join, code_census() against the SAME real package path): test_sites 17 tmp_fixture_sites 0 test_unknown_sites 17 library_write_calls 17. Every one of the 17 previously-measured-safe test sites reverts to genuinely unknown and is counted, exactly as the finding predicts for the branch that 'has no control at all'. CONTROL FIRED-AS-EXPECTED True (.scratch/d6/mutant.py, run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file, AC2's --code-census and AC3's --code-census --plant-unknown-in-test each run twice back to back against committed HEAD 06aca143e3.",
+      "observed": "pytest (AC1): '97 passed' both runs. --code-census (AC2): all counted totals (files_scanned 30, write_like_calls 30, library_write_calls 0, positive_control flagged 1, positive_control_test_file flagged 1, test_sites 17 tmp_fixture_sites 17 test_unknown_sites 0) and every per-site origins/reaches_library value identical both runs; only the mkdtemp-generated tempdir NAME (an operator-cleanup path, not a measured value) differs between runs. --code-census --plant-unknown-in-test (AC3): same, with test_sites 18 test_unknown_sites 1 both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The --negative-control arm",
+      "reason": "BOUNDS (section titled the cell's own preamble): 'this cell runs --code-census only; it does NOT run --negative-control (that copies 300 MB and is round 1's evidence).' negative_control() is untouched by this cell's diff -- confirmed by the commit's own diff touching only the reach formula, the origin/_join/_bindings helpers, code_census(), and main()'s --code-census arm."
+    },
+    {
+      "item": "Any change to the origin rules for non-test code",
+      "reason": "Section 1, 'What this cell does NOT do': 'no change to the origin rules for non-test code'. The reach formula for a non-test file is unchanged in effect: `LIBRARY in origins or UNKNOWN in origins` was already true unconditionally before this cell (is_test was True there, so `not is_test` was False, collapsing the old formula to the same thing); TMP_FIXTURE is a new origin VALUE, not a new RULE that treats non-test code differently, and no non-test site in the real corpus resolves to it (grep for tmp_path_factory/tmpdir across lib/research/corpus found only this module's own new constant definitions)."
+    },
+    {
+      "item": "No new exemption of any kind beyond the measured fixture root",
+      "reason": "Section 1 point 2: 'the ONLY exemption is a measured fixture root.' The reach formula's exemption clause is `is_test and set(origins) == {TMP_FIXTURE}` -- a single, explicit, literal equality against the one new origin class; no other value or combination is exempted."
+    },
+    {
+      "item": "Deletion of the temp plants (positive_control.py, test_plant_control.py, test_plant_unknown.py)",
+      "reason": "Section 1, 'What this cell does NOT do': 'no deletion of the temp plants (they are left, as the existing plant is, with left_for_operator_cleanup True).' Each of the three plants' path is printed with left_for_operator_cleanup True and none is unlinked by this code."
+    },
+    {
+      "item": "Touching the OneDrive research library, a vendor API, the Claude API, or any install",
+      "reason": "Global worker bounds: 'NEVER INSTALL. NEVER CALL A VENDOR API OR THE CLAUDE API. NEVER TOUCH THE LIBRARY.' The diff touches only census_source/_origin/_join/_bindings/code_census/main's --code-census arm; library.library_root() is never called by the new code (only referenced BY NAME inside planted source-code STRINGS the scanner parses as text, never executed); no network or install call appears anywhere in the diff (ruff clean, py_compile clean)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_readonly_proof.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 97 passed; run twice, identical"
+    },
+    {
+      "tool": "readonly_proof CLI --code-census (AC2)",
+      "invocation": "python -m lib.research.corpus.readonly_proof --code-census",
+      "result": "rc 0; files_scanned 30, write_like_calls 30, library_write_calls 0, positive_control flagged 1, positive_control_test_file flagged 1, test_sites 17 tmp_fixture_sites 17 test_unknown_sites 0; run twice, all counted values identical"
+    },
+    {
+      "tool": "readonly_proof CLI --code-census --plant-unknown-in-test (AC3)",
+      "invocation": "python -m lib.research.corpus.readonly_proof --code-census --plant-unknown-in-test",
+      "result": "rc 0; test_sites 18 tmp_fixture_sites 17 test_unknown_sites 1; run twice, all counted values identical"
+    },
+    {
+      "tool": "ruff check --target-version py39 (pre-commit hygiene, also run standalone)",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/readonly_proof.py lib/research/corpus/tests/test_readonly_proof.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile (pre-commit hygiene, also run standalone)",
+      "invocation": "python -m py_compile lib/research/corpus/readonly_proof.py lib/research/corpus/tests/test_readonly_proof.py",
+      "result": "rc 0, no output (both files compile)"
+    },
+    {
+      "tool": ".scratch/d6/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/d6/mutant.py",
+      "result": "rc 0; FIX test_unknown_sites 0, MUTANT (TMP_FIXTURE dominance clause removed from _join) test_unknown_sites 17; CONTROL FIRED-AS-EXPECTED True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~3 <0.9.0_WK_AMGT_CORPUS~3@opal.agent>\" -F <msgfile> -- lib/research/corpus/readonly_proof.py lib/research/corpus/tests/test_readonly_proof.py",
+      "result": "commit 06aca143e3: risk-reflex REFLEX CLEAN (2 of 2 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 2 files; naming-gate PASS 0 graded; to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no surprise-channel rows in this commit)"
+    }
+  ]
+}
