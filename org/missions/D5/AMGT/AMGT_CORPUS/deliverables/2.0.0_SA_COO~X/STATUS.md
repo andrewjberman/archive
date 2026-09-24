@@ -1,48 +1,44 @@
 # AMGT_CORPUS current state
 
-Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~08:3xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
+Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:0xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
-## INCIDENT on served output, this seat's act -- row `AMGT_CORPUS-Z-S13` (ARMED, disarm owner this seat)
+## Round 2 -- EXECUTING, 5 of 6 cells drained
 
-At 08:02:37Z-08:02:55Z this seat's induction fire (d-5 as first issued) re-minted `s3://opal-data-harvest/crosswalk/v1/
-2026-09-24.json` through CLOUD's `build_crosswalk`, twenty puts (one per called name), and REPLACED the object
-`2.0.0_SA_COO~Z` had published at 03:32:47Z under a never-widen pair (523,207 bytes, document-sha256 `9bd953b9c06f...`,
-MEASURED 194) with a 231,910-byte document (MEASURED 36 + 20 UNRESOLVED noise registrations). Served effect: ASML_US_Equity
-and AAPL_US_Equity read UNRESOLVED where they read MEASURED/SERVED. Zero Bloomberg calls were made (the fire's own defect:
-`--folder` alone reads the ONE PAGER workbook). This seat's first grade ("exposure, MEASURED 36 -> 36", msg 25324) compared
-against the PREVIOUS dated key, never the key it wrote -- a GRAIN error, owned. R-36 (built on it) is WITHDRAWN by the CTO.
+Decomposition v2.0 @`df6798aebf`; ONE issuance @`7f48b997a9`. Drained into CLOUD: d-6 @`341bffca19`, d-1 @`c356bbff56`,
+d-2 @`a419df8f9d`, d-5 @`7dc89c66c3` (after two issuer re-opens: amendment 1 the folder-vs-report disagreement refusal,
+amendment 2 the call carries `--bloomberg "<root> <cc>"` beside `--folder`); corpus suite 244 PASS on CLOUD. In flight:
+d-3 (~1, the composed dossier; `dossier.py` exists on its branch). Pending: d-4 (the 93-of-93 census), behind the fire.
 
-- **Rollback:** `2.0.0_SA_COO~Z`'s act on the CTO's GO (msgs 25332/25338), under the EXISTING pair's rollback leg: server-side
-  copy-object from VersionId `K1qTvwqiuo3jNvF_bwC9...` (the bucket is versioned; 21 versions, 0 delete markers; confirmed on
-  this seat's own instrument); verify-after = size 523,207 + ETag `2c0ff894...` + GET sha `9bd953b9...` + the three direct
-  invokes. The 20 noise versions stay addressable. Ledger at the CTO: `amgt-crosswalk-0924-rollback`.
-- **The re-fire is HELD by this seat** until the restore verifies AND the two builders are one on CLOUD (`0.0.0_AB_MSTR~Z`'s
-  drain of `closer/amgt-peers-z-20260924`, which carries the universe/v1 registration source). Then ONE re-fire through the
-  unified builder under a never-widen pair whose halves print the writer count of the key and state the blast radius as
-  TWENTY successive puts with the rollback addressing the version before the first (CTO 25338). "Registrations without the
-  pool" is DEFERRED: add_security has no such mode and the seam is not this seat's to change.
-- **Evidence:** `induction_run_2026-09-24_fire_attempt1.json`, `evidence/induction_fire_attempt1_20260924T0802Z.log`,
-  `evidence/registrations_misfire_attempt1_20260924T0802Z.patch` (the reverted rows). Lesson banked at this seat.
+Measured: extraction v2 123 of 123 (inline leads 22 of 52 PDFs); continuations 33 of 33 (with_pillars 10, PDF pillars 5;
+4,580 of 4,580 citations; ASML_NA_Equity 2 pillars); scanner 0 library writes, 17 of 17 test sites fixture-rooted;
+induction dry run on CLOUD: population 60, evidenced 20, ambiguous 2 (Copa, Uber collisions), disagreement 1 (America
+Movil AXMB vs AMXB), other 37, 20 of 20 argv carry both flags, bloomberg_calls 0.
 
-## Round 2 -- EXECUTING, 4 of 6 cells drained
+## INCIDENT Z-S13 (this seat's act) and the HELD re-fire
 
-Decomposition v2.0 @`df6798aebf`; ONE issuance @`7f48b997a9`. Drained: d-6 @`341bffca19`, d-1 @`c356bbff56`, d-5 (first close)
-@`cb0abfcd96`, d-2 @`a419df8f9d`; corpus suite 235 PASS on CLOUD after the last merge. In flight: d-3 (~1, the composed
-dossier); d-5 RE-OPENED a second time @`859fe13dc8` (amendment 2: the call carries `--bloomberg "<root> <cc>"` from the
-request row; the dry run asserts both flags; a folder-only argv is refused before the seam) -- ~2 building, its BUILD is not
-held. Pending: d-4 (the 93-of-93 census) behind d-3 and the corrected fire by design.
+The 08:02Z fire (d-5 as first issued) made 0 Bloomberg calls and, through `add_security`'s per-name `write_pool`, replaced
+`2.0.0_SA_COO~Z`'s signed `crosswalk/v1/2026-09-24.json` (MEASURED 194) with CLOUD's 36-shape plus 20 UNRESOLVED noise rows;
+this seat's first grade used the wrong before-object. **Rollback CLOSED** 08:22:33Z by `2.0.0_SA_COO~Z` on the CTO's GO
+(copy-object from the signed VersionId; verified 3 of 3 legs on three instruments; ledger `amgt-crosswalk-0924-rollback`
+closed). Row Z-S13 condition 1 met.
 
-Measured this round: extraction v2 for 123 of 123 reports (inline leads in 22 of 52 PDFs); continuations rebuilt 33 of 33
-(with_pillars 10, with_pdf_pillars 5; 4,580 of 4,580 citations resolve; first PDF-only name ASML_NA_Equity, 2 pillars);
-scanner: 0 library writes, 17 of 17 test sites measured fixture-rooted; induction dry run: population 60, evidenced 20,
-ambiguous 2, disagreement 1 (America Movil, never called), other 37.
+**Re-fire HELD on two clauses, both on `add_security` (`2.0.0_SA_COO~Z`'s surface, taken on its Peers closer track):**
+1. `write_pool` once per run (one put), not once per name (20 versions in 18 s was the partial-read window itself).
+2. **Measured 09:0xZ, this seat's pre-flight:** `crosswalk.build_crosswalk("2026-09-24")` in memory on CLOUD returns MEASURED
+   **36**, not 194 -- the universe/v1 source is an explicit `identity_universe`/`identity_source` argument the CLI passes
+   and `add_security._persist_registration_and_pool` (`:175`) and its collision check (`:392`) never do. Without this clause
+   the corrected fire re-creates the incident with one put. Reported to both seats (msg after 25353).
+Then ONE re-fire under a never-widen pair whose halves print the key's writer count (two: the Peers producer, this
+induction), state the blast radius as the puts actually made, and address the rollback to the version before the first.
+Evidence of attempt 1: `induction_run_2026-09-24_fire_attempt1.json`, `evidence/induction_fire_attempt1_20260924T0802Z.log`,
+`evidence/registrations_misfire_attempt1_20260924T0802Z.patch`.
 
 ## Interfaces owed outward
 
 `DOSSIER_INTERFACE.md` (d-3) to `2.0.0_SA_COO~Z` when d-3 drains. Judgment criteria owed to `3.0.0_SA_CVO~Z` at L9: d-2 AC4,
-d-3 AC4. The crosswalk stamp + registered count to `2.0.0_SA_COO~Z` after the CORRECTED fire (its Peers trigger); until
-then that seat holds its Peers batch off the 09-24 stamp (adopted as a ruling in R-36).
+d-3 AC4. The crosswalk stamp + registered count to `2.0.0_SA_COO~Z` after the corrected fire (its Peers trigger).
 
 Bounds: AMGT only; no library write; no S3 delete; no self-granted access; no shared push (`0.0.0_AB_MSTR~Z`); no deploy;
-no pool write from this seat until the hold lifts. This file is current state; history is in git.
+no pool write from this seat until the hold lifts. Residue for the integrator: merged worker worktrees `wk-crps2-2`,
+`wk-crps2-3` (branches merged), the round-1 closer worktree, the temp library copies. This file is current state.
