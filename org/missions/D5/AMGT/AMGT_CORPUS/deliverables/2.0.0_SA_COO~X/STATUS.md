@@ -1,14 +1,17 @@
 # AMGT_CORPUS current state
 
-Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:0xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
+Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:2xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
-## Round 2 -- EXECUTING, 5 of 6 cells drained
+## Round 2 -- EXECUTING, 5 of 6 cells drained (d-1, d-2, d-3, d-5, d-6)
 
 Decomposition v2.0 @`df6798aebf`; ONE issuance @`7f48b997a9`. Drained into CLOUD: d-6 @`341bffca19`, d-1 @`c356bbff56`,
 d-2 @`a419df8f9d`, d-5 @`7dc89c66c3` (after two issuer re-opens: amendment 1 the folder-vs-report disagreement refusal,
-amendment 2 the call carries `--bloomberg "<root> <cc>"` beside `--folder`); corpus suite 244 PASS on CLOUD. In flight:
-d-3 (~1, the composed dossier; `dossier.py` exists on its branch). Pending: d-4 (the 93-of-93 census), behind the fire.
+amendment 2 the call carries `--bloomberg "<root> <cc>"` beside `--folder`), **d-3 @`34a556c46e`** (the composed dossier:
+33 of 33 names, written 20 / existed 13; census 825 fields, 286 cited, 539 ABSENT-with-reason, 0 neither; negative control
+ABSENT; `read_dossier` @`bdfbd7ff6b`; `DOSSIER_INTERFACE.md` published to `2.0.0_SA_COO~Z` 09:22Z); corpus suite 254 PASS
+on CLOUD. Pending: d-4 (the 93-of-93 census), behind the fire by design. Worker slots ~1, ~2, ~3 have drained every order
+issued to them; slot ~1 is continued onto d-4 only after the corrected fire, the re-ingest and the production sequence.
 
 Measured: extraction v2 123 of 123 (inline leads 22 of 52 PDFs); continuations 33 of 33 (with_pillars 10, PDF pillars 5;
 4,580 of 4,580 citations; ASML_NA_Equity 2 pillars); scanner 0 library writes, 17 of 17 test sites fixture-rooted;
