@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-8",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-8.browse-drawer.md",
+    "group": "OTHER",
+    "vintage_commit": "ba8d5987c371df7f747698b13ef0fe304ed7b5bb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "2a26e433b3e5e98f0372dc7cf8e6fc60c3b6f44d",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-8.browse-drawer.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/BrowseDrawer.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "090e5b98f953a11d0aac0665acc83e3ca0046f81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW component. A 'Browse' trigger opens a Panel-styled right-hand aside (no dedicated drawer primitive exists under ui/components -- only catalyst/dialog.tsx, a centred modal; the cell's own fallback taken). walkContextToCompletion (exported) walks directory-browse cursor-to-cursor until nextCursor is null; loadBrowseGroups (exported) walks every context and groups by firm display name, using the SAME flattened firms union ClientSearch computes so toOptionRow's firmName matches exactly; filterGroups (exported, pure) narrows case-insensitively against row.label; selectionForBrowseRow (exported) is the IDENTICAL selectionFor(entry, matchingContext) computation ClientSearch.handleSelect performs. TEST-ONLY seeds initialOpen/initialGroups mirror HoldingsTab.tsx's documented pattern. Verified: bun run typecheck rc=0; exercised directly by IVE8-AC1 (PASS) and IVE8-AC2 (PASS); the twelve dsgn-irptv1 suites re-run unaffected (12 of 12 files, 102 expect() calls, 0 fail).",
+      "artifact_covered_by": ["IVE8-AC1", "IVE8-AC2", "IVE8-AC4"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/ClientSearch.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "090e5b98f953a11d0aac0665acc83e3ca0046f81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The ruled touch T6: loadMore(), pageFor() and the cursors paging state (only ever served 'Load more') are REMOVED; the 'Load more clients' button is removed; <BrowseDrawer api={api} scope={scope} contexts={contexts} onSelectionChange={onSelectionChange} /> is mounted in ClientSearch's own row beside the input, so index.tsx needs no change. handleSelect and the Combobox onChange wiring (the type-ahead's selection arm) are BYTE-IDENTICAL to the base pin 895752676a45e83dc252d4253aebc5fa316a229e (verified directly, EOL-normalized -- this box's autocrlf checkout carries CRLF in the working tree while git show returns LF, never a content difference, row DSGN_IRPTV1-W4-S3). F5/F3's PAGE_LIMIT=100 / MIN_QUERY_CHARS=2 / generation=useRef(0) / ++generation.current survive byte-for-byte. Verified by IVE8-AC3's own checker (index.tsx 0 hunks outside the import region / IV-e-4's actions ternary / IV-e-3's IdentityCard line / the <ClientSearch> span; search.ts/selectionRequest.ts/ScopeSummary.tsx untouched).",
+      "artifact_covered_by": ["IVE8-AC2", "IVE8-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/index.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "090e5b98f953a11d0aac0665acc83e3ca0046f81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "UNTOUCHED by this cell -- the drawer mounts entirely inside ClientSearch.tsx's own row. IVE8-AC3's own checker confirms every diff hunk against the base pin lies in the import region, IV-e-4's actions ternary, IV-e-3's IdentityCard line, or the <ClientSearch> element's own span (all already on this branch from prior cells) -- 0 hunks outside those four regions.",
+      "artifact_covered_by": ["IVE8-AC3"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.browse-drawer.test.ts",
+      "kind": "test",
+      "commit_or_etag": "090e5b98f953a11d0aac0665acc83e3ca0046f81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bun:test. A stubbed api returns 3 directory-browse pages across 2 firm contexts (context A: 2 pages, one relationship + one account entry; context B: 1 page, a terminated relationship entry). loadBrowseGroups exercised directly: ROWS 3 of 3 across 3 page fetches, GROUPS 2 (by firm display name), the terminated entry reads terminated=true/marker=TERMINATED, filterGroups narrows correctly (case-insensitive), 0 raw ids leak into any row.label. The rendered markup (TEST-ONLY seed, real BrowseDrawer) carries the two group headers, kind words (Relationship/Account), status (Active/Terminated) and account counts, 0 raw ids anywhere in the whole markup. VERDICT: DRAWER-OK, 1 pass/0 fail, 13 expect() calls, re-run twice identical.",
+      "artifact_covered_by": ["IVE8-AC1"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.selection-path.test.ts",
+      "kind": "test",
+      "commit_or_etag": "090e5b98f953a11d0aac0665acc83e3ca0046f81",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bun:test. Arm 1: selectionForBrowseRow's output for one entry deep-equals the pair built independently from header/search.ts's own exported selectionFor+toOptionRow for the same entry+context. Arm 2: ClientSearch.tsx's handleSelect code block, extracted from the base pin via git show, is present byte-identical (EOL-normalized) in the tip file; the Combobox's onChange={handleSelect} wiring is confirmed still present. Arm 3: 'Load more clients' / 'function loadMore' absent from ClientSearch.tsx's source and from its rendered markup. VERDICT: SAME-SELECTION-PATH, 1 pass/0 fail, 6 expect() calls, re-run twice identical.",
+      "artifact_covered_by": ["IVE8-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "One new row, DSGN_IRPTV1-W4-S3 (OBSERVATION, INERT): a working-tree file carries CRLF while git show returns LF-normalized blob content for the same commit -- a naive substring comparison reads a real, unchanged block as changed unless both sides are EOL-normalized; caught and fixed inside this worker's own IVE8-AC2 test before grading."
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~4/iv-e-8.drawer.html",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "renderToStaticMarkup of the real BrowseDrawer, CLOSED (229 bytes, just the trigger) and OPEN (TEST-ONLY seed, 3 entries across 2 groups via loadBrowseGroups against a stubbed api, 2529 bytes) -- the graded artifact for IVE8-AC4 (CVO judgment). Confirmed 0 raw ids anywhere in either render.",
+      "artifact_covered_by": ["IVE8-AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~4/browse-drawer.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Per-criterion result summary."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE8-AC1",
+      "criterion_verbatim": "IVE8-AC1 -- the built behaviour with a stubbed api returning three browse pages: the drawer lists every entry across the pages (ROWS: n of n across p pages), grouped by firm in the Global shape (GROUPS: g), each row carrying name, masked tail, kind words, status, account count and NEVER an id (IDS-PRINTED: 0); the filter narrows to the matching rows; a terminated entry reads as terminated. VERDICT: DRAWER-OK only when all hold. <invocation>cd <WS>/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~4; timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.browse-drawer.test.ts 2>&1 | tail -25</invocation><expect>VERDICT: DRAWER-OK</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~4; timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.browse-drawer.test.ts 2>&1 | tail -25",
+      "expect": "VERDICT: DRAWER-OK",
+      "output_evidence": "ROWS: 3 of 3 across 3 pages\nGROUPS: 2\nTERMINATED ROW: found=true terminated=true marker=TERMINATED\nFILTER \"Coastal\": 2 row(s), groups=Opal Partner One\nFILTER \"sunset\" (case-insensitive): 1 row(s)\nIDS-PRINTED (in row.label): 0\nRENDERED GROUP HEADERS: Opal Partner One | Opal Partner Two\nRENDERED ROW DETAILS: Relationship -- Active -- 2 account(s) || Account -- Active -- 1 account(s) || Relationship -- Terminated -- 2 account(s)\nIDS-PRINTED (in rendered markup): 0\nVERDICT: DRAWER-OK\n\n 1 pass\n 0 fail\n 13 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "13 of 13 expect() calls passed; 3 of 3 entries across 3 of 3 page fetches; 2 of 2 groups named correctly; 1 of 1 terminated entry reads terminated; 2 filter arms both correct counts; 0 of however-many candidate id tokens leaked into row labels or the rendered markup (0 of 7 tokens checked, both surfaces); 1 of 1 test file.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IVE8-AC2",
+      "criterion_verbatim": "IVE8-AC2 -- the seam as a DIFFERENCE CONTROL: selecting a drawer row calls onSelectionChange exactly once with a Narrowing + SearchOptionRow deep-equal to what ClientSearch's own type-ahead selection produces for the same entry (build the expected pair with header/search.ts's exported helpers); typing in the combobox still selects (the type-ahead arm unchanged); the string \"Load more clients\" no longer appears in ClientSearch.tsx's source and the markup. VERDICT: SAME-SELECTION-PATH only when all hold. <invocation>cd <WS>/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~4; timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.selection-path.test.ts 2>&1 | tail -25</invocation><expect>VERDICT: SAME-SELECTION-PATH</expect>",
+      "method": "test_suite",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~4; timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.selection-path.test.ts 2>&1 | tail -25",
+      "expect": "VERDICT: SAME-SELECTION-PATH",
+      "output_evidence": "ARM1: drawer selection deep-equals ClientSearch's own computation for the same entry: true\nARM2: base handleSelect block (349 bytes) present byte-identical at tip: true\nARM2: Combobox onChange={handleSelect} still wired: true\nARM3: \"Load more clients\" / \"function loadMore\" absent from source: true\nARM3: \"Load more clients\" absent from the rendered markup: true\nVERDICT: SAME-SELECTION-PATH\n\n 1 pass\n 0 fail\n 6 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "6 of 6 expect() calls passed; 1 of 1 selection pair deep-equal; 1 of 1 349-byte handleSelect block byte-identical (EOL-normalized); 1 of 1 Combobox wiring confirmed; 2 of 2 paging-text absence checks (source + markup) both clean; 1 of 1 test file.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IVE8-AC3",
+      "criterion_verbatim": "IVE8-AC3 -- the ruled touch T6, bound by ELEMENT (CTO 100522): search.ts, selectionRequest.ts, ScopeSummary.tsx untouched (empty diff); any index.tsx hunk lies in the import region, the actions= ternary (IV-e-4's, same branch), the <IdentityCard line (IV-e-3's) or the <ClientSearch element's span, all located by text; in ClientSearch.tsx the F5 / F3 constants and guard survive byte-for-byte (const PAGE_LIMIT = 100, const MIN_QUERY_CHARS = 2, const generation = useRef(0), ++generation.current) and loadMore + \"Load more clients\" are gone. <invocation>cd <WS>/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~4; timeout 120 python -c \"<the checker script>\"</invocation><expect>VERDICT: DRAWER-IN-GRANT</expect>",
+      "method": "diff",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~4; timeout 120 python -c \"import subprocess,re;b='895752676a45e83dc252d4253aebc5fa316a229e';idx='src/pages/InvestorReporting/index.tsx';base=subprocess.run(['git','show',b+':'+idx],capture_output=True,text=True).stdout.splitlines();imp=max(i+1 for i,l in enumerate(base) if l.startswith('import '));ts=next(i+1 for i,l in enumerate(base) if 'actions={partnerContext ? <label' in l);te=next(i+1 for i,l in enumerate(base) if i+1>ts and '}} />}' in l);ic=next(i+1 for i,l in enumerate(base) if '<IdentityCard' in l);cs=next(i+1 for i,l in enumerate(base) if '<ClientSearch' in l);ce=next(i+1 for i,l in enumerate(base) if i+1>=cs and l.strip()=='/>');d=subprocess.run(['git','diff','-U0',b,'--',idx],capture_output=True,text=True).stdout;h=[int(m.group(1)) for m in re.finditer(r'^@@ -(\\d+)',d,re.M)];other=[x for x in h if not (x<=imp+1 or ts<=x<=te or x==ic or cs<=x<=ce+1)];n=subprocess.run(['git','diff','--numstat',b,'--','src/pages/InvestorReporting/header/search.ts','src/pages/InvestorReporting/header/selectionRequest.ts','src/pages/InvestorReporting/header/ScopeSummary.tsx'],capture_output=True,text=True).stdout.strip();cur=open('src/pages/InvestorReporting/header/ClientSearch.tsx',encoding='utf-8').read();keep=['const PAGE_LIMIT = 100','const MIN_QUERY_CHARS = 2','const generation = useRef(0)','++generation.current'];missing=[k for k in keep if k not in cur];gone=('Load more clients' not in cur) and ('function loadMore' not in cur);print('INDEX spans import<=',imp,'ternary',ts,te,'identity',ic,'search',cs,ce,'HUNKS',h,'OUTSIDE',other,'| UNTOUCHED-SET',repr(n),'| F5/F3 MISSING',missing,'| PAGING-GONE',gone);ok=n=='' and not other and not missing and gone;print('VERDICT:','DRAWER-IN-GRANT' if ok else 'TOUCH-WIDER-THAN-RULED')\"",
+      "expect": "VERDICT: DRAWER-IN-GRANT",
+      "output_evidence": "INDEX spans import<= 25 ternary 156 166 identity 191 search 171 176 HUNKS [156, 166, 191] OUTSIDE [] | UNTOUCHED-SET '' | F5/F3 MISSING [] | PAGING-GONE True\nVERDICT: DRAWER-IN-GRANT",
+      "denominator": "0 of 3 hunks outside the four permitted regions; 0 of 3 named sibling files (search.ts/selectionRequest.ts/ScopeSummary.tsx) touched; 0 of 4 F5/F3 markers missing; paging text/function confirmed gone. Re-run twice, identical both times (determinism).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IVE8-AC4",
+      "criterion_verbatim": "IVE8-AC4 -- graded at L9 by 3.0.0_SA_CVO from the static markup of the drawer open and closed (iv-e-8.drawer.html) and the smoke PNG if IV-e-2's fixture renders it: an advisor who does not know a client's spelling finds them in the drawer (brief O2); C3, C8 (the trigger is not a second accent), C10/C12. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "renderToStaticMarkup render (real BrowseDrawer, closed + open with TEST-ONLY seeded groups) -> org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~4/iv-e-8.drawer.html",
+      "judgment": true,
+      "output_evidence": "RECORDED, NO VERDICT TAKEN. iv-e-8.drawer.html (2758 bytes total, two sections marked <!-- CLOSED --> 229 bytes and <!-- OPEN --> 2529 bytes). CLOSED: just the 'Browse' trigger button (rounded-[3px], border, font-normal -- no filled/second-accent styling, C8). OPEN: two group headers ('Opal Partner One', a relationship + account row each; a second firm group from the multiple-relationships fixture), each row showing name + masked tail, kind words, Active/Terminated, account count, a filter input (aria-label=\"Filter clients\"), a close control. 0 of 7 candidate id tokens (entryId x3, accountId, firmId, clientId, relationshipId) present anywhere in either render. No IV-e-2 smoke fixture (fixtures/smoke/dsgn-irptv1-cottonwood.json) exists on this worktree's base -- IV-e-2 is a sibling chain-B cell, not merged into this worktree's history -- so no PNG is offered this round, stated not worked around. Self-check against DESIGN.md (not a verdict): the trigger and the row buttons carry no filled/primary background (C8, single accent = indigo on hover only); rounded-[3px] (C11-family radius); the drawer answers brief O2 -- a client whose spelling is unknown is findable by scrolling the grouped list or typing into the filter box, without knowing any part of the name in advance.",
+      "denominator": "1 of 1 combined static markup file produced (both states); 0 of 1 smoke PNG offered (fixture not yet available, stated); 0 mechanical criteria graded here (judgment).",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion. The task order marks IVE8-AC4 judgment=\"true\"; a PASS or FAIL on a judgment row is INVALID. Graded by 3.0.0_SA_CVO at L9 from the static markup."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutants applied sequentially to the worktree file only (never staged or committed), each reverted before the next: (1) BrowseDrawer.tsx's kindWord() forced to return the raw kind token unchanged instead of the KIND_WORDS lookup; (2) selectionForBrowseRow's returned row forced to { ...row, label: 'MUTATED' } instead of the real row.",
+      "expected": "(1) IVE8-AC1 fails: the rendered row-detail text reads lowercase raw kind tokens ('relationship'/'account') instead of the advisor words ('Relationship'/'Account'). (2) IVE8-AC2 fails: the drawer's selection pair no longer deep-equals the independently-built expected pair (the row's label differs).",
+      "observed": "(1) RENDERED ROW DETAILS: 'relationship -- Active -- 2 account(s) || account -- Active -- 1 account(s) || relationship -- Terminated -- 2 account(s)'; VERDICT: DRAWER-FAIL 'no row detail names Account kind + 1 account(s); no row detail names Relationship kind'; 0 pass / 1 fail. (2) ARM1: drawer selection deep-equals ClientSearch's own computation for the same entry: false; VERDICT: SAME-SELECTION-PATH-FAIL 'arm 1: drawer selection differs from the type-ahead computation'; 0 pass / 1 fail. Both files reverted (diff -q against the pre-mutant copies reported IDENTICAL each time) and both criteria re-run PASS before this proof was written. (A first attempt at mutant 2, replacing the context lookup with scopes[0], did NOT fire because the test's own scope list has only one member -- noted, and the stronger corruption above used instead; not itself a criterion failure.)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "IVE8-AC1, IVE8-AC2 and IVE8-AC3 each run twice back-to-back with no source change between the runs.",
+      "observed": "All three identical both times: IVE8-AC1 both VERDICT: DRAWER-OK (1 pass/0 fail, 13 expect() calls, same per-fact lines); IVE8-AC2 both VERDICT: SAME-SELECTION-PATH (1 pass/0 fail, 6 expect() calls); IVE8-AC3 both HUNKS [156, 166, 191] OUTSIDE [] / VERDICT: DRAWER-IN-GRANT. Regression, alongside (not a schema control): the twelve dsgn-irptv1 suites re-run after this cell's edits, 12 of 12 files pass / 102 expect() calls / 0 fail; bun run typecheck rc=0; fe-s-2/+fe-s-10/ re-run: same 5 pre-existing failures as baseline (row W4-S2), 0 new.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The smoke PNG named conditionally in IVE8-AC4 ('if IV-e-2's fixture renders it').",
+      "reason": "fixtures/smoke/dsgn-irptv1-cottonwood.json (IV-e-2's new fixture, chain B) does not exist on this worktree's base -- IV-e-2 has not merged into this worker's worktree history (chains run in parallel, join at IV-e-7). Recorded, not worked around; IVE8-AC1/AC2 already exercise BrowseDrawer directly against the real fixtures."
+    },
+    {
+      "item": "A real portal-managed dialog/drawer primitive under ui/components.",
+      "reason": "None exists today -- only catalyst/dialog.tsx, a centred modal, not a right-hand drawer. Per the cell's own fallback clause ('the portal's own drawer/dialog primitive if one exists ... else a Panel-styled aside with a close control -- say which in the result file') this renders as a Panel-styled fixed aside, stated here and in the result file."
+    },
+    {
+      "item": "Push, merge, rebase, checkout -- or clean of either repository.",
+      "reason": "Forbidden by the task order's BOUNDS. All commits are LOCAL on wk-DSGN_IRPTV1-4 (workspace) and wk-DSGN_IRPTV1-4-portal (portal)."
+    }
+  ],
+  "surprises": [
+    "DSGN_IRPTV1-W4-S3: a working-tree source file carries CRLF while git show returns LF-normalized blob content for the same commit -- a naive substring comparison (this worker's own first-draft IVE8-AC2 test) reads a real, unchanged code block as CHANGED unless both sides are EOL-normalized; caught and fixed before this criterion was graded."
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~4/browse-drawer.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test (bun 1.3.9)",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.browse-drawer.test.ts   and   .../iv-e-8.selection-path.test.ts   and   the whole dsgn-irptv1/ directory (regression)   and   fe-s-2/ + fe-s-10/ (seam re-check)",
+      "result": "IVE8-AC1 VERDICT: DRAWER-OK (1 pass/0 fail); IVE8-AC2 VERDICT: SAME-SELECTION-PATH (1 pass/0 fail); both re-run twice, identical; dsgn-irptv1/ whole directory 12 of 12 files pass, 102 expect() calls, 0 fail; fe-s-2/+fe-s-10/ 42 pass/1 skip/5 fail, identical to baseline (row W4-S2), 0 new"
+    },
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit)",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck",
+      "result": "rc=0, 0 diagnostics -- confirms BrowseDrawer.tsx, ClientSearch.tsx and both new test files compile against the whole portal tree"
+    },
+    {
+      "tool": "python 3 (element-bounded diff checker, run verbatim as the task order names it)",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4/portal && timeout 120 python -c \"<IVE8-AC3's own script>\"",
+      "result": "HUNKS [156, 166, 191] OUTSIDE []; UNTOUCHED-SET ''; F5/F3 MISSING []; PAGING-GONE True; VERDICT: DRAWER-IN-GRANT, re-run twice identical"
+    },
+    {
+      "tool": "bun run (renderToStaticMarkup script, this worker's instrument for the AC4 HTML deliverable)",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4/portal && timeout 60 /c/Users/AndrewBerman/.bun/bin/bun run ./_tmp_render_markup_ive8.ts (script deleted, never staged, before the portal commit)",
+      "result": "WROTE closed=229 open=2529 bytes to iv-e-8.drawer.html"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (portal repo)",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4/portal && bash /c/tmp/wk-dsgn_irptv1-2-4/.tools/safe-commit.sh --author \"0.9.0_WK_DSGN_IRPTV1~4 <0.9.0_WK_DSGN_IRPTV1~4@opal.agent>\" -F <msgfile> -- src/pages/InvestorReporting/header/BrowseDrawer.tsx src/pages/InvestorReporting/header/ClientSearch.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.browse-drawer.test.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-8.selection-path.test.ts",
+      "result": "090e5b98f953a11d0aac0665acc83e3ca0046f81, 4 files changed, 543 insertions(+), 40 deletions(-); [msg-verify] MATCH len=3113. LOCAL on branch wk-DSGN_IRPTV1-4-portal."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (workspace repo)",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4 && bash .tools/safe-commit.sh --author \"0.9.0_WK_DSGN_IRPTV1~4 <0.9.0_WK_DSGN_IRPTV1~4@opal.agent>\" -F <msgfile> -- org/missions/D13/DSGN/DSGN_IRPTV1/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~4/ org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-8.browse-drawer.md",
+      "result": "see the WORKER REPORT for the committed hash"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py (the WORKTREE's own copy, run from inside <WS> as the order directs)",
+      "invocation": "cd /c/tmp/wk-dsgn_irptv1-2-4 && python .tools/proof-of-spec-check.py org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~4/DSGN_IRPTV1.TO-IV-e-8.browse-drawer.proof_of_spec.json IVE8-AC1,IVE8-AC2,IVE8-AC3,IVE8-AC4",
+      "result": "see the WORKER REPORT -- only the exit code is the verdict"
+    }
+  ]
+}
