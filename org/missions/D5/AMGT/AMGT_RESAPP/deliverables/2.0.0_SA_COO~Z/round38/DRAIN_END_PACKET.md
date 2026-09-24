@@ -32,6 +32,11 @@ on peers; sizes [10] on thesis and model. rm-2 (weight 300, the strip radii) and
 NONE on any face: every criterion is mechanical. The CVO's L9 reads the renders as it chooses; the packet names the artifacts:
 the six PNGs per scope under `contract-check-after-rm-<n>/` at each drain and the wave-1 cells' own captures.
 
+⚠ **Every render graded this round (and in round 37) is a LOCAL vite render.** On the DEPLOYED surface the page renders empty
+panels: Z-S226 (BLOCKING, the CTO's, 2026-09-22) -- CloudFront has no cache behavior for `/api/scoped/amgt/*`, so every request
+falls to the SPA origin and returns index.html as JSON. R-79 @120895ee97 routes it to this issuer as round 39's first cell (s.6). An
+L9 verdict on this packet is a verdict on the local render and says nothing about the served page.
+
 ## 4. New investigation rows this round (L8 input)
 
 W140-S1, W140-S2 (issuer), Z-S250 (issuer, disarms W140-S2), W144-S1 (rm-5 -> rm-2), the CTO's Z-S251 (ARMED, disarm owner the
@@ -79,6 +84,11 @@ that still differs on CAT (msgs 25587, 25595).
 
 ## 6. Carried to the CTO's round-38 analysis (not closed here)
 
+- **Z-S226 (R-79), ROUND 39's FIRST CELL:** re-measure the distribution's behavior list (the row's read is two days old); add ONE
+  behavior for `/api/scoped/amgt/*` at the API origin CARRYING the auth-validator edge attachment the working families use (omitting
+  it trades a blank page for a 401); a served infra act -- CTO/COO never-widen pair with the distribution's behavior count printed
+  and the unmoved ones enumerated, and a NEVER-2 entry opened before the apply. Until it lands, nothing rounds 37/38 built is
+  reachable by a user.
 - **Z-S251:** one round-39 cell over the 13 sites (28 hits / 1032 files, page 1 of 1) keyed to the token, PrintExportAction.tsx:136's
   scrim literal included; reported, left standing this round.
 - **The DESIGN.md C13 edit** (rm-6's draft, ratified by the CTO @b26449defe; the named writer edits in a round-39 cell, with the
