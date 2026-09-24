@@ -1,58 +1,48 @@
 # AMGT_CORPUS current state
 
-Owner `2.0.0_SA_COO~X` (Claude seat since 2026-09-24 03:12Z); 2026-09-24 ~05:3xZ.
-**Mode: CANONICAL FLOW again** (R-26 @`ad5c7a75c6`, Andrew ~04:3xZ). The closer mandate `COO_X_CORPUS.md`
-@`0e33cea24b` governed 2026-09-23 16:28Z to 2026-09-24 04:46Z; its work is drained and this file is now the
-project's current-state carrier under the spine, not a closer STATUS.
+Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~08:0xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
+halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
-## Round 1 -- TERMINAL at CLOUD `b4a8638eeb`
+## Round 2 -- EXECUTING, 3 of 6 cells drained
 
-11 of 11 orders `complete` (anchored `<status>` census). `CRPS-c-11` (read-only proof, FWD-9) closed 2026-09-24
-~05:2xZ: instance `deliverables/2.0.0_SA_COO~X/AMGT_CORPUS.TO-CRPS-c-11.read-only-proof.proof_of_spec.json`, VALID
-bound to the order; AC1 91 PASS, AC2 retained root-bound negative control (123 stored / 0 puts / 0 read failures,
-writes denied), AC3 census 30 files / 27 write-like / 0 library / plant flagged, AC4 212 PASS, AC6 51 of 51 in
-grant; AC5 (judgment) recorded for `3.0.0_SA_CVO~Z`. Two issuer amendments on c-11, expects unchanged: AC3 window
-`tail -30 -> -40` (row `AMGT_CORPUS-Z-S10` @`4359367fee`); AC2 log path + instance home re-pointed to this lane's
-folder (owned-paths refuses the never-spawned worker's folder).
-**L8 handed to `3.0.0_SA_CVO~Z`** (~05:3xZ): new rows Z-S10 and the closer-C rows Z-S5..S9; c-11 AC5 at L9.
-Owed next in order: the CVO's slug -> `1.0.0_SA_CTO~Z`'s round-1 analysis -> this lane's L5/L6 for round 2.
+Decomposition v2.0 @`df6798aebf`; ONE issuance @`7f48b997a9` (fanout 3 of 3 chains). Anchored order census:
 
-## What the drain landed (`b4a8638eeb`, 51 paths)
+| cell | slot | state | drain | measured at the tip |
+|---|---|---|---|---|
+| d-6 scanner exempting-branch control | ~3 | complete | `341bffca19` | 30 files / 0 library writes; both positive controls fire; 17 of 17 test sites measured tmp-fixture-rooted; difference control 0 -> 1 |
+| d-1 extraction v2 beside v1 | ~1 | complete | `c356bbff56` | 123 of 123 bronze reports, idempotent second run; docx control identical 25 of 25; inline leads in 22 of 52 PDFs, any section lead in 39 of 52 |
+| d-5 scripted induction producer | ~2 | complete | `cb0abfcd96` | dry run: population 60, evidenced 20, ambiguous 2 (Copa, Uber collide), DISAGREEMENT 1 (America Movil AXMB vs AMXB, never called), other 37; bloomberg_calls 0; `--fire` refused outside the issuer's drain; identity surface untouched |
+| d-2 continuation PDF pillar branch | ~1 | in flight | -- | continued 07:3xZ |
+| d-3 composed dossier (R12) | ~1 | pending | -- | after d-2 |
+| d-4 coverage census 93 of 93 (R14) | ~1 | pending | -- | after d-3 and the fire |
 
-`lib/research/corpus/`: `readonly_proof.py` + tests (c-11), `report_input.py` + tests (B08 adapter, CVO PASS on its
-source boundary, integrated by `2.0.0_SA_COO~Z` at `ab43417aee` in its own worktree), `typed.py` period fix + test.
-Lane deliverables (evidence, I4 handoff/patch, reviews) and the closer channel `INVESTIGATION_v1_CLOSER_C.md`
-(rows Z-S5..S9). Corpus suite 212 PASS on the merged tree.
+Hygiene once per merge on CLOUD: corpus suite 218 -> 220 -> 235 PASS. One issuer re-open this round: d-5 amendment 1
+@`c2166b4642` (the CVO's AXMB/AMXB refusal was a NAME in the bounds and no MECHANISM; now a general folder-vs-report
+disagreement refusal), re-closed by the same worker.
 
-## Round 2 -- the addendum, NOT YET CUT
+## The FIRE -- the issuer's drain act, not yet taken
 
-PRD v0.5 ADDENDUM A @`1ffb156ecd` (CTO msg 25261): FWD-10..FWD-18 = the dossier fold (CRO~Y brief @`328e17d5e5`,
-O1..O9), FWD-19 = Andrew's full backfill (93 of 93 DISPOSITIONED, never "populated"; 11 can never carry prose).
-Manifest rows R12 (composed dossier, gold `research-dossier`, `as_of` in the object name), R13 (induction read-back,
-consumes the universe, writes no surface), R14 (coverage census in `research-backlog`). `C-NO-VENDOR-CALL` amended
-narrowly: ONE `reference_data` call per backlog name, ONCE, via `add_security`, from a SCRIPTED producer (R-16 V2,
-R-21); never an agent turn; AXMB/AMXB stays REFUSED; the Model figure pull (V3) is NOT authorized.
-Pre-read for L5: `extract.py` (K3 standalone-heading rule), `continuation.py` (docx-only pillar rule), CRO~Y's
-`measure_pdf_extractability.py` (the three PDF rules), the round-1 decomposition v1.0 (11 cells, 5 chains, M=5).
-**Open L5 question the addendum names for the two seats:** who RUNS the scripted induction -- the runner is corpus
-code (this lane) calling `add_security` (Served Runtime, `2.0.0_SA_COO~Z`'s surface); to be settled in the
-decomposition with the CTO, not assumed.
+Authority: R-16 V2 (Andrew 02:47Z, the 60 backlog names, one `reference_data` call each, once), R-21 (scripted, never an
+agent turn), `C-NO-VENDOR-CALL` v0.5 (PRD A.4). Producer: `lib/research/corpus/induction_run.py` @`1a9fc3118f`, in CLOUD
+at `cb0abfcd96`; it will make 20 calls (the evidenced-and-agreeing rows) and none for the 40 others, each printed with
+its reason. Preconditions measured 07:5xZ: Bloomberg DAPI `ok` on 127.0.0.1:8194 (`bloomberg_health`); the one exchange
+with `2.0.0_SA_COO~Z` on the pinned candidate sent 07:55Z (add_security is its surface; imported, unchanged). The hold
+lifts on that reply or at 08:30Z, whichever first, and the fire is recorded here with its read-back
+(`deliverables/2.0.0_SA_COO~X/induction_run_<as_of>_fire.json`). After it: the existing ingest re-run (idempotent),
+then the production sequence for the newly resolved names (extraction v2, typed, continuation, templates, dossiers)
+before `~1` is continued onto d-4. Model-tab figures (V3) are NOT pulled.
 
-## Live-thread dependencies (unchanged)
+## Interfaces owed outward
 
-E0/B00 and the served-runtime client/display of `thesis.corpus`: `2.0.0_SA_COO~Z`. The deployed `opal-amgt-scoped-api`
-is the signed no-span repair (C1 deployed 22:02Z, C4 PASS @`4cb1b6b009`), whose signature predates the corpus join:
-the deployed connector is UNPROVEN. Final acceptance: `3.0.0_SA_CVO~Z`.
+`DOSSIER_INTERFACE.md` (d-3) to `2.0.0_SA_COO~Z` as an interface publication when d-3 drains -- the render halves of
+FWD-10/11/12/15 are `AMGT_RESAPP`'s round. Judgment criteria owed to `3.0.0_SA_CVO~Z` at L9: d-2 AC4, d-3 AC4.
 
-## Parked, with owners
+## Rows and residue
 
-- Operator cleanup (never a seat's delete): read-only library copies under `%TEMP%\amgt_corpus_ro_copy_2026-09-23T*`
-  (4 x 307.6 MB) and `amgt_corpus_census_*` plant dirs; the merged worktree `C:/tmp/closer-amgt-corpus-x-20260923`
-  (branch merged, only `.scratch/` left) -- routed with R-26b's residue ledger to `0.0.0_AB_MSTR~Z`.
-- Scanner enhancements (this lane, after the first live accepted case); runtime heartbeat summary defect (runtime
-  owner via CTO); `org/XXX.md` Step 1b-F row naming this lane on `NFRA_C3MATERIALIZE` (LAPTOP D11, all orders
-  complete here; the row is `1.0.0_SA_CTO`'s to strike).
+Rows this round: Z-S12 (owner's disarm of Z-S6..S9, evidence-cited). CTO~Z accepted the two routed enrichment items
+(contract-half guard built on its own surface @`77c53a3051`; router-driving fix to RESAPP). Residue for the integrator:
+four read-only library copies and the census plant dirs under `%TEMP%`, the merged worktrees
+(`closer-amgt-corpus-x-20260923`, `wk-crps2-3`, `wk-crps2-2` once their branches are deleted after the round).
 
-Bounds: AMGT only; no source-library mutation; no vendor or model call from a seat turn; no S3 delete; no
-self-granted access; no shared push (`0.0.0_AB_MSTR~Z` pushes); no deploy. R1-R9 stand.
+Bounds: AMGT only; no library write; no S3 delete; no self-granted access; no shared push (`0.0.0_AB_MSTR~Z`); no deploy.
 This file is current state; history is in git.
