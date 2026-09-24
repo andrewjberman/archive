@@ -50,7 +50,7 @@ Mutant control: reverted `PerformanceHeadline.tsx`'s tile-value class back to `f
 text-slate-900`, re-ran -- `CLASS-CENSUS over 2 files: slate tokens 1 | 600 weights 1` /
 `VERDICT: SLATE-OR-600-REMAIN`. Fired as expected; file restored, `git diff` clean afterward.
 
-## IVE2-AC2 -- the instrument -- REFUSED
+## IVE2-AC2 (ORIGINAL INVOCATION, SUPERSEDED BY THE AMENDMENT BELOW) -- REFUSED, kept as record
 
 `node scripts/ui-smoke.mjs investor-reporting iv-e-2.png --port 5181 --fixtures
 dsgn-irptv1-cottonwood.json` (the order's own required invocation, no `--click` steps) --
@@ -92,13 +92,38 @@ auth-stub/CORS/fixture-route recipe byte-for-byte, then drives `page.getByRole('
 {name:'Client search'})` directly to select "Cottonwood Trust" and clicks the Holdings tab
 (`page.getByRole('button', {name:'Holdings', exact:true})` -- `TabNavigation`'s tab strip is
 plain `<button>`s, no `role="tab"`). Result: `DRIVER-FIXTURES-MATCH: matched 5 of 5`;
-`iv-e-2-selected.png` (173077 bytes) shows `IdentityCard` (Cottonwood Trust, account A-CW-01),
-`PerformanceHeadline` (4 tiles, mounted on the Performance tab before the Holdings click) and,
-after the Holdings click, `CategoryViewTree`'s donut + `SecurityList`'s SECURITIES table (2 rows,
-Ticker "not supplied" on both -- no `display.symbol` planted, honest per IV-e-1's fix). DOM read:
-`identityCard=2, securityRows=2, headlineTiles=0` (Holdings tab active at capture time; a
-separate run before the Holdings click read `headlineTiles=4`). Netlog:
-`iv-e-2-selected.netlog.tsv`.
+`iv-e-2-selected.png` (173077 bytes) shows `IdentityCard` (Cottonwood Trust, account A-CW-01)
+and, on the Holdings tab the driver opens and clicks to, `CategoryViewTree`'s donut +
+`SecurityList`'s SECURITIES table (2 rows, Ticker "not supplied" on both -- no `display.symbol`
+planted, honest per IV-e-1's fix). DOM read: `identityCard=2, securityRows=2, headlineTiles=0`
+-- **CORRECTION**: an earlier draft of this section claimed `PerformanceHeadline` also appears
+in `iv-e-2-selected.png`; it does not -- the driver never opens the Performance tab (it clicks
+straight to Holdings), so `headlineTiles` reads 0 in every run of this exact script, not just
+this one. `PerformanceHeadline`'s own conformance is graded from its static markup
+(`iv-e-1.hero.html`/its own suite), never from this PNG. Netlog: `iv-e-2-selected.netlog.tsv`.
+
+## IVE2-AC2 (AMENDED, 1.0.0_SA_CTO 100625) -- the driver run -- PASS
+
+The issuer re-cut this criterion: `<expect>` is now ANCHORED to `DRIVER-FIXTURES-MATCH:
+matched 5 of 5`, and the instrument is this worker's own COMMITTED standalone driver
+(`deliverables/0.9.0_WK_DSGN_IRPTV1~5/iv-e-2-selection-driver.mjs`), pinned by content (git blob
+`8c665e7295308d992c204da777976ea5b89167eb`), fed to `node --input-type=module -` on stdin from
+`<WS>/portal` (so `playwright-core` resolves from the portal's own `node_modules` -- running it
+as a file from the `org/missions/...` tree cannot resolve that package, measured earlier this
+same order). Amended invocation, run exactly as the order now states it (pin check first):
+
+```
+test "$(git hash-object .../iv-e-2-selection-driver.mjs)" = 8c665e7295308d992c204da777976ea5b89167eb || { echo DRIVER-PIN-MISMATCH; exit 1; }
+node --input-type=module - 5181 .../iv-e-2-selected.png fixtures/smoke/dsgn-irptv1-cottonwood.json < .../iv-e-2-selection-driver.mjs
+```
+
+Output: `SELECTED: Cottonwood Trust` / `CLICKED: Holdings tab` / `SELECT-OK: true` / `STATE:
+{"identityCard":2,"securityRows":2,"headlineTiles":0}` / `DRIVER-FIXTURES-MATCH: matched 5 of
+5` / `SAVED: .../iv-e-2-selected.png`. PNG re-saved at the SAME byte count as the issuer's own
+self-test on `4a55727e`: 173077 bytes. PASS-by-output.
+
+The prior `scripts/ui-smoke.mjs` row above (REFUSED, `matched 2 of 5`) is KEPT as the record of
+why the criterion was re-cut, per the issuer's own instruction -- it is not superseded silently.
 
 ## IVE2-AC3 -- the seam
 
@@ -107,10 +132,15 @@ across 9 files, 91 `expect()` calls; every round-1 and IV-e-1 suite unchanged.
 
 ## IVE2-AC4 -- RECORD, no verdict (judgment, CVO at L9)
 
-- `iv-e-2.png` (55485 bytes) -- the order's own required AC2 invocation: IdentityCard only.
-- `iv-e-2-selected.png` (173077 bytes) -- the supplementary driver's richer capture: IdentityCard
-  + PerformanceHeadline + SecurityList/CategoryViewTree, all navy-on-white, no slate visible.
-- `iv-e-2-selection-driver.mjs` -- the driver script itself, for reproduction.
+- `iv-e-2-selected.png` (173077 bytes, AMENDED instrument) -- the graded PNG: `IdentityCard` +
+  the Holdings tab (`CategoryViewTree`'s donut + `SecurityList`'s SECURITIES table), all
+  navy-on-white, no slate visible. Does **not** show `PerformanceHeadline` (Performance tab,
+  never opened by this driver) -- graded from its own static markup instead.
+  `identityCard=2, securityRows=2, headlineTiles=0`.
+- `iv-e-2.png` (55485 bytes) -- the SUPERSEDED order-own-invocation PNG, kept for the record:
+  `IdentityCard` only.
+- `iv-e-2-selection-driver.mjs` -- the driver script itself (pinned by content
+  `8c665e7295308d992c204da777976ea5b89167eb`), for reproduction.
 - `iv-e-2-selected.netlog.tsv` -- the driver's own request log (5 of 5 fixture routes hit).
 
 ## Surprise rows filed
