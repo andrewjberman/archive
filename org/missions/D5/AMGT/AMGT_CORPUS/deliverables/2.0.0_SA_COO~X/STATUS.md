@@ -1,9 +1,26 @@
 # AMGT_CORPUS current state
 
-Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:2xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
+Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~21:1xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
-## ROUND 3 -- EXECUTING (~19:1xZ)
+## ROUND 3 -- ALL 5 CELLS DRAINED (~20:4xZ); the 40-name FIRE held on ONE limb
+
+Drains, each re-graded at the worker's tip on this seat's run: e-2 @`bb6b1f2f25` (22 mnemonics), e-3 @`1266b834ec` (sector
+template re-mints once, 218 reports), e-4 @`5637be19e9` (production-sequence runner), e-1 @`21e624a003` (curated evidence
+table), e-5 @`dae976b3b0` (served-as-empty-shell: 94 folders = 44 + 9 + 41). All five instances VALID. Worktrees
+`/c/tmp/wk-crps3-{1..4}` removed and branches deleted. Eight ARMED rows owed by this seat disarmed by carrier Z-S22
+@`2b3c2761e8`.
+
+THE FIRE: pre-flight VERDICT PASS on `2.0.0_SA_COO~Z`'s builder fix @`9ec1226a01` (UNRESOLVED 40 -> 0, twins 0,
+multi-claimed 0, 214 of 214 prior keys; `evidence/preflight_40_fire_20260924T210247Z.log`). Pair: COO half
+`NEVER_WIDEN_ROUND3_FIRE40_HALVES.md` @`8bd8ba7e2b`, corrected @`498c9aeb01`; CTO half
+`ledger/NEVER_WIDEN_ROUND3_FIRE40_CTO_HALF.md` @`af08f78a9b` signs every limb but the VENDOR limb. Asked of
+`1.0.0_SA_CTO~Z` (21:05Z): does Andrew-direct R-21 @`b390c36444` release it; the CTO is also asking Andrew. `2.0.0_SA_COO~Y`
+agreed the run is this producer's (msg 25747); its 94-folder proposal agrees on 37 of the 40, and the 3 differences sit on its
+own not-document-confirmed list with no US-line record in the pool, so the home listings stand. Bloomberg terminal signed in
+20:4xZ (one ledger attempt), health OK. After the fire: the production sequence through the runner, then the FWD-12 pull.
+
+## ROUND 3 (history) -- EXECUTING (~19:1xZ)
 
 Decomposition v3.0 @`d63cdd71ca` (five cells cut by write set, 15 checks as files dry-run at the base: 12 build checks FAIL,
 3 bounds PASS); ONE issuance @`6108b0d804`; e-1 amended before its spawn @`c1437f9864` (the evidence table read against the
