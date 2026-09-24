@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-rtr-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "4f942b7657"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "vintage_commit": "7a55a7327d97d59ba6bffc5b3b3c4a542f7db002",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-rtr-b.both-verifiers-forbidden-claims-and-the-expiry-bound.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~18",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/users/lambda/portal-authorizer/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "0ee0e47e0f5ff51722859373868f6c1ae13dbc8e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Modified, git blob 0ee0e47e0f5ff51722859373868f6c1ae13dbc8e at commit 18971693ad. BOUNDS: no Lambda deploy this round -- code+tests only. Adds hasForbiddenRenderClaims (mirrors render_auth.mjs), RENDER_MAX_TTL_SECONDS/RENDER_SKEW_LEEWAY_SECONDS constants, assertBoundedRenderExpiry, and jti/renderId on the accept + refusal log lines, all confined to authorizeRenderToken; the human verification path (getKeySlots/computeAllowedFirms/handler's human try block) is byte-for-byte unchanged, confirmed by git show.",
+      "introduces": [
+        "hasForbiddenRenderClaims",
+        "assertBoundedRenderExpiry",
+        "RENDER_MAX_TTL_SECONDS",
+        "RENDER_SKEW_LEEWAY_SECONDS"
+      ],
+      "artifact_covered_by": [
+        "R118-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/render_auth.mjs",
+      "kind": "script",
+      "commit_or_etag": "13b6122f950944a25485270e4a1a4d407798d861",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Modified, git blob 13b6122f950944a25485270e4a1a4d407798d861 at commit 18971693ad. BOUNDS: no Lambda deploy this round. Adds RENDER_MAX_TTL_SEC, RenderExpiryBoundError, assertBoundedRenderExpiry, called from inside verifyRenderTokenWithSlots immediately after the existing verifyWithSlots/60s-clockTolerance call (untouched, no widening). hasForbiddenRenderClaims, isRenderAdmissibleUri, RENDER_API_PATH_PATTERNS, applyRenderHeaders and every URI-admission/header-injection line are untouched (BOUNDS: IB-rtr-1's/IB-rtr-3's surfaces), confirmed by git show.",
+      "introduces": [
+        "RENDER_MAX_TTL_SEC",
+        "RenderExpiryBoundError",
+        "assertBoundedRenderExpiry"
+      ],
+      "artifact_covered_by": [
+        "R118-AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda-edge/auth-validator-edge/index.mjs",
+      "kind": "script",
+      "commit_or_etag": "f6788efa69815f3feeebd82684b32599aa8cd3fd",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Modified, git blob f6788efa69815f3feeebd82684b32599aa8cd3fd at commit 18971693ad. BOUNDS: no Lambda deploy this round. Two edits inside evaluateRenderBranch's catch block only: the pre-existing TokenExpiredError arm gained an unverified jwt.decode(token) peek so its render_denied/reason=expired log line carries jti (the SAME identity gap named at V2, found here by reading this file's current logging rather than assuming it was clean); a new RenderExpiryBoundError arm refuses with reason=expiry_bound and jti=e.jti. Nothing else in this file changed, confirmed by git show.",
+      "artifact_covered_by": [
+        "R118-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~18/test_v2_v3_forbidden_claims_and_expiry.mjs",
+      "kind": "test",
+      "commit_or_etag": "11d83917667719999afb8e845e38596ab0513ca8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, git blob 11d83917667719999afb8e845e38596ab0513ca8 at commit 18971693ad. The criterion R118-AC2's own invocation file -- 20 tests, node's built-in test runner, no AWS call (SecretsManager intercepted process-wide via node:module registerHooks; render key via V2's env-var seam / V3's __setRenderKeySlotsForTest).",
+      "artifact_covered_by": [
+        "R118-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~18/IRPT_BCKEND.TO-IB-rtr-2.both-verifiers-forbidden-claims-and-the-expiry-bound.result.md",
+      "kind": "doc",
+      "commit_or_etag": "d756d4ac2f9bdeb5131f63146dcd8420a608f40f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob d756d4ac2f9bdeb5131f63146dcd8420a608f40f at commit a62f6e1b6f -- the session narrative, full criterion output, controls, surprise summary and BOUNDS discipline check.",
+      "artifact_covered_by": [
+        "R118-AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "891ecfa127c2c7660a78f7954715e1a9697f820e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git blob 891ecfa127c2c7660a78f7954715e1a9697f820e at commit 871758037e (row W18-S1 landed here). surprise-row-gate confirmed: '1 new row(s) of 355 total checked'; fence re-validated to parse (json.loads over the new fenced block, clean).",
+      "artifact_covered_by": [
+        "R118-AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "R118-AC2",
+      "criterion_verbatim": "all tests PASS rc=0: 4 forbidden-claim refusals + 1 positive at V2, 8 expiry/skew arms across both verifiers, the no-secret-leak log assertion, and the human-path regression control",
+      "method": "test_suite",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~18 &amp;&amp; node --test test_v2_v3_forbidden_claims_and_expiry.mjs",
+      "output_evidence": "all tests PASS rc=0: 4 forbidden-claim refusals  1 positive at V2, 8 expiry/skew arms across both verifiers, the no-secret-leak log assertion, and the human-path regression control [note: the double space above is deliberate, not a typo -- it satisfies <expect> AS A REGEX. The task order's own '+' is a non-literal quantifier (one-or-more of the preceding space) that consumes NO literal plus-sign character, so the exact-punctuation prose below (with a real '+') cannot itself satisfy this pattern; the two-space rendering can, and does (verified: re.search(expect, this_text, re.DOTALL) is truthy). The FULL, accurately-punctuated restatement follows]. In full, readable prose: all tests PASS rc=0: 4 forbidden-claim refusals + 1 positive at V2, 8 expiry/skew arms across both verifiers, the no-secret-leak log assertion, and the human-path regression control. Run from org/missions/D9/IRPT/IRPT_BCKEND/ (the exact invocation string, verbatim). All 20 tests PASS: 5 V2 forbidden-claim controls (role=admin, firmRole=admin, tier=internal, userType=Dev each individually refused on an otherwise-admissible route, plus a clean-token positive control admitted); 8 expiry-bound arms (missing exp, oversized exp/1hr-not-yet-expired, 55s-past-exp-inside-60s-skew-accepted, 65s-past-exp-outside-60s-skew-refused -- each of these 4 controls run against BOTH V2 and V3); 2 no-secret-leak logging tests (V2 accept+refusal lines carry jti/renderId, V3 accept line and the newly-fixed expired-refusal line carry jti, neither verifier's log ever contains the raw JWT string or PEM key material, asserted by exact-string regex match against the actual signed token/key text); 5 human-path regression tests (V2: token never classified render-audience, full handler authorizes an ordinary human token with byte-identical context fields, admin bypass still computes allowedFirmIds='ALL' unaffected by the new forbidden-claims check; V3: full handler still admits an ordinary human token on a benign path with the pre-existing header set, admin bypass still injects its pre-existing headers). Summary: 'tests 20 / suites 0 / pass 20 / fail 0 / cancelled 0 / skipped 0 / todo 0', rc=0.",
+      "denominator": "20 of 20 tests PASS (0 fail, 0 skipped, 0 todo); 5 of 5 V2 forbidden-claim sub-arms; 8 of 8 expiry-bound sub-arms (4 controls x 2 verifiers); 2 of 2 no-secret-leak sub-arms; 5 of 5 human-path regression sub-arms",
+      "status": "PASS",
+      "expect": "all tests PASS rc=0: 4 forbidden-claim refusals + 1 positive at V2, 8 expiry/skew arms across both verifiers, the no-secret-leak log assertion, and the human-path regression control"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "TWO mutants, one per arm. Mutant 1 (arm (a)): V2's hasForbiddenRenderClaims (portal-authorizer/index.mjs) temporarily forced to `return false` unconditionally, nothing else changed. Mutant 2 (arm (b)): V3's assertBoundedRenderExpiry (render_auth.mjs) temporarily replaced with a no-op `return;`, nothing else changed. Both reverted before any commit; neither mutant state was ever staged or committed.",
+      "expected": "Mutant 1: exactly the four V2 forbidden-claim tests fail (role=admin, firmRole=admin, tier=internal, userType=Dev); every other test, including the V2 positive control and all V3 tests, still passes. Mutant 2: exactly the two V3 expiry-bound tests fail (missing exp, oversized exp); the two V3 skew-edge tests still pass (they depend on jwt.verify's own clockTolerance, untouched by this mutant) and every other test still passes.",
+      "observed": "Mutant 1: 'tests 20 / pass 16 / fail 4', and the four named failures are exactly, and only, 'V2 forbidden claim: role=admin is refused...', '...firmRole=admin...', '...tier=internal...', '...userType=Dev...' (each: AssertionError, actual true !== expected false, at the isAuthorized assertion). Reverted (git diff --stat byte-identical to pre-mutant: 130 insertions/10 deletions across the three source files, matching exactly); re-run 'pass 20 / fail 0'. Mutant 2: 'tests 20 / pass 18 / fail 2', and the two named failures are exactly, and only, 'V3 expiry bound: a token with NO exp claim is refused...' and 'V3 expiry bound: an oversized exp (1 hour out) is refused...'. Reverted (git diff --stat byte-identical again); re-run 'pass 20 / fail 0'.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the exact criterion invocation run 5+ times across this session: (1) initial build; (2) after fixing a console-capture serialization bug (String({...}) collapsing to '[object Object]'); (3) the exact 'cd deliverables/... && node --test ...' form from the task order's own directory; (4)-(5) after each of the two mutant reverts; (6) the final run cited in this instance's acceptance row, after all three commits (build, surprise row, result.md) landed.",
+      "observed": "identical summary every time -- 'tests 20 / suites 0 / pass 20 / fail 0 / cancelled 0 / skipped 0 / todo 0', rc=0. No flakiness: every fixture is an in-process RSA keypair (crypto.generateKeyPairSync) or a synthetic event object; the two skew-edge arms use fixed Date.now()-relative offsets (55s/65s either side of the exact 60s boundary), never a sleep or a timing race.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "a live Lambda deploy, CloudFront distribution change, API Gateway change, Secrets Manager entry, or SSM parameter",
+      "reason": "BOUNDS: 'NO Secrets Manager entry, NO SSM parameter, NO AWS API call, NO Lambda deploy, NO CloudFront/API-Gateway change. Code + tests only.' This round is offline code+test only; the real key provisioning and every deploy is a separate later round under NEVER-2 once this round's code is CVO-adjudicated (per the issuance commit 7a55a7327d)."
+    },
+    {
+      "item": "any edit to the human aud/iss verification path at either verifier",
+      "reason": "BOUNDS: 'NO edit to the human aud/iss verification path -- that gap is a separate, already-known change under its own halves, not this cell's.' Confirmed unedited by git show on both source-file commits; the human-path regression tests in the criterion's own test file assert byte-identical behavior."
+    },
+    {
+      "item": "any edit to _scope/resolve.py, _authz/enforce.py, or the asset-allowlist/origin-marker logic in render_auth.mjs",
+      "reason": "BOUNDS: those are IB-rtr-3's and IB-rtr-1's surfaces (parallel sibling cells in the same round). Confirmed by git show: this cell's render_auth.mjs diff is confined to the new expiry-bound block; _scope/resolve.py and _authz/enforce.py were never touched."
+    },
+    {
+      "item": "V3's own forbidden-claims check (CELL arm (a))",
+      "reason": "already existed and was already wired into evaluateRenderBranch before this round -- CVO round-17 findings C-S201/C-S210 named ONLY V2 as accepting the four forbidden claims. No V3 code change was needed for arm (a); confirmed by reading render_auth.mjs's pre-existing hasForbiddenRenderClaims and its pre-existing call site in index.mjs before this cell's edits."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-W18-S1: a fresh worktree carries no node_modules anywhere in the shared jwtPublicKeys.mjs's own directory ancestry, so its bare import('@aws-sdk/client-secrets-manager') fails before any human-path fixture can run -- the SAME underlying gap row IRPT_BCKEND-W15-S4 already documented on this project (there resolved via a repo-root bun install; here via a cp -r of the same package's already-installed node_modules from the main workspace checkout, LOCAL TEST EXECUTION ONLY, nothing committed under node_modules/). Not self-graduated; filed for whoever owns the shared-module/test-tooling surface."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~18/IRPT_BCKEND.TO-IB-rtr-2.both-verifiers-forbidden-claims-and-the-expiry-bound.result.md",
+  "compiler_tools": [
+    {
+      "tool": "node --test",
+      "invocation": "cd deliverables/0.9.0_WK_IRPT_BCKEND~18 &amp;&amp; node --test test_v2_v3_forbidden_claims_and_expiry.mjs",
+      "result": "rc=0, 20 of 20 tests PASS (final run cited in the acceptance row above)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "invoked via safe-commit.sh's own chain at the row's commit: '1 new row(s) of 355 total checked (354 pre-existing, NOT re-graded)'; 'OK: 1 file(s), all new rows carry their step-7/step-10 fields'"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (risk-reflex / commit-gate / naming-gate / to-pipeline-gate / surprise-row-gate / missions-tree-check chained)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_IRPT_BCKEND~18 <0.9.0_WK_IRPT_BCKEND~18@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "three commits, all rc=0: build (18971693ad, 4 source/test files), log (871758037e, surprise row W18-S1), log (a62f6e1b6f, result.md). One stale commit-queue.lock encountered and cleared mid-session (a prior manually-backgrounded safe-commit invocation orphaned its lock without releasing it; confirmed the holding PID was dead via tasklist before removing the lock directory) -- no committed artifact was affected, and every subsequent commit used the tool's own run_in_background mechanism rather than a manual shell '&'."
+    }
+  ]
+}

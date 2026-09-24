@@ -1,0 +1,23 @@
+=== ARM diagnostic (R91-AC4): the CVO~B diagnostic, UNMODIFIED, against the REPAIRED source ===
+--- BASELINE recorded at arm (a) (unchanged source), from IB-rti-1_baseline_diagnostic_output.txt ---
+  BASE  negative: sign-in page | status=200 pw=1 writes=0 navs=2 success=False placeholder=True
+  BASE  counterexample: HTTP 500 without password input | status=500 pw=0 writes=1 navs=2 success=True placeholder=True
+  BASE  counterexample: arbitrary non-portal origin accepted | status=200 pw=0 writes=1 navs=2 success=True placeholder=True
+--- REPAIRED source, unmodified diagnostic (sha256 of source 5b26be9133ae468d) ---
+  POST  negative: sign-in page | status=200 pw=1 writes=0 navs=0 success=False placeholder=False | errors: BLOCKED: INSTANCE_ID_MISSING_OR_INVALID -- IRPT_CAPTURE_INSTANCE_ID must be a real EC2 ins
+  POST  counterexample: HTTP 500 without password input | status=500 pw=0 writes=0 navs=0 success=False placeholder=False | errors: BLOCKED: INSTANCE_ID_MISSING_OR_INVALID -- IRPT_CAPTURE_INSTANCE_ID must be a real EC2 ins
+  POST  counterexample: arbitrary non-portal origin accepted | status=200 pw=0 writes=0 navs=0 success=False placeholder=False | errors: BLOCKED: ORIGIN_NOT_ALLOWED -- https://example.invalid is not in the allowlist (https://op
+  [ok] password-present control still writes nothing 
+  [ok] HTTP 500 counterexample REFUSES (0 writes, no success) 
+  [ok] arbitrary-origin counterexample REFUSES (0 writes, no success, 0 navigations) 
+  [ok] no case prints the literal instance placeholder 
+  [ok] diagnostic env line present for the instance-id-supplied copy 
+--- REPAIRED source, diagnostic copy that ONLY adds IRPT_CAPTURE_INSTANCE_ID (reaches the readiness code) ---
+  POST+ID negative: sign-in page | status=200 pw=1 writes=0 navs=2 success=False placeholder=False | errors: TEST STOP: still waiting, no capture
+  POST+ID counterexample: HTTP 500 without password input | status=500 pw=0 writes=0 navs=2 success=False placeholder=False | errors: TEST STOP: still waiting, no capture
+  POST+ID counterexample: arbitrary non-portal origin accepted | status=200 pw=0 writes=0 navs=0 success=False placeholder=False | errors: BLOCKED: ORIGIN_NOT_ALLOWED -- https://example.invalid is not in the allowlist (https://op
+  [ok] with an id supplied: 500 counterexample still REFUSES 
+  [ok] with an id supplied: password case still writes nothing 
+  [ok] with an id supplied: foreign origin still 0 navigations, 0 writes 
+  [ok] arm (e) authenticated POSITIVE (2xx, same origin, no password, marker present): exactly 1 write + success 
+IBR91-CVOB-DIAGNOSTIC-COUNTEREXAMPLES-REFUSE-POSITIVE-CONTROL-PASSES

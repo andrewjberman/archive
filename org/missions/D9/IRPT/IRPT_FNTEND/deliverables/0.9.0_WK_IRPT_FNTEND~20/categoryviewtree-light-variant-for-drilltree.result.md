@@ -1,0 +1,178 @@
+# FE-s-70 result -- CategoryViewTree additive light variant for DrillTree
+
+**These captures are FIXTURE-FED**: every `ui-smoke.mjs` invocation below drove the real route
+(`/investor-reporting`, `/portfolios`) with fixtures answered at the network layer (`--fixtures`);
+no live backend or route was reached. That is the right evidence for FWD-12's DONE WHEN here
+("the Investor Reporting screens look and behave like the rest of the Opal portal") -- the
+question is purely about rendered visual state against portal/DESIGN.md, which a fixture-fed
+capture answers completely; it needs no live-wire counterpart the way a data-correctness cell
+would.
+
+## What changed
+
+`portal/src/components/CategoryViewTree.tsx` gained an additive `ground?: 'dark' | 'light'` prop
+(default `'dark'`), threaded through `TreeBody` -> `CategoryOverview` -> `CategoryTile` ->
+`SegmentBar`. When `'light'`:
+- The ready-state card (`CategoryOverview`) drops the dark-gradient `GraphicPanel` wrapper for a
+  plain white surface with the same outer `border-black`/`rounded-[4px]` frame, an indigo top rule
+  kept as the one accent, and `Eyebrow` (black-on-white) instead of `PanelEyebrow` (lilac-on-navy).
+- Every non-data ink (`headline`, subtext, tile name/figures/copy, the pie's slice stroke, the
+  segment-bar track, the hover/rest tile fill and ring) re-derives per DESIGN.md C5 (preserve the
+  ROLE and the ratio, re-hue the value): navy `#163372` for primary text/figures, `darkGray
+  #6B7280` for secondary copy (legal on a panel per C3's ink table), the hairline `#C4CBDB` for
+  boundaries, the canvas `#F4F6FA` step for hover, and the site indigo `#5F3BE3` for the one
+  "View breakdown" text link (C8's one-accent-link allowance).
+- `l0ColorOf`/`l1ColorOf`/`memberColor` (the L0/L1/L2 legend, the pie slices, the bar segments) are
+  called identically on both grounds -- **zero data colours moved.**
+
+`portal/src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx:223` -- the ONE line -- now reads
+`<CategoryViewTree result={mdpfResult} ground="light" />`. Nothing else in that file changed.
+
+`CategoryBreakdownDialog` (the L2 modal) and `SegmentBar`'s own default caller inside it are
+untouched: `SegmentBar` takes `ground` as an OPTIONAL prop defaulting to `'dark'`, and the dialog
+never passes it, so its render is byte-identical to before this cell.
+
+## Criteria
+
+**F70-AC1** -- `bun run typecheck`. `rc=0`, clean `tsc -b --noEmit` with no diagnostics.
+PASS-by-output.
+
+**AMENDMENT (2.0.0_SA_COO~F, commit `ea18c43025`, post-report, closing row `IRPT_FNTEND-W20-S1`):**
+F70-AC2/AC3/AC4's selectors were corrected from `section[...] > div` to
+`section[...] > div:nth-of-type(2) > div`, to reach `CategoryOverview`'s own card div (the
+section's SECOND direct div child -- `TreeBody` returns a fragment, so it contributes no DOM node
+of its own) rather than the Eyebrow heading wrapper (the first). Verified byte-identical against
+the shared tree (`git show ea18c43025:...` vs this worktree's copy, `diff --strip-trailing-cr`:
+only `<status>` differs). Applied the same correction to this worktree's copy and re-ran F70-AC2,
+AC3 and AC4 below, against the SAME already-committed fix (no code changes needed).
+
+**F70-AC2** -- Holdings, 1440px, light variant, WHITE ground (C3), corrected selector. Fixture
+`fe-s-18-holdings-observed.json` (no separate `category-views.json` key needed -- `DrillTree.tsx`'s
+`mdpfResultFromSnapshot` derives the tree from the `holdings/` snapshot alone, confirmed by the
+capture below actually reaching the ready state).
+```
+EXPECT[[data-slot="holdings-drill-tree"] section[aria-labelledby="asset-category-views"]]: PASS (1 visible)
+EXPECT-GROUND[[data-slot="holdings-drill-tree"] section[aria-labelledby="asset-category-views"] > div:nth-of-type(2) > div]: PASS rgb(255, 255, 255)
+ASSERT-CONTENT: 1 of 1 met
+ASSERT-GROUND: 1 of 1 met
+```
+Read `f70_irpt_1440.png` directly: the "Asset Category Views" card is a real white panel with an
+indigo top rule, navy "Total Assets" headline and figure, and three white/hairline tiles (Models
+lilac, SMAs teal, Client amber top-strips and dots -- unchanged data colours) with navy text.
+Clause read against: C3 (panel role, white surface, hairline boundary), C5 (ink re-hued
+navy-on-white, ratio preserved). PASS-by-output; PNG read confirms the visual claim.
+**Control discipline (HOW item 4), round 2:** re-checking this CORRECTED assertion's discriminating
+power (the coordinator's relay explicitly asked for this if the amendment's own description did not
+hold up under test) found it is STILL not fully discriminating on a bare mutant-revert (no
+`--inject-css`) -- see row `IRPT_FNTEND-W20-S2` below, filed because the amendment's claim
+("it now genuinely discriminates ground=\"light\" from ground=\"dark\"") did not survive that check.
+The criterion's literal invocation still ran unmodified (against the amended `<expect>`) and its
+output matches verbatim, so it is reported PASS-by-output per BOUNDS.
+
+**F70-AC3** -- same, at 390px, corrected selector.
+```
+EXPECT[...]: PASS (1 visible)
+EXPECT-GROUND[[data-slot="holdings-drill-tree"] section[aria-labelledby="asset-category-views"] > div:nth-of-type(2) > div]: PASS rgb(255, 255, 255)
+ASSERT-CONTENT: 1 of 1 met
+ASSERT-GROUND: 1 of 1 met
+```
+Read `f70_irpt_390.png` directly: same white card, single-column tile stack, legible at the narrow
+viewport, no clipping. PASS-by-output. Same W20-S2 note as AC2.
+
+**F70-AC4** -- THE GROUND CONTROL, corrected selector. `--inject-css` paints
+`section[...] > div:nth-of-type(2) > div` silver (`#c4cbdb`) directly and removes any
+background-image, then re-runs the SAME ground assertion.
+```
+INJECT-CSS: [data-slot="holdings-drill-tree"] section[aria-labelledby="asset-category-views"] > div:nth-of-type(2) > div{background:#c4cbdb !important; background-image:none !important}
+EXPECT-GROUND[[data-slot="holdings-drill-tree"] section[aria-labelledby="asset-category-views"] > div:nth-of-type(2) > div]: FAIL rgb(196, 203, 219)
+ASSERT-GROUND: 0 of 1 met
+```
+Matches `<expect>` exactly. PASS-by-output. This control DOES discriminate, on BOTH the original
+and the corrected selector (`--inject-css` sets a real `background-color` directly on the matched
+node, bypassing the transparent-walk mechanism entirely -- see W20-S2's root-cause explanation).
+
+**F70-AC5** -- Model Portfolios BEFORE capture, current HEAD, `__tests__/fe-s-69/fixtures/mp.json`
+(landed by FE-s-69, present in this worktree's base -- no fallback fixture needed).
+```
+SAVED : .../f70_mp_before_1440.png
+```
+PASS-by-output. Read `f70_mp_before_1440.png`: the dark "All Categories" hero card, `$0` total (this
+fixture's `sums.view_plane` is 0 and no peer AUM is present so no pie/tiles render -- the same
+no-peers state on both captures, see AC6).
+
+**F70-AC6** -- Model Portfolios AFTER capture, same fixture, asserting the sibling is unbroken
+(`ground` defaults to `'dark'`).
+```
+EXPECT[section[aria-labelledby="asset-category-views"]]: PASS (1 visible)
+EXPECT-STYLE[section[aria-labelledby="asset-category-views"] .relative::background-image]: PASS radial-gradient(90% 85% at 80% 85%, rgba(95, 59, 227, 0.55), rgba(0, 0, 0, 0) 65%), linear-gradient(rgba(255, 255, 255, 0.05) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(160deg, rgb(8, 19, 43), rgb(21, 37, 81))
+ASSERT-CONTENT: 1 of 1 met
+ASSERT-STYLE: 1 of 1 met
+```
+Read `f70_mp_before_1440.png` and `f70_mp_after_1440.png` side by side: pixel-identical dark hero
+card, same "$0" headline, same AUA-by-model / Client Holdings panels below. Model Portfolios' own
+use of `CategoryViewTree` is untouched. PASS-by-output, confirmed by direct visual comparison.
+
+**F70-AC7** -- `bun test src/pages/InvestorReporting/__tests__/fe-s-7` (also picks up fe-s-72/fe-s-73
+by substring match, per bun's own path matching). `37 pass, 0 fail, 180 expect() calls`. Read both
+named files (`slices.test.ts`, `drill.test.ts`) first, per instruction: neither pins CategoryViewTree's
+rendered classes -- both exercise `slices.ts`'s pure decision functions directly (drill destinations,
+revision mismatches, sum-preservation), bypassing the `@/`-aliased render path entirely (their own
+header explains why: `bun test` cannot resolve `@/` in this worktree). No update needed; nothing
+pinned the old dark-card classes. PASS-by-output.
+
+**F70-AC8** -- whole IRPT_FNTEND suite, dev server stopped (PID killed via `Stop-Process`, port 5951
+verified closed via `curl` returning `000`/rc=28 before this run), `IRPT_FE_DEV_PORT` unset.
+`620 pass, 22 skip, 0 fail, 2618 expect() calls, 642 tests across 117 files`. PASS-by-output.
+
+**F70-AC9** -- judgment, RECORDED, no verdict:
+- Chart legend / data colours (percent labels, donut/pie segments, per-model L1/L2 dots and bar
+  segments): `l0ColorOf`, `l1ColorOf`, `memberColor` are called with the exact same arguments on
+  both grounds; the only ground-conditional value touching the pie is the SLICE STROKE (the ring
+  between slices), which is the panel's own background colour (white vs the band's ink), never a
+  data hue. Read `f70_irpt_1440.png`/`f70_irpt_390.png`: Models lilac, SMAs teal, Client amber --
+  identical hues to `f70_mp_before_1440.png`/`f70_mp_after_1440.png`'s dark card.
+- Additive: `ground` is a new, optional prop; every caller that does not pass it (Model Portfolios,
+  and `CategoryBreakdownDialog`'s own internal `SegmentBar` call) gets `'dark'`, the pre-existing
+  render -- confirmed identical before/after in AC6's PNGs.
+- `DrillTree.tsx` changed exactly one line (`ground="light"` on its existing `<CategoryViewTree>`
+  call); no other render in that file moved.
+
+## Surprise rows filed
+
+`IRPT_FNTEND-W20-S1` (INVESTIGATION_v2.md): F70-AC2/AC3's ORIGINAL `--expect-ground` selector
+resolves, via `document.querySelector`, to the section's Eyebrow wrapper `<div>` (the FIRST `> div`
+in document order) rather than `CategoryOverview`'s own card div (the second child) -- and because
+that Eyebrow div carries no background of its own, `groundColor()`'s ancestor walk passes straight
+through it and the (also transparent) `<section>` to `DrillTree.tsx`'s own ambient `bg-white`
+wrapper. Verified by temporarily reverting `DrillTree.tsx` to `ground="dark"` (no fix applied) and
+re-running AC2's exact invocation: it printed the IDENTICAL `PASS rgb(255, 255, 255)` /
+`ASSERT-GROUND: 1 of 1 met`. F70-AC4 (which paints that same first-match div directly via
+`--inject-css`, rather than relying on an ancestor) correctly discriminates. This cell's actual,
+committed implementation is independently confirmed correct by reading the PNGs; the row is about
+the bare ground assertion's discriminating power on this selector, filed per the criterion rule's
+own control discipline (HOW item 4) without editing AC2/AC3's expectation. CLOSED by the COO's
+amendment (`ea18c43025`), which corrected the selector to `> div:nth-of-type(2) > div`.
+
+`IRPT_FNTEND-W20-S2` (INVESTIGATION_v2.md): the amendment's own corrected selector STILL does not
+discriminate `ground="light"` from `ground="dark"` on a bare (non-`--inject-css`) ground read --
+the amendment's claim that it "now genuinely discriminates" was checked (per the coordinator's own
+instruction to verify, not trust) and did NOT hold up. Root cause, one level deeper than W20-S1:
+`ui-smoke.mjs`'s `groundColor()` (:404-419) reads ONLY computed `backgroundColor` at each step of
+its ancestor walk and never inspects `backgroundImage`. `GraphicPanel`'s own root div (the dark
+branch's card) sets ONLY `backgroundImage` (`GRAPHIC_PANEL_STYLE`, `HeroGraphic.tsx:35-43`) and no
+`backgroundColor` at all -- so even though it visibly renders the dark gradient, its own computed
+backgroundColor is fully transparent, and the walk passes through it to `DrillTree.tsx`'s ambient
+`bg-white` wrapper exactly as it did for the Eyebrow div in W20-S1. Because that ambient wrapper and
+the LIGHT variant's own surface happen to share the same white value, the bare ground read cannot
+tell "the card is genuinely white" apart from "the card is dark but transparent to this specific
+instrument." Verified: reverted `DrillTree.tsx` to `ground="dark"` (confirmed live via a direct
+`--expect-style background-image!=none` probe on the identical selector, which PASSed the dark
+gradient string, while a `background-color` probe on the same element FAILed as
+`rgba(0, 0, 0, 0)`), then re-ran the corrected AC2 invocation verbatim: IDENTICAL
+`PASS rgb(255, 255, 255)` / `ASSERT-GROUND: 1 of 1 met`. F70-AC4's `--inject-css` control still
+discriminates correctly (on both selector versions), because it sets a real `backgroundColor`
+directly on the matched node rather than relying on the walk. This cell's actual implementation
+remains independently confirmed correct by the PNG reads; this row documents that the CORRECTED
+bare ground assertion, specifically, still cannot tell the two grounds apart -- a finding beyond
+this cell's own grant to fix (the instrument itself, `scripts/ui-smoke.mjs`, is FE-s-65's surface,
+not FE-s-70's).

@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_FNTEND.TO-FE-s-70",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/prd/IRPT_FNTEND_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5fd2dc9ab5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_FNTEND/decompositions/IRPT_FNTEND_DECOMP.md",
+    "vintage_commit": "730c75ee87",
+    "to_ref": "org/missions/D9/IRPT/IRPT_FNTEND/task-orders/IRPT_FNTEND.TO-FE-s-70.categoryviewtree-light-variant-for-drilltree.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_FNTEND~20",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/CategoryViewTree.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "9ebdcc34d6d89de35a4ed2a73e886edb5c8d1ef6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Additive ground?: 'dark'|'light' prop (default 'dark') threaded through TreeBody/CategoryOverview/CategoryTile/SegmentBar. Every caller that omits it (CategoryBreakdownDialog's own SegmentBar call; Model Portfolios) renders byte-identical to before this cell -- confirmed by F70-AC6's before/after PNG pair read directly. Committed at portal 9ebdcc34, LOCAL on portal branch wk-irpt_fntend-11-70-fe-s-70-portal (portal frozen); not pushed, not deployed.",
+      "artifact_covered_by": ["F70-AC1", "F70-AC2", "F70-AC3", "F70-AC4", "F70-AC6", "F70-AC7", "F70-AC8", "F70-AC9"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "9ebdcc34d6d89de35a4ed2a73e886edb5c8d1ef6",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Exactly ONE line changed (git diff --stat: 1 insertion, 1 deletion): line 223, `<CategoryViewTree result={mdpfResult} />` -> `<CategoryViewTree result={mdpfResult} ground=\"light\" />`. No other line in this file touched. Committed at portal 9ebdcc34, LOCAL; not deployed.",
+      "artifact_covered_by": ["F70-AC1", "F70-AC2", "F70-AC3", "F70-AC4", "F70-AC9"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "F70-AC1",
+      "criterion_verbatim": "the whole portal typechecks.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "output_evidence": "$ tsc -b --noEmit\nrc=0",
+      "denominator": "N/A -- boolean rc check",
+      "status": "PASS",
+      "expect": "rc=0(?![0-9])"
+    },
+    {
+      "criterion_id": "F70-AC2",
+      "criterion_verbatim": "on Holdings, the category-views card renders on a WHITE ground (C3), using the additive light variant: ASSERT-CONTENT: 1 of 1 met, ASSERT-GROUND: 1 of 1 met. This fixture already reaches the ready state -- DrillTree.tsx's mdpfResultFromSnapshot derives it from the holdings/ snapshot alone, no separate category-views.json key is needed for IRPT.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-11-70-fe-s-70/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~20/f70_irpt_1440.png --port 5951 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings --expect '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"]' --expect-ground '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div=rgb(255, 255, 255)'",
+      "output_evidence": "EXPECT[[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"]]: PASS (1 visible)\nEXPECT-GROUND[[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div]: PASS rgb(255, 255, 255)\nASSERT-CONTENT: 1 of 1 met\nASSERT-GROUND: 1 of 1 met\nFIXTURES-MATCH: matched 3 of 9",
+      "denominator": "1 of 1 content assertion met, 1 of 1 ground assertion met",
+      "status": "PASS",
+      "expect": "ASSERT-CONTENT: 1 of 1 met[\\s\\S]*ASSERT-GROUND: 1 of 1 met",
+      "status_reason": "PASS, against the COO's amendment (commit ea18c43025, corrected selector `> div:nth-of-type(2) > div`, applied to this worktree's copy and verified byte-identical to the shared tree modulo <status>). Original control-discipline finding (row IRPT_FNTEND-W20-S1: the ORIGINAL `> div` selector matched the section's Eyebrow wrapper, not the card, and did not discriminate ground) is CLOSED by that amendment. Re-checking the CORRECTED selector's discriminating power per the coordinator's own instruction to verify rather than trust found it STILL does not discriminate on a bare (non-inject-css) ground read -- filed as row IRPT_FNTEND-W20-S2: GraphicPanel's own div (the dark branch, at the identical structural position) sets only `backgroundImage`, never `backgroundColor` (HeroGraphic.tsx GRAPHIC_PANEL_STYLE), so groundColor() (which reads only backgroundColor) walks past it to the same ambient bg-white wrapper regardless of ground -- reverting DrillTree.tsx to ground=\"dark\" and re-running this exact invocation printed the IDENTICAL PASS rgb(255, 255, 255). The invocation was run exactly as the amendment states, unmodified, and its output matches <expect> verbatim, so it is reported PASS-by-output per BOUNDS; the actual fix is independently confirmed correct by reading f70_irpt_1440.png directly and by F70-AC4's inject-css control, which DOES discriminate (on both selector versions)."
+    },
+    {
+      "criterion_id": "F70-AC3",
+      "criterion_verbatim": "the same, at 390.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-11-70-fe-s-70/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~20/f70_irpt_390.png --port 5951 --width 390 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings --expect '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"]' --expect-ground '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div=rgb(255, 255, 255)'",
+      "output_evidence": "EXPECT[[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"]]: PASS (1 visible)\nEXPECT-GROUND[[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div]: PASS rgb(255, 255, 255)\nASSERT-CONTENT: 1 of 1 met\nASSERT-GROUND: 1 of 1 met\nFIXTURES-MATCH: matched 3 of 9",
+      "denominator": "1 of 1 content assertion met, 1 of 1 ground assertion met",
+      "status": "PASS",
+      "expect": "ASSERT-CONTENT: 1 of 1 met[\\s\\S]*ASSERT-GROUND: 1 of 1 met",
+      "status_reason": "PASS, against the COO's amendment. Same control-discipline note as F70-AC2 (rows IRPT_FNTEND-W20-S1 CLOSED, IRPT_FNTEND-W20-S2 filed); PNG f70_irpt_390.png read directly, confirms the white card at the narrow viewport."
+    },
+    {
+      "criterion_id": "F70-AC4",
+      "criterion_verbatim": "THE GROUND CONTROL: after painting the card silver, the same ground assertion FAILS.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs investor-reporting C:/tmp/wk-irpt_fntend-11-70-fe-s-70/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~20/f70_irpt_control.png --port 5951 --width 1440 --fixtures src/pages/InvestorReporting/fixtures/smoke/fe-s-18-holdings-observed.json --click Holdings --inject-css '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div{background:#c4cbdb !important; background-image:none !important}' --expect-ground '[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div=rgb(255, 255, 255)'",
+      "output_evidence": "INJECT-CSS: [data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div{background:#c4cbdb !important; background-image:none !important}\nEXPECT-GROUND[[data-slot=\"holdings-drill-tree\"] section[aria-labelledby=\"asset-category-views\"] > div:nth-of-type(2) > div]: FAIL rgb(196, 203, 219)\nASSERT-GROUND: 0 of 1 met",
+      "denominator": "0 of 1 ground assertion met (the required negative result)",
+      "status": "PASS",
+      "expect": "ASSERT-GROUND: 0 of 1 met",
+      "status_reason": "PASS, against the COO's amendment's corrected selector. This control genuinely discriminates on BOTH selector versions (original and corrected), because --inject-css sets a real backgroundColor directly on the matched node, bypassing the transparent-walk mechanism that defeats the bare ground read (rows W20-S1, W20-S2)."
+    },
+    {
+      "criterion_id": "F70-AC5",
+      "criterion_verbatim": "BEFORE capture: Model Portfolios' own category-views card, current HEAD (uses __tests__/fe-s-69/fixtures/mp.json, authored by FE-s-69; if FE-s-69 has not landed yet, author your own copy of it -- one key, category-views.json, from .frontend-dev/fixtures/category-views.fixture.json's global block).",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && timeout 180 node scripts/ui-smoke.mjs portfolios C:/tmp/wk-irpt_fntend-11-70-fe-s-70/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~20/f70_mp_before_1440.png --port 5951 --width 1440 --fixtures src/pages/InvestorReporting/__tests__/fe-s-69/fixtures/mp.json",
+      "output_evidence": "SAVED : C:/tmp/wk-irpt_fntend-11-70-fe-s-70/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~20/f70_mp_before_1440.png\nFIXTURES-MATCH: matched 1 of 1",
+      "denominator": "N/A -- boolean presence of SAVED",
+      "status": "PASS",
+      "expect": "SAVED",
+      "status_reason": "PASS. FE-s-69's fixture (portal/src/pages/InvestorReporting/__tests__/fe-s-69/fixtures/mp.json) was already present in this worktree's base (committed by 0.9.0_WK_IRPT_FNTEND~19); no fallback fixture authored."
+    },
+    {
+      "criterion_id": "F70-AC6",
+      "criterion_verbatim": "AFTER your fix, Model Portfolios' OWN use is UNCHANGED (ground defaults to 'dark'): the card still shows a real gradient background-image. This is the CTO-mandated before/after PROVING THE SIBLING IS UNBROKEN, not a wrong-state control -- read both PNGs and confirm the dark card looks the same in both.",
+      "method": "command",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && NODE_DISABLE_COLORS=1 NO_COLOR=1 timeout 180 node scripts/ui-smoke.mjs portfolios C:/tmp/wk-irpt_fntend-11-70-fe-s-70/org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~20/f70_mp_after_1440.png --port 5951 --width 1440 --fixtures src/pages/InvestorReporting/__tests__/fe-s-69/fixtures/mp.json --expect 'section[aria-labelledby=\"asset-category-views\"]' --expect-style 'section[aria-labelledby=\"asset-category-views\"] .relative::background-image!=none'",
+      "output_evidence": "EXPECT[section[aria-labelledby=\"asset-category-views\"]]: PASS (1 visible)\nEXPECT-STYLE[section[aria-labelledby=\"asset-category-views\"] .relative::background-image]: PASS radial-gradient(90% 85% at 80% 85%, rgba(95, 59, 227, 0.55), rgba(0, 0, 0, 0) 65%), linear-gradient(rgba(255, 255, 255, 0.05) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(160deg, rgb(8, 19, 43), rgb(21, 37, 81))\nASSERT-CONTENT: 1 of 1 met\nASSERT-STYLE: 1 of 1 met",
+      "denominator": "1 of 1 content assertion met, 1 of 1 style assertion met",
+      "status": "PASS",
+      "expect": "ASSERT-CONTENT: 1 of 1 met[\\s\\S]*ASSERT-STYLE: 1 of 1 met",
+      "status_reason": "PASS. f70_mp_before_1440.png and f70_mp_after_1440.png read side by side: pixel-identical dark hero card, same $0 headline, same AUA-by-model/Client Holdings panels below -- Model Portfolios' own render is untouched by this cell."
+    },
+    {
+      "criterion_id": "F70-AC7",
+      "criterion_verbatim": "__tests__/fe-s-7/slices.test.ts and drill.test.ts (the two existing tests that reference CategoryViewTree) still pass. READ both files first: if either pins the CURRENT dark-card classes, update it in this commit to expect the additive prop's default (unchanged) behaviour.",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-7",
+      "output_evidence": "37 pass\n 0 fail\n 180 expect() calls\nRan 37 tests across 5 files. [257.00ms]",
+      "denominator": "0 fail of 37 tests (37 pass)",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail",
+      "status_reason": "PASS. Both named files read in full first: neither pins CategoryViewTree's rendered classes -- both exercise slices.ts's pure decision functions (drill destinations, revision mismatches, sum-preservation) directly, bypassing the @/-aliased render path entirely (their own file header explains bun test cannot resolve @/ in this worktree). No update needed. The invocation also picked up __tests__/fe-s-72 and fe-s-73 by bun's own substring path match (5 files total, not just the 2 named); all pass. Re-run after the COO amendment (no portal source changed net -- git status/diff clean); identical result."
+    },
+    {
+      "criterion_id": "F70-AC8",
+      "criterion_verbatim": "the whole IRPT_FNTEND suite is green (dev server stopped; IRPT_FE_DEV_PORT unset).",
+      "method": "test_suite",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "output_evidence": "620 pass\n 22 skip\n 0 fail\n 2618 expect() calls\nRan 642 tests across 117 files. [50.34s]",
+      "denominator": "0 fail of 642 tests (620 pass, 22 skip)",
+      "status": "PASS",
+      "expect": "(?<![0-9])0 fail",
+      "status_reason": "Dev server stopped before this run: PowerShell Get-NetTCPConnection -LocalPort 5951 -State Listen resolved the PID, Stop-Process -Force killed it, curl http://localhost:5951 -> HTTP_CODE=000 (rc=28) confirming closed; IRPT_FE_DEV_PORT unset in the running shell. Re-run after the COO amendment and dev-server restart (no portal source changed net); identical result."
+    },
+    {
+      "criterion_id": "F70-AC9",
+      "criterion_verbatim": "graded at L9 by the CVO: the chart legend's data colours (the percent labels, the donut segments) are UNCHANGED in the light variant (C6/C8 exempt, per the CTO's scope correction); the fix is ADDITIVE (a new prop, default preserves Model Portfolios' current behaviour) rather than a second look-alike component; DrillTree.tsx passes the new prop and nothing else about its render changed. RECORD; NO VERDICT.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion; git -C portal diff HEAD~1 HEAD -- src/components/CategoryViewTree.tsx (grep for l0ColorOf/l1ColorOf/memberColor call sites, unchanged arguments both grounds); git -C portal diff HEAD~1 HEAD -- src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx (1 insertion/1 deletion, git diff --stat); f70_irpt_1440.png / f70_irpt_390.png vs f70_mp_before_1440.png / f70_mp_after_1440.png read side by side for legend hues",
+      "output_evidence": "git -C portal diff --stat HEAD~1 HEAD -- src/pages/InvestorReporting/tabs/holdings/DrillTree.tsx: '1 file changed, 1 insertion(+), 1 deletion(-)' -- the sole changed line is 223, adding ground=\"light\" to the existing <CategoryViewTree> call; nothing else in the file moved. In CategoryViewTree.tsx, every call site of l0ColorOf/l1ColorOf/memberColor is unconditional on `ground` (read directly in the diff: the ternaries introduced touch only text/background/stroke classes, never the colour-lookup functions or their arguments). ground is declared `ground?: 'dark' | 'light'` with a default of 'dark' on the exported component, and SegmentBar's own ground parameter defaults to 'dark' as well, so every existing caller (CategoryBreakdownDialog's internal SegmentBar call, and Model Portfolios via ModelPortfolios.tsx, unedited) renders exactly as before. f70_irpt_1440.png/f70_irpt_390.png show Models=lilac/violet300, SMAs=teal500, Client=amber400 top-strips and dots; f70_mp_before_1440.png/f70_mp_after_1440.png (dark, unaffected) show the identical three hues on their pie/legend -- same PALETTE tokens, same values.",
+      "denominator": "N/A -- judgment criterion, no verdict computed here",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true; graded by 3.0.0_SA_CVO at L9 per spine v3 L9. No self-grade taken.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "F70-AC4 (the task order's own ground control: --inject-css paints the card's own div silver and removes the background-image, then re-runs the ground assertion) is the numbered wrong-state arm THE CRITERION RULE (d) requires -- run against BOTH the original and the COO-amended (`:nth-of-type(2)`) selector. In addition, per HOW item 4's control discipline, this worker ran TWO ROUNDS of an UNNUMBERED diligence check (mutant-revert of ground=\"dark\"): round 1 against the original selector (surfaced row W20-S1), round 2 against the amended selector after the coordinator's relay explicitly asked to verify rather than trust the amendment's claim of discrimination (surfaced row W20-S2). DrillTree.tsx was temporarily edited to ground=\"dark\" each round, the exact AC2 invocation re-run, then restored to ground=\"light\" and AC2 re-run again for the final capture -- both rounds.",
+      "expected": "F70-AC4's inject-css arm reports the ground assertion as FAILED (not the passing white value), on both selector versions. Each mutant-revert round was expected to also report FAIL under ground=\"dark\", discriminating the fix from no-fix on that round's selector.",
+      "observed": "F70-AC4 fired as expected on BOTH selector versions: EXPECT-GROUND[...]: FAIL rgb(196, 203, 219), ASSERT-GROUND: 0 of 1 met. NEITHER mutant-revert round fired as expected: round 1 (original selector) printed the IDENTICAL PASS rgb(255, 255, 255) under ground=\"dark\" because the selector's first `> div` match is the Eyebrow wrapper (transparent), not the card (row W20-S1, CLOSED by the COO's amendment). Round 2 (amended `:nth-of-type(2)` selector) ALSO printed the IDENTICAL PASS rgb(255, 255, 255) under ground=\"dark\", for a related but distinct reason: GraphicPanel's own div (the dark branch, same structural position) sets only backgroundImage, never backgroundColor, so groundColor() (backgroundColor-only) walks past it to the same ambient bg-white wrapper regardless of ground (row W20-S2, filed, NOT closed by anything in this instance -- the fix is FE-s-65's instrument, outside this cell's grant). Confirmed the ground=\"dark\" state was genuinely live each time via a direct --expect-style background-image probe (PASSed the dark gradient string) paired with a background-color probe (FAILed as rgba(0, 0, 0, 0)) on the identical selector. F70-AC2/AC3 are still reported PASS-by-output (their literal invocations, run unmodified against the amended <expect>, match verbatim) per BOUNDS' no-edit-the-expectation rule. The actual visual fix was independently confirmed correct by direct PNG reads (f70_irpt_1440.png, f70_irpt_390.png) both rounds.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "F70-AC2's exact invocation (same fixture/port/selectors, committed ground=\"light\" state, amended selector) run twice in immediate succession against the same live dev server, across two separate dev-server sessions (before and after the amendment).",
+      "observed": "All runs printed the identical EXPECT-GROUND[...]: PASS rgb(255, 255, 255) / ASSERT-CONTENT: 1 of 1 met / ASSERT-GROUND: 1 of 1 met. Identical across every run, byte for byte, both before and after the amendment and across both dev-server sessions.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal/src/pages/InvestorReporting/__tests__/fe-s-70/ left empty (no new test file authored there)",
+      "reason": "No criterion in this TO requires a new unit test: F70-AC7 is satisfied by the two pre-existing fe-s-7 tests (neither needed updating -- they exercise slices.ts's pure functions, never CategoryViewTree's render), and F70-AC8 is the whole-suite regression check. The visual behaviour is proved by the ui-smoke captures/assertions (F70-AC2..AC6), which is the discipline THE INSTRUMENT section establishes for this round's visual cells."
+    }
+  ],
+  "surprises": [
+    "IRPT_FNTEND-W20-S1: F70-AC2/AC3's ORIGINAL --expect-ground selector resolves (document.querySelector, first match in document order) to the section's Eyebrow wrapper div, not CategoryOverview's own card, so the assertion prints the identical white PASS whether ground is 'light' (this cell's fix) or 'dark' (the pre-fix default) -- verified by temporarily reverting DrillTree.tsx to ground=\"dark\" and re-running the exact AC2 invocation. F70-AC4's inject-css control (which paints that same first-match div directly) correctly discriminates. CLOSED by the COO's amendment (commit ea18c43025), which corrected the selector to `> div:nth-of-type(2) > div`.",
+    "IRPT_FNTEND-W20-S2: the COO amendment's own corrected selector STILL does not discriminate ground=\"light\" from ground=\"dark\" on a bare (non-inject-css) ground read -- GraphicPanel's own div sets only backgroundImage, never backgroundColor, so groundColor() (which reads only backgroundColor) walks past it to the same ambient bg-white wrapper regardless of ground, exactly as it did for the Eyebrow div in W20-S1. Verified by the same mutant-revert discipline, per the coordinator's own instruction to verify the amendment's claim rather than trust it; the claim (\"it now genuinely discriminates\") did not hold up. F70-AC4's inject-css control still discriminates correctly on the corrected selector too."
+  ],
+  "session_log": "org/missions/D9/IRPT/IRPT_FNTEND/deliverables/0.9.0_WK_IRPT_FNTEND~20/categoryviewtree-light-variant-for-drilltree.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit), bun 1.3.9",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && timeout 180 /c/Users/AndrewBerman/.bun/bin/bun run typecheck; echo rc=$?",
+      "result": "rc=0"
+    },
+    {
+      "tool": "bun test 1.3.9 (fe-s-7 -- F70-AC7)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/fe-s-7",
+      "result": "37 pass / 0 fail / 180 expect() calls / Ran 37 tests across 5 files. [455.00ms]"
+    },
+    {
+      "tool": "bun test 1.3.9 (whole InvestorReporting suite -- F70-AC8, dev server stopped, IRPT_FE_DEV_PORT unset)",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && timeout 600 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting",
+      "result": "620 pass / 22 skip / 0 fail / 2618 expect() calls / Ran 642 tests across 117 files. [54.66s]"
+    },
+    {
+      "tool": "scripts/ui-smoke.mjs (Playwright-core + system Edge, headless), vite dev server, worktree port 5951",
+      "invocation": "cd C:/tmp/wk-irpt_fntend-11-70-fe-s-70/portal && IRPT_FE_DEV_PORT=5951 bun run dev --port 5951 (background), then node scripts/ui-smoke.mjs investor-reporting|portfolios <out.png> --port 5951 --width <1440|390> --fixtures <fixture.json> [--click/--expect/--expect-style/--expect-ground/--inject-css per row]",
+      "result": "rc=0 on every criterion run (F70-AC2..AC6); every EXPECT*/ASSERT-*/FIXTURES-MATCH line quoted in the acceptance rows above is this tool's own printed output"
+    },
+    {
+      "tool": "PowerShell Get-NetTCPConnection / Stop-Process (dev server shutdown verification for F70-AC8)",
+      "invocation": "Get-NetTCPConnection -LocalPort 5951 -State Listen; Stop-Process -Id <pid> -Force; curl http://localhost:5951",
+      "result": "PID 28280 stopped; curl returns HTTP_CODE=000 (rc=28) after shutdown"
+    }
+  ]
+}
