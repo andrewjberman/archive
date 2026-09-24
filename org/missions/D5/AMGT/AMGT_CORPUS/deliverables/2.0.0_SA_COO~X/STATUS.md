@@ -12,6 +12,11 @@ per READ_HERE s.2 that is the one retry, so this seat STOPPED. Attempt ledger: 2
 covers it, pair @2a3319e5ae covers the derive) and the re-mint of the 4 + AMD (pairs @ae79d37b0c / CTO @35e4cb93ef), which
 also waits for the running production sequence (step 9 dossier since 21:49Z). Served state is safe: the 31 keys restored
 (Z-S26 @c25c5207a8), 58 new keys serve an honest empty block (0 figures).
+The production sequence (started 21:35Z after the ingest read resolved_folders 73) ran steps 1-8 and was
+KILLED by this seat's own 7200 s timeout at ~23:35Z inside step 9 (dossier, running since 21:49Z; rc 124); step 10 never ran;
+no corpus process remains; write-once objects mean nothing partial was served. RESUME ORDER once the terminal is signed in:
+corrected FWD-12 pull (identifiers with spaces) + derive, content-verified (FY rows > 0 per key); the re-mint; `ingest --write`
+(expect resolved_folders 94); then `production_sequence --run` with no 2 h ceiling (dossier alone exceeds 1 h 45 m).
 
 ## ROUND 3 -- ALL 5 CELLS DRAINED (~20:4xZ); the 40-name FIRE held on ONE limb
 
