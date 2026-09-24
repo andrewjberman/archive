@@ -1,0 +1,198 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-h-9",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-9.desktop-outbox-upload-into-the-new-grammar.md",
+    "group": "OTHER",
+    "vintage_commit": "7a7e1860d94ff86b35739713a751e9480f9aa9e8"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "9fbf337a74c1c8ef6b598a0a9f1cab75328747e1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-9.desktop-outbox-upload-into-the-new-grammar.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "0d8564f20c87d4ce6ce7f452b97074e63afe9e0f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New LegacyUploader: opens progress.sqlite3 mode=ro, reads article_objects (83) + article_links (84) READ-ONLY, puts each stored normalised-record file's bytes as bronze via harvest_grammar.put_article_bronze(..., received_form=\"normalised_record\") -- the ONE writer (ruling 2, unchanged) -- and rebuilds the silver article row from those SAME bytes via silver_from_bronze.article_rows(), with discovery filled from every link the article carries (discovered_for = every linked security_key, first_discovered_at = the earliest link, retrieval_rung = symbol_listing for sa else name_search, search_query = the linked pilot security's sa_symbol for sa else its company). Rows are grouped by (source, run_stamp) -- their own shared value -- and written with ONE silver_append call per group via _silver_append_retrying_object_name, which retries a PreconditionFailed under a suffixed run_stamp rather than colliding forever on a key a same-second sibling (or an earlier partial run) already occupies; never deletes anything.",
+      "introduces": ["_silver_append_retrying_object_name"],
+      "artifact_covered_by": ["AC1", "AC4", "AC5", "AC6"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/__main__.py",
+      "kind": "script",
+      "commit_or_etag": "56ae77f848bce3914a17a2d5c80799194377e352",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New `upload-legacy` command choice, dispatched BEFORE Worker(root, config) is constructed (that constructor opens progress.sqlite3 READ-WRITE) so the CLI path never touches the real database in write mode -- matches LegacyUploader's own mode=ro contract. New `upload-harvest` command makes the already-built HarvestUploader reachable from the CLI for the first time (HVST-h-10 uses it). Both take the existing --runtime-root flag and the new --retrieval-mode flag (choices backfill/live, default live); no path hardcoded.",
+      "introduces": ["upload-legacy", "upload-harvest", "--retrieval-mode"],
+      "artifact_covered_by": ["AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_legacy_upload.py",
+      "kind": "test",
+      "commit_or_etag": "56ae77f848bce3914a17a2d5c80799194377e352",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, exactly the six arms section 1 item 4 names, over a temp SQLite FILE (never :memory: -- LegacyUploader opens the file by path) and a STUB S3 client (same shape as lib/research/harvest/tests/test_store.py). No network, no vendor call, no live bucket.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "seeking-alpha|bloomberg|barrons|ft|wsj/harvest/bronze/article/article_hash=*",
+      "kind": "s3_object",
+      "commit_or_etag": "AC6-verified-83-of-83-heads",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "83 bronze objects (one per legacy article_objects row) live in opal-data-harvest, put with metadata received-form=normalised_record. Verified by AC6: head_object succeeded on 83 of 83 keys named in the receipt's bronze_keys, and every one carries received-form=normalised_record (0 overlap with the 6 pre-existing seeking-alpha REST-channel bronze objects, confirmed by hash comparison before the first live run).",
+      "artifact_covered_by": ["AC4", "AC6"]
+    },
+    {
+      "path_or_key": "seeking-alpha|bloomberg|barrons|ft|wsj/harvest/silver/article/date=*/part-*.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "AC4-AC5-83-of-83-settled",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "83 silver article rows live in opal-data-harvest (one per legacy article), reached across two live runs after the object-name-collision fix: the first post-fix run wrote the remaining 15 not-yet-written rows (errors 0), and the run captured as this cell's literal AC4/AC5 evidence found the corpus fully settled (bronze_put 0, silver_rows_written 0, silver_rows_unchanged 83, errors 0 on both). Four same-second SA groups (19 articles) that previously deadlocked on a stale part-<run_stamp>.parquet key now resolve via the suffix-retry.",
+      "artifact_covered_by": ["AC4", "AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~9/upload_legacy.receipt.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The literal AC4 invocation's teed receipt; committed together with this instance at the complete flip."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit, six baseline lines recorded; test_bronze_capture.py \"12 passed\" and test_silver_from_bronze.py \"14 passed\"",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py; do echo \"$t :: $(python -m pytest $t -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "lib/opal_data_harvest/test_bronze_capture.py :: 12 passed in 0.40s | lib/opal_data_harvest/test_silver_from_bronze.py :: 14 passed in 0.75s | lib/opal_data_harvest/test_harvest_grammar.py :: 7 passed in 0.69s | lib/opal_data_harvest/test_worker.py :: 2 failed, 18 passed, 2 subtests passed in 1.00s | lib/opal_data_harvest/test_catalog.py :: 5 passed in 0.61s | lib/opal_data_harvest/test_verification.py :: 1 failed, 3 passed, 2 subtests passed in 0.31s -- identical across every re-run this session (before and after each of this cell's three commits), confirming these two pre-existing failures (test_worker.py, test_verification.py) predate this cell and are never touched by its <paths>",
+      "denominator": "6 of 6 baseline files run; test_bronze_capture.py reads exactly \"12 passed\" and test_silver_from_bronze.py reads exactly \"14 passed\" as named",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"6 passed\" and no \"failed\" -- the six arms named in section 1 item 4",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_legacy_upload.py -v --color=no -p no:cacheprovider 2>&1 | tail -10",
+      "output_evidence": "test_legacy_article_uploaded_as_normalised_record PASSED | test_legacy_links_become_discovered_for PASSED | test_legacy_upload_dedupes_existing_hash PASSED | test_legacy_upload_is_read_only_on_sqlite PASSED | test_cli_upload_legacy_reachable PASSED | test_cli_upload_harvest_reachable PASSED | ============================== 6 passed in 1.91s ==============================",
+      "denominator": "6 of 6 arms passed, 0 failed, at final HEAD 0d8564f20c (re-run after each of the two live-discovered fixes; identical outcome each time)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "each line's passed and failed counts EQUAL its AC0 line",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py; do echo \"$t :: $(python -m pytest $t -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "Run AFTER every edit, at HEAD 0d8564f20c: lib/opal_data_harvest/test_bronze_capture.py :: 12 passed in 0.33s | lib/opal_data_harvest/test_silver_from_bronze.py :: 14 passed in 0.71s | lib/opal_data_harvest/test_harvest_grammar.py :: 7 passed in 0.65s | lib/opal_data_harvest/test_worker.py :: 2 failed, 18 passed, 2 subtests passed in 0.66s | lib/opal_data_harvest/test_catalog.py :: 5 passed in 0.56s | lib/opal_data_harvest/test_verification.py :: 1 failed, 3 passed, 2 subtests passed in 0.30s -- every passed/failed count equals the AC0 line for that file",
+      "denominator": "6 of 6 baseline files re-run; 6 of 6 lines' passed/failed counts equal their AC0 line exactly; 0 new failures, 0 pre-existing failures removed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"outside_allowed []\" and three lines each \"compiles True crlf 0 non_ascii_chars 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/hv9/ac3.py",
+      "output_evidence": "fork_base b7a3e1f702519165ada8e82e36c373a7b1fa6e0f. outside_allowed []. lib/opal_data_harvest/__main__.py compiles True crlf 0 non_ascii_chars 0. lib/opal_data_harvest/uploads.py compiles True crlf 0 non_ascii_chars 0. lib/opal_data_harvest/test_legacy_upload.py compiles True crlf 0 non_ascii_chars 0.",
+      "denominator": "3 of 3 changed files compile clean, pure ASCII, 0 CRLF; 0 outside_allowed; fork_base equals this worktree's true fork off SITEZ (the HVST-h-2 drain), re-run at final HEAD 0d8564f20c",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a receipt with \"articles_seen\": 83, bronze_put plus bronze_skipped equal to 83, \"links_seen\": 84, \"links_carried\": 84 and \"errors\": 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && MAIN=\"$(git worktree list --porcelain | head -1 | sed 's/^worktree //')\" && python -m lib.opal_data_harvest upload-legacy --runtime-root \"$MAIN/.runtime/opal-data-harvest\" | tee org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~9/upload_legacy.receipt.json",
+      "output_evidence": "{\"articles_seen\": 83, \"bronze_put\": 0, \"bronze_skipped\": 83, \"silver_rows_written\": 0, \"silver_rows_unchanged\": 83, \"links_seen\": 84, \"links_carried\": 84, \"errors\": 0, \"bronze_keys\": [...83 keys...]}. This literal invocation's own bronze_put+bronze_skipped = 83, links_seen = 84, links_carried = 84, errors = 0 -- all as named. TWO live-discovered defects were fixed before this literal run: a naive one-silver_append-call-per-article design (this cell's first build, 56ae77f848) errored 15 of 83 (all same-second SA siblings colliding on an identical run_stamp key); grouping same-(source,run_stamp) rows into one call (56d64650ba) then errored 19 of 83 (the grouped write collided with a key one sibling had already claimed in the prior broken run); the suffix-retry fix (0d8564f20c) resolved both, verified by a prior (non-teed) invocation of the identical command showing errors:0 with bronze_put:0, silver_rows_written:15 (the 15 previously-blocked rows landing), immediately before this literal AC4 run found the corpus already fully settled.",
+      "denominator": "83 of 83 articles_seen; 84 of 84 links_seen and links_carried; 0 errors; rc=0 (via echo $? after the pipeline)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the SECOND run's receipt reads \"bronze_put\": 0 and \"silver_rows_written\": 0 with \"errors\": 0 -- none duplicated",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && MAIN=\"$(git worktree list --porcelain | head -1 | sed 's/^worktree //')\" && python -m lib.opal_data_harvest upload-legacy --runtime-root \"$MAIN/.runtime/opal-data-harvest\"",
+      "output_evidence": "{\"articles_seen\": 83, \"bronze_put\": 0, \"bronze_skipped\": 83, \"silver_rows_written\": 0, \"silver_rows_unchanged\": 83, \"links_seen\": 84, \"links_carried\": 84, \"errors\": 0}",
+      "denominator": "bronze_put 0 of 83, silver_rows_written 0 of 83 possible, errors 0 -- run immediately after AC4's literal invocation, identical corpus, nothing new written",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "\"heads 83 of 83\", and received_form_counts showing normalised_record for every key AC4 put (any pre-existing SA REST object skipped by dedupe shows its own form)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/hv9/ac6.py",
+      "output_evidence": "heads 83 of 83 | received_form_counts {'normalised_record': 83}",
+      "denominator": "83 of 83 bronze_keys head_object-verified; 83 of 83 carry received-form=normalised_record (0 dedupe hits against the 6 pre-existing seeking-alpha REST-channel objects -- their article ids do not overlap the legacy set, confirmed by hash comparison before the first live run)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/hv9/mutant_control.py (not committed) runs the SAME fixture/assertion AC1's test_legacy_article_uploaded_as_normalised_record uses, once against the REAL LegacyUploader and once against a MUTANT subclass whose run() calls put_article_bronze with received_form=\"as_received\" (the pre-cell default) instead of \"normalised_record\" -- the ONE substantive value this cell adds to the bronze write.",
+      "expected": "REAL: the bronze object's received-form metadata reads \"normalised_record\" (assertion passes). MUTANT: it reads \"as_received\" (assertion fails).",
+      "observed": "REAL received-form='normalised_record' assertion_would_PASS=True. MUTANT received-form='as_received' assertion_would_PASS=False. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's full test file (test_legacy_upload.py) run multiple times across this session (after each of the three commits); the mutant control script run twice back to back; the live AC5 invocation run and compared against AC4's settled output.",
+      "observed": "pytest: '6 passed' every run, no flakiness. Mutant script: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical output. Live: AC4 and AC5's receipts are byte-for-byte identical in every field but the tee/no-tee difference, confirming the settled corpus is stable across repeated invocations.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The legacy Uploader class, the `upload` CLI command, upload_outbox, store.py, config.json, the bronze/silver builders' as_received behaviour, anything under publications/v1/ or publication-links/v1/",
+      "reason": "Section 1 'What this cell does NOT change' names all of these explicitly; verified: git diff base..HEAD -- lib/opal_data_harvest/config.json lib/research/harvest/store.py lib/opal_data_harvest/silver_from_bronze.py lib/opal_data_harvest/harvest_grammar.py is empty, and uploads.py's pre-existing Uploader and HarvestUploader classes are byte-unchanged (only LegacyUploader and _silver_append_retrying_object_name are new)."
+    },
+    {
+      "item": "Editing lib/research/harvest/store.py to give silver_append a per-caller object-name disambiguator",
+      "reason": "Out of this cell's <paths>. The same-run_stamp collision hazard is worked around entirely inside LegacyUploader (grouping + suffix-retry) and recorded as a surprise row (AMGT_HARVST-Z-W9-S1, ARMED, disarm_owner 2.0.0_SA_COO~Y) because the identical hazard shape exists, unguarded, in the pre-existing HarvestUploader path this cell did not touch."
+    },
+    {
+      "item": "Deleting the one stale/partial silver part-<run_stamp>.parquet object this cell's own first live (pre-fix) attempt left behind",
+      "reason": "S3 deletes require Andrew's explicit confirmation (Agent Autonomy section) and this L7 worker carries no send tool to ask for it mid-task. The suffix-retry fix makes the stale object harmless (its one row's content is correct, just incomplete relative to its sibling batch) without touching it; recorded in the same surprise row."
+    }
+  ],
+  "surprises": ["AMGT_HARVST-Z-W9-S1: silver_append's run_stamp-only, content-blind IfNoneMatch=\"*\" key collides across same-second siblings and across a prior partial run's own poisoned key; worked around inside LegacyUploader (grouping + suffix-retry), never by editing store.py or deleting the stale object; the same unguarded hazard shape remains live in HarvestUploader."],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC0, baseline sweep)",
+      "invocation": "for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py; do python -m pytest $t -q --color=no -p no:cacheprovider; done",
+      "result": "12 passed | 14 passed | 7 passed | 2 failed, 18 passed, 2 subtests passed | 5 passed | 1 failed, 3 passed, 2 subtests passed -- identical every re-run this session"
+    },
+    {
+      "tool": "pytest (AC1, new test file)",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_legacy_upload.py -v --color=no -p no:cacheprovider",
+      "result": "rc 0; 6 passed, 0 failed (re-run after each commit, identical outcome each time)"
+    },
+    {
+      "tool": ".scratch/hv9/ac3.py (AC3, given verbatim by section 5)",
+      "invocation": "timeout 120 python .scratch/hv9/ac3.py",
+      "result": "rc 0; fork_base b7a3e1f702; 3 of 3 changed files compile clean/ASCII/no-CRLF; outside_allowed []"
+    },
+    {
+      "tool": ".scratch/hv9/mutant_control.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/hv9/mutant_control.py",
+      "result": "rc 0; REAL received-form=normalised_record (assertion PASS); MUTANT received-form=as_received (assertion FAIL); CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "python -m lib.opal_data_harvest upload-legacy (AC4/AC5, live S3 writes to opal-data-harvest)",
+      "invocation": "MAIN=\"$(git worktree list --porcelain | head -1 | sed 's/^worktree //')\"; python -m lib.opal_data_harvest upload-legacy --runtime-root \"$MAIN/.runtime/opal-data-harvest\"",
+      "result": "First post-fix run: errors 0, bronze_put 0, silver_rows_written 15 (clearing the backlog the two earlier live defects had blocked). AC4's literal (teed) run and AC5's follow-up run: both errors 0, bronze_put 0, silver_rows_written 0, silver_rows_unchanged 83 -- fully settled, idempotent."
+    },
+    {
+      "tool": ".scratch/hv9/ac6.py (AC6, live head_object verification)",
+      "invocation": "timeout 590 python .scratch/hv9/ac6.py",
+      "result": "rc 0; heads 83 of 83; received_form_counts {'normalised_record': 83}"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh), three commits",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~9 <0.9.0_WK_AMGT_HARVST~9@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "56ae77f848 (build: LegacyUploader + CLI commands + test file, 3 files, risk-reflex clean, naming-gate PASS, commit-gate OK after one ruff fix for an unused variable); 56d64650ba (fix: batch same-run_stamp rows, 1 file, all gates OK); 0d8564f20c (fix: suffix-retry on a poisoned key, 1 file, all gates OK)"
+    }
+  ]
+}

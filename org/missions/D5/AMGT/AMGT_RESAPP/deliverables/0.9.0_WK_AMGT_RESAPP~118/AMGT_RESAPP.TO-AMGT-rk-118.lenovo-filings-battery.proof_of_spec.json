@@ -1,0 +1,205 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-118",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-118.lenovo-filings-battery.md",
+    "group": "W",
+    "vintage_commit": "bf5c280e489ffbfebddc5f6b17a579a0699927a7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "bf5c280e489ffbfebddc5f6b17a579a0699927a7",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-118.lenovo-filings-battery.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~118",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-118, cell AMGT-rk-118 (round 30, L-FIL, Lenovo trial wave 2 stage 3, ISSUER-SITE ONLY, chained after AMGT-rk-121). Worker 0.9.0_WK_AMGT_RESAPP~118, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-30-118 in worktree C:/tmp/wk-amgt-30-118, cut from base 427b32cd9d (carries rk-121's crosswalk-identity merge). THE BAR FIRST: branch wk-amgt-30-118, org/ + .tools/ confirmed present. Both never-widen pair halves confirmed present (ledger/NEVER_WIDEN_ROUND30_RK118_{COO,CTO}_HALF.md, both committed in issuance bf5c280e48; CTO half text-marked SIGNED 2026-09-22 ~19:4xZ, COO half committed in the same issuance commit whose hash it names as its own signature vintage). GRADING ORDER FOLLOWED EXACTLY: AC0, AC1, (ledger opened), AC2, AC3, AC4, AC5, (ledger closed). AC0 (read-only, no fetch): pair_coo True pair_cto True; keys ticker_root '992' exchange 'HK' cik 932477 web_address 'www.lenovo.com' legal_name 'LENOVO GROUP LTD'; precursor_rk121_applied True (rk-121 confirmed live in this base); max_pages_default 40 max_depth 3 delay 2.0; exchange_listing_seed (None, \"no exchange listing template for exchange 'HK'\") -- confirms hkexnews cannot be pulled in via an exchange-listing seed; CEILING printed: '1 SEC ticker table + <=1 EDGAR index + <=1 EDGAR document + <=40 issuer-site pages; 0 vendor-word calls'. AC1 (read-only baseline): filing_attempt_992 1, filings_v1_992 1, filing_attempt_all 180, filings_v1_all 206, sec_filing_bronze 0, issuer_doc_bronze 0, company_tickers 0; pre 992 attempt status UNRESOLVED-SOURCE, reason \"filing_identity.source is 'none': no cik and expected form to fetch by\"; pre.json written. SURPRISE FILED (AMGT_RESAPP-Z-W118-S1, OBSERVATION/INERT): the order's literal deploy-ledger open command names leg kind 's3-key' for the w4 leg, but .tools/deploy_ledger.py's leg-kind enum (activation, ec2-baked-asset, git, s3-prefix, tf-lambda, verify) has no 's3-key' member -- the exact command as written refused rc=1 ('leg kind s3-key not in [...]') before opening any leg. Worked around by substituting 's3-prefix' for that one leg's kind only (id, target string and proof_required column unchanged); ledger opened cleanly with 4 legs at slug amgt-rk118-lenovo-filings, entry org/critical_paths/change_management/20260922T2014Z_amgt-rk118-lenovo-filings_deploy_completion.md, opened 2026-09-22T20:14:46Z, BEFORE AC2's live act and AFTER AC1's read-only baseline, exactly as ordered. AC2 (LIVE, ONE invocation, no re-run needed -- no transient failure occurred): `python -m lib.research.filings.battery --security-key 992_HK_Equity --write-bronze --write-pool --cache-dir .scratch/r118/cache --out-dir .scratch/r118/out`. Outcome: UNRESOLVED-SOURCE across all five declared steps -- step 1 edgar-ticker: ticker '992' not found in the live SEC company_tickers table (10459 rows); step 2 edgar-bloomberg-cik: Bloomberg CIK 932477 RESOLVES to EDGAR entity 'LENOVO GROUP LTD' (a TRIAL FINDING per the order's own s.1 note 1 -- EDGAR now has an entity match for a name the PRD calls 'not an SEC filer') but no 10-K exists in the issuer's recent window (63 filings of 9 distinct forms), so it does not produce a winning document; step 3 esef-lei: not held (HTTP 404, does not apply to HK as expected); step 4 company-site: crawl exhausted at 1 of 40 pages (cap NOT exceeded), seeds=['https://www.lenovo.com'], candidates_tried=0, queue_remaining=0, no candidate passed all three tests; step 5 national-regulator: 'no adapter for jurisdiction UNKNOWN' -- NO hkexnews.hk fetch occurred at any point (confirmed by full-text read of AC2's captured stdout: the string 'hkexnews' does not appear), so msg 24257's exclusion held automatically and no BLOCKING row was needed. Pool line: CHANGED-HELD: 992_HK_Equity filing_identity: {'source': 'none'} -> {'source': 'battery'} (rk-105 semantics: the outcome's underlying identity classification MOVED even though the served status stayed UNRESOLVED-SOURCE, so rk-105 holds the write and reports CHANGED-HELD rather than SKIP-HELD); run exited rc=2, which is CORRECT under rk-105 and is NOT a failure of this cell per the order's own text ('A CHANGED-HELD is NOT a failure of this cell'). AC3 (post-act census against AC1's pre.json): filing_attempt_all pre 180 post 180 added 0 foreign 0; filings_v1_all pre 206 post 206 added 0 foreign 0 -- NO foreign-security write occurred (the sole ROLLBACK trigger named in BOUNDS did not fire). 992 filing_attempt count 1 (unchanged from AC1), filings_v1 count 1 (unchanged from AC1) -- because rk-105's CHANGED-HELD branch writes NOTHING to S3, the pre-existing filing_attempt object (predating both rk-121 and this run) was left exactly as AC1 read it, and its own JSON carries no 'battery' key/attempts array (it predates that schema), so no step-by-step table could be read FROM THE S3 OBJECT; that table is captured instead in AC2's stdout above, which is the run's own authoritative record of the five steps' outcomes since nothing was persisted. AC4 (bronze census against AC1's pre.json): sec_filing_bronze pre 0 post 0 added 0 (step 2 resolved an EDGAR entity match but found no 10-K document to fetch, so no bronze object was written); issuer_doc_bronze pre 0 post 0 added 0 (step 4's crawl visited exactly 1 page and found 0 candidate documents to store, consistent with rk-98's ruled per-candidate storage behaviour producing zero when zero candidates exist); company_tickers pre 0 post 1 added 1, key 'sec/harvest/bronze/company_tickers/date=2026-09-22/company_tickers.json' -- step 1 ran and this is the FIRST company_tickers object for the estate, exactly as the order's W1 description predicts; issuer_doc partitions [] (empty, consistent with 0 added). AC5 (served thesis verify + control): thesis 992_HK_Equity -> statusCode 200, FunctionError None, drafting_status ABSENT, drafting_reason \"filing_identity.source is 'none': no cik and expected form to fetch by\" -- Lenovo's Thesis tab still serves the OLD pre-existing reason (expected: CHANGED-HELD wrote nothing to filing_attempt, so the served object and its reason are unchanged from AC1's read; the trial finding is that the underlying route classification moved to 'battery' while the served reason has not yet caught up, exactly as the never-widen pair's B6/item-6 predicted for a case where the outcome is held); control thesis CAT_US_Equity -> statusCode 200, drafting_status ABSENT, drafting_reason 'no drafted document at s3://opal-data-harvest/drafting/v1/CAT_US_Equity.json: NoSuchKey' -- CONTROL DID NOT REGRESS (both branches: neither the served-200 status nor CAT's own existing NoSuchKey reason changed), so the ROLLBACK trigger for a control regression did not fire. Ledger legs w4 and w5 closed on AC3's read (both proofs quote AC3's own printed deciding values), w3 closed on AC4's read, v closed on AC5's read, then the entry closed 2026-09-22T20:17:49Z -- all 4 legs proven, sentinel removed, nothing stranded, window 4.0h not exceeded. No S3 delete, no IAM/Lambda/portal/infra change, no install, no Bloomberg/Lusha/SA/model call at any point (public sources only: SEC EDGAR ticker table, SEC EDGAR CIK index, Lenovo's own site). All six criteria (AC0-AC5) PASS-by-output; every deciding value is printed above with its denominator; this instance flips the task order's <status> to complete.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal-data-harvest/sec/harvest/bronze/company_tickers/date=2026-09-22/company_tickers.json",
+      "kind": "s3_object",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC4: company_tickers pre 0 post 1 added 1, key printed; first for the estate, as W1 in the task order predicted.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260922T2014Z_amgt-rk118-lenovo-filings_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "deploy_ledger.py open then close-leg x4 then close; final read shows Status CLOSED -- nothing stranded -- closed 20260922T201749Z, all 4 legs proven.",
+      "artifact_covered_by": [
+        "AC3",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row AMGT_RESAPP-Z-W118-S1 appended by textual splice inside the one fenced JSON array (array re-parsed valid, 532 rows, last id AMGT_RESAPP-Z-W118-S1); records the 's3-key' leg-kind mismatch this instance's surprises field cites."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~118/AMGT_RESAPP.TO-AMGT-rk-118.lenovo-filings-battery.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any fetch: \"pair_coo True pair_cto True\"; the keys line showing cik 932477, web_address www.lenovo.com and legal_name LENOVO GROUP LTD; \"precursor_rk121_applied True\" -- a False here is a STOP with a BLOCKING row, because the crawl would have zero seeds; \"max_pages_default 40\"; the exchange-listing seed reading (None, \"no exchange listing template for exchange 'HK'\"); and the CEILING line. Record every value",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r118/ac0.py",
+      "output_evidence": "pair_coo True pair_cto True | keys {\"ticker_root\": \"992\", \"exchange\": \"HK\", \"cik\": 932477, \"web_address\": \"www.lenovo.com\", \"legal_name\": \"LENOVO GROUP LTD\"} | precursor_rk121_applied True | max_pages_default 40 max_depth 3 delay 2.0 | exchange_listing_seed (None, \"no exchange listing template for exchange 'HK'\") | CEILING: 1 SEC ticker table + <=1 EDGAR index + <=1 EDGAR document + <=40 issuer-site pages; 0 vendor-word calls",
+      "denominator": "6 of 6 named deciding values printed and matched (pair_coo, pair_cto, cik, web_address, legal_name, precursor_rk121_applied, max_pages_default, exchange_listing_seed, CEILING -- all present, no fetch performed before this read)",
+      "status": "PASS",
+      "expect": "pair_coo True pair_cto True.*cik.*932477.*web_address.*www\\.lenovo\\.com.*legal_name.*LENOVO GROUP LTD.*precursor_rk121_applied True.*max_pages_default 40.*no exchange listing template for exchange 'HK'.*CEILING"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "READ-ONLY baselines, each recorded as the bar its AC3/AC4 counterpart is written against: at the cut filing_attempt_992 1, filings_v1_992 1, sec_filing_bronze 0, issuer_doc_bronze 0, company_tickers 0, with the estate-wide counts too; and the pre 992 attempt printed with its status UNRESOLVED-SOURCE and its reason. pre.json written",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r118/ac1.py",
+      "output_evidence": "pre filing_attempt_992 1 | pre filings_v1_992 1 | pre filing_attempt_all 180 | pre filings_v1_all 206 | pre sec_filing_bronze 0 | pre issuer_doc_bronze 0 | pre company_tickers 0 | pre 992 attempt status UNRESOLVED-SOURCE reason \"filing_identity.source is 'none': no cik and expected form to fetch by\" | pre.json written to .scratch/r118/pre.json",
+      "denominator": "7 of 7 named baselines printed matching the task order's expected values (992-scoped 1/1, both estate-wide counts, three bronze prefixes at 0)",
+      "status": "PASS",
+      "expect": "filing_attempt_992 1.*filings_v1_992 1.*sec_filing_bronze 0.*issuer_doc_bronze 0.*company_tickers 0.*UNRESOLVED-SOURCE"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "LIVE, ledger OPEN before it, ONE invocation. Either a RESOLVED line naming the winning route and document, or an \"UNRESOLVED-SOURCE: 992_HK_Equity -- <reason>\" line; plus the pool line (OK: uploaded, or rk-105's \"SKIP-HELD: ... (unchanged UNRESOLVED outcome; held object kept)\", or \"CHANGED-HELD: 992_HK_Equity <differing field>\" with the run returning 2). EVERY outcome is a graded result, not a failure. If any line shows a fetch of hkexnews.hk, STOP with a BLOCKING row quoting msg 24257",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m lib.research.filings.battery --security-key 992_HK_Equity --write-bronze --write-pool --cache-dir .scratch/r118/cache --out-dir .scratch/r118/out 2&gt;&amp;1 | tee .scratch/r118/ac2_out.txt",
+      "output_evidence": "UNRESOLVED-SOURCE: 992_HK_Equity -- every declared step failed or found no key/seed -- step 1 (edgar-ticker): ticker '992' not found in the live SEC company_tickers table (10459 rows); step 2 (edgar-bloomberg-cik): Bloomberg CIK 932477 resolves to EDGAR entity 'LENOVO GROUP LTD'; no 10-K in the issuer's recent window (63 filings of 9 distinct form(s)); step 3 (esef-lei): not held (HTTP 404); step 4 (company-site): crawl exhausted (seeds=['https://www.lenovo.com'] pages_visited=1 (cap 40) candidates_tried=0 queue_remaining=0) with no candidate passing all three tests; step 5 (national-regulator): no adapter for jurisdiction UNKNOWN | CHANGED-HELD: 992_HK_Equity filing_identity: {'source': 'none'} -> {'source': 'battery'} | CHANGED-HELD SUMMARY: 1 name(s) | rc=2 | 0 hkexnews fetches (full-text read of .scratch/r118/ac2_out.txt contains no 'hkexnews' string)",
+      "denominator": "outcome line present (UNRESOLVED-SOURCE branch), pool line present (CHANGED-HELD branch, rc=2 as rk-105 requires), 0 of 0 hkexnews fetches (no BLOCKING row needed), ledger confirmed OPEN before this invocation ran (opened 2026-09-22T20:14:46Z per the change-management record, before this criterion's timestamp)",
+      "status": "PASS",
+      "expect": "UNRESOLVED-SOURCE: 992_HK_Equity.*step 1.*step 2.*step 3.*step 4.*step 5.*CHANGED-HELD.*0 hkexnews fetches"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"foreign 0\" for BOTH filing_attempt and filings/v1 -- nothing was written under any security_key but 992_HK_Equity (a foreign key is a ROLLBACK trigger); the 992 counts against AC1's; and the attempt's own step-by-step table printed: step 1 edgar-ticker, step 2 edgar-bloomberg-cik (which NOW runs, because rk-121 supplies cik 932477 -- record what it found), step 3 esef-lei not applicable, step 4 company-site with its reason, step 5 regulator. Close the w4 and w5 legs",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r118/ac3.py",
+      "output_evidence": "filing_attempt_all pre 180 post 180 added 0 foreign 0 [] | filings_v1_all pre 206 post 206 added 0 foreign 0 [] | 992 filing_attempt 1 filings_v1 1 ['filings/v1/992_HK_Equity/UNRESOLVED-SOURCE.source.json'] | attempt status UNRESOLVED-SOURCE winner None (no 'battery'/'attempts' key present in the S3 object because rk-105's CHANGED-HELD branch wrote NOTHING -- the pre-existing object AC1 already read is unchanged, so the step-by-step table is not embedded in the S3 object; it is captured verbatim in AC2's stdout above, which is this run's authoritative step-by-step record: step 1 edgar-ticker not found; step 2 edgar-bloomberg-cik RESOLVED an entity but no 10-K (NEW this round, as predicted); step 3 esef-lei not held/not applicable; step 4 company-site exhausted at 1 page; step 5 national-regulator no adapter) | legs w4 and w5 closed with proof citing this criterion's own printed values",
+      "denominator": "foreign 0 of 0 for BOTH surfaces (the sole rollback trigger did not fire); 992 counts 1/1 matching AC1's baseline exactly (0 added, as rk-105's CHANGED-HELD branch requires); 5 of 5 steps accounted for (via AC2, since the object was not rewritten)",
+      "status": "PASS",
+      "expect": "foreign 0.*foreign 0.*992 filing_attempt 1 filings_v1 1"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the three bronze prefixes with pre/post/added; every added key belongs to this run (company_tickers 0 -> 1 if step 1 ran; issuer_doc_bronze 0 -> N for the step-4 candidates the crawl checked, per rk-98's ruled behaviour). The issuer_doc partitions are printed so a foreign security's partition is visible. Close the w3 leg",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r118/ac4.py",
+      "output_evidence": "sec_filing_bronze pre 0 post 0 added 0 [] | issuer_doc_bronze pre 0 post 0 added 0 [] | company_tickers pre 0 post 1 added 1 ['sec/harvest/bronze/company_tickers/date=2026-09-22/company_tickers.json'] | issuer_doc partitions [] | leg w3 closed with proof citing this criterion's own printed values",
+      "denominator": "3 of 3 bronze prefixes read with pre/post/added; company_tickers moved exactly 0->1 as the order predicted for step 1 running; issuer_doc_bronze stayed 0 because the crawl found 0 candidates (consistent with step 4's own reason line in AC2); 0 foreign partitions visible",
+      "status": "PASS",
+      "expect": "sec_filing_bronze pre 0 post 0.*issuer_doc_bronze pre 0 post 0.*company_tickers pre 0 post 1 added 1"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the served thesis route for 992_HK_Equity returns 200, and the CONTROL CAT_US_Equity also returns 200 (a control regression is a ROLLBACK trigger). Lenovo's drafting_status and drafting_reason are printed -- if the outcome is still UNRESOLVED, the reason is the trial finding; if it RESOLVED, note that the adapter still serves the OLD reason until the supersede reader cell lands (Z-S225's sibling, carried by the CTO at round 27). Close the verify leg and the entry",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r118/ac5.py",
+      "output_evidence": "thesis 992_HK_Equity -> 200 FE None drafting_status ABSENT drafting_reason \"filing_identity.source is 'none': no cik and expected form to fetch by\" | thesis CAT_US_Equity -> 200 FE None drafting_status ABSENT drafting_reason 'no drafted document at s3://opal-data-harvest/drafting/v1/CAT_US_Equity.json: NoSuchKey: An error occurred (NoSuchKey) when calling the GetO...' | verify leg and entry closed: entry Status CLOSED -- nothing stranded -- closed 20260922T201749Z",
+      "denominator": "2 of 2 statusCode 200 (Lenovo + control, no regression trigger fired); Lenovo's reason confirmed OLD/unchanged (matches AC1's pre-read reason verbatim, expected because CHANGED-HELD wrote nothing to filing_attempt); ledger entry confirmed CLOSED with all 4 legs proven",
+      "status": "PASS",
+      "expect": "thesis 992_HK_Equity -> 200.*thesis CAT_US_Equity -> 200"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "No code was changed by this cell (every code file is a WALL per the order's s.3), so there is no code mutant to plant. The control here is AC5's CONTROL security CAT_US_Equity, named explicitly by the order as the rollback-trigger check for a served-route regression.",
+      "expected": "CAT_US_Equity's thesis route returns 200 both before and after this cell's act (this cell never writes any CAT_US_Equity object), proving the served route for an UNRELATED security did not regress.",
+      "observed": "thesis CAT_US_Equity -> 200, drafting_reason 'NoSuchKey' unchanged in shape from what a control that this cell never touches is expected to read.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The order bounds this cell to ONE invocation of the live battery act (section 4: 'ONE run. One transient network failure ... allows ONE re-run'); no transient failure occurred, so AC2 ran exactly once and was not re-run. AC0, AC1, AC3, AC4 and AC5 are all read-only/local and were each run once in the ordered grading sequence; re-running them a second time was not performed because AC2's single-invocation bound already fixes the state they read against, and a second read would add cost with no discriminating value per Rule 22's speed governor.",
+      "observed": "Each criterion's script ran once, in the mandated grading order (AC0, AC1, ledger-open, AC2, AC3, AC4, AC5, ledger-close), and every read after AC2 is internally consistent (AC3/AC4's added-key counts agree with AC2's stdout account of what ran; AC5's served reason matches AC1's pre-read reason verbatim, as required by the CHANGED-HELD branch writing nothing).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any hkexnews.hk fetch or HKEX regulator-route registry row",
+      "reason": "excluded by the CTO's ruling msg 24257 ('the trial's filings stage is CONFINED TO THE ISSUER'S OWN SITE'); AC0's exchange_listing_seed read confirms nothing pulls an exchange seed in for HK, and AC2's full-text output contains no 'hkexnews' string. Rule 30: a builder refusal is a missing registry row, belonging to the registry lane on the other fabric, not routed from here."
+    },
+    {
+      "item": "any Bloomberg, Lusha, Seeking Alpha or model-block call",
+      "reason": "the order names public sources only (SEC EDGAR + issuer site); 0 vendor-word calls were spent, confirmed by AC0's own printed CEILING line and by the battery's actual egress (SEC EDGAR ticker table, SEC EDGAR CIK index, Lenovo's own site) with no other host contacted."
+    },
+    {
+      "item": "any S3 delete, IAM change, Lambda deploy, portal change, or code edit",
+      "reason": "this order changes no code (rk-121 already did) and names no such act; none was performed at any point in this session."
+    },
+    {
+      "item": "a second battery invocation",
+      "reason": "the order allows ONE re-run only on a transient network failure; no transient failure occurred, so the single AC2 invocation stands and is not repeated."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W118-S1: the order's literal deploy-ledger open command names leg kind 's3-key' for the w4 leg, but .tools/deploy_ledger.py's leg-kind enum has no 's3-key' member (only activation, ec2-baked-asset, git, s3-prefix, tf-lambda, verify), so the exact command refused rc=1 before opening; worked around by substituting 's3-prefix' for that leg's kind only."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "python",
+      "invocation": "python .scratch/r118/ac0.py",
+      "result": "pair_coo True pair_cto True; keys cik 932477 web_address www.lenovo.com legal_name LENOVO GROUP LTD; precursor_rk121_applied True; max_pages_default 40; exchange_listing_seed (None, no template); CEILING printed"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .scratch/r118/ac1.py",
+      "result": "read-only baselines printed and pre.json written"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-rk118-lenovo-filings ... (w4 leg kind substituted s3-prefix for the order's literal, invalid s3-key)",
+      "result": "OK: OPENED deploy ledger 'amgt-rk118-lenovo-filings' (4 legs)"
+    },
+    {
+      "tool": "python -m lib.research.filings.battery",
+      "invocation": "python -m lib.research.filings.battery --security-key 992_HK_Equity --write-bronze --write-pool --cache-dir .scratch/r118/cache --out-dir .scratch/r118/out",
+      "result": "UNRESOLVED-SOURCE: 992_HK_Equity; CHANGED-HELD: 992_HK_Equity filing_identity source none->battery; rc=2 (ONE invocation, no re-run needed)"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .scratch/r118/ac3.py",
+      "result": "foreign 0 (both surfaces); 992 counts unchanged 1/1"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .scratch/r118/ac4.py",
+      "result": "company_tickers 0->1 added 1; sec_filing_bronze and issuer_doc_bronze unchanged at 0"
+    },
+    {
+      "tool": "python",
+      "invocation": "python .scratch/r118/ac5.py",
+      "result": "thesis 992_HK_Equity -> 200; thesis CAT_US_Equity -> 200 (control, no regression)"
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py close-leg --slug amgt-rk118-lenovo-filings --leg-id {w4,w5,w3,v} --proof ... ; python .tools/deploy_ledger.py close --slug amgt-rk118-lenovo-filings",
+      "result": "OK: CLOSED deploy ledger 'amgt-rk118-lenovo-filings' -- all 4 legs proven; sentinel removed"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~118/AMGT_RESAPP.TO-AMGT-rk-118.lenovo-filings-battery.proof_of_spec.json AC0,AC1,AC2,AC3,AC4,AC5",
+      "result": "PENDING -- run after this instance is written"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~118 <0.9.0_WK_AMGT_RESAPP~118@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "PENDING-THIS-COMMIT"
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-8",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-8.fund-form-per-fund.md",
+    "group": "OTHER",
+    "vintage_commit": "dc937b5150f6bf04a412a002c97ed94b2d456e01"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "dc937b5150f6bf04a412a002c97ed94b2d456e01",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-8.fund-form-per-fund.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/fund_form.py",
+      "kind": "script",
+      "commit_or_etag": "eebaeb1fa1a8875e0f422c7c7e5836b7f26a34ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build()/distinct_funds()/absent_fund_reports()/compare_skeletons() are pure; gather_items()/write()/current_inputs()/read_latest()/stored_funds() read CRPS-c-3's typed silver records (store.silver_latest) and each record's own extract_key extraction, sorted by (security_key, report_id). Measured on the live corpus (--write, real S3): funds IDVZ (reports 37, sections 433) and PFOE (reports 7, sections 1592); funds 2 fund_reports 44 absent_fund_reports 79. Written through gold.gold_put, never overwriting: s3://opal-data-harvest/amgt/harvest/gold/research-fund-form/fund=idvz/b5b15d3bf826322f.json and .../fund=pfoe/578b263102df5142.json, both put_performed True. No S3 delete of any kind, anywhere in this cell.",
+      "introduces": ["build", "distinct_funds", "absent_fund_reports", "compare_skeletons", "build_document", "gather_items", "current_inputs", "write", "read_latest", "stored_funds"],
+      "artifact_covered_by": ["AC1", "AC2", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_fund_form.py",
+      "kind": "test",
+      "commit_or_etag": "eebaeb1fa1a8875e0f422c7c7e5836b7f26a34ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 tests, offline under tests/conftest.py's poison: NO FUND INVENTED (a None-fund record lands only in absent_fund_reports, build(None,...) is always empty), BOTH KEPT (two funds with different skeletons both survive and --compare's differing-sections set is exact), by_class never blends A and B, report_class OTHER is excluded from every form, every skeleton line carries count/of, heading normalisation is case-and-whitespace only, a heading repeated within one report counts that report once, cited_reports is capped at 3, the skeleton sorts by median order position, and a full write/read_latest/CLI --write+--compare round trip over an in-memory FakeS3Client with store.silver_latest monkeypatched (test_typed.py's own pattern) proving never-overwrite and the printed shapes.",
+      "artifact_covered_by": ["AC1", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "eebaeb1fa1a8875e0f422c7c7e5836b7f26a34ae",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new row appended: AMGT_CORPUS-Z-W5-S1 (PFOE's real fund form measures 1592 distinct sections over 7 reports, far past the scan's 'fixed five-section skeleton' narrative, because CRPS-c-2's PDF heading detector is a font-size/bold heuristic that also tags years, tickers and table cell values as headings -- measured, faithful to this cell's sole stated input, and out of this cell's scope to fix).",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_fund_form.py -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_fund_form.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "............                                                             [100%]\n12 passed in 0.14s",
+      "denominator": "12 of 12 tests passed, 0 failed; run twice across this session (before and after the fix that moved heading normalisation into _skeleton()), identical outcome the second time onward",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.fund_form --compare 2>&1 | tail -40 -- expect (?s)fund \\S+ reports \\d+ sections \\d+.*pair \\S+ \\S+ shared \\d+ only_\\S+ \\d+ only_\\S+ \\d+",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.fund_form --compare 2>&1 | tail -40",
+      "output_evidence": "fund IDVZ reports 37 sections 433\nfund PFOE reports 7 sections 1592\npair IDVZ PFOE shared 48 only_IDVZ 385 only_PFOE 1544\n  only_IDVZ sections: <385 normalised heading strings, alphabetical, e.g. '$', 'performance vs fund', 'recommendation: maintain position in idvz', 'trading history', ...>\n  only_PFOE sections: <1544 normalised heading strings, alphabetical, e.g. 'geographic highlights', 'headline results', 'headwinds and risks', 'guidance', 'segment highlights', plus a large volume of numeric/table-cell text, ...>",
+      "denominator": "read_latest per fund matched current_inputs() exactly (2 of 2 funds resolved: IDVZ 37 typed rows of class A-D with fund=IDVZ, PFOE 7 of class A-D with fund=PFOE, out of 44 fund-bearing + 79 absent-fund rows total); shared 48 of the union, only_IDVZ 385, only_PFOE 1544; re.search of AC2's exact expect pattern against this output returned a match (verified separately with python re.search)",
+      "expect": "(?s)fund \\S+ reports \\d+ sections \\d+.*pair \\S+ \\S+ shared \\d+ only_\\S+ \\d+ only_\\S+ \\d+",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "The --write summary and AC2's comparison beside the scan's description of the two funds. Record them verbatim, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, graded by 3.0.0_SA_CVO~Z at L9, never self-graded",
+      "output_evidence": "--WRITE SUMMARY (real run): 'fund IDVZ reports 37 sections 433 put_performed True' / 'fund PFOE reports 7 sections 1592 put_performed True' / 'funds 2 fund_reports 44 absent_fund_reports 79'.\n\nAC2 --COMPARE: 'fund IDVZ reports 37 sections 433' / 'fund PFOE reports 7 sections 1592' / 'pair IDVZ PFOE shared 48 only_IDVZ 385 only_PFOE 1544', with the two only_-sets printed in full (385 and 1544 normalised heading strings respectively).\n\nTHE SCAN'S DESCRIPTION (RESEARCH_CORPUS_SCAN_20260922.md s.1/s.3, this order's own comparison bar, quoted in section 1): 'The two funds write differently and the layer must know which fund a name is in.' IDVZ (43 names; Word; the international-dividend PM) carries RECOMMENDATION + TRADING HISTORY + PERFORMANCE VS FUND and dividend language in nearly every file. PFOE (18 names; PDF; the US-growth PM) carries a fixed five-section skeleton (Headline results, Geographic highlights, Segment highlights, Headwinds and risks, Guidance) and 'Fund: PFOE' in the header. DIVZ appears 3 times as a candidate fund.\n\nAGREEMENT: IDVZ's measured skeleton does contain 'recommendation'-family, 'trading history' and 'performance vs fund' headings, matching the scan's description directly (only_IDVZ's alphabetically-first entries include 'performance vs fund', 'trading history', and multiple 'recommendation: ...' variants carrying the position-size language the scan and CRPS-c-3's own B-class rule describe). PFOE's five named sections (headline results, geographic highlights, segment highlights, headwinds and risks, guidance) ARE present verbatim, lower-cased, inside PFOE's measured skeleton -- e.g. 'headline results', 'geographic highlights', 'headwinds and risks', 'guidance', 'segment highlights' all appear in only_PFOE's printed list.\n\nDIFFERENCE: PFOE's measured skeleton is 1592 sections, not five, and IDVZ's is 433, not the small set the scan's prose names. This cell's `skeleton` is built from CRPS-c-2's own `headings` list verbatim (case/whitespace normalisation only, per this order's RULED instruction, which forbids inventing or filtering structure beyond that) -- and that input's PDF heading detector (font-size/bold heuristic) also tags years, tickers, dollar figures and table cell values as 'headings', which the DOCX path does to a lesser but still real degree. So the five/short-list scan narrative and the ~400-1600-section measurement are not in conflict about WHICH sections the funds keep (the named sections are present in both), only about how much additional non-title text the shared extraction's heading heuristic also captured. AMGT_CORPUS-Z-W5-S1 records this. IDVZ's fund count (37) and PFOE's (7) also read low against the scan's 43-name/18-name counts because this cell counts REPORTS whose typed record states the fund AND whose report_class is A-D (excluding OTHER and fund-absent records), a narrower population than 'every name in the folder'.",
+      "denominator": "N/A -- judgment row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L9: a judgment criterion is graded by 3.0.0_SA_CVO~Z at adjudication, never self-graded by the worker that produced it."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": ".................................................................        [100%]\n65 passed in 0.59s",
+      "denominator": "65 of 65 tests passed across the whole lib/research/corpus/tests package (12 of them this cell's), 0 failed",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": ".scratch/c8/hyg.py -- diff the worktree against git merge-base HEAD SITEZ over lib and org; print outside_allowed [...] (every changed path NOT in <paths>), changed_files <n>, per changed .py compiles <bool> crlf <n> non_ascii <n>, then bad <n> -- expect (?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c8/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 3\nlib/research/corpus/fund_form.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_fund_form.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "3 of 3 changed paths under lib/org are inside the <paths> grant (0 outside_allowed: the two new lib/research/corpus/* files plus the modified INVESTIGATION_v1.md; the task-order file itself had not been touched at this point in the run); 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, so bad 0 of 2. hyg.py itself unions `git diff --name-only <merge-base>` with `git ls-files --others` over lib/org so a brand-new untracked file is not invisible to the sweep (git diff alone shows 0 for a never-tracked path).",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A for this task order -- no mutant control was named in the RULED build instructions or the proof-of-spec section; none built.",
+      "expected": "N/A",
+      "observed": "N/A",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 run twice (before and after moving heading normalisation into _skeleton()), AC4 run once post-fix, AC2/--write run once each against real S3 (never-overwrite: a second --write would be idempotent by gold_put's own conditional-put design, not re-run here to avoid an unnecessary second S3 round trip), AC5 run twice (before and after adding the surprise row).",
+      "observed": "AC1: 12 passed both times after the fix (7 failed before it, diagnosing the missing normalisation call in _skeleton -- fixed in-cell, not reported as a defect). AC4: 65 passed. AC5: outside_allowed [] and bad 0 both times; changed_files tracked the real working-tree state (2 then 3, as the investigation row was added).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Sector templates, typecast, or a position/fund-of-record choice for a security",
+      "reason": "Section 1, 'What this cell does NOT do': 'no sector templates, no typecast, no position or fund-of-record choice for a security (that is the continuation artifact's), no change to other modules.' fund_form.py imports no sector or typecast module and writes no continuation-shaped artifact."
+    },
+    {
+      "item": "Reading or importing continuation.py (the sibling worker's module)",
+      "reason": "Face's own context note: a sibling worker (slot ~1) is building continuation.py to the same gold shape concurrently; this cell was built from the face's own restatement of the gold shape and never imports or reads continuation.py, which is not on this branch."
+    },
+    {
+      "item": "Any S3 delete",
+      "reason": "BOUNDS: 'NO S3 DELETE OF ANY KIND' (row AMGT_CORPUS-Z-S4). fund_form.py imports no delete_object call anywhere; gold.gold_put is the only write path and it is never-overwrite (conditional put with IfNoneMatch=*); a wrong object is superseded by bumping METHOD_VERSION, never deleted."
+    },
+    {
+      "item": "Inventing, merging or renaming a fund value",
+      "reason": "RULED: 'Funds are the values the records STATE. No fund is added, merged or renamed.' distinct_funds()/build() only ever compare against the exact `fund` string CRPS-c-3's typed record carries; a record with fund None is counted only in absent_fund_reports and enters no form (test_no_fund_invented_absent_lands_in_absent_fund_reports)."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W5-S1: CRPS-c-8's real --write measured PFOE's fund form at 1592 distinct sections over 7 reports (IDVZ 433 over 37), far past the scan's 'fixed five-section skeleton' narrative for PFOE, because CRPS-c-2's PDF heading detector is a font-size/bold heuristic that also tags years, tickers and table cell values as headings, not only true section titles -- measured, faithful to this cell's sole stated input (the extraction's own `headings` list), and out of this cell's scope to fix (CRPS-c-2/extract.py is READ-ONLY here)."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_fund_form.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 12 passed, 0 failed"
+    },
+    {
+      "tool": "fund_form CLI --write (build step)",
+      "invocation": "python -m lib.research.corpus.fund_form --write",
+      "result": "rc 0; fund IDVZ reports 37 sections 433 put_performed True; fund PFOE reports 7 sections 1592 put_performed True; funds 2 fund_reports 44 absent_fund_reports 79; written s3://opal-data-harvest/amgt/harvest/gold/research-fund-form/fund=idvz/b5b15d3bf826322f.json and .../fund=pfoe/578b263102df5142.json"
+    },
+    {
+      "tool": "fund_form CLI --compare (AC2)",
+      "invocation": "python -m lib.research.corpus.fund_form --compare",
+      "result": "rc 0; reads the two objects --write just wrote back (inputs match current_inputs() per fund); prints the per-fund summary then one pair line and the full differing-sections lists; AC2's exact expect regex matches (python re.search verified separately)"
+    },
+    {
+      "tool": "pytest (AC4)",
+      "invocation": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 65 passed, 0 failed"
+    },
+    {
+      "tool": ".scratch/c8/hyg.py (AC5, written per the task order's own literal spec)",
+      "invocation": "python .scratch/c8/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 3; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    }
+  ]
+}

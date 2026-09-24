@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-109",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-109.fye-join-in-stage-derive.md",
+    "group": "OTHER",
+    "vintage_commit": "0ed364cff014697720af7bcd9931f254cf83d827"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "0ed364cff014697720af7bcd9931f254cf83d827",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-109.fye-join-in-stage-derive.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~109",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-109, cell AMGT-rk-109 (round 28, the Lenovo trial's wave 0), issued by 2.0.0_SA_COO~Z. Worker 0.9.0_WK_AMGT_RESAPP~109, L7 subagent, branch wk-amgt-28-109 in worktree C:/tmp/wk-amgt-28-109, base 0ed364cff0. THE BAR FIRST: branch wk-amgt-28-109, org/ and .tools/ present, TREE-OK. Order read WORKER FACE only, top to the RECORD FACE marker. Re-read the measured state against branch HEAD: confirmed 0 commits touched lib/integrations/infra/.tools/portal between the pin 96cc4dae9d and this worktree's base 0ed364cff0, so the cell's 'MEASURED STATE at SITEZ 96cc4dae9d' text describes this worktree's own pre-edit bytes exactly. Built model_block_pull._load_fye_join (loads fye_join.py by path, same pattern as _load_sa_forecast_fallback) and _is_december_fye(hist_rows) (True when every row carrying a fye_join.FUNDAMENTAL_FIELDS member is dated month 12, or when no such row exists). stage_derive now branches on that helper: December keeps merge_by_fiscal_year exactly as before (fy_groups computed identically, no new keys anywhere in the served block -- byte-identical, proved against the pinned module in the new test's arm 3); a non-December name instead calls fye_join.fiscal_period_join(hist_rows) (no dense price series in this cell, per the order), sets each group's PX_LAST to the paired price, records price_date/gap_days ON the PX_LAST figure specifically, marks a HIST_FIELDS member that exists ONLY on a non-anchor (price-only) row as unresolved with the named reason instead of silently dropping it (computed once per security as non_anchor_only_fields, since fiscal_period_join never merges such a field), and adds a top-level fiscal_year_join key (method + max_gap_days via fye_join.max_gap_days) ONLY on the non-December path -- the December block never gains this key, so its bytes are unchanged even in principle. New test_stage_derive_fye.py (4 tests, fully offline): the March pairing (992 HK Equity-shaped fixture, 3 fiscal years, each PX_LAST figure carries the correct paired price/price_date/gap_days computed independently in the test via date arithmetic, not by re-deriving the production formula); the price-only PE_RATIO landing in unresolved with the named reason and never as a figure; December byte-identity against a pinned copy of model_block_pull.py loaded via `git show 96cc4dae9d:...` into a temp file (both module instances' _load_sa_forecast_fallback and _FIELD_MAP_PATH/_FIELD_MAP_CACHE are pinned to the REAL research directory so a temp-dir sibling-load artifact cannot masquerade as a behavior difference; only the 'vintage' field is stripped before comparison -- there is no other clock-carrying field anywhere in the served block); and the helper directly (all-December True with a non-fundamentals row outside December correctly ignored, any-March False, no-fundamentals True). SURPRISE FILED (AMGT_RESAPP-Z-W109-S1): the worker built the code change before running AC0's literal invocation, so AC0's sed portion (lines 965-978) no longer shows the pre-edit stage_derive header on the current tree; recovered via `git show 96cc4dae9d:...` (verified byte-identical to the worktree's true pre-edit state by the zero-intervening-commits check above) rather than a literal re-run of the sed on the current file. The four baseline pytest files needed no substitution -- AC0's real run and AC2's post-edit run produced IDENTICAL counts (3 failed 2 passed / 4 passed / 1 failed 5 passed / 13 passed), confirming the refusal clause's pre-existing failures neither grew nor shrank. All four proof invocations were re-run a SECOND time after discovering that the Bash tool's cwd resets to the primary workspace between calls (not this worktree) -- the literal invocation's own `cd \"$(git rev-parse --show-toplevel)\")` is unsafe as a call's FIRST command for that reason; every criterion below was captured with the tool's cwd explicitly anchored in this worktree first, then the literal invocation chain run, confirmed by printing `pwd` immediately before each. MUTANT CONTROL: forced _is_december_fye to `return True` unconditionally (one-line edit, model_block_pull.py only, snapshotted to .scratch/r109/model_block_pull_pre_mutant.py before mutating) -- 3 of 4 new tests FAILED (the March pairing test, the price-only-ratio test, and the helper test itself; the December identity test still passed, exactly as expected since forcing December never changes that path). Restored from the snapshot immediately after, confirmed md5sum-identical to the committed blob, re-ran the full suite twice more (stable, 4 passed both times) plus AC0-AC3 once more, all unchanged. Nothing outside <paths> touched; fye_join.py, derive_fye_fixed.py and merge_by_fiscal_year are UNTOUCHED (read-only); no S3 object, served block or currency label touched (that is rk-112, chained after this cell per the RECORD FACE). No install, no Bloomberg/vendor call, no AWS/S3 write anywhere in this session -- every S3 touch inside stage_derive's call graph is monkeypatched to an in-memory stub. Branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50 never read, shown, diffed or checked out.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "34d88231b8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stage_derive branches on the new _is_december_fye helper; December path calls merge_by_fiscal_year exactly as before (byte-identical, AC1 arm 3); non-December calls fye_join.fiscal_period_join, pairs PX_LAST with price_date/gap_days, marks non-anchor-only fields unresolved, and adds fiscal_year_join only on that path (AC1 arms 1/2/4)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_stage_derive_fye.py",
+      "kind": "test",
+      "commit_or_etag": "34d88231b8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline test file, 4 of 4 tests passing over stubbed S3 -- no network, no live bucket, no vendor call; a mutant control (forcing December always) fails 3 of the 4, proving the suite discriminates the RULED behavior."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "34d88231b8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "row AMGT_RESAPP-Z-W109-S1 appended (AC0 sequencing note), disarm_owner 2.0.0_SA_COO~Z."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-109.fye-join-in-stage-derive.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "record-face <status> flipped pending -> complete."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~109/AMGT_RESAPP.TO-AMGT-rk-109.fye-join-in-stage-derive.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: stage_derive calling merge_by_fiscal_year; then four per-file baselines, recorded (measured at the cut: 3 failed 2 passed; 4 passed; 1 failed 5 passed; 13 passed)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && sed -n '965,978p' integrations/bloomberg/research/model_block_pull.py && for t in test_fye_join test_vintage_derivation_identity test_latest_stamp_raw_pair test_forecast_fallback; do echo \"$t $(python -m pytest integrations/bloomberg/research/tests/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "def stage_derive(s3, security: str, raw_stamp: str | None) -> dict:\n    \"\"\"Read the raw bytes BACK from S3 (never the pull's in-memory result) and compute the\n    derived model_block.json, landed at its own, later stamp -- independently re-runnable.\"\"\"\n    sec_key = security_key(security)\n    if raw_stamp is None:\n        raw_stamp = _latest_stamp(s3, sec_key)\n    ref = _read_json_from_s3(s3, _bronze_key(\"refdata\", sec_key, raw_stamp))\n    hist = _read_json_from_s3(s3, _bronze_key(\"histdata\", sec_key, raw_stamp))\n\n    header_vals = ref.get(security, {})\n    header_errs = header_vals.get(\"__field_errors__\", {})\n    hist_rows = hist.get(security, [])\n    fy_groups = merge_by_fiscal_year(hist_rows)\ntest_fye_join 3 failed, 2 passed in 1.75s\ntest_vintage_derivation_identity 4 passed in 0.03s\ntest_latest_stamp_raw_pair 1 failed, 5 passed in 0.44s\ntest_forecast_fallback 13 passed in 0.28s",
+      "denominator": "4 of 4 baseline files recorded; sed shows lines 965-978 read from the PIN (96cc4dae9d), NOT the worker's own working tree, because the worker edited model_block_pull.py before running AC0's literal invocation (row AMGT_RESAPP-Z-W109-S1) -- the pin's bytes are proven identical to this worktree's true pre-edit state by 0 commits touching lib/integrations/infra/.tools/portal between 96cc4dae9d and base 0ed364cff0 (git log --oneline 96cc4dae9d..0ed364cff0 -- lib integrations infra .tools portal, 0 lines). All four pytest baselines match the order's own recorded cut-time measurement exactly (3 failed 2 passed; 4 passed; 1 failed 5 passed; 13 passed) and needed no substitution -- run directly against the (edited) working tree, unaffected because this cell only ever ADDS a new branch, never touches the four baseline files' own code paths.",
+      "status": "PASS",
+      "expect": "def stage_derive[\\s\\S]*merge_by_fiscal_year\\(hist_rows\\)[\\s\\S]*3 failed, 2 passed[\\s\\S]*4 passed[\\s\\S]*1 failed, 5 passed[\\s\\S]*13 passed"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"4 passed\" and 0 failed -- the March pairing, the price-only ratio going unresolved, the December name byte-identical to the pinned module, and the helper",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests/test_stage_derive_fye.py -v --color=no -p no:cacheprovider 2>&1 | tail -7",
+      "output_evidence": "integrations/bloomberg/research/tests/test_stage_derive_fye.py::test_march_fye_pairs_price_on_or_before_period_end PASSED [ 25%]\nintegrations/bloomberg/research/tests/test_stage_derive_fye.py::test_march_fye_price_only_ratio_is_unresolved PASSED [ 50%]\nintegrations/bloomberg/research/tests/test_stage_derive_fye.py::test_december_name_byte_identical_to_pin PASSED [ 75%]\nintegrations/bloomberg/research/tests/test_stage_derive_fye.py::test_is_december_fye PASSED [100%]\n\n============================== 4 passed in 0.37s ==============================",
+      "denominator": "4 of 4 named tests PASSED, 0 failed",
+      "status": "PASS",
+      "expect": "test_march_fye_pairs_price_on_or_before_period_end PASSED[\\s\\S]*test_march_fye_price_only_ratio_is_unresolved PASSED[\\s\\S]*test_december_name_byte_identical_to_pin PASSED[\\s\\S]*test_is_december_fye PASSED[\\s\\S]*4 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "each of the four lines EQUALS its AC0 line: no new failure, and no pre-existing failure removed or added",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in test_fye_join test_vintage_derivation_identity test_latest_stamp_raw_pair test_forecast_fallback; do echo \"$t $(python -m pytest integrations/bloomberg/research/tests/$t.py -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "test_fye_join 3 failed, 2 passed in 1.71s\ntest_vintage_derivation_identity 4 passed in 0.03s\ntest_latest_stamp_raw_pair 1 failed, 5 passed in 0.41s\ntest_forecast_fallback 13 passed in 0.25s",
+      "denominator": "4 of 4 lines EQUAL their AC0 counterpart exactly (3 failed 2 passed; 4 passed; 1 failed 5 passed; 13 passed) -- 0 new failure, 0 pre-existing failure removed or added",
+      "status": "PASS",
+      "expect": "test_fye_join 3 failed, 2 passed[\\s\\S]*test_vintage_derivation_identity 4 passed[\\s\\S]*test_latest_stamp_raw_pair 1 failed, 5 passed[\\s\\S]*test_forecast_fallback 13 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"changed_code_files\" lists EXACTLY integrations/bloomberg/research/model_block_pull.py and integrations/bloomberg/research/tests/test_stage_derive_fye.py; each \"compiles True crlf 0\" and non_ascii_chars equal to the value at the pin (measure the pin's model_block_pull.py in AC0's spirit and record it)",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r109/ac4.py",
+      "output_evidence": "changed_code_files ['integrations/bloomberg/research/model_block_pull.py', 'integrations/bloomberg/research/tests/test_stage_derive_fye.py']\nintegrations/bloomberg/research/model_block_pull.py compiles True crlf 0 non_ascii_chars 0\nintegrations/bloomberg/research/tests/test_stage_derive_fye.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "2 of 2 changed files are exactly the named set (git diff 96cc4dae9d HEAD over lib/integrations/infra/.tools/portal, 0 files changed between the pin and this worker's base commit 0ed364cff0); 2 of 2 files compile True, crlf 0; non_ascii_chars 0 for model_block_pull.py, matching the pin's own measured value (also 0, computed directly from the pin's bytes: .scratch/r109/model_block_pull_pre_edit.py); test_stage_derive_fye.py is a NEW file (absent at the pin, so it carries no pin value to match) and its own non_ascii_chars is 0.",
+      "status": "PASS",
+      "expect": "changed_code_files \\['integrations/bloomberg/research/model_block_pull\\.py', 'integrations/bloomberg/research/tests/test_stage_derive_fye\\.py'\\][\\s\\S]*compiles True crlf 0 non_ascii_chars 0[\\s\\S]*compiles True crlf 0 non_ascii_chars 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "_is_december_fye is the entire gate deciding which join stage_derive uses. MUTANT: forced it to `return True` unconditionally (one line inserted at the top of the function body, model_block_pull.py otherwise untouched in the working tree), re-ran the full new test file.",
+      "expected": "3 of the 4 new tests FAIL: the March pairing test (PX_LAST would be paired by calendar-year mispairing instead of fiscal_period_join, and price_date/gap_days/fiscal_year_join would not exist), the price-only-ratio test (PE_RATIO would merge via merge_by_fiscal_year's calendar grouping instead of landing unresolved), and the helper test itself (mbp._is_december_fye would return True for the any-March case). The December identity test should still PASS (forcing December never changes that path).",
+      "observed": "3 failed, 1 passed in 0.42s -- test_march_fye_pairs_price_on_or_before_period_end FAILED, test_march_fye_price_only_ratio_is_unresolved FAILED, test_is_december_fye FAILED (assert True is False on the any-March case); test_december_name_byte_identical_to_pin PASSED, exactly as expected. Restored model_block_pull.py from .scratch/r109/model_block_pull_pre_mutant.py (a plain binary copy taken before mutating; never git checkout --/show/stash) immediately after, confirmed md5sum cd6d402ced90a81030917fbbc066dbd4 identical before and after, git diff --stat showed 0 changes post-restore, and re-ran the full suite twice more (4 passed both times) plus AC0-AC3 once more, all unchanged.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every criterion is a pure offline read: pytest against in-process stubs (no network, no AWS, no vendor call), or a local git show/git diff/py_compile/compile() read against this worktree's own committed bytes.",
+      "observed": "test_stage_derive_fye.py: 4 passed, run 4 times across this session (pre-commit, post-commit anchored run for AC1, and twice more post-mutant-restore) -- identical PASSED lines and identical '4 passed' summary every time. The four baseline files (AC0/AC2): run twice (pre-commit AC0-style, post-commit anchored AC2) with byte-identical per-file lines both times. AC3's exact 2-file list and crlf/non_ascii_chars lines: run twice (pre-commit and post-commit-anchored), identical output evidence both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "fye_join.py, derive_fye_fixed.py and merge_by_fiscal_year",
+      "reason": "section 1 'What this cell does NOT change' -- read-only, never edited."
+    },
+    {
+      "item": "the pull stage (stage_pull)",
+      "reason": "section 1 'What this cell does NOT change'."
+    },
+    {
+      "item": "any S3 object, served block or currency label",
+      "reason": "section 1 'What this cell does NOT change' -- that is rk-112, chained after this cell per the RECORD FACE note 4."
+    },
+    {
+      "item": "a dense daily price series for the non-December path",
+      "reason": "RULED item 2: 'no dense series in this cell (the daily price is stage 11, a later cell)' -- fiscal_period_join is called with hist_rows only, dense_price_rows never supplied."
+    },
+    {
+      "item": "any S3 write, S3 delete, deploy, or vendor call",
+      "reason": "section 4 BOUNDS: CODE ONLY. Every test stubs S3; no live AWS act anywhere in this session."
+    },
+    {
+      "item": "branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50",
+      "reason": "never read, shown, diffed or checked out, per the order's own instruction."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W109-S1: the worker edited model_block_pull.py before running AC0's literal sed invocation, shifting stage_derive's line range; AC0's sed portion was reconstructed from the pin (git show 96cc4dae9d:...) instead, verified identical to the worktree's true pre-edit bytes via a zero-intervening-commits check. No data or served artifact affected."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_stage_derive_fye.py -v -p no:cacheprovider",
+      "result": "4 passed in 0.37s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_fye_join.py -q -p no:cacheprovider",
+      "result": "3 failed, 2 passed in 1.71s (pre-existing, unchanged)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_vintage_derivation_identity.py -q -p no:cacheprovider",
+      "result": "4 passed in 0.03s (unchanged)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_latest_stamp_raw_pair.py -q -p no:cacheprovider",
+      "result": "1 failed, 5 passed in 0.41s (pre-existing, unchanged)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_forecast_fallback.py -q -p no:cacheprovider",
+      "result": "13 passed in 0.25s (unchanged)"
+    },
+    {
+      "tool": "git diff / compile() (custom script)",
+      "invocation": "python .scratch/r109/ac4.py",
+      "result": "changed_code_files exactly the 2 named files; both compile True crlf 0 non_ascii_chars 0"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~109 <0.9.0_WK_AMGT_RESAPP~109@opal.agent>\" -F .scratch/r109/commit_msg_1.txt -- integrations/bloomberg/research/model_block_pull.py integrations/bloomberg/research/tests/test_stage_derive_fye.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "34d88231b8, 3 files changed, 388 insertions(+), 15 deletions(-)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~109/AMGT_RESAPP.TO-AMGT-rk-109.fye-join-in-stage-derive.proof_of_spec.json AC0,AC1,AC2,AC3",
+      "result": "PENDING -- run after this instance is written"
+    }
+  ]
+}

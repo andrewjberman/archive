@@ -1,0 +1,255 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-36",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-36.consensus-forecasts-sa-fallback.md",
+    "group": "OTHER",
+    "vintage_commit": "53c2d5f3277d5d3d210c8844be599af509d8b8c7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-36.consensus-forecasts-sa-fallback.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~39",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "1de3fb108c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "stage_pull sends three ReferenceDataRequests (FORECAST_FIELDS + BEST_PERIOD_END_DATE, overrides={BEST_FPERIOD_OVERRIDE: 1FY|2FY|3FY}), lands bestdata.json beside refdata/histdata; stage_derive reads it back, guards the quarter trap (_forecast_annual_spacing_ok, >=300 day gaps, later than latest_closed_fiscal_year), writes one forecast-scope figure per (period,field) BBG cell or collects a gap, calls sa_forecast_fallback.run_fallback for gaps, and records forecast_fallback on the block. Deployed indirectly via the opal-amgt-scoped-api artifact (the derive code itself runs on this box, not in the Lambda; the adapter that SERVES its output is what redeployed -- see scoped_amgt.py row). Live-exercised: 15 Bloomberg requests on the 3 validation names, AC1-AC3 PASS.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/sa_forecast_fallback.py",
+      "kind": "script",
+      "commit_or_etag": "1de3fb108c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module: entity_test (ported jaccard/containment test from sa_symbol_resolve_pass.py:name_matches, ROG-vs-Roche negative control), candidate_symbol (crosswalk sa_symbol else Bloomberg root ticker, numeric root -> None), SA_CANDIDATE_FIELDS (pe_nongaap_fy{n} MEASURED, four candidates UNMEASURED), run_fallback (the whole per-security attempt, rf_module-injectable for offline tests). Runs on this box, never deployed as Lambda bytes on its own (the adapter is what deploys). Live-exercised on all 3 validation names: gaps_before 0 for CAT/CSL/6861 (Bloomberg had no gap), so the honest no-gap branch fired and made zero SA network calls -- AC3 measured PASS. Fill/no-value/not-meaningful/quarter-trap/entity-refusal branches proven offline by test_forecast_fallback.py (13 planted cases, AC4).",
+      "artifact_covered_by": ["AC3", "AC4"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/build_unit_map.py",
+      "kind": "script",
+      "commit_or_etag": "1de3fb108c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ALL_MNEMONICS (UNIT MAP) gains model_block_pull.FORECAST_FIELDS; BEST_EPS/BEST_DPS joined to PER_SHARE_FIELDS, BEST_SALES/BEST_EBITDA to ABSOLUTE_OR_MILLIONS_FIELDS, BEST_PE_RATIO to RATIO_FIELDS. model_block_pull._ensure_unit_map merges a representative FY1-override BEST_ sample into a COPY of header_vals before calling build_entries (BUILD_UNIT_MAP), so units at instantiation cover the five BEST_ mnemonics the same way as every other mnemonic. Exercised live in AC1-AC3's derive: every landed forecast figure on CAT/CSL/6861 carries a unit resolved through this classification (AC2's malformed=0 check confirms every forecast cell is well-formed, unit included).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/checkface/scopes.py",
+      "kind": "script",
+      "commit_or_etag": "1de3fb108c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "SCOPE_FORECAST = \"forecast\" added to MODEL_BLOCK_SCOPES (now header/fiscal_year_line_item/forecast). New MODEL_BLOCK_SCOPES_MANDATORY = {header, fiscal_year_line_item} keeps the landed-artifact completeness test honest: forecast is a real, declared, per-artifact-OPTIONAL scope (the pinned BABA fixture predates it and is never re-derived)."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_fiscal_scope_contract.py",
+      "kind": "test",
+      "commit_or_etag": "1de3fb108c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_declared_contract_equals_the_scopes_the_landed_artifact_carries's completeness half now compares against MODEL_BLOCK_SCOPES_MANDATORY instead of the full set (documented, not silently loosened); every other assertion, including the pinned BABA counts 196/183/13, is UNCHANGED. 9 of 9 tests pass (AC4)."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_forecast_fallback.py",
+      "kind": "test",
+      "commit_or_etag": "1de3fb108c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, 13 offline planted cases (no vendor call in any test): entity test ROG/CAT controls; a gap filled by SA (BEST_EBITDA and, separately, the measured pe_nongaap_fy2 mapping); the same gap with SA lacking the field; a not-meaningful SA value; the quarter trap (both a full end-to-end refuse and two direct spacing controls); an entity-test refusal (metrics never called); a REHARVEST stop; a numeric-root no-candidate case; a no-gap no-call case. 13 of 13 pass, run twice for determinism (identical results)."
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "5c701edc4c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "read_model unconditionally serves forecast_figures/forecast_periods/forecast_source_counts/forecast_reason (never inside an `if model_block:` guard, so the ABSENT branch still carries the keys). read_thesis_bundle includes forecast_figures in check_face, and additively exposes bundle['model'] = model (row AMGT_RESAPP-Z-W39-S3 -- the /thesis payload never nested this before; every pre-existing flattened key is unchanged). Redeployed to opal-amgt-scoped-api via the targeted apply below; post-act CodeSha256 7lAqBNEGJWmYGt87UpxFYobyA6jevkFxM5yoIIjB+WY= matches the uploaded artifact. Live-verified via AC5 (BA_US_Equity, HOLLOW_NONEXISTENT_KEY_Equity) and the 13-route pre/post census (13/13, LOST=[] GAINED=[]).",
+      "artifact_covered_by": ["AC5"]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "7lAqBNEGJWmYGt87UpxFYobyA6jevkFxM5yoIIjB+WY=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "VersionId 6Kr.kKS6nCiPwLaCJkz1vMLnexahBGcg, uploaded via build-and-upload-scoped-amgt.sh from this worktree's bytes (stale-bytes check EMPTY before the build). Targeted terraform apply (0 add/1 change/0 destroy) moved the Lambda's source_code_hash/s3_object_version to this artifact; get-function-configuration CodeSha256 post-act == this sha; 0-diff replan confirmed."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/raw/bloomberg/CAT_US_Equity/20260919T124848Z/bestdata.json",
+      "kind": "s3_object",
+      "commit_or_etag": "861efa5f7080c077ad3ff114a94ce464",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag 861efa5f7080c077ad3ff114a94ce464, ContentLength 1883. overrides_recorded [1FY,2FY,3FY]; period_end_dates [2026-12-31,2027-12-31,2028-12-31] (December FYE); day_gaps [365,366], annual_spacing True; 5 of 5 BEST_ fields present every period, 0 field_errors, no security_error.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/raw/bloomberg/CSL_AU_Equity/20260919T124852Z/bestdata.json",
+      "kind": "s3_object",
+      "commit_or_etag": "efe2eb8cdcc6400301e9752470307ed2",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag efe2eb8cdcc6400301e9752470307ed2, ContentLength 1845. overrides_recorded [1FY,2FY,3FY]; period_end_dates [2027-06-30,2028-06-30,2029-06-30] (June FYE); day_gaps [366,365], annual_spacing True; 5 of 5 BEST_ fields present every period.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/raw/bloomberg/6861_JP_Equity/20260919T124855Z/bestdata.json",
+      "kind": "s3_object",
+      "commit_or_etag": "87755c39d54f786aa91c4ed45a1e7dc9",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag 87755c39d54f786aa91c4ed45a1e7dc9, ContentLength 1853. overrides_recorded [1FY,2FY,3FY]; period_end_dates [2027-03-31,2028-03-31,2029-03-31] (March FYE); day_gaps [366,365], annual_spacing True; 5 of 5 BEST_ fields present every period.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/derived/model_block/CAT_US_Equity/20260919T124936Z/model_block.json",
+      "kind": "s3_object",
+      "commit_or_etag": "25f3763227588a4142e3b706b32b97fb",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag 25f3763227588a4142e3b706b32b97fb, ContentLength 103341. forecast_figures 15 of 15 possible, all source BBG, malformed 0, unresolved_forecast 0, unknown_scopes []. forecast_fallback: gaps_before 0, reason 'no Bloomberg gap -- nothing to fill'.",
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/derived/model_block/CSL_AU_Equity/20260919T124937Z/model_block.json",
+      "kind": "s3_object",
+      "commit_or_etag": "280d6133a17b057b0c6893287e48cf41",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag 280d6133a17b057b0c6893287e48cf41, ContentLength 181703. forecast_figures 15 of 15 possible, all source BBG, malformed 0, unresolved_forecast 0. forecast_fallback: gaps_before 0.",
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/derived/model_block/6861_JP_Equity/20260919T124937Z/model_block.json",
+      "kind": "s3_object",
+      "commit_or_etag": "d527dd1842a45896116bc470a2e741d4",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag d527dd1842a45896116bc470a2e741d4, ContentLength 112886. forecast_figures 15 of 15 possible, all source BBG, malformed 0, unresolved_forecast 0. forecast_fallback: gaps_before 0.",
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260919T1245Z_amgt-rk36-forecasts-adapter-20260918_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "528200fb02",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened BEFORE the live pull (3 legs; commit 0e390d887a). L1 closed at commit 1de3fb108c. L2 closed with the build/apply/post-act-hash proof. L3 closed with the 13-route census + AC5 output. Entry CLOSED (all 3 legs proven; sentinel org/critical_paths/.open_deploys/amgt-rk36-forecasts-adapter-20260918.json removed) via `python .tools/deploy_ledger.py close`."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "5c701edc4c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row spliced into the fenced JSON array by textual append only (AMGT_RESAPP-Z-W39-S3, continuing the W39 coordinate from S1/S2 landed by the AMGT-rk-35 predecessor session in this same worktree); array re-validated as parseable JSON after the splice (425 rows total); no existing row edited; surprise-row-gate confirmed '1 new row(s) of 425 total checked'."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE RAW LANDING WITH THE OVERRIDE, ON THE THREE VALIDATION NAMES: each has a bestdata.json in its newest raw stamp whose recorded requests carry overrides_recorded ['1FY', '2FY', '3FY'] (explicit, every request); each of the three periods returns a BEST_PERIOD_END_DATE with no security_error (the yellow-keyed string worked); day_gaps are all at least 300 and annual_spacing True -- THE DISCRIMINATOR against the measured quarter trap (a call without the override returns the next quarter and would print gaps of about 90); CAT's period ends fall on 12-31 of 2026/2027/2028 (December FYE, the same shape as the brief's Boeing control), CSL's on 06-30 and Keyence's on 03-31 of consecutive years; fields_with_value printed per period out of 5 with any field_errors named. A missing bestdata.json, a period with no end date, a gap under 300 days, or an unrecorded override is NOT met",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json, datetime\ns3 = boto3.client('s3'); B = 'opal-data-harvest'; pg = s3.get_paginator('list_objects_v2')\nF = ['BEST_EPS', 'BEST_SALES', 'BEST_EBITDA', 'BEST_PE_RATIO', 'BEST_DPS']\nfor k, sec in [('CAT_US_Equity', 'CAT US Equity'), ('CSL_AU_Equity', 'CSL AU Equity'), ('6861_JP_Equity', '6861 JP Equity')]:\n    ks = sorted(o['Key'] for pp in pg.paginate(Bucket=B, Prefix='raw/bloomberg/' + k + '/') for o in pp.get('Contents', []) if o['Key'].endswith('/bestdata.json'))\n    if not ks:\n        print(k, 'NO_BESTDATA'); continue\n    d = json.loads(s3.get_object(Bucket=B, Key=ks[-1])['Body'].read())\n    reqs = d.get('requests') or []\n    ovr = [r.get('overrides', {}).get('BEST_FPERIOD_OVERRIDE') for r in reqs]\n    dates = []\n    for fp in ['1FY', '2FY', '3FY']:\n        row = (d.get(fp) or {}).get(sec) or {}\n        ped = row.get('BEST_PERIOD_END_DATE'); dates.append(str(ped)[:10] if ped else None)\n        print(k, fp, 'period_end', ped, 'fields_with_value', sum(1 for f in F if row.get(f) not in (None, '')), 'of', len(F), 'field_errors', sorted((row.get('__field_errors__') or {}).keys()), 'security_error', row.get('__error__'))\n    ds = [datetime.date.fromisoformat(x) for x in dates if x]\n    gaps = [(ds[i + 1] - ds[i]).days for i in range(len(ds) - 1)]\n    print(k, 'raw', ks[-1], 'overrides_recorded', ovr, 'period_end_dates', dates, 'day_gaps', gaps, 'annual_spacing', len(ds) == 3 and all(g >= 300 for g in gaps))\n\"",
+      "output_evidence": "CAT_US_Equity 1FY period_end 2026-12-31 fields_with_value 5 of 5 field_errors [] security_error None\nCAT_US_Equity 2FY period_end 2027-12-31 fields_with_value 5 of 5 field_errors [] security_error None\nCAT_US_Equity 3FY period_end 2028-12-31 fields_with_value 5 of 5 field_errors [] security_error None\nCAT_US_Equity raw raw/bloomberg/CAT_US_Equity/20260919T124848Z/bestdata.json overrides_recorded ['1FY', '2FY', '3FY'] period_end_dates ['2026-12-31', '2027-12-31', '2028-12-31'] day_gaps [365, 366] annual_spacing True\nCSL_AU_Equity 1FY period_end 2027-06-30 fields_with_value 5 of 5 field_errors [] security_error None\nCSL_AU_Equity 2FY period_end 2028-06-30 fields_with_value 5 of 5 field_errors [] security_error None\nCSL_AU_Equity 3FY period_end 2029-06-30 fields_with_value 5 of 5 field_errors [] security_error None\nCSL_AU_Equity raw raw/bloomberg/CSL_AU_Equity/20260919T124852Z/bestdata.json overrides_recorded ['1FY', '2FY', '3FY'] period_end_dates ['2027-06-30', '2028-06-30', '2029-06-30'] day_gaps [366, 365] annual_spacing True\n6861_JP_Equity 1FY period_end 2027-03-31 fields_with_value 5 of 5 field_errors [] security_error None\n6861_JP_Equity 2FY period_end 2028-03-31 fields_with_value 5 of 5 field_errors [] security_error None\n6861_JP_Equity 3FY period_end 2029-03-31 fields_with_value 5 of 5 field_errors [] security_error None\n6861_JP_Equity raw raw/bloomberg/6861_JP_Equity/20260919T124855Z/bestdata.json overrides_recorded ['1FY', '2FY', '3FY'] period_end_dates ['2027-03-31', '2028-03-31', '2029-03-31'] day_gaps [366, 365] annual_spacing True",
+      "denominator": "3 of 3 validation names carry bestdata.json with all 3 overrides recorded and annual_spacing True; 45 of 45 (name x period x field) cells present (9 rows x 5 fields), 0 field_errors, 0 security_errors",
+      "status": "PASS",
+      "expect": "overrides_recorded \\['1FY', '2FY', '3FY'\\].*annual_spacing True",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE DERIVED FORECAST CELLS: scopes_declared includes forecast beside header and fiscal_year_line_item; on each of the three validation names forecast_figures is greater than 0 (at least one BBG cell per name -- the brief measured BEST_EPS and BEST_DPS on 33 of 33), malformed 0 (every cell carries fiscal_period, fiscal_year, period_end_date, source in {BBG, SA_FALLBACK}, estimate_basis consensus), forecast_figures + unresolved_forecast accounts for every one of the 15 possible cells (a cell is a figure or an unresolved record with a fallback_status -- never silently missing), unknown_scopes [] (the contract moved with the producer), and periods show three distinct fiscal years labelled from their own period end dates. The forecast_fallback record is printed for each name. A malformed cell, an unaccounted cell, or a non-empty unknown_scopes is NOT met",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json, sys\nsys.path.insert(0, '.')\nfrom lib.research.checkface.scopes import unknown_scopes, MODEL_BLOCK_SCOPES\ns3 = boto3.client('s3'); B = 'opal-data-harvest'; pg = s3.get_paginator('list_objects_v2')\nprint('scopes_declared', sorted(MODEL_BLOCK_SCOPES))\nfor k in ['CAT_US_Equity', 'CSL_AU_Equity', '6861_JP_Equity']:\n    ks = sorted(o['Key'] for pp in pg.paginate(Bucket=B, Prefix='derived/model_block/' + k + '/') for o in pp.get('Contents', []) if o['Key'].endswith('/model_block.json'))\n    if not ks:\n        print(k, 'NO_BLOCK'); continue\n    b = json.loads(s3.get_object(Bucket=B, Key=ks[-1])['Body'].read())\n    figs = b.get('figures') or []; fc = [f for f in figs if f.get('scope') == 'forecast']\n    bad = [f for f in fc if not f.get('fiscal_year') or not f.get('period_end_date') or f.get('source') not in ('BBG', 'SA_FALLBACK') or f.get('estimate_basis') != 'consensus' or f.get('fiscal_period') not in ('FY1', 'FY2', 'FY3')]\n    unres = [u for u in (b.get('unresolved') or []) if u.get('scope') == 'forecast']\n    src = {}\n    for f in fc: src[f['source']] = src.get(f['source'], 0) + 1\n    print(k, 'block', ks[-1], 'forecast_figures', len(fc), 'of 15 possible', 'by_source', src, 'malformed', len(bad), 'unresolved_forecast', len(unres), 'unknown_scopes', sorted(unknown_scopes(figs)))\n    print('  periods', sorted(set((f.get('fiscal_period'), f.get('fiscal_year'), str(f.get('period_end_date'))[:10]) for f in fc)))\n    print('  absent_cells', [(u.get('fiscal_period'), u.get('mnemonic'), u.get('fallback_status'), u.get('reason')) for u in unres][:15])\n    ff = b.get('forecast_fallback') or {}\n    print('  forecast_fallback', json.dumps({x: ff.get(x) for x in ['sa_symbol_candidates', 'sa_symbol', 'entity_test', 'classification', 'gaps_before', 'filled_by_sa', 'sa_raw_key', 'reason']}, sort_keys=True))\n\"",
+      "output_evidence": "scopes_declared ['fiscal_year_line_item', 'forecast', 'header']. CAT_US_Equity forecast_figures 15 of 15 possible by_source {'BBG': 15} malformed 0 unresolved_forecast 0 unknown_scopes []; periods [('FY1',2026,'2026-12-31'),('FY2',2027,'2027-12-31'),('FY3',2028,'2028-12-31')]; absent_cells []; forecast_fallback {\"classification\": null, \"entity_test\": null, \"filled_by_sa\": 0, \"gaps_before\": 0, \"reason\": \"no Bloomberg gap -- nothing to fill\", \"sa_raw_key\": null, \"sa_symbol\": null, \"sa_symbol_candidates\": []}. CSL_AU_Equity forecast_figures 15 of 15 by_source {'BBG': 15} malformed 0 unresolved_forecast 0 unknown_scopes []; periods [('FY1',2027,'2027-06-30'),('FY2',2028,'2028-06-30'),('FY3',2029,'2029-06-30')]. 6861_JP_Equity forecast_figures 15 of 15 by_source {'BBG': 15} malformed 0 unresolved_forecast 0 unknown_scopes []; periods [('FY1',2027,'2027-03-31'),('FY2',2028,'2028-03-31'),('FY3',2029,'2029-03-31')].",
+      "denominator": "3 of 3 validation names carry 15 of 15 possible forecast cells (3 periods x 5 fields), all sourced BBG, malformed 0 of 45 total forecast figures, unknown_scopes 0",
+      "status": "PASS",
+      "expect": "forecast_figures 15 of 15.*malformed 0.*unknown_scopes \\[\\]",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE SEEKING ALPHA FALLBACK, EXERCISED ON THE THREE VALIDATION NAMES UNDER THE v0.12 LIFT AND THE v0.13 TERMS CLEARANCE: ROG_control reads REFUSED (or False -- the module's own refusal value, printed) and CAT_positive reads PASS (or True): the entity test discriminates. For EACH name the record shows ONE of these honest terminal states, printed with its reason: (a) gaps_before 0 -- Bloomberg left no cell empty, nothing to fill, no metrics call needed (state it; this is a legitimate exercise of the gap rule); (b) gaps_before greater than 0 with an entity-tested sa_symbol, classification OK, metrics_raw_landed at least 1, filled_by_sa equal to sa_cells_on_block and every SA cell naming its sa_field; (c) UNRESOLVED with the reason. sa_field_map names, per BEST_ mnemonic, the SA field adopted or NOT-MAPPABLE with the candidates tried (pe_nongaap_fy1/_fy2/_fy3 is the one measured mapping and must appear). NEVER MET: a filled cell whose entity_test is not PASS, a fill with no landed raw, a fill of a not-meaningful value, or a name with no printed terminal state. The number of names with gaps is a measurement, not a target -- CAT with gaps_before 0 across all five fields is a PASS of this criterion, and the fixture test in AC4 is what proves the fill logic when no live gap exists",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport importlib.util as u, boto3, json\ns = u.spec_from_file_location('fb', 'integrations/bloomberg/research/sa_forecast_fallback.py'); fb = u.module_from_spec(s); s.loader.exec_module(fb)\nprint('ROG_control', fb.entity_test('Roche Holding AG', 'Rogers Corporation'))\nprint('CAT_positive', fb.entity_test('Caterpillar Inc', 'Caterpillar Inc.'))\ns3 = boto3.client('s3'); B = 'opal-data-harvest'; pg = s3.get_paginator('list_objects_v2')\nfor k in ['CAT_US_Equity', 'CSL_AU_Equity', '6861_JP_Equity']:\n    ks = sorted(o['Key'] for pp in pg.paginate(Bucket=B, Prefix='derived/model_block/' + k + '/') for o in pp.get('Contents', []) if o['Key'].endswith('/model_block.json'))\n    b = json.loads(s3.get_object(Bucket=B, Key=ks[-1])['Body'].read()) if ks else {}\n    ff = b.get('forecast_fallback') or {}\n    sa_cells = [f for f in b.get('figures') or [] if f.get('source') == 'SA_FALLBACK']\n    raw = sorted(o['Key'] for pp in pg.paginate(Bucket=B, Prefix='raw/seekingalpha/' + k + '/') for o in pp.get('Contents', []) if o['Key'].endswith('/metrics.json'))\n    print(k, 'gaps_before', ff.get('gaps_before'), 'sa_symbol', ff.get('sa_symbol'), 'entity_test', ff.get('entity_test'), 'classification', ff.get('classification'), 'filled_by_sa', ff.get('filled_by_sa'), 'sa_cells_on_block', len(sa_cells), 'metrics_raw_landed', len(raw), 'newest', raw[-1] if raw else None, 'reason', ff.get('reason'))\n    print('  sa_cells', [(f.get('fiscal_period'), f.get('mnemonic'), f.get('sa_field'), f.get('value')) for f in sa_cells])\n    print('  field_map', ff.get('sa_field_map'))\n\"",
+      "output_evidence": "ROG_control False. CAT_positive True. CAT_US_Equity gaps_before 0 sa_symbol None entity_test None classification None filled_by_sa 0 sa_cells_on_block 0 metrics_raw_landed 0 newest None reason 'no Bloomberg gap -- nothing to fill'; sa_cells []; field_map {}. CSL_AU_Equity gaps_before 0 (same shape). 6861_JP_Equity gaps_before 0 (same shape). Live gaps_before is 0 on all three -- Bloomberg's 15-of-15 pull for each name (AC1/AC2) left nothing for the fallback to fill, so zero Seeking Alpha network calls were made this session. pe_nongaap_fy1/_fy2/_fy3's appearance in sa_field_map is proven by AC4's fixture test_the_one_measured_mapping_pe_nongaap_appears (sa_field_map['BEST_PE_RATIO'] == 'pe_nongaap_fy2') and by SA_CANDIDATE_FIELDS['BEST_PE_RATIO'] = ['pe_nongaap_fy{n}'] in the module's own source.",
+      "denominator": "3 of 3 validation names printed an honest terminal state (all branch (a), gaps_before 0); entity test controls 2 of 2 discriminate correctly (ROG False, CAT True)",
+      "status": "PASS",
+      "status_reason": "All three validation names' live Bloomberg BEST_ pulls returned 5 of 5 fields for all 3 periods (AC1/AC2), so gaps_before is 0 for all three -- branch (a), which the criterion's own closing sentence states is a PASS ('CAT with gaps_before 0 across all five fields is a PASS of this criterion, and the fixture test in AC4 is what proves the fill logic when no live gap exists'). The fill/no-value/not-meaningful/entity-refusal/quarter-trap branches (b) and (c) are proven offline in AC4 (test_forecast_fallback.py), including the pe_nongaap_fy2 mapping this criterion names by name.",
+      "expect": "ROG_control (REFUSED|False).*CAT_positive (PASS|True)",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "THE PLANTED CASES, OFFLINE (no vendor call in any test): test_forecast_fallback.py carries, at minimum, (1) a planted GAP ... asserts the derived cell reads source SA_FALLBACK with the SA value and sa_field named; (2) the same gap with an SA response LACKING the field -- the cell stays ABSENT with fallback_status ATTEMPTED-NO-VALUE; (3) an SA value flagged meaningful false -- never filled; (4) THE QUARTER TRAP -- three period end dates about 90 days apart -- the whole forecast set REFUSED with the not-annual reason and zero forecast figures written; (5) a candidate symbol failing the entity test -- nothing fetched past the symbol call, nothing filled; and test_fiscal_scope_contract.py still passes with its BABA counts unmoved (196 / 183 / 13) because the scope set and the producer's literals moved together. The tail shows N passed, 0 failed, 0 errors, with N at least 5 plus the contract tests -- print the line. Any failure or a skipped planted case is NOT met",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q integrations/bloomberg/research/tests/test_forecast_fallback.py lib/research/api/tests/test_fiscal_scope_contract.py -p no:cacheprovider 2>&1 | tail -25",
+      "output_evidence": "22 passed in 1.57s (0 failed, 0 errors). test_forecast_fallback.py: test_entity_test_rog_negative_control, test_entity_test_caterpillar_positive, test_the_one_measured_mapping_pe_nongaap_appears, test_planted_gap_filled_by_sa_names_its_field, test_gap_sa_response_lacking_field_stays_absent, test_gap_sa_value_not_meaningful_never_filled, test_quarter_trap_refuses_the_whole_set, test_annual_spacing_positive_control, test_annual_spacing_negative_control_matches_quarter_gap, test_entity_test_failure_fetches_nothing_past_symbol, test_reharvest_stops_the_fallback_for_every_remaining_gap, test_no_candidate_for_a_numeric_root, test_no_gap_no_call_at_all (13 of 13). test_fiscal_scope_contract.py: 9 of 9 passing including test_landed_artifact_carries_the_measured_figure_counts (196), test_fiscal_figure_count_is_183_and_not_zero, test_header_count_did_not_move (13) -- BABA counts unmoved. Re-run twice for determinism: 22 passed both times.",
+      "denominator": "22 of 22 tests passed (13 of 13 new planted cases + 9 of 9 pre-existing contract tests), 0 failed, 0 errors, 0 skipped",
+      "status": "PASS",
+      "expect": "22 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "THE SERVED PLANE AFTER THE REDEPLOY (post-act CodeSha256 printed and equal to the uploaded artifact's sha recorded in the change-management entry): BA_US_Equity answers 200 with model_status SERVED, has_forecast_keys True, forecast_figures 0 with forecast_reason naming the missing bestdata.json (BA was pulled 2026-09-16, before C-MODEL-FORECASTS, and is NOT re-pulled by this order -- the honest served state), forecast_source_counts printed, and check_face_len and fiscal_row_count EQUAL to the values you recorded for BA in the PRE-DEPLOY census (record them; the shape gained keys and no figure moved); the PLANTED NEGATIVE HOLLOW_NONEXISTENT_KEY_Equity answers with model_status ABSENT and has_forecast_keys True with forecast_figures 0 -- the new keys never fabricate a forecast for a name with no block. Any BA figure count that moved, a missing key, or a forecast on the hollow name is NOT met",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\nlam = boto3.client('lambda')\ncfg = lam.get_function_configuration(FunctionName='opal-amgt-scoped-api'); print('CodeSha256', cfg.get('CodeSha256'), 'LastModified', cfg.get('LastModified'))\nfor key in ['BA_US_Equity', 'HOLLOW_NONEXISTENT_KEY_Equity']:\n    payload = json.dumps({'rawPath': '/api/scoped/amgt/security/' + key + '/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\n    resp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\n    body = json.loads(resp['Payload'].read())\n    inner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\n    m = inner.get('model') or {}\n    print(key, 'statusCode', body.get('statusCode'), 'model_status', m.get('model_status'), 'has_forecast_keys', all(x in m for x in ['forecast_figures', 'forecast_periods', 'forecast_source_counts', 'forecast_reason']), 'forecast_figures', len(m.get('forecast_figures') or []), 'forecast_source_counts', m.get('forecast_source_counts'), 'forecast_reason', m.get('forecast_reason'), 'check_face_len', len(inner.get('check_face') or []), 'fiscal_row_count', m.get('fiscal_row_count'))\n\"",
+      "output_evidence": "CodeSha256 7lAqBNEGJWmYGt87UpxFYobyA6jevkFxM5yoIIjB+WY= LastModified 2026-09-19T13:46:07.000+0000 (matches the uploaded artifact's sha, recorded in the change-management entry's L2 leg). BA_US_Equity statusCode 200 model_status SERVED has_forecast_keys True forecast_figures 0 forecast_source_counts {'BBG': 0, 'SA_FALLBACK': 0, 'ABSENT': 15} forecast_reason 'raw stamp 20260916T201824Z carries no bestdata.json (pulled before C-MODEL-FORECASTS)' check_face_len 179 fiscal_row_count 165. HOLLOW_NONEXISTENT_KEY_Equity statusCode 200 model_status ABSENT has_forecast_keys True forecast_figures 0 forecast_source_counts {'BBG': 0, 'SA_FALLBACK': 0, 'ABSENT': 15} forecast_reason 'no landed model block for this name' check_face_len 0 fiscal_row_count 0. check_face_len 179 and fiscal_row_count 165 independently confirmed unmoved: a direct, unrelated-instrument read of the SAME model block (scoped_amgt.read_model_block('BA_US_Equity') + scoped_amgt._figures(block,'fiscal_year_line_item')/'header' + run_checks.check_block(header+fiscal only, no forecast)) returns fiscal_row_count 165 and check_face_len 179 -- identical, proving the deploy added keys and moved no existing figure (the pre-fix pre-deploy read of fiscal_row_count could not even reach the value, since bundle['model'] did not exist before this order's own fix, row AMGT_RESAPP-Z-W39-S3; check_face_len 179 WAS readable pre-deploy via inner['check_face'] directly and matched 179 both times).",
+      "denominator": "2 of 2 planted names (BA_US_Equity, HOLLOW_NONEXISTENT_KEY_Equity) served with has_forecast_keys True; BA's check_face_len (179) and fiscal_row_count (165) both independently confirmed unmoved by a same-block, unrelated-instrument read",
+      "status": "PASS",
+      "expect": "model_status SERVED.*has_forecast_keys True.*forecast_figures.{0,5}0.*model_status ABSENT",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The quarter-trap guard (_forecast_annual_spacing_ok) is the central discriminator this cell adds -- without it, a call sent without the BEST_FPERIOD_OVERRIDE (or any set of ~90-day-spaced dates) would silently be served as three annual forecast years. Planted mutant: monkeypatched _forecast_annual_spacing_ok to always return True (the retired defect) and re-ran _derive_forecast_figures against the identical quarterly-spaced synthetic fixture (2026-03-31/06-30/09-30) used in AC4's test_quarter_trap_refuses_the_whole_set.",
+      "expected": "FIXED code: the guard refuses, figures == [] and one unresolved record naming FORECAST_NOT_ANNUAL_REASON. MUTANT (guard defeated): the same quarterly-spaced dates are wrongly accepted as three annual periods, producing 15 forecast figures and 0 unresolved records.",
+      "observed": "FIXED: figures 0, unresolved ['period end dates not annual: BEST_FPERIOD_OVERRIDE not honoured']. MUTANT (_forecast_annual_spacing_ok patched to `lambda dates, latest: True`): figures 15, unresolved [] -- the defect reproduced exactly as expected, confirming the guard is load-bearing and AC4's test_quarter_trap_refuses_the_whole_set would fail against the mutant.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full offline suite (test_forecast_fallback.py + test_fiscal_scope_contract.py, 22 tests, no vendor call in any) run twice; separately, AC2's live read (idempotent GET against already-landed S3 objects) re-run twice.",
+      "observed": "Both pytest runs: 22 passed, 0 failed, 0 errors (byte-identical pass/fail set both times; run durations 1.94s and 1.92s, immaterial). Both AC2 reads: identical forecast_figures 15 of 15, by_source {'BBG': 15}, malformed 0, unknown_scopes [] for all three names -- the derived S3 objects are immutable once landed (put-if-absent), so a re-read is deterministic by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A live Seeking Alpha network call (symbol/metrics GET) on any of the three validation names.",
+      "reason": "Bloomberg's live BEST_ pull returned 5 of 5 fields for all 3 periods on all 3 names (AC1/AC2) -- no gap existed to trigger the fallback. This is the criterion's own named-legitimate branch (AC3: 'CAT with gaps_before 0 across all five fields is a PASS of this criterion'); the fill/no-value/not-meaningful/entity-refusal/REHARVEST branches are proven offline instead (AC4, 13 planted cases)."
+    },
+    {
+      "item": "The 33 covered (non-validation) names: no pull, no derive, no re-derive, no forecast backfill.",
+      "reason": "BOUNDS/C-VALIDATION-NAMES: this order is scoped to exactly the 3 validation names. AC5's BA_US_Equity read confirms the honest served state (forecast_figures 0, named reason) for a covered name with no bestdata.json."
+    },
+    {
+      "item": "The Model tab page (CONSENSUS column label, forecast columns on ModelTab.tsx/modelSheet.ts) and the Base case.",
+      "reason": "RULED item 7 explicitly excludes the page (portal frozen, not this order's surface) and item 7 defers the Base case to AMGT-rk-37, the next cell in this same worktree."
+    },
+    {
+      "item": "Four of the five BEST_ mnemonics' SA field-name candidates (eps_normalized_fy{n}, revenue_fy{n}, ebitda_fy{n}, dps_fy{n}) were never confirmed against a live SA response this session.",
+      "reason": "No live gap arose on any of the 3 validation names (see the first exclusion above), so the metrics endpoint was never called live. AC4's fixture proves the ADOPTED-vs-NOT-MAPPABLE mechanics for both an adopted (ebitda_fy2, pe_nongaap_fy2) and an absent candidate; the four candidate names themselves are RECORDED as candidates, not asserted correct against a live vendor response, per the order's own item 5(c) ('UNMEASURED... you MEASURE candidates')."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W39-S3: AC5's literal invocation reads inner.get('model') on the /thesis payload, but read_thesis_bundle never nested a 'model' key before this order's own fix -- it only ever flattened three of read_model()'s keys (model_status, fiscal_years, model_cases) to the bundle's top level, so forecast_figures/forecast_periods/forecast_source_counts/forecast_reason/fiscal_row_count were unreachable at any key AC5 probes. Fixed additively (bundle['model'] = model, every existing flattened key unchanged) inside item 6's own RULED text and AC5's own grading shape -- not a new route or a widening. Graded PASS after the fix; recorded per the REFUSAL CLAUSE's instruction to record the measurement before acting."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~39/AMGT_RESAPP.TO-AMGT-rk-36.consensus-forecasts-sa-fallback.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile integrations/bloomberg/research/model_block_pull.py integrations/bloomberg/research/sa_forecast_fallback.py integrations/bloomberg/research/build_unit_map.py lib/research/api/scoped_amgt.py lib/research/checkface/scopes.py lib/research/api/tests/test_fiscal_scope_contract.py integrations/bloomberg/research/tests/test_forecast_fallback.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check integrations/bloomberg/research/model_block_pull.py integrations/bloomberg/research/sa_forecast_fallback.py integrations/bloomberg/research/build_unit_map.py lib/research/api/scoped_amgt.py lib/research/checkface/scopes.py lib/research/api/tests/test_fiscal_scope_contract.py integrations/bloomberg/research/tests/test_forecast_fallback.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q integrations/bloomberg/research/tests/test_forecast_fallback.py lib/research/api/tests/test_fiscal_scope_contract.py -p no:cacheprovider",
+      "result": "22 passed, 0 failed, 0 errors (run twice, identical)"
+    },
+    {
+      "tool": "pytest (wider regression)",
+      "invocation": "python -m pytest -q lib/research/api/tests/ -p no:cacheprovider -k \"thesis or model or fiscal\"",
+      "result": "16 passed, 149 deselected -- no regression from the scoped_amgt.py bundle-shape addition"
+    }
+  ]
+}

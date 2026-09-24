@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-65",
+  "phase": "BUILD-GENERAL",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "ce51efce2156af6d5705d804d564dd0bc4dac02c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-65.accession-ranking-rule-both-readers.md"
+  },
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "16999602615f9643385bc571748aa7a25079baf0"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~65",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/management/roster.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1", "AC3", "AC4"],
+      "deploy_evidence": "43 insertions, 6 deletions (git diff --stat). Adds `_DOC_ID_RE = re.compile(r'^doc-[0-9a-f]{16}$')`, `_is_doc_id_key(key)` (the generator shape only -- Doc- capital and doc-fixture excluded), and `pick_source_key(keys)` -- the one pure, importable, no-I/O function implementing the ruled three-class order (EDGAR accession > doc-<16hex> > anything else, sorted-last within class). `load_source_object`'s `:869-870` bare accession-vs-placeholder logic is replaced by a single call `key = pick_source_key(keys)`; its signature and (object, label) return are unchanged. `_is_accession_key` is untouched (kept, same meaning, still used inside pick_source_key). Docstrings on both functions updated to name the three classes. Ruff (py39 target) clean; py_compile clean; ds-precommit-check.py rc=0.",
+      "introduces": [
+        "def pick_source_key(keys):",
+        "def _is_doc_id_key(key):",
+        "_DOC_ID_RE = re.compile(r\"^doc-[0-9a-f]{16}$\")"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_management.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC1"],
+      "deploy_evidence": "50 insertions (git diff --stat). AccessionPlaceholderTest's two pre-existing arms (test_a_real_accession_beats_the_placeholder_even_though_it_sorts_first, test_the_placeholder_is_picked_only_when_it_is_all_there_is) left byte-identical; four new arms appended per section 1 item 3(a)-(d): test_doc_id_beats_a_placeholder_that_sorts_after_it (arm a, the discriminating arm -- a doc-<16hex> beside unresolved-probe, a placeholder that sorts after 'd'), test_digit_accession_beats_a_doc_id (arm b, the ruled EDGAR-before-doc- order), test_capital_doc_id_is_class_0_sorted_last_decides (arm c, a Doc- capital variant pinned as class 0, sorted-last decides -- UNRESOLVED-SOURCE wins over Doc- because 'U'(85) > 'D'(68)), test_pick_source_key_over_a_mixed_list_of_all_three_classes (arm d, pick_source_key called directly over all three classes). Ruff (py39 target) clean; py_compile clean; ds-precommit-check.py rc=0."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/management_posture_batch.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC2", "AC3"],
+      "deploy_evidence": "3 insertions, 1 deletion (git diff --stat). Adds `from lib.research.management import roster as management_roster` beside the existing enrich/judge imports (the module already puts the repo root on sys.path). `filed_status`'s `:105` bare `key = sorted(keys)[-1]` is replaced by `key = management_roster.pick_source_key(keys)` -- the rule is imported, never copied. Nothing else in the module moves (served_names, filed_names, keyed_population, argparse wiring all untouched). The docstring's parity claim ('reading the LATEST accession the same way roster.py's own load_source_object does') is now true at HEAD. Ruff (py39 target) clean; py_compile clean; ds-precommit-check.py rc=0.",
+      "introduces": [
+        "from lib.research.management import roster as management_roster  # noqa: E402",
+        "key = management_roster.pick_source_key(keys)"
+      ]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_management_posture_batch.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": ["AC2"],
+      "deploy_evidence": "NEW FILE (was MISSING at spawn, confirmed by a pre-edit existence check). Own minimal stub S3 client (_StubBody/_StubPaginator/_StubS3) built in this file, not imported from lib/research/management/tests/test_management.py's private helpers, per the order's explicit instruction. sys.path wiring follows test_price_axis_pull.py's own pattern (RESEARCH_DIR + REPO_ROOT inserted, then `import management_posture_batch as mpb`). Two arms per section 1 item 3(e)-(f): test_filed_status_and_filed_names_resolve_a_digit_accession_over_unresolved_source (arm e -- a digit accession beside UNRESOLVED-SOURCE for one name -> filed_status 'RESOLVED', filed_names([name]) == [name], where HEAD's bare sort returns 'UNRESOLVED-SOURCE' and [] respectively), test_filed_status_resolves_from_the_doc_id_object_over_a_late_sorting_placeholder (arm f -- a doc-<16hex> beside unresolved-probe -> 'RESOLVED' read from the doc- object). Ruff (py39 target) clean; py_compile clean; ds-precommit-check.py rc=0."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-65.accession-ranking-rule-both-readers.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "<status> flipped pending -> complete, per the order's own section 6 instruction. No other line in the RECORD FACE or WORKER FACE touched."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"N passed\" with 0 failed and N equal to the spawn-time baseline (73 at the cut, re-measured) plus the count of arms you added to AccessionPlaceholderTest (at least 4: arms a-d of section 1 item 3); the two pre-existing AccessionPlaceholderTest arms still pass unchanged",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/management/tests -q 2>&1 | tail -5",
+      "output_evidence": "77 passed in 4.97s",
+      "denominator": "77 passed, 0 failed (73-test spawn-time baseline, re-measured identically before editing, plus the 4 new AccessionPlaceholderTest arms a-d; the 2 pre-existing arms in that class pass unchanged, byte-identical)",
+      "status": "PASS",
+      "expect": "\\d+ passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every test PASSED, 0 failed, including arm e (a digit accession beside UNRESOLVED-SOURCE -> filed_status \"RESOLVED\" and filed_names returns the name, where HEAD returns []) and arm f (a doc-<16hex> beside unresolved-probe -> \"RESOLVED\" read from the doc- object)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests/test_management_posture_batch.py -v 2>&1 | tail -12",
+      "output_evidence": "integrations/bloomberg/research/tests/test_management_posture_batch.py::test_filed_status_and_filed_names_resolve_a_digit_accession_over_unresolved_source PASSED [ 50%]\nintegrations/bloomberg/research/tests/test_management_posture_batch.py::test_filed_status_resolves_from_the_doc_id_object_over_a_late_sorting_placeholder PASSED [100%]\n\n2 passed in 0.06s",
+      "denominator": "2 passed, 0 failed (arm e, arm f)",
+      "status": "PASS",
+      "expect": "2 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "doc_vs_late_placeholder doc-1defdb68a7ffd3b7.source.json (the explicit class beats a placeholder that sorts after it -- at HEAD pick_source_key does not exist and load_source_object would pick unresolved-probe); digit_vs_doc 000000000000000001.source.json (EDGAR before doc-, the ruled order); batch_bare_sort_in_filed_status 0 and imports_pick_source_key True (one rule, imported, never copied)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport sys\nsys.path.insert(0, '.')\nfrom lib.research.management import roster\nkeys = ['p/X/unresolved-probe.source.json', 'p/X/doc-1defdb68a7ffd3b7.source.json', 'p/X/Doc-1defdb68a7ffd3b7.source.json', 'p/X/UNRESOLVED-SOURCE.source.json']\nprint('doc_vs_late_placeholder', roster.pick_source_key(keys).rsplit('/', 1)[-1])\nprint('digit_vs_doc', roster.pick_source_key(keys + ['p/X/000000000000000001.source.json']).rsplit('/', 1)[-1])\nb = open('integrations/bloomberg/research/management_posture_batch.py', encoding='utf-8').read()\nbody = b.split('def filed_status', 1)[1].split('\\ndef ', 1)[0]\nprint('batch_bare_sort_in_filed_status', body.count('sorted(keys)[-1]'), 'imports_pick_source_key', b.count('pick_source_key') >= 1)\n\"",
+      "output_evidence": "doc_vs_late_placeholder doc-1defdb68a7ffd3b7.source.json\ndigit_vs_doc 000000000000000001.source.json\nbatch_bare_sort_in_filed_status 0 imports_pick_source_key True",
+      "denominator": "4 of 4 printed lines match expect exactly",
+      "status": "PASS",
+      "expect": "doc_vs_late_placeholder doc-1defdb68a7ffd3b7\\.source\\.json[\\s\\S]*digit_vs_doc 000000000000000001\\.source\\.json[\\s\\S]*batch_bare_sort_in_filed_status 0 imports_pick_source_key True"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "all four print compiles True and crlf 0; each file's non_ascii_bytes equals its at_SITEZ figure (this cell adds no non-ASCII) and the new test file prints at_SITEZ NEW-FILE with non_ascii_bytes 0 -- the bar is the delta against SITEZ, never an assumed literal zero for a pre-existing file",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport io, subprocess\nfor f in ('lib/research/management/roster.py', 'lib/research/management/tests/test_management.py', 'integrations/bloomberg/research/management_posture_batch.py', 'integrations/bloomberg/research/tests/test_management_posture_batch.py'):\n    b = io.open(f, 'rb').read()\n    compile(b.decode('utf-8'), f, 'exec')\n    base = subprocess.run(['git', 'show', 'SITEZ:' + f], capture_output=True)\n    hb = base.stdout if base.returncode == 0 else b''\n    print(f, 'compiles True', 'crlf', b.count(b'\\r\\n'), 'non_ascii_bytes', len(b) - len(b.decode('utf-8')), 'at_SITEZ', (len(hb) - len(hb.decode('utf-8'))) if hb else 'NEW-FILE')\n\"",
+      "output_evidence": "lib/research/management/roster.py compiles True crlf 0 non_ascii_bytes 0 at_SITEZ 0\nlib/research/management/tests/test_management.py compiles True crlf 0 non_ascii_bytes 0 at_SITEZ 0\nintegrations/bloomberg/research/management_posture_batch.py compiles True crlf 0 non_ascii_bytes 0 at_SITEZ 0\nintegrations/bloomberg/research/tests/test_management_posture_batch.py compiles True crlf 0 non_ascii_bytes 0 at_SITEZ NEW-FILE",
+      "denominator": "4 of 4 files: compiles True, crlf 0, non_ascii_bytes == at_SITEZ (0==0 for the three pre-existing files; the new file prints non_ascii_bytes 0 with at_SITEZ NEW-FILE)",
+      "status": "PASS",
+      "expect": "compiles True[\\s\\S]*crlf 0[\\s\\S]*non_ascii_bytes 0 at_SITEZ (0|NEW-FILE)"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Snapshotted lib/research/management/roster.py (sha256 43d5106e1c2c60702d43d0ea93f9eeeb353347e2f67f8d7174f597f3edad9c23) to .scratch/roster.py.pre_mutant, then replaced pick_source_key's three-class body with the bare `return sorted(keys)[-1]  # MUTANT_SENTINEL_RK65`, restoring the exact HEAD-era defect this cell closes.",
+      "expected": "AC1 turns FAIL (the 4 new AccessionPlaceholderTest arms fail; the pre-existing 73 stay PASS); AC2 turns FAIL (arms e and f both fail, reproducing today's live wrong answer); AC3's printed values change from the ruled winners to the bare-sort losers; after restore the file is byte-identical to the pre-mutant snapshot.",
+      "observed": "FIRED: AC1 -- 'lib/research/management/tests/test_management.py::AccessionPlaceholderTest::test_a_real_accession_beats_the_placeholder_even_though_it_sorts_first', '::test_digit_accession_beats_a_doc_id', '::test_doc_id_beats_a_placeholder_that_sorts_after_it', '::test_pick_source_key_over_a_mixed_list_of_all_three_classes' all FAILED, '4 failed, 73 passed' -- test_a_real_accession_beats_the_placeholder_even_though_it_sorts_first is ALSO one of the four FAILED (the mutant bare-sorts every call, so the pre-existing accession-vs-placeholder arm breaks too); the OTHER pre-existing arm (placeholder picked only when alone) and the new arm c (Doc- capital vs UNRESOLVED-SOURCE, class 0 sorted-last) both still PASS under the mutant because their correct answer happens to coincide with plain ASCII sort ('U' > 'D' either way) -- so '4 failed' names exactly: the pre-existing digit-vs-placeholder arm, plus new arms a, b and d (arm c does not fail). AC2 -- both arms FAILED: 'AssertionError: assert \\'UNRESOLVED-SOURCE\\' == \\'RESOLVED\\'' for both test_filed_status_and_filed_names_resolve_a_digit_accession_over_unresolved_source and test_filed_status_resolves_from_the_doc_id_object_over_a_late_sorting_placeholder, '2 failed'. AC3 -- printed 'doc_vs_late_placeholder unresolved-probe.source.json' and 'digit_vs_doc unresolved-probe.source.json' (both wrong, reproducing the live defect). Restore verified: sha256 of the restored file is 43d5106e1c2c60702d43d0ea93f9eeeb353347e2f67f8d7174f597f3edad9c23, identical to the pre-mutant snapshot, and `cmp -s` printed RESTORED_BYTE_IDENTICAL. AC1, AC2 and AC3 were then re-run clean on the restored file (77 passed; 2 passed; correct printed values), matching the acceptance rows above.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "lib/research/management/tests run twice and integrations/bloomberg/research/tests/test_management_posture_batch.py run twice, on the restored (post-mutant-control) files, each pair compared on its final summary line.",
+      "observed": "lib/research/management/tests: '77 passed in 5.21s' then '77 passed in 5.47s' (durations differ, pass/fail counts identical). test_management_posture_batch.py: '2 passed in 0.04s' both times, identical per-test PASSED lines both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "_is_accession_key's meaning or callers.",
+      "reason": "The order's 'What this cell does NOT change' names it explicitly: 'KEEP that function and its meaning, callers may depend on it.' pick_source_key calls it unchanged; no caller of _is_accession_key was touched."
+    },
+    {
+      "item": "load_source_object's signature or (object, label) return shape.",
+      "reason": "The order requires both UNCHANGED. Verified: the function still returns (json object, label string), called with the same (security_key, source_path=None, client=None) signature; only the internal key-selection line was replaced with a call to pick_source_key."
+    },
+    {
+      "item": "lib/research/management/enrich.py, management.schema.json, domains.json, tests/test_lusha_domain.py.",
+      "reason": "Named as WALLS in the order -- the held wk-amgt-14-50 branch changes exactly those. Not read or written by this cell (this worker never checked out or diffed that branch, per the order's explicit prohibition)."
+    },
+    {
+      "item": "lib/research/filings/analyze.py:1410 (source_from_pool, the same bare-sort pattern).",
+      "reason": "Named as NOT this cell's -- 'measured to cause a fallback rather than a wrong answer'. Not edited; no row filed against it since no disagreement was found there during this cell's work."
+    },
+    {
+      "item": "Copying pick_source_key's rule into management_posture_batch.py instead of importing it.",
+      "reason": "The order's REFUSAL CLAUSE names this explicitly as forbidden ('never by copying the rule into the batch module'). filed_status imports and calls roster.pick_source_key; AC3 measures 0 occurrences of the bare-sort pattern inside filed_status's body."
+    },
+    {
+      "item": "Any live AWS call, pool read or write.",
+      "reason": "Preflight declares comp-iam DECLARED-NOT-APPLICABLE -- every criterion runs against an in-memory stub S3 client the tests build themselves. No boto3 client was constructed in this session; all four criteria ran offline."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest lib/research/management/tests (AC1)",
+      "invocation": "python -m pytest lib/research/management/tests -q",
+      "result": "77 passed, 0 failed"
+    },
+    {
+      "tool": "pytest integrations/bloomberg/research/tests/test_management_posture_batch.py (AC2)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_management_posture_batch.py -v",
+      "result": "2 passed, 0 failed"
+    },
+    {
+      "tool": "direct pick_source_key + filed_status source inspection (AC3)",
+      "invocation": "python -c \"...\" (inline script per the order's literal AC3 invocation)",
+      "result": "doc_vs_late_placeholder doc-1defdb68a7ffd3b7.source.json; digit_vs_doc 000000000000000001.source.json; batch_bare_sort_in_filed_status 0; imports_pick_source_key True"
+    },
+    {
+      "tool": "compile + CRLF + non-ASCII delta vs SITEZ (AC4)",
+      "invocation": "python -c \"...\" (inline script per the order's literal AC4 invocation)",
+      "result": "all four files compile True, crlf 0, non_ascii_bytes matches at_SITEZ (0/0/0/0, new file NEW-FILE)"
+    },
+    {
+      "tool": "mutation control -- bare-sort mutant in pick_source_key, re-ran AC1/AC2/AC3, restored from a sha256-verified snapshot",
+      "invocation": "python - (string replace the three-class body with `return sorted(keys)[-1]  # MUTANT_SENTINEL_RK65`); pytest lib/research/management/tests; pytest integrations/bloomberg/research/tests/test_management_posture_batch.py; python -c AC3 script; cp snapshot back; sha256sum; cmp -s",
+      "result": "AC1 4 failed of 77; AC2 2 failed of 2; AC3 printed the wrong (bare-sort) winners; restore sha256 43d5106e1c2c60702d43d0ea93f9eeeb353347e2f67f8d7174f597f3edad9c23 matched the pre-mutant snapshot, cmp -s RESTORED_BYTE_IDENTICAL"
+    },
+    {
+      "tool": "determinism control -- lib and batch test suites each run twice on the restored files",
+      "invocation": "python -m pytest lib/research/management/tests -q (x2); python -m pytest integrations/bloomberg/research/tests/test_management_posture_batch.py -v (x2)",
+      "result": "identical pass counts both times: 77 passed / 77 passed; 2 passed / 2 passed"
+    },
+    {
+      "tool": "py_compile + ruff (py39 target) + ds-precommit-check.py on all four changed/new .py files",
+      "invocation": "python -m py_compile <4 files>; ruff check --target-version py39 <4 files>; python .tools/ds-precommit-check.py <4 files>",
+      "result": "py_compile: no errors. ruff: 'All checks passed!'. ds-precommit-check: rc=0, no output"
+    }
+  ]
+}

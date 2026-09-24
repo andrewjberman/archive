@@ -1,0 +1,225 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-h-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-3.retrieval-rungs-provenance-watermark-and-plan.md",
+    "group": "OTHER",
+    "vintage_commit": "c57f1e490edfb76b2f7f972b7c7d2c0495614b6d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "9fbf337a74c1c8ef6b598a0a9f1cab75328747e1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-3.retrieval-rungs-provenance-watermark-and-plan.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/publishers.py",
+      "kind": "script",
+      "commit_or_etag": "92482d23eaa647458b38fabf5e56cc9e47905d3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "normalize() gains discovery=None, threaded through every yielded article. Publisher's transport (module+PacedSession) now builds LAZILY via _ensure_session()/_session_built (module/session exposed as property() pairs, never @x.setter, to clear ds-precommit-check's undefined-name scan); a caller's direct `.session =`/`.module =` assignment (every offline test double) counts as already-built regardless of value. Each of seeking_alpha/bloomberg/financial_times/dow_jones checks harvest_grammar.get_listing_bronze (listing) and article_known (article) BEFORE any real GET when harvest_dedupe is set, attaches a discovery dict (symbol_listing for sa/the bbg probe, name_search for bbg/ft/wsj/barrons searches), and in retrieval_mode=backfill pages via the new _stop_paging (empty page / every hit older than bound_date / repeated hit set / max_listing_pages) -- live mode's existing page caps (sa 1, bbg 3, ft 1, wsj/barrons 1) are untouched. New DowJones._parse_urls staticmethod (listing HTML -> URLs with no session) and discover(page=) (wsj/barrons PAGE_PARAM). New bbg_symbol_news_probe(). PAGE_PARAM/DEFAULT_MAX_LISTING_PAGES tables, every publisher entry `verified: False`.",
+      "introduces": ["_stop_paging", "_discovery", "_hit_date", "_hit_identity", "PAGE_PARAM", "DEFAULT_MAX_LISTING_PAGES", "bbg_symbol_news_probe", "_ensure_session", "set_pending_pace", "session_opened", "DowJones._parse_urls"],
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/transport.py",
+      "kind": "script",
+      "commit_or_etag": "92482d23eaa647458b38fabf5e56cc9e47905d3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "HARVEST_REFUSE_NETWORK=1 (read fresh via os.environ on every call, never cached) raises RuntimeError(\"network refused\") in PacedSession.__init__ and PacedSession.get, BEFORE any I/O -- the inner session's own .get is never reached.",
+      "introduces": ["_network_refused"],
+      "artifact_covered_by": ["AC0", "AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/harvest_grammar.py",
+      "kind": "script",
+      "commit_or_etag": "92482d23eaa647458b38fabf5e56cc9e47905d3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "get_listing_bronze (a pure bucket read at today's/`when`'s date partition, the SAME prefix put_listing_bronze writes under -- never a GET), watermark (newest published_utc among silver article rows whose discovered_for holds the security, via store.silver_latest) and backfill_bound (max(floor, watermark), always a date) added; nothing else in the module changed.",
+      "introduces": ["get_listing_bronze", "watermark", "backfill_bound"],
+      "artifact_covered_by": ["AC0", "AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/worker.py",
+      "kind": "script",
+      "commit_or_etag": "92482d23eaa647458b38fabf5e56cc9e47905d3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_write_harvest_raw carries record[\"discovery\"] into the outbox record. run_job: the persisted-pacing-floor line prefers client.set_pending_pace() (never forces the lazy session build a bare `client.session.next_allowed_at=` would); sets client.retrieval_mode/harvest_dedupe/harvest_client (hasattr-guarded, so every pre-existing fake Client test double is untouched) and, in backfill mode, client.bound_date via harvest_grammar.backfill_bound and client.max_listing_pages from config; the articles_per_security acceptance cap is skipped in backfill mode; persist_http_cookies is skipped when the client opened no session (getattr(client,\"session_opened\",lambda:True)() -- defaults True for anything lacking the method, matching every pre-existing test double's prior behaviour exactly).",
+      "artifact_covered_by": ["AC0", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "92482d23eaa647458b38fabf5e56cc9e47905d3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New module-level _silver_append_retrying_object_name(client, source, table, rows, record_key_fields, run_stamp, max_attempts=20), factored out of LegacyUploader's own method of the same name (now a thin same-named wrapper calling it, byte-identical call site/behaviour -- test_legacy_upload.py's 6 arms re-run unchanged). HarvestUploader._run_articles now: (1) puts bronze and builds each row per-article as before, but (2) groups rows by (source, run_stamp) and makes ONE silver_append call per group via the shared retry helper instead of one call per article -- disarming row AMGT_HARVST-Z-W9-S1 (this was the row's named unguarded exposure). record.get(\"discovery\") is threaded into article_rows(discovery=...).",
+      "artifact_covered_by": ["AC0", "AC1", "AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/config.json",
+      "kind": "config_data",
+      "commit_or_etag": "92482d23eaa647458b38fabf5e56cc9e47905d3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds backfill_floor: \"2026-01-01\" and max_listing_pages: {sa:25, bbg:25, ft:25, wsj:25, barrons:25} -- the working caps section 4 requires be stated here, never as a finding.",
+      "artifact_covered_by": ["AC5"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/__main__.py",
+      "kind": "script",
+      "commit_or_etag": "92482d23eaa647458b38fabf5e56cc9e47905d3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New `plan` command choice: prints one JSON line per --publishers value ({publisher, bound, max_listing_pages, planned_listing_pages, watermark_source}) plus a total line, reads config's backfill_floor/max_listing_pages, and calls harvest_grammar.backfill_bound (the ONE S3 read this command can make) ONLY when --with-watermark is passed (never by this cell). New --security-json/--floor/--with-watermark/--bbg-symbol-probe flags; --security-json overrides the run/universe security selection; --retrieval-mode and --floor are threaded into config for Worker.run_job to read. --bbg-symbol-probe makes bbg_symbol_news_probe reachable from `run` in place of the normal fetch, never invoked by this cell's own tests.",
+      "introduces": ["\"plan\"", "--security-json", "--floor", "--with-watermark", "--bbg-symbol-probe"],
+      "artifact_covered_by": ["AC5"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_retrieval_provenance.py",
+      "kind": "test",
+      "commit_or_etag": "92482d23eaa647458b38fabf5e56cc9e47905d3c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, the exact thirteen arms section 1 item 9 names, over STUB inner sessions (same shape as test_bronze_capture.py) and a STUB S3 client (same shape as lib/research/harvest/tests/test_store.py). No network, no vendor call, no live bucket.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Appended row AMGT_HARVST-Z-W3-S1 (ARMED, disarm_owner 2.0.0_SA_COO~Y): AC0's premise of a clean pre-edit baseline read did not hold on this worker's own sequencing (edited before measuring, corrected via a byte-verified HEAD swap-in), and that reconstruction surfaced a pre-existing, unrelated dual-module-identity defect in two tests' own unittest.mock.patch target strings (test_worker.py, test_verification.py) that fails 2 of the 7 AC0/AC2 files independent of this cell."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-3.retrieval-rungs-provenance-watermark-and-plan.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "status -> complete, committed together with this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit, seven baseline lines recorded; the three predecessor files read 12, 14 and 6 passed",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_legacy_upload.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py; do echo \"$t :: $(python -m pytest $t -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "SURPRISE ROW AMGT_HARVST-Z-W3-S1: this worker began editing transport.py/harvest_grammar.py/publishers.py BEFORE running this invocation (a sequencing lapse). It was corrected before any further edit: the three touched files were swapped for their byte-verified `git show HEAD:<path>` content (diff -q confirmed 0 differences against HEAD for all three), this invocation was then run for real, and the edits were restored from a snapshot (diff -q confirmed 0 differences against the pre-swap working tree afterward). That genuine pre-edit run: lib/opal_data_harvest/test_bronze_capture.py :: 12 passed in 0.35s | lib/opal_data_harvest/test_silver_from_bronze.py :: 14 passed in 0.74s | lib/opal_data_harvest/test_legacy_upload.py :: 6 passed in 0.81s | lib/opal_data_harvest/test_harvest_grammar.py :: 7 passed in 0.72s | lib/opal_data_harvest/test_worker.py :: 2 failed, 18 passed, 2 subtests passed in 0.68s | lib/opal_data_harvest/test_catalog.py :: 5 passed in 0.65s | lib/opal_data_harvest/test_verification.py :: 1 failed, 3 passed, 2 subtests passed in 0.29s.",
+      "denominator": "7 of 7 baseline files run; test_bronze_capture.py reads exactly \"12 passed\", test_silver_from_bronze.py \"14 passed\" and test_legacy_upload.py \"6 passed\" as named; 2 of 7 files (test_worker.py, test_verification.py) carry a pre-existing failure each, GROUNDED as unrelated to this cell in row AMGT_HARVST-Z-W3-S1 (reproduced identically against a scratch copy of publishers.py restored to git HEAD, and test_verification.py/verification.py were never touched by this cell at all)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"13 passed\" and no \"failed\" -- the thirteen arms named in section 1 item 9, the same-second sibling arm included",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/test_retrieval_provenance.py -v --color=no -p no:cacheprovider 2>&1 | tail -16",
+      "output_evidence": "test_rung_recorded_per_publisher PASSED | test_search_provenance_query_rank_page PASSED | test_paging_stops_at_floor PASSED | test_paging_stops_at_watermark PASSED | test_paging_stops_on_repeat_page PASSED | test_paging_stops_at_max_pages PASSED | test_article_dedupe_before_vendor_call_every_publisher PASSED | test_listing_dedupe_replays_bronze_without_network PASSED | test_second_same_day_run_makes_zero_vendor_calls PASSED | test_network_refuser_raises_before_io PASSED | test_plan_prints_counts_with_zero_network PASSED | test_bbg_symbol_probe_captures_listing PASSED | test_harvest_uploader_same_second_siblings_both_land PASSED | ============================= 13 passed in 1.00s ==============================",
+      "denominator": "13 of 13 arms passed, 0 failed, at final HEAD 92482d23ea (re-run identical before and after the code commit)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "each line's passed and failed counts EQUAL its AC0 line",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_legacy_upload.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py; do echo \"$t :: $(python -m pytest $t -q --color=no -p no:cacheprovider 2>&1 | tail -1)\"; done",
+      "output_evidence": "Run AFTER every edit, at final HEAD 92482d23ea: lib/opal_data_harvest/test_bronze_capture.py :: 12 passed in 0.32s | lib/opal_data_harvest/test_silver_from_bronze.py :: 14 passed in 0.69s | lib/opal_data_harvest/test_legacy_upload.py :: 6 passed in 0.76s | lib/opal_data_harvest/test_harvest_grammar.py :: 7 passed in 0.68s | lib/opal_data_harvest/test_worker.py :: 2 failed, 18 passed, 2 subtests passed in 0.72s | lib/opal_data_harvest/test_catalog.py :: 5 passed in 0.60s | lib/opal_data_harvest/test_verification.py :: 1 failed, 3 passed, 2 subtests passed in 0.31s -- every passed/failed count equals the AC0 line for that file, exactly",
+      "denominator": "7 of 7 baseline files re-run; 7 of 7 lines' passed/failed counts equal their AC0 line exactly; 0 new failures, 0 pre-existing failures removed or masked",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "NOTHING printed before \"--- end of forbidden-surface diff\" (store.py and the CRO scripts unchanged since the pin), then three lines each \"crlf 0 non_ascii 0\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- lib/research org/tier1_exec && echo \"--- end of forbidden-surface diff\" && for f in lib/opal_data_harvest/test_retrieval_provenance.py lib/opal_data_harvest/publishers.py lib/opal_data_harvest/__main__.py; do python -c \"import sys;b=open(sys.argv[1],'rb').read();compile(b.decode('utf-8'),sys.argv[1],'exec');print(sys.argv[1],'crlf',b.count(bytes([13,10])),'non_ascii',sum(1 for c in b.decode('utf-8') if ord(c)>127))\" $f; done",
+      "output_evidence": "--- end of forbidden-surface diff | lib/opal_data_harvest/test_retrieval_provenance.py crlf 0 non_ascii 0 | lib/opal_data_harvest/publishers.py crlf 0 non_ascii 0 | lib/opal_data_harvest/__main__.py crlf 0 non_ascii 0",
+      "denominator": "0 of 0 forbidden-surface files touched (lib/research, org/tier1_exec both empty diffs against merge-base SITEZ); 3 of 3 changed files compile clean, 0 CRLF, 0 non-ASCII, at final HEAD 92482d23ea",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"pin_block_lines 7 present_verbatim_in_head True\" -- the mention floor's lines at the pin appear verbatim in HEAD",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/hv3/ac4.py",
+      "output_evidence": "pin_block_lines 7 present_verbatim_in_head True",
+      "denominator": "1 of 1 check: the 7-line mention-floor block at pin 9fbf337a74 (lines 99-105) is present verbatim, unmodified, in publishers.py at final HEAD 92482d23ea",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "five per-publisher JSON lines each carrying \"bound\": \"2026-01-01\" and an integer \"planned_listing_pages\", plus a total line, and NO \"network refused\" anywhere in the output",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && HARVEST_REFUSE_NETWORK=1 python -m lib.opal_data_harvest plan --publishers sa bbg ft wsj barrons --security-json .scratch/hv3/lenovo_probe.json --floor 2026-01-01 --retrieval-mode backfill",
+      "output_evidence": "{\"publisher\": \"sa\", \"bound\": \"2026-01-01\", \"max_listing_pages\": 25, \"planned_listing_pages\": 25, \"watermark_source\": \"floor_only\"} | {\"publisher\": \"bbg\", ... } | {\"publisher\": \"ft\", ...} | {\"publisher\": \"wsj\", ...} | {\"publisher\": \"barrons\", ...} | {\"total_planned_listing_pages\": 125, \"publishers\": 5} -- \"network refused\" absent from stdout and stderr",
+      "denominator": "5 of 5 publisher lines carry bound=2026-01-01 and an integer planned_listing_pages; 1 of 1 total line; 0 occurrences of \"network refused\"; rc=0, at final HEAD 92482d23ea",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/hv3/mutant_control.py (not committed) runs test_paging_stops_at_max_pages's own scenario (2-page cap, 3 pages of fixture responses queued) once against the REAL publishers._stop_paging and once against a MUTANT that always returns (False, None) -- never stopping paging.",
+      "expected": "REAL: exactly pages [1, 2] are fetched (the max_listing_pages cap fires; assertion passes). MUTANT: the loop tries to page past page 2 into fixture data that was never queued for it, raising rather than reproducing [1, 2] (assertion fails).",
+      "observed": "REAL pages=[1, 2] assertion_would_PASS=True. MUTANT pages='raised KeyError: 4' assertion_would_PASS=False. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_retrieval_provenance.py's full 13-arm file run repeatedly across this session (before and after the code commit); the mutant control script run twice back to back; the full AC0/AC2 baseline sweep run three times across the session (pre-edit reconstruction, mid-session, post-commit).",
+      "observed": "pytest: '13 passed' every run, no flakiness. Mutant script: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical output. Baseline sweep: the same 2 pre-existing failures (test_worker.py, test_verification.py) and the same 5 all-passing files, byte-identical pass/fail counts, all three times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The mention floor (publishers.py normalize()'s company-relevance check), store.py, the CRO transport scripts (sa_rest_fetch.py/bloomberg_rest_fetch.py/ft_rest_fetch.py beyond reading their existing get_json/search/discover shapes), the legacy Uploader class, and the bronze/silver builders' outputs for a given input",
+      "reason": "Section 1 'What this cell does NOT change' names all of these explicitly. AC4 proves the mention-floor block byte-identical to the pin. git diff at final HEAD against the merge-base shows lib/research and org/tier1_exec untouched (AC3's own forbidden-surface check). The legacy Uploader class is byte-unchanged (only HarvestUploader's _run_articles and a new module-level helper changed in uploads.py); silver_from_bronze.py and store.py are untouched."
+    },
+    {
+      "item": "ticker_search rung",
+      "reason": "Section 1 item 1 reserves this enum value and states it is 'emitted by no path in this round' -- no path in this cell's build emits it either; the enum member exists for a future cell."
+    },
+    {
+      "item": "A true pre-fetch article identity for WSJ/Barrons dedupe",
+      "reason": "Neither publisher exposes a stable id before the article GET (the real vendor id arrives only in the response). The pre-GET dedupe check for these two uses content_hash(url)[:24] as a documented proxy identity, distinct from the article's eventual stored article.get(\"id\") -- so it protects a FUTURE run using this same convention, not today's legacy-catalog-keyed history. Stated in the worker report and in publishers.py's own comment at the check, per BOUNDS 'stated in your report, never findings' for this class of default."
+    },
+    {
+      "item": "Editing test_worker.py's or test_verification.py's unittest.mock.patch target strings to fix the dual-module-identity defect surfaced while reconstructing AC0",
+      "reason": "Out of this cell's contract (verification.py, the file the second failure actually lives in, is not in <paths> at all; retargeting test_worker.py's patch string alone would fix one symptom of a shared, undiagnosed-scope defect and is a neighbouring-defect fix, not this cell's build). Recorded as surprise row AMGT_HARVST-Z-W3-S1 (ARMED, disarm_owner 2.0.0_SA_COO~Y); AC0 and AC2 both record the 2 pre-existing failures unchanged, never silently fixed."
+    },
+    {
+      "item": "A live vendor call or live S3 write of any kind",
+      "reason": "Section header: 'CODE ONLY, stubs, no vendor call.' Every test uses STUB sessions and a STUB S3 client; AC5 runs the real CLI under HARVEST_REFUSE_NETWORK=1. HVST-h-10 is named as the cell that runs this build live."
+    }
+  ],
+  "surprises": ["AMGT_HARVST-Z-W3-S1: AC0's premise of a clean pre-edit baseline read did not hold (this worker's own sequencing lapse, corrected via a byte-verified HEAD swap-in), surfacing a pre-existing dual-module-identity defect in two tests' own unittest.mock.patch target strings that fails 2 of the 7 AC0/AC2 files independent of this cell; not fixed (out of contract), recorded, and both AC0 and AC2 record it unchanged."],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC0, baseline sweep, reconstructed pre-edit via a byte-verified git-HEAD swap-in)",
+      "invocation": "for t in lib/opal_data_harvest/test_bronze_capture.py lib/opal_data_harvest/test_silver_from_bronze.py lib/opal_data_harvest/test_legacy_upload.py lib/opal_data_harvest/test_harvest_grammar.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_catalog.py lib/opal_data_harvest/test_verification.py; do python -m pytest $t -q --color=no -p no:cacheprovider; done",
+      "result": "12 passed | 14 passed | 6 passed | 7 passed | 2 failed, 18 passed, 2 subtests passed | 5 passed | 1 failed, 3 passed, 2 subtests passed -- identical pre-edit (reconstructed) and post-edit (AC2)"
+    },
+    {
+      "tool": "pytest (AC1, new test file)",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_retrieval_provenance.py -v --color=no -p no:cacheprovider",
+      "result": "rc 0; 13 passed, 0 failed (re-run before and after the code commit, identical outcome)"
+    },
+    {
+      "tool": ".scratch/hv3/ac4.py (AC4, given verbatim by section 5)",
+      "invocation": "timeout 120 python .scratch/hv3/ac4.py",
+      "result": "rc 0; pin_block_lines 7 present_verbatim_in_head True"
+    },
+    {
+      "tool": ".scratch/hv3/mutant_control.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/hv3/mutant_control.py",
+      "result": "rc 0; REAL pages=[1, 2] (assertion PASS); MUTANT raised KeyError (assertion FAIL); CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "python -m lib.opal_data_harvest plan (AC5, zero-network CLI invocation)",
+      "invocation": "HARVEST_REFUSE_NETWORK=1 python -m lib.opal_data_harvest plan --publishers sa bbg ft wsj barrons --security-json .scratch/hv3/lenovo_probe.json --floor 2026-01-01 --retrieval-mode backfill",
+      "result": "rc 0; 5 per-publisher lines + 1 total line; every bound=2026-01-01; 0 occurrences of \"network refused\""
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~3 <0.9.0_WK_AMGT_HARVST~3@opal.agent>\" -F <msgfile> -- <paths>",
+      "result": "92482d23ea (build: rungs/provenance/paging/dedupe/plan/refuser/probe/HarvestUploader fix, 8 files, risk-reflex clean, naming-gate PASS; one ds-precommit-check false positive on the @x.setter property idiom fixed by switching to property()/property() pairs, one ruff unused-import fixed, then commit-gate OK)"
+    }
+  ]
+}

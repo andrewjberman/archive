@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-10",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-10.one-call-substrate-read.md",
+    "group": "OTHER",
+    "vintage_commit": "74f25cbb6bc7a980b5fac744bcf25a9aa9fa70ee"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "40107c6f48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-10.one-call-substrate-read.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/substrate.py",
+      "kind": "script",
+      "commit_or_etag": "e3551494bef1f43595dc11f883d02524b641c75b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "substrate(security_key, client=None) returns {security_key, prior_reports, continuation, sector_template, fund_form, typecast} -- prior_reports is a direct, always-fresh typed.reports_for() read ({bronze_key, sha256, period, class} per report, no bytes served); each of the four derived members is {uri, content_sha256, method_version, inputs_count, current} via the ONE stored-object picker _pick_stored (matches the module's own current_inputs() when a match exists, else the lexicographically-last stored object with current False, else {absent: reason}). sector_template is resolved via sector_template.business_type_of_security (not business_type_of -- row AMGT_CORPUS-Z-W1-S2); fund_form via the continuation artifact's own fund_of_record. --first-covered calls substrate() once for the security key continuation._resolved_security_keys/read_latest would pick (same algorithm, reused via _pick_first_covered_security_key). --difference-arm mirrors the live typed-silver/research-report-extract/four-gold-table prefixes (GET/LIST only) into an in-memory StubS3Client, calls substrate() (call 1), adds ONE synthetic OTHER-class non-xlsx report to the stub via typed.record()+store.silver_append()+store.bronze_put() (stub-only, no live S3 write of any kind), re-derives ONLY continuation on the stub (continuation.write_one), calls substrate() again (call 2), and reports changed_set vs expected_changed_set=[continuation, prior_reports].",
+      "introduces": ["substrate", "_pick_stored", "_pick_first_covered_security_key", "run_difference_arm", "StubS3Client", "_build_mirror_stub", "_add_synthetic_report", "prior_reports_hash"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_substrate.py",
+      "kind": "test",
+      "commit_or_etag": "e3551494bef1f43595dc11f883d02524b641c75b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 offline tests under the poison, every object seeded through the package's own writers (store.bronze_put/store.silver_append/continuation.write_one/sector_template._run_write) against substrate.StubS3Client: ONE CALL FIVE MEMBERS (all 5 keys present); ABSENT IS NAMED (a security with no XLSX record resolves sector_template to {absent: ...} while a REAL 'healthcare' sector_template artifact for a DIFFERENT security lives in the same store and is not leaked into the absent reason, and is itself reachable); CURRENT FLIPS (adding a second report without re-deriving continuation flips continuation.current from True to False while the still-picked object's content_sha256 is unchanged, and the three artifacts with nothing to move stay absent both times); THE DIFFERENCE ARM CAN FAIL (run_difference_arm(..., redrive=False) leaves continuation out of changed_set, so difference_ok is False) and its positive twin (redrive=True gives changed_set == expected_changed_set, difference_ok True); a poison positive control. A module-level pyarrow warm-up (pa.Table.from_pylist at import time, before conftest's autouse poison fixture runs) avoids a real per-device artifact: pyarrow's first-ever from_pylist call lazily imports pandas, which calls platform.win32_ver() -> subprocess.run(['ver']) once on this device -- warming it at collection time keeps every later from_pylist call (inside a poisoned test, via store.silver_append) off subprocess.",
+      "artifact_covered_by": ["AC1", "AC4", "AC5"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_substrate.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_substrate.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "......                                                                   [100%]\n6 passed in 0.57s",
+      "denominator": "6 of 6 tests passed, 0 failed; run against committed HEAD e3551494be and re-run once more, identical outcome both times",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.substrate --first-covered -- expect prior_reports N H current B ... continuation [64hex] current True ... typecast [64hex] current True ... members 5 present P absent A ... call_count 1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.substrate --first-covered 2>&1 | tail -10",
+      "output_evidence": "security_key IMB_LN_Equity\nprior_reports 15 6704d1e8bdd456b63ccb8d48583bf5879e08cd8bba3686cb048abda8fa192bf6 current True\ncontinuation 958021a0591764fb3c965c4e4e17802d6be01342d157dce324682634ab43befe current True\nsector_template absent current False\nfund_form 577ec13815e284a07a0435d54d03d4ea40d3dfca6d94d8ea543f5c2c62866937 current True\ntypecast 395bcad1dde3b07e88bd200d8cfd5d0e10346a226375dc4f018f69d6ffb38de0 current True\nmembers 5 present 4 absent 1\ncall_count 1",
+      "denominator": "1 of 1 substrate() call (call_count 1); IMB_LN_Equity is the security key continuation._resolved_security_keys/read_latest's own selection would pick (same algorithm, reused); 4 of 5 members present (sector_template absent because business_type_of_security resolves IMB_LN_Equity to a conflicting multi-type case, named in AC3's output), 1 absent; continuation and typecast both current True as the pattern requires; run twice back to back, byte-identical",
+      "expect": "(?s)prior_reports \\d+ \\S+ current \\S+.*continuation [0-9a-f]{64} current True.*typecast [0-9a-f]{64} current True.*members 5 present \\d+ absent \\d+.*call_count 1",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.substrate --difference-arm -- expect continuation call1 H1 call2 H2 changed True ... typecast call1 H call2 H changed False ... difference_ok True",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.substrate --difference-arm 2>&1 | tail -10",
+      "output_evidence": "security_key IMB_LN_Equity\nprior_reports call1 6704d1e8bdd456b63ccb8d48583bf5879e08cd8bba3686cb048abda8fa192bf6 call2 7d18dc1825a750697fca03a5162e11a63ab5b62664cb2d33a6aa50dab4ac12c6 changed True\ncontinuation call1 958021a0591764fb3c965c4e4e17802d6be01342d157dce324682634ab43befe call2 b5a30bdb1aa480ea9fe8ec4b762db73d441a01de1ba530cc946ba8a6998032af changed True\nsector_template call1 absent:business type unmapped: conflict: consumer-non-cyclicals, technology call2 absent:business type unmapped: conflict: consumer-non-cyclicals, technology changed False\nfund_form call1 577ec13815e284a07a0435d54d03d4ea40d3dfca6d94d8ea543f5c2c62866937 call2 577ec13815e284a07a0435d54d03d4ea40d3dfca6d94d8ea543f5c2c62866937 changed False\ntypecast call1 395bcad1dde3b07e88bd200d8cfd5d0e10346a226375dc4f018f69d6ffb38de0 call2 395bcad1dde3b07e88bd200d8cfd5d0e10346a226375dc4f018f69d6ffb38de0 changed False\nchanged_set ['continuation', 'prior_reports']\nexpected_changed_set ['continuation', 'prior_reports']\ndifference_ok True",
+      "denominator": "5 of 5 members reported (prior_reports, continuation, sector_template, fund_form, typecast, in that print order); changed_set == expected_changed_set (2 of 5 members changed: continuation, prior_reports; 3 of 5 unchanged: sector_template, fund_form, typecast); the synthetic added report is OTHER-class and non-xlsx by construction, so it is invisible to sector_template grouping, fund_form's FUND_CLASSES filter and typecast's xlsx-only scan; run twice back to back (fresh stub each time), byte-identical",
+      "expect": "(?s)continuation call1 [0-9a-f]{64} call2 [0-9a-f]{64} changed True.*typecast call1 ([0-9a-f]{64}) call2 \\1 changed False.*difference_ok True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "........................................................................ [ 67%]\n..................................                                       [100%]\n106 passed in 0.92s",
+      "denominator": "106 of 106 tests passed across the whole lib/research/corpus/tests package (6 new in test_substrate.py plus 100 from earlier cells), 0 failed; run twice back to back, identical",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "python .scratch/c10/hyg.py (write it) -- expect outside_allowed [] ... changed_files N ... bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c10/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 3\nlib/research/corpus/substrate.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_substrate.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "3 of 3 changed paths (against git merge-base HEAD SITEZ, over lib and org, tracked diff UNION untracked-now-committed files) are inside this cell's <paths> grant (0 outside_allowed) -- the third is the INVESTIGATION_v1.md row, a .md so not py-checked; 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, so bad 0 of 2; run twice back to back, identical",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/c10/mutant.py (not committed) runs --first-covered's continuation line twice against the SAME real corpus: FIX uses substrate._pick_stored's real match line (docs[key]['inputs'] == wanted_inputs); MUTANT monkeypatches substrate._pick_stored with a copy whose match line is inverted (!= instead of ==) -- the ONE comparison the 'current' bool depends on.",
+      "expected": "MUTANT's continuation line reports 'current False' where FIX reports 'current True' (or vice versa), because a matching stored artifact now fails the inverted test and a non-matching one passes it.",
+      "observed": "FIX: 'continuation 958021a0591764fb3c965c4e4e17802d6be01342d157dce324682634ab43befe current True'. MUTANT: 'continuation 958021a0591764fb3c965c4e4e17802d6be01342d157dce324682634ab43befe current False' (same object picked, same content_sha256 -- only the current flag flips). CONTROL FIRED-AS-EXPECTED True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file, AC2's --first-covered, AC3's --difference-arm, AC4's full test suite, AC5's hyg.py, and .scratch/c10/mutant.py each run twice back to back.",
+      "observed": "pytest (AC1): '6 passed' both runs. --first-covered (AC2): byte-identical output both runs (diff empty). --difference-arm (AC3): byte-identical output both runs (diff empty) -- the synthetic report's content bytes are fixed, so its sha256/report_id are stable across separate stub builds despite each run's own wall-clock fetched_at (fetched_at is a LINEAGE column, never part of any derived artifact's inputs or fields). pytest (AC4): '106 passed' both runs. hyg.py (AC5): 'bad 0' both runs. mutant.py: 'CONTROL FIRED-AS-EXPECTED True' both runs, identical FIX/MUTANT lines both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any S3 write of any kind (including the difference arm)",
+      "reason": "BOUNDS (section 4): 'NO S3 WRITE of any kind; the difference arm is stub-only by construction.' Every write in --difference-arm (store.bronze_put, store.silver_append, gold.gold_put via continuation.write_one) is called with client=stub (substrate.StubS3Client), never the live default client; the live client (store._default_client()) is used only for get_object/head_object/list_objects_v2 inside _mirror_prefix and the read-only member functions."
+    },
+    {
+      "item": "Any S3 delete of any kind",
+      "reason": "BOUNDS (section 4, issuer amendment on row AMGT_CORPUS-Z-S4): 'NO S3 DELETE OF ANY KIND.' No delete_object/delete_objects call appears anywhere in substrate.py or its tests; confirmed by code review and by hyg.py's own bad 0."
+    },
+    {
+      "item": "Any derivation of sector_template/fund_form/typecast/continuation's own fields",
+      "reason": "Module docstring / section 1: 'It performs no derivation: it READS.' substrate.py imports and calls each sibling module's own current_inputs()/business_type_of_security() and picks among ALREADY-STORED gold objects (_pick_stored); it never recomputes fields, sections, kpi_set or any other artifact content itself. The only content substrate.py builds directly is prior_reports (a direct read of typed silver rows, never a derived gold artifact) and the difference arm's ONE synthetic input report, which is explicitly RULED as part of the proof mechanism."
+    },
+    {
+      "item": "Touching the OneDrive research library, a vendor API, or the Claude API",
+      "reason": "BOUNDS: 'NEVER INSTALL. NEVER CALL A VENDOR API OR THE CLAUDE API. NEVER TOUCH THE LIBRARY.' substrate.py imports only this estate's own continuation/fund_form/gold/sector_template/typecast/typed/store modules plus stdlib (argparse, datetime, hashlib, json, sys); lib.research.corpus.library is never imported; every offline test runs under tests/conftest.py's poison, proven live by the poison positive control test."
+    },
+    {
+      "item": "Using sector_template.business_type_of (the order's own literal wording)",
+      "reason": "Row AMGT_CORPUS-Z-W1-S2: c-7's own current module docstring designates business_type_of as report-level, evidence-only, 'never consulted for grouping' since its own reopen amendment, and its real writer (_run_write) partitions gold objects by business_type_of_security. Using the literally-named function would make sector_template read absent for nearly every security (0 of 13 business types reach a report at the report level, per row AMGT_CORPUS-Z-W4-S1) and would not match how CRPS-c-7's artifacts are actually keyed, so business_type_of_security was used instead and the discrepancy is filed, not silently resolved."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W1-S2: This order's own inlined text names the superseded sector_template.business_type_of; c-7's own module docstring (ISSUER AMENDMENT, row AMGT_CORPUS-Z-W4-S1's reopen) states business_type_of is report-level, evidence-only, 'never consulted for grouping', and that business_type_of_security is the function its gold writer actually partitions by -- substrate.py's sector_template member uses business_type_of_security, not the order's literally-named function."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, AC4)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_substrate.py -q --color=no -p no:cacheprovider ; python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0 both; 6 passed (test_substrate.py alone), 106 passed (whole package); run twice each, identical outcomes"
+    },
+    {
+      "tool": "substrate CLI --first-covered (AC2)",
+      "invocation": "python -m lib.research.corpus.substrate --first-covered",
+      "result": "rc 0; security_key IMB_LN_Equity; prior_reports 15, continuation/fund_form/typecast current True, sector_template absent (conflicting multi-type); members 5 present 4 absent 1; call_count 1; run twice, byte-identical"
+    },
+    {
+      "tool": "substrate CLI --difference-arm (AC3)",
+      "invocation": "python -m lib.research.corpus.substrate --difference-arm",
+      "result": "rc 0; changed_set ['continuation', 'prior_reports'] == expected_changed_set; difference_ok True; run twice, byte-identical"
+    },
+    {
+      "tool": ".scratch/c10/hyg.py (AC5, written this cell per the criterion's own invocation)",
+      "invocation": "python .scratch/c10/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 3; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    },
+    {
+      "tool": ".scratch/c10/mutant.py (not committed -- scratch control harness)",
+      "invocation": "PYTHONPATH=. python .scratch/c10/mutant.py",
+      "result": "rc 0; FIX continuation line ends 'current True', MUTANT (inverted _pick_stored match) ends 'current False'; CONTROL FIRED-AS-EXPECTED True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/substrate.py lib/research/corpus/tests/test_substrate.py org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "commit e3551494be: risk-reflex REFLEX CLEAN (3 of 3 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 3 files (the .md is not py-checked); naming-gate WARN 3 graded (0 REFUSE -- an 's3://%s/%s' format-string literal inside error/uri-building helpers, the same shape already WARNed on gold.py/typed.py in earlier cells); to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (1 new row of 14 total, all step-7/step-10 fields present); surprise-corpus OK (matches legacy baseline, 0 new failures)"
+    }
+  ]
+}

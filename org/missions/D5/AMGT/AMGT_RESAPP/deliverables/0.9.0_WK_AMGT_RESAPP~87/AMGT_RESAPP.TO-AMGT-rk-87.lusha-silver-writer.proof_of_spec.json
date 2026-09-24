@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-87",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-87.lusha-silver-writer.md",
+    "group": "W",
+    "vintage_commit": "f7fcf11592f4af08f6850b85cf516b85bac375eb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "f7fcf11592f4af08f6850b85cf516b85bac375eb",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-87.lusha-silver-writer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~87",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-87, cell AMGT-rk-87 (H4-lusha, round 22, contract C-LUSHA-EXCEPTION). Worker 0.9.0_WK_AMGT_RESAPP~87, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-22-87 in worktree C:/tmp/wk-amgt-22-87, HEAD f7fcf11592 at spawn (no ancestry in wk-amgt-14-50, confirmed by the spawn prompt). THE BAR FIRST: printed `git rev-parse --abbrev-ref HEAD` (wk-amgt-22-87) and confirmed org/ and .tools/ present, TREE-OK. Order read WORKER FACE only, top to the RECORD FACE marker (line 262). Never read, showed, diffed or checked out wk-amgt-14-50 / C:/tmp/wk-amgt-14-50 at any point. AC0 gate run FIRST, before any edit: store_file True, store_names_present 12 of 12 missing [], validate_refusals 0, silver address exactly s3://opal-data-harvest/lusha/harvest/silver/contact_match/date=2026-09-21/part-20260921T120000Z.parquet -- matched the order's <expect> exactly, so the build proceeded. Read lib/research/harvest/store.py (H0-store, rk-81's; a WALL, not edited) and lib/research/harvest/tests/test_store.py (reused its _StubS3 idiom verbatim, defined locally in the new test file per that file's own convention). Read lib/research/management/enrich.py's prospecting_page, attach_profiles, name_matches, scrub, is_contact_key and lib/research/management/roster.py's asciify to match the estate's own derivation rules exactly (title from jobTitle str-or-{title}, profile_url from socialLinks.linkedin only, ASCII-fold via roster.asciify, name match via enrich.name_matches). Confirmed by reading bloomberg_fallback.py and ceo_search.py (enrich.py's own import chain) that neither imports boto3/urllib/requests at module level, so importing lib.research.management.enrich from the new module does not compromise AC4's offline-credential run. Built lib/research/harvest/lusha.py exactly per section 1's RULED interface: module constants SOURCE/TABLE/ENDPOINT/RECORD_KEY/NO_RESULT_PERSON_ID and the KEPT_FIELDS allow-list tuple verbatim as ruled; contact_match_rows(results, company_domain, fetched_at, officers=None, results_total=None) -> (rows, skipped), PURE, building a `candidate` dict from the raw result's own keys plus derived fields and projecting through `{k: candidate.get(k) for k in KEPT_FIELDS}` so KEPT_FIELDS is the single control; person_id from id/personId/contactId (first present, stringified), a result with none skipped and counted; job_title from jobTitle (str or {title}); profile_url from socialLinks.linkedin ONLY; matched_officer via enrich.name_matches against a supplied officers list; a zero-result fetch returns ONE sentinel row with person_id=NO_RESULT_PERSON_ID and every other vendor field None; already_fetched(company_domain, since, client=None) reading store.silver_latest; write_contact_match(rows, run_stamp, client=None) calling store.silver_append only, never bronze_put, never building a URI, never importing boto3/a Lusha client/urllib/requests. lusha.py imports `lib.research.harvest.store as store` (qualified, module-level) per the W85-S1 cutting rule so the identity arm holds. Not wired: no existing file edited, confirmed by AC5. Built lib/research/harvest/tests/test_lusha.py with the exact 9 named arms over an in-process stub S3 (_StubS3, same idiom as test_store.py's, defined locally). Ran every criterion AC0-AC6 in order, once before committing and once again after committing, both runs identical: AC0 PASS (gate, both times); AC1 9/9 passed both times, all 9 named arms; AC2 harvest suite re-measured at spawn = 28 (rk-81 11 + rk-83 9 + rk-84 8, exactly the order's own worked example since no sibling cell had merged first) and after this cell's 9 arms = 37 passed both times, management suite unchanged 95 passed/13 subtests both times; AC3 real_keys_subset_of_allow_list True rows 1, then widening KEPT_FIELDS with emails/phones and re-calling contact_match_rows on the SAME unfiltered result leaked both fields (mutant_allow_list_widened_leaks_or_raises True) -- proving the projection is driven by KEPT_FIELDS, not a hidden deny-list, both times; AC4 9 passed with every AWS credential source pointed at nothing (AWS_PROFILE=__rk87_no_such_profile__, AWS_CONFIG_FILE/AWS_SHARED_CREDENTIALS_FILE=/nonexistent, AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/AWS_SESSION_TOKEN unset) both times -- no AWS or network call is made by any arm; AC5 py_files 6677 (git ls-files '*.py'; the two new files were already tracked-eligible via git ls-files count since they were added to the index by the time of the post-commit re-run, and present via the explicit fallback list on the pre-commit run) unparsed 0, importers exactly ['lib/research/harvest/tests/test_lusha.py'] -- the writer is wired into nothing else -- and enrich.py/ceo_search.py both byte_equal_to_pin True against the PINNED commit 3863a8200d382e8b9943f7d03141326b93a86d26 (pin_sha16 b1f2edb2550c037c / 2b5da242faf81c50, matching the order's stated pins exactly) both times; AC6 both new files compile True, crlf 0, non_ascii_bytes 0 both times. No BLOCKING row was needed (AC0's gate passed cleanly on the first read, and every subsequent criterion matched its <expect> exactly on the first run with no repair). No surprise row was filed: nothing in this session diverged from what the order specified or measured -- the baselines re-measured at spawn (harvest 28, management 95/13 subtests) matched the order's own MEASURED STATE section exactly, and every criterion's actual output matched its <expect> verbatim on the first attempt. Committed the code+tests+record-face flip+instance in one commit (see COMMITS in the final report).",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/lusha.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new library, code-only, no S3 write and no live AWS/Lusha call performed by the module or its tests (AC4 confirms offline with every AWS credential source pointed at nothing). Not packaged into any Lambda artifact by this order; zero production callers (AC5); not wired into enrich.py or ceo_search.py (AC5 byte-equality).",
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3", "AC4", "AC5", "AC6"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_lusha.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline test file, 9 tests / 9 passed against an in-process stub S3; not packaged into any Lambda artifact."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-87.lusha-silver-writer.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "record-face <status> flipped pending -> complete."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~87/AMGT_RESAPP.TO-AMGT-rk-87.lusha-silver-writer.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "\"store_file True\"; \"store_names_present 12 of 12 missing []\"; \"validate_refusals 0\"; \"silver s3://opal-data-harvest/lusha/harvest/silver/contact_match/date=2026-09-21/part-20260921T120000Z.parquet\". Any other reading -- store absent (rk-81 not merged), a missing name, a refusal, or a bucket other than opal-data-harvest -- is a STOP: file a BLOCKING row (disarm_owner 2.0.0_SA_COO~Z) and edit nothing",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c '\nimport importlib, os\nprint(\"store_file\", os.path.exists(\"lib/research/harvest/store.py\"))\ns = importlib.import_module(\"lib.research.harvest.store\")\nneed = [\"SCOPE\", \"HARVEST_BUCKET\", \"CONTACT_FIELDS\", \"LushaExceptionError\", \"SilverRowError\", \"address_of\", \"date_partition\", \"stamp\", \"bronze_put\", \"silver_append\", \"silver_latest\", \"record_hash\"]\nprint(\"store_names_present\", sum(1 for x in need if hasattr(s, x)), \"of\", len(need), \"missing\", [x for x in need if not hasattr(s, x)])\nfrom lib import opal_naming as n\nr = n.validate()\nprint(\"validate_refusals\", len(r[0]) if isinstance(r, tuple) else r)\nprint(\"silver\", n.address(\"lusha\", \"harvest\", \"silver\", \"contact_match\", \"date=2026-09-21\", \"part-20260921T120000Z.parquet\"))\n'",
+      "output_evidence": "store_file True\nstore_names_present 12 of 12 missing []\nvalidate_refusals 0\nsilver s3://opal-data-harvest/lusha/harvest/silver/contact_match/date=2026-09-21/part-20260921T120000Z.parquet",
+      "denominator": "12 of 12 named store names present, 0 missing; 0 of N registry refusals; 1 of 1 silver address matched exactly",
+      "status": "PASS",
+      "expect": "store_file True[\\s\\S]*store_names_present 12 of 12 missing \\[\\][\\s\\S]*validate_refusals 0[\\s\\S]*silver s3://opal-data-harvest/lusha/harvest/silver/contact_match/date=2026-09-21/part-20260921T120000Z\\.parquet"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "a final line \"9 passed\" and 0 failed, the PASSED lines naming test_allow_list_drops_every_contact_field, test_profile_url_is_the_linkedin_link_only, test_matched_officer_uses_the_estate_name_rule, test_zero_result_fetch_writes_one_sentinel_row, test_silver_append_writes_lusha_silver_with_null_bronze_key, test_already_fetched_reads_the_bucket, test_module_never_calls_bronze_put_and_the_store_refuses_lusha_bronze, test_module_imports_no_client_or_network, test_patched_store_is_the_one_production_reaches",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_lusha.py -v -p no:cacheprovider 2>&1 | tail -14",
+      "output_evidence": "lib/research/harvest/tests/test_lusha.py::test_allow_list_drops_every_contact_field PASSED [ 11%]\nlib/research/harvest/tests/test_lusha.py::test_profile_url_is_the_linkedin_link_only PASSED [ 22%]\nlib/research/harvest/tests/test_lusha.py::test_matched_officer_uses_the_estate_name_rule PASSED [ 33%]\nlib/research/harvest/tests/test_lusha.py::test_zero_result_fetch_writes_one_sentinel_row PASSED [ 44%]\nlib/research/harvest/tests/test_lusha.py::test_silver_append_writes_lusha_silver_with_null_bronze_key PASSED [ 55%]\nlib/research/harvest/tests/test_lusha.py::test_already_fetched_reads_the_bucket PASSED [ 66%]\nlib/research/harvest/tests/test_lusha.py::test_module_never_calls_bronze_put_and_the_store_refuses_lusha_bronze PASSED [ 77%]\nlib/research/harvest/tests/test_lusha.py::test_module_imports_no_client_or_network PASSED [ 88%]\nlib/research/harvest/tests/test_lusha.py::test_patched_store_is_the_one_production_reaches PASSED [100%]\n9 passed in 0.40s",
+      "denominator": "9 of 9 named arms passed, 0 failed",
+      "status": "PASS",
+      "expect": "test_allow_list_drops_every_contact_field PASSED[\\s\\S]*test_profile_url_is_the_linkedin_link_only PASSED[\\s\\S]*test_matched_officer_uses_the_estate_name_rule PASSED[\\s\\S]*test_zero_result_fetch_writes_one_sentinel_row PASSED[\\s\\S]*test_silver_append_writes_lusha_silver_with_null_bronze_key PASSED[\\s\\S]*test_already_fetched_reads_the_bucket PASSED[\\s\\S]*test_module_never_calls_bronze_put_and_the_store_refuses_lusha_bronze PASSED[\\s\\S]*test_module_imports_no_client_or_network PASSED[\\s\\S]*test_patched_store_is_the_one_production_reaches PASSED[\\s\\S]*9 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "two lines: first \"N passed\" and 0 failed where N is the harvest suite's count re-measured at spawn (rk-81's own tests plus any sibling cell already merged) plus this cell's 9 (measured at 739eb5f288: harvest 28 = rk-81 11 + rk-83 9 + rk-84 8, so 37 if no sibling merges first); then \"95 passed\" (13 subtests) and 0 failed, UNCHANGED from the cut -- re-measure both before you edit and print the two baselines in your instance",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests -q -p no:cacheprovider 2>&1 | tail -1 && python -m pytest lib/research/management/tests -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "37 passed in 0.55s\n95 passed, 13 subtests passed in 5.85s",
+      "denominator": "BASELINES re-measured at spawn (before any edit): harvest suite 28 passed (rk-81 11 + rk-83 9 + rk-84 8, no sibling cell had merged first -- matches the order's own worked example exactly), management suite 95 passed/13 subtests. AFTER this cell's 9 new arms: harvest 37 = 28 + 9, management still 95 passed/13 subtests, UNCHANGED.",
+      "status": "PASS",
+      "expect": "37 passed[\\s\\S]*95 passed, 13 subtests passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"real_keys_subset_of_allow_list True rows 1\", then \"mutant_allow_list_widened_leaks_or_raises\" followed by True or \"raised <Error>\" -- proving the projection is DRIVEN by KEPT_FIELDS (widening the allow-list is what lets a contact field in, so the allow-list is the control), never False. If the mutant prints False, the projection ignores KEPT_FIELDS: REFUSE and fix the module so KEPT_FIELDS is the only source of kept keys",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c '\nimport datetime, importlib\nm = importlib.import_module(\"lib.research.harvest.lusha\")\nat = datetime.datetime(2026, 9, 21, 12, 0, tzinfo=datetime.timezone.utc)\nres = [{\"id\": 7, \"firstName\": \"Ada\", \"lastName\": \"Doe\", \"jobTitle\": {\"title\": \"CEO\"}, \"emails\": [\"a@x.com\"], \"phones\": [\"+1 212 555 0100\"], \"socialLinks\": {\"linkedin\": \"https://www.linkedin.com/in/ada\", \"twitter\": \"@ada\"}}]\nreal = m.contact_match_rows(res, \"x.com\", at)\nrows = real[0] if isinstance(real, tuple) else real\nprint(\"real_keys_subset_of_allow_list\", all(set(r) <= set(m.KEPT_FIELDS) for r in rows), \"rows\", len(rows))\nm.KEPT_FIELDS = tuple(m.KEPT_FIELDS) + (\"emails\", \"phones\")\ntry:\n    mut = m.contact_match_rows(res, \"x.com\", at)\n    mrows = mut[0] if isinstance(mut, tuple) else mut\n    leaked = any((\"emails\" in r) or (\"phones\" in r) for r in mrows)\nexcept Exception as e:\n    leaked = \"raised \" + type(e).__name__\nprint(\"mutant_allow_list_widened_leaks_or_raises\", leaked)\n'",
+      "output_evidence": "real_keys_subset_of_allow_list True rows 1\nmutant_allow_list_widened_leaks_or_raises True",
+      "denominator": "1 of 1 row's keys a subset of KEPT_FIELDS before widening; after widening KEPT_FIELDS to include emails/phones, the SAME candidate leaks both (mutant_allow_list_widened_leaks_or_raises True, never False) -- the allow-list is the single control",
+      "status": "PASS",
+      "expect": "real_keys_subset_of_allow_list True rows 1[\\s\\S]*mutant_allow_list_widened_leaks_or_raises True"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "\"9 passed\" and 0 failed with every AWS credential source pointed at nothing -- the tests make no AWS or network call (a live call would raise a credentials or profile error)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN AWS_PROFILE=__rk87_no_such_profile__ AWS_CONFIG_FILE=/nonexistent AWS_SHARED_CREDENTIALS_FILE=/nonexistent python -m pytest lib/research/harvest/tests/test_lusha.py -q -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "9 passed in 0.43s",
+      "denominator": "9 of 9 passed, 0 failed, with AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/AWS_SESSION_TOKEN unset and AWS_PROFILE/AWS_CONFIG_FILE/AWS_SHARED_CREDENTIALS_FILE pointed at nonexistent targets -- no AWS or network call was made by any of the 9 arms",
+      "status": "PASS",
+      "expect": "9 passed"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"unparsed 0\" and \"importers ['lib/research/harvest/tests/test_lusha.py']\" -- the new writer is imported by its own test ONLY, wired into nothing; then enrich.py \"byte_equal_to_pin True pin_sha16 b1f2edb2550c037c\" and ceo_search.py \"byte_equal_to_pin True pin_sha16 2b5da242faf81c50\" (measured at the cut, PINNED commit, never HEAD or a merge-base -- row Z-S193)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c '\nimport ast, hashlib, subprocess\nPIN = \"3863a8200d382e8b9943f7d03141326b93a86d26\"\nfiles = [f for f in subprocess.run([\"git\", \"ls-files\", \"*.py\"], capture_output=True, text=True).stdout.splitlines() if f]\nfiles += [f for f in (\"lib/research/harvest/lusha.py\", \"lib/research/harvest/tests/test_lusha.py\") if f not in files]\nimporters, bad = [], 0\nfor f in files:\n    try: tree = ast.parse(open(f, \"rb\").read().decode(\"utf-8\"))\n    except Exception: bad += 1; continue\n    for node in ast.walk(tree):\n        mods = []\n        if isinstance(node, ast.Import): mods = [a.name for a in node.names]\n        elif isinstance(node, ast.ImportFrom) and node.module: mods = [node.module] + [node.module + \".\" + a.name for a in node.names]\n        if any(x == \"lib.research.harvest.lusha\" for x in mods): importers.append(f); break\nprint(\"py_files\", len(files), \"unparsed\", bad, \"importers\", sorted(set(importers)))\nfor f in (\"lib/research/management/enrich.py\", \"lib/research/management/ceo_search.py\"):\n    base = subprocess.run([\"git\", \"show\", PIN + \":\" + f], capture_output=True).stdout\n    print(f, \"byte_equal_to_pin\", open(f, \"rb\").read() == base, \"pin_sha16\", hashlib.sha256(base).hexdigest()[:16])\n'",
+      "output_evidence": "py_files 6677 unparsed 0 importers ['lib/research/harvest/tests/test_lusha.py']\nlib/research/management/enrich.py byte_equal_to_pin True pin_sha16 b1f2edb2550c037c\nlib/research/management/ceo_search.py byte_equal_to_pin True pin_sha16 2b5da242faf81c50",
+      "denominator": "6677 tracked *.py files (plus the 2 new files via the explicit fallback), 0 unparsed; 1 of 1 importer (the new module's own test file); 2 of 2 named files byte-equal to the PINNED commit 3863a8200d382e8b9943f7d03141326b93a86d26",
+      "status": "PASS",
+      "expect": "unparsed 0[\\s\\S]*importers \\['lib/research/harvest/tests/test_lusha\\.py'\\][\\s\\S]*enrich\\.py byte_equal_to_pin True pin_sha16 b1f2edb2550c037c[\\s\\S]*ceo_search\\.py byte_equal_to_pin True pin_sha16 2b5da242faf81c50"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "both files print compiles True, crlf 0 and non_ascii_bytes 0 (both are NEW, absent at the pin)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c '\nimport io\nfor f in (\"lib/research/harvest/lusha.py\", \"lib/research/harvest/tests/test_lusha.py\"):\n    b = io.open(f, \"rb\").read()\n    print(f, \"compiles\", bool(compile(b.decode(\"utf-8\"), f, \"exec\")), \"crlf\", b.count(bytes([13, 10])), \"non_ascii_bytes\", len(b) - len(b.decode(\"utf-8\")))\n'",
+      "output_evidence": "lib/research/harvest/lusha.py compiles True crlf 0 non_ascii_bytes 0\nlib/research/harvest/tests/test_lusha.py compiles True crlf 0 non_ascii_bytes 0",
+      "denominator": "2 of 2 files: compiles True, crlf 0, non_ascii_bytes 0",
+      "status": "PASS",
+      "expect": "lib/research/harvest/lusha\\.py compiles True crlf 0 non_ascii_bytes 0[\\s\\S]*lib/research/harvest/tests/test_lusha\\.py compiles True crlf 0 non_ascii_bytes 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC3's own arm: after proving real_keys_subset_of_allow_list True on the unmutated module, KEPT_FIELDS is widened in-process to include 'emails' and 'phones' (both already present as raw pass-through keys in the SAME candidate dict, since contact_match_rows builds candidate from dict(result) plus derived fields), and contact_match_rows is called again on the identical input.",
+      "expected": "Widening the allow-list is what lets a contact field in: mutant_allow_list_widened_leaks_or_raises must print True (or 'raised <Error>'), never False, proving the projection is driven by KEPT_FIELDS and not a hidden deny-list or hardcoded key set.",
+      "observed": "mutant_allow_list_widened_leaks_or_raises True -- the widened allow-list let both 'emails' and 'phones' leak into the row, confirming KEPT_FIELDS is the single control on what a row carries.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every criterion is a pure offline read against an in-process stub S3 (AC0, AC1, AC3, AC4, AC6) or a pure-Python AST/git census (AC5) or an offline pytest run (AC2). No live AWS, Lusha or network call is made anywhere in this session. AC0-AC6 were each run once pre-commit (working tree) and once post-commit (committed bytes).",
+      "observed": "AC0-AC6 identical pre- and post-commit: AC0 store_file True/store_names_present 12 of 12 missing []/validate_refusals 0/silver address exact match both times; AC1 9 passed both times, same 9 names; AC2 37 passed then 95 passed/13 subtests both times; AC3 real_keys_subset_of_allow_list True rows 1, mutant leaks True both times; AC4 9 passed both times with AWS pointed at nothing; AC5 py_files 6677/unparsed 0/importers identical, both pin byte-equalities True both times; AC6 both files compiles True/crlf 0/non_ascii_bytes 0 both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "any edit to lib/research/harvest/store.py, lib/research/management/enrich.py, ceo_search.py, roster.py or management.schema.json",
+      "reason": "section 1 'What this cell does NOT change': this cell is H4-lusha only, a new module and its tests, called by no production code yet. Confirmed by AC5 (0 production importers outside the new module's own test file; enrich.py and ceo_search.py byte-equal to the pinned commit)."
+    },
+    {
+      "item": "any Lusha API call, any S3 put/get/list against a live bucket, any secret read, any deploy",
+      "reason": "section 4 BOUNDS: CODE ONLY. AC4 proves the whole test suite passes with every AWS credential source pointed at nothing; the module never imports boto3, a Lusha client, urllib or requests (AC1's test_module_imports_no_client_or_network); no secret was read anywhere in this session."
+    },
+    {
+      "item": "any bronze write or bronze address for the lusha source",
+      "reason": "C-LUSHA-EXCEPTION: write_contact_match never calls store.bronze_put; store.py itself already refuses a lusha bronze_put with LushaExceptionError (AC1's test_module_never_calls_bronze_put_and_the_store_refuses_lusha_bronze proves both halves: no bronze_put call in lusha.py's AST, and store.bronze_put('lusha', ...) raises)."
+    },
+    {
+      "item": "any alarm, monitor, SNS/SES-send, notification, freshness checker, or non-ASCII content",
+      "reason": "section 4 BOUNDS forbid all of these; none created. AC6 proves 0 non-ASCII bytes in both new files."
+    },
+    {
+      "item": "branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50",
+      "reason": "never read, shown, diffed or checked out, per the order's own instruction and the spawn note (exposed Lusha credential)."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_lusha.py -v -p no:cacheprovider",
+      "result": "9 passed in 0.40s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN AWS_PROFILE=__rk87_no_such_profile__ AWS_CONFIG_FILE=/nonexistent AWS_SHARED_CREDENTIALS_FILE=/nonexistent python -m pytest lib/research/harvest/tests/test_lusha.py -q -p no:cacheprovider",
+      "result": "9 passed in 0.43s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/harvest/tests -q -p no:cacheprovider && python -m pytest lib/research/management/tests -q -p no:cacheprovider",
+      "result": "37 passed in 0.55s ; 95 passed, 13 subtests passed in 5.85s"
+    },
+    {
+      "tool": "py_compile (via compile())",
+      "invocation": "python -c \"compile(...)\" over lib/research/harvest/lusha.py and lib/research/harvest/tests/test_lusha.py",
+      "result": "both compiles True, crlf 0, non_ascii_bytes 0"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~87 <0.9.0_WK_AMGT_RESAPP~87@opal.agent>\" -F <msgfile> -- lib/research/harvest/lusha.py lib/research/harvest/tests/test_lusha.py org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-87.lusha-silver-writer.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~87/AMGT_RESAPP.TO-AMGT-rk-87.lusha-silver-writer.proof_of_spec.json",
+      "result": "PENDING -- run after this instance is written"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~87/AMGT_RESAPP.TO-AMGT-rk-87.lusha-silver-writer.proof_of_spec.json AC0,AC1,AC2,AC3,AC4,AC5,AC6",
+      "result": "PENDING -- run after this instance is written"
+    }
+  ]
+}

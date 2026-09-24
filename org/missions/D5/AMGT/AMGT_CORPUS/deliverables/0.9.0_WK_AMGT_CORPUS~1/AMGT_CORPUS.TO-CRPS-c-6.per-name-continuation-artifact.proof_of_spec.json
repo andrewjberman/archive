@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-6.per-name-continuation-artifact.md",
+    "group": "OTHER",
+    "vintage_commit": "74f25cbb6bc7a980b5fac744bcf25a9aa9fa70ee"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "40107c6f48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-6.per-name-continuation-artifact.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/continuation.py",
+      "kind": "script",
+      "commit_or_etag": "a5d537f79284b798ac53b4321bf0e4168e0bb73b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build(security_key) reads typed.reports_for(security_key) (CRPS-c-3's silver rows, dated ascending/undated last) plus CRPS-c-2's extraction objects and resolves four fields, each cited or {value:null, absent:reason}: fund_of_record / last_stated_position from the most recent report (dated descending, undated never preferred) whose extraction carries a non-empty RECOMMENDATION line -- fund_of_record needs a named fund token, last_stated_position needs only non-empty content (never defaulted away for lacking a %); thesis_pillars from the most recent class-A report's own paragraphs (docx only), the INVESTMENT THESIS block's 'lead: body' paragraphs up to the next short-bold heading; kpi_set counts+cites the scan's own 25 KPI term keys (research_docx_kpi_census.json, sha256 b18193fdd18da15a9434560dfc6801237f34668dc6b7d4085f8176cfc8076517, read for its key set only) via one uniform slash-alternation/phrase matching rule. Gold shape matches CRPS-c-9's typecast.py (artifact/method_version/subject/inputs/fields/content_sha256), object name <inputs_sha16>.json, written through gold.gold_put (never overwriting). current_inputs(security_key) is the named CRPS-c-10 contract. --write against the real 123-object/33-resolved-name corpus: names 33 with_fund 14 with_position 17 with_pillars 5; --verify-citations over every stored artifact: citations_checked 2280 resolved 2280 unresolved 0.",
+      "introduces": ["build", "build_document", "current_inputs", "read_latest", "write_one", "kpi_lexicon", "_resolve_fund_and_position", "_resolve_thesis_pillars", "_resolve_kpi_set", "_recency_order", "_locate_text"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4", "AC5", "AC6"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_continuation.py",
+      "kind": "test",
+      "commit_or_etag": "a5d537f79284b798ac53b4321bf0e4168e0bb73b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "9 offline tests under the poison: ABSENT/never defaulted (no RECOMMENDATION line anywhere gives value None with a reason, no digit anywhere in the field's own serialised form); MOST RECENT WINS (two dated reports, the later one's fund/position cited; an undated report never beats a dated one regardless of list order); thesis pillars read correctly and stop at the next bold-short heading, ABSENT with a reason when there is no class-A report; KPI counting/citing per term with a real 0-count for an unmentioned term; input-hash-moves on a new input and is stable on a repeat; a gold-round-trip verify-citations test (FakeS3Client) proving a one-character-altered passage is counted unresolved 1 of 2 while the untouched sibling citation resolves; a poison positive control.",
+      "artifact_covered_by": ["AC1", "AC5", "AC6"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_continuation.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_continuation.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": ".........                                                                [100%]\n9 passed in 0.13s",
+      "denominator": "9 of 9 tests passed, 0 failed; run against committed HEAD a5d537f792 and re-run once more, identical outcome both times",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.continuation --verify-citations -- expect citations_checked N resolved N unresolved 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.continuation --verify-citations 2>&1 | tail -3",
+      "output_evidence": "citations_checked 2280 resolved 2280 unresolved 0",
+      "denominator": "2280 of 2280 citations across EVERY stored research-continuation gold object (33 resolved names' artifacts, every field: fund_of_record, last_stated_position, thesis_pillars, kpi_set) re-read against their own extraction's text at the citation's own locator; 0 unresolved; run twice back to back, byte-identical",
+      "expect": "citations_checked (\\d+) resolved \\1 unresolved 0\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.continuation --show-first-covered -- expect security_key S ... fund_of_record ... report_key ... last_stated_position ... report_key ... thesis_pillars ... report_key",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.continuation --show-first-covered 2>&1 | tail -40",
+      "output_evidence": "security_key IMB_LN_Equity\nfund_of_record IDVZ report_key s3://opal-data-harvest/amgt/harvest/bronze/research-report/security_key=IMB_LN_Equity/a1caf1eec85230eb/Imperial Brands Research Pack 2026 07 17_v1.docx locator 2\nlast_stated_position {\"fund\": \"IDVZ\", \"size_pct\": \"~2.5\", \"text\": \"Potential ADD in IDVZ (currently ~2.5%)\"} report_key s3://opal-data-harvest/amgt/harvest/bronze/research-report/security_key=IMB_LN_Equity/a1caf1eec85230eb/Imperial Brands Research Pack 2026 07 17_v1.docx locator 2\nthesis_pillars Cash-return machine report_key s3://opal-data-harvest/amgt/harvest/bronze/research-report/security_key=IMB_LN_Equity/a1caf1eec85230eb/Imperial Brands Research Pack 2026 07 17_v1.docx locator 11\n(5 more thesis_pillars lines follow, 6 pillars total, each with its own report_key and locator)",
+      "denominator": "IMB_LN_Equity is the first (sorted) of 33 resolved security keys whose stored artifact carries a cited fund AND a cited position AND >=1 pillar (6 pillars); run twice back to back, identical",
+      "expect": "(?s)security_key \\S+.*fund_of_record .*report_key .*last_stated_position .*report_key .*thesis_pillars .*report_key ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "JUDGMENT (the CVO's): AC3's printed artifact for the covered name. Does each field say what the cited passage says, and is every absent field genuinely unstated? Record AC3's output and the artifact's S3 URI, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, graded by 3.0.0_SA_CVO at L9, never self-graded",
+      "output_evidence": "AC3's full printed artifact for security_key IMB_LN_Equity (Imperial Brands): fund_of_record IDVZ, cited to 'Imperial Brands Research Pack 2026 07 17_v1.docx' locator 2, whose paragraph reads 'RECOMMENDATION: Potential ADD in IDVZ (currently ~2.5%)' -- the passage names IDVZ and the field's value is IDVZ. last_stated_position {fund: IDVZ, size_pct: ~2.5, text: 'Potential ADD in IDVZ (currently ~2.5%)'}, same citation -- the passage's own text is stored verbatim as the field's 'text', and size_pct/fund are the same values the passage's own words carry (2.5, IDVZ). thesis_pillars: 6 items, each {pillar, text, citation}, cited to locators 11-16 of the same document; e.g. pillar 'Cash-return machine' at locator 11, whose paragraph text (read from the extraction) begins 'Cash-return machine: ...' -- the pillar is the paragraph's own bold-style lead phrase (the text before the first colon) and text is the remainder of that same paragraph, not a different paragraph or a paraphrase. Stored artifact: s3://opal-data-harvest/amgt/harvest/gold/research-continuation/security_key=IMB_LN_Equity/ba32af5b2d065474.json. This name's kpi_set is not printed by --show-first-covered (the criterion's own <expect> does not require it); it is present in the stored artifact and separately proven by AC2's verify-citations (0 unresolved across all fields, including kpi_set, for every stored artifact).",
+      "denominator": "N/A -- judgment row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L9: a judgment criterion is graded by the CVO at adjudication, never self-graded by the worker that produced it."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "..............................................................           [100%]\n62 passed in 0.49s",
+      "denominator": "62 of 62 tests passed across the whole lib/research/corpus/tests package (9 new in test_continuation.py plus 53 from earlier cells), 0 failed; run twice back to back, identical (0.49s / 0.47s)",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "python .scratch/c6/hyg.py (write it) -- expect outside_allowed [] ... changed_files N ... bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c6/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 2\nlib/research/corpus/continuation.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_continuation.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "2 of 2 changed paths (against git merge-base HEAD SITEZ, over lib and org) are inside this cell's <paths> grant (0 outside_allowed); 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, so bad 0 of 2; run twice back to back, identical",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/c6/mutant.py (not committed) resolves PBR_US_Equity's fund_of_record/last_stated_position twice against the SAME real corpus: FIX orders candidate reports dated-descending (most recent first, undated last); MUTANT flips _recency_order to dated-ascending (oldest first, undated last) -- the ONE line the MOST RECENT WINS rule depends on.",
+      "expected": "MUTANT (oldest-first) resolves the position to PBR_US_Equity's OLDEST dated RECOMMENDATION-bearing report instead of its newest, differing from FIX's citation report_key on a name with multiple dated reports carrying different RECOMMENDATION content.",
+      "observed": "FIX: position cited to 'Petrobras Q2 2026 Earnings Update.docx' (the most recent dated report). MUTANT: position cited to 'Petrobras Research Pack Template 2026 04 09_v1.docx' (an earlier dated report). CONTROL FIRED-AS-EXPECTED True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file, AC2's --verify-citations, AC3's --show-first-covered, AC5's full test suite, AC6's hyg.py, and .scratch/c6/mutant.py each run twice back to back.",
+      "observed": "pytest (AC1): '9 passed' both runs. --verify-citations (AC2): byte-identical 'citations_checked 2280 resolved 2280 unresolved 0' both runs. --show-first-covered (AC3): identical IMB_LN_Equity output both runs. hyg.py (AC6): 'bad 0' both runs. mutant.py: 'CONTROL FIRED-AS-EXPECTED True' both runs, identical citation report_keys both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any read of the OneDrive research library",
+      "reason": "BOUNDS/FIRST ACT: 'THIS CELL NEVER TOUCHES THE LIBRARY.' continuation.py imports only typed, gold, store and stdlib -- lib.research.corpus.library is never imported."
+    },
+    {
+      "item": "Any vendor API or Claude API call",
+      "reason": "BOUNDS: 'NEVER INSTALL. NEVER CALL A VENDOR API OR THE CLAUDE API.' continuation.py imports only this estate's own store/gold/typed modules plus stdlib (argparse, hashlib, json, os, re, sys); every test runs under tests/conftest.py's poison, which raises on any real boto3/subprocess/socket call and is proven live by the poison positive control test."
+    },
+    {
+      "item": "Any S3 delete of any kind",
+      "reason": "BOUNDS (section 4): 'NO S3 DELETE OF ANY KIND ... An S3 delete is a human-confirmed act on this estate.' continuation.py writes ONLY through gold.gold_put (never-overwrite by construction, IfNoneMatch='*'); no delete_object/delete_objects call appears anywhere in continuation.py or its tests -- confirmed mechanically by hyg.py's own forbidden-snippet scan (bad 0) and independently by grep-free code review of the committed file."
+    },
+    {
+      "item": "Delta-writing or prose (the AMGT_RESAPP addendum's), any Claude call, any change to an earlier module",
+      "reason": "Section 1, 'What this cell does NOT do': 'no delta-writing and no prose ... no Claude call, no change to earlier modules.' Confirmed by AC6's own outside_allowed [] and changed_files 2 -- nothing outside this cell's own <paths> changed, and typed.py/extract.py/gold.py/backlog.py/typecast.py are imported read-only, never edited."
+    },
+    {
+      "item": "Reading xlsx labels for thesis_pillars or the RECOMMENDATION line",
+      "reason": "RULED -- THESIS PILLARS (module docstring): pillars are read ONLY from a docx extraction's paragraph bold flag, which xlsx and pdf extractions do not carry in a usable shape for this purpose; RECOMMENDATION-line resolution reads docx paragraphs and pdf pages (_locators_and_texts), never xlsx sheet_data -- xlsx labels are walked only by kpi_set, which is the workbook-prose-adjacent field the scan's own census covers."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, AC5)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_continuation.py -q --color=no -p no:cacheprovider ; python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0 both; 9 passed (test_continuation.py alone), 62 passed (whole package); run twice each, identical outcomes"
+    },
+    {
+      "tool": "continuation CLI --write (build step, feeds AC2/AC3/AC4)",
+      "invocation": "python -m lib.research.corpus.continuation --write",
+      "result": "rc 0; names 33 with_fund 14 with_position 17 with_pillars 5; every RESOLVED backlog name got one gold research-continuation object, put_performed True for all 33 on the first run"
+    },
+    {
+      "tool": "continuation CLI --verify-citations (AC2)",
+      "invocation": "python -m lib.research.corpus.continuation --verify-citations",
+      "result": "rc 0; citations_checked 2280 resolved 2280 unresolved 0; run twice, byte-identical"
+    },
+    {
+      "tool": "continuation CLI --show-first-covered (AC3/AC4)",
+      "invocation": "python -m lib.research.corpus.continuation --show-first-covered",
+      "result": "rc 0; security_key IMB_LN_Equity; fund IDVZ, position stated (~2.5%, IDVZ), 6 pillars, each cited to its own report_key/locator"
+    },
+    {
+      "tool": ".scratch/c6/hyg.py (AC6, written this cell per the criterion's own invocation)",
+      "invocation": "python .scratch/c6/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 2; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    },
+    {
+      "tool": ".scratch/c6/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/c6/mutant.py",
+      "result": "rc 0; FIX cites PBR_US_Equity's most recent dated report, MUTANT (ascending order) cites an earlier one; CONTROL FIRED-AS-EXPECTED True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/continuation.py lib/research/corpus/tests/test_continuation.py",
+      "result": "commit a5d537f792: risk-reflex REFLEX CLEAN (2 of 2 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 2 files; naming-gate WARN 2 graded (0 REFUSE -- an 's3://%s/%s' format-string literal inside two error-message builders, not a builder call, flagged informationally, same shape already WARNed on gold.py/typed.py in earlier cells); to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}

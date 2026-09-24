@@ -1,0 +1,184 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-44",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1699960261"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-44.management-batch-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~46",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/management/batch.py",
+      "kind": "script",
+      "commit_or_etag": "692cf70697a6eac670e2375372fe158ab6ee42fc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a local library + CLI; this cell deploys nothing to the cloud (BOUND: no vendor call, no pool write). Exercised live against the pool in AC2 (a read) and against the live scheduled task in AC3 (task_definition()'s change_action/read_back strings).",
+      "introduces": [
+        "load_population",
+        "census_filings",
+        "PLACEHOLDER_FILENAME",
+        "change_action",
+        "read_back"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/run_batch.cmd",
+      "kind": "schedule",
+      "commit_or_etag": "692cf70697a6eac670e2375372fe158ab6ee42fc",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "the file the scheduled task's Execute path resolves to; AC4 measures 0 typed dates and 0 --universe occurrences in the committed bytes. The LIVE task's action was corrected via schtasks /Change /TR (escaped inner quotes) and read back twice before/after (AC3): the task stays Disabled/Enabled False throughout and Arguments goes empty, though Execute carries the literal escaped quote characters at each end rather than a bare path ending in this file's name (row AMGT_RESAPP-Z-W46-S1; AC3 status FAIL on that literal clause).",
+      "artifact_covered_by": [
+        "AC3",
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/management/tests/test_management.py",
+      "kind": "test",
+      "commit_or_etag": "692cf70697a6eac670e2375372fe158ab6ee42fc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "27 of 27 tests pass, 0 failures 0 errors (AC1); CensusTest plants the round's own validation names and asserts the four-way partition and a local-crosswalk population read; a mutant on the placeholder-distinction line FIRED (controls.mutant).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "two new rows, AMGT_RESAPP-Z-W46-S1 and AMGT_RESAPP-Z-W46-S2, appended by textual splice inside the existing fenced JSON array; both validate against org/surprise_channel/schemas/investigation_item.schema.json with 0 errors (checked with jsonschema.Draft7Validator)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-44.management-batch-census.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "RECORD FACE <status> flipped pending -> complete; the WORKER FACE above it is unmodified."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "every test passes (\"OK\" on the last line, \"Ran N tests\" printed with N >= 27 -- 25 at HEAD plus at least the planted census test and the quoted-launcher test); the output names a census test whose planted keys are the three validation names (CAT_US_Equity placeholder-only, CSL_AU_Equity no-object, 6861_JP_Equity real) and the two slash names (BP/_LN_Equity real, NG/_LN_Equity placeholder-only) and asserts 5 == 2 + 2 + 1 + 0; and a task-definition test that asserts the /TR argument carries the launcher path inside ESCAPED inner quotes and that run_batch.cmd carries no typed date",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest lib.research.management.tests.test_management -v 2>&1 | tail -40",
+      "output_evidence": "test_the_census_is_slash_safe_and_placeholder_aware (lib.research.management.tests.test_management.CensusTest.test_the_census_is_slash_safe_and_placeholder_aware) ... ok\ntest_the_population_is_the_crosswalks_measured_records_never_a_typed_date (lib.research.management.tests.test_management.CensusTest.test_the_population_is_the_crosswalks_measured_records_never_a_typed_date) ... ok\n...\ntest_the_task_is_weekly_and_its_launcher_is_derived (lib.research.management.tests.test_management.TaskDefinitionTest.test_the_task_is_weekly_and_its_launcher_is_derived) ... ok\n\n----------------------------------------------------------------------\nRan 27 tests in 0.303s\n\nOK",
+      "denominator": "27 of 27 unit tests OK, 0 failures 0 errors (25 at HEAD + 2 new: CensusTest.test_the_census_is_slash_safe_and_placeholder_aware, CensusTest.test_the_population_is_the_crosswalks_measured_records_never_a_typed_date); the census test's own denominator inside it is 5 == 2 + 2 + 1 + 0 over the round's five planted names",
+      "status": "PASS",
+      "expect": "test_the_census_is_slash_safe_and_placeholder_aware.*?ok.*?test_the_population_is_the_crosswalks_measured_records_never_a_typed_date.*?ok.*?test_the_task_is_weekly_and_its_launcher_is_derived.*?ok.*?Ran 27 tests.*?OK"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the dry run against the LIVE pool prints the crosswalk vintage it resolved (crosswalk/v1/2026-09-15.json at the cut, or newer -- never a typed date), a POPULATION line with the MEASURED count (33 at the cut), and the four partitions whose sum equals it -- real-filing (12 at the cut; re-measure), placeholder-only (21 at the cut), no-object (0), unresolved-accession (0) -- with the placeholder-only list naming BP/_LN_Equity and NG/_LN_Equity BY NAME (today both are silently absent from every list the batch prints); WOULD-BUILD equals the real-filing list; the last line is the DRY-RUN line stating nothing built, no Lusha call, no SERP call, no pool write, no task run",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.management.batch --dry-run 2>&1 | tail -20",
+      "output_evidence": "CROSSWALK: crosswalk/v1/2026-09-19.json as_of 2026-09-19\nPOPULATION: 36 MEASURED record(s)\nPARTITIONS: real-filing 12 placeholder-only 21 no-object 3 unresolved-accession 0 (sum 36 of population 36)\nREAL-FILING: ASML_NA_Equity, BABA_US_Equity, BA_US_Equity, COST_US_Equity, HAL_US_Equity, HD_US_Equity, INTU_US_Equity, KMB_US_Equity, NU_US_Equity, PBR_US_Equity, SAP_GY_Equity, VLO_US_Equity\nPLACEHOLDER-ONLY: 2317_TT_Equity, 9433_JP_Equity, 992_HK_Equity, BBSE3_BZ_Equity, BP/_LN_Equity, ENEL_IM_Equity, HSBA_LN_Equity, ICICIBC_IN_Equity, IMB_LN_Equity, KPN_NA_Equity, NG/_LN_Equity, NOVN_SW_Equity, RKT_LN_Equity, RMS_FP_Equity, ROG_SW_Equity, RWE_GR_Equity, SSE_LN_Equity, ST_SP_Equity, ULVR_LN_Equity, WALMEX*_MM_Equity, ZURN_SW_Equity\nNO-OBJECT: 6861_JP_Equity, CAT_US_Equity, CSL_AU_Equity\nUNRESOLVED-ACCESSION: <none>\nWOULD-BUILD: ASML_NA_Equity, BABA_US_Equity, BA_US_Equity, COST_US_Equity, HAL_US_Equity, HD_US_Equity, INTU_US_Equity, KMB_US_Equity, NU_US_Equity, PBR_US_Equity, SAP_GY_Equity, VLO_US_Equity\nDRY-RUN: nothing built, no Lusha call, no SERP call, no pool write, no task run. 12 of 36 name(s) would be built.",
+      "denominator": "re-measured live at proof-write time: population drifted from 33 (at spawn) to 36 (a new crosswalk/v1/2026-09-19.json vintage landed in the shared pool mid-task, adding the three round validation names CAT_US_Equity/CSL_AU_Equity/6861_JP_Equity as new MEASURED records with no filings object yet); real-filing stayed 12 of 12, placeholder-only stayed 21 of 21 (both include the two slash names by name), no-object moved 0 -> 3 (exactly the three new names), unresolved-accession 0; 12+21+3+0 = 36 = population on both reads",
+      "status": "PASS",
+      "expect": "CROSSWALK: crosswalk/v1/20[0-9]{2}-[0-9]{2}-[0-9]{2}\\.json as_of 20[0-9]{2}-[0-9]{2}-[0-9]{2}.*?POPULATION: [0-9]+ MEASURED record\\(s\\).*?PARTITIONS: real-filing [0-9]+ placeholder-only [0-9]+ no-object [0-9]+ unresolved-accession 0 \\(sum [0-9]+ of population [0-9]+\\).*?PLACEHOLDER-ONLY:.*?BP/_LN_Equity.*?NG/_LN_Equity.*?WOULD-BUILD:.*?DRY-RUN: nothing built, no Lusha call, no SERP call, no pool write, no task run\\."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "run ONCE BEFORE the change and ONCE AFTER, both outputs recorded: BEFORE, Execute reads \"C:\\Users\\Opal\" with the remainder of the path in Arguments (the split); AFTER, Execute reads the ONE full path ending \"\\lib\\research\\management\\run_batch.cmd\" and Arguments is empty; in BOTH, STATE reads Disabled and SETTINGS-ENABLED reads False -- the task was never enabled by this order (denominator: 1 task, 2 reads)",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && powershell.exe -NoProfile -Command \"\\$t = Get-ScheduledTask -TaskName 'OpalResearch-ExecManagement'; \\$t.Actions | Format-List Execute,Arguments; Write-Output ('STATE ' + \\$t.State); Write-Output ('SETTINGS-ENABLED ' + \\$t.Settings.Enabled)\" 2>&1 | tail -12",
+      "output_evidence": "BEFORE (first act, before any edit):\nExecute   : C:\\Users\\Opal\nArguments : Bloomberg\\Desktop\\ajb_workspace\\lib\\research\\management\\run_batch.cmd\n\n\n\nSTATE Disabled\nSETTINGS-ENABLED False\n\nAFTER (post schtasks /Change):\nExecute   : \"C:\\Users\\Opal Bloomberg\\Desktop\\ajb_workspace\\lib\\research\\management\\run_batch.cmd\"\nArguments : \n\n\n\nSTATE Disabled\nSETTINGS-ENABLED False\n\n[diagnostic re-read] LEN 85\nRAW [\"C:\\Users\\Opal Bloomberg\\Desktop\\ajb_workspace\\lib\\research\\management\\run_batch.cmd\"]\nLAST10 [batch.cmd\"]",
+      "denominator": "1 task (OpalResearch-ExecManagement), 2 mandated reads (BEFORE/AFTER) plus 1 diagnostic length/bracket re-read taken to settle the byte-level question",
+      "status": "FAIL",
+      "status_reason": "BEFORE matches exactly (Execute split at the space, remainder in Arguments). AFTER: the split-at-space defect IS corrected (Execute is ONE unsplit field, Arguments is empty) and STATE/SETTINGS-ENABLED read Disabled/False in both reads -- but Execute measures 85 characters, the 83-character launcher path plus one literal doublequote character at each end (schtasks stores the /TR value's bytes as given, quotes included, rather than stripping them), so it does not byte-match the criterion's literal 'ending \\lib\\research\\management\\run_batch.cmd' (the true last character is a quote, not 'd'). RULED item 4 names schtasks /Change /TR with escaped inner quotes as the ONE mechanism to use, so no alternate route was substituted per the REFUSAL CLAUSE. Filed as AMGT_RESAPP-Z-W46-S1."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "run_batch.cmd carries 0 typed dates and 0 occurrences of --universe (1 and 1 at HEAD); batch.py carries 0 occurrences of .split(\"/\") (1 at HEAD :83), at least 1 occurrence of the placeholder guard string UNRESOLVED-SOURCE.source.json (0 at HEAD) and at least 1 of load_crosswalk (0 at HEAD) -- two files, denominator printed",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport io, re\nb = io.open('lib/research/management/batch.py', encoding='utf-8').read()\nc = io.open('lib/research/management/run_batch.cmd', encoding='utf-8').read()\nprint('run_batch.cmd typed dates', len(re.findall(r'20[0-9]{2}-[0-9]{2}-[0-9]{2}', c)))\nprint('run_batch.cmd --universe', c.count('--universe'))\nprint('batch.py split(\\\"/\\\") occurrences', b.count('.split(\\\"/\\\")'))\nprint('batch.py UNRESOLVED-SOURCE.source.json guard', b.count('UNRESOLVED-SOURCE.source.json'))\nprint('batch.py load_crosswalk', b.count('load_crosswalk'))\nprint('DENOMINATOR files 2')\n\"",
+      "output_evidence": "run_batch.cmd typed dates 0\nrun_batch.cmd --universe 0\nbatch.py split(\"/\") occurrences 0\nbatch.py UNRESOLVED-SOURCE.source.json guard 1\nbatch.py load_crosswalk 3\nDENOMINATOR files 2",
+      "denominator": "2 of 2 files checked (run_batch.cmd, batch.py); 0 typed dates and 0 --universe in run_batch.cmd (1 and 1 at HEAD); 0 .split(\"/\") occurrences in batch.py (1 at HEAD); 1 UNRESOLVED-SOURCE.source.json guard and 3 load_crosswalk occurrences (0 and 0 at HEAD)",
+      "status": "PASS",
+      "expect": "run_batch\\.cmd typed dates 0.*?run_batch\\.cmd --universe 0.*?batch\\.py split\\(\"/\"\\) occurrences 0.*?batch\\.py UNRESOLVED-SOURCE\\.source\\.json guard [1-9][0-9]*.*?batch\\.py load_crosswalk [1-9][0-9]*.*?DENOMINATOR files 2"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "ONE arm, the exact defect the order's RULED item 2 forbids reintroduced: in census_filings(), the placeholder-vs-accession distinction line `accessions = [k for k in keys if k[len(prefix):] != PLACEHOLDER_FILENAME]` was mutated to `accessions = [k for k in keys]` (every object under a name's prefix, placeholder included, treated as a candidate accession), snapshotted first to .scratch/batch.py.snapshot.",
+      "expected": "CensusTest.test_the_census_is_slash_safe_and_placeholder_aware fails: CAT_US_Equity and NG/_LN_Equity (planted as placeholder-only, i.e. carrying ONLY an UNRESOLVED-SOURCE.source.json object) would now read their placeholder object's status (UNRESOLVED, not RESOLVED) and land in unresolved_accession instead of placeholder_only.",
+      "observed": "FAIL: AssertionError: Items in the second set but not the first: 'CAT_US_Equity' 'NG/_LN_Equity' (assertEqual on placeholder_only). test_the_population_is_the_crosswalks_measured_records_never_a_typed_date, which does not touch census_filings, still passed (1 of 2 tests in CensusTest failed, as expected for a single-function mutation). The file was restored from .scratch/batch.py.snapshot immediately after and the full 27-test suite re-verified OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the dry run (python -m lib.research.management.batch --dry-run) executed twice in immediate succession against the live pool, stdout captured to two files and compared by sha256.",
+      "observed": "run1 0abbcadf3552bab0d8be256f22ca9c195156d4ad7355a442bee1afe40c4b59ea; run2 0abbcadf3552bab0d8be256f22ca9c195156d4ad7355a442bee1afe40c4b59ea; diff empty; IDENTICAL. (Both runs landed inside the AC2 population-drift window described in AC2's denominator but the crosswalk did not change AGAIN between these two back-to-back runs, so the two bytes are directly comparable.)",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "running the batch for real (--write-pool) or enabling the scheduled task",
+      "reason": "BOUND by the order's own text: 'THE TASK STAYS DISABLED. No run. No pool write. No vendor call.' Only --dry-run and the /Change + read-back were exercised."
+    },
+    {
+      "item": "fixing roster.load_source_object()'s sorted(keys)[-1] placeholder-priority defect",
+      "reason": "roster.py is READ-ONLY under this order's <paths> (AMGT-rk-46's file, whose own order names the fix). Filed as row AMGT_RESAPP-Z-W46-S2 item 1."
+    },
+    {
+      "item": "unifying batch.py's census with integrations/bloomberg/research/management_posture_batch.py's keyed_population/filed_status into one shared function",
+      "reason": "the order's RULED item 1 explicitly leaves this reconciliation 'a stated residue, not a silent one'; integrations/bloomberg/research/ is read-only here. Measured live: the two drivers' real-filing/MANAGEMENT-CEILING sets are now IDENTICAL (12 names) though the code is still duplicated. Filed as row AMGT_RESAPP-Z-W46-S2 item 2."
+    },
+    {
+      "item": "correcting AC3's literal 'ending run_batch.cmd' expectation",
+      "reason": "REFUSED per the order's own REFUSAL CLAUSE: RULED item 4 names schtasks /Change /TR with escaped inner quotes as the one mechanism, and that mechanism, measured on this box via both an MSYS-bash invocation and a native cmd.exe script invocation, stores the literal quote characters in Action.Execute rather than stripping them. Filed as row AMGT_RESAPP-Z-W46-S1; AC3 stands FAIL on that literal clause."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W46-S1: AC3's escaped-inner-quotes /TR mechanism (RULED item 4) is confirmed on this box, via two independent invocation routes, to leave the literal quote characters embedded in the stored Action.Execute value rather than stripping them -- the split-at-space defect IS corrected and Arguments is empty, but Execute ends in a trailing doublequote, not 'd', so AC3's literal wording does not byte-match.",
+    "AMGT_RESAPP-Z-W46-S2: two off-task facts the order itself named to file together -- (1) roster.load_source_object()'s sorted(keys)[-1] would prefer a placeholder over a real accession for a name carrying both (AMGT-rk-46's file, not touched here); (2) batch.py and management_posture_batch.py's population/census logic is still two independent implementations, though MEASURED LIVE they now compute the identical 12-name real-filing/MANAGEMENT-CEILING set after this cell's fix."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~46/AMGT_RESAPP.TO-AMGT-rk-44.management-batch-census.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "python -m unittest",
+      "invocation": "python -m unittest lib.research.management.tests.test_management -v 2>&1 | tail -40",
+      "result": "Ran 27 tests, OK, 0 failures 0 errors"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/management/batch.py lib/research/management/tests/test_management.py",
+      "result": "PY_COMPILE_OK"
+    },
+    {
+      "tool": "ruff (py39 target)",
+      "invocation": "ruff check --target-version py39 lib/research/management/batch.py lib/research/management/tests/test_management.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile + ds-precommit + ruff)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~46 <0.9.0_WK_AMGT_RESAPP~46@opal.agent>\" -F <msgfile> -- lib/research/management/batch.py lib/research/management/run_batch.cmd lib/research/management/tests/test_management.py",
+      "result": "692cf70697a6eac670e2375372fe158ab6ee42fc (3 files)"
+    },
+    {
+      "tool": "jsonschema Draft7Validator",
+      "invocation": "validate the two new investigation rows against org/surprise_channel/schemas/investigation_item.schema.json",
+      "result": "AMGT_RESAPP-Z-W46-S1 errors 0; AMGT_RESAPP-Z-W46-S2 errors 0"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <instance> AC1,AC2,AC3,AC4",
+      "result": "see the worker report (rc is the verdict)"
+    }
+  ]
+}

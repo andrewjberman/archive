@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-h-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-5.gold-chatter-daily-dense-absolute.md",
+    "group": "OTHER",
+    "vintage_commit": "df910bd910c2d3bdf62d48627d3ee149b03b5246"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "9fbf337a74c1c8ef6b598a0a9f1cab75328747e1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-h-5.gold-chatter-daily-dense-absolute.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/harvest/publication_gold.py",
+      "kind": "script",
+      "commit_or_etag": "597647b138",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Extends HVST-h-4's module without editing its functions' behaviour. New: GOLD_DAILY_TABLE='chatter_daily', BACKFILL_FLOOR=2026-01-01, ENABLED_PUBLISHERS (sorted(SOURCE_FOR_PUBLISHER): barrons/bbg/ft/sa/wsj), GOLD_DAILY_SCHEMA; daily_rows(mention_rows, securities, start, end, coverage) -- PURE, dense one row per (security, day), articles_total/tier_a..d/mention_score/mention_count_total/publishers_distinct, trailing_7d_sum/trailing_30d_sum floored at start, baseline_30d_sum/baseline_30d_days (30 days before the trailing-7 window), cumulative_ytd (resets per calendar year), first/last_published_utc, data_status (COMPLETE/PARTIAL/DENIED); _day_of places a row by published_utc.astimezone(UTC).date(), never a naive .date() read; publisher_coverage(listing_hit_rows, securities, run_status=None) derives {security_key:{publisher_code:(span_start,span_end)}} from listing_hit rows matched to a security by word-bounded search_query (_listing_hit_security_match, same shape as the harvester floor); _iter_all_listing_hits reads EVERY listing_hit row across all 5 sources directly from parquet (store.silver_latest's per-key latest-only collapse would drop every hit sharing a page's dedupe key but one); _latest_gold_snapshot_rows(table) reads the newest date= partition's newest part file for any full-snapshot gold table; build_daily(securities, as_of_date, client=None) wires these together and write_gold gained an optional schema= parameter (default GOLD_MENTION_SCHEMA, so every pre-existing call site is byte-for-byte unchanged) so the daily table can be written under GOLD_DAILY_SCHEMA. New CLI subcommand build-daily --securities-json FILE --as-of YYYY-MM-DD.",
+      "introduces": ["daily_rows", "publisher_coverage", "build_daily", "_day_of", "_publisher_of", "_date_range", "_window_sum", "_baseline", "_covers", "_listing_hit_published_date", "_listing_hit_security_match", "_latest_gold_snapshot_rows", "_iter_all_listing_hits", "GOLD_DAILY_TABLE", "GOLD_DAILY_SCHEMA", "BACKFILL_FLOOR", "ENABLED_PUBLISHERS"],
+      "artifact_covered_by": ["AC1", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/harvest/tests/test_publication_gold_daily.py",
+      "kind": "test",
+      "commit_or_etag": "597647b138",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, exactly the ten arms section 1 item 3 names: test_dense_zero_rows_for_empty_days, test_row_count_is_days_times_securities, test_published_utc_places_the_day, test_offset_timestamp_lands_on_utc_day, test_trailing_sums_inclusive, test_baseline_short_at_start, test_cumulative_ytd, test_absolute_only_columns, test_data_status_complete_partial_denied, test_rebuild_identical. Pure fixtures throughout; no network, no live bucket.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: \"12 passed\" (the predecessor's bar)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_publication_gold_mention.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "12 passed in 0.46s",
+      "denominator": "1 of 1 baseline file run before any edit; matches the task order's own stated baseline of 12 passed",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"10 passed\" and no \"failed\" -- the ten arms named in section 1 item 3",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_publication_gold_daily.py -v --color=no -p no:cacheprovider 2>&1 | tail -14",
+      "output_evidence": "test_dense_zero_rows_for_empty_days PASSED | test_row_count_is_days_times_securities PASSED | test_published_utc_places_the_day PASSED | test_offset_timestamp_lands_on_utc_day PASSED | test_trailing_sums_inclusive PASSED | test_baseline_short_at_start PASSED | test_cumulative_ytd PASSED | test_absolute_only_columns PASSED | test_data_status_complete_partial_denied PASSED | test_rebuild_identical PASSED | ============================= 10 passed in 0.14s ==============================",
+      "denominator": "10 of 10 arms passed, 0 failed; re-run twice back to back for determinism (0.14s both times, identical outcome)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"12 passed\" and no \"failed\" -- HVST-h-4's behaviour unchanged",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/harvest/tests/test_publication_gold_mention.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "12 passed in 0.42s",
+      "denominator": "1 of 1 baseline file re-run after every edit; passed count equals AC0's 12 passed exactly (only the timing suffix differs)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "before \"--- end\", ONLY lib/research/harvest/publication_gold.py and lib/research/harvest/tests/test_publication_gold_daily.py, and nothing else under lib",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- lib && git status --porcelain -- lib && echo \"--- end\"",
+      "output_evidence": " M lib/research/harvest/publication_gold.py\\n?? lib/research/harvest/tests/test_publication_gold_daily.py\\n--- end (run pre-commit against merge-base 2c4d75266a; git status -- lib shows the two files as tracked-modified and untracked respectively since the commit had not yet landed at capture time; both are now committed at 597647b138, at which point git status -- lib prints nothing further)",
+      "denominator": "2 of 2 lines before \"--- end\" are exactly the two allowed files; 0 other paths under lib appear in either listing",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "a JSON line whose rows equal securities times days, with a key beginning \"amgt/harvest/gold/chatter_daily/date=\"",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.harvest.publication_gold build-daily --securities-json .scratch/hv5/securities.json --as-of \"$(date -u +%Y-%m-%d)\"",
+      "output_evidence": "{\"days\": 265, \"key\": \"amgt/harvest/gold/chatter_daily/date=2026-09-22/part-20260922T213712Z.parquet\", \"rows\": 1590, \"rows_per_security\": 265, \"securities\": 6}",
+      "denominator": "rows=1590 equals securities(6) x days(265) exactly; key starts with the required literal prefix",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "\"missing_days 0\" with first 2026-01-01 and lenovo_rows equal to expected_days; \"rebuild_symmetric_difference 0\"; \"banned_columns []\" -- dense from the floor, rebuildable, absolute only (FWD-9's gold half)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/hv5/check.py",
+      "output_evidence": "lenovo_rows 265 expected_days 265 first 2026-01-01 last 2026-09-22 missing_days 0\\nrebuild_symmetric_difference 0\\nbanned_columns []",
+      "denominator": "265 of 265 expected Lenovo days present (0 missing), first=2026-01-01; 0 of 1590 rows in the rebuild symmetric difference; 0 banned column names found across all 1590 written rows",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/hv5/mutant_control.py (not committed) reconstructs _day_of with a plausible bug -- returning the naive `dt.date()` (wall-clock y/m/d) instead of `dt.astimezone(UTC).date()` -- and runs both the real and mutant rule against test_offset_timestamp_lands_on_utc_day's exact fixture: published_utc = 2026-01-02T02:00+05:00 (== 2026-01-01T21:00Z).",
+      "expected": "REAL (_day_of, astimezone-then-date): day 2026-01-01. MUTANT (naive .date()): day 2026-01-02 -- wrongly placed a calendar day late.",
+      "observed": "REAL day=2026-01-01; MUTANT day=2026-01-02; CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_publication_gold_daily.py run twice back to back; mutant_control.py run twice back to back; the AC5 rebuild (check.py) itself is a determinism control on the live build (fresh daily_rows recompute vs the written snapshot).",
+      "observed": "pytest: '10 passed' both runs (0.14s both times, identical pass/fail outcome). Mutant script: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical output. check.py: rebuild_symmetric_difference 0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any live vendor call or harvester CLI run",
+      "reason": "BOUNDS + the issuer note: HVST-h-10's Lenovo run is DONE and must not be re-attempted. This cell reads only already-landed silver (article_security_mention gold snapshot, listing_hit silver) via direct S3 reads, and writes only to amgt/harvest/gold/chatter_daily/ under a conditional PUT. No publisher session is opened."
+    },
+    {
+      "item": "silver, store.py (edited only in AC3's forbidden sense -- store.py is READ from, never written to), the chatter axis, any served object, HVST-h-4's functions' own behaviour",
+      "reason": "Section 1 'What this cell does NOT change' names all of these; verified unchanged by AC3's own diff (only publication_gold.py and its test file appear under lib) and AC0/AC2's identical '12 passed' before and after."
+    },
+    {
+      "item": "A real (non-empty) COMPLETE or PARTIAL data_status anywhere in the live build",
+      "reason": "Measured this session: silver `listing_hit` holds ZERO rows across all five publishers (seeking-alpha/bloomberg/barrons/wsj/ft) -- the legacy-migrated silver holds `article` rows only, never a listing page. So publisher_coverage's live map is empty for every security and every one of the 1590 written rows grades DENIED. This is the honest, computed consequence of the real retrieval state (no listing pages were ever captured to silver), not a defect in the coverage logic -- confirmed by direct S3 list_objects_v2 against every source's listing_hit prefix (0 objects each) before any code was written, and re-confirmed by the live build's own data_status tally (DENIED: 1590, 0 COMPLETE, 0 PARTIAL)."
+    },
+    {
+      "item": "A publisher 'run status' table distinct from listing_hit's own rows",
+      "reason": "No such table exists in any surface this cell may read or write; publisher_coverage's optional run_status argument (default: every publisher present in the data is treated as a success) is exercised directly by its own design, and the live build passes none -- a publisher's ABSENCE from listing_hit (the real, measured state) already covers no day via _covers(None, day), which is the same outcome a run_status of 'not success' would produce."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC0, baseline, before any edit)",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_publication_gold_mention.py -q --color=no -p no:cacheprovider",
+      "result": "12 passed in 0.46s"
+    },
+    {
+      "tool": "pytest (AC1, new test file)",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_publication_gold_daily.py -v --color=no -p no:cacheprovider",
+      "result": "rc 0; 10 passed, 0 failed (run twice, identical outcome: 0.14s both times)"
+    },
+    {
+      "tool": "pytest (AC2, baseline, after every edit)",
+      "invocation": "python -m pytest lib/research/harvest/tests/test_publication_gold_mention.py -q --color=no -p no:cacheprovider",
+      "result": "12 passed in 0.42s -- equal to AC0"
+    },
+    {
+      "tool": "git diff + git status (AC3, given verbatim by section 5)",
+      "invocation": "git diff --name-only \"$(git merge-base HEAD SITEZ)\" HEAD -- lib && git status --porcelain -- lib && echo \"--- end\"",
+      "result": "rc 0; exactly lib/research/harvest/publication_gold.py and lib/research/harvest/tests/test_publication_gold_daily.py before \"--- end\""
+    },
+    {
+      "tool": "lib.research.harvest.publication_gold build-daily CLI (AC4, live S3 read+write against opal-data-harvest)",
+      "invocation": "python -m lib.research.harvest.publication_gold build-daily --securities-json .scratch/hv5/securities.json --as-of 2026-09-22",
+      "result": "rc 0; days=265 rows=1590 rows_per_security=265 securities=6; key=amgt/harvest/gold/chatter_daily/date=2026-09-22/part-20260922T213712Z.parquet"
+    },
+    {
+      "tool": ".scratch/hv5/check.py (AC5, given verbatim by section 5; not committed)",
+      "invocation": "python .scratch/hv5/check.py",
+      "result": "rc 0; lenovo_rows 265 expected_days 265 first 2026-01-01 last 2026-09-22 missing_days 0; rebuild_symmetric_difference 0; banned_columns []"
+    },
+    {
+      "tool": ".scratch/hv5/mutant_control.py (controls.mutant; not committed)",
+      "invocation": "python .scratch/hv5/mutant_control.py",
+      "result": "rc 0; REAL day=2026-01-01; MUTANT day=2026-01-02; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "S3 probe of listing_hit across all 5 sources (pre-build measurement, not committed)",
+      "invocation": "python .scratch/hv5/probe.py",
+      "result": "rc 0; seeking-alpha/bloomberg/barrons/wsj/ft listing_hit count=0 each; article counts 9/19/15/15/14; gold article_security_mention count=1 (date=2026-09-22)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_HARVST~5 <0.9.0_WK_AMGT_HARVST~5@opal.agent>\" -F <msgfile> -- lib/research/harvest/publication_gold.py lib/research/harvest/tests/test_publication_gold_daily.py",
+      "result": "commit 597647b138: risk-reflex REFLEX CLEAN (2 of 2 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 2 files; naming-gate PASS 0 graded; to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}

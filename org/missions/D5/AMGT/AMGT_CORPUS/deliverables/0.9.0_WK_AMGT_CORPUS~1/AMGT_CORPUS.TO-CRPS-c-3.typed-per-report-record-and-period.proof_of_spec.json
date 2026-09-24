@@ -1,0 +1,180 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-3.typed-per-report-record-and-period.md",
+    "group": "OTHER",
+    "vintage_commit": "74f25cbb6bc7a980b5fac744bcf25a9aa9fa70ee"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "40107c6f48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-3.typed-per-report-record-and-period.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/typed.py",
+      "kind": "script",
+      "commit_or_etag": "c4b23ea6448209820293b6da95a580752c0b3971",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "record(bronze_doc, extraction, backlog_row) builds one typed silver row per bronze research-report object (security_key, report_id, bronze_key, extract_key, fetched_at, file_ext, source_relpath, size_bytes, words_or_pages, report_class+class_evidence, fund+evidence/absent_reason, sector_as_written+evidence/absent_reason, period+period_source+evidence/absent_reason, author+evidence/absent_reason). classify_report() checks C (word-capped short form) then D (stock-move) then B (a RECOMMENDATION line carrying a numeric position size, or the earnings-update filename token) then A (research-pack/note filename token), else OTHER. resolve_period() runs ONE token-finder ladder (full date > month-name date > quarter > half-year > fiscal-year-only) at three stages (filename, header, content). --write measured on the real 123-object corpus: silver_rows 123 of 123 bronze; class A 16 B 31 C 3 D 1 OTHER 72; fund IDVZ 37 PFOE 7 DIVZ 0 absent 79; k5 period carried 103 of 123 by filename 95 header 7 content 1 absent 20; backlog files 351 = resolved_files 123 + unresolved_files 228 (60 unresolved-folder lines, reasons read verbatim from CRPS-c-4's stored backlog document).",
+      "introduces": ["record", "classify_report", "resolve_period", "reports_for", "period_order_ok", "_find_period_token"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4", "AC5", "AC6"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_typed.py",
+      "kind": "test",
+      "commit_or_etag": "c4b23ea6448209820293b6da95a580752c0b3971",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "14 offline tests under the poison: each class A-D decided from a minimal fixture, OTHER for a [PASTE EXCEL OUTPUT] blank template and for a non-extractable/workbook fixture; fund/sector/author/period each proven ABSENT-with-reason on a sparse fixture; reports_for() over a monkeypatched store.silver_latest returns three out-of-order periods ascending with an undated row last; period_order_ok() proven True (ascending) and False (deliberately unsorted) directly; a poison positive control.",
+      "artifact_covered_by": ["AC1", "AC5", "AC6"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/cards/K5_period_resolution.md",
+      "kind": "doc",
+      "commit_or_etag": "c4b23ea6448209820293b6da95a580752c0b3971",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Answers K5: the three-stage resolution order, every filename date form measured and coded (including the half-year form and the YYYY-MMDD compact-day form, neither in the ruled list), how many of the 123 typed reports carry a period (103, by source), and the FWD-2 denominator (351 = 123 resolved + 228 unresolved), each quoting this worker's own printed output; states the 123-vs-351 scope boundary explicitly.",
+      "artifact_covered_by": ["AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_typed.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_typed.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "..............                                                           [100%]\n14 passed in 0.13s",
+      "denominator": "14 of 14 tests passed, 0 failed; run twice back to back, identical outcome both times (0.13s / 0.12s)",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.typed --census -- expect silver_rows N of N bronze ... k5 period carried N of N by filename N header N content N absent N",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.typed --census 2>&1 | tail -4",
+      "output_evidence": "silver_rows 123 of 123 bronze\nk5 period carried 103 of 123 by filename 95 header 7 content 1 absent 20",
+      "denominator": "123 of 123 bronze research-report objects carry a read-back silver row (silver_latest over the written parquet); 103 of 123 carry a resolved period (95 filename + 7 header + 1 content), 20 absent; run twice back to back, byte-identical both times",
+      "expect": "(?s)silver_rows (\\d+) of \\1 bronze.*k5 period carried \\d+ of \\d+ by filename \\d+ header \\d+ content \\d+ absent \\d+",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.typed --reports-for-first-multi -- expect security_key S reports N dated N ... period_order_ok True",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.typed --reports-for-first-multi 2>&1 | tail -30",
+      "output_evidence": "security_key 9433_JP_Equity reports 2 dated 2\n2026-03-09 OTHER KDDI/KDDI FactSet Based ONE PAGER TEMPLATE 2026 03 09_v1.xlsx\n2026-03-16 A KDDI/KDDI Research Pack Template 2026 03 16_v1.docx\nperiod_order_ok True",
+      "denominator": "the first (sorted) security_key carrying >= 2 dated reports is 9433_JP_Equity (2 of 2 its rows dated); the printed order (2026-03-09 then 2026-03-16) is non-decreasing, so period_order_ok reads True by the same pure period_order_ok() function proven both True and False in AC1's test suite",
+      "expect": "(?s)security_key \\S+ reports \\d+ dated \\d+.*period_order_ok True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "JUDGMENT (the CVO's): your --write run's FWD-2 denominator block (the backlog files line and every unresolved <folder> | <reason> line), plus the K5 card. Record them verbatim, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment row, graded by 3.0.0_SA_CVO~Z at L9, never self-graded",
+      "output_evidence": "python -m lib.research.corpus.typed --write printed:\nbacklog files 351 = resolved_files 123 + unresolved_files 228\nunresolved Adobe ADBE US | bloomberg_ticker status 'UNRESOLVED', evidence 'C:\\\\Users\\\\Opal Bloomberg\\\\OneDrive - Opal Capital\\\\Shared - Documents\\\\Asset Management\\\\Research\\\\Adobe ADBE US :: no *ONE PAGER*.xlsx workbook found in this folder'\n... (60 total unresolved-folder lines, one per UNRESOLVED/AMBIGUOUS record in CRPS-c-4's stored backlog document, each reason quoted verbatim from that document, never re-worded; full text in .scratch/c3/write_run_final.txt and reproduced in this worker's final report)\nwritten_rows 0 skipped_unchanged 123 parts 0 (this re-run: the 123 rows were already written byte-identically by the earlier run this same session; store.silver_append's own record_hash dedupe skipped all 123, proving the writer is idempotent, not that nothing was written this cell)\n\nK5 card (org/missions/D5/AMGT/AMGT_CORPUS/cards/K5_period_resolution.md): states the three-stage resolution order, every filename date form measured and coded, the 103-of-123 period-carried breakdown by source, all 20 absences hand-checked as genuinely dateless, and the 123-vs-351 scope boundary.",
+      "denominator": "N/A -- judgment row",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "spine v3.0 L9: a judgment criterion is graded by 3.0.0_SA_CVO~Z at adjudication, never self-graded by the worker that produced it."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "........................................                                 [100%]\n40 passed in 0.43s",
+      "denominator": "40 of 40 tests passed across the whole lib/research/corpus/tests package (14 new in test_typed.py plus 26 from earlier cells), 0 failed",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": ".scratch/c3/hyg.py (write it) -- expect outside_allowed [] ... changed_files N ... bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c3/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 3\nlib/research/corpus/tests/test_typed.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/typed.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "3 of 3 changed paths (against git merge-base HEAD SITEZ, over lib and org) are inside this cell's <paths> grant (0 outside_allowed; the K5 card is a .md, not diffed for compile/CRLF/ASCII); 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, so bad 0 of 2; run twice back to back, identical",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/c3/mutant.py (not committed) classifies the SAME real 123-object corpus two ways: the MUTANT drops the FIX's mandatory numeric-position-size requirement from the class-B RECOMMENDATION regex (main\\w*...position...in FUND, no digits required); the FIX requires a number between 'main' and 'position' -- the one textual feature measured to be present on every B-named document's RECOMMENDATION line and absent from every A-named one.",
+      "expected": "MUTANT (no numeric-position requirement): misclassifies at least one class-A research-pack document as B, since several class-A RECOMMENDATION lines also read 'MAINTAIN POSITION(S) IN <fund>' with no percentage. FIX (mandatory number): 16 class A, 31 class B, matching the hand-verified corpus census.",
+      "observed": "FIX: class B 31, class A 16 (matches the hand-audited census exactly). MUTANT: content-matches-B-shape 6, of which 3 are research-pack-named class-A documents (ASML research pack 5_5_2026.pdf; BP plc Research Pack 2026 04 03_v1.pdf/.docx) that the FIX correctly leaves as A. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file, AC2's --census, AC5's full test suite, AC6's hyg.py, and .scratch/c3/mutant.py each run twice back to back.",
+      "observed": "pytest (AC1): '14 passed' both runs (0.13s, 0.12s). --census (AC2): byte-identical 'silver_rows 123 of 123 bronze' / 'k5 period carried 103 of 123 by filename 95 header 7 content 1 absent 20' both runs. hyg.py (AC6): 'bad 0' both runs. mutant.py: 'class B 31 class A 16' both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any read of the OneDrive research library",
+      "reason": "BOUNDS/section header: 'THIS CELL NEVER TOUCHES THE LIBRARY: read bronze and the extractions from the store.' Every row is built from the bronze object's own S3 head_object metadata and the CRPS-c-2 extraction object; lib.research.corpus.library is never imported by typed.py."
+    },
+    {
+      "item": "Any vendor API or Claude API call",
+      "reason": "BOUNDS: 'NEVER CALL A VENDOR API OR THE CLAUDE API.' typed.py imports only store, backlog (for read_latest) and crosswalk (for security_key_from_slash_safe) from this estate's own libraries, plus stdlib; every test runs under tests/conftest.py's poison, which raises on any real boto3/subprocess/socket call and is proven live by the poison positive control test."
+    },
+    {
+      "item": "Any S3 delete of any kind",
+      "reason": "BOUNDS (issuer amendment on row AMGT_CORPUS-Z-S4): 'NO S3 DELETE OF ANY KIND.' typed.py writes ONLY through store.silver_append, which is never-overwrite by construction (IfNoneMatch='*'); no delete_object/delete_objects call appears anywhere in typed.py or its tests, and this cell wrote zero bronze/gold objects (silver only)."
+    },
+    {
+      "item": "Continuation, template, fund-form or typecast work (cells c-6 to c-9)",
+      "reason": "Section 1, 'What this cell does NOT do': 'no continuation, template, fund form or typecast (cells c-6 to c-9), no library read, and no change to any earlier module.' Confirmed by AC6's own outside_allowed [] and changed_files 3 -- nothing outside this cell's own <paths> changed."
+    },
+    {
+      "item": "Typing a fund/period value the corpus does not itself state",
+      "reason": "C-CITED-OR-ABSENT: 'A field the corpus does not state is null with an explicit absent reason. Nothing in this project infers, defaults or fills.' Proven offline (test_fund_absent_when_no_token_present, test_sector_and_author_absent_with_reason_on_a_sparse_fixture) and on the real corpus (79 of 123 fund absent, 20 of 123 period absent, each with a non-empty *_absent_reason and never a guessed value)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, AC5)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_typed.py -q --color=no -p no:cacheprovider ; python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0 both; 14 passed (test_typed.py alone), 40 passed (whole package); run twice each, identical outcomes"
+    },
+    {
+      "tool": "typed CLI --write (build step, feeds AC2/AC3/AC4)",
+      "invocation": "python -m lib.research.corpus.typed --write",
+      "result": "rc 0; silver_rows 123 of 123 bronze; class A 16 B 31 C 3 D 1 OTHER 72; fund IDVZ 37 PFOE 7 DIVZ 0 absent 79; k5 period carried 103 of 123 by filename 95 header 7 content 1 absent 20; backlog files 351 = resolved_files 123 + unresolved_files 228; written_rows 123 skipped_unchanged 0 parts 1 on the first run; re-run this same session: written_rows 0 skipped_unchanged 123 parts 0 (idempotent)"
+    },
+    {
+      "tool": "typed CLI --census (AC2)",
+      "invocation": "python -m lib.research.corpus.typed --census",
+      "result": "rc 0; reads silver back via store.silver_latest; silver_rows 123 of 123 bronze; k5 period carried 103 of 123 by filename 95 header 7 content 1 absent 20; run twice, byte-identical"
+    },
+    {
+      "tool": "typed CLI --reports-for-first-multi (AC3)",
+      "invocation": "python -m lib.research.corpus.typed --reports-for-first-multi",
+      "result": "rc 0; security_key 9433_JP_Equity reports 2 dated 2; period_order_ok True"
+    },
+    {
+      "tool": ".scratch/c3/hyg.py (AC6, written this cell per the criterion's own invocation)",
+      "invocation": "python .scratch/c3/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 3; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    },
+    {
+      "tool": ".scratch/c3/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/c3/mutant.py",
+      "result": "rc 0; FIX: class B 31 class A 16; MUTANT (no numeric-position requirement): content-matches-B-shape 6, misfiring on 3 research-pack-named class-A documents; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/typed.py lib/research/corpus/tests/test_typed.py org/missions/D5/AMGT/AMGT_CORPUS/cards/K5_period_resolution.md",
+      "result": "commit c4b23ea644: risk-reflex REFLEX CLEAN (3 of 3 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 3 files (K5 card is not code); naming-gate WARN 2 graded (0 REFUSE -- an s3://%s/%s format-string literal inside the bronze_key/extract_key field builder, not a builder call, flagged informationally); to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-94",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-94.print-pack-fiscal-year-sort.md",
+    "group": "W",
+    "vintage_commit": "cb66bab9c0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "cb66bab9c0",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-94.print-pack-fiscal-year-sort.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~94",
+  "session_log": "Worker 0.9.0_WK_AMGT_RESAPP~94, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-23-94 in worktree C:/tmp/wk-amgt-23-94, spawn HEAD carrying both never-widen halves. THE BAR FIRST: branch wk-amgt-23-94, org/ and .tools/ present, TREE-OK. Order read WORKER FACE only, top to the RECORD FACE marker. Never-widen pair read first: both halves present and SIGNED (ledger/NEVER_WIDEN_ROUND23_RK94_{COO,CTO}_HALF.md) -- AC0 PASS (both files present, rk-92 status grep = 1). RULED item 1: added two module-level helpers to lib/research/print/render_pack.py -- _fiscal_year_sort_key(fy) returning (0, int(str(fy))) for a 4-digit numeric label else (1, str(fy)), and _group_by_fiscal_year(figures) grouping by str(fiscal_year) so a year stored once as \"2026\" and once as 2026 merges into ONE heading. The render loop became `for fy in sorted(by_fy, key=_fiscal_year_sort_key)`; no other line changed. RULED item 2: new lib/research/api/tests/test_print_fiscal_year_sort.py, exactly 5 offline arms named in the order (sort-key ordering, grouping merge, all-str order unchanged, the discriminating arm loading render_pack.py's bytes at PINNED commit 218ff3c994 via `git show` into a temp module -- exec'd, then build_pack() called on the pinned module and the patched module with the same mixed-type model block, pinned raises TypeError, patched does not -- and the identity arm proving scoped_amgt._print_pack's function-scope import reaches the SAME render_pack module object via a monkeypatched build_pack recorder). AC1: 5 passed, 0 failed, all 5 named tests present. AC2 (re-measured at spawn): 204 passed, 0 failed (199 baseline + this cell's 5). Committed the code (5357068676) BEFORE any live act. AC4 (post-commit): exactly 1 commit on the closure roots since the served source 33ea2e4e00, by this worker only -- 0 foreign commits. AC7 (closure check, run BEFORE AC5): build-and-upload-scoped-amgt.sh --build-only .scratch/r94/rk94_build.zip -- \"BUILD-ONLY: copied to .scratch/r94/rk94_build.zip -- NOT uploaded\" exactly; ac7.py/ac7_inner.py written verbatim from the order text and run: \"render_pack in zip True\"; three controls (lib resolves inside the artifact; lib.opal_naming/lib.research.harvest.store/pyarrow NOT importable; boto3 importable from the Lambda runtime set only -- True); ARM import_handler OK, ARM import_scoped_amgt OK, ARM render_pack_sort_from_zip OK ['2016', '2025', 2026, 2027, '?']; RESULT arms 3 ok 3 import_fail 0 other_fail 0; rc 0. AC5 (THE ACT): opened deploy ledger amgt-rk94-print-pack-fy-sort BEFORE the first upload (org/critical_paths/.open_deploys/amgt-rk94-print-pack-fy-sort.json, org/critical_paths/change_management/20260922T0807Z_..._deploy_completion.md, leg opal-amgt-scoped-api tf-lambda). Ran build-and-upload-scoped-amgt.sh for REAL (no --build-only): uploaded VersionId igyEHtXet.BLL6JZBkR1Us3Pwrt_Q0Ww, local sha256 (b64) r93CxQqrk8k8h2Q8KO4Iicn3pk8kyF4SFo47a9Cca5w=, head-object confirmed server-side. ISSUER-TEXT GAP (filed AMGT_RESAPP-Z-W94-S1, DISMISSED_WITH_REASON, not blocking): the literal ac5.py script's targeted `terraform plan` FAILED -- 'Error: Backend initialization required, please run \"terraform init\"' -- this fresh worktree had never run terraform init (no .terraform/ present; the order's text names no init step). Ran `terraform -chdir=infra/aws/terraform/harvest init -input=false` manually (standard, non-destructive: backend s3 opal-313476888478-terraform-state key harvest/tfstate, provider hashicorp/aws v5.100.0 installed) -- then re-ran the SAME plan: 'Plan: 0 to add, 1 to change, 0 to destroy.' exactly, over module.scoped_amgt_api.aws_lambda_function.this (s3_object_version + source_code_hash only). `HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -input=false -auto-approve -lock-timeout=60s -target=module.scoped_amgt_api.aws_lambda_function.this`: 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Post-apply read: CodeSha256 moved from AC3's cRT7dOyfg8dNA2cjv4fz+i5fw9OursxqNyKfXh17jyQ= to r93CxQqrk8k8h2Q8KO4Iicn3pk8kyF4SFo47a9Cca5w= (equal to the uploaded artifact's own sha), State Active, LastUpdateStatus Successful. AC6 (post-act, ran twice -- first attempt timed out at 560s doing 42 redundant print invokes (5 named + 37 full sweep separately, each successful print taking ~12.6s live); fixed ac6.py to derive the 5 named statuses from the single 37-key sweep, re-ran with a 750s bound and unbuffered flushing): the five named model-block keys (CAT_US_Equity, CSL_AU_Equity, 6861_JP_Equity, BA_US_Equity, COST_US_Equity) ALL return 200 -- 5 of 5 -- so NO rollback trigger fired. Whole-population sweep: print_keys 37, print_200 36 (up from AC3's 33), print_non200 exactly [('NVDA_US_Equity', 404)] -- pre-existing, unrelated. 0 print regressions (every AC3 200 is still 200). All 12 non-print GET routes still 200, 0 regressions. Scoped policy sha unchanged (42d6bd14a35e1718, 4 statements, equal to AC3). A post-act targeted `terraform plan` read 'No changes. Your infrastructure matches the configuration.' Deploy ledger leg closed with this AC6 read as proof ('OK: leg opal-amgt-scoped-api closed. Remaining open: NONE'), ledger closed ('OK: CLOSED deploy ledger ... all 1 legs proven; sentinel removed'), committed (f16e253426). AC8: `git diff --name-only 218ff3c994 HEAD` over the two paths returns exactly the two files; both 0 non-ASCII bytes, 0 CRLF (measured via direct byte read), equal to render_pack.py's pre-edit figures of 0 and 0. Filed AMGT_RESAPP-Z-W94-S1 (OBSERVATION, INERT, DISMISSED_WITH_REASON) for the terraform-init gap and committed it (ffdff6b277). STATUS: flipping <status> to complete -- AC0-AC8 all PASS-by-output, no rollback fired, ledger closed with nothing stranded.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "5357068676",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC7's isolated closure check confirms 'render_pack in zip True' and ARM render_pack_sort_from_zip OK reading the sort key FROM THE ZIP's own bytes; deployed via the targeted apply (post CodeSha256 r93CxQqrk8k8h2Q8KO4Iicn3pk8kyF4SFo47a9Cca5w=, equal to the uploaded artifact's sha); AC6's live /print sweep confirms the fix on the served plane -- CAT/CSL/6861 moved from 500 (AC3) to 200 (AC6), the 33 previously-rendering names unchanged (0 regressions)."
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_print_fiscal_year_sort.py",
+      "kind": "test",
+      "commit_or_etag": "5357068676",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW test file, not packaged into the Lambda artifact (tests/ excluded by the build's closure walk). 5 of 5 arms passed (AC1); re-confirmed passing inside the full lib/research/api/tests run (AC2, 204 passed)."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260922T0807Z_amgt-rk94-print-pack-fy-sort_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "f16e253426",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Deploy ledger record, opened before the first upload and CLOSED with AC6's post-act read as proof (leg opal-amgt-scoped-api, all 1 legs proven, sentinel removed -- nothing stranded)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND23_RK94_COO_HALF.md && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND23_RK94_CTO_HALF.md && grep -c \"^<\"\"status>complete</\"\"status>$\" org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-92.sa-raw-move.md",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND23_RK94_COO_HALF.md && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND23_RK94_CTO_HALF.md && grep -c \"^<\"\"status>complete</\"\"status>$\" org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-92.sa-raw-move.md",
+      "output_evidence": "Both never-widen half files present and read (COO half: 'Status: SIGNED at issuance'; CTO half: 'Status: SIGNED') -- both pair halves present (read BOTH, signed) and \"1\": grep -c returned 1 (rk-92/M3 status line matched exactly once). Re-run verbatim (exact TO text incl. the doubled-quote grep pattern) confirms the same result: 1.",
+      "denominator": "2 of 2 files present, 1 of 1 grep match",
+      "status": "PASS",
+      "expect": "both pair halves present \\(read BOTH, signed\\) and \"1\""
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/api/tests/test_print_fiscal_year_sort.py -v -p no:cacheprovider",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/api/tests/test_print_fiscal_year_sort.py -v -p no:cacheprovider",
+      "output_evidence": "test_sort_key_orders_mixed_str_and_int_years PASSED; test_grouping_key_merges_str_and_int_of_one_year PASSED; test_all_str_years_order_unchanged PASSED; test_head_copy_raises_on_mixed_keys PASSED; test_patched_render_pack_is_the_one_print_pack_reaches PASSED. '5 passed in 0.93s'",
+      "denominator": "5 of 5 passed, 0 failed",
+      "status": "PASS",
+      "expect": "5 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/api/tests -q -p no:cacheprovider",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/api/tests -q -p no:cacheprovider",
+      "output_evidence": "'204 passed in 3.67s' -- re-measured baseline (199) plus this cell's 5 new tests, 0 failed.",
+      "denominator": "204 of 204 passed, 0 failed",
+      "status": "PASS",
+      "expect": "204 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r94/ac3.py",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r94/ac3.py",
+      "output_evidence": "CodeSha256 cRT7dOyfg8dNA2cjv4fz+i5fw9OursxqNyKfXh17jyQ= ArtifactVersionId 3SfOfR7Pr3dGvmyY.dKr4doXcNWQnOuF policy_sha 42d6bd14a35e1718 statements 4 / routes 13 status [200, 500] non200 ['/api/scoped/amgt/security/{security_key}/print'] / print_keys 37 print_200 33 print_non200 [('6861_JP_Equity', 500), ('CAT_US_Equity', 500), ('CSL_AU_Equity', 500), ('NVDA_US_Equity', 404)] -- exact match to <expect> and to both never-widen halves' cut values.",
+      "denominator": "all named values match exactly (CodeSha256, ArtifactVersionId, policy_sha, statements=4, routes=13, print_keys=37, print_200=33, the 4 named non-200 keys)",
+      "status": "PASS",
+      "expect": "CodeSha256 cRT7dOyfg8dNA2cjv4fz\\+i5fw9OursxqNyKfXh17jyQ="
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && git log --format=\"%h %an %s\" 33ea2e4e00..HEAD -- lib/research lib/opal_data_harvest infra/aws/lambda/research/scoped_amgt_api infra/aws/terraform/harvest",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git log --format=\"%h %an %s\" 33ea2e4e00..HEAD -- lib/research lib/opal_data_harvest infra/aws/lambda/research/scoped_amgt_api infra/aws/terraform/harvest",
+      "output_evidence": "Run BEFORE the code commit: empty (0 commits, matching '0 at the cut'). Run AFTER the code commit: exactly 1 line -- '5357068676 0.9.0_WK_AMGT_RESAPP~94 fix(AMGT_RESAPP AMGT-rk-94, ...)'.",
+      "denominator": "1 of 1 commits on the closure roots, and it is this worker's own",
+      "status": "PASS",
+      "expect": "5357068676"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only .scratch/r94/rk94_build.zip 2>&1 | tail -3 && python .scratch/r94/ac7.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only .scratch/r94/rk94_build.zip 2>&1 | tail -3 && python .scratch/r94/ac7.py",
+      "output_evidence": "Run verbatim (exact TO text, piped through tail -3) twice -- once initially (captured via redirection for review) and once again exactly as written for this record: 'BUILD-ONLY: copied to .scratch/r94/rk94_build.zip -- NOT uploaded'. ac7.py: 'unzipped 197 entries; render_pack in zip True'; 'control: lib resolves inside the artifact'; 'control: lib.opal_naming, lib.research.harvest.store, pyarrow NOT importable (isolated)'; 'control: boto3 importable from the Lambda runtime set only -- True'; 'ARM import_handler OK lambda_function'; 'ARM import_scoped_amgt OK lib.research.api.scoped_amgt'; \"ARM render_pack_sort_from_zip OK ['2016', '2025', 2026, 2027, '?']\"; 'RESULT arms 3 ok 3 import_fail 0 other_fail 0'. Both runs identical.",
+      "denominator": "3 of 3 arms OK, 0 import_fail, 0 other_fail",
+      "status": "PASS",
+      "expect": "render_pack in zip True"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r94/ac5.py",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r94/ac5.py",
+      "output_evidence": "Ledger opened before first upload ('OK: OPENED deploy ledger amgt-rk94-print-pack-fy-sort (1 legs)'); build+upload succeeded (head-object VersionId igyEHtXet.BLL6JZBkR1Us3Pwrt_Q0Ww, local sha256 (b64) r93CxQqrk8k8h2Q8KO4Iicn3pk8kyF4SFo47a9Cca5w=). ac5.py's own plan call inside this same invocation then FAILED ('Backend initialization required, please run \"terraform init\"') because this fresh worktree had never run terraform init -- see status_reason and surprise row AMGT_RESAPP-Z-W94-S1 for the supplemental commands that completed the deploy this criterion asserts. Once init ran (non-destructive, outside this invocation), the SAME plan command the script issues read 'Plan: 0 to add, 1 to change, 0 to destroy.' exactly; HALT_ACK=1 safe-apply read 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.'; post-apply read 'POST CodeSha256 r93CxQqrk8k8h2Q8KO4Iicn3pk8kyF4SFo47a9Cca5w= State Active LastUpdateStatus Successful' (moved from AC3's cRT7dOyf..., equal to the uploaded artifact's own sha).",
+      "denominator": "N/A -- deploy-completion checklist; every named sub-value (plan diff, apply summary, CodeSha256 equality, State, LastUpdateStatus) matched <expect>",
+      "status": "PASS",
+      "status_reason": "The recorded invocation (python .scratch/r94/ac5.py, exactly as the order names) failed mid-script at the plan step on a precondition the order's text does not name (terraform init in a fresh worktree; no .terraform/ directory existed). Supplemental commands OUTSIDE this criterion's own invocation completed the deploy: `terraform -chdir=infra/aws/terraform/harvest init -input=false` (standard, non-destructive), then the order's own plan and HALT_ACK=1 safe-apply commands (unchanged, run directly), both of which matched <expect> verbatim. Filed as surprise row AMGT_RESAPP-Z-W94-S1 (OBSERVATION, INERT, DISMISSED_WITH_REASON) per THE REFUSAL CLAUSE.",
+      "expect": "Plan: 0 to add, 1 to change, 0 to destroy"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r94/ac6.py",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r94/ac6.py",
+      "output_evidence": "FIVE-NAME print status: {'CAT_US_Equity': 200, 'CSL_AU_Equity': 200, '6861_JP_Equity': 200, 'BA_US_Equity': 200, 'COST_US_Equity': 200} -- 5 of 5 200: True. print_keys 37 print_200 36 print_non200 [('NVDA_US_Equity', 404)]. print regressions (was 200, now not): []. routes 13, all 200; non-print route regressions: []. policy_sha 42d6bd14a35e1718 statements 4 equal to pre: True. post CodeSha256 r93CxQqrk8k8h2Q8KO4Iicn3pk8kyF4SFo47a9Cca5w= State Active LastUpdateStatus Successful. Targeted plan: 'No changes. Your infrastructure matches the configuration.' 'OK: leg opal-amgt-scoped-api closed. Remaining open: NONE' / 'OK: CLOSED deploy ledger amgt-rk94-print-pack-fy-sort -- all 1 legs proven; sentinel removed'.",
+      "denominator": "5 of 5 named prints 200; 36 of 37 print_200 (up from 33, the 3 fixed, NVDA's 404 unchanged, 0 regressed); 12 of 12 non-print GET routes unchanged at 200; policy_sha equal; plan No changes",
+      "status": "PASS",
+      "status_reason": "A first attempt at exactly this invocation timed out at 560s (rc 124) because the script separately invoked the 5 named prints AND the full 37-key sweep (42 total print invokes; each successful live print takes ~12.6s). Fixed the script to derive the 5 named statuses from the single 37-key sweep (37 total print invokes, same substance, no duplicate calls) and re-ran the SAME recorded invocation (python .scratch/r94/ac6.py) with a larger bound (750s) and -u only for interim progress visibility during the wait -- semantically identical to an unflagged run of the recorded command; the result above is that run's output.",
+      "expect": "5 of 5"
+    },
+    {
+      "criterion_id": "AC8",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && git diff --name-only 218ff3c994 HEAD -- lib/research/print/render_pack.py lib/research/api/tests/test_print_fiscal_year_sort.py",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git diff --name-only 218ff3c994 HEAD -- lib/research/print/render_pack.py lib/research/api/tests/test_print_fiscal_year_sort.py",
+      "output_evidence": "lib/research/api/tests/test_print_fiscal_year_sort.py\\nlib/research/print/render_pack.py -- exactly the two files. Byte read (python): render_pack.py non_ascii_bytes 0 crlf 0; test_print_fiscal_year_sort.py non_ascii_bytes 0 crlf 0.",
+      "denominator": "2 of 2 files, each 0 non-ASCII bytes and 0 CRLF",
+      "status": "PASS",
+      "expect": "lib/research/api/tests/test_print_fiscal_year_sort.py"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order names one discriminating arm directly (test_head_copy_raises_on_mixed_keys, AC1's 4th arm): render_pack.py's bytes at the PINNED commit 218ff3c994 (pre-fix), executed into a temp module, must raise TypeError on the same mixed str/int fiscal-year input that the patched module handles cleanly -- a mutant-equivalent proving the test suite is not vacuously green against unfixed code.",
+      "expected": "pinned.build_pack(...) raises TypeError; render_pack.build_pack(...) (patched) does not raise and returns (pdf_path, txt_path) that exist on disk.",
+      "observed": "test_head_copy_raises_on_mixed_keys PASSED: pytest.raises(TypeError) captured the pinned module's failure; the patched module's build_pack() call on the same input returned real pdf_path/txt_path, both asserted to exist.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "pytest run twice for AC1 (once standalone, once as part of AC2's full lib/research/api/tests run) -- same 5 arms, same names, same pass count both times. AC7's closure check produces identical CLOSURE/VERIFY/ISOLATED lines across the --build-only run and the real (non-build-only) build inside AC5 (both printed the same 51 code / 7 data / 139 vendored entries, 197 total, 807553 bytes).",
+      "observed": "AC1 standalone: 5 passed. AC1 inside AC2: same 5 tests present among the 204 passed. AC7's build log and AC5's real-upload build log are byte-identical in their CLOSURE+/DATA+/VERIFY/ISOLATED lines (only the temp directory path and final upload step differ).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "chain G (step 2 of ruling msg 24146): the producer that writes forecast fiscal years as int, and model_block's re-homing re-derivation",
+      "reason": "Explicitly named in the order as OUT of this cell's scope ('This cell is step (1) ONLY. Step (2) ... is NOT this cell (chain G).'); render_pack's normalised sort/grouping key makes the print route correct regardless of whether a future producer writes str or int years, so step (1) does not depend on step (2) landing."
+    },
+    {
+      "item": "any repair to build script's terraform-init precondition, or to ac5.py's script text",
+      "reason": "Out of <paths> (infra/aws/terraform/harvest/ is not a WORKER-writable surface here; .scratch/r94/ac5.py is scratch, not a repo artifact). Worked around per THE REFUSAL CLAUSE by running the real terraform init + plan + apply commands; recorded as surprise row AMGT_RESAPP-Z-W94-S1."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W94-S1: AC5's literal ac5.py script failed at the targeted `terraform plan` step ('Backend initialization required, please run \"terraform init\"') because this fresh worktree had never run terraform init -- the order's text names no init step. Ran `terraform init` manually (standard, non-destructive); the same plan and HALT_ACK=1 safe-apply commands the order names then matched their <expect> exactly, and AC6's post-act read confirmed a clean, fully-proven deploy with 0 rollback triggers. OBSERVATION, INERT, DISMISSED_WITH_REASON -- not blocking."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests/test_print_fiscal_year_sort.py -v -p no:cacheprovider",
+      "result": "5 passed in 0.93s"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/api/tests -q -p no:cacheprovider",
+      "result": "204 passed in 3.67s"
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only .scratch/r94/rk94_build.zip",
+      "result": "CLOSURE: 51 entries at the fixed point after 4 passes; VERIFY missing [] both scopes; ISOLATED 3 of 3 arms OK; 'BUILD-ONLY: copied to .scratch/r94/rk94_build.zip -- NOT uploaded'"
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh (real upload)",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh",
+      "result": "Uploaded s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip VersionId igyEHtXet.BLL6JZBkR1Us3Pwrt_Q0Ww, local sha256 (b64) r93CxQqrk8k8h2Q8KO4Iicn3pk8kyF4SFo47a9Cca5w=, head-object confirmed server-side"
+    },
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest init -input=false (precondition, not named in the order text)",
+      "result": "Terraform has been successfully initialized! (backend s3 opal-313476888478-terraform-state key harvest/tfstate; hashicorp/aws v5.100.0 installed)"
+    },
+    {
+      "tool": "terraform",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest plan -target=module.scoped_amgt_api.aws_lambda_function.this",
+      "result": "Plan: 0 to add, 1 to change, 0 to destroy. (pre-act); 'No changes. Your infrastructure matches the configuration.' (post-act, AC6)"
+    },
+    {
+      "tool": "safe-apply.sh",
+      "invocation": "HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -input=false -auto-approve -lock-timeout=60s -target=module.scoped_amgt_api.aws_lambda_function.this",
+      "result": "Apply complete! Resources: 0 added, 1 changed, 0 destroyed."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open --slug amgt-rk94-print-pack-fy-sort --title \"AMGT-rk-94 print pack fiscal-year sort redeploy\" --author 0.9.0_WK_AMGT_RESAPP~94 --lambda opal-amgt-scoped-api ; ... close-leg --leg-id opal-amgt-scoped-api --proof \"...\" ; ... close",
+      "result": "OK: OPENED deploy ledger 'amgt-rk94-print-pack-fy-sort' (1 legs) ... OK: leg opal-amgt-scoped-api closed. Remaining open: NONE ... OK: CLOSED deploy ledger 'amgt-rk94-print-pack-fy-sort' -- all 1 legs proven; sentinel removed"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~94 <0.9.0_WK_AMGT_RESAPP~94@opal.agent>\" -F <msgfile> -- <paths> (three commits: code, deploy ledger, surprise row)",
+      "result": "5357068676 (code), f16e253426 (deploy ledger), ffdff6b277 (surprise row) -- all committed clean, commit-gate/naming-gate/to-pipeline-gate/surprise-row-gate all OK"
+    }
+  ]
+}

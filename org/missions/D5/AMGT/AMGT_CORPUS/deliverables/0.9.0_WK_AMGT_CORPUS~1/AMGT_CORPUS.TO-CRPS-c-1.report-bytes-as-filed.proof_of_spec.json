@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-1.report-bytes-as-filed.md",
+    "group": "OTHER",
+    "vintage_commit": "40107c6f48fb9ba60b94b936646674699d244ae7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "40107c6f48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-1.report-bytes-as-filed.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/ingest.py",
+      "kind": "script",
+      "commit_or_etag": "165024a5020c1e481cafadbafbed642f7c24627e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ingest(root, document, client=None, open_func=open): for every file of every RESOLVED folder (resolution taken FRESH from backlog.build(), never a typed list), opens the library path with \"rb\" only, computes sha256, and lands it via store.bronze_put under form_b_object(report_id, safe_name) -- report_id is the sha256's first 16 hex so a changed file lands under a NEW key and the prior object stays. Placeholder state is recorded from library.census() BEFORE the read; a read failure is counted in read_failed and never skipped silently. --write measured live: run 1 (cold, some placeholders unhydrated) gave resolved_folders 33 files_in_resolved 123 stored 123 (put_performed 123 existed 0) read_failed 0, placeholders_before 24 hydrated_ok 24, unresolved_files 228 in 59 folders. Run 2 (immediately after) gave the SAME population but put_performed 0 existed 123 and placeholders_before 0 (the first run had already hydrated every OneDrive placeholder it touched) -- proving bronze's never-overwrite live, not just in the stub. --verify measured live: objects 123 files 123 match 123 mismatch 0, elapsed_s 15.313 (well inside the 120s bound, 16-worker thread pool).",
+      "introduces": ["ingest", "content_type_for", "safe_object_name", "_objects_for_resolved", "_verify_one"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_ingest.py",
+      "kind": "test",
+      "commit_or_etag": "165024a5020c1e481cafadbafbed642f7c24627e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "8 tests under the package poison with a stub S3 client (never real boto3.client): SAME BYTES TWICE (existed True, put_performed False on the second ingest); CHANGED BYTES (new report_id/key, prior object's bytes untouched); NON-ASCII NAME (stored as <report_id><ext>, metadata source-relpath percent-encodes the real name); UNRESOLVED IS NOT STORED (an Unresolved-Co file produces no put and is surfaced in unresolved_files); READ MODE (every open() of a library path recorded \"rb\", none other); VERIFY CAN FAIL (a one-byte-corrupted stored object reports match False with a mismatch detail, and the same object with its bytes restored reports match True) -- a verifier that cannot report a mismatch proves nothing. Plus 2 pure-helper tests (content_type_for, safe_object_name).",
+      "artifact_covered_by": ["AC1", "AC4", "AC5"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/ingest_run.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The run record from the final live --write, carrying the integer keys files_in_resolved (123), stored (123), read_failed (0) and unresolved_files (228), plus resolved_folders, put_performed/existed, placeholders_before/hydrated_ok and the unresolved_folders list (59 folder names).",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_ingest.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_ingest.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "........                                                                 [100%]\n8 passed in 0.15s",
+      "denominator": "8 of 8 tests passed, 0 failed; re-run after the ruff-gate fix, identical outcome",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.ingest --verify -- expect objects N files N match N mismatch 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.ingest --verify 2>&1 | tail -4",
+      "output_evidence": "objects 123 files 123 match 123 mismatch 0\nelapsed_s 15.313",
+      "denominator": "123 of 123 stored objects re-opened and re-read from the library, all 123 byte-for-byte identical, 0 mismatch; 16-worker thread pool, elapsed 15.313s of a 120s bound",
+      "expect": "objects (\\d+) files \\1 match \\1 mismatch 0\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -c \"...ingest_run.json...\" -- expect files_in_resolved N stored N read_failed 0 unresolved_files N",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"import json,glob; p=glob.glob('org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/ingest_run.json')[0]; d=json.load(open(p)); print('files_in_resolved', d['files_in_resolved'], 'stored', d['stored'], 'read_failed', d['read_failed'], 'unresolved_files', d['unresolved_files'])\"",
+      "output_evidence": "files_in_resolved 123 stored 123 read_failed 0 unresolved_files 228",
+      "denominator": "123 of 123 resolved-folder files stored (read_failed 0), 228 files left unresolved across 59 folders; 123 + 228 = 351, the full library census",
+      "expect": "files_in_resolved (\\d+) stored \\1 read_failed 0 unresolved_files \\d+",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "......................                                                   [100%]\n22 passed in 0.18s",
+      "denominator": "22 of 22 tests passed (14 from CRPS-c-4's test_library.py/test_backlog.py + 8 from this cell's test_ingest.py), 0 failed",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "python .scratch/c1/hyg.py -- expect outside_allowed [] ... changed_files N ... bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c1/hyg.py",
+      "output_evidence": "outside_allowed []\nchanged_files 3\nlib/research/corpus/ingest.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_ingest.py compiles True crlf 0 non_ascii 0\nbad 0",
+      "denominator": "3 of 3 changed paths inside this order's <paths>/deliverables grant (0 outside_allowed) -- ingest.py, test_ingest.py, ingest_run.json; 2 of 2 changed .py files compile clean, 0 CRLF, 0 non-ASCII, bad 0 of 2. Base: git merge-base HEAD SITEZ (== b5b2c17763, identical to this order's own starting commit)",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/c1/mutant.py (not committed) compares the FIX's selection rule (state == RESOLVED) against a plausible bug (state != UNRESOLVED, which would also select an AMBIGUOUS folder) over a 3-state stub library, at the selection step only.",
+      "expected": "FIX selects only ['Resolved Co']. MUTANT (the plausible bug) additionally selects 'Ambiguous Co', so FIX != MUTANT.",
+      "observed": "FIX (state == RESOLVED): ['Resolved Co']. MUTANT (state != UNRESOLVED): ['Ambiguous Co', 'Resolved Co']. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_ingest.py's full file run twice back to back; --write run twice back to back (cold then warm); --verify run twice back to back; .scratch/c1/mutant.py run twice back to back.",
+      "observed": "pytest: '8 passed in 0.15s' / '8 passed in 0.14s' -- same pass count both runs. --write: run 1 (cold) put_performed 123 existed 0 placeholders_before 24; run 2 (warm) put_performed 0 existed 123 placeholders_before 0 -- the POPULATION (files_in_resolved 123, unresolved_files 228) is IDENTICAL both runs, and bronze's never-overwrite is exactly what makes put_performed/existed flip between runs (this is the expected non-idempotent field; the content is idempotent, proven by --verify's mismatch 0 after both runs). --verify: 'objects 123 files 123 match 123 mismatch 0' both runs (elapsed_s 4.453 then 15.313 -- both under the 120s bound). mutant.py: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical selections.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Extraction of text, headings or tables from any stored report",
+      "reason": "Section 1: 'Extraction ... is a SEPARATE object that names the bytes object it was derived from' -- that is CRPS-c-2, not this cell. ingest.py stores only the as-filed bytes object; no extraction code exists in this module."
+    },
+    {
+      "item": "Any write, move, rename or delete under the library root",
+      "reason": "BOUNDS: THE LIBRARY IS READ-ONLY. Every open of a library path in ingest.py and test_ingest.py uses \"rb\" and no other mode -- proven offline by test_every_library_open_is_read_binary (builtins.open wrapped to record every mode; asserts the recorded list is exactly ['rb']), and the live --write/--verify runs never touched the library beyond reading (placeholder counts only ever move toward hydrated, never regress, across the two --write runs)."
+    },
+    {
+      "item": "Storing a file from an UNRESOLVED or AMBIGUOUS folder under any guessed key",
+      "reason": "Section 1 / THE POPULATION: 'A file in an UNRESOLVED or AMBIGUOUS folder is NOT stored under any guessed key.' ingest() only stores when record['state'] == backlog.STATE_RESOLVED; every other file is collected in unresolved_files with its folder's own reason and never reaches store.bronze_put -- proven offline by test_unresolved_folder_file_is_not_stored and live by the --write run (228 unresolved_files, 0 of them appearing among the 123 stored)."
+    },
+    {
+      "item": "Any change to lib/research/corpus/library.py, backlog.py, gold.py, tests/conftest.py, lib/research/harvest/store.py or lib/research/identity/crosswalk.py",
+      "reason": "BOUNDS: all READ-ONLY for this cell. git diff HEAD~1 -- <those paths> is empty for this commit; ingest.py only imports and calls their existing public functions (library.census/library_root, backlog.build/STATE_RESOLVED, store.bronze_put/entity_partition/form_b_object/fetch_key_exists/HARVEST_BUCKET)."
+    },
+    {
+      "item": "A non-ASCII S3 object name",
+      "reason": "safe_object_name() always returns either the file's own ASCII name (checked with str.encode('ascii')) or '<report_id><ext>' (report_id is hex, ASCII by construction) -- proven offline by test_non_ascii_file_name_stored_as_report_id_ext and test_safe_object_name_ascii_vs_non_ascii, and live: 0 of the 123 stored objects hit lib/opal_naming.py's G3 ASCII refusal."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_ingest.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 8 passed, 0 failed"
+    },
+    {
+      "tool": "ingest CLI --verify (AC2)",
+      "invocation": "python -m lib.research.corpus.ingest --verify",
+      "result": "rc 0; objects 123 files 123 match 123 mismatch 0; elapsed_s 15.313"
+    },
+    {
+      "tool": "python -c ingest_run.json read (AC3)",
+      "invocation": "python -c \"import json,glob; ...\"",
+      "result": "rc 0; files_in_resolved 123 stored 123 read_failed 0 unresolved_files 228"
+    },
+    {
+      "tool": "pytest full package (AC4)",
+      "invocation": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 22 passed, 0 failed"
+    },
+    {
+      "tool": ".scratch/c1/hyg.py (AC5, this order's own hygiene shape)",
+      "invocation": "python .scratch/c1/hyg.py",
+      "result": "rc 0; outside_allowed []; changed_files 3; 2 of 2 changed .py files compile True, crlf 0, non_ascii 0; bad 0"
+    },
+    {
+      "tool": "ingest CLI --write (build step, run twice)",
+      "invocation": "python -m lib.research.corpus.ingest --write",
+      "result": "rc 0 both times; resolved_folders 33 files_in_resolved 123 stored 123 read_failed 0; run 1 put_performed 123 existed 0 placeholders_before 24 hydrated_ok 24; run 2 put_performed 0 existed 123 placeholders_before 0 hydrated_ok 0; unresolved_files 228 in 59 folders both runs"
+    },
+    {
+      "tool": ".scratch/c1/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/c1/mutant.py",
+      "result": "rc 0; FIX ['Resolved Co']; MUTANT ['Ambiguous Co', 'Resolved Co']; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/ingest.py lib/research/corpus/tests/test_ingest.py",
+      "result": "commit 165024a502: risk-reflex REFLEX CLEAN (2 of 2 files checked, 0 hits against 1662 danger nodes); commit-gate OK 2 of 2 files (after removing two ruff-flagged unused imports, datetime and pytest); naming-gate PASS 0 graded; to-pipeline-gate OK (no task_orders/*.md staged); surprise-row-gate OK (no rows in this commit)"
+    }
+  ]
+}

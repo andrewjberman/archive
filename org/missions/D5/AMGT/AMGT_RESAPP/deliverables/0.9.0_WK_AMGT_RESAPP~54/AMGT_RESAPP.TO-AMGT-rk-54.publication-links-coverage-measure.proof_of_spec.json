@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-54",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb40",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-54.publication-links-coverage-measure.md"
+  },
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1699960261"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~54",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~54/PUBLICATION_LINKS_COVERAGE_MEASURE_20260918.json",
+      "kind": "doc",
+      "commit_or_etag": "d4d64c141d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a MEASURE-only record, not a deployed artifact; committed at d4d64c141d and re-verified by AC5's own invocation against it in this instance (rc 0, population 36).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~54/PUBLICATION_LINKS_COVERAGE_MEASURE_20260918.md",
+      "kind": "doc",
+      "commit_or_etag": "d4d64c141d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the human-readable record: five instruments' verbatim output, the per-name table, the paragraph, the vintage-race note and the controls section.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "d4d64c141d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "two new rows spliced textually into the append-only fenced JSON array (376 total, 374 pre-existing not re-graded): AMGT_RESAPP-Z-W54-S1 and AMGT_RESAPP-Z-W54-S2; surprise-row-gate OK at commit (2 new rows, all carry step-7/step-10 fields)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the association layer listed WHOLE (paginated, never a page): every key form present under publication-links/v1/ with its link count and the object total as the denominator (3 forms -- BA, COST, HD -- at the intake; re-measure and print what is there, malformed keys counted under <malformed>), and the body layer per publisher with its total; a LIVE listing, read-only",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3\ns3 = boto3.client('s3')\npg = s3.get_paginator('list_objects_v2')\nforms = {}\ntotal = 0\nfor page in pg.paginate(Bucket='opal-data-harvest', Prefix='publication-links/v1/'):\n    for o in page.get('Contents', []):\n        total += 1\n        parts = o['Key'][len('publication-links/v1/'):].rsplit('/', 2)\n        form = parts[0] if len(parts) == 3 else '<malformed>'\n        forms[form] = forms.get(form, 0) + 1\npubs = {}\nptotal = 0\nfor page in pg.paginate(Bucket='opal-data-harvest', Prefix='publications/v1/'):\n    for o in page.get('Contents', []):\n        ptotal += 1\n        pub = o['Key'].split('/')[2]\n        pubs[pub] = pubs.get(pub, 0) + 1\nprint('LINKS key_forms', len(forms), 'objects', total)\nfor k in sorted(forms): print('  form', k, 'links', forms[k])\nprint('BODIES publishers', len(pubs), 'objects', ptotal, sorted(pubs.items()))\n\"",
+      "output_evidence": "LINKS key_forms 3 objects 7\n  form BA links 2\n  form COST links 2\n  form HD links 3\nBODIES publishers 5 objects 7 [('barrons', 2), ('bbg', 2), ('ft', 1), ('sa', 1), ('wsj', 1)]",
+      "denominator": "7 of 7 link objects (paginated total, all pages), 7 of 7 body objects; 3 of 3 key forms present (BA, COST, HD), 0 <malformed>",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "one line per MEASURED crosswalk record (33 of 33 at the cut; re-measure) naming its alias count, its deduped link count over EVERY alias the crosswalk holds, and any read state raised, then the summary line RECORDS measured 33 of 33 with_links K without_alias J -- K is the read side's own coverage figure (3 at the intake) and J the count of names with NO lookup key (the L3 claim about AAPL/NVDA/MSFT/JPM/TSLA, measured on the record, not the brief)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nfrom lib.research.identity import crosswalk\nfrom lib.research.coverage import pool_reader\ndoc, _i, _a = crosswalk.load_crosswalk()\nrecs = [r for r in doc['records'] if r.get('resolution') == crosswalk.RESOLUTION_MEASURED]\nwith_links = 0; no_alias = 0\nfor r in recs:\n    forms = crosswalk.aliases(r['security_key'])\n    counters = {}\n    links = pool_reader.list_links(r['security_key'], dedupe=True, counters=counters)\n    if not forms: no_alias += 1\n    if links: with_links += 1\n    print(r['security_key'], 'aliases', len(forms), 'links', len(links), 'states', {k: v for k, v in counters.items() if v})\nprint('RECORDS measured', len(recs), 'of', len(doc['records']), 'with_links', with_links, 'without_alias', no_alias)\n\"",
+      "output_evidence": "ASML_NA_Equity aliases 3 links 0 states {}\nBABA_US_Equity aliases 3 links 0 states {}\nBBSE3_BZ_Equity aliases 3 links 0 states {}\nBP/_LN_Equity aliases 3 links 0 states {}\nBA_US_Equity aliases 3 links 2 states {}\nCOST_US_Equity aliases 3 links 2 states {}\nENEL_IM_Equity aliases 3 links 0 states {}\nHSBA_LN_Equity aliases 3 links 0 states {}\nHAL_US_Equity aliases 3 links 0 states {}\nRMS_FP_Equity aliases 3 links 0 states {}\nHD_US_Equity aliases 3 links 3 states {}\n2317_TT_Equity aliases 3 links 0 states {}\nICICIBC_IN_Equity aliases 3 links 0 states {}\nIMB_LN_Equity aliases 3 links 0 states {}\nINTU_US_Equity aliases 3 links 0 states {}\n9433_JP_Equity aliases 3 links 0 states {}\nKMB_US_Equity aliases 3 links 0 states {}\nKPN_NA_Equity aliases 3 links 0 states {}\n992_HK_Equity aliases 3 links 0 states {}\nNG/_LN_Equity aliases 3 links 0 states {}\nNOVN_SW_Equity aliases 3 links 0 states {}\nNU_US_Equity aliases 3 links 0 states {}\nPBR_US_Equity aliases 3 links 0 states {}\nRWE_GR_Equity aliases 3 links 0 states {}\nRKT_LN_Equity aliases 3 links 0 states {}\nROG_SW_Equity aliases 3 links 0 states {}\nSAP_GY_Equity aliases 3 links 0 states {}\nSSE_LN_Equity aliases 3 links 0 states {}\nST_SP_Equity aliases 3 links 0 states {}\nULVR_LN_Equity aliases 3 links 0 states {}\nVLO_US_Equity aliases 3 links 0 states {}\nWALMEX*_MM_Equity aliases 3 links 0 states {}\nZURN_SW_Equity aliases 3 links 0 states {}\nCAT_US_Equity aliases 2 links 0 states {}\nCSL_AU_Equity aliases 2 links 0 states {}\n6861_JP_Equity aliases 2 links 0 states {}\nRECORDS measured 36 of 96 with_links 3 without_alias 0\n\nSURPRISE, filed as AMGT_RESAPP-Z-W54-S2: this SAME invocation, run earlier in this cell's session, read crosswalk/v1/2026-09-15.json (implicitly, as then-latest) and printed 'RECORDS measured 33 of 33 with_links 3 without_alias 0' -- matching the order's own stated cut figure exactly. Before this instance was finalized, crosswalk/v1/2026-09-19.json landed live in the pool (LastModified 2026-09-19T01:23:43Z) and the IDENTICAL unmodified invocation began returning 36 instead of 33, because crosswalk.load_crosswalk() resolves sorted(keys)[-1] with no vintage pin (lib/research/identity/crosswalk.py:528). The output above is the SETTLED, final reading (36, vintage crosswalk/v1/2026-09-19.json), reproduced identically across two more runs after the new file stopped changing.",
+      "denominator": "36 of 96 crosswalk records are MEASURED (60 UNRESOLVED) at the settled vintage crosswalk/v1/2026-09-19.json -- NOT 33 of 33 as the order's own text states for its cited vintage crosswalk/v1/2026-09-15.json; with_links=3, without_alias=0 at both vintages checked",
+      "status": "PASS",
+      "status_reason": "the invocation ran exactly as written and its output is recorded verbatim; the criterion's own prose expectation cites '33 of 33' as the order's stated cut figure, which this instrument reproduced on an earlier run before a live vintage rotation changed the answer to 36 -- both readings are documented and neither is inferred"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the harvester's own ingestion ledger read READ-ONLY from the MAIN tree's absolute path with its size and mtime printed, each table's row count as its denominator, then jobs per (publisher, security_key, status), articles and links per security_key, and the upload outbox per status/error -- the instrument that separates NEVER-JOBBED from JOBBED-NOTHING-STORED from STORED; if the file is ABSENT the invocation prints ABSENT and the path and the ingestion axis is recorded UNMEASURED (never inferred)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport os, sqlite3, datetime\np = 'C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest/progress.sqlite3'\nif not os.path.isfile(p):\n    print('ABSENT', p); raise SystemExit(0)\nst = os.stat(p)\nprint('LEDGER', p, 'bytes', st.st_size, 'mtime', datetime.datetime.utcfromtimestamp(st.st_mtime).isoformat() + 'Z')\ndb = sqlite3.connect('file:' + p + '?mode=ro', uri=True)\nfor t in ('jobs', 'articles', 'article_objects', 'article_links', 'upload_outbox'):\n    try:\n        n = db.execute('SELECT COUNT(*) FROM ' + t).fetchone()[0]\n    except sqlite3.Error as e:\n        print('TABLE', t, 'UNREADABLE', e); continue\n    print('TABLE', t, 'rows', n)\nprint('JOBS by publisher, security_key, status:')\nfor row in db.execute('SELECT publisher, security_key, status, COUNT(*) FROM jobs GROUP BY 1,2,3 ORDER BY 2,1,3'): print('  ', row)\nprint('ARTICLES by publisher, security_key:')\nfor row in db.execute('SELECT publisher, security_key, COUNT(*) FROM articles GROUP BY 1,2 ORDER BY 2,1'): print('  ', row)\nprint('LINKS by security_key:')\nfor row in db.execute('SELECT security_key, COUNT(*) FROM article_links GROUP BY 1 ORDER BY 1'): print('  ', row)\nprint('OUTBOX by status, error_code:')\nfor row in db.execute('SELECT status, error_code, COUNT(*) FROM upload_outbox GROUP BY 1,2 ORDER BY 1,2'): print('  ', row)\n\"",
+      "output_evidence": "LEDGER C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.runtime/opal-data-harvest/progress.sqlite3 bytes 282624 mtime 2026-09-15T04:58:26.531710Z\nTABLE jobs rows 32\nTABLE articles rows 84\nTABLE article_objects rows 83\nTABLE article_links rows 84\nTABLE upload_outbox rows 167\nJOBS by publisher, security_key, status:\n   ('barrons', 'BA', 'auth_failed_after_refresh', 1)\n   ('barrons', 'BA', 'complete_candidates', 2)\n   ('barrons', 'BA', 'request_rejected', 1)\n   ('bbg', 'BA', 'complete_candidates', 2)\n   ('bbg', 'BA', 'error', 2)\n   ('bbg', 'BA', 'insufficient_coverage', 1)\n   ('ft', 'BA', 'complete_candidates', 1)\n   ('sa', 'BA', 'complete_candidates', 1)\n   ('sa', 'BA', 'new_articles', 1)\n   ('wsj', 'BA', 'complete_candidates', 1)\n   ('barrons', 'COST', 'complete_candidates', 2)\n   ('barrons', 'COST', 'cooldown', 1)\n   ('bbg', 'COST', 'complete_candidates', 1)\n   ('bbg', 'COST', 'cooldown', 1)\n   ('bbg', 'COST', 'insufficient_coverage', 1)\n   ('bbg', 'COST', 'request_rejected', 1)\n   ('ft', 'COST', 'complete_candidates', 1)\n   ('sa', 'COST', 'complete_candidates', 1)\n   ('wsj', 'COST', 'complete_candidates', 1)\n   ('barrons', 'HD', 'complete_candidates', 1)\n   ('barrons', 'HD', 'cooldown', 1)\n   ('barrons', 'HD', 'error', 1)\n   ('bbg', 'HD', 'complete_candidates', 1)\n   ('bbg', 'HD', 'cooldown', 2)\n   ('ft', 'HD', 'complete_candidates', 1)\n   ('sa', 'HD', 'complete_candidates', 1)\n   ('wsj', 'HD', 'complete_candidates', 1)\nARTICLES by publisher, security_key:\n   ('barrons', 'BA', 5)\n   ('bbg', 'BA', 9)\n   ('ft', 'BA', 5)\n   ('sa', 'BA', 10)\n   ('wsj', 'BA', 5)\n   ('barrons', 'COST', 5)\n   ('bbg', 'COST', 5)\n   ('ft', 'COST', 5)\n   ('sa', 'COST', 5)\n   ('wsj', 'COST', 5)\n   ('barrons', 'HD', 5)\n   ('bbg', 'HD', 5)\n   ('ft', 'HD', 5)\n   ('sa', 'HD', 5)\n   ('wsj', 'HD', 5)\nLINKS by security_key:\n   ('BA', 34)\n   ('COST', 25)\n   ('HD', 25)\nOUTBOX by status, error_code:\n   ('pending', None, 167)",
+      "denominator": "jobs=32, articles=84, article_objects=83, article_links=84, upload_outbox=167 rows (each table's own COUNT(*)); ledger present, NOT ABSENT, so the ingestion axis is MEASURED, not UNMEASURED",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the six config switches read back verbatim (universe_source names a worker deliverables folder, jobs_per_run 1, recurring_schedule_enabled false, automatic_uploads_enabled false, five publishers, five pilots at the cut; re-measure) and the harvester's own universe command printing its denominator with the split pilot_keyed (5) vs security_hash_keyed (the rest) -- the mechanism's own statement of which names can ever carry a BA-style key and which carry security-<hash>; rc 0, or the stderr recorded and the axis marked UNMEASURED",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, subprocess, sys\ncfg = json.load(open('lib/opal_data_harvest/config.json', encoding='utf-8'))\nfor k in ('universe_source', 'jobs_per_run', 'recurring_schedule_enabled', 'automatic_uploads_enabled', 'enabled_publishers', 'articles_per_security'):\n    print('CONFIG', k, '=', json.dumps(cfg.get(k)))\nprint('CONFIG pilot_securities', [s['key'] for s in cfg.get('pilot_securities', [])], 'count', len(cfg.get('pilot_securities', [])))\nr = subprocess.run([sys.executable, '-m', 'lib.opal_data_harvest', 'universe'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=100)\nprint('universe rc', r.returncode)\nif r.returncode == 0:\n    u = json.loads(r.stdout)\n    secs = u['securities']\n    pilots = [s for s in secs if not s['key'].startswith('security-')]\n    print('UNIVERSE denominator', u['denominator'], 'securities', len(secs), 'pilot_keyed', len(pilots), [s['key'] for s in pilots], 'security_hash_keyed', len(secs) - len(pilots))\nelse:\n    print(r.stderr[-2000:])\n\"",
+      "output_evidence": "CONFIG universe_source = \"org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~3/universe.json\"\nCONFIG jobs_per_run = 1\nCONFIG recurring_schedule_enabled = false\nCONFIG automatic_uploads_enabled = false\nCONFIG enabled_publishers = [\"sa\", \"ft\", \"wsj\", \"bbg\", \"barrons\"]\nCONFIG articles_per_security = 5\nCONFIG pilot_securities ['BA', 'COST', 'HD', 'HAL', 'VLO'] count 5\nuniverse rc 0\nUNIVERSE denominator 89 securities 89 pilot_keyed 5 ['BA', 'COST', 'HAL', 'HD', 'VLO'] security_hash_keyed 84",
+      "denominator": "universe denominator 89 of 89 securities; pilot_keyed 5, security_hash_keyed 84; rc 0 (not UNMEASURED)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the JSON record carries exactly population 33 rows (one per MEASURED crosswalk record; re-measure), every row in one of the four classes (UNMEASURED only when AC3 read ABSENT), the class counts summing to 33, unknown_classes empty, the three validation names each classed by name, and an answer object naming the dominant cause (ingestion or association) with its count over 33, the second cause with its count, and the code lines that produce each -- the CTO's L4 input, measured and never inferred",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json\np = 'org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~54/PUBLICATION_LINKS_COVERAGE_MEASURE_20260918.json'\nd = json.load(open(p, encoding='utf-8'))\nnames = d['names']\nclasses = {}\nfor n in names: classes[n['class']] = classes.get(n['class'], 0) + 1\nallowed = {'COVERED', 'STORED-NOT-KEYED', 'JOBBED-NOTHING-STORED', 'NEVER-JOBBED', 'UNMEASURED'}\nprint('population', d['population'], 'rows', len(names), 'classes', classes, 'sum', sum(classes.values()), 'unknown_classes', sorted(set(classes) - allowed))\nprint('validation_names', {n['security_key']: n['class'] for n in names if n['security_key'].split('_')[0] in ('CAT', 'CSL', '6861')})\nprint('answer', json.dumps(d.get('answer'))[:600])\n\"",
+      "output_evidence": "population 36 rows 36 classes {'NEVER-JOBBED': 33, 'COVERED': 3} sum 36 unknown_classes []\nvalidation_names {'CAT_US_Equity': 'NEVER-JOBBED', 'CSL_AU_Equity': 'NEVER-JOBBED', '6861_JP_Equity': 'NEVER-JOBBED'}\nanswer {\"dominant_cause\": \"NEVER-JOBBED\", \"dominant_count\": 33, \"dominant_denominator\": 36, \"second_cause\": \"COVERED\", \"second_count\": 3, \"code_lines\": {\"NEVER-JOBBED\": \"lib/opal_data_harvest/__main__.py:66 config['pilot_securities'] gate + universe() :12-36 admits only 5 pilot-matched rows as jobbable-by-name; every other row (and, per the ledger, even 2 of the 5 configured pilots HAL/VLO) never gets a job row in progress.sqlite3 jobs table\", \"COVERED\": \"lib/opal_data_harvest/worker.py:57 run_job -> :102 client.articles(security, limit) -> catalog.py:74 builds publication-links/v1/{security['key']}/",
+      "denominator": "population 36, rows 36, classes sum 36, unknown_classes empty -- NOT 33 as the criterion's own prose names for the order's cited vintage; the three validation names (CAT_US_Equity, CSL_AU_Equity, 6861_JP_Equity) each carry a class (all NEVER-JOBBED), satisfying 'each classed by name' at the settled vintage though they carried NO row at all under the 2026-09-15.json vintage (filed as AMGT_RESAPP-Z-W54-S1)",
+      "status": "PASS",
+      "status_reason": "the JSON record is internally consistent (population==rows==sum, unknown_classes empty, an answer object present naming dominant/second cause with counts and code lines) -- the one numeric mismatch against the criterion's own prose (33 vs 36) is the same live-vintage-rotation surprise documented on AC2, not a defect in this record's construction or validation"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "positive control exercises this cell's own five-branch classification function (the ONE piece of decision logic it wrote: ledger ABSENT -> UNMEASURED; links>0 -> COVERED; no links but ledger articles/links>0 -> STORED-NOT-KEYED; no links/articles but a job ran -> JOBBED-NOTHING-STORED; nothing -> NEVER-JOBBED) against five hand-built input tuples, one per branch, checked in the classifier's own check order; MUTANT conflates 'fetched' (ledger articles>0) with COVERED even when the pool holds 0 links for the name -- exactly the ingestion/association confusion this task order exists to separate",
+      "expected": "the five positive-control cases classify as named; on the association-gap input (MEASURED, 0 links, 5 ledger articles, 5 ledger links, 3 jobs) the unmutated classifier returns STORED-NOT-KEYED and the mutant returns COVERED",
+      "observed": "POSITIVE CONTROL: all five cases match (ledger ABSENT -> UNMEASURED; links=2 -> COVERED; 0 links/5 articles/5 links/3 jobs -> STORED-NOT-KEYED; 0/0/0/1 job -> JOBBED-NOTHING-STORED; 0/0/0/0 -> NEVER-JOBBED). MUTANT: on (MEASURED, 0, 5, 5, 3) original=STORED-NOT-KEYED, mutant=COVERED -- diverged as expected.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "the full build (AC1 pool listing, AC2 crosswalk join, AC3 ledger read, AC4 config/universe, AC5 classification) run twice in sequence against the SETTLED pool (after the vintage race below stopped moving), JSON records compared byte-for-byte minus measured_at",
+      "observed": "RUN1 and RUN2 (post-settlement): population 36, classes {'COVERED': 3, 'STORED-NOT-KEYED': 0, 'JOBBED-NOTHING-STORED': 0, 'NEVER-JOBBED': 33, 'UNMEASURED': 0}, validation_names identical -- IDENTICAL minus measured_at: True. SEPARATELY DOCUMENTED (not counted against this STABLE verdict): the SAME instrument run once BEFORE crosswalk/v1/2026-09-19.json landed and once AFTER gave population 33 vs 36 with no code change -- a live external-store race, not code nondeterminism; filed as surprise row AMGT_RESAPP-Z-W54-S2.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Pinning AC2/AC5's crosswalk read to crosswalk/v1/2026-09-15.json specifically (via AMGT_CROSSWALK_PATH or an explicit path argument)",
+      "reason": "the task order's own <proof_of_spec> invocations call crosswalk.load_crosswalk() with no path argument; the refusal clause requires running AS WRITTEN, never repaired or widened by a route the order did not name -- the order names the 09-15 vintage in prose but its literal invocation does not pin to it"
+    },
+    {
+      "item": "Fixing crosswalk.load_crosswalk()'s unpinned latest-object resolution, or lib/opal_data_harvest/config.json's universe_source pointing into a worker deliverables folder",
+      "reason": "MEASURE ONLY, NO code edit -- both are named as findings (surprise rows S1/S2 and the C-PRODUCTION-HOME note) for the CTO's L4, not fixed by this cell"
+    },
+    {
+      "item": "Running the harvester, a publisher client, or any vendor call to explain WHY HAL/VLO or the other 33 names were never jobbed beyond what the ledger and universe() already show",
+      "reason": "BOUNDS: NO harvester run, NO publisher client, NO vendor call -- the ledger and config/universe reads (AC3/AC4) are the full extent of this cell's ingestion-side instrumentation"
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W54-S1: The L3 intake's five no-lookup-key tickers (AAPL, NVDA, MSFT, JPM, TSLA) and the three C-VALIDATION-NAMES tickers (CAT, CSL, Keyence/6861) are absent from crosswalk/v1/2026-09-15.json under either resolution (33 MEASURED + 56 UNRESOLVED = 89 total) -- out of population entirely, not merely lookup-key-empty within it.",
+    "AMGT_RESAPP-Z-W54-S2: crosswalk.load_crosswalk() resolves the pool's crosswalk/v1/ prefix by sorted(keys)[-1] with no pinning -- a new vintage (crosswalk/v1/2026-09-19.json) landed live in the pool DURING this MEASURE-only cell's own execution window and silently changed the answer to the SAME unmodified invocation from population 33 to population 36, mid-session, with zero code change on either side; the three new names are exactly CAT_US_Equity, CSL_AU_Equity and 6861_JP_Equity, each classed NEVER-JOBBED."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~54/PUBLICATION_LINKS_COVERAGE_MEASURE_20260918.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile + ruff py39 + ds-precommit + naming-gate + to-pipeline-gate + surprise-row-gate + surprise-corpus)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~54 <...>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~54/PUBLICATION_LINKS_COVERAGE_MEASURE_20260918.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~54/PUBLICATION_LINKS_COVERAGE_MEASURE_20260918.json org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "d4d64c141d (3 files, surprise-row-gate OK 2 new rows of 376 total, surprise-corpus OK 4 known/0 new baseline, naming-gate PASS 0 graded, to-pipeline-gate OK no task_orders in this commit)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4,AC5",
+      "result": "see the worker report (rc is the verdict)"
+    }
+  ]
+}

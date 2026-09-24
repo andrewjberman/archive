@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-106.b4-roster-domain-diagnosis",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "b2c0a06527d6a0744394cda107500b2d486edf16"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "40f01c2b085de7a532eef5315cdce2a86b46a058",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-106.b4-roster-domain-diagnosis.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~106",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~106/B4_ROSTER_DOMAIN_DIAGNOSIS.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "a read-only findings record, not a deployed artifact; answers Q-a1/Q-a2/Q-b with file:line@40f01c2b08 citations and a bounded 'what the next round would cut' section, no code change.",
+      "artifact_covered_by": ["AC0", "AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "one new row spliced textually into the append-only fenced JSON array (505 total, 504 pre-existing not re-graded): AMGT_RESAPP-Z-W106-S1; array re-parsed valid after the splice (505 rows, last id confirmed)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any other act: \"census before prefixes P objects O\" (measured at the cut: 21 top-level prefixes). Record P and O",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r106/census.py before",
+      "output_evidence": "census before prefixes 21 objects 1780",
+      "denominator": "21 of 21 top-level opal-data-harvest prefixes listed, 1780 objects summed across all of them (paginated, full listing)",
+      "status": "PASS",
+      "expect": "census before prefixes \\d+ objects \\d+",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"sections\" lists all four headings: Q-a1, Q-a2, Q-b and \"What the next round would cut\". \"citations\" is at least 1 per answered claim, and the count is recorded. Each of Q-a1, Q-a2 and Q-b carries an explicit ANSWER line (or UNDETERMINED with what would decide it)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"t=open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~106/B4_ROSTER_DOMAIN_DIAGNOSIS.md',encoding='utf-8').read(); print('sections', [h for h in ('Q-a1','Q-a2','Q-b','What the next round would cut') if h in t]); print('citations', t.count(' @'))\"",
+      "output_evidence": "sections ['Q-a1', 'Q-a2', 'Q-b', 'What the next round would cut']\ncitations 17",
+      "denominator": "4 of 4 required headings present; 17 ' @' citation markers counted across the file (each 'file:line @40f01c2b08'-style citation and 'msg/vintage @'-style reference); 3 of 3 questions (Q-a1, Q-a2, Q-b) each carry an explicit '**ANSWER (Q-...):**' line, none UNDETERMINED",
+      "status": "PASS",
+      "expect": "sections \\['Q-a1', 'Q-a2', 'Q-b', 'What the next round would cut'\\].*citations \\d+",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"emails 0 phone_like 0\" -- the findings carry no contact data",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"t=open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~106/B4_ROSTER_DOMAIN_DIAGNOSIS.md',encoding='utf-8').read(); import re; print('emails', len(re.findall(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}', t)), 'phone_like', len(re.findall(r'[+][0-9][0-9 ()-]{7,}', t)))\"",
+      "output_evidence": "emails 0 phone_like 0",
+      "denominator": "0 of however-many ' @' occurrences (17, all citation-form 'path:line @HASH' or 'msg NNNNN @time') match the email regex; 0 phone-like sequences found -- the whole file scanned",
+      "status": "PASS",
+      "expect": "emails 0 phone_like 0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"census after prefixes P objects O\", equal to AC0's P and O, and \"changed 0\" with no CHANGED line. The bucket is SHARED with scheduled producers, so a CHANGED line is not by itself this worker's write. Each one is attributed from its newest object's key and LastModified, and recorded with a row. It is a FAIL only if a changed object falls under a key this worker's scripts address. The git diff prints NOTHING: 0 code files changed. \"write_calls 0\" over every scratch script, so no script this worker ran can write to S3.",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r106/census.py after && python .scratch/r106/zero_writes.py && git diff --name-only d3ba12c64b HEAD -- lib integrations infra .tools portal && python -c \"import glob; fs=glob.glob('.scratch/r106/*.py'); print('scratch_scripts', len(fs), 'write_calls', sum(open(f,encoding='utf-8').read().count(w) for f in fs for w in ('put_object','copy_object','delete_object','upload_file','upload_fileobj')))\"",
+      "output_evidence": "census after prefixes 21 objects 1780\nprefixes 21 21 changed 0\n\nscratch_scripts 12 write_calls 0",
+      "denominator": "AC0/AC3 census: 21 of 21 prefixes both before and after, 1780 of 1780 objects both before and after; zero_writes: 21 keys compared in both snapshots, changed 0, no CHANGED line printed; git diff over lib/integrations/infra/.tools/portal between d3ba12c64b and HEAD: 0 files listed (blank line between zero_writes output and the scratch_scripts line IS that empty git-diff output); scratch scan: 12 of 12 .scratch/r106/*.py scripts scanned, write_calls 0 across all five write-verb tokens (put_object, copy_object, delete_object, upload_file, upload_fileobj)",
+      "status": "PASS",
+      "expect": "census after prefixes 21 objects 1780.*prefixes 21 21 changed 0.*scratch_scripts \\d+ write_calls 0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "N/A-SPEC-NAMES-NONE: this task order is a READ-ONLY diagnosis (comp-adversary DECLARED-NOT-APPLICABLE in the preflight; no code is written or changed) -- there is no decision logic of this worker's own authorship to plant a mutant against. The nearest thing to a discriminator is AC3's zero-write proof, which is a NEGATIVE control (no S3 write ever executed) rather than a mutatable positive assertion.",
+      "expected": "N/A -- no code artifact exists for this order to mutate.",
+      "observed": "Confirmed by AC3: 0 code files changed (git diff empty), 0 write-verb tokens across all 12 scratch scripts run this session, and the S3 census is byte-identical before/after (21 prefixes, 1780 objects, changed 0).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC0's census.py and AC2's load_source_object/build_roster read were each re-run more than once against the live bucket/live objects during this session (the before-census at AC0, a second full census at AC3, and the qa2_roster.py/qa2b_vendors.py reads were also re-derived independently via qb_final_subtraction.py's own fresh GET of the same silver row) with byte-identical results each time (same officer_count 0, same roster_reason string, same silver-row denominator 13/1, same verified_site.host).",
+      "observed": "census before == census after (21 prefixes, 1780 objects, 0 changed); load_source_object's returned label ('silver:filing_source:6861_JP_Equity:doc-1defdb68a7ffd3b7') and roster_reason text identical across the qa2_roster.py run and the qb_final_subtraction.py run; the filing_source silver-vendor split (sec 13/0, issuer-site 1/1) reproduced identically in qa2b_vendors.py and qb_final_subtraction.py's independent construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any Lusha call, any vendor call, reading the Lusha key, any S3 put/copy/delete, any Lambda invoke, and any --write CLI flag",
+      "reason": "BOUNDS: READ-ONLY by rule. AC3 proves 0 S3 writes across all top-level prefixes of opal-data-harvest and 0 code files changed; no vendor client was ever imported or called."
+    },
+    {
+      "item": "Cutting or proposing actual code for the 3 items in 'What the next round would cut'",
+      "reason": "RULED: 'A code fix is cut only on what the diagnosis finds, in the next round' (CTO msg 24216). This order's deliverable is findings only; the code-cut list names files and the decision each would need, nothing is implemented."
+    },
+    {
+      "item": "A literal S3 object or table named 'the model block' for Q-b",
+      "reason": "No such object exists in opal-data-harvest (21 top-level prefixes, none 'model/'); covered via the crosswalk record's model_key/identity sub-block instead, and filed as surprise row AMGT_RESAPP-Z-W106-S1 rather than silently substituted."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W106-S1: Q-b's cell text names 'the model block' as an object to cover for 6861's domain fields; no S3 tier or object literally named 'model' exists in opal-data-harvest (21 top-level prefixes measured), so this worker covered the crosswalk record's model_key/identity sub-block as the nearest reading -- it carries no URL/host field either way, so Q-b's answer is unaffected."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~106/B4_ROSTER_DOMAIN_DIAGNOSIS.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate: py_compile + ruff py39 + ds-precommit + naming-gate + to-pipeline-gate + surprise-row-gate + surprise-corpus)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~106 <0.9.0_WK_AMGT_RESAPP~106@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~106/B4_ROSTER_DOMAIN_DIAGNOSIS.md org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~106/AMGT_RESAPP.TO-AMGT-rk-106.b4-roster-domain-diagnosis.proof_of_spec.json org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-106.b4-roster-domain-diagnosis.md",
+      "result": "see the worker report (rc / commit hash is the record)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC0,AC1,AC2,AC3",
+      "result": "see the worker report (rc is the verdict)"
+    }
+  ]
+}

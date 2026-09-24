@@ -1,0 +1,82 @@
+{
+  "written_before_run_at": "2026-09-23T00:22:24Z",
+  "events_jsonl_baseline_lines": 233,
+  "events_jsonl_lines_after": 281,
+  "auth_verdicts": {
+    "sa": {
+      "status": "SAVED-SESSION-PRESENT-AGE-UNVERIFIED",
+      "reason": "local session file present (not decrypted, no network); mtime 2026-09-15T04:37:16.354400+00:00, age 187.7h -- freshness/validity only knowable from the live run's own auth_check, never a local stat"
+    },
+    "bbg": {
+      "status": "SAVED-SESSION-PRESENT-AGE-UNVERIFIED",
+      "reason": "local session file present (not decrypted, no network); mtime 2026-09-15T04:48:50.562473+00:00, age 187.6h -- freshness/validity only knowable from the live run's own auth_check, never a local stat"
+    },
+    "ft": {
+      "status": "SAVED-SESSION-PRESENT-AGE-UNVERIFIED",
+      "reason": "local session file present (not decrypted, no network); mtime 2026-09-15T03:26:43.928091+00:00, age 188.9h -- freshness/validity only knowable from the live run's own auth_check, never a local stat"
+    },
+    "wsj": {
+      "status": "SAVED-SESSION-PRESENT-AGE-UNVERIFIED",
+      "reason": "local session file present (not decrypted, no network); mtime 2026-09-15T03:27:17.812194+00:00, age 188.9h -- freshness/validity only knowable from the live run's own auth_check, never a local stat"
+    },
+    "barrons": {
+      "status": "SAVED-SESSION-PRESENT-AGE-UNVERIFIED",
+      "reason": "local session file present (not decrypted, no network); mtime 2026-09-15T14:47:45.381916+00:00, age 177.6h -- freshness/validity only knowable from the live run's own auth_check, never a local stat"
+    }
+  },
+  "live_run_invocations": 1,
+  "invocation": "python -m lib.opal_data_harvest run --runtime-root <main-worktree>/.runtime/opal-data-harvest --publishers sa bbg ft wsj barrons --retrieval-mode backfill --floor 2026-01-01 --security-json lenovo.security.json --bbg-symbol-probe --harvest-grammar --max-jobs 5",
+  "invocation_at": "2026-09-23T00:23:01Z (events_delta's first http event; started immediately after plan.json)",
+  "rc": 2,
+  "bbg_symbol_probe_verdict": "UNRESOLVED-CHALLENGED",
+  "bbg_symbol_probe_reason": "VerificationRequired: Publisher verification challenge from www.bloomberg.com -- a real vendor call, caught cleanly by the Phase 0b fix, the run continued into Worker.run() for all five publishers immediately afterward (proven below: every publisher has a job_finished event).",
+  "publisher_outcomes": {
+    "sa": {
+      "status": "upstream_unavailable",
+      "reason": "HTTP 502 from seekingalpha.com after 24 accepted / 6 rejected (rejection reasons: short_or_partial_body, company_not_mentioned); the upstream 502 stopped further paging, not a code defect. 3 of the 24 accepted were genuinely NEW (raw_bytes captured, harvest_raw_outbox rows written); the other 21 were served via the legacy catalog's storage_reused replay from the FIRST attempt's prior fetch (HVST-h-10's earlier spend), so harvest mode correctly wrote bronze only for the 3 new ones.",
+      "accepted": 24,
+      "rejected": 6,
+      "planned_listing_pages": 25,
+      "actual_listing_pages": "unknown-exact (not separately counted by run_job; 24 accepted + 6 rejected articles fetched before the 502)"
+    },
+    "bbg": {
+      "status": "error",
+      "reason": "HTTPError (verification challenge on the FIRST article/listing fetch inside Worker.run(), a SEPARATE occurrence from the CLI probe's own challenge above). This triggered a REAL verification-repair attempt (event verification_started, verification_repairs=1) -- an UNPLANNED/UNEXPECTED call beyond the plain fetch, recorded here per the CTO's residual. The repair did not complete before the job's own retry budget (attempt=1) re-raised, ending the job with status=error.",
+      "accepted": 0,
+      "rejected": 0,
+      "planned_listing_pages": 25,
+      "actual_listing_pages": 0,
+      "unexpected_calls": ["verification_started (real browser-based verification repair attempt, publisher=bbg, artifact=.../verification/20260923T002752Z-bbg-6675554d)"]
+    },
+    "ft": {
+      "status": "request_rejected",
+      "reason": "HTTP 403 from www.ft.com/search -- a real rejection, no verification challenge marker matched, so no repair was attempted per ft's own contract (ft is not in the {bbg, barrons} verification-repair set).",
+      "accepted": 0,
+      "rejected": 0,
+      "planned_listing_pages": 25,
+      "actual_listing_pages": 0
+    },
+    "wsj": {
+      "status": "complete_candidates",
+      "reason": "11 accepted, 0 rejected. The saved session had expired (AuthExpired), triggering a REAL re-authentication (events reauth_started/reauth_succeeded, network_auth_corroborated true, auth_refreshes=1) -- an UNPLANNED/UNEXPECTED call beyond the plain fetch, recorded here per the CTO's residual. The replayed job then succeeded fully.",
+      "accepted": 11,
+      "rejected": 0,
+      "planned_listing_pages": 25,
+      "actual_listing_pages": "unknown-exact (11 accepted articles fetched; paging stopped on its own bound, not an error)",
+      "unexpected_calls": ["reauth_started/reauth_succeeded (real canonical-harvester re-login, publisher=wsj, artifact=.../auth/20260923T002802Z-wsj-dda9b9aa, network_auth_corroborated true)"]
+    },
+    "barrons": {
+      "status": "request_rejected",
+      "reason": "The saved session had ALSO expired (AuthExpired), triggering a REAL re-authentication (events reauth_started/reauth_succeeded, network_auth_corroborated true, auth_refreshes=1) -- an UNPLANNED/UNEXPECTED call beyond the plain fetch, recorded here per the CTO's residual. The replayed job then hit 'Publisher verification challenge from www.barrons.com' on its own first real attempt (attempt=1 after the reauth replay, so the retry/repair path was not re-entered) and ended request_rejected.",
+      "accepted": 0,
+      "rejected": 0,
+      "planned_listing_pages": 25,
+      "actual_listing_pages": 0,
+      "unexpected_calls": ["reauth_started/reauth_succeeded (real canonical-harvester re-login, publisher=barrons, artifact=.../auth/20260923T003258Z-barrons-028229ab, network_auth_corroborated true)"]
+    }
+  },
+  "unexpected_or_unplanned_calls_summary": "THREE unplanned/unexpected calls occurred beyond the plain listing/article fetch, per the CTO's residual (sessions ~7.6 days old, one already challenged): bbg's verification-repair attempt (did not complete), wsj's re-authentication (succeeded, then wsj's job completed), and barrons's re-authentication (succeeded, then barrons's job was still rejected on the replay). None of these is a governance breach -- each is the harvester's own existing, legitimate retry/repair mechanism firing because the 7.6-day-old sessions were genuinely stale -- but each is a cost to this act's yield (extra real vendor contact beyond the plan's five plain fetches) and is recorded here rather than absorbed into the plain per-publisher accounting above.",
+  "harvest_grammar_engaged": true,
+  "harvest_grammar_note": "Confirmed: harvest_raw_outbox carries 3 rows for sa (its 3 genuinely-new accepted articles) and 11 for wsj (all of wsj's accepted articles, none of them storage_reused); harvest_listing_outbox carries 2 rows for wsj. bbg/ft/barrons wrote nothing (0 accepted for all three).",
+  "no_network_evidence_note": "Not applicable this round -- Phase 1 IS the authorised live vendor-call invocation; every http event above is real and expected under the granted word, except the three unplanned/unexpected calls named above, which are named rather than absorbed."
+}

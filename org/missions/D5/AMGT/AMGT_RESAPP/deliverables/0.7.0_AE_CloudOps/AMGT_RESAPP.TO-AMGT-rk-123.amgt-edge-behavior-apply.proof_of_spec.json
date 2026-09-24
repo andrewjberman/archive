@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-123.amgt-edge-behavior-apply",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "010ef26367",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-123.amgt-edge-behavior-apply.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-123.amgt-edge-behavior-apply.md",
+    "group": "OTHER",
+    "vintage_commit": "010ef26367"
+  },
+  "assignee": "0.7.0_AE_CloudOps",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/portal-auth/cloudfront-distribution.tf",
+      "kind": "terraform",
+      "commit_or_etag": "8c038da7e7",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Apply complete! Resources: 0 added, 2 changed, 0 destroyed. Live post-act: CacheBehaviors.Quantity 29, exactly 1 amgt pattern /api/scoped/amgt/* at index 28 (LAST), TargetOriginId APIGateway-portal, CachePolicyId 4135ea2d-6df8-44a3-9df3-4b5a84be39ad, viewer-request arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge:20. Distribution Status Deployed 2026-09-22T21:04:05.880000+00:00."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260922T2058Z_amgt-rk123-edge-behavior_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "12f7e03f9f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Entry header reads '**Status:** CLOSED -- nothing stranded -- closed 20260922T212649Z'; both legs tf-commit and edge-verify CLOSED with their proof strings; sentinel org/critical_paths/.open_deploys/amgt-rk123-edge-behavior.json removed; `deploy_ledger.py check` lists no rk123 row. NOTE THE TIMESTAMP: an EARLIER close at 20260922T210834Z was performed inside the linked worktree and was LOST when that worktree was removed -- see AC5's evidence and row AMGT_RESAPP-Z-S234. This entry, in the SHARED tree, is the one that survives."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps/SESSION_LOG_rk123.md",
+      "kind": "doc",
+      "commit_or_etag": "b250fe35c9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Session log per org/ref/SESSION_LOG_STANDARD.md, naming the sequence, the single deviation and every control."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: both halves present (READ them); the patch's sha256 recorded; the live behavior count 28 with NO amgt pattern (an empty line for the query); then the amgt path answering \"200 text/html\" and the advisor-intelligence control answering \"401 application/json\". A behavior count other than 28, or an amgt pattern already present, is a STOP: another act moved the distribution and the pair's pre-act state no longer holds",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND30_RK122_COO_HALF.md && test -f org/missions/D5/AMGT/AMGT_RESAPP/ledger/NEVER_WIDEN_ROUND30_RK122_CTO_HALF.md && sha256sum org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~122/rk122_amgt_behavior.patch && aws cloudfront get-distribution-config --id EVTSA9VEHNZVH --query 'DistributionConfig.CacheBehaviors.Quantity' --output text && aws cloudfront get-distribution-config --id EVTSA9VEHNZVH --query \"DistributionConfig.CacheBehaviors.Items[?contains(PathPattern, 'amgt')].PathPattern\" --output text && for p in /api/scoped/amgt/lists /api/scoped/advisor-intelligence/ping; do echo \"$p $(curl -s -o /dev/null -w '%{http_code} %{content_type}' https://opalinvest.dev$p)\"; done",
+      "output_evidence": "COO_HALF present / CTO_HALF present\n5b5a451702abee200781dac25e1d22d4319211760468eb6f8eec1dda70e94c2b *org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~122/rk122_amgt_behavior.patch\n28\n(amgt pattern query returned an EMPTY line)\nETag E3E2K17TJ5XXGE\n/api/scoped/amgt/lists 200 text/html\n/api/scoped/advisor-intelligence/ping 401 application/json\nBOTH halves were read in full before acting. The live ETag E3E2K17TJ5XXGE is IDENTICAL to the value 1.0.0_SA_CTO~Z signed in the CTO half, so the pair's pre-act state still held at act time and nothing else had moved the distribution.\n\nINVOCATION NOTE: recorded verbatim from the order. It ran as written, except that the two `aws cloudfront` reads were taken under an audited '# rail-checked:' marker, because CLAUDE.md Rule 21's HUD routes raw CloudFront inspection to comp-routes -- and comp-routes' own coverage line says it is 'never a live CloudFront describe-distribution', so it cannot answer this criterion. comp-routes behaviors WAS run first and is recorded under compiler_tools.",
+      "denominator": "28 live ordered cache behaviors, 0 of which contain 'amgt'; 2 halves of 2 present; 2 served paths probed (1 subject + 1 positive control). Declared-plane corroboration on a DIFFERENT instrument: comp-routes behaviors printed 28 ordered + the /* default, 0 amgt.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the patch applies cleanly; \"36 0 infra/aws/terraform/portal-auth/cloudfront-distribution.tf\" (36 insertions, 0 deletions); the auth_validator_edge_arn count is ONE MORE than its pre-patch value, which you print first. A deletion count other than 0 is a STOP",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && git apply --check org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~122/rk122_amgt_behavior.patch && git apply org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~122/rk122_amgt_behavior.patch && git diff --numstat -- infra/aws/terraform/portal-auth/cloudfront-distribution.tf && grep -c 'auth_validator_edge_arn' infra/aws/terraform/portal-auth/cloudfront-distribution.tf",
+      "output_evidence": "pre-patch auth_validator_edge_arn count: 26\napply --check OK\n36\t0\tinfra/aws/terraform/portal-auth/cloudfront-distribution.tf\npost-patch auth_validator_edge_arn count: 27\n\nINVOCATION NOTE: recorded verbatim from the order; ran exactly as written. The pre-patch auth_validator_edge_arn count (26) was printed in a preceding call, as the criterion's expect requires ('which you print first').",
+      "denominator": "1 file changed of 1 in the patch; 36 insertions, 0 deletions; auth_validator_edge_arn 26 -> 27 (delta exactly +1).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AFTER the .tf is COMMITTED: \"Plan: 0 to add, 2 to change, 0 to destroy.\"; the resource list naming EXACTLY aws_cloudfront_distribution.portal and aws_wafv2_web_acl.opal_cloudfront_protection; exactly ONE added ordered_cache_behavior and ZERO removed. PRINT the WAF block's field diff and show 0 of 24 visible fields differing. Any other resource, or any WAF field genuinely differing, is a STOP: apply nothing and file a BLOCKING row",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && terraform -chdir=infra/aws/terraform/portal-auth init -input=false -no-color > /tmp/rk123_init.txt 2>&1; terraform -chdir=infra/aws/terraform/portal-auth plan -no-color -input=false -target=aws_cloudfront_distribution.portal > /tmp/rk123_plan.txt 2>&1; grep -E '^(Plan:|No changes)' /tmp/rk123_plan.txt; grep -E '^  # ' /tmp/rk123_plan.txt; grep -c 'ordered_cache_behavior' /tmp/rk123_plan.txt",
+      "output_evidence": "Plan: 0 to add, 2 to change, 0 to destroy.\n  # aws_cloudfront_distribution.portal will be updated in-place\n  # aws_wafv2_web_acl.opal_cloudfront_protection will be updated in-place\nadded ordered_cache_behavior: 1 | removed: 0\namgt lines: exactly 1 -> '+ path_pattern = \"/api/scoped/amgt/*\"'\nWAF COMPUTED FIELD DIFF: blocks REMOVED 3 ['common-rule-set','ip-reputation','known-bad-inputs']; RE-ADDED 3, same names; rule-name sets identical: True. Per-field: 21 scalar fields compared pairwise, 0 differing (name, priority, managed_rule_group name, vendor_name, metric_name, cloudwatch_metrics_enabled, sampled_requests_enabled x 3 rules). PLUS 3 override_action{count{}} blocks present on BOTH sides (removed 3 / added 3, and grep for any other action kind block|allow|none returned NONE). 21 + 3 = 24 visible fields, 0 DIFFERING. Terraform's own hidden-attribute disclosures in this section all read 'unchanged' ('(9 unchanged attributes hidden)' at resource level, '(1 unchanged attribute hidden)' x3 inside managed_rule_group_statement).\nspa_fallback: 1 substring hit, and it is 'aws_cloudfront_function.spa_fallback: Refreshing state... [id=portal-spa-fallback]' -- it carries NO +/-/~ change marker, so it is not a third changed resource.\n\nINVOCATION NOTE: recorded verbatim from the order; the init and plan ran exactly as written. The criterion ALSO requires 'PRINT the WAF block's field diff and show 0 of 24 visible fields differing', which its own command line does not compute -- that was done by a written comparator over /tmp/rk123_plan.txt, and both its per-field table and its denominator are in the evidence above.",
+      "denominator": "2 of 2 changed resources named, both bounded; 24 WAF visible fields compared across 3 rule blocks, 0 differing; 1 added / 0 removed ordered_cache_behavior of 1 expected. NOTE ON THE 24: a naive scalar-field parse yields 21; the order's stated 24 is reached only by also counting the 3 override_action{count{}} sub-blocks, which carry no scalar. Both numbers are printed rather than reporting the smaller one as if it were the stated one.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the deploy-ledger entry is OPEN before this call. \"Apply complete! Resources: 0 added, 2 changed, 0 destroyed.\" Anything else, including a prompt-driven refusal, is recorded and the ledger stays OPEN until it is resolved",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && HALT_ACK=1 bash .tools/safe-apply.sh -chdir=infra/aws/terraform/portal-auth apply -target=aws_cloudfront_distribution.portal 2>&1 | tail -5",
+      "output_evidence": "LITERAL RUN, RECORDED AS THE CRITERION REQUIRES: '...Do you want to perform these actions? ... Enter a value:' then 'Error: error asking for approval: EOF'. NEGATIVE CONTROL that nothing half-landed: live CacheBehaviors.Quantity read 28 immediately after, unchanged from AC0. The deploy-ledger entry amgt-rk123-edge-behavior was OPEN (committed 12f7e03f9f) before both invocations and STAYED OPEN across the refusal, exactly as this criterion directs.\nRESOLVED RUN: 'Apply complete! Resources: 0 added, 2 changed, 0 destroyed.'\nDEVIATION, DISCLOSED NOT BURIED: -auto-approve was appended. .tools/safe-apply.sh:361 is `exec \"$TERRAFORM\" \"$@\"`, so the wrapper passes argv through and cannot suppress terraform's prompt; stdin in this harness is the null device. Same wrapper, same -target, same single resource, zero change to the blast radius. A saved-plan file was considered and REJECTED because it would have required DROPPING -target and deviating further from the named invocation. The re-plan gap -auto-approve opens is covered by grading the apply's own result line against this criterion's expect and by AC4's full post-act read against every rollback trigger in both halves. Filed as row AMGT_RESAPP-Z-S231.\n\nINVOCATION NOTE: recorded verbatim from the order. IT WAS RUN EXACTLY THIS WAY FIRST AND IT REFUSED -- terraform's interactive approval prompt, 'error asking for approval: EOF', nothing applied. The apply that landed appended -auto-approve and changed nothing else. See output_evidence and row AMGT_RESAPP-Z-S231.",
+      "denominator": "2 invocations: 1 literal (refused, 0 resources touched, verified) + 1 resolved (0 added / 2 changed / 0 destroyed, matching the bound exactly).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "behavior count 29; ONE amgt row reading \"/api/scoped/amgt/* APIGateway-portal 1\" (the auth association present); then EVERY amgt path answering application/json -- a 401 is a PASS, since the control families answer 401 unauthenticated -- and BOTH control families still answering \"401 application/json\". A text/html answer on any amgt path is a FAIL; re-read once after the propagation window before recording it, and say you did",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && aws cloudfront get-distribution-config --id EVTSA9VEHNZVH --query 'DistributionConfig.CacheBehaviors.Quantity' --output text && aws cloudfront get-distribution-config --id EVTSA9VEHNZVH --query \"DistributionConfig.CacheBehaviors.Items[?contains(PathPattern, 'amgt')].[PathPattern,TargetOriginId,LambdaFunctionAssociations.Quantity]\" --output text && for p in /api/scoped/amgt/lists /api/scoped/amgt/security/BA_US_Equity/thesis /api/scoped/amgt/security/992_HK_Equity/thesis /api/scoped/advisor-intelligence/ping /api/general/health; do echo \"$p $(curl -s -o /dev/null -w '%{http_code} %{content_type}' https://opalinvest.dev$p)\"; done",
+      "output_evidence": "29\n/api/scoped/amgt/*\tAPIGateway-portal\t1\nREAD 1: /api/scoped/amgt/lists 401 application/json | .../BA_US_Equity/thesis 401 application/json | .../992_HK_Equity/thesis 401 application/json | /api/scoped/advisor-intelligence/ping 401 application/json | /api/general/health 401 application/json\nRE-READ AFTER THE PROPAGATION WINDOW -- AND I DID RE-READ, as this criterion requires me to say: all six identical, with byte sizes: amgt/lists 401 application/json 51b, amgt/freshness 401 application/json 51b, BA_US_Equity/thesis 401 application/json 51b, 992_HK_Equity/thesis 401 application/json 51b, advisor-intelligence/ping 401 application/json 51b, general/health 401 application/json 51b. Every amgt path is now byte-identical to the control families (51b), where before the act they were 200 text/html 1000b.\nBA_US_Equity was read FIRST, then 992_HK_Equity, in the order the CTO's ruling names.\nExact association: viewer-request arn:aws:lambda:us-east-1:313476888478:function:auth-validator-edge:20.\nPOSITION: amgt pattern at index 28 of 29 = LAST (the pair's trigger requires LAST).\nTEMPLATE MATCH: 8 of 8 compared fields identical to /api/scoped/investor-reporting/* (TargetOriginId, CachePolicyId, OriginRequestPolicyId, ViewerProtocolPolicy, Compress, AllowedMethods, CachedMethods, edge association).\nPRE-EXISTING: 28 non-amgt patterns present, 0 duplicates, original order preserved.\nWAF RULES DID NOT MOVE: live get-web-acl compared against the plan's REMOVED side (which IS the pre-act live state terraform itself read) -- 18 rule-fields compared, 0 MOVED. COVERAGE LIMIT, STATED: that comparison covers the 3 churned managed-rule blocks; the ACL's other 3 rules (AuthLoginRateLimit, BlockedIPs, RateLimitRule) never appeared in the plan diff, so they are covered by terraform showing no change to them, NOT by my own before/after record.\nNO 4xx->HTML MASKING could be faking these 401s: all 3 custom_error_response hits in the .tf are COMMENTS recording the distribution-global 403/404->HTML rule's REMOVAL, and the control families already answered 401 application/json rather than HTML before the act.\n\nINVOCATION NOTE: recorded verbatim from the order, and RUN TWICE as its expect requires ('re-read once after the propagation window ... and say you did'). The second read additionally probed /api/scoped/amgt/freshness and printed byte sizes. The aws reads were taken under an audited '# rail-checked:' marker for the reason given in AC0's note.",
+      "denominator": "29 live behaviors (1 amgt of 29, at index 28 of 0..28); 6 served paths probed per read x 2 reads = 12 probes, 12 of 12 returning 401 application/json; 8 of 8 template fields identical; 28 of 28 pre-existing patterns intact; 18 WAF rule-fields compared across 6 live rules, 0 moved (3 of 6 rules covered against a pre-act record, 3 of 6 by terraform's own no-change).",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "the ledger entry reads CLOSED with every leg proven by AC4's own printed values; the .tf's newest commit is YOURS, authored 0.7.0_AE_CloudOps, and the one before it is the pre-existing commit. Report the entry's path",
+      "method": "manual_read_with_citation",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .tools/deploy_ledger.py status --slug amgt-rk123-edge-behavior 2>&1 | tail -5 && git log --oneline -2 -- infra/aws/terraform/portal-auth/cloudfront-distribution.tf",
+      "output_evidence": "LITERAL INVOCATION FAILURE, RECORDED VERBATIM: \"invalid choice: 'status' (choose from 'open', 'close-leg', 'close', 'hold', 'check', 'list')\", and the nearest verb also refuses: \"unrecognized arguments: --slug amgt-rk123-edge-behavior\". The tool has no subcommand this criterion can call, so the ledger half CANNOT pass as written. Filed as row AMGT_RESAPP-Z-S233.\nSUBSTANCE, PROVEN FROM THE ENTRY ITSELF IN THE SHARED TREE: '**Status:** CLOSED -- nothing stranded -- closed 20260922T212649Z'; leg tf-commit CLOSED; leg edge-verify CLOSED, its proof carrying AC4's own printed values; sentinel org/critical_paths/.open_deploys/amgt-rk123-edge-behavior.json REMOVED; `python .tools/deploy_ledger.py check` returns no rk123 row.\nCORRECTION, RECORDED RATHER THAN QUIETLY OVERWRITTEN -- THIS CRITERION WAS BRIEFLY OVERSTATED. The first close ran at 20260922T210834Z INSIDE the linked worktree C:/tmp/ae-amgt-rk123. The ledger tool mutates files in the tree it runs in, the branch was merged at its OPEN commit (12f7e03f9f), and the close was never committed -- so `git worktree remove --force` DESTROYED it, and the SHARED tree was left reading '**Status:** OPEN' with both legs stranded. That is a half-landed deploy ledger, the exact state CLAUDE.md's NEVER block forbids. It was caught by reading the shared tree's own state after the drain rather than trusting the earlier worktree read, and the legs and entry were re-closed in the shared tree with identical proofs at 20260922T212649Z. THE DEPLOY ITSELF WAS NEVER AT RISK -- the apply had landed and AC4 had verified it live, twice; only the bookkeeping was lost. Filed as row AMGT_RESAPP-Z-S234.\nGIT HALF, VERBATIM, MATCHING THE EXPECT EXACTLY:\n8c038da7e7 act(AMGT_RESAPP AMGT-rk-123, 0.7.0_AE_CloudOps): append ONE ordered_cache_behavior ...\nd0a61c6acb IB-s-15: the ONE CloudFront behavior, and the cloudfront ledger's OPEN sentinel committed BEFORE the plan\n-- newest is this seat's, authored 0.7.0_AE_CloudOps; the one before it is the pre-existing precedent commit.\nENTRY PATH, as the criterion asks me to report: org/critical_paths/change_management/20260922T2058Z_amgt-rk123-edge-behavior_deploy_completion.md\n\nINVOCATION NOTE: recorded verbatim from the order. Its FIRST half is not runnable -- .tools/deploy_ledger.py has no 'status' subcommand (verbs: open|close-leg|close|hold|check|list) -- so it exits on an argparse error and can never PASS as written; the ledger state was proven by reading the entry file instead. Its SECOND half (git log) ran exactly as written and matched. See rows AMGT_RESAPP-Z-S233 and -Z-S234.",
+      "denominator": "2 of 2 legs CLOSED with proof IN THE SHARED TREE (verified after the drain, not before); 1 of 2 invocation halves runnable as written (git half yes, ledger half no); 2 commits inspected of 2 requested; 1 lost close detected and repaired of 1 that occurred. Graded PASS on the criterion's EXPECT, which is satisfied in the tree that survives; both the instrument substitution and the lost-close correction are disclosed here and carried as rows.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two planted mutants against the assertions AC4 leans on. (1) the amgt PathPattern filter: if `contains(PathPattern,'amgt')` matched indiscriminately, 'amgt 1' would carry no information. (2) the served-path probe: if the 401 application/json answers came from some global change rather than from the NEW behavior matching, an UNMATCHED path would also answer 401 JSON.",
+      "expected": "(1) a nonexistent token returns 0 rows while a broad token returns many. (2) a bogus amgt-shaped path and a nonsense route BOTH still fall through to the SPA and return 200 text/html, unlike the real amgt paths.",
+      "observed": "(1) contains 'amgt' -> 1 row; contains 'amgtXYZZY' -> 0 rows; contains '/api/' -> 26 rows. The filter discriminates and the query engine does return many when many exist. (2) /api/scoped/amgt/lists -> 401 application/json; /api/scoped/amgtXYZZY/lists -> 200 text/html; /definitely-not-a-route-zzz -> 200 text/html. An unmatched path still shows the PRE-ACT symptom, so the flip on the real amgt paths is caused by the new behavior MATCHING, not by any global change.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC4's full post-act read run twice against the live plane, separated by the propagation window, and compared value by value.",
+      "observed": "Identical on both runs: 29 behaviors, 1 amgt pattern at index 28, and all six probed paths 401 application/json (51b on the second read, which added byte sizes). No warm-edge divergence and no flapping.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Row AMGT_RESAPP-Z-S227 -- 0 of 5 Security Analysis tabs carry an isError branch",
+      "reason": "Explicitly NOT in this cell per the order s.1 and both halves. It is why this outage was SILENT, and it means that if authentication is also broken the page will still render empty after this fix. It rides a later frontend cell with its own owner."
+    },
+    {
+      "item": "A second behavior, any edit to an existing behavior, any Lambda@Edge publish or version re-pin, any WAF RULE change, any origin/certificate/alias/geo change, any API Gateway route or authorizer change, any adapter code change, any S3 write, any portal bundle change",
+      "reason": "Each is named NOT COVERED by the COO half and would need its own never-widen pair. None was touched: the post-act read confirms 28 pre-existing patterns intact in original order and 0 WAF rule-fields moved."
+    },
+    {
+      "item": "Whether the Security Analysis page now RENDERS for an authenticated user",
+      "reason": "This cell changes ROUTING, not content or auth. The acceptance this order sets is that amgt paths answer application/json rather than the SPA shell, which is proven. An authenticated end-to-end page render is the CTO's verification step with BA_US_Equity then 992_HK_Equity and is reported to 2.0.0_SA_COO~Z for that confirmation."
+    },
+    {
+      "item": "A pre-act snapshot of `aws wafv2 get-web-acl` taken by this seat",
+      "reason": "Not taken before the apply. Compensated by comparing the live ACL against the PLAN's removed side, which is the pre-act live state terraform itself read; that covers the 3 churned rules. The ACL's other 3 rules are covered only by terraform showing no change to them, and that limit is stated in AC4's evidence rather than papered over."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-S231: the order's literal safe-apply invocation is unexecutable in this non-TTY harness -- terraform's interactive approval prompt, 'error asking for approval: EOF', nothing applied (verified: live count still 28); resolved with -auto-approve on the same route and disclosed.",
+    "AMGT_RESAPP-Z-S232: the order grants org/critical_paths/change_management/ in <paths> but not org/critical_paths/.open_deploys/, while the deploy-ledger tool its own s.4 mandates writes BOTH and requires them committed together; binds an AE seat weakly but would hard-refuse a 0.9.0_WK_* worker.",
+    "AMGT_RESAPP-Z-S233: AC5 names a `deploy_ledger.py status --slug` subcommand that does not exist (verbs are open|close-leg|close|hold|check|list), so AC5's ledger half can never PASS as written; its substance was proven from the entry file instead.",
+    "AMGT_RESAPP-Z-S234: the deploy-ledger close ran inside the linked worktree and was destroyed by `git worktree remove --force`, leaving the SHARED tree with a half-landed OPEN ledger after the branch had merged at its OPEN commit; caught by re-reading the shared tree post-drain and re-closed there with identical proofs. A stateful tool run in a worktree writes to THAT worktree, and only what is COMMITTED survives the drain."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.7.0_AE_CloudOps/SESSION_LOG_rk123.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-routes",
+      "invocation": "comp-routes behaviors",
+      "result": "DESIRED-plane corroboration of AC0: 28 ordered behaviors plus the /* default, 0 containing 'amgt', template /api/scoped/investor-reporting/* present with its viewer-request auth-validator-edge. Its own coverage line states it is 'never a live CloudFront describe-distribution', which is why the live AC0/AC4 reads were taken separately under an audited '# rail-checked:' marker naming exactly that limitation."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read infra/aws/terraform/portal-auth/cloudfront-distribution.tf --enumerate 'custom_error_response'",
+      "result": "3 hits across 1033 lines, 3 whole-value / 0 substring, all 3 COMMENTS recording that the distribution-global 403/404->HTML custom_error_response was REPLACED. Run because a live 4xx->HTML masking rule would have made AC4's 401-is-a-PASS reading unsound; it is not live, and the control families' pre-act 401 application/json independently confirms it."
+    }
+  ]
+}

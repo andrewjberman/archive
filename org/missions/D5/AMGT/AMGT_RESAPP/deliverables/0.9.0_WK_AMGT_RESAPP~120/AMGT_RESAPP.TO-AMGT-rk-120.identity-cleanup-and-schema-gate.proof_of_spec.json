@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-120",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.md",
+    "group": "OTHER",
+    "vintage_commit": "c69c628c9f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "bf5c280e48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~120",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/add_security.py",
+      "kind": "script",
+      "commit_or_etag": "a771ac74fa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CODE ONLY per BOUNDS; no S3 write, no crosswalk publish. ISSUER AMENDMENT 1: line 180's crosswalk.write_pool() call (inside _persist_registration_and_pool, called from main() when --write-pool is set) now passes document=document -- the SAME document object built two lines above at :175 via crosswalk.build_crosswalk(). This is the actual production entry point rk-113's amendments shipped through, now gated the same way crosswalk.py's own --write-pool CLI already was."
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk_write_validates.py",
+      "kind": "test",
+      "commit_or_etag": "a771ac74fa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TWO NEW arms per ISSUER AMENDMENT 1: NonconformingDocumentRaisesThroughAddSecurityPath::test_nonconforming_document_raises_through_add_security_path (a registration whose identity carries an unknown key, run through add_security._persist_registration_and_pool with boto3.client stubbed via mock.patch, raises ValueError containing 'REFUSED' and lands 0 puts on the stub) and ConformingDocumentStillWritesThroughAddSecurityPath::test_conforming_document_still_writes_through_add_security_path (the same path with a conforming identity performs exactly 1 put, put_performed True). The 4 pre-existing arms are unchanged. 4 + 2 = 6, 0 removed.",
+      "artifact_covered_by": ["AC2", "AC3", "AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: registrations 8 with the ENRICH row for 992_HK_Equity; the HEAD build reading 96 records with denominators carrying enriched 1, and 992's identity present -- production is healthy; then the suite line reading \"1 failed, 66 passed\" (I0 = 67 collected), which is Z-S225. Record every value; a drifted count is RECORDED, not a fail",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python .scratch/r120/ac0.py &amp;&amp; python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2&gt;&amp;1 | tail -1",
+      "output_evidence": "CARRIED FORWARD per this round's task-order instruction ('AC0's baseline stands as recorded'): registrations 8 enrich_rows ['992_HK_Equity']\nHEAD build records 96 denominators {\"input_names\": 89, \"records\": 96, \"MEASURED\": 36, \"UNRESOLVED\": 60, \"with_association_keys\": 96, \"association_conventions\": [\"bare-root-pilot-key\", \"security-hash-key\", \"pack-key\", \"model-key\", \"bloomberg-identifier\", \"bloomberg-identifier-with-equity-suffix\"], \"registered\": 7, \"enriched\": 1}\n992 identity present True\nvalidator_used_by_tests jsonschema\n1 failed, 66 passed in 1.56s -- originally measured pre-edit, this cell's prior instance (deliverables/0.9.0_WK_AMGT_RESAPP~120/... @c2a76629e2), not re-run this round because AC0 describes a state (the tree before ANY edit) this round's tree no longer is in.",
+      "denominator": "5 of 5 named values recorded (registrations count+enrich_rows, records count, denominators.enriched, 992 identity present, suite line); carried forward, not re-measured -- re-running AC0's own invocation now would read the POST-edit tree, which is not what AC0 names.",
+      "status": "PASS",
+      "expect": "registrations 8[\\s\\S]*992_HK_Equity[\\s\\S]*records 96[\\s\\S]*enriched.: 1[\\s\\S]*identity present True[\\s\\S]*1 failed, 66 passed"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "LIMB (a): \"8 passed\" and 0 failed -- the 7 existing arms plus test_enrich_row_present_does_not_break_the_property -- with test_no_enrich_rows_byte_identical now PASSING against the LIVE registrations, because the pinned side is built from an ENRICH-free set",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -v -p no:cacheprovider 2&gt;&amp;1 | tail -12",
+      "output_evidence": "EnrichAttachesIdentityNoNewRecord::test_enrich_attaches_identity_no_new_record PASSED [ 12%]\nEnrichWithoutCoverageRecordRefuses::test_enrich_without_coverage_record_refuses PASSED [ 25%]\nDuplicateEnrichRefuses::test_duplicate_enrich_refuses PASSED [ 37%]\nNoEnrichRowsByteIdentical::test_no_enrich_rows_byte_identical PASSED [ 50%]\nEnrichRowPresentDoesNotBreakTheProperty::test_enrich_row_present_does_not_break_the_property PASSED [ 62%]\nAddSecurityEnrichRowOneCall::test_add_security_enrich_row_one_call PASSED [ 75%]\nBuildFailureLeavesRegistrationsUnchanged::test_build_failure_leaves_registrations_unchanged PASSED [ 87%]\nEnrichedDocumentValidatesAgainstSchema::test_enriched_document_validates_against_schema PASSED [100%]\n\n8 passed in 1.61s",
+      "denominator": "8 of 8 arms PASSED, 0 failed -- unchanged from AC0-era baseline; this cell's amendment did not touch this file",
+      "status": "PASS",
+      "expect": "test_no_enrich_rows_byte_identical PASSED[\\s\\S]*test_enrich_row_present_does_not_break_the_property PASSED[\\s\\S]*8 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AMENDED (ISSUER AMENDMENT 1): LIMB (b) becomes \"6 passed\" and 0 failed -- the 4 pre-existing arms plus two new arms proving the add_security.py path: a nonconforming document raises with 0 S3 writes, and the conforming path still writes",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest lib/research/identity/tests/test_crosswalk_write_validates.py -v -p no:cacheprovider 2&gt;&amp;1 | tail -10",
+      "output_evidence": "ConformingDocumentWritesUnchanged::test_conforming_document_writes_unchanged PASSED [ 16%]\nNonconformingDocumentRaisesBeforePut::test_nonconforming_document_raises_before_put PASSED [ 33%]\nRefusalNamesTheFirstViolation::test_refusal_names_the_first_violation PASSED [ 50%]\nNonconformingDocumentRaisesThroughAddSecurityPath::test_nonconforming_document_raises_through_add_security_path PASSED [ 66%]\nConformingDocumentStillWritesThroughAddSecurityPath::test_conforming_document_still_writes_through_add_security_path PASSED [ 83%]\nLiveServedDocumentValidates::test_live_served_document_validates PASSED [100%]\n\n6 passed in 1.92s",
+      "denominator": "6 of 6 named arms PASSED, 0 failed (4 pre-existing + 2 new per the amendment). LiveServedDocumentValidates ran (not skipped): the live pool was reachable this session.",
+      "status": "PASS",
+      "expect": "test_nonconforming_document_raises_through_add_security_path PASSED[\\s\\S]*test_conforming_document_still_writes_through_add_security_path PASSED[\\s\\S]*6 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "AMENDED: the identity suite reads \"N passed\" with 0 FAILED, N = I0 (67) + 1 new enrich arm + 6 new validator arms (4 + 2) = 74; and the filings suite is UNCHANGED from its own pre-edit count",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest lib/research/identity/tests -q -p no:cacheprovider 2&gt;&amp;1 | tail -1 &amp;&amp; python -m pytest lib/research/filings/tests -q -p no:cacheprovider 2&gt;&amp;1 | tail -1",
+      "output_evidence": "74 passed in 2.93s\n106 passed in 10.57s",
+      "denominator": "identity suite: 74 of 74 passed, 0 failed (arithmetic: I0 67 + 1 enrich arm + 6 validator arms [4 orig + 2 new] = 74, matching the amended AC3 exactly). filings suite: 106 passed, unchanged from the prior session's recorded pre-edit baseline (106 passed) and this session's own measurement -- no file in lib/research/filings/ was touched by this cell at any point.",
+      "status": "PASS",
+      "expect": "74 passed[\\s\\S]*106 passed"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "ISSUER AMENDMENT 2 (@c69c628c9f), superseding Amendment 1's version: build_universe.py IS STRUCK FROM THIS CELL, its call site stays UNCHANGED, and \"AC4's file list gains EXACTLY ONE module, add_security.py (AMENDMENT 2: not build_universe.py)\" -- i.e. the changed code files are EXACTLY lib/research/identity/add_security.py and lib/research/identity/tests/test_crosswalk_write_validates.py (the code-bearing commit for this amendment); the schema/registrations diff stays EMPTY.",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; git diff --name-only HEAD~1 HEAD -- lib integrations infra .tools portal &amp;&amp; git diff --stat HEAD~1 HEAD -- lib/research/identity/crosswalk.schema.json lib/research/identity/registrations.json",
+      "output_evidence": "LITERAL re-run at the current worktree HEAD (c69c628c9f, ISSUER AMENDMENT 2's own commit to the task-order .md, parent 86d0bd6d5b, a proof_of_spec-only record commit): BOTH commands return EMPTY -- neither commit touches lib/integrations/infra/.tools/portal or the schema/registrations files, because Amendment 2 changes only the governing order's text, not code, and this cell's prior record commit changes only this instance's JSON. GRAIN CORRECTION (per Rule 22): the literal relative HEAD~1/HEAD window no longer points at the code-bearing commit, exactly the situation AC0 was carried forward for -- so the equivalent diff is re-run against the actual code commit and its own parent: `git diff --name-only ae4b5d95ba a771ac74fa -- lib integrations infra .tools portal` returns exactly:\nlib/research/identity/add_security.py\nlib/research/identity/tests/test_crosswalk_write_validates.py\n`git diff --stat ae4b5d95ba a771ac74fa -- lib/research/identity/crosswalk.schema.json lib/research/identity/registrations.json` returns empty. Both re-measured fresh this session (not carried forward from the prior instance).",
+      "denominator": "2 of 2 files match ISSUER AMENDMENT 2's own named list exactly (add_security.py, test_crosswalk_write_validates.py) -- build_universe.py correctly absent (struck from the cell) and no longer expected. 0 of 2 schema/registrations files touched, at both the literal current-HEAD window and the code-commit window. lib/research/identity/build_universe.py independently confirmed 0 diff against the round base (bf5c280e48) at current HEAD -- untouched, per step 2 of this session's re-grade.",
+      "status": "PASS",
+      "expect": "lib/research/identity/add_security\\.py[\\s\\S]*lib/research/identity/tests/test_crosswalk_write_validates\\.py",
+      "status_reason": "RECORDED PASS: ISSUER AMENDMENT 2 (@c69c628c9f) confirms the worker's BLOCKING row W120-S3 was correct -- build_universe.py's union document cannot conform to crosswalk.schema.json, so it is struck from the cell rather than forced. The file list Amendment 2 itself names (add_security.py plus the test file) is exactly what the code-bearing commit a771ac74fa already contains, unchanged since Amendment 1. W120-S3 is resolved by this amendment; recorded as AMGT_RESAPP-Z-W120-S4."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Mutated add_security.py's write_pool call at :180 back to omitting document= (reverting this round's own one-line change), leaving everything else untouched. Ran test_crosswalk_write_validates.py's two new arms; reverted with a second Edit, confirmed byte-identical to the committed copy via `diff` before any further evidence was recorded.",
+      "expected": "test_nonconforming_document_raises_through_add_security_path fails (ValueError not raised, since the schema check is never reached without document=); test_conforming_document_still_writes_through_add_security_path is unaffected (the write still happens with or without validation).",
+      "observed": "1 failed, 5 passed -- NonconformingDocumentRaisesThroughAddSecurityPath::test_nonconforming_document_raises_through_add_security_path failed with 'AssertionError: ValueError not raised', exactly as predicted; ConformingDocumentStillWritesThroughAddSecurityPath stayed PASSED. Reverted; `git diff` against the committed lib/research/identity/add_security.py returned empty (byte-identical) and the full write-validates file returned to 6 passed.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Two same-input back-to-back runs of `python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py lib/research/identity/tests/test_crosswalk_write_validates.py -q -p no:cacheprovider`, post-commit HEAD a771ac74fa.",
+      "observed": "Run 1: '14 passed in 1.8x s'. Run 2: '14 passed in 1.9x s'. Identical pass/fail outcome both runs (8 + 6 = 14); timing differs only in the trailing decimal.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "registrations.json, crosswalk.schema.json, battery.py, every S3 object, the served crosswalk (write)",
+      "reason": "section 1 'What this cell does NOT change' plus BOUNDS. registrations.json is read-only; crosswalk.schema.json is a WALL and the validator's read-only schema source; no publish/--write-pool was ever invoked against a real bucket."
+    },
+    {
+      "item": "build_universe.py's write_pool call site (making it pass document=)",
+      "reason": "ISSUER AMENDMENT 1 instructed this; the worker refused with BLOCKING row AMGT_RESAPP-Z-W120-S3 because build_union()'s returned document does not conform to crosswalk.schema.json and cannot be made to without editing the schema (a WALL) or the document shape (barred by BOUNDS as a scope change for the CTO). ISSUER AMENDMENT 2 (@c69c628c9f) AGREES: it strikes build_universe.py from this cell outright, confirms the refusal was correct, and records the union pool write's missing schema as a scope item for the CTO. S3 is resolved for this cell by AMGT_RESAPP-Z-W120-S4; the underlying gap is carried forward at the CTO's level, not repaired here."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W120-S2: W120-S1's add_security.py half is resolved by ISSUER AMENDMENT 1 @ae4b5d95ba -- add_security.py:180 now passes document=document, closing the historically-live gap (rk-113's actual publish path). build_universe.py's half is not resolved the same way; see S3. hazard_standing INERT (for the piece this row covers); disposition UNDER_INVESTIGATION, graduation is the CVO's.",
+    "AMGT_RESAPP-Z-W120-S3: ISSUER AMENDMENT 1 literally instructs build_universe.py:918's write_pool call to also pass document=document, but build_union()'s returned object is a structurally different shape than crosswalk.schema.json (empirically confirmed: jsonschema.validate raises 'Additional properties are not allowed (holdings_source, names, snapshot_date were unexpected)' on a document shaped exactly like build_union()'s return). Complying literally would refuse every real union write. Not implemented; BLOCKING, hazard_standing ARMED, disarm_owner 2.0.0_SA_COO~Z. AC4 recorded FAIL as a direct consequence, per BOUNDS' own instruction to STOP with a BLOCKING row rather than force a schema or document-shape edit. RESOLVED this session by ISSUER AMENDMENT 2 -- see AMGT_RESAPP-Z-W120-S4.",
+    "AMGT_RESAPP-Z-W120-S4: AMGT_RESAPP-Z-W120-S3 is RESOLVED by ISSUER AMENDMENT 2 @c69c628c9f -- the COO (S3's own disarm_owner) independently measured build_union()'s document shape, agreed the worker's refusal was correct, and struck build_universe.py from this cell; AC4's file list is now exactly add_security.py plus test_crosswalk_write_validates.py, both already committed at a771ac74fa. The underlying gap (the union pool write has no schema of its own) is NOT repaired here; it is carried forward as a scope item for the CTO, per Amendment 2's own words. class OBSERVATION, hazard_standing ARMED (the production gap itself is unchanged), disarm_owner re-pointed to 1.0.0_SA_CTO; disposition UNDER_INVESTIGATION."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~120/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.proof_of_spec.json (this instance carries the session narrative inline; no separate SESSION_LOG.md was produced for this cell)",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests -q -p no:cacheprovider",
+      "result": "74 passed in 2.93s, 0 failed (AC3), up from the prior AC0/AC3 baseline of 67 collected -> 72 passed; this round's amendment adds 2 more"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests/test_crosswalk_enrich_coverage.py -v -p no:cacheprovider",
+      "result": "8 passed in 1.61s (unchanged this round)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/identity/tests/test_crosswalk_write_validates.py -v -p no:cacheprovider",
+      "result": "6 passed in 1.92s (4 pre-existing + 2 new this round, AC2)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest lib/research/filings/tests -q -p no:cacheprovider",
+      "result": "106 passed in 10.57s, unchanged"
+    },
+    {
+      "tool": "python + jsonschema (union-shape probe, this round's evidence for W120-S3)",
+      "invocation": "jsonschema.validate() on a minimal document shaped exactly like build_universe.py's build_union() return (as_of/snapshot_date/schema_version/coverage_source/holdings_source/names/denominators) against crosswalk.schema.json",
+      "result": "raised jsonschema.ValidationError: \"Additional properties are not allowed ('holdings_source', 'names', 'snapshot_date' were unexpected)\" -- confirms build_universe.py's document cannot conform to crosswalk.schema.json without a schema or shape edit"
+    },
+    {
+      "tool": "git",
+      "invocation": "git diff --name-only HEAD~1 HEAD -- lib integrations infra .tools portal; git diff --stat HEAD~1 HEAD -- lib/research/identity/crosswalk.schema.json lib/research/identity/registrations.json; git rev-parse HEAD",
+      "result": "Superseded this session by ISSUER AMENDMENT 2 (@c69c628c9f): build_universe.py is struck from the cell, so the 'missing build_universe.py' finding recorded here no longer applies. See the next tool entry for this session's re-measurement."
+    },
+    {
+      "tool": "git (this session, W120-S3/S4 re-grade against ISSUER AMENDMENT 2)",
+      "invocation": "git diff --stat bf5c280e48 HEAD -- lib/research/identity/build_universe.py (confirm untouched); git diff --name-only HEAD~1 HEAD -- lib integrations infra .tools portal (literal AC4 invocation at current HEAD c69c628c9f); git diff --name-only ae4b5d95ba a771ac74fa -- lib integrations infra .tools portal (GRAIN-corrected: the code-bearing commit's own window, since HEAD has since moved through two non-code commits)",
+      "result": "build_universe.py: empty diff, 0 changes since round base -- confirmed untouched. Literal HEAD~1..HEAD (c69c628c9f's parent 86d0bd6d5b, both non-code commits): empty, both pathspecs. Code-commit window (ae4b5d95ba..a771ac74fa): exactly lib/research/identity/add_security.py and lib/research/identity/tests/test_crosswalk_write_validates.py, schema/registrations diff empty -- matches ISSUER AMENDMENT 2's own named list exactly. AC4 now PASS."
+    },
+    {
+      "tool": ".tools/commit-gate.sh + .tools/surprise-row-gate.py (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/r120/commit2_msg.txt -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~120/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.proof_of_spec.json org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.md",
+      "result": "surprise-row-gate re-graded 1 new row (S4) of 532 total (531 pre-existing, NOT re-graded), step-7/step-10 fields present, OK; surprise-corpus OK (4 known, 0 new, 0 resolved) -- pre-checked before the commit, see the commit's own gate output for the final run."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~120/AMGT_RESAPP.TO-AMGT-rk-120.identity-cleanup-and-schema-gate.proof_of_spec.json AC0,AC1,AC2,AC3,AC4",
+      "result": "see this session's own grading run recorded in the WORKER REPORT; rc printed there is the verdict"
+    }
+  ]
+}

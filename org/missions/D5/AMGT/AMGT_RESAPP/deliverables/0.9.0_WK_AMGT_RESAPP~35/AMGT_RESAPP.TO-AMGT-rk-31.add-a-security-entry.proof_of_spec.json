@@ -1,0 +1,217 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-31",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "C",
+    "vintage_commit": "1699960261"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb40",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-31.add-a-security-entry.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~35",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/add_security.py",
+      "kind": "script",
+      "commit_or_etag": "0add9d26c12fde72944ce53771fb45ce030325aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The CLI itself is what was exercised live against opal-data-harvest under AC2-AC8 (real S3 writes, real Bloomberg calls); library code, no separate deploy step for this cell."
+    },
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "0add9d26c12fde72944ce53771fb45ce030325aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_crosswalk()'s registrations second input, load_registrations()/registrations_path(), _record_for_registration() -- exercised by add_security.py's own --write-pool calls (AC4/AC5) and by the fixture unit arms."
+    },
+    {
+      "path_or_key": "lib/research/identity/crosswalk.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "0add9d26c12fde72944ce53771fb45ce030325aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Validated against the LIVE crosswalk/v1/2026-09-15.json object before any code was written against it, and against a registration-bearing fixture document in AC7/test_add_security.py."
+    },
+    {
+      "path_or_key": "lib/research/identity/registrations.json",
+      "kind": "config_data",
+      "commit_or_etag": "0add9d26c12fde72944ce53771fb45ce030325aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "CONFIG read by build_crosswalk() as a second input; 7 rows landed by this run's own --write-pool calls (AC4 x3, AC5 x4), verified via crosswalk.load_crosswalk(refresh=True)."
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_add_security.py",
+      "kind": "test",
+      "commit_or_etag": "0add9d26c12fde72944ce53771fb45ce030325aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 new unit arms, run as part of AC7's 41-of-41 pass."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/crosswalk/v1/2026-09-19.json",
+      "kind": "s3_object",
+      "commit_or_etag": "9a33fc49e71e6050c652083f84fcdce48fe5b88d01296a82c10721d3c33e3745",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "write_pool() head_object read-back (AC4/AC5's OK: uploaded lines); AC6 confirms all 89 base records byte-identical, base 2026-09-15.json untouched."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/raw/bloomberg/CAT_US_Equity/20260919T011821Z/identity.json",
+      "kind": "s3_object",
+      "commit_or_etag": "put-if-absent, ContentLength=183",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC4 RAW LANDED line; the pre-act census (change-management log) shows this prefix was 404 before the run."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/raw/bloomberg/CSL_AU_Equity/20260919T011824Z/identity.json",
+      "kind": "s3_object",
+      "commit_or_etag": "put-if-absent, ContentLength=175",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC4 RAW LANDED line."
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/raw/bloomberg/6861_JP_Equity/20260919T011828Z/identity.json",
+      "kind": "s3_object",
+      "commit_or_etag": "put-if-absent, ContentLength=369",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "AC4 RAW LANDED line."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260919T0056Z_amgt-rk-31-add-security_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "0add9d26c12fde72944ce53771fb45ce030325aa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened before the first --write-pool with the never-widen pair's sha256 and fresh pre-act census; all 3 legs (L1 git, L2 verify, L3 verify) closed with proof; entry CLOSED."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the pool crosswalk's as_of, records and MEASURED printed, the corpus folder denominator printed, and the UNREGISTERED set listed with its count -- the analysis names 4 (Alphabet, Eli Lilly, Quanta Services, UnitedHealth); the PRINTED set is the population AC5 registers",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport os\nfrom lib.research.identity import build_universe, crosswalk\nroot = build_universe.CORPUS_ROOT\nfolders = sorted(n for n in os.listdir(root) if os.path.isdir(os.path.join(root, n)))\ndoc, _i, _a = crosswalk.load_crosswalk(refresh=True)\nknown = set(r['source_row']['folder'] for r in doc['records'] if r['source_row'].get('folder'))\nunreg = [f for f in folders if f not in known]\nprint('crosswalk_as_of', doc['as_of'], 'records', len(doc['records']), 'MEASURED', doc['denominators']['MEASURED'])\nprint('corpus_folders', len(folders), 'registered', len(set(folders) & known), 'unregistered', len(unreg))\nfor f in unreg: print('UNREGISTERED', repr(f))\n\"",
+      "output_evidence": "crosswalk_as_of 2026-09-15 records 89 MEASURED 33\ncorpus_folders 93 registered 89 unregistered 4\nUNREGISTERED 'Alphabet GOOGL US'\nUNREGISTERED 'Eli Lilly LLY US'\nUNREGISTERED 'Quanta Services PWR'\nUNREGISTERED 'UnitedHealth Group UNH US'\nRC=0",
+      "denominator": "93 corpus folders total; 89 of 93 already registered; 4 of 93 unregistered, matching the analysis's named four exactly",
+      "status": "PASS",
+      "expect": "crosswalk_as_of 2026-09-15 records 89 MEASURED 33.*corpus_folders 93 registered 89 unregistered 4.*UNREGISTERED 'Alphabet GOOGL US'.*UNREGISTERED 'Eli Lilly LLY US'.*UNREGISTERED 'Quanta Services PWR'.*UNREGISTERED 'UnitedHealth Group UNH US'"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "rc 0; the printed record reads security_key CAT_US_Equity, bloomberg 'CAT US', identity.bloomberg_security 'CAT US Equity', identity.name containing CATERPILLAR, identity.lei and identity.cik non-null (cik 18230, sec_id '0000018230'), bloomberg_calls 1; nothing_written True",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, hashlib, subprocess, sys\ns3 = boto3.client('s3', region_name='us-east-1')\ndef count(p):\n    n = 0\n    for page in s3.get_paginator('list_objects_v2').paginate(Bucket='opal-data-harvest', Prefix=p): n += len(page.get('Contents', []))\n    return n\ndef sha(p):\n    try: return hashlib.sha256(open(p, 'rb').read()).hexdigest()[:16]\n    except FileNotFoundError: return 'ABSENT'\nbefore = (count('crosswalk/v1/'), count('raw/bloomberg/CAT_US_Equity/'), sha('lib/research/identity/registrations.json'))\nr = subprocess.run([sys.executable, '-m', 'lib.research.identity.add_security', '--bloomberg', 'CAT US', '--as-of', '$(date -u +%Y-%m-%d)', '--dry-run'], capture_output=True, timeout=100)\nprint('rc', r.returncode); print(r.stdout.decode('utf-8', 'replace')[-3000:]); print(r.stderr.decode('utf-8', 'replace')[-800:])\nafter = (count('crosswalk/v1/'), count('raw/bloomberg/CAT_US_Equity/'), sha('lib/research/identity/registrations.json'))\nprint('before', before); print('after', after); print('nothing_written', before == after)\n\"",
+      "output_evidence": "rc 0\nMEASURED: security_key CAT_US_Equity bloomberg 'CAT US' name 'CATERPILLAR INC' lei 'WRJR7GS4GTRECRRTVX92' cik 18230 sec_id '0000018230' AGREES: id token 'US' == Bloomberg EXCH_CODE 'US'\nbloomberg_calls 1\nDRY RUN: nothing written (registrations.json unchanged, no S3 put)\n\n\nbefore (1, 0, 'ABSENT')\nafter (1, 0, 'ABSENT')\nnothing_written True",
+      "denominator": "1 of 1 Bloomberg call made; 3 of 3 before/after counters unchanged (crosswalk/v1/ count, raw prefix count, registrations.json sha256)",
+      "status": "PASS",
+      "expect": "rc 0.*security_key CAT_US_Equity bloomberg 'CAT US'.*name 'CATERPILLAR INC'.*lei 'WRJR7GS4GTRECRRTVX92' cik 18230 sec_id '0000018230'.*AGREES.*bloomberg_calls 1.*nothing_written True"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE PLANTED NEGATIVE: rc is non-zero, the output reads resolution UNRESOLVED with security_key None and a reason carrying the vendor's OWN security-error text, no key is minted, nothing_written True",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, hashlib, subprocess, sys\ns3 = boto3.client('s3', region_name='us-east-1')\ndef count(p):\n    n = 0\n    for page in s3.get_paginator('list_objects_v2').paginate(Bucket='opal-data-harvest', Prefix=p): n += len(page.get('Contents', []))\n    return n\ndef sha(p):\n    try: return hashlib.sha256(open(p, 'rb').read()).hexdigest()[:16]\n    except FileNotFoundError: return 'ABSENT'\nbefore = (count('crosswalk/v1/'), count('raw/bloomberg/ZZZZQQ_US_Equity/'), sha('lib/research/identity/registrations.json'))\nr = subprocess.run([sys.executable, '-m', 'lib.research.identity.add_security', '--bloomberg', 'ZZZZQQ US', '--as-of', '$(date -u +%Y-%m-%d)', '--dry-run'], capture_output=True, timeout=100)\nprint('rc', r.returncode); print(r.stdout.decode('utf-8', 'replace')[-1500:]); print(r.stderr.decode('utf-8', 'replace')[-800:])\nafter = (count('crosswalk/v1/'), count('raw/bloomberg/ZZZZQQ_US_Equity/'), sha('lib/research/identity/registrations.json'))\nprint('nothing_written', before == after)\n\"",
+      "output_evidence": "rc 1\nUNRESOLVED: security_key None -- Bloomberg security error for 'ZZZZQQ US Equity': Unknown/Invalid Security  [nid:23118]\nbloomberg_calls 1\nDRY RUN: nothing written (registrations.json unchanged, no S3 put)\n\n\nnothing_written True",
+      "denominator": "1 of 1 Bloomberg call made and it errored; 0 keys minted; nothing_written True",
+      "status": "PASS",
+      "expect": "rc 1.*UNRESOLVED: security_key None -- Bloomberg security error for 'ZZZZQQ US Equity': Unknown/Invalid Security.*bloomberg_calls 1.*nothing_written True"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "three write-pool runs each print their write_pool receipt and the raw landing key; the pool's newest crosswalk then reads MEASURED = 33 + 3 = 36 with registered 3, and every form of each validation name resolves to its canonical key with resolution MEASURED; a name whose call failed is UNRESOLVED and counted, never dropped",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && for id in \"CAT US\" \"CSL AU\" \"6861 JP\"; do python -m lib.research.identity.add_security --bloomberg \"$id\" --as-of \"$(date -u +%Y-%m-%d)\" --write-pool 2>&1 | tail -2 || echo \"RC=$? for $id\"; done && python -c \"\nfrom lib.research.identity import crosswalk\ndoc, _i, _a = crosswalk.load_crosswalk(refresh=True)\nprint('as_of', doc['as_of'], 'records', doc['denominators']['records'], 'MEASURED', doc['denominators']['MEASURED'], 'UNRESOLVED', doc['denominators']['UNRESOLVED'], 'registered', doc['denominators'].get('registered'))\nfor form in ('CAT US', 'CSL AU', '6861 JP', 'CAT US Equity', 'CAT_US_Equity'):\n    r = crosswalk.resolve(form); print(form, '->', r['security_key'], r['resolution'], r.get('matched_as'))\n\"",
+      "output_evidence": "RAW LANDED: s3://opal-data-harvest/raw/bloomberg/CAT_US_Equity/20260919T011821Z/identity.json ContentLength=183\nMEASURED: security_key CAT_US_Equity bloomberg 'CAT US' name 'CATERPILLAR INC' lei 'WRJR7GS4GTRECRRTVX92' cik 18230 sec_id '0000018230' AGREES: id token 'US' == Bloomberg EXCH_CODE 'US'\nbloomberg_calls 1\nOK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-19.json ContentLength=191161 document-sha256=2f388e28c0645d64c571c585a4ac364e0f6507f49baf3f2f0b56fcfa31e1d344 schema-version=1 records=90 MEASURED=34 UNRESOLVED=56 registered=1\n---- end CAT US ----\nRAW LANDED: s3://opal-data-harvest/raw/bloomberg/CSL_AU_Equity/20260919T011824Z/identity.json ContentLength=175\nMEASURED: security_key CSL_AU_Equity bloomberg 'CSL AU' name 'CSL LTD' lei '529900ECSECK5ZDQTE14' cik 1274152 sec_id '0001274152' AGREES: id token 'AU' == Bloomberg EXCH_CODE 'AU'\nbloomberg_calls 1\nOK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-19.json ContentLength=193845 document-sha256=4a7b58bdc79e6a22db709340c2e1d6db3268835405207176396bce6a2d24a1dd schema-version=1 records=91 MEASURED=35 UNRESOLVED=56 registered=2\n---- end CSL AU ----\nRAW LANDED: s3://opal-data-harvest/raw/bloomberg/6861_JP_Equity/20260919T011828Z/identity.json ContentLength=369\nMEASURED: security_key 6861_JP_Equity bloomberg '6861 JP' name 'KEYENCE CORP' lei '529900M7PQBS7A89DZ11' cik None sec_id None AGREES: id token 'JP' == Bloomberg EXCH_CODE 'JP'\nfield_errors {\"CENTRAL_INDEX_KEY_NUMBER\": {\"category\": \"BAD_FLD\", \"code\": 9, \"message\": \"Field not applicable to security\", \"subcategory\": \"NOT_APPLICABLE_TO_REF_DATA\"}}\nbloomberg_calls 1\nOK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-19.json ContentLength=196773 document-sha256=9a33fc49e71e6050c652083f84fcdce48fe5b88d01296a82c10721d3c33e3745 schema-version=1 records=92 MEASURED=36 UNRESOLVED=56 registered=3\n---- end 6861 JP ----\nas_of 2026-09-19 records 92 MEASURED 36 UNRESOLVED 56 registered 3\nCAT US -> CAT_US_Equity MEASURED bloomberg\nCSL AU -> CSL_AU_Equity MEASURED bloomberg\n6861 JP -> 6861_JP_Equity MEASURED bloomberg\nCAT US Equity -> CAT_US_Equity MEASURED bloomberg_equity_suffix\nCAT_US_Equity -> CAT_US_Equity MEASURED model_key",
+      "denominator": "3 of 3 validation names registered MEASURED (33 base + 3 = 36); 5 of 5 probed forms resolve to the correct canonical key; 1 of 3 (6861 JP) carries a field_errors entry for CENTRAL_INDEX_KEY_NUMBER, recorded verbatim, cik/sec_id both None (never guessed)",
+      "status": "PASS",
+      "expect": "MEASURED: security_key CAT_US_Equity.*OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-19\\.json.*registered=1.*MEASURED: security_key CSL_AU_Equity.*registered=2.*MEASURED: security_key 6861_JP_Equity.*field_errors.*CENTRAL_INDEX_KEY_NUMBER.*registered=3.*MEASURED 36.*CAT US -> CAT_US_Equity MEASURED bloomberg.*CSL AU -> CSL_AU_Equity MEASURED bloomberg.*6861 JP -> 6861_JP_Equity MEASURED bloomberg.*CAT US Equity -> CAT_US_Equity MEASURED bloomberg_equity_suffix.*CAT_US_Equity -> CAT_US_Equity MEASURED model_key"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "every unregistered folder is DISPOSITIONED -- printed with rc 0 and a last line naming its disposition; unregistered_after 0 of N; MEASURED + UNRESOLVED == records; the analysis's four are among the dispositioned set",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport os, subprocess, sys\nfrom lib.research.identity import build_universe, crosswalk\nroot = build_universe.CORPUS_ROOT\nfolders = sorted(n for n in os.listdir(root) if os.path.isdir(os.path.join(root, n)))\ndoc, _i, _a = crosswalk.load_crosswalk(refresh=True)\nknown = set(r['source_row']['folder'] for r in doc['records'] if r['source_row'].get('folder'))\nunreg = [f for f in folders if f not in known]\nprint('unregistered_before', len(unreg), 'of', len(folders))\nfor f in unreg:\n    r = subprocess.run([sys.executable, '-m', 'lib.research.identity.add_security', '--folder', f, '--as-of', '$(date -u +%Y-%m-%d)', '--write-pool'], capture_output=True, timeout=25)\n    tail = r.stdout.decode('utf-8', 'replace').strip().split('\\n')[-1:]\n    print('FOLDER', repr(f), 'rc', r.returncode, tail)\ncrosswalk._CACHE.clear()\ndoc, _i, _a = crosswalk.load_crosswalk(refresh=True)\nknown = set(r['source_row']['folder'] for r in doc['records'] if r['source_row'].get('folder'))\nprint('unregistered_after', len([f for f in folders if f not in known]), 'of', len(folders), 'MEASURED', doc['denominators']['MEASURED'], 'UNRESOLVED', doc['denominators']['UNRESOLVED'])\n\"",
+      "output_evidence": "unregistered_before 4 of 93\nFOLDER 'Alphabet GOOGL US' rc 0 ['OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-19.json ContentLength=198197 document-sha256=ef2bd3d9a81eaad643b5de1d61644b9cb1430829c1f727c5e4d8822fc1b86f44 schema-version=1 records=93 MEASURED=36 UNRESOLVED=57 registered=4']\nFOLDER 'Eli Lilly LLY US' rc 0 ['OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-19.json ContentLength=199617 document-sha256=0c4ced2deae1754e68db0991939236cc5016509a27272ca9a296cdbcd5708390 schema-version=1 records=94 MEASURED=36 UNRESOLVED=58 registered=5']\nFOLDER 'Quanta Services PWR' rc 0 ['OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-19.json ContentLength=201049 document-sha256=298343643658d7ddd0dcfab5964ffdf2b31cb3571461be142c31aec430fcf2c0 schema-version=1 records=95 MEASURED=36 UNRESOLVED=59 registered=6']\nFOLDER 'UnitedHealth Group UNH US' rc 0 ['OK: uploaded s3://opal-data-harvest/crosswalk/v1/2026-09-19.json ContentLength=202505 document-sha256=6668326f3d1b4d09083560c86652635c5e029eeaff56606ef5f95dfadd1c3cc7 schema-version=1 records=96 MEASURED=36 UNRESOLVED=60 registered=7']\nunregistered_after 0 of 93 MEASURED 36 UNRESOLVED 60",
+      "denominator": "4 of 4 unregistered folders dispositioned (all UNRESOLVED, no ONE PAGER workbook found in any); unregistered_after 0 of 93; MEASURED 36 + UNRESOLVED 60 = 96 records",
+      "status": "PASS",
+      "expect": "unregistered_before 4 of 93.*FOLDER 'Alphabet GOOGL US' rc 0.*FOLDER 'Eli Lilly LLY US' rc 0.*FOLDER 'Quanta Services PWR' rc 0.*FOLDER 'UnitedHealth Group UNH US' rc 0.*unregistered_after 0 of 93 MEASURED 36 UNRESOLVED 60"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "NEVER-WIDEN on the population of record: newest is the object this order wrote, base_records_byte_identical_in_newest N of N with N == the base's record count, newest MEASURED == base MEASURED + the count of registrations that resolved; DELTA=0 on the 33",
+      "method": "live_read",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json\ns3 = boto3.client('s3', region_name='us-east-1')\ndef get(k): return json.loads(s3.get_object(Bucket='opal-data-harvest', Key=k)['Body'].read().decode('utf-8'))\nbase = get('crosswalk/v1/2026-09-15.json')\nkeys = []\nfor page in s3.get_paginator('list_objects_v2').paginate(Bucket='opal-data-harvest', Prefix='crosswalk/v1/'): keys += [o['Key'] for o in page.get('Contents', [])]\nnewest = sorted(keys)[-1]; new = get(newest)\ncanon = lambda r: json.dumps(r, sort_keys=True)\nnew_by_folder = {r['source_row']['folder']: r for r in new['records'] if r['source_row'].get('folder')}\nsame = sum(1 for r in base['records'] if r['source_row']['folder'] in new_by_folder and canon(new_by_folder[r['source_row']['folder']]) == canon(r))\nprint('base 2026-09-15 records', len(base['records']), 'MEASURED', base['denominators']['MEASURED'])\nprint('newest', newest, 'records', len(new['records']), 'MEASURED', new['denominators']['MEASURED'], 'registered', new['denominators'].get('registered'))\nprint('base_records_byte_identical_in_newest', same, 'of', len(base['records']))\n\"",
+      "output_evidence": "base 2026-09-15 records 89 MEASURED 33\nnewest crosswalk/v1/2026-09-19.json records 96 MEASURED 36 registered 7\nbase_records_byte_identical_in_newest 89 of 89",
+      "denominator": "89 of 89 base coverage records byte-identical in the newest object; newest MEASURED 36 = base MEASURED 33 + 3 resolved registrations (the 4 UNRESOLVED folder registrations do not add to MEASURED)",
+      "status": "PASS",
+      "expect": "base 2026-09-15 records 89 MEASURED 33.*newest crosswalk/v1/2026-09-19\\.json records 96 MEASURED 36 registered 7.*base_records_byte_identical_in_newest 89 of 89"
+    },
+    {
+      "criterion_id": "AC7",
+      "criterion_verbatim": "the unit arms pass INCLUDING new arms in test_add_security.py for the registration record shape and association keys, the planted vendor error, a colliding key refused before any write, the 2026-09-15 object and a registration record both validating against crosswalk.schema.json; fixed_point True with ascii True",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m unittest discover -s lib/research/identity/tests -p \"test_*.py\" -q 2>&1 | tail -4 && python -c \"\nimport hashlib, subprocess, sys\nouts = []\nfor _ in range(2):\n    r = subprocess.run([sys.executable, '-m', 'lib.research.identity.crosswalk', '--as-of', '$(date -u +%Y-%m-%d)', '--dry-run'], capture_output=True, timeout=50)\n    outs.append(hashlib.sha256(r.stdout).hexdigest()); print('rc', r.returncode, 'bytes', len(r.stdout), 'sha', outs[-1][:16], 'ascii', len(r.stdout) == len(r.stdout.decode('ascii', 'replace')))\nprint('fixed_point', outs[0] == outs[1])\n\"",
+      "output_evidence": "Ran 41 tests in 0.119s\n\nOK\nREFUSED: security_key 'BA_US_Equity' is already MEASURED on folder 'Boeing BA' -- a collision is refused, never merged (this request: folder None, bloomberg 'BA US')\nbloomberg_calls 0\nalready-registered: folder='Alphabet GOOGL US' bloomberg=None security_key=None resolution=UNRESOLVED\nbloomberg_calls 0\nUNRESOLVED: security_key None -- Bloomberg security error for 'ZZZZQQ US Equity': Unknown/Invalid Security [nid:100]\nbloomberg_calls 1\nDRY RUN: nothing written (registrations.json unchanged, no S3 put)\nrc 0 bytes 202505 sha 6668326f3d1b4d09 ascii True\nrc 0 bytes 202505 sha 6668326f3d1b4d09 ascii True\nfixed_point True",
+      "denominator": "41 of 41 unit arms pass, 0 failures, 0 errors; 2 of 2 dry runs byte-identical (fixed point); the mock-based arms fired 3 planted scenarios (collision, idempotent, vendor error) with 0-or-1 Bloomberg calls each, as expected",
+      "status": "PASS",
+      "expect": "Ran 41 tests in [0-9.]+s\\s*OK.*fixed_point True"
+    },
+    {
+      "criterion_id": "AC8",
+      "criterion_verbatim": "both planted runs REFUSE: rc non-zero, the last line names the --as-of and says it is not today UTC; POST keys == PRE keys, newest unchanged, etags_unchanged True, keys_unchanged True. Run BEFORE AC4 (negative control for AC4's write) and again AFTER AC6 (must still refuse once the today-dated key exists)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, subprocess, sys\ns3 = boto3.client('s3'); B = 'opal-data-harvest'\ndef census():\n    ks = [o['Key'] for p in s3.get_paginator('list_objects_v2').paginate(Bucket=B, Prefix='crosswalk/v1/') for o in p.get('Contents', [])]\n    et = {k: s3.head_object(Bucket=B, Key=k)['ETag'] for k in ks}\n    return ks, et\nks0, et0 = census(); print('PRE keys', len(ks0), 'newest', sorted(ks0)[-1])\nfor asof in ('2026-09-15', '2099-01-01'):\n    r = subprocess.run([sys.executable, '-m', 'lib.research.identity.add_security', '--bloomberg', 'CAT US', '--as-of', asof, '--write-pool'], capture_output=True, text=True, timeout=60)\n    print('PLANTED', asof, 'rc', r.returncode, '|', (r.stdout + r.stderr).strip().splitlines()[-1] if (r.stdout + r.stderr).strip() else '(no output)')\nks1, et1 = census(); print('POST keys', len(ks1), 'newest', sorted(ks1)[-1], 'etags_unchanged', et0 == et1, 'keys_unchanged', ks0 == ks1)\n\"",
+      "output_evidence": "RUN 1 (before AC4):\nPRE keys 1 newest crosswalk/v1/2026-09-15.json\nPLANTED 2026-09-15 rc 3 | REFUSED: --as-of 2026-09-15 is not today (UTC 2026-09-19) -- --write-pool requires today's date. A past date would rewrite the population of record at that key; a future date would win crosswalk._read_pool_latest's sorted(keys)[-1] and be served at once. Nothing written, no Bloomberg call made.\nPLANTED 2099-01-01 rc 3 | REFUSED: --as-of 2099-01-01 is not today (UTC 2026-09-19) -- --write-pool requires today's date. A past date would rewrite the population of record at that key; a future date would win crosswalk._read_pool_latest's sorted(keys)[-1] and be served at once. Nothing written, no Bloomberg call made.\nPOST keys 1 newest crosswalk/v1/2026-09-15.json etags_unchanged True keys_unchanged True\n\nRUN 2 (after AC6):\nPRE keys 2 newest crosswalk/v1/2026-09-19.json\nPLANTED 2026-09-15 rc 3 | REFUSED: --as-of 2026-09-15 is not today (UTC 2026-09-19) -- --write-pool requires today's date. A past date would rewrite the population of record at that key; a future date would win crosswalk._read_pool_latest's sorted(keys)[-1] and be served at once. Nothing written, no Bloomberg call made.\nPLANTED 2099-01-01 rc 3 | REFUSED: --as-of 2099-01-01 is not today (UTC 2026-09-19) -- --write-pool requires today's date. A past date would rewrite the population of record at that key; a future date would win crosswalk._read_pool_latest's sorted(keys)[-1] and be served at once. Nothing written, no Bloomberg call made.\nPOST keys 2 newest crosswalk/v1/2026-09-19.json etags_unchanged True keys_unchanged True",
+      "denominator": "2 of 2 planted dates refused on each of 2 runs (4 of 4 total refusals); 0 of 2 runs changed keys or etags",
+      "status": "PASS",
+      "expect": "PLANTED 2026-09-15 rc 3 \\| REFUSED: --as-of 2026-09-15 is not today.*PLANTED 2099-01-01 rc 3 \\| REFUSED: --as-of 2099-01-01 is not today.*etags_unchanged True keys_unchanged True.*PLANTED 2026-09-15 rc 3 \\| REFUSED.*PLANTED 2099-01-01 rc 3 \\| REFUSED.*etags_unchanged True keys_unchanged True"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A MEASURED registration record's security_key forced to null (the exact 'guessed/dropped identity' shape C-ONE-IDENTITY forbids) and re-validated against the updated crosswalk.schema.json's MEASURED/UNRESOLVED allOf conditional.",
+      "expected": "the schema REFUSES the mutated document; the unmutated document (carrying a registration record) validates",
+      "observed": "CONTROL positive: unmutated document VALIDATES. MUTANT FIRED-AS-EXPECTED: \"None is not of type 'string'\" at records[0].security_key",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "python -m lib.research.identity.crosswalk --as-of 2026-09-19 --dry-run run twice on unchanged inputs (coverage list + the now-stable registrations.json), compared by sha256 of raw stdout bytes (AC7)",
+      "observed": "fixed_point True; rc 0 bytes 202505 sha 6668326f3d1b4d09... both runs identical; ascii True on both",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "COMPANY_WEB_ADDRESS riding on the same Bloomberg call (order section 1 item 2, 'may ride')",
+      "reason": "optional per the order's own wording ('may ride'); not required by any acceptance criterion, and adding an unrequested field is scope the order does not name -- kept out under the never-widen discipline"
+    },
+    {
+      "item": "A second, distinct SEC-identifier DAPI field beyond CENTRAL_INDEX_KEY_NUMBER",
+      "reason": "the order permits adding one 'if the DAPI field dictionary carries a DISTINCT SEC-identifier field, and say which'; no such distinct field was identified, so sec_id is derived from CIK exactly as ruled (fetch.py's %010d padding), never a second call"
+    },
+    {
+      "item": "Any downstream stage (model block pull, battery, analyzer, peers, posture, universe/v1)",
+      "reason": "C-INSTANTIATION-ENTRY's 'every downstream stage runs from that record' is explicitly the OTHER round-14 chains' business, not this cell's (order section 1 item 7)"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~35/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author '0.9.0_WK_AMGT_RESAPP~35 <0.9.0_WK_AMGT_RESAPP~35@opal.agent>' -F <msgfile> -- lib/research/identity/add_security.py lib/research/identity/crosswalk.py lib/research/identity/crosswalk.schema.json lib/research/identity/registrations.json lib/research/identity/tests/test_add_security.py org/critical_paths/.open_deploys/amgt-rk-31-add-security.json org/critical_paths/change_management/20260919T0056Z_amgt-rk-31-add-security_deploy_completion.md",
+      "result": "OK: pre-commit gate clean for 3 of 7 file(s) (the .py graded set); naming-gate PASS 0 graded; to-pipeline-gate/surprise-row-gate OK (no task-order/surprise-row paths in this commit); committed 0add9d26c1"
+    },
+    {
+      "tool": ".tools/deploy_ledger.py",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close --slug amgt-rk-31-add-security",
+      "result": "OPENED with 3 legs before the first --write-pool; all 3 legs CLOSED with proof (L1 commit hash, L2 write_pool receipt, L3 AC6 line); entry CLOSED"
+    },
+    {
+      "tool": "python -m unittest",
+      "invocation": "python -m unittest discover -s lib/research/identity/tests -p 'test_*.py' -q",
+      "result": "Ran 41 tests in 0.119s -- OK (0 failures, 0 errors)"
+    }
+  ]
+}

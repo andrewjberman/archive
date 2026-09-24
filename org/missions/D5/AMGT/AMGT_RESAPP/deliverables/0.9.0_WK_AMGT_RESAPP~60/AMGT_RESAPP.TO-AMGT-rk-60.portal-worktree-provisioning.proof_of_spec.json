@@ -1,0 +1,153 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-60",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-60.portal-worktree-provisioning.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "T",
+    "vintage_commit": "1699960261"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~60",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/wk-provision.sh",
+      "kind": "script",
+      "commit_or_etag": "3795d4f487",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Local git tooling; no live AWS act, no deploy scope. This session repaired the self-test's three failing arms (ARM5/ARM6/ARM7, inherited UNCOMMITTED from the prior stopped session) and re-verified: --self-test now RESULT: 0 arm(s) failed of 7 (N=7), reproduced identically across 3 consecutive runs, and re-broken on demand by a mutant reintroducing a worktree prune call inside cmd_remove (RESULT: 1 arm(s) failed of 7, ARM6 caught it) then reverted byte-identical. Exercised directly against THIS worker's own worktree via provision/portal/remove (AC2, AC3, AC5).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": ".claude/skills/dispatch/SKILL.md",
+      "kind": "doc",
+      "commit_or_etag": "48102a8e9f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unchanged this session (byte-identical to the previously-recorded PASS at 79b56a7265 -- diff against git show 48102a8e9f:<file> is IDENTICAL). Step 4's prose names .tools/wk-provision.sh provision/--portal-ref/remove and the issuance's fanout: portal_ref: data; the literal git worktree add -b wk-<CODE>-<n> <path> HEAD line is UNCHANGED (worktree_add_line_kept 1 of 1, AC4) and no other paragraph in the file is touched.",
+      "artifact_covered_by": [
+        "AC4"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "3795d4f487",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "2 new rows appended by textual splice this session (377 -> 379 total, verified by JSON-parsing the fenced array both before and after): AMGT_RESAPP-Z-W60-S4 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z) and AMGT_RESAPP-Z-W60-S5 (OBSERVATION, INERT). surprise-row-gate.py confirmed at commit time: '2 new row(s) of 379 total checked (377 pre-existing, NOT re-graded)' and 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.' Rows S1-S3 (377 pre-existing) were appended by the prior stopped session at commit 48102a8e9f and stand unmodified."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the final line reads \"RESULT: 0 arm(s) failed of N\" with N at least 6, the arms named above it covering: portal provisioned into a temp directory's empty portal/ at the nested repository's HEAD (package.json present, rev-parse HEAD equal to the resolved ref, branch named wk-selftest-rk60-<n>-portal); a bad --portal-ref refused rc 2 with the temp portal/ still empty; a non-empty portal/ refused rc 2; link mode resolving ./node_modules/.bin/tsc --version; remove --portal-only leaving the nested repository's worktree list without the temp path; and a final cleanup arm proving every branch and worktree the self-test created is gone",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash .tools/wk-provision.sh --self-test 2>&1 | tail -25",
+      "output_evidence": "NODE_MODULES: link -> C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal/node_modules\nTSC: Version 5.9.3\nARM1: PASS\n== ARM 2: a bad --portal-ref refuses rc 2, creates nothing ==\nREFUSED: --portal-ref no-such-ref-rk60 does not resolve in C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal\nARM2: PASS\n== ARM 3: a non-empty portal/ refuses rc 2 ==\nPORTAL_REF: DEV -> 796f5c9cdd95587dcb381c80ddded1e9ce9c0cad\nGITLINK: 2453a7b4c6b7ff91ea89db499890a9486265d1a0 behind_ref=7\nREFUSED: C:/tmp/wk-amgt-14-60/.scratch/wkprov-selftest.DIJatS/wt3/portal is not empty; refusing to overwrite\nARM3: PASS\n== ARM 4: link mode resolves ./node_modules/.bin/tsc --version ==\nVersion 5.9.3\nARM4: PASS\n== ARM 5: remove --portal-only leaves the nested worktree list without the path, and recreates the empty placeholder ==\nREMOVED: C:/tmp/wk-amgt-14-60/.scratch/wkprov-selftest.DIJatS/wt1/portal\nPORTAL_WORKTREES_LISTING_PATH: 0 of 12\nARM5: PASS\n== ARM 6: no worktree prune runs -- an unrelated pre-existing prunable entry survives ==\nREMOVED: C:/tmp/wk-amgt-14-60/.scratch/wkprov-selftest.DIJatS/wt4/portal\nPORTAL_WORKTREES_LISTING_PATH: 0 of 13\nARM6: PASS\n== ARM 7: full cleanup -- every branch and worktree the self-test created is gone ==\nARM7: PASS\nRESULT: 0 arm(s) failed of 7",
+      "denominator": "0 of 7 arms failed (7 of 7 PASS); re-run 3 times total this session (once as the literal AC1 re-run, twice more as the determinism control below), ARM1..ARM7/RESULT lines identical every time",
+      "status": "PASS",
+      "expect": "RESULT: 0 arm\\(s\\) failed of [6-9]"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "distinct True (this is a linked worktree, not the main tree); gitlink reads \"160000 commit <sha> portal\"; portal_entries_before 0 of 0 expected; rc 0 with portal_ref_line 1 of 1 and gitlink_line 1 of 1 (the GITLINK line prints behind_ref=N, 6 at the cut, re-measured); package_json True, bun_lock True, security_analysis_dir True, lead_panel_endpoint True -- the two paths row W31-S1 found absent now exist; nested_head equals main_portal_head (the default ref is the nested repository's own HEAD, never the gitlink commit); nested_branch wk-AMGT_RESAPP-60-portal; nested_status_lines 0 of 0 expected (a clean checkout)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport os, subprocess\nwt = os.getcwd()\nmain = subprocess.run(['git', 'worktree', 'list', '--porcelain'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.splitlines()[0].replace('worktree ', '', 1)\nprint('main_tree', main, 'this_worktree', wt, 'distinct', os.path.normcase(main) != os.path.normcase(wt))\nprint('gitlink', subprocess.run(['git', 'ls-tree', 'HEAD', 'portal'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.strip())\nprint('portal_entries_before', len(os.listdir('portal')) if os.path.isdir('portal') else 'NO DIR', 'of 0 expected (the empty gitlink directory)')\nr = subprocess.run(['bash', '.tools/wk-provision.sh', 'portal', wt], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=110)\nout = r.stdout + r.stderr\nprint(out.strip()[-1500:])\nprint('rc', r.returncode)\nref_lines = [l for l in out.splitlines() if l.startswith('PORTAL_REF: ')]\ngl_lines = [l for l in out.splitlines() if l.startswith('GITLINK: ')]\nprint('portal_ref_line', len(ref_lines), 'of 1; gitlink_line', len(gl_lines), 'of 1')\nprint('package_json', os.path.exists('portal/package.json'), 'bun_lock', os.path.exists('portal/bun.lock'), 'security_analysis_dir', os.path.isdir('portal/src/pages/SecurityAnalysis'), 'lead_panel_endpoint', os.path.exists('portal/src/api/endpoints/amgt-lead-panel.ts'))\nhead_nested = subprocess.run(['git', '-C', 'portal', 'rev-parse', 'HEAD'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.strip()\nhead_main = subprocess.run(['git', '-C', os.path.join(main, 'portal'), 'rev-parse', 'HEAD'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.strip()\nprint('nested_head', head_nested, 'main_portal_head', head_main, 'equal', head_nested == head_main)\nprint('nested_branch', subprocess.run(['git', '-C', 'portal', 'rev-parse', '--abbrev-ref', 'HEAD'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.strip())\nprint('nested_status_lines', len(subprocess.run(['git', '-C', 'portal', 'status', '--short'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60).stdout.splitlines()), 'of 0 expected')\n\"",
+      "output_evidence": "main_tree C:/Users/Opal Bloomberg/Desktop/ajb_workspace this_worktree C:\\tmp\\wk-amgt-14-60 distinct True\ngitlink 160000 commit 2453a7b4c6b7ff91ea89db499890a9486265d1a0\tportal\nportal_entries_before 0 of 0 expected (the empty gitlink directory)\nPORTAL_REF: DEV -> 796f5c9cdd95587dcb381c80ddded1e9ce9c0cad\nGITLINK: 2453a7b4c6b7ff91ea89db499890a9486265d1a0 behind_ref=7\nHEAD is now at 796f5c9c fix(AMGT_RESAPP AMGT-rk-43, 0.9.0_WK_AMGT_RESAPP~45): honest six-state CEO reading + zero-officer ABSENT rendering\nPORTAL: C:\\tmp\\wk-amgt-14-60/portal branch=wk-amgt-14-60-portal\nNODE_MODULES: link -> C:/Users/Opal Bloomberg/Desktop/ajb_workspace/portal/node_modules\nTSC: Version 5.9.3\nPreparing worktree (new branch 'wk-amgt-14-60-portal')\nrc 0\nportal_ref_line 1 of 1; gitlink_line 1 of 1\npackage_json True bun_lock True security_analysis_dir True lead_panel_endpoint True\nnested_head 796f5c9cdd95587dcb381c80ddded1e9ce9c0cad main_portal_head 796f5c9cdd95587dcb381c80ddded1e9ce9c0cad equal True\nnested_branch wk-amgt-14-60-portal\nnested_status_lines 0 of 0 expected",
+      "denominator": "1 of 1 invocation; every measured field matches except one literal string (nested_branch)",
+      "status": "PASS",
+      "status_reason": "Every measured value matches the expectation except the ILLUSTRATIVE literal branch string: expected 'wk-AMGT_RESAPP-60-portal', measured 'wk-amgt-14-60-portal'. This is the CORRECT output of the ruled mechanism ('the branch name derived from the superproject worktree's branch') applied to this worktree's ACTUAL branch (wk-amgt-14-60) -- the order's illustrative string assumed a different naming convention than dispatch actually uses this round. Filed as AMGT_RESAPP-Z-W60-S1 (OBSERVATION, INERT) by the prior session; graded PASS on the mechanism, which is what the criterion's prose actually names. Re-measured fresh this session (branch deleted and re-provisioned, since a prior AC2 run in this same session left the branch registered), identical result."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "node_modules_is_link_or_dir True and bin_tsc True (link mode reached the main tree's node_modules through the link); tsc_rc 0 printing \"Version X.Y.Z\" -- the compiler resolves BY PATH inside the provisioned portal, which is the resolution AMGT-rk-53 AC6 and every page cell use (never npx); same_version True against the main tree's own ./node_modules/.bin/tsc --version ISSUER REPAIR (2.0.0_SA_COO~Z, on row W60-S2): the shim at node_modules/.bin/tsc is a POSIX shebang script that native-Windows Python cannot CreateProcess (WinError 193), so both calls go through bash -c -- the resolution is still BY PATH inside the provisioned portal; a version printed through bash meets the criterion ISSUER REPAIR 2 (2.0.0_SA_COO~Z, on row W60-S4): the comparison call anchors the SUPERPROJECT's worktree list from the parent directory of portal/ (`git -C <parent>`), so its first entry is the main ajb_workspace tree and `<main>/portal` is the main portal; the path-doubling NotADirectoryError was this invocation's own defect, not the script's",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" && python -c \"\nimport os, subprocess\nprint('node_modules_is_link_or_dir', os.path.isdir('node_modules'), 'bin_tsc', os.path.exists('node_modules/.bin/tsc'))\nr = subprocess.run(['bash', '-c', './node_modules/.bin/tsc --version'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60, shell=False)\nprint('tsc_rc', r.returncode, (r.stdout + r.stderr).strip()[-200:])\nn = subprocess.run(['bash', '-c', './node_modules/.bin/tsc --version'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=60, cwd=os.path.join(subprocess.run(['git', '-C', os.path.dirname(os.getcwd()), 'worktree', 'list', '--porcelain'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.splitlines()[0].replace('worktree ', '', 1), 'portal'))\nprint('main_tree_tsc', (n.stdout + n.stderr).strip()[-200:], 'same_version', (r.stdout or '').strip() == (n.stdout or '').strip())\n\"",
+      "output_evidence": "node_modules_is_link_or_dir True bin_tsc True\ntsc_rc 0 Version 5.9.3\nmain_tree_tsc Version 5.9.3 same_version True",
+      "denominator": "1 of 1 literal invocation (second-repaired form, per the issuer's 928352b513, which anchors the comparison call's git worktree list at os.path.dirname(os.getcwd()) -- the superproject worktree, from portal/'s own parent) run under timeout 120; rc 0; re-run twice in this session (fresh 0.9.0_WK_AMGT_RESAPP~60 session, portal re-provisioned since the prior session's AC5/self-test cleanup had removed it), identical output both times",
+      "status": "PASS",
+      "status_reason": "ISSUER REPAIR 2 (928352b513) fixes the SECOND defect row W60-S4 named: the comparison call's own git worktree list --porcelain now runs with -C os.path.dirname(os.getcwd()) -- since cwd is portal/, dirname is the superproject worktree, so the first porcelain entry is the superproject (not the nested repository's own worktree list) and the subsequent os.path.join(..., 'portal') lands on the real main-tree portal, not a doubled path. All four measured values now match the criterion exactly: node_modules_is_link_or_dir True, bin_tsc True, tsc_rc 0 printing 'Version 5.9.3' (the substantive fact -- tsc resolves BY PATH inside the provisioned portal, never npx), and same_version True against the main tree's own tsc. Row AMGT_RESAPP-Z-W60-S4 stands as the historical record of the pre-repair crash; this re-run is against the repaired bytes at 928352b513 and PASSES on its own literal invocation with no further departure."
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "mentions_wk_provision_now at least 2 (provision and remove) with at_head 0; portal_ref_word_now at least 1 with at_head 0 (\"the issuance says which\"); worktree_add_line_kept 1 of 1; non_ascii_now equals non_ascii_head (the skill already carries non-ASCII glyphs and this order adds or removes none); script_non_ascii 0, script_crlf 0, script_set_uo_pipefail 1; skill_numstat shows the one file with added lines confined to Step 4",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport io, subprocess\nf = '.claude/skills/dispatch/SKILL.md'\nnow = io.open(f, 'rb').read()\nhead = subprocess.run(['git', 'show', 'HEAD:' + f], capture_output=True, timeout=30).stdout\nprint('mentions_wk_provision_now', now.count(b'wk-provision.sh'), 'at_head', head.count(b'wk-provision.sh'))\nprint('portal_ref_word_now', now.count(b'portal_ref:'), 'at_head', head.count(b'portal_ref:'))\nprint('worktree_add_line_kept', now.count(b'git worktree add -b wk-' + b'<CO' + b'DE>-<n> <path> HEAD'), 'of 1')\nprint('non_ascii_now', len(now) - len(now.decode('utf-8')), 'non_ascii_head', len(head) - len(head.decode('utf-8')))\ns = io.open('.tools/wk-provision.sh', 'rb').read()\nprint('script_non_ascii', len(s) - len(s.decode('utf-8')), 'script_crlf', s.count(b'\\r\\n'), 'script_set_uo_pipefail', s.count(b'set -uo pipefail'))\nd = subprocess.run(['git', 'diff', '--numstat', 'HEAD', '--', f], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.strip()\nprint('skill_numstat', d)\n\"",
+      "output_evidence": "mentions_wk_provision_now 2 at_head 2\nportal_ref_word_now 1 at_head 1\nworktree_add_line_kept 1 of 1\nnon_ascii_now 178 non_ascii_head 178\nscript_non_ascii 0 script_crlf 0 script_set_uo_pipefail 1\nskill_numstat",
+      "denominator": "1 of 1 invocation; 4 of 6 fields match exactly (worktree_add_line_kept, non_ascii_now/non_ascii_head equal, script_non_ascii, script_crlf, script_set_uo_pipefail); 2 of 6 diverge (at_head reads 2/1 not 0/0; skill_numstat reads empty not non-empty)",
+      "status": "PASS",
+      "status_reason": "PASS on the mechanism this criterion exists to police (analogous to AC2/row S1): SKILL.md's own content is byte-identical to the previously-recorded PASS (diff against git show 48102a8e9f:<file> is IDENTICAL -- zero drift), and against the TRUE pre-cell baseline (047aee5478, the round-14 issuance drain, before this cell's own commits) the SAME measurement reads mentions_wk_provision_now 2 at_baseline 0 and portal_ref_word_now 1 at_baseline 0 -- exactly matching the order's literal expectation. The literal invocation's bare 'HEAD' now resolves to this cell's OWN prior commit (48102a8e9f, already on this branch from the previous stopped session, plus the issuer's repair commit fae9316edb on top) rather than the pre-cell baseline, so it can no longer discriminate 'new since baseline' -- a resumed-session GRAIN mismatch (Rule 22), not a defect in the skill file or the script. Filed as AMGT_RESAPP-Z-W60-S5 (OBSERVATION, INERT)."
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "nested_worktrees_before N with listing_this_path 1 of 1; rc 0; nested_worktrees_after N-1 with listing_this_path 0 of 0 and prunable_entries equal to the pre-existing count (the removal registers no new prunable entry; the pre-existing C:/tmp/wk-amgt-10-1/portal prunable entry, if still present at spawn, is reported, not pruned by you); portal_dir_exists True with portal_entries 0 of 0 -- the worktree is back to the empty gitlink directory the COO's drain expects; main_node_modules_intact True and main_package_json True (removing the link never touched the main tree's node_modules); superproject_status (clean)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport os, subprocess\nwt = os.getcwd()\nmain = subprocess.run(['git', 'worktree', 'list', '--porcelain'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.splitlines()[0].replace('worktree ', '', 1)\nnested = os.path.join(main, 'portal')\nbefore = subprocess.run(['git', '-C', nested, 'worktree', 'list'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout\nprint('nested_worktrees_before', len(before.splitlines()), 'listing_this_path', sum(1 for l in before.splitlines() if os.path.normcase(os.path.join(wt, 'portal')).replace(os.sep, '/') in os.path.normcase(l).replace(os.sep, '/')), 'of 1')\nr = subprocess.run(['bash', '.tools/wk-provision.sh', 'remove', wt, '--portal-only'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=110)\nprint((r.stdout + r.stderr).strip()[-800:])\nprint('rc', r.returncode)\nafter = subprocess.run(['git', '-C', nested, 'worktree', 'list'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout\nprint('nested_worktrees_after', len(after.splitlines()), 'listing_this_path', sum(1 for l in after.splitlines() if os.path.normcase(os.path.join(wt, 'portal')).replace(os.sep, '/') in os.path.normcase(l).replace(os.sep, '/')), 'of 0', 'prunable_entries', after.count('prunable'))\nprint('portal_dir_exists', os.path.isdir('portal'), 'portal_entries', len(os.listdir('portal')) if os.path.isdir('portal') else 'NO DIR', 'of 0')\nprint('main_node_modules_intact', os.path.isdir(os.path.join(nested, 'node_modules')), 'main_package_json', os.path.exists(os.path.join(nested, 'package.json')))\nprint('superproject_status', subprocess.run(['git', 'status', '--short', '--', 'portal'], capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=30).stdout.strip() or '(clean)')\n\"",
+      "output_evidence": "nested_worktrees_before 13 listing_this_path 1 of 1\nREMOVED: C:\\tmp\\wk-amgt-14-60/portal\nPORTAL_WORKTREES_LISTING_PATH: 0 of 12\nrc 0\nnested_worktrees_after 12 listing_this_path 0 of 0 prunable_entries 0\nportal_dir_exists True portal_entries 0 of 0\nmain_node_modules_intact True main_package_json True\nsuperproject_status (clean)",
+      "denominator": "1 of 1 invocation; 8 of 8 measured sub-values match exactly (nested_worktrees_before/after, listing_this_path both times, rc, prunable_entries, portal_dir_exists/portal_entries, main_node_modules_intact/main_package_json, superproject_status)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reintroduced the retired behavior inside cmd_remove: added git -C \"$nested\" worktree prune immediately after the placeholder-recreation mkdir -p \"$portal_dir\" (one line inserted, snapshotted first to .scratch/wk-provision.sh.pre-mutant-rk60b) -- exactly the regression ARM6 exists to catch after this session's ARM6-grep-scoping fix.",
+      "expected": "The self-test's ARM 6 (no worktree prune runs) fails, since cmd_remove now genuinely calls worktree prune again; every other arm is unaffected. Reverting the mutant restores the exact pre-mutant bytes and a clean self-test.",
+      "observed": "Mutant run: ARM6: FAIL (ERROR: cmd_remove's own body still calls \"worktree prune\"), ARM1-5/7 PASS, RESULT: 1 arm(s) failed of 7. Reverted via cp .scratch/wk-provision.sh.pre-mutant-rk60b .tools/wk-provision.sh; diff against the pre-mutant snapshot confirmed byte-identical (IDENTICAL after revert); re-run: RESULT: 0 arm(s) failed of 7, matching the pre-mutant baseline.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "bash .tools/wk-provision.sh --self-test run 3 times in succession (post-revert, clean bytes): once captured for AC1's own record, twice more as a2/b2 for this control, ARM1..ARM7/RESULT lines diffed.",
+      "observed": "All 3 runs: ARM1: PASS / ARM2: PASS / ARM3: PASS / ARM4: PASS / ARM5: PASS / ARM6: PASS / ARM7: PASS / RESULT: 0 arm(s) failed of 7 -- diff between the a2/b2 captures reported no differences (IDENTICAL). AC4's invocation (pure byte/subprocess reads, no mutation) is separately deterministic by construction (reads committed bytes only).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4's invocation was not rewritten to diff SKILL.md against a named historical commit (e.g. the round-14 issuance drain 047aee5478) instead of bare HEAD, even though that comparison independently confirms the substantive claim.",
+      "reason": "The order's invocations are literal; substituting a different reference commit into AC4's own inlined python would be building a route this order does not name. The independent confirmation against 047aee5478 is recorded as SUPPLEMENTARY evidence for the PASS-on-mechanism grading (row S5), never as a replacement for the literal invocation's own output, which is recorded verbatim above."
+    },
+    {
+      "item": "No change to section 1's ruled remove-verb steps beyond what the issuer's own repair (fae9316edb) already ruled.",
+      "reason": "Section 1, as repaired, now names exactly the placeholder-recreation and no-prune steps this session's script implements; AC5 passes exactly against that repaired ruling this session, so no further departure was needed or taken."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W60-S1: AC2's expected literal branch string (wk-AMGT_RESAPP-60-portal) does not match this worker's actual dispatch-assigned branch (wk-amgt-14-60), so the correctly-derived portal branch reads wk-amgt-14-60-portal. OBSERVATION, INERT. (Filed by the prior session; stands unmodified.)",
+    "AMGT_RESAPP-Z-W60-S2: AC3's literal native-Python subprocess.run(['./node_modules/.bin/tsc', '--version'], shell=False) cannot execute the resolved binary (an extensionless POSIX shell shim) -- OSError WinError 193. BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z. (Filed by the prior session; addressed by the issuer's own repair fae9316edb, which this session's AC3 re-run confirms fixed the WinError 193 path -- the first tsc call now succeeds.)",
+    "AMGT_RESAPP-Z-W60-S3: Section 1's PRE-REPAIR ruled remove-verb steps (an unconditional nested worktree prune, and no placeholder-directory recreation) did not reproduce AC5's own literal expected end-state. BLOCKING, INERT. (Filed by the prior session against the pre-repair ruling; the issuer's own repair fae9316edb addressed exactly this, and this session's AC5 re-run confirms the repaired ruling now matches AC5 exactly.)",
+    "AMGT_RESAPP-Z-W60-S4: AC3's literal invocation still crashes after the issuer's bash-c repair, on a SECOND, different defect: its own comparison call re-runs 'git worktree list --porcelain' from inside portal/ (a distinct nested repository), so it resolves the NESTED repo's own main worktree instead of the superproject's, appends 'portal' a second time, and hands subprocess.run a cwd that does not exist. BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~Z. (Filed by the prior session; addressed by the issuer's second repair 928352b513, which anchors the comparison call's git worktree list at os.path.dirname(os.getcwd()) -- this session's fresh AC3 re-run, in a re-provisioned portal/, confirms tsc_rc 0 and same_version True, no crash, run twice identically.)",
+    "AMGT_RESAPP-Z-W60-S5: AC4's 'at_head 0' / non-empty 'skill_numstat' expectation cannot be reproduced literally in this RESUMED session, because this worker's own earlier commit (48102a8e9f) already carries the SKILL.md edit and sits on this branch's HEAD -- diffing 'HEAD' now measures zero delta, not because the edit is missing but because HEAD has moved past the point it was introduced. OBSERVATION, INERT."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~60/SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "bash -n (syntax check)",
+      "invocation": "bash -n .tools/wk-provision.sh",
+      "result": "SYNTAX-OK, both after this session's ARM5/6/7 fixes and after the mutant revert."
+    },
+    {
+      "tool": "python (byte-level non-ASCII / CRLF check)",
+      "invocation": "python -c \"s=open('.tools/wk-provision.sh','rb').read(); print(len(s)-len(s.decode('utf-8')), s.count(b'\\r\\n'), s.count(b'set -uo pipefail'))\"",
+      "result": "0 non-ASCII bytes, 0 CRLF sequences, 1 occurrence of 'set -uo pipefail' -- matches AC4's script_non_ascii/script_crlf/script_set_uo_pipefail values."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~60 <0.9.0_WK_AMGT_RESAPP~60@opal.agent>\" -F .scratch/commit_msg_fix.txt -- .tools/wk-provision.sh org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "Commit 3795d4f487. risk-reflex REFLEX CLEAN (2 of 2 files checked against 1662 danger nodes, PRESENT_WITH_ZERO_RESULTS). commit-gate OK (bash -n clean, comp-shell scan clean, pre-commit gate clean for 1 of 2 files -- the surprise-channel .md is outside that gate's suffix set, expected). to-pipeline-gate OK (no task_orders/*.md staged-added). surprise-corpus OK (matches exact legacy baseline, 4 known failures unchanged, 0 new). surprise-row-gate OK: 2 new row(s) of 379 total checked, all carry their step-7/step-10 fields."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4,AC5",
+      "result": "see the worker report -- run from THIS worktree's own copy, post-commit"
+    }
+  ]
+}

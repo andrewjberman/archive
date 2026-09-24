@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-111",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-111.sa-identity-company-name.md",
+    "group": "W",
+    "vintage_commit": "0ed364cff014697720af7bcd9931f254cf83d827"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "0ed364cff014697720af7bcd9931f254cf83d827",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-111.sa-identity-company-name.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~111",
+  "session_log": "AMGT_RESAPP.TO-AMGT-rk-111, cell AMGT-rk-111 (round 28, the Lenovo trial's wave 0; row AMGT_RESAPP-Z-S219). Worker 0.9.0_WK_AMGT_RESAPP~111, L7 subagent of 2.0.0_SA_COO~Z, branch wk-amgt-28-111 in worktree C:/tmp/wk-amgt-28-111, base 0ed364cff0. THE BAR FIRST: branch wk-amgt-28-111, org/ and .tools/ present, TREE-OK. Order read WORKER FACE only, top to the RECORD FACE marker. Snapshotted the pin's bytes of sa_forecast_fallback.py to .scratch/r111/pin_sa_forecast_fallback.py via `git show 0ed364cff0:...` (never checkout --/stash/show :path -- an explicit-ref git show, the form this repo's own rules use for a slashed ref) before any edit, so AC0's pre-edit line/baseline could be re-derived faithfully even though the edit landed first in this session's actual order of operations (a self-noted ordering slip, corrected by temporarily swapping the pin bytes back into the worktree file, running AC0's literal invocation, then restoring the edited bytes -- confirmed byte-identical to the edited version by diff before continuing). Changed line 239 (now 240, one line earlier in the function gained a new `sa_name_field` dict key) from `sa_attrs.get(\"name\") or sa_attrs.get(\"companyName\")` to `sa_attrs.get(\"companyName\") or sa_attrs.get(\"name\")`, preferring companyName and falling back to the ticker-shaped `name` only when companyName is absent. Added `sa_name_field` (\"companyName\"|\"name\"|None) to _terminal's signature and every terminal/success record dict, threaded from the point sa_name is computed through every return path after it (the entity-refusal terminal, the two post-symbol-fetch metrics-stage terminals (TRANSPORT_ERROR/REHARVEST/non-OK), and the final success record) -- the three early terminals BEFORE sa_attrs is fetched (no candidate, symbol-fetch TRANSPORT_ERROR/REHARVEST/non-OK) are unchanged and still carry no sa_name_field (None by the dict default), since no SA reply exists yet to name a field from. Wrote integrations/bloomberg/research/tests/test_sa_identity_company_name.py (new, 4 tests) driving run_fallback with the same offline FakeRF/FakeResponse stub pattern test_forecast_fallback.py uses (no vendor call, no S3 call, no network): test_companyname_preferred_over_ticker (BA/\"The Boeing Company\" vs block name \"BOEING CO/THE\" -- passes, sa_name_field==companyName); test_lenovo_adr_line (LNVGY/\"Lenovo Group Limited\" vs \"LENOVO GROUP LTD\" -- entity_test measured directly first via a standalone python -c call before writing the assertion: True, because \"ltd\"/\"limited\"/\"group\" all fold to _STOP_TOKENS, leaving both names as the single word set {\"lenovo\"}, jaccard 1.0 -- recorded as the ACTUAL result per the order's own instruction, entity_test left untouched, no widening); test_mismatched_company_still_refuses (ROG/\"Rogers Corporation\" vs \"Roche Holding AG\" -- refuses, same standing negative control as test_forecast_fallback.py's own); test_name_only_reply_falls_back_and_says_so (Caterpillar Inc./no companyName -- passes, sa_name_field==name). Committed the two code paths first (63a11651f2) so AC3's `git diff 96cc4dae9d HEAD` invocation reads the landed change; AC0-AC3 then re-run in order against that HEAD, plus a MUTANT CONTROL run and restore after landing (below). No S3 write, no S3 delete, no AWS call, no vendor call anywhere in this session -- every SA reply is a FakeRF/FakeResponse stub object this test file constructs. entity_test, the SA field map, rest_fetch.py and every S3 object are unchanged (WALLS per section 1 and section 4's THE REFUSAL CLAUSE). Nothing outside <paths> touched. Branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50 never read, shown, diffed or checked out.",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/sa_forecast_fallback.py",
+      "kind": "script",
+      "commit_or_etag": "63a11651f2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "sa_name now prefers attributes.companyName, falling back to attributes.name only when companyName is absent; every terminal/success record now carries sa_name_field naming which attribute was actually compared -- AC0/AC1/AC2/AC3 confirm the change and that the 13 pre-existing fallback arms are unaffected."
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_sa_identity_company_name.py",
+      "kind": "test",
+      "commit_or_etag": "63a11651f2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "new offline test file, 4 of 4 named AC1 arms passing over stub SA replies -- no network, no live bucket, no vendor call."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-111.sa-identity-company-name.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "record-face <status> flipped pending -> complete."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~111/AMGT_RESAPP.TO-AMGT-rk-111.sa-identity-company-name.proof_of_spec.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "this instance."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC0",
+      "criterion_verbatim": "BEFORE any edit: the line preferring attributes \"name\"; then S0 (13 passed). Record S0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && sed -n '239p' integrations/bloomberg/research/sa_forecast_fallback.py && python -m pytest integrations/bloomberg/research/tests/test_forecast_fallback.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "    sa_name = sa_attrs.get(\"name\") or sa_attrs.get(\"companyName\") or \"\"\n13 passed in 0.24s",
+      "denominator": "re-derived by temporarily swapping the pinned pre-edit bytes (git show 0ed364cff0:integrations/bloomberg/research/sa_forecast_fallback.py, saved before this session's first edit) back into the worktree file, running this literal invocation once, then restoring the edited bytes (confirmed byte-identical to the committed blob afterward via md5sum). Line 239 at the pin reads exactly the TICKER-preferring form named in section 1; S0 = 13 of 13 passed, 0 failed.",
+      "status": "PASS",
+      "expect": "sa_attrs\\.get\\(\"name\"\\)[\\s\\S]*13 passed"
+    },
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "\"4 passed\" and 0 failed, with the four named arms PASSED (test_lenovo_adr_line asserting whichever result the entity rule actually gives, with a row filed if it refuses)",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests/test_sa_identity_company_name.py -v --color=no -p no:cacheprovider 2>&1 | tail -7",
+      "output_evidence": "integrations/bloomberg/research/tests/test_sa_identity_company_name.py::test_companyname_preferred_over_ticker PASSED [ 25%]\nintegrations/bloomberg/research/tests/test_sa_identity_company_name.py::test_lenovo_adr_line PASSED [ 50%]\nintegrations/bloomberg/research/tests/test_sa_identity_company_name.py::test_mismatched_company_still_refuses PASSED [ 75%]\nintegrations/bloomberg/research/tests/test_sa_identity_company_name.py::test_name_only_reply_falls_back_and_says_so PASSED [100%]\n\n4 passed in 0.03s",
+      "denominator": "4 of 4 named tests PASSED, 0 failed. test_lenovo_adr_line asserts the MEASURED actual result (entity_test True -- 'Ltd'/'Limited'/'Group' all fold to _STOP_TOKENS leaving both names as {'lenovo'}, jaccard 1.0); no refusal occurred so no row was needed for that arm.",
+      "status": "PASS",
+      "expect": "test_companyname_preferred_over_ticker PASSED[\\s\\S]*test_lenovo_adr_line PASSED[\\s\\S]*test_mismatched_company_still_refuses PASSED[\\s\\S]*test_name_only_reply_falls_back_and_says_so PASSED[\\s\\S]*4 passed"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "\"S0 passed\" and 0 failed: every existing fallback arm is unchanged",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest integrations/bloomberg/research/tests/test_forecast_fallback.py -q --color=no -p no:cacheprovider 2>&1 | tail -1",
+      "output_evidence": "13 passed in 0.31s",
+      "denominator": "13 of 13 passed (S0 baseline from AC0), 0 failed -- run twice post-commit for determinism, identical both times (0.31s, 0.29s).",
+      "status": "PASS",
+      "expect": "13 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "\"changed_code_files\" lists EXACTLY integrations/bloomberg/research/sa_forecast_fallback.py and integrations/bloomberg/research/tests/test_sa_identity_company_name.py; each \"compiles True crlf 0\" and non_ascii_chars equal to the value at the pin",
+      "method": "diff",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r111/ac4.py",
+      "output_evidence": "changed_code_files ['integrations/bloomberg/research/sa_forecast_fallback.py', 'integrations/bloomberg/research/tests/test_sa_identity_company_name.py']\nintegrations/bloomberg/research/sa_forecast_fallback.py compiles True crlf 0 non_ascii_chars 0\nintegrations/bloomberg/research/tests/test_sa_identity_company_name.py compiles True crlf 0 non_ascii_chars 0",
+      "denominator": "2 of 2 changed files are exactly the named set (git diff 96cc4dae9d HEAD over lib/integrations/infra/.tools/portal); both compile True, crlf 0, non_ascii_chars 0; pin non_ascii_chars for sa_forecast_fallback.py measured 0 via the same pin snapshot used for AC0 (the new test file did not exist at the pin, so its pin value is the empty/0 baseline of a new file) -- run twice post-commit, identical both times.",
+      "status": "PASS",
+      "expect": "changed_code_files \\['integrations/bloomberg/research/sa_forecast_fallback\\.py', 'integrations/bloomberg/research/tests/test_sa_identity_company_name\\.py'\\][\\s\\S]*compiles True crlf 0 non_ascii_chars 0[\\s\\S]*compiles True crlf 0 non_ascii_chars 0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The identity fix's whole load-bearing claim is that companyName is preferred over the ticker-shaped name. MUTANT: reverted the sa_name assignment in the working tree only (post-commit bytes) back to `sa_attrs.get(\"name\") or sa_attrs.get(\"companyName\") or \"\"` (the pre-fix ticker-first order), sa_name_field's own logic left untouched, then re-ran test_companyname_preferred_over_ticker alone.",
+      "expected": "the mutant makes test_companyname_preferred_over_ticker FAIL: with name=\"BA\" preferred, entity_test(\"BOEING CO/THE\", \"BA\") is False (BA folds to no >=4-char word, so the jaccard branch returns False on an empty side), so result[\"record\"][\"entity_test\"] is False, not True as asserted",
+      "observed": "FAILED -- assert False is True at the entity_test assertion (1 failed in 0.09s). Restored sa_forecast_fallback.py from .scratch/r111/post_commit_sa_forecast_fallback.py.snap (a plain binary file copy of the committed bytes, taken before mutating; never git checkout --/git show :path/git stash) immediately after, confirmed md5sum-identical to the committed blob (git cat-file -p HEAD:... vs the working file, both 828deb27378b0ca60977f809447d9de3), and re-ran AC1/AC2/AC3 once more, all unchanged.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Every criterion is a pure offline read: pytest against in-process FakeRF/FakeResponse stubs (no network, no AWS, no vendor call), or a local git diff/git show/compile() read against this worktree's own committed bytes. AC0 was run once as the literal combined invocation (sed+pytest) against temporarily-restored pin bytes. AC1/AC2/AC3 were each run twice post-commit with byte-identical output evidence both times.",
+      "observed": "AC1 [4 passed] stable across 2 runs (0.03s both); AC2 [13 passed] stable across 2 runs (0.31s, 0.29s); AC3's exact 2-file list and all crlf/non_ascii lines stable across 2 runs, byte-identical. The mutant run and its restore-then-rerun of AC1/AC2/AC3 is a third, differentiating data point: AC1 alone changes (1 failed) under the mutant and reverts to 4 passed on restore, while AC2/AC3 are untouched by the mutant (the mutant only affects test_sa_identity_company_name.py's own assertions).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "entity_test itself",
+      "reason": "section 1 'What this cell does NOT change' and section 4 THE REFUSAL CLAUSE name it a WALL; test_lenovo_adr_line records the actual result rather than widening the rule."
+    },
+    {
+      "item": "the SA field map, rest_fetch.py, any S3 object",
+      "reason": "section 1 'What this cell does NOT change' -- no edit was made, no grant was needed."
+    },
+    {
+      "item": "any Seeking Alpha, Bright Data, or Bloomberg vendor call; any AWS/S3 call",
+      "reason": "CODE ONLY per the hard limits and section 4 BOUNDS -- every SA reply is a stub FakeRF/FakeResponse object."
+    },
+    {
+      "item": "branch wk-amgt-14-50 / C:/tmp/wk-amgt-14-50",
+      "reason": "never read, shown, diffed or checked out, per the order's own instruction."
+    }
+  ],
+  "surprises": [],
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_forecast_fallback.py -q --color=no -p no:cacheprovider",
+      "result": "13 passed in 0.24s (pre-edit, pin bytes) / 13 passed in 0.31s and 0.29s (post-commit, edited bytes)"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_sa_identity_company_name.py -v --color=no -p no:cacheprovider",
+      "result": "4 passed in 0.03s (run twice, identical)"
+    },
+    {
+      "tool": "git show / compile() (custom script .scratch/r111/ac4.py)",
+      "invocation": "python .scratch/r111/ac4.py",
+      "result": "changed_code_files exactly the 2 named files; both compile True crlf 0 non_ascii_chars 0 (run twice, identical)"
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~111 <0.9.0_WK_AMGT_RESAPP~111@opal.agent>\" -F <msgfile> -- integrations/bloomberg/research/sa_forecast_fallback.py integrations/bloomberg/research/tests/test_sa_identity_company_name.py",
+      "result": "63a11651f2, 2 files changed, 193 insertions(+), 2 deletions(-)"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~111/AMGT_RESAPP.TO-AMGT-rk-111.sa-identity-company-name.proof_of_spec.json AC0,AC1,AC2,AC3",
+      "result": "PENDING -- run after this instance is written"
+    }
+  ]
+}

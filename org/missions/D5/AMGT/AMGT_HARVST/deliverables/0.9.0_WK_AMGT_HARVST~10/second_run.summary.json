@@ -1,0 +1,25 @@
+{
+  "invocation": "HARVEST_REFUSE_NETWORK=1 python -m lib.opal_data_harvest run --runtime-root <main-worktree>/.runtime/opal-data-harvest --publishers sa bbg ft wsj barrons --retrieval-mode backfill --floor 2026-01-01 --security-json lenovo.security.json --bbg-symbol-probe --harvest-grammar --max-jobs 5",
+  "invocation_at": "2026-09-23T00:45:27Z",
+  "first_run_invocation_at": "2026-09-23T00:23:01Z",
+  "same_utc_date": true,
+  "rc": 2,
+  "http_events": 0,
+  "events_jsonl_lines_before": 281,
+  "events_jsonl_lines_after": 286,
+  "network_refused_hits": 4,
+  "status": "4_of_5_publisher_paths_refused_wsj_replayed_barrons_cooldown_short_circuit",
+  "status_reason": "The Phase 0b fix worked exactly as intended: the process did not crash and reached job_finished for all five publishers plus the probe. bbg's probe hit the refuser (RuntimeError('network refused'), recorded UNRESOLVED-CHALLENGED, matching item 4's own real challenge in spirit). sa, bbg (its Worker.run() job, separately from the probe) and ft each hit the refuser too (RuntimeError('network refused'), status=error) because none of them had a replayable path for what this run needed: sa's session-check call itself needs the network (its account-check happens before any content lookup), bbg's job needs a fresh session build, and ft's job likewise. wsj correctly replayed all 11 of its accepted articles from the legacy catalog (Publisher.reuse(), zero network) and finished complete_candidates. barrons short-circuited on its own cooldown state (set by item 4's own request_rejected result, cooldown until ~900s later) before reaching any session/network code at all -- not a refusal, a pre-existing cooldown gate.",
+  "publisher_outcomes": {
+    "sa": {"status": "REFUSED", "error_type": "RuntimeError", "reason": "network refused -- sa's job needs a live session/account check before any content lookup, and none was held"},
+    "bbg": {"status": "REFUSED", "error_type": "RuntimeError", "reason": "network refused -- bbg's job needs a fresh session build; item 4 never captured a working bbg session to replay"},
+    "ft": {"status": "REFUSED", "error_type": "RuntimeError", "reason": "network refused -- ft's job needs a fresh session build; item 4 got 403 and captured nothing to replay"},
+    "wsj": {"status": "REPLAYED-NO-NETWORK", "reason": "All 11 of item 4's accepted articles replayed via the legacy catalog's Publisher.reuse() path, zero network calls, status complete_candidates"},
+    "barrons": {"status": "COOLDOWN-SHORT-CIRCUIT", "reason": "item 4's own request_rejected result set a cooldown (900s); this run's job read that cooldown state and stopped before any session/network code ran at all -- not a refusal, a separate short-circuit"}
+  },
+  "probe": {
+    "verdict": "UNRESOLVED-CHALLENGED",
+    "reason": "RuntimeError: network refused",
+    "note": "Counted as ONE of the four network_refused_hits above."
+  }
+}

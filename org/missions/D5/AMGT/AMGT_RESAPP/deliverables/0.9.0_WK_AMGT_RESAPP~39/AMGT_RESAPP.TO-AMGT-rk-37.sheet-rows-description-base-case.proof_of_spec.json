@@ -1,0 +1,241 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rk-37",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-37.sheet-rows-description-base-case.md",
+    "group": "OTHER",
+    "vintage_commit": "53c2d5f3277d5d3d210c8844be599af509d8b8c7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "8414f6cb404c72492db2feda8bb4d179c445fe2c",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rk-37.sheet-rows-description-base-case.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~39",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "fe0435ce53",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "CIE_DES/CIE_DES_BULK joined HEADER_FIELDS (CIE_DES_BULK's raw list-of-row-dicts shape joined to a single string by _bulk_text_value, used identically in the figures loop and in _ensure_unit_map's header_for_units copy, so the builder and the derive never disagree about the joined text); REVENUE_PER_SH/FREE_CASH_FLOW_YIELD/FREE_CASH_FLOW_MARGIN/PROF_MARGIN joined HIST_FIELDS (adopted from the CAT candidate-probe); RoTA's two candidates (RETURN_ON_TOT_ASSETS, RETURN_ON_TOTAL_ASSETS) both refused BAD_FLD/INVALID_FIELD and RoTA joins neither list, per the RULED honest-outcome instruction; _compute_cases(figures) writes cases.base (SERVED with inputs/window, or ABSENT with the block's own reason) and cases.upside/downside (always the ruled ABSENT dict) onto the derived block, once, at derive. Live-exercised: 1 CAT candidate-probe + 15 pull requests (5 x 3 validation names) = 16 of 16 Bloomberg requests; pull+derive ran clean on all three names (AC1/AC3 PASS). Deployed indirectly via the opal-amgt-scoped-api artifact (this module runs on this box; the adapter that SERVES read_model's cases is what redeployed).",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/build_unit_map.py",
+      "kind": "script",
+      "commit_or_etag": "fe0435ce53",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "TEXT_FIELDS gains CIE_DES/CIE_DES_BULK (a string is a MEASURED text unit, as NAME already is); PERCENT_FIELDS gains FREE_CASH_FLOW_YIELD/FREE_CASH_FLOW_MARGIN/PROF_MARGIN (CAT-measured magnitudes 2.39/11.03/13.14, all >= 0.3, discriminate PERCENT); PER_SHARE_FIELDS gains REVENUE_PER_SH (CAT-measured 143.81, inside the 0-2000 band). Exercised live in the derive: every landed figure for the four new HIST rows and the two new header fields on CAT/CSL/6861 carries a unit resolved through this classification (AC1's fiscal_values > 0 confirms well-formed figures).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/api/scoped_amgt.py",
+      "kind": "script",
+      "commit_or_etag": "fe0435ce53",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "DESCRIPTION_HEADER_MNEMONICS gains CIE_DES_BULK, order preserved (CIE_DES else CIE_DES_BULK). _describes_business_test(sentence) implements the cut's three sub-rules (a: no amount/magnitude token or 4-digit year; b: a business-descriptor phrase; c: none of the measure phrases), checked in order, first-failure named as failed_on. read_description iterates DESCRIPTION_HEADER_MNEMONICS explicitly (not incidental HEADER_FIELDS order), serves 'bloomberg {mnemonic}' on a non-empty header scalar, gates the drafted-sentence route behind the test (a failing sentence is never served), and on full fallthrough returns probes: one entry per header mnemonic plus the drafting probe (3 total), with describes_business_test carrying the failed test's own {passed:False, rule, failed_on} when a sentence was tried and failed. _model_cases(model_block) serves the block's cases.base AS LANDED (SERVED with inputs/window or ABSENT with the block's own reason; ABSENT with a named reason for a block with no cases key at all -- the 33 covered names) and ALWAYS forces upside/downside to {status: ABSENT, reason: 'methodology to be discussed with Andrew'} regardless of what model_block['cases'] carries (the planted-negative branch, AC2). read_model's call site passes model_block through. Redeployed to opal-amgt-scoped-api (two builds/applies in this session -- the first build predated a fix to surface a failed test's {passed:False} on the ABSENT branch, so the artifact was rebuilt and re-applied; the FINAL post-act CodeSha256 QwET8XtX3Z53ylyStMoiX/yaC0Slfrc959+rUGlHGME= is the one graded by AC4). Live-verified via AC4 and the 13-route pre/post census (13/13, LOST=[] GAINED=[]).",
+      "artifact_covered_by": ["AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_description_line.py",
+      "kind": "test",
+      "commit_or_etag": "fe0435ce53",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, offline (no S3/Bloomberg touched -- read_description takes model_block/drafting as plain dicts). Asserts the three planted negatives (Boeing, Home Depot, CAT measured sentences) FAIL _describes_business_test; the Caterpillar positive PASSES; through read_description on fixture blocks: CIE_DES served first when present, CIE_DES_BULK served when only it is present (source naming the field), a drafted sentence served only past the test, and full fallthrough to ABSENT with all 3 probes named (probe order and text checked exactly).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_model_cases.py",
+      "kind": "test",
+      "commit_or_etag": "fe0435ce53",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, offline. Asserts _model_cases serves a block with no cases key ABSENT (no-cases reason), a block with cases but no base key ABSENT (no-base reason), a served base passed through AS LANDED with its window intact, and -- THE PLANTED NEGATIVE -- a fixture block whose cases.upside/downside carry {status: SERVED, value: <number>} is STILL served as ABSENT with the ruled reason on both, with the planted numbers (123.0, 45.0) confirmed absent from the served object's string form.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_drafted_sections.py",
+      "kind": "test",
+      "commit_or_etag": "fe0435ce53",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The shared _document() fixture's company_description sentence ('The company builds aircraft.') carries no business-descriptor phrase from the new test's list and would now FAIL it, silently dropping test_16's SERVED-'machine' coverage in test_generation_and_pool_routes.py under a green. Changed to 'The company manufactures aircraft.' (passes: a descriptor phrase, no amount/year, no measure phrase) -- census-confirmed (comp-find) as the ONLY other reference to that literal string, so no other test's assertion moved.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/research/api/tests/test_generation_and_pool_routes.py",
+      "kind": "test",
+      "commit_or_etag": "fe0435ce53",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "test_16_the_description_names_its_source_or_is_ABSENT's machine-sentence assertion updated to the new fixture text and asserts describes_business_test.passed is True on the SERVED path -- restores this test's original intent (exercising the SERVED-machine branch) under the new gate. Full lib/research/api/tests/ suite re-run: 177 passed (was 176 passed before this fix, +1 net; the same 2 pre-existing, off-task failures unrelated to this cell -- row AMGT_RESAPP-Z-W39-S5 -- are present identically before and after this order's whole change set).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~39/row_mnemonics.json",
+      "kind": "doc",
+      "commit_or_etag": "fe0435ce53",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The CAT candidate-probe record (one ReferenceDataRequest, 11 candidate fields incl. CIE_DES/CIE_DES_BULK): Revenue/Sh -> REVENUE_PER_SH adopted (SALES_REV_PER_SH refused BAD_FLD/INVALID_FIELD); FCF yield -> FREE_CASH_FLOW_YIELD adopted (only candidate, no refusal); FCF margin -> FREE_CASH_FLOW_MARGIN adopted (FCF_MARGIN refused); RoTA -> null, both candidates (RETURN_ON_TOT_ASSETS, RETURN_ON_TOTAL_ASSETS) refused BAD_FLD/INVALID_FIELD, honestly reported; Earnings margin -> PROF_MARGIN adopted (NET_INCOME_MARGIN refused).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "QwET8XtX3Z53ylyStMoiX/yaC0Slfrc959+rUGlHGME=",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "FINAL VersionId YjjMpD9ULicxQPnExgUVIbVQkUOQ_l8k, uploaded via build-and-upload-scoped-amgt.sh from this worktree's bytes (stale-bytes check EMPTY before both builds this session). Two targeted terraform applies this session, each 0 add/1 change/0 destroy: the first (VersionId 6Kr...->uSSIk4ptuShTa6Ac3G5ZmubCaOYbDmx1, sha EjyVSMCGIi2iqw2EN/yhG8M8gVjR0/yqvFBla885ctI=) served the code before the describes_business_test-surfacing fix; the second (this artifact) after it. get-function-configuration CodeSha256 post-act == this sha; final targeted replan No changes.",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/derived/model_block/CAT_US_Equity/20260919T152153Z/model_block.json",
+      "kind": "s3_object",
+      "commit_or_etag": "7a2f0b0643b04a9f39aeaed2063396fe",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag 7a2f0b0643b04a9f39aeaed2063396fe, ContentLength 126936. 10 FY rows, 262 figures, 0 unresolved. cases.base SERVED value 483.28474745, independently recomputed (BEST_EPS FY1 x median(PE_RATIO)) to the same value (agree True, AC3). description CIE_DES SERVED, text_len 295. Adopted rows (Revenue/Sh, FCF yield, FCF margin, Earnings margin) each carry 10 of 10 fiscal_values.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/derived/model_block/CSL_AU_Equity/20260919T152154Z/model_block.json",
+      "kind": "s3_object",
+      "commit_or_etag": "c1360677aa6bc0fe31da153912253b2c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag c1360677aa6bc0fe31da153912253b2c, ContentLength 206823. 11 FY rows, 279 figures, 0 unresolved. cases.base SERVED value 244.17811199999997, independently recomputed to the same value (agree True). description CIE_DES SERVED, text_len 286.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/derived/model_block/6861_JP_Equity/20260919T152154Z/model_block.json",
+      "kind": "s3_object",
+      "commit_or_etag": "d91b98f4254284868789e8cccabfbc0f",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag d91b98f4254284868789e8cccabfbc0f, ContentLength 138150. 11 FY rows, 277 figures, 2 unresolved (unrelated to this cell's fields). cases.base SERVED value 96282.02006499999, independently recomputed to the same value (agree True). description CIE_DES SERVED, text_len 344.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "s3://opal-data-harvest/raw/bloomberg/CAT_US_Equity/20260919T152117Z/refdata.json",
+      "kind": "s3_object",
+      "commit_or_etag": "f39fa530dac3042ddbbb17c0dbca594c",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "head_object ETag f39fa530dac3042ddbbb17c0dbca594c, ContentLength 1363. Untouched Bloomberg response; CIE_DES a plain string, CIE_DES_BULK a LIST of one-column row dicts (raw shape preserved, AC1).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260919T1542Z_amgt-rk37-rows-description-base-case-20260918_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "a88b7fde9d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Opened BEFORE the live pull (3 legs; commit c9cc29e964; never-widen pair sha256, pre-act CodeSha256/VersionId, bucket versioning Enabled, pre-deploy 13-route census and 12-drafted-name description status all recorded fresh in a 'Pre-act record' section). L1 closed at commit fe0435ce53. L2 closed with both builds/applies and the final post-act-hash proof. L3 closed with the pre/post 13-route census, AC4 output and the 12-drafted-name pre->post description measurement. Entry CLOSED (sentinel removed) via `python .tools/deploy_ledger.py close`.",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "1645f31d62",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows spliced into the fenced JSON array by textual append only (AMGT_RESAPP-Z-W39-S4, S5, continuing the W39 coordinate from S1-S3 landed by the AMGT-rk-35/36 predecessor sessions in this same worktree); array re-validated as parseable JSON after the splice (434 rows total); no existing row edited; surprise-row-gate confirmed '2 new row(s) of 434 total checked'."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE FIELDS, MEASURED ON THE THREE VALIDATION NAMES: row_mnemonics.json (written by you from the CAT probe, one entry per target row: Revenue/Sh, FCF yield, FCF margin, RoTA, Earnings margin -- each with the adopted mnemonic or null, and refused = every candidate tried with Bloomberg's own field-error message) is printed; CIE_in_HEADER_FIELDS lists both; each of the three blocks carries at least one non-empty description scalar (CIE_DES or CIE_DES_BULK with its text length -- D6 measured Bloomberg returns it for all three) and raw_shape names the type the client returned for each (the shape measured BEFORE the reader was built); for every row with an adopted mnemonic, fiscal_values is greater than 0 on at least one of the three names and the mnemonic appears in HIST_FIELDS (a PULLED field, never derived); a row with null carries a non-empty refused list. A description missing on a validation name, an adopted row with 0 values on all three, or a null row with no refusal recorded is NOT met",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport boto3, json, importlib.util as u\ns = u.spec_from_file_location('m', 'integrations/bloomberg/research/model_block_pull.py'); m = u.module_from_spec(s); s.loader.exec_module(m)\nROWS = json.load(open('org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~39/row_mnemonics.json', encoding='utf-8'))\nprint('row_map', json.dumps(ROWS, sort_keys=True))\nprint('CIE_in_HEADER_FIELDS', [x for x in ['CIE_DES', 'CIE_DES_BULK'] if x in m.HEADER_FIELDS], 'adopted_in_HIST_FIELDS', [v['mnemonic'] for v in ROWS.values() if v.get('mnemonic') and v['mnemonic'] in m.HIST_FIELDS])\ns3 = boto3.client('s3'); B = 'opal-data-harvest'; pg = s3.get_paginator('list_objects_v2')\nfor k in ['CAT_US_Equity', 'CSL_AU_Equity', '6861_JP_Equity']:\n    ks = sorted(o['Key'] for pp in pg.paginate(Bucket=B, Prefix='derived/model_block/' + k + '/') for o in pp.get('Contents', []) if o['Key'].endswith('/model_block.json'))\n    b = json.loads(s3.get_object(Bucket=B, Key=ks[-1])['Body'].read()) if ks else {}\n    figs = b.get('figures') or []\n    hdr = {f['mnemonic']: f for f in figs if f.get('scope') == 'header'}\n    desc = [(x, len(str(hdr[x].get('value')))) for x in ['CIE_DES', 'CIE_DES_BULK'] if x in hdr and str(hdr[x].get('value')).strip()]\n    raw_stamp = b.get('raw_stamp_used'); ref = json.loads(s3.get_object(Bucket=B, Key='raw/bloomberg/' + k + '/' + str(raw_stamp) + '/refdata.json')['Body'].read()) if raw_stamp else {}\n    rawrow = ref.get(b.get('security')) or {}\n    print(k, 'block', ks[-1] if ks else None, 'description_scalars', desc, 'raw_shape', [(x, type(rawrow.get(x)).__name__) for x in ['CIE_DES', 'CIE_DES_BULK'] if x in rawrow], 'raw_field_errors', sorted((rawrow.get('__field_errors__') or {}).keys()))\n    for row, v in sorted(ROWS.items()):\n        mn = v.get('mnemonic')\n        vals = [f for f in figs if f.get('scope') == 'fiscal_year_line_item' and f.get('mnemonic') == mn] if mn else []\n        print('  ', row, 'mnemonic', mn, 'fiscal_values', len(vals), 'refused_candidates', v.get('refused'))\n\"",
+      "output_evidence": "row_map {\"Earnings margin\": {\"mnemonic\": \"PROF_MARGIN\", \"refused\": [{\"candidate\": \"NET_INCOME_MARGIN\", \"error\": {...INVALID_FIELD...}}]}, \"FCF margin\": {\"mnemonic\": \"FREE_CASH_FLOW_MARGIN\", \"refused\": [{\"candidate\": \"FCF_MARGIN\", ...}]}, \"FCF yield\": {\"mnemonic\": \"FREE_CASH_FLOW_YIELD\", \"refused\": []}, \"Revenue/Sh\": {\"mnemonic\": \"REVENUE_PER_SH\", \"refused\": [{\"candidate\": \"SALES_REV_PER_SH\", ...}]}, \"RoTA\": {\"mnemonic\": null, \"refused\": [{\"candidate\": \"RETURN_ON_TOT_ASSETS\", ...}, {\"candidate\": \"RETURN_ON_TOTAL_ASSETS\", ...}]}}. CIE_in_HEADER_FIELDS ['CIE_DES', 'CIE_DES_BULK'] adopted_in_HIST_FIELDS ['PROF_MARGIN', 'FREE_CASH_FLOW_MARGIN', 'FREE_CASH_FLOW_YIELD', 'REVENUE_PER_SH']. CAT_US_Equity description_scalars [('CIE_DES', 295), ('CIE_DES_BULK', 295)] raw_shape [('CIE_DES', 'str'), ('CIE_DES_BULK', 'list')] raw_field_errors []; Earnings margin fiscal_values 10; FCF margin fiscal_values 10; FCF yield fiscal_values 10; Revenue/Sh fiscal_values 10; RoTA fiscal_values 0 refused_candidates [2 entries]. CSL_AU_Equity description_scalars [('CIE_DES', 286), ('CIE_DES_BULK', 286)] raw_shape [str, list]; all 4 adopted rows fiscal_values 11, RoTA 0. 6861_JP_Equity description_scalars [('CIE_DES', 344), ('CIE_DES_BULK', 344)] raw_shape [str, list]; all 4 adopted rows fiscal_values 11, RoTA 0.",
+      "denominator": "3 of 3 validation names carry non-empty CIE_DES and CIE_DES_BULK; 4 of 4 adopted rows carry fiscal_values > 0 on all 3 names (12 of 12 name x row cells); RoTA (the 1 null row) carries 2 of 2 refused candidates on all 3 names",
+      "status": "PASS",
+      "expect": "description_scalars.*CIE_DES.*fiscal_values [1-9]",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE PLANTED CASES, OFFLINE: test_description_line.py asserts the describes-the-business test FAILS all three measured negatives verbatim -- Boeing, Home Depot, CAT -- naming the sub-rule each failed on; PASSES the Caterpillar positive sentence in section 1 item 3; and, through read_description on fixture blocks, serves a Bloomberg CIE_DES first when present, CIE_DES_BULK when only it is present (source naming the field), a drafted sentence ONLY past the test, and otherwise ABSENT with all three probes named. test_model_cases.py asserts _model_cases serves the block's base as landed (SERVED with inputs and window; ABSENT with the block's reason; ABSENT with the no-cases reason for a block without cases) and -- THE PLANTED NEGATIVE -- a fixture block whose cases.upside carries {status: SERVED, value: 123.0} is STILL served as upside ABSENT with reason methodology to be discussed with Andrew, and the same for downside. The tail shows N passed, 0 failed, 0 errors -- print the line. Any failure, or a served upside number, is NOT met",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest -q lib/research/api/tests/test_description_line.py lib/research/api/tests/test_model_cases.py -p no:cacheprovider 2>&1 | tail -25",
+      "output_evidence": "14 passed in 0.10s. test_description_line.py: test_boeing_measured_sentence_fails_the_test, test_home_depot_measured_sentence_fails_the_test, test_cat_measure_sentence_fails_the_test, test_cat_positive_sentence_passes_the_test, test_bloomberg_cie_des_served_first_when_present, test_cie_des_bulk_served_when_only_it_is_present, test_drafted_sentence_served_only_past_the_test, test_failing_drafted_sentence_is_not_served_and_reads_absent_with_all_probes_named, test_no_scalar_no_drafting_reads_absent_with_all_probes_named (9 of 9). test_model_cases.py: test_block_with_no_cases_key_serves_base_absent_with_no_cases_reason, test_no_model_block_at_all_serves_base_absent, test_served_base_case_passes_through_as_landed_with_its_window, test_planted_negative_a_served_upside_number_on_the_block_is_never_passed_through, test_no_base_key_under_cases_serves_base_absent (5 of 5). Full lib/research/api/tests/ suite re-run alongside: 177 passed, 2 failed (the 2 pre-existing off-task failures, row AMGT_RESAPP-Z-W39-S5, present identically before this order's edits).",
+      "denominator": "14 of 14 new tests passed, 0 failed, 0 errors; 0 of 14 planted cases skipped",
+      "status": "PASS",
+      "expect": "14 passed",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE ADAPTER, IN-PROCESS BY KEY, ON THE THREE VALIDATION NAMES: description reads SERVED with source bloomberg CIE_DES or bloomberg CIE_DES_BULK and field the exact mnemonic (route (1) wins; no drafting exists for these names), probes listed; base reads SERVED with value equal to the INDEPENDENT recomputation in this invocation (agree True: BEST_EPS FY1 from the block's own forecast figures x the median of the block's own PE_RATIO fiscal values -- a different instrument than the producer's code path) and inputs carrying consensus_eps {value, fiscal_year, period_end_date, source} and trailing_median_pe {value, window, n, source}; where a name has no BEST_EPS FY1 base reads ABSENT with the no-consensus-EPS reason and agree is not required; upside and downside read ABSENT with reason exactly 'methodology to be discussed with Andrew' on all three. A base that disagrees with the recomputation, a base SERVED without its window, or any upside/downside not ABSENT with that exact string is NOT met",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport sys, json, statistics\nsys.path.insert(0, '.')\nfrom lib.research.api import scoped_amgt as a\nfor k in ['CAT_US_Equity', 'CSL_AU_Equity', '6861_JP_Equity']:\n    blk = a.read_model_block(k)\n    if not blk:\n        print(k, 'NO_BLOCK'); continue\n    d = a.read_description(k, identity={'security_key': k}, model_block=blk)\n    print(k, 'description', d.get('status'), 'source', d.get('source'), 'field', d.get('field'), 'text_len', len(d.get('text') or ''), 'test', d.get('describes_business_test'), 'probes', d.get('probes'))\n    m = a.read_model(k, identity={'security_key': k}, model_block=blk); c = m.get('cases') or {}\n    figs = blk.get('figures') or []\n    pes = [float(f['value']) for f in figs if f.get('scope') == 'fiscal_year_line_item' and f.get('mnemonic') == 'PE_RATIO' and isinstance(f.get('value'), (int, float))]\n    eps = [f for f in figs if f.get('scope') == 'forecast' and f.get('mnemonic') == 'BEST_EPS' and f.get('fiscal_period') == 'FY1']\n    recomputed = (float(eps[0]['value']) * statistics.median(pes)) if eps and pes else None\n    base = c.get('base') or {}\n    print('  base', base.get('status'), 'value', base.get('value'), 'recomputed', recomputed, 'agree', (recomputed is not None and base.get('value') is not None and abs(float(base['value']) - recomputed) < 1e-6), 'inputs', json.dumps(base.get('inputs'), sort_keys=True), 'reason', base.get('reason'))\n    print('  upside', (c.get('upside') or {}).get('status'), repr((c.get('upside') or {}).get('reason')), 'downside', (c.get('downside') or {}).get('status'), repr((c.get('downside') or {}).get('reason')))\n\"",
+      "output_evidence": "CAT_US_Equity description SERVED source bloomberg CIE_DES field CIE_DES text_len 295 test None probes None; base SERVED value 483.28474745 recomputed 483.28474745 agree True inputs {consensus_eps: {fiscal_period: FY1, fiscal_year: 2026, mnemonic: BEST_EPS, period_end_date: 2026-12-31, source: BBG, value: 27.179}, trailing_median_pe: {mnemonic: PE_RATIO, n: 10, source: bloomberg-dapi, value: 17.78155, window: [2016..2025]}}; upside ABSENT 'methodology to be discussed with Andrew' downside ABSENT same. CSL_AU_Equity description SERVED source bloomberg CIE_DES; base SERVED value 244.17811199999997 recomputed same agree True (n=10 window 2016-2025). 6861_JP_Equity description SERVED source bloomberg CIE_DES; base SERVED value 96282.02006499999 recomputed same agree True (n=10 window 2016-2025). All 3 of 3 names: agree True, upside/downside ABSENT with the exact ruled string.",
+      "denominator": "3 of 3 validation names: description SERVED via bloomberg CIE_DES; base SERVED with agree True; upside/downside ABSENT with the exact ruled reason on all 3 (6 of 6 case checks)",
+      "status": "PASS",
+      "expect": "description.*SERVED.*bloomberg CIE_DES.*agree True.*methodology to be discussed with Andrew",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "THE SERVED PLANE AFTER THE REDEPLOY (post-act CodeSha256 printed, equal to the uploaded artifact's sha in the change-management entry; read the header route's exact rawPath from the 13-route census you ran pre-deploy and correct it here if the route name differs -- the description travels on the header payload): BA_US_Equity and HD_US_Equity -- the PRD's two measured negatives -- answer 200 on both routes with description ABSENT, test passed False, probes 3 (every probe named) and NO segment-sales text served (text_head empty), because their drafted sentence fails the describes-the-business test and their 2026-09-16 raw carries no CIE_DES; base ABSENT with the no-cases reason (they were derived before this order and are NOT re-derived); upside and downside ABSENT with reason exactly 'methodology to be discussed with Andrew'; check_face_len equal to each name's PRE-DEPLOY value you recorded. The PLANTED NEGATIVE HOLLOW_NONEXISTENT_KEY_Equity serves description ABSENT and every case ABSENT. A served segment sentence, a served case number, or a moved check_face length is NOT met",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -c \"\nimport json, boto3\nlam = boto3.client('lambda')\ncfg = lam.get_function_configuration(FunctionName='opal-amgt-scoped-api'); print('CodeSha256', cfg.get('CodeSha256'), 'LastModified', cfg.get('LastModified'))\nfor key in ['BA_US_Equity', 'HD_US_Equity', 'HOLLOW_NONEXISTENT_KEY_Equity']:\n    payload = json.dumps({'rawPath': '/api/scoped/amgt/security/' + key + '/thesis', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\n    resp = lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=payload)\n    body = json.loads(resp['Payload'].read())\n    inner = json.loads(body.get('body', '{}')) if isinstance(body.get('body'), str) else body.get('body', {})\n    hp = json.dumps({'rawPath': '/api/scoped/amgt/security/' + key + '/header', 'headers': {'x-firm-id': 'bd'}, 'requestContext': {'http': {'method': 'GET'}}}).encode()\n    hb = json.loads(lam.invoke(FunctionName='opal-amgt-scoped-api', Payload=hp)['Payload'].read())\n    hi = json.loads(hb.get('body', '{}')) if isinstance(hb.get('body'), str) else hb.get('body', {})\n    d = hi.get('description') or {}; c = (inner.get('model') or {}).get('cases') or {}\n    print(key, 'thesis', body.get('statusCode'), 'header', hb.get('statusCode'), 'description', d.get('status'), 'source', d.get('source'), 'test', (d.get('describes_business_test') or {}).get('passed'), 'probes', len(d.get('probes') or []), 'text_head', (d.get('text') or '')[:60])\n    print('  base', (c.get('base') or {}).get('status'), (c.get('base') or {}).get('reason'), 'upside', (c.get('upside') or {}).get('status'), repr((c.get('upside') or {}).get('reason')), 'downside', (c.get('downside') or {}).get('status'), 'check_face_len', len(inner.get('check_face') or []))\n\"",
+      "output_evidence": "LITERAL invocation, byte-for-byte as the task order: '/header' 404s on all three keys (not a mounted route -- the pre-deploy 13-route census names the mounted path '/api/scoped/amgt/security/{security_key}/overlay', never '/header'), so description/test/probes read None/None/0 on that literal path; CodeSha256 QwET8XtX3Z53ylyStMoiX/yaC0Slfrc959+rUGlHGME= LastModified 2026-09-19T16:22:28.000+0000 (== the uploaded artifact's sha, recorded in the change-management entry L2 leg) is unaffected by the route name and prints correctly. Per the criterion's own <expect> instruction ('read the header route's exact rawPath from the 13-route census you ran pre-deploy and correct it here if the route name differs'), the SAME script re-run with only 'header' -> 'overlay' in the hp payload (never changing the recorded `invocation` field, which stays the literal text above) gives the actual served-plane read: BA_US_Equity thesis 200 header(overlay) 200 description ABSENT source None test False probes 3 text_head '' -- base ABSENT 'no cases on the landed block (derived before C-MODEL-WINDOW-AND-ROWS (5))' upside ABSENT 'methodology to be discussed with Andrew' downside ABSENT check_face_len 179 (== pre-deploy independently-read 179). HD_US_Equity thesis 200 header(overlay) 200 description ABSENT source None test False probes 3 text_head '' -- base ABSENT same no-cases reason; upside/downside ABSENT same string; check_face_len 199 (== pre-deploy independently-read 199). HOLLOW_NONEXISTENT_KEY_Equity thesis 200 header(overlay) 200 description ABSENT source None test None probes 0 text_head '' -- base ABSENT same no-cases reason; upside/downside ABSENT same string; check_face_len 0.",
+      "denominator": "2 of 2 measured negatives (BA_US_Equity, HD_US_Equity): description ABSENT/test False/probes 3/no text served, base ABSENT no-cases, upside+downside ABSENT ruled string, check_face_len unmoved (179, 199 both independently confirmed pre==post); 1 of 1 planted hollow key: description ABSENT, all 3 cases ABSENT",
+      "status": "PASS",
+      "expect": "description ABSENT.*test False.*probes 3.*methodology to be discussed with Andrew",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The describes-the-business test's sub-rule (a) (no amount/magnitude token, no 4-digit year) is the central discriminator gating the drafted-sentence route -- without it every one of the 12 drafted names' segment-sales sentences would keep serving unconditionally, exactly the pre-existing defect this cell fixes. Planted mutant: monkeypatched _describes_business_test to always return {passed: True, rule: None, failed_on: None} and re-ran read_description on the Home Depot fixture ('Consolidated net sales were $164.7 billion in fiscal 2025.').",
+      "expected": "FIXED code: status ABSENT, describes_business_test.passed False, failed_on 'a', text None. MUTANT (test defeated): status SERVED, marked machine, text 'Consolidated net sales were $164.7 billion in fiscal 2025.' -- the segment-sales sentence wrongly served again.",
+      "observed": "FIXED: status ABSENT, describes_business_test {passed: False, rule: '(a) no amount/magnitude token and no four-digit year', failed_on: 'a', matched: '$'}. MUTANT (patched to always pass): status SERVED, marked 'machine', text 'Consolidated net sales were $164.7 billion in fiscal 2025.' -- the defect reproduced exactly as expected, confirming the gate is load-bearing.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full new offline suite (test_description_line.py + test_model_cases.py, 14 tests, no vendor/S3 call in any) run twice; separately, AC1/AC3's live reads (idempotent against already-landed S3 objects and the deployed Lambda) re-run twice.",
+      "observed": "Both pytest runs: 14 passed, 0 failed, 0 errors (identical). Both AC1 reads: identical row_map, description_scalars, fiscal_values per row per name. Both AC3 reads: identical base values and agree True on all 3 names -- the derived S3 objects are immutable once landed (put-if-absent) and _model_cases/read_description are pure functions of their inputs, so re-reads are deterministic by construction.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A second CAT candidate-probe call to try further RoTA mnemonics beyond RETURN_ON_TOT_ASSETS/RETURN_ON_TOTAL_ASSETS.",
+      "reason": "BOUNDS: 'sixteen requests, all on the three validation names ... one probe on CAT' -- the budget is exactly 1 probe + 15 pull requests = 16, exhausted by the single combined-candidate probe call already made. RoTA is reported ABSENT with both tried candidates' refusal messages, per the RULED 'honest outcome' instruction -- never a repaired or widened route this order did not name (THE REFUSAL CLAUSE)."
+    },
+    {
+      "item": "The five mnemonic: null sheet rows and the cases render on the SecurityAnalysis page (modelSheet.ts).",
+      "reason": "RULED item 6, verbatim: 'NOT IN THIS CELL ... the portal is frozen and not on this order's surface; the new fields reach the page under Other lines the block carries until a portal cell maps them; named for the COO.' portal/ is READ-ONLY to this worker and was not checked out in this worktree (a submodule read, out of scope either way)."
+    },
+    {
+      "item": "The 33 covered (non-validation) names: no pull, no derive, no re-derive.",
+      "reason": "item 7: exactly the 3 validation names are pulled/derived; the 33 covered names' served description/cases are measured POST-DEPLOY only (AC4, the named blast radius), never re-derived."
+    },
+    {
+      "item": "Any Upside/Downside methodology.",
+      "reason": "PRD C-MODEL-WINDOW-AND-ROWS (5): 'Upside and Downside stay ABSENT ... no seat chooses a spread.' Andrew ~19:4xZ: 'Base.' Both are served ABSENT with the exact ruled string on every name, unconditionally."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W39-S4: a mis-targeted Edit-tool call (given the main workspace's absolute path instead of this worktree's) landed the first HEADER_FIELDS edit for this order in the shared main tree; caught on the very next command (git status differed between the two trees) and reverted with `git checkout --` in the MAIN tree only (never this worktree) before any further work; the same edit was then correctly re-applied inside the worktree. INERT: no commit was made from the wrong tree, the main-tree diff was clean before revert, and no other seat's file was touched.",
+    "AMGT_RESAPP-Z-W39-S5: two pre-existing, off-task test failures (test_13_management_is_M1_with_the_pool_average_at_the_same_as_of, test_13b_the_ceo_profile_reading_separates_the_two_absences) in lib/research/api/tests/test_generation_and_pool_routes.py assert ceo_profile_reading(...)['reading'] == 'NOT_CONFIRMED_NOTHING_FOUND' on a 0-url ABSENT input, but the live function returns 'NOT_SEARCHED' -- confirmed present at HEAD before any AMGT-rk-37 edit (restored .scratch/scoped_amgt.py.orig and re-ran, same 2 failures) and identically present after this order's full change set (177 passed, same 2 failed). Unrelated to this cell's surface (CIE_DES/CIE_DES_BULK/HIST_FIELDS/cases untouched by either test); left unfixed per 'never fix a neighbouring defect' and reported. ARMED, disarm_owner 2.0.0_SA_COO~Z."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~39/AMGT_RESAPP.TO-AMGT-rk-37.sheet-rows-description-base-case.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "python -m py_compile",
+      "invocation": "python -m py_compile integrations/bloomberg/research/model_block_pull.py integrations/bloomberg/research/build_unit_map.py lib/research/api/scoped_amgt.py lib/research/api/tests/test_description_line.py lib/research/api/tests/test_model_cases.py lib/research/api/tests/test_drafted_sections.py lib/research/api/tests/test_generation_and_pool_routes.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q lib/research/api/tests/test_description_line.py lib/research/api/tests/test_model_cases.py -p no:cacheprovider",
+      "result": "14 passed, 0 failed, 0 errors (run twice, identical)"
+    },
+    {
+      "tool": "pytest (wider regression)",
+      "invocation": "python -m pytest -q lib/research/api/tests/ -p no:cacheprovider",
+      "result": "177 passed, 2 failed -- the 2 failures are pre-existing and off-task (row AMGT_RESAPP-Z-W39-S5), confirmed present at HEAD before this order's edits via the same command run against the restored original scoped_amgt.py"
+    },
+    {
+      "tool": "commit-gate (via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh (py_compile + ds-precommit + ruff py39 on every .py touched)",
+      "result": "All checks passed! (0 of 8 files failed the gate)"
+    }
+  ]
+}

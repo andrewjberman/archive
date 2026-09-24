@@ -1,0 +1,47 @@
+diff --git a/infra/aws/terraform/portal-auth/cloudfront-distribution.tf b/infra/aws/terraform/portal-auth/cloudfront-distribution.tf
+index e4454d27cf..12def34ce2 100644
+--- a/infra/aws/terraform/portal-auth/cloudfront-distribution.tf
++++ b/infra/aws/terraform/portal-auth/cloudfront-distribution.tf
+@@ -932,6 +932,42 @@ resource "aws_cloudfront_distribution" "portal" {
+     }
+   }
+ 
++  # 16. /api/scoped/amgt/* -> Portal API Gateway (auth-gated)
++  #
++  # AMGT_RESAPP cell rk-122 (row AMGT_RESAPP-Z-S226, ARMED). THE ONE BEHAVIOR that makes the
++  # Security Analysis page's 16 mounted amgt routes reachable. Copied from behavior 15
++  # (/api/scoped/investor-reporting/*) EXACTLY: same origin, same viewer protocol policy, same
++  # methods, same cache policy (caching DISABLED -- these are per-viewer scoped answers and must
++  # never be cached at the edge), same origin request policy, same single viewer-request
++  # association to auth-validator-edge. ONLY the path pattern and this comment differ.
++  #
++  # APPENDED AT THE END OF THE ORDERED LIST, DELIBERATELY. `ordered_cache_behavior` is a LIST and
++  # its order IS CloudFront's precedence; inserting in the middle would shift every later block
++  # and the plan would show changes across behaviors this cell must not touch. Appending shifts
++  # nothing. Precedence is unaffected either way: this pattern is disjoint from all 28 existing
++  # ones (there is no /api/* or /api/scoped/* catch-all above it).
++  #
++  # BEFORE this behavior existed, an unauthenticated GET to the prefix fell through to the SPA
++  # default behavior and returned 200 text/html -- measured at 1000 bytes of index.html. That is
++  # the difference control this cell records: after the apply the same request must be refused by
++  # the edge validator.
++  ordered_cache_behavior {
++    path_pattern             = "/api/scoped/amgt/*"
++    target_origin_id         = "APIGateway-portal"
++    viewer_protocol_policy   = "redirect-to-https"
++    allowed_methods          = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
++    cached_methods           = ["GET", "HEAD"]
++    compress                 = true
++    cache_policy_id          = data.aws_cloudfront_cache_policy.caching_disabled.id
++    origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer_except_host.id
++
++    lambda_function_association {
++      event_type   = "viewer-request"
++      lambda_arn   = local.auth_validator_edge_arn
++      include_body = false
++    }
++  }
++
+   # --- Custom Error Responses ---
+   # TRSB_LEDGER.011: the distribution-global custom_error_response (403/404 ->
+   # 200 /index.html) was REMOVED. It was distribution-global so it also caught
