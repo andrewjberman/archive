@@ -1,0 +1,139 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-d-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-5.scripted-induction-producer.md",
+    "group": "OTHER",
+    "vintage_commit": "7f48b997a904cf51cc3ed7116d994e367f96a7d3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "df6798aebf56ea7e78ca679f4c837d1840ce4e43",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-5.scripted-induction-producer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/induction_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "rows_for_run(root) rebuilds the induction request FRESH via induction_request.measure_population + induction_request.build_request over the backlog the universe carries UNRESOLVED (never choose_population's RESOLVED_ABSENT branch, never a stored induction_request.json -- proven by test_rows_for_run_wires_measure_population_census_and_build_request). run(rows, as_of, call, stdout) calls ONE ['--folder', folder, '--as-of', as_of, '--write-pool'] per EVIDENCED row via an injected call(argv)->rc (default add_security.main), parses the outcome from add_security's OWN printed-line grammar (already-registered:/REFUSED:/MEASURED:/UNRESOLVED: prefixes), never calls a non-EVIDENCED row, and prints the totals line FIRST and LAST. make_fake_call(rows) is the --dry-run injected fake: records argv, makes no call, scripts registered/already-registered/refused across the first three EVIDENCED rows (every other EVIDENCED row defaults to registered). --fire is refused unless OPAL_INDUCTION_FIRE=1, --as-of names today (UTC), and the process is not under pytest -- fire_permitted() is the pure gate, tested directly; main()'s --fire branch checks it before ever calling library.library_root(), so a refused --fire never reads the OneDrive library. Measured on the real 93-folder library via --dry-run --as-of 2026-09-24 (run twice, identical both times): population 60 evidenced 21 ambiguous 2 (Copa CPA, Uber Technologies UBER US, both existing security_key collisions) other 37 called 21 registered 19 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60.",
+      "introduces": ["rows_for_run", "run", "make_fake_call", "fire_permitted", "write_readback"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_run.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "12 tests, offline, under tests/conftest.py's autouse poison (boto3.client/resource/Session.client, subprocess.run/Popen, socket.create_connection) plus an explicit save/restore positive control on add_security._load_blp_client (the one site conftest does not cover): (1) rows_for_run's wiring (measure_population(root) -> census-derived entries_by_folder + the UNRESOLVED folders, never resolved_absent, into build_request); (2) run() calling only EVIDENCED rows and parsing every outcome branch (registered/already-registered/refused/unresolved/error) from a hand-scripted call reproducing add_security's own printed-line grammar, with totals math (E+A+O=P, called=evidenced) and totals-FIRST-and-LAST asserted by exact string count/ordering; (3) make_fake_call scripting every branch (registered/already-registered/refused) across 4 EVIDENCED rows with bloomberg_calls 0 and argv recorded; (4) the add_security._load_blp_client poison positive control (raises, counts, resets); (5) fire_permitted's four gate combinations (env+today+outside-pytest=True; missing env=False; non-today as-of=False; inside-pytest=False even with env+today); (6) main()'s --fire refusal end-to-end without the env var, with the env var set (still refused, running under pytest), and with a non-today as-of, plus --as-of format validation (rc 2) -- none of these six touch library.library_root() since the refusal/validation returns before it.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_run_2026-09-24_dry-run.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC2 dry-run read-back JSON: as_of, the 11 totals fields, and one row per population folder (folder, state, called, rc, outcome, security_key|reason, bloomberg_calls). Written only under this worker's own deliverables dir, nowhere under lib/research/identity/.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "............                                                             [100%]\n12 passed in 0.42s",
+      "denominator": "12 of 12 tests passed, 0 failed; run twice back to back (0.52s then 0.42s), identical pass count both times",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --dry-run --as-of 2026-09-24 2>&1 | tail -3 -- expect population ([1-9]\\d*) evidenced \\d+ ambiguous [1-9]\\d* other \\d+ called \\d+ registered \\d+ already_registered \\d+ refused \\d+ errors \\d+ bloomberg_calls 0 sum \\1\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --dry-run --as-of 2026-09-24 2>&1 | tail -3",
+      "output_evidence": "skip Workday WDAY US | NO_EVIDENCE | no report states a ticker in the (Ticker: ...) form\nskip Zoetis ZTS US | NO_EVIDENCE | no report states a ticker in the (Ticker: ...) form\npopulation 60 evidenced 21 ambiguous 2 other 37 called 21 registered 19 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60",
+      "denominator": "population 60 of 60 (the real UNRESOLVED backlog measured fresh); evidenced 21 + ambiguous 2 + other 37 = 60; called 21 = evidenced 21; bloomberg_calls 0 of 0 real calls made (the fake call records argv and returns a scripted rc, never reaching add_security or Bloomberg); run twice back to back, byte-identical totals line both times; regex verified directly against the captured line with Python re.search: True",
+      "expect": "population ([1-9]\\d*) evidenced \\d+ ambiguous [1-9]\\d* other \\d+ called \\d+ registered \\d+ already_registered \\d+ refused \\d+ errors \\d+ bloomberg_calls 0 sum \\1\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --fire --as-of 2026-09-24 2>&1 | tail -3 -- expect (?s)REFUSED: --fire requires OPAL_INDUCTION_FIRE=1.*bloomberg_calls 0\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --fire --as-of 2026-09-24 2>&1 | tail -3",
+      "output_evidence": "warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\nREFUSED: --fire requires OPAL_INDUCTION_FIRE=1 and today's --as-of; this is the issuer's drain act under R-16 V2 / R-21 / C-NO-VENDOR-CALL v0.5\nbloomberg_calls 0",
+      "denominator": "1 of 1 --fire invocation refused (OPAL_INDUCTION_FIRE unset in this shell); rc 3; regex verified directly against the captured 3-line tail with Python re.search under re.DOTALL: True; the real add_security.main / _load_blp_client path is never reached (main()'s --fire branch checks fire_permitted() before calling library.library_root() or rows_for_run)",
+      "expect": "(?s)REFUSED: --fire requires OPAL_INDUCTION_FIRE=1.*bloomberg_calls 0\\b",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/d5/mutant_control.py (not committed) drives the SAME 7-row fixture and the SAME scripted `call` (which raises AssertionError on any folder it has no branch for) through two loops: MUTANT is run()'s row loop with the 'state != STATE_EVIDENCED: skip' guard REMOVED, so it calls every row regardless of state -- the exact defect Section 1 forbids ('every row NOT evidenced ... is printed with its reason and NEVER called'). FIX is the real induction_run.run().",
+      "expected": "MUTANT (no EVIDENCED guard): calls the AMBIGUOUS/NO_EVIDENCE rows too, which the scripted call has no branch for, so it raises AssertionError. FIX (the real run()): calls exactly the 5 EVIDENCED rows, skips the other 2, never raises.",
+      "observed": "FIX (real run()): called=5 ok=True. MUTANT (no EVIDENCED guard): raised AssertionError: unexpected folder 'Ambiguous Co' called. CONTROL_FIRED_AS_EXPECTED=True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file run twice back to back; AC2's --dry-run invocation run twice back to back; AC3's --fire invocation run twice back to back; .scratch/d5/mutant_control.py run twice back to back.",
+      "observed": "pytest: 12 passed both runs (0.52s, 0.42s -- pass count identical). --dry-run: 'population 60 evidenced 21 ambiguous 2 other 37 called 21 registered 19 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60' byte-identical both runs. --fire: identical REFUSED line and 'bloomberg_calls 0' both runs. mutant_control.py: 'MUTANT_RAISED=True FIX_OK=True CONTROL_FIRED_AS_EXPECTED=True' both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any edit under lib/research/identity/",
+      "reason": "Section 1: 'no edit under lib/research/identity/ (another lane's surface; imported, never changed)'. add_security.py, crosswalk.py: read-only; git diff HEAD -- lib/research/identity is empty against the pre-cell HEAD."
+    },
+    {
+      "item": "Any real Bloomberg or S3 call, in any mode",
+      "reason": "BOUNDS: 'NEVER run the real add_security in any mode -- its --dry-run STILL CALLS Bloomberg'. --dry-run here uses an injected fake call that makes no call at all (bloomberg_calls 0 by construction, printed and measured); --fire is refused before rows_for_run/add_security.main are ever reached (OPAL_INDUCTION_FIRE unset in this shell). No worker turn in this project exercises the permitted --fire branch -- the issuer does, once, per integrations/bloomberg/READ_HERE.md."
+    },
+    {
+      "item": "A stored induction_request.json read as this cell's population source",
+      "reason": "Section 1: 'the induction request rebuilt FRESH ... never a stored induction_request.json'. rows_for_run(root) calls induction_request.measure_population(root) + build_request fresh every invocation; test_rows_for_run_wires_measure_population_census_and_build_request proves the wiring never reads induction_request.json."
+    },
+    {
+      "item": "An S3 write, an ingest re-run, or any change to registrations.json/the crosswalk pool from this worker's own invocations",
+      "reason": "Section 1: 'no S3 write; no ingest re-run (the issuer runs the existing ingest after the fire)'. --dry-run's fake call writes nothing (git status after both --dry-run runs shows no change under lib/research/identity/registrations.json or any S3-shaped path); --fire is refused before any write path is reached."
+    },
+    {
+      "item": "An 'unresolved' bucket in the printed/JSON totals line",
+      "reason": "The task order's totals-line grammar (Section 1, reproduced verbatim in AC2's <expect>) names exactly population/evidenced/ambiguous/other/called/registered/already_registered/refused/errors/bloomberg_calls/sum -- no separate unresolved count. The per-row outcome value 'unresolved' is still recorded on any row that reaches it (parsed and asserted in test_run_calls_only_evidenced_and_parses_every_outcome_branch), it is simply not one of the totals line's own named buckets; it did not occur on the real backlog run (all 21 EVIDENCED folders, called under the --dry-run fake, resolved to registered/already-registered/refused only)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 12 passed, 0 failed (run twice, identical pass count, 0.52s then 0.42s)"
+    },
+    {
+      "tool": "induction_run CLI --dry-run (AC2)",
+      "invocation": "python -m lib.research.corpus.induction_run --dry-run --as-of 2026-09-24",
+      "result": "rc 0; population 60 evidenced 21 ambiguous 2 other 37 called 21 registered 19 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60 (byte-identical on a second run)"
+    },
+    {
+      "tool": "induction_run CLI --fire (AC3)",
+      "invocation": "python -m lib.research.corpus.induction_run --fire --as-of 2026-09-24",
+      "result": "rc 3; REFUSED: --fire requires OPAL_INDUCTION_FIRE=1 and today's --as-of ...; bloomberg_calls 0 (identical on a second run)"
+    },
+    {
+      "tool": "py_compile + byte-level CRLF/non-ASCII check (hygiene, ad hoc, not committed)",
+      "invocation": "python -c \"import py_compile; ...\" over lib/research/corpus/induction_run.py and lib/research/corpus/tests/test_induction_run.py",
+      "result": "both files compile True, crlf 0, non_ascii 0; git status --porcelain shows only the two new .py files and the deliverables dir changed, nothing outside <paths>"
+    },
+    {
+      "tool": ".scratch/d5/mutant_control.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/d5/mutant_control.py",
+      "result": "rc 0; FIX (real run()): called=5 ok=True; MUTANT (no EVIDENCED guard): raised AssertionError; CONTROL_FIRED_AS_EXPECTED=True (run twice, identical)"
+    }
+  ]
+}
