@@ -72,8 +72,12 @@ channel conflicts resolved by union, one abort-and-reopen of this seat's own mer
 6. **Dossier throughput:** 53 names at ~2 min each on this device (S3 read-bound); a later cell may batch the reads.
 7. **CTO R-75 (15:17Z, before the slug) on d-4's headline:** `dossier-served 53` is a PIPELINE state; the CONTENT axis over the
    same 93 reads **44 substantive dossiers / 9 served-as-empty-shell (workbook-only) / 40 unresolved at identity**. The 40 are
-   blocked at a single-path resolver (a `*ONE PAGER*.xlsx` filename pattern); `2.0.0_SA_COO~Y`'s Z-S20 shows a second path (EDGAR
-   ticker-to-CIK) working 13 of 13 where prose carries a name -- **how many of the 40 it reaches is a round-3 cell's measurement.**
+   blocked at a single-path resolver (a `*ONE PAGER*.xlsx` filename pattern). **R-76 (15:23Z) AMENDS R-75's reachable basis:**
+   the EDGAR ticker-to-CIK arm is strictly DOWNSTREAM of identity (its key IS the ticker root; 0 of 59 UNRESOLVED universe entries
+   carry a cik), so it cannot be the path that CREATES an identity -- the 40 are **UNMEASURED, count and direction unknown**; a
+   name-to-ticker match against the SEC company_tickers table, or reading the workbook, are plausible and unmeasured, and
+   **measuring one of them is a round-3 cell**, never an inference. (This packet's first R-75 line carried the 13-of-13 number
+   into that population; corrected here, same commit discipline as the ruling.)
    Unreachable by pipeline work alone: 10 workbook-only (the 9 shells + Quanta) and 1 empty folder (Air Liquide) -- a scope
    question surfaced to Andrew once by the CTO, not narrowed here. This seat adopts the content axis for every later "N of 93".
 
