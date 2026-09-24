@@ -32,10 +32,13 @@ on peers; sizes [10] on thesis and model. rm-2 (weight 300, the strip radii) and
 NONE on any face: every criterion is mechanical. The CVO's L9 reads the renders as it chooses; the packet names the artifacts:
 the six PNGs per scope under `contract-check-after-rm-<n>/` at each drain and the wave-1 cells' own captures.
 
-⚠ **Every render graded this round (and in round 37) is a LOCAL vite render.** On the DEPLOYED surface the page renders empty
-panels: Z-S226 (BLOCKING, the CTO's, 2026-09-22) -- CloudFront has no cache behavior for `/api/scoped/amgt/*`, so every request
-falls to the SPA origin and returns index.html as JSON. R-79 @120895ee97 routes it to this issuer as round 39's first cell (s.6). An
-L9 verdict on this packet is a verdict on the local render and says nothing about the served page.
+⚠ **Every render graded this round (and in round 37) is a LOCAL vite render; rounds 37/38 are not deployed.** Z-S226 (BLOCKING, the
+CTO's, 2026-09-22 18:45Z: no CloudFront behavior for `/api/scoped/amgt/*`, so the deployed page parsed index.html as JSON and rendered
+empty) was REMEDIED the same evening by rk-122/rk-123 (behavior 28 of 29 with auth-validator-edge:20, ledger closed 21:26Z) and
+re-measured live by the issuer at 16:0xZ today: every AMGT path answers the edge's 401 JSON unauthenticated, identical to the tickets
+family, while an unclaimed family path still returns 200 text/html (the row's signature, as the negative control). The row's field
+reads ARMED because no carrier cites it (R-78); its disarm is the CTO's. An L9 verdict on this packet is a verdict on the local
+render and says nothing about the served page.
 
 ## 4. New investigation rows this round (L8 input)
 
@@ -84,11 +87,10 @@ that still differs on CAT (msgs 25587, 25595).
 
 ## 6. Carried to the CTO's round-38 analysis (not closed here)
 
-- **Z-S226 (R-79), ROUND 39's FIRST CELL:** re-measure the distribution's behavior list (the row's read is two days old); add ONE
-  behavior for `/api/scoped/amgt/*` at the API origin CARRYING the auth-validator edge attachment the working families use (omitting
-  it trades a blank page for a 401); a served infra act -- CTO/COO never-widen pair with the distribution's behavior count printed
-  and the unmoved ones enumerated, and a NEVER-2 entry opened before the apply. Until it lands, nothing rounds 37/38 built is
-  reachable by a user.
+- **Z-S226 (R-79), ROUND 39's FIRST CELL, NARROWED BY THE RE-MEASURE:** the infra act R-79 sketched is already on file (rk-122/rk-123,
+  09-22) and reads live today (s.3). What remains is a RENDER CHECK on the deployed surface for an authenticated user -- auth and
+  content, not routing -- since Andrew's blank page at ~18:2xZ preceded the fix and rounds 37/38 are not deployed; no pair and no
+  ledger unless that check finds a served defect. The row's disarm carrier is the CTO's (its own disarm_owner).
 - **Z-S251:** one round-39 cell over the 13 sites (28 hits / 1032 files, page 1 of 1) keyed to the token, PrintExportAction.tsx:136's
   scrim literal included; reported, left standing this round.
 - **The DESIGN.md C13 edit** (rm-6's draft, ratified by the CTO @b26449defe; the named writer edits in a round-39 cell, with the
