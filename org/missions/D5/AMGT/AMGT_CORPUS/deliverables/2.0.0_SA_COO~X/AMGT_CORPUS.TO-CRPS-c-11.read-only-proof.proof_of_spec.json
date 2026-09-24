@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-c-11",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-11.read-only-proof.md",
+    "group": "OTHER",
+    "vintage_commit": "40107c6f48fb9ba60b94b936646674699d244ae7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "40107c6f48",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-11.read-only-proof.md"
+  },
+  "assignee": "2.0.0_SA_COO~X",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/readonly_proof.py",
+      "kind": "script",
+      "commit_or_etag": "d382f2a30e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BORN at d382f2a30e (every `introduces` token absent at its parent); current bytes at dc2c0193ef after three scanner fixes (f28faad15b, 5812bd0dea, dc2c0193ef), each reviewed by 2.0.0_SA_COO~Y (H) -- routine source/offline PASS at dc2c0193ef, review 1c877a8c87. --negative-control: copies library.library_root() with shutil.copytree to <tempdir>/amgt_corpus_ro_copy_<UTC stamp> (source only read), applies an icacls DENY on the copy for the current user via a Python argument list (mask DE,DC,WD,AD,WEA,WA -- the generic W of the order's literal mask made icacls fail its own traversal, rc=5, preserved in evidence/negative_control.log and ruled an INSTRUMENT defect by 1.0.0_SA_CTO~Z msg 24818/24824), prints icacls_deny_rc, a read probe (sha256 + enumerate_files), the write_denied_probe (create + append, both PermissionError), an overwrite probe, asserts the resolved ingest root equals the protected copy and prints root/root_source (CTO msg 24829/24841: the control must PRINT what it resolved), runs ingest.ingest in-process against the copy through a client that emulates the existing-object conflict only after reading and checking the retained bytes (conditional_put_attempts 123, actual_s3_puts 0, retained_byte_checks 123), removes the deny entries and leaves the copy for the operator (copy_root ... left_for_operator_cleanup True size_mb). --code-census: parses every .py under lib/research/corpus/ (tests included) with ast, flags open/io.open/Path.open with w/a/x/+ modes, Path.write_text/write_bytes/unlink/rename/replace/rmdir/mkdir/touch/chmod, os.remove/unlink/rename/replace/rmdir/removedirs/makedirs/mkdir/chmod and shutil.move/copy/copy2/copyfile/copytree/rmtree, resolves each target's origin by a def-use walk over lexical scopes (library / outside-library / unknown; unknown in a non-test module counts against the library), prints files_scanned, write_like_calls, one line per flagged call with reaches_library and origins, library_write_calls, and the positive control obtained by censusing a planted temp file containing open(library_root() / 'x', 'w').",
+      "introduces": [
+        "negative_control",
+        "code_census",
+        "_origin",
+        "_join",
+        "PATH_MUTATORS",
+        "OS_MUTATORS",
+        "SHUTIL_MUTATORS"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3",
+        "AC4",
+        "AC5",
+        "AC6"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_readonly_proof.py",
+      "kind": "test",
+      "commit_or_etag": "d382f2a30e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "BORN at d382f2a30e; current bytes at dc2c0193ef. 91 offline tests under the package poison: the census flags a planted open(library_root() / 'x', 'w') and does NOT flag open(p, 'rb'); shutil.move(src_under_root, x) is flagged as reaching the library; a tmp_path write in a test module counts in write_like_calls and not in library_write_calls; plus the binding/scope/definition-time cases added by the three scanner fixes (f28faad15b lexical scopes and shadowed parameters, 5812bd0dea unknown rebindings across static binding forms, dc2c0193ef definition-time writes in enclosing evaluation scopes), each recorded in evidence/SCANNER_*_FIX.json.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC4",
+        "AC5"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/evidence/negative_control_root_bound.log",
+      "kind": "doc",
+      "commit_or_etag": "d382f2a30e",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "sha256 7e39e925439b9aa81c9c0b33dfea309617938f55750af5e50d6cb57221d77b65, tracked at d382f2a30e in this lane's own evidence folder; AC2's path was amended to it (ISSUER AMENDMENT in the order) because the owned-paths hook refuses this seat a write under the never-spawned worker's folder. The run 1.0.0_SA_CTO~Z graded C01 PASS at ACTUAL EXERCISE ON RETAINED BYTES (msg 24841): source_files 351, icacls_deny_rc 0, read_probe OK (enumerate_files 352), write_denied_probe PermissionError PermissionError, overwrite_denied_probe PermissionError, root <copy> root_source env:OPAL_RESEARCH_LIBRARY_ROOT, ingest_rc 0 stored 123 put_performed 0 existed 123 read_failed 0, transport conditional_put_attempts 123 actual_s3_puts 0 retained_byte_checks 123, icacls_remove_deny_rc 0, copy_root C:\\Users\\OPALBL~1\\AppData\\Local\\Temp\\amgt_corpus_ro_copy_20260923T171201776305Z left_for_operator_cleanup True size_mb 307.620. The earlier instrument-defect run (rc=5) is retained beside it as evidence/negative_control.log and is NOT the log this criterion reads.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_readonly_proof.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_readonly_proof.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "........................................................................ [ 79%]\n...................                                                      [100%]\n91 passed in 0.26s",
+      "denominator": "91 of 91 tests passed, 0 failed, on the closer branch carried onto CLOUD (merge 3b51088c91, then 55be6c7dfe); run twice back to back (0.26s, 0.20s), identical outcome",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "tail -8 org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/evidence/negative_control_root_bound.log -- expect (?s)write_denied_probe \\w*(Permission|Access)\\w* \\w*(Permission|Access)\\w*.*ingest_rc 0 stored \\d+ put_performed 0 existed \\d+ read_failed 0.*copy_root \\S.* left_for_operator_cleanup True (ISSUER AMENDMENT: path re-pointed to the executor's tracked evidence log)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && tail -8 org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/evidence/negative_control_root_bound.log",
+      "output_evidence": "write_denied_probe PermissionError PermissionError\noverwrite_denied_probe PermissionError\ncopy_probe_extra_loose_files 1\nroot C:\\Users\\Opal Bloomberg\\AppData\\Local\\Temp\\amgt_corpus_ro_copy_20260923T171201776305Z root_source env:OPAL_RESEARCH_LIBRARY_ROOT\ningest_rc 0 stored 123 put_performed 0 existed 123 read_failed 0\ntransport conditional_put_attempts 123 actual_s3_puts 0 retained_byte_checks 123\nicacls_remove_deny_rc 0\ncopy_root C:\\Users\\OPALBL~1\\AppData\\Local\\Temp\\amgt_corpus_ro_copy_20260923T171201776305Z left_for_operator_cleanup True size_mb 307.620",
+      "denominator": "1 log of 13 lines, sha256 7e39e925439b9aa8...; the last 8 lines carry both probes, the resolved-root line, the ingest line (123 stored / 123 existed / 0 put_performed / 0 read_failed) and the copy_root line; the run itself was a build step executed 2026-09-23 17:12Z against the 351-file copy (read_probe enumerate_files 352 = 351 + the probe's own extra loose file), graded PASS by 1.0.0_SA_CTO~Z msg 24841 after 3.0.0_SA_CVO~Z's fourth-control hazard (msg 24829) was answered by the printed root/root_source pair; the tail re-read this closing turn at the amended path, byte-identical to the copy first placed under the worker folder (same sha256)",
+      "expect": "(?s)write_denied_probe \\w*(Permission|Access)\\w* \\w*(Permission|Access)\\w*.*ingest_rc 0 stored \\d+ put_performed 0 existed \\d+ read_failed 0.*copy_root \\S.* left_for_operator_cleanup True",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.readonly_proof --code-census 2>&1 | tail -40 (ISSUER AMENDMENT: tail -30 -> tail -40, row AMGT_CORPUS-Z-S10) -- expect (?s)files_scanned [1-9]\\d*.*library_write_calls 0\\b.*positive_control flagged 1\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.readonly_proof --code-census 2>&1 | tail -40",
+      "output_evidence": "files_scanned 30\nwrite_like_calls 27\ninduction_request.py:453 os.makedirs deliverables_dir reaches_library False origins ['outside-library']\ninduction_request.py:455 open request_path reaches_library False origins ['outside-library']\ningest.py:241 os.makedirs DELIVERABLES_DIR reaches_library False origins ['outside-library']\ningest.py:257 open RUN_RECORD_PATH reaches_library False origins ['outside-library']\nreadonly_proof.py:366 shutil.copytree copy_root reaches_library False origins ['outside-library']\nreadonly_proof.py:370 shutil.copyfile copied_file reaches_library False origins ['outside-library']\nreadonly_proof.py:397 open copy_root / '__denied_write_probe__' reaches_library False origins ['outside-library']\nreadonly_proof.py:404 open copied_file reaches_library False origins ['outside-library']\nreadonly_proof.py:412 open copied_file reaches_library False origins ['outside-library']\nreadonly_proof.py:470 plant_path.write_text plant_path reaches_library False origins ['outside-library']\ntests\\test_backlog.py:17 folder.mkdir folder reaches_library False origins ['unknown']\ntests\\test_backlog.py:18 (folder / 'one_pager.xlsx').write_bytes folder / 'one_pager.xlsx' reaches_library False origins ['unknown']\ntests\\test_induction_request.py:49 folder_path.mkdir folder_path reaches_library False origins ['unknown']\ntests\\test_induction_request.py:51 path.write_bytes path reaches_library False origins ['unknown']\ntests\\test_ingest.py:78 resolved_dir.mkdir resolved_dir reaches_library False origins ['unknown']\ntests\\test_ingest.py:80 (resolved_dir / name).write_bytes resolved_dir / name reaches_library False origins ['unknown']\ntests\\test_ingest.py:83 unresolved_dir.mkdir unresolved_dir reaches_library False origins ['unknown']\ntests\\test_ingest.py:85 (unresolved_dir / name).write_bytes unresolved_dir / name reaches_library False origins ['unknown']\ntests\\test_ingest.py:153 (tmp_path / 'Resolved Co' / 'report_one.pdf').write_bytes tmp_path / 'Resolved Co' / 'report_one.pdf' reaches_library False origins ['unknown']\ntests\\test_library.py:70 empty_home.mkdir empty_home reaches_library False origins ['unknown']\ntests\\test_library.py:83 empty_home.mkdir empty_home reaches_library False origins ['unknown']\ntests\\test_library.py:100 folder.mkdir folder reaches_library False origins ['unknown']\ntests\\test_library.py:101 (folder / 'one_pager.xlsx').write_bytes folder / 'one_pager.xlsx' reaches_library False origins ['unknown']\ntests\\test_library.py:102 (tmp_path / 'loose.txt').write_bytes tmp_path / 'loose.txt' reaches_library False origins ['unknown']\ntests\\test_library.py:117 (tmp_path / 'Empty Co').mkdir tmp_path / 'Empty Co' reaches_library False origins ['unknown']\ntests\\test_library.py:119 populated.mkdir populated reaches_library False origins ['unknown']\ntests\\test_library.py:120 (populated / 'file.pdf').write_bytes populated / 'file.pdf' reaches_library False origins ['unknown']\nlibrary_write_calls 0\npositive_control flagged 1\npositive_control_path C:\\Users\\OPALBL~1\\AppData\\Local\\Temp\\amgt_corpus_census_k05_bu1g\\positive_control.py left_for_operator_cleanup True",
+      "denominator": "30 of 30 .py files under lib/research/corpus/ scanned (16 modules incl. __init__ + 14 under tests/ incl. __init__ and conftest -- the package's ls at HEAD is recorded under AC5); 27 write-like calls flagged, 0 of 27 reach the library (10 in non-test modules resolve to origins outside-library: the deliverables/run-record writers in induction_request.py and ingest.py, and readonly_proof.py's own copy/probe/plant destinations; 17 in test modules resolve to tmp_path-derived 'unknown' targets, which count in write_like_calls and not in library_write_calls exactly as AC1's tmp_path test requires); positive control 1 of 1 flagged. The output is 32 lines, so the ISSUED tail -30 dropped the two header lines and the regex (anchored on files_scanned first) could not match the literal command while every graded value passed -- filed as row AMGT_CORPUS-Z-S10 and the window amended to tail -40 by the issuer in the closing commit; the amended invocation is the one recorded here. Run three times this session (two before, one at the amended window), identical totals each time; positive_control_path differs only by its temp-directory stamp",
+      "expect": "(?s)files_scanned [1-9]\\d*.*library_write_calls 0\\b.*positive_control flagged 1\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "........................................................................ [ 67%]\n....................................................................     [100%]\n212 passed in 2.20s",
+      "denominator": "212 of 212 tests passed across the whole lib/research/corpus/tests package (91 in test_readonly_proof.py + 121 across the other 13 test modules, including the B08 adapter's test_report_input.py which this branch also carries), 0 failed; run twice this session (1.42s on merge 3b51088c91, 2.20s at 55be6c7dfe), identical",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC5",
+      "criterion_verbatim": "AC5 (JUDGMENT, the CVO's): AC3's full flagged-call list with each reaches_library decision. Is every write-like call in the package correctly judged, and does the census cover every file lib/research/corpus/ holds at HEAD? Record the list and the ls of the package, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion; 3.0.0_SA_CVO~Z grades it at L9. The record is below, no verdict is asserted here.",
+      "output_evidence": "FLAGGED-CALL LIST (27, from AC3's run, one per line, <file>:<line> <call> <target> reaches_library <bool> origins): see AC3 output_evidence lines 3-29 verbatim -- 10 non-test sites (induction_request.py:453,455; ingest.py:241,257; readonly_proof.py:366,370,397,404,412,470) all origins ['outside-library'], 17 test sites (tests/test_backlog.py:17,18; tests/test_induction_request.py:49,51; tests/test_ingest.py:78,80,83,85,153; tests/test_library.py:70,83,100,101,102,117,119,120) all origins ['unknown'] and reaches_library False; library_write_calls 0; positive_control flagged 1.\nLS OF THE PACKAGE AT HEAD (lib/research/corpus/): __init__.py backlog.py continuation.py extract.py fund_form.py gold.py induction_request.py ingest.py library.py readonly_proof.py report_input.py sector_template.py substrate.py typecast.py typed.py tests/ ; tests/: __init__.py conftest.py test_backlog.py test_continuation.py test_extract.py test_fund_form.py test_induction_request.py test_ingest.py test_library.py test_readonly_proof.py test_report_input.py test_sector_template.py test_substrate.py test_typecast.py test_typed.py -- 16 + 14 = 30 files, equal to files_scanned 30.\nPRIOR INDEPENDENT READS OF THIS SAME LIST, recorded not adopted: 2.0.0_SA_COO~Y (H) routine source/offline PASS at dc2c0193ef, review 1c877a8c87 (evidence/H_C_ROUTINE_PASS_dc2c0193ef.json: 28 files at that pin, 27 named write-like calls, zero library flags, ten independent controls); 3.0.0_SA_CVO~Z's fourth-control hazard on the negative control (msg 24829) and its resolution (msg 24841). The scanner is a bounded named-operation/origin instrument, not a proof about arbitrary dynamic Python (module docstring), and the CVO's question 'is every call correctly judged' is exactly the judgment this row does not make.",
+      "denominator": "27 of 27 flagged calls listed with their decision; 30 of 30 files listed; 0 verdicts asserted",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.readonly_proof --code-census 2>&1 | tail -40 ; ls lib/research/corpus/ lib/research/corpus/tests/   # the two reads that produced the RECORD; the criterion itself carries no <invocation> (judgment)"
+    },
+    {
+      "criterion_id": "AC6",
+      "criterion_verbatim": "python .scratch/c11/hyg.py (the same shape as before, over this order's <paths>) -- expect (?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/c11/hyg.py",
+      "output_evidence": "merge_base 4359367feef887a11da92433e25fdc59e6c84920\noutside_allowed []\nadmitted_by_order 5\nadmitted_by_mandate_0e33cea24b 46 [lib/research/corpus/report_input.py, lib/research/corpus/tests/test_report_input.py, lib/research/corpus/tests/test_typed.py, lib/research/corpus/typed.py, 41 files under org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/ (evidence, reviews, handoff, STATUS), org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1_CLOSER_C.md]\nchanged_files 51\nlib/research/corpus/readonly_proof.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/report_input.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_readonly_proof.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_report_input.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/tests/test_typed.py compiles True crlf 0 non_ascii 0\nlib/research/corpus/typed.py compiles True crlf 0 non_ascii 0\n(9 deliverables/*.py rows, each compiles True crlf 0 non_ascii 0)\nbad 0",
+      "denominator": "51 of 51 changed paths (against git merge-base HEAD CLOUD, over lib and org, tracked diff UNION untracked) fall inside the grant: 5 admitted by this order's <paths> plus its amended instance/AC2-log paths (readonly_proof.py, test_readonly_proof.py, the task-order file, this instance, the root-bound log), 46 admitted ONLY by the closer mandate's sole-writer surface (COO_X_CORPUS.md @0e33cea24b: lib/research/corpus/** and org/missions/D5/AMGT/AMGT_CORPUS/**) and PRINTED as such -- the B08 adapter, the typed.py period fix, the lane's evidence and the closer channel file -- 0 outside_allowed; every changed .py file compiles clean, 0 CRLF, 0 non-ASCII, so bad 0. The grant is wider than a worker slot's because this cell was executed by the issuer under the closer mandate (G00 @8d33ad1cc5 transferred c-11 to 2.0.0_SA_COO~X; the worker slot was never spawned) and the script says so in its own docstring; SITEZ is retired so the base is CLOUD. Run three times this session (50/50 twice before the instance and log were re-homed, 51/51 after), identical verdicts",
+      "expect": "(?s)outside_allowed \\[\\].*changed_files \\d+.*bad 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC3's own positive control IS the planted mutant: readonly_proof --code-census writes a temp file OUTSIDE the repo containing open(library_root() / 'x', 'w') and censuses it with the same scanner; a census that cannot flag the plant proves nothing (the order's words). The negative twin is inside AC1: open(p, 'rb') is NOT flagged and a tmp_path write in a test module is counted in write_like_calls and not in library_write_calls.",
+      "expected": "positive_control flagged 1; the rb-open test and the tmp_path test pass.",
+      "observed": "positive_control flagged 1 on every census run this session (3 of 3); AC1 91 passed both runs, the plant/rb/tmp_path cases among them. CONTROL FIRED-AS-EXPECTED True.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file run twice; AC3's census run three times (two at the issued window, one at the amended window); AC4's whole package run twice; AC6's hyg.py run twice; AC2 is a retained log whose tail was re-read once this session and hashed.",
+      "observed": "AC1: 91 passed both runs. AC3: files_scanned 30 / write_like_calls 27 / library_write_calls 0 / positive_control flagged 1 on all three runs (only the temp-directory stamp in positive_control_path differs). AC4: 212 passed both runs. AC6: outside_allowed [] / bad 0 on all three runs (changed_files 50, 50, then 51 once the instance and log were re-homed into the grant). AC2: sha256 7e39e925439b9aa8... at the named path equals the evidence original.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any write, move, rename or delete under the real research library, and any deletion of the read-only copy",
+      "reason": "BOUNDS + FWD-9: the negative control copies the library (source read only), applies the deny to the COPY, and leaves the copy in place (copy_root ... left_for_operator_cleanup True, 307.620 MB at C:\\Users\\OPALBL~1\\AppData\\Local\\Temp\\amgt_corpus_ro_copy_20260923T171201776305Z); recursive deletion is an operator act. The census reads 0 library-reaching write-like calls across 30 of 30 files."
+    },
+    {
+      "item": "Any S3 write beyond what ingest would do (it does nothing: every object exists)",
+      "reason": "The ingestion run reports put_performed 0 existed 123; the transport line reports conditional_put_attempts 123 actual_s3_puts 0 retained_byte_checks 123 -- the client emulates the existing-object conflict only AFTER reading and checking the retained bytes, and cannot issue an S3 mutation (module docstring)."
+    },
+    {
+      "item": "The order's literal icacls mask (OI)(CI)(W,D,DC,WD,AD,WEA,WA)",
+      "reason": "Measured rc=5 with the generic W present (icacls fails its own traversal: 'Successfully processed 1 files; Failed processing 1 files'), reproduced independently by 1.0.0_SA_CTO~Z on a scratch tree (msg 24818) and ruled an INSTRUMENT defect; the specific-rights mask DE,DC,WD,AD,WEA,WA applies rc 0 and the write/append/overwrite probes all raise PermissionError while reads succeed (read_failed 0) -- the discriminating pair the ruling demanded. The failed literal run is retained as evidence/negative_control.log."
+    },
+    {
+      "item": "Execution by worker slot 0.9.0_WK_AMGT_CORPUS~1",
+      "reason": "The slot was never spawned (no branch carries its work); G00 @8d33ad1cc5 transferred execution to 2.0.0_SA_COO~X personally under the AMGT closer mandate COO_X_CORPUS.md @0e33cea24b, which folded c-11's read-only proof into B08/FWD-9. The instance therefore records assignee 2.0.0_SA_COO~X while the order's <issued_to> stays the slot, and AC6's grant is the mandate's surface, printed."
+    },
+    {
+      "item": "A proof about arbitrary dynamic Python",
+      "reason": "The census is a bounded named-operation/origin AST instrument (module docstring: 'This is a bounded AST census, not a proof about arbitrary dynamic Python'); AC5 carries that limit to the CVO as part of the judgment record."
+    },
+    {
+      "item": "Writing under deliverables/0.9.0_WK_AMGT_CORPUS~1/ (the order's literal instance and AC2 log paths)",
+      "reason": "The owned-paths hook (TREE_DELIVERABLES, owner in the path) refused this seat's commit there, correctly: the slot was never spawned and 2.0.0_SA_COO~X is not it. Rather than an audited author override into another serial's folder, the order's AC2 path and section-6 instance home were amended to this lane's own deliverables folder; .tools/to-pipeline-gate.py check_complete_flip searches deliverables/*/ one level down, so the flip resolves the instance here."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-S10: CRPS-c-11 AC3's literal invocation pipes the code census through tail -30, but the census prints 32 lines at HEAD, so the two header lines fall outside the window and the regex (anchored on files_scanned first) cannot match the literal command's output while every graded value is correct -- issuer amended the window to tail -40 in the closing commit, expect unchanged."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, AC4)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_readonly_proof.py -q --color=no -p no:cacheprovider ; python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0 both; 91 passed (test_readonly_proof.py alone, twice), 212 passed (whole package, twice)"
+    },
+    {
+      "tool": "readonly_proof CLI --code-census (AC3)",
+      "invocation": "python -m lib.research.corpus.readonly_proof --code-census",
+      "result": "rc 0; 32 lines; files_scanned 30 write_like_calls 27 library_write_calls 0 positive_control flagged 1; three runs, identical totals"
+    },
+    {
+      "tool": "readonly_proof CLI --negative-control (AC2, build step, executed 2026-09-23 17:12Z under the closer mandate)",
+      "invocation": "python -m lib.research.corpus.readonly_proof --negative-control (root bound to the copy via OPAL_RESEARCH_LIBRARY_ROOT and the explicit argument; log retained)",
+      "result": "rc 0; icacls_deny_rc 0; write_denied_probe PermissionError PermissionError; ingest_rc 0 stored 123 put_performed 0 existed 123 read_failed 0; copy left for operator cleanup, 307.620 MB"
+    },
+    {
+      "tool": ".scratch/c11/hyg.py (AC6, written this cell per the criterion's own invocation)",
+      "invocation": "python .scratch/c11/hyg.py",
+      "result": "rc 0; outside_allowed []; admitted_by_order 5; admitted_by_mandate_0e33cea24b 46; changed_files 51; every changed .py compiles True, crlf 0, non_ascii 0; bad 0; run three times"
+    },
+    {
+      "tool": "surprise-row-gate.py (via safe-commit.sh, shared tree)",
+      "invocation": "bash .tools/safe-commit.sh --author \"2.0.0_SA_COO~X <2.0.0_SA_COO~X@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "first attempt REFUSED (a seat's row carries no W coordinate -- minted as W1-S3, re-minted Z-S10); second attempt committed 4359367fee: 1 new row of 15 total, all step-7/step-10 fields present; surprise-corpus matches the legacy baseline (4 known, 0 new)"
+    },
+    {
+      "tool": "proof-of-spec-check.py --governing-order (the complete flip)",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3,AC4,AC5,AC6 --governing-order org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-c-11.read-only-proof.md",
+      "result": "recorded in the closing commit message (rc printed there)"
+    }
+  ]
+}
