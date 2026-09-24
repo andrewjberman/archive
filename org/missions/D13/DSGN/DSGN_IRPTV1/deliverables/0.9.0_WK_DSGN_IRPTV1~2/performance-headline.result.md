@@ -57,19 +57,41 @@ VERDICT: SPREAD-BRANCHES-OK
 ```
 PASS -- matches `<expect>VERDICT: SPREAD-BRANCHES-OK</expect>`.
 
-## IV2-AC3 -- REFUSED (measured MOUNT-WIDER-THAN-RULED, not ONE-LINE-MOUNT)
+## IV2-AC3 -- superseded FAIL, then PASS on the issuer's amendment
+
+**Attempt 1 (pre-amendment text, CTO ruling 100332 -- REFUSED, measured MOUNT-WIDER-THAN-RULED):**
 
 ```
 NUMSTAT: ['2\t2\tsrc/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx']
 VERDICT: MOUNT-WIDER-THAN-RULED
 ```
 
-The order's own text anticipates exactly this: mounting a NEW component that must be imported
-cannot be a 1-line diff (the render-line swap is one change; the import is a second). Removing the
-now-dead `Summary` import (rather than leaving it unused) made the true diff 2 added / 2 removed,
-wider than even the order's own worked example (2/1) -- but still not the ruled 1/1, so the
-criterion is REFUSED with the measured numstat, per the order's own instruction: "do not widen
-silently." This is reported, not repaired; the COO reads the refusal and rules on it.
+The order's original text ruled the touch to exactly one added and one removed line. Mounting a
+NEW component that must be imported cannot be a 1-line diff (the render-line swap is one change;
+the import is a second). Removing the now-dead `Summary` import (rather than leaving it unused)
+made the true diff 2 added / 2 removed, wider than even the order's own worked example (2/1) --
+but still not the ruled 1/1, so the criterion was REFUSED with the measured numstat, per the
+order's own instruction: "do not widen silently." Reported, not repaired, in commit
+`c480eed9653e12bfc81a72ca5974d55ad829baaf` on this branch.
+
+**Attempt 2 (post-amendment text, issuer `2.0.0_SA_COO~D` on CTO ruling 100467 batch 34, landed at
+workspace commit `09bec77ee3e56956170d0bbce99663a799cb08a7` -- PASS):**
+
+The issuer re-bounded IV2-AC3 to "the ONE mount line PLUS at most ONE import line, nothing else"
+(numstat 2/1 or 2/2, every changed line an import statement or the mount), confirming attempt 1's
+refusal was correct and superseding the 1/1 bound it was measured against. The same portal bytes
+already committed at `03979434f4a6f62fd71e56479779fa0e795bf83e` were re-measured against the
+amended invocation, unchanged -- no portal edit was needed or made:
+
+```
+NUMSTAT: ['2\t2\tsrc/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx']
+CHANGED-LINES: 4 OUTSIDE-MOUNT-OR-IMPORT: []
+VERDICT: MOUNT-PLUS-IMPORT
+```
+PASS -- matches `<expect>VERDICT: MOUNT-PLUS-IMPORT</expect>`. All 4 changed lines are either an
+`import` statement (the `Summary` import removed, the `PerformanceHeadline` import added) or the
+mount swap itself (the `Summary report=` line out, the `PerformanceHeadline` line in) -- 0 lines
+outside that set.
 
 ## IV2-AC4 -- RECORDED, no verdict (judgment; graded by `3.0.0_SA_CVO` at L9)
 
