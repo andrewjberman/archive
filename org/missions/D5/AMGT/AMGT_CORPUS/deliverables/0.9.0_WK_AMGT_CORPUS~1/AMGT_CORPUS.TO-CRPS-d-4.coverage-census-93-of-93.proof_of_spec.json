@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-d-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-4.coverage-census-93-of-93.md",
+    "group": "OTHER",
+    "vintage_commit": "75f65d6655dfcc9a09a36ff801faeb1dd84f98f9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "75f65d6655dfcc9a09a36ff801faeb1dd84f98f9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-4.coverage-census-93-of-93.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/backlog.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New coverage() builder + write_coverage() + CLI --coverage/--folder/--folder-by-index, beside the existing build()/write() (unchanged). coverage() lists folders FRESH from library.list_folders (never transcribed), resolves each exactly as build() does via _resolve_folder (state/security_key/reason/candidates kept byte-identical so continuation._resolved_security_keys keeps working once a coverage vintage becomes read_latest()'s newest object -- verified live: continuation._resolved_security_keys(client) returned 53 keys after --coverage wrote the newest research-backlog object), then computes exactly one DISPOSITION per folder: dossier-served (dossier.read_dossier succeeds -- checked FIRST, decisive even for a report-less folder since dossier.build()/write_one have no report-count floor, per surprise row AMGT_CORPUS-Z-W1-S4), resolved-but-no-prose (workbook-only / empty / no-class-a-or-b-report / pdf-unreadable-to-skeleton / 'dossier not yet built', the last four MEASURED from the folder's own files or from dossier's own pick_a/_find_section_lead -- reused, never re-derived), or unresolved-with-reason (the crosswalk's own reason, unchanged). never_prose_named is a SEPARATE structural cross-cut (module comment above NEVER_PROSE_REASONS): every folder's own files are scanned for workbook-only/empty regardless of what disposition that folder separately carries, so a folder that is ALSO dossier-served (a real, stored, all-fields-absent shell dossier) still gets named -- this is the fix for AMGT_CORPUS-Z-W1-S4's finding. write_coverage() writes the document as a NEW scan vintage at research-backlog through gold.gold_put (never overwriting), object name the scan vintage stamp via harvest_store.form_a_object, exactly as write() does. --folder/--folder-by-index build a fresh coverage() document (no gold write -- read-only lookups) and print a definitive answer, never a silence: 'folder <name> disposition unknown reason not in the Research folder list (F folders)' for an unknown name/out-of-range index.",
+      "introduces": ["coverage", "write_coverage", "_folder_never_prose_reason", "_resolved_disposition", "_never_prose_records", "_print_coverage_totals", "_print_never_prose", "_lookup_record", "_print_folder_lookup", "_run_coverage", "_run_folder_lookup"],
+      "artifact_covered_by": ["AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_backlog.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "4 new tests, offline under tests/conftest.py's poison (boto3.client/resource/Session.client, subprocess.run/Popen, socket.create_connection all raise): a 9-folder fake library built in tmp_path, one folder per shape -- a plain dossier-served, a SHELL-dossier-served workbook-only folder (the decoupling control: dossier.read_dossier is monkeypatched to succeed for it, proving disposition reads dossier-served AND never_prose_named still names it), workbook-only, empty, no-class-a-or-b-report, pdf-unreadable-to-skeleton, 'dossier not yet built', an unresolved and an ambiguous folder. crosswalk.load_pilots/harvester_key/resolve/loaded_from and dossier.read_dossier/_picked_reports are monkeypatched (never a real S3 call; client is a bare string stub). test_coverage_nine_folders_three_dispositions_sum asserts folders_read 9, dossier_served 2, resolved_no_prose 5, unresolved_with_reason 2 summing to 9, every disposition_reason, never_prose_reason on every record, and never_prose_records == [Empty Co, ShellDossier Co, Workbook Co]. test_coverage_totals_and_never_prose_print asserts the exact two print lines. test_coverage_totals_sum_check_fails_loud_on_a_broken_sum asserts _print_coverage_totals returns False when the sum is deliberately broken. test_folder_lookup_by_name_and_index_and_unknown asserts the by-name, by-index and unknown-name print shapes, including the exact unknown-folder line with its folder-count denominator.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Row AMGT_CORPUS-Z-W1-S4 appended (append-only channel, validated by .tools/surprise-row-gate.py): dossier.build()/write_one have no report-count floor, so once the drain's pre-continuation production sequence built dossiers unconditionally for all 53 resolved names, 9 of the corpus's 10 workbook-only folders (the 10th, plus the 1 empty folder, are UNRESOLVED) already read dossier-served under the literal per-folder disposition rule, making a disposition-scoped never_prose_named read 0 where AC2 requires non-zero. Resolved by computing never_prose_named as a STRUCTURAL fact per folder, independent of disposition -- reproduces the corpus's re-measured 11 (10 workbook-only, 1 empty) exactly, matching the decomposition doc's own figure.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_backlog.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_backlog.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "........                                                                 [100%]\n8 passed in 0.94s",
+      "denominator": "8 of 8 tests passed, 0 failed (4 pre-existing CRPS-c-4 tests + 4 new CRPS-d-4 coverage tests)",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.backlog --coverage -- expect folders_read N dossier_served \\1... unresolved_with_reason \\1... sum N ... never_prose_named [1-9]\\d*",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.backlog --coverage 2>&1 | tail -30",
+      "output_evidence": "folders_read 93 dossier_served 53 resolved_no_prose 0 unresolved_with_reason 40 sum 93\nnever_prose_named 11\nAir Liquide AI FP empty\nCostco COST workbook-only\nHaliburton HAL workbook-only\nHome Depot HD workbook-only\nHon Hai 2317 TT workbook-only\nNational Grid NG LN workbook-only\nQuanta Services PWR workbook-only\nRWE AG RWE GY workbook-only\nSSE plc SSE LN workbook-only\nValero Energy VLO workbook-only\nZurich Insurance ZURN SW workbook-only\nfolders_read 93 dossier_served 53 resolved_no_prose 0 unresolved_with_reason 40 sum 93\nwritten s3://opal-data-harvest/amgt/harvest/gold/research-backlog/date=2026-09-24/20260924T145059Z.json put_performed True",
+      "denominator": "93 of 93 folders dispositioned (53 dossier_served + 0 resolved_no_prose + 40 unresolved_with_reason = 93, arithmetic asserted in code); 11 of 11 never-prose folders named with their reason (matches the decomposition doc's own re-measured '10 workbook-only, 1 empty' exactly). Re-checked against AC2's own regex with Python re.search (DOTALL): MATCH. See surprise row AMGT_CORPUS-Z-W1-S4: resolved_no_prose reads 0 (not 11) because dossier.build() has no report-count floor and the drain's production sequence already built a real, stored, all-fields-absent dossier for every one of the 9 workbook-only RESOLVED folders before this worker was continued -- never_prose_named is computed independently of disposition for exactly this reason and still names all 11.",
+      "expect": "(?s)folders_read (\\d+) dossier_served \\d+ resolved_no_prose \\d+ unresolved_with_reason \\d+ sum \\1\\b.*never_prose_named [1-9]\\d*",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.backlog --folder-by-index 0 -- expect folder <name> ... disposition (dossier-served|resolved-but-no-prose|unresolved-with-reason) ... (dossier_uri s3://.../research-dossier/|reason <text>)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.backlog --folder-by-index 0 2>&1 | tail -4",
+      "output_evidence": "folder ASML NA\ndisposition dossier-served\ndossier_uri s3://opal-data-harvest/amgt/harvest/gold/research-dossier/security_key=ASML_NA_Equity/as_of=2026-09-24.76ada4b9a901ced2.json content_sha256 64280258fcc192f9f061da7f8d15b77b99878d4a714cacb6f4f8d2515eb591c6",
+      "denominator": "1 of 1 named folder (index 0 of the fresh sorted 93-folder list, deterministic -- 'ASML NA' sorts first); never a silence (the CLI's unknown-folder/out-of-range branch was separately exercised in AC1's tests and by hand: python -m lib.research.corpus.backlog --folder \"Not A Real Folder\" printed 'folder Not A Real Folder disposition unknown reason not in the Research folder list (93 folders)'). Re-checked against AC3's own regex with Python re.search (DOTALL): MATCH.",
+      "expect": "(?s)folder \\S.*disposition (dossier-served|resolved-but-no-prose|unresolved-with-reason).*(dossier_uri s3://opal-data-harvest/amgt/harvest/gold/research-dossier/|reason \\S)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/d4/mutant.py (not committed) reads the SAME already-written coverage document back from gold (the real 93-folder corpus) and compares the FIX (backlog._never_prose_records, reading the structural never_prose_reason field) against the MUTANT (a plausible earlier design -- filtering on disposition_reason, a subset of resolved-but-no-prose only -- which this worker actually wrote first, per surprise row AMGT_CORPUS-Z-W1-S4, and only replaced after measuring it against the live corpus).",
+      "expected": "FIX names 11 folders (matches the decomposition doc's re-measured 10 workbook-only + 1 empty). MUTANT, scoped to disposition_reason only, names 0 -- because all 9 workbook-only RESOLVED folders already read dossier-served on this corpus, so disposition_reason never carries 'workbook-only'/'empty' for them.",
+      "observed": "FIX never_prose_named 11. MUTANT never_prose_named 0. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_backlog.py's full file run twice back to back; --coverage run twice back to back against the live store; .scratch/d4/mutant.py run twice back to back.",
+      "observed": "pytest: '8 passed in 0.94s' then '8 passed in ...s' (re-run separately, same pass count). --coverage run twice: identical totals both times (folders_read 93 dossier_served 53 resolved_no_prose 0 unresolved_with_reason 40 sum 93; never_prose_named 11 naming the same 11 folders, only the object's own scan_vintage/URI differ between the two never-overwritten gold objects). mutant.py: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical FIX/MUTANT counts.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No induction, no ingestion, no dossier build; no edit to dossier.py, library.py, crosswalk.py; no library write; no S3 delete of any kind",
+      "reason": "Section 1, 'What this cell does NOT do' and section 4 BOUNDS. coverage()/write_coverage()/the folder-lookup CLI only READ dossier.py (read_dossier, _picked_reports, _find_section_lead, SECTION_FIELD_NAMES) and library.py (list_folders, census) and WRITE exactly one new gold object per --coverage invocation, through gold.gold_put's own never-overwrite precondition -- verified: every --coverage run in this session printed put_performed True on a NEW scan-vintage key, never a PreconditionFailed/GoldImmutableError branch. --folder/--folder-by-index perform no gold write at all (coverage() is called without write_coverage())."
+    },
+    {
+      "item": "A closer disposition-scoped never_prose_named computation (i.e. never_prose_named as a strict subset of resolved-but-no-prose)",
+      "reason": "Surprise row AMGT_CORPUS-Z-W1-S4: this was the first, more literal reading of the order's own prose ('resolved, but no dossier CAN exist ... workbook-only / empty'), and it is a correct, honest, non-forced implementation of the per-folder disposition rule -- but it measures 0 never-prose folders on the current corpus vintage (dossier.build() already covers all 53 resolved names, including the 9 workbook-only ones, with a real stored shell object) and therefore cannot satisfy AC2 as written. Replaced with the structural cross-cut (independent of disposition) documented in the row and in backlog.py's own module comments."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W1-S4"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_backlog.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 8 passed, 0 failed"
+    },
+    {
+      "tool": "backlog CLI --coverage (AC2)",
+      "invocation": "python -m lib.research.corpus.backlog --coverage",
+      "result": "rc 0; folders_read 93 dossier_served 53 resolved_no_prose 0 unresolved_with_reason 40 sum 93; never_prose_named 11; written a new research-backlog scan-vintage object, put_performed True"
+    },
+    {
+      "tool": "backlog CLI --folder-by-index 0 (AC3)",
+      "invocation": "python -m lib.research.corpus.backlog --folder-by-index 0",
+      "result": "rc 0; folder ASML NA disposition dossier-served dossier_uri ...research-dossier/security_key=ASML_NA_Equity/... content_sha256 ..."
+    },
+    {
+      "tool": "backlog CLI --folder (unknown-name branch, evidence for AC3's 'never a silence' clause, not a proof criterion)",
+      "invocation": "python -m lib.research.corpus.backlog --folder \"Not A Real Folder\"",
+      "result": "rc 1; folder Not A Real Folder disposition unknown reason not in the Research folder list (93 folders)"
+    },
+    {
+      "tool": "backlog CLI --folder (unresolved-with-reason branch, evidence, not a proof criterion)",
+      "invocation": "python -m lib.research.corpus.backlog --folder \"Air Liquide AI FP\"",
+      "result": "rc 0; folder Air Liquide AI FP disposition unresolved-with-reason reason bloomberg_ticker status 'UNRESOLVED', evidence 'no *ONE PAGER*.xlsx workbook found in this folder'"
+    },
+    {
+      "tool": "continuation._resolved_security_keys (downstream-reader regression check, not a proof criterion)",
+      "invocation": "continuation._resolved_security_keys(client=boto3.client('s3', region_name='us-east-1'))",
+      "result": "rc 0; returned 53 keys -- unaffected by the new coverage vintage becoming read_latest()'s newest object, since state/security_key are kept byte-identical to build()'s own fields"
+    },
+    {
+      "tool": "pytest full package (broader safety check, not a proof criterion)",
+      "invocation": "python -m pytest lib/research/corpus -q -p no:cacheprovider",
+      "result": "rc 0; 260 passed, 0 failed"
+    },
+    {
+      "tool": ".scratch/d4/mutant.py (not committed -- scratch control harness)",
+      "invocation": "PYTHONPATH=. python .scratch/d4/mutant.py",
+      "result": "rc 0; FIX never_prose_named 11; MUTANT never_prose_named 0; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/backlog.py lib/research/corpus/tests/test_backlog.py org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-4.coverage-census-93-of-93.md org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-d-4.coverage-census-93-of-93.proof_of_spec.json",
+      "result": "PENDING -- run after this instance is validated"
+    }
+  ]
+}
