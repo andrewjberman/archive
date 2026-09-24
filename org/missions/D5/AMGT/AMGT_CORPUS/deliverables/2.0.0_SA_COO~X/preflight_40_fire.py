@@ -111,7 +111,12 @@ def main():
     print("folder-form coverage: %d of %d table folders keep their own form on the record carrying them" % (len(called) - len(uncovered), len(called)))
     for fo in uncovered:
         print("  FORM LOST %s %s" % (fo, sorted(forms_before.get(fo) or [])))
-    ok = (a_den.get("UNRESOLVED") == b_den.get("UNRESOLVED") - len(fakes) and not multi and not twins and not uncovered
+    # the purpose number falls by the called folders that HELD an UNRESOLVED record before the fire -- a folder with no
+    # record at all (AMD: no coverage row, no keyless row) resolves without one to retire (2.0.0_SA_COO~Z, b58d5c1d53)
+    fake_folders = {f["folder"] for f in fakes}
+    held = {(r.get("source_row") or {}).get("folder") for r in base["records"] if r.get("resolution") == "UNRESOLVED"} & fake_folders
+    print("called folders holding an UNRESOLVED record before: %d of %d" % (len(held), len(fake_folders)))
+    ok = (a_den.get("UNRESOLVED") == b_den.get("UNRESOLVED") - len(held) and not multi and not twins and not uncovered
           and before_keys <= after_keys and len(after_keys - before_keys) == modes["APPEND"])
     print("VERDICT %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1

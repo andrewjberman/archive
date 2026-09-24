@@ -1,4 +1,9 @@
-# AMGT_CORPUS round 3 -- never-widen pair, the RE-MINT (the 4 skipped registrations + the 16 dropped folder forms)
+# AMGT_CORPUS round 3 -- never-widen pair, the RE-MINT (the 4 skipped registrations + AMD + the 16 dropped folder forms)
+
+**AMENDED 22:0xZ, before any CTO read (`2.0.0_SA_COO~X`):** AMD Advanced Micro Devices -> AMD US joins the table (41 rows,
+@`0d67f8b268`; tier DOC, its one workbook's sources cite `nasdaq-amd/advanced-micro-devices` and ir.amd.com), after CTO msg
+25780 named it the 94th folder; a third builder limb landed for it (`2.0.0_SA_COO~Z` @`b58d5c1d53`: an ENRICH with no record
+to retire adds the folder's own form). Calls at most **5**; the pre-flight below is the 41-row run.
 
 The COO half is below, signed by the issuer `2.0.0_SA_COO~X`. The CTO half is owed by `1.0.0_SA_CTO~Z`, in its own lane
 (`ledger/`), as for the 40-name fire. Nothing runs until both are signed at these bytes AND the production sequence now
@@ -22,7 +27,7 @@ The same producer, the same table, ONE run, after READ_HERE s.2 and `bloomberg_h
     OPAL_INDUCTION_FIRE=1 python -m lib.research.corpus.induction_run --fire --as-of 2026-09-24 \
         --evidence org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/UNRESOLVED40_CALLS_20260924.json
 
-The 36 already keyed skip with no call (`_find_existing` now matches only keyed rows). The 4 are called: at most **4**
+The 36 already keyed skip with no call (`_find_existing` now matches only keyed rows). The 4 and AMD are called: at most **5**
 Bloomberg reference calls, the first for each. Vendor authority: Andrew-direct R-21 @`b390c36444`, released for this
 producer by `1.0.0_SA_CTO~Z` (msg 25761; msg 25773: "R-21 already covers the calls" for these four). One batch call, at most
 one conditional put. The put REBUILDS the whole document, so the 16 forms return in the same put.
@@ -32,8 +37,8 @@ one conditional put. The put REBUILDS the whole document, so the 16 forms return
 1. ONE conditional put on `s3://opal-data-harvest/crosswalk/v1/2026-09-24.json` (IfMatch, digest-differs only, read-back
    raises on mismatch). **Rollback:** copy VersionId `ISiEZGfV4H82rpz2yaM9WelZd4C9ldBI` forward (versioned bucket, no
    delete); the one before it, `BN_TiAyAX_EwRm_nP.PMymkiUnFBMA1N`, stays the round-2 anchor.
-2. Up to 4 write-once raw identity landings, NEW keys only (`IfNoneMatch="*"`).
-3. `lib/research/identity/registrations.json`, +4 rows at most; committed by this seat after the run or reverted with item 1.
+2. Up to 5 write-once raw identity landings, NEW keys only (`IfNoneMatch="*"`).
+3. `lib/research/identity/registrations.json`, +5 rows at most; committed by this seat after the run or reverted with item 1.
 4. This seat's read-back and log.
 NOT in the write set: any other key, `universe/v1/`, any dossier/backlog/filings key, any delete.
 
@@ -53,16 +58,17 @@ raw identity objects 60. Instrument `refire_versions_probe.py`, `evidence/remint
 
 `preflight_40_fire.py` now models the request-side skip with the producer's own `_find_existing` and censuses each
 folder's own form from `crosswalk.harvester_key` (the ingest's function), on committed bytes (identity tree 0 modified,
-CLOUD @`f3c4532dd3`, `evidence/preflight_remint4_20260924T215332Z.log`): already-registered 36, called 4 (ENRICH 3, APPEND 1);
-AFTER `records 235 MEASURED 235 UNRESOLVED 0 registered 47 enriched 20`, multi-claimed 0, twins 0, 234 of 234 prior keys, 1
-new key = 1 appended, **folder-form coverage 40 of 40**, VERDICT PASS.
-- A request that does not MEASURE: that folder stays UNRESOLVED; the put still carries the 16 forms; `UNRESOLVED 4 -> k`
-  printed and named.
+CLOUD @`0d67f8b268` with `crosswalk.py` @`b58d5c1d53`, `evidence/preflight_remint5_20260924T220611Z.log`): already-registered 36,
+called 5 (ENRICH 4, APPEND 1); AFTER `records 235 MEASURED 235 UNRESOLVED 0 registered 47 enriched 21`, multi-claimed 0,
+twins 0, 234 of 234 prior keys, 1 new key = 1 appended, **folder-form coverage 41 of 41**, called folders holding an
+UNRESOLVED record before 4 of 5 (AMD held none), VERDICT PASS. (The 40-row run @`f3c4532dd3` read the same for the 40.)
+- A request that does not MEASURE: that folder stays UNRESOLVED (AMD: stays absent); the put still carries the 16 forms;
+  `UNRESOLVED 4 -> k` printed and named.
 - Nothing lands: `pool_puts` may still be 1, because the rebuilt document now differs (the 16 forms), and that put is
   wanted; versions 25 -> 26.
 
 **Discriminator after the run:** the probe (versions 25 -> 26), the served-object census (twins 0, multi-claimed 0, every
-table folder's own form on the record carrying it), then the re-ingest reading **resolved_folders 93** (89 + the 4), then the
+table folder's own form on the record carrying it), then the re-ingest reading **resolved_folders 94** (89 + the 4 + AMD), then the
 production sequence for the 20.
 
 **The instrument lesson this pair carries.** This seat's first two runs of the widened pre-flight read 36 and 37 of 40
