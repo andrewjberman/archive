@@ -89,5 +89,7 @@ that still differs on CAT (msgs 25587, 25595).
   candidate, parked on the closer STATUS.md.
 - **The rm-3 residue, narrowed by rm-2:** size 10 only (PanelHeader.tsx:99 / DataTimestamp.tsx:38); weight 600 and the strip radii
   are closed.
-- **R-78's census on this serial:** 84 ARMED rows name the issuer as disarm owner, 47 not later cited (an upper bound; most are
-  rounds 1-24 worker rows drained without a carrier). The sweep runs after this drain closes, as its own act, not as a round-39 cell.
+- **R-78's census on this serial:** 45 ARMED rows name `2.0.0_SA_COO~Z` exactly as disarm owner, 26 not later cited; 39 more name
+  the retired predecessor lane `~ZZZ`, 21 not later cited (a first read summed the two as 84 / 47 on a prefix match -- corrected,
+  CTO msg 25617). Upper bounds; most are rounds 1-24 worker rows drained without a carrier. The sweep runs after this drain closes,
+  as its own act, not as a round-39 cell.
