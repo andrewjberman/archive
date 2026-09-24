@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-d-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-1.extraction-method-2-inline-leads.md",
+    "group": "OTHER",
+    "vintage_commit": "7f48b997a904cf51cc3ed7116d994e367f96a7d3"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "7f48b997a904cf51cc3ed7116d994e367f96a7d3",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-1.extraction-method-2-inline-leads.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/extract.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "extract_v2(bronze_uri, body, ext): v1's document shape (via extract(), unchanged) plus, for PDF, `lines` (every line across pages: text/page/size/bold_all/bold_first/lead_prefix/n_spans) and `section_leads` ({name, page, line_index, inline_remainder}, one per line that OPENS a SECTION_NAMES member under rule 1 -- a standalone heading OR a line whose leading bold spans, colon-trimmed and upper-cased, are a known section name); for DOCX, v1's paragraphs/headings/tables are BYTE-EQUAL (the control) plus `section_leads` (one per paragraph whose text-before-the-first-colon, colon-trimmed and upper-cased, is a section name); XLSX unchanged. SECTION_NAMES is the 45-name frozenset ported verbatim from the CRO's measured set (the scan's 25 names + the PFOE author's 20), with VALUATION deliberately excluded (a pillar lead, never a section name); a name followed by a trailing number matches on its alphabetic prefix. The PDF line/lead rules (_pdf_lines_and_leads, _pdf_section_lead_name, _match_section_name) are a direct port of measure_pdf_extractability.py's pdf_lines/section_name_of, rewritten in this module (never imported from the deliverables script). --run-v2 measured live against the 123 bronze research-report objects (same walk --write uses): first run bronze_reports 123 v2_stored 123 put_performed 123 existed 0 read_failed 0, docx_control identical 25 of 25, section_leads_pdf_files_with_any 39 of 52; second (idempotent) run bronze_reports 123 v2_stored 123 put_performed 0 existed 123 read_failed 0, same docx_control/section_leads totals. --census-leads measured live: pdf_files 52 with_inline_leads 22 with_standalone_only 17 with_none 13. No v1 object was rewritten or deleted (123 extract.json objects before and after, verified by a direct list).",
+      "introduces": ["METHOD_VERSION_2", "extract_v2", "_pdf_lines_and_leads", "_pdf_section_lead_name", "_docx_section_leads", "_match_section_name", "_run_v2", "_census_leads"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_extract.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "2 new tests added (6 total in the file, all offline under the package poison, fixtures built in code): (1) test_docx_v2_control_byte_equal_and_section_leads -- asserts extract_v2's docx paragraphs/headings/tables are == extract()'s (THE CONTROL, byte-equal in the structural sense) on the existing fixture, then on a second fixture asserts a 'Recommendation: Buy the position...' paragraph yields a section_leads entry {name: RECOMMENDATION, paragraph_index: 0, inline_remainder: '...'} and a 'Valuation: ...' paragraph yields none; (2) test_pdf_v2_inline_lead_opens_section_standalone_closes_valuation_does_not -- a PyMuPDF-built fixture with an inline bold lead ('RECOMMENDATION: <body>' on one line, bold+non-bold spans), a standalone all-bold heading ending in a colon ('RISKS AND CONSDIERATIONS:'), and a bold inline 'Valuation: <body>' line; asserts exactly 2 section_leads (RECOMMENDATION with the correct inline_remainder, and RISKS AND CONSDIERATIONS), asserts VALUATION is never a member, and asserts every `lines` entry carries the 7 spec'd fields.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_extract.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_extract.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "......                                                                   [100%]\n6 passed in 1.92s",
+      "denominator": "6 of 6 tests passed, 0 failed (4 v1 tests unchanged + 2 new CRPS-d-1 v2 tests: docx control byte-equality + section_leads, pdf inline-lead/standalone-heading/non-member rules)",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.extract --run-v2 -- expect bronze_reports N v2_stored S put_performed P existed E read_failed 0 ... docx_control identical D of D ... section_leads_pdf_files_with_any M of T",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.extract --run-v2 2>&1 | tail -6",
+      "output_evidence": "bronze_reports 123 v2_stored 0 put_performed 0 existed 0 read_failed 0\nbronze_reports 123 v2_stored 123 put_performed 0 existed 123 read_failed 0\ndocx_control identical 25 of 25\nsection_leads_pdf_files_with_any 39 of 52",
+      "denominator": "123 of 123 bronze research-report objects re-read and v2-stored (0 read failures); 25 of 25 extractable docx reports have v2 paragraphs/headings/tables identical to their stored v1 document (THE CONTROL, D of D); 39 of 52 extractable PDF reports carry at least one section_lead. This is the SECOND run in this session (first run: put_performed 123 existed 0; this run: put_performed 0 existed 123, proving the conditional put is idempotent and no v1 object was touched -- verified separately by a direct S3 list showing 123 extract.json and 123 extract.v2.json objects, unchanged in count across both runs)",
+      "expect": "(?s)bronze_reports [1-9]\\d* v2_stored \\d+ put_performed \\d+ existed \\d+ read_failed 0.*docx_control identical (\\d+) of \\1\\b.*section_leads_pdf_files_with_any [1-9]\\d* of [1-9]\\d*",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.extract --census-leads -- expect pdf_files N with_inline_leads N with_standalone_only N with_none N",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.extract --census-leads 2>&1 | tail -3",
+      "output_evidence": "amgt/harvest/bronze/research-report-extract/security_key=WALMEX*_MM_Equity/b441879799bbb1b1/extract.v2.json leads=4 names=BROKER COMMENTARY,EARNINGS ESTIMATE PROGRESSION,PERFORMANCE VS FUND,TRADING HISTORY\namgt/harvest/bronze/research-report-extract/security_key=WALMEX*_MM_Equity/e15f09b7ac627472/extract.v2.json leads=1 names=COMPANY DESCRIPTION\npdf_files 52 with_inline_leads 22 with_standalone_only 17 with_none 13",
+      "denominator": "52 of 52 stored v2 PDF reports censused (22 + 17 + 13 = 52); with_inline_leads is non-zero (22), so the PFOE inline-bold-lead rule -- FWD-16's measured cause -- is not blind on the real corpus",
+      "expect": "pdf_files [1-9]\\d* with_inline_leads [1-9]\\d* with_standalone_only \\d+ with_none \\d+",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/d1/mutant.py (not committed) compares extract_v2's real section-name matcher (_normalise_name, which rstrip(':')s before the SECTION_NAMES compare) against a plausible bug that forgets the trailing-colon strip, over the same in-code PDF fixture used by AC1's test (an inline 'RECOMMENDATION:' lead, a standalone 'RISKS AND CONSDIERATIONS:' heading, a non-member 'Valuation:' line).",
+      "expected": "FIX finds both real section leads (RECOMMENDATION, RISKS AND CONSDIERATIONS). MUTANT (no colon strip) finds neither, because every match compares a colon-suffixed normalised name against the colon-free SECTION_NAMES set, so FIX != MUTANT.",
+      "observed": "FIX section_leads=2 names=['RECOMMENDATION', 'RISKS AND CONSDIERATIONS']. MUTANT section_leads=0 names=[]. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_extract.py's full file run twice back to back; --census-leads run twice back to back after --run-v2 had already landed; --run-v2 itself run twice back to back (first landing, second idempotent); .scratch/d1/mutant.py run twice back to back.",
+      "observed": "pytest: '6 passed in 1.92s' then '6 passed in 0.38s' -- same pass count both runs. --census-leads run twice: byte-identical totals both times (pdf_files 52 with_inline_leads 22 with_standalone_only 17 with_none 13). --run-v2 run twice: identical docx_control (25 of 25) and section_leads (39 of 52) totals both times, with the second run's put_performed/existed swap (123/0 -> 0/123) proving the conditional put path, not the content, changed. mutant.py: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical section_leads sets.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Rewriting or deleting any v1 extract.json object, or touching silver/gold/typed.py/continuation.py",
+      "reason": "Section 1, 'What this cell does NOT do': v1 objects are read-only (used as the docx control) and never rewritten; typed.py/continuation.py are read-only surfaces, not in <paths>. Verified: a direct S3 list before and after --run-v2 shows 123 extract.json objects, unchanged in count and (for the 25 docx) content, both times."
+    },
+    {
+      "item": "Rule 3 (a line ending in ':' whose text equals its bold prefix is a pillar lead with its body below) and general pillar detection",
+      "reason": "Section 1 names measure_pdf_extractability.py's pdf_lines/section_name_of/is_section_heading as the functions to port -- NOT pdf_pillars. Rule 3 and pillar-lead detection are CRPS-d-2's job ('CRPS-d-2 resolves v2 by key substitution'); this cell's section_leads covers only the known SECTION_NAMES, never a company-specific pillar label."
+    },
+    {
+      "item": "Any read of the OneDrive research library, install, or vendor/Claude API call",
+      "reason": "BOUNDS: this module's only imports beyond stdlib/lxml/fitz/openpyxl are lib.research.harvest.store (S3 only, used by the CLI). extract_v2/_pdf_lines_and_leads/_docx_section_leads take bytes directly and never open a library path. All 6 tests in test_extract.py pass under the package poison (which raises on boto3.client/resource/Session.client/subprocess.run/Popen/socket.create_connection), proving no test reaches the store or network."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_extract.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 6 passed, 0 failed"
+    },
+    {
+      "tool": "extract CLI --run-v2 (AC2, build step)",
+      "invocation": "python -m lib.research.corpus.extract --run-v2",
+      "result": "rc 0; first run bronze_reports 123 v2_stored 123 put_performed 123 existed 0 read_failed 0, docx_control identical 25 of 25, section_leads_pdf_files_with_any 39 of 52; second run put_performed 0 existed 123, same docx_control/section_leads totals"
+    },
+    {
+      "tool": "extract CLI --census-leads (AC3)",
+      "invocation": "python -m lib.research.corpus.extract --census-leads",
+      "result": "rc 0; pdf_files 52 with_inline_leads 22 with_standalone_only 17 with_none 13"
+    },
+    {
+      "tool": "pytest full package (broader safety check, not a proof criterion)",
+      "invocation": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 214 passed, 0 failed"
+    },
+    {
+      "tool": "direct S3 list (v1/v2 object-count control, not a proof criterion)",
+      "invocation": "boto3 list_objects_v2 over research-report-extract, counting keys ending /extract.json vs /extract.v2.json",
+      "result": "v1 123, v2 123 -- unchanged v1 count across both --run-v2 runs"
+    },
+    {
+      "tool": ".scratch/d1/mutant.py (not committed -- scratch control harness)",
+      "invocation": "PYTHONPATH=. python .scratch/d1/mutant.py",
+      "result": "rc 0; FIX section_leads=2; MUTANT section_leads=0; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/extract.py lib/research/corpus/tests/test_extract.py org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-1.extraction-method-2-inline-leads.md org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-d-1.extraction-method-2-inline-leads.proof_of_spec.json",
+      "result": "PENDING -- run after this instance is validated"
+    }
+  ]
+}
