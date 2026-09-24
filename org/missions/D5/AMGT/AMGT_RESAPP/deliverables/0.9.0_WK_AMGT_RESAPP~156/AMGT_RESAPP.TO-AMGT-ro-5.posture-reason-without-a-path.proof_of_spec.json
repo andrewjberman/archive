@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ro-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ro-5.posture-reason-without-a-path.md",
+    "group": "C",
+    "vintage_commit": "d4b3321d7115e4707e2a82d669fd405b7922b824"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "d4b3321d7115e4707e2a82d669fd405b7922b824",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ro-5.posture-reason-without-a-path.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~156",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/posture/packs.py",
+      "kind": "script",
+      "commit_or_etag": "e061158d0303d1907e3b45988d7f00c9e97a90bc",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "load_model_block's absent-model-block branch (:67) no longer builds its reason with os.path.relpath(path, _REPO_ROOT) -- the reason is now the fixed literal 'ABSENT (no model block landed for this name)', carrying no path, no separator and no 'model_block_' filename fragment. The present-block branch (:69, which returns the path as the SOURCE string for the pack's provenance, not as a user-read reason) is unchanged; only the absent-branch reason text moved."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "block=None reason='ABSENT ...' path-tokens=none -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-5.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "block=None reason='ABSENT (no model block landed for this name)' path-tokens=none\nexit=0\nARTIFACT: lib/research/posture/packs.py:67 (load_model_block) -- this is the line AC1 exercises.",
+      "denominator": "1 of 1 checked token set (\\\\, /, org, deliverables, model_block_) found in the reason string: none present; block is None; reason is truthy; rc=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the posture package's tests pass (N passed, 0 failed) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-5.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "..........................                                                                   [100%]\n22 passed in 0.20s\nexit=0\nARTIFACT: lib/research/posture/packs.py is inside lib/research/posture, the suite AC2 runs.",
+      "denominator": "22 of 22 tests in lib/research/posture passed, 0 failed; rc=0.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "determinism": {
+      "method": "AC1 and AC2 run twice: once immediately after the edit (pre-commit) and once after the commit landed (this instance's captured run).",
+      "observed": "IDENTICAL both times: AC1 'block=None reason=\\'ABSENT (no model block landed for this name)\\' path-tokens=none' rc=0; AC2 '22 passed' rc=0.",
+      "status": "STABLE"
+    },
+    "mutant": {
+      "description": "AC1's own load-bearing claim is that the ABSENT reason carries no path token. The fix was reverted IN THE WORKING FILE ONLY (os.path.relpath(path, _REPO_ROOT) restored into the reason string) and AC1's exact invocation re-run against that mutation.",
+      "expected": "path-tokens should list at least one non-'none' token (a path separator or 'org'/'deliverables'/'model_block_' fragment) and the script's own exit code should flip to 1.",
+      "observed": "FIRED AS EXPECTED (real re-run, working file only, then restored): with the pre-fix line restored, AC1 printed reason=\"ABSENT org\\missions\\D5\\AMGT\\AMGT_RESAPP\\deliverables\\0.9.0_WK_AMGT_RESAPP~1\\model_block_NOPE_US_Equity.json (no model block landed for this name)\" path-tokens=['org', 'deliverables', 'model_block_'], exit=1. The working file was restored from a pre-mutation backup copy and AC1 re-run: reason='ABSENT (no model block landed for this name)', path-tokens=none, exit=0; git diff against the committed bytes then showed no change.",
+      "status": "FIRED-AS-EXPECTED"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Adding a separate operator-facing path field to the pack or to load_model_block's return shape",
+      "reason": "The cell's build note observes that where the path matters to an operator it should ride a separate field the object already has or gains; no criterion, test, or downstream reader in this worker's <paths> requires such a field, and pack['sources']['model_block'] already carries load_model_block's second return value (now the path-free reason) for the pack's own provenance slot -- adding a new field would be work the task order's literal criteria do not call for."
+    },
+    {
+      "item": "Re-running or refreshing served posture objects written before this change",
+      "reason": "The cell's own text states those objects carry the old text until the next posture run, and that run is explicitly named as not this cell's."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface beyond the files named above and this deliverables folder. Outer worktree: C:/tmp/wk-amgt-40-156 on branch wk-AMGT_RESAPP-156, cut from de941578b770fb44d51c0fbf46593984be4fdcc5. Code commit e061158d0303d1907e3b45988d7f00c9e97a90bc (lib/research/posture/packs.py, 1 file changed, 1 insertion(+), 1 deletion(-)); this proof instance committed next, per WHEN YOU ARE DONE.",
+  "compiler_tools": [
+    {
+      "tool": "python (AC1's own check script)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-5.AC1.py",
+      "result": "block=None reason='ABSENT (no model block landed for this name)' path-tokens=none, rc=0, run twice (pre-commit and post-commit) with identical output both times."
+    },
+    {
+      "tool": "python -m pytest (lib/research/posture)",
+      "invocation": "python -m pytest -q lib/research/posture -p no:cacheprovider",
+      "result": "22 passed, 0 failed, run twice (pre-commit and post-commit) with an identical pass count each time."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~156 <0.9.0_WK_AMGT_RESAPP~156@opal.agent>\" -F .scratch/commit_msg.txt -- lib/research/posture/packs.py",
+      "result": "[risk-reflex] REFLEX CLEAN (1 of 1 file checked, 0 hits); [commit-gate] All checks passed (1 of 1 file); [naming-gate] PASS 0 graded; [to-pipeline-gate] OK; [surprise-row-gate] OK; commit e061158d03, author 0.9.0_WK_AMGT_RESAPP~156, '1 file changed, 1 insertion(+), 1 deletion(-)'; [msg-verify] MATCH len=463."
+    },
+    {
+      "tool": "proof-of-spec-check.py -- THIS WORKTREE'S OWN copy, run from inside C:/tmp/wk-amgt-40-156",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~156/AMGT_RESAPP.TO-AMGT-ro-5.posture-reason-without-a-path.proof_of_spec.json AC1,AC2",
+      "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+    }
+  ]
+}
