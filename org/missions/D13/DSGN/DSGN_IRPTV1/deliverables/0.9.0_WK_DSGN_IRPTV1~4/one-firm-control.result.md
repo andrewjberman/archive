@@ -11,6 +11,10 @@ neither carries `Global (All)`. `index.tsx`'s own source confirmed to no longer 
 
 ## IVE4-AC2 -- the firm-context seam (bun test)
 
+**AMENDED 2026-09-24 by the issuer on `1.0.0_SA_CTO` ruling 100553 (cherry-picked commit `41e07da617`, workspace commit `aea7ac93db`): IVE4-AC2 recut as a DIFFERENCE control (tip failure SET == base failure SET, measured against the issuer's detached checkout `C:/tmp/dsgn-irptv1-base` @895752676a) -- re-run per the amended invocation: `VERDICT: NO-NEW-FAILURES`, PASS by output (5 of 48 at base, 5 of 48 identical at tip, 0 new). Supersedes the FAIL below, which is kept as the history that grounded the amendment (this worker's own W4-S2 measurement).**
+
+Original measurement (pre-amendment), kept for the record:
+
 **FAIL, reported with a full measurement -- the order's `<status>` stays open on this instance.**
 5 of 48 tests in `__tests__/fe-s-2/` + `__tests__/fe-s-10/` already fail at the UNTOUCHED base this
 worktree branched from (portal HEAD `bcf25837`, IV-e-3's own commit, measured *before* touching
