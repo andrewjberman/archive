@@ -1,0 +1,125 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-rn-4",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rn-4.the-ancestor-aware-clip-arm.md",
+  "group": "OTHER",
+  "vintage_commit": "17499a48179dff2b23df0b22f094749d63e30dde"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "17499a48179dff2b23df0b22f094749d63e30dde",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rn-4.the-ancestor-aware-clip-arm.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~149",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/scripts/ui-measure.mjs",
+   "kind": "script",
+   "commit_or_etag": "88305686",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "classify()'s section 7 gains a second arm (7b, ancestor-aware): findAncestorClip(el) walks from a text leaf up to the nearest [data-tab-panel]/main ancestor, locates the nearest ancestor whose own overflow-x/overflow-y is non-visible, checks the path for a flex-row parent/child pair with flex-shrink:0 and min-width:auto on the child, and confirms the leaf's own rendered box is actually cut past that ancestor's edge. clippedByAncestor is 7b's own count; clippedTextBlocksLeafOnly keeps 7a's original leaf-only count; clippedTextBlocks (the graded field) becomes their de-duplicated union. --self-test now also prints 'ANCESTOR-CLIP leafOnly=<a> ancestorAware=<b>'. The docstring at section 7 restates, in substance, the instrument paragraph L4R_C13_RATIFIED.md amendment three moved out of DESIGN.md C13 bullet 5: what clippedTextBlocks grades (both arms) and what it still cannot see (an ancestor transform/clip-path, a flex-COLUMN axis, or a clip only visible at a narrower viewport).",
+   "introduces": [
+    "findAncestorClip(el)",
+    "clippedByAncestor",
+    "clippedTextBlocksLeafOnly",
+    "ANCESTOR-CLIP self-test line"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "portal/scripts/ui-contract-check.mjs",
+   "kind": "script",
+   "commit_or_etag": "88305686",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "infoCols gains clippedByAncestor beside clippedTextBlocks; both the GRADED and the informational per-state table now print it.",
+   "introduces": [
+    "clippedByAncestor column in both tables"
+   ],
+   "artifact_covered_by": [
+    "AC1"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/tests/uiClipFixture.html",
+   "kind": "test",
+   "commit_or_etag": "88305686",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Static fixture reproducing rm-6's read of the pre-rm-5 Lead Panel caption clip: a fixed-width main[data-tab-panel] with overflow-x:hidden, a flex row (justify-content:space-between) whose right child carries flex-shrink:0 and no width/min-width override, holding a bare unclassed <span> caption -- no overflow/clip/ellipsis/nowrap anywhere on the leaf, its parent, or its grandparent. Also carries the original band/strip/purple-fill/identity-accent shapes uiMeasureFixture.html defined, unchanged in count, so the self-test's existing checks (band=1, strip=1, purpleFills=1, identityAccents=2) still pass against it.",
+   "introduces": [
+    "uiClipFixture.html"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "leafOnly=0 ancestorAware=N with N at least 1 on the unsignalled fixture, the self-test's own POSITIVE/NEGATIVE arms still passing, and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round39/checks/rn-4.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "POSITIVE bandContainersTopLevel=1 stripContainers=1 purpleFills=1 identityAccents=2 clippedTextBlocks=1 clippedSample={\"tag\":\"SPAN\",\"head\":\"-- dated 2026-09-23 (requested 2026-09-24) -- this provenanc\",\"tail\":\"-5 Lead Panel defect\",\"fullLen\":239} / NEGATIVE bandContainersTopLevel=0 stripContainers=0 / ANCESTOR-CLIP leafOnly=0 ancestorAware=1 / SELF-TEST OK / leafOnly=0 ancestorAware=1 (self-test rc=0) / exit=0",
+   "denominator": "1 of 1 ANCESTOR-CLIP line printed; leafOnly=0 (== expected 0), ancestorAware=1 (>= expected 1); all 7 of 7 existing self-test checks (5 POSITIVE + 2 NEGATIVE) still passed (SELF-TEST OK); script exit=0.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "src files moved off the base other than the fixture: 0 -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round39/checks/rn-4.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "src files moved off the base other than the fixture: 0 / exit=0",
+   "denominator": "1 of 1 count read 0 (git diff --name-only <merge-base> -- src, minus the fixture, excluding scripts/ which is outside src/); exit=0.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Ran AC1 with findAncestorClip's flex-shrink-0/min-width:auto condition (ii) temporarily forced to false (short-circuit `if (!flexHit) return false` replaced with an unconditional `return false` right after the overflow-ancestor check, i.e. the flex-sizing predicate disabled) to confirm the arm is load-bearing, not a constant true.",
+   "expected": "ancestorAware drops to 0 on uiClipFixture.html once the flex-shrink-0/min-width:auto predicate cannot fire -- the fixture's only clip source is that mechanism.",
+   "observed": "CHECKS-WRONG-WAY confirmed: with the predicate disabled, `node scripts/ui-measure.mjs --self-test --fixture uiClipFixture.html` printed `ANCESTOR-CLIP leafOnly=0 ancestorAware=0` (SELF-TEST FAILED on POSITIVE clippedTextBlocks, got 0 expected 1). Reverted immediately; re-ran AC1 clean (ancestorAware=1, SELF-TEST OK, exit=0) to confirm the revert.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "Ran AC1 twice in succession after the code settled.",
+   "observed": "Both runs printed identical POSITIVE/NEGATIVE lines and ANCESTOR-CLIP leafOnly=0 ancestorAware=1, SELF-TEST OK, exit=0 both times.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "portal/DESIGN.md -- not edited",
+   "reason": "Out of this cell's <paths>; C13's own DESIGN.md edit lands via the named POD_DE_ANY writer per L4R_C13_RATIFIED.md, not this worker."
+  },
+  {
+   "item": "No portal page or component source moved",
+   "reason": "Bound 3 (BOUNDS s.2): no page or component source moves (AC2) -- the only src/ change is the new fixture, confirmed 0 by AC2's own invocation."
+  }
+ ],
+ "surprises": [],
+ "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface beyond the deliverables folder named in the task order and the project's surprise-channel investigation file (no row filed by this cell -- nothing surfaced that the task order did not already name or bound for). Worktree: C:/tmp/wk-amgt-39-149 on branch wk-AMGT_RESAPP-149, at CLOUD tip 17499a4817 (round 39). Portal worktree: C:/tmp/wk-amgt-39-149/portal on branch wk-AMGT_RESAPP-149-portal at portal DEV 5e339ffd, edited (scripts/ui-measure.mjs, scripts/ui-contract-check.mjs, new fixture uiClipFixture.html), committed at portal 88305686. No dev server started (issuer note 1: no server needed for the --self-test --fixture path). This instance and the outer commit (deliverables + portal gitlink bump, no other change) are committed together next, per WHEN YOU ARE DONE step 5. The status flip to complete is the ISSUER's (2.0.0_SA_COO~Z), left untouched by this cell.",
+ "compiler_tools": [
+  {
+   "tool": "node --check (syntax)",
+   "invocation": "cd portal && node --check scripts/ui-measure.mjs && node --check scripts/ui-contract-check.mjs",
+   "result": "SYNTAX-OK on both files."
+  },
+  {
+   "tool": "bash rn-4.AC1.sh (self-test on the new fixture, twice: pre- and post-mutant-control revert)",
+   "invocation": "bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round39/checks/rn-4.AC1.sh",
+   "result": "leafOnly=0 ancestorAware=1, SELF-TEST OK, exit=0, both runs."
+  },
+  {
+   "tool": "bash rn-4.AC2.sh (portal src/ diff against base, minus the fixture)",
+   "invocation": "bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round39/checks/rn-4.AC2.sh",
+   "result": "0 files moved off base other than the fixture; exit=0."
+  },
+  {
+   "tool": "proof-of-spec-check.py -- THIS WORKTREE'S OWN copy, run from inside C:/tmp/wk-amgt-39-149",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~149/AMGT_RESAPP.TO-AMGT-rn-4.the-ancestor-aware-clip-arm.proof_of_spec.json AC1,AC2",
+   "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+  }
+ ]
+}
