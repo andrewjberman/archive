@@ -26,7 +26,16 @@ this seat's first grade used the wrong before-object. **Rollback CLOSED** 08:22:
 (copy-object from the signed VersionId; verified 3 of 3 legs on three instruments; ledger `amgt-crosswalk-0924-rollback`
 closed). Row Z-S13 condition 1 met.
 
-**Re-fire HELD on two clauses, both on `add_security` (`2.0.0_SA_COO~Z`'s surface, taken on its Peers closer track):**
+**UPDATE ~10:5xZ -- all four preconditions HOLD (CTO R-51): the two clauses below were BUILT by `2.0.0_SA_COO~Z`
+@`a125f8be8b` (`--batch` = one put per run; the universe input on every build) and drained onto CLOUD @`8c75f4f90d`
+(byte-identical, R-51). R-49's count-first check, run here on the collision check's own in-memory object: 0 of 20
+evidenced keys collide (positive controls ASML/AAPL present), so the ENRICH fork is moot. d-5 ISSUER AMENDMENT 3
+@`e1014a7eb6` moves the induction to ONE `--batch` call; worker ~2 continued on it. COO half of the pair SIGNED
+@`4bbd43777c` (`NEVER_WIDEN_ROUND2_D5_REFIRE_HALVES.md`; N = 2 writers printed; blast radius ONE conditional put;
+before-state VersionId `aTOpDZTTPlIzLLoeTFumB8KHmv6A0txG`); CTO half owed. The fire runs after the amendment-3 cell
+drains VALID and the CTO half lands.**
+
+**Re-fire was HELD on two clauses, both on `add_security` (`2.0.0_SA_COO~Z`'s surface, taken on its Peers closer track):**
 1. `write_pool` once per run (one put), not once per name (20 versions in 18 s was the partial-read window itself).
 2. **Measured 09:0xZ, this seat's pre-flight:** `crosswalk.build_crosswalk("2026-09-24")` in memory on CLOUD returns MEASURED
    **36**, not 194 -- the universe/v1 source is an explicit `identity_universe`/`identity_source` argument the CLI passes
