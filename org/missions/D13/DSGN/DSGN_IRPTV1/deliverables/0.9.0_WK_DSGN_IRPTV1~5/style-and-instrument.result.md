@@ -50,12 +50,17 @@ Mutant control: reverted `PerformanceHeadline.tsx`'s tile-value class back to `f
 text-slate-900`, re-ran -- `CLASS-CENSUS over 2 files: slate tokens 1 | 600 weights 1` /
 `VERDICT: SLATE-OR-600-REMAIN`. Fired as expected; file restored, `git diff` clean afterward.
 
-## IVE2-AC2 -- the instrument
+## IVE2-AC2 -- the instrument -- REFUSED
 
 `node scripts/ui-smoke.mjs investor-reporting iv-e-2.png --port 5181 --fixtures
 dsgn-irptv1-cottonwood.json` (the order's own required invocation, no `--click` steps) --
-PASS. `FIXTURES: 5 declared; 2 matched >=1 URL` / `FIXTURES-MATCH: matched 2 of 5` /
-`FIXTURE-DEAD: .../performance/sel_... | .../holdings/sel_... | .../selections`.
+**REFUSED**. `FIXTURES: 5 declared; 2 matched >=1 URL` / `FIXTURES-MATCH: matched 2 of 5` /
+`FIXTURE-DEAD: .../performance/sel_... | .../holdings/sel_... | .../selections`. The
+criterion's own text governs: "A partial match is a REFUSAL with the measurement, not a
+pass." 2 of 5 is a partial match, so this row is REFUSED, not PASS -- corrected from an
+earlier PASS grade that relied on the issuer's `<expect>` pattern (`FIXTURES-MATCH: matched`)
+being an unanchored substring a partial line also satisfies. That is the issuer's own defect
+(filed by the COO against the task order, not self-graded around here).
 
 2 of 5 is the genuine ceiling for a click-free run on THIS app: `resolve-scope` and the page's
 own UNCONDITIONAL initial `directory-browse` (fired by `ClientSearch`'s mount effect, no typing
