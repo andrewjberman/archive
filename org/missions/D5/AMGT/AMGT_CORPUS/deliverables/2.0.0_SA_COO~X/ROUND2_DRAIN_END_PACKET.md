@@ -78,6 +78,12 @@ channel conflicts resolved by union, one abort-and-reopen of this seat's own mer
    name-to-ticker match against the SEC company_tickers table, or reading the workbook, are plausible and unmeasured, and
    **measuring one of them is a round-3 cell**, never an inference. (This packet's first R-75 line carried the 13-of-13 number
    into that population; corrected here, same commit discipline as the ruling.)
+8. **CTO R-77 (15:36Z) names the ONE measurement that would move the 40, and its ORDER:** do any of the 40 identity-unresolved
+   folders carry a usable company name in a readable artifact? Bounded at 40 folders, no vendor call, no build. It PRECEDES any
+   name-to-ticker reverse index (three of four components of a name path exist -- the SEC company_tickers table in bronze, rows
+   with a title, a name-token comparator -- the reverse index does not, 0 occurrences; `3.0.0_SA_CVO~Z`'s Z-S20 measured the code
+   plane). Placement: this seat's, at the round-3 cut, as a measurement cell cut BEFORE any index cell, beside the FWD-12 V3 cell
+   and Z-S17's remedy. Both directions stay open until it runs.
    Unreachable by pipeline work alone: 10 workbook-only (the 9 shells + Quanta) and 1 empty folder (Air Liquide) -- a scope
    question surfaced to Andrew once by the CTO, not narrowed here. This seat adopts the content axis for every later "N of 93".
 
