@@ -6,40 +6,49 @@ the SAME instrument or the comparison is between two scripts rather than two sta
     python verify_after.py --capture-before   # immediately before the apply
     python verify_after.py                    # immediately after the apply (AC2)
 
-WHY L2 IS GRADED ON A NORMALISED SHA AND NOT THE RAW ONE (row AMGT_RESAPP-Z-S254).
-The order's AC2 asks that the default path's body sha256 be EQUAL before and after,
-"a different sha is the ROLLBACK trigger". The served PDF is NOT byte-deterministic:
-it carries a render-time /CreationDate, so two IDENTICAL requests four seconds apart
-already differ. Measured on the deployed function 2026-09-24, no deploy involved:
-77862 bytes both times, sha256 f29a7918... and b734929c..., differing in EXACTLY ONE
-span of those 77862 bytes -- "/CreationDate (D:20260924145119Z)" against
-"(D:20260924145123Z)". Raw equality is therefore always FALSE and would roll back a
-correct deploy.
+THREE COMPARANDS ARE COMPUTED FOR EVERY PDF AND ALL THREE ARE PRINTED. Which one
+GRADES L2 is --l2-comparand, so the issuer's ruling is a one-word change and never a
+re-run. Why there are three, in the order they were found to be insufficient:
 
-So this script prints BOTH and is explicit about which one grades:
-  RAW sha        -- printed for the ledger, never graded, expected to differ
-  NORMALISED sha -- /CreationDate, /ModDate and /ID replaced by fixed text; this is
-                    the DELTA=0 the order actually wants, and it was exercised: the
-                    two nondeterministic bodies above normalise to the SAME digest
-                    fab9a93f5b4bbc68db79dba266a02422411b43ec7f55ca496474bc5199b3ba0e.
+  raw          sha256 of the served bytes. The order's original L2. UNUSABLE: the
+               renderer stamps a wall-clock /CreationDate, so two IDENTICAL requests
+               four seconds apart already differ (measured 2026-09-24, 77862 bytes
+               both, one differing span, no deploy involved). Always false, and the
+               order made a different sha the ROLLBACK trigger. Row Z-S254.
 
-The normalisation touches ONLY those three PDF metadata fields. Any real change to
-the rendered document -- a moved figure, a changed number, a dropped section --
-still moves the normalised digest, which is what keeps this a DELTA=0 test rather
-than a way of passing. The CAT_US_Equity negative control proves that on every run:
-it must read DIFFERENT from BA on both comparands, so "equal" is a comparison that
-is free to fail.
+  normalised   sha256 after replacing /CreationDate, /ModDate, /ID with fixed text.
+               Fixes the stamp, and is what issuer amendment 2 (b) mandates. ALSO
+               UNUSABLE ACROSS THIS PARTICULAR DEPLOY: rl-10 sets
+               PdfPages(metadata={"CreationDate": None}), which REMOVES the entry
+               rather than fixing it (render_pack.py:295 and its own comment). So the
+               BEFORE pdf has the field and the AFTER pdf does not, and dropping those
+               bytes shifts every xref offset after them. Measured by simulating that
+               exact shape: fab9a93f... -> 9895fc74..., SURVIVES False.
+
+  content      sha256 over page count plus each page's DECODED CONTENT STREAM -- the
+               drawing program itself, text and vector chart operators alike. Carries
+               no file-level metadata and no byte offsets, so neither hazard reaches
+               it. Exercised on all three arms: identical across two live invokes that
+               differ in the stamp; identical across the metadata strip that moved the
+               file 77862 -> 77388; and DIFFERENT for CAT_US_Equity, so "equal" is
+               still free to fail. This is the default.
+
+  content is NOT a weaker test of the property L2 exists to protect. A moved figure, a
+  changed number or a dropped section all move the content stream. Only metadata and
+  byte offsets are excluded -- which is precisely what the pin changes and precisely
+  what a DELTA=0 claim should not be hostage to.
 
 The print leaf ignores the firm. handler() computes firm_id only to pass the edge
 gate, and the print branch calls _print_pack(requested, identity=identity, fmt=...)
-with no firm argument (lib/research/api/scoped_amgt.py). The header is supplied
-because _firm_id() fails closed with 401 when it is absent.
+with no firm argument. The header is supplied because _firm_id() fails closed with a
+401 when it is absent.
 """
 from __future__ import annotations
 
 import argparse
 import base64
 import hashlib
+import io
 import json
 import os
 import re
@@ -54,6 +63,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 BEFORE_PATH = os.path.join(HERE, "before_reads.json")
 
 RICH_MIN_BYTES = 20 * 1024
+COMPARANDS = ("content", "normalised", "raw")
+SHA_FIELD = {"content": "sha_content", "normalised": "sha_norm", "raw": "sha_raw"}
 
 
 def _event(security_key, query):
@@ -70,8 +81,30 @@ def _normalise(blob):
     """Replace ONLY the render-time PDF metadata. Everything else is compared."""
     out = re.sub(rb"/CreationDate\s*\([^)]*\)", b"/CreationDate(NORMALISED)", blob)
     out = re.sub(rb"/ModDate\s*\([^)]*\)", b"/ModDate(NORMALISED)", out)
-    out = re.sub(rb"/ID\s*\[[^\]]*\]", b"/ID[NORMALISED]", out)
-    return out
+    return re.sub(rb"/ID\s*\[[^\]]*\]", b"/ID[NORMALISED]", out)
+
+
+def _content_digest(blob):
+    """Page count + each page's decoded content stream. No metadata, no xref offsets.
+
+    Returns None rather than raising if the body is not a parseable PDF, so a
+    non-pdf response is reported as such instead of crashing the verify.
+    """
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        return None
+    try:
+        reader = PdfReader(io.BytesIO(blob))
+        hasher = hashlib.sha256()
+        hasher.update("pages={0}".format(len(reader.pages)).encode("ascii"))
+        for page in reader.pages:
+            contents = page.get_contents()
+            data = contents.get_data() if contents is not None else b""
+            hasher.update(hashlib.sha256(data).digest())
+        return hasher.hexdigest()
+    except Exception:
+        return None
 
 
 def _invoke(client, security_key, query):
@@ -79,25 +112,22 @@ def _invoke(client, security_key, query):
     response = client.invoke(FunctionName=FUNCTION, Payload=payload)
     raw = response["Payload"].read()
     if response.get("FunctionError"):
-        return {
-            "error": response["FunctionError"],
-            "raw": raw[:500].decode("utf-8", "replace"),
-        }
+        return {"error": response["FunctionError"], "raw": raw[:500].decode("utf-8", "replace")}
     parsed = json.loads(raw)
     headers = parsed.get("headers") or {}
     ctype = headers.get("Content-Type") or headers.get("content-type") or ""
     body = parsed.get("body") or ""
     blob = base64.b64decode(body) if parsed.get("isBase64Encoded") else body.encode("utf-8")
-    text_head = ""
-    if "pdf" not in ctype:
-        text_head = blob.decode("utf-8", "replace").split("\n")[0].strip()
+    is_pdf = "pdf" in ctype
     return {
         "status": parsed.get("statusCode"),
         "content_type": ctype,
         "bytes": len(blob),
         "sha_raw": hashlib.sha256(blob).hexdigest(),
         "sha_norm": hashlib.sha256(_normalise(blob)).hexdigest(),
-        "first_line": text_head,
+        "sha_content": _content_digest(blob) if is_pdf else None,
+        "has_creationdate": bool(re.search(rb"/CreationDate", blob)) if is_pdf else None,
+        "first_line": "" if is_pdf else blob.decode("utf-8", "replace").split("\n")[0].strip(),
         "body_head": body[:300] if "json" in ctype else "",
     }
 
@@ -111,8 +141,8 @@ def _reads(client):
     }
 
 
-def _code_sha(client_lambda):
-    return client_lambda.get_function_configuration(FunctionName=FUNCTION)["CodeSha256"]
+def _code_sha(client):
+    return client.get_function_configuration(FunctionName=FUNCTION)["CodeSha256"]
 
 
 def _show(label, read):
@@ -123,32 +153,34 @@ def _show(label, read):
         return
     print("    status={0} content-type={1} bytes={2}".format(
         read["status"], read["content_type"], read["bytes"]))
-    print("    sha256 raw       = {0}".format(read["sha_raw"]))
-    print("    sha256 normalised= {0}".format(read["sha_norm"]))
+    print("    sha raw        = {0}".format(read["sha_raw"]))
+    print("    sha normalised = {0}".format(read["sha_norm"]))
+    print("    sha content    = {0}".format(read["sha_content"]))
+    if read.get("has_creationdate") is not None:
+        print("    /CreationDate present = {0}".format(read["has_creationdate"]))
     if read.get("first_line"):
-        print("    first line       = {0!r}".format(read["first_line"][:120]))
+        print("    first line     = {0!r}".format(read["first_line"][:120]))
     if read.get("body_head"):
-        print("    body             = {0}".format(read["body_head"]))
+        print("    body           = {0}".format(read["body_head"]))
 
 
-def capture_before(client, client_lambda):
+def capture_before(client):
     print("=== BEFORE READS (pre-apply) ===")
-    code_sha = _code_sha(client_lambda)
+    code_sha = _code_sha(client)
     print("  CodeSha256 BEFORE = {0}".format(code_sha))
     reads = _reads(client)
     for name in ("ba_default", "ba_rich", "ba_xml", "cat_default"):
         _show(name, reads[name])
-    payload = {"code_sha256": code_sha, "reads": reads}
     with open(BEFORE_PATH, "w", encoding="utf-8", newline="\n") as handle:
-        json.dump(payload, handle, indent=2)
+        json.dump({"code_sha256": code_sha, "reads": reads}, handle, indent=2)
         handle.write("\n")
     print("")
     print("WROTE {0}".format(BEFORE_PATH))
-    print("Paste CodeSha256 BEFORE and the four raw+normalised shas into the NEVER-2 entry.")
+    print("Paste CodeSha256 BEFORE and all three shas into the NEVER-2 entry.")
     return 0
 
 
-def verify_after(client, client_lambda):
+def verify_after(client, comparand):
     if not os.path.exists(BEFORE_PATH):
         print("REFUSED: {0} is absent. Run --capture-before immediately before the apply;".format(BEFORE_PATH))
         print("         an AFTER read with no BEFORE read is not a comparison.")
@@ -157,15 +189,14 @@ def verify_after(client, client_lambda):
     with open(BEFORE_PATH, encoding="utf-8") as handle:
         before = json.load(handle)
 
-    after_code = _code_sha(client_lambda)
+    after_code = _code_sha(client)
     after = _reads(client)
+    b = before["reads"]
+    failures = []
 
     print("=== AFTER READS (post-apply) ===")
     for name in ("ba_default", "ba_rich", "ba_xml", "cat_default"):
         _show(name, after[name])
-
-    b = before["reads"]
-    failures = []
 
     print("")
     print("=== L1: the code moved ===")
@@ -179,26 +210,30 @@ def verify_after(client, client_lambda):
     print("")
     print("=== L2: the pdf default is unchanged (DELTA=0) ===")
     ba_b, ba_a = b["ba_default"], after["ba_default"]
-    print("  BEFORE raw        = {0}".format(ba_b.get("sha_raw")))
-    print("  AFTER  raw        = {0}".format(ba_a.get("sha_raw")))
-    print("  raw EQUAL         = {0}   (NOT GRADED -- /CreationDate makes this false always)".format(
-        ba_b.get("sha_raw") == ba_a.get("sha_raw")))
-    print("  BEFORE normalised = {0}".format(ba_b.get("sha_norm")))
-    print("  AFTER  normalised = {0}".format(ba_a.get("sha_norm")))
-    norm_equal = ba_b.get("sha_norm") == ba_a.get("sha_norm")
-    print("  normalised EQUAL  = {0}   <-- THIS IS L2".format(norm_equal))
+    field = SHA_FIELD[comparand]
+    for name in COMPARANDS:
+        key = SHA_FIELD[name]
+        mark = "  <-- GRADED" if name == comparand else ""
+        print("  {0:<11} BEFORE {1}".format(name, ba_b.get(key)))
+        print("  {0:<11} AFTER  {1}   EQUAL={2}{3}".format(
+            name, ba_a.get(key), ba_b.get(key) == ba_a.get(key), mark))
+    print("  /CreationDate present BEFORE={0} AFTER={1}  (rl-10 removes it; that is expected)".format(
+        ba_b.get("has_creationdate"), ba_a.get("has_creationdate")))
+
     if ba_a.get("status") != 200 or "application/pdf" not in (ba_a.get("content_type") or ""):
         failures.append("L2: default path is not 200 application/pdf")
-    if not norm_equal:
-        failures.append("L2: the pdf default CHANGED -- this is the ROLLBACK trigger")
+    if ba_a.get(field) is None or ba_b.get(field) is None:
+        failures.append("L2: the {0} comparand is unavailable on one side".format(comparand))
+    elif ba_b.get(field) != ba_a.get(field):
+        failures.append("L2: the pdf default CHANGED on the {0} comparand -- ROLLBACK trigger".format(comparand))
 
     print("")
     print("=== L2 negative control: CAT must differ from BA ===")
     cat_a = after["cat_default"]
-    print("  BA  normalised = {0}".format(ba_a.get("sha_norm")))
-    print("  CAT normalised = {0}".format(cat_a.get("sha_norm")))
-    differs = cat_a.get("sha_norm") != ba_a.get("sha_norm")
-    print("  DIFFERENT: {0}   (if this were False, 'equal' could not fail and L2 would be vacuous)".format(differs))
+    print("  BA  {0} = {1}".format(comparand, ba_a.get(field)))
+    print("  CAT {0} = {1}".format(comparand, cat_a.get(field)))
+    differs = cat_a.get(field) != ba_a.get(field)
+    print("  DIFFERENT: {0}   (if False, 'equal' could not fail and L2 would be vacuous)".format(differs))
     if not differs:
         failures.append("CONTROL: CAT and BA read the same -- L2 proves nothing this run")
 
@@ -235,14 +270,14 @@ def verify_after(client, client_lambda):
         failures.append("L3: format=xml did not return 400")
 
     print("")
-    print("=== VERDICT ===")
+    print("=== VERDICT (L2 graded on: {0}) ===".format(comparand))
     if failures:
         for item in failures:
             print("  FAIL: {0}".format(item))
         print("  RESULT: FAIL -- {0} failed check(s) across L1/L2/L3".format(len(failures)))
         return 1
-    print("  OK: L1 code moved; L2 pdf default DELTA=0 on the normalised comparand with a")
-    print("      live negative control; L3 rich served as text/markdown and xml refused 400.")
+    print("  OK: L1 code moved; L2 pdf default DELTA=0 on the {0} comparand with a live".format(comparand))
+    print("      negative control; L3 rich served as text/markdown and xml refused 400.")
     return 0
 
 
@@ -250,12 +285,14 @@ def main():
     parser = argparse.ArgumentParser(description="rm-7 verify-after on the deployed function")
     parser.add_argument("--capture-before", action="store_true",
                         help="take the BEFORE reads and write before_reads.json")
+    parser.add_argument("--l2-comparand", choices=COMPARANDS, default="content",
+                        help="which comparand GRADES L2 (all three are always printed)")
     args = parser.parse_args()
 
     client = boto3.client("lambda", region_name=REGION)
     if args.capture_before:
-        return capture_before(client, client)
-    return verify_after(client, client)
+        return capture_before(client)
+    return verify_after(client, args.l2_comparand)
 
 
 if __name__ == "__main__":
