@@ -1,0 +1,73 @@
+build(AMGT-rl-9, 0.9.0_WK_AMGT_RESAPP~138): the four designed states swept across the merged page, and two real presentation defects the sweep found and fixed
+
+WHAT THIS CELL BUILT (bound 1(1)): scripts/ui-contract-check.mjs gains a --states-sweep mode.
+It reuses ui-smoke.mjs's own --fail/--delay/--expect levers (unedited) for LOADING and ERROR,
+and a small per-state patched-fixtures file for EMPTY (the one branch neither lever reaches).
+NO-PERMISSION has no live consumer anywhere on this page (PanelStates.tsx's own docstring,
+row DSGN_REBRND-W3-S1) -- wiring it is an information-architecture decision this project is
+not chartered to make, so it is captured by rendering the real, unmodified PanelNoPermission
+export through react-dom/server (the same SSR method __rendercheck__/renderCheck.tsx and
+modelPattern.harness.cjs already use on this page) and injecting the markup into an
+already-loaded, already-styled page for the screenshot -- labelled STANDALONE in the printed
+matrix, never claimed reachable by a route. Result: 17 of 17 attempted (state, kind) cells
+PASS, peers-empty correctly recorded N/A (PeersTab has no designed-empty branch reachable
+with a security selected), DESIGNED-STATES 4 of 4 captured at least once, exit 0.
+
+WHAT THE SWEEP FOUND AND THIS CELL FIXED, IN THE PAGE (bound 1(2), presentation-only):
+- ModelTab.tsx: IdentityLine sat in PanelHeader's leftActions (the dark band), but a
+  heatmap-variant Panel never carries .dark-band (Panel.tsx: only chart/mixed do) and
+  PanelHeader's own dark ground is not .dark-band either -- so IdentityLine's unset ink read
+  navy-on-navy (lowContrastChars 37, ratio 1.48; row AMGT_RESAPP-Z-S247). Moved into
+  PanelContent, the same placement ThesisTab/PeersTab/PostureTab already use. lowContrastChars
+  now reads 0 on every one of the six states.
+- ModelTab.tsx's ModelBody ABSENT branch rendered a bare <p>, not one of the four designed
+  states; it now renders the file's own ModelEmptyState (already built, already carrying
+  data-panel-state="empty") instead of a new state.
+- ThesisTab.tsx / ExecManagementTab.tsx / PostureTab.tsx never read isError from
+  useThesisBundle: a real fetch failure on /thesis rendered NOTHING (a blank panel, not one
+  of the four designed states) on three of five tabs. All three now render PanelError with
+  the established message/hint/cause/retry pattern PeersTab.tsx/ModelTab.tsx already use.
+- components/PrintExportAction.tsx: the header Print trigger used a hand-rolled
+  rounded-lg/font-medium/disabled:opacity-40 idiom and the modal used raw text-white/
+  bg-black/60/shadow-2xl/font-semibold utilities -- portal/DESIGN.md C1/C11 violations, and
+  the ONLY source of ui-class-census.mjs's non-zero TOTAL over src/pages/SecurityAnalysis
+  (rl-8's own admitted list was NONE). Trigger now reuses buttonClass (Controls.tsx, the
+  estate's one control vocabulary); the modal now carries .dark-band the same way DarkCard
+  does. ui-class-census.mjs src/pages/SecurityAnalysis: FILES 31 TOTAL 0 (was 12).
+
+WHAT AC1 STILL READS FAIL, AND WHY IT IS A FINDING OUTSIDE THIS CELL'S <paths> (bound 2, never
+tuned away): bandContainersTopLevel/weights/sizes/radii/shadows/purpleFills fail on 5-6 of 6
+states. Traced (diag capture, band-top-level markup dump) to THREE files, none in
+src/pages/SecurityAnalysis/** or this cell's other writable paths:
+  - src/App.tsx: the persistent sidebar ASIDE -- rounded-lg nav links (8px radius), font-medium/
+    font-semibold/font-light nav labels (500/600/300), text-[10px] section headers, shadow-lg,
+    and the "Market Overview" active-link + avatar purple fills. Present on all six states.
+  - src/components/PageHeaderVariants.tsx (PageHeaderCleanBadge): the w-[3px] accent strip,
+    a third purple fill on every state.
+  - src/ui/components/panels/PanelHeader.tsx / PanelFooter.tsx + src/index.css: the portal-wide
+    NAMED LAYERS refactor (DSGN_REBRND, predates this round) repoints --bg-band to
+    --layer-body (18% L) while --bg-header stays --layer-strip (12% L, matching the ORIGINAL
+    #0A1733 ui-measure.mjs's isBand() check is calibrated to) -- so a Panel's OWN wrapper
+    (variant=mixed/chart, --bg-band) no longer matches isBand(), and its PanelHeader/PanelFooter
+    (still --bg-header) each read as a SEPARATE top-level band. bandContainersTopLevel reads
+    2-3 instead of 1 on 5 of 6 states for this reason, verified via a bandTop element dump
+    (ASIDE + PanelHeader-styled DIV [+ PanelFooter-styled DIV on Universe mode]).
+None of PanelHeader.tsx/PanelFooter.tsx/App.tsx/PageHeaderVariants.tsx/index.css are in this
+cell's <paths> (only Panel.tsx is writable under ui/components/panels). REFUSED per bound 2,
+with the measured value and owning file named above.
+
+Files: scripts/ui-contract-check.mjs (--states-sweep mode, additive);
+src/pages/SecurityAnalysis/tabs/ModelTab.tsx (IdentityLine placement, ABSENT branch);
+src/pages/SecurityAnalysis/tabs/{ThesisTab,ExecManagementTab,PostureTab}.tsx (isError branch);
+src/pages/SecurityAnalysis/components/PrintExportAction.tsx (idiom compliance);
+src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs (PanelFooter/PanelError/PanelEmpty stub
+props forwarded; peers absent-column and universe-vintage assertions read the markup AMGT-rl-5
+moved to; generation-caption assertions read the footer TEXT AMGT-rl-8 moved list captions to --
+CHECKS-OK 20 of 20, no WRONG-WAY line, was CHECKS-WRONG-WAY peers_csc_table_absent_marked,
+short_read_refused,generation_captions_present);
+src/pages/SecurityAnalysis/__harness__/posture.harness.cjs (PanelFooter/Controls/DataTooltip
+stubs so the file loads at all post-rl-8; renderHeader renders IdentityHeader/SecurityOverlay.tsx,
+the header's real current owner per LeadPanel.tsx's own docstring, not the now-inert LeadPanel
+Security-mode branch -- CHECKS-OK 32 of 32, was a MODULE_NOT_FOUND crash before this cell).
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
