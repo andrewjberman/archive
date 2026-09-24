@@ -26,6 +26,21 @@ this seat's first grade used the wrong before-object. **Rollback CLOSED** 08:22:
 (copy-object from the signed VersionId; verified 3 of 3 legs on three instruments; ledger `amgt-crosswalk-0924-rollback`
 closed). Row Z-S13 condition 1 met.
 
+**UPDATE ~13:0xZ -- Z-S16 REMEDIED, RE-MINTED, RE-INGESTED; the production sequence found two more.** `2.0.0_SA_COO~Z`'s
+builder fix (a registration RESOLVES its same-folder UNRESOLVED record in place) drained @`a5b9859e0a`; fresh pair (COO half
+@`5de984f360`, CTO half #2 @`839b04a16c`, in force @`6236af5af4`); byte-identity HEAD == `a2b84a1b2a` (51,725 B, sha 200ec514;
+pre-fix differs); ONE `crosswalk.main --write-pool` at 11:59:01Z: versions 23 -> 24, VersionId `BN_TiAyAX_EwRm_nP.PMymkiUnFBMA1N`,
+560,881 B (the pre-built payload exactly), records 274 -> 254, MEASURED 214 with 214 of 214 keys present, UNRESOLVED 60 -> 40,
+resolved_folders 20, multi-claimed forms 0 (evidence @`2c24cc867d`; CTO R-63 closes the pair). Re-ingest 12:00-12:04Z:
+**resolved_folders 53, stored 218 (put_performed 94, existed 124), AMBIGUOUS 0** -- the 20 folders' 94 reports are in bronze.
+Production sequence: extract --write and --run-v2 (v2_stored 218, put 95), typed (218 rows, 95 written), continuation,
+fund_form, typecast (new scope=all-workbooks object) OK; **sector_template REFUSED (row Z-S17 ARMED: its gold object name
+omits the corpus-wide total the body carries, so an unchanged type collides on a grown corpus; gold refused correctly)**;
+dossier rebuilt 33 in 45 min. **Row Z-S18 (INERT, this seat's sequencing miss):** continuation and dossier enumerate names from
+the latest research-backlog scan vintage (round 1's 33), which the decomposed sequence never re-minted, so the 20 new names got
+no continuation or dossier on the first pass; the corrected chain (`backlog --write` -> continuation -> dossier) is RUNNING;
+d-4 is continued after it. Z-S16 disarm carrier row follows the corrected chain.
+
 **UPDATE ~11:3xZ -- FIRED ONCE, AND AN EXPOSURE BEHIND IT.** d-5 amendment 3 drained @`71e2409a43` (re-graded at the tip:
 20 of 20, package 256, checker VALID); the pair completed (COO half @`4bbd43777c`, CTO half @`9a6472e58f` in the CTO's
 folder); `bloomberg_health` OK; before-state re-measured identical (probe-2); the fire ran 11:09:45-11:11:01Z: **population
