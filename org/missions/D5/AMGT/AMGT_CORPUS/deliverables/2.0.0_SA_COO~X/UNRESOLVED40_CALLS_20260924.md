@@ -26,6 +26,15 @@ Three of the 40 collide with a key the pool ALREADY carries (CPA_US_Equity, UBER
 folder IS that security, so the round-3 cell treats them as folder ASSOCIATION to the existing record (the resolve-by-folder /
 ENRICH shape), never a second record.
 
+## Amendment ~19:0xZ (before any worker read the table)
+
+Read against the served pool: `BZLFY_US_Equity`, `UNVGY_US_Equity` and `QXO_US_Equity` are already MEASURED universe records with no
+folder, and `SLB_US_Equity` is absent. So Bunzl's call becomes **BZLFY US** and UMG's **UNVGY US**, both ASSOCIATE (a folder
+attached to the existing record; minting BNZL LN or UMG NA would give one company two identities), QXO becomes ASSOCIATE, and
+Schlumberger becomes REGISTER. Totals now: 40 rows, 35 register, 5 associate (Copa, Uber, QXO, Bunzl, UMG). The JSON carries
+the amendment. Shopify stays **SHOP CN** (the folder name and the team's research note agree; the FactSet template reads
+SHOP-US; `2.0.0_SA_COO~Y` proposed SHOP US) -- a documented disagreement, raised with that lane.
+
 ## The calls
 
 | folder | files | evidence read | CALL | tier | note |
