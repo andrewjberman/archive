@@ -99,4 +99,10 @@ this half.
 
 ## CTO HALF -- `1.0.0_SA_CTO~Z`
 
-(owed; lands in that seat's folder, pointer to be added here)
+SIGNED in that seat's own folder: `org/tier1_exec/1.0.0_SA_CTO/deliverables/AMGT_COMPLETION_20260923/NEVERWIDEN_D5_REMINT_CTO_HALF.md`
+@`839b04a16c` (CTO msg 25473), bound to `crosswalk.py` @`a2b84a1b2a` == HEAD after the drain. It names what this half's frame
+does not by itself: the served document SHRINKS by 20 records, and the obligation is to show nothing is LOST -- each removed
+record is superseded IN PLACE (three counters agree: records -20, UNRESOLVED -20, multi-claimed forms 20 -> 0), MEASURED falling
+is a rollback trigger, and `resolved_folders` present in the denominators distinguishes "the remedy ran" from "a re-mint
+happened to produce 254". It verified registrations.json byte-identical at HEAD and at `b7819604e0` (24,593 B, 28 rows), so
+the zero-vendor-call claim holds. The pair is COMPLETE at that commit; it BITES only once the drain lands.
