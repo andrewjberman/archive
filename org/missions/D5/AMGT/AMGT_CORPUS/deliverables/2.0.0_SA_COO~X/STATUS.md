@@ -26,6 +26,16 @@ this seat's first grade used the wrong before-object. **Rollback CLOSED** 08:22:
 (copy-object from the signed VersionId; verified 3 of 3 legs on three instruments; ledger `amgt-crosswalk-0924-rollback`
 closed). Row Z-S13 condition 1 met.
 
+**UPDATE ~14:1xZ -- THE CORRECTED CHAIN IS DONE; Z-S16 DISARMED (row Z-S19); d-4 CONTINUED.** `backlog --write` minted the
+scan vintage `date=2026-09-24/20260924T130441Z.json` (93 = 53 resolved + 40 unresolved + 0 ambiguous); continuation `names 53
+rebuilt 20 existed 33 (with_pillars 16, pdf 8)`; dossier `names 53 written 36 existed 17` (every one of the 20 new keys written at
+as_of=2026-09-24; 16 of the old 33 rebuilt on changed inputs), 13:05-14:12Z. Andrew-direct ~13:2xZ ("open call approved, all
+options approved do them in order", record @`16ee7f6373`, CTO R-70 confirms the reading): the FWD-12 figures pull's per-use
+word is GIVEN -- spent by ONE cell at the round-3 cut (no scripted puller for the 22 mnemonics exists today; R-21 binds the how).
+Options done in order: drain-end packet DRAFT @`75e4bc7e5c`; served-plane reads (AZN_LN, UBSG_SW MEASURED on the deployed
+route) @`32bf98d750`; ten residue worktrees retired, merged branches deleted, slot ~1 kept. Z-S17's remedy fork settled by the
+one query R-68 named (0 consumers of `total`; it leaves the body; c-7 cell next cut). NOW: worker ~1 continued onto d-4.
+
 **UPDATE ~13:0xZ -- Z-S16 REMEDIED, RE-MINTED, RE-INGESTED; the production sequence found two more.** `2.0.0_SA_COO~Z`'s
 builder fix (a registration RESOLVES its same-folder UNRESOLVED record in place) drained @`a5b9859e0a`; fresh pair (COO half
 @`5de984f360`, CTO half #2 @`839b04a16c`, in force @`6236af5af4`); byte-identity HEAD == `a2b84a1b2a` (51,725 B, sha 200ec514;
