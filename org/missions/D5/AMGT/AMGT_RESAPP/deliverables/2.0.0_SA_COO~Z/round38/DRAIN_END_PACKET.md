@@ -1,20 +1,20 @@
 # AMGT_RESAPP round 38 -- drain-end packet (L7 -> L8/L9 handoff to `3.0.0_SA_CVO~Z`)
 
 Issuer: `2.0.0_SA_COO~Z`. Decomposition s.46 @7eaf2d7dae (rm-7 amended @b374f81234, @a2573d8540, @72cef87e47; rm-6 amended
-@cf6b23c04a). PRD v0.26 unchanged. Seven orders over the round-37 analysis's list. DRAFT 2 (15:3xZ): wave 0, rm-3 and rm-6 drained;
-rm-2 and rm-7 are filled at their close. Push state: LOCAL.
+@cf6b23c04a). PRD v0.26 unchanged. Seven orders over the round-37 analysis's list. DRAFT 3 (16:0xZ): six of seven closed; rm-7 is filled at its
+ledger close. Push state: LOCAL.
 
 ## 1. Orders and their terminal state
 
 | cell | order | assignee | drain | close-out | criteria | rows |
 |---|---|---|---|---|---|---|
 | rm-1 the instrument re-keyed | AMGT-rm-1 | ~140 | 9c9ff2bbf3 | d3f1d8620e | AC1/AC2 PASS; AC3 read by the issuer (the face's `&&` chain; W140-S2 disarmed by Z-S250); VALID | W140-S1 (INERT), W140-S2 (-> Z-S250) |
-| rm-2 the free chrome | AMGT-rm-2 | ~141 | (wave 1) | (wave 1) | 3 mechanical | (wave 1) |
+| rm-2 the free chrome | AMGT-rm-2 | ~141 | a2f35ad222 | 8b95f42d33 | 3 of 3 PASS, VALID; weights/radii/shadows PASS 6 of 6 inside main after | W141-S1 (INERT), Z-S257 (issuer, disarms W144-S1) |
 | rm-3 the residue measured first | AMGT-rm-3 | ~142 | 20d0d02a7a | 455b6d8650 | 3 of 3 PASS, VALID; 18 of 18 failing elements attributed, 0 UNATTRIBUTED | none |
 | rm-4 the export served | AMGT-rm-4 | ~143 | 3350abb022 | 71b30f4ea5 | 3 of 3 PASS, VALID | none |
 | rm-5 the provenance disclosure | AMGT-rm-5 | ~144 | ef9d6978c4 | ab92b79bad | 3 of 3 PASS, VALID | W144-S1 (ARMED -> rm-2) |
 | rm-6 the contract gap measured and drafted | AMGT-rm-6 | ~145 | 7e26b17aec | 7343dc76ad | 3 of 3 PASS, VALID; deliverables only, gitlink unmoved | none |
-| rm-7 the deploy leg | AMGT-rm-7 | 0.7.0_AE_CloudOps~A | (seat order; bound to 3350abb022; lane re-seated 14:19Z; executing 15:2xZ) | -- | 3 mechanical under NEVER-2; L2 on the content-stream plane | Z-S253 (INERT), Z-S254 (ARMED, the issuer's disarm at close) |
+| rm-7 the deploy leg | AMGT-rm-7 | 0.7.0_AE_CloudOps~A | (seat order; bound to 3350abb022; lane re-seated 14:19Z; HELD at the build 15:39Z, unblocked 15:5xZ) | -- | 3 mechanical under NEVER-2 (entry 20260924T1523Z_amgt-rm-7-print-format-rich OPEN @192d45272d); L2 on the content-stream plane | Z-S253 (INERT), Z-S254 (ARMED, the issuer's disarm at close), Z-S256 (the lane's: the build's lib/ precondition) |
 
 Proof instances under `deliverables/0.9.0_WK_AMGT_RESAPP~<n>/`, each re-validated by the issuer inside the worker's worktree.
 
@@ -40,7 +40,10 @@ apply is a 0-diff without the artifact build; the egress widened by exactly that
 never pass and its failure branch is the rollback; remedied on the face at amendments 2 and 3, disarmed when rm-7 closes on the
 content-stream comparand), the CVO's Z-S255 (ARMED: `portal/` is an embedded repo with ZERO active hooks, so no commit inside it is
 graded by owned-paths, contamination or never-rules, and `.gitmodules` is tracked-and-empty -- R-74's finding as a row; disarm
-owner the CVO), plus rm-2's. rm-3 and rm-6 filed none.
+owner the CVO), the AE lane's Z-S256 (the build refuses on a generated-module stamp drift no AMGT cell created; s.5), rm-2's W141-S1 (INERT: AC3
+passed --route to ui-measure.mjs too; the worker added the same additive flag; its `fabric` field reads laptop for site-z, noted) and
+the issuer's Z-S257 (disarms W144-S1: PanelFooter's flex-shrink-0 gone, min-w-0 on both wrappers, clippedTextBlocks 0 in both scopes
+at 5e339ffd). rm-3 and rm-6 filed none.
 
 The CTO's R-76 @4f93bbf428 accepts Z-S253/Z-S254 as found and amends R-57 (the no-pair DELTA=0 must NAME its comparand); the
 plane R-76 names is superseded by amendment 3 -- the metadata-normalised sha also moves under rl-10's CreationDate pin (the entry
@@ -53,6 +56,17 @@ that still differs on CAT (msgs 25587, 25595).
   one extra member with the prior artifact as the rollback, and L2 moved off the raw sha (@a2573d8540); L2 moved again onto the
   content-stream digest on the AE lane's measurement of the pin (@72cef87e47). rm-6's AC1 chain separated (@cf6b23c04a) after
   rm-1's AC3 showed the class.
+- rm-7 HELD at the build (AE msg 25605): `build-and-upload-scoped-amgt.sh` runs `gen_harvest_prefixes.py --check` before packaging and
+  refused on `lib/research/api/_harvest_prefixes.py` drifting from fresh `lib.opal_naming` output -- the REGISTRY_HASH stamp only, all
+  four prefix constants identical; the hash moved with the 09-23 IRPT registry admission @8b4c15c6ba, so the build had refused since
+  then for reasons outside this project. `lib/**` is BASE_EXEC (no AE lane holds it), so the issuer regenerated the module with its
+  own builder and committed @19a22f2f51 (two stamp lines; `--check` rc=0); the order runs on unchanged. The lane's class remedy --
+  run `--build-only` at CUT time so a deploy cell's whole precondition chain surfaces before issuance -- is adopted for this issuer's
+  next deploy cut (three layers surfaced one round trip each on this order: the artifact write, the pin's effect on the comparand,
+  the generated-module stamp).
+- rm-2's post-merge read on the shared portal at DEV 5e339ffd (`contract-check-after-rm-2/`): main scope PASS on every graded
+  column for every state except sizes [10] on thesis and model; the weight-600 residue closed by rm-2's 600 -> 700; body-scope
+  weights [500,600], radii [8px] and the one shadow are the sidebar's.
 - rm-3's attribution (ATTRIBUTION.md, ~142): weight 300 -> PageHeaderVariants.tsx:46 (rm-2's); weight 600 -> PanelHeader.tsx:75
   and the 8px strips -> PanelHeader.tsx:62 (the radii rm-2's, the 600 the residue); size 10 -> DataTimestamp.tsx:38 through
   PanelHeader.tsx:99; band count 1 on all six after re-keying. WHAT A FIX WOULD TOUCH: 3 files, 18 elements.
@@ -73,4 +87,7 @@ that still differs on CAT (msgs 25587, 25595).
 - **The sidebar** (App.tsx): Andrew's reserved card; every body-scope FAIL it owns is reported, never touched.
 - **COO~Y's Z-S20 handoff** (issuer name as a structured field in build_universe.py, 13 of 250): an identity-surface enrichment
   candidate, parked on the closer STATUS.md.
-- **The rm-3 residue** (weight 600, size 10, any non-strip 8px): round 39's fix on rm-3's attribution.
+- **The rm-3 residue, narrowed by rm-2:** size 10 only (PanelHeader.tsx:99 / DataTimestamp.tsx:38); weight 600 and the strip radii
+  are closed.
+- **R-78's census on this serial:** 84 ARMED rows name the issuer as disarm owner, 47 not later cited (an upper bound; most are
+  rounds 1-24 worker rows drained without a carrier). The sweep runs after this drain closes, as its own act, not as a round-39 cell.
