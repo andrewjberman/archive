@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-e-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-2.model-block-22-mnemonics.md",
+    "group": "OTHER",
+    "vintage_commit": "c1437f9864cf3e1d343e0cf5809bf739c08fbd54"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "d63cdd71ca0ad70b108d53c51bb4dd888f47fe07",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-2.model-block-22-mnemonics.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "HIST_FIELDS gained the 16 new mnemonics (EQY_SH_OUT_TOT_MULT_SH ... RETURN_ON_TANGIBLE_ASSETS) appended after PROF_MARGIN, none of the prior 23 entries reordered or removed; FORECAST_FIELDS gained the 6 new mnemonics (BEST_DIV_YLD ... BEST_BPS) appended after the prior 5, prior 5 unchanged; FIELD_BASIS gained one entry per new mnemonic (22 total), appended after EQY_FUND_CRNCY, no existing entry's text touched. Verified programmatically: len(HEADER_FIELDS)==18 (unchanged), len(HIST_FIELDS)==39 (23+16), len(FORECAST_FIELDS)==11 (5+6); each of the 22 counts exactly once across HIST_FIELDS+FORECAST_FIELDS combined and is absent from HEADER_FIELDS; each of the 22 present in FIELD_BASIS with non-empty text, none naming any vendor other than Bloomberg. No change to any cap, existing basis text, landing address (_bronze_prefix/_bronze_key untouched) or derive rule. py_compile clean, 0 CRLF, 0 non-ASCII bytes over the whole file.",
+      "introduces": ["EQY_SH_OUT_TOT_MULT_SH", "RETURN_ON_TANGIBLE_ASSETS", "BEST_ESTIMATE_FCF", "BEST_BPS"],
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_model_block_22_fields.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "8 tests, offline (loads model_block_pull.py by sys.path insertion, same pattern as test_daily_px_args.py; no blpapi import at module scope, asserted directly): the 16 history additions each count exactly once in HIST_FIELDS and are absent from FORECAST_FIELDS; the 6 forecast additions each count exactly once in FORECAST_FIELDS and are absent from HIST_FIELDS; the 22 are present exactly once each across HIST_FIELDS+FORECAST_FIELDS combined; the three request lists' lengths sum to 46+22==68 (18+39+11), with each of the three list lengths asserted individually (18, 39, 11); the 22 are mutually distinct (len(set)==22) and none collides with any pre-existing HEADER_FIELDS/HIST_FIELDS/FORECAST_FIELDS entry; every one of the 22 has a non-empty FIELD_BASIS entry; cmd_pull(['ASML_NA_Equity'], dry_run=True) (no client, no write, capsys-captured) prints request lines carrying all 22 mnemonics. Ran 3 times back to back, identical pass count every time (8 passed, 0.34-0.36s).",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e2_AC1.sh -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e2_AC1.sh",
+      "output_evidence": "........                                                                 [100%]\n8 passed in 0.34s",
+      "denominator": "8 of 8 tests passed, 0 failed; re-run 3 times this session (0.34s/0.35s/0.36s), identical pass count and result every time",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e2_AC2.sh -- expect (?s)DRY-RUN PULL: ASML_NA_Equity.*EQY_SH_OUT_TOT_MULT_SH.*RETURN_ON_TANGIBLE_ASSETS.*BEST_ESTIMATE_FCF.*DRY RUN PULL DONE: 1 of 1 securities planned, 0 written",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e2_AC2.sh",
+      "output_evidence": "DRY-RUN PULL: ASML_NA_Equity -> would send ReferenceDataRequest(security='ASML_NA_Equity', fields=['NAME', 'CRNCY', 'CNTRY_OF_DOMICILE', 'GICS_SECTOR_NAME', 'PX_LAST', 'CUR_MKT_CAP', 'NET_DEBT', 'CURR_ENTP_VAL', 'VOLUME_AVG_30D', 'EQY_SH_OUT_REAL', 'EQY_FREE_FLOAT_PCT', 'EQY_BETA', 'EQY_DVD_YLD_IND', 'SHORT_INT_RATIO', 'SI_PERCENT_EQUITY_FLOAT', 'CIE_DES', 'CIE_DES_BULK', 'EQY_FUND_CRNCY']) and HistoricalDataRequest(security='ASML_NA_Equity', fields=[... 'EQY_SH_OUT_TOT_MULT_SH', 'EQY_RAW_BETA', 'BS_CASH_NEAR_CASH_ITEM', 'BS_TOTAL_LIABILITIES', 'IS_ADJUSTED_GROSS_PROFIT', 'IS_ADJUSTED_OPERATING_INCOME', 'IS_COMP_EPS_ADJUSTED', 'NET_INCOME', 'EQY_DPS', 'IS_DIL_EPS_CONT_OPS', 'PX_TO_FREE_CASH_FLOW', 'GROSS_MARGIN', 'EBITDA_TO_REVENUE', 'RETURN_ON_CAP', 'RETURN_ON_INV_CAPITAL', 'RETURN_ON_TANGIBLE_ASSETS'], start_date=2016-01-01, end_date=2026-09-24, periodicity=YEARLY)\nDRY-RUN PULL: ASML_NA_Equity -> would send ReferenceDataRequest(security='ASML_NA_Equity', fields=['BEST_EPS', 'BEST_SALES', 'BEST_EBITDA', 'BEST_PE_RATIO', 'BEST_DPS', 'BEST_DIV_YLD', 'BEST_EBIT', 'BEST_NET_INCOME', 'BEST_CAPEX', 'BEST_ESTIMATE_FCF', 'BEST_BPS', 'BEST_PERIOD_END_DATE'], overrides={'BEST_FPERIOD_OVERRIDE': '1FY'})\n...(2FY, 3FY overrides, the 'would write' line)...\nDRY RUN PULL DONE: 1 of 1 securities planned, 0 written",
+      "denominator": "1 of 1 security planned (ASML_NA_Equity), 0 written; 22 of 22 new mnemonics present in the printed request lines (16 in the HistoricalDataRequest fields, 6 in each of the three BEST-override ReferenceDataRequest fields); re-run twice, byte-identical output both times (end_date is today's UTC date, computed fresh, stable within the session)",
+      "expect": "(?s)DRY-RUN PULL: ASML_NA_Equity.*EQY_SH_OUT_TOT_MULT_SH.*RETURN_ON_TANGIBLE_ASSETS.*BEST_ESTIMATE_FCF.*DRY RUN PULL DONE: 1 of 1 securities planned, 0 written",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e2_AC3.sh -- expect REFUSE: more than 3 securities requested",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e2_AC3.sh",
+      "output_evidence": "REFUSE: more than 3 securities requested (F2/G-24 cap)",
+      "denominator": "1 of 1 invocation (4 securities requested, cap 3) refused; the cap check (main(), len(args.securities) > 3) is untouched by this cell's edits, confirmed by diff -- the only lines this cell changed are inside HIST_FIELDS, FORECAST_FIELDS and FIELD_BASIS, all appended after existing entries",
+      "expect": "REFUSE: more than 3 securities requested",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/e2/mutant2.py (not committed) loads model_block_pull.py and test_model_block_22_fields.py as the SAME module objects the real test file imports, then mutates the live module in place: removes RETURN_ON_TANGIBLE_ASSETS from HIST_FIELDS and deletes FIELD_BASIS['BEST_BPS'], both real defects this cell's RULED text forbids (a missing mnemonic, a missing basis entry).",
+      "expected": "FIX (unmodified module): test_16_join_hist_fields_exactly_once, test_every_one_of_the_22_has_a_basis_entry and test_dry_run_request_lines_carry_the_22 all PASS. MUTANT: all three FAIL, naming the missing field.",
+      "observed": "FIX: PASS (all three). MUTANT: test_16_join_hist_fields_exactly_once FAIL-AS-EXPECTED: RETURN_ON_TANGIBLE_ASSETS; test_every_one_of_the_22_has_a_basis_entry FAIL-AS-EXPECTED: BEST_BPS; test_dry_run_request_lines_carry_the_22 FAIL: RETURN_ON_TANGIBLE_ASSETS. Module state restored after each mutation (list/dict copied back); real pytest run afterward still 8 passed. CONTROL FIRED-AS-EXPECTED: True (module identity confirmed `t.mbp is mbp` before mutating, so the mutation and the test share the exact object under test).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 (pytest) run 3 times back to back; AC2 (dry-run CLI) run twice back to back; AC3 (cap refusal) run twice back to back.",
+      "observed": "AC1: 8 passed every run (0.34s/0.35s/0.36s). AC2: byte-identical DRY-RUN PULL output both runs (end_date is today's UTC date, stable within this session). AC3: identical 'REFUSE: more than 3 securities requested (F2/G-24 cap)' both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any vendor (Bloomberg) call",
+      "reason": "BOUND: NEVER call Bloomberg, NEVER import or exercise the blp client, NEVER run the puller without --dry-run. AC2/AC3 both ran with --dry-run only, which returns before _load_blp_client() is ever called (cmd_pull's dry_run branch returns 0 before that line). Confirmed by reading cmd_pull's control flow: the dry_run block's own `return 0` precedes `blp = _load_blp_client()`."
+    },
+    {
+      "item": "Any existing field, basis text, cap, landing address or derive rule change",
+      "reason": "BOUND, RULED item 2. Verified by diff: every edit is a pure append (16 lines into HIST_FIELDS after PROF_MARGIN, 6 into FORECAST_FIELDS after BEST_DPS, 22 into FIELD_BASIS after EQY_FUND_CRNCY); no existing line was modified or reordered; _bronze_prefix/_bronze_key/security_key/main()'s cap check are byte-unchanged."
+    },
+    {
+      "item": "Naming any vendor other than Bloomberg in a basis entry",
+      "reason": "Bound (f)/AC6 (model brief). All 22 new FIELD_BASIS entries read as plain Bloomberg-field descriptions ('Bloomberg consensus (BEST) estimate of ...', 'Bloomberg's own ... definition', or a bare metric description); none names another vendor's adjustment concept."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W4-S3: the round-3 decomp doc never writes the concrete cell id CRPS-e-2 (only the template 'CRPS-e-<n>' and the bare table label 'e-2'), so proof-of-spec-check.py's CELL_ID_RE finds 0 declared cell ids and this instance's own decomp_ref alignment VIOLATES, even though AC1/AC2/AC3 all independently PASS-by-output -- see the row for full evidence and scope (all five round-3 siblings affected)."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, via e2_AC1.sh)",
+      "invocation": "python -m pytest integrations/bloomberg/research/tests/test_model_block_22_fields.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 8 passed, 0 failed (run 3 times, identical outcome)"
+    },
+    {
+      "tool": "model_block_pull.py pull --dry-run (AC2, via e2_AC2.sh)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python integrations/bloomberg/research/model_block_pull.py pull --securities ASML_NA_Equity --dry-run",
+      "result": "rc 0; 1 of 1 securities planned, 0 written; all 22 new mnemonics present in the printed request lines"
+    },
+    {
+      "tool": "model_block_pull.py pull --dry-run over-cap (AC3, via e2_AC3.sh)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python integrations/bloomberg/research/model_block_pull.py pull --securities A_US_Equity B_US_Equity C_US_Equity D_US_Equity --dry-run",
+      "result": "rc 1 (SystemExit); REFUSE: more than 3 securities requested (F2/G-24 cap)"
+    },
+    {
+      "tool": "py_compile + ASCII/LF check (both changed files)",
+      "invocation": "python -m py_compile <file>; byte-level scan for bytes>127 and CRLF",
+      "result": "both files compile clean, 0 CRLF, 0 non-ASCII bytes"
+    },
+    {
+      "tool": ".scratch/e2/mutant2.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/e2/mutant2.py",
+      "result": "rc 0; FIX all PASS; MUTANT all three tests FAIL-AS-EXPECTED naming the removed field; CONTROL FIRED-AS-EXPECTED: True"
+    }
+  ]
+}
