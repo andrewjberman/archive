@@ -26,6 +26,22 @@ this seat's first grade used the wrong before-object. **Rollback CLOSED** 08:22:
 (copy-object from the signed VersionId; verified 3 of 3 legs on three instruments; ledger `amgt-crosswalk-0924-rollback`
 closed). Row Z-S13 condition 1 met.
 
+**UPDATE ~11:3xZ -- FIRED ONCE, AND AN EXPOSURE BEHIND IT.** d-5 amendment 3 drained @`71e2409a43` (re-graded at the tip:
+20 of 20, package 256, checker VALID); the pair completed (COO half @`4bbd43777c`, CTO half @`9a6472e58f` in the CTO's
+folder); `bloomberg_health` OK; before-state re-measured identical (probe-2); the fire ran 11:09:45-11:11:01Z: **population
+60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 20 already_registered 0 refused 0 errors 0
+bloomberg_calls 20 batch_calls 1 pool_puts 1 sum 60**, rc 0. Discriminator (probe-3): versions 22 -> 23, latest VersionId
+`tlVd1Cqrlhk93VurXE2jThhPNToWm0wA`, 583,272 B, sha 223264e2, MEASURED 194 -> 214, records 254 -> 274, registered 7 -> 27,
+194 of 194 prior keys present, 20 new; raw bronze partitions 4 -> 24. registrations.json +20 @`b7819604e0`; evidence
+@`911d09d153`; rows Z-S14 (disarm carrier for Z-S13, both conditions MET) and Z-S15 (the worker's committed batch file is a
+test fixture -- `run()` writes into the hard-coded `DELIVERABLES_DIR` the tests share) @`b00b740d0c`.
+**EXPOSURE, row Z-S16 ARMED (disarm owner this seat):** the re-ingest at 11:19Z resolved the SAME 33 folders (stored 124,
+put_performed 1, existed 123) -- **0 of the 20 inducted folders ingested**, because the builder APPENDED each registration
+beside the folder's still-UNRESOLVED coverage record (UNRESOLVED 60 -> 60), so 20 association forms are claimed by two
+identities and `crosswalk.resolve()` reads them AMBIGUOUS. FWD-19 is REALIZED on identity, NOT on re-ingest. Remedy proposed
+to `2.0.0_SA_COO~Z` (its surface): a registration resolves its same-folder UNRESOLVED record instead of appending; then ONE
+re-mint under a fresh pair (no Bloomberg call); then this seat's re-ingest + production sequence; d-4 behind that.
+
 **UPDATE ~10:5xZ -- all four preconditions HOLD (CTO R-51): the two clauses below were BUILT by `2.0.0_SA_COO~Z`
 @`a125f8be8b` (`--batch` = one put per run; the universe input on every build) and drained onto CLOUD @`8c75f4f90d`
 (byte-identical, R-51). R-49's count-first check, run here on the collision check's own in-memory object: 0 of 20
