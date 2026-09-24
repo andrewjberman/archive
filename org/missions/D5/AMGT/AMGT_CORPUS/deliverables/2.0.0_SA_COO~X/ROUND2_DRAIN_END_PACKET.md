@@ -1,6 +1,6 @@
 # AMGT_CORPUS -- round 2 drain-end packet (the COO's task-order packet at drain-end; L8 hand-off input)
 
-Owner `2.0.0_SA_COO~X`; DRAFT at 2026-09-24 ~13:5xZ with ONE line open (d-4). Round 2 = decomposition v2.0 @`df6798aebf`,
+Owner `2.0.0_SA_COO~X`; **FINAL at 2026-09-24 ~15:0xZ -- 6 of 6 orders terminal, d-4 drained @`809a89d8ff`** (was DRAFT at 13:5xZ). Round 2 = decomposition v2.0 @`df6798aebf`,
 ONE issuance @`7f48b997a9` (fan-out 3 of 3 chains, cap 8). PRD v0.6 @`031c3a3a3e`, both L4-R halves SIGNED. This packet is
 the COO's drain-end artifact (Rule 27: it shares the L8 label with the CVO's channel compile and is not it). It becomes
 FINAL when d-4 drains VALID; the L8 slug then goes to `3.0.0_SA_CVO~Z`, the analysis to `1.0.0_SA_CTO~Z`.
@@ -14,7 +14,7 @@ FINAL when d-4 drains VALID; the L8 slug then goes to `3.0.0_SA_CVO~Z`, the anal
 | `TO-CRPS-d-2` PDF pillar branch + thesis_summary | d-2 | `~1` | (in chain A) | `a419df8f9d` | 33 of 33 continuations rebuilt; 4,580 of 4,580 citations; ASML 2 pillars; **AC4 is a JUDGMENT criterion, owed to the CVO** |
 | `TO-CRPS-d-5` scripted induction producer | d-5 | `~2` | 44fb5dfb8d (am. 2), 7e1f39f327 (am. 3) | `cb0abfcd96`, `7dc89c66c3`, **`71e2409a43`** | three issuer re-opens (am. 1 disagreement refusal; am. 2 `--bloomberg` beside `--folder`; am. 3 ONE `--batch` call); final: 20 of 20 tests, package 256, checker VALID |
 | `TO-CRPS-d-3` composed dossier | d-3 | `~1` | bdfbd7ff6b | `34a556c46e` | 33 of 33 names; census 825 fields / 286 cited / 539 ABSENT-with-reason / 0 neither; negative control ABSENT; **AC4 is a JUDGMENT criterion, owed to the CVO** |
-| `TO-CRPS-d-4` coverage census 93-of-93 | d-4 | `~1` | -- | -- | **PENDING**: continued after the corrected production chain (s.5 duty 2); line filled at its drain |
+| `TO-CRPS-d-4` coverage census 93-of-93 | d-4 | `~1` | b011df6c7f | **`809a89d8ff`** | 8 of 8 tests; package 260; checker VALID; this seat's own `--coverage` run: `folders_read 93 dossier_served 53 resolved_no_prose 0 unresolved_with_reason 40 sum 93`, `never_prose_named 11` (10 workbook-only + Air Liquide empty), new scan vintage `date=2026-09-24/20260924T145816Z.json`; `--folder-by-index 0` -> ASML NA dossier-served. Row W1-S4: 9 of the 10 workbook-only folders carry a stored all-fields-absent shell dossier (dossier.build has no report-count floor), so they read dossier-served and never-prose is named structurally -- for the CVO/CTO to weigh |
 
 Hygiene at every drain: corpus suite 218 -> 220 -> 235 -> 244 -> 254 -> 256 PASS on CLOUD; `proof-of-spec-check.py
 --governing-order` VALID rc 0 for each instance; `safe-merge.sh` row gate over the merged index each time (three append-only

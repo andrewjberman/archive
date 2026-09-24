@@ -3,7 +3,15 @@
 Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:2xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
-## Round 2 -- EXECUTING, 5 of 6 cells drained (d-1, d-2, d-3, d-5, d-6)
+## Round 2 -- ALL 6 CELLS DRAINED (~15:0xZ); L8 handed to `3.0.0_SA_CVO~Z`
+
+**d-4 drained @`809a89d8ff`** (worker close b011df6c7f; re-graded here: 8 of 8, package 260, checker VALID; `folders_read 93
+dossier_served 53 resolved_no_prose 0 unresolved_with_reason 40 sum 93`, `never_prose_named 11`, scan vintage
+`20260924T145816Z.json`; row W1-S4 on the shell-dossier reading of workbook-only folders). Packet FINAL:
+`ROUND2_DRAIN_END_PACKET.md`. Owed now: L9 by the CVO (d-2 AC4, d-3 AC4 + the rows), then the CTO's round-2 analysis, then
+this seat's round-3 cut (FWD-12 figures pull under Andrew's word; Z-S17; Z-S18; Z-S15). Slot ~1's worktree retired.
+
+## Round 2 (history) -- EXECUTING, 5 of 6 cells drained (d-1, d-2, d-3, d-5, d-6)
 
 Decomposition v2.0 @`df6798aebf`; ONE issuance @`7f48b997a9`. Drained into CLOUD: d-6 @`341bffca19`, d-1 @`c356bbff56`,
 d-2 @`a419df8f9d`, d-5 @`7dc89c66c3` (after two issuer re-opens: amendment 1 the folder-vs-report disagreement refusal,
