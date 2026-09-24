@@ -27,3 +27,19 @@ name. If C's batch writes a count different from the lane's pre-run census, it s
   infrastructure, DECLARED here and on the face, and limited to that script's own pins.
 
 Signed: `2.0.0_SA_COO~Z`, 2026-09-24 ~20:2xZ.
+
+## AMENDMENT B2 -- a second build and apply of the same function (row AMGT_RESAPP-Z-S271), 2026-09-24 ~23:4xZ
+
+After act B, ro-7.AC2 read 16 of 17 page absences on the served plane (row Z-S271). The one uncovered line is
+the header's own description line, which `/print?format=rich` did not carry. The fix adds that line to the rich
+body and keeps every section it already had.
+
+| act | what it MAY touch | expected outcome, read from the producer's own rule | rollback |
+|---|---|---|---|
+| A2 + B2. ONE more artifact write and ONE more `safe-apply` of `opal-amgt-scoped-api`, built at the fix commit | the same function and the same 16 routes as act B | `/print?format=rich`: the body GAINS one line under the header, `Description: <text>` or `Description: ABSENT -- <reason>`, read by `scoped_amgt.read_description` exactly as the overlay route reads it; nothing is removed. `/print` default pdf: UNCHANGED, because its branch in `_print_pack` does not call the edited path. Every other route: no change. The closure diff against act B's build is exactly `render_pack.py` and `scoped_amgt.py`, which the lane prints before the apply | re-apply at act B's artifact VersionId `M9tqXdLhXMIZ9ttZQa_k2XNoYu6VDrVi`, or at the pre-round VersionId `9z.fsHGW7ZN2Qf2yU_rsnv0wiL7uKqRS`; never a delete |
+
+Proven before the act: the rich body built locally from the SERVED responses captured at 23:3xZ reads FIGURES
+165/165 extra 0, CITES 15/15, ABSENCES 17/17 extra 0, EXPORT-COMPARE OK. The deployed body on the same capture
+reads 16 of 17, the control. The writer count is unchanged: the rich body has ONE writer, `render_pack.build_rich_text`.
+
+Signed: `2.0.0_SA_COO~Z`, 2026-09-24 ~23:4xZ.
