@@ -3,6 +3,16 @@
 Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:2xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
+## ROUND 3 -- EXECUTING (~19:1xZ)
+
+Decomposition v3.0 @`d63cdd71ca` (five cells cut by write set, 15 checks as files dry-run at the base: 12 build checks FAIL,
+3 bounds PASS); ONE issuance @`6108b0d804`; e-1 amended before its spawn @`c1437f9864` (the evidence table read against the
+served pool: Bunzl -> BZLFY US and UMG -> UNVGY US attach to existing universe records; QXO associates; SLB registers; 35
+register + 5 associate; Shopify SHOP CN agreed with `2.0.0_SA_COO~Y`). `2.0.0_SA_COO~Z`'s folder-onto-no-folder ENRICH landed
+@`e640337205` first, so e-1 calls all 40. Workers spawned: `~1` e-4 (then e-5), `~2` e-1, `~3` e-3 (worker-light), `~4` e-2;
+worktrees `/c/tmp/wk-crps3-{1..4}` at `c1437f9864`. Drain acts owed by this seat: the 40-name fire under a fresh pair; the
+22-field pull under Andrew's V3 word (WORLD: change-management entry, batches of 3); the production sequence through e-4's runner.
+
 ## HOLD LIFTED ~18:10Z (CTO msg 25696: the pull landed at de839386bb / a1f085f2ef, every laptop-fabric add on origin). Round 2's
 L10 is cut @`e05085196c` (FWD-19 NOT_REALIZED and moved; the 9 empty shells are NOT dossier-served; s.7 is round 3's list).
 ROUND 3 IS BEING CUT from s.7 plus this seat's reconciled draft @`18f7a03a63`; two one-line asks out (CTO: the FWD-12 cell;
