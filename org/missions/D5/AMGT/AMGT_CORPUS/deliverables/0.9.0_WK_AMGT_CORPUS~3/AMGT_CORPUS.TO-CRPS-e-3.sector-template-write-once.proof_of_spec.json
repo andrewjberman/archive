@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-e-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-3.sector-template-write-once.md",
+    "group": "OTHER",
+    "vintage_commit": "03baefb8af9922ca636a2d20dbd4d21f28ed786e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "03baefb8af9922ca636a2d20dbd4d21f28ed786e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-3.sector-template-write-once.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/sector_template.py",
+      "kind": "script",
+      "commit_or_etag": "c57c1e4337",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build() no longer puts `total` into the `fields` dict (the corpus-wide denominator leaves the artifact body); `total` stays a build() parameter, used only by the two print-time callers to print the disclosure line. `_run_show_first_graded` computes `total = len(_all_rows(client))` itself (the corpus-wide count read fresh at print time, since the stored artifact no longer carries it) and prints it in place of the removed `fields[\"total\"]`. `_run_write`'s print line already used its own local `total` (unchanged). `_assemble_artifact`/`_object_name` untouched. ISSUER AMENDMENT 1 (@03baefb8af): `METHOD_VERSION` IS bumped, \"2\" -> \"3\" -- removing a body field for unchanged inputs changes the body under the SAME old-version name, so the name must change once or gold refuses; old v2 objects keep their names, the one v3 re-mint wrote fresh objects for all 9 business types (verified: gold_list over research-sector-template now carries 9 method_version=3 objects, one per business type, each body confirmed `total`-free).",
+      "introduces": ["METHOD_VERSION = \"3\""],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_sector_template.py",
+      "kind": "test",
+      "commit_or_etag": "f72d8acf68",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Removed the one pre-existing assertion on the retired field (`assert fields[\"total\"] == 2`, the rest of that test kept intact). Added test_body_without_total (the artifact carries no `total` key) and test_grown_corpus_same_inputs_same_name_same_body (the same type inputs under total=124 and total=218 produce byte-identical artifact bodies and the SAME object name, via build()/_assemble_artifact/_object_name directly, unaffected by the later METHOD_VERSION bump since both calls in the test use whatever METHOD_VERSION the module currently holds). All 28 of 28 tests in the file pass, run twice, both before and after the METHOD_VERSION bump.",
+      "introduces": ["test_body_without_total", "test_grown_corpus_same_inputs_same_name_same_body"],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ deselected)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC1.sh",
+      "output_evidence": "..                                                                       [100%]\n2 passed, 26 deselected in 0.16s",
+      "denominator": "2 of 2 selected tests passed (body_without_total, grown_corpus_same_inputs_same_name_same_body; 26 deselected by -k, not failures); full file re-run separately: 28 of 28 pass (`python -m pytest lib/research/corpus/tests/test_sector_template.py -q` -> '28 passed in 0.21s'); check re-run twice, identical PASS both times ('...in 0.16s' then '...in 0.14s')",
+      "expect": "(?m)^\\d+ passed(, \\d+ deselected)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC2.sh -- expect (?s)types [1-9]\\d* reports_typed \\d+ unmapped_reports \\d+ other_excluded \\d+.*securities_typed \\d+ of \\d+ unmapped_securities \\d+ conflicts \\d+",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC2.sh",
+      "output_evidence": "business_type utilities reports 2 of 218 sections 10 kpis 6 charts 3 put_performed True\ntypes 8 reports_typed 79 unmapped_reports 30 other_excluded 109\nsecurities_typed 37 of 53 unmapped_securities 16 conflicts 2",
+      "denominator": "9 of 9 business types reached and written at method_version=3 (verified independently: gold_list over table research-sector-template now carries 9 objects whose method_version==\"3\" and whose fields carry no `total` key, one per business type -- consumer-cyclicals+consumer-services, consumer-non-cyclicals, consumer-services+telecommunications, energy, finance, healthcare, technology, unmapped, utilities); this first post-bump run: 9 of 9 put_performed True (fresh mint, full run captured separately: `python -m lib.research.corpus.sector_template --write` rc 0, 9 business_type lines all put_performed True); a SECOND `--write` (rc 0) reads all 9 as put_performed False (existed) -- write-once idempotency confirmed; old v2 objects (23 total keys in the table, 14 pre-existing v2 + 9 new v3) are UNTOUCHED, no delete, no overwrite",
+      "expect": "(?s)types [1-9]\\d* reports_typed \\d+ unmapped_reports \\d+ other_excluded \\d+.*securities_typed \\d+ of \\d+ unmapped_securities \\d+ conflicts \\d+",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC3.sh -- expect business_type \\S+ reports \\d+ of \\d+",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC3.sh",
+      "output_evidence": "business_type consumer-cyclicals+consumer-services reports 4 of 218",
+      "denominator": "1 of 1 matching line printed (grep -E filters to exactly the `^business_type ` line); the printed denominator (218) is the LIVE corpus total read fresh at print time by `_run_show_first_graded`'s own `total = len(_all_rows(client))`, never read back from the stored artifact (which carries no `total`); run twice, identical output both times",
+      "expect": "business_type \\S+ reports \\d+ of \\d+",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/e3/mutant_test.py (not committed) re-inserts `total` into the `fields` dict build() returns (the pre-fix shape) via a source-patched, in-process re-exec of the committed module, and runs the same small-total-vs-large-total build()/_assemble_artifact/_object_name sequence test_grown_corpus_same_inputs_same_name_same_body exercises, against both the FIX (committed module, unmodified) and the MUTANT (patched module).",
+      "expected": "FIX: the same type inputs under total=124 and total=218 produce identical artifact bodies (same_body=True) and the same object name (same_name=True). MUTANT (total re-inserted into fields): the two totals produce DIFFERENT bodies (same_body=False) while the object name is STILL the same (same_name=True) -- reproducing exactly the shape of the write-once collision AC2 measured pre-amendment, because `_object_name` was never the defect; the body carrying `total` was.",
+      "observed": "python .scratch/e3/mutant_test.py (re-run after the METHOD_VERSION bump, same result) -> 'FIX: same_body=True same_name=True' then 'MUTANT: same_body=False same_name=True' -- matches the prediction exactly, run twice, identical both times.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's check scripts each run twice against committed HEAD c57c1e4337 (post-METHOD_VERSION-bump).",
+      "observed": "AC1: '2 passed, 26 deselected in 0.16s' then '...in 0.14s' -- both PASS, pass/deselect counts identical. AC2: first run mints all 9 method_version=3 objects (put_performed True, verified via gold_list), rc 0, 'types 8 reports_typed 79 unmapped_reports 30 other_excluded 109' / 'securities_typed 37 of 53 unmapped_securities 16 conflicts 2'; second run rc 0, same two summary lines, all 9 put_performed now False (existed) -- write-once idempotency holds. AC3: 'business_type consumer-cyclicals+consumer-services reports 4 of 218' both runs, byte-identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "METHOD_VERSION bumped exactly once, by one",
+      "reason": "ISSUER AMENDMENT 1 (order RECORD FACE, @03baefb8af): the original RULED bullet forbidding a bump was reversed; METHOD_VERSION moved \"2\" -> \"3\" (one bump, not a scheme of per-run bumps) -- grep census: METHOD_VERSION appears once as a literal at :97, value \"3\"."
+    },
+    {
+      "item": "No S3 delete, no gold overwrite",
+      "reason": "Order S.4 BOUNDS (unchanged by the amendment): 'no S3 delete'. gold.py (READ-ONLY to this cell) is untouched; the 14 pre-existing v2 objects are left exactly as they were -- nothing here clears or overwrites them; the amendment's own text: 'Old objects keep their names'."
+    },
+    {
+      "item": "No edit to gold.py, typed.py, extract.py, substrate.py, dossier.py",
+      "reason": "Order S.3 SURFACES: these five are listed READ-ONLY; none appears in this cell's diff across either commit (git diff --stat: only sector_template.py, its test file, this instance, the task-order status flip, and the investigation rows already filed)."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W3-S3: AC2's `--write` could not reach rc 0 pre-amendment because 5 of 9 business types collided on PRE-FIX stale gold objects (method_version=2, `total` still in the stored body) at the same object name the new total-free body computed for unchanged inputs. DISARMED by the issuer's own ISSUER AMENDMENT 1 (METHOD_VERSION bumped to \"3\"): re-run post-bump, AC2 PASS, 9 of 9 types written (rc 0). Row left as filed per issuer instruction; disarm carrier is the issuer's at the drain.",
+    "AMGT_CORPUS-Z-W3-S4: AC1's original <expect> `(?m)^\\d+ passed in ` could never match e3_AC1.sh's own `-k`-filtered pytest summary form ('N passed, M deselected in Xs'). DISARMED by the issuer's amendment to the <expect> regex (`(?m)^\\d+ passed(, \\d+ deselected)? in `): re-run post-amendment, AC1 PASS. Row left as filed per issuer instruction.",
+    "AMGT_CORPUS-Z-W3-S5: proof-of-spec-check's ALIGNMENT limb read the decomp doc's CELL_ID_RE-matched id space as EMPTY because the table cited cells as bare `e-<n>`. DISARMED by the issuer's amendment to the decomp table (now cites `CRPS-e-1`..`CRPS-e-5` directly, verified: `CRPS-e-3` present at decomp doc :27 at commit 03baefb8af). Row left as filed per issuer instruction."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest -k body_without_total or grown_corpus (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC1.sh",
+      "result": "rc 0; 2 passed, 26 deselected; run twice, both PASS"
+    },
+    {
+      "tool": "pytest, full file (extra, not the graded invocation)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_sector_template.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 28 passed in 0.21s"
+    },
+    {
+      "tool": "sector_template --write (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC2.sh ; also run bare twice: python -m lib.research.corpus.sector_template --write",
+      "result": "rc 0 every run post-bump; first run mints 9 of 9 v3 objects (put_performed True), second run reads all 9 existed (False); AC2 PASS"
+    },
+    {
+      "tool": "sector_template --show-first-graded (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC3.sh",
+      "result": "rc 0; 'business_type consumer-cyclicals+consumer-services reports 4 of 218'; run twice, identical"
+    },
+    {
+      "tool": ".scratch/e3/mutant_test.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/e3/mutant_test.py",
+      "result": "rc 0; FIX same_body=True same_name=True; MUTANT (total re-inserted) same_body=False same_name=True; CONTROL FIRED-AS-EXPECTED, run twice, identical"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/sector_template.py lib/research/corpus/tests/test_sector_template.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/sector_template.py lib/research/corpus/tests/test_sector_template.py",
+      "result": "rc 0, no output (both files compile)"
+    }
+  ]
+}
