@@ -1,0 +1,148 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ro-3",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ro-3.the-thesis-section-carries-the-verdict.md",
+  "group": "C",
+  "vintage_commit": "d4b3321d71"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "d4b3321d71",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ro-3.the-thesis-section-carries-the-verdict.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~154",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "ff6a1ac09d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Committed on wk-AMGT_RESAPP-154 @ff6a1ac09d. No server started (issuer note); this cell is a library-level change proven by pytest, not a live deploy.",
+   "introduces": [
+    "company_description_verdict",
+    "DESCRIPTION_VERDICT_PASSED",
+    "DESCRIPTION_VERDICT_FAILED",
+    "DESCRIPTION_VERDICT_NO_SENTENCES",
+    "description_verdict_state",
+    "description_verdict_reason"
+   ]
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_thesis_description_verdict.py",
+   "kind": "test",
+   "commit_or_etag": "ff6a1ac09d",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "New file, committed on wk-AMGT_RESAPP-154 @ff6a1ac09d; this is the AC1-named test module."
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ThesisTab.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "e48f4f95",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Portal commit e48f4f95 on branch wk-AMGT_RESAPP-154-portal (portal DEV base 46c0ae11): new CompanyDescriptionSection/CompanyDescriptionNotServed components gate the 'Company description' heading on description_verdict_state; no server started, no build beyond tsc -b --noEmit, no deploy. The outer worktree's gitlink commit ff6a1ac09d points at e48f4f95.",
+   "introduces": [
+    "CompanyDescriptionSection",
+    "CompanyDescriptionNotServed",
+    "Filed detail (does not describe the business)"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+   "kind": "frontend_component",
+   "commit_or_etag": "e48f4f95",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Same portal commit e48f4f95: DraftedSection gains the two additive optional fields and the DescriptionVerdictState union.",
+   "introduces": [
+    "DescriptionVerdictState",
+    "description_verdict_state",
+    "description_verdict_reason"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "the cell's test module exists and passes (N passed, 0 failed) -- and exit=0",
+   "method": "test_suite",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-3.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "......... [100%]\n9 passed in 0.19s\nexit=0",
+   "denominator": "9 of 9 tests in lib/research/api/tests/test_thesis_description_verdict.py passed, 0 failed.",
+   "status": "PASS",
+   "expect": "\\d+ passed.*exit=0"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "drafting exit=0, tabs exit=0, tsc exit=0 -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-3.AC2.sh; echo \"exit=$?\"",
+   "output_evidence": "drafting exit=0 :: CHECKS-OK 8 of 8\ntabs exit=0 :: CHECKS-OK 20 of 20\ntsc exit=0\nexit=0",
+   "denominator": "3 of 3 sub-checks (drafting harness, tabs harness, tsc -b --noEmit) read exit=0; drafting harness itself CHECKS-OK 8 of 8, tabs harness CHECKS-OK 20 of 20.",
+   "status": "PASS",
+   "expect": "drafting exit=0.*tabs exit=0.*tsc exit=0.*exit=0"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the change set a person reads to judge whether the Thesis section now says only what its sentences are; RECORDED, no verdict (the round-39 ruling: a cell that changes what a served section claims carries a judgment criterion)",
+   "method": "diff",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; git diff --stat $(git merge-base HEAD CLOUD) -- lib/research/api/scoped_amgt.py portal/src/pages/SecurityAnalysis/tabs/ThesisTab.tsx; echo \"exit=$?\"",
+   "output_evidence": "lib/research/api/scoped_amgt.py | 57 +++++++++++++++++++++++++++++++++++++++--\n 1 file changed, 55 insertions(+), 2 deletions(-)\nexit=0\n\nNOTE (recorded, not a substitute for the invocation's own output above): the invocation's pathspec includes portal/src/pages/SecurityAnalysis/tabs/ThesisTab.tsx, but `portal` is a gitlink (bare submodule pointer) in the outer worktree -- `git diff` at the outer repo cannot see file-level content inside a submodule through that pathspec, so the stat line for ThesisTab.tsx is silently absent from this invocation's own output; that absence is the outer repo's gitlink move (ff6a1ac09d -> new gitlink SHA pointing at portal commit e48f4f95). The portal-side diffstat, for the same person's read: `cd portal && git diff --stat 46c0ae11 -- src/pages/SecurityAnalysis/tabs/ThesisTab.tsx` -> `src/pages/SecurityAnalysis/tabs/ThesisTab.tsx | 55 +++++++++++++++++++++++++--\n 1 file changed, 51 insertions(+), 4 deletions(-)`.",
+   "denominator": "N/A -- judgment criterion, output recorded for L9 review, no verdict computed here.",
+   "status": "UNVERIFIABLE-BY-INSTRUMENT",
+   "status_reason": "judgment criterion; the CVO grades it at L9",
+   "judgment": true
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Inverted the pass/fail branch in company_description_verdict (`if test[\"passed\"]:` -> `if not test[\"passed\"]:`, guarding the PASSED return) so a FAILING sentence would read PASSED and vice versa, then re-ran AC1's own invocation.",
+   "expected": "the AGREEMENT tests (overlay header vs thesis route on the same fixture sentence) and the direct verdict-state tests fail, since the mutated function now disagrees with itself/with read_description's independent branch.",
+   "observed": "6 failed, 3 passed, exit=1 (first failure: test_overlay_header_and_thesis_route_agree_on_a_failing_sentence -- AssertionError: assert 'PASSED' == 'FAILED'). Reverted immediately after; git diff --stat on lib/research/api/scoped_amgt.py read empty post-revert, and AC1 re-ran clean (9 passed, exit=0).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1's own script (ro-3.AC1.sh) run three times in succession against the identical committed tree (no source change between runs, verified by git diff --stat reading empty each time).",
+   "observed": "All three runs printed '9 passed' with exit=0 (durations 0.19s-0.26s, timing only, no flakiness).",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The /overlay header's own logic outside the one shared helper -- read_description's header-scalar (Bloomberg CIE_DES/CIE_DES_BULK) routing, the ABSENT reason's header-scalar clause, and every other route/function in scoped_amgt.py",
+   "reason": "Issuer note: touch only the thesis route's part of scoped_amgt.py and the one shared verdict function. The header's Description line is stated correct in the cell text and is not to be touched; the diff is a NEW shared function plus a one-line call-site change inside read_description that routes through it, proven unchanged in behavior by the pre-existing test_description_line.py (9 of 9 still green, re-run post-change)."
+  },
+  {
+   "item": "No server, vite dev build or listener started at any point",
+   "reason": "Bound 1 and issuer note: start no server; all three criteria run from the worktree root exactly as written (pytest and node/tsc, both static/offline)."
+  },
+  {
+   "item": "No install, push, promote, S3 write or vendor call",
+   "reason": "Bound 3 (standing)."
+  },
+  {
+   "item": "AMGT-ro-1, ro-2, ro-4, ro-5, ro-6, ro-7 (the round's other six cells)",
+   "reason": "Owned by sibling worker slots ~152/~153/~155/~156/~157/(ro-7's own slot) per the decomp's rectangle (48c); this task order's <owned_cells> names AMGT-ro-3 only."
+  }
+ ],
+ "surprises": [],
+ "session_log": "No surprise filed -- nothing surfaced outside this cell's own mandate. Worktree: C:/tmp/wk-amgt-40-154 on branch wk-AMGT_RESAPP-154, task order and round-40 checks pinned at d4b3321d71. Portal worktree: C:/tmp/wk-amgt-40-154/portal on branch wk-AMGT_RESAPP-154-portal, portal DEV base 46c0ae11, edited and committed at e48f4f95. Outer commit ff6a1ac09d carries lib/research/api/scoped_amgt.py, the new test module and the portal gitlink move together. The task order's <paths> grant does not include the task-orders/ file itself, so this instance does not flip the task order's <status>; proof-of-spec-check rc and both mechanical criteria PASS-by-output are reported for the issuer to act on.",
+ "compiler_tools": [
+  {
+   "tool": "pytest -q (AC1, via ro-3.AC1.sh)",
+   "invocation": "python -m pytest -q lib/research/api/tests/test_thesis_description_verdict.py -p no:cacheprovider",
+   "result": "9 passed. Also re-ran lib/research/api/tests/test_description_line.py (9 passed) and lib/research/api/tests/test_drafted_sections.py (32 passed) to confirm the shared-function refactor left read_description's existing contract unchanged: 41 passed, 0 failed."
+  },
+  {
+   "tool": "node drafting.harness.cjs / tabs.harness.cjs, npx tsc -b --noEmit (AC2, via ro-3.AC2.sh)",
+   "invocation": "cd portal && node src/pages/SecurityAnalysis/__harness__/drafting.harness.cjs; node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs; npx tsc -b --noEmit",
+   "result": "drafting CHECKS-OK 8 of 8; tabs CHECKS-OK 20 of 20; tsc exit=0, no diagnostics."
+  },
+  {
+   "tool": "proof-of-spec-check.py -- THIS WORKTREE'S OWN copy, run from inside C:/tmp/wk-amgt-40-154",
+   "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~154/AMGT_RESAPP.TO-AMGT-ro-3.the-thesis-section-carries-the-verdict.proof_of_spec.json AC1,AC2,AC3",
+   "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+  }
+ ]
+}
