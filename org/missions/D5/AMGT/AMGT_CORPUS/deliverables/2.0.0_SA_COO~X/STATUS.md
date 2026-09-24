@@ -3,6 +3,16 @@
 Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~21:1xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
+## BLOCKED ~23:0xZ -- the Bloomberg terminal will not sign in (needs a human at the box)
+
+Bloomberg's updater ran 22:26Z and the terminal restarted 22:50-22:52Z, signed out. Two supervised sign-ins (fill, screenshot
+verified 12-char login + 9 dots, submit) left the login window filled and no 8194 listener (a 120 s port poll between them);
+per READ_HERE s.2 that is the one retry, so this seat STOPPED. Attempt ledger: 23 total, 3 today (20:46Z ok, 22:5xZ x2).
+`0.0.3_BG_BBGTerminal` is not registered. Held behind it: the corrected FWD-12 re-pull + derive (CTO ruling msg 25799: R-21
+covers it, pair @2a3319e5ae covers the derive) and the re-mint of the 4 + AMD (pairs @ae79d37b0c / CTO @35e4cb93ef), which
+also waits for the running production sequence (step 9 dossier since 21:49Z). Served state is safe: the 31 keys restored
+(Z-S26 @c25c5207a8), 58 new keys serve an honest empty block (0 figures).
+
 ## ROUND 3 -- ALL 5 CELLS DRAINED (~20:4xZ); the 40-name FIRE held on ONE limb
 
 Drains, each re-graded at the worker's tip on this seat's run: e-2 @`bb6b1f2f25` (22 mnemonics), e-3 @`1266b834ec` (sector
