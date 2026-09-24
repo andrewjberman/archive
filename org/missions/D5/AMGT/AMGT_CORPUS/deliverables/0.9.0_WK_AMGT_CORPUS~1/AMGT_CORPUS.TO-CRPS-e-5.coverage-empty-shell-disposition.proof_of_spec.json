@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-e-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-5.coverage-empty-shell-disposition.md",
+    "group": "OTHER",
+    "vintage_commit": "5637be19e9641e5fe571351e8a893566d0008cf9"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "5637be19e9641e5fe571351e8a893566d0008cf9",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-5.coverage-empty-shell-disposition.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/backlog.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New DISPOSITION_SERVED_AS_EMPTY_SHELL = 'served-as-empty-shell' constant. _resolved_disposition now measures never_prose (the SAME folder-files-only reading _folder_never_prose_reason already provides, never the dossier's field census) BEFORE branching on dossier.read_dossier: a served dossier on a never-prose folder reads served-as-empty-shell (carrying dossier_uri/content_sha256 AND the never_prose reason); a served dossier on a prose-bearing folder still reads dossier-served (unchanged); no dossier + never-prose still reads resolved-but-no-prose (unchanged). coverage() adds a served_as_empty_shell count alongside dossier_served/resolved_no_prose/unresolved_with_reason in the returned document. _print_coverage_totals prints the four-way line ('folders_read N dossier_served D served_as_empty_shell S resolved_no_prose P unresolved_with_reason U sum N') and its sum check now closes over all four. _print_folder_lookup prints BOTH dossier_uri/content_sha256 AND reason for served-as-empty-shell (never one without the other) -- dossier-served and resolved-but-no-prose/unresolved-with-reason branches unchanged. state/security_key untouched throughout (continuation/dossier readers of read_latest() depend on them).",
+      "introduces": ["DISPOSITION_SERVED_AS_EMPTY_SHELL"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_backlog.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Existing test_coverage_nine_folders_three_dispositions_sum and test_coverage_totals_and_never_prose_print UPDATED (not just extended) to the new real counts: ShellDossier Co (workbook-only, a stored shell dossier) now asserts DISPOSITION_SERVED_AS_EMPTY_SHELL with disposition_reason 'workbook-only', dossier_served drops from 2 to 1, served_as_empty_shell asserts 1, the totals print line carries the fourth field -- otherwise these two would regress against the new real behavior. FIVE NEW tests, all named with `empty_shell` (AC1's `-k \"empty_shell\"` selects exactly these 5, deselecting the other 8 in the file): test_empty_shell_disposition_measured_from_folder_files_not_dossier_census (the decoupling, re-measured: ShellDossier Co vs. Dossier Co), test_empty_shell_four_way_sum_closes, test_empty_shell_totals_print_line (the exact 4-field line), test_empty_shell_folder_lookup_prints_both_uri_and_reason (both halves, never one without the other), test_empty_shell_token_census_occurs_only_where_this_cell_put_it (Rule 24 MECE-style guard: scans every .py file under lib/research/corpus/ and asserts the literal string 'served-as-empty-shell' occurs ONLY in backlog.py and this test file -- fails loud if a stray/duplicate definition exists anywhere else).",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_backlog.py -q --color=no -p no:cacheprovider -k \"empty_shell\" -- expect (?m)^\\d+ passed(, \\d+ deselected)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e5_AC1.sh",
+      "output_evidence": ".....                                                                    [100%]\n5 passed, 8 deselected in 0.84s",
+      "denominator": "5 of 5 `empty_shell`-named tests passed, 0 failed, 8 of 13 total tests in the file correctly deselected by -k (run twice back to back: '5 passed, 8 deselected' both times, only the elapsed seconds differ).",
+      "expect": "(?m)^\\d+ passed(, \\d+ deselected)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.backlog --coverage -- expect folders_read N dossier_served \\1... served_as_empty_shell [1-9]\\d*... resolved_no_prose \\1... unresolved_with_reason \\1... sum N ... never_prose_named [1-9]\\d*",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e5_AC2.sh",
+      "output_evidence": "folders_read 94 dossier_served 44 served_as_empty_shell 9 resolved_no_prose 0 unresolved_with_reason 41 sum 94\nnever_prose_named 12\nAMD Advanced Micro Devices workbook-only\nAir Liquide AI FP empty\nCostco COST workbook-only\nHaliburton HAL workbook-only\nHome Depot HD workbook-only\nHon Hai 2317 TT workbook-only\nNational Grid NG LN workbook-only\nQuanta Services PWR workbook-only\nRWE AG RWE GY workbook-only\nSSE plc SSE LN workbook-only\nValero Energy VLO workbook-only\nZurich Insurance ZURN SW workbook-only\nfolders_read 94 dossier_served 44 served_as_empty_shell 9 resolved_no_prose 0 unresolved_with_reason 41 sum 94\nwritten s3://opal-data-harvest/amgt/harvest/gold/research-backlog/date=2026-09-24/20260924T201056Z.json put_performed True",
+      "denominator": "94 of 94 folders dispositioned (44 dossier_served + 9 served_as_empty_shell + 0 resolved_no_prose + 41 unresolved_with_reason = 94, arithmetic asserted in code and re-checked by hand). 12 of 12 never-prose folders named (the round-2 figure of 11 plus AMD, which entered the live library after the round's original census -- decomposition doc section 1a already notes 'AMD appeared after the 14:58Z census'). Re-run twice back to back against the real live library+store: byte-identical totals both times (only the written object's own scan-vintage/URI differ, gold never overwriting). Re-checked against AC2's own regex with Python re.search (DOTALL): MATCH.",
+      "expect": "(?s)folders_read (\\d+) dossier_served \\d+ served_as_empty_shell [1-9]\\d* resolved_no_prose \\d+ unresolved_with_reason \\d+ sum \\1\\b.*never_prose_named [1-9]\\d*",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.backlog --folder \"Costco COST\" -- expect folder Costco COST ... disposition served-as-empty-shell ... (dossier_uri s3://.../research-dossier/|reason \\S)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e5_AC3.sh",
+      "output_evidence": "folder Costco COST\ndisposition served-as-empty-shell\ndossier_uri s3://opal-data-harvest/amgt/harvest/gold/research-dossier/security_key=COST_US_Equity/as_of=2026-09-24.d044454a2dedf726.json content_sha256 aeb1b89e50d22bc131ce0bb0abf81b894041f07e88dd24957f4590b8529ef953\nreason workbook-only",
+      "denominator": "1 of 1 named folder (Costco COST, a folder already measured workbook-only+dossier-served by round-2's own evidence table, row AMGT_CORPUS-Z-W1-S4). Prints BOTH the dossier_uri/content_sha256 line AND the reason line (RULED section 1: never one without the other), matching AC3's <expect> on the first alternative (dossier_uri ...research-dossier/). Re-run twice back to back: byte-identical both times. Re-checked against AC3's own regex with Python re.search (DOTALL): MATCH.",
+      "expect": "(?s)folder Costco COST.*disposition served-as-empty-shell.*(dossier_uri s3://opal-data-harvest/amgt/harvest/gold/research-dossier/|reason \\S)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/e5/mutant.py (not committed): a single-folder scenario (workbook-only entries, a stubbed dossier.read_dossier returning a stored shell) run through the FIX (backlog._resolved_disposition, unmodified, imported live) and through a MUTANT that reproduces the OLD three-way rule inline (dossier.read_dossier decides dossier-served unconditionally, never consulting the folder's own files first) -- the exact rule CRPS-e-5 replaces.",
+      "expected": "FIX reads served-as-empty-shell (the folder's own files are consulted before the dossier-served branch). MUTANT reads dossier-served (the old rule, masking the shell).",
+      "observed": "FIX disposition: served-as-empty-shell -- 'FIX: PASSED (expected served-as-empty-shell)'. MUTANT disposition: dossier-served -- 'MUTANT: FIRED AS EXPECTED (old rule reads dossier-served, masking the shell)'. Run twice back to back, identical both times.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "e5_AC1.sh, e5_AC2.sh, e5_AC3.sh and .scratch/e5/mutant.py each run twice back to back.",
+      "observed": "e5_AC1.sh: '5 passed, 8 deselected' both runs. e5_AC2.sh: byte-identical totals/never-prose-list both runs against the real live library+store (only the new gold object's own scan-vintage/URI differ, per gold's never-overwrite design). e5_AC3.sh: byte-identical output both runs. mutant.py: identical FIX/MUTANT result both runs. The full package (lib/research/corpus) also re-run once: '276 passed', 0 failed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No S3 delete of any kind; no edit to dossier.py, library.py, crosswalk.py; no library write",
+      "reason": "Section 4 BOUNDS. _resolved_disposition/coverage() only READ dossier.py (read_dossier, unchanged) and library.py (list_folders, census, unchanged) and WRITE exactly one new gold object per --coverage invocation, through gold.gold_put's never-overwrite precondition -- verified: every --coverage run this session printed put_performed True on a NEW scan-vintage key."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest -k empty_shell (AC1, via e5_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e5_AC1.sh",
+      "result": "rc 0; 5 passed, 8 deselected (run twice)"
+    },
+    {
+      "tool": "backlog CLI --coverage (AC2, via e5_AC2.sh, real live library+store)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e5_AC2.sh",
+      "result": "rc 0; folders_read 94 dossier_served 44 served_as_empty_shell 9 resolved_no_prose 0 unresolved_with_reason 41 sum 94; never_prose_named 12; written 2 new scan-vintage objects across 2 runs, put_performed True both times"
+    },
+    {
+      "tool": "backlog CLI --folder \"Costco COST\" (AC3, via e5_AC3.sh, real live library+store)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e5_AC3.sh",
+      "result": "rc 0; folder Costco COST disposition served-as-empty-shell dossier_uri ...research-dossier/security_key=COST_US_Equity/... reason workbook-only (run twice, byte-identical)"
+    },
+    {
+      "tool": "pytest full package (broader safety check, not a proof criterion)",
+      "invocation": "python -m pytest lib/research/corpus -q -p no:cacheprovider",
+      "result": "rc 0; 276 passed, 0 failed"
+    },
+    {
+      "tool": ".scratch/e5/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/e5/mutant.py",
+      "result": "rc 0; FIX served-as-empty-shell (PASSED); MUTANT dossier-served (FIRED AS EXPECTED); run twice, identical"
+    },
+    {
+      "tool": "proof-of-spec-check.py (close-out gate)",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-5.coverage-empty-shell-disposition.md",
+      "result": "PENDING -- run after this instance is written"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/backlog.py lib/research/corpus/tests/test_backlog.py org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-5.coverage-empty-shell-disposition.md org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-e-5.coverage-empty-shell-disposition.proof_of_spec.json",
+      "result": "PENDING -- run after this instance is validated"
+    }
+  ]
+}
