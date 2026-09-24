@@ -7,7 +7,7 @@ NOT run until both halves are signed here at these bytes.
 ## COO HALF -- `2.0.0_SA_COO~X`
 
 **Sources:** decomposition v3.0 s.5 duty 1, s.8 (R-16 V2: one call per name for the 60, 20 spent, these 40 remaining), s.9
-hold; Andrew's word on the 40 (record @`090ffea`); the evidence table
+hold; Andrew's word on the 40 PICKS (record @`090ffea`, the read-only census that produced the table -- NOT a vendor word, it ends "no vendor call, no store write"; corrected 21:0xZ on `1.0.0_SA_CTO~Z`'s catch); the evidence table
 `deliverables/2.0.0_SA_COO~X/UNRESOLVED40_CALLS_20260924.json` (40 rows); cell e-1 drained VALID at `21e624a003`; the
 builder change of `2.0.0_SA_COO~Z` @`9ec1226a01` (one record per folder after an attach); round 2's pair
 `NEVER_WIDEN_ROUND2_D5_REFIRE_HALVES.md` (the write-set trace one call deeper, which this act re-uses unchanged because
@@ -24,6 +24,15 @@ which makes EXACTLY ONE call `add_security.main(["--batch", <induction_batch_202
 "--write-pool"])` (`induction_run.py:468`). The batch is the 40 table rows, `{"folder", "bloomberg"}` each; the dry run on
 CLOUD reads `population 41 evidenced 40 called 40` (the 41st row is AMD, outside the table, not called). Bloomberg: at most
 40 reference calls, one per name, never repeated -- the remaining 40 of R-16 V2's 60.
+
+**VENDOR AUTHORITY -- the record, corrected (21:0xZ).** Andrew-direct R-21 @`b390c36444` (~03:2xZ, verbatim): *"all recs
+approved, and you have all the egress you want for vendors. Only thing I'd note is that the pull should be
+deterministic/scripted in nature like the existing pull"* -- BROAD on authority (all vendors), NARROW on mechanism (a
+scripted, re-runnable producer, never an agent turn). This act is that mechanism: `induction_run --fire` -> ONE
+`add_security --batch`, re-runnable from git, read-back to a file. `1.0.0_SA_CTO~Z` named "R-16 V2, R-21" as this
+induction's vendor word at 03:30Z (msg to `2.0.0_SA_COO~Z`, `...033051Z_..._CTO_NEVER-WIDEN_HALF_SIGNED__429efcdf30_.md:59`),
+and round 2's 20-name fire ran on that citation under a CTO-signed pair. Whether R-21 is the per-use word for THIS
+run is the CTO's to rule on its own record; this half does not run the fire until the CTO half releases the limb.
 
 ### BLAST RADIUS -- what the act MAY touch, and the rollback for each
 
@@ -85,4 +94,5 @@ Signed: `2.0.0_SA_COO~X`, 2026-09-24 20:4xZ.
 
 ## CTO HALF -- `1.0.0_SA_CTO~Z`
 
-(owed)
+Signed separately, in the CTO's own lane: `org/missions/D5/AMGT/AMGT_CORPUS/ledger/NEVER_WIDEN_ROUND3_FIRE40_CTO_HALF.md` @`af08f78a9b`
+(every limb signed; the VENDOR limb HELD pending the word).
