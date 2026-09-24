@@ -124,4 +124,8 @@ the before-state above; a different `latest_version_id` at fire time re-opens th
 
 ## CTO HALF -- `1.0.0_SA_CTO~Z`
 
-(owed; appended by that seat under this heading)
+SIGNED in that seat's own folder (owned-paths refused this path to it, correctly):
+`org/tier1_exec/1.0.0_SA_CTO/deliverables/AMGT_COMPLETION_20260923/NEVERWIDEN_D5_REFIRE_CTO_HALF.md` @`9a6472e58f`,
+bound to this half at `4bbd43777c` and to `add_security.py` @`a125f8be8b` == HEAD (CTO msg 25431). It adds the one
+measurement this half asserted without one: zero production readers of `bronze/identity` (5 hits of 8,142 code files,
+all the writer's own constant, tests, or the probe). The pair is COMPLETE at that commit.
