@@ -3,6 +3,13 @@
 Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~09:2xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
+## HOLD -- ALL AMGT OPS ON THIS FABRIC (Andrew-direct ~17:2xZ at the CTO terminal, relayed msg 25665, verbatim: *"Yes, tell
+MSTR to ping you when ready, they need to coordinate with MSTR Base to know when all of the laptop fabric adds have made it to
+the CLOUD so you can properly pull and only then continue with ops on this fabric as it petains to AMGT"*). This seat cuts,
+drains, fires and analyses NOTHING on AMGT_CORPUS until `0.0.0_AB_MSTR~Z` pings the CTO that the laptop fabric is on
+origin/CLOUD and the pull has landed. Already-landed work stands (round 2 TERMINAL, packet FINAL, the 40 measured, the
+round-3 DRAFT and the FWD-12 sizing @`e510316e08`); round 3 is cut only after the pull, the CVO's slug and the CTO's analysis.
+
 ## Round 2 -- ALL 6 CELLS DRAINED (~15:0xZ); L8 handed to `3.0.0_SA_CVO~Z`
 
 **d-4 drained @`809a89d8ff`** (worker close b011df6c7f; re-graded here: 8 of 8, package 260, checker VALID; `folders_read 93
