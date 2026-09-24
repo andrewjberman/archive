@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-e-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-3.sector-template-write-once.md",
+    "group": "OTHER",
+    "vintage_commit": "6108b0d804653afc006fdb7a1a1f59ec9ef9d9aa"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "d63cdd71ca0ad70b108d53c51bb4dd888f47fe07",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-3.sector-template-write-once.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/sector_template.py",
+      "kind": "script",
+      "commit_or_etag": "f72d8acf68",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build() no longer puts `total` into the `fields` dict (the corpus-wide denominator leaves the artifact body); `total` stays a build() parameter, documented as used ONLY by the caller to print the disclosure line at print time. `_run_show_first_graded` now computes `total = len(_all_rows(client))` itself (the corpus-wide count read fresh at print time, since the stored artifact no longer carries it) and prints it in place of the removed `fields[\"total\"]`. `_run_write`'s print line was already using its own local `total` (unchanged). `_assemble_artifact`/`_object_name` untouched. `METHOD_VERSION` NOT bumped, per the order's own bound.",
+      "introduces": ["total = len(_all_rows(client))"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_sector_template.py",
+      "kind": "test",
+      "commit_or_etag": "f72d8acf68",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Removed the one pre-existing assertion on the retired field (`assert fields[\"total\"] == 2`, the rest of that test kept intact). Added test_body_without_total (the artifact carries no `total` key) and test_grown_corpus_same_inputs_same_name_same_body (the same type inputs under total=124 and total=218 produce byte-identical artifact bodies and the SAME object name, via build()/_assemble_artifact/_object_name directly). All 28 of 28 tests in the file pass, run twice.",
+      "introduces": ["test_body_without_total", "test_grown_corpus_same_inputs_same_name_same_body"],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC1.sh -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC1.sh",
+      "output_evidence": "..                                                                       [100%]\n2 passed, 26 deselected in 0.33s",
+      "denominator": "2 of 2 selected tests passed (body_without_total, grown_corpus_same_inputs_same_name_same_body; 26 deselected by -k, not failures; full file re-run separately: 28 of 28 pass, `python -m pytest lib/research/corpus/tests/test_sector_template.py -q` -> '28 passed in 0.20s'); but the check script's own `-k` flag ALWAYS appends ', N deselected' to pytest's summary line when the file carries more tests than the filter selects (28 total, 2 selected, run twice: '2 passed, 26 deselected in 0.33s' then '...in 0.14s') -- so the line never reads bare '2 passed in ...s' and the anchored <expect> regex (?m)^\\d+ passed in  cannot match ANY line of this check's own literal invocation, regardless of how many of the selected tests pass",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "FAIL",
+      "status_reason": "The check script's own `-k \"body_without_total or grown_corpus\"` filter necessarily produces pytest's 'N passed, M deselected in Xs' summary form (M=26 of this file's 28 tests), never the bare 'N passed in Xs' form the order's <expect> anchors on; verified with re.search((?m)^\\d+ passed in , actual_output) -> False, twice. The 2 selected tests genuinely pass (re-verified via the full-file run, 28 of 28, and via re.search against 'N passed in' without the anchor). Not this cell's defect to fix (the check file is read-only, per S.5's own line: 'the check files are the issuer's, read-only to you'); recorded FAIL because the checker grades the mechanical match, not the worker's belief about intent."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC2.sh -- expect (?s)types [1-9]\\d* reports_typed \\d+ unmapped_reports \\d+ other_excluded \\d+.*securities_typed \\d+ of \\d+ unmapped_securities \\d+ conflicts \\d+",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC2.sh",
+      "output_evidence": "security WALMEX*_MM_Equity business_type consumer-non-cyclicals\nsecurity ZURN_SW_Equity sector_label_value 'Financials' extract_key s3://opal-data-harvest/amgt/harvest/bronze/research-report-extract/security_key=ZURN_SW_Equity/f59fe8c896c95590/extract.json label_index 6\nsecurity ZURN_SW_Equity business_type finance\n[the check's own `| tail -3` prints only these 3 lines and reports the PIPE's rc (0, tail's), never python's; the bare underlying command (`python -m lib.research.corpus.sector_template --write`, run separately, 3 times total, twice more) exits rc 1 each time with: lib.research.corpus.gold.GoldImmutableError: gold_put: s3://opal-data-harvest/amgt/harvest/gold/research-sector-template/business_type=consumer-cyclicals+consumer-services/fbb482677a438d92.json already holds a different sha256 -- the run never reaches the 'types ...'/'securities_typed ...' print statements the <expect> regex requires]",
+      "denominator": "0 of the 2 required trailing lines ('types ... securities_typed ...') ever printed, in 3 of 3 runs; the run reaches and prints security-level lines for all 30-odd securities up to Z (the loop over securities completes) but dies on the FIRST business_type in sorted order (consumer-cyclicals+consumer-services) before any business_type/types/securities_typed line prints; in-process diagnostic sweep (not committed) over all 9 groups: 4 of 9 types (finance, technology, consumer-services+telecommunications, unmapped) write cleanly, 5 of 9 (consumer-cyclicals+consumer-services, consumer-non-cyclicals, energy, healthcare, utilities) collide on a PRE-FIX stored object (method_version=2, `total` still in its body) at the SAME name the new total-free body computes for unchanged inputs",
+      "expect": "(?s)types [1-9]\\d* reports_typed \\d+ unmapped_reports \\d+ other_excluded \\d+.*securities_typed \\d+ of \\d+ unmapped_securities \\d+ conflicts \\d+",
+      "status": "FAIL",
+      "status_reason": "Unsatisfiable inside this cell's bound: the order forbids both escapes (S.1 'METHOD_VERSION is NOT bumped'; S.4 'no S3 delete') and gold.py (READ-ONLY to this cell) refuses a different sha under an existing name unconditionally. The fix itself is proven correct and exercised (mutant control below; 4 of 9 types now write cleanly on genuinely-changed inputs); the failure is against 5 PRE-EXISTING gold objects minted by the pre-fix code (the exact object Z-S17 already named), which this cell cannot rewrite without violating its own bound. Filed as row AMGT_CORPUS-Z-W3-S3, disarm_owner 2.0.0_SA_COO~X."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC3.sh -- expect business_type \\S+ reports \\d+ of \\d+",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC3.sh",
+      "output_evidence": "business_type consumer-cyclicals+consumer-services reports 4 of 218",
+      "denominator": "1 of 1 matching line printed (grep -E filters to exactly the `^business_type ` line); the printed denominator (218) is the LIVE corpus total read fresh at print time by the new `_run_show_first_graded`-local `total = len(_all_rows(client))`, not a value read back from the stored artifact (which no longer carries `total`) -- so the disclosure stays correct even though AC2's write did not complete for every type; run twice, identical output both times",
+      "expect": "business_type \\S+ reports \\d+ of \\d+",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/e3/mutant_test.py (not committed) re-inserts `total` into the `fields` dict build() returns (the pre-fix shape) via a source-patched, in-process re-exec of the committed module, and runs the same small-total-vs-large-total build()/_assemble_artifact/_object_name sequence test_grown_corpus_same_inputs_same_name_same_body exercises, against both the FIX (committed module, unmodified) and the MUTANT (patched module).",
+      "expected": "FIX: the same type inputs under total=124 and total=218 produce identical artifact bodies (same_body=True) and the same object name (same_name=True, unaffected either way since `_object_name` never reads `total`). MUTANT (total re-inserted into fields): the two totals produce DIFFERENT bodies (same_body=False) while the object name is STILL the same (same_name=True) -- reproducing exactly the shape of the write-once collision Z-S17/this row's AC2 measured, because `_object_name` was never the defect; the body carrying `total` was.",
+      "observed": "python .scratch/e3/mutant_test.py -> 'FIX: same_body=True same_name=True' then 'MUTANT: same_body=False same_name=True' -- matches the prediction exactly, run twice, identical both times.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's check, AC3's check, and the bare `--write` invocation underlying AC2 each run twice (AC1/AC3 the literal check scripts; `--write` via the module directly since its check script's `tail -3` truncates the same evidence needed both times) against committed working-tree bytes.",
+      "observed": "AC1: '2 passed, 26 deselected in 0.33s' then '2 passed, 26 deselected in 0.15s' -- both PASS, timing differs (expected), pass count identical. AC3: 'business_type consumer-cyclicals+consumer-services reports 4 of 218' both runs, byte-identical. AC2 (`--write` run bare 3 times total across this session): rc 1 every time, identical traceback naming the identical object (business_type=consumer-cyclicals+consumer-services/fbb482677a438d92.json) and identical GoldImmutableError text every time -- the FAILURE itself is deterministic, not flaky.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No METHOD_VERSION bump",
+      "reason": "Order S.1: 'METHOD_VERSION is NOT bumped (the measurement did not change; the body lost a disclosure field).' METHOD_VERSION stays \"2\" throughout this cell's diff (grep census: unchanged at :97)."
+    },
+    {
+      "item": "No S3 delete, no gold overwrite",
+      "reason": "Order S.4 BOUNDS: 'no S3 delete'. gold.py (READ-ONLY to this cell) is untouched; the 5 stale pre-fix objects AC2's row names are left exactly as they were -- nothing here attempts to clear or overwrite them."
+    },
+    {
+      "item": "No edit to gold.py, typed.py, extract.py, substrate.py, dossier.py",
+      "reason": "Order S.3 SURFACES: these five are listed READ-ONLY; none appears in this cell's diff (git diff --stat: only sector_template.py, its test file, this instance and the investigation row)."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W3-S3: AC2's `--write` cannot reach rc 0 on the live corpus even with the fix built and verified correct, because 5 of 9 business types collide on PRE-FIX stale gold objects (method_version=2, `total` still in the stored body) at the same object name the new total-free body computes for unchanged inputs -- the order's own bound (no METHOD_VERSION bump, no S3 delete) forbids both ways to resolve it inside this cell. ARMED, disarm_owner 2.0.0_SA_COO~X.",
+    "AMGT_CORPUS-Z-W3-S4: AC1's <expect> `(?m)^\\d+ passed in ` can never match e3_AC1.sh's own invocation -- its `-k` filter always produces pytest's 'N passed, M deselected in Xs' summary form on this 28-test file, never the bare 'N passed in Xs' form the regex anchors on -- even though the 2 targeted tests genuinely pass. ARMED, disarm_owner 2.0.0_SA_COO~X.",
+    "AMGT_CORPUS-Z-W3-S5: proof-of-spec-check's ALIGNMENT limb reads the decomp doc's CELL_ID_RE-matched id space as EMPTY (0 distinct ids); the table cites cells as bare `e-<n>`, never the prefixed `CRPS-e-<n>` form every criterion's cell_refs cites, so this TO (and structurally every e-1..e-5 TO this round) cannot reach checker rc 0 regardless of acceptance-row correctness. ARMED, disarm_owner 2.0.0_SA_COO~X."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest -k body_without_total or grown_corpus (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC1.sh",
+      "result": "rc 0; 2 passed, 26 deselected; run twice, both PASS"
+    },
+    {
+      "tool": "pytest, full file (extra, not the graded invocation)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_sector_template.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 28 passed in 0.20s"
+    },
+    {
+      "tool": "sector_template --write (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC2.sh ; also run bare: python -m lib.research.corpus.sector_template --write",
+      "result": "check script pipe rc 0 (tail's), bare module rc 1 every run (3 of 3); GoldImmutableError on business_type=consumer-cyclicals+consumer-services/fbb482677a438d92.json; AC2 FAIL"
+    },
+    {
+      "tool": "sector_template --show-first-graded (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e3_AC3.sh",
+      "result": "rc 0; 'business_type consumer-cyclicals+consumer-services reports 4 of 218'; run twice, identical"
+    },
+    {
+      "tool": ".scratch/e3/mutant_test.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/e3/mutant_test.py",
+      "result": "rc 0; FIX same_body=True same_name=True; MUTANT (total re-inserted) same_body=False same_name=True; CONTROL FIRED-AS-EXPECTED, run twice, identical"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/sector_template.py lib/research/corpus/tests/test_sector_template.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/sector_template.py lib/research/corpus/tests/test_sector_template.py",
+      "result": "rc 0, no output (both files compile)"
+    }
+  ]
+}
