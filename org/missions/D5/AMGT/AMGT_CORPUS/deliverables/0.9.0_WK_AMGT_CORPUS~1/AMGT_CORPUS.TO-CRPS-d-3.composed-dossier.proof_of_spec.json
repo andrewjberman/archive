@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-d-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-3.composed-dossier.md",
+    "group": "OTHER",
+    "vintage_commit": "c9a219f98ca01bf1530cd2522bb18a5582be4f2d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "c9a219f98ca01bf1530cd2522bb18a5582be4f2d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-3.composed-dossier.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NEW module. build(security_key, client) composes one research-dossier document from artifacts that already exist (C-DOSSIER-IS-COMPOSED-NEVER-AUTHORED): continuation.read_latest's own fields carried through verbatim (thesis_pillars/thesis_summary/kpi_set/fund_of_record/last_stated_position); substrate's one-call picker for sector_template_ref/fund_form_ref/typecast_ref ({uri, content_sha256} references, never copies) plus model_rows (the typecast's mnemonic_core + the sector template's kpi_set, ordered, every row's figure {value: null, absent: 'Bloomberg figure pull not authorized (R-16 V3)'} per FWD-12); and 12 SECTION fields (recommendation, company_description, growth_algorithm, investment_thesis_summary, risks(+pre_mortem), ownership, management, special_items, cases{upside,base,downside}, why_we_own, positives, negatives, comparison_set) read from the most recent class A pack and class B update's v2 (or v1 fallback) extraction, via continuation._read_reports_with_bytes (reused, not re-derived -- the v2-preference rule lives in exactly one place). The block-boundary rule generalises CRPS-d-2's PDF pillar-branch rule to every section name and to docx (reusing extract.py's own is_heading_bold word-cap) -- continuation._pdf_is_standalone_heading/_pdf_is_lead_only/_pdf_page_medians are reused for the pdf side, never copied. Address/name come from gold.address_of/gold.table_prefix (never a typed bucket/prefix); object name as_of=<UTC date>.<inputs_sha16>.json, single-level security_key=<KEY> partition, table spelled research-dossier, written through gold.gold_put (never overwriting). write_one checks the newest stored object's inputs against fresh current_inputs FIRST and writes nothing when unchanged (C-DOSSIER-REBUILD-IS-A-NO-OP-ON-UNCHANGED-INPUTS) -- measured live: --write --security-key IMB_LN_Equity's FIRST run this session (before IMB_LN_Equity had ever been dossier-built) printed 'address s3://opal-data-harvest/amgt/harvest/gold/research-dossier/security_key=IMB_LN_Equity/as_of=2026-09-24.85cd0367e4920671.json put_performed 1 existed 0 inputs_sha16 85cd0367e4920671' then 'unchanged inputs_sha16 85cd0367e4920671 wrote 0' (the SAME hash, the difference control inside one invocation); a LATER re-run, after the separate --write build step had already covered every name, correctly shows 'unchanged ... wrote 0' TWICE -- itself further live proof of the no-op rule, not a contradiction. --write (no key, BUILD STEP) rebuilt all 33 resolved names: 'names 33 written 20 existed 13' (13 names' inputs were already current from IMB_LN_Equity's own AC2 run plus any names whose upstream artifacts had not changed). --census over the resulting 33 live dossiers: 'dossiers 33 fields_scanned 825 cited 286 absent_with_reason 539 neither 0' then 'negative_control absent_with_reason 1', reproduced identically on a second run (determinism).",
+      "introduces": ["build", "write_one", "read_dossier", "current_inputs", "_resolve_section_field", "_resolve_risks_field", "_find_pre_mortem", "_model_rows", "_run_census", "_build_negative_control_document"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "10 tests, offline under the package poison, every S3 input seeded through the package's own writers (store.bronze_put, typed.record, store.silver_append, continuation.write_one) into substrate.StubS3Client, extraction documents seeded in the v2 shape (carrying section_leads) directly: (1) test_composed_document_with_every_section_present -- a docx class A pack with all 12 section fields + 3 cases + pre_mortem, every one cited, plus continuation's own fund_of_record/last_stated_position cited via its independent regex scan of the SAME paragraph; sector/fund/typecast refs and model_rows correctly ABSENT (never written); (2) test_missing_section_reads_absent_with_reason_naming_report_classes -- MANAGEMENT genuinely absent from the fixture reads ABSENT with reason 'no MANAGEMENT section in class A 2026-05-01 or class B missing', while a present field (company_description) still cites, proving the absence is real; (3) test_pdf_section_block_recommendation_and_pre_mortem -- pure, a v2 PDF document dict (extract.extract_v2's own shape): recommendation line, risks block, and a Pre-mortem: sub-lead all resolve correctly; (4) test_no_op_rebuild_on_unchanged_inputs -- write_one called twice, first wrote=True with a real address line, second wrote=False with the SAME inputs_sha16; (5) test_newest_as_of_reader_picks_the_lexicographically_last_object -- two real objects landed on one key (a class B report added between writes, genuinely moving current_inputs), read_dossier picks sorted(keys)[-1]; (6)/(7) test_classify_field_every_shape / test_document_field_census_values_decomposes_cases_and_pre_mortem -- the census classifier on every field shape (cited/absent/neither) and the cases./risks.pre_mortem decomposition; (8)/(9) test_negative_control_pure_no_picks / test_build_negative_control_document_against_a_real_document_with_real_sections -- the planted PLANTED-UNCITABLE-SECTION name renders ABSENT via the REAL resolver, both with no picks and against a real document carrying real sections (proving the SEARCH, not just 'no report', fails correctly), and is never written to the store; (10) the poison control.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DOSSIER_INTERFACE.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "The side-by-side: 5 TRUE INTERSECTIONS (recommendation, company_description, investment_thesis_summary, risks, cases/model_cases), 1 name-matched-shape-narrower (management, per C-EXEC-MANAGEMENT), 1 PARTIAL (model_rows vs model_status/fiscal_year_figures -- rows named, no figures, FWD-12), the rest ('risks.pre_mortem', 'growth_algorithm', 'ownership', 'special_items', 'why_we_own', 'positives', 'negatives', 'comparison_set', 'thesis_pillars', 'thesis_summary', 'kpi_set', 'fund_of_record', 'last_stated_position', the three *_ref fields) marked 'no slot today'; ThesisBundle's own ceo_bio/posture noted as having no dossier counterpart either. Built from the order's OWN inlined quotation of the file (surprise row AMGT_CORPUS-Z-W1-S3: portal/src/pages/SecurityAnalysis/types.ts is unreadable in this worktree -- .gitmodules is a tracked, genuinely empty blob at HEAD, no submodule URL recorded). Two live example payloads: ACCEPTED = IMB_LN_Equity's real stored dossier (trimmed), REFUSED = read_dossier('NOT_A_REAL_SECURITY_Equity') raising LookupError with the folder-shaped reason.",
+      "artifact_covered_by": ["AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Row AMGT_CORPUS-Z-W1-S3 appended (append-only channel, validated by .tools/surprise-row-gate.py): portal/src/pages/SecurityAnalysis/types.ts, this order's READ-ONLY reference for DOSSIER_INTERFACE.md, is unreadable in this worktree (empty .gitmodules blob at HEAD, no submodule URL, no cached submodule objects) -- DOSSIER_INTERFACE.md is built from the order's own inlined quotation instead.",
+      "artifact_covered_by": ["AC4"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_dossier.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_dossier.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "..........                                                               [100%]\n10 passed in 1.47s",
+      "denominator": "10 of 10 tests passed, 0 failed",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.dossier --write --security-key IMB_LN_Equity -- expect address s3://.../security_key=IMB_LN_Equity/as_of=YYYY-MM-DD.<hash>.json put_performed [01] existed [01] inputs_sha16 <hash> ... unchanged inputs_sha16 <SAME hash> wrote 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.dossier --write --security-key IMB_LN_Equity 2>&1 | tail -8",
+      "output_evidence": "address s3://opal-data-harvest/amgt/harvest/gold/research-dossier/security_key=IMB_LN_Equity/as_of=2026-09-24.85cd0367e4920671.json put_performed 1 existed 0 inputs_sha16 85cd0367e4920671\nunchanged inputs_sha16 85cd0367e4920671 wrote 0",
+      "denominator": "1 of 1 security (IMB_LN_Equity, already-resolved); 2 of 2 write_one calls in this invocation printed, the second a genuine no-op on the SAME inputs_sha16 the first call just wrote -- the difference control named inside the criterion. Captured on the FIRST run of this exact invocation this session, before IMB_LN_Equity had ever been dossier-built; a later re-run, after the separate --write build step had already covered every name (including IMB_LN_Equity, found already current), correctly shows 'unchanged ... wrote 0' on BOTH calls -- further live proof of the same no-op rule at a later moment, not a contradiction of this row.",
+      "expect": "(?s)address s3://opal-data-harvest/amgt/harvest/gold/research-dossier/security_key=IMB_LN_Equity/as_of=\\d{4}-\\d{2}-\\d{2}\\.[0-9a-f]{16}\\.json put_performed [01] existed [01] inputs_sha16 ([0-9a-f]{16}).*unchanged inputs_sha16 \\1 wrote 0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.dossier --census -- expect dossiers N fields_scanned N cited N absent_with_reason N neither 0 ... negative_control absent_with_reason 1",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.dossier --census 2>&1 | tail -4",
+      "output_evidence": "dossiers 33 fields_scanned 825 cited 286 absent_with_reason 539 neither 0\nnegative_control absent_with_reason 1\ndossiers 33 fields_scanned 825 cited 286 absent_with_reason 539 neither 0",
+      "denominator": "33 of 33 resolved names' dossiers scanned (every stored research-dossier object, after the --write build step); 825 of 825 fields classified with 0 landing as neither cited nor reason-bearing (286 + 539 = 825); the planted negative control renders ABSENT WITH REASON, never blank or inferred. Reproduced identically on a second run (determinism).",
+      "expect": "(?s)dossiers [1-9]\\d* fields_scanned [1-9]\\d* cited \\d+ absent_with_reason \\d+ neither 0\\b.*negative_control absent_with_reason 1\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "JUDGMENT (the CVO's): DOSSIER_INTERFACE.md. Does the side-by-side name a true intersection with ThesisBundle, and does every field with no slot say so rather than being mapped by force? Record the sheet's path and the two example payloads, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no invocation; the sheet is read at the path cited in output_evidence",
+      "output_evidence": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DOSSIER_INTERFACE.md -- names 5 TRUE INTERSECTIONS (recommendation, company_description, investment_thesis_summary, risks, cases/model_cases), 1 name-matched-shape-narrower field (management), 1 PARTIAL field (model_rows, rows named but no figures per FWD-12), and marks every remaining dossier field 'no slot today' rather than forcing a mapping; also names ThesisBundle's ceo_bio/posture as having no dossier counterpart. ACCEPTED example: IMB_LN_Equity's live dossier at s3://opal-data-harvest/amgt/harvest/gold/research-dossier/security_key=IMB_LN_Equity/as_of=2026-09-24.85cd0367e4920671.json (trimmed JSON reproduced in the sheet). REFUSED example: dossier.read_dossier('NOT_A_REAL_SECURITY_Equity') raises LookupError('no research-dossier object under s3://opal-data-harvest/amgt/harvest/gold/research-dossier/security_key=NOT_A_REAL_SECURITY_Equity/'). The sheet also carries a READ CAVEAT (surprise row AMGT_CORPUS-Z-W1-S3): portal/src/pages/SecurityAnalysis/types.ts is unreadable in this worktree, so the ThesisBundle column is built from this order's own inlined quotation, not an independent live read -- flagged explicitly for the CVO's own re-verification once the submodule is reachable.",
+      "denominator": "N/A -- judgment",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (task order AC4 carries judgment=\"true\", no <invocation>/<expect>): the substitute oracle is 3.0.0_SA_CVO~X at L9, who reads DOSSIER_INTERFACE.md against ThesisBundle (ideally with the submodule reachable, unlike this worker) and the two example payloads. This row records the sheet's path and both payloads verbatim and carries no PASS/FAIL verdict, per the order's own instruction."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/d3/mutant.py (not committed) compares the real docx block-closing rule (_section_block_items, which stops a section's block at the NEXT section lead via lead_indices) against a plausible bug that forgets that check, over a 3-section fixture (MANAGEMENT, SPECIAL ITEMS, WHY WE OWN back to back, no unnamed heading anywhere).",
+      "expected": "FIX resolves MANAGEMENT as just its own lead's text. MUTANT (no lead_indices check, block runs to the next UNNAMED heading only, of which there is none) absorbs SPECIAL ITEMS' and WHY WE OWN's own content into the MANAGEMENT field, so FIX != MUTANT on the leaked-content signal.",
+      "observed": "FIX management_value='MANAGEMENT: The CEO has run the company for ten years with a strong record.' leaked=False. MUTANT management_value includes all three sections' text, leaked=True. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_dossier.py's full file run twice back to back; --census run twice back to back after the --write build step had landed; .scratch/d3/mutant.py run twice back to back.",
+      "observed": "pytest: '10 passed in 1.47s' then '10 passed in 3.35s' -- same pass count both runs. --census run twice: byte-identical totals both times (dossiers 33 fields_scanned 825 cited 286 absent_with_reason 539 neither 0; negative_control absent_with_reason 1). mutant.py: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical leaked-content values.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any portal or scoped_amgt.py edit, any Bloomberg call, any synthesis of a field across reports, a second partition key",
+      "reason": "Section 1, 'What this cell does NOT do'. Every field is either carried through verbatim from an upstream gold artifact or read as a single cited passage from ONE of the two picked reports (never merged across reports); model_rows carries every figure as {value: null, absent: 'Bloomberg figure pull not authorized (R-16 V3)'}; the partition is security_key=<KEY> only, enforced by construction (gold.address_of is called with exactly that one partition string, never a two-level one)."
+    },
+    {
+      "item": "An independent live read of portal/src/pages/SecurityAnalysis/types.ts",
+      "reason": "Surprise row AMGT_CORPUS-Z-W1-S3: the file is unreadable in this worktree (empty .gitmodules blob at HEAD, no submodule URL tracked anywhere in the repo's history, no cached submodule objects in the shared git-common-dir). DOSSIER_INTERFACE.md is built from the task order's own inlined quotation of the file's relevant lines instead, disclosed explicitly in the sheet and in this row."
+    },
+    {
+      "item": "Any read of the OneDrive research library, install, or vendor/Claude API call",
+      "reason": "BOUNDS: this module's only imports beyond stdlib are lib.research.corpus.continuation/extract/gold/substrate and lib.research.harvest.store (all S3/repo-file only, never the library). All 10 tests in test_dossier.py pass under the package poison (which raises on boto3.client/resource/Session.client/subprocess.run/Popen/socket.create_connection)."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W1-S3"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_dossier.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 10 passed, 0 failed"
+    },
+    {
+      "tool": "dossier CLI --write --security-key IMB_LN_Equity (AC2)",
+      "invocation": "python -m lib.research.corpus.dossier --write --security-key IMB_LN_Equity",
+      "result": "rc 0; first run (fresh state) address ... put_performed 1 existed 0 inputs_sha16 85cd0367e4920671, then unchanged inputs_sha16 85cd0367e4920671 wrote 0; later re-run (after the full build) unchanged wrote 0 twice"
+    },
+    {
+      "tool": "dossier CLI --write (build step, run against the live store)",
+      "invocation": "python -m lib.research.corpus.dossier --write",
+      "result": "rc 0; names 33 written 20 existed 13"
+    },
+    {
+      "tool": "dossier CLI --census (AC3)",
+      "invocation": "python -m lib.research.corpus.dossier --census",
+      "result": "rc 0; dossiers 33 fields_scanned 825 cited 286 absent_with_reason 539 neither 0; negative_control absent_with_reason 1"
+    },
+    {
+      "tool": "pytest full package (broader safety check, not a proof criterion)",
+      "invocation": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 230 passed, 0 failed"
+    },
+    {
+      "tool": "direct S3 reads (AC4 evidence gathering, not a proof criterion)",
+      "invocation": "dossier.read_dossier('IMB_LN_Equity') / dossier.read_dossier('NOT_A_REAL_SECURITY_Equity')",
+      "result": "rc 0; real document read for the accepted example; LookupError raised for the refused example, folder-shaped reason as printed"
+    },
+    {
+      "tool": ".scratch/d3/mutant.py (not committed -- scratch control harness)",
+      "invocation": "PYTHONPATH=. python .scratch/d3/mutant.py",
+      "result": "rc 0; FIX leaked=False; MUTANT leaked=True; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/dossier.py lib/research/corpus/tests/test_dossier.py org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/DOSSIER_INTERFACE.md org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-3.composed-dossier.md org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-d-3.composed-dossier.proof_of_spec.json",
+      "result": "PENDING -- run after this instance is validated"
+    }
+  ]
+}

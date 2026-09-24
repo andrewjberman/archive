@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-d-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-2.continuation-pdf-pillar-branch.md",
+    "group": "OTHER",
+    "vintage_commit": "70defe1169664366e6ddd3269d48729193f57c69"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "70defe1169664366e6ddd3269d48729193f57c69",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-2.continuation-pdf-pillar-branch.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/continuation.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Extraction resolution: _read_one_report/_read_reports_with_bytes now read the v2 sibling ('<report_id>/extract.v2.json') WHEN IT EXISTS (real ClientError NoSuchKey/404, or the offline StubS3Client's KeyError -- both mean 'try v1'), else v1; current_inputs uses the key ACTUALLY READ (read_key_uri), not row['extract_key'] -- verified live: ASML_NA_Equity's rebuilt inputs name 'extract.v2.json' for all 3 of its reports. thesis_pillars/thesis_summary now dispatch on the most recent class A report's OWN type: docx keeps _resolve_thesis_pillars_docx byte-unchanged (THE CONTROL); pdf reads the new PDF pillar branch (_pdf_thesis_block_bounds/_pdf_pillars_raw/_resolve_thesis_pillars_pdf/_resolve_thesis_summary_pdf) over a v2 document's lines/section_leads, ported from measure_pdf_extractability.py's pdf_pillars (140-char WIDE lead regex) and block_after, reusing extract.SECTION_NAMES/_match_section_name/_normalise_name rather than copying them. Every pillar/summary citation's passage is sliced as a literal substring of the raw page text (_pdf_cited_passage), so --verify-citations resolves it regardless of whether the citing extract_key is v1 or v2 (pages is byte-identical between them for a PDF). --write measured live against the 33 resolved names: first run 'names 33 rebuilt 33 existed 0 with_pillars 10 with_pdf_pillars 5', second (idempotent) run 'names 33 rebuilt 0 existed 33 with_pillars 10 with_pdf_pillars 5' -- 5 PDF-only names (ASML_NA_Equity, RMS_FP_Equity, SAP_GY_Equity + 2 more) now carry pillars that were ABSENT in round 1. --verify-citations measured live: before --write (round-1 objects only) 'citations_checked 2280 resolved 2280 unresolved 0'; after --write (round-1 + round-2 objects, gold never overwrites, both stand) 'citations_checked 4580 resolved 4580 unresolved 0'.",
+      "introduces": ["_pdf_thesis_block_bounds", "_pdf_pillars_raw", "_resolve_thesis_pillars_pdf", "_resolve_thesis_summary_pdf", "_read_one_report", "_v2_extract_uri", "_run_show_first_pdf_only"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_continuation.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "6 new tests added (15 of 15 passing, all offline under the package poison, documents built as dicts per the bounds' shapes): (1) test_thesis_summary_absent_for_docx_standalone_heading -- the docx branch's thesis_summary is always '' with reason 'standalone heading, no inline summary'; (2) test_pdf_pillar_branch_finds_inline_and_lead_alone_and_valuation_stops_at_risks -- a PFOE pack (inline INVESTMENT THESIS summary, an inline-lead pillar, a lead-alone pillar, a 'Valuation:' line that IS a pillar, a 'RISKS AND CONSDIERATIONS:' line that closes the block with none of its own content leaking into the pillars) asserts 3 pillars in order, every citation passage a literal substring of the raw page text, and the summary combining the inline remainder with its one continuation line; (3) test_pdf_pillars_absent_with_no_investment_thesis_lead -- both fields ABSENT with reason 'pdf pack carries no INVESTMENT THESIS section lead'; (4)/(5) test_read_one_report_prefers_v2_when_it_exists / _falls_back_to_v1_when_v2_absent -- the extraction-resolution rule at the _read_one_report seam; (6) test_current_inputs_uses_the_actually_read_key_not_the_row_extract_key -- current_inputs's 'key' field is the read_key, never row['extract_key'], proving FWD-8/FWD-17's discriminator.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python -m pytest lib/research/corpus/tests/test_continuation.py -q --color=no -p no:cacheprovider -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_continuation.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "...............                                                          [100%]\n15 passed in 0.51s",
+      "denominator": "15 of 15 tests passed, 0 failed (9 round-1 tests unchanged + 6 new CRPS-d-2 tests: docx-branch thesis_summary control, PDF pillar branch on a PFOE pack, PDF absent reason, v2-preference at the read seam x2, current_inputs uses the read key)",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "python -m lib.research.corpus.continuation --verify-citations -- expect citations_checked N resolved N unresolved 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.continuation --verify-citations 2>&1 | tail -3",
+      "output_evidence": "citations_checked 4580 resolved 4580 unresolved 0",
+      "denominator": "4580 of 4580 citations checked, 0 unresolved -- every stored research-continuation object (round-1 v1-input objects the rebuild superseded, still standing since gold never overwrites, PLUS this cell's freshly rebuilt v2-input objects for all 33 resolved names) re-resolves its citations against the extraction object it names (v1 or v2, per the citation's own extract_key), including the 5 names' worth of NEW PDF-pillar/thesis_summary citations this cell added",
+      "expect": "citations_checked (\\d+) resolved \\1 unresolved 0\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "python -m lib.research.corpus.continuation --show-first-pdf-only -- expect security_key \\S+ ... source_type pdf ... pillars N (>=1) ... report_key ... thesis_summary",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.continuation --show-first-pdf-only 2>&1 | tail -40",
+      "output_evidence": "security_key ASML_NA_Equity\nsource_type pdf\npillars 2\npillar Secular growth tailwinds trump short-term cyclicality in this trillion dollar market report_key s3://opal-data-harvest/amgt/harvest/bronze/research-report/security_key=ASML_NA_Equity/37aa7a78aca3d4fc/ASML research pack 5_5_2026.pdf page 2\npillar Monopoly in EUV lithography with an impregnable moat report_key s3://opal-data-harvest/amgt/harvest/bronze/research-report/security_key=ASML_NA_Equity/37aa7a78aca3d4fc/ASML research pack 5_5_2026.pdf page 2\nthesis_summary The most advanced modern technology does not exist without ASML. Fundamentals are strong with sales growing low-teens, operating margin 35% and growing, solid free cash flow (margin 34%) and net cash on the balance sheet.",
+      "denominator": "1 of 33 resolved names picked (the FIRST, sorted, whose most recent class A report is a PDF carrying >=1 pillar); ASML_NA_Equity is REAL (a PDF-only pack, not a fixture), proving FWD-16 on the live corpus -- 5 of 33 resolved names carry PDF-sourced pillars total (--write's with_pdf_pillars 5)",
+      "expect": "(?s)security_key \\S+.*source_type pdf.*pillars [1-9]\\d*.*report_key .*thesis_summary ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "JUDGMENT (the CVO's): AC3's printed pillars for the PDF-only name beside the pack's own text at the cited pages. Are the leads the team's leads, and is the split between pillar and section correct? Record AC3's output and the artifact's S3 URI, with NO verdict.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no invocation; the artifact is read at the S3 URI cited in output_evidence, alongside the pack's own text at bronze_key page 2 (report_key in AC3's output)",
+      "output_evidence": "AC3's printed pillars for ASML_NA_Equity, page 2: pillar 1 'Secular growth tailwinds trump short-term cyclicality in this trillion dollar market'; pillar 2 'Monopoly in EUV lithography with an impregnable moat'; thesis_summary 'The most advanced modern technology does not exist without ASML. Fundamentals are strong with sales growing low-teens, operating margin 35% and growing, solid free cash flow (margin 34%) and net cash on the balance sheet.' The CURRENT stored artifact (matching current_inputs NOW, distinguished from a superseded round-1 object at the same partition by reading both objects' `inputs[0].key` -- the current one names 'extract.v2.json', the superseded one names 'extract.json'): s3://opal-data-harvest/amgt/harvest/gold/research-continuation/security_key=ASML_NA_Equity/acc4deb208a6814c.json. Source PDF: s3://opal-data-harvest/amgt/harvest/bronze/research-report/security_key=ASML_NA_Equity/37aa7a78aca3d4fc/ASML research pack 5_5_2026.pdf, page 2 (0-indexed, so the pack's page 3).",
+      "denominator": "N/A -- judgment",
+      "judgment": true,
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion (task order AC4 carries judgment=\"true\", no <invocation>/<expect>): the substitute oracle is 3.0.0_SA_CVO~X at L9, who reads the cited artifact and the pack's own PDF text at the cited page against AC3's printed pillars. This row records the artifact's S3 URI and AC3's output verbatim and carries no PASS/FAIL verdict, per the order's own instruction."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/d2/mutant.py (not committed) compares extract_v2's real block-closing rule (_pdf_thesis_block_bounds, which stops the INVESTMENT THESIS block at the next section-lead line index) against a plausible bug that forgets the section-lead check and only stops at an unnamed large/bold heading -- over the same PFOE fixture used by AC1's test, whose block is closed by a 'RISKS AND CONSDIERATIONS:' section lead (never an unnamed heading).",
+      "expected": "FIX finds 3 pillars (Pricing power, Moat, Valuation) with none of the RISKS line's own content ('Regulatory risk...') leaked into any pillar's body. MUTANT (no section-lead check) finds the SAME 3 pillar names but with the RISKS line's content absorbed into the last pillar's (Valuation's) body, since nothing closes the block before the fixture ends -- so FIX != MUTANT on the leaked-content signal.",
+      "observed": "FIX pillars=['Pricing power', 'Moat', 'Valuation'] leaked_risks_content=False. MUTANT pillars=['Pricing power', 'Moat', 'Valuation'] leaked_risks_content=True. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "test_continuation.py's full file run twice back to back; --verify-citations run twice back to back (before and after --write, each a stable measurement of its own moment); --show-first-pdf-only run twice back to back after --write had already landed; --write itself run twice back to back (first landing, second idempotent); .scratch/d2/mutant.py run twice back to back.",
+      "observed": "pytest: '15 passed in 0.50s' then '15 passed in 0.37s'/'15 passed in 1.70s' -- same pass count every run. --show-first-pdf-only run twice: byte-identical output both times (same security_key, pillars, thesis_summary). --write run twice: identical with_pillars/with_pdf_pillars totals both times (10/5), with the second run's rebuilt/existed swap (33/0 -> 0/33) proving the conditional put path, not the content, changed. mutant.py: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical pillar lists and leaked-content flags.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Rewriting typed.py, extract.py, silver, or any other gold table; changing the docx pillar rule",
+      "reason": "Section 1, 'What this cell does NOT do'. _thesis_pillar_paragraphs (the docx branch's block/pillar finder) and _PILLAR_LEAD_RE (its 80-char lead regex) are untouched; verified by test_thesis_pillars_read_from_most_recent_class_a and test_thesis_pillars_absent_with_no_class_a_report (round-1 tests, unedited) still passing byte-for-byte against the SAME assertions."
+    },
+    {
+      "item": "Citing the v2 extraction key on thesis_pillars/thesis_summary citations",
+      "reason": "The order's RULED text scopes 'the key actually read enters inputs' to `inputs`/`current_inputs` only (module docstring, RULED -- Extraction resolution); it does not name the citation schema. Every pillar/summary passage is sliced from `document['pages']`, which extract_v2 keeps BYTE-EQUAL to v1 for PDF, so a citation naming either key resolves identically -- proven live (AC2, 4580 of 4580 resolved) and not changed here."
+    },
+    {
+      "item": "Any read of the OneDrive research library, install, or vendor/Claude API call",
+      "reason": "BOUNDS: this module's only imports beyond stdlib are lib.research.corpus.extract/gold/typed and lib.research.harvest.store (all S3/repo-file only, never the library). All 15 tests in test_continuation.py pass under the package poison (which raises on boto3.client/resource/Session.client/subprocess.run/Popen/socket.create_connection)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_continuation.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 15 passed, 0 failed"
+    },
+    {
+      "tool": "continuation CLI --write (build step, run against the live store)",
+      "invocation": "python -m lib.research.corpus.continuation --write",
+      "result": "rc 0; first run names 33 rebuilt 33 existed 0 with_pillars 10 with_pdf_pillars 5; second run names 33 rebuilt 0 existed 33 with_pillars 10 with_pdf_pillars 5"
+    },
+    {
+      "tool": "continuation CLI --verify-citations (AC2)",
+      "invocation": "python -m lib.research.corpus.continuation --verify-citations",
+      "result": "rc 0; before --write: citations_checked 2280 resolved 2280 unresolved 0; after --write: citations_checked 4580 resolved 4580 unresolved 0"
+    },
+    {
+      "tool": "continuation CLI --show-first-pdf-only (AC3)",
+      "invocation": "python -m lib.research.corpus.continuation --show-first-pdf-only",
+      "result": "rc 0; security_key ASML_NA_Equity, source_type pdf, pillars 2, thesis_summary present"
+    },
+    {
+      "tool": "pytest full package (broader safety check, not a proof criterion)",
+      "invocation": "python -m pytest lib/research/corpus/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 220 passed, 0 failed (214 pre-existing + 6 new, including test_substrate.py/test_report_input.py which call continuation.write_one against an offline StubS3Client that never seeds a v2 key -- proving the v1-fallback path)"
+    },
+    {
+      "tool": "direct S3 read (AC4 evidence gathering, not a proof criterion)",
+      "invocation": "boto3 get_object on both research-continuation objects under security_key=ASML_NA_Equity/, comparing inputs[0].key to distinguish the CURRENT (v2-input) object from the superseded (v1-input) one",
+      "result": "rc 0; acc4deb208a6814c.json (current, v2 inputs) vs f24fd767f0f99245.json (superseded, v1 inputs) -- both stand, gold never overwrites"
+    },
+    {
+      "tool": ".scratch/d2/mutant.py (not committed -- scratch control harness)",
+      "invocation": "PYTHONPATH=. python .scratch/d2/mutant.py",
+      "result": "rc 0; FIX leaked_risks_content=False; MUTANT leaked_risks_content=True; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/corpus/continuation.py lib/research/corpus/tests/test_continuation.py org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-2.continuation-pdf-pillar-branch.md org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-d-2.continuation-pdf-pillar-branch.proof_of_spec.json",
+      "result": "PENDING -- run after this instance is validated"
+    }
+  ]
+}

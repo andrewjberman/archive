@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-d-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-5.scripted-induction-producer.md",
+    "group": "OTHER",
+    "vintage_commit": "e1014a7eb672dd0215d921a7efdfcc964607f027"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "df6798aebf56ea7e78ca679f4c837d1840ce4e43",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-5.scripted-induction-producer.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/induction_run.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ISSUER AMENDMENT 3 (CTO R-38/R-49/R-51 precondition 3, drained add_security @8c75f4f90d): run() now makes EXACTLY ONE call per run. Every effectively-EVIDENCED row (effective_state_and_reason == STATE_EVIDENCED, root/cc both present -- amendments 1 and 2 unchanged) is collected, in the rows' own order, into a request list [{folder, bloomberg: '<root> <cc>'}, ...] written to induction_batch_<as_of>.json under this worker's deliverables dir; when the list is non-empty, ONE call `call(['--batch', <path>, '--as-of', as_of, '--write-pool'])` is made (NO call when the list is empty -- proven by a call that raises if reached). The captured stdout is split by the new `_split_batch_blocks` on each request's own 'bloomberg_calls N' line (a MEASURED block's 'mode ...' line trails AFTER that line and lands in the trailer, never mis-assigned to the wrong request, since block boundaries are counted, not content-matched) and the blocks are assigned to the requests IN ORDER; a block count that differs from the request count marks every request in that batch `error` with a `block count N != request count M` reason, never a guess (new `test_run_block_count_mismatch_errors_every_unassigned_request`). The trailer's own 'BATCH: requested N landed L bloomberg_calls C pool_puts P' line (new `_parse_batch_line`) yields `pool_puts`; its absence sets pool_puts 0 and increments errors by exactly one (new `test_run_missing_batch_line_counts_as_an_error_and_zero_pool_puts`). Per-row `rc` is now null (the rc is the batch's, carried at document['batch']['rc']); the read-back document gains a top-level `batch` object {file, requests, argv, rc, landed, pool_puts, bloomberg_calls}. The totals line gains `batch_calls` (1 iff a call was made) and `pool_puts` between `bloomberg_calls` and `sum`, per the amended AC2 expect. `_build_call_argv` (the per-row --folder+--bloomberg argv builder) is RETIRED -- superseded by the batch request list; no per-row call is ever made. make_fake_call() (no longer taking `rows`) now scripts the --batch shape directly off the batch file's own contents: asserts --batch present, --folder/--bloomberg absent, reads the named file, asserts every request carries folder + a parseable bloomberg, and prints MEASURED/already-registered/REFUSED/MEASURED... blocks by request POSITION (index 1 -> already-registered, index 2 -> REFUSED, every other index -> MEASURED), each closed by its own 'bloomberg_calls 0' line, then one 'BATCH: requested N landed L bloomberg_calls 0 pool_puts 0' line (L = count of scripted MEASURED blocks) and the max rc (4 iff any block is REFUSED). Measured on the real 93-folder library via --dry-run --as-of 2026-09-24 (run 3 times across this session, byte-identical totals line every time): population 60 evidenced 20 ambiguous 2 (Copa CPA, Uber Technologies UBER US) disagreement 1 (America Movil AXMB MM) other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 batch_calls 1 pool_puts 0 sum 60 -- unchanged from amendments 1/2 on every field except the two new tokens, as the amendment predicts (R-49's own count-first collision read found 0 of 20 evidenced keys colliding, so no ENRICH fork applies here).",
+      "introduces": [
+        "_split_batch_blocks",
+        "_parse_batch_line"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_induction_run.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "20 tests (18 prior + 2 new), offline, under tests/conftest.py's autouse poison plus the add_security._load_blp_client positive control: (1) rows_for_run wiring, unchanged; (2) run() now exercised against a hand-scripted `call` reproducing add_security's OWN --batch printed-line grammar (`_scripted_batch_call` helper, reading the batch file the run() under test wrote, printing per-request blocks in file order exactly as add_security.main does, including the 'mode APPEND' line trailing AFTER 'bloomberg_calls N'); NEW test_run_makes_no_call_when_no_effectively_evidenced_rows proves the call is never reached and batch_calls reads 0; NEW test_run_block_count_mismatch_errors_every_unassigned_request proves a genuine block/request-count mismatch marks every affected row `error` with the block-count reason, never a guess; NEW test_run_missing_batch_line_counts_as_an_error_and_zero_pool_puts proves an absent BATCH: line yields pool_puts 0 and errors += 1 while the single present request block still parses correctly; (2a, ISSUER AMENDMENT 1) parse_folder_token / effective_state_and_reason unchanged; test_run_reclassifies_disagreement_and_never_calls_it now asserts against the batch file's own contents (America Movil AXMB MM's folder is asserted ABSENT from the written batch request list, never merely 'not called with argv X'); (2b renamed from 2c, ISSUER AMENDMENT 3 supersedes 2's --folder+--bloomberg per-row tests, RETIRED with _build_call_argv) test_run_refuses_rootless_row_before_ever_batching_it proves a root/cc-less EVIDENCED row is refused before ever being placed in the batch request list, `call` never reached; (3) make_fake_call (no `rows` argument) scripting every outcome branch by request position off the written batch file, asserting the ONE call's argv carries --batch and neither --folder nor --bloomberg, and NEW test_make_fake_call_makes_no_call_when_batch_empty proves it is never invoked when nothing is effectively evidenced; (4) the add_security._load_blp_client poison positive control, unchanged; (5) fire_permitted's four gate combinations, unchanged; (6) main()'s --fire refusal end-to-end (three scenarios) plus --as-of format validation, unchanged.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_run_2026-09-24_dry-run.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC2 dry-run read-back JSON, ISSUER AMENDMENT 3 shape: as_of, the 14 totals fields (batch_calls and pool_puts new), one row per population folder (every called row's rc is now null, per-row outcome/security_key/bloomberg_arg unchanged), and a top-level `batch` object: file induction_batch_2026-09-24.json (relative to this worker's deliverables dir), requests (20 {folder, bloomberg} objects), argv (['--batch', <path>, '--as-of', '2026-09-24', '--write-pool']), rc 4 (the scripted collision at request index 2), landed 18, pool_puts 0, bloomberg_calls 0. Written only under this worker's own deliverables dir, nowhere under lib/research/identity/.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_batch_2026-09-24.json",
+      "kind": "config_data",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ISSUER AMENDMENT 3, NEW artifact: the batch request list run() writes before its ONE call -- a JSON list of exactly 20 {folder, bloomberg} objects, one per effectively-EVIDENCED row, in the request's own sorted order (population 60, evidenced 20, all 20 carry both root and cc so all 20 are placed in the batch -- called == evidenced, as the amendment's own text predicts). Never touched by add_security itself in this worker's turn (the fake `call` reads it, makes no real call).",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
+      "output_evidence": "....................                                                     [100%]\n20 passed in 0.77s",
+      "denominator": "20 of 20 tests passed, 0 failed (18 pre-amendment-3 + 2 new ISSUER AMENDMENT 3 tests); run twice back to back this session, identical pass count both times",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --dry-run --as-of 2026-09-24 2>&1 | tail -3 -- expect population ([1-9]\\d*) evidenced \\d+ ambiguous [1-9]\\d* disagreement [1-9]\\d* other \\d+ called \\d+ registered \\d+ already_registered \\d+ refused \\d+ errors \\d+ bloomberg_calls 0 batch_calls 1 pool_puts 0 sum \\1\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --dry-run --as-of 2026-09-24 2>&1 | tail -3",
+      "output_evidence": "skip Workday WDAY US | NO_EVIDENCE | no report states a ticker in the (Ticker: ...) form\nskip Zoetis ZTS US | NO_EVIDENCE | no report states a ticker in the (Ticker: ...) form\npopulation 60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 batch_calls 1 pool_puts 0 sum 60",
+      "denominator": "population 60 of 60; evidenced 20 + ambiguous 2 + disagreement 1 + other 37 = 60; called 20 = evidenced 20 (C = E, as the amendment predicts -- no root/cc-less EVIDENCED row exists in the real backlog); ambiguous 2 >= 1 and disagreement 1 >= 1 both satisfied; bloomberg_calls 0 of 0 real calls made; batch_calls 1 (exactly one --batch call made) and pool_puts 0 (the scripted fake's own BATCH: line, since the dry-run's fake never mints a real pool); run 3 times across this session (twice back to back plus once mid-review), byte-identical totals line every time and unchanged from amendments 1/2 on every field except the two new trailing tokens, per the amendment's own text; regex verified directly against the captured 3-line tail with Python re.search: True",
+      "expect": "population ([1-9]\\d*) evidenced \\d+ ambiguous [1-9]\\d* disagreement [1-9]\\d* other \\d+ called \\d+ registered \\d+ already_registered \\d+ refused \\d+ errors \\d+ bloomberg_calls 0 batch_calls 1 pool_puts 0 sum \\1\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --fire --as-of 2026-09-24 2>&1 | tail -3 -- expect (?s)REFUSED: --fire requires OPAL_INDUCTION_FIRE=1.*bloomberg_calls 0\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --fire --as-of 2026-09-24 2>&1 | tail -3",
+      "output_evidence": "warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\nREFUSED: --fire requires OPAL_INDUCTION_FIRE=1 and today's --as-of; this is the issuer's drain act under R-16 V2 / R-21 / C-NO-VENDOR-CALL v0.5\nbloomberg_calls 0",
+      "denominator": "1 of 1 --fire invocation refused (OPAL_INDUCTION_FIRE unset in this shell); rc 3; regex verified directly against the captured 3-line tail with Python re.search under re.DOTALL: True; unaffected by ISSUER AMENDMENT 3 (the gate runs before rows_for_run/run()'s batching are ever reached -- identical code path to amendments 1/2)",
+      "expect": "(?s)REFUSED: --fire requires OPAL_INDUCTION_FIRE=1.*bloomberg_calls 0\\b",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/d5/mutant_control.py (not committed) drives an 8-row fixture, including America Movil AXMB MM (raw EVIDENCED, folder/report disagreement), through the SAME scripted `call` (raises AssertionError on any folder it has no branch for) via THREE loops: MUTANT 1 is run()'s row loop with the EVIDENCED-only guard removed entirely; MUTANT 2 is run() AS IT WAS BEFORE AMENDMENT 1 (calls every raw-EVIDENCED row directly, never computing effective_state_and_reason); FIX is the real induction_run.run() at ISSUER AMENDMENT 3, batching through the --batch shape -- the scripted `call` reads the batch file and matches on folder regardless of the per-request call mechanics, so this control still exercises the disagreement guard end to end under the new batching path.",
+      "expected": "MUTANT 1 and MUTANT 2 both call/batch America Movil AXMB MM, which the scripted call has no branch for, so both raise AssertionError. FIX batches exactly the 5 AGREEING EVIDENCED rows in ONE call, reclassifies America Movil to DISAGREEMENT and skips it, skips the 2 non-evidenced rows, never raises.",
+      "observed": "FIX (real run()): called=5 disagreement=1 ok=True. MUTANT 1 (no EVIDENCED guard): raised AssertionError: unexpected folder 'America Movil AXMB MM' called. MUTANT 2 (pre-amendment-1, no disagreement check): raised AssertionError: unexpected folder 'America Movil AXMB MM' called. MUTANT1_RAISED=True MUTANT2_RAISED=True FIX_OK=True CONTROL_FIRED_AS_EXPECTED=True (run twice, identical both times, re-verified after ISSUER AMENDMENT 3).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's test file run twice back to back; AC2's --dry-run invocation run 3 times across this session; AC3's --fire invocation run twice back to back; .scratch/d5/mutant_control.py run twice back to back -- all AFTER ISSUER AMENDMENT 3.",
+      "observed": "pytest: 20 passed every run (0.77s, plus one earlier run at commit build time -- pass count identical both times). --dry-run: 'population 60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 batch_calls 1 pool_puts 0 sum 60' byte-identical every run, and unchanged from the pre-amendment-3 measurement on every field but the two new trailing tokens. --fire: identical REFUSED line and 'bloomberg_calls 0' both runs. mutant_control.py: 'MUTANT1_RAISED=True MUTANT2_RAISED=True FIX_OK=True CONTROL_FIRED_AS_EXPECTED=True' both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any edit under lib/research/identity/",
+      "reason": "Section 1: 'no edit under lib/research/identity/ (another lane's surface; imported, never changed)'. add_security.py, crosswalk.py: read-only; git diff HEAD -- lib/research/identity is empty against the pre-cell HEAD. The drained --batch grammar on add_security.py is the ISSUER's own precondition-3 build (@8c75f4f90d), consumed here as read-only, never edited by this worker."
+    },
+    {
+      "item": "Any real Bloomberg or S3 call, in any mode",
+      "reason": "BOUNDS: 'NEVER run the real add_security in any mode -- its --dry-run STILL CALLS Bloomberg'. --dry-run here uses an injected fake call that makes no call at all (bloomberg_calls 0 by construction); --fire is refused before rows_for_run/run()'s batching/add_security.main are ever reached (OPAL_INDUCTION_FIRE unset in this shell). This worker turn never exercises the permitted --fire branch, nor the ONE real --batch call it would make -- the issuer does, once, per integrations/bloomberg/READ_HERE.md."
+    },
+    {
+      "item": "A stored induction_request.json read as this cell's population source",
+      "reason": "Section 1: 'the induction request rebuilt FRESH ... never a stored induction_request.json'. rows_for_run(root) calls induction_request.measure_population(root) + build_request fresh every invocation, unmodified by ISSUER AMENDMENT 3."
+    },
+    {
+      "item": "An S3 write, an ingest re-run, or any change to registrations.json/the crosswalk pool from this worker's own invocations",
+      "reason": "Section 1: 'no S3 write; no ingest re-run (the issuer runs the existing ingest after the fire)'. --dry-run's fake call writes nothing (not even the batch file's own contents are read by anything beyond the fake); --fire is refused before any write path is reached."
+    },
+    {
+      "item": "More than ONE call to `call` per run, under any input shape",
+      "reason": "ISSUER AMENDMENT 3, verbatim: 'run() makes EXACTLY ONE call per run'. run() collects every effectively-EVIDENCED row into a single batch request list and invokes `call` at most once (never once when the list is empty); proven by test_run_makes_no_call_when_no_effectively_evidenced_rows and test_make_fake_call_makes_no_call_when_batch_empty (a `call` that raises on any invocation, never reached) and by the AC2 measurement's own batch_calls 1 token against 20 evidenced rows."
+    },
+    {
+      "item": "Guessing a per-request outcome when the batch output cannot be split into exactly one block per request",
+      "reason": "ISSUER AMENDMENT 3, verbatim: 'a block count that differs from the request count is an error outcome on every unassigned request, never a guess'. Proven by test_run_block_count_mismatch_errors_every_unassigned_request: every request in a mismatched batch reads outcome=error with a reason naming the exact counts, never a best-effort assignment."
+    },
+    {
+      "item": "Reclassifying any row other than a raw-EVIDENCED one under the disagreement rule",
+      "reason": "ISSUER AMENDMENT 1, verbatim: 'An EVIDENCED row whose report ticker ROOT differs ... is state DISAGREEMENT'. effective_state_and_reason() returns a non-EVIDENCED row's own state and reason unchanged, unaffected by ISSUER AMENDMENT 3."
+    },
+    {
+      "item": "Placing a folder-alone or bloomberg-alone request in the batch, under any circumstance including a defensive/malformed row",
+      "reason": "ISSUER AMENDMENT 2, verbatim: 'NEVER --folder alone', now realised as 'every batch request carries both folder and bloomberg'. A row with no usable root/cc is refused before ever being placed in the batch request list -- proven by test_run_refuses_rootless_row_before_ever_batching_it, whose `call` raises if it is ever invoked and never does."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W2-S4: one --dry-run over the real library, taken right after ISSUER AMENDMENT 2 landed, read a transient population of 40 (Copa/Uber EVIDENCED, ambiguous 0) that reverted to the stable population-60/ambiguous-2 shape on every read before and after it (5 re-reads total) -- traced to the live, read-only identity/crosswalk substrate, never to this cell's code. Not re-triggered under ISSUER AMENDMENT 3: all 3 dry-run measurements this session read the stable population-60 shape."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1)",
+      "invocation": "python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 20 passed, 0 failed (run twice, identical pass count)"
+    },
+    {
+      "tool": "induction_run CLI --dry-run (AC2)",
+      "invocation": "python -m lib.research.corpus.induction_run --dry-run --as-of 2026-09-24",
+      "result": "rc 0; population 60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 batch_calls 1 pool_puts 0 sum 60 (byte-identical across 3 runs this session)"
+    },
+    {
+      "tool": "induction_run CLI --fire (AC3)",
+      "invocation": "python -m lib.research.corpus.induction_run --fire --as-of 2026-09-24",
+      "result": "rc 3; REFUSED: --fire requires OPAL_INDUCTION_FIRE=1 and today's --as-of ...; bloomberg_calls 0 (identical on a second run)"
+    },
+    {
+      "tool": "whole-package pytest (BOUNDS-required, not a criterion)",
+      "invocation": "python -m pytest lib/research/corpus -q -p no:cacheprovider",
+      "result": "rc 0; 256 passed"
+    },
+    {
+      "tool": "py_compile (hygiene, ad hoc, not committed)",
+      "invocation": "python -m py_compile lib/research/corpus/induction_run.py",
+      "result": "compiles clean, rc 0"
+    },
+    {
+      "tool": ".scratch/d5/mutant_control.py (not committed -- scratch control harness, re-run this session against the batched shape)",
+      "invocation": "python .scratch/d5/mutant_control.py",
+      "result": "rc 0; FIX (real run()): called=5 disagreement=1 ok=True; MUTANT 1 and MUTANT 2 both raised AssertionError; CONTROL_FIRED_AS_EXPECTED=True (run twice, identical, re-verified after ISSUER AMENDMENT 3)"
+    }
+  ]
+}

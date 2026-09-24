@@ -1,0 +1,141 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-rm-5",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rm-5.the-provenance-disclosure.md",
+  "group": "C",
+  "vintage_commit": "7eaf2d7dae8d10fcadbd88a8970a9f21e216e26b"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "7eaf2d7dae8d10fcadbd88a8970a9f21e216e26b",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rm-5.the-provenance-disclosure.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~144",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/types.ts",
+   "kind": "frontend_component",
+   "commit_or_etag": "da76356a90af9eaf053f360de4fd2c4d735b0405",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AMGT-rm-5 limb 1 (R-57): `dated?: boolean` and `requested_as_of?: string` added directly to `RankingSet`, with the doc comment rl-8's local augmentation carried (`dated` is the server's own boolean, never itself a date; `as_of_date` is the day it IS dated as). Additive only -- no other field on `RankingSet` moved.",
+   "introduces": [
+    "dated?: boolean",
+    "requested_as_of?: string"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/components/LeadPanel.tsx",
+   "kind": "frontend_component",
+   "commit_or_etag": "da76356a90af9eaf053f360de4fd2c4d735b0405",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Limb 1: `RankingDateFields`/`DatedRankingSet` removed; `sourceFooterContent` now takes `RankingSet | undefined`. Limb 2 (ADJUDICATION_v47 s.2.4): `sourceDisclosureText` split out of `sourceFooterContent` so the 'this list is older than the date requested' clause is no longer appended to the same string; new `SourceCaption` component renders the generation line and (when present) the disclosure line as TWO stacked block elements, each `whitespace-normal break-words`, none carrying truncate/whitespace-nowrap/overflow-hidden. Because `PanelFooter`'s `content` prop is typed `string` (read-only file, no ReactNode escape hatch), `SourceCaption` is rendered entirely through `leftContent` (a `React.ReactNode` slot) alongside `ResolutionNote`; `content` is passed as `\"\"`. Module header comment and the AMGT-rl-8 block comment updated to match.",
+   "introduces": [
+    "sourceDisclosureText",
+    "data-source-caption=\"generation\"",
+    "data-source-caption=\"disclosure\""
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs",
+   "kind": "test",
+   "commit_or_etag": "da76356a90af9eaf053f360de4fd2c4d735b0405",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2's instrument: three new checks over the ACTUAL rendered markup -- source_caption_wraps (no truncate/whitespace-nowrap/overflow-hidden anywhere in this cell's own caption slice, both lines carry the wrap-safe class pair), disclosure_own_line (the disclosure div is a sibling block of the generation-line div, never appended inside it), caption_facts_unchanged (generation id, as_of_date, requested_as_of all present verbatim inside the caption's own generation-line element). All 12 pre-existing checks (band_is_lead_panel .. empty_state_designed_in_band) unchanged and still pass. Was CHECKS-OK 12 of 12; now CHECKS-OK 15 of 15.",
+   "introduces": [
+    "source_caption_wraps",
+    "disclosure_own_line",
+    "caption_facts_unchanged"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "LIMB 1 -- THE FIELDS TYPED WHERE THEY RIDE: both fields present on RankingSet in types.ts (the two grep lines printed, inside the RankingSet interface), the local augmentation gone from LeadPanel.tsx (count 0), and tsc clean (tsc=0)",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; grep -n \"dated?: boolean\\|requested_as_of?: string\" src/pages/SecurityAnalysis/types.ts &amp;&amp; grep -c \"RankingDateFields\\|DatedRankingSet\" src/pages/SecurityAnalysis/components/LeadPanel.tsx; npx tsc -b --noEmit; echo \"tsc=$?\"",
+   "output_evidence": "'203:  dated?: boolean' / '207:  requested_as_of?: string' (both lines inside the RankingSet interface, which opens at types.ts:181 and closes at :212 -- verified by reading the interface span) / '0' (grep -c count on LeadPanel.tsx) / no tsc diagnostics printed / 'tsc=0'.",
+   "denominator": "2 of 2 field greps printed; 1 of 1 augmentation-count line read 0; 1 of 1 tsc run rc=0.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "LIMB 2 -- THE CAPTION WRAPS AND THE DISCLOSURE HAS ITS OWN LINE, proven on the actual LeadPanel through react-dom/server over the fixture whose dated flag is true and whose as_of_date precedes requested_as_of: the harness gains checks source_caption_wraps (the caption element and every wrapper this cell owns carry no truncate / whitespace-nowrap / overflow-hidden class -- read off the rendered markup), disclosure_own_line (the \"older than the date requested\" clause renders in its own block element beneath the generation caption), and caption_facts_unchanged (generation id, as_of_date and requested_as_of all present verbatim); CHECKS-OK n of n with the three new checks named, no WRONG-WAY line",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs",
+   "output_evidence": "Fixture (uiContractFixtures.json, /api/scoped/amgt/lead-panel/rankings/trending/chatter): as_of_date 2026-09-23, requested_as_of 2026-09-24, dated true -- as_of_date precedes requested_as_of as required. Rendered generation-line element verbatim: '<div data-source-caption=\"generation\" class=\"whitespace-normal break-words\">Source: generation 20260923T100026Z-d09ee37a8f3b | state COMPLETE | 2 row(s) committed | coverage vintage pool:universe/v1/2026-09-16.json#as_of=2026-09-16 -- dated 2026-09-23 (requested 2026-09-24)</div>', immediately followed by its own sibling block '<div data-source-caption=\"disclosure\" class=\"whitespace-normal break-words\">this list is older than the date requested, shown as such rather than silently</div>'. 'CHECK source_caption_wraps = true (expected true)', 'CHECK disclosure_own_line = true (expected true)', 'CHECK caption_facts_unchanged = true (expected true)', plus all 12 pre-existing checks true. 'CHECKS-OK 15 of 15'. No CHECKS-WRONG-WAY line printed.",
+   "denominator": "15 of 15 checks PASS (12 pre-existing + 3 new named above); 0 of 15 WRONG-WAY.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "NOTHING ELSE MOVED: the census over the three files reads FILES 3 TOTAL 0, and the shared tabs harness reads CHECKS-OK 20 of 20 with no WRONG-WAY line (as at the cut)",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node scripts/ui-class-census.mjs src/pages/SecurityAnalysis/types.ts src/pages/SecurityAnalysis/components/LeadPanel.tsx src/pages/SecurityAnalysis/components/GenerationCaption.tsx &amp;&amp; node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs",
+   "output_evidence": "'src\\\\pages\\\\SecurityAnalysis\\\\components\\\\GenerationCaption.tsx idiom=0 size=0 weight=0 radius=0 shadow=0 total=0' / 'src\\\\pages\\\\SecurityAnalysis\\\\components\\\\LeadPanel.tsx idiom=0 size=0 weight=0 radius=0 shadow=0 total=0' / 'src\\\\pages\\\\SecurityAnalysis\\\\types.ts idiom=0 size=0 weight=0 radius=0 shadow=0 total=0' / 'FILES 3 TOTAL 0'. tabs.harness.cjs: 'CHECK short_read_refused true (expected true)', 'CHECK short_read_control_served true (expected true)', 'CHECK generation_captions_present true (expected true)', ... 'CHECKS-OK 20 of 20', no CHECKS-WRONG-WAY line.",
+   "denominator": "FILES 3 (of 3 named) TOTAL 0; tabs.harness.cjs 20 of 20 checks PASS, 0 of 20 WRONG-WAY.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC2's own new predicate (source_caption_wraps) must be load-bearing, not vacuous. LeadPanel.tsx's generation-line element (`git show HEAD:` saved first, for an exact restore) had `truncate data-mutant-control` appended to its `whitespace-normal break-words` className, then AC2's invocation was re-run against the mutated file.",
+   "expected": "leadPanelPattern.harness.cjs's source_caption_wraps flips from true to false (the check's forbidden-class regex matches the injected `truncate` token inside the caption slice it reads); every other check stays at its prior value (the mutation touches one element's className only).",
+   "observed": "FIRED AS EXPECTED: 'CHECK source_caption_wraps = false (expected true)', 'CHECKS-WRONG-WAY source_caption_wraps' -- the only check that flipped. The working file was then restored via the Edit tool to remove the injected classes, re-verified with `git diff --numstat` (62 insertions/29 deletions on LeadPanel.tsx, matching the pre-mutant diff exactly, no residual hunk), and AC1/AC2/AC3 re-run in full immediately after: AC1 tsc=0, AC2 CHECKS-OK 15 of 15, AC3 FILES 3 TOTAL 0 / tabs CHECKS-OK 20 of 20 -- identical to the pre-mutant run.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC2's invocation (leadPanelPattern.harness.cjs) run three times in this session: once before the mutant, once during the mutant (expected flip), once after the revert. AC1 and AC3 each run twice (mid-session and as the final captured run above).",
+   "observed": "STABLE. Pre-mutant and post-revert AC2 runs are identical: CHECKS-OK 15 of 15, same 15 CHECK lines, same rendered HTML for universeHtml/overlaySelectedHtml/emptyHtml byte-for-byte (compared by eye against the captured JSON of each run -- both carry the same generation-id/date strings and class lists). AC1's tsc=0 and grep line numbers (203/207) identical on both runs. AC3's FILES 3 TOTAL 0 and tabs CHECKS-OK 20 of 20 identical on both runs.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "portal/src/ui/components/panels/PanelFooter.tsx -- not edited",
+   "reason": "Bound 2 / issuer note 2: read-only for this cell (rm-2's file). Its `content` prop stays typed `string`; this cell's fix routes the caption entirely through `leftContent` instead, which needed no change there. The `flex-shrink-0` shape on its content-side wrapper (the likely actual mid-word-clip mechanism) is surfaced as surprise row AMGT_RESAPP-W144-S1 for rm-2 rather than touched."
+  },
+  {
+   "item": "portal/App.tsx, portal/index.css, portal/src/ui/** -- not touched",
+   "reason": "Bound 2: explicitly read-only for this cell. No criterion required a change there and none was made."
+  },
+  {
+   "item": "The route/query key the /rankings payload is served on -- unchanged",
+   "reason": "Bound 1 (C-PRESENTATION-ONLY): dated and requested_as_of are ALREADY served (R-57); this cell types and renders them, it does not move the wire."
+  }
+ ],
+ "surprises": [
+  "AMGT_RESAPP-W144-S1: PanelFooter.tsx's content prop is typed string (no ReactNode escape hatch) and its content-side wrapper carries flex-shrink-0 whenever leftContent is truthy -- the likely actual mechanism behind ADJUDICATION_v47 s.2.4's mid-word clip, though not a literal truncate/nowrap/overflow-hidden class name so it does not match this cell's own bounds text verbatim. This cell's fix routes entirely around it (content=\"\", full caption through leftContent), so it is unexercised here; hazard_standing ARMED against a future PanelFooter caller, disarm_owner rm-2 (PanelFooter.tsx's owner), disposition UNDER_INVESTIGATION."
+ ],
+ "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface beyond the named files, the project's surprise-channel investigation file (one row appended, AMGT_RESAPP-W144-S1) and this deliverables folder. Portal work: LOCAL commit da76356a90af9eaf053f360de4fd2c4d735b0405 on branch wk-AMGT_RESAPP-144-portal (3 files changed, 122 insertions(+), 29 deletions(-)), built from the merged round-38 issuance point (portal DEV 1f1555d2 named in the spawn prompt); never pushed, portal remote untouched. Outer worktree: C:/tmp/wk-amgt-38-144 on branch wk-AMGT_RESAPP-144, cut from CLOUD tip faaf80c5e797f87f98342b4039857c6a8b2a28a3 (carries round 38's issuance 7eaf2d7dae). This instance and the outer commit carrying it, the portal gitlink move and the investigation row are committed together next, per WHEN YOU ARE DONE step 5. A full `tsc -b --noEmit` ran clean, rc=0, across the whole portal source tree after every edit in this cell.",
+ "compiler_tools": [
+  {
+   "tool": "npx tsc -b --noEmit (whole-portal project build, AC1)",
+   "invocation": "cd portal && npx tsc -b --noEmit",
+   "result": "rc=0, no diagnostics, both before and after the mutant-control round-trip."
+  },
+  {
+   "tool": "node driving leadPanelPattern.harness.cjs (AC2, actual LeadPanel + react-dom/server over a real fixture)",
+   "invocation": "cd portal && node src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs",
+   "result": "CHECKS-OK 15 of 15 (12 pre-existing + 3 new: source_caption_wraps, disclosure_own_line, caption_facts_unchanged), rc=0."
+  },
+  {
+   "tool": "node driving ui-class-census.mjs + tabs.harness.cjs (AC3)",
+   "invocation": "cd portal && node scripts/ui-class-census.mjs src/pages/SecurityAnalysis/types.ts src/pages/SecurityAnalysis/components/LeadPanel.tsx src/pages/SecurityAnalysis/components/GenerationCaption.tsx && node src/pages/SecurityAnalysis/__harness__/tabs.harness.cjs",
+   "result": "FILES 3 TOTAL 0; tabs.harness.cjs CHECKS-OK 20 of 20; rc=0 chained."
+  },
+  {
+   "tool": ".tools/safe-commit.sh (portal commit)",
+   "invocation": "cd portal && bash ../.tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~144 <0.9.0_WK_AMGT_RESAPP~144@opal.agent>\" -F ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~144/portal_commit_msg.txt -- src/pages/SecurityAnalysis/types.ts src/pages/SecurityAnalysis/components/LeadPanel.tsx src/pages/SecurityAnalysis/__harness__/leadPanelPattern.harness.cjs",
+   "result": "[risk-reflex] WARN/HOLD on types.ts naming-collision citations (unrelated auth-handler/exporter types.ts files named in an OTP-TTL change-management note -- read, not applicable to this cell's RankingSet field addition); [commit-gate] WARN 0 of 3 checked (frontend suffixes fall through by design); [naming-gate] PASS 0 graded; [to-pipeline-gate] OK (no task-order files in this commit); commit da76356a90af9eaf053f360de4fd2c4d735b0405, author 0.9.0_WK_AMGT_RESAPP~144, '3 files changed, 122 insertions(+), 29 deletions(-)'; [msg-verify] MATCH len=2294."
+  },
+  {
+   "tool": "proof-of-spec-check.py -- THIS WORKTREE'S OWN copy, run from inside C:/tmp/wk-amgt-38-144",
+   "invocation": "PYTHONPATH=\"$(pwd)\" python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~144/AMGT_RESAPP.TO-AMGT-rm-5.the-provenance-disclosure.proof_of_spec.json AC1,AC2,AC3",
+   "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+  }
+ ]
+}

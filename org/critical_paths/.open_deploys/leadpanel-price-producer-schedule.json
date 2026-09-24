@@ -1,0 +1,49 @@
+{
+  "slug": "leadpanel-price-producer-schedule",
+  "title": "Lead Panel PRICE producer: add an ISOLATED price leg (rc 80-83, disjoint) to scheduled_daily_pull.cmd so the box-side price_axis_pull.py runs on the existing OPAL_BBGTML_daily_pull 07:00 ET schedule. Producer already works (QA fire 2026-09-24T09:52Z landed as-of 2026-09-23, 64/64 rows, 2/2 pointers); ONLY the trigger was absent. Mandate: org/tier1_exec/1.0.0_SA_CTO/deliverables/AMGT_COMPLETION_20260923/BG_BBGTERMINAL_PRICE_PRODUCER.md (B1-B4). Site-Z scheduled tasks run the WORKING TREE, so the .cmd edit IS the deploy.",
+  "author": "0.0.3_BG_BBGTerminal",
+  "status": "OPEN",
+  "opened_at": "2026-09-24T09:55:26.199712+00:00",
+  "window_hours": 3.0,
+  "entry_path": "org/critical_paths/change_management/20260924T0955Z_leadpanel-price-producer-schedule_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "git",
+      "target": "scheduled_daily_pull.cmd :price_leg inserted between :cons_leg and :prune, own RC_PRICE, exit codes 80-83 disjoint from models 0/1/9/20/30/40/50, ETF 60-63, constituents 70-73",
+      "proof_required": "file on disk + commit hash (LOCAL; this seat commits and does not push)",
+      "proof": "Committed by the named integrator 0.0.0_AB_MSTR~Z (this seat has NO OWNPATHS lane by design; safe-commit's refusal 'agent=0.0.3_BG_BBGTerminal not in permitted_agents' for lane ANY_EXEC_OR_AE was CORRECT and was reproduced by the integrator as its own negative control before committing). HASH 8d235eadb1, 4 files +257/-2: integrations/bloomberg/pipeline/scheduled_daily_pull.cmd, org/critical_paths/.open_deploys/leadpanel-price-producer-schedule.json, org/critical_paths/change_management/20260924T0955Z_leadpanel-price-producer-schedule_deploy_completion.md (the first three in ONE commit as this tool requires), plus LEADPANEL_PRICE/STATUS.md. PUSH STATE: on origin/CLOUD @64df5daa18 (ls-remote read ~10:2xZ by the integrator), which carries 8d235eadb1. GIT_COMMIT_AUTHOR_OVERRIDE was NOT used. Committed state now equals deployed state -- material here because site-Z scheduled tasks run the WORKING TREE, so the .cmd edit was already live before the commit; the integrator confirms its remaining integrate acts are fetch/fast-forward/push, none of which rewrite the working tree.",
+      "closed_at": "20260924T102252Z"
+    },
+    {
+      "id": "L2",
+      "kind": "verify",
+      "target": "control flow re-derived at source across ALL reach paths: price leg reached from cons success, cons failure and :cons_missing; NOT reached from :precond_down (rc 50) nor from a pull failure with DAPI_OK=0; %RC% never touched",
+      "proof_required": "path enumeration read back from the SAVED file, not from intent",
+      "proof": "CONTROL FLOW RE-DERIVED FROM THE SAVED FILE (not from intent): labels+gotos enumerated at scheduled_daily_pull.cmd -- all THREE constituents outcomes reach :price_leg (:288 success, :294 failure, :299 :cons_missing via an EXPLICIT goto, never fall-through); all FOUR price arms reach :prune (:347 :353 :358 :363 :368 -> :370); :precond_down (:107->:115) and a pull failure with DAPI_OK=0 (:147) still bypass every landing leg. %RC% is never assigned after :cons_leg (grep over :279-400 = 0 hits). EXERCISED 6 of 6 arms in an isolated harness (scratchpad/exercise_price_leg.py, stub producer, no Bloomberg/S3/DynamoDB): rc0->RC_PRICE=0, rc3->81, rc1->82, rc62->82, script-missing->80, interpreter-missing->83, and the models-chain %RC% sentinel 7777 survived 6 of 6. NOTE the harness's own first cut was WRONG and is recorded: index(':price_leg') matched the substring inside 'goto :price_leg' and produced a self-looping extract that emitted no stdout; anchored on the line-start label it passes. File integrity: 17702->21406 bytes, CRLF 304->375, bare LF 0, non-ascii byte delta 0.",
+      "closed_at": "20260924T101238Z"
+    },
+    {
+      "id": "L3",
+      "kind": "activation",
+      "target": "the 07:00 ET OPAL_BBGTML_daily_pull scheduled fire executes the PRICE leg",
+      "proof_required": "the run log's PRICE LEG EXIT CODE line + Get-ScheduledTaskInfo LastRunTime/LastTaskResult",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "verify",
+      "target": "a PRICE generation dated the trading-day frontier, written BY THE SCHEDULED FIRE and not by the ad-hoc QA fire",
+      "proof_required": "_CURRENT pointer read: as_of_date at frontier AND generation_id/run_id distinct from the 09:52Z ad-hoc run R20260924T095217Z",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260924T095526Z OPENED by 0.0.3_BG_BBGTerminal with 4 leg(s)",
+    "20260924T101238Z LEG L2 closed: CONTROL FLOW RE-DERIVED FROM THE SAVED FILE (not from intent): labels+gotos enumerated at scheduled_daily_pull.cmd -- al",
+    "20260924T102252Z LEG L1 closed: Committed by the named integrator 0.0.0_AB_MSTR~Z (this seat has NO OWNPATHS lane by design; safe-commit's refusal 'agen"
+  ],
+  "last_red_at": null
+}

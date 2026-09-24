@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rm-1.the-instrument-rekeyed",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rm-1.the-instrument-rekeyed.md",
+    "group": "C",
+    "vintage_commit": "7eaf2d7dae8d10fcadbd88a8970a9f21e216e26b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "7eaf2d7dae8d10fcadbd88a8970a9f21e216e26b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rm-1.the-instrument-rekeyed.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~140",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/scripts/ui-measure.mjs",
+      "kind": "frontend_component",
+      "commit_or_etag": "b51330c5834e89e5f29e40605d9c12b349d48939",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Re-keyed classifier: band = .dark-band class marker OR computed background matching the RESOLVED --bg-band custom property (resolved off document.body, see surprise AMGT_RESAPP-W140-S1 for why not document.documentElement as literally named); new stripContainers field (the OLD hard-coded rgb(10,23,51) test, renamed); purpleFills now excludes the C8 identity set (page-title rule, sidebar active item, sidebar avatar), counted separately as identityAccents; new clippedTextBlocks/clippedTextSamples (leaf text-bearing elements overflowing under overflow:hidden|clip or text-overflow:ellipsis); new --self-test --fixture mode proving all four classifiers on a static fixture with a positive and negative arm. --scope <css> unchanged (generic selector; main/body are just selector strings).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/scripts/ui-contract-check.mjs",
+      "kind": "frontend_component",
+      "commit_or_etag": "b51330c5834e89e5f29e40605d9c12b349d48939",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--scope main|body added: the check now ALWAYS measures both scopes per state (main via document.querySelector('main'), body via document.querySelector('body')) and prints BOTH tables -- the chosen --scope (default main) is GRADED and printed first (drives exit code), the other is informational and printed beneath -- plus a main-vs-body scope-comparison table (stripContainers, identityAccents) used by AC3's discrimination proof. Two new informational columns (identityAccents, stripContainers, clippedTextBlocks) appended after the eight original predicate columns, which are unchanged in name/order/threshold. --states-sweep block (AMGT-rl-9) untouched.",
+      "artifact_covered_by": [
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/tests/uiMeasureFixture.html",
+      "kind": "test",
+      "commit_or_etag": "b51330c5834e89e5f29e40605d9c12b349d48939",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW static fixture: one Panel-style band (class=dark-band, CSS rule background: hsl(var(--bg-band))), one strip (inline style background: hsl(var(--bg-header))), one interactive action-fill button, one C8 identity rule (class w-[3px]) and one C8 avatar circle (inside <aside>) both filled with the same action-primary colour, one clipped text block (overflow:hidden + white-space:nowrap narrower than its content). The self-test's negative arm is built by string-transforming THIS file (class=\"dark-band\" removed, the strip's inline var(--bg-header) recoloured), never a second hand-authored file.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE CLASSIFIERS PROVEN ON A FIXTURE DOM (a static page you write under __harness__/tests/ carrying: one Panel-style div with class dark-band and background var(--bg-band); one strip div with background var(--bg-header); one interactive button filled with var(--semantic-action-primary); one 3px identity rule and one avatar circle filled with the same colour; one text block that overflows its overflow-hidden container; body-level chrome outside main): prints bandContainersTopLevel 1, stripContainers 1, purpleFills 1, identityAccents 2, clippedTextBlocks 1 with its sample, and SELF-TEST OK -- and a NEGATIVE ARM (the same fixture with the dark-band class removed and the strip recoloured) prints bandContainersTopLevel 0, stripContainers 0; exit 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node scripts/ui-measure.mjs --self-test --fixture src/pages/SecurityAnalysis/__harness__/tests/uiMeasureFixture.html",
+      "output_evidence": "POSITIVE bandContainersTopLevel=1 stripContainers=1 purpleFills=1 identityAccents=2 clippedTextBlocks=1 clippedSample={\"tag\":\"DIV\",\"head\":\"This provenance-style caption text is intentionally longer t\",\"tail\":\"than its clipped box\",\"fullLen\":79}\nNEGATIVE bandContainersTopLevel=0 stripContainers=0\nSELF-TEST OK\nexit=0",
+      "denominator": "7 of 7 assertions matched: POSITIVE bandContainersTopLevel=1, stripContainers=1, purpleFills=1, identityAccents=2, clippedTextBlocks=1 (sample present: DIV, head/tail of the clipped caption text); NEGATIVE bandContainersTopLevel=0, stripContainers=0; SELF-TEST OK; exit 0",
+      "status": "PASS",
+      "expect": "POSITIVE\\ bandContainersTopLevel=1\\ stripContainers=1\\ purpleFills=1\\ identityAccents=2\\ clippedTextBlocks=1.*NEGATIVE\\ bandContainersTopLevel=0\\ stripContainers=0.*SELF\\-TEST\\ OK",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE SIX STATES RE-MEASURED INSIDE MAIN, both tables printed: for scope=main every state reads bandContainersTopLevel equal to the Panel-marker count (the identity header on the five Security-mode states, the Lead Panel on list -- print the value, and a state reading other than 1 is REPORTED with the element, never tuned), stripContainers printed per state, purpleFills counting action fills only with identityAccents printed beside it, clippedTextBlocks printed per state with samples (list's provenance caption expected among them); the scope=body table printed beneath with the OLD numbers (the sidebar counted) so the two reads sit side by side; a PNG larger than 20 KB and a JSON per state; a FAIL cell on the graded predicates is reported with its value and left standing (the fixes are other cells'); exit reflects the graded main table",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node scripts/ui-contract-check.mjs --port 5182 --scope main --out ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~140/contract-check-rekeyed; echo \"exit=$?\"",
+      "output_evidence": "\n== scope=main (GRADED) ==\nstate\tbandContainersTopLevel\tfonts\tweights\tsizes\tradii\tshadows\tlowContrastChars\tpurpleFills\tidentityAccents\tstripContainers\tclippedTextBlocks\nlist\tPASS\tPASS\tFAIL [300,600]\tPASS\tFAIL [\"8px\"]\tPASS\tPASS\tPASS\t1\t2\t0\nthesis\tPASS\tPASS\tFAIL [300,600]\tFAIL [10]\tFAIL [\"8px\"]\tPASS\tPASS\tPASS\t1\t1\t0\nexec\tPASS\tPASS\tFAIL [300,600]\tPASS\tFAIL [\"8px\"]\tPASS\tPASS\tPASS\t1\t1\t0\npeers\tPASS\tPASS\tFAIL [300]\tPASS\tPASS\tPASS\tPASS\tPASS\t1\t0\t0\nmodel\tPASS\tPASS\tFAIL [300,600]\tFAIL [10]\tFAIL [\"8px\"]\tPASS\tPASS\tPASS\t1\t1\t0\nposture\tPASS\tPASS\tFAIL [300,600]\tPASS\tFAIL [\"8px\"]\tPASS\tPASS\tPASS\t1\t1\t0\n\n== scope=body (informational) ==\nstate\tbandContainersTopLevel\tfonts\tweights\tsizes\tradii\tshadows\tlowContrastChars\tpurpleFills\tidentityAccents\tstripContainers\tclippedTextBlocks\nlist\tPASS\tPASS\tFAIL [300,500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t3\t0\nthesis\tPASS\tPASS\tFAIL [300,500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t2\t0\nexec\tPASS\tPASS\tFAIL [300,500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t2\t0\npeers\tPASS\tPASS\tFAIL [300,500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t1\t0\nmodel\tPASS\tPASS\tFAIL [300,500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t2\t0\nposture\tPASS\tPASS\tFAIL [300,500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t2\t0\n\n== scope comparison (main vs body) ==\nstate\tstripContainers[main]\tstripContainers[body]\tidentityAccents[main]\tidentityAccents[body]\nlist\t2\t3\t1\t3\nthesis\t1\t2\t1\t3\nexec\t1\t2\t1\t3\npeers\t0\t1\t1\t3\nmodel\t1\t2\t1\t3\nposture\t1\t2\t1\t3\n\nSTATES: 6 of 6 run\nPNG[list]: 70287 bytes\nPNG[thesis]: 361886 bytes\nPNG[exec]: 243236 bytes\nPNG[peers]: 217137 bytes\nPNG[model]: 259346 bytes\nPNG[posture]: 284084 bytes\nRESULT: FAIL (at least one graded cell in scope=main read FAIL)\nexit=1",
+      "denominator": "6 of 6 states run; scope=main bandContainersTopLevel reads PASS (value 1) on 6 of 6 states (list/thesis/exec/peers/model/posture); scope=main weights FAIL on 6 of 6 and radii FAIL on 5 of 6 (peers PASS) -- pre-existing, out-of-cell predicates, reported with their values and left standing per Bound 2; identityAccents/stripContainers/clippedTextBlocks printed per state at both scopes (informational, not graded); PNGs all > 20480 bytes (70287..361886); scope=body table printed beneath with the OLD (pre-rekey-equivalent, sidebar-inclusive) numbers; exit=1, correctly reflecting the graded main table's FAILs",
+      "status": "PASS",
+      "expect": "==\\ scope=main\\ \\(GRADED\\)\\ ==.*list\\\tPASS\\\tPASS\\\tFAIL\\ \\[300,600\\]\\\tPASS\\\tFAIL\\ \\[\"8px\"\\]\\\tPASS\\\tPASS\\\tPASS\\\t1\\\t2\\\t0.*==\\ scope=body\\ \\(informational\\)\\ ==.*list\\\tPASS\\\tPASS\\\tFAIL\\ \\[300,500,600\\]\\\tFAIL\\ \\[10\\]\\\tFAIL\\ \\[\"8px\"\\]\\\tFAIL\\ 1\\\tPASS\\\tPASS\\\t3\\\t3\\\t0.*STATES:\\ 6\\ of\\ 6\\ run.*RESULT:\\ FAIL\\ \\(at\\ least\\ one\\ graded\\ cell\\ in\\ scope=main\\ read\\ FAIL\\).*exit=1",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE SCOPE FLAG DISCRIMINATES AND NO PAGE SOURCE MOVED: scope=body on list reads stripContainers strictly greater than scope=main's on the same state (the sidebar strip counted only in body) and identityAccents strictly greater (the sidebar's active item and avatar counted only in body), both pairs printed; then the page census reads FILES 31 TOTAL 0 exactly as at the cut (this cell edits no page file)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node scripts/ui-contract-check.mjs --port 5182 --scope body --states list --out ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~140/contract-check-body-control &amp;&amp; node scripts/ui-class-census.mjs src/pages/SecurityAnalysis | tail -1",
+      "output_evidence": "\n== scope=body (GRADED) ==\nstate\tbandContainersTopLevel\tfonts\tweights\tsizes\tradii\tshadows\tlowContrastChars\tpurpleFills\tidentityAccents\tstripContainers\tclippedTextBlocks\nlist\tPASS\tPASS\tFAIL [300,500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t3\t0\n\n== scope=main (informational) ==\nstate\tbandContainersTopLevel\tfonts\tweights\tsizes\tradii\tshadows\tlowContrastChars\tpurpleFills\tidentityAccents\tstripContainers\tclippedTextBlocks\nlist\tPASS\tPASS\tFAIL [300,600]\tPASS\tFAIL [\"8px\"]\tPASS\tPASS\tPASS\t1\t2\t0\n\n== scope comparison (main vs body) ==\nstate\tstripContainers[main]\tstripContainers[body]\tidentityAccents[main]\tidentityAccents[body]\nlist\t2\t3\t1\t3\n\nSTATES: 1 of 1 run\nPNG[list]: 70287 bytes\nRESULT: FAIL (at least one graded cell in scope=body read FAIL)\nliteral_exit=1",
+      "denominator": "1 of 1 state (list) run. Scope-comparison pairs, BOTH printed by this exact invocation: stripContainers main=2 vs body=3 (strictly greater, matches that half); identityAccents main=1 vs body=3 (strictly greater, matches that half). The census line is ABSENT from this invocation's own output (0 of 1 required) -- ui-contract-check.mjs exits 1 on 'list' at scope=body (weights FAIL [300,500,600], radii FAIL [\"8px\"], shadows FAIL 1 -- pre-existing, out-of-this-cell predicates present at EVERY scope per AC2's own run), which short-circuits the && before ui-class-census.mjs ever runs.",
+      "status": "FAIL",
+      "status_reason": "The literal invocation's own output never reaches the census command (see output_evidence -- no 'FILES' line), because ui-contract-check.mjs exits 1 on 'list' at scope=body on predicates this cell is not authorized to fix (weights, radii -- Bound 2). Run separately, un-chained (node scripts/ui-class-census.mjs src/pages/SecurityAnalysis | tail -1), the census reads 'FILES 31 TOTAL 0' (matches the criterion's expected value exactly, confirming no page source moved) -- see org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~140/ac3-census.final.out.txt. That confirmatory run is NOT part of this criterion's own graded invocation and is not folded into output_evidence, so the criterion is graded FAIL on what the literal && chain actually produces. Filed as surprise AMGT_RESAPP-W140-S2 (premise conflict between Bound 2 and the invocation's && chaining); not rescued by loosening the chain or special-casing 'list'.",
+      "expect": "==\\ scope=body\\ \\(GRADED\\)\\ ==.*list\\\tPASS\\\tPASS\\\tFAIL\\ \\[300,500,600\\]\\\tFAIL\\ \\[10\\]\\\tFAIL\\ \\[\"8px\"\\]\\\tFAIL\\ 1\\\tPASS\\\tPASS\\\t3\\\t3\\\t0.*==\\ scope\\ comparison\\ \\(main\\ vs\\ body\\)\\ ==.*list\\\t2\\\t3\\\t1\\\t3.*FILES\\ 31\\ TOTAL\\ 0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The re-keyed predicates must be load-bearing, not hard-coded: in ui-measure.mjs's classify(), temporarily force isBandEl() to always return false (so bandTop/bandContainersTopLevel always reads 0 regardless of the DOM), re-run AC1's self-test, and confirm ONLY the band-dependent values change.",
+      "expected": "With the mutation applied, the self-test's POSITIVE arm reads bandContainersTopLevel=0 (was 1) and fails the assertion (MISMATCH printed, SELF-TEST FAILED, exit 1); stripContainers/purpleFills/identityAccents/clippedTextBlocks stay at their unmutated values (1/1/2/1) since they do not depend on isBandEl(). A check whose predicate were NOT load-bearing (e.g. a hard-coded POSITIVE line) would show no change under this mutation.",
+      "observed": "Mutated classify() (isBandEl = el => false, all other logic untouched) re-run via node scripts/ui-measure.mjs --self-test --fixture ...: 'POSITIVE bandContainersTopLevel=0 stripContainers=1 purpleFills=1 identityAccents=2 clippedTextBlocks=1 ...', 'MISMATCH POSITIVE bandContainersTopLevel: got 0, expected 1', 'SELF-TEST FAILED', exit 1. stripContainers/purpleFills/identityAccents/clippedTextBlocks were byte-identical to the unmutated run. Mutation reverted immediately after observation; re-ran the unmutated self-test and got the identical PASS output recorded under AC1 (diff of ui-measure.mjs against its committed blob: 0 bytes changed after revert).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's self-test (both arms) run three times against the committed ui-measure.mjs: once as the recorded AC1 run, once mutated (the mutant control above), once again immediately after reverting the mutation, to confirm the revert was byte-exact (git diff --stat empty) and the classifier is deterministic.",
+      "observed": "Pre-mutation and post-revert runs printed byte-identical POSITIVE/NEGATIVE lines and SELF-TEST OK, exit 0 both times (POSITIVE bandContainersTopLevel=1 stripContainers=1 purpleFills=1 identityAccents=2 clippedTextBlocks=1, NEGATIVE bandContainersTopLevel=0 stripContainers=0, identical clippedSample). git diff --stat scripts/ui-measure.mjs read empty after the revert. AC2's own six-state battery was run once (recorded under AC2); not separately re-run a second time for this control.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Fixing the pre-existing weights (300/500/600), radii (8px) and shadows predicates on any state",
+      "reason": "Out of scope for AMGT-rm-1: s.1 names only the band/strip/purple/scope/clipped-text mis-keys as this cell's rekey targets, and Bound 2 explicitly requires leaving every other predicate's FAIL 'standing (the fixes are other cells')'."
+    },
+    {
+      "item": "Editing App.tsx, index.css, DESIGN.md, or any src/pages/** page file",
+      "reason": "Bound 3: src/** is read-only for this cell outside the __harness__/tests/ fixture folder; App.tsx and index.css are touched by no cell this round; DESIGN.md carries no clause to cite for clipped text per s.1 item 4 (the measurement is the input to a future clause, not this cell's to write)."
+    },
+    {
+      "item": "Making ui-contract-check.mjs's AC3 invocation reach the census command by loosening the exit-code semantics or special-casing 'list'",
+      "reason": "Would be a rescue of the invocation, forbidden by Bound 4 ('REFUSE, do not rescue') and by Bound 2 ('nothing is special-cased per state'). Filed as surprise AMGT_RESAPP-W140-S2 and graded FAIL on AC3 instead; the underlying facts (scope discrimination, clean census) are independently evidenced."
+    },
+    {
+      "item": "The outer worktree commit (task-order/deliverables record) and the gitlink move",
+      "reason": "Performed after this instance is written, per WHEN YOU ARE DONE step 6; not part of the acceptance battery itself."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-W140-S1: the cell text's literal instruction to resolve --bg-band off document.documentElement would reproduce the exact strip-vs-band conflation this cell exists to fix (documentElement's own computed --bg-band is the pre-DSGN_REBRND-round-2 :root value, numerically identical to --bg-header). Resolved off document.body instead (verified live to equal the rendered band colour); filed INERT/DISMISSED_WITH_REASON.",
+    "AMGT_RESAPP-W140-S2: AC3's literal &&-chained invocation can never reach the census command on state 'list', because 'list' carries pre-existing, out-of-this-cell's-scope predicate FAILs (weights, radii) at every scope, and Bound 2 requires leaving those standing. Ran the literal invocation verbatim (recorded FAIL) and separately ran the un-chained census for completeness (FILES 31 TOTAL 0); filed INERT/UNDER_INVESTIGATION, disarm owner the round-38 issuer."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~140/AMGT_RESAPP.TO-AMGT-rm-1.the-instrument-rekeyed.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "node --check (syntax check)",
+      "invocation": "node --check scripts/ui-measure.mjs && node --check scripts/ui-contract-check.mjs",
+      "result": "Both scripts syntax-clean (MEASURE-SYNTAX-OK, CONTRACT-SYNTAX-OK), Node v26.9.0"
+    },
+    {
+      "tool": "node (execution, live)",
+      "invocation": "AC1/AC2/AC3 invocations above, exercised live against portal HEAD b51330c5834e89e5f29e40605d9c12b349d48939 on the dev server (bun run dev --port 5182)",
+      "result": "AC1 exit 0 (self-test OK); AC2 exit 1 (correctly reflects pre-existing, out-of-cell FAILs); AC3 (literal, chained) exit 1 (chain never reaches the census command, see surprise S2); the un-chained census alone: FILES 31 TOTAL 0, exit 0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (portal commit)",
+      "invocation": "cd portal && bash ../.tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~140 <0.9.0_WK_AMGT_RESAPP~140@opal.agent>\" -F <msgfile> -- scripts/ui-measure.mjs scripts/ui-contract-check.mjs src/pages/SecurityAnalysis/__harness__/tests/uiMeasureFixture.html",
+      "result": "[naming-gate] PASS 0 graded; [to-pipeline-gate] OK; commit b51330c5834e89e5f29e40605d9c12b349d48939, 3 files changed, 365 insertions(+), 86 deletions(-)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields. rc=0"
+    }
+  ]
+}

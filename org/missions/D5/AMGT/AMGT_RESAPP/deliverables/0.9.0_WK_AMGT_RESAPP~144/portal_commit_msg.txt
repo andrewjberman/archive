@@ -1,0 +1,38 @@
+rm-5(AMGT_RESAPP, 0.9.0_WK_AMGT_RESAPP~144): the provenance disclosure, two limbs -- dated typed where it rides, the Source caption never clipped
+
+Limb 1 (R-57): `dated` and `requested_as_of` are now typed directly on
+`RankingSet` in types.ts, with the doc comment rl-8 wrote (`dated` is the
+server's own boolean, never itself a date). LeadPanel.tsx drops the local
+`RankingDateFields`/`DatedRankingSet` augmentation and reads the fields off
+`RankingSet` itself; `sourceFooterContent` now takes `RankingSet | undefined`.
+
+Limb 2 (ADJUDICATION_v47 s.2.4): the "Source:" caption no longer clips
+mid-word. `sourceDisclosureText` splits the "this list is older than the
+date requested" clause out of `sourceFooterContent` so it renders as its OWN
+block element, a new `SourceCaption` component. Because `PanelFooter`'s
+`content` prop is typed `string` (no ReactNode escape hatch) and is
+read-only for this cell, the caption is rendered entirely through
+`PanelFooter`'s `leftContent` slot instead -- every element `SourceCaption`
+owns carries `whitespace-normal break-words` and none carries
+`truncate`/`whitespace-nowrap`/`overflow-hidden`. `content` is left empty;
+`ResolutionNote` and `SourceCaption` now stack inside `leftContent`.
+
+leadPanelPattern.harness.cjs gains three checks over the actual rendered
+markup: source_caption_wraps, disclosure_own_line, caption_facts_unchanged.
+CHECKS-OK 15 of 15 (12 pre-existing + 3 new). Mutant control (a `truncate`
+class injected into the caption's own generation-line element) fired as
+expected (source_caption_wraps flipped false), then was reverted and
+verified byte-identical to the working tree before the mutant.
+
+tsc -b --noEmit clean. ui-class-census.mjs over types.ts/LeadPanel.tsx/
+GenerationCaption.tsx reads FILES 3 TOTAL 0. tabs.harness.cjs unchanged at
+CHECKS-OK 20 of 20.
+
+Surprise row filed: AMGT_RESAPP-W144-S1 (PanelFooter's `content` div carries
+`flex-shrink-0` whenever `leftContent` is truthy -- the likely actual
+mid-word-clip mechanism, though not a literal truncate/nowrap/overflow-hidden
+class; this cell routes around it via leftContent-only, but the shape
+remains live for any other PanelFooter caller). hazard_standing ARMED,
+disarm_owner rm-2 (PanelFooter.tsx owner).
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
