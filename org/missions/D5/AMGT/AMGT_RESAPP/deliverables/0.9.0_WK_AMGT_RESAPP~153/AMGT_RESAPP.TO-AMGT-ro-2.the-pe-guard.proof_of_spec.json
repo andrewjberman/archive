@@ -1,0 +1,115 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_RESAPP.TO-AMGT-ro-2",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ro-2.the-pe-guard.md",
+  "group": "C",
+  "vintage_commit": "d4b3321d71"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+  "vintage_commit": "d4b3321d71",
+  "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ro-2.the-pe-guard.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_RESAPP~153",
+ "artifacts_produced": [
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/cscTable.ts",
+   "kind": "frontend_component",
+   "commit_or_etag": "d79f4c26",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "valueOf() gains the guard: after the transform==='reciprocal' branch, a PRESENT_CARRIED column whose `reason` (R-1's own `relation` string) begins RECIPROCAL but carries no `transform`/`units` now returns null instead of falling through to `return value`. Every other column (transform set, or reason not RECIPROCAL) unchanged.",
+   "introduces": [
+    "the reason.startsWith('RECIPROCAL') guard in valueOf()"
+   ]
+  },
+  {
+   "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/peersCarry.harness.cjs",
+   "kind": "test",
+   "commit_or_etag": "d79f4c26",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "The fixture's ey/ey_ntm present entries now state transform: 'reciprocal', units: 'fraction' (its yields ARE fractions, 0.05/0.04), matching the rn-2 producer contract. The harness's existing P/E assertions (20/25 in the base case, null/\u221220/null in the edge case) are unchanged and still pass.",
+   "introduces": [
+    "present[].transform/units on the harness's ey/ey_ntm fixture entries"
+   ]
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "peersCarry exit=0 -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-2.AC1.sh; echo \"exit=$?\"",
+   "output_evidence": "{\"result\":\"PASS\",\"fixture_cases\":6,\"consumers\":[\"PeersTab\",\"PostureTab subject and comparable\"],\"real_prepared_object\":false,\"live_browser\":false}\npeersCarry exit=0\nexit=0",
+   "denominator": "1 of 1 harness run, exit=0.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "THE GUARD: entries stripped: 2; P/E cells with no stated unit: 24 absent, 0 numeric -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-2.AC2.cjs; echo \"exit=$?\"",
+   "output_evidence": "entries stripped: 2; P/E cells with no stated unit: 24 absent, 0 numeric; samples: none\nexit=0",
+   "denominator": "24 of 24 P/E cells (12 members x 2 columns) render ABSENT once transform/units are stripped; 0 numeric.",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "THE RELATION (bound): P/E x percent yield == 100 (+/-1): 24 of 24; off-relation 0; null 0 -- and exit=0",
+   "method": "command",
+   "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/pe-relation.cjs; echo \"exit=$?\"",
+   "output_evidence": "P/E x percent yield == 100 (+/-1): 24 of 24; off-relation 0; null 0; samples: none\nexit=0",
+   "denominator": "24 of 24 stated-unit P/E cells satisfy the relation; 0 off-relation, 0 null.",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "AC1's fixture change and AC2/AC3 exercise the guard from opposite directions on the same builder: AC1's peersCarry harness now states transform/units on ey/ey_ntm and asserts the numeric P/E values (20/25) still render; AC2 strips those same two fields from a served-shaped fixture and asserts the guard fires (ABSENT, not the raw yield); AC3 re-asserts the stated-unit case holds the 100/yield relation. The guard is on precisely when the fields are absent and off precisely when they are present, on the same code path.",
+   "expected": "stated transform/units -> numeric P/E in relation; absent transform/units on a RECIPROCAL relation -> null, never a number.",
+   "observed": "AC1 exit=0 (stated case, numeric); AC2 exit=0 (stripped case, 24/24 null, 0 numeric); AC3 exit=0 (stated case, 24/24 in relation).",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1, AC2 and AC3 were each run twice with no source change between runs.",
+   "observed": "Identical output both times on all three criteria.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "No server started; no live render captured",
+   "reason": "Bound 1: no vite/dev build/listener started; all three criteria are file-based invocations run exactly as written."
+  },
+  {
+   "item": "No install, push or promote",
+   "reason": "Bound 3 standing instruction."
+  }
+ ],
+ "surprises": [],
+ "session_log": "Worktree: C:/tmp/wk-amgt-40-153 on branch wk-AMGT_RESAPP-153, started at CLOUD tip d4b3321d71 (round 40 issuance). Portal worktree: C:/tmp/wk-amgt-40-153/portal on branch wk-AMGT_RESAPP-153-portal, started at portal DEV 46c0ae11, ending at d79f4c26 (cscTable.ts, peersCarry.harness.cjs). No server started at any point (Bound 1). Read the built column's `reason` field (portal/src/pages/SecurityAnalysis/cscTable.ts:123, `reason: present.relation ?? ''`) to confirm it carries R-1's own `relation` string verbatim, and read the fixture (portal/src/pages/SecurityAnalysis/__harness__/tests/uiContractFixtures.json:10582/10599) to confirm the live relation text begins the literal string 'RECIPROCAL' on both ey and ey_ntm present entries -- so `column.reason.startsWith('RECIPROCAL')` is a sound guard predicate, added as a fallthrough after the existing transform==='reciprocal' branch (which still handles the two-field-present case unchanged). Two commits: portal d79f4c26 (cscTable.ts guard + harness fixture fix), outer ed60050375 (gitlink bump, portal-only path). Nothing surfaced that the task order did not already name or bound -- no row filed. The status flip to complete is the ISSUER's (2.0.0_SA_COO~Z).",
+ "compiler_tools": [
+  {
+   "tool": "bash (AC1, peersCarry.harness.cjs via a node invocation)",
+   "invocation": "bash org/.../round40/checks/ro-2.AC1.sh",
+   "result": "exit=0; peersCarry exit=0."
+  },
+  {
+   "tool": "node (AC2, real cscTable.ts through the harness's transpile-and-require path)",
+   "invocation": "cd portal && node ../org/.../round40/checks/ro-2.AC2.cjs",
+   "result": "exit=0; entries stripped: 2; P/E cells with no stated unit: 24 absent, 0 numeric."
+  },
+  {
+   "tool": "node (AC3, the relation check over the same builder)",
+   "invocation": "cd portal && node ../org/.../round40/checks/pe-relation.cjs",
+   "result": "exit=0; P/E x percent yield == 100 (+/-1): 24 of 24; off-relation 0; null 0."
+  },
+  {
+   "tool": "proof-of-spec-check.py -- THIS WORKTREE'S OWN copy, run from inside C:/tmp/wk-amgt-40-153",
+   "invocation": "PYTHONPATH=\"$(pwd)\" python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~153/AMGT_RESAPP.TO-AMGT-ro-2.the-pe-guard.proof_of_spec.json AC1,AC2,AC3",
+   "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+  }
+ ]
+}
