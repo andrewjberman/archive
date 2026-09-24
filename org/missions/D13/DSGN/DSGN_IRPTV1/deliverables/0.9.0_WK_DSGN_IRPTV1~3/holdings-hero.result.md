@@ -22,25 +22,25 @@ fixtures (cottonwood-target-blend, smartx-observed) plus every sibling `fe-s-7/h
 `holdingsSnapshot.success.json`: 9 fixtures, all fed correctly, zero fixture-specific assumptions in the
 assertions.
 
-## IV3-AC2 -- the fe-s-7 seam, literal invocation vs. the true suite
+## IV3-AC2 -- the fe-s-7 seam
 
-The task order's own invocation, run verbatim: `bun test src/pages/InvestorReporting/__tests__/fe-s-7` (no
-trailing slash) -- Bun resolves this as a PREFIX match, not a directory match, and sweeps in EVERY sibling
-whose name starts with `fe-s-7` (`fe-s-7`, `fe-s-71` .. `fe-s-78`): 56 tests across 9 files, **53 pass / 3
-fail**. All 3 failures are inside `fe-s-78/cohort-chip.test.ts` (an `EnvelopeMismatch` on
-`unprojected_grant`), a file this cell's `<paths>` grant does not name, untouched by this commit (`git
-status --porcelain` clean on it both before and after), and reproducible standalone (`bun test
-src/pages/InvestorReporting/__tests__/fe-s-78/` alone: 1 pass / 2 fail, unchanged).
+First attempt, the task order's ORIGINAL invocation, run verbatim: `bun test
+src/pages/InvestorReporting/__tests__/fe-s-7` (no trailing slash) -- Bun resolves this as a PREFIX match,
+not a directory match, and sweeps in EVERY sibling whose name starts with `fe-s-7` (`fe-s-7`, `fe-s-71` ..
+`fe-s-78`): 56 tests across 9 files, **53 pass / 3 fail**. All 3 failures are inside
+`fe-s-78/cohort-chip.test.ts` (an `EnvelopeMismatch` on `unprojected_grant`), a file this cell's `<paths>`
+grant does not name, untouched by this commit (`git status --porcelain` clean on it both before and
+after), and reproducible standalone (`bun test src/pages/InvestorReporting/__tests__/fe-s-78/` alone: 1
+pass / 2 fail, unchanged). Graded FAIL on the literal invocation at the time, not repaired or widened, per
+the refusal clause -- and filed, not silently worked around.
 
-Scoped to the ACTUAL "fe-s-7 Holdings suite (drill, slices, source bounds)" the criterion names, with a
-trailing slash so Bun resolves it as a directory rather than a prefix: `bun test
-"src/pages/InvestorReporting/__tests__/fe-s-7/"` -- **32 pass / 0 fail** (3 files, 157 `expect()` calls),
-unchanged by this cell.
-
-Graded MECHANICALLY on the literal invocation's output, which does not contain the `<expect>` pattern (`
-0 fail`): **FAIL**. The 3 failures are pre-existing, unrelated to `IV-t-3`, and out of this order's grant to
-fix; the criterion's own invocation text is a pathspec collision, not a real regression. Not repaired or
-widened -- reported as measured, per the refusal clause.
+ISSUER AMENDMENT (`2.0.0_SA_COO~D`, commit `5241090aef`, cherry-pick of CLOUD `f42548be58`): the issuer
+independently reproduced the same 3-of-56 failure on another worktree that never touched holdings,
+confirmed the cut's own pathspec defect, and amended the task order's `<invocation>` to add the trailing
+slash. Re-run in place, AMENDED invocation: `bun test "src/pages/InvestorReporting/__tests__/fe-s-7/"` --
+**32 pass / 0 fail** (3 files: drill, slices, source-bounds; 157 `expect()` calls). Matches `<expect>` ` 0
+fail`: **PASS**. The original FAIL row is retained in the proof-of-spec instance's `status_reason` as the
+superseded prior attempt, not deleted.
 
 ## IV3-AC3 -- ONE-FUNCTION
 
