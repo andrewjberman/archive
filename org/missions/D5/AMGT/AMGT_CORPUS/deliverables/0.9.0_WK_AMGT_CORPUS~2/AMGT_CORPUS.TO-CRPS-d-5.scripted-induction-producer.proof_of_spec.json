@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-d-5.scripted-induction-producer.md",
     "group": "OTHER",
-    "vintage_commit": "c2166b46421ee411f364db4089949a3f9b024d93"
+    "vintage_commit": "859fe13dc8bbb6c861c12845cb806f7ee94ce0cd"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
@@ -19,8 +19,8 @@
       "kind": "script",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "rows_for_run(root) rebuilds the induction request FRESH via induction_request.measure_population + induction_request.build_request over the backlog the universe carries UNRESOLVED (never choose_population's RESOLVED_ABSENT branch, never a stored induction_request.json). ISSUER AMENDMENT 1: BEFORE any call, effective_state_and_reason(row) reclassifies an EVIDENCED row to the local STATE_DISAGREEMENT when parse_folder_token(folder) finds the folder's own trailing Bloomberg token pair and it DIFFERS from the report's parsed root (reason 'folder_token X report_token Y no third source'); a folder with no such trailing pair, or one whose token AGREES, is unchanged. run(rows, as_of, call, stdout) calls ONE ['--folder', folder, '--as-of', as_of, '--write-pool'] per row whose EFFECTIVE state is EVIDENCED via an injected call(argv)->rc (default add_security.main), parses the outcome from add_security's OWN printed-line grammar (already-registered:/REFUSED:/MEASURED:/UNRESOLVED: prefixes), never calls a DISAGREEMENT/AMBIGUOUS/NO_EVIDENCE/other row, and prints the totals line (now carrying a `disagreement` token) FIRST and LAST. make_fake_call(rows) scripts registered/already-registered/refused across the first three EFFECTIVELY-evidenced folders (a row headed for DISAGREEMENT is never scripted, since it is never called). --fire is refused unless OPAL_INDUCTION_FIRE=1, --as-of names today (UTC), and the process is not under pytest -- fire_permitted() is the pure gate, tested directly; main()'s --fire branch checks it before ever calling library.library_root(). Measured on the real 93-folder library via --dry-run --as-of 2026-09-24 (run twice, identical both times): population 60 evidenced 20 ambiguous 2 (Copa CPA, Uber Technologies UBER US, existing security_key collisions) disagreement 1 (America Movil AXMB MM: folder token AXMB, report token AMXB) other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60.",
-      "introduces": ["parse_folder_token", "effective_state_and_reason", "STATE_DISAGREEMENT"],
+      "deploy_evidence": "rows_for_run(root) rebuilds the induction request FRESH via induction_request.measure_population + induction_request.build_request over the backlog the universe carries UNRESOLVED. ISSUER AMENDMENT 1: BEFORE any call, effective_state_and_reason(row) reclassifies an EVIDENCED row to the local STATE_DISAGREEMENT when parse_folder_token(folder) finds the folder's own trailing Bloomberg token pair and it DIFFERS from the report's parsed root; unchanged otherwise. ISSUER AMENDMENT 2: the call NOW ALWAYS carries BOTH --folder and --bloomberg -- _build_call_argv(folder, root, cc, as_of) returns ['--folder', folder, '--bloomberg', '<root> <cc>', '--as-of', as_of, '--write-pool'], NEVER --folder alone (add_security's --folder-only path reads the folder's ONE PAGER workbook via build_universe.discover_bloomberg_ticker, never the report evidence -- measured at the issuer's first fire: 20 calls, 0 Bloomberg calls, 20 UNRESOLVED). _build_call_argv returns None (refusing BEFORE ever reaching `call`) when root/cc are not both present, which cannot happen on a real EVIDENCED row (proven defensively). The read-back gains `bloomberg_arg` per called row. make_fake_call(rows) scripts registered/already-registered/refused across the first three EFFECTIVELY-evidenced folders and its fake `call` ASSERTS every argv carries both --folder and a parseable --bloomberg (crosswalk._parse_bloomberg). Measured on the real 93-folder library via --dry-run --as-of 2026-09-24 (run twice, identical both times, after a one-off transient substrate reading was re-measured stable -- see surprises AMGT_CORPUS-Z-W2-S4): population 60 evidenced 20 ambiguous 2 (Copa CPA, Uber Technologies UBER US) disagreement 1 (America Movil AXMB MM) other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60; example called row AstraZeneca AZN carries bloomberg_arg 'AZN LN'.",
+      "introduces": ["_build_call_argv"],
       "artifact_covered_by": ["AC1", "AC2", "AC3"]
     },
     {
@@ -28,7 +28,7 @@
       "kind": "test",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "15 tests, offline, under tests/conftest.py's autouse poison (boto3.client/resource/Session.client, subprocess.run/Popen, socket.create_connection) plus an explicit save/restore positive control on add_security._load_blp_client (the one site conftest does not cover): (1) rows_for_run's wiring; (2) run() calling only EFFECTIVELY-EVIDENCED rows and parsing every outcome branch (registered/already-registered/refused/unresolved/error) from a hand-scripted call reproducing add_security's own printed-line grammar, with totals math (E+A+D+O=P, called=evidenced) and totals-FIRST-and-LAST; (2a, ISSUER AMENDMENT 1) parse_folder_token agrees/disagrees/absent (Nestle NESN SW agrees, America Movil AXMB MM disagrees, UBS/JD.com 9618 HK/British American Tobacco carry no trailing pair), effective_state_and_reason on an agreeing row (unchanged EVIDENCED), a disagreeing row (DISAGREEMENT, reason 'folder_token AXMB report_token AMXB no third source'), a no-pair row (unchanged EVIDENCED) and a non-EVIDENCED row (untouched), and run() itself reclassifying America Movil AXMB MM to DISAGREEMENT and never calling it (a scripted call that raises AssertionError on any folder it was not told to expect proves this -- calling America Movil would raise); (3) make_fake_call scripting every branch (registered/already-registered/refused) with bloomberg_calls 0 and argv recorded; (4) the add_security._load_blp_client poison positive control (raises, counts, resets); (5) fire_permitted's four gate combinations; (6) main()'s --fire refusal end-to-end without the env var, with the env var set (still refused, running under pytest), and with a non-today as-of, plus --as-of format validation (rc 2) -- none of these six touch library.library_root().",
+      "deploy_evidence": "18 tests, offline, under tests/conftest.py's autouse poison plus the add_security._load_blp_client positive control: (1) rows_for_run wiring; (2) run() calling only EFFECTIVELY-EVIDENCED rows and parsing every outcome branch; (2a, ISSUER AMENDMENT 1) parse_folder_token / effective_state_and_reason / run()'s own disagreement reclassification; (2c, ISSUER AMENDMENT 2, NEW) _build_call_argv returns the exact ['--folder', folder, '--bloomberg', '<root> <cc>', '--as-of', as_of, '--write-pool'] shape and never --folder alone; _build_call_argv returns None when root or cc (or both) are missing; test_run_refuses_folder_only_call_before_reaching_call proves run() itself never reaches `call` for such a row (a `call` that raises AssertionError if invoked at all is passed, and never fires; the row reads called=False, rc=None, reason naming 'never --folder alone'); (3) make_fake_call scripting every branch, now asserting --bloomberg is present and parseable on every argv and that the recorded --bloomberg values are the expected '<root> <cc>' strings; (4) the add_security._load_blp_client poison positive control; (5) fire_permitted's four gate combinations; (6) main()'s --fire refusal end-to-end (three scenarios) plus --as-of format validation.",
       "artifact_covered_by": ["AC1"]
     },
     {
@@ -36,7 +36,7 @@
       "kind": "config_data",
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The AC2 dry-run read-back JSON, ISSUER AMENDMENT 1 shape: as_of, the 12 totals fields (population/evidenced/ambiguous/disagreement/other/called/registered/already_registered/refused/errors/bloomberg_calls/rows), and one row per population folder including America Movil AXMB MM carrying state DISAGREEMENT, called false, reason 'folder_token AXMB report_token AMXB no third source'. Written only under this worker's own deliverables dir, nowhere under lib/research/identity/.",
+      "deploy_evidence": "The AC2 dry-run read-back JSON, ISSUER AMENDMENT 2 shape: as_of, the 12 totals fields, and one row per population folder; every called row now carries `bloomberg_arg` ('<root> <cc>', e.g. AstraZeneca AZN -> 'AZN LN') alongside `security_key`. Written only under this worker's own deliverables dir, nowhere under lib/research/identity/; the file on disk reflects the LAST (stable, twice-reproduced) --dry-run run, not the one transient reading recorded in surprises AMGT_CORPUS-Z-W2-S4.",
       "artifact_covered_by": ["AC2"]
     }
   ],
@@ -46,8 +46,8 @@
       "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider 2>&1 | tail -3 -- expect (?m)^\\d+ passed in ",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider 2>&1 | tail -3",
-      "output_evidence": "...............                                                          [100%]\n15 passed in 0.40s",
-      "denominator": "15 of 15 tests passed, 0 failed (12 pre-amendment + 3 new ISSUER AMENDMENT 1 tests); run twice back to back (3.25s then 0.40s), identical pass count both times",
+      "output_evidence": "..................                                                       [100%]\n18 passed in 0.53s",
+      "denominator": "18 of 18 tests passed, 0 failed (15 pre-amendment-2 + 3 new ISSUER AMENDMENT 2 tests); run twice back to back (0.78s then 0.53s), identical pass count both times",
       "expect": "(?m)^\\d+ passed in ",
       "status": "PASS"
     },
@@ -57,7 +57,7 @@
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --dry-run --as-of 2026-09-24 2>&1 | tail -3",
       "output_evidence": "skip Workday WDAY US | NO_EVIDENCE | no report states a ticker in the (Ticker: ...) form\nskip Zoetis ZTS US | NO_EVIDENCE | no report states a ticker in the (Ticker: ...) form\npopulation 60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60",
-      "denominator": "population 60 of 60 (the real UNRESOLVED backlog measured fresh); evidenced 20 + ambiguous 2 + disagreement 1 + other 37 = 60; called 20 = evidenced 20; bloomberg_calls 0 of 0 real calls made; run twice back to back, byte-identical totals line both times; regex verified directly against the captured line with Python re.search: True (disagreement 1 >= 1 satisfies America Movil AXMB/AMXB; ambiguous 2 >= 1 satisfies Copa/Uber)",
+      "denominator": "population 60 of 60; evidenced 20 + ambiguous 2 + disagreement 1 + other 37 = 60; called 20 = evidenced 20; bloomberg_calls 0 of 0 real calls made (unaffected by ISSUER AMENDMENT 2 -- the fake call still makes no call, it merely now asserts the argv shape); run twice back to back after this amendment, byte-identical totals line both times and identical to the amendment-1 measurement (unchanged, as the amendment predicted); ambiguous 2 >= 1 and disagreement 1 >= 1 both satisfied. One intervening transient reading (population 40, ambiguous 0) is recorded and explained in surprises AMGT_CORPUS-Z-W2-S4 -- not used as evidence here, since three re-reads before and two after it all reproduce the population-60 figure used above.",
       "expect": "population ([1-9]\\d*) evidenced \\d+ ambiguous [1-9]\\d* disagreement [1-9]\\d* other \\d+ called \\d+ registered \\d+ already_registered \\d+ refused \\d+ errors \\d+ bloomberg_calls 0 sum \\1\\b",
       "status": "PASS"
     },
@@ -67,62 +67,68 @@
       "method": "command",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m lib.research.corpus.induction_run --fire --as-of 2026-09-24 2>&1 | tail -3",
       "output_evidence": "warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.\nREFUSED: --fire requires OPAL_INDUCTION_FIRE=1 and today's --as-of; this is the issuer's drain act under R-16 V2 / R-21 / C-NO-VENDOR-CALL v0.5\nbloomberg_calls 0",
-      "denominator": "1 of 1 --fire invocation refused (OPAL_INDUCTION_FIRE unset in this shell); rc 3; regex verified directly against the captured 3-line tail with Python re.search under re.DOTALL: True; the real add_security.main / _load_blp_client path is never reached; unaffected by ISSUER AMENDMENT 1 (the gate runs before rows_for_run)",
+      "denominator": "1 of 1 --fire invocation refused (OPAL_INDUCTION_FIRE unset in this shell); rc 3; regex verified directly against the captured 3-line tail with Python re.search under re.DOTALL: True; unaffected by ISSUER AMENDMENT 2 (the gate runs before rows_for_run/_build_call_argv are ever reached)",
       "expect": "(?s)REFUSED: --fire requires OPAL_INDUCTION_FIRE=1.*bloomberg_calls 0\\b",
       "status": "PASS"
     }
   ],
   "controls": {
     "mutant": {
-      "description": ".scratch/d5/mutant_control.py (not committed, updated for ISSUER AMENDMENT 1) drives an 8-row fixture, including America Movil AXMB MM (raw EVIDENCED, folder/report disagreement), through the SAME scripted `call` (raises AssertionError on any folder it has no branch for) via THREE loops: MUTANT 1 is run()'s row loop with the EVIDENCED-only guard removed entirely (calls every row regardless of state -- Section 1's core defect); MUTANT 2 is run() AS IT WAS BEFORE THE AMENDMENT (calls every raw-EVIDENCED row directly, never computing effective_state_and_reason, so the disagreement row is called like any other -- the amendment's own defect); FIX is the real induction_run.run().",
-      "expected": "MUTANT 1 (no EVIDENCED guard) and MUTANT 2 (no disagreement check) both call America Movil AXMB MM, which the scripted call has no branch for, so both raise AssertionError. FIX (the real run()) calls exactly the 5 AGREEING EVIDENCED rows, reclassifies America Movil to DISAGREEMENT and skips it, skips the 2 non-evidenced rows, never raises.",
-      "observed": "FIX (real run()): called=5 disagreement=1 ok=True. MUTANT 1 (no EVIDENCED guard): raised AssertionError: unexpected folder 'America Movil AXMB MM' called. MUTANT 2 (pre-amendment, no disagreement check): raised AssertionError: unexpected folder 'America Movil AXMB MM' called. MUTANT1_RAISED=True MUTANT2_RAISED=True FIX_OK=True CONTROL_FIRED_AS_EXPECTED=True (run twice, identical both times).",
+      "description": ".scratch/d5/mutant_control.py (not committed) drives an 8-row fixture, including America Movil AXMB MM (raw EVIDENCED, folder/report disagreement), through the SAME scripted `call` (raises AssertionError on any folder it has no branch for) via THREE loops: MUTANT 1 is run()'s row loop with the EVIDENCED-only guard removed entirely; MUTANT 2 is run() AS IT WAS BEFORE AMENDMENT 1 (calls every raw-EVIDENCED row directly, never computing effective_state_and_reason); FIX is the real induction_run.run(), now building argv through _build_call_argv (ISSUER AMENDMENT 2's --folder+--bloomberg shape) -- the scripted `call` matches on --folder regardless of argv shape, so this control exercises both the disagreement guard and the amendment-2 call path together without needing a third mutant arm.",
+      "expected": "MUTANT 1 and MUTANT 2 both call America Movil AXMB MM, which the scripted call has no branch for, so both raise AssertionError. FIX calls exactly the 5 AGREEING EVIDENCED rows (each argv now carrying --bloomberg), reclassifies America Movil to DISAGREEMENT and skips it, skips the 2 non-evidenced rows, never raises.",
+      "observed": "FIX (real run()): called=5 disagreement=1 ok=True. MUTANT 1 (no EVIDENCED guard): raised AssertionError: unexpected folder 'America Movil AXMB MM' called. MUTANT 2 (pre-amendment-1, no disagreement check): raised AssertionError: unexpected folder 'America Movil AXMB MM' called. MUTANT1_RAISED=True MUTANT2_RAISED=True FIX_OK=True CONTROL_FIRED_AS_EXPECTED=True (run twice, identical both times, re-verified after ISSUER AMENDMENT 2).",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC1's test file run twice back to back; AC2's --dry-run invocation run twice back to back; AC3's --fire invocation run twice back to back; .scratch/d5/mutant_control.py run twice back to back.",
-      "observed": "pytest: 15 passed both runs (3.25s, 0.40s -- pass count identical). --dry-run: 'population 60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60' byte-identical both runs. --fire: identical REFUSED line and 'bloomberg_calls 0' both runs. mutant_control.py: 'MUTANT1_RAISED=True MUTANT2_RAISED=True FIX_OK=True CONTROL_FIRED_AS_EXPECTED=True' both runs, identical.",
+      "method": "AC1's test file run twice back to back; AC2's --dry-run invocation run twice back to back (plus the transient reading and its 5 surrounding stable re-reads, see surprises); AC3's --fire invocation run twice back to back; .scratch/d5/mutant_control.py run twice back to back -- all AFTER ISSUER AMENDMENT 2.",
+      "observed": "pytest: 18 passed both runs (0.78s, 0.53s -- pass count identical). --dry-run: 'population 60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60' byte-identical both runs, and identical to the pre-amendment-2 measurement. --fire: identical REFUSED line and 'bloomberg_calls 0' both runs. mutant_control.py: 'MUTANT1_RAISED=True MUTANT2_RAISED=True FIX_OK=True CONTROL_FIRED_AS_EXPECTED=True' both runs, identical.",
       "status": "STABLE"
     }
   },
   "declared_exclusions": [
     {
       "item": "Any edit under lib/research/identity/",
-      "reason": "Section 1: 'no edit under lib/research/identity/ (another lane's surface; imported, never changed)'. add_security.py, crosswalk.py: read-only; git diff HEAD -- lib/research/identity is empty against the pre-cell HEAD. The disagreement check (parse_folder_token / effective_state_and_reason) is implemented entirely inside induction_run.py, never inside induction_request.classify_folder (also read-only), per the amendment's own instruction ('the classifier ... this module applies that check itself')."
+      "reason": "Section 1: 'no edit under lib/research/identity/ (another lane's surface; imported, never changed)'. add_security.py, crosswalk.py: read-only; git diff HEAD -- lib/research/identity is empty against the pre-cell HEAD. ISSUER AMENDMENT 2's fix (carrying --bloomberg) lives entirely in what argv induction_run.py PASSES to add_security.main, never in add_security itself."
     },
     {
       "item": "Any real Bloomberg or S3 call, in any mode",
-      "reason": "BOUNDS: 'NEVER run the real add_security in any mode -- its --dry-run STILL CALLS Bloomberg'. --dry-run here uses an injected fake call that makes no call at all (bloomberg_calls 0 by construction, printed and measured); --fire is refused before rows_for_run/add_security.main are ever reached (OPAL_INDUCTION_FIRE unset in this shell). No worker turn in this project exercises the permitted --fire branch -- the issuer does, once, per integrations/bloomberg/READ_HERE.md."
+      "reason": "BOUNDS: 'NEVER run the real add_security in any mode -- its --dry-run STILL CALLS Bloomberg'. --dry-run here uses an injected fake call that makes no call at all (bloomberg_calls 0 by construction); --fire is refused before rows_for_run/_build_call_argv/add_security.main are ever reached (OPAL_INDUCTION_FIRE unset in this shell). This worker turn never exercises the permitted --fire branch -- the issuer does, once, per integrations/bloomberg/READ_HERE.md, and ISSUER AMENDMENT 2 exists precisely because the ISSUER's own first fire measured the old call shape making ZERO real calls."
     },
     {
       "item": "A stored induction_request.json read as this cell's population source",
-      "reason": "Section 1: 'the induction request rebuilt FRESH ... never a stored induction_request.json'. rows_for_run(root) calls induction_request.measure_population(root) + build_request fresh every invocation; test_rows_for_run_wires_measure_population_census_and_build_request proves the wiring never reads induction_request.json."
+      "reason": "Section 1: 'the induction request rebuilt FRESH ... never a stored induction_request.json'. rows_for_run(root) calls induction_request.measure_population(root) + build_request fresh every invocation, unmodified by either amendment."
     },
     {
       "item": "An S3 write, an ingest re-run, or any change to registrations.json/the crosswalk pool from this worker's own invocations",
-      "reason": "Section 1: 'no S3 write; no ingest re-run (the issuer runs the existing ingest after the fire)'. --dry-run's fake call writes nothing (git status after every --dry-run run shows no change under lib/research/identity/registrations.json or any S3-shaped path); --fire is refused before any write path is reached."
+      "reason": "Section 1: 'no S3 write; no ingest re-run (the issuer runs the existing ingest after the fire)'. --dry-run's fake call writes nothing; --fire is refused before any write path is reached. The issuer's own first-fire writes (and their revert) are the issuer's act, not this worker's -- see surprises AMGT_CORPUS-Z-W2-S4 for the transient read this cell observed as a downstream effect."
     },
     {
       "item": "An 'unresolved' bucket in the printed/JSON totals line",
-      "reason": "The task order's totals-line grammar (Section 1 + ISSUER AMENDMENT 1, reproduced verbatim in AC2's <expect>) names exactly population/evidenced/ambiguous/disagreement/other/called/registered/already_registered/refused/errors/bloomberg_calls/sum -- no separate unresolved count. The per-row outcome value 'unresolved' is still recorded on any row that reaches it, it is simply not one of the totals line's own named buckets; it did not occur on the real backlog run (all 20 effectively-evidenced folders, called under the --dry-run fake, resolved to registered/already-registered/refused only)."
+      "reason": "The task order's totals-line grammar names exactly population/evidenced/ambiguous/disagreement/other/called/registered/already_registered/refused/errors/bloomberg_calls/sum -- no separate unresolved count. Unaffected by ISSUER AMENDMENT 2 (AC2's expect is unchanged, per the amendment's own text)."
     },
     {
       "item": "Reclassifying any row other than a raw-EVIDENCED one under the disagreement rule",
-      "reason": "ISSUER AMENDMENT 1, verbatim: 'An EVIDENCED row whose report ticker ROOT differs ... is state DISAGREEMENT'. effective_state_and_reason() returns a non-EVIDENCED row's own state and reason unchanged (test_effective_state_agrees_disagrees_and_no_pair's Copa/AMBIGUOUS case); AMBIGUOUS and NO_EVIDENCE rows are never inspected for a folder token at all."
+      "reason": "ISSUER AMENDMENT 1, verbatim: 'An EVIDENCED row whose report ticker ROOT differs ... is state DISAGREEMENT'. effective_state_and_reason() returns a non-EVIDENCED row's own state and reason unchanged."
+    },
+    {
+      "item": "Calling add_security with --folder alone, under any circumstance including a defensive/malformed row",
+      "reason": "ISSUER AMENDMENT 2, verbatim: 'NEVER --folder alone'. _build_call_argv returns None (never a --folder-only argv) whenever root or cc is missing, and run() refuses that row before reaching `call` at all -- proven by test_run_refuses_folder_only_call_before_reaching_call, whose `call` raises if it is ever invoked and never does."
     }
   ],
-  "surprises": [],
+  "surprises": [
+    "AMGT_CORPUS-Z-W2-S4: one --dry-run over the real library, taken right after ISSUER AMENDMENT 2 landed, read a transient population of 40 (Copa/Uber EVIDENCED, ambiguous 0) that reverted to the stable population-60/ambiguous-2 shape on every read before and after it (5 re-reads total) -- traced to the live, read-only identity/crosswalk substrate (plausibly the issuer's own revert of its first-fire writes in flight), never to this cell's code, which is unmodified there. This instance's own AC2 evidence is taken only from the stable, twice-reproduced reading."
+  ],
   "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
     {
       "tool": "pytest (AC1)",
       "invocation": "python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider",
-      "result": "rc 0; 15 passed, 0 failed (run twice, identical pass count, 3.25s then 0.40s)"
+      "result": "rc 0; 18 passed, 0 failed (run twice, identical pass count, 0.78s then 0.53s)"
     },
     {
       "tool": "induction_run CLI --dry-run (AC2)",
       "invocation": "python -m lib.research.corpus.induction_run --dry-run --as-of 2026-09-24",
-      "result": "rc 0; population 60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60 (byte-identical on a second run)"
+      "result": "rc 0; population 60 evidenced 20 ambiguous 2 disagreement 1 other 37 called 20 registered 18 already_registered 1 refused 1 errors 0 bloomberg_calls 0 sum 60 (byte-identical on a second run; one intervening transient run read population 40 -- see surprises)"
     },
     {
       "tool": "induction_run CLI --fire (AC3)",
@@ -132,12 +138,17 @@
     {
       "tool": "py_compile + byte-level CRLF/non-ASCII check (hygiene, ad hoc, not committed)",
       "invocation": "python -c \"import py_compile; ...\" over lib/research/corpus/induction_run.py and lib/research/corpus/tests/test_induction_run.py",
-      "result": "both files compile True, crlf 0, non_ascii 0; git status --porcelain shows only the two changed .py files and the deliverables JSON, nothing outside <paths>"
+      "result": "both files compile True, crlf 0, non_ascii 0; git status --porcelain shows only the two changed .py files, the deliverables JSON and the surprise-channel investigation file, nothing outside <paths>"
     },
     {
-      "tool": ".scratch/d5/mutant_control.py (not committed -- scratch control harness, updated for ISSUER AMENDMENT 1)",
+      "tool": ".scratch/d5/mutant_control.py (not committed -- scratch control harness)",
       "invocation": "python .scratch/d5/mutant_control.py",
-      "result": "rc 0; FIX (real run()): called=5 disagreement=1 ok=True; MUTANT 1 (no EVIDENCED guard) and MUTANT 2 (pre-amendment, no disagreement check) both raised AssertionError; CONTROL_FIRED_AS_EXPECTED=True (run twice, identical)"
+      "result": "rc 0; FIX (real run()): called=5 disagreement=1 ok=True; MUTANT 1 and MUTANT 2 both raised AssertionError; CONTROL_FIRED_AS_EXPECTED=True (run twice, identical, re-verified after ISSUER AMENDMENT 2)"
+    },
+    {
+      "tool": "raw diagnostic reads of induction_request.measure_population (not committed -- used only to characterise surprises AMGT_CORPUS-Z-W2-S4)",
+      "invocation": "python -c \"import lib.research.corpus.induction_request as ir; import lib.research.corpus.library as library; ...\"",
+      "result": "one read: unresolved_folders 40 (transient); three immediately-following reads: unresolved_folders 60, 60, 60 (stable); matches the --dry-run CLI's own before/after totals"
     }
   ]
 }
