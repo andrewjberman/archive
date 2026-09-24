@@ -1,8 +1,8 @@
 # AMGT_RESAPP round 38 -- drain-end packet (L7 -> L8/L9 handoff to `3.0.0_SA_CVO~Z`)
 
 Issuer: `2.0.0_SA_COO~Z`. Decomposition s.46 @7eaf2d7dae (rm-7 amended @b374f81234, @a2573d8540, @72cef87e47; rm-6 amended
-@cf6b23c04a). PRD v0.26 unchanged. Seven orders over the round-37 analysis's list. DRAFT 3 (16:0xZ): six of seven closed; rm-7 is filled at its
-ledger close. Push state: LOCAL.
+@cf6b23c04a). PRD v0.26 unchanged. Seven orders over the round-37 analysis's list. FINAL (16:3xZ): seven of seven terminal, every row
+dispositioned below. Push state: LOCAL.
 
 ## 1. Orders and their terminal state
 
@@ -14,9 +14,11 @@ ledger close. Push state: LOCAL.
 | rm-4 the export served | AMGT-rm-4 | ~143 | 3350abb022 | 71b30f4ea5 | 3 of 3 PASS, VALID | none |
 | rm-5 the provenance disclosure | AMGT-rm-5 | ~144 | ef9d6978c4 | ab92b79bad | 3 of 3 PASS, VALID | W144-S1 (ARMED -> rm-2) |
 | rm-6 the contract gap measured and drafted | AMGT-rm-6 | ~145 | 7e26b17aec | 7343dc76ad | 3 of 3 PASS, VALID; deliverables only, gitlink unmoved | none |
-| rm-7 the deploy leg | AMGT-rm-7 | 0.7.0_AE_CloudOps~A | (seat order; bound to 3350abb022; lane re-seated 14:19Z; HELD at the build 15:39Z, unblocked 15:5xZ) | -- | 3 mechanical under NEVER-2 (entry 20260924T1523Z_amgt-rm-7-print-format-rich OPEN @192d45272d); L2 on the content-stream plane | Z-S253 (INERT), Z-S254 (ARMED, the issuer's disarm at close), Z-S256 (the lane's: the build's lib/ precondition) |
+| rm-7 the deploy leg | AMGT-rm-7 | 0.7.0_AE_CloudOps~A | seat order, no worktree: deploy @35038a7459 (ledger closed 15:58Z), instance @f9d68312f2 + project copy @c3d132ceb8 | 4e3dbfec72 | 3 of 3 PASS, VALID at HEAD; L1 CodeSha256 moved, L2 content-stream digest EQUAL with CAT different, L3 format=rich 200 text/markdown | Z-S253 (INERT), Z-S254 (ARMED), Z-S256 (INERT) -> all three DISARMED via the lane's Z-S258 on the issuer's word |
 
-Proof instances under `deliverables/0.9.0_WK_AMGT_RESAPP~<n>/`, each re-validated by the issuer inside the worker's worktree.
+Proof instances under `deliverables/0.9.0_WK_AMGT_RESAPP~<n>/`, each re-validated by the issuer inside the worker's worktree; rm-7's
+under `deliverables/0.7.0_AE_CloudOps~A/` (the pipeline gate globs `deliverables/*/` for a seat order's instance and does not read the
+tier-2 home, so the lane committed a byte-identical copy there; the original stays under `org/tier2_senior/`).
 
 ## 2. The instrument, re-keyed -- the round's baseline read
 
@@ -49,9 +51,12 @@ never pass and its failure branch is the rollback; remedied on the face at amend
 content-stream comparand), the CVO's Z-S255 (ARMED: `portal/` is an embedded repo with ZERO active hooks, so no commit inside it is
 graded by owned-paths, contamination or never-rules, and `.gitmodules` is tracked-and-empty -- R-74's finding as a row; disarm
 owner the CVO), the AE lane's Z-S256 (the build refuses on a generated-module stamp drift no AMGT cell created; s.5), rm-2's W141-S1 (INERT: AC3
-passed --route to ui-measure.mjs too; the worker added the same additive flag; its `fabric` field reads laptop for site-z, noted) and
+passed --route to ui-measure.mjs too; the worker added the same additive flag; its `fabric` field reads laptop for site-z, noted),
 the issuer's Z-S257 (disarms W144-S1: PanelFooter's flex-shrink-0 gone, min-w-0 on both wrappers, clippedTextBlocks 0 in both scopes
-at 5e339ffd). rm-3 and rm-6 filed none.
+at 5e339ffd) and the AE lane's Z-S258 (INERT; the disarm carrier for Z-S253, Z-S254 and Z-S256, each remedy on its own evidence
+line, the owner's word stated in rm-7's close-out). rm-3 and rm-6 filed none. **Not L8 input, present in the file after Z-S258:**
+Z-S259 and Z-S260 are `3.0.0_SA_CVO~Z`'s own R-78 sweep carriers; the issuer's own sweep carriers follow this packet and are
+not round-38 rows.
 
 The CTO's R-76 @4f93bbf428 accepts Z-S253/Z-S254 as found and amends R-57 (the no-pair DELTA=0 must NAME its comparand); the
 plane R-76 names is superseded by amendment 3 -- the metadata-normalised sha also moves under rl-10's CreationDate pin (the entry
@@ -64,6 +69,17 @@ that still differs on CAT (msgs 25587, 25595).
   one extra member with the prior artifact as the rollback, and L2 moved off the raw sha (@a2573d8540); L2 moved again onto the
   content-stream digest on the AE lane's measurement of the pin (@72cef87e47). rm-6's AC1 chain separated (@cf6b23c04a) after
   rm-1's AC3 showed the class.
+- rm-7 LANDED (AE msg 25628): artifact VersionId ZacA2Kn0CWoJqOFLvTPe2kzZ4x_ctTYe -> 9z.fsHGW7ZN2Qf2yU_rsnv0wiL7uKqRS (807,904 ->
+  844,437 bytes) built at 19a22f2f51; plan 0/1/0 in place touching only s3_object_version, source_code_hash, last_modified; replan No
+  changes. On the real deploy the raw sha and the /CreationDate-normalised sha both read NOT EQUAL while the content-stream digest read
+  EQUAL (77,862 -> 77,828 bytes, the entry present -> absent): amendments 1 and 2 would each have rolled back a correct deploy.
+  NOT CLAIMED by the lane and carried here: rm-4's rich CONTENT is graded on the worker's fixture (162/162, 43/43), never on the
+  live 58,549-byte body; the build pip-downloads pinned wheels from PyPI inside the named script, an egress the face inherited by
+  naming the script rather than declaring; AC3's raw grep needed a `# rail-checked:` marker; a recorded invocation typed as a shell
+  command fails invocation-alignment against the file's XML-escaped `&&` (17 violations on first grading, all repaired). Process
+  note from the lane worth the CTO's eye: the copy's path resolves to `org/missions/**` -> TIER0_MSTR with agents [] by the lane's
+  reading of `.owned-paths.yaml`, and the owned-paths hook ADMITTED the commit -- the hook runs a rule the YAML reading did not
+  predict.
 - rm-7 HELD at the build (AE msg 25605): `build-and-upload-scoped-amgt.sh` runs `gen_harvest_prefixes.py --check` before packaging and
   refused on `lib/research/api/_harvest_prefixes.py` drifting from fresh `lib.opal_naming` output -- the REGISTRY_HASH stamp only, all
   four prefix constants identical; the hash moved with the 09-23 IRPT registry admission @8b4c15c6ba, so the build had refused since
