@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rm-2.the-free-chrome",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rm-2.the-free-chrome.md",
+    "group": "C",
+    "vintage_commit": "31c2e03c0e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "31c2e03c0e",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rm-2.the-free-chrome.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~141",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/PageHeaderVariants.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "4aa49151af5ec8602b9562835b9fece4bd56a35f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Line 46: font-light -> font-normal (the split-weight last word goes from 300 to the C1-legal 400). No other change; the 3px identity accent rule (:40) and the black <h1> are untouched.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "portal/src/ui/components/panels/PanelHeader.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "4aa49151af5ec8602b9562835b9fece4bd56a35f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Line 62: rounded-t-lg (8px, invisible to ui-class-census.mjs's RADIUS_NAMED pattern) -> rounded-t-[4px] (C11 rounded.md, seen and legal under RADIUS_ARBITRARY). Line 75: font-semibold (600) -> font-bold (700), uppercase tracking unchanged. text-white / text-white/NN idioms on the strip left in place (declared exclusion, C5 inversion on a dark strip -- see AC1-idiom-exclusions.md). PanelHeader strip's boxShadow confirmed \"none\" live.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "portal/src/ui/components/panels/PanelFooter.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "4aa49151af5ec8602b9562835b9fece4bd56a35f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Line 93: rounded-b-lg -> rounded-b-[4px]. Row AMGT_RESAPP-W144-S1 (rm-5, routed to this file's owner): line 104 leftContent wrapper gains min-w-0; line 106 content wrapper's flex-shrink-0 replaced with min-w-0 -- both flex children can now shrink and wrap instead of one refusing to shrink and forcing the row to overflow (the likely mid-word-clip mechanism ADJUDICATION_v47 s.2.4 saw when a caller carries both leftContent and content/timestamp). Presentation only; content/timestamp/leftContent prop contract unchanged. PanelFooter strip's boxShadow confirmed \"none\" live.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "portal/scripts/ui-smoke.mjs",
+      "kind": "frontend_component",
+      "commit_or_etag": "4aa49151af5ec8602b9562835b9fece4bd56a35f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Added --route <path> / --out <file> flags, additive over the original positional <route> <outfile.png> form: routeFlagIdx/outFlagIdx checked first, args[0]/args[1] read unchanged when the flags are absent. Named explicitly by the task order's WHAT YOU BUILD item 3 ('If ui-smoke.mjs takes no --route flag, add the smallest one to it ... and say so').",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "portal/scripts/ui-measure.mjs",
+      "kind": "frontend_component",
+      "commit_or_etag": "4aa49151af5ec8602b9562835b9fece4bd56a35f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Added the identical --route flag (route = args.includes('--route') ? args[idx+1] : args[0]), additive, same reasoning. NOT named in the task order's text -- AC3's own invocation passes --route to this script too, and without the flag args[0] would have read '--port'. Filed AMGT_RESAPP-W141-S1, disarmed same-turn.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE THREE FILES CLEAN AT THE SOURCE: weight, radius and shadow categories read 0 on all three (was weight 2, radius 0 by the census's rounded-lg pattern -- print what rounded-t-lg/rounded-b-lg read as, and if the census does not count the -t-/-b- forms say so and count them by grep beside it); the idiom category's remaining hits are each named with the clause that makes them legal on a --bg-header strip (C5 inversion), printed per line with its denominator; FILES 3 and the TOTAL after exclusions 0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node scripts/ui-class-census.mjs src/components/PageHeaderVariants.tsx src/ui/components/panels/PanelHeader.tsx src/ui/components/panels/PanelFooter.tsx",
+      "output_evidence": "src/components/PageHeaderVariants.tsx idiom=0 size=0 weight=0 radius=0 shadow=0 total=0\nsrc/ui/components/panels/PanelFooter.tsx idiom=4 size=0 weight=0 radius=0 shadow=0 total=4\nsrc/ui/components/panels/PanelHeader.tsx idiom=4 size=1 weight=0 radius=0 shadow=0 total=5\nFILES 3 TOTAL 9\n\nRADIUS-PATTERN BLIND SPOT (confirmed by replaying RADIUS_NAMED=/rounded-(md|lg|xl|2xl|3xl)\\b/g against the pre-edit HEAD c7b022a1 bytes via `git show HEAD:<path>`): PanelHeader.tsx's pre-edit `rounded-t-lg` (:62) -> 0 named-pattern hits; PanelFooter.tsx's pre-edit `rounded-b-lg` (:93) -> 0 named-pattern hits. The pattern requires the ladder token (md|lg|xl|2xl|3xl) directly after \"rounded-\"; the inserted \"t-\"/\"b-\" side token defeats it, so the census read radius=0 on both files before this edit despite each rendering an actual 8px (Tailwind .rounded-lg) corner. Post-edit rounded-t-[4px]/rounded-b-[4px] ARE seen by RADIUS_ARBITRARY=/rounded-\\[(\\d+)px\\]/g and correctly read as legal (4 in {2,3,4}).\n\nIDIOM EXCLUSIONS (8 hits total, full detail in AC1-idiom-exclusions.md): PanelHeader.tsx :75 text-white (title, x1), :83 text-white/40 + text-white/70 (help icon, x2), :89 text-white/60 (subtitle, x1) = 4; PanelFooter.tsx :8 text-white/40 (JSDoc comment, documentation-only, not a live class), :104 text-white/50 (caption wrapper), :110 text-white/50 (timestamp), :111 text-white/30 (separator) = 4. Every hit sits inside the strip whose background is bg-[hsl(var(--bg-header))] (DESIGN.md C3's persistent dark \"band\" surface) -- C5 governs carrying a dark-mode idiom ONTO the light ground, not a surface that is genuinely, persistently dark by design, so these are declared legal under the clause \"C5 inversion on a dark strip\" (per the task order's own routing, WHAT YOU BUILD (2)).\n\nOUT OF SCOPE, unchanged: PanelHeader.tsx size=1 (DataTimestamp text-[10px], :99) -- a C2/typography-size concern, not C1 (weight) or C11 (radius/shadow); was already size=1 in the round-38 starting census (FILES 3 TOTAL 11) and remains size=1 after this cell's edits (FILES 3 TOTAL 9 = 8 idiom + 1 size); confirmed live in AC2's own scope=main table as sizes FAIL [10] on thesis/model only, matching the issuer's baseline note exactly.\n\nTOTAL after exclusions (the categories this cell governs -- weight, radius, shadow, idiom): 0.",
+      "denominator": "3 of 3 files clean on weight/radius/shadow (0/0/0 each); 8 of 8 idiom hits named individually with the C5 clause (4 PanelHeader + 4 PanelFooter, one of the four PanelFooter hits a documentation comment not a live class); the census's own RADIUS_NAMED blind spot confirmed on 2 of 2 pre-edit forms (rounded-t-lg, rounded-b-lg) by direct regex replay against HEAD c7b022a1; 1 of 3 files (PanelHeader) carries a residual size=1 hit, named and excluded as out-of-scope (C2, not C1/C11), unchanged before/after this cell.",
+      "status": "PASS",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "INSIDE MAIN, ON ALL SIX STATES: weight 300 reads 0 (was 8 on every state) and no 8px radius attributable to a strip remains (print the radii map per state; the residue, if any, is named by element and is another cell's -- rm-3's attribution); the scope=body table printed beneath still shows the sidebar's weight 500 / shadow / radii and they are REPORTED as the sidebar's, not touched; the C11 shadow limb DETERMINED in words -- the single shadow is named as the sidebar's shadow-lg or as one of your files' and, in the second case, gone; six PNGs larger than 20 KB",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node scripts/ui-contract-check.mjs --port 5183 --scope main --out ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~141/contract-check-chrome; echo \"exit=$?\"",
+      "output_evidence": "== scope=main (GRADED) ==\nstate\tbandContainersTopLevel\tfonts\tweights\tsizes\tradii\tshadows\tlowContrastChars\tpurpleFills\tidentityAccents\tstripContainers\tclippedTextBlocks\nlist\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\t1\t2\t0\nthesis\tPASS\tPASS\tPASS\tFAIL [10]\tPASS\tPASS\tPASS\tPASS\t1\t1\t0\nexec\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\t1\t1\t0\npeers\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\t1\t0\t0\nmodel\tPASS\tPASS\tPASS\tFAIL [10]\tPASS\tPASS\tPASS\tPASS\t1\t1\t0\nposture\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\tPASS\t1\t1\t0\n\nRADII MAP PER STATE (main scope, from each state's own contract-check-chrome/<state>.json \"radii\" field -- no 8px anywhere): list {3.35544e+07px:1(pill), 3px:2, 4px:6}; thesis {3.35544e+07px:18, 3px:4, 4px:27, 2px:1}; exec {3.35544e+07px:13, 3px:8, 4px:10, 2px:2}; peers {3.35544e+07px:1, 3px:4, 4px:9, 2px:2}; model {3.35544e+07px:1, 3px:4, 4px:13, 2px:2}; posture {3.35544e+07px:1, 3px:4, 4px:17, 2px:2}. WEIGHTS MAP PER STATE (main scope, \"weights\" field -- 400/700 only, no 300/500/600 anywhere): list {400:584,700:129}; thesis {400:20455,700:821}; exec {400:3509,700:207}; peers {400:3474,700:287}; model {400:2942,700:245}; posture {400:6213,700:919}.\n\n== scope=body (informational) ==\nstate\tbandContainersTopLevel\tfonts\tweights\tsizes\tradii\tshadows\tlowContrastChars\tpurpleFills\tidentityAccents\tstripContainers\tclippedTextBlocks\nlist\tPASS\tPASS\tFAIL [500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t3\t0\nthesis\tPASS\tPASS\tFAIL [500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t2\t0\nexec\tPASS\tPASS\tFAIL [500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t2\t0\npeers\tPASS\tPASS\tFAIL [500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t1\t0\nmodel\tPASS\tPASS\tFAIL [500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t2\t0\nposture\tPASS\tPASS\tFAIL [500,600]\tFAIL [10]\tFAIL [\"8px\"]\tFAIL 1\tPASS\tPASS\t3\t2\t0\n\nThese body-scope FAILs (weight 500/600, radii 8px, shadow 1) are the SIDEBAR's (App.tsx, untouched by this cell) -- reported, not fixed, per Bound 3.\n\nC11 SHADOW LIMB, DETERMINED: getComputedStyle().boxShadow on a live PanelHeader strip and a live PanelFooter strip both read \"none\" (portal/scripts/_tmp_shadow_check.mjs, run then deleted, output saved to shadow-check-output.json); the sidebar's <aside> reads the real shadow-lg box-shadow values and its className literally carries \"...shadow-lg...\" (App.tsx:271). The single shadow the CVO left INDETERMINATE at rl-9/rm-1 is the sidebar's shadow-lg -- confirmed both statically (my three files carry shadow=0 at the source, AC1) and live (computed boxShadow none on both strips, real values on the sidebar); nothing in my files is touched for shadow because there was nothing to remove.\n\nSTATES: 6 of 6 run\nPNG[list]: 74132 bytes\nPNG[thesis]: 363363 bytes\nPNG[exec]: 244752 bytes\nPNG[peers]: 218739 bytes\nPNG[model]: 260743 bytes\nPNG[posture]: 285569 bytes\nRESULT: FAIL (at least one graded cell in scope=main read FAIL)\nexit=1",
+      "denominator": "6 of 6 states: weight column PASS 6/6 (0 instances of weight 300 on any state; was 8 on every state per the round baseline); radii column PASS 6/6 (0 instances of an 8px strip radius; full radii map printed per state, no 8px in any); shadows column PASS 6/6 in main (unchanged from baseline -- confirms the shadow limb was never main-scope's problem); sizes column FAILs on 2 of 6 states (thesis, model) -- the DataTimestamp size=10 residue, out of this cell, matching the issuer's own baseline note verbatim (\"sizes [10] on thesis and model only\"); this is the sole reason the tool's own RESULT line reads FAIL, not weight/radii/shadow. 6 of 6 PNGs > 20480 bytes (74132..363363).",
+      "status": "PASS",
+      "status_reason": "The tool's own bottom-line RESULT/exit reflect the WHOLE scope=main table (including the sizes column, which belongs to another cell and is explicitly out of Bound 2/3's scope for rm-2), so RESULT reads FAIL and exit=1 -- but this criterion's own <expect> text asks specifically for weight 300 -> 0, the strip radii gone, the body-scope sidebar values reported not touched, and the shadow limb determined in words: every one of those five asks is met and printed above. Graded PASS against the criterion's own literal text, not the tool's aggregate verdict, per Bound 3 (\"A predicate that still FAILS after your three files are clean is a FINDING with its owning file, never tuned\" -- sizes is exactly that finding, named with its owning file and left standing).",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE DASHBOARD STILL RENDERS WITH ITS STRIPS: a /market PNG larger than 20 KB, its stripContainers count printed and equal to the count measured BEFORE your edit (print both -- the strips moved in radius and weight, not in number), tsc clean (tsc=0). If ui-smoke.mjs takes no --route flag, add the smallest one to it (it is in your paths) and say so",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)/portal\" &amp;&amp; node scripts/ui-smoke.mjs --port 5183 --route /market --out ../org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~141/market-after.png &amp;&amp; node scripts/ui-measure.mjs --port 5183 --route /market --scope main &amp;&amp; npx tsc -b --noEmit; echo \"tsc=$?\"",
+      "output_evidence": "ui-smoke.mjs took no --route/--out flags (positional <route> <outfile.png> only); added both, additive over the positional form, exactly as the criterion invites -- SAID here. ui-measure.mjs ALSO took no --route flag and this criterion's own invocation passes --route to it too (not named in the task order text); added the identical flag there, filed AMGT_RESAPP-W141-S1.\n\nmarket-after.png: 127198 bytes (> 20 KB).\n\nui-measure.mjs --route /market --scope main (AFTER, port 5183, this cell's edits live): stripContainers=12; weights {\"400\":607,\"500\":40,\"600\":79,\"700\":447}; radii {\"3.35544e+07px\":1,\"4px\":23,\"8px\":4,\"3px\":1}.\n\nui-measure.mjs /market --scope main (BEFORE, a throwaway git-worktree of portal HEAD c7b022a1 pre-edit, port 5184, torn down after): stripContainers=12; weights {\"300\":8,\"400\":599,\"500\":40,\"600\":161,\"700\":365}; radii {\"3.35544e+07px\":1,\"4px\":17,\"8px\":10,\"3px\":1}.\n\nstripContainers BEFORE=12, AFTER=12 -- EQUAL, as required. The count is unchanged because ui-measure.mjs's stripContainers classifier (classify()'s isStripEl) matches on computed BACKGROUND COLOUR only, independent of border-radius or font-weight by construction -- so this equality is structurally guaranteed by the edit's own shape (radius/weight only, no element added or removed), not a coincidence. weights moved exactly as expected (300's 8 instances folded into 400; 600 dropped by 82, 700 rose by 82 -- the six strip titles' semibold->bold on /market). radii moved exactly as expected (8px dropped by 6, 4px rose by 6 -- six strips' worth; residual 8px:4 belongs to an element outside PageHeaderVariants.tsx/PanelHeader.tsx/PanelFooter.tsx, another cell's attribution per AC2's own Bound).\n\ntsc=0",
+      "denominator": "1 of 1 PNG > 20480 bytes (127198); stripContainers 12 == 12 (BEFORE == AFTER, 1 of 1 pair matches); tsc exit 0 (1 of 1 clean build); 2 of 2 scripts needed the --route addition (ui-smoke.mjs named by the criterion text, ui-measure.mjs found and fixed, filed as a surprise).",
+      "status": "PASS",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The census's weight predicate must be load-bearing: temporarily revert PanelHeader.tsx's font-bold (:75) back to font-semibold (the pre-fix state) and re-run the file's own census, confirming the weight column detects the regression; then restore the fix and confirm the restore is byte-identical and the census reads clean again.",
+      "expected": "Mutated: weight reads 1 (the regressed font-semibold). Reverted: weight reads 0 again, and `diff` against the pre-mutation file is empty (byte-identical restore). A predicate that read weight=0 regardless of the mutation would be non-load-bearing.",
+      "observed": "Mutated (font-bold -> font-semibold): `node scripts/ui-class-census.mjs src/ui/components/panels/PanelHeader.tsx` -> `idiom=4 size=1 weight=1 radius=0 shadow=0 total=6`. Reverted (font-semibold -> font-bold, restoring the committed bytes): same command -> `idiom=4 size=1 weight=0 radius=0 shadow=0 total=5`; `diff` between the restored file and the pre-mutation backup printed nothing (REVERT-BYTE-IDENTICAL).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran the three-file census (AC1's own invocation) twice in a row against the final, committed file state, byte-diffed the two outputs.",
+      "observed": "Both runs printed identical output (weight/radius/shadow 0/0/0 on all three, idiom 0/4/4, size 0/0/1, FILES 3 TOTAL 9); `diff` between the two captured outputs printed nothing (DETERMINISM-CONFIRMED-IDENTICAL).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "PanelHeader.tsx's size=1 (DataTimestamp `text-[10px]`, :99) and the corresponding sizes FAIL [10] on the thesis/model states in both AC2 scope tables",
+      "reason": "This cell's mandate (s.1 WHAT YOU BUILD) is C1 (typeface weight) and C11 (radii, shadow) only; size is a C2/typography-scale concern the task order does not route to this cell. Pre-existing before this edit (round-38 starting census FILES 3 TOTAL 11 already carried it) and unchanged after (FILES 3 TOTAL 9). Reported per Bound 3, never tuned."
+    },
+    {
+      "item": "Fixing the scope=body table's sidebar weight 500/600, shadow, and radii FAILs",
+      "reason": "Bound 3 names these EXPECTED to remain (\"the sidebar's weight 500 / shadow / radii / size-10 are EXPECTED to remain in the scope=body table\"); reported as the sidebar's per AC2, App.tsx is explicitly out of this cell's files (s.1: \"You do not touch App.tsx, index.css, Panel.tsx or any page file\")."
+    },
+    {
+      "item": "Editing App.tsx, index.css, Panel.tsx, or any src/pages/** page file",
+      "reason": "Explicitly excluded by s.1's closing sentence and Bound 2 (presentation only, no page file touched)."
+    },
+    {
+      "item": "Editing portal/DESIGN.md",
+      "reason": "The task order names C1/C11 as the GOVERNING clauses (\"presentation only, under portal/DESIGN.md C1/C11\"), not a file to amend; no new clause text was needed -- the idiom exclusions are documented in this worker's own deliverables (AC1-idiom-exclusions.md) under the issuer's own routed clause language, not as a DESIGN.md edit."
+    },
+    {
+      "item": "The outer worktree commit (task-order/deliverables record) and the gitlink move",
+      "reason": "Performed after this instance is written, per WHEN YOU ARE DONE step 5; not part of the acceptance battery itself."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-W141-S1: AC3's literal invocation passes --route to ui-measure.mjs as well as ui-smoke.mjs, but only ui-smoke.mjs's missing --route flag was named in the task order text; ui-measure.mjs needed the identical addition to parse the route at all (without it, args[0] would have read the literal string '--port'). Fixed same-turn (portal/scripts/ui-measure.mjs is in this cell's <paths>), additive over the untouched positional form; filed OBSERVATION/INERT, disarm owner this worker."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~141/AMGT_RESAPP.TO-AMGT-rm-2.the-free-chrome.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "node --check (syntax check)",
+      "invocation": "cd portal && node --check src/components/PageHeaderVariants.tsx 2>&1 || true; node --check scripts/ui-smoke.mjs && node --check scripts/ui-measure.mjs && node --check scripts/ui-class-census.mjs && node --check scripts/ui-contract-check.mjs",
+      "result": "The two .mjs scripts and the two unedited instrument scripts are syntax-clean (node --check exits 0); the .tsx files are not valid standalone Node syntax (JSX) -- their syntax is proven instead by tsc -b below and by the live render (AC2/AC3 PNGs, six states + /market, all rendered without a build/runtime error)."
+    },
+    {
+      "tool": "npx tsc -b --noEmit",
+      "invocation": "cd portal && npx tsc -b --noEmit; echo tsc=$?",
+      "result": "tsc=0 (clean, run twice -- once standalone, once as part of AC3's literal chained invocation, both times exit 0)"
+    },
+    {
+      "tool": "node (execution, live)",
+      "invocation": "AC1/AC2/AC3 invocations above, exercised live against portal HEAD 4aa49151af5ec8602b9562835b9fece4bd56a35f on the dev server (bun run dev --port 5183); the AC3 BEFORE comparison used a throwaway worktree of the pre-edit HEAD c7b022a1 on port 5184, torn down after",
+      "result": "AC1 census: FILES 3 TOTAL 9 (weight/radius/shadow 0/0/0 on all three). AC2 exit 1 (RESULT: FAIL) on the tool's own aggregate line, driven entirely by the sizes column (thesis/model, another cell's), with weight/radii/shadow/PNG-size all PASS on 6/6 states -- graded PASS against this criterion's own <expect>, see status_reason. AC3: market-after.png 127198 bytes, stripContainers 12==12 before/after, tsc=0."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (portal commit)",
+      "invocation": "cd portal && bash ../.tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~141 <0.9.0_WK_AMGT_RESAPP~141@opal.agent>\" -F <msgfile> -- scripts/ui-measure.mjs scripts/ui-smoke.mjs src/components/PageHeaderVariants.tsx src/ui/components/panels/PanelFooter.tsx src/ui/components/panels/PanelHeader.tsx",
+      "result": "[risk-reflex] REFLEX CLEAN (5/5 files, 0 danger nodes matched); [naming-gate] PASS 0 graded; [to-pipeline-gate] OK (no task_orders/*.md staged); commit 4aa49151af5ec8602b9562835b9fece4bd56a35f, 5 files changed, 17 insertions(+), 10 deletions(-)"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[surprise-corpus] OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved). [surprise-row-gate] OK: 1 file(s), all new rows carry their step-7/step-10 fields. rc=0"
+    }
+  ]
+}

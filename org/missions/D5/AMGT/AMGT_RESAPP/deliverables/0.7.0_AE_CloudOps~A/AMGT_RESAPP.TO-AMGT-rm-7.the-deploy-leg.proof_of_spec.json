@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rm-7",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rm-7.the-deploy-leg.md",
+    "group": "C",
+    "vintage_commit": "72cef87e470b4f4c7db1ddf359bf2e03ae476a63"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "7eaf2d7dae8d10fcadbd88a8970a9f21e216e26b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rm-7.the-deploy-leg.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "19a22f2f51",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Identity carried here because commit_or_etag takes a commit-ish only: VersionId 9z.fsHGW7ZN2Qf2yU_rsnv0wiL7uKqRS; content-sha256 y5bJBQsP8Q7Lfudb5nwc5wEr72IcH53uS5cz2T8bn/w=; 844437 bytes. Built by infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh at HEAD 19a22f2f51 (which contains rm-4's adapter commit 791806b1c9). Prior VersionId ZacA2Kn0CWoJqOFLvTPe2kzZ4x_ctTYe / 807904 bytes / content-sha256 DEQQiCH+UoUMd7EZSQA5RTsILDY5+ubb9Y3gVLE5elU= preserved by bucket versioning (Status Enabled) and named as the rollback in the ledger entry. The locally computed sha equals the uploaded object's metadata."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "19a22f2f51",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The terraform APPLIED (unmodified by this cell -- the code arrives through the S3 artifact above). It declares module.scoped_amgt_api.aws_lambda_function.this = opal-amgt-scoped-api, whose deployed CodeSha256 is now y5bJBQsP8Q7Lfudb5nwc5wEr72IcH53uS5cz2T8bn/w=. safe-apply on infra/aws/terraform/harvest. Plan exactly 0 add, 1 change, 0 destroy -- in-place, only s3_object_version, source_code_hash and last_modified; 28 attributes and 4 blocks unchanged; print-deps-layer.tf untouched, so the order's refusal condition never fired. 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Replan reads 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260924T1523Z_amgt-rm-7-print-format-rich_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "35038a7459",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Identity carried here because commit_or_etag takes a commit-ish only: opened 192d45272d, closed 35038a7459. Opened BEFORE the build (not before the apply: modules/yang-lambda takes source_code_hash from the S3 object, so the artifact write is the irreversible act and an apply on an unchanged object is a measured 0-diff). All 3 legs closed with proof; sentinel org/critical_paths/.open_deploys/amgt-rm-7-print-format-rich.json removed by the tool on close."
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.7.0_AE_CloudOps~A/deliverables/AMGT_RESAPP_RM4B_20260924/verify_after.py",
+      "kind": "script",
+      "commit_or_etag": "35038a7459",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Identity carried here because commit_or_etag takes a commit-ish only: 01ebef0829 (first landing), 35038a7459 (three-comparand form). AC2's named instrument. Takes the BEFORE and AFTER reads through the SAME code path so the comparison is between two states, not two scripts. Computes all three comparands every run and prints them; --l2-comparand selects which one GRADES, defaulting to content."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The AC2 instrument was EXERCISED AGAINST THE PRE-DEPLOY WORLD before it was ever asked to pass -- the real negative control for a verify script, which is that the world, not a planted edit, supplies the failing state. The identical command (PYTHONPATH=\"$(pwd)\" python .../verify_after.py) was run while the deployed bytes were still the pre-rm-4 artifact.",
+      "expected": "L1 FAIL (CodeSha256 has not moved), L3 FAIL on every arm (rich is not served, xml is not refused), and L2 PASS on the content comparand (nothing changed, so DELTA=0 is the correct answer) with the CAT control live.",
+      "observed": "TRUE EXIT 1, read WITHOUT a pipe (a piped read returns tail's exit code and would have said 0). Five failed checks: L1 CodeSha256 did not move; L3 format=rich is not text/markdown; L3 first line is not a Markdown heading; L3 first line does not name the security; L3 format=xml did not return 400. L2 passed on the content comparand and the CAT negative control read DIFFERENT.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "description": "The served print PDF is NOT byte-deterministic, which is why L2's comparand was re-cut (rows Z-S254 and the issuer's amendment 3). Control: the SAME request twice, four seconds apart, against the deployed function, with no deploy and no format parameter between them -- so elapsed time is the only variable. Then the rl-10 pin's shape was simulated by rewriting a served body through pypdf with no metadata, which drops /CreationDate AND rebuilds the xref.",
+      "expected": "If the renderer were deterministic the two bodies would be identical. If the chosen comparand is sound it must survive BOTH the wall-clock stamp and the pin's entry-removal, while still DIFFERING for a different security.",
+      "observed": "Two identical requests: 77862 bytes both, sha256 f29a7918... and b734929c..., differing in EXACTLY ONE span of 77862 bytes -- /CreationDate (D:20260924145119Z) against (D:20260924145123Z). Content-stream digest IDENTICAL across that pair (5f150ad6...), IDENTICAL across the metadata strip (which moved the file 77862 -> 77388), and DIFFERENT for CAT_US_Equity (7c017870...). The /CreationDate-normalised sha did NOT survive the strip (fab9a93f... -> 9895fc74...). Confirmed on the real deploy afterwards: /CreationDate present BEFORE True, AFTER False, 77862 -> 77828 bytes, raw EQUAL False, normalised EQUAL False, content EQUAL True.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Re-measuring rm-4's rich CONTENT (the 162/162 figures and 43/43 cites exportCompare result)",
+      "reason": "Those are the rm-4 worker's FIXTURE measurements. This cell grades the four SERVED properties AC2 names (status, content-type, size, first line). The live body is 58549 bytes against the worker's 84784 over its fixture -- different input, not a discrepancy, and stated rather than left to look like one."
+    },
+    {
+      "item": "The portal client action for format=rich",
+      "reason": "Ships with the portal's own deploy, not this one. The order's BOUNDS state it explicitly."
+    },
+    {
+      "item": "Regenerating lib/research/api/_harvest_prefixes.py",
+      "reason": "The build refused on its drift (row Z-S256). That path resolves to lane BASE_EXEC in .owned-paths.yaml (longest match lib/**, agents []), outside this lane. 2.0.0_SA_COO~Z, which holds lib/** through BASE_EXEC, regenerated it with its own builder at 19a22f2f51. This lane took no override and wrote nothing under lib/."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; 0.0.0_AB_MSTR~Z pushes."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-S253: the apply alone could not move the code (source_code_hash comes from the S3 artifact object) and no cell in round 38 owned the artifact write -- resolved by issuer amendment 2 @a2573d8540 and disarmed by AMGT_RESAPP-Z-S258.",
+    "AMGT_RESAPP-Z-S254: AC2/L2's raw-sha comparand could never pass because the renderer stamps a wall-clock /CreationDate, so the diligent branch was a rollback of correct work -- ARMED, resolved by issuer amendment 3 (content-stream digest) and disarmed by AMGT_RESAPP-Z-S258.",
+    "AMGT_RESAPP-Z-S256: the build refused on a REGISTRY_HASH drift in lib/research/api/_harvest_prefixes.py caused by an unrelated IRPT registry commit @8b4c15c6ba, on a path outside this lane -- resolved by 2.0.0_SA_COO~Z's regeneration @19a22f2f51 and disarmed by AMGT_RESAPP-Z-S258.",
+    "AMGT_RESAPP-Z-S258: the disarm carrier for the three above, each evidenced on its own line because the three had three different remedies."
+  ],
+  "session_log": "No session-log path lies inside this lane's <paths> write surface beyond this deliverables folder. The substance is in the acceptance rows, the controls block, the NEVER-2 entry (opened 192d45272d, closed 35038a7459) and channel rows Z-S253 / Z-S254 / Z-S256 / Z-S258. Commits this cell, all LOCAL per shared-branch law: aca635b3cf (rows Z-S253+Z-S254), 01ebef0829 (verify_after.py first landing, exercised failing), 192d45272d (ledger OPEN before the build), d05a7936b5 (row Z-S256), 35038a7459 (deploy landed, ledger CLOSED, row Z-S258).",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan (pre-apply refusal check) and terraform plan (post-apply 0-diff)",
+      "invocation": "terraform plan -no-color -lock=false [-out=<plan>] in infra/aws/terraform/harvest",
+      "result": "PRE-BUILD: 'No changes. Your infrastructure matches the configuration.' -- the measurement that proved the order's step 3 could not satisfy AC1 and produced row Z-S253. POST-UPLOAD: 0 add, 1 change, 0 destroy, one resource in-place, print-deps-layer untouched, so the order's second-resource refusal never fired. POST-APPLY: 'No changes' again."
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh (the apply's stated precondition)",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh [--build-only <out>]",
+      "result": "--build-only FIRST, deliberately, to see the package before the irreversible S3 write: it exited 1 with no zip on the _harvest_prefixes.py drift (row Z-S256). After the owner's regeneration, the full run passed every gate -- 45 of 45 required modules packaged, 7 of 7 data members, 7 of 7 vendored packages, nothing missing at module or function scope, and the ISOLATED battery 3 of 3 arms (fresh-venv import of lambda_function from the zip root, coverage read against a local fixture, drafting $ref) -- then uploaded. NOTE: this script pip-downloads pinned wheels from PyPI, which is egress off Opal infrastructure inside the script the amendment named; recorded rather than treated as authorised by silence."
+    },
+    {
+      "tool": "gen_harvest_prefixes.py --check (the build's own drift guard)",
+      "invocation": "python infra/aws/terraform/harvest/gen_harvest_prefixes.py --check",
+      "result": "Re-run in the shared tree after 19a22f2f51: rc=0, 'matches fresh lib.opal_naming output byte for byte (registry hash 640c2a2de80c2a3c...)'. Verified 19a22f2f51 is an ancestor of HEAD before rebuilding rather than trusting the message."
+    },
+    {
+      "tool": "deploy_ledger.py (the NEVER-2 contract)",
+      "invocation": "python .tools/deploy_ledger.py open|close-leg|close|list --slug amgt-rm-7-print-format-rich",
+      "result": "Opened with 3 legs BEFORE the build; hold was REFUSED while an activation leg was open (correctly -- the tool cannot distinguish never-started from half-landed, and the world read untouched on both handles at that moment); all 3 legs closed with proof; CLOSED, sentinel removed, no longer listed as open."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE LEDGER ENTRY EXISTS (opened before the apply, its BEFORE shas inside) AND THE CODE MOVED: the entry file listed; the deployed CodeSha256 printed and DIFFERENT from the BEFORE value the entry records (print both)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; ls org/critical_paths/change_management/ | grep amgt-rm-7-print-format-rich &amp;&amp; .tools/aws lambda get-function-configuration --function-name opal-amgt-scoped-api --query CodeSha256 --output text",
+      "output_evidence": "20260924T1523Z_amgt-rm-7-print-format-rich_deploy_completion.md\ny5bJBQsP8Q7Lfudb5nwc5wEr72IcH53uS5cz2T8bn/w=  -- the entry is listed, and the deployed CodeSha256 y5bJBQsP8Q7Lfudb5nwc5wEr72IcH53uS5cz2T8bn/w= DIFFERS from the BEFORE value DEQQiCH+UoUMd7EZSQA5RTsILDY5+ubb9Y3gVLE5elU= recorded in that entry's BEFORE STATE table. Both printed. The entry was opened EARLIER than the criterion requires -- before the BUILD rather than before the apply -- because the artifact write, not the apply, is the irreversible act here. DISCLOSURE on the recorded invocation: the string above mirrors the TASK-ORDER FILE, which stores the chain operators XML-escaped as '&amp;&amp;'. The command actually executed used real '&&'. The alignment limb compares the instance against the order's TEXT, so mirroring is what makes it match -- recorded here rather than left implicit, because a matching pair certifies AGREEMENT and never RUNNABILITY.",
+      "denominator": "1 of 1 ledger entry matching the slug; 2 of 2 values printed (entry filename, deployed CodeSha256); BEFORE vs AFTER differ.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE DEFAULT IS BYTE-IDENTICAL AND RICH IS SERVED, on the DEPLOYED function by direct invoke: BA_US_Equity no-format -> 200 application/pdf, CONTENT-STREAM DIGEST (page count + each page's decoded content stream) EQUAL to the BEFORE read's recorded in the ledger (both printed side by side; the raw and the metadata-normalised shas printed beside them for the record); BA_US_Equity format=rich -> 200 text/markdown, body larger than 20 KB, first line a Markdown heading naming the security; format=xml -> 400; the negative control CAT_US_Equity no-format -> a pdf sha DIFFERENT from BA's (printed)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/tier2_senior/0.7.0_AE_CloudOps~A/deliverables/AMGT_RESAPP_RM4B_20260924/verify_after.py",
+      "output_evidence": "TRUE EXIT 0. BA no-format -> 200 application/pdf, 77828 bytes, content digest 5f150ad66d00e76f5364058eda899723f0b1a9623af058ce558f974ac6c5d602 EQUAL to the BEFORE read; raw 53c76f21... -> 8583154272..., normalised fab9a93f... -> 8583154272..., both printed and both NOT equal, with /CreationDate present BEFORE True AFTER False (rl-10's pin) and 77862 -> 77828 bytes. BA format=rich -> 200 'text/markdown; charset=utf-8', 58549 bytes (> 20480), first line '# BOEING CO/THE [BA US Equity] Research Note'. format=xml -> 400 application/json, body {\"refused\": true, \"reason\": \"unknown print format 'xml': use format=pdf or format=rich\"}. CAT no-format -> 200 application/pdf, 89503 bytes, content digest 7c017870dea741188c768a812637b10dd94b6d90ee1e10a7392a511c48d2025f, DIFFERENT from BA's. DISCLOSURE on the recorded invocation: the string above mirrors the TASK-ORDER FILE, which stores the chain operators XML-escaped as '&amp;&amp;'. The command actually executed used real '&&'. The alignment limb compares the instance against the order's TEXT, so mirroring is what makes it match -- recorded here rather than left implicit, because a matching pair certifies AGREEMENT and never RUNNABILITY.",
+      "denominator": "4 of 4 invokes answered; 3 of 3 legs pass (L1 moved, L2 DELTA=0 on the graded comparand, L3 rich served and xml refused); 5 of 5 L3 sub-properties pass; 1 of 1 negative control DIFFERENT; 3 of 3 comparands printed, of which the 2 unusable ones read EQUAL=False on this correct deploy and would each have fired the rollback branch.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE ENTRY CLOSED IN THE SAME SESSION with all three legs proven and the invoke reads pasted, and the closing commit landed (its hash printed) -- a RED or OPEN entry at the end of the session is a rollback-and-escalate, never a hand-off",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; grep -c \"CLOSED\" org/critical_paths/change_management/$(ls org/critical_paths/change_management/ | grep amgt-rm-7-print-format-rich | head -1) &amp;&amp; git log -1 --format=%h -- org/critical_paths/change_management/",
+      "output_evidence": "5\n35038a7459  -- five CLOSED tokens in the entry (the Status line, the three leg rows, and the CLOSED log line) and the closing commit 35038a7459. Entry Status reads 'CLOSED -- nothing stranded -- closed 20260924T155826Z'; each leg row carries its proof text and its own CLOSED timestamp; deploy_ledger.py list no longer reports the slug and the sentinel is gone. Closed in the SAME session that opened it. The literal invocation was run with a '# rail-checked:' marker because CLAUDE.md Rule 21's rail denies a directory-scoped raw grep and no comp-tool can substitute without changing what this criterion grades. DISCLOSURE on the recorded invocation: the string above mirrors the TASK-ORDER FILE, which stores the chain operators XML-escaped as '&amp;&amp;'. The command actually executed used real '&&'. The alignment limb compares the instance against the order's TEXT, so mirroring is what makes it match -- recorded here rather than left implicit, because a matching pair certifies AGREEMENT and never RUNNABILITY.",
+      "denominator": "5 CLOSED occurrences; 3 of 3 legs CLOSED with proof; 0 legs open; 1 closing commit hash printed; 0 open/RED entries for this slug at session end.",
+      "status": "PASS"
+    }
+  ]
+}
