@@ -5,11 +5,11 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-1.curated-evidence-induction.md",
     "group": "OTHER",
-    "vintage_commit": "c1437f9864cf3e1d343e0cf5809bf739c08fbd54"
+    "vintage_commit": "03baefb8af9922ca636a2d20dbd4d21f28ed786e"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
-    "vintage_commit": "d63cdd71ca0ad70b108d53c51bb4dd888f47fe07",
+    "vintage_commit": "03baefb8af9922ca636a2d20dbd4d21f28ed786e",
     "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-e-1.curated-evidence-induction.md"
   },
   "assignee": "0.9.0_WK_AMGT_CORPUS~2",
@@ -17,7 +17,7 @@
     {
       "path_or_key": "lib/research/corpus/induction_run.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "dc01719b9ddb159c3f564d85d0307921ba683a8b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "ROUND 3 / CRPS-e-1: `--evidence <path>` (dry-run and fire alike) loads and shape-checks (`load_evidence_table`) a curated evidence table (\"rows\" list, each {folder, root, cc, action, tier, basis, ...}) BEFORE any row is classified -- a malformed table (no list under \"rows\", a row missing folder/root/cc/action, or an action outside {register, associate}) is REFUSED, rc 2, printed (test_main_refuses_malformed_evidence_table_before_classifying_rows: rows_for_run monkeypatched to raise if reached, proving the refusal happens first). `effective_row(row, evidence_table)` (new; `effective_state_and_reason` kept as a back-compat 2-tuple wrapper over its first two fields) is consulted per row: a table hit (by folder) overrides state to EVIDENCED unconditionally (over NO_EVIDENCE, AMBIGUOUS, DISAGREEMENT and even amendment 1's own folder-vs-report check), root/cc come from the table row, reason is cited 'evidence table <tier>: <basis>', evidence_source 'evidence-table', association_expected True iff the table row's action is 'associate'; a folder the table does not name keeps the report-text path (evidence_source 'report-text', association_expected always False). run() places EVERY table-named row in the batch request (a table row's own root/cc, regardless of its raw classifier state), and an 'associate' row's request carries association_expected: true. Every result row's read-back now carries the classifier's RAW `state` (row['state'], unchanged) beside the computed `effective_state` and `evidence_source`; the printed 'skip ...' line uses effective_state (unchanged user-facing behaviour for the DISAGREEMENT case). run() and write_readback() both take an optional `deliverables_dir` (default DELIVERABLES_DIR); every test now passes tmp_path so no test writes into the real deliverables dir. build_parser()/main() gained `--evidence`, wired to both --dry-run and --fire. Measured on the real 93-folder library via --dry-run --as-of 2026-09-24 --evidence UNRESOLVED40_CALLS_20260924.json (run twice, byte-identical): population 41 evidenced 40 ambiguous 0 disagreement 0 other 1 called 40 registered 38 already_registered 1 refused 1 errors 0 bloomberg_calls 0 batch_calls 1 pool_puts 0 sum 41 -- the 5 association_expected rows (Bunzl, Copa, QXO, Uber, UMG) all read raw state NO_EVIDENCE/AMBIGUOUS, effective_state EVIDENCED, evidence_source evidence-table, outcome registered (verified directly against the written read-back JSON).",
       "introduces": [
@@ -33,7 +33,7 @@
     {
       "path_or_key": "lib/research/corpus/tests/test_induction_run.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "dc01719b9ddb159c3f564d85d0307921ba683a8b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "29 tests (20 pre-existing from CRPS-d-5/round 2, unchanged in behaviour except test_run_reclassifies_disagreement_and_never_calls_it and test_run_refuses_rootless_row_before_ever_batching_it, both updated to assert the new raw-state/effective_state/evidence_source triple instead of the old single 'state' field, and every run()-calling test now passes deliverables_dir=str(tmp_path)) + 9 NEW (section 7): load_evidence_table's shape checks (valid rows, non-list rows, missing keys, bad action) as ValueError with printable messages; effective_row's unconditional override over NO_EVIDENCE/AMBIGUOUS/a raw-EVIDENCED-but-disagreeing row, and the untouched report-text path; run()'s full evidence-table wiring (raw state preserved, effective_state EVIDENCED, evidence_source, association_expected true only for the 'associate' row, both table rows batched, the untouched third row skipped); run()'s deliverables_dir honoured over the (poisoned, must-never-be-created) module default; write_readback's deliverables_dir; and main()'s malformed-evidence-table refusal before rows_for_run is ever reached. Whole-file run (no -k): 29 passed in 0.76s (run twice, identical). Whole-package `python -m pytest lib/research/corpus -q -p no:cacheprovider`: 269 passed.",
       "artifact_covered_by": [
@@ -43,7 +43,7 @@
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_run_2026-09-24_dry-run.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "dc01719b9ddb159c3f564d85d0307921ba683a8b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "AC2's --dry-run --evidence read-back over the real 93-folder library: population 41, evidenced 40, called 40, batch.requests carries 40 {folder, bloomberg[, association_expected]} objects, and every row carries state/effective_state/evidence_source/association_expected (verified directly: 5 association_expected=true rows -- Bunzl BNZL GB, Copa CPA, QXO, Uber Technologies UBER US, Universal Music Group UMG NL -- all evidence_source evidence-table, raw state NO_EVIDENCE or AMBIGUOUS, outcome registered). Written only under this worker's own deliverables dir.",
       "artifact_covered_by": [
@@ -53,7 +53,7 @@
     {
       "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_batch_2026-09-24.json",
       "kind": "config_data",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "dc01719b9ddb159c3f564d85d0307921ba683a8b",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "The ONE --batch request list AC2's dry-run wrote before its one call: 40 objects, one per effectively-EVIDENCED row (all 40 evidence-table rows; called == evidenced == 40 as the cell's own text predicts), the 5 associate-action rows each carrying association_expected: true.",
       "artifact_covered_by": [
@@ -64,14 +64,13 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e1_AC1.sh -- expect (?m)^\\d+ passed in ",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e1_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ deselected)? in ",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round3/e1_AC1.sh",
-      "output_evidence": ".........                                                                [100%]\n9 passed, 20 deselected in 0.49s",
-      "denominator": "9 of 9 tests selected by the check's own -k filter passed; 20 of 29 total file tests are correctly deselected (pre-existing round-2 tests the filter does not name); the check's own expect regex requires the pytest summary line to read 'N passed in ...' with no other category present, which pytest 9.1.1 never prints once anything is deselected (measured: '9 passed, 20 deselected in 0.49s', re-run twice, byte-identical both times; re.search against the exact captured text returns False). Whole-file run (no -k): 29 of 29 passed.",
-      "expect": "(?m)^\\d+ passed in ",
-      "status": "FAIL",
-      "status_reason": "Invocation output does not and structurally cannot match expect while the check's own -k filter (a deliberate SUBSET, per the task order's own prose) leaves any test deselected -- pytest's terminal summary always inserts ', N deselected' between 'passed' and ' in', which the anchored pattern refuses. Filed as AMGT_CORPUS-Z-W2-S5 (disarm_owner 2.0.0_SA_COO~X, per this order's own BOUNDS instruction), grounded on the literal invocation's own captured bytes plus a direct re.search check; e1_AC1.sh is read-only to this worker (BOUNDS) so the check itself was not edited, and the 9 targeted new tests all pass on their own (see the test_induction_run.py artifact row and AC1's own -k output above)."
+      "output_evidence": ".........                                                                [100%]\n9 passed, 20 deselected in 0.59s",
+      "denominator": "9 of 9 tests selected by the check's own -k filter passed; 20 of 29 total file tests are correctly deselected (pre-existing round-2 tests the filter does not name); the issuer widened AC1's own expect to (?m)^\\d+ passed(, \\d+ deselected)? in  @03baefb8af, which now matches the deselected-bearing summary line -- run 3 times this session (across the pre-fix and post-fix commits), all 3 post-fix runs byte-identical in shape ('9 passed, 20 deselected in <t>s').",
+      "expect": "(?m)^\\d+ passed(, \\d+ deselected)? in ",
+      "status": "PASS"
     },
     {
       "criterion_id": "AC2",
@@ -102,8 +101,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "AC1, AC2 and AC3's own check invocations each run twice back to back this session; test_induction_run.py's whole-file run (29 tests) run twice; .scratch/e1/mutant_control.py run twice.",
-      "observed": "AC1: '9 passed, 20 deselected in ...' both times (timing differs, the deselected/passed counts do not). AC2: totals line 'population 41 evidenced 40 ambiguous 0 disagreement 0 other 1 called 40 registered 38 already_registered 1 refused 1 errors 0 bloomberg_calls 0 batch_calls 1 pool_puts 0 sum 41' byte-identical both runs. AC3: identical REFUSED line and bloomberg_calls 0 both runs. Whole-file pytest: 29 passed both runs. mutant_control.py: identical FIX_OK/MUTANT_OK/CONTROL_FIRED_AS_EXPECTED both runs.",
+      "method": "AC1, AC2 and AC3's own check invocations each run twice back to back this session (AC1 additionally re-run once more after the issuer's expect-widening merge, 3 runs total); test_induction_run.py's whole-file run (29 tests) run twice; .scratch/e1/mutant_control.py run twice.",
+      "observed": "AC1: '9 passed, 20 deselected in ...' all 3 runs, matching the widened expect on the post-merge 2 (timing differs, the passed/deselected counts do not). AC2: totals line 'population 41 evidenced 40 ambiguous 0 disagreement 0 other 1 called 40 registered 38 already_registered 1 refused 1 errors 0 bloomberg_calls 0 batch_calls 1 pool_puts 0 sum 41' byte-identical both runs. AC3: identical REFUSED line and bloomberg_calls 0 both runs. Whole-file pytest: 29 passed both runs. mutant_control.py: identical FIX_OK/MUTANT_OK/CONTROL_FIRED_AS_EXPECTED both runs.",
       "status": "STABLE"
     }
   },
@@ -138,7 +137,7 @@
     {
       "tool": "pytest (AC1)",
       "invocation": "python -m pytest lib/research/corpus/tests/test_induction_run.py -q --color=no -p no:cacheprovider -k \"evidence_table or deliverables_dir or association_expected\"",
-      "result": "rc 0; 9 passed, 20 deselected (run twice, identical both times)"
+      "result": "rc 0; 9 passed, 20 deselected (run 3 times this session, identical shape)"
     },
     {
       "tool": "pytest whole-file (not a criterion, hygiene)",
