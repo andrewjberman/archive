@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-ro-4.two-labels-that-misstate",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/prd/AMGT_RESAPP_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "031c3a3a3eefc8c6cc80265df530dfb243d9fcf1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "d4b3321d7115e4707e2a82d669fd405b7922b824",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-ro-4.two-labels-that-misstate.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~155",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/PostureTab.tsx",
+      "kind": "script",
+      "commit_or_etag": "d0bc92d7247cbd4a598c96eddae385b04297bda2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, one line at :483 -- comparable.loading now reads `comparableThesis.isFetching || comparablePeers.isFetching` instead of `.isLoading`, so a disabled query on an unresolved comparable key (isLoading true forever in react-query) no longer keeps the footer's 'still loading' sentence live permanently.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/components/SecurityOverlay.tsx",
+      "kind": "script",
+      "commit_or_etag": "d0bc92d7247cbd4a598c96eddae385b04297bda2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "MODIFIED, SESSION_BADGE map only -- all three labels relabelled from 'BLOOMBERG: ...' to 'BLOOMBERG SESSION: ...' (CONNECTED / SIGNED OUT / NOT REPORTED, the last renamed from UNKNOWN) so the badge names the session state rather than reading as an identity attribute beside the ticker. Icons and iconInk values unchanged.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "PostureTab comparable *.isLoading reads: 0; badge labels 'BLOOMBERG: ...': 0; labels naming the session: 3 or more -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "PostureTab comparable *.isLoading reads: 0 (want 0); badge labels 'BLOOMBERG: ...': 0 (want 0); labels naming the session: 4 (want >= 3)\nexit=0",
+      "denominator": "3 of 3 sub-checks satisfied (a=0, b=0, c=4>=3); exit=0",
+      "status": "PASS",
+      "expect": "PostureTab comparable \\*\\.isLoading reads: 0.*badge labels 'BLOOMBERG: \\.\\.\\.': 0.*labels naming the session: [3-9]|[1-9][0-9]+.*exit=0",
+      "judgment": false
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "tsc -b --noEmit exit=0 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round39/checks/typecheck.sh; echo \"exit=$?\"",
+      "output_evidence": "tsc -b --noEmit exit=0\nexit=0",
+      "denominator": "1 of 1 typecheck run, exit=0",
+      "status": "PASS",
+      "expect": "tsc -b --noEmit exit=0.*exit=0",
+      "judgment": false
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The order's own discriminator: AC1's grep-based check would still read the comparable-loading count as 0 only if BOTH occurrences of `.isLoading` on comparableThesis/comparablePeers were replaced (not just one), and would read the session-label count below 3 if fewer than all three SESSION_BADGE entries were relabelled.",
+      "expected": "A partial edit (e.g. relabelling only CONNECTED, or leaving one of the two comparable .isLoading reads) would leave AC1's $a nonzero or $c below 3, failing the `[ \"$a\" -eq 0 ] && [ \"$b\" -eq 0 ] && [ \"$c\" -ge 3 ]` gate.",
+      "observed": "Both comparableThesis.isLoading and comparablePeers.isLoading were replaced together on the single line :483, and all three SESSION_BADGE entries were relabelled together; AC1 measured a=0, b=0, c=4, matching a complete edit.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run once, immediately after the edits and again as the recorded proof run; both are read-only static/compiler checks over committed source with no network or randomness.",
+      "observed": "AC1 output identical across runs (a=0, b=0, c=4, exit=0). AC2 (`tsc -b --noEmit`) exit=0 both times.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "subject.loading (PostureTab.tsx:475, `isLoading || peersQuery.isLoading`)",
+      "reason": "Not named by the cell text, which scopes the isLoading-vs-isFetching fix to the comparable side only (the subject query is never conditionally disabled the way the comparable query is)."
+    },
+    {
+      "item": "Starting a dev server / vite build",
+      "reason": "BOUNDS item 1: no server; criteria run from the files named, as written."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~155/AMGT_RESAPP.TO-AMGT-ro-4.two-labels-that-misstate.SESSION_LOG.md",
+  "compiler_tools": [
+    {
+      "tool": "tsc -b --noEmit",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round39/checks/typecheck.sh",
+      "result": "tsc -b --noEmit exit=0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (portal commit)",
+      "invocation": "bash ../.tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~155 <0.9.0_WK_AMGT_RESAPP~155@opal.agent>\" -F ../.scratch/portal_msg.txt -- src/pages/SecurityAnalysis/components/SecurityOverlay.tsx src/pages/SecurityAnalysis/tabs/PostureTab.tsx",
+      "result": "commit d0bc92d7247cbd4a598c96eddae385b04297bda2; msg-verify MATCH"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (parent gitlink commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~155 <0.9.0_WK_AMGT_RESAPP~155@opal.agent>\" -F .scratch/parent_msg.txt -- portal",
+      "result": "commit 53e2b3519a088353457a94c38358446c5c17171e; msg-verify MATCH"
+    }
+  ]
+}
