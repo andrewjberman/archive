@@ -1,12 +1,15 @@
 """AMGT_CORPUS round 3 -- pre-flight of the 40-name induction fire, READ-ONLY (one S3 list + get of universe/v1).
 
-Builds the crosswalk IN MEMORY through add_security's own builder with 40 synthetic registrations shaped exactly as the
-fire would write them: the table's root/cc per folder, and `mode: ENRICH` wherever add_security's own
+Builds the crosswalk IN MEMORY through add_security's own builder with synthetic registrations shaped exactly as the
+fire would write them, for every table row the PRODUCER WOULD CALL -- a row add_security._find_existing matches is
+SKIPPED here exactly as the fire skips it (the branch this script missed at 20:4xZ, row Z-S23): the table's root/cc per folder, and `mode: ENRICH` wherever add_security's own
 `_collision_mode` would return ENRICH (the key already MEASURED on a record with no folder). No Bloomberg call, no put.
 
 Acceptance the fire needs (FWD-19: every folder ends with exactly ONE record):
   UNRESOLVED 40 -> 0, multi-claimed association forms 0, folders with more than one record 0,
   every prior MEASURED key present, and MEASURED rising by exactly the number of APPENDED registrations.
+  FOLDER-FORM COVERAGE (row Z-S24): every called folder's own 'security-<hash>' association form, read from the
+  BEFORE build, is claimed AFTER by exactly the record carrying that folder -- the form the corpus ingest resolves by.
 
   PYTHONPATH="$(pwd)" python org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/preflight_40_fire.py
 """
@@ -60,8 +63,12 @@ def main():
     by_key = {r["security_key"]: r for r in base["records"] if r.get("security_key")}
     table = json.load(open(TABLE, encoding="utf-8"))["rows"]
     fakes, modes = [], collections.Counter()
+    skipped, refused = [], set()
     for row in table:
         key = "%s_%s_Equity" % (row["root"], row["cc"])
+        if add_security._find_existing(rows, row["folder"], "%s %s" % (row["root"], row["cc"])) is not None:
+            skipped.append(row["folder"])
+            continue
         other = by_key.get(key)
         if other is None:
             mode = None
@@ -71,10 +78,16 @@ def main():
             mode = add_security._collision_mode(other_folder, row["folder"], same)
         modes[mode or "APPEND"] += 1
         if mode == "REFUSE":
+            refused.add(row["folder"])
             print("REFUSE (a folder-vs-folder collision) %s -> %s" % (row["folder"], key))
             continue
         fakes.append(synthetic(row, mode))
-    print("table %d | modes %s" % (len(table), dict(modes)))
+    print("table %d | already-registered (skipped, no call) %d | modes of the called %s" % (len(table), len(skipped), dict(modes)))
+    called = {row["folder"] for row in table if row["folder"] not in refused}
+    # each folder's OWN form is the one the corpus ingest resolves by: crosswalk.harvester_key(folder, pilots)
+    # (crosswalk.py:266), computed from the folder name -- never read off a build, which is the object under test
+    pilots = crosswalk.load_pilots()
+    forms_before = {fo: {crosswalk.harvester_key(fo, pilots)[0]} for fo in called}
     b_den, _, _ = summary(base, "BEFORE")
     try:
         after = add_security._build_document(AS_OF, list(rows) + fakes, reg_path, universe, source)
@@ -89,7 +102,16 @@ def main():
     for folder in twins:
         recs = [r for r in after["records"] if (r.get("source_row") or {}).get("folder") == folder]
         print("  TWIN %-42s %s" % (folder, [(r.get("security_key"), r.get("resolution")) for r in recs]))
-    ok = (a_den.get("UNRESOLVED") == b_den.get("UNRESOLVED") - len(fakes) and not multi and not twins
+    uncovered = []
+    for fo in sorted(called):
+        holders = [r for r in after["records"] if (r.get("source_row") or {}).get("folder") == fo]
+        keys_after = set(k for r in holders for k in r.get("association_keys") or [])
+        if not forms_before.get(fo) or not forms_before[fo] <= keys_after:
+            uncovered.append(fo)
+    print("folder-form coverage: %d of %d table folders keep their own form on the record carrying them" % (len(called) - len(uncovered), len(called)))
+    for fo in uncovered:
+        print("  FORM LOST %s %s" % (fo, sorted(forms_before.get(fo) or [])))
+    ok = (a_den.get("UNRESOLVED") == b_den.get("UNRESOLVED") - len(fakes) and not multi and not twins and not uncovered
           and before_keys <= after_keys and len(after_keys - before_keys) == modes["APPEND"])
     print("VERDICT %s" % ("PASS" if ok else "FAIL"))
     return 0 if ok else 1
