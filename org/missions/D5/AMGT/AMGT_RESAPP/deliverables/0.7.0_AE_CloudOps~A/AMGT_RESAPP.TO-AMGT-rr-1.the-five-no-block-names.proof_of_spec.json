@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rr-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rr-1.the-five-no-block-names.md",
+    "group": "C",
+    "vintage_commit": "aa57f7d369"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "aa57f7d369",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rr-1.the-five-no-block-names.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://.../bloomberg/harvest/bronze/{refdata,histdata}/security_key=<k>/<stamp>.json (ACT A, five raw stamps)",
+      "kind": "s3_object",
+      "commit_or_etag": "aa57f7d369",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deploy_evidence": "ACT A, the scripted pull, in two invocations (3 + 2), both rc=0 so the stop-at-first-non-zero condition never fired. Raw stamps: AMD 20260925T221558Z, GOOGL 20260925T221603Z, LLY 20260925T221608Z, PWR 20260925T221744Z, UNH 20260925T221750Z. Each key landed refdata + histdata plus amgt/harvest/state/pull_log/security_key=<k>/<stamp>.json. NEW stamps on keys the CTO half measured at ZERO prior objects, so nothing was overwritten and nothing deleted; the producer's own store contract refuses a write to an existing key. No key returned empty, so none needed printing-as-empty and none was retried by hand. MECHANISM: every vendor call was made by integrations/bloomberg/research/model_block_pull.py and this lane composed none -- R-21's binding constraint. OBSERVATION, not a defect: the pull printed refdata + histdata + pull_log per key and NO bestdata object, where the CTO half's control table shows bestdata 3 for BA/ASML/2317. Recorded so AC1's count is read against it rather than around it; AC1 and AC2 both pass regardless, so it gated nothing."
+    },
+    {
+      "path_or_key": "s3://.../derived/model_block/<k>/<stamp>/model_block.json (ACT B, five first mints)",
+      "kind": "s3_object",
+      "commit_or_etag": "aa57f7d369",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deploy_evidence": "ACT B, the derive, two invocations (3 + 2), both rc=0. Derived stamps and their figures: AMD 20260925T222232Z (10 FY rows, 405 figures, 1 unresolved), GOOGL 20260925T222233Z (10/413/0), LLY 20260925T222234Z (10/421/0), PWR 20260925T222522Z (10/419/0), UNH 20260925T222523Z (10/421/0); each ran its own 66-entry unit map via build_unit_map.py. THE CTO HALF'S CONDITION, PRINTED PER BATCH: batch 1 at HEAD bda25438c8c145baa636d959e8055edbc605dcff, batch 2 at HEAD 0b5adb93794ff27b5252b7fed9b04561272908bf, with 025224c2cd (CRPS-g-1's guarded base-case rule) re-verified as an ancestor immediately before EACH derive. First mints on keys with no prior object: nothing overwritten, nothing deleted, and per the CTO half there is no prior version to restore because the before-state was empty."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260925T2156Z_amgt-rr-1-five-no-block-names_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "aa57f7d369",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The ONE NEVER-2 entry. OPENED at 21:56Z AND COMMITTED at aa57f7d369 BEFORE THE FIRST VENDOR CALL, which the order's BOUNDS-2 requires and which is checkable rather than asserted: the first pull's earliest raw stamp is 20260925T221558Z, after that commit. The commit was REFUSED on its first attempt -- the message carried one non-ASCII character (a U+26D4 marker), which the ascii gate blocked per Andrew-direct 2026-09-01; the character was replaced with '>>' and the commit re-run. The refusal is recorded because the first run's stdout was NOT read as the verdict: safe-commit prints 'DO NOT grep THIS OUTPUT', so the repository was asked instead (git log on the hash, with a bogus hash as the negative control, plus git status on both paths), which is how the failure was caught rather than assumed away. All four legs CLOSED with proof; entry CLOSED and the sentinel removed by the tool."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This cell's real hazard is not a bad number, it is ACTING WITHOUT AUTHORITY: rr-1 is vendor egress, which CLAUDE.md makes a hard stop requiring Andrew's word. The authority was therefore verified at its SOURCE rather than from the order's citation, and the verification itself was controlled -- the first lookup was allowed to return the wrong answer and be caught.",
+      "expected": "Reading the cited authority in the ratified rulings register should either produce Andrew's vendor grant or show that the citation does not support the act, in which case the act must STOP.",
+      "observed": "THE FIRST LOOKUP RETURNED THE WRONG OBJECT AND LOOKED RIGHT. rcg/rulings/RULINGS.jsonl holds exactly one R-21-matching row out of 32 ('R-0021'): dated 2026-08-03, type 'coordination', about spawning 1.0.0_SA_CTO~B as an RCG coordination seat -- no vendor content at all. It RESOLVED, parsed, and carried a plausible date; only its CONTENT showed it was a different object. Stopping there would have produced a FALSE BLOCKER on an act Andrew actually approved, which is the expensive direction because a false blocker is indistinguishable from a real one downstream. A second search over the message record found the real grant: ANDREW-DIRECT R-21 @b390c36444, 2026-09-24, verbatim 'all recs approved, and you have all the egress you want for vendors. Only thing I'd note is that the pull should be deterministic/scripted in nature like the existing pull'. BROAD on authority, NARROW on mechanism. It also settles act (1) expressly: 'diagnostics may be agent-side; any call whose OUTPUT lands in an artifact, a table or a screen goes through a script' -- so the bloomberg_health probe was permitted agent-side and every acquiring call went through the producer. Filed as row AMGT_RESAPP-Z-S283.",
+      "status": "FIRED-AS-EXPECTED",
+      "method": "command"
+    },
+    "determinism": {
+      "description": "Two conditions in this cell are time-varying rather than fixed, so each was read at the moment it governed rather than once at the start: the derive's HEAD floor, and the guarded-rule constants it depends on.",
+      "expected": "The CTO half's floor (HEAD >= 025224c2cd) must hold at EACH derive, not merely when the cell began, and the guarded constants must be present in the COMMIT the derive runs at rather than in the working tree.",
+      "observed": "HEAD MOVED UNDER THIS CELL THREE TIMES while it ran, because peer seats were committing to the shared trunk: b149effef5 at the entry commit, bda25438c8 at derive batch 1, 0b5adb9379 at derive batch 2. The floor was re-verified as an ancestor immediately before EACH batch and both HEADs printed beside their stamps, so the condition is satisfied against the commits the derives ACTUALLY ran at -- a single check at the start would have been a claim about a commit neither derive used. The guarded constants were read from the commit via git show, not the worktree, and sit at exactly the lines the CTO half cites: CASE_BAND_LOW :1076, CASE_BAND_HIGH :1077, _MINOR_UNIT_FACTOR :1084, _is_minor_unit_quote :1087.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any hand-composed vendor call, or a retry of a key by hand",
+      "reason": "R-21's mechanism constraint and the order's BOUNDS-1. Every call was made by model_block_pull.py. No key returned empty, so the print-and-report branch was never needed."
+    },
+    {
+      "item": "Renumbering or correcting either R-21 identifier",
+      "reason": "The citation convention is not this lane's surface. Recorded as row AMGT_RESAPP-Z-S283 with the cheap remedy named (cite the vendor grant as 'R-21 @b390c36444'); the call is 1.0.0_SA_CTO~Z's."
+    },
+    {
+      "item": "Investigating the absent bestdata objects",
+      "reason": "Out of this cell's two acts, and it gated nothing: AC1 reads 5 of 5 blocks landed and AC2 reads 5 of 5 served pages with figures. Recorded on the L1 leg and in the artifact row so it is visible rather than silently absorbed."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; 0.0.0_AB_MSTR~Z pushes."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-S283: two distinct 'R-21's exist in this estate -- rcg/rulings/RULINGS.jsonl's R-0021 is a 2026-08-03 COORDINATION ruling that resolves cleanly and has no vendor content, while the vendor grant every AMGT order cites is a separate Andrew-direct R-21 @b390c36444 carried in the message record. A register lookup is not an authority check when the identifier space is shared. Filed OBSERVATION / INERT, disarm_owner 1.0.0_SA_CTO~Z."
+  ],
+  "session_log": "No session-log path lies inside this lane's <paths> write surface beyond this deliverables folder. The substance is in the acceptance rows, the controls block and the NEVER-2 entry at org/critical_paths/change_management/20260925T2156Z_amgt-rr-1-five-no-block-names_deploy_completion.md.",
+  "compiler_tools": [
+    {
+      "tool": "comp-find (the R-21 ambiguity census)",
+      "invocation": "comp-find 'R-21' --limit 30",
+      "result": "503 hits across 75041 files scanned, bands SURFACED=35 CONFIG=7 DOC=461. The vendor sense dominates usage (scheduled_daily_pull.cmd:317-319, induction_run.py:4,15,124) while the ratified register holds only the coordination sense -- the evidence for row Z-S283."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (the NEVER-2 contract)",
+      "invocation": "deploy_ledger.py open|close-leg|close --slug amgt-rr-1-five-no-block-names",
+      "result": "Opened 21:56Z with 4 legs and COMMITTED at aa57f7d369 before the first vendor call; L1-L4 CLOSED with proof; entry CLOSED and sentinel removed. No hold was needed."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (and its ascii gate)",
+      "invocation": "safe-commit.sh --author ... -F <msgfile> -- <two ledger paths>",
+      "result": "FIRST RUN REFUSED rc=1: the message carried one non-ASCII character. Caught by asking the REPOSITORY (git log on the hash + a bogus-hash negative control + git status on both paths) rather than by reading the tool's stdout, which the tool itself warns against. Character replaced, re-run landed aa57f7d369."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "model blocks landed: 5 of 5 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round43/checks/rr-1.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "'model blocks landed: 5 of 5' / exit=0, the order's expected string exactly. Per key: AMD_US_Equity block=yes fy_rows=10 figures=405 raw_stamp=20260925T221558Z OK; GOOGL 10/413/20260925T221603Z OK; LLY 10/421/20260925T221608Z OK; PWR 10/419/20260925T221744Z OK; UNH 10/421/20260925T221750Z OK. NOT A VACUOUS PASS: each row carries a non-zero figure count AND the raw stamp the block derives from, so a key with no block or an empty one could not read OK, and the five stamps named are the same five this cell's pull printed -- the block is JOINED to the pull that produced it rather than merely counted. The before-state was measured by the CTO half as ZERO derived objects on all five keys, so 5 of 5 is a move from a measured empty state, not a restatement of a pre-existing green.",
+      "denominator": "5 keys of the 5 the order names (AMD, GOOGL, LLY, PWR, UNH); 5 blocks landed, 0 missing.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "served pages with figures: 5 of 5 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round43/checks/rr-1.AC2.py; echo \"exit=$?\"",
+      "output_evidence": "'served pages with figures: 5 of 5' / exit=0, the order's expected string exactly. Per key on the SERVED plane: AMD status=200 fiscal_year_figures=355, GOOGL 200/362, LLY 200/370, PWR 200/368, UNH 200/370. THIS IS THE ACT'S PURPOSE NUMBER: row AMGT_RESAPP-Z-S280 recorded that the print route REFUSED all five ('no printable pack') before this cell, and the CTO half independently measured the before-state as ABSENT on every key, so five 200s carrying figures is a measured move rather than a green restatement. READ RATHER THAN GLOSSED: the served fiscal_year_figures (355-370) are LOWER than the derived figure counts (405-421). That is not a shortfall -- the served page carries fiscal-year figures limited to the years the Model tab shows, which is rq-1's rule now deployed, while the derived block holds the full set. Different populations, stated rather than left to look like a gap.",
+      "denominator": "5 served pages of the 5 keys; 5 returned 200 with a non-zero fiscal_year_figures count, 0 did not.",
+      "status": "PASS"
+    }
+  ]
+}
