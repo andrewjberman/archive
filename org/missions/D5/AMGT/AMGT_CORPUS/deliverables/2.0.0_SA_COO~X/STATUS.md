@@ -3,6 +3,30 @@
 Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~21:1xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
+## ROUND 3 -- DRAINED, L8 HANDED to `3.0.0_SA_CVO~Z` (2026-09-25 ~02:2xZ)
+
+Packet `ROUND3_DRAIN_END_PACKET.md` @`4be92efa19`. **Identity REALIZED 94 of 94**: the 40-name fire (36) + the re-mint (5:
+AMD, GOOGL, LLY, PWR, UNH) into `crosswalk/v1/2026-09-25.json` VersionId `9af5o6BzvZOV.ERosdvtDt7az4CW9nzO`; the re-ingest reads
+resolved_folders 94, unresolved files 0. **FWD-12 NOT realized** (Z-S26 incident rolled back; Z-S29: history `{}` on a 39-field
+request). **Sequence blocked at extract** (Z-S30: Copa's duplicate PDF, extract body not a function of its key). Served Model
+state: 31 restored, 58 honest-empty. Next: the CVO's L8/L9, then the CTO's round-3 analysis (enrichment candidates in packet
+s.5). Nothing is running and nothing is half-landed; the terminal is signed in (health ok 01:4xZ).
+
+(superseded, kept) ## BLOCKED ~23:0xZ -- the Bloomberg terminal will not sign in (needs a human at the box)
+
+Bloomberg's updater ran 22:26Z and the terminal restarted 22:50-22:52Z, signed out. Two supervised sign-ins (fill, screenshot
+verified 12-char login + 9 dots, submit) left the login window filled and no 8194 listener (a 120 s port poll between them);
+per READ_HERE s.2 that is the one retry, so this seat STOPPED. Attempt ledger: 23 total, 3 today (20:46Z ok, 22:5xZ x2).
+`0.0.3_BG_BBGTerminal` is not registered. Held behind it: the corrected FWD-12 re-pull + derive (CTO ruling msg 25799: R-21
+covers it, pair @2a3319e5ae covers the derive) and the re-mint of the 4 + AMD (pairs @ae79d37b0c / CTO @35e4cb93ef), which
+also waits for the running production sequence (step 9 dossier since 21:49Z). Served state is safe: the 31 keys restored
+(Z-S26 @c25c5207a8), 58 new keys serve an honest empty block (0 figures).
+The production sequence (started 21:35Z after the ingest read resolved_folders 73) ran steps 1-8 and was
+KILLED by this seat's own 7200 s timeout at ~23:35Z inside step 9 (dossier, running since 21:49Z; rc 124); step 10 never ran;
+no corpus process remains; write-once objects mean nothing partial was served. RESUME ORDER once the terminal is signed in:
+corrected FWD-12 pull (identifiers with spaces) + derive, content-verified (FY rows > 0 per key); the re-mint; `ingest --write`
+(expect resolved_folders 94); then `production_sequence --run` with no 2 h ceiling (dossier alone exceeds 1 h 45 m).
+
 ## ROUND 3 -- ALL 5 CELLS DRAINED (~20:4xZ); the 40-name FIRE held on ONE limb
 
 Drains, each re-graded at the worker's tip on this seat's run: e-2 @`bb6b1f2f25` (22 mnemonics), e-3 @`1266b834ec` (sector

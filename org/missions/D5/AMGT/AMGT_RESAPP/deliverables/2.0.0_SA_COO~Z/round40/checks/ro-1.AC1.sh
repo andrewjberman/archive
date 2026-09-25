@@ -5,7 +5,7 @@
 set -u
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT" || exit 2
 T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
-cp org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~143/handler_rich_to_file.py "$T/handler_rich_to_file.py"
+cp org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round40/checks/ro-1.rich_handler.py "$T/handler_rich_to_file.py"  # ~143's handler + the read_description stub (row Z-S271)
 PYTHONPATH="$ROOT" python "$T/handler_rich_to_file.py" > "$T/build.log" 2>&1 || { cat "$T/build.log"; echo "rich build failed"; exit 1; }
 RICH="$T/served/BA_US_Equity.md"; [ -s "$RICH" ] || { echo "no rich body at $RICH"; exit 1; }
 cd portal && node src/pages/SecurityAnalysis/__harness__/exportCompare.harness.cjs --rich "$RICH" > "$T/cmp.txt" 2>&1; rc=$?

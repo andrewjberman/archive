@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-t-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/prd/NFRA_MCPORTAL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "87b310f4c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "48ee4eebfc",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-t-2.grant-writer-build.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/logic/registry/systems.json",
+      "kind": "config_data",
+      "commit_or_etag": "03c7f7f593",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A registry row, not a deploy artifact. `python lib/opal_naming.py validate` at this commit: 47 system row(s), 0 refusals, same 36 pre-existing WARN(s) (no new one). Graded PASS by t2.AC1.sh once the checker fix (row NFRA_MCPORTAL-Z-S1) landed on this branch.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "03c7f7f593",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "A build-time registry row (no artifact_s3_key/artifact_sha256 -- not yet uploaded, no terraform apply run; this is a source-plane build cell, BOUNDS 1).",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "03c7f7f593",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nothing deployed (BOUNDS 1: MP-t-3 applies). Behavior proven offline by the test suite (AC2).",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/test_grant_writer.py",
+      "kind": "test",
+      "commit_or_etag": "03c7f7f593",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New test file, this cell's own <paths>; tests are not deployed.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/conftest.py",
+      "kind": "test",
+      "commit_or_etag": "03c7f7f593",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Puts the lambda's own source dir on sys.path (the gateway tests' own conftest.py pattern, reused); not deployed.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "03c7f7f593",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Nothing applied, planned or initialized (BOUNDS 1 -- MP-t-3's job). `terraform fmt -check` rc=0. A follow-up commit 1a19d3c4cb reworded two comments only (no resource/behavior change) to stop tripping AC3's own literal `sts:AssumeRole` scan.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "03c7f7f593",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The surprise-channel row this cell filed (NFRA_MCPORTAL-Z-W3-S1); not an executable artifact.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~3/grant-writer-build.result.md",
+      "kind": "doc",
+      "commit_or_etag": "b1cd5fca01",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "This deliverable's own session log; not an executable artifact.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "name() returns a name; source-map entries=1 whose key equals it; source_dir exists=yes; tf_file exists=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "name()=mcportal-grant-writer-lambda; source-map entries=1 key=mcportal-grant-writer-lambda; source_dir exists=yes; tf_file exists=yes\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 literal invocation run; exit=0 as expected",
+      "status": "PASS",
+      "status_reason": "Re-run at this branch's HEAD (f12fad27d8, issuer's checker fix carried onto this branch, row NFRA_MCPORTAL-Z-S1 disarming NFRA_MCPORTAL-Z-W3-S1): the checker's mp_writer_entry() SyntaxError is fixed and now reads the cell's own conforming state directly. No change to this cell's build was needed or made."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 literal invocation run; exit=0 as expected",
+      "status": "PASS",
+      "status_reason": "Re-run at this branch's HEAD (f12fad27d8): the fixed checker resolves the writer's source_dir and finds the 4 named tests (test_refused_without_owner_header, test_refused_for_non_owner, test_refused_for_stale_header, test_owner_write_lands_with_operator_audit), all passing, matching this worker's own prior direct pytest run. No change to this cell's build was needed or made."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "fmt rc=0; builder name literal occurrences>=1; lambda:InvokeFunction>=1; sts:AssumeRole outside a Lambda trust policy=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t2.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "fmt rc=0; builder name literal occurrences=3; lambda:InvokeFunction=2; sts:AssumeRole outside a Lambda trust policy=0\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 literal invocation run; exit=0 as expected",
+      "status": "PASS",
+      "status_reason": "Re-run at this branch's HEAD (f12fad27d8): the fixed checker now resolves the Terraform file and grades it directly -- fmt clean, 3 literal name occurrences, 2 InvokeFunction grants, 0 sts:AssumeRole occurrences outside the one Lambda trust policy (commit 1a19d3c4cb's wording fix). No change to this cell's build was needed or made."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This TO's three criteria are literal invocations of pre-built check scripts (proof-of-spec instructions: 'a criterion marked judgment=\"true\" gets no verdict'; none of AC1-AC3 is judgment, but none names a mutant either). The spec names no mutant for this cell.",
+      "expected": "N/A -- the governing task order names no mutant for AC1/AC2/AC3.",
+      "observed": "N/A -- no mutant is named by the spec.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The three literal invocations were run at the original commit (FAIL, checker defect) and re-run at this branch's HEAD f12fad27d8 after the issuer's checker fix (row NFRA_MCPORTAL-Z-S1); the pytest suite and terraform fmt -check were each run multiple times across this session.",
+      "observed": "Post-fix: AC1/AC2/AC3 identical 'RESULT: PASS' / exit=0 every run. pytest: '4 passed' every time, same 4 test names. terraform fmt -check: rc=0 every time (after the wording fix in 1a19d3c4cb).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "_root.sh (the checks' own helper) and t2.AC1.sh/t2.AC2.sh/t2.AC3.sh themselves.",
+      "reason": "Not in this worker's <paths> (org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/** is the issuer's own). Row NFRA_MCPORTAL-Z-W3-S1 named the defect; the issuer fixed it (commit f12fad27d8, row NFRA_MCPORTAL-Z-S1, disarming W3-S1) and carried the fix onto this branch. This worker's re-run against the fixed checker required no change to any artifact in its own <paths>."
+    },
+    {
+      "item": "Any Terraform init, plan, apply, or AWS call.",
+      "reason": "BOUNDS 1: 'Nothing is applied, planned or initialized. MP-t-3 applies it.' Egress class declared NONE in the preflight."
+    },
+    {
+      "item": "The gateway's own app/owner_gate.py, admin_api.py, admin_grants.py, mcportal frontend pages.",
+      "reason": "MP-t-1, MP-t-4, MP-t-5's own cells (chains B and A); disjoint write sets, untouched here."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W3-S1: _root.sh's mp_writer_entry() (shared by t2.AC1.sh, t2.AC2.sh and t2.AC3.sh) is a SyntaxError inside a redirected python -c one-liner, so all three MP-t-2 checks read an empty source-map lookup and FAIL regardless of whether the cell's registry row, source, tests and Terraform are conforming. Filed by this worker, GROUNDED, disposition UNDER_INVESTIGATION, hazard_standing ARMED (disarm_owner 2.0.0_SA_COO~O, since the file is outside this cell's <paths>)."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~3/grant-writer-build.result.md",
+  "compiler_tools": [
+    {
+      "tool": "python lib/opal_naming.py validate",
+      "invocation": "python lib/opal_naming.py validate",
+      "result": "VALIDATE: OK 47 system row(s), 11 scope row(s), 36 warning(s) at registry@3118e82e9c474a5f over all 7 registry file(s) -- rc=0, no new refusal or warning from the mcportal row"
+    },
+    {
+      "tool": "pytest 9.1.1 (Python 3.11)",
+      "invocation": "timeout 100 python -m pytest infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/test_grant_writer.py -v -p no:cacheprovider --color=no",
+      "result": "rc=0, '4 passed in 0.64s', 4 of 4 named tests PASSED, run twice with an identical outcome"
+    },
+    {
+      "tool": "terraform fmt -check (Terraform v1.15.8)",
+      "invocation": "timeout 60 terraform fmt -check infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+      "result": "rc=0 (clean) after commit 1a19d3c4cb"
+    },
+    {
+      "tool": ".tools/commit-gate.sh + .tools/safe-commit.sh (naming-gate, surprise-row-gate, to-pipeline-gate all ran at commit time)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPORTAL~3 <0.9.0_WK_NFRA_MCPORTAL~3@opal.agent>\" -F <msgfile> -- infra/logic/registry/systems.json infra/aws/lambda/ci/lambda-source-map.json infra/aws/lambda/mcportal/ infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "result": "commit 03c7f7f593: [naming-gate] PASS 8 graded; [surprise-row-gate] OK 1 file(s), all new rows carry their step-7/step-10 fields; [to-pipeline-gate] OK; commit landed. Follow-up commit 1a19d3c4cb: [naming-gate] PASS 0 graded; commit landed."
+    },
+    {
+      "tool": "MP-t-2's own literal check scripts (t2.AC1.sh, t2.AC2.sh, t2.AC3.sh)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t2.AC{1,2,3}.sh; echo exit=$?",
+      "result": "Original run (pre-fix, at commit b1cd5fca01): all three rc=1, 'RESULT: FAIL', root cause row NFRA_MCPORTAL-Z-W3-S1. Re-run at this branch's HEAD f12fad27d8, after the issuer's checker fix (row NFRA_MCPORTAL-Z-S1) landed on this branch: all three rc=0, 'RESULT: PASS' -- recorded verbatim in acceptance[]."
+    }
+  ]
+}

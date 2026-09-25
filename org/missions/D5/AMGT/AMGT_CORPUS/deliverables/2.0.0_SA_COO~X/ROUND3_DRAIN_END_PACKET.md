@@ -1,7 +1,7 @@
 # AMGT_CORPUS -- round 3 drain-end packet (the COO's task-order packet at drain-end; L8 hand-off input)
 
-**DRAFT, 2026-09-24 ~22:0xZ, by `2.0.0_SA_COO~X`.** Section 1 is final. Section 2's last three drain duties are in
-flight; this file is updated in place as each lands, and the L8 hand-off to `3.0.0_SA_CVO~Z` follows the last.
+**FINAL, 2026-09-25 ~02:2xZ, by `2.0.0_SA_COO~X`** (draft @`0d67f8b268`). Every drain act that can run this round has run;
+three are blocked by defects rowed for the round-3 analysis (section 5). L8 hand-off to `3.0.0_SA_CVO~Z` follows this commit.
 
 ## 1. Orders -- terminal state per task order (5 of 5 issued, 5 of 5 complete, all drained)
 
@@ -24,32 +24,41 @@ declares `<placeholders>`).
 
 ## 2. The drain duties (decomposition v3.0 s.5), as executed
 
-1. **The 40-name FIRE -- DONE, 36 of 40 landed.** Pre-flight caught 20 twin records before any write (row Z-S21, the fix
-   `2.0.0_SA_COO~Z` @`9ec1226a01`); pair COO @`8bd8ba7e2b`/`498c9aeb01`, CTO `ledger/` @`af08f78a9b`, vendor limb released
-   on Andrew-direct R-21 (msg 25761). ONE run @`505fc14404`: batch_calls 1, pool_puts 1, bloomberg_calls 36; served key
-   versions 24 -> 25; records 254 -> 238, MEASURED 214 -> 234, UNRESOLVED 40 -> 4; twins 0, multi-claimed 0 of 545 forms,
-   214 of 214 prior keys, 36 of 40 landed exactly as called. Two gaps, both rowed and both fixed on the identity surface:
-   Z-S23 (4 skipped on keyless rows, @`e772a89bad`) and Z-S24 (16 ENRICH folders lost their form, @`74e6a76e5c`).
-2. **The RE-MINT -- IN FLIGHT.** The 4 + AMD (added to the table from its own workbook) + the 16 forms, one put. Pair COO
-   half @`2a3319e5ae` (AMD amendment to follow); CTO half owed; a third builder limb (ENRICH with no record to retire adds
-   the folder's form) asked of `2.0.0_SA_COO~Z`. Target: 94 of 94 folders MEASURED, resolved at ingest.
-3. **The FWD-12 PULL -- DONE (pull); DERIVE held on its pair.** Change-management entry
-   `amgt-corpus-fwd12-model-block-pull-20260924` @`9361723c96`. 30 of 30 batches rc 0; 89 of 89 keys landed raw, read back on
-   S3 (L1, L2 closed). Derive moves served `derived/model_block` (31 of 89 keys replaced as newest, 58 new; four readers):
-   pair COO half @`2a3319e5ae`, CTO half owed; L3 open.
-4. **The PRODUCTION SEQUENCE -- running** through the runner after the re-ingest (resolved_folders 73; the 16 + 4 + AMD
-   follow the re-mint): `evidence/production_sequence_after_fire40_20260924T212840Z.log`. It runs again after the re-mint
-   and after the derive (dossier Model rows carry the 22).
-5. **The COO's one real run of each outcome at close:** owed after 2-4.
+1. **The 40-name FIRE -- DONE, 36 of 40.** Pre-flight held it once (Z-S21, 20 twins predicted; fix `9ec1226a01`). Pair COO
+   `8bd8ba7e2b`/`498c9aeb01`, CTO `af08f78a9b`, vendor limb released on Andrew-direct R-21 (msg 25761). ONE run @`505fc14404`:
+   bloomberg_calls 36, pool_puts 1; crosswalk 09-24 versions 24 -> 25, UNRESOLVED 40 -> 4, twins 0, multi-claimed 0, 214 of 214.
+2. **The RE-MINT -- DONE, 94 of 94.** The 4 skipped on keyless rows (Z-S23) + AMD (added from its own workbook, 41-row table)
+   + the 16 lost forms (Z-S24), after three builder limbs by `2.0.0_SA_COO~Z` (`e772a89bad`, `74e6a76e5c`, `b58d5c1d53`). The
+   pre-flight was widened to drive the producer's skip rule and census each folder's own form. Pair COO `ae79d37b0c` + A1
+   `9e2d8ab2c2` (the key moved to 09-25 past midnight), CTO `35e4cb93ef` + A1 `2a336885fb`. ONE run @`c79872b0ff`: 5 calls, 1 put,
+   new key `crosswalk/v1/2026-09-25.json` (before-state re-measured ABSENT): 94 of 94 live folders MEASURED with their own
+   form, twins 0, multi-claimed 0 of 564, 234 of 234 prior keys. Re-ingest: **resolved_folders 94, unresolved files 0.**
+   Z-S23/Z-S24 disarmed by Z-S31.
+3. **The FWD-12 PULL -- NOT REALIZED.** First run passed security keys, not Bloomberg identifiers: every response empty; its
+   derive served empty blocks to 31 names for ~7 minutes, rolled back by copy-forward 31 of 31 (Z-S26, incident, this seat's
+   act). The terminal then went down behind its updater (Z-S27); after a human sign-in the corrected re-pull brought refdata and
+   bestdata but history `{}` for every key -- e-2 grew the historical request 23 -> 39 fields and the client drops a
+   request-level error (Z-S29; field limit inferred). No derive ran on it. Served Model state: 31 restored, 58 honest-empty (0
+   figures). Ledger entry closed as run-and-rolled-back @`932b3ffeb2`.
+4. **The PRODUCTION SEQUENCE -- BLOCKED at step 1.** After the re-ingest, extract refused a write-once collision on Copa's
+   duplicate PDF (Z-S30, the Z-S17 class); steps 2-10 skipped, nothing partial served. The earlier post-fire run (steps 1-8
+   over 73 folders) completed and was stopped by this seat's own timeout inside the dossier step.
+5. **The COO's one real run of each outcome:** the served crosswalk census and the re-ingest above (identity outcome); the
+   Model block and dossier outcomes have no real run to show this round (items 3-4).
 
 ## 3. Rows filed this round -- dispositions for the L9
 
 | row | class / standing | one line | for the CVO |
 |---|---|---|---|
-| Z-S21 | OBSERVATION / INERT | pre-flight held the fire before any write (20 twins predicted) | adjudicate |
-| Z-S22 | OBSERVATION / INERT | owner's disarm carrier for Z-S17, W3-S3, W3-S4, W2-S5, W4-S3, W3-S5, W1-S6, W2-S6 | may adjudicate the eight on it |
-| Z-S23 | OBSERVATION / **ARMED** | 4 folders skipped as already-registered on keyless rows | disarms at the re-mint |
-| Z-S24 | OBSERVATION / **ARMED** | 16 ENRICH folders lost their association form; ingest read 73 | disarms at the re-mint + re-ingest |
+| Z-S21 | OBSERVATION / INERT | pre-flight held the fire before any write | adjudicate |
+| Z-S22 | OBSERVATION / INERT | disarm carrier: Z-S17, W3-S3, W3-S4, W2-S5, W4-S3, W3-S5, W1-S6, W2-S6 | adjudicate the eight on it |
+| Z-S23 | OBSERVATION / ARMED (legacy) | 4 skipped on keyless rows | disarmed by Z-S31 |
+| Z-S24 | OBSERVATION / ARMED (legacy) | 16 ENRICH folders lost their form | disarmed by Z-S31 |
+| Z-S26 | OBSERVATION / **ARMED** | INCIDENT: keys passed as identifiers, 31 served empty ~7 min, rolled back; 58 honest-empty | adjudicate; disarms with Z-S29's remedy |
+| Z-S29 | OBSERVATION / **ARMED** | history `{}`: 39-field request, client drops the error | enrichment |
+| Z-S30 | OBSERVATION / **ARMED** | extract body carries the filename; Copa's duplicate PDF stops the sequence | enrichment |
+| Z-S31 | OBSERVATION / INERT | disarm carrier for Z-S23, Z-S24 (94 of 94) | adjudicate |
+| Z-S25, Z-S27, Z-S28 | `1.0.0_SA_CTO~Z`'s rows | purpose number; terminal recovery ladder | as filed |
 | W1-S5, W2-S4 | worker rows, INERT | as filed | adjudicate |
 
 ## 4. Judgment criteria owed to `3.0.0_SA_CVO~Z` at L9
@@ -59,14 +68,16 @@ the Model block, the dossiers) are graded at L9 on the COO's real runs in sectio
 
 ## 5. Enrichment candidates for the round-3 analysis (`1.0.0_SA_CTO~Z`), from this seat's record
 
-1. **A pre-flight must drive the producer's REQUEST path, not only its builder.** Synthetic rows skipped
-   `_find_existing` and missed Z-S23; the widened script now calls it.
-2. **A pre-flight must census what the downstream READER resolves by.** Twins and multi-claimed forms were zero while 16
-   folders lost the form the ingest reads (Z-S24); the script now censuses `crosswalk.harvester_key` per folder.
-3. **Run a pre-flight on committed bytes only.** Two readings came from a peer's uncommitted edit in the shared tree; the
-   cited run prints `git status` of the imported package beside its verdict.
-4. **The worker-deliverables default of `induction_run`** writes its read-back into the worker's folder, which the issuer
-   cannot commit (owned-paths clause 4); the issuer moved it by hand.
+1. **Z-S29 (FWD-12):** split `model_block_pull`'s historical request to at most 25 fields and merge by date; make
+   `blp_client.historical_data` surface a responseError instead of returning `{}`; then ONE pull + derive under the signed
+   pair, verified by FY rows > 0 per key. Carries Z-S26's 58 honest-empty blocks to real ones.
+2. **Z-S30 (FWD-19 extraction half):** the extract body must be a function of its key, and a content-duplicate pair must
+   resolve to one extract; then the whole sequence for the 41 newly inducted names.
+3. **Pre-flights drive the REQUEST path and census what the READER resolves by** (Z-S23, Z-S24); the widened script is the
+   pattern.
+4. **A verify leg checks CONTENT, not presence** (Z-S26: 89 of 89 raw objects existed and all were empty).
+5. **Run pre-flights on committed bytes only** (two readings came from a peer's uncommitted edit in the shared tree).
+6. **`induction_run` writes its read-back into the worker's folder**, which the issuer cannot commit; moved by hand twice.
 
 ## 6. Bounds and residue
 

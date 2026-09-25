@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-b-2",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "820dd79e36309810a703568cba198d0bdfd76fc0",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-b-2.owner-key-and-record.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-b-2.owner-key-and-record.md",
+    "group": "OTHER",
+    "vintage_commit": "3f3c616fe8db3d30faa4a7995c3dfa8597ca5567"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "9a370f264427435755a9fea1d9510172fd120761",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Owner key: MCPORTAL_OWNER_KEY_CLAIM (oid|sub) and MCPORTAL_OWNER_KEY, matched case-insensitively. An unset or other claim refuses with OWNER-CONFIG-MISSING. A header with neither oid nor sub refuses with HEADER-UNVERIFIED. Freshness: with iat present, the 120 s window applies; with no iat, the signed exp bounds the header on the injectable clock, and an expired header refuses with HEADER-STALE. MCPORTAL_CHANGES_TABLE is read first. There is one put_item per WRITTEN or REFUSED outcome, with ConditionExpression attribute_not_exists(pk). A record failure is reported as record=FAILED and never moves the verdict; lambda_handler prints the record state. MCPORTAL_OWNER_OID is no longer read.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/test_owner_key_and_record.py",
+      "kind": "test",
+      "commit_or_etag": "9a370f264427435755a9fea1d9510172fd120761",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file with 6 named tests. It injects an ES256 test key, a fixed clock, a fake store and a fake changes client; the fake client traps UpdateItem, DeleteItem, BatchWriteItem and every other method. It uses no network and no AWS.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/test_grant_writer.py",
+      "kind": "test",
+      "commit_or_etag": "fd2db1531337fdbe60741199beb62aa78b115218",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unchanged and still green. handle() keeps its owner_oid= keyword as shorthand for owner_claim=oid. pytest over tests/: 10 passed, 4 of them existing and 6 new."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "9a370f264427435755a9fea1d9510172fd120761",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "aws_dynamodb_table.mcportal_grant_changes is named mcportal-grant-changes-table. It is PAY_PER_REQUEST, with hash_key pk (S, PRINCIPAL#<tid>#<oid>), range_key sk (S, <UTC ISO ts>#<uuid4 hex>), PITR, SSE and deletion_protection. The writer role statement McportalGrantChangesPutOnly grants [dynamodb:PutItem]. The new aws_iam_role_policy.gw_read_mcportal_grant_changes (gateway-read-mcportal-grant-changes-policy, on aws_iam_role.gw) carries Sid GatewayReadsMcportalGrantChanges with [GetItem, Query, Scan]. Env: MCPORTAL_OWNER_KEY_CLAIM, MCPORTAL_OWNER_KEY and MCPORTAL_CHANGES_TABLE. var.mcportal_owner_oid is replaced by var.mcportal_owner_key_claim (validated oid|sub) and var.mcportal_owner_key, neither with a default. The naming gate passed 3 graded. terraform fmt -check rc=0. Nothing applied.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/b2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests passed; 0 failed/error lines",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/b2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 named tests passed; 0 failed/error lines",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "changes table declared=yes; writer statement PutItem only=yes; gateway statement read-only=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/b2.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "table=yes writer=['dynamodb:PutItem'] gateway=['dynamodb:GetItem', 'dynamodb:Query', 'dynamodb:Scan']\nchanges table declared=yes; writer statement PutItem only=yes; gateway statement read-only=yes\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 conditions met (table declared, writer PutItem only, gateway read-only 3 actions)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Working-tree mutant, never committed: in _append_record, cl.put_item(...) was replaced with cl.update_item(...), and AC2 was run. The file was restored by the reverse byte replacement; afterwards git diff showed only the pre-existing portal gitlink.",
+      "expected": "AC2 FAILs: the trapped UpdateItem is recorded, the record reads FAILED, and both record tests fail.",
+      "observed": "pytest rc=1; named tests passed 0 of 2; failed/error lines 3 / RESULT: FAIL exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 were each run twice at 9a370f2644 with no arguments varied. The first run was the verbatim invocation; the second came after the mutant was restored.",
+      "observed": "Both runs of each criterion printed the identical deciding line: AC1 4 of 4, AC2 2 of 2, and AC3 yes/yes/yes.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "terraform plan/apply and supplying var.mcportal_owner_key_claim / var.mcportal_owner_key",
+      "reason": "The face says written, NOT applied; MP-a-1 applies and supplies both variables."
+    },
+    {
+      "item": "updating the stale _note in infra/aws/lambda/ci/lambda-source-map.json",
+      "reason": "It is outside this order's <paths> (row NFRA_MCPORTAL-Z-W1-S5)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W1-S5: lambda-source-map.json:5064 still describes the writer as matching the oid from MCPORTAL_OWNER_OID, which this cell retired. The note is outside <paths>. The MP-a-1 apply must pass mcportal_owner_key_claim + mcportal_owner_key, not mcportal_owner_oid."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~1/session_log.MP-b-2.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest tests -p no:cacheprovider -q (from the function directory)",
+      "result": "10 passed"
+    },
+    {
+      "tool": "b1.AC2.sh (MP-b-1 in-package refusal)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/b1.AC2.sh",
+      "result": "build rc=0; in-package lambda_handler (Lambda depth) with no owner header -> verdict=REFUSED NO-OWNER-HEADER / RESULT: PASS exit=0 (before and after the commit)"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check -diff infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+      "result": "rc=0"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg_b2.txt -- <4 paths>",
+      "result": "committed 9a370f2644; naming gate PASS 3 graded; surprise-row-gate OK 1 new row"
+    }
+  ]
+}

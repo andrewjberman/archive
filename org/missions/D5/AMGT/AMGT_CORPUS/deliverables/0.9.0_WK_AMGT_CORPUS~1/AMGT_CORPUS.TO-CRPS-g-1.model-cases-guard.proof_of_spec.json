@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-g-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-1.model-cases-guard.md",
+    "group": "OTHER",
+    "vintage_commit": "56cc8d71131df06fe4a6847ac4c1e622ae5d6d2c"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "09fb000683",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-1.model-cases-guard.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "70eb0ac96c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_compute_cases gains quote_ccy/reporting_ccy params and, tested IN ORDER: (1) forward_eps_not_positive when FY1 BEST_EPS <= 0 (reason names the value); (2) no_price when no PX_LAST figure; (3) a minor-unit quote (_is_minor_unit_quote: the block's own quote/reporting currency codes equal case-insensitively but differ case-sensitively, e.g. GBp vs GBP -- never a venue list) scales the base value x100 (CASE_BAND constants; served case carries quote_currency/reporting_currency/unit_factor), any OTHER currency difference refuses currency_mismatch (both currencies named, nothing converted); (4) outside_band when base/px_last falls outside [CASE_BAND_LOW 0.33, CASE_BAND_HIGH 3.0] -- ISSUER AMENDMENT 1 (56cc8d7113): the outside_band reason names BOTH operands (base in the quote unit, px_last) and the ratio, e.g. 'base 218.24 USD / px_last 71.72 USD = 3.043, outside [0.33, 3.0]'. Otherwise SERVED as before, now carrying ratio_to_px_last and band; inputs.trailing_median_pe gains window_rule. stage_derive's call site passes the already-computed quote_ccy/reporting_ccy through (no other stage_derive line touched). New read-only mode: cmd_cases_report + main() 'cases-report' stage + _cases_report_figures -- reads the newest landed raw stamp from S3 (refdata/histdata/bestdata GetObject + the _latest_stamp ListObjectsV2 reads _latest_stamp already does), rebuilds only the three figure kinds _compute_cases needs via the SAME fiscal-year join/closed-year rule stage_derive uses, and prints 'cases <sec_key> base <SERVED|ABSENT> ratio <r|none> cause <cause|none> reason <text>' then 'cases_report served <n> refused <m>'. Writes NOTHING (no _ensure_unit_map call, no s3_put_if_absent call anywhere on this path) and never calls the SA-fallback session (a live vendor call) -- FY1 BEST_EPS is read BBG-source-only from bestdata.json; a gap the real derive would fill via SA_FALLBACK reads ABSENT here instead, documented in _cases_report_figures's docstring as a deliberate HARD-BOUND divergence, never a bug. No field list, history chunking, cap, landing address or any figure other than the cases was touched.",
+      "introduces": [
+        "CASE_BAND_LOW",
+        "CASE_BAND_HIGH",
+        "_MINOR_UNIT_FACTOR",
+        "_is_minor_unit_quote",
+        "cases-report",
+        "cmd_cases_report",
+        "_cases_report_figures",
+        "window_rule",
+        "forward_eps_not_positive",
+        "no_price",
+        "outside_band"
+      ],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_model_cases_guard.py",
+      "kind": "test",
+      "commit_or_etag": "70eb0ac96c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file, 11 tests, fully offline (pure function over an in-memory figures list, no S3/network): forward_eps_not_positive (negative and exactly-zero), no_price, currency_mismatch, outside_band (plain, and the ISSUER AMENDMENT 1 reason-format/operand assertions), outside_band on a minor-unit name (reason names the QUOTE unit, GBp, never GBP), the GBp x100 path landing in band and SERVED with quote_currency/reporting_currency/unit_factor, a plausible USD name SERVED with its ratio and window_rule, and three precedence arms proving each check wins over every later one it could also qualify for.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC1.sh",
+      "output_evidence": "...........                                                              [100%]\n11 passed in 0.34s",
+      "denominator": "11 of 11 tests in test_model_cases_guard.py passed, 0 failed. Run twice back to back under the literal invocation (timeout 120): '11 passed' both times (0.34s, 0.29s -- only elapsed seconds differ).",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC2.sh -- expect (?s)cases BA_US_Equity base ABSENT ratio \\S+ cause forward_eps_not_positive.*cases ULVR_LN_Equity base ABSENT ratio \\S+ cause currency_mismatch.*cases RKT_LN_Equity base SERVED ratio \\d+\\.\\d+.*cases_report served 1 refused 2",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC2.sh",
+      "output_evidence": "cases BA_US_Equity base ABSENT ratio none cause forward_eps_not_positive reason forward EPS (FY1 BEST_EPS) is -0.8280000000000001, not positive -- the case cannot be right\ncases ULVR_LN_Equity base ABSENT ratio none cause currency_mismatch reason quote currency 'GBp' and reporting currency 'EUR' differ and this block converts nothing\ncases RKT_LN_Equity base SERVED ratio 1.5004339488117002 cause none reason None\ncases_report served 1 refused 2",
+      "denominator": "1 of 1 real, live-S3 cases-report invocation over the three named securities' newest landed raw (no vendor call, no write -- read-only). BA_US_Equity: real landed FY1 BEST_EPS -0.828 (measured -- BA_US_Equity's own -18.03x symptom named in section 1 is exactly this EPS) -> forward_eps_not_positive, matches. ULVR_LN_Equity: real landed CRNCY 'GBp' / EQY_FUND_CRNCY 'EUR' (a genuine mismatch, not a minor-unit pair) -> currency_mismatch, matches. RKT_LN_Equity: real landed CRNCY 'GBp' / EQY_FUND_CRNCY 'GBP' (minor-unit pair, x100), FY1 BEST_EPS 3.371, 10-year PE window median ~21.91, px_last 4923.0 -> ratio ~1.500, inside [0.33, 3.0] -> SERVED. served 1 (RKT), refused 2 (BA, ULVR). Run twice back to back: byte-identical both times (same raw stamps, no vendor call re-pulls anything). Re-checked against AC2's own regex with Python re.search (DOTALL): MATCH.",
+      "expect": "(?s)cases BA_US_Equity base ABSENT ratio \\S+ cause forward_eps_not_positive.*cases ULVR_LN_Equity base ABSENT ratio \\S+ cause currency_mismatch.*cases RKT_LN_Equity base SERVED ratio \\d+\\.\\d+.*cases_report served 1 refused 2",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC3.sh",
+      "output_evidence": "........................................................................ [ 74%]\n.........................                                                [100%]\n97 passed in 1.73s",
+      "denominator": "97 of 97 tests in integrations/bloomberg/research/tests passed, 0 failed (86 pre-existing + 11 new from test_model_cases_guard.py). Run twice back to back: '97 passed' both times (1.73s, 2.28s -- only elapsed seconds differ). The pre-cell bound was 86 (BASE_RUN_EVAL_20260925T171447Z.log); the delta is exactly this cell's own new test file, nothing else moved.",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/g1/mutant.py (not committed): the SAME BA-shaped figures (FY1 BEST_EPS -0.828, one PE_RATIO history point, PX_LAST 196.80) run through the FIX (model_block_pull._compute_cases, imported live, unmodified) and through a MUTANT that reproduces the PRE-CRPS-g-1 formula verbatim -- base = FY1 BEST_EPS * trailing-median P/E, with NO forward-EPS/price/currency/band checks at all, the exact shape this module carried before this cell.",
+      "expected": "FIX refuses: status ABSENT, cause forward_eps_not_positive. MUTANT still SERVES the implausible negative value (matching BA_US_Equity's own measured -18.03x symptom named in section 1 of the task order).",
+      "observed": "FIX status=ABSENT cause=forward_eps_not_positive -- 'FIX: PASSED (expected ABSENT/forward_eps_not_positive)'. MUTANT status=SERVED value=-18.03384 -- 'MUTANT: FIRED AS EXPECTED (still SERVES a negative, implausible base -- the guard is what stops it)'. Run twice back to back, identical both times.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "g1_AC1.sh, g1_AC2.sh, g1_AC3.sh and .scratch/g1/mutant.py each run twice back to back under the literal invocation (timeout 120), both before and after folding ISSUER AMENDMENT 1 (56cc8d7113).",
+      "observed": "AC1: '11 passed' every run, before and after the amendment (11 pre-amendment tests grew to 11 total after two amendment-specific assertions were added to existing arms plus one new arm, net delta already reflected). AC2: byte-identical real-S3 cases-report output every run (same three lines + summary, same ratio 1.5004339488117002 for RKT). AC3: '97 passed' every run. mutant.py: identical FIX(ABSENT/forward_eps_not_positive)/MUTANT(SERVED/-18.03384) result every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 (the band table over every covered key) -- not produced by this worker.",
+      "reason": "judgment=true in the task order's <proof_of_spec>; graded at L9 by the CVO on the issuer's own real re-derive, not self-gradable by the worker."
+    },
+    {
+      "item": "No Bloomberg call, no blpapi session, no pull/derive for real, no S3 write of any kind (verified: cases-report's only S3 touches are GetObject/ListObjectsV2 reads of already-landed raw; no _ensure_unit_map call, no s3_put_if_absent call reached on this path).",
+      "reason": "HARD BOUND (spawn prompt) and section 4 BOUNDS."
+    },
+    {
+      "item": "cases-report never calls the Seeking-Alpha forecast-fallback session (_derive_forecast_figures/sa_forecast_fallback.run_fallback) even though a real derive would for a security whose BBG BEST_EPS is empty -- FY1 BEST_EPS is read BBG-source-only.",
+      "reason": "that fallback opens a live web session (a vendor call), forbidden by the same HARD BOUND; none of AC2's three named securities needed it (all three carry a landed BBG FY1 BEST_EPS), so this never diverged from a real derive's answer for this criterion -- documented in _cases_report_figures's own docstring as a deliberate, permanent divergence for any security it WOULD matter for."
+    },
+    {
+      "item": "No field list, history chunking, cap, landing address, or any figure other than the cases was touched; Upside/Downside remain the ruled ABSENT string, unchanged.",
+      "reason": "section 4 BOUNDS."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest test_model_cases_guard.py (AC1, via g1_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC1.sh",
+      "result": "rc 0; 11 passed (run twice, identical)"
+    },
+    {
+      "tool": "model_block_pull.py cases-report (AC2, via g1_AC2.sh, real live S3 raw, no vendor call, no write)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC2.sh",
+      "result": "rc 0; served 1 refused 2 (BA forward_eps_not_positive, ULVR currency_mismatch, RKT SERVED ratio ~1.500) -- run twice, byte-identical"
+    },
+    {
+      "tool": "pytest integrations/bloomberg/research/tests (AC3, via g1_AC3.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g1_AC3.sh",
+      "result": "rc 0; 97 passed (86 pre-existing + 11 new) -- run twice, identical"
+    },
+    {
+      "tool": ".scratch/g1/mutant.py (not committed -- scratch control harness)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python .scratch/g1/mutant.py",
+      "result": "rc 0; FIX ABSENT/forward_eps_not_positive (PASSED); MUTANT SERVED/-18.03384 (FIRED AS EXPECTED); run twice, identical"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh integrations/bloomberg/research/model_block_pull.py integrations/bloomberg/research/tests/test_model_cases_guard.py",
+      "result": "rc 0; OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": "proof-of-spec-check.py (close-out gate)",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-g-1.model-cases-guard.proof_of_spec.json AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-1.model-cases-guard.md",
+      "result": "rc 0; VALID (structural=jsonschema, acceptance rows=3, violations=0)"
+    },
+    {
+      "tool": "safe-commit.sh (final commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-g-1.model-cases-guard.proof_of_spec.json org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-1.model-cases-guard.md",
+      "result": "PENDING -- run immediately after this instance is written"
+    }
+  ]
+}

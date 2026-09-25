@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-f-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-2.hist-request-chunks.md",
+    "group": "OTHER",
+    "vintage_commit": "57052b7e85bcf6a2eec71d4740c289fe1a7b93c0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "20ddaa118f7f2c3a77c4f7cd57b6b5ef307d1d4b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-2.hist-request-chunks.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "integrations/bloomberg/mcp/blp_client.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Added class BlpResponseError(RuntimeError) (new, named per RULED text). historical_data() gained on_response_error: str = \"ignore\" (default). handle() now: if the message carries no securityData AND on_response_error==\"raise\" AND the message carries responseError, raises BlpResponseError(f\"{category}: {message}\"); otherwise (on_response_error==\"ignore\", the default, or no responseError present) returns silently -- byte-for-byte the prior early-return behaviour, so every existing caller (reference_data untouched, historical_data's own no-kwarg call sites) is unchanged. No other function touched. py_compile clean, ruff (py39) clean, 0 CRLF, 0 non-ASCII bytes.",
+      "introduces": ["BlpResponseError", "on_response_error"],
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/model_block_pull.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Added HIST_FIELDS_PER_REQUEST = 25 beside HIST_START/PERIODICITY. Added _hist_field_chunks(fields, per_request) (list-slice split, order preserved) and _merge_historical_by_date(chunk_results) (merges N historical_data() chunk results into ONE {security: [{date, field: value,...}]} result, one row per date, later chunks never overwriting a field an earlier chunk already supplied). stage_pull's single 39-field blp.historical_data(...) call replaced by a loop over _hist_field_chunks(HIST_FIELDS, HIST_FIELDS_PER_REQUEST) (2 chunks: 25, 14), each call carrying on_response_error=\"raise\"; pull_log gains one HistoricalDataRequest entry per chunk (fields=<that chunk's field list>, chunk=<i>, chunks_total=<n>); hist is _merge_historical_by_date(hist_chunk_results). cmd_pull's --dry-run branch: the old single combined ReferenceDataRequest+HistoricalDataRequest print line is split -- the ReferenceDataRequest line is unchanged in content (HEADER_FIELDS only); one new line per historical chunk reads 'DRY-RUN PULL: <security> -> would send HistoricalDataRequest chunk <i> of <n> fields=<k> (security=..., request_fields=<chunk fields>, start_date=..., end_date=..., periodicity=...)' -- the request_fields clause keeps the 22 CRPS-e-2 mnemonics visible in dry-run stdout (see surprise row AMGT_CORPUS-Z-W2-S7: the RULED count-only literal alone broke a sibling READ-ONLY test). No change to HIST_FIELDS' 39 members, FORECAST_FIELDS, FIELD_BASIS, HEADER_FIELDS, HIST_START, PERIODICITY, any bronze/state landing address, the --securities cap (3), or the derive stage. py_compile clean, ruff (py39) clean, 0 CRLF, 0 non-ASCII bytes.",
+      "introduces": ["HIST_FIELDS_PER_REQUEST", "_hist_field_chunks", "_merge_historical_by_date"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "integrations/bloomberg/research/tests/test_hist_request_chunks.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New file, 12 tests, fully OFFLINE (no network, no real blpapi call): (1) module-import regression -- model_block_pull imports without pulling blpapi into sys.modules; (2) HIST_FIELDS_PER_REQUEST==25; (3) 39 HIST_FIELDS chunk into [25,14], order preserved, concatenation reconstructs the original list exactly; (4) a generic 52-field/25-per-request case chunks [25,25,2]; (5) stage_pull's source text is statically checked to pass on_response_error=\"raise\" and to call _hist_field_chunks/_merge_historical_by_date; (6-8) _merge_historical_by_date joins fields from different chunks onto one row per date, a date seen in only one chunk still appears once, multiple securities merge independently; (9-12) blp_client.historical_data exercised against a MINIMAL FAKE blpapi module injected under sys.modules['blpapi'] for a PRIVATE module load (never touching the real blpapi package installed on this box or any blp_client module object a sibling test file already holds cached) -- a responseError message returns {} under the default (\"ignore\", and explicitly \"ignore\"), raises blp.BlpResponseError('LIMIT: too many fields requested') under \"raise\", and a clean securityData response still returns its row normally under \"raise\". py_compile clean, ruff (py39) clean, 0 CRLF, 0 non-ASCII bytes.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f2_AC1.sh -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f2_AC1.sh",
+      "output_evidence": "............                                                             [100%]\n12 passed in 0.32s",
+      "denominator": "12 of 12 tests passed, 0 failed",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f2_AC2.sh -- expect (?s)HistoricalDataRequest chunk 1 of 2 fields=25.*HistoricalDataRequest chunk 2 of 2 fields=14.*DRY RUN PULL DONE: 1 of 1 securities planned, 0 written",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f2_AC2.sh",
+      "output_evidence": "DRY-RUN PULL: ADBE US Equity -> would send ReferenceDataRequest(security='ADBE US Equity', fields=['NAME', 'CRNCY', 'CNTRY_OF_DOMICILE', 'GICS_SECTOR_NAME', 'PX_LAST', 'CUR_MKT_CAP', 'NET_DEBT', 'CURR_ENTP_VAL', 'VOLUME_AVG_30D', 'EQY_SH_OUT_REAL', 'EQY_FREE_FLOAT_PCT', 'EQY_BETA', 'EQY_DVD_YLD_IND', 'SHORT_INT_RATIO', 'SI_PERCENT_EQUITY_FLOAT', 'CIE_DES', 'CIE_DES_BULK', 'EQY_FUND_CRNCY'])\nDRY-RUN PULL: ADBE US Equity -> would send HistoricalDataRequest chunk 1 of 2 fields=25 (security='ADBE US Equity', request_fields=[...25 fields...], start_date=2016-01-01, end_date=2026-09-25, periodicity=YEARLY)\nDRY-RUN PULL: ADBE US Equity -> would send HistoricalDataRequest chunk 2 of 2 fields=14 (security='ADBE US Equity', request_fields=[...14 fields...], start_date=2016-01-01, end_date=2026-09-25, periodicity=YEARLY)\n...(3 forecast ReferenceDataRequest lines, the 'would write' line)...\nDRY RUN PULL DONE: 1 of 1 securities planned, 0 written",
+      "denominator": "1 of 1 security planned (ADBE US Equity), 0 written; 2 of 2 historical chunks printed (25 fields then 14 fields, order preserved); re-run twice, byte-identical output both times (end_date is today's UTC date, computed fresh, stable within the session)",
+      "expect": "(?s)HistoricalDataRequest chunk 1 of 2 fields=25.*HistoricalDataRequest chunk 2 of 2 fields=14.*DRY RUN PULL DONE: 1 of 1 securities planned, 0 written",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f2_AC3.sh -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f2_AC3.sh",
+      "output_evidence": "........................................................................ [ 83%]\n..............                                                           [100%]\n86 passed in 1.15s",
+      "denominator": "86 of 86 tests passed, 0 failed -- the whole integrations/bloomberg/research/tests suite, including the pre-existing test_model_block_22_fields.py (whose test_dry_run_request_lines_carry_the_22 first FAILED against a count-only chunk line; fixed by appending request_fields= to the chunk line, see surprise row AMGT_CORPUS-Z-W2-S7, no file outside <paths> touched)",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/f2/mutant_control.py (not committed): TWO independent mutations, each reverting exactly one real defect this cell fixes. MUTANT 1 -- mbp.HIST_FIELDS_PER_REQUEST set to 39 in the live module object (no chunking, the pre-cell shape) before calling the real _hist_field_chunks. MUTANT 2 -- blp_client.py's on_response_error=\"raise\" branch textually stripped from a private in-memory copy of its source, exec'd against the same FAKE blpapi harness test_hist_request_chunks.py uses, then called with on_response_error=\"raise\" against a responseError-only message.",
+      "expected": "FIX: chunk sizes [25, 14]; on_response_error=\"raise\" raises BlpResponseError on a responseError message. MUTANT 1: chunk sizes [39] (does not match [25, 14]). MUTANT 2: returns without raising (the pre-cell silent-drop defect), so the FIX/MUTANT pair discriminates.",
+      "observed": "FIX_chunk_sizes=[25, 14] FIX1_OK=True; MUTANT_chunk_sizes=[39] MUTANT1_STILL_PASSES=False; FIX2_RAISED=True MUTANT2_RAISED=False; CONTROL_FIRED_AS_EXPECTED=True. Run twice, identical both times.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 (pytest) and AC3 (pytest, whole suite) each run twice back to back; AC2 (dry-run CLI) run twice back to back; .scratch/f2/mutant_control.py run twice.",
+      "observed": "AC1: 12 passed both runs. AC3: 86 passed, 0 failed both runs. AC2: byte-identical DRY-RUN PULL output both runs (end_date is today's UTC date, stable within this session). mutant_control.py: identical CONTROL_FIRED_AS_EXPECTED=True both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any vendor (Bloomberg) call, any live blpapi session",
+      "reason": "BOUND: NEVER call Bloomberg, NEVER open a blpapi session, NEVER run the puller without --dry-run. AC2 ran with --dry-run only (returns before _load_blp_client() is ever called). AC1/AC3's new test file injects a FAKE blpapi module under sys.modules for a private blp_client load -- the real blpapi package (installed on this box) is read but never imported by the test; module identity confirmed by the module-import regression test."
+    },
+    {
+      "item": "Any change to any existing field, basis text, cap, landing address or derive rule; any change to blp_client's default behaviour for any caller",
+      "reason": "BOUND. Verified by diff: HIST_FIELDS' 39 members, FORECAST_FIELDS, FIELD_BASIS, HEADER_FIELDS, the --securities cap (3), _bronze_prefix/_bronze_key/security_key are byte-unchanged. on_response_error defaults to \"ignore\", which is the prior early-return-on-no-securityData behaviour verified byte-for-byte by test_on_response_error_ignore_default_unchanged_for_every_existing_caller (both the no-kwarg call and the explicit \"ignore\" call return {} on the same responseError-only message)."
+    },
+    {
+      "item": "An AC4 row in this instance's acceptance array",
+      "reason": "See surprise row AMGT_CORPUS-Z-W2-S8: the governing checker invocation (Section 5's step 2, literal) is bound to the ids AC1,AC2,AC3 only; carrying an AC4 row (any status/method) is refused as an unexpected coverage addition, and the schema's acceptance[].status/method enums carry no judgment/NOT_EVALUATED value in any case. AC4 is recorded here in prose instead: JUDGMENT, the CVO's, graded at L9 on the issuer's real run after the drain -- nothing produced by this worker."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W2-S7: CRPS-f-2's RULED dry-run chunk-line format (a field COUNT only) would break the pre-existing, READ-ONLY sibling test test_model_block_22_fields.py::test_dry_run_request_lines_carry_the_22 -- resolved by appending the field list to the same line (request_fields=) rather than editing that file, keeping AC2's literal substring match and AC3's whole-suite pass both true at once.",
+    "AMGT_CORPUS-Z-W2-S8: Section 6 step 1 says this instance carries 'AC4 as a judgment row with no grade', but the governing checker invocation named in step 2 is literally bound to ids AC1,AC2,AC3 -- proof-of-spec-check.py's coverage-frame refuses any acceptance row outside the exact expected-id set as an 'unexpected addition' (measured: rc=1, VIOLATION: coverage: instance row 'AC4' is NOT in the TO's expected set), and the schema's acceptance[].status/method enums have no judgment/NOT_EVALUATED member either way. Resolved by omitting AC4 from the acceptance array (recorded in declared_exclusions instead) so the literal checker invocation passes rc=0."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest (AC1, via f2_AC1.sh)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest integrations/bloomberg/research/tests/test_hist_request_chunks.py -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 12 passed, 0 failed"
+    },
+    {
+      "tool": "model_block_pull.py pull --dry-run (AC2, via f2_AC2.sh)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python integrations/bloomberg/research/model_block_pull.py pull --securities \"ADBE US Equity\" --dry-run",
+      "result": "rc 0; 1 of 1 securities planned, 0 written; 2 historical chunks printed (25, 14 fields)"
+    },
+    {
+      "tool": "pytest, whole suite (AC3, via f2_AC3.sh)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest integrations/bloomberg/research/tests -q --color=no -p no:cacheprovider",
+      "result": "rc 0; 86 passed, 0 failed"
+    },
+    {
+      "tool": "py_compile + ruff (py39) + ASCII/LF check (all 3 changed/new files)",
+      "invocation": "python -m py_compile <file>; python -m ruff check --target-version py39 <files>; byte-level scan for bytes>127 and CRLF",
+      "result": "all 3 files compile clean, ruff clean, 0 CRLF, 0 non-ASCII bytes"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh integrations/bloomberg/mcp/blp_client.py integrations/bloomberg/research/model_block_pull.py integrations/bloomberg/research/tests/test_hist_request_chunks.py",
+      "result": "OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": ".scratch/f2/mutant_control.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/f2/mutant_control.py",
+      "result": "rc 0; FIX1_OK=True MUTANT1_STILL_PASSES=False FIX2_RAISED=True MUTANT2_RAISED=False CONTROL_FIRED_AS_EXPECTED=True (run twice, identical)"
+    }
+  ]
+}

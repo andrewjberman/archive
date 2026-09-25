@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-w-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "fee6c9f89c",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-w-1.submodule-root.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-w-1.submodule-root.md",
+    "group": "OTHER",
+    "vintage_commit": "fee6c9f89c"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".gitmodules",
+      "kind": "config_data",
+      "commit_or_etag": "69288c8ca0b396e9f9010a009ee18c0a9c83ca23",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "tree config file, not a deploy-scope artifact; `git show 69288c8ca0:.gitmodules` carries both submodule.opal_ai.{url,branch} and submodule.portal.url; verified live by w1.AC1.sh"
+    },
+    {
+      "path_or_key": ".tools/wk-provision.sh",
+      "kind": "script",
+      "commit_or_etag": "69288c8ca0b396e9f9010a009ee18c0a9c83ca23",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "workspace tool, not a deploy-scope artifact; `bash -n .tools/wk-provision.sh` clean at commit-gate time; the new `--nested <path>=<ref>` provision/remove generalisation and the pre-creation uninitialised-submodule refusal are exercised live by w1.AC3.sh (RESULT: PASS)",
+      "introduces": [
+        "--nested",
+        "provision_nested",
+        "require_nested_initialised"
+      ],
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "opal_ai.url=https://github.com/Opal-Capital/opal_ai.git opal_ai.branch=DEV portal.url=https://github.com/Opal-Capital/portal.git gitlink=160000 90ca424fc7551019cc493847637258adf3c1c4b5 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "opal_ai.url=https://github.com/Opal-Capital/opal_ai.git opal_ai.branch=DEV portal.url=https://github.com/Opal-Capital/portal.git gitlink=160000 90ca424fc7551019cc493847637258adf3c1c4b5\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 conditions matched (opal_ai.url, opal_ai.branch, portal.url, gitlink sha+mode)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "submodule update rc=0; opal_ai HEAD=90ca424fc7551019cc493847637258adf3c1c4b5 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "submodule update rc=0; opal_ai HEAD=90ca424fc7551019cc493847637258adf3c1c4b5; opal_ai toplevel=C:/tmp/oa-1/opal_ai\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 submodule (opal_ai) initialised at the declared HEAD, from the real GitHub remote (egress class declared in the task order's preflight)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "main-tree opal_ai initialised=no; rc=2; created=no; REFUSED: opal_ai is uninitialised in the main tree ... -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "main-tree opal_ai initialised=no; rc=2; created=no; REFUSED: opal_ai is uninitialised in the main tree (git submodule update --init opal_ai)\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 refusal conditions matched (init=no, rc=2, created=no) plus the REFUSED line naming opal_ai and 'uninitialised' -- verified no stray worktree/branch survives (`git worktree list` and `git branch --list wk-NFRA_OPALAI-97` both empty post-run)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Deleted `opal_ai`'s `branch = DEV` line from .gitmodules on disk (uncommitted), re-ran w1.AC1.sh: it correctly FAILed (opal_ai.branch read NONE). Then restored .gitmodules byte-for-byte from a pre-mutation copy (`git status --porcelain -- .gitmodules` empty after restore, no commit touches the mutation).",
+      "expected": "w1.AC1.sh FAILs (RESULT: FAIL, exit=1) while the branch mapping is missing, and PASSes again once restored",
+      "observed": "Mutant run: 'opal_ai.branch=NONE ... RESULT: FAIL' exit=1. Restore run: 'opal_ai.branch=DEV ... RESULT: PASS' exit=0, and `.gitmodules` reads byte-identical to the committed version",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "w1.AC1.sh run twice in a row, post-restore, same worktree state, no arguments varied",
+      "observed": "Both runs printed the identical line 'opal_ai.url=https://github.com/Opal-Capital/opal_ai.git opal_ai.branch=DEV portal.url=https://github.com/Opal-Capital/portal.git gitlink=160000 90ca424fc7551019cc493847637258adf3c1c4b5' followed by 'RESULT: PASS' and exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "opal_ai (the gitlink itself) as an artifacts_produced row",
+      "reason": "`.tools/proof-of-spec-check.py`'s artifact-resolution limb probes presence with `git cat-file -e <pin>:<path>`, which fails for a gitlink tree entry (mode 160000; measured: `git cat-file -e 69288c8ca0:opal_ai` rc=1, `git cat-file -t` rc=128 'could not get object info') regardless of the declared `kind` -- no enum member models a submodule pointer either. The gitlink's existence, mode and pin are proven directly by AC1's and AC2's own output_evidence (`git ls-tree HEAD opal_ai`, `git -C opal_ai rev-parse HEAD`) instead of by an artifact row this checker cannot resolve."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPALAI-Z-W1-S1: owned-paths-validate.py never consults the worker_grant (task-order-paths, ADHC_OWNPTH.005) clause for a path with ZERO existing lane row -- opal_ai read UNDEFINED and was refused before check_agent() could ever be reached; landed via the documented, audited GIT_COMMIT_AUTHOR_OVERRIDE escape hatch (every staged path was inside this order's own <paths> grant)."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~1/session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "bash -n (syntax check)",
+      "invocation": "bash -n .tools/wk-provision.sh",
+      "result": "SYNTAX-OK, and re-verified by the commit-gate's own `[commit-gate] OK: bash -n syntax-checked .tools/wk-provision.sh` at commit 69288c8ca0"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (commit-gate + comp-shell + risk-reflex + surprise-row-gate + to-pipeline-gate)",
+      "invocation": "GIT_COMMIT_AUTHOR_OVERRIDE=0.9.0_WK_NFRA_OPALAI~1 bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPALAI~1 <0.9.0_WK_NFRA_OPALAI~1@opal.agent>\" -F <msgfile> -- .gitmodules opal_ai .tools/wk-provision.sh",
+      "result": "commit 69288c8ca0b396e9f9010a009ee18c0a9c83ca23 on wk-NFRA_OPALAI-1; [commit-gate] OK, [comp-shell scan] 0 findings, [risk-reflex] CLEAN (3 of 3 files checked), [to-pipeline-gate] OK (no task_orders/*.md staged), verified against the repository with `git log -1 --format=%h~%an~%s 69288c8ca0` (matches) and a bogus-hash negative control (`fatal: bad object`, rc=128)"
+    },
+    {
+      "tool": "python .tools/owned-paths-validate.py --check-agent (diagnostic, not a compiler proper)",
+      "invocation": "printf 'opal_ai\\n.gitmodules\\n.tools/wk-provision.sh\\n' | python .tools/owned-paths-validate.py --check-agent 0.9.0_WK_NFRA_OPALAI~1 .owned-paths.yaml",
+      "result": "1 violation: 'VIOLATION: opal_ai -- UNDEFINED (no matching path rule; agent=0.9.0_WK_NFRA_OPALAI~1)' -- filed as NFRA_OPALAI-Z-W1-S1; the other two paths passed clean"
+    }
+  ]
+}
