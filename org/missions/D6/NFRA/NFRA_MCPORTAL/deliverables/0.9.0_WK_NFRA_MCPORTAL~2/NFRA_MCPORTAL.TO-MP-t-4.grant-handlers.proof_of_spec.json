@@ -1,0 +1,192 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-t-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/prd/NFRA_MCPORTAL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "87b310f4c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "48ee4eebfc",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-t-4.grant-handlers.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_grants.py",
+      "kind": "script",
+      "commit_or_etag": "17b7e01c0f0234724cb7177d231b0b4cafee4a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New this cell. Nothing deploys from this order (BOUNDS #2: no push, no install, no AWS write); committed at 17b7e01c0f, worktree bytes match committed bytes (git hash-object: 80cddcecf4ff82392f59acc68c89956423ead546).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "introduces": [
+        "def read_grant_state",
+        "async def get_grant",
+        "def invoke_grant_writer",
+        "async def narrow_grant",
+        "async def widen_grant",
+        "def list_changes",
+        "async def get_changes"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_api.py",
+      "kind": "script",
+      "commit_or_etag": "17b7e01c0f0234724cb7177d231b0b4cafee4a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Edited this cell: registers the four admin_grants routes onto the existing /api/admin/* router (this cell's own chain-B amendment withdrew the separate-writer clause). Not deployed; worktree bytes match committed (git hash-object: 2deabbd4f5fc37b62ec48bc816adfb75c0274e44).",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "introduces": [
+        "Route(\"/grants/{tid}/{oid}\", admin_grants.get_grant",
+        "Route(\"/grants/{tid}/{oid}/narrow\", admin_grants.narrow_grant",
+        "Route(\"/grants/{tid}/{oid}/widen\", admin_grants.widen_grant",
+        "Route(\"/changes\", admin_grants.get_changes"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "17b7e01c0f0234724cb7177d231b0b4cafee4a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Edited this cell (drain amendment): adds GET /assets/{path:path}, owner-gated, serving DASHBOARD_BUNDLE_DIR/assets. Not deployed; worktree bytes match committed (git hash-object: 48d27599477b4bef39d25988d816b9d8cc72369d).",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "introduces": [
+        "async def dashboard_asset",
+        "Route(\"/assets/{path:path}\", dashboard_asset"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_admin_grants.py",
+      "kind": "test",
+      "commit_or_etag": "17b7e01c0f0234724cb7177d231b0b4cafee4a84",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New this cell: the five named tests, run through the real app.server ASGI app via starlette.testclient.TestClient. Tests are not deployed. Worktree bytes match committed (git hash-object: f5ba8fd358c4ba50fb7b0f52da95de0d31092ad9).",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "introduces": [
+        "def test_get_grant_reads_store",
+        "def test_narrow_invokes_writer_with_forwarded_header",
+        "def test_gateway_never_writes_policy",
+        "def test_changes_newest_first",
+        "def test_assets_served_to_owner_only"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~2/probes/mp_t4_mutant.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "New this cell: the CONTROLS.mutant probe (in-process, never a tracked-file mutation). Committed alongside this instance in the same commit as the deliverables/ flip.",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "AC1 (cell_refs=MP-t-4): bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t4.AC1.sh; echo \"exit=$?\" -- expect: pytest rc=0; named tests passed 4 of 4; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 4 of 4; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named tests PASSED (test_get_grant_reads_store, test_narrow_invokes_writer_with_forwarded_header, test_gateway_never_writes_policy, test_changes_newest_first), 0 failed/error lines; run twice, identical both times",
+      "status": "PASS",
+      "expect": "pytest rc=0.*named tests passed 4 of 4.*failed/error lines 0.*RESULT: PASS.*exit=0"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "AC2 (cell_refs=MP-t-4): bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t4.AC2.sh; echo \"exit=$?\" -- expect: live store: NO-PROFILE; bogus table: STORE-UNAVAILABLE -- RESULT: PASS -- exit=0",
+      "method": "live_read",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t4.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "live store: NO-PROFILE; bogus table: STORE-UNAVAILABLE\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 shapes distinguished correctly (a real never-profiled principal against the configured store -> NO-PROFILE; a nonexistent table name -> STORE-UNAVAILABLE); run twice against the live store, identical both times",
+      "status": "PASS",
+      "expect": "live store: NO-PROFILE; bogus table: STORE-UNAVAILABLE.*RESULT: PASS.*exit=0"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "probes/mp_t4_mutant.py monkeypatches app.access_state.AccessState.get to swallow a DependencyUnavailable and return None (\"a store failure silently reads as no record\") in-process only; no tracked file is touched. Re-runs read_grant_state against the live store and a nonexistent table under both the real and mutated get().",
+      "expected": "REAL: live never-profiled principal -> NO-PROFILE; bogus table -> STORE-UNAVAILABLE (the two shapes stay distinct). MUTANT: both answer NO-PROFILE (the distinction AC2 exists to catch collapses).",
+      "observed": "{'real_live': 'NO-PROFILE', 'real_bogus': 'STORE-UNAVAILABLE', 'mutant_live': 'NO-PROFILE', 'mutant_bogus': 'NO-PROFILE'}. VERDICT: PASS-MP-T4-MUTANT.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "tests/test_admin_grants.py (all 5), t4.AC1.sh and t4.AC2.sh (a live AWS read) were each run twice back-to-back.",
+      "observed": "test_admin_grants.py: '5 passed' both runs. t4.AC1.sh: 'pytest rc=0; named tests passed 4 of 4; failed/error lines 0 -- RESULT: PASS' both runs. t4.AC2.sh: 'live store: NO-PROFILE; bogus table: STORE-UNAVAILABLE -- RESULT: PASS' both runs, identical deciding values against the live store each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "the grant-writer Lambda itself (its handler code, its registry row, its IAM)",
+      "reason": "Another cell's build; its lambda-source-map entry had 0 hits at this cut (checks/_root.sh's mp_writer_entry probe). This cell only invokes it via GRANT_WRITER_FUNCTION_NAME and relays its verdict; narrow/widen were exercised against a stubbed Lambda client in tests, never a real invoke."
+    },
+    {
+      "item": "GET /api/admin/changes as a global (no tid/oid) feed",
+      "reason": "The existing store's operator_audit records have no cross-tenant index (access_state.query reads one partition). Implemented tid/oid-scoped; see surprise row NFRA_MCPORTAL-Z-W2-S1."
+    },
+    {
+      "item": "moto-backed tests (test_schwab_catalog.py, test_schwab_export.py, test_schwab_wiring.py, tests/acceptance/**)",
+      "reason": "moto is not installed on this box and this order does not install it. These modules fail collection (ModuleNotFoundError: moto) independent of this cell's changes and are not part of either named proof invocation."
+    },
+    {
+      "item": "app/owner_gate.py, app/access_state.py, app/data_entitlement.py, app/config.py, ops/schwab_entitlement_admin.py",
+      "reason": "Read-only surfaces per this order's SURFACES section; never edited."
+    },
+    {
+      "item": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~2/probes/mp_t4_mutant.py",
+      "reason": "The CONTROLS.mutant probe, referenced by controls.mutant.observed/description, not itself a named acceptance-criterion artifact (AC1/AC2 are the TO's only two criteria)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W2-S1"
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~2/grant-handlers.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest 9.1.1 (Python 3.11.9)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_admin_grants.py -v -p no:cacheprovider --color=no",
+      "result": "5 passed, run twice, identical both times"
+    },
+    {
+      "tool": "pytest 9.1.1 (Python 3.11.9)",
+      "invocation": "cd infra/aws/ec2/opal-gateway && python -m pytest tests/test_owner_gate.py -v -p no:cacheprovider --color=no",
+      "result": "5 passed -- no regression on the MP-t-1 suite this cell is stacked on"
+    },
+    {
+      "tool": "mp_t4_mutant.py probe (in-process mutant control)",
+      "invocation": "python org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~2/probes/mp_t4_mutant.py",
+      "result": "rc=0, VERDICT: PASS-MP-T4-MUTANT"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh infra/aws/ec2/opal-gateway/app/admin_grants.py infra/aws/ec2/opal-gateway/tests/test_admin_grants.py infra/aws/ec2/opal-gateway/app/admin_api.py infra/aws/ec2/opal-gateway/app/server.py",
+      "result": "rc=0, 'OK: pre-commit gate clean for 4 of 4 file(s)'"
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPORTAL~2 <0.9.0_WK_NFRA_MCPORTAL~2@opal.agent>\" -F .scratch/commit-msg-mp-t4.txt -- infra/aws/ec2/opal-gateway/app/admin_grants.py infra/aws/ec2/opal-gateway/tests/test_admin_grants.py infra/aws/ec2/opal-gateway/app/admin_api.py infra/aws/ec2/opal-gateway/app/server.py",
+      "result": "committed 17b7e01c0f on wk-NFRA_MCPORTAL-2 (LOCAL, not pushed); msg-verify MATCH"
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "STAGED=org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md python .tools/surprise-row-gate.py",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; corpus matches the exact legacy baseline (0 new failures)"
+    },
+    {
+      "tool": "t4.AC1.sh / t4.AC2.sh (the governing task order's own literal invocations)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t4.AC1.sh; echo \"exit=$?\"  |  bash .../t4.AC2.sh; echo \"exit=$?\"",
+      "result": "both RESULT: PASS, exit=0, run twice each, identical"
+    }
+  ]
+}
