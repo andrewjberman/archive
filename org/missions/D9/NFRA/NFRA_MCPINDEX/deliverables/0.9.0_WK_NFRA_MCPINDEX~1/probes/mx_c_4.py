@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """NFRA_MCPINDEX MX-c-4 probe -- MXC4-AC1 .. AC12 (AC8 is judgment; no probe call for it).
 
-Run from <WS> (the invocation always `cd`s there first): `py -3.12 <this> AC<n>`.
+Run from <WS> (the invocation always `cd`s there first): `python <this> AC<n>` (device-neutral
+interpreter, row W1-S6; MX-c-5 conformed AC6, AC10 and AC11 to the CTO's ruling R-1 @9c70622d13).
 Every mechanical criterion prints its measurement (instrument, denominator where the criterion
 names one) and ends with exactly one `VERDICT: PASS-MXC4-AC<n>` or `VERDICT: FAIL-MXC4-AC<n> <reason>`
 line. AC1-AC4, AC9's plant, AC12 reuse `tests/test_tool_classification_composition.py`'s planted
@@ -155,50 +156,138 @@ def _head_short() -> str:
 
 
 # --- AC6: 49-name classification stability, before vs after ----------------------------------------
+# MX-c-5 conform: BEFORE is the MX-c-5 cell's BASE commit (below), the WHOLE gateway app/ tree at that
+# commit's bytes (so the three integration directories this cell edits are reverted too -- the MX-c-4
+# snapshot reverted only its own 4 files, which at this base are HEAD's bytes, so it compared the tree
+# with itself). Both sides register the DEPLOYED enabled set first: destructive_ops.classify composes an
+# integration's declared class only through a spec that register_enabled made active.
+
+MXC5_BASE = "97f1aad836"   # issue-carry of NFRA_MCPINDEX.TO-MX-c-5 onto wk-nfra_mcpindex-1-1d (MX-c-4 build)
+DEPLOY_SCRIPT = GW / "deploy-to-ec2.sh"
+
+# The reason for each class MX-c-5 declares, as STATED by 0.9.0_WK_NFRA_MCPINDEX~1 (claim: held -- the
+# worker's reading of each tool's code, graded at L9 as MXC5-AC4; the probe prints it, never grades it).
+MXC5_REASONS = {
+    "ycharts_freshness": "one GET /indices/table_data liveness read; no YCharts state mutated",
+    "ycharts_snapshot_metrics": "one GET /indices/table_data; snapshot values read",
+    "ycharts_time_series": "one GET /charts/general_data.json; history series read",
+    "ycharts_fund_series": "one GET /charts/fund_data.json; daily series read",
+    "ycharts_risk_return_scatter": "one POST /charts/scatter_plot_data.json carrying only security ids "
+                                   "and two metric names; a query-POST returning computed chart data, "
+                                   "nothing saved or changed",
+    "ycharts_search": "one GET /search/suggest/main; name/ticker resolution",
+    "graph_cypher": "statement proxied verbatim to the projection service, which opens Kuzu "
+                    "read_only=True (projection_server.py KuzuAdapter.open_read_only); a write is "
+                    "refused by the engine",
+    "graph_status": "one GET /health on the projection service",
+    "opal_data_refresh_upload": "a WRITE: PUTs 2 PKLs to presigned S3 URLs and POSTs /trigger, firing "
+                                "the live yang-pipeline (unrecallable); dry_run still writes pending/. "
+                                "IRREVERSIBLE_SEND = same class and flags as the fail-closed default",
+}
+
+
+def deployed_enabled_ids() -> list:
+    """ENABLED_INTEGRATIONS as the deploy writes it into the box's .env (deploy-to-ec2.sh); the
+    gateway's own config default (env, empty on this box) is printed beside it, never substituted."""
+    text = DEPLOY_SCRIPT.read_text(encoding="utf-8")
+    hits = re.findall(r"ENABLED_INTEGRATIONS=([A-Za-z0-9_ ,]+?)(?:\\n|['\"\n])", text)
+    if len(hits) != 1:
+        raise RuntimeError("expected exactly 1 ENABLED_INTEGRATIONS= value in %s, found %d: %r"
+                           % (DEPLOY_SCRIPT, len(hits), hits))
+    return [s for s in hits[0].replace(",", " ").split() if s]
+
 
 _CLASSIFY_SNIPPET = r"""
 import sys, json
 sys.path.insert(0, ".")
+enabled = json.loads(sys.argv[1])
 from app import destructive_ops as dop
 from app import data_entitlement as de
+from app import config as _cfg
+from app.integrations import registry as _r
+class _M:
+    def tool(self, *a, **k):
+        return lambda fn: fn
+report = _r.register_enabled(_M(), enabled)
+registered = {iid: sorted(_r._FACTORIES[iid]().register(_M())) for iid in _r.available_ids()}
 names = sorted(de.NATIVE_TOOLS | de.INTEGRATION_TOOLS | frozenset(de.SCHWAB_TOOLS))
 out = {}
 for n in names:
     tag = dop.classify(n)
     out[n] = {"dop_class": tag["class"].value, "dop_unclassified": bool(tag.get("unclassified")),
              "de_class": de.classify(n)}
-print(json.dumps({"names": names, "by_name": out}))
+env_enabled = list(_cfg.get_config().ENABLED_INTEGRATIONS) if hasattr(_cfg, "get_config") else None
+print(json.dumps({"names": names, "by_name": out, "registered": registered,
+                  "report": {k: sorted(v.get("tools", [])) for k, v in report.items()},
+                  "env_enabled": env_enabled}))
 """
 
 
-def _classify_all(gw_root: Path) -> dict:
-    res = subprocess.run([PY, "-c", _CLASSIFY_SNIPPET], cwd=str(gw_root),
+def _classify_all(gw_root: Path, enabled: list) -> dict:
+    res = subprocess.run([PY, "-c", _CLASSIFY_SNIPPET, json.dumps(enabled)], cwd=str(gw_root),
                          capture_output=True, text=True, timeout=60)
     if res.returncode != 0:
         raise RuntimeError("classify snippet failed rc=%d stderr=%s" % (res.returncode, res.stderr[-2000:]))
     return json.loads(res.stdout.strip().splitlines()[-1])
 
 
+def _snapshot_base(tmp_root: Path) -> Path:
+    """The gateway tree with every tracked app/ file set to MXC5_BASE's bytes (binary, via git show)."""
+    dest = tmp_root / "opal-gateway"
+    shutil.copytree(GW, dest, dirs_exist_ok=True,
+                    ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    shutil.rmtree(dest / "app")
+    prefix = "infra/aws/ec2/opal-gateway/"
+    listing = subprocess.run(["git", "ls-tree", "-r", "--name-only", MXC5_BASE, "--", prefix + "app"],
+                             cwd=str(WS), capture_output=True, text=True, check=True).stdout.split("\n")
+    files = [p for p in listing if p]
+    if not files:
+        raise RuntimeError("git ls-tree returned 0 files for %s at %s" % (prefix + "app", MXC5_BASE))
+    for p in files:
+        blob = subprocess.run(["git", "show", "%s:%s" % (MXC5_BASE, p)], cwd=str(WS),
+                              capture_output=True, check=True).stdout
+        out = dest / p[len(prefix):]
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(blob)
+    print("BASE snapshot: %d tracked app/ file(s) at %s" % (len(files), MXC5_BASE))
+    return dest
+
+
 def ac6():
-    with tempfile.TemporaryDirectory(prefix="mxc4_before_") as td:
-        before_root = _snapshot_before(Path(td))
-        before = _classify_all(before_root)
-    after = _classify_all(GW)
+    enabled = deployed_enabled_ids()
+    print("ENABLED_INTEGRATIONS (deployed, %s): %r" % (DEPLOY_SCRIPT.relative_to(WS).as_posix(), enabled))
+    with tempfile.TemporaryDirectory(prefix="mxc5_base_") as td:
+        before = _classify_all(_snapshot_base(Path(td)), enabled)
+    after = _classify_all(GW, enabled)
+    print("ENABLED_INTEGRATIONS (gateway config default on this box, env): %r" % after["env_enabled"])
     names = sorted(set(before["names"]) | set(after["names"]))
-    diffs = []
-    for n in names:
-        b, a = before["by_name"].get(n), after["by_name"].get(n)
-        if b != a:
-            diffs.append({"tool": n, "before": b, "after": a})
-    ac7_owned = {"read_teams_attachment"}   # this cell's OWN deliberate change, graded by AC7/AC8
-    unexpected = [d for d in diffs if d["tool"] not in ac7_owned]
+    enabled_tools = {t for iid in enabled for t in after["registered"].get(iid, [])}
+    expected_new = sorted(n for n in names if before["by_name"][n]["dop_unclassified"] and n in enabled_tools)
+    diffs = {n: (before["by_name"].get(n), after["by_name"].get(n)) for n in names
+             if before["by_name"].get(n) != after["by_name"].get(n)}
+    kept = [n for n in names if n not in expected_new]
+    kept_changed = sorted(n for n in kept if n in diffs)
     print("DENOMINATOR %d tool name(s) (union of before/after NATIVE_TOOLS|INTEGRATION_TOOLS|SCHWAB_TOOLS)"
-         % len(names))
-    print("all differences (%d): %s" % (len(diffs), json.dumps(diffs, indent=2)))
-    print("differences EXCLUDING AC7's own read_teams_attachment change (%d): %s"
-         % (len(unexpected), json.dumps(unexpected, indent=2)))
-    ok = len(names) == 49 and not unexpected
-    _verdict(ok, "AC6", "" if ok else "collateral difference(s) beyond AC7's own change, or denominator != 49")
+          % len(names))
+    print("KEEP: %d tool(s) outside the newly-classified set; %d changed class -> %r"
+          % (len(kept), len(kept_changed), kept_changed))
+    for n in kept_changed:
+        print("  CHANGED %s before=%s after=%s" % (n, json.dumps(diffs[n][0]), json.dumps(diffs[n][1])))
+    print("NEWLY CLASSIFIED: %d tool(s) unclassified at %s whose integration is enabled:" % (len(expected_new), MXC5_BASE))
+    not_classified = []
+    for n in expected_new:
+        a = after["by_name"][n]
+        if a["dop_unclassified"]:
+            not_classified.append(n)
+        print("  %-28s %s -> %s%s   reason: %s"
+              % (n, before["by_name"][n]["dop_class"] + "(unclassified)", a["dop_class"],
+                 "(unclassified)" if a["dop_unclassified"] else "", MXC5_REASONS.get(n, "NO REASON STATED")))
+    missing_reason = [n for n in expected_new if n not in MXC5_REASONS]
+    ok = (len(names) == 49 and len(kept) == 40 and not kept_changed and len(expected_new) == 9
+          and not not_classified and not missing_reason)
+    _verdict(ok, "AC6", "" if ok else
+             "denominator=%d kept=%d kept_changed=%d newly=%d still_unclassified=%r missing_reason=%r"
+             % (len(names), len(kept), len(kept_changed), len(expected_new), not_classified, missing_reason))
 
 
 # --- AC7: read_teams_attachment classified, no longer fail-closed-denied ---------------------------
@@ -276,10 +365,17 @@ SCOPED_FILES = [
     "tests/test_sprint_view.py", "tests/test_ssavail_contract.py", "tests/test_taxsma_workbook.py",
     "tests/test_teams_format.py",
 ]
-# MEASURED 2026-09-21 (this cell's cut, before any MX-c-4 edit): `py -3.12 -m pytest <SCOPED_FILES> -q`.
-BEFORE_SUMMARY = {"passed": 130, "failed": 1, "raw": "1 failed, 130 passed, 55 warnings, 34 subtests passed in 12.99s",
+# MX-c-4's cut (2026-09-21, before any MX-c-4 edit, `py -3.12`, the 10 SCOPED_FILES): 1 failed, 130 passed.
+# MX-c-5 conform: BEFORE is re-MEASURED at THIS cell's base -- 2026-09-25, worktree at 97f1aad836 with no
+# MX-c-5 edit, `python` 3.11.9, via this function over the same 11 files the AFTER run uses (the 10
+# SCOPED_FILES + tests/test_tool_classification_composition.py, which exists at this base).
+BEFORE_SUMMARY = {"passed": 137, "failed": 1,
+                 "raw": "1 failed, 137 passed, 56 warnings, 34 subtests passed in 14.64s",
+                 "base": "97f1aad836", "interpreter": "python 3.11.9",
                  "failed_nodeids": ["tests/test_identity_scope.py::test_scoped_deny_by_default"]}
 SCOPE_NOTE = (
+    "[Carried from MX-c-4's cut (2026-09-21, py -3.12); not re-measured by MX-c-5 except that "
+    "`moto` is still absent under `python` 3.11.9.]\n"
     "SCOPE (denominator over the tracked Gateway test tree, 163 files, decomp s.7): this cell's own "
     "invocation budget (timeout 120) cannot run the FULL suite once -- MEASURED: `py -3.12 -m pytest "
     "tests -q --continue-on-collection-errors` did not finish inside 280s locally. Two exclusions, "
@@ -309,8 +405,8 @@ def ac10():
     files = SCOPED_FILES + ["tests/test_tool_classification_composition.py"]
     res = _run([PY, "-m", "pytest", "-q", "--color=no"] + files, cwd=GW, timeout=100)
     failed_n, passed_n, failed_nodeids = _parse_pytest_summary(res.stdout)
-    print("BEFORE (the %d pre-existing files only): %s" % (len(SCOPED_FILES), json.dumps(BEFORE_SUMMARY)))
-    print("AFTER  (the same %d files + this cell's own new test file): failed=%d passed=%d nodeids=%r"
+    print("BEFORE (the same %d files at this cell's base): %s" % (len(files), json.dumps(BEFORE_SUMMARY)))
+    print("AFTER  (the same %d files, this worktree): failed=%d passed=%d nodeids=%r"
          % (len(files), failed_n, passed_n, failed_nodeids))
     before_failed = set(BEFORE_SUMMARY["failed_nodeids"])
     after_failed = set(failed_nodeids)
@@ -329,27 +425,40 @@ def ac10():
 # tool. The catalog-entry limb is struck from this criterion; it is graded on each tool's own shipping
 # cell (MX-t-1 .. MX-t-7).
 
+# MX-c-5 conform (CTO ruling R-1 @9c70622d13, item 3): the denominator stays 49 and is graded as
+# 44 classified + 5 HELD (G-OPLGTW). A HELD name is a schwab tool that is registered (the schwab
+# factory's register() returns it) but whose integration is absent from ENABLED_INTEGRATIONS as
+# deployed. Classification is read after register_enabled(<deployed set>), the only route by which an
+# integration's declared class becomes visible to destructive_ops.classify. PASS only when the
+# unclassified set IS the HELD set, exactly 5, and every tool clears data_entitlement.
+
 def ac11():
-    sys.path.insert(0, str(GW))
-    from app import destructive_ops as dop     # noqa: E402
-    from app import data_entitlement as de     # noqa: E402
-    tools = sorted(de.NATIVE_TOOLS | de.INTEGRATION_TOOLS | frozenset(de.SCHWAB_TOOLS))
-    fail_dop, fail_de = [], []
-    for t in tools:
-        tag = dop.classify(t)
-        if tag.get("unclassified"):
-            fail_dop.append(t)
-        if de.classify(t) is None:
-            fail_de.append(t)
+    enabled = deployed_enabled_ids()
+    after = _classify_all(GW, enabled)
+    tools = after["names"]
+    schwab_registered = set(after["registered"].get("schwab", []))
+    held = sorted(t for t in schwab_registered if "schwab" not in enabled and t in tools)
+    fail_dop = sorted(t for t in tools if after["by_name"][t]["dop_unclassified"])
+    fail_de = sorted(t for t in tools if after["by_name"][t]["de_class"] is None)
+    classified = [t for t in tools if t not in fail_dop]
+    unheld_unclassified = sorted(set(fail_dop) - set(held))
+    held_but_classified = sorted(set(held) - set(fail_dop))
+    print("ENABLED_INTEGRATIONS (deployed, %s): %r" % (DEPLOY_SCRIPT.relative_to(WS).as_posix(), enabled))
+    print("ENABLED_INTEGRATIONS (gateway config default on this box, env): %r" % after["env_enabled"])
+    print("registered by integration: %s" % json.dumps(after["registered"], sort_keys=True))
     print("DENOMINATOR %d registered tool name(s) (NATIVE_TOOLS | INTEGRATION_TOOLS | SCHWAB_TOOLS)"
-         % len(tools))
+          % len(tools))
+    print("%d = %d classified + %d HELD (G-OPLGTW)" % (len(tools), len(classified), len(held)))
+    print("HELD (schwab, registered, not in ENABLED_INTEGRATIONS): %d -> %r" % (len(held), held))
     print("fails destructive_ops.classify (no declared class): %d -> %r" % (len(fail_dop), fail_dop))
+    print("  of which NOT held: %d -> %r" % (len(unheld_unclassified), unheld_unclassified))
+    print("  held but classified: %d -> %r" % (len(held_but_classified), held_but_classified))
     print("fails data_entitlement.classify (returns None): %d -> %r" % (len(fail_de), fail_de))
-    zero_fail = not fail_dop and not fail_de
-    _verdict(zero_fail, "AC11",
-             "%d of %d tool(s) fail >=1 of the two registry limbs (dop=%d de=%d); "
-             "catalog-entry limb struck from AC11 (graded on each tool's own shipping cell)"
-             % (len({*fail_dop, *fail_de}), len(tools), len(fail_dop), len(fail_de)))
+    ok = (len(tools) == 49 and len(held) == 5 and len(classified) == 44
+          and not unheld_unclassified and not held_but_classified and not fail_de)
+    _verdict(ok, "AC11",
+             "%d = %d classified + %d HELD; unheld unclassified=%r; held but classified=%r; de fails=%r"
+             % (len(tools), len(classified), len(held), unheld_unclassified, held_but_classified, fail_de))
 
 
 # --- AC12 -------------------------------------------------------------------------------------------
