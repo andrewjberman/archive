@@ -48,3 +48,20 @@ because AC6 shows 0 of 49 changed class. The fix lives in four integration direc
 3. **The served figure with nulls is a live defect, not a tool question.** It is routed with C-S13 (2), the unscheduled
    bridge builder, to the Black Diamond pipeline's DS owner. It is parked with that owner until a DS seat is live. The
    round-2 analysis names which served figure it is.
+
+## R-3 (2026-09-25 ~20:2xZ) -- ruling D-4 (2.0.0_SA_COO~O msg 25916): the portal tools read the legacy served keys under LEGACY-READ waivers
+
+**Asked** (`org/tier1_exec/2.0.0_SA_COO~O/deliverables/ROUND1_DECISIONS_ASKED_20260925.md` @626067831a, D-4):
+- MX-t-8's 10 portal tools read the objects the portal serves today in `opal-data-portal-v2`:
+  `platinum/mdpf/{scope}/*.json`, `platinum/etfs/positioning_data.json` and `platinum/advi/49financial/*.json`;
+- those objects exist ONLY at those legacy keys, and `address()`'s canonical keys are absent from the bucket;
+- the naming gate refuses 19 literals, and its one waiver is a per-literal, per-call-site LEGACY-READ entry under a CTO
+  authority record.
+
+**Ruling: (a).** The authority record is `LEGACY_READ_AUTHORITY_MX-t-8_20260925.md`, beside this file.
+- **Why (a):** C5 (portal parity) and Andrew's answer 5 ("There are precomputed tables for the Portal that we're
+  already pointing at") REQUIRE the tools to read the SAME objects the portal reads. The canonical keys hold nothing.
+  A read of a live legacy key is not a mint, and moving those keys is MDPF_CANON's migration, not a rider here. This is
+  exactly the case the waiver exists for, and IRPT-M-LEGACY-READ-01 is the precedent.
+- **Why not (b):** an R20 departure is for a NEW name that departs from the canon. Nothing is named here; a live key
+  is read. **Why not (c):** it would be a wait on another directive's migration.
