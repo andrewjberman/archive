@@ -3,7 +3,16 @@
 Owner `2.0.0_SA_COO~X` (Claude seat, site Z); 2026-09-24 ~21:1xZ. Canonical flow (R-26). PRD v0.6 @`031c3a3a3e`, both L4-R
 halves SIGNED current. Round 1 TERMINAL at `b4a8638eeb` (11 of 11); analysis @`031c3a3a3e`.
 
-## BLOCKED ~23:0xZ -- the Bloomberg terminal will not sign in (needs a human at the box)
+## ROUND 3 -- DRAINED, L8 HANDED to `3.0.0_SA_CVO~Z` (2026-09-25 ~02:2xZ)
+
+Packet `ROUND3_DRAIN_END_PACKET.md` @`4be92efa19`. **Identity REALIZED 94 of 94**: the 40-name fire (36) + the re-mint (5:
+AMD, GOOGL, LLY, PWR, UNH) into `crosswalk/v1/2026-09-25.json` VersionId `9af5o6BzvZOV.ERosdvtDt7az4CW9nzO`; the re-ingest reads
+resolved_folders 94, unresolved files 0. **FWD-12 NOT realized** (Z-S26 incident rolled back; Z-S29: history `{}` on a 39-field
+request). **Sequence blocked at extract** (Z-S30: Copa's duplicate PDF, extract body not a function of its key). Served Model
+state: 31 restored, 58 honest-empty. Next: the CVO's L8/L9, then the CTO's round-3 analysis (enrichment candidates in packet
+s.5). Nothing is running and nothing is half-landed; the terminal is signed in (health ok 01:4xZ).
+
+(superseded, kept) ## BLOCKED ~23:0xZ -- the Bloomberg terminal will not sign in (needs a human at the box)
 
 Bloomberg's updater ran 22:26Z and the terminal restarted 22:50-22:52Z, signed out. Two supervised sign-ins (fill, screenshot
 verified 12-char login + 9 dots, submit) left the login window filled and no 8194 listener (a 120 s port poll between them);
