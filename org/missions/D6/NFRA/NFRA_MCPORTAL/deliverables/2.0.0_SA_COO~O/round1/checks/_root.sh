@@ -4,6 +4,9 @@ _R="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"
 [ -n "$_R" ] || _R="$(git rev-parse --show-toplevel 2>/dev/null)"
 [ -n "$_R" ] || { echo "ERROR: not inside a git worktree"; exit 9; }
 cd "$_R" || { echo "ERROR: cannot cd to $_R"; exit 9; }
+# pipefail: every check captures `out=$(cmd | tr -d CR); rc=$?` -- without it rc is tr's exit status (always 0),
+# so an rc criterion could never read the command's own exit (rows NFRA_OPALAI-Z-W3-S1, -Z-W6-S1).
+set -o pipefail
 MP_BASE="d59ee72eba"
 # The grant writer's lambda-source-map entry: the one whose source_dir names mcportal and whose key names grant-writer.
 # Prints 4 lines: count, key, source_dir, tf_file (blank lines when absent). A parse failure prints "ERROR ..." on line 1
