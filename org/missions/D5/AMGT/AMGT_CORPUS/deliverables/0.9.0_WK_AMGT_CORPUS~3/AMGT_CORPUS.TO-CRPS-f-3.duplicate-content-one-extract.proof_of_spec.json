@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-f-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-3.duplicate-content-one-extract.md",
+    "group": "OTHER",
+    "vintage_commit": "57052b7e85bcf6a2eec71d4740c289fe1a7b93c0"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "20ddaa118f7f2c3a77c4f7cd57b6b5ef307d1d4b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-3.duplicate-content-one-extract.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/extract.py",
+      "kind": "script",
+      "commit_or_etag": "1e65df55c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New helper group_canonical_bronze_keys(prefix, keys): groups sorted keys by (partition, report_id), the first-seen key per group is the canonical one (keys arrive sorted from the caller, so first-seen IS lexicographically first). _run_write and _run_v2 now iterate canonical_keys only (not every listed key), print one duplicate-content line per skip (_print_duplicates) and add a duplicates <n> field to their summary print. New --duplicates CLI mode (_run_duplicates): read-only, no store write, prints 'objects <n> report_ids <m> duplicates <d>' then one duplicate-content line per pair.",
+      "introduces": ["group_canonical_bronze_keys", "_run_duplicates", "--duplicates"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/typed.py",
+      "kind": "script",
+      "commit_or_etag": "1e65df55c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_run_write now imports lib.research.corpus.extract and calls its group_canonical_bronze_keys on the sorted bronze key list before the per-object loop, prints the same duplicate-content lines via extract_mod._print_duplicates, and iterates canonical_keys only -- one typed row per report_id, from the canonical (bronze_key/extract_key) pair. Summary line now reads 'silver_rows %d of %d bronze duplicates %d'.",
+      "introduces": ["extract_mod.group_canonical_bronze_keys(bronze_prefix, bronze_keys)"],
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_duplicate_content.py",
+      "kind": "test",
+      "commit_or_etag": "1e65df55c3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, offline, a stub S3 client (same shape as test_ingest.py's _FakeS3Client, never real boto3). 7 tests: the grouping helper picks the lexicographic first key and is identity on a no-duplicate corpus; extract._run_write puts exactly one extract.json for a duplicate pair and prints duplicate-content + 'duplicates 1'; extract._run_write on a no-duplicate corpus prints 'duplicates 0' and stores one object per object (today's behaviour, unaffected shape); extract._run_duplicates writes nothing and prints the exact 'objects <n> report_ids <m> duplicates <d>' + duplicate-content line shape; main() routes --duplicates to _run_duplicates; typed._run_write emits exactly one silver row (from the canonical key's bronze_key) for the duplicate pair and prints the same duplicate-content line. All 7 pass.",
+      "introduces": ["test_group_canonical_bronze_keys_picks_lexicographic_first", "test_run_duplicates_is_read_only_and_names_the_pair", "test_typed_write_one_row_from_canonical_key"],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC1.sh -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC1.sh",
+      "output_evidence": ".......                                                                  [100%]\n7 passed in 0.41s",
+      "denominator": "7 of 7 tests in test_duplicate_content.py passed; run 3 times (once at build, twice for the determinism check below), identical PASS every time",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC2.sh -- expect (?s)objects \\d+ report_ids \\d+ duplicates [1-9]\\d*.*duplicate-content ff0e11955cb266f4 ",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC2.sh",
+      "output_evidence": "objects 354 report_ids 353 duplicates 1\nduplicate-content ff0e11955cb266f4 Copa Holdings - 2025 Investor Day Presentation (1).pdf Copa Holdings - 2025 Investor Day Presentation.pdf",
+      "denominator": "354 bronze research-report objects listed, 353 distinct (partition, report_id) groups, the ONE live duplicate pair named (CPA_US_Equity/ff0e11955cb266f4), the sorted-first filename ('... Presentation (1).pdf') kept canonical; read-only -- no put_object call made (--duplicates never calls store.bronze_put); run 3 times, byte-identical output every time",
+      "expect": "(?s)objects \\d+ report_ids \\d+ duplicates [1-9]\\d*.*duplicate-content ff0e11955cb266f4 ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC3.sh -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC3.sh",
+      "output_evidence": "........................................................................ [ 98%]\n....                                                                     [100%]\n292 passed in 1.86s",
+      "denominator": "292 of 292 tests in lib/research/corpus/tests pass (the whole corpus suite, the round's bound), run 3 times, identical PASS every time",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/f3/mutant_test.py (not committed): monkeypatches extract_mod.group_canonical_bronze_keys to the pre-fix identity (every key its own group, i.e. today's un-deduplicated walk) and re-runs extract._run_write against the corpus's one measured duplicate pair (fake client, both names same bytes/report_id).",
+      "expected": "FIX (committed group_canonical_bronze_keys): rc 0, exactly one extract.json object stored. MUTANT (identity): the second write's payload differs (bronze_key field carries the second filename) so it collides on the SAME extract.json key with a DIFFERENT sha256 -- store.bronze_put's never-overwrite precondition raises BronzeImmutableError, uncaught by _run_write's try/except (which wraps only parse+extract(), not the put call) -- reproducing exactly the collision the order's own 'Where this came from' section names as today's defect.",
+      "observed": "python .scratch/f3/mutant_test.py -> 'FIX: rc=0 extract_objects=1' then 'MUTANT: BronzeImmutableError: bronze_put: s3://opal-data-harvest/.../ff0e11955cb266f4/extract.json already holds a different sha256 (...)' -- matches the prediction exactly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's check scripts each run 3 times against the committed worktree.",
+      "observed": "AC1: '7 passed in 0.41s' / '7 passed in 0.38s' / '7 passed in 0.45s' -- all PASS, count identical. AC2: 'objects 354 report_ids 353 duplicates 1' + the same duplicate-content line, byte-identical all 3 runs (read-only, no state change between runs). AC3: '292 passed' all 3 runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No --write or --run-v2 or typed --write run for real",
+      "reason": "Order s.4 BOUNDS (hard worker bound, repeated in the dispatch message): never run extract --write/--run-v2 or typed --write for real -- both are exercised only through tests/test_duplicate_content.py's fake S3 client, never against the live store."
+    },
+    {
+      "item": "No change to an extract's or typed row's fields",
+      "reason": "Order s.4 BOUNDS. group_canonical_bronze_keys only decides WHICH keys are processed and prints a disclosure line; extract()/extract_v2()/record()/classify_report() are untouched -- diffed against HEAD, only the CLI-walk functions (_run_write, _run_v2, main, typed._run_write) and the new helper/duplicates mode changed."
+    },
+    {
+      "item": "report_input.py's bronze_key comparison (report_input.py:73)",
+      "reason": "Order text notes readers of bronze_key mean the field stays and typed must collapse the pair the same way -- it does (typed's bronze_key now always comes from the canonical key). report_input.py itself is outside this cell's <paths> (READ-ONLY, 'the research library') and is unedited; its own comparison logic needed no change since it reads whatever bronze_key typed now writes."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, test_duplicate_content.py (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC1.sh",
+      "result": "rc 0; 7 passed; run 3 times, identical PASS"
+    },
+    {
+      "tool": "extract --duplicates against the live corpus (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC2.sh",
+      "result": "rc 0; 'objects 354 report_ids 353 duplicates 1' + the one duplicate-content line naming ff0e11955cb266f4; read-only, no store write; run 3 times, byte-identical"
+    },
+    {
+      "tool": "pytest, whole corpus suite (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f3_AC3.sh",
+      "result": "rc 0; 292 passed; run 3 times, identical PASS"
+    },
+    {
+      "tool": ".scratch/f3/mutant_test.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/f3/mutant_test.py",
+      "result": "rc 0; FIX rc=0 extract_objects=1; MUTANT BronzeImmutableError (the exact pre-fix collision); CONTROL FIRED-AS-EXPECTED"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/extract.py lib/research/corpus/typed.py lib/research/corpus/tests/test_duplicate_content.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/extract.py lib/research/corpus/typed.py lib/research/corpus/tests/test_duplicate_content.py",
+      "result": "rc 0, no output (all three files compile)"
+    }
+  ]
+}
