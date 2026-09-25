@@ -49,7 +49,8 @@ await page.route('**/*', async (r) => {
 
 async function tab(name) {
   await page.getByRole('button', { name, exact: true }).or(page.getByRole('tab', { name })).first().click()
-  await page.waitForTimeout(2500)
+  // 6 s: the charts' entry animation runs past 2.5 s (the first close shot caught the drill pie mid-draw).
+  await page.waitForTimeout(6000)
 }
 async function shot(name) {
   const path = `${PREFIX}.${name}.png`
@@ -104,6 +105,8 @@ await shot('03-performance')
 await tab('Holdings')
 console.log('CLIENT holdings:', JSON.stringify(await probe()))
 await page.locator('[data-slot="identity-card"] summary').first().click().catch(() => {})
+// Opening the card's disclosure resizes the charts' containers and restarts their entry animation; let it finish.
+await page.waitForTimeout(4000)
 console.log('IDENTITY:', (await page.locator('[data-slot="identity-card"]').first().innerText().catch(() => 'none')).replace(/\s+/g, ' ').slice(0, 300))
 await shot('04-holdings')
 await tab('Analysis')
