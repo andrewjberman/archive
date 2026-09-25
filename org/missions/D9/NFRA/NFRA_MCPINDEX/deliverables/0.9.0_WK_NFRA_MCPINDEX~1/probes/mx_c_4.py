@@ -323,60 +323,33 @@ def ac10():
     _verdict(ok, "AC10", "" if ok else "a test that passed before now fails, or pytest itself errored")
 
 
-# --- AC11: C2's bar, exercised over the real registered population ---------------------------------
-
-def _catalog_tool_refs() -> set:
-    import yaml
-    doc = yaml.safe_load(CATALOG.read_text(encoding="utf-8"))
-    refs: set = set()
-
-    def walk(node):
-        if isinstance(node, dict):
-            for k, v in node.items():
-                if k in ("tools", "tool_refs", "tool_ref"):
-                    if isinstance(v, (list, tuple, set)):
-                        refs.update(str(x) for x in v)
-                    elif isinstance(v, str):
-                        refs.add(v)
-                walk(v)
-        elif isinstance(node, (list, tuple)):
-            for x in node:
-                walk(x)
-
-    walk(doc)
-    return refs
-
+# --- AC11: C2's bar, exercised over the real registered population -----------------------------------
+# AMENDED (issuer commit 0bec07601a, per the CTO's ruling @5f3b4a20c6): AC11 grades exactly the two
+# registry limbs -- destructive_ops.classify and data_entitlement -- by name, over every registered
+# tool. The catalog-entry limb is struck from this criterion; it is graded on each tool's own shipping
+# cell (MX-t-1 .. MX-t-7).
 
 def ac11():
     sys.path.insert(0, str(GW))
     from app import destructive_ops as dop     # noqa: E402
     from app import data_entitlement as de     # noqa: E402
     tools = sorted(de.NATIVE_TOOLS | de.INTEGRATION_TOOLS | frozenset(de.SCHWAB_TOOLS))
-    catalog_refs = _catalog_tool_refs()
-    print("CAT tool-reference fields found across the catalog (denominator of tool-naming fields "
-         "'tools'/'tool_ref'/'tool_refs' anywhere in the parsed YAML): %d -> %r"
-         % (len(catalog_refs), sorted(catalog_refs)))
-    fail_dop, fail_de, fail_cat = [], [], []
+    fail_dop, fail_de = [], []
     for t in tools:
         tag = dop.classify(t)
         if tag.get("unclassified"):
             fail_dop.append(t)
         if de.classify(t) is None:
             fail_de.append(t)
-        if t not in catalog_refs:
-            fail_cat.append(t)
     print("DENOMINATOR %d registered tool name(s) (NATIVE_TOOLS | INTEGRATION_TOOLS | SCHWAB_TOOLS)"
          % len(tools))
     print("fails destructive_ops.classify (no declared class): %d -> %r" % (len(fail_dop), fail_dop))
     print("fails data_entitlement.classify (returns None): %d -> %r" % (len(fail_de), fail_de))
-    print("fails catalog-entry-reference resolution: %d -> %r" % (len(fail_cat), fail_cat))
-    zero_fail = not fail_dop and not fail_de and not fail_cat
+    zero_fail = not fail_dop and not fail_de
     _verdict(zero_fail, "AC11",
-             "%d of %d tool(s) fail >=1 of the three axes (dop=%d de=%d catalog=%d); "
-             "DATA_CATALOG.yaml carries 0 tool-reference fields today (MX-c-2/other cells' scope, "
-             "not this cell's <paths>) so the catalog axis fails for every registered tool -- "
-             "REFUSED per bound 9, measured above"
-             % (len({*fail_dop, *fail_de, *fail_cat}), len(tools), len(fail_dop), len(fail_de), len(fail_cat)))
+             "%d of %d tool(s) fail >=1 of the two registry limbs (dop=%d de=%d); "
+             "catalog-entry limb struck from AC11 (graded on each tool's own shipping cell)"
+             % (len({*fail_dop, *fail_de}), len(tools), len(fail_dop), len(fail_de)))
 
 
 # --- AC12 -------------------------------------------------------------------------------------------

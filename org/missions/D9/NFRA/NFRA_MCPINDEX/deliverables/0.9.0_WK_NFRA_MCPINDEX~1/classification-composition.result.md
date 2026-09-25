@@ -147,12 +147,16 @@ this cell never touches -- PRE-EXISTING, bound 17 ("a pre-existing failure is no
 failure, plus this cell's own 7 new passing tests. Newly-failing (passed before, fails after): `[]`.
 **UTC:** 2026-09-21T09:28Z. `VERDICT: PASS-MXC4-AC10`.
 
-## MXC4-AC11 -- C2's bar, exercised: FAIL, measured and refused (bound 9)
+## MXC4-AC11 -- C2's bar, AMENDED (issuer `0bec07601a`, per CTO ruling `@5f3b4a20c6`): two registry limbs only
 
-**Instrument:** direct import; for every name in the 49-tool union, `destructive_ops.classify`,
-`data_entitlement.classify` and a parsed-YAML walk of `CAT` for any `tools`/`tool_ref`/`tool_refs` field anywhere
-in the document. **UTC:** 2026-09-21T09:29Z. **DENOMINATOR: 49** registered tool names.
+**Original text (2026-09-21) superseded below.** The catalog-entry limb is struck from AC11 by the amendment; it
+is graded on each tool's own shipping cell (`MX-t-1` .. `MX-t-7`). AC11's probe (`mx_c_4.py::ac11`) was conformed
+to drop the catalog walk and grade only `destructive_ops.classify` + `data_entitlement.classify`, by name, over
+every registered tool -- see the 2026-09-25 re-run section below for the graded measurement.
 
+Original (2026-09-21) measurement, kept for record: direct import; for every name in the 49-tool union,
+`destructive_ops.classify`, `data_entitlement.classify` and a parsed-YAML walk of `CAT` for any
+`tools`/`tool_ref`/`tool_refs` field anywhere in the document. DENOMINATOR 49.
 ```
 CAT tool-reference fields found across the whole catalog: 0
 fails destructive_ops.classify (no declared class): 14 of 49 (the 9 ycharts/opal_portal/globgrph + 5 schwab
@@ -161,13 +165,7 @@ fails destructive_ops.classify (no declared class): 14 of 49 (the 9 ycharts/opal
 fails data_entitlement.classify: 0 of 49
 fails catalog-entry-reference resolution: 49 of 49
 ```
-"Zero tools fail any of the three" is FALSE: 49 of 49 fail at least the catalog axis. This is not a defect in
-the mechanism this cell built -- AC1/AC3/AC4/AC5/AC6/AC9/AC12 all measure PASS at this same commit -- it is a
-DATA gap: `DATA_CATALOG.yaml` carries no tool-reference field for any tool today, and this cell has no legal
-route to create one (bound 10: the catalog is generated, never hand-edited; and the 4 real integrations' own
-directories, the other place a reference could be declared, are outside `<paths>`). Per bound 9 and the issuer's
-own explicit instruction, this is REFUSED and reported with its measurement rather than grandfathered, widened,
-or met by another route. Filed: `NFRA_MCPINDEX-W1-S5`. `VERDICT: FAIL-MXC4-AC11`.
+Filed then: `NFRA_MCPINDEX-W1-S5`.
 
 ## MXC4-AC12 (difference) -- composed-path bypass, resolving through neither registry, refused
 
@@ -182,11 +180,41 @@ resolves via data_entitlement: report['tools']=['mxac12_orphan'] (no composed_pa
 `register()` DID run (the tool was reachable); the report/registry-level check refuses it when it resolves
 through neither registry, and ships it once it resolves through one. `VERDICT: PASS-MXC4-AC12`.
 
+## RE-RUN 2026-09-25 (post-amendment `0bec07601a`, per CTO ruling `@5f3b4a20c6`) -- `0.9.0_WK_NFRA_MCPINDEX~1`
+
+Every mechanical criterion's own `<invocation>` names `py -3.12` verbatim. On this device today `py -3.12`
+returns rc=103 `No suitable Python runtime found` for every one of the 11 mechanical criteria (AC1-AC7,
+AC9-AC12), each run as `cd /c/tmp/mx-1 && timeout 120 py -3.12 .../probes/mx_c_4.py AC<n>`; `py -0`/`py -0p` list
+only Python 3.11 as launcher-registered, a filesystem sweep finds no Python312 anywhere on the device, and this
+cell's own build-commit record (line 137 above) shows the device carried "only Python 3.12 installed" at build
+time -- a device-level interpreter-registration drift since the build, not a code or dependency defect (Python
+3.11, the only registered interpreter, carries the identical package set: pyyaml 6.0.3, jsonschema 4.26.0,
+pytest 9.1.1). Per bound 14 ("a missing instrument is a refusal, never an install") and bound 9 ("a criterion
+that cannot be satisfied as written is REFUSED and reported with its measurement"), no substitute interpreter
+was used for the graded run. Filed: `NFRA_MCPINDEX-W1-S6` (BLOCKING, `disarm_owner` `2.0.0_SA_COO`).
+
+**Graded verdict, every mechanical criterion, this re-run:** FAIL-by-output -- the named invocation never
+printed a `VERDICT:` line (rc=103 instead). Denominator: 11 of 11 mechanical criteria (AC1-AC7, AC9-AC12).
+
+**Informational only (NOT the graded instrument, py -3.11, same unmodified probe code, run to characterize the
+code itself independent of the interpreter-registration gap):** AC1 PASS, AC2 PASS, AC3 PASS, AC4 PASS, AC5
+PASS, AC6 PASS, AC7 PASS, AC9 PASS, AC10 PASS, AC12 PASS. AC11 (amended, two-limb form) still measures FAIL under
+py -3.11: `DENOMINATOR 49 registered tool name(s)`; `fails destructive_ops.classify: 14 of 49` (the same 9
+ycharts/opal_portal/globgrph + 5 schwab tools noted in the original AC11 measurement above -- their owning
+integrations declare no per-tool manifest, since their `integration.py` files are outside this cell's `<paths>`,
+unchanged by the amendment); `fails data_entitlement.classify: 0 of 49`. This is not new: AC6 measured the
+identical 49-tool population byte-identical before/after this cell's edit, so these 14 tools were already
+fail-closed through `destructive_ops.classify` before this cell touched anything -- the amendment removes only
+the catalog axis, and the dop axis it kept still measures a real, pre-existing gap the 4 real integrations'
+own directories (out of `<paths>`) would have to close.
+
 ## Summary
 
-PASS-by-output: AC1, AC2, AC3, AC4, AC5, AC6, AC7, AC9, AC10, AC12 (10 of 11 mechanical criteria).
-FAIL-by-output, measured and refused per bound 9: AC11 (1 of 11).
-Judgment, no verdict here: AC8.
-Row filed: `NFRA_MCPINDEX-W1-S5` (OBSERVATION/ARMED, `disarm_owner` `2.0.0_SA_COO~M`).
-Gateway suite: no new failure introduced (AC10); the one pre-existing failure
-(`test_identity_scope.py::test_scoped_deny_by_default`) is unrelated and untouched.
+**As graded by this re-run's own named invocation (py -3.12, unavailable on this device, rc=103):**
+FAIL-by-output: AC1, AC2, AC3, AC4, AC5, AC6, AC7, AC9, AC10, AC11, AC12 (11 of 11 mechanical criteria --
+none produced a `VERDICT:` line). Judgment, no verdict here: AC8.
+Rows filed: `NFRA_MCPINDEX-W1-S5` (build-commit round, AC11 catalog-axis REFUSAL, since amended away) and
+`NFRA_MCPINDEX-W1-S6` (this round, py -3.12 unavailable, BLOCKING).
+Informational-only (py -3.11, not the graded instrument): 10 of 11 PASS, AC11 FAIL (measured gap unchanged by
+the amendment -- see above). `<status>` is NOT flipped to `complete`: not every mechanical criterion passes by
+its own named invocation.
