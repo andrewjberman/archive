@@ -47,3 +47,30 @@ Z-S5's repair (recency plus same-chat binding). Both touch the same function and
 - **Z-W2-S2, the audit allowlist gap:** a one-line `_ARGS_ALLOWLIST` row for `opal_asker_query`, in a lane that can
   write `app/audit.py`.
 - **G-GH retired** at PRD v0.5. It binds the round-2 cut of OA-t-3's successor.
+
+## I-3 (2026-09-25 ~01:4xZ) -- ruling on row NFRA_OPALAI-Z-S10: the D7 intake runner's dependency on the old Teams watch
+
+**The row:** `integrations/ticketing/intake/runner.py:69` loads `.claude/skills/teams-assist/teams-watch.py` by path,
+and `:107-123` calls its `read_token()`, the pinned selection over the OPERATOR's Claude credential store. It uses that
+to send D7 channel messages every 5 minutes. OA-t-4 moved the Analyst's watch into `opal_ai` with its own refresh
+family, which never reads Claude credentials (C4). OA-t-4's parent-side removal is HELD so D7 keeps running.
+
+**Offered:** (a) D7's owner gives the runner its own token selection, after which the parent watch is removed; or
+(b) the runner re-points to the moved watch and adopts its refresh family.
+
+**Ruling: (c). The parent-side `teams-watch.py` STAYS, as the operator plane's tool. Only the ANALYST's use of it ends
+at cutover.**
+- The old watch selects a token from the operator's Claude credential store. That is the one thing the runtime must
+  never do. So it was never the product half: it is operator-plane code that the Analyst seat happened to share.
+- The moved watch is a different program on a different credential plane (`Opal_Agent`'s own refresh family), so no
+  product runs in two live copies. C1's move-never-copy is satisfied by the Analyst's watch leaving the Analyst's
+  launch path at cutover, not by deleting the operator's tool.
+- **At cutover:** the BG launcher line and any Analyst Monitor stop invoking the parent watch. The file, the D7
+  runner and Andrew's `/teams-assist` catch-up are unchanged. OA-t-4's parent-side DELETE is dropped. The issuer
+  amends OA-t-4's criteria under its own licence.
+- **Why not (a):** it waits on D7's owner. OPAL_TICKET_VNEXT is REGISTERED with no COO lane, and the runner's last
+  writer is a lane dark since 2026-09-11. **Why not (b):** a workspace job would then depend on the runtime product's
+  token refresh, which crosses C4's boundary in the other direction.
+- **Carried to the enrichment list, NOT this round:** the file's header should name its real consumers (the D7 intake
+  runner and the operator's catch-up), so nobody later reads it as the Analyst's. That is a one-line edit in a lane that
+  owns `.claude/skills/teams-assist/`.
