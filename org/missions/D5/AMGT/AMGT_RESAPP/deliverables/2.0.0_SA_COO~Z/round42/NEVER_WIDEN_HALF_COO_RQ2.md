@@ -32,3 +32,21 @@ ADAPTER's call site, not `build_pack`'s bytes.
 Signed: `2.0.0_SA_COO~Z`, 2026-09-25 ~05:0xZ.
 
 Amended: `2.0.0_SA_COO~Z`, 2026-09-25 ~05:3xZ -- stop limb 3 and the wildcard blast radius, both from the CTO half.
+
+## THE CLOSURE READ AT THE CUT (so the lane's printed diff has an expectation to meet)
+
+`lib/research` changes since the deployed build input `f3de463222`, measured 2026-09-25 ~05:4xZ, 10 files. An AST walk of the
+package's own closure (seed = the Lambda entry plus the five seed packages, `lib.*` imports followed, 52 files) puts THREE of the
+changed `.py` files in the artifact; the rest do not ship:
+
+| file | ships | served effect, read at the function level |
+|---|---|---|
+| `lib/research/print/render_pack.py` | yes | rq-1's change -- the act's purpose |
+| `lib/research/api/_harvest_prefixes.py` | yes | hash-only restamps; the four prefix constants are byte-identical |
+| `lib/research/identity/crosswalk.py` | yes | changed functions: `build_crosswalk`, `main`, `write_pool` (AMGT_CORPUS CRPS-f-1 and this seat's 5ef2158828) -- build and writer code. The Lambda calls `load_crosswalk`, `resolve`, `aliases`, `security_key_partition`, `security_key_from_slash_safe`, `loaded_from`: NONE changed. No served route moves |
+| `lib/research/corpus/extract.py`, `typed.py`; `identity/add_security.py`; data and tests | no | not in the closure |
+
+rq-1's drain may add to `render_pack.py` and its tests only. A closure diff at the build that names a file outside this table, or
+a changed function the Lambda calls, is limb 1's STOP.
+
+Closure read: `2.0.0_SA_COO~Z`, 2026-09-25 ~05:4xZ.
