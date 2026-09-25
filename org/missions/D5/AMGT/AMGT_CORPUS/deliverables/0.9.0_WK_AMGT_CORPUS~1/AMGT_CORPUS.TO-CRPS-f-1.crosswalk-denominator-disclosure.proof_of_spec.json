@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-f-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-1.crosswalk-denominator-disclosure.md",
+    "group": "OTHER",
+    "vintage_commit": "f24bcb742d4447e707e59d7ce98c7cca96561c9f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "f24bcb742d4447e707e59d7ce98c7cca96561c9f",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-1.crosswalk-denominator-disclosure.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/identity/crosswalk.py",
+      "kind": "script",
+      "commit_or_etag": "d87809891cfa31afcbfed558a83ac3b45821182b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "build_crosswalk() gains research_folders=None, research_root=None. denominators ALWAYS gains folders_in_records (distinct non-empty source_row.folder over the final records). When research_folders is given: denominators.research_folders_live = len(set(research_folders)); coverage_vintage.snapshot_stale_against_live = (research_folders_live != denominator_folders); result.research_universe = {source, read_at (UTC ISO), folders}. When not given: research_universe = {absent: <reason>}, research_folders_live and snapshot_stale_against_live both absent. input_names/denominator_folders unchanged. No record/key/form/resolution logic touched. main() gains --disclosure (mutually exclusive with --dry-run/--write-pool): read-only, no put, no registrations write, builds via build_crosswalk with the live list from a new _research_folders_for_disclosure() helper (imports lib.research.corpus.library inside the function; any failure yields (None, None), never raising), prints ONE line 'folders_in_records <n> research_folders_live <m> snapshot_input_names <s> snapshot_stale_against_live <bool>'.",
+      "introduces": [
+        "research_folders=None",
+        "research_root=None",
+        "folders_in_records",
+        "research_folders_live",
+        "snapshot_stale_against_live",
+        "research_universe",
+        "--disclosure",
+        "_research_folders_for_disclosure"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/add_security.py",
+      "kind": "script",
+      "commit_or_etag": "d87809891cfa31afcbfed558a83ac3b45821182b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New _research_folders_disclosure() (imports lib.research.corpus.library inside the function; any failure yields (None, None), never raising). _build_document (the ONE crosswalk build on this path, read by _persist_registration, _mint_pool and the collision check) now passes research_folders/research_root through to crosswalk.build_crosswalk. No change to registration/collision/pool logic.",
+      "introduces": [
+        "_research_folders_disclosure()"
+      ],
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk_disclosure.py",
+      "kind": "test",
+      "commit_or_etag": "d87809891cfa31afcbfed558a83ac3b45821182b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file, 9 tests over a self-contained 3-folder fixture (no network/S3): folders_in_records present with and without research_folders; the absent-with-reason branch (research_folders_live and snapshot_stale_against_live both ABSENT, research_universe carries only 'absent'); the populated branch (research_folders_live/research_universe.source,read_at,folders all present, distinct-count dedupes a repeated name); snapshot_stale_against_live True and False (2 vs 3, 3 vs 3, input_names/denominator_folders unchanged both ways); and that a build WITH research_folders is byte-identical to one WITHOUT once the disclosure-only fields are stripped, plus a direct records/key_conventions equality check.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/tests/test_crosswalk_enrich_coverage.py",
+      "kind": "test",
+      "commit_or_etag": "d87809891cfa31afcbfed558a83ac3b45821182b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NoEnrichRowsByteIdentical's own no_enrich_regs filter gains the RULED arm: after excluding ENRICH-mode rows and rows in unresolved_folders, it now ALSO drops a keyless row whose folder carries a keyed row in the SAME filtered set -- exactly the class the current build_crosswalk's measured_folders/superseded_rows arm already supersedes and the PINNED (pre-round-4) module cannot, which is why the arm was RED at HEAD (97 vs 96 records, Quanta Services PWR's keyless row). With that row dropped from the filtered set fed to BOTH sides, the record-count divergence closes. The disclosure-only fields (denominators.folders_in_records, result.research_universe) are then popped from a COPY of the current build's document before the byte comparison only (orthogonal to the ENRICH property this arm proves; a real build via crosswalk.main/add_security keeps both).",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/identity/crosswalk.schema.json",
+      "kind": "config_data",
+      "commit_or_etag": "856cc1f005f85ec12143ca85fbd88c50613843f9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "ISSUER AMENDMENT 1 (2.0.0_SA_COO~X, on row AMGT_CORPUS-Z-W1-S7), landed by this worker exactly as ruled: four new OPTIONAL properties added to the existing pattern (matching 'registered'/'enriched'/'resolved_folders') -- denominators.folders_in_records, denominators.research_folders_live, coverage_vintage.snapshot_stale_against_live, and a new top-level research_universe object (additionalProperties:false, properties source/read_at/folders/absent, no required list, so it admits BOTH its present shape and its {absent: ...} shape). Nothing else in the schema moved (git diff: 34 insertions, 0 deletions, 0 modifications elsewhere); CRLF line endings preserved throughout (592 CRLF == 592 LF before and after the edit, verified byte-for-byte).",
+      "introduces": [
+        "folders_in_records",
+        "research_folders_live",
+        "snapshot_stale_against_live",
+        "research_universe"
+      ],
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC1.sh -- expect (?m)^\\d+ passed in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC1.sh",
+      "output_evidence": ".........                                                                [100%]\n9 passed in 0.04s",
+      "denominator": "9 of 9 new tests in test_crosswalk_disclosure.py passed, 0 failed. Run twice back to back under the literal invocation (timeout 120): '9 passed' both times (0.04s, 0.04s -- only elapsed seconds differ), re-run again after the schema amendment merged: unchanged.",
+      "expect": "(?m)^\\d+ passed in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC2.sh -- expect folders_in_records (\\d+) research_folders_live \\1 snapshot_input_names \\d+ snapshot_stale_against_live (True|False)",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC2.sh",
+      "output_evidence": "folders_in_records 94 research_folders_live 94 snapshot_input_names 89 snapshot_stale_against_live True",
+      "denominator": "1 of 1 disclosure line, on the real live library + the real registered coverage/registrations inputs on this device. folders_in_records (94) EQUALS research_folders_live (94) -- the crosswalk's own records now carry every one of the 94 live research folders. snapshot_input_names (89) is the unchanged 2026-09-10-style snapshot count; snapshot_stale_against_live reads True (89 != 94), naming the staleness the CTO's ruling required disclosed. Run twice back to back both before and after the schema amendment merged: byte-identical output every time. Re-checked against AC2's own regex with Python re.search: MATCH, group(1)='94'.",
+      "expect": "folders_in_records (\\d+) research_folders_live \\1 snapshot_input_names \\d+ snapshot_stale_against_live (True|False)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC3.sh",
+      "output_evidence": "........................................................................ [ 60%]\n...............................................                        [100%]\n119 passed, 2 subtests passed in 5.15s",
+      "denominator": "119 of 119 identity-suite tests pass, 0 failed. ISSUER AMENDMENT 2 widened AC3's expect to (?m)^\\d+ passed(, \\d+ subtests passed)? in, admitting pytest's own subtests clause (lib/research/identity/tests/test_crosswalk_universe.py's pre-existing unittest subTest usage). Run twice back to back under the literal invocation: '119 passed, 2 subtests passed' both times (5.15s, 5.31s -- only elapsed seconds differ). Re-checked against AC3's amended expect with Python re.search: MATCH (span 0-33, 'match=119 passed, 2 subtests passed in '). Row AMGT_CORPUS-Z-W1-S8 is ANSWERED by this amendment exactly as AMGT_CORPUS-Z-W1-S7 was answered by Amendment 1.",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/f1/mutant.py (not committed): a 4-item live-folder list carrying ONE duplicate ('Boeing BA' twice, 3 distinct names) run through the FIX (crosswalk.build_crosswalk, unmodified, imported live) and through a MUTANT that reproduces research_folders_live as a raw len() of the argument -- never deduped -- the exact class of bug 'their count' (s.1) rules out.",
+      "expected": "FIX reads denominators.research_folders_live == 3 (the DISTINCT count). MUTANT reads 4 (len() of the raw 4-item list, over-counting the duplicate).",
+      "observed": "FIX research_folders_live: 3 -- 'FIX: PASSED (expected 3, the DISTINCT count)'. MUTANT research_folders_live (len(), not deduped): 4 -- 'MUTANT: FIRED AS EXPECTED (raw len() over-counts the duplicate as 4, masking the distinct-count rule)'. Run twice back to back, identical both times.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "f1_AC1.sh, f1_AC2.sh, f1_AC3.sh and .scratch/f1/mutant.py each run twice back to back under the literal invocation, across all three states: base, after Amendment 1 (schema), and after Amendment 2 (expect widened).",
+      "observed": "AC1: '9 passed' every run, every state. AC2: byte-identical disclosure line every run (folders_in_records 94, research_folders_live 94, snapshot_input_names 89, snapshot_stale_against_live True). AC3: before Amendment 1 '15 failed, 104 passed, 2 subtests passed' both runs (identical 15 ids); after Amendment 1 '119 passed, 2 subtests passed' both runs (matches Amendment 2's widened expect); after Amendment 2 re-confirmed '119 passed, 2 subtests passed' both runs, MATCH against the new expect both times. mutant.py: identical FIX(3)/MUTANT(4) result every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No S3 write, no --write-pool invocation by this worker, no change to registrations.json, no change to any record/key/association-form/resolution, no edit to lib/research/corpus/, lib/research/identity/registrations.json or any other identity module.",
+      "reason": "Section 4 BOUNDS and section 3 READ-ONLY list."
+    },
+    {
+      "item": "crosswalk.schema.json: only the four ruled OPTIONAL properties were added (ISSUER AMENDMENT 1); nothing else in the schema moves and its CRLF line endings are unchanged, per the amendment's own instruction.",
+      "reason": "ISSUER AMENDMENT 1 paragraph, section 4 BOUNDS."
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W1-S7: CRPS-f-1's ruled unconditional disclosure fields made write_pool's own schema validation refuse every build (15 of 119 identity-suite tests failed on one cause); ANSWERED by ISSUER AMENDMENT 1, which granted lib/research/identity/crosswalk.schema.json and ruled the four additive properties this worker then landed -- the suite is fully green now (see AC3).",
+    "AMGT_CORPUS-Z-W1-S8: even with the suite fully green (119 passed, 0 failed), AC3's expect regex ^\\d+ passed in did not match the real output 'N passed, 2 subtests passed in Ns' because of a pre-existing unittest subTest usage in test_crosswalk_universe.py, unrelated to this cell; ANSWERED by ISSUER AMENDMENT 2, which widened AC3's expect to (?m)^\\d+ passed(, \\d+ subtests passed)? in -- AC3 now matches (see AC3)."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest test_crosswalk_disclosure.py (AC1, via f1_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC1.sh",
+      "result": "rc 0; 9 passed (run twice, identical, both before and after the schema amendment)"
+    },
+    {
+      "tool": "crosswalk CLI --disclosure (AC2, via f1_AC2.sh, real live library + coverage inputs)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC2.sh",
+      "result": "rc 0; folders_in_records 94 research_folders_live 94 snapshot_input_names 89 snapshot_stale_against_live True (run twice, byte-identical, both before and after the schema amendment)"
+    },
+    {
+      "tool": "pytest lib/research/identity/tests (AC3, via f1_AC3.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC3.sh",
+      "result": "rc 0 (script exit); AFTER both amendments: 119 passed, 2 subtests passed -- suite fully green AND matches AC3's widened expect (Amendment 2); run twice, identical"
+    },
+    {
+      "tool": "schema diff verification",
+      "invocation": "git diff --stat lib/research/identity/crosswalk.schema.json && python -c \"import json; json.load(open('lib/research/identity/crosswalk.schema.json', encoding='utf-8'))\"",
+      "result": "34 insertions(+), 0 deletions, 0 lines modified elsewhere; JSON parses; 592 CRLF == 592 LF (every line still CRLF)"
+    },
+    {
+      "tool": ".scratch/f1/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/f1/mutant.py",
+      "result": "rc 0; FIX research_folders_live 3 (PASSED); MUTANT research_folders_live 4 (FIRED AS EXPECTED); run twice, identical"
+    },
+    {
+      "tool": "proof-of-spec-check.py (close-out gate)",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-1.crosswalk-denominator-disclosure.md",
+      "result": "PENDING -- run after this instance is written"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39, via safe-commit.sh)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~1 <0.9.0_WK_AMGT_CORPUS~1@opal.agent>\" -F <msgfile> -- lib/research/identity/crosswalk.schema.json org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~1/AMGT_CORPUS.TO-CRPS-f-1.crosswalk-denominator-disclosure.proof_of_spec.json",
+      "result": "PENDING -- run after this instance is validated"
+    }
+  ]
+}
