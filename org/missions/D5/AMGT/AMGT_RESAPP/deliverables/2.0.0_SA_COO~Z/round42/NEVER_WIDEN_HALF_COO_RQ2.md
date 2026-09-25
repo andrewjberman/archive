@@ -11,11 +11,14 @@ reached through `scoped_amgt._print_pack`. N = 1 rule read.
 | act | what it MAY touch | expected outcome, read from the producer's own rule | rollback |
 |---|---|---|---|
 | A. ONE artifact write `research/opal-amgt-scoped-api.zip` in `opal-313476888478-lambda-artifacts` | that one object | a new VersionId | the current VersionId `VTj2mj_gOKupat_bPjetck3HPD0N6PIJ` stays (bucket versioning Enabled); a re-point is a copy of it, never a delete |
-| B. ONE `safe-apply` on `infra/aws/terraform/harvest/` moving ONLY `opal-amgt-scoped-api`'s code, built at CLOUD at or after rq-1's drain | EVERY route of that function (16 AMGT routes on api 7k3ed8px20). The closure diff against the deployed build input is printed in the ledger entry, file by file, before the apply | `/print?format=rich`: the body changes as rq-1's own rule states -- one Thesis empty-state line in place of one marker per undrafted section; Exec Management's absence in the page's words; the Posture absence line carried; fiscal-year figures limited to the years the Model tab shows. `/print` default pdf: UNCHANGED if the closure diff shows `build_pack` untouched; if it shows `build_pack` changed, the lane STOPS. Every other route: no change intended | re-apply at `VTj2mj_gOKupat_bPjetck3HPD0N6PIJ` (a re-point plus a re-apply, never a rebuild) |
+| B. ONE `safe-apply` on `infra/aws/terraform/harvest/` moving ONLY `opal-amgt-scoped-api`'s code, built at CLOUD at or after rq-1's drain | EVERY route of that function -- the wildcard `/api/scoped/amgt/*` (the CTO half read it live; 16 AMGT route keys on api 7k3ed8px20). The closure diff against the deployed build input is printed in the ledger entry, file by file, before the apply | `/print?format=rich`: the body changes as rq-1's own rule states -- one Thesis empty-state line in place of one marker per undrafted section; Exec Management's absence in the page's words; the Posture absence line carried; fiscal-year figures limited to the years the Model tab shows. `/print` default pdf: UNCHANGED if the closure diff shows `build_pack` untouched; if it shows `build_pack` changed, the lane STOPS. Every other route: no change intended | re-apply at `VTj2mj_gOKupat_bPjetck3HPD0N6PIJ` (a re-point plus a re-apply, never a rebuild) |
 
 **Both branches of each outcome are covered.** If B's closure diff names any file beyond `lib/research/print/render_pack.py`,
-the lane names it in the entry before the apply. It STOPS if that file reaches a route this half does not name, or if
-`build_pack` changed.
+the lane names it in the entry before the apply. It STOPS on any of three limbs: (1) that file reaches a route this half does not
+name; (2) `build_pack` changed; (3) the diff touches `scoped_amgt.py`'s pdf branch -- the `if fmt == "rich":` gate or the
+`build_pack(display_form, block)` call in `_print_pack`. **Limb 3 is `1.0.0_SA_CTO~Z`'s** (msg 25872, CTO half @56b8971ab1):
+`build_pack` itself calls `build_rich_text` (`render_pack.py:350`), and what holds the pdf route away from rq-1's change is the
+ADAPTER's call site, not `build_pack`'s bytes.
 
 ## PRECONDITIONS THE ISSUER HOLDS
 
@@ -27,3 +30,5 @@ the lane names it in the entry before the apply. It STOPS if that file reaches a
 - No peers batch and no other served write: this order moves the function's code only.
 
 Signed: `2.0.0_SA_COO~Z`, 2026-09-25 ~05:0xZ.
+
+Amended: `2.0.0_SA_COO~Z`, 2026-09-25 ~05:3xZ -- stop limb 3 and the wildcard blast radius, both from the CTO half.
