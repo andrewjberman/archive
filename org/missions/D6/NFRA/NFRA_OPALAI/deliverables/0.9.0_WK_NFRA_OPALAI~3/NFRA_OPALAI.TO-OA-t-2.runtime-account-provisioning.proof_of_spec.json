@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-t-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "C",
+    "vintage_commit": "f06341327e"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "d7efad601b",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-t-2.runtime-account-provisioning.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal_ai/opal/runtime/provision/runtime.config.example.json",
+      "kind": "config_data",
+      "commit_or_etag": "2d83bdb8",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New nested-repo file, example values only (checkout_dir, state_dir, workspace_probe_file, prod_ref); the real config lives outside every repo per bound. git -C opal_ai show 2d83bdb8:opal/runtime/provision/runtime.config.example.json resolves."
+    },
+    {
+      "path_or_key": "opal_ai/opal/runtime/provision/provision-account.ps1",
+      "kind": "script",
+      "commit_or_etag": "2d83bdb8",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not run for real on this box (bound 2.2): -Plan prints the 8 PLAN: lines and exits 0, changing nothing; without -Plan, in this non-elevated session it prints ELEVATION REQUIRED and exits 3 BEFORE any act (verified by direct invocation, rc=3). The real create/mkdir/ACL/DPAPI acts are gated behind the elevation check and were never exercised on this box."
+    },
+    {
+      "path_or_key": "opal_ai/opal/runtime/provision/verify-boundary.ps1",
+      "kind": "script",
+      "commit_or_etag": "2d83bdb8",
+      "artifact_covered_by": ["AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Not run against a real Opal_Agent (none exists on this box, bound 2.2): with no account and no stored DPAPI credential it prints BOUNDARY: NOT-PROVISIONED and exits 4 (verified by direct invocation, rc=4)."
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "0aa82cc09d",
+      "artifact_covered_by": ["AC2", "AC3"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Row NFRA_OPALAI-Z-W3-S1 (this seat's earlier pass) is now DISARMED by row NFRA_OPALAI-Z-S7 (1.0.0_SA_CTO~Z, disarm_owner 2.0.0_SA_COO~O): the shared checker's rc-capture defect is fixed at CLOUD @0ad710832f (set -o pipefail in the shared _root.sh) and carried onto this branch at 8112ad7a06."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "rc=0; PLAN acts matched 8 of 8; Opal_Agent after plan: absent -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/t2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "rc=0; PLAN acts matched 8 of 8; Opal_Agent after plan: absent\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 PLAN: tokens matched (CREATE-USER Opal_Agent, ASSERT-NOT-MEMBER Administrators, ASSERT-NOT-MEMBER CodexSandboxUsers, MKDIR checkout_dir, MKDIR state_dir, ACL checkout_dir Opal_Agent:RX, ACL state_dir Opal_Agent:M, SECRET DPAPI operator); Opal_Agent absent both before and after the -Plan run.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "session elevated=False; rc=3; ELEVATION REQUIRED lines>=1; Opal_Agent=absent; checkout_dir before/after=no/no; state_dir before/after=no/no -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/t2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "session elevated=False; rc=3; ELEVATION REQUIRED lines=1; Opal_Agent=absent; checkout_dir before/after=no/no; state_dir before/after=no/no\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 invocation run, verbatim recorded.",
+      "status": "PASS",
+      "status_reason": "Re-measured on 8112ad7a06 after the shared checker's pipefail fix (row NFRA_OPALAI-Z-S7 disarms NFRA_OPALAI-Z-W3-S1): t2.AC2.sh now captures the script's own rc=3, matching the criterion exactly."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "rc=4; BOUNDARY: NOT-PROVISIONED -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/t2.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "rc=4; BOUNDARY: NOT-PROVISIONED\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 invocation run, verbatim recorded.",
+      "status": "PASS",
+      "status_reason": "Re-measured on 8112ad7a06 after the shared checker's pipefail fix (row NFRA_OPALAI-Z-S7 disarms NFRA_OPALAI-Z-W3-S1): t2.AC3.sh now captures the script's own rc=4, matching the criterion exactly."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The mutant is the elevation/provisioning boundary itself: provision-account.ps1 was run directly (no pipe) against this real non-elevated session and against -Plan, and verify-boundary.ps1 was run directly against this real account-absent box.",
+      "expected": "provision-account.ps1 -Config <cfg> (no -Plan) in a non-elevated session would print 'ELEVATION REQUIRED ...' and exit 3, before any act; verify-boundary.ps1 -Config <cfg> with no Opal_Agent account and no stored credential would print 'BOUNDARY: NOT-PROVISIONED' and exit 4.",
+      "observed": "Direct invocation (bypassing the check scripts' own pipe): provision-account.ps1 printed 'ELEVATION REQUIRED: ...' with direct_rc=3; verify-boundary.ps1 printed 'BOUNDARY: NOT-PROVISIONED' with direct_rc=4 -- both match the cell's spec exactly. Previously the check scripts' own `cmd | tr -d '\\r'; rc=$?` pipeline (pipefail OFF) instead captured tr's exit (always 0), reporting FAIL for a conforming implementation (row NFRA_OPALAI-Z-W3-S1). That checker defect is now fixed at CLOUD @0ad710832f (set -o pipefail in the shared _root.sh, carried onto this branch at 8112ad7a06; disarm row NFRA_OPALAI-Z-S7). Re-run of t2.AC2.sh and t2.AC3.sh on 8112ad7a06 now reports rc=3 and rc=4 respectively, both RESULT: PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 were each run against the committed nested-repo bytes (2d83bdb8) using the checker as it stands at parent-repo HEAD 8112ad7a06 (post pipefail fix). provision-account.ps1 and verify-boundary.ps1 were also run directly (no pipe) in the prior pass to isolate the check harness's own pipeline from the scripts' behaviour.",
+      "observed": "AC1 rc=0/8-of-8/PASS; AC2 rc=3/PASS; AC3 rc=4/PASS -- all three checks-as-written now match the criteria verbatim.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Creating the Opal_Agent account, any runtime directory, or any credential on this box",
+      "reason": "Bound 2.2: never create the account, a runtime dir or a credential on this box; this session is Medium integrity, not elevated, and the script itself refuses (exit 3) before any act."
+    },
+    {
+      "item": "Repairing t2.AC2.sh / t2.AC3.sh's pipe-exit-code loss",
+      "reason": "Both files are 2.0.0_SA_COO~O's own artifacts under org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/**, outside this order's <paths> (not granted to write). Bound 2.3: never repair a criterion. The issuer fixed it directly at CLOUD @0ad710832f (row NFRA_OPALAI-Z-S7 disarms NFRA_OPALAI-Z-W3-S1)."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPALAI-Z-W3-S1: t2.AC2.sh and t2.AC3.sh captured rc from a `cmd | tr -d '\\r'` pipeline with pipefail OFF, so `$?` was always tr's exit (0), never the underlying script's exit code -- their PASS conditions (rc=3, rc=4) could never be satisfied by any conforming implementation. Filed by this seat in the prior pass. DISARMED by NFRA_OPALAI-Z-S7 (1.0.0_SA_CTO~Z, disarm_owner 2.0.0_SA_COO~O): fixed at CLOUD @0ad710832f (set -o pipefail in the shared _root.sh, carried onto this branch at 8112ad7a06)."
+  ],
+  "session_log": "2026-09-24, worktree C:/tmp/oa-3, branch wk-NFRA_OPALAI-3, HEAD 8112ad7a06 (nested opal_ai @2d83bdb8, unchanged from the prior pass). This is a RE-MEASUREMENT pass, not a rebuild: no file under opal_ai/ was touched. (1) grounded the tree (branch + org/ + .tools/ present) and re-read the task order verbatim. (2) confirmed the shared checker fix landed on this branch: parent-repo commit 8112ad7a06 adds `set -o pipefail` to org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/_root.sh, and disarm row NFRA_OPALAI-Z-S7 in INVESTIGATION_v1.Z.md names it as disarming NFRA_OPALAI-Z-W3-S1. (3) re-ran all three checks from the worktree root exactly as the task order names them: t2.AC1.sh -> rc=0, PLAN acts matched 8 of 8, RESULT: PASS, exit=0; t2.AC2.sh -> session elevated=False, rc=3, ELEVATION REQUIRED lines=1, RESULT: PASS, exit=0; t2.AC3.sh -> rc=4, BOUNDARY: NOT-PROVISIONED, RESULT: PASS, exit=0 -- all three now match the criteria verbatim, no created account/dir/credential. (4) rewrote this proof-of-spec instance's AC2/AC3 rows from FAIL to PASS on the fresh output, pinned the surprise-channel artifact to 0aa82cc09d (the row's landing commit) instead of PENDING-THIS-COMMIT, and updated controls/exclusions/surprises to record the disarm. PUSH STATE: LOCAL on wk-NFRA_OPALAI-3. WHAT I DID NOT DO: create any account, directory or credential; touch any file under opal_ai/ or outside this instance; touch the checker files (2.0.0_SA_COO~O's own artifacts, already fixed by the issuer); flip the task order's status.",
+  "compiler_tools": [
+    {
+      "tool": "Read / Grep (native, on named paths)",
+      "invocation": "Read of t2.AC1.sh, t2.AC2.sh, t2.AC3.sh, _root.sh under org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/ (named path, not a repo search)",
+      "result": "Confirmed _root.sh now carries `set -o pipefail`, so `out=$(cmd | tr -d CR); rc=$?` captures the command's own exit code."
+    },
+    {
+      "tool": "bash <check>.sh; echo exit=$? (as the task order names each invocation)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/t2.AC{1,2,3}.sh; echo \"exit=$?\"",
+      "result": "AC1: rc=0; PLAN acts matched 8 of 8; RESULT: PASS; exit=0. AC2: rc=3; ELEVATION REQUIRED lines=1; RESULT: PASS; exit=0. AC3: rc=4; BOUNDARY: NOT-PROVISIONED; RESULT: PASS; exit=0."
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md (run after git add, to exercise the staged-diff read the gate itself uses)",
+      "result": "[surprise-row-gate] ...INVESTIGATION_v1.Z.md: 1 new row(s) of 8 total checked (7 pre-existing, NOT re-graded) -- OK: 1 file(s), all new rows carry their step-7/step-10 fields."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "see the run recorded in the worker report; only the exit code is the verdict."
+    }
+  ]
+}
