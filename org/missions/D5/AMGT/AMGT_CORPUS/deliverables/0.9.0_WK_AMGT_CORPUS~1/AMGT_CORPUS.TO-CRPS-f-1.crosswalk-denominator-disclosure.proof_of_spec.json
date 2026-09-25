@@ -5,11 +5,11 @@
   "spec_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-1.crosswalk-denominator-disclosure.md",
     "group": "OTHER",
-    "vintage_commit": "4272561289fca5f7a9bf551971168ff62a6727b9"
+    "vintage_commit": "f24bcb742d4447e707e59d7ce98c7cca96561c9f"
   },
   "decomp_ref": {
     "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
-    "vintage_commit": "4272561289fca5f7a9bf551971168ff62a6727b9",
+    "vintage_commit": "f24bcb742d4447e707e59d7ce98c7cca96561c9f",
     "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-f-1.crosswalk-denominator-disclosure.md"
   },
   "assignee": "0.9.0_WK_AMGT_CORPUS~1",
@@ -109,14 +109,13 @@
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC3.sh -- expect (?m)^\\d+ passed in ",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
       "method": "test_suite",
       "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC3.sh",
-      "output_evidence": "........................................................................ [ 60%]\n...............................................                        [100%]\n119 passed, 2 subtests passed in 5.44s",
-      "denominator": "119 of 119 identity-suite tests pass, 0 failed -- the schema amendment (ISSUER AMENDMENT 1) closed row AMGT_CORPUS-Z-W1-S7 completely: the same 15 tests that failed before the amendment (all one root cause, the schema's additionalProperties:false) are green now. Run twice back to back: '119 passed, 2 subtests passed' both times (5.44s, 4.78s -- only elapsed seconds differ). The line nonetheless does NOT match AC3's expect regex ^\\d+ passed in -- Python re.search(r'(?m)^\\d+ passed in ', output) on the FULL captured output (not just the tail) returns None, because lib/research/identity/tests/test_crosswalk_universe.py uses unittest subTest (pre-existing, unrelated to CRPS-f-1; the SAME '2 subtests passed' clause already reads in the round's own BASE_RUN_EVAL_20260925T025640Z.log before this cell touched anything: 'CRPS-f-1 AC3 BASE FAIL | ... | 1 failed, 109 passed, 2 subtests passed in 6.21s'). Filed AMGT_CORPUS-Z-W1-S8 (BLOCKING, ARMED, disarm_owner 2.0.0_SA_COO~X).",
-      "expect": "(?m)^\\d+ passed in ",
-      "status": "FAIL",
-      "status_reason": "The suite is genuinely fully green (119 passed, 0 failed) -- the schema amendment closed the real defect row AMGT_CORPUS-Z-W1-S7 named. AC3 still FAILS on the literal mechanical grade because pytest's own summary line reads 'N passed, 2 subtests passed in Ns' (a pre-existing unittest subTest usage in test_crosswalk_universe.py, orthogonal to this cell), which the expect pattern ^\\d+ passed in does not match (Python re.search confirmed None). proof-of-spec-check.py's own acceptance check refuses status=PASS on non-matching output_evidence for a mechanical criterion, so this is recorded FAIL rather than substituted. Filed AMGT_CORPUS-Z-W1-S8, BLOCKING/ARMED, disarm_owner 2.0.0_SA_COO~X: the later run this names is an <expect> amendment (tolerating the subtests clause, as a sibling TO's AC1 already tolerates a deselected-count clause) or removal of the subTest usage, both outside this cell's scope and <paths>."
+      "output_evidence": "........................................................................ [ 60%]\n...............................................                        [100%]\n119 passed, 2 subtests passed in 5.15s",
+      "denominator": "119 of 119 identity-suite tests pass, 0 failed. ISSUER AMENDMENT 2 widened AC3's expect to (?m)^\\d+ passed(, \\d+ subtests passed)? in, admitting pytest's own subtests clause (lib/research/identity/tests/test_crosswalk_universe.py's pre-existing unittest subTest usage). Run twice back to back under the literal invocation: '119 passed, 2 subtests passed' both times (5.15s, 5.31s -- only elapsed seconds differ). Re-checked against AC3's amended expect with Python re.search: MATCH (span 0-33, 'match=119 passed, 2 subtests passed in '). Row AMGT_CORPUS-Z-W1-S8 is ANSWERED by this amendment exactly as AMGT_CORPUS-Z-W1-S7 was answered by Amendment 1.",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
     }
   ],
   "controls": {
@@ -127,8 +126,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "f1_AC1.sh, f1_AC2.sh, f1_AC3.sh and .scratch/f1/mutant.py each run twice back to back under the literal invocation, both before and after the schema amendment merged.",
-      "observed": "AC1: '9 passed' every run. AC2: byte-identical disclosure line every run (folders_in_records 94, research_folders_live 94, snapshot_input_names 89, snapshot_stale_against_live True). AC3: before the amendment '15 failed, 104 passed, 2 subtests passed' both runs (identical 15 ids); after the amendment '119 passed, 2 subtests passed' both runs. mutant.py: identical FIX(3)/MUTANT(4) result every run.",
+      "method": "f1_AC1.sh, f1_AC2.sh, f1_AC3.sh and .scratch/f1/mutant.py each run twice back to back under the literal invocation, across all three states: base, after Amendment 1 (schema), and after Amendment 2 (expect widened).",
+      "observed": "AC1: '9 passed' every run, every state. AC2: byte-identical disclosure line every run (folders_in_records 94, research_folders_live 94, snapshot_input_names 89, snapshot_stale_against_live True). AC3: before Amendment 1 '15 failed, 104 passed, 2 subtests passed' both runs (identical 15 ids); after Amendment 1 '119 passed, 2 subtests passed' both runs (matches Amendment 2's widened expect); after Amendment 2 re-confirmed '119 passed, 2 subtests passed' both runs, MATCH against the new expect both times. mutant.py: identical FIX(3)/MUTANT(4) result every run.",
       "status": "STABLE"
     }
   },
@@ -144,7 +143,7 @@
   ],
   "surprises": [
     "AMGT_CORPUS-Z-W1-S7: CRPS-f-1's ruled unconditional disclosure fields made write_pool's own schema validation refuse every build (15 of 119 identity-suite tests failed on one cause); ANSWERED by ISSUER AMENDMENT 1, which granted lib/research/identity/crosswalk.schema.json and ruled the four additive properties this worker then landed -- the suite is fully green now (see AC3).",
-    "AMGT_CORPUS-Z-W1-S8: even with the suite fully green (119 passed, 0 failed), AC3's expect regex ^\\d+ passed in does not match the real output 'N passed, 2 subtests passed in Ns' because of a pre-existing unittest subTest usage in test_crosswalk_universe.py, unrelated to this cell; the <expect> pattern itself is the issuer's (read-only to this worker) and would need amending to tolerate the subtests clause."
+    "AMGT_CORPUS-Z-W1-S8: even with the suite fully green (119 passed, 0 failed), AC3's expect regex ^\\d+ passed in did not match the real output 'N passed, 2 subtests passed in Ns' because of a pre-existing unittest subTest usage in test_crosswalk_universe.py, unrelated to this cell; ANSWERED by ISSUER AMENDMENT 2, which widened AC3's expect to (?m)^\\d+ passed(, \\d+ subtests passed)? in -- AC3 now matches (see AC3)."
   ],
   "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
   "compiler_tools": [
@@ -161,7 +160,7 @@
     {
       "tool": "pytest lib/research/identity/tests (AC3, via f1_AC3.sh)",
       "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round4/f1_AC3.sh",
-      "result": "rc 0 (script exit); AFTER the schema amendment: 119 passed, 2 subtests passed -- suite fully green but does NOT match AC3's expect regex (subtests clause); run twice, identical"
+      "result": "rc 0 (script exit); AFTER both amendments: 119 passed, 2 subtests passed -- suite fully green AND matches AC3's widened expect (Amendment 2); run twice, identical"
     },
     {
       "tool": "schema diff verification",
