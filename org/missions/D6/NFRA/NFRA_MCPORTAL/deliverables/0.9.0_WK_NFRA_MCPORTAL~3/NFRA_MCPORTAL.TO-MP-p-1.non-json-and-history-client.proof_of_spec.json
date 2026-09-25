@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-p-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "820dd79e36309810a703568cba198d0bdfd76fc0",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-p-1.non-json-and-history-client.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-p-1.non-json-and-history-client.md",
+    "group": "OTHER",
+    "vintage_commit": "3f3c616fe8db3d30faa4a7995c3dfa8597ca5567"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "mcportal/src/api/admin.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "a3bff71ffa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "readJson now refuses a response whose content-type header is present and not application/json (the dev server's SPA-fallback text/html 200) with a plain reason before attempting response.json(); a response with no content-type header is unaffected so round 1's mocked-fetch tests (entitlements.test.tsx) stay green. getRecentChanges already fetches GET /api/admin/changes with no parameters. Exercised by src/api/admin.test.ts.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "mcportal/src/api/admin.test.ts",
+      "kind": "test",
+      "commit_or_etag": "a3bff71ffa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "the two named tests 'a non-JSON 200 is refused with a plain reason' (plants an HTML 200) and 'recent changes asks for every principal' (asserts the fetch URL /api/admin/changes carries no query string); exercised live by p1.AC1.sh",
+      "introduces": [
+        "RAN: a non-JSON 200 is refused with a plain reason",
+        "RAN: recent changes asks for every principal"
+      ],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bun test rc=0; named tests present in sources 2 of 2; pass>=6; fail=0 -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/p1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": " 6 pass\n 0 fail\n 20 expect() calls\nRan 6 tests across 4 files. [86.00ms]\nbun test rc=0; named tests present in sources 2 of 2; pass=6; fail=0\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 conditions matched (rc=0, named-in-sources 2 of 2, pass>=6, fail=0)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Neutralised the content-type refusal in mcportal/src/api/admin.ts (`if (false && contentType && ...)`, on-disk only, uncommitted) and re-ran p1.AC1.sh.",
+      "expected": "the 'a non-JSON 200 is refused with a plain reason' test fails because getRecentChanges() no longer throws on the planted HTML 200 and instead attempts response.json(), which throws a different (unplanned) parse error the test's toThrow(exact message) does not match; overall pass drops below 6 and fail>0.",
+      "observed": "'5 pass / 1 fail / 20 expect() calls' -> 'bun test rc=1; named tests present in sources 2 of 2; pass=5; fail=1' -> RESULT: FAIL exit=1. Restored the file byte-for-byte from the committed a3bff71 state (`cp` from a pre-mutant backup); `git -C mcportal diff --stat` reads clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "p1.AC1.sh run twice in a row, post-restore, no arguments varied",
+      "observed": "run 1: '6 pass / 0 fail / 20 expect() calls', 'bun test rc=0; named tests present in sources 2 of 2; pass=6; fail=0', RESULT: PASS, exit=0. run 2: identical deciding line, RESULT: PASS, exit=0 (only the bun timing suffix differs, 86ms vs 88ms, not read by the checker).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~3/session_log_p1.md",
+  "compiler_tools": [
+    {
+      "tool": "bun install",
+      "invocation": "cd mcportal && bun install",
+      "result": "77 packages installed, 9.23s (node_modules was absent per the spawn note); existing bun.lock, no lockfile change"
+    },
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit)",
+      "invocation": "cd mcportal && bun run typecheck",
+      "result": "rc=0, no output"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "cd mcportal && NO_COLOR=1 bun test src",
+      "result": "6 pass, 0 fail, 20 expect() calls across 4 files"
+    },
+    {
+      "tool": "git -C mcportal commit (nested repo)",
+      "invocation": "git -C mcportal add src/api/admin.test.ts && git -C mcportal commit --author \"0.9.0_WK_NFRA_MCPORTAL~3 <0.9.0_WK_NFRA_MCPORTAL~3@opal.agent>\" -F <msgfile> -- src/api/admin.ts src/api/admin.test.ts",
+      "result": "commit a3bff71ffa on branch wk-NFRA_MCPORTAL-3-mcportal, 2 files changed, 45 insertions; verified with `git -C mcportal log --oneline -1` and `git -C mcportal status --porcelain` clean on those paths"
+    },
+    {
+      "tool": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/p1.AC1.sh",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/p1.AC1.sh; echo \"exit=$?\"",
+      "result": "RESULT: PASS, exit=0, pass=6, fail=0, named tests present in sources 2 of 2"
+    }
+  ]
+}
