@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-b-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "820dd79e36309810a703568cba198d0bdfd76fc0",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-b-1.staged-build.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-b-1.staged-build.md",
+    "group": "OTHER",
+    "vintage_commit": "b7281eb222144a882e083034f5c5b1e88f4e36a4"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/build_package.py",
+      "kind": "script",
+      "commit_or_etag": "bbe09cf6f7bc7f96f88bb747a3df63107940e451",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "stdlib-only builder. It stages .build/staged/ in a layout that MIRRORS THE REPOSITORY and zips it to --out. lambda_function.py sits at the root. The import closure, derived by AST, sits at its repo-relative path under infra/aws/ec2/opal-gateway/: app.access_state, app.config, app.context, app.data_entitlement and ops.schwab_entitlement_admin, plus app/__init__.py and a zero-byte ops/__init__.py. The data file sits at org/standards/NFRA_OPLGTW_CONTRACT.json. That makes 9 members. Exercised by all three checks (build rc=0).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/lambda_function.py",
+      "kind": "script",
+      "commit_or_etag": "bbe09cf6f7bc7f96f88bb747a3df63107940e451",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Before importing app and ops, it puts os.path.join(<own dir>, 'infra','aws','ec2','opal-gateway') first on sys.path when that directory exists (it does in the package, and does not in the source tree). parents[ count at HEAD is 0 (b1.AC3.sh).",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/tests/conftest.py",
+      "kind": "test",
+      "commit_or_etag": "0da92f46756ac08b43475845eb185ff0bf86b9ba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unchanged in this rework. It puts infra/aws/ec2/opal-gateway on sys.path, resolved from git rev-parse --show-toplevel with a .git-ancestor fallback. pytest after the rework: 4 passed."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+      "kind": "terraform",
+      "commit_or_etag": "bbe09cf6f7bc7f96f88bb747a3df63107940e451",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The route is archive_file over the staged directory build_package.py writes (.build/staged). It is not a null_resource/local-exec. The packaging comment now states the mirrored layout. aws_lambda_layer_version.mcportal_grant_writer_deps (layer_name mcportal-grant-writer-deps-layer) is attached through layers. terraform fmt -check rc=0. Nothing applied."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-layer-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "0da92f46756ac08b43475845eb185ff0bf86b9ba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unchanged in this rework. Row mcportal-grant-writer-deps is in the managed grammar. Published-version fields stay null until MP-a-1 builds and applies."
+    },
+    {
+      "path_or_key": "infra/aws/lambda/layers/mcportal-grant-writer-deps/requirements.txt",
+      "kind": "config_data",
+      "commit_or_etag": "0da92f46756ac08b43475845eb185ff0bf86b9ba",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Unchanged in this rework. Pins: PyJWT==2.13.0, cryptography==49.0.0, cffi==2.1.0, pycparser==3.0. Claim is HELD: these are the local interpreter's versions and were not checked against the index. MP-a-1 first tests manylinux2014_x86_64/cp312 wheel availability."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "build rc=0 built zip=yes; extracted at Lambda depth; lambda_handler callable=yes; app and ops resolved inside the package 2 of 2 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/b1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "build rc=0 built zip=yes; extracted at Lambda depth; lambda_handler callable=yes; app and ops resolved inside the package 2 of 2\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 modules resolved inside the extracted package; 3 of 3 conditions met (built, callable, inside)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "build rc=0; in-package lambda_handler (Lambda depth) with no owner header -> verdict=REFUSED NO-OWNER-HEADER -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/b1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "build rc=0; in-package lambda_handler (Lambda depth) with no owner header -> verdict=REFUSED NO-OWNER-HEADER\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 conditions met (build rc=0; verdict REFUSED NO-OWNER-HEADER)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "zip members byte-equal to their repo path at HEAD k of k (k>=2, required members present 2 of 2); parents[ in lambda_function.py=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round2/checks/b1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "synthetic empty package markers: 1\nbuild rc=0; zip members byte-equal to their repo path at HEAD 8 of 8 (required members present 2 of 2); parents[ in lambda_function.py=0\nRESULT: PASS\nexit=0",
+      "denominator": "8 of 8 non-handler members byte-equal to their repo path at HEAD (1 of them a synthetic empty ops/__init__.py); required 2 of 2; parents[ count 0",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Working-tree mutant on lambda_function.py, never committed: the guard 'if os.path.isdir(_PKG_GATEWAY_DIR):' was replaced with 'if False:', so the mirrored gateway directory is never put on sys.path. AC1 was then run. The file was restored by the reverse byte replacement (git diff --quiet rc=0).",
+      "expected": "AC1 FAILs: app is not importable from the extracted package, and inside reads 0 of 2.",
+      "observed": "IMPORT-FAILED ModuleNotFoundError: No module named 'app' / build rc=0 built zip=yes; extracted at Lambda depth; lambda_handler callable=no; app and ops resolved inside the package 0 of 2 / RESULT: FAIL exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3 were each run twice at bbe09cf6f7 with no arguments varied. The first run was the verbatim invocation; the second came after the mutant was restored.",
+      "observed": "Both runs of each criterion printed the identical deciding line: AC1 inside 2 of 2, PASS exit=0; AC2 verdict=REFUSED NO-OWNER-HEADER, PASS exit=0; AC3 8 of 8, parents[ 0, PASS exit=0.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "editing ops/schwab_entitlement_admin.py:49 (parents[5]) or app/config.py (import-time load_dotenv)",
+      "reason": "Both are read-only for this cell. The amended face answers them by the mirrored layout and the script-file checks (rows NFRA_MCPORTAL-Z-W1-S3, -Z-W1-S4)."
+    },
+    {
+      "item": "building or downloading the layer wheels",
+      "reason": "This is MP-a-1's cell, on Andrew's word (face section 2 item 1)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W1-S3: ops/schwab_entitlement_admin.py:49 climbs Path(__file__).resolve().parents[5] at import, so a gateway-relative zip raises IndexError at /var/task. Answered by the issuer's amendment @ b7281eb222 (mirrored layout); this rework builds to it.",
+    "NFRA_MCPORTAL-Z-W1-S4: the pre-amendment checks imported through `python -`, and python-dotenv's find_dotenv asserts on a stdin caller. Answered by the issuer's amendment @ b7281eb222 (script-file probe)."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/0.9.0_WK_NFRA_MCPORTAL~1/session_log.MP-b-1.md",
+  "compiler_tools": [
+    {
+      "tool": "build_package.py",
+      "invocation": "python infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/build_package.py --out .scratch/mcpw.zip",
+      "result": "rc=0, 9 members, all but lambda_function.py at repo-relative paths"
+    },
+    {
+      "tool": "pytest",
+      "invocation": "python -m pytest -q tests (from the function directory)",
+      "result": "4 passed"
+    },
+    {
+      "tool": "terraform fmt",
+      "invocation": "terraform fmt -check infra/aws/terraform/opal-gateway/mcportal_grant_writer.tf",
+      "result": "rc=0"
+    },
+    {
+      "tool": "safe-commit",
+      "invocation": "bash .tools/safe-commit.sh --author ... -F <msgfile> -- <3 paths>",
+      "result": "committed bbe09cf6f7; commit-gate OK 3 of 3"
+    }
+  ]
+}
