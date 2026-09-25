@@ -30,3 +30,21 @@ because AC6 shows 0 of 49 changed class. The fix lives in four integration direc
    to a device-neutral interpreter. It is noted here only so the re-cut does not inherit the pin.
 5. **Why not all 14 in one cell:** the cell would write into a stopped project's integration. That is Andrew's word
    to give, not this lane's to assume.
+
+## R-2 (2026-09-25 ~16:2xZ) -- the two reads came back (MX-q-2 @d9db4d7395): input to the round-2 analysis
+
+**Measured by the round-2 read cell** (drain @e9cb3d257a):
+- **Eclipse (C-S12):** 5 distinct rep ids in live silver, 0 outside the Inflection allowlist.
+- **Black Diamond (C-S13):** 14,367 of 3,185,260 silver transaction rows since 2026-04-14 carry a null cusip (about
+  0.45%), and 1 of 3 served figures that join on cusip already carries nulls.
+
+**Ruled here so the round-2 analysis inherits it:**
+1. **Eclipse:** single tenancy is RECORDED with this read as its evidence, and C-S12's gate is lifted. An Eclipse tool
+   may be cut. Every Eclipse tool still carries a firm-scope assertion that FAILS LOUD if a rep id outside the
+   allowlist ever appears, because single tenancy is a measured fact about today, not a guarantee.
+2. **Black Diamond:** R-2 (3)'s gate is lifted WITH DISCLOSURE. A Black Diamond tool that answers by cusip states, in
+   its answer, how many of the rows it read had no cusip and that they were excluded. It never silently drops them or
+   shows a partial sum as whole.
+3. **The served figure with nulls is a live defect, not a tool question.** It is routed with C-S13 (2), the unscheduled
+   bridge builder, to the Black Diamond pipeline's DS owner. It is parked with that owner until a DS seat is live. The
+   round-2 analysis names which served figure it is.
