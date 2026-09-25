@@ -1,3 +1,58 @@
+# NFRA_MCPORTAL -- session log, `0.9.0_WK_NFRA_MCPORTAL~1`
+
+## NFRA_MCPORTAL.TO-MP-t-5 (round 1, entitlements + recent-changes pages)
+
+Worktree: `C:/tmp/mp-1`, branch `wk-NFRA_MCPORTAL-1`, HEAD `6267ae1aca`. Nested `mcportal` worktree provisioned at
+`--nested mcportal=r1-drain`, branch `wk-NFRA_MCPORTAL-1-mcportal` @ `606f032` (MP-w-1's merged shell), `node_modules`
+absent.
+
+### Sequence
+
+1. `bun install` inside `mcportal/` (77 packages, node_modules had not been installed on this fresh nested worktree).
+2. Read `infra/aws/ec2/opal-gateway/app/data_entitlement.py:1-90` for the `Scope` shape (masters, datasets, accounts,
+   dates, columns, operations) and `portal/DESIGN.md` (C1-C13) for the markup law.
+3. `src/api/admin.ts`: typed client for exactly the four fixed routes, same-origin, `credentials: 'include'`; every
+   write resolves `{"verdict": "WRITTEN"|"REFUSED", "reason"}`.
+4. `src/pages/mcp-server/entitlements/`: split into a fetching container (`Entitlements.tsx`) and a presentational
+   view (`EntitlementsView.tsx`) so the view is testable without a DOM -- **no jsdom/happy-dom is installed in this
+   shell** (`bun.lock` carries neither; adding one is a `package.json` edit outside this order's `<paths>`), so the
+   three named tests are met via `react-dom/server`'s `renderToStaticMarkup` (a string-render, no DOM needed) plus
+   the `admin.ts` client directly against a mocked `globalThis.fetch`, rather than a full render+interact cycle.
+   Same split for `src/pages/recent-changes/` (`RecentChangesView.tsx` exports `sortNewestFirst`).
+5. Tests (`bun test src/pages`): 3 pass, 0 fail, 15 `expect()` calls across 2 files.
+6. `git -C mcportal` had no committer identity in this fresh nested worktree (`Committer identity unknown`); set
+   `user.email`/`user.name` locally to the worker's own serial (not a `--global` change) before the commit named in
+   the Bounds section, which assumes an identity already exists.
+7. Committed on `wk-NFRA_MCPORTAL-1-mcportal`: `1eb686a7b95e677f0d813e8029bac912d4aa5ba1` (11 files).
+8. Mutant control (AC2, `t5.AC2.sh`): (a) appended `fetch("/api/other/probe")` to `admin.ts` (uncommitted) -- FAILed
+   `routes outside /api/admin/=1`, reverted clean (`git checkout -- src/api/admin.ts`); (b) renamed every `widen`
+   token to `expand` (uncommitted) -- FAILed `fixed route fragments present 3 of 4`, reverted clean. Both mutants
+   confirmed FAIL as expected; restore confirmed PASS both times.
+9. Determinism: `t5.AC1.sh` and `t5.AC2.sh` each re-run twice post-restore, byte-identical deciding lines both times
+   (only the reporter's timing suffix differs, not read by either checker).
+10. `bun run typecheck` (`tsc -b --noEmit`) rc=0; `bun run build` (`tsc -b && vite build`) rc=0, `dist/` gitignored.
+11. **Surprise filed** (`NFRA_MCPORTAL-Z-W1-S2`): the task face gives entitlements an explicit sidebar home ("under
+    the sidebar's MCP Server entry") but gives recent-changes none, and `src/shell/pages.ts` (the brief's one order
+    of truth, read-only per this order's Bounds) enumerates exactly the brief's eight entries with no member for it
+    -- the issuer's router hookup has to pick a placement this cell's face and `<paths>` do not decide.
+12. Status flip to `complete` is left to the issuer's drain, per the `NFRA_MCPORTAL.TO-MP-w-1` precedent on this
+    same slot: this order's own `<paths>` grant does not include `task-orders/`.
+
+### Router hookup owed to the issuer (not in this worker's `<paths>`)
+
+```
+import { Entitlements } from './pages/mcp-server/entitlements'
+import { RecentChanges } from './pages/recent-changes'
+...
+<Route path="/mcp-server" element={<Entitlements />} />
+<Route path="/recent-changes" element={<RecentChanges />} />
+```
+
+`recent-changes` is not a `PAGES` id in `src/shell/pages.ts` (see row `NFRA_MCPORTAL-Z-W1-S2`) -- the issuer decides
+whether it gets a new sidebar entry, nests under MCP Server, or stays route-only.
+
+---
+
 # NFRA_MCPORTAL.TO-MP-w-1 -- session log, `0.9.0_WK_NFRA_MCPORTAL~1`
 
 Worktree: `C:/tmp/mp-1`, branch `wk-NFRA_MCPORTAL-1`, based `b99ab96fdf`.
