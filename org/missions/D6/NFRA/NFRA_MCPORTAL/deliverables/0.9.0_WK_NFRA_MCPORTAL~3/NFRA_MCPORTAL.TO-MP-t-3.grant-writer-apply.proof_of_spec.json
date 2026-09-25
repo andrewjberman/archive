@@ -1,0 +1,118 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPORTAL.TO-MP-t-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/prd/NFRA_MCPORTAL_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "87b310f4c2"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_MCPORTAL/decompositions/NFRA_MCPORTAL_DECOMP.md",
+    "vintage_commit": "48ee4eebfc",
+    "to_ref": "org/missions/D6/NFRA/NFRA_MCPORTAL/task-orders/NFRA_MCPORTAL.TO-MP-t-3.grant-writer-apply.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPORTAL~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "7c97f569a5",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two rows filed by this worker: NFRA_MCPORTAL-Z-W3-S2 (G-OWNER-OID, no existing record names Andrew's Entra oid) and NFRA_MCPORTAL-Z-W3-S3 (a frozen-source packaging defect in lambda_function.py's parents[5] repo-root computation). Not executable artifacts.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "entry files at HEAD>=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR printed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "entry files at HEAD=0; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 8 of 8 sentinel(s) scanned\nRESULT: FAIL\nexit=1",
+      "denominator": "1 of 1 literal invocation run; exit=1 (entry files at HEAD=0, expects >=1)",
+      "status": "FAIL",
+      "status_reason": "REFUSED, not attempted: step 1 (find Andrew's Entra object id for var.mcportal_owner_oid) is a hard STOP in the task order -- 'If no existing record names it, STOP: file a BLOCKING row (G-OWNER-OID, owner Andrew) and do not apply.' No existing record (repo-committed or live read-only AWS) names it (row NFRA_MCPORTAL-Z-W3-S2, GROUNDED). The ledger was therefore never opened, so no change-management entry exists at HEAD. Recorded verbatim per the worker rule; not repaired, not widened."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "state=Active; gateway invoke=allowed; gateway assume operator role=implicitDeny or explicitDeny -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "function mcportal-grant-writer-lambda state=Type: User; gateway invoke=Invalid length for parameter ResourceArns[0], value: 0, valid min length: 1; gateway assume operator role=implicitDeny\nRESULT: FAIL\nexit=1",
+      "denominator": "1 of 1 literal invocation run; exit=1 (the function does not exist -- never applied)",
+      "status": "FAIL",
+      "status_reason": "Same upstream refusal as AC1: no apply was made (G-OWNER-OID BLOCKING, row NFRA_MCPORTAL-Z-W3-S2), so `aws lambda get-function` finds nothing to describe and the ARN-dependent simulate call is malformed on an empty ARN. Recorded verbatim; not repaired."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "no header -> REFUSED NO-OWNER-HEADER; forged header -> REFUSED HEADER-UNVERIFIED -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t3.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "no header -> NONE NONE; forged header -> NONE NONE\nRESULT: FAIL\nexit=1",
+      "denominator": "1 of 1 literal invocation run; exit=1 (the function does not exist -- both invokes return no readable response file)",
+      "status": "FAIL",
+      "status_reason": "Same upstream refusal (G-OWNER-OID). Additionally, and separately, even a future apply cannot make this AC pass as written: this worker's grounded finding (row NFRA_MCPORTAL-Z-W3-S3) is that `lambda_function.py`'s own `_REPO_ROOT = Path(__file__).resolve().parents[5]` (line 42) cannot resolve once deployed, because the frozen `.tf`'s `handler = \"lambda_function.lambda_handler\"` forces the file to the deployed package's root (only 3 `.parents` levels exist there; empirically verified via PurePosixPath). That is a logic defect in files this cell may not change (BOUNDS: 'Change no logic in them; a needed logic change is a BLOCKING row'), so it is reported, not repaired."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This TO's three criteria are literal invocations of pre-built check scripts; the governing task order names no mutant for AC1/AC2/AC3, and none of the three is judgment=\"true\".",
+      "expected": "N/A -- the governing task order names no mutant for AC1/AC2/AC3.",
+      "observed": "N/A -- no mutant is named by the spec.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "The three literal invocations were run once each at this worktree's HEAD (0c303246e4, unapplied state) after the oid search was exhausted; the oid search itself (repo comp-find + live read-only AWS SSM/Secrets Manager checks) and the pathlib parents-index proof were each re-run to confirm.",
+      "observed": "AC1/AC2/AC3: identical 'RESULT: FAIL' / exit=1 both times run. The pathlib proof (`PurePosixPath('/var/task/lambda_function.py').parents[5]` -> IndexError) is a deterministic property of path depth, not an environment artifact -- re-run with the same result.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "python .tools/deploy_ledger.py open ...; org/critical_paths/.open_deploys/nfra-mcportal-r1-grant-writer.json; the sentinel commit; safe-apply of mcportal_grant_writer.tf; any ledger close.",
+      "reason": "Task order step 1 is a hard precondition gate: 'If no existing record names it, STOP: file a BLOCKING row (G-OWNER-OID, owner Andrew) and do not apply.' No existing record names Andrew's Entra object id (row NFRA_MCPORTAL-Z-W3-S2). Ledger open, apply, and ledger close are all downstream of step 1 and are therefore not attempted, per BOUNDS 4 ('REFUSE a criterion you cannot meet as written ... never repair a criterion, widen it, or meet it by a route this face does not name')."
+    },
+    {
+      "item": "Vendoring PyJWT/cryptography and staging infra/aws/ec2/opal-gateway's app/ and ops/ trees into infra/aws/lambda/mcportal/mcportal-grant-writer-lambda/.",
+      "reason": "Would be moot even if attempted: row NFRA_MCPORTAL-Z-W3-S3 establishes that the deployed lambda_function.py crashes at import (IndexError on parents[5]) before any vendored dependency or staged tree is ever reached, given the frozen .tf's handler/source_dir shape. Not attempted, to avoid a wasted apply once G-OWNER-OID clears -- surfaced instead so a re-issued cell can carry both fixes together."
+    },
+    {
+      "item": "Any Terraform init, plan, or AWS mutating call (lambda:CreateFunction, iam:CreateRole, etc.).",
+      "reason": "Egress class declared in the preflight is 'AWS WRITE ... through safe-apply', gated on step 1's oid; not reached. Only read-only AWS calls were made (sts get-caller-identity via the check scripts' own AC2/AC3 runs against a non-existent function; ssm describe-parameters; secretsmanager list-secrets, for the oid search)."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPORTAL-Z-W3-S2: no existing record (repo-committed or live read-only AWS) names Andrew's Entra object id; G-OWNER-OID BLOCKING per the decomposition's own pre-named gate (:186). Filed by this worker, GROUNDED, disposition UNDER_INVESTIGATION, hazard_standing ARMED (disarm_owner Andrew).",
+    "NFRA_MCPORTAL-Z-W3-S3: lambda_function.py's `_REPO_ROOT = Path(__file__).resolve().parents[5]` cannot resolve once deployed under the frozen .tf's flat handler/source_dir, so AC3's live invoke cannot pass regardless of packaging quality. Filed by this worker, GROUNDED (empirical pathlib proof + source citations), disposition UNDER_INVESTIGATION, hazard_standing ARMED (disarm_owner 2.0.0_SA_COO~O, since fixing it is a logic change outside this cell's <paths>)."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find (repo content census, corpus=all)",
+      "invocation": "comp-find -i \"andrew\" org/missions/D6/NFRA/NFRA_MCPORTAL --limit 40; comp-find \"POLICY#\" infra/aws/ec2/opal-gateway --limit 30; comp-find \"MCPORTAL_OWNER_OID\" --limit 40",
+      "result": "86 hits/37 files for 'andrew' under the mission tree (email + brief quotes only, no oid); 24 hits/143 files for 'POLICY#' under the gateway (schema + synthetic test fixtures only, no live record); 6 hits/40869 files for MCPORTAL_OWNER_OID (the var/env-var references already known, no stored value)."
+    },
+    {
+      "tool": ".tools/aws (read-only)",
+      "invocation": "timeout 30 .tools/aws ssm describe-parameters --query Parameters[].Name --output text; timeout 30 .tools/aws secretsmanager list-secrets --query SecretList[].Name --output text",
+      "result": "SSM: 0 names matching andrew|oid|mcportal|owner. Secrets Manager: 2 matches (opal/openai/andrew-fideles, google/andrew-goldengate/credentials), neither an Entra object id."
+    },
+    {
+      "tool": "python3 (pathlib proof)",
+      "invocation": "python3 -c \"from pathlib import PurePosixPath; p=PurePosixPath('/var/task/lambda_function.py'); print(list(p.parents)); p.parents[5]\"",
+      "result": "parents = [PurePosixPath('/var/task'), PurePosixPath('/var'), PurePosixPath('/')] (3 entries); p.parents[5] raises IndexError: 5 -- deterministic, re-run with the same result."
+    },
+    {
+      "tool": "MP-t-3's own literal check scripts (t3.AC1.sh, t3.AC2.sh, t3.AC3.sh)",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_MCPORTAL/deliverables/2.0.0_SA_COO~O/round1/checks/t3.AC{1,2,3}.sh; echo exit=$?",
+      "result": "All three rc=1, 'RESULT: FAIL', run once each at this worktree's unapplied HEAD 0c303246e4 -- recorded verbatim in acceptance[]."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py",
+      "invocation": "timeout 60 python .tools/surprise-row-gate.py org/missions/D6/NFRA/NFRA_MCPORTAL/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "result": "rc=0 pre-commit dry run (gate reads staged bytes, not the worktree, so it read 0 new against the not-yet-staged file); the real grading happens at commit time via .tools/commit-gate.sh + .tools/safe-commit.sh."
+    }
+  ]
+}
