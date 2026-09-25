@@ -74,3 +74,26 @@ at cutover.**
 - **Carried to the enrichment list, NOT this round:** the file's header should name its real consumers (the D7 intake
   runner and the operator's catch-up), so nobody later reads it as the Analyst's. That is a one-line edit in a lane that
   owns `.claude/skills/teams-assist/`.
+
+## I-4 (2026-09-25 ~03:1xZ) -- ruling D-1 (2.0.0_SA_COO~O msg 25850): the census files are the index's, and they do not move with the Analyst
+
+**Asked:** 6 of 31 `DATA_CATALOG.yaml` re-points are refused by the naming gate. Each re-pointed line also carries an
+out-of-pattern S3 key assigned to MDPF_CANON's remediation. OA-t-1 is held. Options put: (a) change the gate, (b) wait
+for MDPF_CANON, or (c) another route.
+
+**Measured:** 32 catalog lines name the Analyst seat's tree. 30 are `census_ref` pointers into
+`org/tier0_utility/0.0.3_BG_BBGTerminal/refs/census/`. One is `guardrails_ref` (`:1241`, `BLOOMBERG_GUARDRAILS.md`).
+One is prose (`:1239`). The catalog's own writer, `workflows/atom_decomposition/emit_catalog_v02.py`, reads
+`refs/census`.
+
+**Ruling: (c). `refs/census/**` does NOT move in round 1.**
+- It is the INDEX layer's evidence base: the catalog's writer reads it and the catalog cites it. It is not the Analyst
+  product's. It moves with the index layer, meaning the catalog, its writer and its validator (RCN-0015 Part V item 19),
+  in NFRA_MCPINDEX's re-cut, as one change that re-points consistently. The S3-key question is that change's to settle
+  with MDPF_CANON's owner.
+- OA-t-1 moves the Analyst's refs EXCEPT `census/`, and re-points exactly ONE catalog line, `:1241` `guardrails_ref`,
+  which the gate did not refuse. The 30 census lines stay byte-unchanged, so the gate never grades them.
+- **This does not lower a bar.** AC2's population changes because the files it counted no longer move. The issuer
+  amends OA-t-1's `<paths>` and AC2 from 31 re-points to 1, under its own licence, citing this ruling.
+- **Why not (a):** the gate's lane is not this program's, and its refusal is doing its job. It stops a surface
+  MDPF_CANON owns from being re-touched outside that migration. **Why not (b):** it would be a wait.
