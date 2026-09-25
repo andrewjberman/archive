@@ -1,0 +1,44 @@
+AC0 -- BEFORE state, read live from s3://opal-data-harvest at run time (nothing copied from the task order)
+BEFORE -- silver listing_hit rows per publisher (denominator: 5 publishers, the five in SOURCE_FOR_PUBLISHER)
+  barrons  silver listing_hit rows=0      (parts=0)   bronze news_listing objects=0
+  bbg      silver listing_hit rows=0      (parts=0)   bronze news_listing objects=0
+  ft       silver listing_hit rows=0      (parts=0)   bronze news_listing objects=0
+  sa       silver listing_hit rows=0      (parts=0)   bronze news_listing objects=0
+  wsj      silver listing_hit rows=20     (parts=1)   bronze news_listing objects=2
+  TOTAL    silver listing_hit rows=20 across 5 publishers; bronze news_listing objects=2 across 5 publishers
+  sa EXPLICIT: silver listing_hit rows = 0 ; bronze news_listing objects = 0
+BEFORE snapshot rows pickled: 20 rows -> C:\tmp\wk-hvst-s1b\.scratch\s1\before.pickle
+
+DEPLOYED PERSIST LOCATION -- lib\opal_data_harvest\worker.py bytes at the `finally` wrapping the per-article loop:
+lib\opal_data_harvest\worker.py:218:                             atomic_json(path, result)  # Each completed article survives a mid-job process interruption.
+lib\opal_data_harvest\worker.py:219:                             # HVST-h-3 item 2: a backfill run's acceptance is never capped by
+lib\opal_data_harvest\worker.py:220:                             # articles_per_security -- only its own paging stop conditions end it.
+lib\opal_data_harvest\worker.py:221:                             if retrieval_mode != "backfill" and len(accepted_ids) >= target:
+lib\opal_data_harvest\worker.py:222:                                 break
+lib\opal_data_harvest\worker.py:223:                     finally:
+lib\opal_data_harvest\worker.py:224:                         # HVST-t-1 (row AMGT_HARVST-Z-W15-S1): a CHECKPOINT, not a per-page
+lib\opal_data_harvest\worker.py:225:                         # persist -- `client.listings` is APPENDED TO as each listing/search page
+lib\opal_data_harvest\worker.py:226:                         # is fetched inside client.articles() itself (Publisher._record_listing),
+lib\opal_data_harvest\worker.py:227:                         # so whatever it holds the MOMENT this loop stops -- normal exhaustion, the
+lib\opal_data_harvest\worker.py:228:                         # accepted-target `break` above, or an exception raised from ANYWHERE
+lib\opal_data_harvest\worker.py:229:                         # inside client.articles() (a mid-job 502 on article 7, exactly the live
+lib\opal_data_harvest\worker.py:230:                         # seeking-alpha run) -- is every page captured so far. Persisting it here,
+lib\opal_data_harvest\worker.py:231:                         # in a `finally` wrapping the loop instead of the line that used to sit
+lib\opal_data_harvest\worker.py:232:                         # AFTER it, means a raise can no longer discard pages already captured.
+lib\opal_data_harvest\worker.py:233:                         # Harvest mode only (config key "harvest_grammar", default False -- ruling
+lib\opal_data_harvest\worker.py:234:                         # 4 of AMGT-rk-85, item 5 of HVST-h-1): the legacy path is unaffected
+lib\opal_data_harvest\worker.py:235:                         # either way.
+lib\opal_data_harvest\worker.py:236:                         if self.config.get("harvest_grammar", False) and hasattr(client, "listings"):
+lib\opal_data_harvest\worker.py:237:                             # AMENDMENT 1 (row AMGT_HARVST-Z-S10): `_write_harvest_listings` can
+lib\opal_data_harvest\worker.py:238:                             # itself raise (a bare `entry["raw_bytes"]` subscript, disk IO on
+lib\opal_data_harvest\worker.py:239:                             # `write_bytes`, sqlite on `execute`/`commit`) -- and in Python an
+lib\opal_data_harvest\worker.py:240:                             # exception raised inside a `finally` REPLACES whatever exception was
+lib\opal_data_harvest\worker.py:241:                             # already propagating (the original demoted to `__context__`). Read
+lib\opal_data_harvest\worker.py:242:                             # BEFORE the persist is attempted, so it reflects the loop's own exit
+lib\opal_data_harvest\worker.py:243:                             # state, never this call's.
+lib\opal_data_harvest\worker.py:244:                             already_propagating = sys.exc_info()[0] is not None
+lib\opal_data_harvest\worker.py:245:                             try:
+lib\opal_data_harvest\worker.py:246:                                 self._write_harvest_listings(client.listings)
+lib\opal_data_harvest\worker.py:247:                             except Exception as persist_exc:
+lib\opal_data_harvest\worker.py:248:                                 # Visible, never swallowed: its own event, distinct from every
+lib\opal_data_harvest\worker.py:249:                                 # other event this worker records.
