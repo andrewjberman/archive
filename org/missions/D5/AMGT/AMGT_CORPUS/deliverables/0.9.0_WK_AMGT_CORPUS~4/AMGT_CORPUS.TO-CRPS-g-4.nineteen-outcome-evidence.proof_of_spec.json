@@ -1,0 +1,176 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-g-4",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-4.nineteen-outcome-evidence.md",
+    "group": "OTHER",
+    "vintage_commit": "ad2771b0873fc9f787f87fc1db85ecdd93a3b785"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "09fb000683b687050b1fdaa7eda23571b1021dc6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-4.nineteen-outcome-evidence.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~4/FWD_EVIDENCE_ROUND5.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "one row per FWD-1..FWD-19 (19 of 19, 0 duplicates -- g4_AC1.sh 'outcomes 19 of 19 rows_valid 19 duplicates 0 / VALID'), each row's fence_quote a verbatim DONE-WHEN clause read directly out of the PRD by a script (19 of 19 verbatim -- g4_AC2.sh 'fence_quotes_verbatim 19 of 19'), each row's instrument/output_excerpt the literal invocation and output of a read-only CLI mode, a direct read-only library call, or an s3api GET of an already-served artifact, run this session against served/stored state at HEAD; state is met (13), unmet (5) or unmeasurable (1, with its own reason), never a grade.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~4/FWD_EVIDENCE_ROUND5.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "the same 19 rows as a readable table plus a 5-item Notes section explaining the unmeasurable/unmet reads; a 1:1 rendering of the .json, not a second source of truth (generated from it by .scratch/g4/build_md.py, not committed).",
+      "artifact_covered_by": []
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "one new row appended, AMGT_CORPUS-Z-W4-S4 (surprise-row-gate.py: '1 new row(s) of 58 total checked' / OK): the FWD-4 instrument named in this cell's own worker face (induction_request.py --pick) writes outside this worker's grant, so FWD-4 was measured from already-committed evidence instead of a fresh exercise; plus the population drift (60 -> 0 unresolved) the same probe found.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the evidence file's shape: 19 of 19 outcomes, every row complete, unmeasurable rows with a reason",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g4_AC1.sh",
+      "output_evidence": "outcomes 19 of 19 rows_valid 19 duplicates 0\nVALID",
+      "denominator": "19 of 19 outcomes present, 19 of 19 rows valid (every FWD id present exactly once, every row carrying a non-empty fence_quote/instrument/output_excerpt, a state in {met,unmet,unmeasurable}, and a non-empty reason on the 1 unmeasurable row), 0 duplicate ids; run twice this session, identical output both times.",
+      "expect": "(?m)^VALID$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "every fence quote appears verbatim in the PRD",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g4_AC2.sh",
+      "output_evidence": "fence_quotes_verbatim 19 of 19",
+      "denominator": "19 of 19 fence_quote strings, whitespace-normalized, found as a substring of the whitespace-normalized PRD text; every fence_quote was extracted programmatically straight out of the committed PRD file's own DONE-WHEN...ACCEPT span (.scratch/g4/extract_fences.py, not committed), never retyped by hand; run twice this session, identical output both times.",
+      "expect": "fence_quotes_verbatim 19 of 19",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the bound: your branch changed nothing outside your grant",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g4_AC3.sh",
+      "output_evidence": "paths_outside_grant 0",
+      "denominator": "0 of N changed paths (between merge-base HEAD CLOUD and HEAD) fall outside the four granted path patterns (this worker's own deliverables dir, the surprise-channel investigation file, and this task order file); re-run after this commit to cover the committed evidence files and the channel row.",
+      "expect": "(?m)^paths_outside_grant 0$",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "This cell's spec names no code artifact and no assertion to mutate -- it produces two evidence documents by running read-only instruments against served state and recording their output; there is nothing here a mutant could flip from PASS to FAIL, since the acceptance battery (AC1/AC2/AC3) grades the evidence file's own SHAPE and provenance, not a behavior this worker implemented.",
+      "expected": "N/A -- no code or derived-assertion artifact in scope.",
+      "observed": "N/A -- confirmed by re-reading the task order's own RULED text (section 1: 'two files in your deliverables, nothing else') and BOUNDS (section 4: no write anywhere but the two files, a channel row, and the instance).",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 (g4_AC1.sh, g4_AC2.sh) each run twice, back to back, against the same committed FWD_EVIDENCE_ROUND5.json. AC3 (g4_AC3.sh) run once pre-commit (paths_outside_grant 0) and re-checked after this commit lands.",
+      "observed": "AC1: 'outcomes 19 of 19 rows_valid 19 duplicates 0 / VALID' both runs, byte-identical. AC2: 'fence_quotes_verbatim 19 of 19' both runs, byte-identical. AC3: 'paths_outside_grant 0' pre-commit; the same command re-run after the commit that lands the evidence files and the channel row (see session log / final report) to confirm the grant still holds once those paths are actually diffed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any vendor call, S3 write, --write/--coverage/pull/derive/fire flag, or write to any path outside this worker's <paths>",
+      "reason": "HARD BOUND, this cell's task order section 4. Every instrument run this session is a read-only CLI mode (--census, --read-latest, --folder(-by-index), --show-first-covered, --show-first-graded, --first-covered, --difference-arm, --negative-control, --code-census), a direct read-only library call (backlog.coverage(), never write_coverage()), or an s3api GET of an already-served/committed object; none of them PUT, POST, DELETE or move anything under opal-data-harvest or the synced library."
+    },
+    {
+      "item": "FWD-4 exercised fresh from this worktree",
+      "reason": "induction_request.py --pick hard-codes its one write to org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/, outside this worker's grant -- filed as AMGT_CORPUS-Z-W4-S4 and measured instead from the already-committed evidence of a prior real run of the same command."
+    },
+    {
+      "item": "FWD-17 exercised end to end (a new report landing + a rebuild + a same-inputs no-op rebuild)",
+      "reason": "every instrument that could exercise this fence (ingest --write, dossier --write[--security-key]) is a write, forbidden by this cell's bound; read as unmeasurable with its reason on the row instead."
+    },
+    {
+      "item": "Grading any of the 19 outcomes REALIZED/NOT_REALIZED",
+      "reason": "RULED, this cell's task order section 1 and 6: 'state is YOUR measurement of the DONE-WHEN clause as written, not a grade of the outcome... No grade: grading is L9's and L10's.'"
+    }
+  ],
+  "surprises": [
+    "AMGT_CORPUS-Z-W4-S4: this cell's named FWD-4 instrument (induction_request.py --pick) hard-codes its one write to a sibling worker's (0.9.0_WK_AMGT_CORPUS~2) deliverables path, outside this worker's own <paths> grant and this cell's no-write bound, so FWD-4 could not be freshly EXERCISED from this worktree; measured instead from the already-committed induction_request.json and CRPS-c-5's committed proof_of_spec.json output_evidence at HEAD (a prior real run), and a second, unrelated drift was found by the same probe: that prior run's population (unresolved_in_universe 60 of 93, as_of 2026-09-23) reads 0 of 94 unresolved on a fresh read today."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "lib.research.corpus.ingest --verify (FWD-1)",
+      "invocation": "python -m lib.research.corpus.ingest --verify",
+      "result": "rc 0; objects 354 files 354 match 354 mismatch 0; elapsed_s 13.266"
+    },
+    {
+      "tool": "lib.research.corpus.typed --census / --reports-for-first-multi (FWD-2) + a read-only silver_latest() probe",
+      "invocation": "python -m lib.research.corpus.typed --census ; python -m lib.research.corpus.typed --reports-for-first-multi ; python .scratch/g4/fwd2_probe.py (not committed)",
+      "result": "silver_rows 353 of 354 bronze; k5 period carried 309 of 353, absent 44, all 44 sharing one printed reason; 8306_JP_Equity query returns 2 reports in period order, period_order_ok True"
+    },
+    {
+      "tool": "lib.research.corpus.backlog.coverage() called directly (FWD-3, FWD-14, FWD-19) + --folder-by-index 0 (FWD-14)",
+      "invocation": "python .scratch/g4/fwd3_probe.py ; python -m lib.research.corpus.backlog --folder-by-index 0 ; python .scratch/g4/fwd14_probe.py (none committed)",
+      "result": "folders_read_fresh 94, resolved 94 unresolved 0 ambiguous 0, sum 94; folder-by-index 0 -> AMD, disposition served-as-empty-shell, reason workbook-only; disposition counts dossier_served 82 served_as_empty_shell 12 resolved_no_prose 0 unresolved_with_reason 0, sum 94"
+    },
+    {
+      "tool": "already-committed FWD-4 evidence (induction_request.json, CRPS-c-5 proof_of_spec.json) -- read only, not re-run",
+      "invocation": "cat org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/induction_request.json ; grep output_evidence in the sibling AMGT_CORPUS.TO-CRPS-c-5...proof_of_spec.json",
+      "result": "backlog_folders 93, resolved_absent 0, unresolved_in_universe 60, picked America Movil AXMB MM, vendor_calls 0, s3_writes 0, registrations_json_changed False, poison_positive_control raised 4 of 4"
+    },
+    {
+      "tool": "lib.research.corpus.continuation --show-first-covered (FWD-5)",
+      "invocation": "python -m lib.research.corpus.continuation --show-first-covered",
+      "result": "security_key AZN_LN_Equity; fund_of_record/last_stated_position/5 thesis_pillars, each with a report_key + locator"
+    },
+    {
+      "tool": "lib.research.corpus.sector_template --show-first-graded (FWD-6)",
+      "invocation": "python -m lib.research.corpus.sector_template --show-first-graded",
+      "result": "business_type consumer-cyclicals+consumer-services reports 4 of 353; 8 KPI lines each with a count; kpis_total 8 sections_total 78"
+    },
+    {
+      "tool": "lib.research.corpus.typecast --read-latest (FWD-7)",
+      "invocation": "python -m lib.research.corpus.typecast --read-latest",
+      "result": "workbooks_read 158; with_mnemonics 120; core mnemonics each printed N of 120; extended 6 members; opal_case_assumptions 120 of 158"
+    },
+    {
+      "tool": "lib.research.corpus.substrate --first-covered / --difference-arm (FWD-8)",
+      "invocation": "python -m lib.research.corpus.substrate --first-covered ; python -m lib.research.corpus.substrate --difference-arm",
+      "result": "one-call substrate read for AZN_LN_Equity, 5 present 0 absent, call_count 1; second call: changed_set == expected_changed_set (['continuation','prior_reports']), difference_ok True"
+    },
+    {
+      "tool": "lib.research.corpus.readonly_proof --negative-control / --code-census (FWD-9)",
+      "invocation": "python -m lib.research.corpus.readonly_proof --negative-control ; python -m lib.research.corpus.readonly_proof --code-census",
+      "result": "negative-control: rc 0, write_denied_probe PermissionError, actual_s3_puts 0, ingest_rc 0; code-census: rc 1, library_write_calls 4 (induction_run.py:462,464,688,690)"
+    },
+    {
+      "tool": "s3api GET of composed dossiers (FWD-10, FWD-11, FWD-12, FWD-13, FWD-15, FWD-16, FWD-17) via lib.research.corpus.gold.gold_get and dossier --census",
+      "invocation": "python -m lib.research.corpus.dossier --census ; python .scratch/g4/fetch_imb.py ; .../fetch_amd.py ; .../fetch_adbe.py ; .../fwd17_probe.py ; .../fwd17_probe2.py (none committed)",
+      "result": "dossier --census: dossiers 240 fields_scanned 6000 cited 2415 absent_with_reason 3585 neither 0, negative_control absent_with_reason 1; IMB_LN_Equity/AMD_US_Equity/ADBE_US_Equity dossiers read for pillars/management/cases/model_rows/fund_of_record/last_stated_position; 4 non-overwritten as_of objects listed for IMB_LN_Equity"
+    },
+    {
+      "tool": "s3api GET of the composed dossier for IMB_LN_Equity, pillar-shape read (FWD-18)",
+      "invocation": "python -c \"...\" reading fields['thesis_pillars'][0].keys() from the already-fetched .scratch/g4/imb_dossier.json (not committed)",
+      "result": "pillar dict keys ['citation','pillar','text'] -- no terms/keyword field found"
+    },
+    {
+      "tool": "ASCII / structure check on both committed deliverables",
+      "invocation": "python -c \"data=open(path,'rb').read(); print(sum(1 for b in data if b>127))\"",
+      "result": "0 non-ASCII bytes in both FWD_EVIDENCE_ROUND5.json and FWD_EVIDENCE_ROUND5.md"
+    }
+  ]
+}

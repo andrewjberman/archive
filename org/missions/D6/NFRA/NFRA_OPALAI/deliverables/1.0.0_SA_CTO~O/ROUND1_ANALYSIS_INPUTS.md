@@ -97,3 +97,18 @@ One is prose (`:1239`). The catalog's own writer, `workflows/atom_decomposition/
   amends OA-t-1's `<paths>` and AC2 from 31 re-points to 1, under its own licence, citing this ruling.
 - **Why not (a):** the gate's lane is not this program's, and its refusal is doing its job. It stops a surface
   MDPF_CANON owns from being re-touched outside that migration. **Why not (b):** it would be a wait.
+
+## I-5 (2026-09-25 ~20:5xZ) -- C8's hostedContents reader is served by the laptop CTO's gateway release, not built here
+
+- The laptop `1.0.0_SA_CTO`'s card `GATEWAY_RELEASE_COORDINATION_20260925.md` (commit d06e0a7a15, Andrew-direct
+  ~19:3xZ) routes two Teams fixes it will ship NARROW on the release base:
+  - **gap A:** a `hostedContents` reader for pasted images, under the existing delegated Chat.ReadWrite with no new
+    permission;
+  - **gap B:** `read_chat_messages` retries a Graph 500 page without `$select` and projects the fields client-side.
+- **Gap A IS C8's hostedContents tool.** The round-2 cut builds NO duplicate. It consumes the laptop's tool and
+  grades FWD-2's "a message with pasted content is answered, or plainly declared unreadable" against it.
+- **Gap B addresses part of the Teams-watch blocker (2)** (reads failing with a live token). The round-1 analysis reads
+  the watch's result after gap B lands before it rules anything further on (2).
+- **Order** (release-base rule @75117e60d6): NFRA_MCPORTAL MP-d-1's retry deploys first. The laptop's A+B then cuts on
+  that release commit. This seat reads the laptop's diff before its deploy. Each new tool must be classified in both
+  registries, with the pinned tool-count tests moved.

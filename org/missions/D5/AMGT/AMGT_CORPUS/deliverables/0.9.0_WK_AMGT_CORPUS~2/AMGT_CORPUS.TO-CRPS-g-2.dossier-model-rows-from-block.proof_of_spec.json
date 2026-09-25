@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-g-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-2.dossier-model-rows-from-block.md",
+    "group": "OTHER",
+    "vintage_commit": "ad2771b0873fc9f787f87fc1db85ecdd93a3b785"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "09fb000683b687050b1fdaa7eda23571b1021dc6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-2.dossier-model-rows-from-block.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "238 insertions / 16 deletions (git diff --stat). _model_rows now reads figures from the NEWEST landed derived/model_block/<key>/<stamp>/model_block.json instead of writing the constant FIGURE_ABSENT_REASON ('Bloomberg figure pull not authorized (R-16 V3)', now DELETED as a module constant) on every row. New: _model_block_read(security_key, client) -- the RAW block + a 3-status record (SERVED/ABSENT/READ_FAILED), read with THIS call's OWN client against MODEL_BLOCK_POOL_PREFIX/POOL_BUCKET imported (never retyped) from scoped_amgt/pool_reader, the SAME newest-lexicographic-stamp selection scoped_amgt._read_model_block_pool implements (that helper itself is not called -- see row AMGT_CORPUS-Z-W2-S9); _model_block_stamp (parses the <stamp> path segment); _model_block_entry (block, record) -> {key, sha256} for `inputs`, sha256 of the RAW block's own canonical bytes, so inputs -- and the no-op-rebuild check -- move exactly when the stored block moves, never on the display-time corrected-price overlay; _figure_for_row_key (latest CLOSED fiscal-year figure for the row's mnemonic/label, else its HEADER figure, else its FY1 FORECAST figure; a miss carries the block's own `unresolved` record for that key when one exists); _figure_field (value/unit/source/stamp plus ONE period label keyed by the matched figure's own scope -- fiscal_year for fiscal_year_line_item, fiscal_period for forecast, neither for header). build()/current_inputs() thread the block entry into `inputs` (_build_inputs gained a model_block_entry parameter) and model_rows into `fields`. New CLI: --model-rows-probe --key <security_key> (read-only, no write) prints 'model_rows N with_value N absent N constant_reasons N inputs_model_block <uri|none>'.",
+      "introduces": ["_model_block_read", "_model_block_stamp", "_model_block_entry", "_figure_for_row_key", "_figure_field", "_run_model_rows_probe"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_model_rows.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "NEW file, 10 tests, offline under conftest.py's poison. Exercises _model_rows/_figure_for_row_key/_figure_field/_model_block_entry/_model_block_stamp directly against a HAND-BUILT block/record (never a real S3/pool read -- the private block/record parameters ARE the seam that keeps this suite offline): (1) rows fill from a fixture block -- latest-closed-fiscal-year PX_LAST (2025 over 2024), a HEADER scalar, and an FY1 FORECAST figure, each carrying value/unit/(fiscal_year|fiscal_period)/source/stamp, no fiscal_period leaking onto the fiscal-year hit and no fiscal_year leaking onto the forecast hit; (2) an unresolved mnemonic carries the block's own unresolved reason, never the old constant; (3) a mnemonic/label the block does not carry at all yields the derived 'mnemonic <m> not carried by the Model block' reason, for BOTH a typecast mnemonic and a sector-template label; (4) a missing (ABSENT) block yields 'no derived Model block for <key>' on every row; (5) a READ_FAILED read is never reported as the ABSENT-block reason (asserts the two reasons differ and the READ_FAILED one names 'did not complete'); (6) FIGURE_ABSENT_REASON is not a module attribute any more; (7)/(8) the block is named in `inputs` (key+sha256), and the entry's sha256 moves when the block's own figures do; (9) the lookup order (fiscal-year-line-item, then header, then FY1 forecast) and the stamp parser, positive and negative; (10) the poison control. Typecast/sector-template fixtures are seeded through gold.gold_put against substrate.StubS3Client -- this package's own writer, never real boto3.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Row AMGT_CORPUS-Z-W2-S9 appended (append-only channel, validated by .tools/surprise-row-gate.py at commit time): scoped_amgt._read_model_block_pool takes no client argument and always resolves its own (env-driven, defaulting to a real boto3.client), so calling it directly from this module's client-threaded build()/current_inputs()/write_one() broke 4 of test_dossier.py's pre-existing offline tests under the package poison; resolved by reusing only the SELECTION RULE (prefix + newest-stamp) by literal import, reading through this call's OWN client instead -- the same idiom _list_stored_keys already uses in this file.",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC1.sh",
+      "output_evidence": "..........                                                               [100%]\n10 passed in 0.45s",
+      "denominator": "10 of 10 tests passed, 0 failed. Re-run: 10 passed in 0.39s (determinism).",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC2.sh -- expect model_rows \\d+ with_value [1-9]\\d* absent \\d+ constant_reasons 0 inputs_model_block s3://opal-data-harvest/derived/model_block/",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC2.sh",
+      "output_evidence": "model_rows 96 with_value 41 absent 55 constant_reasons 0 inputs_model_block s3://opal-data-harvest/derived/model_block/ADBE_US_Equity/20260925T043855Z/model_block.json",
+      "denominator": "1 of 1 live key (ADBE_US_Equity), 96 of 96 candidate model_rows classified (41 with_value + 55 absent = 96), 0 of 96 carrying the retired constant reason. Live, read-only probe against real S3 (the ONLY live run this cell makes; --write is never run for real). Re-run byte-identical.",
+      "expect": "model_rows \\d+ with_value [1-9]\\d* absent \\d+ constant_reasons 0 inputs_model_block s3://opal-data-harvest/derived/model_block/",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC3.sh",
+      "output_evidence": "........................................................................ [ 95%]\n..............                                                           [100%]\n302 passed in 1.93s",
+      "denominator": "302 of 302 corpus-package tests passed, 0 failed (292 pre-existing per the round-5 base-run log + 10 new in test_dossier_model_rows.py). Re-run: 302 passed in 2.26s (determinism); an interim run without the client-threading fix (row AMGT_CORPUS-Z-W2-S9) showed 4 failed, 298 passed -- the bound is met only after that fix.",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/g2/mutant.py (not committed) compares the real FIX (_figure_field keys its ONE period label off the matched figure's own `scope`) against the presence-based bug this cell's own test suite actually caught during development (fiscal_year if truthy, else fiscal_period), against a forecast figure that -- like every real forecast figure this producer emits -- carries BOTH fiscal_year and fiscal_period.",
+      "expected": "FIX serves ONLY fiscal_period='FY1' for the forecast hit (no fiscal_year key). MUTANT, picking the first truthy field, serves fiscal_year='2026' instead and drops the FY1 label the RULED spec asks for -- so FIX != MUTANT on which period key is present.",
+      "observed": "FIX fiscal_period_only=True out={'value': 5.5, 'unit': 'USD', 'source': 'BBG', 'stamp': '20260916T120000Z', 'fiscal_period': 'FY1'}. MUTANT fiscal_period_only=False out={..., 'fiscal_year': '2026'}. CONTROL FIRED-AS-EXPECTED: True (run twice, identical both times).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "g2_AC1.sh, g2_AC2.sh and g2_AC3.sh each run twice back to back; .scratch/g2/mutant.py run twice back to back.",
+      "observed": "AC1: '10 passed in 0.45s' then '10 passed in 0.39s' -- same pass count both runs. AC2 (live): byte-identical 'model_rows 96 with_value 41 absent 55 constant_reasons 0 inputs_model_block s3://.../ADBE_US_Equity/20260925T043855Z/model_block.json' both runs (same landed stamp, no write). AC3: '302 passed in 1.93s' then '302 passed in 2.26s' -- same pass count both runs. mutant.py: 'CONTROL FIRED-AS-EXPECTED: True' both runs, identical FIX/MUTANT values.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "dossier --write run for real against the live store",
+      "reason": "HARD BOUND (task order section 4/prompt): never run dossier --write for real; the --model-rows-probe this cell builds is read-only and is the only live run. AC2 is satisfied entirely by --model-rows-probe."
+    },
+    {
+      "item": "Any edit to lib/research/api/scoped_amgt.py, lib/research/checkface/scopes.py, or lib/research/coverage/pool_reader.py",
+      "reason": "READ-ONLY per <paths>: MODEL_BLOCK_POOL_PREFIX, POOL_BUCKET and the SCOPE_* constants are imported (at call time) from those modules, never retyped or modified; scoped_amgt._read_model_block_pool's own client-selection seam is left exactly as it is (row AMGT_CORPUS-Z-W2-S9 names why it is not called directly)."
+    },
+    {
+      "item": "A change to any dossier field other than model_rows and inputs",
+      "reason": "BOUNDS: NO change to any other dossier field. Verified by diff: every other build()/current_inputs()/_build_inputs() code path (continuation-derived fields, sector/fund/typecast refs, sections, cases) is untouched; the only new parameter threaded through is model_block_entry, appended to `inputs` and read nowhere else."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W2-S9"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "g2_AC1.sh (pytest, new model-rows suite)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC1.sh",
+      "result": "rc 0; 10 passed, 0 failed (run twice, stable)"
+    },
+    {
+      "tool": "g2_AC2.sh (dossier CLI --model-rows-probe --key ADBE_US_Equity, live read-only)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC2.sh",
+      "result": "rc 0; model_rows 96 with_value 41 absent 55 constant_reasons 0 inputs_model_block s3://opal-data-harvest/derived/model_block/ADBE_US_Equity/20260925T043855Z/model_block.json (run twice, byte-identical)"
+    },
+    {
+      "tool": "g2_AC3.sh (pytest, full corpus package)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g2_AC3.sh",
+      "result": "rc 0; 302 passed, 0 failed (run twice, stable); an interim run before the client-threading fix showed 4 failed, 298 passed"
+    },
+    {
+      "tool": "ruff (py39 target)",
+      "invocation": "python -m ruff check --target-version py39 lib/research/corpus/dossier.py lib/research/corpus/tests/test_dossier_model_rows.py",
+      "result": "rc 0; All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/dossier.py",
+      "result": "rc 0"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/corpus/dossier.py lib/research/corpus/tests/test_dossier_model_rows.py",
+      "result": "rc 0; OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": ".scratch/g2/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/g2/mutant.py",
+      "result": "rc 0; FIX fiscal_period_only=True; MUTANT fiscal_period_only=False; CONTROL FIRED-AS-EXPECTED: True (run twice, identical)"
+    },
+    {
+      "tool": "surprise-row-gate.py",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc 0 against the worktree copy (new row not yet staged, graded at commit time by safe-commit.sh's own gate chain); corpus baseline unaffected (4 known, 0 new, 0 resolved)"
+    }
+  ]
+}
