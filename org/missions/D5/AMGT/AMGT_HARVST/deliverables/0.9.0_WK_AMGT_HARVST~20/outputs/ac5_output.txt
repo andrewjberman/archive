@@ -1,0 +1,58 @@
+AC5 limb 1 -- WRITE SURFACE. `git status --porcelain -uall` rc=0, 16 changed/untracked path(s) (denominator: every path git reports in this worktree)
+    org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md
+    .scratch/s1/ac0.py
+    .scratch/s1/ac0_output.txt
+    .scratch/s1/ac1b_output.txt
+    .scratch/s1/ac2.py
+    .scratch/s1/ac2_output.txt
+    .scratch/s1/ac3.py
+    .scratch/s1/ac3_output.txt
+    .scratch/s1/ac4.py
+    .scratch/s1/ac4_output.txt
+    .scratch/s1/ac5.py
+    .scratch/s1/ac5_output.txt
+    .scratch/s1/after.pickle
+    .scratch/s1/before.pickle
+    .scratch/s1/row_w20_s1.py
+    .scratch/s1/snapshot_lib.py
+  outside_allowed []
+  lib/ census: `git status --porcelain -uall -- lib` rc=0 -> 0 path(s); `git diff --stat HEAD -- lib` rc=0 -> ''
+  NO lib/ FILE CHANGED: True
+  NOTE, gitignored and therefore invisible above: AC1b's `upload-harvest` created .runtime/opal-data-harvest/ in this worktree (.gitignore:288 `.runtime/`). It is runtime state, not a repo path, and it is empty of pending outbox rows.
+
+AC5 limb 2 -- DELETE CENSUS over every .py under lib/opal_data_harvest, lib/research/harvest, .scratch/s1: 18 delete-verb line(s) across 64 file(s) scanned (denominator)
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:35: wrapped so `put_object`, `copy_object`, `delete_object`, `delete_objects` and `upload_file` RAISE
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:51: _BLOCKED_METHODS = ("put_object", "copy_object", "delete_object", "delete_objects", "upload_file")
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:80: def delete_object(self, *args, **kwargs):
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:81: return self._blocked("delete_object", *args, **kwargs)
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:83: def delete_objects(self, *args, **kwargs):
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:84: return self._blocked("delete_objects", *args, **kwargs)
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:237: ("delete_object",
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:238: lambda: guarded.delete_object(Bucket=store.HARVEST_BUCKET, Key="hvst-u-1-poison-probe")),
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:239: ("delete_objects",
+    lib/opal_data_harvest/classify_unlabelled_bronze.py:240: lambda: guarded.delete_objects(Bucket=store.HARVEST_BUCKET,
+    lib/opal_data_harvest/test_classify_unlabelled_bronze.py:299: ("delete_object", lambda: guarded.delete_object(Bucket="b", Key="k")),
+    lib/opal_data_harvest/test_classify_unlabelled_bronze.py:300: ("delete_objects", lambda: guarded.delete_objects(Bucket="b", Delete={"Objects": [{"Key": "k"}]})),
+    .scratch/s1/ac5.py:17: DELETE_RE = re.compile(r"delete_object|delete_objects|delete_bucket|DeleteObject|DeleteObjects")
+    .scratch/s1/ac5.py:106: probe = "client.delete_objects(Bucket=b, Delete={'Objects': keys})"
+    .scratch/s1/ac5.py:125: client.meta.events.register("before-parameter-build.s3.DeleteObject", refuse)
+    .scratch/s1/ac5.py:126: client.meta.events.register("before-parameter-build.s3.DeleteObjects", refuse)
+    .scratch/s1/ac5.py:132: for verb, call in (("delete_object", lambda: client.delete_object(Bucket=bucket, Key="probe")),
+    .scratch/s1/ac5.py:133: ("delete_objects", lambda: client.delete_objects(
+  EXECUTED PATH, derived mechanically by importing this cell's own entry points (lib.opal_data_harvest.__main__, .uploads, lib.research.harvest.publication_gold) and reading sys.modules: 17 lib/ file(s) imported, rc=0 ; plus the 7 scripts this cell ran.
+  delete-verb lines INSIDE the executed path: 6 -- of which in a file other than AC5's own guard/positive control: 0
+      .scratch/s1/ac5.py:17: DELETE_RE = re.compile(r"delete_object|delete_objects|delete_bucket|DeleteObject|DeleteObjects")
+      .scratch/s1/ac5.py:106: probe = "client.delete_objects(Bucket=b, Delete={'Objects': keys})"
+      .scratch/s1/ac5.py:125: client.meta.events.register("before-parameter-build.s3.DeleteObject", refuse)
+      .scratch/s1/ac5.py:126: client.meta.events.register("before-parameter-build.s3.DeleteObjects", refuse)
+      .scratch/s1/ac5.py:132: for verb, call in (("delete_object", lambda: client.delete_object(Bucket=bucket, Key="probe")),
+      .scratch/s1/ac5.py:133: ("delete_objects", lambda: client.delete_objects(
+  the 12 line(s) OUTSIDE the executed path sit in lib/opal_data_harvest/classify_unlabelled_bronze.py (a separate CLI whose guard makes those verbs RAISE) and its test -- neither was imported or run by this cell.
+  NEGATIVE CONTROL on the same regex (a planted string that MUST match): True
+  S3-SIDE CORROBORATION: every AC2 delta is >= 0 (no publisher's silver row count or bronze object count fell), which is what a delete would have moved.
+
+AC5 limb 3 -- POSITIVE CONTROL: both delete verbs deliberately tripped under the guard, against the never-created bucket 'opal-hvst-s1-delete-positive-control-never-created' (so even a guard failure could not remove an object).
+    delete_object   RAISED DeleteRefused: S3 delete refused by the AC5 guard
+    delete_objects  RAISED DeleteRefused: S3 delete refused by the AC5 guard
+
+AC5 VERDICT LINE: outside_allowed [] ; lib_unchanged=True ; delete_call_sites_in_executed_path_outside_ac5_control=0 of 64 files scanned ; positive_control_both_raise=True
