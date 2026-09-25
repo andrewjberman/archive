@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-w-3",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "b9da668e16",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-w-3.opal-ai-ci.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-w-3.opal-ai-ci.md",
+    "group": "OTHER",
+    "vintage_commit": "b9da668e16"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "opal_ai/opal/checks/run_checks.sh",
+      "kind": "script",
+      "commit_or_etag": "25427629aee4e77e62a6a531e2a3773e779c5778",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "committed to the nested opal_ai repo (a separate repository, not a submodule pointer bump in the parent); `git -C opal_ai show HEAD:opal/checks/run_checks.sh` at 25427629ae carries the py_compile/ruff/ascii/device-path/pytest checks; exercised live by w3.AC1.sh (standalone clone, CHECKS: PASS) and w3.AC2.sh (planted defect, CHECKS: FAIL)",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "opal_ai/.github/workflows/ci.yml",
+      "kind": "config_data",
+      "commit_or_etag": "25427629aee4e77e62a6a531e2a3773e779c5778",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "`git -C opal_ai show HEAD:.github/workflows/ci.yml` at 25427629ae -- on: push (all branches) + pull_request, one job installing python 3.9 + ruff, one step running `bash opal/checks/run_checks.sh`; parsed and exercised by w3.AC3.sh (push=True, steps_invoking_run_checks=1). Its first real GitHub Actions run is on the first push (G-PUSH), out of scope for this cell (no push performed).",
+      "artifact_covered_by": ["AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "the standalone clone's run_checks.sh prints its denominators and CHECKS: PASS -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w3.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "py_compile: 0 files (denominator 0)\nruff: PASS (0 findings)\nascii: PASS (1 files checked)\ndevice-path: PASS (1 files checked)\npytest: SKIP (0 test_*.py files under opal/)\nCHECKS: PASS\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 check-suite run (a standalone git clone of opal_ai, no workspace on the path) exited 0 with CHECKS: PASS",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "rc!=0; CHECKS: FAIL; py_compile named>=1; ascii named>=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "rc=1; CHECKS: FAIL; py_compile named=2; ascii named=2\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 sub-conditions matched (rc!=0, CHECKS: FAIL, py_compile named>=1, ascii named>=1)",
+      "status": "PASS",
+      "status_reason": "The issuer's shared checker fix (`set -o pipefail` in _root.sh, commit 0b2a643117, carried onto this worktree's parent HEAD) corrected the previously-broken capture pipe in w3.AC2.sh's shared harness (`out=$(cmd | tr -d '\\r'); rc=$?` now reads the piped command's own exit, not tr's). Re-run fresh against the same delivered run_checks.sh (unchanged, commit 25427629ae): rc=1 as expected. Disarms row NFRA_OPALAI-Z-W6-S1 (filed by this worker; disarm_owner 2.0.0_SA_COO~O, closed via row NFRA_OPALAI-Z-S8)."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "push=True steps_invoking_run_checks>=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w3.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "push=True steps_invoking_run_checks=1\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 conditions matched (push trigger present, 1 of 1 job step invoking opal/checks/run_checks.sh)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2's own planted mutant (a *.py under opal/ with invalid syntax and a UTF-8 non-ASCII byte) against the delivered run_checks.sh, run directly (bypassing AC2.sh's broken pipe): `cd <clone> && env -u PYTHONPATH bash opal/checks/run_checks.sh; echo $?`",
+      "expected": "run_checks.sh exits 1, prints CHECKS: FAIL, names py_compile and ascii among the failing checks",
+      "observed": "py_compile: FAIL (1 files); ascii: FAIL (1 of 1 files); failing checks: py_compile ascii; CHECKS: FAIL; exit=1",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "w3.AC1.sh run twice in a row against the same committed opal_ai HEAD (25427629ae), no arguments varied",
+      "observed": "Both runs printed the identical denominator lines (py_compile 0 files, ruff PASS 0 findings, ascii PASS 1 files checked, device-path PASS 1 files checked, pytest SKIP) followed by CHECKS: PASS, RESULT: PASS, exit=0",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPALAI-Z-W6-S1: filed OBSERVATION/ARMED by this worker (w3.AC2.sh's rc=$? read the trailing tr's exit status, never run_checks.sh's own, through the shared checker's capture pipe); DISARMED by the issuer's shared-checker fix (commit 0b2a643117, `set -o pipefail` in _root.sh) and closed via row NFRA_OPALAI-Z-S8. AC2 now PASSes on fresh re-run."
+  ],
+  "session_log": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~6/session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "bash -n (syntax check)",
+      "invocation": "bash -n opal_ai/opal/checks/run_checks.sh",
+      "result": "SYNTAX-OK"
+    },
+    {
+      "tool": "python -c import yaml -- ci.yml parse (exercised by w3.AC3.sh)",
+      "invocation": "python -c \"import yaml,sys; yaml.safe_load(open('opal_ai/.github/workflows/ci.yml'))\"",
+      "result": "parses clean; on:push present, one job, one step running bash opal/checks/run_checks.sh (same read w3.AC3.sh performs against the committed HEAD blob)"
+    },
+    {
+      "tool": "git -C opal_ai commit (nested repo, non-shell msgfile, explicit author+committer identity)",
+      "invocation": "git -C opal_ai -c user.name=\"0.9.0_WK_NFRA_OPALAI~6\" -c user.email=\"0.9.0_WK_NFRA_OPALAI~6@opal.agent\" commit --author \"0.9.0_WK_NFRA_OPALAI~6 <0.9.0_WK_NFRA_OPALAI~6@opal.agent>\" -F <msgfile> -- opal/checks/run_checks.sh .github/workflows/ci.yml",
+      "result": "commit 25427629aee4e77e62a6a531e2a3773e779c5778 on wk-NFRA_OPALAI-6-opal_ai; verified with `git -C opal_ai log --oneline -1` (matches) and `git -C opal_ai status --short` (clean)"
+    }
+  ]
+}

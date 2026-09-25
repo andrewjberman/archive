@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-w-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "C",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "fee6c9f89c",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-w-2.nested-repo-gates.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/git-hooks/owned-paths-check.sh",
+      "kind": "script",
+      "commit_or_etag": "d78d28dd87",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Resolves the superproject when run inside a mapped submodule (--show-superproject-working-tree, else the nested repo's own MAIN worktree asked for its superproject), grades staged paths against the PARENT's .owned-paths.yaml/validator re-based to parent-relative, and routes MAIN_ROOT/the audit log through a new _git_x helper that clears GIT_DIR/GIT_INDEX_FILE/GIT_WORK_TREE for any cross-repo -C call (a pre-commit hook's own process carries those pinned to the repo whose commit is in flight, which outranks a bare -C). Exercised by AC1's fixture (nested-granted-pass, nested-violation-block, parent-unchanged arms)."
+    },
+    {
+      "path_or_key": ".tools/git-hooks/install-owned-paths.sh",
+      "kind": "script",
+      "commit_or_etag": "d78d28dd87",
+      "artifact_covered_by": ["AC1", "AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New --submodule <path> flag resolves the nested repo's real gitdir via `git -C <path> rev-parse --absolute-git-dir` (a submodule's .git is a FILE, not a directory) and writes a wrapper there that itself resolves the superproject to find owned-paths-check.sh. Exercised on a SCRATCH fixture only (AC1's install-owned-paths.sh --submodule opal_ai call); the real install into opal_ai's own hooks dir is the round issuer's act (bound #1) -- AC2 confirms the real opal_ai's hooks dir carries no pre-commit hook."
+    },
+    {
+      "path_or_key": ".tools/safe-commit.sh",
+      "kind": "script",
+      "commit_or_etag": "d78d28dd87",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Its own audit-log root now chases the superproject/main-tree the same way, byte-identical for every existing (non-nested) caller (empty-superproject leaves _AUDIT_ROOT==REPO_ROOT). Git operations (staging, mutex, commit) stay scoped to the nested repo via cwd, unchanged. Exercised by AC1's safe-commit-nested-landed arm: a real commit run from inside a SCRATCH nested repo lands (rc=0, the commit shows in `git log`)."
+    },
+    {
+      "path_or_key": ".owned-paths.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "5d0c0fe2da",
+      "artifact_covered_by": ["AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Two new rows, landed BEFORE any hook exists to grade against them: \"opal_ai\" (lane ANY, the gitlink pointer -- portal's own precedent) and \"opal_ai/**\" (lane ANY_EXEC_OR_AE, the same posture infra/architectural_docs/** carries for a new infra-adjacent tree with no dedicated pod). `python .tools/owned-paths-validate.py .owned-paths.yaml` at HEAD: OK, 82 lanes, 374 path rules, all lane refs resolve. AC2's own census (git show HEAD:.owned-paths.yaml) counts 2 (the notes were worded to open with the literal path they document, since the check's census walks dict VALUES only)."
+    },
+    {
+      "path_or_key": ".tools/tests/test_nested_repo_gates.sh",
+      "kind": "test",
+      "commit_or_etag": "d78d28dd87",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New. Builds a SCRATCH superproject + nested repo under mktemp (never the shared opal_ai), copies this worktree's hooks/tools -- plus the small closure safe-commit.sh's universal commit-gate call needs to import cleanly (commit-gate.sh, commit_gate_runner.py, ds-precommit-check.py, git_bash_resolver.py, msys_argv_guard.py, safe_commit_msg_verify.py, org/modules/graph, comp-constants.config.yaml) -- and a minimal lane file into it. Proves 4 arms: nested-granted-pass, nested-violation-block, safe-commit-nested-landed, parent-unchanged. `bash .tools/tests/test_nested_repo_gates.sh`: ARMS: 4 of 4 PASS, exit 0. Run 3 times during this cell (twice mid-build, once post-commit); identical (ARMS: 4 of 4 PASS) each time."
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "5d0c0fe2da",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new row appended (NFRA_OPALAI-Z-W5-S1); surprise-row-gate.py at staging time reported '1 new row(s) of 8 total checked (7 pre-existing, NOT re-graded)' and 'OK: all new rows carry their step-7/step-10 fields', and the same gate ran clean inside safe-commit.sh's own pre-commit chain for this commit."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "rc=0; named arms ok 4 of 4; ARMS: 4 of 4 PASS -- RESULT: PASS -- exit=0",
+      "method": "test_suite",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "rc=0; named arms ok 4 of 4; ARMS: 4 of 4 PASS\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 named arms PASSED (nested-granted-pass, nested-violation-block, safe-commit-nested-landed, parent-unchanged) in the fixture's own ARMS line, matched against the check's regex per arm. Run at HEAD 5d0c0fe2da (post both commits); identical to the pre-follow-up-commit run.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "lane-file entries naming opal_ai/: >=1; pre-commit hook there: absent -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "lane-file entries naming opal_ai/: 2; main-tree opal_ai git dir: C:/Users/Opal Bloomberg/Desktop/ajb_workspace/.git/modules/opal_ai; pre-commit hook there: absent\nRESULT: PASS\nexit=0",
+      "denominator": "2 of the census's own count (>=1 required) naming opal_ai/ in .owned-paths.yaml at HEAD; 1 of 1 real-tree hooks-dir check reads absent (the true post-incident state -- see row NFRA_OPALAI-Z-W5-S1). Run twice: once before the note-wording fix (0, FAIL) and once after (2, PASS).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2's census walks .owned-paths.yaml's dict VALUES only (a Python generator that recurses into dict.values(), never a key) -- so a lane row's own glob KEY (\"opal_ai/**\") is invisible to it no matter how correct the grammar is; only a leaf STRING VALUE (a lane name or a note) starting with \"opal_ai/\" counts. The first landed pair of rows (grammar-correct, notes starting \"opal_ai submodule...\"/\"opal_ai content...\") measured 0 and FAILed; wording both notes to open with the literal path (\"opal_ai/ submodule...\"/\"opal_ai/** content...\") measured 2 and PASSed, with no change to the grant itself (python .tools/owned-paths-validate.py .owned-paths.yaml: 82 lanes / 374 path rules, unchanged before and after).",
+      "expected": "The census count moves from 0 to >=1 purely from re-wording a note's opening words, with the lane/permitted_agents grant identical.",
+      "observed": "0 (FAIL) then 2 (PASS), grant unchanged both times -- confirms the check reads leaf strings, not keys, and that AC2 was never testing whether a worker or lane could actually commit to opal_ai/**.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 were each run 3+ times across this cell's build: mid-build (before the note fix, before the real-tree hook was found/removed), immediately after finding and removing the accidentally-installed real-tree hook, and post the follow-up commit (5d0c0fe2da).",
+      "observed": "AC1: 4 of 4 PASS every run, no variance. AC2: FAIL (rows=0) until the note wording changed, then PASS (rows=2) every run after, including after the real opal_ai hooks-dir cleanup (hook there: absent, confirmed both before the accidental install and after its removal).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Installing the pre-commit hook into the real opal_ai submodule's hooks dir",
+      "reason": "Bound #1: the real install is the round issuer's act at the round's last merge (a hook in the shared nested common dir would grade every other worker's nested commits mid-round). Everything here is proven on a SCRATCH fixture (AC1)."
+    },
+    {
+      "item": "Deriving the linked-nested-worktree fallback path from anything other than the nested repo's own MAIN worktree",
+      "reason": "install-owned-paths.sh's build text names both the direct case and this fallback; AC1's four named arms do not exercise the fallback branch directly (no linked-worktree-of-a-submodule arm is named), so it is implemented per the build text and reasoned from the same primitives AC1 does exercise, but not independently proven by a fifth arm."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPALAI-Z-W5-S1: install-owned-paths.sh --submodule <path> resolves REPO_ROOT from the invoking shell's ambient cwd with no confirmation of which repo it targeted beyond a stdout line; reproduced (and immediately reverted same-turn) on the REAL opal_ai's hooks dir when an exercise call ran without an explicit cd into the fixture first. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~O."
+  ],
+  "session_log": "2026-09-24/25, worktree C:/tmp/oa-5, branch wk-NFRA_OPALAI-5, based on CLOUD @b99ab96fdf. Order of acts: (1) grounded the tree (branch + org/ + .tools/ present); read owned-paths-check.sh, install-owned-paths.sh, safe-commit.sh, owned-paths-validate.py, .owned-paths.yaml's portal precedent, and the w2.AC1/AC2 check scripts + their shared _root.sh. (2) Edited owned-paths-check.sh: superproject resolution (direct, then via the nested repo's own main worktree), NESTED_PREFIX re-basing of staged paths, and a _git_x helper (env -u GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE/...) after discovering by direct reproduction that a pre-commit hook's own process env pins GIT_DIR to the repo whose commit is in flight, which silently out-ranks a bare `-C <other-repo>` on every cross-repo git call. (3) Edited install-owned-paths.sh: --submodule <path>, resolving the target hooks dir via `git -C <path> rev-parse --absolute-git-dir`, and made the generated WRAPPER itself superproject-aware (it does not live at the nested repo's own toplevel). (4) Edited safe-commit.sh: the same superproject/main-tree chase for its audit-log root only (git operations untouched); verified byte-identical for the non-nested case (parent-unchanged arm). (5) Wrote .tools/tests/test_nested_repo_gates.sh; iteratively discovered and fixed FIVE distinct fixture gaps before it reached 4/4: (a) GIT_DIR env pinning breaking the -C common-dir call (fixed in owned-paths-check.sh/safe-commit.sh themselves, not just the fixture); (b) safe-commit.sh's UNIVERSAL commit-gate call (Rule 14, runs on every file, not just .py) needing commit-gate.sh + commit_gate_runner.py's own import closure (ds-precommit-check.py, git_bash_resolver.py, msys_argv_guard.py, org/modules/graph, comp-constants.config.yaml) copied into the fixture; (c) safe-commit.sh's own msg-verify step needing safe_commit_msg_verify.py copied in; (d) the nested repo's own committer identity (user.email/name) never inherited from the fixture's parent config; (e) ARM4 (parent-unchanged) originally re-appended a lane row to .owned-paths.yaml mid-test and then staged that file alongside a content file, making .owned-paths.yaml itself an UNDEFINED violation -- fixed by declaring both lane rows in write_lane_file() from the start. (6) Committed the build (d78d28dd87) via safe-commit.sh; both AC1 and AC2 run: AC1 PASS, AC2 FAIL (lane-file census read 0 -- see below). (7) Landed .owned-paths.yaml's two opal_ai rows (portal's precedent: gitlink pointer -> ANY, content -> ANY_EXEC_OR_AE, the infra/architectural_docs/** posture). (8) Investigating AC2's FAIL, found the check's own census walks dict VALUES only, never keys -- reworded both notes to open with the literal path. (9) Separately, re-running w2.AC2.sh surfaced that the REAL opal_ai's hooks dir carried a pre-commit hook, byte-identical to this cell's own generated wrapper -- traced to an earlier debug/exercise call of install-owned-paths.sh --submodule opal_ai issued via an absolute script path with no prior `cd` into the intended fixture, which (given this harness's own documented per-call cwd reset to the primary workspace root) resolved REPO_ROOT against the REAL main tree instead. Removed the file immediately (`rm -f`), confirmed the real opal_ai hooks dir now carries only git's stock *.sample files (its pre-incident state), confirmed no other unexpected change in the main tree from this (the one unrelated staged .gitmodules change there, +mcportal, predates this session and belongs to another live seat). Filed row NFRA_OPALAI-Z-W5-S1. (10) Committed the note-wording fix + the investigation row (5d0c0fe2da); re-ran AC1 (PASS, unchanged) and AC2 (PASS, rows=2, real-tree hook confirmed absent). PUSH STATE: LOCAL @5d0c0fe2da -- no push attempted; this seat never pushes. WHAT I DID NOT DO: install a hook into the real opal_ai (removed the one accidentally created and reported it as a row rather than silently deleting and moving on); touch anything outside this order's <paths>; widen or repair either criterion by an unnamed route.",
+  "compiler_tools": [
+    {
+      "tool": "Bash (git, python, bash -n)",
+      "invocation": "manual reproduction of GIT_DIR-pinning under a simulated pre-commit hook env (GIT_DIR=... GIT_INDEX_FILE=... bash -c 'git -C <other-repo> rev-parse --git-common-dir'); a probe pre-commit hook (env | grep '^GIT_') installed on a debug fixture to confirm what a real hook process actually inherits",
+      "result": "Confirmed GIT_DIR/GIT_INDEX_FILE are exported into a pre-commit hook's process and outrank a bare `-C <dir>`; motivated the _git_x helper in owned-paths-check.sh."
+    },
+    {
+      "tool": "bash .tools/tests/test_nested_repo_gates.sh",
+      "invocation": "direct + via w2.AC1.sh, run repeatedly during the build",
+      "result": "ARMS: 4 of 4 PASS once all five fixture gaps (see session_log) were closed; stable across 3+ runs."
+    },
+    {
+      "tool": "python .tools/owned-paths-validate.py",
+      "invocation": ".owned-paths.yaml (validate mode) and --self-test",
+      "result": "OK: 82 lanes, 374 path rules, all lane refs resolve, before and after the opal_ai rows landed."
+    },
+    {
+      "tool": "python .tools/surprise-row-gate.py",
+      "invocation": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md (pre-stage; re-ran inside safe-commit.sh's own gate chain)",
+      "result": "1 new row(s) of 8 total checked (7 pre-existing, NOT re-graded) -- OK: all new rows carry their step-7/step-10 fields."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the run recorded in the worker report; only the exit code is the verdict."
+    }
+  ]
+}

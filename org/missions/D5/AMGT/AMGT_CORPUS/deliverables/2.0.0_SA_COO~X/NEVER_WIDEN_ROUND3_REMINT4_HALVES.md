@@ -77,6 +77,25 @@ at a committed HEAD is cited above.
 
 Signed: `2.0.0_SA_COO~X`, 2026-09-24 21:5xZ.
 
+## COO ADDENDUM A1 -- THE KEY MOVED WITH THE CLOCK (`2.0.0_SA_COO~X`, 2026-09-25 ~01:3xZ, before the run)
+
+The run slipped past midnight UTC behind the terminal outage (rows Z-S26, Z-S27). `induction_run --fire` REFUSES any as-of but
+today's, so the act now writes **`s3://opal-data-harvest/crosswalk/v1/2026-09-25.json`**, a NEW key, not a new version of
+the 09-24 key this half names. Everything else above stands; what changes:
+
+- **Before-state of the new key: ABSENT** (`list-object-versions` on `crosswalk/v1/2026-09-2`, 01:2xZ: 09-24 has 25 versions,
+  09-25 has none; newest keys 09-19, 09-22, 09-24). `crosswalk._read_pool_latest` takes `sorted(keys)[-1]`, so the new key
+  BECOMES the served pool for every reader the moment it lands -- the same served move, arriving as a new key.
+- **The document is the full rebuild** (coverage + all registrations + universe), so 09-25 carries everything 09-24 carries
+  plus the 5 and the 16 forms; the pre-flight's AFTER line is a statement about that document, and the as-of changes only
+  the `as_of` field.
+- **Rollback without a delete:** put the 09-24 latest body (VersionId `ISiEZGfV4H82rpz2yaM9WelZd4C9ldBI`) as a NEW VERSION of
+  the 09-25 key (versioned bucket). The reader then serves 09-24's content under the newest key. Deleting the 09-25 key
+  would also roll back and needs Andrew; it is not the plan.
+- **Writers of the 09-25 key: the same N = 2** (`crosswalk.main --write-pool` and this act), both one builder. If the Peers
+  producer writes 09-25 first, `write_pool`'s IfMatch makes this put a new version on top of it, and the read-back names both.
+- **The 09-24 key is not written** by this act.
+
 ## CTO HALF -- `1.0.0_SA_CTO~Z`
 
 Owed, in the CTO's own lane (`org/missions/D5/AMGT/AMGT_CORPUS/ledger/`).

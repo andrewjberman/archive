@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rq-2",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rq-2.the-redeploy.md",
+    "group": "C",
+    "vintage_commit": "33f6531550"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "33f6531550",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rq-2.the-redeploy.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "33f6531550",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deploy_evidence": "ACT A, the one artifact write. Identity carried here because commit_or_etag takes a commit-ish only: VersionId ujFHMNbjbg6Yv3wFotVvfDPnF4reNQdO; content-sha256 FOF+dRXoW1KFFzD0moLigsMB2LMmIjwhwURq7FkCzbw=; 856314 bytes; ETag b2e056eb7cf4ecfc1489a7461e5b190e. The locally computed sha equals the uploaded object's metadata. Prior VersionId VTj2mj_gOKupat_bPjetck3HPD0N6PIJ / 848867 bytes / content-sha256 pmH20bb+L1Kcejf4MKS4tVt+tCIPgeHwSZAsTe+nXZo= preserved by bucket versioning (Enabled) and is the rollback BOTH halves name; the CTO half verified it live at signing (unversioned head-object returns the same id, so it is the CURRENT version). No delete."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "33f6531550",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deploy_evidence": "ACT B, ONE safe-apply; the terraform is unmodified by this cell (the code arrives through the S3 artifact). Plan exactly 0 add, 1 change, 0 destroy -- in-place on module.scoped_amgt_api.aws_lambda_function.this, only s3_object_version, source_code_hash and last_modified; 28 attributes and 4 blocks unchanged; no second resource, so the order's BOUNDS-2 refusal never fired. 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Deployed CodeSha256 now FOF+dRXoW1KFFzD0moLigsMB2LMmIjwhwURq7FkCzbw=, LastUpdateStatus Successful, LastModified 2026-09-25T18:31:46Z; replan reads 'No changes. Your infrastructure matches the configuration.' The CTO half records that the serving surface is a WILDCARD behavior (/api/scoped/amgt/*), not a 16-route list, so the bound on this act comes from the closure diff -- which is why all three stop limbs were graded before the apply."
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260925T1803Z_amgt-rq-2-the-redeploy_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "475b804198",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The ONE NEVER-2 entry. OPENED 18:03Z before the build AND COMMITTED AT 475b804198 BEFORE THE APPLY -- verifiable, not asserted: at that commit the function's CodeSha256 still read the pre-act pmH20bb+L1Kcejf4MKS4tVt+tCIPgeHwSZAsTe+nXZo=, and the apply's LastModified is 18:31:46Z, after it. (At ro-7 the same ask arrived post-apply and was recorded as such; here it did not, and the two are deliberately not left to read alike.) The closure diff and all three stop limbs are enumerated INTO this entry before the apply. Both legs CLOSED with proof; entry CLOSED and the sentinel org/critical_paths/.open_deploys/amgt-rq-2-the-redeploy.json removed by the tool on close."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The three STOP limbs are this act's real gate, and each rests on an instrument that could be blind rather than clean. Every limb was therefore graded WITH a control that proves the instrument can say NO, instead of accepting the GO message's summary ('build_pack is byte-identical, and scoped_amgt.py is untouched') as a producer self-report.",
+      "expected": "For limb 2, an AST function-byte comparator that reports build_pack IDENTICAL must report some other function CHANGED on the same run, or it cannot discriminate. For limb 1's crosswalk carve-out, a comparator that reports the 6 Lambda-called functions identical must find the functions that DID change. For limb 3, an empty diff must be empty for the whole file, not just for the two cited line numbers.",
+      "observed": "LIMB 2: build_pack IDENTICAL (deployed L242-359 sha 11d26e85b4e906e0 == HEAD L242-359 sha 11d26e85b4e906e0) WHILE build_rich_text on the same run reads CHANGED (f9d94a7ba575a52c -> 7bfd5a48f275f152) -- which is rq-1's whole purpose, so the comparator demonstrably sees change. LIMB 1: the 6 Lambda-called crosswalk functions are 6 of 6 IDENTICAL, and the same pass names the 3 that DID change out of 33 defs (_research_folders_for_disclosure, build_crosswalk, main), none Lambda-called. That control also FALSIFIED one line of the COO half: the half names the changed set as build_crosswalk/main/write_pool, but write_pool is UNCHANGED and _research_folders_for_disclosure changed instead. The verdict is unmoved (neither is Lambda-called) and the discrepancy is recorded rather than smoothed, because a wrong list ages into a wrong belief. LIMB 3: scoped_amgt.py is untouched ENTIRELY (empty diff for the path), so the CTO half's reachable state -- a byte-identical build_pack whose ADAPTER call site newly passes a thesis_bundle and drags build_rich_text onto the default pdf route, turning a 200 into a 500 -- is excluded at the whole-file grain rather than by reading two line numbers.",
+      "status": "FIRED-AS-EXPECTED",
+      "method": "command"
+    },
+    "determinism": {
+      "description": "Two non-vacuity reads on the criteria themselves, plus the one limit this cell could not control for. (a) AC1's pinned prior could have been stale, as ro-7's demonstrably was. (b) AC2's '89 of 89' is the exact shape a short-circuit or a replayed cache also produces.",
+      "expected": "(a) AC1's pin must equal the value the LIVE function carried before the act, or AC1 is not a discriminator for this act. (b) AC2 must take fresh live captures and print its denominator, and its recorded exit must be the sweep's own rc rather than a wrapper's or a pipe's.",
+      "observed": "(a) AC1's pin pmH20bb+L1Kcejf4MKS4tVt+tCIPgeHwSZAsTe+nXZo= EQUALS the live pre-act read (measured on the function at 18:0xZ, LastModified 2026-09-24T23:54:02Z, which is this lane's own ro-7 B2 deploy). So AC1 is a live discriminator here -- unlike ro-7's AC1, whose docstring mislabelled its pin's provenance. (b) AC2 passes --cache into a FRESH mktemp -d, so all 89 are live captures, not replays; CAPTURE_FAILED 0 is printed beside the 89 denominator; the script's non-OK filter printed nothing, which is correct only when no name failed; and the recorded exit=0 is the sweep's own rc (the script ends 'exit $rc'). THE LIMIT, STATED: AC2 carries NO pre-act negative arm from this session. It was run once, after the apply, so the world did not supply a failing arm as it did for ro-7's AC2. What stands in its place is indirect and named as such: AC1 proves the bytes moved and the limb-1 subtraction proves render_pack.py (rq-1's changed build_rich_text) is one of exactly 3 files that shipped. No planted-mutant control was manufactured after the fact.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Any peers batch or other served write",
+      "reason": "The COO half states this order moves the function's code only. rq-2 has no act C."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; 0.0.0_AB_MSTR~Z pushes."
+    },
+    {
+      "item": "Re-running AC2 before the apply to obtain a negative arm",
+      "reason": "Not available: the ask, the halves and the order all sequence AC2 after the apply, and the apply had landed before AC2's first run. Recorded as a limit on the determinism control rather than left implicit."
+    },
+    {
+      "item": "Acting on the COO half's write_pool discrepancy",
+      "reason": "It is the issuer's line to correct in its own half. Measured, recorded in the entry and reported; neither write_pool nor _research_folders_for_disclosure is Lambda-called, so it moves no verdict and needed no stop."
+    }
+  ],
+  "surprises": [],
+  "session_log": "No session-log path lies inside this lane's <paths> write surface beyond this deliverables folder. The substance is in the acceptance rows, the controls block and the NEVER-2 entry at org/critical_paths/change_management/20260925T1803Z_amgt-rq-2-the-redeploy_deploy_completion.md.",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan (pre-apply read) and terraform plan (post-apply 0-diff)",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest plan -input=false -no-color -lock-timeout=120s",
+      "result": "PRE-APPLY: 0 add, 1 change, 0 destroy -- in-place, only s3_object_version + source_code_hash + last_modified, 28 attributes and 4 blocks unchanged, no second resource. POST-APPLY: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh --build-only (the closure gate)",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only <tmp>",
+      "result": "rc=0. 203 zip entries, 856314 bytes. VERIFY missing []; VERIFY-SCOPE module-scope [] and function-scope []; ISOLATED 3 of 3 arms OK. Its package listing is the denominator for limb 1's subtraction: 3 of 14 changed files ship."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (the NEVER-2 contract)",
+      "invocation": "deploy_ledger.py open|close-leg|close --slug amgt-rq-2-the-redeploy",
+      "result": "Opened 18:03Z with 2 legs before the build; committed at 475b804198 before the apply; L1 and L2 CLOSED with proof; entry CLOSED and sentinel removed. No hold was needed this round."
+    },
+    {
+      "tool": ".tools/safe-apply.sh and the HALT gate",
+      "invocation": ".tools/safe-apply.sh -chdir=infra/aws/terraform/harvest apply -input=false -auto-approve",
+      "result": "'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' The HALT gate passed without an override; this session's serial file, written during ro-7, still names this lane so the gate scanned this lane's own inbox rather than guessing a principal."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "CodeSha256 differs from pmH20bb+L1Kcejf4MKS4tVt+tCIPgeHwSZAsTe+nXZo= and LastUpdateStatus=Successful -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round42/checks/rq-2.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "CodeSha256=FOF+dRXoW1KFFzD0moLigsMB2LMmIjwhwURq7FkCzbw= LastUpdateStatus=Successful LastModified=2026-09-25T18:31:46.000+0000 (prior pmH20bb+L1Kcejf4MKS4tVt+tCIPgeHwSZAsTe+nXZo=) / exit=0. The deployed sha equals the uploaded artifact's metadata content-sha256 and the locally computed sha, so the bytes that landed are the bytes that were built. THE PIN WAS RE-MEASURED AGAINST THE LIVE FUNCTION BEFORE THE ACT rather than inherited: the live pre-act read was exactly pmH20bb+..., LastModified 2026-09-24T23:54:02Z -- this lane's own ro-7 B2 deploy -- so AC1 was a live discriminator for this act. That check exists because ro-7's AC1 docstring mislabelled its pin's provenance; here the value and the label agree.",
+      "denominator": "1 function, 1 configuration read; the prior value independently re-measured live before the act.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "served over 89 of 89 folders: OK 89, NOT_OK 0, CAPTURE_FAILED 0 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round42/checks/rq-2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "'served over 89 of 89 folders: OK 89, NOT_OK 0, CAPTURE_FAILED 0' / exit=0 -- the order's expected string exactly. Read on the DEPLOYED bytes FOF+dRXoW1KFFzD0moLigsMB2LMmIjwhwURq7FkCzbw= after the apply, sweeping the 89-name snapshot at deliverables/0.9.0_WK_AMGT_RESAPP~4/universe.json (89 entries, counted). NON-VACUITY CHECKED rather than assumed: the script passes --cache into a FRESH mktemp -d, so every one of the 89 is a live capture and none is replayed; CAPTURE_FAILED 0 sits beside the printed denominator, so 89 captures actually occurred; the script's own non-OK filter (grep -v ' OK $' over '^[0-9]+/89 ' lines) printed NOTHING, which is the correct output only when no name failed; and the recorded exit is the sweep's OWN rc, since the script ends 'exit $rc' -- not a wrapper's and not a pipe's, the trap that has produced both a false LANDED and a false REFUSED on this fabric. LIMIT, STATED RATHER THAN IMPLIED: this criterion carries no pre-act negative arm from this session -- it ran once, after the apply. AC1 and the limb-1 subtraction carry the indirect evidence that the served plane moved, and no control was manufactured after the fact to stand in for one.",
+      "denominator": "89 folders swept of 89 in the named snapshot; OK 89, NOT_OK 0, CAPTURE_FAILED 0. The ABSENCE axis runs on all 89 and the FIGURE axis on every name whose page carries figures on the served plane, per the order's section 1.",
+      "status": "PASS"
+    }
+  ]
+}

@@ -13,7 +13,10 @@ import json,sys
 d=json.load(open(sys.argv[1],encoding='utf-8'))
 print(sum(1 for m in d.get('hooks',{}).get('PreToolUse',[]) for h in m.get('hooks',[]) if 'concierge-gate.sh' in h.get('command','')))" "$D/.claude/settings.json" 2>/dev/null || echo 0)
 ff=$(grep -c -- '--ff-only' "$D/launcher.ps1" 2>/dev/null || echo 0)
-bad=$(grep -rlE 'ajb_workspace|AWS_PROFILE|[0-9]\.[0-9]\.[0-9]_[A-Z]{2}_' "$D" 2>/dev/null | wc -l | tr -d ' ')
+# The one exempt line is the config key workspace_probe_file: the face REQUIRES it to name a workspace file (the launch
+# gate proves that read is DENIED), so its value is the spec, not a leak. Every other line under opal/runtime is scanned
+# (row NFRA_OPALAI-Z-W3-S2).
+bad=$(grep -rnE 'ajb_workspace|AWS_PROFILE|[0-9]\.[0-9]\.[0-9]_[A-Z]{2}_' "$D" 2>/dev/null | grep -v '"workspace_probe_file"[[:space:]]*:' | cut -d: -f1 | sort -u | grep -c .)
 gone=yes; git cat-file -e "HEAD:.tools/hooks/bg-concierge-gate.sh" 2>/dev/null && gone=no
 echo "mcp servers=[$servers]; CLAUDE.md import=$imp name=$nm; fence registrations=$hook; launcher --ff-only=$ff; runtime files naming workspace/AWS/serial=$bad; parent fence gone=$gone"
 if [ "$servers" = "opal-gateway-bbg" ] && [ "$imp" -ge 1 ] && [ "$nm" -ge 1 ] && [ "$hook" -ge 1 ] && [ "$ff" -ge 1 ] && [ "$bad" = 0 ] && [ "$gone" = yes ]; then
