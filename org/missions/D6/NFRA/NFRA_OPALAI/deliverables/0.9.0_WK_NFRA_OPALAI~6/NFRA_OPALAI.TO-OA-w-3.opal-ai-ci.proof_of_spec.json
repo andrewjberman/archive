@@ -47,10 +47,10 @@
       "criterion_verbatim": "rc!=0; CHECKS: FAIL; py_compile named>=1; ascii named>=1 -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w3.AC2.sh; echo \"exit=$?\"",
-      "output_evidence": "rc=0; CHECKS: FAIL; py_compile named=2; ascii named=2\nRESULT: FAIL\nexit=1",
-      "denominator": "3 of 4 sub-conditions matched (CHECKS: FAIL, py_compile named>=1, ascii named>=1); rc!=0 not matched",
-      "status": "FAIL",
-      "status_reason": "run_checks.sh itself exits 1 on the planted defect and correctly names both py_compile and ascii as failing (confirmed by direct invocation: `env -u PYTHONPATH bash opal/checks/run_checks.sh` on the planted clone exits 1 with CHECKS: FAIL). w3.AC2.sh's own capture line is `out=$(... | tr -d '\\r'); rc=$?`, which reads the trailing `tr`'s exit status, never run_checks.sh's -- `out=$(false | tr -d '\\r'); echo $?` prints 0 as a positive control, confirming `rc` is always 0 through this pipe regardless of the piped command's exit. The criterion as written cannot be satisfied by any run_checks.sh. Filed as NFRA_OPALAI-Z-W6-S1 (OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~O); w3.AC2.sh is outside this order's <paths> and was not edited."
+      "output_evidence": "rc=1; CHECKS: FAIL; py_compile named=2; ascii named=2\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 sub-conditions matched (rc!=0, CHECKS: FAIL, py_compile named>=1, ascii named>=1)",
+      "status": "PASS",
+      "status_reason": "The issuer's shared checker fix (`set -o pipefail` in _root.sh, commit 0b2a643117, carried onto this worktree's parent HEAD) corrected the previously-broken capture pipe in w3.AC2.sh's shared harness (`out=$(cmd | tr -d '\\r'); rc=$?` now reads the piped command's own exit, not tr's). Re-run fresh against the same delivered run_checks.sh (unchanged, commit 25427629ae): rc=1 as expected. Disarms row NFRA_OPALAI-Z-W6-S1 (filed by this worker; disarm_owner 2.0.0_SA_COO~O, closed via row NFRA_OPALAI-Z-S8)."
     },
     {
       "criterion_id": "AC3",
@@ -75,14 +75,9 @@
       "status": "STABLE"
     }
   },
-  "declared_exclusions": [
-    {
-      "item": "AC2's rc!=0 sub-condition",
-      "reason": "w3.AC2.sh's `out=$(cd \"$T/c\" && timeout 100 env -u PYTHONPATH bash opal/checks/run_checks.sh 2>&1 | tr -d '\\r'); rc=$?` reads `tr`'s own exit status (always 0), never run_checks.sh's -- structurally unobservable through this harness regardless of run_checks.sh's correctness (positive control: `out=$(false | tr -d '\\r'); echo $?` prints 0). run_checks.sh's own exit code is proven correct by direct invocation in the mutant control above. Row NFRA_OPALAI-Z-W6-S1 files this; w3.AC2.sh is a COO deliverable outside this order's <paths> and was not edited."
-    }
-  ],
+  "declared_exclusions": [],
   "surprises": [
-    "NFRA_OPALAI-Z-W6-S1: w3.AC2.sh's rc=$? reads the trailing tr's exit status in its capture pipe, never run_checks.sh's own exit code, so the criterion's rc!=0 limb can never be observed true regardless of what run_checks.sh does; filed OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~O."
+    "NFRA_OPALAI-Z-W6-S1: filed OBSERVATION/ARMED by this worker (w3.AC2.sh's rc=$? read the trailing tr's exit status, never run_checks.sh's own, through the shared checker's capture pipe); DISARMED by the issuer's shared-checker fix (commit 0b2a643117, `set -o pipefail` in _root.sh) and closed via row NFRA_OPALAI-Z-S8. AC2 now PASSes on fresh re-run."
   ],
   "session_log": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~6/session_log.md",
   "compiler_tools": [
