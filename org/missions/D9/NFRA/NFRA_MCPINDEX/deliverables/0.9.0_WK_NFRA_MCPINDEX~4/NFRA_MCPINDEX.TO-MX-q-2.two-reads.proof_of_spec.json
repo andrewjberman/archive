@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-q-2",
+  "phase": "INVESTIGATION",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "c2589961d9",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-q-2.two-reads.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/round2-reads.result.md",
+      "kind": "doc",
+      "commit_or_etag": "cb24130298",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The recorded reads (BD-NULL-CUSIP, BD-SERVED-CUSIP-JOINS, ECLIPSE-SCOPE), each with its instrument and denominator above it. It is a repo document, so nothing is deployed."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_q_2.py",
+      "kind": "test",
+      "commit_or_etag": "cb24130298",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The read-only probe that produced the recorded lines (ListObjectsV2 and GetObject only). It is not deployed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "BD read: rows>0 null_cusip<=rows since=2026-04-14 read_at present=1; served figures checked>=1 carrying null<=checked -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/q2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "BD read: rows=3185260 null_cusip=14367 since=2026-04-14 read_at present=1; served figures checked=3 carrying null=1\nRESULT: PASS\nexit=0",
+      "denominator": "3,185,260 silver transaction rows in 139 partitions dated 2026-04-14..2026-09-25 (of 1,909 partitions); 3 served cusip-joined figures checked, each at its latest partition",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "Eclipse read: rows>0 distinct_ids>=1 outside_allowlist<=distinct_ids allowlist at HEAD=yes read_at present=1 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/q2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "Eclipse read: rows=845 distinct_ids=5 outside_allowlist=0 allowlist=data/inf/scripts/silver/_orion_api_silver_lib.py (at HEAD=yes) read_at present=1\nRESULT: PASS\nexit=0",
+      "denominator": "845 portfolios_simple rows at silver/eclipse/2026-09-25; 787 joined to accounts_v2 (58 have a null eclipse_account_id); 5 distinct rep_ids",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control for a two-read measurement cell (preflight: comp-adversary DECLARED-NOT-APPLICABLE).",
+      "expected": "none",
+      "observed": "None run: the spec names none.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "N/A: each arm is a single live read of changing data (silver takes daily partitions)",
+      "observed": "Each arm ran once, at the read_at stamped on its line.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "B_00 canonical_holdings and A_03 positions_cube build a cusip bridge.",
+      "reason": "Neither output carries a cusip column (latest 2026-09-23), so a null cusip cannot be read from them. They are outside the served_figures_checked=3 denominator."
+    },
+    {
+      "item": "How many of the 22,172 null-cusip holdings_lots rows are cash.",
+      "reason": "B_01 maps 'CASH' to null (:291). This split was not measured."
+    },
+    {
+      "item": "Whether accounts_v2 is Inflection-filtered upstream, and the tenancy of the 58 Eclipse rows with a null eclipse_account_id.",
+      "reason": "Not measured; recorded in row NFRA_MCPINDEX-Z-W4-S1."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W4-S1: Eclipse silver has no rep or firm id column, so rep ids were read through INF_E_00's join to accounts_v2.",
+    "NFRA_MCPINDEX-Z-W4-S2: BD gold canonical lots (unrealized and realized) were last written 2026-07-23."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/round2-reads.result.md",
+  "compiler_tools": [
+    {
+      "tool": "probes/mx_q_2.py (the read instrument)",
+      "invocation": "timeout 120 python org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.9.0_WK_NFRA_MCPINDEX~4/probes/mx_q_2.py BD | ECL",
+      "result": "rc=0 on both arms; the lines are recorded verbatim in round2-reads.result.md"
+    },
+    {
+      "tool": "issuer checks q2.AC1.sh / q2.AC2.sh",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/q2.AC<n>.sh",
+      "result": "RESULT: PASS exit=0 on both, run after commit cb24130298"
+    }
+  ]
+}
