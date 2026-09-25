@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rp-1",
+  "firm": "FABRIC",
+  "phase": "INVESTIGATION",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rp-1.fwd30-across-the-population.md",
+    "group": "C",
+    "vintage_commit": "046a0b542d3c7dc5da507c3e5f510db16e78610b"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "046a0b542d3c7dc5da507c3e5f510db16e78610b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rp-1.fwd30-across-the-population.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~158",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/capture_lib.py",
+      "kind": "script",
+      "commit_or_etag": "cc181e5be849f899c212f8d1b31d5e67e67bf325",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Generalises 0.9.0_WK_AMGT_RESAPP~150/served_capture.py's BA-only SERVED-plane capture (same routes, same event shape, same lambda:Invoke of opal-amgt-scoped-api, read-only) to take any security_key and any output directory; adds _filename_slug() because 2 of the 89 resolved keys carry a literal '/' and would otherwise crash the on-disk write (the JSON payload's own security_key field is never altered, only the file NAME). capture_lib.capture() is the CAPTURE step sweep.py calls once per name; AC1's 445-of-445 route successes (89 names x 5 routes, 0 CAPTURE_FAILED) are this module's own output.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/sweep.py",
+      "kind": "script",
+      "commit_or_etag": "cc181e5be849f899c212f8d1b31d5e67e67bf325",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Iterates the 89 folders of 0.9.0_WK_AMGT_RESAPP~4/universe.json, resolves each folder's security_key via crosswalk.harvester_key + scoped_amgt.resolve_identity (89 of 89 MEASURED, 89 distinct, matching the cell's own s.49b premise), captures via capture_lib.capture() into a fresh tempfile.mkdtemp() per name (outside the repository, removed with shutil.rmtree after its log is written), runs portal's exportCompare.harness.cjs --fixture --rich, parses the FIGURES/CITES/ABSENCES/COVERED/EXPORT-COMPARE lines and writes one TSV row plus one condensed per-name log. sweep.py's own run IS the act AC1 grades the shape of and AC4 prints the NOT_OK rows of.",
+      "artifact_covered_by": ["AC1", "AC4"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/fwd30_population.tsv",
+      "kind": "doc",
+      "commit_or_etag": "cc181e5be849f899c212f8d1b31d5e67e67bf325",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "90 lines (1 header + 89 rows), exact header the task order names. 5 OK (BA_US_Equity, COST_US_Equity, HD_US_Equity, NU_US_Equity, SAP_GY_Equity), 84 NOT_OK, 0 CAPTURE_FAILED -- every route invoked returned 200 for every one of the 89 names, including the 2 whose security_key carries a literal '/' (row AMGT_RESAPP-Z-W158-S1)."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/logs/",
+      "kind": "doc",
+      "commit_or_etag": "cc181e5be849f899c212f8d1b31d5e67e67bf325",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "89 per-folder logs (one per coverage-list name): resolved identity block, each route's status/bytes, the harness's full stdout. No raw captured JSON/rich bytes committed (BOUNDS 3) -- captures lived only in per-name tempfile.mkdtemp() directories, removed after each log was written."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "cc181e5be849f899c212f8d1b31d5e67e67bf325",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended, AMGT_RESAPP-Z-W158-S1 (OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~Z): 2 of 89 resolved security_keys carry a literal '/' (landed-model-block display value copied through unescaped); a direct lambda:Invoke tolerated it, but that bypasses API Gateway's own path-segment matcher, so the real served HTTP route is unmeasured. Append verified purely additive against HEAD (git diff --stat: 24 insertions(+), 0 deletions) before commit, and the surprise-row-gate confirmed 1 new row of 612 total checked, corpus matching the legacy baseline (4 known, 0 new, 0 resolved)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC3 IS the mutant for this cell's central claim (the harness the sweep relies on can fail): round 40's own difference control (ro-1.AC2.sh) re-run unchanged, pointing the harness at round 38's committed rich body carrying 17 figure extras.",
+      "expected": "The harness answers NOT OK, rc=1, on the stale body -- if it could not, every OK/NOT_OK verdict in fwd30_population.tsv would be unfalsifiable.",
+      "observed": "FIRED AS EXPECTED, both runs of this session: FIGURES page=165 rich=179 same=165 missing=0 extra=14; EXPORT-COMPARE NOT OK; harness on the stale body: rc=1 (the control needs 1); checker script exit=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1/AC2/AC3/AC4's exact invocations run twice each in this session, both against the same committed table (fwd30_population.tsv, commit cc181e5be8), no code change between runs.",
+      "observed": "STABLE on every count both runs: AC1 'rows 89 of 89 folders; missing 0; extra 0; duplicated 0; distinct keys 89 / verdicts: OK 5, NOT_OK 84, CAPTURE_FAILED 0 / TABLE SHAPE OK' identical both runs. AC2 'BA_US_Equity row EQUALS a fresh served read: 15 of 15 counts' identical both runs (each run performs its own fresh lambda:Invoke of the deployed function, so this also confirms the served plane itself was stable for BA_US_Equity across the session). AC3 'FIGURES page=165 rich=179 same=165 missing=0 extra=14 / EXPORT-COMPARE NOT OK / rc=1' identical both runs. AC4 'rows not OK: 84 of 89' identical both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No fix to any NOT_OK row -- 84 of 89 names read NOT_OK (mostly ABSENCES set(s) differ, some FIGURES set(s) differ), and none was investigated or corrected.",
+      "reason": "BOUNDS 2 of this cell's own task order: 'No fix. You change no code outside your deliverables folder. A NOT_OK row is the measurement; record it and continue.' AC4 exists precisely so a person (not this worker) judges each NOT_OK row's class."
+    },
+    {
+      "item": "Not measuring whether the 2 security_keys carrying a literal '/' (BP/_LN_Equity, NG/_LN_Equity) resolve correctly through the real, deployed API Gateway HTTP route.",
+      "reason": "This worker's capture is lambda:Invoke, matching served_capture.py's own read-only standing and this cell's EGRESS CLASS declaration; it never goes through API Gateway. Filed as row AMGT_RESAPP-Z-W158-S1 for the issuer rather than exercised, since exercising it would need a different, out-of-scope capture method."
+    },
+    {
+      "item": "No server, no vite, no dev build, no install, no push -- standing bounds",
+      "reason": "BOUNDS 1 of this cell's own face; every criterion above runs from the worktree root exactly as written, plain node and python, no listener started, no AWS write call (lambda:invoke and get_function_configuration are both reads)."
+    },
+    {
+      "item": "Pushing either worktree branch to origin",
+      "reason": "Outer commit cc181e5be849f899c212f8d1b31d5e67e67bf325 on wk-AMGT_RESAPP-158 is LOCAL only; the portal worktree (wk-AMGT_RESAPP-158-portal, DEV fe618e50) was read only (exportCompare.harness.cjs), never edited, never committed."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W158-S1"
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface beyond the files named in artifacts_produced and this deliverables folder. Outer worktree: C:/tmp/wk-amgt-41-158 on branch wk-AMGT_RESAPP-158, cut from CLOUD tip 714db135b89f411adb72130ac0d114b0a2570df2 at session start (the round-41 issuance commit 046a0b542d3c7dc5da507c3e5f510db16e78610b is an ancestor). Portal: C:/tmp/wk-amgt-41-158/portal on branch wk-AMGT_RESAPP-158-portal at DEV fe618e50, matching the task order's stated pin; never committed. Outer commit cc181e5be849f899c212f8d1b31d5e67e67bf325 (93 files changed: capture_lib.py, sweep.py, fwd30_population.tsv, 89 logs/, 1 surprise-channel row), never pushed. This instance file committed on its own next, per WHEN YOU ARE DONE.",
+  "compiler_tools": [
+    {
+      "tool": "bash (AC1's own checker script, literal invocation)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round41/checks/rp-1.AC1.py; echo \"exit=$?\"",
+      "result": "rows 89 of 89 folders; missing 0; extra 0; duplicated 0; distinct keys 89. verdicts: OK 5, NOT_OK 84, CAPTURE_FAILED 0. TABLE SHAPE OK. exit=0."
+    },
+    {
+      "tool": "bash (AC2's own checker script, literal invocation)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round41/checks/rp-1.AC2.sh; echo \"exit=$?\"",
+      "result": "BA_US_Equity row EQUALS a fresh served read: 15 of 15 counts. exit=0."
+    },
+    {
+      "tool": "bash (AC3's own checker script, literal invocation)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round41/checks/rp-1.AC3.sh; echo \"exit=$?\"",
+      "result": "FIGURES page=165 rich=179 same=165 missing=0 extra=14. EXPORT-COMPARE NOT OK. harness on the stale body: rc=1 (the control needs 1). exit=0."
+    },
+    {
+      "tool": "bash (AC4's own checker script, literal invocation, judgment criterion -- output recorded, no verdict)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round41/checks/rp-1.AC4.sh; echo \"exit=$?\"",
+      "result": "Prints the TSV header then every row whose verdict != OK (84 rows), then 'rows not OK: 84 of 89'. exit=0."
+    },
+    {
+      "tool": "python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/sweep.py (the sweep itself, produced the table AC1-AC4 grade)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/sweep.py",
+      "result": "rows written: 89 of 89 folders. verdicts: OK 5, NOT_OK 84, CAPTURE_FAILED 0. Every one of the 89 x 5 = 445 route invokes returned status=200 (0 route errors)."
+    },
+    {
+      "tool": ".tools/surprise-row-gate.py -- validated the new row before commit",
+      "invocation": "python .tools/surprise-row-gate.py org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[surprise-corpus] OK: corpus matches the exact legacy baseline (4 known, 0 new, 0 resolved). [surprise-row-gate] 1 new row(s) of 612 total checked (611 pre-existing, NOT re-graded). OK: 1 file(s), all new rows carry their step-7/step-10 fields."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (outer commit: capture_lib.py, sweep.py, fwd30_population.tsv, logs/, the surprise row)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~158 <0.9.0_WK_AMGT_RESAPP~158@opal.agent>\" -F .scratch/commit1_msg.txt -- org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/sweep.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/capture_lib.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/fwd30_population.tsv org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/logs org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "[risk-reflex] REFLEX CLEAN (93 of 93 files checked, 0 danger nodes hit). [commit-gate] All checks passed (2 of 93 .py files graded). [naming-gate] PASS 0 graded. [to-pipeline-gate] OK (no task-orders in this commit). [surprise-row-gate] OK (1 new row of 612 total). [surprise-corpus] OK (4 known, 0 new, 0 resolved). commit cc181e5be8, 93 files changed. [msg-verify] MATCH len=1512."
+    },
+    {
+      "tool": "proof-of-spec-check.py -- THIS WORKTREE'S OWN copy, run from inside C:/tmp/wk-amgt-41-158",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~158/AMGT_RESAPP.TO-AMGT-rp-1.fwd30-across-the-population.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "rows 89 of 89 folders; missing 0; extra 0; duplicated 0; TABLE SHAPE OK -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round41/checks/rp-1.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "rows 89 of 89 folders; missing 0; extra 0; duplicated 0; distinct keys 89. verdicts: OK 5, NOT_OK 84, CAPTURE_FAILED 0. TABLE SHAPE OK. exit=0.",
+      "denominator": "89 of 89 coverage-list folders have exactly one row, 0 missing, 0 extra, 0 duplicated, 89 distinct security_keys; exit=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "BA_US_Equity row EQUALS a fresh served read: 15 of 15 counts -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round41/checks/rp-1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "BA_US_Equity row EQUALS a fresh served read: 15 of 15 counts. exit=0.",
+      "denominator": "15 of 15 counts (FIGURES/CITES/ABSENCES x page/rich/same/missing/extra) in the table's BA_US_Equity row equal a fresh independent served read by round 40's own check; exit=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE HARNESS CAN FAIL: harness on the stale body: rc=1 (the control needs 1) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round41/checks/rp-1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "FIGURES page=165 rich=179 same=165 missing=0 extra=14. EXPORT-COMPARE NOT OK. harness on the stale body: rc=1 (the control needs 1). exit=0.",
+      "denominator": "the un-fixed round-38 body scores extra=14 (&gt;0) against the harness, rc=1 as required; the checker script itself exits 0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "every row that is not OK, printed whole, for a person to judge whether it names an export defect, a page defect or a data gap; RECORDED, no verdict",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round41/checks/rp-1.AC4.sh; echo \"exit=$?\"",
+      "output_evidence": "Prints the TSV header then all 84 NOT_OK rows verbatim (e.g. 'ASML NA\tASML_NA_Equity\t199\t199\t199\t0\t0\t3\t3\t3\t0\t0\t18\t20\t17\t1\t3\t17\tNOT_OK\tABSENCES set(s) differ ...'), then 'rows not OK: 84 of 89'. exit=0.",
+      "denominator": "N/A -- judgment criterion, RECORDED, no verdict, per the task order's own <judgment=\"true\"> declaration.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion (task order judgment=\"true\") -- status PASS/FAIL is REFUSED by the checker; the substitute oracle is a person at L9/L10, per this cell's own preamble ('FWD-30 is the analysis's largest unmeasured thing').",
+      "judgment": true
+    }
+  ]
+}
