@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-g-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-3.census-fence-names.md",
+    "group": "OTHER",
+    "vintage_commit": "ad2771b0873fc9f787f87fc1db85ecdd93a3b785"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "09fb000683b687050b1fdaa7eda23571b1021dc6",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-g-3.census-fence-names.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/backlog.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New _print_fence_line(document): maps the FOUR coverage counts onto the fence's THREE names -- resolved-but-no-prose = served_as_empty_shell + resolved_no_prose -- and prints 'fence dossier-served <a> resolved-but-no-prose <b> unresolved-with-reason <c> sum <a+b+c> folders_read <n>'. _run_coverage now calls it as ONE ADDITIONAL line after the existing totals (the four existing totals unchanged). New _run_coverage_dry_run(): calls coverage() directly (never write_coverage()/gold.gold_put), prints the same totals + never_prose + fence line, then 'written NONE put_performed False (dry-run)'. New --coverage-dry-run CLI flag added to the mutually-exclusive group, routed in main().",
+      "introduces": ["_print_fence_line", "_run_coverage_dry_run", "--coverage-dry-run"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_backlog_fence_names.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, offline, under tests/conftest.py's poison, reusing test_backlog.py's nine-folder coverage fixture. 6 tests: the fence line's mapping and its sum equal to the folder count; the fence line's exact printed shape; the fence line fails loud on a broken sum; _run_coverage-shape totals+fence together; --coverage-dry-run writes nothing (gold.gold_put monkeypatched to raise AssertionError if called) and prints put_performed False; the dry run's fence line sums to the live folder count computed independently in the same test. All 6 pass.",
+      "introduces": [
+        "test_fence_line_maps_four_counts_onto_the_fences_three_names_and_sums",
+        "test_fence_line_prints_the_fences_own_names",
+        "test_fence_line_fails_loud_on_a_broken_sum",
+        "test_coverage_totals_print_gains_the_fence_line",
+        "test_coverage_dry_run_writes_nothing",
+        "test_coverage_dry_run_matches_live_coverage_folder_count"
+      ],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC1.sh",
+      "output_evidence": "......                                                                   [100%]\n6 passed in 0.84s",
+      "denominator": "6 of 6 tests in test_backlog_fence_names.py passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC2.sh -- expect fence dossier-served \\d+ resolved-but-no-prose \\d+ unresolved-with-reason \\d+ sum (\\d+) folders_read \\1\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC2.sh",
+      "output_evidence": "Zurich Insurance ZURN SW workbook-only\nfolders_read 94 dossier_served 82 served_as_empty_shell 12 resolved_no_prose 0 unresolved_with_reason 0 sum 94\nfence dossier-served 82 resolved-but-no-prose 12 unresolved-with-reason 0 sum 94 folders_read 94\nwritten NONE put_performed False (dry-run)",
+      "denominator": "94 folders read from the live library by --coverage-dry-run, sum 82+12+0 = 94 == folders_read 94; no S3 write made (write_coverage/gold.gold_put not called by this code path)",
+      "expect": "fence dossier-served \\d+ resolved-but-no-prose \\d+ unresolved-with-reason \\d+ sum (\\d+) folders_read \\1\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC3.sh",
+      "output_evidence": "........................................................................ [ 96%]\n..........                                                               [100%]\n298 passed in 3.03s",
+      "denominator": "298 of 298 tests in lib/research/corpus/tests pass (the whole corpus suite, the round's bound, up from 292 pre-cell with this cell's 6 new tests)",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/g3/mutant_test.py (not committed): monkeypatches _print_fence_line back to the pre-fix shape (always printing resolved-but-no-prose 0, i.e. only served_as_empty_shell dropped, never folded with resolved_no_prose) and re-runs it against the live-shaped nine-folder fixture (served_as_empty_shell=1, resolved_no_prose=5).",
+      "expected": "FIX (committed _print_fence_line): resolved-but-no-prose 6, sum 9 == folders_read 9. MUTANT (pre-fix shape, resolved-but-no-prose fixed at 0): sum 1+0+2=3 != folders_read 9 -- the exact 'fence-named field reads 0' defect the order's 'Where this came from' section names.",
+      "observed": "python .scratch/g3/mutant_test.py -> 'FIX: resolved-but-no-prose=6 sum=9 folders_read=9 ok=True' then 'MUTANT: resolved-but-no-prose=0 sum=3 folders_read=9 ok=False' -- matches the prediction exactly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's check scripts each run 2 times against the committed worktree (AC2 read-only against the live library, no store write).",
+      "observed": "AC1: '6 passed in 0.84s' both runs, identical. AC2: 'fence dossier-served 82 resolved-but-no-prose 12 unresolved-with-reason 0 sum 94 folders_read 94' byte-identical both runs (read-only, no state change). AC3: '298 passed' both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No --coverage or --write run for real against the live library",
+      "reason": "Order s.4 BOUNDS (hard worker bound, repeated in the dispatch message): never run backlog --coverage or --write for real; only --coverage-dry-run (writes nothing) was run live, per the order's HARD BOUND."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, test_backlog_fence_names.py (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC1.sh",
+      "result": "rc 0; 6 passed"
+    },
+    {
+      "tool": "backlog --coverage-dry-run against the live corpus (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC2.sh",
+      "result": "rc 0; fence line matches, sum == folders_read, no write"
+    },
+    {
+      "tool": "pytest, whole corpus suite (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round5/g3_AC3.sh",
+      "result": "rc 0; 298 passed"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check lib/research/corpus/backlog.py lib/research/corpus/tests/test_backlog_fence_names.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/backlog.py lib/research/corpus/tests/test_backlog_fence_names.py",
+      "result": "rc 0, no output (both files compile)"
+    }
+  ]
+}
