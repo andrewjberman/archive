@@ -17,36 +17,57 @@
     {
       "path_or_key": "lib/research/identity/crosswalk.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
+      "commit_or_etag": "d87809891cfa31afcbfed558a83ac3b45821182b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "build_crosswalk() gains research_folders=None, research_root=None. denominators ALWAYS gains folders_in_records (distinct non-empty source_row.folder over the final records). When research_folders is given: denominators.research_folders_live = len(set(research_folders)); coverage_vintage.snapshot_stale_against_live = (research_folders_live != denominator_folders); result.research_universe = {source, read_at (UTC ISO), folders}. When not given: research_universe = {absent: <reason>}, research_folders_live and snapshot_stale_against_live both absent. input_names/denominator_folders unchanged. No record/key/form/resolution logic touched. main() gains --disclosure (mutually exclusive with --dry-run/--write-pool): read-only, no put, no registrations write, builds via build_crosswalk with the live list from a new _research_folders_for_disclosure() helper (imports lib.research.corpus.library inside the function; any failure yields (None, None), never raising), prints ONE line 'folders_in_records <n> research_folders_live <m> snapshot_input_names <s> snapshot_stale_against_live <bool>'.",
-      "introduces": ["research_folders=None", "research_root=None", "folders_in_records", "research_folders_live", "snapshot_stale_against_live", "research_universe", "--disclosure", "_research_folders_for_disclosure"],
-      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+      "introduces": [
+        "research_folders=None",
+        "research_root=None",
+        "folders_in_records",
+        "research_folders_live",
+        "snapshot_stale_against_live",
+        "research_universe",
+        "--disclosure",
+        "_research_folders_for_disclosure"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
     },
     {
       "path_or_key": "lib/research/identity/add_security.py",
       "kind": "script",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
+      "commit_or_etag": "d87809891cfa31afcbfed558a83ac3b45821182b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "New _research_folders_disclosure() (imports lib.research.corpus.library inside the function; any failure yields (None, None), never raising). _build_document (the ONE crosswalk build on this path, read by _persist_registration, _mint_pool and the collision check) now passes research_folders/research_root through to crosswalk.build_crosswalk. No change to registration/collision/pool logic.",
-      "introduces": ["_research_folders_disclosure()"],
-      "artifact_covered_by": ["AC3"]
+      "introduces": [
+        "_research_folders_disclosure()"
+      ],
+      "artifact_covered_by": [
+        "AC3"
+      ]
     },
     {
       "path_or_key": "lib/research/identity/tests/test_crosswalk_disclosure.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
+      "commit_or_etag": "d87809891cfa31afcbfed558a83ac3b45821182b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "NEW file, 9 tests over a self-contained 3-folder fixture (no network/S3): folders_in_records present with and without research_folders; the absent-with-reason branch (research_folders_live and snapshot_stale_against_live both ABSENT, research_universe carries only 'absent'); the populated branch (research_folders_live/research_universe.source,read_at,folders all present, distinct-count dedupes a repeated name); snapshot_stale_against_live True and False (2 vs 3, 3 vs 3, input_names/denominator_folders unchanged both ways); and that a build WITH research_folders is byte-identical to one WITHOUT once the disclosure-only fields are stripped, plus a direct records/key_conventions equality check.",
-      "artifact_covered_by": ["AC1"]
+      "artifact_covered_by": [
+        "AC1"
+      ]
     },
     {
       "path_or_key": "lib/research/identity/tests/test_crosswalk_enrich_coverage.py",
       "kind": "test",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
-      "deployed_state": "STAGED-AWAITING-GATE",
+      "commit_or_etag": "d87809891cfa31afcbfed558a83ac3b45821182b",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
       "deploy_evidence": "NoEnrichRowsByteIdentical's own no_enrich_regs filter gains the RULED arm: after excluding ENRICH-mode rows and rows in unresolved_folders, it now ALSO drops a keyless row whose folder carries a keyed row in the SAME filtered set -- exactly the class the current build_crosswalk's measured_folders/superseded_rows arm already supersedes and the PINNED (pre-round-4) module cannot, which is why the arm was RED at HEAD (97 vs 96 records, Quanta Services PWR's keyless row). With that row dropped from the filtered set fed to BOTH sides, the record-count divergence closes. The disclosure-only fields (denominators.folders_in_records, result.research_universe) are then popped from a COPY of the current build's document before the byte comparison only (orthogonal to the ENRICH property this arm proves; a real build via crosswalk.main/add_security keeps both).",
-      "artifact_covered_by": ["AC3"]
+      "artifact_covered_by": [
+        "AC3"
+      ]
     },
     {
       "path_or_key": "lib/research/identity/crosswalk.schema.json",
@@ -54,8 +75,15 @@
       "commit_or_etag": "PENDING-THIS-COMMIT",
       "deployed_state": "STAGED-AWAITING-GATE",
       "deploy_evidence": "ISSUER AMENDMENT 1 (2.0.0_SA_COO~X, on row AMGT_CORPUS-Z-W1-S7), landed by this worker exactly as ruled: four new OPTIONAL properties added to the existing pattern (matching 'registered'/'enriched'/'resolved_folders') -- denominators.folders_in_records, denominators.research_folders_live, coverage_vintage.snapshot_stale_against_live, and a new top-level research_universe object (additionalProperties:false, properties source/read_at/folders/absent, no required list, so it admits BOTH its present shape and its {absent: ...} shape). Nothing else in the schema moved (git diff: 34 insertions, 0 deletions, 0 modifications elsewhere); CRLF line endings preserved throughout (592 CRLF == 592 LF before and after the edit, verified byte-for-byte).",
-      "introduces": ["folders_in_records", "research_folders_live", "snapshot_stale_against_live", "research_universe"],
-      "artifact_covered_by": ["AC3"]
+      "introduces": [
+        "folders_in_records",
+        "research_folders_live",
+        "snapshot_stale_against_live",
+        "research_universe"
+      ],
+      "artifact_covered_by": [
+        "AC3"
+      ]
     }
   ],
   "acceptance": [
