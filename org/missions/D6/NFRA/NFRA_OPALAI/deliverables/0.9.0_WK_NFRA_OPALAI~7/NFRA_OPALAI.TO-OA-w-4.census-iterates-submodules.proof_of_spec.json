@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-w-4",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "C",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "fee6c9f89c",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-w-4.census-iterates-submodules.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~7",
+  "artifacts_produced": [
+    {
+      "path_or_key": ".tools/fabric-commits.py",
+      "kind": "script",
+      "commit_or_etag": "fab4d6301d",
+      "artifact_covered_by": ["AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "--json output gains top-level by_repo: {'parent': N (unchanged scrape), <mapped path>: N | 'UNINITIALISED'}. Mapped paths come from `git config -f .gitmodules --get-regexp path` (mapped_submodule_paths()), never a hard-coded list; a mapped path counts when its `.git` entry exists in this checkout (submodule_initialised()), else the string 'UNINITIALISED', never 0/omitted. Nested commits join by_author/by_project via a new all_commits() helper used by both. The default text report (no flag) now prints a 'repos: ...' line before its project table. Measured this session: by_repo = {'parent': 15970, 'opal_ai': 4, 'portal': 412, 'mcportal': 'UNINITIALISED'}."
+    },
+    {
+      "path_or_key": ".tools/activity-check.py",
+      "kind": "script",
+      "commit_or_etag": "fab4d6301d",
+      "artifact_covered_by": ["AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The header gains a 'repos: parent=<n> <path>=<n|UNINITIALISED> ...' line (same mapped-path/initialised rule as fabric-commits.py, via new mapped_submodule_paths()/submodule_initialised()/all_window_commits()). Nested commits by fabric-serial authors join the same by_agent/recency structures the parent's commits do, each recent-commit dict tagged repo (printed as <path> in the text view when not parent). Measured this session: repos: parent=17216 opal_ai=7 portal=589 mcportal=UNINITIALISED (--days 30)."
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "fab4d6301d",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One new row appended at commit time (NFRA_OPALAI-Z-W7-S1); surprise-row-gate.py reported '1 new row(s) of 24 total checked (23 pre-existing, NOT re-graded)' and 'OK: all new rows carry their step-7/step-10 fields' inside safe-commit.sh's own gate chain. A second row (NFRA_OPALAI-Z-W7-S2) was appended AFTER that commit, during proof-of-spec invocation; not yet re-committed as a separate act (see session_log)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "tool: parent=N (before<=N<=after) opal_ai>=1 portal=UNINITIALISED or an integer -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w4.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "direct parent count before=15970 after=15970; tool: parent=15970 opal_ai=4 portal=412\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 named bound (parent count within [before,after]) held; opal_ai=4 (>=1 required); portal read as an integer (412), one of the two accepted shapes (UNINITIALISED or an integer). Run once from the worktree root after the commit, verbatim.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "repos: parent=N opal_ai>=1 portal=UNINITIALISED or an integer -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/w4.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "repos: parent=17216 opal_ai=7 portal=589 mcportal=UNINITIALISED\n(no repos: field)\nRESULT: PASS\nexit=0",
+      "denominator": "opal_ai=7 (>=1 required); portal read as an integer (589), one of the two accepted shapes. Run once from the worktree root after the commit, verbatim; the second printed line is row NFRA_OPALAI-Z-W7-S2's cosmetic artifact of the check script's own `-m1`+pipefail construction, not a grading effect (the sed extraction reads the first line and the script's own RESULT is PASS).",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Before mapped_submodule_paths()/submodule_initialised() existed, by_repo carried only 'parent'; verified opal_ai and portal were both ABSENT from a pre-edit --json run (git stash of the two edited files, re-run), then present after.",
+      "expected": "by_repo gains one key per .gitmodules-mapped path once the build lands; models/factor_scanner (an unmapped gitlink) never appears.",
+      "observed": "Pre-edit: by_repo = {'parent': N} only. Post-edit: by_repo = {'parent': N, 'opal_ai': 4, 'portal': 412, 'mcportal': 'UNINITIALISED'}; 'models/factor_scanner' absent from by_repo in both runs (it carries no .gitmodules row).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "fabric-commits.py --json --days 30 and activity-check.py --days 30 were each run 2+ times across the build (pre-commit test, post-commit AC1/AC2 invocation).",
+      "observed": "by_repo/repos shapes stable (parent/opal_ai/portal keys present every run, mcportal UNINITIALISED every run); counts drift upward run-to-run only because commits continue landing on this shared tree during the session (the same reason AC1 bounds the parent count with a before/after pair rather than an exact value).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "NFRA_OPALAI-Z-W7-S1: TO-OA-w-4 bound 2 asserts portal reads UNINITIALISED in this worktree; at build time portal is a real initialised checkout here (589 commits/30d) -- the bound's premise does not hold, mcportal is the mapped path that genuinely reads UNINITIALISED. OBSERVATION, INERT; both proof scripts accept either shape for portal, so grading is unaffected.",
+    "NFRA_OPALAI-Z-W7-S2: w4.AC2.sh's `grep -m1 ... || echo fallback` under `set -o pipefail` runs both branches (an early-matching -m1 SIGPIPEs the upstream tr, making the pipeline non-zero despite a real match), so AC2's stdout carries a spurious '(no repos: field)' line alongside the real match. OBSERVATION, INERT; the real line sorts first and the numeric extraction still succeeds, so RESULT: PASS is correct."
+  ],
+  "session_log": "2026-09-25, worktree C:/tmp/oa-7, branch wk-NFRA_OPALAI-7, based on the same tree as its siblings (fee6c9f89c decomp vintage). Order of acts: (1) grounded the tree (branch + org/ + .tools/ present, TREE-OK). (2) Read the TO face, .tools/fabric-commits.py, .tools/activity-check.py, w4.AC1.sh/w4.AC2.sh, .gitmodules (opal_ai/portal/mcportal mapped), and measured live submodule state: `git submodule status` showed opal_ai and portal both '+' (checked out, real .git file, real HEAD -- portal fe618e50), mcportal '-' (no .git entry, genuinely uninitialised) -- contradicting the TO's bound-2 claim that portal reads UNINITIALISED; filed row W7-S1. (3) Edited fabric-commits.py: scrape(days, cwd) now takes a repo dir; added mapped_submodule_paths() (git config -f .gitmodules --get-regexp path), submodule_initialised() (path/.git exists), all_commits() (parent + every initialised mapped submodule's commits), and by_repo(); by_project()/by_author() now run over all_commits(); --json gained by_repo; the default text report prints a 'repos: ...' line. (4) Edited activity-check.py: window_commits(days, cwd, repo) tags each commit with its repo; added the same mapped_submodule_paths()/submodule_initialised() pair and all_window_commits() (parent + initialised submodules, returns commits + repo_counts); build() uses it, recent-commit dicts carry 'repo', output JSON gains 'repos', text output gains a 'repos: ...' header line and per-commit <repo> tags for non-parent commits. (5) py_compile + commit-gate.sh clean (pre-existing non-ASCII WARN in activity-check.py's _ASCII table, not touched, not blocking). (6) Ran both scripts directly to confirm shapes (by_repo/repos dicts, text lines) before committing. (7) Committed (fab4d6301d) via safe-commit.sh with the W7-S1 row staged alongside; surprise-row-gate reported 1 new row of 24 total. (8) Ran w4.AC1.sh and w4.AC2.sh verbatim from the worktree root post-commit: both RESULT: PASS, exit=0. AC2's raw stdout carried a second, spurious line from the check script's own -m1/pipefail interaction; reproduced the mechanism directly (bash -c pipefail repro) and filed row W7-S2 (cosmetic, not a grading defect; w4.AC2.sh is a COO deliverable outside this order's <paths>, not repaired). (9) Wrote this proof-of-spec instance. PUSH STATE: LOCAL @fab4d6301d -- no push attempted; this seat never pushes. WHAT I DID NOT DO: edit w4.AC1.sh/w4.AC2.sh/_root.sh (Read-only, outside <paths>); touch mcportal or any file outside .tools/fabric-commits.py, .tools/activity-check.py and this project's deliverables/surprise-channel folders; widen or repair either AC by an unnamed route.",
+  "compiler_tools": [
+    {
+      "tool": "Bash (git, python)",
+      "invocation": "git submodule status opal_ai portal mcportal; cat opal_ai/.git portal/.git; (cd portal && git log -1 --oneline && git rev-parse --show-toplevel); ls -la mcportal",
+      "result": "opal_ai and portal both carry a real .git file and a resolvable HEAD (portal fe618e50); mcportal carries no .git entry at all -- the live basis for row W7-S1 and for choosing the '.git entry exists' initialisation test."
+    },
+    {
+      "tool": "python -m py_compile",
+      "invocation": ".tools/fabric-commits.py .tools/activity-check.py",
+      "result": "COMPILE-OK"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": ".tools/fabric-commits.py .tools/activity-check.py",
+      "result": "OK: pre-commit gate clean for 2 of 2 file(s) (one pre-existing non-ASCII WARN in activity-check.py, WARN-only, not blocking)"
+    },
+    {
+      "tool": "Bash (bash -c pipefail repro)",
+      "invocation": "set -o pipefail; h=$(timeout 100 python .tools/activity-check.py --days 30 2>&1 | tr -d \"\\r\" | grep -m1 -oE \"repos: .*\" || echo FALLBACK); echo \"H=[$h]\"",
+      "result": "H=[repos: parent=17216 opal_ai=7 portal=589 mcportal=UNINITIALISED\\nFALLBACK] -- confirms the SIGPIPE mechanism behind row W7-S2."
+    },
+    {
+      "tool": "python .tools/surprise-row-gate.py",
+      "invocation": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md (re-ran inside safe-commit.sh's own gate chain)",
+      "result": "1 new row(s) of 24 total checked (23 pre-existing, NOT re-graded) -- OK: all new rows carry their step-7/step-10 fields."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the run recorded in the worker report; only the exit code is the verdict."
+    }
+  ]
+}
