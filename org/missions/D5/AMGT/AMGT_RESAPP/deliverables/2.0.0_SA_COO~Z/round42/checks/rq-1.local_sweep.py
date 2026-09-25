@@ -113,12 +113,24 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--only", default="")
     ap.add_argument("--served", action="store_true")
+    # --live: the population is the LIVE research library (1.0.0_SA_CTO~Z ruling @ea24753b1b: 94 on 2026-09-25), read with
+    # the producer's own reader at run time and printed with its read time -- never pinned. Default stays the 89 snapshot.
+    ap.add_argument("--live", action="store_true")
     a = ap.parse_args()
     from lib.research.identity import crosswalk
     from lib.research.api import scoped_amgt as sa
     cl = load_capture_lib()
     pilots = crosswalk.load_pilots()
-    folders = [n["folder"] for n in json.load(open(UNIVERSE, encoding="utf-8"))["names"]]
+    if a.live:
+        import datetime
+        from lib.research.corpus import library
+        root = library.library_root()
+        folders = list(library.list_folders(root))
+        print("population: LIVE research library %s, %d folders, read_at %s" % (
+            root, len(folders), datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")), flush=True)
+    else:
+        folders = [n["folder"] for n in json.load(open(UNIVERSE, encoding="utf-8"))["names"]]
+        print("population: universe.json snapshot (read 2026-09-10T23:18Z), %d folders" % len(folders), flush=True)
     only = set(x for x in a.only.split(",") if x)
     rows = []
     for i, folder in enumerate(folders, 1):
