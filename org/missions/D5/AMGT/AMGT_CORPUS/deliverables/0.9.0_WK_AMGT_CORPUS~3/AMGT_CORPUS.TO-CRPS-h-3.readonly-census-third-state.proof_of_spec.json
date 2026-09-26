@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-h-3",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-3.readonly-census-third-state.md",
+    "group": "OTHER",
+    "vintage_commit": "e52d265f5c1f9bedba9deb81d8768d65f9240861"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "8d7ef31385",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-3.readonly-census-third-state.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~3",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/readonly_proof.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Every census row now carries a `state` field (`library`/`unresolved`/`clear`) computed with exact precedence LIBRARY-in-origins > UNKNOWN-in-origins-outside-the-tmp-fixture-exemption > clear; `reaches_library` is unchanged on the row. `code_census` gains `tristate_library`/`tristate_unresolved`/`tristate_clear` and `library_write_calls` now sums `state == \"library\"` only (previously summed `reaches_library`, which folded an unresolved UNKNOWN into the library count). `main()`'s `totals()` (called first and last, as before) gains one `tristate library <a> unresolved <b> clear <c> write_like_calls <n>` line and one `unresolved_site <path>:<line> <call> origins <origins>` line per unresolved row. The exit predicate is tightened, never weakened: rc 0 requires both positive controls to flag AND `tristate_library == 0` AND `tristate_unresolved == 0` (previously only `library_write_calls == 0`, i.e. the old summed field); the `--plant-unknown-in-test` control's planted row now reads state `unresolved`, never `library`.",
+      "introduces": ["tristate_library", "tristate_unresolved", "tristate_clear", "row[\"state\"]"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_readonly_proof_tristate.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, 9 tests: one planted call per state (library/unresolved/clear); precedence (a call with both a LIBRARY-origin target and an UNKNOWN-origin target on the SAME call reads `library`, via os.rename's two targets); the tmp-fixture exemption still reads `clear` in a test file; the tristate sum equals write_like_calls on a synthetic 3-file package; an unresolved write is never folded into library_write_calls; the exit predicate stays non-zero (rc 1) with one fake unresolved-only result (monkeypatched code_census) and prints both the tristate line and the unresolved_site line; the exact content main() plants under --plant-unknown-in-test reads state `unresolved`, never `library`. All 9 pass.",
+      "introduces": [
+        "test_state_is_library_when_origin_is_library",
+        "test_state_is_unresolved_when_origin_is_unresolved_unknown",
+        "test_state_is_clear_when_origin_is_safe",
+        "test_precedence_library_dominates_unresolved_on_the_same_call",
+        "test_tmp_fixture_exemption_still_reads_clear_in_a_test_file",
+        "test_tristate_sums_to_write_like_calls",
+        "test_unresolved_write_never_counted_as_library_write_calls",
+        "test_exit_predicate_stays_nonzero_with_one_unresolved_site",
+        "test_plant_unknown_in_test_control_reads_unresolved_not_library"
+      ],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC1.sh",
+      "output_evidence": ".........                                                                [100%]\n9 passed in 0.22s",
+      "denominator": "9 of 9 tests in test_readonly_proof_tristate.py passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC2.sh -- expect (?m)^tristate library 0 unresolved \\d+ clear \\d+ write_like_calls \\d+$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC2.sh",
+      "output_evidence": "unresolved_site induction_run.py:688 os.makedirs origins ['unknown']\nunresolved_site induction_run.py:690 open origins ['unknown']\nlibrary_write_calls 0\ntristate library 0 unresolved 4 clear 43 write_like_calls 47\nunresolved_site induction_run.py:462 os.makedirs origins ['unknown']\nunresolved_site induction_run.py:464 open origins ['unknown']\nunresolved_site induction_run.py:688 os.makedirs origins ['unknown']\nunresolved_site induction_run.py:690 open origins ['unknown']",
+      "denominator": "the live census scanned 40 files (39 corpus package files + this order's own new test file), 47 write-like calls total; tristate 0 + 4 + 43 = 47; the 4 unresolved sites are all in induction_run.py at lines 462/464/688/690 (origin unknown, unresolved via deliverables_dir = deliverables_dir or DELIVERABLES_DIR), listed but not fixed (induction_run.py is READ-ONLY to this order)",
+      "expect": "(?m)^tristate library 0 unresolved \\d+ clear \\d+ write_like_calls \\d+$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC3.sh",
+      "output_evidence": "........................................................................ [ 90%]\n.............................                                            [100%]\n317 passed in 2.17s",
+      "denominator": "317 of 317 tests in lib/research/corpus/tests pass (298 pre-cell + 9 new tristate tests + ...; the whole corpus suite, the round's bound); test_readonly_proof.py's existing per-row reaches_library assertions kept passing unmodified (reaches_library is unchanged on the row)",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/h3/mutant_check.py (not committed): recomputes `library_write_calls` the OLD way (sum of `reaches_library` across all rows, which folds an unresolved UNKNOWN origin into the library count) against the live census, beside the FIX's tristate_library.",
+      "expected": "FIX: tristate_library 0 (the 4 induction_run.py sites are unresolved, not library). MUTANT (old reaches_library sum): library_write_calls 4 -- the exact defect the order's 'Where this came from' section names (an unresolved write silently read as reaching the library).",
+      "observed": "python .scratch/h3/mutant_check.py -> 'FIX: library_write_calls=0 unresolved=4' then 'MUTANT (old reaches_library sum): library_write_calls=4' -- matches the prediction exactly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's check scripts each run 2 times against the committed worktree (AC2 read-only against the repo's own tree, no store write).",
+      "observed": "AC1: '9 passed in 0.22s' both runs, identical modulo timing. AC2: 'tristate library 0 unresolved 4 clear 43 write_like_calls 47' and the same 4 unresolved_site lines byte-identical both runs (read-only, no state change). AC3: '317 passed' both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "induction_run.py's 4 unresolved sites are listed, not changed",
+      "reason": "Order s.3 SURFACES: induction_run.py is READ-ONLY to this worker (\"its four sites are LISTED, not changed\"); the deliverable is the census's third state, not a fix to induction_run.py's own resolution."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, test_readonly_proof_tristate.py (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC1.sh",
+      "result": "rc 0; 9 passed"
+    },
+    {
+      "tool": "readonly_proof --code-census against the live repo (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC2.sh",
+      "result": "rc 0 (grep); tristate line and 4 unresolved_site lines match"
+    },
+    {
+      "tool": "pytest, whole corpus suite (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h3_AC3.sh",
+      "result": "rc 0; 317 passed"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/readonly_proof.py lib/research/corpus/tests/test_readonly_proof_tristate.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/readonly_proof.py lib/research/corpus/tests/test_readonly_proof_tristate.py",
+      "result": "rc 0, no output (both files compile)"
+    }
+  ]
+}
