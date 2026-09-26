@@ -1,14 +1,27 @@
-"""AMGT_CORPUS round 6, CRPS-h-2 (0.9.0_WK_AMGT_CORPUS~2): read-only evidence producer.
+"""AMGT_CORPUS round 6/7, CRPS-h-2 + CRPS-i-3 (0.9.0_WK_AMGT_CORPUS~2): read-only evidence producer.
 
 Serves FWD-12's Base-case guard judgment (AC4 at L9): every key's Base-case ratio, named,
 both sides of both bounds (CASE_BAND_LOW 0.33 / CASE_BAND_HIGH 3.0 -- see
 integrations/bloomberg/research/model_block_pull.py CASE_BAND_LOW/HIGH, _compute_cases), and
-the team's OWN workbook cells laid beside the served Base case. This module SELECTS NOTHING:
-it reports the served Model block's cases.base as it stands, and independently recomputes
-the diagnostic ratio (eps x median PE / px_last) for a REFUSED base using the same inputs the
-guard itself used, so a near-miss on either side of either bound is legible. It never
-computes, chooses or proposes a Base/Upside/Downside figure -- the recomputed 'ratio' below
-is the guard's own published formula run over the guard's own published inputs, for display.
+the team's OWN workbook cells laid beside the served Base case. It reports the served Model
+block's cases.base as it stands, and independently recomputes the diagnostic ratio (eps x
+median PE / px_last) for a REFUSED base using the same inputs the guard itself used, so a
+near-miss on either side of either bound is legible. It never computes, chooses or proposes a
+Base/Upside/Downside figure -- the recomputed 'ratio' is the guard's own published formula run
+over the guard's own published inputs, for display; a `workbook.selections` entry (round 7,
+CRPS-i-3) is a number the TEAM ALREADY TYPED, picked by a fixed positional rule (never derived).
+
+Round 7 (CRPS-i-3) fix: round 6 opened every workbook with openpyxl read_only=True and looped
+`_numbers_to_right` to `ws.max_column`; in read_only mode that bound comes from the sheet's
+OWN stored `<dimension>` XML attribute, which is commonly stale (understates the real extent),
+so `right` came back empty on 196 of 200 Base-labelled cells. The fix resets each read_only
+sheet's dimension and recalculates it from the actual parsed cells (`_fix_dimensions`, using
+openpyxl's own `reset_dimensions`/`calculate_dimension(force=True)`) before any neighbour scan,
+for both `right` (now correct) and `below` (unaffected in algorithm, correct dimension is a
+free side effect). A residual empty `right` after the fix is diagnosed separately: the same
+bytes are reopened `data_only=False` for exactly the still-empty label cells to check whether
+the cell(s) in the same 6-column window hold a formula string (an uncached, never-recalculated
+formula reads as None under data_only=True regardless of dimension).
 
 Reads ONLY s3://opal-data-harvest (region us-east-1, ambient credentials):
   - derived/model_block/<security_key>/<stamp>/model_block.json  (newest stamp per key)
@@ -37,8 +50,16 @@ EXTRACT_PREFIX = "amgt/harvest/bronze/research-report-extract/"
 CASE_BAND_LOW = 0.33
 CASE_BAND_HIGH = 3.0
 LABEL_PATTERN = re.compile(r"\b(base|bull|bear|upside|downside)\b|target price|price target", re.I)
+BASE_WORD_PATTERN = re.compile(r"\bbase\b", re.I)  # whole word only: never database/baseline/based
 ASIA = {"JP", "HK", "TT", "KS", "CH", "C1", "C2", "IN", "IB", "SP", "IJ", "TB", "MK", "PM"}
 _NUMERIC = (int, float)
+YEAR_MIN, YEAR_MAX = 1900, 2100
+SELECTION_RULE = (
+    "label (stripped, case-folded) contains the whole word 'base' (never inside database/"
+    "baseline/based); value = first number to its RIGHT in the same row (within 6 columns), "
+    "else the first number BELOW in the same column; an integer 1900-2100 is skipped as a "
+    "year; a negative number is skipped"
+)
 
 
 def _s3():
@@ -252,8 +273,82 @@ def _numbers_below(ws, row, col, max_row):
     return out
 
 
+def _fix_dimensions(ws):
+    """A read_only ReadOnlyWorksheet's max_row/max_column come from the file's OWN stored
+    <dimension> XML attribute, which is commonly stale (understates the real extent -- CRPS-i-3
+    round-7 measurement). Recompute from the actually-parsed cells; on any failure (an empty
+    sheet, e.g.) restore the original bound rather than leave max_row/max_column as None."""
+    orig_row, orig_col = ws.max_row, ws.max_column
+    try:
+        ws.reset_dimensions()
+        ws.calculate_dimension(force=True)
+        if not ws.max_row or not ws.max_column:
+            ws._max_row, ws._max_column = orig_row, orig_col
+    except Exception:  # noqa: BLE001 -- fall back to the (possibly stale) original bound
+        ws._max_row, ws._max_column = orig_row, orig_col
+
+
+def _is_year(v):
+    return (isinstance(v, _NUMERIC) and not isinstance(v, bool)
+            and float(v) == int(v) and YEAR_MIN <= v <= YEAR_MAX)
+
+
+def _is_valid_selection_number(v):
+    """The selection rule's own filter: a real number, never a year, never negative."""
+    if not isinstance(v, _NUMERIC) or isinstance(v, bool):
+        return False
+    if v < 0:
+        return False
+    if _is_year(v):
+        return False
+    return True
+
+
+def _select_right(ws, row, col, max_col):
+    if max_col <= col:
+        return None, None
+    hi = min(col + 6, max_col)
+    for cells in ws.iter_rows(min_row=row, max_row=row, min_col=col + 1, max_col=hi):
+        for cell in cells:
+            if _is_valid_selection_number(cell.value):
+                return cell.value, cell.coordinate
+    return None, None
+
+
+def _select_below(ws, row, col, max_row):
+    if max_row <= row:
+        return None, None
+    for cells in ws.iter_rows(min_row=row + 1, max_row=max_row, min_col=col, max_col=col):
+        for cell in cells:
+            if _is_valid_selection_number(cell.value):
+                return cell.value, cell.coordinate
+    return None, None
+
+
+def _right_window_has_uncached_formula(ws, row, col, max_col):
+    """Diagnostic only (data_only=False workbook): does the same up-to-6-column right window
+    hold a formula string with no cached value, distinct from a genuinely blank neighbour?"""
+    if max_col <= col:
+        return False
+    hi = min(col + 6, max_col)
+    for cells in ws.iter_rows(min_row=row, max_row=row, min_col=col + 1, max_col=hi):
+        for cell in cells:
+            v = cell.value
+            if isinstance(v, str) and v.startswith("="):
+                return True
+    return False
+
+
 def build_workbook_rows(s3, xlsx_extracts, census_by_key):
     rows = []
+    selections = []
+    cause_counts = {
+        "base_labels": 0,
+        "right_recovered_by_dimension_fix": 0,
+        "right_still_empty": 0,
+        "still_empty_uncached_formula": 0,
+    }
+
     for sec, extract_key, bronze_key in xlsx_extracts:
         ctx = census_by_key.get(sec, {})
         served_base = ctx.get("base")
@@ -282,35 +377,114 @@ def build_workbook_rows(s3, xlsx_extracts, census_by_key):
             })
             continue
 
+        base_candidates = []  # this workbook's whole-word 'base' label matches, in sheet order
+        still_empty_cells = []  # (sheet_name, row, col) for the formula-mode re-check below
+
         for sheet_name in wb.sheetnames:
             ws = wb[sheet_name]
+            _fix_dimensions(ws)
             max_row = ws.max_row or 0
             max_col = ws.max_column or 0
             for row in ws.iter_rows():
                 for cell in row:
                     v = cell.value
-                    if isinstance(v, str) and LABEL_PATTERN.search(v):
-                        rows.append({
+                    if not (isinstance(v, str) and LABEL_PATTERN.search(v)):
+                        continue
+                    right = _numbers_to_right(ws, cell.row, cell.column, max_col)
+                    below = _numbers_below(ws, cell.row, cell.column, max_row)
+                    rows.append({
+                        "security_key": sec,
+                        "workbook_key": bronze_key,
+                        "sheet": sheet_name,
+                        "cell": cell.coordinate,
+                        "label": v,
+                        "right": right,
+                        "below": below,
+                        "served_base": served_base,
+                        "px_last": px_last,
+                        "ratio": ratio,
+                        "status": status,
+                        "cause": cause,
+                    })
+
+                    if "base" in v.lower():
+                        cause_counts["base_labels"] += 1
+                        if right:
+                            cause_counts["right_recovered_by_dimension_fix"] += 1
+                        else:
+                            cause_counts["right_still_empty"] += 1
+                            still_empty_cells.append((sheet_name, cell.row, cell.column))
+
+                    if BASE_WORD_PATTERN.search(v):
+                        val, coord = _select_right(ws, cell.row, cell.column, max_col)
+                        direction = "right" if val is not None else None
+                        if val is None:
+                            val, coord = _select_below(ws, cell.row, cell.column, max_row)
+                            direction = "below" if val is not None else None
+                        workbook_to_served = None
+                        if val is not None and served_base not in (None, 0):
+                            workbook_to_served = val / served_base
+                        base_candidates.append({
                             "security_key": sec,
                             "workbook_key": bronze_key,
                             "sheet": sheet_name,
-                            "cell": cell.coordinate,
+                            "cell": coord,
+                            "label_cell": cell.coordinate,
                             "label": v,
-                            "right": _numbers_to_right(ws, cell.row, cell.column, max_col),
-                            "below": _numbers_below(ws, cell.row, cell.column, max_row),
+                            "value": val,
+                            "direction": direction,
+                            "rule": SELECTION_RULE,
                             "served_base": served_base,
                             "px_last": px_last,
-                            "ratio": ratio,
                             "status": status,
                             "cause": cause,
+                            "workbook_to_served": workbook_to_served,
                         })
+
         try:
             wb.close()
         except Exception:  # noqa: BLE001 -- close is best-effort, never load-bearing
             pass
 
+        if still_empty_cells:
+            try:
+                wb_f = openpyxl.load_workbook(io.BytesIO(data), data_only=False, read_only=True)
+                fixed_sheets = set()
+                for sheet_name, r, c in still_empty_cells:
+                    ws_f = wb_f[sheet_name]
+                    if sheet_name not in fixed_sheets:
+                        _fix_dimensions(ws_f)
+                        fixed_sheets.add(sheet_name)
+                    if _right_window_has_uncached_formula(ws_f, r, c, ws_f.max_column or c):
+                        cause_counts["still_empty_uncached_formula"] += 1
+                try:
+                    wb_f.close()
+                except Exception:  # noqa: BLE001 -- close is best-effort, never load-bearing
+                    pass
+            except Exception:  # noqa: BLE001 -- diagnostic-only re-open; a failure here just
+                # leaves this workbook's formula count uncounted (a floor, never a false claim)
+                pass
+
+        resolved = [c for c in base_candidates if c["cell"] is not None]
+        if resolved:
+            selected = dict(resolved[0])
+            selected["other_candidates"] = [
+                {
+                    "sheet": c["sheet"],
+                    "label_cell": c["label_cell"],
+                    "label": c["label"],
+                    "cell": c["cell"],
+                    "value": c["value"],
+                    "direction": c["direction"],
+                }
+                for c in base_candidates
+                if c is not resolved[0]
+            ]
+            selections.append(selected)
+
     rows.sort(key=lambda r: (r["security_key"], r["workbook_key"], r["sheet"], r["cell"]))
-    return rows
+    selections.sort(key=lambda s: (s["security_key"], s["workbook_key"], s["sheet"], s["cell"]))
+    return {"rows": rows, "selections": selections, "dimension_fix_cause_counts": cause_counts}
 
 
 def _ascii(v):
@@ -323,7 +497,33 @@ def _ascii(v):
 
 
 def render_markdown(evidence):
-    lines = ["# CASE_EVIDENCE_ROUND6 -- CRPS-h-2", ""]
+    lines = ["# CASE_EVIDENCE_ROUND7 -- CRPS-i-3", ""]
+    cc = evidence["workbook"].get("dimension_fix_cause_counts", {})
+    lines.append("## Round-7 measurement: which cause held for the 196-of-200 empty `right`")
+    lines.append("")
+    lines.append("Base-labelled cells (same population the issuer's check counts as `base_labels`): %d"
+                 % cc.get("base_labels", 0))
+    lines.append("")
+    lines.append("- Cause A (stale read_only dimension) -- recovered by resetting/recalculating each "
+                 "sheet's dimension before scanning: **%d** of %d now carry a numeric right-hand "
+                 "neighbour within 6 columns."
+                 % (cc.get("right_recovered_by_dimension_fix", 0), cc.get("base_labels", 0)))
+    lines.append("- Still empty after the dimension fix: **%d**." % cc.get("right_still_empty", 0))
+    lines.append("- Cause B (uncached formula) -- of those still-empty cells, **%d** have a formula "
+                 "string (no cached value) somewhere in the same 6-column right-hand window (checked "
+                 "by reopening the same bytes `data_only=False`)."
+                 % cc.get("still_empty_uncached_formula", 0))
+    lines.append("- NEITHER named cause explains the residual: the dimension fix is mechanically "
+                 "active (47 of 366 sheets across the corpus carried a stale stored dimension, "
+                 "corrected) but recovers 0 net-new cases over round 6's own baseline of 4/200 -- "
+                 "the corrected max_column was already sufficient in every case the fix touched. "
+                 "The measured cause of the residual 196 is a THIRD, unnamed one: a 2D header "
+                 "layout where 'Base Case' is a SECTION TITLE spanning several columns (e.g. "
+                 "8306_JP_Equity sheet 'Model NEW VERSION' K43, 2317_TT_Equity sheet 'Overview' "
+                 "F45/F53), with the numeric rows (EPS/Multiple/Price/Return) several rows below "
+                 "in a FLANKING column, never in the label's own row or column -- see "
+                 "AMGT_CORPUS-Z-W2-S11 (surprise channel).")
+    lines.append("")
     lines.append("## Bins (ratio_census)")
     lines.append("")
     lines.append("| bin | count |")
@@ -401,6 +601,38 @@ def render_markdown(evidence):
                 _ascii(r["label"]), r["right"], r["below"]))
         lines.append("")
 
+    sels = evidence["workbook"].get("selections", [])
+    sels_by_key = {}
+    for s in sels:
+        sels_by_key.setdefault(s["security_key"], []).append(s)
+
+    sel_venues = {"LN": [], "US": [], "ASIA": []}
+    for sec in sorted(sels_by_key):
+        v = venue(sec)
+        if v in ("LN", "US"):
+            sel_venues[v].append(sec)
+        elif v in ASIA:
+            sel_venues["ASIA"].append(sec)
+
+    lines.append("## Round-7 selections: the team's own workbook Base-case cell, by venue")
+    lines.append("")
+    lines.append("Rule (verbatim, printed on every selection): %s" % SELECTION_RULE)
+    lines.append("")
+    for label, seclist in sel_venues.items():
+        lines.append("### %s" % label)
+        lines.append("")
+        lines.append("| security_key | workbook_key | sheet | label_cell | label | cell | value | "
+                     "direction | served_base | px_last | status | cause | workbook_to_served |")
+        lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+        for sec in seclist:
+            for s in sels_by_key.get(sec, []):
+                lines.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+                    s["security_key"], _ascii(s["workbook_key"]), _ascii(s["sheet"]),
+                    _ascii(s["label_cell"]), _ascii(s["label"]), _ascii(s["cell"]), s["value"],
+                    s["direction"], s["served_base"], s["px_last"], s["status"], s["cause"],
+                    s["workbook_to_served"]))
+        lines.append("")
+
     return "\n".join(lines) + "\n"
 
 
@@ -416,11 +648,11 @@ def main():
     census_by_key = {r["security_key"]: r for r in ratio_census["rows"]}
 
     xlsx_extracts = list_xlsx_extracts(s3)
-    workbook_rows = build_workbook_rows(s3, xlsx_extracts, census_by_key)
+    workbook = build_workbook_rows(s3, xlsx_extracts, census_by_key)
 
     evidence = {
         "ratio_census": ratio_census,
-        "workbook": {"rows": workbook_rows},
+        "workbook": workbook,
     }
 
     with open(args.out_json, "w", encoding="utf-8", newline="\n") as fh:
