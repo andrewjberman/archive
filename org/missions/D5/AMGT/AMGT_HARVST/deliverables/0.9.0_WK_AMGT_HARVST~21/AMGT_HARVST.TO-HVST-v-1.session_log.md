@@ -209,8 +209,19 @@ SUBFAILED(failures=2) lib/opal_data_harvest/test_worker.py::Tests::test_single_b
 ```
 
 `160 -> 161 passed`, `3 -> 3 failed`: +1 (this cell's new test), ZERO REGRESSIONS, same three
-pre-existing failing nodeids. Corroboration of the +1 from a second instrument: the
-`test_silver_from_bronze.py` module now collects 17 items where it collected 16.
+pre-existing failing nodeids.
+
+THE POPULATION IS NOT THE SUMMARY LINE'S ARITHMETIC. `python -m pytest lib/opal_data_harvest/ -q
+--collect-only | tail -3` prints `162 tests collected`, so `3 failed, 161 passed` is 161 passed +
+ONE failed test (`test_verification`) + TWO `SUBFAILED` entries, which are subtest failures of a
+test that passes at test level (`test_worker`) and are therefore already inside the 161. Adding the
+summary's two numbers overstates the population by 2 -- the first version of the proof instance did
+exactly that (164) and was corrected against the `--collect-only` read. The pass denominator is
+**161 of 162 collected**, against **160 of 161** pre-change.
+
+The +1 is MEASURED on both ends, not inferred: `git show
+HEAD~1:lib/opal_data_harvest/test_silver_from_bronze.py | grep -c '^def test'` = 16 against 17 in
+the worktree.
 
 The naming clause of AC3 is NOT producible by this invocation -- `pytest -q` prints a nodeid only for
 a test that FAILED. Measured: 0 grep hits for the new test's name in the tailed output AND in the
