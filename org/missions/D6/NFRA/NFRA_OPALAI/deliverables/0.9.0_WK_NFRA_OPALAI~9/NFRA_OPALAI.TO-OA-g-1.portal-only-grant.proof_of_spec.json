@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-g-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "9ba4ca286f",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-g-1.portal-only-grant.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~9",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/data_entitlement.py",
+      "kind": "script",
+      "commit_or_etag": "da7749916d",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "parse_scope accepts SCOPE_DIMENSIONS, or SCOPE_DIMENSIONS plus the optional PORTAL_DIMENSION 'portal_channels' (a non-empty list of channel ids matching ^[a-z][a-z0-9_]{0,63}$). With a non-empty portal_channels, masters, datasets, accounts and columns may all be empty together (a portal-only grant). A partly-empty Schwab half, or a Schwab half that is empty with no or empty portal_channels, goes to the unchanged strict parse and is Malformed. A record without the key parses exactly as before. Scope gains portal_channels (default frozenset()) and a portal_only property; allowed_tools returns frozenset() for a portal-only grant. Not deployed: the deploy is OA-g-2."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/asker_scope.py",
+      "kind": "script",
+      "commit_or_etag": "da7749916d",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "EffectiveScope gains portal_channels, which passes through with the rest and collapses to empty with it. In handle_asker_query, after the calling identity's catalog_gate verdict passes and before any fetch: if the asker's grant carries portal_channels, the key is served only when verdict.row['_channel'] is a granted channel. Otherwise the tool returns _denial('asker_channel_denied', ...), the same deny shape, audited as DENY-CHANNEL. Docstring points (c) and (d) are amended. A grant without portal_channels takes the unchanged path."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/ops/schwab_entitlement_admin.py",
+      "kind": "script",
+      "commit_or_etag": "da7749916d",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "validate_candidate(raw, contract, catalog_channels=None) rejects portal_channels (CandidateRejected) when the contract has no portal_grant with scope_dimension 'portal_channels', or when a channel is not one the catalog holds. The held channels come from load_catalog_channels(), which reads app/refs/DATA_CATALOG.yaml through catalog_gate.load_catalog and fails closed. prepare() passes catalog_channels through. scope_diff/format_diff carry portal_channels. _scope_to_raw writes portal_channels only when it is carried, so a Schwab-only grant keeps its v1.1 record shape."
+    },
+    {
+      "path_or_key": "org/standards/NFRA_OPLGTW_CONTRACT.json",
+      "kind": "config_data",
+      "commit_or_etag": "da7749916d",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "contract_version 1.1 -> 1.2. A new top-level portal_grant block (placed after grant_date_modes) holds: scope_dimension 'portal_channels', optional true, and absent_means (the record parses as v1.1). It names channel_catalog infra/aws/ec2/opal-gateway/app/refs/DATA_CATALOG.yaml; channel_ids are the channels.* keys that catalog_gate indexes. empty_when_portal_channels lists masters/accounts/datasets/columns, with empty_rule 'only together and only beside a non-empty portal_channels; empty of both is malformed'. The block also sets portal_only_schwab_tools [], served_by opal_asker_query and store 'the same data_entitlement POLICY record; no second grant store'. No other key changed. integrations/schwab/catalog.py parse_contract ignores unknown keys, and nothing in the gateway reads contract_version."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_portal_grant.py",
+      "kind": "test",
+      "commit_or_etag": "da7749916d",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The six named tests use injected stores, an injected STS client, a monkeypatched query_v0._fetch_capped and the real DATA_CATALOG.yaml. Two servable channels are derived from the live catalog, never typed. The refusal test first asserts that the calling identity's own gate WOULD serve the other-channel key, so the refusal is the asker grant's alone. The file does not contain the string the checks grep for."
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "e369f7147c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended (NFRA_OPALAI-Z-W9-S1); 37 -> 38 rows; git numstat 23 added, 0 deleted; safe-commit surprise-corpus: new=0 failures."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/g1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 named tests PASSED (test_portal_grant_zero_masters_parses, test_portal_only_grant_admits_no_schwab_tool); the whole file ran 6 of 6 passed. Run under timeout 120 from the worktree root twice: after commit da7749916d, and again at HEAD e369f7147c (the row commit, which touches no tested file); identical output both times.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/g1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 named tests PASSED (test_asker_portal_scope_admits_granted_channel, test_asker_portal_scope_refuses_other_channel); the whole file ran 6 of 6 passed. Run under timeout 120 from the worktree root twice: after commit da7749916d, and again at HEAD e369f7147c (the row commit, which touches no tested file); identical output both times.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/g1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "2 of 2 named tests PASSED (test_admin_accepts_portal_only_candidate, test_admin_rejects_unknown_portal_channel); the whole file ran 6 of 6 passed. Run under timeout 120 from the worktree root twice: after commit da7749916d, and again at HEAD e369f7147c (the row commit, which touches no tested file); identical output both times.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "tests/test_portal_grant.py was run against the base (9ba4ca286f) data_entitlement.py, asker_scope.py and schwab_entitlement_admin.py, swapped in with git show and then restored from HEAD.",
+      "expected": "The base grammar refuses any scope carrying portal_channels, so every test fails.",
+      "observed": "6 failed, 0 passed; files restored from HEAD, git status clean.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The three checks were run twice (after da7749916d and at e369f7147c), and the file was also run in a combined run with test_asker_scope and test_identity_scope.",
+      "observed": "6 of 6 passed on every run; combined 19 of 19 passed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "tests/test_data_entitlement_guard.py and tests/test_entitlement_admin.py (the existing parse_scope and admin suites)",
+      "reason": "NOT run: neither can be collected on this device (No module named moto). Their result is UNREAD, not PASS. By reading: OGZ1-AC10 compares check_scope's six dimensions to SCOPE_DIMENSIONS, which is unchanged, and OGZ2-AC4 reads diff keys by name, where the added portal_channels key is additive. Same condition as row NFRA_OPALAI-Z-W8-S1."
+    },
+    {
+      "item": "deploy, POLICY write, push, vendor call; app/admin_grants.py read-back",
+      "reason": "Deploy is OA-g-2 and the POLICY write is OA-g-3. This seat never pushes, and no vendor call is in scope. admin_grants.py is outside <paths>: row NFRA_OPALAI-Z-W9-S1."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPALAI-Z-W9-S1: the owner grant-read route (app/admin_grants.py _grant_json) builds its scope from six fixed dimensions and drops portal_channels. A portal-only grant reads back there as an apparently empty grant (measured at da7749916d). The file is outside <paths> and was not edited. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~O."
+  ],
+  "session_log": "2026-09-26 UTC. Worktree C:/tmp/oa-9, branch wk-NFRA_OPALAI-9, cut at 9ba4ca286f; TREE-OK. (1) Read the worker face, the three g1 checks, data_entitlement.py, asker_scope.py, catalog_gate.py, schwab_entitlement_admin.py, the contract, query_v0 _catalog/_principal, and the contract readers (integrations/schwab/catalog.py parse_contract). Catalog: 15 channel ids. (2) Baseline: test_asker_scope + test_identity_scope 13 passed. (3) Built the grammar, asker path, operator path, contract v1.2 and tests. (4) test_portal_grant + test_asker_scope + test_identity_scope: 19 passed. Neighbours: test_admin_grants 5 passed, test_schwab_query 25 passed, test_teams_reader_fallback 5 passed. test_schwab_denial_envelope and test_schwab_asset_policy fail at collection with No module named moto. A whole-suite run hit its 500 s bound (rc 124) and was not retried. commit-gate clean 4 of 4; 0 non-ASCII characters in the 5 files. (5) Restored audit.jsonl and committed da7749916d. (6) AC1-AC3 verbatim: all RESULT: PASS, exit=0. (7) Mutant control: 6 failed on the base modules; restored. (8) Measured the admin_grants read-back gap; filed and committed row W9-S1 at e369f7147c. (9) Re-ran AC1-AC3 at e369f7147c: identical PASS; audit.jsonl restored. (10) This instance and the status flip are committed together. PUSH STATE: LOCAL, never pushed.",
+  "compiler_tools": [
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "app/data_entitlement.py app/asker_scope.py ops/schwab_entitlement_admin.py tests/test_portal_grant.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "tests/test_portal_grant.py tests/test_asker_scope.py tests/test_identity_scope.py -v",
+      "result": "19 passed"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2,AC3",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}
