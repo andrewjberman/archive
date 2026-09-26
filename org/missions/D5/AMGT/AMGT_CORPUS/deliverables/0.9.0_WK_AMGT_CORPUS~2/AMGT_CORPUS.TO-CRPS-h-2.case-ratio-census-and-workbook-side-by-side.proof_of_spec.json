@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-h-2",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-2.case-ratio-census-and-workbook-side-by-side.md",
+    "group": "OTHER",
+    "vintage_commit": "e52d265f5c1f9bedba9deb81d8768d65f9240861"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "8d7ef31385",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-2.case-ratio-census-and-workbook-side-by-side.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/case_evidence.py",
+      "kind": "script",
+      "commit_or_etag": "f40ad102b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW read-only producer, PYTHONPATH-runnable via `python case_evidence.py --out-json <path> [--out-md <path>]`, ASCII/LF, Python 3.9-compatible (no walrus/match, only stdlib + boto3 + openpyxl already installed). Reads ONLY s3://opal-data-harvest region us-east-1 (derived/model_block/** newest-stamp-per-key via list_objects_v2 + get_object; amgt/harvest/bronze/research-report-extract/** get_object filtered to type==xlsx, then its bronze_key opened live via openpyxl(data_only=True, read_only=True)). Writes ONLY the two paths given on argv (json.dump sort_keys=True, no timestamp field; the .md pass runs every workbook string through .encode('ascii','backslashreplace').decode('ascii') so a workbook's own non-ASCII text -- e.g. em/en-dashes measured in 3 sheets -- survives losslessly as literal \\uXXXX escapes rather than raw bytes or a dropped character). No S3 write, no vendor/gateway call anywhere in the module (grep of its own body: zero put_object/delete_object/blpapi/requests calls). Computes NOTHING resembling a Base/Upside/Downside pick: `_ratio_for` either uses the guard's own already-published `value`/`ratio_to_px_last` (SERVED) or reapplies the guard's OWN published formula (eps x median PE [x100 on a minor-unit quote] / px_last) over the guard's OWN published `inputs`/`px_last` for a REFUSED case, purely for display; `ratio_basis` names 'quote-unit' (same currency, or a detected minor-unit pair) vs 'unconverted' (a real currency mismatch, no conversion attempted) vs null (not computable from what the block carries).",
+      "introduces": [
+        "newest_model_blocks",
+        "build_ratio_census",
+        "_ratio_for",
+        "_bin_for",
+        "list_xlsx_extracts",
+        "build_workbook_rows",
+        "render_markdown"
+      ],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/CASE_EVIDENCE_ROUND6.json",
+      "kind": "s3_object",
+      "commit_or_etag": "f40ad102b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Producer output over the live corpus at commit time: ratio_census.rows has 97 entries, one per served-Model-block security_key (independently re-counted by the issuer's own h2_check.py --shape at grading time, see AC1). bins: <0.33 1, 0.5-1.0 13, 1.0-1.5 22, 1.5-2.0 13, 2.0-2.5 1, 2.5-3.0 2, 3.0-3.5 1, >=3.5 3, unconverted 14, not-computable 27 (sums to 97; 0.33-0.5 present in the schema, 0 occupancy). near_ceiling (3.0) below-side: SAN_FP_Equity 2.566, ZTS_US_Equity 2.522, UBER_US_Equity 2.004, NU_US_Equity 1.860, ISRG_US_Equity 1.845; above-side: NFLX_US_Equity 3.043 (the one case the task order's own section 1 names), NOW_US_Equity 4.453, GPN_US_Equity 5.170, CELH_US_Equity 23.021 (only 4 comparable refusals sit above 3.0, so 'above' carries 4 not 5). near_floor (0.33) below-side: BA_US_Equity -0.092 (forward_eps_not_positive, the ONLY comparable ratio under 0.33); above-side: RWE_GR_Equity 0.537, CAT_US_Equity 0.597, NOKIA_FH_Equity 0.635, 2317_TT_Equity 0.788, PWR_US_Equity 0.791. workbook.rows has 669 entries over 53 distinct security_key (of 55 xlsx-bearing keys; 2 keys' workbooks carried no matching Base/Bull/Bear/Upside/Downside/target-price label cell), 0 rows missing a sheet/cell coordinate.",
+      "artifact_covered_by": ["AC1", "AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/CASE_EVIDENCE_ROUND6.md",
+      "kind": "doc",
+      "commit_or_etag": "f40ad102b2",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The bins table, near_floor/near_ceiling by name, then one table per venue (LN 9 keys, US 16 keys, ASIA 7 keys by the same _LN_/_US_/Asian-exchange-token rule the issuer's h2_check.py venue() reads) of served Base case beside the team's own workbook cells, plus a final section listing every cause-bearing refused key that also carries a workbook (for the CVO's AC4 judgment sample).",
+      "artifact_covered_by": []
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC1.sh -- expect h2 OK census_rows (\\d+) bins_sum \\1 keys_with_block \\1 workbook_names [1-9]\\d* rows_without_coord 0\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC1.sh",
+      "output_evidence": "h2 OK census_rows 97 bins_sum 97 keys_with_block 97 workbook_names 53 rows_without_coord 0",
+      "denominator": "1 of 1 real, live-S3 shape check (timeout 120, single run, no retry needed): the issuer's own independent count of served-Model-block keys (97, computed fresh from list_objects_v2 inside h2_check.py, not read from my JSON) equals my census row count (97) and my bins sum (97); every one of the 669 workbook rows over 53 named keys carries a non-empty sheet AND cell.",
+      "expect": "h2 OK census_rows (\\d+) bins_sum \\1 keys_with_block \\1 workbook_names [1-9]\\d* rows_without_coord 0\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC2.sh -- expect h2 determinism identical sha [0-9a-f]{12}",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC2.sh",
+      "output_evidence": "h2 determinism identical sha 4639ea944625",
+      "denominator": "1 of 1 real invocation of the issuer's --determinism mode, which runs case_evidence.py TWICE back to back into two fresh temp files and sha256's each; both runs against the live corpus produced byte-identical JSON (sha 4639ea944625) both when I ran it standalone (twice, pre- and post- the ruff-lint fix) and when the issuer's own check ran it a third time -- sorted keys/rows and no timestamp field in the JSON hold across independent runs minutes apart.",
+      "expect": "h2 determinism identical sha [0-9a-f]{12}",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC3.sh -- expect h2 floor LN [1-9]\\d* US [1-9]\\d* ASIA [1-9]\\d* refused_in_census (\\d+) of \\1\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC3.sh",
+      "output_evidence": "h2 floor LN 9 US 16 ASIA 7 refused_in_census 20 of 20",
+      "denominator": "1 of 1 real check over the live corpus: 9 London, 16 US and 7 Asian-venue keys are named in the workbook sample (R-1 floor satisfied, every venue present), and all 20 of 20 cause-bearing refused keys (the issuer's own independent recount: status ABSENT with a truthy cause) appear in my ratio census (trivially true by construction -- every served-block key gets exactly one census row -- and confirmed by the equality).",
+      "expect": "h2 floor LN [1-9]\\d* US [1-9]\\d* ASIA [1-9]\\d* refused_in_census (\\d+) of \\1\\b",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/h2/run1.json (not committed): the SAME live corpus run through the committed FIX (_ratio_for, which falls back to base_value/px_last when a SERVED base carries no `ratio_to_px_last`) and, one run earlier, through a MUTANT shape -- the same function with that fallback removed, depending on `ratio_to_px_last` alone, the shape this producer carried before AMGT_CORPUS-Z-W2-S10 was filed.",
+      "expected": "3 SERVED keys (6861_JP_Equity, CAT_US_Equity, CSL_AU_Equity) whose landed model_block.json predates CRPS-g-1's guard rewrite carry `value`/`px_last` but no `ratio_to_px_last`. MUTANT: these 3 misclassify as not-computable (bin count 30, not 27). FIX: all 3 land in their true numeric bin.",
+      "observed": "MUTANT run (.scratch/h2/run1.json): not-computable 30 = 25 no-cause-ABSENT + 1 no_price + 1 null-cases + these 3 SERVED misreads -- 'FIRED AS EXPECTED (still misreads a real SERVED case as not-computable)'. FIX run (the committed CASE_EVIDENCE_ROUND6.json): not-computable 27 (the correct 25+1+1); the 3 keys compute to 1.258 / 0.597 / 1.390 respectively (CAT_US_Equity 0.597 visible in near_floor), all inside [0.33, 3.0] as their guard-published `value`/`px_last` implies they must be (SERVED is only reached inside the band).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "case_evidence.py run standalone 3 times (once before the ruff-lint pass, twice via h2_AC2.sh's own paired subprocess run) against the same live S3 state, each a fresh process, no shared cache.",
+      "observed": "sha256 of the JSON body identical across all runs (4639ea944625...) both before and after the lint fix (the lint fix touched only an unused import and an unused exception-binding name, not the evidence-building code path).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 (the CVO's judgment: does each served Base case read as plausible beside the team's own workbook, and does the near-bound distribution support [0.33, 3.0]?) -- not graded by this worker.",
+      "reason": "judgment=true in the task order's <proof_of_spec>; graded at L9 by the CVO on this cell's evidence, not self-gradable by the worker."
+    },
+    {
+      "item": "No Base/Upside/Downside figure computed, chosen or proposed anywhere in case_evidence.py -- `_ratio_for`'s recomputation reapplies the guard's OWN published formula over the guard's OWN published inputs for a REFUSED case only, and uses the guard's own published `value`/`ratio_to_px_last` verbatim for a SERVED case.",
+      "reason": "section 4 BOUNDS."
+    },
+    {
+      "item": "No S3 write, no vendor/gateway call (every read is boto3 GetObject/ListObjectsV2 against s3://opal-data-harvest; openpyxl opens an in-memory BytesIO of an already-fetched object, never a network call of its own).",
+      "reason": "section 4 BOUNDS."
+    },
+    {
+      "item": "No producer (model_block_pull.py, the bronze extractor) edited.",
+      "reason": "section 4 BOUNDS."
+    }
+  ],
+  "surprises": ["AMGT_CORPUS-Z-W2-S10"],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "h2_check.py --shape (AC1, via h2_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC1.sh",
+      "result": "rc 0; h2 OK census_rows 97 bins_sum 97 keys_with_block 97 workbook_names 53 rows_without_coord 0"
+    },
+    {
+      "tool": "h2_check.py --determinism (AC2, via h2_AC2.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC2.sh",
+      "result": "rc 0; h2 determinism identical sha 4639ea944625"
+    },
+    {
+      "tool": "h2_check.py --floor (AC3, via h2_AC3.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h2_AC3.sh",
+      "result": "rc 0; h2 floor LN 9 US 16 ASIA 7 refused_in_census 20 of 20"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/case_evidence.py",
+      "result": "rc 0; OK: pre-commit gate clean for 1 of 1 file(s)"
+    },
+    {
+      "tool": "non-ASCII byte-delta check (CLAUDE.md rule 4)",
+      "invocation": "python -c \"b=open(p,'rb').read(); print(len(b)-len(b.decode('utf-8')))\" over case_evidence.py, CASE_EVIDENCE_ROUND6.json, CASE_EVIDENCE_ROUND6.md",
+      "result": "0 non-ASCII bytes in all three (the .md's workbook-text em/en-dashes are backslashreplace-escaped, not dropped)"
+    },
+    {
+      "tool": "safe-commit.sh (artifacts commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~2 <0.9.0_WK_AMGT_CORPUS~2@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/case_evidence.py org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/CASE_EVIDENCE_ROUND6.json org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/CASE_EVIDENCE_ROUND6.md org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "result": "rc 0; commit f40ad102b2 on wk-amgt_corpus-6-2 (LOCAL)"
+    },
+    {
+      "tool": "proof-of-spec-check.py (close-out gate)",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~2/AMGT_CORPUS.TO-CRPS-h-2.case-ratio-census-and-workbook-side-by-side.proof_of_spec.json AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-2.case-ratio-census-and-workbook-side-by-side.md",
+      "result": "PENDING -- run immediately after this instance is written"
+    },
+    {
+      "tool": "safe-commit.sh (final commit: instance + order status flip)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~2 <0.9.0_WK_AMGT_CORPUS~2@opal.agent>\" -F <msgfile> -- <instance path> <order path>",
+      "result": "PENDING -- run immediately after this instance is written"
+    }
+  ]
+}

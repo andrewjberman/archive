@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-h-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-1.dossier-newest-is-last-write.md",
+    "group": "OTHER",
+    "vintage_commit": "e52d265f5c1f9bedba9deb81d8768d65f9240861"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "8d7ef313856c4bf3a938e74162e9ac775c33906a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-1.dossier-newest-is-last-write.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/dossier.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read_dossier now picks, among the objects on the NEWEST as_of DATE (string-compared date segment, via new _dossier_as_of_date), the one with the GREATEST S3 LastModified (new _list_stored_objects reuses the single list_objects_v2 paginate call, no extra per-object call) -- an exact LastModified tie, or any object in the newest-date group carrying no LastModified (an offline stub that does not model it, e.g. substrate.StubS3Client), falls back to the prior key-name-lexicographic pick, so every existing offline test keeps its exact prior behaviour. _list_stored_keys is unchanged (still used by test_dossier.py). write_one is unchanged: its comparison is against read_dossier's pick, which is now correct. Docstrings on read_dossier and write_one corrected to describe last-write selection, not hash-lexicographic selection.",
+      "introduces": ["_list_stored_objects", "_dossier_as_of_date"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_dossier_newest.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, offline, under tests/conftest.py's poison (imports only lib.research.corpus.dossier/gold and lib.research.harvest.store). A LOCAL _StubClient (not substrate.StubS3Client, which this cell never edits) models LastModified per listed object. 4 tests: same-date reversed hash/write order picks the later WRITE; a later date wins over an old-dated-but-later-written object; an exact LastModified tie falls back to the key name; write_one against a stub whose LAST write's inputs equal fresh inputs prints unchanged/wrote 0 even though an OLDER object with a greater hash carries different inputs (current_inputs monkeypatched). All 4 pass.",
+      "introduces": [
+        "test_same_date_reverse_hash_order_the_later_write_wins",
+        "test_later_date_wins_regardless_of_time",
+        "test_exact_last_modified_tie_falls_back_to_key_name",
+        "test_write_one_unchanged_against_the_last_write_not_the_greatest_hash"
+      ],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC1.sh",
+      "output_evidence": "....                                                                     [100%]\n4 passed in 0.42s",
+      "denominator": "4 of 4 tests in test_dossier_newest.py passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC2.sh -- expect read_dossier serves the last write (\\d+) of \\1\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC2.sh",
+      "output_evidence": "partitions 95 objects 373\nrewrites_on_unchanged_inputs 37\nread_dossier serves the last write 95 of 95",
+      "denominator": "95 of 95 security partitions: the changed read_dossier's pick equals the last-written object (max S3 LastModified) in every partition of the live research-dossier table (read-only census, no write)",
+      "expect": "read_dossier serves the last write (\\d+) of \\1\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC3.sh",
+      "output_evidence": "........................................................................ [ 92%]\n........................                                                 [100%]\n312 passed in 3.82s",
+      "denominator": "312 of 312 tests in lib/research/corpus/tests pass (the whole corpus suite, up from 308 pre-cell with this cell's 4 new tests)",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/h1/mutant_test.py (not committed): reverts read_dossier to the pre-fix key-name-lexicographic pick (sorted(keys)[-1], ignoring LastModified entirely) and re-runs it against test_dossier_newest.py's same-date reverse-hash-order fixture (written-first object carries the lexically-greater hash).",
+      "expected": "FIX (committed read_dossier): picks the LATER WRITE (lesser hash, greater LastModified). MUTANT (pre-fix sorted(keys)[-1]): picks the OLDER write (greater hash) -- the exact defect the order's 'Where this came from' section names (37 of 95 names carrying a rewrite on unchanged inputs because the pick was stale).",
+      "observed": "python .scratch/h1/mutant_test.py -> 'FIX: picked last_written_key=True' then 'MUTANT: picked last_written_key=False (picked first_written_key instead)' -- matches the prediction exactly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's check scripts each run 2 times against the committed worktree (AC2 read-only against the live table, no store write).",
+      "observed": "AC1: '4 passed in 0.42s' / '4 passed in 0.44s' both runs, same pass count. AC2: 'partitions 95 objects 373 / rewrites_on_unchanged_inputs 37 / read_dossier serves the last write 95 of 95' byte-identical both runs (read-only, no state change). AC3: '312 passed' both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No dossier --write or write_one run against the real store",
+      "reason": "Order s.4 BOUNDS (hard worker bound): never run dossier --write / write_one against the real S3 store; AC2's census script (read-only, the issuer's own file) is the only invocation run against the live table."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, test_dossier_newest.py (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC1.sh",
+      "result": "rc 0; 4 passed"
+    },
+    {
+      "tool": "dossier_order_census.py against the live research-dossier table (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC2.sh",
+      "result": "rc 0; read_dossier serves the last write 95 of 95"
+    },
+    {
+      "tool": "pytest, whole corpus suite (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h1_AC3.sh",
+      "result": "rc 0; 312 passed"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/dossier.py lib/research/corpus/tests/test_dossier_newest.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/dossier.py",
+      "result": "rc 0, no output (compiles)"
+    }
+  ]
+}
