@@ -121,12 +121,18 @@ def main():
     # --require-cases (R-8, round 42 analysis): the harness must print a CASES line for every compared name, and across the
     # sweep the page must show at least one case value, every one reaching the export, with none extra.
     ap.add_argument("--require-cases", action="store_true")
+    # --folders-file: a PINNED population, one folder per line (# comments allowed) -- the live library AS OF a stated read.
+    ap.add_argument("--folders-file", default="")
     a = ap.parse_args()
     from lib.research.identity import crosswalk
     from lib.research.api import scoped_amgt as sa
     cl = load_capture_lib()
     pilots = crosswalk.load_pilots()
-    if a.live:
+    if a.folders_file:
+        lines = open(a.folders_file, encoding="utf-8").read().splitlines()
+        folders = [ln for ln in lines if ln.strip() and not ln.startswith("#")]
+        print("population: PINNED %s, %d folders" % (a.folders_file, len(folders)), flush=True)
+    elif a.live:
         import datetime
         from lib.research.corpus import library
         root = library.library_root()
