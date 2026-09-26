@@ -183,6 +183,19 @@ MXC5_REASONS = {
     "opal_data_refresh_upload": "a WRITE: PUTs 2 PKLs to presigned S3 URLs and POSTs /trigger, firing "
                                 "the live yang-pipeline (unrecallable); dry_run still writes pending/. "
                                 "IRREVERSIBLE_SEND = same class and flags as the fail-closed default",
+    # MX-c-5 amendment (items 5-6): the 5 schwab tools, declared in integrations/schwab/integration.py.
+    "schwab_get_access": "returns the caller's grant, scope summary and per-dataset availability read "
+                         "from the catalog; places, changes or cancels nothing",
+    "schwab_list_files": "lists the catalog's servable silver files for one master/dataset/date range; "
+                         "a read",
+    "schwab_describe_dataset": "describes the granted fields' types/units/grain from the pinned silver "
+                               "schema; a read",
+    "schwab_query": "one bounded read-only job (S3 GET of pinned silver objects under the read role); "
+                    "no source or external state changes",
+    "schwab_prepare_download": "validates the request and mints a 5-minute, single-use, identity-bound "
+                               "ticket in the gateway's own access-state store (export.mint, IF_ABSENT); "
+                               "the link re-runs the same grant-checked read -- no source data or "
+                               "external state changes",
 }
 
 
@@ -253,16 +266,28 @@ def _snapshot_base(tmp_root: Path) -> Path:
     return dest
 
 
+def _all_registered_ids(gw_root: Path, enabled: list) -> list:
+    """The deployed enabled ids, then every other id registry._FACTORIES knows (registered but not
+    enabled: schwab). MX-c-5 amendment: a declared class is visible to destructive_ops.classify only
+    through a spec register_enabled made active, so the probe registers these onto a FAKE mcp in its own
+    child process -- ENABLED_INTEGRATIONS (config and deploy script) is read, never written."""
+    probe = _classify_all(gw_root, enabled)
+    return list(enabled) + [i for i in sorted(probe["registered"]) if i not in enabled]
+
+
 def ac6():
     enabled = deployed_enabled_ids()
     print("ENABLED_INTEGRATIONS (deployed, %s): %r" % (DEPLOY_SCRIPT.relative_to(WS).as_posix(), enabled))
+    all_ids = _all_registered_ids(GW, enabled)
+    print("REGISTERED onto a fake mcp in the probe's child process (deployed set + registered-not-enabled): %r"
+          % all_ids)
     with tempfile.TemporaryDirectory(prefix="mxc5_base_") as td:
-        before = _classify_all(_snapshot_base(Path(td)), enabled)
-    after = _classify_all(GW, enabled)
+        before = _classify_all(_snapshot_base(Path(td)), all_ids)
+    after = _classify_all(GW, all_ids)
     print("ENABLED_INTEGRATIONS (gateway config default on this box, env): %r" % after["env_enabled"])
     names = sorted(set(before["names"]) | set(after["names"]))
-    enabled_tools = {t for iid in enabled for t in after["registered"].get(iid, [])}
-    expected_new = sorted(n for n in names if before["by_name"][n]["dop_unclassified"] and n in enabled_tools)
+    reg_tools = {t for iid in all_ids for t in after["registered"].get(iid, [])}
+    expected_new = sorted(n for n in names if before["by_name"][n]["dop_unclassified"] and n in reg_tools)
     diffs = {n: (before["by_name"].get(n), after["by_name"].get(n)) for n in names
              if before["by_name"].get(n) != after["by_name"].get(n)}
     kept = [n for n in names if n not in expected_new]
@@ -273,7 +298,8 @@ def ac6():
           % (len(kept), len(kept_changed), kept_changed))
     for n in kept_changed:
         print("  CHANGED %s before=%s after=%s" % (n, json.dumps(diffs[n][0]), json.dumps(diffs[n][1])))
-    print("NEWLY CLASSIFIED: %d tool(s) unclassified at %s whose integration is enabled:" % (len(expected_new), MXC5_BASE))
+    print("NEWLY CLASSIFIED: %d tool(s) unclassified at %s whose integration is registered:"
+          % (len(expected_new), MXC5_BASE))
     not_classified = []
     for n in expected_new:
         a = after["by_name"][n]
@@ -283,7 +309,7 @@ def ac6():
               % (n, before["by_name"][n]["dop_class"] + "(unclassified)", a["dop_class"],
                  "(unclassified)" if a["dop_unclassified"] else "", MXC5_REASONS.get(n, "NO REASON STATED")))
     missing_reason = [n for n in expected_new if n not in MXC5_REASONS]
-    ok = (len(names) == 49 and len(kept) == 40 and not kept_changed and len(expected_new) == 9
+    ok = (len(names) == 49 and len(kept) == 35 and not kept_changed and len(expected_new) == 14
           and not not_classified and not missing_reason)
     _verdict(ok, "AC6", "" if ok else
              "denominator=%d kept=%d kept_changed=%d newly=%d still_unclassified=%r missing_reason=%r"
@@ -425,40 +451,53 @@ def ac10():
 # tool. The catalog-entry limb is struck from this criterion; it is graded on each tool's own shipping
 # cell (MX-t-1 .. MX-t-7).
 
-# MX-c-5 conform (CTO ruling R-1 @9c70622d13, item 3): the denominator stays 49 and is graded as
-# 44 classified + 5 HELD (G-OPLGTW). A HELD name is a schwab tool that is registered (the schwab
-# factory's register() returns it) but whose integration is absent from ENABLED_INTEGRATIONS as
-# deployed. Classification is read after register_enabled(<deployed set>), the only route by which an
-# integration's declared class becomes visible to destructive_ops.classify. PASS only when the
-# unclassified set IS the HELD set, exactly 5, and every tool clears data_entitlement.
+# MX-c-5 AMENDED (issuer, items 5-6, after Andrew lifted the NFRA_OPLGTW stop): the denominator stays
+# 49 and PASSES only on 49 classified + 0 HELD. A HELD name is now a registered tool whose integration
+# declares NO class for it (the ruling R-1 hold left the schwab five undeclared). Classification is read
+# after register_enabled(<deployed set + registered-not-enabled>) onto a fake mcp in the probe's child
+# process -- the only route by which a declared class becomes visible to destructive_ops.classify; the
+# deployed-set-only view is printed beside it, never substituted. ENABLED_INTEGRATIONS is not written.
 
 def ac11():
     enabled = deployed_enabled_ids()
-    after = _classify_all(GW, enabled)
+    deployed = _classify_all(GW, enabled)
+    all_ids = _all_registered_ids(GW, enabled)
+    after = _classify_all(GW, all_ids)
     tools = after["names"]
-    schwab_registered = set(after["registered"].get("schwab", []))
-    held = sorted(t for t in schwab_registered if "schwab" not in enabled and t in tools)
+    not_enabled = [i for i in all_ids if i not in enabled]
+    reg_not_enabled = sorted(t for i in not_enabled for t in after["registered"].get(i, []))
     fail_dop = sorted(t for t in tools if after["by_name"][t]["dop_unclassified"])
+    held = sorted(t for t in fail_dop if t in reg_not_enabled)
     fail_de = sorted(t for t in tools if after["by_name"][t]["de_class"] is None)
     classified = [t for t in tools if t not in fail_dop]
-    unheld_unclassified = sorted(set(fail_dop) - set(held))
-    held_but_classified = sorted(set(held) - set(fail_dop))
+    deployed_changed = sorted(t for t in tools if not deployed["by_name"][t]["dop_unclassified"]
+                              and deployed["by_name"][t] != after["by_name"][t])
+    deployed_unclassified = sorted(t for t in tools if deployed["by_name"][t]["dop_unclassified"])
+    schwab = sorted(after["registered"].get("schwab", []))
     print("ENABLED_INTEGRATIONS (deployed, %s): %r" % (DEPLOY_SCRIPT.relative_to(WS).as_posix(), enabled))
     print("ENABLED_INTEGRATIONS (gateway config default on this box, env): %r" % after["env_enabled"])
+    print("REGISTERED (probe child process, fake mcp): %r; registered-not-enabled: %r" % (all_ids, not_enabled))
     print("registered by integration: %s" % json.dumps(after["registered"], sort_keys=True))
     print("DENOMINATOR %d registered tool name(s) (NATIVE_TOOLS | INTEGRATION_TOOLS | SCHWAB_TOOLS)"
           % len(tools))
-    print("%d = %d classified + %d HELD (G-OPLGTW)" % (len(tools), len(classified), len(held)))
-    print("HELD (schwab, registered, not in ENABLED_INTEGRATIONS): %d -> %r" % (len(held), held))
+    print("%d = %d classified + %d HELD" % (len(tools), len(classified), len(held)))
+    print("HELD (registered, no declared class): %d -> %r" % (len(held), held))
+    print("schwab tools (registered, NOT enabled) with their declared class: %d" % len(schwab))
+    for t in schwab:
+        print("  %-26s %s%s" % (t, after["by_name"][t]["dop_class"],
+                                "(unclassified)" if after["by_name"][t]["dop_unclassified"] else ""))
     print("fails destructive_ops.classify (no declared class): %d -> %r" % (len(fail_dop), fail_dop))
-    print("  of which NOT held: %d -> %r" % (len(unheld_unclassified), unheld_unclassified))
-    print("  held but classified: %d -> %r" % (len(held_but_classified), held_but_classified))
     print("fails data_entitlement.classify (returns None): %d -> %r" % (len(fail_de), fail_de))
-    ok = (len(tools) == 49 and len(held) == 5 and len(classified) == 44
-          and not unheld_unclassified and not held_but_classified and not fail_de)
+    print("deployed-set-only view (register_enabled(%r)): %d unclassified -> %r  (an integration that is "
+          "not enabled is not active, so classify stays fail-closed for its tools there)"
+          % (enabled, len(deployed_unclassified), deployed_unclassified))
+    print("classified in the deployed view but different once schwab registers: %d -> %r"
+          % (len(deployed_changed), deployed_changed))
+    ok = (len(tools) == 49 and len(classified) == 49 and len(held) == 0 and not fail_dop
+          and not fail_de and len(schwab) == 5 and not deployed_changed)
     _verdict(ok, "AC11",
-             "%d = %d classified + %d HELD; unheld unclassified=%r; held but classified=%r; de fails=%r"
-             % (len(tools), len(classified), len(held), unheld_unclassified, held_but_classified, fail_de))
+             "%d = %d classified + %d HELD; unclassified=%r; de fails=%r; schwab=%d; deployed changed=%r"
+             % (len(tools), len(classified), len(held), fail_dop, fail_de, len(schwab), deployed_changed))
 
 
 # --- AC12 -------------------------------------------------------------------------------------------
