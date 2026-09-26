@@ -4,12 +4,15 @@
 record @bda25438c8). **Unblocks:** NFRA_OPALAI FWD-1 (the Analyst answers a colleague in Teams from its own account)
 and NFRA_MCPORTAL FWD-1 (you change a colleague's access from the dashboard).
 
-**Precondition status (`2.0.0_SA_COO~O`, 2026-09-25 ~22:5xZ):**
-- (a) round-1 code is in `opal_ai` DEV locally @fd8ab8a; the push of DEV and PROD waits on `0.0.0_AB_MSTR~Z`
-  (G-PUSH): NOT YET;
-- (b) `runtime.config.json`: NOT YET, written once (a) lands;
-- (c) NFRA_MCPORTAL's release `1f7128201a` is LIVE since 21:25:38Z: MET;
-- (d) Z-S19: NOT YET, because the upload refusal cell (Andrew's option 2) is being cut.
+**Precondition status (`2.0.0_SA_COO~O`, 2026-09-26 ~00:3xZ):**
+- (a) MET. `opal_ai` DEV and PROD are both at `fd8ab8a57f` on origin. `0.0.0_AB_MSTR~Z` pushed them (msg
+  20260925T235909Z) and verified by `ls-remote`.
+- (b) MET. `C:\opal_runtime\runtime.config.json` is written outside every repo (keys `checkout_dir`, `state_dir`,
+  `workspace_probe_file`, `prod_ref`).
+- (c) MET. NFRA_MCPORTAL's release `1f7128201a` went live at 21:25:38Z. The live gateway is now `1.0.0_SA_CTO`'s laptop
+  release `0af72fb1d0` (23:01:38Z), which is built on `1f7128201a`, so the MCPORTAL code is still served.
+- (d) NOT YET. Z-S19's server-side fix is cut as `OA-f-1` (build, running) and `OA-f-2` (the narrow release)
+  @`0dd3492d8a`.
 
 **Before you sit down, `2.0.0_SA_COO~O` confirms in one message that:**
 - (a) the round-1 code is merged into `opal_ai` DEV and PROD;
