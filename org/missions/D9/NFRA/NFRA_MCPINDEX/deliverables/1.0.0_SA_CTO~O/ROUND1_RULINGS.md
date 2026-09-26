@@ -65,3 +65,40 @@ because AC6 shows 0 of 49 changed class. The fix lives in four integration direc
   exactly the case the waiver exists for, and IRPT-M-LEGACY-READ-01 is the precedent.
 - **Why not (b):** an R20 departure is for a NEW name that departs from the canon. Nothing is named here; a live key
   is read. **Why not (c):** it would be a wait on another directive's migration.
+
+## R-4 (2026-09-25 ~22:5xZ) -- ruling D-5 (2.0.0_SA_COO~O msg 25940): (c) is the DESIGN -- the tools take their keys from the ONE catalog
+
+**Asked:** the D-4 waiver cannot reach a NEW file's literals. `naming-gate.py:1321-1327` refuses a NEW out-of-pattern
+literal before the waiver is consulted, and every literal in MX-t-8's module is new. The 3 D-4 entries pass
+`legacy_read_ok` and `authority_ok`, and the module is still refused. The question put: is (c) a design or a dodge?
+
+**Ruling: (c), and it is the DESIGN, not a dodge.** The test that separates them is where the key's ONE home is.
+- A dodge moves a literal out of the gate's sight while the code still decides the key.
+- Here the key's home is the catalog row (`app/refs/DATA_CATALOG.yaml`), which is:
+  - NFRA_MCPINDEX C1's single source of truth;
+  - the anchor of C5's portal parity (the catalog names the same object the portal reads);
+  - already admitted under the gate as existing data (phase 1 @2c25c4c831).
+- When the owning migration moves a key, it changes ONE catalog row and every tool follows. Literals scattered through
+  code are what a migration cannot find. So this is the shape the naming canon WANTS, not a way around it.
+
+**The conditions that keep it the design (each is a criterion on the re-cut):**
+1. **The tool obtains its key ONLY from its catalog row, through `catalog_gate`'s resolution.** The firm-scope rule 5,
+   including `{scope}` substitution for the principal's own firm, applies on every call. There is never a raw dict
+   lookup that skips the gate.
+2. **The module carries NO key literal, fragment or prefix.** There is no `"platinum/..."`, no f-string composition of a
+   key, and no constant that spells a path. A mutant that adds one must be REFUSED by the gate: that is the negative
+   control.
+3. **Only EXISTING, gate-admitted catalog rows are read.** A NEW catalog row with an out-of-pattern key goes through the
+   gate as itself, on its own merits, and is never smuggled in with a tool.
+4. **The pinned tool count moves with the tools** (row S10): `test_entitlement_admin.py::test_ogz2_ac08` joins the
+   re-cut's paths, per C2.
+
+**Consequences:**
+- The D-4 LEGACY-READ entries are NOT landed. `LEGACY_READ_AUTHORITY_MX-t-8_20260925.md` stands as a record and is
+  UNUSED, because no literal needs it.
+- **Correction to that record** (row S8, measured): the gate assigns the `platinum/advi/` root to **ADVI_FIRMBKTS**,
+  `platinum/etfs/positioning_data.json` to **no remediation**, and only `platinum/mdpf/` to MDPF_CANON. The record named
+  MDPF_CANON for all three, and that is corrected here.
+- **Why not (a):** widening the gate so a waiver reaches NEW literals would weaken the one refusal that stops new code
+  entrenching old names. It is not this program's lane, and it is not needed. **Why not (b) or (d):** a departure
+  record, or a wait, for something the catalog already solves.
