@@ -19,8 +19,8 @@
       "path_or_key": "data/assets/scripts/silver/etf_conversion.py",
       "kind": "script",
       "commit_or_etag": "6c6232a5d7",
-      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "expected_partitions_etf now follows kc.feed instead of hardcoding netassets_page, so fact_holdings enters the expected set and the sweep can both dispatch a holdings key and report a holdings hole. NOT DEPLOYED and that is measured, not assumed: safe-deploy.sh maps data/assets/scripts/silver/ to s3://opal-data-mdpf/code/scripts/silver/, probed 404, printed SKIP-NOT-MEMBER and 'NOTHING WAS DEPLOYED' -- and that S3 prefix is not how this converter runs. The running code is the vendored Lambda zip opal-assets-silver-etf, whose rebuild is a DT/AE act under rule 13 and NEVER-9. Row NFRA_MCPINDEX-Z-S4.",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "expected_partitions_etf now follows kc.feed instead of hardcoding netassets_page, so fact_holdings enters the expected set and the sweep both dispatches a holdings key and reports a holdings hole. NOW DEPLOYED AND VERIFIED IN THE RUNNING BYTES, not inferred from a filename: the zip of opal-assets-silver-etf (LastModified 2026-09-26T09:26:39Z, CodeSha256 ZyhzyrjuHLi9TfRC9CFSpvPHY6Rcyq/aPgseJafmuTg=) was downloaded and its etf_conversion.py read -- _convert_trueshares_holdings 2 occurrences (was 0), the kc.feed fix present, the is_numeric_dtype fix present. The rebuild is 0.7.0_AE_CloudOps~I's act under TO-MX-s-3, not this lane's; safe-deploy remains inapplicable to this path and that finding stands.",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -92,10 +92,10 @@
       "criterion_verbatim": "for DIVZ and IDVZ, guard missing=0, fact_holdings>0, guard expected within 2 of the live silver total; funds whose guard counts the holdings feed 2 of 2 -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s1.AC2.sh; echo \"exit=$?\"",
-      "output_evidence": "live: DIVZ: guard expected=73 missing=0 live silver=106 of which fact_holdings=33; IDVZ: guard expected=73 missing=0 live silver=106 of which fact_holdings=33; funds whose guard counts the holdings feed 0 of 2 -- RESULT: FAIL -- exit=1",
-      "denominator": "2 funds, 2 examined, 0 passing. Per fund: guard expected 73 against 106 live silver objects, of which 33 are fact_holdings. 106 - 33 = 73 exactly.",
-      "status": "FAIL",
-      "status_reason": "REFUSED AS UNREACHABLE FROM THIS LANE, not failed by the fix. meta/backfill-status.json has exactly ONE writer -- run_sweep -- which executes the DEPLOYED bundle. Those bytes were downloaded and hashed this session (CodeSha256 a14fYacwkjPlkj7P5qb7QGTKDeQ2A9GTnkM/t1rTxcs=, vendored etf_conversion.py sha256 623568f38934f491a25c0f09d11a331297618445ef1afa5a22f8337336c56436) and carry ZERO occurrences of _convert_trueshares_holdings plus the old netassets-only expected set; the bundle was built 2026-07-15, six weeks before the converter landed at e442e30964 on 2026-08-24. The guard code IS fixed and IS proven -- test_guard_REPORTS_a_planted_missing_holdings_date plants a missing holdings date, sees backfill_complete false and 'missing 1' in the guard's own detail, and fails on the old code. Only a DT/AE bundle rebuild plus Terraform apply can move the served value (rule 13, NEVER-9). The criterion was neither widened nor met by a route the face does not name. Rows NFRA_MCPINDEX-Z-S4 (the blocker) and Z-S5 (the served PASS -> FAIL flip this order's own backfill causes at the next 23:30Z sweep, self-clearing on the rebuild)."
+      "output_evidence": "live: DIVZ: guard expected=106 missing=0 live silver=106 of which fact_holdings=33; IDVZ: guard expected=106 missing=0 live silver=106 of which fact_holdings=33; funds whose guard counts the holdings feed 2 of 2 -- RESULT: PASS -- exit=0",
+      "denominator": "2 funds, 2 examined, 2 passing. Per fund: guard expected 106 against 106 live silver objects, of which 33 are fact_holdings; missing 0, alien 0. Re-run by the criterion's literal invocation at 2026-09-26 ~12:3xZ, after MX-s-3's rebuild and 0.7.0_AE_CloudOps~I's sweep.",
+      "status": "PASS",
+      "status_reason": "CLOSED at 2026-09-26 ~11:18Z, having been REFUSED-AS-UNREACHABLE in the first instance. It was never reachable from the DS lane: backfill-status.json has exactly ONE writer, the sweep, which runs the deployed bundle. 0.7.0_AE_CloudOps~I rebuilt opal-assets-silver-etf under NFRA_MCPINDEX.TO-MX-s-3 (live LastModified 2026-09-26T09:26:39Z, CodeSha256 ZyhzyrjuHLi9TfRC9CFSpvPHY6Rcyq/aPgseJafmuTg=) and fired the sweep (proof @765a8f105e); the guard was rewritten at 2026-09-26T11:18:33Z. THE OUTCOME WAS PREDICTED AND VERIFIED IN ADVANCE, not discovered after: before the rebuild this seat ran the sweep's read-only halves from the FIXED bytes against live state and recorded expected=106, alien=0, PASS in section 9 of the result doc. The served figure landed at exactly 106/106/0. The rebuilt bytes were independently checked by downloading the zip: _convert_trueshares_holdings 2 occurrences (was 0), both fixes present."
     }
   ],
   "controls": {
@@ -114,7 +114,7 @@
   "declared_exclusions": [
     {
       "item": "The Lambda bundle rebuild and Terraform apply for opal-assets-silver-etf, which vendors data/assets/scripts/silver/etf_conversion.py",
-      "reason": "DT/AE under CLAUDE.md rule 13 and NEVER-9 (aws lambda update-function-code is Terraform only). This is the single act that closes AC2 and disarms Z-S5. Row NFRA_MCPINDEX-Z-S4."
+      "reason": "DT/AE under CLAUDE.md rule 13 and NEVER-9 (aws lambda update-function-code is Terraform only). CLOSED SINCE: 0.7.0_AE_CloudOps~I rebuilt it under NFRA_MCPINDEX.TO-MX-s-3 at 2026-09-26T09:26:39Z and fired the sweep; AC2 then passed and row Z-S4's blocker is cleared. The exclusion was correct as an exclusion -- the act was out of lane -- and it is recorded here as discharged rather than deleted."
     },
     {
       "item": "An S3 notification rule matching a trueshares holdings .csv on opal-data-assets",
@@ -134,10 +134,10 @@
     }
   ],
   "surprises": [
-    "NFRA_MCPINDEX-Z-S3: the mirror framework's float64 parse-or-raise is guarded by `dtype == object`, which pandas 3 reads False, so the Rule 17 CAPTURED-BAD boundary is skipped for every float64 column; five vendored copies, fixed in the etf copy only.",
-    "NFRA_MCPINDEX-Z-S4: the deployed opal-assets-silver-etf bundle predates the holdings converter by six weeks and carries zero occurrences of it, and no S3 rule matches a holdings .csv -- so AC2 is unreachable from the DS lane.",
-    "NFRA_MCPINDEX-Z-S5: this order's own backfill flips trueshares/{DIVZ,IDVZ} backfill-status.json from PASS to FAIL with alien 33 at the next 23:30Z sweep, self-clearing on the rebuild.",
-    "NFRA_MCPINDEX-Z-S6: pre-existing and off-task -- pathfinder/{PFDE,PFOE} already serve verdict FAIL / 'missing 2' and no row named it."
+    "NFRA_MCPINDEX-Z-S3: the mirror framework's float64 parse-or-raise is guarded by `dtype == object`, which pandas 3 reads False, so the Rule 17 CAPTURED-BAD boundary is skipped for every float64 column; five vendored copies, fixed in the etf copy only. STILL OPEN -- the shared framework is untouched.",
+    "NFRA_MCPINDEX-Z-S4: the deployed bundle predated the holdings converter by six weeks and no S3 rule matched a holdings .csv, which is why AC2 was unreachable from the DS lane. THE BUNDLE HALF IS NOW CLOSED by TO-MX-s-3's rebuild at 2026-09-26T09:26:39Z; the missing .csv notification rule (a delivery-latency question, never a cause of the zero) is not known to be addressed.",
+    "NFRA_MCPINDEX-Z-S5: this order's backfill would have flipped trueshares/{DIVZ,IDVZ} backfill-status.json from PASS to FAIL with alien 33 at the next sweep. DEFUSED, NEVER REALISED: the rebuild landed 09:26:39Z, about 14 hours before the 23:30Z scheduled fire, so the sweep that ran was the fixed code and wrote PASS with alien 0. The row's formal disarm is its disarm_owner's, not this seat's.",
+    "NFRA_MCPINDEX-Z-S6: pre-existing and off-task -- pathfinder/{PFDE,PFOE} serve verdict FAIL / 'missing 2'. NARROWED by Z-S11: it is fact_dailynav for 2026-08-29 and 2026-08-30 on both funds, a conversion failure with bronze present and well-formed, and a weekend-shell explanation of mine was refuted. Still open, still filepoint."
   ],
   "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~D/logs/2026-09-25/ds_d_mx_s_1_trueshares_holdings_silver_2255-0230Z.md",
   "compiler_tools": [
