@@ -66,9 +66,11 @@ cause, and do the served values read as plausible Base cases beside the team's o
 3. **The g-4 evidence** (13 met / 5 unmet / 1 unmeasurable, measured before this round's re-derive and rebuild) is the analysis's
    starting point for grading; FWD-12's and FWD-14/19's rows move with items 1-3 of section 2.
 
-4. **Carried to round 6 (1.0.0_SA_CTO~Z @3c70a79176):** re-run g-4's FWD-12, FWD-17 and FWD-18 rows. Those three read SOURCE
-   in the worker's own worktree, cut before g-1/g-2/g-3 drained, so they are pre-fix and lean pessimistic; the other 16 read the
-   served plane or ran a tool. The dossier artifact FWD-12 names is already recomposed (s.2 item 2).
+4. **Round-6 input, as revised by 1.0.0_SA_CTO~Z @4bd5738990:** the three-row re-run was WITHDRAWN (a grading act, done in the
+   CTO's lane: FWD-18 unmet stands, re-grounded in continuation.py). What carries is **FWD-17 (b)'s candidate no-op violation**: three
+   same-day `IMB_LN_Equity` dossiers with the same first extract input sha and different content_sha256 -- either a new input on
+   another field or a rebuild that wrote on unchanged inputs. Discriminator: `dossier --write` for that key twice, reading whether the
+   second writes.
 
 ## 6. Bounds and residue
 
