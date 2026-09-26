@@ -1,0 +1,185 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-1",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "c3f599e9f2",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-1.trueshares-holdings-silver.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~D",
+  "artifacts_produced": [
+    {
+      "path_or_key": "data/assets/scripts/silver/etf_conversion.py",
+      "kind": "script",
+      "commit_or_etag": "6c6232a5d7",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "expected_partitions_etf now follows kc.feed instead of hardcoding netassets_page, so fact_holdings enters the expected set and the sweep can both dispatch a holdings key and report a holdings hole. NOT DEPLOYED and that is measured, not assumed: safe-deploy.sh maps data/assets/scripts/silver/ to s3://opal-data-mdpf/code/scripts/silver/, probed 404, printed SKIP-NOT-MEMBER and 'NOTHING WAS DEPLOYED' -- and that S3 prefix is not how this converter runs. The running code is the vendored Lambda zip opal-assets-silver-etf, whose rebuild is a DT/AE act under rule 13 and NEVER-9. Row NFRA_MCPINDEX-Z-S4.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/etf_conversion.py",
+      "kind": "script",
+      "commit_or_etag": "23efc28a2f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_to_arrow_etf's float64 parse-or-raise re-guarded on the DECLARED type (`not pd.api.types.is_numeric_dtype`) rather than `dtype == object`, which pandas 3.0.3 reads False for a column of strings. Required for MX-s-1 step 2's 'Rule 17 STRICT': without it the backfill would have bypassed the CAPTURED-BAD boundary entirely. Equivalent on the deployed pandas-2 path, measured -- lambda-written partitions from 2026-09-25T22:00Z read back float64, reachable only through the object branch.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "data/assets/scripts/silver/tests/test_etf_conversion.py",
+      "kind": "test",
+      "commit_or_etag": "23efc28a2f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Five tests added, 23 -> 28 passed / 3 skipped. Every one was falsified against the unfixed source before being trusted (see controls.mutant). Includes the step-4 planted-hole test and a pathfinder 1->2 fan negative control asserting the untouched branch."
+    },
+    {
+      "path_or_key": "s3://opal-data-assets/trueshares/{DIVZ,IDVZ}/silver/fact_holdings/date=2026-08-24..2026-09-25/data.parquet",
+      "kind": "s3_object",
+      "commit_or_etag": "66 objects, 33 per fund, dates 2026-08-24..2026-09-25 contiguous",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "Before, measured on the exact prefixes about to be written: DIVZ bronze=33 silver=0, IDVZ bronze=33 silver=0. Backfill: converted=66 skipped_idempotent=0 failed=0. After, live re-read: 33 and 33. Verified against the ARTIFACTS rather than the runner's rc: all 66 re-read from S3 -- 0 defects, 2,367 rows (957 DIVZ + 1,410 IDVZ), every partition's Account set equal to its own fund, every float64 column numeric on read-back, written parquet schema .equals() the declared arrow schema. No object deleted.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/probes/mx_s_1_backfill.py",
+      "kind": "script",
+      "commit_or_etag": "44f5910f8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The backfill runner: --list is read-only, --date converts one date, --all the rest; idempotent by construction via partition_exists unless --force; deletes nothing.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/trueshares-holdings-silver.result.md",
+      "kind": "doc",
+      "commit_or_etag": "44f5910f8f",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The cause (both stacked defects, with the running bytes hashed), the fix, the backfill, the guard, the four rows, and what is owed by whom."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "b2df0b5aef",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_MCPINDEX-Z-S3..Z-S6 appended in the SHARED tree (CLAUDE.md 14b inverts for an append-only channel). surprise-row-gate: '4 new row(s) of 19 total checked (15 pre-existing, NOT re-graded) ... all new rows carry their step-7/step-10 fields.'"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "for DIVZ and IDVZ, silver fact_holdings dates >= bronze dates > 0; funds converted 2 of 2 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "live: DIVZ: bronze dates=33 silver fact_holdings dates=33; IDVZ: bronze dates=33 silver fact_holdings dates=33; funds converted 2 of 2 -- RESULT: PASS -- exit=0",
+      "denominator": "66 bronze holdings deliveries (33 per fund) over 2026-08-24..2026-09-25, against 66 silver fact_holdings partitions live after the backfill; 0 of 66 pending on a re-run.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "for DIVZ and IDVZ, guard missing=0, fact_holdings>0, guard expected within 2 of the live silver total; funds whose guard counts the holdings feed 2 of 2 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "live: DIVZ: guard expected=73 missing=0 live silver=106 of which fact_holdings=33; IDVZ: guard expected=73 missing=0 live silver=106 of which fact_holdings=33; funds whose guard counts the holdings feed 0 of 2 -- RESULT: FAIL -- exit=1",
+      "denominator": "2 funds, 2 examined, 0 passing. Per fund: guard expected 73 against 106 live silver objects, of which 33 are fact_holdings. 106 - 33 = 73 exactly.",
+      "status": "FAIL",
+      "status_reason": "REFUSED AS UNREACHABLE FROM THIS LANE, not failed by the fix. meta/backfill-status.json has exactly ONE writer -- run_sweep -- which executes the DEPLOYED bundle. Those bytes were downloaded and hashed this session (CodeSha256 a14fYacwkjPlkj7P5qb7QGTKDeQ2A9GTnkM/t1rTxcs=, vendored etf_conversion.py sha256 623568f38934f491a25c0f09d11a331297618445ef1afa5a22f8337336c56436) and carry ZERO occurrences of _convert_trueshares_holdings plus the old netassets-only expected set; the bundle was built 2026-07-15, six weeks before the converter landed at e442e30964 on 2026-08-24. The guard code IS fixed and IS proven -- test_guard_REPORTS_a_planted_missing_holdings_date plants a missing holdings date, sees backfill_complete false and 'missing 1' in the guard's own detail, and fails on the old code. Only a DT/AE bundle rebuild plus Terraform apply can move the served value (rule 13, NEVER-9). The criterion was neither widened nor met by a route the face does not name. Rows NFRA_MCPINDEX-Z-S4 (the blocker) and Z-S5 (the served PASS -> FAIL flip this order's own backfill causes at the next 23:30Z sweep, self-clearing on the rebuild)."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Planted mutant by reverting the real fix, twice and separately, with the new tests held constant -- the only control that distinguishes a test that PROVES the fix from one that merely passes beside it.",
+      "expected": "Reverting expected_partitions_etf fails the three feed tests; reverting the _to_arrow_etf guard alone fails the two typing tests. The 23 pre-existing tests stay green in both, or the mutant is not localised.",
+      "observed": "Revert 1 (expected_partitions_etf to HEAD): 3 failed, 23 passed, 3 skipped -- 'assert 1 == 2'; the planted holdings date resolved to fact_netassets_page, naming the defect exactly. Revert 2 (the _to_arrow_etf guard hunk only): 2 failed, 26 passed, 3 skipped -- pyarrow ArrowInvalid instead of the converter's VendorDriftError, and 'Shares read back as str, not a number'. Both restored; 28 passed / 3 skipped.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Re-ran the full backfill with no --force against the post-backfill live state, and re-ran the test suite after each restore.",
+      "observed": "Re-run: pending=0 on both funds, 'CONVERT (0 unit(s))', KEYS WRITTEN 0, converted=0 failed=0, state unchanged at bronze=33 silver=33 per fund -- idempotent in fact, not only by construction. Suite stable at 28 passed / 3 skipped across runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The Lambda bundle rebuild and Terraform apply for opal-assets-silver-etf, which vendors data/assets/scripts/silver/etf_conversion.py",
+      "reason": "DT/AE under CLAUDE.md rule 13 and NEVER-9 (aws lambda update-function-code is Terraform only). This is the single act that closes AC2 and disarms Z-S5. Row NFRA_MCPINDEX-Z-S4."
+    },
+    {
+      "item": "An S3 notification rule matching a trueshares holdings .csv on opal-data-assets",
+      "reason": "Measured: a holdings key matches 0 of 11 live rules (the trueshares rules carry suffix '.html'). NOT a cause of the zero -- the ENABLED sweep at cron(30 23 * * ? *) lists bronze directly -- so it is a delivery-latency question for DT/AE, not a silver gap. Row NFRA_MCPINDEX-Z-S4."
+    },
+    {
+      "item": "data/assets/scripts/silver/mirror_conversion.py:330, the identical `dtype == object` guard in the shared mirror framework, vendored into five silver bundles",
+      "reason": "Fixed in the etf copy only. Changing a five-pipeline shared framework is far wider than this order's write surface. Row NFRA_MCPINDEX-Z-S3."
+    },
+    {
+      "item": "pathfinder/{PFDE,PFOE} silver completeness, whose served guard reads FAIL / 'missing 2'",
+      "reason": "Pre-existing: checked against the served artifact's own LastModified, which predates anything this order wrote. Off-task; filed as row NFRA_MCPINDEX-Z-S6 rather than chased, per CLAUDE.md section 2."
+    },
+    {
+      "item": "Gold, platinum and every served key, plus s3://opal-data-assets/trueshares/{DIVZ,IDVZ}/silver/fact_holdings/ beyond the 66 backfilled partitions",
+      "reason": "MX-s-1 bound 1 is silver only. Nothing outside trueshares/{DIVZ,IDVZ}/silver/fact_holdings/ was written, and no object was deleted."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-S3: the mirror framework's float64 parse-or-raise is guarded by `dtype == object`, which pandas 3 reads False, so the Rule 17 CAPTURED-BAD boundary is skipped for every float64 column; five vendored copies, fixed in the etf copy only.",
+    "NFRA_MCPINDEX-Z-S4: the deployed opal-assets-silver-etf bundle predates the holdings converter by six weeks and carries zero occurrences of it, and no S3 rule matches a holdings .csv -- so AC2 is unreachable from the DS lane.",
+    "NFRA_MCPINDEX-Z-S5: this order's own backfill flips trueshares/{DIVZ,IDVZ} backfill-status.json from PASS to FAIL with alien 33 at the next 23:30Z sweep, self-clearing on the rebuild.",
+    "NFRA_MCPINDEX-Z-S6: pre-existing and off-task -- pathfinder/{PFDE,PFOE} already serve verdict FAIL / 'missing 2' and no row named it."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~D/logs/2026-09-25/ds_d_mx_s_1_trueshares_holdings_silver_2255-0230Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'dtype == object' --all --limit 25",
+      "result": "26 hit(s) across 75,199 file(s); 8 are the defective guard, 6 of those vendored into lambda bundles. Sized the framework exposure behind row Z-S3 with a printed denominator."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'bd_assets\\.parquet' --all --limit 60",
+      "result": "68 hit(s) across 75,160 file(s). Established N=1 writer (convert_assets_to_silver.py) before reasoning about the bridge, per NEVER-1's count-the-writers rule."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'expected_partitions_etf' --all --limit 20",
+      "result": "5 hit(s), bands DEF=2 SURFACED=2 TEST=1 -- surfaced the repo/lambda pair and the single pre-existing test, which turned out to exercise a pathfinder key only."
+    },
+    {
+      "tool": "comp-pipescript io",
+      "invocation": "comp-pipescript io etf_conversion.py --pipeline all",
+      "result": "NOT-APPLICABLE, MEASURED: 'Unknown script in tree [all]: ETF_CONVERSION'. The opal-data-assets ETF tree is in none of the tool's indexed pipelines ('data/assets' is not an accepted --pipeline choice), so the DS role minimum has no coverage on this script. Recorded as a coverage gap, never as a skipped check."
+    },
+    {
+      "tool": "safe-deploy.sh",
+      "invocation": ".tools/safe-deploy.sh data/assets/scripts/silver/etf_conversion.py",
+      "result": "SKIP-NOT-MEMBER, probed s3://opal-data-mdpf/code/scripts/silver/etf_conversion.py -> 404, 'NOTHING WAS DEPLOYED'. Exit code captured into a variable, not read through a tail pipe -- an earlier read through `| tail` reported a false exit=0 that was tail's."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": ".tools/safe-commit.sh --author '0.4.0_DS_ClientPlatform~D <...>' -F <msgfile> -- <paths>",
+      "result": "4 commits, all gates clean. surprise-row-gate: '4 new row(s) of 19 total checked ... all new rows carry their step-7/step-10 fields.' missions-tree-check correctly refused twice on an incomplete sparse cone before passing at 0 violations."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "Refused the first draft on 14 violations -- schema shapes, three missing required blocks, and artifact-coverage on 4 artifacts. Every one was real; this instance is the corrected one."
+    },
+    {
+      "tool": "NOTE",
+      "invocation": "n/a",
+      "result": "comp-pipescript is BLIND to this pipeline and that is measured, not skipped: 'Unknown script in tree [all]: ETF_CONVERSION' -- the opal-data-assets ETF tree is in none of the tool's indexed pipelines, so the DS role minimum (io / deployed / postdeps) has no coverage here. Worth naming as its own gap: a DS seat working this tree has no dependency-graph instrument at all, which is part of how a whole registered feed sat unconverted for a month with every instrument reporting green."
+    }
+  ]
+}
