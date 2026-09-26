@@ -2,8 +2,9 @@
 # MX-v-6 AC1 (E4, the question set from REAL asks): infra/aws/ec2/opal-gateway/tests/routing/questions.yaml holds at least
 # 20 questions; every one carries a `source` naming a file that exists at HEAD (a real ask, e.g. the Analyst's thread
 # memory under org/tier0_utility/0.0.3_BG_BBGTerminal/threads/) and an `expected_tool`; and NO question shares a run of
-# 6 or more consecutive words with any `description` in the catalog (RCN-0014 finding 13: never probe from the index's
-# own words).
+# 6 or more consecutive words with ANY string in the catalog (RCN-0014 finding 13: never probe from the index's own
+# words). AMENDED on row NFRA_MCPINDEX-Z-W2-S7: the catalog carries no `description` key, so the first cut compared
+# against 0 strings and could not fail; it now reads every string and FAILS when it read none.
 . "$(dirname "$0")/_root.sh"
 Q="$GW/tests/routing/questions.yaml"; CAT="$GW/app/refs/DATA_CATALOG.yaml"
 [ -f "$Q" ] || { echo "$Q absent"; echo "RESULT: FAIL"; exit 1; }
@@ -16,13 +17,13 @@ cat = yaml.safe_load(open(sys.argv[2], encoding='utf-8'))
 descs = []
 def walk(o):
     if isinstance(o, dict):
-        for k, v in o.items():
-            if k == 'description' and isinstance(v, str):
-                descs.append(v)
+        for v in o.values():
             walk(v)
     elif isinstance(o, list):
         for v in o:
             walk(v)
+    elif isinstance(o, str):
+        descs.append(o)
 walk(cat)
 words = lambda s: re.findall(r"[a-z0-9']+", s.lower())
 grams = set()
@@ -46,5 +47,6 @@ EOF
 echo "$out"
 n=$(printf '%s' "$out" | sed -n 's/^questions=\([0-9]*\) .*/\1/p'); s=$(printf '%s' "$out" | sed -n 's/.*sources_at_head=\([0-9]*\) .*/\1/p')
 t=$(printf '%s' "$out" | sed -n 's/.*expected_tools=\([0-9]*\) .*/\1/p'); o=$(printf '%s' "$out" | sed -n 's/.*catalog_overlap=\([0-9]*\) .*/\1/p')
-if [ -n "$n" ] && [ "$n" -ge 20 ] && [ "$s" = "$n" ] && [ "$t" = "$n" ] && [ "$o" = 0 ]; then echo "RESULT: PASS"; exit 0; fi
+d=$(printf '%s' "$out" | sed -n 's/.*descriptions=\([0-9]*\).*/\1/p')
+if [ -n "$n" ] && [ "$n" -ge 20 ] && [ "$s" = "$n" ] && [ "$t" = "$n" ] && [ "$o" = 0 ] && [ "${d:-0}" -gt 0 ]; then echo "RESULT: PASS"; exit 0; fi
 echo "RESULT: FAIL"; exit 1

@@ -4,15 +4,21 @@
 record @bda25438c8). **Unblocks:** NFRA_OPALAI FWD-1 (the Analyst answers a colleague in Teams from its own account)
 and NFRA_MCPORTAL FWD-1 (you change a colleague's access from the dashboard).
 
-**Precondition status (`2.0.0_SA_COO~O`, 2026-09-26 ~00:3xZ):**
+**Precondition status (`2.0.0_SA_COO~O`, 2026-09-26 ~09:5xZ): ALL FOUR MET.**
 - (a) MET. `opal_ai` DEV and PROD are both at `fd8ab8a57f` on origin. `0.0.0_AB_MSTR~Z` pushed them (msg
   20260925T235909Z) and verified by `ls-remote`.
 - (b) MET. `C:\opal_runtime\runtime.config.json` is written outside every repo (keys `checkout_dir`, `state_dir`,
   `workspace_probe_file`, `prod_ref`).
-- (c) MET. NFRA_MCPORTAL's release `1f7128201a` went live at 21:25:38Z. The live gateway is now `1.0.0_SA_CTO`'s laptop
-  release `0af72fb1d0` (23:01:38Z), which is built on `1f7128201a`, so the MCPORTAL code is still served.
-- (d) NOT YET. Z-S19's server-side fix is cut as `OA-f-1` (build, running) and `OA-f-2` (the narrow release)
-  @`0dd3492d8a`.
+- (c) MET. NFRA_MCPORTAL's release `1f7128201a` went live at 21:25:38Z. The gateway now serves `c5f8099440`
+  (07:43:40Z), built on the laptop release `0af72fb1d0`, which is built on `1f7128201a`, so the MCPORTAL code is still
+  served.
+- (d) MET. The upload tool `opal_data_refresh_upload` now admits ONE registered OAuth client, the operator's sign-in on
+  this box. It is live since 07:43:40Z (OA-f-2, drained @837d4d1e1d, closed @3558be2482). The Analyst's runtime signs
+  in as Opal_Agent with its OWN Claude Code, so it registers a DIFFERENT client and is refused. `2.0.0_SA_COO~O`
+  confirms that after your step 5 sign-in, by counting the live refresh families for Opal Bloomberg: two clients, and
+  the new one is not the granted one.
+- Step 6 (Alyssa Keith, portal figures only) additionally waits on addendum A2. The build is done (@45ddd8d948). Next
+  are the narrow release OA-g-2 and the grant write OA-g-3. Parts A, B and D do not wait on it.
 
 **Before you sit down, `2.0.0_SA_COO~O` confirms in one message that:**
 - (a) the round-1 code is merged into `opal_ai` DEV and PROD;

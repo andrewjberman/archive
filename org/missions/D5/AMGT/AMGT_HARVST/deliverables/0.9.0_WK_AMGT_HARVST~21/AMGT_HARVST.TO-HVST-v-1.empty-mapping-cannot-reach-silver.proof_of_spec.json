@@ -1,0 +1,174 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-v-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "97af12ec2b",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-v-1.empty-mapping-cannot-reach-silver.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-v-1.empty-mapping-cannot-reach-silver.md",
+    "group": "C",
+    "vintage_commit": "d0171ffe4f"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~21",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/silver_from_bronze.py",
+      "kind": "script",
+      "commit_or_etag": "fa1116c9b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THE FIX: module-private `_null_empty_mappings(value)` plus one line in `listing_hit_rows` -- `rows.append({key: _null_empty_mappings(value) for key, value in row.items()})`. PUBLISHER-NEUTRAL AND FIELD-NEUTRAL BY CONSTRUCTION: the only predicate is `isinstance(value, dict) and not value`, so no publisher code and no field name appears in the logic (`themes`/`sa` occur only in the comment describing the measured firing). Recursion descends into dicts and lists so an empty mapping NESTED inside a populated one is nulled too, while a populated container keeps its type, key order and values; the coercion is applied per FIELD VALUE, never to the row container. Pure row-builder, no I/O, no client, nothing to deploy -- `lib/research/harvest/store.py` was NOT touched (standing clause 3), only read to lift its exact write path into the AC scripts.",
+      "introduces": [
+        "_null_empty_mappings"
+      ],
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_silver_from_bronze.py",
+      "kind": "test",
+      "commit_or_etag": "fa1116c9b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The suite arm for row AMGT_HARVST-Z-S28, section 17: `test_empty_mapping_in_a_listing_row_is_nulled_and_writes_for_every_publisher`. FOUR publishers (sa, bbg, wsj, barrons), a DIFFERENT empty-mapping field name on each (themes, tickers, keywords, meta) precisely so no field name can be special; each row is driven through the real write path (`pa.Table.from_pylist` + `pq.write_table`) and the nulled column's arrow type asserted `pa.null()`. Plus the negative arm: a POPULATED mapping stays `struct<berkshire: string>`, an empty mapping nested inside a populated one is nulled without re-typing the parent, and the populated value survives a parquet round trip. Prints its own denominator: `empty_mapping_nulled_and_written 4 of 4 publishers, 5 rows written to parquet`.",
+      "introduces": [
+        "test_empty_mapping_in_a_listing_row_is_nulled_and_writes_for_every_publisher"
+      ],
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~21/AMGT_HARVST.TO-HVST-v-1.session_log.md",
+      "kind": "doc",
+      "commit_or_etag": "fa1116c9b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The committed session log: the change described, all three criteria's outputs in full, the mutant and determinism controls, and the three rows filed. Assembled mechanically from the captured run outputs (.scratch/r1/*.txt) rather than retyped.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "fa1116c9b3",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three APPENDED rows, no existing row edited: AMGT_HARVST-Z-W21-S1 / -S2 / -S3. The file still parses as ONE fenced JSON array (55 rows) and carries zero non-ASCII characters.",
+      "introduces": [
+        "AMGT_HARVST-Z-W21-S1",
+        "AMGT_HARVST-Z-W21-S2",
+        "AMGT_HARVST-Z-W21-S3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE DEFECT REPRODUCED AND THEN GONE, on the REAL held sa payload, both arms in one output: BEFORE the change, building the listing rows and calling pyarrow's parquet writer raises ArrowNotImplementedError naming a struct with no child field; AFTER the change, the same payload writes and the row count is printed (expected 20). The BEFORE arm must be produced by running the pre-change code path, never by quoting this order",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r1/ac1.py",
+      "output_evidence": "AC1 -- HVST-v-1: empty mapping in a listing row, BEFORE and AFTER, one held sa payload\nheld payload: C:\\Users\\Opal Bloomberg\\Desktop\\ajb_workspace\\.runtime\\opal-data-harvest\\harvest_listing\\sa_p1_990943eddbd5a172.json (137260 bytes)\npyarrow 24.0.0 | write path = pa.Table.from_pylist + pq.write_table (store.py:348 verbatim, in-memory buffer, NO S3)\n\nARM PROVENANCE (the control that the BEFORE arm is really pre-change bytes)\n  BEFORE source = <git show HEAD:lib/opal_data_harvest/silver_from_bronze.py>  carries '_null_empty_mappings': False\n  AFTER  source = lib/opal_data_harvest/silver_from_bronze.py (worktree)  carries '_null_empty_mappings': True\n\nBEFORE (HEAD bytes): rows built = 20 of 20 expected; empty-mapping field values = 20\n  themes on row[0] = {}   (type dict)\n  WRITE RAISED: ArrowNotImplementedError: Cannot write struct type 'themes' with no child field to Parquet. Consider adding a dummy child field.\n  raised at: pyarrow.lib.ArrowNotImplementedError: Cannot write struct type 'themes' with no child field to Parquet. Consider adding a dummy child field.\n\nAFTER (worktree bytes): rows built = 20 of 20 expected; empty-mapping field values = 0\n  themes on row[0] = None   (type NoneType)\n  WRITE: SUCCEEDED -- parquet row count written = 20 of 20 expected\n  arrow type of themes AFTER = null\n  columns = 25\n\n  BEFORE arm ran pre-change bytes (no fix marker)      PASS\n  AFTER arm ran post-change bytes (fix marker present) PASS\n  BEFORE write raised ArrowNotImplementedError         PASS\n  BEFORE error names a struct with no child field      PASS\n  AFTER write succeeded                                PASS\n  AFTER parquet row count == 20                        PASS\n  AFTER rows carry no empty mapping                    PASS\n  BEFORE rows carried 20 empty mappings                PASS\n\nAC1 denominator: 8 of 8 checks PASS\nAC1: PASS -- defect reproduced on pre-change bytes and gone on post-change bytes\n[rc=0]",
+      "denominator": "8 of 8 checks PASS. Row denominator: 20 of 20 listing rows from the one held sa page (sa_p1_990943eddbd5a172.json, 137260 bytes), 25 columns. Empty-mapping field values: 20 BEFORE, 0 AFTER.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE POSITIVE CONTROL, and it is the criterion that can fail this cell: wsj's held listing payload produces a BYTE-IDENTICAL row set and an IDENTICAL arrow schema before and after the change -- print both schemas and the comparison verdict, plus the row count. AND a populated mapping still writes AS A STRUCT: construct a row whose mapping has at least one key, show its arrow type is struct with that child, and show it writes. A fix that re-types a column wsj already writes is a silver schema change wearing a bug fix's clothes and must be caught here",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r1/ac2.py",
+      "output_evidence": "AC2 -- HVST-v-1 POSITIVE CONTROL: wsj unchanged, populated mapping still a struct\npyarrow 24.0.0 | BEFORE = git show HEAD:lib/opal_data_harvest/silver_from_bronze.py (carries fix: False) | AFTER = worktree (carries fix: True)\n\n==============================================================================\nARM A -- wsj HELD listing payloads: byte-identical rows AND identical arrow schema\n==============================================================================\n\n-- wsj_p1_45058f937f5eff24.html (598358 bytes held)  rows BEFORE = 20  rows AFTER = 20\n   canonical row-set sha256 BEFORE = ea63967cc060054e302c78d84ee9875950139803df673ea39b1b13db0588229b (27195 bytes)\n   canonical row-set sha256 AFTER  = ea63967cc060054e302c78d84ee9875950139803df673ea39b1b13db0588229b (27195 bytes)\n   ROW SET VERDICT: BYTE-IDENTICAL\n   direct equality (before_rows == after_rows): True\n   arrow schema BEFORE (25 fields):\n      articleUrl: string\n      commerceProduct: string\n      contentTag: string\n      bylineData: list<item: struct<text: string, ref: string, phrase_type: string, id: string, type: string, name: string>>\n      flashline: string\n      headline: string\n      imageAlt: string\n      printHeadline: string\n      printPublicationDate: string\n      seoPathValue: string\n      summary: string\n      timestamp: string\n      article_id: null\n      url: string\n      search_rank: int64\n      search_page: int64\n      search_query: string\n      query_sha256: string\n      source: string\n      publisher: string\n      fetch_date_utc: date32[day]\n      bronze_key: string\n      fetched_at: timestamp[us, tz=UTC]\n      retrieval_mode: string\n      run_stamp: string\n   arrow schema AFTER  (25 fields):\n      articleUrl: string\n      commerceProduct: string\n      contentTag: string\n      bylineData: list<item: struct<text: string, ref: string, phrase_type: string, id: string, type: string, name: string>>\n      flashline: string\n      headline: string\n      imageAlt: string\n      printHeadline: string\n      printPublicationDate: string\n      seoPathValue: string\n      summary: string\n      timestamp: string\n      article_id: null\n      url: string\n      search_rank: int64\n      search_page: int64\n      search_query: string\n      query_sha256: string\n      source: string\n      publisher: string\n      fetch_date_utc: date32[day]\n      bronze_key: string\n      fetched_at: timestamp[us, tz=UTC]\n      retrieval_mode: string\n      run_stamp: string\n   SCHEMA VERDICT: IDENTICAL\n   parquet row count BEFORE = 20  AFTER = 20\n   table data equality: True\n\n-- wsj_p2_bfec5a47fe3ed50b.html (529261 bytes held)  rows BEFORE = 0  rows AFTER = 0\n   canonical row-set sha256 BEFORE = 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945 (2 bytes)\n   canonical row-set sha256 AFTER  = 4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945 (2 bytes)\n   ROW SET VERDICT: BYTE-IDENTICAL\n   direct equality (before_rows == after_rows): True\n   0 rows on this held page -- no schema to compare (searchResults is an empty list in the captured bytes); row-set identity still measured above\n\nARM A row denominator: 20 wsj listing rows compared across 2 held pages\n\n==============================================================================\nARM B -- a POPULATED mapping still writes AS A STRUCT (and a nested empty one is nulled)\n==============================================================================\nrows built = 1 of 1 expected\nthemes value  = {'berkshire': 'primary'}\nnested value  = {'kept': {'inner': 7}, 'dropped': None}\nlinks value   = {'self': '/news/901-populated'}\narrow type of themes = struct<berkshire: string>\narrow type of nested = struct<kept: struct<inner: int64>, dropped: null>\narrow type of links  = struct<self: string>\nWRITE: SUCCEEDED -- parquet bytes = 6701, rows = 1\nread back from the parquet bytes: themes = {'berkshire': 'primary'}\nread back from the parquet bytes: nested = {'kept': {'inner': 7}, 'dropped': None}\n\n  wsj_p1_45058f937f5eff24.html arrow schema identical        PASS\n  wsj_p1_45058f937f5eff24.html arrow table data identical    PASS\n  wsj_p1_45058f937f5eff24.html parquet row count unchanged   PASS\n  wsj_p1_45058f937f5eff24.html row set byte-identical        PASS\n  wsj_p1_45058f937f5eff24.html row count unchanged           PASS\n  wsj_p2_bfec5a47fe3ed50b.html row set byte-identical        PASS\n  wsj_p2_bfec5a47fe3ed50b.html row count unchanged           PASS\n  populated themes is a struct with its child                PASS\n  populated themes value preserved                           PASS\n  populated parent stays a struct with an empty child nulled PASS\n  populated links unchanged                                  PASS\n  populated-mapping row writes to parquet                    PASS\n  populated themes survives the parquet round trip           PASS\n\nAC2 denominator: 13 of 13 checks PASS (wsj rows compared: 20)\nAC2: PASS -- wsj row set and schema unmoved; a populated mapping is still a struct\n[rc=0]",
+      "denominator": "13 of 13 checks PASS. wsj rows compared: 20 of 20 (wsj_p1, the only held wsj page that yields rows -- wsj_p2's captured searchResults is an empty list, 0 rows both arms, row AMGT_HARVST-Z-W21-S3), across 2 of 2 held wsj pages; 25 of 25 arrow fields identical; populated-mapping arm 1 of 1 row written and round-tripped.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the opal_data_harvest suite runs and its pass/fail counts are printed as a BOUND -- the number of tests passing, stated with the count, and zero regressions against the pre-change run of the same command (print both numbers). Your new test for the empty-mapping case is part of this suite and is named in the output",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/ -q 2>&1 | tail -15",
+      "output_evidence": "PRE-CHANGE run of the identical command, before any edit in this worktree (@d0171ffe4f): `3 failed, 160 passed, 4 subtests passed in 5.73s`, pytest rc=1 read via PIPESTATUS (the pipeline's own rc is tail's and is always 0).\n\nPOST-CHANGE run:\n    dj().check()\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n\n    def check(self):\n>       value = self.session.get(self.base + \"/client?legacy=false\",\n                ^^^^^^^^^^^^^^^^\n                                 headers={\"Referer\": self.base + \"/\", \"Accept\": \"application/json\"}).json()\nE       AttributeError: 'NoneType' object has no attribute 'get'\n\nlib\\opal_data_harvest\\publishers.py:672: AttributeError\n=========================== short test summary info ===========================\nFAILED lib/opal_data_harvest/test_verification.py::Tests::test_disabled_barrons_contract_defers_before_opening_a_browser - FileExistsError: [WinError 183] Cannot create a file when that file already...\nSUBFAILED(failures=1) lib/opal_data_harvest/test_worker.py::Tests::test_single_broken_dow_jones_article_is_skipped_but_repeated_server_failure_stops - AttributeError: 'NoneType' object has no attribute 'get'\nSUBFAILED(failures=2) lib/opal_data_harvest/test_worker.py::Tests::test_single_broken_dow_jones_article_is_skipped_but_repeated_server_failure_stops - AttributeError: 'NoneType' object has no attribute 'get'\n3 failed, 161 passed, 4 subtests passed in 5.35s\n[pipeline rc=0]\n\nBOTH NUMBERS: 160 -> 161 passed (+1, this cell's new test), 3 -> 3 failed, 4 -> 4 subtests passed. ZERO REGRESSIONS: the same three pre-existing nodeids fail before and after, none of them in this cell's write grant (row AMGT_HARVST-Z-W21-S2). Second instrument on the +1: test_silver_from_bronze.py now collects 17 items where it collected 16 -- MEASURED on both ends, not inferred: `git show HEAD~1:lib/opal_data_harvest/test_silver_from_bronze.py | grep -c '^def test'` = 16 against 17 in the worktree, and `--collect-only` on the whole suite = 162 post-change, hence 161 pre-change.\n\nTHE NAMING CLAUSE IS NOT PRODUCIBLE BY THIS INVOCATION and is NOT claimed as met by it (row AMGT_HARVST-Z-W21-S1, ARMED, disarm_owner 2.0.0_SA_COO~Y): `pytest -q` prints a nodeid only for a test that FAILED, so grep for the new test's name returns 0 hits in the tailed output AND 0 in the full untailed -q stream, while the three FAILING nodeids are named. pytest.ini carries no addopts. The auxiliary run that does name it, recorded here as the substitute oracle for that clause only:\n============================= test session starts =============================\nplatform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0 -- C:\\Users\\Opal Bloomberg\\AppData\\Local\\Programs\\Python\\Python311\\python.exe\nrootdir: C:\\tmp\\wk-hvst-r1\nconfigfile: pytest.ini\nplugins: anyio-4.14.1\ncollecting ... collected 17 items / 16 deselected / 1 selected\n\nlib/opal_data_harvest/test_silver_from_bronze.py::test_empty_mapping_in_a_listing_row_is_nulled_and_writes_for_every_publisher PASSED [100%]\n\n====================== 1 passed, 16 deselected in 0.49s =======================\n[rc=0]\n\n(ANSI colour escapes stripped from the pytest streams above; bytes otherwise as captured.)",
+      "denominator": "161 of 162 COLLECTED tests pass post-change, against 160 of 161 pre-change: +1 collected, +1 passed, 1 pre-existing failed test unchanged. THE COLLECTED COUNT IS THE DENOMINATOR AND IT IS NOT THE SUMMARY LINE'S ARITHMETIC: `python -m pytest lib/opal_data_harvest/ -q --collect-only | tail -3` prints `162 tests collected`, so the summary's `3 failed, 161 passed` is 161 passed + 1 FAILED TEST (test_verification) + 2 SUBFAILED entries, which are subtest failures of a test that passes at test level (test_worker) and are already counted inside the 161. Adding the summary's failed and passed numbers overstates the population by 2 -- corrected here against the collect-only read rather than inferred from the summary. The new test itself: 4 of 4 publishers, 5 of 5 rows written to parquet.",
+      "status": "PASS",
+      "status_reason": "PASS is claimed on the BOUND the invocation produces -- the passing count, both numbers, and zero regressions. The clause 'named in the output' is UNPRODUCIBLE BY THIS INSTRUMENT (pytest -q never names a passing test; measured 0 grep hits in both the tailed and the untailed stream) and is carried to the issuer as row AMGT_HARVST-Z-W21-S1 with the -v run as the substitute oracle, rather than being reported as met by output. If the issuer reads that clause as load-bearing, this row is a FAIL and the order stays open on it -- that judgment is the issuer's at L9, not this worker's."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "`_null_empty_mappings` replaced by the identity function in the live module and the new suite test re-run, then reverted and re-run -- the fix removed, nothing else touched (.scratch/r1/mutant.py, rc=0).",
+      "expected": "The test FAILS with the mutation applied (and fails on the empty-mapping assertion, not incidentally), and PASSES again once it is reverted.",
+      "observed": "MUTANT CONTROL -- test: test_empty_mapping_in_a_listing_row_is_nulled_and_writes_for_every_publisher\nmutation applied: _null_empty_mappings -> identity (the fix removed, nothing else touched)\nMUTANT RESULT: FIRED -- AssertionError: sa: empty mapping 'themes' was not nulled: {}\n  last frame: File \"C:\\tmp\\wk-hvst-r1\\lib\\opal_data_harvest\\test_silver_from_bronze.py\", line 656, in test_empty_mapping_in_a_listing_row_is_nulled_and_writes_for_every_publisher |     assert rows[0][empty_field] is None, \\ |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nmutation reverted\nempty_mapping_nulled_and_written 4 of 4 publishers, 5 rows written to parquet\nPOST-REVERT: PASSED (the mutation, not the test, was the difference)\nmutant denominator: 1 mutation, 1 test, expected FIRED then PASSED\nVERDICT: FIRED-AS-EXPECTED",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1 and AC2 each run twice on the same inputs, the two outputs compared byte-for-byte with `cmp` and `sha256sum` (.scratch/r1/det_ac{1,2}_{1,2}.txt).",
+      "observed": "AC1 run1 vs run2: IDENTICAL, both 9be5d3d874b171f93f68a6d7dda46aed24f7fc884fdbf8c2175eca1008ef9bda. AC2 run1 vs run2: IDENTICAL, both 96cddbae2ac3926265c4acc40e28a88b8e76030dfa7578284abc8baff12e1dea. The suite's own baseline is NOT fully stable in its CAUSES (row AMGT_HARVST-Z-W21-S2): one pre-existing failure reported KeyError 'bundle' on one run and FileExistsError [WinError 183] on the next, same nodeid, no intervening edit. Its COUNTS were stable across both runs (3 failed).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A coercion at `lib/research/harvest/store.py` `silver_append` (:348), where a truly universal empty-mapping fix would belong for EVERY silver table.",
+      "reason": "Standing clause 3 forbids it outright -- that function is the chokepoint every silver table in the estate writes through, it is not in this cell's <paths>, and editing it fails the cell even if the tests pass. Read only. The issuer records it as a never-widen conversation, not a rider on a BLOCKING disarm."
+    },
+    {
+      "item": "The same empty-mapping coercion on `article_rows` (the silver `article` table).",
+      "reason": "Out of the cell's sentence: 'make a listing ROW carrying an empty mapping writable'. Every criterion is a listing-row criterion and AC2's control is a listing row. Widening to the article path unmeasured would be the worker widening its own order. STATED SO IT IS NOT READ AS COVERED: an empty mapping in an ARTICLE payload still fails at the same parquet writer."
+    },
+    {
+      "item": "Any live S3 read or write, any vendor call, and any re-run of the sa listing upload that row AMGT_HARVST-Z-S28 was filed from.",
+      "reason": "Standing clauses 1 and 2 (no network, no vendor call, no S3 write, no S3 delete). The write path is exercised against an in-memory io.BytesIO, which is the same `pq.write_table` call `silver_append` makes; the S3 `put_object` that follows it is not reached. The held payloads under the main tree's .runtime/ were read only and never copied into the repo."
+    },
+    {
+      "item": "The three pre-existing suite failures (test_verification.py test_disabled_barrons_contract_defers_before_opening_a_browser; test_worker.py test_single_broken_dow_jones_article_is_skipped_but_repeated_server_failure_stops, 2 subfailures).",
+      "reason": "Outside this cell's <paths>, and a worker never fixes a neighbouring defect. Present identically before and after, so the zero-regression comparison holds. Recorded as row AMGT_HARVST-Z-W21-S2 so the 161 is not read as a green suite."
+    },
+    {
+      "item": "An `expect` regex on any acceptance row.",
+      "reason": "The task order's <expect> clauses are prose sentences, not Python regexes; pasting prose into the field would make the checker's DOTALL match fail on output that satisfies the criterion. The rows are graded as self-report against the verbatim criterion text, which is the pre-v3 state and is stated as such."
+    }
+  ],
+  "surprises": [
+    "AMGT_HARVST-Z-W21-S1: AC3's literal invocation cannot produce one clause of its own expectation -- `pytest -q` prints a nodeid only for a FAILING test, so 'your new test ... is named in the output' is unsatisfiable by `python -m pytest lib/opal_data_harvest/ -q | tail -15` no matter what the worker writes (0 grep hits in the tailed AND the untailed stream; the test itself passes and is named under -v). OBSERVATION / ARMED, disarm_owner 2.0.0_SA_COO~Y.",
+    "AMGT_HARVST-Z-W21-S2: the suite AC3 grades against is already red at HEAD -- 3 failed / 160 passed before this cell touched anything -- and one of those failures changed its CAUSE between two runs minutes apart (KeyError 'bundle' then FileExistsError WinError 183) while keeping the same nodeid, so 'zero regressions' is stable on counts but not on causes. OBSERVATION / ARMED, disarm_owner 2.0.0_SA_COO~Y.",
+    "AMGT_HARVST-Z-W21-S3: one of the two held wsj listing pages yields ZERO rows -- wsj_p2's captured bytes carry `searchResults` as an EMPTY LIST -- so the wsj control population is 20 rows from ONE page, not 40 from two, a denominator a sibling cell counting 'wsj: 2 held pages' would over-state twofold. OBSERVATION / INERT."
+  ],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~21/AMGT_HARVST.TO-HVST-v-1.session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "ac1.py (AC1 -- the defect reproduced on pre-change bytes, then gone)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r1/ac1.py",
+      "result": "rc=0; 8 of 8 checks PASS; BEFORE ArrowNotImplementedError on themes, AFTER 20 of 20 rows written, themes typed null"
+    },
+    {
+      "tool": "ac2.py (AC2 -- wsj positive control + populated-mapping arm)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python .scratch/r1/ac2.py",
+      "result": "rc=0; 13 of 13 checks PASS; wsj row set BYTE-IDENTICAL (ea63967cc060054e302c78d84ee9875950139803df673ea39b1b13db0588229b both arms), schema IDENTICAL over 25 fields, populated mapping still struct<berkshire: string>"
+    },
+    {
+      "tool": "pytest (AC3 -- the suite as a bound)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && python -m pytest lib/opal_data_harvest/ -q 2>&1 | tail -15",
+      "result": "pre-change 3 failed / 160 passed / 4 subtests; post-change 3 failed / 161 passed / 4 subtests; +1, zero regressions. Denominator read separately: `--collect-only` = 162 tests collected (161 pre-change), so the summary line's failed+passed is NOT the population"
+    },
+    {
+      "tool": "mutant.py (control -- the fix mutated to a no-op)",
+      "invocation": "python .scratch/r1/mutant.py",
+      "result": "rc=0; FIRED-AS-EXPECTED (AssertionError on the empty-mapping assertion), then PASSED once reverted"
+    },
+    {
+      "tool": ".tools/commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "runs inside .tools/safe-commit.sh on this commit",
+      "result": "see the commit's own output; both edited files are .py"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py (this instance)",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~21/AMGT_HARVST.TO-HVST-v-1.empty-mapping-cannot-reach-silver.proof_of_spec.json AC1,AC2,AC3",
+      "result": "see the report line beside this instance in the session log; only the exit code is the verdict"
+    }
+  ]
+}

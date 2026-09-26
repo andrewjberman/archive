@@ -1,0 +1,40 @@
+{
+  "inputs": [
+    {
+      "input": "spans",
+      "producer": "lib/research/filings/drafting_build.py:303",
+      "commit": "705dd96375d016310f6b0afc8acb538ddfe78fe0",
+      "owner_project": "AMGT_RESAPP",
+      "write_surface": "the drafting document object (`sections[].sentences[].quoted_spans`) that `build_drafting_document()` returns and `AMGT-rk-91`'s pipeline lands as the `.analysis.json`-derived drafting artifact; no S3 prefix of its own -- it rides the filings analysis object",
+      "served_evidence": "the `thesis` route's served drafting block carries `held_no_span_count: 21`, `held_no_span_basis: READ_GATE_ONLY_OBJECT_FIELD_ABSENT`, `held_uncited_count: 0` (read off `ctoZ_ENDPOINT_COVERAGE_AUDIT_AMGT_RESAPP_20260925T0355Z.md` section on FWD-18, itself a fresh live read of `amgt-lead-panel.ts:132`'s thesis route ~2026-09-25 06:2xZ) -- 23 drafted sentences, 2 served on span, 21 held",
+      "proposed_cell": "AMGT_RESAPP: at `FilingsProducer.draft()` (`drafting_build.py:280-317`), the `quoted_spans(text, self.excerpt_locator)` call (`:290`) returns `[]` for the 21 held sentences because `quote_method` falls to `none-found` (`:291-296`); a cell would widen `quoted_spans()`'s own matcher (`:205`) so it locates a verbatim span for prose forms it currently misses, moving the 21 from held to served and closing FWD-18/FWD-9/FWD-3 together per round42's own finding"
+    },
+    {
+      "input": "unit_sign",
+      "producer": "integrations/bloomberg/research/model_block_pull.py:700",
+      "commit": "705dd96375d016310f6b0afc8acb538ddfe78fe0",
+      "owner_project": "shared: AMGT_RESAPP, AMGT_CORPUS",
+      "write_surface": "the landed `model_block.json` figure's `unit` field, persisted to the AMGT_CORPUS model-block deliverable store that AMGT_RESAPP's `read_model_block` (`scoped_amgt.py`) reads back",
+      "served_evidence": "`checkface/run_checks.py`'s live figure verdicts on the served `thesis`/`overlay` routes report `verdict REFUSE`, `reason \"<mnemonic>: unit/sign convention is 'NOT-YET-BUILT', not MEASURED\"` for 27 distinct mnemonics (26 `NOT-YET-BUILT` + 1 `IS_DIV_PER_SHR` `SIGN-UNRESOLVED`), covering 192 of 391 served pdf figure lines (49%) -- read off `ctoZ_ENDPOINT_COVERAGE_AUDIT_AMGT_RESAPP_20260925T0355Z.md` FWD-3/FWD-5/FWD-9 sections, a live `lambda:Invoke` of `opal-amgt-scoped-api` at `/api/scoped/amgt/security/BA_US_Equity/print`",
+      "proposed_cell": "shared cell, likely landing in AMGT_CORPUS (owns `model_block_pull.py`'s build): `_resolved_unit()`/`_resolved_sign()` (`:684-712`) fall back to the placeholder whenever `field_map.json` (built by `build_field_map.py`, C-UNIT-MAP-MEASURED) carries no entry for that mnemonic+security; a cell extends `build_field_map.py` to resolve the 26 missing mnemonics (the `BEST_*` consensus set plus `NET_INCOME` etc.) so `_resolved_unit()` returns a real unit instead of the pointer, moving FWD-3, FWD-5 and unblocking FWD-20's `BEST_ESTIMATE_FCF` subtrahend"
+    },
+    {
+      "input": "social_chatter",
+      "producer": "lib/research/api/scoped_amgt.py:1999-2000",
+      "commit": "705dd96375d016310f6b0afc8acb538ddfe78fe0",
+      "owner_project": "AMGT_RESAPP",
+      "write_surface": "the `overlay` route's served payload, keys `chatter` and `price` (GET `/api/scoped/amgt/security/{key}/overlay`, client-called at `amgt-lead-panel.ts`)",
+      "served_evidence": "row Z-S278 and `ctoZ_ENDPOINT_COVERAGE_AUDIT_AMGT_RESAPP_20260925T0355Z.md` FWD-11 section: a live read of `overlay` for `BA_US_Equity` shows `chatter: null` and `price: null` as bare nulls (no `status`/`coverage_status`/reason field), unlike `description`, `feed` and `posture` on the same payload which each carry a typed absence; `trending/chatter` route separately serves `row_count 2`, both scores `0`, `state COMPLETE`, `empty_reason null` (FWD-15 section, live read ~2026-09-25 07:0xZ)",
+      "proposed_cell": "AMGT_RESAPP: at `scoped_amgt.py:1999-2000`, replace the bare `by_axis.get(...)` value for `chatter` (and `price`) with the estate's own `classify.absent()` helper that `description`/`feed`/`posture` already use on the same payload, so a null carries WHY (nothing collected vs. read failed vs. never wired) -- closes the FWD-11 finding and gives FWD-13/FWD-15/FWD-16 a real absence to read instead of a silent null"
+    },
+    {
+      "input": "universe",
+      "producer": "lib/research/identity/build_universe.py:846-855",
+      "commit": "705dd96375d016310f6b0afc8acb538ddfe78fe0",
+      "owner_project": "AMGT_RESAPP",
+      "write_surface": "s3://opal-data-harvest/universe/v1/<as_of>.json (`UNIVERSE_PREFIX = \"universe/v1/\"`, `build_universe.py:449`), the union-universe pool document's `denominators` block",
+      "served_evidence": "the `freshness` route's live `universe_denominators` (client-called via `amgt-lead-panel.ts`, read in `ctoZ_ENDPOINT_COVERAGE_AUDIT_AMGT_RESAPP_20260925T0355Z.md` FWD-7 section): `coverage 89, holdings_distinct 167, union 250, both 6, resolved 191, unresolved 59`; the live research library reads `folders_in_records 95` (round43 analysis section 2.3, crosswalk object read `23:49:31Z`); the tenure pool reads `7` (FWD-17, same audit); FOUR denominators (89/94-or-95/7/250) stand unreconciled in one project per the audit's own count",
+      "proposed_cell": "reserved, not a build cell per the audit and round42/43 analyses: `FWD-17`, `FWD-19`, `rp-1` and this route are all blocked on Andrew naming WHICH of the four populations (89 frozen snapshot, 95 live research folder, 7 tenure pool, 250 union) is the ranking/posture/comparable universe -- the fabric can only surface the card, per `ROUND_ANALYSIS.round42.md` and the audit's FWD-7/FWD-19 sections; a build cell would pick one of the four and re-key `build_universe.py`'s consumers (posture's `membership.py:119`, the freshness route, the lead-panel ranking) onto it once Andrew answers"
+    }
+  ]
+}
