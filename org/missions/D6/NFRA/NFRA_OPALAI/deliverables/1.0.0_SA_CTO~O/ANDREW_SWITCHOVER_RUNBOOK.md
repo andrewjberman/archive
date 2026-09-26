@@ -56,14 +56,14 @@ It fills in the exact paths below. Nothing here asks you to type a password or a
    - `claude mcp add --transport http --scope user opal-gateway-bbg https://mcp.opalinvest.dev/mcp`, the ONE server the
      runtime may use;
    - `[Environment]::SetEnvironmentVariable('OPAL_RUNTIME_CONFIG','C:\opal_runtime\runtime.config.json','User')`.
-4. **Claude sign-in:** run the launcher command above. A browser sign-in opens. Sign in with the Claude account you
-   choose for the Analyst.
+4. **Claude sign-in:** run the launcher command above. A browser sign-in opens. Sign in with the DEDICATED Analyst account,
+   never your own (your answer to call 3, record `ANDREW_DIRECT_20260926_022xZ_CTO_O_OPEN_CALLS_1_TO_6_ANSWERED.md`).
 5. **Gateway sign-in:** in that same session, the gateway (`opal-gateway-bbg`) asks for a Microsoft sign-in as
    **Opal Bloomberg**. The MFA code comes to your phone. The Analyst's first act then checks `whoami` = Opal Bloomberg.
 
 ## Part C -- the test colleague
 
-6. **Name the colleague and what they may see.** The COO writes their permissions through the existing operator path,
+6. **The colleague is Alyssa Keith, scoped to portal figures only** (your answer to call 2). The COO writes their permissions through the existing operator path,
    and nothing new is built. Then the colleague asks the Analyst one real question in Teams, about a figure the portal
    shows. A second, un-admitted person asks too, and must be refused.
 
@@ -73,8 +73,8 @@ It fills in the exact paths below. Nothing here asks you to type a password or a
    that records the claims) in your browser, signed in as yourself. That one request lets the gateway record which
    identity claims your sign-in carries, as names only and no values. If the recorded names do NOT include `oid`, also
    open `https://mcp.opalinvest.dev/api/admin/whoami` and give the COO the `sub` value it shows you. It goes only into
-   the grant writer's configuration. The writer's apply also needs your word for one pinned download from PyPI
-   (G-PYPI).
+   the grant writer's configuration. Your word for the writer's one pinned PyPI download
+   (G-PYPI) is given (call 4).
 8. **Later, the live test:** from the dashboard's Entitlements tab, narrow one colleague's data access, see their next
    question answered within the new limit, then widen it back.
 

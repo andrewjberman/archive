@@ -24,8 +24,10 @@ Z-W2-S2, and the gateway release-base rule @75117e60d6.
    containing an unprofiled member is refused.
 2. **E2 -- the upload refused to the runtime** (Z-S18 and Z-S19, Andrew's option 2). `identity_scope` is keyed on
    (identity, OAuth client_id), and `opal_data_refresh_upload` is allowed to the operator's client only. The test points
-   at a fixture overlay. **If Andrew's call 2 answer lets the Analyst seat's fence drop the upload now, that one-line
-   fence change is cut FIRST, ahead of this whole list.**
+   at a fixture overlay. OA-f-1 already landed the client key (@e8b9aaeebf); what remains is the fence: **drop
+   `opal_data_refresh_upload` from the Analyst's tool list.** Andrew's call-6 answer (~02:2xZ): a daily script does
+   the upload off the gateway (`publish_to_portal.py`), and an agent is only a failsafe. The Analyst runtime cannot be
+   that failsafe (its own OAuth client, no AWS), so the fence drop loses nothing.
 3. **E3 -- switch the Analyst on for the asker tool.** Add `opal_asker_query` to the concierge seed allowlist, which
    ends the "deploys dark" state from Z-S6. **Only after E1 and E2 land**, because the tool goes live for the Teams path
    only once the bypass and the upload reach are closed.
@@ -46,10 +48,12 @@ Z-W2-S2, and the gateway release-base rule @75117e60d6.
 8. **E8 -- speed** (FWD-3, S9): real exchanges timed stage by stage against the 2026-08-20 baseline. Its first cell only
    MEASURES; the remedies are cut from what it finds.
 
+9. **E9 -- the gateway move into `opal_ai`** (FWD-5 and FWD-11, S11 and S12). G-MOVE is OPEN: Andrew lifted the
+   NFRA_OPLGTW stop fully (~02:2xZ, call 5). Cut after E1-E3 land, from the ONE release base (@75117e60d6), one
+   release; its first cell is the census of what CLOUD holds unreleased on the gateway paths.
+
 ## Deliberately NOT in this draft
 
-- **The gateway move into `opal_ai`** (FWD-5 and FWD-11, S11 and S12). It is held by G-MOVE, which waits on Andrew's
-  OPLGTW call.
 - **Operator controls** (FWD-8's admit, narrow and remove): these ARE NFRA_MCPORTAL's Entitlements tab. This project
   grades FWD-8 against MCPORTAL's deliverable and builds no second admin surface.
 - **The release flow** (S13, FWD-9): its first real exercise is E3's release. It is graded then, not built separately.
