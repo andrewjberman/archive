@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-v-6",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "97f1aad836",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-v-6.routing-harness.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~2",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/routing/questions.yaml",
+      "kind": "config_data",
+      "commit_or_etag": "e1cdb12550",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "27 questions quoted from repo records of a staff member asking them. Each has id, question, asker, source (path:line) and expected_tool. 27 of 27 quotes were found at the cited line (worker's check, window of the line plus 2). The 8 asks in the Analyst's thread memory are Q01-Q06, Q26 and Q27. The other 19 come from logs, orders, a change record and call transcripts. Expected tools: 3 datasets (Q05 and Q07 json/benchmarks/model_portfolio_benchmarks.json, Q22 json-tiered/market-overview/summary/all-returns.json) and 24 NOT_CATALOGUED. Nothing is deployed.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/routing/run_routing.py",
+      "kind": "test",
+      "commit_or_etag": "e1cdb12550",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Offline harness. It calls opal_discover.discover(question, OPAL_INTERNAL, '') on the catalog loaded through query_v0._catalog(). The routed tool is the answer's first match: the portal_index tool whose accessor names that row, otherwise query_v0:<dataset key>. With no match it is NOT_CATALOGUED. The harness prints one line per question and ends with 'ROUTING: k of n routed to the expected tool'. --plant-mislabel swaps the expected tool of the first hit. It reads no S3 and writes nothing; audit.jsonl was unchanged after every run (git status clean).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "e1cdb12550",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Rows NFRA_MCPINDEX-Z-W2-S7, -S8 and -S9 were appended (surprise-row-gate: 3 new rows of 34, OK; the diff is 69 insertions and 0 deletions). No existing row was edited.",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/v6.AC1.sh; echo \"exit=$?\" -- expect: questions>=20; sources_at_head equals questions; expected_tools equals questions; catalog_overlap=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/v6.AC1.sh; echo \"exit=$?\"",
+      "expect": "(?m)^questions=(2[0-9]|[3-9][0-9]) sources_at_head=\\1 expected_tools=\\1 catalog_overlap=0 .*\\nRESULT: PASS\\s*\\nexit=0$",
+      "output_evidence": "questions=27 sources_at_head=27 expected_tools=27 catalog_overlap=0 descriptions=0\nRESULT: PASS\nexit=0",
+      "denominator": "27 questions; 27 of 27 sources exist at HEAD e1cdb12550; 27 of 27 carry an expected_tool; catalog_overlap 0 of 27. The check compared the questions against 0 catalog descriptions (descriptions=0), because the runtime catalog has no 'description' key, so this term cannot fail (row NFRA_MCPINDEX-Z-W2-S7, ARMED). The worker measured separately: 0 of 27 questions share a 6-word or a 4-word run with any of the catalog's 1069 string values. Run verbatim from the worktree root after the commit.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/v6.AC2.sh; echo \"exit=$?\" -- expect: plain run rc=0 ROUTING k of n (n>=20); planted-mislabel run rc=0 ROUTING k-1 of n -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/v6.AC2.sh; echo \"exit=$?\"",
+      "expect": "(?m)^plain run rc=0 ROUTING 21 of 27; planted-mislabel run rc=0 ROUTING 20 of 27\\s*\\nRESULT: PASS\\s*\\nexit=0$",
+      "output_evidence": "plain run rc=0 ROUTING 21 of 27; planted-mislabel run rc=0 ROUTING 20 of 27\nRESULT: PASS\nexit=0",
+      "denominator": "21 of 27 questions routed to the expected tool; the planted run scored 20 of 27 on the same n. The misses are Q05, Q07, Q09, Q13, Q22 and Q25 (row NFRA_MCPINDEX-Z-W2-S8). All 21 hits are NOT_CATALOGUED asks correctly left unrouted; 0 of the 3 dataset-expected asks route to their dataset first. Run verbatim from the worktree root at HEAD e1cdb12550.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "--plant-mislabel swaps the expected tool of the first question the plain run scores as a hit (Q01: NOT_CATALOGUED -> query_v0:json/benchmarks/model_portfolio_benchmarks.json). A second, unplanned negative arm also fired: the draft set cited Q05 at 2026-08-20.md:14, and the worker's quote-at-line check showed the ST ask sits at :13, so the citation was corrected before the commit.",
+      "expected": "The score falls by exactly 1 over the same n.",
+      "observed": "The plain run reported 'ROUTING: 21 of 27'. The planted run printed 'CONTROL: planted mislabel on Q01 ...', showed Q01 as a MISS, and reported 'ROUTING: 20 of 27'. Both exited rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The same inputs were run several times: the harness directly (25-question draft and 27-question set), the AC2 check before the commit and the AC2 check after it.",
+      "observed": "On the 27-question set every run gave 21 of 27 with the same 6 misses (Q05, Q07, Q09, Q13, Q22, Q25), and every planted run gave 20 of 27. Routing is a pure function of the committed catalog and question file.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No routing defect was fixed, and the check scripts and discover code were not edited.",
+      "reason": "Bound 1: a routing defect is a ROW (-Z-W2-S8). The check scripts and gateway code outside tests/routing/ are outside <paths>, so the vacuous overlap term is row -Z-W2-S7."
+    },
+    {
+      "item": "<status> in task-orders/NFRA_MCPINDEX.TO-MX-v-6.routing-harness.md is not flipped.",
+      "reason": "task-orders/ is not in this order's <paths> (the write grant), so the issuer flips it."
+    },
+    {
+      "item": "Expected tools are the author's reading of each ask. No accuracy bar is set.",
+      "reason": "The face sets no bar for this round. The live cold run with a non-author asker is G-B, Andrew's."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-W2-S7: v6.AC1's catalog_overlap compares against 0 catalog descriptions (the catalog has no 'description' key), so the term cannot fail. OBSERVATION/ARMED, disarm_owner 2.0.0_SA_COO~O.",
+    "NFRA_MCPINDEX-Z-W2-S8: routing defect with 6 misses in 3 signatures: a common word selects a whole channel (Q09, Q13, Q25), an unranked channel lists the served dataset after catalog order (Q05, Q07), and an index ask matches nothing (Q22). OBSERVATION/INERT.",
+    "NFRA_MCPINDEX-Z-W2-S9: the Analyst's thread memory holds 8 asks (1 data ask), and the CRO's question lists were not located. 19 of the 27 questions come from other verbatim records, and 24 of the 27 expect NOT_CATALOGUED. OBSERVATION/INERT."
+  ],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-v-6.routing-harness.md",
+  "compiler_tools": [
+    {
+      "tool": "round-2 checks v6.AC1.sh and v6.AC2.sh, the criterion instruments",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/v6.AC<1|2>.sh; echo \"exit=$?\"   (cwd /c/tmp/mx-2v)",
+      "result": "AC1 RESULT: PASS exit=0; AC2 RESULT: PASS exit=0 (at e1cdb12550)"
+    },
+    {
+      "tool": "run_routing.py (the harness itself)",
+      "invocation": "python infra/aws/ec2/opal-gateway/tests/routing/run_routing.py [--plant-mislabel]",
+      "result": "ROUTING: 21 of 27; planted: ROUTING: 20 of 27"
+    },
+    {
+      "tool": "comp-find / Grep census for real asks",
+      "invocation": "comp-find -i 'question list'; comp-find -i 'client ticket'; Grep over org/ for quoted '?' asks attributed to Andrew, Alyssa, Yang and staff; Grep over org/tier1_exec/4.0.0_SA_CRO*/** for question lists",
+      "result": "Thread memory: 11 inbound messages, 8 asks. The CRO's question lists were not located. 19 further verbatim staff asks were found in logs, orders, a change record and transcripts."
+    },
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~2 <...>\" -F .scratch/msg1.txt -- <3 paths>",
+      "result": "rc=0; e1cdb12550 (3 files, 370 insertions)"
+    }
+  ]
+}

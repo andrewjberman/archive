@@ -39,6 +39,8 @@ band). g-1's AC2 was re-cut before issuance when the measured currency data show
    HEAD `d8692bd507` (>= the guarded rule): 325 figures, 10 FY rows; **Base refused currency_mismatch (HKD vs USD)** as predicted.
    **AIA's dossier landed 02:1xZ** (`research-dossier/security_key=1299_HK_Equity/as_of=2026-09-26.1c60efdd74337db8.json`): 96
    model_rows, 38 with a value, its Model block named in inputs, a thesis summary from the team's memo. AIA is end to end.
+   **The full sequence after AIA closed 10 of 10, rc 0 (03:08Z): `fence dossier-served 83 resolved-but-no-prose 12
+   unresolved-with-reason 0 sum 95 folders_read 95`** -- every folder in the live research library dispositioned, none unresolved.
 
 ## 3. Rows -- dispositions for the L9
 

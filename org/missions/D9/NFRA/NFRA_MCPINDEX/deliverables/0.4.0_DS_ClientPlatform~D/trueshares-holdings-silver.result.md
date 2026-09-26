@@ -185,3 +185,34 @@ the served artifact's own LastModified, which predates the backfill -- it is not
 **Gap worth naming:** the `data/assets` ETF silver pipeline is invisible to `comp-pipescript` in all three verbs.
 A DS seat working this tree has no dependency-graph instrument at all, which is part of why a whole feed could
 sit unconverted for a month with every tool reporting green.
+
+---
+
+## 9. ADDENDUM 2026-09-26 -- Z-S5's self-clearing claim is now MEASURED, not predicted
+
+Section 4 claimed the PASS -> FAIL guard flip "clears itself with no data act" once the bundle is
+rebuilt. That was a prediction. It has now been tested, and it holds.
+
+Instrument: the sweep's READ-ONLY halves -- `expected_partitions_etf`, `_landed_silver`,
+`set_identity` -- run from the **FIXED repo bytes** against **live** bucket state. `run_sweep` itself
+was not called; nothing was written. The script asserts the module carries the W3-S2 fix before it
+will run, so it cannot silently grade the old bytes.
+
+What the rebuilt Lambda would write:
+
+```
+trueshares/DIVZ  expected=106 landed=106 matched=106 missing=0 alien=0 -> PASS  (fact_holdings=33, backfill_complete=True)
+trueshares/IDVZ  expected=106 landed=106 matched=106 missing=0 alien=0 -> PASS  (fact_holdings=33, backfill_complete=True)
+pathfinder/PFDE  expected=146 landed=144 matched=144 missing=2 alien=0 -> FAIL
+pathfinder/PFOE  expected=146 landed=144 matched=144 missing=2 alien=0 -> FAIL
+```
+
+**expected=106 exactly, alien=0.** So the rebuild both closes AC2 and disarms `Z-S5` in one act, and the
+72 backfilled partitions stop being alien the moment the bundle carries the fix. The deadline in section 4
+stands: a rebuild before 2026-09-26T23:30Z means the served verdict never flips at all.
+
+The same run named pathfinder's long-standing `missing 2` as
+`fact_dailynav/date={2026-08-29,2026-08-30}` on both funds. Bronze is present, on time and well-formed for
+both dates, so it is a conversion failure rather than a non-delivery -- and a weekend-shell explanation I
+offered for it was refuted by reading the files. That is filed as row `Z-S11`, citing `Z-S6`, and is
+outside this order's trueshares-only write surface.

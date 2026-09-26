@@ -1,0 +1,167 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-2",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "c3f599e9f2",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-2.bd-cusip-bridge.md"
+  },
+  "assignee": "0.4.0_DS_ClientPlatform~D",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/bd-cusip-bridge.result.md",
+      "kind": "doc",
+      "commit_or_etag": "7b29e3ef14",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ],
+      "deploy_evidence": "The cause one level above R-2 (2), the 119-log denominator behind it, the three FAIL verdicts with their measurements, and the ordered remedy spec for the DT/AE apply."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/probes/mx_s_2.py",
+      "kind": "script",
+      "commit_or_etag": "7b29e3ef14",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deploy_evidence": "AC3 plus a DIAG arm. AC3 prints its SUBSTITUTE cash rule, the tokens it used and the residual it cannot classify, because B_01's own rule keys on an asset_id column the served partition does not carry. DIAG bounds the fixable set from above and says so."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/SIGNOFF_REQUEST_bd_cusip.md",
+      "kind": "doc",
+      "commit_or_etag": "7b29e3ef14",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deploy_evidence": "The never-widen blast radius, measured: 73 partitions dated on/after the bridge freeze, both branches of the outcome read from B_01's own rule at :284-292, N=1 writer counted, and a rollback VersionId per key with opal-data-bd versioning verified Enabled live. Both halves UNSIGNED. It recommends NOT signing until the bridge is current. Nothing served moved."
+    },
+    {
+      "path_or_key": "org/missions/D9/NFRA/NFRA_MCPINDEX/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "8fc747bc09",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ],
+      "deploy_evidence": "Rows Z-S8, Z-S9, Z-S10, verified 3 of 3 present at CLOUD HEAD with a negative control on a non-existent id. NOTE ON THE PIN: this commit is 2.0.0_SA_COO~O's, not mine -- that seat committed the shared tree while my append sat uncommitted in it, so its commit carried my rows in alongside its own Z-S7. The rows landed correctly and the gate graded them; the authorship in the log is not mine and is stated rather than left to imply otherwise."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "schedules/rules named *assets-dim* ENABLED>=1; bd_assets_dim.parquet LastModified after issue=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s2.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "schedules/rules named *assets-dim* ENABLED=0 ( ); bd_assets_dim.parquet LastModified=2026-04-14T20:44:16+00:00 after issue=no -- RESULT: FAIL -- exit=1",
+      "denominator": "EventBridge rules and Scheduler schedules whose name contains 'assets-dim': 0 ENABLED. One rule for this leg DOES exist and is ENABLED -- bd-asset-dim-pipeline-trigger, cron(10 22 ? * MON-FRI *) -- but carries 'asset-dim' singular, so AC1's substring never matches it. Bridge LastModified 2026-04-14T20:44:16Z against an issue time of 2026-09-25T23:00:00Z.",
+      "status": "FAIL",
+      "status_reason": "REFUSED, on two independent grounds either of which is sufficient. (1) OUT OF LANE: CLAUDE.md rule 13 gives PROD triggers to DT/AE, and the order itself says not to work around the lane gate. (2) IT WOULD BE A FIX IN NAME ONLY: build_bd_assets_dim.py's only input, silver/bd_assets.parquet, is frozen at 2026-04-14T20:09:23Z -- 35 minutes BEFORE the bridge it feeds -- and both carry the SAME 10,937 asset_ids. Of the 791 asset_ids present in silver transactions since 2026-04-14 and absent from the bridge, the number present in that source today is ZERO. Firing the builder would move LastModified, satisfy this criterion's own freshness limb, and resolve 0 of 791. The ad-hoc QA fire named in step 1 was therefore also not made: it would have manufactured a passing AC1 over an unchanged bridge. Root cause in row Z-S8; the ordered remedy is section 5 of the result doc."
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "entry files at HEAD>=1; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR printed -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s2.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "entry files at HEAD=0; sentinel at HEAD=no; listed OPEN/HELD=0; SCAN DENOMINATOR: 12 of 12 sentinel(s) scanned -- RESULT: FAIL -- exit=1",
+      "denominator": "12 of 12 open-deploy sentinels scanned; 0 entry files at HEAD for slug nfra-mcpindex-bd-cusip-served-fix.",
+      "status": "FAIL",
+      "status_reason": "No NEVER-2 ledger entry exists because NO DEPLOY OCCURRED, and no deploy occurred because the served rewrite is gated on a never-widen sign-off this order correctly STOPPED for. Both halves are UNSIGNED in SIGNOFF_REQUEST_bd_cusip.md. Opening a ledger entry for an act that has not happened would be the inverse defect -- an OPEN entry another device would later have to measure and close SUPERSEDED. The sign-off request is written in full, with 73 partitions enumerated and a rollback VersionId per key, and recommends the halves NOT be signed until the bridge is current, because a rewrite against today's frozen bridge reproduces the same numbers."
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "(?m)^VERDICT: PASS-MXS2-AC3(?![0-9])",
+      "method": "command",
+      "invocation": "timeout 300 python org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/0.4.0_DS_ClientPlatform~D/probes/mx_s_2.py AC3",
+      "output_evidence": "DENOMINATOR: 1264679 rows; null cusip (incl. literal CASH) 22173; of which cash by the substitute 15185; NON-CASH null cusip 6988; of those, blank asset_name 98. VERDICT: FAIL-MXS2-AC3 (6988 non-cash null-cusip row(s))",
+      "denominator": "1,264,679 rows in gold/timeseries/holdings_lots/2026-09-18.parquet, the latest of 99 partitions read by key. Bridge side: 10,937 asset_ids, 9,900 with a usable cusip, 1,037 with none.",
+      "status": "FAIL",
+      "status_reason": "FAILS, and is ALSO not computable or reachable as written -- two separate defects in the criterion, both measured. (i) NOT COMPUTABLE: 'not cash by B_01's own cash rule' keys on asset_id=4 (B_01.holdings_lots.py:284-292), and the served partition carries NO asset_id column -- B_01 drops it before writing. The probe substitutes a stated asset_name token rule, prints the tokens, and counts the 98 rows it cannot classify either way rather than silently bucketing them. (ii) NOT REACHABLE: 1,037 of the bridge's 10,937 assets carry no cusip at all, so a permanent floor of non-cash nulls survives any bridge state; AC3 would read FAIL even after C-S13 is fully repaired. What a re-run could actually move is bounded, not asserted: of the 6,988 non-cash nulls, 1,798 carry a ticker today's bridge could resolve and 5,190 do not -- and 1,798 is an UPPER bound, because B_01 joins on asset_id while that bounding join uses ticker and the two keys can disagree. I did NOT measure that a re-run changes nothing. Row Z-S10 proposes a delta bar against a measured baseline in place of the absolute zero; the issuer amends its own criteria."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec names no mutant control, and this cell built nothing to plant one in: no schedule was created, no served object was rewritten. The controls that carried the weight were falsification controls on the READS, which is where every claim here comes from.",
+      "expected": "none named by the spec",
+      "observed": "Two run anyway. (1) SSM list_commands returned a bare 0, which would have read as 'no commands ever ran'; the exact CommandId from the lambda's own log was then used as a POSITIVE CONTROL and returned a full invocation record -- so the 0 was blindness, not absence. (2) The presence of my surprise rows at CLOUD HEAD was checked with a negative control on a non-existent row id, which correctly returned 0.",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Each arm is a single live read of changing production state; the log corpus read is a full sweep with its denominator printed rather than a sample.",
+      "observed": "AC1, AC2 and AC3 each ran and returned the same verdict on repeat within the session. The 119-log classification partitions cleanly with no residue (69 FAILED + 50 OK + 0 unclassifiable = 119), which is itself the stability check on that instrument.",
+      "status": "N/A-WITH-REASON"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The production schedule for build_bd_assets_dim.py, and the one ad-hoc QA fire of the builder named in step 1",
+      "reason": "Out of lane (rule 13 gives PROD triggers to DT/AE) AND a no-op while the builder's input is frozen -- it would resolve 0 of 791 missing asset_ids while making AC1 pass. The spec DT/AE needs is section 5 of the result doc. Row Z-S8."
+    },
+    {
+      "item": "The served rewrite of any gold/timeseries/holdings_lots partition, and the NEVER-2 ledger entry that would bound it",
+      "reason": "Gated on a never-widen sign-off with both halves UNSIGNED. The order says STOP until both are recorded; they are not. Nothing served moved and no ledger entry was opened for an act that did not happen."
+    },
+    {
+      "item": "Repairing the BD portal login on opal-bd-asset-dim-download (EC2 i-0e6f6dc014fdcf1cd), and making its wrapper exit non-zero on failure",
+      "reason": "AE/CloudOps and DT; a credential rotation or any vendor-side interaction needs Andrew's explicit word. This is the actual fix for C-S13 and everything else is a no-op before it. Rows Z-S8 and Z-S9."
+    },
+    {
+      "item": "Restoring the compaction to silver/bd_assets.parquet, which stopped at 2026-04-14 while silver/assets/ kept landing through 2026-06-18",
+      "reason": "A second, earlier break in the same chain, in convert_assets_to_silver.py's invocation (it writes the compacted file unless --no-compacted is passed; what the SSM document passes was not read). Named in the remedy spec, not repaired here."
+    },
+    {
+      "item": "Any alarm, monitor, notification or freshness checker over the 69-night silent failure",
+      "reason": "Standing moratorium. A non-zero exit code on a failing producer is a producer reporting its own result and is not an alarm; it is proposed in row Z-S9 as the owner's act."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-S8: the root cause of C-S13 is one level above R-2 (2) -- the BD asset-dim download has failed 69 consecutive runs since 2026-06-23 on one portal login timeout, so the builder's only input is frozen and scheduling the builder resolves 0 of 791 missing asset_ids.",
+    "NFRA_MCPINDEX-Z-S9: the SSM wrapper exits 0 on a failed pipeline, so SSM records Status=Success for a run whose own stdout reports failure -- why 95 days of nightly failure were invisible.",
+    "NFRA_MCPINDEX-Z-S10: MX-s-2 AC3 is neither computable nor reachable as written -- its cash rule keys on an asset_id column the served artifact does not carry, and its zero bar is impossible because 1,037 of 10,937 bridge assets have no cusip at all."
+  ],
+  "session_log": "org/tier2_senior/0.4.0_DS_ClientPlatform~D/logs/2026-09-25/ds_d_mx_s_1_trueshares_holdings_silver_2255-0230Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-schedule",
+      "invocation": "(not run)",
+      "result": "The order's preflight says RUN AT THE ACT. NO ACT WAS TAKEN -- no schedule was created -- so there was no act to grade. Recorded as not-run with its reason rather than omitted, because a silently skipped preflight on a schedule-creating order would read as a clean one."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'bd_assets\\.parquet' --all --limit 60",
+      "result": "68 hit(s) across 75,160 file(s). Established N=1 writer of the builder's input (convert_assets_to_silver.py) before reasoning about the chain -- NEVER-1's count-the-writers rule -- which is what showed one dead producer freezes the whole bridge."
+    },
+    {
+      "tool": "comp-pipescript io / deployed / postdeps",
+      "invocation": "comp-pipescript io etf_conversion.py --pipeline all (same class of target)",
+      "result": "NOT-APPLICABLE, MEASURED, same gap as MX-s-1: the BD asset-dim and data/assets trees resolve in no indexed pipeline ('Unknown script in tree [all]'). The DS role minimum has no coverage on either script. Recorded as a coverage gap, never as a skipped check."
+    },
+    {
+      "tool": "live AWS reads (the instruments that actually carried this cell)",
+      "invocation": "events describe-rule / list-targets, lambda logs, ssm get_command_invocation by exact CommandId, s3 head + full-prefix sweeps, s3 get_bucket_versioning, list_object_versions",
+      "result": "All denominators printed. The decisive one: all 119 asset-dim download logs read IN FULL -- 69 FAILED, 50 OK, 0 unclassifiable, 69 of 69 the same signature. A bare 0 from ssm list_commands was resolved with a positive control rather than read as absence."
+    },
+    {
+      "tool": "safe-commit.sh",
+      "invocation": ".tools/safe-commit.sh --author '0.4.0_DS_ClientPlatform~D <...>' -F <msgfile> -- <paths>",
+      "result": "Deliverables committed 7b29e3ef14, gates clean, missions-tree-check 0 violations. The surprise-row commit was REFUSED with 'no changes added' because a peer had already committed the shared tree carrying my rows -- caught by reading the refusal rather than the exit line, and recorded in the artifact pin above."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance>",
+      "result": "Run on this instance; result recorded in the report."
+    }
+  ]
+}
