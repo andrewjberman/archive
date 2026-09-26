@@ -37,6 +37,8 @@ band). g-1's AC2 was re-cut before issuance when the measured currency data show
    call, `1299_HK_Equity` APPEND; served: 236 records, **folders_in_records 95 == research_folders_live 95 == the records' own
    count**, twins 0, 235 of 235 prior keys. Re-ingest 95 of 95 resolved. Pull + derive under the CTO's extension @`6534565b92` at
    HEAD `d8692bd507` (>= the guarded rule): 325 figures, 10 FY rows; **Base refused currency_mismatch (HKD vs USD)** as predicted.
+   **AIA's dossier landed 02:1xZ** (`research-dossier/security_key=1299_HK_Equity/as_of=2026-09-26.1c60efdd74337db8.json`): 96
+   model_rows, 38 with a value, its Model block named in inputs, a thesis summary from the team's memo. AIA is end to end.
 
 ## 3. Rows -- dispositions for the L9
 
