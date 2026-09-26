@@ -64,6 +64,10 @@ cause, and do the served values read as plausible Base cases beside the team's o
 3. **The g-4 evidence** (13 met / 5 unmet / 1 unmeasurable, measured before this round's re-derive and rebuild) is the analysis's
    starting point for grading; FWD-12's and FWD-14/19's rows move with items 1-3 of section 2.
 
+4. **Carried to round 6 (1.0.0_SA_CTO~Z @3c70a79176):** re-run g-4's FWD-12, FWD-17 and FWD-18 rows. Those three read SOURCE
+   in the worker's own worktree, cut before g-1/g-2/g-3 drained, so they are pre-fix and lean pessimistic; the other 16 read the
+   served plane or ran a tool. The dossier artifact FWD-12 names is already recomposed (s.2 item 2).
+
 ## 6. Bounds and residue
 
 AMGT only; no library write; no S3 delete; no shared push. No worktree residue. Running at hand-off: the production sequence for
