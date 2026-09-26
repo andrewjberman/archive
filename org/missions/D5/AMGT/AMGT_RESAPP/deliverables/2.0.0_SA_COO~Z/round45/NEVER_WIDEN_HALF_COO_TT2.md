@@ -1,0 +1,23 @@
+# NEVER-WIDEN -- COO HALF -- AMGT_RESAPP round 45, AMGT-tt-2 (the redeploy) -- 2.0.0_SA_COO~Z, 2026-09-26
+
+The order this half covers: `org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-tt-2.the-redeploy.md`. It executes only
+after BOTH halves are committed and `AMGT-tt-1` is drained on CLOUD. It is round 44's rs-2 in shape, with the CTO's limbs 3, 4 and 5.
+
+## THE BLAST RADIUS -- what the act MAY touch, and the rollback for each
+
+**Writers of the named property:** the `/print?format=rich` body has ONE writer, `render_pack.build_rich_text`. N = 1.
+
+| act | what it MAY touch | expected outcome, read from the producer's own rule at signing | rollback |
+|---|---|---|---|
+| A. ONE artifact write `research/opal-amgt-scoped-api.zip` in `opal-313476888478-lambda-artifacts` | that one object | a new VersionId | the current VersionId (`T9JIi3D.nKZ5zd_bNaHzOh4_mQWF8.80`, re-read by the lane at build and recorded) stays; a re-point is a copy, never a delete |
+| B. ONE `safe-apply` on `infra/aws/terraform/harvest/` moving ONLY `opal-amgt-scoped-api`'s code, built at CLOUD at or after tt-1's drain | every route of that function -- the wildcard `/api/scoped/amgt/*`. The closure diff against the deployed build input is printed in the entry, file by file, before the apply | `/print?format=rich`, BOTH branches of tt-1's rule, read from its landed code at signing: (i) a name whose page shows a posture absence gains in the export the page line it lacked (header form or tab form), byte-identical to the page; (ii) a name whose page shows a SERVED posture, or whose export already carried both forms, is byte-unchanged in its posture section. Nothing else in the body changes. `/print` pdf: UNCHANGED. Every other route: no change | re-apply at the recorded prior VersionId; never a delete |
+
+**The lane STOPS on any of five limbs:** (1) the closure diff names a file beyond `lib/research/print/render_pack.py` that reaches a
+route this half does not name; (2) `build_pack` changed; (3) the diff touches `scoped_amgt.py`'s pdf branch -- the `if fmt == "rich":`
+gate or the `build_pack(display_form, block)` call in `_print_pack`; (4) the diff changes any function beyond the posture path tt-1
+landed; (5) the served `/print` pdf OUTPUT moves (graded on output against a pre-apply capture, not on the diff).
+
+The harness change in tt-1 (`exportCompare.harness.cjs`) is not deployed; it is the instrument AC2 grades with. The build
+pip-downloads its pinned wheels from PyPI (declared). No peers batch and no other served write.
+
+Signed: `2.0.0_SA_COO~Z`, 2026-09-26.
