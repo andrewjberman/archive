@@ -29,6 +29,16 @@ sign-off (CTO half + a second, non-acting half)" (record `ANDREW_DIRECT_20260926
   (`ANDREW_DIRECT_20260926_022xZ_CTO_O_OPEN_CALLS_1_TO_6_ANSWERED.md`). It is a separate act with its own order.
   This half does not sign it.
 
+## Writers of the named property (NEVER-1: count them), added 2026-09-26 ~18:4xZ
+**N = 1.** The only site that puts `portal_channels` into a STORED record is the operator admin command,
+`ops/schwab_entitlement_admin.py:274-275` (it writes the field only when the scope carries it). That command
+refuses the field unless the contract declares `portal_grant`, and refuses channels the catalog does not hold
+(`:192-199`). `app/admin_grants.py:105-107` builds the `get_grant` read-back response, so it is not a writer.
+Every other hit in `infra/aws/ec2/opal-gateway` is parse, enforcement or tests. Counted by `3.0.0_SA_CVO~Z`
+(file msg 20260926T183500Z, 53 hits); the two cited ranges were re-read here at HEAD.
+**So "no record carries `portal_channels` today" is a bounded property, not a moment:** it can change only when
+someone deliberately runs that command, which is OA-g-3's act, not this one.
+
 ## Rollback, per key
 - Code: redeploy the base artifact `opal-gateway-c5f8099440.tar.gz` through the same release script (the 90-second
   health rollback does this on its own if /health fails). The manifest record reverts with it.
