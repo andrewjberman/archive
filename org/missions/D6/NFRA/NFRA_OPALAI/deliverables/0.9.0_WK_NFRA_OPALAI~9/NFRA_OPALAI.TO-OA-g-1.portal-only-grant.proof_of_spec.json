@@ -46,6 +46,16 @@
       "deploy_evidence": "validate_candidate(raw, contract, catalog_channels=None) rejects portal_channels (CandidateRejected) when the contract has no portal_grant with scope_dimension 'portal_channels', or when a channel is not one the catalog holds. The held channels come from load_catalog_channels(), which reads app/refs/DATA_CATALOG.yaml through catalog_gate.load_catalog and fails closed. prepare() passes catalog_channels through. scope_diff/format_diff carry portal_channels. _scope_to_raw writes portal_channels only when it is carried, so a Schwab-only grant keeps its v1.1 record shape."
     },
     {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/admin_grants.py",
+      "kind": "script",
+      "commit_or_etag": "9a28cfbbe6",
+      "artifact_covered_by": [
+        "AC3"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Item 5, amended on row Z-W9-S1: _grant_json (the dashboard's Entitlements read) adds scope.portal_channels (sorted) whenever the grant carries a non-empty set. A grant without it reads back byte-for-byte as before, with no key. Not deployed: the deploy is OA-g-2."
+    },
+    {
       "path_or_key": "org/standards/NFRA_OPLGTW_CONTRACT.json",
       "kind": "config_data",
       "commit_or_etag": "da7749916d",
@@ -58,21 +68,21 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_portal_grant.py",
       "kind": "test",
-      "commit_or_etag": "da7749916d",
+      "commit_or_etag": "9a28cfbbe6",
       "artifact_covered_by": [
         "AC1",
         "AC2",
         "AC3"
       ],
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The six named tests use injected stores, an injected STS client, a monkeypatched query_v0._fetch_capped and the real DATA_CATALOG.yaml. Two servable channels are derived from the live catalog, never typed. The refusal test first asserts that the calling identity's own gate WOULD serve the other-channel key, so the refusal is the asker grant's alone. The file does not contain the string the checks grep for."
+      "deploy_evidence": "The six named tests use injected stores, an injected STS client, a monkeypatched query_v0._fetch_capped and the real DATA_CATALOG.yaml. Two servable channels are derived from the live catalog, never typed. The refusal test first asserts that the calling identity's own gate WOULD serve the other-channel key, so the refusal is the asker grant's alone. The file does not contain the string the checks grep for. Item 5 (9a28cfbbe6) adds a seventh test, test_admin_readback_shows_portal_channels (graded under AC3), still with no moto import."
     },
     {
       "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
       "kind": "doc",
-      "commit_or_etag": "e369f7147c",
+      "commit_or_etag": "d22e478369",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "One row appended (NFRA_OPALAI-Z-W9-S1); 37 -> 38 rows; git numstat 23 added, 0 deleted; safe-commit surprise-corpus: new=0 failures."
+      "deploy_evidence": "Two rows appended by this seat: NFRA_OPALAI-Z-W9-S1 at e369f7147c (37 -> 38 rows) and NFRA_OPALAI-Z-W9-S2 at d22e478369 (38 -> 39 rows; numstat 22 added, 0 deleted). The surprise-row-gate at d22e478369 printed '1 new row(s) of 39 total checked' and OK; surprise-corpus reported new=0."
     }
   ],
   "acceptance": [
@@ -82,7 +92,7 @@
       "method": "command",
       "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/g1.AC1.sh; echo \"exit=$?\"",
       "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
-      "denominator": "2 of 2 named tests PASSED (test_portal_grant_zero_masters_parses, test_portal_only_grant_admits_no_schwab_tool); the whole file ran 6 of 6 passed. Run under timeout 120 from the worktree root twice: after commit da7749916d, and again at HEAD e369f7147c (the row commit, which touches no tested file); identical output both times.",
+      "denominator": "2 of 2 named tests PASSED (test_portal_grant_zero_masters_parses, test_portal_only_grant_admits_no_schwab_tool); the whole file ran 7 of 7 passed. Run under timeout 120 from the worktree root after item-5 commit 9a28cfbbe6 and again at HEAD d22e478369 (the row commit, which touches no tested file); identical output both times.",
       "status": "PASS"
     },
     {
@@ -91,16 +101,16 @@
       "method": "command",
       "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/g1.AC2.sh; echo \"exit=$?\"",
       "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
-      "denominator": "2 of 2 named tests PASSED (test_asker_portal_scope_admits_granted_channel, test_asker_portal_scope_refuses_other_channel); the whole file ran 6 of 6 passed. Run under timeout 120 from the worktree root twice: after commit da7749916d, and again at HEAD e369f7147c (the row commit, which touches no tested file); identical output both times.",
+      "denominator": "2 of 2 named tests PASSED (test_asker_portal_scope_admits_granted_channel, test_asker_portal_scope_refuses_other_channel); the whole file ran 7 of 7 passed. Run under timeout 120 from the worktree root after item-5 commit 9a28cfbbe6 and again at HEAD d22e478369 (the row commit, which touches no tested file); identical output both times.",
       "status": "PASS"
     },
     {
       "criterion_id": "AC3",
-      "criterion_verbatim": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "criterion_verbatim": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0 -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/g1.AC3.sh; echo \"exit=$?\"",
-      "output_evidence": "pytest rc=0; named tests passed 2 of 2; failed/error lines 0\nRESULT: PASS\nexit=0",
-      "denominator": "2 of 2 named tests PASSED (test_admin_accepts_portal_only_candidate, test_admin_rejects_unknown_portal_channel); the whole file ran 6 of 6 passed. Run under timeout 120 from the worktree root twice: after commit da7749916d, and again at HEAD e369f7147c (the row commit, which touches no tested file); identical output both times.",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests PASSED (test_admin_accepts_portal_only_candidate, test_admin_rejects_unknown_portal_channel, test_admin_readback_shows_portal_channels); the whole file ran 7 of 7 passed. Run under timeout 120 from the worktree root after item-5 commit 9a28cfbbe6 and again at HEAD d22e478369 (the row commit, which touches no tested file); identical output both times.",
       "status": "PASS"
     }
   ],
@@ -112,8 +122,8 @@
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "The three checks were run twice (after da7749916d and at e369f7147c), and the file was also run in a combined run with test_asker_scope and test_identity_scope.",
-      "observed": "6 of 6 passed on every run; combined 19 of 19 passed.",
+      "method": "The three checks were run at da7749916d, e369f7147c, 9a28cfbbe6 and d22e478369, and the file ran in a combined run with test_asker_scope, test_identity_scope and test_admin_grants.",
+      "observed": "Every check PASS on every run; at d22e478369 the combined run printed 25 passed.",
       "status": "STABLE"
     }
   },
@@ -123,24 +133,25 @@
       "reason": "NOT run: neither can be collected on this device (No module named moto). Their result is UNREAD, not PASS. By reading: OGZ1-AC10 compares check_scope's six dimensions to SCOPE_DIMENSIONS, which is unchanged, and OGZ2-AC4 reads diff keys by name, where the added portal_channels key is additive. Same condition as row NFRA_OPALAI-Z-W8-S1."
     },
     {
-      "item": "deploy, POLICY write, push, vendor call; app/admin_grants.py read-back",
-      "reason": "Deploy is OA-g-2 and the POLICY write is OA-g-3. This seat never pushes, and no vendor call is in scope. admin_grants.py is outside <paths>: row NFRA_OPALAI-Z-W9-S1."
+      "item": "deploy, POLICY write, push, vendor call",
+      "reason": "Deploy is OA-g-2 and the POLICY write is OA-g-3. This seat never pushes, and no vendor call is in scope. The admin_grants.py read-back, excluded in the first run, is now built as item 5."
     }
   ],
   "surprises": [
-    "NFRA_OPALAI-Z-W9-S1: the owner grant-read route (app/admin_grants.py _grant_json) builds its scope from six fixed dimensions and drops portal_channels. A portal-only grant reads back there as an apparently empty grant (measured at da7749916d). The file is outside <paths> and was not edited. OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~O."
+    "NFRA_OPALAI-Z-W9-S1: the owner grant-read route (app/admin_grants.py _grant_json) dropped portal_channels (measured at da7749916d). The issuer amended the order with item 5, which this seat built at 9a28cfbbe6. The row stays OBSERVATION, ARMED, disarm_owner 2.0.0_SA_COO~O: the issuer dispositions it, not this seat.",
+    "NFRA_OPALAI-Z-W9-S2: item 5 built at 9a28cfbbe6. OBSERVATION, INERT; disarms nothing."
   ],
-  "session_log": "2026-09-26 UTC. Worktree C:/tmp/oa-9, branch wk-NFRA_OPALAI-9, cut at 9ba4ca286f; TREE-OK. (1) Read the worker face, the three g1 checks, data_entitlement.py, asker_scope.py, catalog_gate.py, schwab_entitlement_admin.py, the contract, query_v0 _catalog/_principal, and the contract readers (integrations/schwab/catalog.py parse_contract). Catalog: 15 channel ids. (2) Baseline: test_asker_scope + test_identity_scope 13 passed. (3) Built the grammar, asker path, operator path, contract v1.2 and tests. (4) test_portal_grant + test_asker_scope + test_identity_scope: 19 passed. Neighbours: test_admin_grants 5 passed, test_schwab_query 25 passed, test_teams_reader_fallback 5 passed. test_schwab_denial_envelope and test_schwab_asset_policy fail at collection with No module named moto. A whole-suite run hit its 500 s bound (rc 124) and was not retried. commit-gate clean 4 of 4; 0 non-ASCII characters in the 5 files. (5) Restored audit.jsonl and committed da7749916d. (6) AC1-AC3 verbatim: all RESULT: PASS, exit=0. (7) Mutant control: 6 failed on the base modules; restored. (8) Measured the admin_grants read-back gap; filed and committed row W9-S1 at e369f7147c. (9) Re-ran AC1-AC3 at e369f7147c: identical PASS; audit.jsonl restored. (10) This instance and the status flip are committed together. PUSH STATE: LOCAL, never pushed.",
+  "session_log": "2026-09-26 UTC. Worktree C:/tmp/oa-9, branch wk-NFRA_OPALAI-9, cut at 9ba4ca286f; TREE-OK. (1) Read the worker face, the three g1 checks, data_entitlement.py, asker_scope.py, catalog_gate.py, schwab_entitlement_admin.py, the contract, query_v0 _catalog/_principal, and the contract readers (integrations/schwab/catalog.py parse_contract). Catalog: 15 channel ids. (2) Baseline: test_asker_scope + test_identity_scope 13 passed. (3) Built the grammar, asker path, operator path, contract v1.2 and tests. (4) test_portal_grant + test_asker_scope + test_identity_scope: 19 passed. Neighbours: test_admin_grants 5 passed, test_schwab_query 25 passed, test_teams_reader_fallback 5 passed. test_schwab_denial_envelope and test_schwab_asset_policy fail at collection with No module named moto. A whole-suite run hit its 500 s bound (rc 124) and was not retried. commit-gate clean 4 of 4; 0 non-ASCII characters in the 5 files. (5) Restored audit.jsonl and committed da7749916d. (6) AC1-AC3 verbatim: all RESULT: PASS, exit=0. (7) Mutant control: 6 failed on the base modules; restored. (8) Measured the admin_grants read-back gap; filed and committed row W9-S1 at e369f7147c. (9) Re-ran AC1-AC3 at e369f7147c: identical PASS; audit.jsonl restored. (10) This instance and the status flip are committed together. PUSH STATE: LOCAL, never pushed. RE-OPEN (item 5, amended at fb7efc02b8): TREE-OK on wk-NFRA_OPALAI-9. (11) Edited _grant_json and added test_admin_readback_shows_portal_channels. test_portal_grant + test_asker_scope + test_identity_scope: 20 passed. test_admin_grants: 5 passed with no moto needed. commit-gate clean 2 of 2. audit.jsonl restored; committed 9a28cfbbe6. The safe-commit call ran past its 120 s bound and the harness backgrounded it; it exited 0 with the commit landed. (12) AC1-AC3 verbatim: PASS, with AC3 at 3 of 3. (13) Row W9-S2 committed at d22e478369. (14) AC1-AC3 re-run at d22e478369: identical PASS; combined suites 25 passed; audit.jsonl restored. (15) This instance and the status flip are committed together. PUSH STATE: LOCAL, never pushed.",
   "compiler_tools": [
     {
       "tool": "bash .tools/commit-gate.sh",
-      "invocation": "app/data_entitlement.py app/asker_scope.py ops/schwab_entitlement_admin.py tests/test_portal_grant.py",
-      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+      "invocation": "first run: 4 files (da7749916d); item 5: app/admin_grants.py tests/test_portal_grant.py (9a28cfbbe6)",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s); OK: pre-commit gate clean for 2 of 2 file(s)"
     },
     {
       "tool": "python -m pytest",
-      "invocation": "tests/test_portal_grant.py tests/test_asker_scope.py tests/test_identity_scope.py -v",
-      "result": "19 passed"
+      "invocation": "tests/test_portal_grant.py tests/test_asker_scope.py tests/test_identity_scope.py tests/test_admin_grants.py -q",
+      "result": "25 passed"
     },
     {
       "tool": "proof-of-spec-check.py",
