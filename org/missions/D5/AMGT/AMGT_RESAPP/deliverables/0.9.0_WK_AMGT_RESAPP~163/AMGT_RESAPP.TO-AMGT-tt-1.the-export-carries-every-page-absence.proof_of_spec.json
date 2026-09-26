@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-tt-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-tt-1.the-export-carries-every-page-absence.md",
+    "group": "C",
+    "vintage_commit": "897d9b4a7dfd78554d2a2f63b5112941338c8efb"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "897d9b4a7dfd78554d2a2f63b5112941338c8efb",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-tt-1.the-export-carries-every-page-absence.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~163",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "`_posture_markdown` now writes BOTH the header form and the Posture tab's own form of an ABSENT line, for both the non-SERVED branch and the SERVED+verdict=='absent' branch. BOUNDS forbid any deploy/server/AWS act; the served body is reached at tt-2 (issuer notes), not here.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "lib/research/print/tests/test_posture_markdown.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New unit test file, 7 tests, isolating `_posture_markdown`'s four status/verdict branches and asserting both page forms are present per absent branch; unaffected branches (SERVED non-absent, no-posture, READ_FAILED) asserted unchanged.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/__harness__/exportCompare.harness.cjs",
+      "kind": "frontend_component",
+      "commit_or_etag": "4e29386e6a11b591d3604d26ad297f974cec316a",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on portal branch wk-AMGT_RESAPP-163-portal at 4e29386e (plain `git commit`, per worker instructions); `ok` predicate now also requires `absDiff.missing.length === 0`. This is a repo-only harness/instrument file (no portal deploy scope named in this TO's BOUNDS). The outer commit's `portal` gitlink was NOT advanced to this hash: `.tools/git-hooks/gitlink-publication-check.sh` (adopted 2026-09-26) refuses an outer commit naming an unpublished submodule commit, and this worker is barred from pushing -- filed as AMGT_RESAPP-Z-W163-S1. The outer worktree's tracked portal pointer stays at its pre-existing value pending a push/merge only the drain can perform.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Both fixes exercised against their own pre-fix state (git show HEAD:<path> for render_pack.py; git show HEAD~1:<path> for the harness, i.e. the state before this cell's portal commit), rerun, then restored byte-identical (diff confirmed IDENTICAL both times) before the real commits.",
+      "expected": "render_pack.py pre-fix: AC1 sweep reproduces the issuer's own base run (9 of 95 OK, 86 abs_missing=1, sweep rc=1). Harness pre-fix: AC2 reproduces the issuer's own base run (EXPORT-COMPARE OK / rc=0 on both pinned pre-fix exports, 'THE VERDICT COUNTS A DROPPED ABSENCE: NO', exit=1).",
+      "observed": "render_pack.py reverted to HEAD: 'local rebuild over 95 of 95 folders: OK 9, NOT_OK 86 ... absences missing=0 on 9 of 95 names; EXPORT-COMPARE OK on 9 of 95; sweep rc=1' exit=1 -- matches the issuer's noted base run exactly. Harness reverted to HEAD~1: 'RKT_LN_Equity: harness rc=0 ... EXPORT-COMPARE OK', 'AMD_US_Equity: harness rc=0 ... EXPORT-COMPARE OK', 'THE VERDICT COUNTS A DROPPED ABSENCE: NO' exit=1 -- matches the issuer's noted base run exactly. Both files restored (diff against the pre-revert copy: IDENTICAL) before the fixed re-runs recorded under acceptance below.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Each of AC1, AC2, AC3's literal invocations run twice in this session (once during development, once as the final recorded run below); AC1 additionally run a third time after the mutant-and-restore cycle.",
+      "observed": "All repeats: AC1 'absences missing=0 on 95 of 95 names; EXPORT-COMPARE OK on 95 of 95; sweep rc=0' exit=0; AC2 'THE VERDICT COUNTS A DROPPED ABSENCE: YES on 2 of 2' exit=0; AC3 '43 passed' exit=0 -- no randomness observed across repeats.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal/src/pages/SecurityAnalysis/tabs/PostureTab.tsx, SecurityOverlay.tsx, LeadPanel.tsx (the page files)",
+      "reason": "TO section 1: 'The page is the reference: you change no page file.' Confirmed unchanged: only render_pack.py, the new test file, and the harness's OK predicate were edited."
+    },
+    {
+      "item": "build_pack (the PDF path) and any data change",
+      "reason": "BOUNDS item 2: never bend the product to the instrument and never make the instrument blind to fit the product -- build_pack and the harness's page parser are untouched."
+    },
+    {
+      "item": "Refreshing C:/tmp/amgt-r44-close or editing round45/checks/controls/",
+      "reason": "BOUNDS item 3: do not refresh the cache, do not edit the controls directory. Both confirmed untouched (checks read the fixed capture as-is; the two pinned pre-fix control fixtures in controls/ are read-only inputs to AC2)."
+    },
+    {
+      "item": "Reaching the served/deployed body (server, AWS, promote)",
+      "reason": "BOUNDS item 1 and preflight EGRESS CLASS: NONE. The issuer's own notes state the export change reaches the served body only at tt-2, a different cell; this cell is repo-only."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-W163-S1: the TO's 'outer commit, including the portal gitlink' instruction cannot be discharged by this worker alone -- .tools/git-hooks/gitlink-publication-check.sh (adopted 2026-09-26, same day) refuses an outer commit naming an unpublished portal commit, and the worker standing rule is 'never push'. The outer commit lands the render_pack.py fix, the new test, this deliverables folder and the TO status flip WITHOUT advancing the portal gitlink; the portal harness fix is committed on its own branch (wk-AMGT_RESAPP-163-portal @ 4e29386e), awaiting the drain."
+  ],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface beyond this deliverables folder, the two edited product/instrument files, the new test file, and the task-order status flip. Worktree C:/tmp/wk-amgt-45-163 on branch wk-AMGT_RESAPP-163 (outer) / wk-AMGT_RESAPP-163-portal (portal submodule), cut from CLOUD tip 897d9b4a7dfd78554d2a2f63b5112941338c8efb.",
+  "compiler_tools": [
+    {
+      "tool": "Read/Grep (page-reference reading: PostureTab.tsx, LeadPanel.tsx, SecurityOverlay.tsx)",
+      "invocation": "Read portal/src/pages/SecurityAnalysis/tabs/PostureTab.tsx (offsets 55-460); Read portal/src/pages/SecurityAnalysis/components/LeadPanel.tsx (offsets 230-320); Grep 'PostureHeaderLine' portal/src; Read portal/src/pages/SecurityAnalysis/components/SecurityOverlay.tsx (offsets 1-300)",
+      "result": "Located the two live forms of an ABSENT posture line per status branch: non-SERVED header line (SecurityOverlay.tsx:148-153, no 'Nothing is rendered...' tail) vs the Posture tab's own line (PostureTab.tsx:440-446, tail present); SERVED+verdict=='absent' header line (SecurityOverlay.tsx:155-167, carries the machine disclaimer) vs the Posture tab's own line (PostureTab.tsx:342-345, no disclaimer). SecurityOverlay.tsx is the file actually mounted as the page header (IdentityHeader) -- its LOCAL PostureHeaderLine, not LeadPanel.tsx's now-dead copy, is the one reaching the harness's combinedHtml."
+    },
+    {
+      "tool": "python (edit + reasoning, no new dependency)",
+      "invocation": "Edit lib/research/print/render_pack.py `_posture_markdown`: both absent branches now append two lines (header form + tab form) instead of one.",
+      "result": "Diff applied cleanly; see the commit for the exact bytes."
+    },
+    {
+      "tool": "node (edit, no new dependency)",
+      "invocation": "Edit portal/src/pages/SecurityAnalysis/__harness__/exportCompare.harness.cjs: added `absDiff.missing.length === 0` to the `ok` predicate (line ~494).",
+      "result": "Diff applied cleanly; see the portal commit for the exact bytes."
+    },
+    {
+      "tool": "bash (literal AC invocations, run repeatedly incl. the mutant-and-restore cycle)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/tt-1.AC{1,2,3}.sh",
+      "result": "AC1: 'absences missing=0 on 95 of 95 names; EXPORT-COMPARE OK on 95 of 95; sweep rc=0' exit=0. AC2: 'THE VERDICT COUNTS A DROPPED ABSENCE: YES on 2 of 2' exit=0. AC3: '43 passed' exit=0."
+    },
+    {
+      "tool": "git commit (plain, portal submodule)",
+      "invocation": "cd portal && git commit --author \"0.9.0_WK_AMGT_RESAPP~163 <0.9.0_WK_AMGT_RESAPP~163@opal.agent>\" -F <msgfile> -- src/pages/SecurityAnalysis/__harness__/exportCompare.harness.cjs",
+      "result": "Committed on wk-AMGT_RESAPP-163-portal at 4e29386e (not detached HEAD, confirmed via 'git branch --show-current' before committing)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (outer repo)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~163 <0.9.0_WK_AMGT_RESAPP~163@opal.agent>\" -F <msgfile> -- lib/research/print/render_pack.py lib/research/print/tests/test_posture_markdown.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~163 org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-tt-1.the-export-carries-every-page-absence.md org/missions/D5/AMGT/AMGT_RESAPP/surprise-channel/investigations/INVESTIGATION_v1.md -- the initial attempt also staged 'portal' and was REFUSED by gitlink-publication-check.sh (AMGT_RESAPP-Z-W163-S1); 'portal' dropped from the paths for this run.",
+      "result": "See the worker's final report -- commit hash and push state stated there."
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py -- this worktree's own copy",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~163/AMGT_RESAPP.TO-AMGT-tt-1.the-export-carries-every-page-absence.proof_of_spec.json AC1,AC2,AC3",
+      "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/tt-1.AC1.sh; echo \"exit=$?\" -- EXPECT: absences missing=0 on 95 of 95 names; EXPORT-COMPARE OK on 95 of 95; sweep rc=0 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/tt-1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "population: PINNED org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/population_at_cut.txt, 95 folders\nlocal rebuild over 95 of 95 folders: OK 95, NOT_OK 0, CAPTURE_FAILED 0\ncases over 95 of 95 compared names: page=285 rich=285 same=285 missing=0 extra=0\nabsences missing=0 on 95 of 95 names; EXPORT-COMPARE OK on 95 of 95; sweep rc=0\nexit=0",
+      "denominator": "95 of 95 pinned population folders rebuilt OK; 95 of 95 read absences missing=0; 95 of 95 read EXPORT-COMPARE OK",
+      "expect": "absences missing=0 on 95 of 95 names; EXPORT-COMPARE OK on 95 of 95; sweep rc=0[\\s\\S]*exit=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/tt-1.AC2.sh; echo \"exit=$?\" -- EXPECT: THE VERDICT COUNTS A DROPPED ABSENCE: YES on 2 of 2 (harness rc=1 on both pinned pre-fix exports) -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/tt-1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "RKT_LN_Equity: harness rc=1; ABSENCES page=33 rich=32 same=32 missing=1 extra=0 ; EXPORT-COMPARE NOT OK\nAMD_US_Equity: harness rc=1; ABSENCES page=31 rich=30 same=30 missing=1 extra=0 ; EXPORT-COMPARE NOT OK\nTHE VERDICT COUNTS A DROPPED ABSENCE: YES on 2 of 2\nexit=0",
+      "denominator": "2 of 2 pinned pre-fix control fixtures (RKT_LN_Equity, AMD_US_Equity) read harness rc=1 / EXPORT-COMPARE NOT OK",
+      "expect": "THE VERDICT COUNTS A DROPPED ABSENCE: YES on 2 of 2[\\s\\S]*exit=0",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/tt-1.AC3.sh; echo \"exit=$?\" -- EXPECT: pytest lib/research/print/tests: all passed -- and exit=0",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round45/checks/tt-1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "43 passed in 5.16s\nexit=0",
+      "denominator": "43 of 43 tests in lib/research/print/tests passed (36 pre-existing + 7 new in test_posture_markdown.py)",
+      "expect": "\\d+ passed[\\s\\S]*exit=0",
+      "status": "PASS"
+    }
+  ]
+}

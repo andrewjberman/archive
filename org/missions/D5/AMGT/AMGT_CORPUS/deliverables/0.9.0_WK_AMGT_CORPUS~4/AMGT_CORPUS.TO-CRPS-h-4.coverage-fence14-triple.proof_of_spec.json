@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-h-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-4.coverage-fence14-triple.md",
+    "group": "OTHER",
+    "vintage_commit": "e52d265f5c1f9bedba9deb81d8768d65f9240861"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "8d7ef313856c4bf3a938e74162e9ac775c33906a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-4.coverage-fence14-triple.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/backlog.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New _fence14_classify(record): classifies one folder into FWD-14's own three names by precedence -- never_prose_reason in NEVER_PROSE_REASONS first (empty-or-workbook-only, STRUCTURAL, independent of state/disposition), else AMBIGUOUS, else RESOLVED, else outside-fence (a disclosed remainder). New _print_fence14_line(document): prints 'fence14 resolved <a> ambiguous <b> empty-or-workbook-only <c> sum <a+b+c> outside-fence <d> folders_read <n>' plus one 'fence14_outside <folder> <state> <reason>' line per outside-fence folder, returning True iff a+b+c+d == n. Wired as ONE ADDITIONAL line, after the existing fence line, in both _run_coverage and _run_coverage_dry_run; the four existing coverage-totals fields and the FWD-19 fence line are unchanged.",
+      "introduces": ["_fence14_classify", "_print_fence14_line", "FENCE14_RESOLVED", "FENCE14_AMBIGUOUS", "FENCE14_EMPTY_OR_WORKBOOK", "FENCE14_OUTSIDE"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_backlog_fence14.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, offline, under tests/conftest.py's poison, reusing test_backlog.py's nine-folder coverage fixture (_make_coverage_library / _setup_coverage_crosswalk / _setup_coverage_dossier). 6 tests: precedence (ShellDossier Co and Workbook Co, both RESOLVED and workbook-only, classify once as empty-or-workbook-only, never also resolved; Empty Co likewise); the sum on the fixture (resolved 4, ambiguous 1, empty-or-workbook-only 3, outside-fence 1 == folders_read 9); the exact printed line shape plus the fence14_outside line for Unresolved Co (UNRESOLVED, carries a real report.pdf, never_prose_reason None -- lands outside the fence's three names); a broken folder_count fails loud; the totals+fence+fence14 three-line shape together; --coverage-dry-run writes nothing (gold.gold_put monkeypatched to raise) and prints the fence14 line. All 6 pass.",
+      "introduces": [
+        "test_fence14_precedence_a_workbook_only_resolved_folder_counts_once",
+        "test_fence14_sums_to_the_folder_count_on_the_nine_folder_fixture",
+        "test_fence14_prints_its_own_line_and_names_the_outside_fence_folder",
+        "test_fence14_line_fails_loud_on_a_broken_folder_count",
+        "test_coverage_totals_print_gains_the_fence14_line",
+        "test_coverage_dry_run_writes_nothing_and_prints_fence14"
+      ],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC1.sh",
+      "output_evidence": "......                                                                   [100%]\n6 passed in 0.54s",
+      "denominator": "6 of 6 tests in test_backlog_fence14.py passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC2.sh -- expect fence14 resolved \\d+ ambiguous \\d+ empty-or-workbook-only \\d+ sum (\\d+) outside-fence 0 folders_read \\1\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC2.sh",
+      "output_evidence": "fence14 resolved 83 ambiguous 0 empty-or-workbook-only 12 sum 95 outside-fence 0 folders_read 95",
+      "status_reason": "Preceding (non-deciding) line from the same run, printed before the fence14 line: 'fence dossier-served 83 resolved-but-no-prose 12 unresolved-with-reason 0 sum 95 folders_read 95' (FWD-19's own fence, unchanged by this cell).",
+      "denominator": "95 folders read from the live library by --coverage-dry-run; sum 83+0+12 = 95 == folders_read 95, outside-fence 0; no S3 write made (write_coverage/gold.gold_put not called by this code path)",
+      "expect": "fence14 resolved \\d+ ambiguous \\d+ empty-or-workbook-only \\d+ sum (\\d+) outside-fence 0 folders_read \\1\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC3.sh",
+      "output_evidence": "........................................................................ [ 91%]\n..........................                                               [100%]\n314 passed in 2.58s",
+      "denominator": "314 of 314 tests in lib/research/corpus/tests pass (the whole corpus suite, the round's bound, up from 308 pre-cell with this cell's 6 new tests)",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/h4/mutant_test.py (not committed): a 4-record synthetic fixture (RESOLVED, AMBIGUOUS, workbook-only RESOLVED, UNRESOLVED-with-real-pdf) run against the committed _print_fence14_line/_fence14_classify (FIX), then against a mutant classifier that checks state==RESOLVED BEFORE never_prose_reason (the pre-fix precedence order the order's 'ruled' section forbids).",
+      "expected": "FIX: the workbook-only RESOLVED record (W1) classifies as empty-or-workbook-only, counted once; sum 3 + outside 1 == folders_read 4, ok=True. MUTANT: W1 double-reads as 'resolved' (state checked first), so resolved=2 and empty-or-workbook-only=0 -- the exact precedence defect ('a workbook-only resolved folder counts once' RULED text) the order forbids.",
+      "observed": "python .scratch/h4/mutant_test.py -> 'FIX: ok=True' with fence14 line 'resolved 1 ambiguous 1 empty-or-workbook-only 1 sum 3 outside-fence 1 folders_read 4' and 'fence14_outside U1 UNRESOLVED no evidence'; then 'MUTANT: resolved=2 ambiguous=1 ewb=0 outside=1 n=4 double_counts_W1_as_resolved=True' -- matches the prediction exactly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's check scripts each run twice against the committed worktree (AC2 read-only against the live library via --coverage-dry-run, no store write).",
+      "observed": "AC1: '6 passed in 0.54s' / '6 passed in 0.51s' both runs, same pass count. AC2: 'fence14 resolved 83 ambiguous 0 empty-or-workbook-only 12 sum 95 outside-fence 0 folders_read 95' byte-identical both runs (read-only, no state change). AC3: '314 passed' both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No --coverage or --write run for real against the live library",
+      "reason": "Order s.4 BOUNDS (hard worker bound): never run backlog --coverage or --write for real; only --coverage-dry-run (writes nothing) was run live, per the order's HARD BOUND."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, test_backlog_fence14.py (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC1.sh",
+      "result": "rc 0; 6 passed"
+    },
+    {
+      "tool": "backlog --coverage-dry-run against the live corpus (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC2.sh",
+      "result": "rc 0; fence14 line matches, sum + outside-fence == folders_read, outside-fence 0, no write"
+    },
+    {
+      "tool": "pytest, whole corpus suite (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h4_AC3.sh",
+      "result": "rc 0; 314 passed"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/backlog.py lib/research/corpus/tests/test_backlog_fence14.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/backlog.py lib/research/corpus/tests/test_backlog_fence14.py",
+      "result": "rc 0, no output (both files compile)"
+    }
+  ]
+}

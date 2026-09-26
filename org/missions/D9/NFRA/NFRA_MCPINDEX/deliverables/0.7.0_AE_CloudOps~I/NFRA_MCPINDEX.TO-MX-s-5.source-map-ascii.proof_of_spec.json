@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-5",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "9f323d492d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-5.source-map-ascii.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~I",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "b25d506310",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "THE 23 REPLACEMENTS, in 9 contiguous runs, counted per CHARACTER (sum(1 for ch in text if ord(ch) > 127)) and never as a byte delta. (i) 16 chars: the 8-codepoint run U+00C3 U+00A2 U+00E2 U+201A U+00AC U+00E2 U+20AC U+009D, appearing TWICE, replaced by '--'; it is a doubly-re-encoded em dash sitting in the 'Container image ... CI updates image_uri via ECR push' note on news-semantic-clustering and opal-news-ai-sentiment, and byte 32218 (the byte that raised) is the U+009D of the first run. (ii) 1 char: U+2014 em dash -> '--', on find-insure-crawl-web-scraping-browser. (iii) 6 chars: U+00A7 section sign -> the word 'section ', so a citation reading 'PRD v0.3' + U+00A7 + '6' now reads 'PRD v0.3 section 6'; on find-insure-crawl-web, -serving-companies, -serving-employees, -serving-scoring, -serving-consolidate and -crawl-web-scraping-browser. 16 + 1 + 6 = 23 and the accounting is ASSERTED IN THE SCRIPT, not eyeballed -- the run-length total must equal the pre-count or it refuses to write. 8 of 218 function rows changed, text only; the parsed structure was compared before and after with every string value collapsed to a placeholder and the skeleton is IDENTICAL; 288159 -> 288162 bytes. A CORRECTION TO THE ORDER'S PREMISE: it said the 23 'are mojibake: a dash encoded twice'. Only 16 are. The other 7 are a correctly-encoded em dash and six correctly-encoded section signs, ordinary UTF-8 that was never mangled; removing them is a policy act under CLAUDE.md's ALL-or-EVERY-reader rule, not a repair.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/ci/lambda-source-map.json",
+      "kind": "config_data",
+      "commit_or_etag": "22b5419f82",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "STEP 3, the MX-s-3 step-7 record re-run WITH THE RECORDER ITSELF rather than by hand: `record-terraform-deploy.sh opal-assets --function opal-assets-silver-etf --version opal-assets-v0.50.0 --deploy-ledger nfra-mcpindex-silver-etf-rebuild --code-sha256 ZyhzyrjuHLi9TfRC9CFSpvPHY6Rcyq/aPgseJafmuTg= --author ...' -> EXIT 0. It scoped correctly, stamping 1 of 15 rows under the pipeline and leaving 14 untouched, and it printed 'opal-assets-silver-etf 753fe90fb1 (provenance refreshed, value unchanged)'. THAT LINE IS AN INDEPENDENT CHECK ON MX-s-3: the tool computed the SAME last_deployed_commit this seat had hand-written there under row Z-S12, so the hand-write reproduced the tool's rule rather than inventing one. FIRST ATTEMPT EXITED 128 on a git index.lock race with a concurrent seat -- NOT the encoding defect, and nothing was half-written (checked: the tree carried only the artifact_sha256 change build-and-upload.sh had already made). Retried clean.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "nonascii_chars=0 json=ok -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s5.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "nonascii_chars=0 json=ok -- RESULT: PASS -- exit=0",
+      "denominator": "288162 bytes / 288134 characters of lambda-source-map.json read at HEAD, 23 non-ASCII characters before and 0 after, over 218 function rows of which 8 changed. The check reads `git show HEAD:...`, so it grades the COMMITTED bytes and not the worktree. Issuer's dry-run at cut read nonascii_chars=23 json=ok FAIL. RUN BY THIS SEAT at 18:15Z: the issuer separately reported it passing on CLOUD at 16:56Z and that read was NOT carried into this instance.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "A REAL PLANTED MUTANT, and it is the centre of this cell rather than a formality. One U+2014 em dash was planted into a CLEAN, ASCII, valid-JSON file, and the two real writers were then run over it in their exact source forms -- record-terraform-deploy.sh's bare `open()` read at :259 with its `json.dump` write at :340, and build-and-upload.sh's node `JSON.stringify` updater. The question the mutant answers is not 'does the fix work' but 'where does the corruption come from'.",
+      "expected": "If the recorder is merely FRAGILE to inherited mojibake, as row Z-S12 originally claimed, the planted character should survive the round trip unchanged and nothing should break. If instead the pipeline MANUFACTURES the corruption, the character should multiply and the file should eventually become unreadable to the very tool that wrote it.",
+      "observed": "IT MANUFACTURES IT. pass 0, one U+2014. pass 1 (recorder read + write), the single character has BECOME THREE, U+00E2 U+20AC U+201D, and the file still looks ASCII because json.dump escapes them, so nothing complains. pass 2 (node re-write), those three are re-emitted as literal UTF-8 bytes. pass 3 (recorder read), UnicodeDecodeError on byte 0x9d. That reproduces the MX-s-3 failure state INCLUDING THE EXACT BYTE VALUE, from a clean file, in three passes. It also explains a symptom the 'fragile reader' story does not: why the file broke in September after months of silence -- it had been corrupting quietly all along and finally produced a byte cp1252 has no character for. Filed as row NFRA_MCPINDEX-Z-S13, which narrows and corrects my own Z-S12 (including its INERT hazard call, now ARMED).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Three re-reads of state that must not move: the acceptance check re-run after the recorder had written the file again; the recorder's own computed last_deployed_commit compared against the value hand-written under MX-s-3; and a bare default-codepage `open()` of the file, which is the exact call that used to raise.",
+      "observed": "The file still reads 0 non-ASCII characters AFTER the recorder ran over it -- the property is stable under its own worst writer, because cp1252-reading pure ASCII is lossless and the loop has nothing left to mangle. The recorder independently computed 753fe90fb1, the same value hand-written under MX-s-3, so two routes agree. `json.load(open(path))` with no encoding argument returns 218 functions where it previously raised UnicodeDecodeError at 32218. A SECOND MEASUREMENT OF MINE WAS INVALID AND ITS CONTROL CAUGHT IT: my first node arm read 0 non-ASCII and I nearly recorded 'the writers agree'; node had exited rc=1 and the bytes I read were python's. A second attempt also failed (rc=1, wrong argv index). Only the third run -- rc=0 AND a positive control proving node had actually rewritten the file -- gave the real answer, which was the OPPOSITE of the first reading.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Fixing record-terraform-deploy.sh's unguarded reader and writer (encoding='utf-8' at :259 and :340).",
+      "reason": "MX-s-5 bound 1 is 'The one data file, plus the recorder re-run. No other file changes', and the order's own step 2 says 'Do not fix other tools here.' Carried as row Z-S13 with disarm_owner 2.0.0_SA_COO~O."
+    },
+    {
+      "item": "A commit-time ASCII guard on lambda-source-map.json.",
+      "reason": "It would have caught all 105 commits that toggled this corruption, and it is the durable fix -- but CLAUDE.md section 2 forbids implementing an approval gate unless Andrew explicitly asks. Proposed in row Z-S13, not built."
+    },
+    {
+      "item": "The other non-ASCII in the estate, including infra/aws/lambda/ci/build-and-upload.sh's own source.",
+      "reason": "Out of bound 1's one-file scope. Noticed while reading, not swept."
+    },
+    {
+      "item": "git push, and publication of the opal-assets-v0.50.0 tag.",
+      "reason": "Bound 2 'Standing: no push', and LD-0367/0368 make CLOUD integrator-only. Andrew approved the tag's publication at ~18:1xZ (record ANDREW_DIRECT_20260926_181xZ_ALL_RECS_APPROVED_THREE_OPEN_CALLS.md) and it is PARKED for 0.0.0_AB_MSTR~Z, not done here."
+    }
+  ],
+  "surprises": [
+    "NFRA_MCPINDEX-Z-S13: narrows and corrects my own Z-S12. The recorder does not merely fail on mojibake -- its read+write pair MANUFACTURES it from any non-ASCII character, silently, and the two writers of this file hold OPPOSITE encoding policies (python escapes, node writes literally), so the ASCII property this order restored is enforced by nothing. Class BLOCKING, hazard ARMED (Z-S12 called it INERT and that was wrong). disarm_owner 2.0.0_SA_COO~O."
+  ],
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~I/logs/2026-09-26/ae_i_mx_s_3_silver_etf_rebuild_0530-1200Z.md",
+  "compiler_tools": [
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'lambda-source-map' --band SURFACED --limit 30",
+      "result": "14,486 hits across 75,716 files; bands HEAD=335 DEF=40 SURFACED=4,860 CONFIG=6,016 TEST=14 DOC=3,221. The WRITER CENSUS step 2 asked for. The name census is far too wide to be the answer on its own -- it matches every mention -- so it was used only to enumerate candidates, and the two actual writers were then confirmed by reading their code: build-and-upload.sh's node updater (fs.writeFileSync + JSON.stringify) and record-terraform-deploy.sh's python writer (:340 json.dump). deploy_ledger.py, parity-gates.sh, import-closure-check.py and estate_report_runner.py are READERS only."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read org/ref/SESSION_LOG_STANDARD.md --for \"what sections must every session log contain?\"",
+      "result": "209 lines, 43 sections, 9 qualifiers. Gave the AE-specific shape (Deployment Sequence table replaces Work Completed, plus a Verification section) used for this session's log."
+    }
+  ]
+}
