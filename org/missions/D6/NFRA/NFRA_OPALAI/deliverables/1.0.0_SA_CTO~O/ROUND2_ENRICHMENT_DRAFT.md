@@ -41,6 +41,8 @@ Z-W2-S2, and the gateway release-base rule @75117e60d6.
    - Contract question for the analysis: a server-side history cap on the agent-facing instance.
 7. **E7 -- the batch cell:** the `_ARGS_ALLOWLIST` line for `opal_asker_query` (Z-W2-S2), and the teams-watch header
    naming its real consumers (I-3).
+   It also carries **CI green (Z-S20):** `ci.yml` installs pytest and ruff; `portal_lookup.py`'s 15 ruff findings
+   are FIXED, never waived; `run_checks.sh` reports ruff's real count. One green run on a real push is FWD-13's proof.
 8. **E8 -- speed** (FWD-3, S9): real exchanges timed stage by stage against the 2026-08-20 baseline. Its first cell only
    MEASURES; the remedies are cut from what it finds.
 
