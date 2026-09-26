@@ -1,0 +1,145 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-f-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "0dd3492d8a",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-f-1.identity-scope-client-key.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~8",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/identity_scope.py",
+      "kind": "script",
+      "commit_or_etag": "38d47e22a9",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Overlay grammar '<email> <tool> [client=<id>]'. _load_overlay() returns (unqualified scopes, identity -> {tool: admitted client_ids}); a qualified row makes its identity scoped and admits its tool only when the request's verified client_id equals <id>; no client -> no admit; a malformed third token admits nothing. _load_scopes() keeps its email -> frozenset(tool) shape (unqualified rows + seed). check(email, tool, client_id=None) reads context.get_current_client_id() when no argument is passed, so the three call sites (tools._run, integrations.base.run_integration_tool, asker_scope.effective_scope) are unchanged. The seed is untouched. Not deployed: the deploy is OA-f-2."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/context.py",
+      "kind": "script",
+      "commit_or_etag": "38d47e22a9",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New contextvar _current_client_id (default ''), set only by set_current_principal(principal, client_id='') -- every call resets it -- and cleared by set_current_email (the GUI path has no OAuth client). get_current_client_id() is the one reader."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/app/server.py",
+      "kind": "script",
+      "commit_or_etag": "38d47e22a9",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_bearer_auth(request) returns (principal, the validated token's client_id claim or '' when absent or not a string); the /mcp GuardMiddleware sets both with set_current_principal(principal, client_id) at the same point the principal was set before. _bearer_principal is its principal half, so /teams/poll and /query/v0 are unchanged and carry no client. Scratch probe (not committed; oauth_as.validate_access_token stubbed): claim 'mcp-probe' -> client_id 'mcp-probe' in context; claim absent -> ''; claim 123 -> ''."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/identity_tool_allowlist.txt",
+      "kind": "config_data",
+      "commit_or_etag": "38d47e22a9",
+      "artifact_covered_by": [
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The upload row is now 'opalbloomberg@opalinvest.com opal_data_refresh_upload client=mcp-iLcAi35L7ueDQvPN7Ikp9w', with a comment citing Andrew's option 2 (CTO msg 25935) and row Z-S18; the existing andrew-asked authorization comment is kept verbatim. The client was measured by a read-only scan of gateway-access-state-table: 134 items (Count=ScannedCount=134, no LastEvaluatedKey), 122 oauth_refresh_family rows, 1 for opalbloomberg@opalinvest.com, status active 1, distinct client_id 1. The scan output was deleted after the count; no other field was printed."
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_identity_scope.py",
+      "kind": "test",
+      "commit_or_etag": "38d47e22a9",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Adds test_upload_admitted_only_for_operator_client, test_upload_refused_for_other_client_same_identity (another client, '', a case variant, a suffixed id, an empty context, and the set_current_email path all refused) and test_qualified_row_malformed_or_unqualified; test_scoped_deny_by_default reads a tmp_path fixture overlay. The __main__ runner passes a temp dir to tmp_path tests."
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/surprise-channel/investigations/INVESTIGATION_v1.Z.md",
+      "kind": "doc",
+      "commit_or_etag": "38d47e22a9",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "One row appended (NFRA_OPALAI-Z-W8-S1); 31 -> 32 rows, prior rows byte-identical; surprise-row-gate inside safe-commit: 'OK: 1 file(s), all new rows carry their step-7/step-10 fields.'"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/f1.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "pytest rc=0; named tests passed 3 of 3; failed/error lines 0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 named tests PASSED; the whole file ran 9 of 9 passed. Run once, under timeout 120, from the worktree root after commit 38d47e22a9. Negative control: the same test file against the pre-change identity_scope.py (HEAD 0dd3492d8a) -> 4 failed, 5 passed.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "unqualified upload rows=0; client-qualified=1; live match=yes -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~O/round1/checks/f1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "unqualified upload rows=0; client-qualified=1 (client=mcp-iLcAi35L7ueDQvPN7Ikp9w); live: families_clients=1 match=yes\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 upload rows at HEAD client-qualified, 0 unqualified; the live store carries 1 distinct client for this identity's refresh families and the row's client is it. Run once, under timeout 120, after commit 38d47e22a9.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The new tests run against the pre-change identity_scope.py (git show 0dd3492d8a:.../identity_scope.py swapped in, then restored).",
+      "expected": "The old parser reads 'client=<id>' as noise and admits the upload for every client, so the client-keyed tests fail.",
+      "observed": "4 failed (test_scoped_deny_by_default, test_upload_admitted_only_for_operator_client, test_upload_refused_for_other_client_same_identity, test_qualified_row_malformed_or_unqualified), 5 passed; restored file diff re-checked.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "tests/test_identity_scope.py run under pytest three times (build, pre-commit, AC1) and once standalone (python tests/test_identity_scope.py).",
+      "observed": "9 of 9 passed on every pytest run; standalone printed PASS for every test and OK.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "tests/test_data_entitlement_guard.py (OGZ1-AC11) kept passing",
+      "reason": "NOT run: it cannot be collected on this device (No module named moto); installing moto is egress beyond this order's declared class. Its result is UNREAD, not PASS. Row NFRA_OPALAI-Z-W8-S1."
+    },
+    {
+      "item": "deploy, push, vendor call; edits to app/tools.py, app/integrations/base.py, app/asker_scope.py",
+      "reason": "Deploy is OA-f-2; this seat never pushes; no vendor call is in scope. The three call sites are unchanged because check() reads the verified client_id from the request context."
+    }
+  ],
+  "surprises": [
+    "NFRA_OPALAI-Z-W8-S1: the order says keep tests/test_data_entitlement_guard.py passing, but it cannot be collected here ('No module named moto'; 18 of 31 gateway test files import moto; no cached wheel; installing it is egress beyond this order's declared class). OBSERVATION, INERT, disarm_owner 2.0.0_SA_COO~O: one run on a device with moto before OA-f-2 deploys."
+  ],
+  "session_log": "2026-09-26 UTC, worktree C:/tmp/oa-8, branch wk-NFRA_OPALAI-8 cut at 0dd3492d8a; TREE-OK. (1) Read identity_scope.py, context.py, server.py (_bearer_principal, GuardMiddleware, both REST routes), oauth_as.py (client_id claim at issue), the two chokepoints and asker_scope.py, the tracked overlay, tests, f1.AC1.sh and f1.AC2.sh. (2) Read-only scan of gateway-access-state-table: 1 active refresh family for opalbloomberg@opalinvest.com, 1 client, mcp-iLcAi35L7ueDQvPN7Ikp9w; scan file deleted. (3) Built context contextvar, _bearer_auth, client-qualified grammar, the tracked row and tests. (4) test_identity_scope 9/9; negative control 4 failed on the old module; commit-gate clean 4 of 4. (5) test_data_entitlement_guard.py and the other moto-dependent suites could not be collected (no moto); test_asker_scope + test_taxsma_workbook + test_jwt_cve_lock ran 30 passed, 1 error (moto, in test_jwt_cve_lock); a whole-suite run of the non-moto files hit its 300 s timeout (rc 143), not retried. Filed row W8-S1. (6) Restored audit.jsonl, committed 38d47e22a9. (7) AC1 and AC2 run verbatim: both RESULT: PASS, exit=0; audit.jsonl restored again. (8) This instance and the status flip committed together. PUSH STATE: LOCAL, never pushed.",
+  "compiler_tools": [
+    {
+      "tool": ".tools/aws dynamodb scan",
+      "invocation": "timeout 120 .tools/aws dynamodb scan --table-name gateway-access-state-table --output json (read-only), counted by python printing only counts and client_id",
+      "result": "items 134, no LastEvaluatedKey; oauth_refresh_family 122; opalbloomberg families 1, active 1, distinct clients 1: mcp-iLcAi35L7ueDQvPN7Ikp9w"
+    },
+    {
+      "tool": "bash .tools/commit-gate.sh",
+      "invocation": "app/identity_scope.py app/context.py app/server.py tests/test_identity_scope.py",
+      "result": "OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": "python -m pytest",
+      "invocation": "tests/test_identity_scope.py -v; tests/test_data_entitlement_guard.py -q",
+      "result": "9 passed; test_data_entitlement_guard.py: 1 error at collection (No module named moto), 0 tests run"
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py <this instance> AC1,AC2",
+      "result": "see the worker report; only the exit code is the verdict."
+    }
+  ]
+}

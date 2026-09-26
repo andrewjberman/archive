@@ -1,0 +1,209 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-29",
+  "firm": "COT",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-29.ai-cot-cash-and-drill-legend.md",
+    "group": "OTHER",
+    "vintage_commit": "0d790a92c92aa021305cbe091975bff74a9263ab"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "0d790a92c92aa021305cbe091975bff74a9263ab",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-29.ai-cot-cash-and-drill-legend.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~19",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/_partners/cottonwood/layout.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "3a87274ff4429c02ef12133782e512e32f498caa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "includesCash: false -> true; colorPalette gains cash: ASSET_CLASS.cash alongside the existing other: PALETTE.purple600; ordered gains 'cash' at the front. Verified by IVE29-AC1 (VERDICT: COT-CASH-ON-OK) and the mutant control (flipping includesCash back to false fires the expected AC1 failure).",
+      "introduces": [
+        "includesCash: true",
+        "cash: ASSET_CLASS.cash"
+      ],
+      "artifact_covered_by": [
+        "IVE29-AC1",
+        "IVE29-AC2"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/_shared/panels/ConsolidatedOverviewPanel.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "3a87274ff4429c02ef12133782e512e32f498caa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The vertical legend's hardcoded ['cash','fixed_income','equity','alternatives'] gains 'other' after alternatives. The component gains an optional `tenantLayout` prop (strictly additive -- every existing caller that omits it is unchanged); colour resolution moves from a bare `mixPieColor` alias to `resolveMixColor(cls, tenantLayout)`, preferring `tenantLayout.assetClasses.colorPalette[cls]` (same mechanism as PartnerAnalytics.tsx's resolveMixClassMeta) and falling back to the global MIX_PIE palette. Verified by IVE29-AC3 (VERDICT: DRILL-LEGEND-OK): rendered via react-dom/server with the real component, the legend lists 'Cash' and 'Other' with formatted amounts and each its own resolved colour; the 49financial-shaped comparison shows no 'Other'.",
+      "introduces": [
+        "tenantLayout?: TenantLayoutConfig",
+        "resolveMixColor"
+      ],
+      "artifact_covered_by": [
+        "IVE29-AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/__tests__/cot-other/cot-cash.layout.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3a87274ff4429c02ef12133782e512e32f498caa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bun:test. Cottonwood discovered structurally (the one layout with includesOther true) checked for includesCash true, ordered including 'cash', colorPalette.cash === ASSET_CLASS.cash, other unregressed at purple600, resolved through useTenantLayout; every other discovered layout's cash/other flags compared against the ACTUAL base commit's bytes (git show 7eec611ab155cf4b47310342f356a0b2c83c4f28:<path>), never a hand-typed expectation. VERDICT: COT-CASH-ON-OK, 1 pass / 0 fail, re-run twice identical.",
+      "artifact_covered_by": [
+        "IVE29-AC1"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/__tests__/cot-other/cot-cash.shares.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3a87274ff4429c02ef12133782e512e32f498caa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bun:test. Exercises the real normalizeMixTo4Class with options driven from the discovered Cottonwood layout (the exact call AdvisorBookView.tsx makes): a 5-class mix (cash, equity, fixed_income, alternatives, other) yields 5 entries whose pct sums to 1 within 1e-9 with cash at its market value; an all-cash mix yields exactly one entry, cash, at pct 1. VERDICT: COT-SHARES-OK, 1 pass / 0 fail, re-run twice identical.",
+      "artifact_covered_by": [
+        "IVE29-AC2"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/__tests__/cot-other/cot-drill-legend.test.ts",
+      "kind": "test",
+      "commit_or_etag": "3a87274ff4429c02ef12133782e512e32f498caa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "bun:test, react-dom/server. Renders the real ConsolidatedOverviewPanel fed the exact composition shape AdvisorBookView.tsx computes (platinumToComposition -> normalizeMixTo4Class) and the new tenantLayout prop; asserts the legend lists 'Cash' and 'Other' with formatted amounts and each its own resolved colour (verified present in the rendered HTML), and that the 49financial-shaped comparison shows no 'Other'. Also documents the MEASURED recharts SSR limitation (PieChart/Cell render an empty recharts-wrapper under renderToStaticMarkup) and states the donut/legend colour parity as a source-level guarantee instead. VERDICT: DRILL-LEGEND-OK, 1 pass / 0 fail, re-run twice identical.",
+      "artifact_covered_by": [
+        "IVE29-AC3"
+      ]
+    },
+    {
+      "path_or_key": "portal/src/pages/AdvisorIntelligence/__tests__/cot-other/node-builtins.d.ts",
+      "kind": "test",
+      "commit_or_etag": "3a87274ff4429c02ef12133782e512e32f498caa",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Ambient declarations extended (same minimal-declare pattern as the existing fs/path/url entries) for node:child_process execSync and the process global, needed by cot-cash.layout.test.ts's base-commit comparison. bun run typecheck (tsc -b --noEmit) rc=0, 0 diagnostics."
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Row DSGN_IRPTV1-W19-S1 appended (ARMED): ConsolidatedOverviewPanel's new tenantLayout prop is not yet threaded through CanonicalBookView.tsx and its three callers, none of which are in this TO's <paths>, so PROD's client-drill donut/legend colours stay on the global MIX_PIE fallback until a follow-on TO wires it. python .tools/surprise-row-gate.py and a direct jsonschema.validate() against org/surprise_channel/schemas/investigation_item.schema.json both confirm the row is well-formed."
+    },
+    {
+      "path_or_key": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~19/ai-cot-cash-and-drill-legend.result.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Per-criterion result summary."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE29-AC1",
+      "criterion_verbatim": "IVE29-AC1 -- the Cottonwood tenant layout turns cash ON (its mix normalisation includes `cash`) and colours it `ASSET_CLASS.cash` from `src/lib/chartColors.ts` (the asset-class cash green, Andrew's C1), while `other` stays ON in PALETTE.purple600; the 49financial and Inflection layouts are unchanged from the base (their cash and other flags equal the base's). The test prints `VERDICT: COT-CASH-ON-OK` only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~19; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/AdvisorIntelligence/__tests__/cot-other/cot-cash.layout.test.ts 2>&1 | tail -25",
+      "expect": "VERDICT: COT-CASH-ON-OK",
+      "output_evidence": "discovered 4 partner layout(s): 49financial, cottonwood, demo, inflection\nCottonwood (cottonwood) includesCash=true cash colour=#86efac\n49financial: current includesCash=false base=false; current includesOther=undefined base=false\ndemo: current includesCash=false base=false; current includesOther=undefined base=false\ninflection: current includesCash=true base=true; current includesOther=undefined base=false\nVERDICT: COT-CASH-ON-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 of 1 discovered layout with includesOther true (Cottonwood) checked for cash-on + ASSET_CLASS.cash + other unregressed; 3 of 3 remaining discovered layouts (49financial, demo, inflection) checked against the actual base commit's cash/other flags -- 0 mismatches",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IVE29-AC2",
+      "criterion_verbatim": "IVE29-AC2 -- normalising a Cottonwood mix carrying cash, equity, fixed_income, alternatives and other yields five entries whose pct values sum to 1 (within 1e-9) with cash present at its market value; an all-cash mix yields exactly one entry, cash, at pct 1. The test prints `VERDICT: COT-SHARES-OK` only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~19; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/AdvisorIntelligence/__tests__/cot-other/cot-cash.shares.test.ts 2>&1 | tail -25",
+      "expect": "VERDICT: COT-SHARES-OK",
+      "output_evidence": "discovered 4 partner layout(s); cot=cottonwood\n5-class classesPresent = [\"alternatives\",\"cash\",\"equity\",\"fixed_income\",\"other\"]\npctSum = 1\nallCash.mix = [{\"asset_class\":\"cash\",\"label\":\"Cash\",\"market_value\":250000,\"pct\":1}]\nVERDICT: COT-SHARES-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "5 of 5 canonical+other classes present with pct summing to 1 within 1e-9; 1 of 1 all-cash entry at pct 1; 1 of 1 cash-excluded (49financial-shaped) regression arm carries no cash",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IVE29-AC3",
+      "criterion_verbatim": "IVE29-AC3 -- `ConsolidatedOverviewPanel`'s vertical legend, rendered from a Cottonwood composition carrying `other` and `cash`, lists an \"Other\" entry and a \"Cash\" entry with their formatted amounts and each class's own colour; the same panel under the 49financial layout lists no \"Other\". The test prints `VERDICT: DRILL-LEGEND-OK` only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~19; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/AdvisorIntelligence/__tests__/cot-other/cot-drill-legend.test.ts 2>&1 | tail -25",
+      "expect": "VERDICT: DRILL-LEGEND-OK",
+      "output_evidence": "cot=cottonwood bd=49financial\ncashItem={\"asset_class\":\"cash\",\"label\":\"Cash\",\"market_value\":19230791,\"pct\":0.27539128118998396} otherItem={\"asset_class\":\"other\",\"label\":\"Other\",\"market_value\":48500000,\"pct\":0.6945360249463592}\ncashColor=#86efac otherColor=#9333ea\nlegend occurrences of resolved colour #86efac: 1\nlegend occurrences of resolved colour #9333ea: 1\nVERDICT: DRILL-LEGEND-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "2 of 2 legend entries (Cash, Other) present with formatted amounts and their own resolved colour (1 of 1 occurrence each in the rendered HTML); 1 of 1 49financial-shaped comparison shows no Other entry",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "IVE29-AC4",
+      "criterion_verbatim": "IVE29-AC4 -- graded by `2.0.0_SA_COO~D` on the proof the CTO names (SIGNOFF_COT_CASH_S138_20260925.md @d257eb67aa): after 2.0.0_SA_COO~M's C_06 cash run, one named relationship on the PROD portal shows its cash slice at the measured amount with shares summing to 100%, and one all-cash client shows 100% cash. RECORD; never self-graded.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- L9/drain real-run read by 2.0.0_SA_COO~D, not this worker's instrument",
+      "judgment": true,
+      "output_evidence": "RECORDED, NO VERDICT TAKEN by this worker, per the task order naming 2.0.0_SA_COO~D as the grader after 2.0.0_SA_COO~M's C_06 cash run (CTO sign-off SIGNOFF_COT_CASH_S138_20260925.md @d257eb67aa). The code-level guarantee the real run will observe: IVE29-AC1 confirms Cottonwood's layout turns cash on (ASSET_CLASS.cash, other unregressed at purple600); IVE29-AC2 confirms normalizeMixTo4Class produces a 5-class mix summing to 100% shares and an all-cash mix at 100% cash; IVE29-AC3 confirms the client-drill legend lists both Cash and Other with their own colours (component-level; row DSGN_IRPTV1-W19-S1 records that the colour half is not yet threaded through the real PROD call chain, which is outside this TO's <paths>).",
+      "denominator": "0 of 0 mechanical criteria graded here (judgment) -- deferred to 2.0.0_SA_COO~D's PROD drain trace.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "JUDGMENT criterion. The task order marks IVE29-AC4 judgment=\"true\"; a PASS or FAIL on a judgment row is INVALID. Graded by 2.0.0_SA_COO~D after 2.0.0_SA_COO~M's C_06 cash run, per SIGNOFF_COT_CASH_S138_20260925.md."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "In-worktree-only flip of Cottonwood's `includesCash` back to `false` (portal layout.ts), never staged/committed.",
+      "expected": "IVE29-AC1 fails: Cottonwood includesCash reads false where the test expects true.",
+      "observed": "VERDICT: COT-CASH-ON-FAIL, failures include \"Cottonwood includesCash = false, expected true\" and \"useTenantLayout(cottonwood).assetClasses.includesCash !== true\" -- 0 pass / 1 fail. Reverted via the inverse edit; `git diff -- src/pages/AdvisorIntelligence/_partners/cottonwood/layout.ts` against HEAD printed no output (byte-identical to the committed state) before IVE29-AC1 was re-run to VERDICT: COT-CASH-ON-OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "IVE29-AC1, IVE29-AC2 and IVE29-AC3 each run twice back-to-back with no source change between runs; the full cot-other/ directory (6 tests, 6 files) run clean; bun run typecheck (tsc -b --noEmit) run before and after all edits.",
+      "observed": "All three criteria's VERDICT lines and per-fact console output were byte-identical across both runs each. cot-other/ directory: 6 pass / 0 fail, 6 expect() calls, both runs. bun run typecheck: rc=0, 0 diagnostics, both before and after.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Editing src/lib/chartColors.ts to change MIX_PIE.cash or ASSET_CLASS globally.",
+      "reason": "The task order names it READ ONLY. The per-tenant colorPalette override mechanism (already established by IV-e-28 for `other`) is the correct route -- it colours Cottonwood's cash without touching Inflection's existing (unchanged, amber) cash rendering."
+    },
+    {
+      "item": "Threading the new `tenantLayout` prop through CanonicalBookView.tsx and its three callers (AdvisorBookView.tsx, ClientsTab.tsx, AdvisorBookClientDetail.tsx) so the real PROD page passes it.",
+      "reason": "None of those four files are in this TO's <paths> grant. Filed as surprise row DSGN_IRPTV1-W19-S1 (ARMED) rather than widening the grant."
+    },
+    {
+      "item": "Editing composition.ts.",
+      "reason": "normalizeMixTo4Class already supported { includeCash, includeOther } independently (built generically by IV-e-28); IVE29-AC2 passes against the unmodified function."
+    },
+    {
+      "item": "Push, merge, rebase, checkout -- or clean of either repository.",
+      "reason": "Forbidden by the task order's BOUNDS. The commit is LOCAL on wk-DSGN_IRPTV1-19-portal."
+    }
+  ],
+  "surprises": [
+    "DSGN_IRPTV1-W19-S1: ConsolidatedOverviewPanel's new tenantLayout prop passes IVE29-AC3 exactly as specified, but none of its three real PROD call chains (CanonicalBookView.tsx and its own three callers) are in this TO's <paths>, so PROD's client-drill donut/legend keeps the global MIX_PIE fallback colours (cash amber, other grey) until a follow-on TO threads the prop through."
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~19/ai-cot-cash-and-drill-legend.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test (bun 1.3.9)",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~19; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/AdvisorIntelligence/__tests__/cot-other/cot-cash.layout.test.ts src/pages/AdvisorIntelligence/__tests__/cot-other/cot-cash.shares.test.ts src/pages/AdvisorIntelligence/__tests__/cot-other/cot-drill-legend.test.ts",
+      "result": "3 pass / 0 fail, 3 expect() calls, re-run twice identical"
+    },
+    {
+      "tool": "bun test (regression, cot-other/ directory incl. the pre-existing IV-e-28 tests)",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~19; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/AdvisorIntelligence/__tests__/cot-other/",
+      "result": "6 pass / 0 fail, 6 expect() calls, 6 files -- no regression on IVE28-AC1/AC2/AC3's tests"
+    },
+    {
+      "tool": "bun run typecheck (tsc -b --noEmit)",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19/portal && timeout 120 bun run typecheck",
+      "result": "rc=0, 0 diagnostics"
+    },
+    {
+      "tool": ".tools/safe-commit.sh (portal repo)",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19/portal && bash ../.tools/safe-commit.sh --author \"0.9.0_WK_DSGN_IRPTV1~19 <0.9.0_WK_DSGN_IRPTV1~19@opal.agent>\" -F <msgfile> -- src/pages/AdvisorIntelligence/_partners/cottonwood/layout.ts src/pages/AdvisorIntelligence/_shared/panels/ConsolidatedOverviewPanel.tsx src/pages/AdvisorIntelligence/__tests__/cot-other/node-builtins.d.ts src/pages/AdvisorIntelligence/__tests__/cot-other/cot-cash.layout.test.ts src/pages/AdvisorIntelligence/__tests__/cot-other/cot-cash.shares.test.ts src/pages/AdvisorIntelligence/__tests__/cot-other/cot-drill-legend.test.ts",
+      "result": "committed 3a87274ff4429c02ef12133782e512e32f498caa on wk-DSGN_IRPTV1-19-portal (LOCAL)"
+    },
+    {
+      "tool": "python .tools/surprise-row-gate.py",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19 && python .tools/surprise-row-gate.py org/missions/D13/DSGN/DSGN_IRPTV1/surprise-channel/investigations/INVESTIGATION_v1.md DSGN_IRPTV1-W19-S1",
+      "result": "OK: 1 file(s), all new rows carry their step-7/step-10 fields; row also validated directly against org/surprise_channel/schemas/investigation_item.schema.json via jsonschema.validate() (SCHEMA OK)"
+    },
+    {
+      "tool": ".tools/proof-of-spec-check.py (the WORKTREE's own copy, run from inside <WS>)",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-19 && python .tools/proof-of-spec-check.py org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~19/DSGN_IRPTV1.TO-IV-e-29.ai-cot-cash-and-drill-legend.proof_of_spec.json IVE29-AC1,IVE29-AC2,IVE29-AC3,IVE29-AC4",
+      "result": "see the WORKER REPORT -- only the exit code is the verdict"
+    }
+  ]
+}

@@ -4,12 +4,15 @@
 record @bda25438c8). **Unblocks:** NFRA_OPALAI FWD-1 (the Analyst answers a colleague in Teams from its own account)
 and NFRA_MCPORTAL FWD-1 (you change a colleague's access from the dashboard).
 
-**Precondition status (`2.0.0_SA_COO~O`, 2026-09-25 ~22:5xZ):**
-- (a) round-1 code is in `opal_ai` DEV locally @fd8ab8a; the push of DEV and PROD waits on `0.0.0_AB_MSTR~Z`
-  (G-PUSH): NOT YET;
-- (b) `runtime.config.json`: NOT YET, written once (a) lands;
-- (c) NFRA_MCPORTAL's release `1f7128201a` is LIVE since 21:25:38Z: MET;
-- (d) Z-S19: NOT YET, because the upload refusal cell (Andrew's option 2) is being cut.
+**Precondition status (`2.0.0_SA_COO~O`, 2026-09-26 ~00:3xZ):**
+- (a) MET. `opal_ai` DEV and PROD are both at `fd8ab8a57f` on origin. `0.0.0_AB_MSTR~Z` pushed them (msg
+  20260925T235909Z) and verified by `ls-remote`.
+- (b) MET. `C:\opal_runtime\runtime.config.json` is written outside every repo (keys `checkout_dir`, `state_dir`,
+  `workspace_probe_file`, `prod_ref`).
+- (c) MET. NFRA_MCPORTAL's release `1f7128201a` went live at 21:25:38Z. The live gateway is now `1.0.0_SA_CTO`'s laptop
+  release `0af72fb1d0` (23:01:38Z), which is built on `1f7128201a`, so the MCPORTAL code is still served.
+- (d) NOT YET. Z-S19's server-side fix is cut as `OA-f-1` (build, running) and `OA-f-2` (the narrow release)
+  @`0dd3492d8a`.
 
 **Before you sit down, `2.0.0_SA_COO~O` confirms in one message that:**
 - (a) the round-1 code is merged into `opal_ai` DEV and PROD;
@@ -53,14 +56,14 @@ It fills in the exact paths below. Nothing here asks you to type a password or a
    - `claude mcp add --transport http --scope user opal-gateway-bbg https://mcp.opalinvest.dev/mcp`, the ONE server the
      runtime may use;
    - `[Environment]::SetEnvironmentVariable('OPAL_RUNTIME_CONFIG','C:\opal_runtime\runtime.config.json','User')`.
-4. **Claude sign-in:** run the launcher command above. A browser sign-in opens. Sign in with the Claude account you
-   choose for the Analyst.
+4. **Claude sign-in:** run the launcher command above. A browser sign-in opens. Sign in with the DEDICATED Analyst account,
+   never your own (your answer to call 3, record `ANDREW_DIRECT_20260926_022xZ_CTO_O_OPEN_CALLS_1_TO_6_ANSWERED.md`).
 5. **Gateway sign-in:** in that same session, the gateway (`opal-gateway-bbg`) asks for a Microsoft sign-in as
    **Opal Bloomberg**. The MFA code comes to your phone. The Analyst's first act then checks `whoami` = Opal Bloomberg.
 
 ## Part C -- the test colleague
 
-6. **Name the colleague and what they may see.** The COO writes their permissions through the existing operator path,
+6. **The colleague is Alyssa Keith, scoped to portal figures only** (your answer to call 2). The COO writes their permissions through the existing operator path,
    and nothing new is built. Then the colleague asks the Analyst one real question in Teams, about a figure the portal
    shows. A second, un-admitted person asks too, and must be refused.
 
@@ -70,8 +73,8 @@ It fills in the exact paths below. Nothing here asks you to type a password or a
    that records the claims) in your browser, signed in as yourself. That one request lets the gateway record which
    identity claims your sign-in carries, as names only and no values. If the recorded names do NOT include `oid`, also
    open `https://mcp.opalinvest.dev/api/admin/whoami` and give the COO the `sub` value it shows you. It goes only into
-   the grant writer's configuration. The writer's apply also needs your word for one pinned download from PyPI
-   (G-PYPI).
+   the grant writer's configuration. Your word for the writer's one pinned PyPI download
+   (G-PYPI) is given (call 4).
 8. **Later, the live test:** from the dashboard's Entitlements tab, narrow one colleague's data access, see their next
    question answered within the new limit, then widen it back.
 
