@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-i-1",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-i-1.continuation-readers-select-method-version.md",
+    "group": "OTHER",
+    "vintage_commit": "4051cbb215f9038da42d7555764a3deb1d7707db"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "4051cbb215f9038da42d7555764a3deb1d7707db",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-i-1.continuation-readers-select-method-version.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~1",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/continuation.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "read_latest now, among the stored objects whose `inputs` equal current_inputs(...) NOW, prefers the one carrying the CURRENT METHOD_VERSION (the one written LAST -- S3 LastModified from the same listing -- when several current-method objects match; the key name breaks an exact tie only, including a both-missing-LastModified pair). When NO candidate carries the current method version, the pre-existing behaviour stands: the first key in sorted order, so a name is never left unserved. New shared helpers `_select_stored` and `_later_candidate` (module-private) hold the selection rule once; substrate.py's `_pick_stored` reuses `_select_stored` rather than re-implementing it. No producer write path, object name, or `inputs` shape changed.",
+      "introduces": ["_select_stored", "_later_candidate"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/substrate.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "_pick_stored now takes an explicit `current_method_version` parameter (each of the four call sites passes that table's OWN producer module constant -- continuation.METHOD_VERSION, sector_template.METHOD_VERSION, fund_form.METHOD_VERSION, typecast.METHOD_VERSION -- never a string typed into substrate.py) and, among the input-matching objects, selects via continuation._select_stored (never a re-implementation). The stale-fallback arm (no input match at all: current=False, lexicographically last key) is unchanged.",
+      "introduces": ["current_method_version", "continuation._select_stored"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_continuation_reader_method.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, offline, under tests/conftest.py's poison. A local _StubClient (LastModified-aware, mirrors CRPS-h-1's test_dossier_newest.py::_StubClient, never re-typing substrate.StubS3Client which carries none). 8 tests: (1) a /1 and /2 object share inputs, the /1 key sorts first -- both continuation.read_latest and substrate._pick_stored return the /2; (2) two current-method objects -- the later write (LastModified) wins over key order; (3) no current-method object among input-matching ones -- the /1 is still served, current=True; (4) an exact LastModified tie (or both missing) falls back to the key name; (5)-(8) one test per substrate table (continuation, sector_template, fund_form, typecast) proving substrate._pick_stored compares that table's OWN module constant, passed explicitly, against a stale-first-sorted-key fixture. All 8 pass.",
+      "introduces": [
+        "test_both_readers_prefer_current_method_when_the_stale_key_sorts_first",
+        "test_among_two_current_method_objects_the_later_write_wins",
+        "test_no_current_method_match_still_serves_the_input_matching_object",
+        "test_exact_last_modified_tie_falls_back_to_key_name",
+        "test_pick_stored_continuation_table_compares_continuations_own_constant",
+        "test_pick_stored_sector_template_table_compares_sector_templates_own_constant",
+        "test_pick_stored_fund_form_table_compares_fund_forms_own_constant",
+        "test_pick_stored_typecast_table_compares_typecasts_own_constant"
+      ],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC1.sh",
+      "output_evidence": "........                                                                 [100%]\n8 passed in 0.44s",
+      "denominator": "8 of 8 tests in test_continuation_reader_method.py passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC2.sh -- expect continuation_pick names ([1-9]\\d*) current_method_available \\d+ stale_pick 0\\b",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC2.sh",
+      "output_evidence": "continuation_pick names 95 current_method_available 0 stale_pick 0",
+      "denominator": "95 of 95 resolved names censused (read-only, no write): 0 currently carry a stored continuation object whose inputs match AND whose method_version equals continuation.METHOD_VERSION (no /2 rewrite has been run against the live table by this or any prior cell), so the current_method_available population that a stale pick could be measured against is 0 of 95; stale_pick is 0 of that 0 -- no reader serves a stale method while a current one matches, vacuously true over the live table's present state.",
+      "expect": "continuation_pick names ([1-9]\\d*) current_method_available \\d+ stale_pick 0\\b",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC3.sh",
+      "output_evidence": "........................................................................ [ 82%]\n...........................................................              [100%]\n347 passed in 4.15s",
+      "denominator": "347 of 347 tests in lib/research/corpus/tests pass (the whole corpus suite, up from 339 pre-cell with this cell's 8 new tests), including every pre-existing substrate/continuation test unmodified",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/i1/mutant_test.py (not committed): reverts substrate._pick_stored to the pre-fix first-key-in-sorted-order pick (ignoring method_version and LastModified entirely) and re-runs it against a fixture where a /1 object's key sorts first and a /2 object's key sorts last, both sharing `inputs`.",
+      "expected": "FIX (committed _pick_stored via continuation._select_stored): picks the /2 (current method_version). MUTANT (pre-fix sorted(keys) first match): picks the /1 (stale) -- the exact defect the order's 'Where this came from' section names (a method bump served by hash order, the measured 49/46 split).",
+      "observed": "python .scratch/i1/mutant_test.py -> 'FIX: picked current (method /2)=True sha=current-sha' then 'MUTANT: picked current (method /2)=False sha=stale-sha' -- matches the prediction exactly.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1, AC2 and AC3's check scripts each run 2 times against the committed worktree (AC2 read-only against the live table, no store write).",
+      "observed": "AC1: '8 passed in 0.44s' / '8 passed in 0.58s' both runs, same pass count. AC2: 'continuation_pick names 95 current_method_available 0 stale_pick 0' identical both runs (read-only, no state change). AC3: '347 passed' both runs, identical.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No continuation --write or dossier --write run against the real store",
+      "reason": "Order s.4 BOUNDS (hard worker bound): never run continuation --write / dossier --write against the real S3 store; AC2's census script (read-only, the issuer's own file) is the only invocation run against the live table."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, test_continuation_reader_method.py (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC1.sh",
+      "result": "rc 0; 8 passed"
+    },
+    {
+      "tool": "continuation_pick_census.py against the live research-continuation table (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC2.sh",
+      "result": "rc 0; continuation_pick names 95 current_method_available 0 stale_pick 0"
+    },
+    {
+      "tool": "pytest, whole corpus suite (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i1_AC3.sh",
+      "result": "rc 0; 347 passed"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/continuation.py lib/research/corpus/substrate.py lib/research/corpus/tests/test_continuation_reader_method.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/continuation.py lib/research/corpus/substrate.py lib/research/corpus/tests/test_continuation_reader_method.py",
+      "result": "rc 0, no output (compiles)"
+    }
+  ]
+}
