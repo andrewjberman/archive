@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rr-3",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rr-3.the-redeploy.md",
+    "group": "C",
+    "vintage_commit": "bbf234e123"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "bbf234e123",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rr-3.the-redeploy.md"
+  },
+  "assignee": "0.7.0_AE_CloudOps~A",
+  "artifacts_produced": [
+    {
+      "path_or_key": "s3://opal-313476888478-lambda-artifacts/research/opal-amgt-scoped-api.zip",
+      "kind": "s3_object",
+      "commit_or_etag": "bbf234e123",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deploy_evidence": "ACT A, the one artifact write. VersionId VgRYuqQ6UE3y8_4C6l1Rq8wWaXIf4j6K; content-sha256 982nlz5TEI32UQZSqFqbtVwu7/qgVLPn89tMF6kmYvo=; 856864 bytes; ETag c69b4fc3c20a5633968e1391adca1c03. Local sha equals the uploaded metadata. Prior VersionId ujFHMNbjbg6Yv3wFotVvfDPnF4reNQdO / 856314 bytes, READ AT BUILD as the GO directed and preserved by bucket versioning; it is the rollback the half names. No delete."
+    },
+    {
+      "path_or_key": "infra/aws/terraform/harvest/scoped-amgt-api.tf",
+      "kind": "terraform",
+      "commit_or_etag": "bbf234e123",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deploy_evidence": "ACT B, ONE safe-apply; the terraform is unmodified by this cell. Plan exactly 0 add, 1 change, 0 destroy -- in-place on module.scoped_amgt_api.aws_lambda_function.this, only s3_object_version, source_code_hash and last_modified; no second resource. 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' Deployed CodeSha256 now 982nlz5TEI32UQZSqFqbtVwu7/qgVLPn89tMF6kmYvo=, Successful, LastModified 2026-09-25T23:22:39Z; replan 'No changes.'"
+    },
+    {
+      "path_or_key": "org/critical_paths/change_management/20260925T2303Z_amgt-rr-3-the-redeploy_deploy_completion.md",
+      "kind": "doc",
+      "commit_or_etag": "bbf234e123",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The ONE NEVER-2 entry. OPENED 23:03Z AND COMMITTED AT bbf234e123 BEFORE THE BUILD -- this order requires the entry committed before the BUILD, stricter than rq-2's before-the-apply, and it is checkable: at that commit no artifact had been built and the deployed sha still read the pre-act FOF+dRXoW... Limbs 2 and 3 were graded into the entry at that commit; limb 1 needs the built package and was enumerated into it before the apply. L2 was later HELD on a named external gate when AC2 failed, then RELEASED when the issuer supplied amendment 1; both legs CLOSED with proof and the entry CLOSED."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two independent controls, and the first one is the point of this cell: the control that worked at rq-2 DID NOT FIRE here, so reusing it would have been assuming the answer. (a) Limb 2 asks whether build_pack changed; at rq-2 the proof that the comparator could see movement was build_rich_text reading CHANGED. (b) When AC2 failed, the question was whether the act's named ROLLBACK could repair it.",
+      "expected": "(a) An AST comparator reporting build_pack IDENTICAL must report SOMETHING moved on the same run, or the read is indistinguishable from a comparator that stopped working. (b) If the failure is raised inside the deployed function, the rollback is a live remedy; if it is raised before any call reaches it, the rollback cannot touch it.",
+      "observed": "(a) build_rich_text is IDENTICAL here too -- same sha 7bfd5a48f275f152, merely line-shifted 788-941 -> 812-965, which a byte comparison correctly ignores. rq-2's control was therefore UNAVAILABLE. A REPLACEMENT was taken over the same instrument and file pair: the comparator does report _model_case_line ADDED and _model_cases_markdown CHANGED, 2 of 31 defs, whole-file sha 6706eb04ae5f66c4 -> 959c6dd8389a69bd. Not blind, so build_pack's IDENTICAL is a measurement. (b) AC2's failure is raised at crosswalk.harvester_key / scoped_amgt.resolve_identity; inspect.getsource over resolve_identity finds NO network token -- it is a local crosswalk read -- so the TypeError precedes any call reaching the deployed function and re-pointing the artifact cannot mint an identity. The rollback was DECLINED on that measurement, L2 was HELD on a named gate, and the issuer supplied amendment 1.",
+      "status": "FIRED-AS-EXPECTED",
+      "method": "command"
+    },
+    "determinism": {
+      "description": "AC2's denominator is not fixed, and the pinned re-run needed its own check. (a) The first run's population was read LIVE at the run. (b) The amendment's pinned file had to be verified to hold what it claims. (c) The re-run's pass had to be read for what it actually adds.",
+      "expected": "(a) A live population can differ from the one the order recorded. (b) The pinned file must contain exactly 94 entries, no duplicates, and not the excluded folder. (c) A pass after a population change should be examined for whether it re-measures anything or merely removes the unmeasurable member.",
+      "observed": "(a) It did differ: the order's ISSUER NOTES record 94 at the cut and sweep.py cites the CTO ruling @ea24753b1b as 94, while the run printed 95 -- the library grew by one between the cut and the act, and the new member 'AIA Group' has no minted identity. Filed as row AMGT_RESAPP-Z-S284. (b) The pinned file reads 96 lines = 2 comments + 94 entries, 0 duplicates, 'AIA Group' absent -- checked before the re-run, not assumed from the amendment's description. (c) THE RE-RUN'S CASES FIGURES ARE IDENTICAL TO THE FAILING RUN'S: page=282 rich=282 same=282 missing=0 extra=0 in both. The same 94 folders passed before; the amendment removed the 95th. So the pinned pass corrected the CRITERION'S DENOMINATOR and added no new served evidence, and the served-plane evidence for this act is the 282/282 cases axis that held in both runs.",
+      "status": "STABLE",
+      "method": "command"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Minting a canonical identity for the research folder 'AIA Group'",
+      "reason": "Outside this lane's <paths>, and the naming question is calls-not-picks -- reserved to 3.0.0_SA_CVO~Z's standing ruling on ambiguous names. Measured and filed as row Z-S284; the issuer carried it to round 44 as new scope (its row Z-S285) and minted nothing this round."
+    },
+    {
+      "item": "Rolling back act B when AC2 first failed",
+      "reason": "Named in the half as the trigger and DECLINED on measurement: the failure is raised in a local crosswalk lookup before any call reaches the deployed function, so the rollback could not repair it and would additionally have removed rr-2's Model Cases rule from the served plane, where the cases axis reads 282/282. Held on a named gate and escalated instead of absorbed."
+    },
+    {
+      "item": "Pushing any commit",
+      "reason": "Shared-branch law: this lane commits LOCAL; 0.0.0_AB_MSTR~Z pushes."
+    }
+  ],
+  "surprises": [
+    "AMGT_RESAPP-Z-S284: rr-3's AC2 graded a LIVE population that grew under it -- 94 folders at the cut, 95 at the run -- and the new member 'AIA Group' has no minted canonical identity, so the sweep recorded CAPTURE_FAILED 1 on a name the deployed code never touched. A live population is not a fixed denominator. Filed OBSERVATION / INERT; resolved the same session by the issuer's amendment 1 pinning the population at 94."
+  ],
+  "session_log": "No session-log path lies inside this lane's <paths> write surface beyond this deliverables folder. The substance is in the acceptance rows, the controls block and the NEVER-2 entry at org/critical_paths/change_management/20260925T2303Z_amgt-rr-3-the-redeploy_deploy_completion.md.",
+  "compiler_tools": [
+    {
+      "tool": "terraform plan (pre-apply) and terraform plan (post-apply 0-diff)",
+      "invocation": "terraform -chdir=infra/aws/terraform/harvest plan -input=false -no-color -lock-timeout=120s",
+      "result": "PRE-APPLY: 0 add, 1 change, 0 destroy, in-place, three code attributes only, no second resource. POST-APPLY: 'No changes. Your infrastructure matches the configuration.'"
+    },
+    {
+      "tool": "build-and-upload-scoped-amgt.sh --build-only (the closure gate)",
+      "invocation": "bash infra/aws/terraform/harvest/build-and-upload-scoped-amgt.sh --build-only <tmp>",
+      "result": "rc=0, 203 zip entries; VERIFY missing []; VERIFY-SCOPE both empty; ISOLATED 3 of 3 arms OK. Its package listing is limb 1's denominator: 1 of 7 changed files ships."
+    },
+    {
+      "tool": ".tools/deploy_ledger.py (the NEVER-2 contract)",
+      "invocation": "deploy_ledger.py open|close-leg|hold|close --slug amgt-rr-3-the-redeploy",
+      "result": "Opened 23:03Z, COMMITTED bbf234e123 before the build; L1 closed; L2 HELD on the AIA Group identity gate, then RELEASED on amendment 1 and closed; entry CLOSED, sentinel removed."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "CodeSha256 differs from FOF+dRXoW1KFFzD0moLigsMB2LMmIjwhwURq7FkCzbw= and LastUpdateStatus=Successful -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round43/checks/rr-3.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "CodeSha256=982nlz5TEI32UQZSqFqbtVwu7/qgVLPn89tMF6kmYvo= LastUpdateStatus=Successful LastModified=2026-09-25T23:22:39.000+0000 (prior FOF+dRXoW1KFFzD0moLigsMB2LMmIjwhwURq7FkCzbw=) / exit=0. The deployed sha equals the uploaded artifact's metadata content-sha256 and the locally computed sha. The pin was RE-MEASURED against the live function before the act rather than inherited: the live pre-act read was exactly FOF+dRXoW..., LastModified 2026-09-25T18:31:46Z -- this lane's own rq-2 deploy -- so AC1 was a live discriminator.",
+      "denominator": "1 function, 1 configuration read; the prior value re-measured live before the act.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "served over N of N folders of the LIVE research library: OK N, NOT_OK 0, CAPTURE_FAILED 0, with cases over N of N compared names at missing=0 extra=0 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round43/checks/rr-3.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "PASSES UNDER AMENDMENT 1 @a2072789f1, which pins the population: 'population: PINNED round43/checks/population_at_cut.txt, 94 folders'; 'served over 94 of 94 folders: OK 94, NOT_OK 0, CAPTURE_FAILED 0'; 'cases over 94 of 94 compared names: page=282 rich=282 same=282 missing=0 extra=0'; exit=0, the script's own rc. THE FIRST RUN AND WHY IT IS KEPT: against the LIVE population the same check read 'population: LIVE research library, 95 folders' and 'OK 94, NOT_OK 0, CAPTURE_FAILED 1', exit=1. The single failure was folder 'AIA Group' (harvester_key security-a49e6fe67bebe3a9), which resolve_identity returns no security_key for -- absent from the 89-name snapshot and from the crosswalk entirely, added to the library after the order recorded N as 94. NOT CAUSED BY THIS ACT and not reachable by its rollback: the TypeError is raised in a LOCAL crosswalk lookup (resolve_identity carries no network token) before any call reaches the deployed function. L2 was HELD on a named gate, row Z-S284 filed, and the issuer chose the pinned population over minting an identity under time pressure. WHAT THE PASS ADDS, STATED HONESTLY: the cases figures are IDENTICAL across both runs (282/282, missing 0, extra 0). The 94 that pass here are the same 94 that read OK before; the amendment removed the 95th. So this criterion's green corrected a DENOMINATOR and added no new served evidence -- the served-plane evidence for the act is the 282/282 cases axis, which held in both runs.",
+      "denominator": "94 folders of the 94 in the pinned population_at_cut.txt (96 lines = 2 comments + 94 entries, 0 duplicates, 'AIA Group' absent -- verified before the re-run). OK 94, NOT_OK 0, CAPTURE_FAILED 0; cases compared over 94 of 94 names, 282 page and 282 rich, 0 missing, 0 extra. The live population at the run was 95; the one excluded member is carried to round 44.",
+      "status": "PASS"
+    }
+  ]
+}
