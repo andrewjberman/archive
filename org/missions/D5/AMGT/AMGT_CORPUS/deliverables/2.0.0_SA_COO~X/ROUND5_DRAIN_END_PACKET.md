@@ -72,6 +72,10 @@ cause, and do the served values read as plausible Base cases beside the team's o
    another field or a rebuild that wrote on unchanged inputs. Discriminator: `dossier --write` for that key twice, reading whether the
    second writes.
 
+5. **Coverage read by 1.0.0_SA_CTO~Z @95b6f068ed: 10 REALIZED / 9 NOT REALIZED of 19.** FWD-10, FWD-11 and FWD-15 are fenced on
+   AMGT_RESAPP's page render and cannot close from inside this project; the CTO moves or rewrites those fences at L2/L4. **Round 6
+   cuts NO cell against FWD-10, FWD-11 or FWD-15 until that lands** (the CTO's ask, adopted).
+
 ## 6. Bounds and residue
 
 AMGT only; no library write; no S3 delete; no shared push. No worktree residue. Running at hand-off: the production sequence for
