@@ -1,10 +1,10 @@
-# AMGT_HARVST task order -- `HVST-r-2` -- ROUND 7 cell 2 of 2: DRAIN WHAT IS ALREADY HELD, then capture, then measure. Serial after `HVST-r-1`
+# AMGT_HARVST task order -- `HVST-v-2` -- ROUND 7 cell 2 of 2: DRAIN WHAT IS ALREADY HELD, then capture, then measure. Serial after `HVST-v-1`
 
 <!-- ===================== WORKER FACE -- this is the WHOLE of the worker's context ===================== -->
 
 <decomp_ref>
 <decomp_doc>org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md</decomp_doc>
-<owned_cells>HVST-r-2</owned_cells>
+<owned_cells>HVST-v-2</owned_cells>
 </decomp_ref>
 <issued_to>0.9.0_WK_AMGT_HARVST~22</issued_to>
 <issued_by>2.0.0_SA_COO~Y</issued_by>
@@ -35,13 +35,13 @@ comp-adversary: DECLARED-NOT-APPLICABLE -- a bounded producer run graded on its 
 5. **`COMPLETE` IS NOT A CRITERION OF THIS CELL.** `data_status COMPLETE` needs all five
    `ENABLED_PUBLISHERS` to cover the day. **`ENABLED_PUBLISHERS` IS NOT NARROWED** -- that is Andrew's call.
 
-## 1. THE CELL -- `HVST-r-2`
+## 1. THE CELL -- `HVST-v-2`
 
 **Drain the listing pages ALREADY HELD, then capture a bounded batch, then measure what moved.**
 
 ⛔ **THE ORDER OF AC1 AND AC2 IS THE WHOLE DESIGN, and round 6 paid for it.** 20 sa listing rows are ALREADY
 on disk in the local outbox, captured at `02:17:52Z` and never written because `Z-S28` blocked the parquet
-write. **They need NO vendor call.** Draining them first exercises `HVST-r-1`'s fix against REAL sa bytes --
+write. **They need NO vendor call.** Draining them first exercises `HVST-v-1`'s fix against REAL sa bytes --
 so if the fix is wrong, this cell learns it BEFORE spending a vendor act rather than after.
 
 **WHAT A LISTING ROW IS FOR:** `publisher_coverage` (`lib/research/harvest/publication_gold.py:485`) builds
@@ -51,7 +51,7 @@ spans. No listing rows for a publisher means that publisher covers NO day, whate
 ## 2. WHERE THIS CAME FROM
 
 Round-6 analysis @`37217d8053`, enrichment item 2. Decomposition section 18 @`97af12ec2b`. **Serial after
-`HVST-r-1`:** AC1a fired into a path that cannot reach silver produces an artifact nothing can read.
+`HVST-v-1`:** AC1a fired into a path that cannot reach silver produces an artifact nothing can read.
 
 ## 3. SURFACES -- what you may read and write
 
@@ -59,13 +59,13 @@ Round-6 analysis @`37217d8053`, enrichment item 2. Decomposition section 18 @`97
 org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~22/
 org/missions/D5/AMGT/AMGT_HARVST/ledger/VENDOR_CALLS_0.9.0_WK_AMGT_HARVST_22.md
 org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md
-org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-2.drain-what-is-held-then-capture.md
+org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-v-2.drain-what-is-held-then-capture.md
 </paths>
 
 Plus `.scratch/r2/` in your worktree.
 
 **NO `lib/` PATH IS IN YOUR WRITE GRANT.** If the producer needs a fix to run, that is a BLOCKING row and
-the cell stops. `HVST-r-1` owns the code.
+the cell stops. `HVST-v-1` owns the code.
 
 ⛔ **THE RUNTIME ROOT GRANT -- READ THIS BEFORE YOUR FIRST INVOCATION. ROUND 6 DIED HERE.** The producer
 resolves its runtime root to the WORKTREE (`publishers.py:22`), and a linked worktree has NO `.runtime` --
@@ -82,19 +82,19 @@ cell passes the absolute runtime root of the MAIN tree**, given in your spawn pr
 - **Capture batch is bounded to the SIX pilot securities and `--max-jobs 2`.** Not the universe.
 - No portal, no Terraform, no deploy, no schedule, no notifier.
 - Every Bash call begins `export OPAL_AGENT_SERIAL=0.9.0_WK_AMGT_HARVST~22;`.
-- Your FIRST act prints `git rev-parse --abbrev-ref HEAD`, confirms `HVST-r-1`'s fix is present in this
+- Your FIRST act prints `git rev-parse --abbrev-ref HEAD`, confirms `HVST-v-1`'s fix is present in this
   worktree (name how you confirmed it), and confirms every path in section 3 exists.
 
 ## 5. PROOF OF SPEC (each invocation LITERAL; timeout 900). THREE mechanical criteria + ONE judgment
 
 <proof_of_spec>
-  <criterion id="AC1" cell_refs="HVST-r-2"><invocation>cd "$(git rev-parse --show-toplevel)" && python .scratch/r2/ac1.py</invocation><expect>THE HELD ROWS REACH SILVER, with NO vendor call: the BEFORE state read live from S3 (sa listing_hit rows and bronze news_listing objects, with the five-publisher denominator), then `upload-harvest --max-objects 40 --runtime-root "<MAIN_TREE>/.runtime/opal-data-harvest"` run through the producer and its output recorded VERBATIM, then the AFTER state on the SAME instrument with sa's delta as a signed number. Expected: sa's 20 held listing rows land. If the uploader still raises, record it verbatim and STOP -- that is HVST-r-1 not working and it is a BLOCKING row, not something to work around</expect></criterion>
+  <criterion id="AC1" cell_refs="HVST-v-2"><invocation>cd "$(git rev-parse --show-toplevel)" && python .scratch/r2/ac1.py</invocation><expect>THE HELD ROWS REACH SILVER, with NO vendor call: the BEFORE state read live from S3 (sa listing_hit rows and bronze news_listing objects, with the five-publisher denominator), then `upload-harvest --max-objects 40 --runtime-root "<MAIN_TREE>/.runtime/opal-data-harvest"` run through the producer and its output recorded VERBATIM, then the AFTER state on the SAME instrument with sa's delta as a signed number. Expected: sa's 20 held listing rows land. If the uploader still raises, record it verbatim and STOP -- that is HVST-v-1 not working and it is a BLOCKING row, not something to work around</expect></criterion>
 
-  <criterion id="AC2" cell_refs="HVST-r-2"><invocation>cd "$(git rev-parse --show-toplevel)" && python -m lib.opal_data_harvest run --publishers sa --harvest-grammar --runtime-root "<MAIN_TREE>/.runtime/opal-data-harvest" --security-json org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json --max-jobs 2 2>&1 | tail -25</invocation><expect>the producer's own output recorded VERBATIM whatever it says, then a SECOND `upload-harvest` run so the newly captured pages reach S3, also recorded verbatim. NO retry. ⛔ If the output shows an auth refresh or a browser starting, STOP per clause 4. AND the ledger row for this call is appended in the same commit -- name the file and print the row you wrote. NOTE the securities file named here is an ARRAY of six; if the flag refuses an array (it takes ONE object), that is a cut defect -- file a BLOCKING row and run the single-security file at org/tier1_exec/2.0.0_SA_COO/deliverables/AMGT_HARVST/sa_one_security_992HK.json instead, recording BOTH attempts</expect></criterion>
+  <criterion id="AC2" cell_refs="HVST-v-2"><invocation>cd "$(git rev-parse --show-toplevel)" && python -m lib.opal_data_harvest run --publishers sa --harvest-grammar --runtime-root "<MAIN_TREE>/.runtime/opal-data-harvest" --security-json org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~4/securities.json --max-jobs 2 2>&1 | tail -25</invocation><expect>the producer's own output recorded VERBATIM whatever it says, then a SECOND `upload-harvest` run so the newly captured pages reach S3, also recorded verbatim. NO retry. ⛔ If the output shows an auth refresh or a browser starting, STOP per clause 4. AND the ledger row for this call is appended in the same commit -- name the file and print the row you wrote. NOTE the securities file named here is an ARRAY of six; if the flag refuses an array (it takes ONE object), that is a cut defect -- file a BLOCKING row and run the single-security file at org/tier1_exec/2.0.0_SA_COO/deliverables/AMGT_HARVST/sa_one_security_992HK.json instead, recording BOTH attempts</expect></criterion>
 
-  <criterion id="AC3" cell_refs="HVST-r-2"><invocation>cd "$(git rev-parse --show-toplevel)" && python .scratch/r2/ac3.py</invocation><expect>publisher_coverage and daily_rows run PURE and IN MEMORY over the post-run listing_hit rows (no gold write): the number of securities for which sa now yields a non-empty span with the denominator tested and each span printed as (start, end); and the data_status distribution BEFORE and AFTER with the count of (security, day) rows that moved DENIED -> PARTIAL, plus publishers_covered / publishers_enabled on a sample moved row. The string COMPLETE must appear ZERO times in any moved row</expect></criterion>
+  <criterion id="AC3" cell_refs="HVST-v-2"><invocation>cd "$(git rev-parse --show-toplevel)" && python .scratch/r2/ac3.py</invocation><expect>publisher_coverage and daily_rows run PURE and IN MEMORY over the post-run listing_hit rows (no gold write): the number of securities for which sa now yields a non-empty span with the denominator tested and each span printed as (start, end); and the data_status distribution BEFORE and AFTER with the count of (security, day) rows that moved DENIED -> PARTIAL, plus publishers_covered / publishers_enabled on a sample moved row. The string COMPLETE must appear ZERO times in any moved row</expect></criterion>
 
-  <criterion id="AC4" cell_refs="HVST-r-2" judgment="true" grader="3.0.0_SA_CVO">**JUDGMENT -- graded at L9 by `3.0.0_SA_CVO`, NEVER self-graded.** <expect>ARE THE LISTING ROWS THAT REACHED SILVER ACTUALLY ABOUT THE SECURITY THEY ARE FILED UNDER? Round 6 had NO plausibility oracle -- 0 of 8 judgment criteria graded -- and a mechanical delta counts rows without being able to see rows counted against the WRONG NAME. Lay out, for a sample the worker names and sizes itself, the security_key each row is filed under beside the article title and the vendor symbol the row came from, so a reader can judge whether the join is right. The worker PRESENTS this evidence and states its sample size and how it chose it; it does NOT grade it</expect></criterion>
+  <criterion id="AC4" cell_refs="HVST-v-2" judgment="true" grader="3.0.0_SA_CVO">**JUDGMENT -- graded at L9 by `3.0.0_SA_CVO`, NEVER self-graded.** <expect>ARE THE LISTING ROWS THAT REACHED SILVER ACTUALLY ABOUT THE SECURITY THEY ARE FILED UNDER? Round 6 had NO plausibility oracle -- 0 of 8 judgment criteria graded -- and a mechanical delta counts rows without being able to see rows counted against the WRONG NAME. Lay out, for a sample the worker names and sizes itself, the security_key each row is filed under beside the article title and the vendor symbol the row came from, so a reader can judge whether the join is right. The worker PRESENTS this evidence and states its sample size and how it chose it; it does NOT grade it</expect></criterion>
 </proof_of_spec>
 
 Write `.scratch/r2/ac1.py` and `ac3.py` yourself. **Record each criterion's ACTUAL OUTPUT and its
@@ -109,7 +109,7 @@ ONCE in your final message. **The ledger row and the evidence land in the SAME c
 <!-- ===================== RECORD FACE -- does NOT travel to the worker ===================== -->
 
 **ISSUER NOTES (L5/L6):**
-1. **AC1 before AC2 is the round-6 correction.** The held rows are free evidence that `r-1` works on real sa
+1. **AC1 before AC2 is the round-6 correction.** The held rows are free evidence that `v-1` works on real sa
    bytes. Spending the vendor act first and discovering the fix is wrong afterwards is the exact ordering
    mistake that made round 6's AC2 structurally `+0`.
 2. **AC2 names the array hazard IN the criterion rather than assuming it away.** `--security-json` takes ONE

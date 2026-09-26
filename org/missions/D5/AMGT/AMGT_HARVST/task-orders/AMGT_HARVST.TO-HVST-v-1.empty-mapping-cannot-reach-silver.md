@@ -1,10 +1,10 @@
-# AMGT_HARVST task order -- `HVST-r-1` -- ROUND 7 cell 1 of 2: disarm `Z-S28`, so a listing page carrying an EMPTY MAPPING can reach silver. PUBLISHER-NEUTRAL or it is not the fix
+# AMGT_HARVST task order -- `HVST-v-1` -- ROUND 7 cell 1 of 2: disarm `Z-S28`, so a listing page carrying an EMPTY MAPPING can reach silver. PUBLISHER-NEUTRAL or it is not the fix
 
 <!-- ===================== WORKER FACE -- this is the WHOLE of the worker's context ===================== -->
 
 <decomp_ref>
 <decomp_doc>org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md</decomp_doc>
-<owned_cells>HVST-r-1</owned_cells>
+<owned_cells>HVST-v-1</owned_cells>
 </decomp_ref>
 <issued_to>0.9.0_WK_AMGT_HARVST~21</issued_to>
 <issued_by>2.0.0_SA_COO~Y</issued_by>
@@ -25,7 +25,7 @@ comp-adversary: DECLARED-NOT-APPLICABLE -- a source change graded by its own tes
    a blast radius this cell has no sign-off for. **It is not in your write grant and editing it fails the
    cell even if the tests pass.**
 
-## 1. THE CELL -- `HVST-r-1`
+## 1. THE CELL -- `HVST-v-1`
 
 **Make a listing row carrying an empty mapping writable, for every publisher.**
 
@@ -61,7 +61,7 @@ lib/opal_data_harvest/silver_from_bronze.py
 lib/opal_data_harvest/test_silver_from_bronze.py
 org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~21/
 org/missions/D5/AMGT/AMGT_HARVST/surprise-channel/investigations/INVESTIGATION_v1.md
-org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-r-1.empty-mapping-cannot-reach-silver.md
+org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-v-1.empty-mapping-cannot-reach-silver.md
 </paths>
 
 Plus `.scratch/r1/` in your worktree for check scripts.
@@ -84,16 +84,16 @@ Plus `.scratch/r1/` in your worktree for check scripts.
 ## 5. PROOF OF SPEC (each invocation LITERAL; timeout 900). THREE mechanical criteria, per the build-TO rule
 
 <proof_of_spec>
-  <criterion id="AC1" cell_refs="HVST-r-1"><invocation>cd "$(git rev-parse --show-toplevel)" && python .scratch/r1/ac1.py</invocation><expect>THE DEFECT REPRODUCED AND THEN GONE, on the REAL held sa payload, both arms in one output: BEFORE the change, building the listing rows and calling pyarrow's parquet writer raises ArrowNotImplementedError naming a struct with no child field; AFTER the change, the same payload writes and the row count is printed (expected 20). The BEFORE arm must be produced by running the pre-change code path, never by quoting this order</expect></criterion>
+  <criterion id="AC1" cell_refs="HVST-v-1"><invocation>cd "$(git rev-parse --show-toplevel)" && python .scratch/r1/ac1.py</invocation><expect>THE DEFECT REPRODUCED AND THEN GONE, on the REAL held sa payload, both arms in one output: BEFORE the change, building the listing rows and calling pyarrow's parquet writer raises ArrowNotImplementedError naming a struct with no child field; AFTER the change, the same payload writes and the row count is printed (expected 20). The BEFORE arm must be produced by running the pre-change code path, never by quoting this order</expect></criterion>
 
-  <criterion id="AC2" cell_refs="HVST-r-1"><invocation>cd "$(git rev-parse --show-toplevel)" && python .scratch/r1/ac2.py</invocation><expect>THE POSITIVE CONTROL, and it is the criterion that can fail this cell: wsj's held listing payload produces a BYTE-IDENTICAL row set and an IDENTICAL arrow schema before and after the change -- print both schemas and the comparison verdict, plus the row count. AND a populated mapping still writes AS A STRUCT: construct a row whose mapping has at least one key, show its arrow type is struct with that child, and show it writes. A fix that re-types a column wsj already writes is a silver schema change wearing a bug fix's clothes and must be caught here</expect></criterion>
+  <criterion id="AC2" cell_refs="HVST-v-1"><invocation>cd "$(git rev-parse --show-toplevel)" && python .scratch/r1/ac2.py</invocation><expect>THE POSITIVE CONTROL, and it is the criterion that can fail this cell: wsj's held listing payload produces a BYTE-IDENTICAL row set and an IDENTICAL arrow schema before and after the change -- print both schemas and the comparison verdict, plus the row count. AND a populated mapping still writes AS A STRUCT: construct a row whose mapping has at least one key, show its arrow type is struct with that child, and show it writes. A fix that re-types a column wsj already writes is a silver schema change wearing a bug fix's clothes and must be caught here</expect></criterion>
 
-  <criterion id="AC3" cell_refs="HVST-r-1"><invocation>cd "$(git rev-parse --show-toplevel)" && python -m pytest lib/opal_data_harvest/ -q 2>&1 | tail -15</invocation><expect>the opal_data_harvest suite runs and its pass/fail counts are printed as a BOUND -- the number of tests passing, stated with the count, and zero regressions against the pre-change run of the same command (print both numbers). Your new test for the empty-mapping case is part of this suite and is named in the output</expect></criterion>
+  <criterion id="AC3" cell_refs="HVST-v-1"><invocation>cd "$(git rev-parse --show-toplevel)" && python -m pytest lib/opal_data_harvest/ -q 2>&1 | tail -15</invocation><expect>the opal_data_harvest suite runs and its pass/fail counts are printed as a BOUND -- the number of tests passing, stated with the count, and zero regressions against the pre-change run of the same command (print both numbers). Your new test for the empty-mapping case is part of this suite and is named in the output</expect></criterion>
 </proof_of_spec>
 
 Write `.scratch/r1/ac1.py` and `ac2.py` yourself. **Record each criterion's ACTUAL OUTPUT and its
 DENOMINATOR.** No judgment criterion in this cell -- its correctness is mechanically decidable, which is
-exactly why `r-2` carries the round's judgment criterion instead.
+exactly why `v-2` carries the round's judgment criterion instead.
 
 ## 6. WHEN YOU ARE DONE
 
@@ -120,7 +120,7 @@ OBSERVATION or BLOCKING -- there is no DEFECT value) and KEEP WORKING.
    failure mode this cell could plausibly introduce is a silent silver schema change on wsj, which no
    mechanical column downstream would flag.
 3. **No judgment criterion here, deliberately** -- correctness is decidable from the two arms. The round's
-   judgment criterion sits on `r-2`, which is where a green number can be green over the wrong rows.
+   judgment criterion sits on `v-2`, which is where a green number can be green over the wrong rows.
 
 <risk>LOCAL</risk>
 <status>pending</status>
