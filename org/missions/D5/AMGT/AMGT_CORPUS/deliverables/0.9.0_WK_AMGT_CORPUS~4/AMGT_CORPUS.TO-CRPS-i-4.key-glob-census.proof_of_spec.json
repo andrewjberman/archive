@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-i-4",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-i-4.key-glob-census.md",
+    "group": "OTHER",
+    "vintage_commit": "4051cbb215f9038da42d7555764a3deb1d7707db"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "4051cbb215f9038da42d7555764a3deb1d7707db",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-i-4.key-glob-census.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~4",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/key_glob_census.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New AST census over lib/research: flags any glob.glob/iglob, fnmatch.fnmatch/fnmatchcase/filter or <Path>.glob/rglob call whose pattern argument is built (directly, via f-string, %, +, .format, or os.path.join) from a name or attribute containing 'security_key' or ending '_key'. `python -m lib.research.corpus.key_glob_census` prints 'glob_sites <n> key_derived <k> files_scanned <f>' plus one 'key_derived_site <path>:<line> <call>' line per flagged call, exit 0 iff key_derived==0. `--plant` writes one key-derived-glob module into a tempfile.TemporaryDirectory (never inside the repo), scans only that dir, prints 'plant_flagged 1'.",
+      "introduces": ["census", "_scan_file", "_key_derived", "run_plant", "main"],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_key_glob_census.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New file, 17 tests: one call-form (glob.glob, glob.iglob, fnmatch.fnmatch/fnmatchcase/filter, Path.glob, Path.rglob) crossed with each key-derivation form (bare name, f-string, %, +, .format, os.path.join) that is key-derived is flagged; a constant pattern and a non-key variable pattern are not flagged; a key-derived name passed as the non-pattern argument is not flagged; the --plant positive control flags via run_plant() and via main(['--plant']); main() over a scratch root prints the summary line. All 17 pass.",
+      "introduces": [
+        "test_glob_glob_direct_key_name_flagged",
+        "test_glob_glob_fstring_key_derived_flagged",
+        "test_glob_iglob_percent_format_key_derived_flagged",
+        "test_glob_glob_plus_concat_key_derived_flagged",
+        "test_glob_glob_dot_format_key_derived_flagged",
+        "test_glob_glob_os_path_join_key_derived_flagged",
+        "test_fnmatch_fnmatch_key_derived_flagged",
+        "test_fnmatch_fnmatchcase_key_derived_flagged",
+        "test_fnmatch_filter_key_derived_flagged",
+        "test_path_glob_method_key_derived_flagged",
+        "test_path_rglob_method_key_derived_flagged",
+        "test_constant_pattern_not_flagged",
+        "test_non_key_variable_pattern_not_flagged",
+        "test_key_derived_name_that_is_not_a_pattern_arg_not_flagged",
+        "test_plant_positive_control_flags",
+        "test_main_plant_flag_exits_zero",
+        "test_main_default_root_prints_summary_line"
+      ],
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC1.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC1.sh",
+      "output_evidence": ".................                                                        [100%]\n17 passed in 0.73s",
+      "denominator": "17 of 17 tests in test_key_glob_census.py passed",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC2.sh -- expect (?m)^glob_sites \\d+ key_derived 0 files_scanned [1-9]\\d*$",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC2.sh",
+      "output_evidence": "glob_sites 6 key_derived 0 files_scanned 260",
+      "denominator": "260 .py files scanned under lib/research; 6 glob/fnmatch call sites found; 0 key-derived",
+      "expect": "(?m)^glob_sites \\d+ key_derived 0 files_scanned [1-9]\\d*$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC3.sh -- expect (?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC3.sh",
+      "output_evidence": "........................................................................ [ 80%]\n....................................................................     [100%]\n356 passed in 4.07s",
+      "denominator": "356 of 356 tests in lib/research/corpus/tests pass (whole corpus suite, up from 339 pre-cell with this cell's 17 new tests)",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "--plant writes one MUTANT module (planted_key_glob.py, glob.glob(f\"{security_key}*.json\") -- a key-derived pattern the live corpus has zero of) into a fresh tempfile.TemporaryDirectory, scans only that dir, prints plant_flagged. A sibling case (constant '*.json' pattern, and a non-key variable 'prefix' built the same f-string way) is the negative arm inside test_constant_pattern_not_flagged / test_non_key_variable_pattern_not_flagged.",
+      "expected": "plant_flagged 1 for the mutant (0 would be a failed control -- the census blind to its own designed positive case); key_derived 0 for both negative-arm cases",
+      "observed": "python -m lib.research.corpus.key_glob_census --plant -> 'plant_flagged 1'; test_plant_positive_control_flags and test_main_plant_flag_exits_zero both pass; test_constant_pattern_not_flagged and test_non_key_variable_pattern_not_flagged both pass (key_derived 0)",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2's check script (read-only AST walk over lib/research, no state) run twice.",
+      "observed": "glob_sites 6 key_derived 0 files_scanned 260 identical both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No call site outside lib/research (e.g. a shell script or another tree's Python interpolating a security key into a glob/fnmatch) is scanned.",
+      "reason": "Order s.1 RULED text scopes the walk to lib/research; a wider scope is out of this cell's <paths>."
+    },
+    {
+      "item": "No key is renamed, escaped or otherwise edited at any call site.",
+      "reason": "Order s.4 BOUNDS: no key is renamed or re-escaped; a live finding would be reported and rowed, not fixed here (moot -- census found none)."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest, test_key_glob_census.py (AC1)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC1.sh",
+      "result": "rc 0; 17 passed"
+    },
+    {
+      "tool": "key_glob_census over lib/research, live (AC2)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC2.sh",
+      "result": "rc 0; glob_sites 6 key_derived 0 files_scanned 260"
+    },
+    {
+      "tool": "pytest, whole corpus suite (AC3)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round7/i4_AC3.sh",
+      "result": "rc 0; 356 passed"
+    },
+    {
+      "tool": "ruff check --target-version py39",
+      "invocation": "ruff check --target-version py39 lib/research/corpus/key_glob_census.py lib/research/corpus/tests/test_key_glob_census.py",
+      "result": "All checks passed!"
+    },
+    {
+      "tool": "py_compile",
+      "invocation": "python -m py_compile lib/research/corpus/key_glob_census.py lib/research/corpus/tests/test_key_glob_census.py",
+      "result": "rc 0, no output (both files compile)"
+    }
+  ]
+}
