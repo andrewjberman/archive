@@ -1,45 +1,41 @@
 # NFRA_MCPINDEX.TO-MX-t-8 -- the portal tools: result
 
-`0.9.0_WK_NFRA_MCPINDEX~3`, branch `wk-NFRA_MCPINDEX-3`, base `d59217f5a8`. Tests:
+`0.9.0_WK_NFRA_MCPINDEX~3`, branch `wk-NFRA_MCPINDEX-3`, build commit `bc0cde67f0`. Module:
+`infra/aws/ec2/opal-gateway/app/integrations/portal_index/integration.py`. Tests:
 `infra/aws/ec2/opal-gateway/tests/test_portal_index.py`.
 
-**The integration module is NOT in the gateway tree.** The naming commit gate (ENFORCE) refuses it, because every
-exact key the portal serves today is a legacy-layout literal that `address()` cannot produce (row
-`NFRA_MCPINDEX-Z-W3-S6`, BLOCKING). The refused bytes are kept, unexecuted, at
-`deliverables/0.9.0_WK_NFRA_MCPINDEX~3/candidate/portal_index/{__init__,integration}.py`. They belong at
-`app/integrations/portal_index/` once the naming remedy lands. Everything below describes that module.
+This supersedes the earlier text of this file, which described a ten-tool module kept outside the tree.
 
-## The ten tools
+## The three tools (order item 13)
 
-Bucket: `opal-data-portal-v2`. Each tool reads ONE whole object by exact key, and `read_object` fences it
-before any S3 call. Every tool declares class `SAFE` on `SPEC.tool_classifications` (one GetObject each, no write).
+Row `-Z-W3-S11`, disarmed by the issuer's seat row `-Z-S2`, cut the cell to the tools whose key catalog_gate resolves
+today. Bucket: the runtime catalog's own `bucket` (`opal-data-portal-v2`). Each tool's key is the `key` of the ONE
+catalog row whose `accessors` names the tool's portal accessor, read at one `{scope}` member and admitted by
+`catalog_gate.gate()` with the caller's principal (ruling D-5 = (c)). The module holds no key literal.
 
-| tool | exact keys (fence prefix) | as-of field | catalog ref |
-|---|---|---|---|
-| `mdpf_get_aum_metrics(scope)` | `platinum/mdpf/{49financial,cottonwood,global,inflection}/aum-metrics.json` | `period` | `portal_mdpf_aum_metrics` |
-| `mdpf_get_account_distribution(scope)` | `platinum/mdpf/{4 scopes}/account-distribution.json` | `period` | `portal_mdpf_account_distribution` |
-| `mdpf_get_aggregate_aua(scope)` | `platinum/mdpf/{4 scopes}/aggregate-aua-timeseries.json` | `as_of_last` | `portal_mdpf_aggregate_aua` |
-| `mdpf_get_category_views(scope)` | `platinum/mdpf/{4 scopes}/category-views.json` | `as_of` | `portal_mdpf_category_views` |
-| `mdpf_get_non_model_assets()` | `platinum/mdpf/global/non-model-assets.json` | `latest.date` | `portal_mdpf_non_model_assets` |
-| `etfs_get_positioning(fund)` | `platinum/etfs/positioning_data.json`; answers `portfolios.{fund}` | `portfolios.{fund}.data_as_of` | `portal_etfs_positioning` |
-| `advi_get_leaderboard(scope)` | `platinum/advi/49financial/leaderboard.json` | `data_as_of` | `portal_advi_leaderboard` |
-| `advi_get_mix_summary(scope)` | `platinum/advi/49financial/mix_summary.json` | `data_as_of` | `portal_advi_mix_summary` |
-| `advi_get_partner_analytics(scope, period)` | `platinum/advi/49financial/partner_analytics_{annual,quarterly}.json` | `data_as_of` | `portal_advi_partner_analytics` |
-| `advi_get_growth_chart(scope, chart)` | `platinum/advi/49financial/{cumulative_chart,timeseries_chart,timeseries_overview}.json` | `data_as_of` | `portal_advi_growth_chart` |
+| tool | portal accessor | exact keys (fence prefix `platinum/mdpf/`) | class | as-of field | catalog ref |
+|---|---|---|---|---|---|
+| `mdpf_get_aum_metrics(scope)` | `getAUMMetricsByFirm` | `platinum/mdpf/{scope}/aum-metrics.json` | SAFE | `period` | `portal_mdpf_aum_metrics` |
+| `mdpf_get_account_distribution(scope)` | `getAccountDistributionByFirm` | `platinum/mdpf/{scope}/account-distribution.json` | SAFE | `period` | `portal_mdpf_account_distribution` |
+| `mdpf_get_aggregate_aua(scope)` | `getMdpfAggregateAUATimeSeriesByFirm` | `platinum/mdpf/{scope}/aggregate-aua-timeseries.json` | SAFE | `as_of_last` | `portal_mdpf_aggregate_aua` |
 
-Excluded inside the fence (analysis AC8): `platinum/mdpf/archive/`, `platinum/mdpf/_manifests/`,
-`platinum/etfs/_manifests/`, `platinum/advi/49financial/_manifests/`. The Inflection/Cottonwood firm buckets are
-out of scope. Every as-of field was confirmed by a read-only `s3api get-object` of the 13 live keys on
-2026-09-25. Only key names and date fields were printed, and nothing was committed.
+- `{scope}` is one of the members the gate indexes for the row: 49financial, cottonwood, global, inflection. A firm
+  principal reads only its own member.
+- Excluded inside the fence (analysis AC8): `platinum/mdpf/archive/` and `platinum/mdpf/_manifests/`.
+- Every tool takes an optional `as_of` (YYYY-MM-DD). An absent or empty object answers `"no data for that date"`
+  with no figure. So does an object whose own as-of differs from the one asked for, and that answer reports both
+  dates.
+- The data_entitlement class of all three is `legacy`, beside `opal_discover` and `opal_describe`. Both factories
+  are wired in `registry.py`, and both integrations stay dormant.
 
-Every tool takes an optional `as_of` (YYYY-MM-DD). An absent or empty object answers
-`"no data for that date"` with no figure. So does an object whose own as-of differs from the one asked for, and
-that answer reports both dates.
+The other seven tools of the analysis's AC7 left this cell for round 3's catalog-row cell: mdpf category-views and
+non-model-assets (its catalog verdict is deny), etfs positioning, and the four advi tools. No catalog row was added
+for them. Their seven `catalog_entries/portal_*` sources were removed from this branch (row `-Z-W3-S13`).
 
 ## R-7 -- model composition and weights: UNANSWERABLE from the portal's objects
 
-No tool answers which holdings, at what weights, make up a model. None of the 13 objects inside this fence carries
-a per-model holdings list with weights:
+No tool answers which holdings, at what weights, make up a model. None of the 13 objects inside the round-1 fence
+carries a per-model holdings list with weights:
 - `aum-metrics.json` `by_model[]` carries `model_name, aum, account_count, q0..q3`.
 - `aggregate-aua-timeseries.json` `by_model.*` carries `display_name, model_value, account_count, cohort_class`.
 - `category-views.json` `nodes.Models` carries `aum, display_label, members, children` (each child: `aum, display_label, members`).
@@ -49,17 +45,16 @@ a per-model holdings list with weights:
 
 The portal objects that might carry model holdings sit under `json/positioning/` (`model.json`,
 `holdings_attribution_data.json`). The round-1 analysis excluded them from the fence as a different property
-(AC1/AC8), so this cell does not read them.
+(AC1/AC8), so this cell does not read them. After the item-13 cut, the three tools this cell registers read
+`aum-metrics.json`, `account-distribution.json` and `aggregate-aua-timeseries.json` only, and none of them carries
+weights.
 
-## Criteria
+## Criteria at `bc0cde67f0`
 
-On the committed tree, AC1, AC2 and AC3 all fail: the six tests cannot import `app.integrations.portal_index`
-(row `-Z-W3-S6`).
+- AC1: `pytest rc=0; named tests passed 2 of 2; failed/error lines 0` -- RESULT: PASS -- exit=0
+- AC2: `pytest rc=0; named tests passed 4 of 4; failed/error lines 0` -- RESULT: PASS -- exit=0
+- AC3: `pytest rc=0; named tests passed 1 of 1; failed/error lines 0` -- RESULT: PASS -- exit=0
 
-Before the commit, with the module in place, the module read 4 passed and 2 failed. AC2's three tests and AC3's
-one test passed. AC1's two tests failed on limbs this order cannot reach (BLOCKING/INERT):
-- `-Z-W3-S1`: `data_entitlement.classify` returns None for 10 of 10 tools, because `app/data_entitlement.py` is outside `<paths>`.
-- `-Z-W3-S2`: `DATA_CATALOG.yaml` cannot be regenerated here. `emit_catalog_v02.py` refuses because `portal/src/api` is absent, while the 10 source entries validate.
-
-Rows `-S3` (registry wiring), `-S4` (catalog_entries is the silver mechanism) and `-S5` (single `tool_prefix`) are
-OBSERVATION/INERT.
+`test_entitlement_admin.py::test_ogz2_ac08` pins portal_index (3) and opal_discover (2), and the total 49
+(44 + 3 + 2). It was not run: the file does not collect here (`ModuleNotFoundError: No module named 'moto'`), and
+`app/integrations/opal_discover` is not on this tree. Row `-Z-W3-S10` stands.
