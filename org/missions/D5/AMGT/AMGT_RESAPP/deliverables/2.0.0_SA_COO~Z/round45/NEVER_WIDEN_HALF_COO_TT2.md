@@ -20,4 +20,15 @@ landed; (5) the served `/print` pdf OUTPUT moves (graded on output against a pre
 The harness change in tt-1 (`exportCompare.harness.cjs`) is not deployed; it is the instrument AC2 grades with. The build
 pip-downloads its pinned wheels from PyPI (declared). No peers batch and no other served write.
 
-Signed: `2.0.0_SA_COO~Z`, 2026-09-26.
+## THE EXPECTED OUTCOME'S TWO FALSIFIERS (the CTO's conditions, 18:30Z)
+
+1. **`abs_missing` moves 86 -> 0 over the 95-name population**, a measured before/after: before = round 44's close run
+   (`round44/close-run/served_live95.tsv` @f4e94c87b7, 86 of 95 at 1, read against `LK9h47ju...DcO4s=`); after = tt-2 AC2 on the
+   new `CodeSha256`. Locally the same move is tt-1 AC1 (base 9 of 95 at 0, `round45/base-runs/tt-1.AC1.log`).
+2. **The OK predicate CONSULTS `absDiff.missing`, shown by a planted control that makes it FAIL**: tt-1 AC2 runs the harness on the
+   two pre-fix served exports pinned in `round45/checks/controls/` (RKT, AMD; each ABSENCES missing=1) and requires NOT OK (rc=1) on
+   both. At base it reads OK on both (`round45/base-runs/tt-1.AC2.log`), so the control is known to discriminate.
+
+Limb 5 is graded at L2/L7 on a before/after pair whose two captures read DIFFERENT `CodeSha256`, as rs-2's did.
+
+Signed: `2.0.0_SA_COO~Z`, 2026-09-26. Amended ~18:4xZ at the CTO's message (18:30Z): the two falsifiers named. Row Z-S289 corrects round 44's 95 of 95.
