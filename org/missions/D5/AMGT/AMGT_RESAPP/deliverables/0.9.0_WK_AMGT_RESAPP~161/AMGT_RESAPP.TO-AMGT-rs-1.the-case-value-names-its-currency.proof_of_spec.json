@@ -1,0 +1,163 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_RESAPP.TO-AMGT-rs-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rs-1.the-case-value-names-its-currency.md",
+    "group": "C",
+    "vintage_commit": "894cc7403da8744577165a4f46b269c70f85885d"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_RESAPP/decompositions/AMGT_RESAPP_DECOMP.md",
+    "vintage_commit": "894cc7403da8744577165a4f46b269c70f85885d",
+    "to_ref": "org/missions/D5/AMGT/AMGT_RESAPP/task-orders/AMGT_RESAPP.TO-AMGT-rs-1.the-case-value-names-its-currency.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_RESAPP~161",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/SecurityAnalysis/tabs/ModelTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "6712c7429e035e4d8d92b123caf59dae75291ee0",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Committed on wk-AMGT_RESAPP-161-portal (portal is a separate git repository, submoduled into this worktree; the outer commit moves the gitlink to this hash). ModelCaseDetail gains quote_currency (local type, row AMGT_RESAPP-Z-S281's own pattern -- types.ts is not this cell's to edit); new caseCurrency(caseData, crncy) returns crncy unless the case's own quote_currency disagrees with it, else null; modelCaseDetail/ModelCaseLine/CasesBlock thread crncy through; ModelBody reads crncy off data.header_figures by IDENTITY_CURRENCY_MNEMONIC ('CRNCY', constants.ts -- the SAME mnemonic SecurityOverlay.tsx's Price tile already reads via figureByMnemonic), passed into both CasesBlock call sites (ABSENT and SERVED branches). No route added, no other page file touched.",
+      "artifact_covered_by": ["AC1", "AC3", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/print/render_pack.py",
+      "kind": "script",
+      "commit_or_etag": "3f9e17ab8970a92194710ddef990fc5b1e18c84c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New _case_currency(case, crncy) -- byte-identical logic to the page's caseCurrency: crncy unless the case's own quote_currency disagrees, else None. _model_case_line/_model_cases_markdown gain a crncy parameter (default None, so every pre-existing call site and test is unaffected) and print '<value> <crncy>' right after the value when currency is not withheld. build_rich_text's call site now reads model_crncy off the SAME unfiltered header_figs_all the Price-tile-gated header table is built from (never the has_px_last-filtered header_figs), and threads it into _model_cases_markdown.",
+      "artifact_covered_by": ["AC1", "AC2", "AC4"]
+    },
+    {
+      "path_or_key": "lib/research/print/tests/test_model_cases_markdown.py",
+      "kind": "test",
+      "commit_or_etag": "3f9e17ab8970a92194710ddef990fc5b1e18c84c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "6 new tests added (36 of 36 pass in this file's suite, up from 30): SERVED case with formula carries '<value> <crncy> (<formula>)'; SERVED case with no formula carries '<value> <crncy>'; no CRNCY prints no currency even when the case carries its own quote_currency (never guessed); own quote_currency agreeing with CRNCY changes nothing; own quote_currency disagreeing with CRNCY prints no currency (never chosen between); _model_cases_markdown threads crncy into the SERVED case only, leaving ABSENT cases' own reason untouched.",
+      "artifact_covered_by": ["AC2"]
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The spec's own adversarial arm (preflight comp-adversary, run by the issuer at the cut): a case whose own quote_currency DISAGREES with CRNCY must print NO currency, never a guessed/chosen one. Exercised directly against _case_currency (test_own_quote_currency_disagreeing_with_crncy_prints_no_currency) and its page-side twin caseCurrency (same disagree branch), since no case in round 44's live capture actually disagrees (measured: 0 of 48 SERVED cases disagree, 45 carry no quote_currency, 3 carry GBp agreeing with CRNCY) -- the population sweep alone could never exercise that branch.",
+      "expected": "case={value:12.5, quote_currency:'EUR'}, crncy='GBp' -> line reads 'Base case: SERVED -- 12.5' (no currency token) -- never '12.5 EUR' or '12.5 GBp'.",
+      "observed": "FIRED-AS-EXPECTED: test_own_quote_currency_disagreeing_with_crncy_prints_no_currency passes; the population-level control (0 disagreements found by direct census of the 48 SERVED cases in C:/tmp/amgt-r43-live95) confirms AC1's 48-of-48 is not concealing a silently-resolved disagreement.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "rs-1.AC1.py (48-of-48 sweep) and the pytest suite each run twice against the same committed code, no code change between runs.",
+      "observed": "STABLE: AC1 read 'served cases carrying their price currency: 48 of 48' / exit=0 on both runs; pytest read '36 passed' on both runs; AC2's 95-of-95 population sweep (single run, ~3600s budget) read 'local rebuild over 95 of 95 folders: OK 95, NOT_OK 0, CAPTURE_FAILED 0; cases over 95 of 95 compared names: page=285 rich=285 same=285 missing=0 extra=0', exit=0 -- the SAME page=rich=same=285 the pre-change population already carried (this cell adds a currency token inside an existing line, never a new figure/absence/cite key the FIGURES/CITES/ABSENCES axes would move on).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "No change to build_pack (the PDF path), no other page file, no data change.",
+      "reason": "BOUNDS 2 of this cell's own face. Only ModelTab.tsx, render_pack.py, its tests, and (found unnecessary, see below) the harness were touched."
+    },
+    {
+      "item": "exportCompare.harness.cjs's CASES extraction was NOT edited.",
+      "reason": "The task order names this as a POSSIBLE need (\"if its CASES extraction needs to learn the currency token, you are its named POD_DE_ANY writer\"), conditional on the harness needing to learn the token. Read at commit: pageCases()'s regex captures the whole <p> inner text verbatim (`([^<]*)`), and artifactCases()'s regex matches `.+$` after '-- ' -- both already capture arbitrary detail text on either side, so the currency token flows through unmodified. AC2's page=285 rich=285 same=285 confirms no CASES-axis regression from leaving it unchanged."
+    },
+    {
+      "item": "No server, no deploy, no push, no AWS write -- standing bounds.",
+      "reason": "BOUNDS 1 of this cell's own face; every criterion ran from the worktree root exactly as written, plain python/bash/node, no listener started, no AWS write."
+    },
+    {
+      "item": "Did not refresh or re-capture C:/tmp/amgt-r43-live95.",
+      "reason": "BOUNDS 3 of this cell's own face: the cache is the issuer's fixed page capture; every AC run read the same cache directory, never deleting or re-capturing it."
+    }
+  ],
+  "surprises": [],
+  "session_log": "N/A -- no session-log path lies inside this worker's <paths> write surface beyond the files named in artifacts_produced and this deliverables folder. Worktree: C:/tmp/wk-amgt-44-161 on branch wk-AMGT_RESAPP-161; portal at C:/tmp/wk-amgt-44-161/portal on branch wk-AMGT_RESAPP-161-portal. No surprise filed: the cell's own premises (48 SERVED cases, 45 with no quote_currency, 3 with GBp, all 3 agreeing with CRNCY, 0 disagreements, 0 names with CRNCY absent among the 48) were verified directly against the fixed capture before writing code and held exactly as stated in section 1 item 2 of the task order.",
+  "compiler_tools": [
+    {
+      "tool": "bash (AC1's own checker script, literal invocation)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round44/checks/rs-1.AC1.py; echo \"exit=$?\"",
+      "result": "served cases carrying their price currency: 48 of 48. exit=0."
+    },
+    {
+      "tool": "bash (AC2's own checker script, literal invocation, population sweep)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round44/checks/rs-1.AC2.sh; echo \"exit=$?\"",
+      "result": "population: LIVE research library, 95 folders, read_at 2026-09-26T06:35:05Z. local rebuild over 95 of 95 folders: OK 95, NOT_OK 0, CAPTURE_FAILED 0. cases over 95 of 95 compared names: page=285 rich=285 same=285 missing=0 extra=0. exit=0."
+    },
+    {
+      "tool": "bash (AC3's own checker script, literal invocation)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round44/checks/rs-1.AC3.sh; echo \"exit=$?\"",
+      "result": "tsc -b --noEmit exit=0. exit=0."
+    },
+    {
+      "tool": "bash (AC4's own checker script, literal invocation, judgment criterion -- output recorded, no verdict)",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round44/checks/rs-1.AC4.sh; echo \"exit=$?\"",
+      "result": "RKT_LN_Equity: 'Base case: SERVED -- 7386.63633 GBp (consensus EPS (FY1) x trailing-median P/E)'. AMD_US_Equity: 'Base case: SERVED -- 652.7344928 USD (...)'. GOOGL_US_Equity: 'Base case: SERVED -- 537.6961078500001 USD (...)'. exit=0."
+    },
+    {
+      "tool": "python -m pytest lib/research/print/tests (AC2's underlying suite, plus this cell's own new tests)",
+      "invocation": "PYTHONPATH=\"$(pwd)\" python -m pytest lib/research/print/tests/ -q",
+      "result": "36 passed in 4.70s (30 pre-existing + 6 new for this cell)."
+    },
+    {
+      "tool": "direct census of the fixed capture (verified the task order's own stated denominators before writing code)",
+      "invocation": "python3 (ad hoc, .scratch): count SERVED cases over C:/tmp/amgt-r43-live95, split by quote_currency presence/agreement with CRNCY",
+      "result": "served_count 48, no_crncy 0, disagree 0 (45 carry no quote_currency, 3 carry GBp, all 3 agree with their name's own CRNCY=GBp)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (portal: ModelTab.tsx, on wk-AMGT_RESAPP-161-portal, plain git commit per worker instructions)",
+      "invocation": "cd portal && git commit --author \"0.9.0_WK_AMGT_RESAPP~161 <0.9.0_WK_AMGT_RESAPP~161@opal.agent>\" -F ../.scratch/portal-commit-msg.txt",
+      "result": "[wk-AMGT_RESAPP-161-portal 6712c742] committed, 1 file changed, 56 insertions(+), 16 deletions(-)."
+    },
+    {
+      "tool": ".tools/safe-commit.sh (outer: render_pack.py, its tests, the portal gitlink move)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_RESAPP~161 <0.9.0_WK_AMGT_RESAPP~161@opal.agent>\" -F .scratch/outer-commit-msg.txt -- lib/research/print/render_pack.py lib/research/print/tests/test_model_cases_markdown.py portal",
+      "result": "[wk-AMGT_RESAPP-161 3f9e17ab89] committed, 3 files changed, 90 insertions(+), 10 deletions(-)."
+    },
+    {
+      "tool": "proof-of-spec-check.py -- THIS WORKTREE'S OWN copy",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_RESAPP/deliverables/0.9.0_WK_AMGT_RESAPP~161/AMGT_RESAPP.TO-AMGT-rs-1.the-case-value-names-its-currency.proof_of_spec.json AC1,AC2,AC3,AC4",
+      "result": "See the worker's final report -- rc is the verdict and the ids are positional."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "served cases carrying their price currency: 48 of 48 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; PYTHONPATH=\"$(pwd)\" python org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round44/checks/rs-1.AC1.py; echo \"exit=$?\"",
+      "output_evidence": "served cases carrying their price currency: 48 of 48\nexit=0",
+      "denominator": "48 of 48 SERVED cases at round 44's fixed capture carry their price currency; exit=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "local rebuild over 95 of 95 folders: OK 95, NOT_OK 0, CAPTURE_FAILED 0; cases over 95 of 95 compared names with missing=0 extra=0 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round44/checks/rs-1.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "population: LIVE research library C:\\Users\\Opal Bloomberg\\OneDrive - Opal Capital\\Shared - Documents\\Asset Management\\Research, 95 folders, read_at 2026-09-26T06:35:05Z\nlocal rebuild over 95 of 95 folders: OK 95, NOT_OK 0, CAPTURE_FAILED 0\ncases over 95 of 95 compared names: page=285 rich=285 same=285 missing=0 extra=0\nexit=0",
+      "denominator": "95 of 95 folders swept, 0 CAPTURE_FAILED, 95 OK, 0 NOT_OK; cases compared over 95 of 95 names, missing=0 extra=0; exit=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "tsc -b --noEmit exit=0 -- and exit=0",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round44/checks/rs-1.AC3.sh; echo \"exit=$?\"",
+      "output_evidence": "tsc -b --noEmit exit=0\nexit=0",
+      "denominator": "N/A -- boolean check (typecheck exit code); exit=0.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC4",
+      "criterion_verbatim": "the rebuilt export's Model Cases section for RKT, AMD and GOOGL, for a person to judge beside the Model tab whether each served value reads as a price in a named currency; RECORDED, no verdict",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; bash org/missions/D5/AMGT/AMGT_RESAPP/deliverables/2.0.0_SA_COO~Z/round44/checks/rs-1.AC4.sh; echo \"exit=$?\"",
+      "output_evidence": "RKT_LN_Equity: 'Upside case: ABSENT -- methodology to be discussed with Andrew' / 'Base case: SERVED -- 7386.63633 GBp (consensus EPS (FY1) x trailing-median P/E)' / 'Downside case: ABSENT -- methodology to be discussed with Andrew'. AMD_US_Equity: Base case: SERVED -- 652.7344928 USD (consensus EPS (FY1) x trailing-median P/E). GOOGL_US_Equity: Base case: SERVED -- 537.6961078500001 USD (consensus EPS (FY1) x trailing-median P/E). exit=0.",
+      "denominator": "N/A -- judgment criterion, RECORDED, no verdict, per the task order's own judgment=\"true\" declaration.",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment criterion (task order judgment=\"true\") -- status PASS/FAIL is REFUSED by the checker; the substitute oracle is a person at L9/L10.",
+      "judgment": true
+    }
+  ]
+}
