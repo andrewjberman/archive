@@ -1,0 +1,149 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_CORPUS.TO-CRPS-h-5",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-5.pillar-and-kpi-terms.md",
+    "group": "OTHER",
+    "vintage_commit": "e52d265f5c1f9bedba9deb81d8768d65f9240861"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_CORPUS/decompositions/AMGT_CORPUS_DECOMP.md",
+    "vintage_commit": "8d7ef313856c4bf3a938e74162e9ac775c33906a",
+    "to_ref": "org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-5.pillar-and-kpi-terms.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_CORPUS~5",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/research/corpus/continuation.py",
+      "kind": "script",
+      "commit_or_etag": "40ae4e61b3a49de389587e34402118c505793fb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "New `_lexicon_name_parts`/`_kpi_vocabulary_terms`/`_pillar_terms` helpers; `_resolve_thesis_pillars(items, lexicon=None)` gains an optional lexicon param (existing 1-arg callers unaffected -- it reads kpi_lexicon() itself when omitted) and attaches `terms` to every resolved pillar item (heading first, then every KPI-vocabulary '/'-split term found in the pillar's text as a whole word, case-insensitively, in order of first appearance, spelled as the vocabulary spells it, no duplicates); `build_document` now passes its already-loaded `lexicon` through. `_resolve_kpi_set` attaches `terms` (the row's own name split on '/', stripped, in order) to every kpi_set row unconditionally (all 25 lexicon terms, matching count>=0). `METHOD_VERSION` bumped amgt-corpus-continuation/1 -> /2. New CLI mode `--show-terms --security-key <key>` (`_run_show_terms`, wired into `main()`'s mutually-exclusive group plus a new `--security-key` argument): builds the one name's continuation IN MEMORY via the same `build_document` path `--write` uses, calls no gold_put, prints one `pillar <heading> terms <t1>|<t2>|...` line per pillar then the summary line `pillars P with_terms P1 kpi_rows K with_terms K1`. No docx-rule change to THE CONTROL (_resolve_thesis_pillars_docx untouched); no change to typed.py, extract.py, gold.py, or any other gold table; dossier.py needs no edit (it copies thesis_pillars/kpi_set unchanged, so the new terms key rides through for free).",
+      "introduces": [
+        "_lexicon_name_parts",
+        "_kpi_vocabulary_terms",
+        "_pillar_terms",
+        "_run_show_terms",
+        "--show-terms",
+        "--security-key"
+      ],
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    },
+    {
+      "path_or_key": "lib/research/corpus/tests/test_continuation_terms.py",
+      "kind": "test",
+      "commit_or_etag": "40ae4e61b3a49de389587e34402118c505793fb8",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "NEW file, 12 tests, fully offline (pure functions over in-memory lexicons/documents; conftest.py's poison covers the whole package): the '/' split (_lexicon_name_parts, _kpi_vocabulary_terms flat/ordered/deduplicated), a kpi_set row's own split terms, pillar terms heading-first in order of first appearance, case-insensitive match keeping the vocabulary's own spelling, the NIM-inside-NIMBLE whole-word non-match, no duplicates on repeated mentions, a '/'-split vocabulary name contributing its parts, _resolve_thesis_pillars wired end to end with an explicit lexicon (two pillars, each pillar's terms asserted), the absent-field carries no terms key, the METHOD_VERSION bump, and --show-terms (via _run_show_terms, monkeypatched _read_reports_with_bytes, a poisoned gold.gold_put that raises if called) prints the pillar line and the summary line and never calls gold.gold_put.",
+      "artifact_covered_by": ["AC1"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC1.sh",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC1.sh",
+      "output_evidence": "............                                                             [100%]\n12 passed in 0.82s",
+      "denominator": "12 of 12 tests in test_continuation_terms.py passed, 0 failed. Run before and after the closing commit (40ae4e61b3): '12 passed' both times (0.67s pre-commit, 0.82s post-commit -- only elapsed seconds differ).",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC2.sh",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC2.sh",
+      "output_evidence": "pillar Size + Growth terms Size + Growth|dividend\npillar Execution record terms Execution record\npillar Strong pipeline terms Strong pipeline\npillar EM growth driver terms EM growth driver\npillar Rare disease is high-margin terms Rare disease is high-margin\npillars 5 with_terms 5 kpi_rows 25 with_terms 25",
+      "denominator": "1 of 1 real, live-S3 --show-terms invocation over AZN_LN_Equity's newest reports, built in memory (no write). 5 of 5 resolved pillars carry a non-empty terms list; 25 of 25 kpi_set lexicon rows carry a non-empty terms list (every lexicon row always gets its own '/'-split name regardless of count). Re-checked against AC2's own regex with Python re.search (MULTILINE): the summary line 'pillars 5 with_terms 5 kpi_rows 25 with_terms 25' MATCHES ^pillars ([1-9]\\d*) with_terms \\1 kpi_rows (\\d+) with_terms \\2$. Run twice back to back (before and after the closing commit): byte-identical both times.",
+      "expect": "(?m)^pillars ([1-9]\\d*) with_terms \\1 kpi_rows (\\d+) with_terms \\2$",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC3.sh",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" && bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC3.sh",
+      "output_evidence": "........................................................................ [ 90%]\n................................                                         [100%]\n320 passed in 3.44s",
+      "denominator": "320 of 320 tests in lib/research/corpus/tests passed, 0 failed (308 pre-existing + 12 new from test_continuation_terms.py). Run before and after the closing commit: '320 passed' both times (6.07s, 3.44s -- only elapsed seconds differ).",
+      "expect": "(?m)^\\d+ passed(, \\d+ subtests passed)? in ",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": ".scratch/h5/mutant.py (not committed): the SAME text ('...stay NIMBLE as conditions change; no NIM mentioned by name.') run through the FIX (continuation._pillar_terms/_kpi_vocabulary_terms, imported live, unmodified -- \\b-bounded whole-word matching) and through a MUTANT term-matcher that reproduces the pre-CRPS-h-5 shape verbatim -- the same '/'-split/escape/join logic but with NO \\b word boundaries at all, so it matches a KPI term as a bare substring.",
+      "expected": "FIX: terms=['Agility', 'NIM'], exactly 1 whole-word NIM hit (the standalone mention; NIMBLE never counted). MUTANT: the substring pattern also counts the NIM inside NIMBLE, so its own NIM-only hit count is HIGHER than the FIX's (2 vs 1) even though both surface the same final terms list -- the substring match is real, it is simply masked by the pillar-terms de-duplication, which is exactly why the whole-word rule is load-bearing at the regex layer, not just at the visible output.",
+      "observed": "FIX terms=['Agility', 'NIM'] NIM_hits=1 -- 'PASSED (expected [\\'Agility\\', \\'NIM\\'], the NIMBLE substring never matched)'. MUTANT terms=['Agility', 'NIM'] NIM_hits=2 -- 'FIRED AS EXPECTED (substring match counts the NIMBLE occurrence the whole-word rule excludes)'. Run twice back to back, identical both times.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "h5_AC1.sh, h5_AC2.sh and h5_AC3.sh each run twice back to back under the literal invocation (timeout 120/300), before and after the closing commit 40ae4e61b3.",
+      "observed": "AC1: '12 passed' every run. AC2: byte-identical real-S3 --show-terms output every run (same 5 pillar lines + summary line for AZN_LN_Equity). AC3: '320 passed' every run.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "AC4 (are a pillar's terms readable as that pillar's theme, and is every term traceable to the heading or the KPI vocabulary with none invented, over a floor sample naming every venue: London, US, Asian) -- not produced by this worker.",
+      "reason": "judgment=true in the task order's <proof_of_spec>; graded at L9 by the CVO on the issuer's own served rewrite, not self-gradable by the worker."
+    },
+    {
+      "item": "No dossier.py edit -- it copies thesis_pillars/kpi_set unchanged, so the new terms key rides through with no code change (task order section 1: 'The dossier copies these fields unchanged, so the dossier needs no edit').",
+      "reason": "READ-ONLY for this worker per section 3 <paths>; ruled by the task order, not a gap."
+    },
+    {
+      "item": "No S3 write of any kind -- --show-terms and every test run here never call gold.gold_put; continuation --write / dossier --write were never run for real.",
+      "reason": "section 4 BOUNDS."
+    },
+    {
+      "item": "The header feed and Chatter filter that will consume the new terms field are a separate page, out of scope for this cell.",
+      "reason": "task order preamble: 'The header feed and Chatter filter that consume the terms are a page, not this project: out of scope.'"
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_CORPUS/surprise-channel/investigations/INVESTIGATION_v1.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest test_continuation_terms.py (AC1, via h5_AC1.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC1.sh",
+      "result": "rc 0; 12 passed (run before and after the closing commit, identical)"
+    },
+    {
+      "tool": "continuation.py --show-terms --security-key AZN_LN_Equity (AC2, via h5_AC2.sh, real live S3 read, no write)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC2.sh",
+      "result": "rc 0; pillars 5 with_terms 5 kpi_rows 25 with_terms 25 -- run twice, byte-identical"
+    },
+    {
+      "tool": "pytest lib/research/corpus/tests (AC3, via h5_AC3.sh)",
+      "invocation": "bash org/missions/D5/AMGT/AMGT_CORPUS/deliverables/2.0.0_SA_COO~X/checks/round6/h5_AC3.sh",
+      "result": "rc 0; 320 passed (308 pre-existing + 12 new) -- run before and after the closing commit, identical"
+    },
+    {
+      "tool": "commit-gate.sh (py_compile + ds-precommit + ruff py39)",
+      "invocation": "bash .tools/commit-gate.sh lib/research/corpus/continuation.py lib/research/corpus/tests/test_continuation_terms.py",
+      "result": "rc 0; OK: pre-commit gate clean for 2 of 2 file(s)"
+    },
+    {
+      "tool": ".scratch/h5/mutant.py (not committed -- scratch control harness)",
+      "invocation": "python .scratch/h5/mutant.py \"$(pwd)\"",
+      "result": "rc 0; FIX terms=['Agility','NIM'] NIM_hits=1 (PASSED); MUTANT terms=['Agility','NIM'] NIM_hits=2 (FIRED AS EXPECTED); run twice, identical"
+    },
+    {
+      "tool": "proof-of-spec-check.py (close-out gate)",
+      "invocation": "python .tools/proof-of-spec-check.py org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~5/AMGT_CORPUS.TO-CRPS-h-5.pillar-and-kpi-terms.proof_of_spec.json AC1,AC2,AC3 --governing-order org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-5.pillar-and-kpi-terms.md",
+      "result": "PENDING -- run immediately after this instance is written"
+    },
+    {
+      "tool": "safe-commit.sh (code + tests)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~5 <0.9.0_WK_AMGT_CORPUS~5@opal.agent>\" -F <msgfile> -- lib/research/corpus/continuation.py lib/research/corpus/tests/test_continuation_terms.py",
+      "result": "LANDED 40ae4e61b3a49de389587e34402118c505793fb8 (LOCAL on wk-amgt_corpus-6-5)"
+    },
+    {
+      "tool": "safe-commit.sh (instance + status flip, final commit)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_AMGT_CORPUS~5 <0.9.0_WK_AMGT_CORPUS~5@opal.agent>\" -F <msgfile> -- org/missions/D5/AMGT/AMGT_CORPUS/deliverables/0.9.0_WK_AMGT_CORPUS~5/AMGT_CORPUS.TO-CRPS-h-5.pillar-and-kpi-terms.proof_of_spec.json org/missions/D5/AMGT/AMGT_CORPUS/task-orders/AMGT_CORPUS.TO-CRPS-h-5.pillar-and-kpi-terms.md",
+      "result": "PENDING -- run immediately after this instance is written"
+    }
+  ]
+}
