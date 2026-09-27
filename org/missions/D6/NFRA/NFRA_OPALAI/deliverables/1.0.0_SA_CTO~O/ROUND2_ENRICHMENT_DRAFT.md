@@ -52,6 +52,17 @@ Z-W2-S2, and the gateway release-base rule @75117e60d6.
    NFRA_OPLGTW stop fully (~02:2xZ, call 5). Cut after E1-E3 land, from the ONE release base (@75117e60d6), one
    release; its first cell is the census of what CLOUD holds unreleased on the gateway paths.
 
+10. **E10 -- retire the legacy `/login` GUI consent** (added 2026-09-27 ~22:5xZ, on row NFRA_OPLGTW-Z-S7, which
+    disarmed W3-S22).
+    - Background: `/login` and the legacy `/callback` branch predate the MCP `/authorize` sign-in. They let any tenant
+      account complete a Graph consent that the gateway caches under its email. For a restricted profile that
+      reaches no usable tool, so it is inert, but it is a surface nothing needs.
+    - The first cell is a census: who has used `/login` in the audit trail since the MCP sign-in went live, and which
+      server-held identities (`/otp`, `/ms`) still depend on the email-keyed cache it writes.
+    - Remove the route only if that census reads zero dependents. Otherwise keep it and narrow it to the named
+      server identities.
+    - It is a gateway release under the never-widen halves. The OG-e-2 email-deny guard stays either way.
+
 ## Deliberately NOT in this draft
 
 - **Operator controls** (FWD-8's admit, narrow and remove): these ARE NFRA_MCPORTAL's Entitlements tab. This project
