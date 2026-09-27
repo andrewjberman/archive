@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-65",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fc21988bce2f5fa67f1a93b3e5da91ab44114105"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "71383ccd8f46165d8c0170653624ce2864f0df73",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-65.export-report-id.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~36",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "5e3a9a9984a0bc03316936564a0d613b0b90e4d0",
+      "artifact_covered_by": ["IVE65-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 5e3a9a99 on branch wk-DSGN_IRPTV1-36-portal (LOCAL, based on local DEV 089c3cbb). `buildPerformanceExportTarget` now returns `PerformanceExportTarget | null`: when `report.retainedReport` is present, `reportRefs` is `[report.retainedReport.reportId]` (the server's own `RPT-<32 hex>` id) and `sourceRevision` is `report.retainedReport.revision` -- unchanged in VALUE from the prior `report.revision.revisionId` for any real retained report (adapt.ts's `adaptPerformanceReport` fills the envelope's `revisionId` FROM `retained.revision`), only in which field it is read from. When `retainedReport` is absent, it returns `null` -- Export is not offered, matching the `onExportTarget` effect's own pre-existing null branch and its already-`PerformanceExportTarget | null` prop type (ReportingTab.tsx:342), so the effect's call site (`onExportTarget?.(buildPerformanceExportTarget(...))`) needed no change. Checked every reader of `PerformanceExportTarget.reportRefs`/`sourceRevision`: `resolveBundle.ts`'s `resolveOne`/`reportCacheKey` key and fetch strictly on `ref.authorizedRevision` (== `sourceRevision`), never `ref.reportRef`; `render/PrintEntry.tsx` builds its own bundle from URL query params (`bundleId`), not from this target, so it is unaffected. Both confirmed by direct read of the source, not inference."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-65.export-report-id.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "5e3a9a9984a0bc03316936564a0d613b0b90e4d0",
+      "artifact_covered_by": ["IVE65-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 5e3a9a99 (new file). Built via `adaptPerformanceReport` from the `fixtures/wire/PerformanceReport.valid.json` wire fixture plus a `retained_ref` block (no fixture on disk carries `retained_ref` pre-built -- measured, comp-find zero hits over the fixtures tree -- so this follows `__tests__/fe-s-5/performance-wire-journey.test.ts`'s own established construction exactly). ARM (a): `reportRefs` equals `[retainedReport.reportId]` matching `RPT-<32 hex>`, `sourceRevision` equals `retainedReport.revision`. ARM (b): `toExportBundleWire(composeExportBundle(...))`'s `authorized_report_revisions[0].report_id` matches `RPT-<32 hex>` and equals the target's reportRef; `.revision` equals `sourceRevision`. ARM (c): a recording fake api fed to `resolveBundle` is called exactly once with `revision` equal to the RETAINED REVISION (never the report id), and the resolved `RenderPerformanceReport`'s `retainedReport`/`actualDates` match the fetched report -- proving the preview still resolves the same report by revision. ARM (d), control: the same wire WITHOUT `retained_ref`, adapted and passed to `buildPerformanceExportTarget`, yields `null`."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-36.export-target-thread.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "5e3a9a9984a0bc03316936564a0d613b0b90e4d0",
+      "artifact_covered_by": ["IVE65-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 5e3a9a99. Re-goldened ONLY the call to `buildPerformanceExportTarget` (this test never asserted `reportRefs`' content, only `accountSetId`/`window`/`sourceRevision` threading, which this cell leaves unchanged in value): the fixture fed in is now `PERF_REPORT` plus a synthetic `retainedReport` whose `revision` equals `PERF_REPORT.revision.revisionId` (the same value the pre-cell code already read), so every existing assertion is unmoved. Added a null-guard around the previously-unconditional `target.*` reads (the function's new return type is `PerformanceExportTarget | null`) and moved ARM 2 inside it. Re-ran post-edit: VERDICT: EXPORT-THREAD-OK, 1 pass / 0 fail."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-53.tenant-thread.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "5e3a9a9984a0bc03316936564a0d613b0b90e4d0",
+      "artifact_covered_by": ["IVE65-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 5e3a9a99. Same re-golden pattern as iv-e-36 (this test's ARM (a) also calls `buildPerformanceExportTarget` directly and asserts only `selectedTenant` threading, not `reportRefs`' content): fed the same synthetic-`retainedReport` fixture, added the null-guard, moved the `buildPreviewRequestState` call inside it. ARM (b), the print-path/`resolveBundle` seam, is untouched (it never calls `buildPerformanceExportTarget`). Re-ran post-edit: VERDICT: TENANT-THREAD-OK, 1 pass / 0 fail."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE65-AC1",
+      "criterion_verbatim": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-36/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-65.export-report-id.test.tsx 2>&1 | tail -15 -- expect: VERDICT: EXPORT-REPORT-ID-OK. Arms: (a) reportRefs/sourceRevision named by retainedReport; (b) composed bundle wire carries the RPT id + revision; (c) preview resolve still fetches by revision; (d) control: no retainedReport -> no export target.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-36/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-65.export-report-id.test.tsx 2>&1 | tail -15",
+      "output_evidence": "TARGET: reportRefs=[\"RPT-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\"] sourceRevision=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\nWIRE: authorized_report_revisions=[{\"report_id\":\"RPT-eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"revision\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"authorization_ref\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"immutable\":true}]\nREFS RESOLVED: 1 of 1\nRESOLVE: calls=1 revision=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\nCONTROL: target=null\nVERDICT: EXPORT-REPORT-ID-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating all 4 named arms via one `failures` array (empty on pass): ARM (a) reportRefs==[RPT-<32hex>] AND sourceRevision==retained revision; ARM (b) wire report_id matches RPT-<32hex> AND equals the target's ref AND wire revision equals sourceRevision; ARM (c) exactly 1 fetch call whose `revision` equals the retained revision (never the report id) AND the resolved performanceReport's retainedReport/actualDates match the fetched report; ARM (d) control target is exactly null. All 4 held (0 failures pushed).",
+      "status": "PASS",
+      "expect": "VERDICT: EXPORT-REPORT-ID-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "ReportingTab.tsx's `buildPerformanceExportTarget` -- `reportRefs: [report.retainedReport.reportId]` reverted in-place (scripted python replace) to the pre-cell `reportRefs: [report.revision.revisionId]` (the revision hash posing as the report id); re-ran IVE65-AC1's exact invocation, then restored the file byte-for-byte from a pre-mutation backup (diff -q confirmed IDENTICAL) and confirmed the restored test re-passes twice.",
+      "expected": "IVE65-AC1 fails: target.reportRefs and the wire's report_id both read the revision hash instead of the RPT-<32 hex> id, and both RPT-shape checks fail.",
+      "observed": "0 pass, 1 fail. Failures: `target.reportRefs=[\"bbb...\"], expected [RPT-eee...]`; `target.reportRefs[0]=bbb... does not match RPT-<32 hex>`; `wire report_id=bbb... does not match RPT-<32 hex>`; `wire report_id=bbb..., expected RPT-eee...` -- exactly the defect S24 named (the server refusing 'invalid report reference'). File restored from the pre-mutation copy (diff -q IDENTICAL); re-ran IVE65-AC1 twice post-restore, both VERDICT: EXPORT-REPORT-ID-OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE65-AC1's exact invocation twice in a row post-restore, plus twice more as part of the full dsgn-irptv1 suite run (before and after the mutant/restore cycle).",
+      "observed": "Identical VERDICT: EXPORT-REPORT-ID-OK both direct post-restore runs; 1 pass / 0 fail, 1 expect() call each time. Full-suite runs: one read 115 pass / 1 fail (a flake unrelated to this cell's files, not reproduced on 2 immediate re-runs which both read 116 pass / 0 fail -- filed as DSGN_IRPTV1-W36-S1); the run immediately after the mutant restore read 116 pass / 0 fail, 557 expect() calls.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "DSGN_IRPTV1-W36-S1: One full run of the dsgn-irptv1 suite printed 115 pass / 1 fail; two immediate re-runs on the identical worktree HEAD printed 116 pass / 0 fail both times -- a flake, not a regression from this cell's own edit; failing test name not isolated before it cleared."
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~36/DSGN_IRPTV1.TO-IV-e-65.export-report-id.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-65.export-report-id.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: EXPORT-REPORT-ID-OK (run twice post-restore, identical; also run once against the reportRefs mutant, correctly FAILED with the named RPT-shape failures)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/",
+      "result": "116 pass / 0 fail across 102 files (full dsgn-irptv1 suite, run twice post-commit, both clean), including the re-goldened iv-e-36 and iv-e-53 files; one earlier pre-commit run read 115 pass / 1 fail (flake, filed as DSGN_IRPTV1-W36-S1, not reproduced)"
+    },
+    {
+      "tool": "tsc",
+      "invocation": "node_modules/.bin/tsc.exe -b --noEmit",
+      "result": "0 errors"
+    },
+    {
+      "tool": "eslint",
+      "invocation": "node_modules/.bin/eslint.exe src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-65.export-report-id.test.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-36.export-target-thread.test.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-53.tenant-thread.test.tsx",
+      "result": "0 errors, 8 warnings, all pre-existing-pattern (react-refresh/only-export-components and one pre-existing unused-arg/exhaustive-deps warning on ReportingTab.tsx unrelated to this cell's edit); the three test files carry 0 warnings"
+    }
+  ]
+}
