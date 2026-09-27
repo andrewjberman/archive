@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-64",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fc21988bce2f5fa67f1a93b3e5da91ab44114105"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "3afe74420b0b7d6a3ec595829d3ebb26c682e608",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-64.submit-tenant.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~41",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/export/submit.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "512e3ba15852b76bb41d14b1d8ba43f991c477e4",
+      "artifact_covered_by": ["IVE64-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 512e3ba1 on branch wk-DSGN_IRPTV1-41-portal (LOCAL). buildSubmitRequest/buildAnalysisSubmitRequest gain an additive optional selectedTenant; downloadRouteFor gains the same and appends selected_tenant to the route's query only when given one and the route does not already carry it; new receiptForFlow applies that rule at receipt-storage time, returning the receipt unchanged (===) when it does not apply.",
+      "introduces": ["receiptForFlow", "tenantField"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/export/ExportButton.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "512e3ba15852b76bb41d14b1d8ba43f991c477e4",
+      "artifact_covered_by": ["IVE64-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 512e3ba1. handleSubmit passes its own selectedTenant prop into buildSubmitRequest and wraps the submitted receipt in receiptForFlow(outcome.receipt, selectedTenant) before storing it in flow state.",
+      "introduces": ["receiptForFlow(outcome.receipt, selectedTenant)"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-64.submit-tenant.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "512e3ba15852b76bb41d14b1d8ba43f991c477e4",
+      "artifact_covered_by": ["IVE64-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 512e3ba1 (new file)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE64-AC1",
+      "criterion_verbatim": "the built behaviour, with its control. Against a recording fake InvestorReportingApi: (a) the Export flow for a performance target carrying a selected tenant issues exactly one submit whose request carries that selectedTenant; (b) every receipt / status read the flow makes after the submit carries it; (c) the download href for a READY receipt carries selected_tenant; (d) control: the same flow with no selected tenant issues requests with NO selectedTenant key and an href unchanged from today. Print VERDICT: SUBMIT-TENANT-OK only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-41/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-64.submit-tenant.test.tsx 2>&1 | tail -15",
+      "output_evidence": "REQUEST WITH TENANT: selectedTenant=reg-e64\nSUBMIT CALLS: 1, submitted=true\nNO FOLLOW-UP READ: getExportReceipt was never called (the stub throws if reached)\nSTORED HREF (ReceiptPanel's own call): /api/scoped/investor-reporting/export/exp-fe9-1/download?selected_tenant=reg-e64\nREQUEST NO TENANT: hasKey=false\nCONTROL STORED RECEIPT UNCHANGED (===): true\nCONTROL HREF: /api/scoped/investor-reporting/export/exp-fe9-1/download\nVERDICT: SUBMIT-TENANT-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating 4 arms, all held: (a) the request buildSubmitRequest built AND the request submitUnderGate's fake actually received both carry selectedTenant=reg-e64, exactly 1 submit-export call; (b) the stub's getExportReceipt (the only other export-read method on the interface) throws if reached and reaching VERDICT proves it was not; (c) receiptForFlow's stored receipt's downloadRouteFor(receipt) (ReceiptPanel's own 1-argument call) carries selected_tenant=reg-e64 and keeps the fixture route as its prefix; (d) the same flow with no selectedTenant: no key on the request, receiptForFlow returns the SAME object (=== identity), href identical to the fixture's own authorizedDownloadRoute",
+      "status": "PASS",
+      "expect": "VERDICT: SUBMIT-TENANT-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "submit.ts's buildSubmitRequest -- replaced `const tenantField = selectedTenant ? { selectedTenant } : {}` with an unconditional `const tenantField = {}` via a scripted in-place edit (backup taken first), dropping the selectedTenant spread entirely; re-ran IVE64-AC1's exact invocation, then restored the file from the pre-mutation backup and confirmed `git diff --stat` against the intended commit showed only the intended 43-insertion/4-deletion hunk.",
+      "expected": "IVE64-AC1 fails: both the built request and the submitted request report selectedTenant=undefined instead of reg-e64.",
+      "observed": "0 pass, 1 fail. Assertion diff: [\"request.selectedTenant=undefined, expected reg-e64\", \"submitted request selectedTenant=undefined, expected reg-e64\"] -- exactly the two arms the mutant strips. File restored; `git diff` against the committed HEAD (512e3ba1) matched the intended edit exactly, and IVE64-AC1 re-ran clean (VERDICT: SUBMIT-TENANT-OK).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE64-AC1's exact invocation 3x: pre-mutant, post-restore (pre-commit), and against the final committed HEAD (512e3ba1).",
+      "observed": "Identical VERDICT: SUBMIT-TENANT-OK every run; 1 pass / 0 fail, 1 expect() call each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~41/submit-tenant.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-64.submit-tenant.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: SUBMIT-TENANT-OK (run 3x across the mutant/restore/post-commit cycle, identical)"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun x tsc -b --noEmit, full portal",
+      "result": "0 errors, both before and after every edit"
+    },
+    {
+      "tool": "eslint",
+      "invocation": "bun x eslint src/pages/InvestorReporting/export/submit.ts src/pages/InvestorReporting/export/ExportButton.tsx src/pages/InvestorReporting/export/ReceiptPanel.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-64.submit-tenant.test.tsx",
+      "result": "0 errors, 2 warnings, both pre-existing (react-refresh/only-export-components on ExportButton.tsx and ReceiptPanel.tsx, which already exported more than one component/function before this cell; ReceiptPanel.tsx itself was not edited by this cell)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/fe-s-9 src/pages/InvestorReporting/__tests__/fe-s-31 src/pages/InvestorReporting/__tests__/fe-s-16 src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-53.tenant-thread.test.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-53.preview-tenant.test.ts (targeted no-regression sweep of every sibling that touches submit.ts/ExportButton.tsx/ReceiptPanel.tsx)",
+      "result": "37 pass / 0 fail, 2 skip, 149 expect() calls across 13 files -- includes fe-s-9/receipt.test.ts's own downloadRouteFor(receipt) === receipt.authorizedDownloadRoute assertion (no selectedTenant argument), still exactly true"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/ (full directory, no-regression sweep)",
+      "result": "113 pass / 0 fail, 551 expect() calls across 99 files"
+    }
+  ]
+}
