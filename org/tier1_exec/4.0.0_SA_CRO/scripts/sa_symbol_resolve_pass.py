@@ -59,6 +59,38 @@ NEWS = "https://seekingalpha.com/api/v3/symbols/{s}/news"
 WINDOW_DAYS = 30          # lib/research/metrics/chatter_axis.py
 DENSITY_MIN = 3           # BREAKOUT's minimum raw mentions
 
+# SOURCE-NAME DEFECTS (2.0.0_SA_COO~Y, 2026-09-26, on Andrew's word; 4.0.0_SA_CRO
+# has no live lane). `company_name(folder)` is the ONLY input to the search query
+# AND to tests (a) and (b), so a folder whose name is misspelled or truncated can
+# never resolve no matter how much rate-limit headroom is spent on it. Measured on
+# batch 14: 'Haliburton' returned 0 candidates, and 'International Container
+# Terminals' returned 10 of which 1 passed the name test and none tied a title.
+#
+# EACH ENTRY IS A FACTUAL REPAIR OF THE SOURCE STRING AND NEVER A GUESS AT A
+# SYMBOL. The acceptance rule is untouched: the corrected name still has to win
+# test (a) against SA's own company name and test (b) against returned titles.
+# That is the point -- an alias that made a test PASS would defeat the rule that
+# caught the 'ROG' -> Rogers Corporation trap s.18 exists for.
+#
+# WHY THE SAME DEFECT IS ALREADY PATCHED ELSEWHERE AND WAS NOT HERE: the harvest
+# CLI carries its own Haliburton special case ("Preserve the known source-folder
+# spelling defect, with its measured HAL symbol", lib/opal_data_harvest/__main__.py).
+# Two consumers read one universe; one was guarded and this one was not. A control
+# does not travel between scripts on its own -- the same sentence this file already
+# says about the 403 stop guard, one axis over.
+#
+# NOT INCLUDED, DELIBERATELY: 'Nubank'. SA names it 'Nu Holdings Ltd.', so no
+# distinctive token is shared and the name test CORRECTLY refuses it. That is a
+# REBRAND the rule cannot corroborate by name, not a source-string defect, and
+# aliasing it would be inventing the corroboration. It stays UNRESOLVED with its
+# evidence, for the later-guidance list.
+SEARCH_NAME_FIX = {
+    # folder spelling -> the company's actual name. Keys are company_name() output,
+    # measured, not the raw folder.
+    "Haliburton": "Halliburton",
+    "International Container Terminals": "International Container Terminal Services",
+}
+
 
 def get_json(url):
     """(status, parsed_or_None). A non-200 is a VALUE, never an exception."""
@@ -215,7 +247,9 @@ def main() -> int:
     if args.dry_run:
         print("MODE           DRY RUN -- zero calls\n")
         for rec in targets:
-            nm = company_name(rec["folder"])
+            # SAME repair as the live loop. A preview that does not apply it
+            # would show a query the run will not make -- the control lying.
+            nm = SEARCH_NAME_FIX.get(company_name(rec["folder"]), company_name(rec["folder"]))
             print("  %-42s -> search %-34s tokens=%s"
                   % (rec["folder"], repr(nm), name_tokens(nm)))
         return 0
@@ -237,6 +271,7 @@ def main() -> int:
     for i, rec in enumerate(targets, 1):
         folder = rec["folder"]
         nm = company_name(folder)
+        nm = SEARCH_NAME_FIX.get(nm, nm)   # source-name repair, before BOTH the query and the tests
         code, payload = get_json(SEARCH.format(q=urllib.parse.quote(nm)))
         calls += 1
         cands = (payload or {}).get("symbols", []) if code == 200 else []
