@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-62",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fc21988bce2f5fa67f1a93b3e5da91ab44114105"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "83576f9dd9155269fb2cc48344c80a6fc5f2a700",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-62.request-history.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~39",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/api/endpoints/investor-reporting.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "4f0ae52df9bf00f16ddf18478c772a68b7169f8a",
+      "artifact_covered_by": ["IVE62-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 4f0ae52d on branch wk-DSGN_IRPTV1-39-portal (LOCAL). `listOwnedAnalysisRequests` gains an optional `selectedTenant` second parameter (NOT part of `OwnedRequestHistoryQuery` -- `ownedHistoryQuery` refuses any key beyond limit/cursor and `contracts/owned-requests.ts` is out of this cell's <paths> grant), merged into the wire query as `selected_tenant`, the same convention every other scoped read in this file already uses. Threaded through `OwnedAnalysisReader` and `FixtureAdapter.listOwnedAnalysisRequests` (which now records the URL with `selected_tenant` in its `callLog`). No route added; the existing `analysis-request-history` operation is reused."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "4f0ae52df9bf00f16ddf18478c772a68b7169f8a",
+      "artifact_covered_by": ["IVE62-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 4f0ae52d. New `selectedTenant` prop, threaded to `api.listOwnedAnalysisRequests`. New per-row status effect: for every listed request, reads its state through the SAME `status-job` capability `ProspectJobStatus.tsx` already exposes (`hasJobReader`/`readIssuedStatus`, imported read-only, never re-implemented) -- one read per row, seeded rows never re-fetched. New exported `OwnedRowStatus` union and `ownedRowStatusWords` (loading -> 'Checking status\u2026'; unavailable -> 'Status unavailable'; ready -> `labelForState(state)` plus the producer's own note or `publicReasonCode` in words). Each `<li>` now carries `data-request-id` and a `data-slot=\"owned-request-state\"` span. New test-only seeds `initialPage` / `initialHistoryError` / `initialRowStatus` (the project's established `initialX` idiom -- the live app never passes them)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "4f0ae52df9bf00f16ddf18478c772a68b7169f8a",
+      "artifact_covered_by": ["IVE62-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 4f0ae52d. Mounts `<OwnedRequestHistory>` (reused, not rebuilt) inside the `hasClient` branch only, passing `selectedTenant={(selectedScopeRef ?? scopeRef).selectedTenant}` (the internal viewer's tenant, the same field every other scoped read in this app carries) and a new test-only `initialOwnedHistory` seed forwarded straight through. Scoped to `hasClient` -- not mounted unconditionally -- to respect the pre-existing, committed `fe-s-72/reachable-states.test.ts` rule (Andrew-direct 2026-09-24 design notes) that the no-client state carries no request panel at all; filed as surprise row DSGN_IRPTV1-W39-S1."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "4f0ae52df9bf00f16ddf18478c772a68b7169f8a",
+      "artifact_covered_by": ["IVE62-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 4f0ae52d. UIW-0927-02 (CTO 101880 amendment): new optional `accountListEntries` prop (one `ClientAccountListEntry` per permitted account), falling back to `HeaderSelectionContext`'s own `accountList` (IV-e-33 (b), the R1 account list `HeaderSelectionContext.ts`'s own header comment named this component as the later wiring for 'Analysis's included accounts'). Each included-account row now reads its label from `listed.label` (pre-masked, CTO 101303) and its value from `AccountFilter.tsx`'s own `formatAccountFilterValue` (imported read-only, never re-implemented) -- the SAME label-and-value shape the account picker shows -- falling back to the prior `DirectoryEntry`-based label+tail rendering, unchanged, when an account is not (yet) in the list."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-62.request-history.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "4f0ae52df9bf00f16ddf18478c772a68b7169f8a",
+      "artifact_covered_by": ["IVE62-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 4f0ae52d (new file). ARM1/2: the REAL `hasJobReader`/`readIssuedStatus` run against a stubbed `getJobStatus`, then `renderToStaticMarkup` over the REAL `OwnedRequestHistory` (seeded via `initialPage`/`initialRowStatus`) proves a request not submitted from this browser shows its READY state, a FAILED/ATTENTION request shows its state AND public reason code in words, and an unanswered row says 'Checking status\u2026' rather than a blank. ARM3: the REAL `FixtureAdapter.listOwnedAnalysisRequests` run twice (with and without `selectedTenant`) proves an internal viewer's read carries `selected_tenant` on the wire URL and a firm's own advisor read does not. CONTROL: `initialHistoryError` renders the named refusal text. MOUNT: the REAL `AnalysisTab`, with a client selected, mounts `OwnedRequestHistory` AND still shows the browser-local 'No job submitted from this browser yet.' message (adds, never replaces); a second MOUNT CONTROL, no client selected, confirms `owned-request-history` is still ABSENT, matching `fe-s-72`'s own committed rule byte for byte. AMENDMENT: `GenerateComposer` rendered under a `HeaderSelectionContext.Provider` carrying a 2-account `accountList` (from `resolvedScope.success.json`'s own 2 `permittedAccountIds`) proves both accounts render their own masked label AND `formatAccountFilterValue`-formatted value, never the bare word 'Account'."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE62-AC1",
+      "criterion_verbatim": "recording fake api. AC1 arms: a job not submitted from this browser appears with its state; an ATTENTION job shows its reason; an internal viewer's request carries selected_tenant; control: a refused history read shows its refusal by name. Amendment 1 AC1 arm: an input with two accounts renders both labels and values and never the bare word 'Account' as an entry. Each mechanical criterion prints its expect string only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-39/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-62.request-history.test.tsx 2>&1 | tail -15",
+      "output_evidence": "ARM1/2 resolved statuses: ready={\"state\":\"READY\",\"publicReasonCode\":null} failed={\"state\":\"FAILED\",\"publicReasonCode\":\"SOURCE_UNAVAILABLE\"} requested=[\"REQ-73e76b09d6e57ad9bf4106de\",\"REQ-f0a82259ac9749c79084fd6b\"]\nARM1/2 row texts: [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"text\":\"Ready\"},{\"id\":\"REQ-f0a82259ac9749c79084fd6b\",\"text\":\"Failed \u2014 SOURCE_UNAVAILABLE\"}]\nARM1/2 CONTROL (unanswered rows): [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"text\":\"Checking status\u2026\"},{\"id\":\"REQ-f0a82259ac9749c79084fd6b\",\"text\":\"Checking status\u2026\"}]\nARM3 urls: internal=/api/scoped/investor-reporting/analysis/requests?limit=25&selected_tenant=fir_internal00000000000000 advisor=/api/scoped/investor-reporting/analysis/requests?limit=25\nCONTROL refused markup carries the named refusal: true\nMOUNT: owned-history mounted=true bothRowsListed=true browserLocalStillShown=true\nMOUNT CONTROL (no client selected): owned-history present=false\nAMENDMENT account rows: [\"Ridgeline Trust ****1001 / Trust \u2014 $125,000\",\"Ridgeline IRA ****1002 / IRA \u2014 $43,000\"] expected=[\"Ridgeline Trust ****1001 / Trust \u2014 $125,000\",\"Ridgeline IRA ****1002 / IRA \u2014 $43,000\"]\nVERDICT: REQUEST-HISTORY-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating 6 named arm groups (ARM1/2 state+reason-code, ARM1/2 CONTROL pending-row wording, ARM3 selected_tenant threading + its own advisor-read control, the refused-history CONTROL, the client-selected MOUNT plus its no-client MOUNT CONTROL, and the AMENDMENT accounts arm), each pushing a named failure string into one `failures` array asserted empty; every arm's own console.log line is reproduced verbatim above so a reader can see which sub-check produced each printed value.",
+      "status": "PASS",
+      "expect": "VERDICT: REQUEST-HISTORY-OK"
+    },
+    {
+      "criterion_id": "IVE62-AC2",
+      "criterion_verbatim": "judgment: the Analysis tab read on the running page (round-8 walk): a job from another session shows with its state, graded by 3.0.0_SA_CVO at L9. Record it in your instance as UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming the CVO; never PASS or FAIL.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- this order's grant does not include a live portal DEV walk; the CVO's own post-drain walk is the instrument this criterion names.",
+      "output_evidence": "This worker's own mechanical proof (IVE62-AC1, VERDICT: REQUEST-HISTORY-OK) is offered as the mechanical proxy for what the live walk would confirm: the Analysis tab, with a client selected, lists the owner's served-history requests (including one from another session) each with its own state, a failed/ATTENTION one with its reason code in words, and a pending/refused read says so by name.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: the task order marks this criterion judgment-graded by 3.0.0_SA_CVO on the issuer's live portal DEV walk after the drain. A worker-assigned PASS/FAIL is refused by the checker; the CVO's live walk is the oracle.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OwnedRequestHistory.tsx's exported `ownedRowStatusWords` -- forced to always `return 'MUTATED'` regardless of the row's kind or status, via a scripted in-place edit (python3 string replacement); re-ran IVE62-AC1's exact invocation, then restored the file byte-for-byte from a pre-mutation backup (diff -q confirmed IDENTICAL, and `git status` on the file showed no diff) and confirmed the restored test re-passes.",
+      "expected": "IVE62-AC1 fails: the READY row, the FAILED row and the unanswered-row CONTROL all read 'MUTATED' instead of their own state words, so VERDICT prints REQUEST-HISTORY-FAIL naming those three arms.",
+      "observed": "0 pass, 1 fail. ARM1/2 row texts both read \"MUTATED\"; ARM1/2 CONTROL (unanswered rows) both read \"MUTATED\"; VERDICT: REQUEST-HISTORY-FAIL ARM1: expected the READY row's own state word \"Ready\", got {\"text\":\"MUTATED\"}; ARM2: expected the FAILED row's state AND reason code in words, got {\"text\":\"MUTATED\"}; ARM1/2 CONTROL: an unanswered row did not say so by name -- exactly the defect the real implementation retires. File restored from the pre-mutation copy (diff -q IDENTICAL, git status clean); re-ran IVE62-AC1 twice post-restore, both VERDICT: REQUEST-HISTORY-OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE62-AC1's exact invocation twice in a row post-restore.",
+      "observed": "Identical VERDICT: REQUEST-HISTORY-OK both runs; 1 pass / 0 fail, 1 expect() call each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": ["DSGN_IRPTV1-W39-S1"],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~39/DSGN_IRPTV1.TO-IV-e-62.request-history.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-62.request-history.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: REQUEST-HISTORY-OK (run twice post-restore, identical; also run once against the ownedRowStatusWords mutant, correctly FAILED with the named ARM1/ARM2/CONTROL failures)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/tabs/analysis/",
+      "result": "18 pass / 0 fail across 3 files (owned-reopen.test.tsx, prospect.test.tsx, recipient.test.tsx) -- the sibling analysis-tab tests closest to this cell's edits, all unmoved"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/",
+      "result": "872 pass / 27 skip / 7 fail across 241 files (full InvestorReporting suite, run post-commit). All 7 failures are pre-existing and unrelated to this cell's <paths> (contracts/adapt.ts's `?? null` census, F45-AC9's vite config-loader script reach, F57-AC2's selection-create/directory-browse unprojected_grant carry, and a pre-existing 'ycharts' token at investor-reporting.ts:200 inside a route-table comment this cell never touches -- verified via `git diff --stat` showing only the 4 intended files plus the new test changed). Before the fix in surprise row DSGN_IRPTV1-W39-S1, this same run showed 871 pass / 8 fail (the extra failure was this cell's own regression against fe-s-72/reachable-states.test.ts, resolved before this instance was written)."
+    },
+    {
+      "tool": "tsc",
+      "invocation": "node_modules/.bin/tsc -b --noEmit",
+      "result": "0 errors"
+    },
+    {
+      "tool": "eslint",
+      "invocation": "node_modules/.bin/eslint.exe src/api/endpoints/investor-reporting.ts src/pages/InvestorReporting/tabs/analysis/AnalysisTab.tsx src/pages/InvestorReporting/tabs/analysis/GenerateComposer.tsx src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-62.request-history.test.tsx",
+      "result": "0 errors, 10 warnings, all pre-existing-pattern (react-refresh/only-export-components for files exporting more than one component/function, plus AnalysisTab.tsx's own pre-existing exhaustive-deps/unused-var warnings at lines 112/199/207, none of which this cell's diff hunks touch -- confirmed via `git diff HEAD~1 HEAD` hunk headers) -- the new test file itself carries 0 warnings"
+    }
+  ]
+}
