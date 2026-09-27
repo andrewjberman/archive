@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-40",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f12fcbb16eb46c6f45641c0fc0c1b99f9955af9f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "f56587bf9e3e0d510124399d5cca1c03261aa877",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-40.account-ytd.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/reporting/accountFocus.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "277a51e6b7e587599335981a64de8bd68342f9be",
+      "artifact_covered_by": ["IVE40-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 277a51e6 on branch wk-DSGN_IRPTV1-26-portal (LOCAL). Adds the new `AccountYtdStatus` union (loading/ready/unavailable), the `ACCOUNT_YTD_LOADING` constant, and the shared `ACCOUNT_YTD_UNAVAILABLE_WORDS` fallback plain-words string -- additive, no existing export touched."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "277a51e6b7e587599335981a64de8bd68342f9be",
+      "artifact_covered_by": ["IVE40-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 277a51e6. New exported `resolveAccountYtd` (pulled out of the fetch effect body, this project's established pattern for an effect a test exercises directly, matching `buildPerformanceExportTarget` above it): one cached one-account POST /selections (`resolveAccountFocus`, its own cache -- never the focused account's) then one GET /performance for the YTD window, never before the as-of date is known, never the client set; UNAVAILABLE covers a thrown refusal, a non-answer-bearing payload, and an answer-bearing payload with no summary-return fact for the window -- each via `wordedRefusalFor` (rule 6's two named codes) or the shared fallback, never the raw code. A new per-account fetch effect (`ytdFetchedKeys` ledger: one request per account+window, never refetched) writes the new `accountYtd` state, gated to the picker by a `ytdWired` readiness check (`focusCtx` present AND the as-of date known) -- BEFORE that gate, `AccountFilter` receives `undefined` and renders exactly as `iv-e-39` left it (the account's own net-worth value), confirmed by the unchanged `iv-e-39.account-picker-refusal.test.tsx`. New test-only prop `initialAccountYtd` (the SAME seed idiom `initialReport`/`initialFocusedAccountId`/`initialAccountRef` already establish; the live app never passes it)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/AccountFilter.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "277a51e6b7e587599335981a64de8bd68342f9be",
+      "artifact_covered_by": ["IVE40-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 277a51e6. New optional `accountYtd` prop (keyed by accountId) and new exported `formatAccountYtd`. In `performanceMode`, the label reads `${label} -- ${formatAccountYtd(accountYtd[accountId])}` when `accountYtd` is SUPPLIED; ABSENT (every pre-existing call site/test, incl. `iv-e-39`, out of this cell's grant), the label falls back to `formatAccountFilterValue(account.value)` exactly as before this cell -- confirmed byte-identical by ARM4 of the new test and by the unmoved `iv-e-39` file."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-40.account-ytd.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "277a51e6b7e587599335981a64de8bd68342f9be",
+      "artifact_covered_by": ["IVE40-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 277a51e6 (new file). ARM1: the pure `formatAccountYtd` contract (loading/absent/ready-with-value/ready-with-null/unavailable). ARM2: `resolveAccountYtd` run directly against a stubbed api for 5 sub-cases (ready, known-code refusal, fallback-code refusal, non-answer-bearing payload, answer-bearing payload with no summary-return fact for the window), the SAME technique `iv-e-34.per-account-performance.test.tsx` establishes -- one create-selection + one performance-report call per account, the request window equal to the YTD preset anchored on the as-of date, never the client account set. ARM3: `renderToStaticMarkup` over the real `ReportingTab`, seeded via the new `initialAccountYtd`, proving each account's own distinct YTD text, a still-loading account reading 'value pending' beside two answered ones in the SAME render (progressive fill), the answered body still rendering despite it (page stays usable), no 'All accounts'/combined option (no client aggregate), and the unavailable account's plain words verbatim (never a raw code). ARM4: a regression control reproducing `iv-e-39`'s own pre-as-of scenario, confirming the picker still falls back to the account's own value byte-for-byte."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE40-AC1",
+      "criterion_verbatim": "one arm per row above, each named by its id, each asserting that row's acceptance line on the rendered page or the code path that produces it. It prints VERDICT: ACCOUNT-YTD-OK only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-26/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~26; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-40.account-ytd.test.tsx 2>&1 | tail -25",
+      "output_evidence": "ARM1 FORMAT: loading=\"value pending\" absent=\"value pending\" ready=\"5.23%\" readyNull=\"value pending\" unavailable=\"Some plain words.\"\nARM2(a) READY: status={\"kind\":\"ready\",\"value\":0.0917} createCalls=1 perfCalls=1 window=2026-01-01..2026-09-09 accountSetId=sel_616363742d6534302d3100000000000000000000000000000000000000000000\nARM2(b) KNOWN REFUSAL: {\"kind\":\"unavailable\",\"words\":\"This account is not covered for performance reporting. It becomes available once this account is added to the covered set for this firm.\"}\nARM2(c) FALLBACK REFUSAL: {\"kind\":\"unavailable\",\"words\":\"Year-to-date return is not available for this account right now. It becomes available once this figure is answered.\"}\nARM2(d) NOT ANSWER-BEARING PAYLOAD: {\"kind\":\"unavailable\",\"words\":\"Year-to-date return is not available for this account right now. It becomes available once this figure is answered.\"}\nARM2(e) NO FACT FOR WINDOW: {\"kind\":\"ready\",\"value\":null}\nARM3 PICKER OPTIONS: [\"Ridgeline Trust ****4401 / Trust -- 5.23%\",\"Ridgeline IRA ****4402 / IRA -- value pending\",\"Ridgeline Joint ****4403 / Joint -- Year-to-date return is not available for this account right now. It becomes available once this figure is answered.\"]\nARM3: everyExpectedPresent=true optionCountMatchesAccounts=true noAllAccountsOption=true bodyRendersDespiteLoading=true\nARM4 REGRESSION CONTROL (pre-as-of, no seed): [\"Ridgeline Trust ****4401 / Trust -- $300,000\",\"Ridgeline IRA ****4402 / IRA -- $610,000\",\"Ridgeline Joint ****4403 / Joint -- $350,000\"] unaffected=true\nVERDICT: ACCOUNT-YTD-OK\n\n 1 pass\n 0 fail\n 17 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "17 expect() calls gating 4 named arms: ARM1 -- 5 of 5 format-contract sub-cases correct (loading, absent, ready+value, ready+null, unavailable); ARM2 -- 5 of 5 resolveAccountYtd sub-cases correct (ready/0.0917, known-code refusal, fallback-code refusal, non-answer-bearing payload, no-fact-for-window), each confirming exactly 1 create-selection + 1 performance-report call scoped to the YTD window, never the client account set; ARM3 -- all 4 sub-checks true (every seeded account's own text present, option count == 3 of 3 accounts with no combined row, no 'All accounts' option, the answered body renders despite one entry still loading); ARM4 -- the pre-as-of regression control renders every one of 3 accounts' own value texts, unaffected by this cell.",
+      "status": "PASS",
+      "expect": "VERDICT: ACCOUNT-YTD-OK"
+    },
+    {
+      "criterion_id": "IVE40-AC2",
+      "criterion_verbatim": "graded at L9 by 3.0.0_SA_CVO (PRD v0.15: \"3.0.0_SA_CVO grades each id\") on the issuer's live walk of portal DEV after the drain: each row above, read on the running page at 1440 px. RECORD; never self-graded.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- this order's grant does not include a live portal DEV walk; the CVO's own post-drain walk is the instrument this criterion names.",
+      "output_evidence": "This worker's own mechanical proof (IVE40-AC1's four named arms, VERDICT: ACCOUNT-YTD-OK) is offered as the mechanical proxy for what the live walk would confirm: each account in the Performance chooser shows its own distinct YTD return beside its name, figures fill in progressively without blocking the page, an uncomputable account reads plain words in its place, and there is still no single/combined return for the whole client.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: the task order marks this criterion judgment-graded by 3.0.0_SA_CVO on the issuer's live portal DEV walk after the drain. A worker-assigned PASS/FAIL is refused by the checker; the CVO's live walk is the oracle.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AccountFilter.tsx's `formatAccountYtd` -- forced to always `return \"MUTATED\"` regardless of the status kind, via a scripted in-place edit (node -e string insertion); re-ran IVE40-AC1's exact invocation, then restored the file byte-for-byte from a pre-mutation backup (diff -q confirmed IDENTICAL) and confirmed the restored test re-passes.",
+      "expected": "IVE40-AC1 fails: every ARM1 sub-case reads \"MUTATED\" instead of its expected text, and ARM3's picker options all read \"MUTATED\" instead of each account's own distinct YTD text.",
+      "observed": "0 pass, 1 fail. failures include: ARM1: loading status read \"MUTATED\", expected \"value pending\"; ARM1: ready value 0.0523 read \"MUTATED\", expected \"5.23%\"; ARM1: unavailable status did not print its own plain words verbatim; ARM3: not every account read its own seeded YTD text; got [\"...-- MUTATED\",\"...-- MUTATED\",\"...-- MUTATED\"] -- exactly the defect the real implementation retires. File restored from the pre-mutation copy (diff -q IDENTICAL); re-ran IVE40-AC1 twice post-restore, both VERDICT: ACCOUNT-YTD-OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE40-AC1's exact invocation twice in a row post-restore.",
+      "observed": "Identical VERDICT: ACCOUNT-YTD-OK both runs; 1 pass / 0 fail, 17 expect() calls each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~26/DSGN_IRPTV1.TO-IV-e-40.account-ytd.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-40.account-ytd.test.tsx",
+      "result": "1 pass / 0 fail, 17 expect() calls, VERDICT: ACCOUNT-YTD-OK (run twice post-restore, identical; also run once against the formatAccountYtd mutant, correctly FAILED with the named ARM1/ARM3 failures)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/",
+      "result": "99 pass / 0 fail across 85 files (full dsgn-irptv1 suite, run post-commit), including the sibling iv-e-39 (account-picker-refusal), iv-e-34 (per-account-performance, focus-refusal-export) and iv-e-36 (export-target-thread, preview-account-scope) files closest to this cell's edits -- all unmoved"
+    },
+    {
+      "tool": "tsc",
+      "invocation": "node_modules/.bin/tsc.exe -b --noEmit",
+      "result": "0 errors"
+    },
+    {
+      "tool": "eslint",
+      "invocation": "node_modules/.bin/eslint.exe src/pages/InvestorReporting/tabs/holdings/AccountFilter.tsx src/pages/InvestorReporting/tabs/reporting/ReportingTab.tsx src/pages/InvestorReporting/tabs/reporting/accountFocus.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-40.account-ytd.test.tsx",
+      "result": "0 errors, 14 warnings, all pre-existing-pattern react-refresh/only-export-components (a file exporting more than one component/function -- the same warning class iv-e-39's own proof documents) plus 2 pre-existing unrelated warnings (unused scopeRef arg, an unnecessary useMemo dep) neither introduced nor touched by this cell; the new test file itself carries 0 warnings"
+    }
+  ]
+}
