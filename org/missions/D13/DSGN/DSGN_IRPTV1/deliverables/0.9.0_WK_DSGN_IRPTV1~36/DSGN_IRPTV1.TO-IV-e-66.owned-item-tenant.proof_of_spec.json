@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-66",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fc21988bce2f5fa67f1a93b3e5da91ab44114105"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "8f03ba34aadd44264c5dd22d4375345af3173fc9",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-66.owned-item-tenant.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~36",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/api/endpoints/investor-reporting.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "11fbff18658893a3d09e49d792a73de2de0f615d",
+      "artifact_covered_by": ["IVE66-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 11fbff18 on branch wk-DSGN_IRPTV1-36-portal (LOCAL, based on local DEV e8a00b23). getOwnedAnalysisRequest/getOwnedAnalysisReport (LiveClient + FixtureAdapter + the OwnedAnalysisReader interface) take an optional selectedTenant, merged into the query the same way listOwnedAnalysisRequests already does (IV-e-62): `query: { selected_tenant: selectedTenant }`, and irBuildRequest drops the key when the value is undefined, so an absent tenant leaves the URL byte-identical to today (confirmed live-client arm (c)/(d) below). getJobStatus (amendment 1) takes the same optional selectedTenant. analysis-request-read's route table `binding` corrected from 'none' to 'query' (cosmetic metadata only, irBuildRequest never reads route.binding -- confirmed by comp-find census, 0 consumers)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "11fbff18658893a3d09e49d792a73de2de0f615d",
+      "artifact_covered_by": ["IVE66-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 11fbff18. reopenOwnedRequest/readOwnedSections now take selectedTenant and pass it through to getOwnedAnalysisRequest/getOwnedAnalysisReport; both effects (the 'open' selected-request effect and its own dep array) carry it. New export readRowStatus(api, requestId, selectedTenant?) makes the per-row status-job call directly (api.getJobStatus(id, selectedTenant)) instead of through ProspectJobStatus.tsx's shared, out-of-grant, 2-ary readIssuedStatus -- a new local type TenantAwareJobReader + predicate hasTenantJobReader widen ONLY the TYPE the guard narrows to (delegating to the SAME runtime hasJobReader check, never a widened runtime admission). tsc -b --noEmit: 0 errors. eslint: 0 errors (5 pre-existing-pattern react-refresh/only-export-components warnings, same class already on hasOwnedReader/reopenOwnedRequest/readOwnedSections before this cell)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-66.owned-item-tenant.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "11fbff18658893a3d09e49d792a73de2de0f615d",
+      "artifact_covered_by": ["IVE66-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 11fbff18 (new file). One arm per cell clause against recording fake api/fetch doubles: ARM(a) readRowStatus/reopenOwnedRequest/readOwnedSections each recorded carrying selected_tenant=<tenant> equal to the passed value (1 call each, id + tenant asserted); ARM(b) a row seeded from a real readRowStatus resolution (state READY) renders 'Ready', never 'Status unavailable', plus the pre-existing 'Checking status...' control for an unanswered row; ARM(c) a real LiveClient with a recording stub transport (same pattern as mvp-selection/owned-history.test.ts) builds a URL carrying selected_tenant=<tenant> for getOwnedAnalysisRequest; ARM(d) control, same three call sites plus the LiveClient, all with no tenant: no selected_tenant key recorded and the LiveClient URL is byte-identical to the pre-cell path (`/api/scoped/investor-reporting/analysis/requests/{id}`, no query string). Fixture (unmodified, discovered from disk): mvp-selection/tests/producer-owned-history.json's own history.items[0].identity.request_id -- the same fixture iv-e-62's test already loads. Re-run twice post-restore (mutant control below): identical VERDICT: OWNED-ITEM-TENANT-OK both times."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE66-AC1",
+      "criterion_verbatim": "Against a recording fake api / fetch: (a) with a selected tenant, every per-request state read (status-job included), the open read and the report read OwnedRequestHistory makes carry selected_tenant equal to it; (b) a row whose read answers READY shows READY (not \"Status unavailable\"); (c) the live client's getOwnedAnalysisRequest(id, tenant) builds a URL whose query carries selected_tenant=<tenant>; (d) control: with no selected tenant the reads carry NO selected_tenant key and the URL is unchanged from today. Print VERDICT: OWNED-ITEM-TENANT-OK only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-36/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-66.owned-item-tenant.test.tsx 2>&1 | tail -15",
+      "output_evidence": "ARM(a) status-job call: [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"selectedTenant\":\"fir_internal00000000000000\"}] resolved={\"state\":\"READY\",\"publicReasonCode\":null}\nARM(a) open read call: [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"selectedTenant\":\"fir_internal00000000000000\"}] report read call: [{\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"selectedTenant\":\"fir_internal00000000000000\"}]\nARM(b) row text: {\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"text\":\"Ready\"}\nARM(b) CONTROL (unanswered row): {\"id\":\"REQ-73e76b09d6e57ad9bf4106de\",\"text\":\"Checking status\\u2026\"}\nARM(c) url: /api/scoped/investor-reporting/analysis/requests/REQ-73e76b09d6e57ad9bf4106de?selected_tenant=fir_internal00000000000000\nARM(d) CONTROL url: /api/scoped/investor-reporting/analysis/requests/REQ-73e76b09d6e57ad9bf4106de\nVERDICT: OWNED-ITEM-TENANT-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating all 4 named arms via one `failures` array (empty on pass): ARM(a) 3 recorded calls (status-job, open, report) each carrying selected_tenant equal to TENANT; ARM(b) the READY row's own text equals 'Ready' AND never 'Status unavailable', plus the unanswered-row control equals 'Checking status\\u2026'; ARM(c) the LiveClient-built URL includes selected_tenant=<tenant>; ARM(d) 2 control call sites (status-job, open+report) with selectedTenant undefined AND the LiveClient URL exactly equals the pre-cell path with no selected_tenant key. All held (0 failures pushed).",
+      "status": "PASS",
+      "expect": "VERDICT: OWNED-ITEM-TENANT-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "OwnedRequestHistory.tsx's readRowStatus -- `return api.getJobStatus(requestId, selectedTenant)` reverted in-place (sed) to the pre-cell-shaped `return api.getJobStatus(requestId)` (tenant dropped); re-ran IVE66-AC1's exact invocation, then restored the file byte-for-byte from a pre-mutation backup (diff -q confirmed IDENTICAL) and confirmed the restored test re-passes twice.",
+      "expected": "IVE66-AC1 fails: ARM(a)'s status-job call is recorded with no selectedTenant, so the failures array is non-empty and expect(failures).toEqual([]) fails.",
+      "observed": "0 pass, 1 fail. Diff printed: `+ \"ARM(a) status-job: expected one call carrying selected_tenant=fir_internal00000000000000, got [{\\\"id\\\":\\\"REQ-73e76b09d6e57ad9bf4106de\\\"}]\"`, exactly the defect amendment 1 named (the status-job read dropping the tenant). File restored from the pre-mutation copy (diff -q IDENTICAL); re-ran IVE66-AC1 twice post-restore, both VERDICT: OWNED-ITEM-TENANT-OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE66-AC1's exact invocation twice in a row post-restore, plus once more as part of the full dsgn-irptv1 directory run (before the mutant/restore cycle) and once more standalone after it.",
+      "observed": "Identical VERDICT: OWNED-ITEM-TENANT-OK on all 4 standalone runs (1 pass / 0 fail, 1 expect() call each). Full dsgn-irptv1 directory run: 118 pass / 0 fail across 104 files, 559 expect() calls, includes this cell's own test file cleanly.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "DSGN_IRPTV1-W36-S2: fixing amendment 1 (thread selected_tenant into the row status-job read) breaks the frozen census in __tests__/fe-s-54/stated-state-wins.test.ts (F54-AC2, expect(productionCallSites.length).toBe(2) now reads 4) because the tenant-aware call site lands in OwnedRequestHistory.tsx instead of collapsing back into ProspectJobStatus.tsx's single call site -- both fe-s-54's test file and ProspectJobStatus.tsx are out of this cell's <paths> grant, so the regression is filed rather than fixed here (ARMED, disarm owner named)."
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~36/DSGN_IRPTV1.TO-IV-e-66.owned-item-tenant.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-66.owned-item-tenant.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: OWNED-ITEM-TENANT-OK (run 4 times across the session, identical; also run once against the readRowStatus mutant, correctly FAILED naming the dropped selected_tenant)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/",
+      "result": "118 pass / 0 fail across 104 files (full dsgn-irptv1 suite, run twice post-commit, both clean, 559 expect() calls), including iv-e-62.request-history.test.tsx (still VERDICT: REQUEST-HISTORY-OK -- this cell's edit did not disturb it) and this cell's own new file"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/mvp-selection/owned-history.test.ts src/pages/InvestorReporting/__tests__/fe-s-57/carry.test.ts",
+      "result": "13 pass / 0 fail, 37 expect() calls -- both files exercise getOwnedAnalysisRequest/getOwnedAnalysisReport directly (mvp-selection asserts the exact pre-cell URL with no tenant supplied) and neither regressed"
+    },
+    {
+      "tool": "tsc",
+      "invocation": "node_modules/.bin/tsc.exe -b --noEmit",
+      "result": "0 errors"
+    },
+    {
+      "tool": "eslint",
+      "invocation": "node_modules/.bin/eslint.exe src/api/endpoints/investor-reporting.ts src/pages/InvestorReporting/tabs/analysis/OwnedRequestHistory.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-66.owned-item-tenant.test.tsx",
+      "result": "0 errors, 5 warnings, all pre-existing-pattern (react-refresh/only-export-components on OwnedRequestHistory.tsx's own exported helper functions, same class already present on hasOwnedReader/reopenOwnedRequest/readOwnedSections before this cell); investor-reporting.ts and the test file carry 0 warnings"
+    },
+    {
+      "tool": "bun test (regression evidence for the filed surprise, not this cell's own criterion)",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/fe-s-54/stated-state-wins.test.ts",
+      "result": "2 pass / 1 fail (F54-AC2 now reads 4 production call sites vs. its frozen expectation of 2) -- filed as DSGN_IRPTV1-W36-S2, out of this cell's <paths> grant to fix"
+    }
+  ]
+}
