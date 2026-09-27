@@ -17,8 +17,10 @@ and NFRA_MCPORTAL FWD-1 (you change a colleague's access from the dashboard).
   in as Opal_Agent with its OWN Claude Code, so it registers a DIFFERENT client and is refused. `2.0.0_SA_COO~O`
   confirms that after your step 5 sign-in, by counting the live refresh families for Opal Bloomberg: two clients, and
   the new one is not the granted one.
-- Step 6 (Alyssa Keith, portal figures only) additionally waits on addendum A2. The build is done (@45ddd8d948). Next
-  are the narrow release OA-g-2 and the grant write OA-g-3. Parts A, B and D do not wait on it.
+- Step 6 (Alyssa Keith, portal figures only) is now UNBLOCKED too (`1.0.0_SA_CTO~O`, 2026-09-27 ~01:2xZ, read off the
+  commits). The narrow release OA-g-2 is complete @20bf1189bd: the gateway serves `df724ef284` since 2026-09-26
+  23:15:53Z. The grant write OA-g-3 drained @da3a2cafbe: Alyssa Keith's portal-only grant is ACTIVE (operations
+  `[query]`, 10 portal channels, zero Schwab masters). So all four parts can run in one sitting.
 
 **Before you sit down, `2.0.0_SA_COO~O` confirms in one message that:**
 - (a) the round-1 code is merged into `opal_ai` DEV and PROD;
