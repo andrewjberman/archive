@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_MCPINDEX.TO-MX-s-7",
+  "phase": "BUILD-GENERAL",
+  "firm": "FABRIC",
+  "spec_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/prd/NFRA_MCPINDEX_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "b7dc80e2cc"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
+    "vintage_commit": "3cc88e7b7d",
+    "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-7.recorder-utf8.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_MCPINDEX~6",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/ci/record-terraform-deploy.sh",
+      "kind": "script",
+      "commit_or_etag": "981d0e931c",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "3-line diff (git diff --stat: 1 file changed, 3 insertions(+), 3 deletions(-)) adding encoding='utf-8' to the 3 bare python open() calls at :259 (read), :340 (write) and :450 (native source-map read). Nothing else in the script changed. Committed on branch wk-NFRA_MCPINDEX-6-s7 at 981d0e931c via GIT_COMMIT_AUTHOR_OVERRIDE=0.9.0_WK_NFRA_MCPINDEX~6 (issuer-authorized for this one AE-lane-path commit).",
+      "artifact_covered_by": ["AC1", "AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "python open() calls=3 bare=0 -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s7.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "python open() calls=3 bare=0\nRESULT: PASS\nexit=0",
+      "denominator": "3 of 3 python open() calls in the script carry encoding='utf-8'; 0 of 3 remain bare",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "block rc=0 em-dash round-trip=intact -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s7.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "block rc=0 em-dash round-trip=intact\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 exercised read/write round-trip of a U+2014-bearing temp map preserved the character (0 mojibake)",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The issuer's own dry-run at base is the negative arm: s7.AC1 FAIL (calls=3 bare=3) and s7.AC2 FAIL (mojibake chars=3) on the pre-fix bytes, per the task order's ISSUER NOTES.",
+      "expected": "Base bytes (bare open()) FAIL both criteria; fixed bytes (encoding='utf-8' on all 3) PASS both.",
+      "observed": "Base: AC1 FAIL calls=3 bare=3, AC2 FAIL mojibake chars=3 (issuer dry-run, task order ISSUER NOTES). Fixed (this commit 981d0e931c): AC1 PASS bare=0, AC2 PASS round-trip=intact. The one axis (bare vs. encoded open()) moves both criteria's verdicts.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Both criteria were re-run once each after the commit, from the same worktree, with no intervening change to the script.",
+      "observed": "AC1 and AC2 each returned identical output and exit=0 on the single measured run recorded here; no flakiness observed.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The hardcoded bun path at :218.",
+      "reason": "Bound 2 of the task order: out of scope, filed separately by the issuer."
+    },
+    {
+      "item": "Running the recorder against the real source map.",
+      "reason": "Bound 1 of the task order: no data file changes and no recorder run against the real source map; AC2 exercises the read/write round-trip on a temp map only."
+    },
+    {
+      "item": "The task order's own <status> flip.",
+      "reason": "Section 3 SURFACES (<paths>) does not grant org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/; flipping the order's own status there is outside this worker's write surface."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-7.recorder-utf8.md",
+  "compiler_tools": [
+    {
+      "tool": ".tools/safe-commit.sh",
+      "invocation": "GIT_COMMIT_AUTHOR_OVERRIDE=0.9.0_WK_NFRA_MCPINDEX~6 bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_MCPINDEX~6 <0.9.0_WK_NFRA_MCPINDEX~6@opal.agent>\" -F <msgfile> -- infra/aws/lambda/ci/record-terraform-deploy.sh",
+      "result": "1 commit on wk-NFRA_MCPINDEX-6-s7: 981d0e931c."
+    },
+    {
+      "tool": "org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s7.AC1.sh and s7.AC2.sh",
+      "invocation": "bash <check>.sh; echo \"exit=$?\"",
+      "result": "Both PASS, both exit=0, run from /c/tmp/mx-s7 after the commit."
+    }
+  ]
+}
