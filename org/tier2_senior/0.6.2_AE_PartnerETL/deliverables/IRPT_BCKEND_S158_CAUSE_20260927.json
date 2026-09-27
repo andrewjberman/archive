@@ -19,7 +19,8 @@
       "an absence proof over every carrier checked, with its denominator"
     ],
     "invocation_prints": "CAUSE-NAMED",
-    "what_is_still_absent": "The per-day PROXIMATE login cause remains absent and is NOT inferred anywhere in this file. The amendment grades what was measurable; it does not manufacture a cause. The next FAILED run of opal-cot-bd-session-fetch is what names one, because document version 5 (live since 2026-09-27T18:37:47.998Z) uploads the wrapper log on the failure branch."
+    "what_is_still_absent": "The per-day PROXIMATE login cause remains absent and is NOT inferred anywhere in this file. The amendment grades what was measurable; it does not manufacture a cause. The next FAILED run of opal-cot-bd-session-fetch is what names one, because document version 5 (live since 2026-09-27T18:37:47.998Z) uploads the wrapper log on the failure branch.",
+    "what_would_make_it_measurable": "The next FAILED run of opal-cot-bd-session-fetch. Document version 5 (live since 2026-09-27T18:37:47.998Z) uploads the wrapper log to s3://opal-data-cot/logs/cot-exporter/session-fetch/ on the failure branch, so the very next failure names its own cause with a real file name and a quotable line. CORRECTED 2026-09-27T20:0xZ (this file previously implied the next SCHEDULED run would be that test): Lever A in cot-bd-session-trigger SKIPS the session-fetch entirely when the stored .bd.identity probes POSITIVE-live AND captured_at is younger than MAX_SESSION_AGE_DAYS (unset in env -> default 7). Measured now via the Lambda's own read-only mode=session-check: session_live true, captured_at 2026-09-27T18:42:27.162Z. At 09-28 07:30 ET the capture is ~0.53d old, so the scheduled run dispatches opal-cot-bronze-run directly and opal-cot-bd-session-fetch does NOT run. The next expected session-fetch is when the capture passes 7 days (~2026-10-04 07:30 ET) or the probe goes negative sooner."
   },
   "premise_correction": {
     "order_asserts": "the box keeps /tmp/cot-session-autologin-*.log",
@@ -126,7 +127,7 @@
     "response_code": 0,
     "outcome": "IT DID NOT REPRODUCE -- the run succeeded on the first attempt. So the 4-day failure was a TRANSIENT or cold-start-conditioned condition, not a standing defect in the wrapper or the login script. No cause was named, therefore no cause was fixed: nothing was changed inside the grant beyond the document step itself.",
     "log_uploaded": "s3://opal-data-cot/logs/cot-exporter/session-fetch/cot-session-autologin-20260927-184053.log (1172 bytes, 2026-09-27T18:42:29Z) -- the fix proven on the branch it could be proven on",
-    "not_yet_exercised": "The FAILURE branch of the new step has not been exercised against a real failure. ABSENT is not EXERCISED-AGAINST: the next failed run is what proves it end to end, and the next scheduled cold-boot run (cron(30 7) America/New_York) is that test."
+    "not_yet_exercised": "The FAILURE branch of the new step has not been exercised against a real failure. ABSENT is not EXERCISED-AGAINST. CORRECTED: the 09-28 07:30 ET run is NOT that test. Lever A in cot-bd-session-trigger SKIPS the session-fetch entirely when the stored .bd.identity probes POSITIVE-live AND captured_at is younger than MAX_SESSION_AGE_DAYS (unset in env -> default 7). Measured now via the Lambda's own read-only mode=session-check: session_live true, captured_at 2026-09-27T18:42:27.162Z. At 09-28 07:30 ET the capture is ~0.53d old, so the scheduled run dispatches opal-cot-bronze-run directly and opal-cot-bd-session-fetch does NOT run. The next expected session-fetch is when the capture passes 7 days (~2026-10-04 07:30 ET) or the probe goes negative sooner."
   },
   "what_changed": {
     "commit": "de68b15717",
@@ -195,5 +196,13 @@
     "IBS158-AC1": "PASS against the AMENDED criterion @9fa6a3c5d8 -- invocation prints CAUSE-NAMED. Refused as ORIGINALLY written (evidence destroyed before the order was cut); the issuer amended rather than this seat weakening the test.",
     "IBS158-AC2": "PASS -- live document version 5 read back from AWS, re-run after the amendment",
     "IBS158-AC3": "PASS -- AWSCURRENT 9da4e781 CreatedDate 2026-09-27T18:42:27.771Z, inside Success command cf7fdead's window"
+  },
+  "lever_a_gate": {
+    "claim_type": "measured",
+    "one_line": "The scheduled session-fetch is age-gated, not daily, which is why 09-16 -> 09-24 shows an 8-day gap under a cron(30 7 * * ? *) schedule and why 09-24..09-27 then fired four days running.",
+    "mechanism": "Lever A in cot-bd-session-trigger SKIPS the session-fetch entirely when the stored .bd.identity probes POSITIVE-live AND captured_at is younger than MAX_SESSION_AGE_DAYS (unset in env -> default 7). Measured now via the Lambda's own read-only mode=session-check: session_live true, captured_at 2026-09-27T18:42:27.162Z. At 09-28 07:30 ET the capture is ~0.53d old, so the scheduled run dispatches opal-cot-bronze-run directly and opal-cot-bd-session-fetch does NOT run. The next expected session-fetch is when the capture passes 7 days (~2026-10-04 07:30 ET) or the probe goes negative sooner.",
+    "why_the_four_days_fired_daily": "09-24 was 8 days after the 09-16 capture, so the age bound was exceeded and the mint leg fired. A failed mint leaves the live cookie untouched by design, so the capture stayed over-age and the mint re-fired on 09-25, 09-26 and 09-27. That explains the FIRING pattern; it does not name the proximate login failure.",
+    "instrument": "aws lambda invoke --function-name cot-bd-session-trigger --payload '{\"mode\":\"session-check\"}' (the Lambda's own read-only probe -- no secret value read), plus the unpacked function source _session_is_positive_live / _handle_session_refresh.",
+    "surprise_row": "IRPT_BCKEND-S168"
   }
 }
