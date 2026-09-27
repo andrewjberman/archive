@@ -54,6 +54,17 @@ Of the 12 commits, 3 mention the name, and every such line is a docstring, a com
 **Condition added (CVO~O's, adopted by this half):** before the upload, read the live `.env`'s `ENABLED_INTEGRATIONS`
 over SSM. If it is not exactly `ycharts opal_portal globgrph`, STOP.
 
+## A second served input: the dashboard bundle -- ADDED 2026-09-27 ~03:5xZ
+
+Neither half named it at signing; `3.0.0_SA_CVO~O` found it (addendum, row NFRA_MCPINDEX-Z-C-S18 @12fff6fc33).
+`deploy-to-ec2.sh:80-92` (at `df724ef284`) builds the dashboard bundle from the nested `mcportal` checkout, at whatever
+commit it is on, and ships it in the artifact. The live bundle is `a3bff71ffa` (`EC2_MANIFEST.json`
+`services.opal-gateway.mcportal_commit`). The worker's `/c/tmp/mx-rel/mcportal` reads `a3bff71ffa` (rev-parse, 03:5xZ). So
+DELTA = 0 holds for the bundle too.
+
+**Condition added (CVO~O's, adopted):** before the upload, `/c/tmp/mx-rel/mcportal` HEAD must be `a3bff71ffa`. On any other
+commit, STOP.
+
 ## Both branches, read from the producer's rule
 
 - **At GO (integrations dormant), IF the SSM read matches the script's literal:** DELTA = 0 on every served answer,
@@ -70,8 +81,8 @@ over SSM. If it is not exactly `ycharts opal_portal globgrph`, STOP.
 
 ## Guards required at GO
 
-The SSM read of the live `ENABLED_INTEGRATIONS` equals `ycharts opal_portal globgrph` BEFORE the upload (else STOP);
-on-box `/health` = 200; the MCP tool list diff = 46 = 46 (this is also what catches a `composed_refused` drop);
+The SSM read of the live `ENABLED_INTEGRATIONS` equals `ycharts opal_portal globgrph` BEFORE the upload (else STOP); the
+`mcportal` checkout at `a3bff71ffa` BEFORE the upload (else STOP); on-box `/health` = 200; the MCP tool list diff = 46 = 46 (this is also what catches a `composed_refused` drop);
 the NEVER-2 ledger `nfra-mcpindex-r2-gateway-release` opened before the upload and closed after; off-hours GO; announcement through `0.0.0_AB_MSTR~Z` and the agentbus.
 
 **Note for the issuer (not a condition):** `tests/test_entitlement_admin.py` does not exist at `df724ef284`, and
