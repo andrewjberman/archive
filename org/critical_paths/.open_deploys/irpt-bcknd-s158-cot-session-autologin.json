@@ -1,0 +1,55 @@
+{
+  "slug": "irpt-bcknd-s158-cot-session-autologin",
+  "title": "IRPT_BCKEND-S158: cot BD session auto-login succeeds again (log-on-failure + named cause fix)",
+  "author": "0.6.2_AE_PartnerETL~S",
+  "status": "OPEN",
+  "opened_at": "2026-09-27T18:13:46.059552+00:00",
+  "window_hours": 6.0,
+  "entry_path": "org/critical_paths/change_management/20260927T1813Z_irpt-bcknd-s158-cot-session-autologin_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "verify",
+      "target": "read the box's own /tmp/cot-session-autologin-*.log via SSM and name the cause per failed day",
+      "proof_required": "ssm:<command_id> + the deliverable JSON path",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "git",
+      "target": "ssm.tf step uploads the log on failure (exit code captured without set -e aborting first) committed on CLOUD",
+      "proof_required": "commit hash + push state",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "activation",
+      "target": "safe-apply of aws_ssm_document.cot_bd_session_fetch so the LIVE document carries the log-on-failure step",
+      "proof_required": "aws ssm get-document read of the live Content",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L4",
+      "kind": "ec2-baked-asset",
+      "target": "the named cause fixed inside the grant and S3->box deployed to /opt/bd-cot-auto-login",
+      "proof_required": "SSM cat/md5 of the RUNNING path",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L5",
+      "kind": "verify",
+      "target": "ONE Success of opal-cot-bd-session-fetch that moves blackdiamond/cot/session AWSCURRENT",
+      "proof_required": "ssm:<command_id> Success + the new AWSCURRENT version id/CreatedDate",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260927T181346Z OPENED by 0.6.2_AE_PartnerETL~S with 5 leg(s)"
+  ],
+  "last_red_at": null
+}
