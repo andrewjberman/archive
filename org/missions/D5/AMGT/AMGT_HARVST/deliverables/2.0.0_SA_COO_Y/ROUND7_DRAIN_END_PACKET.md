@@ -153,3 +153,31 @@ the fixed reader is round 8's, not a retro-edit of this instance's recorded outp
    **proven-valid** sa session. ⚠ **This corrects a claim this seat made to the CTO** -- that the identity gap
    was "untouched by" the word. It is not; it is the thing the word most plausibly moves.
 4. **The 5 best-effort identities**, parked by his own instruction.
+
+## 8. WHAT HAPPENED TO THOSE FOUR CARDS AFTER THE DRAIN -- RULED 2026-09-27, three of four MOVED
+
+Appended rather than rewritten, because section 7 is what was true AT THE DRAIN and this is what is true now.
+**Three of the four cards are no longer at Andrew.** A carded item left standing after its ruling reads as
+open work, which is the same stale-record debt this packet's section 6 complains about elsewhere.
+
+| card | state now | what moved it |
+|---|---|---|
+| 1. bbg verification | **ACTED ON; one MEASUREMENT already banked, the capture outcome still RUNNING at this commit** | His "Yes" to a paced retry. See below -- the banked finding is not the one I expected, and the retry's own verdict is not in yet |
+| 2. serp | **STILL PARKED, unchanged** | Andrew-direct: *"I do want this SERP channel but we will get to it after resolving the holes in the existing channels"* -- so it is sequenced, not carded at him |
+| 3. the authenticated symbol pass | **CLOSED, and NOT by the route this card predicted** | It stalled itself at 56 of 89. Andrew then read all 33 remaining SA pages by hand; `sa_symbol` is **89 of 89** on the producer's own read, wired @d2be2d3b13 |
+| 4. the 5 best-effort identities | **RULED DONE AND READY with a per-identity grade** | Andrew-direct Call 4; grade table recorded in `org/tier1_exec/2.0.0_SA_COO/deliverables/AMGT_HARVST/ADR_RESOLUTION_OF_RESIDUAL.md` |
+
+**CARD 3 IS THE ONE WORTH READING TWICE, because this packet predicted the wrong mechanism.** Section 7 said
+the egress word "is the thing the word most plausibly moves." The word did NOT move it: the endpoint kept
+refusing, the driver stopped itself on its own two-strikes rule at 56 resolved, and the gap closed because a
+HUMAN read 33 vendor pages. **The authorization was never the binding constraint on that axis** -- and I had
+named it as the constraint in the same breath as correcting a different claim about it.
+
+**CARD 1's ACTUAL FINDING, and it inverts the premise of the retry.** bbg's `search/query` serves 200 sixty
+times against seven 403s (67 events) and recovers in as little as 70 seconds, so a retry looked obviously
+right. But a `request_rejected` makes the producer write a **900-second PUBLISHER COOLDOWN**
+(`worker.py:310`) into `progress.sqlite3`, and **that cooldown outlives the process that set it.** My first
+paced run used a 300s gap: attempt 2 fired inside the cooldown, returned `cooldown` on every job in under
+one second, loaded no session and made **no request at all**. A retry inside the cooldown is not a retry --
+it is a no-op that reads exactly like a second vendor refusal. **I paced against the VENDOR's recovery
+window when the binding constraint was OUR OWN, and ours is a number sitting in a local table.**
