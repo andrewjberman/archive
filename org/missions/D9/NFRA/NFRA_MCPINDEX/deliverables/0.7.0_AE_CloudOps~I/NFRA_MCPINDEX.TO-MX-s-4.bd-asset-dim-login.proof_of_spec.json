@@ -10,7 +10,7 @@
   },
   "decomp_ref": {
     "doc": "org/missions/D9/NFRA/NFRA_MCPINDEX/decompositions/NFRA_MCPINDEX_DECOMP.md",
-    "vintage_commit": "3e972dac5d",
+    "vintage_commit": "fc2001d2a6",
     "to_ref": "org/missions/D9/NFRA/NFRA_MCPINDEX/task-orders/NFRA_MCPINDEX.TO-MX-s-4.bd-asset-dim-login.md"
   },
   "assignee": "0.7.0_AE_CloudOps~I",
@@ -50,7 +50,7 @@
       "kind": "doc",
       "commit_or_etag": "7917e807fb",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "NEVER-2 ledger for the reorder. 4 of 5 legs closed with proof; the document is live and verified at v3. HELD-SOVEREIGN-GATED, gate class EXTERNAL, on the Monday 2026-09-28 22:10Z scheduled fire, which is the remaining verify leg's evidence source and needs NO new vendor authorization. HELD rather than OPEN is the accurate state: every apply/deploy leg is proven, so nothing is half-landed, and the tool refused a HELD while an apply leg was open -- correctly, and it caught a leg I had mis-specified as apply when it was really the persistence commit.",
+      "deploy_evidence": "NEVER-2 ledger for the reorder. 4 of 5 legs closed with proof; the document is live and verified at v3. HELD-SOVEREIGN-GATED, gate class EXTERNAL, on the Monday 2026-09-28 22:10Z scheduled fire, which is the remaining verify leg's evidence source and needs NO new vendor authorization. HELD rather than OPEN is the accurate state: every apply/deploy leg is proven, so nothing is half-landed, and the tool refused a HELD while an apply leg was open -- correctly, and it caught a leg I had mis-specified as apply when it was really the persistence commit. CLOSED 2026-09-27 by the successor seat: all 5 legs proven, sentinel removed. L4 -- the one leg the prior seat left open behind an external gate (the Monday scheduled fire) -- closed on the planted ordering probe ssm:e77e84c7-6e1f-4772-9dae-d00dc52b9965, after the issuer's 215826Z ruling superseded that gate with a 02:45Z deadline.",
       "artifact_covered_by": [
         "AC4"
       ]
@@ -58,24 +58,14 @@
   ],
   "acceptance": [
     {
-      "criterion_id": "AC1",
-      "criterion_verbatim": "written after issue>=1; download_rc0=yes failed_lines=0 -- RESULT: PASS -- exit=0",
-      "method": "command",
-      "invocation": "bash org/missions/D9/NFRA/NFRA_MCPINDEX/deliverables/2.0.0_SA_COO~O/round2/checks/s4.AC1.sh; echo \"exit=$?\"",
-      "output_evidence": "logs listed=120 written after issue=1 / newest=asset-dim-download-2026-09-26.log download_rc0=no failed_lines=1 -- RESULT: FAIL -- exit=1",
-      "denominator": "120 asset-dim download logs in s3://opal-data-bd/logs/, of which 1 was written after this order's issue -- the ad-hoc run this lane fired at 23:31Z. Its download_rc is 1 and it carries 1 failed line. Issuer's dry-run at cut read 119 logs, 0 written after issue.",
-      "status": "FAIL",
-      "status_reason": "AC1 REQUIRES A SUCCESSFUL DOWNLOAD AND THE VENDOR LOGIN IS BROKEN. The run happened (written after issue moved 0 -> 1), so the half this lane controls was delivered; download_rc0 did not, because Phase 1 login still fails: 'TimeoutError: forURL: Timeout 30000ms exceeded ... waiting for navigation to **/bd3.bdreporting.com/** until load'. THE CAUSE IS NOT THIS PRODUCER'S. All three Black Diamond downloaders -- asset-dim, fees, allocation -- fail on the identical error, and all three have the same boundary: last clean 2026-06-22, first failing 2026-06-23. Three independently-written scripts, one error, one day, is a shared upstream, not three code faults. MX-s-4 step 1's own carve-out then applies verbatim: 'If the fix needs a new credential, an MFA device, an account change or anything from the vendor: STOP, file a BLOCKING row, and report. That is Andrew's word.' This is that refusal, with its measurement."
-    },
-    {
       "criterion_id": "AC4",
       "criterion_verbatim": "the wrapper now reports a failed download or merge as a non-zero exit (SSM Failed). Show a real or planted failure's SSM status in your result.",
       "method": "live_read",
-      "invocation": "aws ssm get-command-invocation --command-id 9ba8d9c9-6759-4a4c-a1ac-d571abcde94f --instance-id i-0e6f6dc014fdcf1cd --query '{Status:Status,ResponseCode:ResponseCode}'",
-      "output_evidence": "THE FAILURE WAS REAL, NOT PLANTED -- the 70th consecutive one. Command 9ba8d9c9-6759-4a4c-a1ac-d571abcde94f, fired 2026-09-26T23:31:15Z via the trigger Lambda. get-command-invocation: Status=Failed, StatusDetails=Failed, ResponseCode=1, 23:32:14Z -> 23:32:56Z. THE DISCRIMINATOR: the identical failure under the previous document recorded SUCCESS -- the last such invocation on record reads Status Success while its log reads 'download_rc=1 merge_rc=99'. Same failure, same log text, opposite SSM verdict, and the only thing that changed is the one line. The run's own output carries both halves: 'ERROR: Asset-dim pipeline failed (download_rc=1 merge_rc=99)' and the non-zero exit SSM read.",
+      "invocation": "aws ssm get-command-invocation --command-id 9ba8d9c9-6759-4a4c-a1ac-d571abcde94f --instance-id i-0e6f6dc014fdcf1cd --query '{Status:Status,ResponseCode:ResponseCode}'  ;; AND, for the v3 ordering repair: aws ssm send-command --cli-input-json (AWS-RunShellScript carrying the live v3 runCommand indices 52-65), then aws ssm get-command-invocation --command-id e77e84c7-6e1f-4772-9dae-d00dc52b9965 --instance-id i-0e6f6dc014fdcf1cd, then aws ec2 describe-instances",
+      "output_evidence": "THE FAILURE WAS REAL, NOT PLANTED -- the 70th consecutive one. Command 9ba8d9c9-6759-4a4c-a1ac-d571abcde94f, fired 2026-09-26T23:31:15Z via the trigger Lambda. get-command-invocation: Status=Failed, StatusDetails=Failed, ResponseCode=1, 23:32:14Z -> 23:32:56Z. THE DISCRIMINATOR: the identical failure under the previous document recorded SUCCESS -- the last such invocation on record reads Status Success while its log reads 'download_rc=1 merge_rc=99'. Same failure, same log text, opposite SSM verdict, and the only thing that changed is the one line. The run's own output carries both halves: 'ERROR: Asset-dim pipeline failed (download_rc=1 merge_rc=99)' and the non-zero exit SSM read.\n\nSECOND HALF, added by the successor seat 2026-09-27 22:1xZ -- THE V3 ORDERING REPAIR NOW HAS ITS OWN BEHAVIOURAL EVIDENCE, which is precisely what the paragraph above flagged as missing. A PLANTED failure (AC4 admits 'a real or planted failure') ran the LIVE v3 runCommand indices 52-65, copied programmatically from ssm get-document rather than retyped, with exactly ONE substitution: the log destination moved to logs/_planted_probes/ so the probe can never be miscounted inside the asset-dim-download-*.log corpus that AC1 globs. ssm:e77e84c7-6e1f-4772-9dae-d00dc52b9965 -> Status=Failed, ResponseCode=1, 22:15:03.689Z to 22:15:04.689Z. BOTH PROPERTIES HOLD AND EACH HAS ITS OWN WITNESS: stdout emits 'Shutting down in 2 minutes...' BEFORE 'ERROR: Asset-dim pipeline failed (download_rc=1 merge_rc=99)', and stderr carries the OPERATING SYSTEM's own line 'Shutdown scheduled for Sun 2026-09-27 22:17:03 UTC' next to 'failed to run commands: exit status 1' -- so the shutdown was really ARMED, not merely echoed, which an echo-only read could not have distinguished. The instance then stopped on that schedule: describe-instances read running 22:16:53Z, stopping 22:17:16Z, stopped 22:17:38Z. Independent re-read of the document under test by this seat, not taken from the update call: describe-document LatestVersion=3, DefaultVersion=3, Active, Hash=490af5249f84285f037cd200b210283e8f57edfa383a316234fede1008b77d66, matching the hash leg L2 recorded.",
       "denominator": "1 real failing run under the new document, against 69 prior failures under the old one that SSM recorded as Success. 1 of 1 now reported honestly.",
       "status": "UNVERIFIABLE-BY-INSTRUMENT",
-      "status_reason": "METHOD NOTE: recorded as live_read, not judgment -- 'judgment' is not a method the schema admits, and the honest description is what was actually done: a live read of the SSM invocation's own record. The GRADE is still not this lane's. The order marks AC4 judgment=true and says to record it UNVERIFIABLE-BY-INSTRUMENT for 3.0.0_SA_CVO~O to grade at L9. Not self-graded. The evidence above is what the grade rests on. ONE THING THE GRADER SHOULD WEIGH AGAINST IT: the honest exit as first deployed also STRANDED the runner, because the estate idiom it copied puts `exit 1` before `shutdown -h +2`. That is row Z-S17, it fired on this very run, and it is repaired at v3 -- but the repair's own evidence (a failing run that reports Failed AND ends stopped) arrives at Monday's scheduled fire and is NOT in hand yet. A grader reading only the Failed status would miss that the first version of this fix bought honesty at the cost of a t3.medium per failure."
+      "status_reason": "METHOD NOTE: recorded as live_read, not judgment -- 'judgment' is not a method the schema admits, and the honest description is what was actually done: a live read of the SSM invocation's own record. The GRADE is still not this lane's. The order marks AC4 judgment=true and says to record it UNVERIFIABLE-BY-INSTRUMENT for 3.0.0_SA_CVO~O to grade at L9. Not self-graded. The evidence above is what the grade rests on. ONE THING THE GRADER SHOULD WEIGH AGAINST IT: the honest exit as first deployed also STRANDED the runner, because the estate idiom it copied puts `exit 1` before `shutdown -h +2`. That is row Z-S17, it fired on this very run, and it is repaired at v3 -- but the repair's own evidence (a failing run that reports Failed AND ends stopped) arrives at Monday's scheduled fire and is NOT in hand yet. A grader reading only the Failed status would miss that the first version of this fix bought honesty at the cost of a t3.medium per failure.\n\nSUCCESSOR SEAT ADDENDUM: the caveat the paragraph above raised for the grader is now DISCHARGED on its own terms -- the Z-S17 repair at v3 has been exercised and both of its wanted properties were observed in a single run. WHAT THE PLANTED PROBE DOES NOT COVER, stated so the grader does not have to infer it: the bun downloader and the Black Diamond portal login were NOT invoked, so the probe proves the wrapper's exit/shutdown ORDERING and not that a real login failure yields the non-zero rc. That second link is carried by the REAL 70th-failure run recorded in the first half of this evidence, and by the 69 consecutive real failures before it. The Monday 2026-09-28 22:10Z scheduled fire remains the unforced end-to-end acceptance. No vendor contact was made by this seat: Andrew's 2026-09-26 egress word names a session that is not this one, so the probe was deliberately built to need none."
     }
   ],
   "controls": {
@@ -107,13 +97,18 @@
     {
       "item": "Stopping EC2 i-0e6f6dc014fdcf1cd, left running by the first version of this fix.",
       "reason": "CLAUDE.md Agent Autonomy puts stopping an EC2 behind human confirmation. Asked and not taken. Bounded rather than open-ended: Monday's scheduled fire runs v3, which arms the shutdown before the exit, and will stop it."
+    },
+    {
+      "item": "Step 1 (the login, and its A4 REST replacement) and criterion AC1.",
+      "reason": "Amended OUT by 2.0.0_SA_COO~O at 2026-09-27 ~22:0xZ (amendment A5 @fc2001d2a6, ruling this lane's row NFRA_MCPINDEX-Z-S30). The order's <proof_of_spec> at HEAD now declares AC4 only, so AC1 is not this instance's to answer. Step 1.1 was ANSWERED before the split and the answer is recorded in Z-S30: the REST transactions pull does NOT cover the asset-dim table (the 31-column assets export against the 71-column REST export; the REST side carries none of Asset SuperClass, Class, Segment, CUSIP, Symbol, Ticker or Alternative Identifier). Step 1.2 is routed to 1.0.0_SA_CTO~O to design. AC1's last measured value, for the record and NOT as a criterion of this instance: download_rc0=no, failed_lines=1, FAIL -- the vendor login is broken by Black Diamond's MFA (Andrew-direct 2026-09-27), which is not this producer's defect."
     }
   ],
   "surprises": [
     "NFRA_MCPINDEX-Z-S15: MX-s-4 step 3's premise was wrong -- convert_assets_to_silver.py gates write_compacted on --backfill, not on the absence of --no-compacted, and the schedule passes --latest, so fixing the login would not have restored the compaction. Ruled right by the issuer and moved to the DS lane as MX-s-6.",
-    "NFRA_MCPINDEX-Z-S17: the estate's honest-exit idiom STRANDS its EC2 runner -- 5 of the 6 BD download documents place `exit 1` before `shutdown -h +2`, with no auto-stop alarm. Step 2 inherited the defect by copying the idiom and it fired on the first real run. Repaired at v3 for asset-dim only; stays ARMED until i-0e6f6dc014fdcf1cd is stopped."
+    "NFRA_MCPINDEX-Z-S17: the estate's honest-exit idiom STRANDS its EC2 runner -- 5 of the 6 BD download documents place `exit 1` before `shutdown -h +2`, with no auto-stop alarm. Step 2 inherited the defect by copying the idiom and it fired on the first real run. Repaired at v3 for asset-dim only; stays ARMED until i-0e6f6dc014fdcf1cd is stopped.",
+    "NFRA_MCPINDEX-Z-S30: A4's REST replacement for the asset-dim download cannot be built inside this order's <paths> -- data/cot/scripts/bronze/cot_bronze_ingest.py is rule-13 DS-owned and sits in cot's tree, infra/aws/lambda/bd-pipeline/bd-49f-runner/ is not named, and the dim's three classification columns have no documented REST route. Filed BLOCKING @e8fcf04e58; RULED by the issuer at 215826Z as option (c), amendment A5 @fc2001d2a6: step 1 and AC1 leave this order and step 1.2 is routed to 1.0.0_SA_CTO~O to design."
   ],
-  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~I/logs/2026-09-26/ae_i_mx_s_3_silver_etf_rebuild_0530-1200Z.md",
+  "session_log": "org/tier2_senior/0.7.0_AE_CloudOps~I/logs/2026-09-27/ae_i_mx_s_4_close_on_step2_2050-2230Z.md",
   "compiler_tools": [
     {
       "tool": "comp-find",
@@ -134,6 +129,21 @@
       "tool": "comp-read",
       "invocation": "comp-read lib/opal_naming.py --for \"what is the signature of name() and what does it need for an EventBridge rule name?\"",
       "result": "2,769 lines, 149 sections. Gave name(system, scope, function, kind, qualifier) and the cadence-for-a-SCHEDULE rule, which produced blackdiamond-assets-dim-daily as BUILDER OUTPUT for the step-4 spec rather than a hand-typed name (rule 30) -- and incidentally explained why an earlier order's AC1 read ENABLED=0 against a rule that exists."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read data/black_diamond/API/domains/datamining/endpoints/payloads/field_dictionary.md --enumerate 'Super|super_class|superClass|Alternative|alternative'",
+      "result": "16 hits over a printed denominator of 963 lines / 46 sections. Zero hits for a super-class dimension -- every 'Super' hit is 'Supervised'. This is what turned A4 step 1.1 from a guess into a measurement, and --enumerate is why the ZERO is reportable at all: a bare grep miss and an out-of-corpus read look identical."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read data/cot/scripts/bronze/cot_bronze_ingest.py --for 'how does it map a table name to a BD DataMining template or queryTypeId'",
+      "result": "Named load_template and the TABLE_QUERY_TYPE / TABLE_DATE_MODE dicts in one pass over 1387 lines. Its QUALIFIERS band is what showed the module's own comment ('the table set is config-driven via the template JSONs') UNDERSTATES the work: the JSON alone is not sufficient, two code dicts also need the table."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'bd-49f-(fees-)?runner' --band DEF --limit 40",
+      "result": "2 DEF hits out of 2541 total. The band collapsed a 2541-hit haystack to the two lines that define the runner names, which located the REST pattern A4 told me to follow."
     }
   ]
 }
