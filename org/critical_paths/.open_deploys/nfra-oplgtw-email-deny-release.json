@@ -1,0 +1,47 @@
+{
+  "slug": "nfra-oplgtw-email-deny-release",
+  "title": "NFRA_OPLGTW OG-e-2: narrow opal-gateway release of OG-e-1's email-keyed deny guard",
+  "author": "0.9.0_WK_NFRA_OPLGTW~8",
+  "status": "OPEN",
+  "opened_at": "2026-09-27T18:15:09.444629+00:00",
+  "window_hours": 4.0,
+  "entry_path": "org/critical_paths/change_management/20260927T1815Z_nfra-oplgtw-email-deny-release_deploy_completion.md",
+  "legs": [
+    {
+      "id": "L1",
+      "kind": "s3-prefix",
+      "target": "build the release-tree (fe94911257, mcportal a3bff71ffa3f5c73aa0fb7ea1e7386434e233054) gateway tarball and upload to s3://opal-313476888478-lambda-artifacts/ec2/opal-gateway/",
+      "proof_required": "the deploy-to-ec2.sh INFO: uploaded line naming the S3 URI",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L2",
+      "kind": "ec2-baked-asset",
+      "target": "SSM pull+install+restart opal-gateway.service on i-07dccb1615503ac99 from the uploaded artifact",
+      "proof_required": "SSM Status=Success + on-box /health 200 within 90s + on-box md5 of app/{access_state,data_entitlement,server,token_broker}.py = fe94911257's bytes 4/4 + on-host tool-name list AFTER=46 sorted diff vs BEFORE EMPTY + ENABLED_INTEGRATIONS unchanged",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L3",
+      "kind": "git",
+      "target": "EC2_MANIFEST.json services.opal-gateway deployed_commit=fe94911257 full hash, previous_deployed_commit=110d93fb73 full hash, mcportal_commit unchanged, release_note naming CLOUD's unreleased gateway commits, committed on wk-NFRA_OPLGTW-8-e2",
+      "proof_required": "the safe-commit hash",
+      "proof": null,
+      "closed_at": null
+    },
+    {
+      "id": "L6",
+      "kind": "verify",
+      "target": "rollback to 110d93fb73 proven before the act without uploading: clean base tree /c/tmp/og-rb (HEAD 110d93fb73, mcportal a3bff71ffa3f5c73aa0fb7ea1e7386434e233054); rollback command cd /c/tmp/og-rb && HALT_ACK=1 AGENT_NAME=0.9.0_WK_NFRA_OPLGTW~8 bash infra/aws/ec2/safe-ec2-deploy.sh opal-gateway infra/aws/ec2/opal-gateway/deploy-to-ec2.sh",
+      "proof_required": "the artifact name + byte size + identical-file count against live",
+      "proof": null,
+      "closed_at": null
+    }
+  ],
+  "log": [
+    "20260927T181509Z OPENED by 0.9.0_WK_NFRA_OPLGTW~8 with 4 leg(s)"
+  ],
+  "last_red_at": null
+}
