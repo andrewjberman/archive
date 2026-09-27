@@ -1,9 +1,8 @@
 # DSGN_IRPTV1 -- round 7 L8 packet (the COO's drain-end packet) for 3.0.0_SA_CVO
 
 **From:** 2.0.0_SA_COO~D, 2026-09-27. **Ask of the CVO:** compile the channel, grade round 7's judgment criteria on the round-7 walk
-(window 9, record to follow in this packet's addendum), adjudicate the 16 ARMED rows below on their evidence, and send the one L10 slug
-to 1.0.0_SA_CTO. Round 7 is `<risk>LOCAL</risk>` throughout (local portal DEV only). **This packet is a DRAFT until TO-IV-e-50 drains
-and the window-9 walk lands; both are named below.**
+(window 9, `w9-round7-walk-20260927.md`), adjudicate the 20 ARMED rows below on their evidence, and send the one L10 slug
+to 1.0.0_SA_CTO. Round 7 is `<risk>LOCAL</risk>` throughout (local portal DEV only). **Final (2026-09-27 ~06:5xZ): every round-7 issuance order is terminal and the window-9 walk has landed; the one open order, IV-e-50, is a round-less direct act, parked below.**
 
 ## Orders (round 7 issuance @f56587bf9e over PRD v0.15, decomp v7; direct acts round-less)
 
@@ -24,19 +23,21 @@ and the window-9 walk lands; both are named below.**
 | IV-e-47 | UIR-07 Global merge (direct act, CTO 101590) | complete (issuer flip, W25-S5) | b5915df3, merged 6bbf4141 |
 | IV-e-48 | C34 new asset classes on the IR page (direct act) | complete | cc1d3419, merged 66bcfbe0 (+a28c0172 lint) |
 | IV-e-52 | UIR-27 / UIR-29 in full (CTO 101768, direct act) | complete (issuer close: AC2's one failure pre-existing) | 5e6befb7, merged 200d257a |
-| IV-e-50 | harness: deterministic suite, only Q rows fail (CTO 101651) | **running** (slot ~29) | -- |
+| IV-e-50 | harness: deterministic suite, only Q rows fail (CTO 101651) + amendment 1 | **pending, PARKED** (direct act, round-less; its fixes merged; AC1's instance INVALID, controls.determinism UNSTABLE; AC2 FAIL, 5 of 7 not Q rows; the gate refuses a terminal flip; un-parks on the CTO's W29-S8/S10 ruling) | 464b7a37, 34a80a16, merged 3f76cdb2 |
 
-**Drain checks at local DEV 200d257a:** tsc 0 errors; lint 0 errors; suite 898 pass / 27 skip / 17 fail (IV-e-35 took it from 31 to 16;
-IV-e-52 added IVE45-AC1's UIR-29 arm, which IV-e-50 re-goldens). Local DEV is origin DEV c3dd9ca9 (with PROD a0314f22, the C25 release)
+**Drain checks at local DEV 3f76cdb2 (round 7 complete):** tsc 0 errors; lint 0 errors; suite 907 pass / 27 skip / 8 fail. IV-e-50 fixed 9 of
+the 17 at 200d257a, added none. The 8 left: IVE26-AC3 (flaky, W29-S9), F45-AC9 and F57-AC2 (product paths, W29-S8), F25-AC2 x2,
+F25-AC3, the smoke-map fixture set and the source-bounds scan. A second 3-run sample differed from the first (W29-S10): the suite is not
+deterministic on this machine. Local DEV contains origin DEV c3dd9ca9 (with PROD a0314f22, the C25 release)
 plus round 7, pull-merged at 9c45800b; nothing of round 7 is on origin.
 
 ## Judgment criteria (for the CVO's L9)
 
 IVE37-AC2 .. IVE45-AC2, IVE47-AC2 and IVE48-AC2: "each row above, read on the running page at 1440 px". The artifact is the window-9 walk
-of local DEV 200d257a (asked of 2.0.0_SA_COO~P, read-only, window-5 shape); its record lands as this packet's addendum. IVE48-AC2 needs
+of local DEV 200d257a (asked of 2.0.0_SA_COO~P, read-only, window-5 shape); its record is `w9-round7-walk-20260927.md` @a32823e232 (below). IVE48-AC2 needs
 ~M's structured / commodities values written first (not yet).
 
-## The 16 ARMED rows (`comp-surprise --project DSGN_IRPTV1 --armed --json`, 16 rows), with the disposition at this seat
+## The 20 ARMED rows (`comp-surprise --project DSGN_IRPTV1 --armed --json`, 20 of 144 rows, 0 malformed), with the disposition at this seat
 
 | row | disposition |
 |---|---|
@@ -48,7 +49,11 @@ of local DEV 200d257a (asked of 2.0.0_SA_COO~P, read-only, window-5 shape); its 
 | W29-S1 | IV-e-45 amendment 1 (IVE45-AC3 PASS) |
 | W30-S1 | DEFAULT_LAYOUT admits the two classes, drain repair bc9aa02c (CTO 101649) |
 | W29-S2, W29-S3 | CTO 101768 (a) -> IV-e-52, complete |
-| W29-S6, W29-S7 | IV-e-50 amendment 1 @095401b6be (IVE45-AC1's UIR-29 arm; F30-AC4); running |
+| W29-S6, W29-S7 | IV-e-50 amendment 1 @095401b6be: both fixed (UIR-29d/e re-goldened; F30-AC4 re-scoped), merged 3f76cdb2 |
+| **W29-S8** | BLOCKING, disarm_owner 1.0.0_SA_CTO: F45-AC9 (scripts/dev-live.mjs) and F57-AC2 (contracts/adapt.ts) need a product-path cell |
+| **W29-S9** | disarm_owner a cell granting iv-e-26.wire-regen.test.ts: IVE26-AC3 is flaky (failed 1 of 3 runs) |
+| **W29-S10** | BLOCKING, disarm_owner 1.0.0_SA_CTO: two independent 3-run samples gave different stable failing sets (15 vs 7); the "only Q rows fail" bar cannot be graded deterministically here |
+| S19 | disarmed: 34 walk screenshots untracked @cfed2c067b, `*.shots/` ignored @01d82f1550 (closing evidence S21); history purge is Andrew's call |
 
 ## What the signed-in windows showed (records committed; HARs in place, gitignored)
 
@@ -56,6 +61,13 @@ of local DEV 200d257a (asked of 2.0.0_SA_COO~P, read-only, window-5 shape); its 
 - Window 7 (`window7-k10-k11-20260927.md`): the page cannot show an Analysis job from another session (no request-list route);
   the Performance window ends on the holdings as-of (CTO 101758 / R10: keep, plus an exception label in round 8).
 - Window 8 (`w8-20260927.har`): Inflection ****4944 7.98% and Cottonwood ****0441 -1.18% on the face after one reopen each.
+- **Window 9 (the round-7 walk, the judgment artifact):** `w9-round7-walk-20260927.md` @a32823e232, local DEV 200d257a, 05:39Z-05:47Z;
+  HAR `w9-round7-20260927.har` sha256 62fea7a8.. (746 entries, 0 /export, 0 /analysis, 0 /__mockcot/); the record's row table is the evidence
+  per UIR row. Its screenshots are local only (untracked @cfed2c067b, row S19/S21); the CVO reads them on this device on request.
+- **Window 10 (K7/K8, P's never-widen pair):** K7 reopened a 49F report (8.05%); K8's Export preview refused client-side at
+  `export/resolveBundle.ts:255` (MissingPayloadError on the report's own revision, P 101833); 0 export POSTs, nothing written, principal
+  deleted 06:32:17Z (@16f05ab61c). HAR `w10-20260927.har` sha256 488da2d7.. (451 entries). Row S20; root cause row S22 (P 101835): the preview's
+  Performance GET drops `selected_tenant` (resolveBundle.ts:292-300), so the internal viewer gets UNAVAILABLE.
 
 ## Round-8 candidates (for the CTO's analysis)
 
@@ -65,5 +77,14 @@ of local DEV 200d257a (asked of 2.0.0_SA_COO~P, read-only, window-5 shape); its 
 3. **The exception label** (CTO R10 @54323a0fb5): a section whose own source cannot reach the header date says so on its face.
 4. **Analysis job status visible in the page** across sessions (window 7 K10; FE-s-13: no request-list route).
 5. **Cottonwood ****0441:** the cumulative series starts 2026-07-21 while the header says answered 2026-01-02; HOW MUCH reads -$40,348.28.
-6. **Parked, not a cell:** UIR-50's structured / commodities values await 2.0.0_SA_COO~M's write (both portal readers, IV-e-46 and
+6. **The Export preview cannot resolve the report the tab shows** (window 10, row S20): the thread's export hop is broken on DEV. Cause (S22):
+   thread `selectedTenant` from the export target through the preview into resolveBundle's request. P
+   re-cuts window 10 as window 11 on the fix's pin. Thread-breaking, so first in the recut.
+7. **UIR-25:** the account-level pie slices share one colour (window 9).
+8. **UIR-41:** the map's model chips repeat once per sleeve (window 9).
+9. **UIR-04 / 13 / 30:** the firm is shown by its tenant key (`cottonwood`, `49financial`), not a display name (window 9).
+10. **The chooser shows YTD in place of the account value (UIR-15),** and one account reads -100.00% YTD (window 9).
+11. **The S7 bar (IV-e-50's residual):** W29-S8's two product-path failures and W29-S10's run-to-run instability need a CTO ruling:
+    a product cell, a wider Q allowance, or another disposition.
+12. **Parked, not a cell:** UIR-50's structured / commodities values await 2.0.0_SA_COO~M's write (both portal readers, IV-e-46 and
    IV-e-48, are merged on local DEV; neither is on PROD).
