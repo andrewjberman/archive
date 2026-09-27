@@ -24,8 +24,15 @@ sign-off (CTO half + a second, non-acting half)" (record `ANDREW_DIRECT_20260926
 ## Both branches, read from the producer's rule
 - **Today's table (no record carries `portal_channels`):** every existing grant takes the unchanged v1.1 path, so
   **DELTA = 0** on every served answer at GO. The release adds a capability and moves no one.
-- **After a portal-only record is written:** only that person's asker answers change, narrowed to the granted
-  channels. That write is OA-g-3 (Alyssa Keith, portal figures), Andrew's call 2
+- **After a portal-only record is written:** ~~only that person's asker answers change, narrowed to the granted
+  channels.~~ **SUPERSEDED 2026-09-27 ~12:5xZ by this seat: this branch was INCOMPLETE.** Writing ANY profile record makes
+  that principal `restricted` (`data_entitlement.py:28-33` at `110d93fb73`: "a principal with ANY profile record ... is
+  restricted"). A restricted principal is denied every MCP tool not in its grant and every direct REST route (`:41-44`,
+  `decide()` `:364-376`), and a portal-only grant admits no tool. So the write ALSO removes that person's OWN native
+  gateway tools, not only narrowing their asker answers. Measured for the one such record (Alyssa Keith, OA-g-3): 6,895
+  audit records over 2026-09-25..27 hold 92 of hers, ALL `ms_site_children` on the 02Z site-ingest path, which still reads
+  `ok` after the grant; 0 MCP tool calls in the 72 h. So nothing observed broke, but the lockout is latent and was
+  never signed. It is carried to Andrew (entitlements are his class). That write is OA-g-3 (Alyssa Keith, portal figures), Andrew's call 2
   (`ANDREW_DIRECT_20260926_022xZ_CTO_O_OPEN_CALLS_1_TO_6_ANSWERED.md`). It is a separate act with its own order.
   This half does not sign it.
 
