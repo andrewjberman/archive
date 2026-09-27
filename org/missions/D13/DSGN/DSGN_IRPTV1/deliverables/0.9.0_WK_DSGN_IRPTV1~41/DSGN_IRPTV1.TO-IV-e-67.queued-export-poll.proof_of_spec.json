@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-67",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "5d44d0fa6281d69def8454a181adfb2916f794d7"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "502e6fd4dc637d8309f5e261331ce406d647d778",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-67.queued-export-poll.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~41",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/contracts/envelope.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "6e520d8b27356d9a1fd130f640aeed990a6eaa6f",
+      "artifact_covered_by": ["IVE67-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6e520d8b on branch wk-DSGN_IRPTV1-41-portal (LOCAL). New IR_DATA_OPTIONAL_WHILE_LOADING=['submit-export','export-receipt']; the data-presence check becomes `!('data' in body) && !dataOptionalHere`, dataOptionalHere requiring the operation be one of the two AND a well-formed status whose adapted state is 'LOADING'. Every other data-less body still throws EnvelopeMismatch('data').",
+      "introduces": ["IR_DATA_OPTIONAL_WHILE_LOADING", "dataOptionalHere"]
+    },
+    {
+      "path_or_key": "portal/src/api/endpoints/investor-reporting.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "6e520d8b27356d9a1fd130f640aeed990a6eaa6f",
+      "artifact_covered_by": ["IVE67-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6e520d8b. InvestorReportingApi.submitExport's return type widens to Promise<ExportReceipt | {exportId: string; receipt: null}>; LiveClient.submitExport no longer delegates to the shared send() (which cannot return both parsed.data and parsed.status) -- it inlines the same route/build/transport/parse/telemetry/refusal sequence, returns parsed.data unchanged when present, and otherwise reads the export id off the untouched wire payload through interpretSubmitExportAnswer. getExportReceipt and FixtureAdapter.submitExport are unedited.",
+      "introduces": ["LiveClient.submitExport (rewritten body)"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/export/submit.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "6e520d8b27356d9a1fd130f640aeed990a6eaa6f",
+      "artifact_covered_by": ["IVE67-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6e520d8b. SubmitOutcome gains {submitted:true; receipt:null; exportId:string}; submitUnderGate discriminates it from a real ExportReceipt via 'exportId' in answer. New pollExportReceipt(api, request, onReceipt, options?) reads getExportReceipt in a loop, calling onReceipt on every read (queued/running included) and stopping at a terminal jobState (ready/failed/expired) or maxAttempts.",
+      "introduces": ["pollExportReceipt", "PollExportReceiptOptions", "EXPORT_RECEIPT_TERMINAL_STATES"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/export/ExportButton.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "6e520d8b27356d9a1fd130f640aeed990a6eaa6f",
+      "artifact_covered_by": ["IVE67-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6e520d8b. handleSubmit's .then() branches on outcome.receipt === null: starts pollExportReceipt with an ExportReceiptRequest built from the submit's own tenant/scope/revision/selectedTenant plus the polled exportId, storing every read through the existing receiptForFlow/flowReceipt path. ReceiptPanel.tsx is NOT edited -- its existing envelopeFromReceipt already renders queued/running/ready/failed/expired from a bare receipt.",
+      "introduces": ["pollExportReceipt(...) call in handleSubmit"]
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-67.queued-export-poll.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "6e520d8b27356d9a1fd130f640aeed990a6eaa6f",
+      "artifact_covered_by": ["IVE67-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6e520d8b (new file)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/fe-s-31/submit.test.ts",
+      "kind": "test",
+      "commit_or_etag": "6e520d8b27356d9a1fd130f640aeed990a6eaa6f",
+      "artifact_covered_by": ["IVE67-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6e520d8b. Ripple fix (row DSGN_IRPTV1-W41-S1): a one-line `&& control.outcome.receipt` guard beside the pre-existing `control.outcome.submitted` check, made necessary by SubmitOutcome's widened union; no assertion's meaning changed, output byte-identical before/after."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-64.submit-tenant.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "6e520d8b27356d9a1fd130f640aeed990a6eaa6f",
+      "artifact_covered_by": ["IVE67-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit 6e520d8b. Same ripple fix (row DSGN_IRPTV1-W41-S1) at two call sites (lines ~147, ~175): `&& outcome.receipt` guard beside the pre-existing `outcome.submitted` check; output byte-identical before/after."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE67-AC1",
+      "criterion_verbatim": "the built behaviour, with its control. Against a recording fake fetch / api: (a) a submit answered with the W18 data-less QUEUED body (the shape above, synthetic ids) is accepted and yields the exr_ id; (b) the flow then issues receipt reads for that id carrying the selected tenant, and stops at READY with the download link when the fake answers READY; (c) a fake answering a named FAILED stops the poll and shows that state; (d) control: a submit answered WITH data (a receipt) behaves as today, and a data-less answer whose state is not QUEUED/RUNNING is still refused by name. Print VERDICT: QUEUED-EXPORT-POLL-OK only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-41/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-67.queued-export-poll.test.tsx 2>&1 | tail -15",
+      "output_evidence": "(a) data-less QUEUED submit -> client.submitExport returned: {\"exportId\":\"exr_e67aa11bb22cc33dd44ee55f\",\"receipt\":null}\n  (a continued) submitUnderGate unwraps the same queued answer: {\"submitted\":true,\"receipt\":null,\"exportId\":\"exr_e67aa11bb22cc33dd44ee55f\"}\n  (d-ii) data-less READY submit -> refused, field='data'\n  (d-ii CONTROL) parseIrEnvelope itself throws EnvelopeMismatch('data') on the same body: true\n  (d-i) data-present submit -> exportRef=exr_e67aa11bb22cc33dd44ee55f jobState=ready carries no exportId member: true\n  (b) poll reads: 3 (all carrying selectedTenant=reg-e67: true); updates: queued -> running -> ready; final jobState=ready; download link=/api/scoped/investor-reporting/export/exr_e67aa11bb22cc33dd44ee55f/download?selected_tenant=reg-e67\n  (c) poll reads: 2; updates: queued -> failed; stopped at jobState=failed\n  ExportButton.tsx calls pollExportReceipt(...) when outcome.receipt === null: true\nVERDICT: QUEUED-EXPORT-POLL-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating 4 named arms plus 2 controls, all held: (a) client.submitExport on the literal W18 data-less QUEUED body yields {exportId, receipt:null} with the correct exr_ id, and submitUnderGate unwraps the same answer identically; (d-ii) the same shape at state READY (not QUEUED/RUNNING) is refused EnvelopeMismatch('data') through both the client and parseIrEnvelope directly; (d-i) data present still returns the receipt whole, carrying no exportId member; (b) 3 export-receipt reads (queued/running/ready), every one carrying selectedTenant=reg-e67, stop at READY with a tenant-carrying download link; (c) 2 reads (queued/failed) stop at FAILED; plus a source-inspection check that ExportButton.tsx itself calls pollExportReceipt on the queued outcome.",
+      "status": "PASS",
+      "expect": "VERDICT: QUEUED-EXPORT-POLL-OK"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "contracts/envelope.ts -- replaced `const dataOptionalHere = IR_DATA_OPTIONAL_WHILE_LOADING.includes(operation) && status !== null && status.state === 'LOADING'` with an unconditional `const dataOptionalHere = false` via a scripted in-place edit (backup taken first), reinstating the old unconditional data-required rule; re-ran IVE67-AC1's exact invocation, then restored the file from the pre-mutation backup and confirmed `git diff --stat` against the committed HEAD (6e520d8b) showed only the intended hunk.",
+      "expected": "IVE67-AC1 fails: arm (a) throws EnvelopeMismatch('data') instead of accepting the data-less QUEUED body.",
+      "observed": "0 pass, 1 fail. arm (a)'s own `client.submitExport(...)` call throws uncaught: `EnvelopeMismatch: investor-reporting submit-export: response envelope field 'data' does not satisfy the v1 contract` (field='data', publicReasonCode=ENVELOPE_DATA), at envelope.ts:343 (the mutated line) via LiveClient.submitExport -> the test's own await, exactly the arm the mutant strips (the data-less QUEUED body is refused instead of accepted). File restored from a pre-mutation backup; `git status`/`git diff` against committed HEAD (6e520d8b) showed zero difference, and IVE67-AC1 re-ran clean (VERDICT: QUEUED-EXPORT-POLL-OK, 1 pass / 0 fail).",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE67-AC1's exact invocation 3x: pre-mutant, post-restore (pre-commit), and against the final committed HEAD (6e520d8b).",
+      "observed": "Identical VERDICT: QUEUED-EXPORT-POLL-OK every run; 1 pass / 0 fail, 1 expect() call each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "portal/src/pages/InvestorReporting/export/ReceiptPanel.tsx",
+      "reason": "Not edited: its existing, unedited envelopeFromReceipt already renders queued/running/ready/failed/expired from any bare ExportReceipt (jobState-keyed), so no change was needed to satisfy the Build text's 'shows the queued/running state while it polls'."
+    },
+    {
+      "item": "portal/src/api/endpoints/investor-reporting.ts's getExportReceipt",
+      "reason": "Not edited (bounds: 'only submitExport'). The envelope-level symmetry the Build text names for export-receipt ('a receipt read answered the same way is accepted') is real at the parser layer (proven directly in IVE67-AC1's pollExportReceipt arms, which route every read through parseIrEnvelope), but getExportReceipt's own LiveClient method still types its return as non-nullable ExportReceipt and was not widened to handle a data-less export-receipt answer -- a latent gap left for a future cell, not exercised by this cell's built flow (every getExportReceipt fixture/fake in this delivery answers with data present)."
+    }
+  ],
+  "surprises": ["DSGN_IRPTV1-W41-S1"],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~41/queued-export-poll.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-67.queued-export-poll.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: QUEUED-EXPORT-POLL-OK (run 3x across the mutant/restore/post-commit cycle, identical)"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun x tsc -b --noEmit, full portal",
+      "result": "3 errors before the ripple fix (fe-s-31/submit.test.ts:102, iv-e-64.submit-tenant.test.tsx:147,175 -- SubmitOutcome's widened union); 0 errors after"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/fe-s-31/submit.test.ts src/pages/InvestorReporting/__tests__/fe-s-75/parse-control.test.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.submit-data-optional.test.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.wire-regen.test.ts",
+      "result": "7 pass / 0 fail, 11 expect() calls across 4 files -- fe-s-31/submit.test.ts's SUBMIT RETURNS THE EXPORT RECEIPT: yes, unchanged"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/fe-s-1/adapter.test.ts src/pages/InvestorReporting/__tests__/fe-s-9 src/pages/InvestorReporting/__tests__/fe-s-16/mounted-states.test.ts src/pages/InvestorReporting/__tests__/fe-s-35/no-identity.test.ts",
+      "result": "41 pass / 0 fail, 227 expect() calls across 9 files"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-64.submit-tenant.test.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-53.tenant-thread.test.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-53.preview-tenant.test.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-36.preview-account-scope.test.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-26.print-url.test.ts src/pages/InvestorReporting/__tests__/fe-s-13",
+      "result": "38 pass / 0 fail, 119 expect() calls across 11 files -- iv-e-64's own VERDICT: SUBMIT-TENANT-OK unchanged after its ripple-fix guard"
+    }
+  ]
+}
