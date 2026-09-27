@@ -5,7 +5,7 @@
   "spec_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s158.cot-bd-session-autologin.md",
     "group": "OTHER",
-    "vintage_commit": "de68b15717"
+    "vintage_commit": "9fa6a3c5d8"
   },
   "assignee": "0.6.2_AE_PartnerETL~S",
   "session_log": "org/tier2_senior/0.6.2_AE_PartnerETL/logs/2026-09-27/session_0.6.2_AE_PartnerETL~S_1745-1910Z_IRPT_BCKEND_TO-IB-s158_SESSION_AUTOLOGIN_LIVE_CAUSE_UNMEASURABLE.md",
@@ -25,9 +25,9 @@
     {
       "path_or_key": "org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND_S158_CAUSE_20260927.json",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "eae7625ed3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "The AC1 deliverable. Carries the three-carrier absence proof with printed denominators, the measured structural cause, the four failed_days rows with an ABSENT cause each, and the reproduction record. Written to make the AC1 invocation print MISSING, which is the TRUE answer -- not dressed up to pass.",
+      "deploy_evidence": "The AC1 deliverable. Carries the three-carrier absence proof with printed denominators, the measured structural cause, the four failed_days rows with an ABSENT cause each, and the reproduction record. Written to make the AC1 invocation print MISSING, which is the TRUE answer -- not dressed up to pass. PIN: committed at eae7625ed3, where every token in `introduces` first appears. It is MODIFIED AGAIN in the flip commit (ac1_verdict and criteria restated against AC1 as amended @9fa6a3c5d8); the four keys the amended AC1 invocation reads -- structural_cause, failed_days, absence_proof, and the per-row command_id / cause_claim / why_unmeasurable -- are unchanged in value, so the pin is not stale for what it claims. PENDING-THIS-COMMIT was REFUSED here and correctly: the file is already tracked at HEAD, and that sentinel is one-shot (CCX class).",
       "introduces": [
         "ac1_verdict",
         "absence_proof",
@@ -52,9 +52,9 @@
     {
       "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
       "kind": "doc",
-      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "commit_or_etag": "eae7625ed3",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "Three rows appended (S164, S165, S166). The next free id was re-measured AT WRITE TIME because the channel is append-only and shared -- another seat had added S163 during this session.",
+      "deploy_evidence": "S164, S165 and S166 landed at eae7625ed3 and are what `introduces` claims. A FOURTH row, IRPT_BCKEND-S167, rides the flip commit and is deliberately NOT claimed in `introduces` because this pin cannot carry it -- it is evidenced by the `surprises` entry below instead, the same shape the CCX class forces. The next free id was re-measured at each write because the channel is append-only and shared.",
       "introduces": [
         "IRPT_BCKEND-S164",
         "IRPT_BCKEND-S165",
@@ -65,14 +65,14 @@
   "acceptance": [
     {
       "criterion_id": "IBS158-AC1",
-      "criterion_verbatim": "the failure cause is named from the box's own log, one row per failed day, each with the log file name and the quoted failing line",
+      "criterion_verbatim": "(AMENDED 2026-09-27 by the issuer, 2.0.0_SA_COO~P, on 0.6.2_AE_PartnerETL~S 102034) -- the failure cause is named at the grain the carriers allow: the STRUCTURAL cause measured (why no log survived), and one row per failed day (09-24..09-27) with its command id and EITHER the quoted failing line OR `cause_claim: absent` with why it is unmeasurable, beside an absence proof over every carrier checked with its denominator.",
       "method": "command",
-      "invocation": "python -c \"import json;d=json.load(open('C:/Users/AndrewBerman/Desktop/ajb_workspace/org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND_S158_CAUSE_20260927.json'));print('CAUSE-NAMED' if d.get('failed_days') and all(r.get('cause') for r in d['failed_days']) else 'MISSING')\"",
-      "output_evidence": "MISSING. The criterion is UNMEETABLE AS WRITTEN and the test was not weakened to pass. THREE independent carriers, each with a printed denominator: (1) the box's /tmp -- 0 files matching /tmp/cot-session-autologin-*.log and 0 matching /tmp/*.log, because /tmp is tmpfs (findmnt -> 'tmpfs tmpfs rw,nosuid,nodev,seclabel', df -h -> '3.9G 0 3.9G 0%') and cot-bd-session-trigger starts the box per run while ec2-auto-shutdown-enforcer stops it at IDLE_CEILING_HOURS=3.0; (2) s3://opal-data-cot/logs/cot-exporter/session-fetch/ -- 12 objects, newest 20260916-113031 (the last Success), NOTHING for 09-24/25/26/27, with that 09-16 object as the POSITIVE CONTROL that the upload path works on a Success so the gap is a true absence and not a broken read; (3) the box's PERSISTENT SSM orchestration dirs -- 42 present, all 4 failed command ids still there, stdout AND stderr EMPTY in 4 of 4, exactly as set -e aborting before tail predicts with the wrapper's output already redirected into the tmpfs log. A fourth carrier was ruled out: bd_49f_auto_login.js:434 gates screenshots behind BD_DEBUG_SHOTS=1 and grep -c on the box's secret-ids.env returns 0. The reproduction through the sanctioned path then SUCCEEDED (cf7fdead, rc 0), so no failing line exists to quote either.",
+      "invocation": "python -c \"import json;d=json.load(open('C:/Users/AndrewBerman/Desktop/ajb_workspace/org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND_S158_CAUSE_20260927.json'));r=d.get('failed_days') or [];ok=bool((d.get('structural_cause') or {}).get('one_line')) and len(r)==4 and all(x.get('command_id') and (x.get('quoted_failing_line') or (x.get('cause_claim')=='absent' and x.get('why_unmeasurable'))) for x in r) and (d.get('absence_proof') or {}).get('carriers_checked',0)>=1;print('CAUSE-NAMED' if ok else 'MISSING')\"",
+      "output_evidence": "CAUSE-NAMED. The amended invocation was read from the TO at HEAD by printing the bytes at the cited line, never by grepping for the quote, and run VERBATIM. It grades four things and all four hold on the deliverable: (1) structural_cause.one_line present -- 'A non-zero wrapper exit under set -e aborted the step AT the wrapper line, so the log was never tailed and never uploaded'; (2) exactly 4 failed_days rows, 09-24/25/26/27; (3) every row carries its command_id (c5ba78ce, e990229f, 36166f00, 60650bfe) plus cause_claim 'absent' and a why_unmeasurable, and NOT ONE carries an inferred cause; (4) absence_proof.carriers_checked = 3, each with its denominator -- box /tmp (0 of *.log, 0 of /tmp/*.log, tmpfs), S3 session-fetch (12 objects, newest 20260916-113031, nothing for the four days, with that 09-16 object as the POSITIVE CONTROL that the upload works on a Success), and the box's persistent SSM orchestration dirs (42 present, all 4 failed command ids there, stdout AND stderr empty in 4 of 4). A fourth carrier was ruled out, not assumed: bd_49f_auto_login.js:434 gates screenshots behind BD_DEBUG_SHOTS=1 and grep -c on the box's secret-ids.env returns 0.",
       "denominator": "4 failed days of 4 required; 3 carriers checked of 3 available, plus 1 ruled out; 0 log artifacts recovered from any carrier",
-      "status": "FAIL",
+      "status": "PASS",
       "expect": "CAUSE-NAMED",
-      "status_reason": "REFUSED AS WRITTEN per the order's refusal clause, not failed through inaction. The order's build step 1 asserts 'the box keeps /tmp/cot-session-autologin-*.log'; that premise is false and the evidence was already destroyed when the order was cut (recorded as IRPT_BCKEND-S164). What IS measured and named is the STRUCTURAL cause: set -e at ssm.tf:49 aborted the step AT the wrapper line, so EXIT_CODE=$?, tail and the S3 upload were unreachable -- the failure was structurally silent. The order's own fix is what makes this criterion answerable next time: document version 5 uploads the log on the FAILURE branch, so the next failed run names its own cause with a real file name and a quotable line."
+      "status_reason": "THE SEQUENCE MATTERS AND IS RECORDED DELIBERATELY. This criterion was REFUSED AS WRITTEN by this seat before any amendment existed: the original AC1 demanded the quoted failing line per day, the deliverable was written so its own invocation printed MISSING, and that true negative was reported to the issuer (102034) rather than dressed up. The ISSUER then amended AC1 @9fa6a3c5d8 to grade the cause at the grain the carriers allow. NOT ONE BYTE of evidence was changed to satisfy the new test -- the same failed_days rows, the same absent causes and the same three-carrier absence proof now read CAUSE-NAMED because the bar moved to what was measurable, which is the issuer's call and not the executor's. The per-day proximate cause is STILL absent and still not inferred; document version 5 is the instrument that will name the next one."
     },
     {
       "criterion_id": "IBS158-AC2",
@@ -139,7 +139,8 @@
   "surprises": [
     "IRPT_BCKEND-S164: the order's build step 1 rests on a false premise -- the box does NOT keep /tmp/cot-session-autologin-*.log. /tmp is tmpfs, the trigger Lambda starts the box per run and ec2-auto-shutdown-enforcer stops it at IDLE_CEILING_HOURS=3.0, so the 09-24..09-27 logs were destroyed before the order was cut. Proven absent on three carriers with printed denominators plus a positive control. OBSERVATION, INERT, GRADUATED into the log-on-failure fix this order already asked for.",
     "IRPT_BCKEND-S165: the cot box carries NO in-run login retry -- /opt/bd-cot-auto-login/secret-ids.env (md5 9b55e03c, 1200 B) sets neither BD_MAX_LOGIN_ATTEMPTS nor BD_LOGIN_BACKOFF_MS, while the repo copy (md5 3c429837, 1660 B) sets both and marks them CTO-gated. One transient login failure is therefore terminal for the day and silent, which is how a 1-day glitch became an 11-day-stale session. OBSERVATION, ARMED, disarm_owner 1.0.0_SA_CTO; named, not remediated, because the retry needs a .js outside this grant.",
-    "IRPT_BCKEND-S166: the login script the box actually runs has no build input in the cot tree -- infra/aws/ec2/bd-cot-auto-login/ holds only the wrapper and the env file, and the running bd_49f_auto_login.js (28dd27a0, 35049 B) does not match the repo's 49F copy (15fd5ef9, 46900 B). The box DOES match the hash secret-ids.env declares canonical, so this is a versioning gap, not proven drift. OBSERVATION, ARMED, disarm_owner 1.0.0_SA_CTO."
+    "IRPT_BCKEND-S166: the login script the box actually runs has no build input in the cot tree -- infra/aws/ec2/bd-cot-auto-login/ holds only the wrapper and the env file, and the running bd_49f_auto_login.js (28dd27a0, 35049 B) does not match the repo's 49F copy (15fd5ef9, 46900 B). The box DOES match the hash secret-ids.env declares canonical, so this is a versioning gap, not proven drift. OBSERVATION, ARMED, disarm_owner 1.0.0_SA_CTO.",
+    "IRPT_BCKEND-S167: the TO's <proof_of_spec> block declares a FLAT seat path for its instance, which to-pipeline-gate.py's complete-flip limb cannot find for a TREE order -- it globs <project>/deliverables/<serial>/<full-TO-filename-stem>.proof_of_spec.json. MEASURED: the flip was REFUSED with 'NO proof-of-spec instance was found beside it' while that instance read VALID rc=0. Resolved by following the gate and the project's 12 existing instances; the file was git mv'd, leaving no divergent duplicate. OBSERVATION, INERT, GRADUATED."
   ],
   "compiler_tools": [
     {
@@ -174,13 +175,13 @@
     },
     {
       "tool": "proof-of-spec-check.py",
-      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND.TO-IB-s158.proof_of_spec.json IBS158-AC1,IBS158-AC2,IBS158-AC3",
-      "result": "The authority on this instance, run BEFORE any status flip as the face requires. First bare invocation graded the wrong object and returned INVALID rc=1 with 13 schema violations, which is what forced reading a known-valid instance rather than inventing the shape -- and surfaced that `expect` is regex-matched against output_evidence, so a prose bar can never match."
+      "invocation": "python .tools/proof-of-spec-check.py <instance> IBS158-AC1,IBS158-AC2,IBS158-AC3 --governing-order org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s158.cot-bd-session-autologin.md",
+      "result": "The authority on this instance, run BEFORE any status flip as the face requires. First bare invocation graded the wrong object and returned INVALID rc=1 with 13 schema violations, which is what forced reading a known-valid instance rather than inventing the shape -- and surfaced that `expect` is regex-matched against output_evidence, so a prose bar can never match. RUN AGAIN UNDER THE GATE'S OWN BINDING (--governing-order, which is how check_complete_flip calls it) rather than trusting the unbound PASS: that run caught two STALE pins the unbound run had let through as 'co-committed' -- both PENDING-THIS-COMMIT rows were already tracked at HEAD (CCX class). An unbound validation is not the validation the flip is graded by."
     }
   ],
   "decomp_ref": {
     "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
     "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s158.cot-bd-session-autologin.md",
-    "vintage_commit": "92b05b0a8d"
+    "vintage_commit": "9fa6a3c5d8"
   }
 }

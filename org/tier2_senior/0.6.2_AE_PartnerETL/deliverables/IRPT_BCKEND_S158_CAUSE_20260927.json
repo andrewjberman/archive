@@ -8,16 +8,19 @@
   "written_at": "2026-09-27T18:55:00Z",
   "risk": "WORLD",
   "ledger_slug": "irpt-bcknd-s158-cot-session-autologin",
-
   "headline": "The session refresh is live again and the whole COT chain has run, but the per-day failure cause for 09-24..09-27 is UNMEASURABLE: the box's own logs were destroyed before this order was cut, and the failure did not reproduce once the log-on-failure fix was in place.",
-
   "ac1_verdict": {
-    "state": "REFUSED_AS_WRITTEN",
-    "why": "AC1 requires one row per failed day carrying the log file name and the quoted failing line. Those logs no longer exist on any carrier, and the reproduction run SUCCEEDED, so no failing line can be quoted. Per the order's refusal clause the test was NOT weakened to pass: every failed_days row below carries an ABSENT cause, so the AC1 invocation prints MISSING, which is the true answer.",
-    "invocation_prints": "MISSING",
-    "what_would_make_it_measurable": "The next FAILED run of opal-cot-bd-session-fetch. Document version 5 (live since 2026-09-27T18:37:47.998Z) uploads the wrapper log to s3://opal-data-cot/logs/cot-exporter/session-fetch/ on the failure branch, so the very next failure names its own cause with a real file name and a quotable line."
+    "state": "MET_AGAINST_THE_AMENDED_CRITERION",
+    "amended_by": "2.0.0_SA_COO~P (the issuer) @9fa6a3c5d8, on 0.6.2_AE_PartnerETL~S 102034",
+    "history": "AC1 AS ORIGINALLY WRITTEN was refused by this seat, not failed through inaction: it required the quoted failing line per day from the box's own log, and no carrier holds those bytes. The issuer then amended AC1 to grade the cause at the grain the carriers allow. Nothing in this file was changed to make the amended test pass -- the amendment came to the evidence, not the evidence to the amendment.",
+    "amended_criterion_grades": [
+      "the STRUCTURAL cause, measured (why no log survived)",
+      "one row per failed day (09-24..09-27) with its command id and EITHER the quoted failing line OR cause_claim: absent with why it is unmeasurable",
+      "an absence proof over every carrier checked, with its denominator"
+    ],
+    "invocation_prints": "CAUSE-NAMED",
+    "what_is_still_absent": "The per-day PROXIMATE login cause remains absent and is NOT inferred anywhere in this file. The amendment grades what was measurable; it does not manufacture a cause. The next FAILED run of opal-cot-bd-session-fetch is what names one, because document version 5 (live since 2026-09-27T18:37:47.998Z) uploads the wrapper log on the failure branch."
   },
-
   "premise_correction": {
     "order_asserts": "the box keeps /tmp/cot-session-autologin-*.log",
     "world_is": "It does not. /tmp on i-0643a5bee8a8feabf is tmpfs (RAM-backed), so every wrapper log dies with the instance, and cot-bd-session-trigger starts the box per run while ec2-auto-shutdown-enforcer stops it at IDLE_CEILING_HOURS=3.0. Each failure log was therefore destroyed within hours of being written.",
@@ -29,7 +32,6 @@
     ],
     "surprise_row": "IRPT_BCKEND-S164"
   },
-
   "absence_proof": {
     "claim": "The 09-24..09-27 failure logs are unrecoverable from every carrier available to this seat.",
     "claim_type": "measured",
@@ -53,7 +55,6 @@
     ],
     "fourth_carrier_ruled_out": "bd_49f_auto_login.js can upload step screenshots to S3, but only when BD_DEBUG_SHOTS=1 (script line 434). grep -c BD_DEBUG_SHOTS /opt/bd-cot-auto-login/secret-ids.env -> 0. Prod saves none, so no screenshot exists for any failed day."
   },
-
   "structural_cause": {
     "claim_type": "measured",
     "one_line": "A non-zero wrapper exit under `set -e` aborted the step AT the wrapper line, so the log was never tailed and never uploaded -- the failure was structurally silent on every carrier.",
@@ -65,7 +66,6 @@
       "surprise_row": "IRPT_BCKEND-S165"
     }
   },
-
   "failed_days": [
     {
       "date": "2026-09-24",
@@ -116,7 +116,6 @@
       "why_unmeasurable": "tmpfs log destroyed on the next instance stop; no S3 object; orchestration stdout and stderr both empty"
     }
   ],
-
   "reproduction": {
     "intent": "Name the cause by reproducing the failure through the document once the log-on-failure fix was live -- never by hand. Vendor sign-in stayed document-only per 1.0.0_SA_CTO 101946 and 101977.",
     "path": "aws lambda invoke --function-name cot-bd-session-trigger --payload '{\"mode\":\"session-refresh\"}' (the document's own existing trigger Lambda, exactly what the scheduler targets)",
@@ -129,7 +128,6 @@
     "log_uploaded": "s3://opal-data-cot/logs/cot-exporter/session-fetch/cot-session-autologin-20260927-184053.log (1172 bytes, 2026-09-27T18:42:29Z) -- the fix proven on the branch it could be proven on",
     "not_yet_exercised": "The FAILURE branch of the new step has not been exercised against a real failure. ABSENT is not EXERCISED-AGAINST: the next failed run is what proves it end to end, and the next scheduled cold-boot run (cron(30 7) America/New_York) is that test."
   },
-
   "what_changed": {
     "commit": "de68b15717",
     "file": "infra/aws/terraform/cot-pipeline/ssm.tf",
@@ -146,30 +144,56 @@
     "why_it_works": "The wrapper's failure now sits inside a `||` list, which set -e does not act on, so the captured code survives to the final exit. tail gained `|| true` so a missing log cannot re-abort before the upload -- the same class of bug being fixed.",
     "blast_radius_preserved": "Document NAME unchanged and the step still exits non-zero on a failed run, so the cot-session-complete rule (pattern: document-name=opal-cot-bd-session-fetch AND status=Success, target cot-bd-session-trigger) still fires on Success only. Read from the live plane, not inferred."
   },
-
   "session_secret": {
-    "awscurrent_before": {"version_id": "e9259045-d182-42e9-ac0c-e03c090c9d8c", "created": "2026-09-16T11:33:35.346Z", "age_at_fix": "11 days"},
-    "awscurrent_after": {"version_id": "9da4e781-7f11-4cf0-b2dd-2980e56db1db", "created": "2026-09-27T18:42:27.771Z"},
+    "awscurrent_before": {
+      "version_id": "e9259045-d182-42e9-ac0c-e03c090c9d8c",
+      "created": "2026-09-16T11:33:35.346Z",
+      "age_at_fix": "11 days"
+    },
+    "awscurrent_after": {
+      "version_id": "9da4e781-7f11-4cf0-b2dd-2980e56db1db",
+      "created": "2026-09-27T18:42:27.771Z"
+    },
     "attribution": "The new version was written INSIDE the Success command's window (started 18:40:53.956Z, ended 18:42:27.956Z), so the AWSCURRENT move is attributable to that run and to no other writer."
   },
-
   "downstream": {
     "note": "Reaching the Success fired the designed chain, which had been frozen since 09-24. This is the intended consequence of the session refresh, named here because it is live movement.",
-    "opal-cot-bronze-run": {"command_id": "590ed628-32de-4a2a-a8af-88481d418a9e", "status": "Success"},
-    "opal-cot-silver-run": {"command_id": "907f9f8e-ea34-4f65-9f68-7bb280a75b3e", "status": "Success"},
-    "opal-cot-gold-run": {"command_id": "4fad5c7a-ff19-4a7f-bffa-3518f370bdc8", "status": "Success", "response_code": 0, "note": "measured after the deliverable was first written; the full session->bronze->silver->gold chain is green"}
+    "opal-cot-bronze-run": {
+      "command_id": "590ed628-32de-4a2a-a8af-88481d418a9e",
+      "status": "Success"
+    },
+    "opal-cot-silver-run": {
+      "command_id": "907f9f8e-ea34-4f65-9f68-7bb280a75b3e",
+      "status": "Success"
+    },
+    "opal-cot-gold-run": {
+      "command_id": "4fad5c7a-ff19-4a7f-bffa-3518f370bdc8",
+      "status": "Success",
+      "response_code": 0,
+      "note": "measured after the deliverable was first written; the full session->bronze->silver->gold chain is green"
+    }
   },
-
   "deployed_bytes_audit": {
     "method": "md5 of the RUNNING path on the box against the repo build input (rule 22a: never by filename)",
-    "run-bd-auto-login.sh": {"box": "a10ac98ada74e0539b987cb30c8fd979", "repo": "a10ac98ada74e0539b987cb30c8fd979", "verdict": "MATCH"},
-    "secret-ids.env": {"box": "9b55e03c9575d4f6b58d1d239c8409fb (1200 B)", "repo": "3c4298378faa5811b7e0eaf7a192ca2c (1660 B)", "verdict": "DIFFER -- the box lacks the CTO-gated BD_MAX_LOGIN_ATTEMPTS/BD_LOGIN_BACKOFF_MS block; see IRPT_BCKEND-S165. NOT changed by this order."},
-    "bd_49f_auto_login.js": {"box": "28dd27a054b826cc3a87f6b4498d3b5a (35049 B)", "repo_49f_tree": "15fd5ef95081ba1c06c334a2276d93b8 (46900 B)", "verdict": "DIFFER, but the box matches the hash secret-ids.env DECLARES canonical (28dd27a0). The cot deploy source infra/aws/ec2/bd-cot-auto-login/ contains no .js at all, so the running login script has no build input in the cot tree; see IRPT_BCKEND-S166. Out of this order's grant."}
+    "run-bd-auto-login.sh": {
+      "box": "a10ac98ada74e0539b987cb30c8fd979",
+      "repo": "a10ac98ada74e0539b987cb30c8fd979",
+      "verdict": "MATCH"
+    },
+    "secret-ids.env": {
+      "box": "9b55e03c9575d4f6b58d1d239c8409fb (1200 B)",
+      "repo": "3c4298378faa5811b7e0eaf7a192ca2c (1660 B)",
+      "verdict": "DIFFER -- the box lacks the CTO-gated BD_MAX_LOGIN_ATTEMPTS/BD_LOGIN_BACKOFF_MS block; see IRPT_BCKEND-S165. NOT changed by this order."
+    },
+    "bd_49f_auto_login.js": {
+      "box": "28dd27a054b826cc3a87f6b4498d3b5a (35049 B)",
+      "repo_49f_tree": "15fd5ef95081ba1c06c334a2276d93b8 (46900 B)",
+      "verdict": "DIFFER, but the box matches the hash secret-ids.env DECLARES canonical (28dd27a0). The cot deploy source infra/aws/ec2/bd-cot-auto-login/ contains no .js at all, so the running login script has no build input in the cot tree; see IRPT_BCKEND-S166. Out of this order's grant."
+    }
   },
-
   "criteria": {
-    "IBS158-AC1": "REFUSED_AS_WRITTEN -- evidence destroyed before the order was cut and the failure did not reproduce; test not weakened",
-    "IBS158-AC2": "MET -- live document version 5 read back from AWS",
-    "IBS158-AC3": "MET -- AWSCURRENT 9da4e781 created 2026-09-27T18:42:27.771Z inside Success command cf7fdead's window"
+    "IBS158-AC1": "PASS against the AMENDED criterion @9fa6a3c5d8 -- invocation prints CAUSE-NAMED. Refused as ORIGINALLY written (evidence destroyed before the order was cut); the issuer amended rather than this seat weakening the test.",
+    "IBS158-AC2": "PASS -- live document version 5 read back from AWS, re-run after the amendment",
+    "IBS158-AC3": "PASS -- AWSCURRENT 9da4e781 CreatedDate 2026-09-27T18:42:27.771Z, inside Success command cf7fdead's window"
   }
 }
