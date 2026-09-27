@@ -39,16 +39,26 @@ binding list; this half covers exactly these served-code changes and no others.
    `ENABLED_INTEGRATIONS` (`server.py:85`, `config.py:227-228`).
 5. Tests and the routing harness are not served.
 
-## Writers of the named property (NEVER-1: count them)
+## Writers of the named property (NEVER-1: count them) -- CORRECTED 2026-09-27 ~03:2xZ
 
-The property that would move served output here is `ENABLED_INTEGRATIONS`. **N = 1:** the host `.env`, read through
-`os.environ` at `config.py:227-228`. Of the 12 commits, 3 mention the name, and every such line is a docstring, a
-comment or a test string (read line by line). The order forbids changing `.env` (bound 3), and `deploy-to-ec2.sh` is
-read, never edited.
+**SUPERSEDED on these bytes:** the first version said "N = 1: the host `.env` ... the act does not touch it". That was
+WRONG, and `3.0.0_SA_CVO~O` caught it (second half @9ca9e44fea, row NFRA_MCPINDEX-Z-C-S17).
+
+**N = 2.** (1) `deploy-to-ec2.sh:196` rewrites the whole host `.env` on EVERY deploy, with the literal
+`ENABLED_INTEGRATIONS=ycharts opal_portal globgrph` (re-read at `df724ef284` and at HEAD: same line, same literal,
+and no MCPINDEX commit touches the script). (2) Any hand edit of the host `.env` since the last deploy.
+`config.py:227-228` reads the value; it does not write it. So THIS ACT DOES WRITE the property. DELTA = 0 holds only if the
+live `.env` already carries that exact literal; a live value naming `schwab`, say, would be REMOVED by the deploy.
+Of the 12 commits, 3 mention the name, and every such line is a docstring, a comment or a test string.
+
+**Condition added (CVO~O's, adopted by this half):** before the upload, read the live `.env`'s `ENABLED_INTEGRATIONS`
+over SSM. If it is not exactly `ycharts opal_portal globgrph`, STOP.
 
 ## Both branches, read from the producer's rule
 
-- **At GO (integrations dormant):** DELTA = 0 on every served answer; the tool list stays 46 = 46.
+- **At GO (integrations dormant), IF the SSM read matches the script's literal:** DELTA = 0 on every served answer,
+  and the tool list stays 46 = 46. **If it does not match:** the deploy would move `ENABLED_INTEGRATIONS`, so STOP. No
+  such branch is signed.
 - **After Andrew's G-A word enables either integration:** the tool list grows and the new tools serve. That is a
   separate act with its own sign-off. This half does NOT sign it.
 
@@ -60,9 +70,9 @@ read, never edited.
 
 ## Guards required at GO
 
-On-box `/health` = 200; the MCP tool list diff = 46 = 46 (this is also what catches a `composed_refused` drop);
-`ENABLED_INTEGRATIONS` unchanged on the host; the NEVER-2 ledger `nfra-mcpindex-r2-gateway-release` opened before the
-upload and closed after; off-hours GO; announcement through `0.0.0_AB_MSTR~Z` and the agentbus.
+The SSM read of the live `ENABLED_INTEGRATIONS` equals `ycharts opal_portal globgrph` BEFORE the upload (else STOP);
+on-box `/health` = 200; the MCP tool list diff = 46 = 46 (this is also what catches a `composed_refused` drop);
+the NEVER-2 ledger `nfra-mcpindex-r2-gateway-release` opened before the upload and closed after; off-hours GO; announcement through `0.0.0_AB_MSTR~Z` and the agentbus.
 
 **Note for the issuer (not a condition):** `tests/test_entitlement_admin.py` does not exist at `df724ef284`, and
 119a49eef0, 84a725073b and bc0cde67f0 edit it. A per-commit apply onto the live base conflicts there (measured on a
