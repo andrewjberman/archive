@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-63",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "fc21988bce2f5fa67f1a93b3e5da91ab44114105"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "8f03ba34aadd44264c5dd22d4375345af3173fc9",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-63.dates-sources-exception.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~40",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/format.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8 on branch wk-DSGN_IRPTV1-40-portal (LOCAL, based on local DEV 71896c93). New file: `formatPageDate` wraps `@/lib/dateUtils#formatPanelTimestamp` (read-only prior art, never edited) -- a bare CalendarDate (`^\\d{4}-\\d{2}-\\d{2}$`) is formatted via `formatPanelTimestamp(null, value)` then has the fabricated `, 5:00p ET`-shaped clock stripped by regex; any other value (a real Instant) is passed straight to `formatPanelTimestamp(value)` unchanged, keeping its own time."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/IdentityCard.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. `businessAsOf` now reads `formatPageDate(businessAsOfRaw) ?? businessAsOfRaw` (was `formatPanelTimestamp(null, businessAsOfRaw)`) -- the card's 'As of' field is a CalendarDate and no longer carries an invented clock. No other line changed."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsSummary.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. Both `businessAsOf` and `observedAsOf` route through `formatPageDate` (`../../format`) instead of the direct `formatPanelTimestamp` calls; `observedAsOf` is a real Instant so `formatPageDate` delegates straight to `formatPanelTimestamp(value)`, unchanged in output."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/reporting/PerformanceHeadline.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. The 'Answered ... to ...' line now prints `formatPageDate(report.actualDates.start/end)` (was the raw ISO strings). New R10 exception: when `report.actualDates.end < report.sourceTimestamps.businessAsOf` (string-lexicographic == chronological for two YYYY-MM-DD values), a second line `data-slot=\"performance-source-exception\"` reads 'Returns through <formatted end date>'; absent when the two dates are equal (the control). The footer `content` changed from the literal `\"Source: Opal Capital Analysis.\"` to `` `Source: ${footerSourceText}.` `` where `footerSourceText` is `report.lineage.sourceCoordinate` (falling back to the literal only when that field is empty/absent). The help-tip's 'Business date'/'Ingested'/'Generated' facts also now route through `formatPageDate` (this content never reaches `renderToStaticMarkup` per the file's own pre-existing Tooltip note, so this is a correctness-only change with no test-visible effect)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/reporting/MethodAndSources.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. The 'Business as of' / 'Ingested' / 'Generated' Rows now read `formatPageDate(sourceTimestamps.X) ?? 'not stated'` instead of the raw ISO value directly. The 'Source coordinate' row is UNCHANGED (still prints `lineage.sourceCoordinate` verbatim) -- that field is an opaque payload-carried coordinate, not a date, per the wire contract's own doc comment."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/slices.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. `HOLDINGS_FOOTER_SOURCE` renamed `HOLDINGS_FOOTER_SOURCE_FALLBACK` (still the same literal); new exported `holdingsFooterSource(snapshot)` derives `Source: <root provenance.sourceCoordinate(s), + -joined for a multi-root snapshot> .` -- the SAME root-walk/dedupe `holdingsFactsHelp` already uses (UIR-39's multi-root fix applies here too) -- falling back to the literal only when the snapshot carries no root at all."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/SecurityList.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. `PanelFooter content` now `holdingsFooterSource(snapshot)` (was the `HOLDINGS_FOOTER_SOURCE` literal). Amendment 1 (UIW-0927-01): `tickerFor` returns 'Cash' for a `node.cashNode` security with no `display.symbol` (the producer's own wire kind, `assetClass.ts`'s established rule -- never guessed by name); any other ticker-less security is unchanged (still NOT_SUPPLIED)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/AllocationBars.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. `PanelFooter content` now `holdingsFooterSource(snapshot)`. Amendment 1 (UIW-0927-06): the category label span's className changed `w-32 shrink-0 truncate text-slate-900` -> `w-32 shrink-0 whitespace-normal break-words text-slate-900` -- the label now wraps its own text instead of ellipsizing."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/tabs/holdings/HoldingsTreemap.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. `PanelFooter content` now `holdingsFooterSource(snapshot)` (was the `HOLDINGS_FOOTER_SOURCE` literal). No other line in this file touched."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-45.face-batch.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8. Re-goldened (this file predates this cell and is owned by IV-e-45; the <paths> grant names the whole __tests__/ tree for exactly this re-goldening): UIR-45b/c and UIR-28e now expect `formatPageDate`'s output (no fabricated clock) instead of `formatPanelTimestamp(null, ...)`'s; UIR-45d re-written to render `SecurityList` against `BASE_SNAPSHOT` and assert the footer names the snapshot's own root `provenance.sourceCoordinate` (`holdings/tenant-a1/2026-09-09`), never the bare literal; new UIR-45e pins that the literal is retained as `holdingsFooterSource`'s own fallback. Re-ran post-edit: VERDICT: FACE-BATCH-OK, 1 pass / 0 fail."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-63.dates-sources.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "aa1a47f8123fe68dda709640010fae9d24446acc",
+      "artifact_covered_by": ["IVE63-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit aa1a47f8 (new file). Fixtures: `performanceReport.success.json` (actualDates.end === sourceTimestamps.businessAsOf, the control) and `performance.differing-dates.json` (actualDates.end 2026-09-05 BEFORE businessAsOf 2026-09-09, the exception case), both on disk unmodified; a cash-row snapshot cloned from `holdingsSnapshot.success.json` with one node's `cashNode: true` and no `display` added. Arm 1 reads each known date SLOT's own value (never a whole-markup sweep, which would misfire on an opaque `sourceCoordinate` embedding a date-shaped substring, e.g. `perf/tenant-a1/2026-09-09`) across PerformanceHeadline/MethodAndSources/HoldingsSummary/IdentityCard. Arm 2 confirms the Performance and Holdings footers name the served source. Arm 3 confirms the exception label plus its control. Arm 4 confirms the cash-row fix plus a non-cash control. Arm 5 confirms the truncate class is gone from source and from the rendered markup's class attribute."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE63-AC1",
+      "criterion_verbatim": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-40/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-63.dates-sources.test.tsx 2>&1 | tail -15 -- expect: VERDICT: DATES-SOURCES-OK. Arms: no rendered section shows an ISO yyyy-mm-dd date; a source line carries the payload's source; a Performance answer ending before the page date shows the exception label; control: an answer ending ON the page date shows none; plus the Amendment 1 arms.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-40/portal && timeout 120 /c/Users/AndrewBerman/.bun/bin/bun test ./src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-63.dates-sources.test.tsx 2>&1 | tail -15",
+      "output_evidence": "IVE63-1a (PerformanceHeadline \"Answered\" window): OK\nIVE63-1b (MethodAndSources business/ingested/generated rows): OK\nIVE63-1c (HoldingsSummary source dates): OK\nIVE63-1d (IdentityCard \"As of\"): OK\nIVE63-2a (Performance footer names the served source): OK -- Performance footer names lineage.sourceCoordinate (\"perf/tenant-a1/2026-09-09\"), never the bare literal alone\nIVE63-2b (Holdings footer names the served source): OK -- SecurityList footer names the snapshot's own root provenance.sourceCoordinate (\"holdings/tenant-a1/2026-09-09\")\nIVE63-3a (exception label present): OK -- answer ends 2026-09-05, page date 2026-09-09 -- exception label rendered\nIVE63-3b (control: no exception when the answer ends on the page date): OK -- answer ends 2026-09-09, page date 2026-09-09 -- no exception label\nIVE63-4a (cash row reads Cash): OK\nIVE63-4b (control: a non-cash ticker-less security still reads not supplied): OK\nIVE63-5a (no truncate class on the allocation label): OK\nIVE63-5b (rendered label carries no truncate/ellipsis class): OK -- rendered allocation-bar-label class=\"w-32 shrink-0 whitespace-normal break-words text-slate-900\"\nVERDICT: DATES-SOURCES-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating all 12 named arms via one `failures` array (empty on pass): 4 no-raw-ISO-date slot checks, 2 served-source checks, 2 exception-label checks (positive + control), 2 cash-row checks (positive + control), 2 truncate-class checks (source + rendered markup). All 12 held (0 failures pushed).",
+      "status": "PASS",
+      "expect": "VERDICT: DATES-SOURCES-OK"
+    },
+    {
+      "criterion_id": "IVE63-AC2",
+      "criterion_verbatim": "judgment: UIR-45 and the R10 label read on the running page (round-8 walk), graded by 3.0.0_SA_CVO at L9. Record it in your instance as UNVERIFIABLE-BY-INSTRUMENT with a status_reason naming the CVO; never PASS or FAIL.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- judgment criterion, no instrument this worker runs. A live-page walk is out of this worker's <paths> grant and instrument set (no dev server started, per BOUNDS).",
+      "output_evidence": "N/A",
+      "denominator": "N/A",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "Graded by 3.0.0_SA_CVO at L9 (round-8 walk of the running page), not by this worker's own instrument.",
+      "expect": "N/A"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "PerformanceHeadline.tsx's exception guard `report.actualDates.end < pageBusinessAsOf` inverted in-place (scripted python replace to `>`); re-ran IVE63-AC1's exact invocation, then restored the file byte-for-byte from a pre-mutation backup (diff -q confirmed IDENTICAL) and confirmed a clean re-pass twice.",
+      "expected": "IVE63-AC1 fails: arm 3a (the differing-dates fixture, which truly ends BEFORE the page date -- `end < page` true, so `end > page` is false) now finds no exception label.",
+      "observed": "0 pass, 1 fail. IVE63-3a: FAIL -- 'answer ends 2026-09-05, page date 2026-09-09 -- exception label rendered' (the label was absent). IVE63-3b (the control, end === page date, so BOTH `<` and `>` read false) was unaffected by this mutation and still passed -- the mutant fires on exactly the arm whose direction it inverts, not on the equality control, which is the correct discrimination for a `<` vs `>` swap. File restored from the pre-mutation copy (diff -q IDENTICAL); re-ran IVE63-AC1 twice post-restore, both VERDICT: DATES-SOURCES-OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE63-AC1's exact invocation clean multiple times pre-commit and once post-commit (all VERDICT: DATES-SOURCES-OK), then the mutant run (1 fail, above), then twice more post-restore, plus the whole dsgn-irptv1 directory and the whole InvestorReporting tree once each before and once each after this cell's own edits.",
+      "observed": "Identical VERDICT: DATES-SOURCES-OK all three direct runs, 1 pass / 0 fail / 1 expect() call each time. dsgn-irptv1 directory: 121 pass / 0 fail (562 expect() calls), including this cell's own re-goldened iv-e-45.face-batch.test.tsx and the whole-portal `tsc -b --noEmit` inside iv-e-17.regenerated.test.ts (rc=0). Whole InvestorReporting tree: 884 pass / 27 skip (missing local dev-server preconditions, pre-existing and out of this cell's scope) / 5 fail -- all 5 pre-existing and unrelated to this cell's own files (fe-s-1/fixtures.test.ts and fe-s-1/source-bounds.test.ts against api/endpoints/investor-reporting.ts; three F25-AC2/AC3 failures against contracts/adapt.ts and contracts/envelope.ts), confirmed identical before AND after this cell's own edits (same 5 named failures, same files, both runs).",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": [
+    "DSGN_IRPTV1-W40-S1: TO-IV-e-63's Build names a second Performance exception condition (the series' own first date landing after the requested start, e.g. 'Series starts Jul 21') that this worker did NOT implement -- the on-disk reference fixtures (including this cell's own control fixture) make the naive dailyCumulative[0].date-vs-requestedDates.start comparison fire on a clean report too, so it was scoped out rather than risk mislabeling every report. Not blocking: IVE63-AC1's own enumerated arms do not require it."
+  ],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~40/DSGN_IRPTV1.TO-IV-e-63.dates-sources-exception.proof_of_spec.json",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-63.dates-sources.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: DATES-SOURCES-OK (run clean multiple times, identical; also run once against the exception-guard mutant, correctly FAILED arm 3a as named)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/",
+      "result": "121 pass / 0 fail across 107 files (full dsgn-irptv1 suite, run twice post-commit, both clean), including the re-goldened iv-e-45.face-batch.test.tsx and the whole-portal tsc -b --noEmit inside iv-e-17.regenerated.test.ts (rc=0)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/",
+      "result": "884 pass / 27 skip / 5 fail across 251 files, run before and after this cell's own edits -- the same 5 named failures both times, all in files outside this cell's <paths> (api/endpoints/investor-reporting.ts, contracts/adapt.ts, contracts/envelope.ts), none newly introduced"
+    }
+  ]
+}
