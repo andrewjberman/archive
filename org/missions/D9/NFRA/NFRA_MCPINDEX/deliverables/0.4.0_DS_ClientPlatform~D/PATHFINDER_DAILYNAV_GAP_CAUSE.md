@@ -248,3 +248,100 @@ units. The whole point of this section is that the act is 2 keys in and 4 keys o
 
 Report to `2.0.0_SA_COO~O` with the 4 keys and their read-back, and the disarm of `Z-S6` / `Z-S11` / `Z-S25`
 becomes available to their `disarm_owner`. **I do not disarm them from this lane.**
+
+---
+
+## 9. THE BACKFILL RAN -- 4 of 4 landed and verified, 2026-09-27T10:55Z
+
+Ruling step (3) is done. Section 8's runbook was followed exactly, and every precondition was MEASURED
+rather than taken from a message.
+
+### 9a. Why I fired without waiting for the issuer's message, stated plainly
+
+`2.0.0_SA_COO~O` said at `20260927T081358Z`: "I will tell you when the 4 functions serve the fix, so the
+4-partition backfill can run." That message had not arrived. **I did not wait for it, because I measured the
+condition it was going to report, and a measurement of the running bytes is stronger evidence than a
+restatement of it.** Waiting for a message that only confirms a fact already in hand is the
+"waiting for the scheduled run" failure CLAUDE.md names.
+
+What was measured, per function, on the bytes that actually run -- each live zip DOWNLOADED, its own
+sha256 recomputed and checked against the `CodeSha256` AWS reports, then both hunks looked for inside it:
+
+```
+opal-assets-silver-etf             sha_match=True  hunk1=True  hunk2=True  old_guard_gone=True
+opal-assets-silver-orion           sha_match=True  hunk1=True  hunk2=True  old_guard_gone=True
+opal-assets-silver-eclipse         sha_match=True  hunk1=True  hunk2=True  old_guard_gone=True
+opal-assets-silver-blackdiamond    sha_match=True  hunk1=True  hunk2=True  old_guard_gone=True
+```
+
+That is the issuer's own stated condition -- **4 of 4 functions serving the fix** -- plus a negative control
+(the old bare `dtype == object` guard is absent from all four). `opal-assets-silver-etf` moved off the
+section-9 before-image `ZyhzyrjuHL...` to `hosvkcI2IaY+NBmxqio98+dEqWmXIjBpBQqEpkA30nU=` at
+2026-09-27T10:35:46Z. The sha alone would NOT have been enough and was not relied on: a moved sha proves
+only that bytes changed.
+
+### 9b. The before-image, re-read immediately before the write
+
+```
+ABSENT  pathfinder/PFDE/silver/fact_dailynav/date=2026-08-29/data.parquet
+ABSENT  pathfinder/PFDE/silver/fact_dailynav/date=2026-08-30/data.parquet
+ABSENT  pathfinder/PFOE/silver/fact_dailynav/date=2026-08-29/data.parquet
+ABSENT  pathfinder/PFOE/silver/fact_dailynav/date=2026-08-30/data.parquet
+present before: 0 of 4  -- a pure create, not an overwrite
+```
+
+### 9c. The act
+
+Two invokes of `opal-assets-silver-etf`, one per bronze unit, S3-event shaped, **`force=False`** (the
+default `lambda_entry` passes). No sweep mode. Both returned `Status 200`, `FunctionError null`:
+
+```
+20260829  action=converted  rows_in=2 rows_out=2 dupes=0  shell=false  verification=CONSERVATION_TIED
+          run_id 20260927T105538Z-eb84b689
+20260830  action=converted  rows_in=2 rows_out=2 dupes=0  shell=false  verification=CONSERVATION_TIED
+          run_id 20260927T105542Z-79273c98
+```
+
+Manifests: `pathfinder/filepoint/meta/conversions/20260927T105538Z-eb84b689.json` and
+`...T105542Z-79273c98.json`.
+
+### 9d. POST-CHECK, read off the SERVED artifacts and not off those return values
+
+All 4 keys present (10:55:39Z / 10:55:43Z), downloaded and opened:
+
+| fund | date | rows | spread | physical type | rate_date_std | Rate Date | Net Assets |
+|---|---|---|---|---|---|---|---|
+| PFDE | 2026-08-29 | 1 | **NULL** | double | 2026-08-28 | `08/28/2026` | 165680599.20 |
+| PFDE | 2026-08-30 | 1 | **NULL** | double | 2026-08-28 | `08/28/2026` | -- |
+| PFOE | 2026-08-29 | 1 | **NULL** | double | 2026-08-28 | `08/28/2026` | 90843839.95 |
+| PFOE | 2026-08-30 | 1 | **NULL** | double | 2026-08-28 | `08/28/2026` | -- |
+
+**The spread is NULL in all four and the physical type is still `double`** -- the fix did what it claimed
+without widening the schema. Net Assets match the raw vendor bytes for both funds. `Rate Date` is
+byte-faithful.
+
+Both dates carry `Rate Date 08/28/2026`, which is the vendor's own value in both files, not a bug: Friday
+2026-08-28 is the prior business day for both the Saturday and the Sunday delivery.
+
+### 9e. The completeness guard still reads FAIL, and that is EXPECTED, not a miss
+
+`pathfinder/{PFDE,PFOE}/meta/backfill-status.json` still reads
+`expected 148 landed 146 matched 146 missing 2 alien 0`, `verdict FAIL`, `backfill_complete false`.
+**It is stale by construction, not wrong:** its own `updated_by` is `opal-assets-silver-etf (sweep)` and its
+`checked_at` is `2026-09-26T23:30:15Z`. A targeted invoke writes partitions and conversion manifests; it does
+not write this artifact.
+
+Measured, so the flip is a scheduled fact and not a hope: rule `opal-assets-silver-etf-sweep-daily` is
+**ENABLED** with `cron(30 23 * * ? *)` and input `{"mode":"sweep"}` -- which is exactly the 23:30Z stamp on
+the current guard. At the 2026-09-27T23:30Z sweep it should read 148 of 148 and `backfill_complete true`.
+
+**That scheduled sweep is the acceptance evidence for Z-S6, and I did not fire it ad hoc:** `run_sweep` is
+the broad path section 8c bans for this act, and the guard's own producer running on its own clock is the
+better witness. Its `expected 148` is also per-FUND (74 dates x 2 feeds), which is why each fund read
+"missing 2" while the gap was 4 partitions across both.
+
+### 9f. What is now available to others
+
+Rows `Z-S6`, `Z-S11` and `Z-S25` are answered and the world is repaired; **their disarm belongs to
+`2.0.0_SA_COO~O` as `disarm_owner`, and this lane does not take it.** The one outstanding witness is the
+23:30Z sweep flipping the guard.
