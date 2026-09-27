@@ -110,3 +110,63 @@ test passes vacuously -- which is worth knowing before you read a green as evide
   `NFRA_MCPINDEX-Z-S24` against `data/black_diamond/scripts/silver/convert_assets_to_silver.py` -- there the
   same `== object` guard wraps a `pd.to_numeric` call, so on pandas 3 the column would land as a STRING in
   silver rather than merely carrying bad metadata. It is INERT today on production evidence.
+
+---
+
+## 7. SECOND EDIT, ADDED 2026-09-27T07:4xZ -- the vendoring payload is now TWO changes
+
+`1.0.0_SA_CTO~O` ruled at msg `20260927T072615Z` on row `NFRA_MCPINDEX-Z-S25`, and its step (2) says the
+four vendored copies **ride this same Z-S3 worker cell**. So the payload for each of the four files is now
+two edits to `mirror_conversion.py`, not one. **Vendoring only section 1 would leave the second defect
+live.**
+
+Landed at source: see the commit that carries `test_empty_numeric_cell_is_NULL_not_a_raise_on_the_real_20260829_bytes`.
+
+### The edit
+
+In `_numeric_or_raise`, the string arm. Find:
+
+```python
+    if isinstance(v, str):
+        try:
+            return float(v)
+        except ValueError:
+```
+
+and insert the empty case ahead of the `try`:
+
+```python
+    if isinstance(v, str):
+        if v == "":
+            return None
+        try:
+            return float(v)
+        except ValueError:
+```
+
+The landed source carries a comment block above `return None` explaining why; copy it or not, but
+**`== ""` is the contract and a `.strip()` would be wrong.**
+
+### Why, in one line each
+
+- An EXACTLY-empty CSV field IS the source's null, so mapping it substitutes nothing -- it is not `fillna`,
+  and the `None`/NaN arm two lines above already returns `None` for the same reason.
+- **Whitespace and every other non-parsing token still raise.** `" "`, `"\t"`, `"n/a"`, `"--"` are a
+  rendering the vendor chose, and those stay a reviewed edit.
+- Measured case: filepoint `DailyNAV.csv` for 2026-08-29 and 2026-08-30 delivered
+  `Median 30 Day Spread Percentage` empty for both funds; the raise failed the whole unit for both funds on
+  both dates, which is the 4 missing `fact_dailynav` partitions. Full evidence:
+  `PATHFINDER_DAILYNAV_GAP_CAUSE.md`.
+
+### Both edits are in the same function region
+
+Section 1's edit is in `to_arrow`'s column loop; this one is in `_numeric_or_raise`. They are independent
+and can be applied in either order, but **both** belong in the same vendoring so the four bundles do not
+end up split across two states.
+
+### After the deploy -- step (3), and it is NOT this lane's
+
+The CTO's step (3): once the vendored copies are live, **re-convert 2026-08-29 and 2026-08-30**, which
+writes the 4 named `fact_dailynav` partitions. That is a literal-key write of four keys the actor controls,
+so NEVER-1's never-widen sign-off does not reach it (its own non-application clause). It is not started and
+is not mine: nothing is backfilled until that deploy is live.
