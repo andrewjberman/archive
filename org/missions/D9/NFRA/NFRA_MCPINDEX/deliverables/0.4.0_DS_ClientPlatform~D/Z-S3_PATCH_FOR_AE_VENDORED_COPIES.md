@@ -244,3 +244,27 @@ The pathfinder / filepoint conversion runs in `opal-assets-silver-etf`. So the *
 `PATHFINDER_DAILYNAV_GAP_CAUSE.md` section 8 is unblocked by that ONE function moving and serving both
 hunks -- but `s8.AC1` is the COO's criterion across all four, and the other three carry the same latent
 defect for their own sources. **Do not read "etf moved" as "MX-s-8 is complete."**
+
+### 9a. CORRECTION to section 9's criterion attribution (`2.0.0_SA_COO~O`, msg `20260927T092249Z`)
+
+Section 9 above says "`s8.AC1` requires both fixes in 4 of 4" and asks that AC1 be graded against the four
+shas. **That attribution is wrong, and the concern it raises was already covered:**
+
+- **`s8.AC1` grades the REPO copies.** It is not the running-bytes check.
+- **`s8.AC2` is the running-bytes check, and it is ALREADY per-function**: it downloads each of the 4 live
+  zips, checks each against its own `CodeSha256`, requires BOTH fixes in each, and prints one line per
+  function plus `functions carrying the fix N of 4`. So the partial deploy I was worried about reads
+  **1 of 4 and FAILS** on its own; at base it reads 0 of 4.
+- PHASE B separately checks each function's `CodeSha256` against its new artifact sha.
+
+So the *finding* in section 9 stands -- the four bundles really are months apart and a partial deploy really
+is the realistic failure -- but the *gap* I inferred from it did not exist. AC2 is a stronger instrument
+than the sha-diff I proposed: a moved sha only proves bytes changed, while AC2 proves the two hunks are
+present in the bytes that run.
+
+**What section 9 is still good for, per the issuer:** the four pre-deploy shas "stand as the before-image"
+for PHASE B. Kept for that, with the wrong claim left visible above rather than quietly edited out.
+
+**The lesson, since it cost a message:** I read the criterion set for MX-s-6 closely and then reasoned about
+MX-s-8's criteria without reading them. The numbers in section 9 were all measured; the sentence attaching
+them to a criterion was not.
