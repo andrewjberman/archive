@@ -226,8 +226,33 @@ def main() -> int:
         # ONLY a folder that was genuinely ANSWERED is skipped. One the vendor
         # refused was NEVER ASKED, so it must be retried -- skipping it would
         # bake a rate limit into the result as though it were a finding.
-        done = {r["folder"] for r in prior["records"]
-                if r.get("search_http") == 200}
+        # 2.0.0_SA_COO~Y 2026-09-26: `search_http == 200` ALONE WAS NOT "ANSWERED",
+        # and the gap is why a chained run gained ~1 name per batch. A name whose
+        # SEARCH returned 200 but whose NEWS call was refused 403 also carries
+        # search_http 200, so it was skipped every batch and its rate limit was
+        # baked in as though it were a finding -- exactly what the comment above
+        # forbids, one call further down the path. MEASURED on batch 14: 7 of the
+        # 34 unanswered names sat in that state, and their symbols were ALREADY
+        # identified at name_overlap 1.0 (Nike -> NKE 'NIKE, Inc.', Roche ->
+        # RHHBY 'Roche Holding AG'); only the density call was missing.
+        def _answered(r):
+            if r.get("search_http") != 200:
+                return False              # the vendor refused the SEARCH: never asked
+            # A SOURCE-NAME REPAIR INVALIDATES A PRIOR ANSWER: the query string
+            # changed, so an old refusal was about a DIFFERENT company name.
+            prior_nm = r.get("company_name")
+            if SEARCH_NAME_FIX.get(prior_nm, prior_nm) != prior_nm:
+                return False
+            if ((r.get("sa_symbol") or {}).get("value")):
+                return True               # resolved
+            # No value. Was that an EVIDENCE refusal, or a vendor refusal on the
+            # news leg? Any probed candidate with a non-200 means NEVER ANSWERED.
+            for probe in (r.get("candidates_probed") or []):
+                if (probe.get("http") or 200) != 200:
+                    return False
+            return True                   # a genuine refusal on evidence
+
+        done = {r["folder"] for r in prior["records"] if _answered(r)}
         carried = [r for r in prior["records"] if r["folder"] in done]
         refused_before = len(prior["records"]) - len(done)
         targets = [t for t in targets if t["folder"] not in done]
