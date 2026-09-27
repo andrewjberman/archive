@@ -1,0 +1,104 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-47.global-merge",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f3026103f06a85ec1496600cedc1a7fea17143d1"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "dca01c97652c644f439d87e4a5e0fc89f58f1901",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-47.global-merge.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/search.ts",
+      "kind": "frontend_component",
+      "commit_or_etag": "b5915df3ebfdc0eb2ae89be57ff70faed7a26e1b",
+      "artifact_covered_by": ["IVE47-AC1", "IVE47-AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit b5915df3 on branch wk-DSGN_IRPTV1-25-portal (LOCAL). Adds tokensFor/isFullNameMatch/mergeGlobalOrder: a stable partition mirroring the server's handler.full_name_match predicate (sorted token-set equality; a comma and extra whitespace are not tokens)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/ClientSearch.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "b5915df3ebfdc0eb2ae89be57ff70faed7a26e1b",
+      "artifact_covered_by": ["IVE47-AC1", "IVE47-AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit b5915df3. The Global browse effect's setRows(toOptions(entries, firms)) became setRows(mergeGlobalOrder(toOptions(entries, firms), query, scopes.length)) -- the ONE call site; no inline .sort( added to this file."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-47.global-merge.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "b5915df3ebfdc0eb2ae89be57ff70faed7a26e1b",
+      "artifact_covered_by": ["IVE47-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit b5915df3 (new file). Four named arms (first-last, last-first, single-firm unchanged, non-matching rows keep served/firm order) plus a wiring check; VERDICT: GLOBAL-MERGE-OK only when every arm holds. Synthetic fixtures only (no real client name, no firm token)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE47-AC1",
+      "criterion_verbatim": "the four arms above, each named; prints VERDICT: GLOBAL-MERGE-OK only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-25/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~25; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-47.global-merge.test.tsx 2>&1 | tail -25",
+      "output_evidence": "Arm1 (first last) query=\"Piper Callahan\" order=dir-w4,dir-w1,dir-w2,dir-w3\nArm2 (last first) query=\"Callahan Piper\" order=dir-w4,dir-w1,dir-w2,dir-w3\nArm3 (single-firm, unchanged) order=dir-w1,dir-w2,dir-w3,dir-w4\nArm4 (no match, order untouched) order=dir-x1,dir-x2,dir-x3,dir-x4\nArm4 (non-matching rows, relative order kept) nonMatchOrder=dir-w1,dir-w2,dir-w3\nWiring: ClientSearch.tsx calls mergeGlobalOrder(toOptions(entries, firms), query, scopes.length): true\nWiring: ClientSearch.tsx contains no inline .sort(: true\nVERDICT: GLOBAL-MERGE-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating 4 named arms (first-last, last-first, single-firm-unchanged, non-matching-order-kept) plus 2 wiring checks; every arm held, VERDICT: GLOBAL-MERGE-OK. Run three times (twice clean, once post-mutant-restore), identical.",
+      "status": "PASS",
+      "expect": "VERDICT: GLOBAL-MERGE-OK"
+    },
+    {
+      "criterion_id": "IVE47-AC2",
+      "criterion_verbatim": "graded at L9 by 3.0.0_SA_CVO on the issuer's live walk of portal DEV: \"anna thiessen\" and \"thiessen anna\" in Global put the client first. RECORD; never self-graded.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- this order's grant does not include a live portal DEV walk; the CVO's own drain walk is the instrument this criterion names.",
+      "output_evidence": "This worker's own mechanical proof (IVE47-AC1's arms 1/2) is offered as the mechanical proxy for what the drain's live walk would confirm: a full-name query, in either token order, puts the exact client first among a Global search's concatenated per-firm rows, while every other row and every firm's own served order stays exactly as the server sent it.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: the task order marks this criterion judgment-graded by 3.0.0_SA_CVO on the live portal DEV walk. A worker-assigned PASS/FAIL is refused by the checker; the CVO's drain walk is the oracle.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "mergeGlobalOrder's partition comparator inverted in place (python edit): `return a.match ? -1 : 1` (match first) became `return a.match ? 1 : -1` (match LAST); re-ran IVE47-AC1's exact invocation, then restored the file byte-for-byte from a saved copy and re-ran clean.",
+      "expected": "IVE47-AC1's Arm1/Arm2 fail: the full-name match lands at the back of the merged order instead of the front, which the test's own failure branch names explicitly.",
+      "observed": "1 fail, 0 pass -- failures: 'Arm1: expected dir-w4 (the full match) first, got order dir-w1,dir-w2,dir-w3,dir-w4', 'Arm1: expected served-order-preserved tail, got dir-w1,dir-w2,dir-w3,dir-w4', 'Arm2: expected dir-w4 (the full match, reversed tokens) first, got order dir-w1,dir-w2,dir-w3,dir-w4', 'Arm2: expected served-order-preserved tail, got dir-w1,dir-w2,dir-w3,dir-w4'. File restored from a saved copy (git diff --stat against the committed state printed no diff); re-ran clean twice in a row afterward, both VERDICT: GLOBAL-MERGE-OK.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE47-AC1's exact invocation twice in a row, post-restore.",
+      "observed": "Identical VERDICT: GLOBAL-MERGE-OK both runs; 1 pass / 0 fail, 1 expect() call each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [],
+  "surprises": ["DSGN_IRPTV1-W25-S3", "DSGN_IRPTV1-W25-S4", "DSGN_IRPTV1-W25-S5"],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~25/global-merge.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-47.global-merge.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: GLOBAL-MERGE-OK (run clean twice, and once against the inverted-comparator mutant, correctly FAILED with 4 named failures)"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b --noEmit), full portal",
+      "result": "0 errors"
+    },
+    {
+      "tool": "eslint",
+      "invocation": "bunx eslint src/pages/InvestorReporting/header/ClientSearch.tsx src/pages/InvestorReporting/header/search.ts src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-47.global-merge.test.tsx",
+      "result": "0 errors, 4 warnings -- all pre-existing classes unrelated to this cell's edits (react-refresh/only-export-components on ClientSearch.tsx's own already-exported non-component helpers; a pre-existing react-hooks/set-state-in-effect warning on the same effect this cell's one-line setRows change lives inside, predating this cell)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/ (whole directory, no-regression sweep)",
+      "result": "98 pass, 0 fail, 504 expect() calls, 98 tests across 84 files (97 pre-existing + this cell's 1 new file); iv-e-37.search.test.tsx's UIR-07r arm (no client-side .sort( in ClientSearch.tsx) and iv-e-38.header-identity.test.tsx both still pass"
+    }
+  ]
+}
