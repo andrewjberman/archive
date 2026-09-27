@@ -1,0 +1,109 @@
+{
+  "schema_version": "1.0",
+  "to_id": "DSGN_IRPTV1.TO-IV-e-37.search",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/prd/DSGN_IRPTV1_PRD.md",
+    "group": "OTHER",
+    "vintage_commit": "f12fcbb16eb46c6f45641c0fc0c1b99f9955af9f"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D13/DSGN/DSGN_IRPTV1/decompositions/DSGN_IRPTV1_DECOMP.md",
+    "vintage_commit": "f56587bf9e3e0d510124399d5cca1c03261aa877",
+    "to_ref": "org/missions/D13/DSGN/DSGN_IRPTV1/task-orders/DSGN_IRPTV1.TO-IV-e-37.search.md"
+  },
+  "assignee": "0.9.0_WK_DSGN_IRPTV1~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "portal/src/components/ui/SearchSelect.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "d6e6eda34a1244453c6c1dfb96aa86845e9c1360",
+      "artifact_covered_by": ["IVE37-AC1", "IVE37-AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit d6e6eda3 on branch wk-DSGN_IRPTV1-25-portal (LOCAL). New exported searchSelectShouldOpen(query) gates onFocus/handleInput (UIR-01); list z-index -> Z_INDEX.dropdown (z-50), above TabNavigation's z-40 (UIR-02/UIR-08); option row split into a fixed label line + fixed detail/tag slot (UIR-04); input carries spellCheck={false} (UIR-09); new optional resultSummary caption prop (UIR-10)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/header/ClientSearch.tsx",
+      "kind": "frontend_component",
+      "commit_or_etag": "d6e6eda34a1244453c6c1dfb96aa86845e9c1360",
+      "artifact_covered_by": ["IVE37-AC1", "IVE37-AC2"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit d6e6eda3. toSearchSelectOption's tag is never omitted (FIRM_TAG_FALLBACK, UIR-04); new exported globalResultSummary(scopeCount, query, rowCount) wired to SearchSelect's resultSummary (UIR-10); onQuery no longer calls onSelectionChange(null, null) on a keystroke -- the root-cause fix for UIR-11 (a real accepted selection is no longer torn down by typing, so TabShell's own !scopeRef gate never swaps in SampleView's Sample content mid-search)."
+    },
+    {
+      "path_or_key": "portal/src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-37.search.test.tsx",
+      "kind": "test",
+      "commit_or_etag": "d6e6eda34a1244453c6c1dfb96aa86845e9c1360",
+      "artifact_covered_by": ["IVE37-AC1"],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Portal worktree commit d6e6eda3 (new file). One named arm per UIR-01/02/04/06/07r/08/09/10/11; VERDICT: SEARCH-OK only when every arm holds."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IVE37-AC1",
+      "criterion_verbatim": "one arm per row above, each named by its id, each asserting that row's acceptance line on the rendered page or the code path that produces it. It prints VERDICT: SEARCH-OK only when every arm holds.",
+      "method": "test_suite",
+      "invocation": "cd C:/Users/AndrewBerman/Desktop/wk-DSGN_IRPTV1-25/portal && export OPAL_AGENT_SERIAL=0.9.0_WK_DSGN_IRPTV1~25; timeout 180 /c/Users/AndrewBerman/.bun/bin/bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-37.search.test.tsx 2>&1 | tail -25",
+      "output_evidence": "UIR-01 searchSelectShouldOpen('' | '   ')=false searchSelectShouldOpen('a')=true\nUIR-01 old unconditional onFocus present: false; onFocus gated: true; handleInput gated: true\nUIR-01 no list in markup when closed+empty: true\nUIR-02/08 dropdown z=50 (tag=\"...data-slot=\\\"search-select-list\\\"...class=\\\"absolute z-50...\\\"\") tab-strip z=40 (tag=\"...class=\\\"sticky top-0 z-40...\\\"\")\nUIR-04 named row tag=\"Opal Partner One\" unnamed row tag=\"Firm unavailable\" (fallback=\"Firm unavailable\")\nUIR-04 meta slots (fixed layout) per row: 2 (expect 2); tags rendered: Opal Partner One | Firm unavailable\nUIR-06 number boxes=6 badges=6 disclosures=6\nUIR-07r toOptions keeps served order: true (dir-z9,dir-a1,dir-m5)\nUIR-07r ClientSearch.tsx contains no client-side .sort(: true\nUIR-09 INPUT TAG: ...spellCheck=\\\"false\\\"...\nUIR-10 single-firm=undefined no-query=undefined no-rows=undefined global=\"7 matched across firms\"\nUIR-10 SearchSelect renders the caption when supplied: true\nUIR-11 onQuery prop: onQuery={(next) => setQuery(next)}\nUIR-11 TabShell (accepted selection, holdings tab) renders no Sample content: true\n(control) TabShell (no selection) still shows the Sample view: true\nVERDICT: SEARCH-OK\n\n 1 pass\n 0 fail\n 1 expect() calls\nRan 1 test across 1 file.",
+      "denominator": "1 expect() call gating an array of per-row failure strings built from 9 named UIR checks (01, 02/08 combined by shared root cause, 04, 06, 07r, 09, 10, 11); all 9 held, array empty, VERDICT: SEARCH-OK. Run twice (once clean, once post-mutant-restore), identical.",
+      "status": "PASS",
+      "expect": "VERDICT: SEARCH-OK"
+    },
+    {
+      "criterion_id": "IVE37-AC2",
+      "criterion_verbatim": "graded at L9 by 3.0.0_SA_CVO (PRD v0.15: \"3.0.0_SA_CVO grades each id\") on the issuer's live walk of portal DEV after the drain: each row above, read on the running page at 1440 px. RECORD; never self-graded.",
+      "method": "manual_read_with_citation",
+      "invocation": "N/A -- this order's grant does not include a live portal DEV walk at 1440px; the CVO's own drain walk is the instrument this criterion names.",
+      "output_evidence": "This worker's own mechanical proof (IVE37-AC1's 9 arms) is offered as the mechanical proxy for what the drain's live walk would confirm: an empty focused search box shows no list; the open dropdown renders above the tab strip (z-50 > z-40) and no option is hidden; every option shows a firm tag laid out in the same fixed slot; the pre-selection Sample view is fully badge+disclosure marked; served order is never re-ranked client-side; the input carries no spell-check; a Global search states a matched count; and typing a new search no longer drops an already-accepted selection into Sample content.",
+      "denominator": "N/A -- judgment row",
+      "status": "UNVERIFIABLE-BY-INSTRUMENT",
+      "status_reason": "judgment=true: the task order marks this criterion judgment-graded by 3.0.0_SA_CVO on the live portal DEV walk. A worker-assigned PASS/FAIL is refused by the checker; the CVO's drain walk is the oracle.",
+      "judgment": true
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "SearchSelect.tsx's exported searchSelectShouldOpen(query) body replaced in place (python edit) with `return true` (always-open), restoring the UIR-01 defect this cell fixed; re-ran IVE37-AC1's exact invocation, then restored the file byte-for-byte from a saved copy and re-ran clean.",
+      "expected": "IVE37-AC1's UIR-01 arm fails: searchSelectShouldOpen('') and searchSelectShouldOpen('   ') both report open=true, which the test's own failure branch names explicitly.",
+      "observed": "VERDICT: SEARCH-FAIL UIR-01: searchSelectShouldOpen opens for an empty/whitespace query. File restored from a saved copy; `git diff --stat` printed nothing afterward, and the criterion re-ran clean (VERDICT: SEARCH-OK) twice in a row.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "Ran IVE37-AC1's exact invocation twice in a row, post-restore.",
+      "observed": "Identical VERDICT: SEARCH-OK both runs; 1 pass / 0 fail, 1 expect() call each time.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "A literal grouped-by-firm sub-list (BrowseDrawer-style BrowseGroup[]) inside the type-ahead dropdown for UIR-10",
+      "reason": "BrowseDrawer's own loadBrowseGroups/filterGroups/pageGroups operate over a materially different shape (a paginated full-catalogue walk) than ClientSearch's flat, server-narrowed SearchOptionRow[] list; literally reusing them here would require re-shaping ClientSearch's whole result pipeline. UIR-10's own register text offers an explicit disjunct ('grouped OR clearly marked'); this cell satisfies the 'clearly marked' half via UIR-04's now-guaranteed per-row firm tag plus a new matched-count caption. Filed as surprise row DSGN_IRPTV1-W25-S1."
+    }
+  ],
+  "surprises": ["DSGN_IRPTV1-W25-S1"],
+  "session_log": "org/missions/D13/DSGN/DSGN_IRPTV1/deliverables/0.9.0_WK_DSGN_IRPTV1~25/search.result.md",
+  "compiler_tools": [
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-37.search.test.tsx",
+      "result": "1 pass / 0 fail, 1 expect() call, VERDICT: SEARCH-OK (run clean twice, and once against the searchSelectShouldOpen mutant, correctly FAILED)"
+    },
+    {
+      "tool": "bun run typecheck",
+      "invocation": "bun run typecheck (tsc -b --noEmit), full portal",
+      "result": "0 errors"
+    },
+    {
+      "tool": "eslint",
+      "invocation": "bunx eslint src/components/ui/SearchSelect.tsx src/pages/InvestorReporting/header/ClientSearch.tsx src/pages/InvestorReporting/__tests__/dsgn-irptv1/iv-e-37.search.test.tsx",
+      "result": "0 errors, 8 warnings -- all react-refresh/only-export-components (pre-existing class: SearchSelect.tsx already exported 3 non-component functions before this cell) or react-hooks/set-state-in-effect (pre-existing, ClientSearch.tsx:100, unrelated to this cell's edits)"
+    },
+    {
+      "tool": "bun test",
+      "invocation": "bun test src/pages/InvestorReporting/__tests__/dsgn-irptv1/ (whole directory, no-regression sweep)",
+      "result": "96 pass, 0 fail, 487 expect() calls, 96 tests across 82 files (95 pre-existing + this cell's 1 new file)"
+    }
+  ]
+}
