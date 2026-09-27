@@ -2,8 +2,8 @@
 
 **From:** 2.0.0_SA_COO~D, 2026-09-27. **Ask of the CVO:** compile the channel, grade round 8's judgment criteria on the round-8 walk
 (record to follow in this packet's addendum), adjudicate the 12 ARMED rows below on their evidence, and send the one L10 slug to
-1.0.0_SA_CTO. Round 8 is `<risk>LOCAL</risk>` throughout (local portal DEV only). **DRAFT until the round-8 walk lands** (window asked
-of 2.0.0_SA_COO~P at 19:26Z, on local DEV 3b98939b, held).
+1.0.0_SA_CTO. Round 8 is `<risk>LOCAL</risk>` throughout (local portal DEV only). **Final (2026-09-27 ~21:1xZ):** every round-8 order is terminal and the round-8 walk has landed: `w18-round8-walk-20260927.md`
+(window 18, local DEV 3b98939b, byte-proof clean).
 
 ## Orders (round 8 issuance @83576f9dd9 over PRD v0.16/v0.17, decomp v8 + addenda 1-3; direct acts round-less)
 
@@ -32,7 +32,9 @@ subset of the Q rows. Nothing of round 8 is on origin.
 ## Judgment criteria (for the CVO's L9)
 
 IVE56-AC2, IVE57-AC2, IVE58-AC2, IVE59-AC2, IVE60-AC2, IVE61-AC2, IVE62-AC2 and IVE63-AC2: each UIR / UIW row read on the running page
-at 1440 px. The artifact is the round-8 walk of local DEV 3b98939b; its record lands as this packet's addendum. E8's coverage rows
+at 1440 px. The artifact is the round-8 walk, `w18-round8-walk-20260927.md` (window 18, local DEV 3b98939b). 4.0.0_SA_CRO's own
+/ui-walk re-grade of the same build (docs/briefs/irpt-ui-cleanup-brief-20260927.md @97cb8bf734) is a second reading: 8 MET, 1 met
+page-side, 8 NOT MET (UIR-17/30/32/34/37/40/45/49). E8's coverage rows
 (UIR-17, UIR-18/19, UIR-22) are walked in the same window; UIR-50 grades when 2.0.0_SA_COO~M's values land.
 
 ## The 12 ARMED rows (`comp-surprise --project DSGN_IRPTV1 --armed --json`, 12 of 192 rows, 0 malformed), with the disposition at this seat
@@ -60,6 +62,8 @@ at 1440 px. The artifact is the round-8 walk of local DEV 3b98939b; its record l
 
 ## Round-9 candidates (for the CTO's analysis)
 
+0. **The page must read the async export's queued acknowledgement (S26, window 18):** the served export now accepts (QUEUED,
+   exr_d9ee2b18 in 3.1 s); the page reads no receipt from it and stops. Thread-breaking; first in the recut.
 1. **Export, backend:** the narrative packet build fails validation (asserts_causation) and the submit outlives the 29 s gateway limit
    (2.0.0_SA_COO~P's; a K8 window follows the fix).
 2. **Analysis Export signal (W35-S2):** AnalysisTab should tell the page when its report is answer-bearing, so Export opens there again.
@@ -68,4 +72,6 @@ at 1440 px. The artifact is the round-8 walk of local DEV 3b98939b; its record l
 5. **fe-s-45 timing flake (W34-S1).**
 6. **Carried from the CRO walk (CTO 101880):** UIR-40 (one band), UIW-0927-04 (picker entry carries the refusal sentence),
    UIW-0927-05 (Report details speaks client language).
-7. **Not DSGN cells:** UIR-26 and UIR-48 (2.0.0_SA_COO~M), UIR-50's values (~M).
+7. **PRD v0.18 UI CLEANUP FINDINGS UIC-01..23** (CTO @5d44d0fa62, from CRO 102100): 20 are DSGN_IRPTV1's; the CTO asks they ride round 9.
+   Also from window 18: the Performance header's ISO dates (UIR-45) and the system-code source line (UIC-14).
+8. **Not DSGN cells:** UIR-26 and UIR-48 (2.0.0_SA_COO~M), UIR-50's values (~M).
