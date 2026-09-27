@@ -206,3 +206,41 @@ latent one" is a different claim, and only the pandas version settles it.
 to get it out of `opal-assets-silver-etf` by invoking it: `lambda_entry` accepts only an S3-event shape or
 `{"mode": "sweep"}`-style sweep mode and refuses anything else by design, so there is no version echo to
 call, and an S3-shaped payload would DO CONVERSION WORK rather than answer a question.
+
+---
+
+## 9. PRE-DEPLOY BASELINE for `s8.AC1` -- captured 2026-09-27T09:1xZ, BEFORE MX-s-8 lands
+
+A baseline is only takeable before the act, so it is taken here. `s8.AC1` requires both fixes in **4 of 4**,
+and the cheapest way to catch a partial deploy is that **every one of these four values must MOVE**:
+
+| function | CodeSha256 (pre-MX-s-8) | LastModified |
+|---|---|---|
+| `opal-assets-silver-etf` | `ZyhzyrjuHLi9TfRC9CFSpvPHY6Rcyq/aPgseJafmuTg=` | 2026-09-26T09:26:39Z |
+| `opal-assets-silver-orion` | `rwI6QN5qzT30lWZrf87RlSOEl5XmSGkCTUTdlljqDPo=` | 2026-07-15T22:32:26Z |
+| `opal-assets-silver-eclipse` | `5hRkhhxIMZ2hiAqZWtfVtUnwXZt3xeKPnLryWOo5OJU=` | 2026-07-22T14:50:08Z |
+| `opal-assets-silver-blackdiamond` | `XiJ6ZADpVAwtJcRR4U0l/IhO4+eFfzost0Mz9fnTIJA=` | 2026-08-25T17:14:42Z |
+
+**Read at the same moment: the MX-s-8 deploy is NOT live.** All four still carry their pre-MX-s-8 bytes, so
+nothing in sections 1, 7 or 8 has been served yet and the 4-partition backfill stays gated. This table is
+the negative control for that statement, not a prediction.
+
+### The thing this table exists to catch
+
+**The four bundles are NOT in lockstep -- they are months apart** (2026-07-15, 07-22, 08-25, 09-26). Four
+different shas, four different vintages. Two consequences for the vendoring:
+
+1. **A partial deploy is the realistic failure, not a total one.** If one or two functions move and the
+   others do not, every symptom stays exactly as it is today for the unmoved ones, and the only tell is a
+   sha that did not change. Grade all four by this table, and print 4 of 4.
+2. **Section 5's "diff each copy against the source" will show pre-existing differences beyond the two
+   hunks**, because these copies were trimmed and vendored at different times (hence the guard sitting at
+   `:277`, `:275`, `:330`, `:330`). That is expected. The check is "the only NEW difference is the two
+   hunks", not "the copies become identical to the source".
+
+### Note on which functions the dailynav path actually needs
+
+The pathfinder / filepoint conversion runs in `opal-assets-silver-etf`. So the **backfill** in
+`PATHFINDER_DAILYNAV_GAP_CAUSE.md` section 8 is unblocked by that ONE function moving and serving both
+hunks -- but `s8.AC1` is the COO's criterion across all four, and the other three carry the same latent
+defect for their own sources. **Do not read "etf moved" as "MX-s-8 is complete."**
