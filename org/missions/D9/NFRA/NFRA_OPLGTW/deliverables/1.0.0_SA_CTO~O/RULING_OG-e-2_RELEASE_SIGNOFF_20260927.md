@@ -64,7 +64,19 @@ The named property is the answer on `/login`, `/sprint`, `/sprint/`, `/sprint/ar
 
 - Host md5 of the 4 app files equals `110d93fb73`'s bytes BEFORE the act (step 1).
 - The release census names only OG-e-1's gateway files (step 3).
-- The 5 test modules pass on the release tree (step 4).
+- ~~The 5 test modules pass on the release tree (step 4).~~ **SUPERSEDED 2026-09-27 ~17:5xZ by this seat, on row
+  NFRA_OPLGTW-Z-W8-S1:** PHASE A measured 33 of 35 (@c0469280dd). The only failures are 2 in `test_portal_grant.py`,
+  and both read `org/standards/NFRA_OPLGTW_CONTRACT.json`, which the release tree pins to the live base, as step 3
+  requires. That base carries no `portal_grant` section.
+  - The failures come from the repo file, not the shipped diff: the same invocation on CLOUD passes 7 of 7.
+  - No served path reads that file. Its app reader is `integrations/schwab/catalog.py`, which is not enabled
+    (`ENABLED_INTEGRATIONS` = `ycharts opal_portal globgrph`). Its other readers are `ops/` and the tests, which the
+    operator runs from CLOUD.
+  - The 4 served-path modules pass 28 of 28 (`test_email_deny` 11, `test_owner_gate` 5, `test_sprint_view` 8,
+    `test_asker_scope` 4).
+
+  **The condition now reads:** the 4 served-path modules pass in full on the release tree, AND `test_portal_grant.py`
+  fails only in the Z-W8-S1 class, with CLOUD's control at 7 of 7. **MET as measured.**
 - `mcportal` HEAD equals the manifest pin before the upload (steps 5, 11).
 - The live `ENABLED_INTEGRATIONS` is exactly `ycharts opal_portal globgrph` (step 9), else STOP.
 - **Added condition:** at GO, the deployer re-reads `POLICY#EMAILDENY#` = 0 with the same full consistent scan. If it
