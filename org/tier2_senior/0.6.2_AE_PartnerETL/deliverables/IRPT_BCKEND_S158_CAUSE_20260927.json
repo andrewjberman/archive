@@ -1,0 +1,175 @@
+{
+  "to_id": "IRPT_BCKEND.TO-IB-s158",
+  "row": "IRPT_BCKEND-S158",
+  "cell": "IB-sr-1",
+  "project": "IRPT_BCKEND",
+  "round": 19,
+  "author": "0.6.2_AE_PartnerETL~S",
+  "written_at": "2026-09-27T18:55:00Z",
+  "risk": "WORLD",
+  "ledger_slug": "irpt-bcknd-s158-cot-session-autologin",
+
+  "headline": "The session refresh is live again and the whole COT chain has run, but the per-day failure cause for 09-24..09-27 is UNMEASURABLE: the box's own logs were destroyed before this order was cut, and the failure did not reproduce once the log-on-failure fix was in place.",
+
+  "ac1_verdict": {
+    "state": "REFUSED_AS_WRITTEN",
+    "why": "AC1 requires one row per failed day carrying the log file name and the quoted failing line. Those logs no longer exist on any carrier, and the reproduction run SUCCEEDED, so no failing line can be quoted. Per the order's refusal clause the test was NOT weakened to pass: every failed_days row below carries an ABSENT cause, so the AC1 invocation prints MISSING, which is the true answer.",
+    "invocation_prints": "MISSING",
+    "what_would_make_it_measurable": "The next FAILED run of opal-cot-bd-session-fetch. Document version 5 (live since 2026-09-27T18:37:47.998Z) uploads the wrapper log to s3://opal-data-cot/logs/cot-exporter/session-fetch/ on the failure branch, so the very next failure names its own cause with a real file name and a quotable line."
+  },
+
+  "premise_correction": {
+    "order_asserts": "the box keeps /tmp/cot-session-autologin-*.log",
+    "world_is": "It does not. /tmp on i-0643a5bee8a8feabf is tmpfs (RAM-backed), so every wrapper log dies with the instance, and cot-bd-session-trigger starts the box per run while ec2-auto-shutdown-enforcer stops it at IDLE_CEILING_HOURS=3.0. Each failure log was therefore destroyed within hours of being written.",
+    "measured": [
+      "findmnt /tmp -> 'TARGET /tmp  SOURCE tmpfs  FSTYPE tmpfs  OPTIONS rw,nosuid,nodev,seclabel,nr_inodes=1048576'",
+      "df -h /tmp -> 'tmpfs 3.9G 0 3.9G 0% /tmp' (zero used)",
+      "ls /tmp/cot-session-autologin-*.log -> 'No such file or directory'; count 0 (measured 2026-09-27T18:20:12Z, box up 5 min)",
+      "ls /tmp/*.log -> 'No such file or directory' (no log of any kind survived)"
+    ],
+    "surprise_row": "IRPT_BCKEND-S164"
+  },
+
+  "absence_proof": {
+    "claim": "The 09-24..09-27 failure logs are unrecoverable from every carrier available to this seat.",
+    "claim_type": "measured",
+    "carriers_checked": 3,
+    "carriers": [
+      {
+        "carrier": "the box's /tmp (the wrapper's own log)",
+        "denominator": "0 files matching /tmp/cot-session-autologin-*.log; 0 files matching /tmp/*.log",
+        "result": "EMPTY -- tmpfs, destroyed on each stop"
+      },
+      {
+        "carrier": "s3://opal-data-cot/logs/cot-exporter/session-fetch/",
+        "denominator": "12 objects listed, newest cot-session-autologin-20260916-113031.log (2026-09-16T11:33:37Z)",
+        "result": "NOTHING for 09-24, 09-25, 09-26 or 09-27. The 09-16 object is the POSITIVE CONTROL: the upload path works when the run succeeds, so the empty result is a true absence and not a broken read."
+      },
+      {
+        "carrier": "the box's persistent SSM orchestration dirs, /var/lib/amazon/ssm/i-0643a5bee8a8feabf/document/orchestration/<command-id>/awsrunShellScript/RunBdSessionFetch/",
+        "denominator": "42 orchestration dirs present; all 4 failed command ids still present and read",
+        "result": "stdout EMPTY and stderr EMPTY in all 4 of 4. Consistent by construction: the wrapper's output was redirected into the tmpfs log, and set -e killed the shell before tail ever ran, so the step itself emitted nothing."
+      }
+    ],
+    "fourth_carrier_ruled_out": "bd_49f_auto_login.js can upload step screenshots to S3, but only when BD_DEBUG_SHOTS=1 (script line 434). grep -c BD_DEBUG_SHOTS /opt/bd-cot-auto-login/secret-ids.env -> 0. Prod saves none, so no screenshot exists for any failed day."
+  },
+
+  "structural_cause": {
+    "claim_type": "measured",
+    "one_line": "A non-zero wrapper exit under `set -e` aborted the step AT the wrapper line, so the log was never tailed and never uploaded -- the failure was structurally silent on every carrier.",
+    "detail": "ssm.tf line 49 ran `set -e`; line 65 ran `./run-bd-auto-login.sh > $LOG_FILE 2>&1` bare. Under set -e a non-zero exit terminates the shell immediately, so lines 66-69 (`EXIT_CODE=$?`, `tail -25`, `aws s3 cp`, `exit $EXIT_CODE`) were UNREACHABLE on the failure branch. `EXIT_CODE=$?` was dead code. The document still reported Failed with rc 1, which is why the failure was visible as a status and invisible as a reason.",
+    "deployed_bytes_confirmed_not_drift": "aws ssm get-document --name opal-cot-bd-session-fetch (876 bytes) was byte-identical to repo HEAD on this step before the change, so the deployed bytes carried the same dead code -- this was a defect in the build input, not drift away from it.",
+    "why_it_stayed_broken_4_days": {
+      "claim_type": "measured",
+      "text": "Nothing retried and nothing surfaced. The cot box carries no in-run login retry: /opt/bd-cot-auto-login/secret-ids.env (1200 bytes, md5 9b55e03c9575d4f6b58d1d239c8409fb) does NOT set BD_MAX_LOGIN_ATTEMPTS or BD_LOGIN_BACKOFF_MS, while the repo copy (1660 bytes, md5 3c4298378faa5811b7e0eaf7a192ca2c) does and marks them 'Inert until the new .js is box-deployed (CTO-gated)'. So one transient login failure = one lost day, four times over, with no log to read. NOT REMEDIATED HERE: the retry needs the newer .js, which is not in this order's grant.",
+      "surprise_row": "IRPT_BCKEND-S165"
+    }
+  },
+
+  "failed_days": [
+    {
+      "date": "2026-09-24",
+      "command_id": "c5ba78ce-74f7-4c33-b063-092bcbd899cd",
+      "requested_at": "2026-09-24T11:30:32.430Z",
+      "status": "Failed",
+      "response_code": 1,
+      "step_output": "\n----------ERROR-------\nfailed to run commands: exit status 1",
+      "log_file": null,
+      "quoted_failing_line": null,
+      "cause_claim": "absent",
+      "why_unmeasurable": "tmpfs log destroyed on the next instance stop; no S3 object; orchestration stdout and stderr both empty"
+    },
+    {
+      "date": "2026-09-25",
+      "command_id": "e990229f-f261-482d-878b-1ee63b17b6c9",
+      "requested_at": "2026-09-25T11:30:32.478Z",
+      "status": "Failed",
+      "response_code": 1,
+      "step_output": "\n----------ERROR-------\nfailed to run commands: exit status 1",
+      "log_file": null,
+      "quoted_failing_line": null,
+      "cause_claim": "absent",
+      "why_unmeasurable": "tmpfs log destroyed on the next instance stop; no S3 object; orchestration stdout and stderr both empty"
+    },
+    {
+      "date": "2026-09-26",
+      "command_id": "36166f00-518e-43fb-bf7a-ddebb7c487f4",
+      "requested_at": "2026-09-26T11:30:32.665Z",
+      "status": "Failed",
+      "response_code": 1,
+      "step_output": "\n----------ERROR-------\nfailed to run commands: exit status 1",
+      "log_file": null,
+      "quoted_failing_line": null,
+      "cause_claim": "absent",
+      "why_unmeasurable": "tmpfs log destroyed on the next instance stop; no S3 object; orchestration stdout and stderr both empty"
+    },
+    {
+      "date": "2026-09-27",
+      "command_id": "60650bfe-1836-448e-bd9e-aacff291acab",
+      "requested_at": "2026-09-27T11:30:32.404Z",
+      "status": "Failed",
+      "response_code": 1,
+      "step_output": "\n----------ERROR-------\nfailed to run commands: exit status 1",
+      "log_file": null,
+      "quoted_failing_line": null,
+      "cause_claim": "absent",
+      "why_unmeasurable": "tmpfs log destroyed on the next instance stop; no S3 object; orchestration stdout and stderr both empty"
+    }
+  ],
+
+  "reproduction": {
+    "intent": "Name the cause by reproducing the failure through the document once the log-on-failure fix was live -- never by hand. Vendor sign-in stayed document-only per 1.0.0_SA_CTO 101946 and 101977.",
+    "path": "aws lambda invoke --function-name cot-bd-session-trigger --payload '{\"mode\":\"session-refresh\"}' (the document's own existing trigger Lambda, exactly what the scheduler targets)",
+    "command_id": "cf7fdead-a0df-4024-b5a0-30d4974858db",
+    "started": "2026-09-27T18:40:53.956Z",
+    "ended": "2026-09-27T18:42:27.956Z",
+    "status": "Success",
+    "response_code": 0,
+    "outcome": "IT DID NOT REPRODUCE -- the run succeeded on the first attempt. So the 4-day failure was a TRANSIENT or cold-start-conditioned condition, not a standing defect in the wrapper or the login script. No cause was named, therefore no cause was fixed: nothing was changed inside the grant beyond the document step itself.",
+    "log_uploaded": "s3://opal-data-cot/logs/cot-exporter/session-fetch/cot-session-autologin-20260927-184053.log (1172 bytes, 2026-09-27T18:42:29Z) -- the fix proven on the branch it could be proven on",
+    "not_yet_exercised": "The FAILURE branch of the new step has not been exercised against a real failure. ABSENT is not EXERCISED-AGAINST: the next failed run is what proves it end to end, and the next scheduled cold-boot run (cron(30 7) America/New_York) is that test."
+  },
+
+  "what_changed": {
+    "commit": "de68b15717",
+    "file": "infra/aws/terraform/cot-pipeline/ssm.tf",
+    "document_version": 5,
+    "applied_at": "2026-09-27T18:37:47.998Z",
+    "plan": "0 to add, 1 to change, 0 to destroy (targeted)",
+    "live_readback": [
+      "EXIT_CODE=0",
+      "./run-bd-auto-login.sh > $LOG_FILE 2>&1 || EXIT_CODE=$?",
+      "tail -25 $LOG_FILE || true",
+      "aws s3 cp $LOG_FILE s3://opal-data-cot/logs/cot-exporter/session-fetch/$(basename $LOG_FILE) || true",
+      "exit $EXIT_CODE"
+    ],
+    "why_it_works": "The wrapper's failure now sits inside a `||` list, which set -e does not act on, so the captured code survives to the final exit. tail gained `|| true` so a missing log cannot re-abort before the upload -- the same class of bug being fixed.",
+    "blast_radius_preserved": "Document NAME unchanged and the step still exits non-zero on a failed run, so the cot-session-complete rule (pattern: document-name=opal-cot-bd-session-fetch AND status=Success, target cot-bd-session-trigger) still fires on Success only. Read from the live plane, not inferred."
+  },
+
+  "session_secret": {
+    "awscurrent_before": {"version_id": "e9259045-d182-42e9-ac0c-e03c090c9d8c", "created": "2026-09-16T11:33:35.346Z", "age_at_fix": "11 days"},
+    "awscurrent_after": {"version_id": "9da4e781-7f11-4cf0-b2dd-2980e56db1db", "created": "2026-09-27T18:42:27.771Z"},
+    "attribution": "The new version was written INSIDE the Success command's window (started 18:40:53.956Z, ended 18:42:27.956Z), so the AWSCURRENT move is attributable to that run and to no other writer."
+  },
+
+  "downstream": {
+    "note": "Reaching the Success fired the designed chain, which had been frozen since 09-24. This is the intended consequence of the session refresh, named here because it is live movement.",
+    "opal-cot-bronze-run": {"command_id": "590ed628-32de-4a2a-a8af-88481d418a9e", "status": "Success"},
+    "opal-cot-silver-run": {"command_id": "907f9f8e-ea34-4f65-9f68-7bb280a75b3e", "status": "Success"},
+    "opal-cot-gold-run": {"command_id": "4fad5c7a-ff19-4a7f-bffa-3518f370bdc8", "status": "Success", "response_code": 0, "note": "measured after the deliverable was first written; the full session->bronze->silver->gold chain is green"}
+  },
+
+  "deployed_bytes_audit": {
+    "method": "md5 of the RUNNING path on the box against the repo build input (rule 22a: never by filename)",
+    "run-bd-auto-login.sh": {"box": "a10ac98ada74e0539b987cb30c8fd979", "repo": "a10ac98ada74e0539b987cb30c8fd979", "verdict": "MATCH"},
+    "secret-ids.env": {"box": "9b55e03c9575d4f6b58d1d239c8409fb (1200 B)", "repo": "3c4298378faa5811b7e0eaf7a192ca2c (1660 B)", "verdict": "DIFFER -- the box lacks the CTO-gated BD_MAX_LOGIN_ATTEMPTS/BD_LOGIN_BACKOFF_MS block; see IRPT_BCKEND-S165. NOT changed by this order."},
+    "bd_49f_auto_login.js": {"box": "28dd27a054b826cc3a87f6b4498d3b5a (35049 B)", "repo_49f_tree": "15fd5ef95081ba1c06c334a2276d93b8 (46900 B)", "verdict": "DIFFER, but the box matches the hash secret-ids.env DECLARES canonical (28dd27a0). The cot deploy source infra/aws/ec2/bd-cot-auto-login/ contains no .js at all, so the running login script has no build input in the cot tree; see IRPT_BCKEND-S166. Out of this order's grant."}
+  },
+
+  "criteria": {
+    "IBS158-AC1": "REFUSED_AS_WRITTEN -- evidence destroyed before the order was cut and the failure did not reproduce; test not weakened",
+    "IBS158-AC2": "MET -- live document version 5 read back from AWS",
+    "IBS158-AC3": "MET -- AWSCURRENT 9da4e781 created 2026-09-27T18:42:27.771Z inside Success command cf7fdead's window"
+  }
+}

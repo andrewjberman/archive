@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-s158",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s158.cot-bd-session-autologin.md",
+    "group": "OTHER",
+    "vintage_commit": "de68b15717"
+  },
+  "assignee": "0.6.2_AE_PartnerETL~S",
+  "session_log": "org/tier2_senior/0.6.2_AE_PartnerETL/logs/2026-09-27/session_0.6.2_AE_PartnerETL~S_1745-1910Z_IRPT_BCKEND_TO-IB-s158_SESSION_AUTOLOGIN_LIVE_CAUSE_UNMEASURABLE.md",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/terraform/cot-pipeline/ssm.tf",
+      "kind": "terraform",
+      "commit_or_etag": "de68b15717",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "safe-apply of a SAVED targeted plan: 'Apply complete! Resources: 0 added, 1 changed, 0 destroyed.' comp-tagauthz gate PASSED, tombstone-gate CLEAN, zero override. LIVE read-back from AWS (not the repo): aws ssm get-document --name opal-cot-bd-session-fetch -> DefaultVersion 5, LatestVersion 5, Status Active, applied 2026-09-27T18:37:47.998Z; runCommand line 7 './run-bd-auto-login.sh > $LOG_FILE 2>&1 || EXIT_CODE=$?', line 8 'tail -25 $LOG_FILE || true', line 10 'exit $EXIT_CODE'.",
+      "introduces": [
+        "EXIT_CODE=0",
+        "|| EXIT_CODE=$?",
+        "tail -25 $LOG_FILE || true"
+      ]
+    },
+    {
+      "path_or_key": "org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND_S158_CAUSE_20260927.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "The AC1 deliverable. Carries the three-carrier absence proof with printed denominators, the measured structural cause, the four failed_days rows with an ABSENT cause each, and the reproduction record. Written to make the AC1 invocation print MISSING, which is the TRUE answer -- not dressed up to pass.",
+      "introduces": [
+        "ac1_verdict",
+        "absence_proof",
+        "structural_cause",
+        "failed_days"
+      ]
+    },
+    {
+      "path_or_key": "s3://opal-data-cot/logs/cot-exporter/session-fetch/cot-session-autologin-20260927-184053.log",
+      "kind": "s3_object",
+      "commit_or_etag": "1172-bytes-2026-09-27T18:42:29Z",
+      "deployed_state": "DEPLOYED-VERIFIED",
+      "deploy_evidence": "The first log the fixed document uploaded. head-object: ContentLength 1172, LastModified Sun, 27 Sep 2026 18:42:29 GMT. Proves the upload leg runs; it does NOT prove the FAILURE branch, which is declared unexercised below.",
+      "introduces": [
+        "cot-session-autologin-20260927-184053.log"
+      ],
+      "artifact_covered_by": [
+        "IBS158-AC2",
+        "IBS158-AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/surprise-channel/investigations/INVESTIGATION_v1.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Three rows appended (S164, S165, S166). The next free id was re-measured AT WRITE TIME because the channel is append-only and shared -- another seat had added S163 during this session.",
+      "introduces": [
+        "IRPT_BCKEND-S164",
+        "IRPT_BCKEND-S165",
+        "IRPT_BCKEND-S166"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "IBS158-AC1",
+      "criterion_verbatim": "the failure cause is named from the box's own log, one row per failed day, each with the log file name and the quoted failing line",
+      "method": "command",
+      "invocation": "python -c \"import json;d=json.load(open('C:/Users/AndrewBerman/Desktop/ajb_workspace/org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND_S158_CAUSE_20260927.json'));print('CAUSE-NAMED' if d.get('failed_days') and all(r.get('cause') for r in d['failed_days']) else 'MISSING')\"",
+      "output_evidence": "MISSING. The criterion is UNMEETABLE AS WRITTEN and the test was not weakened to pass. THREE independent carriers, each with a printed denominator: (1) the box's /tmp -- 0 files matching /tmp/cot-session-autologin-*.log and 0 matching /tmp/*.log, because /tmp is tmpfs (findmnt -> 'tmpfs tmpfs rw,nosuid,nodev,seclabel', df -h -> '3.9G 0 3.9G 0%') and cot-bd-session-trigger starts the box per run while ec2-auto-shutdown-enforcer stops it at IDLE_CEILING_HOURS=3.0; (2) s3://opal-data-cot/logs/cot-exporter/session-fetch/ -- 12 objects, newest 20260916-113031 (the last Success), NOTHING for 09-24/25/26/27, with that 09-16 object as the POSITIVE CONTROL that the upload path works on a Success so the gap is a true absence and not a broken read; (3) the box's PERSISTENT SSM orchestration dirs -- 42 present, all 4 failed command ids still there, stdout AND stderr EMPTY in 4 of 4, exactly as set -e aborting before tail predicts with the wrapper's output already redirected into the tmpfs log. A fourth carrier was ruled out: bd_49f_auto_login.js:434 gates screenshots behind BD_DEBUG_SHOTS=1 and grep -c on the box's secret-ids.env returns 0. The reproduction through the sanctioned path then SUCCEEDED (cf7fdead, rc 0), so no failing line exists to quote either.",
+      "denominator": "4 failed days of 4 required; 3 carriers checked of 3 available, plus 1 ruled out; 0 log artifacts recovered from any carrier",
+      "status": "FAIL",
+      "expect": "CAUSE-NAMED",
+      "status_reason": "REFUSED AS WRITTEN per the order's refusal clause, not failed through inaction. The order's build step 1 asserts 'the box keeps /tmp/cot-session-autologin-*.log'; that premise is false and the evidence was already destroyed when the order was cut (recorded as IRPT_BCKEND-S164). What IS measured and named is the STRUCTURAL cause: set -e at ssm.tf:49 aborted the step AT the wrapper line, so EXIT_CODE=$?, tail and the S3 upload were unreachable -- the failure was structurally silent. The order's own fix is what makes this criterion answerable next time: document version 5 uploads the log on the FAILURE branch, so the next failed run names its own cause with a real file name and a quotable line."
+    },
+    {
+      "criterion_id": "IBS158-AC2",
+      "criterion_verbatim": "the LIVE document uploads its log on failure (read from AWS, not from the repo)",
+      "method": "live_read",
+      "invocation": "aws ssm get-document --name opal-cot-bd-session-fetch --query Content --output text",
+      "output_evidence": "Read from the LIVE plane, DefaultVersion 5 == LatestVersion 5, Status Active. The step's 10 runCommand lines: 'set -e' / 'export HOME=/root' / 'export PATH=...' / 'cd /opt/bd-cot-auto-login' / 'LOG_FILE=/tmp/cot-session-autologin-$(date +%Y%m%d-%H%M%S).log' / 'EXIT_CODE=0' / './run-bd-auto-login.sh > $LOG_FILE 2>&1 || EXIT_CODE=$?' / 'tail -25 $LOG_FILE || true' / 'aws s3 cp $LOG_FILE s3://opal-data-cot/logs/cot-exporter/session-fetch/$(basename $LOG_FILE) || true' / 'exit $EXIT_CODE'. The wrapper's failure now sits inside a || list, which set -e does not act on, so the captured code survives to the final exit; tail gained || true so a missing log cannot re-abort before the upload. BASELINE for the delta, read before the change: the live document was byte-identical to repo HEAD at 876 bytes, so this was a defect in the build input and not drift away from it.",
+      "denominator": "10 runCommand lines read from the live document; 3 changed of 10, 7 byte-identical to the pre-change baseline",
+      "status": "PASS",
+      "expect": "\\|\\| EXIT_CODE=\\$\\?",
+      "status_reason": "Graded on the SERVED artifact, never on the repo or on terraform's own success claim. NAME-PRESERVATION verified against the live consumer rather than assumed: aws events describe-rule cot-session-complete returns pattern {document-name:[opal-cot-bd-session-fetch], status:[Success]}, target cot-bd-session-trigger -- the document name is unchanged and the step still exits non-zero on a failed run, so that rule still fires on Success only."
+    },
+    {
+      "criterion_id": "IBS158-AC3",
+      "criterion_verbatim": "one Success of the document that moves the session secret's AWSCURRENT",
+      "method": "live_read",
+      "invocation": "aws secretsmanager list-secret-version-ids --secret-id blackdiamond/cot/session --query \"Versions[?contains(VersionStages,'AWSCURRENT')].CreatedDate\" --output text",
+      "output_evidence": "AWSCURRENT MOVED: was e9259045-d182-42e9-ac0c-e03c090c9d8c created 2026-09-16T11:33:35.346Z (11 days stale); is 9da4e781-7f11-4cf0-b2dd-2980e56db1db created 2026-09-27T18:42:27.771Z, later than the 17:00:00Z bar. SECOND LEG of the criterion's expectation ('with one opal-cot-bd-session-fetch command Status Success at or before it'), read with a SEPARATE call recorded here rather than appended to the invocation above: aws ssm get-command-invocation --command-id cf7fdead-a0df-4024-b5a0-30d4974858db --instance-id i-0643a5bee8a8feabf -> Status Success, ResponseCode 0, ExecutionStartDateTime 2026-09-27T18:40:53.956Z, ExecutionEndDateTime 2026-09-27T18:42:27.956Z. The secret write at 18:42:27.771Z falls INSIDE that window, so the move is attributable to that run and to no other writer. The run's own stdout ends '[bd-auto-login] OK: fresh .bd.identity written to SM (blackdiamond/cot/session) + device-trust=present(bd_DeviceRegistration)' then '[orchestrator] cot BD auto-login exit rc=0'. FIRED THROUGH THE SANCTIONED PATH ONLY: aws lambda invoke --function-name cot-bd-session-trigger --payload {\"mode\":\"session-refresh\"}, the document's own existing trigger Lambda and exactly what cot-bd-session-daily-et targets. No hand sign-in; no other path wrote the secret.",
+      "denominator": "1 Success of 1 required; 1 AWSCURRENT move of 1 required; 1 writer identified of 1",
+      "status": "PASS",
+      "expect": "9da4e781-7f11-4cf0-b2dd-2980e56db1db",
+      "status_reason": "The downstream consequence is named rather than left implicit: the Success fired cot-session-complete -> cot-bd-session-trigger and the whole chain that had been frozen since 09-24 then ran green -- opal-cot-bronze-run 590ed628 Success, opal-cot-silver-run 907f9f8e Success, opal-cot-gold-run 4fad5c7a Success rc 0. That is the designed behavior of a session refresh and the actual point of the row, but it is live movement and is therefore reported, not assumed."
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "The arm everything rests on is AC1's ABSENCE claim -- a zero from a read that is silently mis-scoped is indistinguishable from a true absence. So the absence was probed against a POSITIVE CONTROL rather than asserted from an empty listing: the same S3 prefix read that returns nothing for 09-24..09-27 was required to return the 09-16 object, and the same orchestration-dir read that returns empty stdout for the 4 failed commands was run against a directory listing that had to enumerate those 4 command ids. Separately, the non-ASCII rule was mutant-checked by counting characters at HEAD and in the worktree rather than trusting the edit.",
+      "expected": "If the instrument were blind, the 09-16 object would also read absent and the 4 failed command ids would also fail to enumerate. If the edit had introduced non-ASCII, the worktree count would exceed HEAD's 18.",
+      "observed": "The 09-16 object READ PRESENT (1136-1172 byte logs, 12 objects listed with timestamps) while 09-24..09-27 read absent -- so the zero DISCRIMINATES. The orchestration listing enumerated 42 dirs INCLUDING all 4 failed command ids, whose stdout and stderr were then empty -- so the empty is the content, not a missing path. Non-ASCII: HEAD 18 chars, worktree 18 chars, delta 0. Positive control on the git-show read itself: 23224 bytes returned, not clean-empty, so the ABSENT verdict is not a path-mangle artifact.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The live document was read twice by two different queries (get-document Content, and describe-document for the version/status) and the change was independently confirmed by a third instrument: the plan JSON's own before/after runCommand arrays. The AWSCURRENT move was read before the act and after it, and cross-checked against the command invocation's start/end window rather than against wall-clock proximity. Deployed bytes on the box were compared by md5 against the repo build input, never by filename or mtime.",
+      "observed": "All three reads of the document agree on the same 10 lines and on version 5. The pre-act plan JSON's 'after' array is byte-for-byte what the post-apply live read returns. AWSCURRENT before/after differ exactly once and the new CreatedDate falls inside the Success window. md5: run-bd-auto-login.sh box a10ac98ada74e0539b987cb30c8fd979 == repo a10ac98ada74e0539b987cb30c8fd979 (MATCH); secret-ids.env and bd_49f_auto_login.js DIFFER and are recorded as S165 and S166 rather than silently reconciled.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "reproducing the failure by stopping the box and re-firing from a cold boot -- the one experiment that would have named the per-day cause",
+      "reason": "The discriminator between the 4 failed runs and my successful one is that each failure ran on a box the trigger Lambda had started SECONDS earlier (StartInstances 11:30:16Z, command requested 11:30:32Z) while mine ran on a box warm for ~25 minutes. Testing that needs a stop, and CLAUDE.md Agent Autonomy puts stopping EC2 behind human confirmation. NOT DONE, and deliberately not asked as a blocking question: the next scheduled run at cron(30 7) America/New_York IS that cold-boot test, and it now runs with the log-on-failure document in place, so the evidence arrives without spending Andrew's word. Named here so the cold-start hypothesis is not mistaken for a measured cause -- it is neither measured nor recorded as one."
+    },
+    {
+      "item": "running ./run-bd-auto-login.sh directly on the box via AWS-RunShellScript to capture the failure faster",
+      "reason": "FORBIDDEN BY THE ORDER and correctly so: 'Vendor sign-in: ONLY through the document (1.0.0_SA_CTO 101946, 101977). Nobody signs in by hand, and no other path writes the session secret.' It would have been the fastest route to a log and was not taken. Every vendor sign-in in this session went through opal-cot-bd-session-fetch via its own trigger Lambda."
+    },
+    {
+      "item": "deploying BD_MAX_LOGIN_ATTEMPTS / BD_LOGIN_BACKOFF_MS to the box's secret-ids.env, although that file IS in this order's <paths>",
+      "reason": "The absent in-run retry is the reason a 1-day glitch became an 11-day-stale session, so the temptation to fix it here is real. Not done for two reasons: no cause was NAMED, so there is no named cause to fix, and the repo's own comment makes the retry CTO-gated -- 'Inert until the new .js is box-deployed (CTO-gated)' -- with the newer bd_49f_auto_login.js outside this order's grant. Adding env vars the running 28dd27a0 .js ignores would be inert at best and a false reassurance at worst. Surfaced as IRPT_BCKEND-S165 with disarm_owner 1.0.0_SA_CTO."
+    },
+    {
+      "item": "reconciling the cot login script's missing build input",
+      "reason": "infra/aws/ec2/bd-cot-auto-login/ contains no .js at all, so a future S3->box redeploy from the directory the order names as the deploy source could not reproduce the running login script. Out of the <paths> grant and an ownership question, not an executor's call. Recorded as IRPT_BCKEND-S166 with no drift verdict asserted -- the box's bytes match the hash secret-ids.env itself declares canonical (28dd27a0)."
+    },
+    {
+      "item": "L4 of the deploy ledger (ec2-baked-asset: the named cause fixed and S3->box deployed)",
+      "reason": "Declared VACATED, not quietly dropped. The leg was opened before the first write because a WORLD act requires its complete manifest up front; it became inapplicable when the reproduction succeeded and no cause was named. Nothing was deployed to the box in this session: the wrapper's md5 on the box already MATCHES the repo build input exactly, so there was nothing to push even if a cause had been found there."
+    },
+    {
+      "item": "the row id grammar the order prescribes",
+      "reason": "The order asks for surprise rows id'd IRPT_BCKEND-S158-S<k>, which the gate's own schema REFUSES: investigation_item.schema.json pins id to ^[A-Z0-9_]+-(Z-)?(W[0-9]+-|C-)?S[0-9]+$, and S158-S1 does not match. The channel's documented seat grammar IRPT_BCKEND-S<k> was used instead (S164-S166) so the rows are admissible. Flagged for the issuer rather than worked around silently."
+    }
+  ],
+  "surprises": [
+    "IRPT_BCKEND-S164: the order's build step 1 rests on a false premise -- the box does NOT keep /tmp/cot-session-autologin-*.log. /tmp is tmpfs, the trigger Lambda starts the box per run and ec2-auto-shutdown-enforcer stops it at IDLE_CEILING_HOURS=3.0, so the 09-24..09-27 logs were destroyed before the order was cut. Proven absent on three carriers with printed denominators plus a positive control. OBSERVATION, INERT, GRADUATED into the log-on-failure fix this order already asked for.",
+    "IRPT_BCKEND-S165: the cot box carries NO in-run login retry -- /opt/bd-cot-auto-login/secret-ids.env (md5 9b55e03c, 1200 B) sets neither BD_MAX_LOGIN_ATTEMPTS nor BD_LOGIN_BACKOFF_MS, while the repo copy (md5 3c429837, 1660 B) sets both and marks them CTO-gated. One transient login failure is therefore terminal for the day and silent, which is how a 1-day glitch became an 11-day-stale session. OBSERVATION, ARMED, disarm_owner 1.0.0_SA_CTO; named, not remediated, because the retry needs a .js outside this grant.",
+    "IRPT_BCKEND-S166: the login script the box actually runs has no build input in the cot tree -- infra/aws/ec2/bd-cot-auto-login/ holds only the wrapper and the env file, and the running bd_49f_auto_login.js (28dd27a0, 35049 B) does not match the repo's 49F copy (15fd5ef9, 46900 B). The box DOES match the hash secret-ids.env declares canonical, so this is a versioning gap, not proven drift. OBSERVATION, ARMED, disarm_owner 1.0.0_SA_CTO."
+  ],
+  "compiler_tools": [
+    {
+      "tool": "comp-blast",
+      "invocation": "comp-blast opal-cot-bd-session-fetch",
+      "result": "Ran the rule-20 dependency-graph read before the infra change, QUERY not rebuild, provenance header read: served projection built 2026-09-27T12:17:16Z, 28526 nodes / 61180 edges. ANSWER-STATE PRESENT_WITH_ZERO_RESULTS -- and it says so itself: 'no EXTRACTED edge -- NOT provably zero'. So it did NOT clear the blast radius and was not treated as if it had. The real control was a live read of the one consumer: aws events describe-rule cot-session-complete. Worth recording because the pre-commit risk reflex ALSO could not clear this diff -- its danger map was 73.3h STALE and printed 'ANSWER STATE: PARTIAL_OR_BLIND / could not check is NOT checked clean'."
+    },
+    {
+      "tool": "comp-read",
+      "invocation": "comp-read .tools/safe-commit.sh --for '<does it commit only the paths after -- or the whole index>' ; comp-read infra/aws/ec2/bd-49f-auto-login/bd_49f_auto_login.js --enumerate 'screenshot|trace|s3://|window_seconds'",
+      "result": "DECIDED A LANE QUESTION AND CLOSED A CARRIER. The safe-commit read located line 1078's 'git commit --only' plus its lock, which is what established that a commit in the shared tree cannot sweep another seat's already-staged files -- the index held another seat's staged INVESTIGATION_v1.md at the time. The .js enumerate (11 hits / 604 lines) found the S3 screenshot uploader and, decisively, that line 434 gates it behind BD_DEBUG_SHOTS=1 -- which ruled out the fourth possible carrier of the lost evidence instead of leaving it as an untested maybe."
+    },
+    {
+      "tool": "comp-find",
+      "invocation": "comp-find 'screenshot|trace\\.zip|putObject' --files --limit 25 -- infra/aws/ec2/ ; comp-find 'proof_of_spec' --files --limit 20 -- org/standards/",
+      "result": "Located the canonical login script off a printed denominator (343 hits / 464 files scanned, 148 ephemeral-floor and 124 binary declared unsearched) rather than guessing its path -- which is how the cot tree's MISSING .js became visible at all (S166). ONE FAILURE MODE WORTH LOGGING: an earlier comp-find over the whole repo for the instance id exceeded the 120s foreground budget and had to be backgrounded; scoping the census with a pathspec is what made it answer in seconds."
+    },
+    {
+      "tool": "comp-schedule / live scheduler read",
+      "invocation": "aws scheduler list-schedules ; aws scheduler get-schedule --name cot-bd-session-daily-et ; aws lambda get-function-configuration --function-name ec2-auto-shutdown-enforcer",
+      "result": "Established the operating envelope BEFORE acting rather than discovering it mid-deploy. cot-bd-session-daily-et ENABLED, cron(30 7) America/New_York, target cot-bd-session-trigger with Input {\"mode\":\"session-refresh\"} -- which is the sanctioned fire path this session used. The enforcer read (MAX_RUNTIME_HOURS=0, IDLE_CEILING_HOURS=3.0, IDLE_CPU_THRESHOLD=1.0) is what proved a box started for diagnosis would not be stopped out from under the work, and it is half the mechanism behind the tmpfs finding."
+    },
+    {
+      "tool": "deploy_ledger.py",
+      "invocation": "open --slug irpt-bcknd-s158-cot-session-autologin (5 legs, window 6h) ; close-leg L1/L2/L3/L5 ; L4 vacated",
+      "result": "NEVER-law compliance: the complete 5-leg manifest was declared at deploy-START, before the first live act, so the leg that turned out to be inapplicable (L4, the box deploy of a cause-fix that never got named) had to be dispositioned explicitly instead of forgotten. The tool also printed the required commit pathspec for its own sentinel pair, which is what kept the OPEN state from being destroyed by the shared-tree commit."
+    },
+    {
+      "tool": "comp-tool rail (gates fired on me)",
+      "invocation": "three census-into-head/tail pipes (comp-find --files | head, comp-find | tail, comp-read --for | head)",
+      "result": "GATED THREE TIMES, every one correct -- my own habit of reaching for a pager on a census tool, which erases the denominator the tool exists to print. Each was re-run with the tool's native --limit / --files instead. The rail's WHOLE-CALL abort did not bite here because each gated read was its own call, which is the discipline CLAUDE.md Rule 21 prescribes for exactly this reason."
+    },
+    {
+      "tool": "proof-of-spec-check.py",
+      "invocation": "python .tools/proof-of-spec-check.py org/tier2_senior/0.6.2_AE_PartnerETL/deliverables/IRPT_BCKEND.TO-IB-s158.proof_of_spec.json IBS158-AC1,IBS158-AC2,IBS158-AC3",
+      "result": "The authority on this instance, run BEFORE any status flip as the face requires. First bare invocation graded the wrong object and returned INVALID rc=1 with 13 schema violations, which is what forced reading a known-valid instance rather than inventing the shape -- and surfaced that `expect` is regex-matched against output_evidence, so a prose bar can never match."
+    }
+  ],
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP.md",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-s158.cot-bd-session-autologin.md",
+    "vintage_commit": "92b05b0a8d"
+  }
+}
