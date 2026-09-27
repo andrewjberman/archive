@@ -20,7 +20,7 @@
       "kind": "script",
       "commit_or_etag": "06eff3b73f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git diff --stat: 42 lines changed. email_deny_key(email), the email_deny POLICY record type, and operator_transact relaxed to the principal's partition plus at most email_deny puts. No AWS call, no deploy (task order bound).",
+      "deploy_evidence": "git diff --stat: 42 lines changed. email_deny_key(email), the email_deny POLICY record type, and operator_transact relaxed to the principal's partition plus at most email_deny puts. No AWS call, no deploy (task order bound). Unchanged by AMENDMENT A1.",
       "artifact_covered_by": [
         "AC1",
         "AC2"
@@ -31,7 +31,7 @@
       "kind": "script",
       "commit_or_etag": "06eff3b73f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git diff --stat: 17 lines added. email_denial(email, store) -- 403/503/None.",
+      "deploy_evidence": "git diff --stat: 17 lines added. email_denial(email, store) -- 403/503/None. Unchanged by AMENDMENT A1.",
       "artifact_covered_by": [
         "AC1",
         "AC2"
@@ -42,7 +42,7 @@
       "kind": "script",
       "commit_or_etag": "06eff3b73f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git diff --stat: 41 lines added. _email_denied() helper (thread-pooled, budgeted); the GuardMiddleware hook right after enforce(email) covering /login + the 4 /sprint* routes; the legacy /callback pre-redeem_consent check and its EmailDenied handler.",
+      "deploy_evidence": "git diff --stat: 41 lines added. _email_denied() helper (thread-pooled, budgeted); the GuardMiddleware hook right after enforce(email) covering /login + the 4 /sprint* routes; the legacy /callback pre-redeem_consent check and its EmailDenied handler. Unchanged by AMENDMENT A1.",
       "artifact_covered_by": [
         "AC1",
         "AC2"
@@ -53,7 +53,7 @@
       "kind": "script",
       "commit_or_etag": "06eff3b73f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git diff --stat: 22 lines changed. EmailDenied exception; redeem_consent's second check on the validated principal's email, after validation and before either cache write.",
+      "deploy_evidence": "git diff --stat: 22 lines changed. EmailDenied exception; redeem_consent's second check on the validated principal's email, after validation and before either cache write. Unchanged by AMENDMENT A1.",
       "artifact_covered_by": [
         "AC1",
         "AC2"
@@ -62,9 +62,9 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/ops/schwab_entitlement_admin.py",
       "kind": "script",
-      "commit_or_etag": "06eff3b73f",
+      "commit_or_etag": "744e4468e1",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git diff --stat: 90 lines changed. Plan.deny_emails, _candidate_deny_emails/_stored_profile_email, _deny_put_op, activate()'s deny put in the single transaction, deny_backfill() one-shot mode, and the deny-backfill CLI subcommand with --tid/--oid/--email(repeatable)/--approver/--source-authorization.",
+      "deploy_evidence": "Base (06eff3b73f): 90 lines changed -- Plan.deny_emails, _candidate_deny_emails/_stored_profile_email, _deny_put_op, activate()'s deny put in the single transaction, deny_backfill() one-shot mode, and the deny-backfill CLI subcommand. AMENDMENT A1 (744e4468e1): git diff --stat 12 lines changed against 06eff3b73f -- prepare() now raises CandidateRejected (never returns a Plan) when the candidate supplies no email/emails AND the stored profile carries none; the silent no-deny path (deny_emails=()) is removed. Nothing written on refusal (activate() is never reached).",
       "artifact_covered_by": [
         "AC1",
         "AC3"
@@ -73,9 +73,9 @@
     {
       "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_email_deny.py",
       "kind": "test",
-      "commit_or_etag": "06eff3b73f",
+      "commit_or_etag": "744e4468e1",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "New file, 332 lines, exactly 10 tests, no moto: an in-memory _FakeTable stub, AccessState(client=stub), and app.server.app in a Starlette TestClient with the ALB identity stubbed (test_owner_gate.py's pattern).",
+      "deploy_evidence": "Base (06eff3b73f): new file, 332 lines, exactly 10 tests, no moto. AMENDMENT A1 (744e4468e1): git diff --stat 26 lines changed against 06eff3b73f -- adds test_activate_refuses_with_no_resolvable_email (the 11th test): a fresh tid/oid with no candidate email and no stored profile raises CandidateRejected from sea.prepare(), and asserts the fake table's items dict is empty and no put_item/transact_write_items call was made. File now 350 lines, 11 tests total.",
       "artifact_covered_by": [
         "AC1"
       ]
@@ -85,7 +85,17 @@
       "kind": "test",
       "commit_or_etag": "06eff3b73f",
       "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
-      "deploy_evidence": "git diff --stat: 13 lines added. A _NoDenyClient stub wired as acs._default so /sprint's new table read passes through not-denied; no existing assertion weakened.",
+      "deploy_evidence": "git diff --stat: 13 lines added. A _NoDenyClient stub wired as acs._default so /sprint's new table read passes through not-denied; no existing assertion weakened. Unchanged by AMENDMENT A1.",
+      "artifact_covered_by": [
+        "AC2"
+      ]
+    },
+    {
+      "path_or_key": "infra/aws/ec2/opal-gateway/tests/test_portal_grant.py",
+      "kind": "test",
+      "commit_or_etag": "744e4468e1",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "AMENDMENT A1 (744e4468e1): git diff --stat 13 lines changed against the pre-amendment CLOUD-merged base -- _candidate()'s fixture email moves from 'asker@opalinvest.com' to the module-level _SYNTHETIC_EMAIL = 'synthetic.user@example.test' (RFC 2606 reserved domain, never a real address); the Schwab-only candidate built inline in test_admin_accepts_portal_only_candidate (previously carrying no 'email' key at all) now gets the same synthetic email, since prepare() now refuses an email-less candidate with no stored profile. test_admin_accepts_portal_only_candidate and every other test in the file keep passing with every existing assertion intact (none weakened).",
       "artifact_covered_by": [
         "AC2"
       ]
@@ -94,11 +104,11 @@
   "acceptance": [
     {
       "criterion_id": "AC1",
-      "criterion_verbatim": "10 passed -- RESULT: PASS -- exit=0",
+      "criterion_verbatim": "11 passed -- RESULT: PASS -- exit=0",
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/ek.AC1.sh; echo \"exit=$?\"",
-      "output_evidence": "10 passed, 1 warning in 0.90s\nRESULT: PASS\nexit=0",
-      "denominator": "10 of 10 new tests in tests/test_email_deny.py passed, 0 failed, 0 errored",
+      "output_evidence": "11 passed, 1 warning in 0.78s\nRESULT: PASS\nexit=0",
+      "denominator": "11 of 11 tests in tests/test_email_deny.py passed, 0 failed, 0 errored (AMENDMENT A1: 10 -> 11, the 11th being test_activate_refuses_with_no_resolvable_email)",
       "status": "PASS"
     },
     {
@@ -107,7 +117,7 @@
       "method": "command",
       "invocation": "bash org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/ek.AC2.sh; echo \"exit=$?\"",
       "output_evidence": "24 passed, 1 warning in 1.17s\nRESULT: PASS\nexit=0",
-      "denominator": "24 of 24 tests passed across tests/test_owner_gate.py, tests/test_portal_grant.py, tests/test_sprint_view.py, tests/test_asker_scope.py (the issuer's own recorded base value); 0 failed",
+      "denominator": "24 of 24 tests passed across tests/test_owner_gate.py, tests/test_portal_grant.py, tests/test_sprint_view.py, tests/test_asker_scope.py (the issuer's own recorded base value, unmoved by AMENDMENT A1); 0 failed",
       "status": "PASS"
     },
     {
@@ -122,13 +132,13 @@
   ],
   "controls": {
     "mutant": {
-      "description": "The issuer's own dry-run at base (task order ISSUER NOTES, CLOUD @2ae58221ab+) is the negative arm: AC1 FAIL (\"no tests ran\": tests/test_email_deny.py did not exist), AC2 PASS at 24 (the pre-existing base value), AC3 FAIL (rc=2, flags missing 5 of 5: no deny-backfill subcommand existed).",
-      "expected": "Base bytes: AC1 FAIL, AC2 PASS (unaffected -- nothing built yet), AC3 FAIL. Built bytes (this commit): AC1 PASS, AC2 still PASS (>= its base value), AC3 PASS.",
-      "observed": "Base (issuer dry-run, recorded in the task order): AC1 FAIL, AC2 PASS 24, AC3 FAIL rc=2 missing=5. This commit (06eff3b73f): AC1 PASS 10/10, AC2 PASS 24/24 (equal to base, not merely >=), AC3 PASS missing=0/5. The email-deny build (and only it) moves AC1 and AC3; AC2 (the pre-existing regression set) is unmoved, which is the expected control on a BUILD-only cell that must not regress adjacent behavior.",
+      "description": "The issuer's own dry-run at base (task order ISSUER NOTES, CLOUD @2ae58221ab+) is the negative arm: AC1 FAIL (\"no tests ran\": tests/test_email_deny.py did not exist), AC2 PASS at 24 (the pre-existing base value), AC3 FAIL (rc=2, flags missing 5 of 5: no deny-backfill subcommand existed). AMENDMENT A1 adds a second negative arm: the pre-amendment build (06eff3b73f) had prepare() silently return an empty-deny Plan on a no-email candidate (row Z-W7-S1) -- the 11th test now added would have FAILED against those bytes (no CandidateRejected raised).",
+      "expected": "Base bytes: AC1 FAIL, AC2 PASS (unaffected -- nothing built yet), AC3 FAIL. Pre-amendment built bytes (06eff3b73f): AC1 read 10 passed (the amended check script now names 11, so it would FAIL against those bytes -- the silent no-deny path never raised CandidateRejected). Post-amendment built bytes (744e4468e1, this commit): AC1 PASS 11/11, AC2 still PASS 24/24 (equal to base, not merely >=), AC3 PASS missing=0/5.",
+      "observed": "This commit (744e4468e1): AC1 PASS 11/11, AC2 PASS 24/24 (unmoved), AC3 PASS missing=0/5. The A1 refusal (and only it) moves AC1's bar 10->11 and its passing count with it; AC2 (the pre-existing regression set, now including test_portal_grant.py's two candidate builds that needed the synthetic email) stayed at its base value of 24, the expected control on a BUILD-only cell that must not regress adjacent behavior.",
       "status": "FIRED-AS-EXPECTED"
     },
     "determinism": {
-      "method": "Each of AC1/AC2/AC3 was run twice from this worktree after the commit (once during the build, once for this record), with no intervening change.",
+      "method": "Each of AC1/AC2/AC3 was run twice from this worktree after the AMENDMENT A1 commit (744e4468e1): once immediately after committing, once for this record.",
       "observed": "Both runs of each criterion returned identical pass counts and exit=0; no flakiness observed.",
       "status": "STABLE"
     }
@@ -148,7 +158,11 @@
     },
     {
       "item": "The task order's own <status> flip.",
-      "reason": "Section 3 SURFACES (<paths>) does not grant task-orders/; the issuer (2.0.0_SA_COO~O) flips it."
+      "reason": "Section 3 SURFACES (<paths>) does not grant task-orders/; the issuer (2.0.0_SA_COO~O) flips it. AMENDMENT A1 instructions repeat this: 'Do not flip the order's <status>.'"
+    },
+    {
+      "item": "Row NFRA_OPLGTW-Z-W7-S1's disposition.",
+      "reason": "AMENDMENT A1: 'You need not touch row Z-W7-S1; the issuer disposes it.' This worker built the ruled fix; the row's disarm/disposition is 2.0.0_SA_COO~O's."
     }
   ],
   "surprises": [
@@ -162,9 +176,14 @@
       "result": "1 commit on wk-NFRA_OPLGTW-7-e1: 06eff3b73f (8 files changed, 571 insertions(+), 10 deletions(-)). No lane refusal; GIT_COMMIT_AUTHOR_OVERRIDE not used."
     },
     {
+      "tool": ".tools/safe-commit.sh (AMENDMENT A1)",
+      "invocation": "bash .tools/safe-commit.sh --author \"0.9.0_WK_NFRA_OPLGTW~7 <0.9.0_WK_NFRA_OPLGTW~7@opal.agent>\" -F <msgfile> -- infra/aws/ec2/opal-gateway/ops/schwab_entitlement_admin.py infra/aws/ec2/opal-gateway/tests/test_email_deny.py infra/aws/ec2/opal-gateway/tests/test_portal_grant.py",
+      "result": "1 commit on wk-NFRA_OPLGTW-7-e1: 744e4468e1 (3 files changed, 40 insertions(+), 11 deletions(-)). No lane refusal; GIT_COMMIT_AUTHOR_OVERRIDE not used. All commit-gate/naming-gate/to-pipeline-gate/surprise-row-gate checks passed."
+    },
+    {
       "tool": "org/missions/D9/NFRA/NFRA_OPLGTW/deliverables/2.0.0_SA_COO~O/round2/checks/ek.AC1.sh, ek.AC2.sh, ek.AC3.sh",
       "invocation": "bash <check>.sh; echo \"exit=$?\"",
-      "result": "All three PASS, all exit=0, run from /c/tmp/og-e1 at HEAD (06eff3b73f). infra/aws/ec2/opal-gateway/audit.jsonl clean (git status/diff show no change against HEAD)."
+      "result": "All three PASS, all exit=0, run from /c/tmp/og-e1 at HEAD (744e4468e1). infra/aws/ec2/opal-gateway/audit.jsonl clean (git status/diff show no change against HEAD)."
     }
   ]
 }
