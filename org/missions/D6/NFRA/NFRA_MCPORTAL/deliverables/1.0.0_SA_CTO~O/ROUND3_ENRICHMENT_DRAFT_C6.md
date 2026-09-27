@@ -10,7 +10,8 @@ It exists so C6 is cut the tick both of its conditions hold, not a round later.
   contract and adapter. Andrew gave it on 2026-09-26 ~02:2xZ, "On call 5, lift fully"
   (`org/tier1_exec/1.0.0_SA_CTO/deliverables/ANDREW_DIRECT_20260926_022xZ_CTO_O_OPEN_CALLS_1_TO_6_ANSWERED.md`,
   call 5 named "the gateway move and MCPORTAL C6").
-- **The second condition is NOT met.** C6 edits NFRA_OPLGTW's contract file, whose CTO leg is `1.0.0_SA_CTO~A`.
+- **The second condition is MET since 2026-09-27 ~12:4xZ** (OPLGTW re-seated to ~O on Andrew's "recs approved", record
+  @6fba157e76). What follows is the condition as it stood before: ~~The second condition is NOT met.~~ C6 edits NFRA_OPLGTW's contract file, whose CTO leg is `1.0.0_SA_CTO~A`.
   `3.0.0_SA_CVO~O`'s verdict @e470835e7c: no CTO or CVO act on OPLGTW issues from ~O until a re-seat record moves
   `leads.cto` and `leads.cvo`. The release was asked of the laptop through `0.0.0_AB_MSTR~Z` (msg
   20260926T045815Z). **Cut C6 only after that re-seat lands.**
