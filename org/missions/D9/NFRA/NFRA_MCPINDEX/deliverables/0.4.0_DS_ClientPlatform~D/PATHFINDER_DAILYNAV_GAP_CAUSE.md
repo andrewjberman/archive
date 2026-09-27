@@ -168,3 +168,83 @@ the fix is live in whichever copy the sweep runs from; under (b) nothing is owed
 - **The vendor was not contacted.** Whether filepoint should have supplied the spread on those two days is
   a real question and vendor egress needs Andrew's word; it is not needed to explain the gap.
 - **The 4 vendored Lambda copies were not touched** -- unchanged from the Z-S3 handoff, still AE's.
+
+---
+
+## 8. THE BACKFILL RUNBOOK -- written now so it fires cleanly on signal, NOT started
+
+`2.0.0_SA_COO~O` at msg `20260927T081358Z`: MX-s-8 is issued `@f382d1848c` to worker
+`0.9.0_WK_NFRA_MCPINDEX~7` carrying both hunks (`8ba0d6645b`, `bbf8cfefa6`) into the 4 vendored copies;
+`s8.AC1` requires both fixes, 4 of 4; the deploy waits on both never-widen halves, and the COO will say
+when the 4 functions serve the fix. **Step (3) is mine and runs only then.**
+
+This section exists because the act is gated, not hard -- and a gated act that gets re-derived under time
+pressure is how a narrow write becomes a wide one.
+
+### 8a. The exact target, taken from the producer's own rule
+
+The 4 keys are NOT typed here; they are `etf_conversion.expected_partitions_etf([the 2 bronze keys])`:
+
+```
+pathfinder/PFDE/silver/fact_dailynav/date=2026-08-29/data.parquet
+pathfinder/PFDE/silver/fact_dailynav/date=2026-08-30/data.parquet
+pathfinder/PFOE/silver/fact_dailynav/date=2026-08-29/data.parquet
+pathfinder/PFOE/silver/fact_dailynav/date=2026-08-30/data.parquet
+```
+
+From the 2 bronze units, whose `classify_key` reads `kind=data source=pathfinder feed=dailynav`:
+
+```
+pathfinder/filepoint/bronze/dailynav/20260829/DailyNAV.csv   -> date=2026-08-29
+pathfinder/filepoint/bronze/dailynav/20260830/DailyNAV.csv   -> date=2026-08-30
+```
+
+**This is a literal-key write of 4 keys the actor controls**, so NEVER-1's never-widen sign-off does not
+reach it by its own non-application clause. It is still 4 keys and not a sweep.
+
+### 8b. PRE-CHECK -- do not fire until the deployed bytes carry BOTH hunks
+
+The run will fail in exactly the old way if only one hunk is live, so the deploy is the precondition and
+must be read, not assumed:
+
+- `aws lambda get-function-configuration --function-name opal-assets-silver-etf` -> `CodeSha256` must have
+  MOVED off `ZyhzyrjuHLi9TfRC9CFSpvPHY6Rcyq/aPgseJafmuTg=` (the value at 2026-09-27T08:1xZ, runtime
+  python3.11, layer `pandas-pyarrow-layer:1`).
+- Confirm BOTH hunks in the served bytes, not just one: the `to_arrow` dtype guard AND
+  `if v == "": return None` in `_numeric_or_raise`. `s8.AC1` is the COO's oracle for that across 4 of 4.
+- Confirm the 4 target keys are still ABSENT. If any exists, STOP and re-read: something else wrote it.
+
+### 8c. THE ACT -- the production path, with no force
+
+Fire the deployed function with an S3-event-shaped payload per bronze unit (`lambda_entry` accepts
+`Records[].s3.object.key`, and calls `run_event(keys)` with **`force=False`**):
+
+```json
+{"Records": [{"s3": {"object": {"key": "pathfinder/filepoint/bronze/dailynav/20260829/DailyNAV.csv"}}}]}
+```
+
+then the same for `20260830`.
+
+**Why `force=False` is the safety property and must not be "helpfully" changed:** `convert_filepoint` skips
+idempotent only when ALL of a unit's partitions already exist. The 4 are absent, so the unit converts; if
+they were present it would skip rather than overwrite. Passing force would convert that safe no-op into an
+overwrite of served silver, which is a different act with a different sign-off.
+
+**Do NOT use `{"mode": "sweep"}`.** `run_sweep` is the broad path and would touch far more than these 2
+units. The whole point of this section is that the act is 2 keys in and 4 keys out.
+
+### 8d. POST-CHECK -- the write is verified against the served artifact, not the return value
+
+1. All 4 keys exist (`s3api head-object` each; print 4 of 4).
+2. In each, `Median 30 Day Spread Percentage` reads **NULL** -- that is the whole point of the fix and the
+   one field that could silently come back wrong.
+3. The rest of each row is intact: Net Assets `165680599.20` (PFDE) / `90843839.95` (PFOE) for 08-29,
+   `rate_date_std` 2026-08-28, `Rate Date` byte-faithful `"08/28/2026"`.
+4. Re-run the completeness guard that raised Z-S6 and confirm the pathfinder verdict moves off FAIL. **If it
+   does not, that is a NEW finding and not this backfill's failure** -- Z-S6 was filed on the guard's own
+   output and the guard may count something else besides these 4.
+
+### 8e. Then, and only then
+
+Report to `2.0.0_SA_COO~O` with the 4 keys and their read-back, and the disarm of `Z-S6` / `Z-S11` / `Z-S25`
+becomes available to their `disarm_owner`. **I do not disarm them from this lane.**

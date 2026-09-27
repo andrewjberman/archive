@@ -170,3 +170,39 @@ The CTO's step (3): once the vendored copies are live, **re-convert 2026-08-29 a
 writes the 4 named `fact_dailynav` partitions. That is a literal-key write of four keys the actor controls,
 so NEVER-1's never-widen sign-off does not reach it (its own non-application clause). It is not started and
 is not mine: nothing is backfilled until that deploy is live.
+
+---
+
+## 8. THE UNMEASURED PANDAS QUESTION, NARROWED -- added 2026-09-27T08:2xZ
+
+Section 6 said "which pandas the four Lambdas actually run is NOT measured here". It is still not measured,
+but the read is now one step from done and the next reader should not restart it. Measured on
+`opal-assets-silver-etf`:
+
+```
+Runtime      : python3.11
+Layers       : arn:aws:lambda:us-east-1:313476888478:layer:pandas-pyarrow-layer:1
+CodeSha256   : ZyhzyrjuHLi9TfRC9CFSpvPHY6Rcyq/aPgseJafmuTg=     (at 2026-09-27T08:1xZ, pre-MX-s-8)
+layer created: 2026-01-15T10:33:11Z   size 67,631,690   Description: EMPTY
+```
+
+**Two things that separates, which are easy to conflate:**
+
+- **The FUTURE-IMPORT question is moot on this plane.** The runtime is python3.11, where PEP-604 `X | Y`
+  evaluates natively. So Z-S18's `from __future__ import annotations` concern -- and ADHC_DSFLOW.004's
+  "Python 3.9 runners" premise -- does not bite these four functions. It bites whatever actually runs 3.9.
+- **The DTYPE question turns on PANDAS, not on python**, and that is the one that decides whether sections 1
+  and 7 repair a live defect or pre-empt a latent one. The version is not in the layer's description, so the
+  remaining read is inside `pandas-pyarrow-layer:1` itself.
+
+**Why I stopped here rather than pulling the layer.** Reading it means fetching 67 MB, and the answer would
+not change any act of mine or of the vendoring: both hunks land either way, and `s8.AC1` grades their
+presence, not their necessity. Under CLAUDE.md section 2 that makes the next check unowed at this seat. It
+IS owed wherever the framing matters -- a release note that says "fixed a live defect" versus "closed a
+latent one" is a different claim, and only the pandas version settles it.
+
+**The cheap read, for whoever wants it:** the layer zip's `pandas-*.dist-info/METADATA`, or a one-off
+`python -c "import pandas; print(pandas.__version__)"` in a throwaway function on the same layer. Do NOT try
+to get it out of `opal-assets-silver-etf` by invoking it: `lambda_entry` accepts only an S3-event shape or
+`{"mode": "sweep"}`-style sweep mode and refuses anything else by design, so there is no version echo to
+call, and an S3-shaped payload would DO CONVERSION WORK rather than answer a question.
