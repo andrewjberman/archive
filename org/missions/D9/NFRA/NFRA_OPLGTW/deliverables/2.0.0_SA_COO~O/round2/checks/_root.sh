@@ -20,3 +20,10 @@ pytest_named() {
   echo "pytest rc=$rc; named tests passed $p of $n; failed/error lines $failed"
   [ "$rc" = 0 ] && [ "$p" = "$n" ] && [ "$failed" = 0 ]
 }
+# ROUND-2 DRAFT ADDITION: some suites still append to the TRACKED $GW/audit.jsonl despite AUDIT_PATH (row W3-S2, E10's).
+# restore_audit puts the HEAD bytes back after a run and says whether it had to.
+restore_audit() {
+  if ! git diff --quiet -- "$GW/audit.jsonl" 2>/dev/null; then
+    MSYS_NO_PATHCONV=1 git show "HEAD:$GW/audit.jsonl" > "$GW/audit.jsonl"; echo "note: $GW/audit.jsonl was dirtied by the run and restored to HEAD (W3-S2)"
+  fi
+}
