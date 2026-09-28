@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-w-1",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "4801bee438cb793e994b117755c2431f094108a1",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-w-1.listings-append-collides-and-the-suite-is-red.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-w-1.listings-append-collides-and-the-suite-is-red.md",
+    "group": "C",
+    "vintage_commit": "0784a192d82b708e15b77a25f621dad48a30f17d"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~25",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/uploads.py",
+      "kind": "script",
+      "commit_or_etag": "7c92bc56717d2a4262aae642cbf575c4a535a9c0",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "INHERITED, not re-derived by this slot: committed by 0.9.0_WK_AMGT_HARVST~23 at 7c92bc5671, present unchanged on this worktree's branch (wk-hvst-w1-r8b, based on wk-hvst-w1-r8 with AMENDMENT 1 merged). HarvestUploader._run_listings routed through _silver_append_retrying_object_name, grouped by (source, run_stamp), same discipline as _run_articles (row AMGT_HARVST-Z-W9-S1 listings half disarmed). store.py untouched; no publisher special-cased; max_attempts untouched. This slot re-verified the fix (AC1 re-run + independent mutant + determinism controls) rather than re-editing it. sha256 of file as re-verified: b179d319a62e4f15c2a6de7c3219f3048c93d145b2e9f1fd4ab00553f82f62eb.",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/__main__.py",
+      "kind": "script",
+      "commit_or_etag": "7c92bc56717d2a4262aae642cbf575c4a535a9c0",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "INHERITED, not re-derived by this slot: committed by 0.9.0_WK_AMGT_HARVST~23 at 7c92bc5671. --harvest-grammar help text no longer says 'writes' for a flag that writes nothing to S3 (row AMGT_HARVST-Z-S27). This slot re-verified with a live --help read (AC3). sha256 of file as re-verified: f1bee8b6e97a82d28567f6aa76f3d7f10d91ab67e7f04c6ff4cf0ffaa2996915.",
+      "artifact_covered_by": [
+        "AC3"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~25/scripts/ac1_listing_collision.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Byte-identical copy of 0.9.0_WK_AMGT_HARVST~23's AC1 check script, placed in this slot's own scripts/ folder per the spawn instruction (the order's AC1 invocation names this ~25 path). Re-run from here, not re-pathed: negative control reproduces PreconditionFailed on the direct unwrapped store.silver_append call; the repaired call site lands both same-second appends at two distinct object names; landed row count equals the sum of both row sets. Independently re-verified with its own mutant control (fired as expected, reverted) and determinism control (byte-identical across two runs, same sha256 as ~23's own run: db369c6be531d4a69c06d37904952f283e0d28dd56dbbebbdb4666d652d2f87a).",
+      "artifact_covered_by": [
+        "AC1"
+      ]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~25/AMGT_HARVST.TO-HVST-w-1.listings-append-collides-and-the-suite-is-red.session_log.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Committed session log: what was inherited vs re-run, all three criteria's evidence, both controls, commit-gate result, and why no new surprise row was filed.",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2",
+        "AC3"
+      ]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "TWO LISTING APPENDS INSIDE ONE SECOND BOTH LAND, proved against a FAKE in-process s3 client that raises PreconditionFailed on a repeated key exactly as S3 does. Print, in order: (a) a NEGATIVE CONTROL at HEAD's behaviour -- the direct `store.silver_append` call site raising PreconditionFailed on the second append, with the exception text verbatim; (b) the same two appends through the repaired call site, BOTH returning a receipt, with the two distinct object names printed so the suffixed retry is visible; (c) the ROW COUNT landed across both keys, equal to the sum of the two row sets with NO row dropped. A pass requires the negative control to FAIL at HEAD -- a criterion that passes without ever reproducing the defect proves nothing",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~25/scripts/ac1_listing_collision.py",
+      "output_evidence": "(a) NEGATIVE CONTROL -- direct store.silver_append, two same-second appends:\n    first append: OK\n    second append raised: An error occurred (PreconditionFailed) when calling the PutObject operation: stub\n(b) repaired call site (_silver_append_retrying_object_name), same two appends:\n    first receipt:  {'written_rows': 1, 'skipped_unchanged': 0, 'parts': ['s3://opal-data-harvest/ft/harvest/silver/listing_hit/date=2026-09-27/part-20260927T120000Z.parquet']}\n    second receipt: {'written_rows': 1, 'skipped_unchanged': 0, 'parts': ['s3://opal-data-harvest/ft/harvest/silver/listing_hit/date=2026-09-27/part-20260927T120000Z-r1.parquet']}\n    both returned a receipt: True\n    distinct object names: True ({'s3://opal-data-harvest/ft/harvest/silver/listing_hit/date=2026-09-27/part-20260927T120000Z.parquet'} vs {'s3://opal-data-harvest/ft/harvest/silver/listing_hit/date=2026-09-27/part-20260927T120000Z-r1.parquet'})\n(c) row count landed across both keys: 2 (expected sum of both row sets: 2)\nPASS: AC1 -- negative control reproduced the collision; the repaired call site lands both appends with no row dropped",
+      "denominator": "2 of 2 appends landed at distinct object names, 2 of 2 rows landed (sum of both row sets), rc=0",
+      "status": "PASS",
+      "expect": "second append raised.*PreconditionFailed.*both returned a receipt: True.*distinct object names: True.*PASS: AC1"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "the BEFORE and AFTER counts both stated with every failing test named. `-rA` is used deliberately because `-q` NEVER PRINTS A PASSING TEST'S NODEID, which made a round-7 criterion unsatisfiable by construction (row Z-W21-S1). Expected direction: 3 failed / 160 passed at HEAD moves toward 0 failed, and any test still failing is named with its error text. THE WinError 183 CASE IS AN ACCEPTED OUTCOME REPORTED WITH ITS CAUSE, not a failure of this cell: if it is filesystem state rather than logic, say so and LEAVE THE ASSERTION ALONE. A test made green by weakening what it asserts FAILS this criterion",
+      "method": "test_suite",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m pytest lib/research/harvest/tests/ lib/opal_data_harvest/ -rA 2>&amp;1 | tail -60",
+      "output_evidence": "Confirmed invocation byte-identical to AMENDMENT 1's re-cut text at HEAD 0784a192d8 (the /tests/ suffix dropped from the second path only). BEFORE (already measured by the issuer, row AMGT_HARVST-Z-W21-S2, lib/opal_data_harvest/ alone): 3 failed / 160 passed. AFTER, this slot's two literal runs of the full amended invocation (both directories):\nRun 1 tail: FAILED lib/opal_data_harvest/test_verification.py::Tests::test_disabled_barrons_contract_defers_before_opening_a_browser - KeyError: 'bundle'\nSUBFAILED(failures=1) lib/opal_data_harvest/test_worker.py::Tests::test_single_broken_dow_jones_article_is_skipped_but_repeated_server_failure_stops - AttributeError: 'NoneType' object has no attribute 'get'\nSUBFAILED(failures=2) lib/opal_data_harvest/test_worker.py::Tests::test_single_broken_dow_jones_article_is_skipped_but_repeated_server_failure_stops - AttributeError: 'NoneType' object has no attribute 'get'\n======================== 3 failed, 292 passed in 3.71s ========================\nRun 2 tail (same command, same bytes): FAILED lib/opal_data_harvest/test_verification.py::Tests::test_disabled_barrons_contract_defers_before_opening_a_browser - FileExistsError: [WinError 183] Cannot create a file when that file already... ; the same two SUBFAILED AttributeError lines; ======================== 3 failed, 292 passed in 3.23s ========================\nAll three failing nodeids are outside this cell's <paths> (test_verification.py, test_worker.py are not in lib/opal_data_harvest/uploads.py or __main__.py) -- pre-existing, matching the identical nodeids already recorded at row Z-W21-S2 and Z-W23-S1's diagnostic run (3 failed, 292 passed). Same test_disabled_barrons_contract... nodeid alternates KeyError('bundle')/WinError 183 across runs with no intervening edit -- a leftover-filesystem-state condition, already grounded in this project's own channel (INVESTIGATION_v1.md, ~line 1346-1362), NOT caused by this cell and its assertion was NOT touched. The AttributeError case is identical across both runs and pre-dates this cell. No test file in this cell's write grant was edited; no assertion was weakened.",
+      "denominator": "3 failed / 292 passed (both runs), same 3 nodeids both runs, 0 of 3 failures newly introduced by this cell, 0 assertions altered",
+      "status": "PASS",
+      "status_reason": "The invocation runs to completion against the amended, byte-identical text (no usage error, unlike ~23's FAIL on the pre-amendment path). Both counts are stated; every failing test is named with its error text on both runs. The failure count did not move toward 0 because all three failures are pre-existing, outside this cell's <paths>, and unrelated to the listings-append fix (criterion 1 is publisher-neutral append/retry logic; none of the three failing tests exercise it). The WinError-183-class case (test_disabled_barrons_contract...) is reported with its cause (filesystem state, non-deterministic across runs, already grounded in the channel) and its assertion was left untouched, exactly the order's accepted-outcome carve-out. No assertion anywhere was weakened to force a false green.",
+      "expect": "3 failed.*292 passed"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "the `--harvest-grammar` help text NO LONGER SAYS \"writes\" for a flag that writes nothing to S3 (row Z-S27). Print the OLD string and the NEW string. The new text states what the flag actually does -- turns on the harvest-grammar bronze/silver row BUILD and passes a harvest_client to Worker -- and does not imply an S3 write",
+      "method": "command",
+      "invocation": "cd \"$(git rev-parse --show-toplevel)\" &amp;&amp; python -m lib.opal_data_harvest run --help 2>&amp;1 | grep -A3 \"harvest-grammar\"",
+      "output_evidence": "OLD (git show 7c92bc5671^:lib/opal_data_harvest/__main__.py): \"run: turn on harvest-grammar bronze/silver writes (config key harvest_grammar) and build+pass a harvest_client to Worker so its harvest path is reachable (HVST-h-10 row AMGT_HARVST-Z-W10-S2)\"\nNEW, this slot's live --help read: \"  --harvest-grammar     run: turn on the harvest-grammar bronze/silver row\\n                        BUILD (config key harvest_grammar) and build+pass a\\n                        harvest_client to Worker so its harvest path is\\n                        reachable -- writes nothing to S3 by itself (HVST-h-10\\n                        row AMGT_HARVST-Z-W10-S2, text fixed by\\n                        AMGT_HARVST-Z-S27)\"\nThe new text no longer says \"writes\" for the flag's own action (it says row BUILD) and explicitly states it writes nothing to S3 by itself.",
+      "denominator": "1 of 1 flag's help text checked, old vs new string diffed",
+      "status": "PASS",
+      "expect": "row\\s+BUILD.*writes nothing to S3 by itself"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Independently re-ran the mutant in this worktree (not merely cited ~23's): mutated _silver_append_retrying_object_name's suffix line in lib/opal_data_harvest/uploads.py from `stamp_to_use = \"%s-r%d\" % (run_stamp, attempt)` to `stamp_to_use = run_stamp` (no suffix change on retry), then re-ran AC1's exact invocation from this slot's own script copy.",
+      "expected": "AC1 fails: the second, wrapped append now retries under the SAME unchanged key and exhausts max_attempts, raising PreconditionFailed instead of landing at a distinct object name.",
+      "observed": "botocore.exceptions.ClientError: An error occurred (PreconditionFailed) when calling the PutObject operation: exhausted object-name retries -- rc=1 (was rc=0 pre-mutant). Mutation reverted via `git checkout HEAD -- lib/opal_data_harvest/uploads.py` (git diff clean after); py_compile clean; re-run rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's exact invocation (this slot's own script copy) run twice back-to-back post-revert, full stdout captured and compared byte-for-byte, and compared against ~23's own recorded hash.",
+      "observed": "Both runs: sha256 db369c6be531d4a69c06d37904952f283e0d28dd56dbbebbdb4666d652d2f87a, rc=0, IDENTICAL to each other and to 0.9.0_WK_AMGT_HARVST~23's own recorded determinism-control hash -- confirming the inherited fix and the copied script behave identically across worktrees.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "The 3 pre-existing red tests in lib/opal_data_harvest (test_disabled_barrons_contract_defers_before_opening_a_browser, test_single_broken_dow_jones_article_is_skipped_but_repeated_server_failure_stops) and lib/research/harvest/store.py",
+      "reason": "Outside this cell's <paths>; standing clause 3 forbids touching store.py, and a worker never fixes a neighbouring defect. Already carried ARMED by row AMGT_HARVST-Z-W21-S2 and routed to the round-7/8 analysis; re-confirmed, not re-derived, by this slot's AC2 run."
+    },
+    {
+      "item": "Re-deriving or re-editing lib/opal_data_harvest/uploads.py or __main__.py",
+      "reason": "Already repaired and committed by 0.9.0_WK_AMGT_HARVST~23 at 7c92bc5671 (branch wk-hvst-w1-r8, base of this worktree). This slot's job per Amendment 2 was to re-run the three criteria against that inherited fix, not to redo the repair; both files were independently re-verified (AC1/AC3 re-runs, an independent mutant control, an independent determinism control) rather than trusted on report."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~25/AMGT_HARVST.TO-HVST-w-1.listings-append-collides-and-the-suite-is-red.session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -c \"import py_compile; py_compile.compile(path, doraise=True)\" on lib/opal_data_harvest/uploads.py, lib/opal_data_harvest/__main__.py, and this slot's ac1_listing_collision.py copy",
+      "result": "OK on all three, before and after the mutant revert"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/opal_data_harvest/uploads.py lib/opal_data_harvest/__main__.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~25/scripts/ac1_listing_collision.py",
+      "result": "All checks passed! OK: pre-commit gate clean for 3 of 3 file(s)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 lib/opal_data_harvest/uploads.py lib/opal_data_harvest/__main__.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~25/scripts/ac1_listing_collision.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
