@@ -10,7 +10,7 @@ br=$(git show "HEAD:$F" 2>&1 | tr -d '\r' | grep -m1 -oE '^BRANCH: (REMOVE|NARRO
 want=test_login_removed; [ "$br" = NARROW ] && want=test_login_narrowed
 [ -f "$G/tests/test_login_retire.py" ] || { echo "tests/test_login_retire.py absent"; echo "RESULT: FAIL"; exit 1; }
 out=$(cd "$G" && timeout 110 python -m pytest tests/test_login_retire.py -rA -q -p no:cacheprovider --color=no 2>&1 | tr -d '\r' | grep -v '^[[:space:]]*$')
-named=$(printf '%s\n' "$out" | grep -cE "^PASSED tests/test_login_retire.py::$want( |$)")
+named=$(printf '%s\n' "$out" | grep -cE "^PASSED tests[/\]test_login_retire[.]py::$want( |$)")
 failed=$(printf '%s\n' "$out" | grep -cE '^(FAILED|ERROR) ')
 echo "branch=$br named=$want passed=$named failed/errored=$failed; summary: $(printf '%s\n' "$out" | tail -1)"
 if [ "$named" -ge 1 ] && [ "$failed" = 0 ]; then echo "RESULT: PASS"; exit 0; fi
