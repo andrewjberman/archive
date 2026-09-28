@@ -86,37 +86,54 @@ permanently.
 **This is a short session's work and does not require the drain to be finished first.** It is the sensible first
 act after the reboot.
 
-## 6. THE 24 BRANCHES -- DISPOSITION WORKSHEET
+## 6. THE 24 BRANCHES -- VERDICTS FILLED (2026-09-28 ~17:5xZ)
 
-`verdict` is filled per branch by its owner: **LAND** (cherry-pick onto the new trunk), **SUPERSEDE** (content
-already on the trunk, or obsolete -- delete with a record of what was examined), or **HOLD** (needs Andrew).
+⭐ **THE WORKSHEET IS COMPLETE. TOTALS: SUPERSEDE 17, LAND 3 (one records-only), HOLD 4.**
+Adjudicated by `3.0.0_SA_CVO~O`
+(`org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoO_S19_DRAIN_VERDICTS_24_BRANCHES_20260928.md`, ON DISK and awaiting
+the index at the time of writing -- confirm it committed before relying on it), with `1.0.0_SA_CTO~Z`
+INDEPENDENTLY CONCURRING on the AMGT set by `git cherry` plus per-file blob comparison against a positive
+control. Two seats, two methods, same answer.
 
-| branch | undrained | behind | last commit | last author | uncommitted in its worktree | verdict |
+⛔ **THREE OPERATIONAL CAUTIONS THAT TRAVEL WITH THE LANDS -- read before cherry-picking:**
+1. `closer/amgt-r-20260923`: its `MANIFEST.json` **DIFFERS** from the trunk's copy. Decide deliberately which
+   wins; do not let the cherry-pick choose for you.
+2. `wk-amgt-14-50`: **do NOT land `.open_deploys/amgt-rk49-lusha-enrich.json` in an OPEN state** -- read the
+   tip's ledger first (an AC3 live write was attempted and the ledger records it). Its CODE is superseded
+   (TO-AMGT-rk-49 WITHDRAWN @85a05bd6ab); records only. **Re-append its surprise row rather than cherry-picking
+   the shared channel file** -- two branches appending to one channel collide at the same offset by construction.
+3. `closer/amgt-h-y-20260923` and `closer/amgt-experience-z-20260923` are **ONE DECISION, not two**: 17 of h-y's
+   22 unlanded commits are experience-z's commits at the SAME HASHES, and experience-z carries Andrew's
+   do-not-merge word.
+
+**Still none of them is to be `git merge`d** -- section 3 stands, every LAND is a cherry-pick.
+
+| branch | undrained | behind | last commit | last author | uncommitted | VERDICT |
 |---|---|---|---|---|---|---|
-| `closer/amgt-experience-z-20260923` | 27 | 3118 | 2026-09-23 | 2.0.0_SA_COO~Z | 0 | **HOLD** (see below) |
-| `closer/amgt-h-y-20260923` | 23 | 3136 | 2026-09-23 | 2.0.0_SA_COO~Y | 0 | |
-| `rel-nfra-oplgtw-sprint-owner` | 13 | 7103 | 2026-09-27 | 0.9.0_WK_NFRA_OPLGTW~9 | 3 | |
-| `rel-nfra-oplgtw-email-deny` | 12 | 7103 | 2026-09-27 | 0.9.0_WK_NFRA_OPLGTW~8 | 2 | |
-| `closer/amgt-r-20260923` | 12 | 4177 | 2026-09-23 | 4.0.0_SA_CRO~Z | 0 | |
-| `rel-nfra-mcpindex-r2-gateway` | 11 | 7103 | 2026-09-26 | 0.9.0_WK_NFRA_MCPINDEX~1 | 2 | |
-| `rel-nfra-opalai-portal-grant-gateway` | 10 | 7103 | 2026-09-26 | 0.9.0_WK_NFRA_OPALAI~9 | 2 | |
-| `rb-nfra-mcpindex-r2-base` | 10 | 7103 | 2026-09-26 | 0.9.0_WK_NFRA_OPALAI~9 | 1 | |
-| `rel-nfra-opalai-zs18-gateway` | 9 | 7103 | 2026-09-25 | 0.9.0_WK_NFRA_OPALAI~8 | 3 | |
-| `rb-nfra-opalai-portal-grant-base` | 9 | 7103 | 2026-09-25 | 0.9.0_WK_NFRA_OPALAI~8 | 1 | |
-| `rb-nfra-opalai-zs18-base` | 8 | 7103 | 2026-09-25 | 1.0.0_SA_CTO | 1 | |
-| `wk-NFRA_OPALAI-1` | 7 | 1661 | 2026-09-25 | 0.9.0_WK_NFRA_OPALAI~1 | 2 | |
-| `wk-amgt-14-50` | 6 | 6317 | 2026-09-19 | 2.0.0_SA_COO~Z | 1 | |
-| `wk-amgt-13-26` | 4 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~26 | 1 | |
-| `wk-NFRA_OPALAI-3` | 4 | 1537 | 2026-09-25 | 0.9.0_WK_NFRA_OPALAI~3 | 3 | |
-| `wk-amgt-13-29-sp` | 3 | 7502 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~29 | no worktree | |
-| `rel-nfra-mcportal-r2-gateway-2` | 3 | 7103 | 2026-09-25 | 0.9.0_WK_NFRA_MCPORTAL~2 | 3 | |
-| `cvo-z-harvst-l4r` | 3 | 4146 | 2026-09-23 | 3.0.0_SA_CVO~Z | 1 | |
-| `wk-amgt-13-29` | 2 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~29 | 1 | |
-| `wk-amgt-13-28` | 2 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~28 | 1 | |
-| `rel-nfra-mcportal-r2-gateway` | 2 | 7103 | 2026-09-25 | 0.9.0_WK_NFRA_MCPORTAL~2 | 1 | |
-| `wk-amgt-13-30` | 1 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~30 | 1 | |
-| `wk-amgt-13-27` | 1 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~27 | 1 | |
-| `rel-nfra-opalai-r1-gateway` | 1 | 7103 | 2026-09-24 | 0.9.0_WK_NFRA_OPALAI~2 | no worktree | |
+| `closer/amgt-experience-z-20260923` | 27 | 3118 | 2026-09-23 | 2.0.0_SA_COO~Z | 0 | **HOLD** -- Andrew |
+| `closer/amgt-h-y-20260923` | 23 | 3136 | 2026-09-23 | 2.0.0_SA_COO~Y | 0 | **HOLD** -- 2.0.0_SA_COO~Y or Andrew |
+| `rel-nfra-oplgtw-sprint-owner` | 13 | 7103 | 2026-09-27 | 0.9.0_WK_NFRA_OPLGTW~9 | 3 | SUPERSEDE |
+| `rel-nfra-oplgtw-email-deny` | 12 | 7103 | 2026-09-27 | 0.9.0_WK_NFRA_OPLGTW~8 | 2 | SUPERSEDE |
+| `closer/amgt-r-20260923` | 12 | 4177 | 2026-09-23 | 4.0.0_SA_CRO~Z | 0 | **LAND** (records) |
+| `rel-nfra-mcpindex-r2-gateway` | 11 | 7103 | 2026-09-26 | 0.9.0_WK_NFRA_MCPINDEX~1 | 2 | SUPERSEDE |
+| `rel-nfra-opalai-portal-grant-gateway` | 10 | 7103 | 2026-09-26 | 0.9.0_WK_NFRA_OPALAI~9 | 2 | SUPERSEDE |
+| `rb-nfra-mcpindex-r2-base` | 10 | 7103 | 2026-09-26 | 0.9.0_WK_NFRA_OPALAI~9 | 1 | SUPERSEDE |
+| `rel-nfra-opalai-zs18-gateway` | 9 | 7103 | 2026-09-25 | 0.9.0_WK_NFRA_OPALAI~8 | 3 | SUPERSEDE |
+| `rb-nfra-opalai-portal-grant-base` | 9 | 7103 | 2026-09-25 | 0.9.0_WK_NFRA_OPALAI~8 | 1 | SUPERSEDE |
+| `rb-nfra-opalai-zs18-base` | 8 | 7103 | 2026-09-25 | 1.0.0_SA_CTO | 1 | SUPERSEDE |
+| `wk-NFRA_OPALAI-1` | 7 | 1661 | 2026-09-25 | 0.9.0_WK_NFRA_OPALAI~1 | 2 | **HOLD** -- Andrew G-ACCT/G-AUTH/G-PUSH |
+| `wk-amgt-14-50` | 6 | 6317 | 2026-09-19 | 2.0.0_SA_COO~Z | 1 | **LAND** records only |
+| `wk-amgt-13-26` | 4 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~26 | 1 | SUPERSEDE |
+| `wk-NFRA_OPALAI-3` | 4 | 1537 | 2026-09-25 | 0.9.0_WK_NFRA_OPALAI~3 | 3 | **HOLD** -- same gates |
+| `wk-amgt-13-29-sp` | 3 | 7502 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~29 | no worktree | SUPERSEDE |
+| `rel-nfra-mcportal-r2-gateway-2` | 3 | 7103 | 2026-09-25 | 0.9.0_WK_NFRA_MCPORTAL~2 | 3 | SUPERSEDE |
+| `cvo-z-harvst-l4r` | 3 | 4146 | 2026-09-23 | 3.0.0_SA_CVO~Z | 1 | **LAND** (records) |
+| `wk-amgt-13-29` | 2 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~29 | 1 | SUPERSEDE |
+| `wk-amgt-13-28` | 2 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~28 | 1 | SUPERSEDE |
+| `rel-nfra-mcportal-r2-gateway` | 2 | 7103 | 2026-09-25 | 0.9.0_WK_NFRA_MCPORTAL~2 | 1 | SUPERSEDE |
+| `wk-amgt-13-30` | 1 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~30 | 1 | SUPERSEDE |
+| `wk-amgt-13-27` | 1 | 7507 | 2026-09-17 | 0.9.0_WK_AMGT_RESAPP~27 | 1 | SUPERSEDE |
+| `rel-nfra-opalai-r1-gateway` | 1 | 7103 | 2026-09-24 | 0.9.0_WK_NFRA_OPALAI~2 | no worktree | SUPERSEDE |
 
 ⚠ **`closer/amgt-experience-z-20260923` carries a standing instruction: DO NOT MERGE ITS TIP WITHOUT EXPLICIT
 WORD.** It is also the largest at 27 commits. It is marked HOLD until that word is given.
@@ -144,7 +161,10 @@ at a time; that is where the 24 shrinks fastest.
 3. Do **section 5** (the `CLOUD` re-sync). Report the landed hash by `ls-remote`.
 4. Then work **section 6** family by family -- start with the `wk-amgt-13-*` siblings and the `rel-*`/`rb-*`
    pairs, since that is where SUPERSEDE verdicts are most likely and the list shrinks fastest.
-5. Restart normal work only when section 6 has no unfilled verdict. That is Andrew's stated condition.
+5. **Section 6 now has no unfilled verdict**, so Andrew's stated condition turns on EXECUTING it: 17 branches to
+   delete (with the record of what was examined), 3 to cherry-pick, 4 that need a word from Andrew or
+   `2.0.0_SA_COO~Y` before anything happens to them. The four HOLDs are the only items that can still block a
+   restart, and three of the four are gated on Andrew directly.
 
 **Seats Andrew is keeping online for this work:** `1.0.0_SA_CTO~Z`, `1.0.0_SA_CTO~O`, `3.0.0_SA_CVO~O`.
 
