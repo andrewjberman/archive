@@ -179,3 +179,82 @@ so and I will init and run it** -- it is a read-only plan and the only cost is t
 One producer before and after; no second schedule, no parallel path, no comparator. Nothing under
 `data/cot/`. Served gold untouched. No account ids or asset rows in the repo -- this file carries counts,
 byte sizes and hashes only. No push.
+
+---
+
+# ADDENDUM -- amendment A2 (2026-09-28 ~09:0xZ): the closure moves to build time, and I had missed a dependency
+
+`2.0.0_SA_COO~O` amended the order at `@864ea3b7ef` on `1.0.0_SA_CTO~O`'s Z-S43 ruling `@e4b19b9898`.
+The document is re-edited accordingly; **still PHASE A, still nothing deployed.**
+
+## The ruling changed the shape, and it is a better shape than the one I proposed
+
+I proposed publishing `opal_naming` plus the 7 registry JSONs plus `NAMING_SCHEMA.json` into the firm
+bucket. The ruling refuses that and resolves the closure **at build time** instead: MX-s-11
+(`0.4.0_DS_ClientPlatform~D`) generates a 49F **pin** that the pull module imports in place of
+`opal_naming`, so **the multi-firm registry never travels to bd's bucket at all.**
+
+That is the correct call and my proposal was the worse one. Copying a *multi-firm* registry into a
+single firm's bucket to satisfy an import would have put cot's rows inside 49F's plane — the exact
+firm-separation line CLAUDE.md rule 13 and this module's own `assert_firm_separation` exist to hold.
+I was solving for "make the import resolve" and not asking what the artifact *contained*.
+
+## A dependency I missed, and why my instrument could not see it
+
+A2 also names `code/lib/silver_ids.py`, which my Phase A census did not. Verified at the cited lines
+rather than taken on trust -- `build_bd_assets_dim.py:64-70`:
+
+```
+_REPO_ROOT       = <four levels above silver/>
+_SILVER_IDS_PATH = _REPO_ROOT/lib/silver_ids.py
+_spec = importlib.util.spec_from_file_location('opal_lib_silver_ids', _SILVER_IDS_PATH)
+_spec.loader.exec_module(_silver_ids)          # at MODULE LOAD, top level
+```
+
+It is a hard dependency, and the builder's own comment (`:56-63`) explains why it is loaded by
+location: inside that file the name `lib` is already gold's, so `import lib.silver_ids` raises
+`ModuleNotFoundError` -- measured, and re-ordering cannot fix it without breaking
+`lib.etf_classifier`.
+
+**My dependency census used an import-statement regex** (`^\s*(import|from)\s+(lib|...)`). A
+`spec_from_file_location` load is *invisible* to it. So the census returned a clean, denominated,
+confidently-wrong closure. I have now swept both scripts for every by-location mechanism
+(`spec_from_file_location`, `exec_module`, `importlib`, `__import__`, `SourceFileLoader`, `runpy`) and
+found exactly one, the one A2 names; and I checked `etf_classifier.py`'s own imports, which are stdlib
+and `boto3` only, so the closure is complete at six members.
+
+This is the **second** time this session a regex-shaped instrument of mine under-counted a real set --
+the first read 6 occurrences where 18 existed, because one combined alternation swallowed the match it
+was looking for. Same failure class: a pattern that matches the *usual spelling* of a relationship and
+silently misses the unusual one, while still printing a denominator that makes the answer look measured.
+
+## The document after A2
+
+| | |
+|---|---|
+| runCommand lines | 97 -> **98** (7 dropped, 8 added) |
+| `opal_naming` / `code/registry/` / `NAMING_SCHEMA.json` fetches | **0** (deleted, with their `infra/logic/registry` and `org/standards` mkdirs) |
+| shutdown index vs `exit 1` | **90 < 95**, one of each -- KEEP property re-asserted after the patch |
+| non-ASCII | **0** |
+
+Staged closure, each asserted present **exactly once**:
+
+| member | into |
+|---|---|
+| `code/bronze/pull_bd_asset_dim_rest.py` | `$RUNROOT/data/black_diamond/scripts/bronze/` |
+| `code/bronze/_asset_dim_rest_pin.py` | same dir (the generated 49F pin, MX-s-11) |
+| `code/silver/build_bd_assets_dim.py` | `$RUNROOT/data/black_diamond/scripts/silver/` |
+| `code/gold/lib/etf_classifier.py` + `__init__.py` | `$RUNROOT/data/black_diamond/scripts/gold/lib/` |
+| `code/lib/silver_ids.py` | `$RUNROOT/lib/` |
+| `code/lib/trading_calendar.py` | `$RUNROOT/lib/` |
+
+## Step 2 is no longer refused -- it is SEQUENCED
+
+A2 sets it to run when the issuer relays **MX-s-11's `s11.AC2` and `s11.AC3` at PASS**. So this seat is
+not blocked and not waiting on a ruling; it is waiting on a named upstream signal from another cell.
+Row `Z-S43` stays ARMED with `2.0.0_SA_COO~O` as `disarm_owner` until that relay lands and the run
+happens.
+
+**What the never-widen halves are still being asked to sign remains a document READ, not a document
+EXERCISED** -- and the `asset_id`-set diff is still not in this file, for the same reason. That does
+not change under A2.
