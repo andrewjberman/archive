@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-z-2.fwd4-field-census-state-the-mapping-first",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-z-2.fwd4-field-census-state-the-mapping-first.md",
+    "group": "OTHER",
+    "vintage_commit": "5311a2ebd82227117b78215e3a9422853e4c7641"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "300be1dfc9456188ec2b3695b8e782bc65c8bd55",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-z-2.fwd4-field-census-state-the-mapping-first.md"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~33",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~33/scripts/ac1_state_the_mapping.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only: imports the GOLD_MENTION_SCHEMA constant and reads the PRD file; no S3 call, no write, no vendor call. Carried from a prior stopped worker, re-read at the bytes and re-run; not modified."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~33/scripts/ac2_census_non_null.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Read-only: ONE S3 GET of the newest gold snapshot via publication_gold._latest_gold_snapshot_rows; no PUT/DELETE, no vendor call. Carried from a prior stopped worker, re-read at the bytes and re-run; not modified."
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~33/scripts/control_mutants.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deploy_evidence": "Mutant controls over both scripts with the snapshot reader and schema patched in memory; no S3 call, no write."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE MAPPING, STATED BEFORE ANYTHING IS COUNTED, and verified at the bytes. Print FWD-4's DONE WHEN clause (i) VERBATIM as the PRD carries it, then one line per ratified fact naming the GOLD_MENTION_SCHEMA column that carries it -- read from the schema object itself, not from this order's table -- or naming it ABSENT with where the fact actually lives. Print the schema's full field list beside it with its count, so a reader can check the mapping rather than trust it. Then state in one line whether clause (i) is CLOSABLE by a census of this table: yes with the column set named, or no with the unmapped facts named. \u26d4 `share` is EXPECTED ABSENT by C-HV-ABSOLUTE-ONLY and must be reported as contract-compliant, NOT as a gap -- a census calling it missing FAILS this criterion",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~33/scripts/ac1_state_the_mapping.py",
+      "output_evidence": "PRD line 121-125 verbatim (clause i, read live at prd/AMGT_HARVST_PRD.md:119-130): \"DONE WHEN EXERCISED -- every (article, company) pair carries whether the company is in the headline, in the opening, how often it is named, how much of the article names it, which other covered companies it names, and a strength grade\". GOLD_MENTION_SCHEMA field count 24: article_key, publisher, security_key, composite_figi, mention_count, mention_in_title, mention_in_lead, first_mention_block, blocks_hit, blocks_total, match_forms, vendor_tagged_primary, vendor_tagged_secondary, co_mentioned_securities, co_mention_count, is_roundup, signal_tier, signal_weight, published_utc, fetched_at, first_discovered_at, lag_hours, bronze_key, record_hash. MAPPING (all 6 MAPPED, 0 ABSENT, read from the schema object): in the headline -> mention_in_title (bool); in the opening -> mention_in_lead (bool); how often named -> mention_count (int64); how much of the article -> blocks_hit + blocks_total (int64, int64); other covered companies -> co_mentioned_securities (list<string>); strength grade -> signal_tier (string). share_column_finding: present_in_schema=false, expected ABSENT, contract_compliant=true (C-HV-ABSOLUTE-ONLY bars a ratio from gold; share computed at serve time from blocks_hit/blocks_total) -- reported as contract-compliant, NOT a gap. unmapped_facts: []. VERDICT line: clause (i) IS CLOSABLE by a census of this table -- column set: mention_in_title, mention_in_lead, mention_count, blocks_hit, blocks_total, co_mentioned_securities, signal_tier. rc=0.",
+      "denominator": "6 of 6 ratified facts mapped to a column of the 24-field GOLD_MENTION_SCHEMA (0 absent); share checked separately (0 of 1 present, expected absent)",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "EVERY ROW OF THE NEWEST SNAPSHOT CARRIES EVERY MAPPED FACT, with denominators. Over AC1's mapped column set, print: the row count of the newest article_security_mention snapshot; per column, how many rows carry it NON-NULL out of that denominator; and EVERY row that is missing any mapped fact, named by article_key and security_key with the missing column. A list column counts as carried when PRESENT even if EMPTY -- print the empty-vs-null split per list column so the distinction is visible rather than assumed. Report UNMEASURABLE rows separately. State the verdict as \"clause (i) MET over N of N rows\" or \"NOT MET, with the M failing rows named\" -- and if M is 0, say so with N printed, because a bare \"met\" without its denominator is not a measurement",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~33/scripts/ac2_census_non_null.py",
+      "output_evidence": "newest article_security_mention snapshot: gold_rows_total_in_newest_snapshot=263, unmeasurable_rows_count=0, measurable_rows_count=263. per_column_non_null_count (each out of 263): mention_in_title 263, mention_in_lead 263, mention_count 263, blocks_hit 263, blocks_total 263, signal_tier 263, co_mentioned_securities 263. list_column_empty_vs_null_split co_mentioned_securities: present_empty 59, present_nonempty 204, null 0 (denominator 263; 59+204+0=263) -- the 59 empty lists are honest true negatives counted as carried. failing_rows_count=0, failing_rows=[], unmeasurable_rows=[]. VERDICT line: clause (i) MET over 263 of 263 rows. rc=0. Re-run byte-identical (cmp).",
+      "denominator": "263 of 263 rows of the newest snapshot carry all 7 mapped columns (7 columns x 263 rows = 1841 of 1841 cells non-null); 0 failing, 0 unmeasurable",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Two in-memory mutants via control_mutants.py. A: AC2 fed 5 planted rows (empty list, NULL mention_in_lead, NULL co_mentioned_securities, NULL article_key, one clean). B: AC1 run against a schema with signal_tier dropped and a share column added.",
+      "expected": "A: 2 failing rows named with their missing column, 1 UNMEASURABLE, empty list counted CARRIED, verdict NOT MET. B: strength grade reported ABSENT, share reported as contract violation, verdict NOT CLOSABLE.",
+      "observed": "A: failing a2/s2 [mention_in_lead], a4/s4 [co_mentioned_securities]; unmeasurable 1; list split present_empty 1 / nonempty 2 / null 1 of 4; verdict \"clause (i) NOT MET, with 2 of 4 rows failing\". B: unmapped_facts=[a strength grade], share contract_compliant=false, verdict NOT CLOSABLE. Both printed FIRED-AS-EXPECTED: True, rc=0.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC2 run twice and compared with cmp; AC1 run twice and md5sum compared.",
+      "observed": "AC2 outputs byte-identical (cmp clean); AC1 md5 8da9617edcc9bac4ddfa0e24ae7c85c1 on both runs.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "FWD-4 clause (ii) (grade re-derived from stored text and matches)",
+      "reason": "Exercised by HVST-y-2 (263 of 263); order section 5 excludes it here."
+    },
+    {
+      "item": "Any grade of FWD-4",
+      "reason": "Order section 5: this cell measures the clause the grade needs and does not grade the FWD."
+    }
+  ],
+  "surprises": [],
+  "session_log": "Worker 0.9.0_WK_AMGT_HARVST~33, L7 subagent (issuer 2.0.0_SA_COO~Y re-seated to ~H). Bar: branch wk-AMGT_HARVST-33, TREE-OK. Read both carried scripts at the bytes against the face, read FWD-4 DONE WHEN at prd/AMGT_HARVST_PRD.md:119-130, checked publication_gold.py _latest_gold_snapshot_rows exists (:646); both scripts correct, unmodified, run clean. Added control_mutants.py. No surprise row needed.",
+  "compiler_tools": [
+    {
+      "tool": "python (ac1/ac2/control scripts)",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~33/scripts/control_mutants.py",
+      "result": "rc=0, both mutants FIRED-AS-EXPECTED"
+    }
+  ]
+}
