@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "to_id": "NFRA_OPALAI.TO-OA-e-5",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/prd/NFRA_OPALAI_PRD.md",
+    "group": "C",
+    "vintage_commit": "20b2b561f5"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D6/NFRA/NFRA_OPALAI/decompositions/NFRA_OPALAI_DECOMP.md",
+    "vintage_commit": "b17a43ca9a",
+    "to_ref": "org/missions/D6/NFRA/NFRA_OPALAI/task-orders/NFRA_OPALAI.TO-OA-e-5.teams-watch-remeasure.md"
+  },
+  "assignee": "0.9.0_WK_NFRA_OPALAI~14",
+  "artifacts_produced": [
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~14/e5_remeasure.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Measurement script; imports the live watch by path, reads only, writes no cursor, message text or token."
+    },
+    {
+      "path_or_key": "org/missions/D6/NFRA/NFRA_OPALAI/deliverables/0.9.0_WK_NFRA_OPALAI~14/E5_TEAMS_WATCH_REMEASURE.json",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "artifact_covered_by": [
+        "AC1",
+        "AC2"
+      ],
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "Verdict CLEARED: 4 of 4 reads OK on a live token, served_commit fe94911257 (md5 6c888e51a3c652dfe89c74654fde39e3 both live and git)."
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "reads attempted>=1 = ok+failed+token_expired (sum ok=True); signatures sum = failed; chats>=1; identity set=yes; verdict equals implied -- RESULT: PASS -- exit=0",
+      "method": "command",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e5.AC1.sh; echo \"exit=$?\"",
+      "output_evidence": "reads attempted=4 ok=4 failed=0 token_expired=0 (sum ok=True); signatures sum=0 vs failed=0; chats=4; identity set=yes; verdict=CLEARED implied=CLEARED\nRESULT: PASS\nexit=0",
+      "denominator": "4 of 4 chat reads OK; 4 chats touched in the 7-day poll, bound 10.",
+      "status": "PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "live md5 of /opt/opal-gateway/app/tools.py = served_commit's md5 (ssm status Success); gap-B in served (content) measured = file -- RESULT: PASS -- exit=0",
+      "method": "live_read",
+      "invocation": "bash org/missions/D6/NFRA/NFRA_OPALAI/deliverables/2.0.0_SA_COO~AI/round2/checks/e5.AC2.sh; echo \"exit=$?\"",
+      "output_evidence": "served_commit=fe94911257 md5=6c888e51a3c652dfe89c74654fde39e3; live md5=6c888e51a3c652dfe89c74654fde39e3 (ssm status Success); gap-B in served (content) measured=true file=true\nRESULT: PASS\nexit=0",
+      "denominator": "1 of 1 candidate commit (fe94911257, first tried) matched; select_fallback appears 2 times in its tools.py.",
+      "status": "PASS"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Measure-only order; no change to mutate. AC2 compares live host bytes against git bytes.",
+      "expected": "AC2 fails on md5 mismatch",
+      "observed": "md5s equal",
+      "status": "N/A-SPEC-NAMES-NONE"
+    },
+    "determinism": {
+      "method": "Checks run once after the measurement.",
+      "observed": "Both PASS",
+      "status": "N/A-WITH-REASON",
+      "reason": "Single measurement run by design; token lifetime is about 15 minutes."
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Reads beyond the poll's touched chats and the 7-day window",
+      "reason": "Order bounds reads to the chats the watch poll returns, at most 10."
+    }
+  ],
+  "surprises": [],
+  "session_log": "2026-09-28, worktree C:/tmp/oa-14. Resolved served commit by content (fe94911257 md5 match over SSM), wrote and ran e5_remeasure.py once on the issuer-warmed token: 4 of 4 reads OK. No edit to the watch, no cursor write, no token minted. PUSH STATE: LOCAL.",
+  "compiler_tools": [
+    {
+      "tool": "python importlib",
+      "invocation": "e5_remeasure.py imports teams-watch.py by path",
+      "result": "4 of 4 reads OK, CLEARED"
+    }
+  ]
+}
