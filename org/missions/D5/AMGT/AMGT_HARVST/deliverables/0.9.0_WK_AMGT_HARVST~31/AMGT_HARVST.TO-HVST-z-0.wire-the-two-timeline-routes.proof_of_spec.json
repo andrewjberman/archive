@@ -1,0 +1,128 @@
+{
+ "schema_version": "1.0",
+ "to_id": "AMGT_HARVST.TO-HVST-z-0.wire-the-two-timeline-routes",
+ "firm": "FABRIC",
+ "phase": "BUILD-GENERAL",
+ "spec_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~8/SPEC_SECTION_timeline.md",
+  "group": "OTHER",
+  "vintage_commit": "bc80f425c3ca9a7c4c962ae215691b0158fc8421"
+ },
+ "decomp_ref": {
+  "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+  "vintage_commit": "300be1dfc9456188ec2b3695b8e782bc65c8bd55",
+  "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-z-0.wire-the-two-timeline-routes.md"
+ },
+ "assignee": "0.9.0_WK_AMGT_HARVST~31",
+ "artifacts_produced": [
+  {
+   "path_or_key": "lib/research/api/scoped_amgt.py",
+   "kind": "script",
+   "commit_or_etag": "78f11f5a02",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "Local commit on wk-AMGT_HARVST-31; the order deploys and pushes nothing. Handler wired; gateway mount NOT done (row AMGT_HARVST-Z-W31-S1)."
+  },
+  {
+   "path_or_key": "lib/research/api/tests/test_timeline_routes.py",
+   "kind": "test",
+   "commit_or_etag": "78f11f5a02",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "16 offline route tests; not a deployable."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~31/scripts/ac1_routes_serve_real_gold.py",
+   "kind": "script",
+   "commit_or_etag": "78f11f5a02",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC1 instrument; read-only S3 LIST/GET."
+  },
+  {
+   "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~31/scripts/ac2_route_failure_is_not_empty.py",
+   "kind": "script",
+   "commit_or_etag": "78f11f5a02",
+   "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+   "deploy_evidence": "AC2 instrument; no S3, no network."
+  }
+ ],
+ "acceptance": [
+  {
+   "criterion_id": "AC1",
+   "criterion_verbatim": "BOTH ROUTES SERVE REAL LANDED GOLD, not fixtures, and the proof is that the numbers match an independent read. Call each route in-process for the validation security and print: the route path, the field names returned against the spec's enumerated list with the set difference in BOTH directions, and the dense day count with its days-in-range denominator (equal, no gap). THEN prove the data is REAL: print the same day count and the same event count read directly via publication_gold._latest_gold_snapshot_rows, and show the two agree. A route that returns correct-shaped data from a fixture FAILS this criterion -- the independent read is what separates wired from stubbed, and that distinction is the whole reason this cell exists",
+   "method": "command",
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~31/scripts/ac1_routes_serve_real_gold.py",
+   "output_evidence": "exit 0. Deciding lines: 'dense day count served=267, days-in-range denominator (2026-01-01..2026-09-24)=267'; 'INDEPENDENT: day count read directly=267, served=267; event count read directly=4, served=4'; 'INDEPENDENT: articles on 2026-05-22 read directly=3, served=3, chatter_daily articles_total=3'; 'RESULT: PASS (0 failing checks)'. Loaders are the production ones (no seam patched) and read through publication_gold._latest_gold_snapshot_rows. Excerpt:\nnewest landed snapshot of chatter_daily (4 parts listed): s3://opal-data-harvest/amgt/harvest/gold/chatter_daily/date=2026-09-24/part-20260924T105051Z.parquet\nnewest landed snapshot of chatter_event (3 parts listed): s3://opal-data-harvest/amgt/harvest/gold/chatter_event/date=2026-09-24/part-20260924T134754Z.parquet\nnewest landed snapshot of article_security_mention (3 parts listed): s3://opal-data-harvest/amgt/harvest/gold/article_security_mention/date=2026-09-24/part-20260924T105025Z.parquet\nindependent read: 992_HK_Equity chatter_daily rows=267 (first=2026-01-01 last=2026-09-24) chatter_event rows=4 mention rows=32\nROUTE 1: GET /api/scoped/amgt/security/992_HK_Equity/timeline -> HTTP 200\n  range top-level keys: served=4 spec=4 served-minus-spec=[] spec-minus-served=[]\n  series entry: served=15 spec=15 served-minus-spec=[] spec-minus-served=[]\n  event entry: served=9 spec=9 served-minus-spec=[] spec-minus-served=[]\n  dense day count served=267, days-in-range denominator (2026-01-01..2026-09-24)=267\n  INDEPENDENT: day count read directly=267, served=267; event count read directly=4, served=4\nPASS: day count agrees with the independent read \nPASS: event count agrees with the independent read \n  sum(articles_total) served=27 independent=27\n  sub-range from=2026-09-01 to=2026-09-15: HTTP 200, served days=15, denominator=15\nPASS: sub-range dense: 15 of 15 \nROUTE 2: GET /api/scoped/amgt/security/992_HK_Equity/timeline/day/2026-05-22 -> HTTP 200\n  day top-level keys: served=4 spec=4 served-minus-spec=[] spec-minus-served=[]\n  article entry: served=9 spec=9 served-minus-spec=[] spec-minus-served=[]\n  INDEPENDENT: articles on 2026-05-22 read directly=3, served=3, chatter_daily articles_total=3\nPASS: article count agrees with the independent read \nPASS: article keys equal the independent read \nRESULT: PASS (0 failing checks)",
+   "denominator": "267 of 267 dense days (2026-01-01..2026-09-24) served vs 267 read directly; 4 of 4 events; 3 of 3 articles on 2026-05-22; 267 of 267 stored-field rows equal; series 15/15, event 9/9, article 9/9, range-top 4/4, day-top 4/4 fields, set difference empty both directions; 22 PASS checks, 0 FAIL",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC2",
+   "criterion_verbatim": "A FAILED LOAD IS UNREACHABLE TO THE EMPTY-ARRAY ENCODING, at the ROUTE layer. Inject a loader failure (raise, timeout, and malformed rows) into each of the two routes -- 6 cases -- and print for each the HTTP status and body, showing it carries `error: true` with a non-empty stable `error_code` and NO `series`/`events`/`articles` key. Then the CONTRAST: a SUCCESSFUL call over a range with no data, returning an empty array and NO error key. Print the exact predicate a caller uses to tell them apart. 6 of 6 failure cases plus the honest-empty control, or the criterion FAILS. timeline_api already proved this server-side over constructed rows (HVST-w-3 AC2); this proves the ROUTE does not undo it",
+   "method": "command",
+   "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~31/scripts/ac2_route_failure_is_not_empty.py",
+   "output_evidence": "exit 0. 'failure cases held: 6 of 6'; 'RESULT: PASS -- 6 of 6 failure cases + honest-empty controls (0 failing)'. Predicate printed: failed = (http_status != 200) and (body.get('error') is True). Excerpt:\nFAILURE CASES (each must be HTTP != 200, error:true, non-empty error_code, no series/events/articles key)\nPASS: range/raise      HTTP 502 error_code=TIMELINE_FETCH_FAILED data_keys_present=[]\nPASS: range/timeout    HTTP 504 error_code=TIMELINE_TIMEOUT data_keys_present=[]\nPASS: range/malformed  HTTP 502 error_code=TIMELINE_UPSTREAM_MALFORMED data_keys_present=[]\nPASS: day/raise        HTTP 502 error_code=TIMELINE_FETCH_FAILED data_keys_present=[]\nPASS: day/timeout      HTTP 504 error_code=TIMELINE_TIMEOUT data_keys_present=[]\nPASS: day/malformed    HTTP 502 error_code=TIMELINE_UPSTREAM_MALFORMED data_keys_present=[]\nfailure cases held: 6 of 6\n     HTTP 504 body={\"error\": true, \"error_code\": \"TIMELINE_TIMEOUT\", \"message\": \"chatter_daily read timed out: injected S3 read timeout\"}\nPASS: range/honest-empty HTTP 200\nPASS: day/honest-empty (COMPLETE day, 0 articles) HTTP 200\n    failed = (http_status != 200) and (body.get('error') is True)   # == timeline_api.is_error_body(body) on the body\n    a failed body carries error:true + error_code and NEVER series/events/articles;\n    an honest-empty body is HTTP 200, carries an empty series/events/articles array, and NEVER an `error` key.\nRESULT: PASS -- 6 of 6 failure cases + honest-empty controls (0 failing)",
+   "denominator": "6 of 6 failure cases (3 injections x 2 routes: HTTP 502/504, error:true, non-empty error_code, no series/events/articles key) plus 2 of 2 honest-empty controls (HTTP 200, empty array, no error key); bonus S3-timeout-class case HTTP 504",
+   "status": "PASS"
+  },
+  {
+   "criterion_id": "AC3",
+   "criterion_verbatim": "the api suite passes with the new route tests NAMED in the -rA output, and the pass count printed BEFORE and AFTER so nothing elsewhere went red. \u26d4 If any pre-existing test in this suite fails, report it with its error text and DO NOT repair it -- lib/research/api/ is AMGT_RESAPP's surface and a pre-existing failure there is a surprise ROW, not this cell's work",
+   "method": "command",
+   "invocation": "python -m pytest lib/research/api/tests/ -rA --tb=line",
+   "output_evidence": "exit 0. BEFORE (HEAD scoped_amgt.py, no new tests): '============================ 239 passed in 53.48s ============================='. AFTER: '======================= 255 passed in 69.12s (0:01:09) ========================'. New tests named in -rA output (16): test_timeline_route_day_absent_is_a_404_envelope_not_an_empty_list, test_timeline_route_day_joins_headline_and_orders_strongest_first, test_timeline_route_failed_load_is_an_error_envelope_never_an_empty_array, test_timeline_route_honest_empty_range_is_200_with_no_error_key, test_timeline_route_key_with_slash_encoded_and_literal, test_timeline_route_post_and_event_route_are_not_wired, test_timeline_route_range_honours_from_and_to, test_timeline_route_range_serves_only_this_securitys_gold, test_timeline_route_s3_timeout_class_is_reported_as_timeout, test_timeline_route_unresolved_identity_uses_requested_key_verbatim, test_timeline_routes_are_declared_as_data_and_stay_out_of_the_mounted_table. No pre-existing test failed, so no neighbour-repair row was needed.",
+   "denominator": "255 passed 0 failed AFTER vs 239 passed 0 failed BEFORE (+16 new route tests, all named below); 0 pre-existing failures",
+   "status": "PASS"
+  }
+ ],
+ "controls": {
+  "mutant": {
+   "description": "Two single-line mutants of the real route code, each run against its own criterion script unmodified. (a) _timeline_response mutated so an error envelope returns HTTP 200 with empty series/events/articles arrays (the adversary AC2 exists for). (b) _timeline_daily_loader mutated to drop its last row ([:-1]).",
+   "expected": "(a) AC2 fails its 6 failure cases and exits non-zero; (b) AC1's dense-count and independent-read checks fail and exit non-zero.",
+   "observed": "(a) AC2 rc=1: 'failure cases held: 0 of 6', 'RESULT: FAIL -- 0 of 6 ... (7 failing)'. (b) AC1 rc=1: 3 FAIL lines ('dense: served day count equals days-in-range (no gap)', 'dense: served dates are exactly every calendar day from the floor', 'day count agrees with the independent read'), 'RESULT: FAIL (3 failing checks)'. Both reverted from a saved copy; git diff --stat showed 139 insertions and 0 residual [:-1] before the commit.",
+   "status": "FIRED-AS-EXPECTED"
+  },
+  "determinism": {
+   "method": "AC1 and AC2 each run twice more with no code change between runs, stdout compared byte for byte (cmp).",
+   "observed": "AC1 outputs byte-identical (AC1-IDENTICAL), AC2 outputs byte-identical (AC2-IDENTICAL); both rc=0 on both runs. The gold snapshot is a fixed landed object (newest date=2026-09-24 parts named in the AC1 output), so the read is stable until a newer snapshot lands.",
+   "status": "STABLE"
+  }
+ },
+ "declared_exclusions": [
+  {
+   "item": "The event route GET .../timeline/event/<first_day> (get_timeline_event)",
+   "reason": "Order section 3.2: not in scope this cell. It stays unwired; a test pins that the path does not return data."
+  },
+  {
+   "item": "Gateway mount: terraform route_keys in scoped-amgt-api.tf and scoped_amgt_route_table() (16 routes)",
+   "reason": "Outside this order's <paths>; adding to the table would break test_scoped_amgt_mount.py. Routes declared as TIMELINE_ROUTES data. Row AMGT_HARVST-Z-W31-S1."
+  },
+  {
+   "item": "Portal files, push, deploy, FWD-5 walk",
+   "reason": "Order sections 3.4 and 5: the push waits on Andrew and on this cell landing."
+  },
+  {
+   "item": "Day-route latency work (reading fewer silver parts)",
+   "reason": "Would touch publication_gold or timeline_api, outside <paths>. Measured 15.8s locally against a 29s gateway ceiling. Row AMGT_HARVST-Z-W31-S2."
+  },
+  {
+   "item": "HTTP 400 for a client-supplied invalid from/to date",
+   "reason": "timeline_api (not modifiable here) reports it as TIMELINE_UPSTREAM_MALFORMED, which the route maps to 502; the spec defines one envelope and no 4xx for it."
+  }
+ ],
+ "surprises": [
+  "AMGT_HARVST-Z-W31-S1: the two timeline routes are handled by scoped_amgt.handler but not mounted at the gateway (scoped-amgt-api.tf has 0 occurrences of timeline; route table left at 16 so test_scoped_amgt_mount.py stays green). ARMED, disarm owner 2.0.0_SA_COO~H.",
+  "AMGT_HARVST-Z-W31-S2: the day route takes ~15.8s per call from this box (range ~5.4s) because the headline join scans all silver articles; 29s gateway ceiling. ARMED, disarm owner 2.0.0_SA_COO~H."
+ ],
+ "session_log": "Worker 0.9.0_WK_AMGT_HARVST~31, L7 subagent of 2.0.0_SA_COO~H (issuer 2.0.0_SA_COO~Y re-seated), in worktree wk-hvst-r11b-31 on branch wk-AMGT_HARVST-31. THE BAR: branch printed, TREE-OK. Read timeline_api.py, publication_gold._latest_gold_snapshot_rows, and scoped_amgt.handler's per-security arm. BUILD: added _timeline_split (path shape incl. a slash-bearing key), one gold seam _timeline_snapshot_rows over publication_gold._latest_gold_snapshot_rows (timeout-class exceptions re-raised as UpstreamTimeout), three loaders, a silver join for headline and published_precision via publication_gold._iter_latest_articles, and _timeline_response mapping the envelope to HTTP 504/404/502. timeline_api.py, publication_gold.py and the portal were not touched. Baseline api suite measured on HEAD before any new test: 239 passed. AC1/AC2/AC3 run as literal invocations; mutants and determinism recorded in controls. Two rows filed (S1 mount gap, S2 latency). Commit 78f11f5a02 carries code, tests, scripts and rows; the instance and the status flip land in the next commit.",
+ "compiler_tools": [
+  {
+   "tool": "pytest",
+   "invocation": "python -m pytest lib/research/api/tests/ -rA --tb=line",
+   "result": "======================= 255 passed in 69.12s (0:01:09) ======================== (after); ============================ 239 passed in 53.48s ============================= (before)"
+  },
+  {
+   "tool": "safe-commit.sh",
+   "invocation": "bash .tools/safe-commit.sh --author ... -F .scratch/msg1.txt -- <paths>",
+   "result": "committed 78f11f5a02; commit-gate, surprise-row-gate (2 new rows of 73), missions-tree-check all OK"
+  }
+ ]
+}
