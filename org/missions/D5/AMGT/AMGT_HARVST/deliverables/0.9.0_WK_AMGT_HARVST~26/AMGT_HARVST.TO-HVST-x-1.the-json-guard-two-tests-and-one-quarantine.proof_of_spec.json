@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0",
+  "to_id": "AMGT_HARVST.TO-HVST-x-1.the-json-guard-two-tests-and-one-quarantine",
+  "firm": "FABRIC",
+  "decomp_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/decompositions/AMGT_HARVST_DECOMP.md",
+    "vintage_commit": "402a3414c7c8ae9a7ea9eb69c2209fef7a740ed8",
+    "to_ref": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-x-1.the-json-guard-two-tests-and-one-quarantine.md"
+  },
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D5/AMGT/AMGT_HARVST/task-orders/AMGT_HARVST.TO-HVST-x-1.the-json-guard-two-tests-and-one-quarantine.md",
+    "group": "C",
+    "vintage_commit": "402a3414c7c8ae9a7ea9eb69c2209fef7a740ed8"
+  },
+  "assignee": "0.9.0_WK_AMGT_HARVST~26",
+  "artifacts_produced": [
+    {
+      "path_or_key": "lib/opal_data_harvest/publishers.py",
+      "kind": "script",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "DowJones.check() (:672) now guards response.json(): a non-dict result (including None) or a decode error raises AuthExpired instead of AttributeError. commit-gate.sh clean.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_worker.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "test_single_broken_dow_jones_article_is_skipped_but_repeated_server_failure_stops's double completed: client.session now answers /client?legacy=false with a valid logged-in body; only DowJones.discover/DowJones.article are patched (via patch.object on the imported class), so check() runs for real, unmocked. commit-gate.sh clean.",
+      "artifact_covered_by": ["AC2"]
+    },
+    {
+      "path_or_key": "lib/opal_data_harvest/test_verification.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "test_disabled_barrons_contract_defers_before_opening_a_browser quarantined with @unittest.skip carrying the alternation reason and naming cell w-4; no assertion touched. commit-gate.sh clean.",
+      "artifact_covered_by": ["AC3"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~26/scripts/ac1_json_guard.py",
+      "kind": "test",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Demonstrates the guard directly: pulls the PRE-FIX check() body verbatim from git pin 402a3414c7c8ae9a7ea9eb69c2209fef7a740ed8 (never retyped), drives it with a fake session whose .json() returns None (negative control, AttributeError), then drives the SAME input through the current, post-fix check() (AuthExpired), then two positive controls (valid logged-in body passes; logged-out body still raises AuthExpired). commit-gate.sh clean.",
+      "artifact_covered_by": ["AC1"]
+    },
+    {
+      "path_or_key": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~26/AMGT_HARVST.TO-HVST-x-1.the-json-guard-two-tests-and-one-quarantine.session_log.md",
+      "kind": "doc",
+      "commit_or_etag": "PENDING-THIS-COMMIT",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Session log: all three items, both controls, all three criteria's evidence, commit-gate result, and the surprise row filed.",
+      "artifact_covered_by": ["AC1", "AC2", "AC3"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "AC1",
+      "criterion_verbatim": "THE GUARD IS SHOWN DIRECTLY, NEVER THROUGH THE SUITE. Print, in order: (a) a NEGATIVE CONTROL at pre-fix behaviour -- a fake session whose `.json()` returns None driven through `DowJones.check()`, raising `AttributeError`, with the exception type and message verbatim; (b) the SAME input after the guard, raising `AuthExpired` with its message; (c) a POSITIVE control that the guard did not swallow the normal path -- a well-formed logged-in body still passes `check()` without raising, and a logged-OUT body still raises `AuthExpired` (so the guard is not returning early on valid JSON). A pass requires (a) to FAIL pre-fix: a criterion that never makes the defect appear proves nothing. Print the three outcomes with the exception class named in each",
+      "method": "command",
+      "invocation": "python org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~26/scripts/ac1_json_guard.py",
+      "output_evidence": "(a) NEGATIVE CONTROL -- pre-fix check() (pin 402a3414c7c8ae9a7ea9eb69c2209fef7a740ed8), .json() -> None:\n    AttributeError: 'NoneType' object has no attribute 'get'\n(b) SAME INPUT after the guard, post-fix check(), .json() -> None:\n    AuthExpired: Dow Jones session is logged out\n(c1) POSITIVE CONTROL -- logged-in body {'isLoggedIn': True, 'type': 'prosubscriber'}:\n    PASSED, no exception (expected)\n(c2) POSITIVE CONTROL -- logged-out body {'isLoggedIn': False, 'type': 'prosubscriber'}:\n    AuthExpired: Dow Jones session is logged out\n\nAC1 PASS: (a) is AttributeError pre-fix, (b) is AuthExpired post-fix on the same input, (c1) a valid logged-in body still passes, (c2) a logged-out body still raises AuthExpired.",
+      "denominator": "4 of 4 sub-outcomes correct (a/b/c1/c2), rc=0",
+      "status": "PASS",
+      "expect": "AttributeError.*AuthExpired.*PASSED, no exception.*AuthExpired.*AC1 PASS"
+    },
+    {
+      "criterion_id": "AC2",
+      "criterion_verbatim": "THE SUITE'S FAILED COUNT IS ZERO, OR EVERY REMAINING FAILURE IS QUARANTINED WITH A NAMED REASON. Print the BEFORE and AFTER lines verbatim. BEFORE, measured by the issuer at this cut: `3 failed, 306 passed` across TWO tests (one SUBFAILS twice). Expected AFTER: the dow-jones test passes once its double is completed, and the barrons test appears as QUARANTINED (skipped/xfailed) rather than failed, with its marker reason visible in the `-rA` output. State the passed count too -- a failed count that falls while the passed count also falls means tests were removed, not fixed, and that FAILS this criterion",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/research/harvest/tests/ lib/opal_data_harvest/ -rA --tb=line",
+      "output_evidence": "BEFORE (issuer's own measurement at this cut, task order section 1): 3 failed, 306 passed. AFTER, this slot's literal run: last two lines --\nSKIPPED [1] lib\\opal_data_harvest\\test_verification.py:10: QUARANTINE, not a repair (HVST-x-1 item 3): this test alternates between KeyError: 'bundle' and FileExistsError: [WinError 183] Cannot create a file when that file already exists across two identical runs with no intervening edit -- a test that fails differently on identical input is not a regression baseline. Its diagnosis belongs to cell w-4's scope, not this cell's.\n======================= 306 passed, 1 skipped in 3.23s ========================\nFull collection: 307 items (306 + 1). 0 failed. The dow-jones test (test_single_broken_dow_jones_article_is_skipped_but_repeated_server_failure_stops) now appears only under PASSED (both subTest arms). The barrons test appears as SKIPPED with its reason string printed above. Passed count 306 -> 306: unchanged, so no test was removed to force the count down.",
+      "denominator": "306 passed (unchanged from BEFORE) + 1 skipped (quarantined, was 1 of the 3 failed) = 307 collected; 0 failed (was 3)",
+      "status": "PASS",
+      "expect": "306 passed, 1 skipped"
+    },
+    {
+      "criterion_id": "AC3",
+      "criterion_verbatim": "THE QUARANTINE IS VISIBLE AND CARRIES ITS REASON, on the file that holds it. BEFORE, measured by the issuer at this cut: `1 failed, 3 passed`. Expected AFTER: 0 failed, with `test_disabled_barrons_contract_defers_before_opening_a_browser` reported as skipped/xfailed and its REASON TEXT printed in the `-rA` summary, naming (i) that it alternates between `KeyError: 'bundle'` and `FileExistsError: [WinError 183]` on identical input and (ii) that its diagnosis belongs to cell `w-4`. Print the reason string verbatim -- a quarantine whose reason is not in the output is a silent skip, which is worse than the red test",
+      "method": "test_suite",
+      "invocation": "python -m pytest lib/opal_data_harvest/test_verification.py -rA --tb=line",
+      "output_evidence": "BEFORE (issuer's own measurement at this cut, task order section 1): 1 failed, 3 passed. AFTER, this slot's literal run:\nPASSED lib/opal_data_harvest/test_verification.py::Tests::test_http_200_restriction_page_does_not_prove_api_recovery\nPASSED lib/opal_data_harvest/test_verification.py::Tests::test_json_challenge_url_is_not_an_unlocked_article\nPASSED lib/opal_data_harvest/test_verification.py::Tests::test_unlocked_body_and_publisher_word_count_must_agree\nSKIPPED [1] lib\\opal_data_harvest\\test_verification.py:10: QUARANTINE, not a repair (HVST-x-1 item 3): this test alternates between KeyError: 'bundle' and FileExistsError: [WinError 183] Cannot create a file when that file already exists across two identical runs with no intervening edit -- a test that fails differently on identical input is not a regression baseline. Its diagnosis belongs to cell w-4's scope, not this cell's.\n======================== 3 passed, 1 skipped in 0.08s =========================\nThe reason string names both required facts verbatim: (i) the KeyError: 'bundle' / FileExistsError: [WinError 183] alternation on identical input, (ii) that the diagnosis belongs to cell w-4's scope.",
+      "denominator": "0 of 4 failed (was 1 of 4); 3 passed, 1 skipped",
+      "status": "PASS",
+      "expect": "KeyError: 'bundle'.*FileExistsError: \\[WinError 183\\].*w-4"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "Reverted DowJones.check() (publishers.py:672) from the guarded version back to the exact pre-fix unguarded line (self.session.get(...).json() with no isinstance/try-except guard), then re-ran AC1's exact script unmodified.",
+      "expected": "AC1 fails: (b) the post-fix call, driven with the same .json()->None fake session, now raises AttributeError instead of AuthExpired, and the script's own assertion prints a FAIL line and exits non-zero.",
+      "observed": "rc=1. Printed: '(b) SAME INPUT after the guard, post-fix check(), .json() -> None: AttributeError: '\"'\"'NoneType'\"'\"' object has no attribute '\"'\"'get'\"'\"'' then 'FAIL: expected AuthExpired' then 'AC1 FAIL: see the FAIL line(s) above.'. Mutation reverted by re-applying the guard verbatim; git diff --stat confirmed the restored file matches the intended edit exactly (11 insertions, 3 deletions against HEAD 402a3414c7); commit-gate.sh and ruff re-run clean; AC1 re-run rc=0 PASS.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "AC1's script run twice back-to-back post-restore via subprocess, stdout captured and compared byte-for-byte.",
+      "observed": "Both runs rc=0, stdout byte-identical, sha256 56399fc9fb87c0a8cbd67f3933bf5dd141e7bf7f8b5ad2261b22232e9a89c4a4.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "lib/research/harvest/ -- any file under this tree",
+      "reason": "Not in this cell's write grant (bounds section 5.2); the AC2 suite includes lib/research/harvest/tests/ only as a read-only member of the combined run, never edited."
+    },
+    {
+      "item": "Diagnosing why test_disabled_barrons_contract_defers_before_opening_a_browser alternates (KeyError: 'bundle' vs FileExistsError: [WinError 183])",
+      "reason": "Explicitly out of scope (bounds section 5.4): that diagnosis belongs to cell w-4. This cell only quarantines it with the reason named, per item 3."
+    },
+    {
+      "item": "Repairing the module-identity patch-target bug found while completing item 2 (test_worker.py:51's sibling `patch(\"lib.opal_data_harvest.transport.time.time\", ...)`, and test_verification.py:11's `patch.dict(\"lib.opal_data_harvest.verification.REGISTRY\", ...)`)",
+      "reason": "A fourth finding beyond this cell's three mechanical criteria (bounds section 5.1); filed as surprise row AMGT_HARVST-Z-W26-S1 instead of investigated or repaired. Item 2's own fix routes around the bug (patch.object on the directly-imported class) rather than relying on or repairing it."
+    }
+  ],
+  "surprises": ["AMGT_HARVST-Z-W26-S1"],
+  "session_log": "org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~26/AMGT_HARVST.TO-HVST-x-1.the-json-guard-two-tests-and-one-quarantine.session_log.md",
+  "compiler_tools": [
+    {
+      "tool": "py_compile",
+      "invocation": "python -c \"import py_compile; py_compile.compile(path, doraise=True)\" on all 4 touched .py files",
+      "result": "OK on all 4, before and after the mutant revert"
+    },
+    {
+      "tool": ".tools/commit-gate.sh",
+      "invocation": "bash .tools/commit-gate.sh lib/opal_data_harvest/publishers.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_verification.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~26/scripts/ac1_json_guard.py",
+      "result": "All checks passed! OK: pre-commit gate clean for 4 of 4 file(s)"
+    },
+    {
+      "tool": "ruff",
+      "invocation": "python -m ruff check --target-version py39 lib/opal_data_harvest/publishers.py lib/opal_data_harvest/test_worker.py lib/opal_data_harvest/test_verification.py org/missions/D5/AMGT/AMGT_HARVST/deliverables/0.9.0_WK_AMGT_HARVST~26/scripts/ac1_json_guard.py",
+      "result": "All checks passed!"
+    }
+  ]
+}
