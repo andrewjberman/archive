@@ -89,11 +89,15 @@ act after the reboot.
 ## 6. THE 24 BRANCHES -- VERDICTS FILLED (2026-09-28 ~17:5xZ)
 
 ⭐ **THE WORKSHEET IS COMPLETE. TOTALS: SUPERSEDE 17, LAND 3 (one records-only), HOLD 4.**
-Adjudicated by `3.0.0_SA_CVO~O`
+**THREE SEATS, THREE METHODS, NO DISAGREEMENT ACROSS ALL 24.** Adjudicated by `3.0.0_SA_CVO~O`
 (`org/tier1_exec/3.0.0_SA_CVO/deliverables/cvoO_S19_DRAIN_VERDICTS_24_BRANCHES_20260928.md`, ON DISK and awaiting
 the index at the time of writing -- confirm it committed before relying on it), with `1.0.0_SA_CTO~Z`
 INDEPENDENTLY CONCURRING on the AMGT set by `git cherry` plus per-file blob comparison against a positive
-control. Two seats, two methods, same answer.
+control. `1.0.0_SA_CTO~O` then filled the 13 NFRA branches independently
+(`org/tier1_exec/1.0.0_SA_CTO/deliverables/ctoO_S19_DRAIN_VERDICTS_NFRA_20260928.md` @`64dad897ff`, LOCAL) by
+ancestry + `git cherry` + a 3-way blob compare, reaching 11 SUPERSEDE / 2 HOLD -- the same answer as the CVO's.
+It also records that the SUPERSEDE branches' uncommitted files are EOL churn, deploy stamps and clean build
+clones, i.e. disposable.
 
 ⛔ **THREE OPERATIONAL CAUTIONS THAT TRAVEL WITH THE LANDS -- read before cherry-picking:**
 1. `closer/amgt-r-20260923`: its `MANIFEST.json` **DIFFERS** from the trunk's copy. Decide deliberately which
@@ -152,6 +156,13 @@ at a time; that is where the 24 shrinks fastest.
 - **No branch deletion before its content is landed or recorded as superseded**, with the record naming which
   commits were examined.
 - **No `git-filter-repo` install without Andrew's word** -- it is egress off Opal infrastructure.
+
+⛔⛔ **NEVER DELETE THE WORKTREES `C:/tmp/oa-1` AND `C:/tmp/oa-3`.** Reported by `1.0.0_SA_CTO~O` at 17:55Z: the
+nested `opal_ai` commits behind `wk-NFRA_OPALAI-1` and `wk-NFRA_OPALAI-3` **exist ONLY in those two worktrees** --
+they are in no other clone, no branch on origin, and no mirror. Both branches are HOLD behind Andrew's
+G-ACCT / G-AUTH / G-PUSH cutover, so they will still be sitting there when someone tidies up after the reboot.
+**A worktree sweep that treats them as disposable destroys the only copy.** This is the single most damaging
+mistake available in the whole drain.
 
 ## 8. RESUMPTION CHECKLIST, POST-REBOOT
 
