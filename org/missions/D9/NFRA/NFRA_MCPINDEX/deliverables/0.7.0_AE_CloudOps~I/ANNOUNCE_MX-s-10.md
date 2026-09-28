@@ -258,3 +258,120 @@ happens.
 **What the never-widen halves are still being asked to sign remains a document READ, not a document
 EXERCISED** -- and the `asset_id`-set diff is still not in this file, for the same reason. That does
 not change under A2.
+
+---
+
+# STEP 2 ADDENDUM -- two ad-hoc runs, neither reached the vendor; a second BLOCKING row (Z-S44)
+
+Issuer GO at 094028Z (its own s11.AC1/AC2/AC3 re-run at HEAD). Before running I re-ran `s11.AC2` and
+`s11.AC3` myself -- PASS and PASS, 4 of 4 byte-identical to HEAD -- so the gate rested on three
+independent runs (DS's, the issuer's, mine) rather than a producer's self-report.
+
+**Neither run reached Black Diamond. Zero vendor calls have been made by this cell.** That matters
+because the order budgets "one ad-hoc run": attempt 1 died inside the document's own date resolution
+before any network call, and attempt 2 died at the Secrets Manager read, which precedes
+`mint_bearer`. The vendor budget is intact.
+
+## The BEFORE/AFTER oracle, and why its DELTA=0 is NOT the acceptance
+
+One instrument, run on both sides -- writing a second differently-shaped reader would have made any
+difference unattributable between the world and the instrument.
+
+| | BEFORE | AFTER |
+|---|---|---|
+| LastModified | `2026-09-28T06:22:06Z` | **`2026-09-28T06:22:06Z`** |
+| ETag | `a218b3ddb9f93db93ba6fa45b3a97f66` | **identical** |
+| rows / unique `asset_id` | 12,141 / 12,141 | 12,141 / 12,141 |
+| `asset_id` set sha256 | `b38a8b0a…4cb9616a` | **equal** |
+| added / removed | -- | **0 / 0** |
+
+**Read this correctly.** The served `silver/bd_assets_dim.parquet` was **not touched** -- which is the
+NEVER-1 assurance worth having, since both runs failed on a SERVED-class producer. But the DELTA=0 is
+**produced by the failure, not by agreement**: the pull never ran, so nothing could have differed. It
+is a zero measured downstream of the bypass. The order's and the ruling's DELTA=0 -- the pull running
+and yielding the same `asset_id` set -- **remains unexercised**, and the never-widen halves should not
+read this table as satisfying it.
+
+The BEFORE side does cross-check independently: 12,141 = MX-s-9's 12,132 pulled rows + the 9-row
+union tail it measured, and `asset_id` is unique 1:1 with rows.
+
+## Attempt 1 -- `ssm:c8c60492-b443-4839-b16c-8eebf1e1c859`, Failed rc=1, 09:49:03->09:49:11Z
+
+Cause was **mine**: `ERROR: could not resolve the last completed trading day; refusing to guess a date`
+-> `PULL_RC=91`. The log stderr names it exactly:
+
+```
+TypeError: prev_trading_day() missing 1 required positional argument: 'date'
+```
+
+`lib/trading_calendar.py:93` is `def prev_trading_day(date: object)`. I wrote that call from the
+MX-s-9 spec's *prose* ("via `lib/trading_calendar.prev_trading_day`") without reading the signature --
+the same class of error I spent this session catching in other people's work. Ruled as amendment A3
+`@9b5e3c3fd9`, which prescribes the fix I had already applied; the issuer diagnosed it independently
+from the same log.
+
+**What it proved anyway:** the A2 closure staged **7 of 7** objects into the RUNROOT tree, every fetch
+succeeding -- so the dependency set and the tree shape are right. And my refusal guard did its job:
+rather than passing an empty or guessed date to the vendor, it stopped.
+
+The fix is verified twice, not once: `prev_trading_day(now(utc).date())` returns **09/25/2026**
+locally, and the **exact line lifted from the document** -- same quoting, same shell -- also resolves
+`09/25/2026`. A3 asked for the local run first; that is it.
+
+## Attempt 2 -- `ssm:103d29fd-1960-4944-ba60-17b797c603f9`, Failed rc=1, 10:07:37->10:07:47Z
+
+The as-of resolved and the run advanced to `pull_bd_asset_dim_rest.py:172 load_bd_cookie`, where:
+
+```
+botocore.exceptions.ClientError: AccessDeniedException ...
+User: arn:aws:sts::313476888478:assumed-role/bd-exporter-ec2-role/i-0e6f6dc014fdcf1cd
+is not authorized to perform: secretsmanager:GetSecretValue
+on resource: blackdiamond/49f/session
+```
+
+**This refutes this order's own preflight**, which declares `comp-iam:
+DECLARED-NOT-APPLICABLE -- the instance role already reads blackdiamond/49f/session (used by the
+MX-s-9 module)`. Filed as row **`Z-S44`**, under the same preflight's own contingency: *"if a
+permission is missing, that is a BLOCKING row, never a hand-added grant."*
+
+Why the premise was wrong, as a mechanism rather than a slip: it reasoned *the MX-s-9 module reads
+this secret, therefore the instance role reads it.* The module does read it -- but every run of it so
+far was made by a principal that **holds** the grant, never by `i-0e6f6dc014fdcf1cd`. Moving a working
+script to a new host moves it to a new **principal**, and the script's past success carries its old
+identity context silently.
+
+Measured, on both planes:
+
+- **DESIRED** (`comp-iam role bd-exporter-ec2-role`, chosen over a raw `get-role-policy` because its
+  TF-vs-live reconcile is what catches a declared-but-unapplied control): 34 statements, exactly
+  **one** `GetSecretValue`, on `anthropic-api-key-*`, `openai-api-key-*`, `opal/bd/credentials-*` and
+  one entry the tool truncated as `... +1 more`. **The truncation is named, not read through** -- the
+  absence verdict rests on the live refusal, never on that elided list.
+- **Whose grant it is** (`comp-find 'blackdiamond/49f/session'`, 570 hits / 76,953 files, all 10 DEF
+  shown): every consumer is a **Lambda** (`bd-49f-runner:56`, `bd-49f-fees-runner:40`,
+  `bd-49f-keepalive:45`, `bd-49f-freshness-probe:55`, `bd-49f-session-trigger:76`,
+  `opal-assets-bd49f-daily-pull:70`, `-reporting-pull:45`) or the `bd-49f-auto-login` EC2, which
+  **writes** it. Not one is `bd-exporter-ec2-role`.
+
+So the role is provisioned for the **portal era**: its one secret grant is `opal/bd/credentials` --
+the username and password this very order removes.
+
+**The delta is one statement**, and I did not add it: `secretsmanager:GetSecretValue` on
+`arn:...:secret:blackdiamond/49f/session-*`, via Terraform and `safe-apply` (rule 18). Not proposed as
+a rider, because an EC2 instance role gaining read on a live vendor session token is a widening that
+wants its own sign-off -- the same instance runs the other BD Playwright downloaders, so the grant is
+not scoped to this producer alone. Two things Z-S44 does **not** claim: that the grant is safe to add
+(the grantor's call), and that it is sufficient -- nothing past `load_bd_cookie` has ever run.
+
+## The KEEP properties are now exercised three times
+
+Across the MX-s-4 planted probe and both of these real failures, SSM recorded **Failed** and the
+instance **stopped itself** every time -- 09:51:38Z and 10:10:28Z here. The honest exit and the
+shutdown-before-exit ordering are no longer single-observation properties.
+
+## What PHASE B still needs
+
+1. **Z-S44** -- the IAM statement. Hard gate; without it the producer cannot authenticate at all.
+2. **Then step 2 re-run, and only then the halves.** The `asset_id`-set diff the halves are meant to
+   weigh still does not exist, for the third time of saying so.
+3. Rollback unchanged: prior document version **3**, Active, hash `490af524...d442129`.
