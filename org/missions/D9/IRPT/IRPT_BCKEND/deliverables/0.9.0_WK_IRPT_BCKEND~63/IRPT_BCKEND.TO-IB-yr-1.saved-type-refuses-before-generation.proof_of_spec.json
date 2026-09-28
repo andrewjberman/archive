@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0",
+  "to_id": "IRPT_BCKEND.TO-IB-yr-1",
+  "firm": "FABRIC",
+  "phase": "BUILD-GENERAL",
+  "spec_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/prd/IRPT_BCKEND_PRD.md",
+    "group": "B",
+    "vintage_commit": "be111d1e5d53eff514292e345943d0a4f16bcb43"
+  },
+  "decomp_ref": {
+    "doc": "org/missions/D9/IRPT/IRPT_BCKEND/decompositions/IRPT_BCKEND_DECOMP_R19_Y.md",
+    "vintage_commit": "ecbb08548fd051f084949b161bfd2a5a77242e74",
+    "to_ref": "org/missions/D9/IRPT/IRPT_BCKEND/task-orders/IRPT_BCKEND.TO-IB-yr-1.saved-type-refuses-before-generation.md"
+  },
+  "assignee": "0.9.0_WK_IRPT_BCKEND~63",
+  "artifacts_produced": [
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py",
+      "kind": "script",
+      "commit_or_etag": "d2b2750cd5830bb337ca86aa1e208f4a64fa52a1",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not deployed by this order (BOUNDS: served code moves only through 2.0.0_SA_COO~P's next resident/generate builds). Blob hash is the git blob of the worktree file at commit time; step_read_back's return dict now carries `saved_portfolio_type` (effective.get(\"model_portfolio_type\") when source == \"saved_portfolio\", else None), absent at HEAD (git show HEAD:<path> before this edit carried no such key).",
+      "introduces": ["saved_portfolio_type"],
+      "artifact_covered_by": ["Y19-1-AC1", "Y19-1-AC2"]
+    },
+    {
+      "path_or_key": "infra/aws/lambda/investor-reporting/ycharts/generate/resident_worker.py",
+      "kind": "script",
+      "commit_or_etag": "04e17817c306e0ffdd00e7fa92bbdcd79072c59d",
+      "deployed_state": "STAGED-AWAITING-GATE",
+      "deploy_evidence": "Not deployed by this order (same BOUNDS). Blob hash is the git blob of the worktree file at commit time; the semantic read-back checkpoint filter now keeps `saved_portfolio_type`, and a new pre-generation gate raises WorkerAttention(\"TOLERANCE_REQUIRES_STATIC\") when a row is tolerated and saved_portfolio_type is present and not \"fixed\" -- both absent at HEAD (git show HEAD:<path> before this edit filtered only ok/rows/matched/denominator/drifted and had no gate before step_validate).",
+      "introduces": ["saved_type = readback.get(\"saved_portfolio_type\")"],
+      "artifact_covered_by": ["Y19-1-AC1", "Y19-1-AC2"]
+    },
+    {
+      "path_or_key": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~63/IB-yr-1.result.md",
+      "kind": "doc",
+      "commit_or_etag": "75890f41dfc69b05e8e2542424c767620de5d920",
+      "deployed_state": "COMMITTED-NOT-DEPLOY-SCOPE",
+      "deploy_evidence": "git hash-object 75890f41dfc69b05e8e2542424c767620de5d920 -- the session log for this order.",
+      "artifact_covered_by": ["Y19-1-AC1", "Y19-1-AC2"]
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion_id": "Y19-1-AC1",
+      "criterion_verbatim": "the built behaviour: a saved type \"dynamic\" with a tolerated setting ends ATTENTION TOLERANCE_REQUIRES_STATIC with no generation POST, no download, no PDF checkpoint and no publication. Fails at the base (the vendor generates first).",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R19_CHECKS/test_r19_y1_pregen_static.py -k not_fixed",
+      "output_evidence": "1 passed, 2 deselected in 2.21s",
+      "denominator": "1 of 1 selected test (test_not_fixed_refuses_before_generation)",
+      "status": "PASS",
+      "expect": "1 passed"
+    },
+    {
+      "criterion_id": "Y19-1-AC2",
+      "criterion_verbatim": "the difference control: a saved type \"fixed\", or no saved type, still generates once, downloads once and publishes READY through the printed-type check. Passes at the base and must still pass.",
+      "method": "test_suite",
+      "invocation": "python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R19_CHECKS/test_r19_y1_pregen_static.py -k fixed_or_absent",
+      "output_evidence": "2 passed, 1 deselected in 4.68s",
+      "denominator": "2 of 2 selected tests (test_fixed_or_absent_defers_to_the_printed_type[fixed], [None])",
+      "status": "PASS",
+      "expect": "2 passed"
+    }
+  ],
+  "controls": {
+    "mutant": {
+      "description": "AC2's two arms (saved_portfolio_type=\"fixed\", and saved_portfolio_type absent) are the built-in control: the new pre-generation gate must NOT fire on either, leaving the existing post-download tolerance_requires_static check as the sole decider, unchanged by this edit.",
+      "expected": "Both arms reach READY: one generate POST, one download, one publication transaction.",
+      "observed": "test_fixed_or_absent_defers_to_the_printed_type[fixed] and [None] both PASS -- 2 passed, 1 deselected in 4.68s; each asserts result[\"state\"]==\"READY\" and exactly 1 generate POST, 1 download, 1 transaction.",
+      "status": "FIRED-AS-EXPECTED"
+    },
+    "determinism": {
+      "method": "The full check file (all 3 arms) and the full resident_worker regression suite were each run twice at the final bytes.",
+      "observed": "org/tier1_exec/.../test_r19_y1_pregen_static.py reproduced '3 passed in 2.76s' identically on the -v full run after the split -k runs (1 passed + 2 passed); infra/.../tests/test_resident_worker.py reproduced '39 passed, 8 skipped in 31.10s' identically.",
+      "status": "STABLE"
+    }
+  },
+  "declared_exclusions": [
+    {
+      "item": "Optional test addition to test_resident_worker.py (build step 4)",
+      "reason": "Marked optional by the task order (\"Optionally add a test\"); the read-only R19_CHECKS harness (test_r19_y1_pregen_static.py, using test_resident_worker.py's own installed()/world fixtures) already exercises all three saved-type arms (dynamic/tolerated -> ATTENTION; fixed -> READY; absent -> READY), so no addition was made and existing tests were left unchanged per the order's own instruction."
+    }
+  ],
+  "surprises": [],
+  "session_log": "org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~63/IB-yr-1.result.md",
+  "compiler_tools": [
+    {
+      "tool": "pytest org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R19_CHECKS/test_r19_y1_pregen_static.py -k not_fixed",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R19_CHECKS/test_r19_y1_pregen_static.py -k not_fixed",
+      "result": "rc=0, 1 passed, 2 deselected in 2.21s"
+    },
+    {
+      "tool": "pytest org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R19_CHECKS/test_r19_y1_pregen_static.py -k fixed_or_absent",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider org/tier1_exec/2.0.0_SA_COO/deliverables/IRPT_MVP_Y/R19_CHECKS/test_r19_y1_pregen_static.py -k fixed_or_absent",
+      "result": "rc=0, 2 passed, 1 deselected in 4.68s"
+    },
+    {
+      "tool": "pytest infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py (full regression)",
+      "invocation": "timeout 120 python -m pytest -q -p no:cacheprovider infra/aws/lambda/investor-reporting/ycharts/generate/tests/test_resident_worker.py",
+      "result": "rc=0, 39 passed, 8 skipped in 31.10s -- no pre-existing test broken by the new pre-generation gate"
+    },
+    {
+      "tool": "git hash-object (worktree blob isolation, no working-tree stash)",
+      "invocation": "git hash-object infra/aws/lambda/investor-reporting/ycharts/generate/recipe.py resident_worker.py org/missions/D9/IRPT/IRPT_BCKEND/deliverables/0.9.0_WK_IRPT_BCKEND~63/IB-yr-1.result.md",
+      "result": "Confirmed the exact blobs referenced above; git diff --stat confirmed the change is 1 line in recipe.py and 7 insertions/1 deletion in resident_worker.py, no other file touched."
+    }
+  ]
+}
